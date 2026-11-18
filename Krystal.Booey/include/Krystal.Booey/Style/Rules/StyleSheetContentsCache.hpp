@@ -46,7 +46,7 @@ namespace krys::boo::style
     KRYS_NON_COPY_MOVABLE(StyleSheetContentsCache);
 
   public:
-    using Key = Pair<css::CSSOMString, css::ParserContext>;
+    using Key = Pair<CSSOMString, css::ParserContext>;
 
   private:
     struct KeyHash

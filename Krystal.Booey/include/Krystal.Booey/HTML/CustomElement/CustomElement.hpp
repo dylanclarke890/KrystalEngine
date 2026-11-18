@@ -6,16 +6,15 @@
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
+  class HTMLElement;
+  class HTMLFormElement;
 }
 
 namespace krys::boo::html
 {
-  class HTMLElement;
-  class HTMLFormElement;
-
   /// @brief The behaviour of a custom element, written in C++: what a custom element's class is in script.
   /// A custom element definition creates one for each element it defines (when the element is created, or
   /// when it's upgraded), which the element holds for as long as it lives; the element's lifecycle callbacks
@@ -63,7 +62,7 @@ namespace krys::boo::html
     }
 
     /// @brief The element was adopted into @p newDocument from @p oldDocument.
-    virtual void AdoptedCallback(dom::Document &oldDocument, dom::Document &newDocument) noexcept
+    virtual void AdoptedCallback(Document &oldDocument, Document &newDocument) noexcept
     {
       (void)oldDocument;
       (void)newDocument;
@@ -72,10 +71,9 @@ namespace krys::boo::html
     /// @brief One of the definition's observed attributes was set, changed or removed.
     /// @param oldValue Null if the attribute was added.
     /// @param newValue Null if the attribute was removed.
-    virtual void AttributeChangedCallback(const dom::DOMStringAtom &localName,
-                                          const dom::DOMStringAtom &oldValue,
-                                          const dom::DOMStringAtom &newValue,
-                                          const dom::DOMStringAtom &namespaceURI) noexcept
+    virtual void AttributeChangedCallback(const DOMStringAtom &localName, const DOMStringAtom &oldValue,
+                                          const DOMStringAtom &newValue,
+                                          const DOMStringAtom &namespaceURI) noexcept
     {
       (void)localName;
       (void)oldValue;

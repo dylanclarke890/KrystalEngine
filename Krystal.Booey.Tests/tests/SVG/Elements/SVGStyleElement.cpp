@@ -29,7 +29,7 @@ namespace krys::boo::svg::tests
     auto add = [&](utf8_stringview text)
     {
       auto style = CreateRef<SVGStyleElement>(*fixture.Document);
-      REQUIRE_FALSE(style->TextContent(dom::DOMString(text)).HasException());
+      REQUIRE_FALSE(style->TextContent(DOMString(text)).HasException());
       auto events = boo::tests::LoadEvents::ListenTo(*style);
       REQUIRE_FALSE(svg.AppendChild(*style).HasException());
       return events;

@@ -8,10 +8,13 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
+}
 
+namespace krys::boo::dom
+{
   /// @see https://dom.spec.whatwg.org/#interface-htmlcollection
   class HTMLCollection : public RefCounted<HTMLCollection>, public CanMakeWeakPtr<HTMLCollection>
   {

@@ -26,7 +26,7 @@
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmliframeelement
   class HTMLIFrameElement : public HTMLElement
@@ -39,7 +39,7 @@ namespace krys::boo::html
       return false;
     }
 
-    HTMLIFrameElement(dom::Document &document) noexcept;
+    HTMLIFrameElement(Document &document) noexcept;
 
     KRYS_NODISCARD bool IsInteractiveContent() const noexcept final
     {
@@ -60,28 +60,28 @@ namespace krys::boo::html
     void Src(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-srcdoc
-    KRYS_NODISCARD dom::DOMString SrcDoc() const noexcept;
+    KRYS_NODISCARD DOMString SrcDoc() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-srcdoc
-    void SrcDoc(dom::DOMString value) noexcept;
+    void SrcDoc(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-sizes
-    KRYS_NODISCARD dom::DOMString Sizes() const noexcept;
+    KRYS_NODISCARD DOMString Sizes() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-sizes
-    void Sizes(dom::DOMString value) noexcept;
+    void Sizes(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-name
-    KRYS_NODISCARD dom::DOMString Name() const noexcept;
+    KRYS_NODISCARD DOMString Name() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-name
-    void Name(dom::DOMString value) noexcept;
+    void Name(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-allow
-    KRYS_NODISCARD dom::DOMString Allow() const noexcept;
+    KRYS_NODISCARD DOMString Allow() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-allow
-    void Allow(dom::DOMString value) noexcept;
+    void Allow(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-allowfullscreen
     KRYS_NODISCARD bool AllowFullscreen() const noexcept;
@@ -90,50 +90,50 @@ namespace krys::boo::html
     void AllowFullscreen(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-width
-    KRYS_NODISCARD dom::DOMString Width() const noexcept;
+    KRYS_NODISCARD DOMString Width() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-width
-    void Width(dom::DOMString value) noexcept;
+    void Width(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-height
-    KRYS_NODISCARD dom::DOMString Height() const noexcept;
+    KRYS_NODISCARD DOMString Height() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-height
-    void Height(dom::DOMString value) noexcept;
+    void Height(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-referrerpolicy
-    KRYS_NODISCARD dom::DOMString ReferrerPolicy() const noexcept;
+    KRYS_NODISCARD DOMString ReferrerPolicy() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-referrerpolicy
-    void ReferrerPolicy(dom::DOMString value) noexcept;
+    void ReferrerPolicy(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-loading
-    KRYS_NODISCARD dom::DOMString Loading() const noexcept;
+    KRYS_NODISCARD DOMString Loading() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-loading
-    void Loading(dom::DOMString value) noexcept;
+    void Loading(DOMString value) noexcept;
 
 #pragma endregion
 
 #pragma region HTMLIFrameElement Obsolete members - https://html.spec.whatwg.org/#HTMLIFrameElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-align
-    KRYS_NODISCARD dom::DOMString Align() const noexcept;
+    KRYS_NODISCARD DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-align
-    void Align(dom::DOMString value) noexcept;
+    void Align(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-scrolling
-    KRYS_NODISCARD dom::DOMString Scrolling() const noexcept;
+    KRYS_NODISCARD DOMString Scrolling() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-scrolling
-    void Scrolling(dom::DOMString value) noexcept;
+    void Scrolling(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-frameborder
-    KRYS_NODISCARD dom::DOMString FrameBorder() const noexcept;
+    KRYS_NODISCARD DOMString FrameBorder() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-frameborder
-    void FrameBorder(dom::DOMString value) noexcept;
+    void FrameBorder(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-longdesc
     KRYS_NODISCARD dom::USVString LongDesc() const noexcept;
@@ -142,33 +142,32 @@ namespace krys::boo::html
     void LongDesc(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-marginwidth
-    KRYS_NODISCARD dom::DOMString MarginWidth() const noexcept;
+    KRYS_NODISCARD DOMString MarginWidth() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-marginwidth
-    void MarginWidth(dom::DOMString value) noexcept;
+    void MarginWidth(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-marginheight
-    KRYS_NODISCARD dom::DOMString MarginHeight() const noexcept;
+    KRYS_NODISCARD DOMString MarginHeight() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-marginheight
-    void MarginHeight(dom::DOMString value) noexcept;
+    void MarginHeight(DOMString value) noexcept;
 
 #pragma endregion
 
   protected:
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLIFrameElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLIFrameElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLIFrameElement();
   }

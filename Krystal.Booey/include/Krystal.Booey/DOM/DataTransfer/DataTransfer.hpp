@@ -41,7 +41,9 @@
 namespace krys::boo
 {
   class CachedImage;
+  class Document;
   class DragImageLoader;
+  class Element;
   class File;
   class FileList;
   class Pasteboard;
@@ -51,8 +53,6 @@ namespace krys::boo
 namespace krys::boo::dom
 {
   class DataTransferItemList;
-  class Document;
-  class Element;
 
   /// @brief The data of a drag, a clipboard event or an input event, and what a page may do with it.
   /// @see https://html.spec.whatwg.org/multipage/dnd.html#the-datatransfer-interface

@@ -55,7 +55,7 @@ namespace krys::boo::style
   {
     struct Text
     {
-      css::CSSOMString Value;
+      CSSOMString Value;
 
       KRYS_NODISCARD bool operator==(const Text &) const noexcept = default;
     };
@@ -69,8 +69,8 @@ namespace krys::boo::style
 
     struct Counter
     {
-      css::CSSOMStringAtom Identifier;
-      css::CSSOMStringAtom Separator;
+      CSSOMStringAtom Identifier;
+      CSSOMStringAtom Separator;
       CounterStyle Style;
 
       template <typename... F>
@@ -93,7 +93,7 @@ namespace krys::boo::style
     struct Data
     {
       ListType List;
-      Maybe<css::CSSOMString> AltText;
+      Maybe<CSSOMString> AltText;
 
       KRYS_NODISCARD bool operator==(const Data &) const noexcept = default;
     };
@@ -171,24 +171,22 @@ namespace krys::boo::style
                             css::CommaSeparatedTuple<css::CustomIdentifier, Maybe<CounterStyle>>>;
     using CountersFunction = css::FunctionNotation<
       css::ValueId::Counters,
-      css::CommaSeparatedTuple<css::CustomIdentifier, css::CSSOMStringAtom, Maybe<CounterStyle>>>;
+      css::CommaSeparatedTuple<css::CustomIdentifier, CSSOMStringAtom, Maybe<CounterStyle>>>;
 
     if (Separator.View().empty())
     {
       return visitor(CounterFunction {
-        .Parameters = {
-          css::CustomIdentifier {Identifier},
-          Style != css::CustomIdentifier {css::CSSOMStringAtom {css::ToString(css::ValueId::Decimal)}}
-            ? Maybe<CounterStyle> {Style}
-            : std::nullopt}});
+        .Parameters = {css::CustomIdentifier {Identifier},
+                       Style != css::CustomIdentifier {CSSOMStringAtom {css::ToString(css::ValueId::Decimal)}}
+                         ? Maybe<CounterStyle> {Style}
+                         : std::nullopt}});
     }
 
     return visitor(CountersFunction {
-      .Parameters = {
-        css::CustomIdentifier {Identifier}, Separator,
-        Style != css::CustomIdentifier {css::CSSOMStringAtom {css::ToString(css::ValueId::Decimal)}}
-          ? Maybe<CounterStyle> {Style}
-          : std::nullopt}});
+      .Parameters = {css::CustomIdentifier {Identifier}, Separator,
+                     Style != css::CustomIdentifier {CSSOMStringAtom {css::ToString(css::ValueId::Decimal)}}
+                       ? Maybe<CounterStyle> {Style}
+                       : std::nullopt}});
   }
 
   // MARK: - Conversion

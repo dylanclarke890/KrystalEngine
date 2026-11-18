@@ -44,7 +44,7 @@ namespace krys::boo::html
 
   CanvasPattern::~CanvasPattern() noexcept = default;
 
-  bool CanvasPattern::ParseRepetitionType(dom::DOMStringView type, bool &repeatX, bool &repeatY) noexcept
+  bool CanvasPattern::ParseRepetitionType(DOMStringView type, bool &repeatX, bool &repeatY) noexcept
   {
     if (type.empty() || type == u8"repeat")
     {

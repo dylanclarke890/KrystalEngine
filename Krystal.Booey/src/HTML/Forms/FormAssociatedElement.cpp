@@ -47,7 +47,7 @@ namespace krys::boo::html
     }
   }
 
-  RefPtr<dom::Element> FormAssociatedElement::FormForBindings() const noexcept
+  RefPtr<Element> FormAssociatedElement::FormForBindings() const noexcept
   {
     // The getter steps are to return the result of retargeting this's form owner against this, if this's form
     // owner is non-null; otherwise null.
@@ -65,7 +65,7 @@ namespace krys::boo::html
     _form = CreateWeakPtr(newForm);
   }
 
-  void FormAssociatedElement::ElementInsertedIntoAncestor(dom::Element &element, bool) noexcept
+  void FormAssociatedElement::ElementInsertedIntoAncestor(Element &element, bool) noexcept
   {
     krys_debug_assert(&AsHTMLElement() == &element);
     if (_formSetByParser)
@@ -84,7 +84,7 @@ namespace krys::boo::html
     }
   }
 
-  void FormAssociatedElement::ElementRemovedFromAncestor(dom::Element &element, bool) noexcept
+  void FormAssociatedElement::ElementRemovedFromAncestor(Element &element, bool) noexcept
   {
     krys_debug_assert(&AsHTMLElement() == &element);
     if (_form && &dom::TreeQueries::Root(element) != &dom::TreeQueries::Root(*_form))

@@ -93,14 +93,14 @@ namespace krys::boo
   }
 
   Ref<StyleOriginatedAnimationEvent>
-    CSSTransition::CreateEvent(dom::DOMStringAtom eventType, Maybe<Seconds> scheduledTime, double elapsedTime,
+    CSSTransition::CreateEvent(DOMStringAtom eventType, Maybe<Seconds> scheduledTime, double elapsedTime,
                                const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
   {
     return CreateRef<CSSTransitionEvent>(eventType, this, scheduledTime, elapsedTime, pseudoElementIdentifier,
                                          TransitionProperty().ToString());
   }
 
-  css::CSSOMStringAtom CSSTransition::TransitionProperty() const noexcept
+  CSSOMStringAtom CSSTransition::TransitionProperty() const noexcept
   {
     return AnimatablePropertyAsString(_property);
   }

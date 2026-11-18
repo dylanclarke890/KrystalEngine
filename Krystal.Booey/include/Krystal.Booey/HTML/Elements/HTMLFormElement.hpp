@@ -35,18 +35,25 @@ namespace krys::boo::dom
   class Event;
 }
 
+namespace krys::boo
+{
+  class HTMLFormControlElement;
+  class HTMLImageElement;
+}
+
 namespace krys::boo::html
 {
   class DOMFormData;
   class FormAssociatedElement;
   class FormListedElement;
-  class HTMLFormControlElement;
   class HTMLFormControlsCollection;
-  class HTMLImageElement;
   class RadioNodeList;
   enum class RadioNodeListCandidates : uint8;
   class ValidatedFormListedElement;
+}
 
+namespace krys::boo
+{
   /// @see https://html.spec.whatwg.org/#htmlformelement
   class HTMLFormElement : public HTMLElement
   {
@@ -56,14 +63,14 @@ namespace krys::boo::html
     UniquePtr<dom::DOMTokenList> _relList;
     WeakPtr<dom::HTMLCollection> _elements;
     FormSubmission::Attributes _attributes;
-    HashMap<dom::DOMStringAtom, WeakPtr<HTMLElement>> _pastNamesMap;
+    HashMap<DOMStringAtom, WeakPtr<HTMLElement>> _pastNamesMap;
     html::RadioButtonGroups _radioButtonGroups;
     mutable WeakPtr<HTMLFormControlElement> _defaultButton;
     List<WeakPtr<HTMLElement>> _listedElements;
     /// @brief The form's RadioNodeLists by name, which remove themselves as they're destroyed.
-    HashMap<dom::DOMString, WeakPtr<dom::NodeList>> _radioNodeLists;
+    HashMap<DOMString, WeakPtr<dom::NodeList>> _radioNodeLists;
     /// @brief The same for images, which are candidates only if no listed element is.
-    HashMap<dom::DOMString, WeakPtr<dom::NodeList>> _imageRadioNodeLists;
+    HashMap<DOMString, WeakPtr<dom::NodeList>> _imageRadioNodeLists;
     /// @brief The images whose form owner this is, in no particular order.
     List<WeakPtr<HTMLImageElement>> _imageElements;
     List<WeakPtr<HTMLElement>> _invalidFormControls;
@@ -77,17 +84,17 @@ namespace krys::boo::html
     bool _isConstructingEntryList {false};
 
   public:
-    HTMLFormElement(dom::Document &document) noexcept;
+    HTMLFormElement(Document &document) noexcept;
 
     ~HTMLFormElement() noexcept override;
 
 #pragma region HTMLFormElement - https://html.spec.whatwg.org/#htmlformelement
 
     /// @see https://html.spec.whatwg.org/#dom-form-acceptcharset
-    KRYS_NODISCARD dom::DOMString AcceptCharset() const noexcept;
+    KRYS_NODISCARD DOMString AcceptCharset() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-acceptcharset
-    void AcceptCharset(dom::DOMString value) noexcept;
+    void AcceptCharset(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-action
     KRYS_NODISCARD dom::USVString Action() const noexcept;
@@ -96,34 +103,34 @@ namespace krys::boo::html
     void Action(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-autocomplete
-    KRYS_NODISCARD dom::DOMString Autocomplete() const noexcept;
+    KRYS_NODISCARD DOMString Autocomplete() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-autocomplete
-    void Autocomplete(dom::DOMString value) noexcept;
+    void Autocomplete(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-enctype
-    KRYS_NODISCARD dom::DOMString EncType() const noexcept;
+    KRYS_NODISCARD DOMString EncType() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-enctype
-    void EncType(dom::DOMString value) noexcept;
+    void EncType(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-encoding
-    KRYS_NODISCARD dom::DOMString Encoding() const noexcept;
+    KRYS_NODISCARD DOMString Encoding() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-encoding
-    void Encoding(dom::DOMString value) noexcept;
+    void Encoding(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-method
-    KRYS_NODISCARD dom::DOMString Method() const noexcept;
+    KRYS_NODISCARD DOMString Method() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-method
-    void Method(dom::DOMString value) noexcept;
+    void Method(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-name
-    KRYS_NODISCARD dom::DOMString Name() const noexcept;
+    KRYS_NODISCARD DOMString Name() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-name
-    void Name(dom::DOMString value) noexcept;
+    void Name(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-novalidate
     KRYS_NODISCARD bool NoValidate() const noexcept;
@@ -132,22 +139,22 @@ namespace krys::boo::html
     void NoValidate(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-target
-    KRYS_NODISCARD dom::DOMString Target() const noexcept;
+    KRYS_NODISCARD DOMString Target() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-target
-    void Target(dom::DOMString value) noexcept;
+    void Target(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-rel
-    KRYS_NODISCARD dom::DOMString Rel() const noexcept;
+    KRYS_NODISCARD DOMString Rel() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-rel
-    void Rel(dom::DOMString value) noexcept;
+    void Rel(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-rellist
     KRYS_NODISCARD dom::DOMTokenList &RelList() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-elements
-    KRYS_NODISCARD Ref<HTMLFormControlsCollection> Elements() noexcept;
+    KRYS_NODISCARD Ref<html::HTMLFormControlsCollection> Elements() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-length
     KRYS_NODISCARD size_t Length() const noexcept;
@@ -156,8 +163,8 @@ namespace krys::boo::html
     KRYS_NODISCARD RefPtr<HTMLElement> Item(size_t index) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-nameditem
-    KRYS_NODISCARD Maybe<Variant<RefPtr<RadioNodeList>, RefPtr<dom::Element>>>
-      NamedItem(dom::DOMStringView name) noexcept;
+    KRYS_NODISCARD Maybe<Variant<RefPtr<html::RadioNodeList>, RefPtr<Element>>>
+      NamedItem(DOMStringView name) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-submit
     void Submit() noexcept;
@@ -177,9 +184,9 @@ namespace krys::boo::html
 #pragma endregion
 
     /// @brief The elements of the form named @p name, falling back to the one last found by that name.
-    KRYS_NODISCARD List<Ref<dom::Element>> NamedElements(dom::DOMStringView name) noexcept;
+    KRYS_NODISCARD List<Ref<Element>> NamedElements(DOMStringView name) noexcept;
 
-    KRYS_NODISCARD bool IsSupportedPropertyName(dom::DOMStringView name) noexcept;
+    KRYS_NODISCARD bool IsSupportedPropertyName(DOMStringView name) noexcept;
 
     KRYS_NODISCARD bool ShouldAutocomplete() const noexcept;
 
@@ -188,11 +195,11 @@ namespace krys::boo::html
     void UnregisterImageElement(HTMLImageElement &element) noexcept;
 
     /// @brief The images whose form owner this is with an ID or name of @p name, in tree order.
-    KRYS_NODISCARD List<Ref<dom::Element>> NamedImages(dom::DOMStringView name) const noexcept;
+    KRYS_NODISCARD List<Ref<Element>> NamedImages(DOMStringView name) const noexcept;
 
-    void RegisterFormListedElement(FormListedElement &element) noexcept;
+    void RegisterFormListedElement(html::FormListedElement &element) noexcept;
 
-    void UnregisterFormListedElement(FormListedElement &element) noexcept;
+    void UnregisterFormListedElement(html::FormListedElement &element) noexcept;
 
     void AddInvalidFormControl(const HTMLElement &formControlElement) noexcept;
 
@@ -217,8 +224,8 @@ namespace krys::boo::html
     /// @brief The browsing context name the form submits to: the submitter's `formtarget`, the form's
     /// `target`, or the document's base target, with `_blank` for a target with dangling markup.
     /// @see https://html.spec.whatwg.org/#get-an-element's-target
-    KRYS_NODISCARD dom::DOMString EffectiveTarget(const dom::Event *event,
-                                                  HTMLFormControlElement *submitter) const noexcept;
+    KRYS_NODISCARD DOMString EffectiveTarget(const dom::Event *event,
+                                             HTMLFormControlElement *submitter) const noexcept;
 
     KRYS_NODISCARD bool WasUserSubmitted() const noexcept;
 
@@ -240,15 +247,16 @@ namespace krys::boo::html
     KRYS_NODISCARD List<Ref<HTMLElement>> CopyValidatedListedElementsVector() const noexcept;
 
     /// @brief The names and values of the form's text fields.
-    KRYS_NODISCARD List<Pair<dom::DOMString, dom::DOMString>> TextFieldValues() const noexcept;
+    KRYS_NODISCARD List<Pair<DOMString, DOMString>> TextFieldValues() const noexcept;
 
-    KRYS_NODISCARD static HTMLFormElement *FindClosestFormAncestor(const dom::Element &element) noexcept;
+    KRYS_NODISCARD static HTMLFormElement *FindClosestFormAncestor(const Element &element) noexcept;
 
     /// @see https://html.spec.whatwg.org/#constructing-the-form-data-set
     /// @return The entry list, or null if the form is already constructing one.
-    KRYS_NODISCARD RefPtr<DOMFormData>
-      ConstructEntryList(const RefPtr<HTMLFormControlElement> &submitter, const Ref<DOMFormData> &domFormData,
-                         List<Pair<dom::DOMString, dom::DOMString>> *formValues) noexcept;
+    KRYS_NODISCARD RefPtr<html::DOMFormData>
+      ConstructEntryList(const RefPtr<HTMLFormControlElement> &submitter,
+                         const Ref<html::DOMFormData> &domFormData,
+                         List<Pair<DOMString, DOMString>> *formValues) noexcept;
 
     KRYS_NODISCARD const FormSubmission::Attributes &Attributes() const noexcept
     {
@@ -263,12 +271,12 @@ namespace krys::boo::html
     }
 
     /// @brief Forgets the RadioNodeList for @p name, as it's being destroyed.
-    void RadioNodeListDestroyed(dom::DOMStringView name, RadioNodeListCandidates candidates) noexcept;
+    void RadioNodeListDestroyed(DOMStringView name, html::RadioNodeListCandidates candidates) noexcept;
 
-    KRYS_NODISCARD Ref<RadioNodeList> RadioNodeListForName(dom::DOMStringView name) noexcept;
+    KRYS_NODISCARD Ref<html::RadioNodeList> RadioNodeListForName(DOMStringView name) noexcept;
 
-    KRYS_NODISCARD Ref<RadioNodeList> RadioNodeListForName(dom::DOMStringView name,
-                                                           RadioNodeListCandidates candidates) noexcept;
+    KRYS_NODISCARD Ref<html::RadioNodeList>
+      RadioNodeListForName(DOMStringView name, html::RadioNodeListCandidates candidates) noexcept;
 
     KRYS_NODISCARD bool MatchesValidPseudoClass() const noexcept final;
 
@@ -277,11 +285,10 @@ namespace krys::boo::html
   protected:
     void OnInsert() noexcept override;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
   private:
     void Submit(dom::Event *event, bool processingUserGesture, FormSubmissionTrigger trigger,
@@ -289,10 +296,10 @@ namespace krys::boo::html
 
     void SubmitDialog(const Ref<FormSubmission> &formSubmission) noexcept;
 
-    KRYS_NODISCARD uint32 FormElementIndexWithFormAttribute(dom::Element &element, uint32 rangeStart,
+    KRYS_NODISCARD uint32 FormElementIndexWithFormAttribute(Element &element, uint32 rangeStart,
                                                             uint32 rangeEnd) noexcept;
 
-    KRYS_NODISCARD uint32 FormElementIndex(FormListedElement &listedElement) noexcept;
+    KRYS_NODISCARD uint32 FormElementIndex(html::FormListedElement &listedElement) noexcept;
 
     bool ValidateInteractively() noexcept;
 
@@ -300,24 +307,24 @@ namespace krys::boo::html
     /// @return Whether any control is invalid.
     bool CheckInvalidControlsAndCollectUnhandled(List<Ref<HTMLElement>> &unhandledInvalidControls) noexcept;
 
-    KRYS_NODISCARD HTMLElement *ElementFromPastNamesMap(dom::DOMStringView pastName) const noexcept;
+    KRYS_NODISCARD HTMLElement *ElementFromPastNamesMap(DOMStringView pastName) const noexcept;
 
-    void AddToPastNamesMap(FormAssociatedElement &element, dom::DOMStringView pastName) noexcept;
+    void AddToPastNamesMap(html::FormAssociatedElement &element, DOMStringView pastName) noexcept;
 
-    void RemoveFromPastNamesMap(FormAssociatedElement &item) noexcept;
+    void RemoveFromPastNamesMap(html::FormAssociatedElement &item) noexcept;
 
     void ResetListedFormControlElements() noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLFormElement)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLFormElement)
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLFormElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLFormElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLFormElement();
   }

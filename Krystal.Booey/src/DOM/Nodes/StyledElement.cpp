@@ -39,9 +39,10 @@
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
-  StyledElement::StyledElement(Document &document, const QualifiedName &name, NodeFlags nodeFlags) noexcept
+  StyledElement::StyledElement(Document &document, const QualifiedName &name,
+                               dom::NodeFlags nodeFlags) noexcept
       : Element(document, name, nodeFlags)
   {
   }
@@ -50,17 +51,17 @@ namespace krys::boo::dom
 
 #pragma region ElementCSSInlineStyle
 
-  css::CSSStyleProperties &StyledElement::Style() noexcept
+  CSSStyleProperties &StyledElement::Style() noexcept
   {
     return EnsureMutableInlineStyle()->EnsureInlineCSSStyleProperties(*this);
   }
 
-  css::StylePropertyMap &StyledElement::AttributeStyleMap() noexcept
+  StylePropertyMap &StyledElement::AttributeStyleMap() noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-elementcssinlinestyle-attributestylemap
     if (!ExistingAttributeStyleMap())
     {
-      SetAttributeStyleMap(css::InlineStylePropertyMap::Create(*this));
+      SetAttributeStyleMap(InlineStylePropertyMap::Create(*this));
     }
     return *ExistingAttributeStyleMap();
   }
@@ -74,8 +75,8 @@ namespace krys::boo::dom
 
   void StyledElement::SynchronizeStyleAttributeInternal() noexcept
   {
-    krys_debug_assert(HasNodeFlag(NodeFlags::StyleAttributeIsDirty));
-    ClearNodeFlag(NodeFlags::StyleAttributeIsDirty);
+    krys_debug_assert(HasNodeFlag(dom::NodeFlags::StyleAttributeIsDirty));
+    ClearNodeFlag(dom::NodeFlags::StyleAttributeIsDirty);
     if (const auto *inlineStyle = InlineStyle())
     {
       SetSynchronizedLazyAttribute(u8"style", inlineStyle->AsText(css::DefaultSerialisationContext()));
@@ -86,7 +87,7 @@ namespace krys::boo::dom
   {
     if (const auto *inlineStyle = InlineStyle())
     {
-      ClearNodeFlag(NodeFlags::StyleAttributeIsDirty);
+      ClearNodeFlag(dom::NodeFlags::StyleAttributeIsDirty);
       auto newValue = inlineStyle->AsText(css::DefaultSerialisationContext());
       auto oldValue = GetAttribute(u8"style");
       style::AttributeChangeInvalidation styleInvalidation(*this, QualifiedName {null, null, u8"style"},
@@ -217,7 +218,7 @@ namespace krys::boo::dom
 
   void StyledElement::AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style,
                                                            css::PropertyId property,
-                                                           const css::CSSOMString &value) noexcept
+                                                           const CSSOMString &value) noexcept
   {
     style.SetProperty(property, value, NodeDocument().CssParserContext());
   }
@@ -235,7 +236,7 @@ namespace krys::boo::dom
     // This makes wrapperless property sets immutable and so cacheable.
     if (auto *mutableStyleProperties = DynamicDowncast<css::MutableStyleProperties>(_inlineStyle.get()))
     {
-      mutableStyleProperties->ParseDeclaration(css::CSSOMString(newStyleString),
+      mutableStyleProperties->ParseDeclaration(CSSOMString(newStyleString),
                                                css::ParserContext(NodeDocument()));
     }
     else
@@ -257,14 +258,14 @@ namespace krys::boo::dom
       SetInlineStyleFromString(*newStyleString);
     }
 
-    ClearNodeFlag(NodeFlags::StyleAttributeIsDirty);
+    ClearNodeFlag(dom::NodeFlags::StyleAttributeIsDirty);
 
     Node::InvalidateStyle(style::Validity::InlineStyleInvalid);
   }
 
   void StyledElement::DirtyStyleAttribute() noexcept
   {
-    SetNodeFlag(NodeFlags::StyleAttributeIsDirty);
+    SetNodeFlag(dom::NodeFlags::StyleAttributeIsDirty);
 
     if (StyleResolver().RuleSets().GetSelectorsForStyleAttribute() != style::SelectorsForStyleAttribute::None)
     {
@@ -274,7 +275,7 @@ namespace krys::boo::dom
 
   void StyledElement::InvalidateStyleAttribute() noexcept
   {
-    SetNodeFlag(NodeFlags::StyleAttributeIsDirty);
+    SetNodeFlag(dom::NodeFlags::StyleAttributeIsDirty);
 
     // Inline style invalidation optimization does not work if there are selectors targeting the style
     // attribute as some rule may start or stop matching.
@@ -285,7 +286,7 @@ namespace krys::boo::dom
 
     Node::InvalidateStyle(validity);
 
-    if (auto *svgElement = DynamicDowncast<svg::SVGElement>(*this))
+    if (auto *svgElement = DynamicDowncast<SVGElement>(*this))
     {
       svgElement->InvalidateInstances();
     }
@@ -334,7 +335,7 @@ namespace krys::boo::dom
     return true;
   }
 
-  bool StyledElement::SetInlineStyleProperty(css::PropertyId property, const css::CSSOMString &value,
+  bool StyledElement::SetInlineStyleProperty(css::PropertyId property, const CSSOMString &value,
                                              css::IsImportant important, bool *didFailParsing) noexcept
   {
     bool changes = EnsureMutableInlineStyle()->SetProperty(
@@ -346,8 +347,7 @@ namespace krys::boo::dom
     return changes;
   }
 
-  bool StyledElement::SetInlineStyleCustomProperty(const css::CSSOMStringAtom &property,
-                                                   const css::CSSOMString &value,
+  bool StyledElement::SetInlineStyleCustomProperty(const CSSOMStringAtom &property, const CSSOMString &value,
                                                    css::IsImportant important) noexcept
   {
     bool changes = EnsureMutableInlineStyle()->SetCustomProperty(
@@ -382,7 +382,7 @@ namespace krys::boo::dom
     return changes;
   }
 
-  bool StyledElement::RemoveInlineStyleCustomProperty(const css::CSSOMStringAtom &property) noexcept
+  bool StyledElement::RemoveInlineStyleCustomProperty(const CSSOMStringAtom &property) noexcept
   {
     if (!InlineStyle())
     {

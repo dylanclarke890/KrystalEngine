@@ -248,9 +248,9 @@ namespace krys::boo
     KRYS_NODISCARD float
       OutlineSize() const noexcept; // used value combining `outline-width` and `outline-offset`
 
-    KRYS_NODISCARD css::CSSOMString AltFromContent() const noexcept;
+    KRYS_NODISCARD CSSOMString AltFromContent() const noexcept;
 
-    KRYS_NODISCARD const css::CSSOMStringAtom &HyphenString() const noexcept;
+    KRYS_NODISCARD const CSSOMStringAtom &HyphenString() const noexcept;
 
     KRYS_NODISCARD float UsedStrokeWidth(const IntSize &viewportSize) const noexcept;
 

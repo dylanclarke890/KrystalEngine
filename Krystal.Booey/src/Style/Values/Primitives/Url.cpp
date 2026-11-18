@@ -49,7 +49,7 @@ namespace krys::boo::style
   //      CSS:    [.specified = "foo/bar.png", .resolved = null-url]
   //      Style:  [.resolved = "foo/bar.png"]
 
-  URL ToStyleWithScriptExecutionContext(const css::CSSURL &url, const dom::Document &context) noexcept
+  URL ToStyleWithScriptExecutionContext(const css::CSSURL &url, const Document &context) noexcept
   {
     if (url.Resolved.IsNull())
     {

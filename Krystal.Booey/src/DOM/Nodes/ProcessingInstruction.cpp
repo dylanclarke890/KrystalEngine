@@ -33,10 +33,10 @@
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   ProcessingInstruction::ProcessingInstruction(Document &document, DOMString target, DOMString data) noexcept
-      : CharacterData(document, krys::move(data), NodeType::PROCESSING_INSTRUCTION_NODE),
+      : CharacterData(document, krys::move(data), dom::NodeType::PROCESSING_INSTRUCTION_NODE),
         _target(krys::move(target))
   {
     // Initialize:
@@ -46,22 +46,22 @@ namespace krys::boo::dom
     UpdateAttributesFromData();
   }
 
-  ExceptionOr<Ref<ProcessingInstruction>> ProcessingInstruction::Create(Document &document, DOMString target,
-                                                                        DOMString data) noexcept
+  dom::ExceptionOr<Ref<ProcessingInstruction>>
+    ProcessingInstruction::Create(Document &document, DOMString target, DOMString data) noexcept
   {
     // Create a processing instruction node:
     // 1. Let pi be the result of creating a node that implements ProcessingInstruction, given document.
     // 2. Initialize pi with target and data:
     //    1. If target does not match the Name production, then throw an "InvalidCharacterError" DOMException.
-    if (!NameValidation::IsValidXMLName(target))
+    if (!dom::NameValidation::IsValidXMLName(target))
     {
-      return ExceptionCode::InvalidCharacterError;
+      return dom::ExceptionCode::InvalidCharacterError;
     }
 
     // 2. If data contains the string "?>", then throw an "InvalidCharacterError" DOMException.
     if (data.contains(u8"?>"))
     {
-      return ExceptionCode::InvalidCharacterError;
+      return dom::ExceptionCode::InvalidCharacterError;
     }
 
     // 3.-5. In the constructor.
@@ -93,12 +93,12 @@ namespace krys::boo::dom
     return it->Value;
   }
 
-  ExceptionOr<void> ProcessingInstruction::SetAttribute(DOMStringView name, DOMString value) noexcept
+  dom::ExceptionOr<void> ProcessingInstruction::SetAttribute(DOMStringView name, DOMString value) noexcept
   {
     // 1. If name is not a valid attribute local name, then throw an "InvalidCharacterError" DOMException.
-    if (!NameValidation::IsValidAttributeLocalName(name))
+    if (!dom::NameValidation::IsValidAttributeLocalName(name))
     {
-      return ExceptionCode::InvalidCharacterError;
+      return dom::ExceptionCode::InvalidCharacterError;
     }
 
     // 2. Set this's attribute map[name] to value.
@@ -126,12 +126,13 @@ namespace krys::boo::dom
     UpdateDataFromAttributes();
   }
 
-  ExceptionOr<bool> ProcessingInstruction::ToggleAttribute(DOMStringView name, Maybe<bool> force) noexcept
+  dom::ExceptionOr<bool> ProcessingInstruction::ToggleAttribute(DOMStringView name,
+                                                                Maybe<bool> force) noexcept
   {
     // 1. If name is not a valid attribute local name, then throw an "InvalidCharacterError" DOMException.
-    if (!NameValidation::IsValidAttributeLocalName(name))
+    if (!dom::NameValidation::IsValidAttributeLocalName(name))
     {
-      return ExceptionCode::InvalidCharacterError;
+      return dom::ExceptionCode::InvalidCharacterError;
     }
 
     // 2. Let attributes be this's attribute map.
@@ -235,12 +236,12 @@ namespace krys::boo::dom
     }
 
     // 3. Replace data of pi with 0, pi's length, data, and true.
-    (void)TextAlgorithms::Replace(*this, 0uz, Length(), krys::move(data), true);
+    (void)dom::TextAlgorithms::Replace(*this, 0uz, Length(), krys::move(data), true);
   }
 
   ProcessingInstruction::~ProcessingInstruction() noexcept
   {
-    if (RefPtr<css::CSSStyleSheet> sheet = _sheet)
+    if (RefPtr<CSSStyleSheet> sheet = _sheet)
     {
       sheet->ClearOwnerNode();
     }
@@ -256,7 +257,7 @@ namespace krys::boo::dom
     }
   }
 
-  css::CSSStyleSheet *ProcessingInstruction::Sheet() const noexcept
+  CSSStyleSheet *ProcessingInstruction::Sheet() const noexcept
   {
     return _sheet.get();
   }
@@ -376,10 +377,10 @@ namespace krys::boo::dom
     krys_debug_assert(_isCSS);
     css::ParserContext parserContext(*document, baseURL, charset);
 
-    auto cssSheet = css::CSSStyleSheet::Create(
-      css::StyleSheetContents::Create(css::CSSOMString(href), parserContext), *this, true);
+    auto cssSheet =
+      CSSStyleSheet::Create(css::StyleSheetContents::Create(CSSOMString(href), parserContext), *this, true);
     cssSheet->SetDisabled(_alternate);
-    cssSheet->SetTitle(css::CSSOMString(_title));
+    cssSheet->SetTitle(CSSOMString(_title));
     cssSheet->SetMediaQueries(css::mq::MediaQueryParser::Parse(_media, document->CssParserContext()));
 
     _sheet = krys::move(cssSheet);
@@ -392,8 +393,8 @@ namespace krys::boo::dom
 
   void ProcessingInstruction::ParseStyleSheet(const utf8_string &sheet) noexcept
   {
-    Ref<css::CSSStyleSheet> styleSheet = ShareRef(*_sheet);
-    styleSheet->Contents().ParseString(css::CSSOMString(sheet));
+    Ref<CSSStyleSheet> styleSheet = ShareRef(*_sheet);
+    styleSheet->Contents().ParseString(CSSOMString(sheet));
 
     if (CachedResourceHandle cachedSheet = std::exchange(_cachedSheet, nullptr))
     {
@@ -432,7 +433,7 @@ namespace krys::boo::dom
     auto &styleScope = NodeDocument().StyleScope();
     styleScope.RemoveStyleSheetCandidateNode(*this);
 
-    if (RefPtr<css::CSSStyleSheet> sheet = std::exchange(_sheet, nullptr))
+    if (RefPtr<CSSStyleSheet> sheet = std::exchange(_sheet, nullptr))
     {
       sheet->ClearOwnerNode();
     }

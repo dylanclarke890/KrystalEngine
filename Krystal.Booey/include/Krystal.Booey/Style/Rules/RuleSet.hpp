@@ -96,7 +96,7 @@ namespace krys::boo::style
 
   public:
     using RuleDataVector = SmallList<RuleData, 1>;
-    using AtomRuleMap = HashMap<css::CSSOMStringAtom, UniquePtr<RuleDataVector>>;
+    using AtomRuleMap = HashMap<CSSOMStringAtom, UniquePtr<RuleDataVector>>;
 
     constexpr static auto CascadeLayerPriorityForPresentationalHints =
       std::numeric_limits<CascadeLayerPriority>::min();
@@ -203,7 +203,7 @@ namespace krys::boo::style
     List<ScopeRuleIdentifier> _scopeRuleIdentifierForRulePosition;
 
     // @position-try
-    HashMap<css::CSSOMStringAtom, RefPtr<const css::PositionTryRule>> _positionTryRules;
+    HashMap<CSSOMStringAtom, RefPtr<const css::PositionTryRule>> _positionTryRules;
 
     bool _hasHostPseudoClassRulesMatchingInShadowTree {false};
     bool _hasViewportDependentMediaQueries {false};
@@ -218,8 +218,7 @@ namespace krys::boo::style
 
     void AddRule(const css::StyleRule &rule, uint32 selectorIndex, uint32 selectorListIndex) noexcept;
 
-    static void AddToRuleSet(const css::CSSOMStringAtom &key, AtomRuleMap &map,
-                             const RuleData &ruleData) noexcept;
+    static void AddToRuleSet(const CSSOMStringAtom &key, AtomRuleMap &map, const RuleData &ruleData) noexcept;
 
     void ShrinkToFit() noexcept;
 
@@ -236,23 +235,22 @@ namespace krys::boo::style
       return _features;
     }
 
-    KRYS_NODISCARD const RuleDataVector *IdRules(const css::CSSOMStringAtom &key) const noexcept
+    KRYS_NODISCARD const RuleDataVector *IdRules(const CSSOMStringAtom &key) const noexcept
     {
       return Find(_idRules, key);
     }
 
-    KRYS_NODISCARD const RuleDataVector *ClassRules(const css::CSSOMStringAtom &key) const noexcept
+    KRYS_NODISCARD const RuleDataVector *ClassRules(const CSSOMStringAtom &key) const noexcept
     {
       return Find(_classRules, key);
     }
 
-    KRYS_NODISCARD const RuleDataVector *AttributeRules(const css::CSSOMStringAtom &key,
+    KRYS_NODISCARD const RuleDataVector *AttributeRules(const CSSOMStringAtom &key,
                                                         bool isHTMLName) const noexcept;
 
-    KRYS_NODISCARD const RuleDataVector *TagRules(const css::CSSOMStringAtom &key,
-                                                  bool isHTMLName) const noexcept;
+    KRYS_NODISCARD const RuleDataVector *TagRules(const CSSOMStringAtom &key, bool isHTMLName) const noexcept;
 
-    KRYS_NODISCARD const RuleDataVector *UserAgentPartRules(const css::CSSOMStringAtom &key) const noexcept
+    KRYS_NODISCARD const RuleDataVector *UserAgentPartRules(const CSSOMStringAtom &key) const noexcept
     {
       return Find(_userAgentPartRules, key);
     }
@@ -349,7 +347,7 @@ namespace krys::boo::style
     KRYS_NODISCARD List<Ref<const css::ScopeRule>> ScopeRulesFor(const RuleData &ruleData) const noexcept;
 
     KRYS_NODISCARD RefPtr<const css::PositionTryRule>
-      PositionTryRuleForName(const css::CSSOMStringAtom &name) const noexcept;
+      PositionTryRuleForName(const CSSOMStringAtom &name) const noexcept;
 
   private:
     void AddRule(RuleData ruleData, CascadeLayerIdentifier cascadeLayerIdentifier,
@@ -380,21 +378,21 @@ namespace krys::boo::style
       CascadeLayerPriorityForIdentifier(CascadeLayerIdentifier identifier) const noexcept;
 
     KRYS_NODISCARD static const RuleDataVector *Find(const AtomRuleMap &map,
-                                                     const css::CSSOMStringAtom &key) noexcept
+                                                     const CSSOMStringAtom &key) noexcept
     {
       auto it = map.find(key);
       return it == map.end() ? nullptr : it->second.get();
     }
   };
 
-  inline const RuleSet::RuleDataVector *RuleSet::AttributeRules(const css::CSSOMStringAtom &key,
+  inline const RuleSet::RuleDataVector *RuleSet::AttributeRules(const CSSOMStringAtom &key,
                                                                 bool isHTMLName) const noexcept
   {
     auto &rules = isHTMLName ? _attributeLowercaseLocalNameRules : _attributeLocalNameRules;
     return Find(rules, key);
   }
 
-  inline const RuleSet::RuleDataVector *RuleSet::TagRules(const css::CSSOMStringAtom &key,
+  inline const RuleSet::RuleDataVector *RuleSet::TagRules(const CSSOMStringAtom &key,
                                                           bool isHTMLName) const noexcept
   {
     auto &rules = isHTMLName ? _tagLowercaseLocalNameRules : _tagLocalNameRules;

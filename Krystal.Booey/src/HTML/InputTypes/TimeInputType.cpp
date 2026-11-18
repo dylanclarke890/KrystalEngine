@@ -46,9 +46,9 @@ namespace krys::boo::html
   {
     krys_debug_assert(Element());
     auto &element = *Element();
-    auto attribute = [&](dom::DOMStringAtom name)
+    auto attribute = [&](DOMStringAtom name)
     {
-      return element.GetAttribute(krys::move(name)).value_or(dom::DOMString());
+      return element.GetAttribute(krys::move(name)).value_or(DOMString());
     };
     const Decimal stepBase = FindStepBase(Decimal(0));
     const Decimal minimum =
@@ -61,7 +61,7 @@ namespace krys::boo::html
                      StepRange::IsReversible::Yes);
   }
 
-  Maybe<DateComponents> TimeInputType::ParseToDateComponents(dom::DOMStringView source) const noexcept
+  Maybe<DateComponents> TimeInputType::ParseToDateComponents(DOMStringView source) const noexcept
   {
     return DateComponents::FromParsingTime(source);
   }
@@ -99,7 +99,7 @@ namespace krys::boo::html
                                 DateTimeFormatValidationResults::HasMeridiem});
   }
 
-  dom::DOMString TimeInputType::FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept
+  DOMString TimeInputType::FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept
   {
     if (!state.Hour || !state.Minute || !state.Meridiem)
     {

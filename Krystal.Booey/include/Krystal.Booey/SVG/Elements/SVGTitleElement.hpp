@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<title>` element: a title for its parent (or the document, as the document element's child),
   /// never rendered.
@@ -12,7 +12,7 @@ namespace krys::boo::svg
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGTitleElement);
 
   public:
-    explicit SVGTitleElement(dom::Document &document) noexcept;
+    explicit SVGTitleElement(Document &document) noexcept;
 
   private:
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final
@@ -22,8 +22,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGTitleElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGTitleElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGTitleElement();
   }

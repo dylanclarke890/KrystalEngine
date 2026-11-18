@@ -114,7 +114,7 @@ namespace krys::boo::layout_integration
   {
   }
 
-  BoxTreeUpdater::BoxTreeUpdater(RenderBlock &rootRenderer, const dom::Document &document) noexcept
+  BoxTreeUpdater::BoxTreeUpdater(RenderBlock &rootRenderer, const Document &document) noexcept
       : _rootRenderer(rootRenderer), _document(ShareCheckedPtr(&document))
   {
   }

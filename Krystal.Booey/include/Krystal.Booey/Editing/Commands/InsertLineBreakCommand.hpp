@@ -33,9 +33,9 @@ namespace krys::boo
   class InsertLineBreakCommand final : public CompositeEditCommand
   {
   public:
-    explicit InsertLineBreakCommand(dom::Document &document) noexcept;
+    explicit InsertLineBreakCommand(Document &document) noexcept;
 
-    KRYS_NODISCARD static Ref<InsertLineBreakCommand> Create(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<InsertLineBreakCommand> Create(Document &document) noexcept;
 
   private:
     void DoApply() noexcept override;

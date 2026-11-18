@@ -29,7 +29,7 @@
 
 namespace krys::boo
 {
-  RenderMathMLSpace::RenderMathMLSpace(mathml::MathMLSpaceElement &element, RenderStyle &&style) noexcept
+  RenderMathMLSpace::RenderMathMLSpace(boo::MathMLSpaceElement &element, RenderStyle &&style) noexcept
       : RenderMathMLBlock(Type::MathMLSpace, element, krys::move(style))
   {
     krys_debug_assert(IsRenderMathMLSpace());
@@ -37,9 +37,9 @@ namespace krys::boo
 
   RenderMathMLSpace::~RenderMathMLSpace() noexcept = default;
 
-  mathml::MathMLSpaceElement &RenderMathMLSpace::GetElement() const noexcept
+  boo::MathMLSpaceElement &RenderMathMLSpace::GetElement() const noexcept
   {
-    return static_cast<mathml::MathMLSpaceElement &>(NodeForNonAnonymous());
+    return static_cast<boo::MathMLSpaceElement &>(NodeForNonAnonymous());
   }
 
   void RenderMathMLSpace::ComputePreferredLogicalWidths() noexcept

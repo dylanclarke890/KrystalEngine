@@ -34,13 +34,13 @@
 
 namespace krys::boo::css
 {
-  MediaQueryMatcher::MediaQueryMatcher(dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
+  MediaQueryMatcher::MediaQueryMatcher(Document &document) noexcept : _document(CreateWeakPtr(&document))
   {
   }
 
   MediaQueryMatcher::~MediaQueryMatcher() noexcept = default;
 
-  Ref<MediaQueryMatcher> MediaQueryMatcher::Create(dom::Document &document) noexcept
+  Ref<MediaQueryMatcher> MediaQueryMatcher::Create(Document &document) noexcept
   {
     return AdoptRef(*new MediaQueryMatcher(document));
   }

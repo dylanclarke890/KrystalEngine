@@ -35,7 +35,7 @@
 
 namespace krys::boo
 {
-  InsertTextCommand::InsertTextCommand(dom::Document &document, utf8_stringview text,
+  InsertTextCommand::InsertTextCommand(Document &document, utf8_stringview text,
                                        AllowPasswordEcho allowPasswordEcho, bool selectInsertedText,
                                        RebalanceType rebalanceType, EditAction editingAction) noexcept
       : CompositeEditCommand(document, editingAction), _text(text), _allowPasswordEcho(allowPasswordEcho),
@@ -43,7 +43,7 @@ namespace krys::boo
   {
   }
 
-  InsertTextCommand::InsertTextCommand(dom::Document &document, utf8_stringview text,
+  InsertTextCommand::InsertTextCommand(Document &document, utf8_stringview text,
                                        Ref<TextInsertionMarkerSupplier> &&markerSupplier,
                                        EditAction editingAction) noexcept
       : CompositeEditCommand(document, editingAction), _text(text), _selectInsertedText(false),
@@ -51,7 +51,7 @@ namespace krys::boo
   {
   }
 
-  Ref<InsertTextCommand> InsertTextCommand::Create(dom::Document &document, utf8_stringview text,
+  Ref<InsertTextCommand> InsertTextCommand::Create(Document &document, utf8_stringview text,
                                                    AllowPasswordEcho allowPasswordEcho,
                                                    bool selectInsertedText, RebalanceType rebalanceType,
                                                    EditAction editingAction) noexcept
@@ -61,7 +61,7 @@ namespace krys::boo
   }
 
   Ref<InsertTextCommand>
-    InsertTextCommand::CreateWithMarkerSupplier(dom::Document &document, utf8_stringview text,
+    InsertTextCommand::CreateWithMarkerSupplier(Document &document, utf8_stringview text,
                                                 Ref<TextInsertionMarkerSupplier> &&markerSupplier,
                                                 EditAction editingAction) noexcept
   {
@@ -81,7 +81,7 @@ namespace krys::boo
 
     // Prepare for text input by looking at the specified position.
     // It may be necessary to insert a text node to receive characters.
-    if (!Is<dom::Text>(*pos.GetContainerNode()))
+    if (!Is<Text>(*pos.GetContainerNode()))
     {
       auto textNode = GetDocument().CreateTextNode(utf8_string());
       InsertNodeAt(*textNode, pos);
@@ -137,7 +137,7 @@ namespace krys::boo
   bool InsertTextCommand::PerformOverwrite(utf8_stringview text, bool selectInsertedText) noexcept
   {
     dom::Position start = EndingSelection().Start();
-    RefPtr<dom::Text> textNode = ShareRefPtr(start.ContainerText());
+    RefPtr<Text> textNode = ShareRefPtr(start.ContainerText());
     if (!textNode)
     {
       return false;
@@ -153,7 +153,7 @@ namespace krys::boo
     ReplaceTextInNode(*textNode, static_cast<uint32>(start.OffsetInContainerNode()), count, text);
 
     dom::Position endPosition =
-      dom::Position(RefPtr<dom::Text>(textNode),
+      dom::Position(RefPtr<Text>(textNode),
                     static_cast<uint32>(start.OffsetInContainerNode()) + static_cast<uint32>(text.size()));
     SetEndingSelectionWithoutValidation(start, endPosition);
     if (!selectInsertedText)
@@ -264,16 +264,16 @@ namespace krys::boo
       startPosition = PositionInsideTextNode(startPosition);
       krys_debug_assert(startPosition.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor);
       krys_debug_assert(startPosition.GetContainerNode());
-      krys_debug_assert(Is<dom::Text>(*startPosition.GetContainerNode()));
+      krys_debug_assert(Is<Text>(*startPosition.GetContainerNode()));
       if (placeholder.IsNotNull())
       {
         RemovePlaceholderAt(placeholder);
       }
-      RefPtr<dom::Text> textNode = ShareRefPtr(startPosition.ContainerText());
+      RefPtr<Text> textNode = ShareRefPtr(startPosition.ContainerText());
       const auto offset = static_cast<uint32>(startPosition.OffsetInContainerNode());
 
       InsertTextIntoNode(*textNode, offset, _text, _allowPasswordEcho);
-      endPosition = dom::Position(RefPtr<dom::Text>(textNode), offset + static_cast<uint32>(_text.size()));
+      endPosition = dom::Position(RefPtr<Text>(textNode), offset + static_cast<uint32>(_text.size()));
       if (_markerSupplier)
       {
         _markerSupplier->AddMarkersToTextNode(*textNode, offset, _text);
@@ -339,13 +339,13 @@ namespace krys::boo
       return position;
     }
 
-    RefPtr<dom::Node> node = ShareRefPtr(insertPos.GetContainerNode());
-    uint32 offset = Is<dom::Text>(*node) ? static_cast<uint32>(insertPos.OffsetInContainerNode()) : 0;
+    RefPtr<boo::Node> node = ShareRefPtr(insertPos.GetContainerNode());
+    uint32 offset = Is<Text>(*node) ? static_cast<uint32>(insertPos.OffsetInContainerNode()) : 0;
 
     // keep tabs coalesced in tab span
     if (ParentTabSpanNode(node.get()))
     {
-      auto &textNode = Downcast<dom::Text>(*node);
+      auto &textNode = Downcast<Text>(*node);
       InsertTextIntoNode(textNode, offset, u8"\t");
       return dom::Position(ShareRefPtr(&textNode), offset + 1);
     }
@@ -354,7 +354,7 @@ namespace krys::boo
     auto spanNode = CreateTabSpanElement(GetDocument());
 
     // place it
-    if (auto *textNode = DynamicDowncast<dom::Text>(*node))
+    if (auto *textNode = DynamicDowncast<Text>(*node))
     {
       if (offset >= textNode->Length())
       {

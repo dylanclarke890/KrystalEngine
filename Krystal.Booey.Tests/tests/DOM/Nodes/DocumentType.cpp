@@ -15,12 +15,11 @@ namespace krys::boo::dom::tests
   {
     struct CommonTestData
     {
-      Ref<dom::Document> Document;
+      Ref<boo::Document> Document;
       Ref<DocumentType> DocType;
 
-      CommonTestData(const dom::DOMString &name, const dom::DOMString &publicId,
-                     const dom::DOMString &systemId)
-          : Document(CreateRef<dom::Document>()),
+      CommonTestData(const DOMString &name, const DOMString &publicId, const DOMString &systemId)
+          : Document(CreateRef<boo::Document>()),
             DocType(*Document->Implementation().CreateDocumentType(name, publicId, systemId))
       {
       }

@@ -60,7 +60,7 @@ layer at (0,0) size 800x66
 )");
 
     // The thumb is drawn by the theme, and the track knows where it is.
-    auto &input = Downcast<html::HTMLInputElement>(fixture.ById(u8"quarter"));
+    auto &input = Downcast<HTMLInputElement>(fixture.ById(u8"quarter"));
     CHECK(input.Renderer()->Style().UsedAppearance() == StyleAppearance::SliderHorizontal);
     CHECK(input.SliderThumbElement()->Renderer()->Style().UsedAppearance()
           == StyleAppearance::SliderThumbHorizontal);
@@ -73,7 +73,7 @@ layer at (0,0) size 800x66
     // minimum at the bottom.
     ResolverFixture fixture {AhemDocument(u8"input{margin:0;appearance:slider-vertical;width:20px}",
                                           u8"<input type=range id=range value=100>")};
-    auto &input = Downcast<html::HTMLInputElement>(fixture.ById(u8"range"));
+    auto &input = Downcast<HTMLInputElement>(fixture.ById(u8"range"));
     CHECK(input.Renderer()->Style().UsedAppearance() == StyleAppearance::SliderVertical);
     auto *thumb = input.SliderThumbElement()->GetRenderBox();
     CHECK(thumb->Location().Y() == 0);
@@ -88,7 +88,7 @@ layer at (0,0) size 800x66
     boo::tests::EditorFixture fixture(
       u8"<style>body{margin:0}input{margin:0}</style><input type=range id=range "
       u8"value=50>");
-    auto &input = Downcast<html::HTMLInputElement>(fixture.ById(u8"range"));
+    auto &input = Downcast<HTMLInputElement>(fixture.ById(u8"range"));
     auto &handler = fixture.Frame->GetEventHandler();
     auto inputs = fixture.Listen(event_names::Input);
     auto changes = fixture.Listen(event_names::Change);
@@ -128,8 +128,8 @@ layer at (0,0) size 800x66
       u8"<input type=range id=range list=d><input type=range id=plain>"
       u8"<datalist id=d><option value=50><option value=20><option value=x><option disabled "
       u8"value=70></datalist>");
-    auto &input = Downcast<html::HTMLInputElement>(fixture.ById(u8"range"));
-    auto &plain = Downcast<html::HTMLInputElement>(fixture.ById(u8"plain"));
+    auto &input = Downcast<HTMLInputElement>(fixture.ById(u8"range"));
+    auto &plain = Downcast<HTMLInputElement>(fixture.ById(u8"plain"));
     auto &handler = fixture.Frame->GetEventHandler();
 
     SECTION("A slider with ticks is taller, to fit them")

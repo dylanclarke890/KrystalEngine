@@ -44,10 +44,10 @@ namespace krys::boo::html
     constexpr MonotonicTime::duration TypeAheadTimeout = std::chrono::seconds(1);
 
     /// @brief @p value in decimal, zero padded to @p width digits.
-    KRYS_NODISCARD dom::DOMString PadNumber(int value, size_t width) noexcept
+    KRYS_NODISCARD DOMString PadNumber(int value, size_t width) noexcept
     {
       auto digits = std::format("{:0{}}", value, width);
-      return dom::DOMString(reinterpret_cast<const char8 *>(digits.data()), digits.size());
+      return DOMString(reinterpret_cast<const char8 *>(digits.data()), digits.size());
     }
   }
 
@@ -61,7 +61,7 @@ namespace krys::boo::html
     return value >= Minimum && value <= Maximum;
   }
 
-  DateTimeNumericFieldElement::DateTimeNumericFieldElement(dom::Document &document,
+  DateTimeNumericFieldElement::DateTimeNumericFieldElement(Document &document,
                                                            DateTimeFieldElementFieldOwner &fieldOwner,
                                                            const Range &range, int placeholder) noexcept
       : DateTimeFieldElement(document, fieldOwner), _range(range), _placeholder(FormatValue(placeholder)),
@@ -88,7 +88,7 @@ namespace krys::boo::html
     float inlineSize = 0;
     for (char8 c = '0'; c <= '9'; ++c)
     {
-      auto numberString = locale.ConvertToLocalizedNumber(dom::DOMString(length, c));
+      auto numberString = locale.ConvertToLocalizedNumber(DOMString(length, c));
       inlineSize = std::max(inlineSize, font.Width(RenderBlock::ConstructTextRun(numberString, style)));
     }
 
@@ -100,7 +100,7 @@ namespace krys::boo::html
     return _range.Maximum;
   }
 
-  dom::DOMString DateTimeNumericFieldElement::FormatValue(int value) const noexcept
+  DOMString DateTimeNumericFieldElement::FormatValue(int value) const noexcept
   {
     auto &locale = LocaleForOwner();
 
@@ -161,7 +161,7 @@ namespace krys::boo::html
     SetValueAsIntegerByStepping(newValue);
   }
 
-  dom::DOMString DateTimeNumericFieldElement::Value() const noexcept
+  DOMString DateTimeNumericFieldElement::Value() const noexcept
   {
     if (_hasValue)
     {
@@ -170,7 +170,7 @@ namespace krys::boo::html
     return {};
   }
 
-  dom::DOMString DateTimeNumericFieldElement::PlaceholderValue() const noexcept
+  DOMString DateTimeNumericFieldElement::PlaceholderValue() const noexcept
   {
     return _placeholder;
   }
@@ -190,7 +190,7 @@ namespace krys::boo::html
     char8 encoded[U8_MAX_LENGTH];
     size_t encodedLength = 0;
     U8_APPEND_UNSAFE(encoded, encodedLength, charCode);
-    auto number = LocaleForOwner().ConvertFromLocalizedNumber(dom::DOMStringView(encoded, encodedLength));
+    auto number = LocaleForOwner().ConvertFromLocalizedNumber(DOMStringView(encoded, encodedLength));
     int digit = number.empty() ? -1 : number[0] - '0';
     if (digit < 0 || digit > 9)
     {

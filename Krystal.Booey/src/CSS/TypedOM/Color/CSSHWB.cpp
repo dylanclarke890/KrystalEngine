@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Color/CSSHWB.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   namespace
   {

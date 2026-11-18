@@ -25,7 +25,7 @@ namespace krys::boo::tests
       u8"<div id=none style='background-image: cross-fade(none, url(file:///a.png), 25%)'></div>");
     RunNetworkingTasks();
 
-    auto imageSize = [&](dom::DOMStringView id)
+    auto imageSize = [&](DOMStringView id)
     {
       auto &renderer = *fixture.ById(id).Renderer();
       RefPtr image = renderer.Style().GetBackgroundLayers().UsedValues().begin()->GetImage().TryStyleImage();
@@ -56,7 +56,7 @@ namespace krys::boo::tests
       u8"60%)'></div>");
     RunNetworkingTasks();
 
-    auto crossfade = [&](dom::DOMStringView id) -> StyleCrossfadeImage &
+    auto crossfade = [&](DOMStringView id) -> StyleCrossfadeImage &
     {
       auto &renderer = *fixture.ById(id).Renderer();
       return Downcast<StyleCrossfadeImage>(

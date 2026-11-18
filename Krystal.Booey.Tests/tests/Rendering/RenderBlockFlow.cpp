@@ -19,7 +19,7 @@ namespace krys::boo::tests
         {RenderAsTextFlag::ShowAllLayers, RenderAsTextFlag::ShowIDAndClass, RenderAsTextFlag::ShowOverflow});
     }
 
-    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       return Downcast<RenderBox>(*fixture.ById(id).Renderer());
     }

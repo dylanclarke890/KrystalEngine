@@ -26,7 +26,7 @@
 
 namespace krys::boo::html
 {
-  HTMLImageLoader::HTMLImageLoader(dom::Element &element) noexcept : ImageLoader(element)
+  HTMLImageLoader::HTMLImageLoader(boo::Element &element) noexcept : ImageLoader(element)
   {
   }
 
@@ -37,7 +37,7 @@ namespace krys::boo::html
     // FIXME: Video posters fire no events, once they load images.
     bool errorOccurred = Image()->ErrorOccurred();
     (void)dom::EventDispatcher::FireEvent(
-      dom::DOMStringAtom(errorOccurred ? event_names::Error : event_names::Load), GetElement());
+      DOMStringAtom(errorOccurred ? event_names::Error : event_names::Load), GetElement());
   }
 
   void HTMLImageLoader::NotifyFinished(CachedResource &resource) noexcept

@@ -62,13 +62,13 @@ namespace krys::boo
     }
 
     /// @brief The SVG images @p document has loaded, each with its own page.
-    KRYS_NODISCARD List<Ref<svg::SVGImage>> SVGImagesOf(dom::Document &document) noexcept
+    KRYS_NODISCARD List<Ref<SVGImage>> SVGImagesOf(Document &document) noexcept
     {
-      List<Ref<svg::SVGImage>> images;
+      List<Ref<SVGImage>> images;
       for (const auto &[url, resource] : document.GetCachedResourceLoader().AllCachedResources())
       {
         auto *cachedImage = DynamicDowncast<CachedImage>(resource.get());
-        if (auto *image = cachedImage ? DynamicDowncast<svg::SVGImage>(cachedImage->GetImage()) : nullptr)
+        if (auto *image = cachedImage ? DynamicDowncast<SVGImage>(cachedImage->GetImage()) : nullptr)
         {
           images.push_back(ShareRef(*image));
         }
@@ -132,7 +132,7 @@ namespace krys::boo
 
   void Page::SetPageScaleFactor(float scale, const IntPoint &origin) noexcept
   {
-    RefPtr<dom::Document> mainDocument = ShareRefPtr(_mainFrame->Document());
+    RefPtr<boo::Document> mainDocument = ShareRefPtr(_mainFrame->Document());
     RefPtr<LocalFrameView> mainFrameView = mainDocument ? ShareRefPtr(mainDocument->View()) : nullptr;
 
     if (scale == _pageScaleFactor)
@@ -155,7 +155,7 @@ namespace krys::boo
 
         if (mainDocument)
         {
-          mainDocument->ResolveStyle(dom::Document::ResolveStyleType::Rebuild);
+          mainDocument->ResolveStyle(Document::ResolveStyleType::Rebuild);
         }
 
         // Transform change on RenderView doesn't trigger repaint on non-composited contents.
@@ -179,7 +179,7 @@ namespace krys::boo
     }
   }
 
-  void Page::DidChangeMainDocument(dom::Document *newDocument) noexcept
+  void Page::DidChangeMainDocument(Document *newDocument) noexcept
   {
     (void)newDocument;
     _pointerCaptureController->Reset();
@@ -239,7 +239,7 @@ namespace krys::boo
     _imageAnimationEnabled = enabled;
 
     ForEachDocument(
-      [enabled](dom::Document &document)
+      [enabled](Document &document)
       {
         if (auto *svgExtensions = document.SVGExtensionsIfExists())
         {
@@ -317,7 +317,7 @@ namespace krys::boo
     // aren't (see DIFFERENCES.md).
 
     ForEachDocument(
-      [](dom::Document &document)
+      [](Document &document)
       {
         if (auto *window = document.Window())
         {
@@ -325,31 +325,29 @@ namespace krys::boo
         }
       });
 
-    RunProcessingStep(RenderingUpdateStep::FlushAutofocusCandidates, [](dom::Document &document)
-                      { html::FocusAlgorithms::FlushAutofocusCandidates(document); });
+    RunProcessingStep(RenderingUpdateStep::FlushAutofocusCandidates,
+                      [](Document &document) { html::FocusAlgorithms::FlushAutofocusCandidates(document); });
 
-    RunProcessingStep(RenderingUpdateStep::Resize,
-                      [](dom::Document &document) { document.RunResizeSteps(); });
+    RunProcessingStep(RenderingUpdateStep::Resize, [](Document &document) { document.RunResizeSteps(); });
 
-    RunProcessingStep(RenderingUpdateStep::Scroll,
-                      [](dom::Document &document) { document.RunScrollSteps(); });
+    RunProcessingStep(RenderingUpdateStep::Scroll, [](Document &document) { document.RunScrollSteps(); });
 
     RunProcessingStep(RenderingUpdateStep::MediaQueryEvaluation,
-                      [](dom::Document &document) { document.EvaluateMediaQueriesAndReportChanges(); });
+                      [](Document &document) { document.EvaluateMediaQueriesAndReportChanges(); });
 
     // FIXME: Fullscreen events, once there's fullscreen.
     RunProcessingStep(RenderingUpdateStep::Animations,
-                      [](dom::Document &document) { document.UpdateAnimationsAndSendEvents(); });
+                      [](Document &document) { document.UpdateAnimationsAndSendEvents(); });
 
     RunProcessingStep(RenderingUpdateStep::AnimationFrameCallbacks,
-                      [](dom::Document &document) { document.ServiceRequestAnimationFrameCallbacks(); });
+                      [](Document &document) { document.ServiceRequestAnimationFrameCallbacks(); });
 
     RunProcessingStep(RenderingUpdateStep::CaretAnimation,
-                      [](dom::Document &document) { document.ServiceCaretAnimation(); });
+                      [](Document &document) { document.ServiceCaretAnimation(); });
 
     // An SVG image's page is updated with the page that shows it, which its updates are scheduled with.
     RunProcessingStep(RenderingUpdateStep::Images,
-                      [](dom::Document &document)
+                      [](Document &document)
                       {
                         for (auto &image : SVGImagesOf(document))
                         {
@@ -362,23 +360,23 @@ namespace krys::boo
 
     LayoutIfNeeded();
 
-    ForEachDocument([](dom::Document &document) { document.ProcessTopLayerRemovals(); });
+    ForEachDocument([](Document &document) { document.ProcessTopLayerRemovals(); });
 
     RunProcessingStep(RenderingUpdateStep::ResizeObservations,
-                      [this](dom::Document &document) { document.UpdateResizeObservations(*this); });
+                      [this](Document &document) { document.UpdateResizeObservations(*this); });
 
     // https://drafts.csswg.org/scroll-animations-1/#event-loop
-    ForEachDocument([](dom::Document &document) { document.RunPostRenderingUpdateAnimationTasks(); });
+    ForEachDocument([](Document &document) { document.RunPostRenderingUpdateAnimationTasks(); });
 
     // https://html.spec.whatwg.org/#focus-fixup-rule
     RunProcessingStep(RenderingUpdateStep::FocusFixup,
-                      [](dom::Document &document)
+                      [](Document &document)
                       {
                         // If the focused area of the document is not a focusable area, run the focusing steps
                         // for the document's viewport.
                         // (There's no navigation API, whose focus changed during ongoing navigation would be
                         // set to false.)
-                        if (RefPtr<dom::Element> focusedElement = ShareRefPtr(document.FocusedElement()))
+                        if (RefPtr<Element> focusedElement = ShareRefPtr(document.FocusedElement()))
                         {
                           if (!html::FocusAlgorithms::IsFocusableArea(*focusedElement))
                           {
@@ -387,14 +385,14 @@ namespace krys::boo
                         }
                       });
 
-    RunProcessingStep(RenderingUpdateStep::UpdateContentRelevancy, [](dom::Document &document)
+    RunProcessingStep(RenderingUpdateStep::UpdateContentRelevancy, [](Document &document)
                       { (void)document.UpdateRelevancyOfContentVisibilityElements(); });
 
     RunProcessingStep(RenderingUpdateStep::IntersectionObservations,
-                      [](dom::Document &document) { document.UpdateIntersectionObservations(); });
+                      [](Document &document) { document.UpdateIntersectionObservations(); });
 
     RunProcessingStep(RenderingUpdateStep::SnapshottedScrollOffsets,
-                      [](dom::Document &document)
+                      [](Document &document)
                       {
                         if (auto *renderView = document.GetRenderView())
                         {
@@ -406,10 +404,10 @@ namespace krys::boo
     DoAfterUpdateRendering();
 
     RunProcessingStep(RenderingUpdateStep::PrepareCanvasesForDisplayOrFlush,
-                      [](dom::Document &document) { document.PrepareCanvasesForDisplayOrFlushIfNeeded(); });
+                      [](Document &document) { document.PrepareCanvasesForDisplayOrFlushIfNeeded(); });
 
     ForEachDocument(
-      [](dom::Document &document)
+      [](Document &document)
       {
         if (auto *window = document.Window())
         {
@@ -444,7 +442,7 @@ namespace krys::boo
     // Code here should do once-per-frame work that needs to be done before painting, and requires
     // layout to be up-to-date. It should not run script, trigger layout, or dirty layout.
     RunProcessingStep(RenderingUpdateStep::CursorUpdate,
-                      [](dom::Document &document)
+                      [](Document &document)
                       {
                         if (auto *frame = document.Frame())
                         {
@@ -454,10 +452,10 @@ namespace krys::boo
 
     // FIXME: Paint and event timing, once there are any.
 
-    ForEachDocument([](dom::Document &document)
+    ForEachDocument([](Document &document)
                     { document.Selection().UpdateAppearanceAfterUpdatingRendering(); });
 
-    ForEachRenderableDocument([](dom::Document &document) { document.UpdateHighlightPositions(); });
+    ForEachRenderableDocument([](Document &document) { document.UpdateHighlightPositions(); });
   }
 
   void Page::RenderingUpdateCompleted() noexcept
@@ -465,7 +463,7 @@ namespace krys::boo
     _renderingUpdateRemainingSteps = {};
     // The renderers destroyed during the update are deleted once it's over (upstream: when the page is idle).
     ForEachDocument(
-      [](dom::Document &document)
+      [](Document &document)
       {
         if (auto *view = document.View())
         {
@@ -483,15 +481,15 @@ namespace krys::boo
 
   void Page::LayoutIfNeeded(EnumSet<dom::LayoutOptions> layoutOptions) noexcept
   {
-    if (RefPtr<dom::Document> document = ShareRefPtr(_mainFrame->Document()); document && _mainFrame->View())
+    if (RefPtr<boo::Document> document = ShareRefPtr(_mainFrame->Document()); document && _mainFrame->View())
     {
       (void)document->UpdateLayout(layoutOptions);
     }
   }
 
-  void Page::ForEachDocument(const Func<void(dom::Document &)> &functor) const noexcept
+  void Page::ForEachDocument(const Func<void(Document &)> &functor) const noexcept
   {
-    if (RefPtr<dom::Document> document = ShareRefPtr(_mainFrame->Document()))
+    if (RefPtr<boo::Document> document = ShareRefPtr(_mainFrame->Document()))
     {
       functor(*document);
     }
@@ -517,7 +515,7 @@ namespace krys::boo
       }
 
       ForEachDocument(
-        [](dom::Document &document)
+        [](Document &document)
         {
           if (document.GetSettings().HiddenPageCSSAnimationSuspensionEnabled)
           {
@@ -540,7 +538,7 @@ namespace krys::boo
     else
     {
       ForEachDocument(
-        [](dom::Document &document)
+        [](Document &document)
         {
           if (document.GetSettings().HiddenPageCSSAnimationSuspensionEnabled)
           {
@@ -564,19 +562,19 @@ namespace krys::boo
       }
     }
 
-    ForEachDocument([](dom::Document &document) { document.VisibilityStateChanged(); });
+    ForEachDocument([](Document &document) { document.VisibilityStateChanged(); });
   }
 
   void Page::SuspendScriptedAnimations() noexcept
   {
     _scriptedAnimationsSuspended = true;
-    ForEachDocument([](dom::Document &document) { document.SuspendScriptedAnimationControllerCallbacks(); });
+    ForEachDocument([](Document &document) { document.SuspendScriptedAnimationControllerCallbacks(); });
   }
 
   void Page::ResumeScriptedAnimations() noexcept
   {
     _scriptedAnimationsSuspended = false;
-    ForEachDocument([](dom::Document &document) { document.ResumeScriptedAnimationControllerCallbacks(); });
+    ForEachDocument([](Document &document) { document.ResumeScriptedAnimationControllerCallbacks(); });
   }
 
   void Page::ResumeAnimatingImages() noexcept
@@ -589,13 +587,13 @@ namespace krys::boo
     }
   }
 
-  void Page::ForEachRenderableDocument(const Func<void(dom::Document &)> &functor) const noexcept
+  void Page::ForEachRenderableDocument(const Func<void(Document &)> &functor) const noexcept
   {
     // https://html.spec.whatwg.org/#update-the-rendering
     // Remove from docs any Document doc for which doc is render-blocked.
-    List<Ref<dom::Document>> documents;
+    List<Ref<Document>> documents;
     ForEachDocument(
-      [&](dom::Document &document)
+      [&](Document &document)
       {
         if (html::RenderBlocking::IsRenderBlocked(document))
         {
@@ -611,7 +609,7 @@ namespace krys::boo
   }
 
   void Page::RunProcessingStep(RenderingUpdateStep step,
-                               const Func<void(dom::Document &)> &perDocumentFunction) noexcept
+                               const Func<void(Document &)> &perDocumentFunction) noexcept
   {
     _renderingUpdateRemainingSteps.Remove(step);
     ForEachRenderableDocument(perDocumentFunction);
@@ -683,7 +681,7 @@ namespace krys::boo
 
     // Scrollbars that follow the page's appearance change with it, though their styles don't.
     ForEachDocument(
-      [](dom::Document &document)
+      [](Document &document)
       {
         if (auto *view = document.View())
         {
@@ -705,7 +703,7 @@ namespace krys::boo
   void Page::UpdateStyleAfterChangeInEnvironment() noexcept
   {
     ForEachDocument(
-      [](dom::Document &document)
+      [](Document &document)
       {
         if (auto *styleResolver = document.StyleScope().ResolverIfExists())
         {

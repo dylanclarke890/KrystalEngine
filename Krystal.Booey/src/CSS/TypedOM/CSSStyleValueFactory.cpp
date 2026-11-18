@@ -57,42 +57,43 @@
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD Ref<CSSStyleValue> ReifyKeyword(ValueId keyword) noexcept
+    KRYS_NODISCARD Ref<CSSStyleValue> ReifyKeyword(css::ValueId keyword) noexcept
     {
       return CSSKeywordValue::RectifyKeywordish(CSSOMString(ToString(keyword)));
     }
 
     /// @brief Whether a list value of @p property may be reified as its only item. The parser represents
     /// some values that aren't lists as lists, which the Typed OM doesn't treat as lists.
-    KRYS_NODISCARD bool MayConvertValueListToSingleValue(Maybe<PropertyId> property) noexcept
+    KRYS_NODISCARD bool MayConvertValueListToSingleValue(Maybe<css::PropertyId> property) noexcept
     {
       if (!property)
       {
         return true;
       }
-      return *property != PropertyId::GridRowStart && *property != PropertyId::GridRowEnd
-             && *property != PropertyId::GridColumnStart && *property != PropertyId::GridColumnEnd;
+      return *property != css::PropertyId::GridRowStart && *property != css::PropertyId::GridRowEnd
+             && *property != css::PropertyId::GridColumnStart && *property != css::PropertyId::GridColumnEnd;
     }
 
     /// @brief Reifies @p value as a `CSSUnitValue`, if it's a number, percentage or dimension.
     /// @see https://drafts.css-houdini.org/css-typed-om/#reify-a-numeric-value
-    KRYS_NODISCARD RefPtr<CSSStyleValue> ReifyNumericValue(const PrimitiveValue &value) noexcept
+    KRYS_NODISCARD RefPtr<CSSStyleValue> ReifyNumericValue(const css::PrimitiveValue &value) noexcept
     {
       auto type = value.PrimitiveType();
       switch (type)
       {
-        case UnitType::Number:
-        case UnitType::Integer:
+        case css::UnitType::Number:
+        case css::UnitType::Integer:
         {
-          return CSSUnitValue::Create(value.ValueNoConversionDataRequired<double>(), UnitType::Number);
+          return CSSUnitValue::Create(value.ValueNoConversionDataRequired<double>(), css::UnitType::Number);
         }
-        case UnitType::Percentage:
+        case css::UnitType::Percentage:
         {
-          return CSSUnitValue::Create(value.ValueNoConversionDataRequired<double>(), UnitType::Percentage);
+          return CSSUnitValue::Create(value.ValueNoConversionDataRequired<double>(),
+                                      css::UnitType::Percentage);
         }
         default:
         {
@@ -100,8 +101,8 @@ namespace krys::boo::css
         }
       }
       // A dimension: a unit the Typed OM can name.
-      auto unit = PrimitiveValue::UnitTypeString(type);
-      if (unit.empty() || ParseUnitType(unit) != type)
+      auto unit = css::PrimitiveValue::UnitTypeString(type);
+      if (unit.empty() || css::ParseUnitType(unit) != type)
       {
         return nullptr;
       }
@@ -111,21 +112,22 @@ namespace krys::boo::css
     /// @brief @p value, the value of a list or none property, as `none` if it's that, or a generic style
     /// value.
     template <typename T>
-    KRYS_NODISCARD Ref<CSSStyleValue> ReifyListOrNone(const T &list, const Value &value) noexcept
+    KRYS_NODISCARD Ref<CSSStyleValue> ReifyListOrNone(const T &list, const css::Value &value) noexcept
     {
       if (list.IsNone())
       {
-        return ReifyKeyword(ValueId::None);
+        return ReifyKeyword(css::ValueId::None);
       }
-      return CSSStyleValue::Create(ShareRefPtr(const_cast<Value *>(&value)));
+      return CSSStyleValue::Create(ShareRefPtr(const_cast<css::Value *>(&value)));
     }
 
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<Value>> ExtractValue(dom::Document &document, PropertyId property,
-                                                                CSSOMStringView cssText) noexcept
+    KRYS_NODISCARD dom::ExceptionOr<RefPtr<css::Value>>
+      ExtractValue(Document &document, css::PropertyId property, CSSOMStringView cssText) noexcept
     {
-      auto declaration = MutableStyleProperties::Create();
-      if (Parser::ParseValue(*declaration, property, cssText, IsImportant::Yes, ParserContext(document))
-          == Parser::ParseResult::Error)
+      auto declaration = css::MutableStyleProperties::Create();
+      if (css::Parser::ParseValue(*declaration, property, cssText, css::IsImportant::Yes,
+                                  css::ParserContext(document))
+          == css::Parser::ParseResult::Error)
       {
         return dom::Exception {dom::ExceptionCode::TypeError};
       }
@@ -133,11 +135,12 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD dom::ExceptionOr<RefPtr<CSSStyleValue>>
-      ExtractShorthandValues(dom::Document &document, PropertyId property, CSSOMStringView cssText) noexcept
+      ExtractShorthandValues(Document &document, css::PropertyId property, CSSOMStringView cssText) noexcept
     {
-      auto declaration = MutableStyleProperties::Create();
-      if (Parser::ParseValue(*declaration, property, cssText, IsImportant::Yes, ParserContext(document))
-          == Parser::ParseResult::Error)
+      auto declaration = css::MutableStyleProperties::Create();
+      if (css::Parser::ParseValue(*declaration, property, cssText, css::IsImportant::Yes,
+                                  css::ParserContext(document))
+          == css::Parser::ParseResult::Error)
       {
         return dom::Exception {dom::ExceptionCode::TypeError};
       }
@@ -147,33 +150,34 @@ namespace krys::boo::css
 
     KRYS_NODISCARD Ref<CSSUnparsedValue> ExtractCustomValues(CSSOMStringView cssText) noexcept
     {
-      InputStream input {CSSOMString(cssText)};
-      Tokenizer tokenizer(input);
+      css::InputStream input {CSSOMString(cssText)};
+      css::Tokenizer tokenizer(input);
       std::ignore = tokenizer.PumpTokenizer();
       return CSSUnparsedValue::Create(tokenizer.Tokens());
     }
   }
 
   RefPtr<CSSStyleValue> CSSStyleValueFactory::ConstructStyleValueForShorthandSerialisation(
-    dom::Document &document, const CSSOMString &serialisation) noexcept
+    Document &document, const CSSOMString &serialisation) noexcept
   {
     if (serialisation.empty())
     {
       return nullptr;
     }
 
-    InputStream input {CSSOMString(serialisation)};
-    Tokenizer tokenizer(input);
+    css::InputStream input {CSSOMString(serialisation)};
+    css::Tokenizer tokenizer(input);
     std::ignore = tokenizer.PumpTokenizer();
     if (serialisation.contains(u8"var("))
     {
       return CSSUnparsedValue::Create(tokenizer.Tokens());
     }
-    return CSSStyleValue::Create(VariableReferenceValue::Create(tokenizer.Tokens(), ParserContext(document)));
+    return CSSStyleValue::Create(
+      css::VariableReferenceValue::Create(tokenizer.Tokens(), css::ParserContext(document)));
   }
 
   dom::ExceptionOr<List<Ref<CSSStyleValue>>>
-    CSSStyleValueFactory::ParseStyleValue(dom::Document &document, CSSOMStringView property,
+    CSSStyleValueFactory::ParseStyleValue(Document &document, CSSOMStringView property,
                                           CSSOMStringView cssText, bool parseMultiple) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#parse-a-cssstylevalue
@@ -183,15 +187,15 @@ namespace krys::boo::css
     }
 
     // A custom property's value is its tokens, with the variable references among them.
-    if (IsCustomPropertyName(property))
+    if (css::IsCustomPropertyName(property))
     {
       return List<Ref<CSSStyleValue>> {ExtractCustomValues(cssText)};
     }
 
     // 1. If property is not a custom property name string, set property to property ASCII lowercased.
     // 2. If property is not a valid CSS property, throw a TypeError.
-    auto propertyId = PropertyIdFromName(text::ToASCIILower(property));
-    if (propertyId == PropertyId::Invalid)
+    auto propertyId = css::PropertyIdFromName(text::ToASCIILower(property));
+    if (propertyId == css::PropertyId::Invalid)
     {
       return dom::Exception {dom::ExceptionCode::TypeError};
     }
@@ -223,16 +227,16 @@ namespace krys::boo::css
 
     // 4. Subdivide into iterations whatToReturn, and set whatToReturn to the result.
     // https://drafts.css-houdini.org/css-typed-om/#subdivide-into-iterations
-    List<Ref<Value>> values;
+    List<Ref<css::Value>> values;
     if (auto value = result.ReleaseValue())
     {
-      if (Property::IsListValuedProperty(propertyId))
+      if (css::Property::IsListValuedProperty(propertyId))
       {
-        if (auto *list = DynamicDowncast<ValueContainingList>(*value))
+        if (auto *list = DynamicDowncast<css::ValueContainingList>(*value))
         {
           for (const auto &item : *list)
           {
-            values.push_back(ShareRef(const_cast<Value &>(item)));
+            values.push_back(ShareRef(const_cast<css::Value &>(item)));
           }
         }
       }
@@ -263,12 +267,12 @@ namespace krys::boo::css
     return results;
   }
 
-  dom::ExceptionOr<Ref<CSSStyleValue>> CSSStyleValueFactory::ReifyValue(dom::Document &document,
-                                                                        const Value &value,
-                                                                        Maybe<PropertyId> property) noexcept
+  dom::ExceptionOr<Ref<CSSStyleValue>>
+    CSSStyleValueFactory::ReifyValue(Document &document, const css::Value &value,
+                                     Maybe<css::PropertyId> property) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#reify-as-a-cssstylevalue
-    if (const auto *primitiveValue = DynamicDowncast<PrimitiveValue>(value))
+    if (const auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value))
     {
       // https://drafts.css-houdini.org/css-typed-om/#reify-a-math-expression
       if (const auto *calcValue = primitiveValue->CSSCalcValue())
@@ -285,7 +289,7 @@ namespace krys::boo::css
       if (primitiveValue->IsValueId() || primitiveValue->IsCustomIdent())
       {
         return Ref<CSSStyleValue>(
-          CSSKeywordValue::RectifyKeywordish(primitiveValue->CssText(DefaultSerialisationContext())));
+          CSSKeywordValue::RectifyKeywordish(primitiveValue->CssText(css::DefaultSerialisationContext())));
       }
       if (auto numeric = ReifyNumericValue(*primitiveValue))
       {
@@ -293,31 +297,35 @@ namespace krys::boo::css
         return nonNullNumeric;
       }
     }
-    else if (const auto *imageValue = DynamicDowncast<ImageValue>(value))
+    else if (const auto *imageValue = DynamicDowncast<css::ImageValue>(value))
     {
       return Ref<CSSStyleValue>(
-        CSSImageValue::Create(ShareRef(const_cast<ImageValue &>(*imageValue)), document));
+        CSSImageValue::Create(ShareRef(const_cast<css::ImageValue &>(*imageValue)), document));
     }
-    else if (const auto *referenceValue = DynamicDowncast<VariableReferenceValue>(value))
+    else if (const auto *referenceValue = DynamicDowncast<css::VariableReferenceValue>(value))
     {
       // https://drafts.css-houdini.org/css-typed-om/#reify-a-list-of-component-values
       return Ref<CSSStyleValue>(CSSUnparsedValue::Create(referenceValue->Data().TokenRange()));
     }
-    else if (const auto *substitutionValue = DynamicDowncast<PendingSubstitutionValue>(value))
+    else if (const auto *substitutionValue = DynamicDowncast<css::PendingSubstitutionValue>(value))
     {
       return Ref<CSSStyleValue>(
         CSSUnparsedValue::Create(substitutionValue->ShorthandValue().Data().TokenRange()));
     }
-    else if (const auto *customPropertyValue = DynamicDowncast<CustomPropertyValue>(value))
+    else if (const auto *customPropertyValue = DynamicDowncast<css::CustomPropertyValue>(value))
     {
       return krys::SwitchOn(
-        customPropertyValue->Value(), [&](const Ref<VariableReferenceValue> &reference)
-        { return ReifyValue(document, *reference, property); }, [&](const Ref<VariableData> &data)
-        { return ReifyValue(document, *VariableReferenceValue::Create(Ref<VariableData>(data)), property); },
-        [&](GlobalKeyword keyword) -> dom::ExceptionOr<Ref<CSSStyleValue>>
-        { return ReifyKeyword(ToValueId(keyword)); });
+        customPropertyValue->Value(), [&](const Ref<css::VariableReferenceValue> &reference)
+        { return ReifyValue(document, *reference, property); },
+        [&](const Ref<css::VariableData> &data)
+        {
+          return ReifyValue(document, *css::VariableReferenceValue::Create(Ref<css::VariableData>(data)),
+                            property);
+        },
+        [&](css::GlobalKeyword keyword) -> dom::ExceptionOr<Ref<CSSStyleValue>>
+        { return ReifyKeyword(css::ToValueId(keyword)); });
     }
-    else if (const auto *transformList = DynamicDowncast<TransformListValue>(value))
+    else if (const auto *transformList = DynamicDowncast<css::TransformListValue>(value))
     {
       auto transformValue = CSSTransformValue::Create(*transformList, document);
       if (transformValue.HasException())
@@ -326,26 +334,26 @@ namespace krys::boo::css
       }
       return Ref<CSSStyleValue>(transformValue.ReleaseValue());
     }
-    else if (const auto *filterValue = DynamicDowncast<FilterValue>(value))
+    else if (const auto *filterValue = DynamicDowncast<css::FilterValue>(value))
     {
       return ReifyListOrNone(filterValue->GetFilter(), value);
     }
-    else if (const auto *boxShadowValue = DynamicDowncast<BoxShadowPropertyValue>(value))
+    else if (const auto *boxShadowValue = DynamicDowncast<css::BoxShadowPropertyValue>(value))
     {
       return ReifyListOrNone(boxShadowValue->Shadow(), value);
     }
-    else if (const auto *textShadowValue = DynamicDowncast<TextShadowPropertyValue>(value))
+    else if (const auto *textShadowValue = DynamicDowncast<css::TextShadowPropertyValue>(value))
     {
       return ReifyListOrNone(textShadowValue->Shadow(), value);
     }
-    else if (const auto *easingValue = DynamicDowncast<EasingFunctionValue>(value))
+    else if (const auto *easingValue = DynamicDowncast<css::EasingFunctionValue>(value))
     {
       // A keyword easing function is that keyword.
       return easingValue->GetEasingFunction().SwitchOn(
-        [&]<ValueId keyword>(KeywordValueConstant<keyword>) { return ReifyKeyword(keyword); },
-        [&](const auto &) { return CSSStyleValue::Create(ShareRefPtr(const_cast<Value *>(&value))); });
+        [&]<css::ValueId keyword>(css::KeywordValueConstant<keyword>) { return ReifyKeyword(keyword); },
+        [&](const auto &) { return CSSStyleValue::Create(ShareRefPtr(const_cast<css::Value *>(&value))); });
     }
-    else if (const auto *valueList = DynamicDowncast<ValueList>(value))
+    else if (const auto *valueList = DynamicDowncast<css::ValueList>(value))
     {
       // A list of one item is that item, and a list-valued property's list is its first item.
       if (!valueList->Length())
@@ -353,17 +361,17 @@ namespace krys::boo::css
         return dom::Exception {dom::ExceptionCode::TypeError};
       }
       if ((valueList->Length() == 1 && MayConvertValueListToSingleValue(property))
-          || (property && Property::IsListValuedProperty(*property)))
+          || (property && css::Property::IsListValuedProperty(*property)))
       {
         return ReifyValue(document, (*valueList)[0], property);
       }
     }
 
-    return CSSStyleValue::Create(ShareRefPtr(const_cast<Value *>(&value)));
+    return CSSStyleValue::Create(ShareRefPtr(const_cast<css::Value *>(&value)));
   }
 
   dom::ExceptionOr<List<Ref<CSSStyleValue>>>
-    CSSStyleValueFactory::ListFromStyleValuesOrStrings(dom::Document &document, CSSOMStringView property,
+    CSSStyleValueFactory::ListFromStyleValuesOrStrings(Document &document, CSSOMStringView property,
                                                        List<CSSStyleValueOrString> values) noexcept
   {
     List<Ref<CSSStyleValue>> styleValues;

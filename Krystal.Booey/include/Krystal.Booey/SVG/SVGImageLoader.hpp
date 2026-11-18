@@ -21,7 +21,7 @@
 
 #include "Krystal.Booey/Loader/ImageLoader.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGImageElement;
 

@@ -27,17 +27,23 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLFormElement;
   class HTMLSelectElement;
+}
 
+namespace krys::boo::html
+{
   enum class AllowStyleInvalidation : bool
   {
     No,
     Yes,
   };
+}
 
+namespace krys::boo
+{
   /// @see https://html.spec.whatwg.org/#htmloptionelement
   class HTMLOptionElement : public HTMLElement
   {
@@ -46,7 +52,7 @@ namespace krys::boo::html
   private:
     WeakPtr<HTMLSelectElement> _ownerSelect;
     WeakPtr<HTMLSlotElement> _contentsSlot;
-    WeakPtr<dom::Element> _labelElement;
+    WeakPtr<Element> _labelElement;
     bool _disabled {false};
     bool _isSelected {false};
     bool _isDefault {false};
@@ -55,13 +61,12 @@ namespace krys::boo::html
     bool _dirtiness {false};
 
   public:
-    explicit HTMLOptionElement(dom::Document &document) noexcept;
+    explicit HTMLOptionElement(Document &document) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option
     static dom::ExceptionOr<Ref<HTMLOptionElement>>
-      CreateForLegacyFactoryFunction(dom::Document &document, dom::DOMString text,
-                                     Maybe<dom::DOMString> value, bool defaultSelected,
-                                     bool selected) noexcept;
+      CreateForLegacyFactoryFunction(Document &document, DOMString text, Maybe<DOMString> value,
+                                     bool defaultSelected, bool selected) noexcept;
 
     /// @see https://html.spec.whatwg.org/#concept-option-disabled
     KRYS_NODISCARD bool IsDisabledFormControl() const noexcept final;
@@ -93,13 +98,13 @@ namespace krys::boo::html
 
     /// @brief The form owner of the option's select, retargeted against the option.
     /// @see https://html.spec.whatwg.org/#dom-option-form
-    KRYS_NODISCARD RefPtr<dom::Element> FormForBindings() const noexcept;
+    KRYS_NODISCARD RefPtr<Element> FormForBindings() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option-label
-    KRYS_NODISCARD dom::DOMString Label() const noexcept;
+    KRYS_NODISCARD DOMString Label() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option-label
-    void Label(dom::DOMString value) noexcept;
+    void Label(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option-defaultselected
     KRYS_NODISCARD bool DefaultSelected() const noexcept;
@@ -108,23 +113,23 @@ namespace krys::boo::html
     void DefaultSelected(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option-selected
-    KRYS_NODISCARD bool
-      Selected(AllowStyleInvalidation allowStyleInvalidation = AllowStyleInvalidation::Yes) const noexcept;
+    KRYS_NODISCARD bool Selected(
+      html::AllowStyleInvalidation allowStyleInvalidation = html::AllowStyleInvalidation::Yes) const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option-selected
     void Selected(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option-value
-    KRYS_NODISCARD dom::DOMString Value() const noexcept;
+    KRYS_NODISCARD DOMString Value() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option-value
-    void Value(dom::DOMString value) noexcept;
+    void Value(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option-text
-    KRYS_NODISCARD dom::DOMString Text() const noexcept;
+    KRYS_NODISCARD DOMString Text() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option-text
-    void Text(dom::DOMString value) noexcept;
+    void Text(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option-index
     KRYS_NODISCARD int32 Index() const noexcept;
@@ -139,15 +144,14 @@ namespace krys::boo::html
     KRYS_NODISCARD HTMLSlotElement *SlotForHostChild() const noexcept;
 
     /// @brief The label shown for the option: its text, ignoring its `label` attribute, in quirks mode.
-    KRYS_NODISCARD dom::DOMString DisplayLabel() const noexcept;
+    KRYS_NODISCARD DOMString DisplayLabel() const noexcept;
 
     /// @brief The label, indented when the option is in an optgroup.
-    KRYS_NODISCARD dom::DOMString TextIndentedToRespectGroupLabel() const noexcept;
+    KRYS_NODISCARD DOMString TextIndentedToRespectGroupLabel() const noexcept;
 
     /// @brief Sets the option's selectedness, without making it dirty or telling its select.
-    void
-      SetSelectedState(bool selected,
-                       AllowStyleInvalidation allowStyleInvalidation = AllowStyleInvalidation::Yes) noexcept;
+    void SetSelectedState(bool selected, html::AllowStyleInvalidation allowStyleInvalidation =
+                                           html::AllowStyleInvalidation::Yes) noexcept;
 
     KRYS_NODISCARD bool SelectedWithoutUpdate() const noexcept
     {
@@ -175,20 +179,19 @@ namespace krys::boo::html
 
     void OnPostConnection() noexcept override;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
-    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
     void OnChildrenChanged() noexcept override;
 
     /// @brief Tells the datalists the option is in that their suggestions may have changed.
     void NotifyAncestorDataLists() noexcept;
 
-    void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept override;
+    void DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept override;
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
 #pragma endregion
 
@@ -197,24 +200,24 @@ namespace krys::boo::html
     /// @return The select it forgot, if any.
     RefPtr<HTMLSelectElement> UpdateOwnerSelect() noexcept;
 
-    KRYS_NODISCARD dom::DOMString CollectOptionInnerText() const noexcept;
+    KRYS_NODISCARD DOMString CollectOptionInnerText() const noexcept;
 
-    KRYS_NODISCARD dom::DOMString CollectOptionInnerTextCollapsingWhitespace() const noexcept;
+    KRYS_NODISCARD DOMString CollectOptionInnerTextCollapsingWhitespace() const noexcept;
 
     /// @brief The option's label: its non-empty `label` attribute, or its text.
     /// @see https://html.spec.whatwg.org/#concept-option-label
-    KRYS_NODISCARD dom::DOMString OptionLabel() const noexcept;
+    KRYS_NODISCARD DOMString OptionLabel() const noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLOptionElement)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLOptionElement)
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLOptionElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLOptionElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLOptionElement();
   }

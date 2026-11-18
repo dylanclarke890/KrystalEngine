@@ -23,25 +23,22 @@
 
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGGradientElement;
   class SVGStopElement;
-}
 
-namespace krys::boo
-{
   // This class exists mostly so we can hear about gradient stop style changes
   class RenderSVGGradientStop final : public RenderElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderSVGGradientStop);
 
   public:
-    RenderSVGGradientStop(svg::SVGStopElement &, RenderStyle &&) noexcept;
+    RenderSVGGradientStop(SVGStopElement &, RenderStyle &&) noexcept;
 
     ~RenderSVGGradientStop() noexcept override;
 
-    KRYS_NODISCARD svg::SVGStopElement &GetElement() const noexcept;
+    KRYS_NODISCARD SVGStopElement &GetElement() const noexcept;
 
   private:
     void StyleDidChange(style::Difference, const RenderStyle *oldStyle) noexcept override;
@@ -91,7 +88,7 @@ namespace krys::boo
     {
     }
 
-    KRYS_NODISCARD svg::SVGGradientElement *GradientElement() const noexcept;
+    KRYS_NODISCARD SVGGradientElement *GradientElement() const noexcept;
   };
 }
 

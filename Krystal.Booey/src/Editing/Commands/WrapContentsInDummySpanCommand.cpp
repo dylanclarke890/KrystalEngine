@@ -34,19 +34,19 @@
 
 namespace krys::boo
 {
-  Ref<WrapContentsInDummySpanCommand> WrapContentsInDummySpanCommand::Create(dom::Element &element) noexcept
+  Ref<WrapContentsInDummySpanCommand> WrapContentsInDummySpanCommand::Create(Element &element) noexcept
   {
     return CreateRef<WrapContentsInDummySpanCommand>(element);
   }
 
-  WrapContentsInDummySpanCommand::WrapContentsInDummySpanCommand(dom::Element &element) noexcept
+  WrapContentsInDummySpanCommand::WrapContentsInDummySpanCommand(Element &element) noexcept
       : SimpleEditCommand(element.NodeDocument()), _element(ShareRef(element))
   {
   }
 
   void WrapContentsInDummySpanCommand::ExecuteApply() noexcept
   {
-    List<Ref<dom::Node>> children;
+    List<Ref<Node>> children;
     for (auto *child = _element->FirstChild(); child; child = child->NextSibling())
     {
       children.push_back(ShareRef(*child));
@@ -79,7 +79,7 @@ namespace krys::boo
       return;
     }
 
-    List<Ref<dom::Node>> children;
+    List<Ref<Node>> children;
     for (auto *child = _dummySpan->FirstChild(); child; child = child->NextSibling())
     {
       children.push_back(ShareRef(*child));

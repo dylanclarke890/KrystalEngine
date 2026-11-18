@@ -52,7 +52,7 @@ namespace krys::boo::tests
                         event_names::CompositionEnd, event_names::BeforeInput, event_names::Input,
                         event_names::TextInput, event_names::KeyDown, event_names::KeyPress})
       {
-        fixture.Document->AddEventListener(dom::DOMStringAtom(type), log, true);
+        fixture.Document->AddEventListener(DOMStringAtom(type), log, true);
       }
       return log;
     }
@@ -87,7 +87,7 @@ namespace krys::boo::tests
     EditorFixture fixture(u8"<div id=e contenteditable>ab</div><p id=p>xyz</p>");
     auto &editor = fixture.GetEditor();
     auto &root = fixture.ById(u8"e");
-    Downcast<html::HTMLElement>(root).Focus();
+    Downcast<HTMLElement>(root).Focus();
     fixture.SetCaret(fixture.TextIn(u8"e"), 2);
     auto log = LogEvents(fixture);
 
@@ -230,7 +230,7 @@ namespace krys::boo::tests
     EditorFixture fixture(u8"<div id=e contenteditable>abcd</div>");
     auto &editor = fixture.GetEditor();
     auto &root = fixture.ById(u8"e");
-    Downcast<html::HTMLElement>(root).Focus();
+    Downcast<HTMLElement>(root).Focus();
     fixture.Select(fixture.TextIn(u8"e"), 1, 3);
     auto log = LogEvents(fixture);
 
@@ -250,7 +250,7 @@ namespace krys::boo::tests
     EditorFixture fixture(u8"<div id=e contenteditable>ab&nbsp;</div>");
     auto &editor = fixture.GetEditor();
     auto &root = fixture.ById(u8"e");
-    Downcast<html::HTMLElement>(root).Focus();
+    Downcast<HTMLElement>(root).Focus();
     auto &text = fixture.TextIn(u8"e");
     fixture.SetCaret(text, static_cast<uint32>(text.Length()));
 
@@ -266,7 +266,7 @@ namespace krys::boo::tests
   {
     EditorFixture fixture(u8"<input id=field value=ab>");
     auto &editor = fixture.GetEditor();
-    auto &field = Downcast<html::HTMLInputElement>(fixture.ById(u8"field"));
+    auto &field = Downcast<HTMLInputElement>(fixture.ById(u8"field"));
     field.Focus();
     field.SetSelectionRange(2, 2);
     auto log = LogEvents(fixture);
@@ -290,7 +290,7 @@ namespace krys::boo::tests
     EditorFixture fixture(u8"<div id=e contenteditable>ab</div>");
     auto &editor = fixture.GetEditor();
     auto &root = fixture.ById(u8"e");
-    Downcast<html::HTMLElement>(root).Focus();
+    Downcast<HTMLElement>(root).Focus();
     fixture.SetCaret(fixture.TextIn(u8"e"), 2);
     auto log = LogEvents(fixture);
     auto &eventHandler = fixture.Frame->GetEventHandler();
@@ -324,7 +324,7 @@ namespace krys::boo::tests
                           u8"<div id=plain tabindex=0>b</div>");
     auto focus = [&](utf8_stringview id)
     {
-      Downcast<html::HTMLElement>(fixture.ById(id)).Focus();
+      Downcast<HTMLElement>(fixture.ById(id)).Focus();
       return fixture.Client->InputMethodEnabled;
     };
 
@@ -338,7 +338,7 @@ namespace krys::boo::tests
 
     // Losing the focus, by blurring or removal, turns it off.
     CHECK(focus(u8"text"));
-    Downcast<html::HTMLElement>(fixture.ById(u8"text")).Blur();
+    Downcast<HTMLElement>(fixture.ById(u8"text")).Blur();
     CHECK_FALSE(fixture.Client->InputMethodEnabled);
     CHECK(focus(u8"area"));
     fixture.ById(u8"area").Remove();

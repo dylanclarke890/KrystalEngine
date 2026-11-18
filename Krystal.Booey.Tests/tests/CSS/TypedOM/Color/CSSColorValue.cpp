@@ -133,7 +133,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "CSSColorValue: parsing reifies colours",
                    "[CSS][TypedOM][css-typed-om:dom-csscolorvalue-parse][css-typed-om:reify-a-color-value]")
   {
-    auto document = CreateRef<dom::Document>();
+    auto document = CreateRef<Document>();
     auto parse = [&](utf8_stringview text) -> Ref<CSSStyleValue>
     {
       auto parsed = CSSColorValue::Parse(*document, text);

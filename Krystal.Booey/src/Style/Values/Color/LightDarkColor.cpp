@@ -35,7 +35,7 @@ namespace krys::boo::style
   {
     ColorResolutionStateNester nester {state};
 
-    Ref<const dom::Document> document = state.Document;
+    Ref<const boo::Document> document = state.Document;
     if (document->UseDarkAppearance(&state.Style))
     {
       return ToStyleColor(unresolved.DarkColor, state);

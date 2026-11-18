@@ -30,9 +30,9 @@
 #include "Krystal.Booey/SVG/SVGFilterPrimitiveStandardAttributes.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFELightElement::SVGFELightElement(dom::Document &document, SVGElementInterface interface) noexcept
+  SVGFELightElement::SVGFELightElement(Document &document, SVGElementInterface interface) noexcept
       : SVGElement(document, CreateUnique<PropertyRegistry>(*this), interface),
         _azimuth(SVGAnimatedNumber::Create(this)), _elevation(SVGAnimatedNumber::Create(this)),
         _x(SVGAnimatedNumber::Create(this)), _y(SVGAnimatedNumber::Create(this)),
@@ -72,56 +72,56 @@ namespace krys::boo::svg
     return nullptr;
   }
 
-  void SVGFELightElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                           Maybe<dom::DOMStringView> value) noexcept
+  void SVGFELightElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                           Maybe<DOMStringView> value) noexcept
   {
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::AzimuthAttr())
     {
-      _azimuth->SetBaseValInternal(ToFloatOrZero(string));
+      _azimuth->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::ElevationAttr())
     {
-      _elevation->SetBaseValInternal(ToFloatOrZero(string));
+      _elevation->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::XAttr())
     {
-      _x->SetBaseValInternal(ToFloatOrZero(string));
+      _x->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::YAttr())
     {
-      _y->SetBaseValInternal(ToFloatOrZero(string));
+      _y->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::ZAttr())
     {
-      _z->SetBaseValInternal(ToFloatOrZero(string));
+      _z->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::PointsAtXAttr())
     {
-      _pointsAtX->SetBaseValInternal(ToFloatOrZero(string));
+      _pointsAtX->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::PointsAtYAttr())
     {
-      _pointsAtY->SetBaseValInternal(ToFloatOrZero(string));
+      _pointsAtY->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::PointsAtZAttr())
     {
-      _pointsAtZ->SetBaseValInternal(ToFloatOrZero(string));
+      _pointsAtZ->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::SpecularExponentAttr())
     {
-      _specularExponent->SetBaseValInternal(ToFloatOrZero(string));
+      _specularExponent->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::LimitingConeAngleAttr())
     {
-      _limitingConeAngle->SetBaseValInternal(ToFloatOrZero(string));
+      _limitingConeAngle->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
 
     SVGElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGFELightElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGFELightElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {

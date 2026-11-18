@@ -53,7 +53,7 @@ namespace krys::boo::style
       KRYS_NODISCARD bool operator==(const Shape &) const noexcept = default;
     };
 
-    Variant<css::keywords::None, Shape, css::CSSOMStringAtom> Value;
+    Variant<css::keywords::None, Shape, CSSOMStringAtom> Value;
 
     TextEmphasisStyle(css::keywords::None keyword) noexcept : Value {keyword}
     {
@@ -63,7 +63,7 @@ namespace krys::boo::style
     {
     }
 
-    TextEmphasisStyle(css::CSSOMStringAtom &&customMark) noexcept : Value {krys::move(customMark)}
+    TextEmphasisStyle(CSSOMStringAtom &&customMark) noexcept : Value {krys::move(customMark)}
     {
     }
 
@@ -72,8 +72,8 @@ namespace krys::boo::style
       return HoldsAlternative<css::keywords::None>(Value);
     }
 
-    // css::CSSOMString representation of the mark.
-    KRYS_NODISCARD css::CSSOMStringAtom MarkString() const noexcept;
+    // CSSOMString representation of the mark.
+    KRYS_NODISCARD CSSOMStringAtom MarkString() const noexcept;
 
     template <typename... F>
     decltype(auto) SwitchOn(F &&...f) const noexcept

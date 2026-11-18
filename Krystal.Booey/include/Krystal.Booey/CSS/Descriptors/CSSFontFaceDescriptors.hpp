@@ -28,7 +28,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSFontFaceRule;
 
@@ -37,12 +37,12 @@ namespace krys::boo::css
   class CSSFontFaceDescriptors final : public PropertySetCSSDescriptors
   {
   private:
-    CSSFontFaceDescriptors(MutableStyleProperties &propertySet, CSSFontFaceRule &parentRule) noexcept;
+    CSSFontFaceDescriptors(css::MutableStyleProperties &propertySet, CSSFontFaceRule &parentRule) noexcept;
 
   public:
     ~CSSFontFaceDescriptors() noexcept override;
 
-    KRYS_NODISCARD static Ref<CSSFontFaceDescriptors> Create(MutableStyleProperties &propertySet,
+    KRYS_NODISCARD static Ref<CSSFontFaceDescriptors> Create(css::MutableStyleProperties &propertySet,
                                                              CSSFontFaceRule &parentRule) noexcept;
 
     KRYS_NODISCARD StyleDeclarationType GetStyleDeclarationType() const noexcept final
@@ -87,13 +87,13 @@ namespace krys::boo::css
     dom::ExceptionOr<void> SetFontDisplay(const CSSOMString &value) noexcept;
 
   private:
-    KRYS_NODISCARD RuleType GetRuleType() const noexcept final;
+    KRYS_NODISCARD css::RuleType GetRuleType() const noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSFontFaceDescriptors)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleDeclaration &declaration) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSFontFaceDescriptors)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleDeclaration &declaration) noexcept
   {
-    return declaration.GetStyleDeclarationType() == krys::boo::css::StyleDeclarationType::FontFace;
+    return declaration.GetStyleDeclarationType() == krys::boo::StyleDeclarationType::FontFace;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

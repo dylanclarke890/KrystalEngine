@@ -24,7 +24,7 @@
 #include "Krystal.Booey/SVG/Internals/SVGPathTraversalStateBuilder.hpp"
 #include "Krystal.Booey/Graphics/Paths/PathTraversalState.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   SVGPathTraversalStateBuilder::SVGPathTraversalStateBuilder(PathTraversalState &state,
                                                              float desiredLength) noexcept
@@ -33,18 +33,20 @@ namespace krys::boo::svg
     _traversalState.SetDesiredLength(desiredLength);
   }
 
-  void SVGPathTraversalStateBuilder::MoveTo(const FloatPoint &targetPoint, bool, PathCoordinateMode) noexcept
+  void SVGPathTraversalStateBuilder::MoveTo(const FloatPoint &targetPoint, bool,
+                                            svg::PathCoordinateMode) noexcept
   {
     (void)_traversalState.ProcessPathElement(PathElement::Type::MoveToPoint, std::span {&targetPoint, 1});
   }
 
-  void SVGPathTraversalStateBuilder::LineTo(const FloatPoint &targetPoint, PathCoordinateMode) noexcept
+  void SVGPathTraversalStateBuilder::LineTo(const FloatPoint &targetPoint, svg::PathCoordinateMode) noexcept
   {
     (void)_traversalState.ProcessPathElement(PathElement::Type::AddLineToPoint, std::span {&targetPoint, 1});
   }
 
   void SVGPathTraversalStateBuilder::CurveToCubic(const FloatPoint &point1, const FloatPoint &point2,
-                                                  const FloatPoint &targetPoint, PathCoordinateMode) noexcept
+                                                  const FloatPoint &targetPoint,
+                                                  svg::PathCoordinateMode) noexcept
   {
     std::array points {point1, point2, targetPoint};
 

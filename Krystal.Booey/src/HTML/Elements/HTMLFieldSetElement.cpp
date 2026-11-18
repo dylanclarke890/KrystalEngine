@@ -32,15 +32,15 @@
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include <algorithm>
 
-namespace krys::boo::html
+namespace krys::boo
 {
   namespace
   {
     void UpdateFromControlElementsAncestorDisabledStateUnder(HTMLElement &startNode, bool isDisabled) noexcept
     {
-      for (dom::Node *node = &startNode; node;)
+      for (Node *node = &startNode; node;)
       {
-        auto *element = DynamicDowncast<dom::Element>(*node);
+        auto *element = DynamicDowncast<boo::Element>(*node);
         if (!element)
         {
           node = dom::TreeQueries::Next(*node, &startNode);
@@ -68,8 +68,8 @@ namespace krys::boo::html
     }
   }
 
-  HTMLFieldSetElement::HTMLFieldSetElement(dom::Document &document) noexcept
-      : HTMLFormControlElement(document, HTMLElementInterface::FieldSet)
+  HTMLFieldSetElement::HTMLFieldSetElement(Document &document) noexcept
+      : HTMLFormControlElement(document, html::HTMLElementInterface::FieldSet)
   {
   }
 
@@ -186,7 +186,7 @@ namespace krys::boo::html
     // The elements IDL attribute must return an HTMLCollection rooted at the fieldset element, whose filter
     // matches listed elements.
     Ref<dom::HTMLCollection> elements = CreateRef<dom::LiveHTMLCollection>(
-      *this, [](const dom::Element &element) { return element.IsFormListedElement(); });
+      *this, [](const boo::Element &element) { return element.IsFormListedElement(); });
     _elements = CreateWeakPtr<dom::HTMLCollection>(elements.get());
     return elements;
   }
@@ -244,23 +244,23 @@ namespace krys::boo::html
 
   bool HTMLFieldSetElement::Disabled() const noexcept
   {
-    return Reflect<bool>(*this, u8"disabled");
+    return html::Reflect<bool>(*this, u8"disabled");
   }
 
   void HTMLFieldSetElement::Disabled(bool value) noexcept
   {
-    CEReactionsScope ceReactions;
-    Reflect<bool>(*this, u8"disabled", krys::move(value));
+    html::CEReactionsScope ceReactions;
+    html::Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 
-  dom::DOMString HTMLFieldSetElement::Name() const noexcept
+  DOMString HTMLFieldSetElement::Name() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLFieldSetElement::Name(dom::DOMString value) noexcept
+  void HTMLFieldSetElement::Name(DOMString value) noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    return html::Reflect<DOMString>(*this, u8"name", krys::move(value));
   }
 
 #pragma endregion

@@ -25,7 +25,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyTraits.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGValueProperty.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The deprecated alias of `DOMRect` that SVG's interfaces still use.
   /// @see https://svgwg.org/svg2-draft/types.html#InterfaceSVGAnimatedRect
@@ -125,7 +125,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept override
     {
       return SVGPropertyTraits<FloatRect>::ToString(_value);
     }

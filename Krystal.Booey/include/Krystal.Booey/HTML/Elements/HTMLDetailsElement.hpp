@@ -27,7 +27,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLSlotElement;
   class HTMLSummaryElement;
@@ -48,19 +48,19 @@ namespace krys::boo::html
     RefPtr<dom::ToggleEventTask> _toggleEventTask;
 
   public:
-    explicit HTMLDetailsElement(dom::Document &document) noexcept;
+    explicit HTMLDetailsElement(Document &document) noexcept;
 
     ~HTMLDetailsElement() noexcept override;
 
-    KRYS_NODISCARD static Ref<HTMLDetailsElement> Create(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<HTMLDetailsElement> Create(Document &document) noexcept;
 
 #pragma region HTMLDetailsElement - https://html.spec.whatwg.org/#htmldetailselement
 
     /// @see https://html.spec.whatwg.org/#dom-details-name
-    KRYS_NODISCARD dom::DOMString Name() const noexcept;
+    KRYS_NODISCARD DOMString Name() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-details-name
-    void Name(dom::DOMString value) noexcept;
+    void Name(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-details-open
     KRYS_NODISCARD bool Open() const noexcept;
@@ -82,7 +82,7 @@ namespace krys::boo::html
 
     /// @brief The slot of the element's shadow tree that takes @p child: the summary slot for the first
     /// `summary` child, the content slot otherwise.
-    KRYS_NODISCARD HTMLSlotElement *SlotForHostChild(const dom::Node &child) const noexcept;
+    KRYS_NODISCARD HTMLSlotElement *SlotForHostChild(const Node &child) const noexcept;
 
     /// @brief Reassigns the element's children to its slots after a `summary` child was inserted, removed or
     /// moved.
@@ -96,15 +96,14 @@ namespace krys::boo::html
   protected:
 #pragma region Extensibility Hooks
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept final;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept final;
 
     void OnPostConnection() noexcept final;
 
 #pragma endregion
 
-    void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept final;
+    void DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept final;
 
   private:
     /// @brief The other elements in the element's details name group.
@@ -116,13 +115,13 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLDetailsElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLDetailsElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLDetailsElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLDetailsElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLDetailsElement();
   }

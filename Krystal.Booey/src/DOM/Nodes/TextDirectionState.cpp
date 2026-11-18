@@ -32,7 +32,7 @@ namespace krys::boo::dom
 {
   TextDirectionState ParseTextDirectionState(Maybe<DOMStringView> value) noexcept
   {
-    return html::EnumeratedAttribute<"dir", html::HTMLElement>::ResolveState(value).value_or(
+    return html::EnumeratedAttribute<"dir", HTMLElement>::ResolveState(value).value_or(
       TextDirectionState::Undefined);
   }
 
@@ -50,6 +50,6 @@ namespace krys::boo::dom
   {
     auto textDirectionState = ElementTextDirectionState(element);
     return textDirectionState == TextDirectionState::Auto
-           || (Is<html::HTMLBDIElement>(element) && textDirectionState == TextDirectionState::Undefined);
+           || (Is<HTMLBDIElement>(element) && textDirectionState == TextDirectionState::Undefined);
   }
 }

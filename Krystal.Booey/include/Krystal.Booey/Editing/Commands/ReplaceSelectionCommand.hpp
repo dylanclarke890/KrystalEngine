@@ -62,33 +62,33 @@ namespace krys::boo
     class InsertedNodes
     {
     private:
-      RefPtr<dom::Node> _firstNodeInserted;
-      RefPtr<dom::Node> _lastNodeInserted;
+      RefPtr<boo::Node> _firstNodeInserted;
+      RefPtr<boo::Node> _lastNodeInserted;
 
     public:
-      void RespondToNodeInsertion(dom::Node *node) noexcept;
+      void RespondToNodeInsertion(boo::Node *node) noexcept;
 
-      void WillRemoveNodePreservingChildren(dom::Node *node) noexcept;
+      void WillRemoveNodePreservingChildren(boo::Node *node) noexcept;
 
-      void WillRemovePossibleAncestorNode(dom::Node *node) noexcept;
+      void WillRemovePossibleAncestorNode(boo::Node *node) noexcept;
 
-      void WillRemoveNode(dom::Node *node) noexcept;
+      void WillRemoveNode(boo::Node *node) noexcept;
 
-      void DidReplaceNode(dom::Node *node, dom::Node *newNode) noexcept;
+      void DidReplaceNode(boo::Node *node, boo::Node *newNode) noexcept;
 
       KRYS_NODISCARD bool IsEmpty() const noexcept
       {
         return !_firstNodeInserted;
       }
 
-      KRYS_NODISCARD dom::Node *FirstNodeInserted() const noexcept
+      KRYS_NODISCARD boo::Node *FirstNodeInserted() const noexcept
       {
         return _firstNodeInserted.get();
       }
 
-      KRYS_NODISCARD dom::Node *LastLeafInserted() const noexcept;
+      KRYS_NODISCARD boo::Node *LastLeafInserted() const noexcept;
 
-      KRYS_NODISCARD dom::Node *PastLastLeaf() const noexcept;
+      KRYS_NODISCARD boo::Node *PastLastLeaf() const noexcept;
     };
 
     VisibleSelection _visibleSelectionForInsertedText;
@@ -98,7 +98,7 @@ namespace krys::boo
     bool _selectReplacement;
     bool _smartReplace;
     bool _matchStyle;
-    const RefPtr<dom::DocumentFragment> _documentFragment;
+    const RefPtr<DocumentFragment> _documentFragment;
     UniquePtr<ReplacementFragment> _replacementFragment;
     utf8_string _documentFragmentHTMLMarkup;
     utf8_string _documentFragmentPlainText;
@@ -108,14 +108,14 @@ namespace krys::boo
     bool _shouldMergeEnd {false};
 
   public:
-    ReplaceSelectionCommand(dom::Document &document, RefPtr<dom::DocumentFragment> &&fragment,
+    ReplaceSelectionCommand(Document &document, RefPtr<DocumentFragment> &&fragment,
                             EnumSet<CommandOption> options, EditAction editAction) noexcept;
 
     ~ReplaceSelectionCommand() noexcept override;
 
     KRYS_NODISCARD static Ref<ReplaceSelectionCommand>
-      Create(dom::Document &document, RefPtr<dom::DocumentFragment> &&fragment,
-             EnumSet<CommandOption> options, EditAction editingAction = EditAction::Insert) noexcept;
+      Create(Document &document, RefPtr<DocumentFragment> &&fragment, EnumSet<CommandOption> options,
+             EditAction editingAction = EditAction::Insert) noexcept;
 
     KRYS_NODISCARD const VisibleSelection &VisibleSelectionForInsertedText() const noexcept
     {
@@ -130,7 +130,7 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<dom::SimpleRange> InsertedContentRange() const noexcept;
 
   private:
-    KRYS_NODISCARD dom::DOMString InputEventData() const noexcept final;
+    KRYS_NODISCARD DOMString InputEventData() const noexcept final;
 
     KRYS_NODISCARD RefPtr<dom::DataTransfer> InputEventDataTransfer() const noexcept final;
 
@@ -138,12 +138,12 @@ namespace krys::boo
 
     void DoApply() noexcept override;
 
-    RefPtr<dom::Node> InsertAsListItems(dom::Element &listElement, dom::Node *insertionBlock,
+    RefPtr<boo::Node> InsertAsListItems(Element &listElement, boo::Node *insertionBlock,
                                         const dom::Position &position, InsertedNodes &insertedNodes) noexcept;
 
-    void UpdateNodesInserted(dom::Node *node) noexcept;
+    void UpdateNodesInserted(boo::Node *node) noexcept;
 
-    KRYS_NODISCARD bool ShouldRemoveEndBR(dom::Node *endBR,
+    KRYS_NODISCARD bool ShouldRemoveEndBR(boo::Node *endBR,
                                           const VisiblePosition &originalVisPosBeforeEndBR) noexcept;
 
     KRYS_NODISCARD bool ShouldMergeStart(bool selectionStartWasStartOfParagraph,
@@ -162,7 +162,7 @@ namespace krys::boo
 
     void MakeInsertedContentRoundTrippableWithHTMLTreeBuilder(InsertedNodes &insertedNodes) noexcept;
 
-    void MoveNodeOutOfAncestor(dom::Node &node, dom::Node &ancestor, InsertedNodes &insertedNodes) noexcept;
+    void MoveNodeOutOfAncestor(boo::Node &node, boo::Node &ancestor, InsertedNodes &insertedNodes) noexcept;
 
     KRYS_NODISCARD VisiblePosition PositionAtStartOfInsertedContent() const noexcept;
 

@@ -32,19 +32,15 @@
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::dom
-{
-  class Document;
-  class Node;
-}
-
 namespace krys::boo
 {
   class CaretAnimator;
   class Color;
+  class Document;
   class FloatRect;
   class GraphicsContext;
   class LayoutPoint;
+  class Node;
   class Page;
 
   enum class CaretAnimatorStopReason : uint8
@@ -65,9 +61,9 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual LayoutRect LocalCaretRect() const noexcept = 0;
 
-    KRYS_NODISCARD virtual dom::Document *GetDocument() noexcept = 0;
+    KRYS_NODISCARD virtual Document *GetDocument() noexcept = 0;
 
-    KRYS_NODISCARD virtual dom::Node *CaretNode() noexcept = 0;
+    KRYS_NODISCARD virtual Node *CaretNode() noexcept = 0;
   };
 
   /// @brief Animates a caret: whether it's shown as it blinks, serviced at each rendering update its timer

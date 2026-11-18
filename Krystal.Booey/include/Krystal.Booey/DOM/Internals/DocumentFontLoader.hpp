@@ -33,6 +33,8 @@
 
 namespace krys::boo
 {
+  class Document;
+
   namespace url
   {
     class URL;
@@ -42,8 +44,6 @@ namespace krys::boo
 
   namespace dom
   {
-    class Document;
-
     /// @brief Requests a document's web fonts, and begins loading them soon after something first needs them.
     /// @note Owned by its document.
     // FIXME: Counting the fonts waiting to load as requests that hold back the load event.

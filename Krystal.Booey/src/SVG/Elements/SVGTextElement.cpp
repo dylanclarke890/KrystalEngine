@@ -26,9 +26,9 @@
 #include "Krystal.Booey/SVG/Elements/SVGTSpanElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGTextElement::SVGTextElement(dom::Document &document) noexcept
+  SVGTextElement::SVGTextElement(Document &document) noexcept
       : SVGTextPositioningElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Text)
   {
   }
@@ -38,9 +38,9 @@ namespace krys::boo::svg
     return CreateRenderer<RenderSVGText>(*this, krys::move(style));
   }
 
-  bool SVGTextElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
+  bool SVGTextElement::ChildShouldCreateRenderer(const Node &child) const noexcept
   {
-    if (Is<dom::Text>(child))
+    if (Is<Text>(child))
     {
       return true;
     }

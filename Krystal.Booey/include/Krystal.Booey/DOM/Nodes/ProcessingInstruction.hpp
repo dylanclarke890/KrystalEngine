@@ -32,12 +32,18 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSStyleSheet;
 }
 
 namespace krys::boo::dom
+{
+  class NodeAlgorithms;
+  class TextAlgorithms;
+}
+
+namespace krys::boo
 {
   /// @brief A processing instruction (`<?target data?>`), whose data holds pseudo-attributes.
   /// @see https://dom.spec.whatwg.org/#interface-processinginstruction
@@ -45,8 +51,8 @@ namespace krys::boo::dom
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ProcessingInstruction);
     friend class Document;
-    friend class NodeAlgorithms;
-    friend class TextAlgorithms;
+    friend class dom::NodeAlgorithms;
+    friend class dom::TextAlgorithms;
 
   private:
     /// @see https://dom.spec.whatwg.org/#concept-pi-target
@@ -58,7 +64,7 @@ namespace krys::boo::dom
     DOMString _title;
     DOMString _media;
     CachedResourceHandle<CachedCSSStyleSheet> _cachedSheet;
-    RefPtr<css::CSSStyleSheet> _sheet;
+    RefPtr<CSSStyleSheet> _sheet;
     bool _loading {false};
     bool _alternate {false};
     bool _createdByParser {false};
@@ -78,8 +84,8 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#create-a-processing-instruction-node
     /// @see https://dom.spec.whatwg.org/#processinginstruction-initialize
     /// @see https://dom.spec.whatwg.org/#dom-processinginstruction-processinginstruction
-    KRYS_NODISCARD static ExceptionOr<Ref<ProcessingInstruction>> Create(Document &document, DOMString target,
-                                                                         DOMString data) noexcept;
+    KRYS_NODISCARD static dom::ExceptionOr<Ref<ProcessingInstruction>>
+      Create(Document &document, DOMString target, DOMString data) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-processinginstruction-target
     KRYS_NODISCARD const DOMString &Target() const noexcept
@@ -101,13 +107,13 @@ namespace krys::boo::dom
     KRYS_NODISCARD Maybe<DOMString> GetAttribute(DOMStringView name) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-processinginstruction-setattribute
-    ExceptionOr<void> SetAttribute(DOMStringView name, DOMString value) noexcept;
+    dom::ExceptionOr<void> SetAttribute(DOMStringView name, DOMString value) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-processinginstruction-removeattribute
     void RemoveAttribute(DOMStringView name) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-processinginstruction-toggleattribute
-    ExceptionOr<bool> ToggleAttribute(DOMStringView name, Maybe<bool> force = null) noexcept;
+    dom::ExceptionOr<bool> ToggleAttribute(DOMStringView name, Maybe<bool> force = null) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-processinginstruction-hasattribute
     KRYS_NODISCARD bool HasAttribute(DOMStringView name) const noexcept;
@@ -117,7 +123,7 @@ namespace krys::boo::dom
 #pragma region LinkStyle - https://drafts.csswg.org/cssom/#the-linkstyle-interface
 
     /// @see https://drafts.csswg.org/cssom/#dom-linkstyle-sheet
-    KRYS_NODISCARD css::CSSStyleSheet *Sheet() const noexcept;
+    KRYS_NODISCARD CSSStyleSheet *Sheet() const noexcept;
 
 #pragma endregion
 
@@ -176,8 +182,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::ProcessingInstruction)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::ProcessingInstruction)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
     return node.IsProcessingInstructionNode();
   }

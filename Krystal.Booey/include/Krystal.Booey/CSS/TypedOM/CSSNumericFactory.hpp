@@ -28,7 +28,7 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
 #include "Krystal.Booey/CSS/Values/UnitType.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief The `CSS` namespace's functions that make unit values: `CSS.px(10)` is
   /// `CSSNumericFactory::Px(10)`.
@@ -37,323 +37,323 @@ namespace krys::boo::css
   {
     KRYS_NODISCARD static Ref<CSSUnitValue> Number(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::Number);
+      return CSSUnitValue::Create(value, css::UnitType::Number);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Percent(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::Percentage);
+      return CSSUnitValue::Create(value, css::UnitType::Percentage);
     }
 
     // <length>
     KRYS_NODISCARD static Ref<CSSUnitValue> Em(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::em);
+      return CSSUnitValue::Create(value, css::UnitType::em);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Rem(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::rem);
+      return CSSUnitValue::Create(value, css::UnitType::rem);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Ex(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::ex);
+      return CSSUnitValue::Create(value, css::UnitType::ex);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Rex(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::rex);
+      return CSSUnitValue::Create(value, css::UnitType::rex);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Cap(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::cap);
+      return CSSUnitValue::Create(value, css::UnitType::cap);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Rcap(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::rcap);
+      return CSSUnitValue::Create(value, css::UnitType::rcap);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Ch(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::ch);
+      return CSSUnitValue::Create(value, css::UnitType::ch);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Rch(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::rch);
+      return CSSUnitValue::Create(value, css::UnitType::rch);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Ic(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::ic);
+      return CSSUnitValue::Create(value, css::UnitType::ic);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Ric(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::ric);
+      return CSSUnitValue::Create(value, css::UnitType::ric);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Lh(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::lh);
+      return CSSUnitValue::Create(value, css::UnitType::lh);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Rlh(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::rlh);
+      return CSSUnitValue::Create(value, css::UnitType::rlh);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Vw(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::vw);
+      return CSSUnitValue::Create(value, css::UnitType::vw);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Vh(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::vh);
+      return CSSUnitValue::Create(value, css::UnitType::vh);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Vi(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::vi);
+      return CSSUnitValue::Create(value, css::UnitType::vi);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Vb(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::vb);
+      return CSSUnitValue::Create(value, css::UnitType::vb);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Vmin(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::vmin);
+      return CSSUnitValue::Create(value, css::UnitType::vmin);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Vmax(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::vmax);
+      return CSSUnitValue::Create(value, css::UnitType::vmax);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Cm(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::cm);
+      return CSSUnitValue::Create(value, css::UnitType::cm);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Mm(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::mm);
+      return CSSUnitValue::Create(value, css::UnitType::mm);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Q(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::Q);
+      return CSSUnitValue::Create(value, css::UnitType::Q);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> In(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::in);
+      return CSSUnitValue::Create(value, css::UnitType::in);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Pt(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::pt);
+      return CSSUnitValue::Create(value, css::UnitType::pt);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Pc(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::pc);
+      return CSSUnitValue::Create(value, css::UnitType::pc);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Px(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::px);
+      return CSSUnitValue::Create(value, css::UnitType::px);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Cqw(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::cqw);
+      return CSSUnitValue::Create(value, css::UnitType::cqw);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Cqh(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::cqh);
+      return CSSUnitValue::Create(value, css::UnitType::cqh);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Cqi(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::cqi);
+      return CSSUnitValue::Create(value, css::UnitType::cqi);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Cqb(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::cqb);
+      return CSSUnitValue::Create(value, css::UnitType::cqb);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Cqmin(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::cqmin);
+      return CSSUnitValue::Create(value, css::UnitType::cqmin);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Cqmax(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::cqmax);
+      return CSSUnitValue::Create(value, css::UnitType::cqmax);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Svw(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::svw);
+      return CSSUnitValue::Create(value, css::UnitType::svw);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Svh(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::svh);
+      return CSSUnitValue::Create(value, css::UnitType::svh);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Svi(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::svi);
+      return CSSUnitValue::Create(value, css::UnitType::svi);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Svb(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::svb);
+      return CSSUnitValue::Create(value, css::UnitType::svb);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Svmin(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::svmin);
+      return CSSUnitValue::Create(value, css::UnitType::svmin);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Svmax(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::svmax);
+      return CSSUnitValue::Create(value, css::UnitType::svmax);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Lvw(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::lvw);
+      return CSSUnitValue::Create(value, css::UnitType::lvw);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Lvh(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::lvh);
+      return CSSUnitValue::Create(value, css::UnitType::lvh);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Lvi(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::lvi);
+      return CSSUnitValue::Create(value, css::UnitType::lvi);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Lvb(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::lvb);
+      return CSSUnitValue::Create(value, css::UnitType::lvb);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Lvmin(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::lvmin);
+      return CSSUnitValue::Create(value, css::UnitType::lvmin);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Lvmax(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::lvmax);
+      return CSSUnitValue::Create(value, css::UnitType::lvmax);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Dvw(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::dvw);
+      return CSSUnitValue::Create(value, css::UnitType::dvw);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Dvh(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::dvh);
+      return CSSUnitValue::Create(value, css::UnitType::dvh);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Dvi(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::dvi);
+      return CSSUnitValue::Create(value, css::UnitType::dvi);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Dvb(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::dvb);
+      return CSSUnitValue::Create(value, css::UnitType::dvb);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Dvmin(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::dvmin);
+      return CSSUnitValue::Create(value, css::UnitType::dvmin);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Dvmax(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::dvmax);
+      return CSSUnitValue::Create(value, css::UnitType::dvmax);
     }
 
     // <angle>
     KRYS_NODISCARD static Ref<CSSUnitValue> Deg(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::deg);
+      return CSSUnitValue::Create(value, css::UnitType::deg);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Grad(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::grad);
+      return CSSUnitValue::Create(value, css::UnitType::grad);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Rad(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::rad);
+      return CSSUnitValue::Create(value, css::UnitType::rad);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Turn(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::turn);
+      return CSSUnitValue::Create(value, css::UnitType::turn);
     }
 
     // <time>
     KRYS_NODISCARD static Ref<CSSUnitValue> S(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::s);
+      return CSSUnitValue::Create(value, css::UnitType::s);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Ms(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::ms);
+      return CSSUnitValue::Create(value, css::UnitType::ms);
     }
 
     // <frequency>
     KRYS_NODISCARD static Ref<CSSUnitValue> Hz(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::hz);
+      return CSSUnitValue::Create(value, css::UnitType::hz);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> KHz(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::khz);
+      return CSSUnitValue::Create(value, css::UnitType::khz);
     }
 
     // <resolution>
     KRYS_NODISCARD static Ref<CSSUnitValue> Dpi(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::dpi);
+      return CSSUnitValue::Create(value, css::UnitType::dpi);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Dpcm(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::dpcm);
+      return CSSUnitValue::Create(value, css::UnitType::dpcm);
     }
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Dppx(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::dppx);
+      return CSSUnitValue::Create(value, css::UnitType::dppx);
     }
 
     // <flex>
     KRYS_NODISCARD static Ref<CSSUnitValue> Fr(double value) noexcept
     {
-      return CSSUnitValue::Create(value, UnitType::fr);
+      return CSSUnitValue::Create(value, css::UnitType::fr);
     }
   };
 }

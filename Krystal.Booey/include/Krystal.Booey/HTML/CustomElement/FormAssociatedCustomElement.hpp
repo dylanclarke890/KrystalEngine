@@ -31,10 +31,13 @@
 #include "Krystal.Booey/HTML/Forms/ValidatedFormListedElement.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLMaybeFormAssociatedCustomElement;
+}
 
+namespace krys::boo::html
+{
   /// @brief The form-associated half of a form-associated custom element: its form owner, submission value,
   /// validity and disabled state, set through its `ElementInternals`.
   /// @see https://html.spec.whatwg.org/#form-associated-custom-element
@@ -91,10 +94,10 @@ namespace krys::boo::html
     void SetFormValue(CustomElementFormValue &&submissionValue, Maybe<CustomElementFormValue> state) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-setvalidity
-    dom::ExceptionOr<void> SetValidity(ValidityStateFlags flags, const dom::DOMString &message,
+    dom::ExceptionOr<void> SetValidity(ValidityStateFlags flags, const DOMString &message,
                                        HTMLElement *validationAnchor) noexcept;
 
-    KRYS_NODISCARD dom::DOMString ValidationMessage() const noexcept final;
+    KRYS_NODISCARD DOMString ValidationMessage() const noexcept final;
 
     KRYS_NODISCARD bool ComputeValidity() const noexcept final;
 
@@ -106,7 +109,7 @@ namespace krys::boo::html
     /// @brief The element was upgraded: it takes its form owner and disabled state from its attributes.
     void DidUpgrade() noexcept;
 
-    KRYS_NODISCARD dom::DOMString FormControlType() const noexcept final;
+    KRYS_NODISCARD DOMString FormControlType() const noexcept final;
 
     // The element's node hooks, which it forwards.
     using ValidatedFormListedElement::DidFinishInsertingNode;

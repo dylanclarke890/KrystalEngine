@@ -30,14 +30,10 @@
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
   class Element;
-}
-
-namespace krys::boo
-{
   class LocalFrameView;
   class RenderObject;
   class ScrollableArea;
@@ -63,7 +59,7 @@ namespace krys::boo
 
   private:
     ScrollableArea &_owningScrollableArea;
-    WeakPtr<dom::Element> _anchorElement;
+    WeakPtr<Element> _anchorElement;
     FloatPoint _lastOffsetForAnchorElement;
     bool _midUpdatingScrollPositionForAnchorElement {false};
     bool _isQueuedForScrollPositionUpdate {false};
@@ -86,10 +82,10 @@ namespace krys::boo
     /// @brief Chooses the anchor node: a priority candidate, or the first element the candidate examination
     /// selects.
     /// @see https://drafts.csswg.org/css-scroll-anchoring/#anchor-node-selection
-    void ChooseAnchorElement(dom::Document &document) noexcept;
+    void ChooseAnchorElement(Document &document) noexcept;
 
     /// @see https://drafts.csswg.org/css-scroll-anchoring/#candidate-examination
-    KRYS_NODISCARD CandidateExaminationResult ExamineAnchorCandidate(dom::Element &element) noexcept;
+    KRYS_NODISCARD CandidateExaminationResult ExamineAnchorCandidate(Element &element) noexcept;
 
     /// @brief Chooses an anchor node if there's none and the scroller is scrolled, and queues the scroller
     /// for an adjustment after the next layout.
@@ -102,16 +98,16 @@ namespace krys::boo
     /// @brief Whether @p object renders the anchor node or one of its ancestors within this scroller.
     KRYS_NODISCARD bool IsInScrollAnchoringAncestorChain(const RenderObject &object) const noexcept;
 
-    KRYS_NODISCARD dom::Element *AnchorElement() const noexcept
+    KRYS_NODISCARD Element *AnchorElement() const noexcept
     {
       return _anchorElement.get();
     }
 
   private:
-    KRYS_NODISCARD dom::Element *FindAnchorElementRecursive(dom::Element *element) noexcept;
+    KRYS_NODISCARD Element *FindAnchorElementRecursive(Element *element) noexcept;
 
     /// @see https://drafts.csswg.org/css-scroll-anchoring/#priority-candidates
-    KRYS_NODISCARD bool DidFindPriorityCandidate(dom::Document &document) noexcept;
+    KRYS_NODISCARD bool DidFindPriorityCandidate(Document &document) noexcept;
 
     KRYS_NODISCARD FloatPoint ComputeOffsetFromOwningScroller(const RenderObject &candidate) const noexcept;
 

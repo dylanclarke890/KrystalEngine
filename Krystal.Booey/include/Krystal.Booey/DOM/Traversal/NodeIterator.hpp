@@ -5,16 +5,19 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Node;
+}
 
+namespace krys::boo::dom
+{
   /// @brief A node, and whether the pointer is before or after it.
   /// @see https://dom.spec.whatwg.org/#node-pointer
   struct NodePointer
   {
     /// @see https://dom.spec.whatwg.org/#node-pointer-node
-    Ref<dom::Node> Node;
+    Ref<boo::Node> Node;
     /// @see https://dom.spec.whatwg.org/#node-pointer-pointer-before
     bool PointerBefore {false};
   };
@@ -24,7 +27,7 @@ namespace krys::boo::dom
   /// @see https://dom.spec.whatwg.org/#iterator-collection
   class NodeIterator : public TraversalBase, public RefCounted<NodeIterator>
   {
-    friend class Document;
+    friend class boo::Document;
     friend class IteratorAlgorithms;
 
   private:

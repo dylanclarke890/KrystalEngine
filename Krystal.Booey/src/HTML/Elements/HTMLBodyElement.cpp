@@ -27,82 +27,81 @@
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLBodyElement::HTMLBodyElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Body)
+  HTMLBodyElement::HTMLBodyElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Body)
   {
   }
 
 #pragma region HTMLBodyElement Obsolete members
 
-  dom::DOMString HTMLBodyElement::Text() const noexcept
+  DOMString HTMLBodyElement::Text() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"text").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"text").value_or(u8"");
   }
 
-  void HTMLBodyElement::Text(dom::DOMString value) noexcept
+  void HTMLBodyElement::Text(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"text", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"text", krys::move(value));
   }
 
-  dom::DOMString HTMLBodyElement::Link() const noexcept
+  DOMString HTMLBodyElement::Link() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"link").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"link").value_or(u8"");
   }
 
-  void HTMLBodyElement::Link(dom::DOMString value) noexcept
+  void HTMLBodyElement::Link(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"link", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"link", krys::move(value));
   }
 
-  dom::DOMString HTMLBodyElement::VLink() const noexcept
+  DOMString HTMLBodyElement::VLink() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"vlink").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"vlink").value_or(u8"");
   }
 
-  void HTMLBodyElement::VLink(dom::DOMString value) noexcept
+  void HTMLBodyElement::VLink(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"vlink", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"vlink", krys::move(value));
   }
 
-  dom::DOMString HTMLBodyElement::ALink() const noexcept
+  DOMString HTMLBodyElement::ALink() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"alink").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"alink").value_or(u8"");
   }
 
-  void HTMLBodyElement::ALink(dom::DOMString value) noexcept
+  void HTMLBodyElement::ALink(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"alink", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"alink", krys::move(value));
   }
 
-  dom::DOMString HTMLBodyElement::BgColor() const noexcept
+  DOMString HTMLBodyElement::BgColor() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"bgcolor").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"bgcolor").value_or(u8"");
   }
 
-  void HTMLBodyElement::BgColor(dom::DOMString value) noexcept
+  void HTMLBodyElement::BgColor(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"bgcolor", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"bgcolor", krys::move(value));
   }
 
-  dom::DOMString HTMLBodyElement::Background() const noexcept
+  DOMString HTMLBodyElement::Background() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"background").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"background").value_or(u8"");
   }
 
-  void HTMLBodyElement::Background(dom::DOMString value) noexcept
+  void HTMLBodyElement::Background(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"background", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"background", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region Presentational hints
 
-  bool
-    HTMLBodyElement::HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                        const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool HTMLBodyElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                           const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == u8"background" || localName == u8"marginwidth" || localName == u8"leftmargin"
@@ -114,12 +113,12 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLBodyElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                               const dom::DOMStringAtom &namespaceURI,
-                                                               dom::DOMStringView value,
+  void HTMLBodyElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                               const DOMStringAtom &namespaceURI,
+                                                               DOMStringView value,
                                                                css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
@@ -132,7 +131,7 @@ namespace krys::boo::html
       {
         style.SetProperty(
           css::PropertyId::BackgroundImage,
-          css::ImageValue::Create(NodeDocument().CompleteURL(url), css::CSSOMStringAtom(LocalName().View())));
+          css::ImageValue::Create(NodeDocument().CompleteURL(url), CSSOMStringAtom(LocalName().View())));
       }
       return;
     }
@@ -161,10 +160,9 @@ namespace krys::boo::html
     HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
   }
 
-  void HTMLBodyElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                           Maybe<dom::DOMStringView> oldValue,
-                                           Maybe<dom::DOMStringView> value,
-                                           const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLBodyElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                           Maybe<DOMStringView> value,
+                                           const DOMStringAtom &namespaceURI) noexcept
   {
     if (namespaceURI == null)
     {

@@ -44,13 +44,13 @@ namespace krys::boo::tests
         {
           return "none";
         }
-        auto id = element->GetAttribute(u8"id").value_or(dom::DOMString());
+        auto id = element->GetAttribute(u8"id").value_or(DOMString());
         return std::string(id.begin(), id.end());
       }
 
       void Focus(utf8_stringview id) noexcept
       {
-        Downcast<html::HTMLElement>(ById(id)).Focus();
+        Downcast<HTMLElement>(ById(id)).Focus();
       }
 
       bool Key(utf8_string key, utf8_string keyIdentifier, int32 keyCode,
@@ -253,15 +253,15 @@ namespace krys::boo::tests
       SpatialNavigationOn on {fixture.Document->GetSettings()};
       CHECK(fixture.Key(u8"ArrowDown", u8"Down", vk::Down));
       CHECK(fixture.Focused() == "two");
-      CHECK(Downcast<html::HTMLInputElement>(fixture.ById(u8"one")).Checked());
-      CHECK_FALSE(Downcast<html::HTMLInputElement>(fixture.ById(u8"two")).Checked());
+      CHECK(Downcast<HTMLInputElement>(fixture.ById(u8"one")).Checked());
+      CHECK_FALSE(Downcast<HTMLInputElement>(fixture.ById(u8"two")).Checked());
     }
 
     SECTION("a list box changes its selection until it reaches its end, then the focus moves")
     {
       NavigationFixture fixture {u8"<select id=list size=3 style=display:block><option>A<option>B</select>"
                                  u8"<button id=after style=display:block;width:40px;height:40px></button>"};
-      auto &list = Downcast<html::HTMLSelectElement>(fixture.ById(u8"list"));
+      auto &list = Downcast<HTMLSelectElement>(fixture.ById(u8"list"));
       list.Focus();
       SpatialNavigationOn on {fixture.Document->GetSettings()};
       CHECK(fixture.Key(u8"ArrowDown", u8"Down", vk::Down));

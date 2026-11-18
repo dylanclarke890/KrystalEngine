@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGValueProperty.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   // FIXME: Remove this class once SVGMatrix becomes an alias to DOMMatrix.
   /// @see https://svgwg.org/svg2-draft/types.html#InterfaceSVGMatrix

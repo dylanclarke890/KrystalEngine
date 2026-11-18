@@ -5,10 +5,10 @@
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include <algorithm>
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLHeadingElement::HTMLHeadingElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Heading)
+  HTMLHeadingElement::HTMLHeadingElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Heading)
   {
   }
 
@@ -24,13 +24,13 @@ namespace krys::boo::html
     uint64 level = 0;
     switch (TagQualifiedName().TagName())
     {
-      case TagName::h1: level = 1; break;
-      case TagName::h2: level = 2; break;
-      case TagName::h3: level = 3; break;
-      case TagName::h4: level = 4; break;
-      case TagName::h5: level = 5; break;
-      case TagName::h6: level = 6; break;
-      default:          break;
+      case html::TagName::h1: level = 1; break;
+      case html::TagName::h2: level = 2; break;
+      case html::TagName::h3: level = 3; break;
+      case html::TagName::h4: level = 4; break;
+      case html::TagName::h5: level = 5; break;
+      case html::TagName::h6: level = 6; break;
+      default:                break;
     }
 
     // 8. Assert: level is not 0.
@@ -44,13 +44,13 @@ namespace krys::boo::html
     return static_cast<uint32>(std::min<uint64>(level, 9));
   }
 
-  uint64 HTMLHeadingElement::ComputedHeadingOffset(const dom::Element &element) noexcept
+  uint64 HTMLHeadingElement::ComputedHeadingOffset(const Element &element) noexcept
   {
     // 1. Let offset be 0.
     uint64 offset = 0;
 
     // 2. Let inclusiveAncestor be element.
-    const dom::Element *inclusiveAncestor = &element;
+    const Element *inclusiveAncestor = &element;
 
     // 3. While inclusiveAncestor is not null:
     while (inclusiveAncestor)
@@ -67,11 +67,11 @@ namespace krys::boo::html
         if (auto value = htmlElement->GetAttribute(u8"headingoffset"))
         {
           // (An integer too large for int64 isn't an error, just more than any level needs.)
-          if (auto parsed = Numbers::ParseNonNegativeInteger(*value); parsed.Success())
+          if (auto parsed = html::Numbers::ParseNonNegativeInteger(*value); parsed.Success())
           {
             nextOffset = static_cast<uint64>(parsed.Value);
           }
-          else if (parsed.Error == MicroParserError::OutOfRange)
+          else if (parsed.Error == html::MicroParserError::OutOfRange)
           {
             nextOffset = UINT64_MAX;
           }
@@ -100,14 +100,14 @@ namespace krys::boo::html
 
 #pragma region HTMLHeadingElement Obsolete members
 
-  dom::DOMString HTMLHeadingElement::Align() const noexcept
+  DOMString HTMLHeadingElement::Align() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLHeadingElement::Align(dom::DOMString value) noexcept
+  void HTMLHeadingElement::Align(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"align", krys::move(value));
   }
 
 #pragma endregion

@@ -78,14 +78,14 @@ namespace krys::boo::html
     Timer _repeatingTimer;
 
   public:
-    SpinButtonElement(dom::Document &, SpinButtonOwner &) noexcept;
+    SpinButtonElement(Document &, SpinButtonOwner &) noexcept;
 
     ~SpinButtonElement() noexcept override;
 
     // The owner of SpinButtonElement must call removeSpinButtonOwner
     // because SpinButtonElement can be outlive SpinButtonOwner
     // implementation, e.g. during event handling.
-    KRYS_NODISCARD static Ref<SpinButtonElement> Create(dom::Document &, SpinButtonOwner &) noexcept;
+    KRYS_NODISCARD static Ref<SpinButtonElement> Create(Document &, SpinButtonOwner &) noexcept;
 
     KRYS_NODISCARD UpDownState GetUpDownState() const noexcept
     {
@@ -136,13 +136,13 @@ namespace krys::boo::html
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::SpinButtonElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &element) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &element) noexcept
   {
     return element.IsSpinButtonElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    return node.IsHTMLElement() && IsType(Downcast<krys::boo::html::HTMLElement>(node));
+    return node.IsHTMLElement() && IsType(Downcast<krys::boo::HTMLElement>(node));
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

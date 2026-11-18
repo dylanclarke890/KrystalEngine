@@ -43,21 +43,21 @@ namespace krys::boo::html
     {
     }
 
-    KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
+    KRYS_NODISCARD DOMStringView FormControlType() const noexcept final
     {
       return input_type_names::Email;
     }
 
-    KRYS_NODISCARD bool TypeMismatchFor(dom::DOMStringView value) const noexcept final;
+    KRYS_NODISCARD bool TypeMismatchFor(DOMStringView value) const noexcept final;
 
     KRYS_NODISCARD bool TypeMismatch() const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString TypeMismatchText() const noexcept final;
+    KRYS_NODISCARD DOMString TypeMismatchText() const noexcept final;
 
     KRYS_NODISCARD bool SupportsSelectionAPI() const noexcept final;
 
-    void AttributeChanged(const dom::DOMStringAtom &localName) noexcept final;
+    void AttributeChanged(const DOMStringAtom &localName) noexcept final;
 
-    KRYS_NODISCARD dom::DOMString SanitizeValue(dom::DOMStringView proposedValue) const noexcept final;
+    KRYS_NODISCARD DOMString SanitizeValue(DOMStringView proposedValue) const noexcept final;
   };
 }

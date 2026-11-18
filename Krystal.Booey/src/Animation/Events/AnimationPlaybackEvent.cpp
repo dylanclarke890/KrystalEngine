@@ -39,14 +39,14 @@ namespace krys::boo
     }
   }
 
-  AnimationPlaybackEvent::AnimationPlaybackEvent(dom::DOMStringAtom type,
+  AnimationPlaybackEvent::AnimationPlaybackEvent(DOMStringAtom type,
                                                  const AnimationPlaybackEventInit &eventInitDict) noexcept
       : AnimationEventBase(krys::move(type), eventInitDict), _timelineTime(eventInitDict.TimelineTime),
         _currentTime(eventInitDict.CurrentTime)
   {
   }
 
-  AnimationPlaybackEvent::AnimationPlaybackEvent(dom::DOMStringAtom type, WebAnimation *animation,
+  AnimationPlaybackEvent::AnimationPlaybackEvent(DOMStringAtom type, WebAnimation *animation,
                                                  Maybe<WebAnimationTime> scheduledTime,
                                                  Maybe<WebAnimationTime> timelineTime,
                                                  Maybe<WebAnimationTime> currentTime) noexcept

@@ -46,7 +46,7 @@ namespace krys::boo::html
     TypeAhead _typeAhead;
 
   protected:
-    DateTimeSymbolicFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner,
+    DateTimeSymbolicFieldElement(Document &document, DateTimeFieldElementFieldOwner &fieldOwner,
                                  const List<utf8_string> &symbols, int placeholderIndex) noexcept;
 
     KRYS_NODISCARD size_t SymbolsSize() const noexcept
@@ -79,9 +79,9 @@ namespace krys::boo::html
 
     void StepUp() noexcept final;
 
-    KRYS_NODISCARD dom::DOMString Value() const noexcept final;
+    KRYS_NODISCARD DOMString Value() const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString PlaceholderValue() const noexcept final;
+    KRYS_NODISCARD DOMString PlaceholderValue() const noexcept final;
 
     void HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept final;
 
@@ -90,6 +90,6 @@ namespace krys::boo::html
 
     KRYS_NODISCARD int32 OptionCount() const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString OptionAtIndex(int32 index) const noexcept final;
+    KRYS_NODISCARD DOMString OptionAtIndex(int32 index) const noexcept final;
   };
 }

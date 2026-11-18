@@ -21,14 +21,14 @@ namespace krys::boo::html::tests
     /// @brief The presentational hints of the element with @p id in @p markup, serialised.
     struct HintFixture : css::tests::ValueFixture
     {
-      RefPtr<dom::HTMLDocument> Document;
+      RefPtr<HTMLDocument> Document;
 
-      KRYS_NODISCARD dom::StyledElement &Element(utf8_string markup, dom::DOMStringView id = u8"e") noexcept
+      KRYS_NODISCARD StyledElement &Element(utf8_string markup, DOMStringView id = u8"e") noexcept
       {
         Document = ResolverFixture::Parse(krys::move(markup));
         auto element = Document->GetElementById(id);
         krys_assert(element);
-        return Downcast<dom::StyledElement>(*element);
+        return Downcast<StyledElement>(*element);
       }
 
       KRYS_NODISCARD static std::string Text(const css::StyleProperties *style) noexcept
@@ -37,7 +37,7 @@ namespace krys::boo::html::tests
                      : std::string {};
       }
 
-      KRYS_NODISCARD std::string Hints(utf8_string markup, dom::DOMStringView id = u8"e") noexcept
+      KRYS_NODISCARD std::string Hints(utf8_string markup, DOMStringView id = u8"e") noexcept
       {
         return Text(Element(krys::move(markup), id).PresentationalHintStyle());
       }
@@ -165,7 +165,7 @@ namespace krys::boo::html::tests
     auto frameset = document->GetElementById(u8"e");
     REQUIRE(frameset);
     CHECK(Is<HTMLFrameSetElement>(Downcast<HTMLElement>(*frameset)));
-    CHECK(Text(Downcast<dom::StyledElement>(*frameset).PresentationalHintStyle())
+    CHECK(Text(Downcast<StyledElement>(*frameset).PresentationalHintStyle())
           == "border-color: rgb(0, 255, 0);");
   }
 
@@ -218,9 +218,9 @@ namespace krys::boo::html::tests
       auto document = ResolverFixture::Parse(u8R"(<table id=t border=2 cellpadding=3>
         <colgroup id=cg></colgroup><tbody id=tb><tr><td id=c></td></tr></tbody></table>)");
       auto &table = Downcast<HTMLTableElement>(Downcast<HTMLElement>(*document->GetElementById(u8"t")));
-      auto &cell = Downcast<dom::StyledElement>(*document->GetElementById(u8"c"));
-      auto &section = Downcast<dom::StyledElement>(*document->GetElementById(u8"tb"));
-      auto &colgroup = Downcast<dom::StyledElement>(*document->GetElementById(u8"cg"));
+      auto &cell = Downcast<StyledElement>(*document->GetElementById(u8"c"));
+      auto &section = Downcast<StyledElement>(*document->GetElementById(u8"tb"));
+      auto &colgroup = Downcast<StyledElement>(*document->GetElementById(u8"cg"));
 
       CHECK(Text(table.AdditionalPresentationalHintStyle()) == "border-style: outset;");
       CHECK(Text(cell.AdditionalPresentationalHintStyle())

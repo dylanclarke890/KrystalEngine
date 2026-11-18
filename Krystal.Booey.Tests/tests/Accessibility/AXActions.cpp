@@ -26,8 +26,7 @@ namespace krys::boo::ax::tests
       }
     };
 
-    void ListenWith(dom::Element &element, dom::DOMStringAtom type,
-                    Func<void(dom::Event &)> &&function) noexcept
+    void ListenWith(Element &element, DOMStringAtom type, Func<void(dom::Event &)> &&function) noexcept
     {
       element.AddEventListener(
         krys::move(type), Ref<dom::EventListenerCallback>(CreateRef<FunctionListener>(krys::move(function))),
@@ -46,7 +45,7 @@ namespace krys::boo::ax::tests
     CHECK(clicks == 1);
 
     CHECK(page.Object(u8"box").Press());
-    CHECK(Downcast<html::HTMLInputElement>(page.ById(u8"box")).Checked());
+    CHECK(Downcast<HTMLInputElement>(page.ById(u8"box")).Checked());
 
     // The real control the author hid in an ARIA one is pressed.
     CHECK(page.Object(u8"group").ActionElement() == &page.ById(u8"inner"));
@@ -74,13 +73,13 @@ namespace krys::boo::ax::tests
     auto &input = page.Object(u8"input");
     CHECK(input.CanSetValueAttribute());
     CHECK_FALSE(page.Object(u8"readonly").CanSetValueAttribute());
-    CHECK(input.SetValue(dom::DOMStringView(u8"new")));
-    CHECK(Downcast<html::HTMLInputElement>(page.ById(u8"input")).Value() == u8"new");
+    CHECK(input.SetValue(DOMStringView(u8"new")));
+    CHECK(Downcast<HTMLInputElement>(page.ById(u8"input")).Value() == u8"new");
 
     // A focused field is typed into.
     input.SetFocused(true);
-    CHECK(input.SetValue(dom::DOMStringView(u8"typed")));
-    CHECK(Downcast<html::HTMLInputElement>(page.ById(u8"input")).Value() == u8"typed");
+    CHECK(input.SetValue(DOMStringView(u8"typed")));
+    CHECK(Downcast<HTMLInputElement>(page.ById(u8"input")).Value() == u8"typed");
 
     auto &range = page.Object(u8"range");
     CHECK(range.SetValue(30.0f));
@@ -107,7 +106,7 @@ namespace krys::boo::ax::tests
     auto &list = page.Object(u8"list");
     REQUIRE(list.Children().size() == 2);
     list.Children()[1]->SetSelected(true);
-    CHECK(Downcast<html::HTMLSelectElement>(page.ById(u8"list")).SelectedIndex() == 1);
+    CHECK(Downcast<HTMLSelectElement>(page.ById(u8"list")).SelectedIndex() == 1);
 
     auto &details = page.Object(u8"details");
     details.SetIsExpanded(true);

@@ -38,13 +38,20 @@ namespace krys::boo::dom
   class KeyboardEvent;
 }
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLOptGroupElement;
-  class HTMLOptionsCollection;
+}
 
+namespace krys::boo::html
+{
+  class HTMLOptionsCollection;
+}
+
+namespace krys::boo
+{
   /// @see https://html.spec.whatwg.org/#htmlselectelement
-  class HTMLSelectElement : public HTMLFormControlElement, private TypeAheadDataSource
+  class HTMLSelectElement : public HTMLFormControlElement, private html::TypeAheadDataSource
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLSelectElement);
 
@@ -60,11 +67,11 @@ namespace krys::boo::html
 
   private:
     WeakPtr<HTMLSlotElement> _selectButtonSlot;
-    WeakPtr<dom::Element> _selectFallbackButtonText;
+    WeakPtr<boo::Element> _selectFallbackButtonText;
     WeakPtr<HTMLElement> _selectPopover;
     WeakPtr<HTMLSlotElement> _selectPopoverSlot;
     WeakPtr<HTMLSlotElement> _selectListBoxSlot;
-    WeakPtr<dom::Element> _selectButton;
+    WeakPtr<boo::Element> _selectButton;
     bool _slotsAreForMenuList {true};
     bool _contentsUseBaseAppearance {false};
 
@@ -91,7 +98,7 @@ namespace krys::boo::html
     WeakPtr<dom::HTMLCollection> _selectedOptions;
     List<bool> _lastOnChangeSelection;
     List<bool> _cachedStateForActiveSelection;
-    TypeAhead _typeAhead;
+    html::TypeAhead _typeAhead;
     uint32 _size {0};
     int32 _lastOnChangeIndex {-1};
     int32 _activeSelectionAnchorIndex {-1};
@@ -103,12 +110,12 @@ namespace krys::boo::html
     mutable bool _shouldRecalcListItems {false};
 
   public:
-    explicit HTMLSelectElement(dom::Document &document) noexcept;
+    explicit HTMLSelectElement(Document &document) noexcept;
 
-    KRYS_NODISCARD static Ref<HTMLSelectElement> Create(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<HTMLSelectElement> Create(Document &document) noexcept;
 
     /// @brief The select whose list of options a child of @p startNode would be in, if any.
-    KRYS_NODISCARD static HTMLSelectElement *FindOwnerSelect(dom::ContainerNode *startNode,
+    KRYS_NODISCARD static HTMLSelectElement *FindOwnerSelect(ContainerNode *startNode,
                                                              ExcludeOptGroup excludeOptGroup) noexcept;
 
     KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept override
@@ -124,10 +131,10 @@ namespace krys::boo::html
 #pragma region HTMLSelectElement - https://html.spec.whatwg.org/#htmlselectelement
 
     /// @see https://html.spec.whatwg.org/#dom-select-autocomplete
-    KRYS_NODISCARD dom::DOMString Autocomplete() const noexcept;
+    KRYS_NODISCARD DOMString Autocomplete() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-autocomplete
-    void Autocomplete(dom::DOMString value) noexcept;
+    void Autocomplete(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;
@@ -145,10 +152,10 @@ namespace krys::boo::html
     void Multiple(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-name
-    KRYS_NODISCARD dom::DOMString Name() const noexcept override;
+    KRYS_NODISCARD DOMString Name() const noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-select-name
-    void Name(dom::DOMString value) noexcept;
+    void Name(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-required
     KRYS_NODISCARD bool Required() const noexcept;
@@ -167,13 +174,13 @@ namespace krys::boo::html
     void Size(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-type
-    KRYS_NODISCARD dom::DOMString Type() const noexcept
+    KRYS_NODISCARD DOMString Type() const noexcept
     {
       return FormControlType();
     }
 
     /// @see https://html.spec.whatwg.org/#dom-select-options
-    KRYS_NODISCARD Ref<HTMLOptionsCollection> Options() noexcept;
+    KRYS_NODISCARD Ref<html::HTMLOptionsCollection> Options() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-length
     KRYS_NODISCARD uint32 Length() const noexcept;
@@ -185,7 +192,7 @@ namespace krys::boo::html
     KRYS_NODISCARD HTMLOptionElement *Item(uint32 index) const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-nameditem
-    KRYS_NODISCARD HTMLOptionElement *NamedItem(dom::DOMStringView name) const noexcept;
+    KRYS_NODISCARD HTMLOptionElement *NamedItem(DOMStringView name) const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-add
     dom::ExceptionOr<void> Add(const OptionOrOptGroupElement &element,
@@ -212,10 +219,10 @@ namespace krys::boo::html
     void SelectedIndex(int32 index) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-value
-    KRYS_NODISCARD dom::DOMString Value() const noexcept;
+    KRYS_NODISCARD DOMString Value() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-value
-    void Value(dom::DOMStringView value) noexcept;
+    void Value(DOMStringView value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-showpicker
     dom::ExceptionOr<void> ShowPicker() noexcept;
@@ -238,7 +245,7 @@ namespace krys::boo::html
     /// the select button slot and the other children the select popover's; all of a list box's take its own
     /// slot.
     /// @see https://html.spec.whatwg.org/#the-select-element-2
-    KRYS_NODISCARD HTMLSlotElement *SlotForHostChild(const dom::Node &child) const noexcept;
+    KRYS_NODISCARD HTMLSlotElement *SlotForHostChild(const Node &child) const noexcept;
 
     /// @brief Whether the select renders as a drop-down box with base appearance (`appearance: base-select`):
     /// its shadow tree instead of a menu list, and a popover for its picker.
@@ -277,7 +284,7 @@ namespace krys::boo::html
     void InvalidateSelectedItems() noexcept;
 
     void UpdateListItemSelectedStates(
-      AllowStyleInvalidation allowStyleInvalidation = AllowStyleInvalidation::Yes) noexcept;
+      html::AllowStyleInvalidation allowStyleInvalidation = html::AllowStyleInvalidation::Yes) noexcept;
 
     /// @brief Selects an option inserted into the list of options if it's selected.
     void OptionInserted(HTMLOptionElement &option) noexcept;
@@ -320,7 +327,7 @@ namespace krys::boo::html
       return _allowsNonContiguousSelection;
     }
 
-    KRYS_NODISCARD dom::DOMString FormControlType() const noexcept final;
+    KRYS_NODISCARD DOMString FormControlType() const noexcept final;
 
     KRYS_NODISCARD bool IsEnumeratable() const noexcept final
     {
@@ -349,7 +356,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool ValueMissing() const noexcept final;
 
-    bool AppendFormData(DOMFormData &formData) noexcept final;
+    bool AppendFormData(html::DOMFormData &formData) noexcept final;
 
     /// @see https://html.spec.whatwg.org/#the-select-element:concept-form-reset-control
     void Reset() noexcept final;
@@ -357,7 +364,7 @@ namespace krys::boo::html
   protected:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
 
-    KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &child) const noexcept final;
+    KRYS_NODISCARD bool ChildShouldCreateRenderer(const Node &child) const noexcept final;
 
     void DidRecalcStyle(EnumSet<style::Change> styleChange) noexcept final;
 
@@ -369,13 +376,12 @@ namespace krys::boo::html
 
     void OnChildrenChanged() noexcept final;
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept final;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept final;
 
     void DisabledStateChanged() noexcept final;
 
-    void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept final;
+    void DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept final;
 
   private:
     void BaseAppearanceDefaultEventHandler(dom::Event &event) noexcept;
@@ -389,7 +395,7 @@ namespace krys::boo::html
 
     /// @brief Moves the focus between the selectable options for an arrow, Home, End or page key.
     /// @see https://html.spec.whatwg.org/#focus-another-option
-    void FocusOptionForKey(dom::DOMStringView keyIdentifier) noexcept;
+    void FocusOptionForKey(DOMStringView keyIdentifier) noexcept;
 
     /// @see https://html.spec.whatwg.org/#append-new-option-elements
     dom::ExceptionOr<void> AppendNewOptionElements(uint32 count) noexcept;
@@ -402,8 +408,9 @@ namespace krys::boo::html
 
     void DispatchChangeEventForMenuList() noexcept;
 
-    void RecalcListItems(bool updateSelectedStates = true, AllowStyleInvalidation allowStyleInvalidation =
-                                                             AllowStyleInvalidation::Yes) const noexcept;
+    void RecalcListItems(
+      bool updateSelectedStates = true,
+      html::AllowStyleInvalidation allowStyleInvalidation = html::AllowStyleInvalidation::Yes) const noexcept;
 
     void TypeAheadFind(dom::KeyboardEvent &event) noexcept;
 
@@ -449,21 +456,21 @@ namespace krys::boo::html
 
     KRYS_NODISCARD int32 OptionCount() const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString OptionAtIndex(int32 index) const noexcept final;
+    KRYS_NODISCARD DOMString OptionAtIndex(int32 index) const noexcept final;
 
 #pragma endregion
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLSelectElement)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLSelectElement)
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return Is<krys::boo::html::HTMLElement>(target)
-           && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLSelectElement();
+    return Is<krys::boo::HTMLElement>(target)
+           && Downcast<krys::boo::HTMLElement>(target).IsHTMLSelectElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLSelectElement();
   }

@@ -26,9 +26,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFEGaussianBlurElement::SVGFEGaussianBlurElement(dom::Document &document) noexcept
+  SVGFEGaussianBlurElement::SVGFEGaussianBlurElement(Document &document) noexcept
       : SVGFilterPrimitiveStandardAttributes(document, CreateUnique<PropertyRegistry>(*this),
                                              SVGElementInterface::FEGaussianBlur),
         _in1(SVGAnimatedString::Create(this)), _stdDeviationX(SVGAnimatedNumber::Create(this)),
@@ -55,15 +55,14 @@ namespace krys::boo::svg
     UpdateSVGRendererForElementChange();
   }
 
-  void SVGFEGaussianBlurElement::AttributeChanged(const dom::QualifiedName &name,
-                                                  Maybe<dom::DOMStringView> oldValue,
-                                                  Maybe<dom::DOMStringView> value) noexcept
+  void SVGFEGaussianBlurElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                                  Maybe<DOMStringView> value) noexcept
   {
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::StdDeviationAttr())
     {
-      if (auto result = ParseNumberOptionalNumber(string))
+      if (auto result = svg::ParseNumberOptionalNumber(string))
       {
         _stdDeviationX->SetBaseValInternal(result->first);
         _stdDeviationY->SetBaseValInternal(result->second);
@@ -71,7 +70,7 @@ namespace krys::boo::svg
     }
     else if (name == SVGNames::InAttr())
     {
-      _in1->SetBaseValInternal(dom::DOMString(string));
+      _in1->SetBaseValInternal(DOMString(string));
     }
     else if (name == SVGNames::EdgeModeAttr())
     {
@@ -85,7 +84,7 @@ namespace krys::boo::svg
     SVGFilterPrimitiveStandardAttributes::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGFEGaussianBlurElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGFEGaussianBlurElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (attributeName == SVGNames::InAttr())
     {
@@ -112,7 +111,7 @@ namespace krys::boo::svg
   }
 
   bool SVGFEGaussianBlurElement::SetFilterEffectAttribute(FilterEffect &effect,
-                                                          const dom::QualifiedName &attributeName) noexcept
+                                                          const QualifiedName &attributeName) noexcept
   {
     auto &feGaussianBlur = Downcast<FEGaussianBlur>(effect);
 

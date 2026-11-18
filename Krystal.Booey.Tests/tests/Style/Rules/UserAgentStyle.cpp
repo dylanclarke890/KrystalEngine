@@ -22,7 +22,7 @@ namespace krys::boo::style::tests
   namespace
   {
     /// @brief The number of top-level rules in a minified style sheet: blocks, and at-rule statements.
-    KRYS_NODISCARD uint32 CountTopLevelRules(css::CSSOMStringView text)
+    KRYS_NODISCARD uint32 CountTopLevelRules(CSSOMStringView text)
     {
       uint32 count = 0;
       uint32 depth = 0;
@@ -74,7 +74,7 @@ namespace krys::boo::style::tests
 
     /// @brief Checks that every rule of @p text survived parsing into @p sheet, and that only the rules in
     /// @p expectedEmpty lost all their declarations.
-    void RequireFullyParsed(css::CSSOMStringView text, const css::StyleSheetContents *sheet,
+    void RequireFullyParsed(CSSOMStringView text, const css::StyleSheetContents *sheet,
                             const List<std::string> &expectedEmpty = {})
     {
       REQUIRE(sheet);
@@ -98,8 +98,8 @@ namespace krys::boo::style::tests
     SECTION("Every rule of the sheets parses")
     {
       // The default sheet is the HTML sheet followed by the theme's.
-      RequireFullyParsed(css::CSSOMString(css::HTMLUserAgentStyleSheet)
-                           + css::CSSOMString(RenderTheme::Singleton().ExtraDefaultStyleSheet()),
+      RequireFullyParsed(CSSOMString(css::HTMLUserAgentStyleSheet)
+                           + CSSOMString(RenderTheme::Singleton().ExtraDefaultStyleSheet()),
                          UserAgentStyle::DefaultStyleSheet);
       RequireFullyParsed(css::QuirksUserAgentStyleSheet, UserAgentStyle::QuirksStyleSheet);
       RequireFullyParsed(css::CounterStylesUserAgentStyleSheet, UserAgentStyle::CounterStylesStyleSheet);
@@ -138,7 +138,7 @@ namespace krys::boo::style::tests
                    "[Style][UserAgentStyle]")
   {
     UserAgentStyle::InitDefaultStyleSheet();
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
 
     SECTION("SVG and MathML")
     {
@@ -184,7 +184,7 @@ namespace krys::boo::style::tests
     CHECK(fixture.Resolve(fixture.ById(u8"b")).Style->Display() == DisplayType::Block);
 
     // Only in HTML documents: an XML document's tables can hold forms.
-    auto document = CreateRef<dom::XMLDocument>();
+    auto document = CreateRef<XMLDocument>();
     auto table = document->CreateElementNS(infra::namespaces::HTML, u8"table").ReleaseValue();
     auto form = document->CreateElementNS(infra::namespaces::HTML, u8"form").ReleaseValue();
     REQUIRE_FALSE(document->AppendChild(*table).HasException());

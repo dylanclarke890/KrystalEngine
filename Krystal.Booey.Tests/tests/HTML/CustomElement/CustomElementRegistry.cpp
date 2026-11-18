@@ -114,7 +114,7 @@ namespace krys::boo::html::tests
       (void)TakeCalls();
       auto clone = ById(u8"a").CloneNode(false);
       REQUIRE_FALSE(clone.HasException());
-      auto &cloned = Downcast<dom::Element>(*clone.Value());
+      auto &cloned = Downcast<Element>(*clone.Value());
       CHECK(cloned.IsDefinedCustomElement());
       CHECK(TakeCalls() == Log {u8"constructed", u8"attribute value null 1"});
     }
@@ -137,7 +137,7 @@ namespace krys::boo::html::tests
     SECTION("defining a name upgrades the document's elements in tree order")
     {
       Parse(u8"<x-late id=a value=1><x-late id=b></x-late></x-late><div><x-late id=c></x-late></div>");
-      Ref<dom::Element> first = ShareRef(ById(u8"a"));
+      Ref<Element> first = ShareRef(ById(u8"a"));
       CHECK(first->IsCustomElementUpgradeCandidate());
       CHECK_FALSE(first->Matches(u8":defined").ReleaseValue());
 
@@ -253,7 +253,7 @@ namespace krys::boo::html::tests
 
     SECTION("adopting it into another document")
     {
-      auto other = CreateRef<dom::HTMLDocument>();
+      auto other = CreateRef<HTMLDocument>();
       REQUIRE_FALSE(other->AdoptNode(element).HasException());
       CHECK(TakeCalls() == Log {u8"disconnected a", u8"adopted a"});
     }
@@ -264,7 +264,7 @@ namespace krys::boo::html::tests
 
       struct Reenter : dom::EventListenerCallback
       {
-        dom::Element *Target {nullptr};
+        Element *Target {nullptr};
         Log *Calls {nullptr};
 
         void HandleEvent(dom::Event &) noexcept override

@@ -17,7 +17,7 @@ namespace krys::boo::svg::tests
 
   namespace
   {
-    KRYS_NODISCARD SVGTextContentElement &TextById(dom::Document &document, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD SVGTextContentElement &TextById(Document &document, DOMStringView id) noexcept
     {
       auto element = document.GetElementById(id);
       krys_assert(element);

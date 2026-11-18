@@ -76,7 +76,7 @@ namespace krys::boo
     }
   }
 
-  CachedResourceLoader::CachedResourceLoader(dom::Document *document) noexcept
+  CachedResourceLoader::CachedResourceLoader(boo::Document *document) noexcept
       : _document(CreateWeakPtr(document)),
         _garbageCollectDocumentResourcesTimer(*this, &CachedResourceLoader::GarbageCollectDocumentResources)
   {
@@ -106,12 +106,12 @@ namespace krys::boo
     return document ? document->Frame() : nullptr;
   }
 
-  dom::Document *CachedResourceLoader::GetDocument() const noexcept
+  boo::Document *CachedResourceLoader::GetDocument() const noexcept
   {
     return _document.get();
   }
 
-  void CachedResourceLoader::SetDocument(dom::Document *document) noexcept
+  void CachedResourceLoader::SetDocument(boo::Document *document) noexcept
   {
     _document = CreateWeakPtr(document);
   }

@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Color/CSSColorValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief A colour in the oklab colour space.
   /// @see https://drafts.css-houdini.org/css-typed-om/#cssoklab
@@ -79,9 +79,9 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSOKLab)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleValue &styleValue) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSOKLab)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleValue &styleValue) noexcept
   {
-    return styleValue.StyleValueType() == krys::boo::css::CSSStyleValueType::CSSOKLab;
+    return styleValue.StyleValueType() == krys::boo::CSSStyleValueType::CSSOKLab;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

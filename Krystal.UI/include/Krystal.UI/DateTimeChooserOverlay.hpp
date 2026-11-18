@@ -50,7 +50,7 @@ namespace krys::ui
     /// @brief What the input's value chooses, in the same units as `_highlighted`, if anything.
     Maybe<int32> _selected;
     /// @brief The element showing each choosable day or month, by its value in `_highlighted`'s units.
-    HashMap<int32, RefPtr<boo::dom::Element>> _cells;
+    HashMap<int32, RefPtr<boo::Element>> _cells;
     bool _visible {false};
 
   public:

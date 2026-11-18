@@ -607,8 +607,8 @@ namespace krys
         document.AddEventListener(u8"click",
                                   [](boo::dom::Event &event)
                                   {
-                                    auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
-                                    auto *target = node ? DynamicDowncast<boo::dom::Element>(*node) : nullptr;
+                                    auto *node = DynamicDowncast<boo::Node>(event.Target().get());
+                                    auto *target = node ? DynamicDowncast<boo::Element>(*node) : nullptr;
                                     if (!target)
                                     {
                                       return;
@@ -616,7 +616,7 @@ namespace krys
                                     auto card = target->Closest(u8".card");
                                     if (card.HasValue() && card.Value())
                                     {
-                                      (void)card.Value()->ClassList().Toggle(boo::dom::DOMString(u8"picked"));
+                                      (void)card.Value()->ClassList().Toggle(boo::DOMString(u8"picked"));
                                     }
                                   });
       // Shows the `key` of each key pressed on the page in its `#last-key` element.
@@ -626,7 +626,7 @@ namespace krys
         {
           if (auto label = _pageView->Document().GetElementById(u8"last-key"))
           {
-            auto key = event.Key() == u8" " ? boo::dom::DOMString(u8"Space") : event.Key();
+            auto key = event.Key() == u8" " ? boo::DOMString(u8"Space") : event.Key();
             (void)label->TextContent(krys::move(key));
           }
         });
@@ -636,8 +636,8 @@ namespace krys
         u8"command",
         [](boo::dom::CommandEvent &event)
         {
-          auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
-          auto *dialog = node ? DynamicDowncast<boo::html::HTMLDialogElement>(*node) : nullptr;
+          auto *node = DynamicDowncast<boo::Node>(event.Target().get());
+          auto *dialog = node ? DynamicDowncast<boo::HTMLDialogElement>(*node) : nullptr;
           if (dialog && event.Command() == u8"--show")
           {
             (void)dialog->Show();
@@ -651,8 +651,8 @@ namespace krys
         u8"close",
         [this](boo::dom::Event &event)
         {
-          auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
-          auto *dialog = node ? DynamicDowncast<boo::html::HTMLDialogElement>(*node) : nullptr;
+          auto *node = DynamicDowncast<boo::Node>(event.Target().get());
+          auto *dialog = node ? DynamicDowncast<boo::HTMLDialogElement>(*node) : nullptr;
           if (!dialog)
           {
             return;
@@ -660,8 +660,8 @@ namespace krys
           const auto &result = dialog->ReturnValue();
           if (dialog->Id() == u8"confirm-save")
           {
-            auto *form = DynamicDowncast<boo::html::HTMLFormElement>(
-              _pageView->Document().GetElementById(u8"settings").get());
+            auto *form =
+              DynamicDowncast<boo::HTMLFormElement>(_pageView->Document().GetElementById(u8"settings").get());
             if (form && result == u8"save")
             {
               (void)form->RequestSubmit();
@@ -675,7 +675,7 @@ namespace krys
           {
             return;
           }
-          (void)label->TextContent(result.empty() ? boo::dom::DOMString(u8"Closed without an answer.")
+          (void)label->TextContent(result.empty() ? boo::DOMString(u8"Closed without an answer.")
                                                   : u8"Closed with \u201c" + result + u8"\u201d.");
         },
         true);
@@ -688,8 +688,7 @@ namespace krys
       if (auto clock = _pageView ? _pageView->Document().GetElementById(u8"clock") : nullptr)
       {
         auto text = std::format("Open for {}:{:02}", _secondsOpen / 60, _secondsOpen % 60);
-        (void)clock->TextContent(
-          boo::dom::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
+        (void)clock->TextContent(boo::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
       }
     }
 
@@ -737,7 +736,7 @@ namespace krys
       {
         if (auto link = document.GetElementById(u8"topic-" + utf8_string(name)))
         {
-          (void)link->ClassList().Toggle(boo::dom::DOMString(u8"current"), name == topic);
+          (void)link->ClassList().Toggle(boo::DOMString(u8"current"), name == topic);
         }
       }
     }
@@ -792,7 +791,7 @@ namespace krys
       _pageView->SetLoadHandler([this](const ui::LoadEvent &event) { HandleLoad(event); });
       // The page's custom elements, which its parser creates.
       std::ignore = _pageView->DefineCustomElement(
-        u8"bean-rating", [](boo::html::HTMLElement &element) { return CreateUnique<BeanRating>(element); },
+        u8"bean-rating", [](boo::HTMLElement &element) { return CreateUnique<BeanRating>(element); },
         BeanRating::Options());
       LoadPage();
     }
@@ -828,7 +827,7 @@ namespace krys
       {
         for (auto &item : request.Entries->Items())
         {
-          auto *value = std::get_if<boo::dom::DOMString>(&item.Data);
+          auto *value = std::get_if<boo::DOMString>(&item.Data);
           auto *file = std::get_if<RefPtr<boo::File>>(&item.Data);
           entries += (entries.empty() ? u8"" : u8"&") + item.Name + u8"="
                      + (value   ? *value

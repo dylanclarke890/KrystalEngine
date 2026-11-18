@@ -10,17 +10,20 @@
 #include "Krystal.Core/Types/WeakPtr.hpp"
 #include <algorithm>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Attr;
   class Element;
+}
 
+namespace krys::boo::dom
+{
   /// @brief A live view of an element's attribute list.
   /// @see https://dom.spec.whatwg.org/#interface-namednodemap
   /// @see https://dom.spec.whatwg.org/#concept-namednodemap-attribute
   class NamedNodeMap
   {
-    friend class Element;
+    friend class boo::Element;
 
   private:
     /// @see https://dom.spec.whatwg.org/#concept-namednodemap-element

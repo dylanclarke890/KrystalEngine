@@ -28,7 +28,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSPositionTryRule;
 
@@ -37,12 +37,13 @@ namespace krys::boo::css
   class CSSPositionTryDescriptors final : public PropertySetCSSDescriptors
   {
   private:
-    CSSPositionTryDescriptors(MutableStyleProperties &propertySet, CSSPositionTryRule &parentRule) noexcept;
+    CSSPositionTryDescriptors(css::MutableStyleProperties &propertySet,
+                              CSSPositionTryRule &parentRule) noexcept;
 
   public:
     ~CSSPositionTryDescriptors() noexcept override;
 
-    KRYS_NODISCARD static Ref<CSSPositionTryDescriptors> Create(MutableStyleProperties &propertySet,
+    KRYS_NODISCARD static Ref<CSSPositionTryDescriptors> Create(css::MutableStyleProperties &propertySet,
                                                                 CSSPositionTryRule &parentRule) noexcept;
 
     KRYS_NODISCARD StyleDeclarationType GetStyleDeclarationType() const noexcept final
@@ -209,16 +210,16 @@ namespace krys::boo::css
   private:
     // Override this to invalidate all remembered last-successful position options
     // when property value changes.
-    dom::ExceptionOr<void> SetPropertyInternal(PropertyId property, const CSSOMString &value,
-                                               IsImportant important) noexcept override;
+    dom::ExceptionOr<void> SetPropertyInternal(css::PropertyId property, const CSSOMString &value,
+                                               css::IsImportant important) noexcept override;
 
-    KRYS_NODISCARD RuleType GetRuleType() const noexcept final;
+    KRYS_NODISCARD css::RuleType GetRuleType() const noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSPositionTryDescriptors)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleDeclaration &declaration) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSPositionTryDescriptors)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleDeclaration &declaration) noexcept
   {
-    return declaration.GetStyleDeclarationType() == krys::boo::css::StyleDeclarationType::PositionTry;
+    return declaration.GetStyleDeclarationType() == krys::boo::StyleDeclarationType::PositionTry;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

@@ -10,8 +10,7 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD RenderMathMLFraction &FractionById(ResolverFixture &fixture,
-                                                      dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderMathMLFraction &FractionById(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       (void)fixture.Document->UpdateLayout();
       auto *renderer = fixture.ById(id).Renderer();

@@ -89,16 +89,16 @@ namespace krys::boo
   {
     bool gAccessibilityEnabled = false;
 
-    KRYS_NODISCARD bool IsHTMLElementNamed(const dom::Node &node, dom::DOMStringView localName) noexcept
+    KRYS_NODISCARD bool IsHTMLElementNamed(const boo::Node &node, DOMStringView localName) noexcept
     {
-      auto *element = DynamicDowncast<dom::Element>(node);
-      return element && Is<html::HTMLElement>(*element) && element->LocalName() == localName;
+      auto *element = DynamicDowncast<boo::Element>(node);
+      return element && Is<HTMLElement>(*element) && element->LocalName() == localName;
     }
 
     /// @brief Whether @p node is inside a canvas's fallback content (but not a user agent shadow tree).
-    KRYS_NODISCARD bool IsInCanvasSubtree(const dom::Element &composedParent) noexcept
+    KRYS_NODISCARD bool IsInCanvasSubtree(const boo::Element &composedParent) noexcept
     {
-      for (const dom::Node *ancestor = &composedParent; ancestor; ancestor = ancestor->ParentInComposedTree())
+      for (const boo::Node *ancestor = &composedParent; ancestor; ancestor = ancestor->ParentInComposedTree())
       {
         if (IsHTMLElementNamed(*ancestor, u8"canvas"))
         {
@@ -111,7 +111,7 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD bool NodeRendererIsValid(const dom::Node &node) noexcept
+    KRYS_NODISCARD bool NodeRendererIsValid(const boo::Node &node) noexcept
     {
       auto *renderer = node.Renderer();
       if (!renderer)
@@ -133,7 +133,7 @@ namespace krys::boo
     }
 
     /// @brief Whether @p element is part of an HTML table (a row, cell, section, column or caption).
-    KRYS_NODISCARD bool IsHTMLTablePart(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool IsHTMLTablePart(const boo::Element &element) noexcept
     {
       for (auto localName :
            {u8"tr", u8"td", u8"th", u8"thead", u8"tbody", u8"tfoot", u8"col", u8"colgroup", u8"caption"})
@@ -147,14 +147,13 @@ namespace krys::boo
     }
 
     /// @brief Whether @p element is named by ARIA (which takes precedence over a label element).
-    KRYS_NODISCARD bool HasAnyARIALabelling(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool HasAnyARIALabelling(const boo::Element &element) noexcept
     {
       return element.HasAttribute(u8"aria-label") || element.HasAttribute(u8"aria-labelledby");
     }
 
     /// @brief A label's control, unless it's a descendant of the label that's being torn down.
-    KRYS_NODISCARD RefPtr<html::HTMLElement>
-      ControlForLabelElement(const html::HTMLLabelElement &label) noexcept
+    KRYS_NODISCARD RefPtr<HTMLElement> ControlForLabelElement(const HTMLLabelElement &label) noexcept
     {
       auto control = label.Control();
       if (!control || (control->Renderer() && !control->Renderer()->Parent()))
@@ -165,7 +164,7 @@ namespace krys::boo
     }
 
     /// @brief The attributes that relate an element to others.
-    constexpr dom::DOMStringView RelationAttributes[] = {
+    constexpr DOMStringView RelationAttributes[] = {
       u8"aria-activedescendant",
       u8"aria-controls",
       u8"aria-describedby",
@@ -179,8 +178,8 @@ namespace krys::boo
       u8"popovertarget",
     };
 
-    KRYS_NODISCARD bool HasAnyRole(const dom::Element &element,
-                                   std::initializer_list<dom::DOMStringView> roles) noexcept
+    KRYS_NODISCARD bool HasAnyRole(const boo::Element &element,
+                                   std::initializer_list<DOMStringView> roles) noexcept
     {
       for (auto role : roles)
       {
@@ -193,7 +192,7 @@ namespace krys::boo
     }
   }
 
-  AXObjectCache::AXObjectCache(dom::Document &document) noexcept
+  AXObjectCache::AXObjectCache(boo::Document &document) noexcept
       : _document(document), _notificationPostTimer(*this, &AXObjectCache::NotificationPostTimerFired),
         _performCacheUpdateTimer(*this, &AXObjectCache::PerformCacheUpdateTimerFired)
   {
@@ -280,7 +279,7 @@ namespace krys::boo
     return FocusedObjectForNode(_document);
   }
 
-  AXObject *AXObjectCache::FocusedImageMapUIElement(html::HTMLAreaElement &area) noexcept
+  AXObject *AXObjectCache::FocusedImageMapUIElement(boo::HTMLAreaElement &area) noexcept
   {
     auto image = area.ImageElement();
     auto *imageObject = image ? GetOrCreate(*image) : nullptr;
@@ -298,10 +297,10 @@ namespace krys::boo
     return nullptr;
   }
 
-  AXObject *AXObjectCache::FocusedObjectForNode(dom::Node &node) noexcept
+  AXObject *AXObjectCache::FocusedObjectForNode(boo::Node &node) noexcept
   {
     // A focused area's object is its image's child.
-    if (auto *area = DynamicDowncast<html::HTMLAreaElement>(node))
+    if (auto *area = DynamicDowncast<boo::HTMLAreaElement>(node))
     {
       return FocusedImageMapUIElement(*area);
     }
@@ -325,9 +324,9 @@ namespace krys::boo
     return focus;
   }
 
-  AXObject *AXObjectCache::Get(const dom::Node &node) const noexcept
+  AXObject *AXObjectCache::Get(const boo::Node &node) const noexcept
   {
-    if (auto *document = DynamicDowncast<dom::Document>(node)) KRYS_UNLIKELY
+    if (auto *document = DynamicDowncast<boo::Document>(node)) KRYS_UNLIKELY
     {
       auto *renderView = document->GetRenderView();
       return renderView ? Get(*renderView) : nullptr;
@@ -360,11 +359,11 @@ namespace krys::boo
     {
       return AXSVGObject::Create(GenerateID(), renderer, *this, true);
     }
-    if (Is<svg::SVGElement>(node) || renderer.IsRenderSVGInlineText())
+    if (Is<SVGElement>(node) || renderer.IsRenderSVGInlineText())
     {
       return AXSVGObject::Create(GenerateID(), renderer, *this);
     }
-    if (auto *element = DynamicDowncast<dom::Element>(node); element && Is<mathml::MathMLElement>(*element))
+    if (auto *element = DynamicDowncast<boo::Element>(node); element && Is<MathMLElement>(*element))
     {
       return AXMathMLElement::Create(GenerateID(), renderer, *this);
     }
@@ -372,8 +371,8 @@ namespace krys::boo
     {
       return AXMenuList::Create(GenerateID(), *menuList, *this);
     }
-    if (Is<RenderProgress>(renderer) || Is<RenderMeter>(renderer) || Is<html::HTMLProgressElement>(node)
-        || Is<html::HTMLMeterElement>(node))
+    if (Is<RenderProgress>(renderer) || Is<RenderMeter>(renderer) || Is<HTMLProgressElement>(node)
+        || Is<HTMLMeterElement>(node))
     {
       return AXProgressIndicator::Create(GenerateID(), renderer, *this);
     }
@@ -384,14 +383,14 @@ namespace krys::boo
     return AXRenderObject::Create(GenerateID(), renderer, *this);
   }
 
-  Ref<AXNodeObject> AXObjectCache::CreateFromNode(dom::Node &node) noexcept
+  Ref<AXNodeObject> AXObjectCache::CreateFromNode(boo::Node &node) noexcept
   {
-    if (auto *element = DynamicDowncast<dom::Element>(node);
-        element && (Is<html::HTMLProgressElement>(*element) || Is<html::HTMLMeterElement>(*element)))
+    if (auto *element = DynamicDowncast<boo::Element>(node);
+        element && (Is<HTMLProgressElement>(*element) || Is<HTMLMeterElement>(*element)))
     {
       return AXProgressIndicator::Create(GenerateID(), *element, *this);
     }
-    if (auto *element = DynamicDowncast<dom::Element>(node); element && Is<svg::SVGElement>(*element))
+    if (auto *element = DynamicDowncast<boo::Element>(node); element && Is<SVGElement>(*element))
     {
       return AXSVGObject::Create(GenerateID(), *element, *this);
     }
@@ -419,7 +418,7 @@ namespace krys::boo
     return object.get();
   }
 
-  void AXObjectCache::CacheAndInitializeWrapper(AXObject &object, const dom::Node *node,
+  void AXObjectCache::CacheAndInitializeWrapper(AXObject &object, const boo::Node *node,
                                                 const RenderObject *renderer) noexcept
   {
     auto id = object.ObjectID();
@@ -436,7 +435,7 @@ namespace krys::boo
     object.Init();
   }
 
-  AXObject *AXObjectCache::GetOrCreate(dom::Node &node, IsPartOfRelation isPartOfRelation) noexcept
+  AXObject *AXObjectCache::GetOrCreate(boo::Node &node, IsPartOfRelation isPartOfRelation) noexcept
   {
     if (auto *object = Get(node))
     {
@@ -445,14 +444,14 @@ namespace krys::boo
     return GetOrCreateSlow(node, isPartOfRelation);
   }
 
-  AXObject *AXObjectCache::GetOrCreateSlow(dom::Node &node, IsPartOfRelation isPartOfRelation) noexcept
+  AXObject *AXObjectCache::GetOrCreateSlow(boo::Node &node, IsPartOfRelation isPartOfRelation) noexcept
   {
     krys_debug_assert(&node.NodeDocument() == &_document);
 
     // An option or option group is its select's, rendered or not: a list box's child, or (for an option) a
     // child of a menu list's pop-up, as long as the menu list is rendered.
-    auto *option = DynamicDowncast<html::HTMLOptionElement>(node);
-    auto *group = DynamicDowncast<html::HTMLOptGroupElement>(node);
+    auto *option = DynamicDowncast<HTMLOptionElement>(node);
+    auto *group = DynamicDowncast<HTMLOptGroupElement>(node);
     if (option || group)
     {
       auto *select = option ? option->OwnerSelectElement() : group->OwnerSelectElement();
@@ -471,7 +470,7 @@ namespace krys::boo
       }
       else
       {
-        object = AXListBoxOption::Create(GenerateID(), Downcast<html::HTMLElement>(node), *this);
+        object = AXListBoxOption::Create(GenerateID(), Downcast<HTMLElement>(node), *this);
       }
       CacheAndInitializeWrapper(*object, &node, nullptr);
       return object.get();
@@ -482,7 +481,7 @@ namespace krys::boo
       return GetOrCreate(*node.Renderer());
     }
 
-    if (auto *document = DynamicDowncast<dom::Document>(node)) KRYS_UNLIKELY
+    if (auto *document = DynamicDowncast<boo::Document>(node)) KRYS_UNLIKELY
     {
       return GetOrCreate(document->GetRenderView());
     }
@@ -498,9 +497,9 @@ namespace krys::boo
     if (isPartOfRelation == IsPartOfRelation::No && !IsDescendantOfRelatedNode(node))
     {
       bool insideMeterElement = IsHTMLElementNamed(*composedParent, u8"meter");
-      auto *element = DynamicDowncast<dom::Element>(node);
+      auto *element = DynamicDowncast<boo::Element>(node);
       bool hasDisplayContents = element && element->HasDisplayContents();
-      bool isPopover = element && Is<html::HTMLElement>(*element) && element->HasAttribute(u8"popover");
+      bool isPopover = element && Is<HTMLElement>(*element) && element->HasAttribute(u8"popover");
       bool isFocused = element && _document.FocusedElement() == element;
       bool isAreaElement = IsHTMLElementNamed(node, u8"area");
       if (!inCanvasSubtree && !insideMeterElement && !hasDisplayContents && !isPopover && !isFocused
@@ -606,7 +605,7 @@ namespace krys::boo
     Remove(id);
   }
 
-  void AXObjectCache::Remove(dom::Node &node) noexcept
+  void AXObjectCache::Remove(boo::Node &node) noexcept
   {
     auto found = _nodeIdMapping.find(&node);
     if (found != _nodeIdMapping.end())
@@ -622,7 +621,7 @@ namespace krys::boo
     }
 
     _deferredTextChangedList.remove(&node);
-    if (auto *element = DynamicDowncast<dom::Element>(node))
+    if (auto *element = DynamicDowncast<boo::Element>(node))
     {
       _deferredRecomputeIsIgnoredList.remove(element);
       _deferredSelectedChildrenChangedList.remove(element);
@@ -638,7 +637,7 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::ChildrenChanged(dom::Node &node) noexcept
+  void AXObjectCache::ChildrenChanged(boo::Node &node) noexcept
   {
     // A rendered node's renderer reports its children changing.
     if (!node.Renderer())
@@ -670,7 +669,7 @@ namespace krys::boo
     if (newChild)
     {
       auto *node = newChild->GetNode();
-      DeferElementAddedOrRemoved(DynamicDowncast<dom::Element>(node));
+      DeferElementAddedOrRemoved(DynamicDowncast<boo::Element>(node));
       // The display: contents elements between the child and its parent renderer's element have no renderers
       // of their own, so were added with it.
       for (auto *ancestor = node ? node->ParentElement() : nullptr;
@@ -682,7 +681,7 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::DeferElementAddedOrRemoved(dom::Element *element) noexcept
+  void AXObjectCache::DeferElementAddedOrRemoved(boo::Element *element) noexcept
   {
     if (!element)
     {
@@ -696,7 +695,7 @@ namespace krys::boo
     StartPerformCacheUpdateTimer();
   }
 
-  bool AXObjectCache::IsModalElement(const dom::Element &element) noexcept
+  bool AXObjectCache::IsModalElement(const boo::Element &element) noexcept
   {
     if ((ax::HasRole(element, u8"dialog") || ax::HasRole(element, u8"alertdialog"))
         && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(
@@ -704,7 +703,7 @@ namespace krys::boo
     {
       return true;
     }
-    auto *dialog = DynamicDowncast<html::HTMLDialogElement>(element);
+    auto *dialog = DynamicDowncast<HTMLDialogElement>(element);
     return dialog && dialog->IsModal();
   }
 
@@ -713,7 +712,7 @@ namespace krys::boo
     for (auto *node = dom::TreeQueries::Next(_document, nullptr); node;
          node = dom::TreeQueries::Next(*node, nullptr))
     {
-      if (auto *element = DynamicDowncast<dom::Element>(node); element && IsModalElement(*element))
+      if (auto *element = DynamicDowncast<boo::Element>(node); element && IsModalElement(*element))
       {
         _modalElements.push_back(element);
       }
@@ -721,11 +720,11 @@ namespace krys::boo
     _modalNodesInitialized = true;
   }
 
-  bool AXObjectCache::ModalElementHasAccessibleContent(dom::Element &element) noexcept
+  bool AXObjectCache::ModalElementHasAccessibleContent(boo::Element &element) noexcept
   {
     // Whether an object is ignored depends on the modal dialog, which is being worked out: the DOM is walked
     // for objects that are unignored in themselves.
-    List<dom::Node *> nodeStack {element.FirstChild()};
+    List<boo::Node *> nodeStack {element.FirstChild()};
     while (!nodeStack.empty())
     {
       auto *node = nodeStack.back();
@@ -748,7 +747,7 @@ namespace krys::boo
 
   void AXObjectCache::UpdateCurrentModalNode() noexcept
   {
-    auto recomputeModalElement = [&]() -> dom::Element *
+    auto recomputeModalElement = [&]() -> boo::Element *
     {
       if (_modalElements.empty())
       {
@@ -761,8 +760,8 @@ namespace krys::boo
 
       SetForScope retrieving(_isRetrievingCurrentModalNode, true);
       // The deepest of the modal dialogs with the focus in it; there's none if the focus isn't in one.
-      RefPtr<dom::Element> focusedElement = ShareRefPtr(_document.FocusedElement());
-      dom::Element *modalElementToReturn = nullptr;
+      RefPtr<boo::Element> focusedElement = ShareRefPtr(_document.FocusedElement());
+      boo::Element *modalElementToReturn = nullptr;
       bool foundModalWithFocusInside = false;
       for (auto *element : _modalElements)
       {
@@ -799,9 +798,9 @@ namespace krys::boo
     }
   }
 
-  bool AXObjectCache::IsNodeVisible(const dom::Node *node) noexcept
+  bool AXObjectCache::IsNodeVisible(const boo::Node *node) noexcept
   {
-    auto *element = DynamicDowncast<dom::Element>(node);
+    auto *element = DynamicDowncast<boo::Element>(node);
     auto *renderer = element ? element->Renderer() : nullptr;
     if (!renderer)
     {
@@ -830,7 +829,7 @@ namespace krys::boo
            || element->NodeDocument().FocusedElement() == element;
   }
 
-  dom::Node *AXObjectCache::ModalNode() noexcept
+  boo::Node *AXObjectCache::ModalNode() noexcept
   {
     if (!_modalNodesInitialized)
     {
@@ -848,13 +847,13 @@ namespace krys::boo
     return _currentModalElement;
   }
 
-  void AXObjectCache::DeferModalChange(dom::Element &element) noexcept
+  void AXObjectCache::DeferModalChange(boo::Element &element) noexcept
   {
     _deferredModalChangedList.add(&element);
     StartPerformCacheUpdateTimer();
   }
 
-  void AXObjectCache::HandleMenuOpened(dom::Element &element) noexcept
+  void AXObjectCache::HandleMenuOpened(boo::Element &element) noexcept
   {
     if (element.Renderer() && ax::HasRole(element, u8"menu"))
     {
@@ -862,7 +861,7 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::HandleLiveRegionCreated(dom::Element &element) noexcept
+  void AXObjectCache::HandleLiveRegionCreated(boo::Element &element) noexcept
   {
     // (A display: contents live region has no renderer, but is in the tree.)
     if (!element.Renderer() && !element.HasDisplayContents())
@@ -941,21 +940,21 @@ namespace krys::boo
 
     // Adding or removing rows can make a layout table a data table or the other way round.
     auto *element = object->GetElement();
-    if (Is<html::HTMLTableElement>(element))
+    if (Is<HTMLTableElement>(element))
     {
       DeferRecomputeTableIsExposed(element);
     }
-    else if (auto *section = DynamicDowncast<html::HTMLTableSectionElement>(element))
+    else if (auto *section = DynamicDowncast<HTMLTableSectionElement>(element))
     {
-      DeferRecomputeTableIsExposed(const_cast<html::HTMLTableElement *>(section->FindParentTable()));
+      DeferRecomputeTableIsExposed(const_cast<HTMLTableElement *>(section->FindParentTable()));
     }
     StartPerformCacheUpdateTimer();
   }
 
-  void AXObjectCache::DeferRecomputeTableIsExposed(dom::Element *element) noexcept
+  void AXObjectCache::DeferRecomputeTableIsExposed(boo::Element *element) noexcept
   {
     // A table with no object yet works it out when it gets one.
-    auto *table = DynamicDowncast<html::HTMLTableElement>(element);
+    auto *table = DynamicDowncast<HTMLTableElement>(element);
     auto *object = table ? Get(*table) : nullptr;
     if (!object)
     {
@@ -1092,7 +1091,7 @@ namespace krys::boo
     PostNotification(&object, AXNotification::RoleChanged);
   }
 
-  void AXObjectCache::RecomputeIsIgnored(dom::Node &node) noexcept
+  void AXObjectCache::RecomputeIsIgnored(boo::Node &node) noexcept
   {
     if (auto *object = Get(node))
     {
@@ -1108,7 +1107,7 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::DeferRecomputeIsIgnored(dom::Element *element) noexcept
+  void AXObjectCache::DeferRecomputeIsIgnored(boo::Element *element) noexcept
   {
     if (!element || !NodeRendererIsValid(*element))
     {
@@ -1118,7 +1117,7 @@ namespace krys::boo
     StartPerformCacheUpdateTimer();
   }
 
-  void AXObjectCache::DeferRecomputeIsIgnoredIfNeeded(dom::Element *element) noexcept
+  void AXObjectCache::DeferRecomputeIsIgnoredIfNeeded(boo::Element *element) noexcept
   {
     if (!element || !NodeRendererIsValid(*element))
     {
@@ -1132,9 +1131,9 @@ namespace krys::boo
     RecomputeIsIgnored(*element->Renderer());
   }
 
-  void AXObjectCache::DeferAttributeChangeIfNeeded(dom::Element &element, const dom::DOMStringAtom &name,
-                                                   Maybe<dom::DOMStringView> oldValue,
-                                                   Maybe<dom::DOMStringView> newValue) noexcept
+  void AXObjectCache::DeferAttributeChangeIfNeeded(boo::Element &element, const DOMStringAtom &name,
+                                                   Maybe<DOMStringView> oldValue,
+                                                   Maybe<DOMStringView> newValue) noexcept
   {
     if (oldValue == newValue)
     {
@@ -1145,12 +1144,11 @@ namespace krys::boo
     {
       RelationsNeedUpdate();
     }
-    auto oldString = oldValue.value_or(dom::DOMStringView {});
-    auto newString = newValue.value_or(dom::DOMStringView {});
+    auto oldString = oldValue.value_or(DOMStringView {});
+    auto newString = newValue.value_or(DOMStringView {});
     if (NodeRendererIsValid(element) && RendererNeedsDeferredUpdate(*element.Renderer()))
     {
-      _deferredAttributeChanges.push_back(
-        {&element, name, dom::DOMString(oldString), dom::DOMString(newString)});
+      _deferredAttributeChanges.push_back({&element, name, DOMString(oldString), DOMString(newString)});
       StartPerformCacheUpdateTimer();
       return;
     }
@@ -1158,8 +1156,7 @@ namespace krys::boo
     HandleAttributeChange(element, name.View(), oldString, newString);
   }
 
-  bool AXObjectCache::ShouldProcessAttributeChange(dom::Element &element,
-                                                   dom::DOMStringView name) const noexcept
+  bool AXObjectCache::ShouldProcessAttributeChange(boo::Element &element, DOMStringView name) const noexcept
   {
     // aria-modal changes subtrees that are being shown or hidden, which assistive technology may not have
     // asked about yet.
@@ -1173,8 +1170,8 @@ namespace krys::boo
     return Get(element) || (parent && Get(*parent));
   }
 
-  void AXObjectCache::HandleAttributeChange(dom::Element &element, dom::DOMStringView name,
-                                            dom::DOMStringView oldValue, dom::DOMStringView newValue) noexcept
+  void AXObjectCache::HandleAttributeChange(boo::Element &element, DOMStringView name, DOMStringView oldValue,
+                                            DOMStringView newValue) noexcept
   {
     enum class TableProperty : uint8
     {
@@ -1190,7 +1187,7 @@ namespace krys::boo
         {
           for (auto *ancestor = element.ParentElement(); ancestor; ancestor = ancestor->ParentElement())
           {
-            if (Is<html::HTMLTableElement>(*ancestor))
+            if (Is<HTMLTableElement>(*ancestor))
             {
               DeferRecomputeTableIsExposed(ancestor);
               break;
@@ -1606,7 +1603,7 @@ namespace krys::boo
 
   // Relations.
 
-  AXRelation AXObjectCache::AttributeToRelationType(dom::DOMStringView attribute) noexcept
+  AXRelation AXObjectCache::AttributeToRelationType(DOMStringView attribute) noexcept
   {
     if (attribute == u8"aria-activedescendant")
     {
@@ -1647,7 +1644,7 @@ namespace krys::boo
     return AXRelation::None;
   }
 
-  bool AXObjectCache::IsRelationAttribute(dom::DOMStringView attribute) noexcept
+  bool AXObjectCache::IsRelationAttribute(DOMStringView attribute) noexcept
   {
     return AttributeToRelationType(attribute) != AXRelation::None;
   }
@@ -1679,7 +1676,7 @@ namespace krys::boo
     return AXRelation::None;
   }
 
-  bool AXObjectCache::AddRelation(dom::Element &origin, dom::Element &target, AXRelation relation) noexcept
+  bool AXObjectCache::AddRelation(boo::Element &origin, boo::Element &target, AXRelation relation) noexcept
   {
     // Only an element's labelled-by relation can be to itself.
     if (relation == AXRelation::None || (&origin == &target && relation != AXRelation::LabeledBy))
@@ -1772,21 +1769,21 @@ namespace krys::boo
     return true;
   }
 
-  bool AXObjectCache::AddRelation(dom::Element &origin, dom::DOMStringView attribute) noexcept
+  bool AXObjectCache::AddRelation(boo::Element &origin, DOMStringView attribute) noexcept
   {
     auto relation = AttributeToRelationType(attribute);
-    auto name = dom::DOMStringAtom(attribute);
+    auto name = DOMStringAtom(attribute);
     bool addedRelation = false;
     // The relations go to the resolved target elements: through a shadow host's reference target to the
     // element it names, leaving out a host whose reference target names nothing.
-    auto addResolvedRelation = [&](dom::Element &unresolvedTarget)
+    auto addResolvedRelation = [&](boo::Element &unresolvedTarget)
     {
       if (auto target = unresolvedTarget.ResolveReferenceTarget())
       {
         addedRelation |= AddRelation(origin, *target, relation);
       }
     };
-    auto addRelations = [&](const List<Ref<dom::Element>> &targets)
+    auto addRelations = [&](const List<Ref<boo::Element>> &targets)
     {
       for (const auto &target : targets)
       {
@@ -1795,7 +1792,7 @@ namespace krys::boo
     };
 
     // The elements the attribute refers to (set through its IDL attribute, or by ID).
-    if (dom::Element::IsElementReflectionAttribute(name))
+    if (boo::Element::IsElementReflectionAttribute(name))
     {
       if (auto target = origin.ElementForAttributeInternal(name))
       {
@@ -1803,7 +1800,7 @@ namespace krys::boo
         return addedRelation;
       }
     }
-    else if (dom::Element::IsElementsArrayReflectionAttribute(name))
+    else if (boo::Element::IsElementsArrayReflectionAttribute(name))
     {
       if (auto targets = origin.ElementsForAttributeInternal(name))
       {
@@ -1845,14 +1842,14 @@ namespace krys::boo
     return addedRelation;
   }
 
-  bool AXObjectCache::AddLabelForRelation(dom::Element &origin) noexcept
+  bool AXObjectCache::AddLabelForRelation(boo::Element &origin) noexcept
   {
-    auto *label = DynamicDowncast<html::HTMLLabelElement>(origin);
+    auto *label = DynamicDowncast<HTMLLabelElement>(origin);
     auto control = label ? ControlForLabelElement(*label) : nullptr;
     return control && AddRelation(origin, *control, AXRelation::LabelFor);
   }
 
-  bool AXObjectCache::RemoveRelation(dom::Element &origin, AXRelation relation) noexcept
+  bool AXObjectCache::RemoveRelation(boo::Element &origin, AXRelation relation) noexcept
   {
     auto object = ShareRefPtr(Get(origin));
     if (!object)
@@ -1965,11 +1962,11 @@ namespace krys::boo
     _previousOwners.clear();
   }
 
-  void AXObjectCache::UpdateRelationsForTree(dom::ContainerNode &root) noexcept
+  void AXObjectCache::UpdateRelationsForTree(boo::ContainerNode &root) noexcept
   {
     for (auto &node : dom::DescendantRange(root))
     {
-      auto *elementPointer = DynamicDowncast<dom::Element>(node);
+      auto *elementPointer = DynamicDowncast<boo::Element>(node);
       if (!elementPointer)
       {
         continue;
@@ -1996,7 +1993,7 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::UpdateRelations(dom::Element &origin, dom::DOMStringView attribute) noexcept
+  void AXObjectCache::UpdateRelations(boo::Element &origin, DOMStringView attribute) noexcept
   {
     if (IsHTMLElementNamed(origin, u8"meta") || IsHTMLElementNamed(origin, u8"head")
         || IsHTMLElementNamed(origin, u8"script") || IsHTMLElementNamed(origin, u8"html")
@@ -2045,7 +2042,7 @@ namespace krys::boo
     return targets->second;
   }
 
-  bool AXObjectCache::IsDescendantOfRelatedNode(dom::Node &node) noexcept
+  bool AXObjectCache::IsDescendantOfRelatedNode(boo::Node &node) noexcept
   {
     for (auto *parent = node.ParentNode(); parent; parent = parent->ParentNode())
     {
@@ -2059,9 +2056,9 @@ namespace krys::boo
     return false;
   }
 
-  bool AXObjectCache::UpdateLabelFor(dom::Element &label) noexcept
+  bool AXObjectCache::UpdateLabelFor(boo::Element &label) noexcept
   {
-    auto *labelElement = DynamicDowncast<html::HTMLLabelElement>(label);
+    auto *labelElement = DynamicDowncast<HTMLLabelElement>(label);
     if (!labelElement)
     {
       return false;
@@ -2075,7 +2072,7 @@ namespace krys::boo
     return true;
   }
 
-  void AXObjectCache::HandleActiveDescendantChange(dom::Element &element) noexcept
+  void AXObjectCache::HandleActiveDescendantChange(boo::Element &element) noexcept
   {
     // Only a focused element's active descendant is of interest.
     auto *frame = element.NodeDocument().Frame();
@@ -2127,10 +2124,10 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::HandleTabPanelSelected(dom::Element *oldElement, dom::Element *newElement) noexcept
+  void AXObjectCache::HandleTabPanelSelected(boo::Element *oldElement, boo::Element *newElement) noexcept
   {
     // The tabs that control the tab panels the focus left and entered change their selected state.
-    auto tabPanelOf = [this](dom::Element *element) -> AXObject *
+    auto tabPanelOf = [this](boo::Element *element) -> AXObject *
     {
       auto *object = element ? Get(*element) : nullptr;
       for (auto *ancestor = object ? object->ParentObject() : nullptr; ancestor;
@@ -2164,7 +2161,7 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::OnPopoverToggle(dom::Element &popover) noexcept
+  void AXObjectCache::OnPopoverToggle(boo::Element &popover) noexcept
   {
     // Each element whose popovertarget (or commandfor) is the popover is told.
     if (auto object = ShareRefPtr(Get(popover)))
@@ -2176,8 +2173,8 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::HandleRoleChanged(dom::Element &element, dom::DOMStringView oldValue,
-                                        dom::DOMStringView newValue) noexcept
+  void AXObjectCache::HandleRoleChanged(boo::Element &element, DOMStringView oldValue,
+                                        DOMStringView newValue) noexcept
   {
     auto object = ShareRefPtr(Get(element));
     if (!object)
@@ -2198,7 +2195,7 @@ namespace krys::boo
     object->UpdateRole();
   }
 
-  void AXObjectCache::HandleAriaExpandedChange(dom::Element &element) noexcept
+  void AXObjectCache::HandleAriaExpandedChange(boo::Element &element) noexcept
   {
     auto object = ShareRefPtr(Get(element));
     if (!object)
@@ -2281,7 +2278,7 @@ namespace krys::boo
     object->RecomputeIsIgnored();
   }
 
-  void AXObjectCache::DeferTextChangedIfNeeded(dom::Node *node) noexcept
+  void AXObjectCache::DeferTextChangedIfNeeded(boo::Node *node) noexcept
   {
     if (!node || !NodeRendererIsValid(*node))
     {
@@ -2296,17 +2293,17 @@ namespace krys::boo
     HandleTextChanged(GetOrCreate(*node));
   }
 
-  void AXObjectCache::CheckedStateChanged(dom::Element &element) noexcept
+  void AXObjectCache::CheckedStateChanged(boo::Element &element) noexcept
   {
     PostNotification(&element, AXNotification::CheckedStateChanged);
   }
 
-  void AXObjectCache::ValueChanged(dom::Element &element) noexcept
+  void AXObjectCache::ValueChanged(boo::Element &element) noexcept
   {
     PostNotification(&element, AXNotification::ValueChanged);
   }
 
-  void AXObjectCache::OnSelectedOptionChanged(dom::Element &element) noexcept
+  void AXObjectCache::OnSelectedOptionChanged(boo::Element &element) noexcept
   {
     if (ax::HasCellARIARole(element))
     {
@@ -2333,7 +2330,7 @@ namespace krys::boo
     HandleTabPanelSelected(nullptr, &element);
   }
 
-  void AXObjectCache::HandleMenuItemSelected(dom::Element *element) noexcept
+  void AXObjectCache::HandleMenuItemSelected(boo::Element *element) noexcept
   {
     if (!element || !HasAnyRole(*element, {u8"menuitem", u8"menuitemradio", u8"menuitemcheckbox"}))
     {
@@ -2341,14 +2338,14 @@ namespace krys::boo
     }
     if (!element->Focused()
         && !infra::StringAlgorithms::ASCIICaseInsensitiveMatch(
-          element->GetAttribute(u8"aria-selected").value_or(dom::DOMString {}), u8"true"))
+          element->GetAttribute(u8"aria-selected").value_or(DOMString {}), u8"true"))
     {
       return;
     }
     PostNotification(GetOrCreate(*element), AXNotification::MenuListItemSelected);
   }
 
-  void AXObjectCache::SelectedChildrenChanged(dom::Node *node) noexcept
+  void AXObjectCache::SelectedChildrenChanged(boo::Node *node) noexcept
   {
     PostNotification(node, AXNotification::SelectedChildrenChanged);
   }
@@ -2361,7 +2358,7 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::DeferSelectedChildrenChangedIfNeeded(dom::Element &select) noexcept
+  void AXObjectCache::DeferSelectedChildrenChangedIfNeeded(boo::Element &select) noexcept
   {
     if (!NodeRendererIsValid(select))
     {
@@ -2384,7 +2381,7 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::OnEditableTextValueChanged(dom::Node &node) noexcept
+  void AXObjectCache::OnEditableTextValueChanged(boo::Node &node) noexcept
   {
     // The text control the node is in (an input's inner text, an editable element's text) is the one whose
     // value changed; otherwise the node's (or its nearest ancestor's) object.
@@ -2404,11 +2401,11 @@ namespace krys::boo
     PostNotification(object, AXNotification::ValueChanged);
   }
 
-  dom::Element *AXObjectCache::RootAXEditableElement(const dom::Node &node) noexcept
+  boo::Element *AXObjectCache::RootAXEditableElement(const boo::Node &node) noexcept
   {
-    auto &mutableNode = const_cast<dom::Node &>(node);
-    dom::Element *result = mutableNode.RootEditableElement();
-    auto *element = DynamicDowncast<dom::Element>(mutableNode);
+    auto &mutableNode = const_cast<boo::Node &>(node);
+    boo::Element *result = mutableNode.RootEditableElement();
+    auto *element = DynamicDowncast<boo::Element>(mutableNode);
     if (!element)
     {
       element = mutableNode.ParentElement();
@@ -2423,7 +2420,7 @@ namespace krys::boo
     return result;
   }
 
-  void AXObjectCache::OnTitleChange(dom::Document &document) noexcept
+  void AXObjectCache::OnTitleChange(boo::Document &document) noexcept
   {
     if (auto *object = Get(document))
     {
@@ -2431,7 +2428,7 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::OnValidityChange(dom::Element &element) noexcept
+  void AXObjectCache::OnValidityChange(boo::Element &element) noexcept
   {
     if (auto *object = Get(element))
     {
@@ -2439,8 +2436,8 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::OnRadioGroupMembershipChanged(const dom::Element &radio,
-                                                    const List<Ref<html::HTMLInputElement>> &group) noexcept
+  void AXObjectCache::OnRadioGroupMembershipChanged(const boo::Element &radio,
+                                                    const List<Ref<boo::HTMLInputElement>> &group) noexcept
   {
     for (const auto &sibling : group)
     {
@@ -2455,11 +2452,11 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::OnFocusChange(dom::Element *oldElement, dom::Element *newElement) noexcept
+  void AXObjectCache::OnFocusChange(boo::Element *oldElement, boo::Element *newElement) noexcept
   {
     // An element whose renderer is out of date (or not made yet) can't say yet whether it's ignored, which
     // the focus change depends on.
-    auto shouldDefer = [](dom::Element *element)
+    auto shouldDefer = [](boo::Element *element)
     {
       if (!element)
       {
@@ -2508,7 +2505,7 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::HandleFocusedUIElementChanged(dom::Element *oldElement, dom::Element *newElement,
+  void AXObjectCache::HandleFocusedUIElementChanged(boo::Element *oldElement, boo::Element *newElement,
                                                     UpdateModal updateModal) noexcept
   {
     if (updateModal == UpdateModal::Yes)
@@ -2570,7 +2567,7 @@ namespace krys::boo
       Ref protectedElement = ShareRef(*element);
       HandleMenuOpened(*element);
       HandleLiveRegionCreated(*element);
-      if (Is<html::HTMLLabelElement>(*element))
+      if (Is<HTMLLabelElement>(*element))
       {
         HandleLabelChanged(GetOrCreate(*element));
       }
@@ -2632,7 +2629,7 @@ namespace krys::boo
     auto modalChanged = std::exchange(_deferredModalChangedList, {});
     for (auto *element : modalChanged)
     {
-      if (!Is<html::HTMLDialogElement>(*element) && !ax::HasRole(*element, u8"dialog")
+      if (!Is<HTMLDialogElement>(*element) && !ax::HasRole(*element, u8"dialog")
           && !ax::HasRole(*element, u8"alertdialog"))
       {
         continue;
@@ -2660,7 +2657,7 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::OnRendererCreated(dom::Node &node) noexcept
+  void AXObjectCache::OnRendererCreated(boo::Node &node) noexcept
   {
     if (auto *object = DynamicDowncast<AXRenderObject>(Get(node)))
     {
@@ -2672,7 +2669,7 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::OnStyleChange(dom::Element &element, const RenderStyle *oldStyle,
+  void AXObjectCache::OnStyleChange(boo::Element &element, const RenderStyle *oldStyle,
                                     const RenderStyle *newStyle) noexcept
   {
     if (!oldStyle || !newStyle)
@@ -2725,14 +2722,14 @@ namespace krys::boo
     auto notification = page && &page->MainFrame() == frame ? AXNotification::NewDocumentLoadComplete
                                                             : AXNotification::LayoutComplete;
     // The web area's object may not exist yet, and making it may not be safe now.
-    _deferredNotifications.emplace_back(ShareRef<dom::Node>(_document), notification);
+    _deferredNotifications.emplace_back(ShareRef<boo::Node>(_document), notification);
     StartPerformCacheUpdateTimer();
   }
 
-  void AXObjectCache::HandleScrolledToAnchor(dom::Node &anchor) noexcept
+  void AXObjectCache::HandleScrolledToAnchor(boo::Node &anchor) noexcept
   {
     // The anchor may be ignored: the first object after it that isn't is told.
-    RefPtr<dom::Node> node = ShareRefPtr(&anchor);
+    RefPtr<boo::Node> node = ShareRefPtr(&anchor);
     auto *object = GetOrCreate(*node);
     while (object && object->IsIgnored())
     {
@@ -2753,7 +2750,7 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::OnSlottedContentChange(dom::Element &slot) noexcept
+  void AXObjectCache::OnSlottedContentChange(boo::Element &slot) noexcept
   {
     ChildrenChanged(Get(slot));
 
@@ -2779,7 +2776,7 @@ namespace krys::boo
     PostNotification(&_document, AXNotification::IsEditableWebAreaChanged);
   }
 
-  void AXObjectCache::OnDragElementChanged(dom::Element *oldElement, dom::Element *newElement) noexcept
+  void AXObjectCache::OnDragElementChanged(boo::Element *oldElement, boo::Element *newElement) noexcept
   {
     if (oldElement == newElement)
     {
@@ -2813,7 +2810,7 @@ namespace krys::boo
     }
   }
 
-  AXObject *AXObjectCache::ObservableObjectForNode(dom::Node *node) noexcept
+  AXObject *AXObjectCache::ObservableObjectForNode(boo::Node *node) noexcept
   {
     auto *object = node ? GetOrCreate(*node) : nullptr;
     if (auto *observable = object ? object->ObservableObject() : nullptr)
@@ -2823,8 +2820,8 @@ namespace krys::boo
     return GetOrCreate(_document);
   }
 
-  void AXObjectCache::PostTextStateChangeNotification(dom::Node *node, AXTextChange change,
-                                                      dom::DOMStringView text,
+  void AXObjectCache::PostTextStateChangeNotification(boo::Node *node, AXTextChange change,
+                                                      DOMStringView text,
                                                       const VisiblePosition &position) noexcept
   {
     if (change == AXTextChange::Inserted)
@@ -2837,8 +2834,8 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::PostTextReplacementNotification(dom::Node *node, dom::DOMStringView deletedText,
-                                                      dom::DOMStringView insertedText,
+  void AXObjectCache::PostTextReplacementNotification(boo::Node *node, DOMStringView deletedText,
+                                                      DOMStringView insertedText,
                                                       const VisiblePosition &position) noexcept
   {
     if (!node || (deletedText.empty() && insertedText.empty()))
@@ -2857,12 +2854,12 @@ namespace krys::boo
     if (!deletedText.empty())
     {
       _textChangesToPost.push_back(
-        {ShareRef(*object), AXTextChange::Deleted, offset, dom::DOMString(deletedText)});
+        {ShareRef(*object), AXTextChange::Deleted, offset, DOMString(deletedText)});
     }
     if (!insertedText.empty())
     {
       _textChangesToPost.push_back(
-        {ShareRef(*object), AXTextChange::Inserted, offset, dom::DOMString(insertedText)});
+        {ShareRef(*object), AXTextChange::Inserted, offset, DOMString(insertedText)});
     }
     if (!_notificationPostTimer.IsActive())
     {
@@ -2887,7 +2884,7 @@ namespace krys::boo
     PostNotification(observable ? observable : GetOrCreate(_document), AXNotification::SelectedTextChanged);
   }
 
-  void AXObjectCache::PostNotification(dom::Node *node, AXNotification notification) noexcept
+  void AXObjectCache::PostNotification(boo::Node *node, AXNotification notification) noexcept
   {
     // Get an existing object (creating one here can lay out, in the middle of a render tree update): the
     // node's or its nearest ancestor's.
@@ -2990,7 +2987,7 @@ namespace krys::boo
     }
   }
 
-  void AXReplacedText::PostTextStateChangeNotification(AXObjectCache *cache, dom::DOMStringView insertedText,
+  void AXReplacedText::PostTextStateChangeNotification(AXObjectCache *cache, DOMStringView insertedText,
                                                        const VisibleSelection &selection) const noexcept
   {
     if (!cache || !AXObjectCache::AccessibilityEnabled())

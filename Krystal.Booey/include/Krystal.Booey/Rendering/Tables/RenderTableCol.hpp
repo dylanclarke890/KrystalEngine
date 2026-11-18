@@ -50,9 +50,9 @@ namespace krys::boo
     {
     }
 
-    RenderTableCol(dom::Element &element, RenderStyle &&style) noexcept;
+    RenderTableCol(Element &element, RenderStyle &&style) noexcept;
 
-    RenderTableCol(dom::Document &document, RenderStyle &&style) noexcept;
+    RenderTableCol(Document &document, RenderStyle &&style) noexcept;
 
     ~RenderTableCol() noexcept override;
 

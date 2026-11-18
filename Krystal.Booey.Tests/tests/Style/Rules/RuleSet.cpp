@@ -19,14 +19,14 @@ namespace krys::boo::style::tests
     {
       css::ParserContext context(css::ParserMode::HTMLStandard);
       auto sheet = css::StyleSheetContents::Create(context);
-      sheet->ParseString(css::CSSOMString(text));
+      sheet->ParseString(CSSOMString(text));
       return sheet;
     }
 
     /// @brief The rule set of @p sheet, built for a screen.
     KRYS_NODISCARD Ref<RuleSet> Build(const css::StyleSheetContents &sheet)
     {
-      static const css::mq::MediaQueryEvaluator screen {css::CSSOMStringAtom(u8"screen")};
+      static const css::mq::MediaQueryEvaluator screen {CSSOMStringAtom(u8"screen")};
       auto ruleSet = RuleSet::Create();
       {
         RuleSetBuilder builder(*ruleSet, screen);
@@ -54,9 +54,9 @@ namespace krys::boo::style::tests
       return texts;
     }
 
-    KRYS_NODISCARD css::CSSOMStringAtom Atom(utf8_stringview string)
+    KRYS_NODISCARD CSSOMStringAtom Atom(utf8_stringview string)
     {
-      return css::CSSOMStringAtom(string);
+      return CSSOMStringAtom(string);
     }
 
     /// @brief The only rule data in @p ruleSet whose selector is @p text, in any bucket.

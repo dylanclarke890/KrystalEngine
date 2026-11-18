@@ -15,9 +15,9 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    KRYS_NODISCARD Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
+    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       parser->PumpTokenizer();
@@ -51,7 +51,7 @@ namespace krys::boo::css::tests
     };
 
     /// @brief Shows @p document in a new frame with an 800x600 view.
-    KRYS_NODISCARD Ref<LocalFrame> ShowInFrame(dom::Document &document) noexcept
+    KRYS_NODISCARD Ref<LocalFrame> ShowInFrame(Document &document) noexcept
     {
       auto frame = LocalFrame::Create();
       frame->CreateView({800, 600});
@@ -62,7 +62,7 @@ namespace krys::boo::css::tests
     /// @brief A parsed document, evaluated against an 800x600 screen view in a page on a 1920x1080 screen.
     struct MatchMediaFixture : ValueFixture
     {
-      Ref<dom::HTMLDocument> Document {Parse(u8"<!DOCTYPE html><p>")};
+      Ref<HTMLDocument> Document {Parse(u8"<!DOCTYPE html><p>")};
       MediaPage Media {*Document};
       Ref<LocalFrame> Frame {ShareRef(Media.Frame())};
 
@@ -110,7 +110,7 @@ namespace krys::boo::css::tests
       Frame->SetDocument(nullptr);
       REQUIRE_FALSE(Document->Window()->MatchMedia(u8"all")->Matches());
 
-      auto empty = CreateRef<dom::HTMLDocument>();
+      auto empty = CreateRef<HTMLDocument>();
       auto emptyFrame = ShowInFrame(*empty);
       REQUIRE_FALSE(empty->Window()->MatchMedia(u8"all")->Matches());
     }

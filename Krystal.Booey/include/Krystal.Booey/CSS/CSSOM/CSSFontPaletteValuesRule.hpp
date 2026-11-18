@@ -33,7 +33,10 @@
 namespace krys::boo::css
 {
   class FontPaletteValuesRule;
+}
 
+namespace krys::boo
+{
   /// @brief An `@font-palette-values` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-fonts/#om-fontpalettevalues
   class CSSFontPaletteValuesRule final : public CSSRule
@@ -58,19 +61,19 @@ namespace krys::boo::css
     KRYS_NODISCARD CSSOMString OverrideColors() const noexcept;
 
   private:
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::FontPaletteValues;
+      return css::RuleType::FontPaletteValues;
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
-    void Reattach(Rule &rule) noexcept final;
+    void Reattach(css::Rule &rule) noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSFontPaletteValuesRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSFontPaletteValuesRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::FontPaletteValues;
   }

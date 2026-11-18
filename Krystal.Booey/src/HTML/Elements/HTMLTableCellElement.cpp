@@ -30,19 +30,18 @@
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLTableCellElement::HTMLTableCellElement(dom::Document &document) noexcept
-      : HTMLTablePartElement(document, HTMLElementInterface::TableCell)
+  HTMLTableCellElement::HTMLTableCellElement(Document &document) noexcept
+      : HTMLTablePartElement(document, html::HTMLElementInterface::TableCell)
   {
   }
 
 #pragma region HTMLTableCellElement
 
-  void HTMLTableCellElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                                Maybe<dom::DOMStringView> oldValue,
-                                                Maybe<dom::DOMStringView> value,
-                                                const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLTableCellElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                                Maybe<DOMStringView> value,
+                                                const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLTablePartElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
@@ -61,13 +60,13 @@ namespace krys::boo::html
 
   /// @see https://html.spec.whatwg.org/#attr-th-scope
   template <>
-  struct EnumeratedAttributeTraits<"scope", HTMLTableCellElement>
+  struct html::EnumeratedAttributeTraits<"scope", HTMLTableCellElement>
   {
-    using State = ScopeAttributeState;
-    static inline const KeywordStateMapping<State> StateMappings[] = {{u8"row", State::Row},
-                                                                      {u8"col", State::Col},
-                                                                      {u8"rowgroup", State::RowGroup},
-                                                                      {u8"colgroup", State::ColGroup}};
+    using State = html::ScopeAttributeState;
+    static inline const html::KeywordStateMapping<State> StateMappings[] = {{u8"row", State::Row},
+                                                                            {u8"col", State::Col},
+                                                                            {u8"rowgroup", State::RowGroup},
+                                                                            {u8"colgroup", State::ColGroup}};
 
     // The Auto state has no keyword.
     constexpr static State MissingValueDefault = State::Auto;
@@ -76,57 +75,59 @@ namespace krys::boo::html
 
   uint32 HTMLTableCellElement::ColSpan() const noexcept
   {
-    return Reflect<uint32, ReflectDefault<uint32> {1}, ReflectRange<uint32> {1, 1'000}>(*this, u8"colspan");
+    return html::Reflect<uint32, html::ReflectDefault<uint32> {1}, html::ReflectRange<uint32> {1, 1'000}>(
+      *this, u8"colspan");
   }
 
   void HTMLTableCellElement::ColSpan(uint32 value) noexcept
   {
-    Reflect<uint32, ReflectDefault<uint32> {1}>(*this, u8"colspan", value);
+    html::Reflect<uint32, html::ReflectDefault<uint32> {1}>(*this, u8"colspan", value);
   }
 
   uint32 HTMLTableCellElement::RowSpan() const noexcept
   {
-    return Reflect<uint32, ReflectDefault<uint32> {1}, ReflectRange<uint32> {0, 65'534}>(*this, u8"rowspan");
+    return html::Reflect<uint32, html::ReflectDefault<uint32> {1}, html::ReflectRange<uint32> {0, 65'534}>(
+      *this, u8"rowspan");
   }
 
   void HTMLTableCellElement::RowSpan(uint32 value) noexcept
   {
-    Reflect<uint32, ReflectDefault<uint32> {1}>(*this, u8"rowspan", value);
+    html::Reflect<uint32, html::ReflectDefault<uint32> {1}>(*this, u8"rowspan", value);
   }
 
-  dom::DOMString HTMLTableCellElement::Headers() const noexcept
+  DOMString HTMLTableCellElement::Headers() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"headers").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"headers").value_or(u8"");
   }
 
-  void HTMLTableCellElement::Headers(dom::DOMString value) noexcept
+  void HTMLTableCellElement::Headers(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"headers", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"headers", krys::move(value));
   }
 
-  dom::DOMString HTMLTableCellElement::Scope() const noexcept
+  DOMString HTMLTableCellElement::Scope() const noexcept
   {
-    return ReflectEnumerated<"scope", HTMLTableCellElement>(*this);
+    return html::ReflectEnumerated<"scope", HTMLTableCellElement>(*this);
   }
 
-  void HTMLTableCellElement::Scope(dom::DOMString value) noexcept
+  void HTMLTableCellElement::Scope(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"scope", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"scope", krys::move(value));
   }
 
-  dom::DOMString HTMLTableCellElement::Abbr() const noexcept
+  DOMString HTMLTableCellElement::Abbr() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"abbr").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"abbr").value_or(u8"");
   }
 
-  void HTMLTableCellElement::Abbr(dom::DOMString value) noexcept
+  void HTMLTableCellElement::Abbr(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"abbr", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"abbr", krys::move(value));
   }
 
   int32 HTMLTableCellElement::CellIndex() const noexcept
   {
-    if (!AsTableElement<HTMLTableRowElement>(ParentNode()))
+    if (!html::AsTableElement<HTMLTableRowElement>(ParentNode()))
     {
       return -1;
     }
@@ -134,7 +135,7 @@ namespace krys::boo::html
     int32 index = 0;
     for (auto *sibling = PreviousSibling(); sibling; sibling = sibling->PreviousSibling())
     {
-      if (AsTableElement<HTMLTableCellElement>(sibling))
+      if (html::AsTableElement<HTMLTableCellElement>(sibling))
       {
         ++index;
       }
@@ -146,102 +147,103 @@ namespace krys::boo::html
 
 #pragma region HTMLTableCellElement Obsolete members
 
-  dom::DOMString HTMLTableCellElement::Align() const noexcept
+  DOMString HTMLTableCellElement::Align() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLTableCellElement::Align(dom::DOMString value) noexcept
+  void HTMLTableCellElement::Align(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"align", krys::move(value));
   }
 
-  dom::DOMString HTMLTableCellElement::Axis() const noexcept
+  DOMString HTMLTableCellElement::Axis() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"axis").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"axis").value_or(u8"");
   }
 
-  void HTMLTableCellElement::Axis(dom::DOMString value) noexcept
+  void HTMLTableCellElement::Axis(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"axis", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"axis", krys::move(value));
   }
 
-  dom::DOMString HTMLTableCellElement::Height() const noexcept
+  DOMString HTMLTableCellElement::Height() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"height").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"height").value_or(u8"");
   }
 
-  void HTMLTableCellElement::Height(dom::DOMString value) noexcept
+  void HTMLTableCellElement::Height(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"height", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"height", krys::move(value));
   }
 
-  dom::DOMString HTMLTableCellElement::Width() const noexcept
+  DOMString HTMLTableCellElement::Width() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"width").value_or(u8"");
   }
 
-  void HTMLTableCellElement::Width(dom::DOMString value) noexcept
+  void HTMLTableCellElement::Width(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"width", krys::move(value));
   }
 
-  dom::DOMString HTMLTableCellElement::Char() const noexcept
+  DOMString HTMLTableCellElement::Char() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"char").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"char").value_or(u8"");
   }
 
-  void HTMLTableCellElement::Char(dom::DOMString value) noexcept
+  void HTMLTableCellElement::Char(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"char", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"char", krys::move(value));
   }
 
-  dom::DOMString HTMLTableCellElement::CharOff() const noexcept
+  DOMString HTMLTableCellElement::CharOff() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"charoff").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"charoff").value_or(u8"");
   }
 
-  void HTMLTableCellElement::CharOff(dom::DOMString value) noexcept
+  void HTMLTableCellElement::CharOff(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"charoff", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"charoff", krys::move(value));
   }
 
   bool HTMLTableCellElement::NoWrap() const noexcept
   {
-    return Reflect<bool>(*this, u8"nowrap");
+    return html::Reflect<bool>(*this, u8"nowrap");
   }
 
   void HTMLTableCellElement::NoWrap(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"nowrap", krys::move(value));
+    html::Reflect<bool>(*this, u8"nowrap", krys::move(value));
   }
 
-  dom::DOMString HTMLTableCellElement::VAlign() const noexcept
+  DOMString HTMLTableCellElement::VAlign() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"valign").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"valign").value_or(u8"");
   }
 
-  void HTMLTableCellElement::VAlign(dom::DOMString value) noexcept
+  void HTMLTableCellElement::VAlign(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"valign", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"valign", krys::move(value));
   }
 
-  dom::DOMString HTMLTableCellElement::BgColor() const noexcept
+  DOMString HTMLTableCellElement::BgColor() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"bgcolor").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"bgcolor").value_or(u8"");
   }
 
-  void HTMLTableCellElement::BgColor(dom::DOMString value) noexcept
+  void HTMLTableCellElement::BgColor(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"bgcolor", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"bgcolor", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region Presentational hints
 
-  bool HTMLTableCellElement::HasPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool
+    HTMLTableCellElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                             const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == u8"nowrap" || localName == u8"width" || localName == u8"height"))
@@ -252,10 +254,10 @@ namespace krys::boo::html
   }
 
   void HTMLTableCellElement::CollectPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI, dom::DOMStringView value,
+    const DOMStringAtom &localName, const DOMStringAtom &namespaceURI, DOMStringView value,
     css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLTablePartElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);

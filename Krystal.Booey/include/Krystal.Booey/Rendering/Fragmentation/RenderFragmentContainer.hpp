@@ -199,10 +199,10 @@ namespace krys::boo
     }
 
   protected:
-    RenderFragmentContainer(Type type, dom::Element &element, RenderStyle &&style,
+    RenderFragmentContainer(Type type, Element &element, RenderStyle &&style,
                             RenderFragmentedFlow *fragmentedFlow) noexcept;
 
-    RenderFragmentContainer(Type type, dom::Document &document, RenderStyle &&style,
+    RenderFragmentContainer(Type type, Document &document, RenderStyle &&style,
                             RenderFragmentedFlow *fragmentedFlow) noexcept;
 
     ~RenderFragmentContainer() noexcept override;

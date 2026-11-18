@@ -82,7 +82,7 @@ namespace krys::boo::ax::tests
                    u8"<div id=aria role=list><div role=listitem>A</div></div>"
                    u8"<div id=empty role=list></div>"
                    u8"<dl id=dl><dt>A</dt><dd>B</dd></dl>");
-    auto roleOf = [&](dom::DOMStringView id)
+    auto roleOf = [&](DOMStringView id)
     {
       auto &object = page.Object(id);
       (void)object.Children();

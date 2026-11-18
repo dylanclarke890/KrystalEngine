@@ -6,7 +6,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class DocumentFragment;
@@ -37,56 +37,52 @@ namespace krys::boo::html
   public:
     /// @brief @p element, or a template's template contents.
     /// @see https://html.spec.whatwg.org/#target-for-html-insertion
-    KRYS_NODISCARD static dom::ContainerNode &TargetForHTMLInsertion(dom::Element &element) noexcept;
+    KRYS_NODISCARD static ContainerNode &TargetForHTMLInsertion(Element &element) noexcept;
 
     /// @brief @p node's parent, null if it has none, or a `HierarchyRequestError` if it can't give the parser
     /// a context (it's a template, a document, or a fragment without a host).
     /// @see https://html.spec.whatwg.org/#parent-for-html-insertion
-    KRYS_NODISCARD static dom::ExceptionOr<dom::ContainerNode *>
-      ParentForHTMLInsertion(dom::Node &node) noexcept;
+    KRYS_NODISCARD static dom::ExceptionOr<ContainerNode *> ParentForHTMLInsertion(Node &node) noexcept;
 
     /// @brief Replaces @p target's children with @p html parsed in its context.
     /// @param sanitizer The options' sanitizer member, or null if it's missing.
     /// @see https://html.spec.whatwg.org/#set-and-filter-html
-    static dom::ExceptionOr<void> FilterAndSetHTML(dom::ContainerNode &target, dom::DOMStringView html,
+    static dom::ExceptionOr<void> FilterAndSetHTML(ContainerNode &target, DOMStringView html,
                                                    const SanitizerInput *sanitizer,
                                                    FragmentParserMode mode) noexcept;
 
     /// @brief Inserts @p html, parsed in @p parent's context, into @p parent before @p child.
     /// @see https://html.spec.whatwg.org/#filter-and-pre-insert-html
-    static dom::ExceptionOr<void> FilterAndPreInsertHTML(dom::ContainerNode &parent, dom::Node *child,
-                                                         dom::DOMStringView html,
-                                                         const SanitizerInput *sanitizer,
+    static dom::ExceptionOr<void> FilterAndPreInsertHTML(ContainerNode &parent, Node *child,
+                                                         DOMStringView html, const SanitizerInput *sanitizer,
                                                          FragmentParserMode mode) noexcept;
 
     /// @brief Replaces @p node with @p html, parsed in @p parent's context.
     /// @see https://html.spec.whatwg.org/#filter-and-replace-with-html
-    static dom::ExceptionOr<void> FilterAndReplaceWithHTML(dom::ContainerNode &parent, dom::Node &node,
-                                                           dom::DOMStringView html,
+    static dom::ExceptionOr<void> FilterAndReplaceWithHTML(ContainerNode &parent, Node &node,
+                                                           DOMStringView html,
                                                            const SanitizerInput *sanitizer,
                                                            FragmentParserMode mode) noexcept;
 
     /// @brief @p html parsed as @p target's children; null when Safe parsing into a script element.
     /// @see https://html.spec.whatwg.org/#parse-html-for-insertion
-    KRYS_NODISCARD static dom::ExceptionOr<RefPtr<dom::DocumentFragment>>
-      ParseHTMLForInsertion(dom::ContainerNode &target, dom::DOMStringView html,
-                            const SanitizerInput *sanitizer, FragmentParserMode mode) noexcept;
+    KRYS_NODISCARD static dom::ExceptionOr<RefPtr<DocumentFragment>>
+      ParseHTMLForInsertion(ContainerNode &target, DOMStringView html, const SanitizerInput *sanitizer,
+                            FragmentParserMode mode) noexcept;
 
     /// @brief The steps of `beforeHTML()` and `beforeHTMLUnsafe()`, shared by elements and character data.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtml
-    static dom::ExceptionOr<void> BeforeHTML(dom::Node &node, dom::DOMStringView html,
-                                             const SanitizerInput *sanitizer,
+    static dom::ExceptionOr<void> BeforeHTML(Node &node, DOMStringView html, const SanitizerInput *sanitizer,
                                              FragmentParserMode mode) noexcept;
 
     /// @brief The steps of `afterHTML()` and `afterHTMLUnsafe()`.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtml
-    static dom::ExceptionOr<void> AfterHTML(dom::Node &node, dom::DOMStringView html,
-                                            const SanitizerInput *sanitizer,
+    static dom::ExceptionOr<void> AfterHTML(Node &node, DOMStringView html, const SanitizerInput *sanitizer,
                                             FragmentParserMode mode) noexcept;
 
     /// @brief The steps of `replaceWithHTML()` and `replaceWithHTMLUnsafe()`.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtml
-    static dom::ExceptionOr<void> ReplaceWithHTML(dom::Node &node, dom::DOMStringView html,
+    static dom::ExceptionOr<void> ReplaceWithHTML(Node &node, DOMStringView html,
                                                   const SanitizerInput *sanitizer,
                                                   FragmentParserMode mode) noexcept;
   };

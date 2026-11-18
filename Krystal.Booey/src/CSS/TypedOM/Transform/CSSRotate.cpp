@@ -33,7 +33,7 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   namespace
   {
@@ -80,8 +80,8 @@ namespace krys::boo::css
                                    CSSNumericFactory::Number(1), krys::move(angle)));
   }
 
-  dom::ExceptionOr<Ref<CSSRotate>> CSSRotate::Create(const FunctionValue &function,
-                                                     dom::Document &document) noexcept
+  dom::ExceptionOr<Ref<CSSRotate>> CSSRotate::Create(const css::FunctionValue &function,
+                                                     Document &document) noexcept
   {
     auto reified = ReifyArguments(function, document);
     if (reified.HasException())
@@ -92,7 +92,7 @@ namespace krys::boo::css
     auto count = arguments.size();
     switch (function.Name())
     {
-      case ValueId::RotateX:
+      case css::ValueId::RotateX:
       {
         if (count == 1)
         {
@@ -100,7 +100,7 @@ namespace krys::boo::css
         }
         break;
       }
-      case ValueId::RotateY:
+      case css::ValueId::RotateY:
       {
         if (count == 1)
         {
@@ -108,7 +108,7 @@ namespace krys::boo::css
         }
         break;
       }
-      case ValueId::RotateZ:
+      case css::ValueId::RotateZ:
       {
         if (count == 1)
         {
@@ -116,7 +116,7 @@ namespace krys::boo::css
         }
         break;
       }
-      case ValueId::Rotate:
+      case css::ValueId::Rotate:
       {
         if (count == 1)
         {
@@ -124,7 +124,7 @@ namespace krys::boo::css
         }
         break;
       }
-      case ValueId::Rotate3d:
+      case css::ValueId::Rotate3d:
       {
         if (count == 4)
         {
@@ -209,7 +209,7 @@ namespace krys::boo::css
     builder.Append(u8')');
   }
 
-  dom::ExceptionOr<Ref<DOMMatrix>> CSSRotate::ToMatrix() const noexcept
+  dom::ExceptionOr<Ref<css::DOMMatrix>> CSSRotate::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
     const auto *angleUnitValue = DynamicDowncast<CSSUnitValue>(*_angle);
@@ -220,7 +220,7 @@ namespace krys::boo::css
     {
       return dom::Exception {dom::ExceptionCode::TypeError};
     }
-    auto angle = angleUnitValue->ConvertTo(UnitType::deg);
+    auto angle = angleUnitValue->ConvertTo(css::UnitType::deg);
     if (!angle)
     {
       return dom::Exception {dom::ExceptionCode::TypeError};
@@ -235,10 +235,11 @@ namespace krys::boo::css
     {
       matrix.Rotate3d(xUnitValue->Value(), yUnitValue->Value(), zUnitValue->Value(), angle->Value());
     }
-    return DOMMatrix::Create(matrix, Is2D() ? DOMMatrixReadOnly::Is2D::Yes : DOMMatrixReadOnly::Is2D::No);
+    return css::DOMMatrix::Create(matrix, Is2D() ? css::DOMMatrixReadOnly::Is2D::Yes
+                                                 : css::DOMMatrixReadOnly::Is2D::No);
   }
 
-  RefPtr<Value> CSSRotate::ToCSSValue() const noexcept
+  RefPtr<css::Value> CSSRotate::ToCSSValue() const noexcept
   {
     auto angle = _angle->ToCSSValue();
     if (!angle)
@@ -247,7 +248,7 @@ namespace krys::boo::css
     }
     if (Is2D())
     {
-      return FunctionValue::Create(ValueId::Rotate, Ref<Value>(krys::move(angle)));
+      return css::FunctionValue::Create(css::ValueId::Rotate, Ref<css::Value>(krys::move(angle)));
     }
     auto x = _x->ToCSSValue();
     auto y = _y->ToCSSValue();
@@ -256,11 +257,11 @@ namespace krys::boo::css
     {
       return nullptr;
     }
-    ValueListBuilder arguments;
-    arguments.push_back(Ref<Value>(krys::move(x)));
-    arguments.push_back(Ref<Value>(krys::move(y)));
-    arguments.push_back(Ref<Value>(krys::move(z)));
-    arguments.push_back(Ref<Value>(krys::move(angle)));
-    return FunctionValue::Create(ValueId::Rotate3d, krys::move(arguments));
+    css::ValueListBuilder arguments;
+    arguments.push_back(Ref<css::Value>(krys::move(x)));
+    arguments.push_back(Ref<css::Value>(krys::move(y)));
+    arguments.push_back(Ref<css::Value>(krys::move(z)));
+    arguments.push_back(Ref<css::Value>(krys::move(angle)));
+    return css::FunctionValue::Create(css::ValueId::Rotate3d, krys::move(arguments));
   }
 }

@@ -162,7 +162,7 @@ namespace krys::boo
     // Showing the document in the frame makes its window; the host then sets up the window before the
     // document is parsed (its custom element definitions, say).
     // The previous document is kept alive too, so the new window can take over its navigation entries.
-    frame->SetDocument(ShareRefPtr<dom::Document>(document.get()));
+    frame->SetDocument(ShareRefPtr<Document>(document.get()));
     if (frame->Document() != document.get())
     {
       return false;
@@ -172,12 +172,12 @@ namespace krys::boo
     // The document is loading until its parser finishes.
     document->SetParsing(true);
     dom::DocumentAlgorithms::UpdateCurrentDocumentReadiness(*document, html::DocumentReadyState::Loading);
-    if (auto *imageDocument = DynamicDowncast<html::ImageDocument>(document.get()))
+    if (auto *imageDocument = DynamicDowncast<ImageDocument>(document.get()))
     {
       // An image document's bytes go to its image as they are.
       _imageDocument = ShareRefPtr(imageDocument);
     }
-    else if (auto *htmlDocument = DynamicDowncast<dom::HTMLDocument>(document.get()))
+    else if (auto *htmlDocument = DynamicDowncast<HTMLDocument>(document.get()))
     {
       _parser = CreateRef<html::DocumentParser>(*htmlDocument);
       if (IsTextDocumentMIMEType(_mimeType))
@@ -201,7 +201,7 @@ namespace krys::boo
       return;
     }
 
-    if (RefPtr<html::ImageDocument> imageDocument = _imageDocument)
+    if (RefPtr<ImageDocument> imageDocument = _imageDocument)
     {
       _hasReceivedSomeData = true;
       _imageData.insert(_imageData.end(), data.begin(), data.end());
@@ -266,7 +266,7 @@ namespace krys::boo
     _state = State::Finished;
 
     RefPtr<LocalFrame> protectedFrame = ShareRefPtr(_frame.get());
-    if (RefPtr<html::ImageDocument> imageDocument = krys::move(_imageDocument))
+    if (RefPtr<ImageDocument> imageDocument = krys::move(_imageDocument))
     {
       _hasReceivedSomeData = true;
       auto data = SharedBuffer::Create(krys::move(_imageData));

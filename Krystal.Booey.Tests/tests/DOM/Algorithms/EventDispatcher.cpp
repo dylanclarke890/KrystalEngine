@@ -22,7 +22,7 @@ namespace krys::boo::dom::tests
 {
   namespace
   {
-    KRYS_NODISCARD Ref<Element> NewElement(Document &document, dom::DOMStringAtom localName)
+    KRYS_NODISCARD Ref<Element> NewElement(Document &document, DOMStringAtom localName)
     {
       auto element = document.CreateElement(krys::move(localName));
       REQUIRE_FALSE(element.HasException());
@@ -178,7 +178,7 @@ namespace krys::boo::dom::tests
   {
     auto document = CreateRef<HTMLDocument>();
     auto element = NewElement(*document, u8"input");
-    auto *checkbox = &Downcast<html::HTMLInputElement>(*element);
+    auto *checkbox = &Downcast<HTMLInputElement>(*element);
     REQUIRE_FALSE(checkbox->SetAttribute(u8"type", u8"checkbox").HasException());
     REQUIRE_FALSE(document->AppendChild(*checkbox).HasException());
 
@@ -338,7 +338,7 @@ namespace krys::boo::dom::tests
             "[EventDispatcher][dom:concept-event-listener-inner-invoke]")
   {
     boo::tests::PaintFixture fixture(u8"<!DOCTYPE html><p id=p></p>", {200, 100}, true);
-    Ref<dom::Document> old = ShareRef(*fixture.Document);
+    Ref<boo::Document> old = ShareRef(*fixture.Document);
     auto p = old->GetElementById(u8"p");
     REQUIRE(p);
     REQUIRE(old->Window());
@@ -400,7 +400,7 @@ namespace krys::boo::dom::tests
     SECTION("Events the user agent fires with attributes are trusted (invalid)")
     {
       auto element = NewElement(*fixture.Document, u8"input");
-      auto &input = Downcast<html::HTMLInputElement>(*element);
+      auto &input = Downcast<HTMLInputElement>(*element);
       REQUIRE_FALSE(input.SetAttribute(u8"required", u8"").HasException());
       REQUIRE_FALSE(fixture.Root->AppendChild(input).HasException());
       bool trusted = false;
@@ -423,7 +423,7 @@ namespace krys::boo::dom::tests
     {
       using dictionary_type = EventInit;
 
-      TestEvent(dom::DOMStringAtom type, const dictionary_type &init) noexcept : Event(krys::move(type), init)
+      TestEvent(DOMStringAtom type, const dictionary_type &init) noexcept : Event(krys::move(type), init)
       {
       }
     };
@@ -457,7 +457,7 @@ namespace krys::boo::dom::tests
             "[EventDispatcher][dom:action-versus-occurrence]")
   {
     boo::tests::PaintFixture fixture(u8"<!DOCTYPE html><input id=a><input id=b>", {200, 100}, true);
-    auto &a = Downcast<html::HTMLInputElement>(*fixture.Document->GetElementById(u8"a"));
+    auto &a = Downcast<HTMLInputElement>(*fixture.Document->GetElementById(u8"a"));
     a.Focus();
     REQUIRE(fixture.Document->FocusedElement() == &a);
 

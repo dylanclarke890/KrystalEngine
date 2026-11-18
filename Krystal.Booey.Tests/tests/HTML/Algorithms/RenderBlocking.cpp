@@ -10,7 +10,7 @@ namespace krys::boo::html::tests
     "RenderBlocking::HasRenderBlockingToken: \"render\" among the blocking attribute's tokens, in any case",
     "[HTML][RenderBlocking][html:blocking-tokens-set][html:potentially-render-blocking]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto element = document->CreateElement(u8"link").ReleaseValue();
     CHECK_FALSE(RenderBlocking::HasRenderBlockingToken(*element));
 
@@ -31,9 +31,9 @@ namespace krys::boo::html::tests
   namespace
   {
     /// @brief An HTML document with an html element and a head, but no body yet.
-    Ref<dom::HTMLDocument> CreateDocumentWithoutBody() noexcept
+    Ref<HTMLDocument> CreateDocumentWithoutBody() noexcept
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto html = document->CreateElement(u8"html").ReleaseValue();
       REQUIRE_FALSE(html->AppendChild(*document->CreateElement(u8"head").ReleaseValue()).HasException());
       REQUIRE_FALSE(document->AppendChild(*html).HasException());
@@ -53,7 +53,7 @@ namespace krys::boo::html::tests
     CHECK_FALSE(RenderBlocking::AllowsAddingRenderBlockingElements(*document));
 
     // Not an XML document.
-    CHECK_FALSE(RenderBlocking::AllowsAddingRenderBlockingElements(*CreateRef<dom::XMLDocument>()));
+    CHECK_FALSE(RenderBlocking::AllowsAddingRenderBlockingElements(*CreateRef<XMLDocument>()));
   }
 
   TEST_CASE("RenderBlocking: blocking and unblocking rendering on an element",

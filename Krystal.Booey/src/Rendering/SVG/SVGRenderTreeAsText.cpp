@@ -124,21 +124,21 @@ namespace krys::boo
       return ts;
     }
 
-    TextStream &operator<<(TextStream &ts, const svg::SVGUnitTypes::SVGUnitType &unitType) noexcept
+    TextStream &operator<<(TextStream &ts, const SVGUnitTypes::SVGUnitType &unitType) noexcept
     {
-      ts << svg::SVGPropertyTraits<svg::SVGUnitTypes::SVGUnitType>::ToString(unitType);
+      ts << SVGPropertyTraits<SVGUnitTypes::SVGUnitType>::ToString(unitType);
       return ts;
     }
 
-    TextStream &operator<<(TextStream &ts, const svg::SVGMarkerUnitsType &markerUnit) noexcept
+    TextStream &operator<<(TextStream &ts, const SVGMarkerUnitsType &markerUnit) noexcept
     {
-      ts << svg::SVGPropertyTraits<svg::SVGMarkerUnitsType>::ToString(markerUnit);
+      ts << SVGPropertyTraits<SVGMarkerUnitsType>::ToString(markerUnit);
       return ts;
     }
 
-    TextStream &operator<<(TextStream &ts, const svg::SVGSpreadMethodType &type) noexcept
+    TextStream &operator<<(TextStream &ts, const SVGSpreadMethodType &type) noexcept
     {
-      ts << text::ToASCIIUpper(svg::SVGPropertyTraits<svg::SVGSpreadMethodType>::ToString(type));
+      ts << text::ToASCIIUpper(SVGPropertyTraits<SVGSpreadMethodType>::ToString(type));
       return ts;
     }
 
@@ -215,7 +215,7 @@ namespace krys::boo
 
     void WriteSVGStrokePaintingResource(TextStream &ts, const RenderElement &renderer,
                                         const LegacyRenderSVGResource &strokePaintingResource,
-                                        const svg::SVGGraphicsElement &shape) noexcept
+                                        const boo::SVGGraphicsElement &shape) noexcept
     {
       TextStreamSeparator s(' ');
       ts << u8" [stroke={" << s;
@@ -223,7 +223,7 @@ namespace krys::boo
 
       const auto &style = renderer.Style();
 
-      svg::SVGLengthContext lengthContext(&shape);
+      SVGLengthContext lengthContext(&shape);
       double dashOffset = lengthContext.ValueForLength(style.StrokeDashOffset(), style::ZoomNeeded {});
       double strokeWidth = lengthContext.ValueForLength(style.GetStrokeWidth(), style::ZoomNeeded {});
       auto dashArray = DashArray::map(style.StrokeDashArray(), [&](const auto &length) -> DashArrayElement
@@ -240,7 +240,7 @@ namespace krys::boo
         WriteNameValuePair(ts, u8"dash array", dashArray);
       }
 
-      if (auto *element = DynamicDowncast<svg::SVGGeometryElement>(shape))
+      if (auto *element = DynamicDowncast<SVGGeometryElement>(shape))
       {
         double pathLength = element->PathLength();
         WriteIfNotDefault(ts, u8"path length", pathLength, 0.0);
@@ -289,7 +289,7 @@ namespace krys::boo
         return;
       }
 
-      auto fragment = svg::SVGURIReference::FragmentIdentifierFromIRIString(value, element->NodeDocument());
+      auto fragment = SVGURIReference::FragmentIdentifierFromIRIString(value, element->NodeDocument());
       WriteIfNotEmpty(ts, name, fragment.View());
     };
 
@@ -319,44 +319,44 @@ namespace krys::boo
     }
   }
 
-  void WriteSVGGraphicsElement(TextStream &ts, const svg::SVGGraphicsElement &svgElement) noexcept
+  void WriteSVGGraphicsElement(TextStream &ts, const boo::SVGGraphicsElement &svgElement) noexcept
   {
-    svg::SVGLengthContext lengthContext(&svgElement);
+    SVGLengthContext lengthContext(&svgElement);
 
-    if (auto *element = DynamicDowncast<svg::SVGRectElement>(svgElement))
+    if (auto *element = DynamicDowncast<SVGRectElement>(svgElement))
     {
       WriteNameValuePair(ts, u8"x", element->X().Value(lengthContext));
       WriteNameValuePair(ts, u8"y", element->Y().Value(lengthContext));
       WriteNameValuePair(ts, u8"width", element->Width().Value(lengthContext));
       WriteNameValuePair(ts, u8"height", element->Height().Value(lengthContext));
     }
-    else if (auto *line = DynamicDowncast<svg::SVGLineElement>(svgElement))
+    else if (auto *line = DynamicDowncast<SVGLineElement>(svgElement))
     {
       WriteNameValuePair(ts, u8"x1", line->X1().Value(lengthContext));
       WriteNameValuePair(ts, u8"y1", line->Y1().Value(lengthContext));
       WriteNameValuePair(ts, u8"x2", line->X2().Value(lengthContext));
       WriteNameValuePair(ts, u8"y2", line->Y2().Value(lengthContext));
     }
-    else if (auto *ellipse = DynamicDowncast<svg::SVGEllipseElement>(svgElement))
+    else if (auto *ellipse = DynamicDowncast<SVGEllipseElement>(svgElement))
     {
       WriteNameValuePair(ts, u8"cx", ellipse->Cx().Value(lengthContext));
       WriteNameValuePair(ts, u8"cy", ellipse->Cy().Value(lengthContext));
       WriteNameValuePair(ts, u8"rx", ellipse->Rx().Value(lengthContext));
       WriteNameValuePair(ts, u8"ry", ellipse->Ry().Value(lengthContext));
     }
-    else if (auto *circle = DynamicDowncast<svg::SVGCircleElement>(svgElement))
+    else if (auto *circle = DynamicDowncast<SVGCircleElement>(svgElement))
     {
       WriteNameValuePair(ts, u8"cx", circle->Cx().Value(lengthContext));
       WriteNameValuePair(ts, u8"cy", circle->Cy().Value(lengthContext));
       WriteNameValuePair(ts, u8"r", circle->R().Value(lengthContext));
     }
-    else if (auto *poly = DynamicDowncast<svg::SVGPolyElement>(svgElement))
+    else if (auto *poly = DynamicDowncast<SVGPolyElement>(svgElement))
     {
       WriteNameAndQuotedValue(ts, u8"points", poly->Points().ValueAsString());
     }
-    else if (auto *path = DynamicDowncast<svg::SVGPathElement>(svgElement))
+    else if (auto *path = DynamicDowncast<SVGPathElement>(svgElement))
     {
-      dom::DOMString pathString;
+      DOMString pathString;
       // FIXME: We should switch to UnalteredParsing here - this will affect the path dumping output of dozens
       // of tests.
       (void)svg::BuildStringFromByteStream(path->PathByteStream(), pathString,
@@ -421,13 +421,13 @@ namespace krys::boo
 
   namespace
   {
-    void WriteCommonGradientProperties(TextStream &ts, svg::SVGSpreadMethodType spreadMethod,
+    void WriteCommonGradientProperties(TextStream &ts, SVGSpreadMethodType spreadMethod,
                                        const AffineTransform &gradientTransform,
-                                       svg::SVGUnitTypes::SVGUnitType gradientUnits) noexcept
+                                       SVGUnitTypes::SVGUnitType gradientUnits) noexcept
     {
       WriteNameValuePair(ts, u8"gradientUnits", gradientUnits);
 
-      if (spreadMethod != svg::SVGSpreadMethodPad)
+      if (spreadMethod != SVGSpreadMethodPad)
       {
         ts << u8" [spreadMethod=" << spreadMethod << ']';
       }
@@ -459,7 +459,7 @@ namespace krys::boo
       WriteNameValuePair(ts, u8"primitiveUnits", filter->PrimitiveUnits());
       ts << '\n';
       // Creating a placeholder filter which is passed to the builder.
-      Ref<svg::SVGFilterElement> filterElement = ShareRef(filter->FilterElement());
+      Ref<SVGFilterElement> filterElement = ShareRef(filter->FilterElement());
       NullGraphicsContext nullContext;
       auto placeholderFilter = SVGFilterRenderer::Create(filterElement.get(), *filterElement,
                                                          {
@@ -742,7 +742,7 @@ namespace krys::boo
       if (auto maskImage = style.GetMaskLayers().UsedFirst().GetImage().TryStyleImage())
       {
         auto &document = renderer.GetDocument();
-        auto resourceID = svg::SVGURIReference::FragmentIdentifierFromIRIString(maskImage->Url(), document);
+        auto resourceID = SVGURIReference::FragmentIdentifierFromIRIString(maskImage->Url(), document);
         if (auto *masker = GetRenderSVGResourceById<LegacyRenderSVGResourceMasker>(
               renderer.TreeScopeForSVGReferences(), resourceID))
         {

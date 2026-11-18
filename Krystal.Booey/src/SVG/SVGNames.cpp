@@ -3,13 +3,13 @@
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 #define KRYS_DEFINE_SVG_ATTRIBUTE_NAME(Name, localName)                                                      \
-  const dom::QualifiedName &SVGNames::Name() noexcept                                                        \
+  const krys::boo::QualifiedName &SVGNames::Name() noexcept                                                  \
   {                                                                                                          \
-    static NeverDestroyed<const dom::QualifiedName> name {null, null, localName};                            \
+    static NeverDestroyed<const krys::boo::QualifiedName> name {null, null, localName};                      \
     return name;                                                                                             \
   }
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   KRYS_DEFINE_SVG_ATTRIBUTE_NAME(AccumulateAttr, u8"accumulate")
   KRYS_DEFINE_SVG_ATTRIBUTE_NAME(AdditiveAttr, u8"additive")
@@ -188,13 +188,15 @@ namespace krys::boo::svg
   KRYS_DEFINE_SVG_ATTRIBUTE_NAME(XChannelSelectorAttr, u8"xChannelSelector")
   KRYS_DEFINE_SVG_ATTRIBUTE_NAME(YChannelSelectorAttr, u8"yChannelSelector")
   KRYS_DEFINE_SVG_ATTRIBUTE_NAME(ZAttr, u8"z")
+}
 
+namespace krys::boo::svg
+{
 #define KRYS_DEFINE_XLINK_ATTRIBUTE_NAME(Name, localName)                                                    \
-  const dom::QualifiedName &XLinkNames::Name() noexcept                                                      \
+  const QualifiedName &XLinkNames::Name() noexcept                                                           \
   {                                                                                                          \
-    static NeverDestroyed<const dom::QualifiedName> name {dom::DOMStringAtom(infra::namespaces::XLink),      \
-                                                          infra::namespace_prefixes::XLink,                  \
-                                                          dom::DOMStringAtom(localName)};                    \
+    static NeverDestroyed<const QualifiedName> name {                                                        \
+      DOMStringAtom(infra::namespaces::XLink), infra::namespace_prefixes::XLink, DOMStringAtom(localName)};  \
     return name;                                                                                             \
   }
 

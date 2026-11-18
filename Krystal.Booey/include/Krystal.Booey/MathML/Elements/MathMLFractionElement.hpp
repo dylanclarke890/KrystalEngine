@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/MathML/Elements/MathMLRowElement.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   /// @brief The `<mfrac>` element: a fraction, its numerator centred over its denominator.
   /// @see https://w3c.github.io/mathml-core/#fractions-mfrac
@@ -39,7 +39,7 @@ namespace krys::boo::mathml
     Maybe<Length> _lineThickness;
 
   public:
-    explicit MathMLFractionElement(dom::Document &document) noexcept
+    explicit MathMLFractionElement(Document &document) noexcept
         : MathMLRowElement(document, MathMLElementInterface::Fraction)
     {
     }
@@ -49,19 +49,19 @@ namespace krys::boo::mathml
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
 
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::mathml::MathMLFractionElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::mathml::MathMLElement &element) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::MathMLFractionElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::MathMLElement &element) noexcept
   {
-    return element.Interface() == krys::boo::mathml::MathMLElementInterface::Fraction;
+    return element.Interface() == krys::boo::MathMLElementInterface::Fraction;
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    auto *element = krys::DynamicDowncast<krys::boo::mathml::MathMLElement>(node);
+    auto *element = krys::DynamicDowncast<krys::boo::MathMLElement>(node);
     return element && IsType(*element);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

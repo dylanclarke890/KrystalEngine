@@ -23,7 +23,7 @@
 
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<defs>` element: graphics that aren't drawn where they are, only referenced.
   /// @see https://svgwg.org/svg2-draft/struct.html#InterfaceSVGDefsElement
@@ -32,7 +32,7 @@ namespace krys::boo::svg
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGDefsElement);
 
   public:
-    explicit SVGDefsElement(dom::Document &document) noexcept;
+    explicit SVGDefsElement(Document &document) noexcept;
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGDefsElement, SVGGraphicsElement>;
 
@@ -43,8 +43,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGDefsElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGDefsElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGDefsElement();
   }

@@ -31,10 +31,6 @@ namespace krys::boo
   class CachedImageClient;
   class LayoutSize;
   class RenderObject;
-}
-
-namespace krys::boo::svg
-{
   class SVGImage;
   class SVGImageForContainer;
 

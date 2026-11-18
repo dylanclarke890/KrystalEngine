@@ -33,18 +33,18 @@ namespace krys::boo::html::tests
   {
 #pragma region Serialise
 
-    void SerialiseNode(dom::Node &node, dom::DOMString &output, size_t depth) noexcept
+    void SerialiseNode(Node &node, DOMString &output, size_t depth) noexcept
     {
       switch (node.NodeType())
       {
         case dom::NodeType::ELEMENT_NODE:
         {
-          auto &element = Downcast<dom::Element>(node);
+          auto &element = Downcast<Element>(node);
 
           krys::boo::tests::Indent(output, depth);
 
           auto localName = element.LocalName().ToString();
-          auto namespaceName = [&] -> dom::DOMString
+          auto namespaceName = [&] -> DOMString
           {
             if (element.NamespaceURI() == infra::namespaces::SVG)
             {
@@ -62,12 +62,12 @@ namespace krys::boo::html::tests
 
           output += u8"<" + namespaceName + localName + u8">\n";
 
-          List<Pair<dom::DOMString, dom::DOMString>> attributes;
+          List<Pair<DOMString, DOMString>> attributes;
           for (size_t i = 0; i < element.Attributes().Length(); ++i)
           {
             auto attr = element.Attributes().Item(i);
             auto attrLocalName = attr->LocalName().ToString();
-            auto attrNamespaceName = [&] -> dom::DOMString
+            auto attrNamespaceName = [&] -> DOMString
             {
               if (attr->NamespaceURI() == infra::namespaces::XML)
               {
@@ -116,25 +116,25 @@ namespace krys::boo::html::tests
         case dom::NodeType::TEXT_NODE:
         {
           krys::boo::tests::Indent(output, depth);
-          output += u8'"' + Downcast<dom::Text>(node).Data() + u8"\"\n";
+          output += u8'"' + Downcast<Text>(node).Data() + u8"\"\n";
           break;
         }
         case dom::NodeType::COMMENT_NODE:
         {
           krys::boo::tests::Indent(output, depth);
-          output += u8"<!-- " + Downcast<dom::Comment>(node).Data() + u8" -->\n";
+          output += u8"<!-- " + Downcast<Comment>(node).Data() + u8" -->\n";
           break;
         }
         case dom::NodeType::PROCESSING_INSTRUCTION_NODE:
         {
-          auto &instruction = Downcast<dom::ProcessingInstruction>(node);
+          auto &instruction = Downcast<ProcessingInstruction>(node);
           krys::boo::tests::Indent(output, depth);
           output += u8"<?" + instruction.Target() + u8" " + instruction.Data() + u8">\n";
           break;
         }
         case dom::NodeType::DOCUMENT_TYPE_NODE:
         {
-          auto &documentType = Downcast<dom::DocumentType>(node);
+          auto &documentType = Downcast<DocumentType>(node);
 
           krys::boo::tests::Indent(output, depth);
 
@@ -155,7 +155,7 @@ namespace krys::boo::html::tests
         }
       }
 
-      if (auto *containerNode = DynamicDowncast<dom::ContainerNode>(node))
+      if (auto *containerNode = DynamicDowncast<ContainerNode>(node))
       {
         for (auto &child : dom::ChildNodeRange(*containerNode))
         {
@@ -164,9 +164,9 @@ namespace krys::boo::html::tests
       }
     }
 
-    KRYS_NODISCARD static dom::DOMString SerialiseDocument(dom::Document &document) noexcept
+    KRYS_NODISCARD static DOMString SerialiseDocument(boo::Document &document) noexcept
     {
-      dom::DOMString output = u8"#document\n";
+      DOMString output = u8"#document\n";
 
       for (auto &child : dom::ChildNodeRange(document))
       {
@@ -182,8 +182,8 @@ namespace krys::boo::html::tests
     struct HTMLTreeBuilderTest
     {
       utf8_string Input;
-      dom::DOMString Expected;
-      Maybe<dom::DOMString> FragmentContext;
+      DOMString Expected;
+      Maybe<DOMString> FragmentContext;
       Maybe<ParserScriptingMode> ScriptingMode;
     };
 
@@ -242,7 +242,7 @@ namespace krys::boo::html::tests
       return tests;
     }
 
-    static Ref<DocumentParser> CreateParser(dom::HTMLDocument &document, utf8_string &&input) noexcept
+    static Ref<DocumentParser> CreateParser(HTMLDocument &document, utf8_string &&input) noexcept
     {
       auto parser = CreateRef<DocumentParser>(document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
@@ -252,34 +252,34 @@ namespace krys::boo::html::tests
     static void ExecuteHTMLTreeBuilderTest(const HTMLTreeBuilderTest &test, size_t number,
                                            size_t total) noexcept
     {
-      dom::DOMString output;
+      DOMString output;
       if (test.FragmentContext.has_value())
       {
-        auto document = CreateRef<dom::Document>();
+        auto document = CreateRef<boo::Document>();
         // The context is "svg <name>", "math <name>" or an HTML element's name.
         utf8_stringview context = *test.FragmentContext;
-        RefPtr<dom::Element> element;
+        RefPtr<Element> element;
         if (context.starts_with(u8"svg ") || context.starts_with(u8"math "))
         {
           auto space = context.find(u8' ');
           auto namespaceURI =
             context.starts_with(u8"svg ") ? infra::namespaces::SVG : infra::namespaces::MathML;
-          element = document->CreateElementNS(namespaceURI, dom::DOMStringAtom(context.substr(space + 1)))
-                      .ReleaseValue();
+          element =
+            document->CreateElementNS(namespaceURI, DOMStringAtom(context.substr(space + 1))).ReleaseValue();
         }
         else
         {
           TagName fragmentTagName = ParseTagName(*test.FragmentContext);
-          dom::QualifiedName qName = dom::QualifiedName {infra::namespaces::HTML, null,
-                                                         dom::DOMStringAtom(test.FragmentContext.value()),
-                                                         fragmentTagName, Namespace::HTML};
+          QualifiedName qName =
+            QualifiedName {infra::namespaces::HTML, null, DOMStringAtom(test.FragmentContext.value()),
+                           fragmentTagName, Namespace::HTML};
           element = dom::ElementFactory::Create(*document, qName, null);
         }
         auto result = DocumentParser::ParseFragment(*element, test.Input, false,
                                                     test.ScriptingMode.value_or(ParserScriptingMode::Inert));
 
         output = u8"#document\n";
-        for (dom::Node &child : dom::ChildNodeRange(*result))
+        for (Node &child : dom::ChildNodeRange(*result))
         {
           SerialiseNode(child, output, 0uz);
         }
@@ -287,7 +287,7 @@ namespace krys::boo::html::tests
       }
       else
       {
-        auto document = CreateRef<dom::HTMLDocument>();
+        auto document = CreateRef<HTMLDocument>();
         auto parser = CreateParser(*document, utf8_string(test.Input));
 
         if (test.ScriptingMode.has_value())
@@ -338,22 +338,22 @@ namespace krys::boo::html::tests
 {
   namespace
   {
-    Ref<dom::Element> CreateElement(dom::Document &document, dom::DOMStringAtom tagName)
+    Ref<Element> CreateElement(boo::Document &document, DOMStringAtom tagName)
     {
       auto element = document.CreateElement(krys::move(tagName));
       REQUIRE(element.HasValue());
       return *element;
     }
 
-    Ref<svg::SVGElement> CreateSVGElement(dom::Document &document, dom::DOMStringAtom tagName) noexcept
+    Ref<SVGElement> CreateSVGElement(boo::Document &document, DOMStringAtom tagName) noexcept
     {
       auto element = document.CreateElementNS(infra::namespaces::SVG, krys::move(tagName));
       REQUIRE(element.HasValue());
-      return Downcast<svg::SVGElement>(*element);
+      return Downcast<SVGElement>(*element);
     }
 
-    Ref<dom::DocumentType> CreateDocumentType(dom::Document &document, const dom::DOMString &name,
-                                              const dom::DOMString &publicId, const dom::DOMString &systemId)
+    Ref<DocumentType> CreateDocumentType(boo::Document &document, const DOMString &name,
+                                         const DOMString &publicId, const DOMString &systemId)
     {
       auto element = document.Implementation().CreateDocumentType(name, publicId, systemId);
       REQUIRE(element.HasValue());
@@ -369,7 +369,7 @@ namespace krys::boo::html::tests
 
   TEST_CASE("DumpNode should serialize a complete HTML document correctly", "[HTML][TreeConstruction]")
   {
-    Ref<dom::Document> document = CreateRef<dom::Document>();
+    Ref<boo::Document> document = CreateRef<boo::Document>();
 
     auto doctype = CreateDocumentType(*document, u8"html", u8"", u8"");
     REQUIRE_FALSE(document->AppendChild(*doctype).HasException());
@@ -403,9 +403,9 @@ namespace krys::boo::html::tests
     auto svg = CreateSVGElement(*document, u8"svg");
     REQUIRE_FALSE(body->AppendChild(*svg).HasException());
 
-    dom::DOMString output = SerialiseDocument(*document);
+    DOMString output = SerialiseDocument(*document);
 
-    dom::DOMString expectedOutput = u8R"(#document
+    DOMString expectedOutput = u8R"(#document
 | <!DOCTYPE html>
 | <html>
 |   <head>
@@ -708,7 +708,7 @@ namespace krys::boo::html::tests
   TEST_CASE("DocumentParser: adjusted foreign attributes get their namespace and prefix",
             "[HTML][DocumentParser][html:adjust-foreign-attributes][html:create-an-element-for-the-token]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto parser = CreateParser(
       *document,
       utf8_string(u8"<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' "
@@ -721,7 +721,7 @@ namespace krys::boo::html::tests
     auto xmlns = svg->GetAttributeNodeNS(infra::namespaces::XMLNS, u8"xmlns");
     REQUIRE(xmlns);
     CHECK(xmlns->Prefix() == null);
-    CHECK(svg->GetAttribute(u8"xmlns") == dom::DOMString(u8"http://www.w3.org/2000/svg"));
+    CHECK(svg->GetAttribute(u8"xmlns") == DOMString(u8"http://www.w3.org/2000/svg"));
 
     // xmlns:xlink and xlink:href keep their prefixes.
     auto xlink = svg->GetAttributeNodeNS(infra::namespaces::XMLNS, u8"xlink");
@@ -735,7 +735,7 @@ namespace krys::boo::html::tests
   TEST_CASE("DocumentParser: form controls join the open form even when they aren't inside it",
             "[HTML][DocumentParser][html:create-an-element-for-the-token][html:form-element-pointer]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     // The form start tag in a table inserts the form and pops it straight away, so the controls in the cell
     // aren't its descendants.
     auto parser = CreateParser(*document, utf8_string(u8"<table><form id=f><tr><td><input id=i>"
@@ -761,7 +761,7 @@ namespace krys::boo::html::tests
   TEST_CASE("DocumentParser: form controls it creates start out reset",
             "[HTML][DocumentParser][html:create-an-element-for-the-token]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto parser = CreateParser(*document, utf8_string(u8"<input id=i type=checkbox checked value=v>"
                                                       u8"<textarea id=t>text</textarea>"
                                                       u8"<select id=s><option>a<option selected>b</select>"));

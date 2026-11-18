@@ -34,7 +34,7 @@
 namespace krys::boo::html
 {
   // https://html.spec.whatwg.org/#dom-path2d
-  Ref<Path2D> Path2D::Create(dom::DOMStringView pathData) noexcept
+  Ref<Path2D> Path2D::Create(DOMStringView pathData) noexcept
   {
     // 4. Let svgPath be the result of parsing and interpreting path according to SVG 2's rules for path data.
     auto svgPath = svg::BuildPathFromString(pathData);

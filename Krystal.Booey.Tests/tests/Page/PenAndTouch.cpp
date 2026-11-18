@@ -22,14 +22,14 @@ namespace krys::boo::tests
 
     KRYS_NODISCARD std::string Name(const dom::EventTarget *target)
     {
-      auto *node = DynamicDowncast<dom::Node>(target);
-      auto *element = node ? DynamicDowncast<dom::Element>(*node) : nullptr;
+      auto *node = DynamicDowncast<Node>(target);
+      auto *element = node ? DynamicDowncast<Element>(*node) : nullptr;
       if (!element)
       {
         return node ? "document" : "null";
       }
-      auto id = element->GetAttribute(u8"id").value_or(dom::DOMString());
-      auto name = id.empty() ? element->LocalName().View() : dom::DOMStringView(id);
+      auto id = element->GetAttribute(u8"id").value_or(DOMString());
+      auto name = id.empty() ? element->LocalName().View() : DOMStringView(id);
       return std::string(name.begin(), name.end());
     }
 
@@ -98,7 +98,7 @@ namespace krys::boo::tests
         {
           if (recordPointerMoves || type != utf8_stringview(u8"pointermove"))
           {
-            Document->AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, true);
+            Document->AddEventListener(DOMStringAtom(type), Ref {recorder}, true);
           }
         }
       }
@@ -143,7 +143,7 @@ namespace krys::boo::tests
       void On(dom::EventTarget &target, utf8_stringview type, TAction action) noexcept
       {
         Ref<dom::EventListenerCallback> listener = CreateRef<ActionListener<TAction>>(krys::move(action));
-        target.AddEventListener(dom::DOMStringAtom(type), krys::move(listener), false);
+        target.AddEventListener(DOMStringAtom(type), krys::move(listener), false);
       }
     };
 
@@ -377,7 +377,7 @@ namespace krys::boo::tests
         ++calls;
       };
       Ref<dom::EventListenerCallback> listener = CreateRef<ActionListener<decltype(action)>>(action);
-      target.AddEventListener(dom::DOMStringAtom(type), krys::move(listener), false);
+      target.AddEventListener(DOMStringAtom(type), krys::move(listener), false);
     };
 
     SECTION("nothing is dispatched, and the press still activates what it hits")

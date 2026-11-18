@@ -6,9 +6,6 @@
 
 namespace krys::boo::tests
 {
-  using html::HTMLOptionElement;
-  using html::HTMLSelectElement;
-
   namespace
   {
     KRYS_NODISCARD HTMLOptionElement &OptionById(EditorFixture &fixture, utf8_stringview id) noexcept
@@ -51,7 +48,7 @@ namespace krys::boo::tests
   {
     EditorFixture fixture(u8"<p></p>");
     auto created = HTMLOptionElement::CreateForLegacyFactoryFunction(*fixture.Document, u8"New",
-                                                                     dom::DOMString(u8"n"), true, false);
+                                                                     DOMString(u8"n"), true, false);
     REQUIRE_FALSE(created.HasException());
     auto option = created.ReleaseValue();
     CHECK(option->LocalName() == u8"option");

@@ -26,16 +26,15 @@ namespace krys::boo::dom::tests
     {
       Ref<Document> Document;
       Ref<TestElement> Element;
-      Ref<dom::Text> TextChild1;
-      Ref<dom::Text> TextChild2;
+      Ref<Text> TextChild1;
+      Ref<Text> TextChild2;
       Ref<TestElement> ElementChild1;
       Ref<TestElement> ElementChild2;
       Ref<HTMLCollection> Collection;
 
       CommonTestData(LiveHTMLCollectionFilterFunc &&filter = DefaultFilter) noexcept
           : Document(CreateRef<HTMLDocument>()), Element(CreateRef<TestElement>(*Document)),
-            TextChild1(CreateRef<dom::Text>(*Document, u8"")),
-            TextChild2(CreateRef<dom::Text>(*Document, u8"")),
+            TextChild1(CreateRef<Text>(*Document, u8"")), TextChild2(CreateRef<Text>(*Document, u8"")),
             ElementChild1(CreateRef<TestElement>(*Document)),
             ElementChild2(CreateRef<TestElement>(*Document)),
             Collection(CreateRef<LiveHTMLCollection>(*Element, krys::move(filter)))

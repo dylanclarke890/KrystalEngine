@@ -38,10 +38,10 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLTableElement::HTMLTableElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Table)
+  HTMLTableElement::HTMLTableElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Table)
   {
   }
 
@@ -51,7 +51,7 @@ namespace krys::boo::html
 
   namespace
   {
-    KRYS_NODISCARD bool IsTableChildWithTagName(const dom::Node &node, TagName tagName) noexcept
+    KRYS_NODISCARD bool IsTableChildWithTagName(const Node &node, html::TagName tagName) noexcept
     {
       auto *element = DynamicDowncast<HTMLElement>(node);
       return element && element->HasTagName(tagName);
@@ -59,11 +59,11 @@ namespace krys::boo::html
 
     // The first child of the table that is a section with the tag name.
     KRYS_NODISCARD RefPtr<HTMLTableSectionElement> FirstTableSection(const HTMLTableElement &table,
-                                                                     TagName tagName) noexcept
+                                                                     html::TagName tagName) noexcept
     {
       for (auto *child = table.FirstChild(); child; child = child->NextSibling())
       {
-        auto *section = AsTableElement<HTMLTableSectionElement>(child);
+        auto *section = html::AsTableElement<HTMLTableSectionElement>(child);
         if (section && section->HasTagName(tagName))
         {
           return ShareRefPtr(const_cast<HTMLTableSectionElement *>(section));
@@ -77,7 +77,7 @@ namespace krys::boo::html
   {
     for (auto *child = FirstChild(); child; child = child->NextSibling())
     {
-      if (auto *caption = AsTableElement<HTMLTableCaptionElement>(child))
+      if (auto *caption = html::AsTableElement<HTMLTableCaptionElement>(child))
       {
         return ShareRefPtr(const_cast<HTMLTableCaptionElement *>(caption));
       }
@@ -87,7 +87,7 @@ namespace krys::boo::html
 
   dom::ExceptionOr<void> HTMLTableElement::Caption(const RefPtr<HTMLTableCaptionElement> &caption) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
 
     // 1. Remove the first caption element child of this, if any.
     DeleteCaption();
@@ -113,7 +113,7 @@ namespace krys::boo::html
     }
 
     // 2. Let caption be the result of creating a table element given this and "caption".
-    auto caption = CreateTableElement<HTMLTableCaptionElement>(NodeDocument(), u8"caption");
+    auto caption = html::CreateTableElement<HTMLTableCaptionElement>(NodeDocument(), u8"caption");
 
     // 3. Insert caption as the first node of this.
     (void)Caption(RefPtr<HTMLTableCaptionElement>(caption));
@@ -124,7 +124,7 @@ namespace krys::boo::html
 
   void HTMLTableElement::DeleteCaption() noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     if (auto caption = Caption())
     {
       (void)RemoveChild(*caption);
@@ -133,16 +133,16 @@ namespace krys::boo::html
 
   RefPtr<HTMLTableSectionElement> HTMLTableElement::THead() const noexcept
   {
-    return FirstTableSection(*this, TagName::thead);
+    return FirstTableSection(*this, html::TagName::thead);
   }
 
   dom::ExceptionOr<void> HTMLTableElement::THead(const RefPtr<HTMLTableSectionElement> &head) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
 
     // 1. If the given value is neither null nor a thead element, then throw a "HierarchyRequestError"
     //    DOMException.
-    if (head && !head->HasTagName(TagName::thead)) KRYS_UNLIKELY
+    if (head && !head->HasTagName(html::TagName::thead)) KRYS_UNLIKELY
     {
       return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
     }
@@ -157,11 +157,11 @@ namespace krys::boo::html
     {
       return {};
     }
-    dom::Node *child = FirstChild();
+    Node *child = FirstChild();
     for (; child; child = child->NextSibling())
     {
-      if (Is<dom::Element>(*child) && !IsTableChildWithTagName(*child, TagName::caption)
-          && !IsTableChildWithTagName(*child, TagName::colgroup))
+      if (Is<Element>(*child) && !IsTableChildWithTagName(*child, html::TagName::caption)
+          && !IsTableChildWithTagName(*child, html::TagName::colgroup))
       {
         break;
       }
@@ -183,7 +183,7 @@ namespace krys::boo::html
     }
 
     // 2. Let thead be the result of creating a table element given this and "thead".
-    auto head = CreateTableElement<HTMLTableSectionElement>(NodeDocument(), u8"thead");
+    auto head = html::CreateTableElement<HTMLTableSectionElement>(NodeDocument(), u8"thead");
 
     // 3. Insert thead immediately before the first element child of this that is neither a caption element
     // nor
@@ -196,7 +196,7 @@ namespace krys::boo::html
 
   void HTMLTableElement::DeleteTHead() noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     if (auto head = THead())
     {
       (void)RemoveChild(*head);
@@ -205,16 +205,16 @@ namespace krys::boo::html
 
   RefPtr<HTMLTableSectionElement> HTMLTableElement::TFoot() const noexcept
   {
-    return FirstTableSection(*this, TagName::tfoot);
+    return FirstTableSection(*this, html::TagName::tfoot);
   }
 
   dom::ExceptionOr<void> HTMLTableElement::TFoot(const RefPtr<HTMLTableSectionElement> &foot) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
 
     // 1. If the given value is neither null nor a tfoot element, then throw a "HierarchyRequestError"
     //    DOMException.
-    if (foot && !foot->HasTagName(TagName::tfoot)) KRYS_UNLIKELY
+    if (foot && !foot->HasTagName(html::TagName::tfoot)) KRYS_UNLIKELY
     {
       return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
     }
@@ -244,7 +244,7 @@ namespace krys::boo::html
     }
 
     // 2. Let tfoot be the result of creating a table element given this and "tfoot".
-    auto foot = CreateTableElement<HTMLTableSectionElement>(NodeDocument(), u8"tfoot");
+    auto foot = html::CreateTableElement<HTMLTableSectionElement>(NodeDocument(), u8"tfoot");
 
     // 3. Insert tfoot at the end of this.
     (void)TFoot(RefPtr<HTMLTableSectionElement>(foot));
@@ -255,7 +255,7 @@ namespace krys::boo::html
 
   void HTMLTableElement::DeleteTFoot() noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     if (auto foot = TFoot())
     {
       (void)RemoveChild(*foot);
@@ -270,7 +270,7 @@ namespace krys::boo::html
     }
 
     Ref<dom::HTMLCollection> tBodies = CreateRef<dom::LiveHTMLCollection>(
-      *this, [](const dom::Element &element) { return IsTableChildWithTagName(element, TagName::tbody); },
+      *this, [](const Element &element) { return IsTableChildWithTagName(element, html::TagName::tbody); },
       dom::LiveCollectionInvalidation::TreeOnly, dom::LiveCollectionTraversal::Children);
     _tBodies = CreateWeakPtr(tBodies.get());
     return tBodies;
@@ -279,7 +279,7 @@ namespace krys::boo::html
   Ref<HTMLTableSectionElement> HTMLTableElement::CreateTBody() noexcept
   {
     // 1. Let tbody be the result of creating a table element given this and "tbody".
-    auto body = CreateTableElement<HTMLTableSectionElement>(NodeDocument(), u8"tbody");
+    auto body = html::CreateTableElement<HTMLTableSectionElement>(NodeDocument(), u8"tbody");
 
     // 2. Insert tbody immediately after the last tbody element child of this, if any; otherwise insert tbody
     // at
@@ -295,9 +295,9 @@ namespace krys::boo::html
   {
     for (auto *child = LastChild(); child; child = child->PreviousSibling())
     {
-      if (IsTableChildWithTagName(*child, TagName::tbody))
+      if (IsTableChildWithTagName(*child, html::TagName::tbody))
       {
-        return const_cast<HTMLTableSectionElement *>(AsTableElement<HTMLTableSectionElement>(child));
+        return const_cast<HTMLTableSectionElement *>(html::AsTableElement<HTMLTableSectionElement>(child));
       }
     }
     return nullptr;
@@ -310,7 +310,7 @@ namespace krys::boo::html
       return ShareRef(*rows);
     }
 
-    Ref<dom::HTMLCollection> rows = CreateRef<HTMLTableRowsCollection>(*this);
+    Ref<dom::HTMLCollection> rows = CreateRef<html::HTMLTableRowsCollection>(*this);
     _rows = CreateWeakPtr(rows.get());
     return rows;
   }
@@ -332,13 +332,13 @@ namespace krys::boo::html
     RefPtr<HTMLTableRowElement> row;
     if (index == -1)
     {
-      lastRow = ShareRefPtr(HTMLTableRowsCollection::LastRow(*this));
+      lastRow = ShareRefPtr(html::HTMLTableRowsCollection::LastRow(*this));
     }
     else
     {
       for (int32 i = 0; i <= index; ++i)
       {
-        row = ShareRefPtr(HTMLTableRowsCollection::RowAfter(*this, lastRow.get()));
+        row = ShareRefPtr(html::HTMLTableRowsCollection::RowAfter(*this, lastRow.get()));
         if (!row)
         {
           if (i != index)
@@ -353,9 +353,9 @@ namespace krys::boo::html
 
     // 2. Let tr be the result of creating a table element given this and "tr".
     auto &document = NodeDocument();
-    auto newRow = CreateTableElement<HTMLTableRowElement>(document, u8"tr");
+    auto newRow = html::CreateTableElement<HTMLTableRowElement>(document, u8"tr");
 
-    RefPtr<dom::ContainerNode> parent;
+    RefPtr<ContainerNode> parent;
     // 5. Otherwise, if index is −1 or equal to the number of items in the rows collection, then append tr to
     //    the parent of the last tr element in the rows collection.
     // 6. Otherwise, insert tr immediately before the indexth tr element in the rows collection, in the same
@@ -370,13 +370,13 @@ namespace krys::boo::html
       // element
       //    in this.
       // (The last tbody child, as in browsers.)
-      parent = ShareRefPtr<dom::ContainerNode>(LastBody());
+      parent = ShareRefPtr<ContainerNode>(LastBody());
 
       // 3. If the rows collection has zero elements in it, and this has no tbody elements in it:
       if (!parent)
       {
         // 3a. Let tbody be the result of creating a table element given this and "tbody".
-        auto newBody = CreateTableElement<HTMLTableSectionElement>(document, u8"tbody");
+        auto newBody = html::CreateTableElement<HTMLTableSectionElement>(document, u8"tbody");
 
         // 3b. Append tr to tbody.
         (void)newBody->AppendChild(*newRow);
@@ -400,7 +400,7 @@ namespace krys::boo::html
 
   dom::ExceptionOr<void> HTMLTableElement::DeleteRow(int32 index) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
 
     // 1. If index is less than −1 or greater than or equal to the number of elements in the rows collection,
     //    then throw an "IndexSizeError" DOMException.
@@ -412,7 +412,7 @@ namespace krys::boo::html
     //    the rows collection is empty.
     if (index == -1)
     {
-      row = ShareRefPtr(HTMLTableRowsCollection::LastRow(*this));
+      row = ShareRefPtr(html::HTMLTableRowsCollection::LastRow(*this));
       if (!row)
       {
         return {};
@@ -422,7 +422,7 @@ namespace krys::boo::html
     {
       for (int32 i = 0; i <= index; ++i)
       {
-        row = ShareRefPtr(HTMLTableRowsCollection::RowAfter(*this, row.get()));
+        row = ShareRefPtr(html::HTMLTableRowsCollection::RowAfter(*this, row.get()));
         if (!row)
         {
           break;
@@ -442,94 +442,94 @@ namespace krys::boo::html
 
 #pragma region HTMLTableElement Obsolete members
 
-  dom::DOMString HTMLTableElement::Align() const noexcept
+  DOMString HTMLTableElement::Align() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLTableElement::Align(dom::DOMString value) noexcept
+  void HTMLTableElement::Align(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"align", krys::move(value));
   }
 
-  dom::DOMString HTMLTableElement::Border() const noexcept
+  DOMString HTMLTableElement::Border() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"border").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"border").value_or(u8"");
   }
 
-  void HTMLTableElement::Border(dom::DOMString value) noexcept
+  void HTMLTableElement::Border(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"border", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"border", krys::move(value));
   }
 
-  dom::DOMString HTMLTableElement::Frame() const noexcept
+  DOMString HTMLTableElement::Frame() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"frame").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"frame").value_or(u8"");
   }
 
-  void HTMLTableElement::Frame(dom::DOMString value) noexcept
+  void HTMLTableElement::Frame(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"frame", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"frame", krys::move(value));
   }
 
-  dom::DOMString HTMLTableElement::Rules() const noexcept
+  DOMString HTMLTableElement::Rules() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"rules").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"rules").value_or(u8"");
   }
 
-  void HTMLTableElement::Rules(dom::DOMString value) noexcept
+  void HTMLTableElement::Rules(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"rules", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"rules", krys::move(value));
   }
 
-  dom::DOMString HTMLTableElement::Summary() const noexcept
+  DOMString HTMLTableElement::Summary() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"summary").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"summary").value_or(u8"");
   }
 
-  void HTMLTableElement::Summary(dom::DOMString value) noexcept
+  void HTMLTableElement::Summary(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"summary", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"summary", krys::move(value));
   }
 
-  dom::DOMString HTMLTableElement::Width() const noexcept
+  DOMString HTMLTableElement::Width() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"width").value_or(u8"");
   }
 
-  void HTMLTableElement::Width(dom::DOMString value) noexcept
+  void HTMLTableElement::Width(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"width", krys::move(value));
   }
 
-  dom::DOMString HTMLTableElement::BgColor() const noexcept
+  DOMString HTMLTableElement::BgColor() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"bgcolor").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"bgcolor").value_or(u8"");
   }
 
-  void HTMLTableElement::BgColor(dom::DOMString value) noexcept
+  void HTMLTableElement::BgColor(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"bgcolor", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"bgcolor", krys::move(value));
   }
 
-  dom::DOMString HTMLTableElement::CellPadding() const noexcept
+  DOMString HTMLTableElement::CellPadding() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"cellpadding").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"cellpadding").value_or(u8"");
   }
 
-  void HTMLTableElement::CellPadding(dom::DOMString value) noexcept
+  void HTMLTableElement::CellPadding(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"cellpadding", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"cellpadding", krys::move(value));
   }
 
-  dom::DOMString HTMLTableElement::CellSpacing() const noexcept
+  DOMString HTMLTableElement::CellSpacing() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"cellspacing").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"cellspacing").value_or(u8"");
   }
 
-  void HTMLTableElement::CellSpacing(dom::DOMString value) noexcept
+  void HTMLTableElement::CellSpacing(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"cellspacing", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"cellspacing", krys::move(value));
   }
 
 #pragma endregion
@@ -538,23 +538,23 @@ namespace krys::boo::html
 
   namespace
   {
-    KRYS_NODISCARD bool HasHTMLTagName(const dom::Element &element, TagName tagName) noexcept
+    KRYS_NODISCARD bool HasHTMLTagName(const Element &element, html::TagName tagName) noexcept
     {
       return Is<HTMLElement>(element) && element.TagQualifiedName().TagName() == tagName;
     }
 
-    KRYS_NODISCARD bool IsTableCellAncestor(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool IsTableCellAncestor(const Element &element) noexcept
     {
-      return HasHTMLTagName(element, TagName::thead) || HasHTMLTagName(element, TagName::tbody)
-             || HasHTMLTagName(element, TagName::tfoot) || HasHTMLTagName(element, TagName::tr)
-             || HasHTMLTagName(element, TagName::th);
+      return HasHTMLTagName(element, html::TagName::thead) || HasHTMLTagName(element, html::TagName::tbody)
+             || HasHTMLTagName(element, html::TagName::tfoot) || HasHTMLTagName(element, html::TagName::tr)
+             || HasHTMLTagName(element, html::TagName::th);
     }
 
-    bool SetTableCellsChanged(dom::Element &element) noexcept
+    bool SetTableCellsChanged(Element &element) noexcept
     {
       bool cellChanged = false;
 
-      if (HasHTMLTagName(element, TagName::td))
+      if (HasHTMLTagName(element, html::TagName::td))
       {
         cellChanged = true;
       }
@@ -574,11 +574,11 @@ namespace krys::boo::html
       return cellChanged;
     }
 
-    KRYS_NODISCARD bool GetBordersFromFrameAttributeValue(dom::DOMStringView value, bool &borderTop,
+    KRYS_NODISCARD bool GetBordersFromFrameAttributeValue(DOMStringView value, bool &borderTop,
                                                           bool &borderRight, bool &borderBottom,
                                                           bool &borderLeft) noexcept
     {
-      using namespace presentational_hints;
+      using namespace html::presentational_hints;
       borderTop = false;
       borderRight = false;
       borderBottom = false;
@@ -651,8 +651,8 @@ namespace krys::boo::html
     }
   }
 
-  bool HTMLTableElement::HasPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool HTMLTableElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                            const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == u8"width" || localName == u8"height" || localName == u8"bgcolor"
@@ -665,12 +665,12 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLTableElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                                const dom::DOMStringAtom &namespaceURI,
-                                                                dom::DOMStringView value,
+  void HTMLTableElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                                const DOMStringAtom &namespaceURI,
+                                                                DOMStringView value,
                                                                 css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
@@ -778,12 +778,11 @@ namespace krys::boo::html
     HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
   }
 
-  void HTMLTableElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                            Maybe<dom::DOMStringView> oldValue,
-                                            Maybe<dom::DOMStringView> value,
-                                            const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLTableElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                            Maybe<DOMStringView> value,
+                                            const DOMStringAtom &namespaceURI) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
     {
@@ -792,7 +791,7 @@ namespace krys::boo::html
 
     auto bordersBefore = GetCellBorders();
     auto oldPadding = _padding;
-    auto newValue = value.value_or(dom::DOMStringView {});
+    auto newValue = value.value_or(DOMStringView {});
 
     if (localName == u8"border")
     {
@@ -838,7 +837,7 @@ namespace krys::boo::html
     {
       if (!newValue.empty())
       {
-        auto padding = Numbers::ParseInteger(newValue);
+        auto padding = html::Numbers::ParseInteger(newValue);
         _padding = static_cast<uint16>(
           std::clamp<int64>(padding.Success() ? padding.Value : 0, 0, std::numeric_limits<uint16>::max()));
       }

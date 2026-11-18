@@ -26,16 +26,12 @@
 #include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
-namespace krys::boo::svg
-{
-  class SVGTextPositioningElement;
-}
-
 namespace krys::boo
 {
   class RenderBoxModelObject;
   class RenderSVGInlineText;
   class RenderSVGText;
+  class SVGTextPositioningElement;
 
   /// @brief Performs the first layout phase for SVG text.
   ///
@@ -49,10 +45,10 @@ namespace krys::boo
 
     struct TextPosition
     {
-      explicit TextPosition(svg::SVGTextPositioningElement *newElement, uint32 newStart = 0,
+      explicit TextPosition(SVGTextPositioningElement *newElement, uint32 newStart = 0,
                             uint32 newLength = 0) noexcept;
 
-      CheckedPtr<svg::SVGTextPositioningElement> Element;
+      CheckedPtr<SVGTextPositioningElement> Element;
       /// @brief In characters, from the start of the whole text.
       uint32 Start;
       /// @brief In characters.

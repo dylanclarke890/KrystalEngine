@@ -85,7 +85,7 @@ namespace krys::boo::style
         break;
       case PseudoElementType::After:
       case PseudoElementType::Before:
-        if (auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(renderer.GetElement()))
+        if (auto *pseudoElement = DynamicDowncast<PseudoElement>(renderer.GetElement()))
         {
           if (auto *host = pseudoElement->HostElement())
           {
@@ -398,18 +398,17 @@ namespace krys::boo::style
 
   namespace
   {
-    bool KeyframesRuleExistsForAnimation(dom::Element &element, const ScopedName &animationName) noexcept
+    bool KeyframesRuleExistsForAnimation(boo::Element &element, const ScopedName &animationName) noexcept
     {
-      return Scope::ResolveTreeScopedReference(
-        element, animationName,
-        [](const Scope &scope, const css::CSSOMStringAtom &name) -> bool
-        {
-          if (auto *resolver = scope.ResolverIfExists())
-          {
-            return resolver->IsAnimationNameValid(name.ToString());
-          }
-          return false;
-        });
+      return Scope::ResolveTreeScopedReference(element, animationName,
+                                               [](const Scope &scope, const CSSOMStringAtom &name) -> bool
+                                               {
+                                                 if (auto *resolver = scope.ResolverIfExists())
+                                                 {
+                                                   return resolver->IsAnimationNameValid(name.ToString());
+                                                 }
+                                                 return false;
+                                               });
     }
   }
 
@@ -602,7 +601,7 @@ namespace krys::boo::style
     bool PropertyInStyleMatchesValueForTransitionInMap(const AnimatableCSSProperty &property,
                                                        const RenderStyle &style,
                                                        AnimatableCSSPropertyToTransitionMap &transitions,
-                                                       const dom::Document &document) noexcept
+                                                       const Document &document) noexcept
     {
       auto it = transitions.find(property);
       if (it != transitions.end())
@@ -654,9 +653,9 @@ namespace krys::boo::style
               }
               return false;
             },
-            [&](const css::CSSOMStringAtom &customProperty)
+            [&](const CSSOMStringAtom &customProperty)
             {
-              const auto *customPropertyToMatch = std::get_if<css::CSSOMStringAtom>(&property);
+              const auto *customPropertyToMatch = std::get_if<CSSOMStringAtom>(&property);
               return customPropertyToMatch && *customPropertyToMatch == customProperty;
             });
         });
@@ -664,7 +663,7 @@ namespace krys::boo::style
 
     void CompileTransitionPropertiesInStyle(const RenderStyle &style,
                                             CSSPropertiesBitSet &transitionProperties,
-                                            HashSet<css::CSSOMStringAtom> &transitionCustomProperties,
+                                            HashSet<CSSOMStringAtom> &transitionCustomProperties,
                                             bool &transitionPropertiesContainAll) noexcept
     {
       const auto &transitions = style.GetTransitions();
@@ -707,7 +706,7 @@ namespace krys::boo::style
                   transitionProperties.Set(resolvedPropertyId);
                 }
               },
-              [&](const css::CSSOMStringAtom &customProperty)
+              [&](const CSSOMStringAtom &customProperty)
               { transitionCustomProperties.insert(customProperty); });
           });
       }
@@ -1046,7 +1045,7 @@ namespace krys::boo::style
     // style.
     bool transitionPropertiesContainAll = false;
     CSSPropertiesBitSet transitionProperties;
-    HashSet<css::CSSOMStringAtom> transitionCustomProperties;
+    HashSet<CSSOMStringAtom> transitionCustomProperties;
     CompileTransitionPropertiesInStyle(currentStyle, transitionProperties, transitionCustomProperties,
                                        transitionPropertiesContainAll);
     CompileTransitionPropertiesInStyle(newStyle, transitionProperties, transitionCustomProperties,

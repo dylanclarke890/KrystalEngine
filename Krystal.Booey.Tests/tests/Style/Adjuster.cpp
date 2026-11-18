@@ -20,9 +20,9 @@ namespace krys::boo::style::tests
 {
   namespace
   {
-    KRYS_NODISCARD Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
+    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       parser->PumpTokenizer();
@@ -31,7 +31,7 @@ namespace krys::boo::style::tests
 
     struct AdjusterFixture : css::tests::ValueFixture
     {
-      Ref<dom::HTMLDocument> Document {Parse(u8R"(<!DOCTYPE html><body><div id=parent>
+      Ref<HTMLDocument> Document {Parse(u8R"(<!DOCTYPE html><body><div id=parent>
         <div id=div></div><span id=span></span><img id=img><table id=table></table><ruby id=ruby></ruby>
         <textarea id=textarea></textarea><input id=password type=PassWord><marquee id=marquee></marquee>
         <legend id=legend></legend><rt id=rt></rt>
@@ -41,7 +41,7 @@ namespace krys::boo::style::tests
       /// @brief The mode declarations are parsed in.
       css::ParserMode Mode {css::ParserMode::HTMLStandard};
 
-      KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) const noexcept
+      KRYS_NODISCARD Element &ById(DOMStringView id) const noexcept
       {
         auto element = Document->GetElementById(id);
         krys_assert(element);
@@ -50,7 +50,7 @@ namespace krys::boo::style::tests
 
       /// @brief The style the builder computes from the author's `css` for `element`, inheriting from
       /// `parent` (the document's default style if null) as the resolver does, before adjusting.
-      KRYS_NODISCARD UniquePtr<RenderStyle> Build(utf8_stringview css, const dom::Element *element = nullptr,
+      KRYS_NODISCARD UniquePtr<RenderStyle> Build(utf8_stringview css, const Element *element = nullptr,
                                                   const RenderStyle *parent = nullptr) noexcept
       {
         auto defaultStyle = Resolver::DefaultStyleForElement(*Document, nullptr);
@@ -72,7 +72,7 @@ namespace krys::boo::style::tests
       }
 
       /// @brief The style of `element` from `css`, adjusted for its parent's style (and parent box style).
-      KRYS_NODISCARD UniquePtr<RenderStyle> Adjusted(utf8_stringview css, dom::Element *element = nullptr,
+      KRYS_NODISCARD UniquePtr<RenderStyle> Adjusted(utf8_stringview css, Element *element = nullptr,
                                                      const RenderStyle *parent = nullptr,
                                                      const RenderStyle *parentBox = nullptr) noexcept
       {
@@ -355,13 +355,13 @@ namespace krys::boo::style::tests
       auto &svg = ById(u8"svg");
       auto &inner = ById(u8"inner");
       auto &nested = ById(u8"nested");
-      CHECK(DynamicDowncast<svg::SVGElement>(svg)->IsOutermostSVGSVGElement());
-      CHECK_FALSE(DynamicDowncast<svg::SVGElement>(svg)->IsInnerSVGSVGElement());
-      CHECK_FALSE(DynamicDowncast<svg::SVGElement>(inner)->IsOutermostSVGSVGElement());
-      CHECK(DynamicDowncast<svg::SVGElement>(inner)->IsInnerSVGSVGElement());
+      CHECK(DynamicDowncast<SVGElement>(svg)->IsOutermostSVGSVGElement());
+      CHECK_FALSE(DynamicDowncast<SVGElement>(svg)->IsInnerSVGSVGElement());
+      CHECK_FALSE(DynamicDowncast<SVGElement>(inner)->IsOutermostSVGSVGElement());
+      CHECK(DynamicDowncast<SVGElement>(inner)->IsInnerSVGSVGElement());
       // An <svg> in a <foreignObject> is an outermost one (and an inner one).
-      CHECK(DynamicDowncast<svg::SVGElement>(nested)->IsOutermostSVGSVGElement());
-      CHECK_FALSE(DynamicDowncast<svg::SVGElement>(ById(u8"circle"))->IsOutermostSVGSVGElement());
+      CHECK(DynamicDowncast<SVGElement>(nested)->IsOutermostSVGSVGElement());
+      CHECK_FALSE(DynamicDowncast<SVGElement>(ById(u8"circle"))->IsOutermostSVGSVGElement());
 
       // Only outermost <svg> elements are positioned.
       CHECK(Adjusted(u8"position: absolute", &svg)->GetPosition() == PositionType::Absolute);
@@ -398,7 +398,7 @@ namespace krys::boo::style::tests
     CHECK(img.IsReplaced());
     CHECK(IsSkippedContentRoot(*Adjusted(u8"display: inline; content-visibility: hidden", &img), img));
     CHECK_FALSE(div.IsReplaced());
-    CHECK(DynamicDowncast<svg::SVGElement>(ById(u8"svg"))->IsReplaced());
+    CHECK(DynamicDowncast<SVGElement>(ById(u8"svg"))->IsReplaced());
     CHECK_FALSE(ById(u8"inner").IsReplaced());
 
     // No element is relevant to the user yet, so `auto` skips its contents.

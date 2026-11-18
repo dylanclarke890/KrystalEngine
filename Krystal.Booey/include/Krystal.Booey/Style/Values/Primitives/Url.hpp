@@ -29,7 +29,7 @@
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -61,7 +61,7 @@ namespace krys::boo::style
   // MARK: Conversion
 
   /// @brief Special conversion function for use by filters and font-face code.
-  KRYS_NODISCARD URL ToStyleWithScriptExecutionContext(const css::CSSURL &, const dom::Document &) noexcept;
+  KRYS_NODISCARD URL ToStyleWithScriptExecutionContext(const css::CSSURL &, const Document &) noexcept;
 
   template <>
   struct ToCSS<URL>

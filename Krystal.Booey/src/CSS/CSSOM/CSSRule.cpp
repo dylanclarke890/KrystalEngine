@@ -28,7 +28,7 @@
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   namespace
   {
@@ -48,7 +48,7 @@ namespace krys::boo::css
     // "This enumeration is thus frozen in its current state, and no new new values will be
     // added to reflect additional at-rules; all at-rules beyond the ones listed above will return 0."
     // https://drafts.csswg.org/cssom/#the-cssrule-interface
-    if (StyleRuleType() >= FirstUnexposedRuleType)
+    if (StyleRuleType() >= css::FirstUnexposedRuleType)
     {
       return 0;
     }
@@ -60,17 +60,17 @@ namespace krys::boo::css
     return {};
   }
 
-  const ParserContext &CSSRule::GetParserContext() const noexcept
+  const css::ParserContext &CSSRule::GetParserContext() const noexcept
   {
     auto *styleSheet = ParentStyleSheet();
-    return styleSheet ? styleSheet->Contents().GetParserContext() : StrictParserContext();
+    return styleSheet ? styleSheet->Contents().GetParserContext() : css::StrictParserContext();
   }
 
   bool CSSRule::HasStyleRuleAncestor() const noexcept
   {
     for (auto *current = ParentRule(); current; current = current->ParentRule())
     {
-      if (current->StyleRuleType() == RuleType::Style)
+      if (current->StyleRuleType() == css::RuleType::Style)
       {
         return true;
       }
@@ -84,17 +84,17 @@ namespace krys::boo::css
     {
       if (Is<CSSStyleRule>(*parentRule))
       {
-        return NestedParserContextType::Style;
+        return css::NestedParserContextType::Style;
       }
       if (Is<CSSScopeRule>(*parentRule))
       {
-        return NestedParserContextType::Scope;
+        return css::NestedParserContextType::Scope;
       }
     }
     return {};
   }
 
-  RefPtr<StyleRuleWithNesting> CSSRule::PrepareChildStyleRuleForNesting(StyleRule &) noexcept
+  RefPtr<css::StyleRuleWithNesting> CSSRule::PrepareChildStyleRuleForNesting(css::StyleRule &) noexcept
   {
     return nullptr;
   }

@@ -8,9 +8,9 @@ namespace krys::boo::html::tests
 {
   namespace
   {
-    KRYS_NODISCARD Ref<dom::HTMLDocument> ParseWithBase(utf8_string &&input) noexcept
+    KRYS_NODISCARD Ref<HTMLDocument> ParseWithBase(utf8_string &&input) noexcept
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
       auto parser = CreateRef<DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
@@ -18,7 +18,7 @@ namespace krys::boo::html::tests
       return document;
     }
 
-    KRYS_NODISCARD HTMLBaseElement *AsBase(const RefPtr<dom::Element> &element) noexcept
+    KRYS_NODISCARD HTMLBaseElement *AsBase(const RefPtr<Element> &element) noexcept
     {
       REQUIRE(element);
       return &Downcast<HTMLBaseElement>(Downcast<HTMLElement>(*element));
@@ -43,7 +43,7 @@ namespace krys::boo::html::tests
     CHECK(AsBase(none->NextElementSibling())->Href() == u8"https://[x");
 
     base->Href(u8"other/");
-    CHECK(base->GetAttribute(u8"href") == dom::DOMString(u8"other/"));
+    CHECK(base->GetAttribute(u8"href") == DOMString(u8"other/"));
   }
 
   TEST_CASE("HTMLBaseElement.target: reflected, and the first base target is the document's",

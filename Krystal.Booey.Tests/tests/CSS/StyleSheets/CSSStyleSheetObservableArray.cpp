@@ -14,9 +14,9 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    KRYS_NODISCARD Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
+    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       parser->PumpTokenizer();
@@ -28,8 +28,7 @@ namespace krys::boo::css::tests
       html::EventLoop::Current().RunUntilIdle();
     }
 
-    KRYS_NODISCARD Ref<CSSStyleSheet> ConstructedSheet(dom::Document &document,
-                                                       const CSSOMString &text = u8"a {}")
+    KRYS_NODISCARD Ref<CSSStyleSheet> ConstructedSheet(Document &document, const CSSOMString &text = u8"a {}")
     {
       auto sheet = CSSStyleSheet::Create(document, {});
       REQUIRE(sheet.HasValue());
@@ -37,9 +36,9 @@ namespace krys::boo::css::tests
       return sheet.ReleaseValue();
     }
 
-    KRYS_NODISCARD bool IsAdoptedBy(const CSSStyleSheet &sheet, const dom::ContainerNode &treeScope) noexcept
+    KRYS_NODISCARD bool IsAdoptedBy(const CSSStyleSheet &sheet, const ContainerNode &treeScope) noexcept
     {
-      return std::ranges::any_of(sheet.AdoptingTreeScopes(), [&](const WeakPtr<dom::ContainerNode> &scope)
+      return std::ranges::any_of(sheet.AdoptingTreeScopes(), [&](const WeakPtr<ContainerNode> &scope)
                                  { return scope.get() == &treeScope; });
     }
 
@@ -76,7 +75,7 @@ namespace krys::boo::css::tests
       auto contentsSheet = SheetFromText(u8"a {}");
       RequireNotAllowed(adopted.SetSheets({contentsSheet}));
 
-      auto otherDocument = CreateRef<dom::HTMLDocument>();
+      auto otherDocument = CreateRef<HTMLDocument>();
       auto otherSheet = ConstructedSheet(*otherDocument);
       RequireNotAllowed(adopted.SetValueAt(0, *otherSheet));
 
@@ -205,7 +204,7 @@ namespace krys::boo::css::tests
 
       SECTION("Adoption into another document drops them")
       {
-        auto otherDocument = CreateRef<dom::HTMLDocument>();
+        auto otherDocument = CreateRef<HTMLDocument>();
         REQUIRE_FALSE(otherDocument->AdoptNode(*host).HasException());
         REQUIRE(shadow->GetAdoptedStyleSheets().empty());
         REQUIRE(sheet->IsDetached());
@@ -231,10 +230,10 @@ namespace krys::boo::css::tests
       SECTION("A document")
       {
         RefPtr<CSSStyleSheet> otherSheet;
-        WeakPtr<dom::Document> weakDocument;
+        WeakPtr<Document> weakDocument;
         {
           auto otherDocument = Parse(u8"<!DOCTYPE html><body>");
-          weakDocument = CreateWeakPtr<dom::Document>(otherDocument.get());
+          weakDocument = CreateWeakPtr<Document>(otherDocument.get());
           otherSheet = ConstructedSheet(*otherDocument);
           REQUIRE_FALSE(otherDocument->SetAdoptedStyleSheets({ShareRef(*otherSheet)}).HasException());
           REQUIRE_FALSE(otherSheet->IsDetached());

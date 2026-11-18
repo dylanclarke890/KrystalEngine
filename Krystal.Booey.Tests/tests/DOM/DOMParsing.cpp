@@ -107,7 +107,7 @@ namespace krys::boo::dom::tests
       auto templateElement = data.Document->CreateElement(u8"template").ReleaseValue();
       REQUIRE_FALSE(templateElement->InnerHTML(u8"<span>in</span>").HasException());
       CHECK_FALSE(templateElement->HasChildNodes());
-      auto content = Downcast<html::HTMLTemplateElement>(*templateElement).Content();
+      auto content = Downcast<HTMLTemplateElement>(*templateElement).Content();
       REQUIRE(content->FirstChild());
       CHECK(MarkupText(templateElement->InnerHTML().ReleaseValue()) == "<span>in</span>");
     }
@@ -704,7 +704,7 @@ namespace krys::boo::dom::tests
       auto p = div.FirstElementChild();
       REQUIRE(p->ShadowRoot());
       CHECK(MarkupText(p->ShadowRoot()->InnerHTML().ReleaseValue()) == "<b></b>");
-      auto *second = DynamicDowncast<html::HTMLTemplateElement>(p->FirstElementChild().get());
+      auto *second = DynamicDowncast<HTMLTemplateElement>(p->FirstElementChild().get());
       REQUIRE(second);
       CHECK(MarkupText(second->InnerHTML().ReleaseValue()) == "<i></i>");
     }
@@ -715,14 +715,14 @@ namespace krys::boo::dom::tests
         div.SetHTMLUnsafe(u8"<p><template shadowrootmode=none><b></b></template></p>").HasException());
       auto p = div.FirstElementChild();
       CHECK_FALSE(p->ShadowRoot());
-      CHECK(Is<html::HTMLTemplateElement>(p->FirstElementChild().get()));
+      CHECK(Is<HTMLTemplateElement>(p->FirstElementChild().get()));
     }
 
     SECTION("a top-level template doesn't attach to the context element")
     {
       REQUIRE_FALSE(div.SetHTMLUnsafe(u8"<template shadowrootmode=open><b></b></template>").HasException());
       CHECK_FALSE(div.ShadowRoot());
-      CHECK(Is<html::HTMLTemplateElement>(div.FirstElementChild().get()));
+      CHECK(Is<HTMLTemplateElement>(div.FirstElementChild().get()));
     }
 
     SECTION("nest")

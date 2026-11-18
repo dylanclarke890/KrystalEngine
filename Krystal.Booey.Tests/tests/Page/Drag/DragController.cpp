@@ -94,7 +94,7 @@ namespace krys::boo::tests
         TestPage = Page::Create(nullptr, CreateUnique<TestEditorClient>(), nullptr, krys::move(client));
         Frame = ShareRefPtr(&TestPage->MainFrame());
         Frame->CreateView({400, 300});
-        Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+        Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
         (void)Document->UpdateLayout();
         PlatformStrategies::Singleton().SetPasteboardStrategy(&Pasteboard);
       }
@@ -119,12 +119,12 @@ namespace krys::boo::tests
         return Document->Selection();
       }
 
-      KRYS_NODISCARD dom::Text &TextIn(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD Text &TextIn(DOMStringView id) noexcept
       {
-        return Downcast<dom::Text>(*ById(id).FirstChild());
+        return Downcast<Text>(*ById(id).FirstChild());
       }
 
-      void Select(dom::Node &node, uint32 start, uint32 end) noexcept
+      void Select(Node &node, uint32 start, uint32 end) noexcept
       {
         Selection().MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&node), start),
                            dom::MakeContainerOffsetPosition(ShareRefPtr(&node), end), Affinity::Downstream);
@@ -134,7 +134,7 @@ namespace krys::boo::tests
       void ListenWith(utf8_stringview type, Func<void(dom::Event &)> &&function) noexcept
       {
         Document->AddEventListener(
-          dom::DOMStringAtom(type),
+          DOMStringAtom(type),
           Ref<dom::EventListenerCallback>(CreateRef<FunctionListener>(krys::move(function))), true);
       }
 
@@ -148,10 +148,9 @@ namespace krys::boo::tests
           ListenWith(type,
                      [this](dom::Event &event)
                      {
-                       auto *element =
-                         DynamicDowncast<dom::Element>(DynamicDowncast<dom::Node>(event.Target().get()));
+                       auto *element = DynamicDowncast<Element>(DynamicDowncast<Node>(event.Target().get()));
                        utf8_string id =
-                         element ? element->GetAttribute(u8"id").value_or(dom::DOMString()) : utf8_string();
+                         element ? element->GetAttribute(u8"id").value_or(DOMString()) : utf8_string();
                        Log.push_back(event.Type().ToString() + u8"@" + id);
                      });
         }
@@ -228,7 +227,7 @@ namespace krys::boo::tests
                                     operation);
       }
 
-      KRYS_NODISCARD static std::string InnerHTML(const dom::Node &node) noexcept
+      KRYS_NODISCARD static std::string InnerHTML(const Node &node) noexcept
       {
         return Narrow(SerializeFragment(node, SerializedNodes::SubtreesOfChildren));
       }
@@ -263,8 +262,8 @@ namespace krys::boo::tests
                        });
     auto accept = [&](dom::Event &event)
     {
-      auto *target = DynamicDowncast<dom::Element>(DynamicDowncast<dom::Node>(event.Target().get()));
-      if (!target || target->GetAttribute(u8"id") != dom::DOMString(u8"dst"))
+      auto *target = DynamicDowncast<Element>(DynamicDowncast<Node>(event.Target().get()));
+      if (!target || target->GetAttribute(u8"id") != DOMString(u8"dst"))
       {
         return;
       }
@@ -549,8 +548,8 @@ namespace krys::boo::tests
                    "[Page][DragController]")
   {
     DragFixture fixture(u8"<input id=t><br><input id=f type=file multiple>");
-    auto &text = Downcast<html::HTMLInputElement>(fixture.ById(u8"t"));
-    auto &file = Downcast<html::HTMLInputElement>(fixture.ById(u8"f"));
+    auto &text = Downcast<HTMLInputElement>(fixture.ById(u8"t"));
+    auto &file = Downcast<HTMLInputElement>(fixture.ById(u8"f"));
     fixture.Client->SourceMask = AnyDragOperation();
 
     SECTION("Text into a text field")

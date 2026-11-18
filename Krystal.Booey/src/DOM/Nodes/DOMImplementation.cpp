@@ -58,7 +58,7 @@ namespace krys::boo::dom
       }
       else if (namespaceUri == infra::namespaces::SVG)
       {
-        doc = CreateRefPtr<svg::SVGDocument>();
+        doc = CreateRefPtr<SVGDocument>();
         doc->_contentType = u8"image/svg+xml";
       }
       else
@@ -199,7 +199,7 @@ namespace krys::boo::dom
       }
       if (text::IsASCIICaselessEqual(contentType, u8"image/svg+xml"))
       {
-        auto document = CreateRef<svg::SVGDocument>();
+        auto document = CreateRef<SVGDocument>();
         document->_contentType = u8"image/svg+xml";
         return document;
       }
@@ -212,7 +212,7 @@ namespace krys::boo::dom
       // https://html.spec.whatwg.org/#navigate-media
       if (MIMETypeRegistry::IsSupportedImageMIMEType(contentType))
       {
-        Ref<Document> document = CreateRef<html::ImageDocument>();
+        Ref<Document> document = CreateRef<ImageDocument>();
         document->_contentType = DOMString(contentType);
         return document;
       }

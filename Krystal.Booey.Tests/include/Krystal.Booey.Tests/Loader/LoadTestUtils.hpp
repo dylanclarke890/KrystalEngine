@@ -116,7 +116,7 @@ namespace krys::boo::tests
       return TestPage->MainFrame();
     }
 
-    KRYS_NODISCARD dom::Document &Document() const noexcept
+    KRYS_NODISCARD boo::Document &Document() const noexcept
     {
       return *Frame().Document();
     }

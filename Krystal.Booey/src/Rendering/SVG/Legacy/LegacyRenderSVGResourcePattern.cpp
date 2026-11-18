@@ -34,7 +34,7 @@
 
 namespace krys::boo
 {
-  LegacyRenderSVGResourcePattern::LegacyRenderSVGResourcePattern(svg::SVGPatternElement &element,
+  LegacyRenderSVGResourcePattern::LegacyRenderSVGResourcePattern(SVGPatternElement &element,
                                                                  RenderStyle &&style) noexcept
       : LegacyRenderSVGResourceContainer(Type::LegacySVGResourcePattern, element, krys::move(style))
   {
@@ -42,9 +42,9 @@ namespace krys::boo
 
   LegacyRenderSVGResourcePattern::~LegacyRenderSVGResourcePattern() noexcept = default;
 
-  svg::SVGPatternElement &LegacyRenderSVGResourcePattern::PatternElement() const noexcept
+  SVGPatternElement &LegacyRenderSVGResourcePattern::PatternElement() const noexcept
   {
-    return Downcast<svg::SVGPatternElement>(LegacyRenderSVGResourceContainer::GetElement());
+    return Downcast<SVGPatternElement>(LegacyRenderSVGResourceContainer::GetElement());
   }
 
   void LegacyRenderSVGResourcePattern::RemoveAllClientsFromCache() noexcept
@@ -197,7 +197,7 @@ namespace krys::boo
     // Spec: When the geometry of the applicable element has no width or height and objectBoundingBox is
     // specified, then the given effect (e.g. a gradient or a filter) will be ignored.
     FloatRect objectBoundingBox = renderer.ObjectBoundingBox();
-    if (_attributes.PatternUnits() == svg::SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX
+    if (_attributes.PatternUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX
         && objectBoundingBox.IsEmpty())
     {
       return {};
@@ -260,17 +260,17 @@ namespace krys::boo
   {
     KRYS_NODISCARD FloatRect CalculatePatternBoundaries(const svg::PatternAttributes &attributes,
                                                         const FloatRect &objectBoundingBox,
-                                                        const svg::SVGPatternElement &patternElement) noexcept
+                                                        const SVGPatternElement &patternElement) noexcept
     {
-      return svg::SVGLengthContext::ResolveRectangle(&patternElement, attributes.PatternUnits(),
-                                                     objectBoundingBox, attributes.X(), attributes.Y(),
-                                                     attributes.Width(), attributes.Height());
+      return SVGLengthContext::ResolveRectangle(&patternElement, attributes.PatternUnits(), objectBoundingBox,
+                                                attributes.X(), attributes.Y(), attributes.Width(),
+                                                attributes.Height());
     }
   }
 
   bool LegacyRenderSVGResourcePattern::BuildTileImageTransform(RenderElement &renderer,
                                                                const svg::PatternAttributes &attributes,
-                                                               const svg::SVGPatternElement &patternElement,
+                                                               const SVGPatternElement &patternElement,
                                                                FloatRect &patternBoundaries,
                                                                AffineTransform &tileImageTransform) noexcept
   {
@@ -282,15 +282,15 @@ namespace krys::boo
     }
 
     AffineTransform viewBoxCTM =
-      svg::SVGFitToViewBox::ViewBoxToViewTransform(attributes.ViewBox(), attributes.PreserveAspectRatio(),
-                                                   patternBoundaries.Width(), patternBoundaries.Height());
+      SVGFitToViewBox::ViewBoxToViewTransform(attributes.ViewBox(), attributes.PreserveAspectRatio(),
+                                              patternBoundaries.Width(), patternBoundaries.Height());
 
     // Apply viewBox/objectBoundingBox transformations.
     if (!viewBoxCTM.IsIdentity())
     {
       tileImageTransform = viewBoxCTM;
     }
-    else if (attributes.PatternContentUnits() == svg::SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
+    else if (attributes.PatternContentUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
     {
       tileImageTransform.Scale(objectBoundingBox.Width(), objectBoundingBox.Height());
     }
@@ -329,16 +329,16 @@ namespace krys::boo
     }
 
     AffineTransform contentTransformation;
-    if (attributes.PatternContentUnits() == svg::SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
+    if (attributes.PatternContentUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
     {
       contentTransformation = tileImageTransform;
     }
 
     // Draw the content into the ImageBuffer.
-    Ref<const svg::SVGPatternElement> contentElement = ShareRef(*attributes.PatternContentElement());
+    Ref<const SVGPatternElement> contentElement = ShareRef(*attributes.PatternContentElement());
     for (auto *node = contentElement->FirstChild(); node; node = node->NextSibling())
     {
-      auto *child = DynamicDowncast<svg::SVGElement>(*node);
+      auto *child = DynamicDowncast<SVGElement>(*node);
       if (!child || !child->Renderer())
       {
         continue;

@@ -44,7 +44,7 @@ namespace krys::boo
     return AdoptRef(*new AXScrollbar(id, scrollbar, cache));
   }
 
-  dom::Document *AXScrollbar::GetDocument() const noexcept
+  Document *AXScrollbar::GetDocument() const noexcept
   {
     auto *parent = ParentObject();
     return parent ? parent->GetDocument() : nullptr;

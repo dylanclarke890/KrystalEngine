@@ -18,7 +18,7 @@ namespace krys::boo::tests
       List<std::string> ids;
       for (auto &renderer : range)
       {
-        auto *element = DynamicDowncast<dom::Element>(renderer.GetNode());
+        auto *element = DynamicDowncast<Element>(renderer.GetNode());
         ids.push_back(element ? css::tests::ToNarrow(element->GetAttribute(u8"id").value_or(u8"")) : "view");
       }
       return ids;

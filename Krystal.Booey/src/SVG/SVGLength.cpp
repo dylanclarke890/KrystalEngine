@@ -28,7 +28,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   dom::ExceptionOr<float> SVGLength::ValueForBindings() noexcept
   {

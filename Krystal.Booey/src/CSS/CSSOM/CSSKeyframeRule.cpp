@@ -31,9 +31,9 @@
 #include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Core/Assert.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSKeyframeRule::CSSKeyframeRule(KeyframeRule &keyframe, CSSKeyframesRule *parent) noexcept
+  CSSKeyframeRule::CSSKeyframeRule(css::KeyframeRule &keyframe, CSSKeyframesRule *parent) noexcept
       : CSSRule(nullptr), _keyframe(ShareRef(keyframe))
   {
     SetParentRule(parent);
@@ -76,7 +76,7 @@ namespace krys::boo::css
     return *_propertiesCSSOMWrapper;
   }
 
-  void CSSKeyframeRule::Reattach(Rule &) noexcept
+  void CSSKeyframeRule::Reattach(css::Rule &) noexcept
   {
     // No need to reattach, the underlying data is shareable on mutation.
     krys_debug_assert(false);

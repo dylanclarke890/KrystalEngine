@@ -28,7 +28,7 @@
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   RefPtr<css::Value> CSSMathValue::ToCSSValue() const noexcept
   {
@@ -38,18 +38,18 @@ namespace krys::boo::css
       return nullptr;
     }
 
-    auto type = calc::GetType(*node);
+    auto type = css::calc::GetType(*node);
     auto category = type.CalculationCategory();
     if (!category)
     {
       return nullptr;
     }
 
-    return PrimitiveValue::Create(calc::Value::Create(*category, All,
-                                                      calc::Tree {
-                                                        .Root = krys::move(*node),
-                                                        .Type = type,
-                                                        .Stage = calc::Stage::Specified,
-                                                      }));
+    return css::PrimitiveValue::Create(css::calc::Value::Create(*category, css::All,
+                                                                css::calc::Tree {
+                                                                  .Root = krys::move(*node),
+                                                                  .Type = type,
+                                                                  .Stage = css::calc::Stage::Specified,
+                                                                }));
   }
 }

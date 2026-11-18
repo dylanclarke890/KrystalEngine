@@ -150,7 +150,7 @@ namespace krys::boo
     bool s_hadNonVisibleOverflow = false;
   }
 
-  RenderBox::RenderBox(Type type, dom::Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags,
+  RenderBox::RenderBox(Type type, Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags,
                        TypeSpecificFlags typeSpecificFlags) noexcept
       : RenderBoxModelObject(type, element, krys::move(style), baseTypeFlags | TypeFlag::IsBox,
                              typeSpecificFlags)
@@ -158,8 +158,8 @@ namespace krys::boo
     krys_debug_assert(IsRenderBox());
   }
 
-  RenderBox::RenderBox(Type type, dom::Document &document, RenderStyle &&style,
-                       EnumSet<TypeFlag> baseTypeFlags, TypeSpecificFlags typeSpecificFlags) noexcept
+  RenderBox::RenderBox(Type type, Document &document, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags,
+                       TypeSpecificFlags typeSpecificFlags) noexcept
       : RenderBoxModelObject(type, document, krys::move(style), baseTypeFlags | TypeFlag::IsBox,
                              typeSpecificFlags)
   {
@@ -520,8 +520,8 @@ namespace krys::boo
         auto &document = GetDocument();
         auto documentElement = document.DocumentElement();
         auto *documentElementRenderer = documentElement->Renderer();
-        auto *htmlElement = DynamicDowncast<html::HTMLElement>(documentElement.get());
-        if (htmlElement && Is<html::HTMLHtmlElement>(*htmlElement) && document.Body().get() == GetElement()
+        auto *htmlElement = DynamicDowncast<HTMLElement>(documentElement.get());
+        if (htmlElement && Is<HTMLHtmlElement>(*htmlElement) && document.Body().get() == GetElement()
             && documentElementRenderer && documentElementRenderer->EffectiveOverflowX() == Overflow::Visible
             && styleToUse.UsedContain().IsNone() && documentElementRenderer->Style().UsedContain().IsNone())
         {
@@ -2809,11 +2809,11 @@ namespace krys::boo
     // https://bugs.webkit.org/show_bug.cgi?id=46473
     if (Style().LogicalWidth().IsAuto() && !IsStretchingColumnFlexItem())
     {
-      if (auto *element = DynamicDowncast<html::HTMLElement>(GetElement());
+      if (auto *element = DynamicDowncast<HTMLElement>(GetElement());
           element
-          && (Is<html::HTMLInputElement>(*element) || Is<html::HTMLSelectElement>(*element)
-              || Is<html::HTMLButtonElement>(*element) || Is<html::HTMLTextAreaElement>(*element)
-              || Is<html::HTMLLegendElement>(*element)))
+          && (Is<HTMLInputElement>(*element) || Is<HTMLSelectElement>(*element)
+              || Is<HTMLButtonElement>(*element) || Is<HTMLTextAreaElement>(*element)
+              || Is<HTMLLegendElement>(*element)))
       {
         return true;
       }
@@ -3420,8 +3420,7 @@ namespace krys::boo
     {
       return false;
     }
-    if (Is<html::HTMLFormControlElement>(child.GetElement())
-        && !Is<html::HTMLFieldSetElement>(child.GetElement()))
+    if (Is<HTMLFormControlElement>(child.GetElement()) && !Is<HTMLFieldSetElement>(child.GetElement()))
     {
       return false;
     }
@@ -3741,7 +3740,7 @@ namespace krys::boo
     {
       return true;
     }
-    if (Is<html::HTMLFormControlElement>(GetElement()))
+    if (Is<HTMLFormControlElement>(GetElement()))
     {
       return true;
     }
@@ -4086,7 +4085,7 @@ namespace krys::boo
   }
 
   bool RenderBox::ScrollLayer(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount,
-                              dom::Element **stopElement, ScrollIsAnimated animated) noexcept
+                              Element **stopElement, ScrollIsAnimated animated) noexcept
   {
     auto *scrollableArea = Layer() ? Layer()->GetScrollableArea() : nullptr;
     if (scrollableArea && scrollableArea->Scroll(direction, granularity, stepCount, animated))
@@ -4103,7 +4102,7 @@ namespace krys::boo
   }
 
   bool RenderBox::Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount,
-                         dom::Element **stopElement, ScrollIsAnimated animated) noexcept
+                         Element **stopElement, ScrollIsAnimated animated) noexcept
   {
     if (ScrollLayer(direction, granularity, stepCount, stopElement, animated))
     {
@@ -4126,8 +4125,7 @@ namespace krys::boo
   }
 
   bool RenderBox::LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                                uint32 stepCount, dom::Element **stopElement,
-                                ScrollIsAnimated animated) noexcept
+                                uint32 stepCount, Element **stopElement, ScrollIsAnimated animated) noexcept
   {
     if (auto *scrollableArea = Layer() ? Layer()->GetScrollableArea() : nullptr)
     {
@@ -5549,7 +5547,7 @@ namespace krys::boo
   bool RenderBox::IsUnsplittableForPagination() const noexcept
   {
     return IsBlockLevelReplacedOrAtomicInline()
-           || (Is<html::HTMLFormControlElement>(GetElement()) && !Is<html::HTMLFieldSetElement>(GetElement()))
+           || (Is<HTMLFormControlElement>(GetElement()) && !Is<HTMLFieldSetElement>(GetElement()))
            || HasUnsplittableScrollingOverflow() || (Parent() && IsWritingModeRoot())
            || (IsFloating() && Style().GetPseudoElementType() == PseudoElementType::FirstLetter
                && Style().InitialLetter().Drop() > 0)
@@ -6729,8 +6727,8 @@ namespace krys::boo
     if (auto reference = clipPath.TryReference())
     {
       auto element = GetDocument().GetElementById(reference->Fragment().View());
-      auto *svgElement = DynamicDowncast<svg::SVGElement>(element.get());
-      if (!svgElement || !Is<svg::SVGClipPathElement>(*svgElement) || !svgElement->Renderer())
+      auto *svgElement = DynamicDowncast<SVGElement>(element.get());
+      if (!svgElement || !Is<SVGClipPathElement>(*svgElement) || !svgElement->Renderer())
       {
         return true;
       }

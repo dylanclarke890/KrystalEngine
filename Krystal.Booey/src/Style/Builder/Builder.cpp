@@ -210,7 +210,7 @@ namespace krys::boo::style
     }
   }
 
-  void Builder::ApplyCustomProperty(const css::CSSOMStringAtom &name) noexcept
+  void Builder::ApplyCustomProperty(const CSSOMStringAtom &name) noexcept
   {
     if (_state->_appliedCustomProperties.contains(name))
     {
@@ -226,7 +226,7 @@ namespace krys::boo::style
     ApplyCustomPropertyImpl(name, iterator->second);
   }
 
-  void Builder::ApplyCustomPropertyImpl(const css::CSSOMStringAtom &name,
+  void Builder::ApplyCustomPropertyImpl(const CSSOMStringAtom &name,
                                         const PropertyCascade::Property &property) noexcept
   {
     if (!property.CssValue)
@@ -328,7 +328,7 @@ namespace krys::boo::style
   }
 
   bool Builder::ApplyRollbackCascadeCustomProperty(const PropertyCascade &rollbackCascade,
-                                                   const css::CSSOMStringAtom &name) noexcept
+                                                   const CSSOMStringAtom &name) noexcept
   {
     auto iterator = rollbackCascade.CustomProperties().find(name);
     if (iterator == rollbackCascade.CustomProperties().end())
@@ -465,7 +465,7 @@ namespace krys::boo::style
     }
   }
 
-  void Builder::ApplyCustomProperty(const css::CSSOMStringAtom &name,
+  void Builder::ApplyCustomProperty(const CSSOMStringAtom &name,
                                     ResolvedCustomProperty &&parsedCustomProperty) noexcept
   {
     auto &style = _state->Style();

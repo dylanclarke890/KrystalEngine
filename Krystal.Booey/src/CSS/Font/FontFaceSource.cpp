@@ -151,7 +151,7 @@ namespace krys::boo::css
     protectedFace->FontLoaded(*this);
   }
 
-  void CSSFontFaceSource::Load(dom::Document *) noexcept
+  void CSSFontFaceSource::Load(boo::Document *) noexcept
   {
     SetStatus(Status::Loading);
 

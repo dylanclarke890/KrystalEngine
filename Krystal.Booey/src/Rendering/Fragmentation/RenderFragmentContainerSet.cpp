@@ -28,8 +28,7 @@
 
 namespace krys::boo
 {
-  RenderFragmentContainerSet::RenderFragmentContainerSet(Type type, dom::Document &document,
-                                                         RenderStyle &&style,
+  RenderFragmentContainerSet::RenderFragmentContainerSet(Type type, Document &document, RenderStyle &&style,
                                                          RenderFragmentedFlow &fragmentedFlow) noexcept
       : RenderFragmentContainer(type, document, krys::move(style), &fragmentedFlow)
   {

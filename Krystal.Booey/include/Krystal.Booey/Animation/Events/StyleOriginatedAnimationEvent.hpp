@@ -36,16 +36,16 @@ namespace krys::boo
   {
   private:
     double _elapsedTime;
-    css::CSSOMString _pseudoElement;
+    CSSOMString _pseudoElement;
     Maybe<style::PseudoElementIdentifier> _pseudoElementIdentifier;
 
   protected:
     StyleOriginatedAnimationEvent(
-      dom::DOMStringAtom type, WebAnimation *animation, Maybe<Seconds> scheduledTime, double elapsedTime,
+      DOMStringAtom type, WebAnimation *animation, Maybe<Seconds> scheduledTime, double elapsedTime,
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
 
-    StyleOriginatedAnimationEvent(dom::DOMStringAtom type, const dom::EventInit &eventInitDict,
-                                  double elapsedTime, css::CSSOMString pseudoElement) noexcept;
+    StyleOriginatedAnimationEvent(DOMStringAtom type, const dom::EventInit &eventInitDict, double elapsedTime,
+                                  CSSOMString pseudoElement) noexcept;
 
   public:
     ~StyleOriginatedAnimationEvent() noexcept override;
@@ -56,7 +56,7 @@ namespace krys::boo
       return _elapsedTime;
     }
 
-    KRYS_NODISCARD const css::CSSOMString &PseudoElement() noexcept;
+    KRYS_NODISCARD const CSSOMString &PseudoElement() noexcept;
 
     KRYS_NODISCARD const Maybe<style::PseudoElementIdentifier> &PseudoElementIdentifier() const noexcept
     {

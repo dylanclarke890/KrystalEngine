@@ -24,7 +24,7 @@
 
 #include "Krystal.Booey/SVG/SVGFilterPrimitiveStandardAttributes.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGComponentTransferFunctionElement;
 
@@ -39,9 +39,9 @@ namespace krys::boo::svg
     Ref<SVGAnimatedString> _in1;
 
   public:
-    explicit SVGFEComponentTransferElement(dom::Document &document) noexcept;
+    explicit SVGFEComponentTransferElement(Document &document) noexcept;
 
-    KRYS_NODISCARD dom::DOMString In1() const noexcept
+    KRYS_NODISCARD DOMString In1() const noexcept
     {
       return _in1->CurrentValue();
     }
@@ -52,24 +52,24 @@ namespace krys::boo::svg
     }
 
     void TransferFunctionAttributeChanged(SVGComponentTransferFunctionElement &child,
-                                          const dom::QualifiedName &attributeName) noexcept;
+                                          const QualifiedName &attributeName) noexcept;
 
     using PropertyRegistry =
       SVGPropertyOwnerRegistry<SVGFEComponentTransferElement, SVGFilterPrimitiveStandardAttributes>;
 
   protected:
-    bool SetFilterEffectAttributeFromChild(FilterEffect &effect, const dom::Element &child,
-                                           const dom::QualifiedName &attributeName) noexcept final;
+    bool SetFilterEffectAttributeFromChild(FilterEffect &effect, const Element &child,
+                                           const QualifiedName &attributeName) noexcept final;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
-    KRYS_NODISCARD List<dom::DOMStringAtom> FilterEffectInputsNames() const noexcept final
+    KRYS_NODISCARD List<DOMStringAtom> FilterEffectInputsNames() const noexcept final
     {
-      return {dom::DOMStringAtom(In1())};
+      return {DOMStringAtom(In1())};
     }
 
     KRYS_NODISCARD RefPtr<FilterEffect>
@@ -78,14 +78,14 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGFEComponentTransferElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGFEComponentTransferElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGFEComponentTransferElement();
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    auto *svgElement = krys::DynamicDowncast<krys::boo::svg::SVGElement>(node);
+    auto *svgElement = krys::DynamicDowncast<krys::boo::SVGElement>(node);
     return svgElement && IsType(*svgElement);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

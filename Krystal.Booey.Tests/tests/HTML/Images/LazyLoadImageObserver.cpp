@@ -20,15 +20,15 @@ namespace krys::boo::tests
     {
       constexpr static IntSize ViewSize {200, 100};
       Ref<Page> TestPage;
-      Ref<dom::HTMLDocument> Document;
+      Ref<HTMLDocument> Document;
 
       explicit LazyImageFixture(utf8_string &&markup) noexcept
-          : TestPage(Page::Create()), Document(CreateRef<dom::HTMLDocument>())
+          : TestPage(Page::Create()), Document(CreateRef<HTMLDocument>())
       {
         html::EventLoop::Current().RunUntilIdle();
         auto &frame = TestPage->MainFrame();
         frame.CreateView(ViewSize);
-        frame.SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+        frame.SetDocument(ShareRefPtr<boo::Document>(Document.get()));
         auto parser = CreateRef<html::DocumentParser>(*Document);
         parser->InputStream().Append(u8"<!DOCTYPE html>" + krys::move(markup), IsEOF::Yes);
         parser->PumpTokenizer();
@@ -40,16 +40,16 @@ namespace krys::boo::tests
         return TestPage->MainFrame();
       }
 
-      KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) const noexcept
+      KRYS_NODISCARD Element &ById(DOMStringView id) const noexcept
       {
         auto element = Document->GetElementById(id);
         krys_assert(element);
         return *element;
       }
 
-      KRYS_NODISCARD html::HTMLImageElement &Image(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD HTMLImageElement &Image(DOMStringView id) noexcept
       {
-        return Downcast<html::HTMLImageElement>(ById(id));
+        return Downcast<HTMLImageElement>(ById(id));
       }
 
       void UpdateRendering() noexcept
@@ -78,7 +78,7 @@ namespace krys::boo::tests
     CHECK(css::tests::ToNarrow(fixture.Image(u8"invalid").Loading()) == "eager");
 
     fixture.Image(u8"missing").Loading(u8"lazy");
-    CHECK(fixture.Image(u8"missing").GetAttribute(u8"loading") == dom::DOMString(u8"lazy"));
+    CHECK(fixture.Image(u8"missing").GetAttribute(u8"loading") == DOMString(u8"lazy"));
   }
 
   TEST_CASE("LazyLoadImageObserver: a lazy image loads once it intersects the viewport",

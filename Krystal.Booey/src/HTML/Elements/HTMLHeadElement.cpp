@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLHeadElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLHeadElement::HTMLHeadElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Head)
+  HTMLHeadElement::HTMLHeadElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Head)
   {
   }
 }

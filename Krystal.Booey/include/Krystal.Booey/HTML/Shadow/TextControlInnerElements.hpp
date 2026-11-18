@@ -42,9 +42,9 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(TextControlInnerContainer);
 
   public:
-    explicit TextControlInnerContainer(dom::Document &document) noexcept;
+    explicit TextControlInnerContainer(Document &document) noexcept;
 
-    KRYS_NODISCARD static Ref<TextControlInnerContainer> Create(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<TextControlInnerContainer> Create(Document &document) noexcept;
 
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
@@ -60,9 +60,9 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(TextControlInnerElement);
 
   public:
-    explicit TextControlInnerElement(dom::Document &document) noexcept;
+    explicit TextControlInnerElement(Document &document) noexcept;
 
-    KRYS_NODISCARD static Ref<TextControlInnerElement> Create(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<TextControlInnerElement> Create(Document &document) noexcept;
 
   private:
     KRYS_NODISCARD Maybe<style::UnadjustedStyle>
@@ -77,9 +77,9 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(TextControlInnerTextElement);
 
   public:
-    explicit TextControlInnerTextElement(dom::Document &document) noexcept;
+    explicit TextControlInnerTextElement(Document &document) noexcept;
 
-    KRYS_NODISCARD static Ref<TextControlInnerTextElement> Create(dom::Document &document,
+    KRYS_NODISCARD static Ref<TextControlInnerTextElement> Create(Document &document,
                                                                   bool isEditable) noexcept;
 
     void DefaultEventHandler(dom::Event &event) noexcept override;
@@ -112,9 +112,9 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(TextControlPlaceholderElement);
 
   public:
-    explicit TextControlPlaceholderElement(dom::Document &document) noexcept;
+    explicit TextControlPlaceholderElement(Document &document) noexcept;
 
-    KRYS_NODISCARD static Ref<TextControlPlaceholderElement> Create(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<TextControlPlaceholderElement> Create(Document &document) noexcept;
 
   private:
     KRYS_NODISCARD Maybe<style::UnadjustedStyle>
@@ -131,9 +131,9 @@ namespace krys::boo::html
     bool _canAdjustStyleForAppearance {true};
 
   public:
-    explicit SearchFieldResultsButtonElement(dom::Document &document) noexcept;
+    explicit SearchFieldResultsButtonElement(Document &document) noexcept;
 
-    KRYS_NODISCARD static Ref<SearchFieldResultsButtonElement> Create(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<SearchFieldResultsButtonElement> Create(Document &document) noexcept;
 
     void DefaultEventHandler(dom::Event &event) noexcept override;
 
@@ -160,9 +160,9 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SearchFieldCancelButtonElement);
 
   public:
-    explicit SearchFieldCancelButtonElement(dom::Document &document) noexcept;
+    explicit SearchFieldCancelButtonElement(Document &document) noexcept;
 
-    KRYS_NODISCARD static Ref<SearchFieldCancelButtonElement> Create(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<SearchFieldCancelButtonElement> Create(Document &document) noexcept;
 
     void DefaultEventHandler(dom::Event &event) noexcept override;
 
@@ -174,25 +174,25 @@ namespace krys::boo::html
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::TextControlInnerTextElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &element) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &element) noexcept
   {
     return element.IsTextControlInnerTextElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    return node.IsHTMLElement() && IsType(Downcast<krys::boo::html::HTMLElement>(node));
+    return node.IsHTMLElement() && IsType(Downcast<krys::boo::HTMLElement>(node));
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::SearchFieldResultsButtonElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &element) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &element) noexcept
   {
     return element.IsSearchFieldResultsButtonElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    return node.IsHTMLElement() && IsType(Downcast<krys::boo::html::HTMLElement>(node));
+    return node.IsHTMLElement() && IsType(Downcast<krys::boo::HTMLElement>(node));
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

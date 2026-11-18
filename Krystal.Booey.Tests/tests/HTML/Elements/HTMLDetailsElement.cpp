@@ -23,7 +23,7 @@ namespace krys::boo::html::tests
 
   namespace
   {
-    KRYS_NODISCARD std::string Narrow(dom::DOMStringView string)
+    KRYS_NODISCARD std::string Narrow(DOMStringView string)
     {
       return std::string(reinterpret_cast<const char *>(string.data()), string.size());
     }
@@ -34,9 +34,9 @@ namespace krys::boo::html::tests
       List<std::string> Events;
       List<dom::EventListenerHandle> Handles;
 
-      void Watch(dom::Element &element) noexcept
+      void Watch(Element &element) noexcept
       {
-        auto id = Narrow(element.GetAttribute(u8"id").value_or(dom::DOMString()));
+        auto id = Narrow(element.GetAttribute(u8"id").value_or(DOMString()));
         Handles.push_back(element.AddEventListener(u8"toggle",
                                                    [this, id](dom::Event &event)
                                                    {
@@ -69,8 +69,8 @@ namespace krys::boo::html::tests
     void Navigate(NavigationFixture &fixture, utf8_stringview url) noexcept
     {
       fixture.Frame->Loader().ChangeLocation(url::URL(fixture.Document->GetURL(), url),
-                                             dom::DOMStringAtom::Empty(), nullptr,
-                                             ReferrerPolicy::EmptyString, null);
+                                             DOMStringAtom::Empty(), nullptr, ReferrerPolicy::EmptyString,
+                                             null);
       html::EventLoop::Current().RunUntilIdle();
     }
   }
@@ -246,8 +246,8 @@ namespace krys::boo::html::tests
     {
       // Both stay open in a disconnected tree; once connected, the first finds the second open and closes.
       auto container = document.CreateElement(u8"div").ReleaseValue();
-      Ref<dom::Element> first = document.CreateElement(u8"details").ReleaseValue();
-      Ref<dom::Element> second = document.CreateElement(u8"details").ReleaseValue();
+      Ref<Element> first = document.CreateElement(u8"details").ReleaseValue();
+      Ref<Element> second = document.CreateElement(u8"details").ReleaseValue();
       for (auto *details : {first.get(), second.get()})
       {
         (void)details->SetAttribute(u8"name", u8"other");
@@ -292,15 +292,14 @@ namespace krys::boo::html::tests
       {
         CHECK(event.Bubbles());
         CHECK_FALSE(event.Cancelable());
-        events.push_back(Narrow(Downcast<dom::Element>(Downcast<dom::Node>(*event.Target()))
-                                  .GetAttribute(u8"id")
-                                  .value_or(dom::DOMString())));
+        events.push_back(Narrow(
+          Downcast<Element>(Downcast<Node>(*event.Target())).GetAttribute(u8"id").value_or(DOMString())));
       });
 
     SECTION("hidden=until-found reflects as such, whatever its case")
     {
       CHECK(hidden.IsHiddenUntilFound());
-      hidden.Hidden(dom::DOMString(u8"UNTIL-FOUND"));
+      hidden.Hidden(DOMString(u8"UNTIL-FOUND"));
       CHECK(hidden.GetAttribute(u8"hidden") == u8"until-found");
     }
 

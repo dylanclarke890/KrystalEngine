@@ -2739,7 +2739,7 @@ namespace std
   {
     size_t operator()(const krys::boo::css::CustomIdentifier &identifier) const noexcept
     {
-      return hash<krys::boo::css::CSSOMStringAtom> {}(identifier.Value);
+      return hash<krys::boo::CSSOMStringAtom> {}(identifier.Value);
     }
   };
 

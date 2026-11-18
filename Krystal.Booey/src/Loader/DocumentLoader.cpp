@@ -321,7 +321,7 @@ namespace krys::boo
       _isLoadingMainResource = false;
       return;
     }
-    if (RefPtr<dom::Document> document = ShareRefPtr(frame->Document()))
+    if (RefPtr<boo::Document> document = ShareRefPtr(frame->Document()))
     {
       document->SetLastModified(_response.LastModified());
       // The Content-Language header's first language is the document's language until a content-language
@@ -338,7 +338,7 @@ namespace krys::boo
       }
       if (!contentLanguage.empty())
       {
-        document->SetContentLanguage(dom::DOMString(contentLanguage));
+        document->SetContentLanguage(DOMString(contentLanguage));
       }
     }
     _writer.AddData(data);
@@ -363,7 +363,7 @@ namespace krys::boo
     // https://html.spec.whatwg.org/#creating-a-new-browsing-context
     // 26. Completely finish loading document.
     // (The document is never parsed, so its readiness is "complete", and it gets no load event.)
-    if (RefPtr<dom::Document> document = ShareRefPtr(_frame ? _frame->Document() : nullptr))
+    if (RefPtr<boo::Document> document = ShareRefPtr(_frame ? _frame->Document() : nullptr))
     {
       dom::DocumentAlgorithms::UpdateCurrentDocumentReadiness(*document, html::DocumentReadyState::Complete);
     }

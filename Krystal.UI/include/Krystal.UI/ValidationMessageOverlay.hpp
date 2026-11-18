@@ -19,7 +19,7 @@ namespace krys::ui
   private:
     View *_owner {nullptr};
     UniquePtr<View> _view;
-    WeakPtr<boo::dom::Element> _anchor;
+    WeakPtr<boo::Element> _anchor;
     utf8_string _message;
     boo::IntRect _rect;
     boo::Timer _hideTimer {*this, &ValidationMessageOverlay::Hide};
@@ -31,7 +31,7 @@ namespace krys::ui
     ~ValidationMessageOverlay() noexcept override;
 
     /// @brief Shows @p message at @p anchor, in place of the message shown.
-    void Show(boo::dom::Element &anchor, utf8_stringview message) noexcept;
+    void Show(boo::Element &anchor, utf8_stringview message) noexcept;
 
     /// @brief Forgets the owner, which is going away.
     void Detach() noexcept;
@@ -42,7 +42,7 @@ namespace krys::ui
     }
 
     /// @brief Whether the message is shown at @p anchor.
-    KRYS_NODISCARD bool IsShownAt(const boo::dom::Element &anchor) const noexcept
+    KRYS_NODISCARD bool IsShownAt(const boo::Element &anchor) const noexcept
     {
       return _visible && _anchor.get() == &anchor;
     }

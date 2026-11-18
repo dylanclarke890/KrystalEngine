@@ -88,7 +88,7 @@ namespace krys::boo
     }
 
     /// @see https://drafts.csswg.org/css-animations-2/#dom-cssanimation-animationname
-    KRYS_NODISCARD const css::CSSOMStringAtom &AnimationName() const noexcept
+    KRYS_NODISCARD const CSSOMStringAtom &AnimationName() const noexcept
     {
       return _animationName.Name;
     }
@@ -127,7 +127,7 @@ namespace krys::boo
     KRYS_NODISCARD boo::TimingFunction *BackingAnimationTimingFunction() const noexcept final;
 
     KRYS_NODISCARD Ref<StyleOriginatedAnimationEvent>
-      CreateEvent(dom::DOMStringAtom eventType, Maybe<Seconds> scheduledTime, double elapsedTime,
+      CreateEvent(DOMStringAtom eventType, Maybe<Seconds> scheduledTime, double elapsedTime,
                   const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept final;
 
     KRYS_NODISCARD AnimationTimeline *BindingsTimeline() const noexcept final;

@@ -103,7 +103,7 @@ namespace krys::boo
       size_t sum = 0;
       for (const auto &[name, values] : tags)
       {
-        size_t entry = DefaultHash<css::CSSOMString>::Hash(name);
+        size_t entry = DefaultHash<CSSOMString>::Hash(name);
         for (auto value : values)
         {
           entry = krys::Hash::Combine(entry, value);

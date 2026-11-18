@@ -37,14 +37,14 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD bool IsSVGElementNamed(const dom::Node *node, dom::DOMStringView localName) noexcept
+    KRYS_NODISCARD bool IsSVGElementNamed(const Node *node, DOMStringView localName) noexcept
     {
-      auto *element = DynamicDowncast<dom::Element>(node);
-      return element && Is<svg::SVGElement>(*element) && element->LocalName() == localName;
+      auto *element = DynamicDowncast<Element>(node);
+      return element && Is<SVGElement>(*element) && element->LocalName() == localName;
     }
   }
 
-  AXSVGObject::AXSVGObject(AXId id, RenderObject *renderer, dom::Node *node, AXObjectCache &cache,
+  AXSVGObject::AXSVGObject(AXId id, RenderObject *renderer, Node *node, AXObjectCache &cache,
                            bool isSVGRoot) noexcept
       : AXRenderObject(id, renderer, node, cache), _isSVGRoot(isSVGRoot)
   {
@@ -58,7 +58,7 @@ namespace krys::boo
     return AdoptRef(*new AXSVGObject(id, &renderer, renderer.GetNode(), cache, isSVGRoot));
   }
 
-  Ref<AXSVGObject> AXSVGObject::Create(AXId id, dom::Element &element, AXObjectCache &cache) noexcept
+  Ref<AXSVGObject> AXSVGObject::Create(AXId id, Element &element, AXObjectCache &cache) noexcept
   {
     return AdoptRef(*new AXSVGObject(id, nullptr, &element, cache, false));
   }
@@ -80,23 +80,23 @@ namespace krys::boo
     {
       return false;
     }
-    auto hasValue = [](const dom::Element &element, dom::DOMStringAtom name)
+    auto hasValue = [](const Element &element, DOMStringAtom name)
     {
       auto value = element.GetAttribute(krys::move(name));
       return value && !value->empty();
     };
-    auto isAccessible = [&](const dom::Node &node)
+    auto isAccessible = [&](const Node &node)
     {
-      auto *element = DynamicDowncast<dom::Element>(node);
-      if (!element || !Is<svg::SVGElement>(*element))
+      auto *element = DynamicDowncast<Element>(node);
+      if (!element || !Is<SVGElement>(*element))
       {
         return false;
       }
       return IsSVGElementNamed(element, u8"title") || IsSVGElementNamed(element, u8"desc")
-             || Is<svg::SVGTextContentElement>(Downcast<svg::SVGElement>(*element))
-             || hasValue(*element, u8"role") || hasValue(*element, u8"aria-label");
+             || Is<SVGTextContentElement>(Downcast<SVGElement>(*element)) || hasValue(*element, u8"role")
+             || hasValue(*element, u8"aria-label");
     };
-    for (const dom::Node *node = root; node; node = dom::TreeQueries::Next(*node, root))
+    for (const Node *node = root; node; node = dom::TreeQueries::Next(*node, root))
     {
       if (isAccessible(*node))
       {

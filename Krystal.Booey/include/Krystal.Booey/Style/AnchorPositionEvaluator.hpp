@@ -48,14 +48,10 @@
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
   class Element;
-}
-
-namespace krys::boo
-{
   class RenderBox;
   class RenderBoxModelObject;
   class RenderElement;
@@ -193,7 +189,7 @@ namespace krys::boo::style
     Positioned,
   };
 
-  using AnchorElements = HashMap<ResolvedScopedName, WeakPtr<dom::Element>>;
+  using AnchorElements = HashMap<ResolvedScopedName, WeakPtr<boo::Element>>;
 
   struct AnchorPositionedState
   {
@@ -202,7 +198,7 @@ namespace krys::boo::style
     AnchorPositionResolutionStage Stage {AnchorPositionResolutionStage::FindAnchors};
   };
 
-  using AnchorPositionedKey = Pair<RefPtr<const dom::Element>, Maybe<PseudoElementIdentifier>>;
+  using AnchorPositionedKey = Pair<RefPtr<const boo::Element>, Maybe<PseudoElementIdentifier>>;
 
   /// @brief Hashes an anchor-positioned element or pseudo-element, for maps keyed by it.
   struct AnchorPositionedKeyHash
@@ -210,7 +206,7 @@ namespace krys::boo::style
     KRYS_NODISCARD size_t operator()(const AnchorPositionedKey &key) const noexcept
     {
       auto pseudoHash = key.second ? DefaultHash<PseudoElementIdentifier>::Hash(*key.second) : 0uz;
-      return UnsignedIntegerPairHash(std::hash<const dom::Element *> {}(key.first.get()), pseudoHash);
+      return UnsignedIntegerPairHash(std::hash<const boo::Element *> {}(key.first.get()), pseudoHash);
     }
   };
 
@@ -229,7 +225,7 @@ namespace krys::boo::style
   {
     // The anchor-positioned element: the map is keyed by its address, and this tells a destroyed element from
     // a new one at the same address.
-    WeakPtr<dom::Element> Element;
+    WeakPtr<boo::Element> Element;
 
     // The pseudo-element identifier can be used to access the AnchorPositionedState struct of the current
     // element in an AnchorPositionedStates map, in combination with the relevant Element object.
@@ -238,8 +234,8 @@ namespace krys::boo::style
     List<ResolvedAnchor> Anchors;
   };
 
-  using AnchorPositionedToAnchorMap = HashMap<const dom::Element *, AnchorPositionedToAnchorEntry>;
-  using AnchorToAnchorPositionedMap = HashMap<const RenderBoxModelObject *, List<Ref<dom::Element>>>;
+  using AnchorPositionedToAnchorMap = HashMap<const boo::Element *, AnchorPositionedToAnchorEntry>;
+  using AnchorToAnchorPositionedMap = HashMap<const RenderBoxModelObject *, List<Ref<boo::Element>>>;
 
   /// @brief Resolves anchor positioning: finds the anchors of anchor-positioned boxes and evaluates the
   /// `anchor()` and `anchor-size()` functions against their geometry.
@@ -270,13 +266,13 @@ namespace krys::boo::style
     KRYS_NODISCARD static Maybe<double> EvaluateSize(BuilderState &, Maybe<ScopedName> elementName,
                                                      Maybe<AnchorSizeDimension>) noexcept;
 
-    static void UpdateAnchorPositioningStatesAfterInterleavedLayout(dom::Document &,
+    static void UpdateAnchorPositioningStatesAfterInterleavedLayout(Document &,
                                                                     AnchorPositionedStates &) noexcept;
 
     static void UpdateScrollAdjustments(RenderView &) noexcept;
 
     static void
-      UpdateAnchorPositionedStateForDefaultAnchorAndPositionVisibility(dom::Element &, const RenderStyle &,
+      UpdateAnchorPositionedStateForDefaultAnchorAndPositionVisibility(boo::Element &, const RenderStyle &,
                                                                        AnchorPositionedStates &) noexcept;
 
     KRYS_NODISCARD static LayoutRect
@@ -329,14 +325,14 @@ namespace krys::boo::style
                                                       Maybe<ScopedName> anchorNameArgument) noexcept;
 
     KRYS_NODISCARD static AnchorElements
-      FindAnchorsForAnchorPositionedElement(const dom::Element &,
+      FindAnchorsForAnchorPositionedElement(const boo::Element &,
                                             const HashSet<ResolvedScopedName> &anchorNames,
                                             const AnchorsForAnchorName &) noexcept;
 
-    KRYS_NODISCARD static RefPtr<const dom::Element>
+    KRYS_NODISCARD static RefPtr<const boo::Element>
       AnchorPositionedElementOrPseudoElement(BuilderState &) noexcept;
 
-    KRYS_NODISCARD static AnchorPositionedKey KeyForElementOrPseudoElement(const dom::Element &) noexcept;
+    KRYS_NODISCARD static AnchorPositionedKey KeyForElementOrPseudoElement(const boo::Element &) noexcept;
 
     static void AddAnchorFunctionScrollCompensatedAxis(RenderStyle &, const RenderBox &anchored,
                                                        const RenderBoxModelObject &anchor, BoxAxis) noexcept;

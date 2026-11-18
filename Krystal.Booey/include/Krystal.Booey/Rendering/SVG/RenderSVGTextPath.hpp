@@ -23,32 +23,29 @@
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGGeometryElement;
   class SVGLengthValue;
   class SVGTextPathElement;
-}
 
-namespace krys::boo
-{
   /// @brief The renderer of a `<textPath>`: its text is laid out along the referenced shape's path.
   class RenderSVGTextPath final : public RenderSVGInline
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderSVGTextPath);
 
   public:
-    RenderSVGTextPath(svg::SVGTextPathElement &, RenderStyle &&) noexcept;
+    RenderSVGTextPath(SVGTextPathElement &, RenderStyle &&) noexcept;
 
     ~RenderSVGTextPath() noexcept override;
 
-    KRYS_NODISCARD svg::SVGTextPathElement &TextPathElement() const noexcept;
+    KRYS_NODISCARD SVGTextPathElement &TextPathElement() const noexcept;
 
-    KRYS_NODISCARD svg::SVGGeometryElement *TargetElement() const noexcept;
+    KRYS_NODISCARD SVGGeometryElement *TargetElement() const noexcept;
 
     KRYS_NODISCARD Path LayoutPath() const noexcept;
 
-    KRYS_NODISCARD const svg::SVGLengthValue &StartOffset() const noexcept;
+    KRYS_NODISCARD const SVGLengthValue &StartOffset() const noexcept;
 
     void GraphicsElement() const = delete;
 

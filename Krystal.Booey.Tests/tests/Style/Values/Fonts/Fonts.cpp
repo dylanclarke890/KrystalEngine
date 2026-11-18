@@ -243,9 +243,9 @@ namespace krys::boo::style::tests
     auto functions = Convert<FontVariantAlternates>(
       PropertyId::FontVariantAlternates, u8"swash(flowing) styleset(a, b) historical-forms stylistic(s)");
     const auto &values = functions.GetPlatform().GetValues();
-    CHECK(values.Swash == css::CSSOMString {u8"flowing"});
-    CHECK(values.Styleset == List<css::CSSOMString> {u8"a", u8"b"});
-    CHECK(values.Stylistic == css::CSSOMString {u8"s"});
+    CHECK(values.Swash == CSSOMString {u8"flowing"});
+    CHECK(values.Styleset == List<CSSOMString> {u8"a", u8"b"});
+    CHECK(values.Stylistic == CSSOMString {u8"s"});
     CHECK_FALSE(values.Ornaments);
     CHECK(Serialised(functions) == "stylistic(s) historical-forms styleset(a, b) swash(flowing)");
     CHECK(Created(functions) == "stylistic(s) historical-forms styleset(a, b) swash(flowing)");

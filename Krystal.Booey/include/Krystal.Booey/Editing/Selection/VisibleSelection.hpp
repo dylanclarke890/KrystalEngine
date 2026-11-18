@@ -115,7 +115,7 @@ namespace krys::boo
 
     KRYS_NODISCARD static const VisibleSelection &EmptySelection() noexcept;
 
-    KRYS_NODISCARD static VisibleSelection SelectionFromContentsOfNode(dom::Node *node) noexcept;
+    KRYS_NODISCARD static VisibleSelection SelectionFromContentsOfNode(Node *node) noexcept;
 
     void SetAffinity(Affinity affinity) noexcept
     {
@@ -236,7 +236,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsOrphan() const noexcept;
 
-    KRYS_NODISCARD RefPtr<dom::Document> GetDocument() const noexcept;
+    KRYS_NODISCARD RefPtr<Document> GetDocument() const noexcept;
 
     KRYS_NODISCARD bool IsBaseFirst() const noexcept
     {
@@ -267,7 +267,7 @@ namespace krys::boo
     // This function contracts the range around text and moves the caret upstream before returning the range.
     KRYS_NODISCARD Maybe<dom::SimpleRange> ToNormalizedRange() const noexcept;
 
-    KRYS_NODISCARD dom::Element *RootEditableElement() const noexcept;
+    KRYS_NODISCARD Element *RootEditableElement() const noexcept;
 
     /// @brief Whether the selection starts in a password field.
     KRYS_NODISCARD bool IsInPasswordField() const noexcept;
@@ -285,13 +285,13 @@ namespace krys::boo
     KRYS_NODISCARD bool IsContentRichlyEditable() const noexcept;
 
     // Returns a child of the ShadowRoot node for shadow trees, or null for non-shadow trees.
-    KRYS_NODISCARD dom::Node *NonBoundaryShadowTreeRootNode() const noexcept;
+    KRYS_NODISCARD Node *NonBoundaryShadowTreeRootNode() const noexcept;
 
     KRYS_NODISCARD static dom::Position AdjustPositionForEnd(const dom::Position &currentPosition,
-                                                             dom::Node *startContainerNode) noexcept;
+                                                             Node *startContainerNode) noexcept;
 
     KRYS_NODISCARD static dom::Position AdjustPositionForStart(const dom::Position &currentPosition,
-                                                               dom::Node *endContainerNode) noexcept;
+                                                               Node *endContainerNode) noexcept;
 
     void SetWithoutValidation(const dom::Position &anchor, const dom::Position &focus) noexcept;
 

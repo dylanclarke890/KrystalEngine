@@ -5,10 +5,13 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Node;
+}
 
+namespace krys::boo::dom
+{
   /// @brief A range: a start and an end boundary point, static or live.
   /// @see https://dom.spec.whatwg.org/#interface-abstractrange
   /// @see https://dom.spec.whatwg.org/#concept-range

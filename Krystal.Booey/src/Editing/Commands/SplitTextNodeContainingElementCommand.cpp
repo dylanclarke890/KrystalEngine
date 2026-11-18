@@ -30,7 +30,7 @@
 
 namespace krys::boo
 {
-  SplitTextNodeContainingElementCommand::SplitTextNodeContainingElementCommand(dom::Text &text,
+  SplitTextNodeContainingElementCommand::SplitTextNodeContainingElementCommand(Text &text,
                                                                                uint32 offset) noexcept
       : CompositeEditCommand(text.NodeDocument()), _text(ShareRef(text)), _offset(offset)
   {
@@ -38,7 +38,7 @@ namespace krys::boo
   }
 
   Ref<SplitTextNodeContainingElementCommand>
-    SplitTextNodeContainingElementCommand::Create(dom::Text &text, uint32 offset) noexcept
+    SplitTextNodeContainingElementCommand::Create(Text &text, uint32 offset) noexcept
   {
     return CreateRef<SplitTextNodeContainingElementCommand>(text, offset);
   }
@@ -49,7 +49,7 @@ namespace krys::boo
 
     SplitTextNode(*_text, _offset);
 
-    RefPtr<dom::Element> parent = ShareRefPtr(_text->ParentElement());
+    RefPtr<Element> parent = ShareRefPtr(_text->ParentElement());
     if (!parent)
     {
       return;
@@ -65,7 +65,7 @@ namespace krys::boo
     if (!parentRenderer || !parentRenderer->IsInline())
     {
       WrapContentsInDummySpan(*parent);
-      auto *firstChild = DynamicDowncast<dom::Element>(parent->FirstChild());
+      auto *firstChild = DynamicDowncast<Element>(parent->FirstChild());
       if (!firstChild)
       {
         return;

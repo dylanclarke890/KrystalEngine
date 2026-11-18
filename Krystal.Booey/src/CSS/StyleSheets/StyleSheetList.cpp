@@ -25,25 +25,24 @@
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  StyleSheetList::StyleSheetList(dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
+  StyleSheetList::StyleSheetList(Document &document) noexcept : _document(CreateWeakPtr(&document))
   {
   }
 
-  StyleSheetList::StyleSheetList(dom::ShadowRoot &shadowRoot) noexcept
-      : _shadowRoot(CreateWeakPtr(&shadowRoot))
+  StyleSheetList::StyleSheetList(ShadowRoot &shadowRoot) noexcept : _shadowRoot(CreateWeakPtr(&shadowRoot))
   {
   }
 
   StyleSheetList::~StyleSheetList() noexcept = default;
 
-  Ref<StyleSheetList> StyleSheetList::Create(dom::Document &document) noexcept
+  Ref<StyleSheetList> StyleSheetList::Create(Document &document) noexcept
   {
     return AdoptRef(*new StyleSheetList(document));
   }
 
-  Ref<StyleSheetList> StyleSheetList::Create(dom::ShadowRoot &shadowRoot) noexcept
+  Ref<StyleSheetList> StyleSheetList::Create(ShadowRoot &shadowRoot) noexcept
   {
     return AdoptRef(*new StyleSheetList(shadowRoot));
   }
@@ -61,7 +60,7 @@ namespace krys::boo::css
     return _detachedStyleSheets;
   }
 
-  dom::Node *StyleSheetList::OwnerNode() const noexcept
+  Node *StyleSheetList::OwnerNode() const noexcept
   {
     if (auto *document = _document.get())
     {

@@ -45,7 +45,7 @@ namespace krys::boo::style
     {
       if (primitiveValue->IsFontFamily())
       {
-        return {css::CSSOMStringAtom {primitiveValue->StringValue()}, FontFamilyKind::Specified};
+        return {CSSOMStringAtom {primitiveValue->StringValue()}, FontFamilyKind::Specified};
       }
 
       auto valueID = primitiveValue->ValueId();
@@ -78,14 +78,14 @@ namespace krys::boo::style
     }
 
     Maybe<FontFamilyKind> firstFontKind;
-    List<css::CSSOMStringAtom> families;
+    List<CSSOMStringAtom> families;
     for (const auto &contentValue : *valueList)
     {
-      auto [family, kind] = [&]() -> Pair<css::CSSOMStringAtom, FontFamilyKind>
+      auto [family, kind] = [&]() -> Pair<CSSOMStringAtom, FontFamilyKind>
       {
         if (contentValue.IsFontFamily())
         {
-          return {css::CSSOMStringAtom {contentValue.StringValue()}, FontFamilyKind::Specified};
+          return {CSSOMStringAtom {contentValue.StringValue()}, FontFamilyKind::Specified};
         }
 
         auto valueID = contentValue.ValueId();

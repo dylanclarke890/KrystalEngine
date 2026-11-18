@@ -26,22 +26,22 @@ namespace krys::boo::html::tests
     /// @brief A chrome client that keeps the validation message it's asked to show.
     struct ValidationChromeClient final : ChromeClient
     {
-      const dom::Element *Anchor {nullptr};
-      dom::DOMString Message;
+      const boo::Element *Anchor {nullptr};
+      DOMString Message;
       uint32 ShowCount {0};
 
       void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
       {
       }
 
-      void ShowValidationMessage(dom::Element &anchor, const dom::DOMString &message) noexcept final
+      void ShowValidationMessage(boo::Element &anchor, const DOMString &message) noexcept final
       {
         Anchor = &anchor;
         Message = message;
         ++ShowCount;
       }
 
-      void HideValidationMessage(const dom::Element &anchor) noexcept final
+      void HideValidationMessage(const boo::Element &anchor) noexcept final
       {
         if (Anchor == &anchor)
         {
@@ -55,7 +55,7 @@ namespace krys::boo::html::tests
         Message.clear();
       }
 
-      KRYS_NODISCARD bool IsValidationMessageVisible(const dom::Element &anchor) const noexcept final
+      KRYS_NODISCARD bool IsValidationMessageVisible(const boo::Element &anchor) const noexcept final
       {
         return Anchor == &anchor;
       }
@@ -68,7 +68,7 @@ namespace krys::boo::html::tests
                                                                    false, {}, MonotonicTime::Now()));
     }
 
-    KRYS_NODISCARD bool Matches(const dom::Element &element, dom::DOMStringView selector)
+    KRYS_NODISCARD bool Matches(const boo::Element &element, DOMStringView selector)
     {
       auto result = element.Matches(selector);
       REQUIRE_FALSE(result.HasException());

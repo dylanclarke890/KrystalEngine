@@ -71,7 +71,7 @@ namespace krys::boo
 
     List<Ref<CSSAnimation>> _cssAnimationsPendingAttachment;
     List<Pair<style::NameScope, style::WeakStyleable>> _timelineScopeEntries;
-    HashMap<css::CSSOMStringAtom, List<Ref<ScrollTimeline>>> _nameToTimelineMap;
+    HashMap<CSSOMStringAtom, List<Ref<ScrollTimeline>>> _nameToTimelineMap;
     ListHashSet<Ref<ScrollTimeline>> _removedTimelines;
 
   public:
@@ -79,14 +79,13 @@ namespace krys::boo
 
     ~StyleOriginatedTimelinesController() noexcept;
 
-    void RegisterNamedScrollTimeline(const css::CSSOMStringAtom &name, const style::Styleable &source,
+    void RegisterNamedScrollTimeline(const CSSOMStringAtom &name, const style::Styleable &source,
                                      ScrollAxis axis) noexcept;
 
-    void RegisterNamedViewTimeline(const css::CSSOMStringAtom &name, const style::Styleable &subject,
+    void RegisterNamedViewTimeline(const CSSOMStringAtom &name, const style::Styleable &subject,
                                    ScrollAxis axis, const style::ViewTimelineInsetItem &insets) noexcept;
 
-    void UnregisterNamedTimeline(const css::CSSOMStringAtom &name,
-                                 const style::Styleable &styleable) noexcept;
+    void UnregisterNamedTimeline(const CSSOMStringAtom &name, const style::Styleable &styleable) noexcept;
 
     void AttachAnimation(CSSAnimation &animation) noexcept;
 
@@ -94,7 +93,7 @@ namespace krys::boo
                                                 const style::Styleable &styleable) noexcept;
 
     void UpdateTimelineForTimelineScope(const Ref<ScrollTimeline> &timeline,
-                                        const css::CSSOMStringAtom &name) noexcept;
+                                        const CSSOMStringAtom &name) noexcept;
 
     void UnregisterNamedTimelinesAssociatedWithElement(const style::Styleable &styleable) noexcept;
 
@@ -107,12 +106,12 @@ namespace krys::boo
     void StyleableWasRemoved(const style::Styleable &styleable) noexcept;
 
   private:
-    KRYS_NODISCARD List<Ref<ScrollTimeline>> &TimelinesForName(const css::CSSOMStringAtom &name) noexcept;
+    KRYS_NODISCARD List<Ref<ScrollTimeline>> &TimelinesForName(const CSSOMStringAtom &name) noexcept;
 
     KRYS_NODISCARD List<style::WeakStyleable>
       RelatedTimelineScopeElements(const css::CustomIdentifier &name) noexcept;
 
-    void UpdateCSSAnimationsAssociatedWithNamedTimeline(const css::CSSOMStringAtom &name) noexcept;
+    void UpdateCSSAnimationsAssociatedWithNamedTimeline(const CSSOMStringAtom &name) noexcept;
 
     void AttachAnimation(CSSAnimation &animation, AllowsDeferral allowsDeferral) noexcept;
 
@@ -126,6 +125,6 @@ namespace krys::boo
                          const style::Styleable &styleable,
                          const List<style::WeakStyleable> &timelineScopeElements) noexcept;
 
-    KRYS_NODISCARD ScrollTimeline &InactiveNamedTimeline(const css::CSSOMStringAtom &name) noexcept;
+    KRYS_NODISCARD ScrollTimeline &InactiveNamedTimeline(const CSSOMStringAtom &name) noexcept;
   };
 }

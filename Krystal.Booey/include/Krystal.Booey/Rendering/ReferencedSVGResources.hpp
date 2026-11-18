@@ -34,9 +34,13 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include <utility>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
+}
+
+namespace krys::boo::dom
+{
   class DocumentOrShadowRoot;
 }
 
@@ -46,12 +50,6 @@ namespace krys::boo::style
   struct ReferencePath;
 }
 
-namespace krys::boo::svg
-{
-  class SVGElement;
-  class SVGFilterElement;
-}
-
 namespace krys::boo
 {
   class CSSSVGResourceElementClient;
@@ -59,6 +57,8 @@ namespace krys::boo
   class LegacyRenderSVGResourceContainer;
   class RenderElement;
   class RenderStyle;
+  class SVGElement;
+  class SVGFilterElement;
 
   /// @brief The SVG elements a renderer's style refers to (a `clip-path: url()` or `filter: url()`), which
   /// tell it when they change.
@@ -68,19 +68,19 @@ namespace krys::boo
 
   public:
     using SVGQualifiedNames = List<html::TagName>;
-    using SVGElementIdentifierAndTagPairs = List<std::pair<dom::DOMStringAtom, SVGQualifiedNames>>;
+    using SVGElementIdentifierAndTagPairs = List<std::pair<DOMStringAtom, SVGQualifiedNames>>;
 
   private:
     RenderElement &_renderer;
-    HashMap<dom::DOMStringAtom, UniquePtr<CSSSVGResourceElementClient>> _elementClients;
+    HashMap<DOMStringAtom, UniquePtr<CSSSVGResourceElementClient>> _elementClients;
 
   public:
     explicit ReferencedSVGResources(RenderElement &) noexcept;
 
     ~ReferencedSVGResources() noexcept;
 
-    KRYS_NODISCARD static SVGElementIdentifierAndTagPairs
-      ReferencedSVGResourceIDs(const RenderStyle &, const dom::Document &) noexcept;
+    KRYS_NODISCARD static SVGElementIdentifierAndTagPairs ReferencedSVGResourceIDs(const RenderStyle &,
+                                                                                   const Document &) noexcept;
 
     void UpdateReferencedResources(dom::DocumentOrShadowRoot &,
                                    const SVGElementIdentifierAndTagPairs &) noexcept;
@@ -89,23 +89,23 @@ namespace krys::boo
     KRYS_NODISCARD static LegacyRenderSVGResourceClipper *
       ReferencedClipperRenderer(dom::DocumentOrShadowRoot &, const style::ReferencePath &) noexcept;
 
-    KRYS_NODISCARD static RefPtr<svg::SVGFilterElement>
+    KRYS_NODISCARD static RefPtr<SVGFilterElement>
       ReferencedFilterElement(dom::DocumentOrShadowRoot &, const style::ReferenceFilterOperation &) noexcept;
 
     KRYS_NODISCARD static LegacyRenderSVGResourceContainer *
-      ReferencedRenderResource(dom::DocumentOrShadowRoot &, const dom::DOMStringAtom &fragment) noexcept;
+      ReferencedRenderResource(dom::DocumentOrShadowRoot &, const DOMStringAtom &fragment) noexcept;
 
   private:
-    KRYS_NODISCARD static RefPtr<svg::SVGElement> ElementForResourceID(dom::DocumentOrShadowRoot &,
-                                                                       const dom::DOMStringAtom &resourceID,
-                                                                       html::TagName) noexcept;
+    KRYS_NODISCARD static RefPtr<SVGElement> ElementForResourceID(dom::DocumentOrShadowRoot &,
+                                                                  const DOMStringAtom &resourceID,
+                                                                  html::TagName) noexcept;
 
-    KRYS_NODISCARD static RefPtr<svg::SVGElement> ElementForResourceIDs(dom::DocumentOrShadowRoot &,
-                                                                        const dom::DOMStringAtom &resourceID,
-                                                                        const SVGQualifiedNames &) noexcept;
+    KRYS_NODISCARD static RefPtr<SVGElement> ElementForResourceIDs(dom::DocumentOrShadowRoot &,
+                                                                   const DOMStringAtom &resourceID,
+                                                                   const SVGQualifiedNames &) noexcept;
 
-    void AddClientForTarget(svg::SVGElement &targetElement, const dom::DOMStringAtom &) noexcept;
+    void AddClientForTarget(SVGElement &targetElement, const DOMStringAtom &) noexcept;
 
-    void RemoveClientForTarget(dom::DocumentOrShadowRoot &, const dom::DOMStringAtom &) noexcept;
+    void RemoveClientForTarget(dom::DocumentOrShadowRoot &, const DOMStringAtom &) noexcept;
   };
 }

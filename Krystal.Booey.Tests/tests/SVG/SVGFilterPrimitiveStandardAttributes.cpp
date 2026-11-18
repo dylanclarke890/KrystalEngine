@@ -40,14 +40,14 @@ namespace krys::boo::tests
         (void)Document->UpdateLayout();
       }
 
-      template <typename T = svg::SVGFilterPrimitiveStandardAttributes>
-      KRYS_NODISCARD T &Primitive(dom::DOMStringView id) noexcept
+      template <typename T = SVGFilterPrimitiveStandardAttributes>
+      KRYS_NODISCARD T &Primitive(DOMStringView id) noexcept
       {
-        return Downcast<T>(Downcast<svg::SVGElement>(ById(id)));
+        return Downcast<T>(Downcast<SVGElement>(ById(id)));
       }
 
       /// @brief The effect the primitive `#id` creates, given @p inputs, or null.
-      KRYS_NODISCARD RefPtr<FilterEffect> Effect(dom::DOMStringView id,
+      KRYS_NODISCARD RefPtr<FilterEffect> Effect(DOMStringView id,
                                                  const FilterEffectVector &inputs = {}) noexcept
       {
         NullGraphicsContext context;
@@ -55,21 +55,21 @@ namespace krys::boo::tests
       }
 
       template <typename T>
-      KRYS_NODISCARD T &EffectAs(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD T &EffectAs(DOMStringView id) noexcept
       {
         auto effect = Effect(id);
         krys_assert(effect);
         return Downcast<T>(*effect);
       }
 
-      void Set(dom::DOMStringView id, dom::DOMStringView name, dom::DOMStringView value) noexcept
+      void Set(DOMStringView id, DOMStringView name, DOMStringView value) noexcept
       {
-        (void)ById(id).SetAttribute(dom::DOMStringAtom(name), dom::DOMString(value));
+        (void)ById(id).SetAttribute(DOMStringAtom(name), DOMString(value));
         (void)Document->UpdateLayout();
       }
     };
 
-    KRYS_NODISCARD List<utf8_string> Names(const List<dom::DOMStringAtom> &atoms) noexcept
+    KRYS_NODISCARD List<utf8_string> Names(const List<DOMStringAtom> &atoms) noexcept
     {
       List<utf8_string> names;
       for (const auto &atom : atoms)
@@ -148,12 +148,12 @@ namespace krys::boo::tests
                              u8"<feGaussianBlur id=one stdDeviation=4 edgeMode=sideways />"
                              u8"<feGaussianBlur id=zero />");
 
-    auto &pair = fixture.Primitive<svg::SVGFEGaussianBlurElement>(u8"pair");
+    auto &pair = fixture.Primitive<SVGFEGaussianBlurElement>(u8"pair");
     CHECK(pair.StdDeviationX() == 2.f);
     CHECK(pair.StdDeviationY() == 3.f);
     CHECK(pair.EdgeMode() == EdgeModeType::Wrap);
 
-    auto &one = fixture.Primitive<svg::SVGFEGaussianBlurElement>(u8"one");
+    auto &one = fixture.Primitive<SVGFEGaussianBlurElement>(u8"one");
     CHECK(one.StdDeviationX() == 4.f);
     CHECK(one.StdDeviationY() == 4.f);
     CHECK(one.EdgeMode() == EdgeModeType::None);
@@ -270,7 +270,7 @@ namespace krys::boo::tests
     CHECK(noise.StitchTiles());
 
     // A negative base frequency disables the effect; an octave count that isn't a number is the initial 1.
-    CHECK(fixture.Primitive<svg::SVGFETurbulenceElement>(u8"bad").NumOctaves() == 1);
+    CHECK(fixture.Primitive<SVGFETurbulenceElement>(u8"bad").NumOctaves() == 1);
     CHECK_FALSE(fixture.Effect(u8"bad"));
   }
 

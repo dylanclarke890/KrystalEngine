@@ -229,11 +229,10 @@ namespace krys::boo::css
   }
 
   Ref<ImmutableStyleProperties> Parser::ParseInlineStyleDeclaration(CSSOMStringView string,
-                                                                    const dom::Element &element) noexcept
+                                                                    const Element &element) noexcept
   {
     ParserContext context(element.NodeDocument());
-    context.Mode =
-      StrictToParserMode(Is<html::HTMLElement>(element) && !element.NodeDocument().InQuirksMode());
+    context.Mode = StrictToParserMode(Is<HTMLElement>(element) && !element.NodeDocument().InQuirksMode());
 
     Parser parser(context, string);
     parser.ConsumeDeclarationList(parser.GetTokenizer()->Tokens(), RuleType::Style);

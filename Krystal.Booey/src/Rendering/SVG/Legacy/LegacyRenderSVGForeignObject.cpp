@@ -38,7 +38,7 @@
 
 namespace krys::boo
 {
-  LegacyRenderSVGForeignObject::LegacyRenderSVGForeignObject(svg::SVGForeignObjectElement &element,
+  LegacyRenderSVGForeignObject::LegacyRenderSVGForeignObject(SVGForeignObjectElement &element,
                                                              RenderStyle &&style) noexcept
       : RenderSVGBlock(Type::LegacySVGForeignObject, element, krys::move(style))
   {
@@ -47,9 +47,9 @@ namespace krys::boo
 
   LegacyRenderSVGForeignObject::~LegacyRenderSVGForeignObject() noexcept = default;
 
-  svg::SVGForeignObjectElement &LegacyRenderSVGForeignObject::ForeignObjectElement() const noexcept
+  SVGForeignObjectElement &LegacyRenderSVGForeignObject::ForeignObjectElement() const noexcept
   {
-    return Downcast<svg::SVGForeignObjectElement>(RenderSVGBlock::GraphicsElement());
+    return Downcast<SVGForeignObjectElement>(RenderSVGBlock::GraphicsElement());
   }
 
   void LegacyRenderSVGForeignObject::Paint(PaintInfo &paintInfo, const LayoutPoint &) noexcept
@@ -155,7 +155,7 @@ namespace krys::boo
 
     // Cache viewport boundaries
     auto &foreignObjectElement = ForeignObjectElement();
-    svg::SVGLengthContext lengthContext(&foreignObjectElement);
+    SVGLengthContext lengthContext(&foreignObjectElement);
     FloatPoint viewportLocation(foreignObjectElement.X().Value(lengthContext),
                                 foreignObjectElement.Y().Value(lengthContext));
     _viewport = FloatRect(viewportLocation, FloatSize(foreignObjectElement.Width().Value(lengthContext),

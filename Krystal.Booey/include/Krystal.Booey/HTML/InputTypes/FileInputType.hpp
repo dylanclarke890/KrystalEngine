@@ -44,7 +44,7 @@ namespace krys::boo::html
   {
   private:
     Ref<FileList> _fileList;
-    dom::DOMString _displayString;
+    DOMString _displayString;
     RefPtr<FileChooser> _fileChooser;
 
   public:
@@ -55,21 +55,21 @@ namespace krys::boo::html
 
     ~FileInputType() noexcept final;
 
-    KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
+    KRYS_NODISCARD DOMStringView FormControlType() const noexcept final
     {
       return input_type_names::File;
     }
 
     bool AppendFormData(DOMFormData &formData) const noexcept final;
 
-    KRYS_NODISCARD bool ValueMissing(dom::DOMStringView value) const noexcept final;
+    KRYS_NODISCARD bool ValueMissing(DOMStringView value) const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString ValueMissingText() const noexcept final;
+    KRYS_NODISCARD DOMString ValueMissingText() const noexcept final;
 
     KRYS_NODISCARD bool CanSetStringValue() const noexcept final;
 
     /// @brief The value: C:\\fakepath\\ and the first file's name, or empty without files.
-    KRYS_NODISCARD dom::DOMString FirstElementPathForInputValue() const noexcept;
+    KRYS_NODISCARD DOMString FirstElementPathForInputValue() const noexcept;
 
     KRYS_NODISCARD FileList &Files() noexcept
     {
@@ -90,11 +90,11 @@ namespace krys::boo::html
 
     bool ReceiveDroppedFiles(const DragData &dragData) noexcept final;
 
-    KRYS_NODISCARD dom::DOMString DisplayString() const noexcept final;
+    KRYS_NODISCARD DOMString DisplayString() const noexcept final;
 
     KRYS_NODISCARD bool DirAutoUsesValue() const noexcept final;
 
-    void SetValue(dom::DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,
+    void SetValue(DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,
                   TextControlSetValueSelection selection) noexcept final;
 
   private:
@@ -105,7 +105,7 @@ namespace krys::boo::html
 
     void DisabledStateChanged() noexcept final;
 
-    void AttributeChanged(const dom::DOMStringAtom &name) noexcept final;
+    void AttributeChanged(const DOMStringAtom &name) noexcept final;
 
     void HandleActivationBehavior(dom::Event &event) noexcept final;
 

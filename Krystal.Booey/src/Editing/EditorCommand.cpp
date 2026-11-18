@@ -1304,7 +1304,7 @@ namespace krys::boo
   }
 
   Editor::Command::Command(const EditorInternalCommand *command, EditorCommandSource source,
-                           dom::Document &document) noexcept
+                           Document &document) noexcept
       : _command(command), _source(source), _document(command ? ShareRefPtr(&document) : nullptr)
   {
     krys_debug_assert(command || !_document);

@@ -63,7 +63,7 @@ namespace krys::boo::style
     return css::ValueId::Normal;
   }
 
-  css::CSSOMString ConvertSingleAnimationRangeNameToRangeString(SingleAnimationRangeName rangeName) noexcept
+  CSSOMString ConvertSingleAnimationRangeNameToRangeString(SingleAnimationRangeName rangeName) noexcept
   {
     switch (rangeName)
     {
@@ -81,7 +81,7 @@ namespace krys::boo::style
   }
 
   SingleAnimationRangeName
-    ConvertRangeStringToSingleTimelineRangeName(const css::CSSOMString &rangeString) noexcept
+    ConvertRangeStringToSingleTimelineRangeName(const CSSOMString &rangeString) noexcept
   {
     if (rangeString == u8"cover")
     {

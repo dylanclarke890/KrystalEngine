@@ -39,7 +39,7 @@ namespace krys::boo
     ~TextInsertionBaseCommand() noexcept override = default;
 
   protected:
-    explicit TextInsertionBaseCommand(dom::Document &document,
+    explicit TextInsertionBaseCommand(Document &document,
                                       EditAction editingAction = EditAction::Unspecified) noexcept;
 
     static void ApplyTextInsertionCommand(LocalFrame *frame, TextInsertionBaseCommand &command,

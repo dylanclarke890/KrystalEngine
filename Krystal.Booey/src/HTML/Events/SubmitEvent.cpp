@@ -4,7 +4,7 @@
 
 namespace krys::boo::html
 {
-  SubmitEvent::SubmitEvent(dom::DOMStringAtom type, const SubmitEventInit &eventInitDict) noexcept
+  SubmitEvent::SubmitEvent(DOMStringAtom type, const SubmitEventInit &eventInitDict) noexcept
       : Event(krys::move(type), eventInitDict), _submitter(eventInitDict.Submitter)
   {
   }

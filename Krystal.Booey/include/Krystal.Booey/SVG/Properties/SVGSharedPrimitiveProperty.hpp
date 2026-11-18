@@ -30,7 +30,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The value of an animated primitive property (a boolean, integer, number or string).
   template <typename TProperty>
@@ -64,7 +64,7 @@ namespace krys::boo::svg
       _value = value;
     }
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept override
     {
       return SVGPropertyTraits<TProperty>::ToString(_value);
     }

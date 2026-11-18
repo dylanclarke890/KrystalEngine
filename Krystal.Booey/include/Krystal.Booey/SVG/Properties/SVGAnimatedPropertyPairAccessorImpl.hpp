@@ -30,7 +30,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyPairAnimatorImpl.hpp"
 #include "Krystal.Booey/SVG/SVGMarkerTypes.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief Reaches a marker's `orient`, reflected by an angle and an orient type.
   template <typename TOwner>
@@ -69,7 +69,7 @@ namespace krys::boo::svg
       animatedProperty.SetDirty();
     }
 
-    KRYS_NODISCARD Maybe<dom::DOMString> Synchronize(const TOwner &owner) const noexcept final
+    KRYS_NODISCARD Maybe<DOMString> Synchronize(const TOwner &owner) const noexcept final
     {
       bool dirty1 = Property1(owner)->IsDirty();
       bool dirty2 = Property2(owner)->IsDirty();
@@ -80,16 +80,14 @@ namespace krys::boo::svg
 
       auto type = Property2(owner)->BaseVal();
 
-      dom::DOMString string1 =
-        dirty1 ? *Property1(owner)->Synchronize() : Property1(owner)->BaseValAsString();
-      dom::DOMString string2 =
-        dirty2 ? *Property2(owner)->Synchronize() : Property2(owner)->BaseValAsString();
+      DOMString string1 = dirty1 ? *Property1(owner)->Synchronize() : Property1(owner)->BaseValAsString();
+      DOMString string2 = dirty2 ? *Property2(owner)->Synchronize() : Property2(owner)->BaseValAsString();
       return type == SVGMarkerOrientAuto || type == SVGMarkerOrientAutoStartReverse ? string2 : string1;
     }
 
     KRYS_NODISCARD RefPtr<SVGAttributeAnimator>
-      CreateAnimator(TOwner &owner, const dom::QualifiedName &attributeName, AnimationMode animationMode,
-                     CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final
+      CreateAnimator(TOwner &owner, const QualifiedName &attributeName, svg::AnimationMode animationMode,
+                     svg::CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final
     {
       return SVGAnimatedAngleOrientAnimator::Create(attributeName, Property1(owner), Property2(owner),
                                                     animationMode, calcMode, isAccumulated, isAdditive);
@@ -123,7 +121,7 @@ namespace krys::boo::svg
     }
 
   private:
-    KRYS_NODISCARD Maybe<dom::DOMString> Synchronize(const TOwner &owner) const noexcept final
+    KRYS_NODISCARD Maybe<DOMString> Synchronize(const TOwner &owner) const noexcept final
     {
       bool dirty1 = Property1(owner)->IsDirty();
       bool dirty2 = Property2(owner)->IsDirty();
@@ -132,16 +130,14 @@ namespace krys::boo::svg
         return {};
       }
 
-      dom::DOMString string1 =
-        dirty1 ? *Property1(owner)->Synchronize() : Property1(owner)->BaseValAsString();
-      dom::DOMString string2 =
-        dirty2 ? *Property2(owner)->Synchronize() : Property2(owner)->BaseValAsString();
+      DOMString string1 = dirty1 ? *Property1(owner)->Synchronize() : Property1(owner)->BaseValAsString();
+      DOMString string2 = dirty2 ? *Property2(owner)->Synchronize() : Property2(owner)->BaseValAsString();
       return string1 == string2 ? string1 : string1 + u8", " + string2;
     }
 
     KRYS_NODISCARD RefPtr<SVGAttributeAnimator>
-      CreateAnimator(TOwner &owner, const dom::QualifiedName &attributeName, AnimationMode animationMode,
-                     CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final
+      CreateAnimator(TOwner &owner, const QualifiedName &attributeName, svg::AnimationMode animationMode,
+                     svg::CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final
     {
       return SVGAnimatedIntegerPairAnimator::Create(attributeName, Property1(owner), Property2(owner),
                                                     animationMode, calcMode, isAccumulated, isAdditive);
@@ -175,7 +171,7 @@ namespace krys::boo::svg
     }
 
   private:
-    KRYS_NODISCARD Maybe<dom::DOMString> Synchronize(const TOwner &owner) const noexcept final
+    KRYS_NODISCARD Maybe<DOMString> Synchronize(const TOwner &owner) const noexcept final
     {
       bool dirty1 = Property1(owner)->IsDirty();
       bool dirty2 = Property2(owner)->IsDirty();
@@ -184,16 +180,14 @@ namespace krys::boo::svg
         return {};
       }
 
-      dom::DOMString string1 =
-        dirty1 ? *Property1(owner)->Synchronize() : Property1(owner)->BaseValAsString();
-      dom::DOMString string2 =
-        dirty2 ? *Property2(owner)->Synchronize() : Property2(owner)->BaseValAsString();
+      DOMString string1 = dirty1 ? *Property1(owner)->Synchronize() : Property1(owner)->BaseValAsString();
+      DOMString string2 = dirty2 ? *Property2(owner)->Synchronize() : Property2(owner)->BaseValAsString();
       return string1 == string2 ? string1 : string1 + u8", " + string2;
     }
 
     KRYS_NODISCARD RefPtr<SVGAttributeAnimator>
-      CreateAnimator(TOwner &owner, const dom::QualifiedName &attributeName, AnimationMode animationMode,
-                     CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final
+      CreateAnimator(TOwner &owner, const QualifiedName &attributeName, svg::AnimationMode animationMode,
+                     svg::CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final
     {
       return SVGAnimatedNumberPairAnimator::Create(attributeName, Property1(owner), Property2(owner),
                                                    animationMode, calcMode, isAccumulated, isAdditive);

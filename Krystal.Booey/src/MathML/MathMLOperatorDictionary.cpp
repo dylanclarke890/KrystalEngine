@@ -28,7 +28,7 @@
 #include <array>
 #include <utility>
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   namespace
   {

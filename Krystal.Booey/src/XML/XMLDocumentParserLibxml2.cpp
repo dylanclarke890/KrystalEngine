@@ -70,43 +70,43 @@ namespace krys::boo::xml
     int globalDescriptor = 0;
     bool didInitializeXMLParser = false;
 
-    KRYS_NODISCARD dom::DOMStringView ToStringView(Span<const xmlChar> string) noexcept
+    KRYS_NODISCARD DOMStringView ToStringView(Span<const xmlChar> string) noexcept
     {
-      return dom::DOMStringView(reinterpret_cast<const char8 *>(string.data()), string.size());
+      return DOMStringView(reinterpret_cast<const char8 *>(string.data()), string.size());
     }
 
-    KRYS_NODISCARD dom::DOMStringView ToStringView(const xmlChar *string) noexcept
+    KRYS_NODISCARD DOMStringView ToStringView(const xmlChar *string) noexcept
     {
       if (!string)
       {
         return {};
       }
-      return dom::DOMStringView(reinterpret_cast<const char8 *>(string),
-                                std::strlen(reinterpret_cast<const char *>(string)));
+      return DOMStringView(reinterpret_cast<const char8 *>(string),
+                           std::strlen(reinterpret_cast<const char *>(string)));
     }
 
-    KRYS_NODISCARD dom::DOMString ToString(Span<const xmlChar> string) noexcept
+    KRYS_NODISCARD DOMString ToString(Span<const xmlChar> string) noexcept
     {
-      return dom::DOMString(ToStringView(string));
+      return DOMString(ToStringView(string));
     }
 
-    KRYS_NODISCARD dom::DOMString ToString(const xmlChar *string) noexcept
+    KRYS_NODISCARD DOMString ToString(const xmlChar *string) noexcept
     {
-      return dom::DOMString(ToStringView(string));
+      return DOMString(ToStringView(string));
     }
 
-    KRYS_NODISCARD dom::DOMStringAtom ToAtomString(Span<const xmlChar> string) noexcept
+    KRYS_NODISCARD DOMStringAtom ToAtomString(Span<const xmlChar> string) noexcept
     {
-      return dom::DOMStringAtom(ToStringView(string));
+      return DOMStringAtom(ToStringView(string));
     }
 
-    KRYS_NODISCARD dom::DOMStringAtom ToAtomString(const xmlChar *string) noexcept
+    KRYS_NODISCARD DOMStringAtom ToAtomString(const xmlChar *string) noexcept
     {
       if (!string)
       {
         return null;
       }
-      return dom::DOMStringAtom(ToStringView(string));
+      return DOMStringAtom(ToStringView(string));
     }
 
     int MatchFunc(const char *) noexcept
@@ -204,7 +204,7 @@ namespace krys::boo::xml
   xmlParserInputPtr ExternalEntityLoader(const char *url, const char *id, xmlParserCtxtPtr context) noexcept
   {
     if (!ShouldAllowExternalLoad(
-          url::URL(dom::DOMStringView(reinterpret_cast<const char8 *>(url), std::strlen(url)))))
+          url::URL(DOMStringView(reinterpret_cast<const char8 *>(url), std::strlen(url)))))
     {
       return nullptr;
     }
@@ -272,20 +272,20 @@ namespace krys::boo::xml
 
   // --------------------------------
 
-  bool XMLDocumentParser::SupportsXMLVersion(dom::DOMStringView version) noexcept
+  bool XMLDocumentParser::SupportsXMLVersion(DOMStringView version) noexcept
   {
     return version == u8"1.0";
   }
 
-  XMLDocumentParser::XMLDocumentParser(dom::Document &document) noexcept
-      : DocumentParser(document), _currentNode(ShareRefPtr<dom::ContainerNode>(&document))
+  XMLDocumentParser::XMLDocumentParser(boo::Document &document) noexcept
+      : DocumentParser(document), _currentNode(ShareRefPtr<ContainerNode>(&document))
   {
   }
 
-  XMLDocumentParser::XMLDocumentParser(dom::DocumentFragment &fragment,
-                                       HashMap<dom::DOMStringAtom, dom::DOMStringAtom> &&prefixToNamespaceMap,
-                                       dom::DOMStringAtom defaultNamespaceURI) noexcept
-      : DocumentParser(fragment.NodeDocument()), _currentNode(ShareRefPtr<dom::ContainerNode>(&fragment)),
+  XMLDocumentParser::XMLDocumentParser(DocumentFragment &fragment,
+                                       HashMap<DOMStringAtom, DOMStringAtom> &&prefixToNamespaceMap,
+                                       DOMStringAtom defaultNamespaceURI) noexcept
+      : DocumentParser(fragment.NodeDocument()), _currentNode(ShareRefPtr<ContainerNode>(&fragment)),
         _parsingFragment(true), _prefixToNamespaceMap(krys::move(prefixToNamespaceMap)),
         _defaultNamespaceURI(krys::move(defaultNamespaceURI))
   {
@@ -307,7 +307,7 @@ namespace krys::boo::xml
     krys_debug_assert(!_currentNode);
   }
 
-  void XMLDocumentParser::DoWrite(const dom::DOMString &parseString) noexcept
+  void XMLDocumentParser::DoWrite(const DOMString &parseString) noexcept
   {
     krys_debug_assert(!IsDetached());
     if (!_context)
@@ -341,21 +341,21 @@ namespace krys::boo::xml
       const xmlChar *URI;
     };
 
-    KRYS_NODISCARD bool
-      HandleNamespaceAttributes(List<Pair<dom::QualifiedName, dom::DOMString>> &prefixedAttributes,
-                                const xmlChar **libxmlNamespaces, int numNamespaces) noexcept
+    KRYS_NODISCARD bool HandleNamespaceAttributes(List<Pair<QualifiedName, DOMString>> &prefixedAttributes,
+                                                  const xmlChar **libxmlNamespaces,
+                                                  int numNamespaces) noexcept
     {
       auto namespaces = Span<const XMLSAX2Namespace>(
         reinterpret_cast<const XMLSAX2Namespace *>(libxmlNamespaces), static_cast<size_t>(numNamespaces));
       for (auto &xmlNamespace : namespaces)
       {
-        auto namespaceQName = dom::DOMStringAtom(infra::namespace_prefixes::XMLNS);
+        auto namespaceQName = DOMStringAtom(infra::namespace_prefixes::XMLNS);
         auto namespaceURI = ToString(xmlNamespace.URI);
         if (xmlNamespace.Prefix)
         {
-          dom::DOMString qualifiedName(u8"xmlns:");
+          DOMString qualifiedName(u8"xmlns:");
           qualifiedName.append(ToStringView(xmlNamespace.Prefix));
-          namespaceQName = dom::DOMStringAtom(qualifiedName);
+          namespaceQName = DOMStringAtom(qualifiedName);
         }
 
         auto result = dom::NameValidation::ValidateAndExtract(infra::namespaces::XMLNS, namespaceQName,
@@ -379,9 +379,8 @@ namespace krys::boo::xml
       const xmlChar *End;
     };
 
-    KRYS_NODISCARD bool
-      HandleElementAttributes(List<Pair<dom::QualifiedName, dom::DOMString>> &prefixedAttributes,
-                              const xmlChar **libxmlAttributes, int numAttributes) noexcept
+    KRYS_NODISCARD bool HandleElementAttributes(List<Pair<QualifiedName, DOMString>> &prefixedAttributes,
+                                                const xmlChar **libxmlAttributes, int numAttributes) noexcept
     {
       auto attributes = Span<const XMLSAX2Attributes>(
         reinterpret_cast<const XMLSAX2Attributes *>(libxmlAttributes), static_cast<size_t>(numAttributes));
@@ -391,17 +390,17 @@ namespace krys::boo::xml
         auto attrValue = ToString(Span<const xmlChar>(attribute.Value, valueLength));
         auto attrPrefix = ToStringView(attribute.Prefix);
         auto attrURI = attrPrefix.empty() ? null : ToAtomString(attribute.URI);
-        dom::DOMStringAtom attrQName = null;
+        DOMStringAtom attrQName = null;
         if (attrPrefix.empty())
         {
           attrQName = ToAtomString(attribute.LocalName);
         }
         else
         {
-          dom::DOMString qualifiedName(attrPrefix);
+          DOMString qualifiedName(attrPrefix);
           qualifiedName.push_back(u8':');
           qualifiedName.append(ToStringView(attribute.LocalName));
-          attrQName = dom::DOMStringAtom(qualifiedName);
+          attrQName = DOMStringAtom(qualifiedName);
         }
 
         auto result = dom::NameValidation::ValidateAndExtract(attrURI, attrQName,
@@ -416,8 +415,7 @@ namespace krys::boo::xml
       return true;
     }
 
-    void SetAttributes(dom::Element &element,
-                       List<Pair<dom::QualifiedName, dom::DOMString>> &attributeVector) noexcept
+    void SetAttributes(Element &element, List<Pair<QualifiedName, DOMString>> &attributeVector) noexcept
     {
       for (auto &[name, value] : attributeVector)
       {
@@ -453,7 +451,7 @@ namespace krys::boo::xml
         auto it = _prefixToNamespaceMap.find(prefix);
         uri = it != _prefixToNamespaceMap.end() ? it->second : null;
       }
-      else if (Is<svg::SVGElement>(_currentNode.get()) || localName == u8"svg")
+      else if (Is<SVGElement>(_currentNode.get()) || localName == u8"svg")
       {
         uri = infra::namespaces::SVG;
       }
@@ -463,7 +461,7 @@ namespace krys::boo::xml
       }
     }
 
-    dom::QualifiedName qName(uri, prefix, localName);
+    QualifiedName qName(uri, prefix, localName);
 
     auto &document = _currentNode->NodeDocument();
     RefPtr<html::CustomElementRegistry> registry =
@@ -481,7 +479,7 @@ namespace krys::boo::xml
       customElementReactionStack.emplace();
     }
 
-    List<Pair<dom::QualifiedName, dom::DOMString>> prefixedAttributes;
+    List<Pair<QualifiedName, DOMString>> prefixedAttributes;
     bool handledAttributes = HandleNamespaceAttributes(prefixedAttributes, libxmlNamespaces, numNamespaces);
     bool success = handledAttributes
                      ? HandleElementAttributes(prefixedAttributes, libxmlAttributes, numAttributes)
@@ -514,7 +512,7 @@ namespace krys::boo::xml
       return;
     }
 
-    if (auto *templateElement = DynamicDowncast<html::HTMLTemplateElement>(newElement.get()))
+    if (auto *templateElement = DynamicDowncast<HTMLTemplateElement>(newElement.get()))
     {
       PushCurrentNode(templateElement->Content().get());
     }
@@ -539,8 +537,8 @@ namespace krys::boo::xml
       return;
     }
 
-    RefPtr<dom::ContainerNode> node = _currentNode;
-    if (auto *element = DynamicDowncast<dom::Element>(node.get()))
+    RefPtr<ContainerNode> node = _currentNode;
+    if (auto *element = DynamicDowncast<Element>(node.get()))
     {
       element->FinishParsingChildren();
     }
@@ -618,7 +616,7 @@ namespace krys::boo::xml
       return;
     }
 
-    auto cdataSection = CreateRef<dom::CDATASection>(_currentNode->NodeDocument(), ToString(s));
+    auto cdataSection = CreateRef<CDATASection>(_currentNode->NodeDocument(), ToString(s));
     (void)dom::MutationAlgorithms::Append(*cdataSection, *_currentNode);
   }
 
@@ -634,7 +632,7 @@ namespace krys::boo::xml
       return;
     }
 
-    auto comment = CreateRef<dom::Comment>(_currentNode->NodeDocument(), ToString(s));
+    auto comment = CreateRef<boo::Comment>(_currentNode->NodeDocument(), ToString(s));
     (void)dom::MutationAlgorithms::Append(*comment, *_currentNode);
   }
 
@@ -995,7 +993,7 @@ namespace krys::boo::xml
     }
   }
 
-  bool XMLDocumentParser::AppendFragmentSource(dom::DOMStringView chunk) noexcept
+  bool XMLDocumentParser::AppendFragmentSource(DOMStringView chunk) noexcept
   {
     krys_debug_assert(!_context);
     krys_debug_assert(_parsingFragment);

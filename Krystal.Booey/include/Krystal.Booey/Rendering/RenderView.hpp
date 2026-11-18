@@ -80,7 +80,7 @@ namespace krys::boo
     RenderSelection _selection;
 
   public:
-    RenderView(dom::Document &document, RenderStyle &&style) noexcept;
+    RenderView(Document &document, RenderStyle &&style) noexcept;
 
     ~RenderView() noexcept override;
 
@@ -97,7 +97,7 @@ namespace krys::boo
     void UpdateHitTestResult(HitTestResult &result, const LayoutPoint &point) const noexcept override;
 
     /// @brief The root element.
-    KRYS_NODISCARD dom::Node *NodeForHitTest() const noexcept override;
+    KRYS_NODISCARD Node *NodeForHitTest() const noexcept override;
 
     KRYS_NODISCARD LocalFrameView &FrameView() const noexcept
     {

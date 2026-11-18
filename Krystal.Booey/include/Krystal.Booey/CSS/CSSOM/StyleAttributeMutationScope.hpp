@@ -31,13 +31,10 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
-}
 
-namespace krys::boo::css
-{
   /// @brief Queues the mutation record for a change to an element's `style` attribute made through its inline
   /// style's CSSOM view. Scopes nest; only the outermost one reads the old value and queues the record, and
   /// only if `EnqueueMutationRecord` was called.
@@ -46,13 +43,13 @@ namespace krys::boo::css
     KRYS_NON_COPY_MOVABLE(StyleAttributeMutationScope);
 
   private:
-    RefPtr<dom::Element> _element;
-    Maybe<dom::DOMString> _oldValue;
+    RefPtr<Element> _element;
+    Maybe<DOMString> _oldValue;
     bool _isCustomElement {false};
     bool _shouldDeliver {false};
 
   public:
-    explicit StyleAttributeMutationScope(dom::Element *element) noexcept;
+    explicit StyleAttributeMutationScope(Element *element) noexcept;
 
     ~StyleAttributeMutationScope() noexcept;
 

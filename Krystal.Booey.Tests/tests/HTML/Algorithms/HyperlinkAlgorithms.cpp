@@ -9,26 +9,26 @@ namespace krys::boo::html::tests
   namespace
   {
     /// @brief An HTML document with a head holding a base element whose target is @p baseTarget.
-    KRYS_NODISCARD Ref<dom::HTMLDocument> DocumentWithBaseTarget(utf8_stringview baseTarget) noexcept
+    KRYS_NODISCARD Ref<HTMLDocument> DocumentWithBaseTarget(utf8_stringview baseTarget) noexcept
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto html = document->CreateElement(u8"html").ReleaseValue();
       auto head = document->CreateElement(u8"head").ReleaseValue();
       auto base = document->CreateElement(u8"base").ReleaseValue();
-      REQUIRE_FALSE(base->SetAttribute(u8"target", dom::DOMString(baseTarget)).HasException());
+      REQUIRE_FALSE(base->SetAttribute(u8"target", DOMString(baseTarget)).HasException());
       REQUIRE_FALSE(head->AppendChild(*base).HasException());
       REQUIRE_FALSE(html->AppendChild(*head).HasException());
       REQUIRE_FALSE(document->AppendChild(*html).HasException());
       return document;
     }
 
-    KRYS_NODISCARD Ref<HTMLElement> CreateWithTarget(dom::Document &document, dom::DOMStringAtom localName,
+    KRYS_NODISCARD Ref<HTMLElement> CreateWithTarget(Document &document, DOMStringAtom localName,
                                                      Maybe<utf8_stringview> target) noexcept
     {
       auto element = document.CreateElement(krys::move(localName)).ReleaseValue();
       if (target)
       {
-        REQUIRE_FALSE(element->SetAttribute(u8"target", dom::DOMString(*target)).HasException());
+        REQUIRE_FALSE(element->SetAttribute(u8"target", DOMString(*target)).HasException());
       }
       REQUIRE_FALSE(document.DocumentElement()->AppendChild(*element).HasException());
       return Downcast<HTMLElement>(krys::move(element));

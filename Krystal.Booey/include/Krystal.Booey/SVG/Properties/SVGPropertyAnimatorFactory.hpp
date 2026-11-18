@@ -33,40 +33,42 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief Makes the animators of an element's presentation attributes, which animate its animated style
   /// properties; the animators of one attribute share the value they animate.
   class SVGPropertyAnimatorFactory
   {
     using PropertyCreator = Ref<SVGProperty> (*)() noexcept;
-    using AnimatorCreator = Ref<SVGAttributeAnimator> (*)(const dom::QualifiedName &, Ref<SVGProperty> &&,
-                                                          AnimationMode, CalcMode, bool, bool) noexcept;
+    using AnimatorCreator = Ref<SVGAttributeAnimator> (*)(const QualifiedName &, Ref<SVGProperty> &&,
+                                                          svg::AnimationMode, svg::CalcMode, bool,
+                                                          bool) noexcept;
 
     // This list maps an attribute name to a pair of static methods. The first one creates a shared
     // Ref<SVGProperty> for the value type of this attribute. The second creates the animator given the
     // attribute name and the shared Ref<SVGProperty>.
     struct AttributeAnimatorCreator
     {
-      const dom::QualifiedName *Name;
+      const QualifiedName *Name;
       PropertyCreator CreateProperty;
       AnimatorCreator CreateAnimator;
     };
 
   private:
-    List<Pair<dom::QualifiedName, Ref<SVGProperty>>> _attributeProperty;
+    List<Pair<QualifiedName, Ref<SVGProperty>>> _attributeProperty;
 
   public:
     SVGPropertyAnimatorFactory() noexcept = default;
 
-    KRYS_NODISCARD static bool IsKnownAttribute(const dom::QualifiedName &attributeName) noexcept
+    KRYS_NODISCARD static bool IsKnownAttribute(const QualifiedName &attributeName) noexcept
     {
       return FindCreator(attributeName);
     }
 
-    KRYS_NODISCARD RefPtr<SVGAttributeAnimator> CreateAnimator(const dom::QualifiedName &attributeName,
-                                                               AnimationMode animationMode, CalcMode calcMode,
-                                                               bool isAccumulated, bool isAdditive) noexcept
+    KRYS_NODISCARD RefPtr<SVGAttributeAnimator> CreateAnimator(const QualifiedName &attributeName,
+                                                               svg::AnimationMode animationMode,
+                                                               svg::CalcMode calcMode, bool isAccumulated,
+                                                               bool isAdditive) noexcept
     {
       const auto *creator = FindCreator(attributeName);
       if (!creator)
@@ -86,7 +88,7 @@ namespace krys::boo::svg
                                      isAccumulated, isAdditive);
     }
 
-    void AnimatorWillBeDeleted(const dom::QualifiedName &attributeName) noexcept
+    void AnimatorWillBeDeleted(const QualifiedName &attributeName) noexcept
     {
       auto iterator = std::ranges::find_if(_attributeProperty,
                                            [&](const auto &entry) { return entry.first == attributeName; });
@@ -121,15 +123,16 @@ namespace krys::boo::svg
 
     template <typename TAnimator>
     KRYS_NODISCARD static Ref<SVGAttributeAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGProperty> &&property,
-             AnimationMode animationMode, CalcMode calcMode, bool isAccumulated, bool isAdditive) noexcept
+      Create(const QualifiedName &attributeName, Ref<SVGProperty> &&property,
+             svg::AnimationMode animationMode, svg::CalcMode calcMode, bool isAccumulated,
+             bool isAdditive) noexcept
     {
       return TAnimator::Create(attributeName, krys::move(property), animationMode, calcMode, isAccumulated,
                                isAdditive);
     }
 
     KRYS_NODISCARD static const AttributeAnimatorCreator *
-      FindCreator(const dom::QualifiedName &attributeName) noexcept
+      FindCreator(const QualifiedName &attributeName) noexcept
     {
       for (const auto &creator : AttributeAnimatorCreators())
       {
@@ -145,7 +148,7 @@ namespace krys::boo::svg
     {
       constexpr auto color = &CreateValueProperty<Color>;
       constexpr auto number = &CreateValueProperty<float>;
-      constexpr auto string = &CreateValueProperty<dom::DOMString>;
+      constexpr auto string = &CreateValueProperty<DOMString>;
       constexpr auto colorAnimator = &Create<SVGColorAnimator>;
       constexpr auto lengthAnimator = &Create<SVGLengthAnimator>;
       constexpr auto lengthListAnimator = &Create<SVGLengthListAnimator>;

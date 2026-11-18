@@ -27,27 +27,23 @@
 
 #include "Krystal.Booey/Editing/Commands/EditCommand.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
   class Node;
-}
 
-namespace krys::boo
-{
   /// @brief Splits an element before one of its children: a clone takes the children before it.
   class SplitElementCommand final : public SimpleEditCommand
   {
   private:
-    RefPtr<dom::Element> _element1;
-    const Ref<dom::Element> _element2;
-    const Ref<dom::Node> _atChild;
+    RefPtr<Element> _element1;
+    const Ref<Element> _element2;
+    const Ref<Node> _atChild;
 
   public:
-    KRYS_NODISCARD static Ref<SplitElementCommand> Create(dom::Element &element,
-                                                          dom::Node &splitPointChild) noexcept;
+    KRYS_NODISCARD static Ref<SplitElementCommand> Create(Element &element, Node &splitPointChild) noexcept;
 
-    SplitElementCommand(dom::Element &element, dom::Node &splitPointChild) noexcept;
+    SplitElementCommand(Element &element, Node &splitPointChild) noexcept;
 
   private:
     void DoApply() noexcept override;

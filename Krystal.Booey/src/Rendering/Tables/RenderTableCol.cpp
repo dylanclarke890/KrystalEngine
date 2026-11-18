@@ -33,7 +33,7 @@
 
 namespace krys::boo
 {
-  RenderTableCol::RenderTableCol(dom::Element &element, RenderStyle &&style) noexcept
+  RenderTableCol::RenderTableCol(Element &element, RenderStyle &&style) noexcept
       : RenderBox(Type::TableCol, element, krys::move(style))
   {
     // init RenderObject attributes
@@ -42,7 +42,7 @@ namespace krys::boo
     krys_debug_assert(IsRenderTableCol());
   }
 
-  RenderTableCol::RenderTableCol(dom::Document &document, RenderStyle &&style) noexcept
+  RenderTableCol::RenderTableCol(Document &document, RenderStyle &&style) noexcept
       : RenderBox(Type::TableCol, document, krys::move(style))
   {
     SetInline(true);
@@ -95,9 +95,8 @@ namespace krys::boo
   {
     krys_debug_assert(GetElement());
     auto oldSpan = _span;
-    auto *htmlElement = DynamicDowncast<html::HTMLElement>(GetElement());
-    if (auto *tableColElement =
-          htmlElement ? DynamicDowncast<html::HTMLTableColElement>(*htmlElement) : nullptr)
+    auto *htmlElement = DynamicDowncast<HTMLElement>(GetElement());
+    if (auto *tableColElement = htmlElement ? DynamicDowncast<HTMLTableColElement>(*htmlElement) : nullptr)
     {
       _span = tableColElement->Span();
     }

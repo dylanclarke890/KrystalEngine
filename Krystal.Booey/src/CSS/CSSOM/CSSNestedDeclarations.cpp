@@ -24,16 +24,17 @@
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSNestedDeclarations::CSSNestedDeclarations(NestedDeclarationsRule &rule, CSSStyleSheet *parent) noexcept
+  CSSNestedDeclarations::CSSNestedDeclarations(css::NestedDeclarationsRule &rule,
+                                               CSSStyleSheet *parent) noexcept
       : CSSRule(parent), _styleRule(ShareRef(rule))
   {
   }
 
   CSSNestedDeclarations::~CSSNestedDeclarations() noexcept = default;
 
-  Ref<CSSNestedDeclarations> CSSNestedDeclarations::Create(NestedDeclarationsRule &rule,
+  Ref<CSSNestedDeclarations> CSSNestedDeclarations::Create(css::NestedDeclarationsRule &rule,
                                                            CSSStyleSheet *sheet) noexcept
   {
     return AdoptRef(*new CSSNestedDeclarations(rule, sheet));
@@ -50,12 +51,12 @@ namespace krys::boo::css
 
   CSSOMString CSSNestedDeclarations::CssText() const noexcept
   {
-    return _styleRule->Properties().AsText(DefaultSerialisationContext());
+    return _styleRule->Properties().AsText(css::DefaultSerialisationContext());
   }
 
-  void CSSNestedDeclarations::Reattach(Rule &rule) noexcept
+  void CSSNestedDeclarations::Reattach(css::Rule &rule) noexcept
   {
-    _styleRule = ShareRef(Downcast<NestedDeclarationsRule>(rule));
+    _styleRule = ShareRef(Downcast<css::NestedDeclarationsRule>(rule));
     if (_propertiesCSSOMWrapper)
     {
       _propertiesCSSOMWrapper->Reattach(_styleRule->MutableProperties());

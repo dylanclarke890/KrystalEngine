@@ -39,7 +39,7 @@ namespace krys::boo::ax::tests
   {
     AXFixture page(u8"<img id=image usemap=#map width=100 height=100 alt=Shapes>"
                    u8"<map name=map><area id=area href=#a shape=rect coords=0,0,50,50 alt=A></map>");
-    Downcast<html::HTMLElement>(page.ById(u8"area")).Focus();
+    Downcast<HTMLElement>(page.ById(u8"area")).Focus();
     auto *focused = page.Cache().FocusedObject();
     REQUIRE(focused);
     CHECK(focused->GetNode() == &page.ById(u8"area"));

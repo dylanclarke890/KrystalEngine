@@ -27,7 +27,7 @@
 
 #include "Krystal.Core/Numeric.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief The operation a math value performs.
   /// @see https://drafts.css-houdini.org/css-typed-om/#enumdef-cssmathoperator

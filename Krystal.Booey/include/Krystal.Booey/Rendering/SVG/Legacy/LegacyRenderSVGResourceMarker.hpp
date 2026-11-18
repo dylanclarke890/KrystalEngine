@@ -22,14 +22,11 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGMarkerElement;
   enum class SVGMarkerUnitsType : uint8;
-}
 
-namespace krys::boo
-{
   /// @brief The renderer of a `<marker>`: draws its children at the vertices of the shapes that reference it.
   class LegacyRenderSVGResourceMarker final : public LegacyRenderSVGResourceContainer
   {
@@ -40,11 +37,11 @@ namespace krys::boo
     FloatRect _viewport;
 
   public:
-    LegacyRenderSVGResourceMarker(svg::SVGMarkerElement &, RenderStyle &&) noexcept;
+    LegacyRenderSVGResourceMarker(SVGMarkerElement &, RenderStyle &&) noexcept;
 
     ~LegacyRenderSVGResourceMarker() noexcept override;
 
-    KRYS_NODISCARD svg::SVGMarkerElement &MarkerElement() const noexcept;
+    KRYS_NODISCARD SVGMarkerElement &MarkerElement() const noexcept;
 
     void RemoveAllClientsFromCache() noexcept override
     {
@@ -87,7 +84,7 @@ namespace krys::boo
 
     KRYS_NODISCARD Maybe<float> Angle() const noexcept;
 
-    KRYS_NODISCARD svg::SVGMarkerUnitsType MarkerUnits() const noexcept;
+    KRYS_NODISCARD SVGMarkerUnitsType MarkerUnits() const noexcept;
 
     KRYS_NODISCARD RenderSVGResourceType ResourceType() const noexcept override
     {

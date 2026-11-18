@@ -18,10 +18,10 @@ namespace krys::boo::dom::tests
   {
     struct CommonTestData
     {
-      Ref<dom::Document> Document;
+      Ref<boo::Document> Document;
       Ref<DocumentFragment> Node;
 
-      CommonTestData() : Document(CreateRef<dom::Document>()), Node(CreateRef<DocumentFragment>(*Document))
+      CommonTestData() : Document(CreateRef<boo::Document>()), Node(CreateRef<DocumentFragment>(*Document))
       {
       }
 
@@ -51,8 +51,7 @@ namespace krys::boo::dom::tests
     CHECK(shadow->Host() == host.get());
     auto templateElement =
       data.Document->CreateElementNS(infra::namespaces::HTML, u8"template").ReleaseValue();
-    CHECK(Downcast<html::HTMLTemplateElement>(*templateElement).TemplateContents().Host()
-          == templateElement.get());
+    CHECK(Downcast<HTMLTemplateElement>(*templateElement).TemplateContents().Host() == templateElement.get());
   }
 
   TEST_CASE("Node.nodeType: a DocumentFragment is a DOCUMENT_FRAGMENT_NODE",
@@ -74,8 +73,8 @@ namespace krys::boo::dom::tests
             "dom:string-replace-all]")
   {
     CommonTestData data;
-    auto textNode1 = CreateRef<dom::Text>(*data.Document, u8"Hello");
-    auto textNode2 = CreateRef<dom::Text>(*data.Document, u8" world!");
+    auto textNode1 = CreateRef<Text>(*data.Document, u8"Hello");
+    auto textNode2 = CreateRef<Text>(*data.Document, u8" world!");
 
     REQUIRE_FALSE(data.Node->AppendChild(*textNode1).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*textNode2).HasException());

@@ -81,7 +81,7 @@ namespace krys::boo::style
     return _integerPosition;
   }
 
-  css::CSSOMString GridPosition::NamedGridLine() const noexcept
+  CSSOMString GridPosition::NamedGridLine() const noexcept
   {
     krys_debug_assert(_type == GridPositionType::Explicit || _type == GridPositionType::Span
                       || _type == GridPositionType::NamedGridArea);
@@ -117,7 +117,7 @@ namespace krys::boo::style
 
       if (primitiveValue->IsCustomIdent())
       {
-        return css::CustomIdentifier {css::CSSOMStringAtom {primitiveValue->StringValue()}};
+        return css::CustomIdentifier {CSSOMStringAtom {primitiveValue->StringValue()}};
       }
 
       state.SetCurrentPropertyInvalidAtComputedValueTime();
@@ -138,7 +138,7 @@ namespace krys::boo::style
                             ? uncheckedNumericValue->ResolveAsInteger<int>(state.CssToLengthConversionData())
                             : 0;
     auto gridLineName = uncheckedGridLineName && uncheckedGridLineName->IsCustomIdent()
-                          ? css::CSSOMStringAtom {uncheckedGridLineName->StringValue()}
+                          ? CSSOMStringAtom {uncheckedGridLineName->StringValue()}
                           : null;
 
     if (uncheckedSpanValue && uncheckedSpanValue->ValueId() == css::ValueId::Span)

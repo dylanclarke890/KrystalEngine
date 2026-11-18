@@ -72,8 +72,7 @@ namespace krys::boo
     }
 
   protected:
-    LegacyRenderSVGContainer(Type, svg::SVGElement &, RenderStyle &&,
-                             EnumSet<SVGModelObjectFlag> = {}) noexcept;
+    LegacyRenderSVGContainer(Type, SVGElement &, RenderStyle &&, EnumSet<SVGModelObjectFlag> = {}) noexcept;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {

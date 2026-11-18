@@ -37,12 +37,12 @@ namespace krys::boo
   private:
     SourceImage _sourceImage;
     FloatRect _sourceImageRect;
-    svg::SVGPreserveAspectRatioValue _preserveAspectRatio;
+    SVGPreserveAspectRatioValue _preserveAspectRatio;
 
   public:
     KRYS_NODISCARD static Ref<FEImage>
       Create(SourceImage &&sourceImage, const FloatRect &sourceImageRect,
-             const svg::SVGPreserveAspectRatioValue &preserveAspectRatio) noexcept;
+             const SVGPreserveAspectRatioValue &preserveAspectRatio) noexcept;
 
     KRYS_NODISCARD bool operator==(const FEImage &other) const noexcept;
 
@@ -61,14 +61,14 @@ namespace krys::boo
       return _sourceImageRect;
     }
 
-    KRYS_NODISCARD const svg::SVGPreserveAspectRatioValue &PreserveAspectRatio() const noexcept
+    KRYS_NODISCARD const SVGPreserveAspectRatioValue &PreserveAspectRatio() const noexcept
     {
       return _preserveAspectRatio;
     }
 
   private:
     FEImage(SourceImage &&sourceImage, const FloatRect &sourceImageRect,
-            const svg::SVGPreserveAspectRatioValue &preserveAspectRatio) noexcept;
+            const SVGPreserveAspectRatioValue &preserveAspectRatio) noexcept;
 
     KRYS_NODISCARD bool operator==(const FilterEffect &other) const noexcept override
     {

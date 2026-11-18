@@ -25,10 +25,10 @@
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLObjectElement::HTMLObjectElement(dom::Document &document) noexcept
-      : HTMLPlugInElement(document, HTMLElementInterface::Object)
+  HTMLObjectElement::HTMLObjectElement(Document &document) noexcept
+      : HTMLPlugInElement(document, html::HTMLElementInterface::Object)
   {
   }
 
@@ -37,7 +37,7 @@ namespace krys::boo::html
     ClearForm();
   }
 
-  bool HTMLObjectElement::AppendFormData(DOMFormData &) noexcept
+  bool HTMLObjectElement::AppendFormData(html::DOMFormData &) noexcept
   {
     return false;
   }
@@ -45,7 +45,7 @@ namespace krys::boo::html
   void HTMLObjectElement::OnInsert() noexcept
   {
     HTMLPlugInElement::OnInsert();
-    FormListedElement::ElementInsertedIntoAncestor(*this, IsConnected());
+    html::FormListedElement::ElementInsertedIntoAncestor(*this, IsConnected());
     if (!IsConnected())
     {
       ResetFormOwner();
@@ -58,35 +58,34 @@ namespace krys::boo::html
     ResetFormOwner();
   }
 
-  void HTMLObjectElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLObjectElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLPlugInElement::OnRemove(isSubtreeRoot, oldAncestor);
-    FormListedElement::ElementRemovedFromAncestor(*this, oldAncestor.IsConnected());
+    html::FormListedElement::ElementRemovedFromAncestor(*this, oldAncestor.IsConnected());
   }
 
-  void HTMLObjectElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLObjectElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLPlugInElement::OnMove(isSubtreeRoot, oldAncestor);
-    FormListedElement::ElementRemovedFromAncestor(*this, false);
-    FormListedElement::ElementInsertedIntoAncestor(*this, IsConnected());
+    html::FormListedElement::ElementRemovedFromAncestor(*this, false);
+    html::FormListedElement::ElementInsertedIntoAncestor(*this, IsConnected());
     ResetFormOwner();
   }
 
-  void HTMLObjectElement::OnAdopt(dom::Document &oldDocument) noexcept
+  void HTMLObjectElement::OnAdopt(Document &oldDocument) noexcept
   {
     HTMLPlugInElement::OnAdopt(oldDocument);
-    FormListedElement::DidMoveToNewDocument();
+    html::FormListedElement::DidMoveToNewDocument();
   }
 
-  void HTMLObjectElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                             Maybe<dom::DOMStringView> oldValue,
-                                             Maybe<dom::DOMStringView> value,
-                                             const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLObjectElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                             Maybe<DOMStringView> value,
+                                             const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLPlugInElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI == null)
     {
-      FormListedElement::ParseAttribute(localName, value);
+      html::FormListedElement::ParseAttribute(localName, value);
     }
   }
 
@@ -94,174 +93,174 @@ namespace krys::boo::html
 
   dom::USVString HTMLObjectElement::Data() const noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"data");
+    return html::ReflectURL<dom::USVString>(*this, u8"data");
   }
 
   void HTMLObjectElement::Data(dom::USVString value) noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"data", krys::move(value));
+    return html::ReflectURL<dom::USVString>(*this, u8"data", krys::move(value));
   }
 
-  dom::DOMString HTMLObjectElement::Type() const noexcept
+  DOMString HTMLObjectElement::Type() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"type").value_or(u8"");
   }
 
-  void HTMLObjectElement::Type(dom::DOMString value) noexcept
+  void HTMLObjectElement::Type(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"type", krys::move(value));
   }
 
-  dom::DOMString HTMLObjectElement::Name() const noexcept
+  DOMString HTMLObjectElement::Name() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLObjectElement::Name(dom::DOMString value) noexcept
+  void HTMLObjectElement::Name(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"name", krys::move(value));
   }
 
-  dom::DOMString HTMLObjectElement::Width() const noexcept
+  DOMString HTMLObjectElement::Width() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"width").value_or(u8"");
   }
 
-  void HTMLObjectElement::Width(dom::DOMString value) noexcept
+  void HTMLObjectElement::Width(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"width", krys::move(value));
   }
 
-  dom::DOMString HTMLObjectElement::Height() const noexcept
+  DOMString HTMLObjectElement::Height() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"height").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"height").value_or(u8"");
   }
 
-  void HTMLObjectElement::Height(dom::DOMString value) noexcept
+  void HTMLObjectElement::Height(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"height", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"height", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region HTMLObjectElement Obsolete members
 
-  dom::DOMString HTMLObjectElement::Align() const noexcept
+  DOMString HTMLObjectElement::Align() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLObjectElement::Align(dom::DOMString value) noexcept
+  void HTMLObjectElement::Align(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"align", krys::move(value));
   }
 
-  dom::DOMString HTMLObjectElement::Archive() const noexcept
+  DOMString HTMLObjectElement::Archive() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"archive").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"archive").value_or(u8"");
   }
 
-  void HTMLObjectElement::Archive(dom::DOMString value) noexcept
+  void HTMLObjectElement::Archive(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"archive", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"archive", krys::move(value));
   }
 
-  dom::DOMString HTMLObjectElement::Code() const noexcept
+  DOMString HTMLObjectElement::Code() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"code").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"code").value_or(u8"");
   }
 
-  void HTMLObjectElement::Code(dom::DOMString value) noexcept
+  void HTMLObjectElement::Code(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"code", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"code", krys::move(value));
   }
 
   bool HTMLObjectElement::Declare() const noexcept
   {
-    return Reflect<bool>(*this, u8"declare");
+    return html::Reflect<bool>(*this, u8"declare");
   }
 
   void HTMLObjectElement::Declare(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"declare", krys::move(value));
+    html::Reflect<bool>(*this, u8"declare", krys::move(value));
   }
 
   uint32 HTMLObjectElement::HSpace() const noexcept
   {
-    return Reflect<uint32>(*this, u8"hspace");
+    return html::Reflect<uint32>(*this, u8"hspace");
   }
 
   void HTMLObjectElement::HSpace(uint32 value) noexcept
   {
-    Reflect<uint32>(*this, u8"hspace", krys::move(value));
+    html::Reflect<uint32>(*this, u8"hspace", krys::move(value));
   }
 
-  dom::DOMString HTMLObjectElement::Standby() const noexcept
+  DOMString HTMLObjectElement::Standby() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"standby").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"standby").value_or(u8"");
   }
 
-  void HTMLObjectElement::Standby(dom::DOMString value) noexcept
+  void HTMLObjectElement::Standby(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"standby", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"standby", krys::move(value));
   }
 
   uint32 HTMLObjectElement::VSpace() const noexcept
   {
-    return Reflect<uint32>(*this, u8"vspace");
+    return html::Reflect<uint32>(*this, u8"vspace");
   }
 
   void HTMLObjectElement::VSpace(uint32 value) noexcept
   {
-    Reflect<uint32>(*this, u8"vspace", krys::move(value));
+    html::Reflect<uint32>(*this, u8"vspace", krys::move(value));
   }
 
-  dom::DOMString HTMLObjectElement::CodeBase() const noexcept
+  DOMString HTMLObjectElement::CodeBase() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"codebase").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"codebase").value_or(u8"");
   }
 
-  void HTMLObjectElement::CodeBase(dom::DOMString value) noexcept
+  void HTMLObjectElement::CodeBase(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"codebase", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"codebase", krys::move(value));
   }
 
-  dom::DOMString HTMLObjectElement::CodeType() const noexcept
+  DOMString HTMLObjectElement::CodeType() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"codetype").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"codetype").value_or(u8"");
   }
 
-  void HTMLObjectElement::CodeType(dom::DOMString value) noexcept
+  void HTMLObjectElement::CodeType(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"codetype", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"codetype", krys::move(value));
   }
 
-  dom::DOMString HTMLObjectElement::UseMap() const noexcept
+  DOMString HTMLObjectElement::UseMap() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"usemap").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"usemap").value_or(u8"");
   }
 
-  void HTMLObjectElement::UseMap(dom::DOMString value) noexcept
+  void HTMLObjectElement::UseMap(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"usemap", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"usemap", krys::move(value));
   }
 
-  dom::DOMString HTMLObjectElement::Border() const noexcept
+  DOMString HTMLObjectElement::Border() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"border").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"border").value_or(u8"");
   }
 
-  void HTMLObjectElement::Border(dom::DOMString value) noexcept
+  void HTMLObjectElement::Border(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"border", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"border", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region Presentational hints
 
-  bool HTMLObjectElement::HasPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool HTMLObjectElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                             const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && (localName == u8"border"))
     {
@@ -270,12 +269,12 @@ namespace krys::boo::html
     return HTMLPlugInElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLObjectElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                                 const dom::DOMStringAtom &namespaceURI,
-                                                                 dom::DOMStringView value,
+  void HTMLObjectElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                                 const DOMStringAtom &namespaceURI,
+                                                                 DOMStringView value,
                                                                  css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLPlugInElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);

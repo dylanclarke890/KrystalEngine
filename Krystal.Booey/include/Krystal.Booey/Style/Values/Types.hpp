@@ -36,22 +36,16 @@
 
 namespace krys::boo
 {
-  class RenderStyle;
-
   struct BlendingContext;
-
   enum class CompositeOperation : uint8;
+  class Element;
+  class RenderStyle;
 }
 
 namespace krys::boo::css
 {
   class PrimitiveValue;
   class ToLengthConversionData;
-}
-
-namespace krys::boo::dom
-{
-  class Element;
 }
 
 namespace krys::boo::style::interpolation
@@ -157,15 +151,15 @@ namespace krys::boo::style
   template <>
   constexpr inline bool TreatAsNonConverting<css::PropertyIdentifier> = true;
 
-  // Specialize `TreatAsNonConverting` for `css::CSSOMStringAtom`, to indicate that its type does not change
+  // Specialize `TreatAsNonConverting` for `CSSOMStringAtom`, to indicate that its type does not change
   // from the CSS representation.
   template <>
-  constexpr inline bool TreatAsNonConverting<css::CSSOMStringAtom> = true;
+  constexpr inline bool TreatAsNonConverting<CSSOMStringAtom> = true;
 
-  // Specialize `TreatAsNonConverting` for `css::CSSOMString`, to indicate that its type does not change from
+  // Specialize `TreatAsNonConverting` for `CSSOMString`, to indicate that its type does not change from
   // the CSS representation.
   template <>
-  constexpr inline bool TreatAsNonConverting<css::CSSOMString> = true;
+  constexpr inline bool TreatAsNonConverting<CSSOMString> = true;
 
   // Specialize `TreatAsNonConverting` for `url::URL`, to indicate that its type does not change from the CSS
   // representation.
@@ -921,9 +915,9 @@ namespace krys::boo::style
   /// template<>
   /// struct krys::boo::style::DeprecatedCSSValueConversion<StyleType>
   /// {
-  ///   Maybe<StyleType> operator()(const RefPtr<dom::Element>&&, const css::Value&);
-  ///   Maybe<StyleType> operator()(const RefPtr<dom::Element>&&, const css::PrimitiveValue&);
-  ///   [optional] Maybe<StyleType> operator()(const RefPtr<dom::Element>&&, [DerivedFrom<css::Value>])
+  ///   Maybe<StyleType> operator()(const RefPtr<Element>&&, const css::Value&);
+  ///   Maybe<StyleType> operator()(const RefPtr<Element>&&, const css::PrimitiveValue&);
+  ///   [optional] Maybe<StyleType> operator()(const RefPtr<Element>&&, [DerivedFrom<css::Value>])
   ///   noexcept;
   /// };
   template <typename StyleType>
@@ -933,14 +927,14 @@ namespace krys::boo::style
   struct DeprecatedCSSValueConversionInvoker
   {
     template <typename... Rest>
-    KRYS_NODISCARD Maybe<StyleType> operator()(const RefPtr<dom::Element> &element, const css::Value &value,
+    KRYS_NODISCARD Maybe<StyleType> operator()(const RefPtr<Element> &element, const css::Value &value,
                                                Rest &&...rest) const noexcept
     {
       return DeprecatedCSSValueConversion<StyleType> {}(element, value, std::forward<Rest>(rest)...);
     }
 
     template <typename... Rest>
-    KRYS_NODISCARD Maybe<StyleType> operator()(const RefPtr<dom::Element> &element,
+    KRYS_NODISCARD Maybe<StyleType> operator()(const RefPtr<Element> &element,
                                                const css::PrimitiveValue &value,
                                                Rest &&...rest) const noexcept
     {
@@ -948,7 +942,7 @@ namespace krys::boo::style
     }
 
     template <typename... Rest>
-    KRYS_NODISCARD Maybe<StyleType> operator()(const RefPtr<dom::Element> &element,
+    KRYS_NODISCARD Maybe<StyleType> operator()(const RefPtr<Element> &element,
                                                const DerivedFrom<css::Value> auto &value,
                                                Rest &&...rest) const noexcept
     {
@@ -993,7 +987,7 @@ namespace krys::boo::style
   /// template<>
   /// struct krys::boo::style::Serialiser<StyleType>
   /// {
-  ///   void operator()(css::CSSOMString&, const css::SerialisationContext&, const RenderStyle&, const
+  ///   void operator()(CSSOMString&, const css::SerialisationContext&, const RenderStyle&, const
   ///                   StyleType&) noexcept;
   /// };
   template <typename StyleType>
@@ -1009,9 +1003,8 @@ namespace krys::boo::style
     }
 
     template <typename StyleType, typename... Rest>
-    KRYS_NODISCARD css::CSSOMString operator()(const css::SerialisationContext &context,
-                                               const RenderStyle &style, const StyleType &value,
-                                               Rest &&...rest) const noexcept
+    KRYS_NODISCARD CSSOMString operator()(const css::SerialisationContext &context, const RenderStyle &style,
+                                          const StyleType &value, Rest &&...rest) const noexcept
     {
       StringBuilder builder;
       this->operator()(builder, context, style, value, std::forward<Rest>(rest)...);
@@ -1039,9 +1032,9 @@ namespace krys::boo::style
                                       const RenderStyle &style, const StyleType &value,
                                       // Passed to each element's conversion, so never forwarded.
                                       // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
-                                      css::CSSOMStringView separator, Rest &&...rest) noexcept
+                                      CSSOMStringView separator, Rest &&...rest) noexcept
   {
-    css::CSSOMStringView swappedSeparator = u8"";
+    CSSOMStringView swappedSeparator = u8"";
     auto caller = krys::CreateVisitor(
       [&]<css::OptionalLike T>(const T &element)
       {
@@ -1066,7 +1059,7 @@ namespace krys::boo::style
   void SerialisationForCSSOnTupleLikeCoalescing(StringBuilder &builder,
                                                 const css::SerialisationContext &context,
                                                 const RenderStyle &style, const StyleType &value,
-                                                css::CSSOMStringView separator, Rest &&...rest) noexcept
+                                                CSSOMStringView separator, Rest &&...rest) noexcept
   {
     if constexpr (std::tuple_size_v<StyleType> == 2)
     {
@@ -1113,9 +1106,9 @@ namespace krys::boo::style
                                       const RenderStyle &style, const StyleType &value,
                                       // Passed to each element's conversion, so never forwarded.
                                       // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
-                                      css::CSSOMStringView separator, Rest &&...rest) noexcept
+                                      CSSOMStringView separator, Rest &&...rest) noexcept
   {
-    css::CSSOMStringView swappedSeparator = u8"";
+    CSSOMStringView swappedSeparator = u8"";
     for (const auto &element : value)
     {
       builder.Append(std::exchange(swappedSeparator, separator));

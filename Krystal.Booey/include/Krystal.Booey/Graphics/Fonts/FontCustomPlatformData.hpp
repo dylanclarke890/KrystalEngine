@@ -85,8 +85,8 @@ namespace krys::boo
 
     /// @brief The font in @p buffer (a TrueType or OpenType font; WOFF fonts are converted before), or null
     /// if it isn't one.
-    KRYS_NODISCARD static RefPtr<FontCustomPlatformData>
-      Create(SharedBuffer &buffer, const css::CSSOMString &itemInCollection) noexcept;
+    KRYS_NODISCARD static RefPtr<FontCustomPlatformData> Create(SharedBuffer &buffer,
+                                                                const CSSOMString &itemInCollection) noexcept;
 
     /// @brief The platform font for @p description, made bold or italic synthetically if asked.
     KRYS_NODISCARD boo::FontPlatformData
@@ -94,7 +94,7 @@ namespace krys::boo
                           const FontCreationContext &fontCreationContext) const noexcept;
 
     /// @brief Whether fonts in @p format (a `format()` keyword or string, e.g. `woff2`) can be loaded.
-    KRYS_NODISCARD static bool SupportsFormat(css::CSSOMStringView format) noexcept;
+    KRYS_NODISCARD static bool SupportsFormat(CSSOMStringView format) noexcept;
 
     /// @brief Whether the font technology @p technology is supported.
     KRYS_NODISCARD static bool SupportsTechnology(css::FontTechnology technology) noexcept;

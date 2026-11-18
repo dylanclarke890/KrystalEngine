@@ -25,13 +25,10 @@
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGContainer.hpp"
 
-namespace krys::boo::svg
-{
-  class SVGGraphicsElement;
-}
-
 namespace krys::boo
 {
+  class SVGGraphicsElement;
+
   /// @brief The renderer of a transformable SVG container: `<g>`, `<a>`, `<switch>` and `<use>`.
   class LegacyRenderSVGTransformableContainer final : public LegacyRenderSVGContainer
   {
@@ -45,7 +42,7 @@ namespace krys::boo
     FloatRect _lastTransformReferenceBoxRect {};
 
   public:
-    LegacyRenderSVGTransformableContainer(svg::SVGGraphicsElement &, RenderStyle &&) noexcept;
+    LegacyRenderSVGTransformableContainer(SVGGraphicsElement &, RenderStyle &&) noexcept;
 
     ~LegacyRenderSVGTransformableContainer() noexcept override;
 
@@ -72,7 +69,7 @@ namespace krys::boo
     void GetElement() const = delete;
 
   private:
-    KRYS_NODISCARD svg::SVGGraphicsElement &GraphicsElement() noexcept;
+    KRYS_NODISCARD SVGGraphicsElement &GraphicsElement() noexcept;
 
     bool CalculateLocalTransform() noexcept override;
 

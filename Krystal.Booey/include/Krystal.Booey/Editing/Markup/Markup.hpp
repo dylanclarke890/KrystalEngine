@@ -37,7 +37,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class Document;
@@ -45,6 +45,10 @@ namespace krys::boo::dom
   class Element;
   class Node;
   class ShadowRoot;
+}
+
+namespace krys::boo::dom
+{
   struct SimpleRange;
   enum class TreeType : uint8;
 }
@@ -74,54 +78,53 @@ namespace krys::boo
       OnlyUserSelectNone,
     };
 
-    HashMap<const dom::Node *, State> _cache;
+    HashMap<const Node *, State> _cache;
     bool _useComposedTree;
 
   public:
     explicit UserSelectNoneStateCache(dom::TreeType treeType) noexcept;
 
-    KRYS_NODISCARD bool NodeOnlyContainsUserSelectNone(dom::Node &node) noexcept
+    KRYS_NODISCARD bool NodeOnlyContainsUserSelectNone(Node &node) noexcept
     {
       return ComputeState(node) == State::OnlyUserSelectNone;
     }
 
   private:
-    KRYS_NODISCARD dom::ContainerNode *ParentNode(dom::Node &node) const noexcept;
+    KRYS_NODISCARD ContainerNode *ParentNode(Node &node) const noexcept;
 
-    KRYS_NODISCARD dom::Node *FirstChild(dom::Node &node) const noexcept;
+    KRYS_NODISCARD Node *FirstChild(Node &node) const noexcept;
 
-    KRYS_NODISCARD dom::Node *NextSibling(dom::Node &node) const noexcept;
+    KRYS_NODISCARD Node *NextSibling(Node &node) const noexcept;
 
-    KRYS_NODISCARD State ComputeState(dom::Node &targetNode) noexcept;
+    KRYS_NODISCARD State ComputeState(Node &targetNode) noexcept;
   };
 
   /// @brief The text, as a fragment of `p`s (or clones of the context's block), `br`s, text nodes and tab
   /// spans, that it would be pasted as at @p context.
-  KRYS_NODISCARD Ref<dom::DocumentFragment> CreateFragmentFromText(const dom::SimpleRange &context,
-                                                                   utf8_stringview text) noexcept;
+  KRYS_NODISCARD Ref<DocumentFragment> CreateFragmentFromText(const dom::SimpleRange &context,
+                                                              utf8_stringview text) noexcept;
 
   /// @brief The markup, parsed as if it were in a `body`.
-  KRYS_NODISCARD Ref<dom::DocumentFragment> CreateFragmentFromMarkup(dom::Document &document,
-                                                                     utf8_stringview markup,
-                                                                     utf8_stringview baseURL) noexcept;
+  KRYS_NODISCARD Ref<DocumentFragment> CreateFragmentFromMarkup(Document &document, utf8_stringview markup,
+                                                                utf8_stringview baseURL) noexcept;
 
   /// @brief The markup, parsed as the children of @p contextElement, for `innerHTML`, `outerHTML`,
   /// `insertAdjacentHTML()` and `setHTMLUnsafe()`: as HTML in an HTML document or when the policy says to,
   /// and as XML otherwise, which throws a `SyntaxError` if it isn't well formed.
   /// @see https://html.spec.whatwg.org/#fragment-parsing-algorithm-steps
-  KRYS_NODISCARD dom::ExceptionOr<Ref<dom::DocumentFragment>>
-    CreateFragmentForInnerOuterHTML(dom::Element &contextElement, utf8_stringview markup,
+  KRYS_NODISCARD dom::ExceptionOr<Ref<DocumentFragment>>
+    CreateFragmentForInnerOuterHTML(Element &contextElement, utf8_stringview markup,
                                     EnumSet<dom::ParserContentPolicy> parserContentPolicy = {}) noexcept;
 
   /// @see https://w3c.github.io/DOM-Parsing/#dom-range-createcontextualfragment
-  KRYS_NODISCARD dom::ExceptionOr<Ref<dom::DocumentFragment>>
-    CreateContextualFragment(dom::Element &element, utf8_stringview markup) noexcept;
+  KRYS_NODISCARD dom::ExceptionOr<Ref<DocumentFragment>>
+    CreateContextualFragment(Element &element, utf8_stringview markup) noexcept;
 
-  KRYS_NODISCARD bool IsPlainTextMarkup(dom::Node *node) noexcept;
+  KRYS_NODISCARD bool IsPlainTextMarkup(Node *node) noexcept;
 
   // These methods are used by HTMLElement & ShadowRoot to replace the children with respected fragment/text.
-  dom::ExceptionOr<void> ReplaceChildrenWithFragment(dom::ContainerNode &container,
-                                                     const Ref<dom::DocumentFragment> &fragment) noexcept;
+  dom::ExceptionOr<void> ReplaceChildrenWithFragment(ContainerNode &container,
+                                                     const Ref<DocumentFragment> &fragment) noexcept;
 
   enum class ConvertBlocksToInlines : bool
   {
@@ -156,7 +159,7 @@ namespace krys::boo
   /// @brief The range's markup, with the styles that make it look as it does inlined, so it looks the same
   /// wherever it's pasted.
   KRYS_NODISCARD utf8_string SerializePreservingVisualAppearance(
-    const dom::SimpleRange &range, List<Ref<dom::Node>> *nodes = nullptr,
+    const dom::SimpleRange &range, List<Ref<Node>> *nodes = nullptr,
     AnnotateForInterchange annotate = AnnotateForInterchange::No,
     ConvertBlocksToInlines convertBlocksToInlines = ConvertBlocksToInlines::No,
     ResolveURLs resolveURLs = ResolveURLs::No) noexcept;
@@ -167,7 +170,7 @@ namespace krys::boo
     IgnoreUserSelectNone ignoreUserSelectNone = IgnoreUserSelectNone::Yes,
     PreserveBaseElement preserveBaseElement = PreserveBaseElement::No,
     PreserveDirectionForInlineText preserveDirectionForInlineText = PreserveDirectionForInlineText::No,
-    List<Ref<dom::Node>> *nodes = nullptr) noexcept;
+    List<Ref<Node>> *nodes = nullptr) noexcept;
 
   enum class SerializedNodes : uint8
   {
@@ -197,23 +200,23 @@ namespace krys::boo
 
   /// @see https://html.spec.whatwg.org/#serialising-html-fragments
   KRYS_NODISCARD utf8_string SerializeFragment(
-    const dom::Node &node, SerializedNodes root, List<Ref<dom::Node>> *nodes = nullptr,
+    const Node &node, SerializedNodes root, List<Ref<Node>> *nodes = nullptr,
     ResolveURLs resolveURLs = ResolveURLs::No, Maybe<SerializationSyntax> serializationSyntax = null,
     SerializeShadowRoots serializeShadowRoots = SerializeShadowRoots::Explicit,
-    List<Ref<dom::ShadowRoot>> &&explicitShadowRoots = {}) noexcept;
+    List<Ref<ShadowRoot>> &&explicitShadowRoots = {}) noexcept;
 
   /// @brief Serializes @p node as the markup getters (`innerHTML`, `outerHTML`) do: as HTML in an HTML
   /// document, and otherwise as XML that must be well-formed.
   /// @return An `InvalidStateError` if the XML serialization meets one of its error cases.
   /// @see https://html.spec.whatwg.org/#fragment-serializing-algorithm-steps
   KRYS_NODISCARD dom::ExceptionOr<utf8_string>
-    SerializeFragmentRequiringWellFormed(const dom::Node &node, SerializedNodes root) noexcept;
+    SerializeFragmentRequiringWellFormed(const Node &node, SerializedNodes root) noexcept;
 
   KRYS_NODISCARD utf8_string URLToMarkup(utf8_stringview url, utf8_stringview title) noexcept;
 
   /// @brief A page with empty clients, whose main frame shows an empty document, to parse markup in apart
   /// from @p destinationDocument.
-  KRYS_NODISCARD Ref<Page> CreatePageForSanitizingWebContent(dom::Document *destinationDocument) noexcept;
+  KRYS_NODISCARD Ref<Page> CreatePageForSanitizingWebContent(Document *destinationDocument) noexcept;
 
   enum class MSOListQuirks : bool
   {
@@ -226,14 +229,14 @@ namespace krys::boo
   /// @param fragmentSanitizer Changes the parsed fragment before it's serialised, if given.
   /// @return The markup, or none if the staging page has no document.
   KRYS_NODISCARD Maybe<utf8_string>
-    SanitizeMarkup(utf8_stringview rawHTML, dom::Document *destinationDocument,
+    SanitizeMarkup(utf8_stringview rawHTML, Document *destinationDocument,
                    MSOListQuirks msoListQuirks = MSOListQuirks::Disabled,
-                   const Func<void(dom::DocumentFragment &)> &fragmentSanitizer = {}) noexcept;
+                   const Func<void(DocumentFragment &)> &fragmentSanitizer = {}) noexcept;
 
-  KRYS_NODISCARD utf8_string SanitizedMarkupForFragmentInDocument(const Ref<dom::DocumentFragment> &fragment,
-                                                                  dom::Document &document,
+  KRYS_NODISCARD utf8_string SanitizedMarkupForFragmentInDocument(const Ref<DocumentFragment> &fragment,
+                                                                  Document &document,
                                                                   MSOListQuirks msoListQuirks,
                                                                   utf8_stringview originalMarkup) noexcept;
 
-  KRYS_NODISCARD utf8_string DocumentTypeString(const dom::Document &document) noexcept;
+  KRYS_NODISCARD utf8_string DocumentTypeString(const Document &document) noexcept;
 }

@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/SVG/SVGAnimateElementBase.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<set>` element: sets an attribute or property to a value for its interval.
   /// @note `SVGAnimateElement` implements a superset of the functionality.
@@ -12,10 +12,10 @@ namespace krys::boo::svg
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGSetElement);
 
   public:
-    explicit SVGSetElement(dom::Document &document) noexcept
+    explicit SVGSetElement(Document &document) noexcept
         : SVGAnimateElementBase(document, SVGElementInterface::Set)
     {
-      SetAnimationMode(AnimationMode::To);
+      SetAnimationMode(svg::AnimationMode::To);
     }
 
   private:
@@ -27,14 +27,14 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGSetElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &element) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGSetElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &element) noexcept
   {
-    return element.Interface() == krys::boo::svg::SVGElementInterface::Set;
+    return element.Interface() == krys::boo::SVGElementInterface::Set;
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    auto *svgElement = krys::DynamicDowncast<krys::boo::svg::SVGElement>(node);
+    auto *svgElement = krys::DynamicDowncast<krys::boo::SVGElement>(node);
     return svgElement && IsType(*svgElement);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

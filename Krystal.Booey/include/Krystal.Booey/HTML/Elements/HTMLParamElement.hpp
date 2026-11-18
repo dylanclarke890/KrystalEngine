@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @brief The obsolete `param` element.
   /// @see https://html.spec.whatwg.org/#htmlparamelement
@@ -11,36 +11,36 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLParamElement);
 
   public:
-    explicit HTMLParamElement(dom::Document &document) noexcept;
+    explicit HTMLParamElement(Document &document) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-param-name
-    KRYS_NODISCARD dom::DOMString Name() const noexcept;
+    KRYS_NODISCARD DOMString Name() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-param-name
-    void Name(dom::DOMString value) noexcept;
+    void Name(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-param-value
-    KRYS_NODISCARD dom::DOMString Value() const noexcept;
+    KRYS_NODISCARD DOMString Value() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-param-value
-    void Value(dom::DOMString value) noexcept;
+    void Value(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-param-type
-    KRYS_NODISCARD dom::DOMString Type() const noexcept;
+    KRYS_NODISCARD DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-param-type
-    void Type(dom::DOMString value) noexcept;
+    void Type(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-param-valuetype
-    KRYS_NODISCARD dom::DOMString ValueType() const noexcept;
+    KRYS_NODISCARD DOMString ValueType() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-param-valuetype
-    void ValueType(dom::DOMString value) noexcept;
+    void ValueType(DOMString value) noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLParamElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLParamElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLParamElement();
   }

@@ -27,7 +27,7 @@
 #include "Krystal.Booey/CSS/Calc/Tree.hpp"
 #include <algorithm>
 
-namespace krys::boo::css
+namespace krys::boo
 {
   dom::ExceptionOr<Ref<CSSMathClamp>> CSSMathClamp::Create(CSSNumberish &&lower, CSSNumberish &&value,
                                                            CSSNumberish &&upper) noexcept
@@ -113,7 +113,7 @@ namespace krys::boo::css
            && _upper->Equals(*otherClamp->_upper);
   }
 
-  Maybe<calc::Child> CSSMathClamp::ToCalcTreeNode() const noexcept
+  Maybe<css::calc::Child> CSSMathClamp::ToCalcTreeNode() const noexcept
   {
     auto lower = _lower->ToCalcTreeNode();
     if (!lower)
@@ -132,13 +132,13 @@ namespace krys::boo::css
     }
 
     auto clamp =
-      calc::Clamp {.Min = krys::move(*lower), .Val = krys::move(*value), .Max = krys::move(*upper)};
-    auto type = calc::ToType(clamp);
+      css::calc::Clamp {.Min = krys::move(*lower), .Val = krys::move(*value), .Max = krys::move(*upper)};
+    auto type = css::calc::ToType(clamp);
     if (!type)
     {
       return null;
     }
 
-    return calc::CreateChild(krys::move(clamp), *type);
+    return css::calc::CreateChild(krys::move(clamp), *type);
   }
 }

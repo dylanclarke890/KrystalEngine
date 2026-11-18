@@ -23,7 +23,7 @@
 #include "Krystal.Booey/Graphics/Filters/FEDisplacementMap.hpp"
 #include "Krystal.Booey/SVG/SVGFilterPrimitiveStandardAttributes.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   template <>
   struct SVGPropertyTraits<ChannelSelectorType>
@@ -33,7 +33,7 @@ namespace krys::boo::svg
       return static_cast<uint32>(ChannelSelectorType::CHANNEL_A);
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(ChannelSelectorType type) noexcept
+    KRYS_NODISCARD static DOMString ToString(ChannelSelectorType type) noexcept
     {
       switch (type)
       {
@@ -48,7 +48,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    KRYS_NODISCARD static ChannelSelectorType FromString(SVGElement &, dom::DOMStringView value) noexcept
+    KRYS_NODISCARD static ChannelSelectorType FromString(SVGElement &, DOMStringView value) noexcept
     {
       if (value == u8"R")
       {
@@ -84,14 +84,14 @@ namespace krys::boo::svg
     Ref<SVGAnimatedNumber> _scale;
 
   public:
-    explicit SVGFEDisplacementMapElement(dom::Document &document) noexcept;
+    explicit SVGFEDisplacementMapElement(Document &document) noexcept;
 
-    KRYS_NODISCARD dom::DOMString In1() const noexcept
+    KRYS_NODISCARD DOMString In1() const noexcept
     {
       return _in1->CurrentValue();
     }
 
-    KRYS_NODISCARD dom::DOMString In2() const noexcept
+    KRYS_NODISCARD DOMString In2() const noexcept
     {
       return _in2->CurrentValue();
     }
@@ -140,17 +140,16 @@ namespace krys::boo::svg
       SVGPropertyOwnerRegistry<SVGFEDisplacementMapElement, SVGFilterPrimitiveStandardAttributes>;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
-    bool SetFilterEffectAttribute(FilterEffect &effect,
-                                  const dom::QualifiedName &attributeName) noexcept final;
+    bool SetFilterEffectAttribute(FilterEffect &effect, const QualifiedName &attributeName) noexcept final;
 
-    KRYS_NODISCARD List<dom::DOMStringAtom> FilterEffectInputsNames() const noexcept final
+    KRYS_NODISCARD List<DOMStringAtom> FilterEffectInputsNames() const noexcept final
     {
-      return {dom::DOMStringAtom(In1()), dom::DOMStringAtom(In2())};
+      return {DOMStringAtom(In1()), DOMStringAtom(In2())};
     }
 
     KRYS_NODISCARD IntOutsets Outsets(const FloatRect &targetBoundingBox,
@@ -162,8 +161,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGFEDisplacementMapElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGFEDisplacementMapElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGFEDisplacementMapElement();
   }

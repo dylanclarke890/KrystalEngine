@@ -35,12 +35,12 @@
 
 namespace krys::boo::html
 {
-  DataListButtonElement::DataListButtonElement(dom::Document &document, DataListButtonOwner &owner) noexcept
+  DataListButtonElement::DataListButtonElement(Document &document, DataListButtonOwner &owner) noexcept
       : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks), _owner(&owner)
   {
   }
 
-  Ref<DataListButtonElement> DataListButtonElement::Create(dom::Document &document,
+  Ref<DataListButtonElement> DataListButtonElement::Create(Document &document,
                                                            DataListButtonOwner &owner) noexcept
   {
     auto element = CreateRef<DataListButtonElement>(document, owner);

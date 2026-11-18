@@ -29,10 +29,7 @@
 
 namespace krys::boo
 {
-  namespace dom
-  {
-    class Node;
-  }
+  class Node;
 
   namespace html
   {
@@ -45,7 +42,7 @@ namespace krys::boo
   class AXSpinButton final : public AXMockObject
   {
   private:
-    WeakPtr<dom::Node> _spinButtonElement;
+    WeakPtr<boo::Node> _spinButtonElement;
 
   public:
     KRYS_NODISCARD static Ref<AXSpinButton> Create(AXId id, AXObjectCache &cache) noexcept;

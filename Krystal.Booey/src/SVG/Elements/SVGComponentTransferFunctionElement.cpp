@@ -25,10 +25,10 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   SVGComponentTransferFunctionElement::SVGComponentTransferFunctionElement(
-    dom::Document &document, SVGElementInterface interface) noexcept
+    Document &document, SVGElementInterface interface) noexcept
       : SVGElement(document, CreateUnique<PropertyRegistry>(*this), interface),
         _type(SVGAnimatedEnumeration::Create(this, ComponentTransferType::FECOMPONENTTRANSFER_TYPE_IDENTITY)),
         _tableValues(SVGAnimatedNumberList::Create(this)), _slope(SVGAnimatedNumber::Create(this, 1)),
@@ -55,11 +55,11 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGComponentTransferFunctionElement::AttributeChanged(const dom::QualifiedName &name,
-                                                             Maybe<dom::DOMStringView> oldValue,
-                                                             Maybe<dom::DOMStringView> value) noexcept
+  void SVGComponentTransferFunctionElement::AttributeChanged(const QualifiedName &name,
+                                                             Maybe<DOMStringView> oldValue,
+                                                             Maybe<DOMStringView> value) noexcept
   {
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::TypeAttr())
     {
@@ -75,30 +75,29 @@ namespace krys::boo::svg
     }
     else if (name == SVGNames::SlopeAttr())
     {
-      _slope->SetBaseValInternal(ToFloatOrZero(string));
+      _slope->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::InterceptAttr())
     {
-      _intercept->SetBaseValInternal(ToFloatOrZero(string));
+      _intercept->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::AmplitudeAttr())
     {
-      _amplitude->SetBaseValInternal(ToFloatOrZero(string));
+      _amplitude->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::ExponentAttr())
     {
-      _exponent->SetBaseValInternal(ToFloatOrZero(string));
+      _exponent->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::OffsetAttr())
     {
-      _offset->SetBaseValInternal(ToFloatOrZero(string));
+      _offset->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
 
     SVGElement::AttributeChanged(name, oldValue, value);
   }
 
-  void
-    SVGComponentTransferFunctionElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGComponentTransferFunctionElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {

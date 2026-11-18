@@ -185,7 +185,7 @@ namespace krys::boo::css::tests
 
     SECTION("reified")
     {
-      auto document = CreateRef<dom::Document>();
+      auto document = CreateRef<Document>();
       auto parsed =
         CSSStyleValue::Parse(*document, u8"transform",
                              u8"translateX(1px) scaleY(2) rotateZ(3deg) skew(4deg) perspective(5px) "

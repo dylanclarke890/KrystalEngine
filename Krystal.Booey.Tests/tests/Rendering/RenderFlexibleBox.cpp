@@ -11,13 +11,13 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief The box of the element with id @p id, after updating layout.
-    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       (void)fixture.Document->UpdateLayout();
       return Downcast<RenderBox>(*fixture.ById(id).Renderer());
     }
 
-    KRYS_NODISCARD RenderFlexibleBox &FlexBoxOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderFlexibleBox &FlexBoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       return Downcast<RenderFlexibleBox>(BoxOf(fixture, id));
     }

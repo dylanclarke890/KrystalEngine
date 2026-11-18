@@ -14,14 +14,14 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD dom::Element &ElementById(dom::Document &document, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD Element &ElementById(Document &document, DOMStringView id) noexcept
     {
       auto element = document.GetElementById(id);
       krys_assert(element);
       return *element;
     }
 
-    KRYS_NODISCARD SVGResources *ResourcesById(dom::Document &document, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD SVGResources *ResourcesById(Document &document, DOMStringView id) noexcept
     {
       auto *renderer = ElementById(document, id).Renderer();
       krys_assert(renderer);

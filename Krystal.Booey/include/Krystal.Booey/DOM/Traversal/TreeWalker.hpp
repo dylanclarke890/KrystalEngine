@@ -10,7 +10,7 @@ namespace krys::boo::dom
   /// @see https://dom.spec.whatwg.org/#interface-treewalker
   class TreeWalker : public TraversalBase, public RefCounted<TreeWalker>
   {
-    friend class Document;
+    friend class boo::Document;
 
   private:
     /// @see https://dom.spec.whatwg.org/#treewalker-current

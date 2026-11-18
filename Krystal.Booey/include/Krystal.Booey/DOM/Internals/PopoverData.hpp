@@ -33,8 +33,9 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
+  class Element;
   class HTMLElement;
 }
 
@@ -76,8 +77,6 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::PopoverState, 4uz);
 
 namespace krys::boo::dom
 {
-  class Element;
-
   /// @brief The popover state of an element with a `popover` attribute.
   /// @see https://html.spec.whatwg.org/#the-popover-attribute
   class PopoverData
@@ -90,7 +89,7 @@ namespace krys::boo::dom
     PopoverState _openedInPopoverMode {PopoverState::None};
     WeakPtr<Element> _previouslyFocusedElement;
     RefPtr<ToggleEventTask> _toggleEventTask;
-    WeakPtr<html::HTMLElement> _invoker;
+    WeakPtr<HTMLElement> _invoker;
     RefPtr<html::CloseWatcher> _closeWatcher;
     bool _isHidingPopover {false};
 
@@ -143,12 +142,12 @@ namespace krys::boo::dom
 
     /// @brief The element that showed the popover (its popover trigger).
     /// @see https://html.spec.whatwg.org/#popover-trigger
-    KRYS_NODISCARD html::HTMLElement *Invoker() const noexcept
+    KRYS_NODISCARD HTMLElement *Invoker() const noexcept
     {
       return _invoker.get();
     }
 
-    void SetInvoker(html::HTMLElement *element) noexcept
+    void SetInvoker(HTMLElement *element) noexcept
     {
       _invoker = CreateWeakPtr(element);
     }

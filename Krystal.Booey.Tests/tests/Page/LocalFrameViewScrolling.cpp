@@ -95,11 +95,11 @@ namespace krys::boo::tests
       {
         auto type = event.Type().View();
         std::string target = "document";
-        if (auto *node = DynamicDowncast<dom::Node>(event.Target().get()))
+        if (auto *node = DynamicDowncast<Node>(event.Target().get()))
         {
-          if (auto *element = DynamicDowncast<dom::Element>(*node))
+          if (auto *element = DynamicDowncast<Element>(*node))
           {
-            auto id = element->GetAttribute(u8"id").value_or(dom::DOMString());
+            auto id = element->GetAttribute(u8"id").value_or(DOMString());
             target = std::string(id.begin(), id.end());
           }
         }
@@ -513,7 +513,7 @@ namespace krys::boo::tests
     Ref<dom::EventListenerCallback> recorder = CreateRef<EventRecorder>(records);
     for (auto type : {u8"scroll", u8"scrollend"})
     {
-      fixture.Document->AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, true);
+      fixture.Document->AddEventListener(DOMStringAtom(type), Ref {recorder}, true);
     }
 
     // The view's scroll fires at the document, bubbling, at the next scroll steps, once however often it
@@ -611,7 +611,7 @@ namespace krys::boo::tests
     SECTION("pressing a scrollbar leaves the focus alone")
     {
       auto &field = fixture.ById(u8"field");
-      Downcast<html::HTMLElement>(field).Focus();
+      Downcast<HTMLElement>(field).Focus();
       REQUIRE(fixture.Document->FocusedElement() == &field);
       Press(handler, {190, 75});
       Release(handler, {190, 75});
@@ -843,7 +843,7 @@ namespace krys::boo::tests
     SECTION("pressing a scrollbar doesn't move the focus to the viewport")
     {
       auto &field = fixture.ById(u8"field");
-      Downcast<html::HTMLElement>(field).Focus();
+      Downcast<HTMLElement>(field).Focus();
       Press(handler, {90, 60});
       Release(handler, {90, 60});
       CHECK(fixture.Document->FocusedElement() == &field);
@@ -1053,7 +1053,7 @@ namespace krys::boo::tests
     SECTION("the focused box scrolls first, then the view")
     {
       auto &box = fixture.ById(u8"box");
-      Downcast<html::HTMLElement>(box).Focus();
+      Downcast<HTMLElement>(box).Focus();
       CHECK(down());
       CHECK(box.ScrollTop() == 40);
       CHECK(Key(handler, u8"End", u8"End", vk::End));

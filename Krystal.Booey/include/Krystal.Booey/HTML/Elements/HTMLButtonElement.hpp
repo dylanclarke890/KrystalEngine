@@ -26,7 +26,7 @@
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlbuttonelement
   class HTMLButtonElement : public HTMLFormControlElement
@@ -50,23 +50,23 @@ namespace krys::boo::html
       return false;
     }
 
-    HTMLButtonElement(dom::Document &document) noexcept;
+    HTMLButtonElement(Document &document) noexcept;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
 
 #pragma region HTMLButtonElement - https://html.spec.whatwg.org/#htmlbuttonelement
 
     /// @see https://html.spec.whatwg.org/#dom-button-command
-    KRYS_NODISCARD dom::DOMString Command() const noexcept;
+    KRYS_NODISCARD DOMString Command() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-command
-    void Command(dom::DOMString value) noexcept;
+    void Command(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-commandforelement
-    KRYS_NODISCARD RefPtr<dom::Element> CommandForElementForBindings() const noexcept;
+    KRYS_NODISCARD RefPtr<boo::Element> CommandForElementForBindings() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-commandforelement
-    void CommandForElementForBindings(dom::Element *element) noexcept;
+    void CommandForElementForBindings(boo::Element *element) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;
@@ -81,16 +81,16 @@ namespace krys::boo::html
     void FormAction(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formenctype
-    KRYS_NODISCARD dom::DOMString EncType() const noexcept;
+    KRYS_NODISCARD DOMString EncType() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formenctype
-    void EncType(dom::DOMString value) noexcept;
+    void EncType(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formmethod
-    KRYS_NODISCARD dom::DOMString FormMethod() const noexcept;
+    KRYS_NODISCARD DOMString FormMethod() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formmethod
-    void FormMethod(dom::DOMString value) noexcept;
+    void FormMethod(DOMString value) noexcept;
 
     using HTMLFormControlElement::FormNoValidate;
 
@@ -98,32 +98,32 @@ namespace krys::boo::html
     void FormNoValidate(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formtarget
-    KRYS_NODISCARD dom::DOMString FormTarget() const noexcept;
+    KRYS_NODISCARD DOMString FormTarget() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formtarget
-    void FormTarget(dom::DOMString value) noexcept;
+    void FormTarget(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-name
-    KRYS_NODISCARD dom::DOMString Name() const noexcept override;
+    KRYS_NODISCARD DOMString Name() const noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-button-name
-    void Name(dom::DOMString value) noexcept;
+    void Name(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-type
-    KRYS_NODISCARD dom::DOMString Type() const noexcept;
+    KRYS_NODISCARD DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-type
-    void Type(dom::DOMString value) noexcept;
+    void Type(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-value
-    KRYS_NODISCARD dom::DOMString Value() const noexcept;
+    KRYS_NODISCARD DOMString Value() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-value
-    void Value(dom::DOMString value) noexcept;
+    void Value(DOMString value) noexcept;
 
 #pragma endregion
 
-    KRYS_NODISCARD dom::DOMString FormControlType() const noexcept final;
+    KRYS_NODISCARD DOMString FormControlType() const noexcept final;
 
     KRYS_NODISCARD bool IsEnumeratable() const noexcept final
     {
@@ -155,12 +155,12 @@ namespace krys::boo::html
 
     /// @brief The element the button sends its command: its `commandfor` element.
     /// @see https://html.spec.whatwg.org/#attr-button-commandfor
-    KRYS_NODISCARD RefPtr<dom::Element> CommandForElement() const noexcept;
+    KRYS_NODISCARD RefPtr<boo::Element> CommandForElement() const noexcept;
 
     /// @brief The state of the button's `command` attribute.
     KRYS_NODISCARD dom::CommandType GetCommandType() const noexcept;
 
-    bool AppendFormData(DOMFormData &formData) noexcept final;
+    bool AppendFormData(html::DOMFormData &formData) noexcept final;
 
     /// @see https://html.spec.whatwg.org/#the-button-element:activation-behaviour
     void ActivationBehavior(dom::Event &event) noexcept final;
@@ -170,21 +170,20 @@ namespace krys::boo::html
   protected:
     KRYS_NODISCARD bool ComputeWillValidate() const noexcept final;
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept final;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept final;
 
   private:
     void OnInsert() noexcept override;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
-    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
     /// @brief Computes the type again, which in the Auto state depends on the parent.
     void UpdateTypeForParent() noexcept;
 
-    void ComputeType(dom::DOMStringView typeAttributeValue) noexcept;
+    void ComputeType(DOMStringView typeAttributeValue) noexcept;
 
     /// @brief Fires `command` at the button's `commandfor` element, which then carries out a built-in command
     /// unless a listener canceled it.
@@ -192,13 +191,13 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLButtonElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLButtonElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLButtonElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLButtonElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLButtonElement();
   }

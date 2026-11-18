@@ -34,9 +34,9 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  Ref<CSSMatrixComponent> CSSMatrixComponent::Create(const DOMMatrixReadOnly &matrix,
+  Ref<CSSMatrixComponent> CSSMatrixComponent::Create(const css::DOMMatrixReadOnly &matrix,
                                                      CSSMatrixComponentOptions options) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssmatrixcomponent-cssmatrixcomponent
@@ -48,8 +48,8 @@ namespace krys::boo::css
     return AdoptRef(*new CSSMatrixComponent(matrix, options.Is2D.value_or(matrix.GetIs2D())));
   }
 
-  dom::ExceptionOr<Ref<CSSMatrixComponent>> CSSMatrixComponent::Create(const FunctionValue &function,
-                                                                       dom::Document &document) noexcept
+  dom::ExceptionOr<Ref<CSSMatrixComponent>> CSSMatrixComponent::Create(const css::FunctionValue &function,
+                                                                       Document &document) noexcept
   {
     auto reified = ReifyArguments(function, document);
     if (reified.HasException())
@@ -68,31 +68,31 @@ namespace krys::boo::css
     }
 
     const auto &e = entries;
-    if (function.Name() == ValueId::Matrix && e.size() == 6)
+    if (function.Name() == css::ValueId::Matrix && e.size() == 6)
     {
-      auto matrix = DOMMatrixReadOnly::Create(TransformationMatrix(e[0], e[1], e[2], e[3], e[4], e[5]),
-                                              DOMMatrixReadOnly::Is2D::Yes);
+      auto matrix = css::DOMMatrixReadOnly::Create(TransformationMatrix(e[0], e[1], e[2], e[3], e[4], e[5]),
+                                                   css::DOMMatrixReadOnly::Is2D::Yes);
       return Create(*matrix);
     }
-    if (function.Name() == ValueId::Matrix3d && e.size() == 16)
+    if (function.Name() == css::ValueId::Matrix3d && e.size() == 16)
     {
-      auto matrix =
-        DOMMatrixReadOnly::Create(TransformationMatrix(e[0], e[1], e[2], e[3], e[4], e[5], e[6], e[7], e[8],
-                                                       e[9], e[10], e[11], e[12], e[13], e[14], e[15]),
-                                  DOMMatrixReadOnly::Is2D::No);
+      auto matrix = css::DOMMatrixReadOnly::Create(TransformationMatrix(e[0], e[1], e[2], e[3], e[4], e[5],
+                                                                        e[6], e[7], e[8], e[9], e[10], e[11],
+                                                                        e[12], e[13], e[14], e[15]),
+                                                   css::DOMMatrixReadOnly::Is2D::No);
       return Create(*matrix);
     }
     return dom::Exception {dom::ExceptionCode::TypeError};
   }
 
-  CSSMatrixComponent::CSSMatrixComponent(const DOMMatrixReadOnly &matrix, bool is2D) noexcept
+  CSSMatrixComponent::CSSMatrixComponent(const css::DOMMatrixReadOnly &matrix, bool is2D) noexcept
       : CSSTransformComponent(is2D), _matrix(matrix.CloneAsDOMMatrix())
   {
   }
 
   CSSMatrixComponent::~CSSMatrixComponent() noexcept = default;
 
-  void CSSMatrixComponent::SetMatrix(Ref<DOMMatrix> matrix) noexcept
+  void CSSMatrixComponent::SetMatrix(Ref<css::DOMMatrix> matrix) noexcept
   {
     _matrix = krys::move(matrix);
   }
@@ -114,7 +114,7 @@ namespace krys::boo::css
                    m.M42(), u8", ", m.M43(), u8", ", m.M44(), u8')');
   }
 
-  dom::ExceptionOr<Ref<DOMMatrix>> CSSMatrixComponent::ToMatrix() const noexcept
+  dom::ExceptionOr<Ref<css::DOMMatrix>> CSSMatrixComponent::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
     if (!Is2D())
@@ -123,27 +123,27 @@ namespace krys::boo::css
     }
     // Flattened to 2D.
     const auto &m = *_matrix;
-    return DOMMatrix::Create(TransformationMatrix(m.A(), m.B(), m.C(), m.D(), m.E(), m.F()),
-                             DOMMatrixReadOnly::Is2D::Yes);
+    return css::DOMMatrix::Create(TransformationMatrix(m.A(), m.B(), m.C(), m.D(), m.E(), m.F()),
+                                  css::DOMMatrixReadOnly::Is2D::Yes);
   }
 
-  RefPtr<Value> CSSMatrixComponent::ToCSSValue() const noexcept
+  RefPtr<css::Value> CSSMatrixComponent::ToCSSValue() const noexcept
   {
     const auto &m = *_matrix;
-    ValueListBuilder arguments;
+    css::ValueListBuilder arguments;
     if (Is2D())
     {
       for (double entry : {m.A(), m.B(), m.C(), m.D(), m.E(), m.F()})
       {
-        arguments.push_back(PrimitiveValue::Create(entry));
+        arguments.push_back(css::PrimitiveValue::Create(entry));
       }
-      return FunctionValue::Create(ValueId::Matrix, krys::move(arguments));
+      return css::FunctionValue::Create(css::ValueId::Matrix, krys::move(arguments));
     }
     for (double entry : {m.M11(), m.M12(), m.M13(), m.M14(), m.M21(), m.M22(), m.M23(), m.M24(), m.M31(),
                          m.M32(), m.M33(), m.M34(), m.M41(), m.M42(), m.M43(), m.M44()})
     {
-      arguments.push_back(PrimitiveValue::Create(entry));
+      arguments.push_back(css::PrimitiveValue::Create(entry));
     }
-    return FunctionValue::Create(ValueId::Matrix3d, krys::move(arguments));
+    return css::FunctionValue::Create(css::ValueId::Matrix3d, krys::move(arguments));
   }
 }

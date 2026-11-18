@@ -31,10 +31,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLPictureElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLSourceElement::HTMLSourceElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Source)
+  HTMLSourceElement::HTMLSourceElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Source)
   {
   }
 
@@ -42,78 +42,77 @@ namespace krys::boo::html
 
   dom::USVString HTMLSourceElement::Src() const noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"src");
+    return html::ReflectURL<dom::USVString>(*this, u8"src");
   }
 
   void HTMLSourceElement::Src(dom::USVString value) noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
+    return html::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
-  dom::DOMString HTMLSourceElement::Type() const noexcept
+  DOMString HTMLSourceElement::Type() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"type").value_or(u8"");
   }
 
-  void HTMLSourceElement::Type(dom::DOMString value) noexcept
+  void HTMLSourceElement::Type(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"type", krys::move(value));
   }
 
   dom::USVString HTMLSourceElement::SrcSet() const noexcept
   {
-    return Reflect<dom::USVString>(*this, u8"srcset");
+    return html::Reflect<dom::USVString>(*this, u8"srcset");
   }
 
   void HTMLSourceElement::SrcSet(dom::USVString value) noexcept
   {
-    return Reflect<dom::USVString>(*this, u8"srcset", krys::move(value));
+    return html::Reflect<dom::USVString>(*this, u8"srcset", krys::move(value));
   }
 
-  dom::DOMString HTMLSourceElement::Sizes() const noexcept
+  DOMString HTMLSourceElement::Sizes() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"sizes").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"sizes").value_or(u8"");
   }
 
-  void HTMLSourceElement::Sizes(dom::DOMString value) noexcept
+  void HTMLSourceElement::Sizes(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"sizes", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"sizes", krys::move(value));
   }
 
-  dom::DOMString HTMLSourceElement::Media() const noexcept
+  DOMString HTMLSourceElement::Media() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"media").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"media").value_or(u8"");
   }
 
-  void HTMLSourceElement::Media(dom::DOMString value) noexcept
+  void HTMLSourceElement::Media(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"media", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"media", krys::move(value));
   }
 
   uint32 HTMLSourceElement::Width() const noexcept
   {
-    return Reflect<uint32>(*this, u8"width");
+    return html::Reflect<uint32>(*this, u8"width");
   }
 
   void HTMLSourceElement::Width(uint32 value) noexcept
   {
-    Reflect<uint32>(*this, u8"width", krys::move(value));
+    html::Reflect<uint32>(*this, u8"width", krys::move(value));
   }
 
   uint32 HTMLSourceElement::Height() const noexcept
   {
-    return Reflect<uint32>(*this, u8"height");
+    return html::Reflect<uint32>(*this, u8"height");
   }
 
   void HTMLSourceElement::Height(uint32 value) noexcept
   {
-    Reflect<uint32>(*this, u8"height", krys::move(value));
+    html::Reflect<uint32>(*this, u8"height", krys::move(value));
   }
 
 #pragma endregion
 
-  const css::mq::MediaQueryList &
-    HTMLSourceElement::ParsedMediaAttribute(dom::Document &document) const noexcept
+  const css::mq::MediaQueryList &HTMLSourceElement::ParsedMediaAttribute(Document &document) const noexcept
   {
     if (!_cachedParsedMediaAttribute)
     {
@@ -149,7 +148,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#the-source-element:html-element-removing-steps
-  void HTMLSourceElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLSourceElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
 
@@ -171,7 +170,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#the-source-element:html-element-moving-steps
-  void HTMLSourceElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLSourceElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
 
@@ -217,10 +216,9 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLSourceElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                             Maybe<dom::DOMStringView> oldValue,
-                                             Maybe<dom::DOMStringView> value,
-                                             const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLSourceElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                             Maybe<DOMStringView> value,
+                                             const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)

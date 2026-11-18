@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleDeclaration.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   CSSStyleDeclaration::~CSSStyleDeclaration() noexcept = default;
 }

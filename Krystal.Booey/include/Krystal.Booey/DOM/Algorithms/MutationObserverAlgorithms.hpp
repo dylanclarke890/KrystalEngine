@@ -6,16 +6,16 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLSlotElement;
+  class Node;
 }
 
 namespace krys::boo::dom
 {
   class MutationObserver;
   enum class MutationRecordType : uint8;
-  class Node;
   class RegisteredObserver;
 
   /// @see https://dom.spec.whatwg.org/#mutation-observers
@@ -37,7 +37,7 @@ namespace krys::boo::dom
     /// @brief Appends @p slot to the surrounding agent's signal slots, which get `slotchange` when mutation
     /// observers are next notified.
     /// @see https://dom.spec.whatwg.org/#signal-slot-list
-    static void AppendSignalSlot(html::HTMLSlotElement &slot) noexcept;
+    static void AppendSignalSlot(HTMLSlotElement &slot) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#add-transient-registered-observers
     static void AddTransientRegisteredObservers(Node &node, Node &parent) noexcept;

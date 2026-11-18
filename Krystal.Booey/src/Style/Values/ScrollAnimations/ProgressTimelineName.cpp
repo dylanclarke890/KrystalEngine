@@ -41,10 +41,9 @@ namespace krys::boo::style
     const auto *primitiveValue = RequiredDowncast<css::PrimitiveValue>(state, value);
     if (!primitiveValue)
     {
-      return ProgressTimelineName {css::CustomIdentifier {css::CSSOMStringAtom::Empty()}};
+      return ProgressTimelineName {css::CustomIdentifier {CSSOMStringAtom::Empty()}};
     }
 
-    return ProgressTimelineName {
-      css::CustomIdentifier {css::CSSOMStringAtom {primitiveValue->StringValue()}}};
+    return ProgressTimelineName {css::CustomIdentifier {CSSOMStringAtom {primitiveValue->StringValue()}}};
   }
 }

@@ -185,12 +185,12 @@ namespace krys::boo::html
 
 #pragma region SliderThumbElement
 
-  SliderThumbElement::SliderThumbElement(dom::Document &document) noexcept
+  SliderThumbElement::SliderThumbElement(Document &document) noexcept
       : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
   {
   }
 
-  Ref<SliderThumbElement> SliderThumbElement::Create(dom::Document &document) noexcept
+  Ref<SliderThumbElement> SliderThumbElement::Create(Document &document) noexcept
   {
     auto element = CreateRef<SliderThumbElement>(document);
     element->SetUserAgentPart(css::user_agent_parts::WebkitSliderThumb());
@@ -455,14 +455,14 @@ namespace krys::boo::html
 
 #pragma region SliderContainerElement
 
-  SliderContainerElement::SliderContainerElement(dom::Document &document) noexcept
+  SliderContainerElement::SliderContainerElement(Document &document) noexcept
       : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
   {
     // The container takes touches, which are only dispatched in documents with listeners for them.
     document.AddListenerTypeIfNeeded(event_names::TouchStart);
   }
 
-  void SliderContainerElement::OnAdopt(dom::Document &oldDocument) noexcept
+  void SliderContainerElement::OnAdopt(Document &oldDocument) noexcept
   {
     HTMLDivElement::OnAdopt(oldDocument);
     NodeDocument().AddListenerTypeIfNeeded(event_names::TouchStart);
@@ -572,7 +572,7 @@ namespace krys::boo::html
     return (_slidingDirection == SlidingDirection::Vertical) == isVertical;
   }
 
-  Ref<SliderContainerElement> SliderContainerElement::Create(dom::Document &document) noexcept
+  Ref<SliderContainerElement> SliderContainerElement::Create(Document &document) noexcept
   {
     auto element = CreateRef<SliderContainerElement>(document);
     element->SetUserAgentPart(css::user_agent_parts::WebkitSliderContainer());

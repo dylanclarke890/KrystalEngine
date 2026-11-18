@@ -1,13 +1,17 @@
 ﻿#pragma once
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class CharacterData;
   class ContainerNode;
   class Document;
   class Node;
-  class Range;
   class Text;
+}
+
+namespace krys::boo::dom
+{
+  class Range;
 
   class LiveRangeUpdater
   {

@@ -25,7 +25,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyImpl.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   template <>
   struct SVGPropertyTraits<ComponentTransferType>
@@ -35,7 +35,7 @@ namespace krys::boo::svg
       return static_cast<uint32>(ComponentTransferType::FECOMPONENTTRANSFER_TYPE_GAMMA);
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(ComponentTransferType type) noexcept
+    KRYS_NODISCARD static DOMString ToString(ComponentTransferType type) noexcept
     {
       switch (type)
       {
@@ -51,7 +51,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    KRYS_NODISCARD static ComponentTransferType FromString(SVGElement &, dom::DOMStringView value) noexcept
+    KRYS_NODISCARD static ComponentTransferType FromString(SVGElement &, DOMStringView value) noexcept
     {
       if (value == u8"discrete")
       {
@@ -171,12 +171,12 @@ namespace krys::boo::svg
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGComponentTransferFunctionElement, SVGElement>;
 
   protected:
-    SVGComponentTransferFunctionElement(dom::Document &document, SVGElementInterface interface) noexcept;
+    SVGComponentTransferFunctionElement(Document &document, SVGElementInterface interface) noexcept;
 
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept override;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept override;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept override;
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept override
     {
@@ -185,15 +185,15 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGComponentTransferFunctionElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGComponentTransferFunctionElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGFEFuncAElement() || target.IsSVGFEFuncBElement() || target.IsSVGFEFuncGElement()
            || target.IsSVGFEFuncRElement();
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    auto *svgElement = krys::DynamicDowncast<krys::boo::svg::SVGElement>(node);
+    auto *svgElement = krys::DynamicDowncast<krys::boo::SVGElement>(node);
     return svgElement && IsType(*svgElement);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

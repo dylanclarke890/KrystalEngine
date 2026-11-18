@@ -46,7 +46,7 @@
 #include <cmath>
 #include <numbers>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   SVGLengthContext::SVGLengthContext(const SVGElement *context, const Maybe<FloatSize> &viewportSize) noexcept
       : _context(CreateWeakPtr(const_cast<SVGElement *>(context))),
@@ -412,7 +412,7 @@ namespace krys::boo::svg
         return nullptr;
       }
 
-      const dom::Node *currentContext = context;
+      const Node *currentContext = context;
       do
       {
         if (currentContext->Renderer())
@@ -432,7 +432,7 @@ namespace krys::boo::svg
         return nullptr;
       }
 
-      RefPtr<const dom::Element> rootElement = svgElement->NodeDocument().DocumentElement();
+      RefPtr<const Element> rootElement = svgElement->NodeDocument().DocumentElement();
       if (!rootElement || !rootElement->Renderer())
       {
         return nullptr;

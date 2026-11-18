@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLMediaElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlaudioelement
   class HTMLAudioElement : public HTMLMediaElement
@@ -10,12 +10,12 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLAudioElement);
 
   public:
-    HTMLAudioElement(dom::Document &document) noexcept;
+    HTMLAudioElement(Document &document) noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLAudioElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLAudioElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLAudioElement();
   }

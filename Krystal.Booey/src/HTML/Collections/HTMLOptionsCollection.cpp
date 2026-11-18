@@ -28,7 +28,7 @@ namespace krys::boo::html
 {
   HTMLOptionsCollection::HTMLOptionsCollection(HTMLSelectElement &select) noexcept
       : LiveHTMLCollection(select,
-                           [&select](const dom::Element &element)
+                           [&select](const Element &element)
                            {
                              auto *option = DynamicDowncast<HTMLOptionElement>(element);
                              return option && option->OwnerSelectElement() == &select;

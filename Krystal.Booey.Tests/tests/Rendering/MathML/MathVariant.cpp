@@ -52,7 +52,7 @@ namespace krys::boo::tests
                           u8"<span id=span style=\"text-transform: math-auto\">h</span>"};
     (void)fixture.Document->UpdateLayout();
 
-    auto text = [&](dom::DOMStringView id) -> std::string
+    auto text = [&](DOMStringView id) -> std::string
     {
       auto *renderer = fixture.ById(id).FirstChild()->Renderer();
       REQUIRE(renderer);

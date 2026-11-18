@@ -60,7 +60,7 @@
   }                                                                                                          \
   auto resultVariable = resultOrException_##resultVariable.ReleaseValue()
 
-namespace krys::boo::css
+namespace krys::boo
 {
   template <typename T>
   KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>>
@@ -78,7 +78,7 @@ namespace krys::boo::css
   }
 
   KRYS_NODISCARD static dom::ExceptionOr<List<Ref<CSSNumericValue>>>
-    ReifyMathExpressions(const calc::Children &nodes) noexcept
+    ReifyMathExpressions(const css::calc::Children &nodes) noexcept
   {
     List<Ref<CSSNumericValue>> values;
     values.reserve(nodes.size());
@@ -90,77 +90,77 @@ namespace krys::boo::css
     return values;
   }
 
-  template <calc::Numeric T>
+  template <css::calc::Numeric T>
   KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>> ReifyMathExpression(const T &root) noexcept
   {
-    return ConvertToExceptionOrNumericValue(CSSUnitValue::Create(root.Value, calc::ToUnit(root)));
+    return ConvertToExceptionOrNumericValue(CSSUnitValue::Create(root.Value, css::calc::ToUnit(root)));
   }
 
   KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>>
-    ReifyMathExpression(const calc::Symbol &) noexcept
+    ReifyMathExpression(const css::calc::Symbol &) noexcept
   {
     // CSS Typed OM doesn't currently support unresolved symbols.
     return dom::Exception {dom::ExceptionCode::UnknownError};
   }
 
   KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>>
-    ReifyMathExpression(const calc::SiblingCount &) noexcept
+    ReifyMathExpression(const css::calc::SiblingCount &) noexcept
   {
     // CSS Typed OM doesn't currently support unresolved sibling-count() functions.
     return dom::Exception {dom::ExceptionCode::UnknownError};
   }
 
   KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>>
-    ReifyMathExpression(const calc::SiblingIndex &) noexcept
+    ReifyMathExpression(const css::calc::SiblingIndex &) noexcept
   {
     // CSS Typed OM doesn't currently support unresolved sibling-index() functions.
     return dom::Exception {dom::ExceptionCode::UnknownError};
   }
 
   KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>>
-    ReifyMathExpression(const calc::IndirectNode<calc::Sum> &root) noexcept
+    ReifyMathExpression(const css::calc::IndirectNode<css::calc::Sum> &root) noexcept
   {
     CSS_NUMERIC_RETURN_IF_EXCEPTION(values, ReifyMathExpressions(root->Children));
     return ConvertToExceptionOrNumericValue(CSSMathSum::Create(krys::move(values)));
   }
 
   KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>>
-    ReifyMathExpression(const calc::IndirectNode<calc::Product> &root) noexcept
+    ReifyMathExpression(const css::calc::IndirectNode<css::calc::Product> &root) noexcept
   {
     CSS_NUMERIC_RETURN_IF_EXCEPTION(values, ReifyMathExpressions(root->Children));
     return ConvertToExceptionOrNumericValue(CSSMathProduct::Create(krys::move(values)));
   }
 
   KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>>
-    ReifyMathExpression(const calc::IndirectNode<calc::Negate> &root) noexcept
+    ReifyMathExpression(const css::calc::IndirectNode<css::calc::Negate> &root) noexcept
   {
     CSS_NUMERIC_RETURN_IF_EXCEPTION(child, CSSNumericValue::ReifyMathExpression(root->A));
     return ConvertToExceptionOrNumericValue(CSSMathNegate::Create(krys::move(child)));
   }
 
   KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>>
-    ReifyMathExpression(const calc::IndirectNode<calc::Invert> &root) noexcept
+    ReifyMathExpression(const css::calc::IndirectNode<css::calc::Invert> &root) noexcept
   {
     CSS_NUMERIC_RETURN_IF_EXCEPTION(child, CSSNumericValue::ReifyMathExpression(root->A));
     return ConvertToExceptionOrNumericValue(CSSMathInvert::Create(krys::move(child)));
   }
 
   KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>>
-    ReifyMathExpression(const calc::IndirectNode<calc::Min> &root) noexcept
+    ReifyMathExpression(const css::calc::IndirectNode<css::calc::Min> &root) noexcept
   {
     CSS_NUMERIC_RETURN_IF_EXCEPTION(values, ReifyMathExpressions(root->Children));
     return ConvertToExceptionOrNumericValue(CSSMathMin::Create(krys::move(values)));
   }
 
   KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>>
-    ReifyMathExpression(const calc::IndirectNode<calc::Max> &root) noexcept
+    ReifyMathExpression(const css::calc::IndirectNode<css::calc::Max> &root) noexcept
   {
     CSS_NUMERIC_RETURN_IF_EXCEPTION(values, ReifyMathExpressions(root->Children));
     return ConvertToExceptionOrNumericValue(CSSMathMax::Create(krys::move(values)));
   }
 
   KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>>
-    ReifyMathExpression(const calc::IndirectNode<calc::Clamp> &root) noexcept
+    ReifyMathExpression(const css::calc::IndirectNode<css::calc::Clamp> &root) noexcept
   {
     CSS_NUMERIC_RETURN_IF_EXCEPTION(min, CSSNumericValue::ReifyMathExpression(root->Min));
     CSS_NUMERIC_RETURN_IF_EXCEPTION(val, CSSNumericValue::ReifyMathExpression(root->Val));
@@ -171,28 +171,29 @@ namespace krys::boo::css
 
   template <typename TOp>
   KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>>
-    ReifyMathExpression(const calc::IndirectNode<TOp> &) noexcept
+    ReifyMathExpression(const css::calc::IndirectNode<TOp> &) noexcept
   {
     return dom::Exception {dom::ExceptionCode::UnknownError};
   }
 
-  dom::ExceptionOr<Ref<CSSNumericValue>> CSSNumericValue::ReifyMathExpression(const calc::Tree &tree) noexcept
+  dom::ExceptionOr<Ref<CSSNumericValue>>
+    CSSNumericValue::ReifyMathExpression(const css::calc::Tree &tree) noexcept
   {
     return CSSNumericValue::ReifyMathExpression(tree.Root);
   }
 
   dom::ExceptionOr<Ref<CSSNumericValue>>
-    CSSNumericValue::ReifyMathExpression(const calc::Child &root) noexcept
+    CSSNumericValue::ReifyMathExpression(const css::calc::Child &root) noexcept
   {
-    return root.SwitchOn([](const auto &child) { return css::ReifyMathExpression(child); });
+    return root.SwitchOn([](const auto &child) { return boo::ReifyMathExpression(child); });
   }
 
   dom::ExceptionOr<Ref<CSSNumericValue>>
-    CSSNumericValue::ReifyMathExpression(const calc::ChildOrNone &root) noexcept
+    CSSNumericValue::ReifyMathExpression(const css::calc::ChildOrNone &root) noexcept
   {
-    return root.SwitchOn([](const calc::Child &child) -> dom::ExceptionOr<Ref<CSSNumericValue>>
+    return root.SwitchOn([](const css::calc::Child &child) -> dom::ExceptionOr<Ref<CSSNumericValue>>
                          { return CSSNumericValue::ReifyMathExpression(child); },
-                         [](const keywords::None &) -> dom::ExceptionOr<Ref<CSSNumericValue>>
+                         [](const css::keywords::None &) -> dom::ExceptionOr<Ref<CSSNumericValue>>
                          { return dom::Exception {dom::ExceptionCode::UnknownError}; });
   }
 
@@ -220,7 +221,7 @@ namespace krys::boo::css
 
     if (auto *unitValue = DynamicDowncast<CSSUnitValue>(value.get()))
     {
-      if (unitValue->UnitEnum() == UnitType::Number)
+      if (unitValue->UnitEnum() == css::UnitType::Number)
       {
         if (unitValue->Value() == 0.0 || unitValue->Value() == -0.0)
         {
@@ -315,7 +316,7 @@ namespace krys::boo::css
     negatedValues.reserve(values.size());
     for (auto &numberish : values)
     {
-      negatedValues.push_back(css::Negate(RectifyNumberish(krys::move(numberish))));
+      negatedValues.push_back(boo::Negate(RectifyNumberish(krys::move(numberish))));
     }
     return AddInternal(krys::move(negatedValues));
   }
@@ -335,7 +336,7 @@ namespace krys::boo::css
       for (size_t i = 0; i < values.size(); ++i)
       {
         auto unit = Downcast<CSSUnitValue>(*values[i]).UnitEnum();
-        if (unit == UnitType::Number)
+        if (unit == css::UnitType::Number)
         {
           continue;
         }
@@ -354,7 +355,7 @@ namespace krys::boo::css
           product *= Downcast<CSSUnitValue>(*value).Value();
         }
         auto unit = nonNumberUnitIndex ? Downcast<CSSUnitValue>(*values[*nonNumberUnitIndex]).UnitEnum()
-                                       : UnitType::Number;
+                                       : css::UnitType::Number;
         return Ref<CSSNumericValue> {CSSUnitValue::Create(product, unit)};
       }
     }
@@ -373,7 +374,7 @@ namespace krys::boo::css
     invertedValues.reserve(values.size());
     for (auto &value : values)
     {
-      CSS_NUMERIC_RETURN_IF_EXCEPTION(inverted, css::Invert(RectifyNumberish(krys::move(value))));
+      CSS_NUMERIC_RETURN_IF_EXCEPTION(inverted, boo::Invert(RectifyNumberish(krys::move(value))));
       invertedValues.push_back(krys::move(inverted));
     }
     return MultiplyInternal(krys::move(invertedValues));
@@ -440,7 +441,7 @@ namespace krys::boo::css
     }
     if (addend.Units.empty())
     {
-      return CSSUnitValue::Create(addend.Value, UnitType::Number);
+      return CSSUnitValue::Create(addend.Value, css::UnitType::Number);
     }
     auto unit = addend.Units.begin();
     if (unit->second != 1)
@@ -450,7 +451,7 @@ namespace krys::boo::css
     return CSSUnitValue::Create(addend.Value, unit->first);
   }
 
-  dom::ExceptionOr<Ref<CSSUnitValue>> CSSNumericValue::To(UnitType unit) noexcept
+  dom::ExceptionOr<Ref<CSSUnitValue>> CSSNumericValue::To(css::UnitType unit) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-to
     auto type = CSSNumericType::Create(unit);
@@ -483,12 +484,12 @@ namespace krys::boo::css
   dom::ExceptionOr<Ref<CSSMathSum>> CSSNumericValue::ToSum(const List<CSSOMString> &units) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-tosum
-    List<UnitType> parsedUnits;
+    List<css::UnitType> parsedUnits;
     parsedUnits.reserve(units.size());
     for (const auto &unit : units)
     {
       auto parsedUnit = CSSUnitValue::ParseUnit(unit);
-      if (parsedUnit == UnitType::Unknown)
+      if (parsedUnit == css::UnitType::Unknown)
       {
         return dom::Exception {dom::ExceptionCode::SyntaxError, u8"Invalid unit parameter"};
       }
@@ -551,23 +552,23 @@ namespace krys::boo::css
     return CSSMathSum::Create(krys::move(result));
   }
 
-  KRYS_NODISCARD static UnitType TokenUnitType(const Token &token) noexcept
+  KRYS_NODISCARD static css::UnitType TokenUnitType(const css::Token &token) noexcept
   {
     switch (token.Type())
     {
-      case TokenType::Number:     return UnitType::Number;
-      case TokenType::Percentage: return UnitType::Percentage;
-      case TokenType::Dimension:  return ParseUnitType(token.Unit());
-      default:                    return UnitType::Unknown;
+      case css::TokenType::Number:     return css::UnitType::Number;
+      case css::TokenType::Percentage: return css::UnitType::Percentage;
+      case css::TokenType::Dimension:  return css::ParseUnitType(token.Unit());
+      default:                         return css::UnitType::Unknown;
     }
   }
 
-  dom::ExceptionOr<Ref<CSSNumericValue>> CSSNumericValue::Parse(dom::Document &document,
+  dom::ExceptionOr<Ref<CSSNumericValue>> CSSNumericValue::Parse(Document &document,
                                                                 CSSOMString &&cssText) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-parse
-    InputStream inputStream {krys::move(cssText)};
-    Tokenizer tokenizer(inputStream);
+    css::InputStream inputStream {krys::move(cssText)};
+    css::Tokenizer tokenizer(inputStream);
     std::ignore = tokenizer.PumpTokenizer();
     auto range = tokenizer.Tokens();
     range.DiscardWhitespace();
@@ -588,47 +589,47 @@ namespace krys::boo::css
     // https://drafts.css-houdini.org/css-typed-om/#reify-a-numeric-value
     switch (componentValueRange.Peek().Type())
     {
-      case TokenType::Dimension:
-      case TokenType::Number:
-      case TokenType::Percentage:
+      case css::TokenType::Dimension:
+      case css::TokenType::Number:
+      case css::TokenType::Percentage:
       {
         const auto &token = componentValueRange.ConsumeIncludingWhitespace();
         auto unitType = TokenUnitType(token);
-        if (token.Type() == TokenType::Dimension && !CSSNumericType::Create(unitType))
+        if (token.Type() == css::TokenType::Dimension && !CSSNumericType::Create(unitType))
         {
           return dom::Exception {dom::ExceptionCode::SyntaxError, u8"Failed to parse CSS text"};
         }
         return ConvertToExceptionOrNumericValue(CSSUnitValue::Create(token.NumericValue(), unitType));
       }
-      case TokenType::Function:
+      case css::TokenType::Function:
       {
         auto functionId = componentValueRange.Peek().FunctionId();
-        if (functionId == ValueId::Calc || functionId == ValueId::Min || functionId == ValueId::Max
-            || functionId == ValueId::Clamp)
+        if (functionId == css::ValueId::Calc || functionId == css::ValueId::Min
+            || functionId == css::ValueId::Max || functionId == css::ValueId::Clamp)
         {
           // FIXME: The spec is unclear on what context to use when parsing in CSSNumericValue so for the
           // time-being, we use `Category::LengthPercentage`, as it is the most permissive.
           // See https://github.com/w3c/csswg-drafts/issues/10753
 
-          auto parserContext = ParserContext {document};
-          auto parserState = PropertyParserState {
+          auto parserContext = css::ParserContext {document};
+          auto parserState = css::PropertyParserState {
             .Context = parserContext,
           };
-          auto parserOptions = calc::ParserOptions {
-            .Category = Category::LengthPercentage,
-            .Range = All,
+          auto parserOptions = css::calc::ParserOptions {
+            .Category = css::Category::LengthPercentage,
+            .Range = css::All,
             .AllowedSymbols = {},
             .PropertyOptions = {},
           };
-          auto simplificationOptions = calc::SimplificationOptions {
-            .Category = Category::LengthPercentage,
-            .Range = All,
+          auto simplificationOptions = css::calc::SimplificationOptions {
+            .Category = css::Category::LengthPercentage,
+            .Range = css::All,
             .ConversionData = null,
             .SymbolTable = {},
             .AllowZeroValueLengthRemovalFromSum = false,
           };
-          auto tree =
-            calc::ParseAndSimplify(componentValueRange, parserState, parserOptions, simplificationOptions);
+          auto tree = css::calc::ParseAndSimplify(componentValueRange, parserState, parserOptions,
+                                                  simplificationOptions);
           if (!tree)
           {
             return dom::Exception {dom::ExceptionCode::SyntaxError, u8"Failed to parse CSS text"};

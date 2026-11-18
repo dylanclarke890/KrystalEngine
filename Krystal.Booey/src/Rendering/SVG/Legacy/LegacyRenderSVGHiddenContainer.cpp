@@ -23,7 +23,7 @@
 namespace krys::boo
 {
   LegacyRenderSVGHiddenContainer::LegacyRenderSVGHiddenContainer(
-    Type type, svg::SVGElement &element, RenderStyle &&style, EnumSet<SVGModelObjectFlag> svgFlags) noexcept
+    Type type, SVGElement &element, RenderStyle &&style, EnumSet<SVGModelObjectFlag> svgFlags) noexcept
       : LegacyRenderSVGContainer(type, element, krys::move(style),
                                  svgFlags | SVGModelObjectFlag::IsHiddenContainer)
   {

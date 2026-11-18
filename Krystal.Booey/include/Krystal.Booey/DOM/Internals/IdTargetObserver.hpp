@@ -28,9 +28,13 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Macros.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
+}
+
+namespace krys::boo::dom
+{
   class IdTargetObserverRegistry;
 
   /// @brief Observes which element has an ID in a tree scope, while it lives.

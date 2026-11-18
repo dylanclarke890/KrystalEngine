@@ -39,10 +39,10 @@
 
 #include "Krystal.Core/Text/ASCII.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLStyleElement::HTMLStyleElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Style)
+  HTMLStyleElement::HTMLStyleElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Style)
   {
   }
 
@@ -53,7 +53,7 @@ namespace krys::boo::html
 
 #pragma region LinkStyle
 
-  css::CSSStyleSheet *HTMLStyleElement::Sheet() const noexcept
+  CSSStyleSheet *HTMLStyleElement::Sheet() const noexcept
   {
     return _styleSheetOwner.Sheet();
   }
@@ -82,23 +82,23 @@ namespace krys::boo::html
     }
   }
 
-  dom::DOMString HTMLStyleElement::Media() const noexcept
+  DOMString HTMLStyleElement::Media() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"media").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"media").value_or(u8"");
   }
 
-  void HTMLStyleElement::Media(dom::DOMString value) noexcept
+  void HTMLStyleElement::Media(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"media", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"media", krys::move(value));
   }
 
   dom::DOMTokenList &HTMLStyleElement::Blocking() noexcept
   {
     if (!_blocking)
     {
-      _blocking = dom::ElementAlgorithms::CreateDOMTokenList(
-        *this, u8"blocking", [](dom::Document &, dom::DOMStringView token)
-        { return text::IsASCIICaselessEqual(token, u8"render"); });
+      _blocking =
+        dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"blocking", [](Document &, DOMStringView token)
+                                                   { return text::IsASCIICaselessEqual(token, u8"render"); });
     }
 
     return *_blocking;
@@ -108,24 +108,23 @@ namespace krys::boo::html
 
 #pragma region HTMLStyleElement Obsolete members
 
-  dom::DOMString HTMLStyleElement::Type() const noexcept
+  DOMString HTMLStyleElement::Type() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"type").value_or(u8"");
   }
 
-  void HTMLStyleElement::Type(dom::DOMString value) noexcept
+  void HTMLStyleElement::Type(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"type", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region Extension Hooks
 
-  void HTMLStyleElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                            Maybe<dom::DOMStringView> oldValue,
-                                            Maybe<dom::DOMStringView> value,
-                                            const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLStyleElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                            Maybe<DOMStringView> value,
+                                            const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
@@ -139,12 +138,13 @@ namespace krys::boo::html
       _blocking->AssociatedAttributeValueChanged();
     }
     // An element that's no longer potentially render-blocking stops blocking rendering.
-    if (localName == u8"blocking" && !RenderBlocking::HasRenderBlockingToken(*this) && !_createdByParser)
+    if (localName == u8"blocking" && !html::RenderBlocking::HasRenderBlockingToken(*this)
+        && !_createdByParser)
     {
       UnblockRendering();
     }
 
-    auto newValue = value ? dom::DOMStringAtom(*value) : null;
+    auto newValue = value ? DOMStringAtom(*value) : null;
     if (localName == u8"title")
     {
       if (auto *sheet = Sheet(); sheet && !dom::TreeQueries::IsInShadowTree(*this))
@@ -191,7 +191,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLStyleElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLStyleElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
     if (oldAncestor.IsConnected())
@@ -242,7 +242,7 @@ namespace krys::boo::html
     // it's parsed, never holds back rendering; see DIFFERENCES.md.)
     UnblockRendering();
     html::EventLoop::Current().QueueTask(
-      TaskSource::Networking, NodeDocument(), [element = ShareRef(*this), loaded = _loadedSheet]
+      html::TaskSource::Networking, NodeDocument(), [element = ShareRef(*this), loaded = _loadedSheet]
       { dom::EventDispatcher::FireEvent(loaded ? event_names::Load : event_names::Error, *element); });
   }
 
@@ -251,7 +251,7 @@ namespace krys::boo::html
     // An element is potentially render-blocking if its blocking tokens set contains "render", or if it is
     // implicitly potentially render-blocking: a style element is if the parser made it.
     // https://html.spec.whatwg.org/#potentially-render-blocking
-    if (!RenderBlocking::HasRenderBlockingToken(*this) && !_createdByParser)
+    if (!html::RenderBlocking::HasRenderBlockingToken(*this) && !_createdByParser)
     {
       return;
     }
@@ -265,8 +265,7 @@ namespace krys::boo::html
         documentStyle = style::ResolveForDocument(document);
       }
       auto *frameView = document.View();
-      css::mq::MediaQueryEvaluator evaluator(frameView ? frameView->MediaType()
-                                                       : css::CSSOMStringAtom(u8"screen"),
+      css::mq::MediaQueryEvaluator evaluator(frameView ? frameView->MediaType() : CSSOMStringAtom(u8"screen"),
                                              document, documentStyle ? &*documentStyle : nullptr);
       if (!evaluator.Evaluate(mediaQueries))
       {
@@ -274,7 +273,7 @@ namespace krys::boo::html
       }
     }
 
-    RenderBlocking::BlockRendering(*this);
+    html::RenderBlocking::BlockRendering(*this);
     _isRenderBlocking = true;
   }
 
@@ -282,7 +281,7 @@ namespace krys::boo::html
   {
     if (_isRenderBlocking)
     {
-      RenderBlocking::UnblockRendering(*this);
+      html::RenderBlocking::UnblockRendering(*this);
       _isRenderBlocking = false;
     }
   }

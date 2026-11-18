@@ -45,19 +45,19 @@ namespace krys::boo
     using NodeVector = List<Ref<TNode>>;
 
   protected:
-    HashMap<dom::DOMStringAtom, Ref<TNode>> _namedNodes;
+    HashMap<DOMStringAtom, Ref<TNode>> _namedNodes;
     HashMap<Ref<TNode>, NodeVector> _nodeInputs;
     RefPtr<TNode> _lastNode;
 
   public:
     virtual ~SVGFilterGraph() noexcept = default;
 
-    virtual void AddNamedNode(const dom::DOMStringAtom &id, Ref<TNode> &&) noexcept = 0;
+    virtual void AddNamedNode(const DOMStringAtom &id, Ref<TNode> &&) noexcept = 0;
 
-    KRYS_NODISCARD virtual RefPtr<TNode> GetNamedNode(const dom::DOMStringAtom &id) const noexcept = 0;
+    KRYS_NODISCARD virtual RefPtr<TNode> GetNamedNode(const DOMStringAtom &id) const noexcept = 0;
 
     /// @brief The nodes named @p names; none if one isn't a node or a source.
-    KRYS_NODISCARD Maybe<NodeVector> GetNamedNodes(Span<const dom::DOMStringAtom> names) const noexcept
+    KRYS_NODISCARD Maybe<NodeVector> GetNamedNodes(Span<const DOMStringAtom> names) const noexcept
     {
       NodeVector nodes;
 
@@ -121,7 +121,7 @@ namespace krys::boo
     }
 
   protected:
-    KRYS_NODISCARD static bool IsSourceName(const dom::DOMStringAtom &name) noexcept
+    KRYS_NODISCARD static bool IsSourceName(const DOMStringAtom &name) noexcept
     {
       return name.View() == SourceGraphic::EffectName() || name.View() == SourceAlpha::EffectName();
     }

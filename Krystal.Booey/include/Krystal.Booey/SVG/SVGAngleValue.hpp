@@ -31,7 +31,7 @@ namespace krys::boo::dom
   class ExceptionOr;
 }
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGAngleValue
   {
@@ -70,9 +70,9 @@ namespace krys::boo::svg
       return _valueInSpecifiedUnits;
     }
 
-    dom::ExceptionOr<void> SetValueAsString(dom::DOMStringView) noexcept;
+    dom::ExceptionOr<void> SetValueAsString(DOMStringView) noexcept;
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept;
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept;
 
     dom::ExceptionOr<void> NewValueSpecifiedUnits(uint16 unitType, float valueInSpecifiedUnits) noexcept;
 

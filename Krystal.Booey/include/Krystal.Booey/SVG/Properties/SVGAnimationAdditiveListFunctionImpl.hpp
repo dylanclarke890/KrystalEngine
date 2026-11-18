@@ -33,7 +33,7 @@
 #include "Krystal.Booey/SVG/SVGTransformDistance.hpp"
 #include "Krystal.Booey/SVG/SVGTransformList.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGElement;
 
@@ -42,19 +42,19 @@ namespace krys::boo::svg
     using Base = SVGAnimationAdditiveListFunction<SVGLengthList>;
 
   public:
-    SVGAnimationLengthListFunction(AnimationMode animationMode, CalcMode calcMode, bool isAccumulated,
-                                   bool isAdditive, SVGLengthMode lengthMode) noexcept
+    SVGAnimationLengthListFunction(svg::AnimationMode animationMode, svg::CalcMode calcMode,
+                                   bool isAccumulated, bool isAdditive, SVGLengthMode lengthMode) noexcept
         : Base(animationMode, calcMode, isAccumulated, isAdditive, lengthMode)
     {
     }
 
-    void SetFromAndToValues(SVGElement &, dom::DOMStringView from, dom::DOMStringView to) noexcept override
+    void SetFromAndToValues(SVGElement &, DOMStringView from, DOMStringView to) noexcept override
     {
       (void)_from->Parse(from);
       (void)_to->Parse(to);
     }
 
-    void SetToAtEndOfDurationValue(SVGElement &, dom::DOMStringView toAtEndOfDuration) noexcept override
+    void SetToAtEndOfDurationValue(SVGElement &, DOMStringView toAtEndOfDuration) noexcept override
     {
       (void)_toAtEndOfDuration->Parse(toAtEndOfDuration);
     }
@@ -67,7 +67,7 @@ namespace krys::boo::svg
         return;
       }
 
-      const auto &fromItems = _animationMode == AnimationMode::To ? animated->Items() : _from->Items();
+      const auto &fromItems = _animationMode == svg::AnimationMode::To ? animated->Items() : _from->Items();
       const auto &toItems = _to->Items();
       const auto &toAtEndOfDurationItems = ToAtEndOfDuration()->Items();
       auto &animatedItems = animated->Items();
@@ -117,13 +117,13 @@ namespace krys::boo::svg
     using Base = SVGAnimationAdditiveListFunction<SVGNumberList>;
     using Base::Base;
 
-    void SetFromAndToValues(SVGElement &, dom::DOMStringView from, dom::DOMStringView to) noexcept override
+    void SetFromAndToValues(SVGElement &, DOMStringView from, DOMStringView to) noexcept override
     {
       (void)_from->Parse(from);
       (void)_to->Parse(to);
     }
 
-    void SetToAtEndOfDurationValue(SVGElement &, dom::DOMStringView toAtEndOfDuration) noexcept override
+    void SetToAtEndOfDurationValue(SVGElement &, DOMStringView toAtEndOfDuration) noexcept override
     {
       (void)_toAtEndOfDuration->Parse(toAtEndOfDuration);
     }
@@ -135,7 +135,7 @@ namespace krys::boo::svg
         return;
       }
 
-      const auto &fromItems = _animationMode == AnimationMode::To ? animated->Items() : _from->Items();
+      const auto &fromItems = _animationMode == svg::AnimationMode::To ? animated->Items() : _from->Items();
       const auto &toItems = _to->Items();
       const auto &toAtEndOfDurationItems = ToAtEndOfDuration()->Items();
       auto &animatedItems = animated->Items();
@@ -175,13 +175,13 @@ namespace krys::boo::svg
     using Base = SVGAnimationAdditiveListFunction<SVGPointList>;
     using Base::Base;
 
-    void SetFromAndToValues(SVGElement &, dom::DOMStringView from, dom::DOMStringView to) noexcept override
+    void SetFromAndToValues(SVGElement &, DOMStringView from, DOMStringView to) noexcept override
     {
       (void)_from->Parse(from);
       (void)_to->Parse(to);
     }
 
-    void SetToAtEndOfDurationValue(SVGElement &, dom::DOMStringView toAtEndOfDuration) noexcept override
+    void SetToAtEndOfDurationValue(SVGElement &, DOMStringView toAtEndOfDuration) noexcept override
     {
       (void)_toAtEndOfDuration->Parse(toAtEndOfDuration);
     }
@@ -193,7 +193,7 @@ namespace krys::boo::svg
         return;
       }
 
-      const auto &fromItems = _animationMode == AnimationMode::To ? animated->Items() : _from->Items();
+      const auto &fromItems = _animationMode == svg::AnimationMode::To ? animated->Items() : _from->Items();
       const auto &toItems = _to->Items();
       const auto &toAtEndOfDurationItems = ToAtEndOfDuration()->Items();
       auto &animatedItems = animated->Items();
@@ -239,13 +239,13 @@ namespace krys::boo::svg
     using Base = SVGAnimationAdditiveListFunction<SVGTransformList>;
     using Base::Base;
 
-    void SetFromAndToValues(SVGElement &, dom::DOMStringView from, dom::DOMStringView to) noexcept override
+    void SetFromAndToValues(SVGElement &, DOMStringView from, DOMStringView to) noexcept override
     {
       _from->Parse(from);
       _to->Parse(to);
     }
 
-    void SetToAtEndOfDurationValue(SVGElement &, dom::DOMStringView toAtEndOfDuration) noexcept override
+    void SetToAtEndOfDurationValue(SVGElement &, DOMStringView toAtEndOfDuration) noexcept override
     {
       _toAtEndOfDuration->Parse(toAtEndOfDuration);
     }
@@ -271,7 +271,7 @@ namespace krys::boo::svg
 
       // Never resize the animatedList to the _to size, instead either clear the list
       // or append to it.
-      if (!animatedItems.empty() && (!_isAdditive || _animationMode == AnimationMode::To))
+      if (!animatedItems.empty() && (!_isAdditive || _animationMode == svg::AnimationMode::To))
       {
         animated->ClearItems();
       }

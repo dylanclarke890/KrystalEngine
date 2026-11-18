@@ -64,7 +64,7 @@ namespace krys::boo::style
       return _orderedNamedGridLines.Map.empty() && _orderedNamedAutoRepeatGridLines.Map.empty();
     }
 
-    virtual void CollectLineNamesForIndex(List<css::CSSOMString> &, uint32 index) const noexcept = 0;
+    virtual void CollectLineNamesForIndex(List<CSSOMString> &, uint32 index) const noexcept = 0;
 
     KRYS_NODISCARD virtual int32 NamedGridLineCount() const noexcept
     {
@@ -78,7 +78,7 @@ namespace krys::boo::style
       AutoRepeatNamedLines,
     };
 
-    void AppendLines(List<css::CSSOMString> &, uint32 index, NamedLinesType) const noexcept;
+    void AppendLines(List<CSSOMString> &, uint32 index, NamedLinesType) const noexcept;
   };
 
   /// @brief Collects the line names of a grid container's template.
@@ -98,7 +98,7 @@ namespace krys::boo::style
     {
     }
 
-    void CollectLineNamesForIndex(List<css::CSSOMString> &, uint32 index) const noexcept override;
+    void CollectLineNamesForIndex(List<CSSOMString> &, uint32 index) const noexcept override;
   };
 
   /// @brief Collects the line names of a subgrid's template.
@@ -132,7 +132,7 @@ namespace krys::boo::style
       _autoRepeatTotalLineSets *= _autoRepeatLineSetListLength;
     }
 
-    void CollectLineNamesForIndex(List<css::CSSOMString> &, uint32 index) const noexcept override;
+    void CollectLineNamesForIndex(List<CSSOMString> &, uint32 index) const noexcept override;
 
     KRYS_NODISCARD int32 NamedGridLineCount() const noexcept override
     {
@@ -140,7 +140,7 @@ namespace krys::boo::style
     }
   };
 
-  inline void OrderedNamedLinesCollector::AppendLines(List<css::CSSOMString> &lineNames, uint32 index,
+  inline void OrderedNamedLinesCollector::AppendLines(List<CSSOMString> &lineNames, uint32 index,
                                                       NamedLinesType type) const noexcept
   {
     auto &map =
@@ -157,7 +157,7 @@ namespace krys::boo::style
   }
 
   inline void
-    OrderedNamedLinesCollectorInGridLayout::CollectLineNamesForIndex(List<css::CSSOMString> &lineNamesValue,
+    OrderedNamedLinesCollectorInGridLayout::CollectLineNamesForIndex(List<CSSOMString> &lineNamesValue,
                                                                      uint32 i) const noexcept
   {
     krys_debug_assert(!IsEmpty());
@@ -197,8 +197,9 @@ namespace krys::boo::style
     AppendLines(lineNamesValue, autoRepeatIndexInFirstRepetition, NamedLinesType::AutoRepeatNamedLines);
   }
 
-  inline void OrderedNamedLinesCollectorInSubgridLayout::CollectLineNamesForIndex(
-    List<css::CSSOMString> &lineNamesValue, uint32 i) const noexcept
+  inline void
+    OrderedNamedLinesCollectorInSubgridLayout::CollectLineNamesForIndex(List<CSSOMString> &lineNamesValue,
+                                                                        uint32 i) const noexcept
   {
     if (!_autoRepeatLineSetListLength || i < _insertionPoint)
     {

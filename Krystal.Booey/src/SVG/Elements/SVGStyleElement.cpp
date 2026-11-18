@@ -33,9 +33,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGStyleElement::SVGStyleElement(dom::Document &document) noexcept
+  SVGStyleElement::SVGStyleElement(Document &document) noexcept
       : SVGElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Style)
   {
   }
@@ -59,40 +59,40 @@ namespace krys::boo::svg
     }
   }
 
-  dom::DOMString SVGStyleElement::Type() const noexcept
+  DOMString SVGStyleElement::Type() const noexcept
   {
     return dom::ElementAlgorithms::GetAttributeValue(*this, SVGNames::TypeAttr().LocalName());
   }
 
-  void SVGStyleElement::Type(dom::DOMString value) noexcept
+  void SVGStyleElement::Type(DOMString value) noexcept
   {
     dom::ElementAlgorithms::SetAttributeValue(*this, SVGNames::TypeAttr().LocalName(), krys::move(value));
   }
 
-  dom::DOMString SVGStyleElement::Media() const noexcept
+  DOMString SVGStyleElement::Media() const noexcept
   {
     return dom::ElementAlgorithms::GetAttributeValue(*this, SVGNames::MediaAttr().LocalName());
   }
 
-  void SVGStyleElement::Media(dom::DOMString value) noexcept
+  void SVGStyleElement::Media(DOMString value) noexcept
   {
     dom::ElementAlgorithms::SetAttributeValue(*this, SVGNames::MediaAttr().LocalName(), krys::move(value));
   }
 
-  dom::DOMString SVGStyleElement::Title() const noexcept
+  DOMString SVGStyleElement::Title() const noexcept
   {
     return dom::ElementAlgorithms::GetAttributeValue(*this, SVGNames::TitleAttr().LocalName());
   }
 
-  void SVGStyleElement::Title(dom::DOMString value) noexcept
+  void SVGStyleElement::Title(DOMString value) noexcept
   {
     dom::ElementAlgorithms::SetAttributeValue(*this, SVGNames::TitleAttr().LocalName(), krys::move(value));
   }
 
-  void SVGStyleElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                         Maybe<dom::DOMStringView> value) noexcept
+  void SVGStyleElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                         Maybe<DOMStringView> value) noexcept
   {
-    auto newValue = value ? dom::DOMStringAtom(*value) : null;
+    auto newValue = value ? DOMStringAtom(*value) : null;
     if (name == SVGNames::TitleAttr())
     {
       if (auto *sheet = Sheet(); sheet && !dom::TreeQueries::IsInShadowTree(*this))
@@ -145,7 +145,7 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGStyleElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void SVGStyleElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     SVGElement::OnRemove(isSubtreeRoot, oldAncestor);
     if (oldAncestor.IsConnected())

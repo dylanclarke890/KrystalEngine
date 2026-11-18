@@ -21,7 +21,7 @@
 
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<foreignObject>` element: content from other namespaces (HTML) laid out in a rectangle of an
   /// SVG drawing.
@@ -37,7 +37,7 @@ namespace krys::boo::svg
     Ref<SVGAnimatedLength> _height;
 
   public:
-    explicit SVGForeignObjectElement(dom::Document &document) noexcept;
+    explicit SVGForeignObjectElement(Document &document) noexcept;
 
     KRYS_NODISCARD const SVGLengthValue &X() const noexcept
     {
@@ -82,14 +82,14 @@ namespace krys::boo::svg
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGForeignObjectElement, SVGGraphicsElement>;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final;
 
-    KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &) const noexcept final;
+    KRYS_NODISCARD bool ChildShouldCreateRenderer(const Node &) const noexcept final;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
 
@@ -105,8 +105,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGForeignObjectElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGForeignObjectElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGForeignObjectElement();
   }

@@ -66,8 +66,8 @@ namespace krys::boo::style
       bool _isSubgrid {false};
 
     public:
-      NamedLineCollectionBase(const RenderGrid &initialGrid, const css::CSSOMString &name,
-                              GridPositionSide side, bool nameIsAreaName) noexcept;
+      NamedLineCollectionBase(const RenderGrid &initialGrid, const CSSOMString &name, GridPositionSide side,
+                              bool nameIsAreaName) noexcept;
 
       KRYS_NODISCARD bool HasNamedLines() const noexcept;
 
@@ -86,7 +86,7 @@ namespace krys::boo::style
       KRYS_NON_COPY_MOVABLE(NamedLineCollection);
 
     public:
-      NamedLineCollection(const RenderGrid &initialGrid, const css::CSSOMString &name, GridPositionSide side,
+      NamedLineCollection(const RenderGrid &initialGrid, const CSSOMString &name, GridPositionSide side,
                           bool nameIsAreaName = false) noexcept;
 
       KRYS_NODISCARD int FirstPosition() const noexcept;
@@ -109,8 +109,8 @@ namespace krys::boo::style
                : GridTrackSizingDirection::Rows;
     }
 
-    KRYS_NODISCARD css::CSSOMString ImplicitNamedGridLineForSide(const css::CSSOMString &lineName,
-                                                                 GridPositionSide side) noexcept
+    KRYS_NODISCARD CSSOMString ImplicitNamedGridLineForSide(const CSSOMString &lineName,
+                                                            GridPositionSide side) noexcept
     {
       return lineName + (IsStartSide(side) ? u8"-start" : u8"-end");
     }
@@ -132,9 +132,8 @@ namespace krys::boo::style
       }
     }
 
-    KRYS_NODISCARD Maybe<int> ClampedImplicitLineForArea(const RenderStyle &style,
-                                                         const css::CSSOMString &name, int min, int max,
-                                                         GridTrackSizingDirection direction,
+    KRYS_NODISCARD Maybe<int> ClampedImplicitLineForArea(const RenderStyle &style, const CSSOMString &name,
+                                                         int min, int max, GridTrackSizingDirection direction,
                                                          bool isStartSide) noexcept
     {
       auto &areas = style.GetGridTemplateAreas().Map.Map;
@@ -152,17 +151,16 @@ namespace krys::boo::style
     }
 
     template <typename TMap>
-    KRYS_NODISCARD const List<uint32> *FindIndices(const TMap &map, const css::CSSOMString &name) noexcept
+    KRYS_NODISCARD const List<uint32> *FindIndices(const TMap &map, const CSSOMString &name) noexcept
     {
       auto iterator = map.find(name);
       return iterator == map.end() ? nullptr : &iterator->second;
     }
 
-    NamedLineCollectionBase::NamedLineCollectionBase(const RenderGrid &initialGrid,
-                                                     const css::CSSOMString &name, GridPositionSide side,
-                                                     bool nameIsAreaName) noexcept
+    NamedLineCollectionBase::NamedLineCollectionBase(const RenderGrid &initialGrid, const CSSOMString &name,
+                                                     GridPositionSide side, bool nameIsAreaName) noexcept
     {
-      css::CSSOMString lineName = nameIsAreaName ? ImplicitNamedGridLineForSide(name, side) : name;
+      CSSOMString lineName = nameIsAreaName ? ImplicitNamedGridLineForSide(name, side) : name;
       auto direction = DirectionFromSide(side);
       const auto *grid = &initialGrid;
       const auto *gridContainerStyle = &grid->Style();
@@ -211,15 +209,15 @@ namespace krys::boo::style
         // specified. It's possible for authors to manually name a *-start implicit line name for the end line
         // search, and vice-versa, so we need to remember which side we inferred from the name, separately
         // from the side we're searching for.
-        css::CSSOMString areaName = name;
+        CSSOMString areaName = name;
         bool startSide = IsStartSide(side);
         if (!nameIsAreaName)
         {
           size_t suffix = name.find(u8"-start");
-          if (suffix == css::CSSOMString::npos)
+          if (suffix == CSSOMString::npos)
           {
             suffix = name.find(u8"-end");
-            krys_debug_assert(suffix != css::CSSOMString::npos);
+            krys_debug_assert(suffix != CSSOMString::npos);
             startSide = false;
           }
           else
@@ -333,7 +331,7 @@ namespace krys::boo::style
       return contains(_autoRepeatNamedLinesIndices, autoRepeatIndexInFirstRepetition);
     }
 
-    NamedLineCollection::NamedLineCollection(const RenderGrid &initialGrid, const css::CSSOMString &name,
+    NamedLineCollection::NamedLineCollection(const RenderGrid &initialGrid, const CSSOMString &name,
                                              GridPositionSide side, bool nameIsAreaName) noexcept
         : NamedLineCollectionBase(initialGrid, name, side, nameIsAreaName)
     {
@@ -626,7 +624,7 @@ namespace krys::boo::style
       return start + 1;
     }
 
-    KRYS_NODISCARD css::CSSOMString NameOf(const css::CustomIdentifier &name) noexcept
+    KRYS_NODISCARD CSSOMString NameOf(const css::CustomIdentifier &name) noexcept
     {
       return name.Value.ToString();
     }

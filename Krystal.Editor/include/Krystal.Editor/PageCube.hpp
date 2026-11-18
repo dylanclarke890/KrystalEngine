@@ -70,7 +70,7 @@ void main()
 
   private:
     gfx::Device &_device;
-    WeakPtr<boo::dom::Document> _document;
+    WeakPtr<boo::Document> _document;
     List<boo::dom::EventListenerHandle> _listeners;
     List<boo::html::EngineTextureRenderingContext *> _contexts;
     gfx::TextureHandle _texture {};
@@ -88,7 +88,7 @@ void main()
     double _lastY {0};
 
   public:
-    PageCube(boo::dom::Document &document, gfx::Device &device) noexcept
+    PageCube(boo::Document &document, gfx::Device &device) noexcept
         : _device(device), _document(CreateWeakPtr(&document))
     {
       auto cube = document.GetElementById(u8"cube");
@@ -101,7 +101,7 @@ void main()
         _texture, {static_cast<int32>(TextureSize), static_cast<int32>(TextureSize)});
       for (auto id : {u8"cube", u8"cube-strip"})
       {
-        auto *canvas = DynamicDowncast<boo::html::HTMLCanvasElement>(document.GetElementById(id).get());
+        auto *canvas = DynamicDowncast<boo::HTMLCanvasElement>(document.GetElementById(id).get());
         if (!canvas)
         {
           continue;
@@ -118,7 +118,7 @@ void main()
       auto listen = [&](utf8_stringview type, Func<void(boo::dom::PointerEvent &)> &&callback)
       {
         _listeners.push_back(cube->AddEventListener(
-          boo::dom::DOMStringAtom(type), [callback = krys::move(callback)](boo::dom::Event &event)
+          boo::DOMStringAtom(type), [callback = krys::move(callback)](boo::dom::Event &event)
           { callback(static_cast<boo::dom::PointerEvent &>(event)); }));
       };
       listen(u8"pointerdown",
@@ -324,7 +324,7 @@ void main()
       return true;
     }
 
-    KRYS_NODISCARD RefPtr<boo::dom::Element> ById(utf8_stringview id) const noexcept
+    KRYS_NODISCARD RefPtr<boo::Element> ById(utf8_stringview id) const noexcept
     {
       return _document ? _document->GetElementById(id) : nullptr;
     }
@@ -348,8 +348,7 @@ void main()
                              / std::numbers::pi_v<float>);
         };
         auto text = std::format("Turned {}° across, {}° up", degrees(_yaw), -degrees(_pitch));
-        (void)label->TextContent(
-          boo::dom::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
+        (void)label->TextContent(boo::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
       }
     }
   };

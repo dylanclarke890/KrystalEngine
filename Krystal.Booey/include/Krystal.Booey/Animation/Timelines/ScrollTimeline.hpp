@@ -37,14 +37,10 @@
 
 namespace krys::boo
 {
+  class Document;
+  class Element;
   class RenderElement;
   class ScrollableArea;
-
-  namespace dom
-  {
-    class Document;
-    class Element;
-  }
 
   /// @brief A timeline whose progress is the scroll position of a scroll container, as a percentage.
   /// @see https://drafts.csswg.org/scroll-animations-1/#scrolltimeline-interface
@@ -75,24 +71,23 @@ namespace krys::boo
 
     style::WeakStyleable _source;
     ScrollAxis _axis {ScrollAxis::Block};
-    css::CSSOMStringAtom _name {null};
+    CSSOMStringAtom _name {null};
     Scroller _scroller {Scroller::Self};
-    WeakPtr<dom::Element> _timelineScopeElement;
+    WeakPtr<boo::Element> _timelineScopeElement;
     CurrentTimeData _cachedCurrentTimeData {};
     bool _isInactiveStyleOriginatedTimeline {false};
 
   public:
     /// @see https://drafts.csswg.org/scroll-animations-1/#dom-scrolltimeline-scrolltimeline
-    KRYS_NODISCARD static Ref<ScrollTimeline> Create(dom::Document &document,
+    KRYS_NODISCARD static Ref<ScrollTimeline> Create(boo::Document &document,
                                                      const ScrollTimelineOptions &options = {}) noexcept;
 
-    KRYS_NODISCARD static Ref<ScrollTimeline> Create(const css::CSSOMStringAtom &name,
-                                                     ScrollAxis axis) noexcept;
+    KRYS_NODISCARD static Ref<ScrollTimeline> Create(const CSSOMStringAtom &name, ScrollAxis axis) noexcept;
 
     KRYS_NODISCARD static Ref<ScrollTimeline> Create(Scroller scroller, ScrollAxis axis) noexcept;
 
     KRYS_NODISCARD static Ref<ScrollTimeline>
-      CreateInactiveStyleOriginatedTimeline(const css::CSSOMStringAtom &name) noexcept;
+      CreateInactiveStyleOriginatedTimeline(const CSSOMStringAtom &name) noexcept;
 
     KRYS_NODISCARD const style::WeakStyleable &SourceStyleable() const noexcept
     {
@@ -100,11 +95,11 @@ namespace krys::boo
     }
 
     /// @see https://drafts.csswg.org/scroll-animations-1/#dom-scrolltimeline-source
-    KRYS_NODISCARD virtual RefPtr<dom::Element> BindingsSource() const noexcept;
+    KRYS_NODISCARD virtual RefPtr<boo::Element> BindingsSource() const noexcept;
 
-    KRYS_NODISCARD virtual RefPtr<dom::Element> Source() const noexcept;
+    KRYS_NODISCARD virtual RefPtr<boo::Element> Source() const noexcept;
 
-    void SetSource(dom::Element *source) noexcept;
+    void SetSource(boo::Element *source) noexcept;
 
     void SetSource(const style::Styleable &styleable) noexcept;
 
@@ -118,12 +113,12 @@ namespace krys::boo
       _axis = axis;
     }
 
-    KRYS_NODISCARD const css::CSSOMStringAtom &GetName() const noexcept
+    KRYS_NODISCARD const CSSOMStringAtom &GetName() const noexcept
     {
       return _name;
     }
 
-    void SetName(const css::CSSOMStringAtom &name) noexcept
+    void SetName(const CSSOMStringAtom &name) noexcept
     {
       _name = name;
     }
@@ -145,12 +140,12 @@ namespace krys::boo
 
     KRYS_NODISCARD style::SingleAnimationRange DefaultRange() const noexcept override;
 
-    KRYS_NODISCARD const WeakPtr<dom::Element> &TimelineScopeDeclaredElement() const noexcept
+    KRYS_NODISCARD const WeakPtr<boo::Element> &TimelineScopeDeclaredElement() const noexcept
     {
       return _timelineScopeElement;
     }
 
-    void SetTimelineScopeElement(const dom::Element &element) noexcept;
+    void SetTimelineScopeElement(const boo::Element &element) noexcept;
 
     void ClearTimelineScopeDeclaredElement() noexcept
     {
@@ -161,16 +156,16 @@ namespace krys::boo
     KRYS_NODISCARD virtual Pair<WebAnimationTime, WebAnimationTime>
       IntervalForAttachmentRange(const style::SingleAnimationRange &attachmentRange) const noexcept;
 
-    void RemoveTimelineFromDocument(dom::Element *element) noexcept;
+    void RemoveTimelineFromDocument(boo::Element *element) noexcept;
 
   protected:
-    ScrollTimeline(const css::CSSOMStringAtom &name, ScrollAxis axis) noexcept;
+    ScrollTimeline(const CSSOMStringAtom &name, ScrollAxis axis) noexcept;
 
     KRYS_NODISCARD virtual Data ComputeTimelineData(
       UseCachedCurrentTime useCachedCurrentTime = UseCachedCurrentTime::Yes) const noexcept;
 
     KRYS_NODISCARD static ScrollableArea *ScrollableAreaForSourceRenderer(const RenderElement *renderer,
-                                                                          dom::Document &document) noexcept;
+                                                                          boo::Document &document) noexcept;
 
     KRYS_NODISCARD ResolvedScrollDirection GetResolvedScrollDirection() const noexcept;
 

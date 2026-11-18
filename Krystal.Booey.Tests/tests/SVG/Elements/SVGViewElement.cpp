@@ -17,7 +17,7 @@ namespace krys::boo::svg::tests
   namespace
   {
     template <typename T>
-    KRYS_NODISCARD T &ById(dom::Document &document, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD T &ById(Document &document, DOMStringView id) noexcept
     {
       auto element = document.GetElementById(id);
       krys_assert(element);
@@ -25,10 +25,10 @@ namespace krys::boo::svg::tests
     }
 
     // Makes an <svg> parsed from @p markup the document element, as in an SVG document.
-    void MakeSVGTheDocumentElement(dom::Document &document, dom::DOMStringView id) noexcept
+    void MakeSVGTheDocumentElement(Document &document, DOMStringView id) noexcept
     {
-      Ref<dom::Element> svg = ShareRef(*document.GetElementById(id));
-      Ref<dom::Element> html = ShareRef(*document.DocumentElement());
+      Ref<Element> svg = ShareRef(*document.GetElementById(id));
+      Ref<Element> html = ShareRef(*document.DocumentElement());
       krys_assert(!document.ReplaceChild(*svg, *html).HasException());
     }
   }

@@ -34,7 +34,10 @@
 namespace krys::boo::css
 {
   class FunctionRule;
+}
 
+namespace krys::boo
+{
   /// @brief An `@function` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-mixins/#the-function-interface
   class CSSFunctionRule final : public CSSGroupingRule
@@ -66,15 +69,15 @@ namespace krys::boo::css
   private:
     KRYS_NODISCARD const css::FunctionRule &GetFunctionRule() const noexcept;
 
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::Function;
+      return css::RuleType::Function;
     }
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSFunctionRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSFunctionRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::Function;
   }

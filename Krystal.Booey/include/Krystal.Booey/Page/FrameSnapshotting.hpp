@@ -42,11 +42,7 @@ namespace krys::boo
   class ImageBuffer;
   class IntRect;
   class LocalFrame;
-
-  namespace dom
-  {
-    class Node;
-  }
+  class Node;
 
   /// @brief What a snapshot paints, and how.
   enum class SnapshotFlags : uint16
@@ -93,7 +89,7 @@ namespace krys::boo
 
   /// @brief A snapshot of @p node and its descendants alone, on a transparent background; null if it isn't
   /// rendered.
-  KRYS_NODISCARD RefPtr<ImageBuffer> SnapshotNode(LocalFrame &, dom::Node &, SnapshotOptions) noexcept;
+  KRYS_NODISCARD RefPtr<ImageBuffer> SnapshotNode(LocalFrame &, boo::Node &, SnapshotOptions) noexcept;
 
   /// @brief A snapshot of the frame's selection alone; null if it isn't a range or its bounds are empty.
   KRYS_NODISCARD RefPtr<ImageBuffer> SnapshotSelection(LocalFrame &, SnapshotOptions) noexcept;

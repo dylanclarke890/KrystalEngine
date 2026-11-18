@@ -37,13 +37,13 @@
 
 namespace krys::boo::html
 {
-  bool CheckboxInputType::ValueMissing(dom::DOMStringView) const noexcept
+  bool CheckboxInputType::ValueMissing(DOMStringView) const noexcept
   {
     krys_debug_assert(Element());
     return Element()->IsRequired() && !Element()->Checked();
   }
 
-  dom::DOMString CheckboxInputType::ValueMissingText() const noexcept
+  DOMString CheckboxInputType::ValueMissingText() const noexcept
   {
     return ValidationMessageValueMissingForCheckboxText();
   }

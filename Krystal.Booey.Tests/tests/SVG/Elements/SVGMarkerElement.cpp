@@ -13,7 +13,7 @@ namespace krys::boo::svg::tests
   namespace
   {
     template <typename T>
-    KRYS_NODISCARD T &ElementById(dom::Document &document, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD T &ElementById(Document &document, DOMStringView id) noexcept
     {
       auto element = document.GetElementById(id);
       krys_assert(element);

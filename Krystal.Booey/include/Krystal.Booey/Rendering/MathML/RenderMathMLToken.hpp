@@ -34,10 +34,7 @@
 
 namespace krys::boo
 {
-  namespace mathml
-  {
-    class MathMLTokenElement;
-  }
+  class MathMLTokenElement;
 
   /// @brief The renderer of a token element (`<mi>`, `<mn>`, `<ms>` and `<mtext>`) and the base of the
   /// operator renderer: a block of its text.
@@ -47,13 +44,13 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderMathMLToken);
 
   public:
-    RenderMathMLToken(Type type, mathml::MathMLTokenElement &element, RenderStyle &&style) noexcept;
+    RenderMathMLToken(Type type, boo::MathMLTokenElement &element, RenderStyle &&style) noexcept;
 
-    RenderMathMLToken(Type type, dom::Document &document, RenderStyle &&style) noexcept;
+    RenderMathMLToken(Type type, Document &document, RenderStyle &&style) noexcept;
 
     ~RenderMathMLToken() noexcept override;
 
-    KRYS_NODISCARD mathml::MathMLTokenElement &GetElement() const noexcept;
+    KRYS_NODISCARD boo::MathMLTokenElement &GetElement() const noexcept;
 
     /// @brief Updates the renderer after the token's content changed.
     virtual void UpdateTokenContent() noexcept;

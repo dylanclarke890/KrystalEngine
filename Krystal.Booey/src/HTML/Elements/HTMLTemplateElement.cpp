@@ -8,14 +8,14 @@
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#attr-template-shadowrootmode
   template <>
-  struct EnumeratedAttributeTraits<"shadowrootmode", HTMLTemplateElement>
+  struct html::EnumeratedAttributeTraits<"shadowrootmode", HTMLTemplateElement>
   {
-    using State = ShadowRootModeAttributeState;
-    static inline const KeywordStateMapping<State> StateMappings[] = {
+    using State = html::ShadowRootModeAttributeState;
+    static inline const html::KeywordStateMapping<State> StateMappings[] = {
       {u8"open", State::Open},
       {u8"closed", State::Closed},
     };
@@ -26,10 +26,10 @@ namespace krys::boo::html
 
   /// @see https://html.spec.whatwg.org/#attr-template-shadowrootslotassignment
   template <>
-  struct EnumeratedAttributeTraits<"shadowrootslotassignment", HTMLTemplateElement>
+  struct html::EnumeratedAttributeTraits<"shadowrootslotassignment", HTMLTemplateElement>
   {
-    using State = ShadowRootSlotAssignmentAttributeState;
-    static inline const KeywordStateMapping<State> StateMappings[] = {
+    using State = html::ShadowRootSlotAssignmentAttributeState;
+    static inline const html::KeywordStateMapping<State> StateMappings[] = {
       {u8"named", State::Named},
       {u8"manual", State::Manual},
     };
@@ -41,15 +41,15 @@ namespace krys::boo::html
   // FIXME: Implement the HTMLTemplateElement constructor in a spec compliant way.
 
   // https://html.spec.whatwg.org/#template-contents
-  HTMLTemplateElement::HTMLTemplateElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Template),
+  HTMLTemplateElement::HTMLTemplateElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Template),
         // 1. Let document be the template element's node document's appropriate template contents owner
         //    document.
         // (Skipped: there's no inert template contents owner document.)
         // 2. Create a DocumentFragment object whose node document is document and host is the template
         // element.
         // 3. Set the template element's template contents to the newly created DocumentFragment object.
-        _content(CreateRef<dom::DocumentFragment>(document))
+        _content(CreateRef<DocumentFragment>(document))
   {
     _content->SetHost(*this);
   }
@@ -57,41 +57,41 @@ namespace krys::boo::html
 #pragma region HTMLTemplateElement
 
   // https://html.spec.whatwg.org/#dom-template-content
-  RefPtr<dom::DocumentFragment> HTMLTemplateElement::Content() const noexcept
+  RefPtr<DocumentFragment> HTMLTemplateElement::Content() const noexcept
   {
     // 1. Assert: this's template contents is not a ShadowRoot node.
-    krys_assert(!Is<dom::ShadowRoot>(_content.get()));
+    krys_assert(!Is<boo::ShadowRoot>(_content.get()));
 
     // 2. Return this's template contents.
     return _content;
   }
 
-  dom::DOMString HTMLTemplateElement::HtmlFor() const noexcept
+  DOMString HTMLTemplateElement::HtmlFor() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"for").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"for").value_or(u8"");
   }
 
-  void HTMLTemplateElement::HtmlFor(dom::DOMString value) noexcept
+  void HTMLTemplateElement::HtmlFor(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"for", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"for", krys::move(value));
   }
 
-  void HTMLTemplateElement::SetTemplateContents(dom::ShadowRoot &shadow) noexcept
+  void HTMLTemplateElement::SetTemplateContents(boo::ShadowRoot &shadow) noexcept
   {
-    _content = ShareRef<dom::DocumentFragment>(shadow);
+    _content = ShareRef<DocumentFragment>(shadow);
   }
 
   namespace
   {
     // https://html.spec.whatwg.org/#find-markers
-    KRYS_NODISCARD Pair<dom::ProcessingInstruction *, dom::ProcessingInstruction *>
-      FindMarkers(dom::ContainerNode &scope, dom::DOMStringView name) noexcept
+    KRYS_NODISCARD Pair<ProcessingInstruction *, ProcessingInstruction *>
+      FindMarkers(ContainerNode &scope, DOMStringView name) noexcept
     {
       // 1. For each descendant of scope's descendants, in tree order:
       for (auto &descendant : dom::DescendantRange(scope))
       {
         // 1a. If descendant is not a ProcessingInstruction node, then continue.
-        auto *instruction = DynamicDowncast<dom::ProcessingInstruction>(descendant);
+        auto *instruction = DynamicDowncast<ProcessingInstruction>(descendant);
         if (!instruction)
         {
           continue;
@@ -123,7 +123,7 @@ namespace krys::boo::html
           for (auto *sibling = instruction->NextSibling(); sibling; sibling = sibling->NextSibling())
           {
             // 1d.iv.A. If sibling is a ProcessingInstruction node:
-            auto *siblingInstruction = DynamicDowncast<dom::ProcessingInstruction>(*sibling);
+            auto *siblingInstruction = DynamicDowncast<ProcessingInstruction>(*sibling);
             if (!siblingInstruction)
             {
               continue;
@@ -167,7 +167,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#prepare-content-patching
-  bool HTMLTemplateElement::PrepareContentPatching(dom::ContainerNode &scope) noexcept
+  bool HTMLTemplateElement::PrepareContentPatching(ContainerNode &scope) noexcept
   {
     // 1. Assert: template's for attribute is specified.
     // 2. Let markerName be template's for attribute's value.
@@ -206,7 +206,7 @@ namespace krys::boo::html
     // 11. Let currentNode be start's next sibling.
     // 12. While currentNode is not null: if currentNode is end, then break; append currentNode to
     //     removedNodes; and set currentNode to currentNode's next sibling.
-    List<Ref<dom::Node>> removedNodes;
+    List<Ref<Node>> removedNodes;
     for (auto *currentNode = start->NextSibling(); currentNode && currentNode != end;
          currentNode = currentNode->NextSibling())
     {
@@ -227,7 +227,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#the-template-element:concept-node-adopt-ext
-  void HTMLTemplateElement::OnAdopt(dom::Document &oldDocument) noexcept
+  void HTMLTemplateElement::OnAdopt(Document &oldDocument) noexcept
   {
     HTMLElement::OnAdopt(oldDocument);
 
@@ -235,14 +235,14 @@ namespace krys::boo::html
     // (The template contents are in the template's own document.)
     // 2. Adopt node's template contents (a DocumentFragment object) into document.
     // (Not a declarative shadow root, which is a host's.)
-    if (!Is<dom::ShadowRoot>(*_content))
+    if (!Is<boo::ShadowRoot>(*_content))
     {
       (void)dom::DocumentAlgorithms::AdoptNode(*_content, NodeDocument());
     }
   }
 
   // https://html.spec.whatwg.org/#the-template-element:concept-node-clone-ext
-  void HTMLTemplateElement::OnClone(dom::Node &copy, bool subtree) noexcept
+  void HTMLTemplateElement::OnClone(Node &copy, bool subtree) noexcept
   {
     HTMLElement::OnClone(copy, subtree);
 
@@ -262,74 +262,74 @@ namespace krys::boo::html
     }
   }
 
-  dom::DOMString HTMLTemplateElement::ShadowRootMode() const noexcept
+  DOMString HTMLTemplateElement::ShadowRootMode() const noexcept
   {
-    return ReflectEnumerated<"shadowrootmode", HTMLTemplateElement>(*this);
+    return html::ReflectEnumerated<"shadowrootmode", HTMLTemplateElement>(*this);
   }
 
-  void HTMLTemplateElement::ShadowRootMode(dom::DOMString value) noexcept
+  void HTMLTemplateElement::ShadowRootMode(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"shadowrootmode", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"shadowrootmode", krys::move(value));
   }
 
   bool HTMLTemplateElement::ShadowRootDelegatesFocus() const noexcept
   {
-    return Reflect<bool>(*this, u8"shadowrootdelegatesfocus");
+    return html::Reflect<bool>(*this, u8"shadowrootdelegatesfocus");
   }
 
   void HTMLTemplateElement::ShadowRootDelegatesFocus(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"shadowrootdelegatesfocus", krys::move(value));
+    html::Reflect<bool>(*this, u8"shadowrootdelegatesfocus", krys::move(value));
   }
 
-  dom::DOMString HTMLTemplateElement::ShadowRootSlotAssignment() const noexcept
+  DOMString HTMLTemplateElement::ShadowRootSlotAssignment() const noexcept
   {
-    return ReflectEnumerated<"shadowrootslotassignment", HTMLTemplateElement>(*this);
+    return html::ReflectEnumerated<"shadowrootslotassignment", HTMLTemplateElement>(*this);
   }
 
-  void HTMLTemplateElement::ShadowRootSlotAssignment(dom::DOMString value) noexcept
+  void HTMLTemplateElement::ShadowRootSlotAssignment(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"shadowrootslotassignment", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"shadowrootslotassignment", krys::move(value));
   }
 
   bool HTMLTemplateElement::ShadowRootClonable() const noexcept
   {
-    return Reflect<bool>(*this, u8"shadowrootclonable");
+    return html::Reflect<bool>(*this, u8"shadowrootclonable");
   }
 
   void HTMLTemplateElement::ShadowRootClonable(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"shadowrootclonable", krys::move(value));
+    html::Reflect<bool>(*this, u8"shadowrootclonable", krys::move(value));
   }
 
   bool HTMLTemplateElement::ShadowRootSerialisable() const noexcept
   {
-    return Reflect<bool>(*this, u8"shadowrootserializable");
+    return html::Reflect<bool>(*this, u8"shadowrootserializable");
   }
 
   void HTMLTemplateElement::ShadowRootSerialisable(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"shadowrootserializable", krys::move(value));
+    html::Reflect<bool>(*this, u8"shadowrootserializable", krys::move(value));
   }
 
-  Maybe<dom::DOMString> HTMLTemplateElement::ShadowRootReferenceTarget() const noexcept
+  Maybe<DOMString> HTMLTemplateElement::ShadowRootReferenceTarget() const noexcept
   {
-    return Reflect<Maybe<dom::DOMString>>(*this, u8"shadowrootreferencetarget");
+    return html::Reflect<Maybe<DOMString>>(*this, u8"shadowrootreferencetarget");
   }
 
-  void HTMLTemplateElement::ShadowRootReferenceTarget(Maybe<dom::DOMString> value) noexcept
+  void HTMLTemplateElement::ShadowRootReferenceTarget(Maybe<DOMString> value) noexcept
   {
-    Reflect<Maybe<dom::DOMString>>(*this, u8"shadowrootreferencetarget", krys::move(value));
+    html::Reflect<Maybe<DOMString>>(*this, u8"shadowrootreferencetarget", krys::move(value));
   }
 
-  dom::DOMString HTMLTemplateElement::ShadowRootCustomElementRegistry() const noexcept
+  DOMString HTMLTemplateElement::ShadowRootCustomElementRegistry() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"shadowrootcustomelementregistry").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"shadowrootcustomelementregistry").value_or(u8"");
   }
 
-  void HTMLTemplateElement::ShadowRootCustomElementRegistry(dom::DOMString value) noexcept
+  void HTMLTemplateElement::ShadowRootCustomElementRegistry(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"shadowrootcustomelementregistry", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"shadowrootcustomelementregistry", krys::move(value));
   }
 
 #pragma endregion

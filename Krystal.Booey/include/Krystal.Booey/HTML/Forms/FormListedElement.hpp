@@ -28,7 +28,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Node;
 }
@@ -46,7 +46,7 @@ namespace krys::boo::html
   {
   private:
     UniquePtr<FormAttributeTargetObserver> _formAttributeTargetObserver;
-    dom::DOMString _customValidationMessage;
+    DOMString _customValidationMessage;
 
   public:
     ~FormListedElement() noexcept override;
@@ -60,7 +60,7 @@ namespace krys::boo::html
 
     /// @brief The `name` attribute's value, or the empty string if there isn't one (the `name` IDL attribute
     /// doesn't use this).
-    KRYS_NODISCARD virtual dom::DOMString Name() const noexcept;
+    KRYS_NODISCARD virtual DOMString Name() const noexcept;
 
     /// @brief Appends the element's entries for submission, if it's a successful control.
     /// @return Whether it appended any.
@@ -74,7 +74,7 @@ namespace krys::boo::html
 
     void ResetFormOwner() noexcept final;
 
-    void FormOwnerRemovedFromTree(const dom::Node &formRoot) noexcept;
+    void FormOwnerRemovedFromTree(const Node &formRoot) noexcept;
 
     // The ValidityState attributes. The implementations of patternMismatch, rangeOverflow, rangeUnderflow,
     // stepMismatch, tooShort, tooLong and valueMissing must call WillValidate.
@@ -104,12 +104,12 @@ namespace krys::boo::html
     KRYS_NODISCARD virtual bool ValueMissing() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-cva-validationmessage
-    KRYS_NODISCARD virtual dom::DOMString ValidationMessage() const noexcept;
+    KRYS_NODISCARD virtual DOMString ValidationMessage() const noexcept;
 
     KRYS_NODISCARD virtual bool ComputeValidity() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-cva-setcustomvalidity
-    virtual void SetCustomValidity(dom::DOMStringView error) noexcept;
+    virtual void SetCustomValidity(DOMStringView error) noexcept;
 
     void FormAttributeTargetChanged() noexcept;
 
@@ -125,7 +125,7 @@ namespace krys::boo::html
     FormListedElement() noexcept;
 
     /// @brief Sets the custom validity error message as it is.
-    virtual void SetCustomValidationMessage(dom::DOMStringView message) noexcept;
+    virtual void SetCustomValidationMessage(DOMStringView message) noexcept;
 
     void ClearForm() noexcept
     {
@@ -134,20 +134,20 @@ namespace krys::boo::html
 
     void DidMoveToNewDocument() noexcept;
 
-    void ElementInsertedIntoAncestor(dom::Element &element, bool connectedToDocument) noexcept override;
+    void ElementInsertedIntoAncestor(boo::Element &element, bool connectedToDocument) noexcept override;
 
-    void ElementRemovedFromAncestor(dom::Element &element, bool disconnectedFromDocument) noexcept override;
+    void ElementRemovedFromAncestor(boo::Element &element, bool disconnectedFromDocument) noexcept override;
 
-    void ParseAttribute(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> value) noexcept;
+    void ParseAttribute(const DOMStringAtom &localName, Maybe<DOMStringView> value) noexcept;
 
-    void ParseFormAttribute(Maybe<dom::DOMStringView> value) noexcept;
+    void ParseFormAttribute(Maybe<DOMStringView> value) noexcept;
 
     // A class that overrides WillChangeForm() or DidChangeForm() must clear its form in its destructor.
     virtual void WillChangeForm() noexcept;
 
     virtual void DidChangeForm() noexcept;
 
-    KRYS_NODISCARD dom::DOMString CustomValidationMessage() const noexcept;
+    KRYS_NODISCARD DOMString CustomValidationMessage() const noexcept;
 
   private:
     void SetFormInternal(HTMLFormElement *newForm) noexcept final;

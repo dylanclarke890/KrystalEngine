@@ -33,7 +33,7 @@ namespace krys::boo::dom
       /// @see https://dom.spec.whatwg.org/#mutation-observer-list
       List<Ref<MutationObserver>> PendingMutationObservers;
       /// @see https://dom.spec.whatwg.org/#signal-slot-list
-      List<Ref<html::HTMLSlotElement>> SignalSlots;
+      List<Ref<HTMLSlotElement>> SignalSlots;
       /// @see https://dom.spec.whatwg.org/#mutation-observer-counter
       uint64 MutationObserverCounter {0};
     };
@@ -124,7 +124,7 @@ namespace krys::boo::dom
     }
   }
 
-  void MutationObserverAlgorithms::AppendSignalSlot(html::HTMLSlotElement &slot) noexcept
+  void MutationObserverAlgorithms::AppendSignalSlot(HTMLSlotElement &slot) noexcept
   {
     AppendToSet(SurroundingAgent().SignalSlots, slot);
   }

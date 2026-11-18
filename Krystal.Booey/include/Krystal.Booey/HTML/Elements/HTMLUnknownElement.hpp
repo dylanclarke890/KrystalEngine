@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlunknownelement
   class HTMLUnknownElement : public HTMLElement
@@ -10,12 +10,12 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLUnknownElement);
 
   public:
-    HTMLUnknownElement(dom::Document &document) noexcept;
+    HTMLUnknownElement(Document &document) noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLUnknownElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLUnknownElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
     return target.IsHTMLUnknownElement();
   }

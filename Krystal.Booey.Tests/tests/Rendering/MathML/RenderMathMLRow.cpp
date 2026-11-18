@@ -20,7 +20,7 @@ namespace krys::boo::tests
       return fixture;
     }
 
-    KRYS_NODISCARD RenderBox &RowBoxById(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderBox &RowBoxById(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       auto *renderer = fixture.ById(id).Renderer();
       REQUIRE(renderer);

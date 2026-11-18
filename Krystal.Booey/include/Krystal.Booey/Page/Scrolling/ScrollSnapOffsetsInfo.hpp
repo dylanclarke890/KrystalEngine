@@ -39,10 +39,7 @@
 
 namespace krys::boo
 {
-  namespace dom
-  {
-    class Element;
-  }
+  class Element;
   class RenderBox;
   class RenderStyle;
   class ScrollableArea;
@@ -68,7 +65,7 @@ namespace krys::boo
     /// @brief The snap areas, relative to the scroll offsets.
     List<LayoutRect> SnapAreas;
     /// @brief The element of each of `SnapAreas`.
-    List<WeakPtr<dom::Element>> SnapAreaTargets;
+    List<WeakPtr<boo::Element>> SnapAreaTargets;
 
     KRYS_NODISCARD const List<SnapOffset> &OffsetsForAxis(ScrollEventAxis axis) const noexcept
     {

@@ -57,7 +57,7 @@ namespace krys::boo
     }
   }
 
-  dom::Element *ScrollLatchingController::LatchedElement() const noexcept
+  Element *ScrollLatchingController::LatchedElement() const noexcept
   {
     return _state ? _state->WheelEventElement.get() : nullptr;
   }
@@ -76,7 +76,7 @@ namespace krys::boo
 
   void ScrollLatchingController::UpdateAndFetchLatchingState(const LocalFrameView &view,
                                                              const PlatformWheelEvent &wheelEvent,
-                                                             RefPtr<dom::Element> &latchedElement,
+                                                             RefPtr<Element> &latchedElement,
                                                              WeakPtr<ScrollableArea> &scrollableArea) noexcept
   {
     if (!wheelEvent.UseLatchedEventElement())
@@ -113,7 +113,7 @@ namespace krys::boo
     scrollableArea = _state->GestureScrollableArea;
   }
 
-  void ScrollLatchingController::RemoveLatchingStateForTarget(const dom::Element &element) noexcept
+  void ScrollLatchingController::RemoveLatchingStateForTarget(const Element &element) noexcept
   {
     if (_state && _state->WheelEventElement.get() == &element)
     {

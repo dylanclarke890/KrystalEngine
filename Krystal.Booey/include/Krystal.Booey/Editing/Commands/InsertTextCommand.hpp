@@ -35,7 +35,7 @@ namespace krys::boo
   public:
     virtual ~TextInsertionMarkerSupplier() noexcept = default;
 
-    virtual void AddMarkersToTextNode(dom::Text &text, uint32 offsetOfInsertion,
+    virtual void AddMarkersToTextNode(Text &text, uint32 offsetOfInsertion,
                                       utf8_stringview textInserted) noexcept = 0;
 
   protected:
@@ -62,21 +62,21 @@ namespace krys::boo
     RefPtr<TextInsertionMarkerSupplier> _markerSupplier;
 
   public:
-    InsertTextCommand(dom::Document &document, utf8_stringview text,
+    InsertTextCommand(Document &document, utf8_stringview text,
                       Ref<TextInsertionMarkerSupplier> &&markerSupplier, EditAction editingAction) noexcept;
 
-    InsertTextCommand(dom::Document &document, utf8_stringview text, AllowPasswordEcho allowPasswordEcho,
+    InsertTextCommand(Document &document, utf8_stringview text, AllowPasswordEcho allowPasswordEcho,
                       bool selectInsertedText, RebalanceType rebalanceType,
                       EditAction editingAction) noexcept;
 
     KRYS_NODISCARD static Ref<InsertTextCommand>
-      Create(dom::Document &document, utf8_stringview text, AllowPasswordEcho allowPasswordEcho,
+      Create(Document &document, utf8_stringview text, AllowPasswordEcho allowPasswordEcho,
              bool selectInsertedText = false,
              RebalanceType rebalanceType = RebalanceLeadingAndTrailingWhitespaces,
              EditAction editingAction = EditAction::Insert) noexcept;
 
     KRYS_NODISCARD static Ref<InsertTextCommand>
-      CreateWithMarkerSupplier(dom::Document &document, utf8_stringview text,
+      CreateWithMarkerSupplier(Document &document, utf8_stringview text,
                                Ref<TextInsertionMarkerSupplier> &&markerSupplier,
                                EditAction editingAction = EditAction::Insert) noexcept;
 

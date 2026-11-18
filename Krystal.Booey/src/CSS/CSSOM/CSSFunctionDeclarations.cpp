@@ -30,9 +30,9 @@
 #include "Krystal.Booey/CSS/Rules/FunctionRule.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSFunctionDeclarations::CSSFunctionDeclarations(FunctionDeclarationsRule &rule,
+  CSSFunctionDeclarations::CSSFunctionDeclarations(css::FunctionDeclarationsRule &rule,
                                                    CSSStyleSheet *parent) noexcept
       : CSSRule(parent), _styleRule(ShareRef(rule))
   {
@@ -40,7 +40,7 @@ namespace krys::boo::css
 
   CSSFunctionDeclarations::~CSSFunctionDeclarations() noexcept = default;
 
-  Ref<CSSFunctionDeclarations> CSSFunctionDeclarations::Create(FunctionDeclarationsRule &rule,
+  Ref<CSSFunctionDeclarations> CSSFunctionDeclarations::Create(css::FunctionDeclarationsRule &rule,
                                                                CSSStyleSheet *sheet) noexcept
   {
     return AdoptRef(*new CSSFunctionDeclarations(rule, sheet));
@@ -58,12 +58,12 @@ namespace krys::boo::css
 
   CSSOMString CSSFunctionDeclarations::CssText() const noexcept
   {
-    return _styleRule->Properties().AsText(DefaultSerialisationContext());
+    return _styleRule->Properties().AsText(css::DefaultSerialisationContext());
   }
 
-  void CSSFunctionDeclarations::Reattach(Rule &rule) noexcept
+  void CSSFunctionDeclarations::Reattach(css::Rule &rule) noexcept
   {
-    _styleRule = ShareRef(Downcast<FunctionDeclarationsRule>(rule));
+    _styleRule = ShareRef(Downcast<css::FunctionDeclarationsRule>(rule));
     if (_descriptorsCSSOMWrapper)
     {
       auto properties = ShareRef(_styleRule->MutableProperties());

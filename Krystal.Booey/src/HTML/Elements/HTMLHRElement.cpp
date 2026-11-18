@@ -27,72 +27,71 @@
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLHRElement::HTMLHRElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::HR)
+  HTMLHRElement::HTMLHRElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::HR)
   {
   }
 
 #pragma region HTMLHRElement Obsolete members
 
-  dom::DOMString HTMLHRElement::Align() const noexcept
+  DOMString HTMLHRElement::Align() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLHRElement::Align(dom::DOMString value) noexcept
+  void HTMLHRElement::Align(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"align", krys::move(value));
   }
 
-  dom::DOMString HTMLHRElement::Color() const noexcept
+  DOMString HTMLHRElement::Color() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"color").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"color").value_or(u8"");
   }
 
-  void HTMLHRElement::Color(dom::DOMString value) noexcept
+  void HTMLHRElement::Color(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"color", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"color", krys::move(value));
   }
 
   bool HTMLHRElement::NoShade() const noexcept
   {
-    return Reflect<bool>(*this, u8"noshade");
+    return html::Reflect<bool>(*this, u8"noshade");
   }
 
   void HTMLHRElement::NoShade(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"noshade", krys::move(value));
+    html::Reflect<bool>(*this, u8"noshade", krys::move(value));
   }
 
-  dom::DOMString HTMLHRElement::Size() const noexcept
+  DOMString HTMLHRElement::Size() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"size").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"size").value_or(u8"");
   }
 
-  void HTMLHRElement::Size(dom::DOMString value) noexcept
+  void HTMLHRElement::Size(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"size", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"size", krys::move(value));
   }
 
-  dom::DOMString HTMLHRElement::Width() const noexcept
+  DOMString HTMLHRElement::Width() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"width").value_or(u8"");
   }
 
-  void HTMLHRElement::Width(dom::DOMString value) noexcept
+  void HTMLHRElement::Width(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"width", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region Presentational hints
 
-  bool
-    HTMLHRElement::HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                      const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool HTMLHRElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                         const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == u8"width" || localName == u8"color" || localName == u8"noshade"
@@ -103,12 +102,12 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLHRElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                             const dom::DOMStringAtom &namespaceURI,
-                                                             dom::DOMStringView value,
+  void HTMLHRElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                             const DOMStringAtom &namespaceURI,
+                                                             DOMStringView value,
                                                              css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
@@ -159,7 +158,7 @@ namespace krys::boo::html
     }
     if (localName == u8"size")
     {
-      auto size = Numbers::ParseInteger(value);
+      auto size = html::Numbers::ParseInteger(value);
       if (size.Success() && size.Value > 1)
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::Height,

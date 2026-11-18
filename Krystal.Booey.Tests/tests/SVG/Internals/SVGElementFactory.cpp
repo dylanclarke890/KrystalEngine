@@ -79,7 +79,7 @@ namespace krys::boo::svg::tests
   namespace
   {
     template <typename T>
-    KRYS_NODISCARD bool IsCreated(dom::Document &document, const dom::DOMStringAtom &localName) noexcept
+    KRYS_NODISCARD bool IsCreated(Document &document, const DOMStringAtom &localName) noexcept
     {
       auto element = document.CreateElementNS(infra::namespaces::SVG, localName);
       krys_assert(!element.HasException());
@@ -195,7 +195,7 @@ namespace krys::boo::svg::tests
     CHECK(document->StyleSheets().Length() == 1u);
 
     // SVG's tag names in HTML are still unknown HTML elements.
-    CHECK(Is<html::HTMLUnknownElement>(Downcast<html::HTMLElement>(*document->GetElementById(u8"t"))));
+    CHECK(Is<HTMLUnknownElement>(Downcast<HTMLElement>(*document->GetElementById(u8"t"))));
   }
 
   TEST_CASE("ParseTagName: SVG's tag names", "[HTML][TagName]")

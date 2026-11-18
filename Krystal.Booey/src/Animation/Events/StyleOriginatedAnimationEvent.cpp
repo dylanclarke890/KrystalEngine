@@ -31,21 +31,21 @@
 namespace krys::boo
 {
   StyleOriginatedAnimationEvent::StyleOriginatedAnimationEvent(
-    dom::DOMStringAtom type, WebAnimation *animation, Maybe<Seconds> scheduledTime, double elapsedTime,
+    DOMStringAtom type, WebAnimation *animation, Maybe<Seconds> scheduledTime, double elapsedTime,
     const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
       : AnimationEventBase(krys::move(type), animation, scheduledTime), _elapsedTime(elapsedTime),
         _pseudoElementIdentifier(pseudoElementIdentifier)
   {
   }
 
-  StyleOriginatedAnimationEvent::StyleOriginatedAnimationEvent(dom::DOMStringAtom type,
+  StyleOriginatedAnimationEvent::StyleOriginatedAnimationEvent(DOMStringAtom type,
                                                                const dom::EventInit &eventInitDict,
                                                                double elapsedTime,
-                                                               css::CSSOMString pseudoElement) noexcept
+                                                               CSSOMString pseudoElement) noexcept
       : AnimationEventBase(krys::move(type), eventInitDict), _elapsedTime(elapsedTime),
         _pseudoElement(krys::move(pseudoElement))
   {
-    RefPtr<dom::Node> node = ShareRefPtr(DynamicDowncast<dom::Node>(Target().get()));
+    RefPtr<Node> node = ShareRefPtr(DynamicDowncast<Node>(Target().get()));
     auto [parsed, pseudoElementIdentifier] =
       PseudoElementIdentifierFromString(_pseudoElement, node ? &node->NodeDocument() : nullptr);
     _pseudoElementIdentifier = parsed ? pseudoElementIdentifier : null;
@@ -53,7 +53,7 @@ namespace krys::boo
 
   StyleOriginatedAnimationEvent::~StyleOriginatedAnimationEvent() noexcept = default;
 
-  const css::CSSOMString &StyleOriginatedAnimationEvent::PseudoElement() noexcept
+  const CSSOMString &StyleOriginatedAnimationEvent::PseudoElement() noexcept
   {
     if (_pseudoElementIdentifier && _pseudoElement.empty())
     {

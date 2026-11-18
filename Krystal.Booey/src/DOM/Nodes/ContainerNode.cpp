@@ -26,7 +26,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   namespace
   {
@@ -46,8 +46,9 @@ namespace krys::boo::dom
     }
   }
 
-  ContainerNode::ContainerNode(Document &document, dom::NodeType type, NodeFlags flags) noexcept
-      : Node(document, type, flags | NodeFlags::IsContainerNode), _firstChild(nullptr), _lastChild(nullptr)
+  ContainerNode::ContainerNode(Document &document, dom::NodeType type, dom::NodeFlags flags) noexcept
+      : Node(document, type, flags | dom::NodeFlags::IsContainerNode), _firstChild(nullptr),
+        _lastChild(nullptr)
   {
   }
 
@@ -66,7 +67,7 @@ namespace krys::boo::dom
       child->_nextSibling = nullptr;
       child->_previousSibling = nullptr;
       child->_parentNode = nullptr;
-      child->ClearNodeFlag(NodeFlags::IsConnected);
+      child->ClearNodeFlag(dom::NodeFlags::IsConnected);
       queue.Nodes.push_back(child);
     }
 

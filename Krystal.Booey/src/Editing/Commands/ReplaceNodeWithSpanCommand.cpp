@@ -41,16 +41,15 @@ namespace krys::boo
 {
   namespace
   {
-    void SwapInNodePreservingAttributesAndChildren(dom::Element &newNode,
-                                                   dom::Element &nodeToReplace) noexcept
+    void SwapInNodePreservingAttributesAndChildren(Element &newNode, Element &nodeToReplace) noexcept
     {
       krys_debug_assert(nodeToReplace.IsConnected());
-      RefPtr<dom::ContainerNode> parentNode = ShareRefPtr(nodeToReplace.ParentNode());
+      RefPtr<ContainerNode> parentNode = ShareRefPtr(nodeToReplace.ParentNode());
 
       // FIXME: Fix this to send the proper MutationRecords when MutationObservers are present.
       CloneDataFromElement(newNode, nodeToReplace);
 
-      List<Ref<dom::Node>> children;
+      List<Ref<Node>> children;
       for (auto *child = nodeToReplace.FirstChild(); child; child = child->NextSibling())
       {
         children.push_back(ShareRef(*child));
@@ -65,12 +64,12 @@ namespace krys::boo
     }
   }
 
-  Ref<ReplaceNodeWithSpanCommand> ReplaceNodeWithSpanCommand::Create(dom::Element &element) noexcept
+  Ref<ReplaceNodeWithSpanCommand> ReplaceNodeWithSpanCommand::Create(Element &element) noexcept
   {
     return CreateRef<ReplaceNodeWithSpanCommand>(element);
   }
 
-  ReplaceNodeWithSpanCommand::ReplaceNodeWithSpanCommand(dom::Element &element) noexcept
+  ReplaceNodeWithSpanCommand::ReplaceNodeWithSpanCommand(Element &element) noexcept
       : SimpleEditCommand(element.NodeDocument()), _elementToReplace(ShareRef(element))
   {
   }

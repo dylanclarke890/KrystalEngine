@@ -15,10 +15,10 @@
 
 namespace krys::boo::html
 {
-  bool RenderBlocking::HasRenderBlockingToken(const dom::Element &element) noexcept
+  bool RenderBlocking::HasRenderBlockingToken(const Element &element) noexcept
   {
     // 1. Let value be the value of el's blocking attribute, or the empty string if no such attribute exists.
-    auto value = element.GetAttribute(u8"blocking").value_or(dom::DOMString());
+    auto value = element.GetAttribute(u8"blocking").value_or(DOMString());
 
     // 2. Set value to value, converted to ASCII lowercase.
     // 3. Let rawTokens be the result of splitting value on ASCII whitespace.
@@ -35,12 +35,12 @@ namespace krys::boo::html
     return false;
   }
 
-  bool RenderBlocking::AllowsAddingRenderBlockingElements(const dom::Document &document) noexcept
+  bool RenderBlocking::AllowsAddingRenderBlockingElements(const Document &document) noexcept
   {
     return document.ContentType() == u8"text/html" && document.BodyOrFrameset() == nullptr;
   }
 
-  bool RenderBlocking::IsRenderBlocked(const dom::Document &document) noexcept
+  bool RenderBlocking::IsRenderBlocked(const Document &document) noexcept
   {
     // A Document document is render-blocked if both of the following are true:
     // - document's render-blocking element set is not empty, or document allows adding render-blocking
@@ -56,7 +56,7 @@ namespace krys::boo::html
     return !document._renderBlockingElements.empty() || AllowsAddingRenderBlockingElements(document);
   }
 
-  bool RenderBlocking::IsRenderBlocking(const dom::Element &element) noexcept
+  bool RenderBlocking::IsRenderBlocking(const Element &element) noexcept
   {
     // An element el is render-blocking if el's node document document is render-blocked, and el is in
     // document's render-blocking element set.
@@ -67,7 +67,7 @@ namespace krys::boo::html
                                   { return renderBlockingElement.get() == &element; });
   }
 
-  void RenderBlocking::BlockRendering(dom::Element &element) noexcept
+  void RenderBlocking::BlockRendering(Element &element) noexcept
   {
     // 1. Let document be el's node document.
     auto &document = element.NodeDocument();
@@ -87,7 +87,7 @@ namespace krys::boo::html
     }
   }
 
-  void RenderBlocking::UnblockRendering(dom::Element &element) noexcept
+  void RenderBlocking::UnblockRendering(Element &element) noexcept
   {
     // 1. Let document be el's node document.
     auto &document = element.NodeDocument();

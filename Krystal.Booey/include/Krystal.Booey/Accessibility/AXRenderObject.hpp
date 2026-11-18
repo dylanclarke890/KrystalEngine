@@ -50,7 +50,7 @@ namespace krys::boo
                                                      AXObjectCache &cache) noexcept;
 
     /// @brief An object for @p node with no renderer yet (`display: contents` and so on).
-    KRYS_NODISCARD static Ref<AXRenderObject> Create(AXId id, dom::Node &node, AXObjectCache &cache) noexcept;
+    KRYS_NODISCARD static Ref<AXRenderObject> Create(AXId id, Node &node, AXObjectCache &cache) noexcept;
 
     ~AXRenderObject() noexcept override;
 
@@ -72,13 +72,13 @@ namespace krys::boo
     /// @brief Sets the renderer, for a node whose renderer was created or destroyed; whether it changed.
     bool SetRendererIfNeeded(RenderObject *renderer) noexcept;
 
-    KRYS_NODISCARD dom::Document *GetDocument() const noexcept override;
+    KRYS_NODISCARD Document *GetDocument() const noexcept override;
 
     KRYS_NODISCARD AXObject *ParentObject() const noexcept override;
 
     void AddChildren() noexcept override;
 
-    KRYS_NODISCARD dom::DOMString StringValue() const noexcept override;
+    KRYS_NODISCARD DOMString StringValue() const noexcept override;
 
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
 
@@ -94,12 +94,12 @@ namespace krys::boo
 
     using AXNodeObject::SetValue;
 
-    bool SetValue(dom::DOMStringView value) noexcept override;
+    bool SetValue(DOMStringView value) noexcept override;
 
     KRYS_NODISCARD bool IsIgnoredElementWithinMathTree() const noexcept override;
 
   protected:
-    AXRenderObject(AXId id, RenderObject *renderer, dom::Node *node, AXObjectCache &cache) noexcept;
+    AXRenderObject(AXId id, RenderObject *renderer, Node *node, AXObjectCache &cache) noexcept;
 
     KRYS_NODISCARD AXRole DetermineAccessibilityRole() noexcept override;
 

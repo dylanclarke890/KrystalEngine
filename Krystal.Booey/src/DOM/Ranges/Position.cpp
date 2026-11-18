@@ -730,8 +730,7 @@ namespace krys::boo::dom
       }
 
       // Don't include inline tables.
-      if (auto *element = DynamicDowncast<html::HTMLElement>(*node);
-          element && Is<html::HTMLTableElement>(*element))
+      if (auto *element = DynamicDowncast<HTMLElement>(*node); element && Is<HTMLTableElement>(*element))
       {
         return false;
       }
@@ -782,8 +781,8 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD bool IsNonTextSVGElement(const Node &node) noexcept
     {
-      auto *svgElement = DynamicDowncast<svg::SVGElement>(node);
-      return svgElement && !Is<svg::SVGTextElement>(*svgElement);
+      auto *svgElement = DynamicDowncast<SVGElement>(node);
+      return svgElement && !Is<SVGTextElement>(*svgElement);
     }
   }
 
@@ -980,8 +979,8 @@ namespace krys::boo::dom
 
       // stop before going above the body, up into the head
       // return the last visible streamer position
-      if (auto *element = DynamicDowncast<html::HTMLElement>(currentNode);
-          element && Is<html::HTMLBodyElement>(*element) && currentPosition.AtEndOfNode())
+      if (auto *element = DynamicDowncast<HTMLElement>(currentNode);
+          element && Is<HTMLBodyElement>(*element) && currentPosition.AtEndOfNode())
       {
         break;
       }
@@ -1252,7 +1251,7 @@ namespace krys::boo::dom
              && !NodeIsUserSelectNone(node->ParentNode());
     }
 
-    if (Is<html::HTMLHtmlElement>(*_anchorNode))
+    if (Is<HTMLHtmlElement>(*_anchorNode))
     {
       return false;
     }
@@ -1261,7 +1260,7 @@ namespace krys::boo::dom
     {
       if (Is<RenderBlockFlow>(*block) || Is<RenderGrid>(*block) || Is<RenderFlexibleBox>(*block))
       {
-        if (block->LogicalHeight() || Is<html::HTMLBodyElement>(*_anchorNode)
+        if (block->LogicalHeight() || Is<HTMLBodyElement>(*_anchorNode)
             || _anchorNode->IsRootEditableElement())
         {
           if (!HasRenderedNonAnonymousDescendantsWithHeight(*block))
@@ -1293,8 +1292,8 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD bool IsHTMLBRElement(const Node &node) noexcept
     {
-      auto *element = DynamicDowncast<html::HTMLElement>(node);
-      return element && Is<html::HTMLBRElement>(*element);
+      auto *element = DynamicDowncast<HTMLElement>(node);
+      return element && Is<HTMLBRElement>(*element);
     }
   }
 

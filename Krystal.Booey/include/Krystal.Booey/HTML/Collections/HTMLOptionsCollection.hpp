@@ -27,13 +27,16 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLElement;
   class HTMLOptGroupElement;
   class HTMLOptionElement;
   class HTMLSelectElement;
+}
 
+namespace krys::boo::html
+{
   /// @brief A select's `options`: the options in its list of options.
   /// @see https://html.spec.whatwg.org/#htmloptionscollection
   class HTMLOptionsCollection final : public dom::LiveHTMLCollection

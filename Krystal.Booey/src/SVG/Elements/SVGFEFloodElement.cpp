@@ -26,16 +26,16 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFEFloodElement::SVGFEFloodElement(dom::Document &document) noexcept
+  SVGFEFloodElement::SVGFEFloodElement(Document &document) noexcept
       : SVGFilterPrimitiveStandardAttributes(document, CreateUnique<PropertyRegistry>(*this),
                                              SVGElementInterface::FEFlood)
   {
   }
 
   bool SVGFEFloodElement::SetFilterEffectAttribute(FilterEffect &effect,
-                                                   const dom::QualifiedName &attributeName) noexcept
+                                                   const QualifiedName &attributeName) noexcept
   {
     auto *renderer = Renderer();
     krys_debug_assert(renderer);

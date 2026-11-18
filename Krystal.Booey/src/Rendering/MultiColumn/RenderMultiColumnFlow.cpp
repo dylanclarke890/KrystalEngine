@@ -34,7 +34,7 @@
 
 namespace krys::boo
 {
-  RenderMultiColumnFlow::RenderMultiColumnFlow(dom::Document &document, RenderStyle &&style) noexcept
+  RenderMultiColumnFlow::RenderMultiColumnFlow(Document &document, RenderStyle &&style) noexcept
       : RenderFragmentedFlow(Type::MultiColumnFlow, document, krys::move(style))
   {
     SetFragmentedFlowState(FragmentedFlowState::InsideFlow);

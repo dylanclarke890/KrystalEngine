@@ -17,8 +17,8 @@ namespace krys::boo::dom::tests
       Ref<Text> Text;
 
       AbstractRangeTestData()
-          : Document(CreateRef<dom::Document>()), Parent(CreateRef<TestElement>(*Document)),
-            Text(CreateRef<dom::Text>(*Document, u8"text"))
+          : Document(CreateRef<boo::Document>()), Parent(CreateRef<TestElement>(*Document)),
+            Text(CreateRef<boo::Text>(*Document, u8"text"))
       {
         REQUIRE_FALSE(Parent->AppendChild(*Text).HasException());
       }

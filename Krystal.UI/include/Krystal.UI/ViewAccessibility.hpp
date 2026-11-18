@@ -37,7 +37,7 @@ namespace krys::ui
     /// document still has it.
     struct ForeignCache
     {
-      WeakPtr<boo::dom::Document> Document;
+      WeakPtr<boo::Document> Document;
       const boo::AXObjectCache *Cache {nullptr};
 
       KRYS_NODISCARD boo::AXObjectCache *Get() const noexcept;

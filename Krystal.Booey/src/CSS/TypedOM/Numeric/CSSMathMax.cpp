@@ -26,7 +26,7 @@
 #include "Krystal.Booey/CSS/TypedOM/Numeric/CSSMathMax.hpp"
 #include "Krystal.Booey/CSS/Calc/Tree.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   dom::ExceptionOr<Ref<CSSMathMax>> CSSMathMax::Create(List<CSSNumberish> numberishes) noexcept
   {
@@ -107,9 +107,9 @@ namespace krys::boo::css
     return currentMax;
   }
 
-  Maybe<calc::Child> CSSMathMax::ToCalcTreeNode() const noexcept
+  Maybe<css::calc::Child> CSSMathMax::ToCalcTreeNode() const noexcept
   {
-    List<calc::Child> children;
+    List<css::calc::Child> children;
     for (const auto &child : _values->Array())
     {
       if (auto node = child->ToCalcTreeNode())
@@ -122,13 +122,13 @@ namespace krys::boo::css
       return null;
     }
 
-    auto operation = calc::Max {.Children = krys::move(children)};
-    auto type = calc::ToType(operation);
+    auto operation = css::calc::Max {.Children = krys::move(children)};
+    auto type = css::calc::ToType(operation);
     if (!type)
     {
       return null;
     }
 
-    return calc::CreateChild(krys::move(operation), *type);
+    return css::calc::CreateChild(krys::move(operation), *type);
   }
 }

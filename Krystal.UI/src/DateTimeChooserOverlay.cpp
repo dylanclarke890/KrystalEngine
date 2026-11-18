@@ -467,10 +467,10 @@ namespace krys::ui
     (void)_view->Document().UpdateLayout();
 
     _cells.clear();
-    for (boo::dom::Node *node = _view->Document().DocumentElement().get(); node;
+    for (boo::Node *node = _view->Document().DocumentElement().get(); node;
          node = boo::dom::TreeQueries::Next(*node))
     {
-      if (auto *element = DynamicDowncast<boo::dom::Element>(*node))
+      if (auto *element = DynamicDowncast<boo::Element>(*node))
       {
         if (auto attribute = element->GetAttribute(u8"data-value"))
         {

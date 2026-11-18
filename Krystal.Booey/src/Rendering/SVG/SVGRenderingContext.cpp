@@ -146,7 +146,7 @@ namespace krys::boo
     if (style.HasPositionedMask())
     {
       if (auto *graphicsElement =
-            DynamicDowncast<svg::SVGGraphicsElement>(Downcast<svg::SVGElement>(*renderer.GetElement())))
+            DynamicDowncast<SVGGraphicsElement>(Downcast<SVGElement>(*renderer.GetElement())))
       {
         isolateMaskForBlending = graphicsElement->ShouldIsolateBlending();
       }

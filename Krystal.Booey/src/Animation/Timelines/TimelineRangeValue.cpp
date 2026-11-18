@@ -33,7 +33,7 @@
 
 namespace krys::boo
 {
-  RefPtr<css::Value> ConvertToCSSValue(TimelineRangeValue value, const RefPtr<dom::Element> &element,
+  RefPtr<css::Value> ConvertToCSSValue(TimelineRangeValue value, const RefPtr<boo::Element> &element,
                                        style::SingleAnimationRangeType type) noexcept
   {
     if (!element)
@@ -44,7 +44,7 @@ namespace krys::boo
     Ref document = ShareRef(element->NodeDocument());
     return krys::SwitchOn(
       value,
-      [&](dom::DOMString &rangeString) -> RefPtr<css::Value>
+      [&](DOMString &rangeString) -> RefPtr<css::Value>
       {
         return css::parse_property::ParseSingleAnimationRange(rangeString, document->CssParserContext(),
                                                               type);
@@ -70,9 +70,9 @@ namespace krys::boo
         }
         return nullptr;
       },
-      [&](RefPtr<css::CSSKeywordValue> &rangeKeyword) -> RefPtr<css::Value>
+      [&](RefPtr<CSSKeywordValue> &rangeKeyword) -> RefPtr<css::Value>
       { return rangeKeyword ? rangeKeyword->ToCSSValue() : nullptr; },
-      [&](RefPtr<css::CSSNumericValue> &rangeValue) -> RefPtr<css::Value>
+      [&](RefPtr<CSSNumericValue> &rangeValue) -> RefPtr<css::Value>
       { return rangeValue ? rangeValue->ToCSSValue() : nullptr; });
   }
 }

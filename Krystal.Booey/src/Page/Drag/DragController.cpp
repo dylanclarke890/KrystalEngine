@@ -67,9 +67,9 @@
 
 namespace krys::boo
 {
-  bool IsDraggableLink(const dom::Element &element) noexcept
+  bool IsDraggableLink(const Element &element) noexcept
   {
-    if (auto *anchorElement = DynamicDowncast<html::HTMLAnchorElement>(element))
+    if (auto *anchorElement = DynamicDowncast<HTMLAnchorElement>(element))
     {
       return anchorElement->HasAttribute(u8"href") && anchorElement->IsLiveLink();
     }
@@ -91,17 +91,17 @@ namespace krys::boo
         ForceAtClick, SyntheticClickType::NoTap);
     }
 
-    KRYS_NODISCARD RefPtr<dom::DocumentFragment> DocumentFragmentFromDragData(const DragData &dragData,
-                                                                              LocalFrame &frame,
-                                                                              const dom::SimpleRange &context,
-                                                                              bool allowPlainText,
-                                                                              bool &chosePlainText) noexcept
+    KRYS_NODISCARD RefPtr<DocumentFragment> DocumentFragmentFromDragData(const DragData &dragData,
+                                                                         LocalFrame &frame,
+                                                                         const dom::SimpleRange &context,
+                                                                         bool allowPlainText,
+                                                                         bool &chosePlainText) noexcept
     {
       chosePlainText = false;
 
       if (dragData.ContainsCompatibleContent())
       {
-        if (RefPtr<dom::DocumentFragment> fragment = frame.Document()->GetEditor().WebContentFromPasteboard(
+        if (RefPtr<DocumentFragment> fragment = frame.Document()->GetEditor().WebContentFromPasteboard(
               *Pasteboard::Create(dragData), context, allowPlainText, chosePlainText))
         {
           return fragment;
@@ -113,7 +113,7 @@ namespace krys::boo
           utf8_string url = dragData.AsURL(DragData::DoNotConvertFilenames, &title);
           if (!url.empty())
           {
-            Ref<dom::Document> document = ShareRef(context.Start.Container->NodeDocument());
+            Ref<Document> document = ShareRef(context.Start.Container->NodeDocument());
             auto anchor = CreateHTMLElement(*document, u8"a");
             dom::ElementAlgorithms::SetAttributeValue(*anchor, u8"href", url);
             if (title.empty())
@@ -129,7 +129,7 @@ namespace krys::boo
               }
             }
             (void)anchor->AppendChild(*document->CreateTextNode(krys::move(title)));
-            Ref<dom::DocumentFragment> fragment = document->CreateDocumentFragment();
+            Ref<DocumentFragment> fragment = document->CreateDocumentFragment();
             (void)fragment->AppendChild(*anchor);
             return fragment;
           }
@@ -149,9 +149,9 @@ namespace krys::boo
       return dragHandlingMethod != DragHandlingMethod::None;
     }
 
-    KRYS_NODISCARD RefPtr<html::HTMLInputElement> AsFileInput(dom::Node &node) noexcept
+    KRYS_NODISCARD RefPtr<HTMLInputElement> AsFileInput(Node &node) noexcept
     {
-      auto *inputElement = DynamicDowncast<html::HTMLInputElement>(node);
+      auto *inputElement = DynamicDowncast<HTMLInputElement>(node);
       if (!inputElement)
       {
         return nullptr;
@@ -160,15 +160,14 @@ namespace krys::boo
       // If this is a button inside of the a file input, move up to the file input.
       if (inputElement->IsTextButton())
       {
-        inputElement = DynamicDowncast<html::HTMLInputElement>(dom::TreeQueries::ShadowHost(*inputElement));
+        inputElement = DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*inputElement));
       }
 
       return inputElement && inputElement->IsFileUpload() ? ShareRefPtr(inputElement) : nullptr;
     }
 
     // This can return null if an empty document is loaded.
-    KRYS_NODISCARD RefPtr<dom::Element> ElementUnderMouse(dom::Document &documentUnderMouse,
-                                                          const IntPoint &p) noexcept
+    KRYS_NODISCARD RefPtr<Element> ElementUnderMouse(Document &documentUnderMouse, const IntPoint &p) noexcept
     {
       auto *frame = documentUnderMouse.Frame();
       float zoomFactor = frame ? frame->PageZoomFactor() : 1;
@@ -184,7 +183,7 @@ namespace krys::boo
       }
 
       // FIXME: Use parentElementInComposedTree here.
-      auto *element = DynamicDowncast<dom::Element>(*node);
+      auto *element = DynamicDowncast<Element>(*node);
       if (!element)
       {
         element = node->ParentElement();
@@ -241,24 +240,24 @@ namespace krys::boo
       return DragOperation::Generic;
     }
 
-    KRYS_NODISCARD bool ImageElementIsDraggable(const html::HTMLImageElement &, const LocalFrame &) noexcept
+    KRYS_NODISCARD bool ImageElementIsDraggable(const HTMLImageElement &, const LocalFrame &) noexcept
     {
       return true;
     }
 
-    KRYS_NODISCARD CachedImage *GetCachedImage(dom::Element &element) noexcept
+    KRYS_NODISCARD CachedImage *GetCachedImage(Element &element) noexcept
     {
       auto *renderImage = DynamicDowncast<RenderImage>(element.Renderer());
       return renderImage ? renderImage->GetCachedImage() : nullptr;
     }
 
-    KRYS_NODISCARD Image *GetImage(dom::Element &element) noexcept
+    KRYS_NODISCARD Image *GetImage(Element &element) noexcept
     {
       auto *cachedImage = GetCachedImage(element);
       return (cachedImage && !cachedImage->ErrorOccurred()) ? cachedImage->GetImage() : nullptr;
     }
 
-    void SelectElement(dom::Element &element) noexcept
+    void SelectElement(Element &element) noexcept
     {
       if (element.NodeDocument().Frame())
       {
@@ -284,7 +283,7 @@ namespace krys::boo
     }
 
     /// @brief Where @p element is in the root view: its renderer's bounding box, in window coordinates.
-    KRYS_NODISCARD IntRect BoundsInRootViewSpace(dom::Element &element) noexcept
+    KRYS_NODISCARD IntRect BoundsInRootViewSpace(Element &element) noexcept
     {
       auto *view = element.NodeDocument().View();
       auto *renderer = element.Renderer();
@@ -305,7 +304,7 @@ namespace krys::boo
       return IntPoint(xpos, ypos);
     }
 
-    KRYS_NODISCARD RefPtr<dom::Element> ContainingLinkElement(dom::Element &element) noexcept
+    KRYS_NODISCARD RefPtr<Element> ContainingLinkElement(Element &element) noexcept
     {
       for (auto *currentElement = &element; currentElement; currentElement = currentElement->ParentElement())
       {
@@ -394,7 +393,7 @@ namespace krys::boo
                                                 dragData.ContainsFiles());
     }
     MouseMovedIntoDocument(nullptr);
-    if (RefPtr<html::HTMLInputElement> fileInput = std::exchange(_fileInputElementUnderMouse, nullptr))
+    if (RefPtr<HTMLInputElement> fileInput = std::exchange(_fileInputElementUnderMouse, nullptr))
     {
       fileInput->SetCanReceiveDroppedFiles(false);
     }
@@ -448,7 +447,7 @@ namespace krys::boo
     return false;
   }
 
-  void DragController::MouseMovedIntoDocument(RefPtr<dom::Document> &&newDocument) noexcept
+  void DragController::MouseMovedIntoDocument(RefPtr<Document> &&newDocument) noexcept
   {
     if (_documentUnderMouse == newDocument)
     {
@@ -554,13 +553,13 @@ namespace krys::boo
       }
 
       IntPoint point = frameView->WindowToContents(dragData.ClientPosition());
-      RefPtr<dom::Element> element = ElementUnderMouse(*_documentUnderMouse, point);
+      RefPtr<Element> element = ElementUnderMouse(*_documentUnderMouse, point);
       if (!element)
       {
         return DragHandlingMethod::None;
       }
 
-      RefPtr<html::HTMLInputElement> elementAsFileInput = AsFileInput(*element);
+      RefPtr<HTMLInputElement> elementAsFileInput = AsFileInput(*element);
       if (_fileInputElementUnderMouse != elementAsFileInput)
       {
         if (_fileInputElementUnderMouse)
@@ -585,7 +584,7 @@ namespace krys::boo
         DragIsMove(innerDocument.Selection(), dragData) ? DragOperation::Move : DragOperation::Copy;
 
       uint32 numberOfFiles = dragData.NumberOfFiles();
-      if (RefPtr<html::HTMLInputElement> fileInput = _fileInputElementUnderMouse)
+      if (RefPtr<HTMLInputElement> fileInput = _fileInputElementUnderMouse)
       {
         if (fileInput->IsDisabledFormControl() || (!fileInput->Multiple() && numberOfFiles > 1))
         {
@@ -624,7 +623,7 @@ namespace krys::boo
 
     // We are not over an editable region. Make sure we're clearing any prior drag cursor.
     ClearDragCaret();
-    if (RefPtr<html::HTMLInputElement> fileInput = std::exchange(_fileInputElementUnderMouse, nullptr))
+    if (RefPtr<HTMLInputElement> fileInput = std::exchange(_fileInputElementUnderMouse, nullptr))
     {
       fileInput->SetCanReceiveDroppedFiles(false);
     }
@@ -652,9 +651,8 @@ namespace krys::boo
 
   bool DragController::ConcludeEditDrag(const DragData &dragData) noexcept
   {
-    RefPtr<html::HTMLInputElement> fileInput = _fileInputElementUnderMouse;
-    if (RefPtr<html::HTMLInputElement> fileInputUnderMouse =
-          std::exchange(_fileInputElementUnderMouse, nullptr))
+    RefPtr<HTMLInputElement> fileInput = _fileInputElementUnderMouse;
+    if (RefPtr<HTMLInputElement> fileInputUnderMouse = std::exchange(_fileInputElementUnderMouse, nullptr))
     {
       fileInputUnderMouse->SetCanReceiveDroppedFiles(false);
     }
@@ -665,7 +663,7 @@ namespace krys::boo
     }
 
     IntPoint point = _documentUnderMouse->View()->WindowToContents(dragData.ClientPosition());
-    RefPtr<dom::Element> element = ElementUnderMouse(*_documentUnderMouse, point);
+    RefPtr<Element> element = ElementUnderMouse(*_documentUnderMouse, point);
     if (!element)
     {
       return false;
@@ -706,7 +704,7 @@ namespace krys::boo
     VisibleSelection dragCaret(dragCaretController.CaretPosition());
     auto range = dragCaret.ToNormalizedRange();
     auto &innerSelection = innerFrame->Document()->Selection();
-    RefPtr<dom::Element> rootEditableElement = ShareRefPtr(innerSelection.Selection().RootEditableElement());
+    RefPtr<Element> rootEditableElement = ShareRefPtr(innerSelection.Selection().RootEditableElement());
 
     // For range to be null a client must have done something bad while
     // manually controlling drag behaviour
@@ -720,7 +718,7 @@ namespace krys::boo
     if (isMove || dragCaret.IsContentRichlyEditable())
     {
       bool chosePlainText = false;
-      RefPtr<dom::DocumentFragment> fragment =
+      RefPtr<DocumentFragment> fragment =
         DocumentFragmentFromDragData(dragData, *innerFrame, *range, true, chosePlainText);
       if (!fragment || !editor.ShouldInsertFragment(*fragment, range))
       {
@@ -770,7 +768,7 @@ namespace krys::boo
       }
 
       Client().WillPerformDragDestinationAction(DragDestinationAction::Edit, dragData);
-      RefPtr<dom::DocumentFragment> fragment = CreateFragmentFromText(*range, text);
+      RefPtr<DocumentFragment> fragment = CreateFragmentFromText(*range, text);
 
       if (SetSelectionToDragCaret(innerFrame.get(), dragCaret, point))
       {
@@ -808,7 +806,7 @@ namespace krys::boo
       LayoutPoint(point), {HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active,
                            HitTestRequest::Type::AllowChildFrameContent});
 
-    RefPtr<dom::Node> dragNode = ShareRefPtr(result.InnerNonSharedNode());
+    RefPtr<Node> dragNode = ShareRefPtr(result.InnerNonSharedNode());
     if (!dragNode)
     {
       return false;
@@ -881,10 +879,9 @@ namespace krys::boo
 
   // FIXME: Colour inputs, with dragging colours. (No attachments or models, which are Cocoa's, and no
   // image overlay text; see DIFFERENCES.md.)
-  RefPtr<dom::Element> DragController::DraggableElement(const LocalFrame *sourceFrame,
-                                                        dom::Element *startElement,
-                                                        const IntPoint &dragOrigin,
-                                                        DragState &state) const noexcept
+  RefPtr<Element> DragController::DraggableElement(const LocalFrame *sourceFrame, Element *startElement,
+                                                   const IntPoint &dragOrigin,
+                                                   DragState &state) const noexcept
   {
     state.Type = sourceFrame->Document()->Selection().Contains(LayoutPoint(dragOrigin))
                    ? EnumSet<boo::DragSourceAction> {DragSourceAction::Selection}
@@ -894,10 +891,10 @@ namespace krys::boo
       return nullptr;
     }
 
-    RefPtr<dom::Element> selectionDragElement = state.Type.Contains(DragSourceAction::Selection)
-                                                    && _dragSourceAction.Contains(DragSourceAction::Selection)
-                                                  ? ShareRefPtr(startElement)
-                                                  : nullptr;
+    RefPtr<Element> selectionDragElement = state.Type.Contains(DragSourceAction::Selection)
+                                               && _dragSourceAction.Contains(DragSourceAction::Selection)
+                                             ? ShareRefPtr(startElement)
+                                             : nullptr;
 
     for (auto *element = startElement; element;
          element = dom::TreeQueries::ParentOrShadowHostElement(*element))
@@ -916,7 +913,7 @@ namespace krys::boo
       }
       if (dragMode == UserDrag::Auto)
       {
-        if (auto *image = DynamicDowncast<html::HTMLImageElement>(*element);
+        if (auto *image = DynamicDowncast<HTMLImageElement>(*element);
             image && _dragSourceAction.Contains(DragSourceAction::Image)
             && ImageElementIsDraggable(*image, *sourceFrame))
         {
@@ -936,7 +933,7 @@ namespace krys::boo
   }
 
   void DragController::PrepareForDragStart(LocalFrame &source, EnumSet<boo::DragSourceAction> actionMask,
-                                           dom::Element &element, dom::DataTransfer &dataTransfer,
+                                           Element &element, dom::DataTransfer &dataTransfer,
                                            const IntPoint &dragOrigin) const noexcept
   {
     Ref protectedSource = ShareRef(source);
@@ -976,7 +973,7 @@ namespace krys::boo
     }
   }
 
-  Maybe<HitTestResult> DragController::HitTestResultForDragStart(LocalFrame &source, dom::Element &element,
+  Maybe<HitTestResult> DragController::HitTestResultForDragStart(LocalFrame &source, Element &element,
                                                                  const IntPoint &location) noexcept
   {
     if (!source.View() || !source.Document() || !source.Document()->GetRenderView())
@@ -1056,7 +1053,7 @@ namespace krys::boo
     }
 
     krys_debug_assert(state.Source);
-    Ref<dom::Element> element = ShareRef(*state.Source);
+    Ref<Element> element = ShareRef(*state.Source);
 
     auto *image = GetImage(*element);
     auto &editor = src.Document()->GetEditor();
@@ -1149,7 +1146,7 @@ namespace krys::boo
         // selected.  In this case, we should expand the selection to
         // the enclosing anchor element
         dom::Position pos = sourceSelection.CanonicalAnchor();
-        if (RefPtr<dom::Element> node = EnclosingAnchorElement(pos))
+        if (RefPtr<Element> node = EnclosingAnchorElement(pos))
         {
           selection.SetSelection(VisibleSelection::SelectionFromContentsOfNode(node.get()));
         }
@@ -1186,8 +1183,8 @@ namespace krys::boo
     return false;
   }
 
-  void DragController::DoImageDrag(dom::Element &element, const IntPoint &dragOrigin,
-                                   const IntRect &layoutRect, LocalFrame &frame, IntPoint &dragImageOffset,
+  void DragController::DoImageDrag(Element &element, const IntPoint &dragOrigin, const IntRect &layoutRect,
+                                   LocalFrame &frame, IntPoint &dragImageOffset,
                                    const DragState &state) noexcept
   {
     IntPoint mouseDownPoint = dragOrigin;
@@ -1266,9 +1263,9 @@ namespace krys::boo
     item.DragLocationInContentCoordinates = dragLoc;
     item.DragLocationInWindowCoordinates = frameView->ContentsToWindow(dragLoc);
 
-    if (RefPtr<dom::Element> element = state.Source)
+    if (RefPtr<Element> element = state.Source)
     {
-      RefPtr<dom::Element> dataTransferImageElement = state.DataTransfer->DragImageElement();
+      RefPtr<Element> dataTransferImageElement = state.DataTransfer->DragImageElement();
       if (state.Type == EnumSet<boo::DragSourceAction> {DragSourceAction::DHTML})
       {
         // If the drag image has been customized, fall back to positioning the preview relative to the drag
@@ -1291,18 +1288,18 @@ namespace krys::boo
         item.DragPreviewFrameInRootViewCoordinates = BoundsInRootViewSpace(*element);
       }
 
-      if (RefPtr<dom::Element> link = ContainingLinkElement(*element))
+      if (RefPtr<Element> link = ContainingLinkElement(*element))
       {
         auto titleAttribute = link->GetAttribute(u8"title");
         if (titleAttribute && !titleAttribute->empty())
         {
           item.Title = *titleAttribute;
         }
-        else if (auto *htmlLink = DynamicDowncast<html::HTMLElement>(*link))
+        else if (auto *htmlLink = DynamicDowncast<HTMLElement>(*link))
         {
           item.Title = htmlLink->InnerText();
         }
-        item.Url = frame.Document()->CompleteURL(link->GetAttribute(u8"href").value_or(dom::DOMString()));
+        item.Url = frame.Document()->CompleteURL(link->GetAttribute(u8"href").value_or(DOMString()));
       }
     }
     Client().StartDrag(krys::move(item), *state.DataTransfer, *mainFrame);
@@ -1319,7 +1316,7 @@ namespace krys::boo
     return image.Size().Height() * image.Size().Width() <= MaxOriginalImageArea;
   }
 
-  void DragController::DeclareAndWriteDragImage(dom::DataTransfer &dataTransfer, dom::Element &element,
+  void DragController::DeclareAndWriteDragImage(dom::DataTransfer &dataTransfer, Element &element,
                                                 const url::URL &url, utf8_stringview label) noexcept
   {
     auto *frame = element.NodeDocument().Frame();

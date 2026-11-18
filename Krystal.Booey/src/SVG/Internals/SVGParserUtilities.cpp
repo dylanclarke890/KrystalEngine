@@ -38,7 +38,7 @@ namespace krys::boo::svg
       return x >= -max && x <= max;
     }
 
-    KRYS_NODISCARD bool StartsWithDigit(const dom::DOMStringView &buffer) noexcept
+    KRYS_NODISCARD bool StartsWithDigit(const DOMStringView &buffer) noexcept
     {
       return !buffer.empty() && text::IsASCIIDigit(buffer.front());
     }
@@ -49,7 +49,7 @@ namespace krys::boo::svg
     // FIXME: Can this be shared/replaced with number parsing in WTF?
     template <typename TFloat = float>
     KRYS_NODISCARD Maybe<TFloat>
-      GenericParseNumber(dom::DOMStringView &buffer,
+      GenericParseNumber(DOMStringView &buffer,
                          SuffixSkippingPolicy skip = SuffixSkippingPolicy::Skip) noexcept
     {
       // read the sign
@@ -194,12 +194,12 @@ namespace krys::boo::svg
     }
   }
 
-  Maybe<float> ParseNumber(dom::DOMStringView &buffer, SuffixSkippingPolicy skip) noexcept
+  Maybe<float> ParseNumber(DOMStringView &buffer, SuffixSkippingPolicy skip) noexcept
   {
     return GenericParseNumber(buffer, skip);
   }
 
-  Maybe<float> ParseNumberFromString(dom::DOMStringView string, SuffixSkippingPolicy skip) noexcept
+  Maybe<float> ParseNumberFromString(DOMStringView string, SuffixSkippingPolicy skip) noexcept
   {
     auto result = GenericParseNumber(string, skip);
     if (!string.empty())
@@ -211,7 +211,7 @@ namespace krys::boo::svg
 
   // only used to parse largeArcFlag and sweepFlag which must be a "0" or "1"
   // and might not have any whitespace/comma after it
-  Maybe<bool> ParseArcFlag(dom::DOMStringView &buffer) noexcept
+  Maybe<bool> ParseArcFlag(DOMStringView &buffer) noexcept
   {
     if (buffer.empty())
     {
@@ -240,7 +240,7 @@ namespace krys::boo::svg
     return flag;
   }
 
-  float ToFloatOrZero(dom::DOMStringView string) noexcept
+  float ToFloatOrZero(DOMStringView string) noexcept
   {
     while (!string.empty() && text::IsASCIIWhitespace(string.front()))
     {
@@ -258,7 +258,7 @@ namespace krys::boo::svg
     return result.ec == std::errc {} && result.ptr == last ? value : 0;
   }
 
-  Maybe<double> ToDouble(dom::DOMStringView string) noexcept
+  Maybe<double> ToDouble(DOMStringView string) noexcept
   {
     while (!string.empty() && text::IsASCIIWhitespace(string.front()))
     {
@@ -280,7 +280,7 @@ namespace krys::boo::svg
     return value;
   }
 
-  Maybe<std::pair<float, float>> ParseNumberOptionalNumber(dom::DOMStringView string) noexcept
+  Maybe<std::pair<float, float>> ParseNumberOptionalNumber(DOMStringView string) noexcept
   {
     if (string.empty())
     {
@@ -312,7 +312,7 @@ namespace krys::boo::svg
     return std::make_pair(*x, *y);
   }
 
-  Maybe<FloatPoint> ParsePoint(dom::DOMStringView string) noexcept
+  Maybe<FloatPoint> ParsePoint(DOMStringView string) noexcept
   {
     if (string.empty())
     {
@@ -336,7 +336,7 @@ namespace krys::boo::svg
     return point;
   }
 
-  Maybe<FloatRect> ParseRect(dom::DOMStringView string) noexcept
+  Maybe<FloatRect> ParseRect(DOMStringView string) noexcept
   {
     SkipOptionalSVGSpaces(string);
 
@@ -364,7 +364,7 @@ namespace krys::boo::svg
     return FloatRect {*x, *y, *width, *height};
   }
 
-  Maybe<FloatPoint> ParseFloatPoint(dom::DOMStringView &buffer) noexcept
+  Maybe<FloatPoint> ParseFloatPoint(DOMStringView &buffer) noexcept
   {
     auto x = ParseNumber(buffer);
     if (!x)

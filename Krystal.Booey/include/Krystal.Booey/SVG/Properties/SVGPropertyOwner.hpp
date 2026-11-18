@@ -27,7 +27,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGElement;
   class SVGProperty;

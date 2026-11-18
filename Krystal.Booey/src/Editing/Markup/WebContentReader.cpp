@@ -57,7 +57,7 @@ namespace krys::boo
 
   WebContentReader::~WebContentReader() noexcept = default;
 
-  void WebContentReader::AddFragment(Ref<dom::DocumentFragment> &&newFragment) noexcept
+  void WebContentReader::AddFragment(Ref<DocumentFragment> &&newFragment) noexcept
   {
     if (!_fragment)
     {
@@ -69,7 +69,7 @@ namespace krys::boo
     }
   }
 
-  RefPtr<dom::DocumentFragment> WebContentReader::TakeFragment() noexcept
+  RefPtr<DocumentFragment> WebContentReader::TakeFragment() noexcept
   {
     return std::exchange(_fragment, nullptr);
   }

@@ -65,7 +65,7 @@ namespace krys::boo::style
 
     return krys::SwitchOn(
       _value, [&](const GuaranteedInvalid &) -> Ref<css::Value>
-      { return css::PrimitiveValue::Create(css::CSSOMString {}); },
+      { return css::PrimitiveValue::Create(CSSOMString {}); },
       [&](const Ref<css::VariableData> &variableData) -> Ref<css::Value>
       { return css::VariableReferenceValue::Create(Ref<css::VariableData> {variableData}); },
       [&](const Value &value) -> Ref<css::Value> { return convertValue(value); },
@@ -89,8 +89,8 @@ namespace krys::boo::style
       });
   }
 
-  css::CSSOMString CustomProperty::PropertyValueSerialisation(const css::SerialisationContext &context,
-                                                              const RenderStyle &style) const noexcept
+  CSSOMString CustomProperty::PropertyValueSerialisation(const css::SerialisationContext &context,
+                                                         const RenderStyle &style) const noexcept
   {
     StringBuilder builder;
     PropertyValueSerialisation(builder, context, style);
@@ -130,7 +130,7 @@ namespace krys::boo::style
       });
   }
 
-  css::CSSOMString
+  CSSOMString
     CustomProperty::PropertyValueSerialisationForTokenization(const css::SerialisationContext &context,
                                                               const RenderStyle &style) const noexcept
   {

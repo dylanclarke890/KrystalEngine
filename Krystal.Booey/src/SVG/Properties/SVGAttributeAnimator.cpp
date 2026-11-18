@@ -28,7 +28,7 @@
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   bool SVGAttributeAnimator::IsAnimatedStylePropertyAnimator(const SVGElement &targetElement) const noexcept
   {
@@ -42,11 +42,11 @@ namespace krys::boo::svg
   }
 
   void SVGAttributeAnimator::ApplyAnimatedStylePropertyChange(SVGElement &element, css::PropertyId id,
-                                                              dom::DOMStringView value) noexcept
+                                                              DOMStringView value) noexcept
   {
     krys_debug_assert(id != css::PropertyId::Invalid);
 
-    if (!element.EnsureAnimatedSMILStyleProperties().SetProperty(id, css::CSSOMString(value)))
+    if (!element.EnsureAnimatedSMILStyleProperties().SetProperty(id, CSSOMString(value)))
     {
       return;
     }
@@ -54,7 +54,7 @@ namespace krys::boo::svg
   }
 
   void SVGAttributeAnimator::ApplyAnimatedStylePropertyChange(SVGElement &targetElement,
-                                                              dom::DOMStringView value) noexcept
+                                                              DOMStringView value) noexcept
   {
     // FIXME: Do we really need to check both isConnected and !parentNode?
     if (!targetElement.IsConnected() || !targetElement.ParentNode())
@@ -103,7 +103,7 @@ namespace krys::boo::svg
   }
 
   void SVGAttributeAnimator::ApplyAnimatedPropertyChange(SVGElement &element,
-                                                         const dom::QualifiedName &attributeName) noexcept
+                                                         const QualifiedName &attributeName) noexcept
   {
     element.SVGAttributeChanged(attributeName);
   }

@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/SVG/Elements/SVGPolyElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<polygon>` element: a closed shape through a list of points.
   /// @see https://svgwg.org/svg2-draft/shapes.html#InterfaceSVGPolygonElement
@@ -11,12 +11,12 @@ namespace krys::boo::svg
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGPolygonElement);
 
   public:
-    explicit SVGPolygonElement(dom::Document &document) noexcept;
+    explicit SVGPolygonElement(Document &document) noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGPolygonElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGPolygonElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGPolygonElement();
   }

@@ -27,13 +27,10 @@
 
 #include "Krystal.Booey/Accessibility/AXNodeObject.hpp"
 
-namespace krys::boo::html
-{
-  class HTMLOptionElement;
-}
-
 namespace krys::boo
 {
+  class HTMLOptionElement;
+
   /// @brief An `option` of a drop-down `select`: a child of the menu list's pop-up, with no children.
   class AXMenuListOption final : public AXNodeObject
   {
@@ -41,7 +38,7 @@ namespace krys::boo
     WeakPtr<AXObject> _parent;
 
   public:
-    KRYS_NODISCARD static Ref<AXMenuListOption> Create(AXId id, html::HTMLOptionElement &element,
+    KRYS_NODISCARD static Ref<AXMenuListOption> Create(AXId id, HTMLOptionElement &element,
                                                        AXObjectCache &cache) noexcept;
 
     KRYS_NODISCARD bool IsMenuListOption() const noexcept override
@@ -83,14 +80,14 @@ namespace krys::boo
       return IsEnabled();
     }
 
-    KRYS_NODISCARD dom::DOMString StringValue() const noexcept override;
+    KRYS_NODISCARD DOMString StringValue() const noexcept override;
 
     void SetSelected(bool selected) noexcept override;
 
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
 
   private:
-    AXMenuListOption(AXId id, html::HTMLOptionElement &element, AXObjectCache &cache) noexcept;
+    AXMenuListOption(AXId id, HTMLOptionElement &element, AXObjectCache &cache) noexcept;
 
     KRYS_NODISCARD AXRole DetermineAccessibilityRole() noexcept override
     {
@@ -102,7 +99,7 @@ namespace krys::boo
       return IsIgnoredByDefault();
     }
 
-    KRYS_NODISCARD html::HTMLOptionElement *OptionElement() const noexcept;
+    KRYS_NODISCARD HTMLOptionElement *OptionElement() const noexcept;
   };
 }
 

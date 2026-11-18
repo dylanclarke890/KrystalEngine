@@ -34,13 +34,9 @@
 
 namespace krys::boo
 {
+  class Document;
   class RenderStyle;
   struct Settings;
-
-  namespace dom
-  {
-    class Document;
-  }
 }
 
 namespace krys::boo::style::interpolation
@@ -67,11 +63,11 @@ namespace krys::boo::style::interpolation
 
   /// @brief Whether the property's values in @p a and @p b are equal.
   KRYS_NODISCARD bool Equals(const AnimatableCSSProperty &property, const RenderStyle &a,
-                             const RenderStyle &b, const dom::Document &document) noexcept;
+                             const RenderStyle &b, const boo::Document &document) noexcept;
 
   /// @brief Whether the property can be interpolated between its values in @p a and @p b.
   KRYS_NODISCARD bool CanInterpolate(const AnimatableCSSProperty &property, const RenderStyle &a,
-                                     const RenderStyle &b, const dom::Document &document) noexcept;
+                                     const RenderStyle &b, const boo::Document &document) noexcept;
 
   /// @brief Interpolates the property from its value in @p from to its value in @p to into @p destination.
   void Interpolate(const AnimatableCSSProperty &property, RenderStyle &destination, const RenderStyle &from,

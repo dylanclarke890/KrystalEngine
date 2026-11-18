@@ -28,12 +28,12 @@
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <charconv>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   namespace
   {
     // The number the string is, after any leading whitespace, or 0 if it isn't one.
-    KRYS_NODISCARD float ToFloat(dom::DOMStringView string) noexcept
+    KRYS_NODISCARD float ToFloat(DOMStringView string) noexcept
     {
       while (!string.empty() && text::IsASCIIWhitespace(string.front()))
       {
@@ -52,7 +52,7 @@ namespace krys::boo::svg
     }
   }
 
-  SVGStopElement::SVGStopElement(dom::Document &document) noexcept
+  SVGStopElement::SVGStopElement(Document &document) noexcept
       : SVGElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Stop),
         _offset(SVGAnimatedNumber::Create(this, 0))
   {
@@ -64,12 +64,12 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGStopElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                        Maybe<dom::DOMStringView> value) noexcept
+  void SVGStopElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                        Maybe<DOMStringView> value) noexcept
   {
     if (name == SVGNames::OffsetAttr())
     {
-      auto string = value.value_or(dom::DOMStringView {});
+      auto string = value.value_or(DOMStringView {});
       if (string.ends_with(u8'%'))
       {
         _offset->SetBaseValInternal(ToFloat(string.substr(0, string.size() - 1)) / 100.0f);
@@ -83,7 +83,7 @@ namespace krys::boo::svg
     SVGElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGStopElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGStopElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {

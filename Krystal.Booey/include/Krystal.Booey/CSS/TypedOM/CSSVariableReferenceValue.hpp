@@ -28,7 +28,7 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSStyleValue.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSUnparsedValue;
 

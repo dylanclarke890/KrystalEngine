@@ -30,10 +30,13 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include <compare>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Node;
+}
 
+namespace krys::boo::dom
+{
   /// @brief A node and an offset into it.
   /// @see https://dom.spec.whatwg.org/#boundary-points
   /// @see https://dom.spec.whatwg.org/#concept-range-bp

@@ -161,7 +161,7 @@ namespace krys::boo::style
     css::PropertyId _lowestSeenLogicalGroupProperty {css::LastLogicalGroupProperty};
     css::PropertyId _highestSeenLogicalGroupProperty {css::FirstLogicalGroupProperty};
 
-    HashMap<css::CSSOMStringAtom, Property> _customProperties;
+    HashMap<CSSOMStringAtom, Property> _customProperties;
 
   public:
     PropertyCascade(const MatchResult &matchResult, IncludedProperties &&includedProperties,
@@ -191,13 +191,13 @@ namespace krys::boo::style
     KRYS_NODISCARD const Property *
       LastPropertyResolvingLogicalPropertyPair(css::PropertyId id, WritingMode writingMode) const noexcept;
 
-    KRYS_NODISCARD bool HasCustomProperty(const css::CSSOMStringAtom &name) const noexcept;
+    KRYS_NODISCARD bool HasCustomProperty(const CSSOMStringAtom &name) const noexcept;
 
-    KRYS_NODISCARD const Property &GetCustomProperty(const css::CSSOMStringAtom &name) const noexcept;
+    KRYS_NODISCARD const Property &GetCustomProperty(const CSSOMStringAtom &name) const noexcept;
 
     KRYS_NODISCARD Span<const css::PropertyId> LogicalGroupPropertyIds() const noexcept;
 
-    KRYS_NODISCARD const HashMap<css::CSSOMStringAtom, Property> &CustomProperties() const noexcept
+    KRYS_NODISCARD const HashMap<CSSOMStringAtom, Property> &CustomProperties() const noexcept
     {
       return _customProperties;
     }
@@ -298,13 +298,13 @@ namespace krys::boo::style
     return Span<const css::PropertyId> {_logicalGroupPropertyIds}.first(_seenLogicalGroupPropertyCount);
   }
 
-  inline bool PropertyCascade::HasCustomProperty(const css::CSSOMStringAtom &name) const noexcept
+  inline bool PropertyCascade::HasCustomProperty(const CSSOMStringAtom &name) const noexcept
   {
     return _customProperties.contains(name);
   }
 
   inline const PropertyCascade::Property &
-    PropertyCascade::GetCustomProperty(const css::CSSOMStringAtom &name) const noexcept
+    PropertyCascade::GetCustomProperty(const CSSOMStringAtom &name) const noexcept
   {
     krys_debug_assert(HasCustomProperty(name));
     return _customProperties.find(name)->second;

@@ -50,7 +50,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool Equals(const StyleImageSet &) const noexcept;
 
-    KRYS_NODISCARD ImageWithScale SelectBestFitImage(const dom::Document &) noexcept final;
+    KRYS_NODISCARD ImageWithScale SelectBestFitImage(const Document &) noexcept final;
 
   private:
     StyleImageSet(List<ImageWithScale> &&, List<size_t> &&) noexcept;
@@ -59,7 +59,7 @@ namespace krys::boo
 
     KRYS_NODISCARD ImageWithScale BestImageForScaleFactor() noexcept;
 
-    void UpdateDeviceScaleFactor(const dom::Document &) noexcept;
+    void UpdateDeviceScaleFactor(const Document &) noexcept;
   };
 }
 

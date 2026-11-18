@@ -27,10 +27,10 @@
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "string"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLLIElement::HTMLLIElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::LI)
+  HTMLLIElement::HTMLLIElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::LI)
   {
   }
 
@@ -38,35 +38,34 @@ namespace krys::boo::html
 
   int32 HTMLLIElement::Value() const noexcept
   {
-    return Reflect<int32>(*this, u8"value");
+    return html::Reflect<int32>(*this, u8"value");
   }
 
   void HTMLLIElement::Value(int32 value) noexcept
   {
-    Reflect<int32>(*this, u8"value", krys::move(value));
+    html::Reflect<int32>(*this, u8"value", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region HTMLLIElement Obsolete members
 
-  dom::DOMString HTMLLIElement::Type() const noexcept
+  DOMString HTMLLIElement::Type() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"type").value_or(u8"");
   }
 
-  void HTMLLIElement::Type(dom::DOMString value) noexcept
+  void HTMLLIElement::Type(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"type", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region Presentational hints
 
-  bool
-    HTMLLIElement::HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                      const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool HTMLLIElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                         const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && (localName == u8"type" || localName == u8"value"))
     {
@@ -75,12 +74,12 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLLIElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                             const dom::DOMStringAtom &namespaceURI,
-                                                             dom::DOMStringView value,
+  void HTMLLIElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                             const DOMStringAtom &namespaceURI,
+                                                             DOMStringView value,
                                                              css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
@@ -132,13 +131,12 @@ namespace krys::boo::html
     }
     if (localName == u8"value")
     {
-      if (auto parsedValue = Numbers::ParseInteger(value);
+      if (auto parsedValue = html::Numbers::ParseInteger(value);
           parsedValue.Success() && parsedValue.Value >= std::numeric_limits<int32>::min()
           && parsedValue.Value <= std::numeric_limits<int32>::max())
       {
-        auto counter = css::CSSOMString(u8"list-item ");
-        counter +=
-          css::CSSOMString(reinterpret_cast<const char8 *>(std::to_string(parsedValue.Value).c_str()));
+        auto counter = CSSOMString(u8"list-item ");
+        counter += CSSOMString(reinterpret_cast<const char8 *>(std::to_string(parsedValue.Value).c_str()));
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::CounterSet, counter);
       }
       return;

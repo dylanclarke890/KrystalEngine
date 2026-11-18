@@ -30,10 +30,7 @@
 
 namespace krys::boo
 {
-  namespace dom
-  {
-    class Element;
-  }
+  class Element;
 
   /// @brief How a programmatic scroll moves.
   /// @see https://drafts.csswg.org/cssom-view/#enumdef-scrollbehavior
@@ -54,5 +51,5 @@ namespace krys::boo
   /// @brief Whether a scroll with @p behavior, of the scrolling box of @p associatedElement, is smooth.
   /// @see https://drafts.csswg.org/cssom-view/#scrolling
   KRYS_NODISCARD bool UseSmoothScrolling(ScrollBehavior behavior,
-                                         const dom::Element *associatedElement) noexcept;
+                                         const boo::Element *associatedElement) noexcept;
 }

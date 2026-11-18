@@ -136,7 +136,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool LocalNameMatches(const Element &element, const DOMStringAtom &localName,
                                          const DOMStringAtom &lowercaseLocalName) noexcept
     {
-      if (Is<html::HTMLElement>(element) && Is<dom::HTMLDocument>(element.NodeDocument()))
+      if (Is<HTMLElement>(element) && Is<HTMLDocument>(element.NodeDocument()))
       {
         return element.LocalName() == lowercaseLocalName;
       }
@@ -360,13 +360,13 @@ namespace krys::boo::dom
     auto &prefix = selectorAttribute.NamespacePrefix();
     auto &namespaceURI = selectorAttribute.NamespaceURI();
 
-    bool documentIsHTML = Is<dom::HTMLDocument>(rootNode.NodeDocument());
+    bool documentIsHTML = Is<HTMLDocument>(rootNode.NodeDocument());
 
     ForEachDescendantElement(
       rootNode,
       [&](Element &element)
       {
-        bool isHTML = documentIsHTML && Is<html::HTMLElement>(element);
+        bool isHTML = documentIsHTML && Is<HTMLElement>(element);
         auto &localNameToMatch = isHTML ? localNameLowercase : localName;
         for (auto &attribute : element.AttributeList())
         {

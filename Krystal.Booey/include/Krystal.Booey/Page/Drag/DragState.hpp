@@ -38,7 +38,7 @@ namespace krys::boo
   struct DragState
   {
     /// @brief The element that may be a drag source, for the current mouse gesture.
-    RefPtr<dom::Element> Source;
+    RefPtr<Element> Source;
     bool ShouldDispatchEvents {false};
     // Should be Maybe<>.
     EnumSet<DragSourceAction> Type;

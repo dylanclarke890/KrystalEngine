@@ -13,6 +13,6 @@ namespace krys::boo
     IterationCompositeOperation IterationComposite {IterationCompositeOperation::Replace};
     CompositeOperation Composite {CompositeOperation::Replace};
     /// @brief A pseudo-element selector (`::before`); empty for the element itself.
-    dom::DOMString PseudoElement;
+    DOMString PseudoElement;
   };
 }

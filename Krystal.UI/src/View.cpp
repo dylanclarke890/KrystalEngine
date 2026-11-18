@@ -124,8 +124,7 @@ namespace krys::ui
       _fileChooserHandler = krys::move(handler);
     }
 
-    void ShowValidationMessage(boo::dom::Element &anchor,
-                               const boo::dom::DOMString &message) noexcept override
+    void ShowValidationMessage(boo::Element &anchor, const boo::DOMString &message) noexcept override
     {
       if (!_view)
       {
@@ -138,7 +137,7 @@ namespace krys::ui
       _validationMessage->Show(anchor, message);
     }
 
-    void HideValidationMessage(const boo::dom::Element &anchor) noexcept override
+    void HideValidationMessage(const boo::Element &anchor) noexcept override
     {
       if (_validationMessage && _validationMessage->IsShownAt(anchor))
       {
@@ -154,7 +153,7 @@ namespace krys::ui
       }
     }
 
-    KRYS_NODISCARD bool IsValidationMessageVisible(const boo::dom::Element &anchor) const noexcept override
+    KRYS_NODISCARD bool IsValidationMessageVisible(const boo::Element &anchor) const noexcept override
     {
       return _validationMessage && _validationMessage->IsShownAt(anchor);
     }
@@ -491,7 +490,7 @@ namespace krys::ui
 
     void DispatchNewWindowRequested(const boo::NavigationAction &action, const boo::ResourceRequest &request,
                                     const boo::FormSubmission *formSubmission,
-                                    boo::dom::DOMStringView frameName) noexcept override
+                                    boo::DOMStringView frameName) noexcept override
     {
       Request(action, request, formSubmission, frameName);
     }
@@ -510,8 +509,7 @@ namespace krys::ui
     /// @param newWindowName The browsing context a new window would be; null (a null view) for the view's
     /// own.
     void Request(const boo::NavigationAction &action, const boo::ResourceRequest &request,
-                 const boo::FormSubmission *formSubmission,
-                 boo::dom::DOMStringView newWindowName) const noexcept
+                 const boo::FormSubmission *formSubmission, boo::DOMStringView newWindowName) const noexcept
     {
       if (!_navigationHandler)
       {
@@ -545,7 +543,7 @@ namespace krys::ui
         navigation.Target = formSubmission->Target();
         if (!navigation.SourceElement)
         {
-          navigation.SourceElement = ShareRefPtr<boo::dom::Element>(formSubmission->Form());
+          navigation.SourceElement = ShareRefPtr<boo::Element>(formSubmission->Form());
         }
         navigation.EncodingType = formSubmission->EncodingType();
         navigation.Entries = ShareRefPtr(formSubmission->EntryList());
@@ -652,16 +650,16 @@ namespace krys::ui
     _accessibility.reset();
   }
 
-  boo::dom::HTMLDocument &View::Document() const noexcept
+  boo::HTMLDocument &View::Document() const noexcept
   {
-    return Downcast<boo::dom::HTMLDocument>(*_frame->Document());
+    return Downcast<boo::HTMLDocument>(*_frame->Document());
   }
 
   void View::LoadHTML(utf8_string markup, boo::url::URL &&url, boo::CachePolicy cachePolicy) noexcept
   {
     _frame->SetSubresourceCachePolicy(cachePolicy);
     auto requestURL = url.IsNull() ? boo::url::URL(u8"about:blank") : url;
-    boo::FrameLoadRequest request(ShareRef<boo::dom::Document>(Document()),
+    boo::FrameLoadRequest request(ShareRef<boo::Document>(Document()),
                                   boo::ResourceRequest(krys::move(requestURL)), null);
     request.SetSubstituteData(boo::SubstituteData(krys::move(markup), u8"text/html", krys::move(url)));
     _frame->Loader().Load(krys::move(request));
@@ -682,8 +680,8 @@ namespace krys::ui
   void View::Load(boo::url::URL &&url, boo::CachePolicy cachePolicy) noexcept
   {
     _frame->SetSubresourceCachePolicy(cachePolicy);
-    boo::FrameLoadRequest request(ShareRef<boo::dom::Document>(Document()),
-                                  boo::ResourceRequest(krys::move(url)), null);
+    boo::FrameLoadRequest request(ShareRef<boo::Document>(Document()), boo::ResourceRequest(krys::move(url)),
+                                  null);
     _frame->Loader().Load(krys::move(request));
   }
 
@@ -760,7 +758,7 @@ namespace krys::ui
     writer.End();
   }
 
-  Expected<void> View::DefineCustomElement(const boo::dom::DOMStringAtom &name,
+  Expected<void> View::DefineCustomElement(const boo::DOMStringAtom &name,
                                            boo::html::CustomElementFactory &&factory,
                                            boo::html::CustomElementOptions &&options) noexcept
   {
@@ -1155,12 +1153,12 @@ namespace krys::ui
     _imageBuffers->Release();
   }
 
-  boo::dom::Element *View::HitTest(const boo::IntPoint &point) noexcept
+  boo::Element *View::HitTest(const boo::IntPoint &point) noexcept
   {
     return HitTestInPage(ToPage(point));
   }
 
-  boo::dom::Element *View::HitTestInPage(const boo::IntPoint &point) const noexcept
+  boo::Element *View::HitTestInPage(const boo::IntPoint &point) const noexcept
   {
     return Document().ElementFromPoint(point.X(), point.Y()).get();
   }
@@ -2308,7 +2306,7 @@ namespace krys::ui
     if (pressed(GamepadButton::South) && !GamepadOverlayKey(pal::Key::Enter))
     {
       GamepadInteraction(true);
-      if (RefPtr<boo::dom::Element> element = ShareRefPtr(Document().FocusedElement()))
+      if (RefPtr<boo::Element> element = ShareRefPtr(Document().FocusedElement()))
       {
         (void)element->DispatchSimulatedClick(
           nullptr, boo::dom::SimulatedClickMouseEventOptions::SendMouseUpDownEvents);

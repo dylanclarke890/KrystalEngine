@@ -33,11 +33,7 @@
 
 namespace krys::boo
 {
-  namespace dom
-  {
-    class Element;
-  }
-
+  class Element;
   class LocalFrame;
   class RenderObject;
   class RenderView;
@@ -67,7 +63,7 @@ namespace krys::boo
                                                     EnumSet<RenderAsTextFlag> behavior = {}) noexcept;
 
   /// @brief The render tree and layer tree under @p element's box, laid out, as text.
-  KRYS_NODISCARD utf8_string ExternalRepresentation(dom::Element *element,
+  KRYS_NODISCARD utf8_string ExternalRepresentation(boo::Element *element,
                                                     EnumSet<RenderAsTextFlag> behavior = {}) noexcept;
 
   void ExternalRepresentationForLocalFrame(TextStream &ts, LocalFrame &frame,
@@ -92,7 +88,7 @@ namespace krys::boo
   // Helper function shared with SVGRenderTreeAsText
   KRYS_NODISCARD utf8_string QuoteAndEscapeNonPrintables(utf8_stringview s) noexcept;
 
-  KRYS_NODISCARD utf8_string CounterValueForElement(dom::Element *element) noexcept;
+  KRYS_NODISCARD utf8_string CounterValueForElement(boo::Element *element) noexcept;
 
-  KRYS_NODISCARD utf8_string MarkerTextForListItem(dom::Element *element) noexcept;
+  KRYS_NODISCARD utf8_string MarkerTextForListItem(boo::Element *element) noexcept;
 }

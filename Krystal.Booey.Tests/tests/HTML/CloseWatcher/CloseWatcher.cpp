@@ -116,7 +116,7 @@ namespace krys::boo::html::tests
 
     SECTION("A document that isn't fully active can't make one")
     {
-      auto detached = CreateRef<dom::HTMLDocument>();
+      auto detached = CreateRef<HTMLDocument>();
       auto result = CloseWatcher::Create(*detached);
       REQUIRE(result.HasException());
       CHECK(result.GetException().Code() == dom::ExceptionCode::InvalidStateError);

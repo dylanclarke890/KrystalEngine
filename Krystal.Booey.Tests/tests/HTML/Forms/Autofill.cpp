@@ -15,9 +15,9 @@ namespace krys::boo::html::tests
   {
     FormFixture fixture(u8"<input id=i><input id=h type=hidden><select id=s></select>");
     auto &input = fixture.Get<HTMLInputElement>(u8"i");
-    auto autocomplete = [&](dom::DOMStringView value)
+    auto autocomplete = [&](DOMStringView value)
     {
-      REQUIRE_FALSE(input.SetAttribute(u8"autocomplete", dom::DOMString(value)).HasException());
+      REQUIRE_FALSE(input.SetAttribute(u8"autocomplete", DOMString(value)).HasException());
       return Str(input.Autocomplete());
     };
     CHECK(Str(input.Autocomplete()).empty());
@@ -63,7 +63,7 @@ namespace krys::boo::html::tests
     auto data = AutofillData::Create(input);
     CHECK(Str(data.FieldName) == "webauthn");
     CHECK(data.CredentialType == NonAutofillCredentialType::WebAuthn);
-    CHECK(data.HintSet == List<dom::DOMString> {u8"mobile", u8"shipping"});
-    CHECK(data.Scope == List<dom::DOMString> {u8"section-a", u8"shipping", u8"mobile"});
+    CHECK(data.HintSet == List<DOMString> {u8"mobile", u8"shipping"});
+    CHECK(data.Scope == List<DOMString> {u8"section-a", u8"shipping", u8"mobile"});
   }
 }

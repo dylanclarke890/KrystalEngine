@@ -50,7 +50,7 @@ namespace krys::boo::tests
     /// @brief A listener that takes over the scrolling: it scrolls the box itself, and cancels the event.
     struct ScriptScroller : public dom::EventListenerCallback
     {
-      dom::Element *Box {nullptr};
+      Element *Box {nullptr};
 
       void HandleEvent(dom::Event &event) noexcept override
       {

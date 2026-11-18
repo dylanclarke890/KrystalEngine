@@ -190,12 +190,12 @@ namespace krys::boo
   {
     friend struct krys::MarkableTraits<FontVariantAlternatesValues>;
 
-    Maybe<css::CSSOMString> Stylistic;
-    List<css::CSSOMString> Styleset;
-    List<css::CSSOMString> CharacterVariant;
-    Maybe<css::CSSOMString> Swash;
-    Maybe<css::CSSOMString> Ornaments;
-    Maybe<css::CSSOMString> Annotation;
+    Maybe<CSSOMString> Stylistic;
+    List<CSSOMString> Styleset;
+    List<CSSOMString> CharacterVariant;
+    Maybe<CSSOMString> Swash;
+    Maybe<CSSOMString> Ornaments;
+    Maybe<CSSOMString> Annotation;
     bool HistoricalForms {false};
 
     KRYS_NODISCARD bool operator==(const FontVariantAlternatesValues &) const noexcept = default;

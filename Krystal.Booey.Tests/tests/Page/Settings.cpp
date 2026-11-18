@@ -78,7 +78,7 @@ namespace krys::boo::tests
 
       auto clone = document.CloneNode();
       REQUIRE_FALSE(clone.HasException());
-      CHECK(&Downcast<dom::Document>(*clone.ReleaseValue()).GetSettings() == settings.get());
+      CHECK(&Downcast<Document>(*clone.ReleaseValue()).GetSettings() == settings.get());
     }
   }
 

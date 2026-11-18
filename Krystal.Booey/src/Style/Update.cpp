@@ -35,13 +35,13 @@
 
 namespace krys::boo::style
 {
-  Update::Update(dom::Document &document) noexcept : _document(ShareRef(document))
+  Update::Update(boo::Document &document) noexcept : _document(ShareRef(document))
   {
   }
 
   Update::~Update() noexcept = default;
 
-  const ElementUpdate *Update::GetElementUpdate(const dom::Element &element) const noexcept
+  const ElementUpdate *Update::GetElementUpdate(const Element &element) const noexcept
   {
     auto it = _elements.find(ShareRefPtr(&element));
     if (it == _elements.end())
@@ -51,7 +51,7 @@ namespace krys::boo::style
     return &it->second;
   }
 
-  ElementUpdate *Update::GetElementUpdate(const dom::Element &element) noexcept
+  ElementUpdate *Update::GetElementUpdate(const Element &element) noexcept
   {
     auto it = _elements.find(ShareRefPtr(&element));
     if (it == _elements.end())
@@ -61,7 +61,7 @@ namespace krys::boo::style
     return &it->second;
   }
 
-  const TextUpdate *Update::GetTextUpdate(const dom::Text &text) const noexcept
+  const TextUpdate *Update::GetTextUpdate(const Text &text) const noexcept
   {
     auto it = _texts.find(ShareRefPtr(&text));
     if (it == _texts.end())
@@ -71,7 +71,7 @@ namespace krys::boo::style
     return &it->second;
   }
 
-  const RenderStyle *Update::ElementStyle(const dom::Element &element) const noexcept
+  const RenderStyle *Update::ElementStyle(const Element &element) const noexcept
   {
     if (auto *update = GetElementUpdate(element))
     {
@@ -80,7 +80,7 @@ namespace krys::boo::style
     return element.GetRenderStyle();
   }
 
-  RenderStyle *Update::ElementStyle(const dom::Element &element) noexcept
+  RenderStyle *Update::ElementStyle(const Element &element) noexcept
   {
     if (auto *update = GetElementUpdate(element))
     {
@@ -94,12 +94,12 @@ namespace krys::boo::style
     return &renderer->MutableStyle();
   }
 
-  void Update::AddElement(dom::Element &element, dom::Element *parent, ElementUpdate &&elementUpdate) noexcept
+  void Update::AddElement(Element &element, Element *parent, ElementUpdate &&elementUpdate) noexcept
   {
     krys_debug_assert(dom::ComposedTreeAncestors(element).First() == parent);
-    krys_debug_assert(!_elements.contains(ShareRefPtr<const dom::Element>(&element)));
+    krys_debug_assert(!_elements.contains(ShareRefPtr<const Element>(&element)));
 
-    _roots.remove(ShareRefPtr<dom::ContainerNode>(&element));
+    _roots.remove(ShareRefPtr<ContainerNode>(&element));
     AddPossibleRoot(parent);
 
     if (elementUpdate.MayNeedRebuildRoot)
@@ -112,16 +112,16 @@ namespace krys::boo::style
       Scope::ForNode(element).AddElementWithViewportUnits(element);
     }
 
-    _elements.emplace(ShareRefPtr<const dom::Element>(&element), krys::move(elementUpdate));
+    _elements.emplace(ShareRefPtr<const Element>(&element), krys::move(elementUpdate));
   }
 
-  void Update::AddText(dom::Text &text, dom::Element *parent, TextUpdate &&textUpdate) noexcept
+  void Update::AddText(Text &text, Element *parent, TextUpdate &&textUpdate) noexcept
   {
     krys_debug_assert(dom::ComposedTreeAncestors(text).First() == parent);
 
     AddPossibleRoot(parent);
 
-    auto [it, isNewEntry] = _texts.try_emplace(ShareRefPtr<const dom::Text>(&text), krys::move(textUpdate));
+    auto [it, isNewEntry] = _texts.try_emplace(ShareRefPtr<const Text>(&text), krys::move(textUpdate));
 
     if (!isNewEntry)
     {
@@ -139,7 +139,7 @@ namespace krys::boo::style
     }
   }
 
-  void Update::AddText(dom::Text &text, TextUpdate &&textUpdate) noexcept
+  void Update::AddText(Text &text, TextUpdate &&textUpdate) noexcept
   {
     AddText(text, dom::ComposedTreeAncestors(text).First(), krys::move(textUpdate));
   }
@@ -149,29 +149,29 @@ namespace krys::boo::style
     _initialContainingBlockUpdate = krys::move(style);
   }
 
-  void Update::AddSVGRendererUpdate(svg::SVGElement &element) noexcept
+  void Update::AddSVGRendererUpdate(SVGElement &element) noexcept
   {
     auto *parent = dom::ComposedTreeAncestors(element).First();
-    _roots.remove(ShareRefPtr<dom::ContainerNode>(&element));
+    _roots.remove(ShareRefPtr<ContainerNode>(&element));
     AddPossibleRoot(parent);
     element.SetNeedsSVGRendererUpdate(true);
   }
 
-  void Update::AddPossibleRoot(dom::Element *element) noexcept
+  void Update::AddPossibleRoot(Element *element) noexcept
   {
     if (!element)
     {
-      _roots.add(ShareRefPtr<dom::ContainerNode>(_document.get()));
+      _roots.add(ShareRefPtr<ContainerNode>(_document.get()));
       return;
     }
-    if (element->NeedsSVGRendererUpdate() || _elements.contains(ShareRefPtr<const dom::Element>(element)))
+    if (element->NeedsSVGRendererUpdate() || _elements.contains(ShareRefPtr<const Element>(element)))
     {
       return;
     }
-    _roots.add(ShareRefPtr<dom::ContainerNode>(element));
+    _roots.add(ShareRefPtr<ContainerNode>(element));
   }
 
-  void Update::AddPossibleRebuildRoot(dom::Element &element, dom::Element *parent) noexcept
+  void Update::AddPossibleRebuildRoot(Element &element, Element *parent) noexcept
   {
     if (parent && _rebuildRoots.contains(ShareRefPtr(parent)))
     {

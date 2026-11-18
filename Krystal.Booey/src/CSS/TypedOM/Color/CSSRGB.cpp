@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Color/CSSRGB.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   dom::ExceptionOr<Ref<CSSRGB>> CSSRGB::Create(CSSColorRGBComp red, CSSColorRGBComp green,
                                                CSSColorRGBComp blue, CSSColorPercent alpha) noexcept

@@ -25,7 +25,7 @@
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/SVG/SVGFilterPrimitiveStandardAttributes.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   template <>
   struct SVGPropertyTraits<BlendMode>
@@ -35,19 +35,19 @@ namespace krys::boo::svg
       return static_cast<uint32>(BlendMode::Luminosity);
     }
 
-    KRYS_NODISCARD static BlendMode FromString(SVGElement &, dom::DOMStringView string) noexcept
+    KRYS_NODISCARD static BlendMode FromString(SVGElement &, DOMStringView string) noexcept
     {
       BlendMode mode = BlendMode::Normal;
       ParseBlendMode(string, mode);
       return mode;
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(BlendMode type) noexcept
+    KRYS_NODISCARD static DOMString ToString(BlendMode type) noexcept
     {
       if (type < BlendMode::PlusDarker)
       {
         auto name = BlendModeName(type);
-        return dom::DOMString(name.begin(), name.end());
+        return DOMString(name.begin(), name.end());
       }
 
       return {};
@@ -66,14 +66,14 @@ namespace krys::boo::svg
     Ref<SVGAnimatedEnumeration> _mode;
 
   public:
-    explicit SVGFEBlendElement(dom::Document &document) noexcept;
+    explicit SVGFEBlendElement(Document &document) noexcept;
 
-    KRYS_NODISCARD dom::DOMString In1() const noexcept
+    KRYS_NODISCARD DOMString In1() const noexcept
     {
       return _in1->CurrentValue();
     }
 
-    KRYS_NODISCARD dom::DOMString In2() const noexcept
+    KRYS_NODISCARD DOMString In2() const noexcept
     {
       return _in2->CurrentValue();
     }
@@ -102,17 +102,16 @@ namespace krys::boo::svg
       SVGPropertyOwnerRegistry<SVGFEBlendElement, SVGFilterPrimitiveStandardAttributes>;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
-    bool SetFilterEffectAttribute(FilterEffect &effect,
-                                  const dom::QualifiedName &attributeName) noexcept final;
+    bool SetFilterEffectAttribute(FilterEffect &effect, const QualifiedName &attributeName) noexcept final;
 
-    KRYS_NODISCARD List<dom::DOMStringAtom> FilterEffectInputsNames() const noexcept final
+    KRYS_NODISCARD List<DOMStringAtom> FilterEffectInputsNames() const noexcept final
     {
-      return {dom::DOMStringAtom(In1()), dom::DOMStringAtom(In2())};
+      return {DOMStringAtom(In1()), DOMStringAtom(In2())};
     }
 
     KRYS_NODISCARD RefPtr<FilterEffect>
@@ -121,8 +120,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGFEBlendElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGFEBlendElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGFEBlendElement();
   }

@@ -21,8 +21,7 @@ namespace krys::boo::tests
     {
       using AnimationPageFixture::AnimationPageFixture;
 
-      KRYS_NODISCARD CSSTransition *RunningTransition(dom::DOMStringView id,
-                                                      css::PropertyId property) noexcept
+      KRYS_NODISCARD CSSTransition *RunningTransition(DOMStringView id, css::PropertyId property) noexcept
       {
         auto *transitions = ById(id).RunningTransitionsByProperty(null);
         if (!transitions)
@@ -113,7 +112,7 @@ namespace krys::boo::tests
     auto width = [](TransitionFixture &fixture)
     {
       (void)fixture.Document->UpdateLayout();
-      return Downcast<html::HTMLElement>(fixture.ById(u8"box")).OffsetWidth();
+      return Downcast<HTMLElement>(fixture.ById(u8"box")).OffsetWidth();
     };
     constexpr auto styles = u8"<!DOCTYPE html><style>@keyframes fade{from,to{opacity:.1}}";
 

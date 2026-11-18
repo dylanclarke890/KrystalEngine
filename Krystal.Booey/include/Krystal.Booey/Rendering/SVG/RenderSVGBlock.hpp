@@ -21,13 +21,10 @@
 
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 
-namespace krys::boo::svg
-{
-  class SVGGraphicsElement;
-}
-
 namespace krys::boo
 {
+  class SVGGraphicsElement;
+
   /// @brief A block inside an SVG renderer tree (a `<foreignObject>`, and later SVG text), positioned and
   /// repainted in SVG coordinates.
   class RenderSVGBlock : public RenderBlockFlow
@@ -35,12 +32,12 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderSVGBlock);
 
   public:
-    KRYS_NODISCARD svg::SVGGraphicsElement &GraphicsElement() const noexcept;
+    KRYS_NODISCARD SVGGraphicsElement &GraphicsElement() const noexcept;
 
     void GetElement() const = delete;
 
   protected:
-    RenderSVGBlock(Type, svg::SVGGraphicsElement &, RenderStyle &&) noexcept;
+    RenderSVGBlock(Type, SVGGraphicsElement &, RenderStyle &&) noexcept;
 
     ~RenderSVGBlock() noexcept override;
 

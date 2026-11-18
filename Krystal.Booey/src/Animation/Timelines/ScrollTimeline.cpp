@@ -42,7 +42,7 @@
 
 namespace krys::boo
 {
-  Ref<ScrollTimeline> ScrollTimeline::Create(dom::Document &document,
+  Ref<ScrollTimeline> ScrollTimeline::Create(boo::Document &document,
                                              const ScrollTimelineOptions &options) noexcept
   {
     // https://drafts.csswg.org/scroll-animations-1/#dom-scrolltimeline-scrolltimeline
@@ -76,7 +76,7 @@ namespace krys::boo
     return timeline;
   }
 
-  Ref<ScrollTimeline> ScrollTimeline::Create(const css::CSSOMStringAtom &name, ScrollAxis axis) noexcept
+  Ref<ScrollTimeline> ScrollTimeline::Create(const CSSOMStringAtom &name, ScrollAxis axis) noexcept
   {
     return AdoptRef(*new ScrollTimeline(name, axis));
   }
@@ -87,7 +87,7 @@ namespace krys::boo
   }
 
   Ref<ScrollTimeline>
-    ScrollTimeline::CreateInactiveStyleOriginatedTimeline(const css::CSSOMStringAtom &name) noexcept
+    ScrollTimeline::CreateInactiveStyleOriginatedTimeline(const CSSOMStringAtom &name) noexcept
   {
     auto timeline = AdoptRef(*new ScrollTimeline(name, ScrollAxis::Block));
     timeline->_isInactiveStyleOriginatedTimeline = true;
@@ -102,8 +102,7 @@ namespace krys::boo
   {
   }
 
-  ScrollTimeline::ScrollTimeline(const css::CSSOMStringAtom &name, ScrollAxis axis) noexcept
-      : ScrollTimeline()
+  ScrollTimeline::ScrollTimeline(const CSSOMStringAtom &name, ScrollAxis axis) noexcept : ScrollTimeline()
   {
     _axis = axis;
     _name = name;
@@ -115,12 +114,12 @@ namespace krys::boo
     _scroller = scroller;
   }
 
-  RefPtr<dom::Element> ScrollTimeline::BindingsSource() const noexcept
+  RefPtr<boo::Element> ScrollTimeline::BindingsSource() const noexcept
   {
     return Source();
   }
 
-  RefPtr<dom::Element> ScrollTimeline::Source() const noexcept
+  RefPtr<boo::Element> ScrollTimeline::Source() const noexcept
   {
     auto source = _source.GetStyleable();
     if (!source)
@@ -161,7 +160,7 @@ namespace krys::boo
     krys_unreachable();
   }
 
-  void ScrollTimeline::SetSource(dom::Element *source) noexcept
+  void ScrollTimeline::SetSource(boo::Element *source) noexcept
   {
     if (source)
     {
@@ -194,7 +193,7 @@ namespace krys::boo
     styleable.Element.NodeDocument().EnsureTimelinesController().AddTimeline(*this);
   }
 
-  void ScrollTimeline::RemoveTimelineFromDocument(dom::Element *element) noexcept
+  void ScrollTimeline::RemoveTimelineFromDocument(boo::Element *element) noexcept
   {
     if (element)
     {
@@ -360,13 +359,13 @@ namespace krys::boo
     }
   }
 
-  void ScrollTimeline::SetTimelineScopeElement(const dom::Element &element) noexcept
+  void ScrollTimeline::SetTimelineScopeElement(const boo::Element &element) noexcept
   {
-    _timelineScopeElement = CreateWeakPtr(const_cast<dom::Element *>(&element));
+    _timelineScopeElement = CreateWeakPtr(const_cast<boo::Element *>(&element));
   }
 
   ScrollableArea *ScrollTimeline::ScrollableAreaForSourceRenderer(const RenderElement *renderer,
-                                                                  dom::Document &document) noexcept
+                                                                  boo::Document &document) noexcept
   {
     const auto *renderBox = DynamicDowncast<RenderBox>(renderer);
     if (!renderBox)

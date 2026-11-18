@@ -28,7 +28,7 @@ namespace krys::boo::svg::tests
     CHECK(SVGURIReference::PropertyRegistry::IsKnownAttribute(SVGNames::HrefAttr()));
 
     // Attributes are matched by their namespace and local name, whatever their prefix.
-    dom::QualifiedName unprefixedXLinkHref {dom::DOMStringAtom(infra::namespaces::XLink), null, u8"href"};
+    QualifiedName unprefixedXLinkHref {DOMStringAtom(infra::namespaces::XLink), null, u8"href"};
     CHECK(SVGURIReference::PropertyRegistry::IsKnownAttribute(unprefixedXLinkHref));
     CHECK_FALSE(SVGURIReference::PropertyRegistry::IsKnownAttribute(TestAttributeName(u8"xlink:href")));
 
@@ -100,7 +100,7 @@ namespace krys::boo::svg::tests
 
     SECTION("href")
     {
-      auto xlink = dom::DOMStringAtom(infra::namespaces::XLink);
+      auto xlink = DOMStringAtom(infra::namespaces::XLink);
       REQUIRE_FALSE(element->SetAttributeNS(xlink, u8"xlink:href", u8"#a").HasException());
       CHECK(element->Href() == u8"#a");
 
@@ -124,13 +124,13 @@ namespace krys::boo::svg::tests
     REQUIRE_FALSE(element->X->BaseVal()->SetValueAsString(u8"7px").HasException());
     CHECK_FALSE(element->X->IsDirty());
     CHECK(element->ChangedAttributes.back() == SVGNames::XAttr());
-    CHECK(element->GetAttribute(u8"x") == dom::DOMString(u8"7px"));
+    CHECK(element->GetAttribute(u8"x") == DOMString(u8"7px"));
 
     // Other changes are written when the attributes are next read.
     REQUIRE_FALSE(element->Dx->BaseVal()->SetValueAsString(u8"3px").HasException());
     CHECK(element->Dx->IsDirty());
     CHECK(element->ChangedAttributes.back() == TestAttributeName(u8"dx"));
-    CHECK(element->GetAttribute(u8"dx") == dom::DOMString(u8"3px"));
+    CHECK(element->GetAttribute(u8"dx") == DOMString(u8"3px"));
     CHECK_FALSE(element->Dx->IsDirty());
 
     REQUIRE_FALSE(element->Boolean->SetBaseVal(true).HasException());
@@ -156,24 +156,24 @@ namespace krys::boo::svg::tests
     REQUIRE_FALSE(element->ClassNameAnimated().SetBaseVal(u8"c").HasException());
     REQUIRE_FALSE(element->HrefAnimated().SetBaseVal(u8"#d").HasException());
 
-    CHECK(element->GetAttribute(u8"preserveAlpha") == dom::DOMString(u8"true"));
-    CHECK(element->GetAttribute(u8"numOctaves") == dom::DOMString(u8"3"));
-    CHECK(element->GetAttribute(u8"k1") == dom::DOMString(u8"0.5"));
-    CHECK(element->GetAttribute(u8"filterUnits") == dom::DOMString(u8"objectBoundingBox"));
-    CHECK(element->GetAttribute(u8"lengths") == dom::DOMString(u8"0"));
-    CHECK(element->GetAttribute(u8"values") == dom::DOMString(u8"4"));
-    CHECK(element->GetAttribute(u8"points") == dom::DOMString(u8"1 2"));
-    CHECK(element->GetAttribute(u8"preserveAspectRatio") == dom::DOMString(u8"xMidYMid slice"));
-    CHECK(element->GetAttribute(u8"viewBox") == dom::DOMString(u8"0 0 10 0"));
-    CHECK(element->GetAttribute(u8"result") == dom::DOMString(u8"out"));
-    CHECK(element->GetAttribute(u8"transform") == dom::DOMString(u8"translate(1 2)"));
-    CHECK(element->GetAttribute(u8"viewTransform") == dom::DOMString(u8"scale(2 2)"));
-    CHECK(element->GetAttribute(u8"systemLanguage") == dom::DOMString(u8"en"));
-    CHECK(element->GetAttribute(u8"href") == dom::DOMString(u8"#d"));
+    CHECK(element->GetAttribute(u8"preserveAlpha") == DOMString(u8"true"));
+    CHECK(element->GetAttribute(u8"numOctaves") == DOMString(u8"3"));
+    CHECK(element->GetAttribute(u8"k1") == DOMString(u8"0.5"));
+    CHECK(element->GetAttribute(u8"filterUnits") == DOMString(u8"objectBoundingBox"));
+    CHECK(element->GetAttribute(u8"lengths") == DOMString(u8"0"));
+    CHECK(element->GetAttribute(u8"values") == DOMString(u8"4"));
+    CHECK(element->GetAttribute(u8"points") == DOMString(u8"1 2"));
+    CHECK(element->GetAttribute(u8"preserveAspectRatio") == DOMString(u8"xMidYMid slice"));
+    CHECK(element->GetAttribute(u8"viewBox") == DOMString(u8"0 0 10 0"));
+    CHECK(element->GetAttribute(u8"result") == DOMString(u8"out"));
+    CHECK(element->GetAttribute(u8"transform") == DOMString(u8"translate(1 2)"));
+    CHECK(element->GetAttribute(u8"viewTransform") == DOMString(u8"scale(2 2)"));
+    CHECK(element->GetAttribute(u8"systemLanguage") == DOMString(u8"en"));
+    CHECK(element->GetAttribute(u8"href") == DOMString(u8"#d"));
 
     // The classes are read from the attribute, so className is written to it at once.
     CHECK(element->HasClassName(u8"c"));
-    CHECK(element->GetAttribute(u8"class") == dom::DOMString(u8"c"));
+    CHECK(element->GetAttribute(u8"class") == DOMString(u8"c"));
 
     // Written attributes don't come back to the element as changes.
     CHECK(element->Href() == u8"#d");
@@ -183,20 +183,20 @@ namespace krys::boo::svg::tests
     {
       // Two integers or numbers are written as one if they're equal.
       REQUIRE_FALSE(element->OrderY->SetBaseVal(2).HasException());
-      CHECK(element->GetAttribute(u8"order") == dom::DOMString(u8"1, 2"));
+      CHECK(element->GetAttribute(u8"order") == DOMString(u8"1, 2"));
       REQUIRE_FALSE(element->StdDeviationX->SetBaseVal(2).HasException());
       REQUIRE_FALSE(element->StdDeviationY->SetBaseVal(2).HasException());
-      CHECK(element->GetAttribute(u8"stdDeviation") == dom::DOMString(u8"2"));
+      CHECK(element->GetAttribute(u8"stdDeviation") == DOMString(u8"2"));
 
       // An orientation is an angle or a keyword; setting one resets the other.
       REQUIRE_FALSE(element->OrientAngle->BaseVal()->SetValueAsString(u8"45deg").HasException());
-      CHECK(element->GetAttribute(u8"orient") == dom::DOMString(u8"45deg"));
+      CHECK(element->GetAttribute(u8"orient") == DOMString(u8"45deg"));
       REQUIRE_FALSE(element->OrientType->SetBaseVal(SVGMarkerOrientAuto).HasException());
       CHECK(element->OrientAngle->BaseVal()->ValueAsString() == u8"0");
-      CHECK(element->GetAttribute(u8"orient") == dom::DOMString(u8"auto"));
+      CHECK(element->GetAttribute(u8"orient") == DOMString(u8"auto"));
       REQUIRE_FALSE(element->OrientAngle->BaseVal()->SetValueAsString(u8"10deg").HasException());
       CHECK(element->OrientType->BaseVal() == SVGMarkerOrientAngle);
-      CHECK(element->GetAttribute(u8"orient") == dom::DOMString(u8"10deg"));
+      CHECK(element->GetAttribute(u8"orient") == DOMString(u8"10deg"));
     }
 
     SECTION("Detached")
@@ -212,7 +212,7 @@ namespace krys::boo::svg::tests
 
       // A detached property's changes go nowhere.
       REQUIRE_FALSE(element->Dx->BaseVal()->SetValueAsString(u8"9px").HasException());
-      CHECK(element->GetAttribute(u8"dx") == dom::DOMString(u8"3px"));
+      CHECK(element->GetAttribute(u8"dx") == DOMString(u8"3px"));
     }
   }
 }

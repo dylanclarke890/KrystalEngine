@@ -2,89 +2,89 @@
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
 #pragma region HTMLEmbedElement
 
-  HTMLEmbedElement::HTMLEmbedElement(dom::Document &document) noexcept
-      : HTMLPlugInElement(document, HTMLElementInterface::Embed)
+  HTMLEmbedElement::HTMLEmbedElement(Document &document) noexcept
+      : HTMLPlugInElement(document, html::HTMLElementInterface::Embed)
   {
   }
 
   dom::USVString HTMLEmbedElement::Src() const noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"src");
+    return html::ReflectURL<dom::USVString>(*this, u8"src");
   }
 
   void HTMLEmbedElement::Src(dom::USVString value) noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
+    return html::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
-  dom::DOMString HTMLEmbedElement::Type() const noexcept
+  DOMString HTMLEmbedElement::Type() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"type").value_or(u8"");
   }
 
-  void HTMLEmbedElement::Type(dom::DOMString value) noexcept
+  void HTMLEmbedElement::Type(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"type", krys::move(value));
   }
 
-  dom::DOMString HTMLEmbedElement::Width() const noexcept
+  DOMString HTMLEmbedElement::Width() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"width").value_or(u8"");
   }
 
-  void HTMLEmbedElement::Width(dom::DOMString value) noexcept
+  void HTMLEmbedElement::Width(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"width", krys::move(value));
   }
 
-  dom::DOMString HTMLEmbedElement::Height() const noexcept
+  DOMString HTMLEmbedElement::Height() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"height").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"height").value_or(u8"");
   }
 
-  void HTMLEmbedElement::Height(dom::DOMString value) noexcept
+  void HTMLEmbedElement::Height(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"height", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"height", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region HTMLEmbedElement Obsolete members
 
-  dom::DOMString HTMLEmbedElement::Align() const noexcept
+  DOMString HTMLEmbedElement::Align() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLEmbedElement::Align(dom::DOMString value) noexcept
+  void HTMLEmbedElement::Align(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"align", krys::move(value));
   }
 
-  dom::DOMString HTMLEmbedElement::Name() const noexcept
+  DOMString HTMLEmbedElement::Name() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLEmbedElement::Name(dom::DOMString value) noexcept
+  void HTMLEmbedElement::Name(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"name", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region Presentational hints
 
-  void HTMLEmbedElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                                const dom::DOMStringAtom &namespaceURI,
-                                                                dom::DOMStringView value,
+  void HTMLEmbedElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                                const DOMStringAtom &namespaceURI,
+                                                                DOMStringView value,
                                                                 css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLPlugInElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);

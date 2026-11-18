@@ -30,7 +30,7 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSVariableReferenceValue.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSUnparsedValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   dom::ExceptionOr<Ref<CSSVariableReferenceValue>>
     CSSVariableReferenceValue::Create(CSSOMString variable, RefPtr<CSSUnparsedValue> fallback) noexcept

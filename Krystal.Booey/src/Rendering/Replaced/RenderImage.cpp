@@ -76,14 +76,14 @@ namespace krys::boo
       return CreateUnique<RenderImageResource>();
     }
 
-    KRYS_NODISCARD bool IsDeferredImage(dom::Element *element) noexcept
+    KRYS_NODISCARD bool IsDeferredImage(Element *element) noexcept
     {
-      auto *image = DynamicDowncast<html::HTMLImageElement>(element);
+      auto *image = DynamicDowncast<HTMLImageElement>(element);
       return image && image->IsDeferred();
     }
   }
 
-  RenderImage::RenderImage(Type type, dom::Element &element, RenderStyle &&style, StyleImage *styleImage,
+  RenderImage::RenderImage(Type type, Element &element, RenderStyle &&style, StyleImage *styleImage,
                            float imageDevicePixelRatio) noexcept
       : RenderReplaced(type, element, krys::move(style), LayoutSize(), ReplacedFlag::IsImage),
         _imageResource(CreateImageResource(styleImage)), _imageDevicePixelRatio(imageDevicePixelRatio)
@@ -91,7 +91,7 @@ namespace krys::boo
     UpdateAltText();
   }
 
-  RenderImage::RenderImage(Type type, dom::Document &document, RenderStyle &&style,
+  RenderImage::RenderImage(Type type, Document &document, RenderStyle &&style,
                            StyleImage *styleImage) noexcept
       : RenderReplaced(type, document, krys::move(style), LayoutSize(), ReplacedFlag::IsImage),
         _imageResource(CreateImageResource(styleImage))
@@ -317,7 +317,7 @@ namespace krys::boo
     if (!containerSize.IsEmpty())
     {
       url::URL imageSourceURL;
-      if (auto *imageElement = DynamicDowncast<html::HTMLImageElement>(GetElement()))
+      if (auto *imageElement = DynamicDowncast<HTMLImageElement>(GetElement()))
       {
         imageSourceURL = imageElement->CurrentURL();
       }
@@ -436,7 +436,7 @@ namespace krys::boo
     {
       return false;
     }
-    if (auto *svgImage = DynamicDowncast<svg::SVGImage>(cachedImage->GetImage()))
+    if (auto *svgImage = DynamicDowncast<SVGImage>(cachedImage->GetImage()))
     {
       if (auto rootElement = svgImage->RootElement())
       {
@@ -494,8 +494,8 @@ namespace krys::boo
       return;
     }
 
-    RefPtr<html::HTMLAreaElement> areaElement =
-      ShareRefPtr(DynamicDowncast<html::HTMLAreaElement>(GetDocument().FocusedElement()));
+    RefPtr<HTMLAreaElement> areaElement =
+      ShareRefPtr(DynamicDowncast<HTMLAreaElement>(GetDocument().FocusedElement()));
     if (!areaElement || areaElement->ImageElement().get() != GetElement())
     {
       return;
@@ -533,7 +533,7 @@ namespace krys::boo
       path, outlineWidth, areaElementStyle->ColorResolvingCurrentColor(css::PropertyId::OutlineColor));
   }
 
-  void RenderImage::AreaElementFocusChanged(html::HTMLAreaElement &element) noexcept
+  void RenderImage::AreaElementFocusChanged(HTMLAreaElement &element) noexcept
   {
     krys_debug_assert(element.ImageElement().get() == GetElement());
     (void)element;
@@ -544,9 +544,9 @@ namespace krys::boo
     Repaint();
   }
 
-  html::HTMLMapElement *RenderImage::ImageMap() const noexcept
+  HTMLMapElement *RenderImage::ImageMap() const noexcept
   {
-    auto *imageElement = DynamicDowncast<html::HTMLImageElement>(GetElement());
+    auto *imageElement = DynamicDowncast<HTMLImageElement>(GetElement());
     return imageElement ? imageElement->AssociatedMapElement() : nullptr;
   }
 
@@ -560,7 +560,7 @@ namespace krys::boo
 
     if (tempResult.InnerNode() && GetElement())
     {
-      if (RefPtr<html::HTMLMapElement> map = ShareRefPtr(ImageMap()))
+      if (RefPtr<HTMLMapElement> map = ShareRefPtr(ImageMap()))
       {
         LayoutRect contentBox = ContentBoxRect();
         float scaleFactor = 1 / Style().UsedZoom();
@@ -826,12 +826,11 @@ namespace krys::boo
     }
 
     Maybe<utf8_string> altText;
-    if (auto *image = DynamicDowncast<html::HTMLImageElement>(*GetElement()))
+    if (auto *image = DynamicDowncast<HTMLImageElement>(*GetElement()))
     {
       altText = image->AltText();
     }
-    else if (auto *input = DynamicDowncast<html::HTMLInputElement>(*GetElement());
-             input && input->IsImageButton())
+    else if (auto *input = DynamicDowncast<HTMLInputElement>(*GetElement()); input && input->IsImageButton())
     {
       altText = input->AltText();
     }
@@ -910,7 +909,7 @@ namespace krys::boo
   {
     if (auto *cachedImage = GetCachedImage())
     {
-      if (auto *image = DynamicDowncast<svg::SVGImage>(cachedImage->GetImage()))
+      if (auto *image = DynamicDowncast<SVGImage>(cachedImage->GetImage()))
       {
         return image->EmbeddedContentBox();
       }

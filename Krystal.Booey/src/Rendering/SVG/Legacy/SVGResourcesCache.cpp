@@ -109,8 +109,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool RendererCanHaveResources(RenderObject &renderer) noexcept
     {
-      return renderer.GetNode() && Is<svg::SVGElement>(*renderer.GetNode())
-             && !renderer.IsRenderSVGInlineText();
+      return renderer.GetNode() && Is<SVGElement>(*renderer.GetNode()) && !renderer.IsRenderSVGInlineText();
     }
   }
 
@@ -151,7 +150,7 @@ namespace krys::boo
                                              const RenderStyle *oldStyle,
                                              const RenderStyle &newStyle) noexcept
   {
-    krys_debug_assert(!renderer.GetElement() || Is<svg::SVGElement>(*renderer.GetElement()));
+    krys_debug_assert(!renderer.GetElement() || Is<SVGElement>(*renderer.GetElement()));
 
     if (!renderer.Parent())
     {
@@ -307,9 +306,9 @@ namespace krys::boo
       if (resources->ResourceDestroyed(resource))
       {
         // Mark users of destroyed resources as pending resolution based on the id of the old resource.
-        Ref<svg::SVGElement> clientElement = ShareRef(Downcast<svg::SVGElement>(*client->GetElement()));
+        Ref<SVGElement> clientElement = ShareRef(Downcast<SVGElement>(*client->GetElement()));
         clientElement->TreeScopeForSVGReferences().AddPendingSVGResource(
-          dom::DOMStringAtom(resource.GetElement().Id()), *clientElement);
+          DOMStringAtom(resource.GetElement().Id()), *clientElement);
       }
     }
   }

@@ -43,7 +43,7 @@ namespace krys::boo::style
     {
     }
 
-    BlockEllipsis(css::CSSOMStringAtom &&string) noexcept : _type {Type::String}, _string {krys::move(string)}
+    BlockEllipsis(CSSOMStringAtom &&string) noexcept : _type {Type::String}, _string {krys::move(string)}
     {
     }
 
@@ -87,7 +87,7 @@ namespace krys::boo::style
     };
 
     Type _type {Type::None};
-    css::CSSOMStringAtom _string {null};
+    CSSOMStringAtom _string {null};
   };
 
   // MARK: - Conversion

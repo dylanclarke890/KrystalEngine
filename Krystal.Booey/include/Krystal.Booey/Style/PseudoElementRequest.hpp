@@ -42,7 +42,7 @@ namespace krys::boo::style
     {
     }
 
-    PseudoElementRequest(PseudoElementType type, const css::CSSOMStringAtom &nameArgument) noexcept
+    PseudoElementRequest(PseudoElementType type, const CSSOMStringAtom &nameArgument) noexcept
         : _identifier({type, nameArgument})
     {
       krys_debug_assert(type == PseudoElementType::Highlight);
@@ -63,7 +63,7 @@ namespace krys::boo::style
       return _identifier.Type;
     }
 
-    KRYS_NODISCARD const css::CSSOMStringAtom &NameArgument() const noexcept
+    KRYS_NODISCARD const CSSOMStringAtom &NameArgument() const noexcept
     {
       return _identifier.NameArgument;
     }

@@ -279,7 +279,7 @@ namespace krys::boo
   }
 
   void CounterNode::InsertAfter(CounterNode &newChild, CounterNode *beforeChild,
-                                const css::CSSOMStringAtom &identifier) noexcept
+                                const CSSOMStringAtom &identifier) noexcept
   {
     krys_debug_assert(!newChild._parent);
     krys_debug_assert(!newChild._previousSibling);

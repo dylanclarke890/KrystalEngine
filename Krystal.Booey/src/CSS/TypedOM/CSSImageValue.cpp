@@ -32,14 +32,14 @@
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  Ref<CSSImageValue> CSSImageValue::Create(Ref<ImageValue> cssValue, dom::Document &document) noexcept
+  Ref<CSSImageValue> CSSImageValue::Create(Ref<css::ImageValue> cssValue, boo::Document &document) noexcept
   {
     return AdoptRef(*new CSSImageValue(krys::move(cssValue), document));
   }
 
-  CSSImageValue::CSSImageValue(Ref<ImageValue> cssValue, dom::Document &document) noexcept
+  CSSImageValue::CSSImageValue(Ref<css::ImageValue> cssValue, boo::Document &document) noexcept
       : _cssValue(krys::move(cssValue)), _document(CreateWeakPtr(&document))
   {
   }
@@ -48,7 +48,7 @@ namespace krys::boo::css
 
   void CSSImageValue::Serialise(StringBuilder &builder, EnumSet<SerialisationArguments>) const noexcept
   {
-    builder.Append(_cssValue->CssText(DefaultSerialisationContext()));
+    builder.Append(_cssValue->CssText(css::DefaultSerialisationContext()));
   }
 
   CachedImage *CSSImageValue::Image() const noexcept
@@ -56,12 +56,12 @@ namespace krys::boo::css
     return _cssValue->GetCachedImage();
   }
 
-  dom::Document *CSSImageValue::Document() const noexcept
+  boo::Document *CSSImageValue::Document() const noexcept
   {
     return _document.get();
   }
 
-  RefPtr<Value> CSSImageValue::ToCSSValue() const noexcept
+  RefPtr<css::Value> CSSImageValue::ToCSSValue() const noexcept
   {
     return _cssValue;
   }

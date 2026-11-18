@@ -12,34 +12,34 @@ namespace krys::boo::svg::tests
     struct ParseResult
     {
       bool Ok;
-      dom::DOMString Path;
+      DOMString Path;
     };
 
     // Parses `d` into a byte stream and writes it back out.
-    ParseResult RoundTrip(dom::DOMStringView d, PathParsingMode mode = PathParsingMode::UnalteredParsing)
+    ParseResult RoundTrip(DOMStringView d, PathParsingMode mode = PathParsingMode::UnalteredParsing)
     {
       SVGPathByteStream stream;
       bool ok = BuildSVGPathByteStreamFromString(d, stream, mode);
-      dom::DOMString result;
+      DOMString result;
       REQUIRE(BuildStringFromByteStream(stream, result, PathParsingMode::UnalteredParsing));
       return {ok, result};
     }
 
-    dom::DOMString Unaltered(dom::DOMStringView d)
+    DOMString Unaltered(DOMStringView d)
     {
       auto result = RoundTrip(d);
       CHECK(result.Ok);
       return result.Path;
     }
 
-    dom::DOMString Normalised(dom::DOMStringView d)
+    DOMString Normalised(DOMStringView d)
     {
       auto result = RoundTrip(d, PathParsingMode::NormalisedParsing);
       CHECK(result.Ok);
       return result.Path;
     }
 
-    Maybe<float> Number(dom::DOMStringView string, dom::DOMStringView remaining)
+    Maybe<float> Number(DOMStringView string, DOMStringView remaining)
     {
       auto result = ParseNumber(string);
       CHECK(string == remaining);
@@ -81,7 +81,7 @@ namespace krys::boo::svg::tests
     // Tiny exponents round to zero.
     CHECK(Number(u8"1e-50", u8"") == 0.0f);
 
-    dom::DOMStringView noSkip = u8"10 20";
+    DOMStringView noSkip = u8"10 20";
     CHECK(ParseNumber(noSkip, SuffixSkippingPolicy::DontSkip) == 10.0f);
     CHECK(noSkip == u8" 20");
 
@@ -93,15 +93,15 @@ namespace krys::boo::svg::tests
 
   TEST_CASE("SVGParserUtilities: flags, points and rects", "[SVG][SVGParserUtilities]")
   {
-    dom::DOMStringView flags = u8"01 1";
+    DOMStringView flags = u8"01 1";
     CHECK(ParseArcFlag(flags) == false);
     CHECK(ParseArcFlag(flags) == true);
     CHECK(ParseArcFlag(flags) == true);
     CHECK(flags.empty());
-    dom::DOMStringView badFlag = u8"2";
+    DOMStringView badFlag = u8"2";
     CHECK_FALSE(ParseArcFlag(badFlag));
 
-    dom::DOMStringView points = u8"1,2 3 4";
+    DOMStringView points = u8"1,2 3 4";
     CHECK(ParseFloatPoint(points) == FloatPoint(1, 2));
     CHECK(ParseFloatPoint(points) == FloatPoint(3, 4));
     CHECK_FALSE(ParseFloatPoint(points));
@@ -229,7 +229,7 @@ namespace krys::boo::svg::tests
     // A large arc on a circle bigger than needed takes more than two quarters.
     auto large = Normalised(u8"M 0 0 A 20 20 0 1 1 20 0");
     size_t curves = 0;
-    for (size_t at = large.find(u8'C'); at != dom::DOMString::npos; at = large.find(u8'C', at + 1))
+    for (size_t at = large.find(u8'C'); at != DOMString::npos; at = large.find(u8'C', at + 1))
     {
       ++curves;
     }
@@ -251,7 +251,7 @@ namespace krys::boo::svg::tests
 
     SVGPathByteStream appended(u8"M 1 2");
     appended.Append(SVGPathByteStream(u8"M 0 0 L 3 4"));
-    dom::DOMString result;
+    DOMString result;
     REQUIRE(BuildStringFromByteStream(appended, result, PathParsingMode::UnalteredParsing,
                                       /* checkForInitialMoveTo */ false));
     CHECK(result == u8"M 1 2 M 0 0 L 3 4");
@@ -264,7 +264,7 @@ namespace krys::boo::svg::tests
     CHECK(appended.Size() == 0);
 
     // Building a string from an empty stream succeeds with an empty string.
-    dom::DOMString empty;
+    DOMString empty;
     CHECK(BuildStringFromByteStream(SVGPathByteStream(), empty, PathParsingMode::UnalteredParsing));
     CHECK(empty.empty());
   }
@@ -324,7 +324,7 @@ namespace krys::boo::svg::tests
 
       SVGPathByteStream result;
       REQUIRE(BuildAnimatedSVGPathByteStream(from, to, result, 0.5f));
-      dom::DOMString string;
+      DOMString string;
       REQUIRE(BuildStringFromByteStream(result, string, PathParsingMode::UnalteredParsing));
       CHECK(string == u8"M 5 10 L 20 30");
     }
@@ -333,7 +333,7 @@ namespace krys::boo::svg::tests
     {
       auto absolute = ConvertSVGPathByteStreamToAbsoluteCoordinates(SVGPathByteStream(u8"m 1 2 l 3 4 h 5"));
       REQUIRE(absolute);
-      dom::DOMString string;
+      DOMString string;
       REQUIRE(BuildStringFromByteStream(*absolute, string, PathParsingMode::UnalteredParsing));
       CHECK(string == u8"M 1 2 L 4 6 H 9");
     }

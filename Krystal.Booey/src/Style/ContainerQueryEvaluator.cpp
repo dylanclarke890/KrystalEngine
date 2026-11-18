@@ -37,7 +37,7 @@
 
 namespace krys::boo::style
 {
-  ContainerQueryEvaluator::ContainerQueryEvaluator(const dom::Element &element, SelectionMode selectionMode,
+  ContainerQueryEvaluator::ContainerQueryEvaluator(const Element &element, SelectionMode selectionMode,
                                                    ScopeOrdinal scopeOrdinal,
                                                    ContainerQueryEvaluationState *evaluationState) noexcept
       : _element(ShareRef(element)), _selectionMode(selectionMode), _scopeOrdinal(scopeOrdinal),
@@ -61,7 +61,7 @@ namespace krys::boo::style
     return EvaluateCondition(containerQuery.Condition, *context) == css::mq::EvaluationResult::True;
   }
 
-  static const RenderStyle *StyleForContainer(const dom::Element &container, css::cq::Axis requiredAxes,
+  static const RenderStyle *StyleForContainer(const Element &container, css::cq::Axis requiredAxes,
                                               const ContainerQueryEvaluationState *evaluationState) noexcept
   {
     // Any element can be a style container and we haven't necessarily committed the style to render tree yet.
@@ -103,7 +103,7 @@ namespace krys::boo::style
       return null;
     }
 
-    auto containerParent = ShareRefPtr<const dom::Element>(container->ParentElementInComposedTree());
+    auto containerParent = ShareRefPtr<const Element>(container->ParentElementInComposedTree());
     auto *containerParentStyle =
       containerParent ? StyleForContainer(*containerParent, containerQuery.RequiredAxes, _evaluationState)
                       : containerStyle;
@@ -118,11 +118,9 @@ namespace krys::boo::style
       ShareCheckedPtr<const RenderElement>(container->Renderer())};
   }
 
-  RefPtr<const dom::Element>
-    ContainerQueryEvaluator::SelectContainer(css::cq::Axis requiredAxes, const css::CSSOMString &name,
-                                             const dom::Element &element, SelectionMode selectionMode,
-                                             ScopeOrdinal scopeOrdinal,
-                                             const ContainerQueryEvaluationState *evaluationState) noexcept
+  RefPtr<const Element> ContainerQueryEvaluator::SelectContainer(
+    css::cq::Axis requiredAxes, const CSSOMString &name, const Element &element, SelectionMode selectionMode,
+    ScopeOrdinal scopeOrdinal, const ContainerQueryEvaluationState *evaluationState) noexcept
   {
     // "For each element, the query container to be queried is selected from among the element’s
     // ancestor query containers that have a valid container-type for all the container features
@@ -155,7 +153,7 @@ namespace krys::boo::style
     };
 
     auto isContainerForQuery =
-      [&](const dom::Element &candidateElement, const dom::Element *originatingElement = nullptr)
+      [&](const Element &candidateElement, const Element *originatingElement = nullptr)
     {
       auto *style = StyleForContainer(candidateElement, requiredAxes, evaluationState);
       if (!style)
@@ -194,7 +192,7 @@ namespace krys::boo::style
                                  });
     };
 
-    auto findOriginatingElement = [&]() -> const dom::Element *
+    auto findOriginatingElement = [&]() -> const Element *
     {
       if (selectionMode == SelectionMode::PseudoElement)
       {
@@ -228,7 +226,7 @@ namespace krys::boo::style
       // pseudo-elements, query containers can be established by inclusive flat tree ancestors of their
       // originating element. https://drafts.csswg.org/css-conditional-5/#container-queries
       for (auto ancestor = originatingElement; ancestor;
-           ancestor = ShareRefPtr<const dom::Element>(ancestor->ParentElementInComposedTree()))
+           ancestor = ShareRefPtr<const Element>(ancestor->ParentElementInComposedTree()))
       {
         if (isContainerForQuery(*ancestor, originatingElement.get()))
         {
@@ -250,8 +248,8 @@ namespace krys::boo::style
       return {};
     }
 
-    for (auto ancestor = ShareRefPtr<const dom::Element>(element.ParentElementInComposedTree()); ancestor;
-         ancestor = ShareRefPtr<const dom::Element>(ancestor->ParentElementInComposedTree()))
+    for (auto ancestor = ShareRefPtr<const Element>(element.ParentElementInComposedTree()); ancestor;
+         ancestor = ShareRefPtr<const Element>(ancestor->ParentElementInComposedTree()))
     {
       if (isContainerForQuery(*ancestor))
       {

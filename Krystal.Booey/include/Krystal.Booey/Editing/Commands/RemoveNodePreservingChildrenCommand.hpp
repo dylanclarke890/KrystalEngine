@@ -34,16 +34,16 @@ namespace krys::boo
   class RemoveNodePreservingChildrenCommand final : public CompositeEditCommand
   {
   private:
-    const Ref<dom::Node> _node;
+    const Ref<boo::Node> _node;
     ShouldAssumeContentIsAlwaysEditable _shouldAssumeContentIsAlwaysEditable;
 
   public:
     RemoveNodePreservingChildrenCommand(
-      dom::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
+      boo::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
       EditAction editingAction) noexcept;
 
     KRYS_NODISCARD static Ref<RemoveNodePreservingChildrenCommand>
-      Create(dom::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
+      Create(boo::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
              EditAction editingAction) noexcept;
 
   private:

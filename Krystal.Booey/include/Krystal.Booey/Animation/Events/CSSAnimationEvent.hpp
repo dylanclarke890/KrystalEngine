@@ -32,9 +32,9 @@ namespace krys::boo
   /// @see https://drafts.csswg.org/css-animations-1/#dictdef-animationeventinit
   struct CSSAnimationEventInit : public dom::EventInit
   {
-    css::CSSOMString AnimationName;
+    CSSOMString AnimationName;
     double ElapsedTime {0};
-    css::CSSOMString PseudoElement;
+    CSSOMString PseudoElement;
   };
 
   /// @brief Fired at the owning element of a CSS animation as it starts, iterates, ends or is canceled.
@@ -42,20 +42,19 @@ namespace krys::boo
   class CSSAnimationEvent final : public StyleOriginatedAnimationEvent
   {
   private:
-    css::CSSOMString _animationName;
+    CSSOMString _animationName;
 
   public:
     /// @brief The dictionary its constructor takes.
     using dictionary_type = CSSAnimationEventInit;
 
-    CSSAnimationEvent(dom::DOMStringAtom type, WebAnimation *animation, Maybe<Seconds> scheduledTime,
+    CSSAnimationEvent(DOMStringAtom type, WebAnimation *animation, Maybe<Seconds> scheduledTime,
                       double elapsedTime,
                       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
-                      css::CSSOMString animationName) noexcept;
+                      CSSOMString animationName) noexcept;
 
     /// @see https://drafts.csswg.org/css-animations-1/#dom-animationevent-animationevent
-    explicit CSSAnimationEvent(dom::DOMStringAtom type,
-                               const CSSAnimationEventInit &eventInitDict = {}) noexcept;
+    explicit CSSAnimationEvent(DOMStringAtom type, const CSSAnimationEventInit &eventInitDict = {}) noexcept;
 
     ~CSSAnimationEvent() noexcept override;
 
@@ -65,7 +64,7 @@ namespace krys::boo
     }
 
     /// @see https://drafts.csswg.org/css-animations-1/#dom-animationevent-animationname
-    KRYS_NODISCARD const css::CSSOMString &AnimationName() const noexcept
+    KRYS_NODISCARD const CSSOMString &AnimationName() const noexcept
     {
       return _animationName;
     }

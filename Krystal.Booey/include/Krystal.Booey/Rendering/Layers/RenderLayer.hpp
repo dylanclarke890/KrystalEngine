@@ -1213,7 +1213,7 @@ namespace krys::boo
                  HitTestResult &result) noexcept;
 
     /// @brief The nearest element of the layer's renderer or its ancestors.
-    KRYS_NODISCARD dom::Element *EnclosingElement() const noexcept;
+    KRYS_NODISCARD Element *EnclosingElement() const noexcept;
 
     /// @brief The layers of the top layer's elements and their `::backdrop`s, bottom to top, which the view's
     /// layer paints above everything else.

@@ -10,6 +10,11 @@
 
 namespace krys::boo::dom
 {
+  class TextAlgorithms;
+}
+
+namespace krys::boo
+{
   class Document;
 
   /// @brief A node with data: a Text, Comment or ProcessingInstruction node.
@@ -18,7 +23,7 @@ namespace krys::boo::dom
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CharacterData);
 
-    friend class TextAlgorithms;
+    friend class dom::TextAlgorithms;
 
   private:
     /// @see https://dom.spec.whatwg.org/#concept-cd-data
@@ -26,7 +31,7 @@ namespace krys::boo::dom
 
   protected:
     CharacterData(Document &document, DOMString data, dom::NodeType type,
-                  NodeFlags flags = NodeFlags::None) noexcept;
+                  dom::NodeFlags flags = dom::NodeFlags::None) noexcept;
 
   public:
 #pragma region CharacterData - https://dom.spec.whatwg.org/#characterdata
@@ -38,7 +43,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-characterdata-data
-    ExceptionOr<void> Data(DOMString data) noexcept;
+    dom::ExceptionOr<void> Data(DOMString data) noexcept;
 
     /// @brief Whether the data is empty or only ASCII whitespace.
     KRYS_NODISCARD bool ContainsOnlyASCIIWhitespace() const noexcept
@@ -53,19 +58,19 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-characterdata-substringdata
-    KRYS_NODISCARD ExceptionOr<DOMString> SubstringData(size_t offset, size_t count) const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<DOMString> SubstringData(size_t offset, size_t count) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-characterdata-appenddata
-    ExceptionOr<void> AppendData(DOMString data) noexcept;
+    dom::ExceptionOr<void> AppendData(DOMString data) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-characterdata-insertdata
-    ExceptionOr<void> InsertData(size_t offset, DOMString data) noexcept;
+    dom::ExceptionOr<void> InsertData(size_t offset, DOMString data) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-characterdata-deletedata
-    ExceptionOr<void> DeleteData(size_t offset, size_t count) noexcept;
+    dom::ExceptionOr<void> DeleteData(size_t offset, size_t count) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-characterdata-replacedata
-    ExceptionOr<void> ReplaceData(size_t offset, size_t count, DOMString data) noexcept;
+    dom::ExceptionOr<void> ReplaceData(size_t offset, size_t count, DOMString data) noexcept;
 
 #pragma endregion
 
@@ -78,7 +83,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-node-nodevalue
-    ExceptionOr<void> NodeValue(DOMString value) noexcept final
+    dom::ExceptionOr<void> NodeValue(DOMString value) noexcept final
     {
       return Data(krys::move(value));
     }
@@ -90,7 +95,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
-    ExceptionOr<void> TextContent(DOMString value) noexcept final
+    dom::ExceptionOr<void> TextContent(DOMString value) noexcept final
     {
       return Data(krys::move(value));
     }
@@ -103,22 +108,22 @@ namespace krys::boo::dom
     /// nodes.
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-before
-    ExceptionOr<void> Before(const List<NodeOrString> &nodes) noexcept;
+    dom::ExceptionOr<void> Before(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Inserts `nodes` just after `this`, while replacing strings in `nodes` with equivalent Text
     /// nodes.
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-after
-    ExceptionOr<void> After(const List<NodeOrString> &nodes) noexcept;
+    dom::ExceptionOr<void> After(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Replaces `this` with `nodes`, while replacing strings in `nodes` with equivalent Text nodes.
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-replacewith
-    ExceptionOr<void> ReplaceWith(const List<NodeOrString> &nodes) noexcept;
+    dom::ExceptionOr<void> ReplaceWith(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Removes `this`.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-remove
-    ExceptionOr<void> Remove() noexcept;
+    dom::ExceptionOr<void> Remove() noexcept;
 
 #pragma endregion
 
@@ -127,35 +132,36 @@ namespace krys::boo::dom
     /// @brief Inserts before the node @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtml
-    ExceptionOr<void> BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    dom::ExceptionOr<void> BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Inserts after the node @p html, parsed as HTML in its parent's context, sanitized by @p options
     /// (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtml
-    ExceptionOr<void> AfterHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    dom::ExceptionOr<void> AfterHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Replaces the node with @p html, parsed as HTML in its parent's context, sanitized by @p options
     /// (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtml
-    ExceptionOr<void> ReplaceWithHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    dom::ExceptionOr<void> ReplaceWithHTML(DOMStringView html,
+                                           const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Inserts before the node @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtmlunsafe
-    ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html,
-                                       const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    dom::ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html,
+                                            const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Inserts after the node @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtmlunsafe
-    ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html,
-                                      const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    dom::ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html,
+                                           const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Replaces the node with @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtmlunsafe
-    ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html,
-                                            const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    dom::ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html,
+                                                 const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
 #pragma endregion
 
@@ -181,8 +187,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::CharacterData)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CharacterData)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
     return node.IsCharacterDataNode();
   }

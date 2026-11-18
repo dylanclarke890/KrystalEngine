@@ -44,6 +44,7 @@
 
 namespace krys::boo
 {
+  class Document;
   class File;
 }
 
@@ -51,7 +52,6 @@ namespace krys::boo::dom
 {
   class DataTransfer;
   class DataTransferItem;
-  class Document;
 
   /// @brief A data transfer's items, made from its types and files when first asked for.
   /// @note The data transfer owns its item list.

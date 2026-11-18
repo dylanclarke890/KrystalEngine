@@ -46,10 +46,10 @@ namespace krys::boo
     return AdoptRef(*new AXMathMLElement(id, renderer, cache));
   }
 
-  bool AXMathMLElement::HasLocalName(dom::DOMStringView localName) const noexcept
+  bool AXMathMLElement::HasLocalName(DOMStringView localName) const noexcept
   {
     auto *element = GetElement();
-    return element && Is<mathml::MathMLElement>(*element) && element->LocalName() == localName;
+    return element && Is<MathMLElement>(*element) && element->LocalName() == localName;
   }
 
   AXRole AXMathMLElement::DetermineAccessibilityRole() noexcept
@@ -130,13 +130,13 @@ namespace krys::boo
   bool AXMathMLElement::IsMathFenceOperator() const noexcept
   {
     auto *mathOperator = DynamicDowncast<RenderMathMLOperator>(Renderer());
-    return mathOperator && mathOperator->HasOperatorFlag(mathml::MathMLOperatorDictionary::Fence);
+    return mathOperator && mathOperator->HasOperatorFlag(MathMLOperatorDictionary::Fence);
   }
 
   bool AXMathMLElement::IsMathSeparatorOperator() const noexcept
   {
     auto *mathOperator = DynamicDowncast<RenderMathMLOperator>(Renderer());
-    return mathOperator && mathOperator->HasOperatorFlag(mathml::MathMLOperatorDictionary::Separator);
+    return mathOperator && mathOperator->HasOperatorFlag(MathMLOperatorDictionary::Separator);
   }
 
   bool AXMathMLElement::IsMathText() const noexcept
@@ -314,7 +314,7 @@ namespace krys::boo
     {
       if (!foundPrescript)
       {
-        auto *element = DynamicDowncast<mathml::MathMLElement>(*child);
+        auto *element = DynamicDowncast<MathMLElement>(*child);
         foundPrescript = element && element->LocalName() == u8"mprescripts";
         continue;
       }
@@ -356,7 +356,7 @@ namespace krys::boo
     bool foundBaseElement = false;
     for (auto *child = node->FirstChild(); child; child = child->NextSibling())
     {
-      auto *element = DynamicDowncast<mathml::MathMLElement>(*child);
+      auto *element = DynamicDowncast<MathMLElement>(*child);
       if (element && element->LocalName() == u8"mprescripts")
       {
         break;

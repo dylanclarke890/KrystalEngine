@@ -18,18 +18,18 @@ namespace krys::boo::tests
         (void)Document->UpdateLayout();
       }
 
-      KRYS_NODISCARD dom::Text &TextIn(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD Text &TextIn(DOMStringView id) noexcept
       {
-        return Downcast<dom::Text>(*ById(id).FirstChild());
+        return Downcast<Text>(*ById(id).FirstChild());
       }
     };
 
-    KRYS_NODISCARD dom::Position At(dom::Node &node, uint32 offset) noexcept
+    KRYS_NODISCARD dom::Position At(Node &node, uint32 offset) noexcept
     {
       return dom::MakeContainerOffsetPosition(ShareRefPtr(&node), offset);
     }
 
-    KRYS_NODISCARD bool IsAt(const dom::Position &position, const dom::Node &node, int32 offset) noexcept
+    KRYS_NODISCARD bool IsAt(const dom::Position &position, const Node &node, int32 offset) noexcept
     {
       return position.DeprecatedNode() == &node && position.DeprecatedEditingOffset() == offset;
     }

@@ -36,13 +36,13 @@
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   namespace
   {
     /// @brief @p values as one value of @p property: the value itself, or a list of them.
-    KRYS_NODISCARD RefPtr<Value> ValueFromStyleValues(PropertyId property,
-                                                      const List<Ref<CSSStyleValue>> &values) noexcept
+    KRYS_NODISCARD RefPtr<css::Value> ValueFromStyleValues(css::PropertyId property,
+                                                           const List<Ref<CSSStyleValue>> &values) noexcept
     {
       if (values.empty())
       {
@@ -52,25 +52,26 @@ namespace krys::boo::css
       {
         return values[0]->ToCSSValueWithProperty(property);
       }
-      ValueListBuilder list;
+      css::ValueListBuilder list;
       for (const auto &value : values)
       {
         if (auto cssValue = value->ToCSSValueWithProperty(property))
         {
-          list.push_back(Ref<Value>(krys::move(cssValue)));
+          list.push_back(Ref<css::Value>(krys::move(cssValue)));
         }
       }
-      return ValueList::Create(Property::ListValuedPropertySeparator(property), krys::move(list));
+      return css::ValueList::Create(css::Property::ListValuedPropertySeparator(property), krys::move(list));
     }
 
     /// @brief The property @p property names, if it's one that's exposed in @p document.
-    KRYS_NODISCARD PropertyId ExposedPropertyId(dom::Document &document, CSSOMStringView property) noexcept
+    KRYS_NODISCARD css::PropertyId ExposedPropertyId(boo::Document &document,
+                                                     CSSOMStringView property) noexcept
     {
-      auto propertyId = PropertyIdFromName(text::ToASCIILower(property));
-      if (propertyId == PropertyId::Invalid
-          || !IsExposed(propertyId, ParserContext(document).PropertySettings))
+      auto propertyId = css::PropertyIdFromName(text::ToASCIILower(property));
+      if (propertyId == css::PropertyId::Invalid
+          || !IsExposed(propertyId, css::ParserContext(document).PropertySettings))
       {
-        return PropertyId::Invalid;
+        return css::PropertyId::Invalid;
       }
       return propertyId;
     }
@@ -87,7 +88,7 @@ namespace krys::boo::css
     }
 
     // A custom property's value is one unparsed value.
-    if (IsCustomPropertyName(property))
+    if (css::IsCustomPropertyName(property))
     {
       auto styleValues =
         CSSStyleValueFactory::ListFromStyleValuesOrStrings(*document, property, krys::move(values));
@@ -101,7 +102,7 @@ namespace krys::boo::css
         return dom::Exception {dom::ExceptionCode::TypeError};
       }
       auto value = list[0]->ToCSSValue();
-      auto *reference = value ? DynamicDowncast<VariableReferenceValue>(*value) : nullptr;
+      auto *reference = value ? DynamicDowncast<css::VariableReferenceValue>(*value) : nullptr;
       if (!reference)
       {
         return dom::Exception {dom::ExceptionCode::TypeError};
@@ -111,12 +112,12 @@ namespace krys::boo::css
     }
 
     auto propertyId = ExposedPropertyId(*document, property);
-    if (propertyId == PropertyId::Invalid)
+    if (propertyId == css::PropertyId::Invalid)
     {
       return dom::Exception {dom::ExceptionCode::TypeError};
     }
 
-    if (!Property::IsListValuedProperty(propertyId) && values.size() > 1)
+    if (!css::Property::IsListValuedProperty(propertyId) && values.size() > 1)
     {
       return dom::Exception {dom::ExceptionCode::TypeError};
     }
@@ -163,24 +164,24 @@ namespace krys::boo::css
     }
 
     // The parser may convert numbers to lengths, which the Typed OM doesn't allow.
-    if (const auto *primitiveValue = DynamicDowncast<PrimitiveValue>(*value);
+    if (const auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(*value);
         primitiveValue && (primitiveValue->IsNumber() || primitiveValue->IsInteger())
-        && !Property::AllowsNumberOrIntegerInput(propertyId))
+        && !css::Property::AllowsNumberOrIntegerInput(propertyId))
     {
       return dom::Exception {dom::ExceptionCode::TypeError};
     }
 
     // A pair or quad of equal values serialises as fewer, so its serialisation wouldn't represent it.
-    if (const auto *pair = DynamicDowncast<ValuePair>(*value); pair && pair->CanBeCoalesced())
+    if (const auto *pair = DynamicDowncast<css::ValuePair>(*value); pair && pair->CanBeCoalesced())
     {
       return dom::Exception {dom::ExceptionCode::NotSupportedError};
     }
-    if (const auto *quad = DynamicDowncast<QuadValue>(*value); quad && quad->CanBeCoalesced())
+    if (const auto *quad = DynamicDowncast<css::QuadValue>(*value); quad && quad->CanBeCoalesced())
     {
       return dom::Exception {dom::ExceptionCode::TypeError};
     }
 
-    if (!SetProperty(propertyId, Ref<Value>(krys::move(value))))
+    if (!SetProperty(propertyId, Ref<css::Value>(krys::move(value))))
     {
       return dom::Exception {dom::ExceptionCode::TypeError};
     }
@@ -202,25 +203,25 @@ namespace krys::boo::css
       return dom::Exception {dom::ExceptionCode::TypeError};
     }
 
-    if (IsCustomPropertyName(property))
+    if (css::IsCustomPropertyName(property))
     {
       return dom::Exception {dom::ExceptionCode::TypeError};
     }
     auto propertyId = ExposedPropertyId(*document, property);
-    if (propertyId == PropertyId::Invalid || !Property::IsListValuedProperty(propertyId))
+    if (propertyId == css::PropertyId::Invalid || !css::Property::IsListValuedProperty(propertyId))
     {
       return dom::Exception {dom::ExceptionCode::TypeError};
     }
 
     auto currentValue = PropertyValue(propertyId);
-    ValueListBuilder list;
-    if (const auto *currentList = currentValue ? DynamicDowncast<ValueList>(*currentValue) : nullptr)
+    css::ValueListBuilder list;
+    if (const auto *currentList = currentValue ? DynamicDowncast<css::ValueList>(*currentValue) : nullptr)
     {
       list = currentList->CopyValues();
     }
     else if (currentValue)
     {
-      list.push_back(Ref<Value>(krys::move(currentValue)));
+      list.push_back(Ref<css::Value>(krys::move(currentValue)));
     }
 
     auto styleValues =
@@ -240,15 +241,15 @@ namespace krys::boo::css
       {
         continue;
       }
-      if (Is<VariableReferenceValue>(*cssValue))
+      if (Is<css::VariableReferenceValue>(*cssValue))
       {
         return dom::Exception {dom::ExceptionCode::TypeError};
       }
-      list.push_back(Ref<Value>(krys::move(cssValue)));
+      list.push_back(Ref<css::Value>(krys::move(cssValue)));
     }
 
-    if (!SetProperty(propertyId,
-                     ValueList::Create(Property::ListValuedPropertySeparator(propertyId), krys::move(list))))
+    if (!SetProperty(propertyId, css::ValueList::Create(
+                                   css::Property::ListValuedPropertySeparator(propertyId), krys::move(list))))
     {
       return dom::Exception {dom::ExceptionCode::TypeError};
     }
@@ -258,16 +259,16 @@ namespace krys::boo::css
   dom::ExceptionOr<void> StylePropertyMap::Delete(CSSOMStringView property) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymap-delete
-    if (IsCustomPropertyName(property))
+    if (css::IsCustomPropertyName(property))
     {
       RemoveCustomProperty(CSSOMStringAtom(property));
       return {};
     }
 
     auto *document = Document();
-    auto propertyId =
-      document ? ExposedPropertyId(*document, property) : PropertyIdFromName(text::ToASCIILower(property));
-    if (propertyId == PropertyId::Invalid)
+    auto propertyId = document ? ExposedPropertyId(*document, property)
+                               : css::PropertyIdFromName(text::ToASCIILower(property));
+    if (propertyId == css::PropertyId::Invalid)
     {
       return dom::Exception {dom::ExceptionCode::TypeError};
     }

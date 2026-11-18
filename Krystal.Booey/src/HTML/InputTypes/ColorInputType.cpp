@@ -58,8 +58,7 @@ namespace krys::boo::html
     // https://html.spec.whatwg.org/#update-a-color-well-control-color
     // 3. Let color be the result of parsing value.
     // (As a CSS <color>, with currentcolor as black, as WebKit does.)
-    KRYS_NODISCARD Maybe<Color> ParseColorValue(dom::DOMStringView string,
-                                                const HTMLInputElement &input) noexcept
+    KRYS_NODISCARD Maybe<Color> ParseColorValue(DOMStringView string, const HTMLInputElement &input) noexcept
     {
       using namespace css::parse_property;
       auto context = input.NodeDocument().CssParserContext();
@@ -81,7 +80,7 @@ namespace krys::boo::html
     }
 
     // https://html.spec.whatwg.org/#serialize-a-color-well-control-color
-    KRYS_NODISCARD dom::DOMString SerializeColorValue(Color color, const HTMLInputElement &element) noexcept
+    KRYS_NODISCARD DOMString SerializeColorValue(Color color, const HTMLInputElement &element) noexcept
     {
       // 1. Assert: element is an input element whose type attribute is in the Color state.
       // 2. Let htmlCompatible be false.
@@ -117,7 +116,7 @@ namespace krys::boo::html
       // 6. Return the result of serializing color. If htmlCompatible is true, then do so with HTML-compatible
       //    serialization requested.
       // (An opaque sRGB colour serialises as # and six lowercase hexadecimal digits.)
-      return dom::DOMString(SerialisationForHTML(color));
+      return DOMString(SerialisationForHTML(color));
     }
   }
 
@@ -136,13 +135,13 @@ namespace krys::boo::html
     return false;
   }
 
-  Maybe<dom::DOMString> ColorInputType::FallbackValue() const noexcept
+  Maybe<DOMString> ColorInputType::FallbackValue() const noexcept
   {
     krys_debug_assert(Element());
     return SerializeColorValue(Color::black, *Element());
   }
 
-  dom::DOMString ColorInputType::SanitizeValue(dom::DOMStringView proposedValue) const noexcept
+  DOMString ColorInputType::SanitizeValue(DOMStringView proposedValue) const noexcept
   {
     // https://html.spec.whatwg.org/#update-a-color-well-control-color
     krys_debug_assert(Element());
@@ -192,8 +191,7 @@ namespace krys::boo::html
     UpdateColorSwatch();
   }
 
-  void ColorInputType::SetValue(dom::DOMStringView value, bool valueChanged,
-                                TextFieldEventBehavior eventBehavior,
+  void ColorInputType::SetValue(DOMStringView value, bool valueChanged, TextFieldEventBehavior eventBehavior,
                                 TextControlSetValueSelection selection) noexcept
   {
     InputType::SetValue(value, valueChanged, eventBehavior, selection);
@@ -210,7 +208,7 @@ namespace krys::boo::html
     }
   }
 
-  void ColorInputType::AttributeChanged(const dom::DOMStringAtom &name) noexcept
+  void ColorInputType::AttributeChanged(const DOMStringAtom &name) noexcept
   {
     if (name == u8"value")
     {

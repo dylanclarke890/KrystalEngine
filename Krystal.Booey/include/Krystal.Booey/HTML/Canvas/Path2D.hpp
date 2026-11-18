@@ -56,7 +56,7 @@ namespace krys::boo::html
     }
 
     /// @brief A path from SVG path data (`<path d>`'s syntax).
-    KRYS_NODISCARD static Ref<Path2D> Create(dom::DOMStringView pathData) noexcept;
+    KRYS_NODISCARD static Ref<Path2D> Create(DOMStringView pathData) noexcept;
 
     ~Path2D() noexcept override = default;
 

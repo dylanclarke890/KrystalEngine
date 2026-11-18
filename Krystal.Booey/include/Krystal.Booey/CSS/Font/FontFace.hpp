@@ -39,16 +39,12 @@
 
 namespace krys::boo
 {
+  class Document;
   enum class ExternalResourceDownloadPolicy : bool;
   class Font;
   class FontDescription;
   class FontFeatureValues;
   class FontPaletteValues;
-
-  namespace dom
-  {
-    class Document;
-  }
 }
 
 namespace krys::boo::css
@@ -210,7 +206,7 @@ namespace krys::boo::css
                                         const FontPaletteValues &fontPaletteValues,
                                         const RefPtr<FontFeatureValues> &fontFeatureValues) noexcept;
 
-    static void AppendSources(CSSFontFace &fontFace, ValueList &srcList, dom::Document *context,
+    static void AppendSources(CSSFontFace &fontFace, ValueList &srcList, boo::Document *context,
                               bool isInitiatingElementInUserAgentShadowTree) noexcept;
 
     KRYS_NODISCARD bool RangesMatchCodePoint(char32 character) const noexcept;

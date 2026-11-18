@@ -29,7 +29,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGValueProperty.hpp"
 #include "Krystal.Booey/SVG/SVGAngleValue.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @see https://svgwg.org/svg2-draft/types.html#InterfaceSVGAngle
   class SVGAngle : public SVGValueProperty<SVGAngleValue>
@@ -104,7 +104,7 @@ namespace krys::boo::svg
       return _value.ValueInSpecifiedUnits();
     }
 
-    dom::ExceptionOr<void> SetValueAsString(dom::DOMStringView value) noexcept
+    dom::ExceptionOr<void> SetValueAsString(DOMStringView value) noexcept
     {
       if (IsReadOnly())
       {
@@ -121,7 +121,7 @@ namespace krys::boo::svg
       return result;
     }
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept override
     {
       return _value.ValueAsString();
     }

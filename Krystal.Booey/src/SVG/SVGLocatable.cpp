@@ -30,7 +30,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGSymbolElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   namespace
   {
@@ -55,7 +55,7 @@ namespace krys::boo::svg
   SVGElement *SVGLocatable::NearestViewportElement(const SVGElement *element) noexcept
   {
     krys_debug_assert(element);
-    for (RefPtr<dom::Element> current = ShareRefPtr(dom::TreeQueries::ParentOrShadowHostElement(*element));
+    for (RefPtr<Element> current = ShareRefPtr(dom::TreeQueries::ParentOrShadowHostElement(*element));
          current; current = ShareRefPtr(dom::TreeQueries::ParentOrShadowHostElement(*current)))
     {
       auto *svgElement = DynamicDowncast<SVGElement>(*current);
@@ -72,7 +72,7 @@ namespace krys::boo::svg
   {
     krys_debug_assert(element);
     SVGElement *farthest = nullptr;
-    for (RefPtr<dom::Element> current = ShareRefPtr(dom::TreeQueries::ParentOrShadowHostElement(*element));
+    for (RefPtr<Element> current = ShareRefPtr(dom::TreeQueries::ParentOrShadowHostElement(*element));
          current; current = ShareRefPtr(dom::TreeQueries::ParentOrShadowHostElement(*current)))
     {
       auto *svgElement = DynamicDowncast<SVGElement>(*current);
@@ -101,7 +101,7 @@ namespace krys::boo::svg
     return element->Renderer()->ObjectBoundingBox();
   }
 
-  AffineTransform SVGLocatable::ComputeCTM(SVGElement *element, CTMScope mode,
+  AffineTransform SVGLocatable::ComputeCTM(SVGElement *element, svg::CTMScope mode,
                                            StyleUpdateStrategy styleUpdateStrategy) noexcept
   {
     krys_debug_assert(element);
@@ -111,11 +111,11 @@ namespace krys::boo::svg
     }
 
     RefPtr<SVGElement> stopAtElement =
-      ShareRefPtr(mode == CTMScope::NearestViewportScope ? NearestViewportElement(element) : nullptr);
+      ShareRefPtr(mode == svg::CTMScope::NearestViewportScope ? NearestViewportElement(element) : nullptr);
 
     AffineTransform ctm;
 
-    for (dom::Element *currentElement = element; currentElement;
+    for (Element *currentElement = element; currentElement;
          currentElement = dom::TreeQueries::ParentOrShadowHostElement(*currentElement))
     {
       RefPtr<SVGElement> svgElement = ShareRefPtr(DynamicDowncast<SVGElement>(*currentElement));

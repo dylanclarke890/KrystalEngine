@@ -36,7 +36,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(LegacyRenderSVGResourceContainer);
 
   private:
-    dom::DOMStringAtom _id;
+    DOMStringAtom _id;
     HashSet<RenderElement *> _clients;
     /// @brief The layers filtered from HTML by the resource; each removes itself before it goes.
     HashSet<RenderLayer *> _clientLayers;
@@ -72,7 +72,7 @@ namespace krys::boo
     void MarkAllClientLayersForInvalidation() noexcept;
 
   protected:
-    LegacyRenderSVGResourceContainer(Type, svg::SVGElement &, RenderStyle &&) noexcept;
+    LegacyRenderSVGResourceContainer(Type, SVGElement &, RenderStyle &&) noexcept;
 
     enum class InvalidationMode : uint8
     {
@@ -105,8 +105,7 @@ namespace krys::boo
   };
 
   KRYS_NODISCARD inline LegacyRenderSVGResourceContainer *
-    GetRenderSVGResourceContainerById(dom::DocumentOrShadowRoot &treeScope,
-                                      const dom::DOMStringAtom &id) noexcept
+    GetRenderSVGResourceContainerById(dom::DocumentOrShadowRoot &treeScope, const DOMStringAtom &id) noexcept
   {
     if (id.View().empty())
     {
@@ -123,7 +122,7 @@ namespace krys::boo
 
   template <typename TRenderer>
   KRYS_NODISCARD TRenderer *GetRenderSVGResourceById(dom::DocumentOrShadowRoot &treeScope,
-                                                     const dom::DOMStringAtom &id) noexcept
+                                                     const DOMStringAtom &id) noexcept
   {
     return DynamicDowncast<TRenderer>(GetRenderSVGResourceContainerById(treeScope, id));
   }

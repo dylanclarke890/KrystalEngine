@@ -115,15 +115,14 @@ namespace krys::boo::html
       Src,
     };
 
-    dom::DOMString String;
+    DOMString String;
     float Density {DefaultDensityValue};
     int32 ResourceWidth {UninitializedDescriptor};
     OriginAttribute Origin {OriginAttribute::Srcset};
 
     ImageCandidate() noexcept = default;
 
-    ImageCandidate(dom::DOMString source, const DescriptorParsingResult &result,
-                   OriginAttribute origin) noexcept
+    ImageCandidate(DOMString source, const DescriptorParsingResult &result, OriginAttribute origin) noexcept
         : String(krys::move(source)),
           Density(result.HasDensity() ? result.Density() : UninitializedDescriptor),
           ResourceWidth(result.HasWidth() ? static_cast<int32>(result.ResourceWidth())
@@ -149,11 +148,10 @@ namespace krys::boo::html
   /// @param srcsetAttribute The `srcset` attribute, or null if it's absent.
   /// @see https://html.spec.whatwg.org/#select-an-image-source
   KRYS_NODISCARD ImageCandidate BestFitSourceForImageAttributes(
-    float deviceScaleFactor, Maybe<dom::DOMStringView> srcAttribute,
-    Maybe<dom::DOMStringView> srcsetAttribute, float sourceSize,
-    const Func<bool(const ImageCandidate &)> &shouldIgnoreCandidateCallback = {}) noexcept;
+    float deviceScaleFactor, Maybe<DOMStringView> srcAttribute, Maybe<DOMStringView> srcsetAttribute,
+    float sourceSize, const Func<bool(const ImageCandidate &)> &shouldIgnoreCandidateCallback = {}) noexcept;
 
   /// @see https://html.spec.whatwg.org/#parse-a-srcset-attribute
   KRYS_NODISCARD List<ImageCandidate>
-    ParseImageCandidatesFromSrcsetAttribute(dom::DOMStringView attribute) noexcept;
+    ParseImageCandidatesFromSrcsetAttribute(DOMStringView attribute) noexcept;
 }

@@ -151,7 +151,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD Ref<css::MutableStyleProperties>
-      CopyPropertiesFromComputedStyle(dom::Node *node,
+      CopyPropertiesFromComputedStyle(Node *node,
                                       EditingStyle::PropertiesToInclude propertiesToInclude) noexcept
     {
       style::Extractor computedStyle(node);
@@ -211,13 +211,13 @@ namespace krys::boo
       UseLegacyFontSizeOnlyIfPixelValuesMatch,
     };
 
-    KRYS_NODISCARD int32 LegacyFontSizeFromCSSValue(dom::Document &document, css::PrimitiveValue *value,
+    KRYS_NODISCARD int32 LegacyFontSizeFromCSSValue(Document &document, css::PrimitiveValue *value,
                                                     bool shouldUseFixedFontDefaultSize,
                                                     LegacyFontSizeMode mode) noexcept;
 
     KRYS_NODISCARD bool HasTransparentBackgroundColor(css::StyleProperties *style) noexcept;
 
-    KRYS_NODISCARD RefPtr<css::Value> BackgroundColorInEffect(dom::Node *node) noexcept;
+    KRYS_NODISCARD RefPtr<css::Value> BackgroundColorInEffect(Node *node) noexcept;
 
     KRYS_NODISCARD bool IsValueID(const css::Value &value, ValueId valueID) noexcept
     {
@@ -276,7 +276,7 @@ namespace krys::boo
 
     virtual ~HTMLElementEquivalent() noexcept = default;
 
-    KRYS_NODISCARD virtual bool Matches(const dom::Element &element) const noexcept
+    KRYS_NODISCARD virtual bool Matches(const Element &element) const noexcept
     {
       return !_tagName || IsHTMLElementOfType(&element, *_tagName);
     }
@@ -291,14 +291,14 @@ namespace krys::boo
       return style._mutableStyle && style._mutableStyle->GetPropertyCSSValue(_propertyID);
     }
 
-    KRYS_NODISCARD virtual bool ValueIsPresentInStyle(dom::Element &element,
+    KRYS_NODISCARD virtual bool ValueIsPresentInStyle(Element &element,
                                                       const EditingStyle &style) const noexcept
     {
       return Matches(element)
              && style._mutableStyle->PropertyAsValueId(_propertyID) == _primitiveValue->ValueId();
     }
 
-    virtual void AddToStyle(dom::Element *, EditingStyle *style) const noexcept
+    virtual void AddToStyle(Element *, EditingStyle *style) const noexcept
     {
       style->SetProperty(_propertyID, _primitiveValue->CssText(css::DefaultSerialisationContext()));
     }
@@ -342,7 +342,7 @@ namespace krys::boo
              || mutableStyle.GetPropertyCSSValue(PropertyId::TextDecorationLine);
     }
 
-    KRYS_NODISCARD bool ValueIsPresentInStyle(dom::Element &element,
+    KRYS_NODISCARD bool ValueIsPresentInStyle(Element &element,
                                               const EditingStyle &style) const noexcept override
     {
       if (!Matches(element))
@@ -420,7 +420,7 @@ namespace krys::boo
     }
 
   private:
-    KRYS_NODISCARD bool ValueIsPresentInStyle(dom::Element &element,
+    KRYS_NODISCARD bool ValueIsPresentInStyle(Element &element,
                                               const EditingStyle &style) const noexcept override
     {
       RefPtr<css::Value> value = style._mutableStyle->GetPropertyCSSValue(_propertyID);
@@ -431,20 +431,20 @@ namespace krys::boo
   class HTMLAttributeEquivalent : public HTMLElementEquivalent
   {
   protected:
-    dom::DOMStringAtom _attrName;
+    DOMStringAtom _attrName;
 
   public:
-    HTMLAttributeEquivalent(PropertyId id, html::TagName tagName, dom::DOMStringAtom attrName) noexcept
+    HTMLAttributeEquivalent(PropertyId id, html::TagName tagName, DOMStringAtom attrName) noexcept
         : HTMLElementEquivalent(id, tagName), _attrName(krys::move(attrName))
     {
     }
 
-    HTMLAttributeEquivalent(PropertyId id, dom::DOMStringAtom attrName) noexcept
+    HTMLAttributeEquivalent(PropertyId id, DOMStringAtom attrName) noexcept
         : HTMLElementEquivalent(id), _attrName(krys::move(attrName))
     {
     }
 
-    KRYS_NODISCARD bool Matches(const dom::Element &element) const noexcept override
+    KRYS_NODISCARD bool Matches(const Element &element) const noexcept override
     {
       return HTMLElementEquivalent::Matches(element) && element.HasAttribute(_attrName);
     }
@@ -454,7 +454,7 @@ namespace krys::boo
       return true;
     }
 
-    KRYS_NODISCARD bool ValueIsPresentInStyle(dom::Element &element,
+    KRYS_NODISCARD bool ValueIsPresentInStyle(Element &element,
                                               const EditingStyle &style) const noexcept override
     {
       RefPtr<css::Value> value = AttributeValueAsCSSValue(&element);
@@ -463,7 +463,7 @@ namespace krys::boo
       return CompareCSSValuePtr(value, styleValue);
     }
 
-    void AddToStyle(dom::Element *element, EditingStyle *style) const noexcept override
+    void AddToStyle(Element *element, EditingStyle *style) const noexcept override
     {
       if (RefPtr<css::Value> value = AttributeValueAsCSSValue(element))
       {
@@ -471,7 +471,7 @@ namespace krys::boo
       }
     }
 
-    KRYS_NODISCARD virtual RefPtr<css::Value> AttributeValueAsCSSValue(dom::Element *element) const noexcept
+    KRYS_NODISCARD virtual RefPtr<css::Value> AttributeValueAsCSSValue(Element *element) const noexcept
     {
       krys_debug_assert(element);
       auto value = element->GetAttribute(_attrName);
@@ -485,7 +485,7 @@ namespace krys::boo
       return dummyStyle->GetPropertyCSSValue(_propertyID);
     }
 
-    KRYS_NODISCARD dom::DOMStringAtom AttributeName() const noexcept
+    KRYS_NODISCARD DOMStringAtom AttributeName() const noexcept
     {
       return _attrName;
     }
@@ -499,7 +499,7 @@ namespace krys::boo
     {
     }
 
-    KRYS_NODISCARD RefPtr<css::Value> AttributeValueAsCSSValue(dom::Element *element) const noexcept override
+    KRYS_NODISCARD RefPtr<css::Value> AttributeValueAsCSSValue(Element *element) const noexcept override
     {
       krys_debug_assert(element);
       auto value = element->GetAttribute(_attrName);
@@ -507,7 +507,7 @@ namespace krys::boo
       {
         return nullptr;
       }
-      auto size = html::HTMLFontElement::CSSValueFromFontSizeNumber(*value);
+      auto size = HTMLFontElement::CSSValueFromFontSizeNumber(*value);
       if (!size)
       {
         return nullptr;
@@ -521,7 +521,7 @@ namespace krys::boo
     return CreateRef<EditingStyle>();
   }
 
-  Ref<EditingStyle> EditingStyle::Create(dom::Node *node, PropertiesToInclude propertiesToInclude) noexcept
+  Ref<EditingStyle> EditingStyle::Create(Node *node, PropertiesToInclude propertiesToInclude) noexcept
   {
     return CreateRef<EditingStyle>(node, propertiesToInclude);
   }
@@ -537,12 +537,12 @@ namespace krys::boo
     return CreateRef<EditingStyle>(style);
   }
 
-  Ref<EditingStyle> EditingStyle::Create(const css::CSSStyleProperties *style) noexcept
+  Ref<EditingStyle> EditingStyle::Create(const CSSStyleProperties *style) noexcept
   {
     return CreateRef<EditingStyle>(style);
   }
 
-  Ref<EditingStyle> EditingStyle::Create(PropertyId propertyID, const dom::DOMString &value) noexcept
+  Ref<EditingStyle> EditingStyle::Create(PropertyId propertyID, const DOMString &value) noexcept
   {
     return CreateRef<EditingStyle>(propertyID, value);
   }
@@ -554,7 +554,7 @@ namespace krys::boo
 
   EditingStyle::EditingStyle() noexcept = default;
 
-  EditingStyle::EditingStyle(dom::Node *node, PropertiesToInclude propertiesToInclude) noexcept
+  EditingStyle::EditingStyle(Node *node, PropertiesToInclude propertiesToInclude) noexcept
   {
     Init(node, propertiesToInclude);
   }
@@ -564,7 +564,7 @@ namespace krys::boo
     Init(position.DeprecatedNode(), propertiesToInclude);
   }
 
-  EditingStyle::EditingStyle(const css::CSSStyleProperties *style) noexcept
+  EditingStyle::EditingStyle(const CSSStyleProperties *style) noexcept
   {
     if (style)
     {
@@ -580,7 +580,7 @@ namespace krys::boo
     }
   }
 
-  EditingStyle::EditingStyle(PropertyId propertyID, const dom::DOMString &value) noexcept
+  EditingStyle::EditingStyle(PropertyId propertyID, const DOMString &value) noexcept
   {
     SetProperty(propertyID, value);
   }
@@ -628,7 +628,7 @@ namespace krys::boo
       return CSSValueToColor(ExtractPropertyValue(style, PropertyId::BackgroundColor).get());
     }
 
-    KRYS_NODISCARD Color RGBABackgroundColorInEffect(dom::Node *node) noexcept
+    KRYS_NODISCARD Color RGBABackgroundColorInEffect(Node *node) noexcept
     {
       return CSSValueToColor(BackgroundColorInEffect(node).get());
     }
@@ -659,16 +659,16 @@ namespace krys::boo
     }
   }
 
-  void EditingStyle::Init(dom::Node *initialNode, PropertiesToInclude propertiesToInclude) noexcept
+  void EditingStyle::Init(Node *initialNode, PropertiesToInclude propertiesToInclude) noexcept
   {
-    RefPtr<dom::Node> node = ShareRefPtr(initialNode);
+    RefPtr<Node> node = ShareRefPtr(initialNode);
     if (auto *tabSpan = ParentTabSpanNode(node.get()))
     {
-      node = ShareRefPtr<dom::Node>(tabSpan->ParentNode());
+      node = ShareRefPtr<Node>(tabSpan->ParentNode());
     }
     else if (TabSpanNode(node.get()))
     {
-      node = ShareRefPtr<dom::Node>(node->ParentNode());
+      node = ShareRefPtr<Node>(node->ParentNode());
     }
 
     style::Extractor computedStyleAtPosition(node.get());
@@ -720,7 +720,7 @@ namespace krys::boo
     _shouldUseFixedDefaultFontSize = computedStyleAtPosition.UseFixedFontDefaultSize();
   }
 
-  void EditingStyle::SetProperty(PropertyId propertyID, const dom::DOMString &value,
+  void EditingStyle::SetProperty(PropertyId propertyID, const DOMString &value,
                                  css::IsImportant important) noexcept
   {
     if (!_mutableStyle)
@@ -950,7 +950,7 @@ namespace krys::boo
     (void)_mutableStyle->RemoveProperties(Span<const PropertyId>(BlockProperties));
   }
 
-  void EditingStyle::RemoveStyleAddedByNode(dom::Node *node) noexcept
+  void EditingStyle::RemoveStyleAddedByNode(Node *node) noexcept
   {
     if (!node || !node->ParentNode())
     {
@@ -963,7 +963,7 @@ namespace krys::boo
     RemoveEquivalentProperties(*nodeStyle);
   }
 
-  void EditingStyle::RemoveStyleConflictingWithStyleOfNode(dom::Node &node) noexcept
+  void EditingStyle::RemoveStyleConflictingWithStyleOfNode(Node &node) noexcept
   {
     if (!node.ParentNode() || !_mutableStyle)
     {
@@ -1083,14 +1083,14 @@ namespace krys::boo
       {
         style::Extractor computedStyle(node);
         TriState nodeState =
-          TriStateOfStyle(computedStyle, Is<dom::Text>(*node) ? ShouldIgnoreTextOnlyProperties::No
-                                                              : ShouldIgnoreTextOnlyProperties::Yes);
+          TriStateOfStyle(computedStyle, Is<Text>(*node) ? ShouldIgnoreTextOnlyProperties::No
+                                                         : ShouldIgnoreTextOnlyProperties::Yes);
         if (nodeIsStart)
         {
           state = nodeState;
           nodeIsStart = false;
         }
-        else if (state != nodeState && Is<dom::Text>(*node))
+        else if (state != nodeState && Is<Text>(*node))
         {
           state = TriState::Indeterminate;
           break;
@@ -1116,7 +1116,7 @@ namespace krys::boo
     }
   }
 
-  bool EditingStyle::ConflictsWithInlineStyleOfElement(dom::StyledElement &element,
+  bool EditingStyle::ConflictsWithInlineStyleOfElement(StyledElement &element,
                                                        RefPtr<css::MutableStyleProperties> *newInlineStylePtr,
                                                        EditingStyle *extractedStyle) const noexcept
   {
@@ -1301,7 +1301,7 @@ namespace krys::boo
   }
 
   bool EditingStyle::ConflictsWithImplicitStyleOfElement(
-    dom::Element &element, EditingStyle *extractedStyle,
+    Element &element, EditingStyle *extractedStyle,
     ShouldExtractMatchingStyle shouldExtractMatchingStyle) const noexcept
   {
     if (IsEmpty())
@@ -1325,7 +1325,7 @@ namespace krys::boo
     return false;
   }
 
-  bool EditingStyle::ConflictsWithImplicitStyleOfAttributes(dom::Element &element) const noexcept
+  bool EditingStyle::ConflictsWithImplicitStyleOfAttributes(Element &element) const noexcept
   {
     if (IsEmpty())
     {
@@ -1345,8 +1345,8 @@ namespace krys::boo
   }
 
   bool EditingStyle::ExtractConflictingImplicitStyleOfAttributes(
-    dom::Element &element, ShouldPreserveWritingDirection shouldPreserveWritingDirection,
-    EditingStyle *extractedStyle, List<dom::DOMStringAtom> &conflictingAttributes,
+    Element &element, ShouldPreserveWritingDirection shouldPreserveWritingDirection,
+    EditingStyle *extractedStyle, List<DOMStringAtom> &conflictingAttributes,
     ShouldExtractMatchingStyle shouldExtractMatchingStyle) const noexcept
   {
     // HTMLAttributeEquivalent::AddToStyle doesn't support unicode-bidi and direction properties
@@ -1385,7 +1385,7 @@ namespace krys::boo
     return removed;
   }
 
-  bool EditingStyle::StyleIsPresentInComputedStyleOfNode(dom::Node &node) const noexcept
+  bool EditingStyle::StyleIsPresentInComputedStyleOfNode(Node &node) const noexcept
   {
     if (IsEmpty())
     {
@@ -1416,7 +1416,7 @@ namespace krys::boo
     return !_mutableStyle || GetPropertiesNotIn(*_mutableStyle, computedStyle)->empty();
   }
 
-  bool EditingStyle::ElementIsStyledSpanOrHTMLEquivalent(const dom::Element &element) noexcept
+  bool EditingStyle::ElementIsStyledSpanOrHTMLEquivalent(const Element &element) noexcept
   {
     bool elementIsSpanOrElementEquivalent = false;
     if (IsHTMLElementOfType(&element, html::TagName::span))
@@ -1456,7 +1456,7 @@ namespace krys::boo
 
     if (element.HasAttribute(u8"style"))
     {
-      if (auto *styledElement = DynamicDowncast<dom::StyledElement>(element))
+      if (auto *styledElement = DynamicDowncast<StyledElement>(element))
       {
         if (auto *style = styledElement->InlineStyle())
         {
@@ -1536,7 +1536,7 @@ namespace krys::boo
     }
   }
 
-  void EditingStyle::MergeTypingStyle(dom::Document &document) noexcept
+  void EditingStyle::MergeTypingStyle(Document &document) noexcept
   {
     RefPtr<EditingStyle> typingStyle = ShareRefPtr(document.Selection().TypingStyle());
     if (!typingStyle || typingStyle.get() == this)
@@ -1547,7 +1547,7 @@ namespace krys::boo
     MergeStyle(typingStyle->_mutableStyle.get(), CSSPropertyOverrideMode::OverrideValues);
   }
 
-  void EditingStyle::MergeInlineStyleOfElement(dom::StyledElement &element, CSSPropertyOverrideMode mode,
+  void EditingStyle::MergeInlineStyleOfElement(StyledElement &element, CSSPropertyOverrideMode mode,
                                                PropertiesToInclude propertiesToInclude) noexcept
   {
     auto *inlineStyle = element.InlineStyle();
@@ -1579,7 +1579,7 @@ namespace krys::boo
   namespace
   {
     KRYS_NODISCARD bool ElementMatchesAndPropertyIsNotInInlineStyleDecl(
-      const HTMLElementEquivalent &equivalent, const dom::StyledElement &element,
+      const HTMLElementEquivalent &equivalent, const StyledElement &element,
       EditingStyle::CSSPropertyOverrideMode mode, EditingStyle &style) noexcept
     {
       if (!equivalent.Matches(element))
@@ -1619,7 +1619,7 @@ namespace krys::boo
   }
 
   void EditingStyle::MergeInlineAndImplicitStyleOfElement(
-    dom::StyledElement &element, CSSPropertyOverrideMode mode, PropertiesToInclude propertiesToInclude,
+    StyledElement &element, CSSPropertyOverrideMode mode, PropertiesToInclude propertiesToInclude,
     StandardFontFamilySerializationMode standardFontFamilySerializationMode) noexcept
   {
     auto styleFromRules = EditingStyle::Create();
@@ -1656,7 +1656,7 @@ namespace krys::boo
   }
 
   Ref<EditingStyle> EditingStyle::WrappingStyleForSerialization(
-    dom::Node &context, bool shouldAnnotate,
+    Node &context, bool shouldAnnotate,
     StandardFontFamilySerializationMode standardFontFamilySerializationMode) noexcept
   {
     if (shouldAnnotate)
@@ -1673,9 +1673,9 @@ namespace krys::boo
     auto wrappingStyle = EditingStyle::Create();
 
     // When not annotating for interchange, we only preserve inline style declarations.
-    for (auto *node = &context; node && !Is<dom::Document>(*node); node = node->ParentNode())
+    for (auto *node = &context; node && !Is<Document>(*node); node = node->ParentNode())
     {
-      if (auto *element = DynamicDowncast<dom::StyledElement>(*node))
+      if (auto *element = DynamicDowncast<StyledElement>(*node))
       {
         wrappingStyle->MergeInlineAndImplicitStyleOfElement(
           *element, CSSPropertyOverrideMode::DoNotOverrideValues,
@@ -1755,7 +1755,7 @@ namespace krys::boo
   namespace
   {
     KRYS_NODISCARD Ref<css::MutableStyleProperties>
-      StyleFromMatchedRulesForElement(dom::Element &element, uint32 rulesToInclude) noexcept
+      StyleFromMatchedRulesForElement(Element &element, uint32 rulesToInclude) noexcept
     {
       auto style = css::MutableStyleProperties::Create();
 
@@ -1773,7 +1773,7 @@ namespace krys::boo
     }
   }
 
-  void EditingStyle::MergeStyleFromRules(dom::StyledElement &element) noexcept
+  void EditingStyle::MergeStyleFromRules(StyledElement &element) noexcept
   {
     auto styleFromMatchedRules = StyleFromMatchedRulesForElement(element, style::Resolver::AuthorCSSRules);
     // Styles from the inline style declaration, held in the variable "style", take precedence
@@ -1789,7 +1789,7 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD dom::DOMString LoneFontFamilyName(const css::Value &value) noexcept
+    KRYS_NODISCARD DOMString LoneFontFamilyName(const css::Value &value) noexcept
     {
       if (auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value))
       {
@@ -1801,13 +1801,12 @@ namespace krys::boo
         return {};
       }
       auto *item = DynamicDowncast<css::PrimitiveValue>(list->Item(0));
-      return item ? item->StringValue() : dom::DOMString();
+      return item ? item->StringValue() : DOMString();
     }
   }
 
   void EditingStyle::MergeStyleFromRulesForSerialization(
-    dom::StyledElement &element,
-    StandardFontFamilySerializationMode standardFontFamilySerializationMode) noexcept
+    StyledElement &element, StandardFontFamilySerializationMode standardFontFamilySerializationMode) noexcept
   {
     MergeStyleFromRules(element);
 
@@ -1871,7 +1870,7 @@ namespace krys::boo
   }
 
   Ref<css::MutableStyleProperties>
-    EditingStyle::RemoveInlineStyleRedundantDueToMatchedRules(dom::StyledElement &element) noexcept
+    EditingStyle::RemoveInlineStyleRedundantDueToMatchedRules(StyledElement &element) noexcept
   {
     auto styleFromMatchedRules =
       StyleFromMatchedRulesForElement(element, style::Resolver::AllButEmptyCSSRules);
@@ -1883,8 +1882,7 @@ namespace krys::boo
   }
 
   void EditingStyle::RemoveStyleInContextNotOverridenByMatchedRules(
-    dom::StyledElement &element, dom::Node *context,
-    css::MutableStyleProperties &styleFromMatchedRules) noexcept
+    StyledElement &element, Node *context, css::MutableStyleProperties &styleFromMatchedRules) noexcept
   {
     auto computedStyle = EditingStyle::Create(context, PropertiesToInclude::EditingPropertiesInEffect);
     if (RefPtr<css::MutableStyleProperties> computedStyleMutableStyle = computedStyle->_mutableStyle)
@@ -1966,7 +1964,7 @@ namespace krys::boo
   }
 
   void EditingStyle::RemoveDisplayPropertyFromSpanStyleIfRedundant(
-    dom::StyledElement &element, css::MutableStyleProperties &styleFromMatchedRules) noexcept
+    StyledElement &element, css::MutableStyleProperties &styleFromMatchedRules) noexcept
   {
     // If this element is a span and has display: inline or float: none, remove them unless they are
     // overridden by rules. These rules are added by serialization code to wrap text nodes.
@@ -1988,7 +1986,7 @@ namespace krys::boo
     }
   }
 
-  void EditingStyle::RemoveStyleFromRulesAndContext(dom::StyledElement &element, dom::Node *context) noexcept
+  void EditingStyle::RemoveStyleFromRulesAndContext(StyledElement &element, Node *context) noexcept
   {
     if (!_mutableStyle)
     {
@@ -2000,7 +1998,7 @@ namespace krys::boo
     RemoveDisplayPropertyFromSpanStyleIfRedundant(element, *styleFromMatchedRules);
   }
 
-  void EditingStyle::RemovePropertiesInElementDefaultStyle(dom::Element &element) noexcept
+  void EditingStyle::RemovePropertiesInElementDefaultStyle(Element &element) noexcept
   {
     if (!_mutableStyle || _mutableStyle->empty())
     {
@@ -2123,7 +2121,7 @@ namespace krys::boo
     return v && !v->Equals(*noneValue);
   }
 
-  int32 EditingStyle::LegacyFontSize(dom::Document &document) const noexcept
+  int32 EditingStyle::LegacyFontSize(Document &document) const noexcept
   {
     auto cssValue = _mutableStyle->GetPropertyCSSValue(PropertyId::FontSize);
     auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(cssValue.get());
@@ -2135,7 +2133,7 @@ namespace krys::boo
                                       LegacyFontSizeMode::AlwaysUseLegacyFontSize);
   }
 
-  bool EditingStyle::HasStyle(PropertyId propertyID, const dom::DOMString &value) noexcept
+  bool EditingStyle::HasStyle(PropertyId propertyID, const DOMString &value) noexcept
   {
     return EditingStyle::Create(propertyID, value)->TriStateOfStyle(this) != TriState::False;
   }
@@ -2208,14 +2206,14 @@ namespace krys::boo
     // e.g. if pos was at Position("hello", 5) in <b>hello<div>world</div></b>, we want Position("world", 0)
     // instead. We only do this for range because caret at Position("hello", 5) in <b>hello</b>world should
     // give you font-weight: bold.
-    if (auto *text = DynamicDowncast<dom::Text>(position.GetContainerNode());
+    if (auto *text = DynamicDowncast<Text>(position.GetContainerNode());
         text && selection.IsRange()
         && static_cast<size_t>(position.ComputeOffsetInContainerNode()) == text->Length())
     {
       position = NextVisuallyDistinctCandidate(position);
     }
 
-    RefPtr<dom::Element> element = position.AnchorElementAncestor();
+    RefPtr<Element> element = position.AnchorElementAncestor();
     if (!element)
     {
       return nullptr;
@@ -2255,7 +2253,7 @@ namespace krys::boo
 
     dom::Position position = selection.Start().Downstream();
 
-    RefPtr<dom::Node> node = ShareRefPtr(position.DeprecatedNode());
+    RefPtr<Node> node = ShareRefPtr(position.DeprecatedNode());
     if (!node)
     {
       return WritingDirection::Natural;
@@ -2268,7 +2266,7 @@ namespace krys::boo
       auto range = dom::MakeSimpleRange(position, end);
       for (auto &intersectingNode : dom::IntersectingNodes(*range))
       {
-        if (!Is<dom::StyledElement>(intersectingNode))
+        if (!Is<StyledElement>(intersectingNode))
         {
           continue;
         }
@@ -2299,9 +2297,9 @@ namespace krys::boo
     auto block = EnclosingBlock(node);
     auto foundDirection = WritingDirection::Natural;
 
-    for (; node != block; node = ShareRefPtr<dom::Node>(node->ParentNode()))
+    for (; node != block; node = ShareRefPtr<Node>(node->ParentNode()))
     {
-      if (!Is<dom::StyledElement>(*node))
+      if (!Is<StyledElement>(*node))
       {
         continue;
       }
@@ -2516,7 +2514,7 @@ namespace krys::boo
     }
   }
 
-  void StyleChange::ExtractTextStyles(dom::Document &document, css::MutableStyleProperties &style,
+  void StyleChange::ExtractTextStyles(Document &document, css::MutableStyleProperties &style,
                                       bool shouldUseFixedFontDefaultSize) noexcept
   {
     if (IdentifierForStyleProperty(style, PropertyId::FontWeight) == ValueId::Bold)
@@ -2593,8 +2591,7 @@ namespace krys::boo
                  LegacyFontSizeFromCSSValue(document, primitiveValue, shouldUseFixedFontDefaultSize,
                                             LegacyFontSizeMode::UseLegacyFontSizeOnlyIfPixelValuesMatch))
       {
-        _applyFontSize =
-          dom::DOMString(reinterpret_cast<const char8_t *>(std::to_string(legacyFontSize).c_str()));
+        _applyFontSize = DOMString(reinterpret_cast<const char8_t *>(std::to_string(legacyFontSize).c_str()));
         (void)style.RemoveProperty(PropertyId::FontSize);
       }
     }
@@ -2682,7 +2679,7 @@ namespace krys::boo
       return value->IsFontIndependentLength();
     }
 
-    int32 LegacyFontSizeFromCSSValue(dom::Document &document, css::PrimitiveValue *value,
+    int32 LegacyFontSizeFromCSSValue(Document &document, css::PrimitiveValue *value,
                                      bool shouldUseFixedFontDefaultSize, LegacyFontSizeMode mode) noexcept
     {
       if (IsCSSValueLength(value))
@@ -2730,7 +2727,7 @@ namespace krys::boo
       return IsTransparentColorValue(style->GetPropertyCSSValue(PropertyId::BackgroundColor).get());
     }
 
-    RefPtr<css::Value> BackgroundColorInEffect(dom::Node *node) noexcept
+    RefPtr<css::Value> BackgroundColorInEffect(Node *node) noexcept
     {
       for (auto *ancestor = node; ancestor; ancestor = ancestor->ParentNode())
       {

@@ -18,13 +18,13 @@ namespace krys::boo::tests
         (void)Document->UpdateLayout();
       }
 
-      KRYS_NODISCARD dom::Text &TextIn(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD Text &TextIn(DOMStringView id) noexcept
       {
-        return Downcast<dom::Text>(*ById(id).FirstChild());
+        return Downcast<Text>(*ById(id).FirstChild());
       }
     };
 
-    KRYS_NODISCARD VisiblePosition At(dom::Node &node, uint32 offset) noexcept
+    KRYS_NODISCARD VisiblePosition At(Node &node, uint32 offset) noexcept
     {
       return VisiblePosition(dom::MakeContainerOffsetPosition(ShareRefPtr(&node), offset));
     }

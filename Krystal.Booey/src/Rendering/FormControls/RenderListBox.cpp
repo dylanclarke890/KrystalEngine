@@ -66,7 +66,7 @@ namespace krys::boo
     // Default size when the multiple attribute is present but size attribute is absent.
     constexpr int32 DefaultSize = 4;
 
-    KRYS_NODISCARD FontCascade Bolder(dom::Document &document, const FontCascade &font) noexcept
+    KRYS_NODISCARD FontCascade Bolder(Document &document, const FontCascade &font) noexcept
     {
       auto description = font.GetFontDescription();
       description.SetWeight(description.BolderWeight());
@@ -128,7 +128,7 @@ namespace krys::boo
     }
   }
 
-  RenderListBox::RenderListBox(html::HTMLSelectElement &element, RenderStyle &&style) noexcept
+  RenderListBox::RenderListBox(HTMLSelectElement &element, RenderStyle &&style) noexcept
       : RenderBlockFlow(Type::ListBox, element, krys::move(style))
   {
     View().FrameView().AddScrollableArea(*this);
@@ -144,9 +144,9 @@ namespace krys::boo
     RenderBlockFlow::WillBeDestroyed();
   }
 
-  html::HTMLSelectElement &RenderListBox::SelectElement() const noexcept
+  HTMLSelectElement &RenderListBox::SelectElement() const noexcept
   {
-    return Downcast<html::HTMLSelectElement>(NodeForNonAnonymous());
+    return Downcast<HTMLSelectElement>(NodeForNonAnonymous());
   }
 
   void RenderListBox::UpdateFromElement() noexcept
@@ -163,11 +163,11 @@ namespace krys::boo
     {
       utf8_string text;
       const FontCascade *font = &normalFont;
-      if (auto *optionElement = DynamicDowncast<html::HTMLOptionElement>(element.get()))
+      if (auto *optionElement = DynamicDowncast<HTMLOptionElement>(element.get()))
       {
         text = optionElement->TextIndentedToRespectGroupLabel();
       }
-      else if (auto *optGroupElement = DynamicDowncast<html::HTMLOptGroupElement>(element.get()))
+      else if (auto *optGroupElement = DynamicDowncast<HTMLOptGroupElement>(element.get()))
       {
         text = optGroupElement->GroupLabelText();
         if (!boldFont)
@@ -419,7 +419,7 @@ namespace krys::boo
     return LayoutRect(x, y + itemOffset, ContentBoxWidth(), ItemLogicalHeight());
   }
 
-  Maybe<int32> RenderListBox::OptionRowIndex(const html::HTMLOptionElement &optionElement) const noexcept
+  Maybe<int32> RenderListBox::OptionRowIndex(const HTMLOptionElement &optionElement) const noexcept
   {
     // We can't use optionElement.Index(), because it doesn't account for optgroup items.
     int32 rowIndex = 0;
@@ -436,8 +436,7 @@ namespace krys::boo
     return {};
   }
 
-  Maybe<LayoutRect>
-    RenderListBox::LocalBoundsOfOption(const html::HTMLOptionElement &optionElement) const noexcept
+  Maybe<LayoutRect> RenderListBox::LocalBoundsOfOption(const HTMLOptionElement &optionElement) const noexcept
   {
     auto rowIndex = OptionRowIndex(optionElement);
     if (!rowIndex)
@@ -449,7 +448,7 @@ namespace krys::boo
   }
 
   Maybe<LayoutRect>
-    RenderListBox::LocalBoundsOfOptGroup(const html::HTMLOptGroupElement &optGroupElement) const noexcept
+    RenderListBox::LocalBoundsOfOptGroup(const HTMLOptGroupElement &optGroupElement) const noexcept
   {
     if (optGroupElement.OwnerSelectElement() != &SelectElement())
     {
@@ -461,14 +460,14 @@ namespace krys::boo
 
     for (auto &item : SelectElement().ListItems())
     {
-      if (Is<html::HTMLOptGroupElement>(*item))
+      if (Is<HTMLOptGroupElement>(*item))
       {
         if (item.get() == &optGroupElement)
         {
           boundingBox = ItemBoundingBoxRect({}, rowIndex);
         }
       }
-      else if (Is<html::HTMLOptionElement>(*item) && boundingBox)
+      else if (Is<HTMLOptionElement>(*item) && boundingBox)
       {
         if (item->ParentNode() != &optGroupElement)
         {
@@ -558,7 +557,7 @@ namespace krys::boo
                                           int32 listIndex) noexcept
   {
     auto &listItems = SelectElement().ListItems();
-    RefPtr<html::HTMLElement> listItemElement = ShareRefPtr(listItems[static_cast<size_t>(listIndex)].get());
+    RefPtr<HTMLElement> listItemElement = ShareRefPtr(listItems[static_cast<size_t>(listIndex)].get());
 
     auto *itemStyle = listItemElement->ComputedStyle();
     if (!itemStyle)
@@ -572,8 +571,8 @@ namespace krys::boo
     }
 
     utf8_string itemText;
-    auto *optionElement = DynamicDowncast<html::HTMLOptionElement>(*listItemElement);
-    auto *optGroupElement = DynamicDowncast<html::HTMLOptGroupElement>(*listItemElement);
+    auto *optionElement = DynamicDowncast<HTMLOptionElement>(*listItemElement);
+    auto *optGroupElement = DynamicDowncast<HTMLOptGroupElement>(*listItemElement);
     if (optionElement)
     {
       itemText = optionElement->TextIndentedToRespectGroupLabel();
@@ -646,7 +645,7 @@ namespace krys::boo
                                           int32 listIndex) noexcept
   {
     auto &listItems = SelectElement().ListItems();
-    RefPtr<html::HTMLElement> listItemElement = ShareRefPtr(listItems[static_cast<size_t>(listIndex)].get());
+    RefPtr<HTMLElement> listItemElement = ShareRefPtr(listItems[static_cast<size_t>(listIndex)].get());
     auto *itemStyle = listItemElement->ComputedStyle();
     if (!itemStyle)
     {
@@ -655,8 +654,7 @@ namespace krys::boo
 
     auto &theme = RenderTheme::Singleton();
     Color backColor;
-    if (auto *option = DynamicDowncast<html::HTMLOptionElement>(*listItemElement);
-        option && option->Selected())
+    if (auto *option = DynamicDowncast<HTMLOptionElement>(*listItemElement); option && option->Selected())
     {
       if (GetDocument().Selection().IsFocusedAndActive()
           && GetDocument().FocusedElement() == &SelectElement())
@@ -921,13 +919,13 @@ namespace krys::boo
   }
 
   bool RenderListBox::Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount,
-                             dom::Element **, ScrollIsAnimated animated) noexcept
+                             Element **, ScrollIsAnimated animated) noexcept
   {
     return ScrollableArea::Scroll(direction, granularity, stepCount, animated);
   }
 
   bool RenderListBox::LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                                    uint32 stepCount, dom::Element **, ScrollIsAnimated animated) noexcept
+                                    uint32 stepCount, Element **, ScrollIsAnimated animated) noexcept
   {
     return ScrollableArea::Scroll(
       LogicalToPhysical(direction, GetWritingMode().IsHorizontal(), GetWritingMode().IsBlockFlipped()),

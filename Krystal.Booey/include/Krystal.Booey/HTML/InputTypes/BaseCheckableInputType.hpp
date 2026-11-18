@@ -46,11 +46,11 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool CanSetStringValue() const noexcept override;
 
-    KRYS_NODISCARD Maybe<dom::DOMString> FallbackValue() const noexcept override;
+    KRYS_NODISCARD Maybe<DOMString> FallbackValue() const noexcept override;
 
     KRYS_NODISCARD bool StoresValueSeparateFromAttribute() noexcept override;
 
-    void SetValue(dom::DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,
+    void SetValue(DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,
                   TextControlSetValueSelection selection) noexcept override;
 
   protected:

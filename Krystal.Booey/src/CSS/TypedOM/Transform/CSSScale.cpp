@@ -33,7 +33,7 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   dom::ExceptionOr<Ref<CSSScale>> CSSScale::Create(CSSNumberish x, CSSNumberish y,
                                                    Maybe<CSSNumberish> z) noexcept
@@ -60,8 +60,8 @@ namespace krys::boo::css
       *new CSSScale(is2D, krys::move(rectifiedX), krys::move(rectifiedY), krys::move(rectifiedZ)));
   }
 
-  dom::ExceptionOr<Ref<CSSScale>> CSSScale::Create(const FunctionValue &function,
-                                                   dom::Document &document) noexcept
+  dom::ExceptionOr<Ref<CSSScale>> CSSScale::Create(const css::FunctionValue &function,
+                                                   Document &document) noexcept
   {
     auto reified = ReifyArguments(function, document);
     if (reified.HasException())
@@ -76,7 +76,7 @@ namespace krys::boo::css
     };
     switch (function.Name())
     {
-      case ValueId::ScaleX:
+      case css::ValueId::ScaleX:
       {
         if (count == 1)
         {
@@ -84,7 +84,7 @@ namespace krys::boo::css
         }
         break;
       }
-      case ValueId::ScaleY:
+      case css::ValueId::ScaleY:
       {
         if (count == 1)
         {
@@ -92,7 +92,7 @@ namespace krys::boo::css
         }
         break;
       }
-      case ValueId::ScaleZ:
+      case css::ValueId::ScaleZ:
       {
         if (count == 1)
         {
@@ -100,7 +100,7 @@ namespace krys::boo::css
         }
         break;
       }
-      case ValueId::Scale:
+      case css::ValueId::Scale:
       {
         if (count == 1 || count == 2)
         {
@@ -108,7 +108,7 @@ namespace krys::boo::css
         }
         break;
       }
-      case ValueId::Scale3d:
+      case css::ValueId::Scale3d:
       {
         if (count == 3)
         {
@@ -178,7 +178,7 @@ namespace krys::boo::css
     builder.Append(u8')');
   }
 
-  dom::ExceptionOr<Ref<DOMMatrix>> CSSScale::ToMatrix() const noexcept
+  dom::ExceptionOr<Ref<css::DOMMatrix>> CSSScale::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
     const auto *xUnitValue = DynamicDowncast<CSSUnitValue>(*_x);
@@ -198,10 +198,11 @@ namespace krys::boo::css
     {
       matrix.Scale3d(xUnitValue->Value(), yUnitValue->Value(), zUnitValue->Value());
     }
-    return DOMMatrix::Create(matrix, Is2D() ? DOMMatrixReadOnly::Is2D::Yes : DOMMatrixReadOnly::Is2D::No);
+    return css::DOMMatrix::Create(matrix, Is2D() ? css::DOMMatrixReadOnly::Is2D::Yes
+                                                 : css::DOMMatrixReadOnly::Is2D::No);
   }
 
-  RefPtr<Value> CSSScale::ToCSSValue() const noexcept
+  RefPtr<css::Value> CSSScale::ToCSSValue() const noexcept
   {
     auto x = _x->ToCSSValue();
     auto y = _y->ToCSSValue();
@@ -211,14 +212,15 @@ namespace krys::boo::css
     }
     if (Is2D())
     {
-      return FunctionValue::Create(ValueId::Scale, Ref<Value>(krys::move(x)), Ref<Value>(krys::move(y)));
+      return css::FunctionValue::Create(css::ValueId::Scale, Ref<css::Value>(krys::move(x)),
+                                        Ref<css::Value>(krys::move(y)));
     }
     auto z = _z->ToCSSValue();
     if (!z)
     {
       return nullptr;
     }
-    return FunctionValue::Create(ValueId::Scale3d, Ref<Value>(krys::move(x)), Ref<Value>(krys::move(y)),
-                                 Ref<Value>(krys::move(z)));
+    return css::FunctionValue::Create(css::ValueId::Scale3d, Ref<css::Value>(krys::move(x)),
+                                      Ref<css::Value>(krys::move(y)), Ref<css::Value>(krys::move(z)));
   }
 }

@@ -40,26 +40,25 @@ namespace krys::boo::style
 
   private:
     const bool _isEnabled;
-    const Ref<dom::Element> _element;
+    const Ref<Element> _element;
 
-    dom::DOMStringAtom _newId {null};
+    DOMStringAtom _newId {null};
 
     Invalidator::MatchElementRuleSets _matchElementRuleSets;
 
   public:
-    IdChangeInvalidation(dom::Element &element, const dom::DOMStringAtom &oldId,
-                         const dom::DOMStringAtom &newId) noexcept;
+    IdChangeInvalidation(Element &element, const DOMStringAtom &oldId, const DOMStringAtom &newId) noexcept;
 
     ~IdChangeInvalidation() noexcept;
 
   private:
-    void InvalidateStyle(const dom::DOMStringAtom &changedId) noexcept;
+    void InvalidateStyle(const DOMStringAtom &changedId) noexcept;
 
     void InvalidateStyleWithRuleSets() noexcept;
   };
 
-  inline IdChangeInvalidation::IdChangeInvalidation(dom::Element &element, const dom::DOMStringAtom &oldId,
-                                                    const dom::DOMStringAtom &newId) noexcept
+  inline IdChangeInvalidation::IdChangeInvalidation(Element &element, const DOMStringAtom &oldId,
+                                                    const DOMStringAtom &newId) noexcept
       : _isEnabled(element.NeedsStyleInvalidation()), _element(ShareRef(element))
   {
     if (!_isEnabled)

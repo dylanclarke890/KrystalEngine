@@ -172,7 +172,7 @@ namespace krys::boo
       KRYS_NON_COPY_MOVABLE(ScopedNodeDragEnabler);
 
       // Elements have no drag state to set while they're painted: no pseudo-class matches dragged elements.
-      ScopedNodeDragEnabler(LocalFrame &frame, dom::Node &) noexcept
+      ScopedNodeDragEnabler(LocalFrame &frame, boo::Node &) noexcept
       {
         (void)frame.Document()->UpdateLayout();
       }
@@ -180,7 +180,7 @@ namespace krys::boo
 
     // The snapshot is the drag image: it isn't turned into an image, so it isn't oriented.
     KRYS_NODISCARD DragImageRef CreateDragImageFromSnapshot(RefPtr<ImageBuffer> snapshot,
-                                                            dom::Node *node) noexcept
+                                                            boo::Node *node) noexcept
     {
       if (!snapshot)
       {
@@ -199,7 +199,7 @@ namespace krys::boo
     }
   }
 
-  DragImageRef CreateDragImageForNode(LocalFrame &frame, dom::Node &node) noexcept
+  DragImageRef CreateDragImageForNode(LocalFrame &frame, boo::Node &node) noexcept
   {
     ScopedNodeDragEnabler enableDrag(frame, node);
     SnapshotOptions options {{SnapshotFlags::DraggableElement}};
@@ -267,7 +267,7 @@ namespace krys::boo
     }
   }
 
-  DragImageData CreateDragImageForLink(dom::Element &element, url::URL &url, utf8_stringview inLabel,
+  DragImageData CreateDragImageForLink(boo::Element &element, url::URL &url, utf8_stringview inLabel,
                                        float) noexcept
   {
     const auto &settings = element.NodeDocument().GetSettings();

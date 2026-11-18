@@ -182,15 +182,15 @@ namespace krys::boo
       return ShareRefPtr(&Image::NullImage());
     }
 
-    if (auto *fromSVGImage = DynamicDowncast<svg::SVGImage>(fromImage.get()))
+    if (auto *fromSVGImage = DynamicDowncast<SVGImage>(fromImage.get()))
     {
       auto fromURL = _cachedFromImage ? _cachedFromImage->URL() : url::URL();
-      fromImage = svg::SVGImageForContainer::Create(fromSVGImage, size, 1, fromURL);
+      fromImage = SVGImageForContainer::Create(fromSVGImage, size, 1, fromURL);
     }
-    if (auto *toSVGImage = DynamicDowncast<svg::SVGImage>(toImage.get()))
+    if (auto *toSVGImage = DynamicDowncast<SVGImage>(toImage.get()))
     {
       auto toURL = _cachedToImage ? _cachedToImage->URL() : url::URL();
-      toImage = svg::SVGImageForContainer::Create(toSVGImage, size, 1, toURL);
+      toImage = SVGImageForContainer::Create(toSVGImage, size, 1, toURL);
     }
 
     return CrossfadeGeneratedImage::Create(*fromImage, *toImage, static_cast<float>(_percentage),

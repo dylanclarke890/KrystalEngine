@@ -4,10 +4,13 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLElement;
+}
 
+namespace krys::boo::html
+{
   /// @see https://html.spec.whatwg.org/#submiteventinit
   struct SubmitEventInit : dom::EventInit
   {
@@ -26,7 +29,7 @@ namespace krys::boo::html
     using dictionary_type = SubmitEventInit;
 
     /// @see https://html.spec.whatwg.org/#dom-submitevent-submitevent
-    SubmitEvent(dom::DOMStringAtom type, const SubmitEventInit &eventInitDict = {}) noexcept;
+    SubmitEvent(DOMStringAtom type, const SubmitEventInit &eventInitDict = {}) noexcept;
 
     /// @brief A trusted `submit` event, which bubbles and can be cancelled.
     KRYS_NODISCARD static Ref<SubmitEvent> Create(RefPtr<HTMLElement> &&submitter) noexcept;

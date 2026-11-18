@@ -24,7 +24,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<mpath>` element: references the `<path>` its parent `<animateMotion>` moves along.
   /// @see https://svgwg.org/specs/animations/#MPathElement
@@ -33,7 +33,7 @@ namespace krys::boo::svg
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGMPathElement);
 
   public:
-    explicit SVGMPathElement(dom::Document &) noexcept;
+    explicit SVGMPathElement(Document &) noexcept;
 
     ~SVGMPathElement() noexcept override;
 
@@ -44,10 +44,10 @@ namespace krys::boo::svg
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGMPathElement, SVGElement, SVGURIReference>;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &) noexcept final;
 
     void BuildPendingResource() noexcept final;
 
@@ -55,7 +55,7 @@ namespace krys::boo::svg
 
     void OnPostConnection() noexcept final;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept final;
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final
     {
@@ -64,14 +64,14 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGMPathElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &element) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGMPathElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &element) noexcept
   {
-    return element.Interface() == krys::boo::svg::SVGElementInterface::MPath;
+    return element.Interface() == krys::boo::SVGElementInterface::MPath;
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    auto *svgElement = krys::DynamicDowncast<krys::boo::svg::SVGElement>(node);
+    auto *svgElement = krys::DynamicDowncast<krys::boo::SVGElement>(node);
     return svgElement && IsType(*svgElement);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

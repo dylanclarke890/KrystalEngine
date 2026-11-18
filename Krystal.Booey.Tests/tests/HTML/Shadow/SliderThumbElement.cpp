@@ -25,7 +25,7 @@ namespace krys::boo::tests
   {
     EditorFixture fixture(u8"<style>body{margin:0}input{margin:0}div{height:50px}</style>"
                           u8"<input type=range id=range value=50><div id=other></div>");
-    auto &input = Downcast<html::HTMLInputElement>(fixture.ById(u8"range"));
+    auto &input = Downcast<HTMLInputElement>(fixture.ById(u8"range"));
     auto &handler = fixture.Frame->GetEventHandler();
     auto moves = CreateRef<CountingListener>();
     fixture.ById(u8"other").AddEventListener(event_names::MouseMove, moves, false);

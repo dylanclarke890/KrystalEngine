@@ -29,7 +29,7 @@
 #include "Krystal.Booey/CSS/TypedOM/Numeric/CSSMathOperator.hpp"
 #include "Krystal.Booey/CSS/TypedOM/Numeric/CSSNumericArray.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief A math expression of numeric values.
   /// @see https://drafts.css-houdini.org/css-typed-om/#cssmathvalue
@@ -79,8 +79,8 @@ namespace krys::boo::css
   }
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSMathValue)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleValue &styleValue) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSMathValue)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleValue &styleValue) noexcept
   {
     return krys::boo::css::IsCSSMathValue(styleValue.StyleValueType());
   }

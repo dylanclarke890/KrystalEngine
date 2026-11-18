@@ -40,14 +40,14 @@ namespace krys::boo::style
 
     struct ClassChange
     {
-      dom::DOMStringAtom ClassName;
+      DOMStringAtom ClassName;
       ClassChangeType Type;
     };
 
     constexpr size_t ClassChangeVectorInlineCapacity = 4;
     using ClassChangeVector = SmallList<ClassChange, ClassChangeVectorInlineCapacity>;
 
-    KRYS_NODISCARD ClassChangeVector CollectClasses(Span<const dom::DOMStringAtom> classes,
+    KRYS_NODISCARD ClassChangeVector CollectClasses(Span<const DOMStringAtom> classes,
                                                     ClassChangeType changeType) noexcept
     {
       ClassChangeVector changes;
@@ -58,8 +58,8 @@ namespace krys::boo::style
       return changes;
     }
 
-    KRYS_NODISCARD ClassChangeVector ComputeClassChanges(Span<const dom::DOMStringAtom> oldClasses,
-                                                         Span<const dom::DOMStringAtom> newClasses) noexcept
+    KRYS_NODISCARD ClassChangeVector ComputeClassChanges(Span<const DOMStringAtom> oldClasses,
+                                                         Span<const DOMStringAtom> newClasses) noexcept
     {
       auto oldSize = oldClasses.size();
 
@@ -137,8 +137,8 @@ namespace krys::boo::style
     }
   }
 
-  void ClassChangeInvalidation::ComputeInvalidation(Span<const dom::DOMStringAtom> oldClasses,
-                                                    Span<const dom::DOMStringAtom> newClasses) noexcept
+  void ClassChangeInvalidation::ComputeInvalidation(Span<const DOMStringAtom> oldClasses,
+                                                    Span<const DOMStringAtom> newClasses) noexcept
   {
     auto classChanges = ComputeClassChanges(oldClasses, newClasses);
 

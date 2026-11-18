@@ -35,7 +35,7 @@
 
 namespace krys::boo
 {
-  LegacyRenderSVGResourceFilter::LegacyRenderSVGResourceFilter(svg::SVGFilterElement &element,
+  LegacyRenderSVGResourceFilter::LegacyRenderSVGResourceFilter(SVGFilterElement &element,
                                                                RenderStyle &&style) noexcept
       : LegacyRenderSVGResourceContainer(Type::LegacySVGResourceFilter, element, krys::move(style))
   {
@@ -43,17 +43,17 @@ namespace krys::boo
 
   LegacyRenderSVGResourceFilter::~LegacyRenderSVGResourceFilter() noexcept = default;
 
-  svg::SVGFilterElement &LegacyRenderSVGResourceFilter::FilterElement() const noexcept
+  SVGFilterElement &LegacyRenderSVGResourceFilter::FilterElement() const noexcept
   {
-    return Downcast<svg::SVGFilterElement>(LegacyRenderSVGResourceContainer::GetElement());
+    return Downcast<SVGFilterElement>(LegacyRenderSVGResourceContainer::GetElement());
   }
 
-  svg::SVGUnitTypes::SVGUnitType LegacyRenderSVGResourceFilter::FilterUnits() const noexcept
+  SVGUnitTypes::SVGUnitType LegacyRenderSVGResourceFilter::FilterUnits() const noexcept
   {
     return FilterElement().FilterUnits();
   }
 
-  svg::SVGUnitTypes::SVGUnitType LegacyRenderSVGResourceFilter::PrimitiveUnits() const noexcept
+  SVGUnitTypes::SVGUnitType LegacyRenderSVGResourceFilter::PrimitiveUnits() const noexcept
   {
     return FilterElement().PrimitiveUnits();
   }
@@ -117,11 +117,11 @@ namespace krys::boo
     auto *filterData = filterDataSlot.get();
 
     auto &filterElement = FilterElement();
-    auto *contextElement = DynamicDowncast<svg::SVGElement>(renderer.GetElement());
+    auto *contextElement = DynamicDowncast<SVGElement>(renderer.GetElement());
 
     auto targetBoundingBox = renderer.ObjectBoundingBox();
-    auto filterRegion = svg::SVGLengthContext::ResolveRectangle(
-      contextElement, filterElement, filterElement.FilterUnits(), targetBoundingBox);
+    auto filterRegion = SVGLengthContext::ResolveRectangle(contextElement, filterElement,
+                                                           filterElement.FilterUnits(), targetBoundingBox);
     if (filterRegion.IsEmpty())
     {
       _rendererFilterDataMap.erase(&renderer);
@@ -259,13 +259,13 @@ namespace krys::boo
     auto *renderer = DynamicDowncast<RenderElement>(object);
     if (!renderer)
     {
-      return svg::SVGLengthContext::ResolveRectangle(filterElement, filterElement.FilterUnits(),
-                                                     object.ObjectBoundingBox());
+      return SVGLengthContext::ResolveRectangle(filterElement, filterElement.FilterUnits(),
+                                                object.ObjectBoundingBox());
     }
 
-    auto *contextElement = DynamicDowncast<svg::SVGElement>(renderer->GetElement());
-    return svg::SVGLengthContext::ResolveRectangle(contextElement, filterElement, filterElement.FilterUnits(),
-                                                   object.ObjectBoundingBox());
+    auto *contextElement = DynamicDowncast<SVGElement>(renderer->GetElement());
+    return SVGLengthContext::ResolveRectangle(contextElement, filterElement, filterElement.FilterUnits(),
+                                              object.ObjectBoundingBox());
   }
 
   void LegacyRenderSVGResourceFilter::MarkFilterForRepaint(FilterEffect &effect) noexcept

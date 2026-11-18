@@ -63,14 +63,14 @@
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include <tuple>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
-  Node::Node(Document &document, dom::NodeType type, NodeFlags flags) noexcept
-      : EventTarget(EventTargetFlags::IsNode), _nodeType(type), _nodeDocument(&document),
+  Node::Node(Document &document, dom::NodeType type, dom::NodeFlags flags) noexcept
+      : dom::EventTarget(dom::EventTargetFlags::IsNode), _nodeType(type), _nodeDocument(&document),
         _parentNode(nullptr), _previousSibling(nullptr), _nextSibling(nullptr)
   {
     _flags = flags;
-    if (type != NodeType::DOCUMENT_NODE)
+    if (type != dom::NodeType::DOCUMENT_NODE)
     {
       document.IncrementReferencingNodeCount();
     }
@@ -163,13 +163,13 @@ namespace krys::boo::dom
     }
   }
 
-  void Node::DidAddEventListener(const EventListener &listener) noexcept
+  void Node::DidAddEventListener(const dom::EventListener &listener) noexcept
   {
-    EventTarget::DidAddEventListener(listener);
+    dom::EventTarget::DidAddEventListener(listener);
     NodeDocument().AddListenerTypeIfNeeded(listener.Type());
   }
 
-  DocumentOrShadowRoot &Node::TreeScope() const noexcept
+  dom::DocumentOrShadowRoot &Node::TreeScope() const noexcept
   {
     if (_containingShadowRoot)
     {
@@ -178,13 +178,12 @@ namespace krys::boo::dom
     return NodeDocument();
   }
 
-  DocumentOrShadowRoot &Node::TreeScopeForSVGReferences() const noexcept
+  dom::DocumentOrShadowRoot &Node::TreeScopeForSVGReferences() const noexcept
   {
-    if (auto *shadowRoot = TreeQueries::ContainingShadowRoot(*this);
-        shadowRoot && shadowRoot->Mode() == ShadowRootMode::UserAgent)
+    if (auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(*this);
+        shadowRoot && shadowRoot->Mode() == dom::ShadowRootMode::UserAgent)
     {
-      if (auto *host = DynamicDowncast<svg::SVGElement>(shadowRoot->Host());
-          host && Is<svg::SVGUseElement>(*host))
+      if (auto *host = DynamicDowncast<SVGElement>(shadowRoot->Host()); host && Is<SVGUseElement>(*host))
       {
         return host->TreeScope();
       }
@@ -203,15 +202,16 @@ namespace krys::boo::dom
     {
       return false;
     }
-    auto *shadowRoot = TreeQueries::ContainingShadowRoot(*this);
-    return shadowRoot && shadowRoot->Mode() == ShadowRootMode::UserAgent;
+    auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(*this);
+    return shadowRoot && shadowRoot->Mode() == dom::ShadowRootMode::UserAgent;
   }
 
   TextDirection Node::EffectiveTextDirection() const noexcept
   {
     if (UsesEffectiveTextDirection())
     {
-      return HasNodeFlag(NodeFlags::EffectiveTextDirectionIsRTL) ? TextDirection::RTL : TextDirection::LTR;
+      return HasNodeFlag(dom::NodeFlags::EffectiveTextDirectionIsRTL) ? TextDirection::RTL
+                                                                      : TextDirection::LTR;
     }
 
     // The document element's directionality, if it's an HTML element that keeps one.
@@ -228,11 +228,11 @@ namespace krys::boo::dom
   {
     if (direction == TextDirection::RTL)
     {
-      SetNodeFlag(NodeFlags::EffectiveTextDirectionIsRTL);
+      SetNodeFlag(dom::NodeFlags::EffectiveTextDirectionIsRTL);
     }
     else
     {
-      ClearNodeFlag(NodeFlags::EffectiveTextDirectionIsRTL);
+      ClearNodeFlag(dom::NodeFlags::EffectiveTextDirectionIsRTL);
     }
   }
 
@@ -253,9 +253,9 @@ namespace krys::boo::dom
     return &document == this ? nullptr : &document;
   }
 
-  Node &Node::GetRootNode(const GetRootNodeOptions &options) noexcept
+  Node &Node::GetRootNode(const dom::GetRootNodeOptions &options) noexcept
   {
-    return options.Composed ? TreeQueries::ShadowIncludingRoot(*this) : TreeQueries::Root(*this);
+    return options.Composed ? dom::TreeQueries::ShadowIncludingRoot(*this) : dom::TreeQueries::Root(*this);
   }
 
   Element *Node::ParentElement() const noexcept
@@ -268,7 +268,7 @@ namespace krys::boo::dom
     return FirstChild() != nullptr;
   }
 
-  Ref<NodeList> Node::ChildNodes() noexcept
+  Ref<dom::NodeList> Node::ChildNodes() noexcept
   {
     return EnsureNodeRareData().ChildNodes(*this);
   }
@@ -287,12 +287,12 @@ namespace krys::boo::dom
     EnsureNodeRareData().SetHasEverPaintedImages(hasEverPaintedImages);
   }
 
-  NodeRareData &Node::EnsureNodeRareData() noexcept
+  dom::NodeRareData &Node::EnsureNodeRareData() noexcept
   {
     if (_nodeRareData == nullptr)
     {
-      _nodeRareData = IsElementNode() ? UniquePtr<NodeRareData> {CreateUnique<ElementRareData>()}
-                                      : CreateUnique<NodeRareData>();
+      _nodeRareData = IsElementNode() ? UniquePtr<dom::NodeRareData> {CreateUnique<dom::ElementRareData>()}
+                                      : CreateUnique<dom::NodeRareData>();
     }
     return *_nodeRareData;
   }
@@ -317,11 +317,11 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-  ExceptionOr<void> Node::Normalize() noexcept
+  dom::ExceptionOr<void> Node::Normalize() noexcept
   {
     html::CEReactionsScope ceReactions;
     // Run these steps for each descendant exclusive Text node node of this:
-    RefPtr<Text> next = ShareRefPtr(TreeQueries::NextExclusiveTextNode(*this, this));
+    RefPtr<Text> next = ShareRefPtr(dom::TreeQueries::NextExclusiveTextNode(*this, this));
     while (next != nullptr)
     {
       Ref<Text> node = next;
@@ -332,8 +332,8 @@ namespace krys::boo::dom
       // 2. If length is zero, then remove node and continue with the next exclusive Text node, if any.
       if (length == 0uz)
       {
-        next = ShareRefPtr(TreeQueries::NextExclusiveTextNode(*node, this));
-        if (auto removeResult = MutationAlgorithms::Remove(*node); removeResult.HasException())
+        next = ShareRefPtr(dom::TreeQueries::NextExclusiveTextNode(*node, this));
+        if (auto removeResult = dom::MutationAlgorithms::Remove(*node); removeResult.HasException())
         {
           return removeResult.ReleaseException();
         }
@@ -345,7 +345,7 @@ namespace krys::boo::dom
       //    itself), in tree order.
       DOMString data {};
       const Node *current = node->NextSibling();
-      while (TreeQueries::IsExclusiveTextNode(current))
+      while (dom::TreeQueries::IsExclusiveTextNode(current))
       {
         data += Downcast<Text>(current)->Data();
         current = current->NextSibling();
@@ -361,7 +361,7 @@ namespace krys::boo::dom
       Node *currentNode = node->NextSibling();
 
       // 6. While currentNode is an exclusive Text node:
-      while (TreeQueries::IsExclusiveTextNode(currentNode))
+      while (dom::TreeQueries::IsExclusiveTextNode(currentNode))
       {
         auto &currentTextNode = Downcast<Text>(*currentNode);
 
@@ -374,7 +374,7 @@ namespace krys::boo::dom
         // 6d. For each live range whose end node is currentNode's parent and end offset is currentNode's
         // index:
         //     set its end node to node and its end offset to length.
-        LiveRangeUpdater::NodeNormalized(*node, currentTextNode, length);
+        dom::LiveRangeUpdater::NodeNormalized(*node, currentTextNode, length);
 
         // 6e. Add currentNode's length to length.
         length += currentTextNode.Length();
@@ -384,31 +384,32 @@ namespace krys::boo::dom
       }
 
       // 7. Remove node's contiguous exclusive Text nodes (excluding itself), in tree order.
-      while (TreeQueries::IsExclusiveTextNode(node->NextSibling()))
+      while (dom::TreeQueries::IsExclusiveTextNode(node->NextSibling()))
       {
-        if (auto removeResult = MutationAlgorithms::Remove(*node->NextSibling()); removeResult.HasException())
+        if (auto removeResult = dom::MutationAlgorithms::Remove(*node->NextSibling());
+            removeResult.HasException())
         {
           return removeResult.ReleaseException();
         }
       }
 
-      next = ShareRefPtr(TreeQueries::NextExclusiveTextNode(*node, this));
+      next = ShareRefPtr(dom::TreeQueries::NextExclusiveTextNode(*node, this));
     }
 
     return {};
   }
 
-  ExceptionOr<Ref<Node>> Node::CloneNode(bool subtree) noexcept
+  dom::ExceptionOr<Ref<Node>> Node::CloneNode(bool subtree) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. If this is a shadow root, then throw a "NotSupportedError" DOMException.
     if (Is<ShadowRoot>(this))
     {
-      return Exception {ExceptionCode::NotSupportedError};
+      return dom::Exception {dom::ExceptionCode::NotSupportedError};
     }
 
     // 2. Return the result of cloning a node given this with subtree set to subtree.
-    return NodeAlgorithms::CloneNode(*this, nullptr, subtree);
+    return dom::NodeAlgorithms::CloneNode(*this, nullptr, subtree);
   }
 
   bool Node::IsEqualNode(const Node *otherNode) const noexcept
@@ -418,7 +419,7 @@ namespace krys::boo::dom
       return false;
     }
 
-    return NodeAlgorithms::Equals(*this, *otherNode);
+    return dom::NodeAlgorithms::Equals(*this, *otherNode);
   }
 
   bool Node::IsSameNode(const Node *otherNode) const noexcept
@@ -426,12 +427,12 @@ namespace krys::boo::dom
     return this == otherNode;
   }
 
-  DocumentPosition Node::CompareDocumentPosition(const Node &other) const noexcept
+  dom::DocumentPosition Node::CompareDocumentPosition(const Node &other) const noexcept
   {
     // 1. If this is other, then return zero.
     if (this == &other)
     {
-      return DocumentPosition::DOCUMENT_POSITION_EQUIVALENT;
+      return dom::DocumentPosition::DOCUMENT_POSITION_EQUIVALENT;
     }
 
     // 2. Let node1 be other and node2 be this.
@@ -465,19 +466,19 @@ namespace krys::boo::dom
           // 5b.i.A. If attr equals attr1, then return the result of adding
           // DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
           //         and DOCUMENT_POSITION_PRECEDING.
-          if (NodeAlgorithms::Equals(*attr, *attr1))
+          if (dom::NodeAlgorithms::Equals(*attr, *attr1))
           {
-            return DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
-                   | DocumentPosition::DOCUMENT_POSITION_PRECEDING;
+            return dom::DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
+                   | dom::DocumentPosition::DOCUMENT_POSITION_PRECEDING;
           }
 
           // 5b.i.B. If attr equals attr2, then return the result of adding
           // DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
           //         and DOCUMENT_POSITION_FOLLOWING.
-          if (NodeAlgorithms::Equals(*attr, *attr2))
+          if (dom::NodeAlgorithms::Equals(*attr, *attr2))
           {
-            return DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
-                   | DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
+            return dom::DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
+                   | dom::DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
           }
         }
       }
@@ -487,40 +488,43 @@ namespace krys::boo::dom
     //    DOCUMENT_POSITION_DISCONNECTED, DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC, and either
     //    DOCUMENT_POSITION_PRECEDING or DOCUMENT_POSITION_FOLLOWING, with the constraint that this is to be
     //    consistent, together.
-    if (node1 == nullptr || node2 == nullptr || !TreeQueries::SameRoot(*node1, *node2))
+    if (node1 == nullptr || node2 == nullptr || !dom::TreeQueries::SameRoot(*node1, *node2))
     {
       // The nodes' addresses order them consistently, whichever is asked about the other.
-      auto orderingFlag = &other < this ? DocumentPosition::DOCUMENT_POSITION_PRECEDING
-                                        : DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
+      auto orderingFlag = &other < this ? dom::DocumentPosition::DOCUMENT_POSITION_PRECEDING
+                                        : dom::DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
 
-      return DocumentPosition::DOCUMENT_POSITION_DISCONNECTED
-             | DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | orderingFlag;
+      return dom::DocumentPosition::DOCUMENT_POSITION_DISCONNECTED
+             | dom::DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | orderingFlag;
     }
 
     // 7. If node1 is an ancestor of node2 and attr1 is null, or node1 is node2 and attr2 is non-null, then
     // return
     //    the result of adding DOCUMENT_POSITION_CONTAINS to DOCUMENT_POSITION_PRECEDING.
-    if ((TreeQueries::IsAncestor(*node1, *node2) && attr1 == nullptr) || (node1 == node2 && attr2 != nullptr))
+    if ((dom::TreeQueries::IsAncestor(*node1, *node2) && attr1 == nullptr)
+        || (node1 == node2 && attr2 != nullptr))
     {
-      return DocumentPosition::DOCUMENT_POSITION_CONTAINS | DocumentPosition::DOCUMENT_POSITION_PRECEDING;
+      return dom::DocumentPosition::DOCUMENT_POSITION_CONTAINS
+             | dom::DocumentPosition::DOCUMENT_POSITION_PRECEDING;
     }
 
     // 8. If node1 is a descendant of node2 and attr2 is null, or node1 is node2 and attr1 is non-null, then
     //    return the result of adding DOCUMENT_POSITION_CONTAINED_BY to DOCUMENT_POSITION_FOLLOWING.
-    if ((TreeQueries::IsDescendant(*node1, *node2) && attr2 == nullptr)
+    if ((dom::TreeQueries::IsDescendant(*node1, *node2) && attr2 == nullptr)
         || (node1 == node2 && attr1 != nullptr))
     {
-      return DocumentPosition::DOCUMENT_POSITION_CONTAINED_BY | DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
+      return dom::DocumentPosition::DOCUMENT_POSITION_CONTAINED_BY
+             | dom::DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
     }
 
     // 9. If node1 is preceding node2, then return DOCUMENT_POSITION_PRECEDING.
-    if (TreeQueries::IsPreceding(*node1, *node2))
+    if (dom::TreeQueries::IsPreceding(*node1, *node2))
     {
-      return DocumentPosition::DOCUMENT_POSITION_PRECEDING;
+      return dom::DocumentPosition::DOCUMENT_POSITION_PRECEDING;
     }
 
     // 10. Return DOCUMENT_POSITION_FOLLOWING.
-    return DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
+    return dom::DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
   }
 
   bool Node::Contains(const Node *other) const noexcept
@@ -530,7 +534,7 @@ namespace krys::boo::dom
       return false;
     }
 
-    return TreeQueries::IsInclusiveDescendant(*other, *this);
+    return dom::TreeQueries::IsInclusiveDescendant(*other, *this);
   }
 
   DOMStringAtom Node::LookupPrefix(const DOMStringAtom &namespaceURI) const noexcept
@@ -545,31 +549,31 @@ namespace krys::boo::dom
     switch (NodeType())
     {
       // Element: Return the result of locating a namespace prefix for this using namespace.
-      case NodeType::ELEMENT_NODE:
+      case dom::NodeType::ELEMENT_NODE:
       {
-        return NodeAlgorithms::LocateNamespacePrefix(Downcast<Element>(*this), namespaceURI);
+        return dom::NodeAlgorithms::LocateNamespacePrefix(Downcast<Element>(*this), namespaceURI);
       }
       // Document:
-      case NodeType::DOCUMENT_NODE:
+      case dom::NodeType::DOCUMENT_NODE:
       {
         // 2a. If this's document element is null, then return null.
-        auto *documentElement = TreeQueries::DocumentElement(Downcast<Document>(*this));
+        auto *documentElement = dom::TreeQueries::DocumentElement(Downcast<Document>(*this));
         if (documentElement == nullptr)
         {
           return null;
         }
 
         // 2b. Return the result of locating a namespace prefix for this's document element using namespace.
-        return NodeAlgorithms::LocateNamespacePrefix(*documentElement, namespaceURI);
+        return dom::NodeAlgorithms::LocateNamespacePrefix(*documentElement, namespaceURI);
       }
       // DocumentType, DocumentFragment: Return null.
-      case NodeType::DOCUMENT_TYPE_NODE:
-      case NodeType::DOCUMENT_FRAGMENT_NODE:
+      case dom::NodeType::DOCUMENT_TYPE_NODE:
+      case dom::NodeType::DOCUMENT_FRAGMENT_NODE:
       {
         return null;
       }
       // Attr:
-      case NodeType::ATTRIBUTE_NODE:
+      case dom::NodeType::ATTRIBUTE_NODE:
       {
         // 2a. If this's element is null, then return null.
         const Element *ownerElement = Downcast<Attr>(*this).OwnerElement();
@@ -579,7 +583,7 @@ namespace krys::boo::dom
         }
 
         // 2b. Return the result of locating a namespace prefix for this's element using namespace.
-        return NodeAlgorithms::LocateNamespacePrefix(*ownerElement, namespaceURI);
+        return dom::NodeAlgorithms::LocateNamespacePrefix(*ownerElement, namespaceURI);
       }
       // Otherwise:
       default:
@@ -592,7 +596,7 @@ namespace krys::boo::dom
         }
 
         // 2b. Return the result of locating a namespace prefix for this's parent element using namespace.
-        return NodeAlgorithms::LocateNamespacePrefix(*parentElement, namespaceURI);
+        return dom::NodeAlgorithms::LocateNamespacePrefix(*parentElement, namespaceURI);
       }
     }
   }
@@ -606,7 +610,7 @@ namespace krys::boo::dom
     }
 
     // 2. Return the result of running locate a namespace for this using prefix.
-    return NodeAlgorithms::LocateNamespace(*this, prefix);
+    return dom::NodeAlgorithms::LocateNamespace(*this, prefix);
   }
 
   bool Node::IsDefaultNamespace(DOMStringAtom namespaceURI) const noexcept
@@ -618,54 +622,54 @@ namespace krys::boo::dom
     }
 
     // 2. Let defaultNamespace be the result of running locate a namespace for this using null.
-    auto defaultNamespace = NodeAlgorithms::LocateNamespace(*this, null);
+    auto defaultNamespace = dom::NodeAlgorithms::LocateNamespace(*this, null);
 
     // 3. Return true if defaultNamespace is the same as namespace; otherwise false.
     return namespaceURI == defaultNamespace;
   }
 
-  ExceptionOr<Node &> Node::InsertBefore(Node &newChild, Node *refChild) noexcept
+  dom::ExceptionOr<Node &> Node::InsertBefore(Node &newChild, Node *refChild) noexcept
   {
     html::CEReactionsScope ceReactions;
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
-      return MutationAlgorithms::PreInsert(newChild, *containerNode, refChild);
+      return dom::MutationAlgorithms::PreInsert(newChild, *containerNode, refChild);
     }
 
-    return Exception {ExceptionCode::HierarchyRequestError};
+    return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
   }
 
-  ExceptionOr<Node &> Node::ReplaceChild(Node &newChild, Node &oldChild) noexcept
+  dom::ExceptionOr<Node &> Node::ReplaceChild(Node &newChild, Node &oldChild) noexcept
   {
     html::CEReactionsScope ceReactions;
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
-      return MutationAlgorithms::Replace(oldChild, newChild, *containerNode);
+      return dom::MutationAlgorithms::Replace(oldChild, newChild, *containerNode);
     }
 
-    return Exception {ExceptionCode::HierarchyRequestError};
+    return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
   }
 
-  ExceptionOr<Node &> Node::RemoveChild(Node &oldChild) noexcept
+  dom::ExceptionOr<Node &> Node::RemoveChild(Node &oldChild) noexcept
   {
     html::CEReactionsScope ceReactions;
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
-      return MutationAlgorithms::PreRemove(oldChild, *containerNode);
+      return dom::MutationAlgorithms::PreRemove(oldChild, *containerNode);
     }
 
-    return Exception {ExceptionCode::NotFoundError};
+    return dom::Exception {dom::ExceptionCode::NotFoundError};
   }
 
-  ExceptionOr<Node &> Node::AppendChild(Node &newChild) noexcept
+  dom::ExceptionOr<Node &> Node::AppendChild(Node &newChild) noexcept
   {
     html::CEReactionsScope ceReactions;
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
-      return MutationAlgorithms::Append(newChild, *containerNode);
+      return dom::MutationAlgorithms::Append(newChild, *containerNode);
     }
 
-    return Exception {ExceptionCode::HierarchyRequestError};
+    return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
   }
 
 #pragma endregion
@@ -696,7 +700,7 @@ namespace krys::boo::dom
 
   ContainerNode *Node::ParentInComposedTree() const noexcept
   {
-    if (auto *slot = SlotAlgorithms::GetAssignedSlot(*this))
+    if (auto *slot = dom::SlotAlgorithms::GetAssignedSlot(*this))
     {
       return slot;
     }
@@ -709,7 +713,7 @@ namespace krys::boo::dom
 
   Element *Node::ParentElementInComposedTree() const noexcept
   {
-    if (auto *slot = SlotAlgorithms::GetAssignedSlot(*this))
+    if (auto *slot = dom::SlotAlgorithms::GetAssignedSlot(*this))
     {
       return slot;
     }
@@ -768,12 +772,12 @@ namespace krys::boo::dom
 
   uint32 Node::ComputeNodeIndex() const noexcept
   {
-    return static_cast<uint32>(TreeQueries::Index(*this));
+    return static_cast<uint32>(dom::TreeQueries::Index(*this));
   }
 
   uint32 Node::Length() const noexcept
   {
-    return static_cast<uint32>(TreeQueries::Length(*this));
+    return static_cast<uint32>(dom::TreeQueries::Length(*this));
   }
 
   ContainerNode *Node::ParentOrShadowHostNode() const noexcept
@@ -813,12 +817,12 @@ namespace krys::boo::dom
 
   bool Node::IsDescendantOf(const Node *other) const noexcept
   {
-    return other && TreeQueries::IsDescendant(*this, *other);
+    return other && dom::TreeQueries::IsDescendant(*this, *other);
   }
 
   bool Node::IsShadowIncludingDescendantOf(const Node *other) const noexcept
   {
-    return other && TreeQueries::IsShadowIncludingDescendant(*this, *other);
+    return other && dom::TreeQueries::IsShadowIncludingDescendant(*this, *other);
   }
 
   Node *Node::LastDescendant() const noexcept
@@ -887,7 +891,7 @@ namespace krys::boo::dom
 
     if (IsInShadowTree())
     {
-      return html::HTMLElement::EditabilityFromContentEditableAttr(*this);
+      return HTMLElement::EditabilityFromContentEditableAttr(*this);
     }
 
     // Style-based editability is always possible (no style sheet records whether it uses
@@ -959,14 +963,14 @@ namespace krys::boo::dom
     return result;
   }
 
-  void Node::DefaultEventHandler(Event &event) noexcept
+  void Node::DefaultEventHandler(dom::Event &event) noexcept
   {
     // A middle button press pans the nearest box that can scroll, unless it's on a link.
     if (event.Type() != event_names::MouseDown)
     {
       return;
     }
-    auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
+    auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
     if (!mouseEvent || mouseEvent->Button() != static_cast<int16>(MouseButton::Middle))
     {
       return;
@@ -1031,10 +1035,12 @@ namespace krys::boo::dom
     {
       case style::InvalidationMode::Normal: break;
       case style::InvalidationMode::RecompositeLayer:
-        SetNodeFlag(NodeFlags::StyleResolutionShouldRecompositeLayer);
+        SetNodeFlag(dom::NodeFlags::StyleResolutionShouldRecompositeLayer);
         break;
       case style::InvalidationMode::RebuildRenderer:
-      case style::InvalidationMode::InsertedIntoAncestor: SetNodeFlag(NodeFlags::HasInvalidRenderer); break;
+      case style::InvalidationMode::InsertedIntoAncestor:
+        SetNodeFlag(dom::NodeFlags::HasInvalidRenderer);
+        break;
     }
   }
 
@@ -1059,7 +1065,7 @@ namespace krys::boo::dom
 
   void Node::MarkAncestorsForInvalidatedStyle() noexcept
   {
-    auto composedAncestors = ComposedTreeAncestors(*this);
+    auto composedAncestors = dom::ComposedTreeAncestors(*this);
     auto it = composedAncestors.begin();
     auto end = composedAncestors.end();
     if (it != end)
@@ -1069,7 +1075,7 @@ namespace krys::boo::dom
       for (; it != end; ++it)
       {
         // Iterator skips over shadow roots.
-        if (auto *shadowRoot = TreeQueries::GetShadowRoot(*it))
+        if (auto *shadowRoot = dom::TreeQueries::GetShadowRoot(*it))
         {
           shadowRoot->SetChildNeedsStyleRecalc();
         }
@@ -1099,7 +1105,7 @@ namespace krys::boo::dom
 
     if (validity != style::Validity::Valid)
     {
-      SetNodeFlag(NodeFlags::IsComputedStyleInvalid);
+      SetNodeFlag(dom::NodeFlags::IsComputedStyleInvalid);
     }
 
     bool markAncestors =
@@ -1115,49 +1121,49 @@ namespace krys::boo::dom
 
 #pragma endregion
 
-  EventTarget *Node::GetParent(Event &event) const noexcept
+  dom::EventTarget *Node::GetParent(dom::Event &event) const noexcept
   {
     (void)event;
 
-    if (SlotAlgorithms::IsAssigned(*this))
+    if (dom::SlotAlgorithms::IsAssigned(*this))
     {
-      return SlotAlgorithms::GetAssignedSlot(*this);
+      return dom::SlotAlgorithms::GetAssignedSlot(*this);
     }
 
     return ParentNode();
   }
 
-  List<Ref<RegisteredObserver>> &Node::RegisteredObservers() noexcept
+  List<Ref<dom::RegisteredObserver>> &Node::RegisteredObservers() noexcept
   {
     return EnsureNodeRareData().RegisteredObservers();
   }
 
-  List<Ref<TransientRegisteredObserver>> &Node::TransientRegisteredObservers() noexcept
+  List<Ref<dom::TransientRegisteredObserver>> &Node::TransientRegisteredObservers() noexcept
   {
     return EnsureNodeRareData().TransientRegisteredObservers();
   }
 
   template <>
-  ContainerNode *Parent<TreeType::Tree>(const Node &node) noexcept
+  ContainerNode *dom::Parent<dom::TreeType::Tree>(const Node &node) noexcept
   {
     return node.ParentNode();
   }
 
   template <>
-  ContainerNode *Parent<TreeType::ShadowIncludingTree>(const Node &node) noexcept
+  ContainerNode *dom::Parent<dom::TreeType::ShadowIncludingTree>(const Node &node) noexcept
   {
     return node.ParentOrShadowHostNode();
   }
 
   template <>
-  ContainerNode *Parent<TreeType::ComposedTree>(const Node &node) noexcept
+  ContainerNode *dom::Parent<dom::TreeType::ComposedTree>(const Node &node) noexcept
   {
     return node.ParentInComposedTree();
   }
 
   namespace
   {
-    template <TreeType treeType>
+    template <dom::TreeType treeType>
     KRYS_NODISCARD size_t Depth(const Node &node) noexcept
     {
       size_t depth = 0;
@@ -1176,7 +1182,7 @@ namespace krys::boo::dom
       const Node *DistinctAncestorB;
     };
 
-    template <TreeType treeType>
+    template <dom::TreeType treeType>
     KRYS_NODISCARD AncestorAndChildren CommonInclusiveAncestorAndChildren(const Node &a,
                                                                           const Node &b) noexcept
     {
@@ -1229,20 +1235,22 @@ namespace krys::boo::dom
     }
   }
 
-  template <TreeType treeType>
-  Node *CommonInclusiveAncestor(const Node &a, const Node &b) noexcept
+  template <dom::TreeType treeType>
+  Node *dom::CommonInclusiveAncestor(const Node &a, const Node &b) noexcept
   {
     return const_cast<Node *>(CommonInclusiveAncestorAndChildren<treeType>(a, b).CommonAncestor);
   }
 
-  template Node *CommonInclusiveAncestor<TreeType::Tree>(const Node &, const Node &) noexcept;
+  template Node *dom::CommonInclusiveAncestor<dom::TreeType::Tree>(const Node &, const Node &) noexcept;
 
-  template Node *CommonInclusiveAncestor<TreeType::ShadowIncludingTree>(const Node &, const Node &) noexcept;
+  template Node *dom::CommonInclusiveAncestor<dom::TreeType::ShadowIncludingTree>(const Node &,
+                                                                                  const Node &) noexcept;
 
-  template Node *CommonInclusiveAncestor<TreeType::ComposedTree>(const Node &, const Node &) noexcept;
+  template Node *dom::CommonInclusiveAncestor<dom::TreeType::ComposedTree>(const Node &,
+                                                                           const Node &) noexcept;
 
-  template <TreeType treeType>
-  std::partial_ordering TreeOrder(const Node &a, const Node &b) noexcept
+  template <dom::TreeType treeType>
+  std::partial_ordering dom::TreeOrder(const Node &a, const Node &b) noexcept
   {
     if (&a == &b)
     {
@@ -1281,10 +1289,11 @@ namespace krys::boo::dom
              : std::partial_ordering::greater;
   }
 
-  template std::partial_ordering TreeOrder<TreeType::Tree>(const Node &, const Node &) noexcept;
+  template std::partial_ordering dom::TreeOrder<dom::TreeType::Tree>(const Node &, const Node &) noexcept;
 
-  template std::partial_ordering TreeOrder<TreeType::ShadowIncludingTree>(const Node &,
-                                                                          const Node &) noexcept;
+  template std::partial_ordering dom::TreeOrder<dom::TreeType::ShadowIncludingTree>(const Node &,
+                                                                                    const Node &) noexcept;
 
-  template std::partial_ordering TreeOrder<TreeType::ComposedTree>(const Node &, const Node &) noexcept;
+  template std::partial_ordering dom::TreeOrder<dom::TreeType::ComposedTree>(const Node &,
+                                                                             const Node &) noexcept;
 }

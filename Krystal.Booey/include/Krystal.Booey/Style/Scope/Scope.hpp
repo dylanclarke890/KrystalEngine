@@ -52,36 +52,28 @@
 
 namespace krys::boo
 {
+  class CSSStyleSheet;
+  class Document;
+  class Element;
+  class HTMLSlotElement;
+  class Node;
+  class ProcessingInstruction;
+  class RenderBoxModelObject;
+  class RenderObject;
   class RenderStyle;
+  class ShadowRoot;
+  class StyleSheet;
 }
 
 namespace krys::boo::css
 {
   class CounterStyleRegistry;
-  class CSSStyleSheet;
-  class StyleSheet;
   class StyleSheetContents;
 }
 
 namespace krys::boo::dom
 {
-  class Document;
   class DocumentOrShadowRoot;
-  class Element;
-  class Node;
-  class ProcessingInstruction;
-  class ShadowRoot;
-}
-
-namespace krys::boo::html
-{
-  class HTMLSlotElement;
-}
-
-namespace krys::boo
-{
-  class RenderBoxModelObject;
-  class RenderObject;
 }
 
 namespace krys::boo::style
@@ -109,8 +101,8 @@ namespace krys::boo::style
 
     struct ActiveStyleSheetCollection
     {
-      List<RefPtr<css::StyleSheet>> ActiveStyleSheets;
-      List<RefPtr<css::StyleSheet>> StyleSheetsForStyleSheetList;
+      List<RefPtr<StyleSheet>> ActiveStyleSheets;
+      List<RefPtr<StyleSheet>> StyleSheetsForStyleSheetList;
     };
 
     enum class ResolverUpdateType : uint8
@@ -140,25 +132,25 @@ namespace krys::boo::style
 
   private:
     const ScopeIdentifier _identifier {ScopeIdentifier::Generate()};
-    dom::Document *_document;
-    dom::ShadowRoot *_shadowRoot {nullptr};
+    boo::Document *_document;
+    boo::ShadowRoot *_shadowRoot {nullptr};
 
     RefPtr<Resolver> _resolver;
 
-    List<RefPtr<css::StyleSheet>> _styleSheetsForStyleSheetList;
-    List<RefPtr<css::CSSStyleSheet>> _activeStyleSheets;
+    List<RefPtr<StyleSheet>> _styleSheetsForStyleSheetList;
+    List<RefPtr<CSSStyleSheet>> _activeStyleSheets;
 
     // Track the currently loading top-level stylesheets needed for rendering.
     // Sheets loaded using the @import directive are not included in this count.
     // We use this count of pending sheets to detect when we can begin attaching
     // elements and when it is safe to execute scripts.
-    List<WeakPtr<const dom::Element>> _elementsInHeadWithPendingSheets;
-    List<WeakPtr<const dom::Element>> _elementsInBodyWithPendingSheets;
-    List<WeakPtr<const dom::ProcessingInstruction>> _processingInstructionsWithPendingSheets;
+    List<WeakPtr<const Element>> _elementsInHeadWithPendingSheets;
+    List<WeakPtr<const Element>> _elementsInBodyWithPendingSheets;
+    List<WeakPtr<const ProcessingInstruction>> _processingInstructionsWithPendingSheets;
 
-    List<WeakPtr<dom::Node>> _styleSheetCandidateNodes;
+    List<WeakPtr<Node>> _styleSheetCandidateNodes;
 
-    dom::DOMString _preferredStylesheetSetName;
+    DOMString _preferredStylesheetSetName;
 
     Maybe<UpdateType> _pendingUpdate;
 
@@ -177,15 +169,14 @@ namespace krys::boo::style
     /// @brief The elements whose styles were resolved using viewport units, by address; the weak pointer
     /// tells a destroyed element from a new one at the same address. Some may no longer use them or be in the
     /// scope.
-    HashMap<dom::Element *, WeakPtr<dom::Element>> _elementsWithViewportUnits;
+    HashMap<Element *, WeakPtr<Element>> _elementsWithViewportUnits;
     /// @brief The size at which to forget the destroyed elements among them.
     size_t _elementsWithViewportUnitsPruneSize {64};
 
     UniquePtr<MatchResultCache> _matchResultCache;
 
     // Keyed by address; the weak pointer tells a destroyed container from a new one at the same address.
-    HashMap<const dom::Element *, Pair<WeakPtr<const dom::Element>, LayoutSize>>
-      _queryContainerDimensionsOnLastUpdate;
+    HashMap<const Element *, Pair<WeakPtr<const Element>, LayoutSize>> _queryContainerDimensionsOnLastUpdate;
 
     style::AnchorPositionedToAnchorMap _anchorPositionedToAnchorMap;
 
@@ -207,36 +198,36 @@ namespace krys::boo::style
     /// @brief What the invalidations for layout dependencies have already invalidated in one layout.
     struct LayoutDependencyUpdateContext
     {
-      HashSet<const dom::Element *> InvalidatedContainers;
-      HashSet<const dom::Element *> InvalidatedAnchorPositioned;
+      HashSet<const Element *> InvalidatedContainers;
+      HashSet<const Element *> InvalidatedAnchorPositioned;
     };
 
-    explicit Scope(dom::Document &document) noexcept;
+    explicit Scope(boo::Document &document) noexcept;
 
-    explicit Scope(dom::ShadowRoot &shadowRoot) noexcept;
+    explicit Scope(boo::ShadowRoot &shadowRoot) noexcept;
 
     ~Scope() noexcept;
 
-    KRYS_NODISCARD const List<RefPtr<css::CSSStyleSheet>> &ActiveStyleSheets() const noexcept
+    KRYS_NODISCARD const List<RefPtr<CSSStyleSheet>> &ActiveStyleSheets() const noexcept
     {
       return _activeStyleSheets;
     }
 
-    KRYS_NODISCARD const List<RefPtr<css::StyleSheet>> &StyleSheetsForStyleSheetList() noexcept;
+    KRYS_NODISCARD const List<RefPtr<StyleSheet>> &StyleSheetsForStyleSheetList() noexcept;
 
-    void AddStyleSheetCandidateNode(dom::Node &node, bool createdByParser) noexcept;
+    void AddStyleSheetCandidateNode(Node &node, bool createdByParser) noexcept;
 
-    void RemoveStyleSheetCandidateNode(dom::Node &node) noexcept;
+    void RemoveStyleSheetCandidateNode(Node &node) noexcept;
 
-    void SetPreferredStylesheetSetName(const dom::DOMString &name) noexcept;
+    void SetPreferredStylesheetSetName(const DOMString &name) noexcept;
 
-    void AddPendingSheet(const dom::Element &element) noexcept;
+    void AddPendingSheet(const Element &element) noexcept;
 
-    void RemovePendingSheet(const dom::Element &element) noexcept;
+    void RemovePendingSheet(const Element &element) noexcept;
 
-    void AddPendingSheet(const dom::ProcessingInstruction &processingInstruction) noexcept;
+    void AddPendingSheet(const ProcessingInstruction &processingInstruction) noexcept;
 
-    void RemovePendingSheet(const dom::ProcessingInstruction &processingInstruction) noexcept;
+    void RemovePendingSheet(const ProcessingInstruction &processingInstruction) noexcept;
 
     KRYS_NODISCARD bool HasPendingSheets() const noexcept;
 
@@ -244,14 +235,13 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool HasPendingSheetsInBody() const noexcept;
 
-    KRYS_NODISCARD bool HasPendingSheet(const dom::Element &element) const noexcept;
+    KRYS_NODISCARD bool HasPendingSheet(const Element &element) const noexcept;
 
-    KRYS_NODISCARD bool HasPendingSheetInBody(const dom::Element &element) const noexcept;
+    KRYS_NODISCARD bool HasPendingSheetInBody(const Element &element) const noexcept;
 
-    KRYS_NODISCARD bool
-      HasPendingSheet(const dom::ProcessingInstruction &processingInstruction) const noexcept;
+    KRYS_NODISCARD bool HasPendingSheet(const ProcessingInstruction &processingInstruction) const noexcept;
 
-    KRYS_NODISCARD bool ActiveStyleSheetsContains(const css::CSSStyleSheet &sheet) const noexcept;
+    KRYS_NODISCARD bool ActiveStyleSheetsContains(const CSSStyleSheet &sheet) const noexcept;
 
     /// @brief Called when some stylesheet becomes newly enabled or disabled.
     void DidChangeActiveStyleSheetCandidates() noexcept;
@@ -276,7 +266,7 @@ namespace krys::boo::style
     void DidChangeViewportSize() noexcept;
 
     /// @brief Notes that @p element, in the scope, has a resolved style that uses viewport units.
-    void AddElementWithViewportUnits(dom::Element &element) noexcept;
+    void AddElementWithViewportUnits(Element &element) noexcept;
 
     /// @brief Whether @p style, or the style of one of its pseudo-elements, uses viewport units.
     /// Pseudo-elements aren't nodes: their styles are in their element's, which is restyled for them.
@@ -333,22 +323,22 @@ namespace krys::boo::style
       return *_counterStyleRegistry;
     }
 
-    KRYS_NODISCARD const dom::Document &Document() const noexcept
+    KRYS_NODISCARD const boo::Document &Document() const noexcept
     {
       return *_document;
     }
 
-    KRYS_NODISCARD dom::Document &Document() noexcept
+    KRYS_NODISCARD boo::Document &Document() noexcept
     {
       return *_document;
     }
 
-    KRYS_NODISCARD const dom::ShadowRoot *ShadowRoot() const noexcept
+    KRYS_NODISCARD const boo::ShadowRoot *ShadowRoot() const noexcept
     {
       return _shadowRoot;
     }
 
-    KRYS_NODISCARD dom::ShadowRoot *ShadowRoot() noexcept
+    KRYS_NODISCARD boo::ShadowRoot *ShadowRoot() noexcept
     {
       return _shadowRoot;
     }
@@ -362,22 +352,21 @@ namespace krys::boo::style
     KRYS_NODISCARD const Scope *HostScope() const noexcept;
 
     /// @brief The scope of the shadow root `node` is in, or else of its document.
-    KRYS_NODISCARD static Scope &ForNode(dom::Node &node) noexcept;
+    KRYS_NODISCARD static Scope &ForNode(Node &node) noexcept;
 
-    KRYS_NODISCARD static const Scope &ForNode(const dom::Node &node) noexcept;
+    KRYS_NODISCARD static const Scope &ForNode(const Node &node) noexcept;
 
     /// @brief The scope @p ordinal names from @p element (its own, its shadow root's, a host's or a slot's),
     /// if any.
-    KRYS_NODISCARD static Scope *ForOrdinal(dom::Element &element, ScopeOrdinal ordinal) noexcept;
+    KRYS_NODISCARD static Scope *ForOrdinal(Element &element, ScopeOrdinal ordinal) noexcept;
 
-    KRYS_NODISCARD static const Scope *ForOrdinal(const dom::Element &element, ScopeOrdinal ordinal) noexcept;
+    KRYS_NODISCARD static const Scope *ForOrdinal(const Element &element, ScopeOrdinal ordinal) noexcept;
 
     /// @brief Dereferences the tree-scoped name @p reference: calls @p function with the scope it's from,
     /// then with each scope of the hosts above, until it returns a truthy result.
     /// @see https://drafts.csswg.org/css-scoping-1/#shadow-names
     template <typename TFunction>
-    KRYS_NODISCARD static auto ResolveTreeScopedReference(const dom::Element &element,
-                                                          const ScopedName &reference,
+    KRYS_NODISCARD static auto ResolveTreeScopedReference(const Element &element, const ScopedName &reference,
                                                           const TFunction &function) noexcept;
 
     /// @brief Invalidates the styles that depend on the last layout.
@@ -423,11 +412,11 @@ namespace krys::boo::style
     void UpdateActiveStyleSheets(UpdateType updateType) noexcept;
 
     KRYS_NODISCARD StyleSheetChange
-      AnalyzeStyleSheetChange(const List<RefPtr<css::CSSStyleSheet>> &newStylesheets) noexcept;
+      AnalyzeStyleSheetChange(const List<RefPtr<CSSStyleSheet>> &newStylesheets) noexcept;
 
     void InvalidateStyleAfterStyleSheetChange(const StyleSheetChange &styleSheetChange) noexcept;
 
-    void UpdateResolver(Span<const RefPtr<css::CSSStyleSheet>> activeStyleSheets,
+    void UpdateResolver(Span<const RefPtr<CSSStyleSheet>> activeStyleSheets,
                         ResolverUpdateType updateType) noexcept;
 
     void CreateDocumentResolver() noexcept;
@@ -456,14 +445,14 @@ namespace krys::boo::style
     void EvaluateMediaQueries(TFunction testFunction) noexcept;
 
     KRYS_NODISCARD static MediaQueryViewportState
-      MediaQueryViewportStateForDocument(const dom::Document &document) noexcept;
+      MediaQueryViewportStateForDocument(const boo::Document &document) noexcept;
   };
 
   template <typename TFunction>
-  auto Scope::ResolveTreeScopedReference(const dom::Element &element, const ScopedName &reference,
+  auto Scope::ResolveTreeScopedReference(const Element &element, const ScopedName &reference,
                                          const TFunction &function) noexcept
   {
-    using ReturnType = std::invoke_result_t<TFunction, const Scope &, const css::CSSOMStringAtom &>;
+    using ReturnType = std::invoke_result_t<TFunction, const Scope &, const CSSOMStringAtom &>;
 
     // https://drafts.csswg.org/css-scoping-1/#shadow-names
     // "Whenever a tree-scoped reference is dereferenced to find the CSS construct it is referencing, first
@@ -494,10 +483,9 @@ namespace krys::boo::style
   }
 
   /// @return The slot @p scopeOrdinal slots up the assignment chain from @p element, if any.
-  KRYS_NODISCARD html::HTMLSlotElement *AssignedSlotForScopeOrdinal(const dom::Element &element,
-                                                                    ScopeOrdinal scopeOrdinal) noexcept;
+  KRYS_NODISCARD HTMLSlotElement *AssignedSlotForScopeOrdinal(const Element &element,
+                                                              ScopeOrdinal scopeOrdinal) noexcept;
 
   /// @return The shadow host @p scopeOrdinal scopes up from @p element, if any.
-  KRYS_NODISCARD dom::Element *HostForScopeOrdinal(const dom::Element &element,
-                                                   ScopeOrdinal scopeOrdinal) noexcept;
+  KRYS_NODISCARD Element *HostForScopeOrdinal(const Element &element, ScopeOrdinal scopeOrdinal) noexcept;
 }

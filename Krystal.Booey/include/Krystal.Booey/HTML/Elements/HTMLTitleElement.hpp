@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmltitleelement
   class HTMLTitleElement : public HTMLElement
@@ -10,22 +10,22 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTitleElement);
 
   public:
-    HTMLTitleElement(dom::Document &document) noexcept;
+    HTMLTitleElement(Document &document) noexcept;
 
 #pragma region HTMLTitleElement - https://html.spec.whatwg.org/#htmltitleelement
 
     /// @see https://html.spec.whatwg.org/#dom-title-text
-    KRYS_NODISCARD dom::DOMString Text() const noexcept;
+    KRYS_NODISCARD DOMString Text() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-title-text
-    dom::ExceptionOr<void> Text(dom::DOMString value) noexcept;
+    dom::ExceptionOr<void> Text(DOMString value) noexcept;
 
 #pragma endregion
 
   protected:
     void OnInsert() noexcept override;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
     void OnChildrenChanged() noexcept override;
 
@@ -35,17 +35,17 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLTitleElement)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLTitleElement)
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLTitleElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return Is<krys::boo::html::HTMLElement>(target)
-           && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLTitleElement();
+    return Is<krys::boo::HTMLElement>(target)
+           && Downcast<krys::boo::HTMLElement>(target).IsHTMLTitleElement();
   }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

@@ -37,9 +37,9 @@
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include <algorithm>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGTextContentElement::SVGTextContentElement(dom::Document &document,
+  SVGTextContentElement::SVGTextContentElement(Document &document,
                                                UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
                                                SVGElementInterface interface, SVGElementFlags flags) noexcept
       : SVGGraphicsElement(document, krys::move(propertyRegistry), interface,
@@ -170,15 +170,15 @@ namespace krys::boo::svg
 
   namespace
   {
-    KRYS_NODISCARD bool IsXMLSpaceAttribute(const dom::DOMStringAtom &localName,
-                                            const dom::DOMStringAtom &namespaceURI) noexcept
+    KRYS_NODISCARD bool IsXMLSpaceAttribute(const DOMStringAtom &localName,
+                                            const DOMStringAtom &namespaceURI) noexcept
     {
       return localName == u8"space" && namespaceURI == infra::namespaces::XML;
     }
   }
 
   bool SVGTextContentElement::HasPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
+    const DOMStringAtom &localName, const DOMStringAtom &namespaceURI) const noexcept
   {
     if (IsXMLSpaceAttribute(localName, namespaceURI))
     {
@@ -188,7 +188,7 @@ namespace krys::boo::svg
   }
 
   void SVGTextContentElement::CollectPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI, dom::DOMStringView value,
+    const DOMStringAtom &localName, const DOMStringAtom &namespaceURI, DOMStringView value,
     css::MutableStyleProperties &style) noexcept
   {
     if (IsXMLSpaceAttribute(localName, namespaceURI))
@@ -210,12 +210,11 @@ namespace krys::boo::svg
     SVGGraphicsElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
   }
 
-  void SVGTextContentElement::AttributeChanged(const dom::QualifiedName &name,
-                                               Maybe<dom::DOMStringView> oldValue,
-                                               Maybe<dom::DOMStringView> value) noexcept
+  void SVGTextContentElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                               Maybe<DOMStringView> value) noexcept
   {
     auto parseError = SVGParsingError::None;
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::LengthAdjustAttr())
     {
@@ -236,7 +235,7 @@ namespace krys::boo::svg
     SVGGraphicsElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGTextContentElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGTextContentElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {

@@ -110,7 +110,7 @@ namespace krys::boo::ax::tests
     auto &second = page.Object(u8"second");
     CHECK(list.ActiveDescendant() == &first);
 
-    Downcast<html::HTMLElement>(page.ById(u8"list")).Focus();
+    Downcast<HTMLElement>(page.ById(u8"list")).Focus();
     (void)page.TakeNotifications();
     CHECK(page.Cache().FocusedObject() == &first);
 
@@ -141,7 +141,7 @@ namespace krys::boo::ax::tests
     CHECK(Contains(popover.Controllers(), button));
     (void)page.TakeNotifications();
 
-    REQUIRE_FALSE(Downcast<html::HTMLElement>(page.ById(u8"popover")).ShowPopover().HasException());
+    REQUIRE_FALSE(Downcast<HTMLElement>(page.ById(u8"popover")).ShowPopover().HasException());
     CHECK(AXFixture::WasPosted(page.TakeNotifications(), button, AXNotification::ExpandedChanged));
   }
 
@@ -150,8 +150,7 @@ namespace krys::boo::ax::tests
   {
     AXFixture page(u8"<button id=button aria-controls=host aria-labelledby=host>Go</button>"
                    u8"<x-host id=host>Outside</x-host>");
-    auto shadow =
-      page.ById(u8"host").AttachShadow({.ReferenceTarget = dom::DOMString(u8"inner")}).ReleaseValue();
+    auto shadow = page.ById(u8"host").AttachShadow({.ReferenceTarget = DOMString(u8"inner")}).ReleaseValue();
     REQUIRE_FALSE(shadow->SetHTMLUnsafe(u8"<div id=inner>Inner</div><div id=other>Other</div><slot></slot>")
                     .HasException());
     (void)page.TakeNotifications();
@@ -166,12 +165,12 @@ namespace krys::boo::ax::tests
     CHECK(button.AccessibleName() == u8"Inner");
 
     // Changing the reference target moves the relations.
-    shadow->SetReferenceTarget(dom::DOMString(u8"other"));
+    shadow->SetReferenceTarget(DOMString(u8"other"));
     CHECK_FALSE(Contains(button.ControlledObjects(), inner));
     CHECK(Contains(button.ControlledObjects(), other));
 
     // A reference target naming nothing leaves no relation.
-    shadow->SetReferenceTarget(dom::DOMString(u8"missing"));
+    shadow->SetReferenceTarget(DOMString(u8"missing"));
     CHECK(button.ControlledObjects().empty());
   }
 }

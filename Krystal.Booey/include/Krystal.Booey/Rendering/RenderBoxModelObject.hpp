@@ -348,11 +348,11 @@ namespace krys::boo
     void RemoveOutOfFlowBoxesIfNeededOnStyleChange(RenderBlock &delegateBlock, const RenderStyle &oldStyle,
                                                    const RenderStyle &newStyle) noexcept;
 
-    RenderBoxModelObject(Type type, dom::Element &element, RenderStyle &&style,
-                         EnumSet<TypeFlag> baseTypeFlags, TypeSpecificFlags typeSpecificFlags) noexcept;
+    RenderBoxModelObject(Type type, Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags,
+                         TypeSpecificFlags typeSpecificFlags) noexcept;
 
-    RenderBoxModelObject(Type type, dom::Document &document, RenderStyle &&style,
-                         EnumSet<TypeFlag> baseTypeFlags, TypeSpecificFlags typeSpecificFlags) noexcept;
+    RenderBoxModelObject(Type type, Document &document, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags,
+                         TypeSpecificFlags typeSpecificFlags) noexcept;
 
     void WillBeDestroyed() noexcept override;
 

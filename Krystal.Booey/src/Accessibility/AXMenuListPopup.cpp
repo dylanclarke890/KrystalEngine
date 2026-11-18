@@ -61,7 +61,7 @@ namespace krys::boo
   {
     _childrenInitialized = true;
     auto *parent = _parent.get();
-    auto *select = parent ? DynamicDowncast<html::HTMLSelectElement>(parent->GetNode()) : nullptr;
+    auto *select = parent ? DynamicDowncast<HTMLSelectElement>(parent->GetNode()) : nullptr;
     auto *cache = AxObjectCache();
     if (!select || !cache)
     {

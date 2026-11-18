@@ -33,7 +33,7 @@
 
 namespace krys::boo::html
 {
-  bool RadioInputType::ValueMissing(dom::DOMStringView) const noexcept
+  bool RadioInputType::ValueMissing(DOMStringView) const noexcept
   {
     auto *element = Element();
     krys_debug_assert(element);
@@ -54,7 +54,7 @@ namespace krys::boo::html
 
     bool isRequired = false;
     bool foundCheckedRadio = false;
-    ForEachButtonInDetachedGroup(Downcast<dom::ContainerNode>(dom::TreeQueries::Root(*element)), name,
+    ForEachButtonInDetachedGroup(Downcast<ContainerNode>(dom::TreeQueries::Root(*element)), name,
                                  [&](HTMLInputElement &input)
                                  {
                                    if (input.Checked())
@@ -71,13 +71,12 @@ namespace krys::boo::html
     return isRequired && !foundCheckedRadio;
   }
 
-  void RadioInputType::ForEachButtonInDetachedGroup(dom::ContainerNode &rootNode,
-                                                    dom::DOMStringView groupName,
+  void RadioInputType::ForEachButtonInDetachedGroup(ContainerNode &rootNode, DOMStringView groupName,
                                                     const Func<bool(HTMLInputElement &)> &apply) noexcept
   {
     krys_debug_assert(!groupName.empty());
 
-    for (dom::Node *node = &rootNode; node;)
+    for (Node *node = &rootNode; node;)
     {
       if (Is<HTMLFormElement>(*node))
       {
@@ -116,7 +115,7 @@ namespace krys::boo::html
     }
   }
 
-  dom::DOMString RadioInputType::ValueMissingText() const noexcept
+  DOMString RadioInputType::ValueMissingText() const noexcept
   {
     return ValidationMessageValueMissingForRadioText();
   }
@@ -159,8 +158,8 @@ namespace krys::boo::html
 
     // We can only stay within the form's children if the form hasn't been demoted to a leaf because of
     // malformed HTML.
-    for (dom::Node *node = forward ? dom::TreeQueries::Next(*element) : dom::TreeQueries::Previous(*element);
-         node; node = forward ? dom::TreeQueries::Next(*node) : dom::TreeQueries::Previous(*node))
+    for (Node *node = forward ? dom::TreeQueries::Next(*element) : dom::TreeQueries::Previous(*element); node;
+         node = forward ? dom::TreeQueries::Next(*node) : dom::TreeQueries::Previous(*node))
     {
       // Once we encounter a form element, we know we're through.
       if (Is<HTMLFormElement>(*node))

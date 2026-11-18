@@ -25,15 +25,11 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 
-namespace krys::boo::dom
-{
-  class Node;
-}
-
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSImportRule;
   class MediaList;
+  class Node;
 
   /// @brief The base of the style sheets exposed to scripts.
   /// @see https://drafts.csswg.org/cssom/#the-stylesheet-interface
@@ -46,7 +42,7 @@ namespace krys::boo::css
 
     virtual void SetDisabled(bool disabled) noexcept = 0;
 
-    KRYS_NODISCARD virtual dom::Node *OwnerNode() const noexcept = 0;
+    KRYS_NODISCARD virtual Node *OwnerNode() const noexcept = 0;
 
     KRYS_NODISCARD virtual StyleSheet *ParentStyleSheet() const noexcept
     {

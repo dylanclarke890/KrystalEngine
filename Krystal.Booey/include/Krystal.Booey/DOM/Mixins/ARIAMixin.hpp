@@ -6,31 +6,31 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
 }
 
 // A `DOMString?` attribute reflecting the `aria-*` content attribute `attributeName`.
 #define KRYS_ARIA_STRING_ATTRIBUTE(Name, attributeName)                                                      \
-  KRYS_NODISCARD Maybe<dom::DOMString> Name() const noexcept                                                 \
+  KRYS_NODISCARD Maybe<krys::boo::DOMString> Name() const noexcept                                           \
   {                                                                                                          \
-    return ReflectedString(dom::DOMStringAtom(attributeName));                                               \
+    return ReflectedString(krys::boo::DOMStringAtom(attributeName));                                         \
   }                                                                                                          \
-  void Name(Maybe<dom::DOMString> value) noexcept                                                            \
+  void Name(Maybe<krys::boo::DOMString> value) noexcept                                                      \
   {                                                                                                          \
-    SetReflectedString(dom::DOMStringAtom(attributeName), krys::move(value));                                \
+    SetReflectedString(krys::boo::DOMStringAtom(attributeName), krys::move(value));                          \
   }
 
 // A `FrozenArray<Element>?` attribute reflecting the ID reference list `attributeName`.
 #define KRYS_ARIA_ELEMENTS_ATTRIBUTE(Name, attributeName)                                                    \
-  KRYS_NODISCARD Maybe<List<Ref<dom::Element>>> Name() const noexcept                                        \
+  KRYS_NODISCARD Maybe<List<Ref<krys::boo::Element>>> Name() const noexcept                                  \
   {                                                                                                          \
-    return AttrAssociatedElements(dom::DOMStringAtom(attributeName));                                        \
+    return AttrAssociatedElements(krys::boo::DOMStringAtom(attributeName));                                  \
   }                                                                                                          \
-  void Name(const Maybe<List<Ref<dom::Element>>> &elements) noexcept                                         \
+  void Name(const Maybe<List<Ref<krys::boo::Element>>> &elements) noexcept                                   \
   {                                                                                                          \
-    SetAttrAssociatedElements(dom::DOMStringAtom(attributeName), elements);                                  \
+    SetAttrAssociatedElements(krys::boo::DOMStringAtom(attributeName), elements);                            \
   }
 
 namespace krys::boo::dom::mixins
@@ -38,7 +38,7 @@ namespace krys::boo::dom::mixins
   /// @brief The IDL attributes of an element's ARIA role, states and properties, each reflecting the content
   /// attribute of the same name (`ariaLabel` reflects `aria-label`). On an element they reflect its
   /// attributes; on its `ElementInternals`, the defaults a custom element gives itself.
-  /// @tparam TTarget The reflected target: `dom::Element` or `html::ElementInternals`.
+  /// @tparam TTarget The reflected target: `Element` or `html::ElementInternals`.
   /// @see https://w3c.github.io/aria/#idl-interface
   /// @see https://html.spec.whatwg.org/#accessibility-semantics
   template <typename TTarget>
@@ -50,10 +50,10 @@ namespace krys::boo::dom::mixins
 
     /// @brief The element `aria-activedescendant` refers to.
     /// @see https://w3c.github.io/aria/#dom-ariamixin-ariaactivedescendantelement
-    KRYS_NODISCARD RefPtr<dom::Element> AriaActiveDescendantElement() const noexcept;
+    KRYS_NODISCARD RefPtr<Element> AriaActiveDescendantElement() const noexcept;
 
     /// @see https://w3c.github.io/aria/#dom-ariamixin-ariaactivedescendantelement
-    void AriaActiveDescendantElement(dom::Element *element) noexcept;
+    void AriaActiveDescendantElement(Element *element) noexcept;
 
     // The states and properties.
     KRYS_ARIA_STRING_ATTRIBUTE(AriaAtomic, u8"aria-atomic")
@@ -120,19 +120,17 @@ namespace krys::boo::dom::mixins
 
     /// @brief The `DOMString?` getter of a reflected attribute.
     /// @see https://html.spec.whatwg.org/#reflecting-content-attributes-in-idl-attributes:idl-domstring-2
-    KRYS_NODISCARD Maybe<dom::DOMString> ReflectedString(dom::DOMStringAtom name) const noexcept;
+    KRYS_NODISCARD Maybe<DOMString> ReflectedString(DOMStringAtom name) const noexcept;
 
     /// @brief The `DOMString?` setter of a reflected attribute.
-    void SetReflectedString(dom::DOMStringAtom name, Maybe<dom::DOMString> value) noexcept;
+    void SetReflectedString(DOMStringAtom name, Maybe<DOMString> value) noexcept;
 
     /// @brief The `FrozenArray<Element>?` getter of a reflected attribute.
     /// @see https://html.spec.whatwg.org/#attr-associated-elements
-    KRYS_NODISCARD Maybe<List<Ref<dom::Element>>>
-      AttrAssociatedElements(dom::DOMStringAtom name) const noexcept;
+    KRYS_NODISCARD Maybe<List<Ref<Element>>> AttrAssociatedElements(DOMStringAtom name) const noexcept;
 
     /// @brief The `FrozenArray<Element>?` setter of a reflected attribute.
-    void SetAttrAssociatedElements(dom::DOMStringAtom name,
-                                   const Maybe<List<Ref<dom::Element>>> &elements) noexcept;
+    void SetAttrAssociatedElements(DOMStringAtom name, const Maybe<List<Ref<Element>>> &elements) noexcept;
   };
 }
 

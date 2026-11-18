@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/CSS/Parser/ParserMode.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -48,7 +48,7 @@ namespace krys::boo::css
     explicit SelectorParserContext(const ParserContext &context) noexcept;
 
     /// @brief The document's mode and settings.
-    explicit SelectorParserContext(const dom::Document &document) noexcept;
+    explicit SelectorParserContext(const Document &document) noexcept;
 
     KRYS_NODISCARD friend bool operator==(const SelectorParserContext &,
                                           const SelectorParserContext &) noexcept = default;

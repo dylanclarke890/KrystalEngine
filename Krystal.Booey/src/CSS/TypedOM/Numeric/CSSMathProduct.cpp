@@ -27,7 +27,7 @@
 #include "Krystal.Booey/CSS/Calc/Tree.hpp"
 #include "Krystal.Booey/CSS/TypedOM/Numeric/CSSMathInvert.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   dom::ExceptionOr<Ref<CSSMathProduct>> CSSMathProduct::Create(List<CSSNumberish> numberishes) noexcept
   {
@@ -138,9 +138,9 @@ namespace krys::boo::css
     return values;
   }
 
-  Maybe<calc::Child> CSSMathProduct::ToCalcTreeNode() const noexcept
+  Maybe<css::calc::Child> CSSMathProduct::ToCalcTreeNode() const noexcept
   {
-    List<calc::Child> children;
+    List<css::calc::Child> children;
     for (const auto &child : _values->Array())
     {
       if (auto node = child->ToCalcTreeNode())
@@ -153,13 +153,13 @@ namespace krys::boo::css
       return null;
     }
 
-    auto operation = calc::Product {.Children = krys::move(children)};
-    auto type = calc::ToType(operation);
+    auto operation = css::calc::Product {.Children = krys::move(children)};
+    auto type = css::calc::ToType(operation);
     if (!type)
     {
       return null;
     }
 
-    return calc::CreateChild(krys::move(operation), *type);
+    return css::calc::CreateChild(krys::move(operation), *type);
   }
 }

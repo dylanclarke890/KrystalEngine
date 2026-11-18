@@ -21,11 +21,11 @@
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStream.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGPathByteStream::SVGPathByteStream(dom::DOMStringView string) noexcept
+  SVGPathByteStream::SVGPathByteStream(DOMStringView string) noexcept
   {
-    (void)BuildSVGPathByteStreamFromString(string, *this, PathParsingMode::UnalteredParsing);
+    (void)svg::BuildSVGPathByteStreamFromString(string, *this, svg::PathParsingMode::UnalteredParsing);
   }
 
   Ref<SVGPathByteStream::Data> SVGPathByteStream::Data::Empty() noexcept

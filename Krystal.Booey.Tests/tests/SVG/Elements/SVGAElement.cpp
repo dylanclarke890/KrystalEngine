@@ -15,18 +15,18 @@ namespace krys::boo::svg::tests
 
   namespace
   {
-    void Click(dom::Element &target, int16 button = 0) noexcept
+    void Click(boo::Element &target, int16 button = 0) noexcept
     {
       dom::MouseEventInit init;
       init.Bubbles = true;
       init.Cancelable = true;
       init.Composed = true;
       init.Button = button;
-      auto type = button == 0 ? dom::DOMStringAtom(u8"click") : dom::DOMStringAtom(u8"auxclick");
+      auto type = button == 0 ? DOMStringAtom(u8"click") : DOMStringAtom(u8"auxclick");
       (void)target.DispatchEvent(*CreateRef<dom::MouseEvent>(type, init));
     }
 
-    KRYS_NODISCARD SVGAElement &AById(NavigationFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD SVGAElement &AById(NavigationFixture &fixture, DOMStringView id) noexcept
     {
       return Downcast<SVGAElement>(Downcast<SVGElement>(fixture.ById(id)));
     }
@@ -41,7 +41,7 @@ namespace krys::boo::svg::tests
     fixture.Document->UpdateStyleIfNeeded();
     (void)fixture.Document->UpdateLayout();
 
-    auto focused = [&](dom::DOMStringView id)
+    auto focused = [&](DOMStringView id)
     {
       auto &element = Downcast<SVGElement>(fixture.ById(id));
       element.Focus();
@@ -129,7 +129,7 @@ namespace krys::boo::svg::tests
     Click(fixture.ById(u8"r"));
     CHECK(fixture.Navigations().size() == 1);
     auto &details =
-      Downcast<html::HTMLDetailsElement>(*fixture.Document->QuerySelector(u8"details").ReleaseValue());
+      Downcast<HTMLDetailsElement>(*fixture.Document->QuerySelector(u8"details").ReleaseValue());
     CHECK_FALSE(details.Open());
   }
 }

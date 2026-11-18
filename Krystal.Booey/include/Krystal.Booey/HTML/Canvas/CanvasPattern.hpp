@@ -55,8 +55,7 @@ namespace krys::boo::html
     /// @brief Reads @p type as a pattern's repetition (`repeat`, `repeat-x`, `repeat-y` or `no-repeat`; empty
     /// is `repeat`).
     /// @return False if @p type isn't one.
-    KRYS_NODISCARD static bool ParseRepetitionType(dom::DOMStringView type, bool &repeatX,
-                                                   bool &repeatY) noexcept;
+    KRYS_NODISCARD static bool ParseRepetitionType(DOMStringView type, bool &repeatX, bool &repeatY) noexcept;
 
     KRYS_NODISCARD Pattern &GetPattern() noexcept
     {

@@ -9,16 +9,16 @@ namespace krys::boo::html::tests
 {
   namespace
   {
-    KRYS_NODISCARD Ref<dom::HTMLDocument> ParseTemplateDocument(utf8_string &&input) noexcept
+    KRYS_NODISCARD Ref<HTMLDocument> ParseTemplateDocument(utf8_string &&input) noexcept
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       parser->PumpTokenizer();
       return document;
     }
 
-    KRYS_NODISCARD std::string InnerHTMLOf(dom::Document &document, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD std::string InnerHTMLOf(Document &document, DOMStringView id) noexcept
     {
       auto html = document.GetElementById(id)->InnerHTML().ReleaseValue();
       return std::string(html.begin(), html.end());
@@ -89,7 +89,7 @@ namespace krys::boo::html::tests
   TEST_CASE("HTMLTemplateElement: a deep clone clones the template contents",
             "[HTML][HTMLTemplateElement][dom:concept-node-clone-ext]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto element = document->CreateElement(u8"template").ReleaseValue();
     auto &templateElement = Downcast<HTMLTemplateElement>(*element);
     auto paragraph = document->CreateElement(u8"p").ReleaseValue();
@@ -110,7 +110,7 @@ namespace krys::boo::html::tests
   TEST_CASE("HTMLTemplateElement: content is a fragment hosted by the template",
             "[HTML][HTMLTemplateElement][html:template-contents][html:dom-template-content]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto element = document->CreateElement(u8"template").ReleaseValue();
     auto content = Downcast<HTMLTemplateElement>(*element).Content();
     REQUIRE(content);
@@ -122,8 +122,8 @@ namespace krys::boo::html::tests
   TEST_CASE("HTMLTemplateElement: adopting a template adopts its contents",
             "[HTML][HTMLTemplateElement][html:insertion-end-marker]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
-    auto other = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
+    auto other = CreateRef<HTMLDocument>();
     auto element = document->CreateElement(u8"template").ReleaseValue();
     auto content = Downcast<HTMLTemplateElement>(*element).Content();
     REQUIRE_FALSE(content->AppendChild(*document->CreateElement(u8"p").ReleaseValue()).HasException());
@@ -137,7 +137,7 @@ namespace krys::boo::html::tests
             "[HTML][HTMLTemplateElement][html:dom-template-shadowrootmode]"
             "[html:dom-template-shadowrootslotassignment]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto element = document->CreateElement(u8"template").ReleaseValue();
     auto &templateElement = Downcast<HTMLTemplateElement>(*element);
 
@@ -167,14 +167,14 @@ namespace krys::boo::html::tests
   TEST_CASE("HTMLTemplateElement: shadowRootReferenceTarget reflects the attribute, null without it",
             "[HTML][HTMLTemplateElement][html:dom-template-shadowrootreferencetarget]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto element = document->CreateElement(u8"template").ReleaseValue();
     auto &templateElement = Downcast<HTMLTemplateElement>(*element);
 
     CHECK_FALSE(templateElement.ShadowRootReferenceTarget());
-    templateElement.ShadowRootReferenceTarget(dom::DOMString(u8"inner"));
+    templateElement.ShadowRootReferenceTarget(DOMString(u8"inner"));
     CHECK(templateElement.GetAttribute(u8"shadowrootreferencetarget") == u8"inner");
-    CHECK(templateElement.ShadowRootReferenceTarget() == dom::DOMString(u8"inner"));
+    CHECK(templateElement.ShadowRootReferenceTarget() == DOMString(u8"inner"));
     templateElement.ShadowRootReferenceTarget(null);
     CHECK_FALSE(templateElement.HasAttribute(u8"shadowrootreferencetarget"));
   }

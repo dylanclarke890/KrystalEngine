@@ -28,7 +28,7 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSKeywordValue.hpp"
 #include "Krystal.Booey/CSS/TypedOM/Transform/CSSTransformComponent.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief A perspective's length: a length, or `none` (a string or keyword value).
   /// @see https://drafts.css-houdini.org/css-typed-om/#typedefdef-cssperspectivevalue
@@ -48,8 +48,8 @@ namespace krys::boo::css
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSPerspective>> Create(CSSPerspectiveValue length) noexcept;
 
     /// @brief Reifies a `perspective()` function.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSPerspective>> Create(const FunctionValue &function,
-                                                                       dom::Document &document) noexcept;
+    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSPerspective>> Create(const css::FunctionValue &function,
+                                                                       Document &document) noexcept;
 
     ~CSSPerspective() noexcept override;
 
@@ -70,23 +70,23 @@ namespace krys::boo::css
 
     void Serialise(StringBuilder &builder) const noexcept final;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<DOMMatrix>> ToMatrix() const noexcept final;
+    KRYS_NODISCARD dom::ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
 
     KRYS_NODISCARD CSSTransformType TransformType() const noexcept final
     {
       return CSSTransformType::Perspective;
     }
 
-    KRYS_NODISCARD RefPtr<Value> ToCSSValue() const noexcept final;
+    KRYS_NODISCARD RefPtr<css::Value> ToCSSValue() const noexcept final;
 
   private:
     explicit CSSPerspective(CSSPerspectiveValue length) noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSPerspective)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSTransformComponent &component) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSPerspective)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSTransformComponent &component) noexcept
   {
-    return component.TransformType() == krys::boo::css::CSSTransformType::Perspective;
+    return component.TransformType() == krys::boo::CSSTransformType::Perspective;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

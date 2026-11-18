@@ -36,7 +36,7 @@ namespace krys::boo::style::tests
     /// @brief Tokenizes `text` and consumes a colour from it; fails the test unless every token was consumed.
     css::Color ParseCSS(utf8_stringview text, const css::ParserContext &context = ColorFunctionsEnabled)
     {
-      css::InputStream input {css::CSSOMString(text)};
+      css::InputStream input {CSSOMString(text)};
       css::Tokenizer tokenizer {input};
       tokenizer.PumpTokenizer();
       auto tokens = tokenizer.Tokens();
@@ -51,7 +51,7 @@ namespace krys::boo::style::tests
     /// @brief A document and style to resolve colours against.
     struct Resolution
     {
-      Ref<dom::Document> Document {CreateRef<dom::Document>()};
+      Ref<boo::Document> Document {CreateRef<boo::Document>()};
       RenderStyle Style {RenderStyle::Create()};
 
       Color Convert(const css::Color &value)
@@ -78,7 +78,7 @@ namespace krys::boo::style::tests
       return std::string(serialised.begin(), serialised.end());
     }
 
-    std::string ToString(const css::CSSOMString &value)
+    std::string ToString(const CSSOMString &value)
     {
       return std::string(value.begin(), value.end());
     }
@@ -153,7 +153,7 @@ namespace krys::boo::style::tests
                         u8"hsl(0 100% 50%)", u8"color(srgb 1 0 0)"})
       {
         auto color = resolution.Convert(text);
-        INFO(ToString(css::CSSOMString(text)));
+        INFO(ToString(CSSOMString(text)));
         REQUIRE(color.IsResolvedColor());
         CHECK(Bytes(color.GetResolvedColor()) == Red);
       }
@@ -229,9 +229,9 @@ namespace krys::boo::style::tests
 
       CHECK(keyword(css::ValueId::Linktext).GetResolvedColor() == light);
 
-      resolution.Style.SetColorScheme(ColorScheme {css::SpaceSeparatedList<css::CustomIdentifier> {
-                                                     css::CustomIdentifier {css::CSSOMStringAtom {u8"dark"}}},
-                                                   null});
+      resolution.Style.SetColorScheme(ColorScheme {
+        css::SpaceSeparatedList<css::CustomIdentifier> {css::CustomIdentifier {CSSOMStringAtom {u8"dark"}}},
+        null});
       CHECK(keyword(css::ValueId::Linktext).GetResolvedColor() == dark);
       CHECK(keyword(css::ValueId::WebkitLink).GetResolvedColor()
             == css::ColorFromKeyword(css::ValueId::WebkitLink, ColorOptions::UseDarkAppearance));
@@ -241,9 +241,9 @@ namespace krys::boo::style::tests
     {
       CHECK(Bytes(resolution.Convert(u8"light-dark(red, blue)").GetResolvedColor()) == Red);
 
-      resolution.Style.SetColorScheme(ColorScheme {css::SpaceSeparatedList<css::CustomIdentifier> {
-                                                     css::CustomIdentifier {css::CSSOMStringAtom {u8"dark"}}},
-                                                   null});
+      resolution.Style.SetColorScheme(ColorScheme {
+        css::SpaceSeparatedList<css::CustomIdentifier> {css::CustomIdentifier {CSSOMStringAtom {u8"dark"}}},
+        null});
       CHECK(Bytes(resolution.Convert(u8"light-dark(red, blue)").GetResolvedColor()) == Blue);
 
       CHECK(resolution.Convert(u8"light-dark(currentcolor, blue)").IsResolvedColor());
@@ -339,7 +339,7 @@ namespace krys::boo::style::tests
     for (auto text : {u8"color-mix(in srgb, currentcolor 25%, blue)", u8"contrast-color(currentcolor)",
                       u8"rgb(from currentcolor r g b)", u8"color-layers(currentcolor, red)"})
     {
-      INFO(ToString(css::CSSOMString(text)));
+      INFO(ToString(CSSOMString(text)));
       auto original = resolution.Convert(text);
       auto copy = original;
       CHECK(copy == original);

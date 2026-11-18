@@ -115,7 +115,7 @@ namespace krys::boo
 
   LegacyRenderSVGResourceContainer *
     StyleCachedImage::UncheckedRenderSVGResource(dom::DocumentOrShadowRoot &treeScope,
-                                                 const dom::DOMStringAtom &fragment) const noexcept
+                                                 const DOMStringAtom &fragment) const noexcept
   {
     auto *renderSVGResource = ReferencedSVGResources::ReferencedRenderResource(treeScope, fragment);
     _isRenderSVGResource = renderSVGResource != nullptr;
@@ -139,11 +139,11 @@ namespace krys::boo
     if (!_cachedImage)
     {
       auto fragmentIdentifier =
-        svg::SVGURIReference::FragmentIdentifierFromIRIString(_url, renderer->GetDocument());
+        SVGURIReference::FragmentIdentifierFromIRIString(_url, renderer->GetDocument());
       return UncheckedRenderSVGResource(renderer->TreeScopeForSVGReferences(), fragmentIdentifier);
     }
 
-    auto *image = DynamicDowncast<svg::SVGImage>(_cachedImage->GetImage());
+    auto *image = DynamicDowncast<SVGImage>(_cachedImage->GetImage());
     if (!image)
     {
       return nullptr;
@@ -156,7 +156,7 @@ namespace krys::boo
     }
 
     return UncheckedRenderSVGResource(rootElement->TreeScopeForSVGReferences(),
-                                      dom::DOMStringAtom(_url.Resolved.FragmentIdentifier()));
+                                      DOMStringAtom(_url.Resolved.FragmentIdentifier()));
   }
 
   LegacyRenderSVGResourceContainer *
@@ -358,7 +358,7 @@ namespace krys::boo
 
     if (auto *renderSVGResource = LegacyRenderSVGResource(renderer))
     {
-      return svg::SVGResourceImage::Create(*renderSVGResource, _url);
+      return SVGResourceImage::Create(*renderSVGResource, _url);
     }
 
     if (!_cachedImage)

@@ -38,10 +38,9 @@
 namespace krys::boo
 {
   using MathConstant = OpenTypeMathData::MathConstant;
-  using ScriptType = mathml::MathMLScriptsElement::ScriptType;
-  using mathml::MathMLOperatorDictionary;
+  using ScriptType = MathMLScriptsElement::ScriptType;
 
-  RenderMathMLUnderOver::RenderMathMLUnderOver(mathml::MathMLUnderOverElement &element,
+  RenderMathMLUnderOver::RenderMathMLUnderOver(boo::MathMLUnderOverElement &element,
                                                RenderStyle &&style) noexcept
       : RenderMathMLScripts(Type::MathMLUnderOver, element, krys::move(style))
   {
@@ -50,9 +49,9 @@ namespace krys::boo
 
   RenderMathMLUnderOver::~RenderMathMLUnderOver() noexcept = default;
 
-  mathml::MathMLUnderOverElement &RenderMathMLUnderOver::GetElement() const noexcept
+  boo::MathMLUnderOverElement &RenderMathMLUnderOver::GetElement() const noexcept
   {
-    return static_cast<mathml::MathMLUnderOverElement &>(NodeForNonAnonymous());
+    return static_cast<boo::MathMLUnderOverElement &>(NodeForNonAnonymous());
   }
 
   namespace
@@ -261,11 +260,11 @@ namespace krys::boo
                       || (!accentUnder && GetScriptType() == ScriptType::Over));
 
     auto attributeValue = accentUnder ? GetElement().AccentUnder() : GetElement().Accent();
-    if (attributeValue == mathml::MathMLElement::BooleanValue::True)
+    if (attributeValue == MathMLElement::BooleanValue::True)
     {
       return true;
     }
-    if (attributeValue == mathml::MathMLElement::BooleanValue::False)
+    if (attributeValue == MathMLElement::BooleanValue::False)
     {
       return false;
     }

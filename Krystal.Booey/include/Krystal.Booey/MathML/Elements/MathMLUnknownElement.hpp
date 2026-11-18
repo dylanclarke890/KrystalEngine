@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/MathML/Elements/MathMLRowElement.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   /// @brief An element in the MathML namespace that MathML Core doesn't define, laid out as `<mrow>` is.
   /// @see https://w3c.github.io/mathml-core/#new-mathml-elements
@@ -36,7 +36,7 @@ namespace krys::boo::mathml
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(MathMLUnknownElement);
 
   public:
-    explicit MathMLUnknownElement(dom::Document &document) noexcept
+    explicit MathMLUnknownElement(Document &document) noexcept
         : MathMLRowElement(document, MathMLElementInterface::Unknown, dom::NodeFlags::IsUnknownElement)
     {
     }
@@ -49,14 +49,14 @@ namespace krys::boo::mathml
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::mathml::MathMLUnknownElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::mathml::MathMLElement &element) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::MathMLUnknownElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::MathMLElement &element) noexcept
   {
-    return element.Interface() == krys::boo::mathml::MathMLElementInterface::Unknown;
+    return element.Interface() == krys::boo::MathMLElementInterface::Unknown;
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    auto *element = krys::DynamicDowncast<krys::boo::mathml::MathMLElement>(node);
+    auto *element = krys::DynamicDowncast<krys::boo::MathMLElement>(node);
     return element && IsType(*element);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

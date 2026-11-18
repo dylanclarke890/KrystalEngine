@@ -339,13 +339,13 @@ namespace krys::boo::html
     return ToCanvasTextBaseline(TextBaseline);
   }
 
-  dom::DOMString CanvasRenderingContext2DBase::State::GlobalCompositeOperationString() const noexcept
+  DOMString CanvasRenderingContext2DBase::State::GlobalCompositeOperationString() const noexcept
   {
     const auto name = CompositeOperatorName(GlobalComposite, GlobalBlend);
-    return dom::DOMString(name.begin(), name.end());
+    return DOMString(name.begin(), name.end());
   }
 
-  dom::DOMString CanvasRenderingContext2DBase::State::ShadowColorString() const noexcept
+  DOMString CanvasRenderingContext2DBase::State::ShadowColorString() const noexcept
   {
     return SerialisationForHTML(ShadowColor);
   }
@@ -410,7 +410,7 @@ namespace krys::boo::html
     c->Restore();
   }
 
-  void CanvasRenderingContext2DBase::SetStrokeColorImpl(Color &&color, dom::DOMString unparsedColor) noexcept
+  void CanvasRenderingContext2DBase::SetStrokeColorImpl(Color &&color, DOMString unparsedColor) noexcept
   {
     krys_debug_assert(color.IsValid());
     if (GetState().StrokeStyle.GetColor() == color)
@@ -428,7 +428,7 @@ namespace krys::boo::html
     state.UnparsedStrokeColor = krys::move(unparsedColor);
   }
 
-  void CanvasRenderingContext2DBase::SetFillColorImpl(Color &&color, dom::DOMString unparsedColor) noexcept
+  void CanvasRenderingContext2DBase::SetFillColorImpl(Color &&color, DOMString unparsedColor) noexcept
   {
     krys_debug_assert(color.IsValid());
     if (GetState().FillStyle.GetColor() == color)
@@ -576,7 +576,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-shadowcolor
-  void CanvasRenderingContext2DBase::SetShadowColor(dom::DOMStringView colorString) noexcept
+  void CanvasRenderingContext2DBase::SetShadowColor(DOMStringView colorString) noexcept
   {
     // 1. Let context be this's canvas attribute's value, if that is an element; otherwise null.
     // 2. Let parsedValue be the result of parsing the given value with context if non-null.
@@ -692,7 +692,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-globalcompositeoperation
-  void CanvasRenderingContext2DBase::SetGlobalCompositeOperation(dom::DOMStringView operation) noexcept
+  void CanvasRenderingContext2DBase::SetGlobalCompositeOperation(DOMStringView operation) noexcept
   {
     // 1. If the given value is not identical to any of the values that the <blend-mode> or the
     //    <composite-mode> properties are defined to take, then return.
@@ -1545,7 +1545,7 @@ namespace krys::boo::html
   KRYS_NODISCARD static CanvasRenderingContext2DBase::StyleVariant
     ToStyleVariant(const CanvasStyle &style) noexcept
   {
-    return style.Visit([](const dom::DOMString &string) -> CanvasRenderingContext2DBase::StyleVariant
+    return style.Visit([](const DOMString &string) -> CanvasRenderingContext2DBase::StyleVariant
                        { return string; },
                        [](const Ref<CanvasGradient> &gradient) -> CanvasRenderingContext2DBase::StyleVariant
                        { return RefPtr<CanvasGradient>(gradient); },
@@ -1559,7 +1559,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-strokestyle
-  void CanvasRenderingContext2DBase::SetStrokeStyle(dom::DOMString colorString) noexcept
+  void CanvasRenderingContext2DBase::SetStrokeStyle(DOMString colorString) noexcept
   {
     if (colorString == GetState().UnparsedStrokeColor)
     {
@@ -1616,7 +1616,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-fillstyle
-  void CanvasRenderingContext2DBase::SetFillStyle(dom::DOMString colorString) noexcept
+  void CanvasRenderingContext2DBase::SetFillStyle(DOMString colorString) noexcept
   {
     if (colorString == GetState().UnparsedFillColor)
     {
@@ -1720,8 +1720,7 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#dom-context-2d-createpattern
   dom::ExceptionOr<RefPtr<CanvasPattern>>
-    CanvasRenderingContext2DBase::CreatePattern(CanvasImageSource image,
-                                                dom::DOMStringView repetition) noexcept
+    CanvasRenderingContext2DBase::CreatePattern(CanvasImageSource image, DOMStringView repetition) noexcept
   {
     // 4. If repetition is the empty string, then set it to "repeat".
     // 5. If repetition is not identical to one of "repeat", "repeat-x", "repeat-y", or "no-repeat", then
@@ -1794,7 +1793,7 @@ namespace krys::boo::html
   }
 
   dom::ExceptionOr<RefPtr<CanvasPattern>>
-    CanvasRenderingContext2DBase::CreatePattern(svg::SVGImageElement &imageElement, bool repeatX,
+    CanvasRenderingContext2DBase::CreatePattern(SVGImageElement &imageElement, bool repeatX,
                                                 bool repeatY) noexcept
   {
     auto *cachedImage = imageElement.GetCachedImage();
@@ -1884,8 +1883,7 @@ namespace krys::boo::html
   }
 
   KRYS_NODISCARD static LayoutSize
-    Size(svg::SVGImageElement &element,
-         ImageSizeType sizeType = ImageSizeType::BeforeDevicePixelRatio) noexcept
+    Size(SVGImageElement &element, ImageSizeType sizeType = ImageSizeType::BeforeDevicePixelRatio) noexcept
   {
     return Size(element.GetCachedImage(), element.Renderer(), sizeType);
   }
@@ -1918,7 +1916,7 @@ namespace krys::boo::html
                                FloatRect {0, 0, sourceRectSize.Width(), sourceRectSize.Height()},
                                FloatRect {dx, dy, destRectSize.Width(), destRectSize.Height()});
       },
-      [&](RefPtr<svg::SVGImageElement> &imageElement) -> dom::ExceptionOr<void>
+      [&](RefPtr<SVGImageElement> &imageElement) -> dom::ExceptionOr<void>
       {
         LayoutSize destRectSize = Size(*imageElement, ImageSizeType::AfterDevicePixelRatio);
         LayoutSize sourceRectSize = Size(*imageElement, ImageSizeType::BeforeDevicePixelRatio);
@@ -2007,14 +2005,14 @@ namespace krys::boo::html
                      dstRect, op, blendMode, orientation);
   }
 
-  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(svg::SVGImageElement &imageElement,
+  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(SVGImageElement &imageElement,
                                                                  const FloatRect &srcRect,
                                                                  const FloatRect &dstRect) noexcept
   {
     return DrawImage(imageElement, srcRect, dstRect, GetState().GlobalComposite, GetState().GlobalBlend);
   }
 
-  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(svg::SVGImageElement &imageElement,
+  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(SVGImageElement &imageElement,
                                                                  const FloatRect &srcRect,
                                                                  const FloatRect &dstRect,
                                                                  const CompositeOperator &op,
@@ -2048,7 +2046,7 @@ namespace krys::boo::html
   }
 
   dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(
-    dom::Document &, CachedImage &cachedImage, const RenderObject *renderer, const FloatRect &imageRect,
+    Document &, CachedImage &cachedImage, const RenderObject *renderer, const FloatRect &imageRect,
     const FloatRect &srcRect, const FloatRect &dstRect, const CompositeOperator &op,
     const BlendMode &blendMode, ImageOrientation orientation) noexcept
   {
@@ -2853,7 +2851,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-filter
-  void CanvasRenderingContext2DBase::SetFilterString(dom::DOMStringView filterString) noexcept
+  void CanvasRenderingContext2DBase::SetFilterString(DOMStringView filterString) noexcept
   {
     if (GetState().FilterString == filterString)
     {
@@ -2880,7 +2878,7 @@ namespace krys::boo::html
 
     // 4. Set this's current filter to the given value.
     RealizeSaves();
-    ModifiableState().FilterString = dom::DOMString(filterString);
+    ModifiableState().FilterString = DOMString(filterString);
     ModifiableState().Filter = krys::move(*filter);
   }
 
@@ -3016,11 +3014,11 @@ namespace krys::boo::html
 
   // MARK: - Text
 
-  dom::DOMString CanvasRenderingContext2DBase::State::FontString() const noexcept
+  DOMString CanvasRenderingContext2DBase::State::FontString() const noexcept
   {
     if (!Font.Realized())
     {
-      return dom::DOMString(DefaultFont);
+      return DOMString(DefaultFont);
     }
 
     StringBuilder serializedFont;
@@ -3052,7 +3050,7 @@ namespace krys::boo::html
       }
 
       auto separator = i ? utf8_stringview {u8", "} : utf8_stringview {u8" "};
-      serializedFont.Append(separator, css::SerialiseFontFamily(css::CSSOMString(family)));
+      serializedFont.Append(separator, css::SerialiseFontFamily(CSSOMString(family)));
     }
 
     return krys::move(serializedFont).ToString();
@@ -3223,18 +3221,17 @@ namespace krys::boo::html
   {
     struct ParsedSpacing
     {
-      dom::DOMString Serialised;
+      DOMString Serialised;
       double Pixels;
     };
   }
 
   /// @brief @p spacing parsed as a CSS length and resolved against @p fontCascade; empty if it isn't one, or
   /// has a unit spacing doesn't allow.
-  KRYS_NODISCARD static Maybe<ParsedSpacing> ParseSpacing(dom::DOMStringView spacing,
-                                                          css::PropertyId property,
+  KRYS_NODISCARD static Maybe<ParsedSpacing> ParseSpacing(DOMStringView spacing, css::PropertyId property,
                                                           const FontCascade &fontCascade) noexcept
   {
-    css::InputStream inputStream {css::CSSOMString(spacing)};
+    css::InputStream inputStream {CSSOMString(spacing)};
     css::Tokenizer tokenizer(inputStream);
     std::ignore = tokenizer.PumpTokenizer();
     auto tokenRange = tokenizer.Tokens();
@@ -3272,7 +3269,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-letterspacing
-  void CanvasRenderingContext2DBase::SetLetterSpacing(dom::DOMStringView letterSpacing) noexcept
+  void CanvasRenderingContext2DBase::SetLetterSpacing(DOMStringView letterSpacing) noexcept
   {
     if (GetState().LetterSpacing == letterSpacing)
     {
@@ -3297,7 +3294,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-wordspacing
-  void CanvasRenderingContext2DBase::SetWordSpacing(dom::DOMStringView wordSpacing) noexcept
+  void CanvasRenderingContext2DBase::SetWordSpacing(DOMStringView wordSpacing) noexcept
   {
     if (GetState().WordSpacing == wordSpacing)
     {
@@ -3457,7 +3454,7 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#dom-context-2d-lang
   // (The lang setter steps are to set this's language to the given value.)
-  void CanvasRenderingContext2DBase::SetLang(dom::DOMStringView lang) noexcept
+  void CanvasRenderingContext2DBase::SetLang(DOMStringView lang) noexcept
   {
     if (GetState().Lang == lang)
     {
@@ -3466,7 +3463,7 @@ namespace krys::boo::html
     // Set the font first: one set later would undo the styles set before it.
     std::ignore = GetFontProxy();
     RealizeSaves();
-    ModifiableState().Lang = dom::DOMString(lang);
+    ModifiableState().Lang = DOMString(lang);
     UpdateFontForTextDrawingStyles();
   }
 
@@ -3571,9 +3568,9 @@ namespace krys::boo::html
     return c == 0x0009 || c == 0x000A || c == 0x000B || c == 0x000C || c == 0x000D;
   }
 
-  dom::DOMString CanvasRenderingContext2DBase::NormalizeSpaces(dom::DOMStringView text) noexcept
+  DOMString CanvasRenderingContext2DBase::NormalizeSpaces(DOMStringView text) noexcept
   {
-    auto normalized = dom::DOMString(text);
+    auto normalized = DOMString(text);
     for (auto &c : normalized)
     {
       if (IsSpaceThatNeedsReplacing(c))

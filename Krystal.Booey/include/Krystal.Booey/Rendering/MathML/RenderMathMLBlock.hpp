@@ -36,11 +36,7 @@
 
 namespace krys::boo
 {
-  namespace mathml
-  {
-    class MathMLPresentationElement;
-  }
-
+  class MathMLPresentationElement;
   class RenderMathMLOperator;
 
   /// @brief The base of the MathML renderers: a block whose children are all block-level, laid out by the
@@ -51,9 +47,9 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderMathMLBlock);
 
   public:
-    RenderMathMLBlock(Type type, mathml::MathMLPresentationElement &container, RenderStyle &&style) noexcept;
+    RenderMathMLBlock(Type type, boo::MathMLPresentationElement &container, RenderStyle &&style) noexcept;
 
-    RenderMathMLBlock(Type type, dom::Document &document, RenderStyle &&style) noexcept;
+    RenderMathMLBlock(Type type, Document &document, RenderStyle &&style) noexcept;
 
     ~RenderMathMLBlock() noexcept override;
 
@@ -152,7 +148,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderMathMLTable);
 
   public:
-    RenderMathMLTable(mathml::MathMLElement &element, RenderStyle &&style) noexcept;
+    RenderMathMLTable(MathMLElement &element, RenderStyle &&style) noexcept;
 
     ~RenderMathMLTable() noexcept override;
 
@@ -168,7 +164,7 @@ namespace krys::boo
   /// @brief Resolves the MathML length @p length against @p style.
   /// @param referenceValue What percentages and unitless values are relative to, and the result if @p length
   /// failed to parse.
-  KRYS_NODISCARD LayoutUnit ToUserUnits(const mathml::MathMLElement::Length &length, const RenderStyle &style,
+  KRYS_NODISCARD LayoutUnit ToUserUnits(const MathMLElement::Length &length, const RenderStyle &style,
                                         LayoutUnit referenceValue) noexcept;
 }
 

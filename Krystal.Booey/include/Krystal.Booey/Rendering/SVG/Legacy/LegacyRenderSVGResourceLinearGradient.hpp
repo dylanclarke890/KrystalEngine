@@ -23,13 +23,10 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceGradient.hpp"
 #include "Krystal.Booey/SVG/LinearGradientAttributes.hpp"
 
-namespace krys::boo::svg
-{
-  class SVGLinearGradientElement;
-}
-
 namespace krys::boo
 {
+  class SVGLinearGradientElement;
+
   /// @brief The renderer of a `<linearGradient>`.
   class LegacyRenderSVGResourceLinearGradient final : public LegacyRenderSVGResourceGradient
   {
@@ -39,11 +36,11 @@ namespace krys::boo
     svg::LinearGradientAttributes _attributes;
 
   public:
-    LegacyRenderSVGResourceLinearGradient(svg::SVGLinearGradientElement &, RenderStyle &&) noexcept;
+    LegacyRenderSVGResourceLinearGradient(SVGLinearGradientElement &, RenderStyle &&) noexcept;
 
     ~LegacyRenderSVGResourceLinearGradient() noexcept override;
 
-    KRYS_NODISCARD svg::SVGLinearGradientElement &LinearGradientElement() const noexcept;
+    KRYS_NODISCARD SVGLinearGradientElement &LinearGradientElement() const noexcept;
 
     KRYS_NODISCARD FloatPoint StartPoint(const svg::LinearGradientAttributes &) const noexcept;
 
@@ -57,7 +54,7 @@ namespace krys::boo
       return RenderSVGResourceType::LinearGradientResourceType;
     }
 
-    KRYS_NODISCARD svg::SVGUnitTypes::SVGUnitType GradientUnits() const noexcept final
+    KRYS_NODISCARD SVGUnitTypes::SVGUnitType GradientUnits() const noexcept final
     {
       return _attributes.GradientUnits();
     }

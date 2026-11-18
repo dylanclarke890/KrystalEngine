@@ -15,7 +15,7 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief The text of the generated content of @p element's @p type pseudo-element.
-    KRYS_NODISCARD utf8_string GeneratedText(dom::Element &element, PseudoElementType type)
+    KRYS_NODISCARD utf8_string GeneratedText(Element &element, PseudoElementType type)
     {
       auto *pseudoElement =
         type == PseudoElementType::Before ? element.BeforePseudoElement() : element.AfterPseudoElement();
@@ -31,7 +31,7 @@ namespace krys::boo::tests
       return text;
     }
 
-    KRYS_NODISCARD std::string Before(ResolverFixture &fixture, dom::DOMStringView id)
+    KRYS_NODISCARD std::string Before(ResolverFixture &fixture, DOMStringView id)
     {
       return ToNarrow(GeneratedText(fixture.ById(id), PseudoElementType::Before));
     }
@@ -118,7 +118,7 @@ namespace krys::boo::tests
     auto &document = *fixture.Document;
     document.UpdateStyleIfNeeded();
 
-    auto quote = [&](dom::DOMStringView id, PseudoElementType type)
+    auto quote = [&](DOMStringView id, PseudoElementType type)
     {
       return GeneratedText(fixture.ById(id), type);
     };

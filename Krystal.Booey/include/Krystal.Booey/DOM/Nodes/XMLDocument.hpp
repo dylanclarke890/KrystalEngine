@@ -2,26 +2,26 @@
 
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class XMLDocument : public Document
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(XMLDocument);
 
   protected:
-    XMLDocument(DocumentFlags flags) noexcept : Document(flags | DocumentFlags::IsXMLDocument)
+    XMLDocument(dom::DocumentFlags flags) noexcept : Document(flags | dom::DocumentFlags::IsXMLDocument)
     {
     }
 
   public:
-    XMLDocument() noexcept : Document(DocumentFlags::IsXMLDocument)
+    XMLDocument() noexcept : Document(dom::DocumentFlags::IsXMLDocument)
     {
     }
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::XMLDocument)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Document &document) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::XMLDocument)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Document &document) noexcept
   {
     return document.IsXMLDocument();
   }

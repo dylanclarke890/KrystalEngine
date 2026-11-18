@@ -27,9 +27,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGPatternElement::SVGPatternElement(dom::Document &document) noexcept
+  SVGPatternElement::SVGPatternElement(Document &document) noexcept
       : SVGElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Pattern),
         SVGFitToViewBox(this), SVGTests(this), SVGURIReference(this),
         _x(SVGAnimatedLength::Create(this, SVGLengthMode::Width)),
@@ -58,11 +58,11 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGPatternElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                           Maybe<dom::DOMStringView> value) noexcept
+  void SVGPatternElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                           Maybe<DOMStringView> value) noexcept
   {
     auto parseError = SVGParsingError::None;
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::PatternUnitsAttr())
     {
@@ -110,7 +110,7 @@ namespace krys::boo::svg
     SVGElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGPatternElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGPatternElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName) || SVGFitToViewBox::IsKnownAttribute(attributeName)
         || SVGURIReference::IsKnownAttribute(attributeName))
@@ -145,7 +145,7 @@ namespace krys::boo::svg
     return CreateRenderer<LegacyRenderSVGResourcePattern>(*this, krys::move(style));
   }
 
-  void SVGPatternElement::CollectPatternAttributes(PatternAttributes &attributes) const noexcept
+  void SVGPatternElement::CollectPatternAttributes(svg::PatternAttributes &attributes) const noexcept
   {
     if (!attributes.HasX() && HasAttribute(SVGNames::XAttr().LocalName()))
     {
@@ -198,7 +198,7 @@ namespace krys::boo::svg
     }
   }
 
-  AffineTransform SVGPatternElement::LocalCoordinateSpaceTransform(CTMScope) const noexcept
+  AffineTransform SVGPatternElement::LocalCoordinateSpaceTransform(svg::CTMScope) const noexcept
   {
     return PatternTransform().Concatenate();
   }

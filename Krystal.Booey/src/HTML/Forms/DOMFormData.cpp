@@ -86,46 +86,45 @@ namespace krys::boo::html
   namespace
   {
     // https://html.spec.whatwg.org/#create-an-entry
-    KRYS_NODISCARD DOMFormData::Item CreateStringEntry(dom::DOMStringView name,
-                                                       dom::DOMStringView value) noexcept
+    KRYS_NODISCARD DOMFormData::Item CreateStringEntry(DOMStringView name, DOMStringView value) noexcept
     {
-      return {.Name = dom::DOMString(name), .Data = dom::DOMString(value)};
+      return {.Name = DOMString(name), .Data = DOMString(value)};
     }
 
     // https://html.spec.whatwg.org/#create-an-entry
-    KRYS_NODISCARD DOMFormData::Item CreateFileEntry(dom::DOMStringView name, Blob &blob,
-                                                     Maybe<dom::DOMStringView> filename) noexcept
+    KRYS_NODISCARD DOMFormData::Item CreateFileEntry(DOMStringView name, Blob &blob,
+                                                     Maybe<DOMStringView> filename) noexcept
     {
       if (auto *file = DynamicDowncast<File>(blob))
       {
         if (filename)
         {
-          return {.Name = dom::DOMString(name),
+          return {.Name = DOMString(name),
                   .Data = RefPtr<File>(File::Create(*file, Maybe<utf8_stringview>(*filename)))};
         }
-        return {.Name = dom::DOMString(name), .Data = ShareRefPtr(file)};
+        return {.Name = DOMString(name), .Data = ShareRefPtr(file)};
       }
-      return {.Name = dom::DOMString(name),
+      return {.Name = DOMString(name),
               .Data = RefPtr<File>(File::Create(blob, filename ? *filename : u8"blob"))};
     }
   }
 
-  void DOMFormData::Append(dom::DOMStringView name, dom::DOMStringView value) noexcept
+  void DOMFormData::Append(DOMStringView name, DOMStringView value) noexcept
   {
     _items.push_back(CreateStringEntry(name, value));
   }
 
-  void DOMFormData::Append(dom::DOMStringView name, Blob &blob, Maybe<dom::DOMStringView> filename) noexcept
+  void DOMFormData::Append(DOMStringView name, Blob &blob, Maybe<DOMStringView> filename) noexcept
   {
     _items.push_back(CreateFileEntry(name, blob, filename));
   }
 
-  void DOMFormData::Remove(dom::DOMStringView name) noexcept
+  void DOMFormData::Remove(DOMStringView name) noexcept
   {
     std::erase_if(_items, [&](const Item &item) { return item.Name == name; });
   }
 
-  Maybe<DOMFormData::FormDataEntryValue> DOMFormData::Get(dom::DOMStringView name) const noexcept
+  Maybe<DOMFormData::FormDataEntryValue> DOMFormData::Get(DOMStringView name) const noexcept
   {
     for (auto &item : _items)
     {
@@ -137,7 +136,7 @@ namespace krys::boo::html
     return std::nullopt;
   }
 
-  List<DOMFormData::FormDataEntryValue> DOMFormData::GetAll(dom::DOMStringView name) const noexcept
+  List<DOMFormData::FormDataEntryValue> DOMFormData::GetAll(DOMStringView name) const noexcept
   {
     List<FormDataEntryValue> result;
     for (auto &item : _items)
@@ -150,22 +149,22 @@ namespace krys::boo::html
     return result;
   }
 
-  bool DOMFormData::Has(dom::DOMStringView name) const noexcept
+  bool DOMFormData::Has(DOMStringView name) const noexcept
   {
     return std::ranges::any_of(_items, [&](const Item &item) { return item.Name == name; });
   }
 
-  void DOMFormData::Set(dom::DOMStringView name, dom::DOMStringView value) noexcept
+  void DOMFormData::Set(DOMStringView name, DOMStringView value) noexcept
   {
     Set(name, CreateStringEntry(name, value));
   }
 
-  void DOMFormData::Set(dom::DOMStringView name, Blob &blob, Maybe<dom::DOMStringView> filename) noexcept
+  void DOMFormData::Set(DOMStringView name, Blob &blob, Maybe<DOMStringView> filename) noexcept
   {
     Set(name, CreateFileEntry(name, blob, filename));
   }
 
-  void DOMFormData::Set(dom::DOMStringView name, Item &&item) noexcept
+  void DOMFormData::Set(DOMStringView name, Item &&item) noexcept
   {
     // Replace the first item with a matching name, and remove the rest.
     auto first = std::ranges::find_if(_items, [&](const Item &existing) { return existing.Name == name; });

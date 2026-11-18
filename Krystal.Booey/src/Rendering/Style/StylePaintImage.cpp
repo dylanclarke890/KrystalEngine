@@ -30,7 +30,7 @@
 
 namespace krys::boo
 {
-  StylePaintImage::StylePaintImage(css::CSSOMString &&name, Ref<css::VariableData> &&arguments) noexcept
+  StylePaintImage::StylePaintImage(CSSOMString &&name, Ref<css::VariableData> &&arguments) noexcept
       : StyleGeneratedImage {Type::PaintImage, StylePaintImage::IsFixedSize}, _name {krys::move(name)},
         _arguments {krys::move(arguments)}
   {

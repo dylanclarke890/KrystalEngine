@@ -29,7 +29,7 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSKeywordValue;
 
@@ -75,9 +75,9 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSKeywordValue)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleValue &styleValue) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSKeywordValue)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleValue &styleValue) noexcept
   {
-    return styleValue.StyleValueType() == krys::boo::css::CSSStyleValueType::CSSKeywordValue;
+    return styleValue.StyleValueType() == krys::boo::CSSStyleValueType::CSSKeywordValue;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

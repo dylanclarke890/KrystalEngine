@@ -34,12 +34,12 @@
 #include <cmath>
 #include <numeric>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   namespace
   {
     template <typename TPredicate>
-    KRYS_NODISCARD dom::DOMStringView Trim(dom::DOMStringView string, TPredicate isWhitespace) noexcept
+    KRYS_NODISCARD DOMStringView Trim(DOMStringView string, TPredicate isWhitespace) noexcept
     {
       while (!string.empty() && isWhitespace(string.front()))
       {
@@ -54,13 +54,13 @@ namespace krys::boo::svg
 
     /// @brief Calls @p function with each part of @p string between semicolons.
     template <typename TFunction>
-    void ForEachSemicolonSeparated(dom::DOMStringView string, TFunction function) noexcept
+    void ForEachSemicolonSeparated(DOMStringView string, TFunction function) noexcept
     {
       while (true)
       {
         auto separator = string.find(u8';');
         function(string.substr(0, separator));
-        if (separator == dom::DOMStringView::npos)
+        if (separator == DOMStringView::npos)
         {
           return;
         }
@@ -68,13 +68,13 @@ namespace krys::boo::svg
       }
     }
 
-    KRYS_NODISCARD List<float> ParseKeyTimes(dom::DOMStringView value, bool verifyOrder) noexcept
+    KRYS_NODISCARD List<float> ParseKeyTimes(DOMStringView value, bool verifyOrder) noexcept
     {
       List<float> result;
       bool failed = false;
 
       ForEachSemicolonSeparated(value,
-                                [&](dom::DOMStringView keyTime)
+                                [&](DOMStringView keyTime)
                                 {
                                   if (failed)
                                   {
@@ -83,7 +83,7 @@ namespace krys::boo::svg
 
                                   keyTime = Trim(keyTime, &text::IsUnicodeCompatibleASCIIWhitespace<char8_t>);
 
-                                  auto parsed = ToDouble(keyTime);
+                                  auto parsed = svg::ToDouble(keyTime);
                                   auto time = static_cast<float>(parsed.value_or(0));
                                   if (!parsed || time < 0 || time > 1)
                                   {
@@ -114,7 +114,7 @@ namespace krys::boo::svg
       return result;
     }
 
-    KRYS_NODISCARD Maybe<List<UnitBezier>> ParseKeySplines(dom::DOMStringView string) noexcept
+    KRYS_NODISCARD Maybe<List<UnitBezier>> ParseKeySplines(DOMStringView string) noexcept
     {
       if (string.empty())
       {
@@ -122,7 +122,7 @@ namespace krys::boo::svg
       }
 
       auto buffer = string;
-      SkipOptionalSVGSpaces(buffer);
+      svg::SkipOptionalSVGSpaces(buffer);
 
       List<UnitBezier> result;
 
@@ -133,38 +133,38 @@ namespace krys::boo::svg
 
       while (!buffer.empty())
       {
-        auto posA = ParseNumber(buffer);
+        auto posA = svg::ParseNumber(buffer);
         if (!isInRange(posA))
         {
           return {};
         }
 
-        auto posB = ParseNumber(buffer);
+        auto posB = svg::ParseNumber(buffer);
         if (!isInRange(posB))
         {
           return {};
         }
 
-        auto posC = ParseNumber(buffer);
+        auto posC = svg::ParseNumber(buffer);
         if (!isInRange(posC))
         {
           return {};
         }
 
-        auto posD = ParseNumber(buffer, SuffixSkippingPolicy::DontSkip);
+        auto posD = svg::ParseNumber(buffer, svg::SuffixSkippingPolicy::DontSkip);
         if (!isInRange(posD))
         {
           return {};
         }
 
-        SkipOptionalSVGSpaces(buffer);
+        svg::SkipOptionalSVGSpaces(buffer);
 
         if (!buffer.empty() && buffer.front() == u8';')
         {
           buffer.remove_prefix(1);
         }
 
-        SkipOptionalSVGSpaces(buffer);
+        svg::SkipOptionalSVGSpaces(buffer);
 
         result.emplace_back(*posA, *posB, *posC, *posD);
       }
@@ -178,12 +178,12 @@ namespace krys::boo::svg
     }
   }
 
-  SVGAnimationElement::SVGAnimationElement(dom::Document &document, SVGElementInterface interface) noexcept
+  SVGAnimationElement::SVGAnimationElement(Document &document, SVGElementInterface interface) noexcept
       : SVGSMILElement(document, CreateUnique<PropertyRegistry>(*this), interface), SVGTests(this)
   {
   }
 
-  bool SVGAnimationElement::IsSupportedAttribute(const dom::QualifiedName &attrName) noexcept
+  bool SVGAnimationElement::IsSupportedAttribute(const QualifiedName &attrName) noexcept
   {
     static const Array supportedAttributes {
       &SVGNames::ValuesAttr(),
@@ -201,12 +201,11 @@ namespace krys::boo::svg
                                   [&](const auto *name) { return name->Matches(attrName); });
   }
 
-  void SVGAnimationElement::AttributeChanged(const dom::QualifiedName &name,
-                                             Maybe<dom::DOMStringView> oldValue,
-                                             Maybe<dom::DOMStringView> value) noexcept
+  void SVGAnimationElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                             Maybe<DOMStringView> value) noexcept
   {
     auto parseError = SVGParsingError::ParsingFailed;
-    auto newValue = value.value_or(dom::DOMStringView {});
+    auto newValue = value.value_or(DOMStringView {});
 
     if (name == SVGNames::ValuesAttr())
     {
@@ -217,7 +216,7 @@ namespace krys::boo::svg
       if (value)
       {
         ForEachSemicolonSeparated(
-          newValue, [this](dom::DOMStringView innerValue)
+          newValue, [this](DOMStringView innerValue)
           { _values.emplace_back(Trim(innerValue, &text::IsASCIIWhitespace<char8_t>)); });
       }
       UpdateAnimationMode();
@@ -264,7 +263,7 @@ namespace krys::boo::svg
     SVGSMILElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGAnimationElement::SVGAttributeChanged(const dom::QualifiedName &attrName) noexcept
+  void SVGAnimationElement::SVGAttributeChanged(const QualifiedName &attrName) noexcept
   {
     if (!IsSupportedAttribute(attrName))
     {
@@ -312,7 +311,7 @@ namespace krys::boo::svg
   void SVGAnimationElement::BeginElementAt(float offset) noexcept
   {
     krys_debug_assert(std::isfinite(offset));
-    AddInstanceTime(Begin, Elapsed() + offset, SMILTimeWithOrigin::Origin::Script);
+    AddInstanceTime(Begin, Elapsed() + offset, svg::SMILTimeWithOrigin::Origin::Script);
   }
 
   void SVGAnimationElement::EndElementAt(float offset) noexcept
@@ -322,7 +321,7 @@ namespace krys::boo::svg
     {
       return;
     }
-    AddInstanceTime(End, Elapsed() + offset, SMILTimeWithOrigin::Origin::Script);
+    AddInstanceTime(End, Elapsed() + offset, svg::SMILTimeWithOrigin::Origin::Script);
   }
 
   void SVGAnimationElement::UpdateAnimationMode() noexcept
@@ -330,47 +329,48 @@ namespace krys::boo::svg
     // http://www.w3.org/TR/2001/REC-smil-animation-20010904/#AnimFuncValues
     if (AttributeValue(SVGNames::ValuesAttr()))
     {
-      SetAnimationMode(AnimationMode::Values);
+      SetAnimationMode(svg::AnimationMode::Values);
     }
     else if (!ToValue().empty())
     {
-      SetAnimationMode(FromValue().empty() ? AnimationMode::To : AnimationMode::FromTo);
+      SetAnimationMode(FromValue().empty() ? svg::AnimationMode::To : svg::AnimationMode::FromTo);
     }
     else if (!ByValue().empty())
     {
-      SetAnimationMode(FromValue().empty() ? AnimationMode::By : AnimationMode::FromBy);
+      SetAnimationMode(FromValue().empty() ? svg::AnimationMode::By : svg::AnimationMode::FromBy);
     }
     else
     {
-      SetAnimationMode(AnimationMode::None);
+      SetAnimationMode(svg::AnimationMode::None);
     }
   }
 
-  void SVGAnimationElement::SetCalcMode(dom::DOMStringView calcMode) noexcept
+  void SVGAnimationElement::SetCalcMode(DOMStringView calcMode) noexcept
   {
     if (calcMode == u8"discrete")
     {
-      SetCalcMode(CalcMode::Discrete);
+      SetCalcMode(svg::CalcMode::Discrete);
     }
     else if (calcMode == u8"linear")
     {
-      SetCalcMode(CalcMode::Linear);
+      SetCalcMode(svg::CalcMode::Linear);
     }
     else if (calcMode == u8"paced")
     {
-      SetCalcMode(CalcMode::Paced);
+      SetCalcMode(svg::CalcMode::Paced);
     }
     else if (calcMode == u8"spline")
     {
-      SetCalcMode(CalcMode::Spline);
+      SetCalcMode(svg::CalcMode::Spline);
     }
     else
     {
-      SetCalcMode(Interface() == SVGElementInterface::AnimateMotion ? CalcMode::Paced : CalcMode::Linear);
+      SetCalcMode(Interface() == SVGElementInterface::AnimateMotion ? svg::CalcMode::Paced
+                                                                    : svg::CalcMode::Linear);
     }
   }
 
-  void SVGAnimationElement::SetAttributeType(dom::DOMStringView attributeType) noexcept
+  void SVGAnimationElement::SetAttributeType(DOMStringView attributeType) noexcept
   {
     if (attributeType == u8"CSS")
     {
@@ -386,43 +386,43 @@ namespace krys::boo::svg
     }
   }
 
-  dom::DOMString SVGAnimationElement::ToValue() const noexcept
+  DOMString SVGAnimationElement::ToValue() const noexcept
   {
-    return AttributeValue(SVGNames::ToAttr()).value_or(dom::DOMString {});
+    return AttributeValue(SVGNames::ToAttr()).value_or(DOMString {});
   }
 
-  dom::DOMString SVGAnimationElement::ByValue() const noexcept
+  DOMString SVGAnimationElement::ByValue() const noexcept
   {
-    return AttributeValue(SVGNames::ByAttr()).value_or(dom::DOMString {});
+    return AttributeValue(SVGNames::ByAttr()).value_or(DOMString {});
   }
 
-  dom::DOMString SVGAnimationElement::FromValue() const noexcept
+  DOMString SVGAnimationElement::FromValue() const noexcept
   {
-    return AttributeValue(SVGNames::FromAttr()).value_or(dom::DOMString {});
+    return AttributeValue(SVGNames::FromAttr()).value_or(DOMString {});
   }
 
   bool SVGAnimationElement::IsAdditive() const noexcept
   {
-    return AttributeValue(SVGNames::AdditiveAttr()) == dom::DOMStringView {u8"sum"}
-           || GetAnimationMode() == AnimationMode::By;
+    return AttributeValue(SVGNames::AdditiveAttr()) == DOMStringView {u8"sum"}
+           || GetAnimationMode() == svg::AnimationMode::By;
   }
 
   bool SVGAnimationElement::IsAccumulated() const noexcept
   {
-    return AttributeValue(SVGNames::AccumulateAttr()) == dom::DOMStringView {u8"sum"}
-           && GetAnimationMode() != AnimationMode::To;
+    return AttributeValue(SVGNames::AccumulateAttr()) == DOMStringView {u8"sum"}
+           && GetAnimationMode() != svg::AnimationMode::To;
   }
 
   bool SVGAnimationElement::IsTargetAttributeCSSProperty(SVGElement *targetElement,
-                                                         const dom::QualifiedName &attributeName) noexcept
+                                                         const QualifiedName &attributeName) noexcept
   {
     return targetElement->IsAnimatedStyleAttribute(attributeName);
   }
 
   void SVGAnimationElement::CalculateKeyTimesForCalcModePaced() noexcept
   {
-    krys_debug_assert(GetCalcMode() == CalcMode::Paced);
-    krys_debug_assert(GetAnimationMode() == AnimationMode::Values);
+    krys_debug_assert(GetCalcMode() == svg::CalcMode::Paced);
+    krys_debug_assert(GetAnimationMode() == svg::AnimationMode::Values);
 
     auto valuesCount = static_cast<uint32>(_values.size());
     krys_debug_assert(valuesCount >= 1);
@@ -464,7 +464,7 @@ namespace krys::boo::svg
 
   const List<float> &SVGAnimationElement::KeyTimes() const noexcept
   {
-    return (GetCalcMode() == CalcMode::Paced && GetAnimationMode() != AnimationMode::Path)
+    return (GetCalcMode() == svg::CalcMode::Paced && GetAnimationMode() != svg::AnimationMode::Path)
              ? _keyTimesForPaced
              : _keyTimesFromAttribute;
   }
@@ -477,7 +477,7 @@ namespace krys::boo::svg
     // For linear and spline animations, the last value must be '1'. In those
     // cases we don't need to consider the last value, since |percent| is never
     // greater than one.
-    if (keyTimesCount && GetCalcMode() != CalcMode::Discrete)
+    if (keyTimesCount && GetCalcMode() != svg::CalcMode::Discrete)
     {
       --keyTimesCount;
     }
@@ -493,10 +493,10 @@ namespace krys::boo::svg
 
   float SVGAnimationElement::CalculatePercentForSpline(float percent, uint32 splineIndex) const noexcept
   {
-    krys_debug_assert(GetCalcMode() == CalcMode::Spline);
+    krys_debug_assert(GetCalcMode() == svg::CalcMode::Spline);
     krys_assert(splineIndex < _keySplines.size());
     const UnitBezier &bezier = _keySplines[splineIndex];
-    SMILTime duration = SimpleDuration();
+    svg::SMILTime duration = SimpleDuration();
     if (!duration.IsFinite())
     {
       duration = 100.0;
@@ -509,7 +509,8 @@ namespace krys::boo::svg
     const auto &keyTimes = _keyTimesFromAttribute;
 
     krys_debug_assert(!_keyPoints.empty());
-    krys_debug_assert(GetCalcMode() != CalcMode::Paced || GetAnimationMode() == AnimationMode::Path);
+    krys_debug_assert(GetCalcMode() != svg::CalcMode::Paced
+                      || GetAnimationMode() == svg::AnimationMode::Path);
     krys_debug_assert(keyTimes.size() > 1);
     krys_debug_assert(_keyPoints.size() == keyTimes.size());
 
@@ -521,7 +522,7 @@ namespace krys::boo::svg
     uint32 index = CalculateKeyTimesIndex(percent);
     float fromKeyPoint = _keyPoints[index];
 
-    if (GetCalcMode() == CalcMode::Discrete)
+    if (GetCalcMode() == svg::CalcMode::Discrete)
     {
       return fromKeyPoint;
     }
@@ -532,7 +533,7 @@ namespace krys::boo::svg
     float toKeyPoint = _keyPoints[index + 1];
     float keyPointPercent = (percent - fromPercent) / (toPercent - fromPercent);
 
-    if (GetCalcMode() == CalcMode::Spline)
+    if (GetCalcMode() == svg::CalcMode::Spline)
     {
       krys_debug_assert(_keySplines.size() == _keyPoints.size() - 1);
       keyPointPercent = CalculatePercentForSpline(keyPointPercent, index);
@@ -543,7 +544,7 @@ namespace krys::boo::svg
   float SVGAnimationElement::CalculatePercentForFromTo(float percent) const noexcept
   {
     const auto &keyTimes = KeyTimes();
-    if (GetCalcMode() == CalcMode::Discrete && keyTimes.size() == 2)
+    if (GetCalcMode() == svg::CalcMode::Discrete && keyTimes.size() == 2)
     {
       return percent > keyTimes[1] ? 1.0f : 0.0f;
     }
@@ -552,12 +553,11 @@ namespace krys::boo::svg
   }
 
   void SVGAnimationElement::CurrentValuesFromKeyPoints(float percent, float &effectivePercent,
-                                                       dom::DOMString &from,
-                                                       dom::DOMString &to) const noexcept
+                                                       DOMString &from, DOMString &to) const noexcept
   {
     krys_debug_assert(!_keyPoints.empty());
     krys_debug_assert(_keyPoints.size() == KeyTimes().size());
-    krys_debug_assert(GetCalcMode() != CalcMode::Paced);
+    krys_debug_assert(GetCalcMode() != svg::CalcMode::Paced);
     effectivePercent = CalculatePercentFromKeyPoints(percent);
     auto index = effectivePercent == 1
                    ? _values.size() - 2
@@ -567,7 +567,7 @@ namespace krys::boo::svg
   }
 
   void SVGAnimationElement::CurrentValuesForValuesAnimation(float percent, float &effectivePercent,
-                                                            dom::DOMString &from, dom::DOMString &to) noexcept
+                                                            DOMString &from, DOMString &to) noexcept
   {
     auto valuesCount = static_cast<uint32>(_values.size());
     krys_debug_assert(_animationValid);
@@ -581,16 +581,16 @@ namespace krys::boo::svg
       return;
     }
 
-    CalcMode calcMode = GetCalcMode();
+    svg::CalcMode calcMode = GetCalcMode();
     if (Interface() == SVGElementInterface::Animate)
     {
       krys_debug_assert(TargetElement());
       if (static_cast<SVGAnimateElementBase &>(*this).IsDiscreteAnimator())
       {
-        calcMode = CalcMode::Discrete;
+        calcMode = svg::CalcMode::Discrete;
       }
     }
-    if (!_keyPoints.empty() && calcMode != CalcMode::Paced)
+    if (!_keyPoints.empty() && calcMode != svg::CalcMode::Paced)
     {
       return CurrentValuesFromKeyPoints(percent, effectivePercent, from, to);
     }
@@ -601,7 +601,7 @@ namespace krys::boo::svg
     krys_debug_assert(!keyTimesCount || (keyTimesCount > 1 && !keyTimes[0]));
 
     uint32 index = CalculateKeyTimesIndex(percent);
-    if (calcMode == CalcMode::Discrete)
+    if (calcMode == svg::CalcMode::Discrete)
     {
       if (!keyTimesCount)
       {
@@ -636,7 +636,7 @@ namespace krys::boo::svg
     krys_debug_assert(toPercent > fromPercent);
     effectivePercent = (percent - fromPercent) / (toPercent - fromPercent);
 
-    if (calcMode == CalcMode::Spline)
+    if (calcMode == svg::CalcMode::Spline)
     {
       krys_debug_assert(_keySplines.size() == _values.size() - 1);
       effectivePercent = CalculatePercentForSpline(effectivePercent, index);
@@ -663,58 +663,58 @@ namespace krys::boo::svg
 
     const auto &keyTimes = KeyTimes();
 
-    AnimationMode animationMode = GetAnimationMode();
-    CalcMode calcMode = GetCalcMode();
-    if (calcMode == CalcMode::Spline)
+    svg::AnimationMode animationMode = GetAnimationMode();
+    svg::CalcMode calcMode = GetCalcMode();
+    if (calcMode == svg::CalcMode::Spline)
     {
       auto splinesCount = _keySplines.size();
       if (!splinesCount || (hasKeyPoints && _keyPoints.size() - 1 != splinesCount)
-          || (animationMode == AnimationMode::Values && _values.size() - 1 != splinesCount)
+          || (animationMode == svg::AnimationMode::Values && _values.size() - 1 != splinesCount)
           || (hasKeyTimes && keyTimes.size() - 1 != splinesCount))
       {
         return;
       }
     }
 
-    dom::DOMString from = FromValue();
-    dom::DOMString to = ToValue();
-    dom::DOMString by = ByValue();
-    if (animationMode == AnimationMode::None)
+    DOMString from = FromValue();
+    DOMString to = ToValue();
+    DOMString by = ByValue();
+    if (animationMode == svg::AnimationMode::None)
     {
       return;
     }
-    if ((animationMode == AnimationMode::FromTo || animationMode == AnimationMode::FromBy
-         || animationMode == AnimationMode::To || animationMode == AnimationMode::By)
+    if ((animationMode == svg::AnimationMode::FromTo || animationMode == svg::AnimationMode::FromBy
+         || animationMode == svg::AnimationMode::To || animationMode == svg::AnimationMode::By)
         && (hasKeyPoints && hasKeyTimes
             && (keyTimes.size() < 2 || keyTimes.back() != 1 || keyTimes.size() != _keyPoints.size())))
     {
       return;
     }
-    if (animationMode == AnimationMode::FromTo)
+    if (animationMode == svg::AnimationMode::FromTo)
     {
       _animationValid = SetFromAndToValues(from, to);
     }
-    else if (animationMode == AnimationMode::To)
+    else if (animationMode == svg::AnimationMode::To)
     {
       // For to-animations the from value is the current accumulated value from lower priority animations.
       // The value is not static and is determined during the animation.
       _animationValid = SetFromAndToValues({}, to);
     }
-    else if (animationMode == AnimationMode::FromBy)
+    else if (animationMode == svg::AnimationMode::FromBy)
     {
       _animationValid = SetFromAndByValues(from, by);
     }
-    else if (animationMode == AnimationMode::By)
+    else if (animationMode == svg::AnimationMode::By)
     {
       _animationValid = SetFromAndByValues({}, by);
     }
-    else if (animationMode == AnimationMode::Values)
+    else if (animationMode == svg::AnimationMode::Values)
     {
       _animationValid = !_values.empty()
-                        && (calcMode == CalcMode::Paced || !hasKeyTimes || hasKeyPoints
+                        && (calcMode == svg::CalcMode::Paced || !hasKeyTimes || hasKeyPoints
                             || (_values.size() == keyTimes.size()))
-                        && (calcMode == CalcMode::Discrete || keyTimes.empty() || keyTimes.back() == 1)
-                        && (calcMode != CalcMode::Spline
+                        && (calcMode == svg::CalcMode::Discrete || keyTimes.empty() || keyTimes.back() == 1)
+                        && (calcMode != svg::CalcMode::Spline
                             || ((!_keySplines.empty() && (_keySplines.size() == _values.size() - 1))
                                 || _keySplines.size() == _keyPoints.size() - 1))
                         && (!hasKeyPoints || (keyTimes.size() > 1 && keyTimes.size() == _keyPoints.size()));
@@ -722,12 +722,12 @@ namespace krys::boo::svg
       {
         _animationValid = SetToAtEndOfDurationValue(_values.back());
       }
-      if (calcMode == CalcMode::Paced && _animationValid)
+      if (calcMode == svg::CalcMode::Paced && _animationValid)
       {
         CalculateKeyTimesForCalcModePaced();
       }
     }
-    else if (animationMode == AnimationMode::Path)
+    else if (animationMode == svg::AnimationMode::Path)
     {
       _animationValid = !hasKeyPoints || (keyTimes.size() > 1 && keyTimes.size() == _keyPoints.size());
     }
@@ -741,12 +741,12 @@ namespace krys::boo::svg
     }
 
     float effectivePercent;
-    CalcMode calcMode = GetCalcMode();
-    AnimationMode animationMode = GetAnimationMode();
-    if (animationMode == AnimationMode::Values)
+    svg::CalcMode calcMode = GetCalcMode();
+    svg::AnimationMode animationMode = GetAnimationMode();
+    if (animationMode == svg::AnimationMode::Values)
     {
-      dom::DOMString from;
-      dom::DOMString to;
+      DOMString from;
+      DOMString to;
       CurrentValuesForValuesAnimation(percent, effectivePercent, from, to);
       if (from != _lastValuesAnimationFrom || to != _lastValuesAnimationTo)
       {
@@ -759,15 +759,16 @@ namespace krys::boo::svg
         _lastValuesAnimationTo = to;
       }
     }
-    else if (!_keyPoints.empty() && (calcMode != CalcMode::Paced || animationMode == AnimationMode::Path))
+    else if (!_keyPoints.empty()
+             && (calcMode != svg::CalcMode::Paced || animationMode == svg::AnimationMode::Path))
     {
       effectivePercent = CalculatePercentFromKeyPoints(percent);
     }
-    else if (_keyPoints.empty() && calcMode == CalcMode::Spline && KeyTimes().size() > 1)
+    else if (_keyPoints.empty() && calcMode == svg::CalcMode::Spline && KeyTimes().size() > 1)
     {
       effectivePercent = CalculatePercentForSpline(percent, CalculateKeyTimesIndex(percent));
     }
-    else if (animationMode == AnimationMode::FromTo || animationMode == AnimationMode::To)
+    else if (animationMode == svg::AnimationMode::FromTo || animationMode == svg::AnimationMode::To)
     {
       effectivePercent = CalculatePercentForFromTo(percent);
     }

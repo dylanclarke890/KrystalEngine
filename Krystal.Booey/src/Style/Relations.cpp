@@ -31,7 +31,7 @@
 
 namespace krys::boo::style
 {
-  UniquePtr<Relations> CommitRelationsToRenderStyle(RenderStyle &style, const dom::Element &element,
+  UniquePtr<Relations> CommitRelationsToRenderStyle(RenderStyle &style, const boo::Element &element,
                                                     const Relations &relations) noexcept
   {
     UniquePtr<Relations> remainingRelations;
@@ -98,7 +98,7 @@ namespace krys::boo::style
     }
     for (auto &relation : *relations)
     {
-      auto &element = const_cast<dom::Element &>(*relation.Element);
+      auto &element = const_cast<boo::Element &>(*relation.Element);
       switch (relation.RelationType)
       {
         case Relation::AffectedByEmpty:           element.SetStyleAffectedByEmpty(); break;

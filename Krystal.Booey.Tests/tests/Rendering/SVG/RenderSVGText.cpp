@@ -127,7 +127,7 @@ namespace krys::boo::tests
 )");
 
     // Changing the text lays it out again.
-    auto &textNode = Downcast<dom::Text>(*fixture.Document->GetElementById(u8"tp")->FirstChild());
+    auto &textNode = Downcast<Text>(*fixture.Document->GetElementById(u8"tp")->FirstChild());
     REQUIRE(!textNode.AppendData(u8"de").HasException());
     CHECK(SVGDump(fixture) == u8R"(      RenderSVGRoot {svg} at (0,35) size 44x19
         RenderSVGText {text} at (0,35) size 44x19 contains 1 chunk(s)

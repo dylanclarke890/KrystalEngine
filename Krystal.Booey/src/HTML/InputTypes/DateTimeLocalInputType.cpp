@@ -46,9 +46,9 @@ namespace krys::boo::html
   {
     krys_debug_assert(Element());
     auto &element = *Element();
-    auto attribute = [&](dom::DOMStringAtom name)
+    auto attribute = [&](DOMStringAtom name)
     {
-      return element.GetAttribute(krys::move(name)).value_or(dom::DOMString());
+      return element.GetAttribute(krys::move(name)).value_or(DOMString());
     };
     const Decimal stepBase = FindStepBase(Decimal(0));
     const Decimal minimum =
@@ -61,8 +61,7 @@ namespace krys::boo::html
                      DateTimeLocalInputTypeStepDescription);
   }
 
-  Maybe<DateComponents>
-    DateTimeLocalInputType::ParseToDateComponents(dom::DOMStringView source) const noexcept
+  Maybe<DateComponents> DateTimeLocalInputType::ParseToDateComponents(DOMStringView source) const noexcept
   {
     return DateComponents::FromParsingDateTimeLocal(source);
   }
@@ -85,7 +84,7 @@ namespace krys::boo::html
     return InputType::SetValueAsDate(value);
   }
 
-  dom::DOMString DateTimeLocalInputType::SanitizeValue(dom::DOMStringView proposedValue) const noexcept
+  DOMString DateTimeLocalInputType::SanitizeValue(DOMStringView proposedValue) const noexcept
   {
     if (proposedValue.empty())
     {
@@ -108,8 +107,7 @@ namespace krys::boo::html
        DateTimeFormatValidationResults::HasMinute, DateTimeFormatValidationResults::HasMeridiem});
   }
 
-  dom::DOMString
-    DateTimeLocalInputType::FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept
+  DOMString DateTimeLocalInputType::FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept
   {
     if (!state.Year || !state.Month || !state.DayOfMonth || !state.Hour || !state.Minute || !state.Meridiem)
     {

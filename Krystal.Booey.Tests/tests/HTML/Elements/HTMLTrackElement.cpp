@@ -9,7 +9,7 @@ namespace krys::boo::html::tests
     "HTMLTrackElement.kind: reflects its known values, subtitles when missing and metadata when invalid",
     "[HTML][HTMLTrackElement][html:dom-track-kind][html:attr-track-kind]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto element = document->CreateElement(u8"track").ReleaseValue();
     auto &track = Downcast<HTMLTrackElement>(Downcast<HTMLElement>(*element));
 

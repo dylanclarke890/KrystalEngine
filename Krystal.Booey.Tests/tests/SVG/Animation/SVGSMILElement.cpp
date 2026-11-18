@@ -27,7 +27,7 @@ namespace krys::boo::svg::tests
 
   TEST_CASE("SVGSMILElement: clock values", "[SVG][SVGSMILElement]")
   {
-    auto clock = [](dom::DOMStringView value)
+    auto clock = [](DOMStringView value)
     {
       return SVGSMILElement::ParseClockValue(value);
     };

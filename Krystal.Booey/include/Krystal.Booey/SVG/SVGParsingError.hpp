@@ -28,7 +28,7 @@
 
 #include "Krystal.Core/Enum.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   enum class SVGParsingError : uint8
   {
@@ -38,4 +38,4 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGParsingError, 3uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SVGParsingError, 3uz);

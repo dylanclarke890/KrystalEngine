@@ -34,23 +34,23 @@
 
 namespace krys::boo
 {
-  SimplifyMarkupCommand::SimplifyMarkupCommand(dom::Document &document, dom::Node *firstNode,
-                                               dom::Node *nodeAfterLast) noexcept
+  SimplifyMarkupCommand::SimplifyMarkupCommand(Document &document, boo::Node *firstNode,
+                                               boo::Node *nodeAfterLast) noexcept
       : CompositeEditCommand(document), _firstNode(ShareRefPtr(firstNode)),
         _nodeAfterLast(ShareRefPtr(nodeAfterLast))
   {
   }
 
-  Ref<SimplifyMarkupCommand> SimplifyMarkupCommand::Create(dom::Document &document, dom::Node *firstNode,
-                                                           dom::Node *nodeAfterLast) noexcept
+  Ref<SimplifyMarkupCommand> SimplifyMarkupCommand::Create(Document &document, boo::Node *firstNode,
+                                                           boo::Node *nodeAfterLast) noexcept
   {
     return CreateRef<SimplifyMarkupCommand>(document, firstNode, nodeAfterLast);
   }
 
   void SimplifyMarkupCommand::DoApply() noexcept
   {
-    RefPtr<dom::ContainerNode> rootNode = ShareRefPtr(_firstNode->ParentNode());
-    List<Ref<dom::Node>> nodesToRemove;
+    RefPtr<ContainerNode> rootNode = ShareRefPtr(_firstNode->ParentNode());
+    List<Ref<boo::Node>> nodesToRemove;
 
     (void)GetDocument().UpdateLayoutIgnorePendingStylesheets();
 
@@ -60,19 +60,19 @@ namespace krys::boo
     // We look at inline elements as well as non top level divs that don't have attributes.
     for (auto *node = _firstNode.get(); node && node != _nodeAfterLast; node = dom::TreeQueries::Next(*node))
     {
-      if (node->FirstChild() || (Is<dom::Text>(*node) && node->NextSibling()) || !node->ParentNode())
+      if (node->FirstChild() || (Is<Text>(*node) && node->NextSibling()) || !node->ParentNode())
       {
         continue;
       }
 
-      RefPtr<dom::ContainerNode> startingNode = ShareRefPtr(node->ParentNode());
+      RefPtr<ContainerNode> startingNode = ShareRefPtr(node->ParentNode());
       const auto *startingStyle = startingNode->GetRenderStyle();
       if (!startingStyle)
       {
         continue;
       }
-      RefPtr<dom::ContainerNode> currentNode = startingNode;
-      RefPtr<dom::Node> topNodeWithStartingStyle;
+      RefPtr<ContainerNode> currentNode = startingNode;
+      RefPtr<boo::Node> topNodeWithStartingStyle;
       while (currentNode != rootNode)
       {
         // FIXME: The simplification algorithm should be rewritten to eliminate redundant
@@ -85,7 +85,7 @@ namespace krys::boo
 
         if (rootNode != currentNode->ParentNode() && IsRemovableBlock(currentNode.get()))
         {
-          nodesToRemove.push_back(ShareRef<dom::Node>(*currentNode));
+          nodesToRemove.push_back(ShareRef<boo::Node>(*currentNode));
         }
 
         currentNode = ShareRefPtr(currentNode->ParentNode());
@@ -114,7 +114,7 @@ namespace krys::boo
       }
       if (topNodeWithStartingStyle)
       {
-        for (dom::Node *ancestor = startingNode.get(); ancestor && ancestor != topNodeWithStartingStyle;
+        for (boo::Node *ancestor = startingNode.get(); ancestor && ancestor != topNodeWithStartingStyle;
              ancestor = ancestor->ParentNode())
         {
           nodesToRemove.push_back(ShareRef(*ancestor));
@@ -136,7 +136,7 @@ namespace krys::boo
     }
   }
 
-  int32 SimplifyMarkupCommand::PruneSubsequentAncestorsToRemove(List<Ref<dom::Node>> &nodesToRemove,
+  int32 SimplifyMarkupCommand::PruneSubsequentAncestorsToRemove(List<Ref<boo::Node>> &nodesToRemove,
                                                                 size_t startNodeIndex) noexcept
   {
     size_t pastLastNodeToRemove = startNodeIndex + 1;
@@ -153,8 +153,8 @@ namespace krys::boo
       }
     }
 
-    Ref<dom::Node> highestAncestorToRemove = nodesToRemove[pastLastNodeToRemove - 1];
-    RefPtr<dom::ContainerNode> parent = ShareRefPtr(highestAncestorToRemove->ParentNode());
+    Ref<boo::Node> highestAncestorToRemove = nodesToRemove[pastLastNodeToRemove - 1];
+    RefPtr<ContainerNode> parent = ShareRefPtr(highestAncestorToRemove->ParentNode());
     if (!parent) // Parent has already been removed.
     {
       return -1;

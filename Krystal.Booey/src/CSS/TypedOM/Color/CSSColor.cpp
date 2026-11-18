@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Color/CSSColor.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   dom::ExceptionOr<Ref<CSSColor>> CSSColor::Create(CSSKeywordish colorSpace, List<CSSColorPercent> channels,
                                                    CSSNumberish alpha) noexcept

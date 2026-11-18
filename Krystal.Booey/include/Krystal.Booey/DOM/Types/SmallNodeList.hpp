@@ -3,12 +3,15 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
   class Node;
   class Text;
+}
 
+namespace krys::boo::dom
+{
   /// @brief Covers 99.5%. See webkit.org/b/80706
   constexpr size_t OptimalSmallNodeListSize = 11;
 

@@ -101,7 +101,7 @@ namespace krys::boo::html
 
     // https://html.spec.whatwg.org/#canonicalize-a-sanitizer-name
     // (Names are dictionaries with a namespace already, so only step 3 is left.)
-    KRYS_NODISCARD dom::DOMStringAtom CanonicalSanitizerNamespace(dom::DOMStringAtom namespaceURI) noexcept
+    KRYS_NODISCARD DOMStringAtom CanonicalSanitizerNamespace(DOMStringAtom namespaceURI) noexcept
     {
       // 3. If name["namespace"] is the empty string, then set it to null.
       if (namespaceURI != null && namespaceURI.View().empty())
@@ -608,7 +608,7 @@ namespace krys::boo::html
     //        configuration is true, then set result to true.
     for (auto name : SanitizerConstants::EventHandlerContentAttributes())
     {
-      if (RemoveAttribute(configuration, dom::DOMString(name)))
+      if (RemoveAttribute(configuration, DOMString(name)))
       {
         result = true;
       }
@@ -680,7 +680,7 @@ namespace krys::boo::html
     return Maybe<SanitizerConfig> {krys::move(configuration)};
   }
 
-  bool SanitizerAlgorithms::ContainsJavaScriptURL(dom::DOMStringView value) noexcept
+  bool SanitizerAlgorithms::ContainsJavaScriptURL(DOMStringView value) noexcept
   {
     // 1. Let url be the result of running the basic URL parser on value.
     url::URL url(value);
@@ -700,11 +700,11 @@ namespace krys::boo::html
     return configuration.Comments.value_or(false);
   }
 
-  bool SanitizerAlgorithms::AllowsProcessingInstructionTarget(dom::DOMStringView piTarget,
+  bool SanitizerAlgorithms::AllowsProcessingInstructionTarget(DOMStringView piTarget,
                                                               const SanitizerConfig &configuration) noexcept
   {
     // 1. Let pi be «[ "target" → piTarget ]».
-    SanitizerProcessingInstruction pi {dom::DOMString(piTarget)};
+    SanitizerProcessingInstruction pi {DOMString(piTarget)};
 
     // 2. If configuration["processingInstructions"] exists, then return whether
     //    configuration["processingInstructions"] contains pi.
@@ -718,12 +718,12 @@ namespace krys::boo::html
     return !SanitizerListContains(configuration.RemoveProcessingInstructions, pi);
   }
 
-  SanitizerAction SanitizerAlgorithms::ActionForElementName(dom::DOMStringView localName,
-                                                            dom::DOMStringAtom namespaceURI,
+  SanitizerAction SanitizerAlgorithms::ActionForElementName(DOMStringView localName,
+                                                            DOMStringAtom namespaceURI,
                                                             const SanitizerConfig &configuration) noexcept
   {
     // 1. Let elementName be «[ "name" → localName, "namespace" → namespace ]».
-    SanitizerElementNamespace elementName {dom::DOMString(localName), krys::move(namespaceURI)};
+    SanitizerElementNamespace elementName {DOMString(localName), krys::move(namespaceURI)};
 
     // 2. If configuration["replaceWithChildrenElements"] exists and contains elementName, then return
     //    "Replace with children".
@@ -751,17 +751,16 @@ namespace krys::boo::html
     return SanitizerAction::Keep;
   }
 
-  bool SanitizerAlgorithms::AllowsAttribute(dom::DOMStringView localName,
-                                            const dom::DOMStringAtom &namespaceURI, dom::DOMStringView value,
-                                            dom::DOMStringView elementLocalName,
-                                            const dom::DOMStringAtom &elementNamespace,
+  bool SanitizerAlgorithms::AllowsAttribute(DOMStringView localName, const DOMStringAtom &namespaceURI,
+                                            DOMStringView value, DOMStringView elementLocalName,
+                                            const DOMStringAtom &elementNamespace,
                                             const SanitizerConfig &configuration) noexcept
   {
     // 1. Let attrName be «[ "name" → localName, "namespace" → namespace ]».
-    SanitizerAttributeNamespace attrName {dom::DOMString(localName), namespaceURI};
+    SanitizerAttributeNamespace attrName {DOMString(localName), namespaceURI};
 
     // 2. Let elementName be «[ "name" → elementLocalName, "namespace" → elementNamespace ]».
-    SanitizerElementNamespace elementName {dom::DOMString(elementLocalName), elementNamespace};
+    SanitizerElementNamespace elementName {DOMString(elementLocalName), elementNamespace};
 
     // 3.-4. Let elementWithLocalAttributes be «[ ]». If configuration["elements"] exists and there is an item
     //       element in configuration["elements"] whose name member is elementLocalName and whose namespace
@@ -866,9 +865,8 @@ namespace krys::boo::html
            && std::ranges::none_of(name, [](char8_t c) { return c >= u8'A' && c <= u8'Z'; });
   }
 
-  bool SanitizerAlgorithms::CompareItems(dom::DOMStringView nameA, const dom::DOMStringAtom &namespaceA,
-                                         dom::DOMStringView nameB,
-                                         const dom::DOMStringAtom &namespaceB) noexcept
+  bool SanitizerAlgorithms::CompareItems(DOMStringView nameA, const DOMStringAtom &namespaceA,
+                                         DOMStringView nameB, const DOMStringAtom &namespaceB) noexcept
   {
     // 1.-2. Let namespaceA be itemA["namespace"]. Let namespaceB be itemB["namespace"].
     // 3.-3a. If namespaceA is null: if namespaceB is not null, then return true.

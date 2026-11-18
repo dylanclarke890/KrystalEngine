@@ -31,7 +31,7 @@
 #include "Krystal.Booey/MathML/MathMLNames.hpp"
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLToken.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   void MathMLTokenElement::DidAttachRenderers() noexcept
   {
@@ -59,15 +59,16 @@ namespace krys::boo::mathml
     return CreateRenderer<RenderMathMLToken>(RenderObject::Type::MathMLToken, *this, krys::move(style));
   }
 
-  bool MathMLTokenElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
+  bool MathMLTokenElement::ChildShouldCreateRenderer(const Node &child) const noexcept
   {
     // The HTML specification defines <mi>, <mo>, <mn>, <ms> and <mtext> as insertion points.
     // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
     return StyledElement::ChildShouldCreateRenderer(child);
   }
 
-  bool MathMLTokenElement::HasPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool
+    MathMLTokenElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                           const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && localName == MathMLNames::MathvariantAttr().LocalName()
         && HasTagName(html::TagName::mi))
@@ -77,9 +78,9 @@ namespace krys::boo::mathml
     return MathMLPresentationElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void MathMLTokenElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                                  const dom::DOMStringAtom &namespaceURI,
-                                                                  dom::DOMStringView value,
+  void MathMLTokenElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                                  const DOMStringAtom &namespaceURI,
+                                                                  DOMStringView value,
                                                                   css::MutableStyleProperties &style) noexcept
   {
     // https://w3c.github.io/mathml-core/#the-mathvariant-attribute

@@ -155,7 +155,7 @@ namespace krys::boo
       NextInPreOrderAfterChildren(const CounterNode *stayWithin = nullptr) const noexcept;
 
     void InsertAfter(CounterNode &newChild, CounterNode *beforeChild,
-                     const css::CSSOMStringAtom &identifier) noexcept;
+                     const CSSOMStringAtom &identifier) noexcept;
 
     /// @note @p oldChild's identifier must match the identifier of this counter.
     void RemoveChild(CounterNode &oldChild) noexcept;

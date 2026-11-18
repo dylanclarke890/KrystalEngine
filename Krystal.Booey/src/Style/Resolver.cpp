@@ -72,7 +72,7 @@ namespace krys::boo::style
   class Resolver::State
   {
   private:
-    const dom::Element *_element {};
+    const Element *_element {};
     UniquePtr<RenderStyle> _style;
     const RenderStyle *_parentStyle {};
     UniquePtr<const RenderStyle> _ownedParentStyle;
@@ -82,8 +82,8 @@ namespace krys::boo::style
   public:
     State() noexcept = default;
 
-    State(const dom::Element &element, const RenderStyle *parentStyle,
-          const RenderStyle *documentElementStyle, style::TreeResolutionState *treeResolutionState) noexcept
+    State(const Element &element, const RenderStyle *parentStyle, const RenderStyle *documentElementStyle,
+          style::TreeResolutionState *treeResolutionState) noexcept
         : _element(&element), _parentStyle(parentStyle), _treeResolutionState(treeResolutionState)
     {
       krys_debug_assert(element.IsConnected());
@@ -113,7 +113,7 @@ namespace krys::boo::style
 
     State &operator=(State &&) noexcept = default;
 
-    KRYS_NODISCARD const dom::Element *Element() const noexcept
+    KRYS_NODISCARD const boo::Element *Element() const noexcept
     {
       return _element;
     }
@@ -155,12 +155,12 @@ namespace krys::boo::style
     }
   };
 
-  Ref<Resolver> Resolver::Create(dom::Document &document, ScopeType scopeType) noexcept
+  Ref<Resolver> Resolver::Create(boo::Document &document, ScopeType scopeType) noexcept
   {
     return AdoptRef(*new Resolver(document, scopeType));
   }
 
-  Resolver::Resolver(dom::Document &document, ScopeType scopeType) noexcept
+  Resolver::Resolver(boo::Document &document, ScopeType scopeType) noexcept
       : _document(CreateWeakPtr(&document)), _scopeType(scopeType), _ruleSets(*this),
         _matchedDeclarationsCache(*this)
   {
@@ -213,17 +213,17 @@ namespace krys::boo::style
 
   Resolver::~Resolver() noexcept = default;
 
-  dom::Document &Resolver::Document() noexcept
+  boo::Document &Resolver::Document() noexcept
   {
     return *_document;
   }
 
-  const dom::Document &Resolver::Document() const noexcept
+  const boo::Document &Resolver::Document() const noexcept
   {
     return *_document;
   }
 
-  void Resolver::AppendAuthorStyleSheets(Span<const RefPtr<css::CSSStyleSheet>> styleSheets) noexcept
+  void Resolver::AppendAuthorStyleSheets(Span<const RefPtr<CSSStyleSheet>> styleSheets) noexcept
   {
     _ruleSets.AppendAuthorStyleSheets(styleSheets, _mediaQueryEvaluator);
 
@@ -253,7 +253,7 @@ namespace krys::boo::style
     Document().KeyframesRuleDidChange(animationName.ToString());
   }
 
-  auto Resolver::InitializeStateAndStyle(const dom::Element &element, const ResolutionContext &context,
+  auto Resolver::InitializeStateAndStyle(const Element &element, const ResolutionContext &context,
                                          UniquePtr<RenderStyle> &&initialStyle) noexcept -> State
   {
     auto state =
@@ -285,8 +285,8 @@ namespace krys::boo::style
     }
 
     // BuilderState::useSVGZoomRulesForLength equivalent
-    if (auto *svgElement = DynamicDowncast<svg::SVGElement>(element);
-        svgElement && !(Is<svg::SVGSvgElement>(*svgElement) && element.ParentNode()))
+    if (auto *svgElement = DynamicDowncast<SVGElement>(element);
+        svgElement && !(Is<SVGSvgElement>(*svgElement) && element.ParentNode()))
     {
       state.Style()->SetUseSVGZoomRulesForLength(true);
     }
@@ -308,7 +308,7 @@ namespace krys::boo::style
                            .TreeResolutionState = state.GetTreeResolutionState()};
   }
 
-  UnadjustedStyle Resolver::UnadjustedStyleForElement(dom::Element &element, const ResolutionContext &context,
+  UnadjustedStyle Resolver::UnadjustedStyleForElement(Element &element, const ResolutionContext &context,
                                                       RuleMatchingBehavior matchingBehavior) noexcept
   {
     auto state = InitializeStateAndStyle(element, context);
@@ -343,7 +343,7 @@ namespace krys::boo::style
             .MatchResult = collector.ReleaseMatchResult()};
   }
 
-  ResolvedStyle Resolver::StyleForElement(dom::Element &element, const ResolutionContext &context,
+  ResolvedStyle Resolver::StyleForElement(Element &element, const ResolutionContext &context,
                                           RuleMatchingBehavior matchingBehavior) noexcept
   {
     auto unadjustedStyle = UnadjustedStyleForElement(element, context, matchingBehavior);
@@ -359,7 +359,7 @@ namespace krys::boo::style
             .MatchResult = krys::move(unadjustedStyle.MatchResult)};
   }
 
-  UnadjustedStyle Resolver::UnadjustedStyleForCachedMatchResult(dom::Element &element,
+  UnadjustedStyle Resolver::UnadjustedStyleForCachedMatchResult(Element &element,
                                                                 const ResolutionContext &context,
                                                                 CachedMatchResult cachedResult) noexcept
   {
@@ -388,7 +388,7 @@ namespace krys::boo::style
             .MatchResult = unadjustedStyle.MatchResult};
   }
 
-  UniquePtr<RenderStyle> Resolver::StyleForKeyframe(dom::Element &element, const RenderStyle &elementStyle,
+  UniquePtr<RenderStyle> Resolver::StyleForKeyframe(Element &element, const RenderStyle &elementStyle,
                                                     const ResolutionContext &context,
                                                     const css::KeyframeRule &keyframe,
                                                     BlendingKeyframe &blendingKeyframe) const noexcept
@@ -461,14 +461,14 @@ namespace krys::boo::style
     return state.TakeStyle();
   }
 
-  bool Resolver::IsAnimationNameValid(const css::CSSOMString &name) const noexcept
+  bool Resolver::IsAnimationNameValid(const CSSOMString &name) const noexcept
   {
-    auto atom = css::CSSOMStringAtom(name);
+    auto atom = CSSOMStringAtom(name);
     return _keyframesRuleMap.contains(atom) || UserAgentKeyframes().contains(atom);
   }
 
   List<Ref<css::KeyframeRule>>
-    Resolver::KeyframeRulesForName(const css::CSSOMStringAtom &animationName,
+    Resolver::KeyframeRulesForName(const CSSOMStringAtom &animationName,
                                    const TimingFunction *defaultTimingFunction) const noexcept
   {
     if (animationName.View().empty())
@@ -605,7 +605,7 @@ namespace krys::boo::style
     return deduplicatedKeyframes;
   }
 
-  bool Resolver::KeyframeStylesForAnimation(dom::Element &element, const RenderStyle &elementStyle,
+  bool Resolver::KeyframeStylesForAnimation(Element &element, const RenderStyle &elementStyle,
                                             const ResolutionContext &context, BlendingKeyframes &list,
                                             const TimingFunction *defaultTimingFunction) const noexcept
   {
@@ -644,17 +644,17 @@ namespace krys::boo::style
     return true;
   }
 
-  bool Resolver::HasSelectorForId(const css::CSSOMStringAtom &idValue) const noexcept
+  bool Resolver::HasSelectorForId(const CSSOMStringAtom &idValue) const noexcept
   {
     krys_debug_assert(!idValue.View().empty());
     return _ruleSets.Features().IdsInRules.contains(idValue);
   }
 
-  bool Resolver::HasSelectorForAttribute(const dom::Element &element,
-                                         const css::CSSOMStringAtom &attributeName) const noexcept
+  bool Resolver::HasSelectorForAttribute(const Element &element,
+                                         const CSSOMStringAtom &attributeName) const noexcept
   {
     krys_debug_assert(!attributeName.View().empty());
-    if (Is<html::HTMLElement>(element) && Is<dom::HTMLDocument>(element.NodeDocument()))
+    if (Is<HTMLElement>(element) && Is<HTMLDocument>(element.NodeDocument()))
     {
       return _ruleSets.Features().AttributeLowercaseLocalNamesInRules.contains(attributeName);
     }
@@ -671,7 +671,7 @@ namespace krys::boo::style
     return _ruleSets.EvaluateDynamicMediaQueryRules(_mediaQueryEvaluator);
   }
 
-  Maybe<ResolvedStyle> Resolver::StyleForPseudoElement(dom::Element &element,
+  Maybe<ResolvedStyle> Resolver::StyleForPseudoElement(Element &element,
                                                        const PseudoElementRequest &pseudoElementRequest,
                                                        const ResolutionContext &context) noexcept
   {
@@ -721,8 +721,8 @@ namespace krys::boo::style
     return ResolvedStyle {state.TakeStyle(), nullptr, collector.ReleaseMatchResult()};
   }
 
-  UniquePtr<RenderStyle> Resolver::DefaultStyleForElement(const dom::Document &document,
-                                                          const dom::Element *element) noexcept
+  UniquePtr<RenderStyle> Resolver::DefaultStyleForElement(const boo::Document &document,
+                                                          const Element *element) noexcept
   {
     auto style =
       RenderStyle::CreatePtrWithRegisteredInitialValues(document.StyleScope().GetCustomPropertyRegistry());
@@ -733,9 +733,8 @@ namespace krys::boo::style
 
     auto size = FontSizeForKeyword(static_cast<uint32>(css::ValueId::Medium), false, document);
     fontDescription.SetSpecifiedSize(size);
-    auto computedFontSize =
-      ComputedFontSizeFromSpecifiedSize(size, fontDescription.IsAbsoluteSize(),
-                                        element && Is<svg::SVGElement>(*element), style.get(), document);
+    auto computedFontSize = ComputedFontSizeFromSpecifiedSize(
+      size, fontDescription.IsAbsoluteSize(), element && Is<SVGElement>(*element), style.get(), document);
     fontDescription.SetComputedSize(computedFontSize.Size, computedFontSize.UsedZoomFactor);
 
     style->SetFontDescription(krys::move(fontDescription));
@@ -743,14 +742,14 @@ namespace krys::boo::style
     return style;
   }
 
-  List<RefPtr<const css::StyleRule>> Resolver::StyleRulesForElement(const dom::Element *element,
+  List<RefPtr<const css::StyleRule>> Resolver::StyleRulesForElement(const Element *element,
                                                                     uint32 rulesToInclude) noexcept
   {
     return PseudoStyleRulesForElement(element, {}, rulesToInclude);
   }
 
   List<RefPtr<const css::StyleRule>>
-    Resolver::PseudoStyleRulesForElement(const dom::Element *element,
+    Resolver::PseudoStyleRulesForElement(const Element *element,
                                          const Maybe<PseudoElementRequest> &pseudoElementIdentifier,
                                          uint32 rulesToInclude) noexcept
   {

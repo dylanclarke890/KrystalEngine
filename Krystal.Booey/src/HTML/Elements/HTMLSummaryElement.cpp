@@ -25,7 +25,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGAElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   namespace
   {
@@ -34,18 +34,18 @@ namespace krys::boo::html
       // The target may have been retargeted out of the summary (the default summary's details), in which case
       // no summary is met on the way up.
       auto isInInteractiveContent = false;
-      auto *node = DynamicDowncast<dom::Node>(target);
-      for (auto *element = node ? DynamicDowncast<dom::Element>(*node) : nullptr; element;
+      auto *node = DynamicDowncast<Node>(target);
+      for (auto *element = node ? DynamicDowncast<Element>(*node) : nullptr; element;
            element = dom::TreeQueries::ParentOrShadowHostElement(*element))
       {
         if (Is<HTMLSummaryElement>(*element))
         {
           return isInInteractiveContent;
         }
-        auto *svgElement = DynamicDowncast<svg::SVGElement>(*element);
+        auto *svgElement = DynamicDowncast<SVGElement>(*element);
         if (auto *htmlElement = DynamicDowncast<HTMLElement>(*element);
             (htmlElement && htmlElement->IsInteractiveContent())
-            || (svgElement && Is<svg::SVGAElement>(*svgElement)))
+            || (svgElement && Is<SVGAElement>(*svgElement)))
         {
           isInInteractiveContent = true;
         }
@@ -54,8 +54,8 @@ namespace krys::boo::html
     }
   }
 
-  HTMLSummaryElement::HTMLSummaryElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Summary)
+  HTMLSummaryElement::HTMLSummaryElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Summary)
   {
     SetEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
   }
@@ -158,7 +158,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLSummaryElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLSummaryElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
     if (auto *details = DynamicDowncast<HTMLDetailsElement>(oldAncestor); details && isSubtreeRoot)
@@ -167,7 +167,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLSummaryElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLSummaryElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
     if (!isSubtreeRoot)

@@ -28,7 +28,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGDecoratedPrimitive.hpp"
 #include "Krystal.Core/Concepts.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief An enumeration the DOM sees as an integer, refusing values outside the enumeration and reporting
   /// those the DOM doesn't expose as 0 (unknown).

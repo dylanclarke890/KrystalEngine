@@ -34,15 +34,18 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
+}
 
+namespace krys::boo::dom
+{
   template <typename>
   class ExceptionOr;
 }
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief The style sheets adopted by a document or shadow root (`adoptedStyleSheets`), with the checks and
   /// notifications of the IDL observable array.
@@ -52,12 +55,12 @@ namespace krys::boo::css
     KRYS_NON_COPY_MOVABLE(CSSStyleSheetObservableArray);
 
   private:
-    WeakPtr<dom::ContainerNode> _treeScope;
+    WeakPtr<ContainerNode> _treeScope;
     List<Ref<CSSStyleSheet>> _sheets;
 
   public:
     /// @param treeScope The document or shadow root that adopts the sheets.
-    explicit CSSStyleSheetObservableArray(dom::ContainerNode &treeScope) noexcept;
+    explicit CSSStyleSheetObservableArray(ContainerNode &treeScope) noexcept;
 
     /// @brief Replaces every sheet, if each of @p sheets can be adopted.
     dom::ExceptionOr<void> SetSheets(List<Ref<CSSStyleSheet>> &&sheets) noexcept;

@@ -32,13 +32,13 @@
 
 namespace krys::boo::html
 {
-  RadioNodeList::RadioNodeList(dom::ContainerNode &ownerNode, dom::DOMStringView name,
+  RadioNodeList::RadioNodeList(ContainerNode &ownerNode, DOMStringView name,
                                RadioNodeListCandidates candidates) noexcept
       : LiveNodeList(
           ownerNode,
-          [this](const dom::Node &node)
+          [this](const Node &node)
           {
-            auto *element = DynamicDowncast<dom::Element>(node);
+            auto *element = DynamicDowncast<Element>(node);
             return element && ElementMatches(*element);
           },
           dom::LiveCollectionInvalidation::FormControls,
@@ -57,7 +57,7 @@ namespace krys::boo::html
     }
   }
 
-  dom::DOMString RadioNodeList::Value() const noexcept
+  DOMString RadioNodeList::Value() const noexcept
   {
     // 1. Let element be the first element in tree order represented by the RadioNodeList object that is an
     //    input element whose type attribute is in the Radio Button state and whose checkedness is true.
@@ -78,7 +78,7 @@ namespace krys::boo::html
     return {};
   }
 
-  void RadioNodeList::SetValue(dom::DOMStringView value) noexcept
+  void RadioNodeList::SetValue(DOMStringView value) noexcept
   {
     // 1. If the new value is the string "on": let element be the first element in tree order represented by
     //    the RadioNodeList object that is an input element whose type attribute is in the Radio Button state
@@ -105,7 +105,7 @@ namespace krys::boo::html
     }
   }
 
-  bool RadioNodeList::ElementMatches(const dom::Element &element) const noexcept
+  bool RadioNodeList::ElementMatches(const Element &element) const noexcept
   {
     if (_candidates == RadioNodeListCandidates::Images)
     {

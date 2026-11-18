@@ -33,10 +33,7 @@
 namespace krys::boo
 {
   class LegacyRenderSVGResourceContainer;
-}
 
-namespace krys::boo::svg
-{
   /// @brief An image drawn by an SVG resource a CSS image refers to (a `mask-image: url()` to a `<mask>`).
   class SVGResourceImage final : public GeneratedImage
   {
@@ -69,7 +66,7 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGResourceImage)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGResourceImage)
   KRYS_NODISCARD static bool IsType(const krys::boo::Image &image) noexcept
   {
     return image.IsSVGResourceImage();

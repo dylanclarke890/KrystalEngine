@@ -8,7 +8,7 @@ namespace krys::boo::css::tests
   {
     PathFunction MakePath(CSSOMStringView d, Maybe<FillRule> fillRule = {})
     {
-      return PathFunction {Path {.FillRule = krys::move(fillRule), .Data = {svg::SVGPathByteStream(d)}}};
+      return PathFunction {Path {.FillRule = krys::move(fillRule), .Data = {SVGPathByteStream(d)}}};
     }
   }
 

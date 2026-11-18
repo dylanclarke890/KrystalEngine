@@ -35,7 +35,7 @@
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <limits>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   namespace
   {
@@ -101,7 +101,7 @@ namespace krys::boo::svg
     }
   }
 
-  SVGLengthValue::SVGLengthValue(SVGLengthMode lengthMode, dom::DOMStringView valueAsString) noexcept
+  SVGLengthValue::SVGLengthValue(SVGLengthMode lengthMode, DOMStringView valueAsString) noexcept
       : _value(css::Number<>(0)), _lengthMode(lengthMode)
   {
     (void)SetValueAsString(valueAsString);
@@ -120,10 +120,10 @@ namespace krys::boo::svg
     (void)SetValue(context, value);
   }
 
-  SVGLengthValue SVGLengthValue::Construct(SVGLengthMode lengthMode, dom::DOMStringView valueAsString,
+  SVGLengthValue SVGLengthValue::Construct(SVGLengthMode lengthMode, DOMStringView valueAsString,
                                            SVGParsingError &parseError,
                                            SVGLengthNegativeValuesMode negativeValuesMode,
-                                           Maybe<dom::DOMStringView> fallbackValue) noexcept
+                                           Maybe<DOMStringView> fallbackValue) noexcept
   {
     SVGLengthValue length(lengthMode);
 
@@ -146,7 +146,7 @@ namespace krys::boo::svg
     return length;
   }
 
-  dom::ExceptionOr<void> SVGLengthValue::SetValueAsString(dom::DOMStringView valueAsString,
+  dom::ExceptionOr<void> SVGLengthValue::SetValueAsString(DOMStringView valueAsString,
                                                           SVGLengthMode lengthMode) noexcept
   {
     _lengthMode = lengthMode;
@@ -263,7 +263,7 @@ namespace krys::boo::svg
                           });
   }
 
-  dom::DOMString SVGLengthValue::ValueAsString() const noexcept
+  DOMString SVGLengthValue::ValueAsString() const noexcept
   {
     return krys::SwitchOn(_value,
                           [](const auto &value)
@@ -277,13 +277,13 @@ namespace krys::boo::svg
                                 css::SerialisableNumber {numericValue, css::UnitString(raw->Unit)});
                             }
 
-                            return dom::DOMString();
+                            return DOMString();
                           });
   }
 
-  dom::DOMStringAtom SVGLengthValue::ValueAsAtomString() const noexcept
+  DOMStringAtom SVGLengthValue::ValueAsAtomString() const noexcept
   {
-    return dom::DOMStringAtom(ValueAsString());
+    return DOMStringAtom(ValueAsString());
   }
 
   dom::ExceptionOr<float> SVGLengthValue::ValueForBindings(const SVGLengthContext &context) const noexcept
@@ -363,7 +363,7 @@ namespace krys::boo::svg
     return SetValue(context, value);
   }
 
-  dom::ExceptionOr<void> SVGLengthValue::SetValueAsString(dom::DOMStringView string) noexcept
+  dom::ExceptionOr<void> SVGLengthValue::SetValueAsString(DOMStringView string) noexcept
   {
     if (string.empty())
     {
@@ -393,7 +393,7 @@ namespace krys::boo::svg
     auto parserContext = css::ParserContext {css::ParserMode::SVGAttribute};
     auto parserState = css::PropertyParserState {.Context = parserContext};
 
-    css::InputStream input {css::CSSOMString(trimmedString)};
+    css::InputStream input {CSSOMString(trimmedString)};
     css::Tokenizer tokenizer {input};
     tokenizer.PumpTokenizer();
     auto tokenRange = tokenizer.Tokens();

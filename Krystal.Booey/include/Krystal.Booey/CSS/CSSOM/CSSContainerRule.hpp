@@ -32,7 +32,10 @@
 namespace krys::boo::css
 {
   class ContainerRule;
+}
 
+namespace krys::boo
+{
   /// @see https://drafts.csswg.org/css-conditional-5/#dictdef-csscontainercondition
   struct CSSContainerCondition
   {
@@ -69,15 +72,15 @@ namespace krys::boo::css
   private:
     KRYS_NODISCARD const css::ContainerRule &GetContainerRule() const noexcept;
 
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::Container;
+      return css::RuleType::Container;
     }
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSContainerRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSContainerRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::Container;
   }

@@ -33,7 +33,7 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include <utility>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief Animates a presentation attribute's animated style property with @p TAnimationFunction.
   template <typename TAnimationFunction>
@@ -48,28 +48,26 @@ namespace krys::boo::svg
       return _function.IsDiscrete();
     }
 
-    void SetFromAndToValues(SVGElement &targetElement, dom::DOMStringView from,
-                            dom::DOMStringView to) noexcept override
+    void SetFromAndToValues(SVGElement &targetElement, DOMStringView from, DOMStringView to) noexcept override
     {
       _function.SetFromAndToValues(targetElement, AdjustForInheritance(targetElement, from),
                                    AdjustForInheritance(targetElement, to));
     }
 
-    void SetFromAndByValues(SVGElement &targetElement, dom::DOMStringView from,
-                            dom::DOMStringView by) noexcept override
+    void SetFromAndByValues(SVGElement &targetElement, DOMStringView from, DOMStringView by) noexcept override
     {
       _function.SetFromAndByValues(targetElement, from, by);
     }
 
     void SetToAtEndOfDurationValue(SVGElement &targetElement,
-                                   dom::DOMStringView toAtEndOfDuration) noexcept override
+                                   DOMStringView toAtEndOfDuration) noexcept override
     {
       _function.SetToAtEndOfDurationValue(targetElement, toAtEndOfDuration);
     }
 
   protected:
     template <typename... TArgs>
-    SVGPropertyAnimator(const dom::QualifiedName &attributeName, TArgs &&...arguments) noexcept
+    SVGPropertyAnimator(const QualifiedName &attributeName, TArgs &&...arguments) noexcept
         : SVGAttributeAnimator(attributeName), _function(std::forward<TArgs>(arguments)...)
     {
     }
@@ -79,20 +77,20 @@ namespace krys::boo::svg
       RemoveAnimatedStyleProperty(targetElement);
     }
 
-    KRYS_NODISCARD Maybe<float> CalculateDistance(SVGElement &targetElement, dom::DOMStringView from,
-                                                  dom::DOMStringView to) const noexcept override
+    KRYS_NODISCARD Maybe<float> CalculateDistance(SVGElement &targetElement, DOMStringView from,
+                                                  DOMStringView to) const noexcept override
     {
       return _function.CalculateDistance(targetElement, from, to);
     }
 
-    KRYS_NODISCARD dom::DOMString AdjustForInheritance(SVGElement &targetElement,
-                                                       dom::DOMStringView value) const noexcept
+    KRYS_NODISCARD DOMString AdjustForInheritance(SVGElement &targetElement,
+                                                  DOMStringView value) const noexcept
     {
-      return value == u8"inherit" ? ComputeInheritedCSSPropertyValue(targetElement) : dom::DOMString(value);
+      return value == u8"inherit" ? ComputeInheritedCSSPropertyValue(targetElement) : DOMString(value);
     }
 
-    KRYS_NODISCARD dom::DOMString ComputeCSSPropertyValue(SVGElement &targetElement,
-                                                          css::PropertyId id) const noexcept
+    KRYS_NODISCARD DOMString ComputeCSSPropertyValue(SVGElement &targetElement,
+                                                     css::PropertyId id) const noexcept
     {
       Ref protector = ShareRef(targetElement);
 
@@ -103,10 +101,10 @@ namespace krys::boo::svg
         style::Extractor(&targetElement).PropertyValueSerialisation(id, css::DefaultSerialisationContext());
       targetElement.SetUseOverrideComputedStyle(false);
 
-      return dom::DOMString(serialization);
+      return DOMString(serialization);
     }
 
-    KRYS_NODISCARD dom::DOMString ComputeInheritedCSSPropertyValue(SVGElement &targetElement) const noexcept
+    KRYS_NODISCARD DOMString ComputeInheritedCSSPropertyValue(SVGElement &targetElement) const noexcept
     {
       RefPtr svgParent = ShareRefPtr(DynamicDowncast<SVGElement>(targetElement.ParentElement()));
       if (!svgParent)

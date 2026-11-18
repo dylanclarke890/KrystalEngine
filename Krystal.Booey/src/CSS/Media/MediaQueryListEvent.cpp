@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Media/MediaQueryListEvent.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   MediaQueryListEvent::MediaQueryListEvent(CSSOMStringAtom type,
                                            const MediaQueryListEventInit &eventInitDict) noexcept

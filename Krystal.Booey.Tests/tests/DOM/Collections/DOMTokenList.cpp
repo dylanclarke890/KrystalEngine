@@ -34,7 +34,7 @@ namespace krys::boo::dom::tests
       DOMTokenList &TokenList;
 
       CommonTestData()
-          : Document(CreateRef<dom::Document>()), Element(Document->CreateElement(u8"div").Value()),
+          : Document(CreateRef<boo::Document>()), Element(Document->CreateElement(u8"div").Value()),
             TokenList(Element->ClassList())
       {
       }
@@ -348,7 +348,7 @@ namespace krys::boo::dom::tests
       }
       else
       {
-        return Downcast<TElement>(Downcast<html::HTMLElement>(*element.Value()));
+        return Downcast<TElement>(Downcast<HTMLElement>(*element.Value()));
       }
     }
   }
@@ -371,46 +371,46 @@ namespace krys::boo::dom::tests
     }
     SECTION("a's relList")
     {
-      auto &element = CreateHTML<html::HTMLAnchorElement>(*document, u8"a");
+      auto &element = CreateHTML<HTMLAnchorElement>(*document, u8"a");
       CheckFollowsAttribute(element, element.RelList(), u8"rel");
     }
     SECTION("area's relList")
     {
-      auto &element = CreateHTML<html::HTMLAreaElement>(*document, u8"area");
+      auto &element = CreateHTML<HTMLAreaElement>(*document, u8"area");
       CheckFollowsAttribute(element, element.RelList(), u8"rel");
     }
     SECTION("form's relList")
     {
-      auto &element = CreateHTML<html::HTMLFormElement>(*document, u8"form");
+      auto &element = CreateHTML<HTMLFormElement>(*document, u8"form");
       CheckFollowsAttribute(element, element.RelList(), u8"rel");
     }
     SECTION("link's relList, sizes and blocking")
     {
-      auto &element = CreateHTML<html::HTMLLinkElement>(*document, u8"link");
+      auto &element = CreateHTML<HTMLLinkElement>(*document, u8"link");
       CheckFollowsAttribute(element, element.RelList(), u8"rel");
       CheckFollowsAttribute(element, element.Sizes(), u8"sizes");
       CheckFollowsAttribute(element, element.Blocking(), u8"blocking");
     }
     SECTION("output's htmlFor")
     {
-      auto &element = CreateHTML<html::HTMLOutputElement>(*document, u8"output");
+      auto &element = CreateHTML<HTMLOutputElement>(*document, u8"output");
       CheckFollowsAttribute(element, element.HtmlFor(), u8"for");
     }
     SECTION("script's blocking")
     {
-      auto &element = CreateHTML<html::HTMLScriptElement>(*document, u8"script");
+      auto &element = CreateHTML<HTMLScriptElement>(*document, u8"script");
       CheckFollowsAttribute(element, element.Blocking(), u8"blocking");
     }
     SECTION("style's blocking")
     {
-      auto &element = CreateHTML<html::HTMLStyleElement>(*document, u8"style");
+      auto &element = CreateHTML<HTMLStyleElement>(*document, u8"style");
       CheckFollowsAttribute(element, element.Blocking(), u8"blocking");
     }
     SECTION("SVG a's relList")
     {
       auto element = document->CreateElementNS(infra::namespaces::SVG, u8"a");
       REQUIRE_FALSE(element.HasException());
-      auto &anchor = Downcast<svg::SVGAElement>(Downcast<svg::SVGElement>(*element.Value()));
+      auto &anchor = Downcast<SVGAElement>(Downcast<SVGElement>(*element.Value()));
       CheckFollowsAttribute(anchor, anchor.RelList(), u8"rel");
     }
   }
@@ -525,7 +525,7 @@ namespace krys::boo::dom::tests
     SECTION("a's relList")
     {
       auto document = newDocument();
-      auto &anchor = CreateHTML<html::HTMLAnchorElement>(*document, u8"a");
+      auto &anchor = CreateHTML<HTMLAnchorElement>(*document, u8"a");
       CHECK(anchor.RelList().Supports(u8"NoOpener").ReleaseValue());
       CHECK(anchor.RelList().Supports(u8"noreferrer").ReleaseValue());
       CHECK_FALSE(anchor.RelList().Supports(u8"stylesheet").ReleaseValue());
@@ -534,27 +534,27 @@ namespace krys::boo::dom::tests
     SECTION("area's and form's relList")
     {
       auto areaDocument = newDocument();
-      auto &area = CreateHTML<html::HTMLAreaElement>(*areaDocument, u8"area");
+      auto &area = CreateHTML<HTMLAreaElement>(*areaDocument, u8"area");
       CHECK(area.RelList().Supports(u8"opener").ReleaseValue());
 
       auto formDocument = newDocument();
-      auto &form = CreateHTML<html::HTMLFormElement>(*formDocument, u8"form");
+      auto &form = CreateHTML<HTMLFormElement>(*formDocument, u8"form");
       CHECK_FALSE(form.RelList().Supports(u8"icon").ReleaseValue());
     }
 
     SECTION("blocking")
     {
       auto styleDocument = newDocument();
-      auto &style = CreateHTML<html::HTMLStyleElement>(*styleDocument, u8"style");
+      auto &style = CreateHTML<HTMLStyleElement>(*styleDocument, u8"style");
       CHECK(style.Blocking().Supports(u8"RENDER").ReleaseValue());
       CHECK_FALSE(style.Blocking().Supports(u8"paint").ReleaseValue());
 
       auto scriptDocument = newDocument();
-      auto &script = CreateHTML<html::HTMLScriptElement>(*scriptDocument, u8"script");
+      auto &script = CreateHTML<HTMLScriptElement>(*scriptDocument, u8"script");
       CHECK(script.Blocking().Supports(u8"render").ReleaseValue());
 
       auto linkDocument = newDocument();
-      auto &link = CreateHTML<html::HTMLLinkElement>(*linkDocument, u8"link");
+      auto &link = CreateHTML<HTMLLinkElement>(*linkDocument, u8"link");
       CHECK(link.Blocking().Supports(u8"render").ReleaseValue());
     }
 
@@ -564,11 +564,10 @@ namespace krys::boo::dom::tests
       CHECK(CreateHTML<Element>(*divDocument, u8"div").Part().Supports(u8"a").HasException());
 
       auto linkDocument = newDocument();
-      CHECK(
-        CreateHTML<html::HTMLLinkElement>(*linkDocument, u8"link").Sizes().Supports(u8"any").HasException());
+      CHECK(CreateHTML<HTMLLinkElement>(*linkDocument, u8"link").Sizes().Supports(u8"any").HasException());
 
       auto outputDocument = newDocument();
-      auto &output = CreateHTML<html::HTMLOutputElement>(*outputDocument, u8"output");
+      auto &output = CreateHTML<HTMLOutputElement>(*outputDocument, u8"output");
       CHECK(output.HtmlFor().Supports(u8"a").HasException());
     }
   }
@@ -577,7 +576,7 @@ namespace krys::boo::dom::tests
             "[DOM][DOMTokenList][dom:dom-domtokenlist-supports]")
   {
     auto linkDocument = CreateRef<HTMLDocument>();
-    auto &link = CreateHTML<html::HTMLLinkElement>(*linkDocument, u8"link");
+    auto &link = CreateHTML<HTMLLinkElement>(*linkDocument, u8"link");
     CHECK(link.RelList().Supports(u8"stylesheet").ReleaseValue());
     CHECK(link.RelList().Supports(u8"Alternate").ReleaseValue());
     CHECK_FALSE(link.RelList().Supports(u8"nonsense").ReleaseValue());

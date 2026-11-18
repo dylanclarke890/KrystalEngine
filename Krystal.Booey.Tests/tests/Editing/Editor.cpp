@@ -316,7 +316,7 @@ namespace krys::boo::tests
                     Func<void(dom::Event &)> &&function) noexcept
     {
       fixture.Document->AddEventListener(
-        dom::DOMStringAtom(type),
+        DOMStringAtom(type),
         Ref<dom::EventListenerCallback>(CreateRef<FunctionListener>(krys::move(function))), true);
     }
   }
@@ -390,9 +390,9 @@ namespace krys::boo::tests
     {
       fixture.Pasteboard.Text = u8"pasted";
       fixture.Pasteboard.Markup = u8"<i>pasted</i>";
-      List<dom::DOMString> types;
-      dom::DOMString text;
-      dom::DOMString markup;
+      List<DOMString> types;
+      DOMString text;
+      DOMString markup;
       ListenWith(fixture, event_names::Paste,
                  [&](dom::Event &event)
                  {
@@ -406,7 +406,7 @@ namespace krys::boo::tests
                  });
       fixture.SetCaret(fixture.TextIn(u8"e"), 1);
       editor.Paste();
-      CHECK(types == List<dom::DOMString> {u8"text/plain", u8"text/html"});
+      CHECK(types == List<DOMString> {u8"text/plain", u8"text/html"});
       CHECK(text == u8"pasted");
       // Markup from another application is sanitised: parsed apart, and serialised with its styles inlined.
       CHECK(Narrow(markup).starts_with("<i style=\""));
@@ -432,8 +432,8 @@ namespace krys::boo::tests
                    clipboardData->SetData(document, u8"application/x-custom", u8"custom");
                    event.PreventDefault();
                  });
-      dom::DOMString custom;
-      List<dom::DOMString> types;
+      DOMString custom;
+      List<DOMString> types;
       ListenWith(fixture, event_names::Paste,
                  [&](dom::Event &event)
                  {
@@ -445,7 +445,7 @@ namespace krys::boo::tests
       editor.Copy();
       fixture.SetCaret(fixture.TextIn(u8"e"), 1);
       editor.Paste();
-      CHECK(types == List<dom::DOMString> {u8"application/x-custom"});
+      CHECK(types == List<DOMString> {u8"application/x-custom"});
       CHECK(custom == u8"custom");
 
       EditorFixture other(u8"<div contenteditable>x</div>");
@@ -498,7 +498,7 @@ namespace krys::boo::tests
                    "[Editing][Editor]")
   {
     EditorFixture fixture(u8"<input id=field value=ab>");
-    auto &field = Downcast<html::HTMLInputElement>(fixture.ById(u8"field"));
+    auto &field = Downcast<HTMLInputElement>(fixture.ById(u8"field"));
     bool hadDataTransfer = true;
     int32 events = 0;
     ListenWith(fixture, event_names::BeforeInput,
@@ -524,7 +524,7 @@ namespace krys::boo::tests
     auto &document = *fixture.Document;
     auto &one = fixture.ById(u8"one");
     auto &locked = fixture.ById(u8"locked");
-    auto readWrite = [](dom::Element &element)
+    auto readWrite = [](Element &element)
     {
       return element.Matches(u8":read-write").ReleaseValue();
     };

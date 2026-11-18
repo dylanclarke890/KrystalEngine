@@ -28,7 +28,7 @@ namespace krys::boo::tests
       {
         return "anon";
       }
-      if (auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(*element))
+      if (auto *pseudoElement = DynamicDowncast<PseudoElement>(*element))
       {
         return pseudoElement->GetPseudoElementType() == PseudoElementType::Before ? "::before" : "::after";
       }
@@ -86,7 +86,7 @@ namespace krys::boo::tests
 
     SECTION("The render view is the document's renderer and the tree's root")
     {
-      CHECK(static_cast<const dom::Node &>(document).Renderer() == view);
+      CHECK(static_cast<const Node &>(document).Renderer() == view);
       CHECK(view->IsRenderView());
       CHECK(view->IsAnonymous());
       CHECK_FALSE(view->Parent());
@@ -176,7 +176,7 @@ namespace krys::boo::tests
       fixture.Frame->SetView(nullptr);
       CHECK_FALSE(document.GetRenderView());
       CHECK_FALSE(document.HasLivingRenderTree());
-      CHECK_FALSE(static_cast<const dom::Node &>(document).Renderer());
+      CHECK_FALSE(static_cast<const Node &>(document).Renderer());
       CHECK_FALSE(a->Renderer());
       CHECK_FALSE(fixture.ById(u8"host").BeforePseudoElement());
 
@@ -225,7 +225,7 @@ namespace krys::boo::tests
       krys_assert(r);
       return *r;
     };
-    auto create = [&](const char8_t *tag, const char8_t *id) -> Ref<dom::Element>
+    auto create = [&](const char8_t *tag, const char8_t *id) -> Ref<Element>
     {
       auto created = document.CreateElement(tag);
       REQUIRE_FALSE(created.HasException());
@@ -341,7 +341,7 @@ namespace krys::boo::tests
   {
     PaintFixture fixture(u8"<!DOCTYPE html><div id=a>x</div>", {200, 100}, true);
     fixture.TestPage->UpdateRendering();
-    Ref<dom::Element> element = ShareRef(fixture.ById(u8"a"));
+    Ref<Element> element = ShareRef(fixture.ById(u8"a"));
     auto *renderer = element->Renderer();
     REQUIRE(renderer);
     auto weak = CreateWeakPtr(renderer);

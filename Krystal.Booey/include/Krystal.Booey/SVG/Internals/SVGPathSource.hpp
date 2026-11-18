@@ -26,7 +26,7 @@
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief Produces the segments of an SVG path, from a string or a byte stream.
   class SVGPathSource

@@ -53,7 +53,7 @@ namespace krys::boo
 
     /// @brief Whether @p document's window has transient activation: the request started from a user
     /// gesture.
-    KRYS_NODISCARD bool HasTransientActivation(dom::Document &document) noexcept
+    KRYS_NODISCARD bool HasTransientActivation(Document &document) noexcept
     {
       auto *window = document.Window();
       return window && window->HasTransientActivation();
@@ -78,8 +78,7 @@ namespace krys::boo
 
   PointerLockController::~PointerLockController() noexcept = default;
 
-  void PointerLockController::RequestPointerLock(dom::Element *target,
-                                                 Maybe<dom::PointerLockOptions> &&options,
+  void PointerLockController::RequestPointerLock(Element *target, Maybe<dom::PointerLockOptions> &&options,
                                                  PointerLockCallback &&promise) noexcept
   {
     if (!target || !target->IsConnected() || _documentOfRemovedElementWhileWaitingForUnlock)
@@ -235,7 +234,7 @@ namespace krys::boo
     ClearElement();
   }
 
-  void PointerLockController::DocumentDetached(dom::Document &document) noexcept
+  void PointerLockController::DocumentDetached(Document &document) noexcept
   {
     if (_documentAllowedToRelockWithoutUserGesture.get() == &document)
     {
@@ -262,7 +261,7 @@ namespace krys::boo
     return _lockPending;
   }
 
-  dom::Element *PointerLockController::GetElement() const noexcept
+  Element *PointerLockController::GetElement() const noexcept
   {
     return _element.get();
   }
@@ -313,9 +312,8 @@ namespace krys::boo
       _documentAllowedToRelockWithoutUserGesture = nullptr;
     }
 
-    RefPtr<dom::Document> document = _element
-                                       ? ShareRefPtr(&_element->NodeDocument())
-                                       : ShareRefPtr(_documentOfRemovedElementWhileWaitingForUnlock.get());
+    RefPtr<Document> document = _element ? ShareRefPtr(&_element->NodeDocument())
+                                         : ShareRefPtr(_documentOfRemovedElementWhileWaitingForUnlock.get());
     EnqueueEvent(event_names::PointerLockChange, document.get());
     ClearElement();
     _unlockPending = false;
@@ -323,7 +321,7 @@ namespace krys::boo
   }
 
   void PointerLockController::DispatchLockedMouseEvent(const PlatformMouseEvent &event,
-                                                       const dom::DOMStringAtom &eventType) noexcept
+                                                       const DOMStringAtom &eventType) noexcept
   {
     if (!_element || !_element->NodeDocument().Frame())
     {
@@ -368,7 +366,7 @@ namespace krys::boo
     krys_debug_assert(_promises.empty());
   }
 
-  void PointerLockController::EnqueueEvent(dom::DOMStringAtom type, dom::Element *element) noexcept
+  void PointerLockController::EnqueueEvent(DOMStringAtom type, Element *element) noexcept
   {
     if (element)
     {
@@ -376,7 +374,7 @@ namespace krys::boo
     }
   }
 
-  void PointerLockController::EnqueueEvent(dom::DOMStringAtom type, dom::Document *document) noexcept
+  void PointerLockController::EnqueueEvent(DOMStringAtom type, Document *document) noexcept
   {
     // FIXME: Spec doesn't specify which task source use.
     if (document)

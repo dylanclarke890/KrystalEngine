@@ -99,7 +99,7 @@ namespace krys::boo
     HitTestResult result = GetEventHandler().HitTestResultAtPoint(
       LayoutPoint(framePoint), {HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active,
                                 HitTestRequest::Type::AllowVisibleChildFrameContentOnly});
-    RefPtr<dom::Node> node = ShareRefPtr(result.InnerNonSharedNode());
+    RefPtr<Node> node = ShareRefPtr(result.InnerNonSharedNode());
     if (!node)
     {
       return {};
@@ -117,7 +117,7 @@ namespace krys::boo
     return visiblePos;
   }
 
-  dom::Document *LocalFrame::DocumentAtPoint(const IntPoint &point) const noexcept
+  boo::Document *LocalFrame::DocumentAtPoint(const IntPoint &point) const noexcept
   {
     if (!View())
     {
@@ -137,7 +137,7 @@ namespace krys::boo
     return result.InnerNode() ? &result.InnerNode()->NodeDocument() : nullptr;
   }
 
-  void LocalFrame::SetDocument(const RefPtr<dom::Document> &newDocument) noexcept
+  void LocalFrame::SetDocument(const RefPtr<boo::Document> &newDocument) noexcept
   {
     krys_assert_msg(!newDocument || !newDocument->Frame(), "a document is in one frame at most");
 
@@ -156,7 +156,7 @@ namespace krys::boo
     // The mouse's state refers to the old document's nodes.
     _eventHandler->Clear();
 
-    if (RefPtr<dom::Document> previousDocument = _document)
+    if (RefPtr<boo::Document> previousDocument = _document)
     {
       previousDocument->WillBeRemovedFromFrame();
     }
@@ -211,13 +211,13 @@ namespace krys::boo
     _pageZoomFactor = pageZoomFactor;
     _textZoomFactor = textZoomFactor;
 
-    RefPtr<dom::Document> document = _document;
+    RefPtr<boo::Document> document = _document;
     if (!document)
     {
       return;
     }
 
-    document->ResolveStyle(dom::Document::ResolveStyleType::Rebuild);
+    document->ResolveStyle(boo::Document::ResolveStyleType::Rebuild);
 
     if (RefPtr<LocalFrameView> view = _view)
     {

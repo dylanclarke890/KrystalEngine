@@ -26,7 +26,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedProperty.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   SVGAnimatedProperty::SVGAnimatedProperty(SVGElement *contextElement) noexcept
       : _contextElement(CreateWeakPtr(contextElement))

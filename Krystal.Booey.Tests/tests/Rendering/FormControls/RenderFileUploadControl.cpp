@@ -30,9 +30,9 @@ namespace krys::boo::layout::tests
       return FileList::Create(krys::move(files));
     }
 
-    KRYS_NODISCARD html::HTMLInputElement &ButtonOf(html::HTMLInputElement &input) noexcept
+    KRYS_NODISCARD HTMLInputElement &ButtonOf(HTMLInputElement &input) noexcept
     {
-      return Downcast<html::HTMLInputElement>(*input.UserAgentShadowRoot()->FirstChild());
+      return Downcast<HTMLInputElement>(*input.UserAgentShadowRoot()->FirstChild());
     }
 
     KRYS_NODISCARD std::string Narrow(utf8_stringview text) noexcept
@@ -64,8 +64,8 @@ namespace krys::boo::layout::tests
   {
     ResolverFixture fixture {AhemDocument(u8"input{margin:0}", u8"<input type=file id=one><br>"
                                                                u8"<input type=file id=many multiple>")};
-    auto &one = Downcast<html::HTMLInputElement>(fixture.ById(u8"one"));
-    auto &many = Downcast<html::HTMLInputElement>(fixture.ById(u8"many"));
+    auto &one = Downcast<HTMLInputElement>(fixture.ById(u8"one"));
+    auto &many = Downcast<HTMLInputElement>(fixture.ById(u8"many"));
     // Room for 34 nominal characters (wider than the button and "no file selected" after it), with the
     // button in the shadow tree.
     CHECK(DumpWithIds(fixture) == u8R"(layer at (0,0) size 800x600
@@ -148,8 +148,8 @@ layer at (0,0) size 800x38
     ResolverFixture fixture {AhemDocument(u8"input{margin:0}",
                                           u8"<input type=file id=wide style=width:500px><br>"
                                           u8"<input type=file id=narrow style=width:100px>")};
-    auto &wide = Downcast<html::HTMLInputElement>(fixture.ById(u8"wide"));
-    auto &narrow = Downcast<html::HTMLInputElement>(fixture.ById(u8"narrow"));
+    auto &wide = Downcast<HTMLInputElement>(fixture.ById(u8"wide"));
+    auto &narrow = Downcast<HTMLInputElement>(fixture.ById(u8"narrow"));
     (void)fixture.Document->UpdateLayout();
     CHECK(wide.GetRenderBox()->Width() == 500);
     CHECK(narrow.GetRenderBox()->Width() == 100);

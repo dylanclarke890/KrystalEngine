@@ -12,10 +12,13 @@
 #include "Krystal.Core/TypeTraits.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
+}
 
+namespace krys::boo::dom
+{
   /// @see https://dom.spec.whatwg.org/#abortsignal-abort-algorithms
   class AbortAlgorithmCallback
   {

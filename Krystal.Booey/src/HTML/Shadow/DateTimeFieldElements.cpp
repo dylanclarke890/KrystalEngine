@@ -34,7 +34,7 @@ namespace krys::boo::html
 {
 #pragma region DateTimeDayFieldElement
 
-  DateTimeDayFieldElement::DateTimeDayFieldElement(dom::Document &document,
+  DateTimeDayFieldElement::DateTimeDayFieldElement(Document &document,
                                                    DateTimeFieldElementFieldOwner &fieldOwner) noexcept
       : DateTimeNumericFieldElement(document, fieldOwner, Range {1, 31},
                                     fieldOwner.PlaceholderDate().MonthDay())
@@ -42,8 +42,7 @@ namespace krys::boo::html
   }
 
   Ref<DateTimeDayFieldElement>
-    DateTimeDayFieldElement::Create(dom::Document &document,
-                                    DateTimeFieldElementFieldOwner &fieldOwner) noexcept
+    DateTimeDayFieldElement::Create(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept
   {
     auto element = CreateRef<DateTimeDayFieldElement>(document, fieldOwner);
     Initialize(*element, css::user_agent_parts::WebkitDatetimeEditDayField(), AXDateFieldDayText());
@@ -72,14 +71,14 @@ namespace krys::boo::html
 
 #pragma region DateTimeHourFieldElement
 
-  DateTimeHourFieldElement::DateTimeHourFieldElement(dom::Document &document,
+  DateTimeHourFieldElement::DateTimeHourFieldElement(Document &document,
                                                      DateTimeFieldElementFieldOwner &fieldOwner, int minimum,
                                                      int maximum) noexcept
       : DateTimeNumericFieldElement(document, fieldOwner, Range {minimum, maximum}, (maximum >= 12) ? 12 : 11)
   {
   }
 
-  Ref<DateTimeHourFieldElement> DateTimeHourFieldElement::Create(dom::Document &document,
+  Ref<DateTimeHourFieldElement> DateTimeHourFieldElement::Create(Document &document,
                                                                  DateTimeFieldElementFieldOwner &fieldOwner,
                                                                  int minimum, int maximum) noexcept
   {
@@ -140,7 +139,7 @@ namespace krys::boo::html
 
 #pragma region DateTimeMeridiemFieldElement
 
-  DateTimeMeridiemFieldElement::DateTimeMeridiemFieldElement(dom::Document &document,
+  DateTimeMeridiemFieldElement::DateTimeMeridiemFieldElement(Document &document,
                                                              DateTimeFieldElementFieldOwner &fieldOwner,
                                                              const List<utf8_string> &labels) noexcept
       : DateTimeSymbolicFieldElement(document, fieldOwner, labels, static_cast<int>(labels.size()) - 1)
@@ -148,7 +147,7 @@ namespace krys::boo::html
   }
 
   Ref<DateTimeMeridiemFieldElement>
-    DateTimeMeridiemFieldElement::Create(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner,
+    DateTimeMeridiemFieldElement::Create(Document &document, DateTimeFieldElementFieldOwner &fieldOwner,
                                          const List<utf8_string> &labels) noexcept
   {
     auto element = CreateRef<DateTimeMeridiemFieldElement>(document, fieldOwner, labels);
@@ -179,13 +178,13 @@ namespace krys::boo::html
 #pragma region DateTimeMillisecondFieldElement
 
   DateTimeMillisecondFieldElement::DateTimeMillisecondFieldElement(
-    dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept
+    Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept
       : DateTimeNumericFieldElement(document, fieldOwner, Range {0, 999}, 0)
   {
   }
 
   Ref<DateTimeMillisecondFieldElement>
-    DateTimeMillisecondFieldElement::Create(dom::Document &document,
+    DateTimeMillisecondFieldElement::Create(Document &document,
                                             DateTimeFieldElementFieldOwner &fieldOwner) noexcept
   {
     auto element = CreateRef<DateTimeMillisecondFieldElement>(document, fieldOwner);
@@ -216,14 +215,14 @@ namespace krys::boo::html
 
 #pragma region DateTimeMinuteFieldElement
 
-  DateTimeMinuteFieldElement::DateTimeMinuteFieldElement(dom::Document &document,
+  DateTimeMinuteFieldElement::DateTimeMinuteFieldElement(Document &document,
                                                          DateTimeFieldElementFieldOwner &fieldOwner) noexcept
       : DateTimeNumericFieldElement(document, fieldOwner, Range {0, 59}, 30)
   {
   }
 
   Ref<DateTimeMinuteFieldElement>
-    DateTimeMinuteFieldElement::Create(dom::Document &document,
+    DateTimeMinuteFieldElement::Create(Document &document,
                                        DateTimeFieldElementFieldOwner &fieldOwner) noexcept
   {
     auto element = CreateRef<DateTimeMinuteFieldElement>(document, fieldOwner);
@@ -253,7 +252,7 @@ namespace krys::boo::html
 
 #pragma region DateTimeMonthFieldElement
 
-  DateTimeMonthFieldElement::DateTimeMonthFieldElement(dom::Document &document,
+  DateTimeMonthFieldElement::DateTimeMonthFieldElement(Document &document,
                                                        DateTimeFieldElementFieldOwner &fieldOwner) noexcept
       : DateTimeNumericFieldElement(document, fieldOwner, Range {1, 12},
                                     fieldOwner.PlaceholderDate().Month() + 1)
@@ -261,8 +260,7 @@ namespace krys::boo::html
   }
 
   Ref<DateTimeMonthFieldElement>
-    DateTimeMonthFieldElement::Create(dom::Document &document,
-                                      DateTimeFieldElementFieldOwner &fieldOwner) noexcept
+    DateTimeMonthFieldElement::Create(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept
   {
     auto element = CreateRef<DateTimeMonthFieldElement>(document, fieldOwner);
     Initialize(*element, css::user_agent_parts::WebkitDatetimeEditMonthField(), AXDateFieldMonthText());
@@ -292,14 +290,14 @@ namespace krys::boo::html
 
 #pragma region DateTimeSecondFieldElement
 
-  DateTimeSecondFieldElement::DateTimeSecondFieldElement(dom::Document &document,
+  DateTimeSecondFieldElement::DateTimeSecondFieldElement(Document &document,
                                                          DateTimeFieldElementFieldOwner &fieldOwner) noexcept
       : DateTimeNumericFieldElement(document, fieldOwner, Range {0, 59}, 0)
   {
   }
 
   Ref<DateTimeSecondFieldElement>
-    DateTimeSecondFieldElement::Create(dom::Document &document,
+    DateTimeSecondFieldElement::Create(Document &document,
                                        DateTimeFieldElementFieldOwner &fieldOwner) noexcept
   {
     auto element = CreateRef<DateTimeSecondFieldElement>(document, fieldOwner);
@@ -330,15 +328,13 @@ namespace krys::boo::html
 #pragma region DateTimeSymbolicMonthFieldElement
 
   DateTimeSymbolicMonthFieldElement::DateTimeSymbolicMonthFieldElement(
-    dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner,
-    const List<utf8_string> &labels) noexcept
+    Document &document, DateTimeFieldElementFieldOwner &fieldOwner, const List<utf8_string> &labels) noexcept
       : DateTimeSymbolicFieldElement(document, fieldOwner, labels, fieldOwner.PlaceholderDate().Month())
   {
   }
 
   Ref<DateTimeSymbolicMonthFieldElement>
-    DateTimeSymbolicMonthFieldElement::Create(dom::Document &document,
-                                              DateTimeFieldElementFieldOwner &fieldOwner,
+    DateTimeSymbolicMonthFieldElement::Create(Document &document, DateTimeFieldElementFieldOwner &fieldOwner,
                                               const List<utf8_string> &labels) noexcept
   {
     auto element = CreateRef<DateTimeSymbolicMonthFieldElement>(document, fieldOwner, labels);
@@ -378,7 +374,7 @@ namespace krys::boo::html
     }
   }
 
-  DateTimeWeekFieldElement::DateTimeWeekFieldElement(dom::Document &document,
+  DateTimeWeekFieldElement::DateTimeWeekFieldElement(Document &document,
                                                      DateTimeFieldElementFieldOwner &fieldOwner) noexcept
       : DateTimeNumericFieldElement(document, fieldOwner, Range {1, 53},
                                     WeekOfYear(fieldOwner.PlaceholderDate()))
@@ -386,8 +382,7 @@ namespace krys::boo::html
   }
 
   Ref<DateTimeWeekFieldElement>
-    DateTimeWeekFieldElement::Create(dom::Document &document,
-                                     DateTimeFieldElementFieldOwner &fieldOwner) noexcept
+    DateTimeWeekFieldElement::Create(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept
   {
     auto element = CreateRef<DateTimeWeekFieldElement>(document, fieldOwner);
     Initialize(*element, css::user_agent_parts::WebkitDatetimeEditWeekField(), AXDateFieldWeekText());
@@ -425,7 +420,7 @@ namespace krys::boo::html
     }
   }
 
-  DateTimeYearFieldElement::DateTimeYearFieldElement(dom::Document &document,
+  DateTimeYearFieldElement::DateTimeYearFieldElement(Document &document,
                                                      DateTimeFieldElementFieldOwner &fieldOwner) noexcept
       : DateTimeNumericFieldElement(document, fieldOwner,
                                     Range {DateComponents::MinimumYear(), DateComponents::MaximumYear()},
@@ -434,8 +429,7 @@ namespace krys::boo::html
   }
 
   Ref<DateTimeYearFieldElement>
-    DateTimeYearFieldElement::Create(dom::Document &document,
-                                     DateTimeFieldElementFieldOwner &fieldOwner) noexcept
+    DateTimeYearFieldElement::Create(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept
   {
     auto element = CreateRef<DateTimeYearFieldElement>(document, fieldOwner);
     Initialize(*element, css::user_agent_parts::WebkitDatetimeEditYearField(), AXDateFieldYearText());

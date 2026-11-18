@@ -25,16 +25,16 @@ namespace krys::boo::tests
         (void)Document->UpdateLayout();
       }
 
-      KRYS_NODISCARD svg::SVGFilterElement &FilterById(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD boo::SVGFilterElement &FilterById(DOMStringView id) noexcept
       {
-        return Downcast<svg::SVGFilterElement>(Downcast<svg::SVGElement>(ById(id)));
+        return Downcast<boo::SVGFilterElement>(Downcast<boo::SVGElement>(ById(id)));
       }
 
       /// @brief The renderer of the filter `#id`, applied to the target, or null when the filter is invalid.
-      KRYS_NODISCARD RefPtr<SVGFilterRenderer> Create(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD RefPtr<SVGFilterRenderer> Create(DOMStringView id) noexcept
       {
         NullGraphicsContext context;
-        auto &target = Downcast<svg::SVGElement>(ById(u8"target"));
+        auto &target = Downcast<boo::SVGElement>(ById(u8"target"));
         return SVGFilterRenderer::Create(&target, FilterById(id),
                                          {
                                            .ReferenceBox = {10, 10, 40, 20},
@@ -184,10 +184,10 @@ namespace krys::boo::tests
     CHECK(SVGFilterRenderer::CalculateOutsets(fixture.FilterById(u8"units"), {10, 10, 40, 20})
           == FEOffset::CalculateOutsets({20, 0}));
     CHECK(SVGFilterRenderer::CalculateResolvedSize({.5f, .25f}, {10, 10, 40, 20},
-                                                   svg::SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
+                                                   SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
           == FloatSize {20, 5});
     CHECK(SVGFilterRenderer::CalculateResolvedSize({.5f, .25f}, {10, 10, 40, 20},
-                                                   svg::SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE)
+                                                   SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE)
           == FloatSize {.5f, .25f});
   }
 

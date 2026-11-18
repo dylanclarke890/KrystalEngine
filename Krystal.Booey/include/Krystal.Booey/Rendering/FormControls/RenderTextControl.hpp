@@ -24,9 +24,13 @@
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLTextFormControlElement;
+}
+
+namespace krys::boo::html
+{
   class TextControlInnerTextElement;
 }
 
@@ -41,10 +45,10 @@ namespace krys::boo
   public:
     ~RenderTextControl() noexcept override;
 
-    KRYS_NODISCARD html::HTMLTextFormControlElement &TextFormControlElement() const noexcept;
+    KRYS_NODISCARD HTMLTextFormControlElement &TextFormControlElement() const noexcept;
 
   protected:
-    RenderTextControl(Type type, html::HTMLTextFormControlElement &element, RenderStyle &&style) noexcept;
+    RenderTextControl(Type type, HTMLTextFormControlElement &element, RenderStyle &&style) noexcept;
 
     // This convenience function should not be made public because innerTextElement may outlive the render
     // tree.
@@ -100,7 +104,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderTextControlInnerContainer);
 
   public:
-    RenderTextControlInnerContainer(dom::Element &element, RenderStyle &&style) noexcept;
+    RenderTextControlInnerContainer(Element &element, RenderStyle &&style) noexcept;
 
     ~RenderTextControlInnerContainer() noexcept override;
 

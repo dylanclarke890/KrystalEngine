@@ -36,15 +36,11 @@ namespace krys
   class TextStream;
 }
 
-namespace krys::boo::svg
-{
-  class SVGFilterElement;
-}
-
 namespace krys::boo
 {
   class FilterEffect;
   class GraphicsContext;
+  class SVGFilterElement;
 
   /// @brief A filter as it's applied to one client: drawing its source, then applying the filter.
   struct FilterData
@@ -74,11 +70,11 @@ namespace krys::boo
     HashMap<const RenderObject *, UniquePtr<FilterData>> _rendererFilterDataMap;
 
   public:
-    LegacyRenderSVGResourceFilter(svg::SVGFilterElement &, RenderStyle &&) noexcept;
+    LegacyRenderSVGResourceFilter(SVGFilterElement &, RenderStyle &&) noexcept;
 
     ~LegacyRenderSVGResourceFilter() noexcept override;
 
-    KRYS_NODISCARD svg::SVGFilterElement &FilterElement() const noexcept;
+    KRYS_NODISCARD SVGFilterElement &FilterElement() const noexcept;
 
     KRYS_NODISCARD bool IsIdentity() const noexcept;
 
@@ -95,9 +91,9 @@ namespace krys::boo
     KRYS_NODISCARD FloatRect ResourceBoundingBox(const RenderObject &,
                                                  RepaintRectCalculation) noexcept override;
 
-    KRYS_NODISCARD svg::SVGUnitTypes::SVGUnitType FilterUnits() const noexcept;
+    KRYS_NODISCARD SVGUnitTypes::SVGUnitType FilterUnits() const noexcept;
 
-    KRYS_NODISCARD svg::SVGUnitTypes::SVGUnitType PrimitiveUnits() const noexcept;
+    KRYS_NODISCARD SVGUnitTypes::SVGUnitType PrimitiveUnits() const noexcept;
 
     void MarkFilterForRepaint(FilterEffect &) noexcept;
 

@@ -116,7 +116,7 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD dom::Node *MoveOutOfUserAgentShadowTree(dom::Node &node) noexcept
+    KRYS_NODISCARD boo::Node *MoveOutOfUserAgentShadowTree(boo::Node &node) noexcept
     {
       if (node.IsInShadowTree())
       {
@@ -144,20 +144,20 @@ namespace krys::boo
     }
   }
 
-  void HitTestResult::SetInnerNode(dom::Node *node) noexcept
+  void HitTestResult::SetInnerNode(boo::Node *node) noexcept
   {
-    auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(node);
-    _innerNode = ShareRefPtr(pseudoElement ? static_cast<dom::Node *>(pseudoElement->HostElement()) : node);
+    auto *pseudoElement = DynamicDowncast<PseudoElement>(node);
+    _innerNode = ShareRefPtr(pseudoElement ? static_cast<boo::Node *>(pseudoElement->HostElement()) : node);
   }
 
-  void HitTestResult::SetInnerNonSharedNode(dom::Node *node) noexcept
+  void HitTestResult::SetInnerNonSharedNode(boo::Node *node) noexcept
   {
-    auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(node);
+    auto *pseudoElement = DynamicDowncast<PseudoElement>(node);
     _innerNonSharedNode =
-      ShareRefPtr(pseudoElement ? static_cast<dom::Node *>(pseudoElement->HostElement()) : node);
+      ShareRefPtr(pseudoElement ? static_cast<boo::Node *>(pseudoElement->HostElement()) : node);
   }
 
-  void HitTestResult::SetURLElement(dom::Element *element) noexcept
+  void HitTestResult::SetURLElement(boo::Element *element) noexcept
   {
     _innerURLElement = ShareRefPtr(element);
   }
@@ -219,14 +219,14 @@ namespace krys::boo
       return {};
     }
 
-    if (auto *image = DynamicDowncast<html::HTMLImageElement>(*_innerNonSharedNode))
+    if (auto *image = DynamicDowncast<HTMLImageElement>(*_innerNonSharedNode))
     {
-      return image->GetAttribute(u8"alt").value_or(dom::DOMString());
+      return image->GetAttribute(u8"alt").value_or(DOMString());
     }
 
-    if (auto *input = DynamicDowncast<html::HTMLInputElement>(*_innerNonSharedNode))
+    if (auto *input = DynamicDowncast<HTMLInputElement>(*_innerNonSharedNode))
     {
-      return input->GetAttribute(u8"alt").value_or(dom::DOMString());
+      return input->GetAttribute(u8"alt").value_or(DOMString());
     }
 
     return {};
@@ -275,15 +275,14 @@ namespace krys::boo
       return {};
     }
 
-    auto *element = DynamicDowncast<dom::Element>(*_innerNonSharedNode);
-    auto *htmlElement = DynamicDowncast<html::HTMLElement>(_innerNonSharedNode.get());
+    auto *element = DynamicDowncast<boo::Element>(*_innerNonSharedNode);
+    auto *htmlElement = DynamicDowncast<HTMLElement>(_innerNonSharedNode.get());
     if ((htmlElement
-         && (Is<html::HTMLEmbedElement>(*htmlElement) || Is<html::HTMLImageElement>(*htmlElement)
-             || Is<html::HTMLInputElement>(*htmlElement) || Is<html::HTMLObjectElement>(*htmlElement)))
-        || Is<svg::SVGImageElement>(DynamicDowncast<svg::SVGElement>(element)))
+         && (Is<HTMLEmbedElement>(*htmlElement) || Is<HTMLImageElement>(*htmlElement)
+             || Is<HTMLInputElement>(*htmlElement) || Is<HTMLObjectElement>(*htmlElement)))
+        || Is<SVGImageElement>(DynamicDowncast<SVGElement>(element)))
     {
-      return _innerNonSharedNode->NodeDocument().CompleteURL(
-        element->ImageSourceURL().value_or(dom::DOMString()));
+      return _innerNonSharedNode->NodeDocument().CompleteURL(element->ImageSourceURL().value_or(DOMString()));
     }
 
     return {};
@@ -305,12 +304,12 @@ namespace krys::boo
     {
       return {};
     }
-    return _innerURLElement->TextContent().value_or(dom::DOMString());
+    return _innerURLElement->TextContent().value_or(DOMString());
   }
 
   template <typename TRect>
   inline HitTestProgress
-    HitTestResult::AddNodeToListBasedTestResultCommon(dom::Node *node, const HitTestRequest &request,
+    HitTestResult::AddNodeToListBasedTestResultCommon(boo::Node *node, const HitTestRequest &request,
                                                       const HitTestLocation &locationInContainer,
                                                       const TRect &rect) noexcept
   {
@@ -335,7 +334,7 @@ namespace krys::boo
     }
 
     auto &nodes = MutableListBasedTestResult();
-    if (std::ranges::find_if(nodes, [&](const Ref<dom::Node> &existing) { return existing.get() == node; })
+    if (std::ranges::find_if(nodes, [&](const Ref<boo::Node> &existing) { return existing.get() == node; })
         == nodes.end())
     {
       nodes.push_back(ShareRef(*node));
@@ -350,14 +349,14 @@ namespace krys::boo
     return regionFilled ? HitTestProgress::Stop : HitTestProgress::Continue;
   }
 
-  HitTestProgress HitTestResult::AddNodeToListBasedTestResult(dom::Node *node, const HitTestRequest &request,
+  HitTestProgress HitTestResult::AddNodeToListBasedTestResult(boo::Node *node, const HitTestRequest &request,
                                                               const HitTestLocation &locationInContainer,
                                                               const LayoutRect &rect) noexcept
   {
     return AddNodeToListBasedTestResultCommon(node, request, locationInContainer, rect);
   }
 
-  HitTestProgress HitTestResult::AddNodeToListBasedTestResult(dom::Node *node, const HitTestRequest &request,
+  HitTestProgress HitTestResult::AddNodeToListBasedTestResult(boo::Node *node, const HitTestRequest &request,
                                                               const HitTestLocation &locationInContainer,
                                                               const FloatRect &rect) noexcept
   {
@@ -404,11 +403,11 @@ namespace krys::boo
     return *_listBasedTestResult;
   }
 
-  dom::Element *HitTestResult::TargetElement() const noexcept
+  boo::Element *HitTestResult::TargetElement() const noexcept
   {
-    for (dom::Node *node = _innerNode.get(); node; node = node->ParentInComposedTree())
+    for (boo::Node *node = _innerNode.get(); node; node = node->ParentInComposedTree())
     {
-      if (auto *element = DynamicDowncast<dom::Element>(*node))
+      if (auto *element = DynamicDowncast<boo::Element>(*node))
       {
         return element;
       }
@@ -416,14 +415,14 @@ namespace krys::boo
     return nullptr;
   }
 
-  dom::Element *HitTestResult::InnerNonSharedElement() const noexcept
+  boo::Element *HitTestResult::InnerNonSharedElement() const noexcept
   {
     auto *node = _innerNonSharedNode.get();
     if (!node)
     {
       return nullptr;
     }
-    if (auto *element = DynamicDowncast<dom::Element>(*node))
+    if (auto *element = DynamicDowncast<boo::Element>(*node))
     {
       return element;
     }

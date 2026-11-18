@@ -29,7 +29,7 @@
 
 namespace krys::boo
 {
-  LegacyRenderSVGViewportContainer::LegacyRenderSVGViewportContainer(svg::SVGSvgElement &element,
+  LegacyRenderSVGViewportContainer::LegacyRenderSVGViewportContainer(SVGSvgElement &element,
                                                                      RenderStyle &&style) noexcept
       : LegacyRenderSVGContainer(Type::LegacySVGViewportContainer, element, krys::move(style))
   {
@@ -38,9 +38,9 @@ namespace krys::boo
 
   LegacyRenderSVGViewportContainer::~LegacyRenderSVGViewportContainer() noexcept = default;
 
-  svg::SVGSvgElement &LegacyRenderSVGViewportContainer::SvgSvgElement() const noexcept
+  SVGSvgElement &LegacyRenderSVGViewportContainer::SvgSvgElement() const noexcept
   {
-    return Downcast<svg::SVGSvgElement>(LegacyRenderSVGContainer::GetElement());
+    return Downcast<SVGSvgElement>(LegacyRenderSVGContainer::GetElement());
   }
 
   void LegacyRenderSVGViewportContainer::DetermineIfLayoutSizeChanged() noexcept
@@ -59,7 +59,7 @@ namespace krys::boo
   void LegacyRenderSVGViewportContainer::CalcViewport() noexcept
   {
     auto &element = SvgSvgElement();
-    svg::SVGLengthContext lengthContext(&element);
+    SVGLengthContext lengthContext(&element);
     FloatRect newViewport(element.X().Value(lengthContext), element.Y().Value(lengthContext),
                           element.Width().Value(lengthContext), element.Height().Value(lengthContext));
 

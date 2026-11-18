@@ -38,10 +38,7 @@ namespace krys::boo
 {
   class AffineTransform;
   enum class ColorInterpolation : uint8;
-}
 
-namespace krys::boo::svg
-{
   enum class SVGElementFlags : uint8
   {
     None = 0,
@@ -123,31 +120,37 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::svg::SVGElementFlags, 5uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGElementInterface, 67uz);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::SVGElementFlags, 5uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SVGElementInterface, 67uz);
+
+namespace krys::boo
+{
+  class SVGAnimatedProperty;
+  class SVGAttributeAnimator;
+  class SVGConditionalProcessingAttributes;
+  class SVGElementRareData;
+  class SVGPropertyAnimatorFactory;
+  template <typename TOwner, typename... TBaseTypes>
+  class SVGPropertyOwnerRegistry;
+  class SVGResourceElementClient;
+  class SVGSvgElement;
+  class SVGUseElement;
+}
 
 namespace krys::boo::svg
 {
   enum class AnimationMode : uint8;
   enum class CalcMode : uint8;
   enum class CTMScope : bool;
-  class SVGAnimatedProperty;
-  class SVGAttributeAnimator;
-  class SVGConditionalProcessingAttributes;
-  class SVGElementRareData;
-  class SVGPropertyAnimatorFactory;
-  class SVGResourceElementClient;
-  class SVGSvgElement;
-  class SVGUseElement;
+}
 
-  template <typename TOwner, typename... TBaseTypes>
-  class SVGPropertyOwnerRegistry;
-
+namespace krys::boo
+{
   /// @brief An element in the SVG namespace.
   /// @note Subclasses react to their attributes in `AttributeChanged` (parsing them into their properties,
   /// then calling their base's), and to an attribute or a property having changed in `SVGAttributeChanged`.
   /// @see https://svgwg.org/svg2-draft/types.html#InterfaceSVGElement
-  class SVGElement : public dom::StyledElement, public SVGPropertyOwner
+  class SVGElement : public StyledElement, public SVGPropertyOwner
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGElement);
@@ -170,17 +173,17 @@ namespace krys::boo::svg
     Ref<SVGAnimatedString> _className;
 
   protected:
-    SVGElement(dom::Document &document, UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
+    SVGElement(Document &document, UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
                SVGElementInterface interface, SVGElementFlags flags = SVGElementFlags::None,
                dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
 
     // For the elements whose only properties are SVGElement's (script and unknown elements).
-    SVGElement(dom::Document &document, SVGElementInterface interface,
+    SVGElement(Document &document, SVGElementInterface interface,
                SVGElementFlags flags = SVGElementFlags::None,
                dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
 
   public:
-    explicit SVGElement(dom::Document &document) noexcept;
+    explicit SVGElement(Document &document) noexcept;
 
     ~SVGElement() noexcept override;
 
@@ -275,7 +278,7 @@ namespace krys::boo::svg
 
     void SetInstanceUpdatesBlocked(bool value) noexcept;
 
-    KRYS_NODISCARD virtual AffineTransform LocalCoordinateSpaceTransform(CTMScope) const noexcept;
+    KRYS_NODISCARD virtual AffineTransform LocalCoordinateSpaceTransform(svg::CTMScope) const noexcept;
 
     // For SVGTests
     KRYS_NODISCARD virtual bool IsValid() const noexcept
@@ -283,10 +286,10 @@ namespace krys::boo::svg
       return true;
     }
 
-    KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &) const noexcept override;
+    KRYS_NODISCARD bool ChildShouldCreateRenderer(const Node &) const noexcept override;
 
     /// @brief Reacts to the attribute @p attributeName, or the property that reflects it, having changed.
-    virtual void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept;
+    virtual void SVGAttributeChanged(const QualifiedName &attributeName) noexcept;
 
     void SendLoadEventIfPossible() noexcept;
 
@@ -366,10 +369,9 @@ namespace krys::boo::svg
                          const RenderStyle *shadowHostStyle) noexcept override;
 
     /// @brief The animatable attribute named @p localName, or the null name if there's none.
-    KRYS_NODISCARD static dom::QualifiedName
-      AnimatableAttributeForName(dom::DOMStringView localName) noexcept;
+    KRYS_NODISCARD static QualifiedName AnimatableAttributeForName(DOMStringView localName) noexcept;
 #if KRYS_DEBUG
-    KRYS_NODISCARD bool IsAnimatableAttribute(const dom::QualifiedName &) const noexcept;
+    KRYS_NODISCARD bool IsAnimatableAttribute(const QualifiedName &) const noexcept;
 #endif
 
     KRYS_NODISCARD css::MutableStyleProperties *AnimatedSMILStyleProperties() const noexcept;
@@ -395,14 +397,14 @@ namespace krys::boo::svg
 
     void DetachAllProperties() noexcept;
 
-    KRYS_NODISCARD bool IsAnimatedPropertyAttribute(const dom::QualifiedName &attributeName) const noexcept;
+    KRYS_NODISCARD bool IsAnimatedPropertyAttribute(const QualifiedName &attributeName) const noexcept;
 
-    KRYS_NODISCARD bool IsAnimatedAttribute(const dom::QualifiedName &attributeName) const noexcept;
+    KRYS_NODISCARD bool IsAnimatedAttribute(const QualifiedName &attributeName) const noexcept;
 
-    KRYS_NODISCARD bool IsAnimatedStyleAttribute(const dom::QualifiedName &attributeName) const noexcept;
+    KRYS_NODISCARD bool IsAnimatedStyleAttribute(const QualifiedName &attributeName) const noexcept;
 
     /// @brief Writes the property that reflects @p name back to the attribute, if it has changed.
-    void SynchronizeSVGAttribute(const dom::QualifiedName &name) noexcept;
+    void SynchronizeSVGAttribute(const QualifiedName &name) noexcept;
 
     /// @brief Writes the properties that have changed back to the attributes they reflect.
     void SynchronizeAllSVGAttributes() noexcept;
@@ -416,11 +418,11 @@ namespace krys::boo::svg
       return *_propertyAnimatorFactory;
     }
 
-    KRYS_NODISCARD RefPtr<SVGAttributeAnimator> CreateAnimator(const dom::QualifiedName &, AnimationMode,
-                                                               CalcMode, bool isAccumulated,
+    KRYS_NODISCARD RefPtr<SVGAttributeAnimator> CreateAnimator(const QualifiedName &, svg::AnimationMode,
+                                                               svg::CalcMode, bool isAccumulated,
                                                                bool isAdditive) noexcept;
 
-    void AnimatorWillBeDeleted(const dom::QualifiedName &) noexcept;
+    void AnimatorWillBeDeleted(const QualifiedName &) noexcept;
 
     using Node::ComputedStyle;
 
@@ -433,7 +435,7 @@ namespace krys::boo::svg
     }
 
     // These are needed for the RenderTree, animation and DOM.
-    KRYS_NODISCARD dom::DOMStringAtom ClassName() const noexcept;
+    KRYS_NODISCARD DOMStringAtom ClassName() const noexcept;
 
     KRYS_NODISCARD SVGAnimatedString &ClassNameAnimated() noexcept
     {
@@ -451,35 +453,34 @@ namespace krys::boo::svg
     /// one.
     /// @see https://svgwg.org/svg2-draft/styling.html#PresentationAttributes
     KRYS_NODISCARD static css::PropertyId
-      CssPropertyIdForSVGAttributeName(const dom::DOMStringAtom &localName,
-                                       const dom::DOMStringAtom &namespaceURI) noexcept;
+      CssPropertyIdForSVGAttributeName(const DOMStringAtom &localName,
+                                       const DOMStringAtom &namespaceURI) noexcept;
 
   protected:
     void FinishParsingChildren() noexcept override;
 
 #if KRYS_DEBUG
-    KRYS_NODISCARD virtual bool FilterOutAnimatableAttribute(const dom::QualifiedName &) const noexcept;
+    KRYS_NODISCARD virtual bool FilterOutAnimatableAttribute(const QualifiedName &) const noexcept;
 #endif
 
     /// @brief The attribute change steps of SVG elements, run for every change to one of the element's
     /// attributes. Overrides parse the attributes they reflect, then call their base's.
     /// @param oldValue The previous value, or null if the attribute was added.
     /// @param value The new value, or null if the attribute was removed.
-    virtual void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                  Maybe<dom::DOMStringView> value) noexcept;
+    virtual void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                  Maybe<DOMStringView> value) noexcept;
 
     KRYS_NODISCARD SVGElementRareData &EnsureSVGRareData() noexcept;
 
-    static void ReportAttributeParsingError(SVGParsingError error, const dom::QualifiedName &name,
-                                            dom::DOMStringView value) noexcept;
+    static void ReportAttributeParsingError(SVGParsingError error, const QualifiedName &name,
+                                            DOMStringView value) noexcept;
 
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
     void OnInsert() noexcept override;
@@ -489,7 +490,7 @@ namespace krys::boo::svg
 
     void OnPostConnection() noexcept override;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
     void DidAddEventListener(const dom::EventListener &listener) noexcept override;
 
@@ -847,9 +848,8 @@ namespace krys::boo::svg
   private:
     void WillRecalcStyle(EnumSet<style::Change>) noexcept override;
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept final;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept final;
 
     virtual void ClearTarget() noexcept
     {
@@ -896,8 +896,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
     return target.IsSVGElement();
   }

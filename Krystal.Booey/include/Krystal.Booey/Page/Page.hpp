@@ -38,13 +38,9 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::dom
-{
-  class Document;
-}
-
 namespace krys::boo
 {
+  class Document;
   class DragCaretController;
   class DragController;
   class GraphicsContext;
@@ -290,7 +286,7 @@ namespace krys::boo
     /// @brief Called when the main frame's document is replaced by @p newDocument.
     // FIXME: The rest of what the page resets (the sampled top color, element targeting and the like), once
     // there are those.
-    void DidChangeMainDocument(dom::Document *newDocument) noexcept;
+    void DidChangeMainDocument(Document *newDocument) noexcept;
 
     /// @brief Asks for a rendering update at the next rendering opportunity, which runs (at least) the
     /// @p requestedSteps.
@@ -365,18 +361,18 @@ namespace krys::boo
     /// @brief Brings the style and layout of the page's documents up to date.
     void LayoutIfNeeded(EnumSet<dom::LayoutOptions> layoutOptions = {}) noexcept;
 
-    void ForEachDocument(const Func<void(dom::Document &)> &functor) const noexcept;
+    void ForEachDocument(const Func<void(Document &)> &functor) const noexcept;
 
     /// @brief Restyles every page's documents (UpdateStyleAfterChangeInEnvironment), after a change in the
     /// environment they all share, such as the theme's colours.
     static void UpdateStyleForAllPagesAfterGlobalChangeInEnvironment() noexcept;
 
     /// @brief Calls @p functor for each document that's rendered: not render-blocked ones.
-    void ForEachRenderableDocument(const Func<void(dom::Document &)> &functor) const noexcept;
+    void ForEachRenderableDocument(const Func<void(Document &)> &functor) const noexcept;
 
   private:
     void RunProcessingStep(RenderingUpdateStep step,
-                           const Func<void(dom::Document &)> &perDocumentFunction) noexcept;
+                           const Func<void(Document &)> &perDocumentFunction) noexcept;
 
     void DoAfterUpdateRendering() noexcept;
 

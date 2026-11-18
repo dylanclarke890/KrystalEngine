@@ -444,7 +444,7 @@ namespace krys::boo
     int32 indexOfFirstEnabledOption = 0;
     for (auto &item : selectElement.ListItems())
     {
-      if (Is<html::HTMLOptionElement>(item.get()) && !item->IsDisabledFormControl())
+      if (Is<HTMLOptionElement>(item.get()) && !item->IsDisabledFormControl())
       {
         selectElement.SetActiveSelectionEndIndex(indexOfFirstEnabledOption);
         rects.push_back(renderer.ItemBoundingBoxRect(additionalOffset, indexOfFirstEnabledOption));

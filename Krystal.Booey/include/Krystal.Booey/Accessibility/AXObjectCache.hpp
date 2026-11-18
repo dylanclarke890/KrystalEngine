@@ -37,25 +37,18 @@
 
 namespace krys::boo
 {
+  class ContainerNode;
+  class Document;
+  class Element;
+  class HTMLAreaElement;
+  class HTMLInputElement;
   class LocalFrameView;
+  class Node;
   class RenderElement;
   class RenderObject;
   class RenderStyle;
   class Scrollbar;
 
-  namespace dom
-  {
-    class ContainerNode;
-    class Document;
-    class Element;
-    class Node;
-  }
-
-  namespace html
-  {
-    class HTMLAreaElement;
-    class HTMLInputElement;
-  }
   class AXNodeObject;
   class AXRenderObject;
 
@@ -78,9 +71,9 @@ namespace krys::boo
     };
 
   private:
-    dom::Document &_document;
+    boo::Document &_document;
     HashMap<AXId, Ref<AXObject>> _objects;
-    HashMap<const dom::Node *, AXId> _nodeIdMapping;
+    HashMap<const boo::Node *, AXId> _nodeIdMapping;
     // Renderers with no node (anonymous ones, such as list markers) are looked up by renderer.
     HashMap<const RenderObject *, AXId> _renderObjectIdMapping;
     uint64 _nextID {1};
@@ -95,7 +88,7 @@ namespace krys::boo
       Ref<AXObject> Object;
       AXTextChange Change;
       uint64 Offset;
-      dom::DOMString Text;
+      DOMString Text;
     };
 
     List<TextChange> _textChangesToPost;
@@ -117,26 +110,26 @@ namespace krys::boo
     // An attribute change waiting for its element's renderer to be up to date.
     struct DeferredAttributeChange
     {
-      dom::Element *Element {nullptr};
-      dom::DOMStringAtom Name;
-      dom::DOMString OldValue;
-      dom::DOMString NewValue;
+      boo::Element *Element {nullptr};
+      DOMStringAtom Name;
+      DOMString OldValue;
+      DOMString NewValue;
     };
 
     ListHashSet<AXId> _deferredChildrenChangedList;
     // Elements added to or removed from the tree, which may be live regions or menus that opened.
-    ListHashSet<dom::Element *> _deferredElementAddedOrRemovedList;
+    ListHashSet<boo::Element *> _deferredElementAddedOrRemovedList;
     // Live regions whose contents changed, each told once when the notifications are next posted.
     ListHashSet<AXId> _changedLiveRegions;
     List<DeferredAttributeChange> _deferredAttributeChanges;
     // Nodes whose text changed, and elements whose ignored state needs working out again.
-    ListHashSet<dom::Node *> _deferredTextChangedList;
-    ListHashSet<dom::Element *> _deferredRecomputeIsIgnoredList;
-    ListHashSet<dom::Element *> _deferredSelectedChildrenChangedList;
+    ListHashSet<boo::Node *> _deferredTextChangedList;
+    ListHashSet<boo::Element *> _deferredRecomputeIsIgnoredList;
+    ListHashSet<boo::Element *> _deferredSelectedChildrenChangedList;
     // A focus change waiting for the newly focused element's renderer: the old and new focused elements.
-    Maybe<Pair<RefPtr<dom::Element>, RefPtr<dom::Element>>> _deferredFocusedNodeChange;
+    Maybe<Pair<RefPtr<boo::Element>, RefPtr<boo::Element>>> _deferredFocusedNodeChange;
     // Notifications for objects that may not exist yet, posted once the tree is up to date.
-    List<Pair<Ref<dom::Node>, AXNotification>> _deferredNotifications;
+    List<Pair<Ref<boo::Node>, AXNotification>> _deferredNotifications;
     ListHashSet<AXId> _deferredRendererChangedList;
     // Tables whose exposed state and whose cell slots need working out again.
     ListHashSet<AXId> _deferredRecomputeTableIsExposedList;
@@ -147,14 +140,14 @@ namespace krys::boo
     // The modal dialogs (modal `dialog` elements and dialogs with `aria-modal="true"`), found when first
     // needed; the one that's current, whose outside is ignored; and the dialogs that may have become modal or
     // stopped being.
-    List<dom::Element *> _modalElements;
+    List<boo::Element *> _modalElements;
     bool _modalNodesInitialized {false};
-    dom::Element *_currentModalElement {nullptr};
+    boo::Element *_currentModalElement {nullptr};
     bool _isRetrievingCurrentModalNode {false};
-    ListHashSet<dom::Element *> _deferredModalChangedList;
+    ListHashSet<boo::Element *> _deferredModalChangedList;
 
   public:
-    explicit AXObjectCache(dom::Document &document) noexcept;
+    explicit AXObjectCache(boo::Document &document) noexcept;
 
     ~AXObjectCache() noexcept;
 
@@ -166,7 +159,7 @@ namespace krys::boo
 
     KRYS_NODISCARD static bool AccessibilityEnabled() noexcept;
 
-    KRYS_NODISCARD dom::Document &GetDocument() const noexcept
+    KRYS_NODISCARD boo::Document &GetDocument() const noexcept
     {
       return _document;
     }
@@ -178,7 +171,7 @@ namespace krys::boo
     /// @brief The modal dialog the user is in, outside which everything is ignored; null if there isn't one.
     /// It's the active modal `dialog`; otherwise the deepest `aria-modal` dialog with the focus in it, if
     /// it's visible and has something to expose.
-    KRYS_NODISCARD dom::Node *ModalNode() noexcept;
+    KRYS_NODISCARD boo::Node *ModalNode() noexcept;
 
     /// @brief Whether the cache is working out which dialog is the modal one (when whether an object is
     /// ignored mustn't depend on it).
@@ -216,7 +209,7 @@ namespace krys::boo
 
     // Lookup and creation.
 
-    KRYS_NODISCARD AXObject *Get(const dom::Node &node) const noexcept;
+    KRYS_NODISCARD AXObject *Get(const boo::Node &node) const noexcept;
 
     KRYS_NODISCARD AXObject *Get(const RenderObject &renderer) const noexcept;
 
@@ -225,9 +218,9 @@ namespace krys::boo
     /// @brief The object for @p node, created if it needs one: if it's rendered, or if it isn't but
     /// accessibility needs it anyway (`display: contents`, canvas fallback content, a focused node,
     /// @p isPartOfRelation).
-    AXObject *GetOrCreate(dom::Node &node, IsPartOfRelation isPartOfRelation = IsPartOfRelation::No) noexcept;
+    AXObject *GetOrCreate(boo::Node &node, IsPartOfRelation isPartOfRelation = IsPartOfRelation::No) noexcept;
 
-    AXObject *GetOrCreate(dom::Node *node, IsPartOfRelation isPartOfRelation = IsPartOfRelation::No) noexcept
+    AXObject *GetOrCreate(boo::Node *node, IsPartOfRelation isPartOfRelation = IsPartOfRelation::No) noexcept
     {
       return node ? GetOrCreate(*node, isPartOfRelation) : nullptr;
     }
@@ -251,7 +244,7 @@ namespace krys::boo
     AXObject *Create(AXRole role) noexcept;
 
     /// @brief Removes and detaches @p node's object.
-    void Remove(dom::Node &node) noexcept;
+    void Remove(boo::Node &node) noexcept;
 
     /// @brief Removes and detaches @p renderer's object if it has no node; otherwise the node's object
     /// just loses its renderer.
@@ -262,7 +255,7 @@ namespace krys::boo
     // Changes.
 
     /// @brief @p node's children changed; for a rendered node, the renderer's children-changed covers it.
-    void ChildrenChanged(dom::Node &node) noexcept;
+    void ChildrenChanged(boo::Node &node) noexcept;
 
     void ChildrenChanged(RenderObject &renderer, RenderObject *newChild = nullptr) noexcept;
 
@@ -271,9 +264,9 @@ namespace krys::boo
     /// @brief Tells the platform @p object's role changed from @p previousRole.
     void HandleRoleChanged(AXObject &object, AXRole previousRole) noexcept;
 
-    void RecomputeIsIgnored(dom::Node &node) noexcept;
+    void RecomputeIsIgnored(boo::Node &node) noexcept;
 
-    void RecomputeIsIgnored(dom::Node *node) noexcept
+    void RecomputeIsIgnored(boo::Node *node) noexcept
     {
       if (node)
       {
@@ -284,63 +277,62 @@ namespace krys::boo
     void RecomputeIsIgnored(RenderObject &renderer) noexcept;
 
     /// @brief Works out again (once the tree is next updated) whether @p element's object is ignored.
-    void DeferRecomputeIsIgnored(dom::Element *element) noexcept;
+    void DeferRecomputeIsIgnored(boo::Element *element) noexcept;
 
     /// @brief As above, now if @p element's renderer is up to date.
-    void DeferRecomputeIsIgnoredIfNeeded(dom::Element *element) noexcept;
+    void DeferRecomputeIsIgnoredIfNeeded(boo::Element *element) noexcept;
 
     /// @brief An attribute of @p element changed from @p oldValue to @p newValue (null when it was or is now
     /// absent): handled now, or once the tree is next updated if the element's renderer is out of date.
-    void DeferAttributeChangeIfNeeded(dom::Element &element, const dom::DOMStringAtom &name,
-                                      Maybe<dom::DOMStringView> oldValue,
-                                      Maybe<dom::DOMStringView> newValue) noexcept;
+    void DeferAttributeChangeIfNeeded(boo::Element &element, const DOMStringAtom &name,
+                                      Maybe<DOMStringView> oldValue, Maybe<DOMStringView> newValue) noexcept;
 
     /// @brief The text of @p object (or under it) changed: its name and its ancestors' may have too.
     void HandleTextChanged(AXObject *object) noexcept;
 
     /// @brief As above for @p node's object, now if its renderer is up to date.
-    void DeferTextChangedIfNeeded(dom::Node *node) noexcept;
+    void DeferTextChangedIfNeeded(boo::Node *node) noexcept;
 
     // Form controls and selection.
 
-    void CheckedStateChanged(dom::Element &element) noexcept;
+    void CheckedStateChanged(boo::Element &element) noexcept;
 
-    void ValueChanged(dom::Element &element) noexcept;
+    void ValueChanged(boo::Element &element) noexcept;
 
     /// @brief @p element (an option, a cell, or an item in something with selectable children) was selected
     /// or deselected.
-    void OnSelectedOptionChanged(dom::Element &element) noexcept;
+    void OnSelectedOptionChanged(boo::Element &element) noexcept;
 
-    void SelectedChildrenChanged(dom::Node *node) noexcept;
+    void SelectedChildrenChanged(boo::Node *node) noexcept;
 
     void SelectedChildrenChanged(RenderObject *renderer) noexcept;
 
     /// @brief As above for a select, now if its renderer is up to date.
-    void DeferSelectedChildrenChangedIfNeeded(dom::Element &select) noexcept;
+    void DeferSelectedChildrenChangedIfNeeded(boo::Element &select) noexcept;
 
     /// @brief A menu list's active option changed to the one at @p optionIndex.
     void OnSelectedOptionChanged(RenderObject &menuList, int32 optionIndex) noexcept;
 
     /// @brief The value of the text control (or editable content) @p node is in was edited.
-    void OnEditableTextValueChanged(dom::Node &node) noexcept;
+    void OnEditableTextValueChanged(boo::Node &node) noexcept;
 
     /// @brief Whether @p element is valid changed.
-    void OnValidityChange(dom::Element &element) noexcept;
+    void OnValidityChange(boo::Element &element) noexcept;
 
     /// @brief The outermost element editable to assistive technology at or above @p node: its root editable
     /// element, or the outermost text control (an ARIA text box too) above it; null if there's neither.
-    KRYS_NODISCARD dom::Element *RootAXEditableElement(const dom::Node &node) noexcept;
+    KRYS_NODISCARD boo::Element *RootAXEditableElement(const boo::Node &node) noexcept;
 
     /// @brief @p document's title (the web area's name) may have changed.
-    void OnTitleChange(dom::Document &document) noexcept;
+    void OnTitleChange(boo::Document &document) noexcept;
 
     /// @brief @p radio joined or left the radio button group of @p group (the other buttons in it).
-    void OnRadioGroupMembershipChanged(const dom::Element &radio,
-                                       const List<Ref<html::HTMLInputElement>> &group) noexcept;
+    void OnRadioGroupMembershipChanged(const boo::Element &radio,
+                                       const List<Ref<boo::HTMLInputElement>> &group) noexcept;
 
     /// @brief The focus moved from @p oldElement to @p newElement (either may be null): handled now, or once
     /// the tree is next updated if the new element's renderer is out of date.
-    void OnFocusChange(dom::Element *oldElement, dom::Element *newElement) noexcept;
+    void OnFocusChange(boo::Element *oldElement, boo::Element *newElement) noexcept;
 
     /// @brief Brings the tree up to date with the changes deferred since the last update.
     void PerformDeferredCacheUpdate() noexcept;
@@ -348,10 +340,10 @@ namespace krys::boo
     // Rendering.
 
     /// @brief @p node has a new renderer: its object (if it has one) is updated for it.
-    void OnRendererCreated(dom::Node &node) noexcept;
+    void OnRendererCreated(boo::Node &node) noexcept;
 
     /// @brief @p element's style changed from @p oldStyle to @p newStyle.
-    void OnStyleChange(dom::Element &element, const RenderStyle *oldStyle,
+    void OnStyleChange(boo::Element &element, const RenderStyle *oldStyle,
                        const RenderStyle *newStyle) noexcept;
 
     /// @brief @p renderer became inert or not, or visible or not: its parent's children change.
@@ -364,22 +356,22 @@ namespace krys::boo
     void OnDocumentLoaded() noexcept;
 
     /// @brief The view scrolled to @p anchor (the fragment's target): its first unignored object is told.
-    void HandleScrolledToAnchor(dom::Node &anchor) noexcept;
+    void HandleScrolledToAnchor(boo::Node &anchor) noexcept;
 
     // DOM.
 
     /// @brief The nodes assigned to @p slot changed.
-    void OnSlottedContentChange(dom::Element &slot) noexcept;
+    void OnSlottedContentChange(boo::Element &slot) noexcept;
 
     /// @brief The popover was shown or hidden: the elements that invoke it are told they expanded or
     /// collapsed.
-    void OnPopoverToggle(dom::Element &popover) noexcept;
+    void OnPopoverToggle(boo::Element &popover) noexcept;
 
     /// @brief The document's design mode was turned on or off.
     void HandlePageEditabilityChanged() noexcept;
 
     /// @brief The element being dragged changed from @p oldElement to @p newElement.
-    void OnDragElementChanged(dom::Element *oldElement, dom::Element *newElement) noexcept;
+    void OnDragElementChanged(boo::Element *oldElement, boo::Element *newElement) noexcept;
 
     // Relations.
 
@@ -390,7 +382,7 @@ namespace krys::boo
 
     /// @brief @p origin's @p attribute (a relation attribute) changed its targets: the relation is set up
     /// again.
-    void UpdateRelations(dom::Element &origin, dom::DOMStringView attribute) noexcept;
+    void UpdateRelations(boo::Element &origin, DOMStringView attribute) noexcept;
 
     /// @brief The relations need working out again (an ID changed, so attributes may refer to other
     /// elements).
@@ -404,14 +396,14 @@ namespace krys::boo
     /// @brief @p text was inserted or deleted in the editable region @p node, ending (for an insertion) or
     /// starting (for a deletion) at @p position: the host is told, for the object that tells it about the
     /// region's changes (the web area's if none does), with the change's offset in that object's text.
-    void PostTextStateChangeNotification(dom::Node *node, AXTextChange change, dom::DOMStringView text,
+    void PostTextStateChangeNotification(boo::Node *node, AXTextChange change, DOMStringView text,
                                          const VisiblePosition &position) noexcept;
 
     /// @brief @p deletedText was replaced by @p insertedText, which ends at @p position, in the editable
     /// region
     /// @p node.
-    void PostTextReplacementNotification(dom::Node *node, dom::DOMStringView deletedText,
-                                         dom::DOMStringView insertedText,
+    void PostTextReplacementNotification(boo::Node *node, DOMStringView deletedText,
+                                         DOMStringView insertedText,
                                          const VisiblePosition &position) noexcept;
 
     /// @brief The selection (starting at @p start) changed: `SelectedTextChanged` is posted for the object
@@ -423,7 +415,7 @@ namespace krys::boo
     /// @brief Queues @p notification for @p object, to post to the platform once the current task ends.
     void PostNotification(AXObject *object, AXNotification notification) noexcept;
 
-    void PostNotification(dom::Node *node, AXNotification notification) noexcept;
+    void PostNotification(boo::Node *node, AXNotification notification) noexcept;
 
     void PostNotification(RenderObject *renderer, AXNotification notification) noexcept;
 
@@ -435,36 +427,36 @@ namespace krys::boo
 
     KRYS_NODISCARD Ref<AXRenderObject> CreateObjectFromRenderer(RenderObject &renderer) noexcept;
 
-    KRYS_NODISCARD Ref<AXNodeObject> CreateFromNode(dom::Node &node) noexcept;
+    KRYS_NODISCARD Ref<AXNodeObject> CreateFromNode(boo::Node &node) noexcept;
 
-    void CacheAndInitializeWrapper(AXObject &object, const dom::Node *node,
+    void CacheAndInitializeWrapper(AXObject &object, const boo::Node *node,
                                    const RenderObject *renderer) noexcept;
 
-    AXObject *GetOrCreateSlow(dom::Node &node, IsPartOfRelation isPartOfRelation) noexcept;
+    AXObject *GetOrCreateSlow(boo::Node &node, IsPartOfRelation isPartOfRelation) noexcept;
 
-    KRYS_NODISCARD AXObject *FocusedObjectForNode(dom::Node &node) noexcept;
+    KRYS_NODISCARD AXObject *FocusedObjectForNode(boo::Node &node) noexcept;
 
     /// @brief A focused area's object: its image's child for it.
-    KRYS_NODISCARD AXObject *FocusedImageMapUIElement(html::HTMLAreaElement &area) noexcept;
+    KRYS_NODISCARD AXObject *FocusedImageMapUIElement(boo::HTMLAreaElement &area) noexcept;
 
-    KRYS_NODISCARD static AXRelation AttributeToRelationType(dom::DOMStringView attribute) noexcept;
+    KRYS_NODISCARD static AXRelation AttributeToRelationType(DOMStringView attribute) noexcept;
 
     KRYS_NODISCARD static AXRelation SymmetricRelation(AXRelation relation) noexcept;
 
-    KRYS_NODISCARD static bool IsRelationAttribute(dom::DOMStringView attribute) noexcept;
+    KRYS_NODISCARD static bool IsRelationAttribute(DOMStringView attribute) noexcept;
 
-    bool AddRelation(dom::Element &origin, dom::Element &target, AXRelation relation) noexcept;
+    bool AddRelation(boo::Element &origin, boo::Element &target, AXRelation relation) noexcept;
 
     bool AddRelation(AXObject *origin, AXObject *target, AXRelation relation,
                      bool addSymmetricRelation = true) noexcept;
 
     /// @brief Sets up the relation @p origin's @p attribute gives it to the elements it refers to.
-    bool AddRelation(dom::Element &origin, dom::DOMStringView attribute) noexcept;
+    bool AddRelation(boo::Element &origin, DOMStringView attribute) noexcept;
 
     /// @brief A label's relation to its control.
-    bool AddLabelForRelation(dom::Element &origin) noexcept;
+    bool AddLabelForRelation(boo::Element &origin) noexcept;
 
-    bool RemoveRelation(dom::Element &origin, AXRelation relation) noexcept;
+    bool RemoveRelation(boo::Element &origin, AXRelation relation) noexcept;
 
     void RemoveAllRelations(AXId id) noexcept;
 
@@ -472,35 +464,34 @@ namespace krys::boo
 
     void UpdateRelationsIfNeeded() noexcept;
 
-    void UpdateRelationsForTree(dom::ContainerNode &root) noexcept;
+    void UpdateRelationsForTree(boo::ContainerNode &root) noexcept;
 
     /// @brief Whether an ancestor of @p node is related to something (so @p node may be named by it, and
     /// needs an object).
-    KRYS_NODISCARD bool IsDescendantOfRelatedNode(dom::Node &node) noexcept;
+    KRYS_NODISCARD bool IsDescendantOfRelatedNode(boo::Node &node) noexcept;
 
     /// @brief A label's control changed: the label's relation is set up again, unless the control is labelled
     /// by ARIA (which takes precedence).
-    bool UpdateLabelFor(dom::Element &label) noexcept;
+    bool UpdateLabelFor(boo::Element &label) noexcept;
 
-    void HandleActiveDescendantChange(dom::Element &element) noexcept;
+    void HandleActiveDescendantChange(boo::Element &element) noexcept;
 
-    void HandleTabPanelSelected(dom::Element *oldElement, dom::Element *newElement) noexcept;
+    void HandleTabPanelSelected(boo::Element *oldElement, boo::Element *newElement) noexcept;
 
-    KRYS_NODISCARD bool ShouldProcessAttributeChange(dom::Element &element,
-                                                     dom::DOMStringView name) const noexcept;
+    KRYS_NODISCARD bool ShouldProcessAttributeChange(boo::Element &element,
+                                                     DOMStringView name) const noexcept;
 
-    void HandleAttributeChange(dom::Element &element, dom::DOMStringView name, dom::DOMStringView oldValue,
-                               dom::DOMStringView newValue) noexcept;
+    void HandleAttributeChange(boo::Element &element, DOMStringView name, DOMStringView oldValue,
+                               DOMStringView newValue) noexcept;
 
     /// @brief The `role` attribute changed: an object whose kind depends on it is made again.
-    void HandleRoleChanged(dom::Element &element, dom::DOMStringView oldValue,
-                           dom::DOMStringView newValue) noexcept;
+    void HandleRoleChanged(boo::Element &element, DOMStringView oldValue, DOMStringView newValue) noexcept;
 
-    void HandleAriaExpandedChange(dom::Element &element) noexcept;
+    void HandleAriaExpandedChange(boo::Element &element) noexcept;
 
     void HandleRowCountChanged(AXObject *object) noexcept;
 
-    void HandleMenuItemSelected(dom::Element *element) noexcept;
+    void HandleMenuItemSelected(boo::Element *element) noexcept;
 
     /// @brief Whether a focus change works out the modal dialog again (not when more changes that may change
     /// it are to follow).
@@ -510,35 +501,35 @@ namespace krys::boo
       Yes,
     };
 
-    void HandleFocusedUIElementChanged(dom::Element *oldElement, dom::Element *newElement,
+    void HandleFocusedUIElementChanged(boo::Element *oldElement, boo::Element *newElement,
                                        UpdateModal updateModal = UpdateModal::Yes) noexcept;
 
-    KRYS_NODISCARD static bool IsModalElement(const dom::Element &element) noexcept;
+    KRYS_NODISCARD static bool IsModalElement(const boo::Element &element) noexcept;
 
     void FindModalNodes() noexcept;
 
     /// @brief Whether the modal @p element has anything unignored in it (so it doesn't trap the user in
     /// nothing).
-    KRYS_NODISCARD bool ModalElementHasAccessibleContent(dom::Element &element) noexcept;
+    KRYS_NODISCARD bool ModalElementHasAccessibleContent(boo::Element &element) noexcept;
 
     void UpdateCurrentModalNode() noexcept;
 
     /// @brief Whether @p node is an element that's shown: rendered, not hidden, not transparent and not
     /// `aria-hidden` (unless it's focused).
-    KRYS_NODISCARD static bool IsNodeVisible(const dom::Node *node) noexcept;
+    KRYS_NODISCARD static bool IsNodeVisible(const boo::Node *node) noexcept;
 
-    void DeferModalChange(dom::Element &element) noexcept;
+    void DeferModalChange(boo::Element &element) noexcept;
 
     void HandleChildrenChanged(AXObject &object) noexcept;
 
     /// @brief The object that tells the host about @p node's changes; the web area's if none does.
-    KRYS_NODISCARD AXObject *ObservableObjectForNode(dom::Node *node) noexcept;
+    KRYS_NODISCARD AXObject *ObservableObjectForNode(boo::Node *node) noexcept;
 
-    void DeferElementAddedOrRemoved(dom::Element *element) noexcept;
+    void DeferElementAddedOrRemoved(boo::Element *element) noexcept;
 
-    void HandleMenuOpened(dom::Element &element) noexcept;
+    void HandleMenuOpened(boo::Element &element) noexcept;
 
-    void HandleLiveRegionCreated(dom::Element &element) noexcept;
+    void HandleLiveRegionCreated(boo::Element &element) noexcept;
 
     /// @brief A label (or something labelling an object) changed: the objects it labels are told.
     void HandleLabelChanged(AXObject *object) noexcept;
@@ -549,7 +540,7 @@ namespace krys::boo
 
     /// @brief Works out again (later) whether @p element's table is exposed: adding or removing rows can make
     /// a layout table a data table or the other way round.
-    void DeferRecomputeTableIsExposed(dom::Element *element) noexcept;
+    void DeferRecomputeTableIsExposed(boo::Element *element) noexcept;
 
     void DeferRecomputeTableCellSlots(AXNodeObject &table) noexcept;
 
@@ -608,7 +599,7 @@ namespace krys::boo
   class AXReplacedText
   {
   private:
-    dom::DOMString _replacedText;
+    DOMString _replacedText;
     VisiblePositionIndexRange _replacedRange;
 
   public:
@@ -617,7 +608,7 @@ namespace krys::boo
     explicit AXReplacedText(const VisibleSelection &selection) noexcept;
 
     /// @brief @p insertedText replaced the text (if there was any), leaving @p selection.
-    void PostTextStateChangeNotification(AXObjectCache *cache, dom::DOMStringView insertedText,
+    void PostTextStateChangeNotification(AXObjectCache *cache, DOMStringView insertedText,
                                          const VisibleSelection &selection) const noexcept;
 
     KRYS_NODISCARD const VisiblePositionIndexRange &ReplacedRange() const noexcept

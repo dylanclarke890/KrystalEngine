@@ -26,7 +26,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLSelectElement;
 
@@ -42,18 +42,18 @@ namespace krys::boo::html
   private:
     WeakPtr<HTMLSlotElement> _legendSlot;
     WeakPtr<HTMLSlotElement> _contentsSlot;
-    WeakPtr<dom::Element> _labelElement;
-    WeakPtr<dom::Element> _slottedLegend;
+    WeakPtr<Element> _labelElement;
+    WeakPtr<Element> _slottedLegend;
 
   public:
-    explicit HTMLOptGroupElement(dom::Document &document) noexcept;
+    explicit HTMLOptGroupElement(Document &document) noexcept;
 
-    KRYS_NODISCARD static Ref<HTMLOptGroupElement> Create(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<HTMLOptGroupElement> Create(Document &document) noexcept;
 
     /// @brief The slot of the shadow tree that takes @p child: a first child element that's a legend takes
     /// the legend slot, which otherwise shows the label, and the other children the contents slot.
     /// @see https://html.spec.whatwg.org/#the-select-element-2
-    KRYS_NODISCARD HTMLSlotElement *SlotForHostChild(const dom::Node &child) const noexcept;
+    KRYS_NODISCARD HTMLSlotElement *SlotForHostChild(const Node &child) const noexcept;
 
     KRYS_NODISCARD bool IsDisabledFormControl() const noexcept final
     {
@@ -69,15 +69,15 @@ namespace krys::boo::html
     void Disabled(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-optgroup-label
-    KRYS_NODISCARD dom::DOMString Label() const noexcept;
+    KRYS_NODISCARD DOMString Label() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-optgroup-label
-    void Label(dom::DOMString value) noexcept;
+    void Label(DOMString value) noexcept;
 
 #pragma endregion
 
     /// @brief The `label` attribute, with its white space stripped and collapsed.
-    KRYS_NODISCARD dom::DOMString GroupLabelText() const noexcept;
+    KRYS_NODISCARD DOMString GroupLabelText() const noexcept;
 
     /// @brief The select whose list of options this optgroup is in, if any.
     KRYS_NODISCARD HTMLSelectElement *OwnerSelectElement() const noexcept
@@ -92,19 +92,18 @@ namespace krys::boo::html
 
     void OnInsert() noexcept override;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
-    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
     void OnChildrenChanged() noexcept override;
 
-    void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept override;
+    void DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept override;
 
-    KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &child) const noexcept override;
+    KRYS_NODISCARD bool ChildShouldCreateRenderer(const Node &child) const noexcept override;
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
 #pragma endregion
 
@@ -115,14 +114,14 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLOptGroupElement)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLOptGroupElement)
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLOptGroupElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLOptGroupElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLOptGroupElement();
   }

@@ -282,7 +282,7 @@ namespace krys::boo
       }
     }
 
-    KRYS_NODISCARD bool IsAttributeTrue(dom::DOMStringView value) noexcept
+    KRYS_NODISCARD bool IsAttributeTrue(DOMStringView value) noexcept
     {
       return StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"true");
     }
@@ -368,12 +368,12 @@ namespace krys::boo
     return description;
   }
 
-  dom::Element *AXObject::GetElement() const noexcept
+  Element *AXObject::GetElement() const noexcept
   {
-    return DynamicDowncast<dom::Element>(GetNode());
+    return DynamicDowncast<Element>(GetNode());
   }
 
-  dom::Document *AXObject::GetDocument() const noexcept
+  Document *AXObject::GetDocument() const noexcept
   {
     auto *node = GetNode();
     return node ? &node->NodeDocument() : nullptr;
@@ -413,7 +413,7 @@ namespace krys::boo
     {
       return element->ExistingComputedStyle();
     }
-    return static_cast<dom::Node &>(*element).ComputedStyle();
+    return static_cast<Node &>(*element).ComputedStyle();
   }
 
   AXObject *AXObject::ParentObjectUnignored() const noexcept
@@ -616,9 +616,9 @@ namespace krys::boo
     return ignored;
   }
 
-  bool AXObject::IsModalDescendant(const dom::Node &modalNode) const noexcept
+  bool AXObject::IsModalDescendant(const Node &modalNode) const noexcept
   {
-    for (const dom::Node *ancestor = GetNode(); ancestor; ancestor = ancestor->ParentInComposedTree())
+    for (const Node *ancestor = GetNode(); ancestor; ancestor = ancestor->ParentInComposedTree())
     {
       if (ancestor == &modalNode)
       {
@@ -662,7 +662,7 @@ namespace krys::boo
     }
 
     // Nor is something stacked above the dialog.
-    auto nearestRenderer = [](const dom::Node &start) -> RenderObject *
+    auto nearestRenderer = [](const Node &start) -> RenderObject *
     {
       for (auto *ancestor = &start; ancestor; ancestor = ancestor->ParentInComposedTree())
       {
@@ -763,8 +763,8 @@ namespace krys::boo
     if (element)
     {
       auto localName = element->LocalName();
-      if ((Is<html::HTMLElement>(*element) && (localName == u8"body" || localName == u8"html"))
-          || (Is<svg::SVGElement>(*element) && localName == u8"svg" && !element->ParentNode()))
+      if ((Is<HTMLElement>(*element) && (localName == u8"body" || localName == u8"html"))
+          || (Is<SVGElement>(*element) && localName == u8"svg" && !element->ParentNode()))
       {
         return false;
       }
@@ -774,7 +774,7 @@ namespace krys::boo
     {
       auto *slotObject = _axObjectCache ? _axObjectCache->Get(*slot) : nullptr;
       if (slotObject ? IsAttributeTrue(slotObject->GetAttribute(u8"aria-hidden"))
-                     : IsAttributeTrue(slot->GetAttribute(u8"aria-hidden").value_or(dom::DOMString {})))
+                     : IsAttributeTrue(slot->GetAttribute(u8"aria-hidden").value_or(DOMString {})))
       {
         return true;
       }
@@ -812,12 +812,12 @@ namespace krys::boo
     }
   }
 
-  AXRole AXObject::AriaRoleToRole(dom::DOMStringView value) noexcept
+  AXRole AXObject::AriaRoleToRole(DOMStringView value) noexcept
   {
     return AriaRoleToRole(value, [](AXRole) { return false; });
   }
 
-  AXRole AXObject::AriaRoleToRole(dom::DOMStringView value, const Func<bool(AXRole)> &skipRole) noexcept
+  AXRole AXObject::AriaRoleToRole(DOMStringView value, const Func<bool(AXRole)> &skipRole) noexcept
   {
     for (const auto &roleName : StringAlgorithms::SplitOnWhitespace(value))
     {
@@ -958,7 +958,7 @@ namespace krys::boo
       {
         // A fieldset is a control too.
         auto *element = GetElement();
-        return element && Is<html::HTMLElement>(*element) && element->LocalName() == u8"fieldset";
+        return element && Is<HTMLElement>(*element) && element->LocalName() == u8"fieldset";
       }
     }
   }
@@ -977,7 +977,7 @@ namespace krys::boo
 
   bool AXObject::IsImageMapLink() const noexcept
   {
-    auto *element = DynamicDowncast<html::HTMLElement>(GetElement());
+    auto *element = DynamicDowncast<HTMLElement>(GetElement());
     return element && element->TagQualifiedName().TagName() == html::TagName::area;
   }
 
@@ -989,7 +989,7 @@ namespace krys::boo
 
   bool AXObject::HasRowGroupTag() const noexcept
   {
-    auto *element = DynamicDowncast<html::HTMLElement>(GetElement());
+    auto *element = DynamicDowncast<HTMLElement>(GetElement());
     if (!element)
     {
       return false;
@@ -1043,7 +1043,7 @@ namespace krys::boo
 
     auto isTH = [](const AXObject &object)
     {
-      auto *element = DynamicDowncast<html::HTMLElement>(object.GetElement());
+      auto *element = DynamicDowncast<HTMLElement>(object.GetElement());
       return element && element->TagQualifiedName().TagName() == html::TagName::th;
     };
     bool isARIAGridRow = IsARIAGridRow();
@@ -1600,14 +1600,14 @@ namespace krys::boo
     return !parent || (parent->IsScrollView() && !parent->ParentObject());
   }
 
-  bool AXObject::HasAttribute(dom::DOMStringView name) const noexcept
+  bool AXObject::HasAttribute(DOMStringView name) const noexcept
   {
     auto *element = GetElement();
     if (!element)
     {
       return false;
     }
-    auto atom = dom::DOMStringAtom(name);
+    auto atom = DOMStringAtom(name);
     if (element->HasAttribute(atom))
     {
       return true;
@@ -1617,16 +1617,15 @@ namespace krys::boo
     return internals && internals->InternalContentAttribute(atom).has_value();
   }
 
-  dom::DOMString AXObject::GetAttribute(dom::DOMStringView name) const noexcept
+  DOMString AXObject::GetAttribute(DOMStringView name) const noexcept
   {
     auto *element = GetElement();
-    return element ? AttributeWithDefaultARIA(*element, name) : dom::DOMString {};
+    return element ? AttributeWithDefaultARIA(*element, name) : DOMString {};
   }
 
-  dom::DOMString AXObject::AttributeWithDefaultARIA(const dom::Element &element,
-                                                    dom::DOMStringView name) noexcept
+  DOMString AXObject::AttributeWithDefaultARIA(const Element &element, DOMStringView name) noexcept
   {
-    auto atom = dom::DOMStringAtom(name);
+    auto atom = DOMStringAtom(name);
     if (auto value = element.GetAttribute(atom))
     {
       return krys::move(*value);
@@ -1640,15 +1639,15 @@ namespace krys::boo
     {
       return {};
     }
-    return internals->InternalContentAttribute(atom).value_or(dom::DOMString {});
+    return internals->InternalContentAttribute(atom).value_or(DOMString {});
   }
 
-  dom::DOMString AXObject::GetAttributeTrimmed(dom::DOMStringView name) const noexcept
+  DOMString AXObject::GetAttributeTrimmed(DOMStringView name) const noexcept
   {
-    return dom::DOMString(StringAlgorithms::StripLeadingAndTrailingWhitespace(GetAttribute(name)));
+    return DOMString(StringAlgorithms::StripLeadingAndTrailingWhitespace(GetAttribute(name)));
   }
 
-  int32 AXObject::IntegralAttribute(dom::DOMStringView name) const noexcept
+  int32 AXObject::IntegralAttribute(DOMStringView name) const noexcept
   {
     auto result = html::Numbers::ParseInteger(GetAttribute(name));
     if (!result.Success() || result.Value < std::numeric_limits<int32>::min()
@@ -1693,15 +1692,15 @@ namespace krys::boo
   bool AXObject::Press() noexcept
   {
     // Pressing does nothing without an element to act on.
-    RefPtr<dom::Element> actionElement = ShareRefPtr(ActionElement());
+    RefPtr<Element> actionElement = ShareRefPtr(ActionElement());
     if (!actionElement)
     {
       return false;
     }
 
     // The element under the click point, if it's inside the one pressed, takes the press.
-    RefPtr<dom::Element> hitTestElement;
-    RefPtr<dom::Document> document = ShareRefPtr(GetDocument());
+    RefPtr<Element> hitTestElement;
+    RefPtr<Document> document = ShareRefPtr(GetDocument());
     if (document)
     {
       HitTestResult result {LayoutPoint(ClickPoint())};
@@ -1715,7 +1714,7 @@ namespace krys::boo
         {
           hitTestElement = ShareRefPtr(shadowRoot->Host());
         }
-        else if (auto *element = DynamicDowncast<dom::Element>(*innerNode))
+        else if (auto *element = DynamicDowncast<Element>(*innerNode))
         {
           hitTestElement = ShareRefPtr(element);
         }
@@ -1727,7 +1726,7 @@ namespace krys::boo
     }
 
     // The action element is pressed if it's inside the object's element.
-    RefPtr<dom::Element> pressElement = ShareRefPtr(GetElement());
+    RefPtr<Element> pressElement = ShareRefPtr(GetElement());
     if (!pressElement || actionElement->IsDescendantOf(*pressElement))
     {
       pressElement = actionElement;
@@ -1768,7 +1767,7 @@ namespace krys::boo
   bool AXObject::SetValue(float value) noexcept
   {
     auto text = std::format("{}", value);
-    return SetValue(dom::DOMStringView(reinterpret_cast<const char8_t *>(text.data()), text.size()));
+    return SetValue(DOMStringView(reinterpret_cast<const char8_t *>(text.data()), text.size()));
   }
 
   void AXObject::ScrollToMakeVisible() const noexcept
@@ -1786,10 +1785,10 @@ namespace krys::boo
     }
   }
 
-  dom::DOMString AXObject::StringForVisiblePositionRange(const VisiblePositionRange &range) noexcept
+  DOMString AXObject::StringForVisiblePositionRange(const VisiblePositionRange &range) noexcept
   {
     auto simpleRange = MakeSimpleRange(range);
-    return simpleRange ? PlainText(*simpleRange) : dom::DOMString {};
+    return simpleRange ? PlainText(*simpleRange) : DOMString {};
   }
 
   int32 AXObject::Index(const VisiblePosition &position) const noexcept
@@ -1807,7 +1806,7 @@ namespace krys::boo
     return IndexForVisiblePosition(position);
   }
 
-  dom::DOMString AXObject::DoAXStringForRange(const CharacterRange &range) const noexcept
+  DOMString AXObject::DoAXStringForRange(const CharacterRange &range) const noexcept
   {
     if (!range.Length || !IsTextControl())
     {
@@ -1840,8 +1839,8 @@ namespace krys::boo
       {
         return false;
       }
-      if (auto *element = DynamicDowncast<html::HTMLElement>(iterator.GetNode());
-          element && Is<html::HTMLBRElement>(*element))
+      if (auto *element = DynamicDowncast<HTMLElement>(iterator.GetNode());
+          element && Is<HTMLBRElement>(*element))
       {
         return true;
       }
@@ -1933,7 +1932,7 @@ namespace krys::boo
     return {start, VisiblePositionForIndex(static_cast<int32>(range.Location + range.Length))};
   }
 
-  dom::DOMStringView AXObject::DefaultLiveRegionStatusForRole(AXRole role) noexcept
+  DOMStringView AXObject::DefaultLiveRegionStatusForRole(AXRole role) noexcept
   {
     switch (role)
     {
@@ -1947,22 +1946,22 @@ namespace krys::boo
     }
   }
 
-  bool AXObject::LiveRegionStatusIsEnabled(dom::DOMStringView status) noexcept
+  bool AXObject::LiveRegionStatusIsEnabled(DOMStringView status) noexcept
   {
     return StringAlgorithms::ASCIICaseInsensitiveMatch(status, u8"polite")
            || StringAlgorithms::ASCIICaseInsensitiveMatch(status, u8"assertive");
   }
 
-  dom::DOMString AXObject::LiveRegionStatus() const noexcept
+  DOMString AXObject::LiveRegionStatus() const noexcept
   {
     auto status = GetAttribute(u8"aria-live");
-    return status.empty() ? dom::DOMString(DefaultLiveRegionStatusForRole(Role())) : status;
+    return status.empty() ? DOMString(DefaultLiveRegionStatusForRole(Role())) : status;
   }
 
-  dom::DOMString AXObject::LiveRegionRelevant() const noexcept
+  DOMString AXObject::LiveRegionRelevant() const noexcept
   {
     auto relevant = GetAttribute(u8"aria-relevant");
-    return relevant.empty() ? dom::DOMString(u8"additions text") : relevant;
+    return relevant.empty() ? DOMString(u8"additions text") : relevant;
   }
 
   bool AXObject::LiveRegionAtomic() const noexcept

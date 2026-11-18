@@ -1035,7 +1035,7 @@ namespace krys::boo::dom::tests
       REQUIRE(extractedTextNode);
       REQUIRE(extractedTextNode->NodeType() == NodeType::TEXT_NODE);
 
-      REQUIRE(Downcast<dom::Text>(extractedTextNode.get())->Data() == u8"world");
+      REQUIRE(Downcast<Text>(extractedTextNode.get())->Data() == u8"world");
       REQUIRE(textNode->Data() == u8"Hello, !");
 
       REQUIRE(data.Range->StartContainer() == textNode);
@@ -1113,7 +1113,7 @@ namespace krys::boo::dom::tests
       REQUIRE(extractedTextNode);
       REQUIRE(extractedTextNode->NodeType() == NodeType::TEXT_NODE);
 
-      REQUIRE(Downcast<dom::Text>(extractedTextNode.get())->Data() == u8"world");
+      REQUIRE(Downcast<Text>(extractedTextNode.get())->Data() == u8"world");
       REQUIRE(textNode->Data() == u8"Hello, world!");
 
       REQUIRE(data.Range->StartContainer() == textNode);
@@ -1178,7 +1178,7 @@ namespace krys::boo::dom::tests
 
     SECTION("HierarchyRequestError if start container is a Text node with a null parent")
     {
-      auto node = CreateRef<dom::Text>(*data.Document, u8"data");
+      auto node = CreateRef<Text>(*data.Document, u8"data");
       REQUIRE_FALSE(data.Range->SetStart(*node, 0uz).HasException());
       REQUIRE(data.Range->InsertNode(*node) == ExceptionCode::HierarchyRequestError);
     }
@@ -1676,7 +1676,7 @@ namespace krys::boo::dom::tests
     /// @brief A connected tree: body > div#d > (b#b > "bb", i#i > "ii", u#u).
     struct ConnectedTestData
     {
-      Ref<dom::Document> Document;
+      Ref<boo::Document> Document;
       Ref<Element> Div;
       Ref<Element> B;
       Ref<Text> BText;
@@ -1685,7 +1685,7 @@ namespace krys::boo::dom::tests
       Ref<Element> U;
 
       ConnectedTestData()
-          : Document(dom::Document::ParseHTMLUnsafe(*CreateRef<HTMLDocument>(),
+          : Document(boo::Document::ParseHTMLUnsafe(*CreateRef<HTMLDocument>(),
                                                     u8"<!DOCTYPE html><body><div id=d><b id=b>bb</b>"
                                                     u8"<i id=i>ii</i><u id=u></u></div>")
                        .ReleaseValue()),

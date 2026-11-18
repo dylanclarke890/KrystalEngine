@@ -45,12 +45,8 @@
 
 namespace krys::boo
 {
+  class Document;
   class LocalFrame;
-
-  namespace dom
-  {
-    class Document;
-  }
 
   template <typename T>
   using ResourceErrorOr = Expected<T, ResourceError>;
@@ -85,14 +81,14 @@ namespace krys::boo
     mutable DocumentResourceMap _documentResources;
     // The URLs the document has loaded or validated, which it doesn't load again whatever the cache policy.
     HashSet<utf8_string> _validatedURLs;
-    WeakPtr<dom::Document> _document;
+    WeakPtr<boo::Document> _document;
     int32 _requestCount {0};
     Timer _garbageCollectDocumentResourcesTimer;
     bool _autoLoadImages {true};
     bool _imagesEnabled {true};
 
   public:
-    KRYS_NODISCARD static Ref<CachedResourceLoader> Create(dom::Document *document) noexcept
+    KRYS_NODISCARD static Ref<CachedResourceLoader> Create(boo::Document *document) noexcept
     {
       return AdoptRef(*new CachedResourceLoader(document));
     }
@@ -147,9 +143,9 @@ namespace krys::boo
 
     KRYS_NODISCARD LocalFrame *Frame() const noexcept; // Can be null
 
-    KRYS_NODISCARD dom::Document *GetDocument() const noexcept; // Can be null
+    KRYS_NODISCARD boo::Document *GetDocument() const noexcept; // Can be null
 
-    void SetDocument(dom::Document *) noexcept;
+    void SetDocument(boo::Document *) noexcept;
 
     void GarbageCollectDocumentResources() noexcept;
 
@@ -172,7 +168,7 @@ namespace krys::boo
     KRYS_NODISCARD static const ResourceLoaderOptions &DefaultCachedResourceOptions() noexcept;
 
   private:
-    explicit CachedResourceLoader(dom::Document *) noexcept;
+    explicit CachedResourceLoader(boo::Document *) noexcept;
 
     ResourceErrorOr<CachedResourceHandle<boo::CachedResource>>
       RequestResource(boo::CachedResource::Type, CachedResourceRequest &&,

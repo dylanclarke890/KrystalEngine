@@ -29,7 +29,7 @@
 #include "Krystal.Booey/CSS/Values/VariableData.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   CSSPropertyRule::CSSPropertyRule(css::PropertyRule &rule, CSSStyleSheet *parent) noexcept
       : CSSRule(parent), _propertyRule(ShareRef(rule))
@@ -73,13 +73,13 @@ namespace krys::boo::css
     const auto &descriptor = _propertyRule->GetDescriptor();
 
     builder.Append(u8"@property ");
-    SerialiseIdentifier(descriptor.Name.ToString(), builder);
+    css::SerialiseIdentifier(descriptor.Name.ToString(), builder);
     builder.Append(u8" { ");
 
     if (!descriptor.Syntax.empty())
     {
       builder.Append(u8"syntax: ");
-      SerialiseString(Syntax(), builder);
+      css::SerialiseString(Syntax(), builder);
       builder.Append(u8"; ");
     }
 
@@ -97,7 +97,7 @@ namespace krys::boo::css
     return krys::move(builder).ToString();
   }
 
-  void CSSPropertyRule::Reattach(Rule &rule) noexcept
+  void CSSPropertyRule::Reattach(css::Rule &rule) noexcept
   {
     _propertyRule = ShareRef(Downcast<css::PropertyRule>(rule));
   }

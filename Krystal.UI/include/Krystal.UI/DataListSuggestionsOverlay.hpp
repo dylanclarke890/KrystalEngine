@@ -25,7 +25,7 @@ namespace krys::ui
     UniquePtr<View> _view;
     List<boo::DataListSuggestion> _suggestions;
     /// @brief The element of each suggestion, by its index.
-    List<RefPtr<boo::dom::Element>> _items;
+    List<RefPtr<boo::Element>> _items;
     boo::IntRect _rect;
     int32 _highlightedIndex {-1};
     bool _visible {false};

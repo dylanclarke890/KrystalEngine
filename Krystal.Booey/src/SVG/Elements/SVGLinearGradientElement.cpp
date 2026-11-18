@@ -29,9 +29,9 @@
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGLinearGradientElement::SVGLinearGradientElement(dom::Document &document) noexcept
+  SVGLinearGradientElement::SVGLinearGradientElement(Document &document) noexcept
       : SVGGradientElement(document, CreateUnique<PropertyRegistry>(*this),
                            SVGElementInterface::LinearGradient),
         _x1(SVGAnimatedLength::Create(this, SVGLengthMode::Width, u8"0%")),
@@ -51,12 +51,11 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGLinearGradientElement::AttributeChanged(const dom::QualifiedName &name,
-                                                  Maybe<dom::DOMStringView> oldValue,
-                                                  Maybe<dom::DOMStringView> value) noexcept
+  void SVGLinearGradientElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                                  Maybe<DOMStringView> value) noexcept
   {
     auto parseError = SVGParsingError::None;
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::X1Attr())
     {
@@ -83,7 +82,7 @@ namespace krys::boo::svg
     SVGGradientElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGLinearGradientElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGLinearGradientElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {
@@ -103,7 +102,7 @@ namespace krys::boo::svg
 
   namespace
   {
-    void SetGradientAttributes(SVGGradientElement &element, LinearGradientAttributes &attributes,
+    void SetGradientAttributes(SVGGradientElement &element, svg::LinearGradientAttributes &attributes,
                                bool isLinear = true) noexcept
     {
       if (!attributes.HasSpreadMethod() && element.HasAttribute(SVGNames::SpreadMethodAttr().LocalName()))
@@ -154,7 +153,7 @@ namespace krys::boo::svg
     }
   }
 
-  bool SVGLinearGradientElement::CollectGradientAttributes(LinearGradientAttributes &attributes) noexcept
+  bool SVGLinearGradientElement::CollectGradientAttributes(svg::LinearGradientAttributes &attributes) noexcept
   {
     if (!Renderer())
     {

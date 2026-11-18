@@ -55,14 +55,14 @@ namespace krys::boo::tests
     {
       uint32 FocusRequests {0};
       Ref<Page> TestPage {CreatePage()};
-      RefPtr<dom::HTMLDocument> Document;
+      RefPtr<HTMLDocument> Document;
 
       explicit WindowFixture(utf8_string &&markup = u8"<!DOCTYPE html>") noexcept
       {
         auto &frame = TestPage->MainFrame();
         frame.CreateView({200, 100});
-        Document = CreateRef<dom::HTMLDocument>();
-        frame.SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+        Document = CreateRef<HTMLDocument>();
+        frame.SetDocument(ShareRefPtr<boo::Document>(Document.get()));
         auto parser = CreateRef<html::DocumentParser>(*Document);
         parser->InputStream().Append(krys::move(markup), IsEOF::Yes);
         parser->PumpTokenizer();
@@ -82,7 +82,7 @@ namespace krys::boo::tests
         return *Document->Window();
       }
 
-      KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) const noexcept
+      KRYS_NODISCARD Element &ById(DOMStringView id) const noexcept
       {
         auto element = Document->GetElementById(id);
         REQUIRE(element);
@@ -93,13 +93,13 @@ namespace krys::boo::tests
 
   TEST_CASE("A document gets its window as it becomes a frame's document", "[Page][LocalDOMWindow]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     CHECK(document->Window() == nullptr);
     CHECK(document->DefaultView() == nullptr);
 
     auto frame = LocalFrame::Create();
     frame->CreateView({200, 100});
-    frame->SetDocument(ShareRefPtr<dom::Document>(document.get()));
+    frame->SetDocument(ShareRefPtr<boo::Document>(document.get()));
 
     auto *window = document->Window();
     REQUIRE(window);
@@ -241,14 +241,14 @@ namespace krys::boo::tests
                           u8"<img name=''>");
     auto &window = fixture.Window();
 
-    auto single = [&](dom::DOMStringView name) -> dom::Element *
+    auto single = [&](DOMStringView name) -> Element *
     {
       auto item = window.NamedItem(name);
-      if (!item || !std::holds_alternative<RefPtr<dom::Element>>(*item))
+      if (!item || !std::holds_alternative<RefPtr<Element>>(*item))
       {
         return nullptr;
       }
-      return std::get<RefPtr<dom::Element>>(*item).get();
+      return std::get<RefPtr<Element>>(*item).get();
     };
 
     CHECK(single(u8"picture") == fixture.Document->QuerySelector(u8"img").Value().get());
@@ -271,7 +271,7 @@ namespace krys::boo::tests
     CHECK(collection->Length() == 3);
 
     CHECK(window.SupportedPropertyNames()
-          == List<dom::DOMString> {u8"picture", u8"twice", u8"order", u8"orderform"});
+          == List<DOMString> {u8"picture", u8"twice", u8"order", u8"orderform"});
   }
 
   TEST_CASE("A window's viewport, scrolling and zoom", "[Page][LocalDOMWindow]")
@@ -532,7 +532,7 @@ namespace krys::boo::tests
   {
     WindowFixture fixture(u8"<!DOCTYPE html><body><button id=button>Go</button></body>");
     auto &window = fixture.Window();
-    auto &button = Downcast<html::HTMLElement>(fixture.ById(u8"button"));
+    auto &button = Downcast<HTMLElement>(fixture.ById(u8"button"));
 
     List<std::string> order;
     CHECK(button.OnClick() == nullptr);
@@ -604,7 +604,7 @@ namespace krys::boo::tests
       button.SetOnTouchEnd(count);
       button.SetOnTouchMove(count);
       button.SetOnTouchStart(count);
-      for (dom::DOMStringAtom type :
+      for (DOMStringAtom type :
            {event_names::GotPointerCapture, event_names::LostPointerCapture, event_names::PointerCancel,
             event_names::PointerDown, event_names::PointerEnter, event_names::PointerLeave,
             event_names::PointerMove, event_names::PointerOut, event_names::PointerOver, u8"pointerrawupdate",
@@ -637,7 +637,7 @@ namespace krys::boo::tests
     SECTION("an svg element's handlers are its own")
     {
       auto svg = fixture.Document->CreateElementNS(infra::namespaces::SVG, u8"svg").ReleaseValue();
-      auto &svgElement = Downcast<svg::SVGElement>(*svg);
+      auto &svgElement = Downcast<SVGElement>(*svg);
       svgElement.SetOnResize([](dom::Event &) {});
       CHECK(svgElement.OnResize() != nullptr);
       CHECK(window.OnResize() == nullptr);

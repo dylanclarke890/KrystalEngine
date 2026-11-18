@@ -324,14 +324,14 @@ namespace krys::boo::style
   }
 
   void
-    ScopeRuleSets::AppendAuthorStyleSheets(Span<const RefPtr<css::CSSStyleSheet>> styleSheets,
+    ScopeRuleSets::AppendAuthorStyleSheets(Span<const RefPtr<CSSStyleSheet>> styleSheets,
                                            const css::mq::MediaQueryEvaluator &mediaQueryEvaluator) noexcept
   {
     {
       RuleSetBuilder builder(*_authorStyle, mediaQueryEvaluator, &_styleResolver,
                              RuleSetBuilder::ShrinkToFit::Enable);
 
-      RefPtr<css::CSSStyleSheet> previous;
+      RefPtr<CSSStyleSheet> previous;
       for (auto &cssSheet : styleSheets)
       {
         krys_debug_assert(!cssSheet->Disabled());
@@ -396,23 +396,23 @@ namespace krys::boo::style
   }
 
   const List<InvalidationRuleSet> *
-    ScopeRuleSets::IdInvalidationRuleSets(const css::CSSOMStringAtom &id) const noexcept
+    ScopeRuleSets::IdInvalidationRuleSets(const CSSOMStringAtom &id) const noexcept
   {
-    return EnsureInvalidationRuleSets<css::CSSOMStringAtom, RuleFeatureVector>(id, _idInvalidationRuleSets,
-                                                                               _features.IdRules);
+    return EnsureInvalidationRuleSets<CSSOMStringAtom, RuleFeatureVector>(id, _idInvalidationRuleSets,
+                                                                          _features.IdRules);
   }
 
   const List<InvalidationRuleSet> *
-    ScopeRuleSets::ClassInvalidationRuleSets(const css::CSSOMStringAtom &className) const noexcept
+    ScopeRuleSets::ClassInvalidationRuleSets(const CSSOMStringAtom &className) const noexcept
   {
-    return EnsureInvalidationRuleSets<css::CSSOMStringAtom, RuleFeatureVector>(
+    return EnsureInvalidationRuleSets<CSSOMStringAtom, RuleFeatureVector>(
       className, _classInvalidationRuleSets, _features.ClassRules);
   }
 
   const List<InvalidationRuleSet> *
-    ScopeRuleSets::AttributeInvalidationRuleSets(const css::CSSOMStringAtom &attributeName) const noexcept
+    ScopeRuleSets::AttributeInvalidationRuleSets(const CSSOMStringAtom &attributeName) const noexcept
   {
-    return EnsureInvalidationRuleSets<css::CSSOMStringAtom, List<RuleFeatureWithInvalidationSelector>>(
+    return EnsureInvalidationRuleSets<CSSOMStringAtom, List<RuleFeatureWithInvalidationSelector>>(
       attributeName, _attributeInvalidationRuleSets, _features.AttributeRules);
   }
 
@@ -430,12 +430,11 @@ namespace krys::boo::style
       key, _hasPseudoClassInvalidationRuleSets, _features.HasPseudoClassRules);
   }
 
-  const HashSet<css::CSSOMStringAtom> &
-    ScopeRuleSets::CustomPropertyNamesInStyleContainerQueries() const noexcept
+  const HashSet<CSSOMStringAtom> &ScopeRuleSets::CustomPropertyNamesInStyleContainerQueries() const noexcept
   {
     if (!_customPropertyNamesInStyleContainerQueries)
     {
-      HashSet<css::CSSOMStringAtom> propertyNames;
+      HashSet<CSSOMStringAtom> propertyNames;
 
       auto collectPropertyNames = [&](RuleSet *ruleSet)
       {

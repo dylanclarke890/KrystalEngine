@@ -77,7 +77,7 @@ namespace krys::boo::html
   }
 
   Maybe<style::Filter>
-    CanvasRenderingContext2D::SetFilterStringWithoutUpdatingStyle(dom::DOMStringView filterString) noexcept
+    CanvasRenderingContext2D::SetFilterStringWithoutUpdatingStyle(DOMStringView filterString) noexcept
   {
     auto &canvas = Canvas();
     auto &document = canvas.NodeDocument();
@@ -90,7 +90,7 @@ namespace krys::boo::html
     }
 
     auto parserContext = css::ParserContext(css::StrictToParserMode(!UsesCSSCompatibilityParseMode()));
-    return css::parse_property::ParseFilterValueListOrNoneRaw(css::CSSOMString(filterString), parserContext,
+    return css::parse_property::ParseFilterValueListOrNoneRaw(CSSOMString(filterString), parserContext,
                                                               document, const_cast<RenderStyle &>(*style));
   }
 
@@ -154,18 +154,18 @@ namespace krys::boo::html
     return CSSFilterRenderer::CalculateOutsets(*renderer, GetState().Filter, bounds);
   }
 
-  void CanvasRenderingContext2D::DrawFocusIfNeeded(dom::Element &element) noexcept
+  void CanvasRenderingContext2D::DrawFocusIfNeeded(Element &element) noexcept
   {
     DrawFocusIfNeededInternal(_path, element);
   }
 
-  void CanvasRenderingContext2D::DrawFocusIfNeeded(Path2D &path, dom::Element &element) noexcept
+  void CanvasRenderingContext2D::DrawFocusIfNeeded(Path2D &path, Element &element) noexcept
   {
     DrawFocusIfNeededInternal(path.GetPath(), element);
   }
 
   // https://html.spec.whatwg.org/#draw-focus-if-needed
-  void CanvasRenderingContext2D::DrawFocusIfNeededInternal(const Path &path, dom::Element &element) noexcept
+  void CanvasRenderingContext2D::DrawFocusIfNeededInternal(const Path &path, Element &element) noexcept
   {
     // 1. If element is not focused or is not a descendant of context's canvas element, then return.
     // (Nor is an empty path drawn.)
@@ -187,14 +187,14 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-font
-  void CanvasRenderingContext2D::SetFont(dom::DOMStringView newFont) noexcept
+  void CanvasRenderingContext2D::SetFont(DOMStringView newFont) noexcept
   {
     Canvas().NodeDocument().UpdateStyleIfNeeded();
 
     SetFontWithoutUpdatingStyle(newFont);
   }
 
-  void CanvasRenderingContext2D::SetFontWithoutUpdatingStyle(dom::DOMStringView newFont) noexcept
+  void CanvasRenderingContext2D::SetFontWithoutUpdatingStyle(DOMStringView newFont) noexcept
   {
     // Style isn't updated here: the canvas entry points update it once when they begin, and this is called in
     // the middle of their work. The style may be stale here, but that's better than changing it mid-call.
@@ -215,7 +215,7 @@ namespace krys::boo::html
     // According to http://lists.w3.org/Archives/Public/public-html/2009Jul/0947.html,
     // the "inherit" and "initial" values must be ignored. ParseUnresolvedFont ignores these.
     auto unresolvedFont = css::parse_property::ParseUnresolvedFont(
-      css::CSSOMString(newFont), document, css::StrictToParserMode(!UsesCSSCompatibilityParseMode()));
+      CSSOMString(newFont), document, css::StrictToParserMode(!UsesCSSCompatibilityParseMode()));
     if (!unresolvedFont)
     {
       return;
@@ -244,8 +244,7 @@ namespace krys::boo::html
       return;
     }
 
-    auto newFontSafeCopy =
-      dom::DOMString(newFont); // A copy, since newFont can be deleted inside RealizeSaves.
+    auto newFontSafeCopy = DOMString(newFont); // A copy, since newFont can be deleted inside RealizeSaves.
     RealizeSaves();
     ModifiableState().UnparsedFont = krys::move(newFontSafeCopy);
 
@@ -255,9 +254,9 @@ namespace krys::boo::html
     TakeFontLonghands(GetState().Font.GetFontDescription());
 
     // Recompute the word and the letter spacing for the new font.
-    dom::DOMString letterSpacing;
+    DOMString letterSpacing;
     SetLetterSpacing(std::exchange(ModifiableState().LetterSpacing, letterSpacing));
-    dom::DOMString wordSpacing;
+    DOMString wordSpacing;
     SetWordSpacing(std::exchange(ModifiableState().WordSpacing, wordSpacing));
   }
 
@@ -292,13 +291,13 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-filltext
-  void CanvasRenderingContext2D::FillText(dom::DOMStringView text, double x, double y,
+  void CanvasRenderingContext2D::FillText(DOMStringView text, double x, double y,
                                           Maybe<double> maxWidth) noexcept
   {
     DrawTextInternal(text, x, y, true, maxWidth);
   }
 
-  void CanvasRenderingContext2D::StrokeText(dom::DOMStringView text, double x, double y,
+  void CanvasRenderingContext2D::StrokeText(DOMStringView text, double x, double y,
                                             Maybe<double> maxWidth) noexcept
   {
     DrawTextInternal(text, x, y, false, maxWidth);
@@ -306,7 +305,7 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#dom-context-2d-measuretext
   // (Runs the text preparation algorithm and returns a TextMetrics object with the glyphs' measurements.)
-  Ref<TextMetrics> CanvasRenderingContext2D::MeasureText(dom::DOMStringView text) noexcept
+  Ref<TextMetrics> CanvasRenderingContext2D::MeasureText(DOMStringView text) noexcept
   {
     Canvas().NodeDocument().UpdateStyleIfNeeded();
 
@@ -333,7 +332,7 @@ namespace krys::boo::html
     return StringAtom(css::EffectiveLang(Canvas()));
   }
 
-  void CanvasRenderingContext2D::DrawTextInternal(dom::DOMStringView text, double x, double y, bool fill,
+  void CanvasRenderingContext2D::DrawTextInternal(DOMStringView text, double x, double y, bool fill,
                                                   Maybe<double> maxWidth) noexcept
   {
     Canvas().NodeDocument().UpdateStyleIfNeeded();

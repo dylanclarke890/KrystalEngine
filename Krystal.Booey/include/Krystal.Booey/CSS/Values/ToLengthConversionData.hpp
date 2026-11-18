@@ -38,6 +38,7 @@
 
 namespace krys::boo
 {
+  class Element;
   class FloatSize;
   class FontCascade;
   class RenderStyle;
@@ -49,11 +50,6 @@ namespace krys::boo::style
   class BuilderState;
 }
 
-namespace krys::boo::dom
-{
-  class Element;
-}
-
 namespace krys::boo::css
 {
   class ToLengthConversionData
@@ -63,7 +59,7 @@ namespace krys::boo::css
     const RenderStyle *_rootStyle {nullptr};
     const RenderStyle *_parentStyle {nullptr};
     const boo::RenderView *_renderView {nullptr};
-    RefPtr<const dom::Element> _elementForContainerUnitResolution;
+    RefPtr<const Element> _elementForContainerUnitResolution;
     Maybe<float> _zoom;
     Maybe<PropertyId> _propertyToCompute;
     CheckedPtr<style::BuilderState> _styleBuilderState;
@@ -86,7 +82,7 @@ namespace krys::boo::css
     /// @brief This constructor ignores the `zoom` property.
     ToLengthConversionData(const RenderStyle &, const RenderStyle *rootStyle, const RenderStyle *parentStyle,
                            const boo::RenderView *,
-                           const dom::Element *elementForContainerUnitResolution = nullptr) noexcept;
+                           const Element *elementForContainerUnitResolution = nullptr) noexcept;
 
     ~ToLengthConversionData() noexcept;
 
@@ -134,7 +130,7 @@ namespace krys::boo::css
       return _renderView;
     }
 
-    KRYS_NODISCARD const dom::Element *ElementForContainerUnitResolution() const noexcept
+    KRYS_NODISCARD const Element *ElementForContainerUnitResolution() const noexcept
     {
       return _elementForContainerUnitResolution.get();
     }

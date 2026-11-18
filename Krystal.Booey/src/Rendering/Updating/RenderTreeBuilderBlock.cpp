@@ -472,7 +472,7 @@ namespace krys::boo
   }
 
   RenderPtr<RenderBlockFlow>
-    RenderTreeBuilder::Block::CreateAnonymousBlockWithStyle(dom::Document &document,
+    RenderTreeBuilder::Block::CreateAnonymousBlockWithStyle(Document &document,
                                                             const RenderStyle &style) noexcept
   {
     auto newBox = CreateRenderer<RenderBlockFlow>(

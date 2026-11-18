@@ -28,7 +28,7 @@
 #include "Krystal.Booey/SVG/SVGUnitTypes.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   enum SVGSpreadMethodType : uint8
   {
@@ -46,7 +46,7 @@ namespace krys::boo::svg
       return SVGSpreadMethodRepeat;
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(SVGSpreadMethodType type) noexcept
+    KRYS_NODISCARD static DOMString ToString(SVGSpreadMethodType type) noexcept
     {
       switch (type)
       {
@@ -72,7 +72,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    KRYS_NODISCARD static SVGSpreadMethodType FromString(SVGElement &, dom::DOMStringView value) noexcept
+    KRYS_NODISCARD static SVGSpreadMethodType FromString(SVGElement &, DOMStringView value) noexcept
     {
       if (value == u8"pad")
       {
@@ -145,12 +145,12 @@ namespace krys::boo::svg
     }
 
   protected:
-    SVGGradientElement(dom::Document &, UniquePtr<SVGPropertyRegistry> &&, SVGElementInterface) noexcept;
+    SVGGradientElement(Document &, UniquePtr<SVGPropertyRegistry> &&, SVGElementInterface) noexcept;
 
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept override;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept override;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept override;
 
     void InvalidateGradientResource() noexcept;
 
@@ -164,14 +164,14 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGGradientElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &element) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGGradientElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &element) noexcept
   {
     return element.IsSVGRadialGradientElement() || element.IsSVGLinearGradientElement();
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    auto *svgElement = krys::DynamicDowncast<krys::boo::svg::SVGElement>(node);
+    auto *svgElement = krys::DynamicDowncast<krys::boo::SVGElement>(node);
     return svgElement && IsType(*svgElement);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

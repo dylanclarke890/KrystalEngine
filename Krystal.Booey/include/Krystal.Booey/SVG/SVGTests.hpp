@@ -30,10 +30,9 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGElement;
-
   template <typename TOwner, typename... TBaseTypes>
   class SVGPropertyOwnerRegistry;
 
@@ -71,7 +70,7 @@ namespace krys::boo::svg
     WeakPtr<SVGElement> _contextElement;
 
   public:
-    KRYS_NODISCARD static bool HasExtension(dom::DOMStringView extension) noexcept;
+    KRYS_NODISCARD static bool HasExtension(DOMStringView extension) noexcept;
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGTests>;
 
@@ -96,9 +95,9 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD bool IsValid() const noexcept;
 
-    void ParseAttribute(const dom::QualifiedName &name, Maybe<dom::DOMStringView> value) noexcept;
+    void ParseAttribute(const QualifiedName &name, Maybe<DOMStringView> value) noexcept;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept;
 
   private:
     KRYS_NODISCARD SVGElement &ContextElement() const noexcept;

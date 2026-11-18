@@ -34,7 +34,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/String.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Text;
 }
@@ -89,15 +89,15 @@ namespace krys::boo
     FontCascade::CodePath _fontCodePath {FontCascade::CodePath::Auto};
 
   public:
-    RenderText(Type type, dom::Text &textNode, utf8_string text) noexcept;
+    RenderText(Type type, boo::Text &textNode, utf8_string text) noexcept;
 
-    RenderText(Type type, dom::Document &document, utf8_string text) noexcept;
+    RenderText(Type type, Document &document, utf8_string text) noexcept;
 
     ~RenderText() noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override;
 
-    KRYS_NODISCARD dom::Text *TextNode() const noexcept;
+    KRYS_NODISCARD boo::Text *TextNode() const noexcept;
 
     KRYS_NODISCARD layout::InlineTextBox *LayoutBox() noexcept;
 
@@ -332,7 +332,7 @@ namespace krys::boo
                                                          bool *wasFixed = nullptr) const noexcept;
 
   protected:
-    RenderText(Type type, dom::Node &node, utf8_string text) noexcept;
+    RenderText(Type type, Node &node, utf8_string text) noexcept;
 
     KRYS_NODISCARD RepaintRects LocalRectsForRepaint(RepaintOutlineBounds) const noexcept final;
 

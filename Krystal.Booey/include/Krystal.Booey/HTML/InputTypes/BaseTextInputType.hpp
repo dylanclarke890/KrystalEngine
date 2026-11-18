@@ -39,7 +39,7 @@ namespace krys::boo::html
   class BaseTextInputType : public TextFieldInputType
   {
   public:
-    KRYS_NODISCARD bool PatternMismatch(dom::DOMStringView value) const noexcept override;
+    KRYS_NODISCARD bool PatternMismatch(DOMStringView value) const noexcept override;
 
     KRYS_NODISCARD bool SupportsPlaceholder() const noexcept override;
 

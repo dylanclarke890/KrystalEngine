@@ -33,38 +33,39 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  Ref<InlineStylePropertyMap> InlineStylePropertyMap::Create(dom::StyledElement &element) noexcept
+  Ref<InlineStylePropertyMap> InlineStylePropertyMap::Create(StyledElement &element) noexcept
   {
     return AdoptRef(*new InlineStylePropertyMap(element));
   }
 
-  InlineStylePropertyMap::InlineStylePropertyMap(dom::StyledElement &element) noexcept
+  InlineStylePropertyMap::InlineStylePropertyMap(StyledElement &element) noexcept
       : _element(CreateWeakPtr(&element))
   {
   }
 
   InlineStylePropertyMap::~InlineStylePropertyMap() noexcept = default;
 
-  dom::Document *InlineStylePropertyMap::Document() const noexcept
+  boo::Document *InlineStylePropertyMap::Document() const noexcept
   {
     return _element ? &_element->NodeDocument() : nullptr;
   }
 
-  RefPtr<Value> InlineStylePropertyMap::PropertyValue(PropertyId property) const noexcept
+  RefPtr<css::Value> InlineStylePropertyMap::PropertyValue(css::PropertyId property) const noexcept
   {
     const auto *inlineStyle = _element ? _element->InlineStyle() : nullptr;
     return inlineStyle ? inlineStyle->GetPropertyCSSValue(property) : nullptr;
   }
 
-  CSSOMString InlineStylePropertyMap::ShorthandPropertySerialisation(PropertyId property) const noexcept
+  CSSOMString InlineStylePropertyMap::ShorthandPropertySerialisation(css::PropertyId property) const noexcept
   {
     const auto *inlineStyle = _element ? _element->InlineStyle() : nullptr;
     return inlineStyle ? inlineStyle->GetPropertyValue(property) : CSSOMString();
   }
 
-  RefPtr<Value> InlineStylePropertyMap::CustomPropertyValue(const CSSOMStringAtom &property) const noexcept
+  RefPtr<css::Value>
+    InlineStylePropertyMap::CustomPropertyValue(const CSSOMStringAtom &property) const noexcept
   {
     const auto *inlineStyle = _element ? _element->InlineStyle() : nullptr;
     return inlineStyle ? inlineStyle->GetCustomPropertyCSSValue(property.View()) : nullptr;
@@ -89,12 +90,12 @@ namespace krys::boo::css
     {
       entries.push_back(Entry {
         property.CssName(),
-        ReifyValueToList(document, ShareRefPtr(const_cast<Value *>(property.Value())), property.Id())});
+        ReifyValueToList(document, ShareRefPtr(const_cast<css::Value *>(property.Value())), property.Id())});
     }
     return entries;
   }
 
-  void InlineStylePropertyMap::RemoveProperty(PropertyId property) noexcept
+  void InlineStylePropertyMap::RemoveProperty(css::PropertyId property) noexcept
   {
     if (!_element)
     {
@@ -107,7 +108,8 @@ namespace krys::boo::css
     }
   }
 
-  bool InlineStylePropertyMap::SetShorthandProperty(PropertyId property, const CSSOMString &value) noexcept
+  bool InlineStylePropertyMap::SetShorthandProperty(css::PropertyId property,
+                                                    const CSSOMString &value) noexcept
   {
     if (!_element)
     {
@@ -115,7 +117,7 @@ namespace krys::boo::css
     }
     StyleAttributeMutationScope mutationScope(_element.get());
     bool didFailParsing = false;
-    std::ignore = _element->SetInlineStyleProperty(property, value, IsImportant::No, &didFailParsing);
+    std::ignore = _element->SetInlineStyleProperty(property, value, css::IsImportant::No, &didFailParsing);
     if (!didFailParsing)
     {
       mutationScope.EnqueueMutationRecord();
@@ -123,7 +125,7 @@ namespace krys::boo::css
     return !didFailParsing;
   }
 
-  bool InlineStylePropertyMap::SetProperty(PropertyId property, Ref<Value> value) noexcept
+  bool InlineStylePropertyMap::SetProperty(css::PropertyId property, Ref<css::Value> value) noexcept
   {
     if (!_element)
     {
@@ -132,8 +134,8 @@ namespace krys::boo::css
     StyleAttributeMutationScope mutationScope(_element.get());
     bool didFailParsing = false;
     // FIXME: Validating the value without serialising it and parsing the text.
-    std::ignore = _element->SetInlineStyleProperty(property, value->CssText(DefaultSerialisationContext()),
-                                                   IsImportant::No, &didFailParsing);
+    std::ignore = _element->SetInlineStyleProperty(
+      property, value->CssText(css::DefaultSerialisationContext()), css::IsImportant::No, &didFailParsing);
     if (!didFailParsing)
     {
       std::ignore = _element->SetInlineStyleProperty(property, krys::move(value));
@@ -143,7 +145,7 @@ namespace krys::boo::css
   }
 
   bool InlineStylePropertyMap::SetCustomProperty(const CSSOMStringAtom &property,
-                                                 Ref<VariableReferenceValue> value) noexcept
+                                                 Ref<css::VariableReferenceValue> value) noexcept
   {
     if (!_element)
     {
@@ -151,7 +153,7 @@ namespace krys::boo::css
     }
     StyleAttributeMutationScope mutationScope(_element.get());
     if (_element->SetInlineStyleCustomProperty(
-          CustomPropertyValue::CreateUnresolved(property, krys::move(value))))
+          css::CustomPropertyValue::CreateUnresolved(property, krys::move(value))))
     {
       mutationScope.EnqueueMutationRecord();
     }

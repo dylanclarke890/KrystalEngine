@@ -6,12 +6,12 @@
 
 namespace krys::boo::dom::tests
 {
-  class TestElement : public dom::Element
+  class TestElement : public Element
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(TestElement);
 
   public:
-    TestElement(dom::Document &document) noexcept
+    TestElement(Document &document) noexcept
         : Element(document, {infra::namespaces::HTML, null, u8"test-element"}, dom::NodeFlags::None)
     {
     }

@@ -59,7 +59,7 @@ namespace krys::boo
       return name;
     }
 
-    KRYS_NODISCARD bool ContainsOnlyASCIIWhitespace(dom::DOMStringView string) noexcept
+    KRYS_NODISCARD bool ContainsOnlyASCIIWhitespace(DOMStringView string) noexcept
     {
       return std::ranges::all_of(string, [](char8 c) { return text::IsASCIIWhitespace(c); });
     }
@@ -101,7 +101,7 @@ namespace krys::boo
     }
   }
 
-  ImageLoader::ImageLoader(dom::Element &element) noexcept
+  ImageLoader::ImageLoader(boo::Element &element) noexcept
       : _element(element), _derefElementTimer(*this, &ImageLoader::TimerFired)
   {
   }
@@ -121,7 +121,7 @@ namespace krys::boo
     }
   }
 
-  dom::Document &ImageLoader::GetDocument() noexcept
+  boo::Document &ImageLoader::GetDocument() noexcept
   {
     return _element.NodeDocument();
   }
@@ -181,7 +181,7 @@ namespace krys::boo
     if (attr && !ContainsOnlyASCIIWhitespace(*attr))
     {
       ResourceLoaderOptions options = CachedResourceLoader::DefaultCachedResourceOptions();
-      auto *imageElement = DynamicDowncast<html::HTMLImageElement>(element.get());
+      auto *imageElement = DynamicDowncast<HTMLImageElement>(element.get());
 
       // Use URL from original request for same URL loads in order to preserve the original base URL.
       url::URL imageURL;
@@ -251,10 +251,10 @@ namespace krys::boo
     }
     // Fire an error event if the url is empty, or if an image that uses srcset or picture has no source (the
     // selected source is null and it uses srcset or picture).
-    else if (auto *imageElement = DynamicDowncast<html::HTMLImageElement>(element.get());
+    else if (auto *imageElement = DynamicDowncast<HTMLImageElement>(element.get());
              attr || (imageElement && imageElement->UsesSrcsetOrPicture()))
     {
-      _failedLoadURL = attr.value_or(dom::DOMString());
+      _failedLoadURL = attr.value_or(DOMString());
       _hasPendingErrorEvent = true;
       LoadEventSender().DispatchEventSoon(*this, ErrorEventName());
     }
@@ -653,7 +653,7 @@ namespace krys::boo
     LoadEventSender().DispatchPendingEvents();
   }
 
-  void ImageLoader::ElementDidMoveToNewDocument(dom::Document &oldDocument) noexcept
+  void ImageLoader::ElementDidMoveToNewDocument(boo::Document &oldDocument) noexcept
   {
     ClearFailedLoadURL();
     ClearImage();
@@ -675,7 +675,7 @@ namespace krys::boo
     UpdateFromElement(RelevantMutation::No);
   }
 
-  void ImageLoader::ResetLazyImageLoading(dom::Document &document) noexcept
+  void ImageLoader::ResetLazyImageLoading(boo::Document &document) noexcept
   {
     if (IsDeferred())
     {

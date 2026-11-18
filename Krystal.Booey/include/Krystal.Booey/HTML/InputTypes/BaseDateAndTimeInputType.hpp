@@ -57,9 +57,9 @@ namespace krys::boo::html
       return true;
     }
 
-    KRYS_NODISCARD bool TypeMismatchFor(dom::DOMStringView value) const noexcept final;
+    KRYS_NODISCARD bool TypeMismatchFor(DOMStringView value) const noexcept final;
 
-    KRYS_NODISCARD bool ValueMissing(dom::DOMStringView value) const noexcept final;
+    KRYS_NODISCARD bool ValueMissing(DOMStringView value) const noexcept final;
 
     KRYS_NODISCARD bool TypeMismatch() const noexcept final;
 
@@ -84,19 +84,19 @@ namespace krys::boo::html
 
     ~BaseDateAndTimeInputType() noexcept override;
 
-    KRYS_NODISCARD Decimal ParseToNumber(dom::DOMStringView source,
+    KRYS_NODISCARD Decimal ParseToNumber(DOMStringView source,
                                          const Decimal &defaultValue) const noexcept override;
 
-    KRYS_NODISCARD dom::DOMString Serialize(const Decimal &value) const noexcept final;
+    KRYS_NODISCARD DOMString Serialize(const Decimal &value) const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString SerializeWithComponents(const DateComponents &date) const noexcept;
+    KRYS_NODISCARD DOMString SerializeWithComponents(const DateComponents &date) const noexcept;
 
     KRYS_NODISCARD bool ShouldHaveSecondField(const DateComponents &date) const noexcept;
 
     KRYS_NODISCARD bool ShouldHaveMillisecondField(const DateComponents &date) const noexcept;
 
     /// @brief @p value in decimal, zero padded to @p width digits.
-    KRYS_NODISCARD static dom::DOMString PadNumber(uint32 value, size_t width) noexcept;
+    KRYS_NODISCARD static DOMString PadNumber(uint32 value, size_t width) noexcept;
 
     void ShowPicker() noexcept override;
 
@@ -113,7 +113,7 @@ namespace krys::boo::html
       {
       }
 
-      bool ValidateFormat(dom::DOMStringView format, const BaseDateAndTimeInputType &inputType) noexcept;
+      bool ValidateFormat(DOMStringView format, const BaseDateAndTimeInputType &inputType) noexcept;
     };
 
     RefPtr<DateTimeChooser> _dateTimeChooser;
@@ -121,7 +121,7 @@ namespace krys::boo::html
     bool _pickerWasActivatedByKeyboard {false};
 
     KRYS_NODISCARD virtual Maybe<DateComponents>
-      ParseToDateComponents(dom::DOMStringView source) const noexcept = 0;
+      ParseToDateComponents(DOMStringView source) const noexcept = 0;
 
     KRYS_NODISCARD virtual Maybe<DateComponents>
       SetMillisecondToDateComponents(double value) const noexcept = 0;
@@ -132,14 +132,14 @@ namespace krys::boo::html
     KRYS_NODISCARD virtual bool
       IsValidFormat(EnumSet<DateTimeFormatValidationResults> results) const noexcept = 0;
 
-    KRYS_NODISCARD virtual dom::DOMString SerializeWithMilliseconds(double value) const noexcept;
+    KRYS_NODISCARD virtual DOMString SerializeWithMilliseconds(double value) const noexcept;
 
     // InputType functions:
-    KRYS_NODISCARD dom::DOMString VisibleValue() const noexcept final;
+    KRYS_NODISCARD DOMString VisibleValue() const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString SanitizeValue(dom::DOMStringView proposedValue) const noexcept override;
+    KRYS_NODISCARD DOMString SanitizeValue(DOMStringView proposedValue) const noexcept override;
 
-    void SetValue(dom::DOMStringView value, bool valueChanged, TextFieldEventBehavior eventBehavior,
+    void SetValue(DOMStringView value, bool valueChanged, TextFieldEventBehavior eventBehavior,
                   TextControlSetValueSelection selection) noexcept final;
 
     KRYS_NODISCARD double ValueAsDate() const noexcept override;
@@ -153,7 +153,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD Decimal DefaultValueForStepUp() const noexcept override;
 
-    KRYS_NODISCARD dom::DOMString LocalizeValue(dom::DOMStringView proposedValue) const noexcept final;
+    KRYS_NODISCARD DOMString LocalizeValue(DOMStringView proposedValue) const noexcept final;
 
     KRYS_NODISCARD bool SupportsReadOnly() const noexcept final;
 
@@ -165,7 +165,7 @@ namespace krys::boo::html
 
     void UpdateInnerTextValue() noexcept final;
 
-    void AttributeChanged(const dom::DOMStringAtom &name) noexcept final;
+    void AttributeChanged(const DOMStringAtom &name) noexcept final;
 
     KRYS_NODISCARD bool IsPresentingAttachedView() const noexcept final;
 
@@ -190,7 +190,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool IsEditControlOwnerReadOnly() const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString LocaleIdentifier() const noexcept final;
+    KRYS_NODISCARD DOMString LocaleIdentifier() const noexcept final;
 
     // DateTimeChooserClient functions:
     void DidChooseValue(utf8_stringview value) noexcept final;

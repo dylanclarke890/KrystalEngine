@@ -23,7 +23,7 @@
 
 #include "Krystal.Booey/SVG/SVGFilterPrimitiveStandardAttributes.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<feFlood>` element: its subregion, filled with its `flood-color` and `flood-opacity`.
   /// @see https://drafts.fxtf.org/filter-effects/#InterfaceSVGFEFloodElement
@@ -32,14 +32,13 @@ namespace krys::boo::svg
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGFEFloodElement);
 
   public:
-    explicit SVGFEFloodElement(dom::Document &document) noexcept;
+    explicit SVGFEFloodElement(Document &document) noexcept;
 
     using PropertyRegistry =
       SVGPropertyOwnerRegistry<SVGFEFloodElement, SVGFilterPrimitiveStandardAttributes>;
 
   private:
-    bool SetFilterEffectAttribute(FilterEffect &effect,
-                                  const dom::QualifiedName &attributeName) noexcept final;
+    bool SetFilterEffectAttribute(FilterEffect &effect, const QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD RefPtr<FilterEffect>
       CreateFilterEffect(const FilterEffectVector &inputs,
@@ -47,8 +46,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGFEFloodElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGFEFloodElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGFEFloodElement();
   }

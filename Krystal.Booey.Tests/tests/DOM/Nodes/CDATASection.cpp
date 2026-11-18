@@ -17,11 +17,11 @@ namespace krys::boo::dom::tests
   {
     struct CommonTestData
     {
-      Ref<dom::Document> Document;
+      Ref<boo::Document> Document;
       Ref<CDATASection> Node;
 
-      CommonTestData(dom::DOMString &&value)
-          : Document(CreateRef<dom::Document>()), Node(CreateRef<CDATASection>(*Document, krys::move(value)))
+      CommonTestData(DOMString &&value)
+          : Document(CreateRef<boo::Document>()), Node(CreateRef<CDATASection>(*Document, krys::move(value)))
       {
       }
     };

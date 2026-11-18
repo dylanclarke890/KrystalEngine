@@ -10,9 +10,9 @@
 #include "Krystal.Booey/MathML/Elements/MathMLTokenElement.hpp"
 #include "Krystal.Booey/MathML/Elements/MathMLUnderOverElement.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
-  RefPtr<MathMLElement> MathMLElementFactory::TryCreate(dom::Document &document,
+  RefPtr<MathMLElement> MathMLElementFactory::TryCreate(Document &document,
                                                         html::TagName elementName) noexcept
   {
     using html::TagName;
@@ -68,11 +68,11 @@ namespace krys::boo::mathml
       }
       case TagName::mroot:
       {
-        return CreateRefPtr<MathMLRootElement>(document, RootType::RootWithIndex);
+        return CreateRefPtr<MathMLRootElement>(document, mathml::RootType::RootWithIndex);
       }
       case TagName::msqrt:
       {
-        return CreateRefPtr<MathMLRootElement>(document, RootType::SquareRoot);
+        return CreateRefPtr<MathMLRootElement>(document, mathml::RootType::SquareRoot);
       }
       case TagName::mspace:
       {

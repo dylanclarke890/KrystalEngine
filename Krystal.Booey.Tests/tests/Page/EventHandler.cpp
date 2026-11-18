@@ -25,14 +25,14 @@ namespace krys::boo::tests
   {
     KRYS_NODISCARD std::string Name(const dom::EventTarget *target)
     {
-      auto *node = DynamicDowncast<dom::Node>(target);
-      auto *element = node ? DynamicDowncast<dom::Element>(*node) : nullptr;
+      auto *node = DynamicDowncast<Node>(target);
+      auto *element = node ? DynamicDowncast<Element>(*node) : nullptr;
       if (!element)
       {
         return "null";
       }
-      auto id = element->GetAttribute(u8"id").value_or(dom::DOMString());
-      auto name = id.empty() ? element->LocalName().View() : dom::DOMStringView(id);
+      auto id = element->GetAttribute(u8"id").value_or(DOMString());
+      auto name = id.empty() ? element->LocalName().View() : DOMStringView(id);
       return std::string(name.begin(), name.end());
     }
 
@@ -86,7 +86,7 @@ namespace krys::boo::tests
         for (auto type : {u8"mousemove", u8"mouseover", u8"mouseout", u8"mouseenter", u8"mouseleave",
                           u8"mousedown", u8"mouseup", u8"click", u8"auxclick", u8"dblclick"})
         {
-          Document->AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, true);
+          Document->AddEventListener(DOMStringAtom(type), Ref {recorder}, true);
         }
       }
 
@@ -153,7 +153,7 @@ namespace krys::boo::tests
     void Listen(dom::EventTarget &target, utf8_stringview type, TAction action)
     {
       Ref<dom::EventListenerCallback> listener = CreateRef<ActionListener<TAction>>(krys::move(action));
-      target.AddEventListener(dom::DOMStringAtom(type), krys::move(listener), false);
+      target.AddEventListener(DOMStringAtom(type), krys::move(listener), false);
     }
 
     using Strings = List<std::string>;
@@ -323,7 +323,7 @@ namespace krys::boo::tests
     Ref<dom::EventListenerCallback> recorder = CreateRef<MouseRecorder>(fixture.Records);
     for (auto type : {u8"focus", u8"blur", u8"focusin", u8"focusout"})
     {
-      fixture.Document->AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, true);
+      fixture.Document->AddEventListener(DOMStringAtom(type), Ref {recorder}, true);
     }
     auto &outer = fixture.ById(u8"outer");
     auto &other = fixture.ById(u8"other");
@@ -405,7 +405,7 @@ namespace krys::boo::tests
       Ref<dom::EventListenerCallback> windowRecorder = CreateRef<WindowRecorder>(fixture.Records, window);
       for (auto type : {u8"focus", u8"blur", u8"focusin", u8"focusout"})
       {
-        window->AddEventListener(dom::DOMStringAtom(type), Ref {windowRecorder}, false);
+        window->AddEventListener(DOMStringAtom(type), Ref {windowRecorder}, false);
       }
 
       // The focused element gets blur and focusout before the window, stays focused and stops matching
@@ -445,7 +445,7 @@ namespace krys::boo::tests
     Ref<dom::EventListenerCallback> recorder = CreateRef<KeyRecorder>(fixture.Records);
     for (auto type : {u8"keydown", u8"keypress", u8"keyup"})
     {
-      fixture.Document->AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, true);
+      fixture.Document->AddEventListener(DOMStringAtom(type), Ref {recorder}, true);
     }
     auto &handler = fixture.Handler();
     auto &box = fixture.ById(u8"box");
@@ -608,7 +608,7 @@ namespace krys::boo::tests
   {
     MouseFixture fixture {u8"<div id=outer style=padding:10px><div id=inner style=height:20px></div></div>"};
     auto &outer = fixture.ById(u8"outer");
-    Ref<dom::Element> inner = ShareRef(fixture.ById(u8"inner"));
+    Ref<Element> inner = ShareRef(fixture.ById(u8"inner"));
 
     // The mousemove after a mouseover that removes its target goes to the target's parent.
     Listen(*inner, u8"mouseover", [&](dom::Event &) { (void)outer.RemoveChild(*inner); });
@@ -675,7 +675,7 @@ namespace krys::boo::tests
     SECTION("an update chooses again for a still mouse")
     {
       (void)fixture.Move(100, 10);
-      (void)fixture.ById(u8"box").SetAttribute(u8"style", dom::DOMString(u8"cursor:wait"));
+      (void)fixture.ById(u8"box").SetAttribute(u8"style", DOMString(u8"cursor:wait"));
       (void)fixture.Document->UpdateLayout();
       CHECK(fixture.Handler().CurrentMouseCursor().GetType() == Cursor::Type::Pointer);
       fixture.Handler().UpdateCursor();

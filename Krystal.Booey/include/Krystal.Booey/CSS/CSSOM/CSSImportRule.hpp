@@ -28,11 +28,18 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
+namespace krys::boo
+{
+  class MediaList;
+}
+
 namespace krys::boo::css
 {
   class ImportRule;
-  class MediaList;
+}
 
+namespace krys::boo
+{
   /// @brief An `@import` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/cssom/#the-cssimportrule-interface
   class CSSImportRule final : public CSSRule
@@ -40,16 +47,16 @@ namespace krys::boo::css
     friend class MediaList;
 
   private:
-    const Ref<ImportRule> _importRule;
+    const Ref<css::ImportRule> _importRule;
     mutable RefPtr<MediaList> _mediaCSSOMWrapper;
     mutable RefPtr<CSSStyleSheet> _styleSheetCSSOMWrapper;
 
-    CSSImportRule(ImportRule &rule, CSSStyleSheet *parent) noexcept;
+    CSSImportRule(css::ImportRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
     ~CSSImportRule() noexcept override;
 
-    KRYS_NODISCARD static Ref<CSSImportRule> Create(ImportRule &rule, CSSStyleSheet *sheet) noexcept;
+    KRYS_NODISCARD static Ref<CSSImportRule> Create(css::ImportRule &rule, CSSStyleSheet *sheet) noexcept;
 
     KRYS_NODISCARD CSSOMString Href() const noexcept;
 
@@ -66,27 +73,27 @@ namespace krys::boo::css
     KRYS_NODISCARD CSSOMString SupportsText() const noexcept;
 
   private:
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::Import;
+      return css::RuleType::Import;
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
-    void Reattach(Rule &rule) noexcept final;
+    void Reattach(css::Rule &rule) noexcept final;
 
     void GetChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &childStyleSheets) noexcept final;
 
     KRYS_NODISCARD CSSOMString CssTextInternal(const CSSOMString &urlString) const noexcept;
 
-    KRYS_NODISCARD const mq::MediaQueryList &MediaQueries() const noexcept;
+    KRYS_NODISCARD const css::mq::MediaQueryList &MediaQueries() const noexcept;
 
-    void SetMediaQueries(mq::MediaQueryList &&queries) noexcept;
+    void SetMediaQueries(css::mq::MediaQueryList &&queries) noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSImportRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSImportRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::Import;
   }

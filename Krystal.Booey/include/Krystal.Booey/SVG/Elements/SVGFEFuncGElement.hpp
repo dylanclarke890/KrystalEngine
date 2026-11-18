@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/SVG/Elements/SVGComponentTransferFunctionElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<feFuncG>` element: how its `<feComponentTransfer>` transfers the green channel.
   /// @see https://drafts.fxtf.org/filter-effects/#InterfaceSVGFEFuncGElement
@@ -11,7 +11,7 @@ namespace krys::boo::svg
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGFEFuncGElement);
 
   public:
-    explicit SVGFEFuncGElement(dom::Document &document) noexcept
+    explicit SVGFEFuncGElement(Document &document) noexcept
         : SVGComponentTransferFunctionElement(document, SVGElementInterface::FEFuncG)
     {
     }
@@ -23,8 +23,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGFEFuncGElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGFEFuncGElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGFEFuncGElement();
   }

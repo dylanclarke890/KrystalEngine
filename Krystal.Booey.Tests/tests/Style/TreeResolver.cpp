@@ -19,14 +19,14 @@ namespace krys::boo::style::tests
     const boo::Color Blue {boo::Color::blue};
     const boo::Color Red {boo::Color::red};
 
-    KRYS_NODISCARD Ref<dom::Element> Create(dom::Document &document, dom::DOMStringAtom localName)
+    KRYS_NODISCARD Ref<boo::Element> Create(Document &document, DOMStringAtom localName)
     {
       auto element = document.CreateElement(krys::move(localName));
       REQUIRE_FALSE(element.HasException());
       return element.ReleaseValue();
     }
 
-    KRYS_NODISCARD const RenderStyle &Rendered(const dom::Element &element)
+    KRYS_NODISCARD const RenderStyle &Rendered(const boo::Element &element)
     {
       auto *style = element.GetRenderStyle();
       REQUIRE(style);
@@ -71,7 +71,7 @@ namespace krys::boo::style::tests
       auto &i = fixture.ById(u8"i");
       CHECK_FALSE(i.GetRenderStyle());
       CHECK_FALSE(i.ExistingComputedStyle());
-      CHECK_FALSE(i.ResolveComputedStyle(dom::Element::ResolveComputedStyleMode::RenderedOnly));
+      CHECK_FALSE(i.ResolveComputedStyle(boo::Element::ResolveComputedStyleMode::RenderedOnly));
       auto *computed = i.ComputedStyle();
       REQUIRE(computed);
       CHECK(computed->Display() == DisplayType::Inline);
@@ -258,7 +258,7 @@ namespace krys::boo::style::tests
     // Attaching a shadow root removes the light children from the composed tree until they're slotted.
     CHECK_FALSE(fixture.ById(u8"light").GetRenderStyle());
 
-    auto style = CreateRef<html::HTMLStyleElement>(document);
+    auto style = CreateRef<HTMLStyleElement>(document);
     REQUIRE_FALSE(style->TextContent(u8"slot { color: rgb(0, 0, 255) } div { width: 5px }").HasException());
     auto inner = Create(document, u8"div");
     auto slot = Create(document, u8"slot");
@@ -364,12 +364,12 @@ namespace krys::boo::style::tests
     CHECK(update->IsEmpty());
     update->AddElement(s, &d, {RenderStyle::ClonePtr(Rendered(s)), {Change::NonInherited}});
     CHECK(update->Size() == 1);
-    CHECK(update->Roots().contains(ShareRefPtr<dom::ContainerNode>(&d)));
+    CHECK(update->Roots().contains(ShareRefPtr<ContainerNode>(&d)));
 
     // Adding the parent makes its own parent the root.
     update->AddElement(d, &body, {RenderStyle::ClonePtr(Rendered(d)), {Change::NonInherited}});
-    CHECK_FALSE(update->Roots().contains(ShareRefPtr<dom::ContainerNode>(&d)));
-    CHECK(update->Roots().contains(ShareRefPtr<dom::ContainerNode>(&body)));
+    CHECK_FALSE(update->Roots().contains(ShareRefPtr<ContainerNode>(&d)));
+    CHECK(update->Roots().contains(ShareRefPtr<ContainerNode>(&body)));
 
     CHECK(update->ElementStyle(s) == update->GetElementUpdate(s)->Style.get());
     CHECK(update->ElementStyle(fixture.ById(u8"p")) == fixture.ById(u8"p").GetRenderStyle());

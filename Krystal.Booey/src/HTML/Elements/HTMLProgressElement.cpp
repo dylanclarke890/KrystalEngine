@@ -29,17 +29,17 @@
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include <cmath>
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLProgressElement::HTMLProgressElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Progress, HTMLElementFlags::None,
+  HTMLProgressElement::HTMLProgressElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Progress, html::HTMLElementFlags::None,
                     dom::NodeFlags::HasCustomStyleResolveCallbacks)
   {
   }
 
   HTMLProgressElement::~HTMLProgressElement() noexcept = default;
 
-  Ref<HTMLProgressElement> HTMLProgressElement::Create(dom::Document &document) noexcept
+  Ref<HTMLProgressElement> HTMLProgressElement::Create(Document &document) noexcept
   {
     auto progress = CreateRef<HTMLProgressElement>(document);
     progress->EnsureUserAgentShadowRoot();
@@ -69,10 +69,9 @@ namespace krys::boo::html
     return renderer ? DynamicDowncast<RenderProgress>(*renderer) : nullptr;
   }
 
-  void HTMLProgressElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                               Maybe<dom::DOMStringView> oldValue,
-                                               Maybe<dom::DOMStringView> value,
-                                               const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLProgressElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                               Maybe<DOMStringView> value,
+                                               const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
@@ -106,19 +105,19 @@ namespace krys::boo::html
   double HTMLProgressElement::Value() const noexcept
   {
     // An indeterminate progress bar has no value attribute, so its value is 0 too.
-    double value = ParseHTMLFloatingPointNumberValue(GetAttribute(u8"value").value_or(dom::DOMString()));
+    double value = html::ParseHTMLFloatingPointNumberValue(GetAttribute(u8"value").value_or(DOMString()));
     return !std::isfinite(value) || value < 0 ? 0 : std::min(value, Max());
   }
 
   void HTMLProgressElement::Value(double value) noexcept
   {
-    Reflect<double>(*this, u8"value", krys::move(value));
+    html::Reflect<double>(*this, u8"value", krys::move(value));
   }
 
   // https://html.spec.whatwg.org/#concept-progress-maximum
   double HTMLProgressElement::Max() const noexcept
   {
-    double max = ParseHTMLFloatingPointNumberValue(GetAttribute(u8"max").value_or(dom::DOMString()));
+    double max = html::ParseHTMLFloatingPointNumberValue(GetAttribute(u8"max").value_or(DOMString()));
     return !std::isfinite(max) || max <= 0 ? 1 : max;
   }
 
@@ -126,7 +125,7 @@ namespace krys::boo::html
   {
     if (value > 0)
     {
-      Reflect<double>(*this, u8"max", krys::move(value));
+      html::Reflect<double>(*this, u8"max", krys::move(value));
     }
   }
 
@@ -171,16 +170,16 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLProgressElement::DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept
+  void HTMLProgressElement::DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept
   {
     krys_debug_assert(!_valueElement);
 
     auto &document = NodeDocument();
-    auto inner = ProgressInnerElement::Create(document);
+    auto inner = html::ProgressInnerElement::Create(document);
     (void)root.AppendChild(*inner);
 
-    auto bar = ProgressBarElement::Create(document);
-    auto valueElement = ProgressValueElement::Create(document);
+    auto bar = html::ProgressBarElement::Create(document);
+    auto valueElement = html::ProgressValueElement::Create(document);
     valueElement->SetInlineSizePercentage(HTMLProgressElement::IndeterminatePosition * 100);
     (void)bar->AppendChild(*valueElement);
     _valueElement = CreateWeakPtr(valueElement.get());

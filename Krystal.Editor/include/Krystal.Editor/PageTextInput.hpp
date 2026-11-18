@@ -22,7 +22,7 @@ namespace krys::editor
     KRYS_NON_COPY_MOVABLE(PageTextInput);
 
   private:
-    WeakPtr<boo::dom::Document> _document;
+    WeakPtr<boo::Document> _document;
     List<boo::dom::EventListenerHandle> _listeners;
     /// @brief The lines the log shows, the oldest first.
     List<std::string> _lines;
@@ -31,7 +31,7 @@ namespace krys::editor
     /// @brief How many events the log shows.
     constexpr static size_t MaxLines {12};
 
-    explicit PageTextInput(boo::dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
+    explicit PageTextInput(boo::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
       RefPtr<boo::dom::EventTarget> fields = document.GetElementById(u8"ime-fields");
       if (!fields)
@@ -42,8 +42,8 @@ namespace krys::editor
       for (auto type :
            {u8"compositionstart", u8"compositionupdate", u8"compositionend", u8"beforeinput", u8"input"})
       {
-        _listeners.push_back(fields->AddEventListener(boo::dom::DOMStringAtom(type),
-                                                      [this](boo::dom::Event &event) { Log(event); }));
+        _listeners.push_back(
+          fields->AddEventListener(boo::DOMStringAtom(type), [this](boo::dom::Event &event) { Log(event); }));
       }
       if (RefPtr<boo::dom::EventTarget> clear = document.GetElementById(u8"ime-clear"))
       {
@@ -58,7 +58,7 @@ namespace krys::editor
     }
 
   private:
-    KRYS_NODISCARD static std::string Narrow(boo::dom::DOMStringView text) noexcept
+    KRYS_NODISCARD static std::string Narrow(boo::DOMStringView text) noexcept
     {
       return std::string(text.begin(), text.end());
     }
@@ -68,9 +68,9 @@ namespace krys::editor
     void Log(boo::dom::Event &event) noexcept
     {
       std::string field = "?";
-      if (auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get()))
+      if (auto *node = DynamicDowncast<boo::Node>(event.Target().get()))
       {
-        if (auto *element = DynamicDowncast<boo::dom::Element>(*node))
+        if (auto *element = DynamicDowncast<boo::Element>(*node))
         {
           field = Narrow(element->LocalName().View());
         }
@@ -123,8 +123,7 @@ namespace krys::editor
       {
         text.pop_back();
       }
-      (void)log->TextContent(
-        boo::dom::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
+      (void)log->TextContent(boo::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
     }
   };
 }

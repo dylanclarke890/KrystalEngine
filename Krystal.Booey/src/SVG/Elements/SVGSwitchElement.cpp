@@ -3,14 +3,14 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGTransformableContainer.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGSwitchElement::SVGSwitchElement(dom::Document &document) noexcept
+  SVGSwitchElement::SVGSwitchElement(Document &document) noexcept
       : SVGGraphicsElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Switch)
   {
   }
 
-  bool SVGSwitchElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
+  bool SVGSwitchElement::ChildShouldCreateRenderer(const Node &child) const noexcept
   {
     // We create a renderer for the first valid SVG element child.
     // FIXME: The renderer must be updated after dynamic change of the requiredFeatures, requiredExtensions

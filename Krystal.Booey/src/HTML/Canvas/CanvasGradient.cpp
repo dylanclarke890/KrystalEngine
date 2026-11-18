@@ -70,7 +70,7 @@ namespace krys::boo::html
   CanvasGradient::~CanvasGradient() noexcept = default;
 
   // https://html.spec.whatwg.org/#dom-canvasgradient-addcolorstop
-  dom::ExceptionOr<void> CanvasGradient::AddColorStop(double value, dom::DOMStringView colorString) noexcept
+  dom::ExceptionOr<void> CanvasGradient::AddColorStop(double value, DOMStringView colorString) noexcept
   {
     // (The offset is a double, so a non-finite one is a TypeError.)
     if (!std::isfinite(value))

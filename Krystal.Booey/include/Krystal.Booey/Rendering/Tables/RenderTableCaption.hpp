@@ -35,7 +35,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderTableCaption);
 
   public:
-    RenderTableCaption(dom::Element &element, RenderStyle &&style) noexcept;
+    RenderTableCaption(Element &element, RenderStyle &&style) noexcept;
 
     ~RenderTableCaption() noexcept override;
 

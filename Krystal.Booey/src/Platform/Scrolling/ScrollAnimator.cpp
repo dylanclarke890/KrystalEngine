@@ -195,7 +195,7 @@ namespace krys::boo
     }
 
     auto offset = _scrollableArea.GetScrollOffset();
-    auto targetsForAxis = [&](ScrollEventAxis axis, List<WeakPtr<dom::Element>> &targets)
+    auto targetsForAxis = [&](ScrollEventAxis axis, List<WeakPtr<Element>> &targets)
     {
       targets.clear();
       const auto &offsets = _snapOffsetsInfo->OffsetsForAxis(axis);
@@ -225,7 +225,7 @@ namespace krys::boo
     }
 
     auto current = _scrollableArea.GetScrollOffset();
-    auto correctedForAxis = [&](ScrollEventAxis axis, const List<WeakPtr<dom::Element>> &targets,
+    auto correctedForAxis = [&](ScrollEventAxis axis, const List<WeakPtr<Element>> &targets,
                                 const Scrollbar *scrollbar) -> int32
     {
       int32 value = axis == ScrollEventAxis::Horizontal ? current.X() : current.Y();
@@ -238,7 +238,7 @@ namespace krys::boo
       // The first offset of an element it was snapped to, one that's focused or targeted if there's one of
       // those.
       const SnapOffset *found = nullptr;
-      auto consider = [&](const dom::Element *element)
+      auto consider = [&](const Element *element)
       {
         for (const auto &offset : offsets)
         {

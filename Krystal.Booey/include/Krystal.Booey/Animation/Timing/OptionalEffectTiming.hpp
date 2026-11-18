@@ -13,14 +13,14 @@ namespace krys::boo
   struct OptionalEffectTiming
   {
     /// @brief In milliseconds, or the string `auto`.
-    Maybe<Variant<double, dom::DOMString>> Duration;
+    Maybe<Variant<double, DOMString>> Duration;
     Maybe<double> Iterations;
     /// @brief In milliseconds.
     Maybe<double> Delay;
     /// @brief In milliseconds.
     Maybe<double> EndDelay;
     Maybe<double> IterationStart;
-    Maybe<dom::DOMString> Easing;
+    Maybe<DOMString> Easing;
     Maybe<FillMode> Fill;
     Maybe<PlaybackDirection> Direction;
   };

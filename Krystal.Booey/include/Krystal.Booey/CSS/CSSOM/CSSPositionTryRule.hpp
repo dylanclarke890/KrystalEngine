@@ -30,11 +30,18 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSPositionTryDescriptors;
-  class PositionTryRule;
+}
 
+namespace krys::boo::css
+{
+  class PositionTryRule;
+}
+
+namespace krys::boo
+{
   /// @brief An `@position-try` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-anchor-position/#interfaces
   class CSSPositionTryRule final : public CSSRule
@@ -51,14 +58,14 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<CSSPositionTryRule> Create(css::PositionTryRule &rule,
                                                          CSSStyleSheet *parent) noexcept;
 
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::PositionTry;
+      return css::RuleType::PositionTry;
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
-    void Reattach(Rule &rule) noexcept final;
+    void Reattach(css::Rule &rule) noexcept final;
 
     KRYS_NODISCARD Ref<css::PositionTryRule> ProtectedPositionTryRule() const noexcept;
 
@@ -68,8 +75,8 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSPositionTryRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSPositionTryRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::PositionTry;
   }

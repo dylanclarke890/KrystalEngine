@@ -23,13 +23,10 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceGradient.hpp"
 #include "Krystal.Booey/SVG/RadialGradientAttributes.hpp"
 
-namespace krys::boo::svg
-{
-  class SVGRadialGradientElement;
-}
-
 namespace krys::boo
 {
+  class SVGRadialGradientElement;
+
   /// @brief The renderer of a `<radialGradient>`.
   class LegacyRenderSVGResourceRadialGradient final : public LegacyRenderSVGResourceGradient
   {
@@ -39,11 +36,11 @@ namespace krys::boo
     svg::RadialGradientAttributes _attributes;
 
   public:
-    LegacyRenderSVGResourceRadialGradient(svg::SVGRadialGradientElement &, RenderStyle &&) noexcept;
+    LegacyRenderSVGResourceRadialGradient(SVGRadialGradientElement &, RenderStyle &&) noexcept;
 
     ~LegacyRenderSVGResourceRadialGradient() noexcept override;
 
-    KRYS_NODISCARD svg::SVGRadialGradientElement &RadialGradientElement() const noexcept;
+    KRYS_NODISCARD SVGRadialGradientElement &RadialGradientElement() const noexcept;
 
     KRYS_NODISCARD FloatPoint CenterPoint(const svg::RadialGradientAttributes &) const noexcept;
 
@@ -61,7 +58,7 @@ namespace krys::boo
       return RenderSVGResourceType::RadialGradientResourceType;
     }
 
-    KRYS_NODISCARD svg::SVGUnitTypes::SVGUnitType GradientUnits() const noexcept final
+    KRYS_NODISCARD SVGUnitTypes::SVGUnitType GradientUnits() const noexcept final
     {
       return _attributes.GradientUnits();
     }

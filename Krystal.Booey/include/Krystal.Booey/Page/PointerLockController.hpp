@@ -36,14 +36,10 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
   class Element;
-}
-
-namespace krys::boo
-{
   class Page;
   class PlatformMouseEvent;
   class PlatformWheelEvent;
@@ -75,10 +71,10 @@ namespace krys::boo
     bool _lockPending {false};
     bool _unlockPending {false};
     Maybe<dom::PointerLockOptions> _options;
-    RefPtr<dom::Element> _element;
+    RefPtr<Element> _element;
     List<PointerLockCallback> _promises;
-    WeakPtr<dom::Document> _documentOfRemovedElementWhileWaitingForUnlock;
-    WeakPtr<dom::Document> _documentAllowedToRelockWithoutUserGesture;
+    WeakPtr<Document> _documentOfRemovedElementWhileWaitingForUnlock;
+    WeakPtr<Document> _documentAllowedToRelockWithoutUserGesture;
 
   public:
     explicit PointerLockController(Page &page) noexcept;
@@ -88,7 +84,7 @@ namespace krys::boo
     /// @brief Asks to lock the pointer to @p target (or moves the lock there, if the pointer is locked to an
     /// element of its document); @p promise, if given, settles once the host has answered.
     /// @see https://w3c.github.io/pointerlock/#dom-element-requestpointerlock
-    void RequestPointerLock(dom::Element *target, Maybe<dom::PointerLockOptions> &&options = null,
+    void RequestPointerLock(Element *target, Maybe<dom::PointerLockOptions> &&options = null,
                             PointerLockCallback &&promise = {}) noexcept;
 
     /// @brief Asks the host to unlock the pointer, if it's locked.
@@ -99,7 +95,7 @@ namespace krys::boo
     void RequestPointerUnlockAndForceCursorVisible() noexcept;
 
     /// @brief Unlocks the pointer if @p element has it.
-    void ElementWasRemoved(dom::Element &element) noexcept
+    void ElementWasRemoved(Element &element) noexcept
     {
       if (_element.get() == &element)
       {
@@ -108,7 +104,7 @@ namespace krys::boo
     }
 
     /// @brief Unlocks the pointer if an element of @p document has it.
-    void DocumentDetached(dom::Document &document) noexcept;
+    void DocumentDetached(Document &document) noexcept;
 
     /// @brief Whether the pointer is locked to an element (and the host has said so).
     KRYS_NODISCARD bool IsLocked() const noexcept;
@@ -117,7 +113,7 @@ namespace krys::boo
     KRYS_NODISCARD bool LockPending() const noexcept;
 
     /// @brief The element the pointer is locked (or being locked) to.
-    KRYS_NODISCARD dom::Element *GetElement() const noexcept;
+    KRYS_NODISCARD Element *GetElement() const noexcept;
 
     /// @brief The host has locked the pointer.
     void DidAcquirePointerLock() noexcept;
@@ -130,8 +126,7 @@ namespace krys::boo
 
     /// @brief Dispatches the mouse event of type @p eventType from @p event at the locked element (and a
     /// `click` after a `mouseup`).
-    void DispatchLockedMouseEvent(const PlatformMouseEvent &event,
-                                  const dom::DOMStringAtom &eventType) noexcept;
+    void DispatchLockedMouseEvent(const PlatformMouseEvent &event, const DOMStringAtom &eventType) noexcept;
 
     /// @brief Dispatches the `wheel` event from @p event at the locked element.
     void DispatchLockedWheelEvent(const PlatformWheelEvent &event) noexcept;
@@ -139,9 +134,9 @@ namespace krys::boo
   private:
     void ClearElement() noexcept;
 
-    void EnqueueEvent(dom::DOMStringAtom type, dom::Element *element) noexcept;
+    void EnqueueEvent(DOMStringAtom type, Element *element) noexcept;
 
-    static void EnqueueEvent(dom::DOMStringAtom type, dom::Document *document) noexcept;
+    static void EnqueueEvent(DOMStringAtom type, Document *document) noexcept;
 
     void ResolvePromises() noexcept;
 

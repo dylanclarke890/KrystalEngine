@@ -30,7 +30,7 @@
 
 namespace krys::boo
 {
-  RenderTextControlMultiLine::RenderTextControlMultiLine(html::HTMLTextAreaElement &element,
+  RenderTextControlMultiLine::RenderTextControlMultiLine(HTMLTextAreaElement &element,
                                                          RenderStyle &&style) noexcept
       : RenderTextControl(Type::TextControlMultiLine, element, krys::move(style))
   {
@@ -39,9 +39,9 @@ namespace krys::boo
 
   RenderTextControlMultiLine::~RenderTextControlMultiLine() noexcept = default;
 
-  html::HTMLTextAreaElement &RenderTextControlMultiLine::TextAreaElement() const noexcept
+  HTMLTextAreaElement &RenderTextControlMultiLine::TextAreaElement() const noexcept
   {
-    return Downcast<html::HTMLTextAreaElement>(RenderTextControl::TextFormControlElement());
+    return Downcast<HTMLTextAreaElement>(RenderTextControl::TextFormControlElement());
   }
 
   bool RenderTextControlMultiLine::NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
@@ -107,7 +107,7 @@ namespace krys::boo
   void RenderTextControlMultiLine::LayoutExcludedChildren(RelayoutChildren relayoutChildren) noexcept
   {
     RenderTextControl::LayoutExcludedChildren(relayoutChildren);
-    html::HTMLElement *placeholder = TextFormControlElement().PlaceholderElement();
+    HTMLElement *placeholder = TextFormControlElement().PlaceholderElement();
     RenderElement *placeholderRenderer = placeholder ? placeholder->Renderer() : nullptr;
     if (!placeholderRenderer)
     {

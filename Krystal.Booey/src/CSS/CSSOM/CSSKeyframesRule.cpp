@@ -32,9 +32,9 @@
 #include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Core/Assert.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSKeyframesRule::CSSKeyframesRule(KeyframesRule &keyframesRule, CSSStyleSheet *parent) noexcept
+  CSSKeyframesRule::CSSKeyframesRule(css::KeyframesRule &keyframesRule, CSSStyleSheet *parent) noexcept
       : CSSRule(parent), _keyframesRule(ShareRef(keyframesRule)),
         _childRuleCSSOMWrappers(keyframesRule.Keyframes().size())
   {
@@ -53,7 +53,7 @@ namespace krys::boo::css
     }
   }
 
-  Ref<CSSKeyframesRule> CSSKeyframesRule::Create(KeyframesRule &rule, CSSStyleSheet *sheet) noexcept
+  Ref<CSSKeyframesRule> CSSKeyframesRule::Create(css::KeyframesRule &rule, CSSStyleSheet *sheet) noexcept
   {
     return AdoptRef(*new CSSKeyframesRule(rule, sheet));
   }
@@ -74,7 +74,7 @@ namespace krys::boo::css
   {
     krys_debug_assert(_childRuleCSSOMWrappers.size() == _keyframesRule->Keyframes().size());
 
-    auto keyframe = Parser::ParseKeyframeRule(ruleText, GetParserContext());
+    auto keyframe = css::Parser::ParseKeyframeRule(ruleText, GetParserContext());
     if (!keyframe)
     {
       return;
@@ -157,8 +157,8 @@ namespace krys::boo::css
     return *_ruleListCSSOMWrapper;
   }
 
-  void CSSKeyframesRule::Reattach(Rule &rule) noexcept
+  void CSSKeyframesRule::Reattach(css::Rule &rule) noexcept
   {
-    _keyframesRule = ShareRef(Downcast<KeyframesRule>(rule));
+    _keyframesRule = ShareRef(Downcast<css::KeyframesRule>(rule));
   }
 }

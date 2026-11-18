@@ -60,7 +60,7 @@ namespace krys::boo
       return _hitTestResult.IsOverLink();
     }
 
-    KRYS_NODISCARD dom::Node *TargetNode() const noexcept
+    KRYS_NODISCARD Node *TargetNode() const noexcept
     {
       return _hitTestResult.TargetNode();
     }

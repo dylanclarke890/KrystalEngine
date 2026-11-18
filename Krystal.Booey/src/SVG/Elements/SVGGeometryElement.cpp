@@ -29,7 +29,7 @@
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <charconv>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   namespace
   {
@@ -38,7 +38,7 @@ namespace krys::boo::svg
       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible};
 
     // The number at the start of the string, after any whitespace, or 0 if there isn't one.
-    KRYS_NODISCARD float ToFloat(dom::DOMStringView string) noexcept
+    KRYS_NODISCARD float ToFloat(DOMStringView string) noexcept
     {
       while (!string.empty() && text::IsASCIIWhitespace(string.front()))
       {
@@ -56,7 +56,7 @@ namespace krys::boo::svg
     }
   }
 
-  SVGGeometryElement::SVGGeometryElement(dom::Document &document,
+  SVGGeometryElement::SVGGeometryElement(Document &document,
                                          UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
                                          SVGElementInterface interface) noexcept
       : SVGGraphicsElement(document, krys::move(propertyRegistry), interface,
@@ -154,19 +154,18 @@ namespace krys::boo::svg
     return false;
   }
 
-  void SVGGeometryElement::AttributeChanged(const dom::QualifiedName &name,
-                                            Maybe<dom::DOMStringView> oldValue,
-                                            Maybe<dom::DOMStringView> value) noexcept
+  void SVGGeometryElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                            Maybe<DOMStringView> value) noexcept
   {
     if (name == SVGNames::PathLengthAttr())
     {
-      _pathLength->SetBaseValInternal(ToFloat(value.value_or(dom::DOMStringView {})));
+      _pathLength->SetBaseValInternal(ToFloat(value.value_or(DOMStringView {})));
     }
 
     SVGGraphicsElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGGeometryElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGGeometryElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {

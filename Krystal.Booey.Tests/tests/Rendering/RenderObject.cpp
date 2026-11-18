@@ -12,7 +12,7 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD RenderElement &RendererOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderElement &RendererOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       (void)fixture.Document->UpdateLayout();
       return *fixture.ById(id).Renderer();

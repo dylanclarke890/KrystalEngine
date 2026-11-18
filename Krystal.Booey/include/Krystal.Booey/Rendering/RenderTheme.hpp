@@ -44,16 +44,9 @@
 
 namespace krys::boo
 {
-  namespace dom
-  {
-    class Element;
-  }
-
-  namespace html
-  {
-    class HTMLElement;
-    class HTMLInputElement;
-  }
+  class Element;
+  class HTMLElement;
+  class HTMLInputElement;
 
   class ControlPart;
   enum class DocumentMarkerLineStyleMode : uint8;
@@ -139,7 +132,7 @@ namespace krys::boo
     // metrics and defaults given the contents of the style.  This includes sophisticated operations like
     // selection of control size based off the font, the disabling of appearance when CSS properties that
     // disable native appearance are set, or if the appearance is not supported by the theme.
-    void AdjustStyle(RenderStyle &, const RenderStyle &parentStyle, const dom::Element *) noexcept;
+    void AdjustStyle(RenderStyle &, const RenderStyle &parentStyle, const boo::Element *) noexcept;
 
     KRYS_NODISCARD virtual bool CanCreateControlPartForRenderer(const RenderElement &) const noexcept
     {
@@ -325,7 +318,7 @@ namespace krys::boo
       return 0;
     }
 
-    virtual void AdjustSliderThumbSize(RenderStyle &, const dom::Element *) const noexcept
+    virtual void AdjustSliderThumbSize(RenderStyle &, const boo::Element *) const noexcept
     {
     }
 
@@ -385,18 +378,18 @@ namespace krys::boo
       return 0;
     }
 
-    KRYS_NODISCARD virtual bool ShouldHaveSpinButton(const html::HTMLInputElement &) const noexcept;
+    KRYS_NODISCARD virtual bool ShouldHaveSpinButton(const boo::HTMLInputElement &) const noexcept;
 
-    KRYS_NODISCARD virtual bool ShouldHaveCapsLockIndicator(const html::HTMLInputElement &) const noexcept
+    KRYS_NODISCARD virtual bool ShouldHaveCapsLockIndicator(const boo::HTMLInputElement &) const noexcept
     {
       return false;
     }
 
-    virtual void CreateColorWellSwatchSubtree(html::HTMLElement &) noexcept
+    virtual void CreateColorWellSwatchSubtree(boo::HTMLElement &) noexcept
     {
     }
 
-    virtual void SetColorWellSwatchBackground(html::HTMLElement &, Color) noexcept;
+    virtual void SetColorWellSwatchBackground(boo::HTMLElement &, Color) noexcept;
 
     // Functions for <select> elements.
     KRYS_NODISCARD virtual bool DelegatesMenuListRendering() const noexcept
@@ -439,20 +432,20 @@ namespace krys::boo
 
     // NOTE: This is just a legacy hard-coded list of elements that have some appearance value in html.css
     // FIXME: Remove when devolvable widgets are universally enabled.
-    KRYS_NODISCARD static bool HasAppearanceForElementTypeFromUAStyle(const dom::Element &) noexcept;
+    KRYS_NODISCARD static bool HasAppearanceForElementTypeFromUAStyle(const boo::Element &) noexcept;
 
     virtual void AdjustTextControlInnerContainerStyle(RenderStyle &, const RenderStyle &,
-                                                      const dom::Element *) const noexcept
+                                                      const boo::Element *) const noexcept
     {
     }
 
     virtual void AdjustTextControlInnerPlaceholderStyle(RenderStyle &, const RenderStyle &,
-                                                        const dom::Element *) const noexcept
+                                                        const boo::Element *) const noexcept
     {
     }
 
     virtual void AdjustTextControlInnerTextStyle(RenderStyle &, const RenderStyle &,
-                                                 const dom::Element *) const noexcept
+                                                 const boo::Element *) const noexcept
     {
     }
 
@@ -467,7 +460,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD virtual float
-      AdjustedMaximumLogicalWidthForControl(const RenderStyle &, const dom::Element &,
+      AdjustedMaximumLogicalWidthForControl(const RenderStyle &, const boo::Element &,
                                             float maximumLogicalWidth) const noexcept
     {
       return maximumLogicalWidth;
@@ -557,28 +550,28 @@ namespace krys::boo
     }
 
     // Methods for each appearance value.
-    virtual void AdjustCheckboxStyle(RenderStyle &, const dom::Element *) const noexcept;
+    virtual void AdjustCheckboxStyle(RenderStyle &, const boo::Element *) const noexcept;
 
     virtual bool PaintCheckbox(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
     {
       return true;
     }
 
-    virtual void AdjustRadioStyle(RenderStyle &, const dom::Element *) const noexcept;
+    virtual void AdjustRadioStyle(RenderStyle &, const boo::Element *) const noexcept;
 
     virtual bool PaintRadio(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
     {
       return true;
     }
 
-    virtual void AdjustButtonStyle(RenderStyle &, const dom::Element *) const noexcept;
+    virtual void AdjustButtonStyle(RenderStyle &, const boo::Element *) const noexcept;
 
     virtual bool PaintButton(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
     {
       return true;
     }
 
-    virtual void AdjustColorWellStyle(RenderStyle &, const dom::Element *) const noexcept;
+    virtual void AdjustColorWellStyle(RenderStyle &, const boo::Element *) const noexcept;
 
     virtual bool PaintColorWell(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
     {
@@ -590,15 +583,15 @@ namespace krys::boo
     {
     }
 
-    virtual void AdjustColorWellSwatchStyle(RenderStyle &, const dom::Element *) const noexcept
+    virtual void AdjustColorWellSwatchStyle(RenderStyle &, const boo::Element *) const noexcept
     {
     }
 
-    virtual void AdjustColorWellSwatchOverlayStyle(RenderStyle &, const dom::Element *) const noexcept
+    virtual void AdjustColorWellSwatchOverlayStyle(RenderStyle &, const boo::Element *) const noexcept
     {
     }
 
-    virtual void AdjustColorWellSwatchWrapperStyle(RenderStyle &, const dom::Element *) const noexcept
+    virtual void AdjustColorWellSwatchWrapperStyle(RenderStyle &, const boo::Element *) const noexcept
     {
     }
 
@@ -607,14 +600,14 @@ namespace krys::boo
       return true;
     }
 
-    virtual void AdjustInnerSpinButtonStyle(RenderStyle &, const dom::Element *) const noexcept;
+    virtual void AdjustInnerSpinButtonStyle(RenderStyle &, const boo::Element *) const noexcept;
 
     virtual bool PaintInnerSpinButton(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
     {
       return true;
     }
 
-    virtual void AdjustTextFieldStyle(RenderStyle &, const dom::Element *) const noexcept
+    virtual void AdjustTextFieldStyle(RenderStyle &, const boo::Element *) const noexcept
     {
     }
 
@@ -627,7 +620,7 @@ namespace krys::boo
     {
     }
 
-    virtual void AdjustTextAreaStyle(RenderStyle &, const dom::Element *) const noexcept
+    virtual void AdjustTextAreaStyle(RenderStyle &, const boo::Element *) const noexcept
     {
     }
 
@@ -640,7 +633,7 @@ namespace krys::boo
     {
     }
 
-    virtual void AdjustMenuListStyle(RenderStyle &, const dom::Element *) const noexcept;
+    virtual void AdjustMenuListStyle(RenderStyle &, const boo::Element *) const noexcept;
 
     virtual bool PaintMenuList(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
     {
@@ -652,7 +645,7 @@ namespace krys::boo
     {
     }
 
-    virtual void AdjustMenuListButtonStyle(RenderStyle &, const dom::Element *) const noexcept
+    virtual void AdjustMenuListButtonStyle(RenderStyle &, const boo::Element *) const noexcept
     {
     }
 
@@ -666,14 +659,14 @@ namespace krys::boo
       return true;
     }
 
-    virtual void AdjustMeterStyle(RenderStyle &, const dom::Element *) const noexcept;
+    virtual void AdjustMeterStyle(RenderStyle &, const boo::Element *) const noexcept;
 
     virtual bool PaintMeter(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
     {
       return true;
     }
 
-    virtual void AdjustListButtonStyle(RenderStyle &, const dom::Element *) const noexcept
+    virtual void AdjustListButtonStyle(RenderStyle &, const boo::Element *) const noexcept
     {
     }
 
@@ -682,7 +675,7 @@ namespace krys::boo
       return true;
     }
 
-    virtual void AdjustProgressBarStyle(RenderStyle &, const dom::Element *) const noexcept
+    virtual void AdjustProgressBarStyle(RenderStyle &, const boo::Element *) const noexcept
     {
     }
 
@@ -691,7 +684,7 @@ namespace krys::boo
       return true;
     }
 
-    virtual void AdjustSliderTrackStyle(RenderStyle &, const dom::Element *) const noexcept
+    virtual void AdjustSliderTrackStyle(RenderStyle &, const boo::Element *) const noexcept
     {
     }
 
@@ -700,14 +693,14 @@ namespace krys::boo
       return true;
     }
 
-    virtual void AdjustSliderThumbStyle(RenderStyle &, const dom::Element *) const noexcept;
+    virtual void AdjustSliderThumbStyle(RenderStyle &, const boo::Element *) const noexcept;
 
     virtual bool PaintSliderThumb(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
     {
       return true;
     }
 
-    virtual void AdjustSearchFieldStyle(RenderStyle &, const dom::Element *) const noexcept
+    virtual void AdjustSearchFieldStyle(RenderStyle &, const boo::Element *) const noexcept
     {
     }
 
@@ -720,7 +713,7 @@ namespace krys::boo
     {
     }
 
-    virtual void AdjustSearchFieldCancelButtonStyle(RenderStyle &, const dom::Element *) const noexcept
+    virtual void AdjustSearchFieldCancelButtonStyle(RenderStyle &, const boo::Element *) const noexcept
     {
     }
 
@@ -730,7 +723,7 @@ namespace krys::boo
       return true;
     }
 
-    virtual void AdjustSearchFieldDecorationPartStyle(RenderStyle &, const dom::Element *) const noexcept
+    virtual void AdjustSearchFieldDecorationPartStyle(RenderStyle &, const boo::Element *) const noexcept
     {
     }
 
@@ -741,7 +734,7 @@ namespace krys::boo
     }
 
     virtual void AdjustSearchFieldResultsDecorationPartStyle(RenderStyle &,
-                                                             const dom::Element *) const noexcept
+                                                             const boo::Element *) const noexcept
     {
     }
 
@@ -751,7 +744,7 @@ namespace krys::boo
       return true;
     }
 
-    virtual void AdjustSearchFieldResultsButtonStyle(RenderStyle &, const dom::Element *) const noexcept
+    virtual void AdjustSearchFieldResultsButtonStyle(RenderStyle &, const boo::Element *) const noexcept
     {
     }
 
@@ -784,7 +777,7 @@ namespace krys::boo
     KRYS_NODISCARD virtual style::LineWidthBox ControlBorder(StyleAppearance, const FontCascade &,
                                                              const style::LineWidthBox &zoomedBox,
                                                              float zoomFactor,
-                                                             const dom::Element *) const noexcept;
+                                                             const boo::Element *) const noexcept;
 
     // Whether or not whitespace: pre should be forced on always.
     KRYS_NODISCARD virtual bool ControlRequiresPreWhiteSpace(StyleAppearance) const noexcept
@@ -811,14 +804,14 @@ namespace krys::boo
       ExtractControlStyleStatesForRendererInternal(const RenderElement &) const noexcept;
 
     void AdjustButtonOrCheckboxOrColorWellOrInnerSpinButtonOrRadioStyle(RenderStyle &,
-                                                                        const dom::Element *) const noexcept;
+                                                                        const boo::Element *) const noexcept;
 
     KRYS_NODISCARD static StyleAppearance AutoAppearanceForElement(RenderStyle &,
-                                                                   const dom::Element *) noexcept;
+                                                                   const boo::Element *) noexcept;
 
     KRYS_NODISCARD static StyleAppearance AdjustAppearanceForElement(RenderStyle &,
                                                                      const RenderStyle &parentStyle,
-                                                                     const dom::Element *,
+                                                                     const boo::Element *,
                                                                      StyleAppearance) noexcept;
 
     KRYS_NODISCARD Color SpellingMarkerColor(style::ColorOptions) const noexcept;

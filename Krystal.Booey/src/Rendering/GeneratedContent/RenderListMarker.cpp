@@ -438,7 +438,7 @@ namespace krys::boo
           .TextDirection = TextDirection::LTR,
         };
       },
-      [&](const css::CSSOMStringAtom &identifier)
+      [&](const CSSOMStringAtom &identifier)
       {
         _textContent = {
           .TextWithSuffix = identifier.ToString(),

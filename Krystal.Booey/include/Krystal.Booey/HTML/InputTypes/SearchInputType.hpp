@@ -50,7 +50,7 @@ namespace krys::boo::html
   public:
     explicit SearchInputType(HTMLInputElement &element) noexcept;
 
-    KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
+    KRYS_NODISCARD DOMStringView FormControlType() const noexcept final
     {
       return input_type_names::Search;
     }
@@ -75,7 +75,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD float DecorationWidth(float inputWidth) const noexcept final;
 
-    void SetValue(dom::DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,
+    void SetValue(DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,
                   TextControlSetValueSelection selection) noexcept final;
   };
 }

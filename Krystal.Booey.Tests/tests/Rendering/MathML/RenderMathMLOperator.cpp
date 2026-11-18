@@ -31,8 +31,7 @@ namespace krys::boo::tests
       return fixture;
     }
 
-    KRYS_NODISCARD RenderMathMLOperator &OperatorById(ResolverFixture &fixture,
-                                                      dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderMathMLOperator &OperatorById(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       (void)fixture.Document->UpdateLayout();
       auto *renderer = fixture.ById(id).Renderer();
@@ -40,7 +39,7 @@ namespace krys::boo::tests
       return Downcast<RenderMathMLOperator>(*renderer);
     }
 
-    KRYS_NODISCARD RenderBox &BoxById(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderBox &BoxById(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       auto *renderer = fixture.ById(id).Renderer();
       REQUIRE(renderer);

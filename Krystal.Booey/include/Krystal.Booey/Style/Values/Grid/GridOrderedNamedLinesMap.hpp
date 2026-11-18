@@ -34,7 +34,7 @@ namespace krys::boo::style
 {
   struct GridOrderedNamedLinesMap
   {
-    HashMap<uint32, List<css::CSSOMString>> Map;
+    HashMap<uint32, List<CSSOMString>> Map;
 
     KRYS_NODISCARD bool operator==(const GridOrderedNamedLinesMap &) const noexcept = default;
   };

@@ -47,7 +47,7 @@ namespace krys::boo
     void ExpandToEncompassFragmentedFlowContentsIfNeeded() noexcept;
 
   protected:
-    RenderFragmentContainerSet(Type type, dom::Document &document, RenderStyle &&style,
+    RenderFragmentContainerSet(Type type, Document &document, RenderStyle &&style,
                                RenderFragmentedFlow &fragmentedFlow) noexcept;
 
     ~RenderFragmentContainerSet() noexcept override;

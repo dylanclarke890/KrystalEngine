@@ -39,14 +39,12 @@
 
 namespace krys::boo
 {
+  class Element;
   class ElementAnimationRareData;
   struct IntersectionObserverData;
+  class PseudoElement;
   class RenderStyle;
   struct ResizeObserverData;
-}
-
-namespace krys::boo::css
-{
   class StylePropertyMap;
   class StylePropertyMapReadOnly;
 }
@@ -62,9 +60,7 @@ namespace krys::boo::dom
 {
   class DatasetDOMStringMap;
   class DOMTokenList;
-  class Element;
   class PopoverData;
-  class PseudoElement;
 
   /// @brief The elements set through an element's element reflection attributes, by attribute name.
   /// @see https://html.spec.whatwg.org/#explicitly-set-attr-element
@@ -109,8 +105,8 @@ namespace krys::boo::dom
     UniquePtr<ResizeObserverData> _resizeObserverData;
     UniquePtr<DOMTokenList> _partList;
     UniquePtr<DatasetDOMStringMap> _dataset;
-    RefPtr<css::StylePropertyMap> _attributeStyleMap;
-    RefPtr<css::StylePropertyMapReadOnly> _computedStyleMap;
+    RefPtr<StylePropertyMap> _attributeStyleMap;
+    RefPtr<StylePropertyMapReadOnly> _computedStyleMap;
     Maybe<LayoutUnit> _lastRememberedLogicalWidth;
     Maybe<LayoutUnit> _lastRememberedLogicalHeight;
     Maybe<EnumSet<ContentRelevancy>> _contentRelevancy;
@@ -199,20 +195,20 @@ namespace krys::boo::dom
     void SetDataset(UniquePtr<DatasetDOMStringMap> &&dataset) noexcept;
 
     /// @brief The element's `attributeStyleMap`, once it's been asked for.
-    KRYS_NODISCARD css::StylePropertyMap *AttributeStyleMap() const noexcept
+    KRYS_NODISCARD StylePropertyMap *AttributeStyleMap() const noexcept
     {
       return _attributeStyleMap.get();
     }
 
-    void SetAttributeStyleMap(Ref<css::StylePropertyMap> map) noexcept;
+    void SetAttributeStyleMap(Ref<StylePropertyMap> map) noexcept;
 
     /// @brief The element's `computedStyleMap()`, once it's been asked for.
-    KRYS_NODISCARD css::StylePropertyMapReadOnly *ComputedStyleMap() const noexcept
+    KRYS_NODISCARD StylePropertyMapReadOnly *ComputedStyleMap() const noexcept
     {
       return _computedStyleMap.get();
     }
 
-    void SetComputedStyleMap(Ref<css::StylePropertyMapReadOnly> map) noexcept;
+    void SetComputedStyleMap(Ref<StylePropertyMapReadOnly> map) noexcept;
 
     KRYS_NODISCARD Maybe<LayoutUnit> LastRememberedLogicalWidth() const noexcept
     {

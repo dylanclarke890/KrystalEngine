@@ -32,15 +32,14 @@
 namespace krys::boo::style
 {
   SmallList<PseudoClassInvalidationKey, 4>
-    MakePseudoClassInvalidationKeys(css::SelectorPseudoClass pseudoClass,
-                                    const dom::Element &element) noexcept
+    MakePseudoClassInvalidationKeys(css::SelectorPseudoClass pseudoClass, const Element &element) noexcept
   {
     SmallList<PseudoClassInvalidationKey, 4> keys;
 
     if (auto id = element.IdForStyleResolution(); !id.empty())
     {
       keys.push_back(
-        MakePseudoClassInvalidationKey(pseudoClass, InvalidationKeyType::Id, css::CSSOMStringAtom(id)));
+        MakePseudoClassInvalidationKey(pseudoClass, InvalidationKeyType::Id, CSSOMStringAtom(id)));
     }
 
     for (auto &className : element.ClassNames())
@@ -50,7 +49,7 @@ namespace krys::boo::style
 
     for (auto &attribute : element.AttributeList())
     {
-      css::CSSOMStringAtom localNameLowercase(text::ToASCIILower(attribute->LocalName().View()));
+      CSSOMStringAtom localNameLowercase(text::ToASCIILower(attribute->LocalName().View()));
       if (UnlikelyToHaveSelectorForAttribute(localNameLowercase))
       {
         continue;
@@ -61,7 +60,7 @@ namespace krys::boo::style
 
     keys.push_back(
       MakePseudoClassInvalidationKey(pseudoClass, InvalidationKeyType::Tag,
-                                     css::CSSOMStringAtom(text::ToASCIILower(element.LocalName().View()))));
+                                     CSSOMStringAtom(text::ToASCIILower(element.LocalName().View()))));
     keys.push_back(MakePseudoClassInvalidationKey(pseudoClass, InvalidationKeyType::Universal));
 
     return keys;

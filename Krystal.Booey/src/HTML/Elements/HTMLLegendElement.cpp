@@ -34,10 +34,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLLabelElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLLegendElement::HTMLLegendElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Legend)
+  HTMLLegendElement::HTMLLegendElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Legend)
   {
   }
 
@@ -47,7 +47,7 @@ namespace krys::boo::html
   {
     /// @brief Whether @p element defines a command, leaving labels and legends to the caller.
     /// @see https://html.spec.whatwg.org/#commands
-    KRYS_NODISCARD bool DefinesCommand(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool DefinesCommand(const Element &element) noexcept
     {
       if (Is<HTMLAnchorElement>(element))
       {
@@ -73,7 +73,7 @@ namespace krys::boo::html
     }
   }
 
-  RefPtr<dom::Element> HTMLLegendElement::AccessKeyDelegatee() const noexcept
+  RefPtr<Element> HTMLLegendElement::AccessKeyDelegatee() const noexcept
   {
     // It is a child of a fieldset element.
     auto *parent = ParentNode();
@@ -87,7 +87,7 @@ namespace krys::boo::html
     for (auto *node = dom::TreeQueries::Next(*parent, parent); node;
          node = dom::TreeQueries::Next(*node, parent))
     {
-      auto *element = DynamicDowncast<dom::Element>(*node);
+      auto *element = DynamicDowncast<Element>(*node);
       if (element && !Is<HTMLLabelElement>(*element) && !Is<HTMLLegendElement>(*element)
           && DefinesCommand(*element))
       {
@@ -117,7 +117,7 @@ namespace krys::boo::html
     return fieldset ? fieldset->Form() : nullptr;
   }
 
-  RefPtr<dom::Element> HTMLLegendElement::FormForBindings() const noexcept
+  RefPtr<Element> HTMLLegendElement::FormForBindings() const noexcept
   {
     return RetargetForBindings(Form());
   }
@@ -126,14 +126,14 @@ namespace krys::boo::html
 
 #pragma region HTMLLegendElement Obsolete members
 
-  dom::DOMString HTMLLegendElement::Align() const noexcept
+  DOMString HTMLLegendElement::Align() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLLegendElement::Align(dom::DOMString value) noexcept
+  void HTMLLegendElement::Align(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"align", krys::move(value));
   }
 
 #pragma endregion

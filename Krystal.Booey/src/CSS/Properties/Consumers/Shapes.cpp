@@ -445,7 +445,7 @@ namespace krys::boo::css::parse_property
       return null;
     }
 
-    svg::SVGPathByteStream byteStream;
+    SVGPathByteStream byteStream;
     if (!svg::BuildSVGPathByteStreamFromString(args.ConsumeIncludingWhitespace().IdentCodePoints(),
                                                byteStream, svg::PathParsingMode::UnalteredParsing)
         || byteStream.IsEmpty())

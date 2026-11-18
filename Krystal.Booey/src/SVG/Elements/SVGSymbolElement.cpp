@@ -24,16 +24,16 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGSymbolElement::SVGSymbolElement(dom::Document &document) noexcept
+  SVGSymbolElement::SVGSymbolElement(Document &document) noexcept
       : SVGGraphicsElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Symbol),
         SVGFitToViewBox(this)
   {
   }
 
-  void SVGSymbolElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                          Maybe<dom::DOMStringView> value) noexcept
+  void SVGSymbolElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                          Maybe<DOMStringView> value) noexcept
   {
     SVGFitToViewBox::ParseAttribute(name, value);
     SVGGraphicsElement::AttributeChanged(name, oldValue, value);

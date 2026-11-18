@@ -28,17 +28,17 @@ namespace krys::boo::html
     /// (null if the document isn't fully active).
     /// @see https://html.spec.whatwg.org/#determining-the-target-of-an-event-handler
     KRYS_NODISCARD static dom::EventTarget *DetermineTarget(dom::EventTarget &eventTarget,
-                                                            dom::DOMStringAtom name) noexcept;
+                                                            DOMStringAtom name) noexcept;
 
     /// @brief The value of @p eventTarget's event handler @p name; null if it has none.
     /// @see https://html.spec.whatwg.org/#getting-the-current-value-of-the-event-handler
     KRYS_NODISCARD static const EventHandlerCallback *Get(const dom::EventTarget &eventTarget,
-                                                          const dom::DOMStringAtom &name) noexcept;
+                                                          const DOMStringAtom &name) noexcept;
 
     /// @brief Sets @p eventTarget's event handler @p name to @p value, or deactivates it if @p value is
     /// empty.
     /// @see https://html.spec.whatwg.org/#event-handler-idl-attributes
-    static void Set(dom::EventTarget &eventTarget, const dom::DOMStringAtom &name,
+    static void Set(dom::EventTarget &eventTarget, const DOMStringAtom &name,
                     EventHandlerCallback &&value) noexcept;
   };
 }
@@ -162,11 +162,11 @@ namespace krys::boo::html
   /** @see https://html.spec.whatwg.org/#event-handler-idl-attributes */                                     \
   KRYS_NODISCARD const ::krys::boo::html::EventHandlerCallback *On##Name() const noexcept                    \
   {                                                                                                          \
-    return ::krys::boo::html::EventHandlerAlgorithms::Get(*this, ::krys::boo::dom::DOMStringAtom(name));     \
+    return ::krys::boo::html::EventHandlerAlgorithms::Get(*this, ::krys::boo::DOMStringAtom(name));          \
   }                                                                                                          \
   /** @see https://html.spec.whatwg.org/#event-handler-idl-attributes */                                     \
   void SetOn##Name(::krys::boo::html::EventHandlerCallback &&callback) noexcept                              \
   {                                                                                                          \
-    ::krys::boo::html::EventHandlerAlgorithms::Set(*this, ::krys::boo::dom::DOMStringAtom(name),             \
+    ::krys::boo::html::EventHandlerAlgorithms::Set(*this, ::krys::boo::DOMStringAtom(name),                  \
                                                    ::krys::move(callback));                                  \
   }

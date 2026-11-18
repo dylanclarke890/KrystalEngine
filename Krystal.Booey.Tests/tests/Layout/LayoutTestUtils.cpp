@@ -57,7 +57,7 @@ namespace krys::boo::layout::tests
     return *root;
   }
 
-  const ElementBox &RootBoxOf(style::tests::ResolverFixture &fixture, dom::DOMStringView id) noexcept
+  const ElementBox &RootBoxOf(style::tests::ResolverFixture &fixture, DOMStringView id) noexcept
   {
     auto *renderer = DynamicDowncast<RenderBlockFlow>(fixture.ById(id).Renderer());
     REQUIRE(renderer);

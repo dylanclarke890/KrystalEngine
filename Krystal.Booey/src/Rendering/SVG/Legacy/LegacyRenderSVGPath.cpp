@@ -38,7 +38,7 @@
 
 namespace krys::boo
 {
-  LegacyRenderSVGPath::LegacyRenderSVGPath(svg::SVGGraphicsElement &element, RenderStyle &&style) noexcept
+  LegacyRenderSVGPath::LegacyRenderSVGPath(SVGGraphicsElement &element, RenderStyle &&style) noexcept
       : LegacyRenderSVGShape(Type::LegacySVGPath, element, krys::move(style))
   {
     krys_debug_assert(IsLegacyRenderSVGPath());
@@ -393,7 +393,7 @@ namespace krys::boo
 
   void LegacyRenderSVGPath::StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept
   {
-    if (auto *pathElement = DynamicDowncast<svg::SVGPathElement>(GraphicsElement()))
+    if (auto *pathElement = DynamicDowncast<SVGPathElement>(GraphicsElement()))
     {
       if (!oldStyle || Style().D() != oldStyle->D())
       {

@@ -165,7 +165,7 @@ namespace krys::boo::tests
         TestPage = Page::Create(krys::move(chrome));
         Frame = ShareRefPtr(&TestPage->MainFrame());
         Frame->CreateView({200, 100});
-        Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+        Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
         TestPage->UpdateRendering();
       }
 
@@ -548,7 +548,7 @@ namespace krys::boo::tests
   {
     CompositingFixture fixture(u8"<canvas id=canvas width=40 height=20 style='width:80px;height:80px;"
                                u8"object-fit:contain'></canvas><canvas id=plain></canvas>");
-    auto &canvas = Downcast<html::HTMLCanvasElement>(fixture.ById(u8"canvas"));
+    auto &canvas = Downcast<HTMLCanvasElement>(fixture.ById(u8"canvas"));
 
     // A canvas without a context has no layer of its own.
     CHECK(Downcast<RenderLayerModelObject>(*fixture.ById(u8"plain").Renderer()).Layer() == nullptr);

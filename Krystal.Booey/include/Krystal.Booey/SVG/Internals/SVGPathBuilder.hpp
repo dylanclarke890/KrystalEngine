@@ -30,10 +30,7 @@
 namespace krys::boo
 {
   class Path;
-}
 
-namespace krys::boo::svg
-{
   /// @brief Builds a `Path` from parsed SVG path data (in unaltered or normalised parsing mode).
   class SVGPathBuilder final : public SVGPathConsumer
   {
@@ -55,42 +52,42 @@ namespace krys::boo::svg
     }
 
     // Used in UnalteredParsing/NormalizedParsing modes.
-    void MoveTo(const FloatPoint &, bool closed, PathCoordinateMode) noexcept final;
+    void MoveTo(const FloatPoint &, bool closed, svg::PathCoordinateMode) noexcept final;
 
-    void LineTo(const FloatPoint &, PathCoordinateMode) noexcept final;
+    void LineTo(const FloatPoint &, svg::PathCoordinateMode) noexcept final;
 
     void CurveToCubic(const FloatPoint &, const FloatPoint &, const FloatPoint &,
-                      PathCoordinateMode) noexcept final;
+                      svg::PathCoordinateMode) noexcept final;
 
     void ClosePath() noexcept final;
 
     // Only used in UnalteredParsing mode.
-    void LineToHorizontal(float, PathCoordinateMode) noexcept final
+    void LineToHorizontal(float, svg::PathCoordinateMode) noexcept final
     {
       krys_debug_assert_msg(false, "Unreachable");
     }
 
-    void LineToVertical(float, PathCoordinateMode) noexcept final
+    void LineToVertical(float, svg::PathCoordinateMode) noexcept final
     {
       krys_debug_assert_msg(false, "Unreachable");
     }
 
-    void CurveToCubicSmooth(const FloatPoint &, const FloatPoint &, PathCoordinateMode) noexcept final
+    void CurveToCubicSmooth(const FloatPoint &, const FloatPoint &, svg::PathCoordinateMode) noexcept final
     {
       krys_debug_assert_msg(false, "Unreachable");
     }
 
-    void CurveToQuadratic(const FloatPoint &, const FloatPoint &, PathCoordinateMode) noexcept final
+    void CurveToQuadratic(const FloatPoint &, const FloatPoint &, svg::PathCoordinateMode) noexcept final
     {
       krys_debug_assert_msg(false, "Unreachable");
     }
 
-    void CurveToQuadraticSmooth(const FloatPoint &, PathCoordinateMode) noexcept final
+    void CurveToQuadraticSmooth(const FloatPoint &, svg::PathCoordinateMode) noexcept final
     {
       krys_debug_assert_msg(false, "Unreachable");
     }
 
-    void ArcTo(float, float, float, bool, bool, const FloatPoint &, PathCoordinateMode) noexcept final
+    void ArcTo(float, float, float, bool, bool, const FloatPoint &, svg::PathCoordinateMode) noexcept final
     {
       krys_debug_assert_msg(false, "Unreachable");
     }

@@ -61,7 +61,7 @@ namespace krys::boo::style
   // The maximum depth of the render tree; deeper elements aren't styled.
   constexpr static uint32 DefaultMaximumRenderTreeDepth = 512;
 
-  TreeResolver::TreeResolver(dom::Document &document, UniquePtr<Update> update) noexcept
+  TreeResolver::TreeResolver(Document &document, UniquePtr<Update> update) noexcept
       : _document(ShareRef(document)), _update(krys::move(update))
   {
   }
@@ -71,7 +71,7 @@ namespace krys::boo::style
     _document->StyleScope().UpdateAnchorPositioningStateAfterStyleResolution();
   }
 
-  TreeResolver::Scope::Scope(dom::Document &document, style::Update &update) noexcept
+  TreeResolver::Scope::Scope(Document &document, style::Update &update) noexcept
       : Resolver(ShareRef(document.StyleScope().GetResolver()))
   {
     document.SetIsResolvingTreeStyle(true);
@@ -88,7 +88,7 @@ namespace krys::boo::style
     SelectorMatchingState.ContainerQueryEvaluationState.StyleUpdate = ShareCheckedPtr(&update);
   }
 
-  TreeResolver::Scope::Scope(dom::ShadowRoot &shadowRoot, Scope &enclosingScope) noexcept
+  TreeResolver::Scope::Scope(boo::ShadowRoot &shadowRoot, Scope &enclosingScope) noexcept
       : Resolver(ShareRef(shadowRoot.StyleScope().GetResolver())), ShadowRoot(ShareRefPtr(&shadowRoot)),
         EnclosingScope(ShareRefPtr(&enclosingScope))
   {
@@ -104,12 +104,12 @@ namespace krys::boo::style
     }
   }
 
-  TreeResolver::Parent::Parent(dom::Document &document) noexcept
+  TreeResolver::Parent::Parent(Document &document) noexcept
       : Element(nullptr), Style(*document.InitialContainingBlockStyle())
   {
   }
 
-  TreeResolver::Parent::Parent(dom::Element &element, const RenderStyle &style, EnumSet<Change> changes,
+  TreeResolver::Parent::Parent(boo::Element &element, const RenderStyle &style, EnumSet<Change> changes,
                                TreeResolver::DescendantsToResolve descendantsToResolve,
                                style::IsInDisplayNoneTree isInDisplayNoneTree) noexcept
       : Element(&element), Style(style), Changes(changes), DescendantsToResolve(descendantsToResolve),
@@ -117,7 +117,7 @@ namespace krys::boo::style
   {
   }
 
-  void TreeResolver::PushScope(dom::ShadowRoot &shadowRoot) noexcept
+  void TreeResolver::PushScope(boo::ShadowRoot &shadowRoot) noexcept
   {
     _scopeStack.push_back(CreateRef<Scope>(shadowRoot, GetScope()));
   }
@@ -243,12 +243,12 @@ namespace krys::boo::style
     return resolvedStyle;
   }
 
-  void TreeResolver::ResetStyleForNonRenderedDescendants(dom::Element &subtreeRoot) noexcept
+  void TreeResolver::ResetStyleForNonRenderedDescendants(boo::Element &subtreeRoot) noexcept
   {
     auto descendants = dom::ComposedTreeDescendants(subtreeRoot);
     for (auto it = descendants.begin(); it != descendants.end();)
     {
-      if (auto *element = DynamicDowncast<dom::Element>(*it))
+      if (auto *element = DynamicDowncast<boo::Element>(*it))
       {
         if (element->NeedsStyleRecalc())
         {
@@ -271,7 +271,7 @@ namespace krys::boo::style
 
     auto nonRenderedElementsWithPositionOptions = [&]
     {
-      List<RefPtr<const dom::Element>> result;
+      List<RefPtr<const boo::Element>> result;
       for (const auto &[styleable, options] : _positionOptions)
       {
         if (styleable.first->IsComposedTreeDescendantOf(subtreeRoot))
@@ -289,7 +289,7 @@ namespace krys::boo::style
     subtreeRoot.ClearChildNeedsStyleRecalc();
   }
 
-  static bool AffectsRenderedSubtree(dom::Element &element, const RenderStyle &newStyle) noexcept
+  static bool AffectsRenderedSubtree(boo::Element &element, const RenderStyle &newStyle) noexcept
   {
     if (newStyle.Display() != DisplayType::None)
     {
@@ -370,7 +370,7 @@ namespace krys::boo::style
            || existingStyle->ComputedLineHeight() != style.ComputedLineHeight();
   }
 
-  auto TreeResolver::ResolveElement(dom::Element &element, const RenderStyle *existingStyle,
+  auto TreeResolver::ResolveElement(boo::Element &element, const RenderStyle *existingStyle,
                                     ResolutionType resolutionType) noexcept
     -> Pair<ElementUpdate, DescendantsToResolve>
   {
@@ -427,7 +427,7 @@ namespace krys::boo::style
     }
 
     // What the contents of a select match depends on its appearance, so it's known before they're resolved.
-    if (auto *select = DynamicDowncast<html::HTMLSelectElement>(element);
+    if (auto *select = DynamicDowncast<HTMLSelectElement>(element);
         select
         && select->SetContentsUseBaseAppearance(update.Style->UsedAppearance()
                                                 == StyleAppearance::BaseSelect))
@@ -436,12 +436,11 @@ namespace krys::boo::style
     }
 
     // FIXME: These elements should not change renderer based on appearance property.
-    if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
+    if (auto *htmlElement = DynamicDowncast<HTMLElement>(element);
         htmlElement
-        && ((Is<html::HTMLInputElement>(*htmlElement)
-             && Downcast<html::HTMLInputElement>(*htmlElement).IsSearchField())
-            || Is<html::HTMLMeterElement>(*htmlElement) || Is<html::HTMLProgressElement>(*htmlElement)
-            || Is<html::HTMLSelectElement>(*htmlElement)))
+        && ((Is<HTMLInputElement>(*htmlElement) && Downcast<HTMLInputElement>(*htmlElement).IsSearchField())
+            || Is<HTMLMeterElement>(*htmlElement) || Is<HTMLProgressElement>(*htmlElement)
+            || Is<HTMLSelectElement>(*htmlElement)))
     {
       if (existingStyle && update.Style->UsedAppearance() != existingStyle->UsedAppearance())
       {
@@ -505,7 +504,7 @@ namespace krys::boo::style
     (void)resolveAndAddPseudoElementStyle({PseudoElementType::After});
     (void)resolveAndAddPseudoElementStyle({PseudoElementType::Backdrop});
     (void)resolveAndAddPseudoElementStyle({PseudoElementType::Checkmark});
-    if (Is<html::HTMLSelectElement>(element))
+    if (Is<HTMLSelectElement>(element))
     {
       (void)resolveAndAddPseudoElementStyle({PseudoElementType::PickerIcon});
     }
@@ -514,7 +513,7 @@ namespace krys::boo::style
   }
 
   Maybe<ElementUpdate> TreeResolver::ResolvePseudoElement(
-    dom::Element &element, const PseudoElementIdentifier &pseudoElementIdentifier,
+    boo::Element &element, const PseudoElementIdentifier &pseudoElementIdentifier,
     const ElementUpdate &elementUpdate, style::IsInDisplayNoneTree isInDisplayNoneTree,
     const RenderStyle *existingStyle) noexcept
   {
@@ -653,7 +652,7 @@ namespace krys::boo::style
   }
 
   Maybe<ElementUpdate>
-    TreeResolver::ResolveAncestorPseudoElement(dom::Element &element,
+    TreeResolver::ResolveAncestorPseudoElement(boo::Element &element,
                                                const PseudoElementIdentifier &pseudoElementIdentifier,
                                                const ElementUpdate &elementUpdate) noexcept
   {
@@ -713,7 +712,7 @@ namespace krys::boo::style
   }
 
   Maybe<ResolvedStyle>
-    TreeResolver::ResolveAncestorFirstLinePseudoElement(dom::Element &element,
+    TreeResolver::ResolveAncestorFirstLinePseudoElement(boo::Element &element,
                                                         const ElementUpdate &elementUpdate) noexcept
   {
     if (elementUpdate.Style->Display() == DisplayType::Inline)
@@ -736,7 +735,7 @@ namespace krys::boo::style
       return elementStyle;
     }
 
-    auto findFirstLineElementForBlock = [&]() -> dom::Element *
+    auto findFirstLineElementForBlock = [&]() -> boo::Element *
     {
       if (!IsChildInBlockFormattingContext(*elementUpdate.Style))
       {
@@ -787,9 +786,9 @@ namespace krys::boo::style
   }
 
   Maybe<ResolvedStyle> TreeResolver::ResolveAncestorFirstLetterPseudoElement(
-    dom::Element &element, const ElementUpdate &elementUpdate, ResolutionContext &resolutionContext) noexcept
+    boo::Element &element, const ElementUpdate &elementUpdate, ResolutionContext &resolutionContext) noexcept
   {
-    auto findFirstLetterElement = [&]() -> dom::Element *
+    auto findFirstLetterElement = [&]() -> boo::Element *
     {
       if (elementUpdate.Style->HasPseudoStyle(PseudoElementType::FirstLetter)
           && SupportsFirstLineAndLetterPseudoElement(*elementUpdate.Style))
@@ -1244,10 +1243,10 @@ namespace krys::boo::style
     newStyle->CopyPseudoElementBitsFrom(*resolvedStyle.Style);
 
     auto builderContext = BuilderContext {
-      .Document = ShareRefPtr<const dom::Document>(_document.get()),
+      .Document = ShareRefPtr<const boo::Document>(_document.get()),
       .ParentStyle = &parentStyle,
       .RootElementStyle = resolutionContext.DocumentElementStyle,
-      .Element = ShareRefPtr<const dom::Element>(&styleable.Element),
+      .Element = ShareRefPtr<const boo::Element>(&styleable.Element),
       .TreeResolutionState = &_treeResolutionState,
       .PositionTryFallback = krys::move(positionTryFallback),
     };
@@ -1286,10 +1285,10 @@ namespace krys::boo::style
   HashSet<AnimatableCSSProperty> TreeResolver::ApplyCascadeAfterAnimation(
     RenderStyle &animatedStyle, const AnimatableCSSPropertySet &animatedProperties,
     const AnimatableCSSPropertySet &transitioningProperties, const MatchResult &matchResult,
-    const dom::Element &element, const ResolutionContext &resolutionContext) noexcept
+    const boo::Element &element, const ResolutionContext &resolutionContext) noexcept
   {
     auto builderContext = BuilderContext {
-      .Document = ShareRefPtr<const dom::Document>(_document.get()),
+      .Document = ShareRefPtr<const boo::Document>(_document.get()),
       .ParentStyle = resolutionContext.ParentStyle,
       .RootElementStyle = resolutionContext.DocumentElementStyle,
       .Element = ShareRefPtr(&element),
@@ -1309,7 +1308,7 @@ namespace krys::boo::style
     return styleBuilder.OverriddenAnimatedProperties();
   }
 
-  void TreeResolver::PushParent(dom::Element &element, const RenderStyle &style, EnumSet<Change> changes,
+  void TreeResolver::PushParent(boo::Element &element, const RenderStyle &style, EnumSet<Change> changes,
                                 DescendantsToResolve descendantsToResolve,
                                 style::IsInDisplayNoneTree isInDisplayNoneTree) noexcept
   {
@@ -1317,7 +1316,7 @@ namespace krys::boo::style
     if (style.GetContainerType() != ContainerType::Normal)
     {
       GetScope().SelectorMatchingState.ContainerQueryEvaluationState.SizeQueryContainers.push_back(
-        ShareRef<const dom::Element>(element));
+        ShareRef<const boo::Element>(element));
     }
 
     Parent parent(element, style, changes, descendantsToResolve, isInDisplayNoneTree);
@@ -1327,7 +1326,7 @@ namespace krys::boo::style
       PushScope(*shadowRoot);
       parent.DidPushScope = true;
     }
-    else if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(element); slot && slot->AssignedNodes())
+    else if (auto *slot = DynamicDowncast<HTMLSlotElement>(element); slot && slot->AssignedNodes())
     {
       PushEnclosingScope();
       parent.DidPushScope = true;
@@ -1382,7 +1381,7 @@ namespace krys::boo::style
     }
   }
 
-  auto TreeResolver::DetermineResolutionType(const dom::Element &element, const RenderStyle *existingStyle,
+  auto TreeResolver::DetermineResolutionType(const boo::Element &element, const RenderStyle *existingStyle,
                                              DescendantsToResolve parentDescendantsToResolve,
                                              EnumSet<Change> parentChanges) noexcept -> Maybe<ResolutionType>
   {
@@ -1464,7 +1463,7 @@ namespace krys::boo::style
     krys_unreachable();
   }
 
-  static void ClearNeedsStyleResolution(dom::Element &element) noexcept
+  static void ClearNeedsStyleResolution(boo::Element &element) noexcept
   {
     element.SetHasValidStyle();
     if (auto *before = element.BeforePseudoElement())
@@ -1477,7 +1476,7 @@ namespace krys::boo::style
     }
   }
 
-  static bool HasLoadingStylesheet(const Scope &styleScope, const dom::Element &element,
+  static bool HasLoadingStylesheet(const Scope &styleScope, const boo::Element &element,
                                    bool checkDescendants) noexcept
   {
     if (!styleScope.HasPendingSheetsInBody())
@@ -1495,7 +1494,7 @@ namespace krys::boo::style
     for (auto *descendant = dom::TreeQueries::Next(element, &element); descendant;
          descendant = dom::TreeQueries::Next(*descendant, &element))
     {
-      if (auto *descendantElement = DynamicDowncast<dom::Element>(*descendant);
+      if (auto *descendantElement = DynamicDowncast<boo::Element>(*descendant);
           descendantElement && styleScope.HasPendingSheetInBody(*descendantElement))
       {
         return true;
@@ -1522,7 +1521,7 @@ namespace krys::boo::style
     return style;
   }
 
-  void TreeResolver::ResetDescendantStyleRelations(dom::Element &element,
+  void TreeResolver::ResetDescendantStyleRelations(boo::Element &element,
                                                    DescendantsToResolve descendantsToResolve) noexcept
   {
     switch (descendantsToResolve)
@@ -1554,7 +1553,7 @@ namespace krys::boo::style
       krys_debug_assert(node.IsConnected());
       krys_debug_assert(dom::TreeQueries::ContainingShadowRoot(node) == GetScope().ShadowRoot.get());
 
-      if (auto text = ShareRefPtr(DynamicDowncast<dom::Text>(node)))
+      if (auto text = ShareRefPtr(DynamicDowncast<Text>(node)))
       {
         auto containsOnlyASCIIWhitespace = text->ContainsOnlyASCIIWhitespace();
         auto needsTextUpdate = [&]
@@ -1590,7 +1589,7 @@ namespace krys::boo::style
         continue;
       }
 
-      auto &element = Downcast<dom::Element>(node);
+      auto &element = Downcast<boo::Element>(node);
 
       if (it.Depth() > DefaultMaximumRenderTreeDepth)
       {
@@ -1707,7 +1706,7 @@ namespace krys::boo::style
     PopParentsToDepth(1);
   }
 
-  const RenderStyle *TreeResolver::ExistingStyle(const dom::Element &element) noexcept
+  const RenderStyle *TreeResolver::ExistingStyle(const boo::Element &element) noexcept
   {
     auto *style = element.RenderOrDisplayContentsStyle();
 
@@ -1725,7 +1724,7 @@ namespace krys::boo::style
     return style;
   }
 
-  void TreeResolver::DeferDescendantResolution(dom::Element &element, EnumSet<Change> changes,
+  void TreeResolver::DeferDescendantResolution(boo::Element &element, EnumSet<Change> changes,
                                                DescendantsToResolve descendantsToResolve) noexcept
   {
     _deferredDescendantResolutionStates.emplace(
@@ -1733,7 +1732,7 @@ namespace krys::boo::style
       DeferredDescendantResolutionState {.Changes = changes, .DescendantsToResolve = descendantsToResolve});
   }
 
-  void TreeResolver::ResumeDescendantResolutionIfNeeded(dom::Element &element, EnumSet<Change> &changes,
+  void TreeResolver::ResumeDescendantResolutionIfNeeded(boo::Element &element, EnumSet<Change> &changes,
                                                         DescendantsToResolve &descendantsToResolve) noexcept
   {
     auto it = _deferredDescendantResolutionStates.find(ShareRef(element));
@@ -1750,7 +1749,7 @@ namespace krys::boo::style
     _deferredDescendantResolutionStates.erase(it);
   }
 
-  auto TreeResolver::UpdateStateForQueryContainer(dom::Element &element, const RenderStyle *style,
+  auto TreeResolver::UpdateStateForQueryContainer(boo::Element &element, const RenderStyle *style,
                                                   DescendantsToResolve &descendantsToResolve) noexcept
     -> LayoutInterleavingAction
   {
@@ -1843,7 +1842,7 @@ namespace krys::boo::style
       // Ensure that style resolution visits any unresolved anchor-positioned elements.
       if (state->Stage < AnchorPositionResolutionStage::Resolved)
       {
-        const_cast<dom::Element &>(*key.first).InvalidateForResumingAnchorPositionedElementResolution();
+        const_cast<boo::Element &>(*key.first).InvalidateForResumingAnchorPositionedElementResolution();
         _needsInterleavedLayout = true;
         SaveBeforeResolutionStyleForInterleaving(*key.first);
       }
@@ -1854,7 +1853,7 @@ namespace krys::boo::style
       if (!options.Chosen)
       {
         krys_debug_assert(styleable.first);
-        const_cast<dom::Element &>(*styleable.first).InvalidateForResumingAnchorPositionedElementResolution();
+        const_cast<boo::Element &>(*styleable.first).InvalidateForResumingAnchorPositionedElementResolution();
         _needsInterleavedLayout = true;
         SaveBeforeResolutionStyleForInterleaving(*styleable.first);
       }
@@ -1866,7 +1865,7 @@ namespace krys::boo::style
       // them references those names.
       for (auto &[address, anchors] : _document->StyleScope().AnchorPositionedToAnchorMap())
       {
-        RefPtr<dom::Element> anchorPositionedElement = ShareRefPtr(anchors.Element.get());
+        RefPtr<boo::Element> anchorPositionedElement = ShareRefPtr(anchors.Element.get());
         if (!anchorPositionedElement)
         {
           continue;
@@ -1933,7 +1932,7 @@ namespace krys::boo::style
   }
 
   const RenderStyle *TreeResolver::BeforeResolutionStyle(
-    const dom::Element &element, const Maybe<PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept
+    const boo::Element &element, const Maybe<PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept
   {
     auto resolvePseudoStyle = [&](const RenderStyle *style) -> const RenderStyle *
     {
@@ -1957,7 +1956,7 @@ namespace krys::boo::style
     return resolvePseudoStyle(element.RenderOrDisplayContentsStyle());
   }
 
-  void TreeResolver::SaveBeforeResolutionStyleForInterleaving(const dom::Element &element) noexcept
+  void TreeResolver::SaveBeforeResolutionStyleForInterleaving(const boo::Element &element) noexcept
   {
     auto [it, inserted] = _savedBeforeResolutionStylesForInterleaving.try_emplace(ShareRef(element));
     if (!inserted)
@@ -1970,7 +1969,7 @@ namespace krys::boo::style
     }
   }
 
-  auto TreeResolver::UpdateAnchorPositioningState(dom::Element &element, const RenderStyle *style) noexcept
+  auto TreeResolver::UpdateAnchorPositioningState(boo::Element &element, const RenderStyle *style) noexcept
     -> LayoutInterleavingAction
   {
     if (!style)
@@ -2038,7 +2037,7 @@ namespace krys::boo::style
       return;
     }
 
-    AnchorPositionedKey positionOptionsKey {ShareRefPtr<const dom::Element>(&styleable.Element),
+    AnchorPositionedKey positionOptionsKey {ShareRefPtr<const boo::Element>(&styleable.Element),
                                             styleable.PseudoElementIdentifier};
 
     if (_positionOptions.contains(positionOptionsKey))
@@ -2116,7 +2115,7 @@ namespace krys::boo::style
       // be defined as a tree-scoped name." https://drafts.csswg.org/css-scoping-1/#shadow-names
       return style::Scope::ResolveTreeScopedReference(
         styleable.Element, *fallback.RuleAndTacticsFallback.Rule,
-        [](const style::Scope &scope, const css::CSSOMStringAtom &name) -> RefPtr<const css::StyleProperties>
+        [](const style::Scope &scope, const CSSOMStringAtom &name) -> RefPtr<const css::StyleProperties>
         {
           const auto &ruleSet = scope.ResolverIfExists()->RuleSets().AuthorStyle();
           auto rule = ruleSet.PositionTryRuleForName(name);
@@ -2231,7 +2230,7 @@ namespace krys::boo::style
   {
     // https://drafts.csswg.org/css-anchor-position-1/#fallback-apply
 
-    AnchorPositionedKey anchorPositionedKey {ShareRefPtr<const dom::Element>(&styleable.Element),
+    AnchorPositionedKey anchorPositionedKey {ShareRefPtr<const boo::Element>(&styleable.Element),
                                              styleable.PseudoElementIdentifier};
 
     auto optionIt = _positionOptions.find(anchorPositionedKey);
@@ -2375,7 +2374,7 @@ namespace krys::boo::style
       if (style.GetPositionVisibility().Contains(PositionVisibilityValue::AnchorsValid))
       {
         auto stateIt = _treeResolutionState.AnchorPositionedStates.find(
-          {ShareRefPtr<const dom::Element>(&styleable.Element), styleable.PseudoElementIdentifier});
+          {ShareRefPtr<const boo::Element>(&styleable.Element), styleable.PseudoElementIdentifier});
         if (stateIt != _treeResolutionState.AnchorPositionedStates.end())
         {
           for (const auto &[name, anchorElement] : stateIt->second->AnchorElements)
@@ -2400,7 +2399,7 @@ namespace krys::boo::style
   bool TreeResolver::HasUnresolvedAnchorPosition(const Styleable &styleable) const noexcept
   {
     auto it = _treeResolutionState.AnchorPositionedStates.find(
-      {ShareRefPtr<const dom::Element>(&styleable.Element), styleable.PseudoElementIdentifier});
+      {ShareRefPtr<const boo::Element>(&styleable.Element), styleable.PseudoElementIdentifier});
     return it != _treeResolutionState.AnchorPositionedStates.end()
            && it->second->Stage < AnchorPositionResolutionStage::Resolved;
   }
@@ -2408,7 +2407,7 @@ namespace krys::boo::style
   bool TreeResolver::HasResolvedAnchorPosition(const Styleable &styleable) const noexcept
   {
     auto it = _treeResolutionState.AnchorPositionedStates.find(
-      {ShareRefPtr<const dom::Element>(&styleable.Element), styleable.PseudoElementIdentifier});
+      {ShareRefPtr<const boo::Element>(&styleable.Element), styleable.PseudoElementIdentifier});
     return it != _treeResolutionState.AnchorPositionedStates.end()
            && it->second->Stage >= AnchorPositionResolutionStage::Resolved;
   }
@@ -2476,7 +2475,7 @@ namespace krys::boo::style
 
   static uint32 ResolutionNestingDepth = 0;
 
-  PostResolutionCallbackDisabler::PostResolutionCallbackDisabler(dom::Document &,
+  PostResolutionCallbackDisabler::PostResolutionCallbackDisabler(Document &,
                                                                  DrainCallbacks drainCallbacks) noexcept
       : _drainCallbacks(drainCallbacks)
   {

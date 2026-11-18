@@ -112,7 +112,7 @@ namespace krys::boo
     KRYS_NODISCARD AXRole DetermineAccessibilityRole() noexcept override;
 
   private:
-    KRYS_NODISCARD bool HasLocalName(dom::DOMStringView localName) const noexcept;
+    KRYS_NODISCARD bool HasLocalName(DOMStringView localName) const noexcept;
   };
 }
 

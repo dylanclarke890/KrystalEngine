@@ -25,7 +25,7 @@
 #include "Krystal.Booey/DOM/Geometry/DOMPointReadOnly.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGPoint;
 
@@ -65,18 +65,18 @@ namespace krys::boo::svg
     }
 
   protected:
-    SVGGeometryElement(dom::Document &document, UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
+    SVGGeometryElement(Document &document, UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
                        SVGElementInterface interface) noexcept;
 
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept override;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept override;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept override;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGGeometryElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGGeometryElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGGeometryElement();
   }

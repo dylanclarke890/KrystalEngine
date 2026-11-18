@@ -29,7 +29,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Core/Assert.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   namespace
   {
@@ -37,7 +37,7 @@ namespace krys::boo::css
     StyleAttributeMutationScope *currentScope = nullptr;
   }
 
-  StyleAttributeMutationScope::StyleAttributeMutationScope(dom::Element *element) noexcept
+  StyleAttributeMutationScope::StyleAttributeMutationScope(Element *element) noexcept
       : _element(ShareRefPtr(element))
   {
     ++scopeCount;
@@ -91,14 +91,14 @@ namespace krys::boo::css
 
     dom::MutationObserverAlgorithms::QueueMutationRecord(
       dom::MutationRecordType::Attributes, _element, u8"style", null,
-      _oldValue ? dom::DOMStringAtom(*_oldValue) : null, {}, {}, nullptr, nullptr);
+      _oldValue ? DOMStringAtom(*_oldValue) : null, {}, {}, nullptr, nullptr);
 
     if (_isCustomElement)
     {
       auto newValue = _element->GetAttribute(u8"style");
       html::CustomElementReactionQueue::EnqueueAttributeChangedCallbackIfNeeded(
-        *_element, dom::QualifiedName(null, null, u8"style"),
-        _oldValue ? dom::DOMStringAtom(*_oldValue) : null, newValue ? dom::DOMStringAtom(*newValue) : null);
+        *_element, QualifiedName(null, null, u8"style"), _oldValue ? DOMStringAtom(*_oldValue) : null,
+        newValue ? DOMStringAtom(*newValue) : null);
     }
   }
 

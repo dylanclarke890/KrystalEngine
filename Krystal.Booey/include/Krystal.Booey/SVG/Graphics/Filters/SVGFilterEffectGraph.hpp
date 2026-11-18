@@ -36,20 +36,19 @@ namespace krys::boo
   class SVGFilterEffectGraph final : public SVGFilterGraph<FilterEffect>
   {
   private:
-    HashMap<dom::DOMStringAtom, Ref<FilterEffect>> _sourceNodes;
+    HashMap<DOMStringAtom, Ref<FilterEffect>> _sourceNodes;
 
   public:
     SVGFilterEffectGraph(Ref<FilterEffect> &&sourceGraphic, Ref<FilterEffect> &&sourceAlpha) noexcept
     {
-      _sourceNodes.insert_or_assign(dom::DOMStringAtom(SourceGraphic::EffectName()),
-                                    krys::move(sourceGraphic));
-      _sourceNodes.insert_or_assign(dom::DOMStringAtom(SourceAlpha::EffectName()), krys::move(sourceAlpha));
+      _sourceNodes.insert_or_assign(DOMStringAtom(SourceGraphic::EffectName()), krys::move(sourceGraphic));
+      _sourceNodes.insert_or_assign(DOMStringAtom(SourceAlpha::EffectName()), krys::move(sourceAlpha));
 
       SetNodeInputs(*SourceGraphicNode(), NodeVector {});
       SetNodeInputs(*SourceAlphaNode(), NodeVector {ShareRef(*SourceGraphicNode())});
     }
 
-    void AddNamedNode(const dom::DOMStringAtom &name, Ref<FilterEffect> &&node) noexcept override
+    void AddNamedNode(const DOMStringAtom &name, Ref<FilterEffect> &&node) noexcept override
     {
       if (name.View().empty())
       {
@@ -79,11 +78,11 @@ namespace krys::boo
 
     KRYS_NODISCARD FilterEffect *SourceNode(utf8_stringview name) const noexcept
     {
-      auto it = _sourceNodes.find(dom::DOMStringAtom(name));
+      auto it = _sourceNodes.find(DOMStringAtom(name));
       return it != _sourceNodes.end() ? it->second.get() : nullptr;
     }
 
-    KRYS_NODISCARD RefPtr<FilterEffect> GetNamedNode(const dom::DOMStringAtom &name) const noexcept override
+    KRYS_NODISCARD RefPtr<FilterEffect> GetNamedNode(const DOMStringAtom &name) const noexcept override
     {
       if (!name.View().empty())
       {

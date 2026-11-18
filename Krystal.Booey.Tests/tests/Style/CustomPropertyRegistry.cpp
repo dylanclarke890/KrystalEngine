@@ -20,9 +20,9 @@ namespace krys::boo::style::tests
 
   namespace
   {
-    KRYS_NODISCARD Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
+    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       parser->PumpTokenizer();
@@ -34,9 +34,9 @@ namespace krys::boo::style::tests
       html::EventLoop::Current().RunUntilIdle();
     }
 
-    KRYS_NODISCARD css::CSSOMStringAtom Atom(utf8_stringview name) noexcept
+    KRYS_NODISCARD CSSOMStringAtom Atom(utf8_stringview name) noexcept
     {
-      return css::CSSOMStringAtom {name};
+      return CSSOMStringAtom {name};
     }
 
     KRYS_NODISCARD css::CustomPropertySyntax Syntax(utf8_stringview syntax)
@@ -62,7 +62,7 @@ namespace krys::boo::style::tests
                                                             Maybe<utf8_stringview> initialValue)
     {
       css::PropertyRule::Descriptor descriptor {
-        .Name = Atom(name), .Syntax = css::CSSOMString {syntax}, .Inherits = inherits};
+        .Name = Atom(name), .Syntax = CSSOMString {syntax}, .Inherits = inherits};
       if (initialValue)
       {
         css::tests::Tokens tokens {*initialValue};
@@ -229,7 +229,7 @@ namespace krys::boo::style::tests
     {
       auto host = document->GetElementById(u8"host");
       auto shadow = host->AttachShadow({}).ReleaseValue();
-      auto style = CreateRef<html::HTMLStyleElement>(*document);
+      auto style = CreateRef<HTMLStyleElement>(*document);
       REQUIRE_FALSE(style->TextContent(u8"@property --y { syntax: '*'; inherits: true }").HasException());
       REQUIRE_FALSE(shadow->AppendChild(*style).HasException());
       shadow->StyleScope().FlushPendingUpdate();

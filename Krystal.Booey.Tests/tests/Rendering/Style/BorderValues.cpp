@@ -92,12 +92,12 @@ namespace krys::boo::tests
   TEST_CASE("Counter directives", "[Rendering][Style]")
   {
     CounterDirectiveMap map;
-    map.Map[css::CSSOMStringAtom {u8"chapter"}] = CounterDirectives {.ResetValue = 1};
+    map.Map[CSSOMStringAtom {u8"chapter"}] = CounterDirectives {.ResetValue = 1};
     CHECK_FALSE(map == CounterDirectiveMap {});
 
     auto copy = map;
     CHECK(copy == map);
-    copy.Map[css::CSSOMStringAtom {u8"chapter"}].IncrementValue = 2;
+    copy.Map[CSSOMStringAtom {u8"chapter"}].IncrementValue = 2;
     CHECK_FALSE(copy == map);
   }
 

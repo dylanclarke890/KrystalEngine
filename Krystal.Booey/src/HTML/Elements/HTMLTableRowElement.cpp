@@ -7,10 +7,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTableSectionElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLTableRowElement::HTMLTableRowElement(dom::Document &document) noexcept
-      : HTMLTablePartElement(document, HTMLElementInterface::TableRow)
+  HTMLTableRowElement::HTMLTableRowElement(Document &document) noexcept
+      : HTMLTablePartElement(document, html::HTMLElementInterface::TableRow)
   {
   }
 
@@ -38,13 +38,13 @@ namespace krys::boo::html
     KRYS_NODISCARD HTMLTableElement *TableOfRow(const HTMLTableRowElement &row) noexcept
     {
       auto *parent = row.ParentNode();
-      if (auto *table = AsTableElement<HTMLTableElement>(parent))
+      if (auto *table = html::AsTableElement<HTMLTableElement>(parent))
       {
         return const_cast<HTMLTableElement *>(table);
       }
-      if (AsTableElement<HTMLTableSectionElement>(parent))
+      if (html::AsTableElement<HTMLTableSectionElement>(parent))
       {
-        if (auto *table = AsTableElement<HTMLTableElement>(parent->ParentNode()))
+        if (auto *table = html::AsTableElement<HTMLTableElement>(parent->ParentNode()))
         {
           return const_cast<HTMLTableElement *>(table);
         }
@@ -60,32 +60,32 @@ namespace krys::boo::html
     {
       return -1;
     }
-    return IndexOfRow(*this, HTMLTableRowsCollection::RowAfter(*table, nullptr),
+    return IndexOfRow(*this, html::HTMLTableRowsCollection::RowAfter(*table, nullptr),
                       [table](HTMLTableRowElement *row)
-                      { return HTMLTableRowsCollection::RowAfter(*table, row); });
+                      { return html::HTMLTableRowsCollection::RowAfter(*table, row); });
   }
 
   int32 HTMLTableRowElement::SectionRowIndex() const noexcept
   {
     auto *parent = ParentNode();
-    if (AsTableElement<HTMLTableSectionElement>(parent))
+    if (html::AsTableElement<HTMLTableSectionElement>(parent))
     {
       int32 index = 0;
       for (auto *sibling = PreviousSibling(); sibling; sibling = sibling->PreviousSibling())
       {
-        if (AsTableElement<HTMLTableRowElement>(sibling))
+        if (html::AsTableElement<HTMLTableRowElement>(sibling))
         {
           ++index;
         }
       }
       return index;
     }
-    if (auto *table = AsTableElement<HTMLTableElement>(parent))
+    if (auto *table = html::AsTableElement<HTMLTableElement>(parent))
     {
       auto &mutableTable = const_cast<HTMLTableElement &>(*table);
-      return IndexOfRow(*this, HTMLTableRowsCollection::RowAfter(mutableTable, nullptr),
+      return IndexOfRow(*this, html::HTMLTableRowsCollection::RowAfter(mutableTable, nullptr),
                         [&mutableTable](HTMLTableRowElement *row)
-                        { return HTMLTableRowsCollection::RowAfter(mutableTable, row); });
+                        { return html::HTMLTableRowsCollection::RowAfter(mutableTable, row); });
     }
     return -1;
   }
@@ -98,7 +98,7 @@ namespace krys::boo::html
     }
 
     Ref<dom::HTMLCollection> cells = CreateRef<dom::LiveHTMLCollection>(
-      *this, [](const dom::Element &element) { return AsTableElement<HTMLTableCellElement>(&element); },
+      *this, [](const Element &element) { return html::AsTableElement<HTMLTableCellElement>(&element); },
       dom::LiveCollectionInvalidation::TreeOnly, dom::LiveCollectionTraversal::Children);
     _cells = CreateWeakPtr(cells.get());
     return cells;
@@ -121,7 +121,7 @@ namespace krys::boo::html
 
     // 2. Let table cell be the result of creating an element given this element's node document, "td", and
     //    the HTML namespace.
-    auto cell = CreateTableElement<HTMLTableCellElement>(NodeDocument(), u8"td");
+    auto cell = html::CreateTableElement<HTMLTableCellElement>(NodeDocument(), u8"td");
 
     // 3. If index is −1 or equal to the number of items in the cells collection, then append table cell to
     //    this element.
@@ -138,7 +138,7 @@ namespace krys::boo::html
 
   dom::ExceptionOr<void> HTMLTableRowElement::DeleteCell(int32 index) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
 
     // 1. If index is less than −1 or greater than or equal to the number of elements in the cells
     //    collection, then throw an "IndexSizeError" DOMException.
@@ -170,54 +170,54 @@ namespace krys::boo::html
 
 #pragma region HTMLTableRowElement Obsolete members
 
-  dom::DOMString HTMLTableRowElement::Align() const noexcept
+  DOMString HTMLTableRowElement::Align() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLTableRowElement::Align(dom::DOMString value) noexcept
+  void HTMLTableRowElement::Align(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"align", krys::move(value));
   }
 
-  dom::DOMString HTMLTableRowElement::Char() const noexcept
+  DOMString HTMLTableRowElement::Char() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"char").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"char").value_or(u8"");
   }
 
-  void HTMLTableRowElement::Char(dom::DOMString value) noexcept
+  void HTMLTableRowElement::Char(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"char", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"char", krys::move(value));
   }
 
-  dom::DOMString HTMLTableRowElement::CharOff() const noexcept
+  DOMString HTMLTableRowElement::CharOff() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"charoff").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"charoff").value_or(u8"");
   }
 
-  void HTMLTableRowElement::CharOff(dom::DOMString value) noexcept
+  void HTMLTableRowElement::CharOff(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"charoff", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"charoff", krys::move(value));
   }
 
-  dom::DOMString HTMLTableRowElement::VAlign() const noexcept
+  DOMString HTMLTableRowElement::VAlign() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"valign").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"valign").value_or(u8"");
   }
 
-  void HTMLTableRowElement::VAlign(dom::DOMString value) noexcept
+  void HTMLTableRowElement::VAlign(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"valign", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"valign", krys::move(value));
   }
 
-  dom::DOMString HTMLTableRowElement::BgColor() const noexcept
+  DOMString HTMLTableRowElement::BgColor() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"bgcolor").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"bgcolor").value_or(u8"");
   }
 
-  void HTMLTableRowElement::BgColor(dom::DOMString value) noexcept
+  void HTMLTableRowElement::BgColor(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"bgcolor", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"bgcolor", krys::move(value));
   }
 
 #pragma endregion

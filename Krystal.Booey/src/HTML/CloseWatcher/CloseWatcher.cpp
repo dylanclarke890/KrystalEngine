@@ -35,7 +35,7 @@
 
 namespace krys::boo::html
 {
-  CloseWatcher::CloseWatcher(dom::Document &document, CancelAction &&cancelAction, CloseAction &&closeAction,
+  CloseWatcher::CloseWatcher(Document &document, CancelAction &&cancelAction, CloseAction &&closeAction,
                              GetEnabledState &&getEnabledState) noexcept
       : _document(CreateWeakPtr(&document)), _cancelAction(krys::move(cancelAction)),
         _closeAction(krys::move(closeAction)), _getEnabledState(krys::move(getEnabledState))
@@ -43,7 +43,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-closewatcher
-  dom::ExceptionOr<Ref<CloseWatcher>> CloseWatcher::Create(dom::Document &document,
+  dom::ExceptionOr<Ref<CloseWatcher>> CloseWatcher::Create(Document &document,
                                                            const Options &options) noexcept
   {
     // 1. If this's relevant global object's associated Document is not fully active, then throw an
@@ -104,7 +104,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#establish-a-close-watcher
-  Ref<CloseWatcher> CloseWatcher::Establish(dom::Document &document, CancelAction &&cancelAction,
+  Ref<CloseWatcher> CloseWatcher::Establish(Document &document, CancelAction &&cancelAction,
                                             CloseAction &&closeAction,
                                             GetEnabledState &&getEnabledState) noexcept
   {

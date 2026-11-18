@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/CSSNumericValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief A number with a unit (or none, or a percentage).
   /// @see https://drafts.css-houdini.org/css-typed-om/#cssunitvalue
@@ -35,7 +35,7 @@ namespace krys::boo::css
   {
   private:
     double _value;
-    const UnitType _unit;
+    const css::UnitType _unit;
 
   public:
     /// @return A `TypeError` if @p unit isn't a unit.
@@ -43,7 +43,7 @@ namespace krys::boo::css
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSUnitValue>> Create(double value,
                                                                      const CSSOMString &unit) noexcept;
 
-    KRYS_NODISCARD static Ref<CSSUnitValue> Create(double value, UnitType unit) noexcept
+    KRYS_NODISCARD static Ref<CSSUnitValue> Create(double value, css::UnitType unit) noexcept
     {
       return AdoptRef(*new CSSUnitValue(value, unit));
     }
@@ -66,26 +66,26 @@ namespace krys::boo::css
     /// @brief The unit as it's written after the number.
     KRYS_NODISCARD CSSOMStringView UnitSerialisation() const noexcept;
 
-    KRYS_NODISCARD UnitType UnitEnum() const noexcept
+    KRYS_NODISCARD css::UnitType UnitEnum() const noexcept
     {
       return _unit;
     }
 
     /// @return Null if @p unit isn't compatible with this value's unit.
     /// @see https://drafts.css-houdini.org/css-typed-om/#convert-a-cssunitvalue
-    KRYS_NODISCARD RefPtr<CSSUnitValue> ConvertTo(UnitType unit) const noexcept;
+    KRYS_NODISCARD RefPtr<CSSUnitValue> ConvertTo(css::UnitType unit) const noexcept;
 
     /// @return `UnitType::Unknown` if @p unit isn't a unit.
-    KRYS_NODISCARD static UnitType ParseUnit(const CSSOMString &unit) noexcept;
+    KRYS_NODISCARD static css::UnitType ParseUnit(const CSSOMString &unit) noexcept;
 
     KRYS_NODISCARD RefPtr<css::Value> ToCSSValue() const noexcept final;
 
-    KRYS_NODISCARD RefPtr<css::Value> ToCSSValueWithProperty(PropertyId propertyId) const noexcept final;
+    KRYS_NODISCARD RefPtr<css::Value> ToCSSValueWithProperty(css::PropertyId propertyId) const noexcept final;
 
-    KRYS_NODISCARD Maybe<calc::Child> ToCalcTreeNode() const noexcept final;
+    KRYS_NODISCARD Maybe<css::calc::Child> ToCalcTreeNode() const noexcept final;
 
   private:
-    CSSUnitValue(double value, UnitType unit) noexcept;
+    CSSUnitValue(double value, css::UnitType unit) noexcept;
 
     KRYS_NODISCARD CSSStyleValueType StyleValueType() const noexcept final
     {
@@ -98,9 +98,9 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSUnitValue)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleValue &styleValue) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSUnitValue)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleValue &styleValue) noexcept
   {
-    return styleValue.StyleValueType() == krys::boo::css::CSSStyleValueType::CSSUnitValue;
+    return styleValue.StyleValueType() == krys::boo::CSSStyleValueType::CSSUnitValue;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

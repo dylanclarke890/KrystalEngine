@@ -32,36 +32,44 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSKeyframeRule;
   class CSSRuleList;
-  class KeyframesRule;
+}
 
+namespace krys::boo::css
+{
+  class KeyframesRule;
+}
+
+namespace krys::boo
+{
   /// @brief An `@keyframes` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-animations/#interface-csskeyframesrule
   class CSSKeyframesRule final : public CSSRule
   {
   private:
-    Ref<KeyframesRule> _keyframesRule;
+    Ref<css::KeyframesRule> _keyframesRule;
     mutable List<RefPtr<CSSKeyframeRule>> _childRuleCSSOMWrappers;
     mutable UniquePtr<CSSRuleList> _ruleListCSSOMWrapper;
 
-    CSSKeyframesRule(KeyframesRule &keyframesRule, CSSStyleSheet *parent) noexcept;
+    CSSKeyframesRule(css::KeyframesRule &keyframesRule, CSSStyleSheet *parent) noexcept;
 
   public:
     ~CSSKeyframesRule() noexcept override;
 
-    KRYS_NODISCARD static Ref<CSSKeyframesRule> Create(KeyframesRule &rule, CSSStyleSheet *sheet) noexcept;
+    KRYS_NODISCARD static Ref<CSSKeyframesRule> Create(css::KeyframesRule &rule,
+                                                       CSSStyleSheet *sheet) noexcept;
 
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::Keyframes;
+      return css::RuleType::Keyframes;
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
-    void Reattach(Rule &rule) noexcept final;
+    void Reattach(css::Rule &rule) noexcept final;
 
     KRYS_NODISCARD const CSSOMStringAtom &Name() const noexcept;
 
@@ -87,8 +95,8 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSKeyframesRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSKeyframesRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::Keyframes;
   }

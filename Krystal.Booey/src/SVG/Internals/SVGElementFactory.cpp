@@ -64,9 +64,9 @@
 #include "Krystal.Booey/SVG/Elements/SVGUseElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGViewElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  RefPtr<SVGElement> SVGElementFactory::TryCreate(dom::Document &document, html::TagName elementName) noexcept
+  RefPtr<SVGElement> SVGElementFactory::TryCreate(Document &document, html::TagName elementName) noexcept
   {
     using html::TagName;
 

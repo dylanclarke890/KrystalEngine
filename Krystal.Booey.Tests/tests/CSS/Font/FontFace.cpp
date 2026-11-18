@@ -44,7 +44,7 @@ namespace krys::boo::css::tests
       loop.Run(loop.Now() + delta);
     }
 
-    KRYS_NODISCARD Ref<const Font> PrimaryFont(PageInFrameFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD Ref<const Font> PrimaryFont(PageInFrameFixture &fixture, DOMStringView id) noexcept
     {
       (void)fixture.Document->UpdateLayout();
       auto *style = fixture.ById(id).GetRenderStyle();
@@ -53,7 +53,7 @@ namespace krys::boo::css::tests
     }
 
     /// @brief The font @p id's `X`s are drawn with.
-    KRYS_NODISCARD const Font &GlyphFont(PageInFrameFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD const Font &GlyphFont(PageInFrameFixture &fixture, DOMStringView id) noexcept
     {
       (void)fixture.Document->UpdateLayout();
       auto *style = fixture.ById(id).GetRenderStyle();
@@ -63,13 +63,13 @@ namespace krys::boo::css::tests
       return *glyphData.Font;
     }
 
-    KRYS_NODISCARD utf8_string PrimaryFamily(PageInFrameFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD utf8_string PrimaryFamily(PageInFrameFixture &fixture, DOMStringView id) noexcept
     {
       return PrimaryFont(fixture, id)->PlatformData().FamilyName();
     }
 
     /// @brief The laid out width of @p id: Ahem's glyphs are 1em wide, Liberation Sans' `X` 1366/2048em.
-    KRYS_NODISCARD int32 Width(PageInFrameFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD int32 Width(PageInFrameFixture &fixture, DOMStringView id) noexcept
     {
       return fixture.RendererSize(id).Width();
     }
@@ -599,7 +599,7 @@ namespace krys::boo::css::tests
       u8"</body>");
     LoadFonts(fixture);
 
-    auto faceOf = [&](dom::DOMStringView id)
+    auto faceOf = [&](DOMStringView id)
     {
       return PrimaryFont(fixture, id)->PlatformData().Face();
     };

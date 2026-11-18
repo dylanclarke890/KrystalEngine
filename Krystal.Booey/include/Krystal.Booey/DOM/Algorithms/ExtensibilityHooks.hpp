@@ -27,13 +27,16 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class Document;
   class Element;
   class Node;
+}
 
+namespace krys::boo::dom
+{
   /// @see https://dom.spec.whatwg.org/#other-applicable-specifications
   class ExtensibilityHooks
   {

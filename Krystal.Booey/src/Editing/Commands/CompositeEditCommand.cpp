@@ -78,19 +78,19 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD Ref<dom::Element> CreateBreakElement(dom::Document &document) noexcept
+    KRYS_NODISCARD Ref<Element> CreateBreakElement(Document &document) noexcept
     {
       return CreateHTMLElement(document, u8"br");
     }
 
-    KRYS_NODISCARD bool HasOneChild(const dom::Node &node) noexcept
+    KRYS_NODISCARD bool HasOneChild(const boo::Node &node) noexcept
     {
       auto *firstChild = node.FirstChild();
       return firstChild && !firstChild->NextSibling();
     }
   }
 
-  Ref<EditCommandComposition> EditCommandComposition::Create(dom::Document &document,
+  Ref<EditCommandComposition> EditCommandComposition::Create(Document &document,
                                                              const VisibleSelection &startingSelection,
                                                              const VisibleSelection &endingSelection,
                                                              EditAction editAction) noexcept
@@ -98,7 +98,7 @@ namespace krys::boo
     return CreateRef<EditCommandComposition>(document, startingSelection, endingSelection, editAction);
   }
 
-  EditCommandComposition::EditCommandComposition(dom::Document &document,
+  EditCommandComposition::EditCommandComposition(Document &document,
                                                  const VisibleSelection &startingSelection,
                                                  const VisibleSelection &endingSelection,
                                                  EditAction editAction) noexcept
@@ -294,7 +294,7 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD dom::DOMString
+    KRYS_NODISCARD DOMString
       StringForVisiblePositionIndexRange(const VisiblePositionIndexRange &range) noexcept
     {
       if (range.IsNull())
@@ -330,16 +330,16 @@ namespace krys::boo
     }
   }
 
-  dom::DOMString AccessibilityUndoReplacedText::TextDeletedByUnapply() const noexcept
+  DOMString AccessibilityUndoReplacedText::TextDeletedByUnapply() const noexcept
   {
     return AXObjectCache::AccessibilityEnabled() ? StringForVisiblePositionIndexRange(_rangeDeletedByUnapply)
-                                                 : dom::DOMString {};
+                                                 : DOMString {};
   }
 
-  dom::DOMString AccessibilityUndoReplacedText::TextDeletedByReapply() const noexcept
+  DOMString AccessibilityUndoReplacedText::TextDeletedByReapply() const noexcept
   {
     return AXObjectCache::AccessibilityEnabled() ? StringForVisiblePositionIndexRange(_rangeDeletedByReapply)
-                                                 : dom::DOMString {};
+                                                 : DOMString {};
   }
 
   void AccessibilityUndoReplacedText::PostTextStateChangeNotificationForUnapply(AXObjectCache *cache) noexcept
@@ -382,7 +382,7 @@ namespace krys::boo
     return utf8_string(UndoRedoLabel(_editAction));
   }
 
-  CompositeEditCommand::CompositeEditCommand(dom::Document &document, EditAction editingAction) noexcept
+  CompositeEditCommand::CompositeEditCommand(Document &document, EditAction editingAction) noexcept
       : EditCommand(document, editingAction)
   {
   }
@@ -437,7 +437,7 @@ namespace krys::boo
     // in <rdar://problem/5658603>. Low level operations, like RemoveNodeCommand, don't require a layout
     // because the high level operations that use them perform one if one is necessary (like for the creation
     // of VisiblePositions).
-    Ref<dom::Document> document = ShareRef(GetDocument());
+    Ref<Document> document = ShareRef(GetDocument());
     document->UpdateLayoutIgnorePendingStylesheets();
 
     auto prohibitScrollingForScope =
@@ -543,9 +543,9 @@ namespace krys::boo
     return nullptr;
   }
 
-  dom::DOMString CompositeEditCommand::InputEventTypeName() const noexcept
+  DOMString CompositeEditCommand::InputEventTypeName() const noexcept
   {
-    return dom::DOMString(InputTypeNameForEditingAction(EditingAction()));
+    return DOMString(InputTypeNameForEditingAction(EditingAction()));
   }
 
   bool CompositeEditCommand::IsInputMethodComposing() const noexcept
@@ -594,12 +594,12 @@ namespace krys::boo
       ApplyStyleCommand::Create(GetDocument(), style, start, end, editingAction, level));
   }
 
-  void CompositeEditCommand::ApplyStyledElement(dom::Element &element) noexcept
+  void CompositeEditCommand::ApplyStyledElement(Element &element) noexcept
   {
     ApplyCommandToComposite(ApplyStyleCommand::Create(element, false));
   }
 
-  void CompositeEditCommand::RemoveStyledElement(dom::Element &element) noexcept
+  void CompositeEditCommand::RemoveStyledElement(Element &element) noexcept
   {
     ApplyCommandToComposite(ApplyStyleCommand::Create(element, true));
   }
@@ -615,7 +615,7 @@ namespace krys::boo
     ApplyCommandToComposite(InsertLineBreakCommand::Create(GetDocument()));
   }
 
-  bool CompositeEditCommand::IsRemovableBlock(const dom::Node *node) noexcept
+  bool CompositeEditCommand::IsRemovableBlock(const boo::Node *node) noexcept
   {
     krys_debug_assert(node);
     // FIXME: We should support other elements that can be removed.
@@ -630,7 +630,7 @@ namespace krys::boo
       return false;
     }
 
-    if (!Downcast<dom::Element>(*node).HasAttributes())
+    if (!Downcast<Element>(*node).HasAttributes())
     {
       return true;
     }
@@ -639,10 +639,10 @@ namespace krys::boo
   }
 
   bool CompositeEditCommand::InsertNodeBefore(
-    dom::Node &insertChild, dom::Node &refChild,
+    boo::Node &insertChild, boo::Node &refChild,
     ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable) noexcept
   {
-    RefPtr<dom::ContainerNode> parent = ShareRefPtr(refChild.ParentNode());
+    RefPtr<ContainerNode> parent = ShareRefPtr(refChild.ParentNode());
     if (!parent || (!parent->HasEditableStyle() && parent->Renderer()))
     {
       return false;
@@ -652,9 +652,9 @@ namespace krys::boo
     return true;
   }
 
-  void CompositeEditCommand::InsertNodeAfter(dom::Node &insertChild, dom::Node &refChild) noexcept
+  void CompositeEditCommand::InsertNodeAfter(boo::Node &insertChild, boo::Node &refChild) noexcept
   {
-    RefPtr<dom::ContainerNode> parent = ShareRefPtr(refChild.ParentNode());
+    RefPtr<ContainerNode> parent = ShareRefPtr(refChild.ParentNode());
     if (!parent)
     {
       return;
@@ -671,19 +671,19 @@ namespace krys::boo
     }
   }
 
-  void CompositeEditCommand::InsertNodeAt(dom::Node &insertChild,
+  void CompositeEditCommand::InsertNodeAt(boo::Node &insertChild,
                                           const dom::Position &editingPosition) noexcept
   {
     krys_debug_assert(IsEditablePosition(editingPosition));
     // For editing positions like [table, 0], insert before the table,
     // likewise for replaced elements, brs, etc.
     dom::Position p = editingPosition.ParentAnchoredEquivalent();
-    RefPtr<dom::Node> refChild = ShareRefPtr(p.DeprecatedNode());
+    RefPtr<boo::Node> refChild = ShareRefPtr(p.DeprecatedNode());
     int32 offset = p.DeprecatedEditingOffset();
 
     if (CanHaveChildrenForEditing(*refChild))
     {
-      RefPtr<dom::Node> child = ShareRefPtr(refChild->FirstChild());
+      RefPtr<boo::Node> child = ShareRefPtr(refChild->FirstChild());
       for (int32 i = 0; child && i < offset; i++)
       {
         child = ShareRefPtr(child->NextSibling());
@@ -694,14 +694,14 @@ namespace krys::boo
       }
       else
       {
-        AppendNode(insertChild, Downcast<dom::ContainerNode>(*refChild));
+        AppendNode(insertChild, Downcast<ContainerNode>(*refChild));
       }
     }
     else if (CaretMinOffset(*refChild) >= offset)
     {
       (void)InsertNodeBefore(insertChild, *refChild);
     }
-    else if (auto *text = DynamicDowncast<dom::Text>(*refChild); text && CaretMaxOffset(*refChild) > offset)
+    else if (auto *text = DynamicDowncast<Text>(*refChild); text && CaretMaxOffset(*refChild) > offset)
     {
       SplitTextNode(*text, static_cast<uint32>(offset));
 
@@ -718,14 +718,14 @@ namespace krys::boo
     }
   }
 
-  void CompositeEditCommand::AppendNode(dom::Node &node, dom::ContainerNode &parent) noexcept
+  void CompositeEditCommand::AppendNode(boo::Node &node, ContainerNode &parent) noexcept
   {
     ApplyCommandToComposite(AppendNodeCommand::Create(parent, node, EditingAction()));
   }
 
-  void CompositeEditCommand::RemoveChildrenInRange(dom::Node &node, uint32 from, uint32 to) noexcept
+  void CompositeEditCommand::RemoveChildrenInRange(boo::Node &node, uint32 from, uint32 to) noexcept
   {
-    List<Ref<dom::Node>> children;
+    List<Ref<boo::Node>> children;
     auto *child = node.FirstChild();
     for (uint32 i = 0; child && i < from; ++i)
     {
@@ -743,7 +743,7 @@ namespace krys::boo
   }
 
   void CompositeEditCommand::RemoveNode(
-    dom::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable) noexcept
+    boo::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable) noexcept
   {
     if (!node.NonShadowBoundaryParentNode())
     {
@@ -754,24 +754,24 @@ namespace krys::boo
   }
 
   void CompositeEditCommand::RemoveNodePreservingChildren(
-    dom::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable) noexcept
+    boo::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable) noexcept
   {
     ApplyCommandToComposite(RemoveNodePreservingChildrenCommand::Create(
       node, shouldAssumeContentIsAlwaysEditable, EditingAction()));
   }
 
-  void CompositeEditCommand::RemoveNodeAndPruneAncestors(dom::Node &node) noexcept
+  void CompositeEditCommand::RemoveNodeAndPruneAncestors(boo::Node &node) noexcept
   {
-    RefPtr<dom::ContainerNode> parent = ShareRefPtr(node.ParentNode());
+    RefPtr<ContainerNode> parent = ShareRefPtr(node.ParentNode());
     RemoveNode(node);
     Prune(parent.get());
   }
 
-  void CompositeEditCommand::MoveRemainingSiblingsToNewParent(dom::Node *node, dom::Node *pastLastNodeToMove,
-                                                              dom::Element &newParent) noexcept
+  void CompositeEditCommand::MoveRemainingSiblingsToNewParent(boo::Node *node, boo::Node *pastLastNodeToMove,
+                                                              Element &newParent) noexcept
   {
-    List<Ref<dom::Node>> nodesToRemove;
-    Ref<dom::Element> protectedNewParent = ShareRef(newParent);
+    List<Ref<boo::Node>> nodesToRemove;
+    Ref<Element> protectedNewParent = ShareRef(newParent);
 
     for (auto *currentNode = node; currentNode && currentNode != pastLastNodeToMove;
          currentNode = currentNode->NextSibling())
@@ -787,7 +787,7 @@ namespace krys::boo
   }
 
   void CompositeEditCommand::UpdatePositionForNodeRemovalPreservingChildren(dom::Position &position,
-                                                                            dom::Node &node) noexcept
+                                                                            boo::Node &node) noexcept
   {
     int32 offset = (position.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor)
                      ? position.OffsetInContainerNode()
@@ -799,8 +799,8 @@ namespace krys::boo
     }
   }
 
-  RefPtr<dom::Element> CompositeEditCommand::ReplaceElementWithSpanPreservingChildrenAndAttributes(
-    dom::Element &element) noexcept
+  RefPtr<Element>
+    CompositeEditCommand::ReplaceElementWithSpanPreservingChildrenAndAttributes(Element &element) noexcept
   {
     // It would also be possible to implement all of ReplaceNodeWithSpanCommand
     // as a series of existing smaller edit commands.  Someone who wanted to
@@ -814,7 +814,7 @@ namespace krys::boo
     return ShareRefPtr(command->SpanElement());
   }
 
-  void CompositeEditCommand::Prune(dom::Node *node) noexcept
+  void CompositeEditCommand::Prune(boo::Node *node) noexcept
   {
     if (auto highestNodeToRemove = HighestNodeToRemoveInPruning(node))
     {
@@ -822,20 +822,20 @@ namespace krys::boo
     }
   }
 
-  void CompositeEditCommand::SplitTextNode(dom::Text &node, uint32 offset) noexcept
+  void CompositeEditCommand::SplitTextNode(Text &node, uint32 offset) noexcept
   {
     ApplyCommandToComposite(SplitTextNodeCommand::Create(node, offset));
   }
 
-  void CompositeEditCommand::SplitElement(dom::Element &element, dom::Node &atChild) noexcept
+  void CompositeEditCommand::SplitElement(Element &element, boo::Node &atChild) noexcept
   {
     ApplyCommandToComposite(SplitElementCommand::Create(element, atChild));
   }
 
-  void CompositeEditCommand::MergeIdenticalElements(dom::Element &first, dom::Element &second) noexcept
+  void CompositeEditCommand::MergeIdenticalElements(Element &first, Element &second) noexcept
   {
-    Ref<dom::Element> protectedFirst = ShareRef(first);
-    Ref<dom::Element> protectedSecond = ShareRef(second);
+    Ref<Element> protectedFirst = ShareRef(first);
+    Ref<Element> protectedSecond = ShareRef(second);
     krys_debug_assert(!first.IsDescendantOf(&second) && &second != &first);
     if (first.NextSibling() != &second)
     {
@@ -845,12 +845,12 @@ namespace krys::boo
     ApplyCommandToComposite(MergeIdenticalElementsCommand::Create(first, second));
   }
 
-  void CompositeEditCommand::WrapContentsInDummySpan(dom::Element &element) noexcept
+  void CompositeEditCommand::WrapContentsInDummySpan(Element &element) noexcept
   {
     ApplyCommandToComposite(WrapContentsInDummySpanCommand::Create(element));
   }
 
-  void CompositeEditCommand::SplitTextNodeContainingElement(dom::Text &text, uint32 offset) noexcept
+  void CompositeEditCommand::SplitTextNodeContainingElement(Text &text, uint32 offset) noexcept
   {
     ApplyCommandToComposite(SplitTextNodeContainingElementCommand::Create(text, offset));
   }
@@ -860,7 +860,7 @@ namespace krys::boo
     size_t offset = 0;
     size_t length = text.size();
 
-    RefPtr<dom::ContainerNode> scope;
+    RefPtr<ContainerNode> scope;
     int32 startIndex = IndexForVisiblePosition(EndingSelection().VisibleStart(), scope);
 
     size_t newline;
@@ -889,7 +889,7 @@ namespace krys::boo
     }
   }
 
-  void CompositeEditCommand::InsertTextIntoNode(dom::Text &node, uint32 offset, utf8_stringview text,
+  void CompositeEditCommand::InsertTextIntoNode(Text &node, uint32 offset, utf8_stringview text,
                                                 AllowPasswordEcho allowPasswordEcho) noexcept
   {
     if (!text.empty())
@@ -899,12 +899,12 @@ namespace krys::boo
     }
   }
 
-  void CompositeEditCommand::DeleteTextFromNode(dom::Text &node, uint32 offset, uint32 count) noexcept
+  void CompositeEditCommand::DeleteTextFromNode(Text &node, uint32 offset, uint32 count) noexcept
   {
     ApplyCommandToComposite(DeleteFromTextNodeCommand::Create(node, offset, count, EditingAction()));
   }
 
-  void CompositeEditCommand::ReplaceTextInNode(dom::Text &node, uint32 offset, uint32 count,
+  void CompositeEditCommand::ReplaceTextInNode(Text &node, uint32 offset, uint32 count,
                                                utf8_stringview replacementText,
                                                AllowPasswordEcho allowPasswordEcho) noexcept
   {
@@ -920,13 +920,13 @@ namespace krys::boo
   {
     dom::Position start = EndingSelection().Start();
     dom::Position end = EndingSelection().End();
-    if (start.GetContainerNode() != end.GetContainerNode() || !Is<dom::Text>(start.GetContainerNode())
+    if (start.GetContainerNode() != end.GetContainerNode() || !Is<Text>(start.GetContainerNode())
         || ParentTabSpanNode(start.GetContainerNode()))
     {
       return dom::Position();
     }
 
-    RefPtr<dom::Text> textNode = ShareRefPtr(start.ContainerText());
+    RefPtr<Text> textNode = ShareRefPtr(start.ContainerText());
     auto textLength = static_cast<int32>(textNode->Length());
     if (end.OffsetInContainerNode() < start.OffsetInContainerNode()
         || start.OffsetInContainerNode() > textLength || end.OffsetInContainerNode() > textLength)
@@ -936,11 +936,11 @@ namespace krys::boo
     ReplaceTextInNode(*textNode, static_cast<uint32>(start.OffsetInContainerNode()),
                       static_cast<uint32>(end.OffsetInContainerNode() - start.OffsetInContainerNode()), text);
 
-    return dom::Position(RefPtr<dom::Text>(textNode), static_cast<uint32>(start.OffsetInContainerNode())
-                                                        + static_cast<uint32>(text.size()));
+    return dom::Position(RefPtr<Text>(textNode), static_cast<uint32>(start.OffsetInContainerNode())
+                                                   + static_cast<uint32>(text.size()));
   }
 
-  void CompositeEditCommand::ReplaceTextInNodePreservingMarkers(dom::Text &node, uint32 offset, uint32 count,
+  void CompositeEditCommand::ReplaceTextInNodePreservingMarkers(Text &node, uint32 offset, uint32 count,
                                                                 utf8_stringview replacementText) noexcept
   {
     ReplaceTextInNode(node, offset, count, replacementText);
@@ -964,7 +964,7 @@ namespace krys::boo
         return dom::PositionInParentAfterNode(position.AnchorNode());
     }
 
-    RefPtr<dom::Element> tabSpan = ShareRefPtr(ParentTabSpanNode(position.GetContainerNode()));
+    RefPtr<Element> tabSpan = ShareRefPtr(ParentTabSpanNode(position.GetContainerNode()));
 
     if (position.OffsetInContainerNode() <= CaretMinOffset(*position.GetContainerNode()))
     {
@@ -976,12 +976,12 @@ namespace krys::boo
       return dom::PositionInParentAfterNode(tabSpan.get());
     }
 
-    SplitTextNodeContainingElement(Downcast<dom::Text>(*position.GetContainerNode()),
+    SplitTextNodeContainingElement(Downcast<Text>(*position.GetContainerNode()),
                                    static_cast<uint32>(position.OffsetInContainerNode()));
     return dom::PositionInParentBeforeNode(tabSpan.get());
   }
 
-  void CompositeEditCommand::InsertNodeAtTabSpanPosition(dom::Node &node,
+  void CompositeEditCommand::InsertNodeAtTabSpanPosition(boo::Node &node,
                                                          const dom::Position &position) noexcept
   {
     // insert node before, after, or at split of tab span
@@ -1022,13 +1022,13 @@ namespace krys::boo
     }
   }
 
-  void CompositeEditCommand::RemoveNodeAttribute(dom::Element &element, dom::DOMStringAtom attribute) noexcept
+  void CompositeEditCommand::RemoveNodeAttribute(Element &element, DOMStringAtom attribute) noexcept
   {
     SetNodeAttribute(element, krys::move(attribute), null);
   }
 
-  void CompositeEditCommand::SetNodeAttribute(dom::Element &element, dom::DOMStringAtom attribute,
-                                              Maybe<dom::DOMString> value) noexcept
+  void CompositeEditCommand::SetNodeAttribute(Element &element, DOMStringAtom attribute,
+                                              Maybe<DOMString> value) noexcept
   {
     ApplyCommandToComposite(
       SetNodeAttributeCommand::Create(element, krys::move(attribute), krys::move(value)));
@@ -1073,14 +1073,14 @@ namespace krys::boo
     return ContainsOnlyDeprecatedEditingWhitespace(text);
   }
 
-  RefPtr<dom::Text> CompositeEditCommand::TextNodeForRebalance(const dom::Position &position) noexcept
+  RefPtr<Text> CompositeEditCommand::TextNodeForRebalance(const dom::Position &position) noexcept
   {
     if (position.GetAnchorType() != dom::Position::AnchorType::PositionIsOffsetInAnchor)
     {
       return nullptr;
     }
 
-    RefPtr<dom::Text> textNode = ShareRefPtr(DynamicDowncast<dom::Text>(position.GetContainerNode()));
+    RefPtr<Text> textNode = ShareRefPtr(DynamicDowncast<Text>(position.GetContainerNode()));
     if (!textNode || !textNode->Length())
     {
       return nullptr;
@@ -1112,8 +1112,7 @@ namespace krys::boo
     }
     if (offset >= Offset + OldText.size())
     {
-      return dom::Position(RefPtr<dom::Text>(Node),
-                           static_cast<uint32>(offset - OldText.size() + NewText.size()));
+      return dom::Position(RefPtr<Text>(Node), static_cast<uint32>(offset - OldText.size() + NewText.size()));
     }
 
     // Within the run, to the same character: count the old run's characters before the offset, and step over
@@ -1132,7 +1131,7 @@ namespace krys::boo
         ++newOffset;
       }
     }
-    return dom::Position(RefPtr<dom::Text>(Node), Offset + newOffset);
+    return dom::Position(RefPtr<Text>(Node), Offset + newOffset);
   }
 
   Maybe<WhitespaceRebalance>
@@ -1165,22 +1164,21 @@ namespace krys::boo
   {
     // Whether the single-byte @p character is whitespace; the no-break space's bytes are handled whole by the
     // callers.
-    KRYS_NODISCARD bool IsWhitespaceForRebalance(dom::Text &textNode, char8_t character) noexcept
+    KRYS_NODISCARD bool IsWhitespaceForRebalance(Text &textNode, char8_t character) noexcept
     {
       return character < 0x80 && DeprecatedIsEditingWhitespace(character)
              && (character != u8'\n' || !textNode.Renderer()
                  || !textNode.Renderer()->Style().PreserveNewline());
     }
 
-    KRYS_NODISCARD bool IsContinuationByte(const dom::DOMString &text, size_t index) noexcept
+    KRYS_NODISCARD bool IsContinuationByte(const DOMString &text, size_t index) noexcept
     {
       return index < text.size() && (static_cast<uint8>(text[index]) & 0xC0) == 0x80;
     }
 
     // The no-break space is two bytes in UTF-8; these step over it whole so that whitespace runs end on
     // character boundaries.
-    KRYS_NODISCARD size_t WhitespaceLengthBefore(dom::Text &textNode, const dom::DOMString &text,
-                                                 size_t index) noexcept
+    KRYS_NODISCARD size_t WhitespaceLengthBefore(Text &textNode, const DOMString &text, size_t index) noexcept
     {
       if (index >= 2 && static_cast<uint8>(text[index - 2]) == 0xC2
           && static_cast<uint8>(text[index - 1]) == 0xA0)
@@ -1190,8 +1188,7 @@ namespace krys::boo
       return index >= 1 && IsWhitespaceForRebalance(textNode, text[index - 1]) ? 1 : 0;
     }
 
-    KRYS_NODISCARD size_t WhitespaceLengthAt(dom::Text &textNode, const dom::DOMString &text,
-                                             size_t index) noexcept
+    KRYS_NODISCARD size_t WhitespaceLengthAt(Text &textNode, const DOMString &text, size_t index) noexcept
     {
       if (index + 1 < text.size() && static_cast<uint8>(text[index]) == 0xC2
           && static_cast<uint8>(text[index + 1]) == 0xA0)
@@ -1203,10 +1200,10 @@ namespace krys::boo
   }
 
   Maybe<WhitespaceRebalance>
-    CompositeEditCommand::RebalanceWhitespaceOnTextSubstring(dom::Text &textNode, int32 startOffset,
+    CompositeEditCommand::RebalanceWhitespaceOnTextSubstring(Text &textNode, int32 startOffset,
                                                              int32 endOffset) noexcept
   {
-    dom::DOMString text = textNode.Data();
+    DOMString text = textNode.Data();
     krys_debug_assert(!text.empty());
 
     // Set upstream and downstream to define the extent of the whitespace surrounding text[offset].
@@ -1245,7 +1242,7 @@ namespace krys::boo
     // FIXME: Because of the problem mentioned at the top of this function, we must also use nbsps at the
     // start/end of the string because this function doesn't get all surrounding whitespace, just the
     // whitespace in the current text node.
-    auto *nextSiblingTextNode = DynamicDowncast<dom::Text>(textNode.NextSibling());
+    auto *nextSiblingTextNode = DynamicDowncast<Text>(textNode.NextSibling());
     const bool nextSiblingIsTextNodeWithoutLeadingSpace =
       nextSiblingTextNode && !nextSiblingTextNode->Data().empty()
       && !IsEditingWhitespaceByte(nextSiblingTextNode->Data(), 0);
@@ -1272,7 +1269,7 @@ namespace krys::boo
       return;
     }
 
-    auto *textNode = DynamicDowncast<dom::Text>(position.DeprecatedNode());
+    auto *textNode = DynamicDowncast<Text>(position.DeprecatedNode());
     if (!textNode || !textNode->Length())
     {
       return;
@@ -1303,7 +1300,7 @@ namespace krys::boo
     }
 
     dom::Position pos = visiblePosition.DeepEquivalent().Downstream();
-    if (!pos.GetContainerNode() || !Is<dom::Text>(*pos.GetContainerNode())
+    if (!pos.GetContainerNode() || !Is<Text>(*pos.GetContainerNode())
         || IsHTMLElementOfType(pos.DeprecatedNode(), html::TagName::br))
     {
       return;
@@ -1327,7 +1324,7 @@ namespace krys::boo
     }
   }
 
-  void CompositeEditCommand::DeleteInsignificantText(dom::Text &textNode, uint32 start, uint32 end) noexcept
+  void CompositeEditCommand::DeleteInsignificantText(Text &textNode, uint32 start, uint32 end) noexcept
   {
     if (start >= end)
     {
@@ -1337,7 +1334,7 @@ namespace krys::boo
     (void)GetDocument().UpdateLayout();
 
     bool wholeTextNodeIsEmpty = false;
-    Maybe<dom::DOMString> string;
+    Maybe<DOMString> string;
     auto determineRemovalMode = [&]
     {
       auto *textRenderer = textNode.Renderer();
@@ -1381,7 +1378,7 @@ namespace krys::boo
           gapEnd = std::min(gapEnd, end);
           if (!string)
           {
-            string = dom::DOMString(utf8_stringview(textNode.Data()).substr(start, end - start));
+            string = DOMString(utf8_stringview(textNode.Data()).substr(start, end - start));
           }
           // Remove text in the gap.
           string->erase(gapStart - start - removed, static_cast<size_t>(gapLength));
@@ -1429,10 +1426,10 @@ namespace krys::boo
       return;
     }
 
-    List<Ref<dom::Text>> nodes;
+    List<Ref<Text>> nodes;
     for (auto *node = start.DeprecatedNode(); node; node = TreeQueries::Next(*node))
     {
-      if (auto *textNode = DynamicDowncast<dom::Text>(*node))
+      if (auto *textNode = DynamicDowncast<Text>(*node))
       {
         nodes.push_back(ShareRef(*textNode));
       }
@@ -1461,7 +1458,7 @@ namespace krys::boo
     DeleteInsignificantText(position, VisiblePosition(position).Next().DeepEquivalent().Downstream());
   }
 
-  RefPtr<dom::Element> CompositeEditCommand::AppendBlockPlaceholder(dom::Element &container) noexcept
+  RefPtr<Element> CompositeEditCommand::AppendBlockPlaceholder(Element &container) noexcept
   {
     (void)GetDocument().UpdateLayoutIgnorePendingStylesheets();
 
@@ -1476,7 +1473,7 @@ namespace krys::boo
     return placeholder;
   }
 
-  RefPtr<dom::Node> CompositeEditCommand::InsertBlockPlaceholder(const dom::Position &position) noexcept
+  RefPtr<boo::Node> CompositeEditCommand::InsertBlockPlaceholder(const dom::Position &position) noexcept
   {
     if (position.IsNull())
     {
@@ -1491,7 +1488,7 @@ namespace krys::boo
     return placeholder;
   }
 
-  RefPtr<dom::Node> CompositeEditCommand::AddBlockPlaceholderIfNeeded(dom::Element *container) noexcept
+  RefPtr<boo::Node> CompositeEditCommand::AddBlockPlaceholderIfNeeded(Element *container) noexcept
   {
     if (!container)
     {
@@ -1521,18 +1518,17 @@ namespace krys::boo
     krys_debug_assert(LineBreakExistsAtPosition(position));
 
     // We are certain that the position is at a line break, but it may be a br or a preserved newline.
-    RefPtr<dom::Node> anchorNode = ShareRefPtr(position.AnchorNode());
+    RefPtr<boo::Node> anchorNode = ShareRefPtr(position.AnchorNode());
     if (IsHTMLElementOfType(anchorNode.get(), html::TagName::br))
     {
       RemoveNode(*anchorNode);
       return;
     }
 
-    DeleteTextFromNode(Downcast<dom::Text>(*anchorNode),
-                       static_cast<uint32>(position.OffsetInContainerNode()), 1);
+    DeleteTextFromNode(Downcast<Text>(*anchorNode), static_cast<uint32>(position.OffsetInContainerNode()), 1);
   }
 
-  Ref<dom::Element>
+  Ref<Element>
     CompositeEditCommand::InsertNewDefaultParagraphElementAt(const dom::Position &position) noexcept
   {
     auto &document = GetDocument();
@@ -1544,7 +1540,7 @@ namespace krys::boo
 
   // If the paragraph is not entirely within it's own block, create one and move the paragraph into
   // it, and return that block.  Otherwise return 0.
-  RefPtr<dom::Node>
+  RefPtr<boo::Node>
     CompositeEditCommand::MoveParagraphContentsToNewBlockIfNecessary(const dom::Position &position) noexcept
   {
     if (position.IsNull())
@@ -1639,7 +1635,7 @@ namespace krys::boo
     return newBlock;
   }
 
-  void CompositeEditCommand::PushAnchorElementDown(dom::Element &anchorElement) noexcept
+  void CompositeEditCommand::PushAnchorElementDown(Element &anchorElement) noexcept
   {
     SetEndingSelection(VisibleSelection::SelectionFromContentsOfNode(&anchorElement));
     ApplyStyledElement(anchorElement);
@@ -1655,12 +1651,12 @@ namespace krys::boo
 
   void CompositeEditCommand::CloneParagraphUnderNewElement(const dom::Position &start,
                                                            const dom::Position &end,
-                                                           dom::Node *passedOuterNode,
-                                                           dom::Element *blockElement) noexcept
+                                                           boo::Node *passedOuterNode,
+                                                           Element *blockElement) noexcept
   {
     krys_debug_assert(start <= end);
 
-    auto cloneNode = [&](dom::Node &node, bool deep) -> Ref<dom::Node>
+    auto cloneNode = [&](boo::Node &node, bool deep) -> Ref<boo::Node>
     {
       auto clone = dom::NodeAlgorithms::CloneNode(node, &GetDocument(), deep);
       krys_debug_assert(!clone.HasException());
@@ -1668,8 +1664,8 @@ namespace krys::boo
     };
 
     // First we clone the outerNode
-    RefPtr<dom::Node> lastNode;
-    RefPtr<dom::Node> outerNode = ShareRefPtr(passedOuterNode);
+    RefPtr<boo::Node> lastNode;
+    RefPtr<boo::Node> outerNode = ShareRefPtr(passedOuterNode);
 
     if (outerNode->IsRootEditableElement())
     {
@@ -1681,10 +1677,10 @@ namespace krys::boo
       AppendNode(*lastNode, *blockElement);
     }
 
-    if (start.DeprecatedNode() != outerNode && Is<dom::Element>(*lastNode)
+    if (start.DeprecatedNode() != outerNode && Is<Element>(*lastNode)
         && start.AnchorNode()->IsDescendantOf(outerNode.get()))
     {
-      List<RefPtr<dom::Node>> ancestors;
+      List<RefPtr<boo::Node>> ancestors;
 
       // Insert each node from innerNode to outerNode (excluded) in a list.
       for (auto *n = start.DeprecatedNode(); n && n != outerNode; n = n->ParentNode())
@@ -1698,7 +1694,7 @@ namespace krys::boo
       {
         auto item = std::exchange(ancestors[i - 1], nullptr);
         auto child = cloneNode(*item, IsRenderedTable(item.get()));
-        AppendNode(*child, Downcast<dom::Element>(*lastNode));
+        AppendNode(*child, Downcast<Element>(*lastNode));
         lastNode = krys::move(child);
       }
     }
@@ -1722,8 +1718,8 @@ namespace krys::boo
         outerNode = ShareRefPtr(outerNode->ParentNode());
       }
 
-      RefPtr<dom::Node> startNode = ShareRefPtr(start.DeprecatedNode());
-      for (RefPtr<dom::Node> node =
+      RefPtr<boo::Node> startNode = ShareRefPtr(start.DeprecatedNode());
+      for (RefPtr<boo::Node> node =
              ShareRefPtr(TreeQueries::NextSkippingChildren(*startNode, outerNode.get()));
            node; node = ShareRefPtr(TreeQueries::NextSkippingChildren(*node, outerNode.get())))
       {
@@ -1762,7 +1758,7 @@ namespace krys::boo
     {
       // Note: We want the rightmost candidate.
       dom::Position position = caretAfterDelete.DeepEquivalent().Downstream();
-      RefPtr<dom::Node> node = ShareRefPtr(position.DeprecatedNode());
+      RefPtr<boo::Node> node = ShareRefPtr(position.DeprecatedNode());
       krys_debug_assert(node);
       // Normally deletion will leave a br as a placeholder.
       if (IsHTMLElementOfType(node.get(), html::TagName::br))
@@ -1788,7 +1784,7 @@ namespace krys::boo
       {
         // There is a preserved '\n' at caretAfterDelete.
         // We can safely assume this is a text node.
-        auto &textNode = Downcast<dom::Text>(*node);
+        auto &textNode = Downcast<Text>(*node);
         if (textNode.Length() == 1)
         {
           RemoveNodeAndPruneAncestors(textNode);
@@ -1809,8 +1805,7 @@ namespace krys::boo
 
   void CompositeEditCommand::MoveParagraphWithClones(const VisiblePosition &startOfParagraphToMove,
                                                      const VisiblePosition &endOfParagraphToMove,
-                                                     dom::Element *blockElement,
-                                                     dom::Node *outerNode) noexcept
+                                                     Element *blockElement, boo::Node *outerNode) noexcept
   {
     if (startOfParagraphToMove.IsNull() || endOfParagraphToMove.IsNull())
     {
@@ -1937,9 +1932,9 @@ namespace krys::boo
       return;
     }
 
-    Ref<dom::Document> document = ShareRef(GetDocument());
+    Ref<Document> document = ShareRef(GetDocument());
     // FIXME: Serializing and re-parsing is an inefficient way to preserve style.
-    RefPtr<dom::DocumentFragment> fragment;
+    RefPtr<DocumentFragment> fragment;
     if (startOfParagraphToMove != endOfParagraphToMove)
     {
       fragment = CreateFragmentFromMarkup(
@@ -2005,7 +2000,7 @@ namespace krys::boo
       (void)document->UpdateLayoutIgnorePendingStylesheets();
     }
 
-    RefPtr<dom::ContainerNode> editableRoot = ShareRefPtr(destination.RootEditableElement());
+    RefPtr<ContainerNode> editableRoot = ShareRefPtr(destination.RootEditableElement());
     if (!editableRoot)
     {
       editableRoot = document;
@@ -2054,13 +2049,13 @@ namespace krys::boo
 
   VisibleSelection CompositeEditCommand::ShouldBreakOutOfEmptyListItem() const noexcept
   {
-    RefPtr<dom::Node> emptyListItem = EnclosingEmptyListItem(EndingSelection().VisibleStart());
+    RefPtr<boo::Node> emptyListItem = EnclosingEmptyListItem(EndingSelection().VisibleStart());
     if (!emptyListItem)
     {
       return {};
     }
 
-    RefPtr<dom::ContainerNode> listNode = ShareRefPtr(emptyListItem->ParentNode());
+    RefPtr<ContainerNode> listNode = ShareRefPtr(emptyListItem->ParentNode());
     // FIXME: Can't we do something better when the immediate parent wasn't a list node?
     if (!listNode
         || (!IsHTMLElementOfType(listNode.get(), html::TagName::ul)
@@ -2082,19 +2077,19 @@ namespace krys::boo
       return false;
     }
 
-    RefPtr<dom::Node> emptyListItem = EnclosingEmptyListItem(EndingSelection().VisibleStart());
-    RefPtr<dom::ContainerNode> listNode = ShareRefPtr(emptyListItem->ParentNode());
+    RefPtr<boo::Node> emptyListItem = EnclosingEmptyListItem(EndingSelection().VisibleStart());
+    RefPtr<ContainerNode> listNode = ShareRefPtr(emptyListItem->ParentNode());
     auto style = EditingStyle::Create(EndingSelection().Start());
-    Ref<dom::Document> document = ShareRef(GetDocument());
+    Ref<Document> document = ShareRef(GetDocument());
     style->MergeTypingStyle(*document);
 
-    RefPtr<dom::Element> newBlock;
-    if (RefPtr<dom::ContainerNode> blockEnclosingList = ShareRefPtr(listNode->ParentNode()))
+    RefPtr<Element> newBlock;
+    if (RefPtr<ContainerNode> blockEnclosingList = ShareRefPtr(listNode->ParentNode()))
     {
       if (IsHTMLElementOfType(blockEnclosingList.get(), html::TagName::li))
       {
         // listNode is inside another list item
-        auto &liElement = Downcast<dom::Element>(*blockEnclosingList);
+        auto &liElement = Downcast<Element>(*blockEnclosingList);
         if (VisiblePositionAfterNode(*blockEnclosingList) == VisiblePositionAfterNode(*listNode))
         {
           // If listNode appears at the end of the outer list item, then move listNode outside of this list
@@ -2120,20 +2115,19 @@ namespace krys::boo
       newBlock = CreateDefaultParagraphElement(*document);
     }
 
-    RefPtr<dom::Node> previousListNode =
-      Is<dom::Element>(*emptyListItem)
-        ? ShareRefPtr<dom::Node>(TreeQueries::PreviousElementSibling(*emptyListItem))
+    RefPtr<boo::Node> previousListNode =
+      Is<Element>(*emptyListItem)
+        ? ShareRefPtr<boo::Node>(TreeQueries::PreviousElementSibling(*emptyListItem))
         : ShareRefPtr(emptyListItem->PreviousSibling());
-    RefPtr<dom::Node> nextListNode =
-      Is<dom::Element>(*emptyListItem)
-        ? ShareRefPtr<dom::Node>(TreeQueries::NextElementSibling(*emptyListItem))
-        : ShareRefPtr(emptyListItem->NextSibling());
+    RefPtr<boo::Node> nextListNode =
+      Is<Element>(*emptyListItem) ? ShareRefPtr<boo::Node>(TreeQueries::NextElementSibling(*emptyListItem))
+                                  : ShareRefPtr(emptyListItem->NextSibling());
     if ((nextListNode && IsListItem(*nextListNode)) || IsListHTMLElement(nextListNode.get()))
     {
       // If emptyListItem follows another list item or nested list, split the list node.
       if (previousListNode && (IsListItem(*previousListNode) || IsListHTMLElement(previousListNode.get())))
       {
-        SplitElement(Downcast<dom::Element>(*listNode), *emptyListItem);
+        SplitElement(Downcast<Element>(*listNode), *emptyListItem);
       }
 
       // If emptyListItem is followed by other list item or nested list, then insert newBlock before the list
@@ -2151,7 +2145,7 @@ namespace krys::boo
       RemoveNode(
         (previousListNode && (IsListItem(*previousListNode) || IsListHTMLElement(previousListNode.get())))
           ? *emptyListItem
-          : static_cast<dom::Node &>(*listNode));
+          : static_cast<boo::Node &>(*listNode));
     }
 
     (void)AppendBlockPlaceholder(*newBlock);
@@ -2180,7 +2174,7 @@ namespace krys::boo
     }
 
     VisiblePosition visiblePos(original);
-    RefPtr<dom::Element> enclosingAnchor = EnclosingAnchorElement(original);
+    RefPtr<Element> enclosingAnchor = EnclosingAnchorElement(original);
     dom::Position result = original;
 
     if (!enclosingAnchor)
@@ -2251,23 +2245,23 @@ namespace krys::boo
 
   // Splits the tree parent by parent until we reach the specified ancestor. We use VisiblePositions
   // to determine if the split is necessary. Returns the last split node.
-  RefPtr<dom::Node> CompositeEditCommand::SplitTreeToNode(dom::Node &start, dom::Node &end,
+  RefPtr<boo::Node> CompositeEditCommand::SplitTreeToNode(boo::Node &start, boo::Node &end,
                                                           bool shouldSplitAncestor) noexcept
   {
     krys_debug_assert(&start != &end);
 
-    RefPtr<dom::Node> adjustedEnd = ShareRefPtr(&end);
+    RefPtr<boo::Node> adjustedEnd = ShareRefPtr(&end);
     if (shouldSplitAncestor && adjustedEnd->ParentNode())
     {
       adjustedEnd = ShareRefPtr(adjustedEnd->ParentNode());
     }
 
     krys_debug_assert(adjustedEnd);
-    RefPtr<dom::Node> node;
+    RefPtr<boo::Node> node;
     for (node = ShareRefPtr(&start); node && adjustedEnd != node->ParentNode();)
     {
-      RefPtr<dom::ContainerNode> parentNode = ShareRefPtr(node->ParentNode());
-      auto *parentElement = DynamicDowncast<dom::Element>(parentNode.get());
+      RefPtr<ContainerNode> parentNode = ShareRefPtr(node->ParentNode());
+      auto *parentElement = DynamicDowncast<Element>(parentNode.get());
       if (!parentElement || EditingIgnoresContent(*parentNode))
       {
         break;
@@ -2285,7 +2279,7 @@ namespace krys::boo
     return node;
   }
 
-  Ref<dom::Element> CreateBlockPlaceholderElement(dom::Document &document) noexcept
+  Ref<Element> CreateBlockPlaceholderElement(Document &document) noexcept
   {
     return CreateBreakElement(document);
   }

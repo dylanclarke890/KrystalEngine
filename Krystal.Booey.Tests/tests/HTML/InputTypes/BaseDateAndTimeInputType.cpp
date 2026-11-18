@@ -19,7 +19,6 @@
 namespace krys::boo::tests
 {
   using html::DateTimeEditElement;
-  using html::HTMLInputElement;
 
   namespace
   {
@@ -106,12 +105,12 @@ namespace krys::boo::tests
       {
         auto element = Document->CreateElement(u8"input").Value();
         auto &input = Downcast<HTMLInputElement>(*element);
-        (void)input.SetAttribute(u8"lang", dom::DOMString(lang));
+        (void)input.SetAttribute(u8"lang", DOMString(lang));
         for (auto &[name, value] : attributes)
         {
-          (void)input.SetAttribute(dom::DOMStringAtom(name), dom::DOMString(value));
+          (void)input.SetAttribute(DOMStringAtom(name), DOMString(value));
         }
-        (void)input.SetAttribute(u8"type", dom::DOMString(type));
+        (void)input.SetAttribute(u8"type", DOMString(type));
         (void)Body().AppendChild(input);
         (void)Document->UpdateLayout();
         return input;
@@ -149,13 +148,13 @@ namespace krys::boo::tests
       auto &wrapper = EditElement(input).FieldsWrapperElement();
       for (auto *child = wrapper.FirstChild(); child; child = child->NextSibling())
       {
-        auto &element = Downcast<dom::Element>(*child);
+        auto &element = Downcast<boo::Element>(*child);
         auto part = element.UserAgentPart().View();
         constexpr utf8_stringview prefix = u8"-webkit-datetime-edit-";
         if (part == u8"-webkit-datetime-edit-text")
         {
           layout += u8'"';
-          layout += element.TextContent().value_or(dom::DOMString());
+          layout += element.TextContent().value_or(DOMString());
           layout += u8'"';
         }
         else
@@ -171,10 +170,10 @@ namespace krys::boo::tests
     /// @brief The text the fields show.
     KRYS_NODISCARD utf8_string Shown(HTMLInputElement &input) noexcept
     {
-      return EditElement(input).FieldsWrapperElement().TextContent().value_or(dom::DOMString());
+      return EditElement(input).FieldsWrapperElement().TextContent().value_or(DOMString());
     }
 
-    KRYS_NODISCARD dom::Element &Field(HTMLInputElement &input, size_t index) noexcept
+    KRYS_NODISCARD boo::Element &Field(HTMLInputElement &input, size_t index) noexcept
     {
       return *EditElement(input).Fields()[index];
     }

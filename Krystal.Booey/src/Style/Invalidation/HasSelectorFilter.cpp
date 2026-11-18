@@ -35,7 +35,7 @@ namespace krys::boo::style
   // FIXME: Support additional pseudo-classes.
   constexpr static uint32 HoverSalt = 101;
 
-  HasSelectorFilter::HasSelectorFilter(const dom::Element &element, Type type) noexcept : _type(type)
+  HasSelectorFilter::HasSelectorFilter(const Element &element, Type type) noexcept : _type(type)
   {
     switch (type)
     {
@@ -43,7 +43,7 @@ namespace krys::boo::style
         for (auto *node = dom::TreeQueries::Next(element, &element); node;
              node = dom::TreeQueries::Next(*node, &element))
         {
-          if (auto *descendant = DynamicDowncast<dom::Element>(*node))
+          if (auto *descendant = DynamicDowncast<Element>(*node))
           {
             Add(*descendant);
           }
@@ -120,7 +120,7 @@ namespace krys::boo::style
     return pickKey(hashes.Tags);
   }
 
-  void HasSelectorFilter::Add(const dom::Element &element) noexcept
+  void HasSelectorFilter::Add(const Element &element) noexcept
   {
     SmallList<uint32, 4> elementHashes;
     css::SelectorFilter::CollectElementIdentifierHashes(element, elementHashes);

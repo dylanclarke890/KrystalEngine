@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Color/CSSColorValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief An RGB channel: a number (a fraction), a numeric value, or `none`.
   /// @see https://drafts.css-houdini.org/css-typed-om/#typedefdef-csscolorrgbcomp
@@ -88,9 +88,9 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSRGB)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleValue &styleValue) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSRGB)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleValue &styleValue) noexcept
   {
-    return styleValue.StyleValueType() == krys::boo::css::CSSStyleValueType::CSSRGB;
+    return styleValue.StyleValueType() == krys::boo::CSSStyleValueType::CSSRGB;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

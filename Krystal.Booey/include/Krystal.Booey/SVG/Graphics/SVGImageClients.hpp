@@ -33,7 +33,7 @@
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The chrome client of an SVG image's page: the page's repaints and rendering updates go to the
   /// image's observer.

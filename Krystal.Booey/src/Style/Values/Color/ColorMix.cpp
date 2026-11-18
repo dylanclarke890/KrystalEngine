@@ -187,8 +187,8 @@ namespace krys::boo::style
     builder.Append(u8')');
   }
 
-  css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
-                                                   const ColorMix &colorMix) noexcept
+  CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
+                                              const ColorMix &colorMix) noexcept
   {
     StringBuilder builder;
     SerialisationForCSSTokenization(builder, context, colorMix);

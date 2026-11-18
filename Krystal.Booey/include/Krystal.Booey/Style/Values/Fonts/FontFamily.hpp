@@ -43,7 +43,7 @@ namespace krys::boo::style
   // https://drafts.csswg.org/css-fonts-4/#propdef-font-family
   struct SingleFontFamily
   {
-    css::CSSOMStringAtom Value;
+    CSSOMStringAtom Value;
 
     template <typename... F>
     decltype(auto) SwitchOn(F &&...f) const noexcept
@@ -93,30 +93,30 @@ namespace krys::boo::style
   struct FontFamilies
   {
   private:
-    List<css::CSSOMStringAtom> _families;
+    List<CSSOMStringAtom> _families;
     FontFamilyKind _firstFontKind {FontFamilyKind::Generic};
 
   public:
-    FontFamilies(List<css::CSSOMStringAtom> &&families, FontFamilyKind firstFontKind) noexcept
+    FontFamilies(List<CSSOMStringAtom> &&families, FontFamilyKind firstFontKind) noexcept
         : _families {krys::move(families)}, _firstFontKind {firstFontKind}
     {
     }
 
-    FontFamilies(List<css::CSSOMStringAtom> &&families, bool isSpecifiedFont) noexcept
+    FontFamilies(List<CSSOMStringAtom> &&families, bool isSpecifiedFont) noexcept
         : FontFamilies {krys::move(families),
                         isSpecifiedFont ? FontFamilyKind::Specified : FontFamilyKind::Generic}
     {
     }
 
-    FontFamilies(css::CSSOMStringAtom family, FontFamilyKind firstFontKind) noexcept
-        : FontFamilies {List<css::CSSOMStringAtom> {krys::move(family)}, firstFontKind}
+    FontFamilies(CSSOMStringAtom family, FontFamilyKind firstFontKind) noexcept
+        : FontFamilies {List<CSSOMStringAtom> {krys::move(family)}, firstFontKind}
     {
     }
 
     class const_iterator
     {
     public:
-      using inner_iterator = List<css::CSSOMStringAtom>::const_iterator;
+      using inner_iterator = List<CSSOMStringAtom>::const_iterator;
       using iterator_category = std::forward_iterator_tag;
       using value_type = SingleFontFamily;
       using difference_type = std::ptrdiff_t;
@@ -177,17 +177,17 @@ namespace krys::boo::style
       return SingleFontFamily {_families.back()};
     }
 
-    KRYS_NODISCARD List<css::CSSOMStringAtom> &ToPlatform() noexcept KRYS_LIFETIME_BOUND
+    KRYS_NODISCARD List<CSSOMStringAtom> &ToPlatform() noexcept KRYS_LIFETIME_BOUND
     {
       return _families;
     }
 
-    KRYS_NODISCARD const List<css::CSSOMStringAtom> &ToPlatform() const noexcept KRYS_LIFETIME_BOUND
+    KRYS_NODISCARD const List<CSSOMStringAtom> &ToPlatform() const noexcept KRYS_LIFETIME_BOUND
     {
       return _families;
     }
 
-    KRYS_NODISCARD List<css::CSSOMStringAtom> TakePlatform() noexcept
+    KRYS_NODISCARD List<CSSOMStringAtom> TakePlatform() noexcept
     {
       return krys::move(_families);
     }

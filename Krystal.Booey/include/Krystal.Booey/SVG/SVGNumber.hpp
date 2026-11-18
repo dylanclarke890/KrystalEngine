@@ -29,7 +29,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyTraits.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGValueProperty.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @see https://svgwg.org/svg2-draft/types.html#InterfaceSVGNumber
   class SVGNumber : public SVGValueProperty<float>
@@ -82,7 +82,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept override
     {
       return SVGPropertyTraits<float>::ToString(_value);
     }

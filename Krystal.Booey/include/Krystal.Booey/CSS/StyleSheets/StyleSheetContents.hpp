@@ -35,19 +35,15 @@
 
 namespace krys::boo
 {
+  class CSSStyleSheet;
   class CachedCSSStyleSheet;
   class CachedResource;
-}
-
-namespace krys::boo::dom
-{
   class Document;
   class Node;
 }
 
 namespace krys::boo::css
 {
-  class CSSStyleSheet;
   class ImportRule;
   class LayerRule;
   class NamespaceRule;
@@ -58,7 +54,7 @@ namespace krys::boo::css
   class StyleSheetContents final : public RefCounted<StyleSheetContents>,
                                    public CanMakeWeakPtr<StyleSheetContents>
   {
-    friend class CSSStyleSheet;
+    friend class boo::CSSStyleSheet;
     using PrefixNamespaceURIMap = HashMap<CSSOMStringAtom, CSSOMStringAtom>;
 
   private:
@@ -142,9 +138,9 @@ namespace krys::boo::css
 
     KRYS_NODISCARD StyleSheetContents *RootStyleSheet() const noexcept;
 
-    KRYS_NODISCARD dom::Node *SingleOwnerNode() const noexcept;
+    KRYS_NODISCARD Node *SingleOwnerNode() const noexcept;
 
-    KRYS_NODISCARD dom::Document *SingleOwnerDocument() const noexcept;
+    KRYS_NODISCARD Document *SingleOwnerDocument() const noexcept;
 
     KRYS_NODISCARD utf8_stringview Charset() const noexcept
     {

@@ -157,7 +157,7 @@ namespace krys::boo::tests
     (void)document.Body()->AppendChild(*link);
     html::EventLoop::Current().RunUntilIdle();
     RunNetworkingTasks();
-    auto &linkElement = Downcast<html::HTMLLinkElement>(*link);
+    auto &linkElement = Downcast<HTMLLinkElement>(*link);
     CHECK_FALSE(linkElement.Sheet());
 
     document.Resume(Reason);

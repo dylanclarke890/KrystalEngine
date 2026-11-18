@@ -26,9 +26,6 @@
 
 namespace krys::boo::tests
 {
-  using html::HTMLOptionElement;
-  using html::HTMLSelectElement;
-
   namespace
   {
     KRYS_NODISCARD HTMLSelectElement &SelectById(EditorFixture &fixture, utf8_stringview id) noexcept
@@ -162,7 +159,7 @@ namespace krys::boo::tests
     // An option in a disabled optgroup is disabled, and its label is indented.
     CHECK(OptionById(fixture, u8"c").IsDisabledFormControl());
     CHECK(OptionById(fixture, u8"b").TextIndentedToRespectGroupLabel() == u8"    B");
-    CHECK(Downcast<html::HTMLOptGroupElement>(fixture.ById(u8"g")).GroupLabelText() == u8"Group one");
+    CHECK(Downcast<HTMLOptGroupElement>(fixture.ById(u8"g")).GroupLabelText() == u8"Group one");
     REQUIRE_FALSE(fixture.ById(u8"g").SetAttribute(u8"disabled", u8"").HasException());
     CHECK(OptionById(fixture, u8"b").IsDisabledFormControl());
 
@@ -224,12 +221,12 @@ namespace krys::boo::tests
     auto newOption = [&](utf8_stringview id)
     {
       auto option = CreateRef<HTMLOptionElement>(*fixture.Document);
-      REQUIRE_FALSE(option->SetAttribute(u8"id", dom::DOMString(id)).HasException());
+      REQUIRE_FALSE(option->SetAttribute(u8"id", DOMString(id)).HasException());
       return option;
     };
     auto before = [&](utf8_stringview id)
     {
-      return HTMLSelectElement::HTMLElementOrInt {ShareRefPtr<html::HTMLElement>(&OptionById(fixture, id))};
+      return HTMLSelectElement::HTMLElementOrInt {ShareRefPtr<HTMLElement>(&OptionById(fixture, id))};
     };
 
     SECTION("add() inserts into the parent of the element or indexth option it goes before")
@@ -558,7 +555,7 @@ namespace krys::boo::tests
     constexpr utf8_stringview BaseSelectStyle = u8"<style>select{appearance:base-select;width:100px}</style>";
 
     /// @brief Presses and releases the left button at the centre of @p element.
-    void ClickElement(EditorFixture &fixture, dom::Element &element) noexcept
+    void ClickElement(EditorFixture &fixture, boo::Element &element) noexcept
     {
       (void)fixture.Document->UpdateLayout();
       auto rect = element.Renderer()->AbsoluteBoundingBoxRect();
@@ -630,7 +627,7 @@ namespace krys::boo::tests
       EditorFixture fixture(u8"<style>::picker(select){color:red}select::picker-icon{color:red}"
                             u8"::picker(select):popover-open{color:red}::picker(select)::backdrop{color:red}"
                             u8"::picker(other){color:red}</style>");
-      auto *sheet = DynamicDowncast<css::CSSStyleSheet>(fixture.Document->StyleSheets().Item(1));
+      auto *sheet = DynamicDowncast<CSSStyleSheet>(fixture.Document->StyleSheets().Item(1));
       REQUIRE(sheet);
       REQUIRE(sheet->CssRules()->Length() == 4);
       CHECK(css::tests::ToNarrow(sheet->CssRules()->Item(0)->CssText())
@@ -825,7 +822,7 @@ namespace krys::boo::tests
     {
       auto &option = OptionById(fixture, u8"a");
       option.RemoveAttribute(u8"label");
-      (void)option.TextContent(dom::DOMString(u8"Replaced"));
+      (void)option.TextContent(DOMString(u8"Replaced"));
       (void)fixture.Document->UpdateLayout();
       CHECK_FALSE(layout::tests::DumpWithIds(fixture).contains(u8"\"Contents\""));
       CHECK(Dumps(fixture, u8"\"Replaced\""));
@@ -883,7 +880,7 @@ namespace krys::boo::tests
     {
       REQUIRE(fixture.ById(u8"c").Renderer());
       CHECK(Dumps(fixture, u8"\"Alpha\""));
-      CHECK(button.TextContent().value_or(dom::DOMString()) == u8"Alpha");
+      CHECK(button.TextContent().value_or(DOMString()) == u8"Alpha");
     }
 
     SECTION("is inert, so the press is the select's")

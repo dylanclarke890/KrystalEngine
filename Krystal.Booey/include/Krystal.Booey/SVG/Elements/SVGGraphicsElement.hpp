@@ -28,7 +28,7 @@
 #include "Krystal.Booey/SVG/SVGTransformable.hpp"
 #include "Krystal.Booey/SVG/SVGTransformList.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGMatrix;
   class SVGRect;
@@ -65,7 +65,7 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD SVGElement *FarthestViewportElement() const noexcept override;
 
-    KRYS_NODISCARD AffineTransform LocalCoordinateSpaceTransform(CTMScope mode) const noexcept override
+    KRYS_NODISCARD AffineTransform LocalCoordinateSpaceTransform(svg::CTMScope mode) const noexcept override
     {
       return SVGTransformable::LocalCoordinateSpaceTransform(mode);
     }
@@ -117,19 +117,19 @@ namespace krys::boo::svg
     }
 
   protected:
-    SVGGraphicsElement(dom::Document &document, UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
+    SVGGraphicsElement(Document &document, UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
                        SVGElementInterface interface, SVGElementFlags flags = SVGElementFlags::None,
                        dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
 
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept override;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept override;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept override;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGGraphicsElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGGraphicsElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGGraphicsElement();
   }

@@ -39,9 +39,9 @@ namespace krys::boo::style
     auto *primitiveValue = RequiredDowncast<css::PrimitiveValue>(state, value);
     if (!primitiveValue)
     {
-      return CounterStyle {{css::CSSOMStringAtom {css::ToString(css::ValueId::Decimal)}}};
+      return CounterStyle {{CSSOMStringAtom {css::ToString(css::ValueId::Decimal)}}};
     }
 
-    return CounterStyle {{css::CSSOMStringAtom {primitiveValue->StringValue()}}};
+    return CounterStyle {{CSSOMStringAtom {primitiveValue->StringValue()}}};
   }
 }

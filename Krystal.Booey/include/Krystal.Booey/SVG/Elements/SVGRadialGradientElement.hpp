@@ -26,7 +26,10 @@
 namespace krys::boo::svg
 {
   struct RadialGradientAttributes;
+}
 
+namespace krys::boo
+{
   /// @brief The `<radialGradient>` element: a gradient between a focal circle and an end circle.
   /// @see https://svgwg.org/svg2-draft/pservers.html#InterfaceSVGRadialGradientElement
   class SVGRadialGradientElement final : public SVGGradientElement
@@ -42,9 +45,9 @@ namespace krys::boo::svg
     Ref<SVGAnimatedLength> _fr;
 
   public:
-    explicit SVGRadialGradientElement(dom::Document &document) noexcept;
+    explicit SVGRadialGradientElement(Document &document) noexcept;
 
-    bool CollectGradientAttributes(RadialGradientAttributes &) noexcept;
+    bool CollectGradientAttributes(svg::RadialGradientAttributes &) noexcept;
 
     KRYS_NODISCARD const SVGLengthValue &Cx() const noexcept
     {
@@ -109,10 +112,10 @@ namespace krys::boo::svg
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGRadialGradientElement, SVGGradientElement>;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
 
@@ -120,8 +123,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGRadialGradientElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGRadialGradientElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGRadialGradientElement();
   }

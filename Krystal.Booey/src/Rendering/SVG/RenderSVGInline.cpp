@@ -33,7 +33,7 @@
 
 namespace krys::boo
 {
-  RenderSVGInline::RenderSVGInline(Type type, svg::SVGGraphicsElement &element, RenderStyle &&style) noexcept
+  RenderSVGInline::RenderSVGInline(Type type, SVGGraphicsElement &element, RenderStyle &&style) noexcept
       : RenderInline(type, element, krys::move(style))
   {
     krys_debug_assert(IsRenderSVGInline());
@@ -41,9 +41,9 @@ namespace krys::boo
 
   RenderSVGInline::~RenderSVGInline() noexcept = default;
 
-  svg::SVGGraphicsElement &RenderSVGInline::GraphicsElement() const noexcept
+  SVGGraphicsElement &RenderSVGInline::GraphicsElement() const noexcept
   {
-    return Downcast<svg::SVGGraphicsElement>(Downcast<svg::SVGElement>(*RenderInline::GetElement()));
+    return Downcast<SVGGraphicsElement>(Downcast<SVGElement>(*RenderInline::GetElement()));
   }
 
   UniquePtr<LegacyInlineFlowBox> RenderSVGInline::CreateInlineFlowBox() noexcept

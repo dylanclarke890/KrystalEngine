@@ -95,7 +95,7 @@ namespace krys::boo::style
 
   ComputedFontSize ComputedFontSizeFromSpecifiedSize(float specifiedSize, bool isAbsoluteSize,
                                                      bool useSVGZoomRules, const RenderStyle *style,
-                                                     const dom::Document &document) noexcept
+                                                     const Document &document) noexcept
   {
     float zoomFactor = 1.0f;
     if (!useSVGZoomRules)
@@ -115,8 +115,7 @@ namespace krys::boo::style
   }
 
   float ComputedFontSizeFromSpecifiedSizeForSVGInlineText(float specifiedSize, bool isAbsoluteSize,
-                                                          float zoomFactor,
-                                                          const dom::Document &document) noexcept
+                                                          float zoomFactor, const Document &document) noexcept
   {
     return ComputedFontSizeFromSpecifiedSize(specifiedSize, isAbsoluteSize, zoomFactor,
                                              MinimumFontSizeRule::Absolute, document.GetSettings().Values);
@@ -175,7 +174,7 @@ namespace krys::boo::style
   }
 
   float FontSizeForKeyword(uint32 keywordID, bool shouldUseFixedDefaultSize,
-                           const dom::Document &document) noexcept
+                           const Document &document) noexcept
   {
     return FontSizeForKeyword(keywordID, shouldUseFixedDefaultSize, document.GetSettings().Values,
                               document.InQuirksMode());
@@ -197,7 +196,7 @@ namespace krys::boo::style
   }
 
   int32 LegacyFontSizeForPixelSize(int32 pixelFontSize, bool shouldUseFixedDefaultSize,
-                                   const dom::Document &document) noexcept
+                                   const Document &document) noexcept
   {
     bool quirksMode = document.InQuirksMode();
     const auto &settings = document.GetSettings().Values;

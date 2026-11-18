@@ -24,7 +24,7 @@ namespace krys::boo::ax::tests
 
     SECTION("With the focus in it, everything outside is ignored")
     {
-      Downcast<html::HTMLElement>(page.ById(u8"inside")).Focus();
+      Downcast<HTMLElement>(page.ById(u8"inside")).Focus();
       (void)page.TakeNotifications();
       CHECK(page.Cache().ModalNode() == &page.ById(u8"dialog"));
       CHECK(outside.IsIgnored());
@@ -55,7 +55,7 @@ namespace krys::boo::ax::tests
     AXFixture page(u8"<button id=outside>Outside</button>"
                    u8"<div id=dialog role=dialog aria-modal=true tabindex=0></div>");
     (void)page.Object(u8"outside");
-    Downcast<html::HTMLElement>(page.ById(u8"dialog")).Focus();
+    Downcast<HTMLElement>(page.ById(u8"dialog")).Focus();
     (void)page.TakeNotifications();
     CHECK(page.Cache().ModalNode() == nullptr);
     CHECK_FALSE(page.Object(u8"outside").IsIgnored());
@@ -68,7 +68,7 @@ namespace krys::boo::ax::tests
     auto &text = page.Object(u8"text");
     CHECK(page.Cache().ModalNode() == nullptr);
 
-    auto &dialog = Downcast<html::HTMLDialogElement>(page.ById(u8"dialog"));
+    auto &dialog = Downcast<HTMLDialogElement>(page.ById(u8"dialog"));
     REQUIRE_FALSE(dialog.ShowModal().HasException());
     (void)page.Document->UpdateLayout();
     (void)page.TakeNotifications();

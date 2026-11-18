@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/MathML/Elements/MathMLRowElement.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   /// @brief The script elements: `<msub>`, `<msup>`, `<msubsup>` and `<mmultiscripts>`, and the base of the
   /// under and over elements.
@@ -49,22 +49,21 @@ namespace krys::boo::mathml
     };
 
   private:
-    const boo::mathml::MathMLScriptsElement::ScriptType _scriptType;
+    const boo::MathMLScriptsElement::ScriptType _scriptType;
 
   public:
-    MathMLScriptsElement(dom::Document &document, ScriptType scriptType) noexcept
+    MathMLScriptsElement(Document &document, ScriptType scriptType) noexcept
         : MathMLScriptsElement(document, scriptType, MathMLElementInterface::Scripts)
     {
     }
 
-    KRYS_NODISCARD boo::mathml::MathMLScriptsElement::ScriptType GetScriptType() const noexcept
+    KRYS_NODISCARD boo::MathMLScriptsElement::ScriptType GetScriptType() const noexcept
     {
       return _scriptType;
     }
 
   protected:
-    MathMLScriptsElement(dom::Document &document, ScriptType scriptType,
-                         MathMLElementInterface interface) noexcept
+    MathMLScriptsElement(Document &document, ScriptType scriptType, MathMLElementInterface interface) noexcept
         : MathMLRowElement(document, interface), _scriptType(scriptType)
     {
     }
@@ -73,15 +72,15 @@ namespace krys::boo::mathml
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::mathml::MathMLScriptsElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::mathml::MathMLElement &element) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::MathMLScriptsElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::MathMLElement &element) noexcept
   {
-    return element.Interface() == krys::boo::mathml::MathMLElementInterface::Scripts
-           || element.Interface() == krys::boo::mathml::MathMLElementInterface::UnderOver;
+    return element.Interface() == krys::boo::MathMLElementInterface::Scripts
+           || element.Interface() == krys::boo::MathMLElementInterface::UnderOver;
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    auto *element = krys::DynamicDowncast<krys::boo::mathml::MathMLElement>(node);
+    auto *element = krys::DynamicDowncast<krys::boo::MathMLElement>(node);
     return element && IsType(*element);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

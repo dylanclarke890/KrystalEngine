@@ -35,7 +35,7 @@
 #include "Krystal.Core/Types/WeakPtr.hpp"
 #include <algorithm>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGElement;
 
@@ -63,12 +63,12 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD SVGElement *ContextElement() const noexcept;
 
-    KRYS_NODISCARD virtual dom::DOMString BaseValAsString() const noexcept
+    KRYS_NODISCARD virtual DOMString BaseValAsString() const noexcept
     {
       return {};
     }
 
-    KRYS_NODISCARD virtual dom::DOMString AnimValAsString() const noexcept
+    KRYS_NODISCARD virtual DOMString AnimValAsString() const noexcept
     {
       return {};
     }
@@ -83,7 +83,7 @@ namespace krys::boo::svg
     {
     }
 
-    virtual Maybe<dom::DOMString> Synchronize() noexcept
+    virtual Maybe<DOMString> Synchronize() noexcept
     {
       return {};
     }

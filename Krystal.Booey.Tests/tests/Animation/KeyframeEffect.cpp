@@ -19,14 +19,13 @@ namespace krys::boo::tests
   {
     using namespace std::chrono_literals;
 
-    KRYS_NODISCARD std::string Narrow(const dom::DOMString &string)
+    KRYS_NODISCARD std::string Narrow(const DOMString &string)
     {
       return std::string(string.begin(), string.end());
     }
 
-    KRYS_NODISCARD InputKeyframe Keyframe(KeyframeOffset offset,
-                                          List<Pair<dom::DOMString, dom::DOMString>> properties,
-                                          dom::DOMString easing = u8"linear") noexcept
+    KRYS_NODISCARD InputKeyframe Keyframe(KeyframeOffset offset, List<Pair<DOMString, DOMString>> properties,
+                                          DOMString easing = u8"linear") noexcept
     {
       InputKeyframe keyframe;
       keyframe.Offset = krys::move(offset);
@@ -155,7 +154,7 @@ namespace krys::boo::tests
 
     InputPropertyIndexedKeyframes keyframes;
     keyframes.Properties = {{u8"opacity", {u8"0", u8"0.5", u8"1"}}, {u8"marginLeft", {u8"0px", u8"30px"}}};
-    keyframes.Easing = List<dom::DOMString> {u8"ease-in", u8"ease-out"};
+    keyframes.Easing = List<DOMString> {u8"ease-in", u8"ease-out"};
     auto effect = Valid(fixture.Effect(krys::move(keyframes)));
 
     // The opacities at 0, 0.5 and 1 and the margins at 0 and 1 merge into three keyframes, and the easings
@@ -184,7 +183,7 @@ namespace krys::boo::tests
     // An unused easing must still parse.
     InputPropertyIndexedKeyframes unusedEasing;
     unusedEasing.Properties = {{u8"opacity", {u8"1"}}};
-    unusedEasing.Easing = List<dom::DOMString> {u8"linear", u8"bounce"};
+    unusedEasing.Easing = List<DOMString> {u8"linear", u8"bounce"};
     CHECK(Error(fixture.Effect(krys::move(unusedEasing))) == dom::ExceptionCode::TypeError);
   }
 

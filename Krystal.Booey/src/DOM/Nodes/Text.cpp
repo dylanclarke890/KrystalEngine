@@ -29,7 +29,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGForeignObjectElement.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   Text::Text(Document &document, DOMString data, CDATAConstructorTag) noexcept
       : CharacterData(document, krys::move(data), dom::NodeType::CDATA_SECTION_NODE)
@@ -47,15 +47,15 @@ namespace krys::boo::dom
     // 3. Return text.
   }
 
-  ExceptionOr<Ref<Text>> Text::SplitText(size_t offset) noexcept
+  dom::ExceptionOr<Ref<Text>> Text::SplitText(size_t offset) noexcept
   {
-    return TextAlgorithms::Split(*this, offset);
+    return dom::TextAlgorithms::Split(*this, offset);
   }
 
   DOMString Text::WholeText() const noexcept
   {
     // Return the concatenation of the data of the contiguous Text nodes of this, in tree order.
-    auto contiguousTextNodes = TextAlgorithms::ContiguousTextNodes(*this);
+    auto contiguousTextNodes = dom::TextAlgorithms::ContiguousTextNodes(*this);
 
     size_t capacity = 0uz;
     for (auto &node : contiguousTextNodes)
@@ -78,9 +78,9 @@ namespace krys::boo::dom
 
 #pragma region Slottables
 
-  RefPtr<html::HTMLSlotElement> Text::AssignedSlot() noexcept
+  RefPtr<HTMLSlotElement> Text::AssignedSlot() noexcept
   {
-    return mixins::Slottable::AssignedSlot(*this);
+    return dom::mixins::Slottable::AssignedSlot(*this);
   }
 
 #pragma endregion
@@ -95,8 +95,8 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool IsSVGText(const Text &text) noexcept
     {
       krys_debug_assert(text.ParentNode());
-      auto *parentElement = DynamicDowncast<svg::SVGElement>(*text.ParentNode());
-      return parentElement && !Is<svg::SVGForeignObjectElement>(*parentElement);
+      auto *parentElement = DynamicDowncast<SVGElement>(*text.ParentNode());
+      return parentElement && !Is<SVGForeignObjectElement>(*parentElement);
     }
   }
 

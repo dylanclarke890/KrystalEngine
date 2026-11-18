@@ -35,14 +35,10 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
-{
-  class Document;
-}
-
 namespace krys::boo
 {
   class CompositeEditCommand;
+  class Document;
 
   /// @brief The `inputType` of the input events for an edit of @p action; empty for actions that have none.
   KRYS_NODISCARD utf8_stringview InputTypeNameForEditingAction(EditAction action) noexcept;
@@ -62,7 +58,7 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(EditCommand);
 
   private:
-    const Ref<dom::Document> _document;
+    const Ref<Document> _document;
     VisibleSelection _startingSelection;
     VisibleSelection _endingSelection;
     WeakPtr<CompositeEditCommand> _parent;
@@ -108,13 +104,12 @@ namespace krys::boo
     virtual void DoApply() noexcept = 0;
 
   protected:
-    explicit EditCommand(dom::Document &document,
-                         EditAction editingAction = EditAction::Unspecified) noexcept;
+    explicit EditCommand(Document &document, EditAction editingAction = EditAction::Unspecified) noexcept;
 
-    EditCommand(dom::Document &document, VisibleSelection startingSelection,
+    EditCommand(Document &document, VisibleSelection startingSelection,
                 VisibleSelection endingSelection) noexcept;
 
-    KRYS_NODISCARD dom::Document &GetDocument() const noexcept
+    KRYS_NODISCARD Document &GetDocument() const noexcept
     {
       return *_document;
     }
@@ -153,7 +148,7 @@ namespace krys::boo
     virtual void DoReapply() noexcept; // calls DoApply()
 
   protected:
-    explicit SimpleEditCommand(dom::Document &document,
+    explicit SimpleEditCommand(Document &document,
                                EditAction editingAction = EditAction::Unspecified) noexcept;
 
   private:

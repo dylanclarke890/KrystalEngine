@@ -27,10 +27,10 @@
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLIFrameElement::HTMLIFrameElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::IFrame)
+  HTMLIFrameElement::HTMLIFrameElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::IFrame)
   {
   }
 
@@ -38,174 +38,174 @@ namespace krys::boo::html
 
   dom::USVString HTMLIFrameElement::Src() const noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"src");
+    return html::ReflectURL<dom::USVString>(*this, u8"src");
   }
 
   void HTMLIFrameElement::Src(dom::USVString value) noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
+    return html::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
-  dom::DOMString HTMLIFrameElement::SrcDoc() const noexcept
+  DOMString HTMLIFrameElement::SrcDoc() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"srcdoc").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"srcdoc").value_or(u8"");
   }
 
-  void HTMLIFrameElement::SrcDoc(dom::DOMString value) noexcept
+  void HTMLIFrameElement::SrcDoc(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"srcdoc", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"srcdoc", krys::move(value));
   }
 
-  dom::DOMString HTMLIFrameElement::Sizes() const noexcept
+  DOMString HTMLIFrameElement::Sizes() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"sizes").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"sizes").value_or(u8"");
   }
 
-  void HTMLIFrameElement::Sizes(dom::DOMString value) noexcept
+  void HTMLIFrameElement::Sizes(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"sizes", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"sizes", krys::move(value));
   }
 
-  dom::DOMString HTMLIFrameElement::Name() const noexcept
+  DOMString HTMLIFrameElement::Name() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLIFrameElement::Name(dom::DOMString value) noexcept
+  void HTMLIFrameElement::Name(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"name", krys::move(value));
   }
 
-  dom::DOMString HTMLIFrameElement::Allow() const noexcept
+  DOMString HTMLIFrameElement::Allow() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"allow").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"allow").value_or(u8"");
   }
 
-  void HTMLIFrameElement::Allow(dom::DOMString value) noexcept
+  void HTMLIFrameElement::Allow(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"allow", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"allow", krys::move(value));
   }
 
   bool HTMLIFrameElement::AllowFullscreen() const noexcept
   {
-    return Reflect<bool>(*this, u8"allowfullscreen");
+    return html::Reflect<bool>(*this, u8"allowfullscreen");
   }
 
   void HTMLIFrameElement::AllowFullscreen(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"allowfullscreen", krys::move(value));
+    html::Reflect<bool>(*this, u8"allowfullscreen", krys::move(value));
   }
 
-  dom::DOMString HTMLIFrameElement::Width() const noexcept
+  DOMString HTMLIFrameElement::Width() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"width").value_or(u8"");
   }
 
-  void HTMLIFrameElement::Width(dom::DOMString value) noexcept
+  void HTMLIFrameElement::Width(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"width", krys::move(value));
   }
 
-  dom::DOMString HTMLIFrameElement::Height() const noexcept
+  DOMString HTMLIFrameElement::Height() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"height").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"height").value_or(u8"");
   }
 
-  void HTMLIFrameElement::Height(dom::DOMString value) noexcept
+  void HTMLIFrameElement::Height(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"height", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"height", krys::move(value));
   }
 
-  dom::DOMString HTMLIFrameElement::ReferrerPolicy() const noexcept
+  DOMString HTMLIFrameElement::ReferrerPolicy() const noexcept
   {
-    return ReflectEnumerated<"referrerpolicy">(*this);
+    return html::ReflectEnumerated<"referrerpolicy">(*this);
   }
 
-  void HTMLIFrameElement::ReferrerPolicy(dom::DOMString value) noexcept
+  void HTMLIFrameElement::ReferrerPolicy(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"referrerpolicy", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"referrerpolicy", krys::move(value));
   }
 
-  dom::DOMString HTMLIFrameElement::Loading() const noexcept
+  DOMString HTMLIFrameElement::Loading() const noexcept
   {
-    return ReflectEnumerated<"loading">(*this);
+    return html::ReflectEnumerated<"loading">(*this);
   }
 
-  void HTMLIFrameElement::Loading(dom::DOMString value) noexcept
+  void HTMLIFrameElement::Loading(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"loading", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"loading", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region HTMLIFrameElement Obsolete members
 
-  dom::DOMString HTMLIFrameElement::Align() const noexcept
+  DOMString HTMLIFrameElement::Align() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLIFrameElement::Align(dom::DOMString value) noexcept
+  void HTMLIFrameElement::Align(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"align", krys::move(value));
   }
 
-  dom::DOMString HTMLIFrameElement::Scrolling() const noexcept
+  DOMString HTMLIFrameElement::Scrolling() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"scrolling").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"scrolling").value_or(u8"");
   }
 
-  void HTMLIFrameElement::Scrolling(dom::DOMString value) noexcept
+  void HTMLIFrameElement::Scrolling(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"scrolling", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"scrolling", krys::move(value));
   }
 
-  dom::DOMString HTMLIFrameElement::FrameBorder() const noexcept
+  DOMString HTMLIFrameElement::FrameBorder() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"frameborder").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"frameborder").value_or(u8"");
   }
 
-  void HTMLIFrameElement::FrameBorder(dom::DOMString value) noexcept
+  void HTMLIFrameElement::FrameBorder(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"frameborder", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"frameborder", krys::move(value));
   }
 
   dom::USVString HTMLIFrameElement::LongDesc() const noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"longdesc");
+    return html::ReflectURL<dom::USVString>(*this, u8"longdesc");
   }
 
   void HTMLIFrameElement::LongDesc(dom::USVString value) noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"longdesc", krys::move(value));
+    return html::ReflectURL<dom::USVString>(*this, u8"longdesc", krys::move(value));
   }
 
-  dom::DOMString HTMLIFrameElement::MarginWidth() const noexcept
+  DOMString HTMLIFrameElement::MarginWidth() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"marginwidth").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"marginwidth").value_or(u8"");
   }
 
-  void HTMLIFrameElement::MarginWidth(dom::DOMString value) noexcept
+  void HTMLIFrameElement::MarginWidth(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"marginwidth", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"marginwidth", krys::move(value));
   }
 
-  dom::DOMString HTMLIFrameElement::MarginHeight() const noexcept
+  DOMString HTMLIFrameElement::MarginHeight() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"marginheight").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"marginheight").value_or(u8"");
   }
 
-  void HTMLIFrameElement::MarginHeight(dom::DOMString value) noexcept
+  void HTMLIFrameElement::MarginHeight(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"marginheight", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"marginheight", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region Presentational hints
 
-  bool HTMLIFrameElement::HasPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool HTMLIFrameElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                             const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == u8"width" || localName == u8"height" || localName == u8"frameborder"))
@@ -215,12 +215,12 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLIFrameElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                                 const dom::DOMStringAtom &namespaceURI,
-                                                                 dom::DOMStringView value,
+  void HTMLIFrameElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                                 const DOMStringAtom &namespaceURI,
+                                                                 DOMStringView value,
                                                                  css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
@@ -245,7 +245,7 @@ namespace krys::boo::html
     {
       // Frame border doesn't really match the HTML4 spec definition for iframes. It simply adds
       // a presentational hint that the border should be off if set to zero.
-      auto frameBorder = Numbers::ParseInteger(value);
+      auto frameBorder = html::Numbers::ParseInteger(value);
       if (!frameBorder.Success() || !frameBorder.Value)
       {
         // Add a rule that nulls out our border width.

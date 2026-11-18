@@ -48,12 +48,16 @@ namespace krys::boo::css
   class MutableStyleProperties;
 }
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class CharacterData;
   class Document;
   class Element;
   class Node;
+}
+
+namespace krys::boo::dom
+{
   class Range;
 }
 
@@ -146,22 +150,21 @@ namespace krys::boo
     CaretVisibility _caretVisibility;
 
   public:
-    KRYS_NODISCARD static Color ComputeCaretColor(const RenderStyle &elementStyle,
-                                                  const dom::Node *node) noexcept;
+    KRYS_NODISCARD static Color ComputeCaretColor(const RenderStyle &elementStyle, const Node *node) noexcept;
 
   protected:
     explicit CaretBase(CaretVisibility visibility = CaretVisibility::Hidden) noexcept;
 
-    void InvalidateCaretRect(dom::Node *node, bool caretRectChanged = false,
+    void InvalidateCaretRect(Node *node, bool caretRectChanged = false,
                              CaretAnimator *caretAnimator = nullptr) noexcept;
 
     void ClearCaretRect() noexcept;
 
-    bool UpdateCaretRect(dom::Document &document, const VisiblePosition &caretPosition) noexcept;
+    bool UpdateCaretRect(Document &document, const VisiblePosition &caretPosition) noexcept;
 
     KRYS_NODISCARD static bool ShouldRepaintCaret(const RenderView *view, bool isContentEditable) noexcept;
 
-    void PaintCaret(const dom::Node &node, GraphicsContext &context, const LayoutPoint &paintOffset,
+    void PaintCaret(const Node &node, GraphicsContext &context, const LayoutPoint &paintOffset,
                     CaretAnimator *caretAnimator) const noexcept;
 
     KRYS_NODISCARD const LayoutRect &LocalCaretRectWithoutUpdate() const noexcept
@@ -229,7 +232,7 @@ namespace krys::boo
 
     void Clear() noexcept;
 
-    void NodeWillBeRemoved(dom::Node &node) noexcept;
+    void NodeWillBeRemoved(Node &node) noexcept;
 
   private:
     void ClearCaretPositionWithoutUpdatingStyle() noexcept;
@@ -301,12 +304,12 @@ namespace krys::boo
     };
 
   private:
-    dom::Document *_document;
+    Document *_document;
     VisibleSelection _selection;
     VisiblePosition _originalBase; // Used to store base before the adjustment at bidi boundary.
     TextGranularity _granularity {TextGranularity::CharacterGranularity};
-    RefPtr<dom::Node> _previousCaretNode; // The last node which painted the caret. Retained for clearing the
-                                          // old caret when it moves.
+    RefPtr<Node> _previousCaretNode; // The last node which painted the caret. Retained for clearing the
+                                     // old caret when it moves.
     RefPtr<dom::Range> _associatedLiveRange;
     RefPtr<EditingStyle> _typingStyle;
     // The painted bounds of the caret in absolute coordinates
@@ -325,7 +328,7 @@ namespace krys::boo
     bool _pendingSelectionUpdate {false};
 
   public:
-    explicit FrameSelection(dom::Document *document = nullptr) noexcept;
+    explicit FrameSelection(Document *document = nullptr) noexcept;
 
     ~FrameSelection() noexcept override;
 
@@ -342,7 +345,7 @@ namespace krys::boo
       return options;
     }
 
-    KRYS_NODISCARD dom::Element *RootEditableElementOrDocumentElement() const noexcept;
+    KRYS_NODISCARD Element *RootEditableElementOrDocumentElement() const noexcept;
 
     void MoveTo(const VisiblePosition &position, UserTriggered userTriggered = UserTriggered::No,
                 CursorAlignOnScroll align = CursorAlignOnScroll::IfNeeded) noexcept;
@@ -444,11 +447,10 @@ namespace krys::boo
     }
 
     /// @brief Moves the selection's end points out of @p node before it's removed.
-    void NodeWillBeRemoved(dom::Node &node) noexcept;
+    void NodeWillBeRemoved(Node &node) noexcept;
 
     /// @brief Adjusts the selection's end points in @p node for its data replaced at @p offset.
-    void TextWasReplaced(dom::CharacterData &node, uint32 offset, uint32 oldLength,
-                         uint32 newLength) noexcept;
+    void TextWasReplaced(CharacterData &node, uint32 offset, uint32 oldLength, uint32 newLength) noexcept;
 
     void SetFocused(bool isFocused) noexcept;
 
@@ -515,7 +517,7 @@ namespace krys::boo
       return *_caretAnimator;
     }
 
-    KRYS_NODISCARD dom::Document *GetDocument() noexcept override;
+    KRYS_NODISCARD Document *GetDocument() noexcept override;
 
     KRYS_NODISCARD static bool ShouldChangeSelection(const VisibleSelection &newSelection) noexcept;
 
@@ -560,7 +562,7 @@ namespace krys::boo
 
     void CaretAnimationDidUpdate(CaretAnimator &animator) noexcept override;
 
-    KRYS_NODISCARD dom::Node *CaretNode() noexcept override;
+    KRYS_NODISCARD Node *CaretNode() noexcept override;
 
     KRYS_NODISCARD LayoutRect LocalCaretRect() const noexcept override
     {
@@ -630,7 +632,7 @@ namespace krys::boo
 
     void SetNodeFlags(VisibleSelection &selection, bool value) noexcept;
 
-    void RespondToNodeModification(dom::Node &node, bool anchorRemoved, bool focusRemoved, bool baseRemoved,
+    void RespondToNodeModification(Node &node, bool anchorRemoved, bool focusRemoved, bool baseRemoved,
                                    bool extentRemoved, bool startRemoved, bool endRemoved) noexcept;
 
     void FocusedOrActiveStateChanged() noexcept;

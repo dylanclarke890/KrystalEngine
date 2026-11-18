@@ -46,10 +46,10 @@ namespace krys::boo::css
                 "Compounding must be 0 for ConsumeCombinator.");
   static_assert(sizeof(Selector) == sizeof(SameSizeAsSelector), "Selector should remain small.");
   static_assert(sizeof(CSSOMStringAtom) == sizeof(StringAtomStorage), "Selector::Value() casts the union.");
-  static_assert(sizeof(dom::QualifiedName) == sizeof(dom::QualifiedNameStorage *),
+  static_assert(sizeof(QualifiedName) == sizeof(QualifiedNameStorage *),
                 "Selector::TagQualifiedName() casts the union.");
 
-  Selector::Selector(const dom::QualifiedName &name, bool tagIsForNamespaceRule) noexcept
+  Selector::Selector(const QualifiedName &name, bool tagIsForNamespaceRule) noexcept
       : _match(SelectorMatch::Type)
   {
     SetFlag(SelectorFlag::TagIsForNamespaceRule, tagIsForNamespaceRule);
@@ -899,7 +899,7 @@ namespace krys::boo::css
 
 #pragma endregion
 
-  void Selector::SetAttribute(const dom::QualifiedName &name, AttributeCaseFlag caseFlag) noexcept
+  void Selector::SetAttribute(const QualifiedName &name, AttributeCaseFlag caseFlag) noexcept
   {
     CreateRareData();
     _data.Rare->Attribute = name;

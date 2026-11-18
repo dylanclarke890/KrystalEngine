@@ -37,11 +37,14 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
   class Element;
+}
 
+namespace krys::boo::dom
+{
   /// @brief Whether a token, in ASCII lowercase, is one of the supported tokens of a list's element and
   /// attribute name. Empty when they define no supported tokens.
   /// @see https://dom.spec.whatwg.org/#concept-supported-tokens
@@ -53,7 +56,7 @@ namespace krys::boo::dom
   /// @see https://dom.spec.whatwg.org/#interface-domtokenlist
   class DOMTokenList
   {
-    friend class Element;
+    friend class boo::Element;
     friend class ElementAlgorithms;
     friend class HTMLCollectionAlgorithms;
 

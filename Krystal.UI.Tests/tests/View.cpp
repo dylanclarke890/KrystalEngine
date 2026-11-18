@@ -63,7 +63,7 @@ namespace krys::ui::tests
   {
     /// @brief Clicks @p element as a user does, with the window's transient activation that opening a picker
     /// needs.
-    void UserClick(boo::html::HTMLElement &element) noexcept
+    void UserClick(boo::HTMLElement &element) noexcept
     {
       element.NodeDocument().Window()->NotifyActivated();
       element.Click();
@@ -137,7 +137,7 @@ namespace krys::ui::tests
       }
     };
 
-    KRYS_NODISCARD int32 WidthOf(View &view, boo::dom::DOMStringView id)
+    KRYS_NODISCARD int32 WidthOf(View &view, boo::DOMStringView id)
     {
       auto element = view.Document().GetElementById(id);
       REQUIRE(element);
@@ -187,10 +187,9 @@ namespace krys::ui::tests
       {
         auto &mouse = static_cast<boo::dom::MouseEvent &>(event);
         auto type = mouse.Type().View();
-        auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
-        auto *element = node ? DynamicDowncast<boo::dom::Element>(*node) : nullptr;
-        auto id =
-          element ? element->GetAttribute(u8"id").value_or(boo::dom::DOMString()) : boo::dom::DOMString();
+        auto *node = DynamicDowncast<boo::Node>(event.Target().get());
+        auto *element = node ? DynamicDowncast<boo::Element>(*node) : nullptr;
+        auto id = element ? element->GetAttribute(u8"id").value_or(boo::DOMString()) : boo::DOMString();
         Records.push_back(std::string(type.begin(), type.end()) + ":" + std::string(id.begin(), id.end())
                           + "/" + std::to_string(mouse.Detail()) + "/" + std::to_string(mouse.Buttons()));
       }
@@ -289,7 +288,7 @@ namespace krys::ui::tests
 
     SECTION("The input method's rect is in its pixels")
     {
-      auto &field = Downcast<boo::html::HTMLElement>(*view.Document().GetElementById(u8"field"));
+      auto &field = Downcast<boo::HTMLElement>(*view.Document().GetElementById(u8"field"));
       field.Focus();
       view.UpdateRendering();
       auto rect = view.TextInputRect();
@@ -329,8 +328,8 @@ namespace krys::ui::tests
     List<boo::dom::EventListenerHandle> handles;
     for (auto type : {u8"wheel", u8"pointerdown", u8"dragenter"})
     {
-      handles.push_back(view.Document().AddEventListener(boo::dom::DOMStringAtom(type),
-                                                         Func<void(boo::dom::Event &)>(record)));
+      handles.push_back(
+        view.Document().AddEventListener(boo::DOMStringAtom(type), Func<void(boo::dom::Event &)>(record)));
     }
 
     SECTION("The wheel and a touchpad's pan, whose pixels are the view's")
@@ -417,8 +416,8 @@ namespace krys::ui::tests
     run(view);
     view.MouseMoved({10, 10});
     run(view);
-    auto first = CreateWeakPtr<boo::dom::Document>(&view.Document());
-    auto box = CreateWeakPtr<boo::dom::Node>(view.Document().GetElementById(u8"box").get());
+    auto first = CreateWeakPtr<boo::Document>(&view.Document());
+    auto box = CreateWeakPtr<boo::Node>(view.Document().GetElementById(u8"box").get());
     REQUIRE(first);
 
     view.LoadHTML(u8"<!DOCTYPE html><p>Another page</p>");
@@ -457,13 +456,13 @@ namespace krys::ui::tests
       }
       auto picture = view.Document().GetElementById(u8"image");
       REQUIRE(picture);
-      CHECK(Downcast<boo::html::HTMLImageElement>(*picture).NaturalWidth() > 0);
+      CHECK(Downcast<boo::HTMLImageElement>(*picture).NaturalWidth() > 0);
       auto text = view.Document().GetElementById(u8"text");
       REQUIRE(text);
       CHECK(text->OffsetWidth() == 40);
     };
     loadFromFiles();
-    auto fromFiles = CreateWeakPtr<boo::dom::Document>(&view.Document());
+    auto fromFiles = CreateWeakPtr<boo::Document>(&view.Document());
     view.LoadHTML(u8"<!DOCTYPE html><p>Another page</p>");
     WaitForLoad(view);
     run(view);
@@ -473,13 +472,13 @@ namespace krys::ui::tests
     loadFromFiles();
     std::filesystem::remove_all(directory);
 
-    WeakPtr<boo::dom::Document> second;
+    WeakPtr<boo::Document> second;
     {
       View other({200, 100});
       other.LoadHTML(utf8_string(page));
       WaitForLoad(other);
       run(other);
-      second = CreateWeakPtr<boo::dom::Document>(&other.Document());
+      second = CreateWeakPtr<boo::Document>(&other.Document());
       REQUIRE(second);
     }
     CHECK_FALSE(second);
@@ -576,7 +575,7 @@ namespace krys::ui::tests
     {
       int32 &Constructed;
 
-      Counted(boo::html::HTMLElement &element, int32 &constructed) noexcept
+      Counted(boo::HTMLElement &element, int32 &constructed) noexcept
           : CustomElement(element), Constructed(constructed)
       {
         ++Constructed;
@@ -588,16 +587,16 @@ namespace krys::ui::tests
     view.LoadHTML(u8"<!DOCTYPE html><x-counter id=old></x-counter>");
     WaitForLoad(view);
     REQUIRE(view
-              .DefineCustomElement(u8"x-counter", [&](boo::html::HTMLElement &element)
+              .DefineCustomElement(u8"x-counter", [&](boo::HTMLElement &element)
                                    { return CreateUnique<Counted>(element, constructed); })
               .has_value());
     CHECK(view
-            .DefineCustomElement(u8"x-counter", [](boo::html::HTMLElement &)
-                                 { return UniquePtr<boo::html::CustomElement> {}; })
+            .DefineCustomElement(u8"x-counter",
+                                 [](boo::HTMLElement &) { return UniquePtr<boo::html::CustomElement> {}; })
             .error()
           == "x-counter is already defined");
     CHECK_FALSE(view
-                  .DefineCustomElement(u8"counter", [](boo::html::HTMLElement &)
+                  .DefineCustomElement(u8"counter", [](boo::HTMLElement &)
                                        { return UniquePtr<boo::html::CustomElement> {}; })
                   .has_value());
 
@@ -774,7 +773,7 @@ namespace krys::ui::tests
     Ref<boo::dom::EventListenerCallback> recorder = CreateRef<ClickRecorder>(records);
     for (auto type : {u8"mousedown", u8"mouseup", u8"click", u8"auxclick", u8"dblclick"})
     {
-      view.Document().AddEventListener(boo::dom::DOMStringAtom(type), Ref {recorder}, false);
+      view.Document().AddEventListener(boo::DOMStringAtom(type), Ref {recorder}, false);
     }
 
     // The cursor follows the mouse: the arrow over a box, the I-beam over text and the style's cursor.
@@ -838,8 +837,8 @@ namespace krys::ui::tests
     List<boo::dom::EventListenerHandle> handles;
     for (auto type : {u8"mousedown", u8"wheel", u8"touchstart"})
     {
-      handles.push_back(view.Document().AddEventListener(boo::dom::DOMStringAtom(type),
-                                                         Func<void(boo::dom::Event &)>(record)));
+      handles.push_back(
+        view.Document().AddEventListener(boo::DOMStringAtom(type), Func<void(boo::dom::Event &)>(record)));
     }
 
     view.MousePressed({10, 20}, pal::MouseButton::Left);
@@ -875,10 +874,10 @@ namespace krys::ui::tests
     auto record = [&](boo::dom::Event &event)
     {
       auto type = event.Type().View();
-      auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
-      auto *element = node ? DynamicDowncast<boo::dom::Element>(*node) : nullptr;
-      auto id = element ? element->GetAttribute(u8"id").value_or(boo::dom::DOMString())
-                        : boo::dom::DOMString(u8"document");
+      auto *node = DynamicDowncast<boo::Node>(event.Target().get());
+      auto *element = node ? DynamicDowncast<boo::Element>(*node) : nullptr;
+      auto id =
+        element ? element->GetAttribute(u8"id").value_or(boo::DOMString()) : boo::DOMString(u8"document");
       std::string text = std::string(type.begin(), type.end()) + ":" + std::string(id.begin(), id.end());
       if (event.Type() == boo::event_names::MouseMove)
       {
@@ -891,8 +890,8 @@ namespace krys::ui::tests
     List<boo::dom::EventListenerHandle> handles;
     for (auto type : {u8"pointerlockchange", u8"pointerlockerror", u8"mousemove"})
     {
-      handles.push_back(view.Document().AddEventListener(boo::dom::DOMStringAtom(type),
-                                                         Func<void(boo::dom::Event &)>(record)));
+      handles.push_back(
+        view.Document().AddEventListener(boo::DOMStringAtom(type), Func<void(boo::dom::Event &)>(record)));
     }
 
     // A press on `a` asks to lock the pointer to it (a press is a user gesture).
@@ -1010,10 +1009,9 @@ namespace krys::ui::tests
     auto record = [&](boo::dom::Event &event)
     {
       auto type = event.Type().View();
-      auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
-      auto *element = node ? DynamicDowncast<boo::dom::Element>(*node) : nullptr;
-      auto id =
-        element ? element->GetAttribute(u8"id").value_or(boo::dom::DOMString()) : boo::dom::DOMString();
+      auto *node = DynamicDowncast<boo::Node>(event.Target().get());
+      auto *element = node ? DynamicDowncast<boo::Element>(*node) : nullptr;
+      auto id = element ? element->GetAttribute(u8"id").value_or(boo::DOMString()) : boo::DOMString();
       std::string text = std::string(type.begin(), type.end()) + ":" + std::string(id.begin(), id.end());
       if (auto *pointer = DynamicDowncast<boo::dom::PointerEvent>(event))
       {
@@ -1037,8 +1035,8 @@ namespace krys::ui::tests
     for (auto type : {u8"pointerdown", u8"pointermove", u8"pointerup", u8"pointercancel", u8"mousedown",
                       u8"mouseup", u8"click", u8"touchstart", u8"touchmove", u8"touchend", u8"touchcancel"})
     {
-      handles.push_back(view.Document().AddEventListener(boo::dom::DOMStringAtom(type),
-                                                         Func<void(boo::dom::Event &)>(record)));
+      handles.push_back(
+        view.Document().AddEventListener(boo::DOMStringAtom(type), Func<void(boo::dom::Event &)>(record)));
     }
 
     auto input = [](pal::PointerType type, pal::PointerAction action, uint32 id = 7)
@@ -1219,10 +1217,9 @@ namespace krys::ui::tests
     auto record = [&](boo::dom::Event &event)
     {
       auto type = event.Type().View();
-      auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
-      auto *element = node ? DynamicDowncast<boo::dom::Element>(*node) : nullptr;
-      auto id =
-        element ? element->GetAttribute(u8"id").value_or(boo::dom::DOMString()) : boo::dom::DOMString();
+      auto *node = DynamicDowncast<boo::Node>(event.Target().get());
+      auto *element = node ? DynamicDowncast<boo::Element>(*node) : nullptr;
+      auto id = element ? element->GetAttribute(u8"id").value_or(boo::DOMString()) : boo::DOMString();
       std::string text = std::string(type.begin(), type.end()) + ":" + std::string(id.begin(), id.end());
       if (auto *pointer = DynamicDowncast<boo::dom::PointerEvent>(event))
       {
@@ -1236,8 +1233,8 @@ namespace krys::ui::tests
     for (auto type : {u8"pointerdown", u8"pointerup", u8"pointercancel", u8"mousedown", u8"mouseup",
                       u8"click", u8"dblclick", u8"contextmenu"})
     {
-      handles.push_back(view.Document().AddEventListener(boo::dom::DOMStringAtom(type),
-                                                         Func<void(boo::dom::Event &)>(record)));
+      handles.push_back(
+        view.Document().AddEventListener(boo::DOMStringAtom(type), Func<void(boo::dom::Event &)>(record)));
     }
     // On the document, touchmove's listeners are passive unless they say otherwise; on `tall` they aren't.
     auto cancel = [&](utf8_stringview type, bool onTall = false)
@@ -1246,7 +1243,7 @@ namespace krys::ui::tests
         onTall ? static_cast<boo::dom::EventTarget &>(*view.Document().GetElementById(u8"tall"))
                : view.Document();
       handles.push_back(target.AddEventListener(
-        boo::dom::DOMStringAtom(type),
+        boo::DOMStringAtom(type),
         Func<void(boo::dom::Event &)>([](boo::dom::Event &event) { event.PreventDefault(); })));
     };
 
@@ -1434,7 +1431,7 @@ namespace krys::ui::tests
                   u8"<div style='height: 2000px'></div>");
     WaitForLoad(view);
     view.UpdateRendering();
-    auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"r"));
+    auto &input = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"r"));
     auto rect = input.GetBoundingClientRect();
     auto y = rect->Y() + rect->Height() / 2;
     uint32 changes = 0;
@@ -1483,7 +1480,7 @@ namespace krys::ui::tests
                   u8"<input type=file id=f accept=image/*>");
     WaitForLoad(view);
     view.UpdateRendering();
-    auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"f"));
+    auto &input = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"f"));
     uint32 changes = 0;
     auto handle = input.AddEventListener(
       u8"change", Func<void(boo::dom::Event &)>([&](boo::dom::Event &) { ++changes; }));
@@ -1692,8 +1689,8 @@ namespace krys::ui::tests
     WaitForLoad(view);
     view.UpdateRendering();
 
-    auto &field = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"field"));
-    auto &area = Downcast<boo::html::HTMLTextAreaElement>(*view.Document().GetElementById(u8"area"));
+    auto &field = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"field"));
+    auto &area = Downcast<boo::HTMLTextAreaElement>(*view.Document().GetElementById(u8"area"));
 
     // A click focuses the field and puts the caret at the end of its text; typing goes into its value.
     view.MousePressed({190, 20}, pal::MouseButton::Left);
@@ -1733,7 +1730,7 @@ namespace krys::ui::tests
     Ref<boo::dom::EventListenerCallback> recorder = CreateRef<KeyRecorder>(records);
     for (auto type : {u8"keydown", u8"keypress", u8"keyup"})
     {
-      view.Document().AddEventListener(boo::dom::DOMStringAtom(type), Ref {recorder}, false);
+      view.Document().AddEventListener(boo::DOMStringAtom(type), Ref {recorder}, false);
     }
 
     // A key that types text: its value is the text, and its release reports the same value.
@@ -2039,7 +2036,7 @@ namespace krys::ui::tests
     CHECK(view.Record()->AsText({}).contains(u8"draw-pattern-native-image"));
     // The <img> loads the same file, from the memory cache.
     CHECK(view.Record()->AsText({}).contains(u8"(draw-native-image"));
-    auto &image = Downcast<boo::html::HTMLImageElement>(*view.Document().GetElementById(u8"img"));
+    auto &image = Downcast<boo::HTMLImageElement>(*view.Document().GetElementById(u8"img"));
     CHECK(image.Complete());
     CHECK(image.NaturalWidth() == 2u);
 
@@ -2119,7 +2116,7 @@ namespace krys::ui::tests
     List<utf8_string> entries;
     for (auto &item : requests[0].Entries->Items())
     {
-      entries.push_back(item.Name + u8"=" + std::get<boo::dom::DOMString>(item.Data));
+      entries.push_back(item.Name + u8"=" + std::get<boo::DOMString>(item.Data));
     }
     CHECK(entries == List<utf8_string> {u8"size=large", u8"empty=", u8"go=1"});
   }
@@ -2179,7 +2176,7 @@ namespace krys::ui::tests
     WaitForLoad(view);
     view.UpdateRendering();
 
-    auto &select = Downcast<boo::html::HTMLSelectElement>(*view.Document().GetElementById(u8"s"));
+    auto &select = Downcast<boo::HTMLSelectElement>(*view.Document().GetElementById(u8"s"));
     auto box = select.GetBoundingClientRect();
     boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
     auto changes = 0;
@@ -2274,7 +2271,7 @@ namespace krys::ui::tests
   namespace
   {
     /// @brief The middle of @p element, in its view's viewport offset by @p origin.
-    KRYS_NODISCARD boo::IntPoint CentreOf(boo::dom::Element &element, boo::IntPoint origin = {}) noexcept
+    KRYS_NODISCARD boo::IntPoint CentreOf(boo::Element &element, boo::IntPoint origin = {}) noexcept
     {
       auto box = element.GetBoundingClientRect();
       return boo::IntPoint(origin.X() + static_cast<int32>(box->X() + box->Width() / 2),
@@ -2313,7 +2310,7 @@ namespace krys::ui::tests
     WaitForLoad(view);
     view.UpdateRendering();
 
-    auto &select = Downcast<boo::html::HTMLSelectElement>(*view.Document().GetElementById(u8"s"));
+    auto &select = Downcast<boo::HTMLSelectElement>(*view.Document().GetElementById(u8"s"));
     auto box = select.GetBoundingClientRect();
     boo::IntPoint inside((static_cast<int32>(box->X()) + 5) * 2, (static_cast<int32>(box->Y()) + 5) * 2);
     view.MousePressed(inside, pal::MouseButton::Left);
@@ -2348,7 +2345,7 @@ namespace krys::ui::tests
     WaitForLoad(view);
     view.UpdateRendering();
 
-    auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"d"));
+    auto &input = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"d"));
     auto box = input.GetBoundingClientRect();
     boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
     auto changes = CreateRef<EventCounter>();
@@ -2440,7 +2437,7 @@ namespace krys::ui::tests
     view.LoadHTML(u8"<!DOCTYPE html><input type=month id=m value=2026-09>");
     WaitForLoad(view);
     view.UpdateRendering();
-    auto &month = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"m"));
+    auto &month = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"m"));
     UserClick(month);
     auto *months = static_cast<DateTimeChooserOverlay *>(view.ShownOverlay());
     REQUIRE(months);
@@ -2454,7 +2451,7 @@ namespace krys::ui::tests
     view.LoadHTML(u8"<!DOCTYPE html><input type=week id=w value=2026-W10>");
     WaitForLoad(view);
     view.UpdateRendering();
-    auto &week = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"w"));
+    auto &week = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"w"));
     UserClick(week);
     auto *weeks = static_cast<DateTimeChooserOverlay *>(view.ShownOverlay());
     REQUIRE(weeks);
@@ -2473,7 +2470,7 @@ namespace krys::ui::tests
     WaitForLoad(view);
     view.UpdateRendering();
 
-    auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"c"));
+    auto &input = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"c"));
     auto box = input.GetBoundingClientRect();
     boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
     auto changes = CreateRef<EventCounter>();
@@ -2538,7 +2535,7 @@ namespace krys::ui::tests
 
     SECTION("A date input lists its valid suggestions, then Other for the calendar")
     {
-      auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"d"));
+      auto &input = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"d"));
       UserClick(input);
       auto *picker = static_cast<DateTimeChooserOverlay *>(view.ShownOverlay());
       REQUIRE(picker);
@@ -2573,7 +2570,7 @@ namespace krys::ui::tests
 
     SECTION("A colour input's palette starts with its colour suggestions")
     {
-      auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"c"));
+      auto &input = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"c"));
       UserClick(input);
       auto *picker = static_cast<ColorChooserOverlay *>(view.ShownOverlay());
       REQUIRE(picker);
@@ -2594,7 +2591,7 @@ namespace krys::ui::tests
     WaitForLoad(view);
     view.UpdateRendering();
 
-    auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"t"));
+    auto &input = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"t"));
     auto box = input.GetBoundingClientRect();
     boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
     auto changes = CreateRef<EventCounter>();
@@ -2676,8 +2673,8 @@ namespace krys::ui::tests
     WaitForLoad(view);
     view.UpdateRendering();
 
-    auto &form = Downcast<boo::html::HTMLFormElement>(*view.Document().GetElementById(u8"f"));
-    auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"t"));
+    auto &form = Downcast<boo::HTMLFormElement>(*view.Document().GetElementById(u8"f"));
+    auto &input = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"t"));
     auto box = input.GetBoundingClientRect();
     auto shown = [&]()
     {
@@ -2849,8 +2846,8 @@ namespace krys::ui::tests
     CHECK_FALSE(view.Document().Hidden());
 
     uint32 changes = 0;
-    auto handle = view.Document().AddEventListener(
-      boo::dom::DOMStringAtom(boo::event_names::VisibilityChange), [&](boo::dom::Event &) { ++changes; });
+    auto handle = view.Document().AddEventListener(boo::DOMStringAtom(boo::event_names::VisibilityChange),
+                                                   [&](boo::dom::Event &) { ++changes; });
     view.SetVisible(false);
     CHECK_FALSE(view.IsVisible());
     CHECK(view.Document().Hidden());

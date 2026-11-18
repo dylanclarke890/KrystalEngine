@@ -37,7 +37,7 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
 }
@@ -80,7 +80,7 @@ namespace krys::boo::style
 
     ~MatchedDeclarationsCache() noexcept;
 
-    KRYS_NODISCARD static bool IsCacheable(const dom::Element &, const RenderStyle &,
+    KRYS_NODISCARD static bool IsCacheable(const Element &, const RenderStyle &,
                                            const RenderStyle &parentStyle) noexcept;
 
     KRYS_NODISCARD static uint32 ComputeHash(const MatchResult &,

@@ -27,13 +27,10 @@
 
 #include "Krystal.Booey/Rendering/Replaced/RenderReplaced.hpp"
 
-namespace krys::boo::html
-{
-  class HTMLCanvasElement;
-}
-
 namespace krys::boo
 {
+  class HTMLCanvasElement;
+
   /// @brief The renderer of a `<canvas>`: replaced content at the canvas's size, which its context draws.
   class RenderHTMLCanvas final : public RenderReplaced
   {
@@ -41,11 +38,11 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderHTMLCanvas);
 
   public:
-    RenderHTMLCanvas(html::HTMLCanvasElement &element, RenderStyle &&style) noexcept;
+    RenderHTMLCanvas(HTMLCanvasElement &element, RenderStyle &&style) noexcept;
 
     ~RenderHTMLCanvas() noexcept override;
 
-    KRYS_NODISCARD html::HTMLCanvasElement &CanvasElement() const noexcept;
+    KRYS_NODISCARD HTMLCanvasElement &CanvasElement() const noexcept;
 
     /// @brief Follows the canvas's size, zoomed, as the intrinsic size.
     void CanvasSizeChanged() noexcept;

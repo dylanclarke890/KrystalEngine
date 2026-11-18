@@ -27,14 +27,14 @@
 
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGUnknownElement : public SVGElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGUnknownElement);
 
   public:
-    SVGUnknownElement(dom::Document &document) noexcept;
+    SVGUnknownElement(Document &document) noexcept;
 
   private:
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final
@@ -44,8 +44,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGUnknownElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGUnknownElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGUnknownElement();
   }

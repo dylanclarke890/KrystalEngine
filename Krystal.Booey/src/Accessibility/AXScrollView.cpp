@@ -58,7 +58,7 @@ namespace krys::boo
     return static_cast<LocalFrameView *>(_scrollView.get());
   }
 
-  dom::Document *AXScrollView::GetDocument() const noexcept
+  Document *AXScrollView::GetDocument() const noexcept
   {
     auto *view = ScrollView();
     return view ? view->Frame().Document() : nullptr;

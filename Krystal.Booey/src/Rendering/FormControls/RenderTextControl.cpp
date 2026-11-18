@@ -33,7 +33,7 @@
 
 namespace krys::boo
 {
-  RenderTextControl::RenderTextControl(Type type, html::HTMLTextFormControlElement &element,
+  RenderTextControl::RenderTextControl(Type type, HTMLTextFormControlElement &element,
                                        RenderStyle &&style) noexcept
       : RenderBlockFlow(type, element, krys::move(style), {BlockFlowFlag::IsTextControl})
   {
@@ -42,9 +42,9 @@ namespace krys::boo
 
   RenderTextControl::~RenderTextControl() noexcept = default;
 
-  html::HTMLTextFormControlElement &RenderTextControl::TextFormControlElement() const noexcept
+  HTMLTextFormControlElement &RenderTextControl::TextFormControlElement() const noexcept
   {
-    return Downcast<html::HTMLTextFormControlElement>(*GetElement());
+    return Downcast<HTMLTextFormControlElement>(*GetElement());
   }
 
   RefPtr<html::TextControlInnerTextElement> RenderTextControl::InnerTextElement() const noexcept
@@ -294,7 +294,7 @@ namespace krys::boo
     }
   }
 
-  RenderTextControlInnerContainer::RenderTextControlInnerContainer(dom::Element &element,
+  RenderTextControlInnerContainer::RenderTextControlInnerContainer(Element &element,
                                                                    RenderStyle &&style) noexcept
       : RenderFlexibleBox(Type::TextControlInnerContainer, element, krys::move(style))
   {

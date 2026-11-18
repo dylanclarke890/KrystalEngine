@@ -32,9 +32,9 @@
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Core/Assert.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSLayerStatementRule::CSSLayerStatementRule(LayerRule &rule, CSSStyleSheet *parent) noexcept
+  CSSLayerStatementRule::CSSLayerStatementRule(css::LayerRule &rule, CSSStyleSheet *parent) noexcept
       : CSSRule(parent), _layerRule(ShareRef(rule))
   {
     krys_debug_assert(rule.IsStatement());
@@ -42,7 +42,8 @@ namespace krys::boo::css
 
   CSSLayerStatementRule::~CSSLayerStatementRule() noexcept = default;
 
-  Ref<CSSLayerStatementRule> CSSLayerStatementRule::Create(LayerRule &rule, CSSStyleSheet *parent) noexcept
+  Ref<CSSLayerStatementRule> CSSLayerStatementRule::Create(css::LayerRule &rule,
+                                                           CSSStyleSheet *parent) noexcept
   {
     return AdoptRef(*new CSSLayerStatementRule(rule, parent));
   }
@@ -72,14 +73,14 @@ namespace krys::boo::css
 
     for (const auto &name : _layerRule->NameList())
     {
-      result.push_back(StringFromCascadeLayerName(name));
+      result.push_back(css::StringFromCascadeLayerName(name));
     }
 
     return result;
   }
 
-  void CSSLayerStatementRule::Reattach(Rule &rule) noexcept
+  void CSSLayerStatementRule::Reattach(css::Rule &rule) noexcept
   {
-    _layerRule = ShareRef(Downcast<LayerRule>(rule));
+    _layerRule = ShareRef(Downcast<css::LayerRule>(rule));
   }
 }

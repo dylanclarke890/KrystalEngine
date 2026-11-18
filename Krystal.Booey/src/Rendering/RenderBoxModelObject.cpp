@@ -67,7 +67,7 @@ namespace krys::boo
     }
   }
 
-  RenderBoxModelObject::RenderBoxModelObject(Type type, dom::Element &element, RenderStyle &&style,
+  RenderBoxModelObject::RenderBoxModelObject(Type type, Element &element, RenderStyle &&style,
                                              EnumSet<TypeFlag> baseTypeFlags,
                                              TypeSpecificFlags typeSpecificFlags) noexcept
       : RenderLayerModelObject(type, element, krys::move(style), baseTypeFlags | TypeFlag::IsBoxModelObject,
@@ -76,7 +76,7 @@ namespace krys::boo
     krys_debug_assert(IsRenderBoxModelObject());
   }
 
-  RenderBoxModelObject::RenderBoxModelObject(Type type, dom::Document &document, RenderStyle &&style,
+  RenderBoxModelObject::RenderBoxModelObject(Type type, Document &document, RenderStyle &&style,
                                              EnumSet<TypeFlag> baseTypeFlags,
                                              TypeSpecificFlags typeSpecificFlags) noexcept
       : RenderLayerModelObject(type, document, krys::move(style), baseTypeFlags | TypeFlag::IsBoxModelObject,
@@ -1262,7 +1262,7 @@ namespace krys::boo
                                                               const PaintInfo &paintInfo) const noexcept
   {
     // Some document types force synchronous decoding.
-    if (Is<html::ImageDocument>(GetDocument()))
+    if (Is<ImageDocument>(GetDocument()))
     {
       return DecodingMode::Synchronous;
     }
@@ -1302,7 +1302,7 @@ namespace krys::boo
       return IsVisibleInViewport() ? DecodingMode::Synchronous : DecodingMode::Asynchronous;
     };
 
-    if (auto *imgElement = DynamicDowncast<html::HTMLImageElement>(GetElement()))
+    if (auto *imgElement = DynamicDowncast<HTMLImageElement>(GetElement()))
     {
       // <img decoding="sync"> forces synchronous decoding.
       if (imgElement->GetDecodingMode() == DecodingMode::Synchronous)

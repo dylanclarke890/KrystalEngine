@@ -77,51 +77,50 @@
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include <initializer_list>
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLElement::HTMLElement(dom::Document &document, HTMLElementInterface interface, HTMLElementFlags flags,
-                           dom::NodeFlags nodeFlags) noexcept
+  HTMLElement::HTMLElement(Document &document, html::HTMLElementInterface interface,
+                           html::HTMLElementFlags flags, dom::NodeFlags nodeFlags) noexcept
       : StyledElement(document, dom::NullQualifiedName(), nodeFlags | dom::NodeFlags::IsHTMLElement),
         _flags(flags), _interface(interface)
   {
   }
 
-  HTMLElement::HTMLElement(dom::Document &document, HTMLElementInterface interface,
-                           dom::DOMStringAtom localName, HTMLElementFlags flags,
-                           dom::NodeFlags nodeFlags) noexcept
-      : StyledElement(document, dom::QualifiedName(infra::namespaces::HTML, null, krys::move(localName)),
+  HTMLElement::HTMLElement(Document &document, html::HTMLElementInterface interface, DOMStringAtom localName,
+                           html::HTMLElementFlags flags, dom::NodeFlags nodeFlags) noexcept
+      : StyledElement(document, QualifiedName(infra::namespaces::HTML, null, krys::move(localName)),
                       nodeFlags | dom::NodeFlags::IsHTMLElement),
         _flags(flags), _interface(interface)
   {
   }
 
-  HTMLElement::HTMLElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::None)
+  HTMLElement::HTMLElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::None)
   {
   }
 
 #pragma region HTMLElement
 
-  dom::DOMString HTMLElement::Title() const noexcept
+  DOMString HTMLElement::Title() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"title").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"title").value_or(u8"");
   }
 
-  void HTMLElement::Title(dom::DOMString value) noexcept
+  void HTMLElement::Title(DOMString value) noexcept
   {
-    CEReactionsScope ceReactions;
-    Reflect<dom::DOMString>(*this, u8"title", krys::move(value));
+    html::CEReactionsScope ceReactions;
+    html::Reflect<DOMString>(*this, u8"title", krys::move(value));
   }
 
-  dom::DOMString HTMLElement::Lang() const noexcept
+  DOMString HTMLElement::Lang() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"lang").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"lang").value_or(u8"");
   }
 
-  void HTMLElement::Lang(dom::DOMString value) noexcept
+  void HTMLElement::Lang(DOMString value) noexcept
   {
-    CEReactionsScope ceReactions;
-    Reflect<dom::DOMString>(*this, u8"lang", krys::move(value));
+    html::CEReactionsScope ceReactions;
+    html::Reflect<DOMString>(*this, u8"lang", krys::move(value));
   }
 
   bool HTMLElement::Translate() const noexcept
@@ -131,7 +130,7 @@ namespace krys::boo::html
     return IsTranslateEnabled(*this);
   }
 
-  bool HTMLElement::IsTranslateEnabled(const dom::Element &element) noexcept
+  bool HTMLElement::IsTranslateEnabled(const Element &element) noexcept
   {
     for (auto *ancestor = &element; ancestor; ancestor = ancestor->ParentElement())
     {
@@ -140,13 +139,13 @@ namespace krys::boo::html
       // then the element's translation mode is in the no-translate state.
       if (auto *htmlElement = DynamicDowncast<HTMLElement>(*ancestor))
       {
-        auto state = EnumeratedAttribute<"translate", HTMLElement>::ResolveState(
-          Reflect<dom::DOMString>(*htmlElement, u8"translate"));
-        if (state == TranslateAttributeState::Yes)
+        auto state = html::EnumeratedAttribute<"translate", HTMLElement>::ResolveState(
+          html::Reflect<DOMString>(*htmlElement, u8"translate"));
+        if (state == html::TranslateAttributeState::Yes)
         {
           return true;
         }
-        if (state == TranslateAttributeState::No)
+        if (state == html::TranslateAttributeState::No)
         {
           return false;
         }
@@ -164,29 +163,29 @@ namespace krys::boo::html
   {
     // On setting, it must set the content attribute's value to "yes" if the new value is true, and set the
     // content attribute's value to "no" otherwise.
-    CEReactionsScope ceReactions;
-    Reflect<dom::DOMString>(*this, u8"translate", value ? u8"yes" : u8"no");
+    html::CEReactionsScope ceReactions;
+    html::Reflect<DOMString>(*this, u8"translate", value ? u8"yes" : u8"no");
   }
 
-  dom::DOMString HTMLElement::Dir() const noexcept
+  DOMString HTMLElement::Dir() const noexcept
   {
-    return ReflectEnumerated<"dir">(*this);
+    return html::ReflectEnumerated<"dir">(*this);
   }
 
-  void HTMLElement::Dir(dom::DOMString value) noexcept
+  void HTMLElement::Dir(DOMString value) noexcept
   {
-    CEReactionsScope ceReactions;
-    Reflect<dom::DOMString>(*this, u8"dir", krys::move(value));
+    html::CEReactionsScope ceReactions;
+    html::Reflect<DOMString>(*this, u8"dir", krys::move(value));
   }
 
   // https://html.spec.whatwg.org/#dom-hidden
-  BoolOr<dom::DOMString> HTMLElement::Hidden() const noexcept
+  BoolOr<DOMString> HTMLElement::Hidden() const noexcept
   {
-    auto value = Reflect<dom::DOMString>(*this, u8"hidden");
+    auto value = html::Reflect<DOMString>(*this, u8"hidden");
 
     // 1. If the hidden attribute is in the Hidden Until Found state, then return "until-found".
-    auto state = EnumeratedAttribute<"hidden", HTMLElement>::ResolveState(value);
-    if (state == HiddenAttributeState::UntilFound)
+    auto state = html::EnumeratedAttribute<"hidden", HTMLElement>::ResolveState(value);
+    if (state == html::HiddenAttributeState::UntilFound)
     {
       return u8"until-found";
     }
@@ -194,21 +193,21 @@ namespace krys::boo::html
     // 2. If the hidden attribute is set, then return true.
     // 3. Return false.
     // (Any other value, and the missing value, is in the Hidden state.)
-    return state == HiddenAttributeState::Hidden;
+    return state == html::HiddenAttributeState::Hidden;
   }
 
   bool HTMLElement::IsHiddenUntilFound() const noexcept
   {
-    return EnumeratedAttribute<"hidden", HTMLElement>::ResolveState(GetAttribute(u8"hidden"))
-           == HiddenAttributeState::UntilFound;
+    return html::EnumeratedAttribute<"hidden", HTMLElement>::ResolveState(GetAttribute(u8"hidden"))
+           == html::HiddenAttributeState::UntilFound;
   }
 
   // https://html.spec.whatwg.org/#dom-hidden
   // (The setter's steps are split between the overloads by the given value's type; a null value is the
   // empty string's overload.)
-  void HTMLElement::Hidden(const dom::DOMString &value) noexcept
+  void HTMLElement::Hidden(const DOMString &value) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     // 1. If the given value is a string that is an ASCII case-insensitive match for "until-found", then set
     //    the hidden attribute to "until-found".
     if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"until-found"))
@@ -230,7 +229,7 @@ namespace krys::boo::html
   // https://html.spec.whatwg.org/#dom-hidden
   void HTMLElement::Hidden(bool value) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     // 7. Otherwise, set the hidden attribute to the empty string.
     if (value)
     {
@@ -246,7 +245,7 @@ namespace krys::boo::html
   // https://html.spec.whatwg.org/#dom-hidden
   void HTMLElement::Hidden(double value) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     // NOLINTBEGIN(bugprone-branch-clone): the spec's steps, in order.
     // 5. Otherwise, if the given value is 0, then remove the hidden attribute.
     if (value == 0)
@@ -268,13 +267,13 @@ namespace krys::boo::html
 
   bool HTMLElement::Inert() const noexcept
   {
-    return Reflect<bool>(*this, u8"inert");
+    return html::Reflect<bool>(*this, u8"inert");
   }
 
   void HTMLElement::Inert(bool value) noexcept
   {
-    CEReactionsScope ceReactions;
-    Reflect<bool>(*this, u8"inert", krys::move(value));
+    html::CEReactionsScope ceReactions;
+    html::Reflect<bool>(*this, u8"inert", krys::move(value));
   }
 
   bool HTMLElement::CanBeActuallyDisabled() const noexcept
@@ -318,7 +317,7 @@ namespace krys::boo::html
 
   bool HTMLElement::MatchesReadWritePseudoClass() const noexcept
   {
-    return EditabilityFromContentEditableAttr(*this) != dom::Node::Editability::ReadOnly;
+    return EditabilityFromContentEditableAttr(*this) != Node::Editability::ReadOnly;
   }
 
   RefPtr<dom::NodeList> HTMLElement::Labels() noexcept
@@ -333,7 +332,7 @@ namespace krys::boo::html
     {
       return labels;
     }
-    Ref<dom::NodeList> labels = CreateRef<LabelsNodeList>(*this);
+    Ref<dom::NodeList> labels = CreateRef<html::LabelsNodeList>(*this);
     cachedLabels = CreateWeakPtr<dom::NodeList>(labels.get());
     return labels;
   }
@@ -352,15 +351,15 @@ namespace krys::boo::html
                              dom::SimulatedClickSource::Bindings);
   }
 
-  dom::DOMString HTMLElement::AccessKey() const noexcept
+  DOMString HTMLElement::AccessKey() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"accesskey").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"accesskey").value_or(u8"");
   }
 
-  void HTMLElement::AccessKey(dom::DOMString value) noexcept
+  void HTMLElement::AccessKey(DOMString value) noexcept
   {
-    CEReactionsScope ceReactions;
-    Reflect<dom::DOMString>(*this, u8"accesskey", krys::move(value));
+    html::CEReactionsScope ceReactions;
+    html::Reflect<DOMString>(*this, u8"accesskey", krys::move(value));
   }
 
   bool HTMLElement::AccessKeyAction(bool sendMouseEvents) noexcept
@@ -371,21 +370,21 @@ namespace krys::boo::html
                                              : dom::SimulatedClickMouseEventOptions::SendNoEvents);
   }
 
-  dom::DOMString HTMLElement::AccessKeyLabel() const noexcept
+  DOMString HTMLElement::AccessKeyLabel() const noexcept
   {
     // The modifier is the one EventHandler::HandleAccessKey looks for.
     auto key = AssignedAccessKey();
-    return key.empty() ? key : dom::DOMString(u8"Alt+") + key;
+    return key.empty() ? key : DOMString(u8"Alt+") + key;
   }
 
   bool HTMLElement::Draggable() const noexcept
   {
-    auto value = Reflect<dom::DOMString>(*this, u8"draggable");
-    switch (EnumeratedAttribute<"draggable", HTMLElement>::ResolveState(value))
+    auto value = html::Reflect<DOMString>(*this, u8"draggable");
+    switch (html::EnumeratedAttribute<"draggable", HTMLElement>::ResolveState(value))
     {
-      case DraggableAttributeState::True:  return true;
-      case DraggableAttributeState::False: return false;
-      case DraggableAttributeState::Auto:
+      case html::DraggableAttributeState::True:  return true;
+      case html::DraggableAttributeState::False: return false;
+      case html::DraggableAttributeState::Auto:
       {
         // If the element is an img element, an object element that represents an image, or an a element with
         // an href content attribute, the draggable IDL attribute must return true; otherwise, the draggable
@@ -400,7 +399,7 @@ namespace krys::boo::html
 
   void HTMLElement::Draggable(bool value) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     dom::ElementAlgorithms::SetAttributeValue(*this, u8"draggable", value ? u8"true" : u8"false");
   }
 
@@ -412,27 +411,28 @@ namespace krys::boo::html
     {
       switch (element.TagQualifiedName().TagName())
       {
-        case TagName::button:
-        case TagName::fieldset:
-        case TagName::input:
-        case TagName::output:
-        case TagName::select:
-        case TagName::textarea: break;
-        default:                return nullptr;
+        case html::TagName::button:
+        case html::TagName::fieldset:
+        case html::TagName::input:
+        case html::TagName::output:
+        case html::TagName::select:
+        case html::TagName::textarea: break;
+        default:                      return nullptr;
       }
       auto *formAssociated = const_cast<HTMLElement &>(element).AsFormAssociatedElement();
       return formAssociated ? formAssociated->Form() : nullptr;
     }
 
     /// @see https://html.spec.whatwg.org/#own-autocapitalization-hint
-    KRYS_NODISCARD AutocapitalizeAttributeState OwnAutocapitalizationHint(const HTMLElement &element) noexcept
+    KRYS_NODISCARD html::AutocapitalizeAttributeState
+      OwnAutocapitalizationHint(const HTMLElement &element) noexcept
     {
       // 1. If the autocapitalize content attribute is present on element, and its value is not the empty
       //    string, return the state of the attribute.
       auto value = element.GetAttribute(u8"autocapitalize");
       if (value && !value->empty())
       {
-        return EnumeratedAttribute<"autocapitalize", HTMLElement>::ResolveState(value);
+        return html::EnumeratedAttribute<"autocapitalize", HTMLElement>::ResolveState(value);
       }
       // 2. If element is an autocapitalize-and-autocorrect inheriting element and has a non-null form owner,
       //    return the own autocapitalization hint of element's form owner.
@@ -441,34 +441,35 @@ namespace krys::boo::html
         return OwnAutocapitalizationHint(*form);
       }
       // 3. Return Default.
-      return AutocapitalizeAttributeState::Default;
+      return html::AutocapitalizeAttributeState::Default;
     }
 
     /// @see https://html.spec.whatwg.org/#used-autocorrection-state
-    KRYS_NODISCARD AutocorrectAttributeState UsedAutocorrectionState(const HTMLElement &element) noexcept
+    KRYS_NODISCARD html::AutocorrectAttributeState
+      UsedAutocorrectionState(const HTMLElement &element) noexcept
     {
       // 1. If element is an input element whose type attribute is in one of the URL, Email, or Password
       //    states, then return Off.
       if (auto *input = DynamicDowncast<HTMLInputElement>(element);
           input && (input->IsURLField() || input->IsEmailField() || input->IsPasswordField()))
       {
-        return AutocorrectAttributeState::Off;
+        return html::AutocorrectAttributeState::Off;
       }
       // 2. If the autocorrect content attribute is present on element, then return the state of the
       //    attribute.
       if (auto value = element.GetAttribute(u8"autocorrect"))
       {
-        return EnumeratedAttribute<"autocorrect", HTMLElement>::ResolveState(value);
+        return html::EnumeratedAttribute<"autocorrect", HTMLElement>::ResolveState(value);
       }
       // 3. If element is an autocapitalize-and-autocorrect inheriting element and has a non-null form owner,
       //    then return the state of element's form owner's autocorrect attribute.
       if (auto *form = AutocapitalizeAndAutocorrectFormOwner(element))
       {
-        return EnumeratedAttribute<"autocorrect", HTMLElement>::ResolveState(
+        return html::EnumeratedAttribute<"autocorrect", HTMLElement>::ResolveState(
           form->GetAttribute(u8"autocorrect"));
       }
       // 4. Return On.
-      return AutocorrectAttributeState::On;
+      return html::AutocorrectAttributeState::On;
     }
   }
 
@@ -482,14 +483,14 @@ namespace krys::boo::html
     // element's parent element's spellcheck IDL attribute would return true; otherwise, if none of those
     // conditions applies, then the attribute must instead return false. (Every element's default behavior is
     // inherit-by-default, but true-by-default without a parent element.)
-    for (const dom::Element *element = this; element; element = element->ParentElement())
+    for (const Element *element = this; element; element = element->ParentElement())
     {
-      switch (
-        EnumeratedAttribute<"spellcheck", HTMLElement>::ResolveState(element->GetAttribute(u8"spellcheck")))
+      switch (html::EnumeratedAttribute<"spellcheck", HTMLElement>::ResolveState(
+        element->GetAttribute(u8"spellcheck")))
       {
-        case SpellcheckAttributeState::True:    return true;
-        case SpellcheckAttributeState::False:   return false;
-        case SpellcheckAttributeState::Default: break;
+        case html::SpellcheckAttributeState::True:    return true;
+        case html::SpellcheckAttributeState::False:   return false;
+        case html::SpellcheckAttributeState::Default: break;
       }
     }
     return true;
@@ -498,64 +499,64 @@ namespace krys::boo::html
   // https://html.spec.whatwg.org/#dom-spellcheck
   void HTMLElement::SpellCheck(bool value) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     // On setting, if the new value is true, then the element's spellcheck content attribute must be set to
     // "true", otherwise it must be set to "false".
     dom::ElementAlgorithms::SetAttributeValue(*this, u8"spellcheck", value ? u8"true" : u8"false");
   }
 
   // https://html.spec.whatwg.org/#dom-writingsuggestions
-  dom::DOMString HTMLElement::WritingSuggestions() const noexcept
+  DOMString HTMLElement::WritingSuggestions() const noexcept
   {
     // Return this's computed writing suggestions value.
     // https://html.spec.whatwg.org/#computed-writing-suggestions-value
-    for (const dom::Element *element = this; element; element = element->ParentElement())
+    for (const Element *element = this; element; element = element->ParentElement())
     {
-      switch (EnumeratedAttribute<"writingsuggestions", HTMLElement>::ResolveState(
+      switch (html::EnumeratedAttribute<"writingsuggestions", HTMLElement>::ResolveState(
         element->GetAttribute(u8"writingsuggestions")))
       {
         // 1. If element's writingsuggestions content attribute is in the False state, return "false".
-        case WritingSuggestionsAttributeState::False:   return u8"false";
+        case html::WritingSuggestionsAttributeState::False:   return u8"false";
         // 2. If element's writingsuggestions content attribute is in the Default state, element has a parent
         //    element, and the computed writing suggestions value of element's parent element is "false", then
         //    return "false".
-        case WritingSuggestionsAttributeState::Default: break;
+        case html::WritingSuggestionsAttributeState::Default: break;
         // 3. Return "true".
-        case WritingSuggestionsAttributeState::True:    return u8"true";
+        case html::WritingSuggestionsAttributeState::True:    return u8"true";
       }
     }
     return u8"true";
   }
 
-  void HTMLElement::WritingSuggestions(dom::DOMString value) noexcept
+  void HTMLElement::WritingSuggestions(DOMString value) noexcept
   {
-    CEReactionsScope ceReactions;
-    ReflectSetter(*this, u8"writingsuggestions", krys::move(value));
+    html::CEReactionsScope ceReactions;
+    html::ReflectSetter(*this, u8"writingsuggestions", krys::move(value));
   }
 
   // https://html.spec.whatwg.org/#dom-autocapitalize
-  dom::DOMString HTMLElement::Autocapitalize() const noexcept
+  DOMString HTMLElement::Autocapitalize() const noexcept
   {
     // 1. Let state be the own autocapitalization hint of this.
     switch (OwnAutocapitalizationHint(*this))
     {
       // 2. If state is Default, then return the empty string.
-      case AutocapitalizeAttributeState::Default:    return {};
+      case html::AutocapitalizeAttributeState::Default:    return {};
       // 3. If state is None, then return "none".
-      case AutocapitalizeAttributeState::None:       return u8"none";
+      case html::AutocapitalizeAttributeState::None:       return u8"none";
       // 4. If state is Sentences, then return "sentences".
-      case AutocapitalizeAttributeState::Sentences:  return u8"sentences";
+      case html::AutocapitalizeAttributeState::Sentences:  return u8"sentences";
       // 5. Return the keyword value corresponding to state.
-      case AutocapitalizeAttributeState::Words:      return u8"words";
-      case AutocapitalizeAttributeState::Characters: return u8"characters";
+      case html::AutocapitalizeAttributeState::Words:      return u8"words";
+      case html::AutocapitalizeAttributeState::Characters: return u8"characters";
     }
     krys_unreachable();
   }
 
-  void HTMLElement::Autocapitalize(dom::DOMString value) noexcept
+  void HTMLElement::Autocapitalize(DOMString value) noexcept
   {
-    CEReactionsScope ceReactions;
-    ReflectSetter(*this, u8"autocapitalize", krys::move(value));
+    html::CEReactionsScope ceReactions;
+    html::ReflectSetter(*this, u8"autocapitalize", krys::move(value));
   }
 
   // https://html.spec.whatwg.org/#dom-autocorrect
@@ -563,13 +564,13 @@ namespace krys::boo::html
   {
     // The autocorrect getter steps are: return true if the element's used autocorrection state is On and
     // false if the element's used autocorrection state is Off.
-    return UsedAutocorrectionState(*this) == AutocorrectAttributeState::On;
+    return UsedAutocorrectionState(*this) == html::AutocorrectAttributeState::On;
   }
 
   // https://html.spec.whatwg.org/#dom-autocorrect
   void HTMLElement::Autocorrect(bool value) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     // The setter steps are: if the given value is true, then the element's autocorrect attribute must be set
     // to "on"; otherwise it must be set to "off".
     dom::ElementAlgorithms::SetAttributeValue(*this, u8"autocorrect", value ? u8"on" : u8"off");
@@ -577,38 +578,38 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#dom-inputmode
   // The inputMode IDL attribute must reflect the inputmode content attribute, limited to only known values.
-  dom::DOMString HTMLElement::InputMode() const noexcept
+  DOMString HTMLElement::InputMode() const noexcept
   {
-    return ReflectEnumerated<"inputmode">(*this);
+    return html::ReflectEnumerated<"inputmode">(*this);
   }
 
   // https://html.spec.whatwg.org/#dom-inputmode
-  void HTMLElement::InputMode(dom::DOMString value) noexcept
+  void HTMLElement::InputMode(DOMString value) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     dom::ElementAlgorithms::SetAttributeValue(*this, u8"inputmode", krys::move(value));
   }
 
   // https://html.spec.whatwg.org/#dom-enterkeyhint
   // The enterKeyHint IDL attribute must reflect the enterkeyhint content attribute, limited to only known
   // values.
-  dom::DOMString HTMLElement::EnterKeyHint() const noexcept
+  DOMString HTMLElement::EnterKeyHint() const noexcept
   {
-    return ReflectEnumerated<"enterkeyhint">(*this);
+    return html::ReflectEnumerated<"enterkeyhint">(*this);
   }
 
   // https://html.spec.whatwg.org/#dom-enterkeyhint
-  void HTMLElement::EnterKeyHint(dom::DOMString value) noexcept
+  void HTMLElement::EnterKeyHint(DOMString value) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     dom::ElementAlgorithms::SetAttributeValue(*this, u8"enterkeyhint", krys::move(value));
   }
 
   namespace
   {
     /// @see https://html.spec.whatwg.org/#rendered-text-fragment
-    KRYS_NODISCARD Ref<dom::DocumentFragment> RenderedTextFragment(dom::DOMStringView input,
-                                                                   dom::Document &document) noexcept
+    KRYS_NODISCARD Ref<DocumentFragment> RenderedTextFragment(DOMStringView input,
+                                                              Document &document) noexcept
     {
       // 1. Let fragment be the result of creating a document fragment given document.
       auto fragment = document.CreateDocumentFragment();
@@ -632,7 +633,7 @@ namespace krys::boo::html
         //     is document to fragment.
         if (!text.empty())
         {
-          (void)fragment->AppendChild(*document.CreateTextNode(dom::DOMString(text)));
+          (void)fragment->AppendChild(*document.CreateTextNode(DOMString(text)));
         }
 
         // 4c. While position is not past the end of input, and the code point at position is either U+000A LF
@@ -662,11 +663,11 @@ namespace krys::boo::html
     }
 
     /// @see https://html.spec.whatwg.org/#merge-with-the-next-text-node
-    void MergeWithNextTextNode(dom::Text &node) noexcept
+    void MergeWithNextTextNode(Text &node) noexcept
     {
       // 1. Let next be node's next sibling.
       // 2. If next is not a Text node, then return.
-      RefPtr<dom::Text> next = ShareRefPtr(DynamicDowncast<dom::Text>(node.NextSibling()));
+      RefPtr<Text> next = ShareRefPtr(DynamicDowncast<Text>(node.NextSibling()));
       if (!next)
       {
         return;
@@ -680,7 +681,7 @@ namespace krys::boo::html
     }
   }
 
-  dom::DOMString HTMLElement::InnerText() const noexcept
+  DOMString HTMLElement::InnerText() const noexcept
   {
     // The innerText and outerText getter steps are to return the result of running get the text steps with
     // this.
@@ -693,7 +694,7 @@ namespace krys::boo::html
     //    descendant text content.
     if (!Renderer())
     {
-      return TextContent().value_or(dom::DOMString {});
+      return TextContent().value_or(DOMString {});
     }
 
     // Skipped content (content-visibility) isn't rendered, but it isn't the descendant text content either.
@@ -716,10 +717,10 @@ namespace krys::boo::html
     return PlainText(dom::MakeRangeSelectingNodeContents(self));
   }
 
-  void HTMLElement::InnerText(const dom::DOMString &value) noexcept
+  void HTMLElement::InnerText(const DOMString &value) noexcept
   {
     // The innerText setter steps are to run set the inner text steps with this and the given value.
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
 
     // A text control's inner element holds its value as one text node, with its line breaks normalised.
     if (IsConnected() && IsTextControlInnerTextElement())
@@ -735,27 +736,27 @@ namespace krys::boo::html
     (void)dom::MutationAlgorithms::ReplaceAll(fragment.get(), *this);
   }
 
-  dom::DOMString HTMLElement::OuterText() const noexcept
+  DOMString HTMLElement::OuterText() const noexcept
   {
     return InnerText();
   }
 
-  dom::ExceptionOr<void> HTMLElement::OuterText(const dom::DOMString &value) noexcept
+  dom::ExceptionOr<void> HTMLElement::OuterText(const DOMString &value) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
 
     // 1. If this's parent is null, then throw a "NoModificationAllowedError" DOMException.
-    RefPtr<dom::ContainerNode> parent = ShareRefPtr(ParentNode());
+    RefPtr<ContainerNode> parent = ShareRefPtr(ParentNode());
     if (!parent)
     {
       return dom::ExceptionCode::NoModificationAllowedError;
     }
 
     // 2. Let next be this's next sibling.
-    RefPtr<dom::Node> next = ShareRefPtr(NextSibling());
+    RefPtr<Node> next = ShareRefPtr(NextSibling());
 
     // 3. Let previous be this's previous sibling.
-    RefPtr<dom::Node> previous = ShareRefPtr(PreviousSibling());
+    RefPtr<Node> previous = ShareRefPtr(PreviousSibling());
 
     // 4. Let fragment be the rendered text fragment for the given value given this's node document.
     auto fragment = RenderedTextFragment(value, NodeDocument());
@@ -764,7 +765,7 @@ namespace krys::boo::html
     //    document is this's node document to fragment.
     if (!fragment->HasChildNodes())
     {
-      (void)fragment->AppendChild(*NodeDocument().CreateTextNode(dom::DOMString()));
+      (void)fragment->AppendChild(*NodeDocument().CreateTextNode(DOMString()));
     }
 
     // 6. Replace this with fragment within this's parent.
@@ -777,14 +778,14 @@ namespace krys::boo::html
     //    given next's previous sibling.
     if (next)
     {
-      if (auto *text = DynamicDowncast<dom::Text>(next->PreviousSibling()))
+      if (auto *text = DynamicDowncast<Text>(next->PreviousSibling()))
       {
         MergeWithNextTextNode(*text);
       }
     }
 
     // 8. If previous is a Text node, then merge with the next text node given previous.
-    if (auto *text = DynamicDowncast<dom::Text>(previous.get()))
+    if (auto *text = DynamicDowncast<Text>(previous.get()))
     {
       MergeWithNextTextNode(*text);
     }
@@ -793,7 +794,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-attachinternals
-  dom::ExceptionOr<Ref<ElementInternals>> HTMLElement::AttachInternals() noexcept
+  dom::ExceptionOr<Ref<html::ElementInternals>> HTMLElement::AttachInternals() noexcept
   {
     // 1. If this's is value is not null, then throw a "NotSupportedError" DOMException.
     if (IsValue() != null)
@@ -832,13 +833,13 @@ namespace krys::boo::html
 
     // 7. Set this's attached internals to a new ElementInternals instance whose target element is this.
     // 8. Return this's attached internals.
-    auto internals = ElementInternals::Create(*this);
+    auto internals = html::ElementInternals::Create(*this);
     queue->SetAttachedInternals(internals);
     return internals;
   }
 
   // https://html.spec.whatwg.org/#dom-showpopover
-  dom::ExceptionOr<void> HTMLElement::ShowPopover(const ShowPopoverOptions &options) noexcept
+  dom::ExceptionOr<void> HTMLElement::ShowPopover(const html::ShowPopoverOptions &options) noexcept
   {
     // 1. Let source be options["source"] if it exists; otherwise, null.
     // 2. Run show popover given this, true, and source.
@@ -854,7 +855,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-togglepopover
-  dom::ExceptionOr<bool> HTMLElement::TogglePopover(const TogglePopoverOptionsOrBool &options) noexcept
+  dom::ExceptionOr<bool> HTMLElement::TogglePopover(const html::TogglePopoverOptionsOrBool &options) noexcept
   {
     // 1. Let force be null.
     Maybe<bool> force;
@@ -868,7 +869,7 @@ namespace krys::boo::html
     // 4. Let source be options["source"] if it exists; otherwise, null.
     else
     {
-      auto &dictionary = std::get<TogglePopoverOptions>(options);
+      auto &dictionary = std::get<html::TogglePopoverOptions>(options);
       force = dictionary.Force;
       source = dictionary.Source.get();
     }
@@ -906,35 +907,35 @@ namespace krys::boo::html
     return IsPopoverShowing();
   }
 
-  Maybe<dom::DOMString> HTMLElement::Popover() const noexcept
+  Maybe<DOMString> HTMLElement::Popover() const noexcept
   {
-    return ReflectEnumerated<"popover", HTMLElement, Maybe<dom::DOMString>>(*this);
+    return html::ReflectEnumerated<"popover", HTMLElement, Maybe<DOMString>>(*this);
   }
 
-  void HTMLElement::Popover(Maybe<dom::DOMString> value) noexcept
+  void HTMLElement::Popover(Maybe<DOMString> value) noexcept
   {
-    CEReactionsScope ceReactions;
-    Reflect<Maybe<dom::DOMString>>(*this, u8"popover", krys::move(value));
+    html::CEReactionsScope ceReactions;
+    html::Reflect<Maybe<DOMString>>(*this, u8"popover", krys::move(value));
   }
 
   uint32 HTMLElement::HeadingOffset() const noexcept
   {
-    return Reflect<uint32, ReflectRange<uint32>(0u, 8u)>(*this, u8"headingoffset");
+    return html::Reflect<uint32, html::ReflectRange<uint32>(0u, 8u)>(*this, u8"headingoffset");
   }
 
   void HTMLElement::HeadingOffset(uint32 value) noexcept
   {
-    Reflect<uint32>(*this, u8"headingoffset", krys::move(value));
+    html::Reflect<uint32>(*this, u8"headingoffset", krys::move(value));
   }
 
   bool HTMLElement::HeadingReset() const noexcept
   {
-    return Reflect<bool>(*this, u8"headingreset");
+    return html::Reflect<bool>(*this, u8"headingreset");
   }
 
   void HTMLElement::HeadingReset(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"headingreset", krys::move(value));
+    html::Reflect<bool>(*this, u8"headingreset", krys::move(value));
   }
 
 #pragma endregion
@@ -946,7 +947,7 @@ namespace krys::boo::html
     KRYS_NODISCARD css::ValueId UnicodeBidiAttributeForDirAuto(const HTMLElement &element) noexcept
     {
       auto tagName = element.TagQualifiedName().TagName();
-      if (tagName == TagName::pre || tagName == TagName::textarea)
+      if (tagName == html::TagName::pre || tagName == html::TagName::textarea)
       {
         return css::ValueId::Plaintext;
       }
@@ -984,7 +985,7 @@ namespace krys::boo::html
   dom::ExceptionOr<void> HTMLElement::ShowPopoverInternal(HTMLElement *source, bool throwExceptions) noexcept
   {
     // 1. Let document be element's node document.
-    Ref<dom::Document> document = ShareRef(NodeDocument());
+    Ref<Document> document = ShareRef(NodeDocument());
 
     // 2. If document's showing popover is true, or document's hiding popover nesting count is not 0:
     // 2a. If throwExceptions is true, then throw a "InvalidStateError" DOMException.
@@ -1122,7 +1123,7 @@ namespace krys::boo::html
       if (document->Window())
       {
         auto weakThis = CreateWeakPtr(this);
-        GetPopoverData()->SetCloseWatcher(CloseWatcher::Establish(
+        GetPopoverData()->SetCloseWatcher(html::CloseWatcher::Establish(
           *document, [](bool) { return true; },
           [weakThis]
           {
@@ -1139,7 +1140,7 @@ namespace krys::boo::html
     // 16. Set element's previously focused element to null.
     GetPopoverData()->SetPreviouslyFocusedElement(nullptr);
     // 17. Let originallyFocusedElement be document's focused area of the document's DOM anchor.
-    RefPtr<dom::Element> originallyFocusedElement = ShareRefPtr(document->FocusedElement());
+    RefPtr<Element> originallyFocusedElement = ShareRefPtr(document->FocusedElement());
 
     // 18. Add an element to the top layer given element.
     AddToTopLayer();
@@ -1204,7 +1205,7 @@ namespace krys::boo::html
     }
 
     // 3. Let document be element's node document.
-    Ref<dom::Document> document = ShareRef(NodeDocument());
+    Ref<Document> document = ShareRef(NodeDocument());
     Ref<HTMLElement> protectedThis = ShareRef(*this);
 
     // 4. Let nestedHide be element's popover hiding.
@@ -1333,8 +1334,7 @@ namespace krys::boo::html
 
     // 19. Let previouslyFocusedElement be element's previously focused element.
     // 20. If previouslyFocusedElement is not null:
-    if (RefPtr<dom::Element> previouslyFocusedElement =
-          ShareRefPtr(GetPopoverData()->PreviouslyFocusedElement()))
+    if (RefPtr<Element> previouslyFocusedElement = ShareRefPtr(GetPopoverData()->PreviouslyFocusedElement()))
     {
       // 20a. Set element's previously focused element to null.
       // 20b. If focusPreviousElement is true and document's focused area of the document's DOM anchor is a
@@ -1345,7 +1345,7 @@ namespace krys::boo::html
       if (focusPreviousElement == dom::FocusPreviousElement::Yes && focusedElement
           && dom::TreeQueries::IsShadowIncludingInclusiveDescendant(*focusedElement, *this))
       {
-        FocusAlgorithms::FocusingSteps(*previouslyFocusedElement, nullptr, {.PreventScroll = true});
+        html::FocusAlgorithms::FocusingSteps(*previouslyFocusedElement, nullptr, {.PreventScroll = true});
       }
     }
 
@@ -1356,7 +1356,7 @@ namespace krys::boo::html
     // watcher.)
     if (auto *popoverData = GetPopoverData())
     {
-      if (RefPtr<CloseWatcher> closeWatcher = ShareRefPtr(popoverData->CloseWatcher()))
+      if (RefPtr<html::CloseWatcher> closeWatcher = ShareRefPtr(popoverData->CloseWatcher()))
       {
         closeWatcher->Destroy();
         popoverData->SetCloseWatcher(nullptr);
@@ -1374,7 +1374,7 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#check-popover-validity
   dom::ExceptionOr<bool> HTMLElement::CheckPopoverValidity(bool expectedToBeShowing,
-                                                           dom::Document *expectedDocument) const noexcept
+                                                           Document *expectedDocument) const noexcept
   {
     // 1. If element's popover attribute is in the No Popover state, then throw a "NotSupportedError"
     //    DOMException.
@@ -1438,10 +1438,10 @@ namespace krys::boo::html
 
     // 3. If subject has the autofocus attribute, then let control be subject.
     // 4. Otherwise, let control be the autofocus delegate for subject given "other".
-    RefPtr<dom::Node> control =
+    RefPtr<Node> control =
       HasAttribute(u8"autofocus")
-        ? ShareRefPtr<dom::Node>(this)
-        : ShareRefPtr(FocusAlgorithms::AutofocusDelegate(*this, dom::FocusTrigger::Other));
+        ? ShareRefPtr<Node>(this)
+        : ShareRefPtr(html::FocusAlgorithms::AutofocusDelegate(*this, dom::FocusTrigger::Other));
     // 5. If control is null, then return.
     if (!control)
     {
@@ -1449,14 +1449,14 @@ namespace krys::boo::html
     }
 
     // (A document that isn't in a page has no top-level traversable.)
-    Ref<dom::Document> controlDocument = ShareRef(control->NodeDocument());
+    Ref<Document> controlDocument = ShareRef(control->NodeDocument());
     if (!controlDocument->GetPage())
     {
       return;
     }
 
     // 6. Run the focusing steps given control.
-    FocusAlgorithms::FocusingSteps(*control);
+    html::FocusAlgorithms::FocusingSteps(*control);
 
     // 7. Let topDocument be control's node navigable's top-level traversable's active document.
     // 8. If control's node document's origin is not the same as the origin of topDocument, then return.
@@ -1517,7 +1517,7 @@ namespace krys::boo::html
   {
     auto stringForState = [](dom::ToggleState state)
     {
-      return dom::DOMString(state == dom::ToggleState::Closed ? u8"closed" : u8"open");
+      return DOMString(state == dom::ToggleState::Closed ? u8"closed" : u8"open");
     };
 
     dom::ToggleEventInit init;
@@ -1526,7 +1526,7 @@ namespace krys::boo::html
     // Composed, with relatedTarget the subject if retargeting the source against it gives it, else the
     // source.
     init.Composed = true;
-    init.Source = ShareRefPtr<dom::Element>(source);
+    init.Source = ShareRefPtr<Element>(source);
     auto event = dom::ToggleEvent::Create(event_names::BeforeToggle, init, cancelable);
     (void)dom::EventDispatcher::DispatchFromSource(*event, *this, source);
     return !event->DefaultPrevented();
@@ -1553,9 +1553,9 @@ namespace krys::boo::html
   // 3. If element's popover visibility state is in the showing state and oldValue and value are in different
   //    states, then run the hide popover algorithm given element, true, true, false, and null.
   // (Run for the popover attribute only; the popover data is made and cleared with it.)
-  void HTMLElement::PopoverAttributeChanged(Maybe<dom::DOMStringView> value) noexcept
+  void HTMLElement::PopoverAttributeChanged(Maybe<DOMStringView> value) noexcept
   {
-    auto newPopoverState = EnumeratedAttribute<"popover", HTMLElement>::ResolveState(value);
+    auto newPopoverState = html::EnumeratedAttribute<"popover", HTMLElement>::ResolveState(value);
     if (newPopoverState == GetPopoverState())
     {
       return;
@@ -1569,14 +1569,15 @@ namespace krys::boo::html
     if (IsPopoverShowing())
     {
       (void)HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, false, nullptr);
-      newPopoverState = EnumeratedAttribute<"popover", HTMLElement>::ResolveState(GetAttribute(u8"popover"));
+      newPopoverState =
+        html::EnumeratedAttribute<"popover", HTMLElement>::ResolveState(GetAttribute(u8"popover"));
     }
 
     if (newPopoverState == dom::PopoverState::None)
     {
       if (auto *popoverData = GetPopoverData())
       {
-        if (RefPtr<CloseWatcher> closeWatcher = ShareRefPtr(popoverData->CloseWatcher()))
+        if (RefPtr<html::CloseWatcher> closeWatcher = ShareRefPtr(popoverData->CloseWatcher()))
         {
           closeWatcher->Destroy();
         }
@@ -1589,9 +1590,8 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                       Maybe<dom::DOMStringView> oldValue, Maybe<dom::DOMStringView> value,
-                                       const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                       Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept
   {
     StyledElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 
@@ -1611,26 +1611,26 @@ namespace krys::boo::html
 #pragma endregion
 
   // https://html.spec.whatwg.org/#dom-contenteditable
-  dom::DOMString HTMLElement::ContentEditable() const noexcept
+  DOMString HTMLElement::ContentEditable() const noexcept
   {
     // The contentEditable IDL attribute, on getting, must return the string "true" if the content attribute
     // is set to the True state, "plaintext-only" if the content attribute is set to the Plaintext-Only state,
     // "false" if the content attribute is set to the False state, and "inherit" otherwise.
-    switch (
-      EnumeratedAttribute<"contenteditable", HTMLElement>::ResolveState(GetAttribute(u8"contenteditable")))
+    switch (html::EnumeratedAttribute<"contenteditable", HTMLElement>::ResolveState(
+      GetAttribute(u8"contenteditable")))
     {
-      case ContentEditableAttributeState::True:          return u8"true";
-      case ContentEditableAttributeState::PlaintextOnly: return u8"plaintext-only";
-      case ContentEditableAttributeState::False:         return u8"false";
-      case ContentEditableAttributeState::Inherit:       return u8"inherit";
+      case html::ContentEditableAttributeState::True:          return u8"true";
+      case html::ContentEditableAttributeState::PlaintextOnly: return u8"plaintext-only";
+      case html::ContentEditableAttributeState::False:         return u8"false";
+      case html::ContentEditableAttributeState::Inherit:       return u8"inherit";
     }
     krys_unreachable();
   }
 
   // https://html.spec.whatwg.org/#dom-contenteditable
-  dom::ExceptionOr<void> HTMLElement::ContentEditable(dom::DOMStringView value) noexcept
+  dom::ExceptionOr<void> HTMLElement::ContentEditable(DOMStringView value) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     // On setting, if the new value is an ASCII case-insensitive match for the string "inherit", then the
     // content attribute must be removed, if the new value is an ASCII case-insensitive match for the string
     // "true", then the content attribute must be set to the string "true", if the new value is an ASCII
@@ -1654,9 +1654,9 @@ namespace krys::boo::html
     return dom::Exception {dom::ExceptionCode::SyntaxError};
   }
 
-  dom::Node::Editability HTMLElement::EditabilityFromContentEditableAttr(const dom::Node &node) noexcept
+  Node::Editability HTMLElement::EditabilityFromContentEditableAttr(const Node &node) noexcept
   {
-    auto *startElement = DynamicDowncast<dom::Element>(node);
+    auto *startElement = DynamicDowncast<Element>(node);
     if (!startElement)
     {
       startElement = node.ParentElement();
@@ -1667,50 +1667,50 @@ namespace krys::boo::html
       {
         continue;
       }
-      switch (EnumeratedAttribute<"contenteditable", HTMLElement>::ResolveState(
+      switch (html::EnumeratedAttribute<"contenteditable", HTMLElement>::ResolveState(
         element->GetAttribute(u8"contenteditable")))
       {
-        case ContentEditableAttributeState::True:          return dom::Node::Editability::CanEditRichly;
-        case ContentEditableAttributeState::PlaintextOnly: return dom::Node::Editability::CanEditPlainText;
-        case ContentEditableAttributeState::False:         return dom::Node::Editability::ReadOnly;
-        case ContentEditableAttributeState::Inherit:       break;
+        case html::ContentEditableAttributeState::True:          return Node::Editability::CanEditRichly;
+        case html::ContentEditableAttributeState::PlaintextOnly: return Node::Editability::CanEditPlainText;
+        case html::ContentEditableAttributeState::False:         return Node::Editability::ReadOnly;
+        case html::ContentEditableAttributeState::Inherit:       break;
       }
     }
 
     auto *containingShadowRoot = dom::TreeQueries::ContainingShadowRoot(node);
     if (containingShadowRoot && containingShadowRoot->Mode() == dom::ShadowRootMode::UserAgent)
     {
-      return dom::Node::Editability::ReadOnly;
+      return Node::Editability::ReadOnly;
     }
 
     if (node.NodeDocument().InDesignMode() && node.IsInDocumentTree())
     {
-      return dom::Node::Editability::CanEditRichly;
+      return Node::Editability::CanEditRichly;
     }
 
-    return dom::Node::Editability::ReadOnly;
+    return Node::Editability::ReadOnly;
   }
 
-  dom::DOMString HTMLElement::AttributeOrEmpty(dom::DOMStringView localName) const noexcept
+  DOMString HTMLElement::AttributeOrEmpty(DOMStringView localName) const noexcept
   {
-    return GetAttribute(dom::DOMStringAtom(localName)).value_or(dom::DOMString {});
+    return GetAttribute(DOMStringAtom(localName)).value_or(DOMString {});
   }
 
-  uint32 HTMLElement::ParseBorderWidthAttribute(Maybe<dom::DOMStringView> value) const noexcept
+  uint32 HTMLElement::ParseBorderWidthAttribute(Maybe<DOMStringView> value) const noexcept
   {
     if (value)
     {
-      if (auto borderWidth = Numbers::ParseNonNegativeInteger(*value);
+      if (auto borderWidth = html::Numbers::ParseNonNegativeInteger(*value);
           borderWidth.Success() && borderWidth.Value <= std::numeric_limits<int32>::max())
       {
         return static_cast<uint32>(borderWidth.Value);
       }
     }
 
-    return TagQualifiedName().TagName() == TagName::table && value ? 1 : 0;
+    return TagQualifiedName().TagName() == html::TagName::table && value ? 1 : 0;
   }
 
-  void HTMLElement::ApplyBorderAttributeToStyle(dom::DOMStringView value,
+  void HTMLElement::ApplyBorderAttributeToStyle(DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept
   {
     AddPropertyToPresentationalHintStyle(style, css::PropertyId::BorderWidth,
@@ -1718,14 +1718,14 @@ namespace krys::boo::html
     AddPropertyToPresentationalHintStyle(style, css::PropertyId::BorderStyle, css::ValueId::Solid);
   }
 
-  void HTMLElement::MapLanguageAttributeToLocale(dom::DOMStringView value,
+  void HTMLElement::MapLanguageAttributeToLocale(DOMStringView value,
                                                  css::MutableStyleProperties &style) noexcept
   {
     if (!value.empty())
     {
       // Have to quote so the locale id is treated as a string instead of as a CSS keyword.
       AddPropertyToPresentationalHintStyle(style, css::PropertyId::InternalLocale,
-                                           css::SerialiseString(css::CSSOMString(value)));
+                                           css::SerialiseString(CSSOMString(value)));
     }
     else
     {
@@ -1734,8 +1734,8 @@ namespace krys::boo::html
     }
   }
 
-  bool HTMLElement::HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                       const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool HTMLElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                       const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null)
     {
@@ -1752,9 +1752,9 @@ namespace krys::boo::html
     return StyledElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                           const dom::DOMStringAtom &namespaceURI,
-                                                           dom::DOMStringView value,
+  void HTMLElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                           const DOMStringAtom &namespaceURI,
+                                                           DOMStringView value,
                                                            css::MutableStyleProperties &style) noexcept
   {
     if (namespaceURI == infra::namespaces::XML && localName == u8"lang")
@@ -1776,28 +1776,28 @@ namespace krys::boo::html
       }
       else
       {
-        AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::CSSOMString(value));
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, CSSOMString(value));
       }
     }
     else if (localName == u8"contenteditable")
     {
       auto userModifyValue = css::ValueId::ReadWrite;
-      auto state = EnumeratedAttribute<"contenteditable", HTMLElement>::ResolveState(value);
+      auto state = html::EnumeratedAttribute<"contenteditable", HTMLElement>::ResolveState(value);
       switch (state)
       {
-        case ContentEditableAttributeState::Inherit:
+        case html::ContentEditableAttributeState::Inherit:
         {
           return;
         }
-        case ContentEditableAttributeState::False:
+        case html::ContentEditableAttributeState::False:
         {
           userModifyValue = css::ValueId::ReadOnly;
           break;
         }
-        case ContentEditableAttributeState::PlaintextOnly:
-        case ContentEditableAttributeState::True:
+        case html::ContentEditableAttributeState::PlaintextOnly:
+        case html::ContentEditableAttributeState::True:
         {
-          if (state == ContentEditableAttributeState::PlaintextOnly)
+          if (state == html::ContentEditableAttributeState::PlaintextOnly)
           {
             userModifyValue = css::ValueId::ReadWritePlaintextOnly;
           }
@@ -1812,7 +1812,8 @@ namespace krys::boo::html
     else if (localName == u8"hidden")
     {
       // The hiddenUntilFoundEnabled setting is on by default.
-      if (EnumeratedAttribute<"hidden", HTMLElement>::ResolveState(value) == HiddenAttributeState::UntilFound)
+      if (html::EnumeratedAttribute<"hidden", HTMLElement>::ResolveState(value)
+          == html::HiddenAttributeState::UntilFound)
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::ContentVisibility, css::ValueId::Hidden);
       }
@@ -1823,20 +1824,20 @@ namespace krys::boo::html
     }
     else if (localName == u8"draggable")
     {
-      switch (EnumeratedAttribute<"draggable", HTMLElement>::ResolveState(value))
+      switch (html::EnumeratedAttribute<"draggable", HTMLElement>::ResolveState(value))
       {
-        case DraggableAttributeState::True:
+        case html::DraggableAttributeState::True:
         {
           AddPropertyToPresentationalHintStyle(style, css::PropertyId::InternalUserDrag,
                                                css::ValueId::Element);
           break;
         }
-        case DraggableAttributeState::False:
+        case html::DraggableAttributeState::False:
         {
           AddPropertyToPresentationalHintStyle(style, css::PropertyId::InternalUserDrag, css::ValueId::None);
           break;
         }
-        case DraggableAttributeState::Auto: break;
+        case html::DraggableAttributeState::Auto: break;
       }
     }
     else if (localName == u8"dir")
@@ -1852,9 +1853,10 @@ namespace krys::boo::html
         case dom::TextDirectionState::LTR:
         case dom::TextDirectionState::RTL:
         {
-          AddPropertyToPresentationalHintStyle(style, css::PropertyId::Direction, css::CSSOMString(value));
+          AddPropertyToPresentationalHintStyle(style, css::PropertyId::Direction, CSSOMString(value));
           auto tagName = TagQualifiedName().TagName();
-          if (tagName != TagName::bdi && tagName != TagName::bdo && tagName != TagName::output)
+          if (tagName != html::TagName::bdi && tagName != html::TagName::bdo
+              && tagName != html::TagName::output)
           {
             AddPropertyToPresentationalHintStyle(style, css::PropertyId::UnicodeBidi, css::ValueId::Isolate);
           }
@@ -1878,16 +1880,15 @@ namespace krys::boo::html
   }
 
   void HTMLElement::ApplyAspectRatioFromWidthAndHeightAttributesToStyle(
-    dom::DOMStringView widthAttribute, dom::DOMStringView heightAttribute,
-    css::MutableStyleProperties &style) noexcept
+    DOMStringView widthAttribute, DOMStringView heightAttribute, css::MutableStyleProperties &style) noexcept
   {
-    auto dimensionWidth = Dimensions::ParseHTMLDimension(widthAttribute);
-    if (!dimensionWidth || dimensionWidth->DimensionType != HTMLDimension::Type::Pixel)
+    auto dimensionWidth = html::Dimensions::ParseHTMLDimension(widthAttribute);
+    if (!dimensionWidth || dimensionWidth->DimensionType != html::HTMLDimension::Type::Pixel)
     {
       return;
     }
-    auto dimensionHeight = Dimensions::ParseHTMLDimension(heightAttribute);
-    if (!dimensionHeight || dimensionHeight->DimensionType != HTMLDimension::Type::Pixel)
+    auto dimensionHeight = html::Dimensions::ParseHTMLDimension(heightAttribute);
+    if (!dimensionHeight || dimensionHeight->DimensionType != html::HTMLDimension::Type::Pixel)
     {
       return;
     }
@@ -1896,15 +1897,14 @@ namespace krys::boo::html
   }
 
   void HTMLElement::ApplyAspectRatioWithoutDimensionalRulesFromWidthAndHeightAttributesToStyle(
-    dom::DOMStringView widthAttribute, dom::DOMStringView heightAttribute,
-    css::MutableStyleProperties &style) noexcept
+    DOMStringView widthAttribute, DOMStringView heightAttribute, css::MutableStyleProperties &style) noexcept
   {
-    auto dimensionWidth = Numbers::ParseNonNegativeInteger(widthAttribute);
+    auto dimensionWidth = html::Numbers::ParseNonNegativeInteger(widthAttribute);
     if (!dimensionWidth.Success())
     {
       return;
     }
-    auto dimensionHeight = Numbers::ParseNonNegativeInteger(heightAttribute);
+    auto dimensionHeight = html::Numbers::ParseNonNegativeInteger(heightAttribute);
     if (!dimensionHeight.Success())
     {
       return;
@@ -1922,7 +1922,7 @@ namespace krys::boo::html
                                                       css::RatioValue::Create(css::Ratio {width, height})));
   }
 
-  void HTMLElement::ApplyAlignmentAttributeToStyle(dom::DOMStringView alignment,
+  void HTMLElement::ApplyAlignmentAttributeToStyle(DOMStringView alignment,
                                                    css::MutableStyleProperties &style) noexcept
   {
     // Vertical alignment with respect to the current baseline of the text
@@ -1984,19 +1984,19 @@ namespace krys::boo::html
   }
 
   void HTMLElement::AddHTMLLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                                         dom::DOMStringView value, AllowPercentage allowPercentage,
+                                         DOMStringView value, AllowPercentage allowPercentage,
                                          UseCSSPXAsUnitType useCSSPX, IsMultiLength isMultiLength,
                                          AllowZeroValue allowZeroValue) noexcept
   {
     // Without a zero value, these are the rules for parsing nonzero dimension values.
     // @see https://html.spec.whatwg.org/#rules-for-parsing-non-zero-dimension-values
-    auto dimensionValue = isMultiLength == IsMultiLength::No ? Dimensions::ParseHTMLDimension(value)
-                                                             : Dimensions::ParseHTMLMultiLength(value);
+    auto dimensionValue = isMultiLength == IsMultiLength::No ? html::Dimensions::ParseHTMLDimension(value)
+                                                             : html::Dimensions::ParseHTMLMultiLength(value);
     if (!dimensionValue || (!dimensionValue->Number && allowZeroValue == AllowZeroValue::No))
     {
       return;
     }
-    if (dimensionValue->DimensionType == HTMLDimension::Type::Percentage)
+    if (dimensionValue->DimensionType == html::HTMLDimension::Type::Percentage)
     {
       if (allowPercentage == AllowPercentage::Yes)
       {
@@ -2016,27 +2016,27 @@ namespace krys::boo::html
   }
 
   void HTMLElement::AddHTMLLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                                         dom::DOMStringView value, AllowZeroValue allowZeroValue) noexcept
+                                         DOMStringView value, AllowZeroValue allowZeroValue) noexcept
   {
     AddHTMLLengthToStyle(style, property, value, AllowPercentage::Yes, UseCSSPXAsUnitType::Yes,
                          IsMultiLength::No, allowZeroValue);
   }
 
   void HTMLElement::AddHTMLMultiLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                                              dom::DOMStringView value) noexcept
+                                              DOMStringView value) noexcept
   {
     AddHTMLLengthToStyle(style, property, value, AllowPercentage::Yes, UseCSSPXAsUnitType::Yes,
                          IsMultiLength::Yes);
   }
 
   void HTMLElement::AddHTMLPixelsToStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                                         dom::DOMStringView value) noexcept
+                                         DOMStringView value) noexcept
   {
     AddHTMLLengthToStyle(style, property, value, AllowPercentage::No, UseCSSPXAsUnitType::Yes,
                          IsMultiLength::No);
   }
 
-  Maybe<SRGBA<uint8>> HTMLElement::ParseLegacyColorValue(dom::DOMStringView string) noexcept
+  Maybe<SRGBA<uint8>> HTMLElement::ParseLegacyColorValue(DOMStringView string) noexcept
   {
     // 1. If input is the empty string, then return failure.
     if (string.empty())
@@ -2182,7 +2182,7 @@ namespace krys::boo::html
   }
 
   void HTMLElement::AddHTMLColorToStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                                        dom::DOMStringView attributeValue) noexcept
+                                        DOMStringView attributeValue) noexcept
   {
     if (auto color = ParseLegacyColorValue(attributeValue))
     {

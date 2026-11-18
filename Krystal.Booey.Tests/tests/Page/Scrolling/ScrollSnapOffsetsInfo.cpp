@@ -39,7 +39,7 @@ namespace krys::boo::tests
              + item + item + item + item + item + u8"</div>";
     }
 
-    KRYS_NODISCARD ScrollableArea &AreaOf(dom::Element &element) noexcept
+    KRYS_NODISCARD ScrollableArea &AreaOf(boo::Element &element) noexcept
     {
       auto *area = Downcast<RenderBox>(*element.Renderer()).Layer()->GetScrollableArea();
       REQUIRE(area);
@@ -120,7 +120,7 @@ namespace krys::boo::tests
 
     SECTION("an arrow key goes to the next position")
     {
-      Downcast<html::HTMLElement>(scroller).Focus();
+      Downcast<HTMLElement>(scroller).Focus();
       auto &handler = fixture.TestPage->MainFrame().GetEventHandler();
       CHECK(handler.KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", u8"ArrowDown",
                                                    u8"ArrowDown", u8"Down", vk::Down, false, false, false, {},

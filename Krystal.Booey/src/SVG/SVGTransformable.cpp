@@ -27,23 +27,23 @@
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   namespace
   {
-    int32 ParseTransformParamList(dom::DOMStringView &buffer, Span<float, 6> values, int32 required,
+    int32 ParseTransformParamList(DOMStringView &buffer, Span<float, 6> values, int32 required,
                                   int32 optional) noexcept
     {
       int32 optionalParams = 0, requiredParams = 0;
 
-      if (!SkipOptionalSVGSpaces(buffer) || buffer.front() != u8'(')
+      if (!svg::SkipOptionalSVGSpaces(buffer) || buffer.front() != u8'(')
       {
         return -1;
       }
 
       buffer.remove_prefix(1);
 
-      SkipOptionalSVGSpaces(buffer);
+      svg::SkipOptionalSVGSpaces(buffer);
 
       while (requiredParams < required)
       {
@@ -51,7 +51,7 @@ namespace krys::boo::svg
         {
           return -1;
         }
-        auto parsedNumber = ParseNumber(buffer, SuffixSkippingPolicy::DontSkip);
+        auto parsedNumber = svg::ParseNumber(buffer, svg::SuffixSkippingPolicy::DontSkip);
         if (!parsedNumber)
         {
           return -1;
@@ -60,15 +60,15 @@ namespace krys::boo::svg
         requiredParams++;
         if (requiredParams < required)
         {
-          SkipOptionalSVGSpacesOrDelimiter(buffer);
+          svg::SkipOptionalSVGSpacesOrDelimiter(buffer);
         }
       }
-      if (!SkipOptionalSVGSpaces(buffer))
+      if (!svg::SkipOptionalSVGSpaces(buffer))
       {
         return -1;
       }
 
-      bool delimParsed = SkipOptionalSVGSpacesOrDelimiter(buffer);
+      bool delimParsed = svg::SkipOptionalSVGSpacesOrDelimiter(buffer);
 
       if (buffer.empty())
       {
@@ -92,7 +92,7 @@ namespace krys::boo::svg
           {
             return -1;
           }
-          auto parsedNumber = ParseNumber(buffer, SuffixSkippingPolicy::DontSkip);
+          auto parsedNumber = svg::ParseNumber(buffer, svg::SuffixSkippingPolicy::DontSkip);
           if (!parsedNumber)
           {
             return -1;
@@ -101,16 +101,16 @@ namespace krys::boo::svg
           optionalParams++;
           if (optionalParams < optional)
           {
-            SkipOptionalSVGSpacesOrDelimiter(buffer);
+            svg::SkipOptionalSVGSpacesOrDelimiter(buffer);
           }
         }
 
-        if (!SkipOptionalSVGSpaces(buffer))
+        if (!svg::SkipOptionalSVGSpaces(buffer))
         {
           return -1;
         }
 
-        delimParsed = SkipOptionalSVGSpacesOrDelimiter(buffer);
+        delimParsed = svg::SkipOptionalSVGSpacesOrDelimiter(buffer);
 
         if (buffer.empty() || buffer.front() != u8')' || delimParsed)
         {
@@ -130,8 +130,7 @@ namespace krys::boo::svg
   SVGTransformable::~SVGTransformable() noexcept = default;
 
   bool SVGTransformable::ParseAndReplaceTransform(SVGTransformValue::SVGTransformType type,
-                                                  dom::DOMStringView &buffer,
-                                                  SVGTransform &transform) noexcept
+                                                  DOMStringView &buffer, SVGTransform &transform) noexcept
   {
     krys_assert(type == transform.Value().Type());
     if (type == SVGTransformValue::SVG_TRANSFORM_UNKNOWN)
@@ -192,7 +191,7 @@ namespace krys::boo::svg
   }
 
   RefPtr<SVGTransform> SVGTransformable::ParseTransform(SVGTransformValue::SVGTransformType type,
-                                                        dom::DOMStringView &buffer) noexcept
+                                                        DOMStringView &buffer) noexcept
   {
     if (type == SVGTransformValue::SVG_TRANSFORM_UNKNOWN)
     {
@@ -269,13 +268,13 @@ namespace krys::boo::svg
   }
 
   Maybe<SVGTransformValue::SVGTransformType>
-    SVGTransformable::ParseTransformTypeFromString(dom::DOMStringView string) noexcept
+    SVGTransformable::ParseTransformTypeFromString(DOMStringView string) noexcept
   {
     return ParseTransformType(string);
   }
 
   Maybe<SVGTransformValue::SVGTransformType>
-    SVGTransformable::ParseTransformType(dom::DOMStringView &buffer) noexcept
+    SVGTransformable::ParseTransformType(DOMStringView &buffer) noexcept
   {
     if (buffer.empty())
     {

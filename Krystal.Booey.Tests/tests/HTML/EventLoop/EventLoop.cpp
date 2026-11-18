@@ -85,7 +85,7 @@ namespace krys::boo::html::tests
 
     SECTION("A document's tasks are dropped once it's gone, unless they're to run regardless")
     {
-      RefPtr<dom::Document> document = CreateRef<dom::Document>();
+      RefPtr<boo::Document> document = CreateRef<boo::Document>();
       loop.QueueTask(TaskSource::Networking, *document, [&] { order.push_back(1); });
       loop.QueueTask(
         TaskSource::Networking, *document, [&] { order.push_back(2); }, StoppedDocumentTask::Run);

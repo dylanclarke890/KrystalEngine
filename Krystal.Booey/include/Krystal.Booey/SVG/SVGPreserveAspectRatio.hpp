@@ -29,7 +29,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGValueProperty.hpp"
 #include "Krystal.Booey/SVG/SVGPreserveAspectRatioValue.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @see https://svgwg.org/svg2-draft/coords.html#InterfaceSVGPreserveAspectRatio
   class SVGPreserveAspectRatio : public SVGValueProperty<SVGPreserveAspectRatioValue>
@@ -101,7 +101,7 @@ namespace krys::boo::svg
       return result;
     }
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept override
     {
       return _value.ValueAsString();
     }

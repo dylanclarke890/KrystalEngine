@@ -13,16 +13,16 @@ namespace krys::boo::style::tests
 
   namespace
   {
-    KRYS_NODISCARD Ref<dom::HTMLDocument> ParseDocument(utf8_string &&input) noexcept
+    KRYS_NODISCARD Ref<HTMLDocument> ParseDocument(utf8_string &&input) noexcept
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       parser->PumpTokenizer();
       return document;
     }
 
-    KRYS_NODISCARD dom::Element &ById(dom::Document &document, dom::DOMStringView id)
+    KRYS_NODISCARD boo::Element &ById(boo::Document &document, DOMStringView id)
     {
       auto element = document.GetElementById(id);
       REQUIRE(element);

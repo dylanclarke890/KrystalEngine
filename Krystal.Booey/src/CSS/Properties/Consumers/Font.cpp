@@ -426,7 +426,7 @@ namespace krys::boo::css::parse_property
 
   // MARK: 'font' (shorthand)
 
-  Maybe<UnresolvedFont> ParseUnresolvedFont(const CSSOMString &string, const dom::Document &document,
+  Maybe<UnresolvedFont> ParseUnresolvedFont(const CSSOMString &string, const Document &document,
                                             Maybe<ParserMode> parserModeOverride) noexcept
   {
     auto parserContext =

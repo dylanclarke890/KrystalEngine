@@ -43,7 +43,7 @@ namespace krys::boo::html
     {
     }
 
-    KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
+    KRYS_NODISCARD DOMStringView FormControlType() const noexcept final
     {
       return input_type_names::Hidden;
     }
@@ -52,7 +52,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool StoresValueSeparateFromAttribute() noexcept final;
 
-    void SetValue(dom::DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,
+    void SetValue(DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,
                   TextControlSetValueSelection selection) noexcept final;
 
     bool AppendFormData(DOMFormData &formData) const noexcept final;

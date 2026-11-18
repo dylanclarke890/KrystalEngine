@@ -35,7 +35,10 @@ namespace krys::boo::css
 {
   class FontFeatureValuesBlockRule;
   class FontFeatureValuesRule;
+}
 
+namespace krys::boo
+{
   /// @brief An `@font-feature-values` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-fonts/#om-fontfeaturevalues
   class CSSFontFeatureValuesRule final : public CSSRule
@@ -55,14 +58,14 @@ namespace krys::boo::css
     KRYS_NODISCARD CSSOMStringAtom FontFamily() const noexcept;
 
   private:
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::FontFeatureValues;
+      return css::RuleType::FontFeatureValues;
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
-    void Reattach(Rule &rule) noexcept final;
+    void Reattach(css::Rule &rule) noexcept final;
   };
 
   /// @brief A feature value block inside an `@font-feature-values` rule, exposed to scripts.
@@ -78,26 +81,26 @@ namespace krys::boo::css
                                                                     CSSStyleSheet *sheet) noexcept;
 
   private:
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::FontFeatureValuesBlock;
+      return css::RuleType::FontFeatureValuesBlock;
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
-    void Reattach(Rule &rule) noexcept final;
+    void Reattach(css::Rule &rule) noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSFontFeatureValuesRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSFontFeatureValuesRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::FontFeatureValues;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSFontFeatureValuesBlockRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSFontFeatureValuesBlockRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::FontFeatureValuesBlock;
   }

@@ -38,12 +38,12 @@ namespace krys::boo::tests
     {
       using PageInFrameFixture::PageInFrameFixture;
 
-      KRYS_NODISCARD html::HTMLCanvasElement &Canvas(dom::DOMStringView id = u8"canvas") noexcept
+      KRYS_NODISCARD HTMLCanvasElement &Canvas(DOMStringView id = u8"canvas") noexcept
       {
-        return Downcast<html::HTMLCanvasElement>(ById(id));
+        return Downcast<HTMLCanvasElement>(ById(id));
       }
 
-      KRYS_NODISCARD CanvasRenderingContext2D &Context(dom::DOMStringView id = u8"canvas") noexcept
+      KRYS_NODISCARD CanvasRenderingContext2D &Context(DOMStringView id = u8"canvas") noexcept
       {
         auto context = Canvas(id).GetContext2d();
         REQUIRE(context);
@@ -51,7 +51,7 @@ namespace krys::boo::tests
       }
 
       /// @brief The names of what's been drawn into @p id's buffer.
-      KRYS_NODISCARD List<std::string_view> Drawn(dom::DOMStringView id = u8"canvas") noexcept
+      KRYS_NODISCARD List<std::string_view> Drawn(DOMStringView id = u8"canvas") noexcept
       {
         auto *buffer = Canvas(id).Buffer();
         REQUIRE(buffer);
@@ -70,11 +70,11 @@ namespace krys::boo::tests
       return static_cast<size_t>(std::ranges::count(names, name));
     }
 
-    KRYS_NODISCARD dom::DOMString
+    KRYS_NODISCARD DOMString
       StyleString(const html::CanvasRenderingContext2DBase::StyleVariant &style) noexcept
     {
-      const auto *string = std::get_if<dom::DOMString>(&style);
-      return string ? *string : dom::DOMString(u8"(not a colour)");
+      const auto *string = std::get_if<DOMString>(&style);
+      return string ? *string : DOMString(u8"(not a colour)");
     }
   }
 
@@ -585,10 +585,10 @@ namespace krys::boo::tests
       auto &client = static_cast<AcceleratingChromeClient &>(page->GetChromeClient());
       fixture.Frame = ShareRefPtr(&page->MainFrame());
       fixture.Frame->CreateView({200, 100});
-      fixture.Frame->SetDocument(ShareRefPtr<dom::Document>(fixture.Document.get()));
+      fixture.Frame->SetDocument(ShareRefPtr<boo::Document>(fixture.Document.get()));
       page->UpdateRendering();
 
-      auto &canvas = Downcast<html::HTMLCanvasElement>(*fixture.Document->GetElementById(u8"canvas"));
+      auto &canvas = Downcast<HTMLCanvasElement>(*fixture.Document->GetElementById(u8"canvas"));
       auto context = canvas.GetContext2d();
       REQUIRE(context);
       context->FillRect(0, 0, 5, 5);
@@ -717,7 +717,7 @@ namespace krys::boo::tests
       u8"<img id=pending><img id=broken src='file:///missing.png'>");
     RunNetworkingTasks();
     auto &context = fixture.Context();
-    auto &image = Downcast<html::HTMLImageElement>(fixture.ById(u8"img"));
+    auto &image = Downcast<HTMLImageElement>(fixture.ById(u8"img"));
     REQUIRE(image.Complete());
 
     SECTION("an image")
@@ -728,7 +728,7 @@ namespace krys::boo::tests
       CHECK(Count(fixture.Drawn(), "draw-native-image") == 3u);
 
       // Empty or non-finite rectangles draw nothing; an image with no source isn't drawn either.
-      auto &pending = Downcast<html::HTMLImageElement>(fixture.ById(u8"pending"));
+      auto &pending = Downcast<HTMLImageElement>(fixture.ById(u8"pending"));
       REQUIRE_FALSE(context.DrawImage(ShareRefPtr(&image), 0, 0, 0, 4).HasException());
       REQUIRE_FALSE(
         context.DrawImage(ShareRefPtr(&image), 0, 0, 1, 1, 0, 0, std::nanf(""), 4).HasException());
@@ -738,7 +738,7 @@ namespace krys::boo::tests
 
     SECTION("an image that failed to load is broken, unless the arguments aren't finite")
     {
-      auto &broken = Downcast<html::HTMLImageElement>(fixture.ById(u8"broken"));
+      auto &broken = Downcast<HTMLImageElement>(fixture.ById(u8"broken"));
       CHECK(context.DrawImage(ShareRefPtr(&broken), 0, 0).GetException().Code()
             == dom::ExceptionCode::InvalidStateError);
       REQUIRE_FALSE(context.DrawImage(ShareRefPtr(&broken), std::nanf(""), 0, 1, 1).HasException());
@@ -786,7 +786,7 @@ namespace krys::boo::tests
       CHECK(context.CreatePattern(ShareRefPtr(&image), u8"diagonal").GetException().Code()
             == dom::ExceptionCode::SyntaxError);
       // An image not yet loaded makes no pattern, without an error.
-      auto &pending = Downcast<html::HTMLImageElement>(fixture.ById(u8"pending"));
+      auto &pending = Downcast<HTMLImageElement>(fixture.ById(u8"pending"));
       auto none = context.CreatePattern(ShareRefPtr(&pending), u8"repeat");
       REQUIRE_FALSE(none.HasException());
       CHECK_FALSE(none.Value());
@@ -804,7 +804,7 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief The anchors of the glyph runs drawn into @p canvas's buffer, in order.
-    KRYS_NODISCARD List<FloatPoint> GlyphAnchors(html::HTMLCanvasElement &canvas) noexcept
+    KRYS_NODISCARD List<FloatPoint> GlyphAnchors(HTMLCanvasElement &canvas) noexcept
     {
       auto *buffer = canvas.Buffer();
       REQUIRE(buffer);
@@ -821,8 +821,7 @@ namespace krys::boo::tests
     }
 
     /// @brief Whether a state recorded into @p canvas's buffer draws text with @p mode.
-    KRYS_NODISCARD bool RecordedTextDrawingMode(html::HTMLCanvasElement &canvas,
-                                                TextDrawingMode mode) noexcept
+    KRYS_NODISCARD bool RecordedTextDrawingMode(HTMLCanvasElement &canvas, TextDrawingMode mode) noexcept
     {
       auto *buffer = canvas.Buffer();
       REQUIRE(buffer);
@@ -1090,7 +1089,7 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief The names of what's been drawn into @p canvas's buffer.
-    KRYS_NODISCARD List<std::string_view> DrawnInto(html::HTMLCanvasElement &canvas) noexcept
+    KRYS_NODISCARD List<std::string_view> DrawnInto(HTMLCanvasElement &canvas) noexcept
     {
       auto *buffer = canvas.Buffer();
       REQUIRE(buffer);
@@ -1148,7 +1147,7 @@ namespace krys::boo::tests
   {
     PaintFixture fixture(u8"<!DOCTYPE html><canvas id=canvas width=100 height=50></canvas>", {200, 100},
                          true);
-    auto &canvas = Downcast<html::HTMLCanvasElement>(*fixture.Document->GetElementById(u8"canvas"));
+    auto &canvas = Downcast<HTMLCanvasElement>(*fixture.Document->GetElementById(u8"canvas"));
     auto context = canvas.GetContext2d();
     REQUIRE(context);
 
@@ -1203,7 +1202,7 @@ namespace krys::boo::tests
     Canvas2DFixture fixture(u8"<canvas id=canvas width=100 height=50><button id=button>Go</button>"
                             u8"<button id=other>No</button></canvas><button id=outside>Out</button>");
     auto &context = fixture.Context();
-    auto &button = Downcast<html::HTMLElement>(fixture.ById(u8"button"));
+    auto &button = Downcast<HTMLElement>(fixture.ById(u8"button"));
     context.Rect(10, 10, 30, 20);
 
     SECTION("only for the focused element")
@@ -1221,7 +1220,7 @@ namespace krys::boo::tests
 
     SECTION("only for the canvas's fallback content")
     {
-      auto &outside = Downcast<html::HTMLElement>(fixture.ById(u8"outside"));
+      auto &outside = Downcast<HTMLElement>(fixture.ById(u8"outside"));
       outside.Focus();
       REQUIRE(outside.Focused());
       context.DrawFocusIfNeeded(outside);

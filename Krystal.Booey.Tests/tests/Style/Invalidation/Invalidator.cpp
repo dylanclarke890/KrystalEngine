@@ -14,23 +14,23 @@ namespace krys::boo::style::tests
     const boo::Color Blue {boo::Color::blue};
     const boo::Color Red {boo::Color::red};
 
-    KRYS_NODISCARD Ref<dom::Element> Create(dom::Document &document, dom::DOMStringAtom localName)
+    KRYS_NODISCARD Ref<Element> Create(Document &document, DOMStringAtom localName)
     {
       auto element = document.CreateElement(krys::move(localName));
       REQUIRE_FALSE(element.HasException());
       return element.ReleaseValue();
     }
 
-    KRYS_NODISCARD const RenderStyle &Rendered(const dom::Element &element)
+    KRYS_NODISCARD const RenderStyle &Rendered(const Element &element)
     {
       auto *style = element.GetRenderStyle();
       REQUIRE(style);
       return *style;
     }
 
-    KRYS_NODISCARD Ref<html::HTMLStyleElement> CreateStyle(dom::Document &document, dom::DOMString &&text)
+    KRYS_NODISCARD Ref<HTMLStyleElement> CreateStyle(Document &document, DOMString &&text)
     {
-      auto style = CreateRef<html::HTMLStyleElement>(document);
+      auto style = CreateRef<HTMLStyleElement>(document);
       REQUIRE_FALSE(style->TextContent(krys::move(text)).HasException());
       return style;
     }

@@ -84,8 +84,8 @@ namespace krys::boo
   NavigationAction::NavigationAction() noexcept = default;
 
   NavigationAction::NavigationAction(ResourceRequest originalRequest, bool isFormSubmission,
-                                     dom::Event *event, dom::DOMStringAtom downloadAttribute,
-                                     dom::Element *sourceElement) noexcept
+                                     dom::Event *event, DOMStringAtom downloadAttribute,
+                                     Element *sourceElement) noexcept
       : _originalRequest(krys::move(originalRequest)),
         _keyStateEventData(KeyStateDataForFirstEventWithKeyState(event)),
         _mouseEventData(MouseEventDataForFirstMouseEvent(event)),

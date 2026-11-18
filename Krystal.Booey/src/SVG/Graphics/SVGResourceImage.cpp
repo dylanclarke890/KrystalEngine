@@ -31,7 +31,7 @@
 #include "Krystal.Core/Text/TextStream.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   Ref<SVGResourceImage> SVGResourceImage::Create(LegacyRenderSVGResourceContainer &renderResource,
                                                  const style::URL &resourceURL) noexcept

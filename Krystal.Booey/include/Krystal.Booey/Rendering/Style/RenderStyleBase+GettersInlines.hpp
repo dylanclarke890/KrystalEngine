@@ -203,7 +203,7 @@ namespace krys::boo
     return _computedStyle.GetPseudoElementType();
   }
 
-  inline const css::CSSOMStringAtom &RenderStyleBase::PseudoElementNameArgument() const noexcept
+  inline const CSSOMStringAtom &RenderStyleBase::PseudoElementNameArgument() const noexcept
   {
     return _computedStyle.PseudoElementNameArgument();
   }
@@ -232,13 +232,13 @@ namespace krys::boo
   }
 
   inline const style::CustomProperty *
-    RenderStyleBase::CustomPropertyValue(const css::CSSOMStringAtom &property) const noexcept
+    RenderStyleBase::CustomPropertyValue(const CSSOMStringAtom &property) const noexcept
   {
     return _computedStyle.CustomPropertyValue(property);
   }
 
   inline bool RenderStyleBase::CustomPropertyValueEqual(const RenderStyleBase &other,
-                                                        const css::CSSOMStringAtom &property) const noexcept
+                                                        const CSSOMStringAtom &property) const noexcept
   {
     return _computedStyle.CustomPropertyValueEqual(other._computedStyle, property);
   }
@@ -255,7 +255,7 @@ namespace krys::boo
 
   // MARK: - Custom paint
 
-  inline void RenderStyleBase::AddCustomPaintWatchProperty(const css::CSSOMStringAtom &property) noexcept
+  inline void RenderStyleBase::AddCustomPaintWatchProperty(const CSSOMStringAtom &property) noexcept
   {
     _computedStyle.AddCustomPaintWatchProperty(property);
   }

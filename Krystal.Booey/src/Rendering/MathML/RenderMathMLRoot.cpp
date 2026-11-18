@@ -47,7 +47,7 @@ namespace krys::boo
   using MathConstant = OpenTypeMathData::MathConstant;
   using mathml::RootType;
 
-  RenderMathMLRoot::RenderMathMLRoot(mathml::MathMLRootElement &element, RenderStyle &&style) noexcept
+  RenderMathMLRoot::RenderMathMLRoot(boo::MathMLRootElement &element, RenderStyle &&style) noexcept
       : RenderMathMLRow(Type::MathMLRoot, element, krys::move(style))
   {
     _radicalOperator.SetOperator(Style(), RadicalCharacter, MathOperator::Type::VerticalOperator);
@@ -56,9 +56,9 @@ namespace krys::boo
 
   RenderMathMLRoot::~RenderMathMLRoot() noexcept = default;
 
-  mathml::MathMLRootElement &RenderMathMLRoot::GetElement() const noexcept
+  boo::MathMLRootElement &RenderMathMLRoot::GetElement() const noexcept
   {
-    return static_cast<mathml::MathMLRootElement &>(NodeForNonAnonymous());
+    return static_cast<boo::MathMLRootElement &>(NodeForNonAnonymous());
   }
 
   RootType RenderMathMLRoot::GetRootType() const noexcept

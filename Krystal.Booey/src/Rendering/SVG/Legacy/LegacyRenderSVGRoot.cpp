@@ -54,7 +54,7 @@ namespace krys::boo
     constexpr int DefaultHeight = 150;
   }
 
-  LegacyRenderSVGRoot::LegacyRenderSVGRoot(svg::SVGSvgElement &element, RenderStyle &&style) noexcept
+  LegacyRenderSVGRoot::LegacyRenderSVGRoot(SVGSvgElement &element, RenderStyle &&style) noexcept
       : RenderReplaced(Type::LegacySVGRoot, element, krys::move(style), ReplacedFlag::UsesBoundaryCaching)
   {
     krys_debug_assert(IsLegacyRenderSVGRoot());
@@ -72,9 +72,9 @@ namespace krys::boo
 
   LegacyRenderSVGRoot::~LegacyRenderSVGRoot() noexcept = default;
 
-  svg::SVGSvgElement &LegacyRenderSVGRoot::SvgSvgElement() const noexcept
+  SVGSvgElement &LegacyRenderSVGRoot::SvgSvgElement() const noexcept
   {
-    return Downcast<svg::SVGSvgElement>(Downcast<svg::SVGElement>(NodeForNonAnonymous()));
+    return Downcast<SVGSvgElement>(Downcast<SVGElement>(NodeForNonAnonymous()));
   }
 
   bool LegacyRenderSVGRoot::HasIntrinsicAspectRatio() const noexcept

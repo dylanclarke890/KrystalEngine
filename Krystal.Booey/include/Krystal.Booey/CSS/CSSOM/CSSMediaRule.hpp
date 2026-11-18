@@ -28,11 +28,18 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class MediaList;
-  class MediaRule;
+}
 
+namespace krys::boo::css
+{
+  class MediaRule;
+}
+
+namespace krys::boo
+{
   /// @brief An `@media` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/cssom/#the-cssmediarule-interface
   class CSSMediaRule final : public CSSConditionRule
@@ -42,35 +49,35 @@ namespace krys::boo::css
   private:
     mutable RefPtr<MediaList> _mediaCSSOMWrapper;
 
-    CSSMediaRule(MediaRule &rule, CSSStyleSheet *parent) noexcept;
+    CSSMediaRule(css::MediaRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
     ~CSSMediaRule() noexcept override;
 
-    KRYS_NODISCARD static Ref<CSSMediaRule> Create(MediaRule &rule, CSSStyleSheet *sheet) noexcept;
+    KRYS_NODISCARD static Ref<CSSMediaRule> Create(css::MediaRule &rule, CSSStyleSheet *sheet) noexcept;
 
     KRYS_NODISCARD MediaList *Media() const noexcept;
 
   private:
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::Media;
+      return css::RuleType::Media;
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
-    KRYS_NODISCARD CSSOMString CssText(const SerialisationContext &context) const noexcept final;
+    KRYS_NODISCARD CSSOMString CssText(const css::SerialisationContext &context) const noexcept final;
 
     KRYS_NODISCARD CSSOMString ConditionText() const noexcept final;
 
-    KRYS_NODISCARD const mq::MediaQueryList &MediaQueries() const noexcept;
+    KRYS_NODISCARD const css::mq::MediaQueryList &MediaQueries() const noexcept;
 
-    void SetMediaQueries(mq::MediaQueryList &&queries) noexcept;
+    void SetMediaQueries(css::mq::MediaQueryList &&queries) noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSMediaRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSMediaRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::Media;
   }

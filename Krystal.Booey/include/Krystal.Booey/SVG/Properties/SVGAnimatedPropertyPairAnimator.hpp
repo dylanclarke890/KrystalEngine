@@ -28,7 +28,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGAttributeAnimator.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGElement;
 
@@ -46,10 +46,9 @@ namespace krys::boo::svg
     const Ref<TAnimatedPropertyAnimator2> _animatedPropertyAnimator2;
 
   public:
-    SVGAnimatedPropertyPairAnimator(const dom::QualifiedName &attributeName,
-                                    Ref<AnimatedProperty1> &animated1, Ref<AnimatedProperty2> &animated2,
-                                    AnimationMode animationMode, CalcMode calcMode, bool isAccumulated,
-                                    bool isAdditive) noexcept
+    SVGAnimatedPropertyPairAnimator(const QualifiedName &attributeName, Ref<AnimatedProperty1> &animated1,
+                                    Ref<AnimatedProperty2> &animated2, svg::AnimationMode animationMode,
+                                    svg::CalcMode calcMode, bool isAccumulated, bool isAdditive) noexcept
         : SVGAttributeAnimator(attributeName),
           _animatedPropertyAnimator1(TAnimatedPropertyAnimator1::Create(
             attributeName, animated1, animationMode, calcMode, isAccumulated, isAdditive)),

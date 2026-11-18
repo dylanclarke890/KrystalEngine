@@ -22,12 +22,11 @@ namespace krys::editor
     KRYS_NON_COPY_MOVABLE(PageSpatialNavigation);
 
   private:
-    WeakPtr<boo::dom::Document> _document;
+    WeakPtr<boo::Document> _document;
     List<boo::dom::EventListenerHandle> _listeners;
 
   public:
-    explicit PageSpatialNavigation(boo::dom::Document &document) noexcept
-        : _document(CreateWeakPtr(&document))
+    explicit PageSpatialNavigation(boo::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
       RefPtr<boo::dom::EventTarget> grid = document.GetElementById(u8"nav-grid");
       if (!grid)
@@ -37,7 +36,7 @@ namespace krys::editor
 
       auto listen = [&](utf8_stringview type, Func<void(boo::dom::Event &)> &&callback)
       {
-        _listeners.push_back(grid->AddEventListener(boo::dom::DOMStringAtom(type), krys::move(callback)));
+        _listeners.push_back(grid->AddEventListener(boo::DOMStringAtom(type), krys::move(callback)));
       };
 
       // The arrow keys move the focus as the D-pad does, and the log shows what was pressed.
@@ -61,7 +60,7 @@ namespace krys::editor
                {
                  return;
                }
-               auto *select = DynamicDowncast<boo::html::HTMLSelectElement>(*target);
+               auto *select = DynamicDowncast<boo::HTMLSelectElement>(*target);
                auto value = select ? select->Value() : target->GetAttribute(u8"value").value_or(u8"");
                SetText(u8"nav-log", std::format("Chose “{}”", Narrow(value)));
              });
@@ -73,17 +72,17 @@ namespace krys::editor
       if (auto element = _document ? _document->GetElementById(id) : nullptr)
       {
         (void)element->TextContent(
-          boo::dom::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
+          boo::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
       }
     }
 
-    KRYS_NODISCARD static boo::dom::Element *TargetElement(boo::dom::Event &event) noexcept
+    KRYS_NODISCARD static boo::Element *TargetElement(boo::dom::Event &event) noexcept
     {
-      auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
-      return node ? DynamicDowncast<boo::dom::Element>(*node) : nullptr;
+      auto *node = DynamicDowncast<boo::Node>(event.Target().get());
+      return node ? DynamicDowncast<boo::Element>(*node) : nullptr;
     }
 
-    KRYS_NODISCARD static std::string Narrow(boo::dom::DOMStringView text) noexcept
+    KRYS_NODISCARD static std::string Narrow(boo::DOMStringView text) noexcept
     {
       return std::string(text.begin(), text.end());
     }

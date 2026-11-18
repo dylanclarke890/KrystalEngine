@@ -30,7 +30,7 @@ namespace krys::boo::dom
   class BeforeTextInsertedEvent;
 }
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmltextareaelement
   class HTMLTextAreaElement : public HTMLTextFormControlElement
@@ -48,25 +48,25 @@ namespace krys::boo::html
       HardWrap,
     };
 
-    mutable dom::DOMString _value;
+    mutable DOMString _value;
     RefPtr<HTMLElement> _placeholder;
     WrapMethod _wrap {SoftWrap};
     mutable bool _isDirty {false};
     mutable bool _wasModifiedByUser {false};
 
   public:
-    HTMLTextAreaElement(dom::Document &document) noexcept;
+    HTMLTextAreaElement(Document &document) noexcept;
 
     /// @brief A text area with its user agent shadow tree.
-    KRYS_NODISCARD static Ref<HTMLTextAreaElement> Create(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<HTMLTextAreaElement> Create(Document &document) noexcept;
 
 #pragma region HTMLTextAreaElement - https://html.spec.whatwg.org/#htmltextareaelement
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-autocomplete
-    KRYS_NODISCARD dom::DOMString Autocomplete() const noexcept;
+    KRYS_NODISCARD DOMString Autocomplete() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-autocomplete
-    void Autocomplete(dom::DOMString value) noexcept;
+    void Autocomplete(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-cols
     KRYS_NODISCARD uint32 Cols() const noexcept;
@@ -75,10 +75,10 @@ namespace krys::boo::html
     void Cols(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-dirname
-    KRYS_NODISCARD dom::DOMString DirName() const noexcept;
+    KRYS_NODISCARD DOMString DirName() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-dirname
-    void DirName(dom::DOMString value) noexcept;
+    void DirName(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;
@@ -97,16 +97,16 @@ namespace krys::boo::html
     void MinLength(int32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-name
-    KRYS_NODISCARD dom::DOMString Name() const noexcept override;
+    KRYS_NODISCARD DOMString Name() const noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-name
-    void Name(dom::DOMString value) noexcept;
+    void Name(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-placeholder
-    KRYS_NODISCARD dom::DOMString Placeholder() const noexcept;
+    KRYS_NODISCARD DOMString Placeholder() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-placeholder
-    void Placeholder(dom::DOMString value) noexcept;
+    void Placeholder(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-readonly
     KRYS_NODISCARD bool ReadOnly() const noexcept;
@@ -127,43 +127,43 @@ namespace krys::boo::html
     void Rows(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-wrap
-    KRYS_NODISCARD dom::DOMString Wrap() const noexcept;
+    KRYS_NODISCARD DOMString Wrap() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-wrap
-    void Wrap(dom::DOMString value) noexcept;
+    void Wrap(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-type
-    KRYS_NODISCARD dom::DOMString Type() const noexcept
+    KRYS_NODISCARD DOMString Type() const noexcept
     {
       return FormControlType();
     }
 
     /// @brief The text content of the element.
     /// @see https://html.spec.whatwg.org/#dom-textarea-defaultvalue
-    KRYS_NODISCARD dom::DOMString DefaultValue() const noexcept;
+    KRYS_NODISCARD DOMString DefaultValue() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-defaultvalue
-    void DefaultValue(dom::DOMString value) noexcept;
+    void DefaultValue(DOMString value) noexcept;
 
     /// @brief The raw value.
     /// @see https://html.spec.whatwg.org/#dom-textarea-value
-    KRYS_NODISCARD dom::DOMString Value() const noexcept final;
+    KRYS_NODISCARD DOMString Value() const noexcept final;
 
     dom::ExceptionOr<void>
-      SetValue(dom::DOMStringView value,
-               TextFieldEventBehavior eventBehavior = TextFieldEventBehavior::DispatchNoEvent,
-               TextControlSetValueSelection selection =
-                 TextControlSetValueSelection::SetSelectionToEnd) noexcept final;
+      SetValue(DOMStringView value,
+               html::TextFieldEventBehavior eventBehavior = html::TextFieldEventBehavior::DispatchNoEvent,
+               html::TextControlSetValueSelection selection =
+                 html::TextControlSetValueSelection::SetSelectionToEnd) noexcept final;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-textlength
     KRYS_NODISCARD uint32 TextLength() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-setselectionrange
-    void SetSelectionRangeForBindings(uint32 start, uint32 end, dom::DOMStringView direction = {}) noexcept;
+    void SetSelectionRangeForBindings(uint32 start, uint32 end, DOMStringView direction = {}) noexcept;
 
 #pragma endregion
 
-    KRYS_NODISCARD dom::DOMString FormControlType() const noexcept final
+    KRYS_NODISCARD DOMString FormControlType() const noexcept final
     {
       return u8"textarea";
     }
@@ -188,9 +188,9 @@ namespace krys::boo::html
       return _placeholder.get();
     }
 
-    KRYS_NODISCARD RefPtr<TextControlInnerTextElement> InnerTextElement() const noexcept final;
+    KRYS_NODISCARD RefPtr<html::TextControlInnerTextElement> InnerTextElement() const noexcept final;
 
-    RefPtr<TextControlInnerTextElement> InnerTextElementCreatingShadowSubtreeIfNeeded() noexcept final;
+    RefPtr<html::TextControlInnerTextElement> InnerTextElementCreatingShadowSubtreeIfNeeded() noexcept final;
 
     KRYS_NODISCARD RenderStyle CreateInnerTextStyle(const RenderStyle &style) noexcept final;
 
@@ -251,9 +251,9 @@ namespace krys::boo::html
     KRYS_NODISCARD bool TooLong() const noexcept final;
 
     /// @brief Whether @p candidate would be a valid value.
-    KRYS_NODISCARD bool IsValidValue(dom::DOMStringView candidate) const noexcept;
+    KRYS_NODISCARD bool IsValidValue(DOMStringView candidate) const noexcept;
 
-    bool AppendFormData(DOMFormData &formData) noexcept final;
+    bool AppendFormData(html::DOMFormData &formData) noexcept final;
 
     void Reset() noexcept final;
 
@@ -263,27 +263,25 @@ namespace krys::boo::html
       return Value().empty();
     }
 
-    void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept final;
+    void DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept final;
 
     void UpdatePlaceholderText() noexcept final;
 
     void SubtreeHasChanged() noexcept final;
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept final;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept final;
 
     void OnChildrenChanged() noexcept final;
 
-    void OnClone(dom::Node &copy, bool subtree) noexcept final;
+    void OnClone(Node &copy, bool subtree) noexcept final;
 
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
   private:
@@ -292,29 +290,29 @@ namespace krys::boo::html
 
     void HandleBeforeTextInsertedEvent(dom::BeforeTextInsertedEvent &event) const noexcept;
 
-    KRYS_NODISCARD static dom::DOMString SanitizeUserInputValue(dom::DOMStringView proposedValue,
-                                                                size_t maxLength) noexcept;
+    KRYS_NODISCARD static DOMString SanitizeUserInputValue(DOMStringView proposedValue,
+                                                           size_t maxLength) noexcept;
 
-    void SetNonDirtyValue(dom::DOMStringView value, TextControlSetValueSelection selection) noexcept;
+    void SetNonDirtyValue(DOMStringView value, html::TextControlSetValueSelection selection) noexcept;
 
-    void SetValueCommon(dom::DOMStringView newValue, TextFieldEventBehavior eventBehavior,
-                        TextControlSetValueSelection selection) noexcept;
+    void SetValueCommon(DOMStringView newValue, html::TextFieldEventBehavior eventBehavior,
+                        html::TextControlSetValueSelection selection) noexcept;
 
-    KRYS_NODISCARD bool ValueMissing(Maybe<dom::DOMStringView> value) const noexcept;
+    KRYS_NODISCARD bool ValueMissing(Maybe<DOMStringView> value) const noexcept;
 
-    KRYS_NODISCARD bool TooShort(Maybe<dom::DOMStringView> value, NeedsToCheckDirtyFlag check) const noexcept;
+    KRYS_NODISCARD bool TooShort(Maybe<DOMStringView> value, NeedsToCheckDirtyFlag check) const noexcept;
 
-    KRYS_NODISCARD bool TooLong(Maybe<dom::DOMStringView> value, NeedsToCheckDirtyFlag check) const noexcept;
+    KRYS_NODISCARD bool TooLong(Maybe<DOMStringView> value, NeedsToCheckDirtyFlag check) const noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLTextAreaElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLTextAreaElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLTextAreaElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLTextAreaElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLTextAreaElement();
   }

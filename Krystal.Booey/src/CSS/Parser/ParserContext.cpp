@@ -58,19 +58,18 @@ namespace krys::boo::css
     StaticValuePool::Init();
   }
 
-  ParserContext::ParserContext(const dom::Document &document) noexcept
-      : ParserContext(document.CssParserContext())
+  ParserContext::ParserContext(const Document &document) noexcept : ParserContext(document.CssParserContext())
   {
   }
 
-  ParserContext::ParserContext(const dom::Document &document, const url::URL &sheetBaseURL,
+  ParserContext::ParserContext(const Document &document, const url::URL &sheetBaseURL,
                                utf8_stringview charset) noexcept
       : ParserContext(ParserMode::HTMLStandard)
   {
     BaseURL = sheetBaseURL.IsNull() ? document.BaseURL() : sheetBaseURL;
     Charset = charset;
     Mode = document.InQuirksMode() ? ParserMode::HTMLQuirks : ParserMode::HTMLStandard;
-    IsHTMLDocument = Is<dom::HTMLDocument>(document);
+    IsHTMLDocument = Is<HTMLDocument>(document);
     HasDocumentSecurityOrigin = true;
 
     auto &settings = document.GetSettings();

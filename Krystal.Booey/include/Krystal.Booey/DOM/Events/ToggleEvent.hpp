@@ -5,10 +5,13 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
+}
 
+namespace krys::boo::dom
+{
   /// @see https://html.spec.whatwg.org/#toggleeventinit
   struct ToggleEventInit : EventInit
   {

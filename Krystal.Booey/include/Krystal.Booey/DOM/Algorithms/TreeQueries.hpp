@@ -26,20 +26,19 @@
 
 #include "Krystal.Core/Attributes.hpp"
 
-namespace krys::boo::html
-{
-  class HTMLElement;
-}
-
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class Document;
   class Element;
+  class HTMLElement;
   class Node;
   class ShadowRoot;
   class Text;
+}
 
+namespace krys::boo::dom
+{
   /// @brief Implementations of the various tree concepts/algorithms defined in the DOM spec, grouped together
   /// for ease of use. Also contains additional helper functions related to tree queries that aren't
   /// explicitly defined in the spec, but are useful for implementing the algorithms.
@@ -343,35 +342,35 @@ namespace krys::boo::dom
 
     /// @brief Helper function for getting the next sibling of a node that is an HTMLElement, or nullptr if
     /// there are no more HTMLElement siblings.
-    KRYS_NODISCARD static const html::HTMLElement *NextHTMLElementSibling(const Node &current) noexcept;
+    KRYS_NODISCARD static const HTMLElement *NextHTMLElementSibling(const Node &current) noexcept;
 
     /// @brief Helper function for getting the next sibling of a node that is an HTMLElement, or nullptr if
     /// there are no more HTMLElement siblings.
-    KRYS_NODISCARD static html::HTMLElement *NextHTMLElementSibling(Node &current) noexcept;
+    KRYS_NODISCARD static HTMLElement *NextHTMLElementSibling(Node &current) noexcept;
 
     /// @brief Helper function for getting the previous sibling of a node that is an HTMLElement, or nullptr
     /// if there are no more HTMLElement siblings.
-    KRYS_NODISCARD static const html::HTMLElement *PreviousHTMLElementSibling(const Node &current) noexcept;
+    KRYS_NODISCARD static const HTMLElement *PreviousHTMLElementSibling(const Node &current) noexcept;
 
     /// @brief Helper function for getting the previous sibling of a node that is an HTMLElement, or nullptr
     /// if there are no more HTMLElement siblings.
-    KRYS_NODISCARD static html::HTMLElement *PreviousHTMLElementSibling(Node &current) noexcept;
+    KRYS_NODISCARD static HTMLElement *PreviousHTMLElementSibling(Node &current) noexcept;
 
     /// @brief Helper function for getting the first child of a node that is an HTMLElement, or nullptr if
     /// there are no HTMLElement children.
-    KRYS_NODISCARD static const html::HTMLElement *FirstHTMLElementChild(const ContainerNode &node) noexcept;
+    KRYS_NODISCARD static const HTMLElement *FirstHTMLElementChild(const ContainerNode &node) noexcept;
 
     /// @brief Helper function for getting the first child of a node that is an HTMLElement, or nullptr if
     /// there are no HTMLElement children.
-    KRYS_NODISCARD static html::HTMLElement *FirstHTMLElementChild(ContainerNode &node) noexcept;
+    KRYS_NODISCARD static HTMLElement *FirstHTMLElementChild(ContainerNode &node) noexcept;
 
     /// @brief Helper function for getting the last child of a node that is an HTMLElement, or nullptr if
     /// there are no HTMLElement children.
-    KRYS_NODISCARD static const html::HTMLElement *LastHTMLElementChild(const ContainerNode &node) noexcept;
+    KRYS_NODISCARD static const HTMLElement *LastHTMLElementChild(const ContainerNode &node) noexcept;
 
     /// @brief Helper function for getting the last child of a node that is an HTMLElement, or nullptr if
     /// there are no HTMLElement children.
-    KRYS_NODISCARD static html::HTMLElement *LastHTMLElementChild(ContainerNode &node) noexcept;
+    KRYS_NODISCARD static HTMLElement *LastHTMLElementChild(ContainerNode &node) noexcept;
 
 #pragma endregion
 

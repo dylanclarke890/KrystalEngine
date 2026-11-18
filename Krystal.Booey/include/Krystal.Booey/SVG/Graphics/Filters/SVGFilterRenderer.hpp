@@ -35,12 +35,8 @@ namespace krys::boo
 {
   class FilterImage;
   class GraphicsContext;
-
-  namespace svg
-  {
-    class SVGElement;
-    class SVGFilterElement;
-  }
+  class SVGElement;
+  class SVGFilterElement;
 
   /// @brief Makes the results cache of a filter.
   using FilterResultsCreator = Func<UniquePtr<FilterResults>()>;
@@ -49,7 +45,7 @@ namespace krys::boo
   class SVGFilterRenderer final : public Filter
   {
   private:
-    svg::SVGUnitTypes::SVGUnitType _primitiveUnits;
+    SVGUnitTypes::SVGUnitType _primitiveUnits;
 
     SVGFilterExpression _expression;
     FilterEffectVector _effects;
@@ -58,21 +54,21 @@ namespace krys::boo
 
   public:
     KRYS_NODISCARD static RefPtr<SVGFilterRenderer>
-      Create(svg::SVGElement *contextElement, svg::SVGFilterElement &filterElement,
+      Create(boo::SVGElement *contextElement, boo::SVGFilterElement &filterElement,
              const FilterGeometry &geometry, EnumSet<FilterRenderingMode> preferredRenderingModes,
              const GraphicsContext &destinationContext) noexcept;
 
     KRYS_NODISCARD static Ref<SVGFilterRenderer>
-      Create(svg::SVGUnitTypes::SVGUnitType primitiveUnits, SVGFilterExpression &&expression,
+      Create(SVGUnitTypes::SVGUnitType primitiveUnits, SVGFilterExpression &&expression,
              FilterEffectVector &&effects, const FilterGeometry &geometry,
              EnumSet<FilterRenderingMode> preferredRenderingModes) noexcept;
 
-    KRYS_NODISCARD static bool IsIdentity(svg::SVGFilterElement &filterElement) noexcept;
+    KRYS_NODISCARD static bool IsIdentity(boo::SVGFilterElement &filterElement) noexcept;
 
-    KRYS_NODISCARD static IntOutsets CalculateOutsets(svg::SVGFilterElement &filterElement,
+    KRYS_NODISCARD static IntOutsets CalculateOutsets(boo::SVGFilterElement &filterElement,
                                                       const FloatRect &targetBoundingBox) noexcept;
 
-    KRYS_NODISCARD svg::SVGUnitTypes::SVGUnitType PrimitiveUnits() const noexcept
+    KRYS_NODISCARD SVGUnitTypes::SVGUnitType PrimitiveUnits() const noexcept
     {
       return _primitiveUnits;
     }
@@ -100,9 +96,9 @@ namespace krys::boo
     KRYS_NODISCARD FilterStyleVector CreateFilterStyles(GraphicsContext &context,
                                                         const FilterStyle &sourceStyle) const noexcept final;
 
-    KRYS_NODISCARD static FloatSize
-      CalculateResolvedSize(const FloatSize &size, const FloatRect &targetBoundingBox,
-                            svg::SVGUnitTypes::SVGUnitType primitiveUnits) noexcept;
+    KRYS_NODISCARD static FloatSize CalculateResolvedSize(const FloatSize &size,
+                                                          const FloatRect &targetBoundingBox,
+                                                          SVGUnitTypes::SVGUnitType primitiveUnits) noexcept;
 
     TextStream &ExternalRepresentation(TextStream &ts,
                                        FilterRepresentation representation) const noexcept final;
@@ -111,9 +107,9 @@ namespace krys::boo
                                                           const FilterEffectVector &effects) noexcept;
 
   private:
-    SVGFilterRenderer(const FilterGeometry &geometry, svg::SVGUnitTypes::SVGUnitType primitiveUnits) noexcept;
+    SVGFilterRenderer(const FilterGeometry &geometry, SVGUnitTypes::SVGUnitType primitiveUnits) noexcept;
 
-    SVGFilterRenderer(const FilterGeometry &geometry, svg::SVGUnitTypes::SVGUnitType primitiveUnits,
+    SVGFilterRenderer(const FilterGeometry &geometry, SVGUnitTypes::SVGUnitType primitiveUnits,
                       SVGFilterExpression &&expression, FilterEffectVector &&effects) noexcept;
 
     struct BuiltExpression
@@ -123,7 +119,7 @@ namespace krys::boo
     };
 
     KRYS_NODISCARD static Maybe<BuiltExpression>
-      BuildExpression(svg::SVGElement *contextElement, svg::SVGFilterElement &filterElement,
+      BuildExpression(boo::SVGElement *contextElement, boo::SVGFilterElement &filterElement,
                       const SVGFilterRenderer &filter, const GraphicsContext &destinationContext) noexcept;
 
     void SetExpression(SVGFilterExpression &&expression) noexcept

@@ -42,7 +42,7 @@
 
 namespace krys::boo::style
 {
-  RenderStyle ResolveForDocument(const dom::Document &document) noexcept
+  RenderStyle ResolveForDocument(const Document &document) noexcept
   {
     auto documentStyle = RenderStyle::Create();
 
@@ -74,7 +74,7 @@ namespace krys::boo::style
       int32 size =
         static_cast<int32>(FontSizeForKeyword(static_cast<uint32>(css::ValueId::Medium), false, document));
       fontDescription.SetSpecifiedSize(static_cast<float>(size));
-      bool useSVGZoomRules = Is<svg::SVGDocument>(document);
+      bool useSVGZoomRules = Is<SVGDocument>(document);
       auto computedFontSize =
         ComputedFontSizeFromSpecifiedSize(static_cast<float>(size), fontDescription.IsAbsoluteSize(),
                                           useSVGZoomRules, &documentStyle, document);

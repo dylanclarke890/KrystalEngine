@@ -117,12 +117,12 @@ namespace krys::boo
 
     auto type = PseudoElementType::Checkmark;
     bool usesBaseAppearance = false;
-    if (auto *select = DynamicDowncast<html::HTMLSelectElement>(*element))
+    if (auto *select = DynamicDowncast<HTMLSelectElement>(*element))
     {
       type = PseudoElementType::PickerIcon;
       usesBaseAppearance = select->ContentsUseBaseAppearance();
     }
-    else if (auto *option = DynamicDowncast<html::HTMLOptionElement>(*element))
+    else if (auto *option = DynamicDowncast<HTMLOptionElement>(*element))
     {
       auto *ownerSelect = option->OwnerSelectElement();
       usesBaseAppearance = ownerSelect && ownerSelect->ContentsUseBaseAppearance();

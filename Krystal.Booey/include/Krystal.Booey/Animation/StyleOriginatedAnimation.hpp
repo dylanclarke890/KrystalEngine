@@ -30,13 +30,9 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 
-namespace krys::boo::dom
-{
-  class Element;
-}
-
 namespace krys::boo
 {
+  class Element;
   class StyleOriginatedAnimationEvent;
   class TimingFunction;
 
@@ -47,7 +43,7 @@ namespace krys::boo
   private:
     bool _wasPending {false};
     AnimationEffectPhase _previousPhase {AnimationEffectPhase::Idle};
-    WeakPtr<dom::Element> _owningElement;
+    WeakPtr<Element> _owningElement;
     Maybe<style::PseudoElementIdentifier> _owningPseudoElementIdentifier;
     double _previousIteration {0};
 
@@ -109,7 +105,7 @@ namespace krys::boo
     virtual void SyncPropertiesWithBackingAnimation() noexcept;
 
     KRYS_NODISCARD virtual Ref<StyleOriginatedAnimationEvent>
-      CreateEvent(dom::DOMStringAtom eventType, Maybe<Seconds> scheduledTime, double elapsedTime,
+      CreateEvent(DOMStringAtom eventType, Maybe<Seconds> scheduledTime, double elapsedTime,
                   const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept = 0;
 
   private:
@@ -120,7 +116,7 @@ namespace krys::boo
     /// @see https://drafts.csswg.org/css-transitions-2/#transition-events
     void InvalidateDOMEvents(WebAnimationTime cancelationTime = Seconds {0}) noexcept;
 
-    void EnqueueDOMEvent(dom::DOMStringAtom eventType, WebAnimationTime elapsedTime,
+    void EnqueueDOMEvent(DOMStringAtom eventType, WebAnimationTime elapsedTime,
                          WebAnimationTime scheduledEffectTime) noexcept;
 
     KRYS_NODISCARD WebAnimationTime ComputeCancelationTime() const noexcept;

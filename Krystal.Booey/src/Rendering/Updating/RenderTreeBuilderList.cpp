@@ -147,8 +147,8 @@ namespace krys::boo
   {
     const auto &style = listItemRenderer.Style();
 
-    if (auto *element = DynamicDowncast<html::HTMLElement>(listItemRenderer.GetElement());
-        element && Is<html::HTMLFieldSetElement>(*element))
+    if (auto *element = DynamicDowncast<HTMLElement>(listItemRenderer.GetElement());
+        element && Is<HTMLFieldSetElement>(*element))
     {
       if (auto *marker = listItemRenderer.MarkerRenderer())
       {

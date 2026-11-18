@@ -34,7 +34,7 @@ namespace krys::boo::dom
   class ExceptionOr;
 }
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSRule;
   class CSSStyleSheet;
@@ -47,7 +47,7 @@ namespace krys::boo::css
   private:
     WeakPtr<CSSStyleSheet> _parentStyleSheet;
     WeakPtr<CSSRule> _parentRule;
-    Maybe<mq::MediaQueryList> _detachedMediaQueries;
+    Maybe<css::mq::MediaQueryList> _detachedMediaQueries;
 
     explicit MediaList(CSSStyleSheet *parentSheet) noexcept;
 
@@ -84,9 +84,9 @@ namespace krys::boo::css
     /// @brief Keeps a copy of the media queries, so the list still works once its owner has gone.
     void DetachFromParent() noexcept;
 
-    KRYS_NODISCARD const mq::MediaQueryList &MediaQueries() const noexcept;
+    KRYS_NODISCARD const css::mq::MediaQueryList &MediaQueries() const noexcept;
 
   private:
-    void SetMediaQueries(mq::MediaQueryList &&queries) noexcept;
+    void SetMediaQueries(css::mq::MediaQueryList &&queries) noexcept;
   };
 }

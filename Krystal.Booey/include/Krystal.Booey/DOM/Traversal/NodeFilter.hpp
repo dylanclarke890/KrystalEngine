@@ -57,10 +57,13 @@ namespace krys::boo::dom
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::FilterResult, 3u);
 KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::WhatToShow, 13u);
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Node;
+}
 
+namespace krys::boo::dom
+{
   /// @brief Decides which nodes a NodeIterator or TreeWalker returns.
   /// @see https://dom.spec.whatwg.org/#interface-nodefilter
   class NodeFilter : public RefCounted<NodeFilter>

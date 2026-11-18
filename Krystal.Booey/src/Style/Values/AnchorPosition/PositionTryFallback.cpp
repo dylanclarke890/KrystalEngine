@@ -108,7 +108,7 @@ namespace krys::boo::style
             const auto *primitive = DynamicDowncast<css::PrimitiveValue>(item);
             if (primitive && primitive->IsCustomIdent() && !rule)
             {
-              rule = ScopedName {css::CSSOMStringAtom {primitive->StringValue()}, state.StyleScopeOrdinal()};
+              rule = ScopedName {CSSOMStringAtom {primitive->StringValue()}, state.StyleScopeOrdinal()};
               break;
             }
             state.SetCurrentPropertyInvalidAtComputedValueTime();

@@ -33,13 +33,13 @@
 
 namespace krys::boo
 {
-  Ref<ResizeObservation> ResizeObservation::Create(dom::Element &target,
+  Ref<ResizeObservation> ResizeObservation::Create(Element &target,
                                                    ResizeObserverBoxOptions observedBox) noexcept
   {
     return AdoptRef(*new ResizeObservation(target, observedBox));
   }
 
-  ResizeObservation::ResizeObservation(dom::Element &target, ResizeObserverBoxOptions observedBox) noexcept
+  ResizeObservation::ResizeObservation(Element &target, ResizeObserverBoxOptions observedBox) noexcept
       : _target(CreateWeakPtr(&target)),
         _lastObservationSizes {LayoutSize(-1, -1), LayoutSize(-1, -1), LayoutSize(-1, -1), FloatSize(-1, -1)},
         _observedBox(observedBox)
@@ -70,7 +70,7 @@ namespace krys::boo
 
   Maybe<ResizeObservation::BoxSizes> ResizeObservation::ComputeObservedSizes() const noexcept
   {
-    if (auto *svg = DynamicDowncast<svg::SVGElement>(*_target))
+    if (auto *svg = DynamicDowncast<SVGElement>(*_target))
     {
       if (svg->HasAssociatedSVGLayoutBox())
       {
@@ -186,7 +186,7 @@ namespace krys::boo
   {
     // There's no frame tree, so the depth counts the target's own document only.
     size_t depth = 0;
-    for (dom::Element *parent = _target.get(); parent; parent = parent->ParentElementInComposedTree())
+    for (Element *parent = _target.get(); parent; parent = parent->ParentElementInComposedTree())
     {
       ++depth;
     }

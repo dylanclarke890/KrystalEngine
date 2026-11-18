@@ -40,24 +40,24 @@
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <utility>
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLAreaElement::HTMLAreaElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Area)
+  HTMLAreaElement::HTMLAreaElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Area)
   {
     SetEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
   }
 
   void HTMLAreaElement::ActivationBehavior(dom::Event &event) noexcept
   {
-    HyperlinkAlgorithms::ActivationBehavior(*this, event);
+    html::HyperlinkAlgorithms::ActivationBehavior(*this, event);
   }
 
   void HTMLAreaElement::DefaultEventHandler(dom::Event &event) noexcept
   {
     if (css::IsLink(*this))
     {
-      if (Focused() && HyperlinkAlgorithms::IsEnterKeyKeydownEvent(event))
+      if (Focused() && html::HyperlinkAlgorithms::IsEnterKeyKeydownEvent(event))
       {
         event.SetDefaultHandled();
         (void)DispatchSimulatedClick(&event);
@@ -66,7 +66,7 @@ namespace krys::boo::html
 
       if (event.Type() == event_names::AuxClick && dom::MouseEvent::CanTriggerActivationBehavior(event))
       {
-        HyperlinkAlgorithms::FollowTheHyperlink(*this, event);
+        html::HyperlinkAlgorithms::FollowTheHyperlink(*this, event);
         return;
       }
     }
@@ -74,10 +74,9 @@ namespace krys::boo::html
     HTMLElement::DefaultEventHandler(event);
   }
 
-  void HTMLAreaElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                           Maybe<dom::DOMStringView> oldValue,
-                                           Maybe<dom::DOMStringView> value,
-                                           const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLAreaElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                           Maybe<DOMStringView> value,
+                                           const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
@@ -94,7 +93,7 @@ namespace krys::boo::html
     if (localName == u8"shape")
     {
       // The rectangle state is the missing and invalid value default, so rect and rectangle are left to it.
-      auto shape = value.value_or(dom::DOMStringView());
+      auto shape = value.value_or(DOMStringView());
       if (text::IsASCIICaselessEqual(shape, u8"default"))
       {
         _shape = AreaShape::Default;
@@ -115,7 +114,7 @@ namespace krys::boo::html
     }
     else if (localName == u8"coords")
     {
-      _coords = Numbers::ParseListOfFloatingPointNumbers(value.value_or(dom::DOMStringView()));
+      _coords = html::Numbers::ParseListOfFloatingPointNumbers(value.value_or(DOMStringView()));
       InvalidateCachedRegion();
     }
   }
@@ -303,9 +302,9 @@ namespace krys::boo::html
     }
   }
 
-  RefPtr<dom::Element> HTMLAreaElement::FocusAppearanceUpdateTarget() noexcept
+  RefPtr<Element> HTMLAreaElement::FocusAppearanceUpdateTarget() noexcept
   {
-    if (!FocusAlgorithms::IsFocusableArea(*this))
+    if (!html::FocusAlgorithms::IsFocusableArea(*this))
     {
       return nullptr;
     }
@@ -314,74 +313,74 @@ namespace krys::boo::html
 
 #pragma region HTMLAreaElement
 
-  dom::DOMString HTMLAreaElement::Alt() const noexcept
+  DOMString HTMLAreaElement::Alt() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"alt").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"alt").value_or(u8"");
   }
 
-  void HTMLAreaElement::Alt(dom::DOMString value) noexcept
+  void HTMLAreaElement::Alt(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"alt", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"alt", krys::move(value));
   }
 
-  dom::DOMString HTMLAreaElement::Coords() const noexcept
+  DOMString HTMLAreaElement::Coords() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"coords").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"coords").value_or(u8"");
   }
 
-  void HTMLAreaElement::Coords(dom::DOMString value) noexcept
+  void HTMLAreaElement::Coords(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"coords", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"coords", krys::move(value));
   }
 
-  dom::DOMString HTMLAreaElement::Shape() const noexcept
+  DOMString HTMLAreaElement::Shape() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"shape").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"shape").value_or(u8"");
   }
 
-  void HTMLAreaElement::Shape(dom::DOMString value) noexcept
+  void HTMLAreaElement::Shape(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"shape", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"shape", krys::move(value));
   }
 
-  dom::DOMString HTMLAreaElement::Target() const noexcept
+  DOMString HTMLAreaElement::Target() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"target").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"target").value_or(u8"");
   }
 
-  void HTMLAreaElement::Target(dom::DOMString value) noexcept
+  void HTMLAreaElement::Target(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"target", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"target", krys::move(value));
   }
 
-  dom::DOMString HTMLAreaElement::Download() const noexcept
+  DOMString HTMLAreaElement::Download() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"download").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"download").value_or(u8"");
   }
 
-  void HTMLAreaElement::Download(dom::DOMString value) noexcept
+  void HTMLAreaElement::Download(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"download", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"download", krys::move(value));
   }
 
   dom::USVString HTMLAreaElement::Ping() const noexcept
   {
-    return Reflect<dom::USVString>(*this, u8"ping");
+    return html::Reflect<dom::USVString>(*this, u8"ping");
   }
 
   void HTMLAreaElement::Ping(dom::USVString value) noexcept
   {
-    return Reflect<dom::USVString>(*this, u8"ping", krys::move(value));
+    return html::Reflect<dom::USVString>(*this, u8"ping", krys::move(value));
   }
 
-  dom::DOMString HTMLAreaElement::Rel() const noexcept
+  DOMString HTMLAreaElement::Rel() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"rel").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"rel").value_or(u8"");
   }
 
-  void HTMLAreaElement::Rel(dom::DOMString value) noexcept
+  void HTMLAreaElement::Rel(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"rel", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"rel", krys::move(value));
   }
 
   dom::DOMTokenList &HTMLAreaElement::RelList() noexcept
@@ -390,7 +389,7 @@ namespace krys::boo::html
     {
       _relList =
         dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"rel",
-                                                   [](dom::Document &, dom::DOMStringView token)
+                                                   [](Document &, DOMStringView token)
                                                    {
                                                      return text::IsASCIICaselessEqual(token, u8"noreferrer")
                                                             || text::IsASCIICaselessEqual(token, u8"noopener")
@@ -401,14 +400,14 @@ namespace krys::boo::html
     return *_relList;
   }
 
-  dom::DOMString HTMLAreaElement::ReferrerPolicy() const noexcept
+  DOMString HTMLAreaElement::ReferrerPolicy() const noexcept
   {
-    return ReflectEnumerated<"referrerpolicy">(*this);
+    return html::ReflectEnumerated<"referrerpolicy">(*this);
   }
 
-  void HTMLAreaElement::ReferrerPolicy(dom::DOMString value) noexcept
+  void HTMLAreaElement::ReferrerPolicy(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"referrerpolicy", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"referrerpolicy", krys::move(value));
   }
 
 #pragma endregion
@@ -417,12 +416,12 @@ namespace krys::boo::html
 
   dom::USVString HTMLAreaElement::Href() const noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"href");
+    return html::ReflectURL<dom::USVString>(*this, u8"href");
   }
 
   void HTMLAreaElement::Href(dom::USVString value) noexcept
   {
-    ReflectURL<dom::USVString>(*this, u8"href", krys::move(value));
+    html::ReflectURL<dom::USVString>(*this, u8"href", krys::move(value));
   }
 
   dom::USVString HTMLAreaElement::ToString() const noexcept
@@ -432,13 +431,13 @@ namespace krys::boo::html
 
   url::URL HTMLAreaElement::FullURL() const noexcept
   {
-    return HyperlinkAlgorithms::Href(*this);
+    return html::HyperlinkAlgorithms::Href(*this);
   }
 
   void HTMLAreaElement::SetFullURL(const url::URL &url) noexcept
   {
-    CEReactionsScope ceReactions;
-    HyperlinkAlgorithms::SetHref(*this, url);
+    html::CEReactionsScope ceReactions;
+    html::HyperlinkAlgorithms::SetHref(*this, url);
   }
 
 #pragma endregion
@@ -447,12 +446,12 @@ namespace krys::boo::html
 
   bool HTMLAreaElement::NoHref() const noexcept
   {
-    return Reflect<bool>(*this, u8"nohref");
+    return html::Reflect<bool>(*this, u8"nohref");
   }
 
   void HTMLAreaElement::NoHref(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"nohref", krys::move(value));
+    html::Reflect<bool>(*this, u8"nohref", krys::move(value));
   }
 
 #pragma endregion

@@ -44,8 +44,8 @@ namespace krys::boo::dom::tests
     SECTION("Character data counts UTF-8 code units")
     {
       auto doc = CreateRef<Document>();
-      CHECK(TreeQueries::Length(*CreateRef<krys::boo::dom::Text>(*doc, u8"")) == 0);
-      CHECK(TreeQueries::Length(*CreateRef<krys::boo::dom::Text>(*doc, u8"\u00e9")) == 2);
+      CHECK(TreeQueries::Length(*CreateRef<krys::boo::Text>(*doc, u8"")) == 0);
+      CHECK(TreeQueries::Length(*CreateRef<krys::boo::Text>(*doc, u8"\u00e9")) == 2);
     }
 
     SECTION("Elements count their children")
@@ -53,7 +53,7 @@ namespace krys::boo::dom::tests
       auto doc = CreateRef<Document>();
       auto parent = CreateRef<TestElement>(*doc);
       auto child = CreateRef<TestElement>(*doc);
-      auto textNode = CreateRef<krys::boo::dom::Text>(*doc, u8"Hello, world!");
+      auto textNode = CreateRef<krys::boo::Text>(*doc, u8"Hello, world!");
 
       REQUIRE(TreeQueries::Length(*parent) == 0);
       REQUIRE(TreeQueries::Length(*child) == 0);
@@ -80,7 +80,7 @@ namespace krys::boo::dom::tests
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestElement>(*doc);
     auto child = CreateRef<TestElement>(*doc);
-    auto textNode = CreateRef<krys::boo::dom::Text>(*doc, u8"Hello, world!");
+    auto textNode = CreateRef<krys::boo::Text>(*doc, u8"Hello, world!");
 
     REQUIRE(TreeQueries::IsEmpty(*parent));
     REQUIRE(TreeQueries::IsEmpty(*child));
@@ -1041,7 +1041,7 @@ namespace krys::boo::dom::tests
     {
       auto templateElement = document->CreateElement(u8"template").ReleaseValue();
       REQUIRE_FALSE(host->AppendChild(*templateElement).HasException());
-      auto &content = Downcast<html::HTMLTemplateElement>(*templateElement).TemplateContents();
+      auto &content = Downcast<HTMLTemplateElement>(*templateElement).TemplateContents();
       auto inContent = document->CreateElement(u8"p").ReleaseValue();
       REQUIRE_FALSE(content.AppendChild(*inContent).HasException());
       CHECK(TreeQueries::IsHostIncludingInclusiveAncestorOf(content, *inContent));
@@ -1077,7 +1077,7 @@ namespace krys::boo::dom::tests
 
     CHECK(TreeQueries::IsExclusiveDocumentFragmentNode(*document->CreateDocumentFragment()));
     CHECK(TreeQueries::IsExclusiveDocumentFragmentNode(
-      Downcast<html::HTMLTemplateElement>(*templateElement).TemplateContents()));
+      Downcast<HTMLTemplateElement>(*templateElement).TemplateContents()));
     CHECK_FALSE(TreeQueries::IsExclusiveDocumentFragmentNode(*shadow));
     CHECK_FALSE(TreeQueries::IsExclusiveDocumentFragmentNode(*host));
     CHECK_FALSE(TreeQueries::IsExclusiveDocumentFragmentNode(*document));

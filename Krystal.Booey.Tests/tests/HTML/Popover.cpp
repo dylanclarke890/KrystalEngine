@@ -26,14 +26,14 @@ namespace krys::boo::html::tests
 
   namespace
   {
-    KRYS_NODISCARD std::string Narrow(dom::DOMStringView string)
+    KRYS_NODISCARD std::string Narrow(DOMStringView string)
     {
       return std::string(reinterpret_cast<const char *>(string.data()), string.size());
     }
 
-    KRYS_NODISCARD std::string NarrowOrNull(const Maybe<dom::DOMString> &string)
+    KRYS_NODISCARD std::string NarrowOrNull(const Maybe<DOMString> &string)
     {
-      return string ? Narrow(dom::DOMStringView(*string)) : std::string("null");
+      return string ? Narrow(DOMStringView(*string)) : std::string("null");
     }
 
     /// @brief Records a popover's toggle events, as `"<id>:<type>:<old>><new>"`.
@@ -133,7 +133,7 @@ namespace krys::boo::html::tests
     {
       CHECK(ShowError(plain) == dom::ExceptionCode::NotSupportedError);
       auto detached = document.CreateElement(u8"div").ReleaseValue();
-      (void)detached->SetAttribute(u8"popover", dom::DOMString());
+      (void)detached->SetAttribute(u8"popover", DOMString());
       CHECK(ShowError(Downcast<HTMLElement>(*detached)) == dom::ExceptionCode::InvalidStateError);
       CHECK(log.Take().empty());
     }
@@ -348,7 +348,7 @@ namespace krys::boo::html::tests
     SECTION("A modal dialog can't be a popover")
     {
       auto dialog = document.CreateElement(u8"dialog").ReleaseValue();
-      (void)dialog->SetAttribute(u8"popover", dom::DOMString());
+      (void)dialog->SetAttribute(u8"popover", DOMString());
       REQUIRE_FALSE(document.Body()->AppendChild(*dialog).HasException());
       auto &modal = Downcast<HTMLDialogElement>(*dialog);
       REQUIRE_FALSE(modal.ShowModal().HasException());
@@ -376,7 +376,7 @@ namespace krys::boo::html::tests
     auto &p = Downcast<HTMLElement>(fixture.ById(u8"p"));
     auto &q = Downcast<HTMLElement>(fixture.ById(u8"q"));
     REQUIRE_FALSE(p.ShowPopover().HasException());
-    auto clicked = [&](dom::DOMStringView id)
+    auto clicked = [&](DOMStringView id)
     {
       return document.TopmostClickedPopover(fixture.ById(id)).get();
     };
@@ -451,7 +451,7 @@ namespace krys::boo::html::tests
       // The trigger's focus navigation scope holds the popover, which follows it in sequential navigation.
       CHECK(FocusAlgorithms::IsFocusNavigationScopeOwner(trigger));
       auto order = FocusAlgorithms::SequentialFocusNavigationOrder(document);
-      auto position = [&](dom::DOMStringView id)
+      auto position = [&](DOMStringView id)
       {
         return std::ranges::find(order, &fixture.ById(id)) - order.begin();
       };
@@ -487,9 +487,9 @@ namespace krys::boo::html::tests
   {
     NavigationFixture fixture(u8"<button id=t popovertarget=h>T</button><x-host id=h></x-host>");
     // A shadow root on the element with ID @p id, its reference target @p target, holding @p markup.
-    auto attach = [&](dom::DOMStringView id, const char8_t *target, const char8_t *markup)
+    auto attach = [&](DOMStringView id, const char8_t *target, const char8_t *markup)
     {
-      auto shadow = fixture.ById(id).AttachShadow({.ReferenceTarget = dom::DOMString(target)}).ReleaseValue();
+      auto shadow = fixture.ById(id).AttachShadow({.ReferenceTarget = DOMString(target)}).ReleaseValue();
       REQUIRE_FALSE(shadow->SetHTMLUnsafe(markup).HasException());
       return shadow;
     };
@@ -509,7 +509,7 @@ namespace krys::boo::html::tests
   {
     NavigationFixture fixture(u8"<button id=t popovertarget=h>T</button><x-host id=h></x-host>");
     auto &host = fixture.ById(u8"h");
-    auto shadow = host.AttachShadow({.ReferenceTarget = dom::DOMString(u8"p")}).ReleaseValue();
+    auto shadow = host.AttachShadow({.ReferenceTarget = DOMString(u8"p")}).ReleaseValue();
     REQUIRE_FALSE(shadow->SetHTMLUnsafe(u8"<div id=p popover>P</div>").HasException());
     List<std::string> heard;
     auto onBefore =

@@ -28,10 +28,6 @@
 namespace krys::boo
 {
   class CachedImage;
-}
-
-namespace krys::boo::svg
-{
   class SVGImageLoader;
 
   /// @brief The `<image>` element: a raster image drawn into a rectangle.
@@ -49,13 +45,13 @@ namespace krys::boo::svg
     const UniquePtr<SVGImageLoader> _imageLoader;
 
   public:
-    explicit SVGImageElement(dom::Document &document) noexcept;
+    explicit SVGImageElement(Document &document) noexcept;
 
     ~SVGImageElement() noexcept override;
 
     KRYS_NODISCARD CachedImage *GetCachedImage() const noexcept;
 
-    KRYS_NODISCARD Maybe<dom::DOMString> ImageSourceURL() const noexcept final;
+    KRYS_NODISCARD Maybe<DOMString> ImageSourceURL() const noexcept final;
 
     KRYS_NODISCARD const SVGLengthValue &X() const noexcept
     {
@@ -83,10 +79,10 @@ namespace krys::boo::svg
     }
 
     /// @see https://svgwg.org/svg2-draft/embedded.html#__svg__SVGImageElement__crossOrigin
-    KRYS_NODISCARD Maybe<dom::DOMString> CrossOrigin() const noexcept;
+    KRYS_NODISCARD Maybe<DOMString> CrossOrigin() const noexcept;
 
     /// @see https://svgwg.org/svg2-draft/embedded.html#__svg__SVGImageElement__crossOrigin
-    void CrossOrigin(Maybe<dom::DOMString> value) noexcept;
+    void CrossOrigin(Maybe<DOMString> value) noexcept;
 
     KRYS_NODISCARD SVGAnimatedLength &XAnimated() noexcept
     {
@@ -116,10 +112,10 @@ namespace krys::boo::svg
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGImageElement, SVGGraphicsElement, SVGURIReference>;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
     void DidAttachRenderers() noexcept final;
 
@@ -139,12 +135,12 @@ namespace krys::boo::svg
       return true;
     }
 
-    void OnAdopt(dom::Document &oldDocument) noexcept final;
+    void OnAdopt(Document &oldDocument) noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGImageElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGImageElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGImageElement();
   }

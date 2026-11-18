@@ -16,7 +16,7 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    KRYS_NODISCARD Ref<CSSStyleSheet> ConstructedSheet(dom::Document &document, CSSStyleSheet::Init init = {})
+    KRYS_NODISCARD Ref<CSSStyleSheet> ConstructedSheet(Document &document, CSSStyleSheet::Init init = {})
     {
       auto sheet = CSSStyleSheet::Create(document, krys::move(init));
       REQUIRE(sheet.HasValue());
@@ -207,7 +207,7 @@ namespace krys::boo::css::tests
 
     SECTION("an owner node")
     {
-      auto document = CreateRef<dom::Document>();
+      auto document = CreateRef<Document>();
       auto text = document->CreateTextNode(u8"a");
       auto sheet = CSSStyleSheet::Create(Ref<StyleSheetContents>(contents), *text);
       REQUIRE(sheet->OwnerNode() == text.get());
@@ -239,7 +239,7 @@ namespace krys::boo::css::tests
   TEST_CASE("CSSStyleSheet: constructed sheets", "[CSS][CSSOM][CSSStyleSheet]")
   {
     style::StyleSheetContentsCache::Singleton().Clear();
-    auto document = CreateRef<dom::Document>();
+    auto document = CreateRef<Document>();
 
     SECTION("defaults")
     {
@@ -321,7 +321,7 @@ namespace krys::boo::css::tests
             "[CSS][CSSOM][CSSStyleSheet]")
   {
     style::StyleSheetContentsCache::Singleton().Clear();
-    auto document = CreateRef<dom::Document>();
+    auto document = CreateRef<Document>();
 
     auto first = ConstructedSheet(*document);
     auto second = ConstructedSheet(*document);

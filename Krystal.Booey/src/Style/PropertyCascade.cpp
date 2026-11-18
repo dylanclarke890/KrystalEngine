@@ -77,8 +77,8 @@ namespace krys::boo::style
     const HashSet<AnimatableCSSProperty> *transitioningProperties) noexcept
       : Properties(properties), TransitioningProperties(transitioningProperties)
   {
-    HasCustomProperties = std::ranges::any_of(
-      properties, [](auto &property) { return std::holds_alternative<css::CSSOMStringAtom>(property); });
+    HasCustomProperties = std::ranges::any_of(properties, [](auto &property)
+                                              { return std::holds_alternative<CSSOMStringAtom>(property); });
 
     HasFontSize = properties.contains(css::PropertyId::FontSize);
     HasLineHeight = properties.contains(css::PropertyId::LineHeight);

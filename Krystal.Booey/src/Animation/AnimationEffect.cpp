@@ -70,7 +70,7 @@ namespace krys::boo
     }
     else
     {
-      timing.Duration = dom::DOMString(u8"auto");
+      timing.Duration = DOMString(u8"auto");
     }
     timing.Direction = _timing.Direction;
     timing.Easing = _timing.TimingFunction->CssText();
@@ -132,7 +132,7 @@ namespace krys::boo
         _timing.SpecifiedIterationDuration ? _timing.IterationDuration : _timing.IntrinsicIterationDuration;
       if (auto percent = duration.Percentage())
       {
-        return RefPtr<css::CSSNumericValue> {css::CSSNumericFactory::Percent(*percent)};
+        return RefPtr<CSSNumericValue> {CSSNumericFactory::Percent(*percent)};
       }
       krys_debug_assert(duration.Time());
       return SecondsToWebAnimationsAPITime(*duration.Time());
@@ -159,7 +159,7 @@ namespace krys::boo
   }
 
   dom::ExceptionOr<void>
-    AnimationEffect::BindingsUpdateTiming(dom::Document &document,
+    AnimationEffect::BindingsUpdateTiming(boo::Document &document,
                                           const Maybe<OptionalEffectTiming> &timing) noexcept
   {
     auto retVal = UpdateTiming(document, timing);
@@ -173,7 +173,7 @@ namespace krys::boo
     return retVal;
   }
 
-  dom::ExceptionOr<void> AnimationEffect::UpdateTiming(dom::Document &document,
+  dom::ExceptionOr<void> AnimationEffect::UpdateTiming(boo::Document &document,
                                                        const Maybe<OptionalEffectTiming> &timing) noexcept
   {
     // 6.5.4. Updating the timing of an AnimationEffect
@@ -218,7 +218,7 @@ namespace krys::boo
           return dom::Exception {dom::ExceptionCode::TypeError};
         }
       }
-      else if (std::get<dom::DOMString>(*timing->Duration) != u8"auto")
+      else if (std::get<DOMString>(*timing->Duration) != u8"auto")
       {
         return dom::Exception {dom::ExceptionCode::TypeError};
       }

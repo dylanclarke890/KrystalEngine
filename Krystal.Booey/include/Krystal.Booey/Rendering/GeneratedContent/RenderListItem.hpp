@@ -29,13 +29,9 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::html
-{
-  class HTMLOListElement;
-}
-
 namespace krys::boo
 {
+  class HTMLOListElement;
   class RenderListMarker;
 
   /// @brief A list item: a block flow with a marker and an ordinal value.
@@ -49,7 +45,7 @@ namespace krys::boo
     mutable Maybe<int32> _value;
 
   public:
-    RenderListItem(dom::Element &element, RenderStyle &&style) noexcept;
+    RenderListItem(Element &element, RenderStyle &&style) noexcept;
 
     ~RenderListItem() noexcept override;
 
@@ -78,9 +74,9 @@ namespace krys::boo
 
     void UpdateListMarkerNumbers() noexcept;
 
-    static void UpdateItemValuesForOrderedList(const html::HTMLOListElement &list) noexcept;
+    static void UpdateItemValuesForOrderedList(const HTMLOListElement &list) noexcept;
 
-    KRYS_NODISCARD static uint32 ItemCountForOrderedList(const html::HTMLOListElement &list) noexcept;
+    KRYS_NODISCARD static uint32 ItemCountForOrderedList(const HTMLOListElement &list) noexcept;
 
     KRYS_NODISCARD RenderStyle ComputeMarkerStyle() const noexcept;
 
@@ -101,7 +97,7 @@ namespace krys::boo
   };
 
   /// @brief Whether @p node is a `<ul>` or `<ol>`.
-  KRYS_NODISCARD bool IsHTMLListElement(const dom::Node &node) noexcept;
+  KRYS_NODISCARD bool IsHTMLListElement(const Node &node) noexcept;
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::RenderListItem)

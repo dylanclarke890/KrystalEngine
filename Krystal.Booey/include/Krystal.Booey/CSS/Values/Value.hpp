@@ -35,12 +35,12 @@
 
 namespace krys::boo
 {
+  class CSSStyleDeclaration;
   class CachedResource;
 }
 
 namespace krys::boo::css
 {
-  class CSSStyleDeclaration;
   class PrimitiveValue;
   class Quad;
   class Rect;

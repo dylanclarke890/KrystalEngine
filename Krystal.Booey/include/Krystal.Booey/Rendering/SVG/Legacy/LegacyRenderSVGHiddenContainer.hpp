@@ -30,7 +30,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(LegacyRenderSVGHiddenContainer);
 
   public:
-    LegacyRenderSVGHiddenContainer(Type, svg::SVGElement &, RenderStyle &&,
+    LegacyRenderSVGHiddenContainer(Type, SVGElement &, RenderStyle &&,
                                    EnumSet<SVGModelObjectFlag> = {}) noexcept;
 
   protected:

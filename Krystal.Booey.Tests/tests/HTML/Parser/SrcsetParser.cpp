@@ -52,7 +52,7 @@ namespace krys::boo::html::tests
   {
     SECTION("No srcset uses src")
     {
-      auto candidate = BestFitSourceForImageAttributes(1, dom::DOMStringView(u8"a.png"), null, 0);
+      auto candidate = BestFitSourceForImageAttributes(1, DOMStringView(u8"a.png"), null, 0);
       CHECK(candidate.String == u8"a.png");
       CHECK(candidate.SrcOrigin());
       CHECK(BestFitSourceForImageAttributes(1, null, null, 0).IsEmpty());
@@ -62,8 +62,8 @@ namespace krys::boo::html::tests
     {
       auto pick = [](float scale)
       {
-        return BestFitSourceForImageAttributes(scale, dom::DOMStringView(u8"one.png"),
-                                               dom::DOMStringView(u8"two.png 2x, three.png 3x"), 0);
+        return BestFitSourceForImageAttributes(scale, DOMStringView(u8"one.png"),
+                                               DOMStringView(u8"two.png 2x, three.png 3x"), 0);
       };
       CHECK(pick(1).String == u8"one.png");
       CHECK(pick(1.5f).String == u8"two.png");
@@ -76,9 +76,8 @@ namespace krys::boo::html::tests
     {
       auto pick = [](float sourceSize)
       {
-        return BestFitSourceForImageAttributes(1, dom::DOMStringView(u8"src.png"),
-                                               dom::DOMStringView(u8"small.png 100w, large.png 400w"),
-                                               sourceSize);
+        return BestFitSourceForImageAttributes(1, DOMStringView(u8"src.png"),
+                                               DOMStringView(u8"small.png 100w, large.png 400w"), sourceSize);
       };
       CHECK(pick(100).String == u8"small.png");
       CHECK(pick(200).String == u8"large.png");
@@ -88,7 +87,7 @@ namespace krys::boo::html::tests
 
     SECTION("Ignored candidates")
     {
-      auto candidate = BestFitSourceForImageAttributes(1, null, dom::DOMStringView(u8"a.png 1x, b.png 2x"), 0,
+      auto candidate = BestFitSourceForImageAttributes(1, null, DOMStringView(u8"a.png 1x, b.png 2x"), 0,
                                                        [](const ImageCandidate &candidate)
                                                        { return candidate.String == u8"a.png"; });
       CHECK(candidate.String == u8"b.png");

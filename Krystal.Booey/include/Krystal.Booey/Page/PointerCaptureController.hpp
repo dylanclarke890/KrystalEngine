@@ -36,10 +36,14 @@
 #include "Krystal.Core/Types/WeakPtr.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
   class Element;
+}
+
+namespace krys::boo::dom
+{
   class EventTarget;
   class MouseEvent;
   class PointerEvent;
@@ -48,14 +52,10 @@ namespace krys::boo::dom
 namespace krys::boo
 {
   class DoublePoint;
-  class LocalFrameView;
-  class PlatformTouchEvent;
-}
-
-namespace krys::boo
-{
   class IntPoint;
+  class LocalFrameView;
   class Page;
+  class PlatformTouchEvent;
 
   /// @brief A page's pointers: which element captures each one (`setPointerCapture()`), the
   /// `gotpointercapture` and `lostpointercapture` events as capture changes, whether a cancelled
@@ -74,22 +74,22 @@ namespace krys::boo
         Cancelled,
       };
 
-      WeakPtr<dom::Document> ActiveDocument;
-      RefPtr<dom::Element> PendingTargetOverride;
-      RefPtr<dom::Element> TargetOverride;
-      RefPtr<dom::Element> PreviousTarget;
-      dom::DOMString PointerType;
+      WeakPtr<Document> ActiveDocument;
+      RefPtr<Element> PendingTargetOverride;
+      RefPtr<Element> TargetOverride;
+      RefPtr<Element> PreviousTarget;
+      DOMString PointerType;
       State CurrentState {State::Ready};
       bool IsPrimary {false};
       bool PreventsCompatibilityMouseEvents {false};
       bool PointerIsPressed {false};
       MouseButton PreviousMouseButton {MouseButton::PointerHasNotChanged};
 
-      explicit CapturingData(dom::DOMString pointerType) noexcept : PointerType(krys::move(pointerType))
+      explicit CapturingData(DOMString pointerType) noexcept : PointerType(krys::move(pointerType))
       {
       }
 
-      KRYS_NODISCARD static Ref<CapturingData> Create(const dom::DOMString &pointerType) noexcept
+      KRYS_NODISCARD static Ref<CapturingData> Create(const DOMString &pointerType) noexcept
       {
         return AdoptRef(*new CapturingData(pointerType));
       }
@@ -113,17 +113,16 @@ namespace krys::boo
     explicit PointerCaptureController(Page &page) noexcept;
 
     /// @brief The element capturing @p pointerId, if it's in @p document.
-    KRYS_NODISCARD dom::Element *PointerCaptureElement(dom::Document *document,
-                                                       PointerID pointerId) const noexcept;
+    KRYS_NODISCARD Element *PointerCaptureElement(Document *document, PointerID pointerId) const noexcept;
 
     /// @see https://w3c.github.io/pointerevents/#setting-pointer-capture
-    dom::ExceptionOr<void> SetPointerCapture(dom::Element *capturingTarget, PointerID pointerId) noexcept;
+    dom::ExceptionOr<void> SetPointerCapture(Element *capturingTarget, PointerID pointerId) noexcept;
 
     /// @see https://w3c.github.io/pointerevents/#releasing-pointer-capture
-    dom::ExceptionOr<void> ReleasePointerCapture(dom::Element *capturingTarget, PointerID pointerId) noexcept;
+    dom::ExceptionOr<void> ReleasePointerCapture(Element *capturingTarget, PointerID pointerId) noexcept;
 
     /// @see https://w3c.github.io/pointerevents/#dom-element-haspointercapture
-    KRYS_NODISCARD bool HasPointerCapture(dom::Element *capturingTarget, PointerID pointerId) const noexcept;
+    KRYS_NODISCARD bool HasPointerCapture(Element *capturingTarget, PointerID pointerId) const noexcept;
 
     /// @brief Forgets every pointer but the mouse, as when the page's main document changes.
     void Reset() noexcept;
@@ -131,7 +130,7 @@ namespace krys::boo
     /// @brief Releases every capture, as a pointer lock does.
     void PointerLockWasApplied() noexcept;
 
-    void ElementWasRemoved(dom::Element &element) noexcept
+    void ElementWasRemoved(Element &element) noexcept
     {
       if (_haveAnyCapturingElement)
       {
@@ -140,23 +139,21 @@ namespace krys::boo
     }
 
     /// @brief The pointer event to dispatch before @p mouseEvent, or null if none.
-    KRYS_NODISCARD RefPtr<dom::PointerEvent>
-      PointerEventForMouseEvent(const dom::MouseEvent &mouseEvent, PointerID pointerId,
-                                const dom::DOMString &pointerType) noexcept;
+    KRYS_NODISCARD RefPtr<dom::PointerEvent> PointerEventForMouseEvent(const dom::MouseEvent &mouseEvent,
+                                                                       PointerID pointerId,
+                                                                       const DOMString &pointerType) noexcept;
 
     /// @brief Dispatches `pointerrawupdate` for @p mouseEvent, which moved the pointer, at @p target, if
     /// anything in its document listens for it.
     /// @see https://w3c.github.io/pointerevents/#the-pointerrawupdate-event
     void DispatchPointerRawUpdateForMouseEvent(const dom::MouseEvent &mouseEvent, PointerID pointerId,
-                                               const dom::DOMString &pointerType,
-                                               dom::Element &target) noexcept;
+                                               const DOMString &pointerType, Element &target) noexcept;
 
     /// @brief Keeps the pointer's state without an event, if @p mouseEvent is a `mousemove` and nothing in
     /// @p target's document listens for `pointermove`.
     /// @return Whether it did, so there's no `pointermove` to create.
     KRYS_NODISCARD bool SkipPointerMoveForMouseEvent(const dom::MouseEvent &mouseEvent, PointerID pointerId,
-                                                     const dom::DOMString &pointerType,
-                                                     dom::Element &target) noexcept;
+                                                     const DOMString &pointerType, Element &target) noexcept;
 
     /// @brief Dispatches the pointer events for the touch at @p index in @p event at @p target: `pointerover`
     /// and `pointerenter` before a `pointerdown`, the boundary events if a move changed the target, and
@@ -191,7 +188,7 @@ namespace krys::boo
   private:
     KRYS_NODISCARD RefPtr<CapturingData> CapturingDataFor(PointerID pointerId) const noexcept;
 
-    Ref<CapturingData> EnsureCapturingData(PointerID pointerId, const dom::DOMString &pointerType) noexcept;
+    Ref<CapturingData> EnsureCapturingData(PointerID pointerId, const DOMString &pointerType) noexcept;
 
     Ref<CapturingData> EnsureCapturingDataForPointerEvent(const dom::PointerEvent &event) noexcept;
 
@@ -201,23 +198,23 @@ namespace krys::boo
                                                    PointerID pointerId) const noexcept;
 
     /// @brief What dispatching a `pointermove` at an element of @p document would do to the pointer's state.
-    static void PointerMoveWasSkipped(CapturingData &capturingData, dom::Document &document,
+    static void PointerMoveWasSkipped(CapturingData &capturingData, Document &document,
                                       bool isPrimary) noexcept;
 
     void PointerEventWillBeDispatched(const dom::PointerEvent &event, dom::EventTarget *target) noexcept;
 
     void PointerEventWasDispatched(const dom::PointerEvent &event) noexcept;
 
-    void DispatchOverOrOutEvent(dom::DOMStringAtom type, dom::EventTarget *target,
-                                const PlatformTouchEvent &event, uint32 index, bool isPrimary,
-                                LocalFrameView *view, const DoublePoint &touchDelta) noexcept;
+    void DispatchOverOrOutEvent(DOMStringAtom type, dom::EventTarget *target, const PlatformTouchEvent &event,
+                                uint32 index, bool isPrimary, LocalFrameView *view,
+                                const DoublePoint &touchDelta) noexcept;
 
-    void DispatchEnterOrLeaveEvent(dom::DOMStringAtom type, dom::Element &targetElement,
+    void DispatchEnterOrLeaveEvent(DOMStringAtom type, Element &targetElement,
                                    const PlatformTouchEvent &event, uint32 index, bool isPrimary,
                                    LocalFrameView *view, const DoublePoint &touchDelta) noexcept;
 
     void UpdateHaveAnyCapturingElement() noexcept;
 
-    void ElementWasRemovedSlow(dom::Element &element) noexcept;
+    void ElementWasRemovedSlow(Element &element) noexcept;
   };
 }

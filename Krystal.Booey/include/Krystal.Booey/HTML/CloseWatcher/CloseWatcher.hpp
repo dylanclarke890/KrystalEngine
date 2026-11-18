@@ -35,7 +35,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -66,7 +66,7 @@ namespace krys::boo::html
     using GetEnabledState = Func<bool()>;
 
   private:
-    WeakPtr<dom::Document> _document;
+    WeakPtr<Document> _document;
     CancelAction _cancelAction;
     CloseAction _closeAction;
     GetEnabledState _getEnabledState;
@@ -76,19 +76,19 @@ namespace krys::boo::html
     Maybe<dom::AbortAlgorithmCallback> _signalAlgorithm;
 
   public:
-    CloseWatcher(dom::Document &document, CancelAction &&cancelAction, CloseAction &&closeAction,
+    CloseWatcher(Document &document, CancelAction &&cancelAction, CloseAction &&closeAction,
                  GetEnabledState &&getEnabledState) noexcept;
 
     /// @brief A close watcher of @p document's window that fires `cancel` and `close` at itself, destroyed
     /// once @p options' signal aborts.
     /// @return An `InvalidStateError` if @p document isn't fully active.
     /// @see https://html.spec.whatwg.org/#dom-closewatcher
-    static dom::ExceptionOr<Ref<CloseWatcher>> Create(dom::Document &document,
+    static dom::ExceptionOr<Ref<CloseWatcher>> Create(Document &document,
                                                       const Options &options = {}) noexcept;
 
     /// @brief A close watcher of @p document's window, which must be fully active, with the given actions.
     /// @see https://html.spec.whatwg.org/#establish-a-close-watcher
-    static Ref<CloseWatcher> Establish(dom::Document &document, CancelAction &&cancelAction,
+    static Ref<CloseWatcher> Establish(Document &document, CancelAction &&cancelAction,
                                        CloseAction &&closeAction, GetEnabledState &&getEnabledState) noexcept;
 
     /// @brief Whether the watcher is still in its window's close watcher manager.

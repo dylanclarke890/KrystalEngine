@@ -87,7 +87,7 @@ namespace krys::boo::html
     return true;
   }
 
-  Maybe<dom::DOMString> SubmitInputType::DefaultValue() const noexcept
+  Maybe<DOMString> SubmitInputType::DefaultValue() const noexcept
   {
     return SubmitButtonDefaultLabel();
   }

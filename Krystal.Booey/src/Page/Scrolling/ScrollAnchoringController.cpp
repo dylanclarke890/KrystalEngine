@@ -43,15 +43,14 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD bool ElementIsScrollableArea(const dom::Element &element,
-                                                const ScrollableArea &scrollableArea)
+    KRYS_NODISCARD bool ElementIsScrollableArea(const Element &element, const ScrollableArea &scrollableArea)
     {
       auto *box = element.GetRenderBox();
       return box && box->Layer() && box->Layer()->GetScrollableArea() == &scrollableArea;
     }
 
     /// @brief The element whose box scrolls: the document element for the frame view.
-    KRYS_NODISCARD dom::Element *ElementForScrollableArea(ScrollableArea &scrollableArea)
+    KRYS_NODISCARD Element *ElementForScrollableArea(ScrollableArea &scrollableArea)
     {
       if (auto *layerScrollableArea = DynamicDowncast<RenderLayerScrollableArea>(scrollableArea))
       {
@@ -75,7 +74,7 @@ namespace krys::boo
     }
 
     /// @brief The element itself or its closest ancestor that's a box: what a priority candidate anchors to.
-    KRYS_NODISCARD RefPtr<dom::Element> AnchorElementForPriorityCandidate(dom::Element *element)
+    KRYS_NODISCARD RefPtr<Element> AnchorElementForPriorityCandidate(Element *element)
     {
       while (element)
       {
@@ -91,7 +90,7 @@ namespace krys::boo
       return nullptr;
     }
 
-    KRYS_NODISCARD ScrollAnchoringController *ScrollAnchoringControllerForElement(const dom::Element &element)
+    KRYS_NODISCARD ScrollAnchoringController *ScrollAnchoringControllerForElement(const Element &element)
     {
       auto *renderer = DynamicDowncast<RenderLayerModelObject>(element.Renderer());
       if (renderer && renderer->HasLayer())
@@ -106,10 +105,9 @@ namespace krys::boo
 
     /// @brief Whether @p element, in the chain from @p priorityCandidateElement up to @p parentController's
     /// scroller, is a viable candidate, and isn't a scroller keeping an anchor of its own.
-    KRYS_NODISCARD bool
-      CanIncludeElementInPriorityCandidateChain(dom::Element &element,
-                                                const dom::Element &priorityCandidateElement,
-                                                ScrollAnchoringController &parentController)
+    KRYS_NODISCARD bool CanIncludeElementInPriorityCandidateChain(Element &element,
+                                                                  const Element &priorityCandidateElement,
+                                                                  ScrollAnchoringController &parentController)
     {
       auto candidateResult = parentController.ExamineAnchorCandidate(element);
       auto *elementsController = ScrollAnchoringControllerForElement(element);
@@ -132,7 +130,7 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD bool CanDescendIntoElement(const dom::Element &element)
+    KRYS_NODISCARD bool CanDescendIntoElement(const Element &element)
     {
       if (auto *scrollAnchoringController = ScrollAnchoringControllerForElement(element))
       {
@@ -142,7 +140,7 @@ namespace krys::boo
     }
 
     /// @brief Whether typing in @p element can move what's around it: a text control or editable content.
-    KRYS_NODISCARD bool IsEditablePriorityCandidate(const dom::Element &element)
+    KRYS_NODISCARD bool IsEditablePriorityCandidate(const Element &element)
     {
       return element.IsTextField() || element.HasEditableStyle();
     }
@@ -202,7 +200,7 @@ namespace krys::boo
 
   bool ScrollAnchoringController::IsInScrollAnchoringAncestorChain(const RenderObject &object) const noexcept
   {
-    RefPtr<dom::Element> element = ShareRefPtr(_anchorElement.get());
+    RefPtr<Element> element = ShareRefPtr(_anchorElement.get());
     while (element)
     {
       if (element->Renderer() == &object)
@@ -218,18 +216,18 @@ namespace krys::boo
     return false;
   }
 
-  bool ScrollAnchoringController::DidFindPriorityCandidate(dom::Document &document) noexcept
+  bool ScrollAnchoringController::DidFindPriorityCandidate(Document &document) noexcept
   {
     auto *scrollerElement = ElementForScrollableArea(_owningScrollableArea);
-    auto viablePriorityCandidateForElement = [&](dom::Element *element) -> RefPtr<dom::Element>
+    auto viablePriorityCandidateForElement = [&](Element *element) -> RefPtr<Element>
     {
-      RefPtr<dom::Element> candidateElement = AnchorElementForPriorityCandidate(element);
+      RefPtr<Element> candidateElement = AnchorElementForPriorityCandidate(element);
       if (!candidateElement || candidateElement.get() == scrollerElement)
       {
         return nullptr;
       }
 
-      RefPtr<dom::Element> ancestor = candidateElement;
+      RefPtr<Element> ancestor = candidateElement;
       while (ancestor && ancestor.get() != scrollerElement)
       {
         if (!CanIncludeElementInPriorityCandidateChain(*ancestor, *candidateElement, *this))
@@ -253,7 +251,7 @@ namespace krys::boo
     {
       return false;
     }
-    if (RefPtr<dom::Element> priorityCandidate = viablePriorityCandidateForElement(focusedElement))
+    if (RefPtr<Element> priorityCandidate = viablePriorityCandidateForElement(focusedElement))
     {
       _anchorElement = CreateWeakPtr(priorityCandidate.get());
       _lastOffsetForAnchorElement = ComputeOffsetFromOwningScroller(*priorityCandidate->Renderer());
@@ -262,7 +260,7 @@ namespace krys::boo
     return false;
   }
 
-  CandidateExaminationResult ScrollAnchoringController::ExamineAnchorCandidate(dom::Element &element) noexcept
+  CandidateExaminationResult ScrollAnchoringController::ExamineAnchorCandidate(Element &element) noexcept
   {
     auto *scrollerElement = ElementForScrollableArea(_owningScrollableArea);
     if (scrollerElement == &element)
@@ -300,7 +298,7 @@ namespace krys::boo
     }
 
     auto *document = FrameView().Frame().Document();
-    if ((document && &element == document->BodyOrFrameset()) || Is<html::HTMLHtmlElement>(element)
+    if ((document && &element == document->BodyOrFrameset()) || Is<HTMLHtmlElement>(element)
         || (renderer->IsInline() && !renderer->IsAtomicInlineLevelBox()))
     {
       return CandidateExaminationResult::Skip;
@@ -327,7 +325,7 @@ namespace krys::boo
     return CandidateExaminationResult::Skip;
   }
 
-  dom::Element *ScrollAnchoringController::FindAnchorElementRecursive(dom::Element *element) noexcept
+  Element *ScrollAnchoringController::FindAnchorElementRecursive(Element *element) noexcept
   {
     if (!element)
     {
@@ -354,7 +352,7 @@ namespace krys::boo
     return result == CandidateExaminationResult::Skip ? nullptr : element;
   }
 
-  void ScrollAnchoringController::ChooseAnchorElement(dom::Document &document) noexcept
+  void ScrollAnchoringController::ChooseAnchorElement(Document &document) noexcept
   {
     // `overflow-anchor: none` on the scroller (the root, for the view) opts it out, as in Chrome.
     auto *scrollerElement = ElementForScrollableArea(_owningScrollableArea);
@@ -390,7 +388,7 @@ namespace krys::boo
       return;
     }
 
-    RefPtr<dom::Document> document = ShareRefPtr(FrameView().Frame().Document());
+    RefPtr<boo::Document> document = ShareRefPtr(FrameView().Frame().Document());
     if (!document)
     {
       return;

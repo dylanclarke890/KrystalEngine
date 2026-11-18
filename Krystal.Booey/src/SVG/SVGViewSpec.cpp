@@ -26,7 +26,7 @@
 #include "Krystal.Booey/SVG/SVGTransformList.hpp"
 #include "Krystal.Core/Text/ParsingUtilities.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   SVGViewSpec::SVGViewSpec(SVGElement &contextElement) noexcept
       : SVGFitToViewBox(&contextElement, SVGPropertyAccess::ReadOnly),
@@ -53,7 +53,7 @@ namespace krys::boo::svg
     return DynamicDowncast<SVGElement>(krys::move(element));
   }
 
-  dom::DOMString SVGViewSpec::TransformString() const noexcept
+  DOMString SVGViewSpec::TransformString() const noexcept
   {
     return _transform->ValueAsString();
   }
@@ -65,7 +65,7 @@ namespace krys::boo::svg
     SVGFitToViewBox::Reset();
   }
 
-  bool SVGViewSpec::ParseViewSpec(dom::DOMStringView string) noexcept
+  bool SVGViewSpec::ParseViewSpec(DOMStringView string) noexcept
   {
     auto buffer = string;
     if (buffer.empty() || !_contextElement)
@@ -116,8 +116,7 @@ namespace krys::boo::svg
           {
             return false;
           }
-          _viewTargetString =
-            dom::DOMString(viewTargetStart.substr(0, viewTargetStart.size() - buffer.size()));
+          _viewTargetString = DOMString(viewTargetStart.substr(0, viewTargetStart.size() - buffer.size()));
           buffer.remove_prefix(1);
         }
         else

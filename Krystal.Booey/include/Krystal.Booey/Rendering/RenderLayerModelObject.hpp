@@ -98,10 +98,10 @@ namespace krys::boo
     }
 
   protected:
-    RenderLayerModelObject(Type type, dom::Element &element, RenderStyle &&style,
-                           EnumSet<TypeFlag> baseTypeFlags, TypeSpecificFlags typeSpecificFlags) noexcept;
+    RenderLayerModelObject(Type type, Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags,
+                           TypeSpecificFlags typeSpecificFlags) noexcept;
 
-    RenderLayerModelObject(Type type, dom::Document &document, RenderStyle &&style,
+    RenderLayerModelObject(Type type, Document &document, RenderStyle &&style,
                            EnumSet<TypeFlag> baseTypeFlags, TypeSpecificFlags typeSpecificFlags) noexcept;
 
     void CreateLayer() noexcept;

@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Numeric/CSSMathValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @see https://drafts.css-houdini.org/css-typed-om/#cssmathmin
   class CSSMathMin final : public CSSMathValue
@@ -47,7 +47,7 @@ namespace krys::boo::css
       return *_values;
     }
 
-    KRYS_NODISCARD Maybe<calc::Child> ToCalcTreeNode() const noexcept final;
+    KRYS_NODISCARD Maybe<css::calc::Child> ToCalcTreeNode() const noexcept final;
 
   private:
     KRYS_NODISCARD CSSMathOperator GetOperator() const noexcept final
@@ -73,9 +73,9 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSMathMin)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleValue &styleValue) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSMathMin)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleValue &styleValue) noexcept
   {
-    return styleValue.StyleValueType() == krys::boo::css::CSSStyleValueType::CSSMathMin;
+    return styleValue.StyleValueType() == krys::boo::CSSStyleValueType::CSSMathMin;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

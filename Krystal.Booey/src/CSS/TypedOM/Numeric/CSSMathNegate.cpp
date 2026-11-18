@@ -26,7 +26,7 @@
 #include "Krystal.Booey/CSS/TypedOM/Numeric/CSSMathNegate.hpp"
 #include "Krystal.Booey/CSS/Calc/Tree.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   Ref<CSSMathNegate> CSSMathNegate::Create(CSSNumberish &&numberish) noexcept
   {
@@ -94,7 +94,7 @@ namespace krys::boo::css
     return _value->Equals(otherNegate->Value());
   }
 
-  Maybe<calc::Child> CSSMathNegate::ToCalcTreeNode() const noexcept
+  Maybe<css::calc::Child> CSSMathNegate::ToCalcTreeNode() const noexcept
   {
     auto child = _value->ToCalcTreeNode();
     if (!child)
@@ -102,13 +102,13 @@ namespace krys::boo::css
       return null;
     }
 
-    auto operation = calc::Negate {.A = krys::move(*child)};
-    auto type = calc::ToType(operation);
+    auto operation = css::calc::Negate {.A = krys::move(*child)};
+    auto type = css::calc::ToType(operation);
     if (!type)
     {
       return null;
     }
 
-    return calc::CreateChild(krys::move(operation), *type);
+    return css::calc::CreateChild(krys::move(operation), *type);
   }
 }

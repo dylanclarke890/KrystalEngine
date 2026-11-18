@@ -108,16 +108,16 @@ namespace krys::boo::style
     }
 
     /// @brief The first element at or after @p node in tree order, within @p stayWithin.
-    KRYS_NODISCARD dom::Element *FirstElementFrom(dom::Node *node, const dom::Node &stayWithin) noexcept
+    KRYS_NODISCARD Element *FirstElementFrom(Node *node, const Node &stayWithin) noexcept
     {
-      while (node && !Is<dom::Element>(*node))
+      while (node && !Is<Element>(*node))
       {
         node = dom::TreeQueries::Next(*node, &stayWithin);
       }
-      return static_cast<dom::Element *>(node);
+      return static_cast<Element *>(node);
     }
 
-    void InvalidateAssignedElements(html::HTMLSlotElement &slot) noexcept
+    void InvalidateAssignedElements(HTMLSlotElement &slot) noexcept
     {
       auto *assignedNodes = slot.AssignedNodes();
       if (!assignedNodes)
@@ -126,12 +126,12 @@ namespace krys::boo::style
       }
       for (auto &node : *assignedNodes)
       {
-        auto *element = DynamicDowncast<dom::Element>(node.get());
+        auto *element = DynamicDowncast<Element>(node.get());
         if (!element)
         {
           continue;
         }
-        if (auto *slotElement = DynamicDowncast<html::HTMLSlotElement>(*element);
+        if (auto *slotElement = DynamicDowncast<HTMLSlotElement>(*element);
             slotElement && dom::TreeQueries::ContainingShadowRoot(*node))
         {
           InvalidateAssignedElements(*slotElement);
@@ -205,14 +205,13 @@ namespace krys::boo::style
   }
 
   Invalidator::CheckDescendants
-    Invalidator::InvalidateIfNeeded(dom::Element &element,
-                                    SelectorMatchingState *selectorMatchingState) noexcept
+    Invalidator::InvalidateIfNeeded(Element &element, SelectorMatchingState *selectorMatchingState) noexcept
   {
     InvalidateInShadowTreeIfNeeded(element);
 
     if (_ruleInformation.HasSlottedPseudoElementRules)
     {
-      if (auto *slotElement = DynamicDowncast<html::HTMLSlotElement>(element))
+      if (auto *slotElement = DynamicDowncast<HTMLSlotElement>(element))
       {
         InvalidateAssignedElements(*slotElement);
       }
@@ -245,7 +244,7 @@ namespace krys::boo::style
     krys_unreachable();
   }
 
-  void Invalidator::InvalidateStyleForTree(dom::Element &root,
+  void Invalidator::InvalidateStyleForTree(Element &root,
                                            SelectorMatchingState *selectorMatchingState) noexcept
   {
     if (InvalidateIfNeeded(root, selectorMatchingState) == CheckDescendants::No)
@@ -255,11 +254,11 @@ namespace krys::boo::style
     InvalidateStyleForDescendants(root, selectorMatchingState);
   }
 
-  void Invalidator::InvalidateStyleForDescendants(dom::Element &root,
+  void Invalidator::InvalidateStyleForDescendants(Element &root,
                                                   SelectorMatchingState *selectorMatchingState) noexcept
   {
-    SmallList<dom::Element *, 20> parentStack;
-    dom::Element *previousElement = &root;
+    SmallList<Element *, 20> parentStack;
+    Element *previousElement = &root;
     for (auto *it = FirstElementFrom(root.FirstChild(), root); it;)
     {
       auto &descendant = *it;
@@ -299,7 +298,7 @@ namespace krys::boo::style
     }
   }
 
-  void Invalidator::InvalidateStyle(dom::Document &document) noexcept
+  void Invalidator::InvalidateStyle(Document &document) noexcept
   {
     krys_debug_assert(!_dirtiesAllStyle);
 
@@ -330,7 +329,7 @@ namespace krys::boo::style
     InvalidateStyle(scope.Document());
   }
 
-  void Invalidator::InvalidateStyle(dom::ShadowRoot &shadowRoot) noexcept
+  void Invalidator::InvalidateStyle(ShadowRoot &shadowRoot) noexcept
   {
     krys_debug_assert(!_dirtiesAllStyle);
 
@@ -347,7 +346,7 @@ namespace krys::boo::style
     }
   }
 
-  void Invalidator::InvalidateStyle(dom::Element &element) noexcept
+  void Invalidator::InvalidateStyle(Element &element) noexcept
   {
     krys_debug_assert(!_dirtiesAllStyle);
 
@@ -356,9 +355,9 @@ namespace krys::boo::style
     InvalidateStyleForTree(element, nullptr);
   }
 
-  void Invalidator::InvalidateStyleWithMatchElement(dom::Element &element, MatchElement matchElement) noexcept
+  void Invalidator::InvalidateStyleWithMatchElement(Element &element, MatchElement matchElement) noexcept
   {
-    auto forEachChild = [](dom::ContainerNode &parent, auto &&function)
+    auto forEachChild = [](ContainerNode &parent, auto &&function)
     {
       for (auto *child = dom::TreeQueries::FirstElementChild(parent); child;
            child = dom::TreeQueries::NextElementSibling(*child))
@@ -378,7 +377,7 @@ namespace krys::boo::style
       case MatchElement::Parent:
       {
         // .changed > .subject
-        forEachChild(element, [&](dom::Element &child) { InvalidateIfNeeded(child, nullptr); });
+        forEachChild(element, [&](Element &child) { InvalidateIfNeeded(child, nullptr); });
         break;
       }
       case MatchElement::Ancestor:
@@ -406,15 +405,14 @@ namespace krys::boo::style
       case MatchElement::AnySibling:
         // :nth-last-child(even of .changed)
         forEachChild(*element.ParentNode(),
-                     [&](dom::Element &parentChild) { InvalidateIfNeeded(parentChild, nullptr); });
+                     [&](Element &parentChild) { InvalidateIfNeeded(parentChild, nullptr); });
         break;
       case MatchElement::ParentSibling:
         // .changed ~ .a > .subject
         for (auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
              sibling = dom::TreeQueries::NextElementSibling(*sibling))
         {
-          forEachChild(*sibling,
-                       [&](dom::Element &siblingChild) { InvalidateIfNeeded(siblingChild, nullptr); });
+          forEachChild(*sibling, [&](Element &siblingChild) { InvalidateIfNeeded(siblingChild, nullptr); });
         }
         break;
       case MatchElement::AncestorSibling:
@@ -432,9 +430,9 @@ namespace krys::boo::style
       case MatchElement::ParentAnySibling:
         // :nth-last-child(even of .changed) > .subject
         forEachChild(*element.ParentNode(),
-                     [&](dom::Element &sibling)
+                     [&](Element &sibling)
                      {
-                       forEachChild(sibling, [&](dom::Element &siblingChild)
+                       forEachChild(sibling, [&](Element &siblingChild)
                                     { InvalidateIfNeeded(siblingChild, nullptr); });
                      });
         break;
@@ -443,7 +441,7 @@ namespace krys::boo::style
         // :nth-last-child(even of .changed) .subject
         SelectorMatchingState selectorMatchingState;
         forEachChild(*element.ParentNode(),
-                     [&](dom::Element &sibling)
+                     [&](Element &sibling)
                      {
                        selectorMatchingState.SelectorFilter.PopParentsUntil(element.ParentElement());
                        InvalidateStyleForDescendants(sibling, &selectorMatchingState);
@@ -462,7 +460,7 @@ namespace krys::boo::style
       case MatchElement::HasDescendant:
       {
         // :has(.changed)
-        SmallList<dom::Element *, 16> ancestors;
+        SmallList<Element *, 16> ancestors;
         for (auto *parent = element.ParentElement(); parent; parent = parent->ParentElement())
         {
           ancestors.push_back(parent);
@@ -505,13 +503,13 @@ namespace krys::boo::style
           selectorMatchingState.SelectorFilter.PushParentInitializingIfNeeded(*parent);
         }
         forEachChild(*element.ParentNode(),
-                     [&](dom::Element &sibling) { InvalidateIfNeeded(sibling, &selectorMatchingState); });
+                     [&](Element &sibling) { InvalidateIfNeeded(sibling, &selectorMatchingState); });
         break;
       }
       case MatchElement::HasSiblingDescendant:
       {
         // :has(~ .a .changed)
-        SmallList<dom::Element *, 16> elementAndAncestors;
+        SmallList<Element *, 16> elementAndAncestors;
         elementAndAncestors.push_back(&element);
         for (auto *parent = element.ParentElement(); parent; parent = parent->ParentElement())
         {
@@ -535,7 +533,7 @@ namespace krys::boo::style
       case MatchElement::HasDescendantParent:
       {
         // :has(.changed) > .subject
-        SmallList<dom::Element *, 16> ancestors;
+        SmallList<Element *, 16> ancestors;
         for (auto *parent = element.ParentElement(); parent; parent = parent->ParentElement())
         {
           ancestors.push_back(parent);
@@ -546,7 +544,7 @@ namespace krys::boo::style
         for (auto *ancestor : ancestors | std::views::reverse)
         {
           selectorMatchingState.SelectorFilter.PushParent(ancestor);
-          forEachChild(*ancestor, [&](dom::Element &ancestorChild)
+          forEachChild(*ancestor, [&](Element &ancestorChild)
                        { InvalidateIfNeeded(ancestorChild, &selectorMatchingState); });
         }
         break;
@@ -579,13 +577,13 @@ namespace krys::boo::style
         // ::slotted(.changed)
         if (auto *host = dom::TreeQueries::ShadowHost(element))
         {
-          forEachChild(*host, [&](dom::Element &hostChild) { InvalidateIfNeeded(hostChild, nullptr); });
+          forEachChild(*host, [&](Element &hostChild) { InvalidateIfNeeded(hostChild, nullptr); });
         }
         break;
     }
   }
 
-  void Invalidator::InvalidateShadowParts(dom::ShadowRoot &shadowRoot) noexcept
+  void Invalidator::InvalidateShadowParts(ShadowRoot &shadowRoot) noexcept
   {
     if (shadowRoot.Mode() == dom::ShadowRootMode::UserAgent)
     {
@@ -610,7 +608,7 @@ namespace krys::boo::style
     }
   }
 
-  void Invalidator::InvalidateUserAgentParts(dom::ShadowRoot &shadowRoot) noexcept
+  void Invalidator::InvalidateUserAgentParts(ShadowRoot &shadowRoot) noexcept
   {
     if (shadowRoot.Mode() != dom::ShadowRootMode::UserAgent)
     {
@@ -635,7 +633,7 @@ namespace krys::boo::style
     }
   }
 
-  void Invalidator::InvalidateInShadowTreeIfNeeded(dom::Element &element) noexcept
+  void Invalidator::InvalidateInShadowTreeIfNeeded(Element &element) noexcept
   {
     auto *shadowRoot = dom::TreeQueries::GetShadowRoot(element);
     if (!shadowRoot)
@@ -682,7 +680,7 @@ namespace krys::boo::style
   }
 
   void
-    Invalidator::InvalidateWithMatchElementRuleSets(dom::Element &element,
+    Invalidator::InvalidateWithMatchElementRuleSets(Element &element,
                                                     const MatchElementRuleSets &matchElementRuleSets) noexcept
   {
     SetForScope isInvalidating(element.StyleResolver().RuleSets().IsInvalidatingStyleWithRuleSets(), true);
@@ -694,7 +692,7 @@ namespace krys::boo::style
     }
   }
 
-  void Invalidator::InvalidateWithScopeBreakingHasPseudoClassRuleSet(dom::Element &element,
+  void Invalidator::InvalidateWithScopeBreakingHasPseudoClassRuleSet(Element &element,
                                                                      const RuleSet *ruleSet) noexcept
   {
     SetForScope isInvalidating(element.StyleResolver().RuleSets().IsInvalidatingStyleWithRuleSets(), true);
@@ -718,7 +716,7 @@ namespace krys::boo::style
     scope.Document().ScheduleFullStyleRebuild();
   }
 
-  void Invalidator::InvalidateHostAndSlottedStyleIfNeeded(dom::ShadowRoot &shadowRoot) noexcept
+  void Invalidator::InvalidateHostAndSlottedStyleIfNeeded(ShadowRoot &shadowRoot) noexcept
   {
     auto &host = *shadowRoot.Host();
     auto *resolver = shadowRoot.StyleScope().ResolverIfExists();

@@ -33,16 +33,16 @@
 #include <algorithm>
 #include <numeric>
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLMeterElement::HTMLMeterElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Meter)
+  HTMLMeterElement::HTMLMeterElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Meter)
   {
   }
 
   HTMLMeterElement::~HTMLMeterElement() noexcept = default;
 
-  Ref<HTMLMeterElement> HTMLMeterElement::Create(dom::Document &document) noexcept
+  Ref<HTMLMeterElement> HTMLMeterElement::Create(Document &document) noexcept
   {
     auto meter = CreateRef<HTMLMeterElement>(document);
     meter->EnsureUserAgentShadowRoot();
@@ -59,15 +59,14 @@ namespace krys::boo::html
     return CreateRenderer<RenderMeter>(*this, krys::move(style));
   }
 
-  bool HTMLMeterElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
+  bool HTMLMeterElement::ChildShouldCreateRenderer(const Node &child) const noexcept
   {
     return !Is<RenderMeter>(Renderer()) && HTMLElement::ChildShouldCreateRenderer(child);
   }
 
-  void HTMLMeterElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                            Maybe<dom::DOMStringView> oldValue,
-                                            Maybe<dom::DOMStringView> value,
-                                            const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLMeterElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                            Maybe<DOMStringView> value,
+                                            const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
@@ -86,16 +85,16 @@ namespace krys::boo::html
 
   namespace
   {
-    KRYS_NODISCARD double ParseAttribute(const HTMLMeterElement &element, dom::DOMStringAtom name,
+    KRYS_NODISCARD double ParseAttribute(const HTMLMeterElement &element, DOMStringAtom name,
                                          double fallbackValue) noexcept
     {
       auto attribute = element.GetAttribute(krys::move(name));
-      return attribute ? ParseHTMLFloatingPointNumberValue(*attribute, fallbackValue) : fallbackValue;
+      return attribute ? html::ParseHTMLFloatingPointNumberValue(*attribute, fallbackValue) : fallbackValue;
     }
 
-    void SetDoubleAttribute(HTMLMeterElement &element, dom::DOMStringAtom name, double value) noexcept
+    void SetDoubleAttribute(HTMLMeterElement &element, DOMStringAtom name, double value) noexcept
     {
-      Reflect<double>(element, krys::move(name), krys::move(value));
+      html::Reflect<double>(element, krys::move(name), krys::move(value));
     }
   }
 
@@ -265,13 +264,13 @@ namespace krys::boo::html
     return DynamicDowncast<RenderMeter>(Renderer());
   }
 
-  void HTMLMeterElement::DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept
+  void HTMLMeterElement::DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept
   {
     krys_debug_assert(!_valueElement);
 
     auto &document = NodeDocument();
     auto style = document.CreateElementNS(infra::namespaces::HTML, u8"style").ReleaseValue();
-    (void)style->TextContent(dom::DOMString(css::MeterElementShadowUserAgentStyleSheet));
+    (void)style->TextContent(DOMString(css::MeterElementShadowUserAgentStyleSheet));
     (void)root.AppendChild(*style);
 
     // Pseudos are set to allow author styling.

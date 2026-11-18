@@ -110,7 +110,7 @@ namespace krys::boo::html
     }};
 
     /// @see https://html.spec.whatwg.org/#determine-a-field's-category
-    KRYS_NODISCARD Maybe<AutofillCategory> DetermineFieldCategory(dom::DOMStringView field) noexcept
+    KRYS_NODISCARD Maybe<AutofillCategory> DetermineFieldCategory(DOMStringView field) noexcept
     {
       // 1. If the field is not an ASCII case-insensitive match for one of the tokens given in the first
       // column
@@ -128,7 +128,7 @@ namespace krys::boo::html
 
     /// @brief The string in @p strings that @p token is an ASCII case-insensitive match for, if any.
     template <size_t N>
-    KRYS_NODISCARD Maybe<utf8_stringview> MatchOneOf(dom::DOMStringView token,
+    KRYS_NODISCARD Maybe<utf8_stringview> MatchOneOf(DOMStringView token,
                                                      const Array<utf8_stringview, N> &strings) noexcept
     {
       for (auto string : strings)
@@ -196,7 +196,7 @@ namespace krys::boo::html
     size_t index = tokens.size() - 1;
 
     // 5. Let field be the indexth token in tokens.
-    dom::DOMString field = tokens[index];
+    DOMString field = tokens[index];
 
     // 6. Let category be the result of determining a field's category given field.
     auto category = DetermineFieldCategory(field);
@@ -231,16 +231,16 @@ namespace krys::boo::html
     }
 
     // 11. Let scope tokens be an empty list.
-    List<dom::DOMString> scopeTokens;
+    List<DOMString> scopeTokens;
 
     // 12. Let hint tokens be an empty set.
-    List<dom::DOMString> hintTokens;
+    List<DOMString> hintTokens;
 
     // 13. Let credential type be null.
     auto credentialType = NonAutofillCredentialType::None;
 
     // 14. Let IDL value have the same value as field.
-    dom::DOMString idlValue = field;
+    DOMString idlValue = field;
 
     auto done = [&]
     {
@@ -305,7 +305,7 @@ namespace krys::boo::html
         category == AutofillCategory::Contact && contactToken)
     {
       // 18a. Let contact be the matching string from the list above.
-      dom::DOMString contact(*contactToken);
+      DOMString contact(*contactToken);
 
       // 18b. Insert contact at the start of scope tokens.
       scopeTokens.insert(scopeTokens.begin(), contact);
@@ -334,7 +334,7 @@ namespace krys::boo::html
     if (auto modeToken = MatchOneOf(tokens[index], modeTokens))
     {
       // 19a. Let mode be the matching string from the list above.
-      dom::DOMString mode(*modeToken);
+      DOMString mode(*modeToken);
 
       // 19b. Insert mode at the start of scope tokens.
       scopeTokens.insert(scopeTokens.begin(), mode);
@@ -368,14 +368,14 @@ namespace krys::boo::html
     //     for the string "section-", then jump to the step labeled default.
     auto &sectionToken = tokens[index];
     if (sectionToken.size() < 8
-        || !infra::StringAlgorithms::ASCIICaseInsensitiveMatch(dom::DOMStringView(sectionToken).substr(0, 8),
+        || !infra::StringAlgorithms::ASCIICaseInsensitiveMatch(DOMStringView(sectionToken).substr(0, 8),
                                                                u8"section-"))
     {
       return defaultLabel();
     }
 
     // 22. Let section be the indexth token in tokens, converted to ASCII lowercase.
-    auto section = text::ToASCIILower(dom::DOMStringView(sectionToken));
+    auto section = text::ToASCIILower(DOMStringView(sectionToken));
 
     // 23. Insert section at the start of scope tokens.
     scopeTokens.insert(scopeTokens.begin(), section);

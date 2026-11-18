@@ -48,9 +48,9 @@ namespace krys::boo::html
     using PseudoClass = css::SelectorPseudoClass;
 
     void AddInvalidElementToAncestorFromInsertionPoint(const HTMLElement &element,
-                                                       dom::ContainerNode *insertionPoint) noexcept
+                                                       ContainerNode *insertionPoint) noexcept
     {
-      auto *insertionPointElement = DynamicDowncast<dom::Element>(insertionPoint);
+      auto *insertionPointElement = DynamicDowncast<boo::Element>(insertionPoint);
       for (auto *ancestor = insertionPointElement; ancestor; ancestor = ancestor->ParentElement())
       {
         if (auto *fieldset = DynamicDowncast<HTMLFieldSetElement>(*ancestor))
@@ -61,9 +61,9 @@ namespace krys::boo::html
     }
 
     void RemoveInvalidElementToAncestorFromInsertionPoint(const HTMLElement &element,
-                                                          dom::ContainerNode *insertionPoint) noexcept
+                                                          ContainerNode *insertionPoint) noexcept
     {
-      auto *insertionPointElement = DynamicDowncast<dom::Element>(insertionPoint);
+      auto *insertionPointElement = DynamicDowncast<boo::Element>(insertionPoint);
       for (auto *ancestor = insertionPointElement; ancestor; ancestor = ancestor->ParentElement())
       {
         if (auto *fieldset = DynamicDowncast<HTMLFieldSetElement>(*ancestor))
@@ -142,13 +142,13 @@ namespace krys::boo::html
       return;
     }
 
-    dom::DOMString message;
+    DOMString message;
     if (element.Renderer() && WillValidate())
     {
       message = ValidationMessage();
       auto first = message.find_first_not_of(u8" \t\n\f\r");
       auto last = message.find_last_not_of(u8" \t\n\f\r");
-      message = first == dom::DOMString::npos ? dom::DOMString() : message.substr(first, last - first + 1);
+      message = first == DOMString::npos ? DOMString() : message.substr(first, last - first + 1);
     }
     if (message.empty())
     {
@@ -183,10 +183,10 @@ namespace krys::boo::html
     // An event handler can deref this object.
     auto &element = AsHTMLElement();
     Ref<HTMLElement> protectedThis = ShareRef(element);
-    Ref<dom::Document> originalDocument = ShareRef(element.NodeDocument());
+    Ref<Document> originalDocument = ShareRef(element.NodeDocument());
     // 1a. Fire an event named invalid at element, with the cancelable attribute initialized to true (though
     //     canceling has no effect).
-    auto type = dom::DOMStringAtom(event_names::Invalid);
+    auto type = DOMStringAtom(event_names::Invalid);
     bool notCanceled =
       dom::EventDispatcher::FireEvent<dom::Event>(type, element, dom::EventInit {.Cancelable = true});
 
@@ -376,8 +376,8 @@ namespace krys::boo::html
     }
   }
 
-  void ValidatedFormListedElement::ParseAttribute(const dom::DOMStringAtom &localName,
-                                                  Maybe<dom::DOMStringView> value) noexcept
+  void ValidatedFormListedElement::ParseAttribute(const DOMStringAtom &localName,
+                                                  Maybe<DOMStringView> value) noexcept
   {
     if (localName == u8"disabled" && AsHTMLElement().CanBeActuallyDisabled())
     {
@@ -393,14 +393,14 @@ namespace krys::boo::html
     }
   }
 
-  void ValidatedFormListedElement::ParseDisabledAttribute(Maybe<dom::DOMStringView> value) noexcept
+  void ValidatedFormListedElement::ParseDisabledAttribute(Maybe<DOMStringView> value) noexcept
   {
     krys_debug_assert(AsHTMLElement().CanBeActuallyDisabled());
     bool newDisabled = value.has_value();
     SetDisabledInternal(newDisabled, _disabledByAncestorFieldset);
   }
 
-  void ValidatedFormListedElement::ParseReadOnlyAttribute(Maybe<dom::DOMStringView> value) noexcept
+  void ValidatedFormListedElement::ParseReadOnlyAttribute(Maybe<DOMStringView> value) noexcept
   {
     krys_debug_assert(ReadOnlyBarsFromConstraintValidation());
     bool newHasReadOnlyAttribute = value.has_value();
@@ -418,7 +418,7 @@ namespace krys::boo::html
   }
 
   void ValidatedFormListedElement::InsertedIntoAncestor(bool connectedToDocument,
-                                                        dom::ContainerNode &parentOfInsertedTree) noexcept
+                                                        ContainerNode &parentOfInsertedTree) noexcept
   {
     _isInsideDataList = TriState::Indeterminate;
     UpdateWillValidateAndValidity();
@@ -438,7 +438,7 @@ namespace krys::boo::html
     _isInsideDataList = isInsideDataList;
   }
 
-  void ValidatedFormListedElement::SyncWithFieldsetAncestors(dom::ContainerNode *insertionPoint) noexcept
+  void ValidatedFormListedElement::SyncWithFieldsetAncestors(ContainerNode *insertionPoint) noexcept
   {
     auto &element = AsHTMLElement();
     if (MatchesInvalidPseudoClass())
@@ -451,7 +451,7 @@ namespace krys::boo::html
   }
 
   void ValidatedFormListedElement::RemovedFromAncestor(bool disconnectedFromDocument,
-                                                       dom::ContainerNode &oldParentOfRemovedTree) noexcept
+                                                       ContainerNode &oldParentOfRemovedTree) noexcept
   {
     auto &element = AsHTMLElement();
     bool wasMatchingInvalidPseudoClass = MatchesInvalidPseudoClass();
@@ -484,7 +484,7 @@ namespace krys::boo::html
 
   bool ValidatedFormListedElement::ComputeIsDisabledByFieldsetAncestor() const noexcept
   {
-    const dom::Element *previousAncestor = nullptr;
+    const boo::Element *previousAncestor = nullptr;
     for (auto *ancestor = AsHTMLElement().ParentElement(); ancestor; ancestor = ancestor->ParentElement())
     {
       if (auto *fieldset = DynamicDowncast<HTMLFieldSetElement>(*ancestor);
@@ -574,7 +574,7 @@ namespace krys::boo::html
     ResetFormOwner();
   }
 
-  void ValidatedFormListedElement::SetCustomValidationMessage(dom::DOMStringView message) noexcept
+  void ValidatedFormListedElement::SetCustomValidationMessage(DOMStringView message) noexcept
   {
     FormListedElement::SetCustomValidationMessage(message);
     UpdateValidity();

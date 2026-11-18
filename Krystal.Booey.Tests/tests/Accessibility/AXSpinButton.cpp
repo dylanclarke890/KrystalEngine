@@ -32,7 +32,7 @@ namespace krys::boo::ax::tests
     // The increment button is the top half, the decrement button the bottom.
     CHECK(increment->ElementRect().Y() < decrement->ElementRect().Y());
 
-    auto &element = Downcast<html::HTMLInputElement>(page.ById(u8"number"));
+    auto &element = Downcast<HTMLInputElement>(page.ById(u8"number"));
     CHECK(increment->Press());
     CHECK(element.Value() == u8"6");
     CHECK(decrement->Press());

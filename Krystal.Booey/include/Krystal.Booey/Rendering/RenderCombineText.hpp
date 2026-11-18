@@ -44,7 +44,7 @@ namespace krys::boo
     bool _needsFontUpdate : 1 {false};
 
   public:
-    RenderCombineText(dom::Text &textNode, utf8_string text) noexcept;
+    RenderCombineText(boo::Text &textNode, utf8_string text) noexcept;
 
     ~RenderCombineText() noexcept override;
 

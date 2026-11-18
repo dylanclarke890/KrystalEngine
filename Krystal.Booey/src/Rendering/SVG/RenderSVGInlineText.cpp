@@ -78,7 +78,7 @@ namespace krys::boo
     }
   }
 
-  RenderSVGInlineText::RenderSVGInlineText(dom::Text &textNode, const utf8_string &string) noexcept
+  RenderSVGInlineText::RenderSVGInlineText(boo::Text &textNode, const utf8_string &string) noexcept
       : RenderText(Type::SVGInlineText, textNode, ApplySVGWhitespaceRules(string, false)),
         _layoutAttributes(*this)
   {

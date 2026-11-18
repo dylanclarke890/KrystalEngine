@@ -16,19 +16,19 @@ namespace krys::boo::html::tests
 
   namespace
   {
-    KRYS_NODISCARD HTMLElement &HTML(dom::Element &element)
+    KRYS_NODISCARD HTMLElement &HTML(Element &element)
     {
       return Downcast<HTMLElement>(element);
     }
 
     KRYS_NODISCARD std::string Id(const dom::EventTarget *target)
     {
-      auto *element = DynamicDowncast<dom::Element>(DynamicDowncast<dom::Node>(target));
+      auto *element = DynamicDowncast<Element>(DynamicDowncast<Node>(target));
       if (!element)
       {
         return "null";
       }
-      auto id = element->GetAttribute(u8"id").value_or(dom::DOMString());
+      auto id = element->GetAttribute(u8"id").value_or(DOMString());
       return std::string(id.begin(), id.end());
     }
 
@@ -55,7 +55,7 @@ namespace krys::boo::html::tests
       Ref<dom::EventListenerCallback> recorder = CreateRef<FocusRecorder>(records);
       for (auto type : {u8"focus", u8"blur", u8"focusin", u8"focusout"})
       {
-        target.AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, false);
+        target.AddEventListener(DOMStringAtom(type), Ref {recorder}, false);
       }
     }
   }
@@ -76,7 +76,7 @@ namespace krys::boo::html::tests
       </body>)"};
     auto &document = *fixture.Document;
     document.UpdateStyleIfNeeded();
-    auto focusable = [&](dom::DOMStringView id)
+    auto focusable = [&](DOMStringView id)
     {
       return FocusAlgorithms::IsFocusableArea(fixture.ById(id));
     };
@@ -231,7 +231,7 @@ namespace krys::boo::html::tests
     {
       a.Focus();
       records.clear();
-      Ref<dom::Element> protectedA = ShareRef<dom::Element>(a);
+      Ref<Element> protectedA = ShareRef<Element>(a);
       REQUIRE_FALSE(fixture.ById(u8"d").RemoveChild(a).HasException());
       CHECK_FALSE(document.FocusedElement());
       CHECK_FALSE(a.Focused());
@@ -361,14 +361,14 @@ namespace krys::boo::html::tests
     // The host's shadow tree: a button, a slot for the host's button and a button with a positive tabindex,
     // which comes first in the host's scope.
     auto shadow = HTML(fixture.ById(u8"host")).AttachShadow({}).ReleaseValue();
-    auto append = [&](dom::ContainerNode &parent, dom::DOMStringAtom tagName, dom::DOMStringView id,
-                      dom::DOMStringView tabIndex = {})
+    auto append =
+      [&](ContainerNode &parent, DOMStringAtom tagName, DOMStringView id, DOMStringView tabIndex = {})
     {
       auto element = document.CreateElement(krys::move(tagName)).ReleaseValue();
-      REQUIRE_FALSE(element->SetAttribute(u8"id", dom::DOMString(id)).HasException());
+      REQUIRE_FALSE(element->SetAttribute(u8"id", DOMString(id)).HasException());
       if (!tabIndex.empty())
       {
-        REQUIRE_FALSE(element->SetAttribute(u8"tabindex", dom::DOMString(tabIndex)).HasException());
+        REQUIRE_FALSE(element->SetAttribute(u8"tabindex", DOMString(tabIndex)).HasException());
       }
       REQUIRE_FALSE(parent.AppendChild(*element).HasException());
       return element;
@@ -381,7 +381,7 @@ namespace krys::boo::html::tests
     (void)append(*negativeShadow, u8"button", u8"skipped");
     document.UpdateStyleIfNeeded();
 
-    auto ids = [](const List<dom::Element *> &elements)
+    auto ids = [](const List<Element *> &elements)
     {
       List<std::string> result;
       for (auto *element : elements)

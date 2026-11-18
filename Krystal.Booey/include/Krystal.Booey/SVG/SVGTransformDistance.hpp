@@ -22,7 +22,7 @@
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/SVG/SVGTransformValue.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The difference between two transforms of the same type, which `<animateTransform>` scales by its
   /// progress and adds to its `from` transform.

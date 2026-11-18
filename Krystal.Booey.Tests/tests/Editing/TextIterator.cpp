@@ -58,7 +58,7 @@ namespace krys::boo::tests
   TEST_CASE("TextIterator: ranges and character offsets", "[Editing][TextIterator]")
   {
     TextFixture fixture(u8"<p id=p>hello  world</p>");
-    auto &text = Downcast<dom::Text>(*fixture.ById(u8"p").FirstChild());
+    auto &text = Downcast<boo::Text>(*fixture.ById(u8"p").FirstChild());
     auto scope = dom::MakeRangeSelectingNodeContents(*fixture.Document->Body());
 
     TextIterator iterator(scope);

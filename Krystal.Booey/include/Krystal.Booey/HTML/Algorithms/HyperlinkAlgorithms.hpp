@@ -5,9 +5,14 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
+  class HTMLElement;
+}
+
+namespace krys::boo::dom
+{
   class Event;
 }
 
@@ -18,8 +23,6 @@ namespace krys::boo::url
 
 namespace krys::boo::html
 {
-  class HTMLElement;
-
   /// @brief What `<a>` and `<area>` share as hyperlinks: their URL, their target and following them.
   /// @see https://html.spec.whatwg.org/#links-created-by-a-and-area-elements
   class HyperlinkAlgorithms
@@ -35,13 +38,13 @@ namespace krys::boo::html
     /// @brief The browsing context @p element's link navigates: its `target`, or the document's base target,
     /// with `_blank` for a target with dangling markup.
     /// @see https://html.spec.whatwg.org/#get-an-element's-target
-    KRYS_NODISCARD static dom::DOMStringAtom EffectiveTarget(const HTMLElement &element) noexcept;
+    KRYS_NODISCARD static DOMStringAtom EffectiveTarget(const HTMLElement &element) noexcept;
 
     /// @brief Whether @p event is the keydown of the Enter key.
     KRYS_NODISCARD static bool IsEnterKeyKeydownEvent(const dom::Event &event) noexcept;
 
     /// @brief Whether @p element's `rel` attribute has the keyword @p relation (ASCII case-insensitively).
-    KRYS_NODISCARD static bool HasRel(const HTMLElement &element, dom::DOMStringView relation) noexcept;
+    KRYS_NODISCARD static bool HasRel(const HTMLElement &element, DOMStringView relation) noexcept;
 
     /// @brief The referrer policy @p subject's link is followed with: `no-referrer` for `rel=noreferrer`.
     /// @see https://html.spec.whatwg.org/#hyperlink-referrer-policy

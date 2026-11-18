@@ -30,7 +30,7 @@
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
   class Element;
@@ -53,15 +53,15 @@ namespace krys::boo::html
 
     /// @brief Starts observing @p element, the image of a deferred load, with its document's observer.
     /// @see https://html.spec.whatwg.org/#start-intersection-observing-a-lazy-loading-element
-    static void Observe(dom::Element &element) noexcept;
+    static void Observe(Element &element) noexcept;
 
     /// @brief Stops observing @p element with @p document's observer.
     /// @see https://html.spec.whatwg.org/#stop-intersection-observing-a-lazy-loading-element
-    static void Unobserve(dom::Element &element, dom::Document &document) noexcept;
+    static void Unobserve(Element &element, Document &document) noexcept;
 
-    KRYS_NODISCARD bool IsObserved(dom::Element &element) const noexcept;
+    KRYS_NODISCARD bool IsObserved(Element &element) const noexcept;
 
   private:
-    KRYS_NODISCARD IntersectionObserver *GetIntersectionObserver(dom::Document &document) noexcept;
+    KRYS_NODISCARD IntersectionObserver *GetIntersectionObserver(Document &document) noexcept;
   };
 }

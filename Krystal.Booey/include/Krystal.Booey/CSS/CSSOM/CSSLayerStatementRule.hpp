@@ -38,37 +38,41 @@
 namespace krys::boo::css
 {
   class LayerRule;
+}
 
+namespace krys::boo
+{
   /// @brief An `@layer` statement rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-cascade-5/#the-csslayerstatementrule-interface
   class CSSLayerStatementRule final : public CSSRule
   {
   private:
-    Ref<LayerRule> _layerRule;
+    Ref<css::LayerRule> _layerRule;
 
-    CSSLayerStatementRule(LayerRule &rule, CSSStyleSheet *parent) noexcept;
+    CSSLayerStatementRule(css::LayerRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
     ~CSSLayerStatementRule() noexcept override;
 
-    KRYS_NODISCARD static Ref<CSSLayerStatementRule> Create(LayerRule &rule, CSSStyleSheet *parent) noexcept;
+    KRYS_NODISCARD static Ref<CSSLayerStatementRule> Create(css::LayerRule &rule,
+                                                            CSSStyleSheet *parent) noexcept;
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
     KRYS_NODISCARD List<CSSOMString> NameList() const noexcept;
 
   private:
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::LayerStatement;
+      return css::RuleType::LayerStatement;
     }
 
-    void Reattach(Rule &rule) noexcept final;
+    void Reattach(css::Rule &rule) noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSLayerStatementRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSLayerStatementRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::LayerStatement;
   }

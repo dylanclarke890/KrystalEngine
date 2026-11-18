@@ -61,13 +61,13 @@ namespace krys::boo::tests
 
     KRYS_NODISCARD std::string Name(const dom::EventTarget *target)
     {
-      auto *node = DynamicDowncast<dom::Node>(target);
-      auto *element = node ? DynamicDowncast<dom::Element>(*node) : nullptr;
+      auto *node = DynamicDowncast<Node>(target);
+      auto *element = node ? DynamicDowncast<Element>(*node) : nullptr;
       if (!element)
       {
         return node ? "document" : "null";
       }
-      auto id = element->GetAttribute(u8"id").value_or(dom::DOMString());
+      auto id = element->GetAttribute(u8"id").value_or(DOMString());
       return std::string(id.begin(), id.end());
     }
 
@@ -112,7 +112,7 @@ namespace krys::boo::tests
         TestPage = Page::Create(krys::move(chrome));
         Frame = ShareRefPtr(&TestPage->MainFrame());
         Frame->CreateView({200, 200});
-        Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+        Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
         (void)Document->UpdateLayout();
 
         // Capturing at the document sees the events that don't bubble too.
@@ -121,7 +121,7 @@ namespace krys::boo::tests
                           u8"pointerup", u8"mousedown", u8"mousemove", u8"mouseup", u8"click", u8"wheel",
                           u8"gotpointercapture", u8"lostpointercapture"})
         {
-          Document->AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, true);
+          Document->AddEventListener(DOMStringAtom(type), Ref {recorder}, true);
         }
       }
 
@@ -149,7 +149,7 @@ namespace krys::boo::tests
 
       /// @brief Asks to lock the pointer to @p element, then runs the tasks and microtasks that follow.
       /// @return How the request's promise settled: `ok`, or the exception's code.
-      static std::string Lock(dom::Element &element, dom::PointerLockOptions options = {}) noexcept
+      static std::string Lock(Element &element, dom::PointerLockOptions options = {}) noexcept
       {
         std::string settled = "pending";
         element.RequestPointerLock(

@@ -24,7 +24,7 @@
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImageForContainer.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   SVGImageCache::SVGImageCache(SVGImage *svgImage) noexcept : _svgImage(CreateWeakPtr(svgImage))
   {

@@ -38,12 +38,11 @@
 
 namespace krys::boo
 {
-  InsertLineBreakCommand::InsertLineBreakCommand(dom::Document &document) noexcept
-      : CompositeEditCommand(document)
+  InsertLineBreakCommand::InsertLineBreakCommand(Document &document) noexcept : CompositeEditCommand(document)
   {
   }
 
-  Ref<InsertLineBreakCommand> InsertLineBreakCommand::Create(dom::Document &document) noexcept
+  Ref<InsertLineBreakCommand> InsertLineBreakCommand::Create(Document &document) noexcept
   {
     return CreateRef<InsertLineBreakCommand>(document);
   }
@@ -90,8 +89,8 @@ namespace krys::boo
       return;
     }
 
-    Ref<dom::Document> document = ShareRef(GetDocument());
-    RefPtr<dom::Node> nodeToInsert;
+    Ref<Document> document = ShareRef(GetDocument());
+    RefPtr<boo::Node> nodeToInsert;
     if (ShouldUseBreakElement(position))
     {
       nodeToInsert = CreateHTMLElement(*document, u8"br");
@@ -101,7 +100,7 @@ namespace krys::boo
       nodeToInsert = document->CreateTextNode(u8"\n");
     }
 
-    auto cloneWithoutChildren = [&](dom::Node &node) -> Ref<dom::Node>
+    auto cloneWithoutChildren = [&](boo::Node &node) -> Ref<boo::Node>
     {
       auto clone = dom::NodeAlgorithms::CloneNode(node, &*document, false);
       krys_debug_assert(!clone.HasException());
@@ -141,13 +140,13 @@ namespace krys::boo
       // a simple insertion is sufficient.
     }
     else if (position.DeprecatedEditingOffset() >= CaretMaxOffset(*position.DeprecatedNode())
-             || !Is<dom::Text>(*position.DeprecatedNode()))
+             || !Is<Text>(*position.DeprecatedNode()))
     {
       InsertNodeAt(*nodeToInsert, position);
       SetEndingSelection(VisibleSelection(dom::PositionInParentAfterNode(nodeToInsert.get()),
                                           Affinity::Downstream, EndingSelection().GetDirectionality()));
     }
-    else if (RefPtr<dom::Text> textNode = ShareRefPtr(DynamicDowncast<dom::Text>(*position.DeprecatedNode())))
+    else if (RefPtr<Text> textNode = ShareRefPtr(DynamicDowncast<Text>(*position.DeprecatedNode())))
     {
       // Split a text node
       SplitTextNode(*textNode, static_cast<uint32>(position.DeprecatedEditingOffset()));

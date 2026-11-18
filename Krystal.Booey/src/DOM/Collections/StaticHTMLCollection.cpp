@@ -11,14 +11,14 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
-  StaticHTMLCollection::StaticHTMLCollection(SmallElementList &&elements) noexcept
+  dom::StaticHTMLCollection::StaticHTMLCollection(dom::SmallElementList &&elements) noexcept
       : _elements(krys::move(elements))
   {
   }
 
-  RefPtr<Element> StaticHTMLCollection::Item(size_t index) noexcept
+  RefPtr<Element> dom::StaticHTMLCollection::Item(size_t index) noexcept
   {
     if (index < _elements.size())
     {
@@ -28,22 +28,22 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-  RefPtr<const Element> StaticHTMLCollection::Item(size_t index) const noexcept
+  RefPtr<const Element> dom::StaticHTMLCollection::Item(size_t index) const noexcept
   {
-    return const_cast<StaticHTMLCollection *>(this)->Item(index);
+    return const_cast<dom::StaticHTMLCollection *>(this)->Item(index);
   }
 
-  RefPtr<Element> StaticHTMLCollection::operator[](size_t index) noexcept
-  {
-    return Item(index);
-  }
-
-  RefPtr<const Element> StaticHTMLCollection::operator[](size_t index) const noexcept
+  RefPtr<Element> dom::StaticHTMLCollection::operator[](size_t index) noexcept
   {
     return Item(index);
   }
 
-  RefPtr<Element> StaticHTMLCollection::NamedItem(DOMStringView name) noexcept
+  RefPtr<const Element> dom::StaticHTMLCollection::operator[](size_t index) const noexcept
+  {
+    return Item(index);
+  }
+
+  RefPtr<Element> dom::StaticHTMLCollection::NamedItem(DOMStringView name) noexcept
   {
     // 1. If key is the empty string, return null.
     if (name.empty())
@@ -62,7 +62,7 @@ namespace krys::boo::dom
         return element;
       }
       if (element->NamespaceURI() == infra::namespaces::HTML
-          && ElementAlgorithms::GetAttributeValue(*element, u8"name") == name)
+          && dom::ElementAlgorithms::GetAttributeValue(*element, u8"name") == name)
       {
         return element;
       }
@@ -71,27 +71,27 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-  RefPtr<const Element> StaticHTMLCollection::NamedItem(DOMStringView name) const noexcept
+  RefPtr<const Element> dom::StaticHTMLCollection::NamedItem(DOMStringView name) const noexcept
   {
-    return const_cast<StaticHTMLCollection *>(this)->NamedItem(name);
+    return const_cast<dom::StaticHTMLCollection *>(this)->NamedItem(name);
   }
 
-  RefPtr<Element> StaticHTMLCollection::operator[](DOMStringView name) noexcept
-  {
-    return NamedItem(name);
-  }
-
-  RefPtr<const Element> StaticHTMLCollection::operator[](DOMStringView name) const noexcept
+  RefPtr<Element> dom::StaticHTMLCollection::operator[](DOMStringView name) noexcept
   {
     return NamedItem(name);
   }
 
-  size_t StaticHTMLCollection::Length() const noexcept
+  RefPtr<const Element> dom::StaticHTMLCollection::operator[](DOMStringView name) const noexcept
+  {
+    return NamedItem(name);
+  }
+
+  size_t dom::StaticHTMLCollection::Length() const noexcept
   {
     return _elements.size();
   }
 
-  List<DOMString> StaticHTMLCollection::SupportedPropertyNames() const noexcept
+  List<DOMString> dom::StaticHTMLCollection::SupportedPropertyNames() const noexcept
   {
     // 1. Let result be an empty list.
     List<DOMString> supportedNames;
@@ -111,7 +111,7 @@ namespace krys::boo::dom
       //     nor is in result, append element's name attribute value to result.
       if (element->NamespaceURI() == infra::namespaces::HTML)
       {
-        auto name = ElementAlgorithms::GetAttributeValue(*element, u8"name");
+        auto name = dom::ElementAlgorithms::GetAttributeValue(*element, u8"name");
         if (!name.empty() && !std::ranges::contains(supportedNames, name))
         {
           supportedNames.push_back(name);

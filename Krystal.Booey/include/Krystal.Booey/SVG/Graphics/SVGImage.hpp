@@ -36,18 +36,10 @@
 
 namespace krys::boo
 {
+  class Element;
   class LocalFrameView;
   class Page;
   class RenderBox;
-}
-
-namespace krys::boo::dom
-{
-  class Element;
-}
-
-namespace krys::boo::svg
-{
   class SVGImageChromeClient;
   class SVGImageForContainer;
   class SVGSvgElement;
@@ -158,12 +150,15 @@ namespace krys::boo::svg
                                  const AffineTransform &, const FloatPoint &phase, const FloatSize &spacing,
                                  const FloatRect &, ImagePaintingOptions = {}) noexcept;
   };
-
-  /// @brief Whether @p element is in an SVG image's document.
-  KRYS_NODISCARD bool IsInSVGImage(const dom::Element *element) noexcept;
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGImage)
+namespace krys::boo::svg
+{
+  /// @brief Whether @p element is in an SVG image's document.
+  KRYS_NODISCARD bool IsInSVGImage(const Element *element) noexcept;
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGImage)
   KRYS_NODISCARD static bool IsType(const krys::boo::Image &image) noexcept
   {
     return image.IsSVGImage();

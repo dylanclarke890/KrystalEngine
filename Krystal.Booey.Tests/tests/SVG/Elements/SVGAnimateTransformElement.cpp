@@ -10,8 +10,7 @@ namespace krys::boo::svg::tests
 
   namespace
   {
-    KRYS_NODISCARD AffineTransform TransformOf(const AnimationFixture &fixture,
-                                               dom::DOMStringView id) noexcept
+    KRYS_NODISCARD AffineTransform TransformOf(const AnimationFixture &fixture, DOMStringView id) noexcept
     {
       return fixture.ById<SVGRectElement>(id).Transform().Concatenate();
     }

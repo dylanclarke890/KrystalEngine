@@ -26,9 +26,9 @@
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSMediaRule::CSSMediaRule(MediaRule &mediaRule, CSSStyleSheet *parent) noexcept
+  CSSMediaRule::CSSMediaRule(css::MediaRule &mediaRule, CSSStyleSheet *parent) noexcept
       : CSSConditionRule(mediaRule, parent)
   {
   }
@@ -41,19 +41,19 @@ namespace krys::boo::css
     }
   }
 
-  Ref<CSSMediaRule> CSSMediaRule::Create(MediaRule &rule, CSSStyleSheet *sheet) noexcept
+  Ref<CSSMediaRule> CSSMediaRule::Create(css::MediaRule &rule, CSSStyleSheet *sheet) noexcept
   {
     return AdoptRef(*new CSSMediaRule(rule, sheet));
   }
 
-  const mq::MediaQueryList &CSSMediaRule::MediaQueries() const noexcept
+  const css::mq::MediaQueryList &CSSMediaRule::MediaQueries() const noexcept
   {
-    return Downcast<MediaRule>(GetGroupRule()).MediaQueries();
+    return Downcast<css::MediaRule>(GetGroupRule()).MediaQueries();
   }
 
-  void CSSMediaRule::SetMediaQueries(mq::MediaQueryList &&queries) noexcept
+  void CSSMediaRule::SetMediaQueries(css::mq::MediaQueryList &&queries) noexcept
   {
-    Downcast<MediaRule>(GetGroupRule()).SetMediaQueries(krys::move(queries));
+    Downcast<css::MediaRule>(GetGroupRule()).SetMediaQueries(krys::move(queries));
   }
 
   CSSOMString CSSMediaRule::CssText() const noexcept
@@ -64,7 +64,7 @@ namespace krys::boo::css
     return krys::move(builder).ToString();
   }
 
-  CSSOMString CSSMediaRule::CssText(const SerialisationContext &context) const noexcept
+  CSSOMString CSSMediaRule::CssText(const css::SerialisationContext &context) const noexcept
   {
     StringBuilder builder;
     builder.Append(u8"@media ", ConditionText());
@@ -75,7 +75,7 @@ namespace krys::boo::css
   CSSOMString CSSMediaRule::ConditionText() const noexcept
   {
     StringBuilder builder;
-    mq::Serialise(builder, MediaQueries());
+    css::mq::Serialise(builder, MediaQueries());
     return krys::move(builder).ToString();
   }
 

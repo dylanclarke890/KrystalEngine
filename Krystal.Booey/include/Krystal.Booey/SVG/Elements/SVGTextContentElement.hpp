@@ -36,7 +36,7 @@ namespace krys::boo::dom
   struct DOMPointInit;
 }
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGPoint;
   class SVGRect;
@@ -56,7 +56,7 @@ namespace krys::boo::svg
       return SVGLengthAdjustSpacingAndGlyphs;
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(SVGLengthAdjustType type) noexcept
+    KRYS_NODISCARD static DOMString ToString(SVGLengthAdjustType type) noexcept
     {
       switch (type)
       {
@@ -78,7 +78,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    KRYS_NODISCARD static SVGLengthAdjustType FromString(SVGElement &, dom::DOMStringView value) noexcept
+    KRYS_NODISCARD static SVGLengthAdjustType FromString(SVGElement &, DOMStringView value) noexcept
     {
       if (value == u8"spacingAndGlyphs")
       {
@@ -167,7 +167,7 @@ namespace krys::boo::svg
     }
 
   protected:
-    SVGTextContentElement(dom::Document &, UniquePtr<SVGPropertyRegistry> &&, SVGElementInterface,
+    SVGTextContentElement(Document &, UniquePtr<SVGPropertyRegistry> &&, SVGElementInterface,
                           SVGElementFlags = SVGElementFlags::None) noexcept;
 
     KRYS_NODISCARD bool IsValid() const noexcept override
@@ -175,26 +175,25 @@ namespace krys::boo::svg
       return SVGTests::IsValid();
     }
 
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept override;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept override;
 
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept override;
 
     KRYS_NODISCARD bool SelfHasRelativeLengths() const noexcept override;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGTextContentElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGTextContentElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGTextContentElement();
   }

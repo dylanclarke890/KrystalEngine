@@ -30,13 +30,9 @@
 #include "Krystal.Core/Types/WeakPtr.hpp"
 #include <utility>
 
-namespace krys::boo::dom
-{
-  class DocumentFragment;
-}
-
 namespace krys::boo
 {
+  class DocumentFragment;
   class LocalFrame;
   enum class MSOListQuirks : bool;
 
@@ -70,7 +66,7 @@ namespace krys::boo
     const dom::SimpleRange _context;
     const bool _allowPlainText;
 
-    RefPtr<dom::DocumentFragment> _fragment;
+    RefPtr<DocumentFragment> _fragment;
     bool _madeFragmentFromPlainText {false};
 
   public:
@@ -78,11 +74,11 @@ namespace krys::boo
 
     ~WebContentReader() noexcept override;
 
-    void AddFragment(Ref<dom::DocumentFragment> &&fragment) noexcept;
+    void AddFragment(Ref<DocumentFragment> &&fragment) noexcept;
 
-    KRYS_NODISCARD RefPtr<dom::DocumentFragment> TakeFragment() noexcept;
+    KRYS_NODISCARD RefPtr<DocumentFragment> TakeFragment() noexcept;
 
-    KRYS_NODISCARD dom::DocumentFragment *Fragment() const noexcept
+    KRYS_NODISCARD DocumentFragment *Fragment() const noexcept
     {
       return _fragment.get();
     }

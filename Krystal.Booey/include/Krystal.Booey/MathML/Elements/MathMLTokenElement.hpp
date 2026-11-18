@@ -29,7 +29,7 @@
 
 #include "Krystal.Booey/MathML/Elements/MathMLPresentationElement.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   /// @brief A token element: `<mi>`, `<mn>`, `<ms>` and `<mtext>`, whose text is drawn, and the base of
   /// `<mo>`.
@@ -39,7 +39,7 @@ namespace krys::boo::mathml
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(MathMLTokenElement);
 
   public:
-    explicit MathMLTokenElement(dom::Document &document,
+    explicit MathMLTokenElement(Document &document,
                                 MathMLElementInterface interface = MathMLElementInterface::Token) noexcept
         : MathMLPresentationElement(document, interface)
     {
@@ -53,16 +53,15 @@ namespace krys::boo::mathml
     void OnChildrenChanged() noexcept override;
 
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
   private:
-    KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &child) const noexcept final;
+    KRYS_NODISCARD bool ChildShouldCreateRenderer(const Node &child) const noexcept final;
 
     KRYS_NODISCARD bool IsMathMLToken() const noexcept final
     {
@@ -71,14 +70,14 @@ namespace krys::boo::mathml
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::mathml::MathMLTokenElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::mathml::MathMLElement &element) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::MathMLTokenElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::MathMLElement &element) noexcept
   {
     return element.IsMathMLToken();
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    auto *element = krys::DynamicDowncast<krys::boo::mathml::MathMLElement>(node);
+    auto *element = krys::DynamicDowncast<krys::boo::MathMLElement>(node);
     return element && IsType(*element);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

@@ -27,12 +27,12 @@
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/HTML/CustomElement/FormAssociatedCustomElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   HTMLMaybeFormAssociatedCustomElement::HTMLMaybeFormAssociatedCustomElement(
-    dom::Document &document, const dom::DOMStringAtom &localName) noexcept
-      : HTMLElement(document, HTMLElementInterface::MaybeFormAssociatedCustom, localName,
-                    HTMLElementFlags::None, dom::NodeFlags::None)
+    Document &document, const DOMStringAtom &localName) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::MaybeFormAssociatedCustom, localName,
+                    html::HTMLElementFlags::None, dom::NodeFlags::None)
   {
     krys_debug_assert(dom::NameValidation::IsValidCustomElementName(localName.View()));
   }
@@ -54,22 +54,23 @@ namespace krys::boo::html
     return HasFormAssociatedInterface() && IsDefinedCustomElement();
   }
 
-  FormAssociatedElement *HTMLMaybeFormAssociatedCustomElement::AsFormAssociatedElement() noexcept
+  html::FormAssociatedElement *HTMLMaybeFormAssociatedCustomElement::AsFormAssociatedElement() noexcept
   {
     return IsFormAssociatedCustomElement() ? _formAssociatedCustomElement.get() : nullptr;
   }
 
-  FormListedElement *HTMLMaybeFormAssociatedCustomElement::AsFormListedElement() noexcept
+  html::FormListedElement *HTMLMaybeFormAssociatedCustomElement::AsFormListedElement() noexcept
   {
     return IsFormAssociatedCustomElement() ? _formAssociatedCustomElement.get() : nullptr;
   }
 
-  ValidatedFormListedElement *HTMLMaybeFormAssociatedCustomElement::AsValidatedFormListedElement() noexcept
+  html::ValidatedFormListedElement *
+    HTMLMaybeFormAssociatedCustomElement::AsValidatedFormListedElement() noexcept
   {
     return IsFormAssociatedCustomElement() ? _formAssociatedCustomElement.get() : nullptr;
   }
 
-  FormAssociatedCustomElement *
+  html::FormAssociatedCustomElement *
     HTMLMaybeFormAssociatedCustomElement::FormAssociatedCustomElementForElementInternals() const noexcept
   {
     return HasFormAssociatedInterface() && IsPrecustomizedOrDefinedCustomElement()
@@ -128,8 +129,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLMaybeFormAssociatedCustomElement::OnRemove(bool isSubtreeRoot,
-                                                      dom::ContainerNode &oldAncestor) noexcept
+  void HTMLMaybeFormAssociatedCustomElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
     if (IsFormAssociatedCustomElement())
@@ -138,8 +138,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLMaybeFormAssociatedCustomElement::OnMove(bool isSubtreeRoot,
-                                                    dom::ContainerNode &oldAncestor) noexcept
+  void HTMLMaybeFormAssociatedCustomElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
     if (!IsFormAssociatedCustomElement())
@@ -159,7 +158,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLMaybeFormAssociatedCustomElement::OnAdopt(dom::Document &oldDocument) noexcept
+  void HTMLMaybeFormAssociatedCustomElement::OnAdopt(Document &oldDocument) noexcept
   {
     HTMLElement::OnAdopt(oldDocument);
     if (IsFormAssociatedCustomElement())
@@ -168,9 +167,10 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLMaybeFormAssociatedCustomElement::OnAttributeChanged(
-    const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue, Maybe<dom::DOMStringView> value,
-    const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLMaybeFormAssociatedCustomElement::OnAttributeChanged(const DOMStringAtom &localName,
+                                                                Maybe<DOMStringView> oldValue,
+                                                                Maybe<DOMStringView> value,
+                                                                const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (IsFormAssociatedCustomElement() && namespaceURI == null)
@@ -183,7 +183,7 @@ namespace krys::boo::html
   {
     if (!_formAssociatedCustomElement)
     {
-      _formAssociatedCustomElement = CreateUnique<FormAssociatedCustomElement>(*this);
+      _formAssociatedCustomElement = CreateUnique<html::FormAssociatedCustomElement>(*this);
       // It's now a listed element if it's defined.
       InvalidateLiveCollectionCachesInAncestors();
     }

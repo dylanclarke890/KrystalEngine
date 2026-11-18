@@ -50,7 +50,7 @@ namespace krys::boo::css::mq
   class MediaQueryEvaluator;
 }
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class Element;
@@ -80,12 +80,12 @@ namespace krys::boo::style
 
     struct ScopingRootWithDistance
     {
-      RefPtr<const dom::ContainerNode> ScopingRoot;
+      RefPtr<const ContainerNode> ScopingRoot;
       uint32 Distance {std::numeric_limits<uint32>::max()};
     };
 
   private:
-    const Ref<const dom::Element> _element;
+    const Ref<const boo::Element> _element;
     Ref<const RuleSet> _authorStyle;
     RefPtr<const RuleSet> _userStyle;
     RefPtr<const RuleSet> _userAgentMediaQueryStyle;
@@ -107,12 +107,12 @@ namespace krys::boo::style
 
   public:
     ElementRuleCollector(
-      const dom::Element &element, const ScopeRuleSets &ruleSets,
+      const boo::Element &element, const ScopeRuleSets &ruleSets,
       SelectorMatchingState *selectorMatchingState,
       css::SelectorChecker::Mode mode = css::SelectorChecker::Mode::ResolvingStyle) noexcept;
 
     ElementRuleCollector(
-      const dom::Element &element, const RuleSet &authorStyle, SelectorMatchingState *selectorMatchingState,
+      const boo::Element &element, const RuleSet &authorStyle, SelectorMatchingState *selectorMatchingState,
       css::SelectorChecker::Mode mode = css::SelectorChecker::Mode::ResolvingStyle) noexcept;
 
     ~ElementRuleCollector() noexcept;
@@ -176,7 +176,7 @@ namespace krys::boo::style
 
     void MatchPartPseudoElementRules(DeclarationOrigin origin) noexcept;
 
-    void MatchPartPseudoElementRulesForScope(const dom::Element &partMatchingElement,
+    void MatchPartPseudoElementRulesForScope(const boo::Element &partMatchingElement,
                                              DeclarationOrigin origin) noexcept;
 
     void CollectMatchingRules(DeclarationOrigin origin) noexcept;
@@ -213,7 +213,7 @@ namespace krys::boo::style
 
     void AddMatchedProperties(MatchedProperties &&matchedProperties, DeclarationOrigin origin) noexcept;
 
-    KRYS_NODISCARD const dom::Element &Element() const noexcept
+    KRYS_NODISCARD const boo::Element &Element() const noexcept
     {
       return *_element;
     }

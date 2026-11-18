@@ -26,9 +26,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFEOffsetElement::SVGFEOffsetElement(dom::Document &document) noexcept
+  SVGFEOffsetElement::SVGFEOffsetElement(Document &document) noexcept
       : SVGFilterPrimitiveStandardAttributes(document, CreateUnique<PropertyRegistry>(*this),
                                              SVGElementInterface::FEOffset),
         _in1(SVGAnimatedString::Create(this)), _dx(SVGAnimatedNumber::Create(this)),
@@ -44,29 +44,28 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGFEOffsetElement::AttributeChanged(const dom::QualifiedName &name,
-                                            Maybe<dom::DOMStringView> oldValue,
-                                            Maybe<dom::DOMStringView> value) noexcept
+  void SVGFEOffsetElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                            Maybe<DOMStringView> value) noexcept
   {
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::DxAttr())
     {
-      _dx->SetBaseValInternal(ToFloatOrZero(string));
+      _dx->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::DyAttr())
     {
-      _dy->SetBaseValInternal(ToFloatOrZero(string));
+      _dy->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::InAttr())
     {
-      _in1->SetBaseValInternal(dom::DOMString(string));
+      _in1->SetBaseValInternal(DOMString(string));
     }
 
     SVGFilterPrimitiveStandardAttributes::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGFEOffsetElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGFEOffsetElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (attributeName == SVGNames::InAttr())
     {
@@ -85,7 +84,7 @@ namespace krys::boo::svg
   }
 
   bool SVGFEOffsetElement::SetFilterEffectAttribute(FilterEffect &effect,
-                                                    const dom::QualifiedName &attributeName) noexcept
+                                                    const QualifiedName &attributeName) noexcept
   {
     auto &offset = Downcast<FEOffset>(effect);
 

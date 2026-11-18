@@ -13,14 +13,14 @@ namespace krys::boo::style::tests
   {
     const boo::Color Blue {boo::Color::blue};
 
-    KRYS_NODISCARD Ref<dom::Element> Create(dom::Document &document, dom::DOMStringAtom localName)
+    KRYS_NODISCARD Ref<Element> Create(Document &document, DOMStringAtom localName)
     {
       auto element = document.CreateElement(krys::move(localName));
       REQUIRE_FALSE(element.HasException());
       return element.ReleaseValue();
     }
 
-    KRYS_NODISCARD bool IsBlue(const dom::Element &element)
+    KRYS_NODISCARD bool IsBlue(const Element &element)
     {
       auto *style = element.GetRenderStyle();
       REQUIRE(style);
@@ -28,9 +28,9 @@ namespace krys::boo::style::tests
     }
 
     template <typename T>
-    KRYS_NODISCARD T &HTML(dom::Element &element)
+    KRYS_NODISCARD T &HTML(Element &element)
     {
-      return Downcast<T>(Downcast<html::HTMLElement>(element));
+      return Downcast<T>(Downcast<HTMLElement>(element));
     }
   }
 
@@ -40,11 +40,11 @@ namespace krys::boo::style::tests
     ResolverFixture fixture {u8R"(<!DOCTYPE html><p id=Id class="a b" title=t lang=en></p>)"};
     auto keys = MakePseudoClassInvalidationKeys(css::SelectorPseudoClass::Hover, fixture.ById(u8"Id"));
 
-    auto key = [](InvalidationKeyType type, dom::DOMStringView value = {})
+    auto key = [](InvalidationKeyType type, DOMStringView value = {})
     {
       return value.empty() ? MakePseudoClassInvalidationKey(css::SelectorPseudoClass::Hover, type)
                            : MakePseudoClassInvalidationKey(css::SelectorPseudoClass::Hover, type,
-                                                            css::CSSOMStringAtom(value));
+                                                            CSSOMStringAtom(value));
     };
     REQUIRE(keys.size() == 7);
     CHECK(keys[0] == key(InvalidationKeyType::Id, u8"Id"));
@@ -74,8 +74,8 @@ namespace krys::boo::style::tests
     document.UpdateStyleIfNeeded();
     auto &cs = fixture.ById(u8"cs");
     auto &rs = fixture.ById(u8"rs");
-    auto &input = HTML<html::HTMLInputElement>(fixture.ById(u8"c"));
-    auto &text = HTML<html::HTMLInputElement>(fixture.ById(u8"r"));
+    auto &input = HTML<HTMLInputElement>(fixture.ById(u8"c"));
+    auto &text = HTML<HTMLInputElement>(fixture.ById(u8"r"));
     REQUIRE_FALSE(IsBlue(cs));
 
     SECTION(":checked")
@@ -99,7 +99,7 @@ namespace krys::boo::style::tests
 
     SECTION(":checked and :default for options")
     {
-      auto &option = HTML<html::HTMLOptionElement>(fixture.ById(u8"o"));
+      auto &option = HTML<HTMLOptionElement>(fixture.ById(u8"o"));
       option.Selected(true);
       CHECK(option.StyleValidity() == Validity::ElementInvalid);
       document.UpdateStyleIfNeeded();
@@ -232,7 +232,7 @@ namespace krys::boo::style::tests
     {
       auto &form = fixture.ById(u8"form");
       auto &b1 = fixture.ById(u8"b1");
-      auto width = [&](dom::Element &element)
+      auto width = [&](Element &element)
       {
         auto *style = element.GetRenderStyle();
         REQUIRE(style);

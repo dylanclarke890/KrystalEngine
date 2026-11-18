@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/MathML/Elements/MathMLPresentationElement.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   /// @brief The `<mspace>` element: blank space of a given size.
   /// @see https://w3c.github.io/mathml-core/#space-mspace
@@ -41,7 +41,7 @@ namespace krys::boo::mathml
     Maybe<Length> _depth;
 
   public:
-    explicit MathMLSpaceElement(dom::Document &document) noexcept
+    explicit MathMLSpaceElement(Document &document) noexcept
         : MathMLPresentationElement(document, MathMLElementInterface::Space)
     {
     }
@@ -55,19 +55,19 @@ namespace krys::boo::mathml
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::mathml::MathMLSpaceElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::mathml::MathMLElement &element) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::MathMLSpaceElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::MathMLElement &element) noexcept
   {
-    return element.Interface() == krys::boo::mathml::MathMLElementInterface::Space;
+    return element.Interface() == krys::boo::MathMLElementInterface::Space;
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    auto *element = krys::DynamicDowncast<krys::boo::mathml::MathMLElement>(node);
+    auto *element = krys::DynamicDowncast<krys::boo::MathMLElement>(node);
     return element && IsType(*element);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

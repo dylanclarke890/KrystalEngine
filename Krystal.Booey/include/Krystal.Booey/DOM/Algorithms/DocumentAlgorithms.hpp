@@ -6,12 +6,15 @@
 #include "Krystal.Booey/HTML/Types/DocumentReadyState.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
   class Element;
   class Node;
+}
 
+namespace krys::boo::dom
+{
   class DocumentAlgorithms
   {
   public:

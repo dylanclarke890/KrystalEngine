@@ -41,12 +41,8 @@
 
 namespace krys::boo
 {
-  namespace svg
-  {
-    class SVGElement;
-  }
-
   struct BlendingContext;
+  class SVGElement;
 
   /// @brief A path given by `clip-path` or `offset-path`: a reference, a basic shape, a box or a ray.
   class PathOperation : public RefCounted<PathOperation>
@@ -121,12 +117,12 @@ namespace krys::boo
   {
   private:
     style::URL _url;
-    css::CSSOMStringAtom _fragment;
+    CSSOMStringAtom _fragment;
     Maybe<Path> _path;
 
   public:
     KRYS_NODISCARD static Ref<ReferencePathOperation>
-      Create(const style::URL &, const css::CSSOMStringAtom &fragment, const svg::SVGElement *) noexcept;
+      Create(const style::URL &, const CSSOMStringAtom &fragment, const boo::SVGElement *) noexcept;
 
     KRYS_NODISCARD static Ref<ReferencePathOperation> Create(Maybe<Path> &&) noexcept;
 
@@ -137,7 +133,7 @@ namespace krys::boo
       return _url;
     }
 
-    KRYS_NODISCARD const css::CSSOMStringAtom &Fragment() const noexcept
+    KRYS_NODISCARD const CSSOMStringAtom &Fragment() const noexcept
     {
       return _fragment;
     }
@@ -155,7 +151,7 @@ namespace krys::boo
     KRYS_NODISCARD bool Equals(const PathOperation &other) const noexcept override;
 
   private:
-    ReferencePathOperation(style::URL, css::CSSOMStringAtom fragment, const svg::SVGElement *) noexcept;
+    ReferencePathOperation(style::URL, CSSOMStringAtom fragment, const boo::SVGElement *) noexcept;
 
     explicit ReferencePathOperation(Maybe<Path> &&) noexcept;
   };

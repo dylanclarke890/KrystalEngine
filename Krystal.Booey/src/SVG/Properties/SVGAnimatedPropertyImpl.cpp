@@ -6,11 +6,11 @@ namespace krys::boo::svg
   template class SVGSharedPrimitiveProperty<bool>;
   template class SVGSharedPrimitiveProperty<int32>;
   template class SVGSharedPrimitiveProperty<float>;
-  template class SVGSharedPrimitiveProperty<dom::DOMString>;
+  template class SVGSharedPrimitiveProperty<DOMString>;
   template class SVGAnimatedPrimitiveProperty<bool>;
   template class SVGAnimatedPrimitiveProperty<int32>;
   template class SVGAnimatedPrimitiveProperty<float>;
-  template class SVGAnimatedPrimitiveProperty<dom::DOMString>;
+  template class SVGAnimatedPrimitiveProperty<DOMString>;
   template class SVGAnimatedValueProperty<SVGAngle>;
   template class SVGAnimatedValueProperty<SVGLength>;
   template class SVGAnimatedValueProperty<SVGRect>;

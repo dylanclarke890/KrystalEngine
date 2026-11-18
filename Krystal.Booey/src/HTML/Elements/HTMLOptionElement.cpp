@@ -51,13 +51,13 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD bool IsScriptElement(const dom::Node &node) noexcept
+    KRYS_NODISCARD bool IsScriptElement(const Node &node) noexcept
     {
-      auto *element = DynamicDowncast<dom::Element>(node);
+      auto *element = DynamicDowncast<Element>(node);
       return element && element->LocalName().View() == u8"script"
              && (element->NamespaceURI().View() == infra::namespaces::HTML
                  || element->NamespaceURI().View() == infra::namespaces::SVG);
@@ -73,20 +73,20 @@ namespace krys::boo::html
   // https://html.spec.whatwg.org/#the-select-element-2
   // An option without a label renders as if its contents slot took its children, so only one with a label
   // makes the tree, which stays if the label goes.
-  void HTMLOptionElement::DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept
+  void HTMLOptionElement::DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept
   {
     auto &document = NodeDocument();
     auto contentsSlot = dom::ElementFactory::CreateHTMLElement<HTMLSlotElement>(document, u8"slot");
     _contentsSlot = CreateWeakPtr(contentsSlot.get());
     auto labelElement = dom::ElementFactory::CreateHTMLElement<HTMLSpanElement>(document, u8"span");
-    _labelElement = CreateWeakPtr<dom::Element>(labelElement.get());
+    _labelElement = CreateWeakPtr<Element>(labelElement.get());
     (void)contentsSlot->AppendChild(*labelElement);
     (void)root.AppendChild(*contentsSlot);
   }
 
   HTMLSlotElement *HTMLOptionElement::SlotForHostChild() const noexcept
   {
-    return GetAttribute(u8"label").value_or(dom::DOMString()).empty() ? _contentsSlot.get() : nullptr;
+    return GetAttribute(u8"label").value_or(DOMString()).empty() ? _contentsSlot.get() : nullptr;
   }
 
   void HTMLOptionElement::DefaultEventHandler(dom::Event &event) noexcept
@@ -106,21 +106,19 @@ namespace krys::boo::html
     HTMLElement::DefaultEventHandler(event);
   }
 
-  HTMLOptionElement::HTMLOptionElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Option)
+  HTMLOptionElement::HTMLOptionElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Option)
   {
   }
 
-  dom::ExceptionOr<Ref<HTMLOptionElement>>
-    HTMLOptionElement::CreateForLegacyFactoryFunction(dom::Document &document, dom::DOMString text,
-                                                      Maybe<dom::DOMString> value, bool defaultSelected,
-                                                      bool selected) noexcept
+  dom::ExceptionOr<Ref<HTMLOptionElement>> HTMLOptionElement::CreateForLegacyFactoryFunction(
+    Document &document, DOMString text, Maybe<DOMString> value, bool defaultSelected, bool selected) noexcept
   {
     auto element = dom::ElementFactory::CreateHTMLElement<HTMLOptionElement>(document, u8"option");
 
     if (!text.empty())
     {
-      auto appendResult = element->AppendChild(*CreateRef<dom::Text>(document, krys::move(text)));
+      auto appendResult = element->AppendChild(*CreateRef<boo::Text>(document, krys::move(text)));
       if (appendResult.HasException())
       {
         return appendResult.ReleaseException();
@@ -133,7 +131,7 @@ namespace krys::boo::html
     }
     if (defaultSelected)
     {
-      (void)element->SetAttribute(u8"selected", dom::DOMString());
+      (void)element->SetAttribute(u8"selected", DOMString());
     }
 
     // 6. If selected is true, then set option's selectedness to true; otherwise set its selectedness to false
@@ -169,12 +167,12 @@ namespace krys::boo::html
 
   bool HTMLOptionElement::Disabled() const noexcept
   {
-    return Reflect<bool>(*this, u8"disabled");
+    return html::Reflect<bool>(*this, u8"disabled");
   }
 
   void HTMLOptionElement::Disabled(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"disabled", krys::move(value));
+    html::Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 
   HTMLFormElement *HTMLOptionElement::Form() const noexcept
@@ -186,13 +184,13 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  RefPtr<dom::Element> HTMLOptionElement::FormForBindings() const noexcept
+  RefPtr<Element> HTMLOptionElement::FormForBindings() const noexcept
   {
     return RetargetForBindings(Form());
   }
 
   // https://html.spec.whatwg.org/#dom-option-label
-  dom::DOMString HTMLOptionElement::Label() const noexcept
+  DOMString HTMLOptionElement::Label() const noexcept
   {
     // 1. Let attribute be this's label attribute.
     // 2. If attribute is null, then return the result of getting an option element's label given this and
@@ -200,27 +198,27 @@ namespace krys::boo::html
     // 3. Return attribute's value.
     if (auto label = GetAttribute(u8"label"))
     {
-      return dom::DOMString(*label);
+      return DOMString(*label);
     }
     return OptionLabel();
   }
 
-  void HTMLOptionElement::Label(dom::DOMString value) noexcept
+  void HTMLOptionElement::Label(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"label", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"label", krys::move(value));
   }
 
   bool HTMLOptionElement::DefaultSelected() const noexcept
   {
-    return Reflect<bool>(*this, u8"selected");
+    return html::Reflect<bool>(*this, u8"selected");
   }
 
   void HTMLOptionElement::DefaultSelected(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"selected", krys::move(value));
+    html::Reflect<bool>(*this, u8"selected", krys::move(value));
   }
 
-  bool HTMLOptionElement::Selected(AllowStyleInvalidation allowStyleInvalidation) const noexcept
+  bool HTMLOptionElement::Selected(html::AllowStyleInvalidation allowStyleInvalidation) const noexcept
   {
     if (auto *select = OwnerSelectElement())
     {
@@ -252,32 +250,32 @@ namespace krys::boo::html
     if (RefPtr<HTMLSelectElement> select = ShareRefPtr(OwnerSelectElement()))
     {
       select->OptionSelectionStateChanged(*this, value);
-      FormControlAlgorithms::UpdateDescendantSelectedContents(*select);
+      html::FormControlAlgorithms::UpdateDescendantSelectedContents(*select);
     }
   }
 
-  dom::DOMString HTMLOptionElement::Value() const noexcept
+  DOMString HTMLOptionElement::Value() const noexcept
   {
     if (auto value = GetAttribute(u8"value"))
     {
-      return dom::DOMString(*value);
+      return DOMString(*value);
     }
     return CollectOptionInnerTextCollapsingWhitespace();
   }
 
-  void HTMLOptionElement::Value(dom::DOMString value) noexcept
+  void HTMLOptionElement::Value(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"value", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"value", krys::move(value));
   }
 
-  dom::DOMString HTMLOptionElement::Text() const noexcept
+  DOMString HTMLOptionElement::Text() const noexcept
   {
     return CollectOptionInnerTextCollapsingWhitespace();
   }
 
-  void HTMLOptionElement::Text(dom::DOMString value) noexcept
+  void HTMLOptionElement::Text(DOMString value) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     Ref<HTMLOptionElement> protectedThis = ShareRef(*this);
 
     // Changing the text causes a recalc of a select's items, which will reset the selected index to the first
@@ -326,7 +324,7 @@ namespace krys::boo::html
     return _ownerSelect.get();
   }
 
-  dom::DOMString HTMLOptionElement::DisplayLabel() const noexcept
+  DOMString HTMLOptionElement::DisplayLabel() const noexcept
   {
     // Same as OptionLabel() but ignores the label content attribute in quirks mode for compatibility with
     // other browsers.
@@ -337,7 +335,7 @@ namespace krys::boo::html
     return OptionLabel();
   }
 
-  dom::DOMString HTMLOptionElement::TextIndentedToRespectGroupLabel() const noexcept
+  DOMString HTMLOptionElement::TextIndentedToRespectGroupLabel() const noexcept
   {
     for (auto *ancestor = ParentElement(); ancestor; ancestor = ancestor->ParentElement())
     {
@@ -355,7 +353,7 @@ namespace krys::boo::html
   }
 
   void HTMLOptionElement::SetSelectedState(bool selected,
-                                           AllowStyleInvalidation allowStyleInvalidation) noexcept
+                                           html::AllowStyleInvalidation allowStyleInvalidation) noexcept
   {
     if (_isSelected == selected)
     {
@@ -363,7 +361,7 @@ namespace krys::boo::html
     }
 
     Maybe<style::PseudoClassChangeInvalidation> checkedInvalidation;
-    if (allowStyleInvalidation == AllowStyleInvalidation::Yes)
+    if (allowStyleInvalidation == html::AllowStyleInvalidation::Yes)
     {
       checkedInvalidation.emplace(*this, css::SelectorPseudoClass::Checked, selected);
     }
@@ -416,11 +414,11 @@ namespace krys::boo::html
     HTMLElement::OnPostConnection();
 
     // Update descendant selectedcontent elements for an option given insertedOption.
-    FormControlAlgorithms::UpdateDescendantSelectedContentsForOption(*this);
+    html::FormControlAlgorithms::UpdateDescendantSelectedContentsForOption(*this);
   }
 
   // https://html.spec.whatwg.org/#the-option-element:html-element-removing-steps
-  void HTMLOptionElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLOptionElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
 
@@ -430,12 +428,12 @@ namespace krys::boo::html
     //    given select.
     if (RefPtr<HTMLSelectElement> oldSelect = UpdateOwnerSelect(); oldSelect && _isSelected)
     {
-      FormControlAlgorithms::QueueUpdateDescendantSelectedContents(*oldSelect);
+      html::FormControlAlgorithms::QueueUpdateDescendantSelectedContents(*oldSelect);
     }
   }
 
   // https://html.spec.whatwg.org/#the-option-element:html-element-moving-steps
-  void HTMLOptionElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLOptionElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
 
@@ -446,13 +444,13 @@ namespace krys::boo::html
     RefPtr<HTMLSelectElement> oldSelect = UpdateOwnerSelect();
     if (oldSelect && _isSelected)
     {
-      FormControlAlgorithms::QueueUpdateDescendantSelectedContents(*oldSelect);
+      html::FormControlAlgorithms::QueueUpdateDescendantSelectedContents(*oldSelect);
     }
     OnInsert();
     if (RefPtr<HTMLSelectElement> newSelect = ShareRefPtr(OwnerSelectElement());
         newSelect && newSelect != oldSelect && Selected())
     {
-      FormControlAlgorithms::QueueUpdateDescendantSelectedContents(*newSelect);
+      html::FormControlAlgorithms::QueueUpdateDescendantSelectedContents(*newSelect);
     }
   }
 
@@ -496,10 +494,9 @@ namespace krys::boo::html
     HTMLElement::OnChildrenChanged();
   }
 
-  void HTMLOptionElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                             Maybe<dom::DOMStringView> oldValue,
-                                             Maybe<dom::DOMStringView> value,
-                                             const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLOptionElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                             Maybe<DOMStringView> value,
+                                             const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
@@ -554,7 +551,7 @@ namespace krys::boo::html
         if (RefPtr<HTMLSelectElement> select = ShareRefPtr(OwnerSelectElement()))
         {
           select->OptionSelectionStateChanged(*this, value.has_value());
-          FormControlAlgorithms::UpdateDescendantSelectedContents(*select);
+          html::FormControlAlgorithms::UpdateDescendantSelectedContents(*select);
         }
       }
     }
@@ -566,7 +563,7 @@ namespace krys::boo::html
       }
       if (auto *root = UserAgentShadowRoot())
       {
-        (void)_labelElement->TextContent(dom::DOMString(value.value_or(dom::DOMStringView())));
+        (void)_labelElement->TextContent(DOMString(value.value_or(DOMStringView())));
         dom::SlotAlgorithms::AssignSlottablesForTree(*root);
       }
       if (RefPtr<HTMLSelectElement> select = ShareRefPtr(OwnerSelectElement()))
@@ -599,10 +596,10 @@ namespace krys::boo::html
 #pragma endregion
 
   // https://html.spec.whatwg.org/#get-html-aware-text-content
-  dom::DOMString HTMLOptionElement::CollectOptionInnerText() const noexcept
+  DOMString HTMLOptionElement::CollectOptionInnerText() const noexcept
   {
     // 1. Let text be the empty string.
-    dom::DOMString text;
+    DOMString text;
 
     // 2. For each descendant descendant of element in tree order:
     // 2a. If descendant is a script or SVG script element, then continue skipping all descendants of
@@ -615,7 +612,7 @@ namespace krys::boo::html
                                                    : dom::TreeQueries::Next(*node, this))
     {
       // 2b. If descendant is a Text node, then set text to the concatenation of text and descendant's data.
-      if (auto *textNode = DynamicDowncast<dom::Text>(*node))
+      if (auto *textNode = DynamicDowncast<boo::Text>(*node))
       {
         text += textNode->Data();
       }
@@ -623,19 +620,19 @@ namespace krys::boo::html
     return text;
   }
 
-  dom::DOMString HTMLOptionElement::CollectOptionInnerTextCollapsingWhitespace() const noexcept
+  DOMString HTMLOptionElement::CollectOptionInnerTextCollapsingWhitespace() const noexcept
   {
     // 3. Return the result of strip and collapse ASCII whitespace given text.
     return infra::StringAlgorithms::StripAndCollapseASCIIWhitespace(CollectOptionInnerText());
   }
 
   // https://html.spec.whatwg.org/#concept-option-label
-  dom::DOMString HTMLOptionElement::OptionLabel() const noexcept
+  DOMString HTMLOptionElement::OptionLabel() const noexcept
   {
     // 1. If option has a label attribute whose value is not the empty string, then return that value.
     if (auto label = GetAttribute(u8"label"); label && !label->empty())
     {
-      return dom::DOMString(*label);
+      return DOMString(*label);
     }
 
     // 2. Return the result of get HTML-aware text content given option and includeAltText.

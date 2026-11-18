@@ -35,22 +35,22 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSVariableReferenceValue.hpp"
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   namespace
   {
     /// @brief Whether @p tokens, just after a `var(` token, start a variable reference this can reify: a
     /// custom property name (after whitespace), then a comma or the closing parenthesis.
-    KRYS_NODISCARD bool StartsReifiableVariableReference(TokenRange tokens) noexcept
+    KRYS_NODISCARD bool StartsReifiableVariableReference(css::TokenRange tokens) noexcept
     {
       tokens.DiscardWhitespace();
       const auto &identifier = tokens.ConsumeIncludingWhitespace();
-      if (identifier.Type() != TokenType::Ident || !identifier.IdentCodePoints().starts_with(u8"--"))
+      if (identifier.Type() != css::TokenType::Ident || !identifier.IdentCodePoints().starts_with(u8"--"))
       {
         return false;
       }
       auto next = tokens.Peek().Type();
-      return next == TokenType::Comma || next == TokenType::CloseParen;
+      return next == css::TokenType::Comma || next == css::TokenType::CloseParen;
     }
   }
 
@@ -59,7 +59,7 @@ namespace krys::boo::css
     return AdoptRef(*new CSSUnparsedValue(krys::move(segments)));
   }
 
-  Ref<CSSUnparsedValue> CSSUnparsedValue::Create(TokenRange tokens) noexcept
+  Ref<CSSUnparsedValue> CSSUnparsedValue::Create(css::TokenRange tokens) noexcept
   {
     StringBuilder builder;
     // The segments of the value, then of each variable reference's fallback being reified.
@@ -89,13 +89,13 @@ namespace krys::boo::css
     while (!tokens.IsAtEnd())
     {
       const auto &token = tokens.Consume();
-      if (token.Type() == TokenType::Function && token.FunctionId() == ValueId::Var
+      if (token.Type() == css::TokenType::Function && token.FunctionId() == css::ValueId::Var
           && StartsReifiableVariableReference(tokens))
       {
         flushBuilder();
         tokens.DiscardWhitespace();
         CSSOMString variable(tokens.ConsumeIncludingWhitespace().IdentCodePoints());
-        if (tokens.Consume().Type() == TokenType::Comma)
+        if (tokens.Consume().Type() == css::TokenType::Comma)
         {
           // The fallback follows, up to the matching parenthesis.
           identifiers.emplace_back(krys::move(variable));
@@ -108,12 +108,12 @@ namespace krys::boo::css
           segmentStack.back().emplace_back(RefPtr<CSSVariableReferenceValue>(reference.ReleaseValue()));
         }
       }
-      else if (token.Type() == TokenType::Function || token.Type() == TokenType::OpenParen)
+      else if (token.Type() == css::TokenType::Function || token.Type() == css::TokenType::OpenParen)
       {
         token.Serialise(builder);
         identifiers.emplace_back();
       }
-      else if (token.Type() == TokenType::CloseParen && !identifiers.empty())
+      else if (token.Type() == css::TokenType::CloseParen && !identifiers.empty())
       {
         auto identifier = krys::move(identifiers.back());
         identifiers.pop_back();
@@ -196,11 +196,11 @@ namespace krys::boo::css
     return CSSUnparsedSegment {_segments[index]};
   }
 
-  RefPtr<Value> CSSUnparsedValue::ToCSSValue() const noexcept
+  RefPtr<css::Value> CSSUnparsedValue::ToCSSValue() const noexcept
   {
-    InputStream input {ToString()};
-    Tokenizer tokenizer(input);
+    css::InputStream input {ToString()};
+    css::Tokenizer tokenizer(input);
     std::ignore = tokenizer.PumpTokenizer();
-    return VariableReferenceValue::Create(tokenizer.Tokens(), StrictParserContext());
+    return css::VariableReferenceValue::Create(tokenizer.Tokens(), css::StrictParserContext());
   }
 }

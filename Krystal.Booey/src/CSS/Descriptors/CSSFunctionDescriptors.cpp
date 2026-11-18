@@ -27,9 +27,9 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSFunctionDeclarations.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSFunctionDescriptors::CSSFunctionDescriptors(MutableStyleProperties &propertySet,
+  CSSFunctionDescriptors::CSSFunctionDescriptors(css::MutableStyleProperties &propertySet,
                                                  CSSFunctionDeclarations &parentRule) noexcept
       : PropertySetCSSDescriptors(propertySet, parentRule)
   {
@@ -37,15 +37,15 @@ namespace krys::boo::css
 
   CSSFunctionDescriptors::~CSSFunctionDescriptors() noexcept = default;
 
-  Ref<CSSFunctionDescriptors> CSSFunctionDescriptors::Create(MutableStyleProperties &propertySet,
+  Ref<CSSFunctionDescriptors> CSSFunctionDescriptors::Create(css::MutableStyleProperties &propertySet,
                                                              CSSFunctionDeclarations &parentRule) noexcept
   {
     return AdoptRef(*new CSSFunctionDescriptors(propertySet, parentRule));
   }
 
-  RuleType CSSFunctionDescriptors::GetRuleType() const noexcept
+  css::RuleType CSSFunctionDescriptors::GetRuleType() const noexcept
   {
-    return RuleType::FunctionDeclarations;
+    return css::RuleType::FunctionDeclarations;
   }
 
 #pragma region Descriptors
@@ -53,12 +53,12 @@ namespace krys::boo::css
   // @function 'result'
   CSSOMString CSSFunctionDescriptors::Result() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::Result);
+    return GetPropertyValueInternal(css::PropertyId::Result);
   }
 
   dom::ExceptionOr<void> CSSFunctionDescriptors::SetResult(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Result, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::Result, value, css::IsImportant::No);
   }
 
 #pragma endregion

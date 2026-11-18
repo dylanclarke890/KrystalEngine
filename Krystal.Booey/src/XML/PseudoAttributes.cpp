@@ -24,10 +24,9 @@ namespace krys::boo::xml
     /// @brief Reads a character reference (`&#38;`, `&#x26;`) or a predefined entity reference (`&amp;`) at
     /// the start of @p rest, appending what it represents to @p value; false if there's neither, or the
     /// character isn't legal.
-    KRYS_NODISCARD bool ConsumePseudoAttributeReference(dom::DOMStringView &rest,
-                                                        dom::DOMString &value) noexcept
+    KRYS_NODISCARD bool ConsumePseudoAttributeReference(DOMStringView &rest, DOMString &value) noexcept
     {
-      constexpr static std::pair<dom::DOMStringView, char8> PredefinedEntities[] {
+      constexpr static std::pair<DOMStringView, char8> PredefinedEntities[] {
         {u8"&amp;", u8'&'}, {u8"&lt;", u8'<'}, {u8"&gt;", u8'>'}, {u8"&quot;", u8'"'}, {u8"&apos;", u8'\''}};
       for (auto [entity, character] : PredefinedEntities)
       {
@@ -74,7 +73,7 @@ namespace krys::boo::xml
     }
   }
 
-  Maybe<List<PseudoAttribute>> ParsePseudoAttributes(dom::DOMStringView string) noexcept
+  Maybe<List<PseudoAttribute>> ParsePseudoAttributes(DOMStringView string) noexcept
   {
     // PseudoAtts ::= PseudoAtt? (S PseudoAtt)* S?
     List<PseudoAttribute> result;
@@ -100,7 +99,7 @@ namespace krys::boo::xml
       // PseudoAtt ::= Name S? "=" S? PseudoAttValue
       auto nameEnd =
         std::ranges::find_if(rest, [](char8 ch) { return IsPseudoAttributeSpace(ch) || ch == u8'='; });
-      dom::DOMStringView name(rest.begin(), nameEnd);
+      DOMStringView name(rest.begin(), nameEnd);
       if (!dom::NameValidation::IsValidXMLName(name))
       {
         return null;
@@ -129,7 +128,7 @@ namespace krys::boo::xml
       }
       auto quote = rest.front();
       rest.remove_prefix(1);
-      dom::DOMString value;
+      DOMString value;
       while (true)
       {
         if (rest.empty() || rest.front() == u8'<')
@@ -159,7 +158,7 @@ namespace krys::boo::xml
       {
         return null;
       }
-      result.push_back({dom::DOMString(name), krys::move(value)});
+      result.push_back({DOMString(name), krys::move(value)});
     }
 
     return result;

@@ -25,9 +25,9 @@
 
 #include "Krystal.Booey/SVG/Elements/SVGUnknownElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGUnknownElement::SVGUnknownElement(dom::Document &document) noexcept
+  SVGUnknownElement::SVGUnknownElement(Document &document) noexcept
       : SVGElement(document, SVGElementInterface::Unknown, SVGElementFlags::None,
                    dom::NodeFlags::IsUnknownElement)
   {

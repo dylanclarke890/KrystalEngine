@@ -67,7 +67,7 @@ namespace krys::boo::svg::tests
 
     // The owner marks the property dirty; synchronising gives the attribute's new value once.
     length->SetDirty();
-    CHECK(length->Synchronize() == dom::DOMString(u8"2mm"));
+    CHECK(length->Synchronize() == DOMString(u8"2mm"));
     CHECK_FALSE(length->Synchronize());
 
     auto readOnly = SVGLength::Create(&owner, SVGPropertyAccess::ReadOnly);

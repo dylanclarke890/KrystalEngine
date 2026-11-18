@@ -56,7 +56,7 @@ namespace krys::boo::html
     /// @brief The list of suggestions, while it's shown.
     RefPtr<DataListSuggestionPicker> _suggestionPicker;
     /// @brief The suggestions for the text they were found for.
-    Maybe<Pair<dom::DOMString, List<DataListSuggestion>>> _cachedSuggestions;
+    Maybe<Pair<DOMString, List<DataListSuggestion>>> _cachedSuggestions;
 
   public:
     ~TextFieldInputType() noexcept override;
@@ -66,7 +66,7 @@ namespace krys::boo::html
       return true;
     }
 
-    KRYS_NODISCARD bool ValueMissing(dom::DOMStringView value) const noexcept final;
+    KRYS_NODISCARD bool ValueMissing(DOMStringView value) const noexcept final;
 
     void DataListMayHaveChanged() noexcept final;
 
@@ -102,7 +102,7 @@ namespace krys::boo::html
 
     void RemoveShadowSubtree() noexcept override;
 
-    void AttributeChanged(const dom::DOMStringAtom &name) noexcept override;
+    void AttributeChanged(const DOMStringAtom &name) noexcept override;
 
     void DisabledStateChanged() noexcept final;
 
@@ -112,19 +112,18 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool ShouldUseInputMethod() const noexcept override;
 
-    void HandleFocusEvent(dom::Node *oldFocusedNode) noexcept final;
+    void HandleFocusEvent(Node *oldFocusedNode) noexcept final;
 
     void HandleBlurEvent() noexcept final;
 
-    void SetValue(dom::DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,
+    void SetValue(DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,
                   TextControlSetValueSelection selection) noexcept override;
 
     void UpdateInnerTextValue() noexcept final;
 
-    KRYS_NODISCARD dom::DOMString SanitizeValue(dom::DOMStringView proposedValue) const noexcept override;
+    KRYS_NODISCARD DOMString SanitizeValue(DOMStringView proposedValue) const noexcept override;
 
-    KRYS_NODISCARD virtual dom::DOMString
-      ConvertFromVisibleValue(dom::DOMStringView visibleValue) const noexcept;
+    KRYS_NODISCARD virtual DOMString ConvertFromVisibleValue(DOMStringView visibleValue) const noexcept;
 
     virtual void DidSetValueByUserEdit() noexcept;
 

@@ -36,7 +36,7 @@ namespace krys::boo::css
   {
   }
 
-  SelectorParserContext::SelectorParserContext(const dom::Document &document) noexcept
+  SelectorParserContext::SelectorParserContext(const Document &document) noexcept
       : Mode(document.InQuirksMode() ? ParserMode::HTMLQuirks : ParserMode::HTMLStandard),
         thumbAndTrackPseudoElementsEnabled(document.GetSettings().ThumbAndTrackPseudoElementsEnabled)
   {

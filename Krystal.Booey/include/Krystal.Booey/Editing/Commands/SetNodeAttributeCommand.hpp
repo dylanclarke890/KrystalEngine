@@ -29,29 +29,24 @@
 #include "Krystal.Booey/Editing/Commands/EditCommand.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::dom
-{
-  class Element;
-}
-
 namespace krys::boo
 {
+  class Element;
+
   /// @brief Sets an attribute of an element, or removes it when the value is null.
   class SetNodeAttributeCommand final : public SimpleEditCommand
   {
   private:
-    const Ref<dom::Element> _element;
-    dom::DOMStringAtom _attribute;
-    Maybe<dom::DOMString> _value;
-    Maybe<dom::DOMString> _oldValue;
+    const Ref<Element> _element;
+    DOMStringAtom _attribute;
+    Maybe<DOMString> _value;
+    Maybe<DOMString> _oldValue;
 
   public:
-    KRYS_NODISCARD static Ref<SetNodeAttributeCommand> Create(dom::Element &element,
-                                                              const dom::DOMStringAtom &attribute,
-                                                              Maybe<dom::DOMString> value) noexcept;
+    KRYS_NODISCARD static Ref<SetNodeAttributeCommand>
+      Create(Element &element, const DOMStringAtom &attribute, Maybe<DOMString> value) noexcept;
 
-    SetNodeAttributeCommand(dom::Element &element, dom::DOMStringAtom attribute,
-                            Maybe<dom::DOMString> value) noexcept;
+    SetNodeAttributeCommand(Element &element, DOMStringAtom attribute, Maybe<DOMString> value) noexcept;
 
   private:
     void DoApply() noexcept override;

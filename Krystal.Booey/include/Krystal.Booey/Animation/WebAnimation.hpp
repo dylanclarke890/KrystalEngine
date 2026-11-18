@@ -40,7 +40,7 @@
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -129,7 +129,7 @@ namespace krys::boo
     RefPtr<css::Value> _specifiedRangeStart;
     RefPtr<css::Value> _specifiedRangeEnd;
     double _playbackRate {1};
-    dom::DOMString _id;
+    DOMString _id;
     int32 _suspendCount {0};
     bool _isSuspended {false};
     bool _finishNotificationStepsMicrotaskPending {false};
@@ -141,22 +141,22 @@ namespace krys::boo
     TimeToRunPendingTask _timeToRunPendingPauseTask {TimeToRunPendingTask::NotScheduled};
     ReplaceState _replaceState {ReplaceState::Active};
     uint64 _globalPosition {0};
-    WeakPtr<dom::Document> _document;
+    WeakPtr<Document> _document;
     style::SingleAnimationRange _timelineRange {
       .Start = {css::keywords::Normal {}},
       .End = {css::keywords::Normal {}},
     };
 
   protected:
-    explicit WebAnimation(dom::Document &document) noexcept;
+    explicit WebAnimation(Document &document) noexcept;
 
   public:
     ~WebAnimation() noexcept override;
 
     /// @brief An animation of @p effect on @p document's default timeline.
-    KRYS_NODISCARD static Ref<WebAnimation> Create(dom::Document &document, AnimationEffect *effect) noexcept;
+    KRYS_NODISCARD static Ref<WebAnimation> Create(Document &document, AnimationEffect *effect) noexcept;
 
-    KRYS_NODISCARD static Ref<WebAnimation> Create(dom::Document &document, AnimationEffect *effect,
+    KRYS_NODISCARD static Ref<WebAnimation> Create(Document &document, AnimationEffect *effect,
                                                    AnimationTimeline *timeline) noexcept;
 
     /// @brief Every animation that exists.
@@ -164,7 +164,7 @@ namespace krys::boo
 
     /// @brief Stops every animation of a document that's going away: they lose their listeners and effects,
     /// and with them what those hold on to, even if something still holds the animation.
-    static void StopAnimationsOfDocument(const dom::Document &document) noexcept;
+    static void StopAnimationsOfDocument(const Document &document) noexcept;
 
     KRYS_NODISCARD virtual bool IsStyleOriginatedAnimation() const noexcept
     {
@@ -184,12 +184,12 @@ namespace krys::boo
     KRYS_NODISCARD bool IsSkippedContentAnimation() const noexcept;
 
     /// @see https://drafts.csswg.org/web-animations-1/#dom-animation-id
-    KRYS_NODISCARD const dom::DOMString &Id() const noexcept
+    KRYS_NODISCARD const DOMString &Id() const noexcept
     {
       return _id;
     }
 
-    void SetId(dom::DOMString id) noexcept;
+    void SetId(DOMString id) noexcept;
 
     KRYS_NODISCARD AnimationEffect *BindingsEffect() const noexcept
     {
@@ -473,7 +473,7 @@ namespace krys::boo
     /// @brief Disassociates the animation from its effect and timeline.
     void Remove() noexcept;
 
-    void EnqueueAnimationPlaybackEvent(const dom::DOMStringAtom &type, Maybe<WebAnimationTime> currentTime,
+    void EnqueueAnimationPlaybackEvent(const DOMStringAtom &type, Maybe<WebAnimationTime> currentTime,
                                        Maybe<WebAnimationTime> scheduledTime) noexcept;
 
     /// @brief The animation's position in the global animation list, or zero if it has none.

@@ -21,7 +21,7 @@ namespace krys::boo::svg::tests
     CHECK(length.ValueAsString() == u8"0");
     CHECK(length.IsZero());
 
-    auto check = [&](dom::DOMStringView string, SVGLengthType type, dom::DOMStringView serialised)
+    auto check = [&](DOMStringView string, SVGLengthType type, DOMStringView serialised)
     {
       INFO(std::string(string.begin(), string.end()));
       REQUIRE_FALSE(length.SetValueAsString(string).HasException());
@@ -104,7 +104,7 @@ namespace krys::boo::svg::tests
                                        SVGLengthNegativeValuesMode::Forbid, u8"100%");
     CHECK(error == SVGParsingError::ForbiddenNegativeValue);
     CHECK(length.ValueAsString() == u8"100%");
-    length = SVGLengthValue::Construct(SVGLengthMode::Width, dom::DOMStringView {}, error,
+    length = SVGLengthValue::Construct(SVGLengthMode::Width, DOMStringView {}, error,
                                        SVGLengthNegativeValuesMode::Allow, u8"100%");
     CHECK(length.ValueAsString() == u8"100%");
     length = SVGLengthValue::Construct(SVGLengthMode::Width, u8"5", error, SVGLengthNegativeValuesMode::Allow,

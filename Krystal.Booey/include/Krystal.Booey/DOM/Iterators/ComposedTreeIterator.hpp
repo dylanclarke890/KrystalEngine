@@ -88,7 +88,7 @@ namespace krys::boo::dom
     {
       krys_debug_assert(!Is<ShadowRoot>(root));
 
-      if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(root))
+      if (auto *slot = DynamicDowncast<HTMLSlotElement>(root))
       {
         if (auto *assignedNodes = slot->AssignedNodes())
         {
@@ -297,7 +297,7 @@ namespace krys::boo::dom
     {
       krys_debug_assert(_contextStack.size() > 1 || _rootIsInShadowTree);
 
-      if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(Current()))
+      if (auto *slot = DynamicDowncast<HTMLSlotElement>(Current()))
       {
         if (auto *assignedNodes = slot->AssignedNodes())
         {
@@ -322,7 +322,7 @@ namespace krys::boo::dom
       while (GetContext().Iterator == GetContext().End && _contextStack.size() > 1)
       {
         _contextStack.pop_back();
-        if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(Current()); slot && AdvanceInSlot(1, *slot))
+        if (auto *slot = DynamicDowncast<HTMLSlotElement>(Current()); slot && AdvanceInSlot(1, *slot))
         {
           return;
         }
@@ -334,7 +334,7 @@ namespace krys::boo::dom
       }
     }
 
-    bool AdvanceInSlot(int32 direction, const html::HTMLSlotElement &slot) noexcept
+    bool AdvanceInSlot(int32 direction, const HTMLSlotElement &slot) noexcept
     {
       krys_debug_assert(GetContext().SlotNodeIndex != NotFound);
 
@@ -359,14 +359,13 @@ namespace krys::boo::dom
 
       _contextStack.pop_back();
 
-      if (!AdvanceInSlot(direction, Downcast<html::HTMLSlotElement>(Current())))
+      if (!AdvanceInSlot(direction, Downcast<HTMLSlotElement>(Current())))
       {
         *this = {};
       }
     }
 
-    KRYS_NODISCARD static size_t IndexOfAssignedNode(const html::HTMLSlotElement &slot,
-                                                     const Node &node) noexcept
+    KRYS_NODISCARD static size_t IndexOfAssignedNode(const HTMLSlotElement &slot, const Node &node) noexcept
     {
       auto &assignedNodes = *slot.AssignedNodes();
       for (size_t i = 0; i < assignedNodes.size(); ++i)

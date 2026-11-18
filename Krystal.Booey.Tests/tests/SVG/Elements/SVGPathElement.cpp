@@ -14,16 +14,16 @@ namespace krys::boo::svg::tests
 
   namespace
   {
-    KRYS_NODISCARD SVGPathElement &PathById(dom::Document &document, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD SVGPathElement &PathById(Document &document, DOMStringView id) noexcept
     {
       auto element = document.GetElementById(id);
       krys_assert(element);
       return Downcast<SVGPathElement>(Downcast<SVGElement>(*element));
     }
 
-    KRYS_NODISCARD dom::DOMString AsString(const SVGPathByteStream &stream) noexcept
+    KRYS_NODISCARD DOMString AsString(const SVGPathByteStream &stream) noexcept
     {
-      dom::DOMString result;
+      DOMString result;
       (void)BuildStringFromByteStream(stream, result, PathParsingMode::UnalteredParsing);
       return result;
     }

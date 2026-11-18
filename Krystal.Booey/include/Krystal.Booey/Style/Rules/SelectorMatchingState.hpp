@@ -34,8 +34,8 @@
 
 namespace krys::boo::style
 {
-  using HasPseudoClassCacheKey = Pair<const dom::Element *, const css::Selector *>;
-  using HasPseudoClassFilterKey = Pair<const dom::Element *, uint8>;
+  using HasPseudoClassCacheKey = Pair<const Element *, const css::Selector *>;
+  using HasPseudoClassFilterKey = Pair<const Element *, uint8>;
 
   enum class HasPseudoClassMatch : uint8
   {
@@ -66,13 +66,13 @@ namespace krys::boo::style
   };
 
   KRYS_NODISCARD inline HasPseudoClassCacheKey
-    MakeHasPseudoClassCacheKey(const dom::Element &element, const css::Selector &selector) noexcept
+    MakeHasPseudoClassCacheKey(const Element &element, const css::Selector &selector) noexcept
   {
     return {&element, &selector};
   }
 
   KRYS_NODISCARD inline HasPseudoClassFilterKey
-    MakeHasPseudoClassFilterKey(const dom::Element &element, HasSelectorFilter::Type type) noexcept
+    MakeHasPseudoClassFilterKey(const Element &element, HasSelectorFilter::Type type) noexcept
   {
     return {&element, static_cast<uint8>(type)};
   }

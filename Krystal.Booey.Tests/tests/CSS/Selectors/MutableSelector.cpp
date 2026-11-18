@@ -67,7 +67,7 @@ namespace krys::boo::css::tests
 
     // A tag is put at the start of the compound.
     auto compound = B::Compound(B::Class(u8"x"), B::Id(u8"y"));
-    compound->AppendTagInComplexSelector(dom::QualifiedName(dom::StarAtom(), null, u8"div"));
+    compound->AppendTagInComplexSelector(QualifiedName(dom::StarAtom(), null, u8"div"));
     CHECK(compound->Match() == SelectorMatch::Type);
     CHECK(B::List(krys::move(compound)).SelectorsText() == u8"div.x#y");
 

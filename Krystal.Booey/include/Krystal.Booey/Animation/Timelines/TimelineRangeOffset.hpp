@@ -9,8 +9,8 @@ namespace krys::boo
   /// @see https://drafts.csswg.org/scroll-animations-1/#dictdef-timelinerangeoffset
   struct TimelineRangeOffset
   {
-    dom::DOMString RangeName;
-    RefPtr<css::CSSNumericValue> Offset;
+    DOMString RangeName;
+    RefPtr<CSSNumericValue> Offset;
 
     KRYS_NODISCARD bool operator==(const TimelineRangeOffset &) const noexcept = default;
   };

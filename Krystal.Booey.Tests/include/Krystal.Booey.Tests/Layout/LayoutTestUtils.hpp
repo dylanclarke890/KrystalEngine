@@ -33,5 +33,5 @@ namespace krys::boo::layout::tests
 
   /// @brief Builds the layout tree of the block flow with id @p id and returns its root box.
   KRYS_NODISCARD const ElementBox &RootBoxOf(style::tests::ResolverFixture &fixture,
-                                             dom::DOMStringView id) noexcept;
+                                             DOMStringView id) noexcept;
 }

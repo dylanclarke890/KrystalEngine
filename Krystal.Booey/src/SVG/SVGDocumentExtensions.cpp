@@ -30,18 +30,18 @@
 #include "Krystal.Core/Types/List.hpp"
 #include <algorithm>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD bool AnimationsPausedForDocument(dom::Document &document) noexcept
+    KRYS_NODISCARD bool AnimationsPausedForDocument(Document &document) noexcept
     {
       auto *page = document.GetPage();
       return !page || !page->IsVisible() || !page->ImageAnimationEnabled();
     }
   }
 
-  SVGDocumentExtensions::SVGDocumentExtensions(dom::Document &document) noexcept
+  SVGDocumentExtensions::SVGDocumentExtensions(Document &document) noexcept
       : _document(CreateWeakPtr(&document)), _resourcesCache(CreateUnique<SVGResourcesCache>()),
         _areAnimationsPaused(AnimationsPausedForDocument(document))
   {

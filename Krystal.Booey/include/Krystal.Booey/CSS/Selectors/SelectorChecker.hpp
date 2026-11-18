@@ -39,7 +39,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class Document;
@@ -120,8 +120,8 @@ namespace krys::boo::css
 
     public:
       List<CSSOMStringAtom> ClassList;
-      RefPtr<const dom::ContainerNode> Scope;
-      const dom::Element *HasScope {nullptr};
+      RefPtr<const ContainerNode> Scope;
+      const Element *HasScope {nullptr};
       bool MatchesAllHasScopes {false};
       style::ScopeOrdinal StyleScopeOrdinal {style::ScopeOrdinal::Element};
       style::SelectorMatchingState *SelectorMatchingState {nullptr};
@@ -154,18 +154,18 @@ namespace krys::boo::css
     bool _documentIsHTML;
 
   public:
-    explicit SelectorChecker(const dom::Document &document) noexcept;
+    explicit SelectorChecker(const Document &document) noexcept;
 
-    KRYS_NODISCARD bool Match(const Selector &selector, const dom::Element &element,
+    KRYS_NODISCARD bool Match(const Selector &selector, const Element &element,
                               CheckingContext &checkingContext) const noexcept;
 
-    KRYS_NODISCARD bool MatchHostPseudoClass(const Selector &selector, const dom::Element &element,
+    KRYS_NODISCARD bool MatchHostPseudoClass(const Selector &selector, const Element &element,
                                              CheckingContext &checkingContext) const noexcept;
 
     KRYS_NODISCARD static bool IsCommonPseudoClassSelector(const Selector *selector) noexcept;
 
-    KRYS_NODISCARD static bool AttributeSelectorMatches(const dom::Element &element,
-                                                        const dom::QualifiedName &attributeName,
+    KRYS_NODISCARD static bool AttributeSelectorMatches(const Element &element,
+                                                        const QualifiedName &attributeName,
                                                         const CSSOMStringAtom &attributeValue,
                                                         const Selector &selector) noexcept;
 
@@ -178,10 +178,10 @@ namespace krys::boo::css
                                  MatchType &matchType) const noexcept;
 
     KRYS_NODISCARD bool MatchSelectorList(CheckingContext &checkingContext, const LocalContext &context,
-                                          const dom::Element &element,
+                                          const Element &element,
                                           const SelectorList &selectorList) const noexcept;
 
-    KRYS_NODISCARD bool MatchHasPseudoClass(CheckingContext &checkingContext, const dom::Element &element,
+    KRYS_NODISCARD bool MatchHasPseudoClass(CheckingContext &checkingContext, const Element &element,
                                             const Selector &hasSelector) const noexcept;
   };
 

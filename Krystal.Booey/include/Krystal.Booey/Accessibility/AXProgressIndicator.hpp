@@ -22,14 +22,11 @@
 
 #include "Krystal.Booey/Accessibility/AXRenderObject.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLMeterElement;
   class HTMLProgressElement;
-}
 
-namespace krys::boo
-{
   /// @brief A `progress` or `meter` element: a progress indicator or meter whose range is the element's.
   class AXProgressIndicator final : public AXRenderObject
   {
@@ -37,7 +34,7 @@ namespace krys::boo
     KRYS_NODISCARD static Ref<AXProgressIndicator> Create(AXId id, RenderObject &renderer,
                                                           AXObjectCache &cache) noexcept;
 
-    KRYS_NODISCARD static Ref<AXProgressIndicator> Create(AXId id, dom::Element &element,
+    KRYS_NODISCARD static Ref<AXProgressIndicator> Create(AXId id, Element &element,
                                                           AXObjectCache &cache) noexcept;
 
     KRYS_NODISCARD bool IsIndeterminate() const noexcept override;
@@ -48,10 +45,10 @@ namespace krys::boo
 
     KRYS_NODISCARD float MinValueForRange() const noexcept override;
 
-    KRYS_NODISCARD dom::DOMString ValueDescription() const noexcept override;
+    KRYS_NODISCARD DOMString ValueDescription() const noexcept override;
 
   private:
-    AXProgressIndicator(AXId id, RenderObject *renderer, dom::Node *node, AXObjectCache &cache) noexcept;
+    AXProgressIndicator(AXId id, RenderObject *renderer, Node *node, AXObjectCache &cache) noexcept;
 
     KRYS_NODISCARD AXRole DetermineAccessibilityRole() noexcept override;
 
@@ -60,8 +57,8 @@ namespace krys::boo
       return IsIgnoredByDefault();
     }
 
-    KRYS_NODISCARD html::HTMLProgressElement *ProgressElement() const noexcept;
+    KRYS_NODISCARD HTMLProgressElement *ProgressElement() const noexcept;
 
-    KRYS_NODISCARD html::HTMLMeterElement *MeterElement() const noexcept;
+    KRYS_NODISCARD HTMLMeterElement *MeterElement() const noexcept;
   };
 }

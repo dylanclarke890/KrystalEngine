@@ -88,18 +88,18 @@ namespace krys::boo::tests
 
     auto body = fixture.Document().Body();
     REQUIRE(body);
-    auto *pre = DynamicDowncast<html::HTMLElement>(body->FirstChild());
+    auto *pre = DynamicDowncast<HTMLElement>(body->FirstChild());
     REQUIRE(pre);
     CHECK(pre->LocalName() == u8"pre");
     CHECK(pre->TextContent() == u8"<b>bold</b>\n& more");
-    CHECK(fixture.Document().ContentType() == dom::DOMString(mimeType));
+    CHECK(fixture.Document().ContentType() == DOMString(mimeType));
   }
 
   TEST_CASE("A document loads on a later task, and commits", "[Loader][DocumentLoader]")
   {
     LoadFixture fixture;
     auto &loader = fixture.Frame().Loader();
-    RefPtr<dom::Document> initial = ShareRefPtr(&fixture.Document());
+    RefPtr<boo::Document> initial = ShareRefPtr(&fixture.Document());
     auto *initialWindow = initial->Window();
 
     fixture.LoadMarkup(u8"<!DOCTYPE html><p id=text>Hello</p>", u8"https://example.com/page.html");
@@ -160,7 +160,7 @@ namespace krys::boo::tests
 
     SECTION("a failure keeps the old document")
     {
-      RefPtr<dom::Document> before = ShareRefPtr(&fixture.Document());
+      RefPtr<boo::Document> before = ShareRefPtr(&fixture.Document());
       fixture.LoadURL(u8"https://example.com/missing.html");
       html::EventLoop::Current().RunUntilIdle();
       CHECK(&fixture.Document() == before.get());
@@ -175,7 +175,7 @@ namespace krys::boo::tests
     fixture.Strategy.Defer = true;
     fixture.Strategy.AddText(u8"https://example.com/a.html", u8"<p id=a>", u8"text/html");
     fixture.Strategy.AddText(u8"https://example.com/b.html", u8"<p id=b>", u8"text/html");
-    RefPtr<dom::Document> before = ShareRefPtr(&fixture.Document());
+    RefPtr<boo::Document> before = ShareRefPtr(&fixture.Document());
 
     SECTION("a stopped load's data is dropped")
     {
@@ -401,7 +401,7 @@ namespace krys::boo::tests
     LoadFixture fixture;
     fixture.LoadMarkup(u8"<!DOCTYPE html><body><p>First</p></body>", u8"https://example.com/first.html");
     html::EventLoop::Current().RunUntilIdle();
-    RefPtr<dom::Document> first = ShareRefPtr(&fixture.Document());
+    RefPtr<boo::Document> first = ShareRefPtr(&fixture.Document());
     auto *window = first->Window();
     fixture.Events.clear();
 
@@ -410,8 +410,8 @@ namespace krys::boo::tests
     auto tryToNavigate = [&]
     {
       fixture.Frame().Loader().ChangeLocation(url::URL(u8"https://example.com/elsewhere.html"),
-                                              dom::DOMStringAtom::Empty(), nullptr,
-                                              ReferrerPolicy::EmptyString, null);
+                                              DOMStringAtom::Empty(), nullptr, ReferrerPolicy::EmptyString,
+                                              null);
     };
     auto pageHide = window->AddEventListener<html::PageTransitionEvent>(u8"pagehide",
                                                                         [&](html::PageTransitionEvent &event)
@@ -430,7 +430,7 @@ namespace krys::boo::tests
                                              tryToNavigate();
                                            });
 
-    RefPtr<dom::Element> paragraph = first->QuerySelector(u8"p").ReleaseValue();
+    RefPtr<Element> paragraph = first->QuerySelector(u8"p").ReleaseValue();
     REQUIRE(paragraph);
     auto onDocument = first->AddEventListener(u8"click", [](dom::Event &) {});
     CHECK(first->VisibilityState() == html::DocumentVisibilityState::Visible);

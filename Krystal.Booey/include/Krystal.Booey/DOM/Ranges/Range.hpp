@@ -46,10 +46,13 @@ namespace krys::boo::dom
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::BoundaryPointComparator, 4u)
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class DocumentFragment;
+}
 
+namespace krys::boo::dom
+{
   /// @brief A live range, which follows changes to the tree. Its root is its start node's root.
   /// @see https://dom.spec.whatwg.org/#interface-range
   /// @see https://dom.spec.whatwg.org/#concept-live-range

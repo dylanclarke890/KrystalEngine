@@ -26,10 +26,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLPlugInElement.hpp"
 #include "Krystal.Booey/HTML/Forms/FormListedElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlobjectelement
-  class HTMLObjectElement : public HTMLPlugInElement, public FormListedElement
+  class HTMLObjectElement : public HTMLPlugInElement, public html::FormListedElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLObjectElement);
 
@@ -37,7 +37,7 @@ namespace krys::boo::html
     // FIXME: An object element using its fallback content is treated like a generic HTML element (it can
     // contain range end points), once there's fallback content.
 
-    HTMLObjectElement(dom::Document &document) noexcept;
+    HTMLObjectElement(Document &document) noexcept;
 
     ~HTMLObjectElement() noexcept override;
 
@@ -55,28 +55,28 @@ namespace krys::boo::html
     void Data(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-type
-    KRYS_NODISCARD dom::DOMString Type() const noexcept;
+    KRYS_NODISCARD DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-type
-    void Type(dom::DOMString value) noexcept;
+    void Type(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-name
-    KRYS_NODISCARD dom::DOMString Name() const noexcept override;
+    KRYS_NODISCARD DOMString Name() const noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-object-name
-    void Name(dom::DOMString value) noexcept;
+    void Name(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-width
-    KRYS_NODISCARD dom::DOMString Width() const noexcept;
+    KRYS_NODISCARD DOMString Width() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-width
-    void Width(dom::DOMString value) noexcept;
+    void Width(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-height
-    KRYS_NODISCARD dom::DOMString Height() const noexcept;
+    KRYS_NODISCARD DOMString Height() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-height
-    void Height(dom::DOMString value) noexcept;
+    void Height(DOMString value) noexcept;
 
     // (No `contentDocument`, `contentWindow` or `getSVGDocument()`: an object loads no nested document, as
     // subframes aren't planned; see OVERVIEW.md.)
@@ -105,22 +105,22 @@ namespace krys::boo::html
 #pragma region HTMLObjectElement Obsolete members - https://html.spec.whatwg.org/#HTMLObjectElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-object-align
-    KRYS_NODISCARD dom::DOMString Align() const noexcept;
+    KRYS_NODISCARD DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-align
-    void Align(dom::DOMString value) noexcept;
+    void Align(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-archive
-    KRYS_NODISCARD dom::DOMString Archive() const noexcept;
+    KRYS_NODISCARD DOMString Archive() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-archive
-    void Archive(dom::DOMString value) noexcept;
+    void Archive(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-code
-    KRYS_NODISCARD dom::DOMString Code() const noexcept;
+    KRYS_NODISCARD DOMString Code() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-code
-    void Code(dom::DOMString value) noexcept;
+    void Code(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-declare
     KRYS_NODISCARD bool Declare() const noexcept;
@@ -135,10 +135,10 @@ namespace krys::boo::html
     void HSpace(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-standby
-    KRYS_NODISCARD dom::DOMString Standby() const noexcept;
+    KRYS_NODISCARD DOMString Standby() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-standby
-    void Standby(dom::DOMString value) noexcept;
+    void Standby(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-vspace
     KRYS_NODISCARD uint32 VSpace() const noexcept;
@@ -147,28 +147,28 @@ namespace krys::boo::html
     void VSpace(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-codebase
-    KRYS_NODISCARD dom::DOMString CodeBase() const noexcept;
+    KRYS_NODISCARD DOMString CodeBase() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-codebase
-    void CodeBase(dom::DOMString value) noexcept;
+    void CodeBase(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-codetype
-    KRYS_NODISCARD dom::DOMString CodeType() const noexcept;
+    KRYS_NODISCARD DOMString CodeType() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-codetype
-    void CodeType(dom::DOMString value) noexcept;
+    void CodeType(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-usemap
-    KRYS_NODISCARD dom::DOMString UseMap() const noexcept;
+    KRYS_NODISCARD DOMString UseMap() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-usemap
-    void UseMap(dom::DOMString value) noexcept;
+    void UseMap(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-border
-    KRYS_NODISCARD dom::DOMString Border() const noexcept;
+    KRYS_NODISCARD DOMString Border() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-border
-    void Border(dom::DOMString value) noexcept;
+    void Border(DOMString value) noexcept;
 
 #pragma endregion
 
@@ -187,7 +187,7 @@ namespace krys::boo::html
       return true;
     }
 
-    bool AppendFormData(DOMFormData &formData) noexcept final;
+    bool AppendFormData(html::DOMFormData &formData) noexcept final;
 
     KRYS_NODISCARD HTMLElement &AsHTMLElement() noexcept final
     {
@@ -199,17 +199,17 @@ namespace krys::boo::html
       return *this;
     }
 
-    KRYS_NODISCARD FormAssociatedElement *AsFormAssociatedElement() noexcept final
+    KRYS_NODISCARD html::FormAssociatedElement *AsFormAssociatedElement() noexcept final
     {
       return this;
     }
 
-    KRYS_NODISCARD FormListedElement *AsFormListedElement() noexcept final
+    KRYS_NODISCARD html::FormListedElement *AsFormListedElement() noexcept final
     {
       return this;
     }
 
-    KRYS_NODISCARD ValidatedFormListedElement *AsValidatedFormListedElement() noexcept final
+    KRYS_NODISCARD html::ValidatedFormListedElement *AsValidatedFormListedElement() noexcept final
     {
       return nullptr;
     }
@@ -219,34 +219,32 @@ namespace krys::boo::html
 
     void OnPostConnection() noexcept override;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
-    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
-    void OnAdopt(dom::Document &oldDocument) noexcept override;
+    void OnAdopt(Document &oldDocument) noexcept override;
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLObjectElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLObjectElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLObjectElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLObjectElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLObjectElement();
   }

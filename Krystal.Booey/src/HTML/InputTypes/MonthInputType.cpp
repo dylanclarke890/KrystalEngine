@@ -46,9 +46,9 @@ namespace krys::boo::html
   {
     krys_debug_assert(Element());
     auto &element = *Element();
-    auto attribute = [&](dom::DOMStringAtom name)
+    auto attribute = [&](DOMStringAtom name)
     {
-      return element.GetAttribute(krys::move(name)).value_or(dom::DOMString());
+      return element.GetAttribute(krys::move(name)).value_or(DOMString());
     };
     const Decimal stepBase = FindStepBase(Decimal(0));
     const Decimal minimum =
@@ -61,7 +61,7 @@ namespace krys::boo::html
                      MonthInputTypeStepDescription);
   }
 
-  Maybe<DateComponents> MonthInputType::ParseToDateComponents(dom::DOMStringView source) const noexcept
+  Maybe<DateComponents> MonthInputType::ParseToDateComponents(DOMStringView source) const noexcept
   {
     return DateComponents::FromParsingMonth(source);
   }
@@ -84,7 +84,7 @@ namespace krys::boo::html
     return msec;
   }
 
-  dom::DOMString MonthInputType::SerializeWithMilliseconds(double value) const noexcept
+  DOMString MonthInputType::SerializeWithMilliseconds(double value) const noexcept
   {
     auto date = DateComponents::FromMillisecondsSinceEpochForMonth(value);
     if (!date)
@@ -107,7 +107,7 @@ namespace krys::boo::html
     return Decimal::FromDouble(months);
   }
 
-  Decimal MonthInputType::ParseToNumber(dom::DOMStringView src, const Decimal &defaultValue) const noexcept
+  Decimal MonthInputType::ParseToNumber(DOMStringView src, const Decimal &defaultValue) const noexcept
   {
     auto date = ParseToDateComponents(src);
     if (!date)
@@ -125,7 +125,7 @@ namespace krys::boo::html
       {DateTimeFormatValidationResults::HasYear, DateTimeFormatValidationResults::HasMonth});
   }
 
-  dom::DOMString MonthInputType::FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept
+  DOMString MonthInputType::FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept
   {
     if (!state.Year || !state.Month)
     {

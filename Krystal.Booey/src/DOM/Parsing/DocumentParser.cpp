@@ -27,7 +27,7 @@
 
 namespace krys::boo::dom
 {
-  DocumentParser::DocumentParser(dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
+  DocumentParser::DocumentParser(boo::Document &document) noexcept : _document(CreateWeakPtr(&document))
   {
   }
 

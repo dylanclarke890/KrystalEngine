@@ -36,12 +36,12 @@ namespace krys::boo::html
     /// @brief Whether @p c is one of the ABNF's `atext` characters, which make up the part before the `@`.
     KRYS_NODISCARD constexpr bool IsEmailLocalPartCharacter(char8_t c) noexcept
     {
-      return text::IsASCIIAlphanumeric(c) || dom::DOMStringView(u8".!#$%&'*+/=?^_`{|}~-").contains(c);
+      return text::IsASCIIAlphanumeric(c) || DOMStringView(u8".!#$%&'*+/=?^_`{|}~-").contains(c);
     }
 
     /// @brief Whether @p label is a domain label: 1 to 63 ASCII alphanumerics and hyphens, starting and
     /// ending with an alphanumeric.
-    KRYS_NODISCARD constexpr bool IsValidEmailLabel(dom::DOMStringView label) noexcept
+    KRYS_NODISCARD constexpr bool IsValidEmailLabel(DOMStringView label) noexcept
     {
       if (label.empty() || label.size() > 63 || !text::IsASCIIAlphanumeric(label.front())
           || !text::IsASCIIAlphanumeric(label.back()))
@@ -60,10 +60,10 @@ namespace krys::boo::html
 
     /// @brief Whether @p address is a [valid email
     /// address](https://html.spec.whatwg.org/#valid-e-mail-address).
-    KRYS_NODISCARD constexpr bool IsValidEmailAddress(dom::DOMStringView address) noexcept
+    KRYS_NODISCARD constexpr bool IsValidEmailAddress(DOMStringView address) noexcept
     {
       auto at = address.find(u8'@');
-      if (at == 0 || at == dom::DOMStringView::npos)
+      if (at == 0 || at == DOMStringView::npos)
       {
         return false;
       }
@@ -83,7 +83,7 @@ namespace krys::boo::html
         {
           return false;
         }
-        if (dot == dom::DOMStringView::npos)
+        if (dot == DOMStringView::npos)
         {
           return true;
         }
@@ -92,7 +92,7 @@ namespace krys::boo::html
     }
   }
 
-  bool EmailInputType::TypeMismatchFor(dom::DOMStringView value) const noexcept
+  bool EmailInputType::TypeMismatchFor(DOMStringView value) const noexcept
   {
     krys_debug_assert(Element());
     if (value.empty())
@@ -119,7 +119,7 @@ namespace krys::boo::html
     return TypeMismatchFor(Element()->Value());
   }
 
-  dom::DOMString EmailInputType::TypeMismatchText() const noexcept
+  DOMString EmailInputType::TypeMismatchText() const noexcept
   {
     krys_debug_assert(Element());
     return Element()->Multiple() ? ValidationMessageTypeMismatchForMultipleEmailText()
@@ -131,7 +131,7 @@ namespace krys::boo::html
     return false;
   }
 
-  void EmailInputType::AttributeChanged(const dom::DOMStringAtom &localName) noexcept
+  void EmailInputType::AttributeChanged(const DOMStringAtom &localName) noexcept
   {
     if (localName == u8"multiple")
     {
@@ -141,9 +141,9 @@ namespace krys::boo::html
     BaseTextInputType::AttributeChanged(localName);
   }
 
-  dom::DOMString EmailInputType::SanitizeValue(dom::DOMStringView proposedValue) const noexcept
+  DOMString EmailInputType::SanitizeValue(DOMStringView proposedValue) const noexcept
   {
-    dom::DOMString noLineBreakValue;
+    DOMString noLineBreakValue;
     for (char8 character : proposedValue)
     {
       if (!IsHTMLLineBreak(character))
@@ -155,10 +155,10 @@ namespace krys::boo::html
     krys_debug_assert(Element());
     if (!Element()->Multiple())
     {
-      return dom::DOMString(infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(noLineBreakValue));
+      return DOMString(infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(noLineBreakValue));
     }
 
-    dom::DOMString strippedValue;
+    DOMString strippedValue;
     bool first = true;
     for (const auto &address : infra::StringAlgorithms::StrictlySplit(noLineBreakValue, u8','))
     {

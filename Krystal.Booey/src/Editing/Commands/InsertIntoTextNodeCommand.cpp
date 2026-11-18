@@ -34,7 +34,7 @@
 
 namespace krys::boo
 {
-  Ref<InsertIntoTextNodeCommand> InsertIntoTextNodeCommand::Create(dom::Text &node, uint32 offset,
+  Ref<InsertIntoTextNodeCommand> InsertIntoTextNodeCommand::Create(Text &node, uint32 offset,
                                                                    utf8_stringview text,
                                                                    AllowPasswordEcho allowPasswordEcho,
                                                                    EditAction editingAction) noexcept
@@ -42,7 +42,7 @@ namespace krys::boo
     return CreateRef<InsertIntoTextNodeCommand>(node, offset, text, allowPasswordEcho, editingAction);
   }
 
-  InsertIntoTextNodeCommand::InsertIntoTextNodeCommand(dom::Text &node, uint32 offset, utf8_stringview text,
+  InsertIntoTextNodeCommand::InsertIntoTextNodeCommand(Text &node, uint32 offset, utf8_stringview text,
                                                        AllowPasswordEcho allowPasswordEcho,
                                                        EditAction editingAction) noexcept
       : SimpleEditCommand(node.NodeDocument(), editingAction), _node(ShareRef(node)), _offset(offset),

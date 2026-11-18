@@ -30,7 +30,7 @@ namespace krys::boo::dom
   class HTMLCollection;
 }
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLLegendElement;
 
@@ -45,7 +45,7 @@ namespace krys::boo::html
     WeakPtr<dom::HTMLCollection> _elements;
 
   public:
-    HTMLFieldSetElement(dom::Document &document) noexcept;
+    HTMLFieldSetElement(Document &document) noexcept;
 
     ~HTMLFieldSetElement() noexcept override;
 
@@ -58,15 +58,15 @@ namespace krys::boo::html
     void Disabled(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-fieldset-name
-    KRYS_NODISCARD dom::DOMString Name() const noexcept override;
+    KRYS_NODISCARD DOMString Name() const noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-fieldset-name
-    void Name(dom::DOMString value) noexcept;
+    void Name(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-fieldset-type
-    KRYS_NODISCARD static const dom::DOMStringAtom &Type() noexcept
+    KRYS_NODISCARD static const DOMStringAtom &Type() noexcept
     {
-      static const dom::DOMStringAtom type {u8"fieldset"};
+      static const DOMStringAtom type {u8"fieldset"};
       return type;
     }
 
@@ -94,7 +94,7 @@ namespace krys::boo::html
       return true;
     }
 
-    KRYS_NODISCARD dom::DOMString FormControlType() const noexcept final
+    KRYS_NODISCARD DOMString FormControlType() const noexcept final
     {
       return u8"fieldset";
     }
@@ -115,13 +115,13 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLFieldSetElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLFieldSetElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLFieldSetElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLFieldSetElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLFieldSetElement();
   }

@@ -886,60 +886,60 @@ namespace krys::boo::dom
     return it == std::ranges::end(children) ? nullptr : Downcast<Element>(&*it);
   }
 
-  const html::HTMLElement *TreeQueries::NextHTMLElementSibling(const Node &current) noexcept
+  const HTMLElement *TreeQueries::NextHTMLElementSibling(const Node &current) noexcept
   {
     auto siblings = ConstNextSiblingRange(current);
-    auto it = FirstOfType<html::HTMLElement>(siblings);
-    return it == std::ranges::end(siblings) ? nullptr : Downcast<html::HTMLElement>(&*it);
+    auto it = FirstOfType<HTMLElement>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<HTMLElement>(&*it);
   }
 
-  html::HTMLElement *TreeQueries::NextHTMLElementSibling(Node &current) noexcept
+  HTMLElement *TreeQueries::NextHTMLElementSibling(Node &current) noexcept
   {
     auto siblings = NextSiblingRange(current);
-    auto it = FirstOfType<html::HTMLElement>(siblings);
-    return it == std::ranges::end(siblings) ? nullptr : Downcast<html::HTMLElement>(&*it);
+    auto it = FirstOfType<HTMLElement>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<HTMLElement>(&*it);
   }
 
-  const html::HTMLElement *TreeQueries::PreviousHTMLElementSibling(const Node &current) noexcept
+  const HTMLElement *TreeQueries::PreviousHTMLElementSibling(const Node &current) noexcept
   {
     auto siblings = ConstPreviousSiblingRange(current);
-    auto it = FirstOfType<html::HTMLElement>(siblings);
-    return it == std::ranges::end(siblings) ? nullptr : Downcast<html::HTMLElement>(&*it);
+    auto it = FirstOfType<HTMLElement>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<HTMLElement>(&*it);
   }
 
-  html::HTMLElement *TreeQueries::PreviousHTMLElementSibling(Node &current) noexcept
+  HTMLElement *TreeQueries::PreviousHTMLElementSibling(Node &current) noexcept
   {
     auto siblings = PreviousSiblingRange(current);
-    auto it = FirstOfType<html::HTMLElement>(siblings);
-    return it == std::ranges::end(siblings) ? nullptr : Downcast<html::HTMLElement>(&*it);
+    auto it = FirstOfType<HTMLElement>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<HTMLElement>(&*it);
   }
 
-  const html::HTMLElement *TreeQueries::FirstHTMLElementChild(const ContainerNode &node) noexcept
+  const HTMLElement *TreeQueries::FirstHTMLElementChild(const ContainerNode &node) noexcept
   {
     auto children = ConstChildNodeRange(node);
-    auto it = FirstOfType<html::HTMLElement>(children);
-    return it == std::ranges::end(children) ? nullptr : Downcast<html::HTMLElement>(&*it);
+    auto it = FirstOfType<HTMLElement>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<HTMLElement>(&*it);
   }
 
-  html::HTMLElement *TreeQueries::FirstHTMLElementChild(ContainerNode &node) noexcept
+  HTMLElement *TreeQueries::FirstHTMLElementChild(ContainerNode &node) noexcept
   {
     auto children = ChildNodeRange(node);
-    auto it = FirstOfType<html::HTMLElement>(children);
-    return it == std::ranges::end(children) ? nullptr : Downcast<html::HTMLElement>(&*it);
+    auto it = FirstOfType<HTMLElement>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<HTMLElement>(&*it);
   }
 
-  const html::HTMLElement *TreeQueries::LastHTMLElementChild(const ContainerNode &node) noexcept
+  const HTMLElement *TreeQueries::LastHTMLElementChild(const ContainerNode &node) noexcept
   {
     auto children = ConstChildNodeRange(node);
-    auto it = LastOfType<html::HTMLElement>(children);
-    return it == std::ranges::end(children) ? nullptr : Downcast<html::HTMLElement>(&*it);
+    auto it = LastOfType<HTMLElement>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<HTMLElement>(&*it);
   }
 
-  html::HTMLElement *TreeQueries::LastHTMLElementChild(ContainerNode &node) noexcept
+  HTMLElement *TreeQueries::LastHTMLElementChild(ContainerNode &node) noexcept
   {
     auto children = ChildNodeRange(node);
-    auto it = LastOfType<html::HTMLElement>(children);
-    return it == std::ranges::end(children) ? nullptr : Downcast<html::HTMLElement>(&*it);
+    auto it = LastOfType<HTMLElement>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<HTMLElement>(&*it);
   }
 
 #pragma endregion

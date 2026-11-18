@@ -48,9 +48,9 @@ namespace krys::boo::html
     DataListButtonOwner *_owner {nullptr};
 
   public:
-    DataListButtonElement(dom::Document &document, DataListButtonOwner &owner) noexcept;
+    DataListButtonElement(Document &document, DataListButtonOwner &owner) noexcept;
 
-    KRYS_NODISCARD static Ref<DataListButtonElement> Create(dom::Document &document,
+    KRYS_NODISCARD static Ref<DataListButtonElement> Create(Document &document,
                                                             DataListButtonOwner &owner) noexcept;
 
     /// @brief The owner's going away.

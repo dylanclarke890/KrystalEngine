@@ -34,15 +34,18 @@ namespace krys::boo::css
   {
     class MediaQueryEvaluator;
   }
+}
 
+namespace krys::boo
+{
   /// @brief The object `matchMedia()` returns: the current result of a media query list, and `change` events
   /// whenever it changes.
   /// @see https://drafts.csswg.org/cssom-view/#the-mediaquerylist-interface
   class MediaQueryList final : public dom::EventTarget
   {
   private:
-    RefPtr<MediaQueryMatcher> _matcher;
-    const mq::MediaQueryList _mediaQueries;
+    RefPtr<css::MediaQueryMatcher> _matcher;
+    const css::mq::MediaQueryList _mediaQueries;
     // Indicates if the query has been evaluated after the last style selector change.
     uint32 _evaluationRound;
     // Used to know if the query has changed in the last style selector change.
@@ -50,13 +53,14 @@ namespace krys::boo::css
     bool _matches;
     bool _needsNotification {false};
 
-    MediaQueryList(MediaQueryMatcher &matcher, mq::MediaQueryList &&mediaQueries, bool matches) noexcept;
+    MediaQueryList(css::MediaQueryMatcher &matcher, css::mq::MediaQueryList &&mediaQueries,
+                   bool matches) noexcept;
 
   public:
     ~MediaQueryList() noexcept override;
 
     KRYS_NODISCARD static Ref<MediaQueryList>
-      Create(MediaQueryMatcher &matcher, mq::MediaQueryList &&mediaQueries, bool matches) noexcept;
+      Create(css::MediaQueryMatcher &matcher, css::mq::MediaQueryList &&mediaQueries, bool matches) noexcept;
 
     /// @see https://drafts.csswg.org/cssom-view/#dom-mediaquerylist-media
     KRYS_NODISCARD CSSOMString Media() const noexcept;
@@ -72,7 +76,8 @@ namespace krys::boo::css
     /// @see https://drafts.csswg.org/cssom-view/#dom-mediaquerylist-removelistener
     void RemoveListener(RefPtr<dom::EventListenerCallback> &&listener) noexcept;
 
-    void Evaluate(mq::MediaQueryEvaluator &evaluator, MediaQueryMatcher::EventMode eventMode) noexcept;
+    void Evaluate(css::mq::MediaQueryEvaluator &evaluator,
+                  css::MediaQueryMatcher::EventMode eventMode) noexcept;
 
     void DetachFromMatcher() noexcept;
 

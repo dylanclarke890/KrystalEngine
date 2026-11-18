@@ -18,7 +18,7 @@ namespace krys::boo::html
     constexpr std::array WindowEventHandlerNames {KRYS_WINDOW_EVENT_HANDLERS(KRYS_EVENT_HANDLER_NAME)};
 #undef KRYS_EVENT_HANDLER_NAME
 
-    KRYS_NODISCARD bool IsReflectedOnWindow(const dom::DOMStringAtom &name) noexcept
+    KRYS_NODISCARD bool IsReflectedOnWindow(const DOMStringAtom &name) noexcept
     {
       auto view = name.View();
       return std::ranges::find(WindowReflectingBodyElementEventHandlers, view)
@@ -28,12 +28,12 @@ namespace krys::boo::html
   }
 
   dom::EventTarget *EventHandlerAlgorithms::DetermineTarget(dom::EventTarget &eventTarget,
-                                                            dom::DOMStringAtom name) noexcept
+                                                            DOMStringAtom name) noexcept
   {
     // If eventTarget is not a body element or a frameset element, or name isn't the name of an attribute
     // of the WindowEventHandlers interface mixin or the window-reflecting body element event handler set,
     // then return eventTarget.
-    auto *node = DynamicDowncast<dom::Node>(eventTarget);
+    auto *node = DynamicDowncast<Node>(eventTarget);
     auto *element = node ? DynamicDowncast<HTMLElement>(*node) : nullptr;
     if (!element || !(Is<HTMLBodyElement>(*element) || Is<HTMLFrameSetElement>(*element))
         || !IsReflectedOnWindow(krys::move(name)))
@@ -52,14 +52,14 @@ namespace krys::boo::html
   }
 
   const EventHandlerCallback *EventHandlerAlgorithms::Get(const dom::EventTarget &eventTarget,
-                                                          const dom::DOMStringAtom &name) noexcept
+                                                          const DOMStringAtom &name) noexcept
   {
     // Let eventTarget be the result of determining the target of an event handler; if it's null, return null.
     auto *target = DetermineTarget(const_cast<dom::EventTarget &>(eventTarget), name);
     return target ? target->EventHandlerValue(name) : nullptr;
   }
 
-  void EventHandlerAlgorithms::Set(dom::EventTarget &eventTarget, const dom::DOMStringAtom &name,
+  void EventHandlerAlgorithms::Set(dom::EventTarget &eventTarget, const DOMStringAtom &name,
                                    EventHandlerCallback &&value) noexcept
   {
     // Let eventTarget be the result of determining the target of an event handler; if it's null, return.

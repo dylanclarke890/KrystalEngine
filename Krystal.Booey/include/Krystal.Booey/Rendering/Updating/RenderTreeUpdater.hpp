@@ -35,7 +35,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class Document;
@@ -69,7 +69,7 @@ namespace krys::boo
 
     struct Parent
     {
-      dom::Element *Element {nullptr};
+      boo::Element *Element {nullptr};
       const style::ElementUpdate *Update {nullptr};
       Maybe<RenderTreePosition> Position;
 
@@ -77,9 +77,9 @@ namespace krys::boo
       RenderObject *PreviousChildRenderer {nullptr};
       bool HasPrecedingInFlowChild {false};
 
-      explicit Parent(dom::ContainerNode &root) noexcept;
+      explicit Parent(ContainerNode &root) noexcept;
 
-      Parent(dom::Element &element, const style::ElementUpdate *update) noexcept;
+      Parent(boo::Element &element, const style::ElementUpdate *update) noexcept;
     };
 
     enum class TeardownType : uint8
@@ -91,7 +91,7 @@ namespace krys::boo
     };
 
   private:
-    Ref<dom::Document> _document;
+    Ref<Document> _document;
     UniquePtr<style::Update> _styleUpdate;
     List<Parent> _parentStack;
     UniquePtr<GeneratedContent> _generatedContent;
@@ -104,42 +104,42 @@ namespace krys::boo
     static void CreateContentRenderers(RenderTreeBuilder &builder, RenderElement &pseudoRenderer,
                                        const RenderStyle &style) noexcept;
 
-    RenderTreeUpdater(dom::Document &document, style::PostResolutionCallbackDisabler &) noexcept;
+    RenderTreeUpdater(Document &document, style::PostResolutionCallbackDisabler &) noexcept;
 
     ~RenderTreeUpdater() noexcept;
 
     void Commit(UniquePtr<style::Update> styleUpdate) noexcept;
 
-    static void TearDownRenderers(dom::Element &root) noexcept;
+    static void TearDownRenderers(boo::Element &root) noexcept;
 
-    static void TearDownRenderersForShadowRootInsertion(dom::Element &host) noexcept;
+    static void TearDownRenderersForShadowRootInsertion(boo::Element &host) noexcept;
 
-    static void TearDownRenderersAfterSlotChange(dom::Element &host) noexcept;
+    static void TearDownRenderersAfterSlotChange(boo::Element &host) noexcept;
 
-    static void TearDownRenderer(dom::Text &text) noexcept;
+    static void TearDownRenderer(Text &text) noexcept;
 
   private:
     void UpdateRebuildRoots() noexcept;
 
-    void UpdateRenderTree(dom::ContainerNode &root) noexcept;
+    void UpdateRenderTree(ContainerNode &root) noexcept;
 
-    static void UpdateSVGRenderer(dom::Element &element) noexcept;
+    static void UpdateSVGRenderer(boo::Element &element) noexcept;
 
-    void UpdateElementRenderer(dom::Element &element, const style::ElementUpdate &elementUpdate) noexcept;
+    void UpdateElementRenderer(boo::Element &element, const style::ElementUpdate &elementUpdate) noexcept;
 
     void UpdateRendererStyle(RenderElement &renderer, RenderStyle &&newStyle,
                              style::DifferenceResult minimalStyleDifference) noexcept;
 
-    void CreateRenderer(dom::Element &element, RenderStyle &&style) noexcept;
+    void CreateRenderer(boo::Element &element, RenderStyle &&style) noexcept;
 
-    void UpdateTextRenderer(dom::Text &text, const style::TextUpdate *textUpdate,
-                            const dom::ContainerNode *root) noexcept;
+    void UpdateTextRenderer(Text &text, const style::TextUpdate *textUpdate,
+                            const ContainerNode *root) noexcept;
 
-    void CreateTextRenderer(dom::Text &textNode, const style::TextUpdate *textUpdate) noexcept;
+    void CreateTextRenderer(Text &textNode, const style::TextUpdate *textUpdate) noexcept;
 
-    KRYS_NODISCARD bool TextRendererIsNeeded(const dom::Text &textNode) noexcept;
+    KRYS_NODISCARD bool TextRendererIsNeeded(const Text &textNode) noexcept;
 
-    void StorePreviousRenderer(dom::Node &node) noexcept;
+    void StorePreviousRenderer(Node &node) noexcept;
 
     void UpdateRenderViewStyle() noexcept;
 
@@ -157,11 +157,11 @@ namespace krys::boo
       return *_generatedContent;
     }
 
-    void UpdateBeforeDescendants(dom::Element &element, const style::ElementUpdate *update) noexcept;
+    void UpdateBeforeDescendants(boo::Element &element, const style::ElementUpdate *update) noexcept;
 
-    void UpdateAfterDescendants(dom::Element &element, const style::ElementUpdate *update) noexcept;
+    void UpdateAfterDescendants(boo::Element &element, const style::ElementUpdate *update) noexcept;
 
-    void PushParent(dom::Element &element, const style::ElementUpdate *update) noexcept;
+    void PushParent(boo::Element &element, const style::ElementUpdate *update) noexcept;
 
     void PopParent() noexcept;
 
@@ -169,12 +169,12 @@ namespace krys::boo
 
     KRYS_NODISCARD RenderView &GetRenderView() noexcept;
 
-    static void TearDownRenderers(dom::Element &root, TeardownType teardownType) noexcept;
+    static void TearDownRenderers(boo::Element &root, TeardownType teardownType) noexcept;
 
-    static void TearDownRenderers(dom::Element &root, TeardownType teardownType,
+    static void TearDownRenderers(boo::Element &root, TeardownType teardownType,
                                   RenderTreeBuilder &builder) noexcept;
 
-    static void TearDownLeftoverChildrenOfComposedTree(dom::Element &element,
+    static void TearDownLeftoverChildrenOfComposedTree(boo::Element &element,
                                                        RenderTreeBuilder &builder) noexcept;
 
     enum class NeedsRepaintAndLayout : bool
@@ -184,7 +184,7 @@ namespace krys::boo
     };
 
     static void
-      TearDownTextRenderer(dom::Text &text, const dom::ContainerNode *root, RenderTreeBuilder &builder,
+      TearDownTextRenderer(Text &text, const ContainerNode *root, RenderTreeBuilder &builder,
                            NeedsRepaintAndLayout needsRepaintAndLayout = NeedsRepaintAndLayout::Yes) noexcept;
   };
 }

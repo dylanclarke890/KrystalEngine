@@ -58,7 +58,7 @@ namespace krys::boo
   void FormSubmission::Attributes::ParseAction(utf8_stringview action) noexcept
   {
     // FIXME: Can we parse into a URL? Then we also don't need to trim anymore.
-    _action = dom::DOMString(infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(action));
+    _action = DOMString(infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(action));
   }
 
   utf8_stringview FormSubmission::Attributes::ParseEncodingType(utf8_stringview type) noexcept
@@ -76,7 +76,7 @@ namespace krys::boo
 
   void FormSubmission::Attributes::UpdateEncodingType(utf8_stringview type) noexcept
   {
-    _encodingType = dom::DOMString(ParseEncodingType(type));
+    _encodingType = DOMString(ParseEncodingType(type));
   }
 
   FormSubmission::Method FormSubmission::Attributes::ParseMethodType(utf8_stringview type) noexcept
@@ -97,16 +97,15 @@ namespace krys::boo
     _method = ParseMethodType(type);
   }
 
-  FormSubmission::FormSubmission(Maybe<dom::DOMString> returnValue, url::URL action,
-                                 dom::DOMStringView target, dom::DOMStringView encodingType,
-                                 dom::Event *event) noexcept
+  FormSubmission::FormSubmission(Maybe<DOMString> returnValue, url::URL action, DOMStringView target,
+                                 DOMStringView encodingType, dom::Event *event) noexcept
       : _method(Method::Dialog), _action(krys::move(action)), _target(target), _encodingType(encodingType),
         _event(ShareRefPtr(event)), _returnValue(krys::move(returnValue))
   {
   }
 
-  FormSubmission::FormSubmission(Method method, url::URL action, dom::DOMStringView target,
-                                 dom::DOMStringView encodingType, Ref<html::DOMFormData> &&entryList,
+  FormSubmission::FormSubmission(Method method, url::URL action, DOMStringView target,
+                                 DOMStringView encodingType, Ref<html::DOMFormData> &&entryList,
                                  dom::Event *event) noexcept
       : _method(method), _action(krys::move(action)), _target(target), _encodingType(encodingType),
         _entryList(krys::move(entryList)), _event(ShareRefPtr(event))
@@ -115,14 +114,13 @@ namespace krys::boo
 
   FormSubmission::~FormSubmission() noexcept = default;
 
-  Ref<FormSubmission> FormSubmission::Create(html::HTMLFormElement &form,
-                                             html::HTMLFormControlElement *overrideSubmitter,
+  Ref<FormSubmission> FormSubmission::Create(HTMLFormElement &form, HTMLFormControlElement *overrideSubmitter,
                                              const Attributes &attributes, dom::Event *event,
                                              FormSubmissionTrigger trigger) noexcept
   {
     auto copiedAttributes = attributes;
 
-    RefPtr<html::HTMLFormControlElement> submitter =
+    RefPtr<HTMLFormControlElement> submitter =
       ShareRefPtr(overrideSubmitter ? overrideSubmitter : form.FindSubmitter(event));
     if (submitter)
     {
@@ -144,8 +142,8 @@ namespace krys::boo
       }
     }
 
-    Ref<dom::Document> document = ShareRef(form.NodeDocument());
-    dom::DOMString encodingType = copiedAttributes.EncodingType();
+    Ref<Document> document = ShareRef(form.NodeDocument());
+    DOMString encodingType = copiedAttributes.EncodingType();
     auto actionURL = document->CompleteURL(copiedAttributes.Action().empty() ? document->GetURL().String()
                                                                              : copiedAttributes.Action());
 
@@ -153,7 +151,7 @@ namespace krys::boo
     {
       if (copiedAttributes.GetMethod() == Method::Dialog)
       {
-        Maybe<dom::DOMString> returnValue = submitter ? submitter->ResultForDialogSubmit() : null;
+        Maybe<DOMString> returnValue = submitter ? submitter->ResultForDialogSubmit() : null;
         return CreateRef<FormSubmission>(returnValue, actionURL, form.EffectiveTarget(event, submitter.get()),
                                          encodingType, event);
       }
@@ -178,12 +176,12 @@ namespace krys::boo
     return formSubmission;
   }
 
-  html::HTMLFormElement *FormSubmission::Form() const noexcept
+  HTMLFormElement *FormSubmission::Form() const noexcept
   {
     return _form.get();
   }
 
-  html::HTMLFormControlElement *FormSubmission::Submitter() const noexcept
+  HTMLFormControlElement *FormSubmission::Submitter() const noexcept
   {
     return _submitter.get();
   }
@@ -199,7 +197,7 @@ namespace krys::boo
 
     if (!_target.empty())
     {
-      frameRequest.SetFrameName(dom::DOMStringAtom(_target));
+      frameRequest.SetFrameName(DOMStringAtom(_target));
     }
 
     if (_method == Method::Post)

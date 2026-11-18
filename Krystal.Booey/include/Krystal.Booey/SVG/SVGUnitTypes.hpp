@@ -3,7 +3,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyTraits.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGUnitTypes final : public RefCounted<SVGUnitTypes>
   {
@@ -27,7 +27,7 @@ namespace krys::boo::svg
       return SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX;
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(SVGUnitTypes::SVGUnitType type) noexcept
+    KRYS_NODISCARD static DOMString ToString(SVGUnitTypes::SVGUnitType type) noexcept
     {
       switch (type)
       {
@@ -49,8 +49,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    KRYS_NODISCARD static SVGUnitTypes::SVGUnitType FromString(SVGElement &,
-                                                               dom::DOMStringView value) noexcept
+    KRYS_NODISCARD static SVGUnitTypes::SVGUnitType FromString(SVGElement &, DOMStringView value) noexcept
     {
       if (value == u8"userSpaceOnUse")
       {

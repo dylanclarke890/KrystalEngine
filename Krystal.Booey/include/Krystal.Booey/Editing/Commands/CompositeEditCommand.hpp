@@ -36,13 +36,17 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
-  class DataTransfer;
   class Element;
-  class StaticRange;
   class Text;
+}
+
+namespace krys::boo::dom
+{
+  class DataTransfer;
+  class StaticRange;
 }
 
 namespace krys::boo
@@ -53,7 +57,7 @@ namespace krys::boo
   /// one, so the run's length can change while its characters stay as many.
   struct WhitespaceRebalance
   {
-    RefPtr<dom::Text> Node;
+    RefPtr<Text> Node;
     uint32 Offset {0};
     utf8_string OldText;
     utf8_string NewText;
@@ -74,7 +78,7 @@ namespace krys::boo
   class AccessibilityUndoReplacedText
   {
   private:
-    dom::DOMString _replacedText;
+    DOMString _replacedText;
     VisiblePositionIndexRange _rangeDeletedByUnapply;
     VisiblePositionIndexRange _rangeDeletedByReapply;
 
@@ -95,9 +99,9 @@ namespace krys::boo
     void PostTextStateChangeNotificationForReapply(AXObjectCache *cache) noexcept;
 
   private:
-    KRYS_NODISCARD dom::DOMString TextDeletedByUnapply() const noexcept;
+    KRYS_NODISCARD DOMString TextDeletedByUnapply() const noexcept;
 
-    KRYS_NODISCARD dom::DOMString TextDeletedByReapply() const noexcept;
+    KRYS_NODISCARD DOMString TextDeletedByReapply() const noexcept;
   };
 
   /// @brief The simple commands a top-level command made, which undo and redo it, and the selections before
@@ -112,20 +116,20 @@ namespace krys::boo
     };
 
   private:
-    const Ref<dom::Document> _document;
+    const Ref<Document> _document;
     VisibleSelection _startingSelection;
     VisibleSelection _endingSelection;
     List<RefPtr<SimpleEditCommand>> _commands;
-    RefPtr<dom::Element> _startingRootEditableElement;
-    RefPtr<dom::Element> _endingRootEditableElement;
+    RefPtr<Element> _startingRootEditableElement;
+    RefPtr<Element> _endingRootEditableElement;
     EditAction _editAction;
     AccessibilityUndoReplacedText _replacedText;
 
   public:
-    EditCommandComposition(dom::Document &document, const VisibleSelection &startingSelection,
+    EditCommandComposition(Document &document, const VisibleSelection &startingSelection,
                            const VisibleSelection &endingSelection, EditAction editAction) noexcept;
 
-    KRYS_NODISCARD static Ref<EditCommandComposition> Create(dom::Document &document,
+    KRYS_NODISCARD static Ref<EditCommandComposition> Create(Document &document,
                                                              const VisibleSelection &startingSelection,
                                                              const VisibleSelection &endingSelection,
                                                              EditAction editAction) noexcept;
@@ -168,12 +172,12 @@ namespace krys::boo
       _replacedText.SetRangeDeletedByUnapply(range);
     }
 
-    KRYS_NODISCARD dom::Element *StartingRootEditableElement() const noexcept
+    KRYS_NODISCARD Element *StartingRootEditableElement() const noexcept
     {
       return _startingRootEditableElement.get();
     }
 
-    KRYS_NODISCARD dom::Element *EndingRootEditableElement() const noexcept
+    KRYS_NODISCARD Element *EndingRootEditableElement() const noexcept
     {
       return _endingRootEditableElement.get();
     }
@@ -230,11 +234,11 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD virtual dom::DOMString InputEventTypeName() const noexcept;
+    KRYS_NODISCARD virtual DOMString InputEventTypeName() const noexcept;
 
     KRYS_NODISCARD virtual bool IsInputMethodComposing() const noexcept;
 
-    KRYS_NODISCARD virtual dom::DOMString InputEventData() const noexcept
+    KRYS_NODISCARD virtual DOMString InputEventData() const noexcept
     {
       return {};
     }
@@ -255,7 +259,7 @@ namespace krys::boo
     KRYS_NODISCARD List<RefPtr<dom::StaticRange>> TargetRangesForBindings() const noexcept;
 
   protected:
-    explicit CompositeEditCommand(dom::Document &document,
+    explicit CompositeEditCommand(Document &document,
                                   EditAction editingAction = EditAction::Unspecified) noexcept;
 
     // If WillApplyCommand returns false, we won't proceed with applying the command.
@@ -268,7 +272,7 @@ namespace krys::boo
     //
     // sugary-sweet convenience functions to help create and apply edit commands in composite commands
     //
-    void AppendNode(dom::Node &node, dom::ContainerNode &parent) noexcept;
+    void AppendNode(boo::Node &node, ContainerNode &parent) noexcept;
 
     void ApplyCommandToComposite(Ref<EditCommand> &&command) noexcept;
 
@@ -282,9 +286,9 @@ namespace krys::boo
                     EditAction editingAction = EditAction::ChangeAttributes,
                     ApplyStylePropertyLevel level = ApplyStylePropertyLevel::Default) noexcept;
 
-    void ApplyStyledElement(dom::Element &element) noexcept;
+    void ApplyStyledElement(Element &element) noexcept;
 
-    void RemoveStyledElement(dom::Element &element) noexcept;
+    void RemoveStyledElement(Element &element) noexcept;
 
     void DeleteSelection(bool smartDelete = false, bool mergeBlocksAfterDelete = true, bool replace = false,
                          bool expandForSpecialElements = true, bool sanitizeMarkup = true) noexcept;
@@ -293,19 +297,19 @@ namespace krys::boo
                          bool mergeBlocksAfterDelete = true, bool replace = false,
                          bool expandForSpecialElements = true, bool sanitizeMarkup = true) noexcept;
 
-    virtual void DeleteTextFromNode(dom::Text &node, uint32 offset, uint32 count) noexcept;
+    virtual void DeleteTextFromNode(Text &node, uint32 offset, uint32 count) noexcept;
 
     void InputText(utf8_stringview text, bool selectInsertedText = false) noexcept;
 
-    KRYS_NODISCARD static bool IsRemovableBlock(const dom::Node *node) noexcept;
+    KRYS_NODISCARD static bool IsRemovableBlock(const boo::Node *node) noexcept;
 
-    void InsertNodeAfter(dom::Node &insertChild, dom::Node &refChild) noexcept;
+    void InsertNodeAfter(boo::Node &insertChild, boo::Node &refChild) noexcept;
 
-    void InsertNodeAt(dom::Node &insertChild, const dom::Position &editingPosition) noexcept;
+    void InsertNodeAt(boo::Node &insertChild, const dom::Position &editingPosition) noexcept;
 
-    void InsertNodeAtTabSpanPosition(dom::Node &node, const dom::Position &position) noexcept;
+    void InsertNodeAtTabSpanPosition(boo::Node &node, const dom::Position &position) noexcept;
 
-    bool InsertNodeBefore(dom::Node &insertChild, dom::Node &refChild,
+    bool InsertNodeBefore(boo::Node &insertChild, boo::Node &refChild,
                           ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable =
                             DoNotAssumeContentIsAlwaysEditable) noexcept;
 
@@ -313,10 +317,10 @@ namespace krys::boo
 
     void InsertLineBreak() noexcept;
 
-    void InsertTextIntoNode(dom::Text &node, uint32 offset, utf8_stringview text,
+    void InsertTextIntoNode(Text &node, uint32 offset, utf8_stringview text,
                             AllowPasswordEcho allowPasswordEcho = AllowPasswordEcho::Yes) noexcept;
 
-    void MergeIdenticalElements(dom::Element &first, dom::Element &second) noexcept;
+    void MergeIdenticalElements(Element &first, Element &second) noexcept;
 
     void RebalanceWhitespace() noexcept;
 
@@ -324,7 +328,7 @@ namespace krys::boo
     Maybe<WhitespaceRebalance> RebalanceWhitespaceAt(const dom::Position &position) noexcept;
 
     /// @return The run it replaced, if any, to move positions in its text node across.
-    Maybe<WhitespaceRebalance> RebalanceWhitespaceOnTextSubstring(dom::Text &textNode, int32 startOffset,
+    Maybe<WhitespaceRebalance> RebalanceWhitespaceOnTextSubstring(Text &textNode, int32 startOffset,
                                                                   int32 endOffset) noexcept;
 
     void PrepareWhitespaceAtPositionForSplit(dom::Position &position) noexcept;
@@ -332,76 +336,74 @@ namespace krys::boo
     void ReplaceCollapsibleWhitespaceWithNonBreakingSpaceIfNeeded(
       const VisiblePosition &visiblePosition) noexcept;
 
-    KRYS_NODISCARD static RefPtr<dom::Text> TextNodeForRebalance(const dom::Position &position) noexcept;
+    KRYS_NODISCARD static RefPtr<Text> TextNodeForRebalance(const dom::Position &position) noexcept;
 
     KRYS_NODISCARD static bool ShouldRebalanceLeadingWhitespaceFor(utf8_stringview text) noexcept;
 
-    void RemoveNodeAttribute(dom::Element &element, dom::DOMStringAtom attribute) noexcept;
+    void RemoveNodeAttribute(Element &element, DOMStringAtom attribute) noexcept;
 
-    void RemoveChildrenInRange(dom::Node &node, uint32 from, uint32 to) noexcept;
+    void RemoveChildrenInRange(boo::Node &node, uint32 from, uint32 to) noexcept;
 
-    virtual void RemoveNode(dom::Node &node,
+    virtual void RemoveNode(boo::Node &node,
                             ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable =
                               DoNotAssumeContentIsAlwaysEditable) noexcept;
 
-    RefPtr<dom::Element>
-      ReplaceElementWithSpanPreservingChildrenAndAttributes(dom::Element &element) noexcept;
+    RefPtr<Element> ReplaceElementWithSpanPreservingChildrenAndAttributes(Element &element) noexcept;
 
     void
-      RemoveNodePreservingChildren(dom::Node &node,
+      RemoveNodePreservingChildren(boo::Node &node,
                                    ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable =
                                      DoNotAssumeContentIsAlwaysEditable) noexcept;
 
-    void RemoveNodeAndPruneAncestors(dom::Node &node) noexcept;
+    void RemoveNodeAndPruneAncestors(boo::Node &node) noexcept;
 
-    void MoveRemainingSiblingsToNewParent(dom::Node *node, dom::Node *pastLastNodeToMove,
-                                          dom::Element &newParent) noexcept;
+    void MoveRemainingSiblingsToNewParent(boo::Node *node, boo::Node *pastLastNodeToMove,
+                                          Element &newParent) noexcept;
 
     static void UpdatePositionForNodeRemovalPreservingChildren(dom::Position &position,
-                                                               dom::Node &node) noexcept;
+                                                               boo::Node &node) noexcept;
 
-    void Prune(dom::Node *node) noexcept;
+    void Prune(boo::Node *node) noexcept;
 
-    void ReplaceTextInNode(dom::Text &node, uint32 offset, uint32 count, utf8_stringview replacementText,
+    void ReplaceTextInNode(Text &node, uint32 offset, uint32 count, utf8_stringview replacementText,
                            AllowPasswordEcho allowPasswordEcho = AllowPasswordEcho::Yes) noexcept;
 
     dom::Position ReplaceSelectedTextInNode(utf8_stringview text) noexcept;
 
-    void ReplaceTextInNodePreservingMarkers(dom::Text &node, uint32 offset, uint32 count,
+    void ReplaceTextInNodePreservingMarkers(Text &node, uint32 offset, uint32 count,
                                             utf8_stringview replacementText) noexcept;
 
     dom::Position PositionOutsideTabSpan(const dom::Position &position) noexcept;
 
-    void SetNodeAttribute(dom::Element &element, dom::DOMStringAtom attribute,
-                          Maybe<dom::DOMString> value) noexcept;
+    void SetNodeAttribute(Element &element, DOMStringAtom attribute, Maybe<DOMString> value) noexcept;
 
-    void SplitElement(dom::Element &element, dom::Node &atChild) noexcept;
+    void SplitElement(Element &element, boo::Node &atChild) noexcept;
 
-    void SplitTextNode(dom::Text &node, uint32 offset) noexcept;
+    void SplitTextNode(Text &node, uint32 offset) noexcept;
 
-    void SplitTextNodeContainingElement(dom::Text &text, uint32 offset) noexcept;
+    void SplitTextNodeContainingElement(Text &text, uint32 offset) noexcept;
 
-    void WrapContentsInDummySpan(dom::Element &element) noexcept;
+    void WrapContentsInDummySpan(Element &element) noexcept;
 
-    void DeleteInsignificantText(dom::Text &textNode, uint32 start, uint32 end) noexcept;
+    void DeleteInsignificantText(Text &textNode, uint32 start, uint32 end) noexcept;
 
     void DeleteInsignificantText(const dom::Position &start, const dom::Position &end) noexcept;
 
     void DeleteInsignificantTextDownstream(const dom::Position &position) noexcept;
 
-    RefPtr<dom::Element> AppendBlockPlaceholder(dom::Element &container) noexcept;
+    RefPtr<Element> AppendBlockPlaceholder(Element &container) noexcept;
 
-    RefPtr<dom::Node> InsertBlockPlaceholder(const dom::Position &position) noexcept;
+    RefPtr<boo::Node> InsertBlockPlaceholder(const dom::Position &position) noexcept;
 
-    RefPtr<dom::Node> AddBlockPlaceholderIfNeeded(dom::Element *container) noexcept;
+    RefPtr<boo::Node> AddBlockPlaceholderIfNeeded(Element *container) noexcept;
 
     void RemovePlaceholderAt(const dom::Position &position) noexcept;
 
-    Ref<dom::Element> InsertNewDefaultParagraphElementAt(const dom::Position &position) noexcept;
+    Ref<Element> InsertNewDefaultParagraphElementAt(const dom::Position &position) noexcept;
 
-    RefPtr<dom::Node> MoveParagraphContentsToNewBlockIfNecessary(const dom::Position &position) noexcept;
+    RefPtr<boo::Node> MoveParagraphContentsToNewBlockIfNecessary(const dom::Position &position) noexcept;
 
-    void PushAnchorElementDown(dom::Element &anchorElement) noexcept;
+    void PushAnchorElementDown(Element &anchorElement) noexcept;
 
     void MoveParagraph(const VisiblePosition &startOfParagraphToMove,
                        const VisiblePosition &endOfParagraphToMove, const VisiblePosition &destination,
@@ -412,11 +414,11 @@ namespace krys::boo
                         bool preserveSelection = false, bool preserveStyle = true) noexcept;
 
     void MoveParagraphWithClones(const VisiblePosition &startOfParagraphToMove,
-                                 const VisiblePosition &endOfParagraphToMove, dom::Element *blockElement,
-                                 dom::Node *outerNode) noexcept;
+                                 const VisiblePosition &endOfParagraphToMove, Element *blockElement,
+                                 boo::Node *outerNode) noexcept;
 
     void CloneParagraphUnderNewElement(const dom::Position &start, const dom::Position &end,
-                                       dom::Node *outerNode, dom::Element *blockElement) noexcept;
+                                       boo::Node *outerNode, Element *blockElement) noexcept;
 
     void CleanupAfterDeletion(const VisiblePosition &destination = VisiblePosition()) noexcept;
 
@@ -426,7 +428,7 @@ namespace krys::boo
 
     dom::Position PositionAvoidingSpecialElementBoundary(const dom::Position &original) noexcept;
 
-    RefPtr<dom::Node> SplitTreeToNode(dom::Node &start, dom::Node &end, bool splitAncestor = false) noexcept;
+    RefPtr<boo::Node> SplitTreeToNode(boo::Node &start, boo::Node &end, bool splitAncestor = false) noexcept;
 
   private:
     KRYS_NODISCARD bool IsCompositeEditCommand() const noexcept override
@@ -435,7 +437,7 @@ namespace krys::boo
     }
   };
 
-  KRYS_NODISCARD Ref<dom::Element> CreateBlockPlaceholderElement(dom::Document &document) noexcept;
+  KRYS_NODISCARD Ref<Element> CreateBlockPlaceholderElement(Document &document) noexcept;
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CompositeEditCommand)

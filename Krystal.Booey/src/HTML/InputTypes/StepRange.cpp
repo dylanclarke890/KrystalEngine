@@ -80,7 +80,7 @@ namespace krys::boo::html
   }
 
   Decimal StepRange::ParseStep(AnyStepHandling anyStepHandling, const StepDescription &stepDescription,
-                               Maybe<dom::DOMStringView> stepString) noexcept
+                               Maybe<DOMStringView> stepString) noexcept
   {
     if (!stepString || stepString->empty())
     {

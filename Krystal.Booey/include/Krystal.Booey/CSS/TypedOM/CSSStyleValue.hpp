@@ -37,7 +37,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -45,7 +45,10 @@ namespace krys::boo::dom
 namespace krys::boo::css
 {
   class Value;
+}
 
+namespace krys::boo
+{
   /// @brief The kinds of Typed OM values.
   enum class CSSStyleValueType : uint8
   {
@@ -71,7 +74,10 @@ namespace krys::boo::css
     CSSUnparsedValue,
     CSSKeywordValue,
   };
+}
 
+namespace krys::boo::css
+{
   KRYS_NODISCARD constexpr bool IsCSSNumericValue(CSSStyleValueType type) noexcept
   {
     switch (type)
@@ -176,7 +182,10 @@ namespace krys::boo::css
     }
     return false;
   }
+}
 
+namespace krys::boo
+{
   /// @brief How a value nested in a math value is serialised.
   enum class SerialisationArguments : uint8
   {
@@ -185,9 +194,9 @@ namespace krys::boo::css
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::SerialisationArguments, 2uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SerialisationArguments, 2uz);
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief A CSS value as the Typed OM represents it.
   /// @see https://drafts.css-houdini.org/css-typed-om/#cssstylevalue
@@ -197,12 +206,12 @@ namespace krys::boo::css
 
   protected:
     CSSOMString _customPropertyName;
-    RefPtr<Value> _propertyValue;
+    RefPtr<css::Value> _propertyValue;
 
   public:
     virtual ~CSSStyleValue() noexcept;
 
-    KRYS_NODISCARD static Ref<CSSStyleValue> Create(RefPtr<Value> &&cssValue,
+    KRYS_NODISCARD static Ref<CSSStyleValue> Create(RefPtr<css::Value> &&cssValue,
                                                     CSSOMString &&property = {}) noexcept;
 
     KRYS_NODISCARD static Ref<CSSStyleValue> Create() noexcept;
@@ -211,12 +220,12 @@ namespace krys::boo::css
     /// @return A `TypeError` if @p property isn't a property or @p cssText doesn't parse as its value.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssstylevalue-parse
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSStyleValue>>
-      Parse(dom::Document &document, CSSOMStringView property, CSSOMStringView cssText) noexcept;
+      Parse(Document &document, CSSOMStringView property, CSSOMStringView cssText) noexcept;
 
     /// @brief Parses @p cssText as a value of @p property, each of its iterations reified.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssstylevalue-parseall
     KRYS_NODISCARD static dom::ExceptionOr<List<Ref<CSSStyleValue>>>
-      ParseAll(dom::Document &document, CSSOMStringView property, CSSOMStringView cssText) noexcept;
+      ParseAll(Document &document, CSSOMStringView property, CSSOMStringView cssText) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#stylevalue-serialization
     KRYS_NODISCARD CSSOMString ToString() const noexcept;
@@ -229,15 +238,15 @@ namespace krys::boo::css
       return CSSStyleValueType::CSSStyleValue;
     }
 
-    KRYS_NODISCARD virtual RefPtr<Value> ToCSSValue() const noexcept;
+    KRYS_NODISCARD virtual RefPtr<css::Value> ToCSSValue() const noexcept;
 
-    KRYS_NODISCARD virtual RefPtr<Value> ToCSSValueWithProperty(PropertyId) const noexcept
+    KRYS_NODISCARD virtual RefPtr<css::Value> ToCSSValueWithProperty(css::PropertyId) const noexcept
     {
       return ToCSSValue();
     }
 
   protected:
-    explicit CSSStyleValue(RefPtr<Value> &&cssValue, CSSOMString &&property = {}) noexcept;
+    explicit CSSStyleValue(RefPtr<css::Value> &&cssValue, CSSOMString &&property = {}) noexcept;
 
     CSSStyleValue() noexcept;
   };

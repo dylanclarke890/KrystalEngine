@@ -29,10 +29,13 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLFormControlElement;
+}
 
+namespace krys::boo::html
+{
   /// @brief Whether an element's `autocomplete` attribute describes what it expects the user to enter, or
   /// gives the meaning of the value it already holds (on hidden inputs).
   /// @see https://html.spec.whatwg.org/#autofill-expectation-mantle
@@ -58,19 +61,19 @@ namespace krys::boo::html
     // replace this, but the field name, hint set, scope and credential type could go, leaving one function
     // that computes the exposed value.
     /// @see https://html.spec.whatwg.org/#autofill-field-name
-    dom::DOMString FieldName;
+    DOMString FieldName;
 
     /// @see https://html.spec.whatwg.org/#autofill-hint-set
-    List<dom::DOMString> HintSet;
+    List<DOMString> HintSet;
 
     /// @see https://html.spec.whatwg.org/#autofill-scope
-    List<dom::DOMString> Scope;
+    List<DOMString> Scope;
 
     /// @see https://html.spec.whatwg.org/#non-autofill-credential-type
     NonAutofillCredentialType CredentialType {NonAutofillCredentialType::None};
 
     /// @see https://html.spec.whatwg.org/#idl-exposed-autofill-value
-    dom::DOMString IDLExposedValue;
+    DOMString IDLExposedValue;
 
     /// @brief The autofill data of an input, select or textarea, from its `autocomplete` attribute.
     KRYS_NODISCARD static AutofillData Create(const HTMLFormControlElement &element) noexcept;

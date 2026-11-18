@@ -27,7 +27,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGTransform;
 
@@ -38,19 +38,19 @@ namespace krys::boo::svg
   public:
     ~SVGTransformable() noexcept override;
 
-    static bool ParseAndReplaceTransform(SVGTransformValue::SVGTransformType, dom::DOMStringView &buffer,
+    static bool ParseAndReplaceTransform(SVGTransformValue::SVGTransformType, DOMStringView &buffer,
                                          SVGTransform &) noexcept;
 
     KRYS_NODISCARD static RefPtr<SVGTransform> ParseTransform(SVGTransformValue::SVGTransformType,
-                                                              dom::DOMStringView &buffer) noexcept;
+                                                              DOMStringView &buffer) noexcept;
 
     KRYS_NODISCARD static Maybe<SVGTransformValue::SVGTransformType>
-      ParseTransformTypeFromString(dom::DOMStringView) noexcept;
+      ParseTransformTypeFromString(DOMStringView) noexcept;
 
     KRYS_NODISCARD static Maybe<SVGTransformValue::SVGTransformType>
-      ParseTransformType(dom::DOMStringView &buffer) noexcept;
+      ParseTransformType(DOMStringView &buffer) noexcept;
 
-    KRYS_NODISCARD AffineTransform LocalCoordinateSpaceTransform(CTMScope) const noexcept override
+    KRYS_NODISCARD AffineTransform LocalCoordinateSpaceTransform(svg::CTMScope) const noexcept override
     {
       return AnimatedLocalTransform();
     }

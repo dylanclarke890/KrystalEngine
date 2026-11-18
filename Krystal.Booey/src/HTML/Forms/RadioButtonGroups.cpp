@@ -257,9 +257,9 @@ namespace krys::boo::html
 
   RadioButtonGroups::~RadioButtonGroups() noexcept = default;
 
-  RadioButtonGroup *RadioButtonGroups::Find(dom::DOMStringView name) const noexcept
+  RadioButtonGroup *RadioButtonGroups::Find(DOMStringView name) const noexcept
   {
-    auto group = _nameToGroupMap.find(dom::DOMStringAtom(name));
+    auto group = _nameToGroupMap.find(DOMStringAtom(name));
     return group != _nameToGroupMap.end() ? group->second.get() : nullptr;
   }
 
@@ -277,7 +277,7 @@ namespace krys::boo::html
       return;
     }
 
-    auto &group = _nameToGroupMap[dom::DOMStringAtom(name)];
+    auto &group = _nameToGroupMap[DOMStringAtom(name)];
     if (!group)
     {
       group = CreateUnique<RadioButtonGroup>();
@@ -330,7 +330,7 @@ namespace krys::boo::html
     }
   }
 
-  RefPtr<HTMLInputElement> RadioButtonGroups::CheckedButtonForGroup(dom::DOMStringView name) const noexcept
+  RefPtr<HTMLInputElement> RadioButtonGroups::CheckedButtonForGroup(DOMStringView name) const noexcept
   {
     auto *group = Find(name);
     return group ? group->CheckedButton() : nullptr;
@@ -369,7 +369,7 @@ namespace krys::boo::html
       return;
     }
 
-    auto group = _nameToGroupMap.find(dom::DOMStringAtom(name));
+    auto group = _nameToGroupMap.find(DOMStringAtom(name));
     if (group == _nameToGroupMap.end())
     {
       return;

@@ -20,7 +20,7 @@ namespace krys::boo::tests
 {
   namespace
   {
-    KRYS_NODISCARD StyleImage *BackgroundImage(dom::Element &element) noexcept
+    KRYS_NODISCARD StyleImage *BackgroundImage(Element &element) noexcept
     {
       auto *renderer = element.Renderer();
       REQUIRE(renderer);
@@ -196,8 +196,8 @@ namespace krys::boo::tests
     auto page = Page::Create();
     auto &frame = page->MainFrame();
     frame.CreateView({200, 100});
-    auto document = CreateRef<dom::HTMLDocument>();
-    frame.SetDocument(ShareRefPtr<dom::Document>(document.get()));
+    auto document = CreateRef<HTMLDocument>();
+    frame.SetDocument(ShareRefPtr<boo::Document>(document.get()));
     auto parser = CreateRef<html::DocumentParser>(*document);
     parser->InputStream().Append(
       u8"<!DOCTYPE html><div style='height: 10px; background: url(file:///images/update.png)'></div>",

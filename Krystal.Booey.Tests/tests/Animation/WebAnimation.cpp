@@ -27,7 +27,7 @@ namespace krys::boo::tests
     struct AnimationFixture
     {
       Ref<Page> TestPage {Page::Create()};
-      RefPtr<dom::HTMLDocument> Document;
+      RefPtr<HTMLDocument> Document;
       RefPtr<KeyframeEffect> Effect;
       RefPtr<WebAnimation> Animation;
 
@@ -35,8 +35,8 @@ namespace krys::boo::tests
       {
         auto &frame = TestPage->MainFrame();
         frame.CreateView({200, 100});
-        Document = CreateRef<dom::HTMLDocument>();
-        frame.SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+        Document = CreateRef<HTMLDocument>();
+        frame.SetDocument(ShareRefPtr<boo::Document>(Document.get()));
         auto parser = CreateRef<html::DocumentParser>(*Document);
         parser->InputStream().Append(u8"<!DOCTYPE html><div id=target></div>", IsEOF::Yes);
         parser->PumpTokenizer();
@@ -238,8 +238,7 @@ namespace krys::boo::tests
     auto recorder = CreateRef<EventRecorder>();
     for (auto type : {u8"finish", u8"cancel"})
     {
-      animation.AddEventListener(dom::DOMStringAtom(type), ShareRef<dom::EventListenerCallback>(*recorder),
-                                 false);
+      animation.AddEventListener(DOMStringAtom(type), ShareRef<dom::EventListenerCallback>(*recorder), false);
     }
 
     REQUIRE_FALSE(animation.Play().HasException());

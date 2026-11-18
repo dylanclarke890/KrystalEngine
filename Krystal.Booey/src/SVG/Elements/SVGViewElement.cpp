@@ -2,9 +2,9 @@
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGViewElement::SVGViewElement(dom::Document &document) noexcept
+  SVGViewElement::SVGViewElement(Document &document) noexcept
       : SVGElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::View),
         SVGFitToViewBox(this)
   {
@@ -25,14 +25,14 @@ namespace krys::boo::svg
     _targetElement = nullptr;
   }
 
-  void SVGViewElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                        Maybe<dom::DOMStringView> value) noexcept
+  void SVGViewElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                        Maybe<DOMStringView> value) noexcept
   {
     SVGFitToViewBox::ParseAttribute(name, value);
     SVGElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGViewElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGViewElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     // We ignore changes to SVGNames::viewTargetAttr, which is deprecated and unused.
     if (PropertyRegistry::IsKnownAttribute(attributeName))

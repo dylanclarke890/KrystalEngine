@@ -39,15 +39,11 @@
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class Document;
   class Element;
-}
-
-namespace krys::boo
-{
   class IntersectionObserver;
   class IntersectionObserverEntry;
   class LocalFrame;
@@ -78,9 +74,9 @@ namespace krys::boo
   /// @see https://w3c.github.io/IntersectionObserver/#dictdef-intersectionobserverinit
   struct IntersectionObserverInit
   {
-    Maybe<Variant<RefPtr<dom::Element>, RefPtr<dom::Document>>> Root;
-    dom::DOMString RootMargin {u8"0px"};
-    dom::DOMString ScrollMargin {u8"0px"};
+    Maybe<Variant<RefPtr<Element>, RefPtr<Document>>> Root;
+    DOMString RootMargin {u8"0px"};
+    DOMString ScrollMargin {u8"0px"};
     Variant<double, List<double>> Threshold {0.0};
   };
 
@@ -123,47 +119,47 @@ namespace krys::boo
       Yes,
     };
 
-    WeakPtr<dom::Document> _document;
-    WeakPtr<dom::Document> _implicitRootDocument;
-    WeakPtr<dom::ContainerNode> _root;
+    WeakPtr<Document> _document;
+    WeakPtr<Document> _implicitRootDocument;
+    WeakPtr<ContainerNode> _root;
     IntersectionObserverMarginBox _rootMargin;
     IntersectionObserverMarginBox _scrollMargin;
     List<double> _thresholds;
     IntersectionObserverCallback _callback;
-    List<WeakPtr<dom::Element>> _observationTargets;
+    List<WeakPtr<Element>> _observationTargets;
     List<Ref<IntersectionObserverEntry>> _queuedEntries;
     // An observed element is reported at least once, so it's kept until its first observation.
-    List<Ref<dom::Element>> _targetsWaitingForFirstObservation;
+    List<Ref<Element>> _targetsWaitingForFirstObservation;
     IncludeObscuredInsets _includeObscuredInsets {IncludeObscuredInsets::No};
 
-    IntersectionObserver(dom::Document &document, IntersectionObserverCallback &&callback,
-                         dom::ContainerNode *root, IntersectionObserverMarginBox &&parsedRootMargin,
+    IntersectionObserver(Document &document, IntersectionObserverCallback &&callback, ContainerNode *root,
+                         IntersectionObserverMarginBox &&parsedRootMargin,
                          IntersectionObserverMarginBox &&parsedScrollMargin, List<double> &&thresholds,
                          IncludeObscuredInsets includeObscuredInsets) noexcept;
 
   public:
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-intersectionobserver
     KRYS_NODISCARD static dom::ExceptionOr<Ref<IntersectionObserver>>
-      Create(dom::Document &document, IntersectionObserverCallback &&callback, Init init = {},
+      Create(Document &document, IntersectionObserverCallback &&callback, Init init = {},
              IncludeObscuredInsets includeObscuredInsets = IncludeObscuredInsets::No) noexcept;
 
     ~IntersectionObserver() noexcept;
 
     /// @brief The document whose rendering updates compute the observations: the root's, or the main
     /// frame's for an implicit root.
-    KRYS_NODISCARD dom::Document *TrackingDocument() const noexcept;
+    KRYS_NODISCARD Document *TrackingDocument() const noexcept;
 
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-root
-    KRYS_NODISCARD dom::ContainerNode *Root() const noexcept
+    KRYS_NODISCARD ContainerNode *Root() const noexcept
     {
       return _root.get();
     }
 
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-rootmargin
-    KRYS_NODISCARD dom::DOMString RootMargin() const noexcept;
+    KRYS_NODISCARD DOMString RootMargin() const noexcept;
 
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-scrollmargin
-    KRYS_NODISCARD dom::DOMString ScrollMargin() const noexcept;
+    KRYS_NODISCARD DOMString ScrollMargin() const noexcept;
 
     KRYS_NODISCARD const IntersectionObserverMarginBox &RootMarginBox() const noexcept
     {
@@ -181,7 +177,7 @@ namespace krys::boo
       return _thresholds;
     }
 
-    KRYS_NODISCARD const List<WeakPtr<dom::Element>> &ObservationTargets() const noexcept
+    KRYS_NODISCARD const List<WeakPtr<Element>> &ObservationTargets() const noexcept
     {
       return _observationTargets;
     }
@@ -191,13 +187,13 @@ namespace krys::boo
       return !_observationTargets.empty();
     }
 
-    KRYS_NODISCARD bool IsObserving(const dom::Element &element) const noexcept;
+    KRYS_NODISCARD bool IsObserving(const Element &element) const noexcept;
 
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-observe
-    void Observe(dom::Element &target) noexcept;
+    void Observe(Element &target) noexcept;
 
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-unobserve
-    void Unobserve(dom::Element &target) noexcept;
+    void Unobserve(Element &target) noexcept;
 
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-disconnect
     void Disconnect() noexcept;
@@ -206,7 +202,7 @@ namespace krys::boo
     KRYS_NODISCARD List<Ref<IntersectionObserverEntry>> TakeRecords() noexcept;
 
     /// @brief An observed element is being destroyed.
-    void TargetDestroyed(dom::Element &target) noexcept;
+    void TargetDestroyed(Element &target) noexcept;
 
     /// @brief The root is being destroyed.
     void RootDestroyed() noexcept;
@@ -225,12 +221,12 @@ namespace krys::boo
     void Notify() noexcept;
 
   private:
-    bool RemoveTargetRegistration(dom::Element &target) noexcept;
+    bool RemoveTargetRegistration(Element &target) noexcept;
 
     void RemoveAllTargets() noexcept;
 
     KRYS_NODISCARD IntersectionObservationState ComputeIntersectionState(
-      const IntersectionObserverRegistration &registration, LocalFrameView &hostFrameView,
-      dom::Element &target, ApplyRootMargin applyRootMargin) const noexcept;
+      const IntersectionObserverRegistration &registration, LocalFrameView &hostFrameView, Element &target,
+      ApplyRootMargin applyRootMargin) const noexcept;
   };
 }

@@ -30,10 +30,6 @@
 namespace krys::boo
 {
   class AffineTransform;
-}
-
-namespace krys::boo::svg
-{
   template <typename TOwner, typename... TBaseTypes>
   class SVGPropertyOwnerRegistry;
 
@@ -91,9 +87,9 @@ namespace krys::boo::svg
       _preserveAspectRatio->SetBaseValInternal({});
     }
 
-    KRYS_NODISCARD dom::DOMString ViewBoxString() const noexcept;
+    KRYS_NODISCARD DOMString ViewBoxString() const noexcept;
 
-    KRYS_NODISCARD dom::DOMString PreserveAspectRatioString() const noexcept
+    KRYS_NODISCARD DOMString PreserveAspectRatioString() const noexcept
     {
       return PreserveAspectRatio().ValueAsString();
     }
@@ -112,14 +108,14 @@ namespace krys::boo::svg
     explicit SVGFitToViewBox(SVGElement *contextElement,
                              SVGPropertyAccess access = SVGPropertyAccess::ReadWrite) noexcept;
 
-    KRYS_NODISCARD static bool IsKnownAttribute(const dom::QualifiedName &attributeName) noexcept;
+    KRYS_NODISCARD static bool IsKnownAttribute(const QualifiedName &attributeName) noexcept;
 
     void Reset() noexcept;
 
-    bool ParseAttribute(const dom::QualifiedName &name, Maybe<dom::DOMStringView> value) noexcept;
+    bool ParseAttribute(const QualifiedName &name, Maybe<DOMStringView> value) noexcept;
 
-    KRYS_NODISCARD Maybe<FloatRect> ParseViewBox(dom::DOMStringView value) noexcept;
+    KRYS_NODISCARD Maybe<FloatRect> ParseViewBox(DOMStringView value) noexcept;
 
-    KRYS_NODISCARD static Maybe<FloatRect> ParseViewBox(dom::DOMStringView &buffer, bool validate) noexcept;
+    KRYS_NODISCARD static Maybe<FloatRect> ParseViewBox(DOMStringView &buffer, bool validate) noexcept;
   };
 }

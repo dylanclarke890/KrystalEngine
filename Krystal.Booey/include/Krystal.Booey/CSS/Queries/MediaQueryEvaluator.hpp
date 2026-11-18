@@ -30,12 +30,8 @@
 
 namespace krys::boo
 {
-  class RenderStyle;
-}
-
-namespace krys::boo::dom
-{
   class Document;
+  class RenderStyle;
 }
 
 namespace krys::boo::css::mq
@@ -45,12 +41,12 @@ namespace krys::boo::css::mq
   {
   private:
     CSSOMStringAtom _mediaType;
-    WeakPtr<const dom::Document> _document;
+    WeakPtr<const Document> _document;
     const RenderStyle *_rootElementStyle {nullptr}; // NOTE: must outlive evaluator.
     EvaluationResult _staticMediaConditionResult {EvaluationResult::Unknown};
 
   public:
-    MediaQueryEvaluator(CSSOMStringAtom mediaType, const dom::Document &document,
+    MediaQueryEvaluator(CSSOMStringAtom mediaType, const Document &document,
                         const RenderStyle *rootElementStyle) noexcept;
 
     explicit MediaQueryEvaluator(CSSOMStringAtom mediaType = null,

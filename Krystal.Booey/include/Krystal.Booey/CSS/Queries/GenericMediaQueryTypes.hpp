@@ -41,12 +41,8 @@
 
 namespace krys::boo
 {
-  class RenderElement;
-}
-
-namespace krys::boo::dom
-{
   class Document;
+  class RenderElement;
 }
 
 namespace krys::boo::css::mq
@@ -159,7 +155,7 @@ namespace krys::boo::css::mq
   /// @brief What a feature is evaluated against.
   struct FeatureEvaluationContext
   {
-    WeakRef<const dom::Document> Document;
+    WeakRef<const boo::Document> Document;
     ToLengthConversionData ConversionData {};
     CheckedPtr<const RenderElement> Renderer;
   };

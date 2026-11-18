@@ -45,7 +45,7 @@ namespace krys::boo
     bool _needsTextUpdate {false};
 
   public:
-    RenderQuote(dom::Document &document, RenderStyle &&style, QuoteType quote) noexcept;
+    RenderQuote(Document &document, RenderStyle &&style, QuoteType quote) noexcept;
 
     ~RenderQuote() noexcept override;
 

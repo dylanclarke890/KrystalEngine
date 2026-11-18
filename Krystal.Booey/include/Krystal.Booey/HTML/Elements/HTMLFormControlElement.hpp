@@ -26,10 +26,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Forms/ValidatedFormListedElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @brief A form control: a button, fieldset, input, output, select or textarea.
-  class HTMLFormControlElement : public HTMLElement, public ValidatedFormListedElement
+  class HTMLFormControlElement : public HTMLElement, public html::ValidatedFormListedElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLFormControlElement);
 
@@ -53,22 +53,22 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool MatchesValidPseudoClass() const noexcept override
     {
-      return ValidatedFormListedElement::MatchesValidPseudoClass();
+      return html::ValidatedFormListedElement::MatchesValidPseudoClass();
     }
 
     KRYS_NODISCARD bool MatchesInvalidPseudoClass() const noexcept override
     {
-      return ValidatedFormListedElement::MatchesInvalidPseudoClass();
+      return html::ValidatedFormListedElement::MatchesInvalidPseudoClass();
     }
 
     KRYS_NODISCARD bool MatchesUserValidPseudoClass() const noexcept override
     {
-      return ValidatedFormListedElement::MatchesUserValidPseudoClass();
+      return html::ValidatedFormListedElement::MatchesUserValidPseudoClass();
     }
 
     KRYS_NODISCARD bool MatchesUserInvalidPseudoClass() const noexcept override
     {
-      return ValidatedFormListedElement::MatchesUserInvalidPseudoClass();
+      return html::ValidatedFormListedElement::MatchesUserInvalidPseudoClass();
     }
 
     KRYS_NODISCARD bool IsDisabledFormControl() const noexcept override
@@ -138,40 +138,40 @@ namespace krys::boo::html
     }
 
     /// @brief The return value of a dialog this control submits.
-    KRYS_NODISCARD virtual Maybe<dom::DOMString> ResultForDialogSubmit() const noexcept;
+    KRYS_NODISCARD virtual Maybe<DOMString> ResultForDialogSubmit() const noexcept;
 
     /// @brief The popover the control (a button) shows or hides, if it can.
     /// @see https://html.spec.whatwg.org/#popover-target-element
     KRYS_NODISCARD RefPtr<HTMLElement> PopoverTargetElement() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-popovertargetelement
-    KRYS_NODISCARD RefPtr<dom::Element> PopoverTargetElementForBindings() const noexcept;
+    KRYS_NODISCARD RefPtr<boo::Element> PopoverTargetElementForBindings() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-popovertargetelement
-    void PopoverTargetElementForBindings(dom::Element *element) noexcept;
+    void PopoverTargetElementForBindings(boo::Element *element) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-popovertargetaction
-    KRYS_NODISCARD dom::DOMString PopoverTargetAction() const noexcept;
+    KRYS_NODISCARD DOMString PopoverTargetAction() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-popovertargetaction
-    void PopoverTargetAction(dom::DOMString value) noexcept;
+    void PopoverTargetAction(DOMString value) noexcept;
 
     /// @brief Shows or hides the control's popover target element as its activation, unless the activation
     /// came from inside the popover (@p eventTarget is the event's target).
     /// @see https://html.spec.whatwg.org/#popover-target-attribute-activation-behavior
     void HandlePopoverTargetAction(dom::EventTarget *eventTarget) noexcept;
 
-    KRYS_NODISCARD FormAssociatedElement *AsFormAssociatedElement() noexcept final
+    KRYS_NODISCARD html::FormAssociatedElement *AsFormAssociatedElement() noexcept final
     {
       return this;
     }
 
-    KRYS_NODISCARD FormListedElement *AsFormListedElement() noexcept final
+    KRYS_NODISCARD html::FormListedElement *AsFormListedElement() noexcept final
     {
       return this;
     }
 
-    KRYS_NODISCARD ValidatedFormListedElement *AsValidatedFormListedElement() noexcept final
+    KRYS_NODISCARD html::ValidatedFormListedElement *AsValidatedFormListedElement() noexcept final
     {
       return this;
     }
@@ -187,8 +187,8 @@ namespace krys::boo::html
     }
 
   protected:
-    HTMLFormControlElement(dom::Document &document, HTMLElementInterface interface,
-                           HTMLElementFlags flags = HTMLElementFlags::None) noexcept;
+    HTMLFormControlElement(Document &document, html::HTMLElementInterface interface,
+                           html::HTMLElementFlags flags = html::HTMLElementFlags::None) noexcept;
 
     void OnInsert() noexcept override;
 
@@ -198,15 +198,14 @@ namespace krys::boo::html
 
     void DidRecalcStyle(EnumSet<style::Change>) noexcept override;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
-    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
-    void OnAdopt(dom::Document &oldDocument) noexcept override;
+    void OnAdopt(Document &oldDocument) noexcept override;
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
     void DisabledStateChanged() noexcept override;
 
@@ -225,14 +224,14 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLFormControlElement)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLFormControlElement)
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsFormControlElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsFormControlElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsFormControlElement();
   }

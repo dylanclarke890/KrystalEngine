@@ -33,7 +33,7 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   Ref<CSSKeywordValue> CSSKeywordValue::RectifyKeywordish(CSSKeywordish keywordish) noexcept
   {
@@ -71,16 +71,16 @@ namespace krys::boo::css
   void CSSKeywordValue::Serialise(StringBuilder &builder, EnumSet<SerialisationArguments>) const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#keywordvalue-serialization
-    SerialiseIdentifier(_value, builder);
+    css::SerialiseIdentifier(_value, builder);
   }
 
   RefPtr<css::Value> CSSKeywordValue::ToCSSValue() const noexcept
   {
-    auto keyword = ValueIdFromName(_value);
-    if (keyword == ValueId::Invalid)
+    auto keyword = css::ValueIdFromName(_value);
+    if (keyword == css::ValueId::Invalid)
     {
-      return PrimitiveValue::CreateCustomIdent(_value);
+      return css::PrimitiveValue::CreateCustomIdent(_value);
     }
-    return PrimitiveValue::Create(keyword);
+    return css::PrimitiveValue::Create(keyword);
   }
 }

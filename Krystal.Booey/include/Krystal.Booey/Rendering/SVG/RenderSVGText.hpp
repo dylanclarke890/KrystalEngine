@@ -34,15 +34,11 @@ namespace krys::boo::inline_iterator
   class InlineBoxIterator;
 }
 
-namespace krys::boo::svg
-{
-  class SVGTextElement;
-}
-
 namespace krys::boo
 {
   class RenderSVGInlineText;
   class SVGRootInlineBox;
+  class SVGTextElement;
   class SVGTextLayoutEngine;
 
   /// @brief The renderer of a `<text>`: a block whose inline content is laid out character by character by
@@ -65,11 +61,11 @@ namespace krys::boo
     FloatRect _objectBoundingBox;
 
   public:
-    RenderSVGText(svg::SVGTextElement &, RenderStyle &&) noexcept;
+    RenderSVGText(SVGTextElement &, RenderStyle &&) noexcept;
 
     ~RenderSVGText() noexcept override;
 
-    KRYS_NODISCARD svg::SVGTextElement &TextElement() const noexcept;
+    KRYS_NODISCARD SVGTextElement &TextElement() const noexcept;
 
     KRYS_NODISCARD bool IsChildAllowed(const RenderObject &, const RenderStyle &) const noexcept override;
 

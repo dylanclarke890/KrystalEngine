@@ -27,9 +27,9 @@
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include <algorithm>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGGradientElement::SVGGradientElement(dom::Document &document,
+  SVGGradientElement::SVGGradientElement(Document &document,
                                          UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
                                          SVGElementInterface interface) noexcept
       : SVGElement(document, krys::move(propertyRegistry), interface), SVGURIReference(this),
@@ -50,11 +50,10 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGGradientElement::AttributeChanged(const dom::QualifiedName &name,
-                                            Maybe<dom::DOMStringView> oldValue,
-                                            Maybe<dom::DOMStringView> value) noexcept
+  void SVGGradientElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                            Maybe<DOMStringView> value) noexcept
   {
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
     if (name == SVGNames::GradientUnitsAttr())
     {
       auto propertyValue = SVGPropertyTraits<SVGUnitTypes::SVGUnitType>::FromString(*this, string);
@@ -85,7 +84,7 @@ namespace krys::boo::svg
     UpdateSVGRendererForElementChange();
   }
 
-  void SVGGradientElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGGradientElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName) || SVGURIReference::IsKnownAttribute(attributeName))
     {

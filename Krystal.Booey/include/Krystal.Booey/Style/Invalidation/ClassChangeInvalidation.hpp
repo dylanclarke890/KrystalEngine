@@ -41,29 +41,29 @@ namespace krys::boo::style
 
   private:
     const bool _isEnabled;
-    const Ref<dom::Element> _element;
+    const Ref<Element> _element;
 
     Invalidator::MatchElementRuleSets _beforeChangeRuleSets;
     Invalidator::MatchElementRuleSets _afterChangeRuleSets;
 
   public:
-    ClassChangeInvalidation(dom::Element &element, Span<const dom::DOMStringAtom> oldClasses,
-                            Span<const dom::DOMStringAtom> newClasses) noexcept;
+    ClassChangeInvalidation(Element &element, Span<const DOMStringAtom> oldClasses,
+                            Span<const DOMStringAtom> newClasses) noexcept;
 
     ~ClassChangeInvalidation() noexcept;
 
   private:
-    void ComputeInvalidation(Span<const dom::DOMStringAtom> oldClasses,
-                             Span<const dom::DOMStringAtom> newClasses) noexcept;
+    void ComputeInvalidation(Span<const DOMStringAtom> oldClasses,
+                             Span<const DOMStringAtom> newClasses) noexcept;
 
     void InvalidateBeforeChange() noexcept;
 
     void InvalidateAfterChange() noexcept;
   };
 
-  inline ClassChangeInvalidation::ClassChangeInvalidation(dom::Element &element,
-                                                          Span<const dom::DOMStringAtom> oldClasses,
-                                                          Span<const dom::DOMStringAtom> newClasses) noexcept
+  inline ClassChangeInvalidation::ClassChangeInvalidation(Element &element,
+                                                          Span<const DOMStringAtom> oldClasses,
+                                                          Span<const DOMStringAtom> newClasses) noexcept
       : _isEnabled(element.NeedsStyleInvalidation()), _element(ShareRef(element))
   {
     if (!_isEnabled)

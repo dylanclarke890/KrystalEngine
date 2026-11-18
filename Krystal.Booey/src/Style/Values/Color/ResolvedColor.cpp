@@ -47,8 +47,8 @@ namespace krys::boo::style
     builder.Append(boo::SerialisationForCSS(value.Value));
   }
 
-  css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &,
-                                                   const ResolvedColor &value) noexcept
+  CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &,
+                                              const ResolvedColor &value) noexcept
   {
     return boo::SerialisationForCSS(value.Value);
   }

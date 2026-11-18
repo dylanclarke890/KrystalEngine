@@ -490,8 +490,7 @@ namespace krys::boo::css::parse_property
   // MARK: <'filter'> parsing (raw)
 
   Maybe<style::Filter> ParseFilterValueListOrNoneRaw(const CSSOMString &string, const ParserContext &context,
-                                                     const dom::Document &document,
-                                                     RenderStyle &style) noexcept
+                                                     const Document &document, RenderStyle &style) noexcept
   {
     InputStream inputStream {CSSOMString(string)};
     Tokenizer tokenizer(inputStream);

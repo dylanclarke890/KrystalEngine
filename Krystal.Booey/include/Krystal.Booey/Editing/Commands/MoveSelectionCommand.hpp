@@ -28,28 +28,25 @@
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Commands/CompositeEditCommand.hpp"
 
-namespace krys::boo::dom
-{
-  class DocumentFragment;
-}
-
 namespace krys::boo
 {
+  class DocumentFragment;
+
   /// @brief Moves the selection, dropped as @p fragment, to a position: deletes the selection, then inserts
   /// the fragment there.
   class MoveSelectionCommand final : public CompositeEditCommand
   {
   private:
-    const Ref<dom::DocumentFragment> _fragment;
+    const Ref<DocumentFragment> _fragment;
     dom::Position _position;
     bool _smartInsert;
     bool _smartDelete;
 
   public:
-    MoveSelectionCommand(Ref<dom::DocumentFragment> &&fragment, const dom::Position &position,
-                         bool smartInsert, bool smartDelete) noexcept;
+    MoveSelectionCommand(Ref<DocumentFragment> &&fragment, const dom::Position &position, bool smartInsert,
+                         bool smartDelete) noexcept;
 
-    KRYS_NODISCARD static Ref<MoveSelectionCommand> Create(Ref<dom::DocumentFragment> &&fragment,
+    KRYS_NODISCARD static Ref<MoveSelectionCommand> Create(Ref<DocumentFragment> &&fragment,
                                                            const dom::Position &position,
                                                            bool smartInsert = false,
                                                            bool smartDelete = false) noexcept;

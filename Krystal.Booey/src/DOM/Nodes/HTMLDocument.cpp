@@ -53,7 +53,7 @@
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include <algorithm>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   bool HTMLDocument::IsCaseSensitiveAttribute(const QualifiedName &attributeName) noexcept
   {

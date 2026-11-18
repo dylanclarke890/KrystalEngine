@@ -26,15 +26,18 @@
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
+}
 
+namespace krys::boo::dom
+{
   template <typename>
   class ExceptionOr;
 }
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSRule;
   class CSSStyleSheet;
@@ -63,7 +66,7 @@ namespace krys::boo::css
     KRYS_NODISCARD virtual StyleDeclarationType GetStyleDeclarationType() const noexcept = 0;
 
     /// @brief The element whose `style` attribute this is, if any.
-    KRYS_NODISCARD virtual dom::Element *ParentElement() const noexcept
+    KRYS_NODISCARD virtual Element *ParentElement() const noexcept
     {
       return nullptr;
     }

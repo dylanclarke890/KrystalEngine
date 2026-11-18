@@ -28,14 +28,10 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGModelObject.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::svg
-{
-  class SVGImageElement;
-}
-
 namespace krys::boo
 {
   class RenderImageResource;
+  class SVGImageElement;
 
   /// @brief The renderer of `<image>`: draws its image into its rectangle, fitted by `preserveAspectRatio`.
   class LegacyRenderSVGImage final : public LegacyRenderSVGModelObject
@@ -51,11 +47,11 @@ namespace krys::boo
     const UniquePtr<RenderImageResource> _imageResource;
 
   public:
-    LegacyRenderSVGImage(svg::SVGImageElement &, RenderStyle &&) noexcept;
+    LegacyRenderSVGImage(SVGImageElement &, RenderStyle &&) noexcept;
 
     ~LegacyRenderSVGImage() noexcept override;
 
-    KRYS_NODISCARD svg::SVGImageElement &ImageElement() const noexcept;
+    KRYS_NODISCARD SVGImageElement &ImageElement() const noexcept;
 
     bool UpdateImageViewport() noexcept;
 

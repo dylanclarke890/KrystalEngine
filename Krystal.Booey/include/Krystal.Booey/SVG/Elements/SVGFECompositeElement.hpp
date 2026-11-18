@@ -24,7 +24,7 @@
 #include "Krystal.Booey/Graphics/Filters/FEComposite.hpp"
 #include "Krystal.Booey/SVG/SVGFilterPrimitiveStandardAttributes.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   template <>
   struct SVGPropertyTraits<CompositeOperationType>
@@ -34,7 +34,7 @@ namespace krys::boo::svg
       return static_cast<uint32>(CompositeOperationType::FECOMPOSITE_OPERATOR_LIGHTER);
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(CompositeOperationType type) noexcept
+    KRYS_NODISCARD static DOMString ToString(CompositeOperationType type) noexcept
     {
       switch (type)
       {
@@ -52,7 +52,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    KRYS_NODISCARD static CompositeOperationType FromString(SVGElement &, dom::DOMStringView value) noexcept
+    KRYS_NODISCARD static CompositeOperationType FromString(SVGElement &, DOMStringView value) noexcept
     {
       if (value == u8"arithmetic")
       {
@@ -102,14 +102,14 @@ namespace krys::boo::svg
     Ref<SVGAnimatedNumber> _k4;
 
   public:
-    explicit SVGFECompositeElement(dom::Document &document) noexcept;
+    explicit SVGFECompositeElement(Document &document) noexcept;
 
-    KRYS_NODISCARD dom::DOMString In1() const noexcept
+    KRYS_NODISCARD DOMString In1() const noexcept
     {
       return _in1->CurrentValue();
     }
 
-    KRYS_NODISCARD dom::DOMString In2() const noexcept
+    KRYS_NODISCARD DOMString In2() const noexcept
     {
       return _in2->CurrentValue();
     }
@@ -178,17 +178,16 @@ namespace krys::boo::svg
       SVGPropertyOwnerRegistry<SVGFECompositeElement, SVGFilterPrimitiveStandardAttributes>;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
-    bool SetFilterEffectAttribute(FilterEffect &effect,
-                                  const dom::QualifiedName &attributeName) noexcept final;
+    bool SetFilterEffectAttribute(FilterEffect &effect, const QualifiedName &attributeName) noexcept final;
 
-    KRYS_NODISCARD List<dom::DOMStringAtom> FilterEffectInputsNames() const noexcept final
+    KRYS_NODISCARD List<DOMStringAtom> FilterEffectInputsNames() const noexcept final
     {
-      return {dom::DOMStringAtom(In1()), dom::DOMStringAtom(In2())};
+      return {DOMStringAtom(In1()), DOMStringAtom(In2())};
     }
 
     KRYS_NODISCARD RefPtr<FilterEffect>
@@ -197,8 +196,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGFECompositeElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGFECompositeElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGFECompositeElement();
   }

@@ -55,7 +55,7 @@ namespace krys::boo::html
     event.SetDefaultHandled();
   }
 
-  Maybe<dom::DOMString> ResetInputType::DefaultValue() const noexcept
+  Maybe<DOMString> ResetInputType::DefaultValue() const noexcept
   {
     return ResetButtonDefaultLabel();
   }

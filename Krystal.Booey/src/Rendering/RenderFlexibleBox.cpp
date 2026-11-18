@@ -526,14 +526,14 @@ namespace krys::boo
     }
   }
 
-  RenderFlexibleBox::RenderFlexibleBox(Type type, dom::Element &element, RenderStyle &&style) noexcept
+  RenderFlexibleBox::RenderFlexibleBox(Type type, Element &element, RenderStyle &&style) noexcept
       : RenderBlock(type, element, krys::move(style), TypeFlag::IsFlexibleBox)
   {
     krys_debug_assert(IsRenderFlexibleBox());
     SetChildrenInline(false); // All of our children must be block-level.
   }
 
-  RenderFlexibleBox::RenderFlexibleBox(Type type, dom::Document &document, RenderStyle &&style) noexcept
+  RenderFlexibleBox::RenderFlexibleBox(Type type, Document &document, RenderStyle &&style) noexcept
       : RenderBlock(type, document, krys::move(style), TypeFlag::IsFlexibleBox)
   {
     krys_debug_assert(IsRenderFlexibleBox());

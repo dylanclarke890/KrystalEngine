@@ -40,7 +40,7 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD bool IsInUserAgentShadowRootOrHasEditableShadowAncestor(dom::Node &node) noexcept
+    KRYS_NODISCARD bool IsInUserAgentShadowRootOrHasEditableShadowAncestor(Node &node) noexcept
     {
       auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(node);
       if (!shadowRoot)
@@ -53,7 +53,7 @@ namespace krys::boo
         return true;
       }
 
-      for (dom::Node *currentNode = &node; currentNode; currentNode = currentNode->ParentOrShadowHostNode())
+      for (Node *currentNode = &node; currentNode; currentNode = currentNode->ParentOrShadowHostNode())
       {
         if (currentNode->HasEditableStyle())
         {
@@ -108,7 +108,7 @@ namespace krys::boo
     return selection.get();
   }
 
-  VisibleSelection VisibleSelection::SelectionFromContentsOfNode(dom::Node *node) noexcept
+  VisibleSelection VisibleSelection::SelectionFromContentsOfNode(Node *node) noexcept
   {
     krys_debug_assert(!EditingIgnoresContent(*node));
     return VisibleSelection(VisiblePosition {dom::FirstPositionInNode(node)},
@@ -175,7 +175,7 @@ namespace krys::boo
     return false;
   }
 
-  RefPtr<dom::Document> VisibleSelection::GetDocument() const noexcept
+  RefPtr<Document> VisibleSelection::GetDocument() const noexcept
   {
     auto *document = _canonicalAnchor.GetDocument();
     if (!document)
@@ -602,7 +602,7 @@ namespace krys::boo
   }
 
   dom::Position VisibleSelection::AdjustPositionForEnd(const dom::Position &currentPosition,
-                                                       dom::Node *startContainerNode) noexcept
+                                                       Node *startContainerNode) noexcept
   {
     auto &scopeRoot = dom::TreeQueries::Root(*startContainerNode);
 
@@ -626,7 +626,7 @@ namespace krys::boo
   }
 
   dom::Position VisibleSelection::AdjustPositionForStart(const dom::Position &currentPosition,
-                                                         dom::Node *endContainerNode) noexcept
+                                                         Node *endContainerNode) noexcept
   {
     auto &scopeRoot = dom::TreeQueries::Root(*endContainerNode);
 
@@ -750,7 +750,7 @@ namespace krys::boo
       if (endRoot || endEditableAncestor != baseEditableAncestor)
       {
         dom::Position p = PreviousVisuallyDistinctCandidate(_end);
-        dom::Element *shadowAncestor = endRoot ? dom::TreeQueries::ShadowHost(*endRoot) : nullptr;
+        Element *shadowAncestor = endRoot ? dom::TreeQueries::ShadowHost(*endRoot) : nullptr;
         if (p.IsNull() && shadowAncestor)
         {
           p = dom::PositionAfterNode(shadowAncestor);
@@ -785,7 +785,7 @@ namespace krys::boo
       if (startRoot || startEditableAncestor != baseEditableAncestor)
       {
         dom::Position p = NextVisuallyDistinctCandidate(_start);
-        dom::Element *shadowAncestor = startRoot ? dom::TreeQueries::ShadowHost(*startRoot) : nullptr;
+        Element *shadowAncestor = startRoot ? dom::TreeQueries::ShadowHost(*startRoot) : nullptr;
         if (p.IsNull() && shadowAncestor)
         {
           p = dom::PositionBeforeNode(shadowAncestor);
@@ -841,20 +841,20 @@ namespace krys::boo
     return IsRichlyEditablePosition(Start());
   }
 
-  dom::Element *VisibleSelection::RootEditableElement() const noexcept
+  Element *VisibleSelection::RootEditableElement() const noexcept
   {
     return EditableRootForPosition(Start());
   }
 
   bool VisibleSelection::IsInPasswordField() const noexcept
   {
-    auto *textControl = DynamicDowncast<html::HTMLInputElement>(html::EnclosingTextFormControl(Start()));
+    auto *textControl = DynamicDowncast<HTMLInputElement>(html::EnclosingTextFormControl(Start()));
     return textControl && textControl->IsPasswordField();
   }
 
-  dom::Node *VisibleSelection::NonBoundaryShadowTreeRootNode() const noexcept
+  Node *VisibleSelection::NonBoundaryShadowTreeRootNode() const noexcept
   {
     auto *node = Start().DeprecatedNode();
-    return node && !Is<dom::ShadowRoot>(*node) ? node->NonBoundaryShadowTreeRootNode() : nullptr;
+    return node && !Is<ShadowRoot>(*node) ? node->NonBoundaryShadowTreeRootNode() : nullptr;
   }
 }

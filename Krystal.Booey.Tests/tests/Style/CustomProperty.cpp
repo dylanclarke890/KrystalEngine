@@ -16,13 +16,11 @@
 
 namespace krys::boo::style::tests
 {
-  using css::CSSOMStringAtom;
-
   namespace
   {
-    KRYS_NODISCARD Ref<css::VariableData> VariableData(css::CSSOMStringView text) noexcept
+    KRYS_NODISCARD Ref<css::VariableData> VariableData(CSSOMStringView text) noexcept
     {
-      css::InputStream input {css::CSSOMString {text}};
+      css::InputStream input {CSSOMString {text}};
       css::Tokenizer tokenizer {input};
       std::ignore = tokenizer.PumpTokenizer();
       return css::VariableData::Create(tokenizer.Tokens());

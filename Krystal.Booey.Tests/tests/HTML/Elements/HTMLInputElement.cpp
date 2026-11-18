@@ -15,17 +15,17 @@ namespace krys::boo::html::tests
   namespace
   {
     /// @brief The value an input of type @p type gets when its value is set to @p value.
-    KRYS_NODISCARD std::string Sanitized(dom::DOMStringView type, dom::DOMStringView value,
-                                         dom::DOMStringView attributes = {})
+    KRYS_NODISCARD std::string Sanitized(DOMStringView type, DOMStringView value,
+                                         DOMStringView attributes = {})
     {
       FormFixture fixture(u8"<input id=i " + utf8_string(attributes) + u8">");
       auto &input = fixture.Get<HTMLInputElement>(u8"i");
-      REQUIRE_FALSE(input.SetAttribute(u8"type", dom::DOMString(type)).HasException());
+      REQUIRE_FALSE(input.SetAttribute(u8"type", DOMString(type)).HasException());
       REQUIRE_FALSE(input.SetValue(value).HasException());
       return Str(input.Value());
     }
 
-    KRYS_NODISCARD bool Matches(const dom::Element &element, dom::DOMStringView selector)
+    KRYS_NODISCARD bool Matches(const boo::Element &element, DOMStringView selector)
     {
       auto result = element.Matches(selector);
       REQUIRE_FALSE(result.HasException());
@@ -300,9 +300,9 @@ namespace krys::boo::html::tests
   {
     FormFixture fixture(u8"<input id=i>");
     auto &input = fixture.Get<HTMLInputElement>(u8"i");
-    auto validAs = [&](dom::DOMStringView type, dom::DOMStringView value)
+    auto validAs = [&](DOMStringView type, DOMStringView value)
     {
-      input.Type(dom::DOMString(type));
+      input.Type(DOMString(type));
       (void)input.SetValue(value);
       return !input.TypeMismatch();
     };
@@ -313,8 +313,8 @@ namespace krys::boo::html::tests
     {
       CHECK(validAs(u8"email", u8"a.b!#$%&'*+/=?^_`{|}~-@localhost"));
       CHECK(validAs(u8"email", u8"a@x-1.EXAMPLE"));
-      CHECK(validAs(u8"email", dom::DOMString(u8"a@") + dom::DOMString(63, u8'x')));
-      CHECK_FALSE(validAs(u8"email", dom::DOMString(u8"a@") + dom::DOMString(64, u8'x')));
+      CHECK(validAs(u8"email", DOMString(u8"a@") + DOMString(63, u8'x')));
+      CHECK_FALSE(validAs(u8"email", DOMString(u8"a@") + DOMString(64, u8'x')));
       CHECK_FALSE(validAs(u8"email", u8"@example.com"));
       CHECK_FALSE(validAs(u8"email", u8"a@"));
       CHECK_FALSE(validAs(u8"email", u8"a@b..c"));
@@ -523,9 +523,9 @@ namespace krys::boo::html::tests
   {
     FormFixture fixture(u8R"(<input id=i list=h><x-host id=h></x-host>)");
     // A shadow root on the element with ID @p id, its reference target @p target, holding @p markup.
-    auto attach = [&](dom::DOMStringView id, const char8_t *target, const char8_t *markup)
+    auto attach = [&](DOMStringView id, const char8_t *target, const char8_t *markup)
     {
-      auto shadow = fixture.ById(id).AttachShadow({.ReferenceTarget = dom::DOMString(target)}).ReleaseValue();
+      auto shadow = fixture.ById(id).AttachShadow({.ReferenceTarget = DOMString(target)}).ReleaseValue();
       REQUIRE_FALSE(shadow->SetHTMLUnsafe(markup).HasException());
       return shadow;
     };

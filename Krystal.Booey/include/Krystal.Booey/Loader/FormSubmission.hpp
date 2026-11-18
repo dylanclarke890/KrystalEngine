@@ -44,11 +44,15 @@ namespace krys::boo::dom
   class Event;
 }
 
+namespace krys::boo
+{
+  class HTMLFormControlElement;
+  class HTMLFormElement;
+}
+
 namespace krys::boo::html
 {
   class DOMFormData;
-  class HTMLFormControlElement;
-  class HTMLFormElement;
 }
 
 namespace krys::boo
@@ -79,10 +83,10 @@ namespace krys::boo
     {
     private:
       Method _method {Method::Get};
-      dom::DOMString _action;
-      dom::DOMString _target;
-      dom::DOMString _encodingType {u8"application/x-www-form-urlencoded"};
-      dom::DOMString _acceptCharset;
+      DOMString _action;
+      DOMString _target;
+      DOMString _encodingType {u8"application/x-www-form-urlencoded"};
+      DOMString _acceptCharset;
 
     public:
       KRYS_NODISCARD Method GetMethod() const noexcept
@@ -96,24 +100,24 @@ namespace krys::boo
 
       KRYS_NODISCARD static utf8_stringview MethodString(Method method) noexcept;
 
-      KRYS_NODISCARD const dom::DOMString &Action() const noexcept
+      KRYS_NODISCARD const DOMString &Action() const noexcept
       {
         return _action;
       }
 
       void ParseAction(utf8_stringview action) noexcept;
 
-      KRYS_NODISCARD const dom::DOMString &Target() const noexcept
+      KRYS_NODISCARD const DOMString &Target() const noexcept
       {
         return _target;
       }
 
       void SetTarget(utf8_stringview target) noexcept
       {
-        _target = dom::DOMString(target);
+        _target = DOMString(target);
       }
 
-      KRYS_NODISCARD const dom::DOMString &EncodingType() const noexcept
+      KRYS_NODISCARD const DOMString &EncodingType() const noexcept
       {
         return _encodingType;
       }
@@ -122,14 +126,14 @@ namespace krys::boo
 
       void UpdateEncodingType(utf8_stringview type) noexcept;
 
-      KRYS_NODISCARD const dom::DOMString &AcceptCharset() const noexcept
+      KRYS_NODISCARD const DOMString &AcceptCharset() const noexcept
       {
         return _acceptCharset;
       }
 
       void SetAcceptCharset(utf8_stringview value) noexcept
       {
-        _acceptCharset = dom::DOMString(value);
+        _acceptCharset = DOMString(value);
       }
     };
 
@@ -137,28 +141,28 @@ namespace krys::boo
     Method _method;
     bool _wasCancelled {false};
     url::URL _action;
-    dom::DOMString _target;
-    dom::DOMString _encodingType;
+    DOMString _target;
+    DOMString _encodingType;
     RefPtr<html::DOMFormData> _entryList;
     RefPtr<dom::Event> _event;
-    Maybe<dom::DOMString> _returnValue; // for form[method=dialog]
-    RefPtr<html::HTMLFormElement> _form;
-    RefPtr<html::HTMLFormControlElement> _submitter;
+    Maybe<DOMString> _returnValue; // for form[method=dialog]
+    RefPtr<HTMLFormElement> _form;
+    RefPtr<HTMLFormControlElement> _submitter;
     FormSubmissionTrigger _trigger {FormSubmissionTrigger::NotSubmittedByJavaScript};
 
   public:
     /// @brief A dialog's submission, with the submitter's result.
-    FormSubmission(Maybe<dom::DOMString> returnValue, url::URL action, dom::DOMStringView target,
-                   dom::DOMStringView encodingType, dom::Event *event) noexcept;
+    FormSubmission(Maybe<DOMString> returnValue, url::URL action, DOMStringView target,
+                   DOMStringView encodingType, dom::Event *event) noexcept;
 
     /// @brief A `GET` or `POST` submission of @p entryList.
-    FormSubmission(Method method, url::URL action, dom::DOMStringView target, dom::DOMStringView encodingType,
+    FormSubmission(Method method, url::URL action, DOMStringView target, DOMStringView encodingType,
                    Ref<html::DOMFormData> &&entryList, dom::Event *event) noexcept;
 
     ~FormSubmission() noexcept;
 
-    KRYS_NODISCARD static Ref<FormSubmission> Create(html::HTMLFormElement &form,
-                                                     html::HTMLFormControlElement *overrideSubmitter,
+    KRYS_NODISCARD static Ref<FormSubmission> Create(HTMLFormElement &form,
+                                                     HTMLFormControlElement *overrideSubmitter,
                                                      const Attributes &attributes, dom::Event *event,
                                                      FormSubmissionTrigger trigger) noexcept;
 
@@ -172,14 +176,14 @@ namespace krys::boo
       return _action;
     }
 
-    KRYS_NODISCARD const dom::DOMString &Target() const noexcept
+    KRYS_NODISCARD const DOMString &Target() const noexcept
     {
       return _target;
     }
 
     /// @brief The form's encoding type (`enctype`, or the submitter's `formenctype`), for the host to encode
     /// the entries with: `application/x-www-form-urlencoded`, `multipart/form-data` or `text/plain`.
-    KRYS_NODISCARD const dom::DOMString &EncodingType() const noexcept
+    KRYS_NODISCARD const DOMString &EncodingType() const noexcept
     {
       return _encodingType;
     }
@@ -192,16 +196,16 @@ namespace krys::boo
       return _event.get();
     }
 
-    KRYS_NODISCARD const Maybe<dom::DOMString> &ReturnValue() const noexcept
+    KRYS_NODISCARD const Maybe<DOMString> &ReturnValue() const noexcept
     {
       return _returnValue;
     }
 
     /// @brief The submitted form.
-    KRYS_NODISCARD html::HTMLFormElement *Form() const noexcept;
+    KRYS_NODISCARD HTMLFormElement *Form() const noexcept;
 
     /// @brief The submit button that submitted the form, if any.
-    KRYS_NODISCARD html::HTMLFormControlElement *Submitter() const noexcept;
+    KRYS_NODISCARD HTMLFormControlElement *Submitter() const noexcept;
 
     KRYS_NODISCARD FormSubmissionTrigger Trigger() const noexcept
     {

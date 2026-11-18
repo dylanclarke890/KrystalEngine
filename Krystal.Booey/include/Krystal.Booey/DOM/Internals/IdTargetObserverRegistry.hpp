@@ -32,9 +32,13 @@
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
+}
+
+namespace krys::boo::dom
+{
   class IdTargetObserver;
 
   /// @brief The observers of a tree scope's IDs, told when the element with an ID changes.

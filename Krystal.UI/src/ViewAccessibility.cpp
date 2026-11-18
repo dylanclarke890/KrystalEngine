@@ -127,7 +127,7 @@ namespace krys::ui
       }
     }
 
-    KRYS_NODISCARD uint32 UnsignedAttribute(const AXObject &object, boo::dom::DOMStringView name) noexcept
+    KRYS_NODISCARD uint32 UnsignedAttribute(const AXObject &object, boo::DOMStringView name) noexcept
     {
       auto value = object.GetAttributeTrimmed(name);
       auto parsed = boo::html::Numbers::ParseNonNegativeInteger(value);
@@ -136,7 +136,7 @@ namespace krys::ui
 
     KRYS_NODISCARD bool IsPassword(const AXObject &object) noexcept
     {
-      auto *input = DynamicDowncast<boo::html::HTMLInputElement>(object.GetNode());
+      auto *input = DynamicDowncast<boo::HTMLInputElement>(object.GetNode());
       return input && input->IsPasswordField();
     }
 
@@ -807,7 +807,7 @@ namespace krys::ui
   bool ViewAccessibility::SetValue(pal::AccessibilityNodeID node, utf8_stringview value) noexcept
   {
     RefPtr<AXObject> object = ShareRefPtr(Object(node));
-    return object && object->CanSetValueAttribute() && object->SetValue(boo::dom::DOMStringView(value));
+    return object && object->CanSetValueAttribute() && object->SetValue(boo::DOMStringView(value));
   }
 
   bool ViewAccessibility::SetRangeValue(pal::AccessibilityNodeID node, double value) noexcept
@@ -952,7 +952,7 @@ namespace krys::ui
     }
     pal::AccessibilityTextRun run {offset, offset + 1, TextStyleOf(*renderer)};
     // A text node is drawn alike throughout.
-    if (auto *textNode = DynamicDowncast<boo::dom::Text>(container))
+    if (auto *textNode = DynamicDowncast<boo::Text>(container))
     {
       auto start =
         object->IndexForVisiblePosition(boo::VisiblePosition(boo::FirstPositionInOrBeforeNode(textNode)));

@@ -40,13 +40,13 @@
 
 namespace krys::boo
 {
+  class Document;
   class File;
 }
 
 namespace krys::boo::dom
 {
   class DataTransferItemList;
-  class Document;
 
   /// @brief One of a data transfer's items: a string of a type, or a file.
   /// @see https://html.spec.whatwg.org/multipage/dnd.html#the-datatransferitem-interface

@@ -34,7 +34,7 @@ namespace krys::boo::html
     _taskQueue.push_back({source, krys::move(steps)});
   }
 
-  void EventLoop::QueueTask(TaskSource source, dom::Document &document, Steps &&steps,
+  void EventLoop::QueueTask(TaskSource source, boo::Document &document, Steps &&steps,
                             StoppedDocumentTask whenStopped) noexcept
   {
     _taskQueue.push_back({source, krys::move(steps), CreateWeakPtr(&document), true, whenStopped});

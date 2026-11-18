@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/SVG/Elements/SVGMetadataElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGMetadataElement::SVGMetadataElement(dom::Document &document) noexcept
+  SVGMetadataElement::SVGMetadataElement(Document &document) noexcept
       : SVGElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Metadata)
   {
   }

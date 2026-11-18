@@ -12,10 +12,10 @@ namespace krys::boo
   /// @see https://drafts.csswg.org/web-animations-2/#dictdef-keyframeanimationoptions
   struct KeyframeAnimationOptions : KeyframeEffectOptions
   {
-    dom::DOMString Id;
+    DOMString Id;
     /// @brief The timeline, if given: null for none; when it isn't given, the document's default timeline.
     Maybe<RefPtr<AnimationTimeline>> Timeline;
-    TimelineRangeValue RangeStart {dom::DOMString(u8"normal")};
-    TimelineRangeValue RangeEnd {dom::DOMString(u8"normal")};
+    TimelineRangeValue RangeStart {DOMString(u8"normal")};
+    TimelineRangeValue RangeEnd {DOMString(u8"normal")};
   };
 }

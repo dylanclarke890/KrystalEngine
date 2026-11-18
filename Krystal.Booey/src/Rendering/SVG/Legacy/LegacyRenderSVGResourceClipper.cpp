@@ -43,10 +43,10 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD svg::SVGGraphicsElement *GraphicsElement(dom::Node &node) noexcept
+    KRYS_NODISCARD SVGGraphicsElement *GraphicsElement(Node &node) noexcept
     {
-      auto *element = DynamicDowncast<svg::SVGElement>(node);
-      return element ? DynamicDowncast<svg::SVGGraphicsElement>(*element) : nullptr;
+      auto *element = DynamicDowncast<SVGElement>(node);
+      return element ? DynamicDowncast<SVGGraphicsElement>(*element) : nullptr;
     }
   }
 
@@ -60,7 +60,7 @@ namespace krys::boo
     return !ImageBuffer;
   }
 
-  LegacyRenderSVGResourceClipper::LegacyRenderSVGResourceClipper(svg::SVGClipPathElement &element,
+  LegacyRenderSVGResourceClipper::LegacyRenderSVGResourceClipper(SVGClipPathElement &element,
                                                                  RenderStyle &&style) noexcept
       : LegacyRenderSVGResourceContainer(Type::LegacySVGResourceClipper, element, krys::move(style))
   {
@@ -68,12 +68,12 @@ namespace krys::boo
 
   LegacyRenderSVGResourceClipper::~LegacyRenderSVGResourceClipper() noexcept = default;
 
-  svg::SVGClipPathElement &LegacyRenderSVGResourceClipper::ClipPathElement() const noexcept
+  SVGClipPathElement &LegacyRenderSVGResourceClipper::ClipPathElement() const noexcept
   {
-    return Downcast<svg::SVGClipPathElement>(LegacyRenderSVGResourceContainer::GetElement());
+    return Downcast<SVGClipPathElement>(LegacyRenderSVGResourceContainer::GetElement());
   }
 
-  svg::SVGUnitTypes::SVGUnitType LegacyRenderSVGResourceClipper::ClipPathUnits() const noexcept
+  SVGUnitTypes::SVGUnitType LegacyRenderSVGResourceClipper::ClipPathUnits() const noexcept
   {
     return ClipPathElement().ClipPathUnits();
   }
@@ -170,7 +170,7 @@ namespace krys::boo
 
       // For <use> elements, delegate the decision whether to use mask clipping or not to the referenced
       // element.
-      if (auto *useElement = DynamicDowncast<svg::SVGUseElement>(*graphicsElement))
+      if (auto *useElement = DynamicDowncast<SVGUseElement>(*graphicsElement))
       {
         auto *clipChildRenderer = useElement->RendererClipChild();
         if (clipChildRenderer && rendererRequiresMaskClipping(*clipChildRenderer))
@@ -185,7 +185,7 @@ namespace krys::boo
 
     // Only one visible shape/path was found. Directly continue clipping and transform the content to
     // userspace if necessary.
-    if (ClipPathElement().ClipPathUnits() == svg::SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
+    if (ClipPathElement().ClipPathUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
     {
       AffineTransform transform;
       transform.Translate(objectBoundingBox.Location());
@@ -330,7 +330,7 @@ namespace krys::boo
     GraphicsContext &maskContext = maskImageBuffer.Context();
 
     AffineTransform maskContentTransformation;
-    if (ClipPathElement().ClipPathUnits() == svg::SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
+    if (ClipPathElement().ClipPathUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
     {
       maskContentTransformation.Translate(objectBoundingBox.Location());
       maskContentTransformation.Scale(objectBoundingBox.Size());
@@ -357,7 +357,7 @@ namespace krys::boo
     // Draw all clipPath children into a global mask.
     for (auto *childNode = ClipPathElement().FirstChild(); childNode; childNode = childNode->NextSibling())
     {
-      auto *child = DynamicDowncast<svg::SVGElement>(*childNode);
+      auto *child = DynamicDowncast<SVGElement>(*childNode);
       if (!child)
       {
         continue;
@@ -379,7 +379,7 @@ namespace krys::boo
       }
 
       WindRule newClipRule = style.ClipRule();
-      auto *useElement = DynamicDowncast<svg::SVGUseElement>(*child);
+      auto *useElement = DynamicDowncast<SVGUseElement>(*child);
       if (useElement)
       {
         renderer = useElement->RendererClipChild();
@@ -387,7 +387,7 @@ namespace krys::boo
         {
           continue;
         }
-        if (!useElement->HasAttribute(svg::SVGNames::ClipRuleAttr().LocalName()))
+        if (!useElement->HasAttribute(SVGNames::ClipRuleAttr().LocalName()))
         {
           newClipRule = renderer->Style().ClipRule();
         }
@@ -421,12 +421,12 @@ namespace krys::boo
     for (auto *childNode = ClipPathElement().FirstChild(); childNode; childNode = childNode->NextSibling())
     {
       auto *renderer = DynamicDowncast<RenderElement>(childNode->Renderer());
-      if (!renderer || !Is<svg::SVGElement>(*childNode))
+      if (!renderer || !Is<SVGElement>(*childNode))
       {
         continue;
       }
       if (!renderer->IsLegacyRenderSVGShape() && !renderer->IsRenderSVGText()
-          && !Is<svg::SVGUseElement>(Downcast<svg::SVGElement>(*childNode)))
+          && !Is<SVGUseElement>(Downcast<SVGElement>(*childNode)))
       {
         continue;
       }
@@ -460,7 +460,7 @@ namespace krys::boo
       return false;
     }
 
-    if (ClipPathElement().ClipPathUnits() == svg::SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
+    if (ClipPathElement().ClipPathUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
     {
       AffineTransform transform;
       transform.Translate(objectBoundingBox.Location());
@@ -473,12 +473,12 @@ namespace krys::boo
     for (auto *childNode = ClipPathElement().FirstChild(); childNode; childNode = childNode->NextSibling())
     {
       auto *renderer = childNode->Renderer();
-      if (!Is<svg::SVGElement>(*childNode) || !renderer)
+      if (!Is<SVGElement>(*childNode) || !renderer)
       {
         continue;
       }
       if (!renderer->IsLegacyRenderSVGShape() && !renderer->IsRenderSVGText()
-          && !Is<svg::SVGUseElement>(Downcast<svg::SVGElement>(*childNode)))
+          && !Is<SVGUseElement>(Downcast<SVGElement>(*childNode)))
       {
         continue;
       }
@@ -516,7 +516,7 @@ namespace krys::boo
       CalculateClipContentRepaintRect(repaintRectCalculation);
     }
 
-    if (ClipPathElement().ClipPathUnits() == svg::SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
+    if (ClipPathElement().ClipPathUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
     {
       FloatRect objectBoundingBox = object.ObjectBoundingBox();
       AffineTransform transform;

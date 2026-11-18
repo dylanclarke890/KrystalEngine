@@ -48,7 +48,7 @@ namespace krys::boo
 {
   using style::GridTrackSizingDirection;
 
-  RenderGrid::RenderGrid(dom::Element &element, RenderStyle &&style) noexcept
+  RenderGrid::RenderGrid(Element &element, RenderStyle &&style) noexcept
       : RenderBlock(Type::Grid, element, krys::move(style), {}), _grid(*this),
         _trackSizingAlgorithm(this, CurrentGrid()), _masonryLayout(*this)
   {

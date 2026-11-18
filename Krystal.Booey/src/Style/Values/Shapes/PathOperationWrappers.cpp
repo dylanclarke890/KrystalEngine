@@ -63,7 +63,7 @@ namespace krys::boo::style
       // document local references. To see an example of how this should work, see ReferenceFilterOperation
       // which supports both document local and remote URLs.
 
-      auto fragment = svg::SVGURIReference::FragmentIdentifierFromIRIString(styleURL, state.GetDocument());
+      auto fragment = SVGURIReference::FragmentIdentifierFromIRIString(styleURL, state.GetDocument());
 
       const auto &treeScope = [&]() -> const dom::DocumentOrShadowRoot &
       {
@@ -73,10 +73,10 @@ namespace krys::boo::style
         }
         return state.GetDocument();
       }();
-      auto target = svg::SVGURIReference::TargetElementFromIRIString(styleURL, treeScope);
+      auto target = SVGURIReference::TargetElementFromIRIString(styleURL, treeScope);
 
       return ReferencePathOperation::Create(styleURL, fragment,
-                                            DynamicDowncast<svg::SVGElement>(target.Element.get()));
+                                            DynamicDowncast<SVGElement>(target.Element.get()));
     }
 
     if (const auto *ray = DynamicDowncast<css::RayValue>(value))

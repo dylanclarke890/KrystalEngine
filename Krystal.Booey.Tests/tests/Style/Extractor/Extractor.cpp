@@ -227,9 +227,9 @@ namespace krys::boo::style::tests
     // An extractor for a text node uses its parent element.
     auto text = fixture.Document->CreateTextNode(u8"t");
     REQUIRE_FALSE(fixture.ById(u8"a").AppendChild(*text).HasException());
-    Extractor et {static_cast<dom::Node *>(text.get())};
+    Extractor et {static_cast<Node *>(text.get())};
     CHECK(Computed(et, css::PropertyId::Color) == "rgb(1, 2, 3)");
-    Extractor none {static_cast<dom::Node *>(nullptr)};
+    Extractor none {static_cast<Node *>(nullptr)};
     CHECK(Computed(none, css::PropertyId::Color).empty());
   }
 

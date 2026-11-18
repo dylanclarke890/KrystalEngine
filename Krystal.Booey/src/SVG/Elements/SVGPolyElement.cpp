@@ -24,9 +24,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGPolyElement::SVGPolyElement(dom::Document &document, SVGElementInterface interface) noexcept
+  SVGPolyElement::SVGPolyElement(Document &document, SVGElementInterface interface) noexcept
       : SVGGeometryElement(document, CreateUnique<PropertyRegistry>(*this), interface),
         _points(SVGAnimatedPointList::Create(this))
   {
@@ -38,18 +38,18 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGPolyElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                        Maybe<dom::DOMStringView> value) noexcept
+  void SVGPolyElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                        Maybe<DOMStringView> value) noexcept
   {
     if (name == SVGNames::PointsAttr())
     {
-      _points->BaseVal()->Parse(value.value_or(dom::DOMStringView {}));
+      _points->BaseVal()->Parse(value.value_or(DOMStringView {}));
     }
 
     SVGGeometryElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGPolyElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGPolyElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {

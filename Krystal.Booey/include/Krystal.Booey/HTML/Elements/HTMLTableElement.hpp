@@ -29,7 +29,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLTableCaptionElement;
   class HTMLTableRowElement;
@@ -41,7 +41,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTableElement);
 
   public:
-    HTMLTableElement(dom::Document &document) noexcept;
+    HTMLTableElement(Document &document) noexcept;
 
     ~HTMLTableElement() noexcept override;
 
@@ -115,58 +115,58 @@ namespace krys::boo::html
 #pragma region HTMLTableElement Obsolete members - https://html.spec.whatwg.org/#HTMLTableElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-table-align
-    KRYS_NODISCARD dom::DOMString Align() const noexcept;
+    KRYS_NODISCARD DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-align
-    void Align(dom::DOMString value) noexcept;
+    void Align(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-border
-    KRYS_NODISCARD dom::DOMString Border() const noexcept;
+    KRYS_NODISCARD DOMString Border() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-border
-    void Border(dom::DOMString value) noexcept;
+    void Border(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-frame
-    KRYS_NODISCARD dom::DOMString Frame() const noexcept;
+    KRYS_NODISCARD DOMString Frame() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-frame
-    void Frame(dom::DOMString value) noexcept;
+    void Frame(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-rules
-    KRYS_NODISCARD dom::DOMString Rules() const noexcept;
+    KRYS_NODISCARD DOMString Rules() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-rules
-    void Rules(dom::DOMString value) noexcept;
+    void Rules(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-summary
-    KRYS_NODISCARD dom::DOMString Summary() const noexcept;
+    KRYS_NODISCARD DOMString Summary() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-summary
-    void Summary(dom::DOMString value) noexcept;
+    void Summary(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-width
-    KRYS_NODISCARD dom::DOMString Width() const noexcept;
+    KRYS_NODISCARD DOMString Width() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-width
-    void Width(dom::DOMString value) noexcept;
+    void Width(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-bgcolor
-    KRYS_NODISCARD dom::DOMString BgColor() const noexcept;
+    KRYS_NODISCARD DOMString BgColor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-bgcolor
-    void BgColor(dom::DOMString value) noexcept;
+    void BgColor(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-cellpadding
-    KRYS_NODISCARD dom::DOMString CellPadding() const noexcept;
+    KRYS_NODISCARD DOMString CellPadding() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-cellpadding
-    void CellPadding(dom::DOMString value) noexcept;
+    void CellPadding(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-cellspacing
-    KRYS_NODISCARD dom::DOMString CellSpacing() const noexcept;
+    KRYS_NODISCARD DOMString CellSpacing() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-cellspacing
-    void CellSpacing(dom::DOMString value) noexcept;
+    void CellSpacing(DOMString value) noexcept;
 
 #pragma endregion
 
@@ -184,17 +184,15 @@ namespace krys::boo::html
 
   protected:
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
   private:
     KRYS_NODISCARD HTMLTableSectionElement *LastBody() const noexcept;
@@ -236,14 +234,14 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLTableElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLTableElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return Is<krys::boo::html::HTMLElement>(target)
-           && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLTableElement();
+    return Is<krys::boo::HTMLElement>(target)
+           && Downcast<krys::boo::HTMLElement>(target).IsHTMLTableElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLTableElement();
   }

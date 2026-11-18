@@ -725,7 +725,7 @@ namespace krys::boo::css
         namespacePrefix = null;
       }
 
-      return CreateUnique<MutableSelector>(dom::QualifiedName(namespaceURI, namespacePrefix, elementName));
+      return CreateUnique<MutableSelector>(QualifiedName(namespaceURI, namespacePrefix, elementName));
     }
     PrependTypeSelectorIfNeeded(namespacePrefix, elementName, *compoundSelector);
     return SplitCompoundAtImplicitShadowCrossingCombinator(krys::move(compoundSelector), _context);
@@ -908,9 +908,9 @@ namespace krys::boo::css
       return nullptr;
     }
 
-    dom::QualifiedName qualifiedName = namespacePrefix == null
-                                         ? dom::QualifiedName(null, null, attributeName)
-                                         : dom::QualifiedName(namespaceURI, namespacePrefix, attributeName);
+    QualifiedName qualifiedName = namespacePrefix == null
+                                    ? QualifiedName(null, null, attributeName)
+                                    : QualifiedName(namespaceURI, namespacePrefix, attributeName);
 
     auto selector = CreateUnique<MutableSelector>();
 
@@ -1559,7 +1559,7 @@ namespace krys::boo::css
     {
       determinedPrefix = null;
     }
-    dom::QualifiedName tag(namespaceURI, determinedPrefix, determinedElementName);
+    QualifiedName tag(namespaceURI, determinedPrefix, determinedElementName);
 
     // *:host never matches, so we can't discard the *, otherwise we can't tell the difference between *:host
     // and just :host.

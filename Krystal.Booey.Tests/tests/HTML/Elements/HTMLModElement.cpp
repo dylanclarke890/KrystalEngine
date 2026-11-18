@@ -8,11 +8,11 @@ namespace krys::boo::html::tests
     "HTMLModElement: cite is a URL parsed against the document's base URL, and dateTime is as written",
     "[HTML][HTMLModElement][html:attr-mod-cite][html:attr-mod-datetime]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
     for (auto localName : {u8"ins", u8"del"})
     {
-      auto element = document->CreateElement(dom::DOMStringAtom(localName)).ReleaseValue();
+      auto element = document->CreateElement(DOMStringAtom(localName)).ReleaseValue();
       auto &mod = Downcast<HTMLModElement>(Downcast<HTMLElement>(*element));
       CHECK(mod.Cite().empty());
       CHECK(mod.DateTime().empty());

@@ -29,7 +29,7 @@ namespace krys::editor
     KRYS_NON_COPY_MOVABLE(PagePointers);
 
   private:
-    WeakPtr<boo::dom::Document> _document;
+    WeakPtr<boo::Document> _document;
     List<boo::dom::EventListenerHandle> _listeners;
     /// @brief Each pointer over the pad, by its id (in order), as the readout shows it.
     List<std::pair<int32, std::string>> _pointers;
@@ -43,7 +43,7 @@ namespace krys::editor
     double _lockedY {0};
 
   public:
-    explicit PagePointers(boo::dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
+    explicit PagePointers(boo::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
       if (!document.GetElementById(u8"pointer-pad"))
       {
@@ -55,7 +55,7 @@ namespace krys::editor
       {
         if (target)
         {
-          _listeners.push_back(target->AddEventListener(boo::dom::DOMStringAtom(type), krys::move(callback)));
+          _listeners.push_back(target->AddEventListener(boo::DOMStringAtom(type), krys::move(callback)));
         }
       };
 
@@ -157,7 +157,7 @@ namespace krys::editor
     }
 
   private:
-    KRYS_NODISCARD RefPtr<boo::dom::Element> ById(utf8_stringview id) const noexcept
+    KRYS_NODISCARD RefPtr<boo::Element> ById(utf8_stringview id) const noexcept
     {
       return _document ? _document->GetElementById(id) : nullptr;
     }
@@ -167,11 +167,11 @@ namespace krys::editor
       if (auto element = ById(id))
       {
         (void)element->TextContent(
-          boo::dom::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
+          boo::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
       }
     }
 
-    KRYS_NODISCARD static std::string Narrow(boo::dom::DOMStringView text) noexcept
+    KRYS_NODISCARD static std::string Narrow(boo::DOMStringView text) noexcept
     {
       return std::string(text.begin(), text.end());
     }
@@ -231,8 +231,8 @@ namespace krys::editor
       double top = std::clamp(pointer.ClientY() - areaRect->Top() - _grabY, 0.0,
                               std::max(0.0, areaRect->Height() - chipRect->Height()));
       auto style = std::format("left: {:.0f}px; top: {:.0f}px", left, top);
-      (void)chip->SetAttribute(
-        u8"style", boo::dom::DOMString(reinterpret_cast<const char8_t *>(style.data()), style.size()));
+      (void)chip->SetAttribute(u8"style",
+                               boo::DOMString(reinterpret_cast<const char8_t *>(style.data()), style.size()));
     }
 
     void ShowLock() noexcept

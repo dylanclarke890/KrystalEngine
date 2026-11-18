@@ -25,7 +25,7 @@
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   float SVGAngleValue::Value() const noexcept
   {
@@ -84,7 +84,7 @@ namespace krys::boo::svg
     krys_assert_msg(false, "Not reached");
   }
 
-  dom::DOMString SVGAngleValue::ValueAsString() const noexcept
+  DOMString SVGAngleValue::ValueAsString() const noexcept
   {
     StringBuilder builder;
     switch (_unitType)
@@ -121,7 +121,7 @@ namespace krys::boo::svg
 
   namespace
   {
-    KRYS_NODISCARD SVGAngleValue::Type ParseAngleType(dom::DOMStringView buffer) noexcept
+    KRYS_NODISCARD SVGAngleValue::Type ParseAngleType(DOMStringView buffer) noexcept
     {
       switch (buffer.size())
       {
@@ -158,7 +158,7 @@ namespace krys::boo::svg
     }
   }
 
-  dom::ExceptionOr<void> SVGAngleValue::SetValueAsString(dom::DOMStringView value) noexcept
+  dom::ExceptionOr<void> SVGAngleValue::SetValueAsString(DOMStringView value) noexcept
   {
     if (value.empty())
     {
@@ -167,7 +167,7 @@ namespace krys::boo::svg
     }
 
     auto buffer = value;
-    auto valueInSpecifiedUnits = ParseNumber(buffer, SuffixSkippingPolicy::DontSkip);
+    auto valueInSpecifiedUnits = svg::ParseNumber(buffer, svg::SuffixSkippingPolicy::DontSkip);
     if (!valueInSpecifiedUnits)
     {
       return dom::Exception {dom::ExceptionCode::SyntaxError};

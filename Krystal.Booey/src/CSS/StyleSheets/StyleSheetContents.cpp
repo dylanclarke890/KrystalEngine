@@ -622,7 +622,7 @@ namespace krys::boo::css
     return const_cast<StyleSheetContents *>(root);
   }
 
-  dom::Node *StyleSheetContents::SingleOwnerNode() const noexcept
+  Node *StyleSheetContents::SingleOwnerNode() const noexcept
   {
     auto *root = RootStyleSheet();
     if (root->_clients.empty())
@@ -633,7 +633,7 @@ namespace krys::boo::css
     return root->_clients[0]->OwnerNode();
   }
 
-  dom::Document *StyleSheetContents::SingleOwnerDocument() const noexcept
+  Document *StyleSheetContents::SingleOwnerDocument() const noexcept
   {
     auto *ownerNode = SingleOwnerNode();
     return ownerNode ? &ownerNode->NodeDocument() : nullptr;

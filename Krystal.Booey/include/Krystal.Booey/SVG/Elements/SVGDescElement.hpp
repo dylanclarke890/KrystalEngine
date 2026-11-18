@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<desc>` element: a description of its parent, never rendered.
   /// @see https://svgwg.org/svg2-draft/struct.html#InterfaceSVGDescElement
@@ -11,7 +11,7 @@ namespace krys::boo::svg
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGDescElement);
 
   public:
-    explicit SVGDescElement(dom::Document &document) noexcept;
+    explicit SVGDescElement(Document &document) noexcept;
 
   private:
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final
@@ -21,8 +21,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGDescElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGDescElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGDescElement();
   }

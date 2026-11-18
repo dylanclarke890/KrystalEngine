@@ -41,7 +41,7 @@
 
 namespace krys::boo
 {
-  AnimationTimelinesController::AnimationTimelinesController(dom::Document &document) noexcept
+  AnimationTimelinesController::AnimationTimelinesController(Document &document) noexcept
       : _cachedCurrentTimeClearanceTimer(*this, &AnimationTimelinesController::ClearCachedCurrentTime),
         _document(document)
   {

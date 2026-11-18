@@ -42,8 +42,7 @@
 
 namespace krys::boo
 {
-  LegacyRenderSVGModelObject::LegacyRenderSVGModelObject(Type type, svg::SVGElement &element,
-                                                         RenderStyle &&style,
+  LegacyRenderSVGModelObject::LegacyRenderSVGModelObject(Type type, SVGElement &element, RenderStyle &&style,
                                                          EnumSet<SVGModelObjectFlag> typeFlags) noexcept
       : RenderElement(type, element, krys::move(style), {},
                       typeFlags | SVGModelObjectFlag::IsLegacy | SVGModelObjectFlag::UsesBoundaryCaching)
@@ -175,17 +174,17 @@ namespace krys::boo
 
   namespace
   {
-    void GetElementCTM(svg::SVGElement *element, AffineTransform &transform) noexcept
+    void GetElementCTM(SVGElement *element, AffineTransform &transform) noexcept
     {
       krys_debug_assert(element);
 
-      auto *stopAtElement = svg::SVGLocatable::NearestViewportElement(element);
+      auto *stopAtElement = SVGLocatable::NearestViewportElement(element);
       krys_debug_assert(stopAtElement);
 
       AffineTransform localTransform;
-      dom::Node *current = element;
+      Node *current = element;
 
-      while (auto *currentElement = DynamicDowncast<svg::SVGElement>(current))
+      while (auto *currentElement = DynamicDowncast<SVGElement>(current))
       {
         localTransform = currentElement->Renderer()->LocalToParentTransform();
         transform = localTransform.Multiply(transform);
@@ -225,7 +224,7 @@ namespace krys::boo
     {
       return renderer.IsLegacyRenderSVGShape() || renderer.IsRenderSVGText()
              || renderer.IsLegacyRenderSVGImage()
-             || Is<svg::SVGUseElement>(Downcast<svg::SVGElement>(*renderer.GetElement()));
+             || Is<SVGUseElement>(Downcast<SVGElement>(*renderer.GetElement()));
     }
   }
 
@@ -240,7 +239,7 @@ namespace krys::boo
       return false;
     }
     AffineTransform ctm;
-    auto *svgElement = Downcast<svg::SVGElement>(renderer->GetElement());
+    auto *svgElement = Downcast<SVGElement>(renderer->GetElement());
     GetElementCTM(svgElement, ctm);
     krys_debug_assert(svgElement->Renderer());
     // FIXME: [SVG] checkEnclosure implementation is inconsistent
@@ -260,7 +259,7 @@ namespace krys::boo
       return false;
     }
     AffineTransform ctm;
-    auto *svgElement = Downcast<svg::SVGElement>(renderer->GetElement());
+    auto *svgElement = Downcast<SVGElement>(renderer->GetElement());
     GetElementCTM(svgElement, ctm);
     krys_debug_assert(svgElement->Renderer());
     // FIXME: [SVG] checkEnclosure implementation is inconsistent
@@ -274,8 +273,8 @@ namespace krys::boo
   {
   }
 
-  svg::SVGElement &LegacyRenderSVGModelObject::GetElement() const noexcept
+  SVGElement &LegacyRenderSVGModelObject::GetElement() const noexcept
   {
-    return Downcast<svg::SVGElement>(NodeForNonAnonymous());
+    return Downcast<SVGElement>(NodeForNonAnonymous());
   }
 }

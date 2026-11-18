@@ -2,10 +2,10 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLBaseElement::HTMLBaseElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Base)
+  HTMLBaseElement::HTMLBaseElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Base)
   {
   }
 
@@ -18,7 +18,7 @@ namespace krys::boo::html
 
     // 2. Let url be the value of the href attribute of this element, if it has one, and the empty string
     //    otherwise.
-    auto url = GetAttribute(u8"href").value_or(dom::DOMString());
+    auto url = GetAttribute(u8"href").value_or(DOMString());
 
     // 3. Let urlRecord be the result of parsing url with document's fallback base URL, and document's
     //    character encoding. (Thus, the base element isn't affected by other base elements or itself.)
@@ -36,17 +36,17 @@ namespace krys::boo::html
 
   void HTMLBaseElement::Href(dom::USVString value) noexcept
   {
-    return ReflectSetter<dom::USVString>(*this, u8"href", krys::move(value));
+    return html::ReflectSetter<dom::USVString>(*this, u8"href", krys::move(value));
   }
 
-  dom::DOMString HTMLBaseElement::Target() const noexcept
+  DOMString HTMLBaseElement::Target() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"target").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"target").value_or(u8"");
   }
 
-  void HTMLBaseElement::Target(dom::DOMString value) noexcept
+  void HTMLBaseElement::Target(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"target", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"target", krys::move(value));
   }
 
 #pragma endregion
@@ -61,7 +61,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLBaseElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLBaseElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
 
@@ -71,7 +71,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLBaseElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLBaseElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
 
@@ -81,10 +81,9 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLBaseElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                           Maybe<dom::DOMStringView> oldValue,
-                                           Maybe<dom::DOMStringView> value,
-                                           const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLBaseElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                           Maybe<DOMStringView> value,
+                                           const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 

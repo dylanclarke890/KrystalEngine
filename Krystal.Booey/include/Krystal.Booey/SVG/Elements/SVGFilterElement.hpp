@@ -28,7 +28,7 @@
 #include "Krystal.Booey/SVG/SVGUnitTypes.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<filter>` element: filter primitives applied to the elements that reference it.
   /// @see https://drafts.fxtf.org/filter-effects/#InterfaceSVGFilterElement
@@ -45,7 +45,7 @@ namespace krys::boo::svg
     Ref<SVGAnimatedLength> _height;
 
   public:
-    explicit SVGFilterElement(dom::Document &document) noexcept;
+    explicit SVGFilterElement(Document &document) noexcept;
 
     KRYS_NODISCARD SVGUnitTypes::SVGUnitType FilterUnits() const noexcept
     {
@@ -110,10 +110,10 @@ namespace krys::boo::svg
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGFilterElement, SVGElement, SVGURIReference>;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
     void OnChildrenChanged() noexcept final;
 
@@ -124,7 +124,7 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
 
-    KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &child) const noexcept final;
+    KRYS_NODISCARD bool ChildShouldCreateRenderer(const Node &child) const noexcept final;
 
     KRYS_NODISCARD bool SelfHasRelativeLengths() const noexcept final
     {
@@ -133,8 +133,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGFilterElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGFilterElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGFilterElement();
   }

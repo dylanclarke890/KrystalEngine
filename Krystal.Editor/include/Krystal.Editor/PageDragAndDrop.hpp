@@ -27,10 +27,10 @@ namespace krys::editor
     KRYS_NON_COPY_MOVABLE(PageDragAndDrop);
 
   private:
-    WeakPtr<boo::dom::Document> _document;
+    WeakPtr<boo::Document> _document;
     List<boo::dom::EventListenerHandle> _listeners;
     /// @brief The card being dragged, while one is.
-    RefPtr<boo::dom::Element> _dragged;
+    RefPtr<boo::Element> _dragged;
     /// @brief The lines the log shows, the oldest first.
     List<std::string> _lines;
 
@@ -38,7 +38,7 @@ namespace krys::editor
     /// @brief How many lines the log shows.
     constexpr static size_t MaxLines {12};
 
-    explicit PageDragAndDrop(boo::dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
+    explicit PageDragAndDrop(boo::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
       RefPtr<boo::dom::EventTarget> sample = document.GetElementById(u8"drag-and-drop");
       if (!sample)
@@ -50,7 +50,7 @@ namespace krys::editor
         sample->AddEventListener(u8"dragstart", [this](boo::dom::Event &event) { StartCardDrag(event); }));
       for (auto type : {u8"dragenter", u8"dragover"})
       {
-        _listeners.push_back(sample->AddEventListener(boo::dom::DOMStringAtom(type),
+        _listeners.push_back(sample->AddEventListener(boo::DOMStringAtom(type),
                                                       [this](boo::dom::Event &event) { DragOver(event); }));
       }
       _listeners.push_back(
@@ -65,8 +65,8 @@ namespace krys::editor
       // above left it.
       for (auto type : {u8"dragstart", u8"dragenter", u8"dragleave", u8"drop", u8"dragend"})
       {
-        _listeners.push_back(sample->AddEventListener(boo::dom::DOMStringAtom(type),
-                                                      [this](boo::dom::Event &event) { Log(event); }));
+        _listeners.push_back(
+          sample->AddEventListener(boo::DOMStringAtom(type), [this](boo::dom::Event &event) { Log(event); }));
       }
       if (RefPtr<boo::dom::EventTarget> clear = document.GetElementById(u8"drag-clear"))
       {
@@ -82,26 +82,26 @@ namespace krys::editor
     }
 
   private:
-    KRYS_NODISCARD static std::string Narrow(boo::dom::DOMStringView text) noexcept
+    KRYS_NODISCARD static std::string Narrow(boo::DOMStringView text) noexcept
     {
       return std::string(text.begin(), text.end());
     }
 
-    KRYS_NODISCARD static boo::dom::DOMString Widen(const std::string &text) noexcept
+    KRYS_NODISCARD static boo::DOMString Widen(const std::string &text) noexcept
     {
-      return boo::dom::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size());
+      return boo::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size());
     }
 
     /// @brief The element @p event went to, if it went to one.
-    KRYS_NODISCARD static boo::dom::Element *TargetElement(boo::dom::Event &event) noexcept
+    KRYS_NODISCARD static boo::Element *TargetElement(boo::dom::Event &event) noexcept
     {
-      auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
-      return node ? DynamicDowncast<boo::dom::Element>(*node) : nullptr;
+      auto *node = DynamicDowncast<boo::Node>(event.Target().get());
+      return node ? DynamicDowncast<boo::Element>(*node) : nullptr;
     }
 
     /// @brief The element around @p element (or itself) that matches @p selectors, if there's one.
-    KRYS_NODISCARD static RefPtr<boo::dom::Element> Closest(boo::dom::Element *element,
-                                                            boo::dom::DOMStringView selectors) noexcept
+    KRYS_NODISCARD static RefPtr<boo::Element> Closest(boo::Element *element,
+                                                       boo::DOMStringView selectors) noexcept
     {
       if (!element)
       {
@@ -112,9 +112,9 @@ namespace krys::editor
     }
 
     /// @brief The lists the cards are dropped on.
-    KRYS_NODISCARD List<RefPtr<boo::dom::Element>> Lists() const noexcept
+    KRYS_NODISCARD List<RefPtr<boo::Element>> Lists() const noexcept
     {
-      List<RefPtr<boo::dom::Element>> lists;
+      List<RefPtr<boo::Element>> lists;
       for (auto id : {u8"drag-todo", u8"drag-done"})
       {
         if (auto list = _document ? _document->GetElementById(id) : nullptr)
@@ -134,9 +134,9 @@ namespace krys::editor
       {
         return;
       }
-      dataTransfer.SetData(*_document, u8"text/plain", card->TextContent().value_or(boo::dom::DOMString()));
+      dataTransfer.SetData(*_document, u8"text/plain", card->TextContent().value_or(boo::DOMString()));
       dataTransfer.SetEffectAllowed(u8"move");
-      (void)card->ClassList().Add(boo::dom::DOMString(u8"dragging"));
+      (void)card->ClassList().Add(boo::DOMString(u8"dragging"));
       _dragged = krys::move(card);
     }
 
@@ -144,14 +144,14 @@ namespace krys::editor
     {
       if (_dragged)
       {
-        (void)_dragged->ClassList().Remove(boo::dom::DOMString(u8"dragging"));
+        (void)_dragged->ClassList().Remove(boo::DOMString(u8"dragging"));
         _dragged = nullptr;
       }
       MarkOver(nullptr);
     }
 
     /// @brief Marks @p target (a list or the drop zone) as what a drop would land on, and nothing else.
-    void MarkOver(boo::dom::Element *target) noexcept
+    void MarkOver(boo::Element *target) noexcept
     {
       auto lists = Lists();
       if (auto zone = _document ? _document->GetElementById(u8"drop-zone") : nullptr)
@@ -160,7 +160,7 @@ namespace krys::editor
       }
       for (auto &element : lists)
       {
-        (void)element->ClassList().Toggle(boo::dom::DOMString(u8"over"), element.get() == target);
+        (void)element->ClassList().Toggle(boo::DOMString(u8"over"), element.get() == target);
       }
     }
 
@@ -193,9 +193,9 @@ namespace krys::editor
     static void DragLeave(boo::dom::Event &event) noexcept
     {
       auto *target = TargetElement(event);
-      if (target && target->GetAttribute(u8"id") == boo::dom::DOMString(u8"drop-zone"))
+      if (target && target->GetAttribute(u8"id") == boo::DOMString(u8"drop-zone"))
       {
-        (void)target->ClassList().Remove(boo::dom::DOMString(u8"over"));
+        (void)target->ClassList().Remove(boo::DOMString(u8"over"));
       }
     }
 
@@ -217,13 +217,13 @@ namespace krys::editor
 
     /// @brief Moves the dragged card into @p list: before @p card if it was dropped on its upper half, after
     /// it if on its lower half, or at the end if on no card.
-    void DropCard(boo::dom::Element &list, const RefPtr<boo::dom::Element> &card, double clientY) noexcept
+    void DropCard(boo::Element &list, const RefPtr<boo::Element> &card, double clientY) noexcept
     {
       if (card == _dragged)
       {
         return;
       }
-      RefPtr<boo::dom::Node> before;
+      RefPtr<boo::Node> before;
       if (card)
       {
         auto rect = card->GetBoundingClientRect();
@@ -277,7 +277,7 @@ namespace krys::editor
     /// @brief Logs the files the file input took.
     void FilesChosen(boo::dom::Event &event) noexcept
     {
-      auto *input = DynamicDowncast<boo::html::HTMLInputElement>(TargetElement(event));
+      auto *input = DynamicDowncast<boo::HTMLInputElement>(TargetElement(event));
       auto *files = input ? input->Files() : nullptr;
       if (!files)
       {
@@ -351,7 +351,7 @@ namespace krys::editor
       (void)log->TextContent(Widen(text));
     }
 
-    void ShowDropped(boo::dom::DOMString text) noexcept
+    void ShowDropped(boo::DOMString text) noexcept
     {
       if (auto readout = _document ? _document->GetElementById(u8"drop-readout") : nullptr)
       {

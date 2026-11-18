@@ -46,14 +46,14 @@
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <limits>
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#attr-img-decoding
   template <>
-  struct EnumeratedAttributeTraits<"decoding", HTMLImageElement>
+  struct html::EnumeratedAttributeTraits<"decoding", HTMLImageElement>
   {
-    using State = DecodingAttributeState;
-    static inline const KeywordStateMapping<State> StateMappings[] = {
+    using State = html::DecodingAttributeState;
+    static inline const html::KeywordStateMapping<State> StateMappings[] = {
       {u8"sync", State::Sync}, {u8"async", State::Async}, {u8"auto", State::Auto}};
 
     constexpr static State MissingValueDefault = State::Auto;
@@ -62,11 +62,11 @@ namespace krys::boo::html
 
   namespace
   {
-    KRYS_NODISCARD dom::DOMStringView
-      ExtractMIMETypeFromTypeAttributeForLookup(dom::DOMStringView typeAttribute) noexcept
+    KRYS_NODISCARD DOMStringView
+      ExtractMIMETypeFromTypeAttributeForLookup(DOMStringView typeAttribute) noexcept
     {
       auto semicolonIndex = typeAttribute.find(u8';');
-      if (semicolonIndex == dom::DOMStringView::npos)
+      if (semicolonIndex == DOMStringView::npos)
       {
         return infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(typeAttribute);
       }
@@ -80,8 +80,9 @@ namespace krys::boo::html
     }
   }
 
-  HTMLImageElement::HTMLImageElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Image), _imageLoader(CreateUnique<HTMLImageLoader>(*this))
+  HTMLImageElement::HTMLImageElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Image),
+        _imageLoader(CreateUnique<html::HTMLImageLoader>(*this))
   {
   }
 
@@ -101,14 +102,14 @@ namespace krys::boo::html
     {
       form->UnregisterImageElement(*this);
     }
-    FormAssociatedElement::SetFormInternal(newForm);
+    html::FormAssociatedElement::SetFormInternal(newForm);
     if (newForm)
     {
       newForm->RegisterImageElement(*this);
     }
   }
 
-  void HTMLImageElement::FormOwnerRemovedFromTree(const dom::Node &formRoot) noexcept
+  void HTMLImageElement::FormOwnerRemovedFromTree(const Node &formRoot) noexcept
   {
     if (&dom::TreeQueries::Root(*this) != &formRoot)
     {
@@ -118,54 +119,54 @@ namespace krys::boo::html
 
 #pragma region HTMLImageElement
 
-  dom::DOMString HTMLImageElement::Alt() const noexcept
+  DOMString HTMLImageElement::Alt() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"alt").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"alt").value_or(u8"");
   }
 
-  void HTMLImageElement::Alt(dom::DOMString value) noexcept
+  void HTMLImageElement::Alt(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"alt", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"alt", krys::move(value));
   }
 
   dom::USVString HTMLImageElement::Src() const noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"src");
+    return html::ReflectURL<dom::USVString>(*this, u8"src");
   }
 
   void HTMLImageElement::Src(dom::USVString value) noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
+    return html::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
   dom::USVString HTMLImageElement::SrcSet() const noexcept
   {
-    return Reflect<dom::USVString>(*this, u8"srcset");
+    return html::Reflect<dom::USVString>(*this, u8"srcset");
   }
 
   void HTMLImageElement::SrcSet(dom::USVString value) noexcept
   {
-    return Reflect<dom::USVString>(*this, u8"srcset", krys::move(value));
+    return html::Reflect<dom::USVString>(*this, u8"srcset", krys::move(value));
   }
 
-  dom::DOMString HTMLImageElement::Sizes() const noexcept
+  DOMString HTMLImageElement::Sizes() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"sizes").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"sizes").value_or(u8"");
   }
 
-  void HTMLImageElement::Sizes(dom::DOMString value) noexcept
+  void HTMLImageElement::Sizes(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"sizes", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"sizes", krys::move(value));
   }
 
-  Maybe<dom::DOMString> HTMLImageElement::CrossOrigin() const noexcept
+  Maybe<DOMString> HTMLImageElement::CrossOrigin() const noexcept
   {
-    return ReflectEnumerated<"crossorigin", HTMLElement, Maybe<dom::DOMString>>(*this);
+    return html::ReflectEnumerated<"crossorigin", HTMLElement, Maybe<DOMString>>(*this);
   }
 
-  void HTMLImageElement::CrossOrigin(Maybe<dom::DOMString> value) noexcept
+  void HTMLImageElement::CrossOrigin(Maybe<DOMString> value) noexcept
   {
-    Reflect<Maybe<dom::DOMString>>(*this, u8"crossorigin", krys::move(value));
+    html::Reflect<Maybe<DOMString>>(*this, u8"crossorigin", krys::move(value));
   }
 
   HTMLMapElement *HTMLImageElement::AssociatedMapElement() const noexcept
@@ -180,9 +181,9 @@ namespace krys::boo::html
 
     // 1. If the string being parsed does not contain a U+0023 NUMBER SIGN character, or if the first such
     //    character in the string is the last character in the string, then return null.
-    dom::DOMStringView value = *usemap;
+    DOMStringView value = *usemap;
     auto numberSign = value.find(u8'#');
-    if (numberSign == dom::DOMStringView::npos || numberSign == value.size() - 1)
+    if (numberSign == DOMStringView::npos || numberSign == value.size() - 1)
     {
       return nullptr;
     }
@@ -217,24 +218,24 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  dom::DOMString HTMLImageElement::UseMap() const noexcept
+  DOMString HTMLImageElement::UseMap() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"usemap").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"usemap").value_or(u8"");
   }
 
-  void HTMLImageElement::UseMap(dom::DOMString value) noexcept
+  void HTMLImageElement::UseMap(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"usemap", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"usemap", krys::move(value));
   }
 
   bool HTMLImageElement::IsMap() const noexcept
   {
-    return Reflect<bool>(*this, u8"ismap");
+    return html::Reflect<bool>(*this, u8"ismap");
   }
 
   void HTMLImageElement::IsMap(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"ismap", krys::move(value));
+    html::Reflect<bool>(*this, u8"ismap", krys::move(value));
   }
 
   bool HTMLImageElement::IsServerMap() const noexcept
@@ -260,12 +261,12 @@ namespace krys::boo::html
 
   bool HTMLImageElement::Controls() const noexcept
   {
-    return Reflect<bool>(*this, u8"controls");
+    return html::Reflect<bool>(*this, u8"controls");
   }
 
   void HTMLImageElement::Controls(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"controls", krys::move(value));
+    html::Reflect<bool>(*this, u8"controls", krys::move(value));
   }
 
   uint32 HTMLImageElement::Width() const noexcept
@@ -281,7 +282,7 @@ namespace krys::boo::html
     if (!Renderer())
     {
       // check the attribute first for an explicit pixel value
-      if (auto width = Numbers::ParseNonNegativeInteger(AttributeOrEmpty(u8"width")); width.Success())
+      if (auto width = html::Numbers::ParseNonNegativeInteger(AttributeOrEmpty(u8"width")); width.Success())
       {
         return ClampedAttributeLength(width.Value);
       }
@@ -304,7 +305,7 @@ namespace krys::boo::html
 
   void HTMLImageElement::Width(uint32 value) noexcept
   {
-    Reflect<uint32>(*this, u8"width", krys::move(value));
+    html::Reflect<uint32>(*this, u8"width", krys::move(value));
   }
 
   uint32 HTMLImageElement::Height() const noexcept
@@ -320,7 +321,8 @@ namespace krys::boo::html
     if (!Renderer())
     {
       // check the attribute first for an explicit pixel value
-      if (auto height = Numbers::ParseNonNegativeInteger(AttributeOrEmpty(u8"height")); height.Success())
+      if (auto height = html::Numbers::ParseNonNegativeInteger(AttributeOrEmpty(u8"height"));
+          height.Success())
       {
         return ClampedAttributeLength(height.Value);
       }
@@ -343,7 +345,7 @@ namespace krys::boo::html
 
   void HTMLImageElement::Height(uint32 value) noexcept
   {
-    Reflect<uint32>(*this, u8"height", krys::move(value));
+    html::Reflect<uint32>(*this, u8"height", krys::move(value));
   }
 
   uint32 HTMLImageElement::NaturalWidth() const noexcept
@@ -383,24 +385,24 @@ namespace krys::boo::html
     return dom::USVString(CurrentURL().String());
   }
 
-  dom::DOMString HTMLImageElement::ReferrerPolicy() const noexcept
+  DOMString HTMLImageElement::ReferrerPolicy() const noexcept
   {
-    return ReflectEnumerated<"referrerpolicy">(*this);
+    return html::ReflectEnumerated<"referrerpolicy">(*this);
   }
 
-  void HTMLImageElement::ReferrerPolicy(dom::DOMString value) noexcept
+  void HTMLImageElement::ReferrerPolicy(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"referrerpolicy", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"referrerpolicy", krys::move(value));
   }
 
-  dom::DOMString HTMLImageElement::Decoding() const noexcept
+  DOMString HTMLImageElement::Decoding() const noexcept
   {
-    return ReflectEnumerated<"decoding", HTMLImageElement>(*this);
+    return html::ReflectEnumerated<"decoding", HTMLImageElement>(*this);
   }
 
-  void HTMLImageElement::Decoding(dom::DOMString value) noexcept
+  void HTMLImageElement::Decoding(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"decoding", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"decoding", krys::move(value));
   }
 
   DecodingMode HTMLImageElement::GetDecodingMode() const noexcept
@@ -417,24 +419,24 @@ namespace krys::boo::html
     return DecodingMode::Auto;
   }
 
-  dom::DOMString HTMLImageElement::Loading() const noexcept
+  DOMString HTMLImageElement::Loading() const noexcept
   {
-    return ReflectEnumerated<"loading">(*this);
+    return html::ReflectEnumerated<"loading">(*this);
   }
 
-  void HTMLImageElement::Loading(dom::DOMString value) noexcept
+  void HTMLImageElement::Loading(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"loading", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"loading", krys::move(value));
   }
 
-  dom::DOMString HTMLImageElement::FetchPriority() const noexcept
+  DOMString HTMLImageElement::FetchPriority() const noexcept
   {
-    return ReflectEnumerated<"fetchpriority">(*this);
+    return html::ReflectEnumerated<"fetchpriority">(*this);
   }
 
-  void HTMLImageElement::FetchPriority(dom::DOMString value) noexcept
+  void HTMLImageElement::FetchPriority(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"fetchpriority", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"fetchpriority", krys::move(value));
   }
 
   void HTMLImageElement::Decode(ImageLoader::DecodePromise promise) noexcept
@@ -446,74 +448,74 @@ namespace krys::boo::html
 
 #pragma region HTMLImageElement Obsolete members
 
-  dom::DOMString HTMLImageElement::Name() const noexcept
+  DOMString HTMLImageElement::Name() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLImageElement::Name(dom::DOMString value) noexcept
+  void HTMLImageElement::Name(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"name", krys::move(value));
   }
 
   dom::USVString HTMLImageElement::LowSrc() const noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"lowsrc");
+    return html::ReflectURL<dom::USVString>(*this, u8"lowsrc");
   }
 
   void HTMLImageElement::LowSrc(dom::USVString value) noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"lowsrc", krys::move(value));
+    return html::ReflectURL<dom::USVString>(*this, u8"lowsrc", krys::move(value));
   }
 
-  dom::DOMString HTMLImageElement::Align() const noexcept
+  DOMString HTMLImageElement::Align() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLImageElement::Align(dom::DOMString value) noexcept
+  void HTMLImageElement::Align(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"align", krys::move(value));
   }
 
   uint32 HTMLImageElement::HSpace() const noexcept
   {
-    return Reflect<uint32>(*this, u8"hspace");
+    return html::Reflect<uint32>(*this, u8"hspace");
   }
 
   void HTMLImageElement::HSpace(uint32 value) noexcept
   {
-    Reflect<uint32>(*this, u8"hspace", krys::move(value));
+    html::Reflect<uint32>(*this, u8"hspace", krys::move(value));
   }
 
   uint32 HTMLImageElement::VSpace() const noexcept
   {
-    return Reflect<uint32>(*this, u8"vspace");
+    return html::Reflect<uint32>(*this, u8"vspace");
   }
 
   void HTMLImageElement::VSpace(uint32 value) noexcept
   {
-    Reflect<uint32>(*this, u8"vspace", krys::move(value));
+    html::Reflect<uint32>(*this, u8"vspace", krys::move(value));
   }
 
   dom::USVString HTMLImageElement::LongDesc() const noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"longdesc");
+    return html::ReflectURL<dom::USVString>(*this, u8"longdesc");
   }
 
   void HTMLImageElement::LongDesc(dom::USVString value) noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"longdesc", krys::move(value));
+    return html::ReflectURL<dom::USVString>(*this, u8"longdesc", krys::move(value));
   }
 
-  dom::DOMString HTMLImageElement::Border() const noexcept
+  DOMString HTMLImageElement::Border() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"border").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"border").value_or(u8"");
   }
 
-  void HTMLImageElement::Border(dom::DOMString value) noexcept
+  void HTMLImageElement::Border(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"border", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"border", krys::move(value));
   }
 
 #pragma endregion
@@ -525,7 +527,7 @@ namespace krys::boo::html
 
 #pragma region Loading
 
-  Maybe<dom::DOMString> HTMLImageElement::ImageSourceURL() const noexcept
+  Maybe<DOMString> HTMLImageElement::ImageSourceURL() const noexcept
   {
     if (_bestFitImageURL.empty())
     {
@@ -534,7 +536,7 @@ namespace krys::boo::html
     return _bestFitImageURL;
   }
 
-  Maybe<dom::DOMString> HTMLImageElement::AltText() const noexcept
+  Maybe<DOMString> HTMLImageElement::AltText() const noexcept
   {
     // lets figure out the alt text.. magic stuff
     // http://www.w3.org/TR/1998/REC-html40-19980424/appendix/notes.html#altgen
@@ -590,7 +592,7 @@ namespace krys::boo::html
     return HasLazyLoadableAttributeValue(GetAttribute(u8"loading"));
   }
 
-  bool HTMLImageElement::HasLazyLoadableAttributeValue(Maybe<dom::DOMStringView> attributeValue) noexcept
+  bool HTMLImageElement::HasLazyLoadableAttributeValue(Maybe<DOMStringView> attributeValue) noexcept
   {
     return attributeValue && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*attributeValue, u8"lazy");
   }
@@ -647,7 +649,7 @@ namespace krys::boo::html
     return _imageDevicePixelRatio;
   }
 
-  void HTMLImageElement::SetBestFitURLAndDPRFromImageCandidate(const ImageCandidate &candidate) noexcept
+  void HTMLImageElement::SetBestFitURLAndDPRFromImageCandidate(const html::ImageCandidate &candidate) noexcept
   {
     _bestFitImageURL = candidate.String;
     auto source = ImageSourceURL();
@@ -664,7 +666,7 @@ namespace krys::boo::html
 
   // Steps 3 and 5b to 5l of updating the source set, for the picture's source elements:
   // https://html.spec.whatwg.org/#update-the-source-set
-  ImageCandidate HTMLImageElement::BestFitSourceFromPictureElement() noexcept
+  html::ImageCandidate HTMLImageElement::BestFitSourceFromPictureElement() noexcept
   {
     // 3. If el is an img element whose parent node is a picture element, then replace the contents of
     // elements
@@ -675,7 +677,7 @@ namespace krys::boo::html
       return {};
     }
 
-    ImageCandidate candidate;
+    html::ImageCandidate candidate;
 
     // 5. For each child in elements:
     // 5a. If child is el: (SelectImageSource, with the img's own attributes.)
@@ -725,15 +727,14 @@ namespace krys::boo::html
       }
 
       // 5g. Parse child's sizes attribute with img, and let source set's source size be the returned value.
-      css::SizesAttributeParser sizesParser(source->GetAttribute(u8"sizes").value_or(dom::DOMString()),
-                                            document);
+      css::SizesAttributeParser sizesParser(source->GetAttribute(u8"sizes").value_or(DOMString()), document);
       auto sourceSize = sizesParser.Length();
 
       // 5d. Parse child's srcset attribute and let source set be the returned source set.
       // 5j. Normalize the source densities of source set.
       // (And select an image from it.)
-      candidate = BestFitSourceForImageAttributes(document.DeviceScaleFactor(), null,
-                                                  dom::DOMStringView(*srcset), sourceSize);
+      candidate = html::BestFitSourceForImageAttributes(document.DeviceScaleFactor(), null,
+                                                        DOMStringView(*srcset), sourceSize);
 
       // 5i. If child has width or height attributes, set el's dimension attribute source to child. Otherwise,
       //     set el's dimension attribute source to el.
@@ -755,7 +756,7 @@ namespace krys::boo::html
   {
     // 1. Update the source set for el.
     // First look for the best fit source from our <picture> parent if we have one.
-    ImageCandidate candidate = BestFitSourceFromPictureElement();
+    html::ImageCandidate candidate = BestFitSourceFromPictureElement();
 
     // 5a. If child is el: (Updating the source set, from the img's own attributes.)
     if (candidate.IsEmpty())
@@ -768,8 +769,8 @@ namespace krys::boo::html
       {
         if (srcAttribute)
         {
-          candidate =
-            ImageCandidate(*srcAttribute, DescriptorParsingResult(), ImageCandidate::OriginAttribute::Src);
+          candidate = html::ImageCandidate(*srcAttribute, html::DescriptorParsingResult(),
+                                           html::ImageCandidate::OriginAttribute::Src);
         }
       }
       else
@@ -778,9 +779,9 @@ namespace krys::boo::html
         auto &document = NodeDocument();
         css::SizesAttributeParser sizesParser(AttributeOrEmpty(u8"sizes"), document);
         auto sourceSize = sizesParser.Length();
-        candidate = BestFitSourceForImageAttributes(
-          document.DeviceScaleFactor(), srcAttribute ? Maybe<dom::DOMStringView>(*srcAttribute) : null,
-          dom::DOMStringView(*srcsetAttribute), sourceSize);
+        candidate = html::BestFitSourceForImageAttributes(
+          document.DeviceScaleFactor(), srcAttribute ? Maybe<DOMStringView>(*srcAttribute) : null,
+          DOMStringView(*srcsetAttribute), sourceSize);
       }
     }
     // 2. If el's source set is empty, return null as the URL and undefined as the pixel density.
@@ -802,10 +803,9 @@ namespace krys::boo::html
     SelectImageSource(RelevantMutation::Yes);
   }
 
-  void HTMLImageElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                            Maybe<dom::DOMStringView> oldValue,
-                                            Maybe<dom::DOMStringView> value,
-                                            const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLImageElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                            Maybe<DOMStringView> value,
+                                            const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
@@ -844,7 +844,7 @@ namespace krys::boo::html
   // https://html.spec.whatwg.org/#the-img-element:html-element-insertion-steps
   void HTMLImageElement::OnInsert() noexcept
   {
-    FormAssociatedElement::ElementInsertedIntoAncestor(*this, IsConnected());
+    html::FormAssociatedElement::ElementInsertedIntoAncestor(*this, IsConnected());
     if (!Form())
     {
       ResetFormOwner();
@@ -871,7 +871,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#the-img-element:html-element-removing-steps
-  void HTMLImageElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLImageElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     // 1. If isSubtreeRoot is true and oldAncestor is a picture element, then count this as a relevant
     //    mutation for removedNode.
@@ -884,13 +884,13 @@ namespace krys::boo::html
       SelectImageSource(RelevantMutation::Yes);
     }
 
-    FormAssociatedElement::ElementRemovedFromAncestor(*this, !IsConnected());
+    html::FormAssociatedElement::ElementRemovedFromAncestor(*this, !IsConnected());
 
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
   }
 
   // https://html.spec.whatwg.org/#the-img-element:html-element-moving-steps
-  void HTMLImageElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLImageElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
 
@@ -902,7 +902,7 @@ namespace krys::boo::html
     UpdatePictureElement();
   }
 
-  void HTMLImageElement::OnAdopt(dom::Document &oldDocument) noexcept
+  void HTMLImageElement::OnAdopt(Document &oldDocument) noexcept
   {
     HTMLElement::OnAdopt(oldDocument);
     SelectImageSource(RelevantMutation::No);
@@ -951,8 +951,8 @@ namespace krys::boo::html
 
 #pragma region Presentational hints
 
-  bool HTMLImageElement::HasPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool HTMLImageElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                            const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == u8"width" || localName == u8"height" || localName == u8"border"
@@ -963,12 +963,12 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLImageElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                                const dom::DOMStringAtom &namespaceURI,
-                                                                dom::DOMStringView value,
+  void HTMLImageElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                                const DOMStringAtom &namespaceURI,
+                                                                DOMStringView value,
                                                                 css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);

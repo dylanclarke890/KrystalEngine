@@ -37,7 +37,10 @@ namespace krys::boo::css
 {
   class MutableStyleProperties;
   struct ParserContext;
+}
 
+namespace krys::boo
+{
   /// @brief The base of the descriptor blocks exposed to scripts (`@font-face`, `@page`, `@position-try` and
   /// `@function` declarations).
   class PropertySetCSSDescriptors : public CSSStyleDeclaration, public RefCounted<PropertySetCSSDescriptors>
@@ -53,9 +56,9 @@ namespace krys::boo::css
     WeakPtr<CSSRule> _parentRule;
     // FIXME: Replaced this with a more descriptor specific property map that doesn't have all the complexity
     // of the Style one.
-    Ref<MutableStyleProperties> _propertySet;
+    Ref<css::MutableStyleProperties> _propertySet;
 
-    PropertySetCSSDescriptors(MutableStyleProperties &propertySet, CSSRule &parentRule) noexcept;
+    PropertySetCSSDescriptors(css::MutableStyleProperties &propertySet, CSSRule &parentRule) noexcept;
 
   public:
     ~PropertySetCSSDescriptors() noexcept override;
@@ -80,9 +83,9 @@ namespace krys::boo::css
       _parentRule = nullptr;
     }
 
-    void Reattach(MutableStyleProperties &propertySet) noexcept;
+    void Reattach(css::MutableStyleProperties &propertySet) noexcept;
 
-    KRYS_NODISCARD virtual RuleType GetRuleType() const noexcept = 0;
+    KRYS_NODISCARD virtual css::RuleType GetRuleType() const noexcept = 0;
 
   protected:
     KRYS_NODISCARD CSSStyleSheet *ParentStyleSheet() const noexcept final;
@@ -110,20 +113,20 @@ namespace krys::boo::css
 
     dom::ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept final;
 
-    KRYS_NODISCARD bool IsExposed(PropertyId property) const noexcept;
+    KRYS_NODISCARD bool IsExposed(css::PropertyId property) const noexcept;
 
     KRYS_NODISCARD bool WillMutate() noexcept;
 
     void DidMutate(MutationType type) noexcept;
 
     // PropertyId versions of the CSSOM functions to support bindings.
-    KRYS_NODISCARD CSSOMString GetPropertyValueInternal(PropertyId property) const noexcept;
+    KRYS_NODISCARD CSSOMString GetPropertyValueInternal(css::PropertyId property) const noexcept;
 
-    virtual dom::ExceptionOr<void> SetPropertyInternal(PropertyId property, const CSSOMString &value,
-                                                       IsImportant important) noexcept;
+    virtual dom::ExceptionOr<void> SetPropertyInternal(css::PropertyId property, const CSSOMString &value,
+                                                       css::IsImportant important) noexcept;
 
-    KRYS_NODISCARD ParserContext CssParserContext() const noexcept;
+    KRYS_NODISCARD css::ParserContext CssParserContext() const noexcept;
 
-    KRYS_NODISCARD Ref<MutableStyleProperties> ProtectedPropertySet() const noexcept;
+    KRYS_NODISCARD Ref<css::MutableStyleProperties> ProtectedPropertySet() const noexcept;
   };
 }

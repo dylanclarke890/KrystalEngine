@@ -53,7 +53,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "CSSUnparsedValue: reifying tokens",
                    "[CSS][TypedOM][css-typed-om:reify-a-list-of-component-values]")
   {
-    auto document = CreateRef<dom::Document>();
+    auto document = CreateRef<Document>();
     auto parsed =
       CSSStyleValue::Parse(*document, u8"--x", u8"a var(--b, var(--c, 1px)) calc(var(--d) + 2px)");
     REQUIRE(parsed.HasValue());

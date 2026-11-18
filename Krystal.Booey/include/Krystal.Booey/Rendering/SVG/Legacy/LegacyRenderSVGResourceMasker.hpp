@@ -28,15 +28,11 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include <array>
 
-namespace krys::boo::svg
-{
-  class SVGMaskElement;
-}
-
 namespace krys::boo
 {
   class DestinationColorSpace;
   class ImageBuffer;
+  class SVGMaskElement;
 
   /// @brief The mask image a mask drew for one client.
   struct MaskerData
@@ -54,11 +50,11 @@ namespace krys::boo
     HashMap<const RenderObject *, UniquePtr<MaskerData>> _masker;
 
   public:
-    LegacyRenderSVGResourceMasker(svg::SVGMaskElement &, RenderStyle &&) noexcept;
+    LegacyRenderSVGResourceMasker(SVGMaskElement &, RenderStyle &&) noexcept;
 
     ~LegacyRenderSVGResourceMasker() noexcept override;
 
-    KRYS_NODISCARD svg::SVGMaskElement &MaskElement() const noexcept;
+    KRYS_NODISCARD SVGMaskElement &MaskElement() const noexcept;
 
     void RemoveAllClientsFromCache() noexcept override;
 
@@ -75,9 +71,9 @@ namespace krys::boo
     KRYS_NODISCARD FloatRect ResourceBoundingBox(const RenderObject &,
                                                  RepaintRectCalculation) noexcept override;
 
-    KRYS_NODISCARD svg::SVGUnitTypes::SVGUnitType MaskUnits() const noexcept;
+    KRYS_NODISCARD SVGUnitTypes::SVGUnitType MaskUnits() const noexcept;
 
-    KRYS_NODISCARD svg::SVGUnitTypes::SVGUnitType MaskContentUnits() const noexcept;
+    KRYS_NODISCARD SVGUnitTypes::SVGUnitType MaskContentUnits() const noexcept;
 
     KRYS_NODISCARD RenderSVGResourceType ResourceType() const noexcept override
     {

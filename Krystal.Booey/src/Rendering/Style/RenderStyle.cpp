@@ -319,32 +319,32 @@ namespace krys::boo
                             + style::Evaluate<float>(OutlineOffset(), style::ZoomNeeded {}));
   }
 
-  css::CSSOMString RenderStyle::AltFromContent() const noexcept
+  CSSOMString RenderStyle::AltFromContent() const noexcept
   {
     if (auto *contentData = GetContent().TryData())
     {
-      return contentData->AltText.value_or(css::CSSOMString {});
+      return contentData->AltText.value_or(CSSOMString {});
     }
     return {};
   }
 
-  const css::CSSOMStringAtom &RenderStyle::HyphenString() const noexcept
+  const CSSOMStringAtom &RenderStyle::HyphenString() const noexcept
   {
     krys_debug_assert(GetHyphens() != Hyphens::None);
 
     return krys::SwitchOn(
       GetHyphenateCharacter(),
-      [&](const css::keywords::Auto &) -> const css::CSSOMStringAtom &
+      [&](const css::keywords::Auto &) -> const CSSOMStringAtom &
       {
         // U+2010 HYPHEN when the primary font has a glyph for it, as Chrome and WebKit hyphenate; otherwise
         // the hyphen-minus.
         // FIXME: This should depend on locale.
-        static const NeverDestroyed<const css::CSSOMStringAtom> hyphenMinusString {u8"-"};
-        static const NeverDestroyed<const css::CSSOMStringAtom> hyphenString {u8"\u2010"};
+        static const NeverDestroyed<const CSSOMStringAtom> hyphenMinusString {u8"-"};
+        static const NeverDestroyed<const CSSOMStringAtom> hyphenString {u8"\u2010"};
         return GetFontCascade().PrimaryFont()->GlyphForCharacter(U'\u2010') ? hyphenString.get()
                                                                             : hyphenMinusString.get();
       },
-      [](const css::CSSOMStringAtom &string) -> const css::CSSOMStringAtom & { return string; });
+      [](const CSSOMStringAtom &string) -> const CSSOMStringAtom & { return string; });
   }
 
   float RenderStyle::UsedStrokeWidth(const IntSize &viewportSize) const noexcept

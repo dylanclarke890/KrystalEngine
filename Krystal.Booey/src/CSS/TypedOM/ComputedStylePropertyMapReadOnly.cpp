@@ -33,27 +33,26 @@
 
 #include <algorithm>
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  Ref<ComputedStylePropertyMapReadOnly>
-    ComputedStylePropertyMapReadOnly::Create(dom::Element &element) noexcept
+  Ref<ComputedStylePropertyMapReadOnly> ComputedStylePropertyMapReadOnly::Create(Element &element) noexcept
   {
     return AdoptRef(*new ComputedStylePropertyMapReadOnly(element));
   }
 
-  ComputedStylePropertyMapReadOnly::ComputedStylePropertyMapReadOnly(dom::Element &element) noexcept
+  ComputedStylePropertyMapReadOnly::ComputedStylePropertyMapReadOnly(Element &element) noexcept
       : _element(CreateWeakPtr(&element))
   {
   }
 
   ComputedStylePropertyMapReadOnly::~ComputedStylePropertyMapReadOnly() noexcept = default;
 
-  dom::Document *ComputedStylePropertyMapReadOnly::Document() const noexcept
+  boo::Document *ComputedStylePropertyMapReadOnly::Document() const noexcept
   {
     return _element ? &_element->NodeDocument() : nullptr;
   }
 
-  RefPtr<Value> ComputedStylePropertyMapReadOnly::PropertyValue(PropertyId property) const noexcept
+  RefPtr<css::Value> ComputedStylePropertyMapReadOnly::PropertyValue(css::PropertyId property) const noexcept
   {
     return style::Extractor(_element.get())
       .PropertyValue(property, style::Extractor::UpdateLayout::Yes,
@@ -61,15 +60,15 @@ namespace krys::boo::css
   }
 
   CSSOMString
-    ComputedStylePropertyMapReadOnly::ShorthandPropertySerialisation(PropertyId property) const noexcept
+    ComputedStylePropertyMapReadOnly::ShorthandPropertySerialisation(css::PropertyId property) const noexcept
   {
     return style::Extractor(_element.get())
-      .PropertyValueSerialisation(property, DefaultSerialisationContext(),
+      .PropertyValueSerialisation(property, css::DefaultSerialisationContext(),
                                   style::Extractor::UpdateLayout::Yes,
                                   style::ExtractorState::PropertyValueType::Computed);
   }
 
-  RefPtr<Value>
+  RefPtr<css::Value>
     ComputedStylePropertyMapReadOnly::CustomPropertyValue(const CSSOMStringAtom &property) const noexcept
   {
     return style::Extractor(_element.get()).CustomPropertyValue(property);
@@ -83,7 +82,7 @@ namespace krys::boo::css
     {
       return 0;
     }
-    std::ignore = style::Extractor::UpdateStyleIfNeededForProperty(*element, PropertyId::Custom);
+    std::ignore = style::Extractor::UpdateStyleIfNeededForProperty(*element, css::PropertyId::Custom);
     const auto *style = element->ComputedStyle();
     if (!style)
     {
@@ -104,7 +103,7 @@ namespace krys::boo::css
     }
 
     // Brings the custom properties up to date.
-    std::ignore = style::Extractor::UpdateStyleIfNeededForProperty(*element, PropertyId::Custom);
+    std::ignore = style::Extractor::UpdateStyleIfNeededForProperty(*element, css::PropertyId::Custom);
     const auto *style = element->ComputedStyle();
     if (!style)
     {

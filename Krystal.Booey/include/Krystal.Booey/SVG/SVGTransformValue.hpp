@@ -28,7 +28,7 @@
 #include "Krystal.Booey/SVG/SVGMatrix.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief One transform of a `transform` attribute: its kind, its matrix, and the angle and centre it was
   /// given.
@@ -217,7 +217,7 @@ namespace krys::boo::svg
       _matrix->Value().SkewY(angle);
     }
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept;
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept;
 
     KRYS_NODISCARD static utf8_stringview PrefixForTransformType(SVGTransformType) noexcept;
 

@@ -34,7 +34,7 @@
 namespace krys::boo
 {
   KRYS_NODISCARD inline bool ShouldApplyLayoutContainment(const RenderStyle &style,
-                                                          const dom::Element &element) noexcept
+                                                          const Element &element) noexcept
   {
     // content-visibility hidden and auto turns on layout containment.
     auto hasContainment = style.UsedContain().Contains(style::ContainValue::Layout)
@@ -65,7 +65,7 @@ namespace krys::boo
   }
 
   KRYS_NODISCARD inline bool ShouldApplySizeContainment(const RenderStyle &style,
-                                                        const dom::Element &element) noexcept
+                                                        const Element &element) noexcept
   {
     auto hasContainment =
       style.UsedContain().Contains(style::ContainValue::Size)
@@ -100,7 +100,7 @@ namespace krys::boo
   }
 
   KRYS_NODISCARD inline bool ShouldApplyInlineSizeContainment(const RenderStyle &style,
-                                                              const dom::Element &element) noexcept
+                                                              const Element &element) noexcept
   {
     if (!style.UsedContain().Contains(style::ContainValue::InlineSize))
     {
@@ -130,8 +130,7 @@ namespace krys::boo
     return true;
   }
 
-  KRYS_NODISCARD inline bool ShouldApplyStyleContainment(const RenderStyle &style,
-                                                         const dom::Element &) noexcept
+  KRYS_NODISCARD inline bool ShouldApplyStyleContainment(const RenderStyle &style, const Element &) noexcept
   {
     // content-visibility hidden and auto turns on style containment.
     return style.UsedContain().Contains(style::ContainValue::Style)
@@ -140,7 +139,7 @@ namespace krys::boo
   }
 
   KRYS_NODISCARD inline bool ShouldApplyPaintContainment(const RenderStyle &style,
-                                                         const dom::Element &element) noexcept
+                                                         const Element &element) noexcept
   {
     // content-visibility hidden and auto turns on paint containment.
     auto hasContainment = style.UsedContain().Contains(style::ContainValue::Paint)
@@ -170,8 +169,7 @@ namespace krys::boo
     return true;
   }
 
-  KRYS_NODISCARD inline bool IsSkippedContentRoot(const RenderStyle &style,
-                                                  const dom::Element &element) noexcept
+  KRYS_NODISCARD inline bool IsSkippedContentRoot(const RenderStyle &style, const Element &element) noexcept
   {
     if (!ShouldApplySizeContainment(style, element))
     {

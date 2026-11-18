@@ -27,7 +27,7 @@
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGStringList.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   SVGConditionalProcessingAttributes::SVGConditionalProcessingAttributes(SVGElement &contextElement) noexcept
       : _requiredExtensions(SVGStringList::Create(&contextElement)),
@@ -48,7 +48,7 @@ namespace krys::boo::svg
   {
   }
 
-  bool SVGTests::HasExtension(dom::DOMStringView extension) noexcept
+  bool SVGTests::HasExtension(DOMStringView extension) noexcept
   {
     // We recognize XHTML and MathML, as implemented in Gecko and suggested in the SVG Tiny
     // recommendation (http://www.w3.org/TR/SVG11/struct.html#RequiredExtensionsAttribute).
@@ -68,7 +68,7 @@ namespace krys::boo::svg
     }
 
     auto defaultLanguage = DefaultLanguage();
-    auto genericDefaultLanguage = dom::DOMStringView(defaultLanguage).substr(0, 2);
+    auto genericDefaultLanguage = DOMStringView(defaultLanguage).substr(0, 2);
     for (auto &language : attributes->SystemLanguage().Items())
     {
       if (language != genericDefaultLanguage)
@@ -86,7 +86,7 @@ namespace krys::boo::svg
     return true;
   }
 
-  void SVGTests::ParseAttribute(const dom::QualifiedName &name, Maybe<dom::DOMStringView> value) noexcept
+  void SVGTests::ParseAttribute(const QualifiedName &name, Maybe<DOMStringView> value) noexcept
   {
     // NOTE: an attribute that's present but empty evaluates to false (its list holds an empty string); one
     // that's absent evaluates to true.
@@ -112,7 +112,7 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGTests::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGTests::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (!PropertyRegistry::IsKnownAttribute(attributeName))
     {

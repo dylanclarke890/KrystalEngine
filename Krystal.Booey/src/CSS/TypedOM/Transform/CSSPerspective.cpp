@@ -34,7 +34,7 @@
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   namespace
   {
@@ -91,10 +91,10 @@ namespace krys::boo::css
     return AdoptRef(*new CSSPerspective(checkedLength.ReleaseValue()));
   }
 
-  dom::ExceptionOr<Ref<CSSPerspective>> CSSPerspective::Create(const FunctionValue &function,
-                                                               dom::Document &document) noexcept
+  dom::ExceptionOr<Ref<CSSPerspective>> CSSPerspective::Create(const css::FunctionValue &function,
+                                                               Document &document) noexcept
   {
-    if (function.Name() != ValueId::Perspective || function.Length() != 1)
+    if (function.Name() != css::ValueId::Perspective || function.Length() != 1)
     {
       return dom::Exception {dom::ExceptionCode::TypeError};
     }
@@ -157,21 +157,21 @@ namespace krys::boo::css
     builder.Append(u8')');
   }
 
-  dom::ExceptionOr<Ref<DOMMatrix>> CSSPerspective::ToMatrix() const noexcept
+  dom::ExceptionOr<Ref<css::DOMMatrix>> CSSPerspective::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
     // `perspective(none)` is the identity.
     const auto *numeric = std::get_if<RefPtr<CSSNumericValue>>(&_length);
     if (!numeric)
     {
-      return DOMMatrix::Create(TransformationMatrix(), DOMMatrixReadOnly::Is2D::Yes);
+      return css::DOMMatrix::Create(TransformationMatrix(), css::DOMMatrixReadOnly::Is2D::Yes);
     }
     const auto *unitValue = DynamicDowncast<CSSUnitValue>(numeric->get());
     if (!unitValue)
     {
       return dom::Exception {dom::ExceptionCode::TypeError};
     }
-    auto length = unitValue->ConvertTo(UnitType::px);
+    auto length = unitValue->ConvertTo(css::UnitType::px);
     if (!length)
     {
       return dom::Exception {dom::ExceptionCode::TypeError};
@@ -179,19 +179,19 @@ namespace krys::boo::css
 
     TransformationMatrix matrix;
     matrix.ApplyPerspective(length->Value());
-    return DOMMatrix::Create(matrix, DOMMatrixReadOnly::Is2D::No);
+    return css::DOMMatrix::Create(matrix, css::DOMMatrixReadOnly::Is2D::No);
   }
 
-  RefPtr<Value> CSSPerspective::ToCSSValue() const noexcept
+  RefPtr<css::Value> CSSPerspective::ToCSSValue() const noexcept
   {
     auto length = krys::SwitchOn(
       _length, [](const RefPtr<CSSNumericValue> &value) { return value->ToCSSValue(); },
-      [](const CSSOMString &) { return RefPtr<Value>(); },
+      [](const CSSOMString &) { return RefPtr<css::Value>(); },
       [](const RefPtr<CSSKeywordValue> &value) { return value->ToCSSValue(); });
     if (!length)
     {
       return nullptr;
     }
-    return FunctionValue::Create(ValueId::Perspective, Ref<Value>(krys::move(length)));
+    return css::FunctionValue::Create(css::ValueId::Perspective, Ref<css::Value>(krys::move(length)));
   }
 }

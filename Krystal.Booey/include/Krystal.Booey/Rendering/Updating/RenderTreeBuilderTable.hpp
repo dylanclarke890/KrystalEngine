@@ -27,13 +27,9 @@
 
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
 
-namespace krys::boo::dom
-{
-  class Document;
-}
-
 namespace krys::boo
 {
+  class Document;
   class RenderTable;
   class RenderTableCell;
   class RenderTableRow;
@@ -77,16 +73,16 @@ namespace krys::boo
     void CollapseAndDestroyAnonymousSiblingRows(const RenderTableRow &willBeDestroyed) noexcept;
 
     KRYS_NODISCARD static RenderPtr<RenderTable>
-      CreateAnonymousTableWithStyle(dom::Document &document, const RenderStyle &style) noexcept;
+      CreateAnonymousTableWithStyle(Document &document, const RenderStyle &style) noexcept;
 
     KRYS_NODISCARD static RenderPtr<RenderTableSection>
-      CreateAnonymousTableSectionWithStyle(dom::Document &document, const RenderStyle &style) noexcept;
+      CreateAnonymousTableSectionWithStyle(Document &document, const RenderStyle &style) noexcept;
 
     KRYS_NODISCARD static RenderPtr<RenderTableRow>
-      CreateAnonymousTableRowWithStyle(dom::Document &document, const RenderStyle &style) noexcept;
+      CreateAnonymousTableRowWithStyle(Document &document, const RenderStyle &style) noexcept;
 
     KRYS_NODISCARD static RenderPtr<RenderTableCell>
-      CreateAnonymousTableCellWithStyle(dom::Document &document, const RenderStyle &style) noexcept;
+      CreateAnonymousTableCellWithStyle(Document &document, const RenderStyle &style) noexcept;
 
   private:
     template <typename Parent, typename Child>

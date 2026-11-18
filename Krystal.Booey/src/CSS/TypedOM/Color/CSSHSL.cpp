@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Color/CSSHSL.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   dom::ExceptionOr<Ref<CSSHSL>> CSSHSL::Create(CSSColorAngle hue, CSSColorPercent saturation,
                                                CSSColorPercent lightness, CSSColorPercent alpha) noexcept

@@ -234,10 +234,10 @@ namespace krys::boo
       KRYS_NON_COPY_MOVABLE(UnloadCountIncrementer);
 
     private:
-      RefPtr<dom::Document> _document;
+      RefPtr<Document> _document;
 
     public:
-      explicit UnloadCountIncrementer(dom::Document *document) noexcept : _document(ShareRefPtr(document))
+      explicit UnloadCountIncrementer(Document *document) noexcept : _document(ShareRefPtr(document))
       {
         if (_document)
         {
@@ -258,7 +258,7 @@ namespace krys::boo
   // https://html.spec.whatwg.org/#unload-a-document
   void FrameLoader::DispatchUnloadEvents() noexcept
   {
-    RefPtr<dom::Document> document = ShareRefPtr(_frame.Document());
+    RefPtr<boo::Document> document = ShareRefPtr(_frame.Document());
     if (!document || _pageDismissalEventBeingDispatched)
     {
       return;
@@ -334,7 +334,7 @@ namespace krys::boo
       return;
     }
 
-    RefPtr<dom::Document> document = ShareRefPtr(_frame.Document());
+    RefPtr<boo::Document> document = ShareRefPtr(_frame.Document());
     if (!document)
     {
       return;
@@ -371,7 +371,7 @@ namespace krys::boo
 
   void FrameLoader::CheckCallImplicitClose() noexcept
   {
-    RefPtr<dom::Document> document = ShareRefPtr(_frame.Document());
+    RefPtr<boo::Document> document = ShareRefPtr(_frame.Document());
     if (_didCallImplicitClose || !document || document->Parsing() || document->IsDelayingLoadEvent())
     {
       return;
@@ -410,9 +410,9 @@ namespace krys::boo
     }
   }
 
-  void FrameLoader::ChangeLocation(const url::URL &url, dom::DOMStringAtom passedTarget,
+  void FrameLoader::ChangeLocation(const url::URL &url, DOMStringAtom passedTarget,
                                    dom::Event *triggeringEvent, ReferrerPolicy referrerPolicy,
-                                   dom::DOMStringAtom downloadAttribute, dom::Element *sourceElement) noexcept
+                                   DOMStringAtom downloadAttribute, Element *sourceElement) noexcept
   {
     auto *document = _frame.Document();
     if (!document)
@@ -441,7 +441,7 @@ namespace krys::boo
 
     if (frameRequest.FrameName().View().empty())
     {
-      frameRequest.SetFrameName(dom::DOMStringAtom(document->BaseTarget()));
+      frameRequest.SetFrameName(DOMStringAtom(document->BaseTarget()));
     }
 
     // The target is ignored when the download attribute is set, as the link is downloaded rather than
@@ -462,7 +462,7 @@ namespace krys::boo
     }
 
     RequestNavigation(action, request, nullptr,
-                      targetsThisFrame ? dom::DOMStringView() : effectiveFrameName.View());
+                      targetsThisFrame ? DOMStringView() : effectiveFrameName.View());
   }
 
   void FrameLoader::SubmitForm(Ref<FormSubmission> &&submission) noexcept
@@ -516,8 +516,7 @@ namespace krys::boo
   }
 
   void FrameLoader::RequestNavigation(const NavigationAction &action, const ResourceRequest &request,
-                                      const FormSubmission *formSubmission,
-                                      dom::DOMStringView frameName) noexcept
+                                      const FormSubmission *formSubmission, DOMStringView frameName) noexcept
   {
     if (frameName.empty())
     {
@@ -537,7 +536,7 @@ namespace krys::boo
     _client->DispatchNewWindowRequested(action, request, formSubmission, frameName);
   }
 
-  LocalFrame *FrameLoader::FindFrameForNavigation(dom::DOMStringView name) const noexcept
+  LocalFrame *FrameLoader::FindFrameForNavigation(DOMStringView name) const noexcept
   {
     // https://html.spec.whatwg.org/#the-rules-for-choosing-a-navigable
     // 1. Let chosen be null.
@@ -583,7 +582,7 @@ namespace krys::boo
   void FrameLoader::LoadInSameDocument(const url::URL &url) noexcept
   {
     Ref<LocalFrame> protectedFrame = ShareRef(_frame);
-    RefPtr<dom::Document> document = ShareRefPtr(_frame.Document());
+    RefPtr<boo::Document> document = ShareRefPtr(_frame.Document());
     if (!document)
     {
       return;
@@ -633,7 +632,7 @@ namespace krys::boo
   void FrameLoader::ScrollToFragment(const url::URL &url) noexcept
   {
     RefPtr<LocalFrameView> view = ShareRefPtr(_frame.View());
-    RefPtr<dom::Document> document = ShareRefPtr(_frame.Document());
+    RefPtr<boo::Document> document = ShareRefPtr(_frame.Document());
     if (!view || !document)
     {
       return;

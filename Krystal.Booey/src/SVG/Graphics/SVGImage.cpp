@@ -46,7 +46,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImageClients.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   SVGImage::SVGImage(ImageObserver *observer) noexcept
       : Image(observer), _startAnimationTimer(*this, &SVGImage::StartAnimationTimerFired)
@@ -493,7 +493,7 @@ namespace krys::boo::svg
     return u8"svg";
   }
 
-  bool IsInSVGImage(const dom::Element *element) noexcept
+  bool svg::IsInSVGImage(const Element *element) noexcept
   {
     krys_debug_assert(element);
 

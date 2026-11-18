@@ -61,7 +61,7 @@ namespace krys::boo::dom::tests
 
     auto newSlot = [&]
     {
-      return ShareRef(Downcast<html::HTMLSlotElement>(*document->CreateElement(u8"slot").ReleaseValue()));
+      return ShareRef(Downcast<HTMLSlotElement>(*document->CreateElement(u8"slot").ReleaseValue()));
     };
     auto first = newSlot();
     auto second = newSlot();
@@ -80,9 +80,9 @@ namespace krys::boo::dom::tests
 
   namespace
   {
-    KRYS_NODISCARD Ref<html::HTMLSlotElement> NewSlotNamed(Document &document, DOMString &&name) noexcept
+    KRYS_NODISCARD Ref<HTMLSlotElement> NewSlotNamed(Document &document, DOMString &&name) noexcept
     {
-      auto slot = ShareRef(Downcast<html::HTMLSlotElement>(*document.CreateElement(u8"slot").ReleaseValue()));
+      auto slot = ShareRef(Downcast<HTMLSlotElement>(*document.CreateElement(u8"slot").ReleaseValue()));
       if (!name.empty())
       {
         (void)slot->SetAttribute(u8"name", krys::move(name));
@@ -301,7 +301,7 @@ namespace krys::boo::dom::tests
     auto first = NewSlotNamed(*document, u8"");
     auto second = NewSlotNamed(*document, u8"");
 
-    List<html::HTMLSlotElement *> fired;
+    List<HTMLSlotElement *> fired;
     auto firstListener =
       first->AddEventListener(u8"slotchange", [&](Event &) { fired.push_back(first.get()); });
     auto secondListener =
@@ -313,7 +313,7 @@ namespace krys::boo::dom::tests
     CHECK(fired.empty());
 
     loop.PerformMicrotaskCheckpoint();
-    CHECK(fired == List<html::HTMLSlotElement *> {second.get(), first.get()});
+    CHECK(fired == List<HTMLSlotElement *> {second.get(), first.get()});
 
     // The signal slots were emptied.
     loop.PerformMicrotaskCheckpoint();

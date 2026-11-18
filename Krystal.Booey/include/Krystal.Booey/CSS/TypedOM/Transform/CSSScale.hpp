@@ -28,7 +28,7 @@
 #include "Krystal.Booey/CSS/TypedOM/Transform/CSSTransformComponent.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief A `scale()`, `scale3d()` or single-axis scale.
   /// @see https://drafts.css-houdini.org/css-typed-om/#cssscale
@@ -47,8 +47,8 @@ namespace krys::boo::css
                                                                  Maybe<CSSNumberish> z = {}) noexcept;
 
     /// @brief Reifies a scale function.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSScale>> Create(const FunctionValue &function,
-                                                                 dom::Document &document) noexcept;
+    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSScale>> Create(const css::FunctionValue &function,
+                                                                 Document &document) noexcept;
 
     KRYS_NODISCARD const CSSNumericValue &X() const noexcept
     {
@@ -76,23 +76,23 @@ namespace krys::boo::css
 
     void Serialise(StringBuilder &builder) const noexcept final;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<DOMMatrix>> ToMatrix() const noexcept final;
+    KRYS_NODISCARD dom::ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
 
     KRYS_NODISCARD CSSTransformType TransformType() const noexcept final
     {
       return CSSTransformType::Scale;
     }
 
-    KRYS_NODISCARD RefPtr<Value> ToCSSValue() const noexcept final;
+    KRYS_NODISCARD RefPtr<css::Value> ToCSSValue() const noexcept final;
 
   private:
     CSSScale(bool is2D, Ref<CSSNumericValue> x, Ref<CSSNumericValue> y, Ref<CSSNumericValue> z) noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSScale)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSTransformComponent &component) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSScale)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSTransformComponent &component) noexcept
   {
-    return component.TransformType() == krys::boo::css::CSSTransformType::Scale;
+    return component.TransformType() == krys::boo::CSSTransformType::Scale;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

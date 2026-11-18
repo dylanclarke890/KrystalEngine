@@ -15,23 +15,23 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    KRYS_NODISCARD Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
+    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       parser->PumpTokenizer();
       return document;
     }
 
-    KRYS_NODISCARD dom::Element &ById(dom::Document &document, dom::DOMStringView id)
+    KRYS_NODISCARD boo::Element &ById(Document &document, DOMStringView id)
     {
       auto element = document.GetElementById(id);
       REQUIRE(element);
       return *element;
     }
 
-    KRYS_NODISCARD SelectorList ParseSelector(const dom::Document &document, CSSOMStringView text)
+    KRYS_NODISCARD SelectorList ParseSelector(const Document &document, CSSOMStringView text)
     {
       auto list = SelectorParser::ParseSelectorList(text, SelectorParserContext(document));
       REQUIRE(list);
@@ -189,7 +189,7 @@ namespace krys::boo::css::tests
     auto hasY = ParseSelector(*document, u8":has(.y)");
     auto hasP = ParseSelector(*document, u8":has(p)");
 
-    auto match = [&](const dom::Element &element, const SelectorList &list)
+    auto match = [&](const boo::Element &element, const SelectorList &list)
     {
       SelectorChecker::CheckingContext context(SelectorChecker::Mode::ResolvingStyle);
       context.SelectorMatchingState = &state;
@@ -231,13 +231,13 @@ namespace krys::boo::css::tests
     auto &third = ById(*document, u8"third");
     SelectorChecker checker(*document);
 
-    auto relations = [&](const dom::Element &element, CSSOMStringView text,
+    auto relations = [&](const boo::Element &element, CSSOMStringView text,
                          SelectorChecker::Mode mode = SelectorChecker::Mode::ResolvingStyle)
     {
       SelectorChecker::CheckingContext context(mode);
       auto selectors = ParseSelector(*document, text);
       (void)checker.Match(*selectors.FirstSelectorComponent(), element, context);
-      List<std::tuple<const dom::Element *, style::Relation::Type, uint32>> result;
+      List<std::tuple<const boo::Element *, style::Relation::Type, uint32>> result;
       for (auto &relation : context.StyleRelations)
       {
         result.emplace_back(relation.Element, relation.RelationType, relation.Value);
@@ -246,7 +246,7 @@ namespace krys::boo::css::tests
     };
 
     using R = style::Relation;
-    using Relations = List<std::tuple<const dom::Element *, R::Type, uint32>>;
+    using Relations = List<std::tuple<const boo::Element *, R::Type, uint32>>;
 
     REQUIRE(relations(first, u8":first-child")
             == Relations {{&list, R::ChildrenAffectedByFirstChildRules, 1}, {&first, R::FirstChild, 1}});
@@ -265,7 +265,7 @@ namespace krys::boo::css::tests
     REQUIRE(relations(second, u8"li + li")
             == Relations {{&second, R::AffectedByPreviousSibling, 1}, {&first, R::AffectsNextSibling, 1}});
     // Positions of elements other than the subject affect descendants.
-    const dom::Element *body = document->Body().get();
+    const boo::Element *body = document->Body().get();
     REQUIRE(relations(first, u8":first-of-type > *")
             == Relations {{body, R::DescendantsAffectedByForwardPositionalRules, 1}});
     // Only resolving style records relations.

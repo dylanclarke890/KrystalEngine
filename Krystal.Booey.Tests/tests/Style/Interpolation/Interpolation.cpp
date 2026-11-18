@@ -15,10 +15,10 @@ namespace krys::boo::style::tests
   {
     struct TestClient final : interpolation::Client
     {
-      dom::Document *TestDocument;
+      boo::Document *TestDocument;
       const RenderStyle *Style;
 
-      KRYS_NODISCARD dom::Document *Document() const noexcept override
+      KRYS_NODISCARD boo::Document *Document() const noexcept override
       {
         return TestDocument;
       }
@@ -152,7 +152,7 @@ namespace krys::boo::style::tests
     CHECK(fixture.Value(*padding, css::PropertyId::PaddingLeft) == "10px");
 
     // Registered custom properties interpolate by their syntax; the others swap.
-    const css::CSSOMStringAtom lengthName {u8"--length"};
+    const CSSOMStringAtom lengthName {u8"--length"};
     auto length = fixture.Interpolated(lengthName, 0.25);
     const auto *lengthValue = length->CustomPropertyValue(lengthName);
     REQUIRE(lengthValue);
@@ -161,7 +161,7 @@ namespace krys::boo::style::tests
     REQUIRE(std::holds_alternative<Length<>>(syntaxValue));
     CHECK(std::get<Length<>>(syntaxValue).UnresolvedValue() == 5);
 
-    const css::CSSOMStringAtom tokensName {u8"--tokens"};
+    const CSSOMStringAtom tokensName {u8"--tokens"};
     auto tokens = fixture.Interpolated(tokensName, 0.6);
     CHECK(tokens->CustomPropertyValue(tokensName) == fixture.To->CustomPropertyValue(tokensName));
   }

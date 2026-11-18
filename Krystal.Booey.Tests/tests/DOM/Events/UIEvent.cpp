@@ -43,7 +43,7 @@ namespace krys::boo::tests
                           u8"<div id=editable contenteditable>text</div>");
     auto *window = fixture.Document->Window();
     REQUIRE(window);
-    dom::DOMStringAtom type(u8"x");
+    DOMStringAtom type(u8"x");
 
     SECTION("it's what the dictionary says, and null without one")
     {
@@ -110,7 +110,7 @@ namespace krys::boo::tests
                         u8"beforeinput", u8"input", u8"textInput", u8"compositionstart",
                         u8"compositionupdate", u8"compositionend"})
       {
-        window->AddEventListener(dom::DOMStringAtom(name), Ref {recorder}, true);
+        window->AddEventListener(DOMStringAtom(name), Ref {recorder}, true);
       }
       auto all = [&](std::initializer_list<const char *> names)
       {
@@ -126,7 +126,7 @@ namespace krys::boo::tests
       html::FocusAlgorithms::FocusingSteps(fixture.ById(u8"button"));
       all({"focus", "focusin", "blur", "focusout"});
 
-      Downcast<html::HTMLElement>(fixture.ById(u8"button")).Click();
+      Downcast<HTMLElement>(fixture.ById(u8"button")).Click();
       all({"click"});
 
       using Type = PlatformEvent::Type;

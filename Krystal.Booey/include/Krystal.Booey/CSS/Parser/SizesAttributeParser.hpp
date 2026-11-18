@@ -36,7 +36,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -53,19 +53,19 @@ namespace krys::boo::css
   class SizesAttributeParser
   {
   private:
-    WeakPtr<const dom::Document> _document;
+    WeakPtr<const Document> _document;
     List<mq::MediaQueryResult> _dynamicMediaQueryResults;
     float _length {0};
     bool _lengthWasSet {false};
     bool _isValid {false};
 
   public:
-    SizesAttributeParser(CSSOMStringView attribute, const dom::Document &document) noexcept;
+    SizesAttributeParser(CSSOMStringView attribute, const Document &document) noexcept;
 
     KRYS_NODISCARD float Length() const noexcept;
 
     KRYS_NODISCARD static float ComputeLength(double value, LengthUnit unit,
-                                              const dom::Document &document) noexcept;
+                                              const Document &document) noexcept;
 
     /// @brief The media conditions whose result depends on the viewport or the user's preferences.
     KRYS_NODISCARD const List<mq::MediaQueryResult> &DynamicMediaQueryResults() const noexcept

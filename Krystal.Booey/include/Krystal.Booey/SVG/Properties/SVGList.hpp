@@ -29,7 +29,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGProperty.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The list interface the SVG DOM's lists share (`SVGLengthList`, `SVGStringList`, ...).
   /// @see https://svgwg.org/svg2-draft/types.html#ListInterfaces

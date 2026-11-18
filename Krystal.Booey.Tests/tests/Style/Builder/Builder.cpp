@@ -52,7 +52,7 @@ namespace krys::boo::style::tests
 
       KRYS_NODISCARD static std::string Custom(const RenderStyle &style, utf8_stringview name) noexcept
       {
-        const auto *property = style.CustomPropertyValue(css::CSSOMStringAtom {name});
+        const auto *property = style.CustomPropertyValue(CSSOMStringAtom {name});
         if (!property)
         {
           return "<none>";
@@ -72,13 +72,13 @@ namespace krys::boo::style::tests
       void Register(utf8_stringview name, utf8_stringview syntax, bool inherits, utf8_stringview initialValue)
       {
         css::tests::Tokens tokens {initialValue};
-        css::PropertyRule::Descriptor descriptor {.Name = css::CSSOMStringAtom {name},
-                                                  .Syntax = css::CSSOMString {syntax},
+        css::PropertyRule::Descriptor descriptor {.Name = CSSOMStringAtom {name},
+                                                  .Syntax = CSSOMString {syntax},
                                                   .Inherits = inherits,
                                                   .InitialValue =
                                                     css::VariableData::Create(tokens.Tokenizer.Tokens())};
         Document->StyleScope().GetCustomPropertyRegistry().RegisterFromStylesheet(descriptor);
-        REQUIRE(Document->StyleScope().GetCustomPropertyRegistry().Get(css::CSSOMStringAtom {name}));
+        REQUIRE(Document->StyleScope().GetCustomPropertyRegistry().Get(CSSOMStringAtom {name}));
       }
     };
   }
@@ -310,7 +310,7 @@ namespace krys::boo::style::tests
 
     auto resolve = [&](utf8_stringview name, css::GlobalKeyword keyword)
     {
-      auto value = css::CustomPropertyValue::CreateWithGlobalKeyword(css::CSSOMStringAtom {name}, keyword);
+      auto value = css::CustomPropertyValue::CreateWithGlobalKeyword(CSSOMStringAtom {name}, keyword);
       return builder.ResolveCustomPropertyForContainerQueries(*value);
     };
 

@@ -233,7 +233,7 @@ namespace krys::boo::dom
       return (AtStartOfNode() || AtEndOfNode()) && !Position::NodeIsUserSelectNone(anchorNode->ParentNode());
     }
 
-    if (Is<html::HTMLHtmlElement>(*anchorNode))
+    if (Is<HTMLHtmlElement>(*anchorNode))
     {
       return false;
     }
@@ -242,8 +242,7 @@ namespace krys::boo::dom
     {
       if (Is<RenderBlockFlow>(*block) || Is<RenderGrid>(*block) || Is<RenderFlexibleBox>(*block))
       {
-        if (block->LogicalHeight() || Is<html::HTMLBodyElement>(*anchorNode)
-            || anchorNode->IsRootEditableElement())
+        if (block->LogicalHeight() || Is<HTMLBodyElement>(*anchorNode) || anchorNode->IsRootEditableElement())
         {
           if (!Position::HasRenderedNonAnonymousDescendantsWithHeight(*block))
           {

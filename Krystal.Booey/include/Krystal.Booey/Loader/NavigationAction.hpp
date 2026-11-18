@@ -80,8 +80,7 @@ namespace krys::boo
     NavigationAction() noexcept;
 
     NavigationAction(ResourceRequest originalRequest, bool isFormSubmission, dom::Event *event = nullptr,
-                     dom::DOMStringAtom downloadAttribute = null,
-                     dom::Element *sourceElement = nullptr) noexcept;
+                     DOMStringAtom downloadAttribute = null, Element *sourceElement = nullptr) noexcept;
 
     ~NavigationAction() noexcept;
 

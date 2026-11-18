@@ -18,7 +18,7 @@ namespace krys::boo::html
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TrackReadyState, 4uz);
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmltrackelement
   class HTMLTrackElement : public HTMLElement
@@ -26,18 +26,18 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTrackElement);
 
   private:
-    TrackReadyState _readyState : BitCount<TrackReadyState>() {TrackReadyState::None};
+    html::TrackReadyState _readyState : BitCount<html::TrackReadyState>() {html::TrackReadyState::None};
 
   public:
-    HTMLTrackElement(dom::Document &document) noexcept;
+    HTMLTrackElement(Document &document) noexcept;
 
 #pragma region HTMLTrackElement - https://html.spec.whatwg.org/#htmltrackelement
 
     /// @see https://html.spec.whatwg.org/#dom-track-kind
-    KRYS_NODISCARD dom::DOMString Kind() const noexcept;
+    KRYS_NODISCARD DOMString Kind() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-kind
-    void Kind(dom::DOMString value) noexcept;
+    void Kind(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-src
     KRYS_NODISCARD dom::USVString Src() const noexcept;
@@ -46,16 +46,16 @@ namespace krys::boo::html
     void Src(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-srclang
-    KRYS_NODISCARD dom::DOMString SrcLang() const noexcept;
+    KRYS_NODISCARD DOMString SrcLang() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-srclang
-    void SrcLang(dom::DOMString value) noexcept;
+    void SrcLang(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-label
-    KRYS_NODISCARD dom::DOMString Label() const noexcept;
+    KRYS_NODISCARD DOMString Label() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-label
-    void Label(dom::DOMString value) noexcept;
+    void Label(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-default
     KRYS_NODISCARD bool Default() const noexcept;
@@ -64,7 +64,7 @@ namespace krys::boo::html
     void Default(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-readystate
-    KRYS_NODISCARD TrackReadyState ReadyState() const noexcept
+    KRYS_NODISCARD html::TrackReadyState ReadyState() const noexcept
     {
       return _readyState;
     }
@@ -76,8 +76,8 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLTrackElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLTrackElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLTrackElement();
   }

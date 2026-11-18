@@ -52,7 +52,7 @@ namespace krys::boo::tests
 
     void DispatchNewWindowRequested(const NavigationAction &action, const ResourceRequest &request,
                                     const FormSubmission *formSubmission,
-                                    dom::DOMStringView frameName) noexcept final
+                                    DOMStringView frameName) noexcept final
     {
       Record(action, request, formSubmission, true, frameName);
     }
@@ -64,7 +64,7 @@ namespace krys::boo::tests
 
   private:
     void Record(const NavigationAction &action, const ResourceRequest &request,
-                const FormSubmission *formSubmission, bool isNewWindow, dom::DOMStringView frameName) noexcept
+                const FormSubmission *formSubmission, bool isNewWindow, DOMStringView frameName) noexcept
     {
       auto narrow = [](utf8_stringview text)
       {
@@ -99,14 +99,14 @@ namespace krys::boo::tests
       TestPage = Page::Create(nullptr, nullptr, krys::move(client));
       Frame = ShareRefPtr(&TestPage->MainFrame());
       Frame->CreateView({400, 300});
-      Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+      Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
       Document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
     }
 
     template <typename T>
-    KRYS_NODISCARD T &Get(dom::DOMStringView id) noexcept
+    KRYS_NODISCARD T &Get(DOMStringView id) noexcept
     {
-      return Downcast<T>(Downcast<html::HTMLElement>(ById(id)));
+      return Downcast<T>(Downcast<HTMLElement>(ById(id)));
     }
 
     /// @brief The navigations the page asked for, after running the tasks that start them (form submissions

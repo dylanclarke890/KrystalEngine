@@ -53,14 +53,14 @@ namespace krys::boo::tests
         (void)Document().UpdateLayout();
       }
 
-      KRYS_NODISCARD html::ImageDocument &ImageDocument() const noexcept
+      KRYS_NODISCARD boo::ImageDocument &ImageDocument() const noexcept
       {
-        auto *document = DynamicDowncast<html::ImageDocument>(Document());
+        auto *document = DynamicDowncast<boo::ImageDocument>(Document());
         REQUIRE(document);
         return *document;
       }
 
-      KRYS_NODISCARD html::HTMLImageElement &Image() const noexcept
+      KRYS_NODISCARD HTMLImageElement &Image() const noexcept
       {
         auto *image = ImageDocument().ImageElement();
         REQUIRE(image);
@@ -69,7 +69,7 @@ namespace krys::boo::tests
 
       KRYS_NODISCARD std::string Style() const noexcept
       {
-        return Narrow(Image().GetAttribute(u8"style").value_or(dom::DOMString()));
+        return Narrow(Image().GetAttribute(u8"style").value_or(DOMString()));
       }
 
       void ResizeView(int32 width, int32 height) noexcept
@@ -97,7 +97,7 @@ namespace krys::boo::tests
     CHECK(document.Head());
     CHECK(body->FirstChild() == &fixture.Image());
     CHECK(body->FirstChild() == body->LastChild());
-    CHECK(Narrow(fixture.Image().GetAttribute(u8"src").value_or(dom::DOMString()))
+    CHECK(Narrow(fixture.Image().GetAttribute(u8"src").value_or(DOMString()))
           == "https://example.com/dir/my%20image.png");
 
     // The image has the loaded bytes, without fetching them.
@@ -179,6 +179,6 @@ namespace krys::boo::tests
                    "[HTML][ImageDocument]")
   {
     ImageDocumentFixture fixture(images::PNG, u8"image/x-unknown", u8"https://example.com/image");
-    CHECK_FALSE(Is<html::ImageDocument>(fixture.Document()));
+    CHECK_FALSE(Is<ImageDocument>(fixture.Document()));
   }
 }

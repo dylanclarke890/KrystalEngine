@@ -50,14 +50,14 @@ namespace krys::boo::tests
     struct PageFixture
     {
       Ref<Page> TestPage {Page::Create()};
-      RefPtr<dom::HTMLDocument> Document;
+      RefPtr<HTMLDocument> Document;
 
       explicit PageFixture(utf8_string &&markup) noexcept
       {
         auto &frame = TestPage->MainFrame();
         frame.CreateView({200, 100});
-        Document = CreateRef<dom::HTMLDocument>();
-        frame.SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+        Document = CreateRef<HTMLDocument>();
+        frame.SetDocument(ShareRefPtr<boo::Document>(Document.get()));
         auto parser = CreateRef<html::DocumentParser>(*Document);
         parser->InputStream().Append(krys::move(markup), IsEOF::Yes);
         parser->PumpTokenizer();
@@ -65,7 +65,7 @@ namespace krys::boo::tests
         TestPage->UpdateRendering();
       }
 
-      KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) const noexcept
+      KRYS_NODISCARD Element &ById(DOMStringView id) const noexcept
       {
         auto element = Document->GetElementById(id);
         REQUIRE(element);
@@ -241,7 +241,7 @@ namespace krys::boo::tests
                          u8"http://www.w3.org/1998/Math/MathML");
       PageFixture fixture {u8"<!DOCTYPE html><body>"};
       auto &document = *fixture.Document;
-      auto element = document.CreateElementNS(dom::DOMStringAtom(ns), u8"g").ReleaseValue();
+      auto element = document.CreateElementNS(DOMStringAtom(ns), u8"g").ReleaseValue();
       REQUIRE_FALSE(element->SetAttribute(u8"autofocus", u8"").HasException());
       REQUIRE_FALSE(element->SetAttribute(u8"tabindex", u8"0").HasException());
       CHECK(document.AutofocusCandidates().empty());
@@ -269,8 +269,8 @@ namespace krys::boo::tests
     {
       auto page = Page::Create();
       page->MainFrame().CreateView({200, 100});
-      auto document = CreateRef<dom::HTMLDocument>();
-      page->MainFrame().SetDocument(ShareRefPtr<dom::Document>(document.get()));
+      auto document = CreateRef<HTMLDocument>();
+      page->MainFrame().SetDocument(ShareRefPtr<Document>(document.get()));
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(
         u8"<!DOCTYPE html><div id=auto autofocus tabindex=0></div><div id=other tabindex=0></div>",
@@ -279,7 +279,7 @@ namespace krys::boo::tests
       CHECK(document->AutofocusCandidates().size() == 1);
       CHECK(page->IsRenderingUpdateScheduled());
 
-      Downcast<html::HTMLElement>(*document->GetElementById(u8"other")).Focus();
+      Downcast<HTMLElement>(*document->GetElementById(u8"other")).Focus();
       page->UpdateRendering();
       CHECK(document->FocusedElement() == document->GetElementById(u8"other").get());
       CHECK(document->AutofocusProcessed());
@@ -289,8 +289,8 @@ namespace krys::boo::tests
     {
       auto page = Page::Create();
       page->MainFrame().CreateView({200, 100});
-      auto document = CreateRef<dom::HTMLDocument>();
-      page->MainFrame().SetDocument(ShareRefPtr<dom::Document>(document.get()));
+      auto document = CreateRef<HTMLDocument>();
+      page->MainFrame().SetDocument(ShareRefPtr<Document>(document.get()));
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(
         u8"<!DOCTYPE html><div id=auto autofocus tabindex=0></div><div id=target></div>", IsEOF::Yes);
@@ -307,7 +307,7 @@ namespace krys::boo::tests
 
     SECTION("only in a document shown in a frame")
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(u8"<!DOCTYPE html><div autofocus tabindex=0></div>", IsEOF::Yes);
       parser->PumpTokenizer();
@@ -323,10 +323,10 @@ namespace krys::boo::tests
     auto page = Page::Create();
     auto &frame = page->MainFrame();
     frame.CreateView({200, 100});
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto html = document->CreateElement(u8"html").ReleaseValue();
     REQUIRE_FALSE(document->AppendChild(*html).HasException());
-    frame.SetDocument(ShareRefPtr<dom::Document>(document.get()));
+    frame.SetDocument(ShareRefPtr<Document>(document.get()));
     REQUIRE(html::RenderBlocking::IsRenderBlocked(*document));
 
     uint32 calls = 0;
@@ -357,7 +357,7 @@ namespace krys::boo::tests
   {
     PageFixture fixture {u8"<!DOCTYPE html><div id=box tabindex=0></div>"};
     auto &box = fixture.ById(u8"box");
-    Downcast<html::HTMLElement>(box).Focus();
+    Downcast<HTMLElement>(box).Focus();
     REQUIRE(fixture.Document->FocusedElement() == &box);
 
     // Hidden, it stops being a focusable area, and the rendering update moves the focus to the viewport.
@@ -505,7 +505,7 @@ namespace krys::boo::tests
         LayoutPoint(view.WindowToContents(IntPoint(x, y))),
         {HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active});
       auto *element = result.TargetElement();
-      auto id = element ? element->GetAttribute(u8"id").value_or(dom::DOMString()) : dom::DOMString();
+      auto id = element ? element->GetAttribute(u8"id").value_or(DOMString()) : DOMString();
       return std::string(id.begin(), id.end());
     };
     CHECK(hit(50, 75) == "b");
@@ -525,7 +525,7 @@ namespace krys::boo::tests
     // The client's (10, 35), in the document's pixels, is the content's (120, 110).
     auto fromPoint = fixture.Document->ElementFromPoint(10, 35);
     REQUIRE(fromPoint);
-    CHECK(fromPoint->GetAttribute(u8"id") == dom::DOMString(u8"b"));
+    CHECK(fromPoint->GetAttribute(u8"id") == DOMString(u8"b"));
 
     // Script sees the scale in devicePixelRatio and the visual viewport, which is half the view (less the
     // scrollbar).
@@ -566,7 +566,7 @@ namespace krys::boo::tests
 
     SECTION("A text node's data")
     {
-      auto &text = Downcast<dom::Text>(*fixture.ById(u8"p").FirstChild());
+      auto &text = Downcast<Text>(*fixture.ById(u8"p").FirstChild());
       REQUIRE_FALSE(text.ReplaceData(0, 3, u8"new").HasException());
       CHECK(fixture.TestPage->IsRenderingUpdateScheduled());
 
@@ -733,7 +733,7 @@ namespace krys::boo::tests
   {
     PageFixture fixture {u8"<!DOCTYPE html><svg id=svg><rect width=10 height=10><animate attributeName=x "
                          u8"from=0 to=10 dur=1s></animate></rect></svg>"};
-    auto &svg = Downcast<svg::SVGSvgElement>(Downcast<svg::SVGElement>(fixture.ById(u8"svg")));
+    auto &svg = Downcast<SVGSvgElement>(Downcast<SVGElement>(fixture.ById(u8"svg")));
     CHECK_FALSE(svg.AnimationsPaused());
     fixture.TestPage->SetIsVisible(false);
     CHECK(svg.AnimationsPaused());
@@ -746,7 +746,7 @@ namespace krys::boo::tests
   {
     PageFixture fixture {u8"<!DOCTYPE html><svg id=svg><rect width=10 height=10><animate attributeName=x "
                          u8"from=0 to=10 dur=1s></animate></rect></svg>"};
-    auto &svg = Downcast<svg::SVGSvgElement>(Downcast<svg::SVGElement>(fixture.ById(u8"svg")));
+    auto &svg = Downcast<SVGSvgElement>(Downcast<SVGElement>(fixture.ById(u8"svg")));
     fixture.TestPage->SetImageAnimationEnabled(false);
     CHECK(svg.AnimationsPaused());
 
@@ -777,8 +777,8 @@ namespace krys::boo::tests
     PageFixture fixture {
       u8"<!DOCTYPE html><svg id=svg><rect id=r width=10 height=10><animate attributeName=x "
       u8"from=0 to=100 dur=1s></animate></rect></svg>"};
-    auto &svg = Downcast<svg::SVGSvgElement>(Downcast<svg::SVGElement>(fixture.ById(u8"svg")));
-    auto &rect = Downcast<svg::SVGRectElement>(Downcast<svg::SVGElement>(fixture.ById(u8"r")));
+    auto &svg = Downcast<SVGSvgElement>(Downcast<SVGElement>(fixture.ById(u8"svg")));
+    auto &rect = Downcast<SVGRectElement>(Downcast<SVGElement>(fixture.ById(u8"r")));
     // As the document's load does.
     fixture.Document->SVGExtensions().StartAnimations();
     REQUIRE(svg.TimeContainer().IsActive());

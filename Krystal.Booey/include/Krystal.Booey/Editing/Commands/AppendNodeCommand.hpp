@@ -27,26 +27,23 @@
 
 #include "Krystal.Booey/Editing/Commands/EditCommand.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class Node;
-}
 
-namespace krys::boo
-{
   /// @brief Appends a node to a parent.
   class AppendNodeCommand final : public SimpleEditCommand
   {
   private:
-    const Ref<dom::ContainerNode> _parent;
-    const Ref<dom::Node> _node;
+    const Ref<ContainerNode> _parent;
+    const Ref<Node> _node;
 
   public:
-    KRYS_NODISCARD static Ref<AppendNodeCommand> Create(dom::ContainerNode &parent, dom::Node &node,
+    KRYS_NODISCARD static Ref<AppendNodeCommand> Create(ContainerNode &parent, Node &node,
                                                         EditAction editingAction) noexcept;
 
-    AppendNodeCommand(dom::ContainerNode &parent, dom::Node &node, EditAction editingAction) noexcept;
+    AppendNodeCommand(ContainerNode &parent, Node &node, EditAction editingAction) noexcept;
 
   private:
     void DoApply() noexcept override;

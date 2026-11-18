@@ -24,13 +24,10 @@
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGBlock.hpp"
 
-namespace krys::boo::svg
-{
-  class SVGForeignObjectElement;
-}
-
 namespace krys::boo
 {
+  class SVGForeignObjectElement;
+
   /// @brief The renderer of `<foreignObject>`: a block laid out as CSS in the element's rectangle, painted
   /// and hit tested in SVG coordinates.
   class LegacyRenderSVGForeignObject final : public RenderSVGBlock
@@ -44,11 +41,11 @@ namespace krys::boo
     bool _needsTransformUpdate {true};
 
   public:
-    LegacyRenderSVGForeignObject(svg::SVGForeignObjectElement &, RenderStyle &&) noexcept;
+    LegacyRenderSVGForeignObject(SVGForeignObjectElement &, RenderStyle &&) noexcept;
 
     ~LegacyRenderSVGForeignObject() noexcept override;
 
-    KRYS_NODISCARD svg::SVGForeignObjectElement &ForeignObjectElement() const noexcept;
+    KRYS_NODISCARD SVGForeignObjectElement &ForeignObjectElement() const noexcept;
 
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
 

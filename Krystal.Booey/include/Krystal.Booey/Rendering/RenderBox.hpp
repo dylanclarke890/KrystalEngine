@@ -996,12 +996,12 @@ namespace krys::boo
     /// element of the box that scrolled.
     /// @return Whether something scrolled.
     virtual bool Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
-                        dom::Element **stopElement = nullptr,
+                        Element **stopElement = nullptr,
                         ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
 
     /// @brief As `Scroll`, in a direction relative to the box's writing mode.
     virtual bool LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                               uint32 stepCount = 1, dom::Element **stopElement = nullptr,
+                               uint32 stepCount = 1, Element **stopElement = nullptr,
                                ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
 
     KRYS_NODISCARD bool RequiresLayerWithScrollableArea() const noexcept;
@@ -1128,10 +1128,10 @@ namespace krys::boo
                                                                  BoxAxis physicalAxis) const noexcept;
 
   protected:
-    RenderBox(Type type, dom::Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags = {},
+    RenderBox(Type type, Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags = {},
               TypeSpecificFlags typeSpecificFlags = {}) noexcept;
 
-    RenderBox(Type type, dom::Document &document, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags = {},
+    RenderBox(Type type, Document &document, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags = {},
               TypeSpecificFlags typeSpecificFlags = {}) noexcept;
 
     void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept override;
@@ -1440,7 +1440,7 @@ namespace krys::boo
 
   private:
     bool ScrollLayer(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount,
-                     dom::Element **stopElement, ScrollIsAnimated animated) noexcept;
+                     Element **stopElement, ScrollIsAnimated animated) noexcept;
 
     void AddOverflowWithRendererOffset(const RenderBox &renderer, LayoutSize offsetFromThis,
                                        EnumSet<ComputeOverflowOptions> options = {}) noexcept;

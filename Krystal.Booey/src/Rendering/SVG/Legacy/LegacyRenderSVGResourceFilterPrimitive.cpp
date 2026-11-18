@@ -39,17 +39,16 @@
 namespace krys::boo
 {
   LegacyRenderSVGResourceFilterPrimitive::LegacyRenderSVGResourceFilterPrimitive(
-    svg::SVGFilterPrimitiveStandardAttributes &filterPrimitiveElement, RenderStyle &&style) noexcept
+    SVGFilterPrimitiveStandardAttributes &filterPrimitiveElement, RenderStyle &&style) noexcept
       : LegacyRenderSVGHiddenContainer(Type::LegacySVGResourceFilterPrimitive, filterPrimitiveElement,
                                        krys::move(style))
   {
   }
 
-  svg::SVGFilterPrimitiveStandardAttributes &
+  SVGFilterPrimitiveStandardAttributes &
     LegacyRenderSVGResourceFilterPrimitive::FilterPrimitiveElement() const noexcept
   {
-    return static_cast<svg::SVGFilterPrimitiveStandardAttributes &>(
-      LegacyRenderSVGHiddenContainer::GetElement());
+    return static_cast<SVGFilterPrimitiveStandardAttributes &>(LegacyRenderSVGHiddenContainer::GetElement());
   }
 
   void LegacyRenderSVGResourceFilterPrimitive::StyleDidChange(style::Difference diff,
@@ -64,22 +63,22 @@ namespace krys::boo
 
     const auto &newStyle = Style();
     auto &element = FilterPrimitiveElement();
-    if (Is<svg::SVGFEFloodElement>(element) || Is<svg::SVGFEDropShadowElement>(element))
+    if (Is<SVGFEFloodElement>(element) || Is<SVGFEDropShadowElement>(element))
     {
       if (newStyle.FloodColor() != oldStyle->FloodColor())
       {
-        element.PrimitiveAttributeChanged(svg::SVGNames::FloodColorAttr());
+        element.PrimitiveAttributeChanged(SVGNames::FloodColorAttr());
       }
       if (newStyle.FloodOpacity() != oldStyle->FloodOpacity())
       {
-        element.PrimitiveAttributeChanged(svg::SVGNames::FloodOpacityAttr());
+        element.PrimitiveAttributeChanged(SVGNames::FloodOpacityAttr());
       }
     }
-    else if (Is<svg::SVGFEDiffuseLightingElement>(element) || Is<svg::SVGFESpecularLightingElement>(element))
+    else if (Is<SVGFEDiffuseLightingElement>(element) || Is<SVGFESpecularLightingElement>(element))
     {
       if (newStyle.LightingColor() != oldStyle->LightingColor())
       {
-        element.PrimitiveAttributeChanged(svg::SVGNames::LightingColorAttr());
+        element.PrimitiveAttributeChanged(SVGNames::LightingColorAttr());
       }
     }
   }

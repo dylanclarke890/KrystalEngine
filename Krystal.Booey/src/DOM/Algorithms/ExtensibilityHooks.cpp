@@ -81,7 +81,7 @@ namespace krys::boo::dom
     void UpdateEffectiveTextDirectionAfterInsertion(Element &element) noexcept
     {
       // A slot's directionality is updated once it's inserted, from its assigned nodes.
-      if (!Is<html::HTMLSlotElement>(element))
+      if (!Is<HTMLSlotElement>(element))
       {
         element.UpdateEffectiveTextDirectionIfNeeded();
       }
@@ -89,7 +89,7 @@ namespace krys::boo::dom
 
     void UpdateSlotEffectiveTextDirectionAfterInsertion(Node &node) noexcept
     {
-      if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(node);
+      if (auto *slot = DynamicDowncast<HTMLSlotElement>(node);
           slot && slot->SelfOrPrecedingNodesAffectDirAuto())
       {
         slot->UpdateEffectiveTextDirection();
@@ -124,7 +124,7 @@ namespace krys::boo::dom
           onId(*element, DOMStringAtom(id));
         }
 
-        if (auto *map = DynamicDowncast<html::HTMLMapElement>(*element))
+        if (auto *map = DynamicDowncast<HTMLMapElement>(*element))
         {
           if (!id.empty())
           {
@@ -148,7 +148,7 @@ namespace krys::boo::dom
       auto &scope = parent.TreeScope();
       ForEachTreeScopeKeyInSubtree(
         node, [&](Element &element, DOMStringAtom id) { scope.AddElementById(krys::move(id), element); },
-        [&](html::HTMLMapElement &map, DOMStringAtom name) { scope.AddImageMap(krys::move(name), map); });
+        [&](HTMLMapElement &map, DOMStringAtom name) { scope.AddImageMap(krys::move(name), map); });
     }
   }
 
@@ -161,7 +161,7 @@ namespace krys::boo::dom
       auto &scope = parent.TreeScope();
       ForEachTreeScopeKeyInSubtree(
         node, [&](Element &element, DOMStringAtom id) { scope.RemoveElementById(krys::move(id), element); },
-        [&](html::HTMLMapElement &map, DOMStringAtom name) { scope.RemoveImageMap(krys::move(name), map); });
+        [&](HTMLMapElement &map, DOMStringAtom name) { scope.RemoveImageMap(krys::move(name), map); });
     }
   }
 
@@ -179,8 +179,7 @@ namespace krys::boo::dom
       {
         ForEachTreeScopeKeyInSubtree(
           node, [&](Element &, DOMStringAtom id) { oldScope->ElementsWithIdChangedOrder(krys::move(id)); },
-          [&](html::HTMLMapElement &, DOMStringAtom name)
-          { oldScope->ImageMapsChangedOrder(krys::move(name)); });
+          [&](HTMLMapElement &, DOMStringAtom name) { oldScope->ImageMapsChangedOrder(krys::move(name)); });
       }
       return;
     }

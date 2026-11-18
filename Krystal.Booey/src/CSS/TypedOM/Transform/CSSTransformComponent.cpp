@@ -31,7 +31,7 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSStyleValueFactory.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   CSSTransformComponent::~CSSTransformComponent() noexcept = default;
 
@@ -43,7 +43,7 @@ namespace krys::boo::css
   }
 
   dom::ExceptionOr<List<Ref<CSSNumericValue>>>
-    CSSTransformComponent::ReifyArguments(const FunctionValue &function, dom::Document &document) noexcept
+    CSSTransformComponent::ReifyArguments(const css::FunctionValue &function, Document &document) noexcept
   {
     List<Ref<CSSNumericValue>> arguments;
     for (const auto &argument : function)

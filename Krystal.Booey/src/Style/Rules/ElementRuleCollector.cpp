@@ -103,7 +103,7 @@ namespace krys::boo::style
     }
   };
 
-  ElementRuleCollector::ElementRuleCollector(const dom::Element &element, const ScopeRuleSets &ruleSets,
+  ElementRuleCollector::ElementRuleCollector(const boo::Element &element, const ScopeRuleSets &ruleSets,
                                              SelectorMatchingState *selectorMatchingState,
                                              css::SelectorChecker::Mode mode) noexcept
       : _element(ShareRef(element)), _authorStyle(ShareRef(ruleSets.AuthorStyle())),
@@ -117,7 +117,7 @@ namespace krys::boo::style
       || _selectorMatchingState->SelectorFilter.ParentStackIsConsistent(element.ParentNode()));
   }
 
-  ElementRuleCollector::ElementRuleCollector(const dom::Element &element, const RuleSet &authorStyle,
+  ElementRuleCollector::ElementRuleCollector(const boo::Element &element, const RuleSet &authorStyle,
                                              SelectorMatchingState *selectorMatchingState,
                                              css::SelectorChecker::Mode mode) noexcept
       : _element(ShareRef(element)), _authorStyle(ShareRef(authorStyle)),
@@ -278,14 +278,14 @@ namespace krys::boo::style
       CollectMatchingUserAgentPartRules(matchRequest);
     }
 
-    bool isHTML = Is<html::HTMLElement>(element) && Is<dom::HTMLDocument>(element.NodeDocument());
+    bool isHTML = Is<HTMLElement>(element) && Is<HTMLDocument>(element.NodeDocument());
 
     // We need to collect the rules for id, class, tag, and everything else into a buffer and
     // then sort the buffer.
     auto id = element.IdForStyleResolution();
     if (!id.empty())
     {
-      CollectMatchingRulesForList(matchRequest.RuleSet.IdRules(css::CSSOMStringAtom(id)), matchRequest);
+      CollectMatchingRulesForList(matchRequest.RuleSet.IdRules(CSSOMStringAtom(id)), matchRequest);
     }
     for (auto &className : element.ClassNames())
     {
@@ -508,7 +508,7 @@ namespace krys::boo::style
     MatchPartPseudoElementRulesForScope(partMatchingElement, origin);
   }
 
-  void ElementRuleCollector::MatchPartPseudoElementRulesForScope(const dom::Element &partMatchingElement,
+  void ElementRuleCollector::MatchPartPseudoElementRulesForScope(const boo::Element &partMatchingElement,
                                                                  DeclarationOrigin origin) noexcept
   {
     auto *element = &partMatchingElement;
@@ -516,7 +516,7 @@ namespace krys::boo::style
 
     for (; element; element = dom::TreeQueries::ShadowHost(*element), --styleScopeOrdinal)
     {
-      auto &styleScope = Scope::ForNode(const_cast<dom::Element &>(*element));
+      auto &styleScope = Scope::ForNode(const_cast<boo::Element &>(*element));
       if (!styleScope.GetResolver().RuleSets().IsAuthorStyleDefined())
       {
         continue;
@@ -592,7 +592,7 @@ namespace krys::boo::style
     // hash when filtering the RuleSet. This is limited to HTML only so we don't need to check the namespace
     // (because of tag name match).
     auto matchBasedOnRuleHash = ruleData.GetMatchBasedOnRuleHash();
-    if (matchBasedOnRuleHash != MatchBasedOnRuleHash::None && Is<html::HTMLElement>(Element()))
+    if (matchBasedOnRuleHash != MatchBasedOnRuleHash::None && Is<HTMLElement>(Element()))
     {
       krys_debug_assert_msg(
         !_pseudoElementRequest,
@@ -791,7 +791,7 @@ namespace krys::boo::style
       auto findScopingRoots = [&](const css::SelectorList &selectorList)
       {
         uint32 distance = 0;
-        const dom::Element *ancestor = &Element();
+        const boo::Element *ancestor = &Element();
         bool shadowHostCrossed = false;
         while (ancestor && !shadowHostCrossed)
         {
@@ -838,11 +838,11 @@ namespace krys::boo::style
       //     It is not an inclusive descendant of a scoping limit.
       auto isWithinScopingRootsAndScopeEnd = [&](const css::SelectorList &scopeEnd)
       {
-        auto match = [&](const dom::ContainerNode *scopingRoot, const css::Selector &selector)
+        auto match = [&](const ContainerNode *scopingRoot, const css::Selector &selector)
         {
           auto subContext = context;
           subContext.Scope = ShareRefPtr(scopingRoot);
-          const dom::Element *ancestor = &Element();
+          const boo::Element *ancestor = &Element();
           while (ancestor)
           {
             if (checker.Match(selector, *ancestor, subContext))
@@ -905,11 +905,11 @@ namespace krys::boo::style
           return false;
         }
 
-        auto appendImplicitScopingRoot = [&](const css::CSSStyleSheet &client)
+        auto appendImplicitScopingRoot = [&](const CSSStyleSheet &client)
         {
-          auto addScopingRootWithDistance = [&](const dom::Element &scopingRoot)
+          auto addScopingRootWithDistance = [&](const boo::Element &scopingRoot)
           {
-            const dom::Element *ancestor = &Element();
+            const boo::Element *ancestor = &Element();
             uint32 distance = 0;
             while (ancestor)
             {
@@ -940,7 +940,7 @@ namespace krys::boo::style
             // Check if it's adopted by shadow roots and use the shadow host as scoping root.
             for (auto &adoptingTreeScope : client.AdoptingTreeScopes())
             {
-              if (auto *shadowRoot = DynamicDowncast<dom::ShadowRoot>(adoptingTreeScope.get()))
+              if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(adoptingTreeScope.get()))
               {
                 auto *shadowHost = shadowRoot->Host();
                 if (shadowHost && &shadowHost->NodeDocument() == &Element().NodeDocument())
@@ -1031,7 +1031,7 @@ namespace krys::boo::style
       MatchUserRules();
     }
 
-    if (auto *styledElement = DynamicDowncast<dom::StyledElement>(Element()))
+    if (auto *styledElement = DynamicDowncast<StyledElement>(Element()))
     {
       if (auto *presentationalHintStyle = styledElement->PresentationalHintStyle())
       {
@@ -1042,7 +1042,7 @@ namespace krys::boo::style
         // FIXME: Refcount is an imperfect proxy for sharing within a single document.
         constexpr static auto matchedDeclarationsCacheSharingThreshold = 4;
         bool allowFullCaching =
-          !Is<svg::SVGElement>(*styledElement)
+          !Is<SVGElement>(*styledElement)
           || presentationalHintStyle->GetRefCount() > matchedDeclarationsCacheSharingThreshold;
 
         auto isCacheable = allowFullCaching ? IsCacheable::Yes : IsCacheable::Partially;
@@ -1055,7 +1055,7 @@ namespace krys::boo::style
       AddElementStyleProperties(styledElement->AdditionalPresentationalHintStyle(),
                                 RuleSet::CascadeLayerPriorityForPresentationalHints);
 
-      if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(*styledElement))
+      if (auto *htmlElement = DynamicDowncast<HTMLElement>(*styledElement))
       {
         if (auto textDirection = dom::ComputeTextDirectionIfDirIsAuto(*htmlElement))
         {
@@ -1085,7 +1085,7 @@ namespace krys::boo::style
 
   void ElementRuleCollector::AddElementInlineStyleProperties(bool includeSMILProperties) noexcept
   {
-    auto *styledElement = DynamicDowncast<dom::StyledElement>(Element());
+    auto *styledElement = DynamicDowncast<StyledElement>(Element());
     if (!styledElement)
     {
       return;
@@ -1100,7 +1100,7 @@ namespace krys::boo::style
 
     if (includeSMILProperties)
     {
-      if (auto *svgElement = DynamicDowncast<svg::SVGElement>(Element()))
+      if (auto *svgElement = DynamicDowncast<SVGElement>(Element()))
       {
         AddElementStyleProperties(svgElement->AnimatedSMILStyleProperties(),
                                   RuleSet::CascadeLayerPriorityForUnlayered, IsCacheable::No);

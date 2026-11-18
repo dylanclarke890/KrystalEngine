@@ -67,7 +67,7 @@ namespace krys::boo::tests
       // Logical properties resolve to physical ones; custom properties are animated by name.
       CHECK(keyframes[2].AnimatesProperty(AnimatableCSSProperty {css::PropertyId::MarginLeft}));
       CHECK(keyframes[2].ContainsDirectionAwareProperty());
-      CHECK(keyframes[2].AnimatesProperty(AnimatableCSSProperty {css::CSSOMStringAtom(u8"--custom")}));
+      CHECK(keyframes[2].AnimatesProperty(AnimatableCSSProperty {CSSOMStringAtom(u8"--custom")}));
 
       CHECK(keyframes.ContainsProperty(css::PropertyId::Opacity));
       CHECK(keyframes.ContainsAnimatableCSSProperty());

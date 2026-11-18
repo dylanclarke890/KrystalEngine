@@ -466,7 +466,7 @@ namespace krys::boo
   }
 
   Ref<StyleOriginatedAnimationEvent>
-    CSSAnimation::CreateEvent(dom::DOMStringAtom eventType, Maybe<Seconds> scheduledTime, double elapsedTime,
+    CSSAnimation::CreateEvent(DOMStringAtom eventType, Maybe<Seconds> scheduledTime, double elapsedTime,
                               const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
   {
     return CreateRef<CSSAnimationEvent>(eventType, this, scheduledTime, elapsedTime, pseudoElementIdentifier,

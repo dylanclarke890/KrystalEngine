@@ -52,33 +52,33 @@ namespace krys::boo
 
   namespace
   {
-    const dom::DOMStringAtom &EmptyAtom() noexcept
+    const DOMStringAtom &EmptyAtom() noexcept
     {
-      static const dom::DOMStringAtom atom(u8"");
+      static const DOMStringAtom atom(u8"");
       return atom;
     }
 
-    const dom::DOMStringAtom &XMLNSAtom() noexcept
+    const DOMStringAtom &XMLNSAtom() noexcept
     {
-      static const dom::DOMStringAtom atom(infra::namespace_prefixes::XMLNS);
+      static const DOMStringAtom atom(infra::namespace_prefixes::XMLNS);
       return atom;
     }
 
-    const dom::DOMStringAtom &XMLAtom() noexcept
+    const DOMStringAtom &XMLAtom() noexcept
     {
-      static const dom::DOMStringAtom atom(infra::namespace_prefixes::XML);
+      static const DOMStringAtom atom(infra::namespace_prefixes::XML);
       return atom;
     }
 
-    const dom::DOMStringAtom &IsAtom() noexcept
+    const DOMStringAtom &IsAtom() noexcept
     {
-      static const dom::DOMStringAtom atom(u8"is");
+      static const DOMStringAtom atom(u8"is");
       return atom;
     }
 
-    KRYS_NODISCARD bool ElementCannotHaveEndTag(const dom::Node &node) noexcept
+    KRYS_NODISCARD bool ElementCannotHaveEndTag(const Node &node) noexcept
     {
-      auto *element = DynamicDowncast<html::HTMLElement>(node);
+      auto *element = DynamicDowncast<HTMLElement>(node);
       if (!element)
       {
         return false;
@@ -117,7 +117,7 @@ namespace krys::boo
     // 2. Elements w/ children never self-close because they use a separate end tag.
     // 3. HTML elements which do not have a "forbidden" end tag will close with a separate end tag.
     // 4. Other elements self-close.
-    KRYS_NODISCARD bool ShouldSelfClose(const dom::Element &element, SerializationSyntax syntax) noexcept
+    KRYS_NODISCARD bool ShouldSelfClose(const Element &element, SerializationSyntax syntax) noexcept
     {
       if (syntax != SerializationSyntax::XML)
       {
@@ -127,7 +127,7 @@ namespace krys::boo
       {
         return false;
       }
-      if (Is<html::HTMLElement>(element) && !ElementCannotHaveEndTag(element))
+      if (Is<HTMLElement>(element) && !ElementCannotHaveEndTag(element))
       {
         return false;
       }
@@ -135,7 +135,7 @@ namespace krys::boo
     }
 
     // https://html.spec.whatwg.org/#html-fragment-serialisation-algorithm
-    KRYS_NODISCARD utf8_string TagQName(const dom::Element &element, bool inXMLFragmentSerialization) noexcept
+    KRYS_NODISCARD utf8_string TagQName(const Element &element, bool inXMLFragmentSerialization) noexcept
     {
       // If current node is an element in the HTML namespace, the MathML namespace, or the SVG namespace, then
       // let tagname be current node's local name. Otherwise, let tagname be current node's qualified name.
@@ -150,7 +150,7 @@ namespace krys::boo
     }
 
     // https://html.spec.whatwg.org/#attribute's-serialised-name
-    KRYS_NODISCARD utf8_string HTMLAttributeSerialization(const dom::Attr &attribute) noexcept
+    KRYS_NODISCARD utf8_string HTMLAttributeSerialization(const Attr &attribute) noexcept
     {
       auto namespaceURI = attribute.NamespaceURI().View();
       if (namespaceURI.empty())
@@ -186,7 +186,7 @@ namespace krys::boo
       return result;
     }
 
-    KRYS_NODISCARD bool ShouldAddNamespaceElement(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool ShouldAddNamespaceElement(const Element &element) noexcept
     {
       // Don't add namespace attribute if it is already defined for this elem.
       auto prefix = element.Prefix().View();
@@ -196,11 +196,10 @@ namespace krys::boo
       }
       utf8_string attributeName(u8"xmlns:");
       attributeName.append(prefix);
-      return !element.HasAttribute(dom::DOMStringAtom(attributeName));
+      return !element.HasAttribute(DOMStringAtom(attributeName));
     }
 
-    KRYS_NODISCARD bool ShouldAddNamespaceAttribute(const dom::Attr &attribute,
-                                                    Namespaces &namespaces) noexcept
+    KRYS_NODISCARD bool ShouldAddNamespaceAttribute(const Attr &attribute, Namespaces &namespaces) noexcept
     {
       // Don't add namespace attributes twice
       // HTML Parser will create xmlns attributes without namespace for HTML elements, allow those as well.
@@ -208,14 +207,14 @@ namespace krys::boo
       if (attribute.LocalName() == XMLNSAtom()
           && (namespaceURI.empty() || namespaceURI == infra::namespaces::XMLNS))
       {
-        namespaces.insert_or_assign(EmptyAtom(), dom::DOMStringAtom(attribute.Value()));
+        namespaces.insert_or_assign(EmptyAtom(), DOMStringAtom(attribute.Value()));
         return false;
       }
 
       if (attribute.Prefix() == XMLNSAtom() && namespaceURI == infra::namespaces::XMLNS)
       {
-        namespaces.insert_or_assign(attribute.LocalName(), dom::DOMStringAtom(attribute.Value()));
-        namespaces.insert_or_assign(dom::DOMStringAtom(attribute.Value()), attribute.LocalName());
+        namespaces.insert_or_assign(attribute.LocalName(), DOMStringAtom(attribute.Value()));
+        namespaces.insert_or_assign(DOMStringAtom(attribute.Value()), attribute.LocalName());
         return false;
       }
 
@@ -223,12 +222,12 @@ namespace krys::boo
     }
 
     // There's no scripting, so <noscript>'s text is escaped like any other.
-    KRYS_NODISCARD bool IsScriptEnabled(const dom::Node &) noexcept
+    KRYS_NODISCARD bool IsScriptEnabled(const Node &) noexcept
     {
       return false;
     }
 
-    void AppendXMLDeclaration(utf8_string &result, const dom::Document &document) noexcept
+    void AppendXMLDeclaration(utf8_string &result, const Document &document) noexcept
     {
       if (!document.HasXMLDeclaration())
       {
@@ -236,8 +235,7 @@ namespace krys::boo
       }
 
       const auto &encoding = document.XMLEncoding();
-      bool isStandaloneSpecified =
-        document.XMLStandaloneStatus() != dom::Document::StandaloneStatus::Unspecified;
+      bool isStandaloneSpecified = document.XMLStandaloneStatus() != Document::StandaloneStatus::Unspecified;
 
       result.append(u8"<?xml version=\"");
       result.append(document.XMLVersion());
@@ -292,7 +290,7 @@ namespace krys::boo
       return !localName.contains(u8':') && dom::NameValidation::IsValidXMLName(localName);
     }
 
-    void AppendDocumentType(utf8_string &result, const dom::DocumentType &documentType) noexcept
+    void AppendDocumentType(utf8_string &result, const DocumentType &documentType) noexcept
     {
       if (documentType.Name().empty())
       {
@@ -367,10 +365,10 @@ namespace krys::boo
     result.append(source.substr(positionAfterLastEntity));
   }
 
-  MarkupAccumulator::MarkupAccumulator(List<Ref<dom::Node>> *nodes, ResolveURLs resolveURLs,
+  MarkupAccumulator::MarkupAccumulator(List<Ref<Node>> *nodes, ResolveURLs resolveURLs,
                                        SerializationSyntax serializationSyntax,
                                        SerializeShadowRoots serializeShadowRoots,
-                                       List<Ref<dom::ShadowRoot>> &&explicitShadowRoots,
+                                       List<Ref<ShadowRoot>> &&explicitShadowRoots,
                                        RequireWellFormed requireWellFormed) noexcept
       : _nodes(nodes), _resolveURLs(resolveURLs), _serializationSyntax(serializationSyntax),
         _serializeShadowRoots(serializeShadowRoots), _explicitShadowRoots(krys::move(explicitShadowRoots)),
@@ -382,14 +380,14 @@ namespace krys::boo
 
   MarkupAccumulator::~MarkupAccumulator() noexcept = default;
 
-  utf8_string MarkupAccumulator::SerializeNodes(dom::Node &targetNode, SerializedNodes root) noexcept
+  utf8_string MarkupAccumulator::SerializeNodes(Node &targetNode, SerializedNodes root) noexcept
   {
     SerializeNodesWithNamespaces(targetNode, root, nullptr);
     return _markup;
   }
 
   // FIXME: Writing a style sheet's text with its URLs replaced, with web archives.
-  bool MarkupAccumulator::AppendContentsForNode(utf8_string &, const dom::Node &) noexcept
+  bool MarkupAccumulator::AppendContentsForNode(utf8_string &, const Node &) noexcept
   {
     return false;
   }
@@ -399,7 +397,7 @@ namespace krys::boo
     return _serializeShadowRoots != SerializeShadowRoots::Explicit || !_explicitShadowRoots.empty();
   }
 
-  bool MarkupAccumulator::IncludeShadowRoot(const dom::ShadowRoot &shadowRoot) const noexcept
+  bool MarkupAccumulator::IncludeShadowRoot(const ShadowRoot &shadowRoot) const noexcept
   {
     if (shadowRoot.Mode() == dom::ShadowRootMode::UserAgent)
     {
@@ -420,7 +418,7 @@ namespace krys::boo
                                [&shadowRoot](const auto &item) { return item.get() == &shadowRoot; });
   }
 
-  void MarkupAccumulator::SerializeNodesWithNamespaces(dom::Node &targetNode, SerializedNodes root,
+  void MarkupAccumulator::SerializeNodesWithNamespaces(Node &targetNode, SerializedNodes root,
                                                        const Namespaces *namespaces) noexcept
   {
     List<Namespaces> namespaceStack;
@@ -438,7 +436,7 @@ namespace krys::boo
 
       // An element's children are serialized in the default namespace in scope on it, so that children in no
       // namespace declare the empty default namespace.
-      if (auto *element = DynamicDowncast<dom::Element>(targetNode);
+      if (auto *element = DynamicDowncast<Element>(targetNode);
           element && root != SerializedNodes::SubtreeIncludingNode)
       {
         auto defaultNamespace = element->LookupNamespaceURI(null);
@@ -457,16 +455,16 @@ namespace krys::boo
 
     // The templates whose contents are being serialized, innermost last, so the walk back up leaves a
     // template's contents for the template.
-    List<const html::HTMLTemplateElement *> templates;
+    List<const HTMLTemplateElement *> templates;
 
-    auto firstChild = [&](const dom::Node &current) -> dom::Node *
+    auto firstChild = [&](const Node &current) -> Node *
     {
       bool shouldSkipChidren = AppendContentsForNode(_markup, current);
       if (shouldSkipChidren)
       {
         return nullptr;
       }
-      if (auto *currentTemplate = DynamicDowncast<html::HTMLTemplateElement>(current))
+      if (auto *currentTemplate = DynamicDowncast<HTMLTemplateElement>(current))
       {
         auto content = currentTemplate->Content();
         if (auto *child = content ? content->FirstChild() : nullptr)
@@ -479,13 +477,13 @@ namespace krys::boo
       return current.FirstChild();
     };
 
-    auto shouldEmitCloseTagFor = [&](const dom::Node &node)
+    auto shouldEmitCloseTagFor = [&](const Node &node)
     {
       return _serializationSyntax == SerializationSyntax::XML
-             || !(Is<dom::HTMLDocument>(targetNode.NodeDocument()) && ElementCannotHaveEndTag(node));
+             || !(Is<HTMLDocument>(targetNode.NodeDocument()) && ElementCannotHaveEndTag(node));
     };
 
-    RefPtr<const dom::Node> current = ShareRefPtr(&targetNode);
+    RefPtr<const Node> current = ShareRefPtr(&targetNode);
     do
     {
       bool shouldSkipNode = false;
@@ -503,11 +501,11 @@ namespace krys::boo
       {
         if (ShouldIncludeShadowRoots())
         {
-          auto *element = DynamicDowncast<dom::Element>(*current);
+          auto *element = DynamicDowncast<Element>(*current);
           auto *shadowRoot = element ? TreeQueries::GetShadowRoot(*element) : nullptr;
           if (shadowRoot && IncludeShadowRoot(*shadowRoot))
           {
-            current = ShareRefPtr<const dom::Node>(shadowRoot);
+            current = ShareRefPtr<const Node>(shadowRoot);
             namespaceStack.push_back(namespaceStack.back());
             continue;
           }
@@ -515,7 +513,7 @@ namespace krys::boo
 
         if (auto *child = firstChild(*current))
         {
-          current = ShareRefPtr<const dom::Node>(child);
+          current = ShareRefPtr<const Node>(child);
           namespaceStack.push_back(namespaceStack.back());
           continue;
         }
@@ -530,20 +528,20 @@ namespace krys::boo
       {
         if (auto *nextSibling = current->NextSibling())
         {
-          current = ShareRefPtr<const dom::Node>(nextSibling);
+          current = ShareRefPtr<const Node>(nextSibling);
           namespaceStack.pop_back();
           namespaceStack.push_back(namespaceStack.back());
           break;
         }
 
-        if (ShouldIncludeShadowRoots() && Is<dom::ShadowRoot>(*current))
+        if (ShouldIncludeShadowRoots() && Is<ShadowRoot>(*current))
         {
-          current = ShareRefPtr<const dom::Node>(Downcast<dom::ShadowRoot>(*current).Host());
+          current = ShareRefPtr<const Node>(Downcast<ShadowRoot>(*current).Host());
           if (_serializeShadowRoots != SerializeShadowRoots::AllForInterchange)
           {
             if (auto *child = firstChild(*current))
             {
-              current = ShareRefPtr<const dom::Node>(child);
+              current = ShareRefPtr<const Node>(child);
               namespaceStack.push_back(namespaceStack.back());
               break;
             }
@@ -551,16 +549,16 @@ namespace krys::boo
         }
         else
         {
-          current = ShareRefPtr<const dom::Node>(current->ParentNode());
+          current = ShareRefPtr<const Node>(current->ParentNode());
         }
 
         namespaceStack.pop_back();
-        if (!templates.empty() && Is<dom::DocumentFragment>(current.get())
+        if (!templates.empty() && Is<DocumentFragment>(current.get())
             && templates.back()->Content().get() == current.get())
         {
           if (current != &targetNode)
           {
-            current = ShareRefPtr<const dom::Node>(templates.back());
+            current = ShareRefPtr<const Node>(templates.back());
           }
           templates.pop_back();
         }
@@ -583,21 +581,20 @@ namespace krys::boo
 
   // FIXME: Resolving URL attributes against the document's base URL (ResolveURLs::Yes and its privacy
   // variants), with URL attributes.
-  utf8_string MarkupAccumulator::ResolveURLIfNeeded(const dom::Element &,
-                                                    utf8_stringview urlString) const noexcept
+  utf8_string MarkupAccumulator::ResolveURLIfNeeded(const Element &, utf8_stringview urlString) const noexcept
   {
     (void)_resolveURLs;
     return utf8_string(urlString);
   }
 
-  const dom::ShadowRoot *MarkupAccumulator::SuitableShadowRoot(const dom::Node &node) const noexcept
+  const ShadowRoot *MarkupAccumulator::SuitableShadowRoot(const Node &node) const noexcept
   {
     if (!ShouldIncludeShadowRoots())
     {
       return nullptr;
     }
 
-    auto *shadowRoot = DynamicDowncast<dom::ShadowRoot>(node);
+    auto *shadowRoot = DynamicDowncast<ShadowRoot>(node);
     if (!shadowRoot || !IncludeShadowRoot(*shadowRoot))
     {
       return nullptr;
@@ -607,9 +604,9 @@ namespace krys::boo
 
   // FIXME: The shadow root's custom element registry (shadowrootcustomelementregistry), with custom element
   // registries.
-  void MarkupAccumulator::StartAppendingNode(const dom::Node &node, Namespaces *namespaces) noexcept
+  void MarkupAccumulator::StartAppendingNode(const Node &node, Namespaces *namespaces) noexcept
   {
-    if (auto *element = DynamicDowncast<dom::Element>(node))
+    if (auto *element = DynamicDowncast<Element>(node))
     {
       AppendStartTag(_markup, *element, namespaces);
     }
@@ -655,13 +652,13 @@ namespace krys::boo
 
     if (_nodes)
     {
-      _nodes->push_back(ShareRef(const_cast<dom::Node &>(node)));
+      _nodes->push_back(ShareRef(const_cast<Node &>(node)));
     }
   }
 
-  void MarkupAccumulator::EndAppendingNode(const dom::Node &node) noexcept
+  void MarkupAccumulator::EndAppendingNode(const Node &node) noexcept
   {
-    if (auto *element = DynamicDowncast<dom::Element>(node))
+    if (auto *element = DynamicDowncast<Element>(node))
     {
       AppendEndTag(_markup, *element);
     }
@@ -671,7 +668,7 @@ namespace krys::boo
     }
   }
 
-  void MarkupAccumulator::AppendEndTag(utf8_string &result, const dom::Element &element) noexcept
+  void MarkupAccumulator::AppendEndTag(utf8_string &result, const Element &element) noexcept
   {
     if (ShouldSelfClose(element, _serializationSyntax)
         || (!element.HasChildNodes() && ElementCannotHaveEndTag(element)))
@@ -709,12 +706,12 @@ namespace krys::boo
     AppendCharactersReplacingEntities(result, attribute, entityMask);
   }
 
-  void MarkupAccumulator::AppendCustomAttributes(utf8_string &, const dom::Element &, Namespaces *) noexcept
+  void MarkupAccumulator::AppendCustomAttributes(utf8_string &, const Element &, Namespaces *) noexcept
   {
   }
 
-  void MarkupAccumulator::AppendNamespace(utf8_string &result, const dom::DOMStringAtom &prefix,
-                                          const dom::DOMStringAtom &namespaceURI, Namespaces &namespaces,
+  void MarkupAccumulator::AppendNamespace(utf8_string &result, const DOMStringAtom &prefix,
+                                          const DOMStringAtom &namespaceURI, Namespaces &namespaces,
                                           bool allowEmptyDefaultNS) noexcept
   {
     if (namespaceURI.View().empty())
@@ -762,14 +759,14 @@ namespace krys::boo
     result.push_back(u8'"');
   }
 
-  EnumSet<EntityMask> MarkupAccumulator::EntityMaskForText(const dom::Text &text) const noexcept
+  EnumSet<EntityMask> MarkupAccumulator::EntityMaskForText(const Text &text) const noexcept
   {
     if (InXMLFragmentSerialization())
     {
       return EntityMaskInPCDATA;
     }
 
-    if (auto *element = DynamicDowncast<html::HTMLElement>(text.ParentElement()))
+    if (auto *element = DynamicDowncast<HTMLElement>(text.ParentElement()))
     {
       switch (element->TagQualifiedName().TagName())
       {
@@ -792,12 +789,12 @@ namespace krys::boo
     return EntityMaskInHTMLPCDATA;
   }
 
-  void MarkupAccumulator::AppendText(utf8_string &result, const dom::Text &text) noexcept
+  void MarkupAccumulator::AppendText(utf8_string &result, const Text &text) noexcept
   {
     AppendCharactersReplacingEntities(result, text.Data(), EntityMaskForText(text));
   }
 
-  void MarkupAccumulator::AppendStartTag(utf8_string &result, const dom::Element &element,
+  void MarkupAccumulator::AppendStartTag(utf8_string &result, const Element &element,
                                          Namespaces *namespaces) noexcept
   {
     AppendOpenTag(result, element, namespaces);
@@ -823,7 +820,7 @@ namespace krys::boo
     AppendCloseTag(result, element);
   }
 
-  void MarkupAccumulator::AppendOpenTag(utf8_string &result, const dom::Element &element,
+  void MarkupAccumulator::AppendOpenTag(utf8_string &result, const Element &element,
                                         Namespaces *namespaces) noexcept
   {
     // Error cases: a node with a local name containing a U+003A COLON (:), or that does not match the XML
@@ -851,11 +848,11 @@ namespace krys::boo
     }
   }
 
-  void MarkupAccumulator::AppendCloseTag(utf8_string &result, const dom::Element &element) noexcept
+  void MarkupAccumulator::AppendCloseTag(utf8_string &result, const Element &element) noexcept
   {
     if (ShouldSelfClose(element, _serializationSyntax))
     {
-      if (Is<html::HTMLElement>(element))
+      if (Is<HTMLElement>(element))
       {
         result.push_back(u8' '); // XHTML 1.0 <-> HTML compatibility.
       }
@@ -864,25 +861,25 @@ namespace krys::boo
     result.push_back(u8'>');
   }
 
-  dom::DOMStringAtom MarkupAccumulator::GenerateUniquePrefix(const Namespaces &namespaces) noexcept
+  DOMStringAtom MarkupAccumulator::GenerateUniquePrefix(const Namespaces &namespaces) noexcept
   {
     // http://www.w3.org/TR/DOM-Level-3-Core/namespaces-algorithms.html#normalizeDocumentAlgo
     // Find a prefix following the pattern "NS" + index (starting at 1) and make sure this
     // prefix is not declared in the current scope.
-    dom::DOMStringAtom name = EmptyAtom();
+    DOMStringAtom name = EmptyAtom();
     do
     {
       auto number = std::to_string(++_prefixLevel);
       utf8_string prefix(u8"ns");
       prefix.append(reinterpret_cast<const char8_t *>(number.data()), number.size());
-      name = dom::DOMStringAtom(prefix);
+      name = DOMStringAtom(prefix);
     } while (namespaces.contains(name));
     return name;
   }
 
   // https://w3c.github.io/DOM-Parsing/#dfn-xml-serialization-of-the-attributes
-  utf8_string MarkupAccumulator::XMLAttributeSerialization(const dom::Attr &attribute, Namespaces *namespaces,
-                                                           dom::DOMStringAtom &prefix) noexcept
+  utf8_string MarkupAccumulator::XMLAttributeSerialization(const Attr &attribute, Namespaces *namespaces,
+                                                           DOMStringAtom &prefix) noexcept
   {
     prefix = attribute.Prefix();
     auto namespaceURI = attribute.NamespaceURI();
@@ -895,7 +892,7 @@ namespace krys::boo
       }
       else
       {
-        const dom::DOMStringAtom *foundNS = nullptr;
+        const DOMStringAtom *foundNS = nullptr;
         if (namespaces && !attribute.Prefix().View().empty())
         {
           if (auto found = namespaces->find(attribute.Prefix()); found != namespaces->end())
@@ -934,8 +931,8 @@ namespace krys::boo
   }
 
   // FIXME: Resolving URL attributes (isURLAttribute) when ResolveURLs asks for it, with URL attributes.
-  bool MarkupAccumulator::AppendAttribute(utf8_string &result, const dom::Element &element,
-                                          const dom::Attr &attribute, Namespaces *namespaces) noexcept
+  bool MarkupAccumulator::AppendAttribute(utf8_string &result, const Element &element, const Attr &attribute,
+                                          Namespaces *namespaces) noexcept
   {
     bool isSerializingHTML = !InXMLFragmentSerialization();
 
@@ -957,7 +954,7 @@ namespace krys::boo
                  && IsXMLCharacterData(attribute.Value());
         });
 
-      dom::DOMStringAtom prefix = EmptyAtom();
+      DOMStringAtom prefix = EmptyAtom();
       effectiveXMLName = XMLAttributeSerialization(attribute, namespaces, prefix);
       if (namespaces && ShouldAddNamespaceAttribute(attribute, *namespaces))
       {
@@ -984,14 +981,13 @@ namespace krys::boo
     return false;
   }
 
-  void MarkupAccumulator::AppendNonElementNode(utf8_string &result, const dom::Node &node,
-                                               Namespaces *) noexcept
+  void MarkupAccumulator::AppendNonElementNode(utf8_string &result, const Node &node, Namespaces *) noexcept
   {
     switch (node.NodeType())
     {
       case dom::NodeType::TEXT_NODE:
       {
-        auto &text = Downcast<dom::Text>(node);
+        auto &text = Downcast<Text>(node);
         // Error case: a Text node whose data contains characters that aren't XML Chars.
         CheckWellFormed([&] { return IsXMLCharacterData(text.Data()); });
         AppendText(result, text);
@@ -1000,7 +996,7 @@ namespace krys::boo
       case dom::NodeType::COMMENT_NODE:
       {
         // The data isn't escaped: in XML, the error cases rule out data that would end the comment.
-        auto &data = Downcast<dom::Comment>(node).Data();
+        auto &data = Downcast<Comment>(node).Data();
         // Error cases: a Comment node whose data contains characters that aren't XML Chars, or two adjacent
         // U+002D HYPHEN-MINUS characters (-), or ends with one.
         CheckWellFormed(
@@ -1012,13 +1008,13 @@ namespace krys::boo
       }
       case dom::NodeType::DOCUMENT_NODE:
         // Error case: a Document node with no child element nodes.
-        CheckWellFormed([&] { return static_cast<bool>(Downcast<dom::Document>(node).DocumentElement()); });
-        AppendXMLDeclaration(result, Downcast<dom::Document>(node));
+        CheckWellFormed([&] { return static_cast<bool>(Downcast<Document>(node).DocumentElement()); });
+        AppendXMLDeclaration(result, Downcast<Document>(node));
         break;
       case dom::NodeType::DOCUMENT_FRAGMENT_NODE: break;
       case dom::NodeType::DOCUMENT_TYPE_NODE:
       {
-        auto &documentType = Downcast<dom::DocumentType>(node);
+        auto &documentType = Downcast<DocumentType>(node);
         // Error cases: a DocumentType node whose public identifier contains characters that aren't XML
         // PubidChars, or whose system identifier contains both a U+0022 QUOTATION MARK (") and a U+0027
         // APOSTROPHE ('), or characters that aren't XML Chars.
@@ -1035,7 +1031,7 @@ namespace krys::boo
       }
       case dom::NodeType::PROCESSING_INSTRUCTION_NODE:
       {
-        auto &instruction = Downcast<dom::ProcessingInstruction>(node);
+        auto &instruction = Downcast<ProcessingInstruction>(node);
         // The data isn't escaped: in XML, the error cases rule out data that would end the instruction.
         // Error cases: a ProcessingInstruction node whose target is an ASCII case-insensitive match for "xml"
         // or contains a U+003A COLON (:), or whose data contains characters that aren't XML Chars, or "?>".
@@ -1062,27 +1058,27 @@ namespace krys::boo
           // A CDATASection is a Text node, so the data must be XML Chars. The data isn't escaped, and there's
           // no error case for data containing "]]>" (which createCDATASection() refuses, but the data setter
           // doesn't).
-          CheckWellFormed([&] { return IsXMLCharacterData(Downcast<dom::CDATASection>(node).Data()); });
+          CheckWellFormed([&] { return IsXMLCharacterData(Downcast<CDATASection>(node).Data()); });
           result.append(u8"<![CDATA[");
-          result.append(Downcast<dom::CDATASection>(node).Data());
+          result.append(Downcast<CDATASection>(node).Data());
           result.append(u8"]]>");
         }
         else
         {
-          AppendText(result, Downcast<dom::Text>(node));
+          AppendText(result, Downcast<Text>(node));
         }
         break;
       case dom::NodeType::ATTRIBUTE_NODE:
-        CheckWellFormed([&] { return IsXMLCharacterData(Downcast<dom::Attr>(node).Value()); });
-        AppendAttributeValue(result, Downcast<dom::Attr>(node).Value());
+        CheckWellFormed([&] { return IsXMLCharacterData(Downcast<Attr>(node).Value()); });
+        AppendAttributeValue(result, Downcast<Attr>(node).Value());
         break;
       default: break;
     }
   }
 
-  SerializationSyntax MarkupAccumulator::GetSerializationSyntax(dom::Document &document) noexcept
+  SerializationSyntax MarkupAccumulator::GetSerializationSyntax(Document &document) noexcept
   {
-    if (!Is<dom::HTMLDocument>(document))
+    if (!Is<HTMLDocument>(document))
     {
       return SerializationSyntax::XML;
     }

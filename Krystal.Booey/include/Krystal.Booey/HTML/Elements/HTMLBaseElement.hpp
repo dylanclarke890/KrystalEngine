@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlbaseelement
   class HTMLBaseElement : public HTMLElement
@@ -11,7 +11,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLBaseElement);
 
   public:
-    HTMLBaseElement(dom::Document &document) noexcept;
+    HTMLBaseElement(Document &document) noexcept;
 
 #pragma region HTMLBaseElement - https://html.spec.whatwg.org/#htmlbaseelement
 
@@ -22,28 +22,27 @@ namespace krys::boo::html
     void Href(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-base-target
-    KRYS_NODISCARD dom::DOMString Target() const noexcept;
+    KRYS_NODISCARD DOMString Target() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-base-target
-    void Target(dom::DOMString value) noexcept;
+    void Target(DOMString value) noexcept;
 
 #pragma endregion
 
   protected:
     void OnInsert() noexcept override;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
-    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLBaseElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLBaseElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLBaseElement();
   }

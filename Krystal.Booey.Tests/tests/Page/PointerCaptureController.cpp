@@ -21,14 +21,14 @@ namespace krys::boo::tests
 
     KRYS_NODISCARD std::string Name(const dom::EventTarget *target)
     {
-      auto *node = DynamicDowncast<dom::Node>(target);
-      auto *element = node ? DynamicDowncast<dom::Element>(*node) : nullptr;
+      auto *node = DynamicDowncast<Node>(target);
+      auto *element = node ? DynamicDowncast<Element>(*node) : nullptr;
       if (!element)
       {
         return node ? "document" : "null";
       }
-      auto id = element->GetAttribute(u8"id").value_or(dom::DOMString());
-      auto name = id.empty() ? element->LocalName().View() : dom::DOMStringView(id);
+      auto id = element->GetAttribute(u8"id").value_or(DOMString());
+      auto name = id.empty() ? element->LocalName().View() : DOMStringView(id);
       return std::string(name.begin(), name.end());
     }
 
@@ -86,7 +86,7 @@ namespace krys::boo::tests
         {
           if (recordPointerMoves || type != utf8_stringview(u8"pointermove"))
           {
-            Document->AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, true);
+            Document->AddEventListener(DOMStringAtom(type), Ref {recorder}, true);
           }
         }
       }
@@ -146,10 +146,10 @@ namespace krys::boo::tests
       }
 
       template <typename TAction>
-      void On(dom::Element &element, utf8_stringview type, TAction action) noexcept
+      void On(Element &element, utf8_stringview type, TAction action) noexcept
       {
         Ref<dom::EventListenerCallback> listener = CreateRef<ActionListener<TAction>>(krys::move(action));
-        element.AddEventListener(dom::DOMStringAtom(type), krys::move(listener), false);
+        element.AddEventListener(DOMStringAtom(type), krys::move(listener), false);
       }
     };
   }
@@ -273,7 +273,7 @@ namespace krys::boo::tests
       RefPtr<dom::PointerEvent> click;
       fixture.On(a, u8"click",
                  [&](dom::Event &event) { click = ShareRefPtr(&Downcast<dom::PointerEvent>(event)); });
-      Downcast<html::HTMLElement>(a).Click();
+      Downcast<HTMLElement>(a).Click();
       REQUIRE(click);
       CHECK(click->PointerId() == static_cast<PointerID>(-1));
       CHECK(click->PointerType().empty());
@@ -331,7 +331,7 @@ namespace krys::boo::tests
       }
       SECTION("as a handler")
       {
-        Downcast<html::HTMLElement>(a).SetOnPointerMove([&](dom::Event &) { ++moves; });
+        Downcast<HTMLElement>(a).SetOnPointerMove([&](dom::Event &) { ++moves; });
       }
       SECTION("on the window")
       {

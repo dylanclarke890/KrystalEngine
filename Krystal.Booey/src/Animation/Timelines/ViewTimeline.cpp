@@ -57,7 +57,7 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<Ref<ViewTimeline>> ViewTimeline::Create(dom::Document &document,
+  dom::ExceptionOr<Ref<ViewTimeline>> ViewTimeline::Create(boo::Document &document,
                                                            const ViewTimelineOptions &options) noexcept
   {
     auto viewTimeline = AdoptRef(*new ViewTimeline(options.Axis));
@@ -85,7 +85,7 @@ namespace krys::boo
     return viewTimeline;
   }
 
-  Ref<ViewTimeline> ViewTimeline::Create(const css::CSSOMStringAtom &name, ScrollAxis axis,
+  Ref<ViewTimeline> ViewTimeline::Create(const CSSOMStringAtom &name, ScrollAxis axis,
                                          const style::ViewTimelineInsetItem &insets) noexcept
   {
     return AdoptRef(*new ViewTimeline(name, axis, insets));
@@ -96,14 +96,14 @@ namespace krys::boo
   {
   }
 
-  ViewTimeline::ViewTimeline(const css::CSSOMStringAtom &name, ScrollAxis axis,
+  ViewTimeline::ViewTimeline(const CSSOMStringAtom &name, ScrollAxis axis,
                              style::ViewTimelineInsetItem insets) noexcept
       : ScrollTimeline(name, axis), _insets(krys::move(insets))
   {
   }
 
   auto ViewTimeline::ValidateSpecifiedInsets(const ViewTimelineInsetValue &inset,
-                                             const dom::Document &document) noexcept
+                                             const boo::Document &document) noexcept
     -> dom::ExceptionOr<SpecifiedViewTimelineInsets>
   {
     // https://drafts.csswg.org/scroll-animations-1/#dom-viewtimeline-viewtimeline
@@ -112,7 +112,7 @@ namespace krys::boo
     // at https://github.com/w3c/csswg-drafts/issues/11477.
 
     // If a DOMString value is provided as an inset, parse it as a <'view-timeline-inset'> value;
-    if (const auto *insetString = std::get_if<dom::DOMString>(&inset))
+    if (const auto *insetString = std::get_if<DOMString>(&inset))
     {
       if (insetString->empty())
       {
@@ -136,9 +136,9 @@ namespace krys::boo
     }
 
     auto cssPrimitiveValueForCSSNumericValue =
-      [&](const RefPtr<css::CSSNumericValue> &numericValue) -> dom::ExceptionOr<RefPtr<css::PrimitiveValue>>
+      [&](const RefPtr<CSSNumericValue> &numericValue) -> dom::ExceptionOr<RefPtr<css::PrimitiveValue>>
     {
-      if (const auto *insetValue = DynamicDowncast<css::CSSUnitValue>(numericValue.get()))
+      if (const auto *insetValue = DynamicDowncast<CSSUnitValue>(numericValue.get()))
       {
         auto cssValue = insetValue->ToCSSValue();
         return DynamicDowncast<css::PrimitiveValue>(krys::move(cssValue));
@@ -147,7 +147,7 @@ namespace krys::boo
     };
 
     auto cssPrimitiveValueForCSSKeywordValue =
-      [&](const Ref<css::CSSKeywordValue> &keywordValue) -> dom::ExceptionOr<RefPtr<css::PrimitiveValue>>
+      [&](const Ref<CSSKeywordValue> &keywordValue) -> dom::ExceptionOr<RefPtr<css::PrimitiveValue>>
     {
       if (keywordValue->Value() != u8"auto")
       {
@@ -159,17 +159,17 @@ namespace krys::boo
     auto cssPrimitiveValueForIndividualInset =
       [&](const ViewTimelineIndividualInset &individualInset) -> dom::ExceptionOr<RefPtr<css::PrimitiveValue>>
     {
-      if (const auto *numericInset = std::get_if<RefPtr<css::CSSNumericValue>>(&individualInset))
+      if (const auto *numericInset = std::get_if<RefPtr<CSSNumericValue>>(&individualInset))
       {
         return cssPrimitiveValueForCSSNumericValue(*numericInset);
       }
-      if (const auto *stringInset = std::get_if<dom::DOMString>(&individualInset))
+      if (const auto *stringInset = std::get_if<DOMString>(&individualInset))
       {
-        return cssPrimitiveValueForCSSKeywordValue(css::CSSKeywordValue::RectifyKeywordish(*stringInset));
+        return cssPrimitiveValueForCSSKeywordValue(CSSKeywordValue::RectifyKeywordish(*stringInset));
       }
-      krys_debug_assert(std::holds_alternative<RefPtr<css::CSSKeywordValue>>(individualInset));
+      krys_debug_assert(std::holds_alternative<RefPtr<CSSKeywordValue>>(individualInset));
       return cssPrimitiveValueForCSSKeywordValue(
-        css::CSSKeywordValue::RectifyKeywordish(std::get<RefPtr<css::CSSKeywordValue>>(individualInset)));
+        CSSKeywordValue::RectifyKeywordish(std::get<RefPtr<CSSKeywordValue>>(individualInset)));
     };
 
     // if a sequence is provided, the first value represents the start inset and the second value represents
@@ -204,7 +204,7 @@ namespace krys::boo
     return SpecifiedViewTimelineInsets {startInset, endInset};
   }
 
-  const dom::Element *ViewTimeline::Subject() const noexcept
+  const boo::Element *ViewTimeline::Subject() const noexcept
   {
     if (auto subject = _subject.GetStyleable())
     {
@@ -213,7 +213,7 @@ namespace krys::boo
     return nullptr;
   }
 
-  void ViewTimeline::SetSubject(dom::Element *subject) noexcept
+  void ViewTimeline::SetSubject(boo::Element *subject) noexcept
   {
     if (subject)
     {
@@ -575,7 +575,7 @@ namespace krys::boo
     return style::SingleAnimationRange::DefaultForViewTimeline();
   }
 
-  RefPtr<dom::Element> ViewTimeline::BindingsSource() const noexcept
+  RefPtr<boo::Element> ViewTimeline::BindingsSource() const noexcept
   {
     if (auto subject = _subject.GetStyleable())
     {
@@ -584,7 +584,7 @@ namespace krys::boo
     return ScrollTimeline::BindingsSource();
   }
 
-  RefPtr<dom::Element> ViewTimeline::Source() const noexcept
+  RefPtr<boo::Element> ViewTimeline::Source() const noexcept
   {
     if (const auto *sourceRender = SourceScrollerRenderer())
     {
@@ -789,13 +789,13 @@ namespace krys::boo
     return {computeTime(attachmentRangeOrDefault.Start), computeTime(attachmentRangeOrDefault.End)};
   }
 
-  Ref<css::CSSNumericValue> ViewTimeline::StartOffset() const noexcept
+  Ref<CSSNumericValue> ViewTimeline::StartOffset() const noexcept
   {
-    return css::CSSNumericFactory::Px(ComputeTimelineData().RangeStart);
+    return CSSNumericFactory::Px(ComputeTimelineData().RangeStart);
   }
 
-  Ref<css::CSSNumericValue> ViewTimeline::EndOffset() const noexcept
+  Ref<CSSNumericValue> ViewTimeline::EndOffset() const noexcept
   {
-    return css::CSSNumericFactory::Px(ComputeTimelineData().RangeEnd);
+    return CSSNumericFactory::Px(ComputeTimelineData().RangeEnd);
   }
 }

@@ -33,7 +33,7 @@
 
 namespace krys::boo
 {
-  TemporarySelectionChange::TemporarySelectionChange(dom::Document &document,
+  TemporarySelectionChange::TemporarySelectionChange(Document &document,
                                                      Maybe<VisibleSelection> temporarySelection,
                                                      EnumSet<TemporarySelectionOption> options) noexcept
       : _document(ShareRefPtr(&document)), _options(options),

@@ -29,13 +29,17 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSStyleProperties;
+  class StylePropertyMap;
+}
+
+namespace krys::boo::css
+{
   class ImmutableStyleProperties;
   class MutableStyleProperties;
   class StyleProperties;
-  class StylePropertyMap;
   class Value;
 
   enum class PropertyId : uint16;
@@ -43,7 +47,7 @@ namespace krys::boo::css
   enum class ValueId : uint16;
 }
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   /// @brief An element with an inline style: an element that includes `ElementCSSInlineStyle` (HTML, SVG and
   /// MathML elements). The inline style is parsed from the `style` attribute, and changes made through
@@ -61,7 +65,7 @@ namespace krys::boo::dom
     bool _presentationalHintStyleIsDirty {false};
 
   protected:
-    StyledElement(Document &document, const QualifiedName &name, NodeFlags nodeFlags) noexcept;
+    StyledElement(Document &document, const QualifiedName &name, dom::NodeFlags nodeFlags) noexcept;
 
   public:
     ~StyledElement() noexcept override;
@@ -70,11 +74,11 @@ namespace krys::boo::dom
 
     /// @brief The CSSOM view of the inline style.
     /// @see https://drafts.csswg.org/cssom/#dom-elementcssinlinestyle-style
-    KRYS_NODISCARD css::CSSStyleProperties &Style() noexcept;
+    KRYS_NODISCARD CSSStyleProperties &Style() noexcept;
 
     /// @brief The inline style, as a property map.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-elementcssinlinestyle-attributestylemap
-    KRYS_NODISCARD css::StylePropertyMap &AttributeStyleMap() noexcept;
+    KRYS_NODISCARD StylePropertyMap &AttributeStyleMap() noexcept;
 
 #pragma endregion
 
@@ -97,14 +101,14 @@ namespace krys::boo::dom
     bool SetInlineStyleProperty(css::PropertyId property, double value, css::UnitType unit,
                                 css::IsImportant important = css::IsImportant::No) noexcept;
 
-    bool SetInlineStyleProperty(css::PropertyId property, const css::CSSOMString &value,
+    bool SetInlineStyleProperty(css::PropertyId property, const CSSOMString &value,
                                 css::IsImportant important = css::IsImportant::No,
                                 bool *didFailParsing = nullptr) noexcept;
 
     bool SetInlineStyleProperty(css::PropertyId property, Ref<css::Value> &&value,
                                 css::IsImportant important = css::IsImportant::No) noexcept;
 
-    bool SetInlineStyleCustomProperty(const css::CSSOMStringAtom &property, const css::CSSOMString &value,
+    bool SetInlineStyleCustomProperty(const CSSOMStringAtom &property, const CSSOMString &value,
                                       css::IsImportant important = css::IsImportant::No) noexcept;
 
     bool SetInlineStyleCustomProperty(Ref<css::Value> &&customPropertyValue,
@@ -112,7 +116,7 @@ namespace krys::boo::dom
 
     bool RemoveInlineStyleProperty(css::PropertyId property) noexcept;
 
-    bool RemoveInlineStyleCustomProperty(const css::CSSOMStringAtom &property) noexcept;
+    bool RemoveInlineStyleCustomProperty(const CSSOMStringAtom &property) noexcept;
 
     void RemoveAllInlineStyleProperties() noexcept;
 
@@ -166,7 +170,7 @@ namespace krys::boo::dom
                                                      css::UnitType unit) noexcept;
 
     void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                                              const css::CSSOMString &value) noexcept;
+                                              const CSSOMString &value) noexcept;
 
     static void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style,
                                                      css::PropertyId property,
@@ -198,8 +202,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::StyledElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::StyledElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
     return node.IsStyledElement();
   }

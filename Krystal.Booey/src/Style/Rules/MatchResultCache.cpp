@@ -65,12 +65,12 @@ namespace krys::boo::style
   {
     // Entries are keyed by address: the element they were made for, so a new element at the same address
     // doesn't use them.
-    WeakPtr<const dom::Element> Element;
+    WeakPtr<const boo::Element> Element;
     style::UnadjustedStyle UnadjustedStyle;
     Ref<const css::MutableStyleProperties> InlineStyle;
     List<OriginalInlineProperty> OriginalInlineProperties;
 
-    Entry(const dom::Element &element, style::UnadjustedStyle &&unadjustedStyle,
+    Entry(const boo::Element &element, style::UnadjustedStyle &&unadjustedStyle,
           const css::MutableStyleProperties &inlineStyle) noexcept
         : Element(CreateWeakPtr(&element)), UnadjustedStyle(krys::move(unadjustedStyle)),
           InlineStyle(ShareRef(inlineStyle))
@@ -165,7 +165,7 @@ namespace krys::boo::style
     return result;
   }
 
-  auto MatchResultCache::Find(const dom::Element &element) noexcept -> Entry *
+  auto MatchResultCache::Find(const Element &element) noexcept -> Entry *
   {
     auto it = _entries.find(&element);
     if (it == _entries.end())
@@ -180,8 +180,7 @@ namespace krys::boo::style
     return it->second.get();
   }
 
-  Maybe<CachedMatchResult>
-    MatchResultCache::ResultWithCurrentInlineStyle(const dom::Element &element) noexcept
+  Maybe<CachedMatchResult> MatchResultCache::ResultWithCurrentInlineStyle(const Element &element) noexcept
   {
     auto *entry = Find(element);
     if (!entry)
@@ -189,7 +188,7 @@ namespace krys::boo::style
       return {};
     }
 
-    auto *styledElement = DynamicDowncast<dom::StyledElement>(element);
+    auto *styledElement = DynamicDowncast<StyledElement>(element);
     auto *inlineStyle = styledElement ? styledElement->InlineStyle() : nullptr;
 
     if (!inlineStyle || !IsUsableAfterInlineStyleChange(*entry, *inlineStyle))
@@ -210,7 +209,7 @@ namespace krys::boo::style
     *result.StyleToUpdate = RenderStyle::Clone(style);
   }
 
-  void MatchResultCache::UpdateForFastPathInherit(const dom::Element &element,
+  void MatchResultCache::UpdateForFastPathInherit(const Element &element,
                                                   const RenderStyle &parentStyle) noexcept
   {
     auto *entry = Find(element);
@@ -221,11 +220,11 @@ namespace krys::boo::style
     entry->UnadjustedStyle.Style->FastPathInheritFrom(parentStyle);
   }
 
-  void MatchResultCache::Set(const dom::Element &element, const UnadjustedStyle &unadjustedStyle) noexcept
+  void MatchResultCache::Set(const Element &element, const UnadjustedStyle &unadjustedStyle) noexcept
   {
     // For now we cache match results if there is mutable inline style. This way we can avoid
     // selector matching when it gets mutated again.
-    auto *styledElement = DynamicDowncast<dom::StyledElement>(element);
+    auto *styledElement = DynamicDowncast<StyledElement>(element);
     auto *inlineStyle =
       styledElement ? DynamicDowncast<css::MutableStyleProperties>(styledElement->InlineStyle()) : nullptr;
 

@@ -15,8 +15,6 @@
 
 namespace krys::boo::tests
 {
-  using html::HTMLInputElement;
-
   namespace
   {
     /// @brief Clicks @p input as a user does, with the window's transient activation that opening a picker
@@ -95,10 +93,10 @@ namespace krys::boo::tests
     }
 
     /// @brief The swatch (the `::-webkit-color-swatch` part) of a colour input.
-    KRYS_NODISCARD dom::Element &Swatch(HTMLInputElement &input) noexcept
+    KRYS_NODISCARD boo::Element &Swatch(HTMLInputElement &input) noexcept
     {
-      auto &wrapper = Downcast<dom::Element>(*input.UserAgentShadowRoot()->FirstChild());
-      return Downcast<dom::Element>(*wrapper.FirstChild());
+      auto &wrapper = Downcast<boo::Element>(*input.UserAgentShadowRoot()->FirstChild());
+      return Downcast<boo::Element>(*wrapper.FirstChild());
     }
   }
 
@@ -109,7 +107,7 @@ namespace krys::boo::tests
 
     // The value is lowercased.
     CHECK(input.Value() == u8"#ff8000");
-    auto &wrapper = Downcast<dom::Element>(*input.UserAgentShadowRoot()->FirstChild());
+    auto &wrapper = Downcast<boo::Element>(*input.UserAgentShadowRoot()->FirstChild());
     CHECK(wrapper.UserAgentPart() == u8"-webkit-color-swatch-wrapper");
     auto &swatch = Swatch(input);
     CHECK(swatch.UserAgentPart() == u8"-webkit-color-swatch");
@@ -210,7 +208,7 @@ namespace krys::boo::tests
       UserClick(input);
       REQUIRE(client->Chooser);
 
-      List<dom::DOMString> swatchAtInput;
+      List<DOMString> swatchAtInput;
       auto handle = input.AddEventListener(
         u8"input", [&](dom::Event &) { swatchAtInput.push_back(*Swatch(input).GetAttribute(u8"style")); });
       client->Chooser->Client->DidChooseColor(SRGBA<uint8> {255, 0, 0});

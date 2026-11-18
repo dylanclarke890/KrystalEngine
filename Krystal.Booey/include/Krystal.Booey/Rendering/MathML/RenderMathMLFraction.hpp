@@ -34,10 +34,7 @@
 
 namespace krys::boo
 {
-  namespace mathml
-  {
-    class MathMLFractionElement;
-  }
+  class MathMLFractionElement;
 
   /// @brief The renderer of `<mfrac>`: its numerator centred over its denominator, with a fraction bar
   /// between them on the math axis.
@@ -48,7 +45,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderMathMLFraction);
 
   public:
-    RenderMathMLFraction(mathml::MathMLFractionElement &element, RenderStyle &&style) noexcept;
+    RenderMathMLFraction(boo::MathMLFractionElement &element, RenderStyle &&style) noexcept;
 
     ~RenderMathMLFraction() noexcept override;
 
@@ -85,7 +82,7 @@ namespace krys::boo
       return true;
     }
 
-    KRYS_NODISCARD mathml::MathMLFractionElement &GetElement() const noexcept;
+    KRYS_NODISCARD boo::MathMLFractionElement &GetElement() const noexcept;
 
     KRYS_NODISCARD bool IsValid() const noexcept;
 

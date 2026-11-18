@@ -39,8 +39,8 @@ namespace krys::boo
   // MARK: - ReferencePathOperation
 
   Ref<ReferencePathOperation> ReferencePathOperation::Create(const style::URL &url,
-                                                             const css::CSSOMStringAtom &fragment,
-                                                             const svg::SVGElement *element) noexcept
+                                                             const CSSOMStringAtom &fragment,
+                                                             const boo::SVGElement *element) noexcept
   {
     return AdoptRef(*new ReferencePathOperation(url, fragment, element));
   }
@@ -65,11 +65,11 @@ namespace krys::boo
     return _url == Downcast<ReferencePathOperation>(other)._url;
   }
 
-  ReferencePathOperation::ReferencePathOperation(style::URL url, css::CSSOMStringAtom fragment,
-                                                 const svg::SVGElement *element) noexcept
+  ReferencePathOperation::ReferencePathOperation(style::URL url, CSSOMStringAtom fragment,
+                                                 const boo::SVGElement *element) noexcept
       : PathOperation(Type::Reference), _url(krys::move(url)), _fragment(krys::move(fragment))
   {
-    if (Is<svg::SVGPathElement>(element) || Is<svg::SVGGeometryElement>(element))
+    if (Is<SVGPathElement>(element) || Is<SVGGeometryElement>(element))
     {
       _path = PathFromGraphicsElement(*element);
     }

@@ -33,7 +33,7 @@
 
 namespace krys::boo::svg
 {
-  Path BuildPathFromString(dom::DOMStringView d) noexcept
+  Path BuildPathFromString(DOMStringView d) noexcept
   {
     if (d.empty())
     {
@@ -67,7 +67,7 @@ namespace krys::boo::svg
     return path;
   }
 
-  bool BuildStringFromByteStream(const SVGPathByteStream &stream, dom::DOMString &result,
+  bool BuildStringFromByteStream(const SVGPathByteStream &stream, DOMString &result,
                                  PathParsingMode parsingMode, bool checkForInitialMoveTo) noexcept
   {
     if (stream.IsEmpty())
@@ -79,7 +79,7 @@ namespace krys::boo::svg
     return SVGPathParser::ParseToString(source, result, parsingMode, checkForInitialMoveTo);
   }
 
-  bool BuildSVGPathByteStreamFromString(dom::DOMStringView d, SVGPathByteStream &result,
+  bool BuildSVGPathByteStreamFromString(DOMStringView d, SVGPathByteStream &result,
                                         PathParsingMode parsingMode) noexcept
   {
     result.Clear();

@@ -42,14 +42,14 @@ namespace krys::boo::style
       return Identifier == other;
     }
 
-    KRYS_NODISCARD bool operator==(const css::CSSOMStringAtom &other) const noexcept
+    KRYS_NODISCARD bool operator==(const CSSOMStringAtom &other) const noexcept
     {
       return Identifier.Value == other;
     }
 
     KRYS_NODISCARD bool operator==(css::ValueId other) const noexcept
     {
-      return Identifier.Value == css::CSSOMStringAtom {css::ToString(other)};
+      return Identifier.Value == CSSOMStringAtom {css::ToString(other)};
     }
   };
   DEFINE_TYPE_WRAPPER_GET(CounterStyle, Identifier)

@@ -48,7 +48,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD virtual int32 OptionCount() const noexcept = 0;
 
-    KRYS_NODISCARD virtual dom::DOMString OptionAtIndex(int32 index) const noexcept = 0;
+    KRYS_NODISCARD virtual DOMString OptionAtIndex(int32 index) const noexcept = 0;
   };
 
   /// @brief Finds the option the user is typing the start of.

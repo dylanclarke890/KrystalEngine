@@ -37,7 +37,7 @@
 
 namespace krys::boo::html
 {
-  bool URLInputType::TypeMismatchFor(dom::DOMStringView value) const noexcept
+  bool URLInputType::TypeMismatchFor(DOMStringView value) const noexcept
   {
     return !value.empty() && !url::URL(value).IsValid();
   }
@@ -48,14 +48,14 @@ namespace krys::boo::html
     return TypeMismatchFor(Element()->Value());
   }
 
-  dom::DOMString URLInputType::TypeMismatchText() const noexcept
+  DOMString URLInputType::TypeMismatchText() const noexcept
   {
     return ValidationMessageTypeMismatchForURLText();
   }
 
-  dom::DOMString URLInputType::SanitizeValue(dom::DOMStringView proposedValue) const noexcept
+  DOMString URLInputType::SanitizeValue(DOMStringView proposedValue) const noexcept
   {
-    return dom::DOMString(infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(
+    return DOMString(infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(
       BaseTextInputType::SanitizeValue(proposedValue)));
   }
 }

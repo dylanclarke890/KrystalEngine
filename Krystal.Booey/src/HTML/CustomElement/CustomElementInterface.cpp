@@ -35,7 +35,7 @@
 
 namespace krys::boo::html
 {
-  CustomElementInterface::CustomElementInterface(dom::DOMStringAtom localName, CustomElementFactory &&factory,
+  CustomElementInterface::CustomElementInterface(DOMStringAtom localName, CustomElementFactory &&factory,
                                                  const CustomElementOptions &options) noexcept
       : _name(infra::namespaces::HTML, null, krys::move(localName)), _factory(krys::move(factory)),
         _isElementInternalsDisabled(options.DisableInternals), _isShadowDisabled(options.DisableShadow),
@@ -49,8 +49,9 @@ namespace krys::boo::html
 
   CustomElementInterface::~CustomElementInterface() noexcept = default;
 
-  Ref<dom::Element> CustomElementInterface::ConstructElementWithFallback(
-    dom::Document &document, CustomElementRegistry &registry, const dom::QualifiedName &name) noexcept
+  Ref<Element> CustomElementInterface::ConstructElementWithFallback(Document &document,
+                                                                    CustomElementRegistry &registry,
+                                                                    const QualifiedName &name) noexcept
   {
     if (auto element = TryToConstructCustomElement(document, registry, name))
     {
@@ -63,7 +64,7 @@ namespace krys::boo::html
     return element;
   }
 
-  Ref<HTMLElement> CustomElementInterface::CreateElement(dom::Document &document) noexcept
+  Ref<HTMLElement> CustomElementInterface::CreateElement(Document &document) noexcept
   {
     auto element = CreateRef<HTMLMaybeFormAssociatedCustomElement>(document, _name.LocalName());
     if (_isFormAssociated)
@@ -73,8 +74,9 @@ namespace krys::boo::html
     return element;
   }
 
-  RefPtr<dom::Element> CustomElementInterface::TryToConstructCustomElement(
-    dom::Document &document, CustomElementRegistry &registry, const dom::QualifiedName &name) noexcept
+  RefPtr<Element> CustomElementInterface::TryToConstructCustomElement(Document &document,
+                                                                      CustomElementRegistry &registry,
+                                                                      const QualifiedName &name) noexcept
   {
     (void)registry;
     (void)name;
@@ -104,7 +106,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#concept-upgrade-an-element
-  void CustomElementInterface::UpgradeElement(dom::Element &element) noexcept
+  void CustomElementInterface::UpgradeElement(Element &element) noexcept
   {
     krys_debug_assert(element.TagQualifiedName().LocalName() == _name.LocalName()
                       && element.NamespaceURI() == _name.NamespaceURI());
@@ -193,7 +195,7 @@ namespace krys::boo::html
   }
 
   template <typename TFunction>
-  void CustomElementInterface::InvokeCallback(dom::Element &element, TFunction function) noexcept
+  void CustomElementInterface::InvokeCallback(Element &element, TFunction function) noexcept
   {
     auto *customElement = element.GetCustomElement();
     if (customElement == nullptr)
@@ -206,32 +208,32 @@ namespace krys::boo::html
     function(*customElement);
   }
 
-  void CustomElementInterface::InvokeConnectedCallback(dom::Element &element) noexcept
+  void CustomElementInterface::InvokeConnectedCallback(Element &element) noexcept
   {
     InvokeCallback(element, [](CustomElement &customElement) { customElement.ConnectedCallback(); });
   }
 
-  void CustomElementInterface::InvokeDisconnectedCallback(dom::Element &element) noexcept
+  void CustomElementInterface::InvokeDisconnectedCallback(Element &element) noexcept
   {
     InvokeCallback(element, [](CustomElement &customElement) { customElement.DisconnectedCallback(); });
   }
 
-  void CustomElementInterface::InvokeConnectedMoveCallback(dom::Element &element) noexcept
+  void CustomElementInterface::InvokeConnectedMoveCallback(Element &element) noexcept
   {
     InvokeCallback(element, [](CustomElement &customElement) { customElement.ConnectedMoveCallback(); });
   }
 
-  void CustomElementInterface::InvokeAdoptedCallback(dom::Element &element, dom::Document &oldDocument,
-                                                     dom::Document &newDocument) noexcept
+  void CustomElementInterface::InvokeAdoptedCallback(Element &element, Document &oldDocument,
+                                                     Document &newDocument) noexcept
   {
     InvokeCallback(element, [&](CustomElement &customElement)
                    { customElement.AdoptedCallback(oldDocument, newDocument); });
   }
 
-  void CustomElementInterface::InvokeAttributeChangedCallback(dom::Element &element,
-                                                              const dom::QualifiedName &attributeName,
-                                                              const dom::DOMStringAtom &oldValue,
-                                                              const dom::DOMStringAtom &newValue) noexcept
+  void CustomElementInterface::InvokeAttributeChangedCallback(Element &element,
+                                                              const QualifiedName &attributeName,
+                                                              const DOMStringAtom &oldValue,
+                                                              const DOMStringAtom &newValue) noexcept
   {
     InvokeCallback(element,
                    [&](CustomElement &customElement)
@@ -241,19 +243,18 @@ namespace krys::boo::html
                    });
   }
 
-  void CustomElementInterface::InvokeFormAssociatedCallback(dom::Element &element,
-                                                            HTMLFormElement *form) noexcept
+  void CustomElementInterface::InvokeFormAssociatedCallback(Element &element, HTMLFormElement *form) noexcept
   {
     InvokeCallback(element,
                    [&](CustomElement &customElement) { customElement.FormAssociatedCallback(form); });
   }
 
-  void CustomElementInterface::InvokeFormResetCallback(dom::Element &element) noexcept
+  void CustomElementInterface::InvokeFormResetCallback(Element &element) noexcept
   {
     InvokeCallback(element, [](CustomElement &customElement) { customElement.FormResetCallback(); });
   }
 
-  void CustomElementInterface::InvokeFormDisabledCallback(dom::Element &element, bool isDisabled) noexcept
+  void CustomElementInterface::InvokeFormDisabledCallback(Element &element, bool isDisabled) noexcept
   {
     InvokeCallback(element,
                    [&](CustomElement &customElement) { customElement.FormDisabledCallback(isDisabled); });

@@ -26,7 +26,7 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLFormElement;
 
@@ -39,7 +39,7 @@ namespace krys::boo::html
     bool _processingClick {false};
 
   public:
-    HTMLLabelElement(dom::Document &document) noexcept;
+    HTMLLabelElement(Document &document) noexcept;
 
 #pragma region HTMLLabelElement - https://html.spec.whatwg.org/#htmllabelelement
 
@@ -49,7 +49,7 @@ namespace krys::boo::html
 
     /// @brief The labeled control's form owner, retargeted against the label.
     /// @see https://html.spec.whatwg.org/#dom-label-form
-    KRYS_NODISCARD RefPtr<dom::Element> FormForBindings() const noexcept;
+    KRYS_NODISCARD RefPtr<Element> FormForBindings() const noexcept;
 
     /// @brief The labeled control: the element the `for` attribute names, or the first labelable
     /// descendant.
@@ -65,10 +65,10 @@ namespace krys::boo::html
     KRYS_NODISCARD RefPtr<HTMLElement> ControlForBindings() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-label-htmlfor
-    KRYS_NODISCARD dom::DOMString HtmlFor() const noexcept;
+    KRYS_NODISCARD DOMString HtmlFor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-label-htmlfor
-    void HtmlFor(dom::DOMString value) noexcept;
+    void HtmlFor(DOMString value) noexcept;
 
 #pragma endregion
 
@@ -90,13 +90,13 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLLabelElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLLabelElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLLabelElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLLabelElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLLabelElement();
   }

@@ -751,7 +751,7 @@ namespace krys::boo
 
     // The new position must be in the same editable element. Enforce that first.
     // Unless the descent is from a non-editable html element to an editable body.
-    if (node && Is<html::HTMLHtmlElement>(*node) && !node->HasEditableStyle())
+    if (node && Is<HTMLHtmlElement>(*node) && !node->HasEditableStyle())
     {
       auto body = node->NodeDocument().Body();
       if (body && body->HasEditableStyle())
@@ -764,8 +764,8 @@ namespace krys::boo
 
     // If the html element is editable, descending into its body will look like a descent
     // from non-editable to editable content since rootEditableElement() always stops at the body.
-    if ((editingRoot && Is<html::HTMLHtmlElement>(*editingRoot))
-        || (node && (Is<dom::Document>(*node) || Is<dom::ShadowRoot>(*node))))
+    if ((editingRoot && Is<HTMLHtmlElement>(*editingRoot))
+        || (node && (Is<Document>(*node) || Is<ShadowRoot>(*node))))
     {
       return next.IsNotNull() ? next : prev;
     }
@@ -804,7 +804,7 @@ namespace krys::boo
     // We canonicalize to the first of two equivalent candidates, but the second of the two candidates
     // is the one that will be inside the text node containing the character after this visible position.
     dom::Position pos = _deepPosition.Downstream();
-    if (!pos.GetContainerNode() || !Is<dom::Text>(*pos.GetContainerNode()))
+    if (!pos.GetContainerNode() || !Is<Text>(*pos.GetContainerNode()))
     {
       return 0;
     }
@@ -903,7 +903,7 @@ namespace krys::boo
   }
 
   // FIXME: Maybe this should be deprecated too, like the underlying function?
-  dom::Element *EnclosingBlockFlowElement(const VisiblePosition &visiblePosition) noexcept
+  Element *EnclosingBlockFlowElement(const VisiblePosition &visiblePosition) noexcept
   {
     if (visiblePosition.IsNull())
     {
@@ -913,7 +913,7 @@ namespace krys::boo
     return DeprecatedEnclosingBlockFlowElement(visiblePosition.DeepEquivalent().DeprecatedNode());
   }
 
-  bool IsFirstVisiblePositionInNode(const VisiblePosition &visiblePosition, const dom::Node *node) noexcept
+  bool IsFirstVisiblePositionInNode(const VisiblePosition &visiblePosition, const Node *node) noexcept
   {
     if (visiblePosition.IsNull())
     {
@@ -929,7 +929,7 @@ namespace krys::boo
     return previous.IsNull() || !previous.DeepEquivalent().DeprecatedNode()->IsDescendantOf(node);
   }
 
-  bool IsLastVisiblePositionInNode(const VisiblePosition &visiblePosition, const dom::Node *node) noexcept
+  bool IsLastVisiblePositionInNode(const VisiblePosition &visiblePosition, const Node *node) noexcept
   {
     if (visiblePosition.IsNull())
     {
@@ -963,7 +963,7 @@ namespace krys::boo
     return dom::MakeBoundaryPoint(position.DeepEquivalent());
   }
 
-  dom::Node *CommonInclusiveAncestor(const VisiblePosition &a, const VisiblePosition &b) noexcept
+  Node *CommonInclusiveAncestor(const VisiblePosition &a, const VisiblePosition &b) noexcept
   {
     return dom::CommonInclusiveAncestor(a.DeepEquivalent(), b.DeepEquivalent());
   }
@@ -1003,7 +1003,7 @@ namespace krys::boo
     return {std::max(a.Start, b.Start), std::min(a.End, b.End)};
   }
 
-  dom::Node *CommonInclusiveAncestor(const VisiblePositionRange &range) noexcept
+  Node *CommonInclusiveAncestor(const VisiblePositionRange &range) noexcept
   {
     return CommonInclusiveAncestor(range.Start, range.End);
   }
@@ -1015,7 +1015,7 @@ namespace krys::boo
     {
       return {};
     }
-    auto *rootContainerNode = DynamicDowncast<dom::ContainerNode>(rootNode);
+    auto *rootContainerNode = DynamicDowncast<ContainerNode>(rootNode);
     if (!rootContainerNode)
     {
       rootContainerNode = rootNode->ParentNode();

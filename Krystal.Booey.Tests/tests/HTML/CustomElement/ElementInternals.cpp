@@ -55,15 +55,15 @@ namespace krys::boo::html::tests
     struct InternalsFixture : CustomElementFixture
     {
       /// @brief The behaviour each element got from `DefineInternals`.
-      std::map<const dom::Element *, InternalsElement *> Behaviours;
+      std::map<const boo::Element *, InternalsElement *> Behaviours;
 
-      KRYS_NODISCARD InternalsElement *BehaviourOf(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD InternalsElement *BehaviourOf(DOMStringView id) noexcept
       {
         auto found = Behaviours.find(&ById(id));
         return found == Behaviours.end() ? nullptr : found->second;
       }
 
-      void DefineInternals(dom::DOMStringAtom name, CustomElementOptions &&options = {}) noexcept
+      void DefineInternals(DOMStringAtom name, CustomElementOptions &&options = {}) noexcept
       {
         auto result = Registry().Define(
           krys::move(name),
@@ -77,7 +77,7 @@ namespace krys::boo::html::tests
         REQUIRE_FALSE(result.HasException());
       }
 
-      ElementInternals &InternalsOf(dom::DOMStringView id) noexcept
+      ElementInternals &InternalsOf(DOMStringView id) noexcept
       {
         auto *behaviour = BehaviourOf(id);
         REQUIRE(behaviour);
@@ -85,7 +85,7 @@ namespace krys::boo::html::tests
         return *behaviour->Internals;
       }
 
-      Ref<DOMFormData> Submitted(dom::DOMStringView formId) noexcept
+      Ref<DOMFormData> Submitted(DOMStringView formId) noexcept
       {
         auto formData = DOMFormData::Create(&Downcast<HTMLFormElement>(ById(formId)), nullptr);
         REQUIRE_FALSE(formData.HasException());
@@ -223,7 +223,7 @@ namespace krys::boo::html::tests
       auto file = File::Create(u8"C:/dir/photo.png");
       REQUIRE_FALSE(InternalsOf(u8"a").SetFormValue(RefPtr<File>(file)).HasException());
       auto entries = DOMFormData::Create();
-      entries->Append(u8"x", *file, Maybe<dom::DOMStringView>(u8"renamed.png"));
+      entries->Append(u8"x", *file, Maybe<DOMStringView>(u8"renamed.png"));
       REQUIRE_FALSE(InternalsOf(u8"b").SetFormValue(RefPtr<DOMFormData>(entries)).HasException());
 
       auto submitted = Submitted(u8"f");
@@ -346,8 +346,8 @@ namespace krys::boo::html::tests
     SECTION("strings go to the internal content attribute map, not the element's attributes")
     {
       CHECK_FALSE(internals.Role());
-      internals.Role(dom::DOMString(u8"checkbox"));
-      internals.AriaChecked(dom::DOMString(u8"false"));
+      internals.Role(DOMString(u8"checkbox"));
+      internals.AriaChecked(DOMString(u8"false"));
       CHECK(internals.Role() == u8"checkbox");
       CHECK(internals.InternalContentAttribute(u8"aria-checked") == u8"false");
       CHECK_FALSE(element.HasAttribute(u8"role"));
@@ -363,7 +363,7 @@ namespace krys::boo::html::tests
       CHECK_FALSE(element.AriaActiveDescendantElement());
 
       internals.AriaLabelledByElements(
-        List<Ref<dom::Element>> {ShareRef(ById(u8"b")), ShareRef(ById(u8"a"))});
+        List<Ref<boo::Element>> {ShareRef(ById(u8"b")), ShareRef(ById(u8"a"))});
       auto labelledBy = internals.AriaLabelledByElements();
       REQUIRE(labelledBy);
       REQUIRE(labelledBy->size() == 2);

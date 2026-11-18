@@ -28,10 +28,10 @@
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGParsingError.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   SVGFilterPrimitiveStandardAttributes::SVGFilterPrimitiveStandardAttributes(
-    dom::Document &document, UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
+    Document &document, UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
     SVGElementInterface interface) noexcept
       : SVGElement(document, krys::move(propertyRegistry), interface),
         _x(SVGAnimatedLength::Create(this, SVGLengthMode::Width, u8"0%")),
@@ -57,12 +57,12 @@ namespace krys::boo::svg
 
   SVGFilterPrimitiveStandardAttributes::~SVGFilterPrimitiveStandardAttributes() noexcept = default;
 
-  void SVGFilterPrimitiveStandardAttributes::AttributeChanged(const dom::QualifiedName &name,
-                                                              Maybe<dom::DOMStringView> oldValue,
-                                                              Maybe<dom::DOMStringView> value) noexcept
+  void SVGFilterPrimitiveStandardAttributes::AttributeChanged(const QualifiedName &name,
+                                                              Maybe<DOMStringView> oldValue,
+                                                              Maybe<DOMStringView> value) noexcept
   {
     auto parseError = SVGParsingError::None;
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::XAttr())
     {
@@ -86,7 +86,7 @@ namespace krys::boo::svg
     }
     else if (name == SVGNames::ResultAttr())
     {
-      _result->SetBaseValInternal(dom::DOMString(string));
+      _result->SetBaseValInternal(DOMString(string));
     }
     ReportAttributeParsingError(parseError, name, string);
 
@@ -129,8 +129,8 @@ namespace krys::boo::svg
     return _effect;
   }
 
-  void SVGFilterPrimitiveStandardAttributes::PrimitiveAttributeChanged(
-    const dom::QualifiedName &attribute) noexcept
+  void
+    SVGFilterPrimitiveStandardAttributes::PrimitiveAttributeChanged(const QualifiedName &attribute) noexcept
   {
     RefPtr effect = _effect;
     if (effect && !SetFilterEffectAttribute(*effect, attribute))
@@ -141,7 +141,7 @@ namespace krys::boo::svg
   }
 
   void SVGFilterPrimitiveStandardAttributes::PrimitiveAttributeOnChildChanged(
-    const dom::Element &child, const dom::QualifiedName &attribute) noexcept
+    const Element &child, const QualifiedName &attribute) noexcept
   {
     krys_debug_assert(child.ParentNode() == this);
 
@@ -171,8 +171,7 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGFilterPrimitiveStandardAttributes::SVGAttributeChanged(
-    const dom::QualifiedName &attributeName) noexcept
+  void SVGFilterPrimitiveStandardAttributes::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {

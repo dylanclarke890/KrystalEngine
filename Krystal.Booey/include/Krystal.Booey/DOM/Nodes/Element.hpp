@@ -61,30 +61,27 @@
 
 namespace krys::boo
 {
+  class HTMLButtonElement;
+  class HTMLElement;
+  class HTMLSlotElement;
   struct IntersectionObserverData;
   class Locale;
+  class PlatformKeyboardEvent;
+  class PlatformMouseEvent;
+  class PseudoElement;
   enum class PseudoElementType : uint8;
   class RenderElement;
   class RenderStyle;
   class RenderTreeUpdater;
   struct ResizeObserverData;
-}
-
-namespace krys::boo
-{
-  class PlatformKeyboardEvent;
-  class PlatformMouseEvent;
+  class ShadowRoot;
+  class StylePropertyMap;
+  class StylePropertyMapReadOnly;
 }
 
 namespace krys::boo::url
 {
   class URL;
-}
-
-namespace krys::boo::css
-{
-  class StylePropertyMap;
-  class StylePropertyMapReadOnly;
 }
 
 namespace krys::boo::css::calc
@@ -107,9 +104,6 @@ namespace krys::boo::html
   class CustomElementReactionQueue;
   class CustomElementRegistry;
   class CustomStateSet;
-  class HTMLButtonElement;
-  class HTMLElement;
-  class HTMLSlotElement;
   class OpenElementStack;
   class TreeBuilder;
 }
@@ -168,14 +162,23 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::InsertAdjacentWhere, 4uz);
 namespace krys::boo::dom
 {
   class DatasetDOMStringMap;
+  class DocumentAlgorithms;
+  class ElementAlgorithms;
+  class ElementFactory;
   class ElementRareData;
+  class ExtensibilityHooks;
   class HTMLCollection;
+  class NamedNodeMap;
+  class NodeAlgorithms;
   class NodeList;
   class PopoverData;
-  class PseudoElement;
-  class ShadowRoot;
   struct ShadowRootInit;
+  class SlotAlgorithms;
+  class TreeQueries;
+}
 
+namespace krys::boo
+{
   /// @brief A node with a qualified name and attributes.
   /// @see https://dom.spec.whatwg.org/#interface-element
   /// @see https://dom.spec.whatwg.org/#concept-element
@@ -183,17 +186,17 @@ namespace krys::boo::dom
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Element);
 
-    friend class ElementFactory;
-    friend class DocumentAlgorithms;
-    friend class ElementAlgorithms;
-    friend class ExtensibilityHooks;
-    friend class SlotAlgorithms;
+    friend class dom::ElementFactory;
+    friend class dom::DocumentAlgorithms;
+    friend class dom::ElementAlgorithms;
+    friend class dom::ExtensibilityHooks;
+    friend class dom::SlotAlgorithms;
     friend class HTMLCollectionAlgorithms;
     friend class StackItem;
     friend class Node;
-    friend class NodeAlgorithms;
-    friend class NamedNodeMap;
-    friend class TreeQueries;
+    friend class dom::NodeAlgorithms;
+    friend class dom::NamedNodeMap;
+    friend class dom::TreeQueries;
 
     friend class html::OpenElementStack;
     friend class html::TreeBuilder;
@@ -213,26 +216,26 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#element-custom-element-registry
     RefPtr<html::CustomElementRegistry> _customElementRegistry;
     /// @brief The associated `NamedNodeMap`, created on first use.
-    UniquePtr<NamedNodeMap> _namedNodeMap;
+    UniquePtr<dom::NamedNodeMap> _namedNodeMap;
     /// @brief The `classList`, created on first use.
-    UniquePtr<DOMTokenList> _domTokenList;
+    UniquePtr<dom::DOMTokenList> _domTokenList;
     /// @see https://dom.spec.whatwg.org/#concept-element-attribute
     List<Ref<Attr>> _attributes;
     /// @brief Kept as given, but ignored: customized built-in elements aren't supported.
     /// @see https://dom.spec.whatwg.org/#concept-element-is-value
     DOMStringAtom _is {null};
     /// @see https://dom.spec.whatwg.org/#concept-element-custom-element-state
-    CustomElementState _customElementState {CustomElementState::Uncustomized};
+    dom::CustomElementState _customElementState {dom::CustomElementState::Uncustomized};
 
     /// @see https://dom.spec.whatwg.org/#slotable-name
     DOMString _slottableName;
     /// @see https://dom.spec.whatwg.org/#slotable-assigned-slot
-    WeakPtr<html::HTMLSlotElement> _assignedSlot;
+    WeakPtr<HTMLSlotElement> _assignedSlot;
     /// @see https://dom.spec.whatwg.org/#slottable-manual-slot-assignment
-    WeakPtr<html::HTMLSlotElement> _manuallyAssignedSlot;
+    WeakPtr<HTMLSlotElement> _manuallyAssignedSlot;
 
   protected:
-    Element(Document &document, const QualifiedName &name, NodeFlags nodeFlags) noexcept;
+    Element(Document &document, const QualifiedName &name, dom::NodeFlags nodeFlags) noexcept;
 
   public:
     /// @brief False for elements with `role="img"`, whose content editing ignores.
@@ -282,18 +285,18 @@ namespace krys::boo::dom
     KRYS_NODISCARD DOMString ClassName() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-classlist
-    KRYS_NODISCARD DOMTokenList &ClassList() noexcept;
+    KRYS_NODISCARD dom::DOMTokenList &ClassList() noexcept;
 
     /// @see https://drafts.csswg.org/css-shadow-parts/#dom-element-part
-    KRYS_NODISCARD DOMTokenList &Part() noexcept;
+    KRYS_NODISCARD dom::DOMTokenList &Part() noexcept;
 
     /// @brief The element's `data-*` attributes, by property name.
     /// @see https://html.spec.whatwg.org/#dom-dataset
-    KRYS_NODISCARD DatasetDOMStringMap &Dataset() noexcept;
+    KRYS_NODISCARD dom::DatasetDOMStringMap &Dataset() noexcept;
 
     /// @brief The element's computed style, as a read-only property map.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-element-computedstylemap
-    KRYS_NODISCARD css::StylePropertyMapReadOnly &ComputedStyleMap() noexcept;
+    KRYS_NODISCARD StylePropertyMapReadOnly &ComputedStyleMap() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-slot
     void Slot(DOMString slot) noexcept;
@@ -305,7 +308,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool HasAttributes() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-attributes
-    KRYS_NODISCARD NamedNodeMap &Attributes() noexcept;
+    KRYS_NODISCARD dom::NamedNodeMap &Attributes() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-getattributenames
     KRYS_NODISCARD List<DOMString> GetAttributeNames() const noexcept;
@@ -318,11 +321,11 @@ namespace krys::boo::dom
                                                    DOMStringAtom localName) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-setattribute
-    ExceptionOr<void> SetAttribute(DOMStringAtom qualifiedName, DOMString value) noexcept;
+    dom::ExceptionOr<void> SetAttribute(DOMStringAtom qualifiedName, DOMString value) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-setattributens
-    ExceptionOr<void> SetAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom qualifiedName,
-                                     DOMString value) noexcept;
+    dom::ExceptionOr<void> SetAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom qualifiedName,
+                                          DOMString value) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-removeattribute
     void RemoveAttribute(DOMStringAtom qualifiedName) noexcept;
@@ -331,7 +334,7 @@ namespace krys::boo::dom
     void RemoveAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-toggleattribute
-    ExceptionOr<bool> ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept;
+    dom::ExceptionOr<bool> ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-hasattribute
     /// @see https://dom.spec.whatwg.org/#concept-element-attribute-has
@@ -348,28 +351,28 @@ namespace krys::boo::dom
                                             DOMStringAtom localName) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-setattributenode
-    ExceptionOr<RefPtr<Attr>> SetAttributeNode(Attr &attr) noexcept;
+    dom::ExceptionOr<RefPtr<Attr>> SetAttributeNode(Attr &attr) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-setattributenodens
-    ExceptionOr<RefPtr<Attr>> SetAttributeNodeNS(Attr &attr) noexcept;
+    dom::ExceptionOr<RefPtr<Attr>> SetAttributeNodeNS(Attr &attr) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-removeattributenode
-    ExceptionOr<Ref<Attr>> RemoveAttributeNode(Attr &attr) noexcept;
+    dom::ExceptionOr<Ref<Attr>> RemoveAttributeNode(Attr &attr) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-attachshadow
-    ExceptionOr<Ref<ShadowRoot>> AttachShadow(const ShadowRootInit &init) noexcept;
+    dom::ExceptionOr<Ref<ShadowRoot>> AttachShadow(const dom::ShadowRootInit &init) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-shadowroot
     KRYS_NODISCARD RefPtr<ShadowRoot> ShadowRoot() const noexcept;
 
     /// @brief The element's user agent shadow root, or null if it has none.
-    KRYS_NODISCARD dom::ShadowRoot *UserAgentShadowRoot() const noexcept;
+    KRYS_NODISCARD boo::ShadowRoot *UserAgentShadowRoot() const noexcept;
 
     /// @brief The element's user agent shadow root, attached if it has none.
-    dom::ShadowRoot &EnsureUserAgentShadowRoot() noexcept;
+    boo::ShadowRoot &EnsureUserAgentShadowRoot() noexcept;
 
     /// @brief Attaches a user agent shadow root to the element, which must have no shadow root.
-    dom::ShadowRoot &CreateUserAgentShadowRoot() noexcept;
+    boo::ShadowRoot &CreateUserAgentShadowRoot() noexcept;
 
     /// @brief Builds the element's user agent shadow tree, if the document has it pending
     /// (`Document::AddElementWithPendingUserAgentShadowTreeUpdate`); called before the document's style is
@@ -391,32 +394,33 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-closest
-    KRYS_NODISCARD ExceptionOr<RefPtr<Element>> Closest(DOMStringView selectors) noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<RefPtr<Element>> Closest(DOMStringView selectors) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-matches
-    KRYS_NODISCARD ExceptionOr<bool> Matches(DOMStringView selectors) const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<bool> Matches(DOMStringView selectors) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-webkitmatchesselector
-    KRYS_NODISCARD ExceptionOr<bool> WebkitMatchesSelector(DOMStringView selectors) const noexcept
+    KRYS_NODISCARD dom::ExceptionOr<bool> WebkitMatchesSelector(DOMStringView selectors) const noexcept
     {
       return Matches(selectors);
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-getelementsbytagname
-    KRYS_NODISCARD Ref<HTMLCollection> GetElementsByTagName(DOMStringAtom qualifiedName) noexcept;
+    KRYS_NODISCARD Ref<dom::HTMLCollection> GetElementsByTagName(DOMStringAtom qualifiedName) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-getelementsbytagnamens
-    KRYS_NODISCARD Ref<HTMLCollection> GetElementsByTagNameNS(DOMStringAtom namespaceURI,
-                                                              DOMStringAtom localName) noexcept;
+    KRYS_NODISCARD Ref<dom::HTMLCollection> GetElementsByTagNameNS(DOMStringAtom namespaceURI,
+                                                                   DOMStringAtom localName) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-getelementsbyclassname
-    KRYS_NODISCARD Ref<HTMLCollection> GetElementsByClassName(DOMStringAtom classNames) noexcept;
+    KRYS_NODISCARD Ref<dom::HTMLCollection> GetElementsByClassName(DOMStringAtom classNames) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-insertadjacentelement
-    ExceptionOr<Element *> InsertAdjacentElement(InsertAdjacentWhere where, Element &element) noexcept;
+    dom::ExceptionOr<Element *> InsertAdjacentElement(dom::InsertAdjacentWhere where,
+                                                      Element &element) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-insertadjacenttext
-    ExceptionOr<void> InsertAdjacentText(InsertAdjacentWhere where, DOMString data) noexcept;
+    dom::ExceptionOr<void> InsertAdjacentText(dom::InsertAdjacentWhere where, DOMString data) noexcept;
 
 #pragma endregion
 
@@ -426,101 +430,102 @@ namespace krys::boo::dom
     /// context, sanitized by @p options (the default configuration if it gives none) with unsafe content
     /// removed.
     /// @see https://html.spec.whatwg.org/#dom-element-sethtml
-    ExceptionOr<void> SetHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    dom::ExceptionOr<void> SetHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Appends @p html, parsed as HTML in the element's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-element-appendhtml
-    ExceptionOr<void> AppendHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    dom::ExceptionOr<void> AppendHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Prepends @p html, parsed as HTML in the element's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-element-prependhtml
-    ExceptionOr<void> PrependHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    dom::ExceptionOr<void> PrependHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Replaces the element's children (a template's contents) with @p html, parsed as HTML in its
     /// context; sanitized only if @p options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-element-sethtmlunsafe
-    ExceptionOr<void> SetHTMLUnsafe(DOMStringView html,
-                                    const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    dom::ExceptionOr<void> SetHTMLUnsafe(DOMStringView html,
+                                         const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Appends @p html, parsed as HTML in the element's context; sanitized only if @p options gives a
     /// sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-element-appendhtmlunsafe
-    ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html,
-                                       const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    dom::ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html,
+                                            const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Prepends @p html, parsed as HTML in the element's context; sanitized only if @p options gives a
     /// sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-element-prependhtmlunsafe
-    ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html,
-                                        const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    dom::ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html,
+                                             const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Inserts before the element @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtml
-    ExceptionOr<void> BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    dom::ExceptionOr<void> BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Inserts after the element @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtml
-    ExceptionOr<void> AfterHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    dom::ExceptionOr<void> AfterHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Replaces the element with @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtml
-    ExceptionOr<void> ReplaceWithHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    dom::ExceptionOr<void> ReplaceWithHTML(DOMStringView html,
+                                           const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Inserts before the element @p html, parsed as HTML in its parent's context; sanitized only if
     /// @p options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtmlunsafe
-    ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html,
-                                       const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    dom::ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html,
+                                            const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Inserts after the element @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtmlunsafe
-    ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html,
-                                      const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    dom::ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html,
+                                           const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Replaces the element with @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtmlunsafe
-    ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html,
-                                            const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    dom::ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html,
+                                                 const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief The element's children serialised as HTML, with the shadow roots @p options asks for.
     /// @see https://html.spec.whatwg.org/#dom-element-gethtml
-    KRYS_NODISCARD DOMString GetHTML(GetHTMLOptions options = {}) const noexcept;
+    KRYS_NODISCARD DOMString GetHTML(dom::GetHTMLOptions options = {}) const noexcept;
 
     /// @brief The children serialized; in an XML document, an `InvalidStateError` if they can't be serialized
     /// as well-formed XML.
     /// @see https://html.spec.whatwg.org/#dom-element-innerhtml
-    KRYS_NODISCARD ExceptionOr<DOMString> InnerHTML() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<DOMString> InnerHTML() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-element-innerhtml
-    ExceptionOr<void> InnerHTML(DOMStringView markup) noexcept;
+    dom::ExceptionOr<void> InnerHTML(DOMStringView markup) noexcept;
 
     /// @brief The element serialized; in an XML document, an `InvalidStateError` if it can't be serialized as
     /// well-formed XML.
     /// @see https://html.spec.whatwg.org/#dom-element-outerhtml
-    KRYS_NODISCARD ExceptionOr<DOMString> OuterHTML() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<DOMString> OuterHTML() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-element-outerhtml
-    ExceptionOr<void> OuterHTML(DOMStringView markup) noexcept;
+    dom::ExceptionOr<void> OuterHTML(DOMStringView markup) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-element-insertadjacenthtml
-    ExceptionOr<void> InsertAdjacentHTML(InsertAdjacentWhere where, DOMStringView markup) noexcept;
+    dom::ExceptionOr<void> InsertAdjacentHTML(dom::InsertAdjacentWhere where, DOMStringView markup) noexcept;
 
 #pragma endregion
 
 #pragma region Element (Pointer Events) - https://w3c.github.io/pointerevents/#extensions-to-the-element-interface
 
     /// @see https://w3c.github.io/pointerevents/#dom-element-setpointercapture
-    ExceptionOr<void> SetPointerCapture(int32 pointerId) noexcept;
+    dom::ExceptionOr<void> SetPointerCapture(int32 pointerId) noexcept;
 
     /// @see https://w3c.github.io/pointerevents/#dom-element-releasepointercapture
-    ExceptionOr<void> ReleasePointerCapture(int32 pointerId) noexcept;
+    dom::ExceptionOr<void> ReleasePointerCapture(int32 pointerId) noexcept;
 
     /// @see https://w3c.github.io/pointerevents/#dom-element-haspointercapture
     KRYS_NODISCARD bool HasPointerCapture(int32 pointerId) noexcept;
@@ -534,18 +539,18 @@ namespace krys::boo::dom
     /// once it's locked, or `pointerlockerror` if it can't be.
     /// @param promise Called once, as a microtask, when the lock is applied or the request fails.
     /// @see https://w3c.github.io/pointerlock/#dom-element-requestpointerlock
-    void RequestPointerLock(PointerLockOptions options = {},
-                            Func<void(ExceptionOr<void> &&)> &&promise = {}) noexcept;
+    void RequestPointerLock(dom::PointerLockOptions options = {},
+                            Func<void(dom::ExceptionOr<void> &&)> &&promise = {}) noexcept;
 
 #pragma endregion
 
 #pragma region Element (CSSOM View) - https://drafts.csswg.org/cssom-view/#extension-to-the-element-interface
 
     /// @brief The bounding boxes of the element's boxes, in client coordinates.
-    KRYS_NODISCARD Ref<DOMRectList> GetClientRects() noexcept;
+    KRYS_NODISCARD Ref<dom::DOMRectList> GetClientRects() noexcept;
 
     /// @brief The union of the element's boxes, in client coordinates.
-    KRYS_NODISCARD Ref<DOMRect> GetBoundingClientRect() noexcept;
+    KRYS_NODISCARD Ref<dom::DOMRect> GetBoundingClientRect() noexcept;
 
     KRYS_NODISCARD FloatRect BoundingClientRect() noexcept;
 
@@ -626,7 +631,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD Maybe<DOMString> TextContent() const noexcept final;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
-    ExceptionOr<void> TextContent(DOMString value) noexcept final;
+    dom::ExceptionOr<void> TextContent(DOMString value) noexcept final;
 
 #pragma endregion
 
@@ -634,7 +639,7 @@ namespace krys::boo::dom
 
     /// @brief Returns the child elements.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-children
-    KRYS_NODISCARD Ref<HTMLCollection> Children() noexcept;
+    KRYS_NODISCARD Ref<dom::HTMLCollection> Children() noexcept;
 
     /// @brief Returns the first child that is an element; otherwise null.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-firstelementchild
@@ -660,34 +665,34 @@ namespace krys::boo::dom
     /// equivalent Text nodes.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-prepend
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
-    ExceptionOr<void> Prepend(const List<NodeOrString> &nodes) noexcept;
+    dom::ExceptionOr<void> Prepend(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Inserts `nodes` after the last child of `this`, while replacing strings in `nodes` with
     /// equivalent Text nodes.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-append
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
-    ExceptionOr<void> Append(const List<NodeOrString> &nodes) noexcept;
+    dom::ExceptionOr<void> Append(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Replace all children of `this` with `nodes`, while replacing strings in `nodes` with equivalent
     /// Text nodes.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-replacechildren
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
-    ExceptionOr<void> ReplaceChildren(const List<NodeOrString> &nodes) noexcept;
+    dom::ExceptionOr<void> ReplaceChildren(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Moves, without first removing, `movedNode` into `this` after `child` if `child` is non-null;
     /// otherwise after the last child of node. This method preserves state associated with `movedNode`.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-movebefore
     /// @throws HierarchyRequestError if the constraints of the node tree are violated, or the state
     /// associated with the moved node cannot be preserved.
-    ExceptionOr<void> MoveBefore(Node &node, Node *child) noexcept;
+    dom::ExceptionOr<void> MoveBefore(Node &node, Node *child) noexcept;
 
     /// @brief Returns the first element that is a descendant of `this` that matches `selectors`.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-queryselector
-    KRYS_NODISCARD ExceptionOr<RefPtr<Element>> QuerySelector(DOMStringView selectors) noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<RefPtr<Element>> QuerySelector(DOMStringView selectors) noexcept;
 
     /// @brief Returns all element descendants of `this` that match `selectors`.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-queryselectorall
-    KRYS_NODISCARD ExceptionOr<Ref<NodeList>> QuerySelectorAll(DOMStringView selectors) noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<Ref<dom::NodeList>> QuerySelectorAll(DOMStringView selectors) noexcept;
 
 #pragma endregion
 
@@ -717,29 +722,29 @@ namespace krys::boo::dom
     /// nodes.
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-before
-    ExceptionOr<void> Before(const List<NodeOrString> &nodes) noexcept;
+    dom::ExceptionOr<void> Before(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Inserts `nodes` just after `this`, while replacing strings in `nodes` with equivalent Text
     /// nodes.
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-after
-    ExceptionOr<void> After(const List<NodeOrString> &nodes) noexcept;
+    dom::ExceptionOr<void> After(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Replaces `this` with `nodes`, while replacing strings in `nodes` with equivalent Text nodes.
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-replacewith
-    ExceptionOr<void> ReplaceWith(const List<NodeOrString> &nodes) noexcept;
+    dom::ExceptionOr<void> ReplaceWith(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Removes `this`.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-remove
-    ExceptionOr<void> Remove() noexcept;
+    dom::ExceptionOr<void> Remove() noexcept;
 
 #pragma endregion
 
 #pragma region Slottable Mixin - https://dom.spec.whatwg.org/#slotable
 
     /// @see https://dom.spec.whatwg.org/#dom-slotable-assignedslot
-    KRYS_NODISCARD RefPtr<html::HTMLSlotElement> AssignedSlot() noexcept;
+    KRYS_NODISCARD RefPtr<HTMLSlotElement> AssignedSlot() noexcept;
 
 #pragma endregion
 
@@ -747,7 +752,7 @@ namespace krys::boo::dom
     /// parser have always finished.
     KRYS_NODISCARD bool IsFinishedParsingChildren() const noexcept
     {
-      return !HasNodeFlag(NodeFlags::IsParsingChildren);
+      return !HasNodeFlag(dom::NodeFlags::IsParsingChildren);
     }
 
     KRYS_NODISCARD const QualifiedName &TagQualifiedName() const noexcept
@@ -781,7 +786,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD DOMString IdForStyleResolution() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-custom-element-state
-    KRYS_NODISCARD CustomElementState GetCustomElementState() const noexcept
+    KRYS_NODISCARD dom::CustomElementState GetCustomElementState() const noexcept
     {
       return _customElementState;
     }
@@ -797,19 +802,19 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#concept-element-custom
     KRYS_NODISCARD bool IsDefinedCustomElement() const noexcept
     {
-      return _customElementState == CustomElementState::Custom;
+      return _customElementState == dom::CustomElementState::Custom;
     }
 
     /// @brief Whether the element waits for a definition to upgrade it (its state is `undefined`).
     KRYS_NODISCARD bool IsCustomElementUpgradeCandidate() const noexcept
     {
-      return _customElementState == CustomElementState::Undefined;
+      return _customElementState == dom::CustomElementState::Undefined;
     }
 
     KRYS_NODISCARD bool IsPrecustomizedOrDefinedCustomElement() const noexcept
     {
-      return _customElementState == CustomElementState::Precustomized
-             || _customElementState == CustomElementState::Custom;
+      return _customElementState == dom::CustomElementState::Precustomized
+             || _customElementState == dom::CustomElementState::Custom;
     }
 
     /// @brief The behaviour of the custom element, created by its definition; null unless the element is
@@ -853,11 +858,11 @@ namespace krys::boo::dom
     /// attribute list. Everything that reads the attribute list calls this first.
     void SynchronizeAllAttributes() const noexcept
     {
-      if (HasNodeFlag(NodeFlags::StyleAttributeIsDirty)) KRYS_UNLIKELY
+      if (HasNodeFlag(dom::NodeFlags::StyleAttributeIsDirty)) KRYS_UNLIKELY
       {
         SynchronizeStyleAttribute();
       }
-      if (HasNodeFlag(NodeFlags::AnimatedSVGAttributesAreDirty)) KRYS_UNLIKELY
+      if (HasNodeFlag(dom::NodeFlags::AnimatedSVGAttributesAreDirty)) KRYS_UNLIKELY
       {
         SynchronizeAnimatedSVGAttributes();
       }
@@ -962,9 +967,9 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool IsRelevantToUser() const noexcept;
 
     /// @brief Why the element is relevant to the user, once its relevancy has been determined.
-    KRYS_NODISCARD Maybe<EnumSet<ContentRelevancy>> GetContentRelevancy() const noexcept;
+    KRYS_NODISCARD Maybe<EnumSet<dom::ContentRelevancy>> GetContentRelevancy() const noexcept;
 
-    void SetContentRelevancy(EnumSet<ContentRelevancy> contentRelevancy) noexcept;
+    void SetContentRelevancy(EnumSet<dom::ContentRelevancy> contentRelevancy) noexcept;
 
     /// @brief The base value of a `random()` of the element (or of one of its pseudo-elements) that isn't
     /// shared between elements.
@@ -1110,7 +1115,7 @@ namespace krys::boo::dom
     /// @brief Whether the element's style is resolved by `ResolveCustomStyle`.
     KRYS_NODISCARD bool HasCustomStyleResolveCallbacks() const noexcept
     {
-      return HasNodeFlag(NodeFlags::HasCustomStyleResolveCallbacks);
+      return HasNodeFlag(dom::NodeFlags::HasCustomStyleResolveCallbacks);
     }
 
     /// @brief The element's style, for elements with custom style resolve callbacks (user agent shadow tree
@@ -1132,11 +1137,12 @@ namespace krys::boo::dom
 
     /// @brief Fires `focus` (then `focusin`) at the element as the focus update steps focus it; text controls
     /// update their placeholder and begin editing first.
-    virtual void DispatchFocusEvent(EventTarget *relatedTarget, const FocusOptions &options) noexcept;
+    virtual void DispatchFocusEvent(dom::EventTarget *relatedTarget,
+                                    const dom::FocusOptions &options) noexcept;
 
     /// @brief Fires `blur` (then `focusout`) at the element as the focus update steps unfocus it; text
     /// controls update their placeholder and end editing first.
-    virtual void DispatchBlurEvent(EventTarget *relatedTarget) noexcept;
+    virtual void DispatchBlurEvent(dom::EventTarget *relatedTarget) noexcept;
 
     /// @brief Called after the element lost the focus and `blur` was fired at it.
     virtual void DidBlur() noexcept
@@ -1145,12 +1151,12 @@ namespace krys::boo::dom
 
     /// @brief Shows that the element is focused: places a caret at the start of an editing host (unless the
     /// selection is already in it), and scrolls the element (or the caret) into view.
-    virtual void UpdateFocusAppearance(SelectionRestorationMode restorationMode,
+    virtual void UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
                                        SelectionRevealMode revealMode = SelectionRevealMode::Reveal) noexcept;
 
     /// @brief Shows that the element is focused, through the element that shows it.
     void FindTargetAndUpdateFocusAppearance(
-      SelectionRestorationMode restorationMode,
+      dom::SelectionRestorationMode restorationMode,
       SelectionRevealMode revealMode = SelectionRevealMode::Reveal) noexcept;
 
     /// @brief The element that shows that this one is focused (the image of an image map's area), or null if
@@ -1217,67 +1223,67 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD bool NeedsUpdateQueryContainerDependentStyle() const noexcept
     {
-      return HasNodeFlag(NodeFlags::NeedsUpdateQueryContainerDependentStyle);
+      return HasNodeFlag(dom::NodeFlags::NeedsUpdateQueryContainerDependentStyle);
     }
 
     void ClearNeedsUpdateQueryContainerDependentStyle() noexcept
     {
-      ClearNodeFlag(NodeFlags::NeedsUpdateQueryContainerDependentStyle);
+      ClearNodeFlag(dom::NodeFlags::NeedsUpdateQueryContainerDependentStyle);
     }
 
     KRYS_NODISCARD bool StyleAffectedByEmpty() const noexcept
     {
-      return HasStyleFlag(NodeStyleFlags::StyleAffectedByEmpty);
+      return HasStyleFlag(dom::NodeStyleFlags::StyleAffectedByEmpty);
     }
 
     KRYS_NODISCARD bool StyleIsAffectedByPreviousSibling() const noexcept
     {
-      return HasStyleFlag(NodeStyleFlags::StyleIsAffectedByPreviousSibling);
+      return HasStyleFlag(dom::NodeStyleFlags::StyleIsAffectedByPreviousSibling);
     }
 
     KRYS_NODISCARD bool DescendantsAffectedByPreviousSibling() const noexcept
     {
-      return HasStyleFlag(NodeStyleFlags::DescendantsAffectedByPreviousSibling);
+      return HasStyleFlag(dom::NodeStyleFlags::DescendantsAffectedByPreviousSibling);
     }
 
     KRYS_NODISCARD bool AffectsNextSiblingElementStyle() const noexcept
     {
-      return HasStyleFlag(NodeStyleFlags::AffectsNextSiblingElementStyle);
+      return HasStyleFlag(dom::NodeStyleFlags::AffectsNextSiblingElementStyle);
     }
 
     KRYS_NODISCARD bool ChildrenAffectedByFirstChildRules() const noexcept
     {
-      return HasStyleFlag(NodeStyleFlags::ChildrenAffectedByFirstChildRules);
+      return HasStyleFlag(dom::NodeStyleFlags::ChildrenAffectedByFirstChildRules);
     }
 
     KRYS_NODISCARD bool ChildrenAffectedByLastChildRules() const noexcept
     {
-      return HasStyleFlag(NodeStyleFlags::ChildrenAffectedByLastChildRules);
+      return HasStyleFlag(dom::NodeStyleFlags::ChildrenAffectedByLastChildRules);
     }
 
     KRYS_NODISCARD bool ChildrenAffectedByForwardPositionalRules() const noexcept
     {
-      return HasStyleFlag(NodeStyleFlags::ChildrenAffectedByForwardPositionalRules);
+      return HasStyleFlag(dom::NodeStyleFlags::ChildrenAffectedByForwardPositionalRules);
     }
 
     KRYS_NODISCARD bool DescendantsAffectedByForwardPositionalRules() const noexcept
     {
-      return HasStyleFlag(NodeStyleFlags::DescendantsAffectedByForwardPositionalRules);
+      return HasStyleFlag(dom::NodeStyleFlags::DescendantsAffectedByForwardPositionalRules);
     }
 
     KRYS_NODISCARD bool ChildrenAffectedByBackwardPositionalRules() const noexcept
     {
-      return HasStyleFlag(NodeStyleFlags::ChildrenAffectedByBackwardPositionalRules);
+      return HasStyleFlag(dom::NodeStyleFlags::ChildrenAffectedByBackwardPositionalRules);
     }
 
     KRYS_NODISCARD bool DescendantsAffectedByBackwardPositionalRules() const noexcept
     {
-      return HasStyleFlag(NodeStyleFlags::DescendantsAffectedByBackwardPositionalRules);
+      return HasStyleFlag(dom::NodeStyleFlags::DescendantsAffectedByBackwardPositionalRules);
     }
 
     KRYS_NODISCARD bool AffectedByHasWithPositionalPseudoClass() const noexcept
     {
-      return HasStyleFlag(NodeStyleFlags::AffectedByHasWithPositionalPseudoClass);
+      return HasStyleFlag(dom::NodeStyleFlags::AffectedByHasWithPositionalPseudoClass);
     }
 
     /// @brief Whether selector matching set a flag on the element while matching its children.
@@ -1289,57 +1295,57 @@ namespace krys::boo::dom
 
     void SetStyleAffectedByEmpty() noexcept
     {
-      SetStyleFlag(NodeStyleFlags::StyleAffectedByEmpty);
+      SetStyleFlag(dom::NodeStyleFlags::StyleAffectedByEmpty);
     }
 
     void SetStyleIsAffectedByPreviousSibling() noexcept
     {
-      SetStyleFlag(NodeStyleFlags::StyleIsAffectedByPreviousSibling);
+      SetStyleFlag(dom::NodeStyleFlags::StyleIsAffectedByPreviousSibling);
     }
 
     void SetDescendantsAffectedByPreviousSibling() noexcept
     {
-      SetStyleFlag(NodeStyleFlags::DescendantsAffectedByPreviousSibling);
+      SetStyleFlag(dom::NodeStyleFlags::DescendantsAffectedByPreviousSibling);
     }
 
     void SetAffectsNextSiblingElementStyle() noexcept
     {
-      SetStyleFlag(NodeStyleFlags::AffectsNextSiblingElementStyle);
+      SetStyleFlag(dom::NodeStyleFlags::AffectsNextSiblingElementStyle);
     }
 
     void SetChildrenAffectedByFirstChildRules() noexcept
     {
-      SetStyleFlag(NodeStyleFlags::ChildrenAffectedByFirstChildRules);
+      SetStyleFlag(dom::NodeStyleFlags::ChildrenAffectedByFirstChildRules);
     }
 
     void SetChildrenAffectedByLastChildRules() noexcept
     {
-      SetStyleFlag(NodeStyleFlags::ChildrenAffectedByLastChildRules);
+      SetStyleFlag(dom::NodeStyleFlags::ChildrenAffectedByLastChildRules);
     }
 
     void SetChildrenAffectedByForwardPositionalRules() noexcept
     {
-      SetStyleFlag(NodeStyleFlags::ChildrenAffectedByForwardPositionalRules);
+      SetStyleFlag(dom::NodeStyleFlags::ChildrenAffectedByForwardPositionalRules);
     }
 
     void SetDescendantsAffectedByForwardPositionalRules() noexcept
     {
-      SetStyleFlag(NodeStyleFlags::DescendantsAffectedByForwardPositionalRules);
+      SetStyleFlag(dom::NodeStyleFlags::DescendantsAffectedByForwardPositionalRules);
     }
 
     void SetChildrenAffectedByBackwardPositionalRules() noexcept
     {
-      SetStyleFlag(NodeStyleFlags::ChildrenAffectedByBackwardPositionalRules);
+      SetStyleFlag(dom::NodeStyleFlags::ChildrenAffectedByBackwardPositionalRules);
     }
 
     void SetDescendantsAffectedByBackwardPositionalRules() noexcept
     {
-      SetStyleFlag(NodeStyleFlags::DescendantsAffectedByBackwardPositionalRules);
+      SetStyleFlag(dom::NodeStyleFlags::DescendantsAffectedByBackwardPositionalRules);
     }
 
     void SetAffectedByHasWithPositionalPseudoClass() noexcept
     {
-      SetStyleFlag(NodeStyleFlags::AffectedByHasWithPositionalPseudoClass);
+      SetStyleFlag(dom::NodeStyleFlags::AffectedByHasWithPositionalPseudoClass);
     }
 
     void SetChildIndex(uint32 index) noexcept;
@@ -1353,7 +1359,7 @@ namespace krys::boo::dom
     /// @return A `TypeError` if the keyframes or the timing are invalid, or a `SyntaxError` if the
     /// pseudo-element selector is.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-animatable-animate
-    KRYS_NODISCARD ExceptionOr<Ref<WebAnimation>>
+    KRYS_NODISCARD dom::ExceptionOr<Ref<WebAnimation>>
       Animate(boo::KeyframesInput &&keyframes,
               Maybe<Variant<double, KeyframeAnimationOptions>> options = null) noexcept;
 
@@ -1503,9 +1509,10 @@ namespace krys::boo::dom
     /// @brief Dispatches a click at the element from the user agent, standing in for @p underlyingEvent.
     /// @return False if the element is a disabled form control, or is already being clicked.
     bool DispatchSimulatedClick(
-      Event *underlyingEvent,
-      SimulatedClickMouseEventOptions eventOptions = SimulatedClickMouseEventOptions::SendNoEvents,
-      SimulatedClickVisualOptions visualOptions = SimulatedClickVisualOptions::ShowPressedLook) noexcept;
+      dom::Event *underlyingEvent,
+      dom::SimulatedClickMouseEventOptions eventOptions = dom::SimulatedClickMouseEventOptions::SendNoEvents,
+      dom::SimulatedClickVisualOptions visualOptions =
+        dom::SimulatedClickVisualOptions::ShowPressedLook) noexcept;
 
 #pragma endregion
 
@@ -1515,7 +1522,7 @@ namespace krys::boo::dom
     /// @see https://drafts.csswg.org/css-position-4/#in-top-layer
     KRYS_NODISCARD bool IsInTopLayer() const noexcept
     {
-      return HasEventTargetFlag(EventTargetFlags::IsInTopLayer);
+      return HasEventTargetFlag(dom::EventTargetFlags::IsInTopLayer);
     }
 
     /// @brief Adds the element, which must be connected, to the top of its document's top layer, where it's
@@ -1539,9 +1546,9 @@ namespace krys::boo::dom
 #pragma region Popovers
 
     /// @brief The element's popover state, if it has a `popover` attribute.
-    KRYS_NODISCARD PopoverData *GetPopoverData() const noexcept;
+    KRYS_NODISCARD dom::PopoverData *GetPopoverData() const noexcept;
 
-    PopoverData &EnsurePopoverData() noexcept;
+    dom::PopoverData &EnsurePopoverData() noexcept;
 
     void ClearPopoverData() noexcept;
 
@@ -1550,7 +1557,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool IsPopoverShowing() const noexcept;
 
     /// @brief The state of the element's `popover` attribute.
-    KRYS_NODISCARD PopoverState GetPopoverState() const noexcept;
+    KRYS_NODISCARD dom::PopoverState GetPopoverState() const noexcept;
 
     /// @brief The popover the element (a button) showed and is still the popover trigger of, if any.
     KRYS_NODISCARD Element *InvokedPopover() const noexcept;
@@ -1562,8 +1569,7 @@ namespace krys::boo::dom
     /// @param isPopover Whether the element is a popover about to show, rather than another element about to
     /// enter the top layer (a dialog), whose source isn't considered.
     /// @see https://html.spec.whatwg.org/#topmost-popover-ancestor
-    KRYS_NODISCARD RefPtr<html::HTMLElement> TopmostPopoverAncestor(html::HTMLElement *source,
-                                                                    bool isPopover) noexcept;
+    KRYS_NODISCARD RefPtr<HTMLElement> TopmostPopoverAncestor(HTMLElement *source, bool isPopover) noexcept;
 
 #pragma endregion
 
@@ -1603,14 +1609,14 @@ namespace krys::boo::dom
 
     /// @brief Whether the element carries out a built-in command for the buttons whose `commandfor` element
     /// it is; buttons don't send it the others.
-    KRYS_NODISCARD virtual bool IsValidCommandType(CommandType) const noexcept
+    KRYS_NODISCARD virtual bool IsValidCommandType(dom::CommandType) const noexcept
     {
       return false;
     }
 
     /// @brief Carries out a built-in command, sent by a button, if it applies to the element's state.
     /// @return Whether the element carried it out.
-    virtual bool HandleCommandInternal(html::HTMLButtonElement &, CommandType) noexcept
+    virtual bool HandleCommandInternal(HTMLButtonElement &, dom::CommandType) noexcept
     {
       return false;
     }
@@ -1685,12 +1691,13 @@ namespace krys::boo::dom
     /// @brief Whether the element has user action state in its document (`Document::UserActionElements`).
     KRYS_NODISCARD bool IsUserActionElement() const noexcept
     {
-      return HasNodeFlag(NodeFlags::IsUserActionElement);
+      return HasNodeFlag(dom::NodeFlags::IsUserActionElement);
     }
 
     void SetUserActionElement(bool flag) noexcept
     {
-      flag ? SetNodeFlag(NodeFlags::IsUserActionElement) : ClearNodeFlag(NodeFlags::IsUserActionElement);
+      flag ? SetNodeFlag(dom::NodeFlags::IsUserActionElement)
+           : ClearNodeFlag(dom::NodeFlags::IsUserActionElement);
     }
 
     /// @brief Whether the element is in the chain of elements that became `:active` when the pointer was
@@ -1734,7 +1741,8 @@ namespace krys::boo::dom
                             HitTestRequest request = {}) noexcept;
 
     /// @brief Sets the element's focus, and the focus within of its ancestors in the composed tree.
-    virtual void SetFocus(bool value, FocusVisibility visibility = FocusVisibility::Invisible) noexcept;
+    virtual void SetFocus(bool value,
+                          dom::FocusVisibility visibility = dom::FocusVisibility::Invisible) noexcept;
 
     void SetHasFocusVisible(bool value) noexcept;
 
@@ -1754,11 +1762,11 @@ namespace krys::boo::dom
                   ScrollSnapPointSelectionMethod snapPointSelectionMethod) noexcept;
 
     /// @brief The element's rare data, if it has any.
-    KRYS_NODISCARD ElementRareData *GetElementRareData() const noexcept;
+    KRYS_NODISCARD dom::ElementRareData *GetElementRareData() const noexcept;
 
-    KRYS_NODISCARD ElementRareData &EnsureElementRareData() noexcept;
+    KRYS_NODISCARD dom::ElementRareData &EnsureElementRareData() noexcept;
 
-    void SetCustomElementState(CustomElementState state) noexcept;
+    void SetCustomElementState(dom::CustomElementState state) noexcept;
 
     void DisconnectFromIntersectionObservers() noexcept;
 
@@ -1789,16 +1797,16 @@ namespace krys::boo::dom
     void SetSynchronizedLazyAttribute(const QualifiedName &name, DOMString value) noexcept;
 
     /// @brief The inline style's property map (`attributeStyleMap`), once it's been asked for.
-    KRYS_NODISCARD css::StylePropertyMap *ExistingAttributeStyleMap() const noexcept;
+    KRYS_NODISCARD StylePropertyMap *ExistingAttributeStyleMap() const noexcept;
 
-    void SetAttributeStyleMap(Ref<css::StylePropertyMap> map) noexcept;
+    void SetAttributeStyleMap(Ref<StylePropertyMap> map) noexcept;
 
 #pragma region Parser Hooks
 
     /// @brief Called by the parser when it pushes this element onto the stack of open elements.
     void BeginParsingChildren() noexcept
     {
-      SetNodeFlag(NodeFlags::IsParsingChildren);
+      SetNodeFlag(dom::NodeFlags::IsParsingChildren);
     }
 
     /// @brief Called by the parser when it pops this element off the stack of open elements. Overrides must
@@ -1809,7 +1817,7 @@ namespace krys::boo::dom
 #pragma endregion
 
     /// @brief Called after a user agent shadow root is attached to the element.
-    virtual void DidAddUserAgentShadowRoot(dom::ShadowRoot &) noexcept
+    virtual void DidAddUserAgentShadowRoot(boo::ShadowRoot &) noexcept
     {
     }
 
@@ -1831,10 +1839,14 @@ namespace krys::boo::dom
     void SynchronizeAnimatedSVGAttributes() const noexcept;
 
     /// @brief Replaces the element's children (a template's content's) with @p markup parsed in its context.
-    ExceptionOr<void> ReplaceChildrenWithMarkup(DOMStringView markup,
-                                                EnumSet<ParserContentPolicy> parserContentPolicy) noexcept;
+    dom::ExceptionOr<void>
+      ReplaceChildrenWithMarkup(DOMStringView markup,
+                                EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept;
   };
+}
 
+namespace krys::boo::dom
+{
   /// @brief Invalidates the style of @p sibling and its following siblings that sibling combinators make
   /// depend on their previous siblings, up to the first one that doesn't affect the next.
   void InvalidateForSiblingCombinators(Element *sibling) noexcept;
@@ -1846,8 +1858,8 @@ namespace krys::boo::dom
   KRYS_NODISCARD bool IsInTopLayerOrBackdrop(const RenderStyle &style, const Element *element) noexcept;
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::Element)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::Element)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
     return node.IsElementNode();
   }

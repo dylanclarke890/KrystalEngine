@@ -37,7 +37,7 @@ namespace krys::boo::css
   {
     struct PathData
     {
-      svg::SVGPathByteStream ByteStream;
+      SVGPathByteStream ByteStream;
 
       KRYS_NODISCARD bool operator==(const PathData &) const noexcept = default;
     };

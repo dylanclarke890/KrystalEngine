@@ -27,10 +27,7 @@
 namespace krys::boo
 {
   class AffineTransform;
-}
 
-namespace krys::boo::svg
-{
   /// @brief The `<animateMotion>` element: moves its target along a motion path.
   /// @see https://svgwg.org/specs/animations/#AnimateMotionElement
   class SVGAnimateMotionElement final : public SVGAnimationElement
@@ -55,7 +52,7 @@ namespace krys::boo::svg
     Path _animationPath;
 
   public:
-    explicit SVGAnimateMotionElement(dom::Document &) noexcept;
+    explicit SVGAnimateMotionElement(Document &) noexcept;
 
     void UpdateAnimationPath() noexcept;
 
@@ -64,25 +61,25 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD bool HasValidAttributeName() const noexcept override;
 
-    void AttributeChanged(const dom::QualifiedName &, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept override;
+    void AttributeChanged(const QualifiedName &, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept override;
 
     void StartAnimation() noexcept override;
 
     void StopAnimation(SVGElement *targetElement) noexcept override;
 
-    bool SetFromAndToValues(dom::DOMStringView fromString, dom::DOMStringView toString) noexcept override;
+    bool SetFromAndToValues(DOMStringView fromString, DOMStringView toString) noexcept override;
 
-    bool SetFromAndByValues(dom::DOMStringView fromString, dom::DOMStringView byString) noexcept override;
+    bool SetFromAndByValues(DOMStringView fromString, DOMStringView byString) noexcept override;
 
-    bool SetToAtEndOfDurationValue(dom::DOMStringView toAtEndOfDurationString) noexcept override;
+    bool SetToAtEndOfDurationValue(DOMStringView toAtEndOfDurationString) noexcept override;
 
     void CalculateAnimatedValue(float percentage, uint32 repeatCount) noexcept override;
 
     void ApplyResultsToTarget() noexcept override;
 
-    KRYS_NODISCARD Maybe<float> CalculateDistance(dom::DOMStringView fromString,
-                                                  dom::DOMStringView toString) noexcept override;
+    KRYS_NODISCARD Maybe<float> CalculateDistance(DOMStringView fromString,
+                                                  DOMStringView toString) noexcept override;
 
     KRYS_NODISCARD RotateMode GetRotateMode() const noexcept;
 
@@ -94,14 +91,14 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGAnimateMotionElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &element) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGAnimateMotionElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &element) noexcept
   {
-    return element.Interface() == krys::boo::svg::SVGElementInterface::AnimateMotion;
+    return element.Interface() == krys::boo::SVGElementInterface::AnimateMotion;
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    auto *svgElement = krys::DynamicDowncast<krys::boo::svg::SVGElement>(node);
+    auto *svgElement = krys::DynamicDowncast<krys::boo::SVGElement>(node);
     return svgElement && IsType(*svgElement);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

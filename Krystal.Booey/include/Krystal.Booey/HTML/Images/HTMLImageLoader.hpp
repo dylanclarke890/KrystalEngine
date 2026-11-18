@@ -30,7 +30,7 @@ namespace krys::boo::html
   class HTMLImageLoader final : public ImageLoader
   {
   public:
-    explicit HTMLImageLoader(dom::Element &element) noexcept;
+    explicit HTMLImageLoader(boo::Element &element) noexcept;
 
     ~HTMLImageLoader() noexcept override;
 

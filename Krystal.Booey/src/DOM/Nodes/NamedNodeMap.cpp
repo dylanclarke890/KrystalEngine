@@ -8,16 +8,16 @@
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <ranges>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
-  size_t NamedNodeMap::Length() const noexcept
+  size_t dom::NamedNodeMap::Length() const noexcept
   {
     // Return the attribute list's size.
     _associatedElement->SynchronizeAllAttributes();
     return _associatedElement->_attributes.size();
   }
 
-  RefPtr<Attr> NamedNodeMap::Item(size_t index) noexcept
+  RefPtr<Attr> dom::NamedNodeMap::Item(size_t index) noexcept
   {
     _associatedElement->SynchronizeAllAttributes();
     // 1. If index is equal to or greater than this's attribute list's size, then return null.
@@ -30,98 +30,102 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-  KRYS_NODISCARD RefPtr<const Attr> NamedNodeMap::Item(size_t index) const noexcept
+  KRYS_NODISCARD RefPtr<const Attr> dom::NamedNodeMap::Item(size_t index) const noexcept
   {
-    return const_cast<NamedNodeMap *>(this)->Item(index);
+    return const_cast<dom::NamedNodeMap *>(this)->Item(index);
   }
 
-  RefPtr<Attr> NamedNodeMap::GetNamedItem(DOMStringAtom qualifiedName) noexcept
+  RefPtr<Attr> dom::NamedNodeMap::GetNamedItem(DOMStringAtom qualifiedName) noexcept
   {
-    return ShareRefPtr(ElementAlgorithms::GetAttributeByName(krys::move(qualifiedName), *_associatedElement));
+    return ShareRefPtr(
+      dom::ElementAlgorithms::GetAttributeByName(krys::move(qualifiedName), *_associatedElement));
   }
 
-  KRYS_NODISCARD RefPtr<const Attr> NamedNodeMap::GetNamedItem(DOMStringAtom qualifiedName) const noexcept
+  KRYS_NODISCARD RefPtr<const Attr>
+    dom::NamedNodeMap::GetNamedItem(DOMStringAtom qualifiedName) const noexcept
   {
-    return const_cast<NamedNodeMap *>(this)->GetNamedItem(krys::move(qualifiedName));
+    return const_cast<dom::NamedNodeMap *>(this)->GetNamedItem(krys::move(qualifiedName));
   }
 
-  RefPtr<Attr> NamedNodeMap::GetNamedItemNS(DOMStringAtom attrNamespace, DOMStringAtom localName) noexcept
+  RefPtr<Attr> dom::NamedNodeMap::GetNamedItemNS(DOMStringAtom attrNamespace,
+                                                 DOMStringAtom localName) noexcept
   {
-    return ShareRefPtr(ElementAlgorithms::GetAttributeByNamespace(
+    return ShareRefPtr(dom::ElementAlgorithms::GetAttributeByNamespace(
       krys::move(attrNamespace), krys::move(localName), *_associatedElement));
   }
 
-  KRYS_NODISCARD RefPtr<const Attr> NamedNodeMap::GetNamedItemNS(DOMStringAtom attrNamespace,
-                                                                 DOMStringAtom localName) const noexcept
+  KRYS_NODISCARD RefPtr<const Attr> dom::NamedNodeMap::GetNamedItemNS(DOMStringAtom attrNamespace,
+                                                                      DOMStringAtom localName) const noexcept
   {
-    return const_cast<NamedNodeMap *>(this)->GetNamedItemNS(krys::move(attrNamespace), krys::move(localName));
+    return const_cast<dom::NamedNodeMap *>(this)->GetNamedItemNS(krys::move(attrNamespace),
+                                                                 krys::move(localName));
   }
 
-  ExceptionOr<RefPtr<Attr>> NamedNodeMap::SetNamedItem(Attr &attr) noexcept
-  {
-    html::CEReactionsScope ceReactions;
-    return ElementAlgorithms::SetAttribute(attr, *_associatedElement);
-  }
-
-  ExceptionOr<RefPtr<Attr>> NamedNodeMap::SetNamedItemNS(Attr &attr) noexcept
+  dom::ExceptionOr<RefPtr<Attr>> dom::NamedNodeMap::SetNamedItem(Attr &attr) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return ElementAlgorithms::SetAttribute(attr, *_associatedElement);
+    return dom::ElementAlgorithms::SetAttribute(attr, *_associatedElement);
   }
 
-  ExceptionOr<Ref<Attr>> NamedNodeMap::RemoveNamedItem(DOMStringAtom qualifiedName) noexcept
+  dom::ExceptionOr<RefPtr<Attr>> dom::NamedNodeMap::SetNamedItemNS(Attr &attr) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    return dom::ElementAlgorithms::SetAttribute(attr, *_associatedElement);
+  }
+
+  dom::ExceptionOr<Ref<Attr>> dom::NamedNodeMap::RemoveNamedItem(DOMStringAtom qualifiedName) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let attr be the result of removing an attribute given qualifiedName and element.
-    auto attr = ElementAlgorithms::RemoveAttributeByName(krys::move(qualifiedName), *_associatedElement);
+    auto attr = dom::ElementAlgorithms::RemoveAttributeByName(krys::move(qualifiedName), *_associatedElement);
     // 2. If attr is null, then throw a "NotFoundError" DOMException.
     if (attr == nullptr)
     {
-      return Exception {ExceptionCode::NotFoundError};
+      return dom::Exception {dom::ExceptionCode::NotFoundError};
     }
 
     // 3. Return attr.
     return ShareRef(*attr);
   }
 
-  ExceptionOr<Ref<Attr>> NamedNodeMap::RemoveNamedItemNS(DOMStringAtom attrNamespace,
-                                                         DOMStringAtom localName) noexcept
+  dom::ExceptionOr<Ref<Attr>> dom::NamedNodeMap::RemoveNamedItemNS(DOMStringAtom attrNamespace,
+                                                                   DOMStringAtom localName) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let attr be the result of removing an attribute given namespace, localName, and element.
-    auto attr = ElementAlgorithms::RemoveAttributeByNamespace(krys::move(attrNamespace),
-                                                              krys::move(localName), *_associatedElement);
+    auto attr = dom::ElementAlgorithms::RemoveAttributeByNamespace(
+      krys::move(attrNamespace), krys::move(localName), *_associatedElement);
     // 2. If attr is null, then throw a "NotFoundError" DOMException.
     if (attr == nullptr)
     {
-      return Exception {ExceptionCode::NotFoundError};
+      return dom::Exception {dom::ExceptionCode::NotFoundError};
     }
 
     // 3. Return attr.
     return ShareRef(*attr);
   }
 
-  RefPtr<Attr> NamedNodeMap::operator[](size_t index) noexcept
+  RefPtr<Attr> dom::NamedNodeMap::operator[](size_t index) noexcept
   {
     return Item(index);
   }
 
-  KRYS_NODISCARD RefPtr<const Attr> NamedNodeMap::operator[](size_t index) const noexcept
+  KRYS_NODISCARD RefPtr<const Attr> dom::NamedNodeMap::operator[](size_t index) const noexcept
   {
     return Item(index);
   }
 
-  RefPtr<Attr> NamedNodeMap::operator[](DOMStringAtom qualifiedName) noexcept
+  RefPtr<Attr> dom::NamedNodeMap::operator[](DOMStringAtom qualifiedName) noexcept
   {
     return GetNamedItem(krys::move(qualifiedName));
   }
 
-  RefPtr<const Attr> NamedNodeMap::operator[](DOMStringAtom qualifiedName) const noexcept
+  RefPtr<const Attr> dom::NamedNodeMap::operator[](DOMStringAtom qualifiedName) const noexcept
   {
     return GetNamedItem(krys::move(qualifiedName));
   }
 
-  List<DOMString> NamedNodeMap::SupportedPropertyNames() const noexcept
+  List<DOMString> dom::NamedNodeMap::SupportedPropertyNames() const noexcept
   {
     // 1. Let names be the qualified names of the attributes in this NamedNodeMap object's attribute list,
     //    with duplicates omitted, in order.

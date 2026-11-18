@@ -51,11 +51,11 @@ namespace krys::boo
 
   private:
     WeakPtr<dom::DataTransfer> _dataTransfer;
-    WeakPtr<const dom::Document> _document;
+    WeakPtr<const Document> _document;
 
   public:
     KRYS_NODISCARD static Ref<DragImageLoader> Create(dom::DataTransfer &dataTransfer,
-                                                      const dom::Document &document) noexcept
+                                                      const Document &document) noexcept
     {
       return AdoptRef(*new DragImageLoader(dataTransfer, document));
     }
@@ -77,7 +77,7 @@ namespace krys::boo
     }
 
   private:
-    DragImageLoader(dom::DataTransfer &dataTransfer, const dom::Document &document) noexcept
+    DragImageLoader(dom::DataTransfer &dataTransfer, const Document &document) noexcept
         : _dataTransfer(CreateWeakPtr(&dataTransfer)), _document(CreateWeakPtr(&document))
     {
     }
@@ -799,7 +799,7 @@ namespace krys::boo::dom
     }
 
     CachedResourceHandle<CachedImage> image;
-    if (auto *imageElement = DynamicDowncast<html::HTMLImageElement>(*element);
+    if (auto *imageElement = DynamicDowncast<HTMLImageElement>(*element);
         imageElement && !imageElement->IsConnected())
     {
       image = imageElement->GetCachedImage();

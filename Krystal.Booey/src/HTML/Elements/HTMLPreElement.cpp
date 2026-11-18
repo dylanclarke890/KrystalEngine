@@ -2,10 +2,10 @@
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLPreElement::HTMLPreElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Pre)
+  HTMLPreElement::HTMLPreElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Pre)
   {
   }
 
@@ -13,21 +13,20 @@ namespace krys::boo::html
 
   int32 HTMLPreElement::Width() const noexcept
   {
-    return Reflect<int32>(*this, u8"width");
+    return html::Reflect<int32>(*this, u8"width");
   }
 
   void HTMLPreElement::Width(int32 value) noexcept
   {
-    Reflect<int32>(*this, u8"width", krys::move(value));
+    html::Reflect<int32>(*this, u8"width", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region Presentational hints
 
-  bool
-    HTMLPreElement::HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                       const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool HTMLPreElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                          const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && (localName == u8"wrap"))
     {
@@ -36,12 +35,12 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLPreElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                              const dom::DOMStringAtom &namespaceURI,
-                                                              dom::DOMStringView value,
+  void HTMLPreElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                              const DOMStringAtom &namespaceURI,
+                                                              DOMStringView value,
                                                               css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);

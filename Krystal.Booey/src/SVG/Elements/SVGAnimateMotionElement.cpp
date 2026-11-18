@@ -32,12 +32,12 @@
 #include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGAnimateMotionElement::SVGAnimateMotionElement(dom::Document &document) noexcept
+  SVGAnimateMotionElement::SVGAnimateMotionElement(Document &document) noexcept
       : SVGAnimationElement(document, SVGElementInterface::AnimateMotion)
   {
-    SetCalcMode(CalcMode::Paced);
+    SetCalcMode(svg::CalcMode::Paced);
   }
 
   bool SVGAnimateMotionElement::HasValidAttributeType() const noexcept
@@ -90,13 +90,12 @@ namespace krys::boo::svg
     return true;
   }
 
-  void SVGAnimateMotionElement::AttributeChanged(const dom::QualifiedName &name,
-                                                 Maybe<dom::DOMStringView> oldValue,
-                                                 Maybe<dom::DOMStringView> value) noexcept
+  void SVGAnimateMotionElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                                 Maybe<DOMStringView> value) noexcept
   {
     if (name == SVGNames::PathAttr())
     {
-      _path = BuildPathFromString(value.value_or(dom::DOMStringView {}));
+      _path = svg::BuildPathFromString(value.value_or(DOMStringView {}));
       UpdateAnimationPath();
     }
 
@@ -106,11 +105,11 @@ namespace krys::boo::svg
   SVGAnimateMotionElement::RotateMode SVGAnimateMotionElement::GetRotateMode() const noexcept
   {
     auto rotate = AttributeValue(SVGNames::RotateAttr());
-    if (rotate == dom::DOMStringView {u8"auto"})
+    if (rotate == DOMStringView {u8"auto"})
     {
       return RotateAuto;
     }
-    if (rotate == dom::DOMStringView {u8"auto-reverse"})
+    if (rotate == DOMStringView {u8"auto-reverse"})
     {
       return RotateAutoReverse;
     }
@@ -175,32 +174,30 @@ namespace krys::boo::svg
     ApplyResultsToTarget();
   }
 
-  bool SVGAnimateMotionElement::SetFromAndToValues(dom::DOMStringView fromString,
-                                                   dom::DOMStringView toString) noexcept
+  bool SVGAnimateMotionElement::SetFromAndToValues(DOMStringView fromString, DOMStringView toString) noexcept
   {
     _toPointAtEndOfDuration = {};
-    _fromPoint = ParsePoint(fromString).value_or(FloatPoint {});
-    _toPoint = ParsePoint(toString).value_or(FloatPoint {});
+    _fromPoint = svg::ParsePoint(fromString).value_or(FloatPoint {});
+    _toPoint = svg::ParsePoint(toString).value_or(FloatPoint {});
     return true;
   }
 
-  bool SVGAnimateMotionElement::SetFromAndByValues(dom::DOMStringView fromString,
-                                                   dom::DOMStringView byString) noexcept
+  bool SVGAnimateMotionElement::SetFromAndByValues(DOMStringView fromString, DOMStringView byString) noexcept
   {
     _toPointAtEndOfDuration = {};
-    if (GetAnimationMode() == AnimationMode::By && !IsAdditive())
+    if (GetAnimationMode() == svg::AnimationMode::By && !IsAdditive())
     {
       return false;
     }
-    _fromPoint = ParsePoint(fromString).value_or(FloatPoint {});
-    auto byPoint = ParsePoint(byString).value_or(FloatPoint {});
+    _fromPoint = svg::ParsePoint(fromString).value_or(FloatPoint {});
+    auto byPoint = svg::ParsePoint(byString).value_or(FloatPoint {});
     _toPoint = FloatPoint(_fromPoint.X() + byPoint.X(), _fromPoint.Y() + byPoint.Y());
     return true;
   }
 
-  bool SVGAnimateMotionElement::SetToAtEndOfDurationValue(dom::DOMStringView toAtEndOfDurationString) noexcept
+  bool SVGAnimateMotionElement::SetToAtEndOfDurationValue(DOMStringView toAtEndOfDurationString) noexcept
   {
-    _toPointAtEndOfDuration = ParsePoint(toAtEndOfDurationString).value_or(FloatPoint {});
+    _toPointAtEndOfDuration = svg::ParsePoint(toAtEndOfDurationString).value_or(FloatPoint {});
     return true;
   }
 
@@ -239,7 +236,7 @@ namespace krys::boo::svg
       transform->MakeIdentity();
     }
 
-    if (GetAnimationMode() != AnimationMode::Path)
+    if (GetAnimationMode() != svg::AnimationMode::Path)
     {
       FloatPoint toPointAtEndOfDuration = _toPoint;
       if (IsAccumulated() && repeatCount && _toPointAtEndOfDuration)
@@ -325,15 +322,15 @@ namespace krys::boo::svg
     }
   }
 
-  Maybe<float> SVGAnimateMotionElement::CalculateDistance(dom::DOMStringView fromString,
-                                                          dom::DOMStringView toString) noexcept
+  Maybe<float> SVGAnimateMotionElement::CalculateDistance(DOMStringView fromString,
+                                                          DOMStringView toString) noexcept
   {
-    auto from = ParsePoint(fromString);
+    auto from = svg::ParsePoint(fromString);
     if (!from)
     {
       return {};
     }
-    auto to = ParsePoint(toString);
+    auto to = svg::ParsePoint(toString);
     if (!to)
     {
       return {};
@@ -345,7 +342,7 @@ namespace krys::boo::svg
   {
     if (!_animationPath.IsEmpty())
     {
-      SetAnimationMode(AnimationMode::Path);
+      SetAnimationMode(svg::AnimationMode::Path);
     }
     else
     {

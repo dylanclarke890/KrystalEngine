@@ -28,7 +28,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyAnimatorImpl.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyPairAnimator.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGElement;
 
@@ -40,8 +40,8 @@ namespace krys::boo::svg
 
   public:
     KRYS_NODISCARD static Ref<SVGAnimatedAngleOrientAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGAnimatedAngle> &animated1,
-             Ref<SVGAnimatedOrientType> &animated2, AnimationMode animationMode, CalcMode calcMode,
+      Create(const QualifiedName &attributeName, Ref<SVGAnimatedAngle> &animated1,
+             Ref<SVGAnimatedOrientType> &animated2, svg::AnimationMode animationMode, svg::CalcMode calcMode,
              bool isAccumulated, bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGAnimatedAngleOrientAnimator(attributeName, animated1, animated2, animationMode,
@@ -49,8 +49,7 @@ namespace krys::boo::svg
     }
 
   private:
-    void SetFromAndToValues(SVGElement &targetElement, dom::DOMStringView from,
-                            dom::DOMStringView to) noexcept final
+    void SetFromAndToValues(SVGElement &targetElement, DOMStringView from, DOMStringView to) noexcept final
     {
       auto pairFrom =
         SVGPropertyTraits<std::pair<SVGAngleValue, SVGMarkerOrientType>>::FromString(targetElement, from);
@@ -64,8 +63,7 @@ namespace krys::boo::svg
       _animatedPropertyAnimator2->_function._to = pairTo.second;
     }
 
-    void SetFromAndByValues(SVGElement &targetElement, dom::DOMStringView from,
-                            dom::DOMStringView by) noexcept final
+    void SetFromAndByValues(SVGElement &targetElement, DOMStringView from, DOMStringView by) noexcept final
     {
       SetFromAndToValues(targetElement, from, by);
       if (_animatedPropertyAnimator2->_function._from != SVGMarkerOrientAngle
@@ -140,8 +138,8 @@ namespace krys::boo::svg
 
   public:
     KRYS_NODISCARD static Ref<SVGAnimatedIntegerPairAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGAnimatedInteger> &animated1,
-             Ref<SVGAnimatedInteger> &animated2, AnimationMode animationMode, CalcMode calcMode,
+      Create(const QualifiedName &attributeName, Ref<SVGAnimatedInteger> &animated1,
+             Ref<SVGAnimatedInteger> &animated2, svg::AnimationMode animationMode, svg::CalcMode calcMode,
              bool isAccumulated, bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGAnimatedIntegerPairAnimator(attributeName, animated1, animated2, animationMode,
@@ -149,8 +147,7 @@ namespace krys::boo::svg
     }
 
   private:
-    void SetFromAndToValues(SVGElement &targetElement, dom::DOMStringView from,
-                            dom::DOMStringView to) noexcept final
+    void SetFromAndToValues(SVGElement &targetElement, DOMStringView from, DOMStringView to) noexcept final
     {
       auto pairFrom = SVGPropertyTraits<std::pair<int32, int32>>::FromString(targetElement, from);
       auto pairTo = SVGPropertyTraits<std::pair<int32, int32>>::FromString(targetElement, to);
@@ -162,8 +159,7 @@ namespace krys::boo::svg
       _animatedPropertyAnimator2->_function._to = pairTo.second;
     }
 
-    void SetFromAndByValues(SVGElement &targetElement, dom::DOMStringView from,
-                            dom::DOMStringView by) noexcept final
+    void SetFromAndByValues(SVGElement &targetElement, DOMStringView from, DOMStringView by) noexcept final
     {
       auto pairFrom = SVGPropertyTraits<std::pair<int32, int32>>::FromString(targetElement, from);
       auto pairBy = SVGPropertyTraits<std::pair<int32, int32>>::FromString(targetElement, by);
@@ -175,8 +171,7 @@ namespace krys::boo::svg
       _animatedPropertyAnimator2->_function._to = pairFrom.second + pairBy.second;
     }
 
-    void SetToAtEndOfDurationValue(SVGElement &targetElement,
-                                   dom::DOMStringView toAtEndOfDuration) noexcept final
+    void SetToAtEndOfDurationValue(SVGElement &targetElement, DOMStringView toAtEndOfDuration) noexcept final
     {
       auto pairToAtEndOfDuration =
         SVGPropertyTraits<std::pair<int32, int32>>::FromString(targetElement, toAtEndOfDuration);
@@ -193,8 +188,8 @@ namespace krys::boo::svg
 
   public:
     KRYS_NODISCARD static Ref<SVGAnimatedNumberPairAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGAnimatedNumber> &animated1,
-             Ref<SVGAnimatedNumber> &animated2, AnimationMode animationMode, CalcMode calcMode,
+      Create(const QualifiedName &attributeName, Ref<SVGAnimatedNumber> &animated1,
+             Ref<SVGAnimatedNumber> &animated2, svg::AnimationMode animationMode, svg::CalcMode calcMode,
              bool isAccumulated, bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGAnimatedNumberPairAnimator(attributeName, animated1, animated2, animationMode,
@@ -202,8 +197,7 @@ namespace krys::boo::svg
     }
 
   private:
-    void SetFromAndToValues(SVGElement &targetElement, dom::DOMStringView from,
-                            dom::DOMStringView to) noexcept final
+    void SetFromAndToValues(SVGElement &targetElement, DOMStringView from, DOMStringView to) noexcept final
     {
       auto pairFrom = SVGPropertyTraits<std::pair<float, float>>::FromString(targetElement, from);
       auto pairTo = SVGPropertyTraits<std::pair<float, float>>::FromString(targetElement, to);
@@ -215,8 +209,7 @@ namespace krys::boo::svg
       _animatedPropertyAnimator2->_function._to = pairTo.second;
     }
 
-    void SetFromAndByValues(SVGElement &targetElement, dom::DOMStringView from,
-                            dom::DOMStringView by) noexcept final
+    void SetFromAndByValues(SVGElement &targetElement, DOMStringView from, DOMStringView by) noexcept final
     {
       auto pairFrom = SVGPropertyTraits<std::pair<float, float>>::FromString(targetElement, from);
       auto pairBy = SVGPropertyTraits<std::pair<float, float>>::FromString(targetElement, by);
@@ -228,8 +221,7 @@ namespace krys::boo::svg
       _animatedPropertyAnimator2->_function._to = pairFrom.second + pairBy.second;
     }
 
-    void SetToAtEndOfDurationValue(SVGElement &targetElement,
-                                   dom::DOMStringView toAtEndOfDuration) noexcept final
+    void SetToAtEndOfDurationValue(SVGElement &targetElement, DOMStringView toAtEndOfDuration) noexcept final
     {
       auto pairToAtEndOfDuration =
         SVGPropertyTraits<std::pair<float, float>>::FromString(targetElement, toAtEndOfDuration);

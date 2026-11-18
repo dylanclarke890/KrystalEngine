@@ -26,7 +26,7 @@
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStream.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyImpl.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<path>` element: a shape drawn by path data, from its `d` attribute or the `d` property.
   /// @see https://svgwg.org/svg2-draft/paths.html#InterfaceSVGPathElement
@@ -38,7 +38,7 @@ namespace krys::boo::svg
     Ref<SVGAnimatedPathSegList> _pathSegList;
 
   public:
-    explicit SVGPathElement(dom::Document &document) noexcept;
+    explicit SVGPathElement(Document &document) noexcept;
 
     KRYS_NODISCARD float GetTotalLength() const noexcept final;
 
@@ -57,10 +57,10 @@ namespace krys::boo::svg
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGPathElement, SVGGeometryElement>;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD bool IsValid() const noexcept final
     {
@@ -78,11 +78,10 @@ namespace krys::boo::svg
 
     void OnInsert() noexcept final;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept final;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept final;
 
     void CollectExtraStyleForPresentationalHints(css::MutableStyleProperties &style) noexcept override;
@@ -91,8 +90,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGPathElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGPathElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGPathElement();
   }

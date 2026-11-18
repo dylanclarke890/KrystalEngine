@@ -68,7 +68,7 @@ namespace krys::boo::tests
       LayoutUnit _width;
 
     public:
-      InlineLayout(ResolverFixture &fixture, dom::DOMStringView id, LayoutUnit width,
+      InlineLayout(ResolverFixture &fixture, DOMStringView id, LayoutUnit width,
                    Maybe<layout::BlockLayoutState::LineClamp> lineClamp = null) noexcept
           : _ownedLayoutState(MakeLayoutState(fixture)), _layoutState(*_ownedLayoutState),
             _root(RootBoxOf(fixture, id)),
@@ -95,7 +95,7 @@ namespace krys::boo::tests
         return _formattingContext;
       }
 
-      KRYS_NODISCARD layout::BoxGeometry &GeometryOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+      KRYS_NODISCARD layout::BoxGeometry &GeometryOf(ResolverFixture &fixture, DOMStringView id) noexcept
       {
         auto *box = fixture.ById(id).Renderer()->LayoutBox();
         REQUIRE(box);

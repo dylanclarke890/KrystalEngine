@@ -68,7 +68,7 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#dom-elementinternals-setvalidity
   dom::ExceptionOr<void> FormAssociatedCustomElement::SetValidity(ValidityStateFlags flags,
-                                                                  const dom::DOMString &message,
+                                                                  const DOMString &message,
                                                                   HTMLElement *validationAnchor) noexcept
   {
     krys_debug_assert(_element.IsPrecustomizedOrDefinedCustomElement());
@@ -89,7 +89,7 @@ namespace krys::boo::html
     //    string.
     // (The validation message is the custom validity error message, and customError is a flag.)
     _validityStateFlags = flags;
-    SetCustomValidationMessage(flags.IsValid() ? dom::DOMString()
+    SetCustomValidationMessage(flags.IsValid() ? DOMString()
                                                : infra::StringAlgorithms::NormalizeNewlines(message));
 
     // 9. If anchor is not given, then set it to element.
@@ -109,7 +109,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-elementinternals-validationmessage
-  dom::DOMString FormAssociatedCustomElement::ValidationMessage() const noexcept
+  DOMString FormAssociatedCustomElement::ValidationMessage() const noexcept
   {
     krys_debug_assert(_element.IsPrecustomizedOrDefinedCustomElement());
 
@@ -163,7 +163,7 @@ namespace krys::boo::html
       {
         for (auto &item : (*entries)->Items())
         {
-          if (auto *value = std::get_if<dom::DOMString>(&item.Data))
+          if (auto *value = std::get_if<DOMString>(&item.Data))
           {
             formData.Append(item.Name, *value);
           }
@@ -174,7 +174,7 @@ namespace krys::boo::html
         }
       }
     }
-    else if (auto *value = std::get_if<dom::DOMString>(&_submissionValue))
+    else if (auto *value = std::get_if<DOMString>(&_submissionValue))
     {
       if (auto name = Name(); !name.empty())
       {
@@ -240,7 +240,7 @@ namespace krys::boo::html
     SyncWithFieldsetAncestors(_element.ParentNode());
   }
 
-  dom::DOMString FormAssociatedCustomElement::FormControlType() const noexcept
+  DOMString FormAssociatedCustomElement::FormControlType() const noexcept
   {
     return _element.LocalName().ToString();
   }

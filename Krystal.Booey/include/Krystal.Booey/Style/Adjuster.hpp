@@ -35,19 +35,15 @@
 
 namespace krys::boo
 {
+  class Document;
+  class Element;
   class RenderStyle;
+  class SVGElement;
 }
 
 namespace krys::boo::dom
 {
-  class Document;
-  class Element;
   class EventTarget;
-}
-
-namespace krys::boo::svg
-{
-  class SVGElement;
 }
 
 namespace krys::boo::style
@@ -58,14 +54,14 @@ namespace krys::boo::style
   /// z-index, overflow, text decorations in effect, and the element-specific rules.
   class Adjuster
   {
-    CheckedRef<const dom::Document> _document;
+    CheckedRef<const Document> _document;
     const RenderStyle &_parentStyle;
     const RenderStyle &_parentBoxStyle;
-    RefPtr<dom::Element> _element;
+    RefPtr<Element> _element;
 
   public:
-    Adjuster(const dom::Document &document, const RenderStyle &parentStyle, const RenderStyle *parentBoxStyle,
-             dom::Element *element) noexcept;
+    Adjuster(const Document &document, const RenderStyle &parentStyle, const RenderStyle *parentBoxStyle,
+             Element *element) noexcept;
 
     static void AdjustFromBuilder(RenderStyle &style) noexcept;
 
@@ -77,15 +73,15 @@ namespace krys::boo::style
 
     static void AdjustFirstLineStyle(RenderStyle &style) noexcept;
 
-    static void AdjustSVGElementStyle(RenderStyle &style, const svg::SVGElement &svgElement) noexcept;
+    static void AdjustSVGElementStyle(RenderStyle &style, const SVGElement &svgElement) noexcept;
 
     static bool AdjustEventListenerRegionTypesForRootStyle(RenderStyle &rootStyle,
-                                                           const dom::Document &document) noexcept;
+                                                           const Document &document) noexcept;
 
     /// @brief Propagates the writing mode and direction of the document element (or `<body>`) to the initial
     /// containing block and the document element's used style.
     static void PropagateToDocumentElementAndInitialContainingBlock(Update &update,
-                                                                    const dom::Document &document) noexcept;
+                                                                    const Document &document) noexcept;
 
     KRYS_NODISCARD static UniquePtr<RenderStyle>
       RestoreUsedDocumentElementStyleToComputed(const RenderStyle &style) noexcept;
@@ -98,7 +94,7 @@ namespace krys::boo::style
     void AdjustThemeStyle(RenderStyle &style, const RenderStyle &parentStyle) const noexcept;
 
     KRYS_NODISCARD static EnumSet<EventListenerRegionType>
-      ComputeEventListenerRegionTypes(const dom::Document &document, const RenderStyle &style,
+      ComputeEventListenerRegionTypes(const Document &document, const RenderStyle &style,
                                       const dom::EventTarget &eventTarget,
                                       EnumSet<EventListenerRegionType> parentTypes) noexcept;
   };

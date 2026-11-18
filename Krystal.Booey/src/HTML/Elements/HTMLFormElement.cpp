@@ -51,15 +51,15 @@
 #include <algorithm>
 #include <numeric>
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#attr-form-autocomplete
   template <>
-  struct EnumeratedAttributeTraits<"autocomplete", HTMLFormElement>
+  struct html::EnumeratedAttributeTraits<"autocomplete", HTMLFormElement>
   {
-    using State = AutocompleteAttributeState;
-    static inline const KeywordStateMapping<State> StateMappings[] = {{u8"on", State::On},
-                                                                      {u8"off", State::Off}};
+    using State = html::AutocompleteAttributeState;
+    static inline const html::KeywordStateMapping<State> StateMappings[] = {{u8"on", State::On},
+                                                                            {u8"off", State::Off}};
 
     constexpr static State MissingValueDefault = State::On;
     constexpr static State InvalidValueDefault = State::On;
@@ -67,10 +67,10 @@ namespace krys::boo::html
 
   /// @see https://html.spec.whatwg.org/#attr-fs-method
   template <>
-  struct EnumeratedAttributeTraits<"method", HTMLFormElement>
+  struct html::EnumeratedAttributeTraits<"method", HTMLFormElement>
   {
-    using State = MethodAttributeState;
-    static inline const KeywordStateMapping<State> StateMappings[] = {
+    using State = html::MethodAttributeState;
+    static inline const html::KeywordStateMapping<State> StateMappings[] = {
       {u8"get", State::Get},
       {u8"post", State::Post},
       {u8"dialog", State::Dialog},
@@ -82,10 +82,10 @@ namespace krys::boo::html
 
   /// @see https://html.spec.whatwg.org/#attr-fs-enctype
   template <>
-  struct EnumeratedAttributeTraits<"enctype", HTMLFormElement>
+  struct html::EnumeratedAttributeTraits<"enctype", HTMLFormElement>
   {
-    using State = EnctypeAttributeState;
-    static inline const KeywordStateMapping<State> StateMappings[] = {
+    using State = html::EnctypeAttributeState;
+    static inline const html::KeywordStateMapping<State> StateMappings[] = {
       {u8"application/x-www-form-urlencoded", State::URLEncoded},
       {u8"multipart/form-data", State::FormData},
       {u8"text/plain", State::TextPlain},
@@ -98,7 +98,7 @@ namespace krys::boo::html
   namespace
   {
     /// @brief `_blank` in place of a target that looks like the start of dangling markup.
-    KRYS_NODISCARD dom::DOMString MakeTargetBlankIfHasDanglingMarkup(dom::DOMStringView target) noexcept
+    KRYS_NODISCARD DOMString MakeTargetBlankIfHasDanglingMarkup(DOMStringView target) noexcept
     {
       auto contains = [&](char8 character)
       {
@@ -108,12 +108,12 @@ namespace krys::boo::html
       {
         return u8"_blank";
       }
-      return dom::DOMString(target);
+      return DOMString(target);
     }
   }
 
-  HTMLFormElement::HTMLFormElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Form)
+  HTMLFormElement::HTMLFormElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Form)
   {
   }
 
@@ -142,14 +142,14 @@ namespace krys::boo::html
 
 #pragma region HTMLFormElement
 
-  dom::DOMString HTMLFormElement::AcceptCharset() const noexcept
+  DOMString HTMLFormElement::AcceptCharset() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"accept-charset").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"accept-charset").value_or(u8"");
   }
 
-  void HTMLFormElement::AcceptCharset(dom::DOMString value) noexcept
+  void HTMLFormElement::AcceptCharset(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"accept-charset", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"accept-charset", krys::move(value));
   }
 
   dom::USVString HTMLFormElement::Action() const noexcept
@@ -174,89 +174,89 @@ namespace krys::boo::html
 
   void HTMLFormElement::Action(dom::USVString value) noexcept
   {
-    return ReflectSetter<dom::USVString>(*this, u8"action", krys::move(value));
+    return html::ReflectSetter<dom::USVString>(*this, u8"action", krys::move(value));
   }
 
-  dom::DOMString HTMLFormElement::Autocomplete() const noexcept
+  DOMString HTMLFormElement::Autocomplete() const noexcept
   {
-    return ReflectEnumerated<"autocomplete", HTMLFormElement>(*this);
+    return html::ReflectEnumerated<"autocomplete", HTMLFormElement>(*this);
   }
 
-  void HTMLFormElement::Autocomplete(dom::DOMString value) noexcept
+  void HTMLFormElement::Autocomplete(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"autocomplete", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"autocomplete", krys::move(value));
   }
 
-  dom::DOMString HTMLFormElement::EncType() const noexcept
+  DOMString HTMLFormElement::EncType() const noexcept
   {
-    return ReflectEnumerated<"enctype", HTMLFormElement>(*this);
+    return html::ReflectEnumerated<"enctype", HTMLFormElement>(*this);
   }
 
-  void HTMLFormElement::EncType(dom::DOMString value) noexcept
+  void HTMLFormElement::EncType(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"enctype", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"enctype", krys::move(value));
   }
 
   // https://html.spec.whatwg.org/#dom-fs-encoding
-  dom::DOMString HTMLFormElement::Encoding() const noexcept
+  DOMString HTMLFormElement::Encoding() const noexcept
   {
     // The encoding IDL attribute must reflect the enctype content attribute, limited to only known values.
     return EncType();
   }
 
-  void HTMLFormElement::Encoding(dom::DOMString value) noexcept
+  void HTMLFormElement::Encoding(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"enctype", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"enctype", krys::move(value));
   }
 
-  dom::DOMString HTMLFormElement::Method() const noexcept
+  DOMString HTMLFormElement::Method() const noexcept
   {
-    return ReflectEnumerated<"method", HTMLFormElement>(*this);
+    return html::ReflectEnumerated<"method", HTMLFormElement>(*this);
   }
 
-  void HTMLFormElement::Method(dom::DOMString value) noexcept
+  void HTMLFormElement::Method(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"method", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"method", krys::move(value));
   }
 
-  dom::DOMString HTMLFormElement::Name() const noexcept
+  DOMString HTMLFormElement::Name() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLFormElement::Name(dom::DOMString value) noexcept
+  void HTMLFormElement::Name(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"name", krys::move(value));
   }
 
   bool HTMLFormElement::NoValidate() const noexcept
   {
-    return Reflect<bool>(*this, u8"novalidate");
+    return html::Reflect<bool>(*this, u8"novalidate");
   }
 
   void HTMLFormElement::NoValidate(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"novalidate", krys::move(value));
+    html::Reflect<bool>(*this, u8"novalidate", krys::move(value));
   }
 
-  dom::DOMString HTMLFormElement::Target() const noexcept
+  DOMString HTMLFormElement::Target() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"target").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"target").value_or(u8"");
   }
 
-  void HTMLFormElement::Target(dom::DOMString value) noexcept
+  void HTMLFormElement::Target(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"target", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"target", krys::move(value));
   }
 
-  dom::DOMString HTMLFormElement::Rel() const noexcept
+  DOMString HTMLFormElement::Rel() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"rel").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"rel").value_or(u8"");
   }
 
-  void HTMLFormElement::Rel(dom::DOMString value) noexcept
+  void HTMLFormElement::Rel(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"rel", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"rel", krys::move(value));
   }
 
   dom::DOMTokenList &HTMLFormElement::RelList() noexcept
@@ -265,7 +265,7 @@ namespace krys::boo::html
     {
       _relList =
         dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"rel",
-                                                   [](dom::Document &, dom::DOMStringView token)
+                                                   [](Document &, DOMStringView token)
                                                    {
                                                      return text::IsASCIICaselessEqual(token, u8"noreferrer")
                                                             || text::IsASCIICaselessEqual(token, u8"noopener")
@@ -276,14 +276,14 @@ namespace krys::boo::html
     return *_relList;
   }
 
-  Ref<HTMLFormControlsCollection> HTMLFormElement::Elements() noexcept
+  Ref<html::HTMLFormControlsCollection> HTMLFormElement::Elements() noexcept
   {
     if (auto *elements = _elements.get())
     {
       // Only ever an HTMLFormControlsCollection.
-      return ShareRef(static_cast<HTMLFormControlsCollection &>(*elements));
+      return ShareRef(static_cast<html::HTMLFormControlsCollection &>(*elements));
     }
-    auto elements = CreateRef<HTMLFormControlsCollection>(*this);
+    auto elements = CreateRef<html::HTMLFormControlsCollection>(*this);
     _elements = CreateWeakPtr<dom::HTMLCollection>(elements.get());
     return elements;
   }
@@ -305,12 +305,12 @@ namespace krys::boo::html
 
   RefPtr<HTMLElement> HTMLFormElement::Item(size_t index) noexcept
   {
-    RefPtr<dom::Element> item = Elements()->Item(index);
+    RefPtr<Element> item = Elements()->Item(index);
     return DynamicDowncast<HTMLElement>(krys::move(item));
   }
 
-  Maybe<Variant<RefPtr<RadioNodeList>, RefPtr<dom::Element>>>
-    HTMLFormElement::NamedItem(dom::DOMStringView name) noexcept
+  Maybe<Variant<RefPtr<html::RadioNodeList>, RefPtr<Element>>>
+    HTMLFormElement::NamedItem(DOMStringView name) noexcept
   {
     auto namedItems = NamedElements(name);
     if (namedItems.empty())
@@ -319,12 +319,13 @@ namespace krys::boo::html
     }
     if (namedItems.size() == 1)
     {
-      return Variant<RefPtr<RadioNodeList>, RefPtr<dom::Element>> {RefPtr<dom::Element>(namedItems[0])};
+      return Variant<RefPtr<html::RadioNodeList>, RefPtr<Element>> {RefPtr<Element>(namedItems[0])};
     }
     // Images are candidates only if no listed element is.
-    return Variant<RefPtr<RadioNodeList>, RefPtr<dom::Element>> {RefPtr<RadioNodeList>(RadioNodeListForName(
-      name, Elements()->NamedItems(name).empty() ? RadioNodeListCandidates::Images
-                                                 : RadioNodeListCandidates::ListedElements))};
+    return Variant<RefPtr<html::RadioNodeList>, RefPtr<Element>> {RefPtr<html::RadioNodeList>(
+      RadioNodeListForName(name, Elements()->NamedItems(name).empty()
+                                   ? html::RadioNodeListCandidates::Images
+                                   : html::RadioNodeListCandidates::ListedElements))};
   }
 
   void HTMLFormElement::Submit() noexcept
@@ -373,7 +374,7 @@ namespace krys::boo::html
 
   void HTMLFormElement::Reset() noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
 
     // A reset during a reset (from its event) does nothing, nor does one in a document without a frame.
     if (_isInResetFunction || !NodeDocument().Frame())
@@ -582,7 +583,7 @@ namespace krys::boo::html
 
     // Let relatedTarget be form if the result of retargeting submitterButton against form is form; otherwise
     // submitterButton. Fire submit, composed, with relatedTarget set to relatedTarget.
-    auto submitEvent = SubmitEvent::Create(ShareRefPtr(static_cast<HTMLElement *>(submitter)));
+    auto submitEvent = html::SubmitEvent::Create(ShareRefPtr(static_cast<HTMLElement *>(submitter)));
     (void)dom::EventDispatcher::DispatchFromSource(*submitEvent, *this, submitter);
 
     // Event handling could have resulted in _shouldSubmit becoming true as a side effect, too.
@@ -606,9 +607,9 @@ namespace krys::boo::html
     Submit(event, !submitter, trigger, submitter);
   }
 
-  List<Pair<dom::DOMString, dom::DOMString>> HTMLFormElement::TextFieldValues() const noexcept
+  List<Pair<DOMString, DOMString>> HTMLFormElement::TextFieldValues() const noexcept
   {
-    List<Pair<dom::DOMString, dom::DOMString>> values;
+    List<Pair<DOMString, DOMString>> values;
     for (auto &element : CopyListedElementsVector())
     {
       auto *input = DynamicDowncast<HTMLInputElement>(*element);
@@ -718,7 +719,7 @@ namespace krys::boo::html
     HTMLElement::OnInsert();
   }
 
-  void HTMLFormElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLFormElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     // Not the root node, as the tree scope flags are out of date.
     auto &root = dom::TreeQueries::Root(*this);
@@ -739,10 +740,9 @@ namespace krys::boo::html
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
   }
 
-  void HTMLFormElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                           Maybe<dom::DOMStringView> oldValue,
-                                           Maybe<dom::DOMStringView> value,
-                                           const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLFormElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                           Maybe<DOMStringView> value,
+                                           const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
@@ -756,7 +756,7 @@ namespace krys::boo::html
       _relList->AssociatedAttributeValueChanged();
     }
 
-    auto newValue = value.value_or(dom::DOMStringView());
+    auto newValue = value.value_or(DOMStringView());
     if (localName == u8"action")
     {
       _attributes.ParseAction(newValue);
@@ -779,7 +779,7 @@ namespace krys::boo::html
     }
   }
 
-  uint32 HTMLFormElement::FormElementIndexWithFormAttribute(dom::Element &element, uint32 rangeStart,
+  uint32 HTMLFormElement::FormElementIndexWithFormAttribute(Element &element, uint32 rangeStart,
                                                             uint32 rangeEnd) noexcept
   {
     if (_listedElements.empty())
@@ -820,7 +820,7 @@ namespace krys::boo::html
     return left + 1;
   }
 
-  uint32 HTMLFormElement::FormElementIndex(FormListedElement &listedElement) noexcept
+  uint32 HTMLFormElement::FormElementIndex(html::FormListedElement &listedElement) noexcept
   {
     auto &listedHTMLElement = listedElement.AsHTMLElement();
 
@@ -830,7 +830,7 @@ namespace krys::boo::html
       // A form in a shadow tree the control's form attribute reaches through its host's reference target is
       // placed where the host is.
       auto &formInControlTree =
-        Downcast<dom::Node>(*dom::EventTargetAlgorithms::Retarget(this, listedHTMLElement));
+        Downcast<Node>(*dom::EventTargetAlgorithms::Retarget(this, listedHTMLElement));
       auto order = dom::TreeOrder(listedHTMLElement, formInControlTree);
       krys_debug_assert(order != std::partial_ordering::unordered);
       if (std::is_lt(order))
@@ -885,7 +885,7 @@ namespace krys::boo::html
     return currentListedElementsAfterIndex;
   }
 
-  void HTMLFormElement::RegisterFormListedElement(FormListedElement &element) noexcept
+  void HTMLFormElement::RegisterFormListedElement(html::FormListedElement &element) noexcept
   {
     InvalidateLiveCollectionCaches();
     _listedElements.insert(_listedElements.begin() + FormElementIndex(element),
@@ -907,7 +907,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLFormElement::UnregisterFormListedElement(FormListedElement &element) noexcept
+  void HTMLFormElement::UnregisterFormListedElement(html::FormListedElement &element) noexcept
   {
     InvalidateLiveCollectionCaches();
     auto *htmlElement = &element.AsHTMLElement();
@@ -984,8 +984,8 @@ namespace krys::boo::html
     _invalidFormControls.erase(position);
   }
 
-  dom::DOMString HTMLFormElement::EffectiveTarget(const dom::Event *event,
-                                                  HTMLFormControlElement *overrideSubmitter) const noexcept
+  DOMString HTMLFormElement::EffectiveTarget(const dom::Event *event,
+                                             HTMLFormControlElement *overrideSubmitter) const noexcept
   {
     // The submitter's formtarget is the target given to get an element's target:
     // https://html.spec.whatwg.org/#get-an-element's-target
@@ -1025,13 +1025,13 @@ namespace krys::boo::html
     }
 
     auto target = event->Target();
-    auto *node = DynamicDowncast<dom::Node>(target.get());
+    auto *node = DynamicDowncast<Node>(target.get());
     if (!node)
     {
       return nullptr;
     }
 
-    auto *element = DynamicDowncast<dom::Element>(*node);
+    auto *element = DynamicDowncast<Element>(*node);
     if (!element)
     {
       element = node->ParentElement();
@@ -1092,29 +1092,29 @@ namespace krys::boo::html
     }
   }
 
-  HTMLElement *HTMLFormElement::ElementFromPastNamesMap(dom::DOMStringView pastName) const noexcept
+  HTMLElement *HTMLFormElement::ElementFromPastNamesMap(DOMStringView pastName) const noexcept
   {
     if (pastName.empty() || _pastNamesMap.empty())
     {
       return nullptr;
     }
 
-    auto entry = _pastNamesMap.find(dom::DOMStringAtom(pastName));
+    auto entry = _pastNamesMap.find(DOMStringAtom(pastName));
     return entry != _pastNamesMap.end() ? entry->second.get() : nullptr;
   }
 
-  void HTMLFormElement::AddToPastNamesMap(FormAssociatedElement &element,
-                                          dom::DOMStringView pastName) noexcept
+  void HTMLFormElement::AddToPastNamesMap(html::FormAssociatedElement &element,
+                                          DOMStringView pastName) noexcept
   {
     krys_debug_assert(element.Form() == this);
     if (pastName.empty())
     {
       return;
     }
-    _pastNamesMap[dom::DOMStringAtom(pastName)] = CreateWeakPtr(&element.AsHTMLElement());
+    _pastNamesMap[DOMStringAtom(pastName)] = CreateWeakPtr(&element.AsHTMLElement());
   }
 
-  void HTMLFormElement::RemoveFromPastNamesMap(FormAssociatedElement &item) noexcept
+  void HTMLFormElement::RemoveFromPastNamesMap(html::FormAssociatedElement &item) noexcept
   {
     if (_pastNamesMap.empty())
     {
@@ -1135,7 +1135,7 @@ namespace krys::boo::html
     return !MatchesValidPseudoClass();
   }
 
-  List<Ref<dom::Element>> HTMLFormElement::NamedElements(dom::DOMStringView name) noexcept
+  List<Ref<Element>> HTMLFormElement::NamedElements(DOMStringView name) noexcept
   {
     if (name.empty())
     {
@@ -1162,7 +1162,7 @@ namespace krys::boo::html
     return namedItems;
   }
 
-  bool HTMLFormElement::IsSupportedPropertyName(dom::DOMStringView name) noexcept
+  bool HTMLFormElement::IsSupportedPropertyName(DOMStringView name) noexcept
   {
     return !name.empty()
            && (Elements()->NamedItem(name) || !NamedImages(name).empty() || ElementFromPastNamesMap(name));
@@ -1171,7 +1171,7 @@ namespace krys::boo::html
   bool HTMLFormElement::ShouldAutocomplete() const noexcept
   {
     auto autocomplete = GetAttribute(u8"autocomplete");
-    return !autocomplete || !text::IsASCIICaselessEqual(dom::DOMStringView(*autocomplete), u8"off");
+    return !autocomplete || !text::IsASCIICaselessEqual(DOMStringView(*autocomplete), u8"off");
   }
 
   List<Ref<HTMLElement>> HTMLFormElement::CopyListedElementsVector() const noexcept
@@ -1200,7 +1200,7 @@ namespace krys::boo::html
     return elements;
   }
 
-  HTMLFormElement *HTMLFormElement::FindClosestFormAncestor(const dom::Element &startElement) noexcept
+  HTMLFormElement *HTMLFormElement::FindClosestFormAncestor(const Element &startElement) noexcept
   {
     for (auto *ancestor = startElement.ParentElement(); ancestor; ancestor = ancestor->ParentElement())
     {
@@ -1212,31 +1212,34 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  Ref<RadioNodeList> HTMLFormElement::RadioNodeListForName(dom::DOMStringView name) noexcept
+  Ref<html::RadioNodeList> HTMLFormElement::RadioNodeListForName(DOMStringView name) noexcept
   {
-    return RadioNodeListForName(name, RadioNodeListCandidates::ListedElements);
+    return RadioNodeListForName(name, html::RadioNodeListCandidates::ListedElements);
   }
 
-  Ref<RadioNodeList> HTMLFormElement::RadioNodeListForName(dom::DOMStringView name,
-                                                           RadioNodeListCandidates candidates) noexcept
+  Ref<html::RadioNodeList>
+    HTMLFormElement::RadioNodeListForName(DOMStringView name,
+                                          html::RadioNodeListCandidates candidates) noexcept
   {
-    auto &lists = candidates == RadioNodeListCandidates::Images ? _imageRadioNodeLists : _radioNodeLists;
-    auto &cached = lists[dom::DOMString(name)];
+    auto &lists =
+      candidates == html::RadioNodeListCandidates::Images ? _imageRadioNodeLists : _radioNodeLists;
+    auto &cached = lists[DOMString(name)];
     if (auto *list = cached.get())
     {
-      return ShareRef(static_cast<RadioNodeList &>(*list));
+      return ShareRef(static_cast<html::RadioNodeList &>(*list));
     }
 
-    auto list = CreateRef<RadioNodeList>(*this, name, candidates);
+    auto list = CreateRef<html::RadioNodeList>(*this, name, candidates);
     cached = CreateWeakPtr<dom::NodeList>(list.get());
     return list;
   }
 
-  void HTMLFormElement::RadioNodeListDestroyed(dom::DOMStringView name,
-                                               RadioNodeListCandidates candidates) noexcept
+  void HTMLFormElement::RadioNodeListDestroyed(DOMStringView name,
+                                               html::RadioNodeListCandidates candidates) noexcept
   {
-    auto &lists = candidates == RadioNodeListCandidates::Images ? _imageRadioNodeLists : _radioNodeLists;
-    lists.erase(dom::DOMString(name));
+    auto &lists =
+      candidates == html::RadioNodeListCandidates::Images ? _imageRadioNodeLists : _radioNodeLists;
+    lists.erase(DOMString(name));
   }
 
   void HTMLFormElement::RegisterImageElement(HTMLImageElement &element) noexcept
@@ -1258,9 +1261,9 @@ namespace krys::boo::html
     }
   }
 
-  List<Ref<dom::Element>> HTMLFormElement::NamedImages(dom::DOMStringView name) const noexcept
+  List<Ref<Element>> HTMLFormElement::NamedImages(DOMStringView name) const noexcept
   {
-    List<Ref<dom::Element>> images;
+    List<Ref<Element>> images;
     if (name.empty())
     {
       return images;
@@ -1270,7 +1273,7 @@ namespace krys::boo::html
       auto *element = image.get();
       if (element && (element->GetAttribute(u8"id") == name || element->GetAttribute(u8"name") == name))
       {
-        images.push_back(ShareRef<dom::Element>(*element));
+        images.push_back(ShareRef<Element>(*element));
       }
     }
     std::ranges::sort(images,
@@ -1278,10 +1281,10 @@ namespace krys::boo::html
     return images;
   }
 
-  RefPtr<DOMFormData>
+  RefPtr<html::DOMFormData>
     HTMLFormElement::ConstructEntryList(const RefPtr<HTMLFormControlElement> &submitter,
-                                        const Ref<DOMFormData> &domFormData,
-                                        List<Pair<dom::DOMString, dom::DOMString>> *formValues) noexcept
+                                        const Ref<html::DOMFormData> &domFormData,
+                                        List<Pair<DOMString, DOMString>> *formValues) noexcept
   {
     // https://html.spec.whatwg.org/#constructing-the-form-data-set
     // 1. If form's constructing entry list is true, then return null.
@@ -1332,8 +1335,8 @@ namespace krys::boo::html
     // 6. Let form data be a new FormData object associated with entry list.
     // 7. Fire an event named formdata at form using FormDataEvent, with the formData attribute initialized to
     //    form data and the bubbles attribute initialized to true.
-    auto event =
-      dom::FormDataEvent::Create(event_names::FormData, true, false, false, Ref<DOMFormData>(domFormData));
+    auto event = dom::FormDataEvent::Create(event_names::FormData, true, false, false,
+                                            Ref<html::DOMFormData>(domFormData));
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
 
     if (submitter)

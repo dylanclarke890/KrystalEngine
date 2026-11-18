@@ -87,7 +87,7 @@ namespace krys::boo::css
   }
 
   CSSStyleProperties &
-    MutableStyleProperties::EnsureInlineCSSStyleProperties(dom::StyledElement &parentElement) noexcept
+    MutableStyleProperties::EnsureInlineCSSStyleProperties(StyledElement &parentElement) noexcept
   {
     if (!_cssomWrapper)
     {

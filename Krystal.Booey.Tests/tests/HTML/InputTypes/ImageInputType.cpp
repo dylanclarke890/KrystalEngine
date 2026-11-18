@@ -20,19 +20,19 @@ namespace krys::boo::tests
     {
       using PageInFrameFixture::PageInFrameFixture;
 
-      KRYS_NODISCARD html::HTMLInputElement &Input(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD HTMLInputElement &Input(DOMStringView id) noexcept
       {
-        return Downcast<html::HTMLInputElement>(ById(id));
+        return Downcast<HTMLInputElement>(ById(id));
       }
 
-      KRYS_NODISCARD bool ShowsImage(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD bool ShowsImage(DOMStringView id) noexcept
       {
         (void)Document->UpdateLayout();
         auto *renderer = DynamicDowncast<RenderImage>(ById(id).Renderer());
         return renderer && renderer->GetCachedImage();
       }
 
-      KRYS_NODISCARD bool IsRenderImage(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD bool IsRenderImage(DOMStringView id) noexcept
       {
         (void)Document->UpdateLayout();
         return Is<RenderImage>(ById(id).Renderer());
@@ -109,7 +109,7 @@ namespace krys::boo::tests
 
     InputFixture fixture(u8"<input id=hidden type=image src='file:///a.png' style='display: none'>");
     auto createdElement = fixture.Document->CreateElement(u8"input").ReleaseValue();
-    auto &created = Downcast<html::HTMLInputElement>(*createdElement);
+    auto &created = Downcast<HTMLInputElement>(*createdElement);
     auto createdEvents = LoadEvents::ListenTo(created);
     created.Type(u8"image");
     created.Src(u8"file:///a.png");
@@ -288,13 +288,13 @@ namespace krys::boo::tests
     RunNetworkingTasks();
     auto clone = fixture.Input(u8"i").CloneNode().ReleaseValue();
     RunNetworkingTasks();
-    CHECK(Downcast<html::HTMLInputElement>(*clone).Width() == 3u);
+    CHECK(Downcast<HTMLInputElement>(*clone).Width() == 3u);
 
     // A document without a browsing context loads nothing.
     loader.Strategy.Requests.clear();
     auto inert = fixture.Document->Implementation().CreateHTMLDocument(u8"").ReleaseValue();
     auto element = inert->CreateElement(u8"input").ReleaseValue();
-    auto &input = Downcast<html::HTMLInputElement>(*element);
+    auto &input = Downcast<HTMLInputElement>(*element);
     input.Type(u8"image");
     input.Src(u8"file:///a.png");
     RunNetworkingTasks();
@@ -330,6 +330,6 @@ namespace krys::boo::tests
     (void)handler.HandleMouseReleaseEvent(event(PlatformEvent::Type::MouseReleased, 5, 7));
     RunNetworkingTasks();
 
-    CHECK(Downcast<html::HTMLDialogElement>(fixture.ById(u8"d")).ReturnValue() == u8"5,7");
+    CHECK(Downcast<HTMLDialogElement>(fixture.ById(u8"d")).ReturnValue() == u8"5,7");
   }
 }

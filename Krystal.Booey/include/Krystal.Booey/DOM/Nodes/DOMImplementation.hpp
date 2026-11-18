@@ -12,16 +12,19 @@ namespace krys::boo::url
   class URL;
 }
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
   class DocumentType;
   class XMLDocument;
+}
 
+namespace krys::boo::dom
+{
   /// @see https://dom.spec.whatwg.org/#interface-domimplementation
   class DOMImplementation
   {
-    friend class Document;
+    friend class boo::Document;
 
   private:
     WeakRef<Document> _document;

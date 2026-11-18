@@ -9,7 +9,7 @@ namespace krys::boo::html::tests
 {
   namespace
   {
-    void SerialiseHTMLToken(Token &token, dom::DOMString &output) noexcept
+    void SerialiseHTMLToken(Token &token, DOMString &output) noexcept
     {
       switch (token.Type())
       {
@@ -19,9 +19,9 @@ namespace krys::boo::html::tests
           output += u8"DOCTYPE(";
           output += token.Name();
           output += u8", ";
-          output += dom::DOMStringView(doctype->PublicIdentifier);
+          output += DOMStringView(doctype->PublicIdentifier);
           output += u8", ";
-          output += dom::DOMStringView(doctype->SystemIdentifier);
+          output += DOMStringView(doctype->SystemIdentifier);
           output += u8", ";
           output += u8"ForceQuirks=";
           output += doctype->ForceQuirks ? u8"true" : u8"false";
@@ -31,23 +31,23 @@ namespace krys::boo::html::tests
         case TokenType::Character:
         {
           output += u8"Character(";
-          output += dom::DOMStringView(token.Data());
+          output += DOMStringView(token.Data());
           output += u8")\n";
           break;
         }
         case TokenType::Comment:
         {
           output += u8"Comment(";
-          output += dom::DOMStringView(token.Data());
+          output += DOMStringView(token.Data());
           output += u8")\n";
           break;
         }
         case TokenType::ProcessingInstruction:
         {
           output += u8"ProcessingInstruction(";
-          output += dom::DOMStringView(token.Data());
+          output += DOMStringView(token.Data());
           output += u8", ";
-          output += dom::DOMStringView(token.ProcessingInstructionData());
+          output += DOMStringView(token.ProcessingInstructionData());
           output += u8")\n";
           break;
         }
@@ -222,7 +222,7 @@ namespace krys::boo::html::tests
         inputStream.Append(test.Html, IsEOF::No);
       }
 
-      dom::DOMString tokens;
+      DOMString tokens;
       while (true)
       {
         auto token = tokenizer.NextToken();

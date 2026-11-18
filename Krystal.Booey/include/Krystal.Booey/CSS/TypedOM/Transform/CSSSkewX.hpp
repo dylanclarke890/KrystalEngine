@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Transform/CSSTransformComponent.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief A `skewX()`.
   /// @see https://drafts.css-houdini.org/css-typed-om/#cssskewx
@@ -42,8 +42,8 @@ namespace krys::boo::css
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSSkewX>> Create(Ref<CSSNumericValue> ax) noexcept;
 
     /// @brief Reifies a `skewX()` function.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSSkewX>> Create(const FunctionValue &function,
-                                                                 dom::Document &document) noexcept;
+    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSSkewX>> Create(const css::FunctionValue &function,
+                                                                 Document &document) noexcept;
 
     KRYS_NODISCARD const CSSNumericValue &Ax() const noexcept
     {
@@ -60,23 +60,23 @@ namespace krys::boo::css
 
     void Serialise(StringBuilder &builder) const noexcept final;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<DOMMatrix>> ToMatrix() const noexcept final;
+    KRYS_NODISCARD dom::ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
 
     KRYS_NODISCARD CSSTransformType TransformType() const noexcept final
     {
       return CSSTransformType::SkewX;
     }
 
-    KRYS_NODISCARD RefPtr<Value> ToCSSValue() const noexcept final;
+    KRYS_NODISCARD RefPtr<css::Value> ToCSSValue() const noexcept final;
 
   private:
     explicit CSSSkewX(Ref<CSSNumericValue> ax) noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSSkewX)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSTransformComponent &component) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSSkewX)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSTransformComponent &component) noexcept
   {
-    return component.TransformType() == krys::boo::css::CSSTransformType::SkewX;
+    return component.TransformType() == krys::boo::CSSTransformType::SkewX;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

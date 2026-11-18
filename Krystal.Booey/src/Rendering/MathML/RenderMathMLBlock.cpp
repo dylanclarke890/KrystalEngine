@@ -37,14 +37,14 @@
 
 namespace krys::boo
 {
-  RenderMathMLBlock::RenderMathMLBlock(Type type, mathml::MathMLPresentationElement &container,
+  RenderMathMLBlock::RenderMathMLBlock(Type type, boo::MathMLPresentationElement &container,
                                        RenderStyle &&style) noexcept
       : RenderBlock(type, container, krys::move(style))
   {
     SetChildrenInline(false); // All of our children must be block-level.
   }
 
-  RenderMathMLBlock::RenderMathMLBlock(Type type, dom::Document &document, RenderStyle &&style) noexcept
+  RenderMathMLBlock::RenderMathMLBlock(Type type, Document &document, RenderStyle &&style) noexcept
       : RenderBlock(type, document, krys::move(style))
   {
     SetChildrenInline(false); // All of our children must be block-level.
@@ -54,7 +54,7 @@ namespace krys::boo
 
   bool RenderMathMLBlock::IsChildAllowed(const RenderObject &child, const RenderStyle &) const noexcept
   {
-    return Is<dom::Element>(child.GetNode());
+    return Is<Element>(child.GetNode());
   }
 
   namespace
@@ -109,10 +109,10 @@ namespace krys::boo
     return child.FirstLineBaseline().value_or(logicalHeight);
   }
 
-  LayoutUnit ToUserUnits(const mathml::MathMLElement::Length &length, const RenderStyle &style,
+  LayoutUnit ToUserUnits(const MathMLElement::Length &length, const RenderStyle &style,
                          LayoutUnit referenceValue) noexcept
   {
-    using LengthType = mathml::MathMLElement::LengthType;
+    using LengthType = MathMLElement::LengthType;
 
     switch (length.Type)
     {
@@ -147,7 +147,7 @@ namespace krys::boo
     krys_unreachable();
   }
 
-  RenderMathMLTable::RenderMathMLTable(mathml::MathMLElement &element, RenderStyle &&style) noexcept
+  RenderMathMLTable::RenderMathMLTable(MathMLElement &element, RenderStyle &&style) noexcept
       : RenderTable(Type::MathMLTable, element, krys::move(style))
   {
     krys_debug_assert(IsRenderMathMLTable());

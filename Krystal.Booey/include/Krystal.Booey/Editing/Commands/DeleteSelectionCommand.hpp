@@ -54,18 +54,18 @@ namespace krys::boo
     dom::Position _endingPosition;
     dom::Position _leadingWhitespace;
     dom::Position _trailingWhitespace;
-    RefPtr<dom::Node> _startBlock;
-    RefPtr<dom::Node> _endBlock;
+    RefPtr<boo::Node> _startBlock;
+    RefPtr<boo::Node> _endBlock;
     RefPtr<EditingStyle> _typingStyle;
-    RefPtr<dom::Node> _startRoot;
-    RefPtr<dom::Node> _endRoot;
-    RefPtr<dom::Node> _startTableRow;
-    RefPtr<dom::Node> _endTableRow;
-    RefPtr<dom::Node> _temporaryPlaceholder;
+    RefPtr<boo::Node> _startRoot;
+    RefPtr<boo::Node> _endRoot;
+    RefPtr<boo::Node> _startTableRow;
+    RefPtr<boo::Node> _endTableRow;
+    RefPtr<boo::Node> _temporaryPlaceholder;
 
   public:
-    DeleteSelectionCommand(dom::Document &document, bool smartDelete, bool mergeBlocksAfterDelete,
-                           bool replace, bool expandForSpecialElements, bool sanitizeMarkup,
+    DeleteSelectionCommand(Document &document, bool smartDelete, bool mergeBlocksAfterDelete, bool replace,
+                           bool expandForSpecialElements, bool sanitizeMarkup,
                            EditAction editingAction = EditAction::Delete) noexcept;
 
     DeleteSelectionCommand(const VisibleSelection &selection, bool smartDelete, bool mergeBlocksAfterDelete,
@@ -75,7 +75,7 @@ namespace krys::boo
     ~DeleteSelectionCommand() noexcept override;
 
     KRYS_NODISCARD static Ref<DeleteSelectionCommand>
-      Create(dom::Document &document, bool smartDelete = false, bool mergeBlocksAfterDelete = true,
+      Create(Document &document, bool smartDelete = false, bool mergeBlocksAfterDelete = true,
              bool replace = false, bool expandForSpecialElements = false, bool sanitizeMarkup = true,
              EditAction editingAction = EditAction::Delete) noexcept;
 
@@ -113,10 +113,10 @@ namespace krys::boo
 
     void MakeStylingElementsDirectChildrenOfEditableRootToPreventStyleLoss() noexcept;
 
-    void RemoveNode(dom::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable =
+    void RemoveNode(boo::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable =
                                        DoNotAssumeContentIsAlwaysEditable) noexcept override;
 
-    void DeleteTextFromNode(dom::Text &node, uint32 offset, uint32 count) noexcept override;
+    void DeleteTextFromNode(Text &node, uint32 offset, uint32 count) noexcept override;
 
     void RemoveRedundantBlocks() noexcept;
 
@@ -125,8 +125,8 @@ namespace krys::boo
     void SmartDeleteParagraphSpacers() noexcept;
 
     void RemoveNodeUpdatingStates(
-      dom::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable) noexcept;
+      boo::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable) noexcept;
 
-    void InsertBlockPlaceholderForTableCellIfNeeded(dom::Element &element) noexcept;
+    void InsertBlockPlaceholderForTableCellIfNeeded(Element &element) noexcept;
   };
 }

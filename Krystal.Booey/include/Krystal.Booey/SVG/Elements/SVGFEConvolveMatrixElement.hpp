@@ -23,7 +23,7 @@
 #include "Krystal.Booey/Graphics/Filters/FEConvolveMatrix.hpp"
 #include "Krystal.Booey/SVG/SVGFilterPrimitiveStandardAttributes.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   template <>
   struct SVGPropertyTraits<EdgeModeType>
@@ -38,7 +38,7 @@ namespace krys::boo::svg
       return EdgeModeType::None;
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(EdgeModeType type) noexcept
+    KRYS_NODISCARD static DOMString ToString(EdgeModeType type) noexcept
     {
       switch (type)
       {
@@ -52,7 +52,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    KRYS_NODISCARD static EdgeModeType FromString(SVGElement &, dom::DOMStringView value) noexcept
+    KRYS_NODISCARD static EdgeModeType FromString(SVGElement &, DOMStringView value) noexcept
     {
       if (value == u8"duplicate")
       {
@@ -95,13 +95,13 @@ namespace krys::boo::svg
     Ref<SVGAnimatedBoolean> _preserveAlpha;
 
   public:
-    explicit SVGFEConvolveMatrixElement(dom::Document &document) noexcept;
+    explicit SVGFEConvolveMatrixElement(Document &document) noexcept;
 
     void SetOrder(float orderX, float orderY) noexcept;
 
     void SetKernelUnitLength(float kernelUnitLengthX, float kernelUnitLengthY) noexcept;
 
-    KRYS_NODISCARD dom::DOMString In1() const noexcept
+    KRYS_NODISCARD DOMString In1() const noexcept
     {
       return _in1->CurrentValue();
     }
@@ -225,21 +225,20 @@ namespace krys::boo::svg
       SVGPropertyOwnerRegistry<SVGFEConvolveMatrixElement, SVGFilterPrimitiveStandardAttributes>;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD bool IsValidTargetXOffset() const noexcept;
 
     KRYS_NODISCARD bool IsValidTargetYOffset() const noexcept;
 
-    bool SetFilterEffectAttribute(FilterEffect &effect,
-                                  const dom::QualifiedName &attributeName) noexcept final;
+    bool SetFilterEffectAttribute(FilterEffect &effect, const QualifiedName &attributeName) noexcept final;
 
-    KRYS_NODISCARD List<dom::DOMStringAtom> FilterEffectInputsNames() const noexcept final
+    KRYS_NODISCARD List<DOMStringAtom> FilterEffectInputsNames() const noexcept final
     {
-      return {dom::DOMStringAtom(In1())};
+      return {DOMStringAtom(In1())};
     }
 
     KRYS_NODISCARD RefPtr<FilterEffect>
@@ -248,8 +247,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGFEConvolveMatrixElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGFEConvolveMatrixElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGFEConvolveMatrixElement();
   }

@@ -32,7 +32,7 @@ namespace krys::ui
     /// @brief The colours shown, in order.
     List<boo::Color> _colors;
     /// @brief The element of each colour, by its index.
-    List<RefPtr<boo::dom::Element>> _swatches;
+    List<RefPtr<boo::Element>> _swatches;
     boo::Color _selectedColor;
     int32 _highlightedIndex {-1};
     bool _visible {false};

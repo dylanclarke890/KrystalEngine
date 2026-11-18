@@ -32,15 +32,14 @@
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
-  MathMLOperatorElement::MathMLOperatorElement(dom::Document &document) noexcept
+  MathMLOperatorElement::MathMLOperatorElement(Document &document) noexcept
       : MathMLTokenElement(document, MathMLElementInterface::Operator)
   {
   }
 
-  MathMLOperatorElement::OperatorChar
-    MathMLOperatorElement::ParseOperatorChar(dom::DOMStringView string) noexcept
+  MathMLOperatorElement::OperatorChar MathMLOperatorElement::ParseOperatorChar(DOMStringView string) noexcept
   {
     OperatorChar operatorChar;
     auto view = string;
@@ -76,7 +75,7 @@ namespace krys::boo::mathml
   {
     if (!_operatorChar)
     {
-      _operatorChar = ParseOperatorChar(TextContent().value_or(dom::DOMString {}));
+      _operatorChar = ParseOperatorChar(TextContent().value_or(DOMString {}));
     }
     return *_operatorChar;
   }
@@ -140,7 +139,7 @@ namespace krys::boo::mathml
 
   namespace
   {
-    KRYS_NODISCARD const dom::QualifiedName &
+    KRYS_NODISCARD const QualifiedName &
       PropertyFlagToAttributeName(MathMLOperatorDictionary::Flag flag) noexcept
     {
       switch (flag)
@@ -276,9 +275,8 @@ namespace krys::boo::mathml
     MathMLTokenElement::OnChildrenChanged();
   }
 
-  void MathMLOperatorElement::AttributeChanged(const dom::QualifiedName &name,
-                                               Maybe<dom::DOMStringView> oldValue,
-                                               Maybe<dom::DOMStringView> value) noexcept
+  void MathMLOperatorElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                               Maybe<DOMStringView> value) noexcept
   {
     if (name == MathMLNames::FormAttr())
     {

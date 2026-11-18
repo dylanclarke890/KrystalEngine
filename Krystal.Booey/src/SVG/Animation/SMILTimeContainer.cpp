@@ -57,7 +57,7 @@ namespace krys::boo::svg
   }
 
   void SMILTimeContainer::Schedule(SVGSMILElement *animation, SVGElement *target,
-                                   const dom::QualifiedName &attributeName) noexcept
+                                   const QualifiedName &attributeName) noexcept
   {
     krys_debug_assert(animation->TimeContainer() == this);
     krys_debug_assert(target);
@@ -84,7 +84,7 @@ namespace krys::boo::svg
   }
 
   void SMILTimeContainer::Unschedule(SVGSMILElement *animation, SVGElement *target,
-                                     const dom::QualifiedName &attributeName) noexcept
+                                     const QualifiedName &attributeName) noexcept
   {
     krys_debug_assert(animation->TimeContainer() == this);
 

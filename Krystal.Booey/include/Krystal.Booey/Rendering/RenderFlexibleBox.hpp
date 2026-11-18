@@ -163,9 +163,9 @@ namespace krys::boo
     Maybe<bool> _hasFlexFormattingContextLayout;
 
   public:
-    RenderFlexibleBox(Type type, dom::Element &element, RenderStyle &&style) noexcept;
+    RenderFlexibleBox(Type type, Element &element, RenderStyle &&style) noexcept;
 
-    RenderFlexibleBox(Type type, dom::Document &document, RenderStyle &&style) noexcept;
+    RenderFlexibleBox(Type type, Document &document, RenderStyle &&style) noexcept;
 
     ~RenderFlexibleBox() noexcept override;
 

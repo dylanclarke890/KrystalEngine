@@ -32,9 +32,9 @@
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGRect.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGGraphicsElement::SVGGraphicsElement(dom::Document &document,
+  SVGGraphicsElement::SVGGraphicsElement(Document &document,
                                          UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
                                          SVGElementInterface interface, SVGElementFlags flags,
                                          dom::NodeFlags nodeFlags) noexcept
@@ -59,7 +59,7 @@ namespace krys::boo::svg
 
   AffineTransform SVGGraphicsElement::GetCTM(StyleUpdateStrategy styleUpdateStrategy) noexcept
   {
-    return SVGLocatable::ComputeCTM(this, CTMScope::NearestViewportScope, styleUpdateStrategy);
+    return SVGLocatable::ComputeCTM(this, svg::CTMScope::NearestViewportScope, styleUpdateStrategy);
   }
 
   Ref<SVGMatrix> SVGGraphicsElement::GetScreenCTMForBindings() noexcept
@@ -69,7 +69,7 @@ namespace krys::boo::svg
 
   AffineTransform SVGGraphicsElement::GetScreenCTM(StyleUpdateStrategy styleUpdateStrategy) noexcept
   {
-    return SVGLocatable::ComputeCTM(this, CTMScope::ScreenScope, styleUpdateStrategy);
+    return SVGLocatable::ComputeCTM(this, svg::CTMScope::ScreenScope, styleUpdateStrategy);
   }
 
   AffineTransform SVGGraphicsElement::AnimatedLocalTransform() const noexcept
@@ -119,20 +119,19 @@ namespace krys::boo::svg
     return _supplementalTransform.get();
   }
 
-  void SVGGraphicsElement::AttributeChanged(const dom::QualifiedName &name,
-                                            Maybe<dom::DOMStringView> oldValue,
-                                            Maybe<dom::DOMStringView> value) noexcept
+  void SVGGraphicsElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                            Maybe<DOMStringView> value) noexcept
   {
     if (name == SVGNames::TransformAttr())
     {
-      _transform->BaseVal()->Parse(value.value_or(dom::DOMStringView {}));
+      _transform->BaseVal()->Parse(value.value_or(DOMStringView {}));
     }
 
     SVGTests::ParseAttribute(name, value);
     SVGElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGGraphicsElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGGraphicsElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {

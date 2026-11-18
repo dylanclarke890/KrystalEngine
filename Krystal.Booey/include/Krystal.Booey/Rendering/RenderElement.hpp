@@ -35,7 +35,7 @@
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class Element;
@@ -105,7 +105,7 @@ namespace krys::boo
     /// box.
     /// @param rendererTypeOverride The displays that get a block flow instead.
     KRYS_NODISCARD static RenderPtr<RenderElement>
-      CreateFor(dom::Element &element, RenderStyle &&style,
+      CreateFor(Element &element, RenderStyle &&style,
                 EnumSet<ConstructBlockLevelRendererFor> rendererTypeOverride = {}) noexcept;
 
     /// @brief Whether @p content replaces an element's content with an image: it's exactly one image.
@@ -161,7 +161,7 @@ namespace krys::boo
                   style::DifferenceResult minimalStyleDifference = style::DifferenceResult::Equal) noexcept;
 
     /// @brief The element rendered, or null for an anonymous box.
-    KRYS_NODISCARD dom::Element *GetElement() const noexcept;
+    KRYS_NODISCARD Element *GetElement() const noexcept;
 
     KRYS_NODISCARD layout::ElementBox *LayoutBox() noexcept;
 
@@ -323,8 +323,7 @@ namespace krys::boo
     VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
                                                const IntRect *) noexcept override;
 
-    KRYS_NODISCARD VisibleInViewportState
-      ImageVisibleInViewport(const dom::Document &) const noexcept override;
+    KRYS_NODISCARD VisibleInViewportState ImageVisibleInViewport(const Document &) const noexcept override;
 
     void DidRemoveCachedImageClient(CachedImage &) noexcept override;
 
@@ -404,7 +403,7 @@ namespace krys::boo
                              const RenderStyle *ownStyle = nullptr) const noexcept;
 
     /// @brief The element whose content this renderer renders: the host of a pseudo-element.
-    KRYS_NODISCARD dom::Element *GeneratingElement() const noexcept;
+    KRYS_NODISCARD Element *GeneratingElement() const noexcept;
 
     KRYS_NODISCARD Color SelectionColor(css::PropertyId colorProperty) const noexcept;
 
@@ -545,10 +544,10 @@ namespace krys::boo
     void PushOntoGeometryMap(RenderGeometryMap &geometryMap, const RenderLayerModelObject *repaintContainer,
                              RenderElement *container, bool containerSkipped) const noexcept;
 
-    RenderElement(Type type, dom::Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags,
+    RenderElement(Type type, Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags,
                   TypeSpecificFlags typeSpecificFlags) noexcept;
 
-    RenderElement(Type type, dom::Document &document, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags,
+    RenderElement(Type type, Document &document, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags,
                   TypeSpecificFlags typeSpecificFlags) noexcept;
 
     void WillBeDestroyed() noexcept override;
@@ -623,8 +622,8 @@ namespace krys::boo
     }
 
   private:
-    RenderElement(Type type, dom::ContainerNode &elementOrDocument, RenderStyle &&style,
-                  EnumSet<TypeFlag> flags, TypeSpecificFlags typeSpecificFlags) noexcept;
+    RenderElement(Type type, ContainerNode &elementOrDocument, RenderStyle &&style, EnumSet<TypeFlag> flags,
+                  TypeSpecificFlags typeSpecificFlags) noexcept;
 
     void RemoveFromRenderFragmentedFlowIncludingDescendants(bool shouldUpdateState) noexcept;
 

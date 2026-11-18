@@ -59,7 +59,7 @@ namespace krys::boo
     }
   }
 
-  RenderTextControlSingleLine::RenderTextControlSingleLine(Type type, html::HTMLInputElement &element,
+  RenderTextControlSingleLine::RenderTextControlSingleLine(Type type, HTMLInputElement &element,
                                                            RenderStyle &&style) noexcept
       : RenderTextControl(type, element, krys::move(style))
   {
@@ -68,17 +68,17 @@ namespace krys::boo
 
   RenderTextControlSingleLine::~RenderTextControlSingleLine() noexcept = default;
 
-  html::HTMLElement *RenderTextControlSingleLine::ContainerElement() const noexcept
+  HTMLElement *RenderTextControlSingleLine::ContainerElement() const noexcept
   {
     return InputElement().ContainerElement();
   }
 
-  html::HTMLElement *RenderTextControlSingleLine::InnerBlockElement() const noexcept
+  HTMLElement *RenderTextControlSingleLine::InnerBlockElement() const noexcept
   {
     return InputElement().InnerBlockElement();
   }
 
-  html::HTMLElement *RenderTextControlSingleLine::InnerSpinButtonElement() const noexcept
+  HTMLElement *RenderTextControlSingleLine::InnerSpinButtonElement() const noexcept
   {
     return InputElement().InnerSpinButtonElement();
   }
@@ -101,7 +101,7 @@ namespace krys::boo
     auto innerText = InnerTextElement();
     RenderTextControlInnerBlock *innerTextRenderer = innerText ? innerText->Renderer() : nullptr;
     RenderBox *innerBlockRenderer = InnerBlockElement() ? InnerBlockElement()->GetRenderBox() : nullptr;
-    html::HTMLElement *container = ContainerElement();
+    HTMLElement *container = ContainerElement();
     RenderBox *containerRenderer = container ? container->GetRenderBox() : nullptr;
 
     // To ensure consistency between layouts, we need to reset any conditionally overridden height.
@@ -229,7 +229,7 @@ namespace krys::boo
 
     bool innerTextSizeChanged = innerTextRenderer && innerTextRenderer->Size() != oldInnerTextSize;
 
-    html::HTMLElement *placeholderElement = InputElement().PlaceholderElement();
+    HTMLElement *placeholderElement = InputElement().PlaceholderElement();
     if (RenderBox *placeholderBox = placeholderElement ? placeholderElement->GetRenderBox() : nullptr)
     {
       auto innerTextWidth = LayoutUnit {};
@@ -323,7 +323,7 @@ namespace krys::boo
     //  - we hit a node inside the inner text element,
     //  - we hit the <input> element (e.g. we're over the border or padding), or
     //  - we hit regions not in any decoration buttons.
-    html::HTMLElement *container = ContainerElement();
+    HTMLElement *container = ContainerElement();
     auto innerText = InnerTextElement();
     if ((innerText && dom::TreeQueries::IsDescendant(*result.InnerNode(), *innerText))
         || result.InnerNode() == &InputElement() || (container && container == result.InnerNode()))
@@ -352,13 +352,13 @@ namespace krys::boo
 
     // We may have set the width and the height in the old style in layout().
     // Reset them now to avoid getting a spurious layout hint.
-    html::HTMLElement *innerBlock = InnerBlockElement();
+    HTMLElement *innerBlock = InnerBlockElement();
     if (auto *innerBlockRenderer = innerBlock ? innerBlock->Renderer() : nullptr)
     {
       innerBlockRenderer->MutableStyle().SetHeight(css::keywords::Auto {});
       innerBlockRenderer->MutableStyle().SetWidth(css::keywords::Auto {});
     }
-    html::HTMLElement *container = ContainerElement();
+    HTMLElement *container = ContainerElement();
     if (auto *containerRenderer = container ? container->Renderer() : nullptr)
     {
       containerRenderer->MutableStyle().SetHeight(css::keywords::Auto {});
@@ -583,7 +583,7 @@ namespace krys::boo
   }
 
   bool RenderTextControlSingleLine::Scroll(ScrollDirection direction, ScrollGranularity granularity,
-                                           uint32 stepCount, dom::Element **stopElement,
+                                           uint32 stepCount, Element **stopElement,
                                            ScrollIsAnimated animated) noexcept
   {
     auto *renderer = InnerTextElement()->Renderer();
@@ -601,8 +601,7 @@ namespace krys::boo
 
   bool RenderTextControlSingleLine::LogicalScroll(ScrollLogicalDirection direction,
                                                   ScrollGranularity granularity, uint32 stepCount,
-                                                  dom::Element **stopElement,
-                                                  ScrollIsAnimated animated) noexcept
+                                                  Element **stopElement, ScrollIsAnimated animated) noexcept
   {
     auto *layer = InnerTextElement()->Renderer()->Layer();
     auto *scrollableArea = layer ? layer->GetScrollableArea() : nullptr;
@@ -616,9 +615,9 @@ namespace krys::boo
     return RenderBlockFlow::LogicalScroll(direction, granularity, stepCount, stopElement, animated);
   }
 
-  html::HTMLInputElement &RenderTextControlSingleLine::InputElement() const noexcept
+  HTMLInputElement &RenderTextControlSingleLine::InputElement() const noexcept
   {
-    return Downcast<html::HTMLInputElement>(RenderTextControl::TextFormControlElement());
+    return Downcast<HTMLInputElement>(RenderTextControl::TextFormControlElement());
   }
 
   RenderTextControlInnerBlock *RenderTextControlSingleLine::InnerTextRenderer() const noexcept
@@ -627,8 +626,7 @@ namespace krys::boo
     return innerText ? innerText->Renderer() : nullptr;
   }
 
-  RenderTextControlInnerBlock::RenderTextControlInnerBlock(dom::Element &element,
-                                                           RenderStyle &&style) noexcept
+  RenderTextControlInnerBlock::RenderTextControlInnerBlock(Element &element, RenderStyle &&style) noexcept
       : RenderBlockFlow(Type::TextControlInnerBlock, element, krys::move(style))
   {
     krys_debug_assert(IsRenderTextControlInnerBlock());

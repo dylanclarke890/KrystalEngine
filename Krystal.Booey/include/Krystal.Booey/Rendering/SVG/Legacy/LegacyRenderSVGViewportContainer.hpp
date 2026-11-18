@@ -25,13 +25,10 @@
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGContainer.hpp"
 
-namespace krys::boo::svg
-{
-  class SVGSvgElement;
-}
-
 namespace krys::boo
 {
+  class SVGSvgElement;
+
   // This is used for non-root <svg> elements and <marker> elements, neither of which are SVGTransformable
   // thus we inherit from LegacyRenderSVGContainer instead of LegacyRenderSVGTransformableContainer
   class LegacyRenderSVGViewportContainer final : public LegacyRenderSVGContainer
@@ -46,11 +43,11 @@ namespace krys::boo
     mutable AffineTransform _localToParentTransform {};
 
   public:
-    LegacyRenderSVGViewportContainer(svg::SVGSvgElement &, RenderStyle &&) noexcept;
+    LegacyRenderSVGViewportContainer(SVGSvgElement &, RenderStyle &&) noexcept;
 
     ~LegacyRenderSVGViewportContainer() noexcept override;
 
-    KRYS_NODISCARD svg::SVGSvgElement &SvgSvgElement() const noexcept;
+    KRYS_NODISCARD SVGSvgElement &SvgSvgElement() const noexcept;
 
     KRYS_NODISCARD FloatRect Viewport() const noexcept
     {

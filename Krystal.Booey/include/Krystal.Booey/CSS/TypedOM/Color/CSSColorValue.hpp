@@ -32,13 +32,10 @@
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
-}
 
-namespace krys::boo::css
-{
   /// @brief A colour component that's a percentage: a number (a fraction), a numeric value, or `none`.
   /// @see https://drafts.css-houdini.org/css-typed-om/#typedefdef-csscolorpercent
   using CSSColorPercent = Variant<double, RefPtr<CSSNumericValue>, CSSOMString, RefPtr<CSSKeywordValue>>;
@@ -63,7 +60,7 @@ namespace krys::boo::css
     /// relative colours, and components of other types).
     /// @return A `SyntaxError` if @p cssText isn't a `<color>`.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csscolorvalue-parse
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSStyleValue>> Parse(dom::Document &document,
+    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSStyleValue>> Parse(Document &document,
                                                                      CSSOMStringView cssText) noexcept;
 
     /// @brief The colour as the CSS function its components make (`rgb(50% 255 none / 100%)`).
@@ -91,7 +88,7 @@ namespace krys::boo::css
     /// @brief @p numberish as a percentage component, a number being a fraction.
     KRYS_NODISCARD static CSSColorPercent ToCSSColorPercent(const CSSNumberish &numberish) noexcept;
 
-    KRYS_NODISCARD RefPtr<Value> ToCSSValue() const noexcept final;
+    KRYS_NODISCARD RefPtr<css::Value> ToCSSValue() const noexcept final;
 
     void Serialise(StringBuilder &builder,
                    EnumSet<SerialisationArguments> arguments = {}) const noexcept final;
@@ -106,8 +103,8 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSColorValue)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleValue &styleValue) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSColorValue)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleValue &styleValue) noexcept
   {
     return krys::boo::css::IsCSSColorValue(styleValue.StyleValueType());
   }

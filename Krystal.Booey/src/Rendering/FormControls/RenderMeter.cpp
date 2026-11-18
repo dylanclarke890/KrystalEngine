@@ -25,7 +25,7 @@
 
 namespace krys::boo
 {
-  RenderMeter::RenderMeter(html::HTMLElement &element, RenderStyle &&style) noexcept
+  RenderMeter::RenderMeter(HTMLElement &element, RenderStyle &&style) noexcept
       : RenderBlockFlow(Type::Meter, element, krys::move(style))
   {
     krys_debug_assert(IsRenderMeter());
@@ -33,17 +33,17 @@ namespace krys::boo
 
   RenderMeter::~RenderMeter() noexcept = default;
 
-  html::HTMLMeterElement *RenderMeter::MeterElement() const noexcept
+  HTMLMeterElement *RenderMeter::MeterElement() const noexcept
   {
     krys_debug_assert(GetElement());
 
-    if (auto *meterElement = DynamicDowncast<html::HTMLMeterElement>(*GetElement()))
+    if (auto *meterElement = DynamicDowncast<HTMLMeterElement>(*GetElement()))
     {
       return meterElement;
     }
 
     krys_debug_assert(dom::TreeQueries::ShadowHost(*GetElement()));
-    return Downcast<html::HTMLMeterElement>(dom::TreeQueries::ShadowHost(*GetElement()));
+    return Downcast<HTMLMeterElement>(dom::TreeQueries::ShadowHost(*GetElement()));
   }
 
   void RenderMeter::UpdateLogicalWidth() noexcept

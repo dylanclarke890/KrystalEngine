@@ -27,33 +27,32 @@
 
 #include "Krystal.Booey/SVG/Properties/SVGAnimationFunction.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief An animation function that interpolates, and can add to the underlying value (`additive="sum"`)
   /// and accumulate over repeats (`accumulate="sum"`).
   class SVGAnimationAdditiveFunction : public SVGAnimationFunction
   {
   protected:
-    CalcMode _calcMode;
+    svg::CalcMode _calcMode;
     bool _isAccumulated;
     bool _isAdditive;
 
   public:
-    SVGAnimationAdditiveFunction(AnimationMode animationMode, CalcMode calcMode, bool isAccumulated,
+    SVGAnimationAdditiveFunction(svg::AnimationMode animationMode, svg::CalcMode calcMode, bool isAccumulated,
                                  bool isAdditive) noexcept
         : SVGAnimationFunction(animationMode), _calcMode(calcMode), _isAccumulated(isAccumulated),
           _isAdditive(isAdditive)
     {
     }
 
-    void SetFromAndByValues(SVGElement &targetElement, dom::DOMStringView from,
-                            dom::DOMStringView by) noexcept override
+    void SetFromAndByValues(SVGElement &targetElement, DOMStringView from, DOMStringView by) noexcept override
     {
       SetFromAndToValues(targetElement, from, by);
       AddFromAndToValues(targetElement);
     }
 
-    void SetToAtEndOfDurationValue(SVGElement &, dom::DOMStringView) noexcept override
+    void SetToAtEndOfDurationValue(SVGElement &, DOMStringView) noexcept override
     {
       krys_debug_assert_msg(false, "Additive functions set the value at the end of the duration themselves");
     }
@@ -63,7 +62,7 @@ namespace krys::boo::svg
                                  float toAtEndOfDuration, float animated) const noexcept
     {
       float number;
-      if (_calcMode == CalcMode::Discrete)
+      if (_calcMode == svg::CalcMode::Discrete)
       {
         number = progress < 0.5 ? from : to;
       }
@@ -77,7 +76,7 @@ namespace krys::boo::svg
         number += toAtEndOfDuration * static_cast<float>(repeatCount);
       }
 
-      if (_isAdditive && _animationMode != AnimationMode::To)
+      if (_isAdditive && _animationMode != svg::AnimationMode::To)
       {
         number += animated;
       }

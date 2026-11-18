@@ -54,7 +54,7 @@
 
 namespace krys::boo::dom
 {
-  using WeakSVGElementSet = List<WeakPtr<svg::SVGElement>>;
+  using WeakSVGElementSet = List<WeakPtr<SVGElement>>;
 
   struct SVGResourcesMap
   {
@@ -70,31 +70,31 @@ namespace krys::boo::dom
   namespace
   {
     // The sets are lists: an element is in one at most once, and elements that have gone are ignored.
-    void AddToSet(WeakSVGElementSet &set, svg::SVGElement &element) noexcept
+    void AddToSet(WeakSVGElementSet &set, SVGElement &element) noexcept
     {
-      std::erase_if(set, [](const WeakPtr<svg::SVGElement> &weakElement) { return !weakElement; });
-      if (std::ranges::none_of(set, [&](const WeakPtr<svg::SVGElement> &weakElement)
+      std::erase_if(set, [](const WeakPtr<SVGElement> &weakElement) { return !weakElement; });
+      if (std::ranges::none_of(set, [&](const WeakPtr<SVGElement> &weakElement)
                                { return weakElement.get() == &element; }))
       {
         set.push_back(CreateWeakPtr(&element));
       }
     }
 
-    void RemoveFromSet(WeakSVGElementSet &set, svg::SVGElement &element) noexcept
+    void RemoveFromSet(WeakSVGElementSet &set, SVGElement &element) noexcept
     {
-      std::erase_if(set, [&](const WeakPtr<svg::SVGElement> &weakElement)
+      std::erase_if(set, [&](const WeakPtr<SVGElement> &weakElement)
                     { return !weakElement || weakElement.get() == &element; });
     }
 
-    KRYS_NODISCARD bool SetContains(const WeakSVGElementSet &set, svg::SVGElement &element) noexcept
+    KRYS_NODISCARD bool SetContains(const WeakSVGElementSet &set, SVGElement &element) noexcept
     {
-      return std::ranges::any_of(set, [&](const WeakPtr<svg::SVGElement> &weakElement)
+      return std::ranges::any_of(set, [&](const WeakPtr<SVGElement> &weakElement)
                                  { return weakElement.get() == &element; });
     }
 
     KRYS_NODISCARD bool IsEmptyIgnoringNullReferences(const WeakSVGElementSet &set) noexcept
     {
-      return std::ranges::none_of(set, [](const WeakPtr<svg::SVGElement> &weakElement)
+      return std::ranges::none_of(set, [](const WeakPtr<SVGElement> &weakElement)
                                   { return static_cast<bool>(weakElement); });
     }
   }
@@ -147,7 +147,7 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-  void DocumentOrShadowRoot::AddPendingSVGResource(const DOMStringAtom &id, svg::SVGElement &element) noexcept
+  void DocumentOrShadowRoot::AddPendingSVGResource(const DOMStringAtom &id, SVGElement &element) noexcept
   {
     if (id.View().empty())
     {
@@ -169,7 +169,7 @@ namespace krys::boo::dom
     return GetSVGResourcesMap().PendingResources.contains(id);
   }
 
-  bool DocumentOrShadowRoot::IsElementWithPendingSVGResources(svg::SVGElement &element) const noexcept
+  bool DocumentOrShadowRoot::IsElementWithPendingSVGResources(SVGElement &element) const noexcept
   {
     // This algorithm takes time proportional to the number of pending resources and need not.
     // If performance becomes an issue we can keep a counted set of elements and answer the question
@@ -178,8 +178,7 @@ namespace krys::boo::dom
                                [&](const auto &entry) { return SetContains(entry.second, element); });
   }
 
-  bool DocumentOrShadowRoot::IsPendingSVGResource(svg::SVGElement &element,
-                                                  const DOMStringAtom &id) const noexcept
+  bool DocumentOrShadowRoot::IsPendingSVGResource(SVGElement &element, const DOMStringAtom &id) const noexcept
   {
     if (id.View().empty())
     {
@@ -196,7 +195,7 @@ namespace krys::boo::dom
     return SetContains(it->second, element);
   }
 
-  void DocumentOrShadowRoot::ClearHasPendingSVGResourcesIfPossible(svg::SVGElement &element) noexcept
+  void DocumentOrShadowRoot::ClearHasPendingSVGResourcesIfPossible(SVGElement &element) noexcept
   {
     if (!IsElementWithPendingSVGResources(element))
     {
@@ -204,7 +203,7 @@ namespace krys::boo::dom
     }
   }
 
-  void DocumentOrShadowRoot::RemoveElementFromPendingSVGResources(svg::SVGElement &element) noexcept
+  void DocumentOrShadowRoot::RemoveElementFromPendingSVGResources(SVGElement &element) noexcept
   {
     auto &map = GetSVGResourcesMap();
     if (!map.PendingResources.empty() && element.HasPendingResources())
@@ -248,8 +247,7 @@ namespace krys::boo::dom
     }
   }
 
-  List<WeakPtr<svg::SVGElement>>
-    DocumentOrShadowRoot::RemovePendingSVGResource(const DOMStringAtom &id) noexcept
+  List<WeakPtr<SVGElement>> DocumentOrShadowRoot::RemovePendingSVGResource(const DOMStringAtom &id) noexcept
   {
     auto &pendingResources = GetSVGResourcesMap().PendingResources;
     auto node = pendingResources.extract(id);
@@ -272,7 +270,7 @@ namespace krys::boo::dom
     }
   }
 
-  RefPtr<svg::SVGElement>
+  RefPtr<SVGElement>
     DocumentOrShadowRoot::TakeElementFromPendingSVGResourcesForRemovalMap(const DOMStringAtom &id) noexcept
   {
     if (id.View().empty())
@@ -288,12 +286,12 @@ namespace krys::boo::dom
     }
 
     auto &resourceSet = it->second;
-    std::erase_if(resourceSet, [](const WeakPtr<svg::SVGElement> &weakElement) { return !weakElement; });
+    std::erase_if(resourceSet, [](const WeakPtr<SVGElement> &weakElement) { return !weakElement; });
     if (resourceSet.empty())
     {
       return nullptr;
     }
-    RefPtr<svg::SVGElement> firstElement = ShareRefPtr(resourceSet.front().get());
+    RefPtr<SVGElement> firstElement = ShareRefPtr(resourceSet.front().get());
 
     RemoveFromSet(resourceSet, *firstElement);
 
@@ -324,7 +322,7 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD bool ElementIsImageMapNamed(const Element &element, DOMStringView name) noexcept
     {
-      auto *map = DynamicDowncast<html::HTMLMapElement>(element);
+      auto *map = DynamicDowncast<HTMLMapElement>(element);
       return map && (map->Id() == name || map->Name() == name);
     }
   }
@@ -380,7 +378,7 @@ namespace krys::boo::dom
     return _elementsById->First(DOMStringAtom(id), _rootNode, ElementHasId);
   }
 
-  void DocumentOrShadowRoot::AddImageMap(DOMStringAtom name, html::HTMLMapElement &map) noexcept
+  void DocumentOrShadowRoot::AddImageMap(DOMStringAtom name, HTMLMapElement &map) noexcept
   {
     if (!_imageMapsByName)
     {
@@ -389,7 +387,7 @@ namespace krys::boo::dom
     _imageMapsByName->Add(krys::move(name), map);
   }
 
-  void DocumentOrShadowRoot::RemoveImageMap(DOMStringAtom name, html::HTMLMapElement &map) noexcept
+  void DocumentOrShadowRoot::RemoveImageMap(DOMStringAtom name, HTMLMapElement &map) noexcept
   {
     krys_debug_assert(_imageMapsByName);
     if (_imageMapsByName)
@@ -406,13 +404,13 @@ namespace krys::boo::dom
     }
   }
 
-  html::HTMLMapElement *DocumentOrShadowRoot::FirstImageMap(DOMStringView name) const noexcept
+  HTMLMapElement *DocumentOrShadowRoot::FirstImageMap(DOMStringView name) const noexcept
   {
     if (!_imageMapsByName || name.empty())
     {
       return nullptr;
     }
-    return static_cast<html::HTMLMapElement *>(
+    return static_cast<HTMLMapElement *>(
       _imageMapsByName->First(DOMStringAtom(name), _rootNode, ElementIsImageMapNamed));
   }
 
@@ -512,17 +510,16 @@ namespace krys::boo::dom
 
 #pragma region DocumentOrShadowRoot Mixin (CSSOM)
 
-  css::CSSStyleSheetObservableArray &DocumentOrShadowRoot::AdoptedStyleSheets() noexcept
+  CSSStyleSheetObservableArray &DocumentOrShadowRoot::AdoptedStyleSheets() noexcept
   {
     if (!_adoptedStyleSheets) KRYS_UNLIKELY
     {
-      _adoptedStyleSheets = CreateUnique<css::CSSStyleSheetObservableArray>(_rootNode);
+      _adoptedStyleSheets = CreateUnique<CSSStyleSheetObservableArray>(_rootNode);
     }
     return *_adoptedStyleSheets;
   }
 
-  ExceptionOr<void>
-    DocumentOrShadowRoot::SetAdoptedStyleSheets(List<Ref<css::CSSStyleSheet>> &&sheets) noexcept
+  ExceptionOr<void> DocumentOrShadowRoot::SetAdoptedStyleSheets(List<Ref<CSSStyleSheet>> &&sheets) noexcept
   {
     if (!_adoptedStyleSheets && sheets.empty())
     {
@@ -533,7 +530,7 @@ namespace krys::boo::dom
 
 #pragma endregion
 
-  Span<const Ref<css::CSSStyleSheet>> DocumentOrShadowRoot::GetAdoptedStyleSheets() const noexcept
+  Span<const Ref<CSSStyleSheet>> DocumentOrShadowRoot::GetAdoptedStyleSheets() const noexcept
   {
     if (!_adoptedStyleSheets)
     {

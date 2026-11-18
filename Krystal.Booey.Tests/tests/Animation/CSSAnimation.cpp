@@ -23,13 +23,13 @@ namespace krys::boo::tests
       using AnimationPageFixture::AnimationPageFixture;
 
       /// @brief The CSS animations `#id`'s style created, in its `animation-name` order.
-      KRYS_NODISCARD List<Ref<CSSAnimation>> Animations(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD List<Ref<CSSAnimation>> Animations(DOMStringView id) noexcept
       {
         auto &animations = ById(id).AnimationsCreatedByMarkup(null);
         return {animations.begin(), animations.end()};
       }
 
-      KRYS_NODISCARD CSSAnimation &OnlyAnimation(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD CSSAnimation &OnlyAnimation(DOMStringView id) noexcept
       {
         auto &animations = ById(id).AnimationsCreatedByMarkup(null);
         REQUIRE(animations.size() == 1);
@@ -319,7 +319,7 @@ namespace krys::boo::tests
     // A name without a rule creates no animation...
     CHECK(fixture.Animations(u8"box").empty());
     CHECK(fixture.ById(u8"box").GetKeyframeEffectStack(null)->ContainsInvalidCSSAnimationName(
-      css::CSSOMString {u8"fade"}));
+      CSSOMString {u8"fade"}));
 
     // ...until the rule is added.
     auto &sheet = fixture.ById(u8"sheet");
@@ -387,7 +387,7 @@ namespace krys::boo::tests
       REQUIRE_FALSE(
         effect
           .BindingsUpdateTiming(*fixture.Document,
-                                OptionalEffectTiming {.Duration = Variant<double, dom::DOMString> {4'000.0}})
+                                OptionalEffectTiming {.Duration = Variant<double, DOMString> {4'000.0}})
           .HasException());
       fixture.SetStyle(u8"box", u8"animation-duration: 2s");
       fixture.Frame();
@@ -465,7 +465,7 @@ namespace krys::boo::tests
       AnimationPageFixture fixture {utf8_string(styles)
                                     + u8"option::checkmark{animation:hold 100s}</style>"
                                       u8"<select id=s><option id=a>a</select>"};
-      auto &select = Downcast<html::HTMLSelectElement>(fixture.ById(u8"s"));
+      auto &select = Downcast<HTMLSelectElement>(fixture.ById(u8"s"));
       CHECK(fixture.Document->GetAnimations().empty());
       select.Focus();
       auto *window = fixture.Document->Window();

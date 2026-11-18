@@ -67,9 +67,9 @@ namespace krys::ui::tests
         return _paint;
       }
 
-      KRYS_NODISCARD boo::html::HTMLCanvasElement &Canvas(boo::dom::DOMStringView id = u8"canvas") noexcept
+      KRYS_NODISCARD boo::HTMLCanvasElement &Canvas(boo::DOMStringView id = u8"canvas") noexcept
       {
-        return Downcast<boo::html::HTMLCanvasElement>(*_view.Document().GetElementById(id));
+        return Downcast<boo::HTMLCanvasElement>(*_view.Document().GetElementById(id));
       }
 
       KRYS_NODISCARD boo::html::CanvasRenderingContext2D &Context() noexcept
@@ -137,7 +137,7 @@ namespace krys::ui::tests
     Canvas2DFixture fixture;
     auto &context = fixture.Context();
 
-    context.SetFillStyle(boo::dom::DOMString(u8"red"));
+    context.SetFillStyle(boo::DOMString(u8"red"));
     context.FillRect(0, 0, 50, 50);
     auto *buffer = fixture.Canvas().Buffer();
     REQUIRE(buffer);
@@ -149,7 +149,7 @@ namespace krys::ui::tests
     CheckPixel(image, 75, 25, Black);
 
     // What was drawn before stays; only what's new is rendered.
-    context.SetFillStyle(boo::dom::DOMString(u8"blue"));
+    context.SetFillStyle(boo::DOMString(u8"blue"));
     context.FillRect(50, 0, 50, 50);
     image = fixture.Frame();
     CheckPixel(image, 25, 25, Red);
@@ -185,7 +185,7 @@ namespace krys::ui::tests
     context.Rect(0, 0, 20, 20);
     context.Clip();
     context.Translate(10, 0);
-    context.SetFillStyle(boo::dom::DOMString(u8"lime"));
+    context.SetFillStyle(boo::DOMString(u8"lime"));
     (void)fixture.Frame();
 
     context.FillRect(0, 0, 100, 50);
@@ -203,14 +203,14 @@ namespace krys::ui::tests
     CheckPixel(image, 65, 35, Black);
     CheckPixel(image, 15, 15, Lime);
 
-    context.SetFillStyle(boo::dom::DOMString(u8"red"));
+    context.SetFillStyle(boo::DOMString(u8"red"));
     context.FillRect(60, 30, 10, 10);
     image = fixture.Frame();
     CheckPixel(image, 65, 35, Red);
 
     // Line styles, too.
     context.SetLineWidth(10);
-    context.SetStrokeStyle(boo::dom::DOMString(u8"blue"));
+    context.SetStrokeStyle(boo::DOMString(u8"blue"));
     (void)fixture.Frame();
     context.BeginPath();
     context.MoveTo(80, 0);
@@ -226,10 +226,10 @@ namespace krys::ui::tests
   {
     Canvas2DFixture fixture;
     auto &context = fixture.Context();
-    context.SetFillStyle(boo::dom::DOMString(u8"red"));
+    context.SetFillStyle(boo::DOMString(u8"red"));
     context.FillRect(0, 0, 50, 50);
     (void)fixture.Frame();
-    context.SetFillStyle(boo::dom::DOMString(u8"blue"));
+    context.SetFillStyle(boo::DOMString(u8"blue"));
     context.FillRect(25, 10, 50, 20);
 
     // Painting the page again draws the canvas's texture as an image, with everything drawn so far.
@@ -249,9 +249,9 @@ namespace krys::ui::tests
       Canvas2DFixture fixture;
       fixture.GetView().SetDevice(fixture.Paint().Device());
       auto &context = fixture.Context();
-      context.SetFillStyle(boo::dom::DOMString(u8"red"));
+      context.SetFillStyle(boo::DOMString(u8"red"));
       context.FillRect(0, 0, 50, 50);
-      context.SetFillStyle(boo::dom::DOMString(u8"rgba(0, 0, 255, 0.5)"));
+      context.SetFillStyle(boo::DOMString(u8"rgba(0, 0, 255, 0.5)"));
       context.FillRect(50, 0, 50, 50);
 
       CheckRead(ReadPixel(context, 25, 25), Red);
@@ -265,7 +265,7 @@ namespace krys::ui::tests
       CHECK(bytes->Item(7) == 255);
 
       // Drawing after a read is read too, and shown.
-      context.SetFillStyle(boo::dom::DOMString(u8"lime"));
+      context.SetFillStyle(boo::DOMString(u8"lime"));
       context.FillRect(0, 0, 10, 10);
       CheckRead(ReadPixel(context, 5, 5), Lime);
       auto image = fixture.Frame();
@@ -277,7 +277,7 @@ namespace krys::ui::tests
     {
       Canvas2DFixture fixture;
       auto &context = fixture.Context();
-      context.SetFillStyle(boo::dom::DOMString(u8"red"));
+      context.SetFillStyle(boo::DOMString(u8"red"));
       context.FillRect(0, 0, 50, 50);
       CheckRead(ReadPixel(context, 25, 25), Transparent);
       (void)fixture.Frame();
@@ -290,7 +290,7 @@ namespace krys::ui::tests
     Canvas2DFixture fixture;
     fixture.GetView().SetDevice(fixture.Paint().Device());
     auto &context = fixture.Context();
-    context.SetFillStyle(boo::dom::DOMString(u8"red"));
+    context.SetFillStyle(boo::DOMString(u8"red"));
     context.FillRect(0, 0, 100, 50);
 
     // Green, put whatever the transform, alpha and compositing, then drawn over.
@@ -308,7 +308,7 @@ namespace krys::ui::tests
     context.ResetTransform();
     context.SetGlobalAlpha(1);
     context.SetGlobalCompositeOperation(u8"source-over");
-    context.SetFillStyle(boo::dom::DOMString(u8"blue"));
+    context.SetFillStyle(boo::DOMString(u8"blue"));
     context.FillRect(25, 25, 10, 10);
 
     // Half-transparent white replaces what's there rather than blending with it.
@@ -345,11 +345,11 @@ namespace krys::ui::tests
     REQUIRE(source);
     auto &sourceCanvas = fixture.Canvas(u8"source");
 
-    source->SetFillStyle(boo::dom::DOMString(u8"red"));
+    source->SetFillStyle(boo::DOMString(u8"red"));
     source->FillRect(0, 0, 20, 20);
     REQUIRE_FALSE(context.DrawImage(ShareRefPtr(&sourceCanvas), 0, 0).HasException());
     // Drawing into the source after doesn't change what was drawn from it.
-    source->SetFillStyle(boo::dom::DOMString(u8"blue"));
+    source->SetFillStyle(boo::DOMString(u8"blue"));
     source->FillRect(0, 0, 20, 20);
     REQUIRE_FALSE(context.DrawImage(ShareRefPtr(&sourceCanvas), 30, 0).HasException());
 
@@ -361,7 +361,7 @@ namespace krys::ui::tests
     auto pattern = context.CreatePattern(ShareRefPtr(&sourceCanvas), u8"repeat");
     REQUIRE_FALSE(pattern.HasException());
     REQUIRE(pattern.Value());
-    source->SetFillStyle(boo::dom::DOMString(u8"lime"));
+    source->SetFillStyle(boo::DOMString(u8"lime"));
     source->FillRect(0, 0, 20, 20);
     context.SetFillStyle(Ref<boo::html::CanvasPattern>(pattern.Value()));
     context.FillRect(0, 30, 100, 20);
@@ -381,16 +381,16 @@ namespace krys::ui::tests
     Canvas2DFixture fixture;
     fixture.GetView().SetDevice(fixture.Paint().Device());
     auto &context = fixture.Context();
-    context.SetFillStyle(boo::dom::DOMString(u8"red"));
+    context.SetFillStyle(boo::DOMString(u8"red"));
     context.FillRect(0, 0, 50, 50);
-    context.SetFillStyle(boo::dom::DOMString(u8"rgba(0, 0, 255, 0.5)"));
+    context.SetFillStyle(boo::DOMString(u8"rgba(0, 0, 255, 0.5)"));
     context.FillRect(50, 0, 50, 50);
 
     // The pixels, decoded from @p url, unpremultiplied ARGB.
-    auto decode = [](const boo::dom::DOMString &url) -> List<uint32>
+    auto decode = [](const boo::DOMString &url) -> List<uint32>
     {
       const auto comma = url.find(u8',');
-      REQUIRE(comma != boo::dom::DOMString::npos);
+      REQUIRE(comma != boo::DOMString::npos);
       auto bytes = Base64Decode(
         Span<const uint8>(reinterpret_cast<const uint8 *>(url.data()) + comma + 1, url.size() - comma - 1));
       REQUIRE(bytes);
@@ -455,7 +455,7 @@ namespace krys::ui::tests
 
     SECTION("An sRGB canvas, read and written in Display P3")
     {
-      context.SetFillStyle(boo::dom::DOMString(u8"red"));
+      context.SetFillStyle(boo::DOMString(u8"red"));
       context.FillRect(0, 0, 100, 50);
       CheckRead(read(context, 5, 5, null), Red);
       CheckRead(read(context, 5, 5, PredefinedColorSpace::DisplayP3), {234, 51, 35, 255});
@@ -471,7 +471,7 @@ namespace krys::ui::tests
     {
       auto p3 = fixture.Canvas(u8"p3").GetContext2d({.ColorSpace = PredefinedColorSpace::DisplayP3});
       REQUIRE(p3);
-      p3->SetFillStyle(boo::dom::DOMString(u8"red"));
+      p3->SetFillStyle(boo::DOMString(u8"red"));
       p3->FillRect(0, 0, 100, 50);
       CheckRead(read(*p3, 5, 5, null), {234, 51, 35, 255});
       CheckRead(read(*p3, 5, 5, PredefinedColorSpace::SRGB), Red);

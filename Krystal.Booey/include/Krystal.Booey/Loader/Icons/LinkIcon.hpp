@@ -40,7 +40,7 @@ namespace krys::boo
   {
     url::URL URL;
     /// @brief Its `type` attribute, a hint of its MIME type; empty without one.
-    dom::DOMString MIMEType;
+    DOMString MIMEType;
     /// @brief The width its `sizes` gives first (`60x70` is 60); none without one, or for `any`.
     Maybe<uint32> Size;
 

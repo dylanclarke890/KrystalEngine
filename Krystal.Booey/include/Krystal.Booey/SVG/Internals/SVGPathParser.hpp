@@ -27,7 +27,7 @@
 #include "Krystal.Booey/SVG/Internals/SVGPathConsumer.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathSegType.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGPathByteStream;
   class SVGPathSource;
@@ -41,26 +41,29 @@ namespace krys::boo::svg
     FloatPoint _controlPoint;
     FloatPoint _currentPoint;
     FloatPoint _subPathPoint;
-    PathCoordinateMode _mode {PathCoordinateMode::AbsoluteCoordinates};
-    const PathParsingMode _pathParsingMode {PathParsingMode::NormalisedParsing};
+    svg::PathCoordinateMode _mode {svg::PathCoordinateMode::AbsoluteCoordinates};
+    const svg::PathParsingMode _pathParsingMode {svg::PathParsingMode::NormalisedParsing};
     SVGPathSegType _lastCommand {SVGPathSegType::Unknown};
     bool _closePath {true};
 
   public:
     KRYS_NODISCARD static bool Parse(SVGPathSource &source, SVGPathConsumer &consumer,
-                                     PathParsingMode mode = PathParsingMode::NormalisedParsing,
+                                     svg::PathParsingMode mode = svg::PathParsingMode::NormalisedParsing,
                                      bool checkForInitialMoveTo = true) noexcept;
 
-    KRYS_NODISCARD static bool ParseToByteStream(SVGPathSource &source, SVGPathByteStream &byteStream,
-                                                 PathParsingMode mode = PathParsingMode::NormalisedParsing,
-                                                 bool checkForInitialMoveTo = true) noexcept;
+    KRYS_NODISCARD static bool
+      ParseToByteStream(SVGPathSource &source, SVGPathByteStream &byteStream,
+                        svg::PathParsingMode mode = svg::PathParsingMode::NormalisedParsing,
+                        bool checkForInitialMoveTo = true) noexcept;
 
-    KRYS_NODISCARD static bool ParseToString(SVGPathSource &source, dom::DOMString &result,
-                                             PathParsingMode mode = PathParsingMode::NormalisedParsing,
-                                             bool checkForInitialMoveTo = true) noexcept;
+    KRYS_NODISCARD static bool
+      ParseToString(SVGPathSource &source, DOMString &result,
+                    svg::PathParsingMode mode = svg::PathParsingMode::NormalisedParsing,
+                    bool checkForInitialMoveTo = true) noexcept;
 
   private:
-    SVGPathParser(SVGPathConsumer &consumer, SVGPathSource &source, PathParsingMode parsingMode) noexcept;
+    SVGPathParser(SVGPathConsumer &consumer, SVGPathSource &source,
+                  svg::PathParsingMode parsingMode) noexcept;
 
     KRYS_NODISCARD bool ParsePathData(bool checkForInitialMoveTo) noexcept;
 

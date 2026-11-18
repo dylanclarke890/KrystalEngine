@@ -22,8 +22,7 @@ namespace krys::boo::mathml::tests
 
   namespace
   {
-    KRYS_NODISCARD Ref<dom::Element> Create(dom::Document &document,
-                                            const dom::DOMStringAtom &localName) noexcept
+    KRYS_NODISCARD Ref<Element> Create(Document &document, const DOMStringAtom &localName) noexcept
     {
       auto element = document.CreateElementNS(infra::namespaces::MathML, localName);
       krys_assert(!element.HasException());
@@ -31,8 +30,7 @@ namespace krys::boo::mathml::tests
       return element.ReleaseValue();
     }
 
-    KRYS_NODISCARD MathMLElementInterface InterfaceOf(dom::Document &document,
-                                                      dom::DOMStringAtom localName) noexcept
+    KRYS_NODISCARD MathMLElementInterface InterfaceOf(Document &document, DOMStringAtom localName) noexcept
     {
       auto element = Create(document, krys::move(localName));
       auto *mathMLElement = DynamicDowncast<MathMLElement>(*element);
@@ -76,7 +74,7 @@ namespace krys::boo::mathml::tests
             == RootType::RootWithIndex);
 
       using ScriptType = MathMLScriptsElement::ScriptType;
-      auto scriptType = [&](dom::DOMStringAtom localName)
+      auto scriptType = [&](DOMStringAtom localName)
       {
         return Downcast<MathMLScriptsElement>(*Create(*document, krys::move(localName))).GetScriptType();
       };

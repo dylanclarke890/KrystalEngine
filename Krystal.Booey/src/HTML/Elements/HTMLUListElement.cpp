@@ -25,10 +25,10 @@
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLUListElement::HTMLUListElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::UList)
+  HTMLUListElement::HTMLUListElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::UList)
   {
   }
 
@@ -36,30 +36,30 @@ namespace krys::boo::html
 
   bool HTMLUListElement::Compact() const noexcept
   {
-    return Reflect<bool>(*this, u8"compact");
+    return html::Reflect<bool>(*this, u8"compact");
   }
 
   void HTMLUListElement::Compact(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"compact", krys::move(value));
+    html::Reflect<bool>(*this, u8"compact", krys::move(value));
   }
 
-  dom::DOMString HTMLUListElement::Type() const noexcept
+  DOMString HTMLUListElement::Type() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"type").value_or(u8"");
   }
 
-  void HTMLUListElement::Type(dom::DOMString value) noexcept
+  void HTMLUListElement::Type(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"type", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region Presentational hints
 
-  bool HTMLUListElement::HasPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool HTMLUListElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                            const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && (localName == u8"type"))
     {
@@ -68,12 +68,12 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLUListElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                                const dom::DOMStringAtom &namespaceURI,
-                                                                dom::DOMStringView value,
+  void HTMLUListElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                                const DOMStringAtom &namespaceURI,
+                                                                DOMStringView value,
                                                                 css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);

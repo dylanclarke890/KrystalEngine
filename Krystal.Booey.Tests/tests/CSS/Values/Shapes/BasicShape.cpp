@@ -145,7 +145,7 @@ namespace krys::boo::css::tests
     CHECK(SerialiseForTest(BasicShape {
             InsetFunction {Inset {.Insets = {LP {1_css_px}}, .Radii = BorderRadius::DefaultValue()}}})
           == u8"inset(1px)");
-    CHECK(SerialiseForTest(BasicShape {PathFunction {Path {.Data = {svg::SVGPathByteStream(u8"M 0 0")}}}})
+    CHECK(SerialiseForTest(BasicShape {PathFunction {Path {.Data = {SVGPathByteStream(u8"M 0 0")}}}})
           == u8"path(\"M 0 0\")");
   }
 

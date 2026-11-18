@@ -24,11 +24,10 @@ namespace krys::boo::html
     using dictionary_type = PageTransitionEventInit;
 
     /// @see https://html.spec.whatwg.org/#dom-pagetransitionevent-pagetransitionevent
-    PageTransitionEvent(dom::DOMStringAtom type, const PageTransitionEventInit &eventInitDict = {}) noexcept;
+    PageTransitionEvent(DOMStringAtom type, const PageTransitionEventInit &eventInitDict = {}) noexcept;
 
     /// @brief A trusted page transition event, which bubbles and is cancelable.
-    KRYS_NODISCARD static Ref<PageTransitionEvent> Create(const dom::DOMStringAtom &type,
-                                                          bool persisted) noexcept;
+    KRYS_NODISCARD static Ref<PageTransitionEvent> Create(const DOMStringAtom &type, bool persisted) noexcept;
 
     /// @brief Whether the document comes from, or goes into, the back/forward cache.
     /// @see https://html.spec.whatwg.org/#dom-pagetransitionevent-persisted

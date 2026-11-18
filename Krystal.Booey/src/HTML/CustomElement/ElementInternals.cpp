@@ -43,7 +43,7 @@ namespace krys::boo::html
   ElementInternals::~ElementInternals() noexcept = default;
 
   // https://html.spec.whatwg.org/#dom-elementinternals-shadowroot
-  RefPtr<dom::ShadowRoot> ElementInternals::ShadowRoot() const noexcept
+  RefPtr<boo::ShadowRoot> ElementInternals::ShadowRoot() const noexcept
   {
     // 1. Let target be this's target element.
     auto *element = _target.get();
@@ -65,7 +65,7 @@ namespace krys::boo::html
     return ShareRefPtr(shadowRoot);
   }
 
-  dom::ExceptionOr<RefPtr<dom::Element>> ElementInternals::Form() const noexcept
+  dom::ExceptionOr<RefPtr<boo::Element>> ElementInternals::Form() const noexcept
   {
     // 1. Let element be this's target element.
     // 2. If element is not a form-associated custom element, then throw a "NotSupportedError" DOMException.
@@ -94,7 +94,7 @@ namespace krys::boo::html
     return dom::Exception {dom::ExceptionCode::NotSupportedError};
   }
 
-  dom::ExceptionOr<void> ElementInternals::SetValidity(ValidityStateFlags flags, dom::DOMString message,
+  dom::ExceptionOr<void> ElementInternals::SetValidity(ValidityStateFlags flags, DOMString message,
                                                        HTMLElement *validationAnchor) noexcept
   {
     if (auto *element = ElementAsFormAssociatedCustom())
@@ -122,7 +122,7 @@ namespace krys::boo::html
     return dom::Exception {dom::ExceptionCode::NotSupportedError};
   }
 
-  dom::ExceptionOr<dom::DOMString> ElementInternals::ValidationMessage() const noexcept
+  dom::ExceptionOr<DOMString> ElementInternals::ValidationMessage() const noexcept
   {
     if (auto *element = ElementAsFormAssociatedCustom())
     {
@@ -165,8 +165,7 @@ namespace krys::boo::html
     return _target->EnsureCustomStateSet();
   }
 
-  Maybe<dom::DOMString>
-    ElementInternals::InternalContentAttribute(const dom::DOMStringAtom &name) const noexcept
+  Maybe<DOMString> ElementInternals::InternalContentAttribute(const DOMStringAtom &name) const noexcept
   {
     if (auto it = _internalContentAttributeMap.find(name); it != _internalContentAttributeMap.end())
     {
@@ -175,23 +174,22 @@ namespace krys::boo::html
     return null;
   }
 
-  void ElementInternals::SetInternalContentAttribute(const dom::DOMStringAtom &name,
-                                                     dom::DOMString value) noexcept
+  void ElementInternals::SetInternalContentAttribute(const DOMStringAtom &name, DOMString value) noexcept
   {
     auto oldValue = InternalContentAttribute(name);
     _internalContentAttributeMap[name] = krys::move(value);
     InternalContentAttributeChanged(name, oldValue);
   }
 
-  void ElementInternals::RemoveInternalContentAttribute(const dom::DOMStringAtom &name) noexcept
+  void ElementInternals::RemoveInternalContentAttribute(const DOMStringAtom &name) noexcept
   {
     auto oldValue = InternalContentAttribute(name);
     _internalContentAttributeMap.erase(name);
     InternalContentAttributeChanged(name, oldValue);
   }
 
-  void ElementInternals::InternalContentAttributeChanged(const dom::DOMStringAtom &name,
-                                                         const Maybe<dom::DOMString> &oldValue) noexcept
+  void ElementInternals::InternalContentAttributeChanged(const DOMStringAtom &name,
+                                                         const Maybe<DOMString> &oldValue) noexcept
   {
     // The element's own attribute overrides its default.
     auto *element = _target.get();
@@ -206,8 +204,7 @@ namespace krys::boo::html
     }
   }
 
-  RefPtr<dom::Element>
-    ElementInternals::ElementForAttributeInternal(const dom::DOMStringAtom &name) const noexcept
+  RefPtr<boo::Element> ElementInternals::ElementForAttributeInternal(const DOMStringAtom &name) const noexcept
   {
     // 1. Let element be the result of running reflectedTarget's get the element.
     auto *element = _target.get();
@@ -247,7 +244,7 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  void ElementInternals::SetElementAttribute(const dom::DOMStringAtom &name, dom::Element *element) noexcept
+  void ElementInternals::SetElementAttribute(const DOMStringAtom &name, boo::Element *element) noexcept
   {
     // 1. If the given value is null:
     if (!element)
@@ -261,17 +258,17 @@ namespace krys::boo::html
     }
 
     // 2. Run this's set the content attribute with the empty string.
-    SetInternalContentAttribute(name, dom::DOMString());
+    SetInternalContentAttribute(name, DOMString());
 
     // 3. Set this's explicitly set attr-element to a weak reference to the given value.
     _explicitlySetAttrElements[name] = CreateWeakPtr(element);
   }
 
-  Maybe<List<Ref<dom::Element>>>
-    ElementInternals::ElementsForAttributeInternal(const dom::DOMStringAtom &name) const noexcept
+  Maybe<List<Ref<boo::Element>>>
+    ElementInternals::ElementsForAttributeInternal(const DOMStringAtom &name) const noexcept
   {
     // 1. Let elements be an empty list.
-    List<Ref<dom::Element>> elements;
+    List<Ref<boo::Element>> elements;
 
     // 2. Let element be the result of running reflectedTarget's get the element.
     auto *element = _target.get();
@@ -331,8 +328,8 @@ namespace krys::boo::html
     return elements;
   }
 
-  void ElementInternals::SetElementsArrayAttribute(const dom::DOMStringAtom &name,
-                                                   const Maybe<List<Ref<dom::Element>>> &elements) noexcept
+  void ElementInternals::SetElementsArrayAttribute(const DOMStringAtom &name,
+                                                   const Maybe<List<Ref<boo::Element>>> &elements) noexcept
   {
     // 1. If the given value is null:
     if (!elements)
@@ -346,12 +343,12 @@ namespace krys::boo::html
     }
 
     // 2. Run this's set the content attribute with the empty string.
-    SetInternalContentAttribute(name, dom::DOMString());
+    SetInternalContentAttribute(name, DOMString());
 
     // 3. Let elements be an empty list.
     // 4. For each element in the given value:
     // 4a. Append a weak reference to element to elements.
-    List<WeakPtr<dom::Element>> weakElements;
+    List<WeakPtr<boo::Element>> weakElements;
     weakElements.reserve(elements->size());
     for (auto &element : *elements)
     {

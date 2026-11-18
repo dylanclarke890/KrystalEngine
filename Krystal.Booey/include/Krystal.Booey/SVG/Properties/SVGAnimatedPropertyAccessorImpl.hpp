@@ -46,8 +46,9 @@
                                                                                                              \
   private:                                                                                                   \
     KRYS_NODISCARD RefPtr<SVGAttributeAnimator>                                                              \
-      CreateAnimator(TOwner &owner, const dom::QualifiedName &attributeName, AnimationMode animationMode,    \
-                     CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final            \
+      CreateAnimator(TOwner &owner, const krys::boo::QualifiedName &attributeName,                           \
+                     krys::boo::svg::AnimationMode animationMode, krys::boo::svg::CalcMode calcMode,         \
+                     bool isAccumulated, bool isAdditive) const noexcept final                               \
     {                                                                                                        \
       return AnimatorType::Create(attributeName, Base::Property(owner), animationMode, calcMode,             \
                                   isAccumulated, isAdditive);                                                \
@@ -59,7 +60,7 @@
     }                                                                                                        \
   };
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedAngleAccessor, SVGAnimatedAngle, SVGAnimatedAngleAnimator)
   KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedBooleanAccessor, SVGAnimatedBoolean,
@@ -101,8 +102,8 @@ namespace krys::boo::svg
     }
 
     KRYS_NODISCARD RefPtr<SVGAttributeAnimator>
-      CreateAnimator(TOwner &owner, const dom::QualifiedName &attributeName, AnimationMode animationMode,
-                     CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final
+      CreateAnimator(TOwner &owner, const QualifiedName &attributeName, svg::AnimationMode animationMode,
+                     svg::CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final
     {
       SVGLengthMode lengthMode = Base::Property(owner)->BaseVal()->Value().LengthMode();
       return SVGAnimatedLengthAnimator::Create(attributeName, Base::Property(owner), animationMode, calcMode,
@@ -132,8 +133,8 @@ namespace krys::boo::svg
 
   private:
     KRYS_NODISCARD RefPtr<SVGAttributeAnimator>
-      CreateAnimator(TOwner &owner, const dom::QualifiedName &attributeName, AnimationMode animationMode,
-                     CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final
+      CreateAnimator(TOwner &owner, const QualifiedName &attributeName, svg::AnimationMode animationMode,
+                     svg::CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final
     {
       return SVGAnimatedLengthListAnimator::Create(attributeName, Base::Property(owner), animationMode,
                                                    calcMode, isAccumulated, isAdditive, SVGLengthMode::Width);
@@ -163,8 +164,8 @@ namespace krys::boo::svg
 
   private:
     KRYS_NODISCARD RefPtr<SVGAttributeAnimator>
-      CreateAnimator(TOwner &owner, const dom::QualifiedName &attributeName, AnimationMode animationMode,
-                     CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final
+      CreateAnimator(TOwner &owner, const QualifiedName &attributeName, svg::AnimationMode animationMode,
+                     svg::CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final
     {
       return SVGAnimatedEnumerationAnimator<TEnum>::Create(
         attributeName, Base::Property(owner), animationMode, calcMode, isAccumulated, isAdditive);

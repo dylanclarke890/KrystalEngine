@@ -32,13 +32,9 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
-{
-  class Element;
-}
-
 namespace krys::boo
 {
+  class Element;
   class LocalFrameView;
   class PlatformWheelEvent;
   class ScrollableArea;
@@ -54,7 +50,7 @@ namespace krys::boo
   private:
     struct LatchingState
     {
-      WeakPtr<dom::Element> WheelEventElement;
+      WeakPtr<Element> WheelEventElement;
       WeakPtr<ScrollableArea> GestureScrollableArea;
     };
 
@@ -78,7 +74,7 @@ namespace krys::boo
     }
 
     /// @brief The element the gesture started over, if it's still latched.
-    KRYS_NODISCARD dom::Element *LatchedElement() const noexcept;
+    KRYS_NODISCARD Element *LatchedElement() const noexcept;
 
     /// @brief Whether the event may scroll: when nothing is latched, or a scroller is (@p latchedScroller).
     KRYS_NODISCARD bool LatchingAllowsScrolling(WeakPtr<ScrollableArea> &latchedScroller) const noexcept;
@@ -86,11 +82,11 @@ namespace krys::boo
     /// @brief Latches the event's element and scroller at a gesture's start (or once its deltas are enough
     /// to scroll), and for the gesture's later events replaces them with the latched ones.
     void UpdateAndFetchLatchingState(const LocalFrameView &view, const PlatformWheelEvent &wheelEvent,
-                                     RefPtr<dom::Element> &latchedElement,
+                                     RefPtr<Element> &latchedElement,
                                      WeakPtr<ScrollableArea> &scrollableArea) noexcept;
 
     /// @brief Forgets the latched state if @p element, which is leaving the document, was its target.
-    void RemoveLatchingStateForTarget(const dom::Element &element) noexcept;
+    void RemoveLatchingStateForTarget(const Element &element) noexcept;
 
   private:
     KRYS_NODISCARD static bool ShouldLatchToScrollableArea(const LocalFrameView &view,

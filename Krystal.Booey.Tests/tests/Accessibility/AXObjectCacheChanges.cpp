@@ -96,7 +96,7 @@ namespace krys::boo::ax::tests
     AXFixture page(u8"<button id=button>Go</button>");
     auto &button = page.Object(u8"button");
     CHECK(button.AccessibleName() == u8"Go");
-    auto *text = DynamicDowncast<dom::Text>(page.ById(u8"button").FirstChild());
+    auto *text = DynamicDowncast<Text>(page.ById(u8"button").FirstChild());
     REQUIRE(text);
     auto *textObject = page.Cache().GetOrCreate(*text);
     REQUIRE(textObject);
@@ -159,7 +159,7 @@ namespace krys::boo::ax::tests
     auto &second = page.Object(u8"second");
     (void)page.TakeNotifications();
 
-    Downcast<html::HTMLElement>(page.ById(u8"second")).Focus();
+    Downcast<HTMLElement>(page.ById(u8"second")).Focus();
     CHECK(AXFixture::WasPosted(page.TakeNotifications(), second, AXNotification::FocusedUIElementChanged));
     CHECK(page.Cache().FocusedObject() == &second);
   }
@@ -179,26 +179,26 @@ namespace krys::boo::ax::tests
 
     SECTION("Values")
     {
-      REQUIRE_FALSE(Downcast<html::HTMLInputElement>(page.ById(u8"text")).SetValue(u8"Hello").HasException());
+      REQUIRE_FALSE(Downcast<HTMLInputElement>(page.ById(u8"text")).SetValue(u8"Hello").HasException());
       CHECK(AXFixture::WasPosted(page.TakeNotifications(), text, AXNotification::ValueChanged));
     }
 
     SECTION("Checked states")
     {
-      Downcast<html::HTMLInputElement>(page.ById(u8"box")).SetChecked(true);
+      Downcast<HTMLInputElement>(page.ById(u8"box")).SetChecked(true);
       CHECK(AXFixture::WasPosted(page.TakeNotifications(), box, AXNotification::CheckedStateChanged));
     }
 
     SECTION("Selected options")
     {
-      Downcast<html::HTMLOptionElement>(page.ById(u8"two")).Selected(true);
+      Downcast<HTMLOptionElement>(page.ById(u8"two")).Selected(true);
       CHECK(AXFixture::WasPosted(page.TakeNotifications(), two, AXNotification::SelectedStateChanged));
     }
 
     SECTION("Validity")
     {
       REQUIRE_FALSE(
-        Downcast<html::HTMLInputElement>(page.ById(u8"required")).SetValue(u8"Filled in").HasException());
+        Downcast<HTMLInputElement>(page.ById(u8"required")).SetValue(u8"Filled in").HasException());
       CHECK(AXFixture::WasPosted(page.TakeNotifications(), required, AXNotification::InvalidStatusChanged));
     }
 

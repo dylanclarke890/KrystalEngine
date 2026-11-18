@@ -34,7 +34,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class StyledElement;
 }
@@ -44,7 +44,10 @@ namespace krys::boo::css
   class MutableStyleProperties;
   struct ParserContext;
   class StyleSheetContents;
+}
 
+namespace krys::boo
+{
   /// @brief A declaration block of CSS properties exposed to scripts: a style rule's `style`, an element's
   /// `style` attribute or a computed style.
   /// @see https://drafts.csswg.org/cssom/#the-cssstyleproperties-interface
@@ -61,12 +64,12 @@ namespace krys::boo::css
     dom::ExceptionOr<void> SetCssFloat(const CSSOMString &value) noexcept;
 
     // PropertyId versions of the CSSOM functions to support bindings and editing.
-    KRYS_NODISCARD virtual CSSOMString GetPropertyValueInternal(PropertyId property) noexcept = 0;
+    KRYS_NODISCARD virtual CSSOMString GetPropertyValueInternal(css::PropertyId property) noexcept = 0;
 
-    virtual dom::ExceptionOr<void> SetPropertyInternal(PropertyId property, const CSSOMString &value,
-                                                       IsImportant important) noexcept = 0;
+    virtual dom::ExceptionOr<void> SetPropertyInternal(css::PropertyId property, const CSSOMString &value,
+                                                       css::IsImportant important) noexcept = 0;
 
-    KRYS_NODISCARD virtual Ref<MutableStyleProperties> CopyProperties() const noexcept = 0;
+    KRYS_NODISCARD virtual Ref<css::MutableStyleProperties> CopyProperties() const noexcept = 0;
 
     // Shared implementation for all properties that match
     // https://drafts.csswg.org/cssom/#dom-cssstyledeclaration-camel_cased_attribute.
@@ -86,7 +89,7 @@ namespace krys::boo::css
 
     /// @brief The property named by a script property name: camel-cased (`backgroundColor`) or
     /// WebKit-cased (`webkitTransform`).
-    KRYS_NODISCARD static PropertyId
+    KRYS_NODISCARD static css::PropertyId
       GetPropertyIdFromJavaScriptPropertyName(const CSSOMStringAtom &propertyName) noexcept;
   };
 
@@ -101,10 +104,10 @@ namespace krys::boo::css
       PropertyChanged,
     };
 
-    MutableStyleProperties *_propertySet;
+    css::MutableStyleProperties *_propertySet;
 
   public:
-    explicit PropertySetCSSStyleProperties(MutableStyleProperties &propertySet) noexcept
+    explicit PropertySetCSSStyleProperties(css::MutableStyleProperties &propertySet) noexcept
         : _propertySet(&propertySet)
     {
     }
@@ -115,10 +118,10 @@ namespace krys::boo::css
 
     KRYS_NODISCARD uint32 GetRefCount() const noexcept override;
 
-    KRYS_NODISCARD StyleSheetContents *ContextStyleSheet() const noexcept;
+    KRYS_NODISCARD css::StyleSheetContents *ContextStyleSheet() const noexcept;
 
   protected:
-    KRYS_NODISCARD virtual ParserContext CssParserContext() const noexcept;
+    KRYS_NODISCARD virtual css::ParserContext CssParserContext() const noexcept;
 
   private:
     KRYS_NODISCARD CSSRule *ParentRule() const noexcept override
@@ -147,14 +150,14 @@ namespace krys::boo::css
 
     dom::ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept final;
 
-    KRYS_NODISCARD CSSOMString GetPropertyValueInternal(PropertyId property) noexcept final;
+    KRYS_NODISCARD CSSOMString GetPropertyValueInternal(css::PropertyId property) noexcept final;
 
-    dom::ExceptionOr<void> SetPropertyInternal(PropertyId property, const CSSOMString &value,
-                                               IsImportant important) noexcept final;
+    dom::ExceptionOr<void> SetPropertyInternal(css::PropertyId property, const CSSOMString &value,
+                                               css::IsImportant important) noexcept final;
 
-    KRYS_NODISCARD Ref<MutableStyleProperties> CopyProperties() const noexcept final;
+    KRYS_NODISCARD Ref<css::MutableStyleProperties> CopyProperties() const noexcept final;
 
-    KRYS_NODISCARD bool IsExposed(PropertyId property) const noexcept;
+    KRYS_NODISCARD bool IsExposed(css::PropertyId property) const noexcept;
 
     KRYS_NODISCARD virtual bool WillMutate() noexcept
     {
@@ -171,10 +174,10 @@ namespace krys::boo::css
                                             public RefCounted<StyleRuleCSSStyleProperties>
   {
   private:
-    RuleType _parentRuleType;
+    css::RuleType _parentRuleType;
     WeakPtr<CSSRule> _parentRule;
 
-    StyleRuleCSSStyleProperties(MutableStyleProperties &propertySet, CSSRule &parentRule) noexcept;
+    StyleRuleCSSStyleProperties(css::MutableStyleProperties &propertySet, CSSRule &parentRule) noexcept;
 
   public:
     ~StyleRuleCSSStyleProperties() noexcept override;
@@ -194,7 +197,7 @@ namespace krys::boo::css
       return RefCounted::GetRefCount();
     }
 
-    KRYS_NODISCARD static Ref<StyleRuleCSSStyleProperties> Create(MutableStyleProperties &propertySet,
+    KRYS_NODISCARD static Ref<StyleRuleCSSStyleProperties> Create(css::MutableStyleProperties &propertySet,
                                                                   CSSRule &parentRule) noexcept;
 
     void ClearParentRule() noexcept
@@ -202,7 +205,7 @@ namespace krys::boo::css
       _parentRule = nullptr;
     }
 
-    void Reattach(MutableStyleProperties &propertySet) noexcept;
+    void Reattach(css::MutableStyleProperties &propertySet) noexcept;
 
   private:
     KRYS_NODISCARD CSSStyleSheet *ParentStyleSheet() const noexcept final;
@@ -213,7 +216,7 @@ namespace krys::boo::css
 
     void DidMutate(MutationType type) noexcept final;
 
-    KRYS_NODISCARD ParserContext CssParserContext() const noexcept final;
+    KRYS_NODISCARD css::ParserContext CssParserContext() const noexcept final;
   };
 
   /// @brief The `style` of an element: the CSSOM view of its inline style. Changes are written back to the
@@ -221,12 +224,12 @@ namespace krys::boo::css
   class InlineCSSStyleProperties final : public PropertySetCSSStyleProperties
   {
   private:
-    WeakPtr<dom::StyledElement> _parentElement;
+    WeakPtr<StyledElement> _parentElement;
 
   public:
-    InlineCSSStyleProperties(MutableStyleProperties &propertySet, dom::StyledElement &parentElement) noexcept;
+    InlineCSSStyleProperties(css::MutableStyleProperties &propertySet, StyledElement &parentElement) noexcept;
 
-    KRYS_NODISCARD dom::Element *ParentElement() const noexcept final;
+    KRYS_NODISCARD Element *ParentElement() const noexcept final;
 
   private:
     KRYS_NODISCARD CSSStyleSheet *ParentStyleSheet() const noexcept final
@@ -241,13 +244,13 @@ namespace krys::boo::css
 
     void DidMutate(MutationType type) noexcept final;
 
-    KRYS_NODISCARD ParserContext CssParserContext() const noexcept final;
+    KRYS_NODISCARD css::ParserContext CssParserContext() const noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSStyleProperties)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleDeclaration &declaration) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSStyleProperties)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleDeclaration &declaration) noexcept
   {
-    return declaration.GetStyleDeclarationType() == krys::boo::css::StyleDeclarationType::Style;
+    return declaration.GetStyleDeclarationType() == krys::boo::StyleDeclarationType::Style;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

@@ -96,19 +96,19 @@ namespace krys::boo
     using infra::StringAlgorithms;
 
     /// @brief @p node's HTML tag name, `Unknown` for anything that isn't an HTML element.
-    KRYS_NODISCARD TagName HTMLTagNameOf(const dom::Node *node) noexcept
+    KRYS_NODISCARD TagName HTMLTagNameOf(const Node *node) noexcept
     {
-      auto *element = DynamicDowncast<html::HTMLElement>(node);
+      auto *element = DynamicDowncast<HTMLElement>(node);
       return element ? element->TagQualifiedName().TagName() : TagName::Unknown;
     }
 
-    KRYS_NODISCARD bool EqualsIgnoringCase(dom::DOMStringView a, dom::DOMStringView b) noexcept
+    KRYS_NODISCARD bool EqualsIgnoringCase(DOMStringView a, DOMStringView b) noexcept
     {
       return StringAlgorithms::ASCIICaseInsensitiveMatch(a, b);
     }
 
     /// @brief @p value as a number, if it's one (ARIA's numeric attributes).
-    KRYS_NODISCARD Maybe<float> ParseFloatAttribute(dom::DOMStringView value) noexcept
+    KRYS_NODISCARD Maybe<float> ParseFloatAttribute(DOMStringView value) noexcept
     {
       if (value.empty())
       {
@@ -126,9 +126,9 @@ namespace krys::boo
 
     /// @brief Whether @p node's ::before draws list markers that are in the tree (a list styled with
     /// `list-style: none` that draws its own).
-    KRYS_NODISCARD bool ChildHasPseudoVisibleListItemMarkers(const dom::Node &node) noexcept
+    KRYS_NODISCARD bool ChildHasPseudoVisibleListItemMarkers(const Node &node) noexcept
     {
-      auto *element = DynamicDowncast<dom::Element>(node);
+      auto *element = DynamicDowncast<Element>(node);
       auto *before = element ? element->BeforePseudoElement() : nullptr;
       auto *cache = before ? before->NodeDocument().ExistingAXObjectCache() : nullptr;
       auto *object = cache ? cache->GetOrCreate(*before) : nullptr;
@@ -158,7 +158,7 @@ namespace krys::boo
              || !object.GetAttributeTrimmed(u8"title").empty();
     }
 
-    KRYS_NODISCARD bool ContentEditableAttributeIsEnabled(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool ContentEditableAttributeIsEnabled(const Element &element) noexcept
     {
       auto value = element.GetAttribute(u8"contenteditable");
       if (!value)
@@ -218,8 +218,8 @@ namespace krys::boo
     private:
       AXObjectCache &_cache;
       Kind _kind;
-      const dom::Node &_root;
-      HashSet<const dom::Node *> _visited;
+      const Node &_root;
+      HashSet<const Node *> _visited;
 
       struct Context
       {
@@ -242,12 +242,12 @@ namespace krys::boo
       };
 
     public:
-      TextAlternativeComputation(AXObjectCache &cache, Kind kind, const dom::Node &root) noexcept
+      TextAlternativeComputation(AXObjectCache &cache, Kind kind, const Node &root) noexcept
           : _cache(cache), _kind(kind), _root(root)
       {
       }
 
-      KRYS_NODISCARD dom::DOMString Compute() noexcept
+      KRYS_NODISCARD DOMString Compute() noexcept
       {
         // 1. Set the root node to the given element, the current node to the root node, and the total
         //    accumulated text to the empty string. ...
@@ -258,7 +258,7 @@ namespace krys::boo
         {
           // A description is the text of the elements aria-describedby refers to (step 2B for descriptions);
           // AccessibleDescription falls back to aria-description and the host language's.
-          auto *element = DynamicDowncast<dom::Element>(_root);
+          auto *element = DynamicDowncast<Element>(_root);
           _visited.insert(&_root);
           if (!element)
           {
@@ -266,7 +266,7 @@ namespace krys::boo
           }
           auto description = StringAlgorithms::StripAndCollapseASCIIWhitespace(
             ComputeFromReferences(*element, u8"aria-describedby"));
-          if (description.empty() && Is<svg::SVGElement>(*element))
+          if (description.empty() && Is<SVGElement>(*element))
           {
             description = StringAlgorithms::StripAndCollapseASCIIWhitespace(SVGDescription(*element));
           }
@@ -276,17 +276,17 @@ namespace krys::boo
       }
 
     private:
-      KRYS_NODISCARD AXObject *ObjectFor(const dom::Node &node) const noexcept
+      KRYS_NODISCARD AXObject *ObjectFor(const Node &node) const noexcept
       {
-        return _cache.GetOrCreate(const_cast<dom::Node &>(node), AXObjectCache::IsPartOfRelation::Yes);
+        return _cache.GetOrCreate(const_cast<Node &>(node), AXObjectCache::IsPartOfRelation::Yes);
       }
 
       /// @brief Whether @p node is hidden, as accname defines it: not rendered, or `aria-hidden="true"` on it
       /// or an ancestor.
       /// @see https://w3c.github.io/accname/#dfn-hidden
-      KRYS_NODISCARD static bool IsHidden(const dom::Node &node) noexcept
+      KRYS_NODISCARD static bool IsHidden(const Node &node) noexcept
       {
-        const dom::Element *element = DynamicDowncast<dom::Element>(node);
+        const Element *element = DynamicDowncast<Element>(node);
         if (!element)
         {
           element = node.ParentElementInComposedTree();
@@ -296,14 +296,14 @@ namespace krys::boo
           return false;
         }
         // An area isn't rendered, but is drawn as part of its image.
-        if (auto *area = DynamicDowncast<html::HTMLAreaElement>(*element))
+        if (auto *area = DynamicDowncast<HTMLAreaElement>(*element))
         {
           auto image = area->ImageElement();
           return !image || IsHidden(*image);
         }
         if (!node.Renderer() && !element->HasDisplayContents())
         {
-          return !DynamicDowncast<dom::Text>(node) || !element->Renderer();
+          return !DynamicDowncast<boo::Text>(node) || !element->Renderer();
         }
         if (const auto *style =
               element->Renderer() ? &element->Renderer()->Style() : element->ExistingComputedStyle();
@@ -311,11 +311,9 @@ namespace krys::boo
         {
           return true;
         }
-        for (const dom::Element *ancestor = element; ancestor;
-             ancestor = ancestor->ParentElementInComposedTree())
+        for (const Element *ancestor = element; ancestor; ancestor = ancestor->ParentElementInComposedTree())
         {
-          if (EqualsIgnoringCase(ancestor->GetAttribute(u8"aria-hidden").value_or(dom::DOMString {}),
-                                 u8"true"))
+          if (EqualsIgnoringCase(ancestor->GetAttribute(u8"aria-hidden").value_or(DOMString {}), u8"true"))
           {
             return true;
           }
@@ -323,20 +321,20 @@ namespace krys::boo
         return false;
       }
 
-      KRYS_NODISCARD static bool IsInline(const dom::Node &node) noexcept
+      KRYS_NODISCARD static bool IsInline(const Node &node) noexcept
       {
         auto *renderer = node.Renderer();
         return !renderer || renderer->IsInline();
       }
 
-      KRYS_NODISCARD dom::DOMString ComputeNode(const dom::Node &current, Context context) noexcept
+      KRYS_NODISCARD DOMString ComputeNode(const Node &current, Context context) noexcept
       {
         if (!_visited.insert(&current).second)
         {
           // A node already visited in this computation (a cycle of references) adds nothing more.
           return {};
         }
-        auto *element = DynamicDowncast<dom::Element>(current);
+        auto *element = DynamicDowncast<Element>(current);
         auto *object = element ? ObjectFor(current) : nullptr;
         bool hidden = IsHidden(current);
 
@@ -415,9 +413,9 @@ namespace krys::boo
         }
 
         // 2G. Text Node: Otherwise, if the current node is a Text Node, return its textual contents.
-        if (auto *text = DynamicDowncast<dom::Text>(current))
+        if (auto *text = DynamicDowncast<boo::Text>(current))
         {
-          return dom::DOMString(text->Data());
+          return DOMString(text->Data());
         }
 
         // 2I. Tooltip Attribute: Otherwise, if the current node has a Tooltip attribute, return its value.
@@ -431,17 +429,16 @@ namespace krys::boo
         return {};
       }
 
-      KRYS_NODISCARD dom::DOMString ComputeFromReferences(const dom::Element &element,
-                                                          dom::DOMStringView attribute) noexcept
+      KRYS_NODISCARD DOMString ComputeFromReferences(const Element &element, DOMStringView attribute) noexcept
       {
         // The resolved targets, through shadow hosts' reference targets.
-        auto references = element.ResolvedElementsForAttribute(dom::DOMStringAtom(attribute));
+        auto references = element.ResolvedElementsForAttribute(DOMStringAtom(attribute));
         if (references.empty())
         {
           return {};
         }
         // 2B.i. Set the accumulated text to the empty string.
-        dom::DOMString accumulated;
+        DOMString accumulated;
         // 2B.ii. For each IDREF:
         for (const auto &reference : references)
         {
@@ -474,8 +471,8 @@ namespace krys::boo
                || object.Role() == AXRole::PopUpButton || object.IsRangeControl();
       }
 
-      KRYS_NODISCARD static dom::DOMString EmbeddedControlText(const dom::Element &element,
-                                                               const AXObject &object) noexcept
+      KRYS_NODISCARD static DOMString EmbeddedControlText(const Element &element,
+                                                          const AXObject &object) noexcept
       {
         // 2C. ... textbox: return the value of the textbox.
         if (object.IsTextControl() && !object.IsComboBox())
@@ -483,12 +480,12 @@ namespace krys::boo
           return object.StringValue();
         }
         // 2C. ... combobox or listbox: return the text alternative of the chosen option.
-        if (auto *select = DynamicDowncast<html::HTMLSelectElement>(element))
+        if (auto *select = DynamicDowncast<HTMLSelectElement>(element))
         {
           auto index = select->SelectedIndex();
           if (index >= 0 && static_cast<size_t>(index) < select->ListItems().size())
           {
-            if (auto *option = DynamicDowncast<html::HTMLOptionElement>(select->ListItems()[index].get()))
+            if (auto *option = DynamicDowncast<HTMLOptionElement>(select->ListItems()[index].get()))
             {
               return option->Label();
             }
@@ -502,7 +499,7 @@ namespace krys::boo
         // (Like Chrome, a list box that has several chosen options gives all their names.)
         if (object.IsListBox())
         {
-          dom::DOMString chosen;
+          DOMString chosen;
           for (const auto &option : const_cast<AXObject &>(object).SelectedChildren())
           {
             auto name = option->AccessibleName();
@@ -534,28 +531,28 @@ namespace krys::boo
       /// @brief @p element's `title` or `desc` child (@p localName) whose language best matches the
       /// element's; if none matches, the first with no language.
       /// @see https://w3c.github.io/svg-aam/#mapping_additional_nd
-      KRYS_NODISCARD static const dom::Element *
-        SVGChildWithMatchingLanguage(const dom::Element &element, dom::DOMStringView localName) noexcept
+      KRYS_NODISCARD static const Element *SVGChildWithMatchingLanguage(const Element &element,
+                                                                        DOMStringView localName) noexcept
       {
         auto language = css::EffectiveLang(element);
         if (language.empty())
         {
-          language = dom::DOMString(DefaultLanguage());
+          language = DOMString(DefaultLanguage());
         }
-        auto primary = [](dom::DOMStringView tag)
+        auto primary = [](DOMStringView tag)
         {
           return tag.substr(0, tag.find(u8'-'));
         };
-        const dom::Element *fallback = nullptr;
-        const dom::Element *primaryMatch = nullptr;
+        const Element *fallback = nullptr;
+        const Element *primaryMatch = nullptr;
         for (auto *child = element.FirstElementChild().get(); child;
              child = child->NextElementSibling().get())
         {
-          if (!Is<svg::SVGElement>(*child) || child->LocalName() != localName)
+          if (!Is<SVGElement>(*child) || child->LocalName() != localName)
           {
             continue;
           }
-          auto lang = child->GetAttribute(u8"lang").value_or(dom::DOMString {});
+          auto lang = child->GetAttribute(u8"lang").value_or(DOMString {});
           if (lang.empty())
           {
             // The first equally good match is used.
@@ -574,9 +571,9 @@ namespace krys::boo
       }
 
       /// @brief The element a `use` element refers to.
-      KRYS_NODISCARD static const dom::Element *SVGUseTarget(const dom::Element &element) noexcept
+      KRYS_NODISCARD static const Element *SVGUseTarget(const Element &element) noexcept
       {
-        auto *use = DynamicDowncast<svg::SVGElement>(element);
+        auto *use = DynamicDowncast<SVGElement>(element);
         if (!use || use->LocalName() != u8"use")
         {
           return nullptr;
@@ -590,18 +587,18 @@ namespace krys::boo
         {
           return nullptr;
         }
-        return svg::SVGURIReference::TargetElementFromIRIString(*href, element.TreeScopeForSVGReferences())
+        return SVGURIReference::TargetElementFromIRIString(*href, element.TreeScopeForSVGReferences())
           .Element.get();
       }
 
       /// @brief SVG-AAM's text alternative for @p element, after aria-labelledby and aria-label: its title
       /// child, an a's xlink:title, or the text alternative of what a use element refers to.
       /// @see https://w3c.github.io/svg-aam/#mapping_additional_nd
-      KRYS_NODISCARD static dom::DOMString SVGTextAlternative(const dom::Element &element) noexcept
+      KRYS_NODISCARD static DOMString SVGTextAlternative(const Element &element) noexcept
       {
         if (auto *title = SVGChildWithMatchingLanguage(element, u8"title"))
         {
-          return title->TextContent().value_or(dom::DOMString {});
+          return title->TextContent().value_or(DOMString {});
         }
         if (element.LocalName() == u8"a")
         {
@@ -621,11 +618,11 @@ namespace krys::boo
       /// @brief SVG-AAM's description for @p element, after aria-describedby: its desc child, the description
       /// of what a use element refers to, or its title child if that isn't its name.
       /// @see https://w3c.github.io/svg-aam/#mapping_additional_nd
-      KRYS_NODISCARD static dom::DOMString SVGDescription(const dom::Element &element) noexcept
+      KRYS_NODISCARD static DOMString SVGDescription(const Element &element) noexcept
       {
         if (auto *desc = SVGChildWithMatchingLanguage(element, u8"desc"))
         {
-          return desc->TextContent().value_or(dom::DOMString {});
+          return desc->TextContent().value_or(DOMString {});
         }
         if (auto *target = SVGUseTarget(element))
         {
@@ -635,32 +632,32 @@ namespace krys::boo
         if (auto *title = SVGChildWithMatchingLanguage(element, u8"title");
             title && (element.HasAttribute(u8"aria-labelledby") || element.HasAttribute(u8"aria-label")))
         {
-          return title->TextContent().value_or(dom::DOMString {});
+          return title->TextContent().value_or(DOMString {});
         }
         return {};
       }
 
       /// @brief The text alternative HTML-AAM gives @p element from its markup.
       /// @see https://w3c.github.io/html-aam/#accessible-name-computations-by-html-element
-      KRYS_NODISCARD dom::DOMString HostLanguageLabel(const dom::Element &element, const AXObject &object,
-                                                      bool hidden, const Context &context) noexcept
+      KRYS_NODISCARD DOMString HostLanguageLabel(const Element &element, const AXObject &object, bool hidden,
+                                                 const Context &context) noexcept
       {
         auto tagName = HTMLTagNameOf(&element);
         if (tagName == TagName::Unknown)
         {
-          if (Is<svg::SVGElement>(element))
+          if (Is<SVGElement>(element))
           {
             return SVGTextAlternative(element);
           }
           // A math element's text alternative is its alttext.
-          if (Is<mathml::MathMLElement>(element))
+          if (Is<MathMLElement>(element))
           {
-            return element.GetAttribute(u8"alttext").value_or(dom::DOMString {});
+            return element.GetAttribute(u8"alttext").value_or(DOMString {});
           }
           return {};
         }
 
-        auto *input = DynamicDowncast<html::HTMLInputElement>(element);
+        auto *input = DynamicDowncast<HTMLInputElement>(element);
         if (input && (input->IsTextButton() || input->IsImageButton()))
         {
           // input type=button, submit and reset: the value attribute, else submit's and reset's default
@@ -676,29 +673,29 @@ namespace krys::boo
           {
             return *value;
           }
-          auto type = element.GetAttribute(u8"type").value_or(dom::DOMString {});
+          auto type = element.GetAttribute(u8"type").value_or(DOMString {});
           if (input->IsImageButton())
           {
-            return element.HasAttribute(u8"title") ? dom::DOMString {} : dom::DOMString(u8"Submit Query");
+            return element.HasAttribute(u8"title") ? DOMString {} : DOMString(u8"Submit Query");
           }
           if (EqualsIgnoringCase(type, u8"submit"))
           {
-            return dom::DOMString(u8"Submit");
+            return DOMString(u8"Submit");
           }
           if (EqualsIgnoringCase(type, u8"reset"))
           {
-            return dom::DOMString(u8"Reset");
+            return DOMString(u8"Reset");
           }
           return {};
         }
 
         // Labelable elements: their label elements' text alternatives, in tree order.
-        if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
+        if (auto *htmlElement = DynamicDowncast<HTMLElement>(element);
             htmlElement && htmlElement->IsLabelable() && !context.InNativeTextAlternative)
         {
-          if (auto labels = const_cast<html::HTMLElement *>(htmlElement)->Labels())
+          if (auto labels = const_cast<HTMLElement *>(htmlElement)->Labels())
           {
-            dom::DOMString accumulated;
+            DOMString accumulated;
             for (size_t index = 0; index < labels->Length(); ++index)
             {
               auto label = labels->Item(index);
@@ -758,8 +755,8 @@ namespace krys::boo
       }
 
       /// @brief The text alternative of @p element's first child with @p childTagName.
-      KRYS_NODISCARD dom::DOMString ChildElementText(const dom::Element &element, TagName childTagName,
-                                                     const Context &context) noexcept
+      KRYS_NODISCARD DOMString ChildElementText(const Element &element, TagName childTagName,
+                                                const Context &context) noexcept
       {
         for (auto *child = element.FirstChild(); child; child = child->NextSibling())
         {
@@ -768,17 +765,16 @@ namespace krys::boo
             Context childContext = context;
             childContext.IsRecursion = true;
             childContext.InNameFromContent = true;
-            return NameFromContent(*DynamicDowncast<dom::Element>(child), childContext);
+            return NameFromContent(*DynamicDowncast<Element>(child), childContext);
           }
         }
         return {};
       }
 
-      KRYS_NODISCARD dom::DOMString NameFromContent(const dom::Element &element,
-                                                    const Context &context) noexcept
+      KRYS_NODISCARD DOMString NameFromContent(const Element &element, const Context &context) noexcept
       {
         // 2F.i. Set the accumulated text to the empty string.
-        dom::DOMString accumulated;
+        DOMString accumulated;
         // 2F.ii. Name From Generated Content: Set the result to the empty string. For each of the current
         //        node's ::before and ::after pseudo elements: ... If the pseudo element has an alternative
         //        text, use it; otherwise, its textual content. Prepend ::before's result and append
@@ -787,8 +783,8 @@ namespace krys::boo
 
         // 2F.iii. Determine Child Nodes: Set the set of child nodes to contain the children of the current
         //         node and append the nodes specified by aria-owns on the current node.
-        List<Ref<dom::Node>> childNodes;
-        for (auto &child : dom::ComposedTreeChildren(const_cast<dom::Element &>(element)))
+        List<Ref<Node>> childNodes;
+        for (auto &child : dom::ComposedTreeChildren(const_cast<Element &>(element)))
         {
           childNodes.push_back(ShareRef(child));
         }
@@ -832,17 +828,16 @@ namespace krys::boo
 
       /// @brief The text of @p element's `::before` and `::after` content (their CSS alt text where given),
       /// with a space around a block-level one.
-      KRYS_NODISCARD static Pair<dom::DOMString, dom::DOMString>
-        GeneratedContentText(const dom::Element &element) noexcept
+      KRYS_NODISCARD static Pair<DOMString, DOMString> GeneratedContentText(const Element &element) noexcept
       {
-        auto textOf = [](const dom::PseudoElement *pseudo) -> dom::DOMString
+        auto textOf = [](const PseudoElement *pseudo) -> DOMString
         {
           auto *renderer = pseudo ? pseudo->Renderer() : nullptr;
           if (!renderer)
           {
             return {};
           }
-          dom::DOMString text;
+          DOMString text;
           for (auto *descendant = renderer->FirstChildSlow(); descendant;
                descendant = descendant->NextInPreOrder(renderer))
           {
@@ -871,12 +866,12 @@ namespace krys::boo
     };
   }
 
-  Ref<AXNodeObject> AXNodeObject::Create(AXId id, dom::Node &node, AXObjectCache &cache) noexcept
+  Ref<AXNodeObject> AXNodeObject::Create(AXId id, Node &node, AXObjectCache &cache) noexcept
   {
     return AdoptRef(*new AXNodeObject(id, &node, cache));
   }
 
-  AXNodeObject::AXNodeObject(AXId id, dom::Node *node, AXObjectCache &cache) noexcept
+  AXNodeObject::AXNodeObject(AXId id, Node *node, AXObjectCache &cache) noexcept
       : AXObject(id, cache), _node(CreateWeakPtr(node))
   {
   }
@@ -914,8 +909,8 @@ namespace krys::boo
     }
 
     // The composed tree's parent, skipping document fragments (shadow roots).
-    dom::Node *parent = node->ParentInComposedTree();
-    if (parent && !Is<dom::Element>(*parent) && !Is<dom::Document>(*parent))
+    Node *parent = node->ParentInComposedTree();
+    if (parent && !Is<Element>(*parent) && !Is<Document>(*parent))
     {
       parent = parent->ParentInComposedTree();
     }
@@ -925,7 +920,7 @@ namespace krys::boo
     }
 
     // An area's parent is its image map's image, not the map.
-    if (auto *area = DynamicDowncast<html::HTMLAreaElement>(*node))
+    if (auto *area = DynamicDowncast<HTMLAreaElement>(*node))
     {
       auto image = area->ImageElement();
       return image ? cache->GetOrCreate(*image) : nullptr;
@@ -983,7 +978,7 @@ namespace krys::boo
     {
       return AXRole::Row;
     }
-    if (auto *area = DynamicDowncast<html::HTMLAreaElement>(GetNode()))
+    if (auto *area = DynamicDowncast<HTMLAreaElement>(GetNode()))
     {
       // (The cache works the role out again when the href changes.)
       return !area->Href().empty() ? AXRole::Link : AXRole::Generic;
@@ -1010,12 +1005,12 @@ namespace krys::boo
     {
       return AXRole::Unknown;
     }
-    if (Is<dom::Text>(*node))
+    if (Is<boo::Text>(*node))
     {
       return AXRole::StaticText;
     }
 
-    auto *element = DynamicDowncast<html::HTMLElement>(*node);
+    auto *element = DynamicDowncast<HTMLElement>(*node);
     if (!element)
     {
       return AXRole::Unknown;
@@ -1025,7 +1020,7 @@ namespace krys::boo
     {
       return AXRole::Link;
     }
-    if (auto *select = DynamicDowncast<html::HTMLSelectElement>(*element))
+    if (auto *select = DynamicDowncast<HTMLSelectElement>(*element))
     {
       return select->Multiple() ? AXRole::ListBox : AXRole::PopUpButton;
     }
@@ -1048,7 +1043,7 @@ namespace krys::boo
       default: break;
     }
 
-    if (auto *input = DynamicDowncast<html::HTMLInputElement>(*element))
+    if (auto *input = DynamicDowncast<HTMLInputElement>(*element))
     {
       return RoleFromInputElement(*input);
     }
@@ -1120,7 +1115,7 @@ namespace krys::boo
       case TagName::mark:       return AXRole::Mark;
       case TagName::details:    return AXRole::Details;
       case TagName::summary:
-        if (DynamicDowncast<html::HTMLSummaryElement>(*element)->IsActiveSummary())
+        if (DynamicDowncast<HTMLSummaryElement>(*element)->IsActiveSummary())
         {
           return AXRole::Summary;
         }
@@ -1163,7 +1158,7 @@ namespace krys::boo
     return AXRole::Unknown;
   }
 
-  AXRole AXNodeObject::RoleFromInputElement(const html::HTMLInputElement &input) const noexcept
+  AXRole AXNodeObject::RoleFromInputElement(const HTMLInputElement &input) const noexcept
   {
     if (input.IsTextButton())
     {
@@ -1385,7 +1380,7 @@ namespace krys::boo
     }
     else if (node && cache)
     {
-      if (auto *container = DynamicDowncast<dom::ContainerNode>(*node))
+      if (auto *container = DynamicDowncast<ContainerNode>(*node))
       {
         for (auto &child : dom::ComposedTreeChildren(*container))
         {
@@ -1410,7 +1405,7 @@ namespace krys::boo
     // except a spin button (which a mock object stands for).
     if (IsNativeTextControl())
     {
-      auto *input = DynamicDowncast<html::HTMLInputElement>(node);
+      auto *input = DynamicDowncast<HTMLInputElement>(node);
       return input && input->InnerSpinButtonElement();
     }
 
@@ -1452,14 +1447,14 @@ namespace krys::boo
     {
       return false;
     }
-    List<dom::Node *> queue;
+    List<Node *> queue;
     for (auto *child = node->FirstChild(); child; child = child->NextSibling())
     {
       queue.push_back(child);
     }
     for (size_t index = 0; index < queue.size(); ++index)
     {
-      auto *element = DynamicDowncast<dom::Element>(queue[index]);
+      auto *element = DynamicDowncast<Element>(queue[index]);
       if (!element || ax::HasRole(*element, u8"treeitem"))
       {
         continue;
@@ -1488,7 +1483,7 @@ namespace krys::boo
       return true;
     }
 
-    if (auto *text = DynamicDowncast<dom::Text>(*node); text && !Renderer())
+    if (auto *text = DynamicDowncast<boo::Text>(*node); text && !Renderer())
     {
       // Whitespace only text elements should be ignored when they have no renderer.
       if (StringAlgorithms::StripLeadingAndTrailingWhitespace(text->Data()).empty())
@@ -1507,7 +1502,7 @@ namespace krys::boo
       return true;
     }
 
-    if (auto *area = DynamicDowncast<html::HTMLAreaElement>(*node); area && !area->Href().empty())
+    if (auto *area = DynamicDowncast<HTMLAreaElement>(*node); area && !area->Href().empty())
     {
       return false;
     }
@@ -1539,7 +1534,7 @@ namespace krys::boo
 
   float AXNodeObject::ValueForRange() const noexcept
   {
-    if (auto *input = DynamicDowncast<html::HTMLInputElement>(GetNode()); input && input->IsRangeControl())
+    if (auto *input = DynamicDowncast<HTMLInputElement>(GetNode()); input && input->IsRangeControl())
     {
       return static_cast<float>(input->ValueAsNumber());
     }
@@ -1558,7 +1553,7 @@ namespace krys::boo
 
   float AXNodeObject::MaxValueForRange() const noexcept
   {
-    if (auto *input = DynamicDowncast<html::HTMLInputElement>(GetNode()); input && input->IsRangeControl())
+    if (auto *input = DynamicDowncast<HTMLInputElement>(GetNode()); input && input->IsRangeControl())
     {
       return static_cast<float>(input->Maximum());
     }
@@ -1576,7 +1571,7 @@ namespace krys::boo
 
   float AXNodeObject::MinValueForRange() const noexcept
   {
-    if (auto *input = DynamicDowncast<html::HTMLInputElement>(GetNode()); input && input->IsRangeControl())
+    if (auto *input = DynamicDowncast<HTMLInputElement>(GetNode()); input && input->IsRangeControl())
     {
       return static_cast<float>(input->Minimum());
     }
@@ -1592,9 +1587,9 @@ namespace krys::boo
     return IsSpinButton() ? -std::numeric_limits<float>::max() : 0.0f;
   }
 
-  dom::DOMString AXNodeObject::ValueDescription() const noexcept
+  DOMString AXNodeObject::ValueDescription() const noexcept
   {
-    return IsRangeControl() ? GetAttribute(u8"aria-valuetext") : dom::DOMString {};
+    return IsRangeControl() ? GetAttribute(u8"aria-valuetext") : DOMString {};
   }
 
   Maybe<AXOrientation> AXNodeObject::OrientationFromARIA() const noexcept
@@ -1749,7 +1744,7 @@ namespace krys::boo
     {
       return true;
     }
-    auto *input = DynamicDowncast<html::HTMLInputElement>(node);
+    auto *input = DynamicDowncast<HTMLInputElement>(node);
     return input && (input->IsTextField() || input->IsNumberField());
   }
 
@@ -1783,7 +1778,7 @@ namespace krys::boo
     {
       return true;
     }
-    if (Is<mathml::MathMLElement>(*element) && !GetAttribute(u8"alttext").empty())
+    if (Is<MathMLElement>(*element) && !GetAttribute(u8"alttext").empty())
     {
       return true;
     }
@@ -1889,7 +1884,7 @@ namespace krys::boo
 
   bool AXNodeObject::IsIndeterminate() const noexcept
   {
-    if (auto *input = DynamicDowncast<html::HTMLInputElement>(GetNode()))
+    if (auto *input = DynamicDowncast<HTMLInputElement>(GetNode()))
     {
       return (input->IsCheckbox() && input->Indeterminate()) || false;
     }
@@ -1929,7 +1924,7 @@ namespace krys::boo
       return false;
     }
     // Native checkedness first.
-    if (auto *input = DynamicDowncast<html::HTMLInputElement>(*node))
+    if (auto *input = DynamicDowncast<HTMLInputElement>(*node))
     {
       return input->MatchesCheckedPseudoClass();
     }
@@ -1949,7 +1944,7 @@ namespace krys::boo
 
   bool AXNodeObject::IsSelected() const noexcept
   {
-    if (auto *option = DynamicDowncast<html::HTMLOptionElement>(GetNode()))
+    if (auto *option = DynamicDowncast<HTMLOptionElement>(GetNode()))
     {
       return option->Selected();
     }
@@ -2004,7 +1999,7 @@ namespace krys::boo
     {
       return false;
     }
-    auto *select = DynamicDowncast<html::HTMLSelectElement>(GetNode());
+    auto *select = DynamicDowncast<HTMLSelectElement>(GetNode());
     return select && select->Multiple();
   }
 
@@ -2013,9 +2008,9 @@ namespace krys::boo
     /// @brief The popover @p node (a button) shows and hides, if it's one whose expanded state is the
     /// popover's: a `commandfor` popover it sends a popover command, or (without `commandfor`) its
     /// `popovertarget`. HTML-AAM maps both to `aria-expanded`.
-    KRYS_NODISCARD RefPtr<dom::Element> ExpandedStatePopover(const dom::Node *node) noexcept
+    KRYS_NODISCARD RefPtr<Element> ExpandedStatePopover(const Node *node) noexcept
     {
-      if (auto *button = DynamicDowncast<html::HTMLButtonElement>(node))
+      if (auto *button = DynamicDowncast<HTMLButtonElement>(node))
       {
         if (auto target = button->CommandForElement())
         {
@@ -2033,7 +2028,7 @@ namespace krys::boo
           }
         }
       }
-      if (auto *control = DynamicDowncast<html::HTMLFormControlElement>(node))
+      if (auto *control = DynamicDowncast<HTMLFormControlElement>(node))
       {
         return control->PopoverTargetElement();
       }
@@ -2080,7 +2075,7 @@ namespace krys::boo
     auto *node = GetNode();
     if (HTMLTagNameOf(node) == TagName::details)
     {
-      return DynamicDowncast<dom::Element>(node)->HasAttribute(u8"open");
+      return DynamicDowncast<Element>(node)->HasAttribute(u8"open");
     }
     if (Role() == AXRole::Summary)
     {
@@ -2110,7 +2105,7 @@ namespace krys::boo
     {
       return true;
     }
-    auto *element = DynamicDowncast<dom::Element>(*node);
+    auto *element = DynamicDowncast<Element>(*node);
     return element && !element->IsDisabledFormControl() && html::FocusAlgorithms::IsFocusableArea(*element);
   }
 
@@ -2122,11 +2117,11 @@ namespace krys::boo
       return false;
     }
     // The host language's readonly beats aria-readonly.
-    if (auto *textArea = DynamicDowncast<html::HTMLTextAreaElement>(*node))
+    if (auto *textArea = DynamicDowncast<HTMLTextAreaElement>(*node))
     {
       return !textArea->ReadOnly();
     }
-    if (auto *input = DynamicDowncast<html::HTMLInputElement>(*node); input && input->IsTextField())
+    if (auto *input = DynamicDowncast<HTMLInputElement>(*node); input && input->IsTextField())
     {
       return !input->ReadOnly();
     }
@@ -2159,9 +2154,9 @@ namespace krys::boo
   namespace
   {
     /// @brief @p node, if it's a control a press acts on itself.
-    KRYS_NODISCARD dom::Element *NodeActionElement(dom::Node &node) noexcept
+    KRYS_NODISCARD Element *NodeActionElement(Node &node) noexcept
     {
-      if (auto *input = DynamicDowncast<html::HTMLInputElement>(node))
+      if (auto *input = DynamicDowncast<HTMLInputElement>(node))
       {
         if (!input->IsDisabledFormControl()
             && (input->IsRadioButton() || input->IsCheckbox() || input->IsTextButton()
@@ -2173,15 +2168,15 @@ namespace krys::boo
       }
       else if (auto tag = HTMLTagNameOf(&node); tag == TagName::button || tag == TagName::select)
       {
-        return &Downcast<dom::Element>(node);
+        return &Downcast<Element>(node);
       }
       // Editable content takes presses too.
-      auto *element = DynamicDowncast<dom::Element>(node);
+      auto *element = DynamicDowncast<Element>(node);
       return element && ContentEditableAttributeIsEnabled(*element) ? element : nullptr;
     }
 
     /// @brief A control the author hid inside an ARIA control (a group with role=button around a button).
-    KRYS_NODISCARD dom::Element *NativeActionElement(dom::Node &start) noexcept
+    KRYS_NODISCARD Element *NativeActionElement(Node &start) noexcept
     {
       for (auto *child = start.FirstChild(); child; child = child->NextSibling())
       {
@@ -2217,27 +2212,27 @@ namespace krys::boo
     };
   }
 
-  dom::Element *AXNodeObject::AnchorElement() const noexcept
+  Element *AXNodeObject::AnchorElement() const noexcept
   {
     auto *cache = AxObjectCache();
     for (auto *node = GetNode(); node; node = node->ParentNode())
     {
-      if (Is<html::HTMLAnchorElement>(*node))
+      if (Is<HTMLAnchorElement>(*node))
       {
-        return &Downcast<dom::Element>(*node);
+        return &Downcast<Element>(*node);
       }
       if (auto *renderer = node->Renderer(); renderer && cache)
       {
         if (auto *object = cache->GetOrCreate(*renderer); object && object->IsLink())
         {
-          return DynamicDowncast<dom::Element>(*node);
+          return DynamicDowncast<Element>(*node);
         }
       }
     }
     return nullptr;
   }
 
-  dom::Element *AXNodeObject::ActionElement() const noexcept
+  Element *AXNodeObject::ActionElement() const noexcept
   {
     auto *node = GetNode();
     if (!node)
@@ -2250,7 +2245,7 @@ namespace krys::boo
     }
     if (IsARIAInputRole(_ariaRole))
     {
-      return DynamicDowncast<dom::Element>(*node);
+      return DynamicDowncast<Element>(*node);
     }
     switch (Role())
     {
@@ -2266,7 +2261,7 @@ namespace krys::boo
         {
           return element;
         }
-        return DynamicDowncast<dom::Element>(*node);
+        return DynamicDowncast<Element>(*node);
       default: break;
     }
     if (auto *anchor = AnchorElement())
@@ -2296,7 +2291,7 @@ namespace krys::boo
     {
       return;
     }
-    RefPtr<dom::Document> document = ShareRefPtr(GetDocument());
+    RefPtr<Document> document = ShareRefPtr(GetDocument());
     if (!document)
     {
       return;
@@ -2306,7 +2301,7 @@ namespace krys::boo
     {
       window->NotifyActivated();
     }
-    auto *element = DynamicDowncast<dom::Element>(GetNode());
+    auto *element = DynamicDowncast<Element>(GetNode());
     auto *focusedElement = document->FocusedElement();
     // Focusing the focused element does nothing, so it's unfocused first (focus may have gone to the host's
     // chrome and come back).
@@ -2416,7 +2411,7 @@ namespace krys::boo
 
   void AXNodeObject::SetIsExpanded(bool expanded) noexcept
   {
-    if (auto *details = DynamicDowncast<html::HTMLDetailsElement>(GetNode());
+    if (auto *details = DynamicDowncast<HTMLDetailsElement>(GetNode());
         details && expanded != details->HasAttribute(u8"open"))
     {
       details->ToggleOpen();
@@ -2441,14 +2436,14 @@ namespace krys::boo
       }
       return value ? value : 2;
     }
-    if (auto *heading = DynamicDowncast<html::HTMLHeadingElement>(GetNode()))
+    if (auto *heading = DynamicDowncast<HTMLHeadingElement>(GetNode()))
     {
       return heading->ComputedHeadingLevel();
     }
     return 0;
   }
 
-  dom::DOMString AXNodeObject::AccessibleName() const noexcept
+  DOMString AXNodeObject::AccessibleName() const noexcept
   {
     // A web area (the document's view, which has no node) is named by the html element's aria-label, or else
     // the document's title. (WebKit's order; a frame's web area would be named by its owner element first.)
@@ -2474,7 +2469,7 @@ namespace krys::boo
     return TextAlternativeComputation(*cache, TextAlternativeComputation::Kind::Name, *node).Compute();
   }
 
-  dom::DOMString AXNodeObject::AccessibleDescription() const noexcept
+  DOMString AXNodeObject::AccessibleDescription() const noexcept
   {
     auto *node = GetNode();
     auto *cache = AxObjectCache();
@@ -2497,7 +2492,7 @@ namespace krys::boo
     {
       return ariaDescription;
     }
-    if (Is<svg::SVGElement>(*node))
+    if (Is<SVGElement>(*node))
     {
       return {};
     }
@@ -2509,18 +2504,18 @@ namespace krys::boo
     return {};
   }
 
-  dom::DOMString AXNodeObject::StringValue() const noexcept
+  DOMString AXNodeObject::StringValue() const noexcept
   {
     auto *node = GetNode();
     if (!node)
     {
       return {};
     }
-    if (auto *text = DynamicDowncast<dom::Text>(*node))
+    if (auto *text = DynamicDowncast<boo::Text>(*node))
     {
-      return dom::DOMString(text->Data());
+      return DOMString(text->Data());
     }
-    if (auto *input = DynamicDowncast<html::HTMLInputElement>(*node))
+    if (auto *input = DynamicDowncast<HTMLInputElement>(*node))
     {
       // A password's characters aren't exposed.
       if (input->IsPasswordField())
@@ -2529,21 +2524,21 @@ namespace krys::boo
       }
       return input->Value();
     }
-    if (auto *textArea = DynamicDowncast<html::HTMLTextAreaElement>(*node))
+    if (auto *textArea = DynamicDowncast<HTMLTextAreaElement>(*node))
     {
       return textArea->Value();
     }
-    if (auto *select = DynamicDowncast<html::HTMLSelectElement>(*node); select && !select->Multiple())
+    if (auto *select = DynamicDowncast<HTMLSelectElement>(*node); select && !select->Multiple())
     {
       auto index = select->SelectedIndex();
       if (index >= 0 && static_cast<size_t>(index) < select->ListItems().size())
       {
-        if (auto *option = DynamicDowncast<html::HTMLOptionElement>(select->ListItems()[index].get()))
+        if (auto *option = DynamicDowncast<HTMLOptionElement>(select->ListItems()[index].get()))
         {
           // The option's aria-label overrides its text.
           if (auto label = AttributeWithDefaultARIA(*option, u8"aria-label"); !label.empty())
           {
-            return dom::DOMString(StringAlgorithms::StripLeadingAndTrailingWhitespace(label));
+            return DOMString(StringAlgorithms::StripLeadingAndTrailingWhitespace(label));
           }
           return option->Label();
         }
@@ -2581,21 +2576,20 @@ namespace krys::boo
   namespace
   {
     /// @brief The text form control @p object is, if it's a native text control.
-    KRYS_NODISCARD html::HTMLTextFormControlElement *NativeTextControl(const AXNodeObject &object) noexcept
+    KRYS_NODISCARD HTMLTextFormControlElement *NativeTextControl(const AXNodeObject &object) noexcept
     {
-      return object.IsNativeTextControl()
-               ? DynamicDowncast<html::HTMLTextFormControlElement>(object.GetNode())
-               : nullptr;
+      return object.IsNativeTextControl() ? DynamicDowncast<HTMLTextFormControlElement>(object.GetNode())
+                                          : nullptr;
     }
 
     KRYS_NODISCARD bool IsPasswordField(const AXNodeObject &object) noexcept
     {
-      auto *input = DynamicDowncast<html::HTMLInputElement>(object.GetNode());
+      auto *input = DynamicDowncast<HTMLInputElement>(object.GetNode());
       return input && input->IsPasswordField();
     }
   }
 
-  dom::DOMString AXNodeObject::Text() const noexcept
+  DOMString AXNodeObject::Text() const noexcept
   {
     if (IsStaticText())
     {
@@ -2610,8 +2604,8 @@ namespace krys::boo
       // A password's characters aren't exposed.
       return StringValue();
     }
-    auto *element = DynamicDowncast<html::HTMLElement>(GetElement());
-    return element ? element->InnerText() : dom::DOMString {};
+    auto *element = DynamicDowncast<HTMLElement>(GetElement());
+    return element ? element->InnerText() : DOMString {};
   }
 
   VisiblePositionRange AXNodeObject::GetVisiblePositionRange() const noexcept
@@ -2734,7 +2728,7 @@ namespace krys::boo
     return {static_cast<uint64>(start), static_cast<uint64>(end - start)};
   }
 
-  dom::DOMString AXNodeObject::SelectedText() const noexcept
+  DOMString AXNodeObject::SelectedText() const noexcept
   {
     if (!IsTextControl() || IsPasswordField(*this))
     {
@@ -2762,7 +2756,7 @@ namespace krys::boo
     auto *cache = AxObjectCache();
     for (auto *renderer = Renderer(); cache && renderer && renderer->GetNode(); renderer = renderer->Parent())
     {
-      auto *rendererElement = DynamicDowncast<dom::Element>(renderer->GetNode());
+      auto *rendererElement = DynamicDowncast<Element>(renderer->GetNode());
       if (Is<RenderTextControl>(*renderer) || Is<RenderListBox>(*renderer)
           || (rendererElement
               && (ax::HasRole(*rendererElement, u8"listbox") || ax::HasRole(*rendererElement, u8"textbox")
@@ -2799,8 +2793,7 @@ namespace krys::boo
     // Some sites put display: table on tbody, thead or tfoot, making a table renderer for it: those aren't
     // tables (they're typically in an actual table element).
     auto *node = GetNode();
-    return (Is<RenderTable>(Renderer()) && !Is<html::HTMLTableSectionElement>(node))
-           || Is<html::HTMLTableElement>(node);
+    return (Is<RenderTable>(Renderer()) && !Is<HTMLTableSectionElement>(node)) || Is<HTMLTableElement>(node);
   }
 
   bool AXNodeObject::IsAriaTable() const noexcept
@@ -3003,14 +2996,14 @@ namespace krys::boo
     }
 
     // The rest only applies to an actual table element.
-    auto *table = DynamicDowncast<html::HTMLTableElement>(node);
+    auto *table = DynamicDowncast<HTMLTableElement>(node);
     if (!table)
     {
       return false;
     }
 
     // A valid column or row count says the author wants a data table.
-    auto ariaRowOrColCountIsSet = [this](dom::DOMStringView name)
+    auto ariaRowOrColCountIsSet = [this](DOMStringView name)
     {
       auto count = IntegralAttribute(name);
       return count == -1 || count > 0;
@@ -3286,7 +3279,7 @@ namespace krys::boo
       return 0;
     }
     // IsAriaTable() is true for ARIA grids, tree grids and tables.
-    if (!Is<html::HTMLTableElement>(*tableNode) && !IsAriaTable())
+    if (!Is<HTMLTableElement>(*tableNode) && !IsAriaTable())
     {
       return 0;
     }
@@ -3314,7 +3307,7 @@ namespace krys::boo
     // Step 2.
     uint32 yHeight = 0;
     // Step 3: Let pending tfoot elements be a list of tfoot elements, initially empty.
-    List<Ref<dom::Element>> pendingTfootElements;
+    List<Ref<Element>> pendingTfootElements;
     // Step 10.
     uint32 yCurrent = 0;
     bool didAddCaption = false;
@@ -3492,17 +3485,17 @@ namespace krys::boo
       downwardGrowingCells.clear();
     };
     // https://html.spec.whatwg.org/#algorithm-for-processing-row-groups
-    auto processRowGroup = [&](dom::Element &sectionElement)
+    auto processRowGroup = [&](Element &sectionElement)
     {
       // Step 1 (ystart) is only needed for step 3, which isn't implemented.
 
       // Step 2: Process each tr element child of the row group, in tree order.
-      if (auto *section = DynamicDowncast<html::HTMLTableSectionElement>(sectionElement))
+      if (auto *section = DynamicDowncast<HTMLTableSectionElement>(sectionElement))
       {
         for (auto *child = section->FirstElementChild().get(); child;
              child = child->NextElementSibling().get())
         {
-          if (!Is<html::HTMLTableRowElement>(*child))
+          if (!Is<HTMLTableRowElement>(*child))
           {
             continue;
           }
@@ -3528,9 +3521,9 @@ namespace krys::boo
     };
 
     bool withinImplicitRowGroup = false;
-    auto processTableDescendant = [&](this const auto &self, dom::Node &node) -> void
+    auto processTableDescendant = [&](this const auto &self, Node &node) -> void
     {
-      auto *element = DynamicDowncast<dom::Element>(node);
+      auto *element = DynamicDowncast<Element>(node);
       // Step 8: Skip children of the table that aren't rows or row groups.
       bool descendantIsRow =
         element && (HTMLTagNameOf(element) == TagName::tr || ax::HasRole(*element, u8"row"));
@@ -3569,7 +3562,7 @@ namespace krys::boo
           // shouldn't have.
           if (auto *object = cache->GetOrCreate(node); object && needsToDescend(*object))
           {
-            if (auto *container = DynamicDowncast<dom::ContainerNode>(node))
+            if (auto *container = DynamicDowncast<ContainerNode>(node))
             {
               for (auto &child : dom::ComposedTreeChildren(*container))
               {
@@ -3701,7 +3694,7 @@ namespace krys::boo
     return null;
   }
 
-  dom::DOMString AXNodeObject::AxRowIndexText() const noexcept
+  DOMString AXNodeObject::AxRowIndexText() const noexcept
   {
     if (HasAttribute(u8"aria-rowindextext"))
     {
@@ -3714,7 +3707,7 @@ namespace krys::boo
     return {};
   }
 
-  dom::DOMString AXNodeObject::AxColumnIndexText() const noexcept
+  DOMString AXNodeObject::AxColumnIndexText() const noexcept
   {
     return GetAttribute(u8"aria-colindextext");
   }
@@ -3876,11 +3869,11 @@ namespace krys::boo
   LayoutRect AXNodeObject::ElementRect() const noexcept
   {
     // An area's rect is its shape's, in its image.
-    if (auto *area = DynamicDowncast<html::HTMLAreaElement>(GetNode()))
+    if (auto *area = DynamicDowncast<HTMLAreaElement>(GetNode()))
     {
       for (auto *ancestor = area->ParentElement(); ancestor; ancestor = ancestor->ParentElement())
       {
-        if (Is<html::HTMLMapElement>(*ancestor))
+        if (Is<HTMLMapElement>(*ancestor))
         {
           auto *renderer = ancestor->Renderer();
           return renderer ? area->ComputeRect(renderer) : LayoutRect();

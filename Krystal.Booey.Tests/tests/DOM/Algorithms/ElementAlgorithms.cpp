@@ -30,7 +30,7 @@ namespace krys::boo::dom::tests
     public:
       List<AttributeChange> Changes;
 
-      explicit AttributeChangeRecordingElement(dom::Document &document) noexcept
+      explicit AttributeChangeRecordingElement(Document &document) noexcept
           : Element(document, {infra::namespaces::HTML, null, u8"test-element"}, NodeFlags::None)
       {
       }

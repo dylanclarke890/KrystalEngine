@@ -59,7 +59,7 @@ namespace krys::boo
   namespace
   {
     KRYS_NODISCARD bool
-      HasNoAttributeOrOnlyStyleAttribute(const dom::StyledElement &element,
+      HasNoAttributeOrOnlyStyleAttribute(const StyledElement &element,
                                          ShouldStyleAttributeBeEmpty shouldStyleAttributeBeEmpty) noexcept
     {
       if (!element.HasAttributes())
@@ -80,14 +80,14 @@ namespace krys::boo
       return matchedAttributes == attributeCount;
     }
 
-    KRYS_NODISCARD bool IsSpanWithoutAttributesOrUnstyledStyleSpan(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool IsSpanWithoutAttributesOrUnstyledStyleSpan(const Element &element) noexcept
     {
       return IsHTMLElementOfType(&element, html::TagName::span)
-             && HasNoAttributeOrOnlyStyleAttribute(Downcast<dom::StyledElement>(element),
+             && HasNoAttributeOrOnlyStyleAttribute(Downcast<StyledElement>(element),
                                                    StyleAttributeShouldBeEmpty);
     }
 
-    KRYS_NODISCARD Ref<dom::Element> CreateFontElement(dom::Document &document) noexcept
+    KRYS_NODISCARD Ref<Element> CreateFontElement(Document &document) noexcept
     {
       return CreateHTMLElement(document, u8"font");
     }
@@ -102,18 +102,18 @@ namespace krys::boo
       return style->MutableCopy();
     }
 
-    KRYS_NODISCARD ValueId ComputedUnicodeBidi(dom::Node *node) noexcept
+    KRYS_NODISCARD ValueId ComputedUnicodeBidi(boo::Node *node) noexcept
     {
       auto value = style::Extractor(node).PropertyValue(PropertyId::UnicodeBidi);
       return value ? css::LonghandValueId(PropertyId::UnicodeBidi, *value) : ValueId::Invalid;
     }
 
-    KRYS_NODISCARD dom::ContainerNode *DummySpanAncestorForNode(dom::Node *node) noexcept
+    KRYS_NODISCARD ContainerNode *DummySpanAncestorForNode(boo::Node *node) noexcept
     {
-      RefPtr<dom::Node> currentNode = ShareRefPtr(node);
+      RefPtr<boo::Node> currentNode = ShareRefPtr(node);
       while (currentNode)
       {
-        auto *element = DynamicDowncast<dom::Element>(*currentNode);
+        auto *element = DynamicDowncast<Element>(*currentNode);
         if (element && IsStyleSpanOrSpanWithOnlyStyleAttribute(*element))
         {
           break;
@@ -123,13 +123,13 @@ namespace krys::boo
       return currentNode ? currentNode->ParentNode() : nullptr;
     }
 
-    KRYS_NODISCARD RefPtr<dom::Node> HighestEmbeddingAncestor(dom::Node *startNode,
-                                                              dom::Node *enclosingNode) noexcept
+    KRYS_NODISCARD RefPtr<boo::Node> HighestEmbeddingAncestor(boo::Node *startNode,
+                                                              boo::Node *enclosingNode) noexcept
     {
-      for (RefPtr<dom::Node> currentNode = ShareRefPtr(startNode);
+      for (RefPtr<boo::Node> currentNode = ShareRefPtr(startNode);
            currentNode && currentNode != enclosingNode; currentNode = ShareRefPtr(currentNode->ParentNode()))
       {
-        if (Is<html::HTMLElement>(*currentNode) && ComputedUnicodeBidi(currentNode.get()) == ValueId::Embed)
+        if (Is<HTMLElement>(*currentNode) && ComputedUnicodeBidi(currentNode.get()) == ValueId::Embed)
         {
           return currentNode;
         }
@@ -138,15 +138,15 @@ namespace krys::boo
       return nullptr;
     }
 
-    KRYS_NODISCARD bool ContainsNonEditableRegion(dom::Node &node) noexcept
+    KRYS_NODISCARD bool ContainsNonEditableRegion(boo::Node &node) noexcept
     {
       if (!node.HasEditableStyle())
       {
         return true;
       }
 
-      RefPtr<dom::Node> sibling = ShareRefPtr(TreeQueries::NextSkippingChildren(node));
-      for (RefPtr<dom::Node> descendant = ShareRefPtr(node.FirstChild()); descendant && descendant != sibling;
+      RefPtr<boo::Node> sibling = ShareRefPtr(TreeQueries::NextSkippingChildren(node));
+      for (RefPtr<boo::Node> descendant = ShareRefPtr(node.FirstChild()); descendant && descendant != sibling;
            descendant = ShareRefPtr(TreeQueries::Next(*descendant)))
       {
         if (!descendant->HasEditableStyle())
@@ -160,14 +160,14 @@ namespace krys::boo
 
     struct InlineRunToApplyStyle
     {
-      RefPtr<dom::Node> Start;
-      RefPtr<dom::Node> End;
-      RefPtr<dom::Node> PastEndNode;
+      RefPtr<boo::Node> Start;
+      RefPtr<boo::Node> End;
+      RefPtr<boo::Node> PastEndNode;
       dom::Position PositionForStyleComputation;
-      RefPtr<dom::Node> DummyElement;
+      RefPtr<boo::Node> DummyElement;
       StyleChange Change;
 
-      InlineRunToApplyStyle(dom::Node *start, dom::Node *end, dom::Node *pastEndNode) noexcept
+      InlineRunToApplyStyle(boo::Node *start, boo::Node *end, boo::Node *pastEndNode) noexcept
           : Start(ShareRefPtr(start)), End(ShareRefPtr(end)), PastEndNode(ShareRefPtr(pastEndNode))
       {
         krys_debug_assert(start->ParentNode() == end->ParentNode());
@@ -179,7 +179,7 @@ namespace krys::boo
       }
     };
 
-    KRYS_NODISCARD dom::DOMString JoinWithSpace(const dom::DOMString &a, const dom::DOMString &b) noexcept
+    KRYS_NODISCARD DOMString JoinWithSpace(const DOMString &a, const DOMString &b) noexcept
     {
       if (a.empty())
       {
@@ -189,7 +189,7 @@ namespace krys::boo
       {
         return a;
       }
-      dom::DOMString result;
+      DOMString result;
       result.reserve(a.size() + 1 + b.size());
       result.append(a);
       result.push_back(u8' ');
@@ -198,27 +198,27 @@ namespace krys::boo
     }
   }
 
-  bool IsStyleSpanOrSpanWithOnlyStyleAttribute(const dom::Element &element) noexcept
+  bool IsStyleSpanOrSpanWithOnlyStyleAttribute(const Element &element) noexcept
   {
     return IsHTMLElementOfType(&element, html::TagName::span)
-           && HasNoAttributeOrOnlyStyleAttribute(Downcast<dom::StyledElement>(element),
+           && HasNoAttributeOrOnlyStyleAttribute(Downcast<StyledElement>(element),
                                                  AllowNonEmptyStyleAttribute);
   }
 
-  bool IsEmptyFontTag(const dom::Element *element,
+  bool IsEmptyFontTag(const Element *element,
                       ShouldStyleAttributeBeEmpty shouldStyleAttributeBeEmpty) noexcept
   {
     return IsHTMLElementOfType(element, html::TagName::font)
-           && HasNoAttributeOrOnlyStyleAttribute(Downcast<dom::StyledElement>(*element),
+           && HasNoAttributeOrOnlyStyleAttribute(Downcast<StyledElement>(*element),
                                                  shouldStyleAttributeBeEmpty);
   }
 
-  Ref<dom::Element> CreateStyleSpanElement(dom::Document &document) noexcept
+  Ref<Element> CreateStyleSpanElement(Document &document) noexcept
   {
     return CreateHTMLElement(document, u8"span");
   }
 
-  ApplyStyleCommand::ApplyStyleCommand(dom::Document &document, const EditingStyle *style, EditAction action,
+  ApplyStyleCommand::ApplyStyleCommand(Document &document, const EditingStyle *style, EditAction action,
                                        ApplyStylePropertyLevel level) noexcept
       : CompositeEditCommand(document, action), _style(style->Copy()), _propertyLevel(level),
         _start(EndingSelection().Start().Downstream()), _end(EndingSelection().End().Upstream()),
@@ -226,22 +226,22 @@ namespace krys::boo
   {
   }
 
-  ApplyStyleCommand::ApplyStyleCommand(dom::Document &document, const EditingStyle *style,
-                                       dom::Position start, dom::Position end, EditAction action,
+  ApplyStyleCommand::ApplyStyleCommand(Document &document, const EditingStyle *style, dom::Position start,
+                                       dom::Position end, EditAction action,
                                        ApplyStylePropertyLevel level) noexcept
       : CompositeEditCommand(document, action), _style(style->Copy()), _propertyLevel(level),
         _start(krys::move(start)), _end(krys::move(end)), _useEndingSelection(false), _removeOnly(false)
   {
   }
 
-  ApplyStyleCommand::ApplyStyleCommand(dom::Element &element, bool removeOnly, EditAction action) noexcept
+  ApplyStyleCommand::ApplyStyleCommand(Element &element, bool removeOnly, EditAction action) noexcept
       : CompositeEditCommand(element.NodeDocument(), action), _style(EditingStyle::Create()),
         _start(EndingSelection().Start().Downstream()), _end(EndingSelection().End().Upstream()),
         _useEndingSelection(true), _styledInlineElement(ShareRef(element)), _removeOnly(removeOnly)
   {
   }
 
-  ApplyStyleCommand::ApplyStyleCommand(dom::Document &document, const EditingStyle *style,
+  ApplyStyleCommand::ApplyStyleCommand(Document &document, const EditingStyle *style,
                                        IsInlineElementToRemoveFunction isInlineElementToRemove,
                                        EditAction action) noexcept
       : CompositeEditCommand(document, action), _style(style->Copy()),
@@ -251,27 +251,27 @@ namespace krys::boo
   {
   }
 
-  Ref<ApplyStyleCommand> ApplyStyleCommand::Create(dom::Document &document, const EditingStyle *style,
+  Ref<ApplyStyleCommand> ApplyStyleCommand::Create(Document &document, const EditingStyle *style,
                                                    EditAction action, ApplyStylePropertyLevel level) noexcept
   {
     return CreateRef<ApplyStyleCommand>(document, style, action, level);
   }
 
-  Ref<ApplyStyleCommand> ApplyStyleCommand::Create(dom::Document &document, const EditingStyle *style,
+  Ref<ApplyStyleCommand> ApplyStyleCommand::Create(Document &document, const EditingStyle *style,
                                                    const dom::Position &start, const dom::Position &end,
                                                    EditAction action, ApplyStylePropertyLevel level) noexcept
   {
     return CreateRef<ApplyStyleCommand>(document, style, start, end, action, level);
   }
 
-  Ref<ApplyStyleCommand> ApplyStyleCommand::Create(dom::Element &element, bool removeOnly,
+  Ref<ApplyStyleCommand> ApplyStyleCommand::Create(Element &element, bool removeOnly,
                                                    EditAction action) noexcept
   {
     return CreateRef<ApplyStyleCommand>(element, removeOnly, action);
   }
 
   Ref<ApplyStyleCommand>
-    ApplyStyleCommand::Create(dom::Document &document, const EditingStyle *style,
+    ApplyStyleCommand::Create(Document &document, const EditingStyle *style,
                               IsInlineElementToRemoveFunction isInlineElementToRemoveFunction,
                               EditAction action) noexcept
   {
@@ -366,7 +366,7 @@ namespace krys::boo
     // Save and restore the selection endpoints using their indices in the editable root, since
     // addBlockStyleIfNeeded may moveParagraphs, which can remove these endpoints.
     // Calculate start and end indices from the start of the tree that they're in.
-    RefPtr<dom::ContainerNode> scopeRoot = HighestEditableRoot(visibleStart.DeepEquivalent());
+    RefPtr<ContainerNode> scopeRoot = HighestEditableRoot(visibleStart.DeepEquivalent());
     if (!scopeRoot)
     {
       return;
@@ -391,19 +391,19 @@ namespace krys::boo
       StyleChange styleChange(&style, paragraphStart.DeepEquivalent());
       if (styleChange.CssStyle() || _removeOnly)
       {
-        RefPtr<dom::Node> block =
+        RefPtr<boo::Node> block =
           EnclosingBlock(ShareRefPtr(paragraphStart.DeepEquivalent().DeprecatedNode()));
         if (!_removeOnly)
         {
-          RefPtr<dom::Node> newBlock =
+          RefPtr<boo::Node> newBlock =
             MoveParagraphContentsToNewBlockIfNecessary(paragraphStart.DeepEquivalent());
           if (newBlock)
           {
             block = newBlock;
           }
         }
-        krys_debug_assert(!block || Is<dom::Element>(*block));
-        if (RefPtr<html::HTMLElement> htmlBlock = DynamicDowncast<html::HTMLElement>(block))
+        krys_debug_assert(!block || Is<Element>(*block));
+        if (RefPtr<HTMLElement> htmlBlock = DynamicDowncast<HTMLElement>(block))
         {
           RemoveCSSStyle(style, *htmlBlock);
           if (!_removeOnly)
@@ -429,7 +429,7 @@ namespace krys::boo
     UpdateStartEnd(startPosition, endPosition);
   }
 
-  void ApplyStyleCommand::CleanupUnstyledStyleSpans(dom::ContainerNode *dummySpanAncestor) noexcept
+  void ApplyStyleCommand::CleanupUnstyledStyleSpans(ContainerNode *dummySpanAncestor) noexcept
   {
     if (!dummySpanAncestor)
     {
@@ -441,10 +441,10 @@ namespace krys::boo
     // cloned/split, the new node is always a sibling of it. Therefore, we scan
     // all the children of the dummy's parent
 
-    List<Ref<dom::Element>> toRemove;
+    List<Ref<Element>> toRemove;
     for (auto *child = dummySpanAncestor->FirstChild(); child; child = child->NextSibling())
     {
-      auto *element = DynamicDowncast<dom::Element>(*child);
+      auto *element = DynamicDowncast<Element>(*child);
       if (element && IsSpanWithoutAttributesOrUnstyledStyleSpan(*element))
       {
         toRemove.push_back(ShareRef(*element));
@@ -457,22 +457,22 @@ namespace krys::boo
     }
   }
 
-  RefPtr<html::HTMLElement>
-    ApplyStyleCommand::SplitAncestorsWithUnicodeBidi(dom::Node *node, bool before,
+  RefPtr<HTMLElement>
+    ApplyStyleCommand::SplitAncestorsWithUnicodeBidi(boo::Node *node, bool before,
                                                      WritingDirection allowedDirection) noexcept
   {
     // We are allowed to leave the highest ancestor with unicode-bidi unsplit if it is unicode-bidi: embed and
     // direction: allowedDirection. In that case, we return the unsplit ancestor. Otherwise, we return 0.
-    RefPtr<dom::Element> block = EnclosingBlock(ShareRefPtr(node));
+    RefPtr<Element> block = EnclosingBlock(ShareRefPtr(node));
     if (!block || node == block)
     {
       return nullptr;
     }
 
-    RefPtr<dom::Node> highestAncestorWithUnicodeBidi;
-    RefPtr<dom::Node> nextHighestAncestorWithUnicodeBidi;
+    RefPtr<boo::Node> highestAncestorWithUnicodeBidi;
+    RefPtr<boo::Node> nextHighestAncestorWithUnicodeBidi;
     ValueId highestAncestorUnicodeBidi = ValueId::Invalid;
-    for (RefPtr<dom::Node> ancestor = ShareRefPtr(node->ParentNode()); ancestor != block;
+    for (RefPtr<boo::Node> ancestor = ShareRefPtr(node->ParentNode()); ancestor != block;
          ancestor = ShareRefPtr(ancestor->ParentNode()))
     {
       auto unicodeBidi = ComputedUnicodeBidi(ancestor.get());
@@ -489,12 +489,12 @@ namespace krys::boo
       return nullptr;
     }
 
-    RefPtr<html::HTMLElement> unsplitAncestor;
+    RefPtr<HTMLElement> unsplitAncestor;
 
     if (allowedDirection != WritingDirection::Natural && highestAncestorUnicodeBidi != ValueId::BidiOverride)
     {
-      if (RefPtr<html::HTMLElement> highestAncestorElementWithUnicodeBidi =
-            DynamicDowncast<html::HTMLElement>(highestAncestorWithUnicodeBidi))
+      if (RefPtr<HTMLElement> highestAncestorElementWithUnicodeBidi =
+            DynamicDowncast<HTMLElement>(highestAncestorWithUnicodeBidi))
       {
         auto highestAncestorDirection = EditingStyle::Create(highestAncestorElementWithUnicodeBidi.get(),
                                                              EditingStyle::PropertiesToInclude::AllProperties)
@@ -513,10 +513,10 @@ namespace krys::boo
     }
 
     // Split every ancestor through highest ancestor with embedding.
-    RefPtr<dom::Node> currentNode = ShareRefPtr(node);
+    RefPtr<boo::Node> currentNode = ShareRefPtr(node);
     while (currentNode)
     {
-      RefPtr<dom::Element> parent = ShareRefPtr(&Downcast<dom::Element>(*currentNode->ParentNode()));
+      RefPtr<Element> parent = ShareRefPtr(&Downcast<Element>(*currentNode->ParentNode()));
       if (before ? currentNode->PreviousSibling() : currentNode->NextSibling())
       {
         SplitElement(*parent, before ? *currentNode : *currentNode->NextSibling());
@@ -531,21 +531,21 @@ namespace krys::boo
     return unsplitAncestor;
   }
 
-  void ApplyStyleCommand::RemoveEmbeddingUpToEnclosingBlock(dom::Node *node,
-                                                            dom::Node *unsplitAncestor) noexcept
+  void ApplyStyleCommand::RemoveEmbeddingUpToEnclosingBlock(boo::Node *node,
+                                                            boo::Node *unsplitAncestor) noexcept
   {
-    RefPtr<dom::Element> block = EnclosingBlock(ShareRefPtr(node));
+    RefPtr<Element> block = EnclosingBlock(ShareRefPtr(node));
     if (!block || node == block)
     {
       return;
     }
 
-    RefPtr<dom::Node> parent;
-    for (RefPtr<dom::Node> ancestor = ShareRefPtr(node->ParentNode());
+    RefPtr<boo::Node> parent;
+    for (RefPtr<boo::Node> ancestor = ShareRefPtr(node->ParentNode());
          ancestor != block && ancestor != unsplitAncestor; ancestor = parent)
     {
       parent = ShareRefPtr(ancestor->ParentNode());
-      RefPtr<dom::StyledElement> element = DynamicDowncast<dom::StyledElement>(ancestor);
+      RefPtr<StyledElement> element = DynamicDowncast<StyledElement>(ancestor);
       if (!element)
       {
         continue;
@@ -583,8 +583,8 @@ namespace krys::boo
 
   void ApplyStyleCommand::ApplyInlineStyle(EditingStyle &style) noexcept
   {
-    RefPtr<dom::ContainerNode> startDummySpanAncestor;
-    RefPtr<dom::ContainerNode> endDummySpanAncestor;
+    RefPtr<ContainerNode> startDummySpanAncestor;
+    RefPtr<ContainerNode> endDummySpanAncestor;
 
     // update document layout once before removing styles
     // so that we avoid the expense of updating before each and every call
@@ -729,9 +729,9 @@ namespace krys::boo
     if (textDirection)
     {
       // Avoid applying the unicode-bidi and direction properties beneath ancestors that already have them.
-      RefPtr<dom::Node> startNode = ShareRefPtr(start.DeprecatedNode());
+      RefPtr<boo::Node> startNode = ShareRefPtr(start.DeprecatedNode());
       auto embeddingStartNode = HighestEmbeddingAncestor(startNode.get(), EnclosingBlock(startNode).get());
-      RefPtr<dom::Node> endNode = ShareRefPtr(end.DeprecatedNode());
+      RefPtr<boo::Node> endNode = ShareRefPtr(end.DeprecatedNode());
       auto embeddingEndNode = HighestEmbeddingAncestor(endNode.get(), EnclosingBlock(endNode).get());
 
       if (embeddingStartNode || embeddingEndNode)
@@ -766,7 +766,7 @@ namespace krys::boo
   void ApplyStyleCommand::FixRangeAndApplyInlineStyle(EditingStyle &style, const dom::Position &start,
                                                       const dom::Position &end) noexcept
   {
-    RefPtr<dom::Node> startNode = ShareRefPtr(start.DeprecatedNode());
+    RefPtr<boo::Node> startNode = ShareRefPtr(start.DeprecatedNode());
 
     if (start.DeprecatedEditingOffset() >= CaretMaxOffset(*startNode))
     {
@@ -777,7 +777,7 @@ namespace krys::boo
       }
     }
 
-    RefPtr<dom::Node> pastEndNode = ShareRefPtr(end.DeprecatedNode());
+    RefPtr<boo::Node> pastEndNode = ShareRefPtr(end.DeprecatedNode());
     if (end.DeprecatedEditingOffset() >= CaretMaxOffset(*pastEndNode))
     {
       pastEndNode = ShareRefPtr(TreeQueries::NextSkippingChildren(*pastEndNode));
@@ -796,7 +796,7 @@ namespace krys::boo
     // element in our run to generate <font color="blue" size="4">hello</font> instead of <font
     // color="blue"><font size="4">hello</font></font>
     auto range = *dom::MakeSimpleRange(dom::PositionRange {start, end});
-    RefPtr<dom::Element> editableRoot = ShareRefPtr(startNode->RootEditableElement());
+    RefPtr<Element> editableRoot = ShareRefPtr(startNode->RootEditableElement());
     if (startNode != editableRoot)
     {
       while (editableRoot && startNode->ParentNode() != editableRoot
@@ -809,8 +809,8 @@ namespace krys::boo
     ApplyInlineStyleToNodeRange(style, *startNode, pastEndNode.get());
   }
 
-  void ApplyStyleCommand::ApplyInlineStyleToNodeRange(EditingStyle &style, dom::Node &startNode,
-                                                      dom::Node *pastEndNode) noexcept
+  void ApplyStyleCommand::ApplyInlineStyleToNodeRange(EditingStyle &style, boo::Node &startNode,
+                                                      boo::Node *pastEndNode) noexcept
   {
     if (_removeOnly)
     {
@@ -820,8 +820,8 @@ namespace krys::boo
     GetDocument().UpdateLayoutIgnorePendingStylesheets();
 
     List<InlineRunToApplyStyle> runs;
-    RefPtr<dom::Node> node = ShareRefPtr(&startNode);
-    for (RefPtr<dom::Node> next; node && node != pastEndNode; node = next)
+    RefPtr<boo::Node> node = ShareRefPtr(&startNode);
+    for (RefPtr<boo::Node> next; node && node != pastEndNode; node = next)
     {
       next = ShareRefPtr(TreeQueries::Next(*node));
 
@@ -832,7 +832,7 @@ namespace krys::boo
 
       if (!node->HasRichlyEditableStyle())
       {
-        if (auto *element = DynamicDowncast<html::HTMLElement>(*node))
+        if (auto *element = DynamicDowncast<HTMLElement>(*node))
         {
           // This is a plaintext-only region. Only proceed if it's fully selected.
           // pastEndNode is the node after the last fully selected node, so if it's inside node then
@@ -874,7 +874,7 @@ namespace krys::boo
 
       auto runStart = node;
       auto runEnd = node;
-      RefPtr<dom::Node> sibling = ShareRefPtr(node->NextSibling());
+      RefPtr<boo::Node> sibling = ShareRefPtr(node->NextSibling());
       while (sibling && sibling != pastEndNode && !sibling->Contains(pastEndNode)
              && (!IsBlock(*sibling) || IsHTMLElementOfType(sibling.get(), html::TagName::br))
              && !ContainsNonEditableRegion(*sibling))
@@ -884,7 +884,7 @@ namespace krys::boo
       }
       next = ShareRefPtr(TreeQueries::NextSkippingChildren(*runEnd));
 
-      RefPtr<dom::Node> runPastEndNode = ShareRefPtr(TreeQueries::NextSkippingChildren(*runEnd));
+      RefPtr<boo::Node> runPastEndNode = ShareRefPtr(TreeQueries::NextSkippingChildren(*runEnd));
       if (!ShouldApplyInlineStyleToRun(style, runStart.get(), runPastEndNode.get()))
       {
         continue;
@@ -922,20 +922,20 @@ namespace krys::boo
     }
   }
 
-  bool ApplyStyleCommand::IsStyledInlineElementToRemove(dom::Element *element) const noexcept
+  bool ApplyStyleCommand::IsStyledInlineElementToRemove(Element *element) const noexcept
   {
     return (_styledInlineElement && element->LocalName() == _styledInlineElement->LocalName()
             && element->NamespaceURI() == _styledInlineElement->NamespaceURI())
            || (_isInlineElementToRemoveFunction && _isInlineElementToRemoveFunction(element));
   }
 
-  bool ApplyStyleCommand::ShouldApplyInlineStyleToRun(EditingStyle &style, dom::Node *runStart,
-                                                      dom::Node *pastEndNode) noexcept
+  bool ApplyStyleCommand::ShouldApplyInlineStyleToRun(EditingStyle &style, boo::Node *runStart,
+                                                      boo::Node *pastEndNode) noexcept
   {
     krys_debug_assert(runStart);
 
-    auto *styledInlineHTMLElement = DynamicDowncast<html::HTMLElement>(_styledInlineElement.get());
-    for (RefPtr<dom::Node> node = ShareRefPtr(runStart); node && node != pastEndNode;
+    auto *styledInlineHTMLElement = DynamicDowncast<HTMLElement>(_styledInlineElement.get());
+    for (RefPtr<boo::Node> node = ShareRefPtr(runStart); node && node != pastEndNode;
          node = ShareRefPtr(TreeQueries::Next(*node)))
     {
       if (node->HasChildNodes())
@@ -960,13 +960,13 @@ namespace krys::boo
   }
 
   void ApplyStyleCommand::RemoveConflictingInlineStyleFromRun(EditingStyle &style,
-                                                              RefPtr<dom::Node> &runStart,
-                                                              RefPtr<dom::Node> &runEnd,
-                                                              dom::Node *pastEndNode) noexcept
+                                                              RefPtr<boo::Node> &runStart,
+                                                              RefPtr<boo::Node> &runEnd,
+                                                              boo::Node *pastEndNode) noexcept
   {
     krys_debug_assert(runStart && runEnd);
-    RefPtr<dom::Node> next = runStart;
-    for (RefPtr<dom::Node> node = next; node && node->IsConnected() && node != pastEndNode; node = next)
+    RefPtr<boo::Node> next = runStart;
+    for (RefPtr<boo::Node> node = next; node && node->IsConnected() && node != pastEndNode; node = next)
     {
       if (EditingIgnoresContent(*node))
       {
@@ -978,15 +978,15 @@ namespace krys::boo
         next = ShareRefPtr(TreeQueries::Next(*node));
       }
 
-      auto *htmlElement = DynamicDowncast<html::HTMLElement>(*node);
+      auto *htmlElement = DynamicDowncast<HTMLElement>(*node);
       if (!htmlElement)
       {
         continue;
       }
 
-      RefPtr<dom::Node> previousSibling = ShareRefPtr(node->PreviousSibling());
-      RefPtr<dom::Node> nextSibling = ShareRefPtr(node->NextSibling());
-      RefPtr<dom::ContainerNode> parent = ShareRefPtr(node->ParentNode());
+      RefPtr<boo::Node> previousSibling = ShareRefPtr(node->PreviousSibling());
+      RefPtr<boo::Node> nextSibling = ShareRefPtr(node->NextSibling());
+      RefPtr<ContainerNode> parent = ShareRefPtr(node->ParentNode());
       RemoveInlineStyleFromElement(style, *htmlElement, InlineStyleRemovalMode::Always);
       if (!node->IsConnected())
       {
@@ -1003,7 +1003,7 @@ namespace krys::boo
     }
   }
 
-  bool ApplyStyleCommand::RemoveInlineStyleFromElement(EditingStyle &style, html::HTMLElement &element,
+  bool ApplyStyleCommand::RemoveInlineStyleFromElement(EditingStyle &style, HTMLElement &element,
                                                        InlineStyleRemovalMode mode,
                                                        EditingStyle *extractedStyle) noexcept
   {
@@ -1048,7 +1048,7 @@ namespace krys::boo
     return removed;
   }
 
-  void ApplyStyleCommand::ReplaceWithSpanOrRemoveIfWithoutAttributes(html::HTMLElement &element) noexcept
+  void ApplyStyleCommand::ReplaceWithSpanOrRemoveIfWithoutAttributes(HTMLElement &element) noexcept
   {
     if (HasNoAttributeOrOnlyStyleAttribute(element, StyleAttributeShouldBeEmpty))
     {
@@ -1061,7 +1061,7 @@ namespace krys::boo
     }
   }
 
-  bool ApplyStyleCommand::RemoveImplicitlyStyledElement(EditingStyle &style, html::HTMLElement &element,
+  bool ApplyStyleCommand::RemoveImplicitlyStyledElement(EditingStyle &style, HTMLElement &element,
                                                         InlineStyleRemovalMode mode,
                                                         EditingStyle *extractedStyle) noexcept
   {
@@ -1083,7 +1083,7 @@ namespace krys::boo
     }
 
     // unicode-bidi and direction are pushed down separately so don't push down with other styles
-    List<dom::DOMStringAtom> attributes;
+    List<DOMStringAtom> attributes;
     if (!style.ExtractConflictingImplicitStyleOfAttributes(
           element,
           extractedStyle ? EditingStyle::ShouldPreserveWritingDirection::Yes
@@ -1106,7 +1106,7 @@ namespace krys::boo
     return true;
   }
 
-  bool ApplyStyleCommand::RemoveCSSStyle(EditingStyle &style, html::HTMLElement &element,
+  bool ApplyStyleCommand::RemoveCSSStyle(EditingStyle &style, HTMLElement &element,
                                          InlineStyleRemovalMode mode, EditingStyle *extractedStyle) noexcept
   {
     if (mode == InlineStyleRemovalMode::None)
@@ -1137,23 +1137,21 @@ namespace krys::boo
     return true;
   }
 
-  RefPtr<html::HTMLElement>
-    ApplyStyleCommand::HighestAncestorWithConflictingInlineStyle(EditingStyle &style,
-                                                                 dom::Node *node) noexcept
+  RefPtr<HTMLElement> ApplyStyleCommand::HighestAncestorWithConflictingInlineStyle(EditingStyle &style,
+                                                                                   boo::Node *node) noexcept
   {
     if (!node)
     {
       return nullptr;
     }
 
-    RefPtr<html::HTMLElement> result;
-    RefPtr<dom::Element> unsplittableElement =
-      UnsplittableElementForPosition(FirstPositionInOrBeforeNode(node));
+    RefPtr<HTMLElement> result;
+    RefPtr<Element> unsplittableElement = UnsplittableElementForPosition(FirstPositionInOrBeforeNode(node));
 
-    for (RefPtr<dom::Node> ancestor = ShareRefPtr(node); ancestor;
+    for (RefPtr<boo::Node> ancestor = ShareRefPtr(node); ancestor;
          ancestor = ShareRefPtr(ancestor->ParentNode()))
     {
-      auto *htmlAncestor = DynamicDowncast<html::HTMLElement>(*ancestor);
+      auto *htmlAncestor = DynamicDowncast<HTMLElement>(*ancestor);
       if (htmlAncestor && ShouldRemoveInlineStyleFromElement(style, *htmlAncestor))
       {
         result = ShareRefPtr(htmlAncestor);
@@ -1169,7 +1167,7 @@ namespace krys::boo
     return result;
   }
 
-  void ApplyStyleCommand::ApplyInlineStyleToPushDown(dom::Node &node, EditingStyle *style) noexcept
+  void ApplyStyleCommand::ApplyInlineStyleToPushDown(boo::Node &node, EditingStyle *style) noexcept
   {
     node.NodeDocument().UpdateStyleIfNeeded();
 
@@ -1179,8 +1177,7 @@ namespace krys::boo
     }
 
     RefPtr<EditingStyle> newInlineStyle = ShareRefPtr(style);
-    if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(node);
-        htmlElement && htmlElement->InlineStyle())
+    if (auto *htmlElement = DynamicDowncast<HTMLElement>(node); htmlElement && htmlElement->InlineStyle())
     {
       newInlineStyle = style->Copy();
       newInlineStyle->MergeInlineStyleOfElement(*htmlElement,
@@ -1192,7 +1189,7 @@ namespace krys::boo
     // FIXME: applyInlineStyleToRange should be used here instead.
     if (node.Renderer()->IsRenderBlockFlow() || node.HasChildNodes())
     {
-      if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(node))
+      if (auto *htmlElement = DynamicDowncast<HTMLElement>(node))
       {
         SetNodeAttribute(*htmlElement, u8"style",
                          newInlineStyle->Style()->AsText(css::DefaultSerialisationContext()));
@@ -1217,7 +1214,7 @@ namespace krys::boo
     AddInlineStyleIfNeeded(newInlineStyle.get(), node, node, AddStyledElement::No);
   }
 
-  void ApplyStyleCommand::PushDownInlineStyleAroundNode(EditingStyle &style, dom::Node *targetNode) noexcept
+  void ApplyStyleCommand::PushDownInlineStyleAroundNode(EditingStyle &style, boo::Node *targetNode) noexcept
   {
     auto highestAncestor = HighestAncestorWithConflictingInlineStyle(style, targetNode);
     if (!highestAncestor)
@@ -1226,21 +1223,21 @@ namespace krys::boo
     }
 
     // The outer loop is traversing the tree vertically from highestAncestor to targetNode
-    RefPtr<dom::Node> current = highestAncestor;
+    RefPtr<boo::Node> current = highestAncestor;
     // Along the way, styled elements that contain targetNode are removed and accumulated into
     // elementsToPushDown. Each child of the removed element, exclusing ancestors of targetNode, is then
     // wrapped by clones of elements in elementsToPushDown.
-    List<Ref<dom::Element>> elementsToPushDown;
+    List<Ref<Element>> elementsToPushDown;
     while (current && current != targetNode && current->Contains(targetNode))
     {
-      List<Ref<dom::Node>> currentChildren;
+      List<Ref<boo::Node>> currentChildren;
       for (auto *child = current->FirstChild(); child; child = child->NextSibling())
       {
         currentChildren.push_back(ShareRef(*child));
       }
 
-      RefPtr<dom::StyledElement> styledElement;
-      if (auto *currentElement = DynamicDowncast<dom::StyledElement>(*current);
+      RefPtr<StyledElement> styledElement;
+      if (auto *currentElement = DynamicDowncast<StyledElement>(*current);
           currentElement && IsStyledInlineElementToRemove(currentElement))
       {
         styledElement = ShareRefPtr(currentElement);
@@ -1248,7 +1245,7 @@ namespace krys::boo
       }
 
       auto styleToPushDown = EditingStyle::Create();
-      if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(*current))
+      if (auto *htmlElement = DynamicDowncast<HTMLElement>(*current))
       {
         RemoveInlineStyleFromElement(style, *htmlElement, InlineStyleRemovalMode::IfNeeded,
                                      styleToPushDown.get());
@@ -1305,7 +1302,7 @@ namespace krys::boo
     // Move it to the next deep quivalent position to avoid removing the style from this node.
     // e.g. if pushDownStart was at Position("hello", 5) in <b>hello<div>world</div></b>, we want
     // Position("world", 0) instead.
-    if (auto *text = DynamicDowncast<dom::Text>(pushDownStart.GetContainerNode());
+    if (auto *text = DynamicDowncast<Text>(pushDownStart.GetContainerNode());
         text && static_cast<size_t>(pushDownStart.ComputeOffsetInContainerNode()) == text->Length())
     {
       pushDownStart = NextVisuallyDistinctCandidate(pushDownStart);
@@ -1313,7 +1310,7 @@ namespace krys::boo
     // If pushDownEnd is at the start of a text node, then this node is not fully selected.
     // Move it to the previous deep equivalent position to avoid removing the style from this node.
     dom::Position pushDownEnd = end.Upstream();
-    if (Is<dom::Text>(pushDownEnd.GetContainerNode()) && !pushDownEnd.ComputeOffsetInContainerNode())
+    if (Is<Text>(pushDownEnd.GetContainerNode()) && !pushDownEnd.ComputeOffsetInContainerNode())
     {
       pushDownEnd = PreviousVisuallyDistinctCandidate(pushDownEnd);
     }
@@ -1329,10 +1326,10 @@ namespace krys::boo
     dom::Position s = start.IsNull() || start.IsOrphan() ? pushDownStart : start;
     dom::Position e = end.IsNull() || end.IsOrphan() ? pushDownEnd : end;
 
-    RefPtr<dom::Node> node = ShareRefPtr(start.DeprecatedNode());
+    RefPtr<boo::Node> node = ShareRefPtr(start.DeprecatedNode());
     while (node)
     {
-      RefPtr<dom::Node> next;
+      RefPtr<boo::Node> next;
       if (EditingIgnoresContent(*node))
       {
         krys_debug_assert(node == end.DeprecatedNode() || !node->Contains(end.DeprecatedNode()));
@@ -1343,13 +1340,13 @@ namespace krys::boo
         next = ShareRefPtr(TreeQueries::Next(*node));
       }
 
-      if (RefPtr<html::HTMLElement> element = DynamicDowncast<html::HTMLElement>(node);
+      if (RefPtr<HTMLElement> element = DynamicDowncast<HTMLElement>(node);
           element && NodeFullySelected(*element, start, end))
       {
-        RefPtr<dom::Node> prev = ShareRefPtr(TreeQueries::PreviousPostOrder(*element));
-        RefPtr<dom::Node> nextAfterElement = ShareRefPtr(TreeQueries::Next(*element));
+        RefPtr<boo::Node> prev = ShareRefPtr(TreeQueries::PreviousPostOrder(*element));
+        RefPtr<boo::Node> nextAfterElement = ShareRefPtr(TreeQueries::Next(*element));
         RefPtr<EditingStyle> styleToPushDown;
-        RefPtr<dom::Node> childNode;
+        RefPtr<boo::Node> childNode;
         if (IsStyledInlineElementToRemove(element.get()))
         {
           styleToPushDown = EditingStyle::Create();
@@ -1396,7 +1393,7 @@ namespace krys::boo
     UpdateStartEnd(s, e);
   }
 
-  bool ApplyStyleCommand::NodeFullySelected(dom::Element &element, const dom::Position &start,
+  bool ApplyStyleCommand::NodeFullySelected(Element &element, const dom::Position &start,
                                             const dom::Position &end) noexcept
   {
     // The tree may have changed and Position::upstream() relies on an up-to-date layout.
@@ -1407,7 +1404,7 @@ namespace krys::boo
 
   void ApplyStyleCommand::SplitTextAtStart(const dom::Position &start, const dom::Position &end) noexcept
   {
-    krys_debug_assert(Is<dom::Text>(start.GetContainerNode()));
+    krys_debug_assert(Is<Text>(start.GetContainerNode()));
 
     dom::Position newEnd;
     if (end.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor
@@ -1422,21 +1419,21 @@ namespace krys::boo
       newEnd = end;
     }
 
-    RefPtr<dom::Text> text = ShareRefPtr(start.ContainerText());
+    RefPtr<Text> text = ShareRefPtr(start.ContainerText());
     SplitTextNode(*text, static_cast<uint32>(start.OffsetInContainerNode()));
     UpdateStartEnd(dom::FirstPositionInNode(text.get()), newEnd);
   }
 
   void ApplyStyleCommand::SplitTextAtEnd(const dom::Position &start, const dom::Position &end) noexcept
   {
-    krys_debug_assert(Is<dom::Text>(end.GetContainerNode()));
+    krys_debug_assert(Is<Text>(end.GetContainerNode()));
 
     bool shouldUpdateStart = start.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor
                              && start.GetContainerNode() == end.GetContainerNode();
-    Ref<dom::Text> text = ShareRef(Downcast<dom::Text>(*end.DeprecatedNode()));
+    Ref<Text> text = ShareRef(Downcast<Text>(*end.DeprecatedNode()));
     SplitTextNode(*text, static_cast<uint32>(end.OffsetInContainerNode()));
 
-    RefPtr<dom::Text> prevNode = ShareRefPtr(DynamicDowncast<dom::Text>(text->PreviousSibling()));
+    RefPtr<Text> prevNode = ShareRefPtr(DynamicDowncast<Text>(text->PreviousSibling()));
     if (!prevNode)
     {
       return;
@@ -1444,7 +1441,7 @@ namespace krys::boo
 
     dom::Position newStart =
       shouldUpdateStart
-        ? dom::Position(RefPtr<dom::Text>(prevNode), static_cast<uint32>(start.OffsetInContainerNode()))
+        ? dom::Position(RefPtr<Text>(prevNode), static_cast<uint32>(start.OffsetInContainerNode()))
         : start;
     UpdateStartEnd(newStart, dom::LastPositionInNode(prevNode.get()));
   }
@@ -1452,7 +1449,7 @@ namespace krys::boo
   void ApplyStyleCommand::SplitTextElementAtStart(const dom::Position &start,
                                                   const dom::Position &end) noexcept
   {
-    krys_debug_assert(Is<dom::Text>(start.GetContainerNode()));
+    krys_debug_assert(Is<Text>(start.GetContainerNode()));
 
     dom::Position newEnd;
     if (start.GetContainerNode() == end.GetContainerNode())
@@ -1466,7 +1463,7 @@ namespace krys::boo
       newEnd = end;
     }
 
-    RefPtr<dom::Node> container = ShareRefPtr(start.GetContainerNode());
+    RefPtr<boo::Node> container = ShareRefPtr(start.GetContainerNode());
     SplitTextNodeContainingElement(*start.ContainerText(),
                                    static_cast<uint32>(start.OffsetInContainerNode()));
     UpdateStartEnd(dom::PositionBeforeNode(container.get()), newEnd);
@@ -1474,18 +1471,18 @@ namespace krys::boo
 
   void ApplyStyleCommand::SplitTextElementAtEnd(const dom::Position &start, const dom::Position &end) noexcept
   {
-    krys_debug_assert(Is<dom::Text>(end.GetContainerNode()));
+    krys_debug_assert(Is<Text>(end.GetContainerNode()));
 
     bool shouldUpdateStart = start.GetContainerNode() == end.GetContainerNode();
     SplitTextNodeContainingElement(*end.ContainerText(), static_cast<uint32>(end.OffsetInContainerNode()));
 
-    RefPtr<dom::Node> parentElement = ShareRefPtr(end.GetContainerNode()->ParentNode());
+    RefPtr<boo::Node> parentElement = ShareRefPtr(end.GetContainerNode()->ParentNode());
     if (!parentElement || !parentElement->PreviousSibling())
     {
       return;
     }
-    RefPtr<dom::Text> firstTextNode =
-      ShareRefPtr(DynamicDowncast<dom::Text>(parentElement->PreviousSibling()->LastChild()));
+    RefPtr<Text> firstTextNode =
+      ShareRefPtr(DynamicDowncast<Text>(parentElement->PreviousSibling()->LastChild()));
     if (!firstTextNode)
     {
       return;
@@ -1493,14 +1490,14 @@ namespace krys::boo
 
     dom::Position newStart =
       shouldUpdateStart
-        ? dom::Position(RefPtr<dom::Text>(firstTextNode), static_cast<uint32>(start.OffsetInContainerNode()))
+        ? dom::Position(RefPtr<Text>(firstTextNode), static_cast<uint32>(start.OffsetInContainerNode()))
         : start;
     UpdateStartEnd(newStart, dom::PositionAfterNode(firstTextNode.get()));
   }
 
-  bool ApplyStyleCommand::ShouldSplitTextElement(dom::Element *element, EditingStyle &style) noexcept
+  bool ApplyStyleCommand::ShouldSplitTextElement(Element *element, EditingStyle &style) noexcept
   {
-    auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
+    auto *htmlElement = DynamicDowncast<HTMLElement>(element);
     return htmlElement && ShouldRemoveInlineStyleFromElement(style, *htmlElement);
   }
 
@@ -1509,8 +1506,7 @@ namespace krys::boo
     krys_debug_assert(position.IsNotNull());
 
     auto *node = position.GetContainerNode();
-    if (position.GetAnchorType() != dom::Position::AnchorType::PositionIsOffsetInAnchor
-        || !Is<dom::Text>(node))
+    if (position.GetAnchorType() != dom::Position::AnchorType::PositionIsOffsetInAnchor || !Is<Text>(node))
     {
       return false;
     }
@@ -1521,7 +1517,7 @@ namespace krys::boo
   bool ApplyStyleCommand::MergeStartWithPreviousIfIdentical(const dom::Position &start,
                                                             const dom::Position &end) noexcept
   {
-    RefPtr<dom::Node> startNode = ShareRefPtr(start.GetContainerNode());
+    RefPtr<boo::Node> startNode = ShareRefPtr(start.GetContainerNode());
     if (start.ComputeOffsetInContainerNode())
     {
       return false;
@@ -1539,24 +1535,24 @@ namespace krys::boo
       startNode = ShareRefPtr(startNode->ParentNode());
     }
 
-    RefPtr<dom::Element> element = DynamicDowncast<dom::Element>(startNode);
+    RefPtr<Element> element = DynamicDowncast<Element>(startNode);
     if (!element)
     {
       return false;
     }
 
-    RefPtr<dom::Node> previousSibling = ShareRefPtr(startNode->PreviousSibling());
+    RefPtr<boo::Node> previousSibling = ShareRefPtr(startNode->PreviousSibling());
     if (!previousSibling)
     {
       return false;
     }
-    RefPtr<dom::Element> previousElement = ShareRefPtr(ElementIfEquivalent(*element, *previousSibling));
+    RefPtr<Element> previousElement = ShareRefPtr(ElementIfEquivalent(*element, *previousSibling));
     if (!previousElement)
     {
       return false;
     }
 
-    RefPtr<dom::Node> startChild = ShareRefPtr(element->FirstChild());
+    RefPtr<boo::Node> startChild = ShareRefPtr(element->FirstChild());
     krys_debug_assert(startChild);
     MergeIdenticalElements(*previousElement, *element);
 
@@ -1565,7 +1561,7 @@ namespace krys::boo
     uint32 startOffset = startChild->ComputeNodeIndex();
     uint32 endOffset = static_cast<uint32>(end.DeprecatedEditingOffset())
                        + (startNode == end.DeprecatedNode() ? startOffset : 0);
-    UpdateStartEnd(dom::Position(RefPtr<dom::Node>(startNode), startOffset,
+    UpdateStartEnd(dom::Position(RefPtr<boo::Node>(startNode), startOffset,
                                  dom::Position::AnchorType::PositionIsOffsetInAnchor),
                    dom::Position(ShareRefPtr(end.DeprecatedNode()), endOffset,
                                  dom::Position::AnchorType::PositionIsOffsetInAnchor));
@@ -1575,7 +1571,7 @@ namespace krys::boo
   bool ApplyStyleCommand::MergeEndWithNextIfIdentical(const dom::Position &start,
                                                       const dom::Position &end) noexcept
   {
-    RefPtr<dom::Node> endNode = ShareRefPtr(end.GetContainerNode());
+    RefPtr<boo::Node> endNode = ShareRefPtr(end.GetContainerNode());
 
     if (IsAtomicNode(endNode.get()))
     {
@@ -1594,24 +1590,24 @@ namespace krys::boo
       return false;
     }
 
-    RefPtr<dom::Element> element = DynamicDowncast<dom::Element>(endNode);
+    RefPtr<Element> element = DynamicDowncast<Element>(endNode);
     if (!element)
     {
       return false;
     }
 
-    RefPtr<dom::Node> nextSibling = ShareRefPtr(endNode->NextSibling());
+    RefPtr<boo::Node> nextSibling = ShareRefPtr(endNode->NextSibling());
     if (!nextSibling)
     {
       return false;
     }
-    RefPtr<dom::Element> nextElement = ShareRefPtr(ElementIfEquivalent(*element, *nextSibling));
+    RefPtr<Element> nextElement = ShareRefPtr(ElementIfEquivalent(*element, *nextSibling));
     if (!nextElement)
     {
       return false;
     }
 
-    RefPtr<dom::Node> nextChild = ShareRefPtr(nextElement->FirstChild());
+    RefPtr<boo::Node> nextChild = ShareRefPtr(nextElement->FirstChild());
 
     MergeIdenticalElements(*element, *nextElement);
 
@@ -1619,18 +1615,18 @@ namespace krys::boo
     uint32 endOffset = nextChild ? nextChild->ComputeNodeIndex() : nextElement->CountChildNodes();
     UpdateStartEnd(
       shouldUpdateStart
-        ? dom::Position(RefPtr<dom::Node>(nextElement), static_cast<uint32>(start.OffsetInContainerNode()),
+        ? dom::Position(RefPtr<boo::Node>(nextElement), static_cast<uint32>(start.OffsetInContainerNode()),
                         dom::Position::AnchorType::PositionIsOffsetInAnchor)
         : start,
       dom::Position(nextElement, endOffset, dom::Position::AnchorType::PositionIsOffsetInAnchor));
     return true;
   }
 
-  bool ApplyStyleCommand::SurroundNodeRangeWithElement(dom::Node &startNode, dom::Node &endNode,
-                                                       Ref<dom::Element> &&elementToInsert) noexcept
+  bool ApplyStyleCommand::SurroundNodeRangeWithElement(boo::Node &startNode, boo::Node &endNode,
+                                                       Ref<Element> &&elementToInsert) noexcept
   {
-    Ref<dom::Node> protectedStartNode = ShareRef(startNode);
-    Ref<dom::Element> element = krys::move(elementToInsert);
+    Ref<boo::Node> protectedStartNode = ShareRef(startNode);
+    Ref<Element> element = krys::move(elementToInsert);
 
     if (!InsertNodeBefore(*element, startNode) || !element->IsContentRichlyEditable())
     {
@@ -1638,10 +1634,10 @@ namespace krys::boo
       return false;
     }
 
-    RefPtr<dom::Node> node = ShareRefPtr(&startNode);
+    RefPtr<boo::Node> node = ShareRefPtr(&startNode);
     while (node)
     {
-      RefPtr<dom::Node> next = ShareRefPtr(node->NextSibling());
+      RefPtr<boo::Node> next = ShareRefPtr(node->NextSibling());
       if (IsEditableNode(*node))
       {
         RemoveNode(*node);
@@ -1654,25 +1650,25 @@ namespace krys::boo
       node = next;
     }
 
-    RefPtr<dom::Node> nextSibling = ShareRefPtr(element->NextSibling());
-    RefPtr<dom::Node> previousSibling = ShareRefPtr(element->PreviousSibling());
+    RefPtr<boo::Node> nextSibling = ShareRefPtr(element->NextSibling());
+    RefPtr<boo::Node> previousSibling = ShareRefPtr(element->PreviousSibling());
 
     if (nextSibling && nextSibling->HasEditableStyle())
     {
-      if (RefPtr<dom::Element> nextElement = ShareRefPtr(ElementIfEquivalent(*element, *nextSibling)))
+      if (RefPtr<Element> nextElement = ShareRefPtr(ElementIfEquivalent(*element, *nextSibling)))
       {
         MergeIdenticalElements(*element, *nextElement);
       }
     }
 
-    if (auto *previousSiblingElement = DynamicDowncast<dom::Element>(previousSibling.get());
+    if (auto *previousSiblingElement = DynamicDowncast<Element>(previousSibling.get());
         previousSiblingElement && previousSiblingElement->HasEditableStyle())
     {
-      RefPtr<dom::Node> mergedElementNode = ShareRefPtr(previousSibling->NextSibling());
+      RefPtr<boo::Node> mergedElementNode = ShareRefPtr(previousSibling->NextSibling());
       krys_debug_assert(mergedElementNode);
       if (mergedElementNode->HasEditableStyle())
       {
-        if (RefPtr<dom::Element> mergedElement =
+        if (RefPtr<Element> mergedElement =
               ShareRefPtr(ElementIfEquivalent(*previousSiblingElement, *mergedElementNode)))
         {
           MergeIdenticalElements(*previousSiblingElement, *mergedElement);
@@ -1686,16 +1682,16 @@ namespace krys::boo
     return true;
   }
 
-  void ApplyStyleCommand::AddBlockStyle(const StyleChange &styleChange, html::HTMLElement &block) noexcept
+  void ApplyStyleCommand::AddBlockStyle(const StyleChange &styleChange, HTMLElement &block) noexcept
   {
     // Do not check for legacy styles here. Those styles, like <B> and <I>, only apply for inline content.
     krys_debug_assert(styleChange.CssStyle());
     SetNodeAttribute(block, u8"style",
                      JoinWithSpace(styleChange.CssStyle()->AsText(css::DefaultSerialisationContext()),
-                                   block.GetAttribute(u8"style").value_or(dom::DOMString())));
+                                   block.GetAttribute(u8"style").value_or(DOMString())));
   }
 
-  void ApplyStyleCommand::AddInlineStyleIfNeeded(EditingStyle *style, dom::Node &start, dom::Node &end,
+  void ApplyStyleCommand::AddInlineStyleIfNeeded(EditingStyle *style, boo::Node &start, boo::Node &end,
                                                  AddStyledElement addStyledElement) noexcept
   {
     if (!start.IsConnected() || !end.IsConnected())
@@ -1703,8 +1699,8 @@ namespace krys::boo
       return;
     }
 
-    Ref<dom::Node> protectedStart = ShareRef(start);
-    RefPtr<dom::Node> dummyElement;
+    Ref<boo::Node> protectedStart = ShareRef(start);
+    RefPtr<boo::Node> dummyElement;
     StyleChange styleChange(style, PositionToComputeInlineStyleChange(start, dummyElement));
 
     if (dummyElement)
@@ -1716,12 +1712,12 @@ namespace krys::boo
   }
 
   dom::Position
-    ApplyStyleCommand::PositionToComputeInlineStyleChange(dom::Node &startNode,
-                                                          RefPtr<dom::Node> &dummyElement) noexcept
+    ApplyStyleCommand::PositionToComputeInlineStyleChange(boo::Node &startNode,
+                                                          RefPtr<boo::Node> &dummyElement) noexcept
   {
     // It's okay to obtain the style at the startNode because we've removed all relevant styles from the
     // current run.
-    if (!Is<dom::Element>(startNode))
+    if (!Is<Element>(startNode))
     {
       dummyElement = CreateStyleSpanElement(GetDocument());
       InsertNodeAt(*dummyElement, dom::PositionBeforeNode(&startNode));
@@ -1731,28 +1727,28 @@ namespace krys::boo
     return FirstPositionInOrBeforeNode(&startNode);
   }
 
-  void ApplyStyleCommand::ApplyInlineStyleChange(dom::Node &passedStart, dom::Node &passedEnd,
+  void ApplyStyleCommand::ApplyInlineStyleChange(boo::Node &passedStart, boo::Node &passedEnd,
                                                  StyleChange &styleChange,
                                                  AddStyledElement addStyledElement) noexcept
   {
-    RefPtr<dom::Node> startNode = ShareRefPtr(&passedStart);
-    RefPtr<dom::Node> endNode = ShareRefPtr(&passedEnd);
+    RefPtr<boo::Node> startNode = ShareRefPtr(&passedStart);
+    RefPtr<boo::Node> endNode = ShareRefPtr(&passedEnd);
     krys_debug_assert(startNode->IsConnected());
     krys_debug_assert(endNode->IsConnected());
 
     // Find appropriate font and span elements top-down.
-    RefPtr<html::HTMLFontElement> fontContainer;
-    RefPtr<html::HTMLElement> styleContainer;
+    RefPtr<HTMLFontElement> fontContainer;
+    RefPtr<HTMLElement> styleContainer;
     while (startNode == endNode)
     {
-      if (auto *container = DynamicDowncast<html::HTMLElement>(*startNode))
+      if (auto *container = DynamicDowncast<HTMLElement>(*startNode))
       {
-        if (auto *fontElement = DynamicDowncast<html::HTMLFontElement>(*container))
+        if (auto *fontElement = DynamicDowncast<HTMLFontElement>(*container))
         {
           fontContainer = ShareRefPtr(fontElement);
         }
-        if (Is<html::HTMLSpanElement>(*container)
-            || (!Is<html::HTMLSpanElement>(styleContainer.get()) && container->HasChildNodes()))
+        if (Is<HTMLSpanElement>(*container)
+            || (!Is<HTMLSpanElement>(styleContainer.get()) && container->HasChildNodes()))
         {
           styleContainer = ShareRefPtr(container);
         }
@@ -1761,7 +1757,7 @@ namespace krys::boo
           break;
         }
       }
-      RefPtr<dom::Node> startNodeFirstChild = ShareRefPtr(startNode->FirstChild());
+      RefPtr<boo::Node> startNodeFirstChild = ShareRefPtr(startNode->FirstChild());
       if (!startNodeFirstChild)
       {
         break;
@@ -1770,9 +1766,9 @@ namespace krys::boo
       startNode = startNodeFirstChild;
     }
 
-    const dom::DOMStringAtom colorAttr(u8"color");
-    const dom::DOMStringAtom faceAttr(u8"face");
-    const dom::DOMStringAtom sizeAttr(u8"size");
+    const DOMStringAtom colorAttr(u8"color");
+    const DOMStringAtom faceAttr(u8"face");
+    const DOMStringAtom sizeAttr(u8"size");
 
     // Font tags need to go outside of CSS so that CSS font sizes override leagcy font sizes.
     if (styleChange.ApplyFontColor() || styleChange.ApplyFontFace() || styleChange.ApplyFontSize())

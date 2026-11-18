@@ -27,27 +27,24 @@
 
 #include "Krystal.Booey/Editing/Commands/EditCommand.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
   class Node;
-}
 
-namespace krys::boo
-{
   /// @brief Merges an element into the identical element after it.
   class MergeIdenticalElementsCommand final : public SimpleEditCommand
   {
   private:
-    const Ref<dom::Element> _element1;
-    const Ref<dom::Element> _element2;
-    RefPtr<dom::Node> _atChild;
+    const Ref<Element> _element1;
+    const Ref<Element> _element2;
+    RefPtr<Node> _atChild;
 
   public:
-    KRYS_NODISCARD static Ref<MergeIdenticalElementsCommand> Create(dom::Element &element1,
-                                                                    dom::Element &element2) noexcept;
+    KRYS_NODISCARD static Ref<MergeIdenticalElementsCommand> Create(Element &element1,
+                                                                    Element &element2) noexcept;
 
-    MergeIdenticalElementsCommand(dom::Element &first, dom::Element &second) noexcept;
+    MergeIdenticalElementsCommand(Element &first, Element &second) noexcept;
 
   private:
     void DoApply() noexcept override;

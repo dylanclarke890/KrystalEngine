@@ -14,17 +14,16 @@ namespace krys::boo::infra
   class StringAlgorithms
   {
   public:
-    using position_variable = dom::DOMStringView::const_iterator;
+    using position_variable = DOMStringView::const_iterator;
 
     /// @see https://infra.spec.whatwg.org/#ascii-string
-    KRYS_NODISCARD static bool IsASCIIString(dom::DOMStringView input) noexcept
+    KRYS_NODISCARD static bool IsASCIIString(DOMStringView input) noexcept
     {
       return std::ranges::all_of(input, [](char8 c) { return ::krys::text::IsASCII(c); });
     }
 
     /// @see https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace
-    KRYS_NODISCARD static dom::DOMStringView
-      StripLeadingAndTrailingWhitespace(dom::DOMStringView input) noexcept
+    KRYS_NODISCARD static DOMStringView StripLeadingAndTrailingWhitespace(DOMStringView input) noexcept
     {
       auto start = input.begin();
       auto end = input.end();
@@ -39,14 +38,14 @@ namespace krys::boo::infra
         --end;
       }
 
-      return dom::DOMStringView(start, end);
+      return DOMStringView(start, end);
     }
 
     /// @brief @p input with each CR LF pair, then each remaining CR, replaced by an LF.
     /// @see https://infra.spec.whatwg.org/#normalize-newlines
-    KRYS_NODISCARD static dom::DOMString NormalizeNewlines(dom::DOMStringView input) noexcept
+    KRYS_NODISCARD static DOMString NormalizeNewlines(DOMStringView input) noexcept
     {
-      dom::DOMString result;
+      DOMString result;
       result.reserve(input.size());
       for (size_t i = 0; i < input.size(); ++i)
       {
@@ -65,12 +64,12 @@ namespace krys::boo::infra
     }
 
     /// @see https://infra.spec.whatwg.org/#strip-and-collapse-ascii-whitespace
-    KRYS_NODISCARD static dom::DOMString StripAndCollapseASCIIWhitespace(dom::DOMStringView input) noexcept
+    KRYS_NODISCARD static DOMString StripAndCollapseASCIIWhitespace(DOMStringView input) noexcept
     {
       size_t writeIndex = 0;
       bool inWhitespace = false;
 
-      dom::DOMString result = dom::DOMString(input);
+      DOMString result = DOMString(input);
 
       size_t startIndex = 0;
       while (startIndex < result.length() && IsASCIIWhitespace(result[startIndex]))
@@ -108,9 +107,8 @@ namespace krys::boo::infra
     /// tests only for ASCII code points (giving the same answer for every non-ASCII code unit).
     /// @see https://infra.spec.whatwg.org/#collect-a-sequence-of-code-points
     template <typename TFunc>
-    KRYS_NODISCARD static dom::DOMStringView CollectCodePointSequence(dom::DOMStringView input,
-                                                                      position_variable &position,
-                                                                      TFunc condition) noexcept
+    KRYS_NODISCARD static DOMStringView
+      CollectCodePointSequence(DOMStringView input, position_variable &position, TFunc condition) noexcept
     {
       // 1. Let result be the empty string.
       position_variable start = position;
@@ -123,13 +121,13 @@ namespace krys::boo::infra
       AdvancePositionWhile(input, position, condition);
 
       // 3. Return result.
-      return dom::DOMStringView(start, position);
+      return DOMStringView(start, position);
     }
 
     /// @brief Advances @p position while @p condition returns true for the code unit at it.
     /// @note As for CollectCodePointSequence, @p condition should test only for ASCII code points.
     template <typename TFunc>
-    static void AdvancePositionWhile(dom::DOMStringView input, position_variable &position,
+    static void AdvancePositionWhile(DOMStringView input, position_variable &position,
                                      TFunc condition) noexcept
     {
       while (position != input.end() && condition(*position))
@@ -145,15 +143,14 @@ namespace krys::boo::infra
     }
 
     /// @see https://infra.spec.whatwg.org/#skip-ascii-whitespace
-    static void SkipWhitespace(dom::DOMStringView input, position_variable &position) noexcept
+    static void SkipWhitespace(DOMStringView input, position_variable &position) noexcept
     {
       AdvancePositionWhile(input, position, IsASCIIWhitespace);
     }
 
     /// @param delimiter An ASCII code point.
     /// @see https://infra.spec.whatwg.org/#strictly-split
-    KRYS_NODISCARD static List<dom::DOMString> StrictlySplit(dom::DOMStringView input,
-                                                             char32 delimiter) noexcept
+    KRYS_NODISCARD static List<DOMString> StrictlySplit(DOMStringView input, char32 delimiter) noexcept
     {
       krys_debug_assert(::krys::text::IsASCII(delimiter));
 
@@ -161,7 +158,7 @@ namespace krys::boo::infra
       auto position = input.begin();
 
       // 2. Let tokens be a list of strings, initially empty.
-      List<dom::DOMString> tokens;
+      List<DOMString> tokens;
 
       // 3. Let token be the result of collecting a sequence of code points that are not equal to delimiter
       // from
@@ -192,13 +189,13 @@ namespace krys::boo::infra
     }
 
     /// @see https://infra.spec.whatwg.org/#split-on-ascii-whitespace
-    KRYS_NODISCARD static List<dom::DOMString> SplitOnWhitespace(dom::DOMStringView input)
+    KRYS_NODISCARD static List<DOMString> SplitOnWhitespace(DOMStringView input)
     {
       // 1. Let position be a position variable for input, initially pointing at the start of input.
       auto position = input.begin();
 
       // 2. Let tokens be a list of strings, initially empty.
-      List<dom::DOMString> tokens;
+      List<DOMString> tokens;
 
       // 3. Skip ASCII whitespace within input given position.
       SkipWhitespace(input, position);
@@ -222,13 +219,13 @@ namespace krys::boo::infra
     }
 
     /// @see https://infra.spec.whatwg.org/#split-on-commas
-    KRYS_NODISCARD static List<dom::DOMString> SplitOnComma(dom::DOMStringView input)
+    KRYS_NODISCARD static List<DOMString> SplitOnComma(DOMStringView input)
     {
       // 1. Let position be a position variable for input, initially pointing at the start of input.
       auto position = input.begin();
 
       // 2. Let tokens be a list of strings, initially empty.
-      List<dom::DOMString> tokens;
+      List<DOMString> tokens;
 
       // 3. While position is not past the end of input:
       while (position != input.end())
@@ -259,8 +256,8 @@ namespace krys::boo::infra
     }
 
     /// @see https://infra.spec.whatwg.org/#string-concatenate
-    KRYS_NODISCARD static dom::DOMString Concatenate(Span<dom::DOMString> tokens,
-                                                     const Maybe<dom::DOMString> &separator) noexcept
+    KRYS_NODISCARD static DOMString Concatenate(Span<DOMString> tokens,
+                                                const Maybe<DOMString> &separator) noexcept
     {
       // 1. If list is empty, then return the empty string.
       if (tokens.empty())
@@ -272,7 +269,7 @@ namespace krys::boo::infra
       auto sep = separator.value_or(u8"");
 
       // 3. Return a string whose contents are list’s items, in order, separated from each other by separator.
-      dom::DOMString result;
+      DOMString result;
       for (size_t i = 0; i < tokens.size() - 1; i++)
       {
         result += tokens[i];
@@ -285,7 +282,7 @@ namespace krys::boo::infra
     }
 
     /// @see https://infra.spec.whatwg.org/#ascii-case-insensitive
-    KRYS_NODISCARD static bool ASCIICaseInsensitiveMatch(dom::DOMStringView a, dom::DOMStringView b) noexcept
+    KRYS_NODISCARD static bool ASCIICaseInsensitiveMatch(DOMStringView a, DOMStringView b) noexcept
     {
       if (a.length() != b.length())
       {
@@ -305,7 +302,7 @@ namespace krys::boo::infra
 
     /// @brief Whether @p a sorts before @p b by their UTF-16 code units, given their UTF-8 forms.
     /// @see https://infra.spec.whatwg.org/#code-unit-less-than
-    KRYS_NODISCARD static bool CodeUnitLessThan(dom::DOMStringView a, dom::DOMStringView b) noexcept
+    KRYS_NODISCARD static bool CodeUnitLessThan(DOMStringView a, DOMStringView b) noexcept
     {
       // A UTF-8 string is a prefix of another exactly when its UTF-16 form is.
       auto [aIt, bIt] = std::ranges::mismatch(a, b);

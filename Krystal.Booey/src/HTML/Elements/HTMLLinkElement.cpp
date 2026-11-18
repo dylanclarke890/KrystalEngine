@@ -46,16 +46,16 @@
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @brief A link's `as`: a keyword for each potential destination ("fetch", or a destination other than the
   /// empty string), with no missing or invalid value default.
   /// @see https://html.spec.whatwg.org/#attr-link-as
   template <>
-  struct EnumeratedAttributeTraits<"as", HTMLLinkElement>
+  struct html::EnumeratedAttributeTraits<"as", HTMLLinkElement>
   {
-    using State = AsAttributeState;
-    static inline const KeywordStateMapping<State> StateMappings[] = {
+    using State = html::AsAttributeState;
+    static inline const html::KeywordStateMapping<State> StateMappings[] = {
       {u8"fetch", State::Fetch},
       {u8"audio", State::Audio},
       {u8"audioworklet", State::AudioWorklet},
@@ -84,9 +84,9 @@ namespace krys::boo::html
 
   namespace
   {
-    KRYS_NODISCARD LinkEventSender &LinkLoadEventSenderSingleton() noexcept
+    KRYS_NODISCARD html::LinkEventSender &LinkLoadEventSenderSingleton() noexcept
     {
-      static MainThreadNeverDestroyed<LinkEventSender> sharedLoadEventSender;
+      static MainThreadNeverDestroyed<html::LinkEventSender> sharedLoadEventSender;
       return sharedLoadEventSender;
     }
 
@@ -103,8 +103,8 @@ namespace krys::boo::html
     }
   }
 
-  HTMLLinkElement::HTMLLinkElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Link)
+  HTMLLinkElement::HTMLLinkElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Link)
   {
   }
 
@@ -192,7 +192,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLLinkElement::ParseRel(dom::DOMStringView value) noexcept
+  void HTMLLinkElement::ParseRel(DOMStringView value) noexcept
   {
     // FIXME: The other link types (LinkRelAttribute), once they're loaded.
     _relIsStyleSheet = false;
@@ -244,10 +244,9 @@ namespace krys::boo::html
     return NodeDocument().CompleteURL(*href);
   }
 
-  void HTMLLinkElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                           Maybe<dom::DOMStringView> oldValue,
-                                           Maybe<dom::DOMStringView> value,
-                                           const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLLinkElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                           Maybe<DOMStringView> value,
+                                           const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
@@ -280,7 +279,7 @@ namespace krys::boo::html
       bool wasStyleSheet = _relIsStyleSheet;
       bool wasAlternate = _relIsAlternate;
       bool wasIcon = _relIsIcon;
-      ParseRel(value.value_or(dom::DOMStringView()));
+      ParseRel(value.value_or(DOMStringView()));
       if (wasIcon != _relIsIcon)
       {
         IconMayHaveChanged();
@@ -302,7 +301,7 @@ namespace krys::boo::html
     }
     else if (localName == u8"type")
     {
-      Maybe<dom::DOMString> type = value ? Maybe<dom::DOMString>(*value) : null;
+      Maybe<DOMString> type = value ? Maybe<DOMString>(*value) : null;
       if (type == _type)
       {
         return;
@@ -312,7 +311,7 @@ namespace krys::boo::html
     }
     else if (localName == u8"media")
     {
-      auto media = text::ToASCIILower(dom::DOMString(value.value_or(dom::DOMStringView())));
+      auto media = text::ToASCIILower(DOMString(value.value_or(DOMStringView())));
       if (media == _media)
       {
         return;
@@ -335,12 +334,12 @@ namespace krys::boo::html
     {
       if (_sheet && !dom::TreeQueries::IsInShadowTree(*this))
       {
-        _sheet->SetTitle(css::CSSOMString(value.value_or(dom::DOMStringView())));
+        _sheet->SetTitle(CSSOMString(value.value_or(DOMStringView())));
       }
     }
     else if (localName == u8"blocking")
     {
-      if (RenderBlocking::HasRenderBlockingToken(*this))
+      if (html::RenderBlocking::HasRenderBlockingToken(*this))
       {
         if (_loading && MediaAttributeMatches() && !IsAlternate())
         {
@@ -377,7 +376,7 @@ namespace krys::boo::html
       else
       {
         // FIXME: A content type parser (ParsedContentType), once there's one.
-        auto mimeType = dom::DOMStringView(*_type);
+        auto mimeType = DOMStringView(*_type);
         mimeType = infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(
           mimeType.substr(0, mimeType.find(u8';')));
         treatAsStyleSheet = text::IsASCIICaselessEqual(mimeType, u8"text/css");
@@ -390,7 +389,7 @@ namespace krys::boo::html
     if (_disabledState != DisabledState::Disabled && treatAsStyleSheet && document.Frame() && _url.IsValid())
     {
       // Style sheets are UTF-8 only, whatever the charset attribute says (see DIFFERENCES.md).
-      auto charset = GetAttribute(u8"charset").value_or(dom::DOMString());
+      auto charset = GetAttribute(u8"charset").value_or(DOMString());
 
       if (CachedResourceHandle cachedSheet = std::exchange(_cachedSheet, nullptr))
       {
@@ -472,9 +471,9 @@ namespace krys::boo::html
   {
     // Whether the element is potentially render-blocking:
     // https://html.spec.whatwg.org/#potentially-render-blocking
-    if (RenderBlocking::HasRenderBlockingToken(*this) || IsImplicitlyPotentiallyRenderBlocking())
+    if (html::RenderBlocking::HasRenderBlockingToken(*this) || IsImplicitlyPotentiallyRenderBlocking())
     {
-      RenderBlocking::BlockRendering(*this);
+      html::RenderBlocking::BlockRendering(*this);
       _isRenderBlocking = true;
     }
   }
@@ -483,7 +482,7 @@ namespace krys::boo::html
   {
     if (_isRenderBlocking)
     {
-      RenderBlocking::UnblockRendering(*this);
+      html::RenderBlocking::UnblockRendering(*this);
       _isRenderBlocking = false;
     }
   }
@@ -515,7 +514,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLLinkElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLLinkElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
     if (!oldAncestor.IsConnected())
@@ -563,11 +562,11 @@ namespace krys::boo::html
       _sheet->ClearOwnerNode();
     }
 
-    _sheet = css::CSSStyleSheet::Create(krys::move(styleSheet), *this, true);
+    _sheet = CSSStyleSheet::Create(krys::move(styleSheet), *this, true);
     _sheet->SetMediaQueries(css::mq::MediaQueryParser::Parse(_media, context));
     if (!dom::TreeQueries::IsInShadowTree(*this))
     {
-      _sheet->SetTitle(css::CSSOMString(Title()));
+      _sheet->SetTitle(CSSOMString(Title()));
     }
   }
 
@@ -612,7 +611,7 @@ namespace krys::boo::html
       return;
     }
 
-    auto styleSheet = css::StyleSheetContents::Create(css::CSSOMString(href), parserContext);
+    auto styleSheet = css::StyleSheetContents::Create(CSSOMString(href), parserContext);
     InitializeStyleSheet(Ref<css::StyleSheetContents>(styleSheet), parserContext);
 
     if (!styleSheet->ParseAuthorStyleSheet(cachedStyleSheet))
@@ -663,8 +662,7 @@ namespace krys::boo::html
 
     auto *frameView = document.View();
     krys_debug_assert(frameView);
-    css::mq::MediaQueryEvaluator evaluator(frameView ? frameView->MediaType()
-                                                     : css::CSSOMStringAtom(u8"screen"),
+    css::mq::MediaQueryEvaluator evaluator(frameView ? frameView->MediaType() : CSSOMStringAtom(u8"screen"),
                                            document, documentStyle ? &*documentStyle : nullptr);
     return evaluator.Evaluate(mediaQueryList);
   }
@@ -684,7 +682,7 @@ namespace krys::boo::html
     LinkLoadEventSenderSingleton().DispatchPendingEvents();
   }
 
-  void HTMLLinkElement::DispatchPendingEvent(LinkEventSender *eventSender,
+  void HTMLLinkElement::DispatchPendingEvent(html::LinkEventSender *eventSender,
                                              const StringAtom &eventType) noexcept
   {
     krys_debug_assert(eventSender == &LinkLoadEventSenderSingleton());
@@ -753,7 +751,7 @@ namespace krys::boo::html
 
 #pragma region LinkStyle
 
-  css::CSSStyleSheet *HTMLLinkElement::Sheet() const noexcept
+  CSSStyleSheet *HTMLLinkElement::Sheet() const noexcept
   {
     return _sheet.get();
   }
@@ -764,43 +762,43 @@ namespace krys::boo::html
 
   dom::USVString HTMLLinkElement::Href() const noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"href");
+    return html::ReflectURL<dom::USVString>(*this, u8"href");
   }
 
   void HTMLLinkElement::Href(dom::USVString value) noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"href", krys::move(value));
+    return html::ReflectURL<dom::USVString>(*this, u8"href", krys::move(value));
   }
 
-  Maybe<dom::DOMString> HTMLLinkElement::CrossOrigin() const noexcept
+  Maybe<DOMString> HTMLLinkElement::CrossOrigin() const noexcept
   {
-    return ReflectEnumerated<"crossorigin", HTMLElement, Maybe<dom::DOMString>>(*this);
+    return html::ReflectEnumerated<"crossorigin", HTMLElement, Maybe<DOMString>>(*this);
   }
 
-  void HTMLLinkElement::CrossOrigin(Maybe<dom::DOMString> value) noexcept
+  void HTMLLinkElement::CrossOrigin(Maybe<DOMString> value) noexcept
   {
-    Reflect<Maybe<dom::DOMString>>(*this, u8"crossorigin", krys::move(value));
+    html::Reflect<Maybe<DOMString>>(*this, u8"crossorigin", krys::move(value));
   }
 
-  dom::DOMString HTMLLinkElement::Rel() const noexcept
+  DOMString HTMLLinkElement::Rel() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"rel").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"rel").value_or(u8"");
   }
 
-  void HTMLLinkElement::Rel(dom::DOMString value) noexcept
+  void HTMLLinkElement::Rel(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"rel", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"rel", krys::move(value));
   }
 
-  dom::DOMString HTMLLinkElement::As() const noexcept
+  DOMString HTMLLinkElement::As() const noexcept
   {
     // The as IDL attribute must reflect the as content attribute, limited to only known values.
-    return ReflectEnumerated<"as", HTMLLinkElement>(*this);
+    return html::ReflectEnumerated<"as", HTMLLinkElement>(*this);
   }
 
-  void HTMLLinkElement::As(dom::DOMString value) noexcept
+  void HTMLLinkElement::As(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"as", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"as", krys::move(value));
   }
 
   KRYS_NODISCARD dom::DOMTokenList &HTMLLinkElement::RelList() noexcept
@@ -810,7 +808,7 @@ namespace krys::boo::html
       _relList = dom::ElementAlgorithms::CreateDOMTokenList(
         *this, u8"rel",
         // The link types Booey processes.
-        [](dom::Document &, dom::DOMStringView token)
+        [](Document &, DOMStringView token)
         {
           return text::IsASCIICaselessEqual(token, u8"stylesheet")
                  || text::IsASCIICaselessEqual(token, u8"alternate")
@@ -821,44 +819,44 @@ namespace krys::boo::html
     return *_relList;
   }
 
-  dom::DOMString HTMLLinkElement::Media() const noexcept
+  DOMString HTMLLinkElement::Media() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"media").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"media").value_or(u8"");
   }
 
-  void HTMLLinkElement::Media(dom::DOMString value) noexcept
+  void HTMLLinkElement::Media(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"media", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"media", krys::move(value));
   }
 
-  dom::DOMString HTMLLinkElement::Integrity() const noexcept
+  DOMString HTMLLinkElement::Integrity() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"integrity").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"integrity").value_or(u8"");
   }
 
-  void HTMLLinkElement::Integrity(dom::DOMString value) noexcept
+  void HTMLLinkElement::Integrity(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"integrity", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"integrity", krys::move(value));
   }
 
-  dom::DOMString HTMLLinkElement::HrefLang() const noexcept
+  DOMString HTMLLinkElement::HrefLang() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"hreflang").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"hreflang").value_or(u8"");
   }
 
-  void HTMLLinkElement::HrefLang(dom::DOMString value) noexcept
+  void HTMLLinkElement::HrefLang(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"hreflang", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"hreflang", krys::move(value));
   }
 
-  dom::DOMString HTMLLinkElement::Type() const noexcept
+  DOMString HTMLLinkElement::Type() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"type").value_or(u8"");
   }
 
-  void HTMLLinkElement::Type(dom::DOMString value) noexcept
+  void HTMLLinkElement::Type(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"type", krys::move(value));
   }
 
   KRYS_NODISCARD dom::DOMTokenList &HTMLLinkElement::Sizes() noexcept
@@ -873,41 +871,41 @@ namespace krys::boo::html
 
   dom::USVString HTMLLinkElement::ImageSrcset() const noexcept
   {
-    return Reflect<dom::USVString>(*this, u8"imagesrcset");
+    return html::Reflect<dom::USVString>(*this, u8"imagesrcset");
   }
 
   void HTMLLinkElement::ImageSrcset(dom::USVString value) noexcept
   {
-    return Reflect<dom::USVString>(*this, u8"imagesrcset", krys::move(value));
+    return html::Reflect<dom::USVString>(*this, u8"imagesrcset", krys::move(value));
   }
 
-  dom::DOMString HTMLLinkElement::ImageSizes() const noexcept
+  DOMString HTMLLinkElement::ImageSizes() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"imagesizes").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"imagesizes").value_or(u8"");
   }
 
-  void HTMLLinkElement::ImageSizes(dom::DOMString value) noexcept
+  void HTMLLinkElement::ImageSizes(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"imagesizes", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"imagesizes", krys::move(value));
   }
 
-  dom::DOMString HTMLLinkElement::ReferrerPolicy() const noexcept
+  DOMString HTMLLinkElement::ReferrerPolicy() const noexcept
   {
-    return ReflectEnumerated<"referrerpolicy">(*this);
+    return html::ReflectEnumerated<"referrerpolicy">(*this);
   }
 
-  void HTMLLinkElement::ReferrerPolicy(dom::DOMString value) noexcept
+  void HTMLLinkElement::ReferrerPolicy(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"referrerpolicy", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"referrerpolicy", krys::move(value));
   }
 
   KRYS_NODISCARD dom::DOMTokenList &HTMLLinkElement::Blocking() noexcept
   {
     if (!_blocking)
     {
-      _blocking = dom::ElementAlgorithms::CreateDOMTokenList(
-        *this, u8"blocking", [](dom::Document &, dom::DOMStringView token)
-        { return text::IsASCIICaselessEqual(token, u8"render"); });
+      _blocking =
+        dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"blocking", [](Document &, DOMStringView token)
+                                                   { return text::IsASCIICaselessEqual(token, u8"render"); });
     }
 
     return *_blocking;
@@ -915,56 +913,56 @@ namespace krys::boo::html
 
   bool HTMLLinkElement::Disabled() const noexcept
   {
-    return Reflect<bool>(*this, u8"disabled");
+    return html::Reflect<bool>(*this, u8"disabled");
   }
 
   void HTMLLinkElement::Disabled(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"disabled", krys::move(value));
+    html::Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 
-  dom::DOMString HTMLLinkElement::FetchPriority() const noexcept
+  DOMString HTMLLinkElement::FetchPriority() const noexcept
   {
-    return ReflectEnumerated<"fetchpriority">(*this);
+    return html::ReflectEnumerated<"fetchpriority">(*this);
   }
 
-  void HTMLLinkElement::FetchPriority(dom::DOMString value) noexcept
+  void HTMLLinkElement::FetchPriority(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"fetchpriority", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"fetchpriority", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region HTMLLinkElement Obsolete members
 
-  dom::DOMString HTMLLinkElement::Charset() const noexcept
+  DOMString HTMLLinkElement::Charset() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"charset").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"charset").value_or(u8"");
   }
 
-  void HTMLLinkElement::Charset(dom::DOMString value) noexcept
+  void HTMLLinkElement::Charset(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"charset", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"charset", krys::move(value));
   }
 
-  dom::DOMString HTMLLinkElement::Rev() const noexcept
+  DOMString HTMLLinkElement::Rev() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"rev").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"rev").value_or(u8"");
   }
 
-  void HTMLLinkElement::Rev(dom::DOMString value) noexcept
+  void HTMLLinkElement::Rev(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"rev", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"rev", krys::move(value));
   }
 
-  dom::DOMString HTMLLinkElement::Target() const noexcept
+  DOMString HTMLLinkElement::Target() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"target").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"target").value_or(u8"");
   }
 
-  void HTMLLinkElement::Target(dom::DOMString value) noexcept
+  void HTMLLinkElement::Target(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"target", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"target", krys::move(value));
   }
 
 #pragma endregion

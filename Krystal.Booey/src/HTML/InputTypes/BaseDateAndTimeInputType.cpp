@@ -93,7 +93,7 @@ namespace krys::boo::html
   }
 
   bool BaseDateAndTimeInputType::DateTimeFormatValidator::ValidateFormat(
-    dom::DOMStringView format, const BaseDateAndTimeInputType &inputType) noexcept
+    DOMStringView format, const BaseDateAndTimeInputType &inputType) noexcept
   {
     if (!DateTimeFormat::Parse(format, *this))
     {
@@ -139,7 +139,7 @@ namespace krys::boo::html
     return {};
   }
 
-  bool BaseDateAndTimeInputType::TypeMismatchFor(dom::DOMStringView value) const noexcept
+  bool BaseDateAndTimeInputType::TypeMismatchFor(DOMStringView value) const noexcept
   {
     return !value.empty() && !ParseToDateComponents(value);
   }
@@ -162,7 +162,7 @@ namespace krys::boo::html
     return Decimal::FromDouble(LocalTimeNow());
   }
 
-  Decimal BaseDateAndTimeInputType::ParseToNumber(dom::DOMStringView source,
+  Decimal BaseDateAndTimeInputType::ParseToNumber(DOMStringView source,
                                                   const Decimal &defaultValue) const noexcept
   {
     auto date = ParseToDateComponents(source);
@@ -175,7 +175,7 @@ namespace krys::boo::html
     return Decimal::FromDouble(msec);
   }
 
-  dom::DOMString BaseDateAndTimeInputType::Serialize(const Decimal &value) const noexcept
+  DOMString BaseDateAndTimeInputType::Serialize(const Decimal &value) const noexcept
   {
     if (!value.IsFinite())
     {
@@ -191,7 +191,7 @@ namespace krys::boo::html
     return SerializeWithComponents(*date);
   }
 
-  dom::DOMString BaseDateAndTimeInputType::SerializeWithComponents(const DateComponents &date) const noexcept
+  DOMString BaseDateAndTimeInputType::SerializeWithComponents(const DateComponents &date) const noexcept
   {
     krys_debug_assert(Element());
     Decimal step;
@@ -206,37 +206,37 @@ namespace krys::boo::html
     return date.ToString(SecondFormat::Millisecond);
   }
 
-  dom::DOMString BaseDateAndTimeInputType::SerializeWithMilliseconds(double value) const noexcept
+  DOMString BaseDateAndTimeInputType::SerializeWithMilliseconds(double value) const noexcept
   {
     return Serialize(Decimal::FromDouble(value));
   }
 
-  dom::DOMString BaseDateAndTimeInputType::LocalizeValue(dom::DOMStringView proposedValue) const noexcept
+  DOMString BaseDateAndTimeInputType::LocalizeValue(DOMStringView proposedValue) const noexcept
   {
     auto date = ParseToDateComponents(proposedValue);
     if (!date)
     {
-      return dom::DOMString(proposedValue);
+      return DOMString(proposedValue);
     }
 
     krys_debug_assert(Element());
     auto localized = Element()->GetLocale().FormatDateTime(*date);
-    return localized.empty() ? dom::DOMString(proposedValue) : localized;
+    return localized.empty() ? DOMString(proposedValue) : localized;
   }
 
-  dom::DOMString BaseDateAndTimeInputType::VisibleValue() const noexcept
+  DOMString BaseDateAndTimeInputType::VisibleValue() const noexcept
   {
     krys_debug_assert(Element());
     return LocalizeValue(Element()->Value());
   }
 
-  dom::DOMString BaseDateAndTimeInputType::SanitizeValue(dom::DOMStringView proposedValue) const noexcept
+  DOMString BaseDateAndTimeInputType::SanitizeValue(DOMStringView proposedValue) const noexcept
   {
     if (TypeMismatchFor(proposedValue))
     {
       return {};
     }
-    return dom::DOMString(proposedValue);
+    return DOMString(proposedValue);
   }
 
   bool BaseDateAndTimeInputType::SupportsReadOnly() const noexcept
@@ -244,18 +244,18 @@ namespace krys::boo::html
     return true;
   }
 
-  bool BaseDateAndTimeInputType::ValueMissing(dom::DOMStringView value) const noexcept
+  bool BaseDateAndTimeInputType::ValueMissing(DOMStringView value) const noexcept
   {
     krys_debug_assert(Element());
     return Element()->IsMutable() && Element()->IsRequired() && value.empty();
   }
 
-  dom::DOMString BaseDateAndTimeInputType::PadNumber(uint32 value, size_t width) noexcept
+  DOMString BaseDateAndTimeInputType::PadNumber(uint32 value, size_t width) noexcept
   {
     char buffer[16];
     auto end = std::to_chars(buffer, buffer + sizeof(buffer), value).ptr;
     auto length = static_cast<size_t>(end - buffer);
-    dom::DOMString result(length < width ? width - length : 0, u8'0');
+    DOMString result(length < width ? width - length : 0, u8'0');
     result.append(reinterpret_cast<const char8 *>(buffer), length);
     return result;
   }
@@ -284,7 +284,7 @@ namespace krys::boo::html
            || !stepRange.Step().Remainder(Decimal(MsecPerSecond)).IsZero();
   }
 
-  void BaseDateAndTimeInputType::SetValue(dom::DOMStringView value, bool valueChanged,
+  void BaseDateAndTimeInputType::SetValue(DOMStringView value, bool valueChanged,
                                           TextFieldEventBehavior eventBehavior,
                                           TextControlSetValueSelection selection) noexcept
   {
@@ -423,7 +423,7 @@ namespace krys::boo::html
     }
   }
 
-  void BaseDateAndTimeInputType::AttributeChanged(const dom::DOMStringAtom &name) noexcept
+  void BaseDateAndTimeInputType::AttributeChanged(const DOMStringAtom &name) noexcept
   {
     if (name == u8"max" || name == u8"min")
     {
@@ -580,7 +580,7 @@ namespace krys::boo::html
     return Element()->IsReadOnly();
   }
 
-  dom::DOMString BaseDateAndTimeInputType::LocaleIdentifier() const noexcept
+  DOMString BaseDateAndTimeInputType::LocaleIdentifier() const noexcept
   {
     krys_debug_assert(Element());
     return css::EffectiveLang(*Element());
@@ -663,10 +663,10 @@ namespace krys::boo::html
           continue;
         }
         parameters.SuggestionValues.push_back(
-          element.SanitizeValue(dom::DOMStringView(value)).value_or(dom::DOMString()));
+          element.SanitizeValue(DOMStringView(value)).value_or(DOMString()));
         parameters.LocalizedSuggestionValues.push_back(LocalizeValue(value));
         // NOLINTNEXTLINE(clang-analyzer-cplusplus.Move): a new label each iteration.
-        parameters.SuggestionLabels.push_back(value == label ? dom::DOMString() : krys::move(label));
+        parameters.SuggestionLabels.push_back(value == label ? DOMString() : krys::move(label));
       }
     }
 

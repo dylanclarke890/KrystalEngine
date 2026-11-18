@@ -25,16 +25,16 @@
 namespace krys::boo
 {
   LegacyRenderSVGResourceLinearGradient::LegacyRenderSVGResourceLinearGradient(
-    svg::SVGLinearGradientElement &element, RenderStyle &&style) noexcept
+    SVGLinearGradientElement &element, RenderStyle &&style) noexcept
       : LegacyRenderSVGResourceGradient(Type::LegacySVGResourceLinearGradient, element, krys::move(style))
   {
   }
 
   LegacyRenderSVGResourceLinearGradient::~LegacyRenderSVGResourceLinearGradient() noexcept = default;
 
-  svg::SVGLinearGradientElement &LegacyRenderSVGResourceLinearGradient::LinearGradientElement() const noexcept
+  SVGLinearGradientElement &LegacyRenderSVGResourceLinearGradient::LinearGradientElement() const noexcept
   {
-    return Downcast<svg::SVGLinearGradientElement>(LegacyRenderSVGResourceGradient::GradientElement());
+    return Downcast<SVGLinearGradientElement>(LegacyRenderSVGResourceGradient::GradientElement());
   }
 
   bool LegacyRenderSVGResourceLinearGradient::CollectGradientAttributes() noexcept
@@ -46,15 +46,15 @@ namespace krys::boo
   FloatPoint LegacyRenderSVGResourceLinearGradient::StartPoint(
     const svg::LinearGradientAttributes &attributes) const noexcept
   {
-    return svg::SVGLengthContext::ResolvePoint(&LinearGradientElement(), attributes.GradientUnits(),
-                                               attributes.X1(), attributes.Y1());
+    return SVGLengthContext::ResolvePoint(&LinearGradientElement(), attributes.GradientUnits(),
+                                          attributes.X1(), attributes.Y1());
   }
 
   FloatPoint LegacyRenderSVGResourceLinearGradient::EndPoint(
     const svg::LinearGradientAttributes &attributes) const noexcept
   {
-    return svg::SVGLengthContext::ResolvePoint(&LinearGradientElement(), attributes.GradientUnits(),
-                                               attributes.X2(), attributes.Y2());
+    return SVGLengthContext::ResolvePoint(&LinearGradientElement(), attributes.GradientUnits(),
+                                          attributes.X2(), attributes.Y2());
   }
 
   Ref<Gradient> LegacyRenderSVGResourceLinearGradient::BuildGradient() const noexcept

@@ -37,16 +37,6 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::html
-{
-  class HTMLSelectElement;
-}
-
-namespace krys::boo::svg
-{
-  class SVGImageElement;
-}
-
 namespace krys::boo
 {
   enum class AXDetachmentType : uint8;
@@ -59,9 +49,11 @@ namespace krys::boo
   class DateTimeChooserClient;
   class GraphicsLayer;
   class GraphicsLayerFactory;
+  class HTMLSelectElement;
   class IntRect;
   class LocalFrame;
   class PopupMenuClient;
+  class SVGImageElement;
 
   /// @brief What a page asks of its host: the window's side of the page, and its graphics.
   // FIXME: The rest of the chrome client: tooltips, cursors, scrolling the host's view, search popups and the
@@ -128,7 +120,7 @@ namespace krys::boo
     }
 
     /// @brief Called when an `<image>` in the page has loaded its image.
-    virtual void DidFinishLoadingImageForSVGImage(svg::SVGImageElement &) noexcept
+    virtual void DidFinishLoadingImageForSVGImage(SVGImageElement &) noexcept
     {
     }
 
@@ -170,7 +162,7 @@ namespace krys::boo
     }
 
     /// @brief The options of the focused select changed, for a host showing them in its own picker.
-    virtual void FocusedSelectElementDidChangeOptions(const html::HTMLSelectElement &) noexcept
+    virtual void FocusedSelectElementDidChangeOptions(const HTMLSelectElement &) noexcept
     {
     }
 
@@ -219,14 +211,14 @@ namespace krys::boo
     /// @brief Shows @p message, a constraint the control @p anchor doesn't satisfy, near it (a validation
     /// bubble), in place of any shown; the host may hide it after a while. A host that doesn't override this
     /// shows no messages.
-    virtual void ShowValidationMessage(dom::Element &anchor, const dom::DOMString &message) noexcept
+    virtual void ShowValidationMessage(Element &anchor, const DOMString &message) noexcept
     {
       (void)anchor;
       (void)message;
     }
 
     /// @brief Hides the validation message shown for @p anchor, if it's shown.
-    virtual void HideValidationMessage(const dom::Element &anchor) noexcept
+    virtual void HideValidationMessage(const Element &anchor) noexcept
     {
       (void)anchor;
     }
@@ -237,7 +229,7 @@ namespace krys::boo
     }
 
     /// @brief Whether the validation message for @p anchor is shown.
-    KRYS_NODISCARD virtual bool IsValidationMessageVisible(const dom::Element &anchor) const noexcept
+    KRYS_NODISCARD virtual bool IsValidationMessageVisible(const Element &anchor) const noexcept
     {
       (void)anchor;
       return false;

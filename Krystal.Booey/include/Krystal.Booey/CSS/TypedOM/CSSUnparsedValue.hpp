@@ -31,11 +31,18 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSVariableReferenceValue;
-  class TokenRange;
+}
 
+namespace krys::boo::css
+{
+  class TokenRange;
+}
+
+namespace krys::boo
+{
   /// @brief A segment of an unparsed value: a string, or a variable reference.
   /// @see https://drafts.css-houdini.org/css-typed-om/#typedefdef-cssunparsedsegment
   using CSSUnparsedSegment = Variant<CSSOMString, RefPtr<CSSVariableReferenceValue>>;
@@ -54,7 +61,7 @@ namespace krys::boo::css
 
     /// @brief Splits @p tokens into string segments and the variable references (`var()`) in them.
     /// @see https://drafts.css-houdini.org/css-typed-om/#reify-a-list-of-component-values
-    KRYS_NODISCARD static Ref<CSSUnparsedValue> Create(TokenRange tokens) noexcept;
+    KRYS_NODISCARD static Ref<CSSUnparsedValue> Create(css::TokenRange tokens) noexcept;
 
     ~CSSUnparsedValue() noexcept override;
 
@@ -88,16 +95,16 @@ namespace krys::boo::css
       return CSSStyleValueType::CSSUnparsedValue;
     }
 
-    KRYS_NODISCARD RefPtr<Value> ToCSSValue() const noexcept final;
+    KRYS_NODISCARD RefPtr<css::Value> ToCSSValue() const noexcept final;
 
   private:
     explicit CSSUnparsedValue(List<CSSUnparsedSegment> segments) noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSUnparsedValue)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleValue &styleValue) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSUnparsedValue)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleValue &styleValue) noexcept
   {
-    return styleValue.StyleValueType() == krys::boo::css::CSSStyleValueType::CSSUnparsedValue;
+    return styleValue.StyleValueType() == krys::boo::CSSStyleValueType::CSSUnparsedValue;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

@@ -33,8 +33,7 @@
 
 namespace krys::boo
 {
-  LegacyRenderSVGEllipse::LegacyRenderSVGEllipse(svg::SVGGraphicsElement &element,
-                                                 RenderStyle &&style) noexcept
+  LegacyRenderSVGEllipse::LegacyRenderSVGEllipse(SVGGraphicsElement &element, RenderStyle &&style) noexcept
       : LegacyRenderSVGShape(Type::LegacySVGEllipse, element, krys::move(style))
   {
   }
@@ -90,24 +89,24 @@ namespace krys::boo
   void LegacyRenderSVGEllipse::CalculateRadiiAndCenter() noexcept
   {
     auto &graphicsElement = GraphicsElement();
-    svg::SVGLengthContext lengthContext(&graphicsElement);
-    _center = FloatPoint(
-      lengthContext.ValueForLength(Style().Cx(), style::ZoomNeeded {}, svg::SVGLengthMode::Width),
-      lengthContext.ValueForLength(Style().Cy(), style::ZoomNeeded {}, svg::SVGLengthMode::Height));
-    if (Is<svg::SVGCircleElement>(graphicsElement))
+    SVGLengthContext lengthContext(&graphicsElement);
+    _center =
+      FloatPoint(lengthContext.ValueForLength(Style().Cx(), style::ZoomNeeded {}, SVGLengthMode::Width),
+                 lengthContext.ValueForLength(Style().Cy(), style::ZoomNeeded {}, SVGLengthMode::Height));
+    if (Is<SVGCircleElement>(graphicsElement))
     {
       float radius = lengthContext.ValueForLength(Style().R(), style::ZoomNeeded {});
       _radii = FloatSize(radius, radius);
       return;
     }
 
-    krys_debug_assert(Is<svg::SVGEllipseElement>(graphicsElement));
+    krys_debug_assert(Is<SVGEllipseElement>(graphicsElement));
 
     const auto &rx = Style().Rx();
     const auto &ry = Style().Ry();
     _radii = FloatSize(
-      lengthContext.ValueForLength(rx.IsAuto() ? ry : rx, style::ZoomNeeded {}, svg::SVGLengthMode::Width),
-      lengthContext.ValueForLength(ry.IsAuto() ? rx : ry, style::ZoomNeeded {}, svg::SVGLengthMode::Height));
+      lengthContext.ValueForLength(rx.IsAuto() ? ry : rx, style::ZoomNeeded {}, SVGLengthMode::Width),
+      lengthContext.ValueForLength(ry.IsAuto() ? rx : ry, style::ZoomNeeded {}, SVGLengthMode::Height));
     if (rx.IsAuto())
     {
       _radii.SetWidth(_radii.Height());

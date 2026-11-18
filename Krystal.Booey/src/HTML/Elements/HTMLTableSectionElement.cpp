@@ -31,10 +31,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTableRowElement.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLTableSectionElement::HTMLTableSectionElement(dom::Document &document) noexcept
-      : HTMLTablePartElement(document, HTMLElementInterface::TableSection)
+  HTMLTableSectionElement::HTMLTableSectionElement(Document &document) noexcept
+      : HTMLTablePartElement(document, html::HTMLElementInterface::TableSection)
   {
   }
 
@@ -48,7 +48,7 @@ namespace krys::boo::html
     }
 
     Ref<dom::HTMLCollection> rows = CreateRef<dom::LiveHTMLCollection>(
-      *this, [](const dom::Element &element) { return AsTableElement<HTMLTableRowElement>(&element); },
+      *this, [](const Element &element) { return html::AsTableElement<HTMLTableRowElement>(&element); },
       dom::LiveCollectionInvalidation::TreeOnly, dom::LiveCollectionTraversal::Children);
     _rows = CreateWeakPtr(rows.get());
     return rows;
@@ -71,7 +71,7 @@ namespace krys::boo::html
 
     // 2. Let table row be the result of creating an element given this element's node document, "tr", and
     //    the HTML namespace.
-    auto row = CreateTableElement<HTMLTableRowElement>(NodeDocument(), u8"tr");
+    auto row = html::CreateTableElement<HTMLTableRowElement>(NodeDocument(), u8"tr");
 
     // 3. If index is −1 or equal to the number of items in the rows collection, then append table row to
     //    this element.
@@ -88,7 +88,7 @@ namespace krys::boo::html
 
   dom::ExceptionOr<void> HTMLTableSectionElement::DeleteRow(int32 index) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
 
     // 1. If index is less than −1 or greater than or equal to the number of elements in the rows
     //    collection, then throw an "IndexSizeError" DOMException.
@@ -120,44 +120,44 @@ namespace krys::boo::html
 
 #pragma region HTMLTableSectionElement Obsolete members
 
-  dom::DOMString HTMLTableSectionElement::Align() const noexcept
+  DOMString HTMLTableSectionElement::Align() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLTableSectionElement::Align(dom::DOMString value) noexcept
+  void HTMLTableSectionElement::Align(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"align", krys::move(value));
   }
 
-  dom::DOMString HTMLTableSectionElement::Char() const noexcept
+  DOMString HTMLTableSectionElement::Char() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"char").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"char").value_or(u8"");
   }
 
-  void HTMLTableSectionElement::Char(dom::DOMString value) noexcept
+  void HTMLTableSectionElement::Char(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"char", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"char", krys::move(value));
   }
 
-  dom::DOMString HTMLTableSectionElement::CharOff() const noexcept
+  DOMString HTMLTableSectionElement::CharOff() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"charoff").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"charoff").value_or(u8"");
   }
 
-  void HTMLTableSectionElement::CharOff(dom::DOMString value) noexcept
+  void HTMLTableSectionElement::CharOff(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"charoff", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"charoff", krys::move(value));
   }
 
-  dom::DOMString HTMLTableSectionElement::VAlign() const noexcept
+  DOMString HTMLTableSectionElement::VAlign() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"valign").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"valign").value_or(u8"");
   }
 
-  void HTMLTableSectionElement::VAlign(dom::DOMString value) noexcept
+  void HTMLTableSectionElement::VAlign(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"valign", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"valign", krys::move(value));
   }
 
 #pragma endregion

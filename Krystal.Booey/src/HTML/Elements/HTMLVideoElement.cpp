@@ -27,10 +27,10 @@
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLVideoElement::HTMLVideoElement(dom::Document &document) noexcept
-      : HTMLMediaElement(document, HTMLElementInterface::Video)
+  HTMLVideoElement::HTMLVideoElement(Document &document) noexcept
+      : HTMLMediaElement(document, html::HTMLElementInterface::Video)
   {
   }
 
@@ -38,22 +38,22 @@ namespace krys::boo::html
 
   uint32 HTMLVideoElement::Width() const noexcept
   {
-    return Reflect<uint32>(*this, u8"width");
+    return html::Reflect<uint32>(*this, u8"width");
   }
 
   void HTMLVideoElement::Width(uint32 value) noexcept
   {
-    Reflect<uint32>(*this, u8"width", krys::move(value));
+    html::Reflect<uint32>(*this, u8"width", krys::move(value));
   }
 
   uint32 HTMLVideoElement::Height() const noexcept
   {
-    return Reflect<uint32>(*this, u8"height");
+    return html::Reflect<uint32>(*this, u8"height");
   }
 
   void HTMLVideoElement::Height(uint32 value) noexcept
   {
-    Reflect<uint32>(*this, u8"height", krys::move(value));
+    html::Reflect<uint32>(*this, u8"height", krys::move(value));
   }
 
   uint32 HTMLVideoElement::VideoWidth() noexcept
@@ -74,30 +74,30 @@ namespace krys::boo::html
 
   dom::USVString HTMLVideoElement::Poster() const noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"poster");
+    return html::ReflectURL<dom::USVString>(*this, u8"poster");
   }
 
   void HTMLVideoElement::Poster(dom::USVString value) noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"poster", krys::move(value));
+    return html::ReflectURL<dom::USVString>(*this, u8"poster", krys::move(value));
   }
 
   bool HTMLVideoElement::PlaysInline() const noexcept
   {
-    return Reflect<bool>(*this, u8"playsinline");
+    return html::Reflect<bool>(*this, u8"playsinline");
   }
 
   void HTMLVideoElement::PlaysInline(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"playsinline", krys::move(value));
+    html::Reflect<bool>(*this, u8"playsinline", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region Presentational hints
 
-  bool HTMLVideoElement::HasPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool HTMLVideoElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                            const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && (localName == u8"width" || localName == u8"height"))
     {
@@ -106,12 +106,12 @@ namespace krys::boo::html
     return HTMLMediaElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLVideoElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                                const dom::DOMStringAtom &namespaceURI,
-                                                                dom::DOMStringView value,
+  void HTMLVideoElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                                const DOMStringAtom &namespaceURI,
+                                                                DOMStringView value,
                                                                 css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLMediaElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);

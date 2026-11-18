@@ -28,7 +28,7 @@
 #include "Krystal.Booey/MathML/Elements/MathMLTokenElement.hpp"
 #include "Krystal.Booey/MathML/MathMLOperatorDictionary.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   /// @brief The `<mo>` element: an operator, whose form, spacing and properties come from its attributes and
   /// the operator dictionary.
@@ -60,9 +60,9 @@ namespace krys::boo::mathml
     Maybe<Length> _maxSize;
 
   public:
-    explicit MathMLOperatorElement(dom::Document &document) noexcept;
+    explicit MathMLOperatorElement(Document &document) noexcept;
 
-    KRYS_NODISCARD static OperatorChar ParseOperatorChar(dom::DOMStringView string) noexcept;
+    KRYS_NODISCARD static OperatorChar ParseOperatorChar(DOMStringView string) noexcept;
 
     KRYS_NODISCARD const OperatorChar &GetOperatorChar() noexcept;
 
@@ -95,8 +95,8 @@ namespace krys::boo::mathml
 
     void OnChildrenChanged() noexcept final;
 
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
     KRYS_NODISCARD MathMLOperatorDictionary::Property ComputeDictionaryProperty() noexcept;
 
@@ -108,14 +108,14 @@ namespace krys::boo::mathml
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::mathml::MathMLOperatorElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::mathml::MathMLElement &element) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::MathMLOperatorElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::MathMLElement &element) noexcept
   {
-    return element.Interface() == krys::boo::mathml::MathMLElementInterface::Operator;
+    return element.Interface() == krys::boo::MathMLElementInterface::Operator;
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    auto *element = krys::DynamicDowncast<krys::boo::mathml::MathMLElement>(node);
+    auto *element = krys::DynamicDowncast<krys::boo::MathMLElement>(node);
     return element && IsType(*element);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

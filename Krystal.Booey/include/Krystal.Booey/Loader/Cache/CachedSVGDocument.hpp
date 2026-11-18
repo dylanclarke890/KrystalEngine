@@ -36,7 +36,7 @@ namespace krys::boo
   class CachedSVGDocument final : public CachedResource
   {
   private:
-    RefPtr<svg::SVGDocument> _document;
+    RefPtr<SVGDocument> _document;
     const Ref<Settings> _settings;
 
   public:
@@ -44,7 +44,7 @@ namespace krys::boo
 
     ~CachedSVGDocument() noexcept override;
 
-    KRYS_NODISCARD svg::SVGDocument *Document() const noexcept
+    KRYS_NODISCARD SVGDocument *Document() const noexcept
     {
       return _document.get();
     }

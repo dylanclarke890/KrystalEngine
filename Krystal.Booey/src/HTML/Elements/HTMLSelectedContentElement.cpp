@@ -4,10 +4,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLSelectedContentElement::HTMLSelectedContentElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::SelectedContent)
+  HTMLSelectedContentElement::HTMLSelectedContentElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::SelectedContent)
   {
   }
 
@@ -39,11 +39,11 @@ namespace krys::boo::html
     }
 
     // 3. Update a selectedcontent given select and selectedcontent.
-    FormControlAlgorithms::UpdateSelectedContent(*select, *this);
+    html::FormControlAlgorithms::UpdateSelectedContent(*select, *this);
   }
 
   // https://html.spec.whatwg.org/#the-selectedcontent-element:html-element-moving-steps
-  void HTMLSelectedContentElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLSelectedContentElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
 
@@ -57,9 +57,9 @@ namespace krys::boo::html
     }
 
     // 3. Queue a microtask to update a selectedcontent given select and movedNode.
-    EventLoop::Current().QueueMicrotask(
+    html::EventLoop::Current().QueueMicrotask(
       [select, selectedcontent = ShareRef(*this)]
-      { FormControlAlgorithms::UpdateSelectedContent(*select, *selectedcontent); });
+      { html::FormControlAlgorithms::UpdateSelectedContent(*select, *selectedcontent); });
   }
 
 #pragma endregion

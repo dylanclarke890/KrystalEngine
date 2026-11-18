@@ -38,20 +38,20 @@ namespace krys::boo::style
     {
     }
 
-    WebkitLocale(const css::CSSOMStringAtom &value) noexcept : _platform {value}
+    WebkitLocale(const CSSOMStringAtom &value) noexcept : _platform {value}
     {
     }
 
-    WebkitLocale(css::CSSOMStringAtom &&value) noexcept : _platform {krys::move(value)}
+    WebkitLocale(CSSOMStringAtom &&value) noexcept : _platform {krys::move(value)}
     {
     }
 
-    KRYS_NODISCARD const css::CSSOMStringAtom &GetPlatform() const noexcept KRYS_LIFETIME_BOUND
+    KRYS_NODISCARD const CSSOMStringAtom &GetPlatform() const noexcept KRYS_LIFETIME_BOUND
     {
       return _platform;
     }
 
-    KRYS_NODISCARD css::CSSOMStringAtom TakePlatform() noexcept
+    KRYS_NODISCARD CSSOMStringAtom TakePlatform() noexcept
     {
       return krys::move(_platform);
     }
@@ -79,7 +79,7 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const WebkitLocale &) const noexcept = default;
 
   private:
-    css::CSSOMStringAtom _platform;
+    CSSOMStringAtom _platform;
   };
 
   // MARK: - Conversion
@@ -95,7 +95,7 @@ namespace krys::boo::style
   template <>
   struct ToPlatform<WebkitLocale>
   {
-    const css::CSSOMStringAtom &operator()(const WebkitLocale &value KRYS_LIFETIME_BOUND) noexcept
+    const CSSOMStringAtom &operator()(const WebkitLocale &value KRYS_LIFETIME_BOUND) noexcept
     {
       return value.GetPlatform();
     }

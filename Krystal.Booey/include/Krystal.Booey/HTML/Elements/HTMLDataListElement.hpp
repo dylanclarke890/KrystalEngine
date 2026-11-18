@@ -9,13 +9,10 @@ namespace krys::boo::dom
   class HTMLCollection;
 }
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLOptionElement;
-}
 
-namespace krys::boo::html
-{
   /// @see https://html.spec.whatwg.org/#htmldatalistelement
   class HTMLDataListElement : public HTMLElement
   {
@@ -26,7 +23,7 @@ namespace krys::boo::html
     WeakPtr<dom::HTMLCollection> _options;
 
   public:
-    HTMLDataListElement(dom::Document &document) noexcept;
+    HTMLDataListElement(Document &document) noexcept;
 
     /// @brief The option elements that are descendants of the datalist.
     /// @see https://html.spec.whatwg.org/#dom-datalist-options
@@ -44,14 +41,14 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLDataListElement)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLDataListElement)
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLDataListElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLDataListElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLDataListElement();
   }

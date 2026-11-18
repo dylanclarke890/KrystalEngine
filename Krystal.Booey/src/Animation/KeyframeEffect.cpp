@@ -100,7 +100,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD css::PropertyId
-      IDLAttributeNameToAnimationPropertyName(const dom::DOMString &idlAttributeName) noexcept
+      IDLAttributeNameToAnimationPropertyName(const DOMString &idlAttributeName) noexcept
     {
       // https://drafts.csswg.org/web-animations-1/#idl-attribute-name-to-animation-property-name
       // 1. If attribute conforms to the <custom-property-name> production, return attribute.
@@ -127,8 +127,8 @@ namespace krys::boo
 
       // 4. Otherwise, return the result of applying the IDL attribute to CSS property algorithm [CSSOM] to
       // attribute.
-      auto cssPropertyId = css::CSSStyleProperties::GetPropertyIdFromJavaScriptPropertyName(
-        css::CSSOMStringAtom(idlAttributeName));
+      auto cssPropertyId =
+        CSSStyleProperties::GetPropertyIdFromJavaScriptPropertyName(CSSOMStringAtom(idlAttributeName));
 
       if (cssPropertyId == css::PropertyId::Invalid && css::IsCustomPropertyName(idlAttributeName))
       {
@@ -152,12 +152,12 @@ namespace krys::boo
       {
         return false;
       }
-      auto *offsetUnitValue = DynamicDowncast<css::CSSUnitValue>(timelineRangeOffset.Offset.get());
+      auto *offsetUnitValue = DynamicDowncast<CSSUnitValue>(timelineRangeOffset.Offset.get());
       return offsetUnitValue && offsetUnitValue->UnitEnum() == css::UnitType::Percentage;
     }
 
     /// @brief The whole of @p string as a number, as script converts a string to a double.
-    KRYS_NODISCARD Maybe<double> StringToDouble(const dom::DOMString &string) noexcept
+    KRYS_NODISCARD Maybe<double> StringToDouble(const DOMString &string) noexcept
     {
       const auto *begin = reinterpret_cast<const char *>(string.data());
       const auto *end = begin + string.size();
@@ -171,8 +171,8 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD Maybe<Variant<double, TimelineRangeOffset>>
-      DoubleOrTimelineRangeOffsetFromString(const dom::DOMString &offsetString,
-                                            const dom::Document &document) noexcept
+      DoubleOrTimelineRangeOffsetFromString(const DOMString &offsetString,
+                                            const boo::Document &document) noexcept
     {
       if (auto doubleValue = StringToDouble(offsetString))
       {
@@ -195,12 +195,12 @@ namespace krys::boo
 
       return Variant<double, TimelineRangeOffset> {
         TimelineRangeOffset {style::ConvertSingleAnimationRangeNameToRangeString(rangeName),
-                             css::CSSNumericFactory::Percent(value * 100)}};
+                             CSSNumericFactory::Percent(value * 100)}};
     }
 
     KRYS_NODISCARD Maybe<KeyframeEffect::KeyframeOffset>
       ValidateKeyframeOffset(const KeyframeEffect::KeyframeOffset &offset,
-                             const dom::Document &document) noexcept
+                             const boo::Document &document) noexcept
     {
       if (const auto *doubleValue = std::get_if<double>(&offset))
       {
@@ -216,7 +216,7 @@ namespace krys::boo
         return KeyframeEffect::KeyframeOffset {*timelineRangeOffset};
       }
 
-      if (const auto *stringOffset = std::get_if<dom::DOMString>(&offset))
+      if (const auto *stringOffset = std::get_if<DOMString>(&offset))
       {
         auto parsedValue = DoubleOrTimelineRangeOffsetFromString(*stringOffset, document);
         if (!parsedValue)
@@ -296,7 +296,7 @@ namespace krys::boo
         if (const auto *timelineRangeOffset = std::get_if<TimelineRangeOffset>(&offset))
         {
           auto rangeName = style::ConvertRangeStringToSingleTimelineRangeName(timelineRangeOffset->RangeName);
-          auto *offsetUnitValue = DynamicDowncast<css::CSSUnitValue>(timelineRangeOffset->Offset.get());
+          auto *offsetUnitValue = DynamicDowncast<CSSUnitValue>(timelineRangeOffset->Offset.get());
           krys_debug_assert(offsetUnitValue && offsetUnitValue->UnitEnum() == css::UnitType::Percentage);
           keyframe.ComputedOffset =
             ComputedOffset(rangeName, offsetUnitValue->Value() / 100, viewTimeline, animation);
@@ -378,8 +378,9 @@ namespace krys::boo
     /// @brief Steps 2 to 6 of processing a keyframe-like object: the properties of @p properties that can be
     /// animated, sorted, with their values.
     /// @see https://drafts.csswg.org/web-animations-1/#process-a-keyframe-like-object
-    KRYS_NODISCARD List<KeyframeEffect::PropertyAndValues> ProcessKeyframeLikeObjectProperties(
-      dom::Document &document, const List<Pair<dom::DOMString, List<dom::DOMString>>> &properties) noexcept
+    KRYS_NODISCARD List<KeyframeEffect::PropertyAndValues>
+      ProcessKeyframeLikeObjectProperties(boo::Document &document,
+                                          const List<Pair<DOMString, List<DOMString>>> &properties) noexcept
     {
       // 2. Build up a list of animatable properties as follows:
       //
@@ -391,7 +392,7 @@ namespace krys::boo
       // 3. Let input properties be the result of calling the EnumerableOwnNames operation with keyframe input
       //    as the object.
       // A property given more than once keeps its last values, as an object's would.
-      List<const Pair<dom::DOMString, List<dom::DOMString>> *> inputProperties;
+      List<const Pair<DOMString, List<DOMString>> *> inputProperties;
       for (const auto &property : properties)
       {
         std::erase_if(inputProperties,
@@ -416,7 +417,7 @@ namespace krys::boo
       // 4. Make up a new list animation properties that consists of all of the properties that are in both
       //    input properties and animatable properties, or which are in input properties and conform to the
       //    <custom-property-name> production.
-      using InputProperty = const Pair<dom::DOMString, List<dom::DOMString>> *;
+      using InputProperty = const Pair<DOMString, List<DOMString>> *;
       List<InputProperty> logicalShorthands;
       List<InputProperty> physicalShorthands;
       List<InputProperty> logicalLonghands;
@@ -433,7 +434,7 @@ namespace krys::boo
         AnimatableCSSProperty animatableProperty = resolvedCSSProperty;
         if (cssProperty == css::PropertyId::Custom)
         {
-          animatableProperty = css::CSSOMStringAtom(inputProperty->first);
+          animatableProperty = CSSOMStringAtom(inputProperty->first);
         }
         if (style::interpolation::CanInterpolate(animatableProperty))
         {
@@ -492,7 +493,7 @@ namespace krys::boo
         if (cssPropertyId == css::PropertyId::Custom)
         {
           propertiesAndValues.push_back(KeyframeEffect::PropertyAndValues {
-            cssPropertyId, css::CSSOMStringAtom(propertyName), animationProperty->second});
+            cssPropertyId, CSSOMStringAtom(propertyName), animationProperty->second});
         }
         else
         {
@@ -506,7 +507,7 @@ namespace krys::boo
     }
 
     void SetKeyframeProperty(KeyframeEffect::ParsedKeyframe &keyframe,
-                             const KeyframeEffect::PropertyAndValues &property, const dom::DOMString &value,
+                             const KeyframeEffect::PropertyAndValues &property, const DOMString &value,
                              const css::ParserContext &parserContext) noexcept
     {
       if (property.Property == css::PropertyId::Custom)
@@ -523,7 +524,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD dom::ExceptionOr<void>
-      ProcessIterableKeyframes(dom::Document &document, List<KeyframeEffect::InputKeyframe> keyframesInput,
+      ProcessIterableKeyframes(boo::Document &document, List<KeyframeEffect::InputKeyframe> keyframesInput,
                                List<KeyframeEffect::ParsedKeyframe> &parsedKeyframes) noexcept
     {
       css::ParserContext parserContext(document);
@@ -546,7 +547,7 @@ namespace krys::boo
           }
           keyframeOutput.Offset = *timelineRangeOffset;
         }
-        else if (const auto *stringOffset = std::get_if<dom::DOMString>(&inputKeyframe.Offset))
+        else if (const auto *stringOffset = std::get_if<DOMString>(&inputKeyframe.Offset))
         {
           auto parsedValue = DoubleOrTimelineRangeOffsetFromString(*stringOffset, document);
           if (!parsedValue)
@@ -566,11 +567,11 @@ namespace krys::boo
         keyframeOutput.Easing = krys::move(inputKeyframe.Easing);
         keyframeOutput.Composite = inputKeyframe.Composite;
 
-        List<Pair<dom::DOMString, List<dom::DOMString>>> properties;
+        List<Pair<DOMString, List<DOMString>>> properties;
         properties.reserve(inputKeyframe.Properties.size());
         for (auto &[name, value] : inputKeyframe.Properties)
         {
-          properties.emplace_back(krys::move(name), List<dom::DOMString> {krys::move(value)});
+          properties.emplace_back(krys::move(name), List<DOMString> {krys::move(value)});
         }
 
         for (const auto &propertyAndValue : ProcessKeyframeLikeObjectProperties(document, properties))
@@ -587,8 +588,8 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD dom::ExceptionOr<void> ProcessPropertyIndexedKeyframes(
-      dom::Document &document, KeyframeEffect::InputPropertyIndexedKeyframes keyframesInput,
-      List<KeyframeEffect::ParsedKeyframe> &parsedKeyframes, List<dom::DOMString> &unusedEasings) noexcept
+      boo::Document &document, KeyframeEffect::InputPropertyIndexedKeyframes keyframesInput,
+      List<KeyframeEffect::ParsedKeyframe> &parsedKeyframes, List<DOMString> &unusedEasings) noexcept
     {
       // 1. Let property-indexed keyframe be the result of running the procedure to process a keyframe-like
       // object passing object as the keyframe input.
@@ -599,7 +600,7 @@ namespace krys::boo
       {
         for (auto &offset : *offsets)
         {
-          const auto *stringOffset = std::get_if<dom::DOMString>(&offset);
+          const auto *stringOffset = std::get_if<DOMString>(&offset);
           if (!stringOffset)
           {
             continue;
@@ -736,7 +737,7 @@ namespace krys::boo
         }
         offsets.emplace_back(*timelineRangeOffset);
       }
-      else if (const auto *stringOffset = std::get_if<dom::DOMString>(&sourceOffsets))
+      else if (const auto *stringOffset = std::get_if<DOMString>(&sourceOffsets))
       {
         auto parsedValue = DoubleOrTimelineRangeOffsetFromString(*stringOffset, document);
         if (!parsedValue)
@@ -769,12 +770,12 @@ namespace krys::boo
       //    - sequence<DOMString>, the value of “easing” as-is.
       //    - DOMString, a sequence of length one with the value of “easing” as its single item, i.e. « easing
       //    »,
-      List<dom::DOMString> easings;
-      if (const auto *easingList = std::get_if<List<dom::DOMString>>(&baseProperties.Easing))
+      List<DOMString> easings;
+      if (const auto *easingList = std::get_if<List<DOMString>>(&baseProperties.Easing))
       {
         easings = *easingList;
       }
-      else if (const auto *easing = std::get_if<dom::DOMString>(&baseProperties.Easing))
+      else if (const auto *easing = std::get_if<DOMString>(&baseProperties.Easing))
       {
         easings.push_back(*easing);
       }
@@ -860,7 +861,7 @@ namespace krys::boo
       TimelineRangeOffsetFromSpecifiedOffset(const BlendingKeyframe::KeyframeOffset &specifiedOffset) noexcept
     {
       auto name = style::ConvertSingleAnimationRangeNameToRangeString(specifiedOffset.Name);
-      return TimelineRangeOffset {name, css::CSSNumericFactory::Percent(specifiedOffset.Value * 100)};
+      return TimelineRangeOffset {name, CSSNumericFactory::Percent(specifiedOffset.Value * 100)};
     }
 
     KRYS_NODISCARD BlendingKeyframe::KeyframeOffset
@@ -869,7 +870,7 @@ namespace krys::boo
       if (const auto *timelineRangeOffset = std::get_if<TimelineRangeOffset>(&keyframe.Offset))
       {
         auto rangeName = style::ConvertRangeStringToSingleTimelineRangeName(timelineRangeOffset->RangeName);
-        auto *offsetUnitValue = DynamicDowncast<css::CSSUnitValue>(timelineRangeOffset->Offset.get());
+        auto *offsetUnitValue = DynamicDowncast<CSSUnitValue>(timelineRangeOffset->Offset.get());
         krys_debug_assert(offsetUnitValue && offsetUnitValue->UnitEnum() == css::UnitType::Percentage);
         return {rangeName, offsetUnitValue->Value() / 100};
       }
@@ -906,7 +907,7 @@ namespace krys::boo
   KeyframeEffect::ParsedKeyframe &
     KeyframeEffect::ParsedKeyframe::operator=(ParsedKeyframe &&) noexcept = default;
 
-  dom::DOMString KeyframeEffect::PropertyIdToIDLAttributeName(css::PropertyId property) noexcept
+  DOMString KeyframeEffect::PropertyIdToIDLAttributeName(css::PropertyId property) noexcept
   {
     // https://drafts.csswg.org/web-animations-1/#animation-property-name-to-idl-attribute-name
     // 1. If property follows the <custom-property-name> production, return property.
@@ -929,7 +930,7 @@ namespace krys::boo
   }
 
   dom::ExceptionOr<Ref<KeyframeEffect>>
-    KeyframeEffect::Create(dom::Document &document, dom::Element *target, KeyframesInput &&keyframes,
+    KeyframeEffect::Create(boo::Document &document, Element *target, KeyframesInput &&keyframes,
                            Maybe<Variant<double, KeyframeEffectOptions>> options) noexcept
   {
     Ref keyframeEffect = AdoptRef(*new KeyframeEffect(target, {}));
@@ -941,7 +942,7 @@ namespace krys::boo
       auto &optionsValue = *options;
       if (const auto *duration = std::get_if<double>(&optionsValue))
       {
-        timing.Duration = Variant<double, dom::DOMString> {*duration};
+        timing.Duration = Variant<double, DOMString> {*duration};
       }
       else
       {
@@ -997,14 +998,14 @@ namespace krys::boo
   }
 
   Ref<KeyframeEffect>
-    KeyframeEffect::Create(const dom::Element &target,
+    KeyframeEffect::Create(const Element &target,
                            const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
   {
-    return AdoptRef(*new KeyframeEffect(const_cast<dom::Element *>(&target), pseudoElementIdentifier));
+    return AdoptRef(*new KeyframeEffect(const_cast<Element *>(&target), pseudoElementIdentifier));
   }
 
   KeyframeEffect::KeyframeEffect(
-    dom::Element *target, const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
+    Element *target, const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
       : _target(ShareRefPtr(target)), _pseudoElementIdentifier(pseudoElementIdentifier)
   {
     if (_target)
@@ -1208,7 +1209,7 @@ namespace krys::boo
       {
         (void)styleProperties->MergeAndOverrideOnConflict(matchedRule->Properties());
       }
-      if (auto *styledElement = DynamicDowncast<dom::StyledElement>(*_target);
+      if (auto *styledElement = DynamicDowncast<StyledElement>(*_target);
           styledElement && !_pseudoElementIdentifier)
       {
         if (const auto *inlineProperties = styledElement->InlineStyle())
@@ -1247,7 +1248,7 @@ namespace krys::boo
       // For CSS transitions, all keyframes should return "linear" since the effect's global timing function
       // applies.
       computedKeyframe.Easing = Animation() && Is<CSSTransition>(*Animation())
-                                  ? dom::DOMString(u8"linear")
+                                  ? DOMString(u8"linear")
                                   : TimingFunctionForBlendingKeyframe(keyframe)->CssText();
 
       if (auto compositeOperation = keyframe.CompositeOperation())
@@ -1257,7 +1258,7 @@ namespace krys::boo
 
       auto addPropertyToKeyframe = [&](css::PropertyId cssPropertyId)
       {
-        dom::DOMString styleString;
+        DOMString styleString;
         if (keyframeRule)
         {
           if (auto cssValue = keyframeRule->Properties().GetPropertyCSSValue(cssPropertyId))
@@ -1287,9 +1288,9 @@ namespace krys::boo
         computedKeyframe.StyleStrings.insert_or_assign(cssPropertyId, styleString);
       };
 
-      auto addCustomPropertyToKeyframe = [&](const css::CSSOMStringAtom &customProperty)
+      auto addCustomPropertyToKeyframe = [&](const CSSOMStringAtom &customProperty)
       {
-        dom::DOMString styleString;
+        DOMString styleString;
         if (keyframeRule)
         {
           if (auto cssValue = keyframeRule->Properties().GetCustomPropertyCSSValue(customProperty.View()))
@@ -1322,7 +1323,7 @@ namespace krys::boo
       {
         krys::SwitchOn(
           property, [&](css::PropertyId cssProperty) { addPropertyToKeyframe(cssProperty); },
-          [&](const css::CSSOMStringAtom &customProperty)
+          [&](const CSSOMStringAtom &customProperty)
           {
             if (_animationType != WebAnimationType::CSSAnimation)
             {
@@ -1354,7 +1355,7 @@ namespace krys::boo
     return computedKeyframes;
   }
 
-  dom::ExceptionOr<void> KeyframeEffect::SetBindingsKeyframes(dom::Document &document,
+  dom::ExceptionOr<void> KeyframeEffect::SetBindingsKeyframes(boo::Document &document,
                                                               KeyframesInput keyframesInput) noexcept
   {
     auto retVal = SetKeyframes(document, krys::move(keyframesInput));
@@ -1368,7 +1369,7 @@ namespace krys::boo
     return retVal;
   }
 
-  dom::ExceptionOr<void> KeyframeEffect::SetKeyframes(dom::Document &document,
+  dom::ExceptionOr<void> KeyframeEffect::SetKeyframes(boo::Document &document,
                                                       KeyframesInput keyframesInput) noexcept
   {
     auto processKeyframesResult = ProcessKeyframes(document, krys::move(keyframesInput));
@@ -1386,7 +1387,7 @@ namespace krys::boo
     return processKeyframesResult;
   }
 
-  dom::ExceptionOr<void> KeyframeEffect::ProcessKeyframes(dom::Document &document,
+  dom::ExceptionOr<void> KeyframeEffect::ProcessKeyframes(boo::Document &document,
                                                           KeyframesInput keyframesInput) noexcept
   {
     Ref protectedDocument = ShareRef(document);
@@ -1401,7 +1402,7 @@ namespace krys::boo
     List<ParsedKeyframe> parsedKeyframes;
 
     // 3. to 5. Perform the steps corresponding to the first matching condition from below,
-    List<dom::DOMString> unusedEasings;
+    List<DOMString> unusedEasings;
     if (auto *keyframeList = std::get_if<List<InputKeyframe>>(&keyframesInput))
     {
       auto retVal = ProcessIterableKeyframes(document, krys::move(*keyframeList), parsedKeyframes);
@@ -1567,7 +1568,7 @@ namespace krys::boo
         return std::ranges::any_of(_parsedKeyframes, [&](const auto &keyframe)
                                    { return keyframe.StyleStrings.contains(cssProperty); });
       },
-      [&](const css::CSSOMStringAtom &customProperty)
+      [&](const CSSOMStringAtom &customProperty)
       {
         return std::ranges::any_of(_parsedKeyframes, [&](const auto &keyframe)
                                    { return keyframe.CustomStyleStrings.contains(customProperty); });
@@ -1727,7 +1728,7 @@ namespace krys::boo
     {
       (void)style::Scope::ResolveTreeScopedReference(
         *_target, *backingStyleAnimationName,
-        [&](const style::Scope &scope, const css::CSSOMStringAtom &)
+        [&](const style::Scope &scope, const CSSOMStringAtom &)
         {
           krys_debug_assert(scope.ResolverIfExists());
           return scope.ResolverIfExists()->KeyframeStylesForAnimation(
@@ -1890,7 +1891,7 @@ namespace krys::boo
     return _target && _pseudoElementIdentifier;
   }
 
-  void KeyframeEffect::SetTarget(RefPtr<dom::Element> &&newTarget) noexcept
+  void KeyframeEffect::SetTarget(RefPtr<Element> &&newTarget) noexcept
   {
     if (_target == newTarget)
     {
@@ -1898,7 +1899,7 @@ namespace krys::boo
     }
 
     auto previousTargetStyleable = TargetStyleable();
-    RefPtr<dom::Element> protector;
+    RefPtr<Element> protector;
     if (previousTargetStyleable)
     {
       protector = previousTargetStyleable->ProtectedElement();
@@ -1908,7 +1909,7 @@ namespace krys::boo
     DidChangeTargetStyleable(previousTargetStyleable);
   }
 
-  css::CSSOMString KeyframeEffect::PseudoElement() const noexcept
+  CSSOMString KeyframeEffect::PseudoElement() const noexcept
   {
     // https://drafts.csswg.org/web-animations/#dom-keyframeeffect-pseudoelement
     // The target pseudo-selector. null if this effect has no effect target or if the effect target is an
@@ -1921,7 +1922,7 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> KeyframeEffect::SetPseudoElement(const css::CSSOMString &pseudoElement) noexcept
+  dom::ExceptionOr<void> KeyframeEffect::SetPseudoElement(const CSSOMString &pseudoElement) noexcept
   {
     // https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-pseudoelement
     auto [parsed, pseudoElementIdentifier] = PseudoElementIdentifierFromString(pseudoElement, Document());
@@ -2051,8 +2052,7 @@ namespace krys::boo
     InvalidateElement(TargetStyleable());
   }
 
-  void
-    KeyframeEffect::CustomPropertyRegistrationDidChange(const css::CSSOMStringAtom &customProperty) noexcept
+  void KeyframeEffect::CustomPropertyRegistrationDidChange(const CSSOMStringAtom &customProperty) noexcept
   {
     // If the registration of a custom property is changed, we should recompute keyframes
     // at the next opportunity as the initial value, inherited value, etc. could have changed.
@@ -2994,7 +2994,7 @@ namespace krys::boo
     return animation;
   }
 
-  dom::Document *KeyframeEffect::Document() const noexcept
+  boo::Document *KeyframeEffect::Document() const noexcept
   {
     if (_document)
     {

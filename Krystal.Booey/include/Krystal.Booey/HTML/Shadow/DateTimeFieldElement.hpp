@@ -71,7 +71,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD virtual bool IsFieldOwnerHorizontal() const noexcept = 0;
 
-    KRYS_NODISCARD virtual dom::DOMString LocaleIdentifier() const noexcept = 0;
+    KRYS_NODISCARD virtual DOMString LocaleIdentifier() const noexcept = 0;
 
     /// @brief The date fields show (greyed) until they have values: today.
     KRYS_NODISCARD virtual const DateComponents &PlaceholderDate() const noexcept = 0;
@@ -97,7 +97,7 @@ namespace krys::boo::html
   public:
     void DefaultEventHandler(dom::Event &event) noexcept override;
 
-    KRYS_NODISCARD dom::DOMString VisibleValue() const noexcept;
+    KRYS_NODISCARD DOMString VisibleValue() const noexcept;
 
     void RemoveFieldOwner() noexcept
     {
@@ -121,21 +121,21 @@ namespace krys::boo::html
 
     virtual void StepUp() noexcept = 0;
 
-    KRYS_NODISCARD virtual dom::DOMString Value() const noexcept = 0;
+    KRYS_NODISCARD virtual DOMString Value() const noexcept = 0;
 
-    KRYS_NODISCARD virtual dom::DOMString PlaceholderValue() const noexcept = 0;
+    KRYS_NODISCARD virtual DOMString PlaceholderValue() const noexcept = 0;
 
   protected:
-    DateTimeFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+    DateTimeFieldElement(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
     /// @brief Makes @p field the part named @p part, focusable (its parts are what a date input focuses),
     /// and a spin button named @p label for accessibility.
-    static void Initialize(DateTimeFieldElement &field, dom::DOMStringAtom part,
+    static void Initialize(DateTimeFieldElement &field, DOMStringAtom part,
                            utf8_stringview label = {}) noexcept;
 
     KRYS_NODISCARD Locale &LocaleForOwner() const noexcept;
 
-    KRYS_NODISCARD dom::DOMString LocaleIdentifier() const noexcept;
+    KRYS_NODISCARD DOMString LocaleIdentifier() const noexcept;
 
     void UpdateVisibleValue(EventBehavior eventBehavior) noexcept;
 

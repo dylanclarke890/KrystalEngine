@@ -36,7 +36,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Core/Text/StringToIntegerConversion.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   namespace
   {
@@ -61,7 +61,7 @@ namespace krys::boo::svg
     };
   }
 
-  Color SVGPropertyTraits<Color>::FromString(SVGElement &targetElement, dom::DOMStringView string) noexcept
+  Color SVGPropertyTraits<Color>::FromString(SVGElement &targetElement, DOMStringView string) noexcept
   {
     using namespace css::parse_property;
 
@@ -82,12 +82,12 @@ namespace krys::boo::svg
     return ParseColorRawGeneral(trimmedString, cssParserContext, options, state);
   }
 
-  int32 SVGPropertyTraits<int32>::FromString(SVGElement &, dom::DOMStringView string) noexcept
+  int32 SVGPropertyTraits<int32>::FromString(SVGElement &, DOMStringView string) noexcept
   {
     return text::ParseInteger<int32>(string).value_or(0);
   }
 
-  dom::DOMString SVGPropertyTraits<Color>::ToString(const Color &type) noexcept
+  DOMString SVGPropertyTraits<Color>::ToString(const Color &type) noexcept
   {
     return SerialisationForHTML(type);
   }

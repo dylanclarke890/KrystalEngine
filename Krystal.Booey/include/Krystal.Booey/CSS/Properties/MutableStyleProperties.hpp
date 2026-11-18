@@ -30,14 +30,14 @@
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
+  class CSSStyleProperties;
   class StyledElement;
 }
 
 namespace krys::boo::css
 {
-  class CSSStyleProperties;
   struct ParserContext;
 
   /// @brief A declaration block that can be changed in place.
@@ -83,8 +83,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD CSSStyleProperties &EnsureCSSStyleProperties() noexcept;
 
-    KRYS_NODISCARD CSSStyleProperties &
-      EnsureInlineCSSStyleProperties(dom::StyledElement &parentElement) noexcept;
+    KRYS_NODISCARD CSSStyleProperties &EnsureInlineCSSStyleProperties(StyledElement &parentElement) noexcept;
 
     KRYS_NODISCARD uint32 PropertyCount() const noexcept
     {

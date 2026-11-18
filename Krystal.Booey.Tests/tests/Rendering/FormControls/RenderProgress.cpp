@@ -31,10 +31,10 @@ layer at (0,0) size 800x10
             RenderBlock {DIV} at (0,0) size 25x10 [bgcolor=#008000]
 )");
 
-    auto &half = Downcast<html::HTMLProgressElement>(fixture.ById(u8"half"));
-    auto &spinner = Downcast<html::HTMLProgressElement>(fixture.ById(u8"spinner"));
+    auto &half = Downcast<HTMLProgressElement>(fixture.ById(u8"half"));
+    auto &spinner = Downcast<HTMLProgressElement>(fixture.ById(u8"spinner"));
     CHECK(half.Position() == 0.5);
-    CHECK(spinner.Position() == html::HTMLProgressElement::IndeterminatePosition);
+    CHECK(spinner.Position() == HTMLProgressElement::IndeterminatePosition);
 
     auto &halfRenderer = Downcast<RenderProgress>(*half.Renderer());
     auto &spinnerRenderer = Downcast<RenderProgress>(*spinner.Renderer());

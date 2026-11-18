@@ -4,7 +4,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   /// @brief A comment (`<!-- data -->`).
   /// @see https://dom.spec.whatwg.org/#interface-comment
@@ -34,8 +34,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::Comment)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::Comment)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
     return node.IsCommentNode();
   }

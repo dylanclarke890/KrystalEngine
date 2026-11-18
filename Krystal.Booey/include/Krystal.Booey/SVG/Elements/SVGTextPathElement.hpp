@@ -23,7 +23,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGTextContentElement.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   enum SVGTextPathMethodType : uint8
   {
@@ -47,7 +47,7 @@ namespace krys::boo::svg
       return SVGTextPathMethodStretch;
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(SVGTextPathMethodType type) noexcept
+    KRYS_NODISCARD static DOMString ToString(SVGTextPathMethodType type) noexcept
     {
       switch (type)
       {
@@ -69,7 +69,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    KRYS_NODISCARD static SVGTextPathMethodType FromString(SVGElement &, dom::DOMStringView value) noexcept
+    KRYS_NODISCARD static SVGTextPathMethodType FromString(SVGElement &, DOMStringView value) noexcept
     {
       if (value == u8"align")
       {
@@ -91,7 +91,7 @@ namespace krys::boo::svg
       return SVGTextPathSpacingExact;
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(SVGTextPathSpacingType type) noexcept
+    KRYS_NODISCARD static DOMString ToString(SVGTextPathSpacingType type) noexcept
     {
       switch (type)
       {
@@ -113,7 +113,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    KRYS_NODISCARD static SVGTextPathSpacingType FromString(SVGElement &, dom::DOMStringView value) noexcept
+    KRYS_NODISCARD static SVGTextPathSpacingType FromString(SVGElement &, DOMStringView value) noexcept
     {
       if (value == u8"auto")
       {
@@ -150,7 +150,7 @@ namespace krys::boo::svg
       TEXTPATH_SPACINGTYPE_EXACT = SVGTextPathSpacingExact,
     };
 
-    explicit SVGTextPathElement(dom::Document &) noexcept;
+    explicit SVGTextPathElement(Document &) noexcept;
 
     ~SVGTextPathElement() noexcept override;
 
@@ -190,14 +190,14 @@ namespace krys::boo::svg
   private:
     void OnPostConnection() noexcept override;
 
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept override;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept override;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept override;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
 
-    KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &) const noexcept final;
+    KRYS_NODISCARD bool ChildShouldCreateRenderer(const Node &) const noexcept final;
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final;
 
@@ -205,14 +205,14 @@ namespace krys::boo::svg
 
     void BuildPendingResource() noexcept override;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
     KRYS_NODISCARD bool SelfHasRelativeLengths() const noexcept override;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGTextPathElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGTextPathElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGTextPathElement();
   }

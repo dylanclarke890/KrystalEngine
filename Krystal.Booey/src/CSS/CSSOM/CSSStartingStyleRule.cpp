@@ -27,14 +27,14 @@
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSStartingStyleRule::CSSStartingStyleRule(StartingStyleRule &rule, CSSStyleSheet *parent) noexcept
+  CSSStartingStyleRule::CSSStartingStyleRule(css::StartingStyleRule &rule, CSSStyleSheet *parent) noexcept
       : CSSGroupingRule(rule, parent)
   {
   }
 
-  Ref<CSSStartingStyleRule> CSSStartingStyleRule::Create(StartingStyleRule &rule,
+  Ref<CSSStartingStyleRule> CSSStartingStyleRule::Create(css::StartingStyleRule &rule,
                                                          CSSStyleSheet *parent) noexcept
   {
     return AdoptRef(*new CSSStartingStyleRule(rule, parent));

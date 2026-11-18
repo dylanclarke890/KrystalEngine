@@ -32,12 +32,11 @@
 #include "Krystal.Booey/SVG/Properties/SVGAnimationDiscreteFunctionImpl.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGAnimatedAngleAnimator;
   class SVGAnimatedIntegerPairAnimator;
   class SVGAnimatedOrientTypeAnimator;
-
   template <typename TAnimatedPropertyAnimator1, typename TAnimatedPropertyAnimator2>
   class SVGAnimatedPropertyPairAnimator;
 
@@ -50,10 +49,11 @@ namespace krys::boo::svg
     using Base::Base;
 
   public:
-    KRYS_NODISCARD static Ref<SVGAnimatedAngleAnimator> Create(const dom::QualifiedName &attributeName,
+    KRYS_NODISCARD static Ref<SVGAnimatedAngleAnimator> Create(const QualifiedName &attributeName,
                                                                Ref<SVGAnimatedAngle> &animated,
-                                                               AnimationMode animationMode, CalcMode calcMode,
-                                                               bool isAccumulated, bool isAdditive) noexcept
+                                                               svg::AnimationMode animationMode,
+                                                               svg::CalcMode calcMode, bool isAccumulated,
+                                                               bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGAnimatedAngleAnimator(attributeName, animated, animationMode, calcMode,
                                                     isAccumulated, isAdditive));
@@ -74,9 +74,11 @@ namespace krys::boo::svg
   public:
     using Base::Base;
 
-    KRYS_NODISCARD static Ref<SVGAnimatedBooleanAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGAnimatedBoolean> &animated,
-             AnimationMode animationMode, CalcMode calcMode, bool isAccumulated, bool isAdditive) noexcept
+    KRYS_NODISCARD static Ref<SVGAnimatedBooleanAnimator> Create(const QualifiedName &attributeName,
+                                                                 Ref<SVGAnimatedBoolean> &animated,
+                                                                 svg::AnimationMode animationMode,
+                                                                 svg::CalcMode calcMode, bool isAccumulated,
+                                                                 bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGAnimatedBooleanAnimator(attributeName, animated, animationMode, calcMode,
                                                       isAccumulated, isAdditive));
@@ -101,8 +103,9 @@ namespace krys::boo::svg
 
   public:
     KRYS_NODISCARD static Ref<SVGAnimatedEnumerationAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGAnimatedEnumeration> &animated,
-             AnimationMode animationMode, CalcMode calcMode, bool isAccumulated, bool isAdditive) noexcept
+      Create(const QualifiedName &attributeName, Ref<SVGAnimatedEnumeration> &animated,
+             svg::AnimationMode animationMode, svg::CalcMode calcMode, bool isAccumulated,
+             bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGAnimatedEnumerationAnimator<TEnum>(attributeName, animated, animationMode,
                                                                  calcMode, isAccumulated, isAdditive));
@@ -127,9 +130,11 @@ namespace krys::boo::svg
   public:
     using Base::Base;
 
-    KRYS_NODISCARD static Ref<SVGAnimatedIntegerAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGAnimatedInteger> &animated,
-             AnimationMode animationMode, CalcMode calcMode, bool isAccumulated, bool isAdditive) noexcept
+    KRYS_NODISCARD static Ref<SVGAnimatedIntegerAnimator> Create(const QualifiedName &attributeName,
+                                                                 Ref<SVGAnimatedInteger> &animated,
+                                                                 svg::AnimationMode animationMode,
+                                                                 svg::CalcMode calcMode, bool isAccumulated,
+                                                                 bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGAnimatedIntegerAnimator(attributeName, animated, animationMode, calcMode,
                                                       isAccumulated, isAdditive));
@@ -148,16 +153,16 @@ namespace krys::boo::svg
     using Base = SVGAnimatedPropertyAnimator<SVGAnimatedLength, SVGAnimationLengthFunction>;
 
   public:
-    SVGAnimatedLengthAnimator(const dom::QualifiedName &attributeName, Ref<SVGAnimatedLength> &animated,
-                              AnimationMode animationMode, CalcMode calcMode, bool isAccumulated,
+    SVGAnimatedLengthAnimator(const QualifiedName &attributeName, Ref<SVGAnimatedLength> &animated,
+                              svg::AnimationMode animationMode, svg::CalcMode calcMode, bool isAccumulated,
                               bool isAdditive, SVGLengthMode lengthMode) noexcept
         : Base(attributeName, animated, animationMode, calcMode, isAccumulated, isAdditive, lengthMode)
     {
     }
 
     KRYS_NODISCARD static Ref<SVGAnimatedLengthAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGAnimatedLength> &animated,
-             AnimationMode animationMode, CalcMode calcMode, bool isAccumulated, bool isAdditive,
+      Create(const QualifiedName &attributeName, Ref<SVGAnimatedLength> &animated,
+             svg::AnimationMode animationMode, svg::CalcMode calcMode, bool isAccumulated, bool isAdditive,
              SVGLengthMode lengthMode) noexcept
     {
       return AdoptRef(*new SVGAnimatedLengthAnimator(attributeName, animated, animationMode, calcMode,
@@ -177,17 +182,16 @@ namespace krys::boo::svg
     using Base = SVGAnimatedPropertyAnimator<SVGAnimatedLengthList, SVGAnimationLengthListFunction>;
 
   public:
-    SVGAnimatedLengthListAnimator(const dom::QualifiedName &attributeName,
-                                  Ref<SVGAnimatedLengthList> &animated, AnimationMode animationMode,
-                                  CalcMode calcMode, bool isAccumulated, bool isAdditive,
-                                  SVGLengthMode lengthMode) noexcept
+    SVGAnimatedLengthListAnimator(const QualifiedName &attributeName, Ref<SVGAnimatedLengthList> &animated,
+                                  svg::AnimationMode animationMode, svg::CalcMode calcMode,
+                                  bool isAccumulated, bool isAdditive, SVGLengthMode lengthMode) noexcept
         : Base(attributeName, animated, animationMode, calcMode, isAccumulated, isAdditive, lengthMode)
     {
     }
 
     KRYS_NODISCARD static Ref<SVGAnimatedLengthListAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGAnimatedLengthList> &animated,
-             AnimationMode animationMode, CalcMode calcMode, bool isAccumulated, bool isAdditive,
+      Create(const QualifiedName &attributeName, Ref<SVGAnimatedLengthList> &animated,
+             svg::AnimationMode animationMode, svg::CalcMode calcMode, bool isAccumulated, bool isAdditive,
              SVGLengthMode lengthMode) noexcept
     {
       return AdoptRef(*new SVGAnimatedLengthListAnimator(attributeName, animated, animationMode, calcMode,
@@ -210,9 +214,11 @@ namespace krys::boo::svg
     using Base::Base;
 
   public:
-    KRYS_NODISCARD static Ref<SVGAnimatedNumberAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGAnimatedNumber> &animated,
-             AnimationMode animationMode, CalcMode calcMode, bool isAccumulated, bool isAdditive) noexcept
+    KRYS_NODISCARD static Ref<SVGAnimatedNumberAnimator> Create(const QualifiedName &attributeName,
+                                                                Ref<SVGAnimatedNumber> &animated,
+                                                                svg::AnimationMode animationMode,
+                                                                svg::CalcMode calcMode, bool isAccumulated,
+                                                                bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGAnimatedNumberAnimator(attributeName, animated, animationMode, calcMode,
                                                      isAccumulated, isAdditive));
@@ -233,8 +239,9 @@ namespace krys::boo::svg
 
   public:
     KRYS_NODISCARD static Ref<SVGAnimatedNumberListAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGAnimatedNumberList> &animated,
-             AnimationMode animationMode, CalcMode calcMode, bool isAccumulated, bool isAdditive) noexcept
+      Create(const QualifiedName &attributeName, Ref<SVGAnimatedNumberList> &animated,
+             svg::AnimationMode animationMode, svg::CalcMode calcMode, bool isAccumulated,
+             bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGAnimatedNumberListAnimator(attributeName, animated, animationMode, calcMode,
                                                          isAccumulated, isAdditive));
@@ -255,8 +262,9 @@ namespace krys::boo::svg
 
   public:
     KRYS_NODISCARD static Ref<SVGAnimatedPathSegListAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGAnimatedPathSegList> &animated,
-             AnimationMode animationMode, CalcMode calcMode, bool isAccumulated, bool isAdditive) noexcept
+      Create(const QualifiedName &attributeName, Ref<SVGAnimatedPathSegList> &animated,
+             svg::AnimationMode animationMode, svg::CalcMode calcMode, bool isAccumulated,
+             bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGAnimatedPathSegListAnimator(attributeName, animated, animationMode, calcMode,
                                                           isAccumulated, isAdditive));
@@ -277,9 +285,11 @@ namespace krys::boo::svg
     using Base::Base;
 
   public:
-    KRYS_NODISCARD static Ref<SVGAnimatedPointListAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGAnimatedPointList> &animated,
-             AnimationMode animationMode, CalcMode calcMode, bool isAccumulated, bool isAdditive) noexcept
+    KRYS_NODISCARD static Ref<SVGAnimatedPointListAnimator> Create(const QualifiedName &attributeName,
+                                                                   Ref<SVGAnimatedPointList> &animated,
+                                                                   svg::AnimationMode animationMode,
+                                                                   svg::CalcMode calcMode, bool isAccumulated,
+                                                                   bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGAnimatedPointListAnimator(attributeName, animated, animationMode, calcMode,
                                                         isAccumulated, isAdditive));
@@ -302,8 +312,9 @@ namespace krys::boo::svg
 
   public:
     KRYS_NODISCARD static Ref<SVGAnimatedOrientTypeAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGAnimatedOrientType> &animated,
-             AnimationMode animationMode, CalcMode calcMode, bool isAccumulated, bool isAdditive) noexcept
+      Create(const QualifiedName &attributeName, Ref<SVGAnimatedOrientType> &animated,
+             svg::AnimationMode animationMode, svg::CalcMode calcMode, bool isAccumulated,
+             bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGAnimatedOrientTypeAnimator(attributeName, animated, animationMode, calcMode,
                                                          isAccumulated, isAdditive));
@@ -328,8 +339,9 @@ namespace krys::boo::svg
 
   public:
     KRYS_NODISCARD static Ref<SVGAnimatedPreserveAspectRatioAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGAnimatedPreserveAspectRatio> &animated,
-             AnimationMode animationMode, CalcMode calcMode, bool isAccumulated, bool isAdditive) noexcept
+      Create(const QualifiedName &attributeName, Ref<SVGAnimatedPreserveAspectRatio> &animated,
+             svg::AnimationMode animationMode, svg::CalcMode calcMode, bool isAccumulated,
+             bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGAnimatedPreserveAspectRatioAnimator(attributeName, animated, animationMode,
                                                                   calcMode, isAccumulated, isAdditive));
@@ -351,10 +363,11 @@ namespace krys::boo::svg
   public:
     using Base::Base;
 
-    KRYS_NODISCARD static Ref<SVGAnimatedRectAnimator> Create(const dom::QualifiedName &attributeName,
+    KRYS_NODISCARD static Ref<SVGAnimatedRectAnimator> Create(const QualifiedName &attributeName,
                                                               Ref<SVGAnimatedRect> &animated,
-                                                              AnimationMode animationMode, CalcMode calcMode,
-                                                              bool isAccumulated, bool isAdditive) noexcept
+                                                              svg::AnimationMode animationMode,
+                                                              svg::CalcMode calcMode, bool isAccumulated,
+                                                              bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGAnimatedRectAnimator(attributeName, animated, animationMode, calcMode,
                                                    isAccumulated, isAdditive));
@@ -374,9 +387,11 @@ namespace krys::boo::svg
     using Base::Base;
 
   public:
-    KRYS_NODISCARD static Ref<SVGAnimatedStringAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGAnimatedString> &animated,
-             AnimationMode animationMode, CalcMode calcMode, bool isAccumulated, bool isAdditive) noexcept
+    KRYS_NODISCARD static Ref<SVGAnimatedStringAnimator> Create(const QualifiedName &attributeName,
+                                                                Ref<SVGAnimatedString> &animated,
+                                                                svg::AnimationMode animationMode,
+                                                                svg::CalcMode calcMode, bool isAccumulated,
+                                                                bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGAnimatedStringAnimator(attributeName, animated, animationMode, calcMode,
                                                      isAccumulated, isAdditive));
@@ -390,7 +405,7 @@ namespace krys::boo::svg
 
     void Animate(SVGElement &targetElement, float progress, uint32 repeatCount) noexcept final
     {
-      dom::DOMString &animated = _animated->AnimVal();
+      DOMString &animated = _animated->AnimVal();
       _function.Animate(targetElement, progress, repeatCount, animated);
     }
 
@@ -426,8 +441,9 @@ namespace krys::boo::svg
 
   public:
     KRYS_NODISCARD static Ref<SVGAnimatedTransformListAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGAnimatedTransformList> &animated,
-             AnimationMode animationMode, CalcMode calcMode, bool isAccumulated, bool isAdditive) noexcept
+      Create(const QualifiedName &attributeName, Ref<SVGAnimatedTransformList> &animated,
+             svg::AnimationMode animationMode, svg::CalcMode calcMode, bool isAccumulated,
+             bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGAnimatedTransformListAnimator(attributeName, animated, animationMode, calcMode,
                                                             isAccumulated, isAdditive));

@@ -61,20 +61,20 @@ namespace krys::boo::style
     using PhysicalDirection = BoxSide;
     using FlowRelativeDirection = LogicalBoxSide;
 
-    KRYS_NODISCARD dom::Element *StyleElementForNode(dom::Node *node) noexcept
+    KRYS_NODISCARD Element *StyleElementForNode(Node *node) noexcept
     {
       if (!node)
       {
         return nullptr;
       }
-      if (auto *element = DynamicDowncast<dom::Element>(*node))
+      if (auto *element = DynamicDowncast<Element>(*node))
       {
         return element;
       }
       return ComposedTreeAncestors(*node).First();
     }
 
-    KRYS_NODISCARD bool HasValidStyleForProperty(dom::Element &element, css::PropertyId) noexcept
+    KRYS_NODISCARD bool HasValidStyleForProperty(Element &element, css::PropertyId) noexcept
     {
       if (element.StyleValidity() != Validity::Valid)
       {
@@ -91,7 +91,7 @@ namespace krys::boo::style
 
       // FIXME: Animations. A property with a running keyframe effect doesn't have a valid style.
 
-      auto isQueryContainer = [&](dom::Element &element)
+      auto isQueryContainer = [&](Element &element)
       {
         const auto *style = element.GetRenderStyle();
         return style && style->GetContainerType() != ContainerType::Normal;
@@ -127,7 +127,7 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD const RenderStyle *
-      ComputeRenderStyleForProperty(dom::Element &element,
+      ComputeRenderStyleForProperty(Element &element,
                                     const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
                                     css::PropertyId propertyID, UniquePtr<RenderStyle> &ownedStyle) noexcept
     {
@@ -270,23 +270,23 @@ namespace krys::boo::style
     }
   }
 
-  Extractor::Extractor(dom::Node *node,
+  Extractor::Extractor(Node *node,
                        const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
       : Extractor(StyleElementForNode(node), pseudoElementIdentifier)
   {
   }
 
-  Extractor::Extractor(dom::Node *node) noexcept : Extractor(node, null)
+  Extractor::Extractor(Node *node) noexcept : Extractor(node, null)
   {
   }
 
-  Extractor::Extractor(dom::Element *element,
+  Extractor::Extractor(Element *element,
                        const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
       : _element(ShareRefPtr(element)), _pseudoElementIdentifier(pseudoElementIdentifier)
   {
   }
 
-  Extractor::Extractor(dom::Element *element) noexcept : Extractor(element, null)
+  Extractor::Extractor(Element *element) noexcept : Extractor(element, null)
   {
   }
 
@@ -351,7 +351,7 @@ namespace krys::boo::style
     return element->Renderer();
   }
 
-  bool Extractor::UpdateStyleIfNeededForProperty(dom::Element &element, css::PropertyId propertyID) noexcept
+  bool Extractor::UpdateStyleIfNeededForProperty(Element &element, css::PropertyId propertyID) noexcept
   {
     Ref document = ShareRef(element.NodeDocument());
 
@@ -407,7 +407,7 @@ namespace krys::boo::style
     return style;
   }
 
-  RefPtr<css::Value> Extractor::CustomPropertyValue(const css::CSSOMStringAtom &propertyName) const noexcept
+  RefPtr<css::Value> Extractor::CustomPropertyValue(const CSSOMStringAtom &propertyName) const noexcept
   {
     UniquePtr<RenderStyle> ownedStyle;
     const auto *style = ComputeStyleForCustomProperty(ownedStyle);
@@ -425,8 +425,8 @@ namespace krys::boo::style
     return value->PropertyValue(css::ValuePool::MainThreadPool(), *style);
   }
 
-  css::CSSOMString
-    Extractor::CustomPropertyValueSerialisation(const css::CSSOMStringAtom &propertyName,
+  CSSOMString
+    Extractor::CustomPropertyValueSerialisation(const CSSOMStringAtom &propertyName,
                                                 const css::SerialisationContext &context) const noexcept
   {
     UniquePtr<RenderStyle> ownedStyle;
@@ -437,9 +437,9 @@ namespace krys::boo::style
     return {};
   }
 
-  css::CSSOMString
+  CSSOMString
     Extractor::CustomPropertyValueSerialisationInStyle(const RenderStyle &style,
-                                                       const css::CSSOMStringAtom &propertyName,
+                                                       const CSSOMStringAtom &propertyName,
                                                        const css::SerialisationContext &context) noexcept
   {
     if (const auto *value = style.CustomPropertyValue(propertyName))
@@ -475,7 +475,7 @@ namespace krys::boo::style
       const auto *renderer = ComputeRenderer();
       if (propertyID == css::PropertyId::Display && !renderer)
       {
-        auto *svgElement = DynamicDowncast<svg::SVGElement>(*element);
+        auto *svgElement = DynamicDowncast<SVGElement>(*element);
         if (svgElement && !svgElement->IsValid())
         {
           return nullptr;
@@ -533,7 +533,7 @@ namespace krys::boo::style
       valueType == ExtractorState::PropertyValueType::Resolved ? ComputeRenderer() : nullptr, valueType);
   }
 
-  css::CSSOMString
+  CSSOMString
     Extractor::PropertyValueSerialisation(css::PropertyId propertyID,
                                           const css::SerialisationContext &context, UpdateLayout updateLayout,
                                           ExtractorState::PropertyValueType valueType) const noexcept
@@ -586,7 +586,7 @@ namespace krys::boo::style
     return ExtractorGenerated::ExtractValue(state, propertyID);
   }
 
-  css::CSSOMString
+  CSSOMString
     Extractor::PropertyValueSerialisationInStyle(const RenderStyle &style, css::PropertyId propertyID,
                                                  const css::SerialisationContext &context,
                                                  css::ValuePool &pool, const RenderElement *renderer,

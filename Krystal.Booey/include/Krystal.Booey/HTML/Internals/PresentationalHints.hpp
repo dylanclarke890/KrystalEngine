@@ -9,15 +9,14 @@
 namespace krys::boo::html::presentational_hints
 {
   /// @brief Whether the attribute is @p localName in the null namespace.
-  KRYS_NODISCARD inline bool IsAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI,
-                                         dom::DOMStringView expected) noexcept
+  KRYS_NODISCARD inline bool IsAttribute(const DOMStringAtom &localName, const DOMStringAtom &namespaceURI,
+                                         DOMStringView expected) noexcept
   {
     return namespaceURI == null && localName == expected;
   }
 
-  KRYS_NODISCARD inline css::CSSOMString ToCSSOMString(dom::DOMStringView value) noexcept
+  KRYS_NODISCARD inline CSSOMString ToCSSOMString(DOMStringView value) noexcept
   {
-    return css::CSSOMString(value);
+    return CSSOMString(value);
   }
 }

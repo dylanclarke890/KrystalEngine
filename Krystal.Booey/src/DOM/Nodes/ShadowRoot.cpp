@@ -48,14 +48,14 @@
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   ShadowRoot::ShadowRoot(Document &document, RefPtr<html::CustomElementRegistry> &&registry,
-                         NodeFlags flags) noexcept
-      : DocumentFragment(document, flags | NodeFlags::IsShadowRoot),
+                         dom::NodeFlags flags) noexcept
+      : DocumentFragment(document, flags | dom::NodeFlags::IsShadowRoot),
         DocumentOrShadowRoot(*this, krys::move(registry))
   {
-    SetNodeFlag(NodeFlags::IsInShadowTree);
+    SetNodeFlag(dom::NodeFlags::IsInShadowTree);
     _containingShadowRoot = this;
     _styleScope = CreateUnique<style::Scope>(*this);
   }
@@ -68,7 +68,7 @@ namespace krys::boo::dom
     }
 
     // Children are detached without the removing steps, and something else may hold one.
-    for (auto &node : DescendantRange(*this))
+    for (auto &node : dom::DescendantRange(*this))
     {
       node._containingShadowRoot = nullptr;
     }
@@ -76,19 +76,19 @@ namespace krys::boo::dom
 
 #pragma region DocumentOrShadowRoot Mixin (CSSOM)
 
-  css::StyleSheetList &ShadowRoot::StyleSheets() noexcept
+  StyleSheetList &ShadowRoot::StyleSheets() noexcept
   {
     if (!_styleSheetList)
     {
-      _styleSheetList = css::StyleSheetList::Create(*this);
+      _styleSheetList = StyleSheetList::Create(*this);
     }
     return *_styleSheetList;
   }
 
   List<RefPtr<WebAnimation>> ShadowRoot::GetAnimations() noexcept
   {
-    return NodeDocument().MatchingAnimations([&](Element &target) -> bool
-                                             { return TreeQueries::ContainingShadowRoot(target) == this; });
+    return NodeDocument().MatchingAnimations(
+      [&](Element &target) -> bool { return dom::TreeQueries::ContainingShadowRoot(target) == this; });
   }
 
 #pragma endregion
@@ -138,7 +138,7 @@ namespace krys::boo::dom
 
 #pragma region ShadowRoot (DOM Parsing)
 
-  ExceptionOr<void> ShadowRoot::SetHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
+  dom::ExceptionOr<void> ShadowRoot::SetHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // Filter and set HTML given this, html, options, and Safe.
@@ -146,7 +146,8 @@ namespace krys::boo::dom
                                                            html::FragmentParserMode::Safe);
   }
 
-  ExceptionOr<void> ShadowRoot::AppendHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
+  dom::ExceptionOr<void> ShadowRoot::AppendHTML(DOMStringView html,
+                                                const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // Filter and pre-insert HTML given this, null, html, options, and Safe.
@@ -154,7 +155,8 @@ namespace krys::boo::dom
                                                                  html::FragmentParserMode::Safe);
   }
 
-  ExceptionOr<void> ShadowRoot::PrependHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
+  dom::ExceptionOr<void> ShadowRoot::PrependHTML(DOMStringView html,
+                                                 const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // Filter and pre-insert HTML given this, this's first child, html, options, and Safe.
@@ -162,8 +164,8 @@ namespace krys::boo::dom
       *this, FirstChild(), html, &options.Sanitizer, html::FragmentParserMode::Safe);
   }
 
-  ExceptionOr<void> ShadowRoot::SetHTMLUnsafe(DOMStringView html,
-                                              const html::SetHTMLUnsafeOptions &options) noexcept
+  dom::ExceptionOr<void> ShadowRoot::SetHTMLUnsafe(DOMStringView html,
+                                                   const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
@@ -174,8 +176,8 @@ namespace krys::boo::dom
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
-  ExceptionOr<void> ShadowRoot::AppendHTMLUnsafe(DOMStringView html,
-                                                 const html::SetHTMLUnsafeOptions &options) noexcept
+  dom::ExceptionOr<void> ShadowRoot::AppendHTMLUnsafe(DOMStringView html,
+                                                      const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
@@ -187,8 +189,8 @@ namespace krys::boo::dom
       html::FragmentParserMode::Unsafe);
   }
 
-  ExceptionOr<void> ShadowRoot::PrependHTMLUnsafe(DOMStringView html,
-                                                  const html::SetHTMLUnsafeOptions &options) noexcept
+  dom::ExceptionOr<void> ShadowRoot::PrependHTMLUnsafe(DOMStringView html,
+                                                       const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
@@ -200,7 +202,7 @@ namespace krys::boo::dom
       html::FragmentParserMode::Unsafe);
   }
 
-  DOMString ShadowRoot::GetHTML(GetHTMLOptions options) const noexcept
+  DOMString ShadowRoot::GetHTML(dom::GetHTMLOptions options) const noexcept
   {
     return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
                              ResolveURLs::NoExcludingURLsForPrivacy, SerializationSyntax::HTML,
@@ -209,14 +211,14 @@ namespace krys::boo::dom
                              krys::move(options.ShadowRoots));
   }
 
-  ExceptionOr<DOMString> ShadowRoot::InnerHTML() const noexcept
+  dom::ExceptionOr<DOMString> ShadowRoot::InnerHTML() const noexcept
   {
     // The innerHTML getter steps are to return the result of running fragment serializing algorithm steps
     // with this and true.
     return SerializeFragmentRequiringWellFormed(*this, SerializedNodes::SubtreesOfChildren);
   }
 
-  ExceptionOr<void> ShadowRoot::InnerHTML(DOMStringView markup) noexcept
+  dom::ExceptionOr<void> ShadowRoot::InnerHTML(DOMStringView markup) noexcept
   {
     html::CEReactionsScope ceReactions;
     return ReplaceChildrenWithMarkup(markup, {});
@@ -224,13 +226,13 @@ namespace krys::boo::dom
 
 #pragma endregion
 
-  ExceptionOr<void>
+  dom::ExceptionOr<void>
     ShadowRoot::ReplaceChildrenWithMarkup(DOMStringView markup,
-                                          EnumSet<ParserContentPolicy> parserContentPolicy) noexcept
+                                          EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept
   {
     if (markup.empty())
     {
-      return MutationAlgorithms::ReplaceAll(nullptr, *this);
+      return dom::MutationAlgorithms::ReplaceAll(nullptr, *this);
     }
 
     RefPtr<Element> host = ShareRefPtr(Host());
@@ -277,7 +279,7 @@ namespace krys::boo::dom
 
 #pragma endregion
 
-  EventTarget *ShadowRoot::GetParent(Event &event) const noexcept
+  dom::EventTarget *ShadowRoot::GetParent(dom::Event &event) const noexcept
   {
     if (!event.Composed())
     {
@@ -286,7 +288,7 @@ namespace krys::boo::dom
         auto &firstItem = event._path[0];
         if (auto *invocationTargetNode = DynamicDowncast<Node>(firstItem.InvocationTarget()))
         {
-          if (&TreeQueries::Root(*invocationTargetNode) == this)
+          if (&dom::TreeQueries::Root(*invocationTargetNode) == this)
           {
             return nullptr;
           }
@@ -386,13 +388,13 @@ namespace krys::boo::dom
     return *_partMappings;
   }
 
-  List<Ref<ShadowRoot>> AssignedShadowRootsIfSlotted(const Node &node) noexcept
+  List<Ref<ShadowRoot>> dom::AssignedShadowRootsIfSlotted(const Node &node) noexcept
   {
     List<Ref<ShadowRoot>> result;
-    for (auto *slot = SlotAlgorithms::GetAssignedSlot(node); slot;
-         slot = SlotAlgorithms::GetAssignedSlot(*slot))
+    for (auto *slot = dom::SlotAlgorithms::GetAssignedSlot(node); slot;
+         slot = dom::SlotAlgorithms::GetAssignedSlot(*slot))
     {
-      auto *shadowRoot = TreeQueries::ContainingShadowRoot(*slot);
+      auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(*slot);
       krys_debug_assert(shadowRoot);
       result.push_back(ShareRef(*shadowRoot));
     }

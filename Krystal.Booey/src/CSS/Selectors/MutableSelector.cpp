@@ -77,7 +77,7 @@ namespace krys::boo::css
   {
   }
 
-  MutableSelector::MutableSelector(const dom::QualifiedName &tagQualifiedName) noexcept
+  MutableSelector::MutableSelector(const QualifiedName &tagQualifiedName) noexcept
       : _selector(CreateUnique<Selector>(tagQualifiedName))
   {
   }
@@ -258,7 +258,7 @@ namespace krys::boo::css
     PrependComplexSelectorComponent(relation, krys::move(selector));
   }
 
-  void MutableSelector::AppendTagInComplexSelector(const dom::QualifiedName &tagQualifiedName,
+  void MutableSelector::AppendTagInComplexSelector(const QualifiedName &tagQualifiedName,
                                                    bool tagIsForNamespaceRule) noexcept
   {
     // Make the current last selector the second to last.

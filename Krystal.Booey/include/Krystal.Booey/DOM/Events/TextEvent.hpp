@@ -31,10 +31,13 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class DocumentFragment;
+}
 
+namespace krys::boo::dom
+{
   enum class TextEventInputType : uint8
   {
     Keyboard, // any newline characters in the text are line breaks only, not paragraph separators.

@@ -25,7 +25,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGValuePropertyList.hpp"
 #include "Krystal.Booey/SVG/SVGTransform.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @see https://svgwg.org/svg2-draft/coords.html#InterfaceSVGTransformList
   class SVGTransformList final : public SVGValuePropertyList<SVGTransform>
@@ -70,11 +70,11 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD AffineTransform Concatenate() const noexcept;
 
-    void Parse(dom::DOMStringView) noexcept;
+    void Parse(DOMStringView) noexcept;
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override;
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept override;
 
   private:
-    bool ParseGeneric(dom::DOMStringView &buffer, ListReplacement = ListReplacement::Append) noexcept;
+    bool ParseGeneric(DOMStringView &buffer, ListReplacement = ListReplacement::Append) noexcept;
   };
 }

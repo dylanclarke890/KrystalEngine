@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Color/CSSOKLab.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   dom::ExceptionOr<Ref<CSSOKLab>> CSSOKLab::Create(CSSColorPercent lightness, CSSColorNumber a,
                                                    CSSColorNumber b, CSSColorPercent alpha) noexcept

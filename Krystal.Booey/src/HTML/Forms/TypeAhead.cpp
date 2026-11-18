@@ -48,7 +48,7 @@ namespace krys::boo::html
     }
 
     /// @brief @p text's code points, case folded, without its leading white space.
-    KRYS_NODISCARD utf32_string FoldCaseStrippingLeadingWhiteSpace(dom::DOMStringView text) noexcept
+    KRYS_NODISCARD utf32_string FoldCaseStrippingLeadingWhiteSpace(DOMStringView text) noexcept
     {
       utf32_string folded;
       auto *bytes = reinterpret_cast<const uint8_t *>(text.data());
@@ -154,7 +154,7 @@ namespace krys::boo::html
 
     if (matchMode.Contains(MatchMode::MatchIndex))
     {
-      dom::DOMString digits;
+      DOMString digits;
       for (auto bufferChar : _buffer)
       {
         if (bufferChar > 0x7F)

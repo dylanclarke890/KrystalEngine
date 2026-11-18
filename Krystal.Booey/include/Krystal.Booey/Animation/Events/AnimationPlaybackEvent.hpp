@@ -48,12 +48,12 @@ namespace krys::boo
     /// @brief The dictionary its constructor takes.
     using dictionary_type = AnimationPlaybackEventInit;
 
-    AnimationPlaybackEvent(dom::DOMStringAtom type, WebAnimation *animation,
-                           Maybe<WebAnimationTime> scheduledTime, Maybe<WebAnimationTime> timelineTime,
+    AnimationPlaybackEvent(DOMStringAtom type, WebAnimation *animation, Maybe<WebAnimationTime> scheduledTime,
+                           Maybe<WebAnimationTime> timelineTime,
                            Maybe<WebAnimationTime> currentTime) noexcept;
 
     /// @see https://drafts.csswg.org/web-animations-1/#dom-animationplaybackevent-animationplaybackevent
-    explicit AnimationPlaybackEvent(dom::DOMStringAtom type,
+    explicit AnimationPlaybackEvent(DOMStringAtom type,
                                     const AnimationPlaybackEventInit &eventInitDict = {}) noexcept;
 
     ~AnimationPlaybackEvent() noexcept override;

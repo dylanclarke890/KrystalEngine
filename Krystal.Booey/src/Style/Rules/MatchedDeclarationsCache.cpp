@@ -49,7 +49,7 @@ namespace krys::boo::style
 
   MatchedDeclarationsCache::~MatchedDeclarationsCache() noexcept = default;
 
-  bool MatchedDeclarationsCache::IsCacheable(const dom::Element &element, const RenderStyle &style,
+  bool MatchedDeclarationsCache::IsCacheable(const Element &element, const RenderStyle &style,
                                              const RenderStyle &parentStyle) noexcept
   {
     // FIXME: Writing mode and direction properties modify state when applying to document element by calling

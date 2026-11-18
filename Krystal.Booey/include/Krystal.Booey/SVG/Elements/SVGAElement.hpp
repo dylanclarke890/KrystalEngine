@@ -31,7 +31,7 @@ namespace krys::boo::dom
   class DOMTokenList;
 }
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The link types of an `<a>`'s `rel` that change how it's followed.
   enum class SVGALinkRelation : uint8
@@ -40,9 +40,9 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGALinkRelation, 1uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SVGALinkRelation, 1uz);
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<a>` element: a hyperlink around graphics.
   /// @see https://svgwg.org/svg2-draft/linking.html#InterfaceSVGAElement
@@ -58,14 +58,14 @@ namespace krys::boo::svg
     UniquePtr<dom::DOMTokenList> _relList;
 
   public:
-    explicit SVGAElement(dom::Document &document) noexcept;
+    explicit SVGAElement(Document &document) noexcept;
 
     ~SVGAElement() noexcept override;
 
     /// @see https://svgwg.org/svg2-draft/linking.html#__svg__SVGAElement__target
-    KRYS_NODISCARD dom::DOMStringAtom Target() const noexcept
+    KRYS_NODISCARD DOMStringAtom Target() const noexcept
     {
-      return dom::DOMStringAtom {_target->CurrentValue()};
+      return DOMStringAtom {_target->CurrentValue()};
     }
 
     KRYS_NODISCARD Ref<SVGAnimatedString> &TargetAnimated() noexcept
@@ -79,14 +79,14 @@ namespace krys::boo::svg
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGAElement, SVGGraphicsElement, SVGURIReference>;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
 
-    KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &) const noexcept final;
+    KRYS_NODISCARD bool ChildShouldCreateRenderer(const Node &) const noexcept final;
 
     KRYS_NODISCARD bool IsValid() const noexcept final
     {
@@ -105,8 +105,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGAElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGAElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGAElement();
   }

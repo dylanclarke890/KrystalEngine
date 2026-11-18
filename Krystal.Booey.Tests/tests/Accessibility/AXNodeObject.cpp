@@ -98,12 +98,12 @@ namespace krys::boo::ax::tests
     class DefaultSemanticsElement : public html::CustomElement
     {
     public:
-      explicit DefaultSemanticsElement(html::HTMLElement &element) noexcept : CustomElement(element)
+      explicit DefaultSemanticsElement(HTMLElement &element) noexcept : CustomElement(element)
       {
         auto internals = element.AttachInternals();
         REQUIRE_FALSE(internals.HasException());
-        internals.Value()->Role(dom::DOMString(u8"checkbox"));
-        internals.Value()->AriaChecked(dom::DOMString(u8"true"));
+        internals.Value()->Role(DOMString(u8"checkbox"));
+        internals.Value()->AriaChecked(DOMString(u8"true"));
       }
     };
   }
@@ -113,7 +113,7 @@ namespace krys::boo::ax::tests
   {
     html::tests::CustomElementFixture page;
     REQUIRE_FALSE(page.Registry()
-                    .Define(u8"x-check", [](html::HTMLElement &element)
+                    .Define(u8"x-check", [](HTMLElement &element)
                             { return CreateUnique<DefaultSemanticsElement>(element); }, {})
                     .HasException());
     page.Parse(u8"<x-check id=check>Label</x-check><x-check id=overridden role=switch aria-checked=false>"
@@ -178,7 +178,7 @@ namespace krys::boo::ax::tests
     CHECK(page.Object(u8"target").SupportsExpanded());
     CHECK_FALSE(page.Object(u8"target").IsExpanded());
     CHECK(page.Object(u8"command").SupportsExpanded());
-    REQUIRE_FALSE(Downcast<html::HTMLElement>(page.ById(u8"popover")).ShowPopover().HasException());
+    REQUIRE_FALSE(Downcast<HTMLElement>(page.ById(u8"popover")).ShowPopover().HasException());
     CHECK(page.Object(u8"target").IsExpanded());
     CHECK(page.Object(u8"command").IsExpanded());
     // A command that isn't a popover's doesn't make it expandable.
@@ -209,7 +209,7 @@ namespace krys::boo::ax::tests
     CHECK(page.Object(u8"focusable").CanSetFocusAttribute());
 
     CHECK_FALSE(page.Object(u8"button").IsFocused());
-    DynamicDowncast<html::HTMLElement>(page.ById(u8"button"))->Focus();
+    DynamicDowncast<HTMLElement>(page.ById(u8"button"))->Focus();
     CHECK(page.Object(u8"button").IsFocused());
   }
 

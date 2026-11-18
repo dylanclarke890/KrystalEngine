@@ -4,7 +4,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlfontelement
   class HTMLFontElement : public HTMLElement
@@ -12,44 +12,43 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLFontElement);
 
   public:
-    HTMLFontElement(dom::Document &document) noexcept;
+    HTMLFontElement(Document &document) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-font-color
-    KRYS_NODISCARD dom::DOMString Color() const noexcept;
+    KRYS_NODISCARD DOMString Color() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-font-color
-    void Color(dom::DOMString value) noexcept;
+    void Color(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-font-face
-    KRYS_NODISCARD dom::DOMString Face() const noexcept;
+    KRYS_NODISCARD DOMString Face() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-font-face
-    void Face(dom::DOMString value) noexcept;
+    void Face(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-font-size
-    KRYS_NODISCARD dom::DOMString Size() const noexcept;
+    KRYS_NODISCARD DOMString Size() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-font-size
-    void Size(dom::DOMString value) noexcept;
+    void Size(DOMString value) noexcept;
 
     /// @brief The `font-size` keyword for a legacy font size (`1` to `7`, or relative with `+` or `-`).
     /// @see https://html.spec.whatwg.org/#rules-for-parsing-a-legacy-font-size
-    KRYS_NODISCARD static Maybe<css::ValueId> CSSValueFromFontSizeNumber(dom::DOMStringView string) noexcept;
+    KRYS_NODISCARD static Maybe<css::ValueId> CSSValueFromFontSizeNumber(DOMStringView string) noexcept;
 
   protected:
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLFontElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLFontElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLFontElement();
   }

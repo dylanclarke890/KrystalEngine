@@ -9,9 +9,9 @@ namespace krys::boo::html::tests
 {
   namespace
   {
-    Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
+    Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       parser->PumpTokenizer();
@@ -21,7 +21,7 @@ namespace krys::boo::html::tests
 
   TEST_CASE("OpenElementStack parsing children", "[HTML][OpenElementStack][html:the-stack-of-open-elements]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto element = CreateRef<dom::tests::TestElement>(*document);
     REQUIRE(element->IsFinishedParsingChildren());
 
@@ -64,7 +64,7 @@ namespace krys::boo::html::tests
 
     for (auto &element : dom::InclusiveDescendantRange(*document))
     {
-      if (auto *asElement = DynamicDowncast<dom::Element>(&element))
+      if (auto *asElement = DynamicDowncast<Element>(&element))
       {
         REQUIRE(asElement->IsFinishedParsingChildren());
       }
@@ -77,6 +77,6 @@ namespace krys::boo::html::tests
     REQUIRE(Parse(u8"<!DOCTYPE html><p>")->InNoQuirksMode());
     REQUIRE(
       Parse(u8"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"><p>")->InLimitedQuirksMode());
-    REQUIRE(CreateRef<dom::HTMLDocument>()->InNoQuirksMode());
+    REQUIRE(CreateRef<HTMLDocument>()->InNoQuirksMode());
   }
 }

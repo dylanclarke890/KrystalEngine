@@ -4,7 +4,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   /// @brief A CDATA section in an XML document: a Text node that isn't exclusive.
   /// @see https://dom.spec.whatwg.org/#interface-cdatasection
@@ -29,8 +29,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::CDATASection)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CDATASection)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
     return node.IsCDATASectionNode();
   }

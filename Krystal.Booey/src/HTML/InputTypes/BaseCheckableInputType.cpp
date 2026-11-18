@@ -77,9 +77,9 @@ namespace krys::boo::html
     return false;
   }
 
-  Maybe<dom::DOMString> BaseCheckableInputType::FallbackValue() const noexcept
+  Maybe<DOMString> BaseCheckableInputType::FallbackValue() const noexcept
   {
-    return dom::DOMString(u8"on");
+    return DOMString(u8"on");
   }
 
   bool BaseCheckableInputType::StoresValueSeparateFromAttribute() noexcept
@@ -87,11 +87,11 @@ namespace krys::boo::html
     return false;
   }
 
-  void BaseCheckableInputType::SetValue(dom::DOMStringView sanitizedValue, bool, TextFieldEventBehavior,
+  void BaseCheckableInputType::SetValue(DOMStringView sanitizedValue, bool, TextFieldEventBehavior,
                                         TextControlSetValueSelection) noexcept
   {
     krys_debug_assert(Element());
-    (void)Element()->SetAttribute(u8"value", dom::DOMString(sanitizedValue));
+    (void)Element()->SetAttribute(u8"value", DOMString(sanitizedValue));
   }
 
   void BaseCheckableInputType::FireInputAndChangeEvents() noexcept

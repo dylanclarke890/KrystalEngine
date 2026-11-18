@@ -2,12 +2,15 @@
 
 #include "Krystal.Core/Attributes.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLOptionElement;
-  class HTMLSelectedContentElement;
   class HTMLSelectElement;
+  class HTMLSelectedContentElement;
+}
 
+namespace krys::boo::html
+{
   /// @brief The selectedcontent algorithms of selects and options.
   class FormControlAlgorithms
   {

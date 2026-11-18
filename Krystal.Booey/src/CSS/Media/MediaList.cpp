@@ -28,7 +28,7 @@
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   MediaList::MediaList(CSSStyleSheet *parentSheet) noexcept : _parentStyleSheet(CreateWeakPtr(parentSheet))
   {
@@ -62,7 +62,7 @@ namespace krys::boo::css
     return static_cast<uint32>(MediaQueries().size());
   }
 
-  const mq::MediaQueryList &MediaList::MediaQueries() const noexcept
+  const css::mq::MediaQueryList &MediaList::MediaQueries() const noexcept
   {
     if (_detachedMediaQueries)
     {
@@ -79,7 +79,7 @@ namespace krys::boo::css
     return _parentStyleSheet->MediaQueries();
   }
 
-  void MediaList::SetMediaQueries(mq::MediaQueryList &&queries) noexcept
+  void MediaList::SetMediaQueries(css::mq::MediaQueryList &&queries) noexcept
   {
     if (RefPtr parentStyleSheet = _parentStyleSheet.lock())
     {
@@ -102,13 +102,13 @@ namespace krys::boo::css
   CSSOMString MediaList::MediaText() const noexcept
   {
     StringBuilder builder;
-    mq::Serialise(builder, MediaQueries());
+    css::mq::Serialise(builder, MediaQueries());
     return krys::move(builder).ToString();
   }
 
   void MediaList::SetMediaText(const CSSOMString &value) noexcept
   {
-    SetMediaQueries(mq::MediaQueryParser::Parse(value, StrictParserContext()));
+    SetMediaQueries(css::mq::MediaQueryParser::Parse(value, css::StrictParserContext()));
   }
 
   CSSRule *MediaList::ParentRule() const noexcept
@@ -127,7 +127,7 @@ namespace krys::boo::css
     if (index < queries.size())
     {
       StringBuilder builder;
-      mq::Serialise(builder, queries[index]);
+      css::mq::Serialise(builder, queries[index]);
       return krys::move(builder).ToString();
     }
     return {};
@@ -156,7 +156,7 @@ namespace krys::boo::css
       return;
     }
 
-    auto newQuery = mq::MediaQueryParser::Parse(newMedium, StrictParserContext());
+    auto newQuery = css::mq::MediaQueryParser::Parse(newMedium, css::StrictParserContext());
     auto queries = MediaQueries();
     queries.insert(queries.end(), newQuery.begin(), newQuery.end());
     SetMediaQueries(krys::move(queries));

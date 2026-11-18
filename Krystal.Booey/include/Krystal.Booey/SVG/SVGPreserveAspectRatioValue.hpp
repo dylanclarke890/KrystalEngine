@@ -36,7 +36,7 @@ namespace krys::boo::dom
   class ExceptionOr;
 }
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGPreserveAspectRatioValue
   {
@@ -70,7 +70,7 @@ namespace krys::boo::svg
   public:
     SVGPreserveAspectRatioValue() noexcept = default;
 
-    explicit SVGPreserveAspectRatioValue(dom::DOMStringView) noexcept;
+    explicit SVGPreserveAspectRatioValue(DOMStringView) noexcept;
 
     SVGPreserveAspectRatioValue(SVGPreserveAspectRatioType, SVGMeetOrSliceType) noexcept;
 
@@ -96,14 +96,14 @@ namespace krys::boo::svg
                                           float logicalHeight, float physicalWidth,
                                           float physicalHeight) const noexcept;
 
-    bool Parse(dom::DOMStringView) noexcept;
+    bool Parse(DOMStringView) noexcept;
 
-    bool Parse(dom::DOMStringView &buffer, bool validate) noexcept;
+    bool Parse(DOMStringView &buffer, bool validate) noexcept;
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept;
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept;
 
   private:
-    bool ParseInternal(dom::DOMStringView &buffer, bool validate) noexcept;
+    bool ParseInternal(DOMStringView &buffer, bool validate) noexcept;
   };
 
   template <>
@@ -114,19 +114,19 @@ namespace krys::boo::svg
       return SVGPreserveAspectRatioValue();
     }
 
-    KRYS_NODISCARD static SVGPreserveAspectRatioValue FromString(dom::DOMStringView string) noexcept
+    KRYS_NODISCARD static SVGPreserveAspectRatioValue FromString(DOMStringView string) noexcept
     {
       return SVGPreserveAspectRatioValue(string);
     }
 
-    KRYS_NODISCARD static Maybe<SVGPreserveAspectRatioValue> Parse(const dom::QualifiedName &,
-                                                                   dom::DOMStringView) noexcept
+    KRYS_NODISCARD static Maybe<SVGPreserveAspectRatioValue> Parse(const QualifiedName &,
+                                                                   DOMStringView) noexcept
     {
       krys_assert_msg(false, "Not reached");
       return InitialValue();
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(const SVGPreserveAspectRatioValue &type) noexcept
+    KRYS_NODISCARD static DOMString ToString(const SVGPreserveAspectRatioValue &type) noexcept
     {
       return type.ValueAsString();
     }

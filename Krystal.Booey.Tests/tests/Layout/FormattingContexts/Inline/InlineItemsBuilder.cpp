@@ -235,7 +235,7 @@ b	c  d</div>
     </body>)html"};
     (void)fixture.Document->UpdateLayout();
 
-    auto build = [&](dom::DOMStringView id, layout::InlineContentCache &cache)
+    auto build = [&](DOMStringView id, layout::InlineContentCache &cache)
     {
       layout::InlineItemsBuilder(cache, RootBoxOf(fixture, id)).Build({});
     };

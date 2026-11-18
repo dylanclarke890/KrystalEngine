@@ -12,10 +12,10 @@ namespace krys::boo::dom::mixins::tests
     /// @brief A document whose body holds a `div#host` and the elements it refers to, `span#a` and `span#b`.
     struct ReflectionFixture
     {
-      Ref<dom::Document> Document {CreateRef<dom::HTMLDocument>()};
-      Ref<dom::Element> Host {Create(u8"div", u8"host")};
-      Ref<dom::Element> A {Create(u8"span", u8"a")};
-      Ref<dom::Element> B {Create(u8"span", u8"b")};
+      Ref<boo::Document> Document {CreateRef<HTMLDocument>()};
+      Ref<Element> Host {Create(u8"div", u8"host")};
+      Ref<Element> A {Create(u8"span", u8"a")};
+      Ref<Element> B {Create(u8"span", u8"b")};
 
       ReflectionFixture() noexcept
       {
@@ -28,23 +28,22 @@ namespace krys::boo::dom::mixins::tests
         REQUIRE_FALSE(body->AppendChild(*B).HasException());
       }
 
-      KRYS_NODISCARD Ref<dom::Element> Create(dom::DOMStringAtom localName, dom::DOMStringView id) noexcept
+      KRYS_NODISCARD Ref<Element> Create(DOMStringAtom localName, DOMStringView id) noexcept
       {
         auto element = Document->CreateElement(krys::move(localName)).ReleaseValue();
-        REQUIRE_FALSE(element->SetAttribute(u8"id", dom::DOMString(id)).HasException());
+        REQUIRE_FALSE(element->SetAttribute(u8"id", DOMString(id)).HasException());
         return element;
       }
     };
 
     /// @brief The elements of @p elements, null if it is.
-    KRYS_NODISCARD Maybe<List<const dom::Element *>>
-      Raw(const Maybe<List<Ref<dom::Element>>> &elements) noexcept
+    KRYS_NODISCARD Maybe<List<const Element *>> Raw(const Maybe<List<Ref<Element>>> &elements) noexcept
     {
       if (!elements)
       {
         return null;
       }
-      List<const dom::Element *> raw;
+      List<const Element *> raw;
       for (auto &element : *elements)
       {
         raw.push_back(element.get());
@@ -72,8 +71,8 @@ namespace krys::boo::dom::mixins::tests
 
     SECTION("setting sets the attribute, and null removes it")
     {
-      Host->Role(dom::DOMString(u8"button"));
-      Host->AriaPressed(dom::DOMString(u8"mixed"));
+      Host->Role(DOMString(u8"button"));
+      Host->AriaPressed(DOMString(u8"mixed"));
       CHECK(Host->GetAttribute(u8"role") == u8"button");
       CHECK(Host->GetAttribute(u8"aria-pressed") == u8"mixed");
       Host->AriaPressed(null);
@@ -83,7 +82,7 @@ namespace krys::boo::dom::mixins::tests
     SECTION("on elements in any namespace")
     {
       auto svg = Document->CreateElementNS(infra::namespaces::SVG, u8"rect").ReleaseValue();
-      svg->AriaHidden(dom::DOMString(u8"true"));
+      svg->AriaHidden(DOMString(u8"true"));
       CHECK(svg->GetAttribute(u8"aria-hidden") == u8"true");
       CHECK(svg->AriaHidden() == u8"true");
     }
@@ -136,9 +135,9 @@ namespace krys::boo::dom::mixins::tests
     SECTION("the elements whose IDs the attribute holds, skipping the missing ones")
     {
       REQUIRE_FALSE(Host->SetAttribute(u8"aria-labelledby", u8" b missing\ta ").HasException());
-      CHECK(Raw(Host->AriaLabelledByElements()) == List<const dom::Element *> {B.get(), A.get()});
+      CHECK(Raw(Host->AriaLabelledByElements()) == List<const Element *> {B.get(), A.get()});
       REQUIRE_FALSE(Host->SetAttribute(u8"aria-describedby", u8"").HasException());
-      CHECK(Raw(Host->AriaDescribedByElements()) == List<const dom::Element *> {});
+      CHECK(Raw(Host->AriaDescribedByElements()) == List<const Element *> {});
     }
 
     SECTION("only elements in the element's tree")
@@ -147,28 +146,28 @@ namespace krys::boo::dom::mixins::tests
       auto detached = Create(u8"span", u8"c");
       REQUIRE_FALSE(fragment->AppendChild(*detached).HasException());
       REQUIRE_FALSE(Host->SetAttribute(u8"aria-owns", u8"c a").HasException());
-      CHECK(Raw(Host->AriaOwnsElements()) == List<const dom::Element *> {A.get()});
+      CHECK(Raw(Host->AriaOwnsElements()) == List<const Element *> {A.get()});
     }
 
     SECTION("elements set explicitly, until the attribute changes")
     {
-      Host->AriaControlsElements(List<Ref<dom::Element>> {B, A});
+      Host->AriaControlsElements(List<Ref<Element>> {B, A});
       CHECK(Host->GetAttribute(u8"aria-controls") == u8"");
-      CHECK(Raw(Host->AriaControlsElements()) == List<const dom::Element *> {B.get(), A.get()});
+      CHECK(Raw(Host->AriaControlsElements()) == List<const Element *> {B.get(), A.get()});
       REQUIRE_FALSE(Host->SetAttribute(u8"aria-controls", u8"a").HasException());
-      CHECK(Raw(Host->AriaControlsElements()) == List<const dom::Element *> {A.get()});
+      CHECK(Raw(Host->AriaControlsElements()) == List<const Element *> {A.get()});
     }
 
     SECTION("elements set explicitly that leave the tree aren't returned")
     {
-      Host->AriaFlowToElements(List<Ref<dom::Element>> {A, B});
+      Host->AriaFlowToElements(List<Ref<Element>> {A, B});
       REQUIRE_FALSE(A->Remove().HasException());
-      CHECK(Raw(Host->AriaFlowToElements()) == List<const dom::Element *> {B.get()});
+      CHECK(Raw(Host->AriaFlowToElements()) == List<const Element *> {B.get()});
     }
 
     SECTION("null removes the attribute")
     {
-      Host->AriaDetailsElements(List<Ref<dom::Element>> {A});
+      Host->AriaDetailsElements(List<Ref<Element>> {A});
       Host->AriaDetailsElements(null);
       CHECK_FALSE(Host->HasAttribute(u8"aria-details"));
       CHECK_FALSE(Host->AriaDetailsElements());

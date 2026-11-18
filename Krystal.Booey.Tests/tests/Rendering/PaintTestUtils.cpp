@@ -23,7 +23,7 @@ namespace krys::boo::tests
       Frame = LocalFrame::Create();
     }
     Frame->CreateView(ViewSize);
-    Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+    Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
   }
 
   Ref<const display_list::DisplayList> PaintFixture::PaintedDisplayList() noexcept

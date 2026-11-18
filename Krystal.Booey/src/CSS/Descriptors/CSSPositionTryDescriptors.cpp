@@ -29,9 +29,9 @@
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSPositionTryDescriptors::CSSPositionTryDescriptors(MutableStyleProperties &propertySet,
+  CSSPositionTryDescriptors::CSSPositionTryDescriptors(css::MutableStyleProperties &propertySet,
                                                        CSSPositionTryRule &parentRule) noexcept
       : PropertySetCSSDescriptors(propertySet, parentRule)
   {
@@ -39,15 +39,15 @@ namespace krys::boo::css
 
   CSSPositionTryDescriptors::~CSSPositionTryDescriptors() noexcept = default;
 
-  Ref<CSSPositionTryDescriptors> CSSPositionTryDescriptors::Create(MutableStyleProperties &propertySet,
+  Ref<CSSPositionTryDescriptors> CSSPositionTryDescriptors::Create(css::MutableStyleProperties &propertySet,
                                                                    CSSPositionTryRule &parentRule) noexcept
   {
     return AdoptRef(*new CSSPositionTryDescriptors(propertySet, parentRule));
   }
 
-  RuleType CSSPositionTryDescriptors::GetRuleType() const noexcept
+  css::RuleType CSSPositionTryDescriptors::GetRuleType() const noexcept
   {
-    return RuleType::PositionTry;
+    return css::RuleType::PositionTry;
   }
 
 #pragma region Descriptors
@@ -55,437 +55,437 @@ namespace krys::boo::css
   // @position-try 'margin'
   CSSOMString CSSPositionTryDescriptors::Margin() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::Margin);
+    return GetPropertyValueInternal(css::PropertyId::Margin);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMargin(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Margin, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::Margin, value, css::IsImportant::No);
   }
 
   // @position-try 'margin-top'
   CSSOMString CSSPositionTryDescriptors::MarginTop() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::MarginTop);
+    return GetPropertyValueInternal(css::PropertyId::MarginTop);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginTop(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginTop, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::MarginTop, value, css::IsImportant::No);
   }
 
   // @position-try 'margin-right'
   CSSOMString CSSPositionTryDescriptors::MarginRight() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::MarginRight);
+    return GetPropertyValueInternal(css::PropertyId::MarginRight);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginRight(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginRight, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::MarginRight, value, css::IsImportant::No);
   }
 
   // @position-try 'margin-bottom'
   CSSOMString CSSPositionTryDescriptors::MarginBottom() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::MarginBottom);
+    return GetPropertyValueInternal(css::PropertyId::MarginBottom);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginBottom(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginBottom, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::MarginBottom, value, css::IsImportant::No);
   }
 
   // @position-try 'margin-left'
   CSSOMString CSSPositionTryDescriptors::MarginLeft() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::MarginLeft);
+    return GetPropertyValueInternal(css::PropertyId::MarginLeft);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginLeft(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginLeft, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::MarginLeft, value, css::IsImportant::No);
   }
 
   // @position-try 'margin-block'
   CSSOMString CSSPositionTryDescriptors::MarginBlock() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::MarginBlock);
+    return GetPropertyValueInternal(css::PropertyId::MarginBlock);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginBlock(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginBlock, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::MarginBlock, value, css::IsImportant::No);
   }
 
   // @position-try 'margin-block-start'
   CSSOMString CSSPositionTryDescriptors::MarginBlockStart() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::MarginBlockStart);
+    return GetPropertyValueInternal(css::PropertyId::MarginBlockStart);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginBlockStart(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginBlockStart, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::MarginBlockStart, value, css::IsImportant::No);
   }
 
   // @position-try 'margin-block-end'
   CSSOMString CSSPositionTryDescriptors::MarginBlockEnd() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::MarginBlockEnd);
+    return GetPropertyValueInternal(css::PropertyId::MarginBlockEnd);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginBlockEnd(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginBlockEnd, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::MarginBlockEnd, value, css::IsImportant::No);
   }
 
   // @position-try 'margin-inline'
   CSSOMString CSSPositionTryDescriptors::MarginInline() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::MarginInline);
+    return GetPropertyValueInternal(css::PropertyId::MarginInline);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginInline(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginInline, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::MarginInline, value, css::IsImportant::No);
   }
 
   // @position-try 'margin-inline-start'
   CSSOMString CSSPositionTryDescriptors::MarginInlineStart() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::MarginInlineStart);
+    return GetPropertyValueInternal(css::PropertyId::MarginInlineStart);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginInlineStart(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginInlineStart, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::MarginInlineStart, value, css::IsImportant::No);
   }
 
   // @position-try 'margin-inline-end'
   CSSOMString CSSPositionTryDescriptors::MarginInlineEnd() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::MarginInlineEnd);
+    return GetPropertyValueInternal(css::PropertyId::MarginInlineEnd);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginInlineEnd(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginInlineEnd, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::MarginInlineEnd, value, css::IsImportant::No);
   }
 
   // @position-try 'inset'
   CSSOMString CSSPositionTryDescriptors::Inset() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::Inset);
+    return GetPropertyValueInternal(css::PropertyId::Inset);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInset(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Inset, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::Inset, value, css::IsImportant::No);
   }
 
   // @position-try 'inset-block'
   CSSOMString CSSPositionTryDescriptors::InsetBlock() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::InsetBlock);
+    return GetPropertyValueInternal(css::PropertyId::InsetBlock);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInsetBlock(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::InsetBlock, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::InsetBlock, value, css::IsImportant::No);
   }
 
   // @position-try 'inset-block-start'
   CSSOMString CSSPositionTryDescriptors::InsetBlockStart() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::InsetBlockStart);
+    return GetPropertyValueInternal(css::PropertyId::InsetBlockStart);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInsetBlockStart(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::InsetBlockStart, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::InsetBlockStart, value, css::IsImportant::No);
   }
 
   // @position-try 'inset-block-end'
   CSSOMString CSSPositionTryDescriptors::InsetBlockEnd() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::InsetBlockEnd);
+    return GetPropertyValueInternal(css::PropertyId::InsetBlockEnd);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInsetBlockEnd(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::InsetBlockEnd, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::InsetBlockEnd, value, css::IsImportant::No);
   }
 
   // @position-try 'inset-inline'
   CSSOMString CSSPositionTryDescriptors::InsetInline() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::InsetInline);
+    return GetPropertyValueInternal(css::PropertyId::InsetInline);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInsetInline(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::InsetInline, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::InsetInline, value, css::IsImportant::No);
   }
 
   // @position-try 'inset-inline-start'
   CSSOMString CSSPositionTryDescriptors::InsetInlineStart() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::InsetInlineStart);
+    return GetPropertyValueInternal(css::PropertyId::InsetInlineStart);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInsetInlineStart(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::InsetInlineStart, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::InsetInlineStart, value, css::IsImportant::No);
   }
 
   // @position-try 'inset-inline-end'
   CSSOMString CSSPositionTryDescriptors::InsetInlineEnd() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::InsetInlineEnd);
+    return GetPropertyValueInternal(css::PropertyId::InsetInlineEnd);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInsetInlineEnd(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::InsetInlineEnd, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::InsetInlineEnd, value, css::IsImportant::No);
   }
 
   // @position-try 'top'
   CSSOMString CSSPositionTryDescriptors::Top() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::Top);
+    return GetPropertyValueInternal(css::PropertyId::Top);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetTop(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Top, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::Top, value, css::IsImportant::No);
   }
 
   // @position-try 'left'
   CSSOMString CSSPositionTryDescriptors::Left() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::Left);
+    return GetPropertyValueInternal(css::PropertyId::Left);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetLeft(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Left, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::Left, value, css::IsImportant::No);
   }
 
   // @position-try 'right'
   CSSOMString CSSPositionTryDescriptors::Right() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::Right);
+    return GetPropertyValueInternal(css::PropertyId::Right);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetRight(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Right, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::Right, value, css::IsImportant::No);
   }
 
   // @position-try 'bottom'
   CSSOMString CSSPositionTryDescriptors::Bottom() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::Bottom);
+    return GetPropertyValueInternal(css::PropertyId::Bottom);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetBottom(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Bottom, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::Bottom, value, css::IsImportant::No);
   }
 
   // @position-try 'width'
   CSSOMString CSSPositionTryDescriptors::Width() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::Width);
+    return GetPropertyValueInternal(css::PropertyId::Width);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetWidth(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Width, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::Width, value, css::IsImportant::No);
   }
 
   // @position-try 'min-width'
   CSSOMString CSSPositionTryDescriptors::MinWidth() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::MinWidth);
+    return GetPropertyValueInternal(css::PropertyId::MinWidth);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMinWidth(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MinWidth, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::MinWidth, value, css::IsImportant::No);
   }
 
   // @position-try 'max-width'
   CSSOMString CSSPositionTryDescriptors::MaxWidth() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::MaxWidth);
+    return GetPropertyValueInternal(css::PropertyId::MaxWidth);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMaxWidth(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MaxWidth, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::MaxWidth, value, css::IsImportant::No);
   }
 
   // @position-try 'height'
   CSSOMString CSSPositionTryDescriptors::Height() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::Height);
+    return GetPropertyValueInternal(css::PropertyId::Height);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetHeight(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Height, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::Height, value, css::IsImportant::No);
   }
 
   // @position-try 'min-height'
   CSSOMString CSSPositionTryDescriptors::MinHeight() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::MinHeight);
+    return GetPropertyValueInternal(css::PropertyId::MinHeight);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMinHeight(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MinHeight, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::MinHeight, value, css::IsImportant::No);
   }
 
   // @position-try 'max-height'
   CSSOMString CSSPositionTryDescriptors::MaxHeight() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::MaxHeight);
+    return GetPropertyValueInternal(css::PropertyId::MaxHeight);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMaxHeight(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MaxHeight, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::MaxHeight, value, css::IsImportant::No);
   }
 
   // @position-try 'block-size'
   CSSOMString CSSPositionTryDescriptors::BlockSize() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::BlockSize);
+    return GetPropertyValueInternal(css::PropertyId::BlockSize);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetBlockSize(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::BlockSize, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::BlockSize, value, css::IsImportant::No);
   }
 
   // @position-try 'min-block-size'
   CSSOMString CSSPositionTryDescriptors::MinBlockSize() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::MinBlockSize);
+    return GetPropertyValueInternal(css::PropertyId::MinBlockSize);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMinBlockSize(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MinBlockSize, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::MinBlockSize, value, css::IsImportant::No);
   }
 
   // @position-try 'max-block-size'
   CSSOMString CSSPositionTryDescriptors::MaxBlockSize() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::MaxBlockSize);
+    return GetPropertyValueInternal(css::PropertyId::MaxBlockSize);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMaxBlockSize(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MaxBlockSize, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::MaxBlockSize, value, css::IsImportant::No);
   }
 
   // @position-try 'inline-size'
   CSSOMString CSSPositionTryDescriptors::InlineSize() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::InlineSize);
+    return GetPropertyValueInternal(css::PropertyId::InlineSize);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInlineSize(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::InlineSize, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::InlineSize, value, css::IsImportant::No);
   }
 
   // @position-try 'min-inline-size'
   CSSOMString CSSPositionTryDescriptors::MinInlineSize() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::MinInlineSize);
+    return GetPropertyValueInternal(css::PropertyId::MinInlineSize);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMinInlineSize(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MinInlineSize, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::MinInlineSize, value, css::IsImportant::No);
   }
 
   // @position-try 'max-inline-size'
   CSSOMString CSSPositionTryDescriptors::MaxInlineSize() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::MaxInlineSize);
+    return GetPropertyValueInternal(css::PropertyId::MaxInlineSize);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMaxInlineSize(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MaxInlineSize, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::MaxInlineSize, value, css::IsImportant::No);
   }
 
   // @position-try 'place-self'
   CSSOMString CSSPositionTryDescriptors::PlaceSelf() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::PlaceSelf);
+    return GetPropertyValueInternal(css::PropertyId::PlaceSelf);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetPlaceSelf(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::PlaceSelf, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::PlaceSelf, value, css::IsImportant::No);
   }
 
   // @position-try 'align-self'
   CSSOMString CSSPositionTryDescriptors::AlignSelf() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::AlignSelf);
+    return GetPropertyValueInternal(css::PropertyId::AlignSelf);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetAlignSelf(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::AlignSelf, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::AlignSelf, value, css::IsImportant::No);
   }
 
   // @position-try 'justify-self'
   CSSOMString CSSPositionTryDescriptors::JustifySelf() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::JustifySelf);
+    return GetPropertyValueInternal(css::PropertyId::JustifySelf);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetJustifySelf(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::JustifySelf, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::JustifySelf, value, css::IsImportant::No);
   }
 
   // @position-try 'position-anchor'
   CSSOMString CSSPositionTryDescriptors::PositionAnchor() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::PositionAnchor);
+    return GetPropertyValueInternal(css::PropertyId::PositionAnchor);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetPositionAnchor(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::PositionAnchor, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::PositionAnchor, value, css::IsImportant::No);
   }
 
   // @position-try 'position-area'
   CSSOMString CSSPositionTryDescriptors::PositionArea() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::PositionArea);
+    return GetPropertyValueInternal(css::PropertyId::PositionArea);
   }
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetPositionArea(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::PositionArea, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::PositionArea, value, css::IsImportant::No);
   }
 
 #pragma endregion
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetPropertyInternal(PropertyId property,
+  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetPropertyInternal(css::PropertyId property,
                                                                         const CSSOMString &value,
-                                                                        IsImportant important) noexcept
+                                                                        css::IsImportant important) noexcept
   {
     auto result = PropertySetCSSDescriptors::SetPropertyInternal(property, value, important);
 

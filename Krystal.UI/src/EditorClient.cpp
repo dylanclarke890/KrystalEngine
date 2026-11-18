@@ -165,7 +165,7 @@ namespace krys::ui
 
   bool EditorClient::HandleKeyboardEvent(boo::dom::KeyboardEvent &event) noexcept
   {
-    auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
+    auto *node = DynamicDowncast<boo::Node>(event.Target().get());
     if (!node)
     {
       return false;
@@ -229,7 +229,7 @@ namespace krys::ui
     }
   }
 
-  void EditorClient::DiscardedComposition(const boo::dom::Document &) noexcept
+  void EditorClient::DiscardedComposition(const boo::Document &) noexcept
   {
     if (_discardedCompositionHandler)
     {
@@ -250,7 +250,7 @@ namespace krys::ui
   {
     auto *platformEvent = event.UnderlyingPlatformEvent();
     krys_debug_assert(event.Target());
-    auto &editor = Downcast<boo::dom::Node>(*event.Target()).NodeDocument().GetEditor();
+    auto &editor = Downcast<boo::Node>(*event.Target()).NodeDocument().GetEditor();
 
     if (const auto &underlines = platformEvent->PreeditUnderlines())
     {
@@ -264,7 +264,7 @@ namespace krys::ui
     }
   }
 
-  void EditorClient::SetInputMethodState(boo::dom::Element *element) noexcept
+  void EditorClient::SetInputMethodState(boo::Element *element) noexcept
   {
     _acceptsTextInput = element && element->ShouldUseInputMethod();
   }

@@ -68,8 +68,8 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("Node.nodeName: a Text's is #text", "[DOM][Text][dom:dom-node-nodename]")
   {
-    auto doc = CreateRef<dom::Document>();
-    auto textNode = CreateRef<dom::Text>(*doc, u8"Hello, world!");
+    auto doc = CreateRef<Document>();
+    auto textNode = CreateRef<Text>(*doc, u8"Hello, world!");
 
     REQUIRE(textNode->NodeName() == u8"#text");
   }
@@ -77,8 +77,8 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.nodeType: a Text is a TEXT_NODE",
             "[DOM][Text][dom:dom-node-nodetype][dom:dom-node-text_node]")
   {
-    auto doc = CreateRef<dom::Document>();
-    auto textNode = CreateRef<dom::Text>(*doc, u8"Hello, world!");
+    auto doc = CreateRef<Document>();
+    auto textNode = CreateRef<Text>(*doc, u8"Hello, world!");
 
     REQUIRE(textNode->NodeType() == NodeType::TEXT_NODE);
   }

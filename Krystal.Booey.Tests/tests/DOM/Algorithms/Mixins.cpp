@@ -15,7 +15,7 @@
 namespace krys::boo::dom::tests
 {
   template <typename T>
-  concept NonElementParentNodeMixin = requires(T &node, const T &constNode, dom::DOMStringView id) {
+  concept NonElementParentNodeMixin = requires(T &node, const T &constNode, DOMStringView id) {
     { node.GetElementById(id) } -> SameType<RefPtr<Element>>;
     { constNode.GetElementById(id) } -> SameType<RefPtr<const Element>>;
   };
@@ -39,7 +39,7 @@ namespace krys::boo::dom::tests
 
   template <typename T>
   concept ParentNodeMixin = requires(T &node, const T &constNode, const List<NodeOrString> &nodes,
-                                     Node *optionalNode, dom::DOMString selectors) {
+                                     Node *optionalNode, DOMString selectors) {
     { node.Children() } -> SameType<Ref<HTMLCollection>>;
     { constNode.FirstElementChild() } -> SameType<RefPtr<const Element>>;
     { node.FirstElementChild() } -> SameType<RefPtr<Element>>;
@@ -97,12 +97,12 @@ namespace krys::boo::dom::tests
 
   template <typename T>
   concept SlottableMixin = requires(T &node) {
-    { node.AssignedSlot() } -> SameType<RefPtr<html::HTMLSlotElement>>;
+    { node.AssignedSlot() } -> SameType<RefPtr<HTMLSlotElement>>;
   };
 
   TEST_CASE("Mixin::Slottable", "[HTML][Mixins][dom:mixin-slotable]")
   {
     STATIC_REQUIRE(SlottableMixin<Element>);
-    STATIC_REQUIRE(SlottableMixin<krys::boo::dom::Text>);
+    STATIC_REQUIRE(SlottableMixin<krys::boo::Text>);
   }
 }

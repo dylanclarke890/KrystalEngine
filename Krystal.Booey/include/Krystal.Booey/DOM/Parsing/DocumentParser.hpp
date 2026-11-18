@@ -58,7 +58,7 @@ namespace krys::boo::dom
     virtual void Finish() noexcept = 0;
 
     // Document() will return null after Detach() is called.
-    KRYS_NODISCARD dom::Document *Document() const noexcept
+    KRYS_NODISCARD boo::Document *Document() const noexcept
     {
       krys_debug_assert(_document);
       return _document.get();
@@ -102,6 +102,6 @@ namespace krys::boo::dom
     virtual void Detach() noexcept;
 
   protected:
-    explicit DocumentParser(dom::Document &document) noexcept;
+    explicit DocumentParser(boo::Document &document) noexcept;
   };
 }

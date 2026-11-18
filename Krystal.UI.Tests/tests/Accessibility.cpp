@@ -291,7 +291,7 @@ namespace krys::ui::tests
     SECTION("Actions")
     {
       CHECK(tree.PerformAction(box, pal::AccessibilityAction::Press));
-      CHECK(Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"box")).Checked());
+      CHECK(Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"box")).Checked());
       CHECK(tree.Node(box).value().States.Contains(pal::AccessibilityState::Checked));
 
       CHECK(tree.PerformAction(field, pal::AccessibilityAction::Focus));
@@ -302,7 +302,7 @@ namespace krys::ui::tests
       CHECK(window.HasEvent(field, pal::AccessibilityEvent::Focused));
 
       CHECK(tree.SetValue(field, u8"Changed"));
-      CHECK(Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"field")).Value()
+      CHECK(Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"field")).Value()
             == u8"Changed");
 
       CHECK(tree.SetRangeValue(range, 8));
@@ -687,7 +687,7 @@ namespace krys::ui::tests
       BSTR changed = ::SysAllocString(L"Changed");
       CHECK(SUCCEEDED(value->SetValue(changed)));
       ::SysFreeString(changed);
-      CHECK(Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"field")).Value()
+      CHECK(Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"field")).Value()
             == u8"Changed");
 
       ComRef<IUIAutomationTextPattern> textPattern;

@@ -27,9 +27,13 @@
 
 #include "Krystal.Core/Numeric.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
+}
+
+namespace krys::boo::dom
+{
   class Event;
 
   enum class SimulatedClickMouseEventOptions : uint8

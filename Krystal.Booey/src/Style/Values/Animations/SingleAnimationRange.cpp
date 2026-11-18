@@ -46,7 +46,7 @@ namespace krys::boo::style
     return *this == DefaultValue(type);
   }
 
-  KRYS_NODISCARD static RefPtr<css::CSSNumericValue>
+  KRYS_NODISCARD static RefPtr<CSSNumericValue>
     ToCSSNumericValue(const SingleAnimationRangeLength &offset) noexcept
   {
     // FIXME: A calculated offset (calc()) has no numeric value yet, so it's left out.
@@ -55,9 +55,8 @@ namespace krys::boo::style
       return nullptr;
     }
     return offset.IsPercent()
-             ? RefPtr<css::CSSNumericValue> {css::CSSNumericFactory::Percent(offset.TryPercentage()->Value)}
-             : RefPtr<css::CSSNumericValue> {
-                 css::CSSNumericFactory::Px(offset.TryFixed()->ResolveZoom(ZoomNeeded {}))};
+             ? RefPtr<CSSNumericValue> {CSSNumericFactory::Percent(offset.TryPercentage()->Value)}
+             : RefPtr<CSSNumericValue> {CSSNumericFactory::Px(offset.TryFixed()->ResolveZoom(ZoomNeeded {}))};
   }
 
   TimelineRangeValue SingleAnimationRangeStart::ToTimelineRangeValue() const noexcept
@@ -166,7 +165,7 @@ namespace krys::boo::style
 
   template <typename Edge>
   KRYS_NODISCARD static Maybe<Edge>
-    DeprecatedConvertSingleAnimationRangeEdge(const RefPtr<dom::Element> &element,
+    DeprecatedConvertSingleAnimationRangeEdge(const RefPtr<Element> &element,
                                               const css::Value &value) noexcept
   {
     if (const auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value))
@@ -224,14 +223,14 @@ namespace krys::boo::style
   }
 
   Maybe<SingleAnimationRangeStart>
-    DeprecatedCSSValueConversion<SingleAnimationRangeStart>::operator()(const RefPtr<dom::Element> &element,
+    DeprecatedCSSValueConversion<SingleAnimationRangeStart>::operator()(const RefPtr<Element> &element,
                                                                         const css::Value &value) noexcept
   {
     return DeprecatedConvertSingleAnimationRangeEdge<SingleAnimationRangeStart>(element, value);
   }
 
   Maybe<SingleAnimationRangeEnd>
-    DeprecatedCSSValueConversion<SingleAnimationRangeEnd>::operator()(const RefPtr<dom::Element> &element,
+    DeprecatedCSSValueConversion<SingleAnimationRangeEnd>::operator()(const RefPtr<Element> &element,
                                                                       const css::Value &value) noexcept
   {
     return DeprecatedConvertSingleAnimationRangeEdge<SingleAnimationRangeEnd>(element, value);

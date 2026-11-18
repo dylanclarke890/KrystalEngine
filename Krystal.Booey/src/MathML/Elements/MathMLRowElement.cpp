@@ -27,9 +27,9 @@
 #include "Krystal.Booey/MathML/Elements/MathMLOperatorElement.hpp"
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLRow.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
-  MathMLRowElement::MathMLRowElement(dom::Document &document, MathMLElementInterface interface,
+  MathMLRowElement::MathMLRowElement(Document &document, MathMLElementInterface interface,
                                      dom::NodeFlags nodeFlags) noexcept
       : MathMLPresentationElement(document, interface, nodeFlags)
   {

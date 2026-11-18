@@ -17,7 +17,7 @@ namespace krys::boo::tests
   {
     using namespace std::chrono_literals;
 
-    KRYS_NODISCARD InputKeyframe Opacity(KeyframeOffset offset, dom::DOMString value) noexcept
+    KRYS_NODISCARD InputKeyframe Opacity(KeyframeOffset offset, DOMString value) noexcept
     {
       InputKeyframe keyframe;
       keyframe.Offset = krys::move(offset);
@@ -31,7 +31,7 @@ namespace krys::boo::tests
     }
 
     KRYS_NODISCARD Ref<WebAnimation>
-      Animate(dom::Element &element, KeyframesInput &&keyframes,
+      Animate(Element &element, KeyframesInput &&keyframes,
               Maybe<Variant<double, KeyframeAnimationOptions>> &&options = 1'000.0)
     {
       auto result = element.Animate(krys::move(keyframes), krys::move(options));

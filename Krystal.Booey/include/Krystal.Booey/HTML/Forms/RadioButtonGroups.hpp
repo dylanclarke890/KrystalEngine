@@ -28,9 +28,13 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLInputElement;
+}
+
+namespace krys::boo::html
+{
   class RadioButtonGroup;
 
   /// @brief The radio button groups of a form, or of a tree's radio buttons without a form, by name.
@@ -40,7 +44,7 @@ namespace krys::boo::html
     KRYS_NON_COPY_MOVABLE(RadioButtonGroups);
 
   private:
-    using NameToGroupMap = HashMap<dom::DOMStringAtom, UniquePtr<RadioButtonGroup>>;
+    using NameToGroupMap = HashMap<DOMStringAtom, UniquePtr<RadioButtonGroup>>;
 
     NameToGroupMap _nameToGroupMap;
 
@@ -59,8 +63,7 @@ namespace krys::boo::html
 
     void RemoveButton(HTMLInputElement &element) noexcept;
 
-    KRYS_NODISCARD RefPtr<HTMLInputElement>
-      CheckedButtonForGroup(dom::DOMStringView groupName) const noexcept;
+    KRYS_NODISCARD RefPtr<HTMLInputElement> CheckedButtonForGroup(DOMStringView groupName) const noexcept;
 
     KRYS_NODISCARD bool HasCheckedButton(const HTMLInputElement &element) const noexcept;
 
@@ -70,6 +73,6 @@ namespace krys::boo::html
     KRYS_NODISCARD List<Ref<HTMLInputElement>> GroupMembers(const HTMLInputElement &element) const noexcept;
 
   private:
-    KRYS_NODISCARD RadioButtonGroup *Find(dom::DOMStringView name) const noexcept;
+    KRYS_NODISCARD RadioButtonGroup *Find(DOMStringView name) const noexcept;
   };
 }

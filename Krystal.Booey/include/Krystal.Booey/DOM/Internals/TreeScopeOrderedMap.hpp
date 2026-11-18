@@ -37,11 +37,14 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class Element;
+}
 
+namespace krys::boo::dom
+{
   /// @brief The elements of a tree scope under a key, such as their ID. The first in tree order, and all of
   /// them in tree order, are found by walking the tree only when more than one has the key and they aren't
   /// known already.

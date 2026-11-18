@@ -54,7 +54,7 @@ namespace krys::boo::style
   struct ZoomNeeded;
 }
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGElement;
 

@@ -5,47 +5,47 @@
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLFontElement::HTMLFontElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Font)
+  HTMLFontElement::HTMLFontElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Font)
   {
   }
 
-  dom::DOMString HTMLFontElement::Color() const noexcept
+  DOMString HTMLFontElement::Color() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"color").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"color").value_or(u8"");
   }
 
-  void HTMLFontElement::Color(dom::DOMString value) noexcept
+  void HTMLFontElement::Color(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"color", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"color", krys::move(value));
   }
 
-  dom::DOMString HTMLFontElement::Face() const noexcept
+  DOMString HTMLFontElement::Face() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"face").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"face").value_or(u8"");
   }
 
-  void HTMLFontElement::Face(dom::DOMString value) noexcept
+  void HTMLFontElement::Face(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"face", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"face", krys::move(value));
   }
 
-  dom::DOMString HTMLFontElement::Size() const noexcept
+  DOMString HTMLFontElement::Size() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"size").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"size").value_or(u8"");
   }
 
-  void HTMLFontElement::Size(dom::DOMString value) noexcept
+  void HTMLFontElement::Size(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"size", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"size", krys::move(value));
   }
 
   namespace
   {
     // https://html.spec.whatwg.org/#rules-for-parsing-a-legacy-font-size
-    KRYS_NODISCARD Maybe<int32> ParseFontSize(dom::DOMStringView input) noexcept
+    KRYS_NODISCARD Maybe<int32> ParseFontSize(DOMStringView input) noexcept
     {
       // 1. Let input be the attribute's value.
       // 2. Let position be a pointer into input, initially pointing at the start of the string.
@@ -150,7 +150,7 @@ namespace krys::boo::html
     }
   }
 
-  Maybe<css::ValueId> HTMLFontElement::CSSValueFromFontSizeNumber(dom::DOMStringView string) noexcept
+  Maybe<css::ValueId> HTMLFontElement::CSSValueFromFontSizeNumber(DOMStringView string) noexcept
   {
     auto number = ParseFontSize(string);
     if (!number)
@@ -193,9 +193,8 @@ namespace krys::boo::html
     }
   }
 
-  bool
-    HTMLFontElement::HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                        const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool HTMLFontElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                           const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && (localName == u8"size" || localName == u8"color" || localName == u8"face"))
     {
@@ -204,12 +203,12 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLFontElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                               const dom::DOMStringAtom &namespaceURI,
-                                                               dom::DOMStringView value,
+  void HTMLFontElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                               const DOMStringAtom &namespaceURI,
+                                                               DOMStringView value,
                                                                css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
@@ -232,8 +231,7 @@ namespace krys::boo::html
     {
       if (!value.empty())
       {
-        if (auto fontFaceValue =
-              css::ValuePool::MainThreadPool().CreateFontFaceValue(css::CSSOMStringAtom(value)))
+        if (auto fontFaceValue = css::ValuePool::MainThreadPool().CreateFontFaceValue(CSSOMStringAtom(value)))
         {
           style.SetProperty(css::PropertyId::FontFamily, krys::move(fontFaceValue));
         }

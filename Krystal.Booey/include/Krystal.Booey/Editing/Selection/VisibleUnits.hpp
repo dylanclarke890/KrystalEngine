@@ -158,9 +158,9 @@ namespace krys::boo
   KRYS_NODISCARD bool IsEndOfBlock(const VisiblePosition &position) noexcept;
 
   // document
-  KRYS_NODISCARD VisiblePosition StartOfDocument(const dom::Node *node) noexcept;
+  KRYS_NODISCARD VisiblePosition StartOfDocument(const Node *node) noexcept;
 
-  KRYS_NODISCARD VisiblePosition EndOfDocument(const dom::Node *node) noexcept;
+  KRYS_NODISCARD VisiblePosition EndOfDocument(const Node *node) noexcept;
 
   KRYS_NODISCARD VisiblePosition StartOfDocument(const VisiblePosition &position) noexcept;
 
@@ -215,13 +215,11 @@ namespace krys::boo
     ForwardSearchForBoundaryWithTextIterator(TextIterator &it, utf8_string &string, uint32 prefixLength,
                                              BoundarySearchFunction searchFunction) noexcept;
 
-  KRYS_NODISCARD RefPtr<dom::Node>
-    FindStartOfParagraph(dom::Node *startNode, dom::Node *highestRoot, dom::Node *startBlock, int32 &offset,
-                         dom::Position::AnchorType &type,
-                         EditingBoundaryCrossingRule boundaryCrossingRule) noexcept;
+  KRYS_NODISCARD RefPtr<Node> FindStartOfParagraph(Node *startNode, Node *highestRoot, Node *startBlock,
+                                                   int32 &offset, dom::Position::AnchorType &type,
+                                                   EditingBoundaryCrossingRule boundaryCrossingRule) noexcept;
 
-  KRYS_NODISCARD RefPtr<dom::Node>
-    FindEndOfParagraph(dom::Node *startNode, dom::Node *highestRoot, dom::Node *stayInsideBlock,
-                       int32 &offset, dom::Position::AnchorType &type,
-                       EditingBoundaryCrossingRule boundaryCrossingRule) noexcept;
+  KRYS_NODISCARD RefPtr<Node> FindEndOfParagraph(Node *startNode, Node *highestRoot, Node *stayInsideBlock,
+                                                 int32 &offset, dom::Position::AnchorType &type,
+                                                 EditingBoundaryCrossingRule boundaryCrossingRule) noexcept;
 }

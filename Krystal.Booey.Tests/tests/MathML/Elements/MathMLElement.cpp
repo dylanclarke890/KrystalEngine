@@ -18,7 +18,7 @@ namespace krys::boo::mathml::tests
       auto document = ResolverFixture::Parse(krys::move(markup));
       auto element = document->GetElementById(u8"e");
       krys_assert(element);
-      const auto *style = Downcast<dom::StyledElement>(*element).PresentationalHintStyle();
+      const auto *style = Downcast<StyledElement>(*element).PresentationalHintStyle();
       return style ? css::tests::ToNarrow(style->AsText(css::DefaultSerialisationContext())) : std::string {};
     }
   }
@@ -71,7 +71,7 @@ namespace krys::boo::mathml::tests
                                            u8"<mtd id=b columnspan=0 rowspan=x></mtd>"
                                            u8"<mtd id=c rowspan=70000></mtd></mtr></mtable>"
                                            u8"<mrow id=d columnspan=3 rowspan=2></mrow></math>");
-    auto span = [&](dom::DOMStringView id)
+    auto span = [&](DOMStringView id)
     {
       auto &element = Downcast<MathMLElement>(*document->GetElementById(id));
       return std::pair {element.ColSpan(), element.RowSpan()};

@@ -34,7 +34,7 @@
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   Ref<DeclaredStylePropertyMap> DeclaredStylePropertyMap::Create(CSSStyleRule &ownerRule) noexcept
   {
@@ -48,12 +48,12 @@ namespace krys::boo::css
 
   DeclaredStylePropertyMap::~DeclaredStylePropertyMap() noexcept = default;
 
-  StyleRule *DeclaredStylePropertyMap::GetStyleRule() const noexcept
+  css::StyleRule *DeclaredStylePropertyMap::GetStyleRule() const noexcept
   {
     return _ownerRule ? &_ownerRule->GetStyleRule() : nullptr;
   }
 
-  dom::Document *DeclaredStylePropertyMap::Document() const noexcept
+  boo::Document *DeclaredStylePropertyMap::Document() const noexcept
   {
     auto *sheet = _ownerRule ? _ownerRule->ParentStyleSheet() : nullptr;
     return sheet ? sheet->OwnerDocument() : nullptr;
@@ -78,30 +78,33 @@ namespace krys::boo::css
     {
       entries.push_back(Entry {
         property.CssName(),
-        ReifyValueToList(*document, ShareRefPtr(const_cast<Value *>(property.Value())), property.Id())});
+        ReifyValueToList(*document, ShareRefPtr(const_cast<css::Value *>(property.Value())), property.Id())});
     }
     return entries;
   }
 
-  RefPtr<Value> DeclaredStylePropertyMap::PropertyValue(PropertyId property) const noexcept
+  RefPtr<css::Value> DeclaredStylePropertyMap::PropertyValue(css::PropertyId property) const noexcept
   {
     auto *styleRule = GetStyleRule();
     return styleRule ? styleRule->Properties().GetPropertyCSSValue(property) : nullptr;
   }
 
-  CSSOMString DeclaredStylePropertyMap::ShorthandPropertySerialisation(PropertyId property) const noexcept
+  CSSOMString
+    DeclaredStylePropertyMap::ShorthandPropertySerialisation(css::PropertyId property) const noexcept
   {
     auto *styleRule = GetStyleRule();
     return styleRule ? styleRule->Properties().GetPropertyValue(property) : CSSOMString();
   }
 
-  RefPtr<Value> DeclaredStylePropertyMap::CustomPropertyValue(const CSSOMStringAtom &property) const noexcept
+  RefPtr<css::Value>
+    DeclaredStylePropertyMap::CustomPropertyValue(const CSSOMStringAtom &property) const noexcept
   {
     auto *styleRule = GetStyleRule();
     return styleRule ? styleRule->Properties().GetCustomPropertyCSSValue(property.View()) : nullptr;
   }
 
-  bool DeclaredStylePropertyMap::SetShorthandProperty(PropertyId property, const CSSOMString &value) noexcept
+  bool DeclaredStylePropertyMap::SetShorthandProperty(css::PropertyId property,
+                                                      const CSSOMString &value) noexcept
   {
     if (!_ownerRule)
     {
@@ -112,11 +115,11 @@ namespace krys::boo::css
     auto *styleRule = GetStyleRule();
     bool didFailParsing = false;
     std::ignore =
-      styleRule->MutableProperties().SetProperty(property, value, IsImportant::No, &didFailParsing);
+      styleRule->MutableProperties().SetProperty(property, value, css::IsImportant::No, &didFailParsing);
     return !didFailParsing;
   }
 
-  bool DeclaredStylePropertyMap::SetProperty(PropertyId property, Ref<Value> value) noexcept
+  bool DeclaredStylePropertyMap::SetProperty(css::PropertyId property, Ref<css::Value> value) noexcept
   {
     if (!_ownerRule)
     {
@@ -127,12 +130,12 @@ namespace krys::boo::css
     auto *styleRule = GetStyleRule();
     bool didFailParsing = false;
     std::ignore = styleRule->MutableProperties().SetProperty(
-      property, value->CssText(DefaultSerialisationContext()), IsImportant::No, &didFailParsing);
+      property, value->CssText(css::DefaultSerialisationContext()), css::IsImportant::No, &didFailParsing);
     return !didFailParsing;
   }
 
   bool DeclaredStylePropertyMap::SetCustomProperty(const CSSOMStringAtom &property,
-                                                   Ref<VariableReferenceValue> value) noexcept
+                                                   Ref<css::VariableReferenceValue> value) noexcept
   {
     if (!_ownerRule)
     {
@@ -141,12 +144,12 @@ namespace krys::boo::css
     // The scope may copy the sheet's contents before they change, so the rule is found after it.
     CSSStyleSheet::RuleMutationScope mutationScope(_ownerRule.get());
     auto *styleRule = GetStyleRule();
-    std::ignore = styleRule->MutableProperties().AddParsedProperty(
-      Property(PropertyId::Custom, CustomPropertyValue::CreateUnresolved(property, krys::move(value))));
+    std::ignore = styleRule->MutableProperties().AddParsedProperty(css::Property(
+      css::PropertyId::Custom, css::CustomPropertyValue::CreateUnresolved(property, krys::move(value))));
     return true;
   }
 
-  void DeclaredStylePropertyMap::RemoveProperty(PropertyId property) noexcept
+  void DeclaredStylePropertyMap::RemoveProperty(css::PropertyId property) noexcept
   {
     if (!_ownerRule)
     {

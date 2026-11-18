@@ -33,7 +33,7 @@
 
 namespace krys::boo
 {
-  RenderButton::RenderButton(html::HTMLFormControlElement &element, RenderStyle &&style) noexcept
+  RenderButton::RenderButton(HTMLFormControlElement &element, RenderStyle &&style) noexcept
       : RenderFlexibleBox(Type::Button, element, krys::move(style))
   {
     krys_debug_assert(IsRenderButton());
@@ -41,9 +41,9 @@ namespace krys::boo
 
   RenderButton::~RenderButton() noexcept = default;
 
-  html::HTMLFormControlElement &RenderButton::FormControlElement() const noexcept
+  HTMLFormControlElement &RenderButton::FormControlElement() const noexcept
   {
-    return Downcast<html::HTMLFormControlElement>(NodeForNonAnonymous());
+    return Downcast<HTMLFormControlElement>(NodeForNonAnonymous());
   }
 
   bool RenderButton::CanBeSelectionLeaf() const noexcept
@@ -53,7 +53,7 @@ namespace krys::boo
 
   bool RenderButton::HasLineIfEmpty() const noexcept
   {
-    return Is<html::HTMLInputElement>(FormControlElement());
+    return Is<HTMLInputElement>(FormControlElement());
   }
 
   void RenderButton::SetInnerRenderer(RenderBlock &innerRenderer) noexcept
@@ -108,7 +108,7 @@ namespace krys::boo
   void RenderButton::UpdateFromElement() noexcept
   {
     // If we're an input element, we may need to change our button text.
-    if (auto *input = DynamicDowncast<html::HTMLInputElement>(FormControlElement()))
+    if (auto *input = DynamicDowncast<HTMLInputElement>(FormControlElement()))
     {
       auto value = input->ValueWithDefault();
       SetText(value);
@@ -168,7 +168,7 @@ namespace krys::boo
     // Input elements can't have generated children, but button elements can. We'll
     // write the code assuming any other button types that might emerge in the future
     // can also have children.
-    return !Is<html::HTMLInputElement>(FormControlElement());
+    return !Is<HTMLInputElement>(FormControlElement());
   }
 
   LayoutRect RenderButton::ControlClipRect(const LayoutPoint &additionalOffset) const noexcept
@@ -181,6 +181,6 @@ namespace krys::boo
   // Only clip overflow on input elements, to match other browsers.
   bool RenderButton::HasControlClip() const noexcept
   {
-    return Is<html::HTMLInputElement>(FormControlElement());
+    return Is<HTMLInputElement>(FormControlElement());
   }
 }

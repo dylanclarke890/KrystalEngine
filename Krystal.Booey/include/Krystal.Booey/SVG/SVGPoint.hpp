@@ -32,7 +32,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGValueProperty.hpp"
 #include "Krystal.Booey/SVG/SVGMatrix.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The deprecated alias of `DOMPoint` that SVG's interfaces still use.
   /// @see https://svgwg.org/svg2-draft/shapes.html#InterfaceSVGPointList
@@ -104,7 +104,7 @@ namespace krys::boo::svg
     }
 
   private:
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept override
     {
       return SVGPropertyTraits<FloatPoint>::ToString(_value);
     }

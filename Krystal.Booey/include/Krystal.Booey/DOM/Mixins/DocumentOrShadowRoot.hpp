@@ -37,18 +37,22 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
+namespace krys::boo
+{
+  class CSSStyleSheet;
+  class CSSStyleSheetObservableArray;
+  class ContainerNode;
+  class Element;
+  class HTMLMapElement;
+  class LegacyRenderSVGResourceContainer;
+  class SVGElement;
+}
+
 namespace krys::boo::html
 {
   class CustomElementAlgorithms;
   class CustomElementRegistry;
-  class HTMLMapElement;
   class RadioButtonGroups;
-}
-
-namespace krys::boo::css
-{
-  class CSSStyleSheet;
-  class CSSStyleSheetObservableArray;
 }
 
 namespace krys::boo::style
@@ -56,21 +60,9 @@ namespace krys::boo::style
   class Scope;
 }
 
-namespace krys::boo
-{
-  class LegacyRenderSVGResourceContainer;
-}
-
-namespace krys::boo::svg
-{
-  class SVGElement;
-}
-
 namespace krys::boo::dom
 {
-  class ContainerNode;
   class DocumentAlgorithms;
-  class Element;
   class IdTargetObserverRegistry;
   class NodeAlgorithms;
   struct SVGResourcesMap;
@@ -96,7 +88,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#document-custom-element-registry
     /// @see https://dom.spec.whatwg.org/#shadowroot-custom-element-registry
     RefPtr<html::CustomElementRegistry> _customElementRegistry;
-    UniquePtr<css::CSSStyleSheetObservableArray> _adoptedStyleSheets;
+    UniquePtr<CSSStyleSheetObservableArray> _adoptedStyleSheets;
     UniquePtr<dom::IdTargetObserverRegistry> _idTargetObserverRegistry;
     UniquePtr<TreeScopeOrderedMap> _elementsById;
     UniquePtr<TreeScopeOrderedMap> _imageMapsByName;
@@ -142,12 +134,12 @@ namespace krys::boo::dom
 
     /// @brief The constructed style sheets this document or shadow root adopts, after its other style sheets.
     /// @see https://drafts.csswg.org/cssom/#dom-documentorshadowroot-adoptedstylesheets
-    KRYS_NODISCARD css::CSSStyleSheetObservableArray &AdoptedStyleSheets() noexcept;
+    KRYS_NODISCARD CSSStyleSheetObservableArray &AdoptedStyleSheets() noexcept;
 
     /// @brief Replaces the adopted style sheets.
     /// @return A `NotAllowedError` if a sheet wasn't constructed, or was constructed for another document.
     /// @see https://drafts.csswg.org/cssom/#dom-documentorshadowroot-adoptedstylesheets
-    ExceptionOr<void> SetAdoptedStyleSheets(List<Ref<css::CSSStyleSheet>> &&sheets) noexcept;
+    ExceptionOr<void> SetAdoptedStyleSheets(List<Ref<CSSStyleSheet>> &&sheets) noexcept;
 
 #pragma endregion
 
@@ -183,7 +175,7 @@ namespace krys::boo::dom
                                               HitTestSource source = HitTestSource::User) noexcept;
 
     /// @brief The adopted style sheets, without creating the array.
-    KRYS_NODISCARD Span<const Ref<css::CSSStyleSheet>> GetAdoptedStyleSheets() const noexcept;
+    KRYS_NODISCARD Span<const Ref<CSSStyleSheet>> GetAdoptedStyleSheets() const noexcept;
 
     /// @brief The observers of the IDs in this tree.
     KRYS_NODISCARD dom::IdTargetObserverRegistry &IdTargetObserverRegistry() const noexcept
@@ -215,16 +207,16 @@ namespace krys::boo::dom
     KRYS_NODISCARD Span<Element *const> AllElementsWithId(DOMStringView id) const noexcept;
 
     /// @brief Notes that @p map, in this tree, goes by @p name, its ID or name.
-    void AddImageMap(DOMStringAtom name, html::HTMLMapElement &map) noexcept;
+    void AddImageMap(DOMStringAtom name, HTMLMapElement &map) noexcept;
 
     /// @brief Notes that @p map no longer goes by @p name, or has left this tree.
-    void RemoveImageMap(DOMStringAtom name, html::HTMLMapElement &map) noexcept;
+    void RemoveImageMap(DOMStringAtom name, HTMLMapElement &map) noexcept;
 
     /// @brief Notes that the maps going by @p name may be in a different order, as one has moved.
     void ImageMapsChangedOrder(DOMStringAtom name) noexcept;
 
     /// @brief The first map in this tree with @p name as its ID or name, or null if there's none.
-    KRYS_NODISCARD html::HTMLMapElement *FirstImageMap(DOMStringView name) const noexcept;
+    KRYS_NODISCARD HTMLMapElement *FirstImageMap(DOMStringView name) const noexcept;
 
     /// @brief The groups of the radio buttons in this tree that have no form owner.
     KRYS_NODISCARD html::RadioButtonGroups &RadioButtonGroups() const noexcept
@@ -250,22 +242,21 @@ namespace krys::boo::dom
     KRYS_NODISCARD LegacyRenderSVGResourceContainer *
       LookupLegacySVGResourceById(const DOMStringAtom &id) const noexcept;
 
-    void AddPendingSVGResource(const DOMStringAtom &id, svg::SVGElement &element) noexcept;
+    void AddPendingSVGResource(const DOMStringAtom &id, SVGElement &element) noexcept;
 
     KRYS_NODISCARD bool IsIdOfPendingSVGResource(const DOMStringAtom &id) const noexcept;
 
-    KRYS_NODISCARD bool IsPendingSVGResource(svg::SVGElement &element,
-                                             const DOMStringAtom &id) const noexcept;
+    KRYS_NODISCARD bool IsPendingSVGResource(SVGElement &element, const DOMStringAtom &id) const noexcept;
 
-    void ClearHasPendingSVGResourcesIfPossible(svg::SVGElement &element) noexcept;
+    void ClearHasPendingSVGResourcesIfPossible(SVGElement &element) noexcept;
 
-    void RemoveElementFromPendingSVGResources(svg::SVGElement &element) noexcept;
+    void RemoveElementFromPendingSVGResources(SVGElement &element) noexcept;
 
-    List<WeakPtr<svg::SVGElement>> RemovePendingSVGResource(const DOMStringAtom &id) noexcept;
+    List<WeakPtr<SVGElement>> RemovePendingSVGResource(const DOMStringAtom &id) noexcept;
 
     void MarkPendingSVGResourcesForRemoval(const DOMStringAtom &id) noexcept;
 
-    KRYS_NODISCARD RefPtr<svg::SVGElement>
+    KRYS_NODISCARD RefPtr<SVGElement>
       TakeElementFromPendingSVGResourcesForRemovalMap(const DOMStringAtom &id) noexcept;
 
 #pragma endregion
@@ -273,6 +264,6 @@ namespace krys::boo::dom
   private:
     KRYS_NODISCARD SVGResourcesMap &GetSVGResourcesMap() const noexcept;
 
-    KRYS_NODISCARD bool IsElementWithPendingSVGResources(svg::SVGElement &element) const noexcept;
+    KRYS_NODISCARD bool IsElementWithPendingSVGResources(SVGElement &element) const noexcept;
   };
 }

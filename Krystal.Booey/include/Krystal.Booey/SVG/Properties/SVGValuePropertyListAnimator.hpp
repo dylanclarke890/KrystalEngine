@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/SVG/Properties/SVGPropertyAnimator.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief Animates a presentation attribute whose value is a list (`stroke-dasharray`).
   template <typename TList, typename TAnimationFunction>
@@ -45,7 +45,7 @@ namespace krys::boo::svg
 
   public:
     template <typename... TArgs>
-    SVGValuePropertyListAnimator(const dom::QualifiedName &attributeName, const Ref<SVGProperty> &property,
+    SVGValuePropertyListAnimator(const QualifiedName &attributeName, const Ref<SVGProperty> &property,
                                  TArgs &&...arguments) noexcept
         : Base(attributeName, std::forward<TArgs>(arguments)...),
           _list(ShareRef(static_cast<TList &>(*property)))

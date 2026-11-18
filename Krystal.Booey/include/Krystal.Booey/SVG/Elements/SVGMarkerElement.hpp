@@ -26,7 +26,7 @@
 #include "Krystal.Booey/SVG/SVGFitToViewBox.hpp"
 #include "Krystal.Booey/SVG/SVGMarkerTypes.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGAngle;
 
@@ -62,7 +62,7 @@ namespace krys::boo::svg
       SVG_MARKER_ORIENT_AUTO_START_REVERSE = SVGMarkerOrientAutoStartReverse,
     };
 
-    explicit SVGMarkerElement(dom::Document &document) noexcept;
+    explicit SVGMarkerElement(Document &document) noexcept;
 
     KRYS_NODISCARD AffineTransform ViewBoxToViewTransform(float viewWidth, float viewHeight) const noexcept;
 
@@ -136,9 +136,9 @@ namespace krys::boo::svg
       return _orientType;
     }
 
-    KRYS_NODISCARD dom::DOMStringAtom Orient() const noexcept;
+    KRYS_NODISCARD DOMStringAtom Orient() const noexcept;
 
-    void SetOrient(const dom::DOMStringAtom &) noexcept;
+    void SetOrient(const DOMStringAtom &) noexcept;
 
     void SetOrientToAuto() noexcept;
 
@@ -149,10 +149,10 @@ namespace krys::boo::svg
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGMarkerElement, SVGElement, SVGFitToViewBox>;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
     void OnChildrenChanged() noexcept final;
 
@@ -174,8 +174,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGMarkerElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGMarkerElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGMarkerElement();
   }

@@ -37,7 +37,7 @@
 namespace krys::boo
 {
   /// @brief A property that can be animated: a property id, or a custom property's name.
-  using AnimatableCSSProperty = Variant<css::PropertyId, css::CSSOMStringAtom>;
+  using AnimatableCSSProperty = Variant<css::PropertyId, CSSOMStringAtom>;
 
   enum class AnimationImpact : uint8
   {
@@ -73,7 +73,7 @@ namespace krys::boo
       {
         return DefaultHash<css::PropertyId>::Hash(*id);
       }
-      return std::hash<css::CSSOMStringAtom> {}(std::get<css::CSSOMStringAtom>(property));
+      return std::hash<CSSOMStringAtom> {}(std::get<CSSOMStringAtom>(property));
     }
   };
 

@@ -33,10 +33,13 @@
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGElement;
+}
 
+namespace krys::boo::svg
+{
   /// @see https://svgwg.org/specs/animations/#AnimationModes
   enum class AnimationMode : uint8
   {
@@ -57,18 +60,20 @@ namespace krys::boo::svg
     Paced,
     Spline,
   };
+}
 
+namespace krys::boo
+{
   /// @brief Animates one attribute of a target element for an animation element: an animated property's
   /// animated value, or a presentation attribute's animated style property.
   class SVGAttributeAnimator : public RefCounted<SVGAttributeAnimator>,
                                public CanMakeWeakPtr<SVGAttributeAnimator>
   {
   protected:
-    dom::QualifiedName _attributeName;
+    QualifiedName _attributeName;
 
   public:
-    explicit SVGAttributeAnimator(const dom::QualifiedName &attributeName) noexcept
-        : _attributeName(attributeName)
+    explicit SVGAttributeAnimator(const QualifiedName &attributeName) noexcept : _attributeName(attributeName)
     {
     }
 
@@ -79,15 +84,15 @@ namespace krys::boo::svg
       return false;
     }
 
-    virtual void SetFromAndToValues(SVGElement &, dom::DOMStringView, dom::DOMStringView) noexcept
+    virtual void SetFromAndToValues(SVGElement &, DOMStringView, DOMStringView) noexcept
     {
     }
 
-    virtual void SetFromAndByValues(SVGElement &, dom::DOMStringView, dom::DOMStringView) noexcept
+    virtual void SetFromAndByValues(SVGElement &, DOMStringView, DOMStringView) noexcept
     {
     }
 
-    virtual void SetToAtEndOfDurationValue(SVGElement &, dom::DOMStringView) noexcept
+    virtual void SetToAtEndOfDurationValue(SVGElement &, DOMStringView) noexcept
     {
     }
 
@@ -99,8 +104,8 @@ namespace krys::boo::svg
 
     virtual void Stop(SVGElement &targetElement) noexcept = 0;
 
-    KRYS_NODISCARD virtual Maybe<float> CalculateDistance(SVGElement &, dom::DOMStringView,
-                                                          dom::DOMStringView) const noexcept
+    KRYS_NODISCARD virtual Maybe<float> CalculateDistance(SVGElement &, DOMStringView,
+                                                          DOMStringView) const noexcept
     {
       return {};
     }
@@ -110,14 +115,13 @@ namespace krys::boo::svg
 
     static void InvalidateStyle(SVGElement &) noexcept;
 
-    static void ApplyAnimatedStylePropertyChange(SVGElement &, css::PropertyId,
-                                                 dom::DOMStringView value) noexcept;
+    static void ApplyAnimatedStylePropertyChange(SVGElement &, css::PropertyId, DOMStringView value) noexcept;
 
     static void RemoveAnimatedStyleProperty(SVGElement &, css::PropertyId) noexcept;
 
-    static void ApplyAnimatedPropertyChange(SVGElement &, const dom::QualifiedName &) noexcept;
+    static void ApplyAnimatedPropertyChange(SVGElement &, const QualifiedName &) noexcept;
 
-    void ApplyAnimatedStylePropertyChange(SVGElement &, dom::DOMStringView value) noexcept;
+    void ApplyAnimatedStylePropertyChange(SVGElement &, DOMStringView value) noexcept;
 
     void RemoveAnimatedStyleProperty(SVGElement &) noexcept;
 

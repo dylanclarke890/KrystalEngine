@@ -55,8 +55,8 @@ namespace krys::boo
     return it->second;
   }
 
-  dom::Element *PointerCaptureController::PointerCaptureElement(dom::Document *document,
-                                                                PointerID pointerId) const noexcept
+  Element *PointerCaptureController::PointerCaptureElement(Document *document,
+                                                           PointerID pointerId) const noexcept
   {
     if (auto capturingData = CapturingDataFor(pointerId))
     {
@@ -68,7 +68,7 @@ namespace krys::boo
     return nullptr;
   }
 
-  dom::ExceptionOr<void> PointerCaptureController::SetPointerCapture(dom::Element *capturingTarget,
+  dom::ExceptionOr<void> PointerCaptureController::SetPointerCapture(Element *capturingTarget,
                                                                      PointerID pointerId) noexcept
   {
     // https://w3c.github.io/pointerevents/#setting-pointer-capture
@@ -114,7 +114,7 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> PointerCaptureController::ReleasePointerCapture(dom::Element *capturingTarget,
+  dom::ExceptionOr<void> PointerCaptureController::ReleasePointerCapture(Element *capturingTarget,
                                                                          PointerID pointerId) noexcept
   {
     // https://w3c.github.io/pointerevents/#releasing-pointer-capture
@@ -149,7 +149,7 @@ namespace krys::boo
     return {};
   }
 
-  bool PointerCaptureController::HasPointerCapture(dom::Element *capturingTarget,
+  bool PointerCaptureController::HasPointerCapture(Element *capturingTarget,
                                                    PointerID pointerId) const noexcept
   {
     // https://w3c.github.io/pointerevents/#dom-element-haspointercapture
@@ -193,7 +193,7 @@ namespace krys::boo
     UpdateHaveAnyCapturingElement();
   }
 
-  void PointerCaptureController::ElementWasRemovedSlow(dom::Element &element) noexcept
+  void PointerCaptureController::ElementWasRemovedSlow(Element &element) noexcept
   {
     krys_debug_assert(_haveAnyCapturingElement);
 
@@ -262,7 +262,7 @@ namespace krys::boo
   }
 
   RefPtr<dom::PointerEvent> PointerCaptureController::PointerEventForMouseEvent(
-    const dom::MouseEvent &mouseEvent, PointerID pointerId, const dom::DOMString &pointerType) noexcept
+    const dom::MouseEvent &mouseEvent, PointerID pointerId, const DOMString &pointerType) noexcept
   {
     if (HasActiveTouch())
     {
@@ -352,8 +352,8 @@ namespace krys::boo
 
   void PointerCaptureController::DispatchPointerRawUpdateForMouseEvent(const dom::MouseEvent &mouseEvent,
                                                                        PointerID pointerId,
-                                                                       const dom::DOMString &pointerType,
-                                                                       dom::Element &target) noexcept
+                                                                       const DOMString &pointerType,
+                                                                       Element &target) noexcept
   {
     if (!target.NodeDocument().HasPointerRawUpdateListener() || HasActiveTouch())
     {
@@ -368,8 +368,8 @@ namespace krys::boo
 
   bool PointerCaptureController::SkipPointerMoveForMouseEvent(const dom::MouseEvent &mouseEvent,
                                                               PointerID pointerId,
-                                                              const dom::DOMString &pointerType,
-                                                              dom::Element &target) noexcept
+                                                              const DOMString &pointerType,
+                                                              Element &target) noexcept
   {
     if (mouseEvent.Type() != event_names::MouseMove || target.NodeDocument().HasPointerMoveListener()
         || HasActiveTouch())
@@ -389,7 +389,7 @@ namespace krys::boo
     return true;
   }
 
-  void PointerCaptureController::PointerMoveWasSkipped(CapturingData &capturingData, dom::Document &document,
+  void PointerCaptureController::PointerMoveWasSkipped(CapturingData &capturingData, Document &document,
                                                        bool isPrimary) noexcept
   {
     capturingData.ActiveDocument = CreateWeakPtr(&document);
@@ -400,7 +400,7 @@ namespace krys::boo
     }
   }
 
-  void PointerCaptureController::DispatchOverOrOutEvent(dom::DOMStringAtom type, dom::EventTarget *target,
+  void PointerCaptureController::DispatchOverOrOutEvent(DOMStringAtom type, dom::EventTarget *target,
                                                         const PlatformTouchEvent &event, uint32 index,
                                                         bool isPrimary, LocalFrameView *view,
                                                         const DoublePoint &touchDelta) noexcept
@@ -410,20 +410,18 @@ namespace krys::boo
       target);
   }
 
-  void PointerCaptureController::DispatchEnterOrLeaveEvent(dom::DOMStringAtom type,
-                                                           dom::Element &targetElement,
+  void PointerCaptureController::DispatchEnterOrLeaveEvent(DOMStringAtom type, Element &targetElement,
                                                            const PlatformTouchEvent &event, uint32 index,
                                                            bool isPrimary, LocalFrameView *view,
                                                            const DoublePoint &touchDelta) noexcept
   {
-    List<Ref<dom::Element>> targetChain;
-    for (dom::Element *element = &targetElement; element; element = element->ParentElementInComposedTree())
+    List<Ref<Element>> targetChain;
+    for (Element *element = &targetElement; element; element = element->ParentElementInComposedTree())
     {
       targetChain.push_back(ShareRef(*element));
     }
     // Enter and leave events don't bubble, so they go only to the elements a listener would see them on.
-    EventHandler::RemoveBoundaryTargetsWithoutListeners(targetChain,
-                                                        Span<const dom::DOMStringAtom>(&type, 1));
+    EventHandler::RemoveBoundaryTargetsWithoutListeners(targetChain, Span<const DOMStringAtom>(&type, 1));
 
     if (type == event_names::PointerEnter)
     {
@@ -455,12 +453,12 @@ namespace krys::boo
       return;
     }
 
-    auto *targetNode = DynamicDowncast<dom::Node>(&target);
-    auto *targetElement = targetNode ? DynamicDowncast<dom::Element>(targetNode) : nullptr;
+    auto *targetNode = DynamicDowncast<Node>(&target);
+    auto *targetElement = targetNode ? DynamicDowncast<Element>(targetNode) : nullptr;
     krys_assert(targetElement);
 
     auto mapToPointerEvents = [&](const List<PlatformTouchEvent> &events,
-                                  const dom::DOMStringAtom *type = nullptr) -> List<Ref<dom::PointerEvent>>
+                                  const DOMStringAtom *type = nullptr) -> List<Ref<dom::PointerEvent>>
     {
       auto create = [&](const PlatformTouchEvent &event)
       {
@@ -505,22 +503,20 @@ namespace krys::boo
     Ref<CapturingData> capturingData = EnsureCapturingData(pointerId, dom::TouchPointerEventType());
 
     // Check if the target changed, which would require dispatching boundary events.
-    RefPtr<dom::Element> previousTarget = capturingData->PreviousTarget;
-    RefPtr<dom::Element> currentTarget = ShareRefPtr(targetElement);
+    RefPtr<Element> previousTarget = capturingData->PreviousTarget;
+    RefPtr<Element> currentTarget = ShareRefPtr(targetElement);
 
     capturingData->PreviousTarget = currentTarget;
 
     if (type == event_names::PointerMove && previousTarget != currentTarget)
     {
-      List<Ref<dom::Element>> leftElementsChain;
-      for (dom::Element *element = previousTarget.get(); element;
-           element = element->ParentElementInComposedTree())
+      List<Ref<Element>> leftElementsChain;
+      for (Element *element = previousTarget.get(); element; element = element->ParentElementInComposedTree())
       {
         leftElementsChain.push_back(ShareRef(*element));
       }
-      List<Ref<dom::Element>> enteredElementsChain;
-      for (dom::Element *element = currentTarget.get(); element;
-           element = element->ParentElementInComposedTree())
+      List<Ref<Element>> enteredElementsChain;
+      for (Element *element = currentTarget.get(); element; element = element->ParentElementInComposedTree())
       {
         enteredElementsChain.push_back(ShareRef(*element));
       }
@@ -544,12 +540,12 @@ namespace krys::boo
       }
 
       // Enter and leave events don't bubble, so they go only to the elements a listener would see them on.
-      const dom::DOMStringAtom leaveType(event_names::PointerLeave);
-      const dom::DOMStringAtom enterType(event_names::PointerEnter);
+      const DOMStringAtom leaveType(event_names::PointerLeave);
+      const DOMStringAtom enterType(event_names::PointerEnter);
       EventHandler::RemoveBoundaryTargetsWithoutListeners(leftElementsChain,
-                                                          Span<const dom::DOMStringAtom>(&leaveType, 1));
+                                                          Span<const DOMStringAtom>(&leaveType, 1));
       EventHandler::RemoveBoundaryTargetsWithoutListeners(enteredElementsChain,
-                                                          Span<const dom::DOMStringAtom>(&enterType, 1));
+                                                          Span<const DOMStringAtom>(&enterType, 1));
 
       if (previousTarget)
       {
@@ -606,7 +602,7 @@ namespace krys::boo
     // (A stationary touch has a pointermove, but nothing about it changed.)
     if (touchPoint.GetState() == PlatformTouchPoint::TouchMoved && document.HasPointerRawUpdateListener())
     {
-      const dom::DOMStringAtom rawUpdateType(event_names::PointerRawUpdate);
+      const DOMStringAtom rawUpdateType(event_names::PointerRawUpdate);
       DispatchEvent(
         *dom::PointerEvent::Create(rawUpdateType, platformTouchEvent,
                                    mapToPointerEvents(platformTouchEvent.CoalescedEvents(), &rawUpdateType),
@@ -665,8 +661,8 @@ namespace krys::boo
   void PointerCaptureController::PointerEventWillBeDispatched(const dom::PointerEvent &event,
                                                               dom::EventTarget *target) noexcept
   {
-    auto *node = DynamicDowncast<dom::Node>(target);
-    auto *element = node ? DynamicDowncast<dom::Element>(node) : nullptr;
+    auto *node = DynamicDowncast<Node>(target);
+    auto *element = node ? DynamicDowncast<Element>(node) : nullptr;
     if (!element)
     {
       return;
@@ -716,7 +712,7 @@ namespace krys::boo
   }
 
   auto PointerCaptureController::EnsureCapturingData(PointerID pointerId,
-                                                     const dom::DOMString &pointerType) noexcept
+                                                     const DOMString &pointerType) noexcept
     -> Ref<CapturingData>
   {
     auto it = _activePointerIdsToCapturingData.find(pointerId);
@@ -817,7 +813,7 @@ namespace krys::boo
     // Nothing is pressed after a cancel: a pen or mouse pointer's next press is a pointerdown again.
     capturingData->PointerIsPressed = false;
 
-    auto target = [&]() -> RefPtr<dom::Element>
+    auto target = [&]() -> RefPtr<Element>
     {
       if (capturingData->TargetOverride)
       {

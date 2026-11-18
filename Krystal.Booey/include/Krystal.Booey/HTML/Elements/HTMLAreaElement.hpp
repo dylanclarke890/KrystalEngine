@@ -33,15 +33,11 @@
 
 namespace krys::boo
 {
-  class HitTestResult;
-}
-
-namespace krys::boo::html
-{
   class HTMLImageElement;
+  class HitTestResult;
 
   /// @see https://html.spec.whatwg.org/#htmlareaelement
-  class HTMLAreaElement : public HTMLElement, public URLDecomposition
+  class HTMLAreaElement : public HTMLElement, public html::URLDecomposition
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLAreaElement);
 
@@ -62,7 +58,7 @@ namespace krys::boo::html
     AreaShape _shape {AreaShape::Rect};
 
   public:
-    HTMLAreaElement(dom::Document &document) noexcept;
+    HTMLAreaElement(Document &document) noexcept;
 
     /// @brief Whether the area is the whole image (`shape=default`).
     KRYS_NODISCARD bool IsDefault() const noexcept
@@ -91,7 +87,7 @@ namespace krys::boo::html
                   dom::FocusVisibility visibility = dom::FocusVisibility::Invisible) noexcept override;
 
     /// @brief The image, which shows that the area is focused.
-    KRYS_NODISCARD RefPtr<dom::Element> FocusAppearanceUpdateTarget() noexcept override;
+    KRYS_NODISCARD RefPtr<Element> FocusAppearanceUpdateTarget() noexcept override;
 
     /// @brief Follows the link, if it is one.
     /// @see https://html.spec.whatwg.org/#the-area-element:activation-behaviour
@@ -103,34 +99,34 @@ namespace krys::boo::html
 #pragma region HTMLAreaElement - https://html.spec.whatwg.org/#htmlareaelement
 
     /// @see https://html.spec.whatwg.org/#dom-area-alt
-    KRYS_NODISCARD dom::DOMString Alt() const noexcept;
+    KRYS_NODISCARD DOMString Alt() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-alt
-    void Alt(dom::DOMString value) noexcept;
+    void Alt(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-coords
-    KRYS_NODISCARD dom::DOMString Coords() const noexcept;
+    KRYS_NODISCARD DOMString Coords() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-coords
-    void Coords(dom::DOMString value) noexcept;
+    void Coords(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-shape
-    KRYS_NODISCARD dom::DOMString Shape() const noexcept;
+    KRYS_NODISCARD DOMString Shape() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-shape
-    void Shape(dom::DOMString value) noexcept;
+    void Shape(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-target
-    KRYS_NODISCARD dom::DOMString Target() const noexcept;
+    KRYS_NODISCARD DOMString Target() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-target
-    void Target(dom::DOMString value) noexcept;
+    void Target(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-download
-    KRYS_NODISCARD dom::DOMString Download() const noexcept;
+    KRYS_NODISCARD DOMString Download() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-download
-    void Download(dom::DOMString value) noexcept;
+    void Download(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-ping
     KRYS_NODISCARD dom::USVString Ping() const noexcept;
@@ -139,19 +135,19 @@ namespace krys::boo::html
     void Ping(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-rel
-    KRYS_NODISCARD dom::DOMString Rel() const noexcept;
+    KRYS_NODISCARD DOMString Rel() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-rel
-    void Rel(dom::DOMString value) noexcept;
+    void Rel(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-rellist
     KRYS_NODISCARD dom::DOMTokenList &RelList() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-referrerpolicy
-    KRYS_NODISCARD dom::DOMString ReferrerPolicy() const noexcept;
+    KRYS_NODISCARD DOMString ReferrerPolicy() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-referrerpolicy
-    void ReferrerPolicy(dom::DOMString value) noexcept;
+    void ReferrerPolicy(DOMString value) noexcept;
 
 #pragma endregion
 
@@ -180,9 +176,8 @@ namespace krys::boo::html
 #pragma endregion
 
   protected:
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
   private:
     KRYS_NODISCARD url::URL FullURL() const noexcept final;
@@ -195,13 +190,13 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLAreaElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLAreaElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLAreaElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLAreaElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLAreaElement();
   }

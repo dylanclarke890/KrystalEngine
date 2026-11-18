@@ -14,9 +14,9 @@ namespace krys::boo::svg::tests
 
   namespace
   {
-    KRYS_NODISCARD std::string Hints(const dom::Element &element) noexcept
+    KRYS_NODISCARD std::string Hints(const Element &element) noexcept
     {
-      const auto *style = Downcast<dom::StyledElement>(element).PresentationalHintStyle();
+      const auto *style = Downcast<StyledElement>(element).PresentationalHintStyle();
       return style ? css::tests::ToNarrow(style->AsText(css::DefaultSerialisationContext())) : std::string {};
     }
   }

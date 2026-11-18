@@ -210,7 +210,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "CSSNumericValue: parsing", "[CSS][TypedOM]")
   {
-    auto document = CreateRef<dom::Document>();
+    auto document = CreateRef<Document>();
 
     auto px = Value(CSSNumericValue::Parse(*document, u8"  10px "));
     REQUIRE(Is<CSSUnitValue>(*px));

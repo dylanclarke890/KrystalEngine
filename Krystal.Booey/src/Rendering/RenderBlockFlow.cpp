@@ -189,7 +189,7 @@ namespace krys::boo
   {
   }
 
-  RenderBlockFlow::RenderBlockFlow(Type type, dom::Element &element, RenderStyle &&style,
+  RenderBlockFlow::RenderBlockFlow(Type type, Element &element, RenderStyle &&style,
                                    EnumSet<BlockFlowFlag> flags) noexcept
       : RenderBlock(type, element, krys::move(style), {}, flags)
   {
@@ -197,7 +197,7 @@ namespace krys::boo
     SetChildrenInline(true);
   }
 
-  RenderBlockFlow::RenderBlockFlow(Type type, dom::Document &document, RenderStyle &&style,
+  RenderBlockFlow::RenderBlockFlow(Type type, Document &document, RenderStyle &&style,
                                    EnumSet<BlockFlowFlag> flags) noexcept
       : RenderBlock(type, document, krys::move(style), {}, flags)
   {
@@ -913,7 +913,7 @@ namespace krys::boo
       {
         return false;
       }
-      return !Is<html::HTMLInputElement>(GetElement());
+      return !Is<HTMLInputElement>(GetElement());
     };
     if (shouldApplyAlignContent())
     {
@@ -5986,7 +5986,7 @@ namespace krys::boo
       if (!box->Renderer().NonPseudoNode())
       {
         return dom::MakeDeprecatedLegacyPosition(
-          ShareRefPtr<dom::Node>(flow.NonPseudoElement()),
+          ShareRefPtr<Node>(flow.NonPseudoElement()),
           static_cast<uint32>(start ? flow.CaretMinOffset() : flow.CaretMaxOffset()));
       }
 

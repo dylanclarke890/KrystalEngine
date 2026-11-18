@@ -30,11 +30,18 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSRuleList;
-  class GroupRule;
+}
 
+namespace krys::boo::css
+{
+  class GroupRule;
+}
+
+namespace krys::boo
+{
   /// @brief The base of the rules that contain other rules.
   /// @see https://drafts.csswg.org/cssom/#the-cssgroupingrule-interface
   class CSSGroupingRule : public CSSRule
@@ -76,15 +83,15 @@ namespace krys::boo::css
       return *_groupRule;
     }
 
-    void Reattach(Rule &rule) noexcept override;
+    void Reattach(css::Rule &rule) noexcept override;
 
     void AppendCSSTextForItems(StringBuilder &builder) const noexcept;
 
     void AppendCSSTextWithReplacementURLsForItems(StringBuilder &builder,
-                                                  const SerialisationContext &context) const noexcept;
+                                                  const css::SerialisationContext &context) const noexcept;
 
-    KRYS_NODISCARD RefPtr<StyleRuleWithNesting>
-      PrepareChildStyleRuleForNesting(StyleRule &styleRule) noexcept override;
+    KRYS_NODISCARD RefPtr<css::StyleRuleWithNesting>
+      PrepareChildStyleRuleForNesting(css::StyleRule &styleRule) noexcept override;
 
   private:
     KRYS_NODISCARD bool IsGroupingRule() const noexcept final
@@ -97,12 +104,12 @@ namespace krys::boo::css
     void CssTextForRules(StringBuilder &rules) const noexcept;
 
     void CssTextForRulesWithReplacementURLs(StringBuilder &rules,
-                                            const SerialisationContext &context) const noexcept;
+                                            const css::SerialisationContext &context) const noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSGroupingRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSGroupingRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.IsGroupingRule();
   }

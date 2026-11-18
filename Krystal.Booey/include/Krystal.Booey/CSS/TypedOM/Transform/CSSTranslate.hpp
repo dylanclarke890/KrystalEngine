@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Transform/CSSTransformComponent.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief A `translate()`, `translate3d()` or single-axis translation.
   /// @see https://drafts.css-houdini.org/css-typed-om/#csstranslate
@@ -46,8 +46,8 @@ namespace krys::boo::css
       Create(Ref<CSSNumericValue> x, Ref<CSSNumericValue> y, RefPtr<CSSNumericValue> z = {}) noexcept;
 
     /// @brief Reifies a translation function.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSTranslate>> Create(const FunctionValue &function,
-                                                                     dom::Document &document) noexcept;
+    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSTranslate>> Create(const css::FunctionValue &function,
+                                                                     Document &document) noexcept;
 
     KRYS_NODISCARD const CSSNumericValue &X() const noexcept
     {
@@ -75,23 +75,23 @@ namespace krys::boo::css
 
     void Serialise(StringBuilder &builder) const noexcept final;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<DOMMatrix>> ToMatrix() const noexcept final;
+    KRYS_NODISCARD dom::ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
 
     KRYS_NODISCARD CSSTransformType TransformType() const noexcept final
     {
       return CSSTransformType::Translate;
     }
 
-    KRYS_NODISCARD RefPtr<Value> ToCSSValue() const noexcept final;
+    KRYS_NODISCARD RefPtr<css::Value> ToCSSValue() const noexcept final;
 
   private:
     CSSTranslate(bool is2D, Ref<CSSNumericValue> x, Ref<CSSNumericValue> y, Ref<CSSNumericValue> z) noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSTranslate)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSTransformComponent &component) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSTranslate)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSTransformComponent &component) noexcept
   {
-    return component.TransformType() == krys::boo::css::CSSTransformType::Translate;
+    return component.TransformType() == krys::boo::CSSTransformType::Translate;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

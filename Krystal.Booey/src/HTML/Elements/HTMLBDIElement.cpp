@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLBDIElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLBDIElement::HTMLBDIElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::BDI)
+  HTMLBDIElement::HTMLBDIElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::BDI)
   {
     SetSelfOrPrecedingNodesAffectDirAuto(true);
     document.SetIsDirAttributeDirty();

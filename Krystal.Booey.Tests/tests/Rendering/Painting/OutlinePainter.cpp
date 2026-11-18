@@ -80,7 +80,7 @@ namespace krys::boo::tests
       u8"<!DOCTYPE html><style>body{margin:0}select{margin:0;outline:3px auto blue}</style>"
       u8"<select id=s multiple size=3><option>a</option><option>b</option><option>c</option>"
       u8"</select>");
-    auto &select = Downcast<html::HTMLSelectElement>(fixture.ById(u8"s"));
+    auto &select = Downcast<HTMLSelectElement>(fixture.ById(u8"s"));
     select.Focus();
     // Otherwise the ring is around the whole list box.
     CHECK(fixture.Painted().contains(u8"(rects [at (2,2) size 32x51])"));

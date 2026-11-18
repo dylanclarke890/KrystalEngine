@@ -280,7 +280,7 @@ namespace krys::boo::dom::detail
 
     KRYS_NODISCARD static TNode *Advance(match_constness_t<TNode, Node> *current) noexcept
     {
-      if constexpr (SameType<match_constness_t<TNode, html::HTMLElement>, TNode>)
+      if constexpr (SameType<match_constness_t<TNode, HTMLElement>, TNode>)
       {
         return TreeQueries::NextHTMLElementSibling(*current);
       }
@@ -309,7 +309,7 @@ namespace krys::boo::dom::detail
 
     KRYS_NODISCARD static TNode *Advance(match_constness_t<TNode, Node> *current) noexcept
     {
-      if constexpr (SameType<match_constness_t<TNode, html::HTMLElement>, TNode>)
+      if constexpr (SameType<match_constness_t<TNode, HTMLElement>, TNode>)
       {
         return TreeQueries::PreviousHTMLElementSibling(*current);
       }
@@ -472,11 +472,10 @@ namespace krys::boo::dom
     detail::ScopedSubtreeRange<detail::NextSiblingIteratorPolicy<const Element, false>, const Element>;
 
   using ChildHTMLElementRange =
-    detail::ScopedSubtreeRange<detail::NextSiblingIteratorPolicy<html::HTMLElement, false>,
-                               html::HTMLElement>;
+    detail::ScopedSubtreeRange<detail::NextSiblingIteratorPolicy<HTMLElement, false>, HTMLElement>;
   using ConstChildHTMLElementRange =
-    detail::ScopedSubtreeRange<detail::NextSiblingIteratorPolicy<const html::HTMLElement, false>,
-                               const html::HTMLElement>;
+    detail::ScopedSubtreeRange<detail::NextSiblingIteratorPolicy<const HTMLElement, false>,
+                               const HTMLElement>;
 
 #pragma region Node Range Algorithms
 

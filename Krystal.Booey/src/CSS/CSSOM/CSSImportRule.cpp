@@ -30,9 +30,9 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSImportRule::CSSImportRule(ImportRule &importRule, CSSStyleSheet *parent) noexcept
+  CSSImportRule::CSSImportRule(css::ImportRule &importRule, CSSStyleSheet *parent) noexcept
       : CSSRule(parent), _importRule(ShareRef(importRule))
   {
   }
@@ -49,7 +49,7 @@ namespace krys::boo::css
     }
   }
 
-  Ref<CSSImportRule> CSSImportRule::Create(ImportRule &rule, CSSStyleSheet *sheet) noexcept
+  Ref<CSSImportRule> CSSImportRule::Create(css::ImportRule &rule, CSSStyleSheet *sheet) noexcept
   {
     return AdoptRef(*new CSSImportRule(rule, sheet));
   }
@@ -75,7 +75,7 @@ namespace krys::boo::css
     {
       return null;
     }
-    return StringFromCascadeLayerName(*name);
+    return css::StringFromCascadeLayerName(*name);
   }
 
   CSSOMString CSSImportRule::SupportsText() const noexcept
@@ -86,7 +86,7 @@ namespace krys::boo::css
   CSSOMString CSSImportRule::CssTextInternal(const CSSOMString &urlString) const noexcept
   {
     StringBuilder builder;
-    builder.Append(u8"@import ", SerialiseURL(urlString));
+    builder.Append(u8"@import ", css::SerialiseURL(urlString));
 
     if (auto layerName = LayerName())
     {
@@ -109,7 +109,7 @@ namespace krys::boo::css
     if (!MediaQueries().empty())
     {
       builder.Append(u8' ');
-      mq::Serialise(builder, MediaQueries());
+      css::mq::Serialise(builder, MediaQueries());
     }
 
     builder.Append(u8';');
@@ -143,18 +143,18 @@ namespace krys::boo::css
     return ShareRefPtr(GetStyleSheet());
   }
 
-  void CSSImportRule::Reattach(Rule &) noexcept
+  void CSSImportRule::Reattach(css::Rule &) noexcept
   {
     // FIXME: Implement when enabling caching for stylesheets with import rules.
     krys_debug_assert(false);
   }
 
-  const mq::MediaQueryList &CSSImportRule::MediaQueries() const noexcept
+  const css::mq::MediaQueryList &CSSImportRule::MediaQueries() const noexcept
   {
     return _importRule->MediaQueries();
   }
 
-  void CSSImportRule::SetMediaQueries(mq::MediaQueryList &&queries) noexcept
+  void CSSImportRule::SetMediaQueries(css::mq::MediaQueryList &&queries) noexcept
   {
     _importRule->SetMediaQueries(krys::move(queries));
   }

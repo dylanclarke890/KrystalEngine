@@ -29,9 +29,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGAnimationDiscreteFunctionImpl.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPrimitivePropertyAnimator.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   using SVGColorAnimator = SVGPrimitivePropertyAnimator<Color, SVGAnimationColorFunction>;
   using SVGNumberAnimator = SVGPrimitivePropertyAnimator<float, SVGAnimationNumberFunction>;
-  using SVGStringAnimator = SVGPrimitivePropertyAnimator<dom::DOMString, SVGAnimationStringFunction>;
+  using SVGStringAnimator = SVGPrimitivePropertyAnimator<DOMString, SVGAnimationStringFunction>;
 }

@@ -9,14 +9,14 @@
 
 namespace krys::boo
 {
-  using KeyframeOffset = Variant<std::nullptr_t, double, TimelineRangeOffset, dom::DOMString>;
+  using KeyframeOffset = Variant<std::nullptr_t, double, TimelineRangeOffset, DOMString>;
 
   /// @see https://drafts.csswg.org/web-animations-1/#dictdef-basepropertyindexedkeyframe
   struct BasePropertyIndexedKeyframe
   {
-    Variant<std::nullptr_t, List<KeyframeOffset>, double, TimelineRangeOffset, dom::DOMString> Offset =
+    Variant<std::nullptr_t, List<KeyframeOffset>, double, TimelineRangeOffset, DOMString> Offset =
       List<KeyframeOffset>();
-    Variant<List<dom::DOMString>, dom::DOMString> Easing = List<dom::DOMString>();
+    Variant<List<DOMString>, DOMString> Easing = List<DOMString>();
     Variant<List<CompositeOperationOrAuto>, CompositeOperationOrAuto> Composite =
       List<CompositeOperationOrAuto>();
   };
@@ -25,7 +25,7 @@ namespace krys::boo
   struct BaseKeyframe
   {
     KeyframeOffset Offset;
-    dom::DOMString Easing {u8"linear"};
+    DOMString Easing {u8"linear"};
     CompositeOperationOrAuto Composite {CompositeOperationOrAuto::Auto};
   };
 
@@ -36,7 +36,7 @@ namespace krys::boo
   /// @see https://drafts.csswg.org/web-animations-1/#processing-a-keyframes-argument
   struct InputKeyframe : BaseKeyframe
   {
-    List<Pair<dom::DOMString, dom::DOMString>> Properties;
+    List<Pair<DOMString, DOMString>> Properties;
   };
 
   /// @brief Property-indexed keyframes, as script gives them: each property's list of values, named by its
@@ -44,7 +44,7 @@ namespace krys::boo
   /// @see https://drafts.csswg.org/web-animations-1/#processing-a-keyframes-argument
   struct InputPropertyIndexedKeyframes : BasePropertyIndexedKeyframe
   {
-    List<Pair<dom::DOMString, List<dom::DOMString>>> Properties;
+    List<Pair<DOMString, List<DOMString>>> Properties;
   };
 
   /// @brief The keyframes argument of `animate()`, `setKeyframes()` and the `KeyframeEffect` constructor:

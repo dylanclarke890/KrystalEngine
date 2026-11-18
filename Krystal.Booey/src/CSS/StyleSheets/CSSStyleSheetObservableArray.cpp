@@ -30,12 +30,12 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSStyleSheetObservableArray::CSSStyleSheetObservableArray(dom::ContainerNode &treeScope) noexcept
+  CSSStyleSheetObservableArray::CSSStyleSheetObservableArray(ContainerNode &treeScope) noexcept
       : _treeScope(CreateWeakPtr(&treeScope))
   {
-    krys_debug_assert(Is<dom::Document>(treeScope) || Is<dom::ShadowRoot>(treeScope));
+    krys_debug_assert(Is<Document>(treeScope) || Is<ShadowRoot>(treeScope));
   }
 
   dom::ExceptionOr<void> CSSStyleSheetObservableArray::SetValueAt(uint32 index, CSSStyleSheet &sheet) noexcept

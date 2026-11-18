@@ -12,7 +12,7 @@ namespace krys::boo::tests
 {
   namespace
   {
-    KRYS_NODISCARD std::string Narrow(const dom::DOMString &string)
+    KRYS_NODISCARD std::string Narrow(const DOMString &string)
     {
       return std::string(string.begin(), string.end());
     }
@@ -39,7 +39,7 @@ namespace krys::boo::tests
     SECTION("the initial timing")
     {
       auto timing = effect.GetBindingsTiming();
-      CHECK(std::get<dom::DOMString>(timing.Duration) == u8"auto");
+      CHECK(std::get<DOMString>(timing.Duration) == u8"auto");
       CHECK(timing.Delay == 0);
       CHECK(timing.EndDelay == 0);
       CHECK(timing.IterationStart == 0);
@@ -54,10 +54,10 @@ namespace krys::boo::tests
       REQUIRE_FALSE(effect
                       .BindingsUpdateTiming(*fixture.Document,
                                             OptionalEffectTiming {
-                                              .Duration = Variant<double, dom::DOMString> {2'000.0},
+                                              .Duration = Variant<double, DOMString> {2'000.0},
                                               .Iterations = 3,
                                               .Delay = 500,
-                                              .Easing = dom::DOMString(u8"ease-in"),
+                                              .Easing = DOMString(u8"ease-in"),
                                               .Fill = FillMode::Both,
                                               .Direction = PlaybackDirection::Alternate,
                                             })
@@ -73,11 +73,11 @@ namespace krys::boo::tests
       CHECK(effect.SpecifiedIterationDuration() == Seconds {2});
 
       // `auto` makes the duration unspecified again.
-      REQUIRE_FALSE(effect
-                      .UpdateTiming(*fixture.Document,
-                                    OptionalEffectTiming {
-                                      .Duration = Variant<double, dom::DOMString> {dom::DOMString(u8"auto")}})
-                      .HasException());
+      REQUIRE_FALSE(
+        effect
+          .UpdateTiming(*fixture.Document,
+                        OptionalEffectTiming {.Duration = Variant<double, DOMString> {DOMString(u8"auto")}})
+          .HasException());
       CHECK_FALSE(effect.SpecifiedIterationDuration());
       CHECK(effect.Iterations() == 3);
 
@@ -96,9 +96,9 @@ namespace krys::boo::tests
       expectTypeError({.IterationStart = -1});
       expectTypeError({.Iterations = -1});
       expectTypeError({.Iterations = std::numeric_limits<double>::quiet_NaN()});
-      expectTypeError({.Duration = Variant<double, dom::DOMString> {-1.0}});
-      expectTypeError({.Duration = Variant<double, dom::DOMString> {dom::DOMString(u8"lemon")}});
-      expectTypeError({.Iterations = 2, .Easing = dom::DOMString(u8"bounce")});
+      expectTypeError({.Duration = Variant<double, DOMString> {-1.0}});
+      expectTypeError({.Duration = Variant<double, DOMString> {DOMString(u8"lemon")}});
+      expectTypeError({.Iterations = 2, .Easing = DOMString(u8"bounce")});
       CHECK(effect.Iterations() == 1);
       CHECK(Narrow(effect.GetBindingsTiming().Easing) == "linear");
 
@@ -111,8 +111,8 @@ namespace krys::boo::tests
       REQUIRE_FALSE(effect
                       .UpdateTiming(*fixture.Document,
                                     OptionalEffectTiming {
-                                      .Duration = Variant<double, dom::DOMString> {1'000.0},
-                                      .Easing = dom::DOMString(u8"steps(4)"),
+                                      .Duration = Variant<double, DOMString> {1'000.0},
+                                      .Easing = DOMString(u8"steps(4)"),
                                     })
                       .HasException());
       auto computed = effect.GetBindingsComputedTiming();
@@ -133,11 +133,10 @@ namespace krys::boo::tests
     using namespace std::chrono_literals;
 
     EffectFixture fixture;
-    REQUIRE_FALSE(
-      fixture.Effect
-        ->UpdateTiming(*fixture.Document,
-                       OptionalEffectTiming {.Duration = Variant<double, dom::DOMString> {1'000.0}})
-        .HasException());
+    REQUIRE_FALSE(fixture.Effect
+                    ->UpdateTiming(*fixture.Document,
+                                   OptionalEffectTiming {.Duration = Variant<double, DOMString> {1'000.0}})
+                    .HasException());
     auto animation = WebAnimation::Create(*fixture.Document, fixture.Effect.get());
     REQUIRE_FALSE(animation->Play().HasException());
     fixture.StartAnimations();

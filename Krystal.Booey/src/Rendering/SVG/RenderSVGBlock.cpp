@@ -30,16 +30,16 @@
 
 namespace krys::boo
 {
-  RenderSVGBlock::RenderSVGBlock(Type type, svg::SVGGraphicsElement &element, RenderStyle &&style) noexcept
+  RenderSVGBlock::RenderSVGBlock(Type type, SVGGraphicsElement &element, RenderStyle &&style) noexcept
       : RenderBlockFlow(type, element, krys::move(style), {BlockFlowFlag::IsSVGBlock})
   {
   }
 
   RenderSVGBlock::~RenderSVGBlock() noexcept = default;
 
-  svg::SVGGraphicsElement &RenderSVGBlock::GraphicsElement() const noexcept
+  SVGGraphicsElement &RenderSVGBlock::GraphicsElement() const noexcept
   {
-    return Downcast<svg::SVGGraphicsElement>(Downcast<svg::SVGElement>(*RenderBlockFlow::GetElement()));
+    return Downcast<SVGGraphicsElement>(Downcast<SVGElement>(*RenderBlockFlow::GetElement()));
   }
 
   void RenderSVGBlock::UpdateFromStyle() noexcept

@@ -8,7 +8,7 @@ namespace krys::boo::html
 {
   HTMLFormControlsCollection::HTMLFormControlsCollection(HTMLFormElement &ownerNode) noexcept
       : LiveHTMLCollection(
-          ownerNode, [](const dom::Element &) { return true; }, dom::LiveCollectionInvalidation::FormControls,
+          ownerNode, [](const Element &) { return true; }, dom::LiveCollectionInvalidation::FormControls,
           // Its controls can be anywhere in the form's tree.
           dom::LiveCollectionTraversal::OwnerTree),
         _ownerNode(ShareRef(ownerNode))
@@ -40,12 +40,12 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  dom::Element *HTMLFormControlsCollection::CollectionBegin() const noexcept
+  Element *HTMLFormControlsCollection::CollectionBegin() const noexcept
   {
     return EnumeratableFrom(0);
   }
 
-  dom::Element *HTMLFormControlsCollection::CollectionNext(dom::Element &element) const noexcept
+  Element *HTMLFormControlsCollection::CollectionNext(Element &element) const noexcept
   {
     if (_cachedElement == &element)
     {
@@ -58,9 +58,9 @@ namespace krys::boo::html
     return EnumeratableFrom(static_cast<size_t>(position - elements.begin()) + 1);
   }
 
-  List<Ref<dom::Element>> HTMLFormControlsCollection::NamedItems(dom::DOMStringView name) const noexcept
+  List<Ref<Element>> HTMLFormControlsCollection::NamedItems(DOMStringView name) const noexcept
   {
-    List<Ref<dom::Element>> result;
+    List<Ref<Element>> result;
     if (name.empty())
     {
       return result;
@@ -75,18 +75,18 @@ namespace krys::boo::html
         auto id = element->GetAttribute(u8"id");
         if (id && !id->empty())
         {
-          _itemsById[*id].push_back(const_cast<dom::Element *>(element.get()));
+          _itemsById[*id].push_back(const_cast<Element *>(element.get()));
         }
         auto elementName = element->GetAttribute(u8"name");
         if (elementName && !elementName->empty() && id != elementName)
         {
-          _itemsByName[*elementName].push_back(const_cast<dom::Element *>(element.get()));
+          _itemsByName[*elementName].push_back(const_cast<Element *>(element.get()));
         }
       }
       _hasNamedItemMaps = true;
     }
 
-    auto key = dom::DOMString(name);
+    auto key = DOMString(name);
     for (auto *items : {&_itemsById, &_itemsByName})
     {
       if (auto it = items->find(key); it != items->end())
@@ -100,14 +100,14 @@ namespace krys::boo::html
     return result;
   }
 
-  RefPtr<dom::Element> HTMLFormControlsCollection::NamedItem(dom::DOMStringView name) noexcept
+  RefPtr<Element> HTMLFormControlsCollection::NamedItem(DOMStringView name) noexcept
   {
     auto namedItems = NamedItems(name);
-    return namedItems.empty() ? nullptr : RefPtr<dom::Element>(namedItems.front());
+    return namedItems.empty() ? nullptr : RefPtr<Element>(namedItems.front());
   }
 
-  Maybe<Variant<RefPtr<RadioNodeList>, RefPtr<dom::Element>>>
-    HTMLFormControlsCollection::NamedItemOrItems(dom::DOMStringView name) const noexcept
+  Maybe<Variant<RefPtr<RadioNodeList>, RefPtr<Element>>>
+    HTMLFormControlsCollection::NamedItemOrItems(DOMStringView name) const noexcept
   {
     // 1. If name is the empty string, return null and stop the algorithm. (NamedItems.)
     auto namedItems = NamedItems(name);
@@ -123,7 +123,7 @@ namespace krys::boo::html
     //    id attribute or a name attribute equal to name, then return that node and stop the algorithm.
     if (namedItems.size() == 1)
     {
-      return Variant<RefPtr<RadioNodeList>, RefPtr<dom::Element>> {RefPtr<dom::Element>(namedItems[0])};
+      return Variant<RefPtr<RadioNodeList>, RefPtr<Element>> {RefPtr<Element>(namedItems[0])};
     }
 
     // 4. Otherwise, create a new RadioNodeList object representing a live view of the
@@ -132,7 +132,7 @@ namespace krys::boo::html
     //    the RadioNodeList object must be sorted in tree order.
     // 5. Return that RadioNodeList object.
     // (The form keeps one per name, so the same one is returned while it lives.)
-    return Variant<RefPtr<RadioNodeList>, RefPtr<dom::Element>> {
+    return Variant<RefPtr<RadioNodeList>, RefPtr<Element>> {
       RefPtr<RadioNodeList>(_ownerNode->RadioNodeListForName(name))};
   }
 }

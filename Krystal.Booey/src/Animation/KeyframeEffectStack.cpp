@@ -251,12 +251,12 @@ namespace krys::boo
     return !_invalidCSSAnimationNames.empty();
   }
 
-  bool KeyframeEffectStack::ContainsInvalidCSSAnimationName(const css::CSSOMString &name) const noexcept
+  bool KeyframeEffectStack::ContainsInvalidCSSAnimationName(const CSSOMString &name) const noexcept
   {
     return _invalidCSSAnimationNames.contains(name);
   }
 
-  void KeyframeEffectStack::AddInvalidCSSAnimationName(const css::CSSOMString &name) noexcept
+  void KeyframeEffectStack::AddInvalidCSSAnimationName(const CSSOMString &name) noexcept
   {
     _invalidCSSAnimationNames.insert(name);
   }
@@ -344,7 +344,7 @@ namespace krys::boo
   }
 
   void KeyframeEffectStack::CascadeDidOverrideProperties(const AnimatableCSSPropertySet &overriddenProperties,
-                                                         const dom::Document &document) noexcept
+                                                         const Document &document) noexcept
   {
     AnimatableCSSPropertySet acceleratedPropertiesOverriddenByCascade;
     for (const auto &animatedProperty : overriddenProperties)

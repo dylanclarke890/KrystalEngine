@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/MathML/Elements/MathMLPresentationElement.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   /// @brief An element laid out as a row of its children: `<mrow>`, `<merror>`, `<mphantom>`, `<mstyle>`,
   /// `<semantics>` and `<maction>` (which show their first child), and the base of the elements with
@@ -37,7 +37,7 @@ namespace krys::boo::mathml
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(MathMLRowElement);
 
   public:
-    explicit MathMLRowElement(dom::Document &document,
+    explicit MathMLRowElement(Document &document,
                               MathMLElementInterface interface = MathMLElementInterface::Row,
                               dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
 

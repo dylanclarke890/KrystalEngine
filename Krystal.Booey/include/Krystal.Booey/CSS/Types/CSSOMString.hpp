@@ -2,14 +2,14 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @see https://drafts.csswg.org/cssom/#cssomstring-type
-  using CSSOMString = dom::DOMString;
+  using CSSOMString = DOMString;
 
   /// @see https://drafts.csswg.org/cssom/#cssomstring-type
-  using CSSOMStringView = dom::DOMStringView;
+  using CSSOMStringView = DOMStringView;
 
   /// @see https://drafts.csswg.org/cssom/#cssomstring-type
-  using CSSOMStringAtom = dom::DOMStringAtom;
+  using CSSOMStringAtom = DOMStringAtom;
 }

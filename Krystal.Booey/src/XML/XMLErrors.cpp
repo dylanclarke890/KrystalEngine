@@ -41,31 +41,31 @@ namespace krys::boo::xml
   {
     constexpr int32 MaxErrors = 25;
 
-    KRYS_NODISCARD Ref<dom::Element> CreateHTMLElement(dom::Document &document, utf8_stringview localName,
-                                                       utf8_stringview style = {}) noexcept
+    KRYS_NODISCARD Ref<Element> CreateHTMLElement(Document &document, utf8_stringview localName,
+                                                  utf8_stringview style = {}) noexcept
     {
       auto element = dom::ElementFactory::Create(
-        document, dom::QualifiedName(infra::namespaces::HTML, null, dom::DOMStringAtom(localName)));
+        document, QualifiedName(infra::namespaces::HTML, null, DOMStringAtom(localName)));
       if (!style.empty())
       {
-        dom::ElementAlgorithms::SetAttributeValue(*element, u8"style", dom::DOMString(style));
+        dom::ElementAlgorithms::SetAttributeValue(*element, u8"style", DOMString(style));
       }
       return element;
     }
 
-    void AppendChild(dom::ContainerNode &parent, dom::Node &child) noexcept
+    void AppendChild(ContainerNode &parent, Node &child) noexcept
     {
       (void)dom::MutationAlgorithms::Append(child, parent);
     }
 
-    void AppendText(dom::ContainerNode &parent, dom::DOMString text) noexcept
+    void AppendText(ContainerNode &parent, DOMString text) noexcept
     {
-      auto textNode = CreateRef<dom::Text>(parent.NodeDocument(), krys::move(text));
+      auto textNode = CreateRef<Text>(parent.NodeDocument(), krys::move(text));
       AppendChild(parent, *textNode);
     }
 
-    KRYS_NODISCARD Ref<dom::Element> CreateXHTMLParserErrorHeader(dom::Document &document,
-                                                                  dom::DOMString errorMessages) noexcept
+    KRYS_NODISCARD Ref<Element> CreateXHTMLParserErrorHeader(Document &document,
+                                                             DOMString errorMessages) noexcept
     {
       auto reportElement = CreateHTMLElement(document, u8"parsererror",
                                              u8"display: block; white-space: pre; border: 2px solid #c77; "
@@ -88,7 +88,7 @@ namespace krys::boo::xml
     }
   }
 
-  XMLErrors::XMLErrors(dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
+  XMLErrors::XMLErrors(Document &document) noexcept : _document(CreateWeakPtr(&document))
   {
   }
 
@@ -127,12 +127,12 @@ namespace krys::boo::xml
     // where the errors are located)
 
     // Create elements for display
-    RefPtr<dom::Document> document = ShareRefPtr(_document.get());
+    RefPtr<Document> document = ShareRefPtr(_document.get());
     if (!document)
     {
       return;
     }
-    RefPtr<dom::Element> documentElement = document->DocumentElement();
+    RefPtr<Element> documentElement = document->DocumentElement();
     if (!documentElement)
     {
       auto rootElement = CreateHTMLElement(*document, u8"html");
@@ -165,7 +165,7 @@ namespace krys::boo::xml
 
     auto reportElement = CreateXHTMLParserErrorHeader(*document, krys::move(_errorMessages).ToString());
 
-    if (RefPtr<dom::Node> firstChild = ShareRefPtr(documentElement->FirstChild()))
+    if (RefPtr<Node> firstChild = ShareRefPtr(documentElement->FirstChild()))
     {
       (void)dom::MutationAlgorithms::PreInsert(*reportElement, *documentElement, firstChild.get());
     }

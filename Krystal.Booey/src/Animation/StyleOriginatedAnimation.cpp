@@ -480,7 +480,7 @@ namespace krys::boo
     _previousIteration = iteration;
   }
 
-  void StyleOriginatedAnimation::EnqueueDOMEvent(dom::DOMStringAtom eventType, WebAnimationTime elapsedTime,
+  void StyleOriginatedAnimation::EnqueueDOMEvent(DOMStringAtom eventType, WebAnimationTime elapsedTime,
                                                  WebAnimationTime scheduledEffectTime) noexcept
   {
     if (!_owningElement)

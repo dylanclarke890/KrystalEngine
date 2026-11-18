@@ -59,16 +59,16 @@ namespace krys::boo::html
       return true;
     }
 
-    KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
+    KRYS_NODISCARD DOMStringView FormControlType() const noexcept final
     {
       return input_type_names::Color;
     }
 
     KRYS_NODISCARD bool SupportsRequired() const noexcept final;
 
-    KRYS_NODISCARD Maybe<dom::DOMString> FallbackValue() const noexcept final;
+    KRYS_NODISCARD Maybe<DOMString> FallbackValue() const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString SanitizeValue(dom::DOMStringView proposedValue) const noexcept final;
+    KRYS_NODISCARD DOMString SanitizeValue(DOMStringView proposedValue) const noexcept final;
 
     /// @brief The value as a colour.
     KRYS_NODISCARD Color ValueAsColor() const noexcept;
@@ -94,10 +94,10 @@ namespace krys::boo::html
 
     void CreateShadowSubtree() noexcept final;
 
-    void SetValue(dom::DOMStringView value, bool valueChanged, TextFieldEventBehavior eventBehavior,
+    void SetValue(DOMStringView value, bool valueChanged, TextFieldEventBehavior eventBehavior,
                   TextControlSetValueSelection selection) noexcept final;
 
-    void AttributeChanged(const dom::DOMStringAtom &name) noexcept final;
+    void AttributeChanged(const DOMStringAtom &name) noexcept final;
 
     void HandleActivationBehavior(dom::Event &event) noexcept final;
 

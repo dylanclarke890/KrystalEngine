@@ -55,7 +55,7 @@ namespace krys::boo
     constexpr int32 EndOfLinePadding = 2;
   }
 
-  RenderMenuList::RenderMenuList(html::HTMLSelectElement &element, RenderStyle &&style) noexcept
+  RenderMenuList::RenderMenuList(HTMLSelectElement &element, RenderStyle &&style) noexcept
       : RenderFlexibleBox(Type::MenuList, element, krys::move(style))
   {
     krys_debug_assert(IsRenderMenuList());
@@ -164,9 +164,9 @@ namespace krys::boo
     }
   }
 
-  html::HTMLSelectElement &RenderMenuList::SelectElement() const noexcept
+  HTMLSelectElement &RenderMenuList::SelectElement() const noexcept
   {
-    return Downcast<html::HTMLSelectElement>(NodeForNonAnonymous());
+    return Downcast<HTMLSelectElement>(NodeForNonAnonymous());
   }
 
   void RenderMenuList::DidAttachChild(RenderObject &child, RenderObject *) noexcept
@@ -201,7 +201,7 @@ namespace krys::boo
     float maxOptionWidth = 0;
     for (auto &item : SelectElement().ListItems())
     {
-      auto *option = DynamicDowncast<html::HTMLOptionElement>(item.get());
+      auto *option = DynamicDowncast<HTMLOptionElement>(item.get());
       if (!option)
       {
         continue;
@@ -256,7 +256,7 @@ namespace krys::boo
     utf8_string text;
     if (i >= 0 && i < size)
     {
-      if (auto *option = DynamicDowncast<html::HTMLOptionElement>(listItems[static_cast<size_t>(i)].get()))
+      if (auto *option = DynamicDowncast<HTMLOptionElement>(listItems[static_cast<size_t>(i)].get()))
       {
         text = option->TextIndentedToRespectGroupLabel();
         auto *style = option->ComputedStyle();
@@ -484,11 +484,11 @@ namespace krys::boo
 
     utf8_string itemString;
     auto &element = *listItems[listIndex];
-    if (auto *optGroup = DynamicDowncast<html::HTMLOptGroupElement>(element))
+    if (auto *optGroup = DynamicDowncast<HTMLOptGroupElement>(element))
     {
       itemString = optGroup->GroupLabelText();
     }
-    else if (auto *option = DynamicDowncast<html::HTMLOptionElement>(element))
+    else if (auto *option = DynamicDowncast<HTMLOptionElement>(element))
     {
       itemString = option->TextIndentedToRespectGroupLabel();
     }
@@ -514,7 +514,7 @@ namespace krys::boo
     {
       return {};
     }
-    return listItems[listIndex]->GetAttribute(u8"aria-label").value_or(dom::DOMString());
+    return listItems[listIndex]->GetAttribute(u8"aria-label").value_or(DOMString());
   }
 
   utf8_string RenderMenuList::ItemToolTip(uint32 listIndex) const noexcept
@@ -536,7 +536,7 @@ namespace krys::boo
     }
 
     auto *element = listItems[listIndex].get();
-    if (!Is<html::HTMLOptionElement>(*element))
+    if (!Is<HTMLOptionElement>(*element))
     {
       return false;
     }
@@ -544,9 +544,9 @@ namespace krys::boo
     bool groupEnabled = true;
     if (auto *parentElement = element->ParentElement())
     {
-      if (Is<html::HTMLOptGroupElement>(*parentElement))
+      if (Is<HTMLOptGroupElement>(*parentElement))
       {
-        groupEnabled = !Downcast<html::HTMLOptGroupElement>(*parentElement).IsDisabledFormControl();
+        groupEnabled = !Downcast<HTMLOptGroupElement>(*parentElement).IsDisabledFormControl();
       }
     }
     if (!groupEnabled)
@@ -588,9 +588,9 @@ namespace krys::boo
 
     return PopupMenuStyle(
       style->ColorResolvingCurrentColor(css::PropertyId::Color), itemBackgroundColor, style->GetFontCascade(),
-      element->GetAttribute(u8"lang").value_or(dom::DOMString()),
-      style->GetVisibility() == Visibility::Visible, style->Display() == DisplayType::None, true,
-      style->GetWritingMode().BidiDirection(), IsOverride(style->GetUnicodeBidi()),
+      element->GetAttribute(u8"lang").value_or(DOMString()), style->GetVisibility() == Visibility::Visible,
+      style->Display() == DisplayType::None, true, style->GetWritingMode().BidiDirection(),
+      IsOverride(style->GetUnicodeBidi()),
       itemHasCustomBackgroundColor ? PopupMenuStyle::BackgroundColorType::CustomBackgroundColor
                                    : PopupMenuStyle::BackgroundColorType::DefaultBackgroundColor);
   }
@@ -709,13 +709,13 @@ namespace krys::boo
   bool RenderMenuList::ItemIsSeparator(uint32 listIndex) const noexcept
   {
     auto &listItems = SelectElement().ListItems();
-    return listIndex < listItems.size() && Is<html::HTMLHRElement>(*listItems[listIndex]);
+    return listIndex < listItems.size() && Is<HTMLHRElement>(*listItems[listIndex]);
   }
 
   bool RenderMenuList::ItemIsLabel(uint32 listIndex) const noexcept
   {
     auto &listItems = SelectElement().ListItems();
-    return listIndex < listItems.size() && Is<html::HTMLOptGroupElement>(*listItems[listIndex]);
+    return listIndex < listItems.size() && Is<HTMLOptGroupElement>(*listItems[listIndex]);
   }
 
   bool RenderMenuList::ItemIsSelected(uint32 listIndex) const noexcept
@@ -725,7 +725,7 @@ namespace krys::boo
     {
       return false;
     }
-    auto *option = DynamicDowncast<html::HTMLOptionElement>(listItems[listIndex].get());
+    auto *option = DynamicDowncast<HTMLOptionElement>(listItems[listIndex].get());
     return option && option->Selected();
   }
 

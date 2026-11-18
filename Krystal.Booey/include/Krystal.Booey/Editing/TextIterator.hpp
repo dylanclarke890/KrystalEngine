@@ -37,17 +37,13 @@
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
-{
-  class Node;
-  class Text;
-}
-
 namespace krys::boo
 {
+  class Node;
   class RenderObject;
   class RenderText;
   class RenderTextFragment;
+  class Text;
 
   // Character ranges based on characters from the text iterator. Characters are bytes of its UTF-8 text.
   KRYS_NODISCARD uint64 CharacterCount(const dom::SimpleRange &range,
@@ -139,7 +135,7 @@ namespace krys::boo
     void Set(char32 singleCharacter) noexcept;
   };
 
-  KRYS_NODISCARD bool ShouldEmitNewlinesBeforeAndAfterNode(dom::Node &node) noexcept;
+  KRYS_NODISCARD bool ShouldEmitNewlinesBeforeAndAfterNode(Node &node) noexcept;
 
   /// @brief Iterates through the DOM range, returning all the text, and 0-length boundaries at points where
   /// replaced elements break up the text flow. The text is delivered in the chunks it's already stored in, to
@@ -151,22 +147,22 @@ namespace krys::boo
 
     // Current position, not necessarily of the text being returned, but position as we walk through the DOM
     // tree.
-    RefPtr<dom::Node> _currentNode;
+    RefPtr<Node> _currentNode;
     int32 _offset {0};
     bool _handledNode {false};
     bool _handledChildren {false};
     BitStack _fullyClippedStack;
 
     // The range.
-    RefPtr<dom::Node> _startContainer;
+    RefPtr<Node> _startContainer;
     int32 _startOffset {0};
-    RefPtr<dom::Node> _endContainer;
+    RefPtr<Node> _endContainer;
     int32 _endOffset {0};
-    RefPtr<dom::Node> _pastEndNode;
+    RefPtr<Node> _pastEndNode;
 
     // The current text and its position, in the form to be returned from the iterator.
-    RefPtr<dom::Node> _positionNode;
-    mutable RefPtr<dom::Node> _positionOffsetBaseNode;
+    RefPtr<Node> _positionNode;
+    mutable RefPtr<Node> _positionOffsetBaseNode;
     mutable int32 _positionStartOffset {0};
     mutable int32 _positionEndOffset {0};
     TextIteratorCopyableText _copyableText;
@@ -174,7 +170,7 @@ namespace krys::boo
 
     // Used when there is still some pending text from the current node; when these are false and null, we go
     // back to normal iterating.
-    RefPtr<dom::Node> _nodeForAdditionalNewline;
+    RefPtr<Node> _nodeForAdditionalNewline;
     inline_iterator::TextBoxIterator _textRun;
     inline_iterator::TextLogicalOrderCache _textRunLogicalOrderCache;
 
@@ -186,7 +182,7 @@ namespace krys::boo
     WeakPtr<RenderText> _firstLetterText;
 
     // Used to do the whitespace collapsing logic.
-    RefPtr<dom::Text> _lastTextNode;
+    RefPtr<boo::Text> _lastTextNode;
     bool _lastTextNodeEndedWithCollapsedSpace {false};
     char32 _lastCharacter {0};
 
@@ -216,7 +212,7 @@ namespace krys::boo
 
     KRYS_NODISCARD dom::SimpleRange Range() const noexcept;
 
-    KRYS_NODISCARD dom::Node *GetNode() const noexcept;
+    KRYS_NODISCARD Node *GetNode() const noexcept;
 
     KRYS_NODISCARD const TextIteratorCopyableText &CopyableText() const noexcept
     {
@@ -234,11 +230,11 @@ namespace krys::boo
   private:
     void Init() noexcept;
 
-    void ExitNode(dom::Node *exitedNode) noexcept;
+    void ExitNode(Node *exitedNode) noexcept;
 
     KRYS_NODISCARD bool ShouldRepresentNodeOffsetZero() noexcept;
 
-    KRYS_NODISCARD bool ShouldEmitSpaceBeforeAndAfterNode(dom::Node &node) noexcept;
+    KRYS_NODISCARD bool ShouldEmitSpaceBeforeAndAfterNode(Node &node) noexcept;
 
     void RepresentNodeOffsetZero() noexcept;
 
@@ -252,11 +248,10 @@ namespace krys::boo
 
     void HandleTextNodeFirstLetter(RenderTextFragment &renderer) noexcept;
 
-    void EmitCharacter(char32 character, RefPtr<dom::Node> &&characterNode,
-                       RefPtr<dom::Node> &&offsetBaseNode, int32 textStartOffset,
-                       int32 textEndOffset) noexcept;
+    void EmitCharacter(char32 character, RefPtr<Node> &&characterNode, RefPtr<Node> &&offsetBaseNode,
+                       int32 textStartOffset, int32 textEndOffset) noexcept;
 
-    void EmitText(dom::Text &textNode, const RenderText &renderer, int32 textStartOffset,
+    void EmitText(boo::Text &textNode, const RenderText &renderer, int32 textStartOffset,
                   int32 textEndOffset) noexcept;
 
     void RevertToRemainingTextRun() noexcept;
@@ -272,27 +267,27 @@ namespace krys::boo
 
     // Current position, not necessarily of the text being returned, but position as we walk through the DOM
     // tree.
-    RefPtr<dom::Node> _node;
+    RefPtr<Node> _node;
     int32 _offset {0};
     bool _handledNode {false};
     bool _handledChildren {false};
     BitStack _fullyClippedStack;
 
     // The range.
-    RefPtr<dom::Node> _startContainer;
+    RefPtr<Node> _startContainer;
     int32 _startOffset {0};
-    RefPtr<dom::Node> _endContainer;
+    RefPtr<Node> _endContainer;
     int32 _endOffset {0};
 
     // The current text and its position, in the form to be returned from the iterator.
-    RefPtr<dom::Node> _positionNode;
+    RefPtr<Node> _positionNode;
     int32 _positionStartOffset {0};
     int32 _positionEndOffset {0};
     TextIteratorCopyableText _copyableText;
     utf8_stringview _text;
 
     // Used to do the whitespace logic.
-    RefPtr<dom::Text> _lastTextNode;
+    RefPtr<boo::Text> _lastTextNode;
     char32 _lastCharacter {0};
 
     // Whether _node has advanced beyond the iteration range (i.e. _startContainer).
@@ -319,7 +314,7 @@ namespace krys::boo
 
     KRYS_NODISCARD dom::SimpleRange Range() const noexcept;
 
-    KRYS_NODISCARD dom::Node *GetNode() const noexcept
+    KRYS_NODISCARD Node *GetNode() const noexcept
     {
       krys_debug_assert(!AtEnd());
       return _node.get();
@@ -336,10 +331,9 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HandleNonTextNode() noexcept;
 
-    void EmitCharacter(char32 character, RefPtr<dom::Node> &&node, int32 startOffset,
-                       int32 endOffset) noexcept;
+    void EmitCharacter(char32 character, RefPtr<Node> &&node, int32 startOffset, int32 endOffset) noexcept;
 
-    KRYS_NODISCARD bool AdvanceRespectingRange(dom::Node *next) noexcept;
+    KRYS_NODISCARD bool AdvanceRespectingRange(Node *next) noexcept;
   };
 
   /// @brief Builds on the text iterator, adding a character position so we can walk one character (byte) at a

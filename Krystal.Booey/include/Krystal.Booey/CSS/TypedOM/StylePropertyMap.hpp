@@ -31,7 +31,10 @@
 namespace krys::boo::css
 {
   class VariableReferenceValue;
+}
 
+namespace krys::boo
+{
   /// @brief A map of properties to their values that can be changed.
   /// @see https://drafts.css-houdini.org/css-typed-om/#stylepropertymap
   class StylePropertyMap : public StylePropertyMapReadOnly
@@ -63,23 +66,23 @@ namespace krys::boo::css
     }
 
   protected:
-    virtual void RemoveProperty(PropertyId property) noexcept = 0;
+    virtual void RemoveProperty(css::PropertyId property) noexcept = 0;
 
     virtual void RemoveCustomProperty(const CSSOMStringAtom &property) noexcept = 0;
 
     /// @return False if @p value doesn't parse as @p property's value.
-    virtual bool SetShorthandProperty(PropertyId property, const CSSOMString &value) noexcept = 0;
+    virtual bool SetShorthandProperty(css::PropertyId property, const CSSOMString &value) noexcept = 0;
 
     /// @return False if @p value isn't a valid value of @p property.
-    virtual bool SetProperty(PropertyId property, Ref<Value> value) noexcept = 0;
+    virtual bool SetProperty(css::PropertyId property, Ref<css::Value> value) noexcept = 0;
 
     virtual bool SetCustomProperty(const CSSOMStringAtom &property,
-                                   Ref<VariableReferenceValue> value) noexcept = 0;
+                                   Ref<css::VariableReferenceValue> value) noexcept = 0;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::StylePropertyMap)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::StylePropertyMapReadOnly &map) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::StylePropertyMap)
+  KRYS_NODISCARD static bool IsType(const krys::boo::StylePropertyMapReadOnly &map) noexcept
   {
     return map.IsStylePropertyMap();
   }

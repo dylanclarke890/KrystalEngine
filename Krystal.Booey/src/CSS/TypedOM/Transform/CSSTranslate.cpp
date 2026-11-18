@@ -33,7 +33,7 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   namespace
   {
@@ -65,8 +65,8 @@ namespace krys::boo::css
     return AdoptRef(*new CSSTranslate(is2D, krys::move(x), krys::move(y), krys::move(nonNullZ)));
   }
 
-  dom::ExceptionOr<Ref<CSSTranslate>> CSSTranslate::Create(const FunctionValue &function,
-                                                           dom::Document &document) noexcept
+  dom::ExceptionOr<Ref<CSSTranslate>> CSSTranslate::Create(const css::FunctionValue &function,
+                                                           Document &document) noexcept
   {
     auto reified = ReifyArguments(function, document);
     if (reified.HasException())
@@ -77,7 +77,7 @@ namespace krys::boo::css
     auto count = arguments.size();
     switch (function.Name())
     {
-      case ValueId::TranslateX:
+      case css::ValueId::TranslateX:
       {
         if (count == 1)
         {
@@ -85,7 +85,7 @@ namespace krys::boo::css
         }
         break;
       }
-      case ValueId::TranslateY:
+      case css::ValueId::TranslateY:
       {
         if (count == 1)
         {
@@ -93,7 +93,7 @@ namespace krys::boo::css
         }
         break;
       }
-      case ValueId::TranslateZ:
+      case css::ValueId::TranslateZ:
       {
         if (count == 1)
         {
@@ -101,7 +101,7 @@ namespace krys::boo::css
         }
         break;
       }
-      case ValueId::Translate:
+      case css::ValueId::Translate:
       {
         if (count == 1)
         {
@@ -113,7 +113,7 @@ namespace krys::boo::css
         }
         break;
       }
-      case ValueId::Translate3d:
+      case css::ValueId::Translate3d:
       {
         if (count == 3)
         {
@@ -180,7 +180,7 @@ namespace krys::boo::css
     builder.Append(u8')');
   }
 
-  dom::ExceptionOr<Ref<DOMMatrix>> CSSTranslate::ToMatrix() const noexcept
+  dom::ExceptionOr<Ref<css::DOMMatrix>> CSSTranslate::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
     // The matrix's entries are relative to px, so a length that isn't compatible with px (a relative length
@@ -192,9 +192,9 @@ namespace krys::boo::css
     {
       return dom::Exception {dom::ExceptionCode::TypeError};
     }
-    auto x = xUnitValue->ConvertTo(UnitType::px);
-    auto y = yUnitValue->ConvertTo(UnitType::px);
-    auto z = zUnitValue->ConvertTo(UnitType::px);
+    auto x = xUnitValue->ConvertTo(css::UnitType::px);
+    auto y = yUnitValue->ConvertTo(css::UnitType::px);
+    auto z = zUnitValue->ConvertTo(css::UnitType::px);
     if (!x || !y || !z)
     {
       return dom::Exception {dom::ExceptionCode::TypeError};
@@ -209,10 +209,11 @@ namespace krys::boo::css
     {
       matrix.Translate3d(x->Value(), y->Value(), z->Value());
     }
-    return DOMMatrix::Create(matrix, Is2D() ? DOMMatrixReadOnly::Is2D::Yes : DOMMatrixReadOnly::Is2D::No);
+    return css::DOMMatrix::Create(matrix, Is2D() ? css::DOMMatrixReadOnly::Is2D::Yes
+                                                 : css::DOMMatrixReadOnly::Is2D::No);
   }
 
-  RefPtr<Value> CSSTranslate::ToCSSValue() const noexcept
+  RefPtr<css::Value> CSSTranslate::ToCSSValue() const noexcept
   {
     auto x = _x->ToCSSValue();
     auto y = _y->ToCSSValue();
@@ -222,14 +223,15 @@ namespace krys::boo::css
     }
     if (Is2D())
     {
-      return FunctionValue::Create(ValueId::Translate, Ref<Value>(krys::move(x)), Ref<Value>(krys::move(y)));
+      return css::FunctionValue::Create(css::ValueId::Translate, Ref<css::Value>(krys::move(x)),
+                                        Ref<css::Value>(krys::move(y)));
     }
     auto z = _z->ToCSSValue();
     if (!z)
     {
       return nullptr;
     }
-    return FunctionValue::Create(ValueId::Translate3d, Ref<Value>(krys::move(x)), Ref<Value>(krys::move(y)),
-                                 Ref<Value>(krys::move(z)));
+    return css::FunctionValue::Create(css::ValueId::Translate3d, Ref<css::Value>(krys::move(x)),
+                                      Ref<css::Value>(krys::move(y)), Ref<css::Value>(krys::move(z)));
   }
 }

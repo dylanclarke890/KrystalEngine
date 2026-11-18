@@ -35,13 +35,10 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
-{
-  class Element;
-}
-
 namespace krys::boo
 {
+  class Element;
+
   /// @brief A resize observer's observation of one element: the box it observes and the sizes it last
   /// reported.
   /// @see https://drafts.csswg.org/resize-observer/#resizeobservation
@@ -58,14 +55,14 @@ namespace krys::boo
     };
 
   private:
-    WeakPtr<dom::Element> _target;
+    WeakPtr<Element> _target;
     BoxSizes _lastObservationSizes;
     ResizeObserverBoxOptions _observedBox;
 
-    ResizeObservation(dom::Element &target, ResizeObserverBoxOptions observedBox) noexcept;
+    ResizeObservation(Element &target, ResizeObserverBoxOptions observedBox) noexcept;
 
   public:
-    KRYS_NODISCARD static Ref<ResizeObservation> Create(dom::Element &target,
+    KRYS_NODISCARD static Ref<ResizeObservation> Create(Element &target,
                                                         ResizeObserverBoxOptions observedBox) noexcept;
 
     ~ResizeObservation() noexcept;
@@ -87,7 +84,7 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatSize DevicePixelContentBoxSize() const noexcept;
 
-    KRYS_NODISCARD dom::Element *Target() const noexcept
+    KRYS_NODISCARD Element *Target() const noexcept
     {
       return _target.get();
     }

@@ -30,7 +30,7 @@
 
 namespace krys::boo::style
 {
-  ResolvedScopedName ResolvedScopedName::CreateFromScopedName(const dom::Element &element,
+  ResolvedScopedName ResolvedScopedName::CreateFromScopedName(const Element &element,
                                                               const ScopedName &scopedName) noexcept
   {
     const auto *scope = Scope::ForOrdinal(element, scopedName.ScopeOrdinal);

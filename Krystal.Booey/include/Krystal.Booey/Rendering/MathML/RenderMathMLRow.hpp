@@ -33,10 +33,7 @@
 
 namespace krys::boo
 {
-  namespace mathml
-  {
-    class MathMLRowElement;
-  }
+  class MathMLRowElement;
 
   /// @brief Lays its children out in a row, on a common baseline, stretching its vertical operators to the
   /// row's height: the renderer of `<mrow>` and the base of the renderers with more specific layouts.
@@ -46,11 +43,11 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderMathMLRow);
 
   public:
-    RenderMathMLRow(Type type, mathml::MathMLRowElement &element, RenderStyle &&style) noexcept;
+    RenderMathMLRow(Type type, boo::MathMLRowElement &element, RenderStyle &&style) noexcept;
 
     ~RenderMathMLRow() noexcept override;
 
-    KRYS_NODISCARD mathml::MathMLRowElement &GetElement() const noexcept;
+    KRYS_NODISCARD boo::MathMLRowElement &GetElement() const noexcept;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {

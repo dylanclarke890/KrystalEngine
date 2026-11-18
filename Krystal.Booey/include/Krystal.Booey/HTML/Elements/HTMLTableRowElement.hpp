@@ -4,7 +4,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTablePartElement.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLTableCellElement;
 
@@ -17,7 +17,7 @@ namespace krys::boo::html
     WeakPtr<dom::HTMLCollection> _cells;
 
   public:
-    HTMLTableRowElement(dom::Document &document) noexcept;
+    HTMLTableRowElement(Document &document) noexcept;
 
 #pragma region HTMLTableRowElement - https://html.spec.whatwg.org/#htmltablerowelement
 
@@ -48,47 +48,47 @@ namespace krys::boo::html
 #pragma region HTMLTableRowElement Obsolete members - https://html.spec.whatwg.org/#HTMLTableRowElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-tr-align
-    KRYS_NODISCARD dom::DOMString Align() const noexcept;
+    KRYS_NODISCARD DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-align
-    void Align(dom::DOMString value) noexcept;
+    void Align(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-char
-    KRYS_NODISCARD dom::DOMString Char() const noexcept;
+    KRYS_NODISCARD DOMString Char() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-char
-    void Char(dom::DOMString value) noexcept;
+    void Char(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-charoff
-    KRYS_NODISCARD dom::DOMString CharOff() const noexcept;
+    KRYS_NODISCARD DOMString CharOff() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-charoff
-    void CharOff(dom::DOMString value) noexcept;
+    void CharOff(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-valign
-    KRYS_NODISCARD dom::DOMString VAlign() const noexcept;
+    KRYS_NODISCARD DOMString VAlign() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-valign
-    void VAlign(dom::DOMString value) noexcept;
+    void VAlign(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-bgcolor
-    KRYS_NODISCARD dom::DOMString BgColor() const noexcept;
+    KRYS_NODISCARD DOMString BgColor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-bgcolor
-    void BgColor(dom::DOMString value) noexcept;
+    void BgColor(DOMString value) noexcept;
 
 #pragma endregion
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLTableRowElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLTableRowElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return Is<krys::boo::html::HTMLElement>(target)
-           && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLTableRowElement();
+    return Is<krys::boo::HTMLElement>(target)
+           && Downcast<krys::boo::HTMLElement>(target).IsHTMLTableRowElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLTableRowElement();
   }

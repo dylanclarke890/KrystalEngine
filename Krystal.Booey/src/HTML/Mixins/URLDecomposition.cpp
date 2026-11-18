@@ -106,7 +106,7 @@ namespace krys::boo::html
     return result;
   }
 
-  void URLDecomposition::Protocol(dom::DOMStringView value) noexcept
+  void URLDecomposition::Protocol(DOMStringView value) noexcept
   {
     // 1. Reinitialize url.
     auto copy = FullURL();
@@ -133,7 +133,7 @@ namespace krys::boo::html
     return dom::USVString(FullURL().EncodedUser());
   }
 
-  void URLDecomposition::Username(dom::DOMStringView user) noexcept
+  void URLDecomposition::Username(DOMStringView user) noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
@@ -161,7 +161,7 @@ namespace krys::boo::html
     return dom::USVString(FullURL().EncodedPassword());
   }
 
-  void URLDecomposition::Password(dom::DOMStringView password) noexcept
+  void URLDecomposition::Password(DOMStringView password) noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
@@ -190,7 +190,7 @@ namespace krys::boo::html
     return dom::USVString(FullURL().HostAndPort());
   }
 
-  void URLDecomposition::Host(dom::DOMStringView value) noexcept
+  void URLDecomposition::Host(DOMStringView value) noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
@@ -226,7 +226,7 @@ namespace krys::boo::html
     return dom::USVString(FullURL().Host());
   }
 
-  void URLDecomposition::Hostname(dom::DOMStringView host) noexcept
+  void URLDecomposition::Hostname(DOMStringView host) noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
@@ -268,8 +268,7 @@ namespace krys::boo::html
     return dom::USVString(utf8_string(reinterpret_cast<const char8_t *>(std::to_string(*port).c_str())));
   }
 
-  Maybe<Maybe<uint16>> URLDecomposition::ParsePort(dom::DOMStringView string,
-                                                   dom::DOMStringView protocol) noexcept
+  Maybe<Maybe<uint16>> URLDecomposition::ParsePort(DOMStringView string, DOMStringView protocol) noexcept
   {
     // https://url.spec.whatwg.org/#port-state with state override given.
     uint32 port {0};
@@ -304,7 +303,7 @@ namespace krys::boo::html
     return Maybe<uint16>(static_cast<uint16>(port));
   }
 
-  void URLDecomposition::Port(dom::DOMStringView value) noexcept
+  void URLDecomposition::Port(DOMStringView value) noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
@@ -339,7 +338,7 @@ namespace krys::boo::html
     return dom::USVString(FullURL().Path());
   }
 
-  void URLDecomposition::Pathname(dom::DOMStringView value) noexcept
+  void URLDecomposition::Pathname(DOMStringView value) noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
@@ -370,7 +369,7 @@ namespace krys::boo::html
                                    : dom::USVString(fullURL.QueryWithLeadingQuestionMark());
   }
 
-  void URLDecomposition::Search(dom::DOMStringView value) noexcept
+  void URLDecomposition::Search(DOMStringView value) noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
@@ -426,7 +425,7 @@ namespace krys::boo::html
              : dom::USVString(fullURL.FragmentIdentifierWithLeadingNumberSign());
   }
 
-  void URLDecomposition::Hash(dom::DOMStringView value) noexcept
+  void URLDecomposition::Hash(DOMStringView value) noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.

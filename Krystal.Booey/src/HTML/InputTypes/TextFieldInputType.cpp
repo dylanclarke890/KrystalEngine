@@ -64,7 +64,7 @@ namespace krys::boo::html
   namespace
   {
     /// @brief @p string truncated to @p maxLength UTF-16 code units, without splitting a code point.
-    KRYS_NODISCARD dom::DOMString LimitLength(dom::DOMStringView string, size_t maxLength) noexcept
+    KRYS_NODISCARD DOMString LimitLength(DOMStringView string, size_t maxLength) noexcept
     {
       size_t length = 0;
       for (size_t i = 0; i < string.size(); ++i)
@@ -77,21 +77,19 @@ namespace krys::boo::html
         size_t units = byte >= 0xF0 ? 2 : 1;
         if (length + units > maxLength)
         {
-          return dom::DOMString(string.substr(0, i));
+          return DOMString(string.substr(0, i));
         }
         length += units;
       }
-      return dom::DOMString(string);
+      return DOMString(string);
     }
 
     /// @brief @p text with every occurrence of @p from replaced by @p to.
-    KRYS_NODISCARD dom::DOMString ReplaceAll(dom::DOMStringView text, dom::DOMStringView from,
-                                             dom::DOMStringView to) noexcept
+    KRYS_NODISCARD DOMString ReplaceAll(DOMStringView text, DOMStringView from, DOMStringView to) noexcept
     {
-      dom::DOMString result;
+      DOMString result;
       size_t start = 0;
-      for (size_t found; (found = text.find(from, start)) != dom::DOMStringView::npos;
-           start = found + from.size())
+      for (size_t found; (found = text.find(from, start)) != DOMStringView::npos; start = found + from.size())
       {
         result.append(text.substr(start, found - start));
         result.append(to);
@@ -138,7 +136,7 @@ namespace krys::boo::html
 
     for (auto *node = innerText->FirstChild(); node; node = dom::TreeQueries::Next(*node, innerText.get()))
     {
-      if (auto *text = DynamicDowncast<dom::Text>(*node); text && text->Length())
+      if (auto *text = DynamicDowncast<Text>(*node); text && text->Length())
       {
         return false;
       }
@@ -146,14 +144,14 @@ namespace krys::boo::html
     return true;
   }
 
-  bool TextFieldInputType::ValueMissing(dom::DOMStringView value) const noexcept
+  bool TextFieldInputType::ValueMissing(DOMStringView value) const noexcept
   {
     krys_debug_assert(Element());
     auto &element = *Element();
     return element.IsMutable() && element.IsRequired() && value.empty();
   }
 
-  void TextFieldInputType::SetValue(dom::DOMStringView sanitizedValue, bool valueChanged,
+  void TextFieldInputType::SetValue(DOMStringView sanitizedValue, bool valueChanged,
                                     TextFieldEventBehavior eventBehavior,
                                     TextControlSetValueSelection selection) noexcept
   {
@@ -219,7 +217,7 @@ namespace krys::boo::html
 
     if (!input->Focused())
     {
-      input->SetTextAsOfLastFormControlChangeEvent(dom::DOMString(sanitizedValue));
+      input->SetTextAsOfLastFormControlChangeEvent(DOMString(sanitizedValue));
     }
 
     // FIXME: Telling the editor client a value the user typed changed (didSetValueByUserEdit while processing
@@ -338,7 +336,7 @@ namespace krys::boo::html
     innerLayerScrollable->ScrollToOffset(scrollOffset);
   }
 
-  void TextFieldInputType::HandleFocusEvent(dom::Node *oldFocusedNode) noexcept
+  void TextFieldInputType::HandleFocusEvent(Node *oldFocusedNode) noexcept
   {
     krys_debug_assert(Element());
     krys_debug_assert(oldFocusedNode != Element());
@@ -467,7 +465,7 @@ namespace krys::boo::html
     _container = nullptr;
   }
 
-  void TextFieldInputType::AttributeChanged(const dom::DOMStringAtom &name) noexcept
+  void TextFieldInputType::AttributeChanged(const DOMStringAtom &name) noexcept
   {
     if (name == u8"value" || name == u8"placeholder")
     {
@@ -539,14 +537,14 @@ namespace krys::boo::html
     return true;
   }
 
-  dom::DOMString TextFieldInputType::SanitizeValue(dom::DOMStringView proposedValue) const noexcept
+  DOMString TextFieldInputType::SanitizeValue(DOMStringView proposedValue) const noexcept
   {
     if (std::ranges::none_of(proposedValue, IsHTMLLineBreak)) KRYS_LIKELY
     {
       return LimitLength(proposedValue, HTMLInputElement::MaxEffectiveLength);
     }
 
-    dom::DOMString proposedValueWithoutLineBreaks;
+    DOMString proposedValueWithoutLineBreaks;
     for (char8 character : proposedValue)
     {
       if (!IsHTMLLineBreak(character))
@@ -583,7 +581,7 @@ namespace krys::boo::html
       auto selectionEnd = std::min<size_t>(element.SelectionEnd(), innerText.size());
       krys_debug_assert(selectionStart <= selectionEnd);
       selectionLength = HTMLTextFormControlElement::LengthForAPIValue(
-        dom::DOMStringView(innerText).substr(selectionStart, selectionEnd - selectionStart));
+        DOMStringView(innerText).substr(selectionStart, selectionEnd - selectionStart));
     }
     krys_debug_assert(oldLength >= selectionLength);
 
@@ -593,7 +591,7 @@ namespace krys::boo::html
     size_t appendableLength = maxLength > baseLength ? maxLength - baseLength : 0;
 
     // Truncate the inserted text to avoid violating the maxLength and other constraints.
-    dom::DOMStringView eventText = event.Text();
+    DOMStringView eventText = event.Text();
     size_t textLength = eventText.size();
     while (textLength > 0 && IsHTMLLineBreak(eventText[textLength - 1]))
     {
@@ -663,9 +661,9 @@ namespace krys::boo::html
     return true;
   }
 
-  dom::DOMString TextFieldInputType::ConvertFromVisibleValue(dom::DOMStringView visibleValue) const noexcept
+  DOMString TextFieldInputType::ConvertFromVisibleValue(DOMStringView visibleValue) const noexcept
   {
-    return dom::DOMString(visibleValue);
+    return DOMString(visibleValue);
   }
 
   void TextFieldInputType::SubtreeHasChanged() noexcept
@@ -788,13 +786,12 @@ namespace krys::boo::html
 
   namespace
   {
-    KRYS_NODISCARD bool DataListSuggestionStartsWith(dom::DOMStringView value,
-                                                     dom::DOMStringView prefix) noexcept
+    KRYS_NODISCARD bool DataListSuggestionStartsWith(DOMStringView value, DOMStringView prefix) noexcept
     {
       return text::ToASCIILower(value).starts_with(text::ToASCIILower(prefix));
     }
 
-    KRYS_NODISCARD bool DataListSuggestionContains(dom::DOMStringView value, dom::DOMStringView part) noexcept
+    KRYS_NODISCARD bool DataListSuggestionContains(DOMStringView value, DOMStringView part) noexcept
     {
       return text::ToASCIILower(value).contains(text::ToASCIILower(part));
     }
@@ -923,7 +920,7 @@ namespace krys::boo::html
 
     suggestions.insert(suggestions.end(), std::make_move_iterator(matchesContainingValue.begin()),
                        std::make_move_iterator(matchesContainingValue.end()));
-    _cachedSuggestions = Pair<dom::DOMString, List<DataListSuggestion>> {elementValue, suggestions};
+    _cachedSuggestions = Pair<DOMString, List<DataListSuggestion>> {elementValue, suggestions};
     return suggestions;
   }
 

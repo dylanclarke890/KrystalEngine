@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Color/CSSOKLCH.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   dom::ExceptionOr<Ref<CSSOKLCH>> CSSOKLCH::Create(CSSColorPercent lightness, CSSColorPercent chroma,
                                                    CSSColorAngle hue, CSSColorPercent alpha) noexcept

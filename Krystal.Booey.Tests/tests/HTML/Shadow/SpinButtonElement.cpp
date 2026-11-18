@@ -28,13 +28,13 @@ namespace krys::boo::tests
   {
     EditorFixture fixture(u8"<style>body{margin:0}</style><input type=number id=number value=5>"
                           u8"<input id=text><input type=range id=range>");
-    auto &number = Downcast<html::HTMLInputElement>(fixture.ById(u8"number"));
+    auto &number = Downcast<HTMLInputElement>(fixture.ById(u8"number"));
     auto &handler = fixture.Frame->GetEventHandler();
 
     // Only steppable fields that aren't ranges have one.
     REQUIRE(number.InnerSpinButtonElement());
-    CHECK_FALSE(Downcast<html::HTMLInputElement>(fixture.ById(u8"text")).InnerSpinButtonElement());
-    CHECK_FALSE(Downcast<html::HTMLInputElement>(fixture.ById(u8"range")).InnerSpinButtonElement());
+    CHECK_FALSE(Downcast<HTMLInputElement>(fixture.ById(u8"text")).InnerSpinButtonElement());
+    CHECK_FALSE(Downcast<HTMLInputElement>(fixture.ById(u8"range")).InnerSpinButtonElement());
 
     auto &spinButton = Downcast<html::SpinButtonElement>(*number.InnerSpinButtonElement());
     auto bounds = spinButton.GetRenderBox()->AbsoluteBoundingBoxRect();
@@ -74,7 +74,7 @@ namespace krys::boo::tests
   {
     EditorFixture fixture(u8"<style>body{margin:0}input{margin:0}div{height:50px}</style>"
                           u8"<input type=number id=number value=5><div id=other></div>");
-    auto &number = Downcast<html::HTMLInputElement>(fixture.ById(u8"number"));
+    auto &number = Downcast<HTMLInputElement>(fixture.ById(u8"number"));
     auto &handler = fixture.Frame->GetEventHandler();
     auto moves = CreateRef<CountingListener>();
     fixture.ById(u8"other").AddEventListener(event_names::MouseMove, moves, false);
@@ -102,7 +102,7 @@ namespace krys::boo::tests
     EditorFixture fixture(u8"<style>body{margin:0}input{margin:0}div{height:50px}</style>"
                           u8"<input type=number id=number value=5><div id=other></div><select id=select>"
                           u8"<option>a</option></select>");
-    auto &number = Downcast<html::HTMLInputElement>(fixture.ById(u8"number"));
+    auto &number = Downcast<HTMLInputElement>(fixture.ById(u8"number"));
     auto &handler = fixture.Frame->GetEventHandler();
     auto moves = CreateRef<CountingListener>();
     fixture.ById(u8"other").AddEventListener(event_names::MouseMove, moves, false);

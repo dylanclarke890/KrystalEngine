@@ -61,7 +61,7 @@ namespace krys::boo::html
       {
       }
 
-      bool Build(dom::DOMStringView formatString) noexcept
+      bool Build(DOMStringView formatString) noexcept
       {
         _editElement->ResetFields();
         return DateTimeFormat::Parse(formatString, *this);
@@ -172,13 +172,13 @@ namespace krys::boo::html
           (void)element->SetInlineStyleProperty(css::PropertyId::MarginInlineEnd, -1, css::UnitType::px);
         }
 
-        (void)element->AppendChild(*CreateRef<dom::Text>(document, dom::DOMString(text)));
+        (void)element->AppendChild(*CreateRef<Text>(document, DOMString(text)));
         (void)_editElement->FieldsWrapperElement().AppendChild(*element);
       }
     };
   }
 
-  DateTimeEditElement::DateTimeEditElement(dom::Document &document,
+  DateTimeEditElement::DateTimeEditElement(Document &document,
                                            DateTimeEditElementEditControlOwner &editControlOwner) noexcept
       : HTMLDivElement(document), _editControlOwner(&editControlOwner),
         _placeholderDate(
@@ -195,7 +195,7 @@ namespace krys::boo::html
   }
 
   Ref<DateTimeEditElement>
-    DateTimeEditElement::Create(dom::Document &document,
+    DateTimeEditElement::Create(Document &document,
                                 DateTimeEditElementEditControlOwner &editControlOwner) noexcept
   {
     auto element = CreateRef<DateTimeEditElement>(document, editControlOwner);
@@ -203,10 +203,10 @@ namespace krys::boo::html
     return element;
   }
 
-  dom::Element &DateTimeEditElement::FieldsWrapperElement() const noexcept
+  Element &DateTimeEditElement::FieldsWrapperElement() const noexcept
   {
     krys_debug_assert(FirstChild());
-    return Downcast<dom::Element>(*FirstChild());
+    return Downcast<Element>(*FirstChild());
   }
 
   void DateTimeEditElement::AddField(const Ref<DateTimeFieldElement> &field) noexcept
@@ -258,11 +258,11 @@ namespace krys::boo::html
       element->SetUserAgentPart(css::user_agent_parts::WebkitDatetimeEditFieldsWrapper());
     }
 
-    Ref<dom::Element> fieldsWrapper = ShareRef(FieldsWrapperElement());
+    Ref<Element> fieldsWrapper = ShareRef(FieldsWrapperElement());
     RefPtr<DateTimeFieldElement> focusedField = ShareRefPtr(FocusedFieldElement());
 
     DateTimeEditBuilder builder(*this, layoutParameters);
-    RefPtr<dom::Node> lastChildToBeRemoved = ShareRefPtr(fieldsWrapper->LastChild());
+    RefPtr<Node> lastChildToBeRemoved = ShareRefPtr(fieldsWrapper->LastChild());
     if (!builder.Build(layoutParameters.DateTimeFormat) || _fields.empty())
     {
       lastChildToBeRemoved = ShareRefPtr(fieldsWrapper->LastChild());
@@ -292,7 +292,7 @@ namespace krys::boo::html
 
     if (lastChildToBeRemoved)
     {
-      while (RefPtr<dom::Node> childNode = ShareRefPtr(fieldsWrapper->FirstChild()))
+      while (RefPtr<Node> childNode = ShareRefPtr(fieldsWrapper->FirstChild()))
       {
         (void)fieldsWrapper->RemoveChild(*childNode);
         if (childNode == lastChildToBeRemoved)
@@ -406,9 +406,9 @@ namespace krys::boo::html
     return true;
   }
 
-  dom::DOMString DateTimeEditElement::LocaleIdentifier() const noexcept
+  DOMString DateTimeEditElement::LocaleIdentifier() const noexcept
   {
-    return _editControlOwner ? _editControlOwner->LocaleIdentifier() : dom::DOMString();
+    return _editControlOwner ? _editControlOwner->LocaleIdentifier() : DOMString();
   }
 
   const DateComponents &DateTimeEditElement::PlaceholderDate() const noexcept
@@ -445,17 +445,17 @@ namespace krys::boo::html
     }
   }
 
-  dom::DOMString DateTimeEditElement::Value() const noexcept
+  DOMString DateTimeEditElement::Value() const noexcept
   {
     return _editControlOwner ? _editControlOwner->FormatDateTimeFieldsState(ValueAsDateTimeFieldsState())
-                             : dom::DOMString();
+                             : DOMString();
   }
 
-  dom::DOMString DateTimeEditElement::PlaceholderValue() const noexcept
+  DOMString DateTimeEditElement::PlaceholderValue() const noexcept
   {
     return _editControlOwner ? _editControlOwner->FormatDateTimeFieldsState(
                                  ValueAsDateTimeFieldsState(DateTimePlaceholderIfNoValue::Yes))
-                             : dom::DOMString();
+                             : DOMString();
   }
 
   DateTimeFieldsState DateTimeEditElement::ValueAsDateTimeFieldsState(

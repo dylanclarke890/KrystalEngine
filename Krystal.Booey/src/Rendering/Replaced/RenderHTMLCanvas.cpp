@@ -34,7 +34,7 @@
 
 namespace krys::boo
 {
-  RenderHTMLCanvas::RenderHTMLCanvas(html::HTMLCanvasElement &element, RenderStyle &&style) noexcept
+  RenderHTMLCanvas::RenderHTMLCanvas(HTMLCanvasElement &element, RenderStyle &&style) noexcept
       : RenderReplaced(Type::HTMLCanvas, element, krys::move(style), LayoutSize(element.Size()))
   {
     krys_debug_assert(IsRenderHTMLCanvas());
@@ -42,9 +42,9 @@ namespace krys::boo
 
   RenderHTMLCanvas::~RenderHTMLCanvas() noexcept = default;
 
-  html::HTMLCanvasElement &RenderHTMLCanvas::CanvasElement() const noexcept
+  HTMLCanvasElement &RenderHTMLCanvas::CanvasElement() const noexcept
   {
-    return Downcast<html::HTMLCanvasElement>(NodeForNonAnonymous());
+    return Downcast<HTMLCanvasElement>(NodeForNonAnonymous());
   }
 
   bool RenderHTMLCanvas::RequiresLayer() const noexcept

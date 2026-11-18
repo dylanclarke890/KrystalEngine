@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/SVG/Elements/SVGPolygonElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGPolygonElement::SVGPolygonElement(dom::Document &document) noexcept
+  SVGPolygonElement::SVGPolygonElement(Document &document) noexcept
       : SVGPolyElement(document, SVGElementInterface::Polygon)
   {
   }

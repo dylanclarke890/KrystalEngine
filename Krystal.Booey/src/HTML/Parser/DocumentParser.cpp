@@ -9,27 +9,27 @@
 
 namespace krys::boo::html
 {
-  DocumentParser::DocumentParser(dom::HTMLDocument &document) noexcept
+  DocumentParser::DocumentParser(HTMLDocument &document) noexcept
       : _document(document), _input(),
         _tokenizer(_input, [&]() { return _treeBuilder.IsCDATASectionAllowedInCurrentContext(); }),
         _treeBuilder(document, _tokenizer, _fragmentParsingContext)
   {
   }
 
-  Ref<dom::DocumentFragment> DocumentParser::ParseFragment(dom::ContainerNode &target, utf8_string input,
-                                                           bool allowDeclarativeShadowRoots,
-                                                           ParserScriptingMode scriptingMode,
-                                                           Maybe<SanitizerConfig> &&configuration) noexcept
+  Ref<DocumentFragment> DocumentParser::ParseFragment(ContainerNode &target, utf8_string input,
+                                                      bool allowDeclarativeShadowRoots,
+                                                      ParserScriptingMode scriptingMode,
+                                                      Maybe<SanitizerConfig> &&configuration) noexcept
   {
     // 1. Assert: scriptingMode is either Inert or Fragment.
     krys_debug_assert(scriptingMode == ParserScriptingMode::Inert
                       || scriptingMode == ParserScriptingMode::Fragment);
 
     // 2. Let context be target if target is an Element; otherwise target's host.
-    auto *contextElement = DynamicDowncast<dom::Element>(target);
+    auto *contextElement = DynamicDowncast<Element>(target);
     if (!contextElement)
     {
-      contextElement = Downcast<dom::DocumentFragment>(target).Host();
+      contextElement = Downcast<DocumentFragment>(target).Host();
     }
 
     // 3. Assert: context is non-null.
@@ -37,7 +37,7 @@ namespace krys::boo::html
     auto &context = *contextElement;
 
     // 4. Let document be a Document node whose type is "html".
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
 
     // 5. Let contextDocument be context's node document.
     auto &contextDocument = context.NodeDocument();
@@ -142,7 +142,7 @@ namespace krys::boo::html
 
     // 11. Let root be the result of creating an element given document, "html", the HTML namespace, null,
     //     null, false, and the result of looking up a custom element registry given target.
-    dom::QualifiedName name {infra::namespaces::HTML, null, u8"html", TagName::html, Namespace::HTML};
+    QualifiedName name {infra::namespaces::HTML, null, u8"html", TagName::html, Namespace::HTML};
     auto root =
       dom::ElementFactory::Create(*document, name, null, false,
                                   ShareRefPtr(CustomElementAlgorithms::LookUpCustomElementRegistry(target)));
@@ -181,7 +181,7 @@ namespace krys::boo::html
       ParsedAttribute attribute {};
       attribute.Name.assign(attrName.begin(), attrName.end());
 
-      auto attrValue = context.GetAttribute(dom::DOMStringAtom(attrName));
+      auto attrValue = context.GetAttribute(DOMStringAtom(attrName));
       if (attrValue.has_value())
       {
         attribute.Value.assign(attrValue->begin(), attrValue->end());

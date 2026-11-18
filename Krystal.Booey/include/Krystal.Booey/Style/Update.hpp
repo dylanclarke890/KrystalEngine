@@ -38,20 +38,12 @@
 
 namespace krys::boo
 {
-  class RenderStyle;
-}
-
-namespace krys::boo::dom
-{
   class ContainerNode;
   class Document;
   class Element;
-  class Text;
-}
-
-namespace krys::boo::svg
-{
+  class RenderStyle;
   class SVGElement;
+  class Text;
 }
 
 namespace krys::boo::style
@@ -82,33 +74,33 @@ namespace krys::boo::style
     KRYS_NON_COPY_MOVABLE(Update);
 
   private:
-    Ref<dom::Document> _document;
-    ListHashSet<RefPtr<dom::ContainerNode>> _roots;
-    ListHashSet<RefPtr<dom::Element>> _rebuildRoots;
-    HashMap<RefPtr<const dom::Element>, ElementUpdate> _elements;
-    HashMap<RefPtr<const dom::Text>, TextUpdate> _texts;
+    Ref<boo::Document> _document;
+    ListHashSet<RefPtr<ContainerNode>> _roots;
+    ListHashSet<RefPtr<Element>> _rebuildRoots;
+    HashMap<RefPtr<const Element>, ElementUpdate> _elements;
+    HashMap<RefPtr<const Text>, TextUpdate> _texts;
     UniquePtr<RenderStyle> _initialContainingBlockUpdate;
 
   public:
-    explicit Update(dom::Document &document) noexcept;
+    explicit Update(boo::Document &document) noexcept;
 
     ~Update() noexcept;
 
-    KRYS_NODISCARD const ListHashSet<RefPtr<dom::ContainerNode>> &Roots() const noexcept
+    KRYS_NODISCARD const ListHashSet<RefPtr<ContainerNode>> &Roots() const noexcept
     {
       return _roots;
     }
 
-    KRYS_NODISCARD ListHashSet<RefPtr<dom::Element>> TakeRebuildRoots() noexcept
+    KRYS_NODISCARD ListHashSet<RefPtr<Element>> TakeRebuildRoots() noexcept
     {
       return std::exchange(_rebuildRoots, {});
     }
 
-    KRYS_NODISCARD const ElementUpdate *GetElementUpdate(const dom::Element &element) const noexcept;
+    KRYS_NODISCARD const ElementUpdate *GetElementUpdate(const Element &element) const noexcept;
 
-    KRYS_NODISCARD ElementUpdate *GetElementUpdate(const dom::Element &element) noexcept;
+    KRYS_NODISCARD ElementUpdate *GetElementUpdate(const Element &element) noexcept;
 
-    KRYS_NODISCARD const TextUpdate *GetTextUpdate(const dom::Text &text) const noexcept;
+    KRYS_NODISCARD const TextUpdate *GetTextUpdate(const Text &text) const noexcept;
 
     KRYS_NODISCARD const RenderStyle *InitialContainingBlockUpdate() const noexcept
     {
@@ -116,11 +108,11 @@ namespace krys::boo::style
     }
 
     /// @brief The element's new style, or else the style it's rendered with.
-    KRYS_NODISCARD const RenderStyle *ElementStyle(const dom::Element &element) const noexcept;
+    KRYS_NODISCARD const RenderStyle *ElementStyle(const Element &element) const noexcept;
 
-    KRYS_NODISCARD RenderStyle *ElementStyle(const dom::Element &element) noexcept;
+    KRYS_NODISCARD RenderStyle *ElementStyle(const Element &element) noexcept;
 
-    KRYS_NODISCARD const dom::Document &Document() const noexcept
+    KRYS_NODISCARD const boo::Document &Document() const noexcept
     {
       return *_document;
     }
@@ -135,19 +127,19 @@ namespace krys::boo::style
       return static_cast<uint32>(_elements.size() + _texts.size());
     }
 
-    void AddElement(dom::Element &element, dom::Element *parent, ElementUpdate &&elementUpdate) noexcept;
+    void AddElement(Element &element, Element *parent, ElementUpdate &&elementUpdate) noexcept;
 
-    void AddText(dom::Text &text, dom::Element *parent, TextUpdate &&textUpdate) noexcept;
+    void AddText(Text &text, Element *parent, TextUpdate &&textUpdate) noexcept;
 
-    void AddText(dom::Text &text, TextUpdate &&textUpdate) noexcept;
+    void AddText(Text &text, TextUpdate &&textUpdate) noexcept;
 
-    void AddSVGRendererUpdate(svg::SVGElement &element) noexcept;
+    void AddSVGRendererUpdate(SVGElement &element) noexcept;
 
     void AddInitialContainingBlockUpdate(UniquePtr<RenderStyle> style) noexcept;
 
   private:
-    void AddPossibleRoot(dom::Element *element) noexcept;
+    void AddPossibleRoot(Element *element) noexcept;
 
-    void AddPossibleRebuildRoot(dom::Element &element, dom::Element *parent) noexcept;
+    void AddPossibleRebuildRoot(Element &element, Element *parent) noexcept;
   };
 }

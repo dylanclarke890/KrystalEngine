@@ -74,14 +74,14 @@ namespace krys::boo
     }
   }
 
-  RenderTable::RenderTable(Type type, dom::Element &element, RenderStyle &&style) noexcept
+  RenderTable::RenderTable(Type type, Element &element, RenderStyle &&style) noexcept
       : RenderBlock(type, element, krys::move(style), {}), _columnPos(1, 0_lu)
   {
     SetChildrenInline(false);
     krys_debug_assert(IsRenderTable());
   }
 
-  RenderTable::RenderTable(Type type, dom::Document &document, RenderStyle &&style) noexcept
+  RenderTable::RenderTable(Type type, Document &document, RenderStyle &&style) noexcept
       : RenderBlock(type, document, krys::move(style), {}), _columnPos(1, 0_lu)
   {
     SetChildrenInline(false);
@@ -93,8 +93,8 @@ namespace krys::boo
 
   bool RenderTable::IsHTMLTableElement() const noexcept
   {
-    auto *htmlElement = DynamicDowncast<html::HTMLElement>(GetElement());
-    return htmlElement && Is<html::HTMLTableElement>(*htmlElement);
+    auto *htmlElement = DynamicDowncast<HTMLElement>(GetElement());
+    return htmlElement && Is<HTMLTableElement>(*htmlElement);
   }
 
   bool RenderTable::CollapseBorders() const noexcept

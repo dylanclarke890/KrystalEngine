@@ -26,7 +26,7 @@
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlbodyelement
   class HTMLBodyElement : public HTMLElement
@@ -34,7 +34,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLBodyElement);
 
   public:
-    HTMLBodyElement(dom::Document &document) noexcept;
+    HTMLBodyElement(Document &document) noexcept;
 
 #pragma region WindowEventHandlers - https://html.spec.whatwg.org/#windoweventhandlers
 
@@ -46,70 +46,67 @@ namespace krys::boo::html
 #pragma region HTMLBodyElement Obsolete members - https://html.spec.whatwg.org/#HTMLBodyElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-body-text
-    KRYS_NODISCARD dom::DOMString Text() const noexcept;
+    KRYS_NODISCARD DOMString Text() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-text
-    void Text(dom::DOMString value) noexcept;
+    void Text(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-link
-    KRYS_NODISCARD dom::DOMString Link() const noexcept;
+    KRYS_NODISCARD DOMString Link() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-link
-    void Link(dom::DOMString value) noexcept;
+    void Link(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-vlink
-    KRYS_NODISCARD dom::DOMString VLink() const noexcept;
+    KRYS_NODISCARD DOMString VLink() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-vlink
-    void VLink(dom::DOMString value) noexcept;
+    void VLink(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-alink
-    KRYS_NODISCARD dom::DOMString ALink() const noexcept;
+    KRYS_NODISCARD DOMString ALink() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-alink
-    void ALink(dom::DOMString value) noexcept;
+    void ALink(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-bgcolor
-    KRYS_NODISCARD dom::DOMString BgColor() const noexcept;
+    KRYS_NODISCARD DOMString BgColor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-bgcolor
-    void BgColor(dom::DOMString value) noexcept;
+    void BgColor(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-background
-    KRYS_NODISCARD dom::DOMString Background() const noexcept;
+    KRYS_NODISCARD DOMString Background() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-body-background
-    void Background(dom::DOMString value) noexcept;
+    void Background(DOMString value) noexcept;
 
 #pragma endregion
 
   protected:
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLBodyElement)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLBodyElement)
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLBodyElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return Is<krys::boo::html::HTMLElement>(target)
-           && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLBodyElement();
+    return Is<krys::boo::HTMLElement>(target) && Downcast<krys::boo::HTMLElement>(target).IsHTMLBodyElement();
   }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

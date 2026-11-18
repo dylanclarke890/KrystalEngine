@@ -33,7 +33,7 @@
 #include "Krystal.Core/TriState.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
 }
@@ -97,7 +97,7 @@ namespace krys::boo::html
     /// @brief Must be called when a validation constraint or the control's value changes.
     void UpdateValidity() noexcept;
 
-    void SetCustomValidationMessage(dom::DOMStringView message) noexcept override;
+    void SetCustomValidationMessage(DOMStringView message) noexcept override;
 
     void SetDisabledByAncestorFieldset(bool isDisabled) noexcept;
 
@@ -155,7 +155,7 @@ namespace krys::boo::html
     KRYS_NODISCARD virtual bool ShouldAutocomplete() const noexcept;
 
     /// @brief The control's type, as `type` exposes it.
-    KRYS_NODISCARD virtual dom::DOMString FormControlType() const noexcept = 0;
+    KRYS_NODISCARD virtual DOMString FormControlType() const noexcept = 0;
 
   protected:
     ValidatedFormListedElement() noexcept = default;
@@ -180,18 +180,17 @@ namespace krys::boo::html
       return _disabledByAncestorFieldset;
     }
 
-    void InsertedIntoAncestor(bool connectedToDocument, dom::ContainerNode &parentOfInsertedTree) noexcept;
+    void InsertedIntoAncestor(bool connectedToDocument, ContainerNode &parentOfInsertedTree) noexcept;
 
     void DidFinishInsertingNode() noexcept;
 
-    void RemovedFromAncestor(bool disconnectedFromDocument,
-                             dom::ContainerNode &oldParentOfRemovedTree) noexcept;
+    void RemovedFromAncestor(bool disconnectedFromDocument, ContainerNode &oldParentOfRemovedTree) noexcept;
 
-    void ParseAttribute(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> value) noexcept;
+    void ParseAttribute(const DOMStringAtom &localName, Maybe<DOMStringView> value) noexcept;
 
-    void ParseDisabledAttribute(Maybe<dom::DOMStringView> value) noexcept;
+    void ParseDisabledAttribute(Maybe<DOMStringView> value) noexcept;
 
-    void ParseReadOnlyAttribute(Maybe<dom::DOMStringView> value) noexcept;
+    void ParseReadOnlyAttribute(Maybe<DOMStringView> value) noexcept;
 
     virtual void DisabledStateChanged() noexcept;
 
@@ -210,7 +209,7 @@ namespace krys::boo::html
 
     void SetDataListAncestorState(TriState isInsideDataList) noexcept;
 
-    void SyncWithFieldsetAncestors(dom::ContainerNode *insertionPoint) noexcept;
+    void SyncWithFieldsetAncestors(ContainerNode *insertionPoint) noexcept;
 
   private:
     KRYS_NODISCARD bool ComputeIsDisabledByFieldsetAncestor() const noexcept;

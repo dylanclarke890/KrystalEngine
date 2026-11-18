@@ -48,12 +48,8 @@
 
 namespace krys::boo
 {
-  class RenderStyle;
-}
-
-namespace krys::boo::dom
-{
   class Document;
+  class RenderStyle;
 }
 
 namespace krys::boo::style
@@ -214,8 +210,8 @@ namespace krys::boo::style
   void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
                                        const Color &value) noexcept;
 
-  KRYS_NODISCARD css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
-                                                                  const Color &value) noexcept;
+  KRYS_NODISCARD CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
+                                                             const Color &value) noexcept;
 
   template <>
   struct Serialiser<Color>
@@ -230,7 +226,7 @@ namespace krys::boo::style
 
   KRYS_NODISCARD Color ToStyleColor(const css::Color &value, ColorResolutionState &state) noexcept;
 
-  KRYS_NODISCARD Color ToStyleColor(const css::Color &value, Ref<const dom::Document> document,
+  KRYS_NODISCARD Color ToStyleColor(const css::Color &value, Ref<const Document> document,
                                     const RenderStyle &style,
                                     const css::ToLengthConversionData &conversionData) noexcept;
 

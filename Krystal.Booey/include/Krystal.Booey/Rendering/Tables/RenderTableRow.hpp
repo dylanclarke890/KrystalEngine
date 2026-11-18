@@ -61,9 +61,9 @@ namespace krys::boo
     uint32 _rowIndex : 31 {UnsetRowIndex};
 
   public:
-    RenderTableRow(dom::Element &element, RenderStyle &&style) noexcept;
+    RenderTableRow(Element &element, RenderStyle &&style) noexcept;
 
-    RenderTableRow(dom::Document &document, RenderStyle &&style) noexcept;
+    RenderTableRow(Document &document, RenderStyle &&style) noexcept;
 
     ~RenderTableRow() noexcept override;
 

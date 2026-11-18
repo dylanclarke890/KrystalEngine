@@ -9,12 +9,16 @@ namespace krys::boo::html
   class CustomElementRegistry;
 }
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Attr;
   class Element;
-  enum class InsertAdjacentWhere : uint8;
   class Node;
+}
+
+namespace krys::boo::dom
+{
+  enum class InsertAdjacentWhere : uint8;
   enum class ShadowRootMode : uint8;
   enum class SlotAssignmentMode : uint8;
 

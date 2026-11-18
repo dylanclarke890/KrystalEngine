@@ -27,15 +27,15 @@
 #include "Krystal.Booey/HTML/Elements/HTMLMediaElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLMediaElement::HTMLMediaElement(dom::Document &document, HTMLElementInterface interface) noexcept
-      : HTMLElement(document, interface, HTMLElementFlags::IsMediaElement)
+  HTMLMediaElement::HTMLMediaElement(Document &document, html::HTMLElementInterface interface) noexcept
+      : HTMLElement(document, interface, html::HTMLElementFlags::IsMediaElement)
   {
   }
 
-  HTMLMediaElement::HTMLMediaElement(dom::Document &document) noexcept
-      : HTMLMediaElement(document, HTMLElementInterface::Media)
+  HTMLMediaElement::HTMLMediaElement(Document &document) noexcept
+      : HTMLMediaElement(document, html::HTMLElementInterface::Media)
   {
   }
 }

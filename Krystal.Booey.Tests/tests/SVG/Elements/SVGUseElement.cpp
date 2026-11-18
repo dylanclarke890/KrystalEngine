@@ -20,7 +20,7 @@ namespace krys::boo::svg::tests
   namespace
   {
     template <typename T>
-    KRYS_NODISCARD T &ById(dom::Document &document, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD T &ById(Document &document, DOMStringView id) noexcept
     {
       auto element = document.GetElementById(id);
       krys_assert(element);
@@ -81,14 +81,14 @@ layer at (0,0) size 800x104
     (void)rect.SetAttribute(u8"width", u8"15");
     clone = TargetClone(fixture, use);
     REQUIRE(clone);
-    CHECK(clone->GetAttribute(u8"width") == dom::DOMString(u8"15"));
+    CHECK(clone->GetAttribute(u8"width") == DOMString(u8"15"));
     CHECK(Downcast<SVGRectElement>(*clone).Width().ValueInSpecifiedUnits() == 15);
 
     // So do changes to its inline style through the CSSOM.
     REQUIRE_FALSE(rect.Style().SetProperty(u8"fill", u8"blue", u8"").HasException());
     clone = TargetClone(fixture, use);
     REQUIRE(clone);
-    CHECK(clone->GetAttribute(u8"style") == dom::DOMString(u8"fill: blue;"));
+    CHECK(clone->GetAttribute(u8"style") == DOMString(u8"fill: blue;"));
 
     // A new target is followed too.
     (void)use.SetAttribute(u8"href", u8"#missing");
@@ -141,9 +141,9 @@ layer at (0,0) size 800x104
     auto *symbolClone = TargetClone(fixture, ById<SVGUseElement>(*fixture.Document, u8"inner"));
     REQUIRE(symbolClone);
     REQUIRE(Is<SVGSvgElement>(*symbolClone));
-    CHECK(symbolClone->GetAttribute(u8"width") == dom::DOMString(u8"50"));
+    CHECK(symbolClone->GetAttribute(u8"width") == DOMString(u8"50"));
     CHECK_FALSE(symbolClone->HasAttribute(u8"height"));
-    CHECK(symbolClone->GetAttribute(u8"viewBox") == dom::DOMString(u8"0 0 10 10"));
+    CHECK(symbolClone->GetAttribute(u8"viewBox") == DOMString(u8"0 0 10 10"));
     CHECK(symbolClone->CorrespondingElement() == &ById<SVGElement>(*fixture.Document, u8"s"));
 
     // A use inside the target becomes a <g> holding its own target's instances, without its x, y, width,
@@ -154,7 +154,7 @@ layer at (0,0) size 800x104
     auto *innerClone = DynamicDowncast<SVGElement>(gClone->FirstChild());
     REQUIRE(innerClone);
     CHECK(Is<SVGGElement>(*innerClone));
-    CHECK(innerClone->GetAttribute(u8"id") == dom::DOMString(u8"inner"));
+    CHECK(innerClone->GetAttribute(u8"id") == DOMString(u8"inner"));
     CHECK_FALSE(innerClone->HasAttribute(u8"href"));
     CHECK_FALSE(innerClone->HasAttribute(u8"width"));
     CHECK(innerClone->CorrespondingElement() == &ById<SVGElement>(*fixture.Document, u8"inner"));
@@ -175,7 +175,7 @@ layer at (0,0) size 800x104
     REQUIRE(symbolRect.Instances().size() == 2);
     for (auto &instance : symbolRect.Instances())
     {
-      CHECK(instance->GetAttribute(u8"height") == dom::DOMString(u8"4"));
+      CHECK(instance->GetAttribute(u8"height") == DOMString(u8"4"));
     }
   }
 

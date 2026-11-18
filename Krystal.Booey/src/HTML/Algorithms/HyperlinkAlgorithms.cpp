@@ -36,7 +36,7 @@ namespace krys::boo::html
     /// @brief The target @p target, unless it has dangling markup (a newline and a `<`), which makes it
     /// `_blank`.
     /// @see https://html.spec.whatwg.org/#get-an-element's-target
-    KRYS_NODISCARD dom::DOMStringAtom MakeTargetBlankIfHasDanglingMarkup(dom::DOMStringAtom target) noexcept
+    KRYS_NODISCARD DOMStringAtom MakeTargetBlankIfHasDanglingMarkup(DOMStringAtom target) noexcept
     {
       auto view = target.View();
       if ((view.contains(u8'\n') || view.contains(u8'\r') || view.contains(u8'\t')) && view.contains(u8'<'))
@@ -62,7 +62,7 @@ namespace krys::boo::html
     (void)element.SetAttribute(u8"href", url.String());
   }
 
-  dom::DOMStringAtom HyperlinkAlgorithms::EffectiveTarget(const HTMLElement &element) noexcept
+  DOMStringAtom HyperlinkAlgorithms::EffectiveTarget(const HTMLElement &element) noexcept
   {
     // 1. If target is null:
     // 1a. If element has a target attribute, then set target to that attribute's value.
@@ -70,7 +70,7 @@ namespace krys::boo::html
     //     to the value of the target attribute of the first such base element.
     auto target = element.GetAttribute(u8"target");
     auto effectiveTarget =
-      target ? dom::DOMStringAtom(*target) : dom::DOMStringAtom(element.NodeDocument().BaseTarget());
+      target ? DOMStringAtom(*target) : DOMStringAtom(element.NodeDocument().BaseTarget());
 
     // 2. If target is not null, and contains an ASCII tab or newline and a U+003C (<), then set target to
     //    "_blank".
@@ -88,14 +88,14 @@ namespace krys::boo::html
     return keyboardEvent && keyboardEvent->KeyIdentifier() == u8"Enter";
   }
 
-  bool HyperlinkAlgorithms::HasRel(const HTMLElement &element, dom::DOMStringView relation) noexcept
+  bool HyperlinkAlgorithms::HasRel(const HTMLElement &element, DOMStringView relation) noexcept
   {
     auto rel = element.GetAttribute(u8"rel");
     if (!rel)
     {
       return false;
     }
-    dom::DOMStringView remaining = *rel;
+    DOMStringView remaining = *rel;
     while (!remaining.empty())
     {
       auto start = std::ranges::find_if_not(remaining, [](char8_t c) { return text::IsASCIIWhitespace(c); });
@@ -123,7 +123,7 @@ namespace krys::boo::html
     Maybe<utf8_string> hyperlinkSuffix;
 
     // 3. If element is an a element, and event's target is an img with an ismap attribute specified:
-    auto *targetNode = DynamicDowncast<dom::Node>(event.Target().get());
+    auto *targetNode = DynamicDowncast<Node>(event.Target().get());
     auto *image = targetNode ? DynamicDowncast<HTMLImageElement>(*targetNode) : nullptr;
     if (Is<HTMLAnchorElement>(element) && image && image->HasAttribute(u8"ismap"))
     {
@@ -176,7 +176,7 @@ namespace krys::boo::html
     event.SetDefaultHandled();
 
     // 1. If subject cannot navigate, then return.
-    Ref<dom::Document> document = ShareRef(subject.NodeDocument());
+    Ref<Document> document = ShareRef(subject.NodeDocument());
     RefPtr<LocalFrame> frame = ShareRefPtr(document->Frame());
     if (!frame || (!Is<HTMLAnchorElement>(subject) && !subject.IsConnected()))
     {
@@ -190,7 +190,7 @@ namespace krys::boo::html
 
     // 4. Let urlRecord be the result of encoding-parsing a URL given subject's href attribute value, relative
     //    to subject's node document.
-    auto href = subject.GetAttribute(u8"href").value_or(dom::DOMString());
+    auto href = subject.GetAttribute(u8"href").value_or(DOMString());
     auto urlRecord = document->CompleteURL(infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(href));
 
     // 5. If urlRecord is failure, then return.
@@ -219,7 +219,7 @@ namespace krys::boo::html
     //     subject's hyperlink referrer policy, userInvolvement set to userInvolvement, and sourceElement set
     //     to subject.
     auto downloadAttribute = subject.GetAttribute(u8"download");
-    auto download = downloadAttribute ? dom::DOMStringAtom(*downloadAttribute) : null;
+    auto download = downloadAttribute ? DOMStringAtom(*downloadAttribute) : null;
     frame->Loader().ChangeLocation(urlRecord, targetAttributeValue, &event, HyperlinkReferrerPolicy(subject),
                                    download, &subject);
   }

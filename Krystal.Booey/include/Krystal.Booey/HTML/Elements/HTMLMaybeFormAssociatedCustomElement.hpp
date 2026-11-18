@@ -31,7 +31,10 @@
 namespace krys::boo::html
 {
   class FormAssociatedCustomElement;
+}
 
+namespace krys::boo
+{
   /// @brief An HTML element whose name is a valid custom element name: a custom element, defined or not yet,
   /// which is form-associated if its definition says so.
   class HTMLMaybeFormAssociatedCustomElement final : public HTMLElement
@@ -39,11 +42,10 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLMaybeFormAssociatedCustomElement);
 
   private:
-    UniquePtr<FormAssociatedCustomElement> _formAssociatedCustomElement;
+    UniquePtr<html::FormAssociatedCustomElement> _formAssociatedCustomElement;
 
   public:
-    HTMLMaybeFormAssociatedCustomElement(dom::Document &document,
-                                         const dom::DOMStringAtom &localName) noexcept;
+    HTMLMaybeFormAssociatedCustomElement(Document &document, const DOMStringAtom &localName) noexcept;
 
     ~HTMLMaybeFormAssociatedCustomElement() noexcept override;
 
@@ -55,15 +57,15 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#form-associated-custom-element
     KRYS_NODISCARD bool IsFormAssociatedCustomElement() const noexcept;
 
-    KRYS_NODISCARD FormAssociatedElement *AsFormAssociatedElement() noexcept final;
+    KRYS_NODISCARD html::FormAssociatedElement *AsFormAssociatedElement() noexcept final;
 
-    KRYS_NODISCARD FormListedElement *AsFormListedElement() noexcept final;
+    KRYS_NODISCARD html::FormListedElement *AsFormListedElement() noexcept final;
 
-    KRYS_NODISCARD ValidatedFormListedElement *AsValidatedFormListedElement() noexcept final;
+    KRYS_NODISCARD html::ValidatedFormListedElement *AsValidatedFormListedElement() noexcept final;
 
     /// @brief The form-associated half that the element's internals act on: present once the element is
     /// being upgraded (or created) by a form-associated definition.
-    KRYS_NODISCARD FormAssociatedCustomElement *
+    KRYS_NODISCARD html::FormAssociatedCustomElement *
       FormAssociatedCustomElementForElementInternals() const noexcept;
 
     KRYS_NODISCARD bool MatchesValidPseudoClass() const noexcept final;
@@ -95,26 +97,25 @@ namespace krys::boo::html
 
     void OnPostConnection() noexcept final;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept final;
 
-    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
+    void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept final;
 
-    void OnAdopt(dom::Document &oldDocument) noexcept final;
+    void OnAdopt(Document &oldDocument) noexcept final;
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept final;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLMaybeFormAssociatedCustomElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLMaybeFormAssociatedCustomElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
     return target.IsHTMLElement()
-           && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLMaybeFormAssociatedCustomElement();
+           && Downcast<krys::boo::HTMLElement>(target).IsHTMLMaybeFormAssociatedCustomElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLMaybeFormAssociatedCustomElement();
   }

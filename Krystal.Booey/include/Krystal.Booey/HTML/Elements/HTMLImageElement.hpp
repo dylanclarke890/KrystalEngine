@@ -33,28 +33,31 @@
 namespace krys::boo
 {
   class CachedImage;
+  class HTMLMapElement;
+  class HTMLPictureElement;
+  class HTMLSourceElement;
   class Image;
 }
 
 namespace krys::boo::html
 {
   class HTMLImageLoader;
-  class HTMLMapElement;
-  class HTMLPictureElement;
-  class HTMLSourceElement;
   struct ImageCandidate;
+}
 
+namespace krys::boo
+{
   /// @see https://html.spec.whatwg.org/#htmlimageelement
   // FIXME: decode(), the legacy Image()
   // constructor, and re-selecting the source when the media queries it depends on change.
-  class HTMLImageElement : public HTMLElement, public FormAssociatedElement
+  class HTMLImageElement : public HTMLElement, public html::FormAssociatedElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLImageElement);
     friend class HTMLPictureElement;
 
   private:
-    UniquePtr<HTMLImageLoader> _imageLoader;
-    dom::DOMString _bestFitImageURL;
+    UniquePtr<html::HTMLImageLoader> _imageLoader;
+    DOMString _bestFitImageURL;
     url::URL _currentURL;
     float _imageDevicePixelRatio {1.0f};
     WeakPtr<HTMLPictureElement> _pictureElement;
@@ -76,7 +79,7 @@ namespace krys::boo::html
       return false;
     }
 
-    HTMLImageElement(dom::Document &document) noexcept;
+    HTMLImageElement(Document &document) noexcept;
 
     ~HTMLImageElement() noexcept override;
 
@@ -94,10 +97,10 @@ namespace krys::boo::html
 #pragma region HTMLImageElement - https://html.spec.whatwg.org/#htmlimageelement
 
     /// @see https://html.spec.whatwg.org/#dom-img-alt
-    KRYS_NODISCARD dom::DOMString Alt() const noexcept;
+    KRYS_NODISCARD DOMString Alt() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-alt
-    void Alt(dom::DOMString value) noexcept;
+    void Alt(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-src
     KRYS_NODISCARD dom::USVString Src() const noexcept;
@@ -112,22 +115,22 @@ namespace krys::boo::html
     void SrcSet(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-sizes
-    KRYS_NODISCARD dom::DOMString Sizes() const noexcept;
+    KRYS_NODISCARD DOMString Sizes() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-sizes
-    void Sizes(dom::DOMString value) noexcept;
+    void Sizes(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-crossorigin
-    KRYS_NODISCARD Maybe<dom::DOMString> CrossOrigin() const noexcept;
+    KRYS_NODISCARD Maybe<DOMString> CrossOrigin() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-crossorigin
-    void CrossOrigin(Maybe<dom::DOMString> value) noexcept;
+    void CrossOrigin(Maybe<DOMString> value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-usemap
-    KRYS_NODISCARD dom::DOMString UseMap() const noexcept;
+    KRYS_NODISCARD DOMString UseMap() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-usemap
-    void UseMap(dom::DOMString value) noexcept;
+    void UseMap(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-ismap
     KRYS_NODISCARD bool IsMap() const noexcept;
@@ -170,32 +173,32 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::USVString CurrentSrc() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-referrerpolicy
-    KRYS_NODISCARD dom::DOMString ReferrerPolicy() const noexcept;
+    KRYS_NODISCARD DOMString ReferrerPolicy() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-referrerpolicy
-    void ReferrerPolicy(dom::DOMString value) noexcept;
+    void ReferrerPolicy(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-decoding
-    KRYS_NODISCARD dom::DOMString Decoding() const noexcept;
+    KRYS_NODISCARD DOMString Decoding() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-decoding
-    void Decoding(dom::DOMString value) noexcept;
+    void Decoding(DOMString value) noexcept;
 
     /// @brief The decoding hint `decoding` gives: synchronous, asynchronous, or the engine's choice.
     /// @see https://html.spec.whatwg.org/#image-decoding-hint
     KRYS_NODISCARD DecodingMode GetDecodingMode() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-loading
-    KRYS_NODISCARD dom::DOMString Loading() const noexcept;
+    KRYS_NODISCARD DOMString Loading() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-loading
-    void Loading(dom::DOMString value) noexcept;
+    void Loading(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-fetchpriority
-    KRYS_NODISCARD dom::DOMString FetchPriority() const noexcept;
+    KRYS_NODISCARD DOMString FetchPriority() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-fetchpriority
-    void FetchPriority(dom::DOMString value) noexcept;
+    void FetchPriority(DOMString value) noexcept;
 
     /// @brief Calls @p promise, as a microtask, once the image has loaded and decoded, so it can be drawn
     /// without decoding; it's rejected with an `EncodingError` if it can't be.
@@ -207,10 +210,10 @@ namespace krys::boo::html
 #pragma region HTMLImageElement Obsolete members - https://html.spec.whatwg.org/#HTMLImageElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-img-name
-    KRYS_NODISCARD dom::DOMString Name() const noexcept;
+    KRYS_NODISCARD DOMString Name() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-name
-    void Name(dom::DOMString value) noexcept;
+    void Name(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-lowsrc
     KRYS_NODISCARD dom::USVString LowSrc() const noexcept;
@@ -219,10 +222,10 @@ namespace krys::boo::html
     void LowSrc(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-align
-    KRYS_NODISCARD dom::DOMString Align() const noexcept;
+    KRYS_NODISCARD DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-align
-    void Align(dom::DOMString value) noexcept;
+    void Align(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-hspace
     KRYS_NODISCARD uint32 HSpace() const noexcept;
@@ -243,10 +246,10 @@ namespace krys::boo::html
     void LongDesc(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-border
-    KRYS_NODISCARD dom::DOMString Border() const noexcept;
+    KRYS_NODISCARD DOMString Border() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-border
-    void Border(dom::DOMString value) noexcept;
+    void Border(DOMString value) noexcept;
 
 #pragma endregion
 
@@ -259,7 +262,7 @@ namespace krys::boo::html
     }
 
     /// @brief The `alt` attribute, or else the `title` attribute, or null if it has neither.
-    KRYS_NODISCARD Maybe<dom::DOMString> AltText() const noexcept;
+    KRYS_NODISCARD Maybe<DOMString> AltText() const noexcept;
 
     KRYS_NODISCARD CachedImage *GetCachedImage() const noexcept;
 
@@ -278,12 +281,11 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#will-lazy-load-element-steps
     KRYS_NODISCARD bool IsLazyLoadable() const noexcept;
 
-    KRYS_NODISCARD static bool
-      HasLazyLoadableAttributeValue(Maybe<dom::DOMStringView> attributeValue) noexcept;
+    KRYS_NODISCARD static bool HasLazyLoadableAttributeValue(Maybe<DOMStringView> attributeValue) noexcept;
 
     /// @brief The selected source: the best fitting candidate of a `<picture>`'s sources, or else of `srcset`
     /// and `src`.
-    KRYS_NODISCARD Maybe<dom::DOMString> ImageSourceURL() const noexcept override;
+    KRYS_NODISCARD Maybe<DOMString> ImageSourceURL() const noexcept override;
 
     KRYS_NODISCARD HTMLPictureElement *PictureElement() const noexcept;
 
@@ -293,9 +295,8 @@ namespace krys::boo::html
 
     void DidAttachRenderers() noexcept override;
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
     KRYS_NODISCARD HTMLElement &AsHTMLElement() noexcept final
     {
@@ -312,22 +313,22 @@ namespace krys::boo::html
       return false;
     }
 
-    KRYS_NODISCARD FormAssociatedElement *AsFormAssociatedElement() noexcept final
+    KRYS_NODISCARD html::FormAssociatedElement *AsFormAssociatedElement() noexcept final
     {
       return this;
     }
 
     /// @brief Leaves the form owner, removed from the tree, unless the image went with it.
     /// @param formRoot The root of the form's tree.
-    void FormOwnerRemovedFromTree(const dom::Node &formRoot) noexcept;
+    void FormOwnerRemovedFromTree(const Node &formRoot) noexcept;
 
     void OnInsert() noexcept override;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
-    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
-    void OnAdopt(dom::Document &oldDocument) noexcept override;
+    void OnAdopt(Document &oldDocument) noexcept override;
 
   private:
     void SetPictureElement(HTMLPictureElement *pictureElement) noexcept;
@@ -340,9 +341,9 @@ namespace krys::boo::html
 
     void SelectImageSource(RelevantMutation relevantMutation) noexcept;
 
-    KRYS_NODISCARD ImageCandidate BestFitSourceFromPictureElement() noexcept;
+    KRYS_NODISCARD html::ImageCandidate BestFitSourceFromPictureElement() noexcept;
 
-    void SetBestFitURLAndDPRFromImageCandidate(const ImageCandidate &candidate) noexcept;
+    void SetBestFitURLAndDPRFromImageCandidate(const html::ImageCandidate &candidate) noexcept;
 
     KRYS_NODISCARD float EffectiveImageDevicePixelRatio() const noexcept;
 
@@ -350,12 +351,11 @@ namespace krys::boo::html
 
   protected:
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
     void CollectExtraStyleForPresentationalHints(css::MutableStyleProperties &style) noexcept override;
@@ -367,14 +367,14 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLImageElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLImageElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLImageElement();
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    auto *element = krys::DynamicDowncast<krys::boo::html::HTMLElement>(target);
+    auto *element = krys::DynamicDowncast<krys::boo::HTMLElement>(target);
     return element && element->IsHTMLImageElement();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

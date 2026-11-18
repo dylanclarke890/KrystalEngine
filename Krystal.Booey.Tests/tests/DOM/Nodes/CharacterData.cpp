@@ -14,13 +14,13 @@ namespace krys::boo::dom::tests
   {
     struct CommonTestData
     {
-      Ref<dom::Document> Document;
-      Ref<dom::Text> Node;
+      Ref<boo::Document> Document;
+      Ref<Text> Node;
       Ref<dom::Range> FullRange;
       Ref<dom::Range> PartialRange;
 
       CommonTestData()
-          : Document(CreateRef<dom::Document>()), Node(CreateRef<dom::Text>(*Document, u8"Hello, world!")),
+          : Document(CreateRef<boo::Document>()), Node(CreateRef<Text>(*Document, u8"Hello, world!")),
             FullRange(Document->CreateRange()), PartialRange(Document->CreateRange())
       {
         REQUIRE_FALSE(FullRange->SetStart(*Node, 0uz).HasException());

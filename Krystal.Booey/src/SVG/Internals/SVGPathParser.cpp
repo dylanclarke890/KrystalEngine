@@ -30,7 +30,7 @@
 #include <cmath>
 #include <numbers>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   namespace
   {
@@ -44,7 +44,7 @@ namespace krys::boo::svg
     }
   }
 
-  bool SVGPathParser::Parse(SVGPathSource &source, SVGPathConsumer &consumer, PathParsingMode mode,
+  bool SVGPathParser::Parse(SVGPathSource &source, SVGPathConsumer &consumer, svg::PathParsingMode mode,
                             bool checkForInitialMoveTo) noexcept
   {
     SVGPathParser parser(consumer, source, mode);
@@ -52,7 +52,7 @@ namespace krys::boo::svg
   }
 
   bool SVGPathParser::ParseToByteStream(SVGPathSource &source, SVGPathByteStream &byteStream,
-                                        PathParsingMode mode, bool checkForInitialMoveTo) noexcept
+                                        svg::PathParsingMode mode, bool checkForInitialMoveTo) noexcept
   {
     SVGPathByteStreamBuilder builder(byteStream);
     auto result = Parse(source, builder, mode, checkForInitialMoveTo);
@@ -60,7 +60,7 @@ namespace krys::boo::svg
     return result;
   }
 
-  bool SVGPathParser::ParseToString(SVGPathSource &source, dom::DOMString &result, PathParsingMode mode,
+  bool SVGPathParser::ParseToString(SVGPathSource &source, DOMString &result, svg::PathParsingMode mode,
                                     bool checkForInitialMoveTo) noexcept
   {
     SVGPathStringBuilder builder;
@@ -71,7 +71,7 @@ namespace krys::boo::svg
   }
 
   SVGPathParser::SVGPathParser(SVGPathConsumer &consumer, SVGPathSource &source,
-                               PathParsingMode parsingMode) noexcept
+                               svg::PathParsingMode parsingMode) noexcept
       : _source(source), _consumer(consumer), _pathParsingMode(parsingMode)
   {
   }
@@ -79,7 +79,7 @@ namespace krys::boo::svg
   void SVGPathParser::ParseClosePathSegment() noexcept
   {
     // Reset _currentPoint for the next path.
-    if (_pathParsingMode == PathParsingMode::NormalisedParsing)
+    if (_pathParsingMode == svg::PathParsingMode::NormalisedParsing)
     {
       _currentPoint = _subPathPoint;
     }
@@ -95,9 +95,9 @@ namespace krys::boo::svg
       return false;
     }
 
-    if (_pathParsingMode == PathParsingMode::NormalisedParsing)
+    if (_pathParsingMode == svg::PathParsingMode::NormalisedParsing)
     {
-      if (_mode == PathCoordinateMode::RelativeCoordinates)
+      if (_mode == svg::PathCoordinateMode::RelativeCoordinates)
       {
         _currentPoint += result->TargetPoint;
       }
@@ -106,7 +106,7 @@ namespace krys::boo::svg
         _currentPoint = result->TargetPoint;
       }
       _subPathPoint = _currentPoint;
-      _consumer.MoveTo(_currentPoint, _closePath, PathCoordinateMode::AbsoluteCoordinates);
+      _consumer.MoveTo(_currentPoint, _closePath, svg::PathCoordinateMode::AbsoluteCoordinates);
     }
     else
     {
@@ -124,9 +124,9 @@ namespace krys::boo::svg
       return false;
     }
 
-    if (_pathParsingMode == PathParsingMode::NormalisedParsing)
+    if (_pathParsingMode == svg::PathParsingMode::NormalisedParsing)
     {
-      if (_mode == PathCoordinateMode::RelativeCoordinates)
+      if (_mode == svg::PathCoordinateMode::RelativeCoordinates)
       {
         _currentPoint += result->TargetPoint;
       }
@@ -134,7 +134,7 @@ namespace krys::boo::svg
       {
         _currentPoint = result->TargetPoint;
       }
-      _consumer.LineTo(_currentPoint, PathCoordinateMode::AbsoluteCoordinates);
+      _consumer.LineTo(_currentPoint, svg::PathCoordinateMode::AbsoluteCoordinates);
     }
     else
     {
@@ -151,9 +151,9 @@ namespace krys::boo::svg
       return false;
     }
 
-    if (_pathParsingMode == PathParsingMode::NormalisedParsing)
+    if (_pathParsingMode == svg::PathParsingMode::NormalisedParsing)
     {
-      if (_mode == PathCoordinateMode::RelativeCoordinates)
+      if (_mode == svg::PathCoordinateMode::RelativeCoordinates)
       {
         _currentPoint.Move(result->X, 0);
       }
@@ -161,7 +161,7 @@ namespace krys::boo::svg
       {
         _currentPoint.SetX(result->X);
       }
-      _consumer.LineTo(_currentPoint, PathCoordinateMode::AbsoluteCoordinates);
+      _consumer.LineTo(_currentPoint, svg::PathCoordinateMode::AbsoluteCoordinates);
     }
     else
     {
@@ -178,9 +178,9 @@ namespace krys::boo::svg
       return false;
     }
 
-    if (_pathParsingMode == PathParsingMode::NormalisedParsing)
+    if (_pathParsingMode == svg::PathParsingMode::NormalisedParsing)
     {
-      if (_mode == PathCoordinateMode::RelativeCoordinates)
+      if (_mode == svg::PathCoordinateMode::RelativeCoordinates)
       {
         _currentPoint.Move(0, result->Y);
       }
@@ -188,7 +188,7 @@ namespace krys::boo::svg
       {
         _currentPoint.SetY(result->Y);
       }
-      _consumer.LineTo(_currentPoint, PathCoordinateMode::AbsoluteCoordinates);
+      _consumer.LineTo(_currentPoint, svg::PathCoordinateMode::AbsoluteCoordinates);
     }
     else
     {
@@ -205,16 +205,16 @@ namespace krys::boo::svg
       return false;
     }
 
-    if (_pathParsingMode == PathParsingMode::NormalisedParsing)
+    if (_pathParsingMode == svg::PathParsingMode::NormalisedParsing)
     {
-      if (_mode == PathCoordinateMode::RelativeCoordinates)
+      if (_mode == svg::PathCoordinateMode::RelativeCoordinates)
       {
         result->Point1 += _currentPoint;
         result->Point2 += _currentPoint;
         result->TargetPoint += _currentPoint;
       }
       _consumer.CurveToCubic(result->Point1, result->Point2, result->TargetPoint,
-                             PathCoordinateMode::AbsoluteCoordinates);
+                             svg::PathCoordinateMode::AbsoluteCoordinates);
 
       _controlPoint = result->Point2;
       _currentPoint = result->TargetPoint;
@@ -241,17 +241,17 @@ namespace krys::boo::svg
       _controlPoint = _currentPoint;
     }
 
-    if (_pathParsingMode == PathParsingMode::NormalisedParsing)
+    if (_pathParsingMode == svg::PathParsingMode::NormalisedParsing)
     {
       FloatPoint point1 = ReflectedPoint(_currentPoint, _controlPoint);
-      if (_mode == PathCoordinateMode::RelativeCoordinates)
+      if (_mode == svg::PathCoordinateMode::RelativeCoordinates)
       {
         result->Point2 += _currentPoint;
         result->TargetPoint += _currentPoint;
       }
 
       _consumer.CurveToCubic(point1, result->Point2, result->TargetPoint,
-                             PathCoordinateMode::AbsoluteCoordinates);
+                             svg::PathCoordinateMode::AbsoluteCoordinates);
 
       _controlPoint = result->Point2;
       _currentPoint = result->TargetPoint;
@@ -271,7 +271,7 @@ namespace krys::boo::svg
       return false;
     }
 
-    if (_pathParsingMode == PathParsingMode::NormalisedParsing)
+    if (_pathParsingMode == svg::PathParsingMode::NormalisedParsing)
     {
       _controlPoint = result->Point1;
 
@@ -279,7 +279,7 @@ namespace krys::boo::svg
       point1.Move(2 * _controlPoint.X(), 2 * _controlPoint.Y());
       FloatPoint point2(result->TargetPoint.X() + 2 * _controlPoint.X(),
                         result->TargetPoint.Y() + 2 * _controlPoint.Y());
-      if (_mode == PathCoordinateMode::RelativeCoordinates)
+      if (_mode == svg::PathCoordinateMode::RelativeCoordinates)
       {
         point1.Move(2 * _currentPoint.X(), 2 * _currentPoint.Y());
         point2.Move(3 * _currentPoint.X(), 3 * _currentPoint.Y());
@@ -288,9 +288,10 @@ namespace krys::boo::svg
       point1.Scale(OneOverThree);
       point2.Scale(OneOverThree);
 
-      _consumer.CurveToCubic(point1, point2, result->TargetPoint, PathCoordinateMode::AbsoluteCoordinates);
+      _consumer.CurveToCubic(point1, point2, result->TargetPoint,
+                             svg::PathCoordinateMode::AbsoluteCoordinates);
 
-      if (_mode == PathCoordinateMode::RelativeCoordinates)
+      if (_mode == svg::PathCoordinateMode::RelativeCoordinates)
       {
         _controlPoint += _currentPoint;
       }
@@ -319,13 +320,13 @@ namespace krys::boo::svg
       _controlPoint = _currentPoint;
     }
 
-    if (_pathParsingMode == PathParsingMode::NormalisedParsing)
+    if (_pathParsingMode == svg::PathParsingMode::NormalisedParsing)
     {
       FloatPoint cubicPoint = ReflectedPoint(_currentPoint, _controlPoint);
       FloatPoint point1(_currentPoint.X() + 2 * cubicPoint.X(), _currentPoint.Y() + 2 * cubicPoint.Y());
       FloatPoint point2(result->TargetPoint.X() + 2 * cubicPoint.X(),
                         result->TargetPoint.Y() + 2 * cubicPoint.Y());
-      if (_mode == PathCoordinateMode::RelativeCoordinates)
+      if (_mode == svg::PathCoordinateMode::RelativeCoordinates)
       {
         point2 += _currentPoint;
         result->TargetPoint += _currentPoint;
@@ -333,7 +334,8 @@ namespace krys::boo::svg
       point1.Scale(OneOverThree);
       point2.Scale(OneOverThree);
 
-      _consumer.CurveToCubic(point1, point2, result->TargetPoint, PathCoordinateMode::AbsoluteCoordinates);
+      _consumer.CurveToCubic(point1, point2, result->TargetPoint,
+                             svg::PathCoordinateMode::AbsoluteCoordinates);
 
       _controlPoint = cubicPoint;
       _currentPoint = result->TargetPoint;
@@ -358,11 +360,11 @@ namespace krys::boo::svg
     // target point for the arc are identical, it should be treated as a zero length path. This ensures
     // continuity in animations.
     bool arcIsZeroLength = false;
-    if (_pathParsingMode == PathParsingMode::NormalisedParsing)
+    if (_pathParsingMode == svg::PathParsingMode::NormalisedParsing)
     {
       result->Rx = std::abs(result->Rx);
       result->Ry = std::abs(result->Ry);
-      if (_mode == PathCoordinateMode::RelativeCoordinates)
+      if (_mode == svg::PathCoordinateMode::RelativeCoordinates)
       {
         arcIsZeroLength = result->TargetPoint == FloatPoint::Zero();
       }
@@ -373,9 +375,9 @@ namespace krys::boo::svg
     }
     if (!result->Rx || !result->Ry || arcIsZeroLength)
     {
-      if (_pathParsingMode == PathParsingMode::NormalisedParsing)
+      if (_pathParsingMode == svg::PathParsingMode::NormalisedParsing)
       {
-        if (_mode == PathCoordinateMode::RelativeCoordinates)
+        if (_mode == svg::PathCoordinateMode::RelativeCoordinates)
         {
           _currentPoint += result->TargetPoint;
         }
@@ -383,7 +385,7 @@ namespace krys::boo::svg
         {
           _currentPoint = result->TargetPoint;
         }
-        _consumer.LineTo(_currentPoint, PathCoordinateMode::AbsoluteCoordinates);
+        _consumer.LineTo(_currentPoint, svg::PathCoordinateMode::AbsoluteCoordinates);
       }
       else
       {
@@ -392,10 +394,10 @@ namespace krys::boo::svg
       return true;
     }
 
-    if (_pathParsingMode == PathParsingMode::NormalisedParsing)
+    if (_pathParsingMode == svg::PathParsingMode::NormalisedParsing)
     {
       FloatPoint point1 = _currentPoint;
-      if (_mode == PathCoordinateMode::RelativeCoordinates)
+      if (_mode == svg::PathCoordinateMode::RelativeCoordinates)
       {
         result->TargetPoint += _currentPoint;
       }
@@ -435,17 +437,17 @@ namespace krys::boo::svg
     {
       // Skip spaces between command and first coordinate.
       _source.MoveToNextToken();
-      _mode = PathCoordinateMode::AbsoluteCoordinates;
+      _mode = svg::PathCoordinateMode::AbsoluteCoordinates;
       switch (command)
       {
-        case SVGPathSegType::MoveToRel: _mode = PathCoordinateMode::RelativeCoordinates; [[fallthrough]];
+        case SVGPathSegType::MoveToRel: _mode = svg::PathCoordinateMode::RelativeCoordinates; [[fallthrough]];
         case SVGPathSegType::MoveToAbs:
           if (!ParseMoveToSegment())
           {
             return false;
           }
           break;
-        case SVGPathSegType::LineToRel: _mode = PathCoordinateMode::RelativeCoordinates; [[fallthrough]];
+        case SVGPathSegType::LineToRel: _mode = svg::PathCoordinateMode::RelativeCoordinates; [[fallthrough]];
         case SVGPathSegType::LineToAbs:
           if (!ParseLineToSegment())
           {
@@ -453,7 +455,7 @@ namespace krys::boo::svg
           }
           break;
         case SVGPathSegType::LineToHorizontalRel:
-          _mode = PathCoordinateMode::RelativeCoordinates;
+          _mode = svg::PathCoordinateMode::RelativeCoordinates;
           [[fallthrough]];
         case SVGPathSegType::LineToHorizontalAbs:
           if (!ParseLineToHorizontalSegment())
@@ -462,7 +464,7 @@ namespace krys::boo::svg
           }
           break;
         case SVGPathSegType::LineToVerticalRel:
-          _mode = PathCoordinateMode::RelativeCoordinates;
+          _mode = svg::PathCoordinateMode::RelativeCoordinates;
           [[fallthrough]];
         case SVGPathSegType::LineToVerticalAbs:
           if (!ParseLineToVerticalSegment())
@@ -472,7 +474,7 @@ namespace krys::boo::svg
           break;
         case SVGPathSegType::ClosePath: ParseClosePathSegment(); break;
         case SVGPathSegType::CurveToCubicRel:
-          _mode = PathCoordinateMode::RelativeCoordinates;
+          _mode = svg::PathCoordinateMode::RelativeCoordinates;
           [[fallthrough]];
         case SVGPathSegType::CurveToCubicAbs:
           if (!ParseCurveToCubicSegment())
@@ -481,7 +483,7 @@ namespace krys::boo::svg
           }
           break;
         case SVGPathSegType::CurveToCubicSmoothRel:
-          _mode = PathCoordinateMode::RelativeCoordinates;
+          _mode = svg::PathCoordinateMode::RelativeCoordinates;
           [[fallthrough]];
         case SVGPathSegType::CurveToCubicSmoothAbs:
           if (!ParseCurveToCubicSmoothSegment())
@@ -490,7 +492,7 @@ namespace krys::boo::svg
           }
           break;
         case SVGPathSegType::CurveToQuadraticRel:
-          _mode = PathCoordinateMode::RelativeCoordinates;
+          _mode = svg::PathCoordinateMode::RelativeCoordinates;
           [[fallthrough]];
         case SVGPathSegType::CurveToQuadraticAbs:
           if (!ParseCurveToQuadraticSegment())
@@ -499,7 +501,7 @@ namespace krys::boo::svg
           }
           break;
         case SVGPathSegType::CurveToQuadraticSmoothRel:
-          _mode = PathCoordinateMode::RelativeCoordinates;
+          _mode = svg::PathCoordinateMode::RelativeCoordinates;
           [[fallthrough]];
         case SVGPathSegType::CurveToQuadraticSmoothAbs:
           if (!ParseCurveToQuadraticSmoothSegment())
@@ -507,7 +509,7 @@ namespace krys::boo::svg
             return false;
           }
           break;
-        case SVGPathSegType::ArcRel: _mode = PathCoordinateMode::RelativeCoordinates; [[fallthrough]];
+        case SVGPathSegType::ArcRel: _mode = svg::PathCoordinateMode::RelativeCoordinates; [[fallthrough]];
         case SVGPathSegType::ArcAbs:
           if (!ParseArcToSegment())
           {
@@ -640,7 +642,8 @@ namespace krys::boo::svg
       point2.Move(t * sinEndTheta, -t * cosEndTheta);
 
       _consumer.CurveToCubic(pointTransform.MapPoint(point1), pointTransform.MapPoint(point2),
-                             pointTransform.MapPoint(targetPoint), PathCoordinateMode::AbsoluteCoordinates);
+                             pointTransform.MapPoint(targetPoint),
+                             svg::PathCoordinateMode::AbsoluteCoordinates);
     }
     return true;
   }

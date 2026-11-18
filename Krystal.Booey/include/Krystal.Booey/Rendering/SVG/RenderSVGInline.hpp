@@ -23,13 +23,10 @@
 
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 
-namespace krys::boo::svg
-{
-  class SVGGraphicsElement;
-}
-
 namespace krys::boo
 {
+  class SVGGraphicsElement;
+
   /// @brief An inline SVG text content element (`<tspan>`, `<textPath>`, `<a>` inside text), laid out by its
   /// `<text>`.
   class RenderSVGInline : public RenderInline
@@ -37,11 +34,11 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderSVGInline);
 
   public:
-    RenderSVGInline(Type, svg::SVGGraphicsElement &, RenderStyle &&) noexcept;
+    RenderSVGInline(Type, SVGGraphicsElement &, RenderStyle &&) noexcept;
 
     ~RenderSVGInline() noexcept override;
 
-    KRYS_NODISCARD svg::SVGGraphicsElement &GraphicsElement() const noexcept;
+    KRYS_NODISCARD SVGGraphicsElement &GraphicsElement() const noexcept;
 
     KRYS_NODISCARD bool IsChildAllowed(const RenderObject &, const RenderStyle &) const noexcept override;
 

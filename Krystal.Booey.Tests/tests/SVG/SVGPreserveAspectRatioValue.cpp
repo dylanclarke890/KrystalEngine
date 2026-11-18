@@ -33,7 +33,7 @@ namespace krys::boo::svg::tests
     CHECK_FALSE(value.Parse(u8""));
 
     // Without validation, what follows is left in the buffer.
-    dom::DOMStringView buffer = u8"xMinYMid slice, 1 2";
+    DOMStringView buffer = u8"xMinYMid slice, 1 2";
     CHECK(value.Parse(buffer, false));
     CHECK(value.ValueAsString() == u8"xMinYMid slice");
     CHECK(buffer == u8", 1 2");

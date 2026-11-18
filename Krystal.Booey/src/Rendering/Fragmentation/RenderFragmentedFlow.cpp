@@ -62,7 +62,7 @@ namespace krys::boo
     return _endFragment.get();
   }
 
-  RenderFragmentedFlow::RenderFragmentedFlow(Type type, dom::Document &document, RenderStyle &&style) noexcept
+  RenderFragmentedFlow::RenderFragmentedFlow(Type type, Document &document, RenderStyle &&style) noexcept
       : RenderBlockFlow(type, document, krys::move(style), {BlockFlowFlag::IsFragmentedFlow})
   {
     krys_debug_assert(IsRenderFragmentedFlow());

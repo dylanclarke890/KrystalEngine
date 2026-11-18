@@ -25,7 +25,7 @@
 #include "Krystal.Booey/SVG/SVGTests.hpp"
 #include "Krystal.Booey/SVG/SVGUnitTypes.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<mask>` element: graphics whose luminance or alpha masks the elements that reference it.
   /// @see https://drafts.fxtf.org/css-masking/#InterfaceSVGMaskElement
@@ -42,7 +42,7 @@ namespace krys::boo::svg
     Ref<SVGAnimatedEnumeration> _maskContentUnits;
 
   public:
-    explicit SVGMaskElement(dom::Document &document) noexcept;
+    explicit SVGMaskElement(Document &document) noexcept;
 
     KRYS_NODISCARD const SVGLengthValue &X() const noexcept
     {
@@ -107,10 +107,10 @@ namespace krys::boo::svg
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGMaskElement, SVGElement, SVGTests>;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
     void OnChildrenChanged() noexcept final;
 
@@ -133,8 +133,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGMaskElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGMaskElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGMaskElement();
   }

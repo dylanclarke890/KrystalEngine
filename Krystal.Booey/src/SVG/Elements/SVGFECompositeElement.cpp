@@ -24,9 +24,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFECompositeElement::SVGFECompositeElement(dom::Document &document) noexcept
+  SVGFECompositeElement::SVGFECompositeElement(Document &document) noexcept
       : SVGFilterPrimitiveStandardAttributes(document, CreateUnique<PropertyRegistry>(*this),
                                              SVGElementInterface::FEComposite),
         _in1(SVGAnimatedString::Create(this)), _in2(SVGAnimatedString::Create(this)),
@@ -49,11 +49,10 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGFECompositeElement::AttributeChanged(const dom::QualifiedName &name,
-                                               Maybe<dom::DOMStringView> oldValue,
-                                               Maybe<dom::DOMStringView> value) noexcept
+  void SVGFECompositeElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                               Maybe<DOMStringView> value) noexcept
   {
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::OperatorAttr())
     {
@@ -65,34 +64,34 @@ namespace krys::boo::svg
     }
     else if (name == SVGNames::InAttr())
     {
-      _in1->SetBaseValInternal(dom::DOMString(string));
+      _in1->SetBaseValInternal(DOMString(string));
     }
     else if (name == SVGNames::In2Attr())
     {
-      _in2->SetBaseValInternal(dom::DOMString(string));
+      _in2->SetBaseValInternal(DOMString(string));
     }
     else if (name == SVGNames::K1Attr())
     {
-      _k1->SetBaseValInternal(ToFloatOrZero(string));
+      _k1->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::K2Attr())
     {
-      _k2->SetBaseValInternal(ToFloatOrZero(string));
+      _k2->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::K3Attr())
     {
-      _k3->SetBaseValInternal(ToFloatOrZero(string));
+      _k3->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::K4Attr())
     {
-      _k4->SetBaseValInternal(ToFloatOrZero(string));
+      _k4->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
 
     SVGFilterPrimitiveStandardAttributes::AttributeChanged(name, oldValue, value);
   }
 
   bool SVGFECompositeElement::SetFilterEffectAttribute(FilterEffect &filterEffect,
-                                                       const dom::QualifiedName &attributeName) noexcept
+                                                       const QualifiedName &attributeName) noexcept
   {
     auto &effect = Downcast<FEComposite>(filterEffect);
     if (attributeName == SVGNames::OperatorAttr())
@@ -120,7 +119,7 @@ namespace krys::boo::svg
     return false;
   }
 
-  void SVGFECompositeElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGFECompositeElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (attributeName == SVGNames::InAttr() || attributeName == SVGNames::In2Attr())
     {

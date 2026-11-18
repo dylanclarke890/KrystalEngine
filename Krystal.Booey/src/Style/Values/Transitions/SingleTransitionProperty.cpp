@@ -53,7 +53,7 @@ namespace krys::boo::style
     auto propertyID = primitiveValue->PropertyId();
     if (propertyID == css::PropertyId::Invalid)
     {
-      return css::CustomIdentifier {css::CSSOMStringAtom {primitiveValue->StringValue()}};
+      return css::CustomIdentifier {CSSOMStringAtom {primitiveValue->StringValue()}};
     }
 
     return propertyID;

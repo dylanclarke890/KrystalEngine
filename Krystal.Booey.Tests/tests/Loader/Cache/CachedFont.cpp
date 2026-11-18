@@ -24,7 +24,7 @@ namespace krys::boo::tests
       }
     };
 
-    KRYS_NODISCARD CachedResourceHandle<CachedFont> RequestFont(dom::Document &document,
+    KRYS_NODISCARD CachedResourceHandle<CachedFont> RequestFont(Document &document,
                                                                 utf8_stringview url) noexcept
     {
       CachedResourceRequest request(ResourceRequest(url::URL(url)),

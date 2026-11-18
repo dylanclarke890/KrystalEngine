@@ -27,10 +27,10 @@
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLBRElement::HTMLBRElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::BR)
+  HTMLBRElement::HTMLBRElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::BR)
   {
   }
 
@@ -46,23 +46,22 @@ namespace krys::boo::html
 
 #pragma region HTMLBRElement Obsolete members
 
-  dom::DOMString HTMLBRElement::Clear() const noexcept
+  DOMString HTMLBRElement::Clear() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"clear").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"clear").value_or(u8"");
   }
 
-  void HTMLBRElement::Clear(dom::DOMString value) noexcept
+  void HTMLBRElement::Clear(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"clear", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"clear", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region Presentational hints
 
-  bool
-    HTMLBRElement::HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                      const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool HTMLBRElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                         const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && (localName == u8"clear"))
     {
@@ -71,12 +70,12 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLBRElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                             const dom::DOMStringAtom &namespaceURI,
-                                                             dom::DOMStringView value,
+  void HTMLBRElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                             const DOMStringAtom &namespaceURI,
+                                                             DOMStringView value,
                                                              css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);

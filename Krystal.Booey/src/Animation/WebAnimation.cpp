@@ -55,7 +55,7 @@
 
 namespace krys::boo
 {
-  Ref<WebAnimation> WebAnimation::Create(dom::Document &document, AnimationEffect *effect) noexcept
+  Ref<WebAnimation> WebAnimation::Create(Document &document, AnimationEffect *effect) noexcept
   {
     Ref<WebAnimation> result = AdoptRef(*new WebAnimation(document));
     result->Initialize();
@@ -64,7 +64,7 @@ namespace krys::boo
     return result;
   }
 
-  Ref<WebAnimation> WebAnimation::Create(dom::Document &document, AnimationEffect *effect,
+  Ref<WebAnimation> WebAnimation::Create(Document &document, AnimationEffect *effect,
                                          AnimationTimeline *timeline) noexcept
   {
     Ref<WebAnimation> result = AdoptRef(*new WebAnimation(document));
@@ -92,7 +92,7 @@ namespace krys::boo
     _readyPromise->Resolve();
   }
 
-  WebAnimation::WebAnimation(dom::Document &document) noexcept
+  WebAnimation::WebAnimation(Document &document) noexcept
       : _readyPromise(detail::AnimationPromise::Create(*this)),
         _finishedPromise(detail::AnimationPromise::Create(*this)), _document(CreateWeakPtr(&document))
   {
@@ -105,7 +105,7 @@ namespace krys::boo
     Instances().erase(this);
   }
 
-  void WebAnimation::StopAnimationsOfDocument(const dom::Document &document) noexcept
+  void WebAnimation::StopAnimationsOfDocument(const Document &document) noexcept
   {
     List<Ref<WebAnimation>> animations;
     for (auto *animation : Instances())
@@ -153,7 +153,7 @@ namespace krys::boo
     }
   }
 
-  void WebAnimation::SetId(dom::DOMString id) noexcept
+  void WebAnimation::SetId(DOMString id) noexcept
   {
     _id = krys::move(id);
   }
@@ -975,7 +975,7 @@ namespace krys::boo
     }
   }
 
-  void WebAnimation::EnqueueAnimationPlaybackEvent(const dom::DOMStringAtom &type,
+  void WebAnimation::EnqueueAnimationPlaybackEvent(const DOMStringAtom &type,
                                                    Maybe<WebAnimationTime> currentTime,
                                                    Maybe<WebAnimationTime> scheduledTime) noexcept
   {
@@ -2085,8 +2085,7 @@ namespace krys::boo
     // 2.1 If target is not an element capable of having a style attribute (for example, it is a
     // pseudo-element or is an element in a document format for which style attributes are not defined) throw
     // a "NoModificationAllowedError" DOMException and abort these steps.
-    RefPtr styledElement =
-      ShareRefPtr(DynamicDowncast<dom::StyledElement>(effect ? effect->Target() : nullptr));
+    RefPtr styledElement = ShareRefPtr(DynamicDowncast<StyledElement>(effect ? effect->Target() : nullptr));
     if (!styledElement || effect->TargetsPseudoElement())
     {
       return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
@@ -2215,7 +2214,7 @@ namespace krys::boo
             css::Property::ResolveDirectionAwareProperty(propertyId, animatedStyle->GetWritingMode());
           return inlineStyle->SetProperty(resolvedCSSProperty, string, parserContext);
         },
-        [&](const css::CSSOMStringAtom &customProperty)
+        [&](const CSSOMStringAtom &customProperty)
         {
           auto string = computedStyleExtractor.CustomPropertyValueSerialisationInStyle(
             *animatedStyle, customProperty, css::DefaultSerialisationContext());

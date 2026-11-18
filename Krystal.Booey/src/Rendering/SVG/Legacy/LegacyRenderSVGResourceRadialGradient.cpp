@@ -26,16 +26,16 @@
 namespace krys::boo
 {
   LegacyRenderSVGResourceRadialGradient::LegacyRenderSVGResourceRadialGradient(
-    svg::SVGRadialGradientElement &element, RenderStyle &&style) noexcept
+    SVGRadialGradientElement &element, RenderStyle &&style) noexcept
       : LegacyRenderSVGResourceGradient(Type::LegacySVGResourceRadialGradient, element, krys::move(style))
   {
   }
 
   LegacyRenderSVGResourceRadialGradient::~LegacyRenderSVGResourceRadialGradient() noexcept = default;
 
-  svg::SVGRadialGradientElement &LegacyRenderSVGResourceRadialGradient::RadialGradientElement() const noexcept
+  SVGRadialGradientElement &LegacyRenderSVGResourceRadialGradient::RadialGradientElement() const noexcept
   {
-    return Downcast<svg::SVGRadialGradientElement>(LegacyRenderSVGResourceGradient::GradientElement());
+    return Downcast<SVGRadialGradientElement>(LegacyRenderSVGResourceGradient::GradientElement());
   }
 
   bool LegacyRenderSVGResourceRadialGradient::CollectGradientAttributes() noexcept
@@ -47,29 +47,29 @@ namespace krys::boo
   FloatPoint LegacyRenderSVGResourceRadialGradient::CenterPoint(
     const svg::RadialGradientAttributes &attributes) const noexcept
   {
-    return svg::SVGLengthContext::ResolvePoint(&RadialGradientElement(), attributes.GradientUnits(),
-                                               attributes.Cx(), attributes.Cy());
+    return SVGLengthContext::ResolvePoint(&RadialGradientElement(), attributes.GradientUnits(),
+                                          attributes.Cx(), attributes.Cy());
   }
 
   FloatPoint LegacyRenderSVGResourceRadialGradient::FocalPoint(
     const svg::RadialGradientAttributes &attributes) const noexcept
   {
-    return svg::SVGLengthContext::ResolvePoint(&RadialGradientElement(), attributes.GradientUnits(),
-                                               attributes.Fx(), attributes.Fy());
+    return SVGLengthContext::ResolvePoint(&RadialGradientElement(), attributes.GradientUnits(),
+                                          attributes.Fx(), attributes.Fy());
   }
 
   float LegacyRenderSVGResourceRadialGradient::Radius(
     const svg::RadialGradientAttributes &attributes) const noexcept
   {
-    return svg::SVGLengthContext::ResolveLength(&RadialGradientElement(), attributes.GradientUnits(),
-                                                attributes.R());
+    return SVGLengthContext::ResolveLength(&RadialGradientElement(), attributes.GradientUnits(),
+                                           attributes.R());
   }
 
   float LegacyRenderSVGResourceRadialGradient::FocalRadius(
     const svg::RadialGradientAttributes &attributes) const noexcept
   {
-    return svg::SVGLengthContext::ResolveLength(&RadialGradientElement(), attributes.GradientUnits(),
-                                                attributes.Fr());
+    return SVGLengthContext::ResolveLength(&RadialGradientElement(), attributes.GradientUnits(),
+                                           attributes.Fr());
   }
 
   Ref<Gradient> LegacyRenderSVGResourceRadialGradient::BuildGradient() const noexcept

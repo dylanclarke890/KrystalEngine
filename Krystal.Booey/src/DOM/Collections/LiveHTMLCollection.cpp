@@ -9,42 +9,42 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
-  LiveHTMLCollection::LiveHTMLCollection(ContainerNode &root, LiveHTMLCollectionFilterFunc &&filter,
-                                         LiveCollectionInvalidation invalidation,
-                                         LiveCollectionTraversal traversal) noexcept
-      : LiveCollection(root, invalidation, traversal), _filter(krys::move(filter))
+  dom::LiveHTMLCollection::LiveHTMLCollection(ContainerNode &root, dom::LiveHTMLCollectionFilterFunc &&filter,
+                                              dom::LiveCollectionInvalidation invalidation,
+                                              dom::LiveCollectionTraversal traversal) noexcept
+      : dom::LiveCollection(root, invalidation, traversal), _filter(krys::move(filter))
   {
   }
 
-  LiveHTMLCollection::~LiveHTMLCollection() noexcept
+  dom::LiveHTMLCollection::~LiveHTMLCollection() noexcept
   {
     ForgetNamedItems();
   }
 
-  void LiveHTMLCollection::InvalidateCache() noexcept
+  void dom::LiveHTMLCollection::InvalidateCache() noexcept
   {
     _indexCache.Invalidate();
     ForgetNamedItems();
     UnregisterCache();
   }
 
-  void LiveHTMLCollection::InvalidateCacheForAttribute(DOMStringAtom localName) noexcept
+  void dom::LiveHTMLCollection::InvalidateCacheForAttribute(DOMStringAtom localName) noexcept
   {
     if (localName == u8"id" || localName == u8"name")
     {
       ForgetNamedItems();
     }
-    LiveCollection::InvalidateCacheForAttribute(localName);
+    dom::LiveCollection::InvalidateCacheForAttribute(localName);
   }
 
-  void LiveHTMLCollection::WillValidateIndexCache() const noexcept
+  void dom::LiveHTMLCollection::WillValidateIndexCache() const noexcept
   {
     RegisterCache();
   }
 
-  Element *LiveHTMLCollection::FirstMatchFrom(Node *node) const noexcept
+  Element *dom::LiveHTMLCollection::FirstMatchFrom(Node *node) const noexcept
   {
     for (; node; node = NextNode(*node))
     {
@@ -56,47 +56,47 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-  Element *LiveHTMLCollection::CollectionBegin() const noexcept
+  Element *dom::LiveHTMLCollection::CollectionBegin() const noexcept
   {
     return FirstMatchFrom(FirstNode());
   }
 
-  Element *LiveHTMLCollection::CollectionNext(Element &element) const noexcept
+  Element *dom::LiveHTMLCollection::CollectionNext(Element &element) const noexcept
   {
     return FirstMatchFrom(NextNode(element));
   }
 
-  void LiveHTMLCollection::ForgetNamedItems() noexcept
+  void dom::LiveHTMLCollection::ForgetNamedItems() noexcept
   {
     if (_hasNamedItems)
     {
       _hasNamedItems = false;
       _namedItems.clear();
-      Root().NodeDocument().LiveCollectionCacheRemoved(LiveCollectionInvalidation::IdOrName);
+      Root().NodeDocument().LiveCollectionCacheRemoved(dom::LiveCollectionInvalidation::IdOrName);
     }
   }
 
-  RefPtr<Element> LiveHTMLCollection::Item(size_t index) noexcept
+  RefPtr<Element> dom::LiveHTMLCollection::Item(size_t index) noexcept
   {
     return ShareRefPtr(_indexCache.At(*this, index));
   }
 
-  RefPtr<const Element> LiveHTMLCollection::Item(size_t index) const noexcept
+  RefPtr<const Element> dom::LiveHTMLCollection::Item(size_t index) const noexcept
   {
-    return const_cast<LiveHTMLCollection *>(this)->Item(index);
+    return const_cast<dom::LiveHTMLCollection *>(this)->Item(index);
   }
 
-  RefPtr<Element> LiveHTMLCollection::operator[](size_t index) noexcept
-  {
-    return Item(index);
-  }
-
-  RefPtr<const Element> LiveHTMLCollection::operator[](size_t index) const noexcept
+  RefPtr<Element> dom::LiveHTMLCollection::operator[](size_t index) noexcept
   {
     return Item(index);
   }
 
-  RefPtr<Element> LiveHTMLCollection::NamedItem(DOMStringView name) noexcept
+  RefPtr<const Element> dom::LiveHTMLCollection::operator[](size_t index) const noexcept
+  {
+    return Item(index);
+  }
+
+  RefPtr<Element> dom::LiveHTMLCollection::NamedItem(DOMStringView name) noexcept
   {
     // 1. If key is the empty string, return null.
     if (name.empty())
@@ -119,7 +119,7 @@ namespace krys::boo::dom
         }
         if (element->NamespaceURI() == infra::namespaces::HTML)
         {
-          if (auto elementName = ElementAlgorithms::GetAttributeValue(*element, u8"name");
+          if (auto elementName = dom::ElementAlgorithms::GetAttributeValue(*element, u8"name");
               !elementName.empty())
           {
             _namedItems.try_emplace(DOMString(elementName), element);
@@ -127,34 +127,34 @@ namespace krys::boo::dom
         }
       }
       _hasNamedItems = true;
-      Root().NodeDocument().LiveCollectionCacheAdded(LiveCollectionInvalidation::IdOrName);
+      Root().NodeDocument().LiveCollectionCacheAdded(dom::LiveCollectionInvalidation::IdOrName);
     }
 
     auto it = _namedItems.find(DOMString(name));
     return it != _namedItems.end() ? ShareRefPtr(it->second) : nullptr;
   }
 
-  RefPtr<const Element> LiveHTMLCollection::NamedItem(DOMStringView name) const noexcept
+  RefPtr<const Element> dom::LiveHTMLCollection::NamedItem(DOMStringView name) const noexcept
   {
-    return const_cast<LiveHTMLCollection *>(this)->NamedItem(name);
+    return const_cast<dom::LiveHTMLCollection *>(this)->NamedItem(name);
   }
 
-  RefPtr<Element> LiveHTMLCollection::operator[](DOMStringView name) noexcept
-  {
-    return NamedItem(name);
-  }
-
-  RefPtr<const Element> LiveHTMLCollection::operator[](DOMStringView name) const noexcept
+  RefPtr<Element> dom::LiveHTMLCollection::operator[](DOMStringView name) noexcept
   {
     return NamedItem(name);
   }
 
-  size_t LiveHTMLCollection::Length() const noexcept
+  RefPtr<const Element> dom::LiveHTMLCollection::operator[](DOMStringView name) const noexcept
+  {
+    return NamedItem(name);
+  }
+
+  size_t dom::LiveHTMLCollection::Length() const noexcept
   {
     return _indexCache.Count(*this);
   }
 
-  List<DOMString> LiveHTMLCollection::SupportedPropertyNames() const noexcept
+  List<DOMString> dom::LiveHTMLCollection::SupportedPropertyNames() const noexcept
   {
     // 1. Let result be an empty list.
     List<DOMString> supportedNames;
@@ -176,7 +176,7 @@ namespace krys::boo::dom
       //     nor is in result, append element's name attribute value to result.
       if (element.NamespaceURI() == infra::namespaces::HTML)
       {
-        auto name = ElementAlgorithms::GetAttributeValue(element, u8"name");
+        auto name = dom::ElementAlgorithms::GetAttributeValue(element, u8"name");
         if (!name.empty() && !std::ranges::contains(supportedNames, name))
         {
           supportedNames.push_back(name);

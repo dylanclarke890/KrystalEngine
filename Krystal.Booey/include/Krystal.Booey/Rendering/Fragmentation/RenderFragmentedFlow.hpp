@@ -338,7 +338,7 @@ namespace krys::boo
     }
 
   protected:
-    RenderFragmentedFlow(Type type, dom::Document &document, RenderStyle &&style) noexcept;
+    RenderFragmentedFlow(Type type, Document &document, RenderStyle &&style) noexcept;
 
     KRYS_NODISCARD RenderFragmentedFlow *LocateEnclosingFragmentedFlow() const noexcept override
     {

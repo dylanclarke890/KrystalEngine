@@ -50,11 +50,11 @@ namespace krys::boo
       KRYS_NON_COPY_MOVABLE(ScopedFramePaintingState);
 
       const LocalFrame &Frame;
-      const dom::Node *Node;
+      const boo::Node *Node;
       const EnumSet<boo::PaintBehavior> PaintBehavior;
       const boo::Color BackgroundColor;
 
-      ScopedFramePaintingState(LocalFrame &frame, dom::Node *node) noexcept
+      ScopedFramePaintingState(LocalFrame &frame, boo::Node *node) noexcept
           : Frame(frame), Node(node), PaintBehavior(frame.View()->GetPaintBehavior()),
             BackgroundColor(frame.View()->BaseBackgroundColor())
       {
@@ -87,7 +87,7 @@ namespace krys::boo
       return nullptr;
     }
 
-    Ref<dom::Document> document = ShareRef(*frame.Document());
+    Ref<boo::Document> document = ShareRef(*frame.Document());
     (void)document->UpdateLayout();
 
     LocalFrameView::SelectionInSnapshot shouldIncludeSelection = LocalFrameView::IncludeSelection;
@@ -196,7 +196,7 @@ namespace krys::boo
     return SnapshotFrameRect(frame, EnclosingIntRect(selectionBounds), krys::move(options));
   }
 
-  RefPtr<ImageBuffer> SnapshotNode(LocalFrame &frame, dom::Node &node, SnapshotOptions options) noexcept
+  RefPtr<ImageBuffer> SnapshotNode(LocalFrame &frame, boo::Node &node, SnapshotOptions options) noexcept
   {
     if (!node.Renderer())
     {

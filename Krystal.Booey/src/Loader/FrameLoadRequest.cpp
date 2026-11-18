@@ -47,14 +47,13 @@ namespace krys::boo
 
   FrameLoadRequestBase::~FrameLoadRequestBase() noexcept = default;
 
-  void FrameLoadRequestBase::SetSourceElement(dom::Element *sourceElement) noexcept
+  void FrameLoadRequestBase::SetSourceElement(Element *sourceElement) noexcept
   {
     _sourceElement = ShareRefPtr(sourceElement);
   }
 
-  FrameLoadRequest::FrameLoadRequest(Ref<dom::Document> &&requester, ResourceRequest &&resourceRequest,
-                                     dom::DOMStringAtom frameName,
-                                     dom::DOMStringAtom downloadAttribute) noexcept
+  FrameLoadRequest::FrameLoadRequest(Ref<Document> &&requester, ResourceRequest &&resourceRequest,
+                                     DOMStringAtom frameName, DOMStringAtom downloadAttribute) noexcept
       : _requester(krys::move(requester)), _resourceRequest(krys::move(resourceRequest)),
         _frameName(krys::move(frameName))
   {

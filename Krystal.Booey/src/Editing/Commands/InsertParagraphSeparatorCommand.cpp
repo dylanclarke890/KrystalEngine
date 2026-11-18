@@ -42,7 +42,7 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD bool IsHeading(const dom::Node *node) noexcept
+    KRYS_NODISCARD bool IsHeading(const boo::Node *node) noexcept
     {
       return IsHTMLElementOfType(node, html::TagName::h1) || IsHTMLElementOfType(node, html::TagName::h2)
              || IsHTMLElementOfType(node, html::TagName::h3) || IsHTMLElementOfType(node, html::TagName::h4)
@@ -53,8 +53,7 @@ namespace krys::boo
     // pasting, it's easy to have each new line be a div deeper than the previous.  E.g., in the case
     // below, we want to insert at ^ instead of |.
     // <div>foo<div>bar</div>|</div>^
-    KRYS_NODISCARD RefPtr<dom::Element>
-      HighestVisuallyEquivalentDivBelowRoot(dom::Element *startBlock) noexcept
+    KRYS_NODISCARD RefPtr<Element> HighestVisuallyEquivalentDivBelowRoot(Element *startBlock) noexcept
     {
       auto *currentBlock = startBlock;
       // We don't want to return a root node (if it happens to be a div, e.g., in a document fragment) because
@@ -72,9 +71,9 @@ namespace krys::boo
       return ShareRefPtr(currentBlock);
     }
 
-    KRYS_NODISCARD bool IsPhrasingContent(const dom::Node &node) noexcept
+    KRYS_NODISCARD bool IsPhrasingContent(const boo::Node &node) noexcept
     {
-      auto *element = DynamicDowncast<dom::Element>(node);
+      auto *element = DynamicDowncast<Element>(node);
       if (!element)
       {
         return false;
@@ -162,7 +161,7 @@ namespace krys::boo
     }
   }
 
-  InsertParagraphSeparatorCommand::InsertParagraphSeparatorCommand(dom::Document &document,
+  InsertParagraphSeparatorCommand::InsertParagraphSeparatorCommand(Document &document,
                                                                    bool mustUseDefaultParagraphElement,
                                                                    EditAction editingAction) noexcept
       : CompositeEditCommand(document, editingAction),
@@ -173,7 +172,7 @@ namespace krys::boo
   InsertParagraphSeparatorCommand::~InsertParagraphSeparatorCommand() noexcept = default;
 
   Ref<InsertParagraphSeparatorCommand>
-    InsertParagraphSeparatorCommand::Create(dom::Document &document, bool useDefaultParagraphElement,
+    InsertParagraphSeparatorCommand::Create(Document &document, bool useDefaultParagraphElement,
                                             EditAction editingAction) noexcept
   {
     return CreateRef<InsertParagraphSeparatorCommand>(document, useDefaultParagraphElement, editingAction);
@@ -199,7 +198,7 @@ namespace krys::boo
     _style->MergeTypingStyle(*position.GetDocument());
   }
 
-  void InsertParagraphSeparatorCommand::ApplyStyleAfterInsertion(dom::Node *originalEnclosingBlock) noexcept
+  void InsertParagraphSeparatorCommand::ApplyStyleAfterInsertion(boo::Node *originalEnclosingBlock) noexcept
   {
     // Not only do we break out of header tags, but we also do not preserve the typing style,
     // in order to match other browsers.
@@ -222,7 +221,7 @@ namespace krys::boo
   }
 
   bool InsertParagraphSeparatorCommand::ShouldUseDefaultParagraphElement(
-    dom::Node *enclosingBlock) const noexcept
+    boo::Node *enclosingBlock) const noexcept
   {
     if (_mustUseDefaultParagraphElement)
     {
@@ -238,8 +237,9 @@ namespace krys::boo
     return IsHeading(enclosingBlock);
   }
 
-  void InsertParagraphSeparatorCommand::GetAncestorsInsideBlock(
-    const dom::Node *insertionNode, dom::Element *outerBlock, List<RefPtr<dom::Element>> &ancestors) noexcept
+  void InsertParagraphSeparatorCommand::GetAncestorsInsideBlock(const boo::Node *insertionNode,
+                                                                Element *outerBlock,
+                                                                List<RefPtr<Element>> &ancestors) noexcept
   {
     ancestors.clear();
 
@@ -254,12 +254,12 @@ namespace krys::boo
     }
   }
 
-  Ref<dom::Element>
-    InsertParagraphSeparatorCommand::CloneHierarchyUnderNewBlock(const List<RefPtr<dom::Element>> &ancestors,
-                                                                 Ref<dom::Element> &&blockToInsert) noexcept
+  Ref<Element>
+    InsertParagraphSeparatorCommand::CloneHierarchyUnderNewBlock(const List<RefPtr<Element>> &ancestors,
+                                                                 Ref<Element> &&blockToInsert) noexcept
   {
     // Make clones of ancestors in between the start node and the start block.
-    Ref<dom::Element> parent = krys::move(blockToInsert);
+    Ref<Element> parent = krys::move(blockToInsert);
     for (size_t i = ancestors.size(); i != 0; --i)
     {
       auto child = CloneElementWithoutChildren(*ancestors[i - 1]);
@@ -291,9 +291,9 @@ namespace krys::boo
       affinity = EndingSelection().GetAffinity();
     }
 
-    Ref<dom::Document> document = ShareRef(GetDocument());
+    Ref<Document> document = ShareRef(GetDocument());
     // FIXME: The parentAnchoredEquivalent conversion needs to be moved into enclosingBlock.
-    RefPtr<dom::Element> startBlock =
+    RefPtr<Element> startBlock =
       EnclosingBlock(ShareRefPtr(insertionPosition.ParentAnchoredEquivalent().GetContainerNode()));
     dom::Position canonicalPos = VisiblePosition(insertionPosition).DeepEquivalent();
     if (!startBlock || !startBlock->NonShadowBoundaryParentNode()
@@ -354,7 +354,7 @@ namespace krys::boo
     }
 
     // Create block to be inserted.
-    RefPtr<dom::Element> blockToInsert;
+    RefPtr<Element> blockToInsert;
     if (startBlock->IsRootEditableElement())
     {
       blockToInsert = CreateDefaultParagraphElement(*document);
@@ -393,7 +393,7 @@ namespace krys::boo
       {
         // Most of the time we want to stay at the nesting level of the startBlock (e.g., when nesting within
         // lists).  However, for div nodes, this can result in nested div tags that are hard to break out of.
-        RefPtr<dom::Element> siblingNode = startBlock;
+        RefPtr<Element> siblingNode = startBlock;
         if (IsHTMLElementOfType(blockToInsert.get(), html::TagName::div))
         {
           siblingNode = HighestVisuallyEquivalentDivBelowRoot(startBlock.get());
@@ -403,10 +403,10 @@ namespace krys::boo
 
       // Recreate the same structure in the new paragraph.
 
-      List<RefPtr<dom::Element>> ancestors;
+      List<RefPtr<Element>> ancestors;
       GetAncestorsInsideBlock(PositionOutsideTabSpan(insertionPosition).DeprecatedNode(), startBlock.get(),
                               ancestors);
-      auto parent = CloneHierarchyUnderNewBlock(ancestors, Ref<dom::Element>(blockToInsert));
+      auto parent = CloneHierarchyUnderNewBlock(ancestors, Ref<Element>(blockToInsert));
 
       if (!AppendBlockPlaceholder(*parent))
       {
@@ -424,7 +424,7 @@ namespace krys::boo
     // similar case where previous position is in another, presumeably nested, block.
     if (isFirstInBlock || !InSameBlock(visiblePos, visiblePos.Previous()))
     {
-      RefPtr<dom::Node> refNode;
+      RefPtr<boo::Node> refNode;
 
       insertionPosition = PositionOutsideTabSpan(insertionPosition);
 
@@ -457,12 +457,12 @@ namespace krys::boo
 
       // Recreate the same structure in the new paragraph.
 
-      List<RefPtr<dom::Element>> ancestors;
+      List<RefPtr<Element>> ancestors;
       GetAncestorsInsideBlock(
         PositionAvoidingSpecialElementBoundary(PositionOutsideTabSpan(insertionPosition)).DeprecatedNode(),
         startBlock.get(), ancestors);
 
-      auto parent = CloneHierarchyUnderNewBlock(ancestors, Ref<dom::Element>(blockToInsert));
+      auto parent = CloneHierarchyUnderNewBlock(ancestors, Ref<Element>(blockToInsert));
       if (!AppendBlockPlaceholder(*parent))
       {
         return;
@@ -533,8 +533,7 @@ namespace krys::boo
       insertionPosition.LeadingWhitespacePosition(VisiblePosition::DefaultAffinity);
     // FIXME: leadingWhitespacePosition is returning the position before preserved newlines for positions
     // after the preserved newline, causing the newline to be turned into a nbsp.
-    if (RefPtr<dom::Text> textNode =
-          ShareRefPtr(DynamicDowncast<dom::Text>(leadingWhitespace.DeprecatedNode())))
+    if (RefPtr<Text> textNode = ShareRefPtr(DynamicDowncast<Text>(leadingWhitespace.DeprecatedNode())))
     {
       krys_debug_assert(!textNode->Renderer() || textNode->Renderer()->Style().CollapseWhiteSpace());
       ReplaceTextInNodePreservingMarkers(*textNode,
@@ -544,8 +543,7 @@ namespace krys::boo
 
     // Split at pos if in the middle of a text node.
     dom::Position positionAfterSplit;
-    if (RefPtr<dom::Text> textNode =
-          ShareRefPtr(DynamicDowncast<dom::Text>(*insertionPosition.GetContainerNode()));
+    if (RefPtr<Text> textNode = ShareRefPtr(DynamicDowncast<Text>(*insertionPosition.GetContainerNode()));
         textNode && insertionPosition.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor)
     {
       bool atEnd = static_cast<size_t>(insertionPosition.OffsetInContainerNode()) >= textNode->Length();
@@ -592,15 +590,15 @@ namespace krys::boo
     // Move the start node and the siblings of the start node.
     if (VisiblePosition(insertionPosition) != VisiblePosition(dom::PositionBeforeNode(blockToInsert.get())))
     {
-      RefPtr<dom::Node> n;
+      RefPtr<boo::Node> n;
       if (insertionPosition.GetContainerNode() == startBlock)
       {
         n = ShareRefPtr(insertionPosition.ComputeNodeAfterPosition());
       }
       else
       {
-        RefPtr<dom::Node> splitTo = ShareRefPtr(insertionPosition.GetContainerNode());
-        if (Is<dom::Text>(*splitTo) && insertionPosition.OffsetInContainerNode() >= CaretMaxOffset(*splitTo))
+        RefPtr<boo::Node> splitTo = ShareRefPtr(insertionPosition.GetContainerNode());
+        if (Is<Text>(*splitTo) && insertionPosition.OffsetInContainerNode() >= CaretMaxOffset(*splitTo))
         {
           splitTo = ShareRefPtr(TreeQueries::Next(*splitTo, startBlock.get()));
         }
@@ -631,9 +629,9 @@ namespace krys::boo
         krys_debug_assert(!positionAfterSplit.GetContainerNode()->Renderer()
                           || positionAfterSplit.GetContainerNode()->Renderer()->Style().CollapseWhiteSpace());
         DeleteInsignificantTextDownstream(positionAfterSplit);
-        if (Is<dom::Text>(*positionAfterSplit.DeprecatedNode()))
+        if (Is<Text>(*positionAfterSplit.DeprecatedNode()))
         {
-          InsertTextIntoNode(Downcast<dom::Text>(*positionAfterSplit.GetContainerNode()), 0,
+          InsertTextIntoNode(Downcast<Text>(*positionAfterSplit.GetContainerNode()), 0,
                              NonBreakingSpaceString());
         }
       }

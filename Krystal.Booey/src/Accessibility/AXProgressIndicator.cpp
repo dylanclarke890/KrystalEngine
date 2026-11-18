@@ -32,13 +32,13 @@ namespace krys::boo
     return AdoptRef(*new AXProgressIndicator(id, &renderer, renderer.GetNode(), cache));
   }
 
-  Ref<AXProgressIndicator> AXProgressIndicator::Create(AXId id, dom::Element &element,
+  Ref<AXProgressIndicator> AXProgressIndicator::Create(AXId id, Element &element,
                                                        AXObjectCache &cache) noexcept
   {
     return AdoptRef(*new AXProgressIndicator(id, nullptr, &element, cache));
   }
 
-  AXProgressIndicator::AXProgressIndicator(AXId id, RenderObject *renderer, dom::Node *node,
+  AXProgressIndicator::AXProgressIndicator(AXId id, RenderObject *renderer, Node *node,
                                            AXObjectCache &cache) noexcept
       : AXRenderObject(id, renderer, node, cache)
   {
@@ -94,7 +94,7 @@ namespace krys::boo
     return 0;
   }
 
-  dom::DOMString AXProgressIndicator::ValueDescription() const noexcept
+  DOMString AXProgressIndicator::ValueDescription() const noexcept
   {
     auto description = AXRenderObject::ValueDescription();
     if (!description.empty())
@@ -104,18 +104,18 @@ namespace krys::boo
     // A meter's value text is its content (WebKit adds the gauge region on Cocoa only; Chrome doesn't).
     if (auto *meter = MeterElement())
     {
-      return meter->TextContent().value_or(dom::DOMString {});
+      return meter->TextContent().value_or(DOMString {});
     }
     return description;
   }
 
-  html::HTMLProgressElement *AXProgressIndicator::ProgressElement() const noexcept
+  HTMLProgressElement *AXProgressIndicator::ProgressElement() const noexcept
   {
-    return DynamicDowncast<html::HTMLProgressElement>(GetNode());
+    return DynamicDowncast<HTMLProgressElement>(GetNode());
   }
 
-  html::HTMLMeterElement *AXProgressIndicator::MeterElement() const noexcept
+  HTMLMeterElement *AXProgressIndicator::MeterElement() const noexcept
   {
-    return DynamicDowncast<html::HTMLMeterElement>(GetNode());
+    return DynamicDowncast<HTMLMeterElement>(GetNode());
   }
 }

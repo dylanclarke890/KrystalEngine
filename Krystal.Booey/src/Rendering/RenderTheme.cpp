@@ -83,7 +83,7 @@ namespace krys::boo
   RenderTheme::~RenderTheme() noexcept = default;
 
   StyleAppearance RenderTheme::AdjustAppearanceForElement(RenderStyle &style, const RenderStyle &parentStyle,
-                                                          const dom::Element *element,
+                                                          const boo::Element *element,
                                                           StyleAppearance autoAppearance) noexcept
   {
     if (!element)
@@ -115,7 +115,7 @@ namespace krys::boo
     // https://drafts.csswg.org/css-ui-4/#appearance-switching
     if (appearance == StyleAppearance::BaseSelect)
     {
-      auto *select = DynamicDowncast<html::HTMLSelectElement>(*element);
+      auto *select = DynamicDowncast<HTMLSelectElement>(*element);
       if ((select && select->UsesMenuList())
           || (element->IsInUserAgentShadowTree()
               && element->UserAgentPart() == css::user_agent_parts::InternalSelectPicker()))
@@ -161,7 +161,7 @@ namespace krys::boo
       return autoAppearance;
     }
 
-    auto *inputElement = DynamicDowncast<html::HTMLInputElement>(element);
+    auto *inputElement = DynamicDowncast<boo::HTMLInputElement>(element);
 
     if (appearance == StyleAppearance::TextField)
     {
@@ -186,7 +186,7 @@ namespace krys::boo
     return appearance;
   }
 
-  bool RenderTheme::HasAppearanceForElementTypeFromUAStyle(const dom::Element &element) noexcept
+  bool RenderTheme::HasAppearanceForElementTypeFromUAStyle(const boo::Element &element) noexcept
   {
     // NOTE: This is just a legacy hard-coded list of elements that have some appearance value in html.css
     // FIXME: Remove when devolvable widgets are universally enabled.
@@ -195,7 +195,7 @@ namespace krys::boo
     {
       return true;
     }
-    if (!Is<html::HTMLElement>(element))
+    if (!Is<boo::HTMLElement>(element))
     {
       return false;
     }
@@ -212,7 +212,7 @@ namespace krys::boo
   }
 
   void RenderTheme::AdjustStyle(RenderStyle &style, const RenderStyle &parentStyle,
-                                const dom::Element *element) noexcept
+                                const boo::Element *element) noexcept
   {
     auto autoAppearance = AutoAppearanceForElement(style, element);
     auto appearance = AdjustAppearanceForElement(style, parentStyle, element, autoAppearance);
@@ -312,7 +312,7 @@ namespace krys::boo
   }
 
   StyleAppearance RenderTheme::AutoAppearanceForElement(RenderStyle &style,
-                                                        const dom::Element *elementPtr) noexcept
+                                                        const boo::Element *elementPtr) noexcept
   {
     if (!elementPtr)
     {
@@ -321,7 +321,7 @@ namespace krys::boo
 
     const auto &element = *elementPtr;
 
-    if (const auto *input = DynamicDowncast<html::HTMLInputElement>(element))
+    if (const auto *input = DynamicDowncast<boo::HTMLInputElement>(element))
     {
       if (input->IsTextButton())
       {
@@ -369,27 +369,27 @@ namespace krys::boo
       return StyleAppearance::None;
     }
 
-    if (Is<html::HTMLButtonElement>(element))
+    if (Is<HTMLButtonElement>(element))
     {
       return StyleAppearance::Button;
     }
 
-    if (const auto *select = DynamicDowncast<html::HTMLSelectElement>(element))
+    if (const auto *select = DynamicDowncast<HTMLSelectElement>(element))
     {
       return select->UsesMenuList() ? StyleAppearance::Menulist : StyleAppearance::Listbox;
     }
 
-    if (Is<html::HTMLTextAreaElement>(element))
+    if (Is<HTMLTextAreaElement>(element))
     {
       return StyleAppearance::TextArea;
     }
 
-    if (Is<html::HTMLMeterElement>(element))
+    if (Is<HTMLMeterElement>(element))
     {
       return StyleAppearance::Meter;
     }
 
-    if (Is<html::HTMLProgressElement>(element))
+    if (Is<HTMLProgressElement>(element))
     {
       return StyleAppearance::ProgressBar;
     }
@@ -456,13 +456,11 @@ namespace krys::boo
 
       switch (element.GetGaugeRegion())
       {
-        case html::HTMLMeterElement::GaugeRegion::Optimum:
-          gaugeRegion = MeterPart::GaugeRegion::Optimum;
-          break;
-        case html::HTMLMeterElement::GaugeRegion::Suboptimal:
+        case HTMLMeterElement::GaugeRegion::Optimum: gaugeRegion = MeterPart::GaugeRegion::Optimum; break;
+        case HTMLMeterElement::GaugeRegion::Suboptimal:
           gaugeRegion = MeterPart::GaugeRegion::Suboptimal;
           break;
-        case html::HTMLMeterElement::GaugeRegion::EvenLessGood:
+        case HTMLMeterElement::GaugeRegion::EvenLessGood:
           gaugeRegion = MeterPart::GaugeRegion::EvenLessGood;
           break;
       }
@@ -483,7 +481,7 @@ namespace krys::boo
     void UpdateSliderTrackPartForRenderer(SliderTrackPart &sliderTrackPart,
                                           const RenderElement &renderer) noexcept
     {
-      auto &input = Downcast<html::HTMLInputElement>(*renderer.GetElement());
+      auto &input = Downcast<boo::HTMLInputElement>(*renderer.GetElement());
       krys_debug_assert(input.IsRangeControl());
 
       IntSize thumbSize;
@@ -728,7 +726,7 @@ namespace krys::boo
       if (type == StyleAppearance::SearchFieldCancelButton)
       {
         auto *element = renderer->GetElement();
-        dom::Node *input = dom::TreeQueries::ShadowHost(*element);
+        Node *input = dom::TreeQueries::ShadowHost(*element);
         if (!input)
         {
           input = element;
@@ -1113,7 +1111,7 @@ namespace krys::boo
 
   bool RenderTheme::IsChecked(const RenderElement &renderer) noexcept
   {
-    auto *element = DynamicDowncast<html::HTMLInputElement>(renderer.GetElement());
+    auto *element = DynamicDowncast<boo::HTMLInputElement>(renderer.GetElement());
     return element && element->MatchesCheckedPseudoClass();
   }
 
@@ -1121,7 +1119,7 @@ namespace krys::boo
   {
     // This does not currently support multiple elements and therefore radio buttons are excluded.
     // FIXME: However, what about <progress>?
-    auto *input = DynamicDowncast<html::HTMLInputElement>(renderer.GetElement());
+    auto *input = DynamicDowncast<boo::HTMLInputElement>(renderer.GetElement());
     return input && input->IsCheckbox() && css::MatchesIndeterminatePseudoClass(*input);
   }
 
@@ -1140,7 +1138,7 @@ namespace krys::boo
     }
 
     // FIXME: This should be part of RenderTheme::extractControlStyleForRenderer().
-    dom::Element *delegate = element;
+    boo::Element *delegate = element;
     if (auto *sliderThumb = DynamicDowncast<html::SliderThumbElement>(element))
     {
       delegate = sliderThumb->HostInput();
@@ -1169,7 +1167,7 @@ namespace krys::boo
   {
     if (auto *element = renderer.GetElement())
     {
-      return Is<html::HTMLFormControlElement>(*element) && !css::MatchesReadWritePseudoClass(*element);
+      return Is<HTMLFormControlElement>(*element) && !css::MatchesReadWritePseudoClass(*element);
     }
     return false;
   }
@@ -1216,13 +1214,13 @@ namespace krys::boo
 
   bool RenderTheme::HasListButton(const RenderElement &renderer) noexcept
   {
-    auto *input = DynamicDowncast<html::HTMLInputElement>(renderer.GeneratingElement());
+    auto *input = DynamicDowncast<boo::HTMLInputElement>(renderer.GeneratingElement());
     return input && input->List();
   }
 
   bool RenderTheme::HasListButtonPressed(const RenderElement &renderer) noexcept
   {
-    auto *input = DynamicDowncast<html::HTMLInputElement>(renderer.GeneratingElement());
+    auto *input = DynamicDowncast<boo::HTMLInputElement>(renderer.GeneratingElement());
     if (!input)
     {
       return false;
@@ -1292,7 +1290,7 @@ namespace krys::boo
 
   style::LineWidthBox RenderTheme::ControlBorder(StyleAppearance appearance, const FontCascade &,
                                                  const style::LineWidthBox &zoomedBox, float,
-                                                 const dom::Element *) const noexcept
+                                                 const boo::Element *) const noexcept
   {
     switch (appearance)
     {
@@ -1352,7 +1350,7 @@ namespace krys::boo
   // FIXME: iOS does not use this so arguably this should be better abstracted. Or maybe we should
   // investigate if we can bring the various ports closer together.
   void RenderTheme::AdjustButtonOrCheckboxOrColorWellOrInnerSpinButtonOrRadioStyle(
-    RenderStyle &style, const dom::Element *element) const noexcept
+    RenderStyle &style, const boo::Element *element) const noexcept
   {
     auto appearance = style.UsedAppearance();
     const auto &fontCascade = style.GetFontCascade();
@@ -1483,38 +1481,38 @@ namespace krys::boo
                                  && !element->IsDisabledFormControl());
   }
 
-  void RenderTheme::AdjustCheckboxStyle(RenderStyle &style, const dom::Element *element) const noexcept
+  void RenderTheme::AdjustCheckboxStyle(RenderStyle &style, const boo::Element *element) const noexcept
   {
     AdjustButtonOrCheckboxOrColorWellOrInnerSpinButtonOrRadioStyle(style, element);
   }
 
-  void RenderTheme::AdjustRadioStyle(RenderStyle &style, const dom::Element *element) const noexcept
+  void RenderTheme::AdjustRadioStyle(RenderStyle &style, const boo::Element *element) const noexcept
   {
     AdjustButtonOrCheckboxOrColorWellOrInnerSpinButtonOrRadioStyle(style, element);
   }
 
-  void RenderTheme::AdjustColorWellStyle(RenderStyle &style, const dom::Element *element) const noexcept
+  void RenderTheme::AdjustColorWellStyle(RenderStyle &style, const boo::Element *element) const noexcept
   {
     AdjustButtonOrCheckboxOrColorWellOrInnerSpinButtonOrRadioStyle(style, element);
   }
 
-  void RenderTheme::AdjustButtonStyle(RenderStyle &style, const dom::Element *element) const noexcept
+  void RenderTheme::AdjustButtonStyle(RenderStyle &style, const boo::Element *element) const noexcept
   {
     AdjustButtonOrCheckboxOrColorWellOrInnerSpinButtonOrRadioStyle(style, element);
   }
 
-  void RenderTheme::AdjustInnerSpinButtonStyle(RenderStyle &style, const dom::Element *element) const noexcept
+  void RenderTheme::AdjustInnerSpinButtonStyle(RenderStyle &style, const boo::Element *element) const noexcept
   {
     AdjustButtonOrCheckboxOrColorWellOrInnerSpinButtonOrRadioStyle(style, element);
   }
 
-  void RenderTheme::AdjustMenuListStyle(RenderStyle &style, const dom::Element *) const noexcept
+  void RenderTheme::AdjustMenuListStyle(RenderStyle &style, const boo::Element *) const noexcept
   {
     style.SetOverflowX(Overflow::Visible);
     style.SetOverflowY(Overflow::Visible);
   }
 
-  void RenderTheme::AdjustMeterStyle(RenderStyle &style, const dom::Element *) const noexcept
+  void RenderTheme::AdjustMeterStyle(RenderStyle &style, const boo::Element *) const noexcept
   {
     style.SetBoxShadow(css::keywords::None {});
   }
@@ -1581,12 +1579,12 @@ namespace krys::boo
     context.DrawRect(FloatRect(SnappedIntRect(largerCorner)));
   }
 
-  bool RenderTheme::ShouldHaveSpinButton(const html::HTMLInputElement &inputElement) const noexcept
+  bool RenderTheme::ShouldHaveSpinButton(const boo::HTMLInputElement &inputElement) const noexcept
   {
     return inputElement.IsSteppable() && !inputElement.IsRangeControl();
   }
 
-  void RenderTheme::SetColorWellSwatchBackground(html::HTMLElement &swatch, Color color) noexcept
+  void RenderTheme::SetColorWellSwatchBackground(boo::HTMLElement &swatch, Color color) noexcept
   {
     if (!color.IsOpaque())
     {
@@ -1595,7 +1593,7 @@ namespace krys::boo
     (void)swatch.SetInlineStyleProperty(css::PropertyId::BackgroundColor, SerialisationForHTML(color));
   }
 
-  void RenderTheme::AdjustSliderThumbStyle(RenderStyle &style, const dom::Element *element) const noexcept
+  void RenderTheme::AdjustSliderThumbStyle(RenderStyle &style, const boo::Element *element) const noexcept
   {
     AdjustSliderThumbSize(style, element);
   }

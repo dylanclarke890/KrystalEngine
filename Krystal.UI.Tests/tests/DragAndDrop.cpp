@@ -71,15 +71,14 @@ namespace krys::ui::tests
             type,
             [this](boo::dom::Event &event)
             {
-              auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
-              auto *element = DynamicDowncast<boo::dom::Element>(node);
+              auto *node = DynamicDowncast<boo::Node>(event.Target().get());
+              auto *element = DynamicDowncast<boo::Element>(node);
               if (!Text.empty())
               {
                 Text += ' ';
               }
-              Text +=
-                Narrow(event.Type().View()) + "@"
-                + (element ? Narrow(element->GetAttribute(u8"id").value_or(boo::dom::DOMString())) : "");
+              Text += Narrow(event.Type().View()) + "@"
+                      + (element ? Narrow(element->GetAttribute(u8"id").value_or(boo::DOMString())) : "");
             }));
         }
       }
@@ -114,9 +113,9 @@ namespace krys::ui::tests
       std::string dropped;
       auto accept = [](boo::dom::Event &event)
       {
-        auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
-        auto *element = DynamicDowncast<boo::dom::Element>(node);
-        if (element && element->GetAttribute(u8"id") == boo::dom::DOMString(u8"dst"))
+        auto *node = DynamicDowncast<boo::Node>(event.Target().get());
+        auto *element = DynamicDowncast<boo::Element>(node);
+        if (element && element->GetAttribute(u8"id") == boo::DOMString(u8"dst"))
         {
           Downcast<boo::dom::DragEvent>(event).GetDataTransfer()->SetDropEffect(u8"copy");
           event.PreventDefault();
@@ -257,9 +256,9 @@ namespace krys::ui::tests
       size_t files = 0;
       auto accept = [](boo::dom::Event &event)
       {
-        auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
-        auto *element = DynamicDowncast<boo::dom::Element>(node);
-        if (element && element->GetAttribute(u8"id") == boo::dom::DOMString(u8"dst"))
+        auto *node = DynamicDowncast<boo::Node>(event.Target().get());
+        auto *element = DynamicDowncast<boo::Element>(node);
+        if (element && element->GetAttribute(u8"id") == boo::DOMString(u8"dst"))
         {
           event.PreventDefault();
         }

@@ -31,7 +31,7 @@ namespace krys::boo::style
 {
   // <'hyphenate-character'> = auto | <string>
   // https://drafts.csswg.org/css-text-4/#propdef-hyphenate-character
-  struct HyphenateCharacter : css::ValueOrKeyword<css::CSSOMStringAtom, css::keywords::Auto>
+  struct HyphenateCharacter : css::ValueOrKeyword<CSSOMStringAtom, css::keywords::Auto>
   {
     using Base::Base;
 

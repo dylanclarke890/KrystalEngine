@@ -31,12 +31,9 @@
 
 namespace krys::boo
 {
-  namespace dom
-  {
-    class Document;
-  }
+  class Document;
 
   /// @brief The icons @p document's head names with `<link rel=icon>`, with `http(s):` and `data:` URLs:
   /// the largest first, then in tree order.
-  KRYS_NODISCARD List<LinkIcon> CollectLinkIcons(const dom::Document &document) noexcept;
+  KRYS_NODISCARD List<LinkIcon> CollectLinkIcons(const boo::Document &document) noexcept;
 }

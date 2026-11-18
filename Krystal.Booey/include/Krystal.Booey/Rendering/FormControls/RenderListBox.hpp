@@ -37,15 +37,12 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLOptGroupElement;
   class HTMLOptionElement;
   class HTMLSelectElement;
-}
 
-namespace krys::boo
-{
   /// @brief The renderer of a select drawn as a list box: it draws its own items, and is its own scrollable
   /// area, scrolling by pixels, a line at a time being an item.
   class RenderListBox final : public RenderBlockFlow, public ScrollableArea
@@ -83,11 +80,11 @@ namespace krys::boo
     ScrollPosition _scrollPosition;
 
   public:
-    RenderListBox(html::HTMLSelectElement &element, RenderStyle &&style) noexcept;
+    RenderListBox(HTMLSelectElement &element, RenderStyle &&style) noexcept;
 
     ~RenderListBox() noexcept override;
 
-    KRYS_NODISCARD html::HTMLSelectElement &SelectElement() const noexcept;
+    KRYS_NODISCARD HTMLSelectElement &SelectElement() const noexcept;
 
     void SelectionChanged() noexcept;
 
@@ -101,11 +98,10 @@ namespace krys::boo
     KRYS_NODISCARD LayoutRect ItemBoundingBoxRect(const LayoutPoint &additionalOffset,
                                                   int32 index) const noexcept;
 
-    KRYS_NODISCARD Maybe<LayoutRect>
-      LocalBoundsOfOption(const html::HTMLOptionElement &option) const noexcept;
+    KRYS_NODISCARD Maybe<LayoutRect> LocalBoundsOfOption(const HTMLOptionElement &option) const noexcept;
 
     KRYS_NODISCARD Maybe<LayoutRect>
-      LocalBoundsOfOptGroup(const html::HTMLOptGroupElement &optGroup) const noexcept;
+      LocalBoundsOfOptGroup(const HTMLOptGroupElement &optGroup) const noexcept;
 
     /// @brief Scrolls the item at @p index fully into the content box, unless it's in view (or will be,
     /// once a smooth scroll ends), smoothly if @p animated.
@@ -123,7 +119,7 @@ namespace krys::boo
     KRYS_NODISCARD uint32 Size() const noexcept;
 
     bool Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
-                dom::Element **stopElement = nullptr,
+                Element **stopElement = nullptr,
                 ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept override;
 
     void ScrollDidEnd() noexcept final;
@@ -162,7 +158,7 @@ namespace krys::boo
                                   const LayoutPoint &accumulatedOffset) noexcept override;
 
     bool LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
-                       dom::Element **stopElement = nullptr,
+                       Element **stopElement = nullptr,
                        ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept override;
 
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
@@ -303,7 +299,7 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutUnit ListLogicalHeight() const noexcept;
 
-    KRYS_NODISCARD Maybe<int32> OptionRowIndex(const html::HTMLOptionElement &option) const noexcept;
+    KRYS_NODISCARD Maybe<int32> OptionRowIndex(const HTMLOptionElement &option) const noexcept;
 
     KRYS_NODISCARD LayoutRect RectForScrollbar(const Scrollbar &scrollbar) const noexcept;
 

@@ -12,9 +12,9 @@ namespace krys::boo::xml
   struct PseudoAttribute
   {
     /// @see https://www.w3.org/TR/xml-stylesheet/#dt-name
-    dom::DOMString Name;
+    DOMString Name;
     /// @see https://www.w3.org/TR/xml-stylesheet/#dt-value
-    dom::DOMString Value;
+    DOMString Value;
   };
 
   /// @brief Parses @p string as pseudo-attributes (`name="value" other='value'`), in order; null if it
@@ -22,5 +22,5 @@ namespace krys::boo::xml
   /// or has a name twice.
   /// @see https://www.w3.org/TR/xml-stylesheet/#dt-parsing
   /// @see https://www.w3.org/TR/xml-stylesheet/#dt-parsing-result
-  KRYS_NODISCARD Maybe<List<PseudoAttribute>> ParsePseudoAttributes(dom::DOMStringView string) noexcept;
+  KRYS_NODISCARD Maybe<List<PseudoAttribute>> ParsePseudoAttributes(DOMStringView string) noexcept;
 }

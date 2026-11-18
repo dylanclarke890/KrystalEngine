@@ -41,13 +41,13 @@ namespace krys::boo
   class StylePaintImage final : public StyleGeneratedImage
   {
   private:
-    css::CSSOMString _name;
+    CSSOMString _name;
     const Ref<css::VariableData> _arguments;
 
   public:
     constexpr static bool IsFixedSize = false;
 
-    KRYS_NODISCARD static Ref<StylePaintImage> Create(css::CSSOMString name,
+    KRYS_NODISCARD static Ref<StylePaintImage> Create(CSSOMString name,
                                                       Ref<css::VariableData> arguments) noexcept
     {
       return AdoptRef(*new StylePaintImage(krys::move(name), krys::move(arguments)));
@@ -56,7 +56,7 @@ namespace krys::boo
     ~StylePaintImage() noexcept override;
 
   private:
-    StylePaintImage(css::CSSOMString &&, Ref<css::VariableData> &&) noexcept;
+    StylePaintImage(CSSOMString &&, Ref<css::VariableData> &&) noexcept;
 
     KRYS_NODISCARD bool Equals(const StyleImage &) const noexcept final;
 

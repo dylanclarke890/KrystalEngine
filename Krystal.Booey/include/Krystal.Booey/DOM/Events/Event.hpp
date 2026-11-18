@@ -50,9 +50,13 @@ namespace krys::boo::dom
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::EventPhaseType, 4u)
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
+}
+
+namespace krys::boo::dom
+{
   class EventTarget;
 
   /// @see https://dom.spec.whatwg.org/#dictdef-eventinit
@@ -67,10 +71,10 @@ namespace krys::boo::dom
   /// @see https://dom.spec.whatwg.org/#event
   class Event : public RefCounted<Event>
   {
-    friend class Document;
+    friend class boo::Document;
     friend class EventDispatcher;
     friend class EventFactory;
-    friend class ShadowRoot;
+    friend class boo::ShadowRoot;
     friend class EventTarget;
 
   protected:

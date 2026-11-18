@@ -25,7 +25,7 @@ namespace krys::boo::tests
       bool operator==(const Observed &) const = default;
     };
 
-    KRYS_NODISCARD std::string Narrow(dom::DOMStringView string)
+    KRYS_NODISCARD std::string Narrow(DOMStringView string)
     {
       return std::string(reinterpret_cast<const char *>(string.data()), string.size());
     }
@@ -39,7 +39,7 @@ namespace krys::boo::tests
       Func<void(ResizeObserver &)> OnDeliver;
       Ref<ResizeObserver> Observer;
 
-      explicit Recorder(dom::Document &document) noexcept
+      explicit Recorder(Document &document) noexcept
           : Observer(ResizeObserver::Create(
               document,
               [this](const List<Ref<ResizeObserverEntry>> &entries, ResizeObserver &observer)
@@ -71,9 +71,9 @@ namespace krys::boo::tests
       }
     };
 
-    void SetStyle(dom::Element &element, dom::DOMStringView style)
+    void SetStyle(Element &element, DOMStringView style)
     {
-      REQUIRE_FALSE(element.SetAttribute(u8"style", dom::DOMString(style)).HasException());
+      REQUIRE_FALSE(element.SetAttribute(u8"style", DOMString(style)).HasException());
     }
   }
 
@@ -256,7 +256,7 @@ namespace krys::boo::tests
       update();
       (void)recorder.Take();
 
-      Ref<dom::Element> removed = ShareRef(inner);
+      Ref<Element> removed = ShareRef(inner);
       removed->Remove();
       update();
       CHECK(recorder.Take() == List<List<Observed>> {{{"inner"}}});
@@ -308,7 +308,7 @@ namespace krys::boo::tests
     SetStyle(box, u8"contain-intrinsic-size: auto 300px");
     update();
     CHECK(box.LastRememberedLogicalHeight() == LayoutUnit(120));
-    Ref<dom::Element> removed = ShareRef(box);
+    Ref<Element> removed = ShareRef(box);
     removed->Remove();
     update();
     CHECK(removed->LastRememberedLogicalHeight() == null);

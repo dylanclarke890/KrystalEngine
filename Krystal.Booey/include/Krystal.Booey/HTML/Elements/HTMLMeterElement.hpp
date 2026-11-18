@@ -26,10 +26,7 @@
 namespace krys::boo
 {
   class RenderMeter;
-}
 
-namespace krys::boo::html
-{
   /// @see https://html.spec.whatwg.org/#htmlmeterelement
   class HTMLMeterElement : public HTMLElement
   {
@@ -52,11 +49,11 @@ namespace krys::boo::html
       return false;
     }
 
-    explicit HTMLMeterElement(dom::Document &document) noexcept;
+    explicit HTMLMeterElement(Document &document) noexcept;
 
     ~HTMLMeterElement() noexcept override;
 
-    KRYS_NODISCARD static Ref<HTMLMeterElement> Create(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<HTMLMeterElement> Create(Document &document) noexcept;
 
 #pragma region HTMLMeterElement - https://html.spec.whatwg.org/#htmlmeterelement
 
@@ -104,17 +101,16 @@ namespace krys::boo::html
 
     KRYS_NODISCARD GaugeRegion GetGaugeRegion() const noexcept;
 
-    KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &child) const noexcept override;
+    KRYS_NODISCARD bool ChildShouldCreateRenderer(const Node &child) const noexcept override;
 
   protected:
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
 
-    void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept override;
+    void DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept override;
 
     void DidElementStateChange() noexcept;
 
@@ -122,13 +118,13 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLMeterElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLMeterElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLMeterElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLMeterElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLMeterElement();
   }

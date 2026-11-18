@@ -196,7 +196,7 @@ namespace krys::boo
     StartAutoscrollTimer();
   }
 
-  void AutoscrollController::UpdateDragAndDrop(dom::Node *dropTargetNode, const IntPoint &eventPosition,
+  void AutoscrollController::UpdateDragAndDrop(Node *dropTargetNode, const IntPoint &eventPosition,
                                                MonotonicTime::duration eventTime) noexcept
   {
     IntSize offset;

@@ -210,14 +210,14 @@ namespace krys::boo::style
   template <>
   struct DeprecatedCSSValueConversion<SingleAnimationRangeStart>
   {
-    KRYS_NODISCARD Maybe<SingleAnimationRangeStart> operator()(const RefPtr<dom::Element> &,
+    KRYS_NODISCARD Maybe<SingleAnimationRangeStart> operator()(const RefPtr<Element> &,
                                                                const css::Value &) noexcept;
   };
 
   template <>
   struct DeprecatedCSSValueConversion<SingleAnimationRangeEnd>
   {
-    KRYS_NODISCARD Maybe<SingleAnimationRangeEnd> operator()(const RefPtr<dom::Element> &,
+    KRYS_NODISCARD Maybe<SingleAnimationRangeEnd> operator()(const RefPtr<Element> &,
                                                              const css::Value &) noexcept;
   };
 }

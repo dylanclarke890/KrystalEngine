@@ -32,7 +32,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderSVGTSpan);
 
   public:
-    RenderSVGTSpan(svg::SVGTextPositioningElement &element, RenderStyle &&style) noexcept
+    RenderSVGTSpan(SVGTextPositioningElement &element, RenderStyle &&style) noexcept
         : RenderSVGInline(Type::SVGTSpan, element, krys::move(style))
     {
       krys_debug_assert(IsRenderSVGTSpan());

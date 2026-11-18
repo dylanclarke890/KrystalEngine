@@ -40,7 +40,7 @@ namespace krys::boo::dom
   {
     struct AncestorSibling
     {
-      CheckedPtr<dom::Node> Sibling;
+      CheckedPtr<Node> Sibling;
       uint32 Depth;
     };
 

@@ -55,7 +55,7 @@ namespace krys::boo::tests
       List<List<Observed>> Notifications;
       RefPtr<IntersectionObserver> Observer;
 
-      explicit Recorder(dom::Document &document, IntersectionObserver::Init &&init = {}) noexcept
+      explicit Recorder(Document &document, IntersectionObserver::Init &&init = {}) noexcept
       {
         auto observer = IntersectionObserver::Create(
           document,
@@ -79,7 +79,7 @@ namespace krys::boo::tests
       }
     };
 
-    KRYS_NODISCARD dom::ExceptionCode CreateError(dom::Document &document, IntersectionObserver::Init &&init)
+    KRYS_NODISCARD dom::ExceptionCode CreateError(Document &document, IntersectionObserver::Init &&init)
     {
       auto observer = IntersectionObserver::Create(
         document, [](const List<Ref<IntersectionObserverEntry>> &, IntersectionObserver &) {},
@@ -141,7 +141,7 @@ namespace krys::boo::tests
       CHECK(byElement.Observer->Root() == &a);
       CHECK(byElement.Observer->TrackingDocument() == &document);
 
-      Recorder byDocument(document, {.Root = RefPtr<dom::Document>(ShareRefPtr(&document))});
+      Recorder byDocument(document, {.Root = RefPtr<Document>(ShareRefPtr(&document))});
       CHECK(byDocument.Observer->Root() == &document);
 
       Recorder implicit(document);
@@ -350,7 +350,7 @@ namespace krys::boo::tests
       update();
       CHECK(recorder.Take().size() == 1);
 
-      Ref<dom::Element> removed = ShareRef(a);
+      Ref<Element> removed = ShareRef(a);
       removed->Remove();
       update();
       CHECK(recorder.Take() == List<List<Observed>> {{{"a", false, 0, {}, {}, {}}}});
@@ -374,7 +374,7 @@ namespace krys::boo::tests
 
     SECTION("A destroyed root disconnects its observers")
     {
-      RefPtr<dom::Element> root = fixture.Document->CreateElement(u8"div").ReleaseValue();
+      RefPtr<Element> root = fixture.Document->CreateElement(u8"div").ReleaseValue();
       Recorder recorder(*fixture.Document, {.Root = root});
       recorder.Observer->Observe(a);
       CHECK(recorder.Observer->HasObservationTargets());
@@ -388,7 +388,7 @@ namespace krys::boo::tests
     {
       {
         Recorder recorder(*fixture.Document,
-                          {.Root = RefPtr<dom::Document>(ShareRefPtr(fixture.Document.get()))});
+                          {.Root = RefPtr<boo::Document>(ShareRefPtr(fixture.Document.get()))});
         recorder.Observer->Observe(a);
         REQUIRE(a.IntersectionObserverDataIfExists());
         CHECK(a.IntersectionObserverDataIfExists()->Registrations.size() == 1);

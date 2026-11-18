@@ -37,16 +37,15 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
-  class DataTransfer;
   class Document;
   class Element;
 }
 
-namespace krys::boo::html
+namespace krys::boo::dom
 {
-  class HTMLInputElement;
+  class DataTransfer;
 }
 
 namespace krys::boo
@@ -54,6 +53,7 @@ namespace krys::boo
   class DragData;
   struct DragState;
   class FrameSelection;
+  class HTMLInputElement;
   class HitTestResult;
   class Image;
   class IntRect;
@@ -75,10 +75,10 @@ namespace krys::boo
     UniquePtr<DragClient> _client;
 
     /// @brief The document the mouse was last dragged over.
-    RefPtr<dom::Document> _documentUnderMouse;
+    RefPtr<Document> _documentUnderMouse;
     /// @brief The document (if any) that initiated the drag.
-    RefPtr<dom::Document> _dragInitiator;
-    RefPtr<html::HTMLInputElement> _fileInputElementUnderMouse;
+    RefPtr<Document> _dragInitiator;
+    RefPtr<HTMLInputElement> _fileInputElementUnderMouse;
     uint32 _numberOfItemsToBeAccepted {0};
 
     DragHandlingMethod _dragHandlingMethod {DragHandlingMethod::None};
@@ -158,7 +158,7 @@ namespace krys::boo
       return _dragHandlingMethod;
     }
 
-    KRYS_NODISCARD dom::Document *DocumentUnderMouse() const noexcept
+    KRYS_NODISCARD Document *DocumentUnderMouse() const noexcept
     {
       return _documentUnderMouse.get();
     }
@@ -172,9 +172,9 @@ namespace krys::boo
     EnumSet<DragSourceAction> DelegateDragSourceAction(const IntPoint &rootViewPoint) noexcept;
 
     /// @brief The element a press at @p dragOrigin on @p start would drag, noting in @p state what it drags.
-    KRYS_NODISCARD RefPtr<dom::Element> DraggableElement(const LocalFrame *sourceFrame, dom::Element *start,
-                                                         const IntPoint &dragOrigin,
-                                                         DragState &state) const noexcept;
+    KRYS_NODISCARD RefPtr<Element> DraggableElement(const LocalFrame *sourceFrame, Element *start,
+                                                    const IntPoint &dragOrigin,
+                                                    DragState &state) const noexcept;
 
     void DragEnded() noexcept;
 
@@ -184,7 +184,7 @@ namespace krys::boo
     /// @brief Writes what a drag of @p element (the selection, an image or a link, as @p actionMask says)
     /// carries by default to @p dataTransfer, before `dragstart` lets the page change it.
     void PrepareForDragStart(LocalFrame &sourceFrame, EnumSet<DragSourceAction> actionMask,
-                             dom::Element &sourceElement, dom::DataTransfer &dataTransfer,
+                             Element &sourceElement, dom::DataTransfer &dataTransfer,
                              const IntPoint &dragOrigin) const noexcept;
 
     /// @brief Starts the drag @p state describes, handing it to the client.
@@ -222,16 +222,16 @@ namespace krys::boo
 
     static bool IsCopyKeyDown(const DragData &dragData) noexcept;
 
-    void MouseMovedIntoDocument(RefPtr<dom::Document> &&newDocument) noexcept;
+    void MouseMovedIntoDocument(RefPtr<Document> &&newDocument) noexcept;
 
     void DisallowFileAccessIfNeeded(DragData &dragData) noexcept;
 
-    KRYS_NODISCARD static Maybe<HitTestResult>
-      HitTestResultForDragStart(LocalFrame &source, dom::Element &element, const IntPoint &location) noexcept;
+    KRYS_NODISCARD static Maybe<HitTestResult> HitTestResultForDragStart(LocalFrame &source, Element &element,
+                                                                         const IntPoint &location) noexcept;
 
     KRYS_NODISCARD static bool ShouldUseCachedImageForDragImage(const Image &image) noexcept;
 
-    void DoImageDrag(dom::Element &element, const IntPoint &dragOrigin, const IntRect &layoutRect,
+    void DoImageDrag(Element &element, const IntPoint &dragOrigin, const IntRect &layoutRect,
                      LocalFrame &frame, IntPoint &dragImageOffset, const DragState &state) noexcept;
 
     void DoSystemDrag(DragImage image, const IntPoint &dragLoc, const IntPoint &eventPos, LocalFrame &frame,
@@ -242,11 +242,11 @@ namespace krys::boo
       return *_client;
     }
 
-    static void DeclareAndWriteDragImage(dom::DataTransfer &dataTransfer, dom::Element &element,
+    static void DeclareAndWriteDragImage(dom::DataTransfer &dataTransfer, Element &element,
                                          const url::URL &url, utf8_stringview label) noexcept;
   };
 
   /// @brief Whether @p element is a link a press may drag: an `a` with an `href` that isn't editable, or an
   /// SVG `a`.
-  KRYS_NODISCARD bool IsDraggableLink(const dom::Element &element) noexcept;
+  KRYS_NODISCARD bool IsDraggableLink(const Element &element) noexcept;
 }

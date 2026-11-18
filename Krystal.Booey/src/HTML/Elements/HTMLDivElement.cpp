@@ -3,41 +3,42 @@
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLDivElement::HTMLDivElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Div, u8"div", HTMLElementFlags::None,
+  HTMLDivElement::HTMLDivElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Div, u8"div", html::HTMLElementFlags::None,
                     dom::NodeFlags::None)
   {
   }
 
-  HTMLDivElement::HTMLDivElement(dom::Document &document, dom::NodeFlags nodeFlags) noexcept
-      : HTMLElement(document, HTMLElementInterface::Div, u8"div", HTMLElementFlags::None, nodeFlags)
+  HTMLDivElement::HTMLDivElement(Document &document, dom::NodeFlags nodeFlags) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Div, u8"div", html::HTMLElementFlags::None,
+                    nodeFlags)
   {
   }
 
 #pragma region HTMLDivElement Obsolete members
 
-  dom::DOMString HTMLDivElement::Align() const noexcept
+  DOMString HTMLDivElement::Align() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLDivElement::Align(dom::DOMString value) noexcept
+  void HTMLDivElement::Align(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"align", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region Presentational hints
 
-  void HTMLDivElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                              const dom::DOMStringAtom &namespaceURI,
-                                                              dom::DOMStringView value,
+  void HTMLDivElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                              const DOMStringAtom &namespaceURI,
+                                                              DOMStringView value,
                                                               css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);

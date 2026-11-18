@@ -31,7 +31,7 @@
 namespace krys::boo
 {
   // Offsets into the text are UTF-8 bytes; collapsible whitespace is ASCII, so each is one byte.
-  utf8_string ConvertHTMLTextToInterchangeFormat(utf8_stringview in, const dom::Text *node) noexcept
+  utf8_string ConvertHTMLTextToInterchangeFormat(utf8_stringview in, const Text *node) noexcept
   {
     // Assume all the text comes from node.
     if (node->Renderer() && node->Renderer()->Style().PreserveNewline())

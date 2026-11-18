@@ -28,8 +28,8 @@
 
 namespace krys::boo
 {
-  LegacyRenderSVGTransformableContainer::LegacyRenderSVGTransformableContainer(
-    svg::SVGGraphicsElement &element, RenderStyle &&style) noexcept
+  LegacyRenderSVGTransformableContainer::LegacyRenderSVGTransformableContainer(SVGGraphicsElement &element,
+                                                                               RenderStyle &&style) noexcept
       : LegacyRenderSVGContainer(Type::LegacySVGTransformableContainer, element, krys::move(style))
   {
     krys_debug_assert(IsLegacyRenderSVGTransformableContainer());
@@ -44,18 +44,18 @@ namespace krys::boo
     // If we're either the renderer for a <use> element, or for any <g> element inside the shadow
     // tree, that was created during the use/symbol/svg expansion in SVGUseElement. These containers
     // need to respect the translations induced by their corresponding use elements x/y attributes.
-    RefPtr<svg::SVGUseElement> useElement = ShareRefPtr(DynamicDowncast<svg::SVGUseElement>(element));
-    if (!useElement && element.IsInShadowTree() && Is<svg::SVGGElement>(element))
+    RefPtr<SVGUseElement> useElement = ShareRefPtr(DynamicDowncast<SVGUseElement>(element));
+    if (!useElement && element.IsInShadowTree() && Is<SVGGElement>(element))
     {
       if (auto *correspondingElement = element.CorrespondingElement())
       {
-        useElement = ShareRefPtr(DynamicDowncast<svg::SVGUseElement>(*correspondingElement));
+        useElement = ShareRefPtr(DynamicDowncast<SVGUseElement>(*correspondingElement));
       }
     }
 
     if (useElement)
     {
-      svg::SVGLengthContext lengthContext(&element);
+      SVGLengthContext lengthContext(&element);
       FloatSize translation(useElement->X().Value(lengthContext), useElement->Y().Value(lengthContext));
       if (translation != _additionalTranslation)
       {
@@ -83,8 +83,8 @@ namespace krys::boo
     return true;
   }
 
-  svg::SVGGraphicsElement &LegacyRenderSVGTransformableContainer::GraphicsElement() noexcept
+  SVGGraphicsElement &LegacyRenderSVGTransformableContainer::GraphicsElement() noexcept
   {
-    return Downcast<svg::SVGGraphicsElement>(LegacyRenderSVGContainer::GetElement());
+    return Downcast<SVGGraphicsElement>(LegacyRenderSVGContainer::GetElement());
   }
 }

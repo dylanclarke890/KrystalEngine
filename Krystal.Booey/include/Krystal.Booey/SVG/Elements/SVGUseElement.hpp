@@ -30,10 +30,7 @@
 namespace krys::boo
 {
   class CachedSVGDocument;
-}
 
-namespace krys::boo::svg
-{
   /// @brief The `<use>` element: draws a copy of another element, cloned into its user agent shadow tree
   /// (its instances) and kept in step with the original.
   /// @see https://svgwg.org/svg2-draft/struct.html#UseElement
@@ -55,7 +52,7 @@ namespace krys::boo::svg
     CachedResourceHandle<CachedSVGDocument> _externalDocument;
 
   public:
-    explicit SVGUseElement(dom::Document &document) noexcept;
+    explicit SVGUseElement(Document &document) noexcept;
 
     ~SVGUseElement() noexcept override;
 
@@ -114,14 +111,14 @@ namespace krys::boo::svg
 
     void OnPostConnection() noexcept final;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept final;
 
     void BuildPendingResource() noexcept final;
 
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
 
@@ -131,15 +128,15 @@ namespace krys::boo::svg
 
     void NotifyFinished(CachedResource &) noexcept final;
 
-    KRYS_NODISCARD dom::Document *ExternalDocument() const noexcept;
+    KRYS_NODISCARD Document *ExternalDocument() const noexcept;
 
     void UpdateExternalDocument() noexcept;
 
     KRYS_NODISCARD FloatRect GetBBox(StyleUpdateStrategy = AllowStyleUpdate) noexcept final;
 
-    KRYS_NODISCARD RefPtr<SVGElement> FindTarget(dom::DOMStringAtom *targetID = nullptr) const noexcept;
+    KRYS_NODISCARD RefPtr<SVGElement> FindTarget(DOMStringAtom *targetID = nullptr) const noexcept;
 
-    void CloneTarget(dom::ContainerNode &container, SVGElement &target) const noexcept;
+    void CloneTarget(ContainerNode &container, SVGElement &target) const noexcept;
 
     KRYS_NODISCARD RefPtr<SVGElement> TargetClone() const noexcept;
 
@@ -187,8 +184,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGUseElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGUseElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGUseElement();
   }

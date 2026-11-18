@@ -38,7 +38,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -104,7 +104,7 @@ namespace krys::boo::layout
     FormattingContextLayoutForBlockInInlineFunction _formattingContextLayoutForBlockInInlineFunction;
 
   public:
-    LayoutState(const dom::Document &document, const ElementBox &rootContainer, Type type,
+    LayoutState(const Document &document, const ElementBox &rootContainer, Type type,
                 FormattingContextLayoutFunction &&formattingContextLayoutFunction,
                 FormattingContextLogicalWidthFunction &&formattingContextLogicalWidthFunction,
                 FormattingContextLogicalHeightFunction &&formattingContextLogicalHeightFunction,
@@ -118,7 +118,7 @@ namespace krys::boo::layout
       return _type;
     }
 
-    void UpdateQuirksMode(const dom::Document &document) noexcept;
+    void UpdateQuirksMode(const Document &document) noexcept;
 
     KRYS_NODISCARD InlineContentCache &
       GetInlineContentCache(const ElementBox &formattingContextRoot) noexcept;

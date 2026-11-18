@@ -53,7 +53,7 @@ namespace krys::boo
     LayoutRect _contentRect;
 
   public:
-    RenderMathMLMenclose(mathml::MathMLMencloseElement &element, RenderStyle &&style) noexcept;
+    RenderMathMLMenclose(MathMLMencloseElement &element, RenderStyle &&style) noexcept;
 
     ~RenderMathMLMenclose() noexcept override;
 
@@ -71,10 +71,9 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutUnit RuleThickness() const noexcept;
 
-    KRYS_NODISCARD bool
-      HasNotation(mathml::MathMLMencloseElement::MencloseNotationFlag notationFlag) const noexcept
+    KRYS_NODISCARD bool HasNotation(MathMLMencloseElement::MencloseNotationFlag notationFlag) const noexcept
     {
-      return static_cast<mathml::MathMLMencloseElement &>(NodeForNonAnonymous()).HasNotation(notationFlag);
+      return static_cast<MathMLMencloseElement &>(NodeForNonAnonymous()).HasNotation(notationFlag);
     }
 
     KRYS_NODISCARD SpaceAroundContent GetSpaceAroundContent(LayoutUnit contentWidth,

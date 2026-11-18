@@ -31,7 +31,7 @@
 #include "Krystal.Booey/SVG/SVGMatrix.hpp"
 #include "Krystal.Booey/SVG/SVGTransformValue.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @see https://svgwg.org/svg2-draft/coords.html#InterfaceSVGTransform
   class SVGTransform : public SVGValueProperty<SVGTransformValue>, public SVGPropertyOwner
@@ -240,7 +240,7 @@ namespace krys::boo::svg
       _value.MatrixDidChange();
     }
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept override
     {
       return _value.ValueAsString();
     }

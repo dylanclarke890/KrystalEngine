@@ -27,28 +27,25 @@
 
 #include "Krystal.Booey/Editing/Commands/EditCommand.hpp"
 
-namespace krys::boo::dom
-{
-  class Node;
-}
-
 namespace krys::boo
 {
+  class Node;
+
   /// @brief Inserts a node before a sibling.
   class InsertNodeBeforeCommand final : public SimpleEditCommand
   {
   private:
-    const Ref<dom::Node> _insertChild;
-    const Ref<dom::Node> _refChild;
+    const Ref<Node> _insertChild;
+    const Ref<Node> _refChild;
     ShouldAssumeContentIsAlwaysEditable _shouldAssumeContentIsAlwaysEditable;
 
   public:
     KRYS_NODISCARD static Ref<InsertNodeBeforeCommand>
-      Create(dom::Node &childToInsert, dom::Node &childToInsertBefore,
+      Create(Node &childToInsert, Node &childToInsertBefore,
              ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
              EditAction editingAction = EditAction::Insert) noexcept;
 
-    InsertNodeBeforeCommand(dom::Node &childToInsert, dom::Node &childToInsertBefore,
+    InsertNodeBeforeCommand(Node &childToInsert, Node &childToInsertBefore,
                             ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
                             EditAction editingAction) noexcept;
 

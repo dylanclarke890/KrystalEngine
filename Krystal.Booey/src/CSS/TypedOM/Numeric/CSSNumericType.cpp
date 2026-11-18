@@ -29,56 +29,56 @@
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include <utility>
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  Maybe<CSSNumericType> CSSNumericType::Create(UnitType unit, int32 exponent) noexcept
+  Maybe<CSSNumericType> CSSNumericType::Create(css::UnitType unit, int32 exponent) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#cssnumericvalue-create-a-type
     CSSNumericType type;
-    switch (UnitCategoryForType(unit))
+    switch (css::UnitCategoryForType(unit))
     {
-      case UnitCategory::Number:
+      case css::UnitCategory::Number:
       {
         return type;
       }
-      case UnitCategory::Percent:
+      case css::UnitCategory::Percent:
       {
         type.Percent = exponent;
         return type;
       }
-      case UnitCategory::AbsoluteLength:
-      case UnitCategory::FontRelativeLength:
-      case UnitCategory::ViewportPercentageLength:
+      case css::UnitCategory::AbsoluteLength:
+      case css::UnitCategory::FontRelativeLength:
+      case css::UnitCategory::ViewportPercentageLength:
       {
         type.Length = exponent;
         return type;
       }
-      case UnitCategory::Angle:
+      case css::UnitCategory::Angle:
       {
         type.Angle = exponent;
         return type;
       }
-      case UnitCategory::Time:
+      case css::UnitCategory::Time:
       {
         type.Time = exponent;
         return type;
       }
-      case UnitCategory::Frequency:
+      case css::UnitCategory::Frequency:
       {
         type.Frequency = exponent;
         return type;
       }
-      case UnitCategory::Resolution:
+      case css::UnitCategory::Resolution:
       {
         type.Resolution = exponent;
         return type;
       }
-      case UnitCategory::Flex:
+      case css::UnitCategory::Flex:
       {
         type.Flex = exponent;
         return type;
       }
-      case UnitCategory::Other:
+      case css::UnitCategory::Other:
       {
         break;
       }
@@ -109,7 +109,7 @@ namespace krys::boo::css
       return a;
     }
 
-    for (auto type : EachBaseType())
+    for (auto type : css::EachBaseType())
     {
       if (type == CSSNumericBaseType::Percent)
       {

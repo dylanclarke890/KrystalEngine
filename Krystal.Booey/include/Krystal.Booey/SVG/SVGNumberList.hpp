@@ -28,7 +28,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGValuePropertyList.hpp"
 #include "Krystal.Booey/SVG/SVGNumber.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @see https://svgwg.org/svg2-draft/types.html#InterfaceSVGNumberList
   class SVGNumberList final : public SVGValuePropertyList<SVGNumber>
@@ -54,8 +54,8 @@ namespace krys::boo::svg
       return AdoptRef(*new SVGNumberList(other, access));
     }
 
-    bool Parse(dom::DOMStringView) noexcept;
+    bool Parse(DOMStringView) noexcept;
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override;
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept override;
   };
 }

@@ -18,11 +18,11 @@ namespace krys::boo::dom::tests
   {
     struct ReplaceTestData
     {
-      Ref<dom::Document> Document;
+      Ref<boo::Document> Document;
       Ref<Text> Node;
 
       ReplaceTestData()
-          : Document(CreateRef<dom::Document>()), Node(CreateRef<Text>(*Document, u8"0123456789"))
+          : Document(CreateRef<boo::Document>()), Node(CreateRef<Text>(*Document, u8"0123456789"))
       {
       }
 

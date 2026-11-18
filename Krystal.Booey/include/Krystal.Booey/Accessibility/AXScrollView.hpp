@@ -64,7 +64,7 @@ namespace krys::boo
     /// @brief The view's scroll bar running in @p orientation (vertical if undefined), if it has one.
     KRYS_NODISCARD AXObject *ScrollBar(AXOrientation orientation) noexcept;
 
-    KRYS_NODISCARD dom::Document *GetDocument() const noexcept override;
+    KRYS_NODISCARD Document *GetDocument() const noexcept override;
 
     KRYS_NODISCARD AXObject *ParentObject() const noexcept override;
 

@@ -59,9 +59,9 @@ namespace krys::boo
   {
     constexpr char32 ObjectReplacementCharacter = 0xFFFC;
 
-    KRYS_NODISCARD bool IsHTMLElementOfType(const dom::Node &node, html::TagName tagName) noexcept
+    KRYS_NODISCARD bool IsHTMLElementOfType(const Node &node, html::TagName tagName) noexcept
     {
-      auto *element = DynamicDowncast<html::HTMLElement>(node);
+      auto *element = DynamicDowncast<HTMLElement>(node);
       return element && element->TagQualifiedName().TagName() == tagName;
     }
   }
@@ -117,17 +117,17 @@ namespace krys::boo
   {
     // This function is like Range::pastLastNode, except for the fact that it can climb up out of shadow
     // trees.
-    KRYS_NODISCARD RefPtr<dom::Node> NextInPreOrderCrossingShadowBoundaries(dom::Node &rangeEndContainer,
-                                                                            int32 rangeEndOffset) noexcept
+    KRYS_NODISCARD RefPtr<Node> NextInPreOrderCrossingShadowBoundaries(Node &rangeEndContainer,
+                                                                       int32 rangeEndOffset) noexcept
     {
-      if (rangeEndOffset >= 0 && !Is<dom::CharacterData>(rangeEndContainer))
+      if (rangeEndOffset >= 0 && !Is<CharacterData>(rangeEndContainer))
       {
         if (auto *next = rangeEndContainer.TraverseToChildAt(static_cast<uint32>(rangeEndOffset)))
         {
           return ShareRefPtr(next);
         }
       }
-      for (dom::Node *node = &rangeEndContainer; node; node = node->ParentOrShadowHostNode())
+      for (Node *node = &rangeEndContainer; node; node = node->ParentOrShadowHostNode())
       {
         if (auto *next = node->NextSibling())
         {
@@ -137,13 +137,12 @@ namespace krys::boo
       return nullptr;
     }
 
-    KRYS_NODISCARD inline bool FullyClipsContents(const dom::Node &node,
-                                                  TextIteratorBehaviors behaviors) noexcept
+    KRYS_NODISCARD inline bool FullyClipsContents(const Node &node, TextIteratorBehaviors behaviors) noexcept
     {
       auto *renderer = node.Renderer();
       if (!renderer)
       {
-        auto *element = DynamicDowncast<dom::Element>(node);
+        auto *element = DynamicDowncast<Element>(node);
         return element && !element->HasDisplayContents();
       }
       auto *box = DynamicDowncast<RenderBox>(*renderer);
@@ -169,7 +168,7 @@ namespace krys::boo
       return box->ContentBoxSize().IsEmpty();
     }
 
-    KRYS_NODISCARD inline bool IgnoresContainerClip(const dom::Node &node) noexcept
+    KRYS_NODISCARD inline bool IgnoresContainerClip(const Node &node) noexcept
     {
       auto *renderer = node.Renderer();
       if (!renderer || renderer->IsRenderTextOrLineBreak())
@@ -179,18 +178,18 @@ namespace krys::boo
       return renderer->IsOutOfFlowPositioned();
     }
 
-    void PushFullyClippedState(BitStack &stack, dom::Node &node, TextIteratorBehaviors behaviors) noexcept
+    void PushFullyClippedState(BitStack &stack, Node &node, TextIteratorBehaviors behaviors) noexcept
     {
       // Push true if this node full clips its contents, or if a parent already has fully
       // clipped and this is not a node that ignores its container's clip.
       stack.Push(FullyClipsContents(node, behaviors) || (stack.Top() && !IgnoresContainerClip(node)));
     }
 
-    void SetUpFullyClippedStack(BitStack &stack, dom::Node &node, TextIteratorBehaviors behaviors) noexcept
+    void SetUpFullyClippedStack(BitStack &stack, Node &node, TextIteratorBehaviors behaviors) noexcept
     {
       // Put the nodes in a vector so we can iterate in reverse order.
       // FIXME: This (and TextIterator in general) should use ComposedTreeIterator.
-      List<dom::Node *> ancestry;
+      List<Node *> ancestry;
       for (auto *parent = node.ParentOrShadowHostNode(); parent; parent = parent->ParentOrShadowHostNode())
       {
         ancestry.push_back(parent);
@@ -205,8 +204,7 @@ namespace krys::boo
       PushFullyClippedState(stack, node, behaviors);
     }
 
-    KRYS_NODISCARD bool IsClippedByFrameAncestor(const dom::Document &,
-                                                 TextIteratorBehaviors behaviors) noexcept
+    KRYS_NODISCARD bool IsClippedByFrameAncestor(const Document &, TextIteratorBehaviors behaviors) noexcept
     {
       if (!behaviors.Contains(TextIteratorBehavior::ClipsToFrameAncestors))
       {
@@ -233,7 +231,7 @@ namespace krys::boo
       return true;
     }
 
-    if (auto *element = DynamicDowncast<dom::Element>(renderer->GetNode()))
+    if (auto *element = DynamicDowncast<Element>(renderer->GetNode()))
     {
       auto isFormControl = IsHTMLElementOfType(*element, html::TagName::button)
                            || IsHTMLElementOfType(*element, html::TagName::fieldset)
@@ -248,7 +246,7 @@ namespace krys::boo
         return true;
       }
       if (auto role = element->GetAttribute(u8"role");
-          role && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(dom::DOMStringView(*role), u8"img"))
+          role && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(DOMStringView(*role), u8"img"))
       {
         return true;
       }
@@ -308,9 +306,9 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD dom::Node *FirstNode(const dom::BoundaryPoint &point) noexcept
+    KRYS_NODISCARD Node *FirstNode(const dom::BoundaryPoint &point) noexcept
     {
-      if (Is<dom::CharacterData>(*point.Container))
+      if (Is<CharacterData>(*point.Container))
       {
         return point.Container.get();
       }
@@ -380,35 +378,35 @@ namespace krys::boo
   {
     // (The flat tree, TraversesFlatTree, is for finding text, and there's no find in page; see
     // DIFFERENCES.md.)
-    KRYS_NODISCARD inline dom::Node *FirstChild(TextIteratorBehaviors, dom::Node &node) noexcept
+    KRYS_NODISCARD inline Node *FirstChild(TextIteratorBehaviors, Node &node) noexcept
     {
       return node.FirstChild();
     }
 
-    KRYS_NODISCARD inline dom::Node *NextSibling(TextIteratorBehaviors, dom::Node &node) noexcept
+    KRYS_NODISCARD inline Node *NextSibling(TextIteratorBehaviors, Node &node) noexcept
     {
       return node.NextSibling();
     }
 
-    KRYS_NODISCARD inline dom::Node *NextNode(TextIteratorBehaviors, dom::Node &node) noexcept
+    KRYS_NODISCARD inline Node *NextNode(TextIteratorBehaviors, Node &node) noexcept
     {
       return dom::TreeQueries::Next(node);
     }
 
-    KRYS_NODISCARD inline bool IsDescendantOf(TextIteratorBehaviors, dom::Node &node,
-                                              dom::Node &possibleAncestor) noexcept
+    KRYS_NODISCARD inline bool IsDescendantOf(TextIteratorBehaviors, Node &node,
+                                              Node &possibleAncestor) noexcept
     {
       return node.IsDescendantOf(&possibleAncestor);
     }
 
-    KRYS_NODISCARD inline dom::Node *ParentNodeOrShadowHost(TextIteratorBehaviors, dom::Node &node) noexcept
+    KRYS_NODISCARD inline Node *ParentNodeOrShadowHost(TextIteratorBehaviors, Node &node) noexcept
     {
       return node.ParentOrShadowHostNode();
     }
 
-    KRYS_NODISCARD inline bool HasDisplayContents(dom::Node &node) noexcept
+    KRYS_NODISCARD inline bool HasDisplayContents(Node &node) noexcept
     {
-      auto *element = DynamicDowncast<dom::Element>(node);
+      auto *element = DynamicDowncast<Element>(node);
       return element && element->HasDisplayContents();
     }
 
@@ -475,7 +473,7 @@ namespace krys::boo
       // break begins.
       // FIXME: It would be cleaner if we emitted two newlines during the last
       // iteration, instead of using m_needsAnotherNewline.
-      auto parentNode = ShareRefPtr<dom::Node>(nodeForAdditionalNewline->ParentNode());
+      auto parentNode = ShareRefPtr<Node>(nodeForAdditionalNewline->ParentNode());
       EmitCharacter('\n', krys::move(parentNode), krys::move(nodeForAdditionalNewline), 1, 1);
       return;
     }
@@ -522,7 +520,7 @@ namespace krys::boo
           {
             _handledChildren = true;
           }
-          else if (renderer->IsRenderText() && Is<dom::Text>(*_currentNode))
+          else if (renderer->IsRenderText() && Is<boo::Text>(*_currentNode))
           {
             _handledNode = HandleTextNode();
           }
@@ -544,18 +542,16 @@ namespace krys::boo
       // find a new current node to handle in depth-first manner,
       // calling exitNode() as we come back thru a parent node
 
-      RefPtr<dom::Node> next =
-        _handledChildren ? nullptr : ShareRefPtr(FirstChild(_behaviors, *_currentNode));
+      RefPtr<Node> next = _handledChildren ? nullptr : ShareRefPtr(FirstChild(_behaviors, *_currentNode));
       _offset = 0;
       if (!next)
       {
-        RefPtr<dom::Node> currentNode = _currentNode;
+        RefPtr<Node> currentNode = _currentNode;
         next = ShareRefPtr(NextSibling(_behaviors, *currentNode));
         if (!next)
         {
           bool pastEnd = NextNode(_behaviors, *currentNode) == _pastEndNode.get();
-          RefPtr<dom::Node> parentNode =
-            ShareRefPtr<dom::Node>(ParentNodeOrShadowHost(_behaviors, *currentNode));
+          RefPtr<Node> parentNode = ShareRefPtr<Node>(ParentNodeOrShadowHost(_behaviors, *currentNode));
           while (!next && parentNode)
           {
             if ((pastEnd && parentNode == _endContainer)
@@ -564,11 +560,11 @@ namespace krys::boo
               return;
             }
             bool haveRenderer = IsRendererAccessible(currentNode->Renderer(), _behaviors);
-            RefPtr<dom::Node> exitedNode = krys::move(currentNode);
+            RefPtr<Node> exitedNode = krys::move(currentNode);
             _currentNode = krys::move(parentNode);
             currentNode = _currentNode;
             _fullyClippedStack.Pop();
-            parentNode = ShareRefPtr<dom::Node>(ParentNodeOrShadowHost(_behaviors, *currentNode));
+            parentNode = ShareRefPtr<Node>(ParentNodeOrShadowHost(_behaviors, *currentNode));
             if (haveRenderer)
             {
               ExitNode(exitedNode.get());
@@ -632,7 +628,7 @@ namespace krys::boo
 
   bool TextIterator::HandleTextNode() noexcept
   {
-    Ref<dom::Text> textNode = Downcast<dom::Text>(_currentNode);
+    Ref<boo::Text> textNode = Downcast<boo::Text>(_currentNode);
 
     if (_fullyClippedStack.Top() && !_behaviors.Contains(TextIteratorBehavior::IgnoresStyleVisibility))
     {
@@ -707,7 +703,7 @@ namespace krys::boo
 
   void TextIterator::HandleTextRun() noexcept
   {
-    Ref<dom::Text> textNode = Downcast<dom::Text>(_currentNode);
+    Ref<boo::Text> textNode = Downcast<boo::Text>(_currentNode);
 
     const RenderText &renderer = _firstLetterText ? *_firstLetterText : *textNode->Renderer();
     if (renderer.Style().GetVisibility() != Visibility::Visible
@@ -907,7 +903,7 @@ namespace krys::boo
 
     if (_lastTextNodeEndedWithCollapsedSpace)
     {
-      EmitCharacter(' ', ShareRefPtr<dom::Node>(_lastTextNode->ParentNode()), _lastTextNode, 1, 1);
+      EmitCharacter(' ', ShareRefPtr<Node>(_lastTextNode->ParentNode()), _lastTextNode, 1, 1);
       return false;
     }
 
@@ -916,7 +912,7 @@ namespace krys::boo
     {
       if (auto innerTextElement = renderTextControl->TextFormControlElement().InnerTextElement())
       {
-        _currentNode = ShareRefPtr<dom::Node>(dom::TreeQueries::ContainingShadowRoot(*innerTextElement));
+        _currentNode = ShareRefPtr<Node>(dom::TreeQueries::ContainingShadowRoot(*innerTextElement));
         PushFullyClippedState(_fullyClippedStack, *_currentNode, _behaviors);
         _offset = 0;
         return false;
@@ -945,8 +941,8 @@ namespace krys::boo
 
     if (shouldEmitObjectReplacementCharacter)
     {
-      EmitCharacter(ObjectReplacementCharacter, ShareRefPtr<dom::Node>(_currentNode->ParentNode()),
-                    RefPtr<dom::Node>(_currentNode), 0, 1);
+      EmitCharacter(ObjectReplacementCharacter, ShareRefPtr<Node>(_currentNode->ParentNode()),
+                    RefPtr<Node>(_currentNode), 0, 1);
       // Don't process subtrees for embedded objects. If the text there is required,
       // it must be explicitly asked by specifying a range falling inside its boundaries.
       _handledChildren = true;
@@ -958,12 +954,11 @@ namespace krys::boo
       // We want replaced elements to behave like punctuation for boundary
       // finding, and to simply take up space for the selection preservation
       // code in moveParagraphs, so we use a comma.
-      EmitCharacter(',', ShareRefPtr<dom::Node>(_currentNode->ParentNode()), RefPtr<dom::Node>(_currentNode),
-                    0, 1);
+      EmitCharacter(',', ShareRefPtr<Node>(_currentNode->ParentNode()), RefPtr<Node>(_currentNode), 0, 1);
       return true;
     }
 
-    _positionNode = ShareRefPtr<dom::Node>(_currentNode->ParentNode());
+    _positionNode = ShareRefPtr<Node>(_currentNode->ParentNode());
     _positionOffsetBaseNode = _currentNode;
     _positionStartOffset = 0;
     _positionEndOffset = 1;
@@ -989,7 +984,7 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD bool ShouldEmitTabBeforeNode(dom::Node &node) noexcept
+    KRYS_NODISCARD bool ShouldEmitTabBeforeNode(Node &node) noexcept
     {
       auto *cell = DynamicDowncast<RenderTableCell>(node.Renderer());
 
@@ -1004,7 +999,7 @@ namespace krys::boo
       return table && (table->CellBefore(cell) || table->CellAbove(cell));
     }
 
-    KRYS_NODISCARD bool ShouldEmitNewlineForNode(dom::Node *node, bool emitsOriginalText) noexcept
+    KRYS_NODISCARD bool ShouldEmitNewlineForNode(Node *node, bool emitsOriginalText) noexcept
     {
       auto *renderer = node->Renderer();
       if (!(renderer ? renderer->IsBR() : IsHTMLElementOfType(*node, html::TagName::br)))
@@ -1017,7 +1012,7 @@ namespace krys::boo
                   && IsHTMLElementOfType(*shadowHost, html::TagName::input));
     }
 
-    KRYS_NODISCARD bool HasHeaderTag(const dom::Node &element) noexcept
+    KRYS_NODISCARD bool HasHeaderTag(const Node &element) noexcept
     {
       return IsHTMLElementOfType(element, html::TagName::h1)
              || IsHTMLElementOfType(element, html::TagName::h2)
@@ -1027,7 +1022,7 @@ namespace krys::boo
              || IsHTMLElementOfType(element, html::TagName::h6);
     }
 
-    KRYS_NODISCARD bool ShouldEmitReplacementInsteadOfNode(const dom::Node &) noexcept
+    KRYS_NODISCARD bool ShouldEmitReplacementInsteadOfNode(const Node &) noexcept
     {
       // Placeholders should eventually disappear, so treating them as a line break doesn't make sense
       // as when they are removed the text after it is combined with the text before it.
@@ -1036,7 +1031,7 @@ namespace krys::boo
     }
   }
 
-  bool ShouldEmitNewlinesBeforeAndAfterNode(dom::Node &node) noexcept
+  bool ShouldEmitNewlinesBeforeAndAfterNode(Node &node) noexcept
   {
     // Block flow (versus inline flow) is represented by having
     // a newline both before and after the element.
@@ -1087,8 +1082,7 @@ namespace krys::boo
   namespace
   {
     KRYS_NODISCARD bool
-      ShouldEmitNewlineAfterNode(dom::Node &node,
-                                 bool emitsCharactersBetweenAllVisiblePositions = false) noexcept
+      ShouldEmitNewlineAfterNode(Node &node, bool emitsCharactersBetweenAllVisiblePositions = false) noexcept
     {
       // FIXME: It should be better but slower to create a VisiblePosition here.
       if (!ShouldEmitNewlinesBeforeAndAfterNode(node))
@@ -1102,7 +1096,7 @@ namespace krys::boo
       {
         return true;
       }
-      dom::Node *subsequentNode = &node;
+      Node *subsequentNode = &node;
       while ((subsequentNode = dom::TreeQueries::NextSkippingChildren(*subsequentNode)))
       {
         if (subsequentNode->Renderer())
@@ -1113,12 +1107,12 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD bool ShouldEmitNewlineBeforeNode(dom::Node &node) noexcept
+    KRYS_NODISCARD bool ShouldEmitNewlineBeforeNode(Node &node) noexcept
     {
       return ShouldEmitNewlinesBeforeAndAfterNode(node);
     }
 
-    KRYS_NODISCARD bool ShouldEmitExtraNewlineForNode(dom::Node &node) noexcept
+    KRYS_NODISCARD bool ShouldEmitExtraNewlineForNode(Node &node) noexcept
     {
       // When there is a significant collapsed bottom margin, emit an extra
       // newline for a more realistic result. We end up getting the right
@@ -1156,7 +1150,7 @@ namespace krys::boo
       return static_cast<int32>(length) - textEnd;
     }
 
-    KRYS_NODISCARD int32 MaxOffsetIncludingCollapsedSpaces(dom::Node &node) noexcept
+    KRYS_NODISCARD int32 MaxOffsetIncludingCollapsedSpaces(Node &node) noexcept
     {
       int32 offset = CaretMaxOffset(node);
       if (auto *renderText = DynamicDowncast<RenderText>(node.Renderer()))
@@ -1246,13 +1240,13 @@ namespace krys::boo
     // The currPos.isNotNull() check is needed because positions in non-HTML content
     // (like SVG) do not have visible positions, and we don't want to emit for them either.
     VisiblePosition startPos =
-      VisiblePosition(dom::Position(RefPtr<dom::Node>(_startContainer), static_cast<uint32>(_startOffset),
+      VisiblePosition(dom::Position(RefPtr<Node>(_startContainer), static_cast<uint32>(_startOffset),
                                     dom::Position::AnchorType::PositionIsOffsetInAnchor));
     VisiblePosition currPos = VisiblePosition(dom::PositionBeforeNode(&currentNode));
     return startPos.IsNotNull() && currPos.IsNotNull() && !InSameLine(startPos, currPos);
   }
 
-  bool TextIterator::ShouldEmitSpaceBeforeAndAfterNode(dom::Node &node) noexcept
+  bool TextIterator::ShouldEmitSpaceBeforeAndAfterNode(Node &node) noexcept
   {
     return node.Renderer() && node.Renderer()->IsRenderTable()
            && (node.Renderer()->IsInline()
@@ -1267,12 +1261,12 @@ namespace krys::boo
     // create VisiblePositions, which is expensive. So, we perform the inexpensive checks
     // on m_currentNode to see if it necessitates emitting a character first and will early return
     // before encountering shouldRepresentNodeOffsetZero()s worse case behavior.
-    RefPtr<dom::Node> currentNode = _currentNode;
+    RefPtr<Node> currentNode = _currentNode;
     if (ShouldEmitTabBeforeNode(*currentNode))
     {
       if (ShouldRepresentNodeOffsetZero())
       {
-        auto parentNode = ShareRefPtr<dom::Node>(currentNode->ParentNode());
+        auto parentNode = ShareRefPtr<Node>(currentNode->ParentNode());
         EmitCharacter('\t', krys::move(parentNode), krys::move(currentNode), 0, 0);
       }
     }
@@ -1280,7 +1274,7 @@ namespace krys::boo
     {
       if (ShouldRepresentNodeOffsetZero())
       {
-        auto parentNode = ShareRefPtr<dom::Node>(currentNode->ParentNode());
+        auto parentNode = ShareRefPtr<Node>(currentNode->ParentNode());
         EmitCharacter('\n', krys::move(parentNode), krys::move(currentNode), 0, 0);
       }
     }
@@ -1288,7 +1282,7 @@ namespace krys::boo
     {
       if (ShouldRepresentNodeOffsetZero())
       {
-        auto parentNode = ShareRefPtr<dom::Node>(currentNode->ParentNode());
+        auto parentNode = ShareRefPtr<Node>(currentNode->ParentNode());
         EmitCharacter(' ', krys::move(parentNode), krys::move(currentNode), 0, 0);
       }
     }
@@ -1296,7 +1290,7 @@ namespace krys::boo
     {
       if (ShouldRepresentNodeOffsetZero())
       {
-        auto parentNode = ShareRefPtr<dom::Node>(currentNode->ParentNode());
+        auto parentNode = ShareRefPtr<Node>(currentNode->ParentNode());
         EmitCharacter(ObjectReplacementCharacter, krys::move(parentNode), krys::move(currentNode), 0, 0);
       }
     }
@@ -1304,17 +1298,17 @@ namespace krys::boo
 
   bool TextIterator::HandleNonTextNode() noexcept
   {
-    RefPtr<dom::Node> currentNode = _currentNode;
+    RefPtr<Node> currentNode = _currentNode;
     if (ShouldEmitNewlineForNode(currentNode.get(),
                                  _behaviors.Contains(TextIteratorBehavior::EmitsOriginalText)))
     {
-      auto parentNode = ShareRefPtr<dom::Node>(currentNode->ParentNode());
+      auto parentNode = ShareRefPtr<Node>(currentNode->ParentNode());
       EmitCharacter('\n', krys::move(parentNode), krys::move(currentNode), 0, 1);
     }
     else if (_behaviors.Contains(TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions)
              && currentNode->Renderer() && currentNode->Renderer()->IsHR())
     {
-      auto parentNode = ShareRefPtr<dom::Node>(currentNode->ParentNode());
+      auto parentNode = ShareRefPtr<Node>(currentNode->ParentNode());
       EmitCharacter(' ', krys::move(parentNode), krys::move(currentNode), 0, 1);
     }
     else
@@ -1325,7 +1319,7 @@ namespace krys::boo
     return true;
   }
 
-  void TextIterator::ExitNode(dom::Node *exitedNode) noexcept
+  void TextIterator::ExitNode(Node *exitedNode) noexcept
   {
     // prevent emitting a newline when exiting a collapsed block at beginning of the range
     // FIXME: !m_hasEmitted does not necessarily mean there was a collapsed block... it could
@@ -1339,7 +1333,7 @@ namespace krys::boo
     // Emit with a position *inside* m_currentNode, after m_currentNode's contents, in
     // case it is a block, because the run should start where the
     // emitted character is positioned visually.
-    RefPtr<dom::Node> baseNode = ShareRefPtr(exitedNode);
+    RefPtr<Node> baseNode = ShareRefPtr(exitedNode);
     // FIXME: This shouldn't require the m_lastTextNode to be true, but we can't change that without making
     // the logic in _web_attributedStringFromRange match. We'll get that for free when we switch to use
     // TextIterator in _web_attributedStringFromRange.
@@ -1357,8 +1351,7 @@ namespace krys::boo
       if (_lastCharacter != '\n')
       {
         // insert a newline with a position following this block's contents.
-        EmitCharacter('\n', ShareRefPtr<dom::Node>(baseNode->ParentNode()), RefPtr<dom::Node>(baseNode), 1,
-                      1);
+        EmitCharacter('\n', ShareRefPtr<Node>(baseNode->ParentNode()), RefPtr<Node>(baseNode), 1, 1);
         // remember whether to later add a newline for the current node
         krys_debug_assert(!_nodeForAdditionalNewline);
         if (addNewline)
@@ -1369,21 +1362,20 @@ namespace krys::boo
       else if (addNewline)
       {
         // insert a newline with a position following this block's contents.
-        EmitCharacter('\n', ShareRefPtr<dom::Node>(baseNode->ParentNode()), RefPtr<dom::Node>(baseNode), 1,
-                      1);
+        EmitCharacter('\n', ShareRefPtr<Node>(baseNode->ParentNode()), RefPtr<Node>(baseNode), 1, 1);
       }
     }
 
     // If nothing was emitted, see if we need to emit a space.
     if (!_positionNode && ShouldEmitSpaceBeforeAndAfterNode(*_currentNode))
     {
-      auto parentNode = ShareRefPtr<dom::Node>(baseNode->ParentNode());
+      auto parentNode = ShareRefPtr<Node>(baseNode->ParentNode());
       EmitCharacter(' ', krys::move(parentNode), krys::move(baseNode), 1, 1);
     }
   }
 
-  void TextIterator::EmitCharacter(char32 character, RefPtr<dom::Node> &&characterNode,
-                                   RefPtr<dom::Node> &&offsetBaseNode, int32 textStartOffset,
+  void TextIterator::EmitCharacter(char32 character, RefPtr<Node> &&characterNode,
+                                   RefPtr<Node> &&offsetBaseNode, int32 textStartOffset,
                                    int32 textEndOffset) noexcept
   {
     krys_debug_assert(characterNode);
@@ -1401,7 +1393,7 @@ namespace krys::boo
     _lastTextNodeEndedWithCollapsedSpace = false;
   }
 
-  void TextIterator::EmitText(dom::Text &textNode, const RenderText &renderer, int32 textStartOffset,
+  void TextIterator::EmitText(boo::Text &textNode, const RenderText &renderer, int32 textStartOffset,
                               int32 textEndOffset) noexcept
   {
     krys_debug_assert(textStartOffset >= 0);
@@ -1423,7 +1415,7 @@ namespace krys::boo
 
     textEndOffset = std::min(static_cast<int32>(string.size()), textEndOffset);
 
-    _positionNode = ShareRefPtr<dom::Node>(&textNode);
+    _positionNode = ShareRefPtr<Node>(&textNode);
     _positionOffsetBaseNode = nullptr;
     _positionStartOffset = textStartOffset;
     _positionEndOffset = textEndOffset;
@@ -1453,10 +1445,10 @@ namespace krys::boo
             {ShareRef(*_positionNode), static_cast<uint64>(_positionEndOffset)}};
   }
 
-  dom::Node *TextIterator::GetNode() const noexcept
+  Node *TextIterator::GetNode() const noexcept
   {
     auto start = Range().Start;
-    if (Is<dom::CharacterData>(*start.Container))
+    if (Is<CharacterData>(*start.Container))
     {
       return start.Container.get();
     }
@@ -1469,12 +1461,12 @@ namespace krys::boo
   {
     range.Start.GetDocument().UpdateLayoutIgnorePendingStylesheets();
 
-    dom::Node *startNode = range.Start.Container.get();
-    dom::Node *endNode = range.End.Container.get();
+    Node *startNode = range.Start.Container.get();
+    Node *endNode = range.End.Container.get();
     uint32 startOffset = static_cast<uint32>(range.Start.Offset);
     uint32 endOffset = static_cast<uint32>(range.End.Offset);
 
-    if (!Is<dom::CharacterData>(*startNode))
+    if (!Is<CharacterData>(*startNode))
     {
       if (startOffset < startNode->CountChildNodes())
       {
@@ -1482,7 +1474,7 @@ namespace krys::boo
         startOffset = 0;
       }
     }
-    if (!Is<dom::CharacterData>(*endNode))
+    if (!Is<CharacterData>(*endNode))
     {
       if (endOffset > 0 && endOffset <= endNode->CountChildNodes())
       {
@@ -1615,7 +1607,7 @@ namespace krys::boo
 
   bool SimplifiedBackwardsTextIterator::HandleTextNode() noexcept
   {
-    _lastTextNode = ShareRefPtr(&Downcast<dom::Text>(*_node));
+    _lastTextNode = ShareRefPtr(&Downcast<boo::Text>(*_node));
 
     int32 startOffset;
     int32 offsetInNode;
@@ -1701,17 +1693,17 @@ namespace krys::boo
     // finding, and to simply take up space for the selection preservation
     // code in moveParagraphs, so we use a comma. Unconditionally emit
     // here because this iterator is only used for boundary finding.
-    EmitCharacter(',', ShareRefPtr<dom::Node>(_node->ParentNode()), index, index + 1);
+    EmitCharacter(',', ShareRefPtr<Node>(_node->ParentNode()), index, index + 1);
     return true;
   }
 
   bool SimplifiedBackwardsTextIterator::HandleNonTextNode() noexcept
   {
-    RefPtr<dom::Node> currentNode = _node;
+    RefPtr<Node> currentNode = _node;
     if (ShouldEmitTabBeforeNode(*currentNode))
     {
       int32 index = static_cast<int32>(currentNode->ComputeNodeIndex());
-      EmitCharacter('\t', ShareRefPtr<dom::Node>(currentNode->ParentNode()), index + 1, index + 1);
+      EmitCharacter('\t', ShareRefPtr<Node>(currentNode->ParentNode()), index + 1, index + 1);
     }
     else if (ShouldEmitNewlineForNode(currentNode.get(),
                                       _behaviors.Contains(TextIteratorBehavior::EmitsOriginalText))
@@ -1723,7 +1715,7 @@ namespace krys::boo
         int32 index = static_cast<int32>(currentNode->ComputeNodeIndex());
         // The start of this emitted range is wrong. Ensuring correctness would require
         // VisiblePositions and so would be slow. previousBoundary expects this.
-        EmitCharacter('\n', ShareRefPtr<dom::Node>(currentNode->ParentNode()), index + 1, index + 1);
+        EmitCharacter('\n', ShareRefPtr<Node>(currentNode->ParentNode()), index + 1, index + 1);
       }
     }
     return true;
@@ -1731,7 +1723,7 @@ namespace krys::boo
 
   void SimplifiedBackwardsTextIterator::ExitNode() noexcept
   {
-    RefPtr<dom::Node> node = _node;
+    RefPtr<Node> node = _node;
     if (ShouldEmitTabBeforeNode(*node))
     {
       EmitCharacter('\t', krys::move(node), 0, 0);
@@ -1746,7 +1738,7 @@ namespace krys::boo
     }
   }
 
-  void SimplifiedBackwardsTextIterator::EmitCharacter(char32 character, RefPtr<dom::Node> &&node,
+  void SimplifiedBackwardsTextIterator::EmitCharacter(char32 character, RefPtr<Node> &&node,
                                                       int32 startOffset, int32 endOffset) noexcept
   {
     krys_debug_assert(node);
@@ -1758,7 +1750,7 @@ namespace krys::boo
     _lastCharacter = character;
   }
 
-  bool SimplifiedBackwardsTextIterator::AdvanceRespectingRange(dom::Node *next) noexcept
+  bool SimplifiedBackwardsTextIterator::AdvanceRespectingRange(Node *next) noexcept
   {
     if (!next)
     {
@@ -2119,11 +2111,11 @@ namespace krys::boo
 
       auto boundary = [&](uint64 targetLocation) -> dom::BoundaryPoint
       {
-        if (auto *textNode = DynamicDowncast<dom::Text>(*textRunRange.Start.Container))
+        if (auto *textNode = DynamicDowncast<boo::Text>(*textRunRange.Start.Container))
         {
           krys_debug_assert(targetLocation - location <= textNode->Length());
           uint64 offset = textRunRange.Start.Offset + targetLocation - location;
-          return {ShareRef<dom::Node>(*textNode), offset};
+          return {ShareRef<Node>(*textNode), offset};
         }
         return targetLocation == location ? textRunRange.Start : textRunRange.End;
       };

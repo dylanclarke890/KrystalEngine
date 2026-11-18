@@ -30,11 +30,14 @@
 namespace krys::boo::svg
 {
   // Instantiated once in SVGAnimatedPropertyImpl.cpp (see SVGAnimatedPropertyImpl.hpp).
-  extern template class SVGSharedPrimitiveProperty<dom::DOMString>;
-  extern template class SVGAnimatedPrimitiveProperty<dom::DOMString>;
+  extern template class SVGSharedPrimitiveProperty<DOMString>;
+  extern template class SVGAnimatedPrimitiveProperty<DOMString>;
+}
 
+namespace krys::boo
+{
   /// @see https://svgwg.org/svg2-draft/types.html#InterfaceSVGAnimatedString
-  class SVGAnimatedString : public SVGAnimatedPrimitiveProperty<dom::DOMString>
+  class SVGAnimatedString : public SVGAnimatedPrimitiveProperty<DOMString>
   {
   public:
     KRYS_NODISCARD static Ref<SVGAnimatedString> Create(SVGElement *contextElement) noexcept
@@ -44,7 +47,7 @@ namespace krys::boo::svg
 
   protected:
     SVGAnimatedString(SVGElement *contextElement) noexcept
-        : SVGAnimatedPrimitiveProperty<dom::DOMString>(contextElement)
+        : SVGAnimatedPrimitiveProperty<DOMString>(contextElement)
     {
     }
   };

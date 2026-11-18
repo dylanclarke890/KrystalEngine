@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/SVG/Elements/SVGFEPointLightElement.hpp"
 #include "Krystal.Booey/Graphics/Filters/PointLightSource.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFEPointLightElement::SVGFEPointLightElement(dom::Document &document) noexcept
+  SVGFEPointLightElement::SVGFEPointLightElement(Document &document) noexcept
       : SVGFELightElement(document, SVGElementInterface::FEPointLight)
   {
   }

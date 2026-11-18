@@ -5,23 +5,23 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLTitleElement::HTMLTitleElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Title)
+  HTMLTitleElement::HTMLTitleElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Title)
   {
   }
 
 #pragma region HTMLTitleElement
 
-  dom::DOMString HTMLTitleElement::Text() const noexcept
+  DOMString HTMLTitleElement::Text() const noexcept
   {
     return dom::TextAlgorithms::ChildTextContent(*this);
   }
 
-  dom::ExceptionOr<void> HTMLTitleElement::Text(dom::DOMString value) noexcept
+  dom::ExceptionOr<void> HTMLTitleElement::Text(DOMString value) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     return dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *this);
   }
 
@@ -36,7 +36,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLTitleElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLTitleElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
     if (oldAncestor.IsConnected())

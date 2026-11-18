@@ -29,12 +29,12 @@
 
 namespace krys::boo
 {
+  class Element;
   class LocalDOMWindow;
 }
 
 namespace krys::boo::dom
 {
-  class Element;
   class EventListener;
   class EventPathItem;
   class EventTarget;

@@ -42,39 +42,40 @@
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD PropertyId ParseJavaScriptCSSPropertyName(const CSSOMStringAtom &propertyName) noexcept
+    KRYS_NODISCARD css::PropertyId
+      ParseJavaScriptCSSPropertyName(const CSSOMStringAtom &propertyName) noexcept
     {
-      static MainThreadNeverDestroyed<HashMap<CSSOMStringAtom, PropertyId>> propertyIdCache;
+      static MainThreadNeverDestroyed<HashMap<CSSOMStringAtom, css::PropertyId>> propertyIdCache;
 
       if (propertyName == null)
       {
-        return PropertyId::Invalid;
+        return css::PropertyId::Invalid;
       }
 
       auto name = propertyName.View();
       auto length = name.size();
       if (!length)
       {
-        return PropertyId::Invalid;
+        return css::PropertyId::Invalid;
       }
 
-      auto &cache = static_cast<HashMap<CSSOMStringAtom, PropertyId> &>(propertyIdCache);
+      auto &cache = static_cast<HashMap<CSSOMStringAtom, css::PropertyId> &>(propertyIdCache);
       if (auto it = cache.find(propertyName); it != cache.end())
       {
         return it->second;
       }
 
-      Array<char8, MaxPropertyNameLength> buffer;
+      Array<char8, css::MaxPropertyNameLength> buffer;
       auto outputLength = 0uz;
       auto i = 0uz;
 
       if (text::IsASCIIUpper(name[0]))
       {
-        return PropertyId::Invalid;
+        return css::PropertyId::Invalid;
       }
 
       buffer[outputLength++] = text::ToASCIILower(name[i++]);
@@ -84,7 +85,7 @@ namespace krys::boo::css
       auto propertySizeLeft = length - i;
       if (propertySizeLeft > bufferSizeLeft)
       {
-        return PropertyId::Invalid;
+        return css::PropertyId::Invalid;
       }
 
       for (; i < length; ++i)
@@ -93,7 +94,7 @@ namespace krys::boo::css
         if (!c || !text::IsASCII(c))
         {
           // illegal character
-          return PropertyId::Invalid;
+          return css::PropertyId::Invalid;
         }
         if (text::IsASCIIUpper(c))
         {
@@ -101,7 +102,7 @@ namespace krys::boo::css
           propertySizeLeft = length - i + 1;
           if (propertySizeLeft > bufferSizeLeft)
           {
-            return PropertyId::Invalid;
+            return css::PropertyId::Invalid;
           }
           buffer[outputLength++] = u8'-';
           buffer[outputLength++] = text::ToASCIILowerUnchecked(c);
@@ -113,9 +114,9 @@ namespace krys::boo::css
         krys_debug_assert(outputLength < buffer.size());
       }
 
-      auto id = FindProperty(CSSOMStringView(buffer.data(), outputLength));
+      auto id = css::FindProperty(CSSOMStringView(buffer.data(), outputLength));
       // FIXME: Why aren't we memoizing CSS property names we fail to find?
-      if (id != PropertyId::Invalid)
+      if (id != css::PropertyId::Invalid)
       {
         cache.emplace(propertyName, id);
       }
@@ -129,11 +130,12 @@ namespace krys::boo::css
     };
 
     template <PropertyLookupMode Mode>
-    KRYS_NODISCARD PropertyId LookupCSSPropertyFromIDLAttribute(const CSSOMStringAtom &attribute) noexcept
+    KRYS_NODISCARD css::PropertyId
+      LookupCSSPropertyFromIDLAttribute(const CSSOMStringAtom &attribute) noexcept
     {
-      static MainThreadNeverDestroyed<HashMap<CSSOMStringAtom, PropertyId>> idCache;
+      static MainThreadNeverDestroyed<HashMap<CSSOMStringAtom, css::PropertyId>> idCache;
 
-      auto &cache = static_cast<HashMap<CSSOMStringAtom, PropertyId> &>(idCache);
+      auto &cache = static_cast<HashMap<CSSOMStringAtom, css::PropertyId> &>(idCache);
       if (auto it = cache.find(attribute); it != cache.end())
       {
         return it->second;
@@ -167,8 +169,8 @@ namespace krys::boo::css
         }
       }
 
-      auto id = FindProperty(output);
-      krys_debug_assert(id != PropertyId::Invalid);
+      auto id = css::FindProperty(output);
+      krys_debug_assert(id != css::PropertyId::Invalid);
       cache.emplace(attribute, id);
       return id;
     }
@@ -176,12 +178,13 @@ namespace krys::boo::css
 
 #pragma region CSSStyleProperties
 
-  PropertyId
+  css::PropertyId
     CSSStyleProperties::GetPropertyIdFromJavaScriptPropertyName(const CSSOMStringAtom &propertyName) noexcept
   {
     auto property = ParseJavaScriptCSSPropertyName(propertyName);
-    return property != PropertyId::Invalid && css::IsExposed(property, nullptr) ? property
-                                                                                : PropertyId::Invalid;
+    return property != css::PropertyId::Invalid && css::IsExposed(property, nullptr)
+             ? property
+             : css::PropertyId::Invalid;
   }
 
   CSSOMString
@@ -198,7 +201,7 @@ namespace krys::boo::css
   {
     auto property =
       LookupCSSPropertyFromIDLAttribute<PropertyLookupMode::ConvertUsingNoDashPrefix>(attribute);
-    return SetPropertyInternal(property, value, IsImportant::No);
+    return SetPropertyInternal(property, value, css::IsImportant::No);
   }
 
   CSSOMString
@@ -213,17 +216,17 @@ namespace krys::boo::css
                                                               const CSSOMString &value) noexcept
   {
     auto property = LookupCSSPropertyFromIDLAttribute<PropertyLookupMode::NoConversion>(attribute);
-    return SetPropertyInternal(property, value, IsImportant::No);
+    return SetPropertyInternal(property, value, css::IsImportant::No);
   }
 
   CSSOMString CSSStyleProperties::CssFloat() noexcept
   {
-    return GetPropertyValueInternal(PropertyId::Float);
+    return GetPropertyValueInternal(css::PropertyId::Float);
   }
 
   dom::ExceptionOr<void> CSSStyleProperties::SetCssFloat(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Float, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::Float, value, css::IsImportant::No);
   }
 
 #pragma endregion
@@ -278,7 +281,7 @@ namespace krys::boo::css
 
   CSSOMString PropertySetCSSStyleProperties::CssText() const noexcept
   {
-    return _propertySet->AsText(DefaultSerialisationContext());
+    return _propertySet->AsText(css::DefaultSerialisationContext());
   }
 
   dom::ExceptionOr<void> PropertySetCSSStyleProperties::SetCssText(const CSSOMString &text) noexcept
@@ -299,12 +302,12 @@ namespace krys::boo::css
 
   CSSOMString PropertySetCSSStyleProperties::GetPropertyValue(const CSSOMString &propertyName) noexcept
   {
-    if (IsCustomPropertyName(propertyName))
+    if (css::IsCustomPropertyName(propertyName))
     {
       return _propertySet->GetCustomPropertyValue(propertyName);
     }
 
-    auto property = PropertyIdFromName(propertyName);
+    auto property = css::PropertyIdFromName(propertyName);
     if (!IsExposed(property))
     {
       return {};
@@ -314,12 +317,12 @@ namespace krys::boo::css
 
   CSSOMString PropertySetCSSStyleProperties::GetPropertyPriority(const CSSOMString &propertyName) noexcept
   {
-    if (IsCustomPropertyName(propertyName))
+    if (css::IsCustomPropertyName(propertyName))
     {
       return _propertySet->CustomPropertyIsImportant(propertyName) ? u8"important" : CSSOMString();
     }
 
-    auto property = PropertyIdFromName(propertyName);
+    auto property = css::PropertyIdFromName(propertyName);
     if (!IsExposed(property))
     {
       return {};
@@ -329,7 +332,7 @@ namespace krys::boo::css
 
   CSSOMString PropertySetCSSStyleProperties::GetPropertyShorthand(const CSSOMString &propertyName) noexcept
   {
-    auto property = PropertyIdFromName(propertyName);
+    auto property = css::PropertyIdFromName(propertyName);
     if (!IsExposed(property))
     {
       return {};
@@ -339,7 +342,7 @@ namespace krys::boo::css
 
   bool PropertySetCSSStyleProperties::IsPropertyImplicit(const CSSOMString &propertyName) noexcept
   {
-    return _propertySet->IsPropertyImplicit(PropertyIdFromName(propertyName));
+    return _propertySet->IsPropertyImplicit(css::PropertyIdFromName(propertyName));
   }
 
   dom::ExceptionOr<void> PropertySetCSSStyleProperties::SetProperty(const CSSOMString &propertyName,
@@ -349,10 +352,10 @@ namespace krys::boo::css
     html::CEReactionsScope ceReactions;
     StyleAttributeMutationScope mutationScope {ParentElement()};
 
-    auto property = PropertyIdFromName(propertyName);
-    if (IsCustomPropertyName(propertyName))
+    auto property = css::PropertyIdFromName(propertyName);
+    if (css::IsCustomPropertyName(propertyName))
     {
-      property = PropertyId::Custom;
+      property = css::PropertyId::Custom;
     }
 
     if (!IsExposed(property))
@@ -372,14 +375,14 @@ namespace krys::boo::css
     }
 
     bool changed;
-    if (property == PropertyId::Custom) KRYS_UNLIKELY
+    if (property == css::PropertyId::Custom) KRYS_UNLIKELY
     {
       changed =
-        _propertySet->SetCustomProperty(propertyName, value, CssParserContext(), IsImportant(important));
+        _propertySet->SetCustomProperty(propertyName, value, CssParserContext(), css::IsImportant(important));
     }
     else
     {
-      changed = _propertySet->SetProperty(property, value, CssParserContext(), IsImportant(important));
+      changed = _propertySet->SetProperty(property, value, CssParserContext(), css::IsImportant(important));
     }
 
     DidMutate(changed ? MutationType::PropertyChanged : MutationType::NoChanges);
@@ -398,10 +401,10 @@ namespace krys::boo::css
   {
     html::CEReactionsScope ceReactions;
     StyleAttributeMutationScope mutationScope {ParentElement()};
-    auto property = PropertyIdFromName(propertyName);
-    if (IsCustomPropertyName(propertyName))
+    auto property = css::PropertyIdFromName(propertyName);
+    if (css::IsCustomPropertyName(propertyName))
     {
-      property = PropertyId::Custom;
+      property = css::PropertyId::Custom;
     }
 
     if (!IsExposed(property))
@@ -415,8 +418,9 @@ namespace krys::boo::css
     }
 
     CSSOMString result;
-    bool changed = property != PropertyId::Custom ? _propertySet->RemoveProperty(property, &result)
-                                                  : _propertySet->RemoveCustomProperty(propertyName, &result);
+    bool changed = property != css::PropertyId::Custom
+                     ? _propertySet->RemoveProperty(property, &result)
+                     : _propertySet->RemoveCustomProperty(propertyName, &result);
 
     DidMutate(changed ? MutationType::PropertyChanged : MutationType::NoChanges);
 
@@ -427,7 +431,7 @@ namespace krys::boo::css
     return result;
   }
 
-  CSSOMString PropertySetCSSStyleProperties::GetPropertyValueInternal(PropertyId property) noexcept
+  CSSOMString PropertySetCSSStyleProperties::GetPropertyValueInternal(css::PropertyId property) noexcept
   {
     if (!IsExposed(property))
     {
@@ -436,9 +440,9 @@ namespace krys::boo::css
     return _propertySet->GetPropertyValue(property);
   }
 
-  dom::ExceptionOr<void> PropertySetCSSStyleProperties::SetPropertyInternal(PropertyId property,
-                                                                            const CSSOMString &value,
-                                                                            IsImportant important) noexcept
+  dom::ExceptionOr<void>
+    PropertySetCSSStyleProperties::SetPropertyInternal(css::PropertyId property, const CSSOMString &value,
+                                                       css::IsImportant important) noexcept
   {
     StyleAttributeMutationScope mutationScope {ParentElement()};
     if (!WillMutate())
@@ -464,32 +468,32 @@ namespace krys::boo::css
     return {};
   }
 
-  bool PropertySetCSSStyleProperties::IsExposed(PropertyId property) const noexcept
+  bool PropertySetCSSStyleProperties::IsExposed(css::PropertyId property) const noexcept
   {
-    if (property == PropertyId::Invalid)
+    if (property == css::PropertyId::Invalid)
     {
       return false;
     }
 
     auto parserContext = CssParserContext();
     bool parsingDescriptor =
-      parserContext.EnclosingRuleType && *parserContext.EnclosingRuleType != RuleType::Style;
+      parserContext.EnclosingRuleType && *parserContext.EnclosingRuleType != css::RuleType::Style;
     return css::IsExposed(property, &parserContext.PropertySettings)
-           && (!Property::IsDescriptorOnly(property) || parsingDescriptor);
+           && (!css::Property::IsDescriptorOnly(property) || parsingDescriptor);
   }
 
-  StyleSheetContents *PropertySetCSSStyleProperties::ContextStyleSheet() const noexcept
+  css::StyleSheetContents *PropertySetCSSStyleProperties::ContextStyleSheet() const noexcept
   {
     auto *cssStyleSheet = ParentStyleSheet();
     return cssStyleSheet ? &cssStyleSheet->Contents() : nullptr;
   }
 
-  ParserContext PropertySetCSSStyleProperties::CssParserContext() const noexcept
+  css::ParserContext PropertySetCSSStyleProperties::CssParserContext() const noexcept
   {
-    return ParserContext(_propertySet->ParserMode());
+    return css::ParserContext(_propertySet->ParserMode());
   }
 
-  Ref<MutableStyleProperties> PropertySetCSSStyleProperties::CopyProperties() const noexcept
+  Ref<css::MutableStyleProperties> PropertySetCSSStyleProperties::CopyProperties() const noexcept
   {
     return _propertySet->MutableCopy();
   }
@@ -498,7 +502,7 @@ namespace krys::boo::css
 
 #pragma region StyleRuleCSSStyleProperties
 
-  StyleRuleCSSStyleProperties::StyleRuleCSSStyleProperties(MutableStyleProperties &propertySet,
+  StyleRuleCSSStyleProperties::StyleRuleCSSStyleProperties(css::MutableStyleProperties &propertySet,
                                                            CSSRule &parentRule) noexcept
       : PropertySetCSSStyleProperties(propertySet), _parentRuleType(parentRule.StyleRuleType()),
         _parentRule(CreateWeakPtr(&parentRule))
@@ -511,8 +515,9 @@ namespace krys::boo::css
     _propertySet->SubRef();
   }
 
-  Ref<StyleRuleCSSStyleProperties> StyleRuleCSSStyleProperties::Create(MutableStyleProperties &propertySet,
-                                                                       CSSRule &parentRule) noexcept
+  Ref<StyleRuleCSSStyleProperties>
+    StyleRuleCSSStyleProperties::Create(css::MutableStyleProperties &propertySet,
+                                        CSSRule &parentRule) noexcept
   {
     return AdoptRef(*new StyleRuleCSSStyleProperties(propertySet, parentRule));
   }
@@ -546,7 +551,7 @@ namespace krys::boo::css
     return _parentRule.get();
   }
 
-  ParserContext StyleRuleCSSStyleProperties::CssParserContext() const noexcept
+  css::ParserContext StyleRuleCSSStyleProperties::CssParserContext() const noexcept
   {
     auto *styleSheet = ContextStyleSheet();
     if (!styleSheet)
@@ -559,7 +564,7 @@ namespace krys::boo::css
     return context;
   }
 
-  void StyleRuleCSSStyleProperties::Reattach(MutableStyleProperties &propertySet) noexcept
+  void StyleRuleCSSStyleProperties::Reattach(css::MutableStyleProperties &propertySet) noexcept
   {
     _propertySet->SubRef();
     _propertySet = &propertySet;
@@ -570,13 +575,13 @@ namespace krys::boo::css
 
 #pragma region InlineCSSStyleProperties
 
-  InlineCSSStyleProperties::InlineCSSStyleProperties(MutableStyleProperties &propertySet,
-                                                     dom::StyledElement &parentElement) noexcept
+  InlineCSSStyleProperties::InlineCSSStyleProperties(css::MutableStyleProperties &propertySet,
+                                                     StyledElement &parentElement) noexcept
       : PropertySetCSSStyleProperties(propertySet), _parentElement(CreateWeakPtr(&parentElement))
   {
   }
 
-  dom::Element *InlineCSSStyleProperties::ParentElement() const noexcept
+  Element *InlineCSSStyleProperties::ParentElement() const noexcept
   {
     return _parentElement.get();
   }
@@ -602,7 +607,7 @@ namespace krys::boo::css
     _parentElement->InvalidateStyleAttribute();
   }
 
-  ParserContext InlineCSSStyleProperties::CssParserContext() const noexcept
+  css::ParserContext InlineCSSStyleProperties::CssParserContext() const noexcept
   {
     if (!_parentElement)
     {

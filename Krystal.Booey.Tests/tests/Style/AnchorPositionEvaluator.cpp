@@ -18,7 +18,7 @@ namespace krys::boo::style::tests
 {
   namespace
   {
-    KRYS_NODISCARD LayoutRect FrameRectOf(dom::Element &element)
+    KRYS_NODISCARD LayoutRect FrameRectOf(boo::Element &element)
     {
       (void)element.NodeDocument().UpdateLayout();
       auto *box = DynamicDowncast<RenderBox>(element.Renderer());
@@ -26,9 +26,9 @@ namespace krys::boo::style::tests
       return box->FrameRect();
     }
 
-    void SetStyle(dom::Element &element, dom::DOMStringView style)
+    void SetStyle(boo::Element &element, DOMStringView style)
     {
-      REQUIRE_FALSE(element.SetAttribute(u8"style", dom::DOMString(style)).HasException());
+      REQUIRE_FALSE(element.SetAttribute(u8"style", DOMString(style)).HasException());
     }
   }
 
@@ -199,8 +199,8 @@ namespace krys::boo::style::tests
 
     SECTION("A popover's invoker is its implicit anchor")
     {
-      auto &menu = Downcast<html::HTMLElement>(fixture.ById(u8"menu"));
-      auto &invoker = Downcast<html::HTMLElement>(fixture.ById(u8"invoker"));
+      auto &menu = Downcast<HTMLElement>(fixture.ById(u8"menu"));
+      auto &invoker = Downcast<HTMLElement>(fixture.ById(u8"invoker"));
       SetStyle(menu, u8"left: anchor(left); top: anchor(bottom)");
       REQUIRE_FALSE(menu.ShowPopover({.Source = ShareRefPtr(&invoker)}).HasException());
       CHECK(FrameRectOf(menu).Location() == LayoutPoint(200, 30));

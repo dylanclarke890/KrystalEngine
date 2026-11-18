@@ -4,7 +4,7 @@
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
   class Node;

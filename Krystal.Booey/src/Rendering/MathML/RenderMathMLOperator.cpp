@@ -37,14 +37,12 @@
 
 namespace krys::boo
 {
-  using mathml::MathMLOperatorDictionary;
-
   namespace
   {
     constexpr char32 MinusSign = 0x2212;
   }
 
-  RenderMathMLOperator::RenderMathMLOperator(mathml::MathMLOperatorElement &element,
+  RenderMathMLOperator::RenderMathMLOperator(boo::MathMLOperatorElement &element,
                                              RenderStyle &&style) noexcept
       : RenderMathMLToken(Type::MathMLOperator, element, krys::move(style))
   {
@@ -53,9 +51,9 @@ namespace krys::boo
 
   RenderMathMLOperator::~RenderMathMLOperator() noexcept = default;
 
-  mathml::MathMLOperatorElement &RenderMathMLOperator::GetElement() const noexcept
+  boo::MathMLOperatorElement &RenderMathMLOperator::GetElement() const noexcept
   {
-    return static_cast<mathml::MathMLOperatorElement &>(NodeForNonAnonymous());
+    return static_cast<boo::MathMLOperatorElement &>(NodeForNonAnonymous());
   }
 
   char32 RenderMathMLOperator::TextContent() const noexcept

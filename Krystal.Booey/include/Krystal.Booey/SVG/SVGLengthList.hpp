@@ -28,7 +28,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGValuePropertyList.hpp"
 #include "Krystal.Booey/SVG/SVGLength.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @see https://svgwg.org/svg2-draft/types.html#InterfaceSVGLengthList
   class SVGLengthList final : public SVGValuePropertyList<SVGLength>
@@ -62,9 +62,9 @@ namespace krys::boo::svg
       return _lengthMode;
     }
 
-    bool Parse(dom::DOMStringView) noexcept;
+    bool Parse(DOMStringView) noexcept;
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override;
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept override;
 
   private:
     SVGLengthList(SVGLengthMode lengthMode) noexcept : _lengthMode(lengthMode)

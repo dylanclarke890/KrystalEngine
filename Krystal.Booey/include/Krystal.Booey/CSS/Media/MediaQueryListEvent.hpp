@@ -4,7 +4,7 @@
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @see https://drafts.csswg.org/cssom-view/#dictdef-mediaquerylisteventinit
   struct MediaQueryListEventInit : public dom::EventInit

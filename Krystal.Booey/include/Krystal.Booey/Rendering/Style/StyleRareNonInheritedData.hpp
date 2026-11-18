@@ -157,7 +157,7 @@ namespace krys::boo
     style::ClipPath ClipPath;
 
     DataRef<style::CustomPropertyData> CustomProperties;
-    HashSet<css::CSSOMStringAtom> CustomPaintWatchedProperties;
+    HashSet<CSSOMStringAtom> CustomPaintWatchedProperties;
 
     style::Rotate Rotate;
     style::Scale Scale;
@@ -195,7 +195,7 @@ namespace krys::boo
     style::ScrollSnapType ScrollSnapType;
     style::ScrollSnapAlign ScrollSnapAlign;
 
-    css::CSSOMStringAtom PseudoElementNameArgument;
+    CSSOMStringAtom PseudoElementNameArgument;
 
     style::AnchorNames AnchorNames;
     style::NameScope AnchorScope;

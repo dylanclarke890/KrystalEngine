@@ -211,12 +211,10 @@ namespace krys::boo
         return false;
       }
 
-      auto aStyleable =
-        style::Styleable(*DynamicDowncast<dom::Element>(DynamicDowncast<dom::Node>(aTarget.get())),
-                         aAsStyleOriginatedAnimationEvent->PseudoElementIdentifier());
-      auto bStyleable =
-        style::Styleable(*DynamicDowncast<dom::Element>(DynamicDowncast<dom::Node>(bTarget.get())),
-                         bAsStyleOriginatedAnimationEvent->PseudoElementIdentifier());
+      auto aStyleable = style::Styleable(*DynamicDowncast<Element>(DynamicDowncast<Node>(aTarget.get())),
+                                         aAsStyleOriginatedAnimationEvent->PseudoElementIdentifier());
+      auto bStyleable = style::Styleable(*DynamicDowncast<Element>(DynamicDowncast<Node>(bTarget.get())),
+                                         bAsStyleOriginatedAnimationEvent->PseudoElementIdentifier());
       return CompareStyleOriginatedAnimationOwningElementPositionsInDocumentTreeOrder(aStyleable, bStyleable);
     }
   }
@@ -351,7 +349,7 @@ namespace krys::boo
     return false;
   }
 
-  css::CSSOMString PseudoElementIdentifierAsString(
+  CSSOMString PseudoElementIdentifierAsString(
     const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
   {
     if (!pseudoElementIdentifier)
@@ -361,7 +359,7 @@ namespace krys::boo
 
     auto withName = [&](utf8_stringview prefix)
     {
-      css::CSSOMString result {prefix};
+      CSSOMString result {prefix};
       result += u8'(';
       result += pseudoElementIdentifier->NameArgument.View();
       result += u8')';
@@ -387,8 +385,7 @@ namespace krys::boo
   }
 
   Pair<bool, Maybe<style::PseudoElementIdentifier>>
-    PseudoElementIdentifierFromString(const css::CSSOMString &pseudoElement,
-                                      const dom::Document *document) noexcept
+    PseudoElementIdentifierFromString(const CSSOMString &pseudoElement, const Document *document) noexcept
   {
     // https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-pseudoelement
     if (pseudoElement.empty())

@@ -52,7 +52,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD Color GetColor() const noexcept;
 
-    KRYS_NODISCARD dom::DOMString ColorString() const noexcept;
+    KRYS_NODISCARD DOMString ColorString() const noexcept;
 
     KRYS_NODISCARD RefPtr<CanvasGradient> GetCanvasGradient() const noexcept;
 
@@ -73,11 +73,11 @@ namespace krys::boo::html
   /// @brief Parses @p colorString as a CSS colour for @p canvasBase; `currentcolor` is the canvas's `color`
   /// (from its inline style), or black.
   /// @return The invalid colour if it doesn't parse.
-  KRYS_NODISCARD Color ParseColor(dom::DOMStringView colorString, CanvasBase &canvasBase) noexcept;
+  KRYS_NODISCARD Color ParseColor(DOMStringView colorString, CanvasBase &canvasBase) noexcept;
 
   /// @brief Parses @p colorString as a CSS colour in standards mode, with `currentcolor` as black.
   /// @return The invalid colour if it doesn't parse.
-  KRYS_NODISCARD Color ParseColor(dom::DOMStringView colorString) noexcept;
+  KRYS_NODISCARD Color ParseColor(DOMStringView colorString) noexcept;
 
   inline CanvasStyle::CanvasStyle(Color color) noexcept : _style(krys::move(color))
   {
@@ -109,7 +109,7 @@ namespace krys::boo::html
     return std::get<Ref<CanvasPattern>>(_style);
   }
 
-  inline dom::DOMString CanvasStyle::ColorString() const noexcept
+  inline DOMString CanvasStyle::ColorString() const noexcept
   {
     if (!std::holds_alternative<Color>(_style))
     {

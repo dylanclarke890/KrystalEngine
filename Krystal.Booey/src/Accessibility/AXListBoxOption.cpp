@@ -36,27 +36,26 @@
 
 namespace krys::boo
 {
-  Ref<AXListBoxOption> AXListBoxOption::Create(AXId id, html::HTMLElement &element,
-                                               AXObjectCache &cache) noexcept
+  Ref<AXListBoxOption> AXListBoxOption::Create(AXId id, HTMLElement &element, AXObjectCache &cache) noexcept
   {
     return AdoptRef(*new AXListBoxOption(id, element, cache));
   }
 
-  AXListBoxOption::AXListBoxOption(AXId id, html::HTMLElement &element, AXObjectCache &cache) noexcept
+  AXListBoxOption::AXListBoxOption(AXId id, HTMLElement &element, AXObjectCache &cache) noexcept
       : AXNodeObject(id, &element, cache)
   {
   }
 
   AXListBoxOption::~AXListBoxOption() noexcept = default;
 
-  html::HTMLSelectElement *AXListBoxOption::ListBoxOptionParentNode() const noexcept
+  HTMLSelectElement *AXListBoxOption::ListBoxOptionParentNode() const noexcept
   {
     auto *node = GetNode();
-    if (auto *option = DynamicDowncast<html::HTMLOptionElement>(node))
+    if (auto *option = DynamicDowncast<HTMLOptionElement>(node))
     {
       return option->OwnerSelectElement();
     }
-    if (auto *group = DynamicDowncast<html::HTMLOptGroupElement>(node))
+    if (auto *group = DynamicDowncast<HTMLOptGroupElement>(node))
     {
       return group->OwnerSelectElement();
     }
@@ -100,14 +99,14 @@ namespace krys::boo
 
   bool AXListBoxOption::IsEnabled() const noexcept
   {
-    return !(Is<html::HTMLOptGroupElement>(GetNode())
+    return !(Is<HTMLOptGroupElement>(GetNode())
              || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(GetAttribute(u8"aria-disabled"), u8"true")
              || HasAttribute(u8"disabled"));
   }
 
   bool AXListBoxOption::IsSelected() const noexcept
   {
-    auto *option = DynamicDowncast<html::HTMLOptionElement>(GetNode());
+    auto *option = DynamicDowncast<HTMLOptionElement>(GetNode());
     return option && option->Selected();
   }
 
@@ -123,7 +122,7 @@ namespace krys::boo
 
   bool AXListBoxOption::CanSetSelectedAttribute() const noexcept
   {
-    auto *option = DynamicDowncast<html::HTMLOptionElement>(GetNode());
+    auto *option = DynamicDowncast<HTMLOptionElement>(GetNode());
     if (!option || option->IsDisabledFormControl())
     {
       return false;
@@ -132,18 +131,18 @@ namespace krys::boo
     return !select || !select->IsDisabledFormControl();
   }
 
-  dom::DOMString AXListBoxOption::StringValue() const noexcept
+  DOMString AXListBoxOption::StringValue() const noexcept
   {
     if (auto label = GetAttributeTrimmed(u8"aria-label"); !label.empty())
     {
       return label;
     }
     auto *node = GetNode();
-    if (auto *option = DynamicDowncast<html::HTMLOptionElement>(node))
+    if (auto *option = DynamicDowncast<HTMLOptionElement>(node))
     {
       return option->Label();
     }
-    if (auto *group = DynamicDowncast<html::HTMLOptGroupElement>(node))
+    if (auto *group = DynamicDowncast<HTMLOptGroupElement>(node))
     {
       return group->GroupLabelText();
     }

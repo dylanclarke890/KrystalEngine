@@ -32,35 +32,32 @@
 #include "Krystal.Booey/Platform/Network/ResourceRequest.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
   class Element;
-}
 
-namespace krys::boo
-{
   /// @brief What a request to load a frame and the navigation action it becomes have in common.
   class FrameLoadRequestBase
   {
   private:
-    dom::DOMStringAtom _downloadAttribute {null};
-    RefPtr<dom::Element> _sourceElement;
+    DOMStringAtom _downloadAttribute {null};
+    RefPtr<Element> _sourceElement;
 
   public:
     /// @brief The `download` attribute of the link followed; null if it has none.
-    KRYS_NODISCARD const dom::DOMStringAtom &DownloadAttribute() const noexcept KRYS_LIFETIME_BOUND
+    KRYS_NODISCARD const DOMStringAtom &DownloadAttribute() const noexcept KRYS_LIFETIME_BOUND
     {
       return _downloadAttribute;
     }
 
     /// @brief The element that started the navigation (a link or a form), if any.
-    KRYS_NODISCARD dom::Element *SourceElement() const noexcept
+    KRYS_NODISCARD Element *SourceElement() const noexcept
     {
       return _sourceElement.get();
     }
 
-    void SetSourceElement(dom::Element *sourceElement) noexcept;
+    void SetSourceElement(Element *sourceElement) noexcept;
 
   protected:
     FrameLoadRequestBase() noexcept;
@@ -75,7 +72,7 @@ namespace krys::boo
 
     ~FrameLoadRequestBase() noexcept;
 
-    void SetDownloadAttribute(dom::DOMStringAtom downloadAttribute) noexcept
+    void SetDownloadAttribute(DOMStringAtom downloadAttribute) noexcept
     {
       _downloadAttribute = krys::move(downloadAttribute);
     }
@@ -86,9 +83,9 @@ namespace krys::boo
   class FrameLoadRequest : public FrameLoadRequestBase
   {
   private:
-    Ref<dom::Document> _requester;
+    Ref<Document> _requester;
     ResourceRequest _resourceRequest;
-    dom::DOMStringAtom _frameName;
+    DOMStringAtom _frameName;
     ReferrerPolicy _referrerPolicy {ReferrerPolicy::EmptyString};
     Maybe<SubstituteData> _substituteData;
 
@@ -96,8 +93,8 @@ namespace krys::boo
     /// @param requester The document asking for the load.
     /// @param frameName The browsing context to load into (`_self`, `_blank` and the others, or a name).
     /// @param downloadAttribute The `download` attribute of the link followed; null if it has none.
-    FrameLoadRequest(Ref<dom::Document> &&requester, ResourceRequest &&resourceRequest,
-                     dom::DOMStringAtom frameName, dom::DOMStringAtom downloadAttribute = null) noexcept;
+    FrameLoadRequest(Ref<Document> &&requester, ResourceRequest &&resourceRequest, DOMStringAtom frameName,
+                     DOMStringAtom downloadAttribute = null) noexcept;
 
     ~FrameLoadRequest() noexcept;
 
@@ -114,7 +111,7 @@ namespace krys::boo
       return _resourceRequest.IsNull();
     }
 
-    KRYS_NODISCARD dom::Document &Requester() const noexcept
+    KRYS_NODISCARD Document &Requester() const noexcept
     {
       return *_requester;
     }
@@ -129,7 +126,7 @@ namespace krys::boo
       return _resourceRequest;
     }
 
-    KRYS_NODISCARD const dom::DOMStringAtom &FrameName() const noexcept KRYS_LIFETIME_BOUND
+    KRYS_NODISCARD const DOMStringAtom &FrameName() const noexcept KRYS_LIFETIME_BOUND
     {
       return _frameName;
     }
@@ -145,7 +142,7 @@ namespace krys::boo
       _substituteData = krys::move(substituteData);
     }
 
-    void SetFrameName(dom::DOMStringAtom frameName) noexcept
+    void SetFrameName(DOMStringAtom frameName) noexcept
     {
       _frameName = krys::move(frameName);
     }

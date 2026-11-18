@@ -32,26 +32,23 @@
 
 #include "Krystal.Booey/Editing/Commands/EditCommand.hpp"
 
-namespace krys::boo::dom
-{
-  class Element;
-}
-
 namespace krys::boo
 {
+  class Element;
+
   /// @brief Replaces an element with a span that has its attributes and children.
   class ReplaceNodeWithSpanCommand final : public SimpleEditCommand
   {
   private:
-    const Ref<dom::Element> _elementToReplace;
-    RefPtr<dom::Element> _spanElement;
+    const Ref<Element> _elementToReplace;
+    RefPtr<Element> _spanElement;
 
   public:
-    KRYS_NODISCARD static Ref<ReplaceNodeWithSpanCommand> Create(dom::Element &element) noexcept;
+    KRYS_NODISCARD static Ref<ReplaceNodeWithSpanCommand> Create(Element &element) noexcept;
 
-    explicit ReplaceNodeWithSpanCommand(dom::Element &element) noexcept;
+    explicit ReplaceNodeWithSpanCommand(Element &element) noexcept;
 
-    KRYS_NODISCARD dom::Element *SpanElement() const noexcept
+    KRYS_NODISCARD Element *SpanElement() const noexcept
     {
       return _spanElement.get();
     }

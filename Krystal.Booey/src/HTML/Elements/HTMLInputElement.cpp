@@ -65,19 +65,19 @@
 #include <algorithm>
 #include <cmath>
 
-namespace krys::boo::html
+namespace krys::boo
 {
   namespace
   {
     /// @see https://html.spec.whatwg.org/#limited-to-only-non-negative-numbers-greater-than-zero
-    KRYS_NODISCARD uint32 LimitToOnlyHTMLNonNegativeNumbersGreaterThanZero(Maybe<dom::DOMStringView> value,
+    KRYS_NODISCARD uint32 LimitToOnlyHTMLNonNegativeNumbersGreaterThanZero(Maybe<DOMStringView> value,
                                                                            uint32 defaultValue) noexcept
     {
       if (!value)
       {
         return defaultValue;
       }
-      auto result = Numbers::ParseNonNegativeInteger(*value);
+      auto result = html::Numbers::ParseNonNegativeInteger(*value);
       if (!result.Success() || result.Value == 0 || result.Value > 2'147'483'647)
       {
         return defaultValue;
@@ -88,40 +88,41 @@ namespace krys::boo::html
 
   /// @brief Tells its input when the element its `list` attribute names changes, in a task, as the change
   /// may be in the middle of a tree mutation.
-  class ListAttributeTargetObserver final : private dom::IdTargetObserver
+  class html::ListAttributeTargetObserver final : private dom::IdTargetObserver
   {
   private:
     WeakPtr<HTMLInputElement> _element;
 
   public:
-    ListAttributeTargetObserver(dom::DOMStringAtom id, HTMLInputElement &element) noexcept
+    ListAttributeTargetObserver(DOMStringAtom id, HTMLInputElement &element) noexcept
         : IdTargetObserver(element.TreeScope().IdTargetObserverRegistry(), krys::move(id)),
           _element(CreateWeakPtr(&element))
     {
     }
 
   private:
-    void IdTargetChanged(dom::Element &) noexcept override
+    void IdTargetChanged(boo::Element &) noexcept override
     {
       auto *element = _element.get();
       if (!element)
       {
         return;
       }
-      EventLoop::Current().QueueTask(TaskSource::DOMManipulation, element->NodeDocument(),
-                                     [weakElement = _element]
-                                     {
-                                       if (RefPtr<HTMLInputElement> element = ShareRefPtr(weakElement.get()))
-                                       {
-                                         element->DataListMayHaveChanged();
-                                       }
-                                     });
+      html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation, element->NodeDocument(),
+                                           [weakElement = _element]
+                                           {
+                                             if (RefPtr<HTMLInputElement> element =
+                                                   ShareRefPtr(weakElement.get()))
+                                             {
+                                               element->DataListMayHaveChanged();
+                                             }
+                                           });
     }
   };
 
-  HTMLInputElement::HTMLInputElement(dom::Document &document) noexcept
-      : HTMLTextFormControlElement(document, HTMLElementInterface::Input),
-        _inputType(CreateRef<TextInputType>(*this))
+  HTMLInputElement::HTMLInputElement(Document &document) noexcept
+      : HTMLTextFormControlElement(document, html::HTMLElementInterface::Input),
+        _inputType(CreateRef<html::TextInputType>(*this))
   {
     // Activation follows the type: see UpdateEventTargetFlags().
     SetEventTargetFlag(dom::EventTargetFlags::HasLegacyPreActivationBehavior);
@@ -145,59 +146,59 @@ namespace krys::boo::html
 
 #pragma region HTMLInputElement
 
-  dom::DOMString HTMLInputElement::Accept() const noexcept
+  DOMString HTMLInputElement::Accept() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"accept").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"accept").value_or(u8"");
   }
 
-  void HTMLInputElement::Accept(dom::DOMString value) noexcept
+  void HTMLInputElement::Accept(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"accept", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"accept", krys::move(value));
   }
 
   bool HTMLInputElement::Alpha() const noexcept
   {
-    return Reflect<bool>(*this, u8"alpha");
+    return html::Reflect<bool>(*this, u8"alpha");
   }
 
   void HTMLInputElement::Alpha(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"alpha", krys::move(value));
+    html::Reflect<bool>(*this, u8"alpha", krys::move(value));
   }
 
-  dom::DOMString HTMLInputElement::Alt() const noexcept
+  DOMString HTMLInputElement::Alt() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"alt").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"alt").value_or(u8"");
   }
 
-  void HTMLInputElement::Alt(dom::DOMString value) noexcept
+  void HTMLInputElement::Alt(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"alt", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"alt", krys::move(value));
   }
 
   // https://html.spec.whatwg.org/#dom-fe-autocomplete
-  dom::DOMString HTMLInputElement::Autocomplete() const noexcept
+  DOMString HTMLInputElement::Autocomplete() const noexcept
   {
     // Return the element's IDL-exposed autofill value.
-    return AutofillData::Create(*this).IDLExposedValue;
+    return html::AutofillData::Create(*this).IDLExposedValue;
   }
 
-  void HTMLInputElement::Autocomplete(dom::DOMString value) noexcept
+  void HTMLInputElement::Autocomplete(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"autocomplete", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"autocomplete", krys::move(value));
   }
 
   bool HTMLInputElement::DefaultChecked() const noexcept
   {
-    return Reflect<bool>(*this, u8"checked");
+    return html::Reflect<bool>(*this, u8"checked");
   }
 
   void HTMLInputElement::DefaultChecked(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"checked", krys::move(value));
+    html::Reflect<bool>(*this, u8"checked", krys::move(value));
   }
 
-  void HTMLInputElement::SetChecked(bool isChecked, WasSetByJavaScript wasCheckedByJavaScript) noexcept
+  void HTMLInputElement::SetChecked(bool isChecked, html::WasSetByJavaScript wasCheckedByJavaScript) noexcept
   {
     _dirtyCheckednessFlag = true;
     if (Checked() == isChecked)
@@ -228,39 +229,39 @@ namespace krys::boo::html
     }
   }
 
-  dom::DOMString HTMLInputElement::ColourSpace() const noexcept
+  DOMString HTMLInputElement::ColourSpace() const noexcept
   {
     auto value = GetAttribute(u8"colorspace");
-    if (value && text::IsASCIICaselessEqual(dom::DOMStringView(*value), u8"display-p3"))
+    if (value && text::IsASCIICaselessEqual(DOMStringView(*value), u8"display-p3"))
     {
       return u8"display-p3";
     }
     return u8"limited-srgb";
   }
 
-  void HTMLInputElement::ColourSpace(dom::DOMString value) noexcept
+  void HTMLInputElement::ColourSpace(DOMString value) noexcept
   {
     (void)SetAttribute(u8"colorspace", krys::move(value));
   }
 
-  dom::DOMString HTMLInputElement::DirName() const noexcept
+  DOMString HTMLInputElement::DirName() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"dirname").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"dirname").value_or(u8"");
   }
 
-  void HTMLInputElement::DirName(dom::DOMString value) noexcept
+  void HTMLInputElement::DirName(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"dirname", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"dirname", krys::move(value));
   }
 
   bool HTMLInputElement::Disabled() const noexcept
   {
-    return Reflect<bool>(*this, u8"disabled");
+    return html::Reflect<bool>(*this, u8"disabled");
   }
 
   void HTMLInputElement::Disabled(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"disabled", krys::move(value));
+    html::Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 
   dom::USVString HTMLInputElement::FormAction() const noexcept
@@ -285,42 +286,42 @@ namespace krys::boo::html
 
   void HTMLInputElement::FormAction(dom::USVString value) noexcept
   {
-    return ReflectSetter<dom::USVString>(*this, u8"formaction", krys::move(value));
+    return html::ReflectSetter<dom::USVString>(*this, u8"formaction", krys::move(value));
   }
 
-  dom::DOMString HTMLInputElement::FormEnctype() const noexcept
+  DOMString HTMLInputElement::FormEnctype() const noexcept
   {
-    return ReflectEnumerated<"formenctype">(*this);
+    return html::ReflectEnumerated<"formenctype">(*this);
   }
 
-  void HTMLInputElement::FormEnctype(dom::DOMString value) noexcept
+  void HTMLInputElement::FormEnctype(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"formenctype", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"formenctype", krys::move(value));
   }
 
-  dom::DOMString HTMLInputElement::FormMethod() const noexcept
+  DOMString HTMLInputElement::FormMethod() const noexcept
   {
-    return ReflectEnumerated<"formmethod">(*this);
+    return html::ReflectEnumerated<"formmethod">(*this);
   }
 
-  void HTMLInputElement::FormMethod(dom::DOMString value) noexcept
+  void HTMLInputElement::FormMethod(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"formmethod", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"formmethod", krys::move(value));
   }
 
   void HTMLInputElement::FormNoValidate(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"formnovalidate", krys::move(value));
+    html::Reflect<bool>(*this, u8"formnovalidate", krys::move(value));
   }
 
-  dom::DOMString HTMLInputElement::FormTarget() const noexcept
+  DOMString HTMLInputElement::FormTarget() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"formtarget").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"formtarget").value_or(u8"");
   }
 
-  void HTMLInputElement::FormTarget(dom::DOMString value) noexcept
+  void HTMLInputElement::FormTarget(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"formtarget", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"formtarget", krys::move(value));
   }
 
   uint32 HTMLInputElement::Height() const noexcept
@@ -330,7 +331,7 @@ namespace krys::boo::html
 
   void HTMLInputElement::Height(uint32 value) noexcept
   {
-    Reflect<uint32>(*this, u8"height", krys::move(value));
+    html::Reflect<uint32>(*this, u8"height", krys::move(value));
   }
 
   void HTMLInputElement::SetIndeterminate(bool newValue) noexcept
@@ -354,34 +355,34 @@ namespace krys::boo::html
     }
   }
 
-  dom::DOMString HTMLInputElement::Max() const noexcept
+  DOMString HTMLInputElement::Max() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"max").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"max").value_or(u8"");
   }
 
-  void HTMLInputElement::Max(dom::DOMString value) noexcept
+  void HTMLInputElement::Max(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"max", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"max", krys::move(value));
   }
 
   void HTMLInputElement::MaxLength(int32 value) noexcept
   {
-    Reflect<int32>(*this, u8"maxlength", krys::move(value));
+    html::Reflect<int32>(*this, u8"maxlength", krys::move(value));
   }
 
-  dom::DOMString HTMLInputElement::Min() const noexcept
+  DOMString HTMLInputElement::Min() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"min").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"min").value_or(u8"");
   }
 
-  void HTMLInputElement::Min(dom::DOMString value) noexcept
+  void HTMLInputElement::Min(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"min", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"min", krys::move(value));
   }
 
   void HTMLInputElement::MinLength(int32 value) noexcept
   {
-    Reflect<int32>(*this, u8"minlength", krys::move(value));
+    html::Reflect<int32>(*this, u8"minlength", krys::move(value));
   }
 
   bool HTMLInputElement::Multiple() const noexcept
@@ -391,65 +392,65 @@ namespace krys::boo::html
 
   void HTMLInputElement::Multiple(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"multiple", krys::move(value));
+    html::Reflect<bool>(*this, u8"multiple", krys::move(value));
   }
 
-  dom::DOMString HTMLInputElement::Name() const noexcept
+  DOMString HTMLInputElement::Name() const noexcept
   {
     return _name;
   }
 
-  void HTMLInputElement::Name(dom::DOMString value) noexcept
+  void HTMLInputElement::Name(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"name", krys::move(value));
   }
 
-  dom::DOMString HTMLInputElement::Pattern() const noexcept
+  DOMString HTMLInputElement::Pattern() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"pattern").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"pattern").value_or(u8"");
   }
 
-  void HTMLInputElement::Pattern(dom::DOMString value) noexcept
+  void HTMLInputElement::Pattern(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"pattern", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"pattern", krys::move(value));
   }
 
-  dom::DOMString HTMLInputElement::Placeholder() const noexcept
+  DOMString HTMLInputElement::Placeholder() const noexcept
   {
     // The line breaks are removed from the attribute's value.
-    auto attributeValue = GetAttribute(u8"placeholder").value_or(dom::DOMString());
-    if (std::ranges::none_of(attributeValue, IsHTMLLineBreak)) KRYS_LIKELY
+    auto attributeValue = GetAttribute(u8"placeholder").value_or(DOMString());
+    if (std::ranges::none_of(attributeValue, html::IsHTMLLineBreak)) KRYS_LIKELY
     {
       return attributeValue;
     }
 
-    std::erase_if(attributeValue, IsHTMLLineBreak);
+    std::erase_if(attributeValue, html::IsHTMLLineBreak);
     return attributeValue;
   }
 
-  void HTMLInputElement::Placeholder(dom::DOMString value) noexcept
+  void HTMLInputElement::Placeholder(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"placeholder", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"placeholder", krys::move(value));
   }
 
   bool HTMLInputElement::ReadOnly() const noexcept
   {
-    return Reflect<bool>(*this, u8"readonly");
+    return html::Reflect<bool>(*this, u8"readonly");
   }
 
   void HTMLInputElement::ReadOnly(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"readonly", krys::move(value));
+    html::Reflect<bool>(*this, u8"readonly", krys::move(value));
   }
 
   bool HTMLInputElement::Required() const noexcept
   {
-    return Reflect<bool>(*this, u8"required");
+    return html::Reflect<bool>(*this, u8"required");
   }
 
   void HTMLInputElement::Required(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"required", krys::move(value));
+    html::Reflect<bool>(*this, u8"required", krys::move(value));
   }
 
   uint32 HTMLInputElement::Size() const noexcept
@@ -465,32 +466,31 @@ namespace krys::boo::html
     }
     auto limitedSize = value > 2'147'483'647 ? static_cast<uint32>(DefaultSize) : value;
     auto string = std::to_string(limitedSize);
-    (void)SetAttribute(u8"size",
-                       dom::DOMString(reinterpret_cast<const char8 *>(string.data()), string.size()));
+    (void)SetAttribute(u8"size", DOMString(reinterpret_cast<const char8 *>(string.data()), string.size()));
     return {};
   }
 
   dom::USVString HTMLInputElement::Src() const noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"src");
+    return html::ReflectURL<dom::USVString>(*this, u8"src");
   }
 
   void HTMLInputElement::Src(dom::USVString value) noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
+    return html::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
-  dom::DOMString HTMLInputElement::Step() const noexcept
+  DOMString HTMLInputElement::Step() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"step").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"step").value_or(u8"");
   }
 
-  void HTMLInputElement::Step(dom::DOMString value) noexcept
+  void HTMLInputElement::Step(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"step", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"step", krys::move(value));
   }
 
-  void HTMLInputElement::Type(dom::DOMString value) noexcept
+  void HTMLInputElement::Type(DOMString value) noexcept
   {
     (void)SetAttribute(u8"type", krys::move(value));
   }
@@ -500,21 +500,21 @@ namespace krys::boo::html
     return _inputType && _inputType->IsImageButton();
   }
 
-  dom::DOMString HTMLInputElement::DefaultValue() const noexcept
+  DOMString HTMLInputElement::DefaultValue() const noexcept
   {
-    return GetAttribute(u8"value").value_or(dom::DOMString());
+    return GetAttribute(u8"value").value_or(DOMString());
   }
 
-  void HTMLInputElement::DefaultValue(dom::DOMString value) noexcept
+  void HTMLInputElement::DefaultValue(DOMString value) noexcept
   {
     (void)SetAttribute(u8"value", krys::move(value));
   }
 
-  Maybe<dom::DOMString> HTMLInputElement::ValueOrNull() const noexcept
+  Maybe<DOMString> HTMLInputElement::ValueOrNull() const noexcept
   {
     if (_inputType->IsFileUpload())
     {
-      return static_cast<const FileInputType &>(*_inputType).FirstElementPathForInputValue();
+      return static_cast<const html::FileInputType &>(*_inputType).FirstElementPathForInputValue();
     }
 
     if (_valueIfDirty)
@@ -524,7 +524,7 @@ namespace krys::boo::html
 
     if (auto valueString = GetAttribute(u8"value"))
     {
-      if (auto sanitizedValue = SanitizeValue(dom::DOMStringView(*valueString)))
+      if (auto sanitizedValue = SanitizeValue(DOMStringView(*valueString)))
       {
         return sanitizedValue;
       }
@@ -533,14 +533,14 @@ namespace krys::boo::html
     return _inputType->FallbackValue();
   }
 
-  dom::DOMString HTMLInputElement::Value() const noexcept
+  DOMString HTMLInputElement::Value() const noexcept
   {
-    return ValueOrNull().value_or(dom::DOMString());
+    return ValueOrNull().value_or(DOMString());
   }
 
-  dom::ExceptionOr<void> HTMLInputElement::SetValue(dom::DOMStringView value,
-                                                    TextFieldEventBehavior eventBehavior,
-                                                    TextControlSetValueSelection selection) noexcept
+  dom::ExceptionOr<void> HTMLInputElement::SetValue(DOMStringView value,
+                                                    html::TextFieldEventBehavior eventBehavior,
+                                                    html::TextControlSetValueSelection selection) noexcept
   {
     if (IsFileUpload() && !value.empty())
     {
@@ -548,7 +548,7 @@ namespace krys::boo::html
     }
 
     Ref<HTMLInputElement> protectedThis = ShareRef(*this);
-    auto sanitizedValue = SanitizeValue(value).value_or(dom::DOMString());
+    auto sanitizedValue = SanitizeValue(value).value_or(DOMString());
     bool valueChanged = sanitizedValue != Value();
 
     SetLastChangeWasNotUserEdit();
@@ -559,7 +559,7 @@ namespace krys::boo::html
       UpdateEffectiveTextDirection();
     }
 
-    if (valueChanged && eventBehavior == TextFieldEventBehavior::DispatchNoEvent)
+    if (valueChanged && eventBehavior == html::TextFieldEventBehavior::DispatchNoEvent)
     {
       SetTextAsOfLastFormControlChangeEvent(sanitizedValue);
     }
@@ -567,16 +567,16 @@ namespace krys::boo::html
     return {};
   }
 
-  void HTMLInputElement::SetValueForUser(dom::DOMStringView value) noexcept
+  void HTMLInputElement::SetValueForUser(DOMStringView value) noexcept
   {
-    (void)SetValue(value, TextFieldEventBehavior::DispatchInputAndChangeEvent);
+    (void)SetValue(value, html::TextFieldEventBehavior::DispatchInputAndChangeEvent);
   }
 
-  void HTMLInputElement::SetValueInternal(dom::DOMStringView sanitizedValue,
-                                          TextFieldEventBehavior eventBehavior) noexcept
+  void HTMLInputElement::SetValueInternal(DOMStringView sanitizedValue,
+                                          html::TextFieldEventBehavior eventBehavior) noexcept
   {
-    _valueIfDirty = dom::DOMString(sanitizedValue);
-    _wasModifiedByUser = eventBehavior != TextFieldEventBehavior::DispatchNoEvent;
+    _valueIfDirty = DOMString(sanitizedValue);
+    _wasModifiedByUser = eventBehavior != html::TextFieldEventBehavior::DispatchNoEvent;
     UpdateValidity();
   }
 
@@ -595,8 +595,8 @@ namespace krys::boo::html
     return _inputType->ValueAsDouble();
   }
 
-  dom::ExceptionOr<void> HTMLInputElement::SetValueAsNumber(double newValue,
-                                                            TextFieldEventBehavior eventBehavior) noexcept
+  dom::ExceptionOr<void>
+    HTMLInputElement::SetValueAsNumber(double newValue, html::TextFieldEventBehavior eventBehavior) noexcept
   {
     if (!std::isfinite(newValue))
     {
@@ -612,7 +612,7 @@ namespace krys::boo::html
 
   void HTMLInputElement::Width(uint32 value) noexcept
   {
-    Reflect<uint32>(*this, u8"width", krys::move(value));
+    html::Reflect<uint32>(*this, u8"width", krys::move(value));
   }
 
   dom::ExceptionOr<void> HTMLInputElement::StepUp(int n) noexcept
@@ -625,7 +625,7 @@ namespace krys::boo::html
     return _inputType->StepUp(-n);
   }
 
-  dom::DOMString HTMLInputElement::ValidationMessage() const noexcept
+  DOMString HTMLInputElement::ValidationMessage() const noexcept
   {
     if (!WillValidate())
     {
@@ -697,7 +697,7 @@ namespace krys::boo::html
     return !someError;
   }
 
-  bool HTMLInputElement::TooShort(dom::DOMStringView value, NeedsToCheckDirtyFlag check) const noexcept
+  bool HTMLInputElement::TooShort(DOMStringView value, NeedsToCheckDirtyFlag check) const noexcept
   {
     if (!SupportsMinLength())
     {
@@ -728,7 +728,7 @@ namespace krys::boo::html
     return LengthForAPIValue(value) < static_cast<size_t>(min);
   }
 
-  bool HTMLInputElement::TooLong(dom::DOMStringView value, NeedsToCheckDirtyFlag check) const noexcept
+  bool HTMLInputElement::TooLong(DOMStringView value, NeedsToCheckDirtyFlag check) const noexcept
   {
     if (!SupportsMaxLength())
     {
@@ -746,7 +746,7 @@ namespace krys::boo::html
     return LengthForAPIValue(value) > max;
   }
 
-  bool HTMLInputElement::IsValidValue(dom::DOMStringView value) const noexcept
+  bool HTMLInputElement::IsValidValue(DOMStringView value) const noexcept
   {
     if (!_inputType->IsValidValue(value))
     {
@@ -771,7 +771,7 @@ namespace krys::boo::html
     return _inputType->GetAllowedValueStep(step);
   }
 
-  StepRange HTMLInputElement::CreateStepRange(AnyStepHandling anyStepHandling) const noexcept
+  html::StepRange HTMLInputElement::CreateStepRange(html::AnyStepHandling anyStepHandling) const noexcept
   {
     return _inputType->CreateStepRange(anyStepHandling);
   }
@@ -889,16 +889,17 @@ namespace krys::boo::html
   {
     if (_inputType->IsFileUpload())
     {
-      return &static_cast<FileInputType &>(*_inputType).Files();
+      return &static_cast<html::FileInputType &>(*_inputType).Files();
     }
     return nullptr;
   }
 
-  void HTMLInputElement::SetFiles(RefPtr<FileList> &&files, WasSetByJavaScript wasSetByJavaScript) noexcept
+  void HTMLInputElement::SetFiles(RefPtr<FileList> &&files,
+                                  html::WasSetByJavaScript wasSetByJavaScript) noexcept
   {
     if (_inputType->IsFileUpload())
     {
-      static_cast<FileInputType &>(*_inputType).SetFiles(krys::move(files), wasSetByJavaScript);
+      static_cast<html::FileInputType &>(*_inputType).SetFiles(krys::move(files), wasSetByJavaScript);
     }
   }
 
@@ -920,7 +921,7 @@ namespace krys::boo::html
     }
   }
 
-  dom::DOMString HTMLInputElement::DisplayString() const noexcept
+  DOMString HTMLInputElement::DisplayString() const noexcept
   {
     return _inputType->DisplayString();
   }
@@ -930,16 +931,16 @@ namespace krys::boo::html
     return _inputType->IsImageButton();
   }
 
-  HTMLImageLoader &HTMLInputElement::EnsureImageLoader() noexcept
+  html::HTMLImageLoader &HTMLInputElement::EnsureImageLoader() noexcept
   {
     if (!_imageLoader)
     {
-      _imageLoader = CreateUnique<HTMLImageLoader>(*this);
+      _imageLoader = CreateUnique<html::HTMLImageLoader>(*this);
     }
     return *_imageLoader;
   }
 
-  dom::DOMString HTMLInputElement::AltText() const noexcept
+  DOMString HTMLInputElement::AltText() const noexcept
   {
     for (auto name : {u8"alt", u8"title", u8"value"})
     {
@@ -1052,7 +1053,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLInputElement::HandleFocusEvent(dom::Node *oldFocusedNode) noexcept
+  void HTMLInputElement::HandleFocusEvent(Node *oldFocusedNode) noexcept
   {
     _inputType->HandleFocusEvent(oldFocusedNode);
 
@@ -1088,7 +1089,7 @@ namespace krys::boo::html
     if (IsDateField() || IsDateTimeLocalField() || IsMonthField() || IsTimeField() || IsWeekField())
     {
       // NOLINTNEXTLINE(bugprone-parent-virtual-call): focus only, without HTMLElement's simulated click.
-      return dom::Element::AccessKeyAction(sendMouseEvents);
+      return boo::Element::AccessKeyAction(sendMouseEvents);
     }
     return HTMLTextFormControlElement::AccessKeyAction(sendMouseEvents);
   }
@@ -1118,12 +1119,12 @@ namespace krys::boo::html
   {
     krys_debug_assert(IsTextField());
     uint32 start = 0;
-    auto direction = TextFieldSelectionDirection::SelectionHasNoDirection;
+    auto direction = html::TextFieldSelectionDirection::SelectionHasNoDirection;
     if (NodeDocument().Frame()
         && NodeDocument().GetEditor().Behavior().ShouldMoveSelectionToEndWhenFocusingTextInput())
     {
       start = std::numeric_limits<uint32>::max();
-      direction = TextFieldSelectionDirection::SelectionHasForwardDirection;
+      direction = html::TextFieldSelectionDirection::SelectionHasForwardDirection;
     }
     uint32 end = restorationMode == dom::SelectionRestorationMode::PlaceCaretAtStart
                    ? start
@@ -1184,7 +1185,7 @@ namespace krys::boo::html
     return _inputType->IsPresentingAttachedView();
   }
 
-  void HTMLInputElement::SetValueFromRenderer(dom::DOMStringView value) noexcept
+  void HTMLInputElement::SetValueFromRenderer(DOMStringView value) noexcept
   {
     // File upload controls will never use this.
     krys_debug_assert(!IsFileUpload());
@@ -1193,7 +1194,7 @@ namespace krys::boo::html
     // The assert macro above may also be simplified by removing the expression
     // that calls isEmpty.
     // http://bugs.webkit.org/show_bug.cgi?id=9661
-    _valueIfDirty = value == u8"\n" ? dom::DOMString {} : dom::DOMString(value);
+    _valueIfDirty = value == u8"\n" ? DOMString {} : DOMString(value);
 
     SetFormControlValueMatchesRenderer(true);
     _wasModifiedByUser = true;
@@ -1221,8 +1222,8 @@ namespace krys::boo::html
 
     if (NodeDocument().FocusedElement() == this)
     {
-      EventLoop::Current().QueueTask(
-        TaskSource::UserInteraction, NodeDocument(),
+      html::EventLoop::Current().QueueTask(
+        html::TaskSource::UserInteraction, NodeDocument(),
         [weakThis = CreateWeakPtr(this)]
         {
           RefPtr<HTMLInputElement> protectedThis = ShareRefPtr(weakThis.get());
@@ -1241,12 +1242,12 @@ namespace krys::boo::html
     return _inputType->ContainerElement();
   }
 
-  RefPtr<TextControlInnerTextElement> HTMLInputElement::InnerTextElement() const noexcept
+  RefPtr<html::TextControlInnerTextElement> HTMLInputElement::InnerTextElement() const noexcept
   {
     return _inputType->InnerTextElement();
   }
 
-  RefPtr<TextControlInnerTextElement>
+  RefPtr<html::TextControlInnerTextElement>
     HTMLInputElement::InnerTextElementCreatingShadowSubtreeIfNeeded() noexcept
   {
     return _inputType->InnerTextElementCreatingShadowSubtreeIfNeeded();
@@ -1329,8 +1330,8 @@ namespace krys::boo::html
     return textBlockStyle;
   }
 
-  dom::ExceptionOr<void> HTMLInputElement::SetRangeText(dom::DOMStringView replacement, uint32 start,
-                                                        uint32 end, dom::DOMStringView selectionMode) noexcept
+  dom::ExceptionOr<void> HTMLInputElement::SetRangeText(DOMStringView replacement, uint32 start, uint32 end,
+                                                        DOMStringView selectionMode) noexcept
   {
     if (!_inputType->SupportsSelectionAPI())
     {
@@ -1382,18 +1383,17 @@ namespace krys::boo::html
     return {};
   }
 
-  Maybe<dom::DOMString> HTMLInputElement::SelectionDirectionForBindings() const noexcept
+  Maybe<DOMString> HTMLInputElement::SelectionDirectionForBindings() const noexcept
   {
     if (!CanHaveSelection() || !_inputType->SupportsSelectionAPI())
     {
       return null;
     }
 
-    return dom::DOMString(SelectionDirection());
+    return DOMString(SelectionDirection());
   }
 
-  dom::ExceptionOr<void>
-    HTMLInputElement::SetSelectionDirectionForBindings(dom::DOMStringView direction) noexcept
+  dom::ExceptionOr<void> HTMLInputElement::SetSelectionDirectionForBindings(DOMStringView direction) noexcept
   {
     if (!CanHaveSelection() || !_inputType->SupportsSelectionAPI())
     {
@@ -1405,20 +1405,20 @@ namespace krys::boo::html
   }
 
   dom::ExceptionOr<void> HTMLInputElement::SetSelectionRangeForBindings(uint32 start, uint32 end,
-                                                                        dom::DOMStringView direction) noexcept
+                                                                        DOMStringView direction) noexcept
   {
     if (!CanHaveSelection() || !_inputType->SupportsSelectionAPI())
     {
       return dom::Exception {dom::ExceptionCode::InvalidStateError};
     }
 
-    SetSelectionRange(start, end, direction, ForBindings::Yes);
+    SetSelectionRange(start, end, direction, html::ForBindings::Yes);
     return {};
   }
 
-  dom::DOMString HTMLInputElement::FormControlType() const noexcept
+  DOMString HTMLInputElement::FormControlType() const noexcept
   {
-    return dom::DOMString(_inputType->FormControlType());
+    return DOMString(_inputType->FormControlType());
   }
 
 #pragma endregion
@@ -1468,7 +1468,7 @@ namespace krys::boo::html
 
 #pragma region Value
 
-  Maybe<dom::DOMString> HTMLInputElement::SanitizeValue(Maybe<dom::DOMStringView> value) const noexcept
+  Maybe<DOMString> HTMLInputElement::SanitizeValue(Maybe<DOMStringView> value) const noexcept
   {
     if (!value)
     {
@@ -1477,19 +1477,19 @@ namespace krys::boo::html
     return _inputType->SanitizeValue(*value);
   }
 
-  dom::DOMString HTMLInputElement::VisibleValue() const noexcept
+  DOMString HTMLInputElement::VisibleValue() const noexcept
   {
     return _inputType->VisibleValue();
   }
 
-  dom::DOMString HTMLInputElement::ValueWithDefault() const noexcept
+  DOMString HTMLInputElement::ValueWithDefault() const noexcept
   {
     if (auto value = ValueOrNull())
     {
       return *value;
     }
 
-    return _inputType->DefaultValue().value_or(dom::DOMString());
+    return _inputType->DefaultValue().value_or(DOMString());
   }
 
   bool HTMLInputElement::IsActivatedSubmit() const noexcept
@@ -1509,7 +1509,7 @@ namespace krys::boo::html
     return std::min<uint32>(static_cast<uint32>(MaxLength()), MaxEffectiveLength);
   }
 
-  void HTMLInputElement::MaxLengthAttributeChanged(Maybe<dom::DOMStringView> newValue) noexcept
+  void HTMLInputElement::MaxLengthAttributeChanged(Maybe<DOMStringView> newValue) noexcept
   {
     uint32 oldEffectiveMaxLength = EffectiveMaxLength();
     InternalSetMaxLength(ParseLengthAttribute(newValue));
@@ -1521,7 +1521,7 @@ namespace krys::boo::html
     UpdateValidity();
   }
 
-  void HTMLInputElement::MinLengthAttributeChanged(Maybe<dom::DOMStringView> newValue) noexcept
+  void HTMLInputElement::MinLengthAttributeChanged(Maybe<DOMStringView> newValue) noexcept
   {
     int32 oldMinLength = MinLength();
     InternalSetMinLength(ParseLengthAttribute(newValue));
@@ -1535,11 +1535,11 @@ namespace krys::boo::html
 
   void HTMLInputElement::UpdateValueIfNeeded() noexcept
   {
-    auto newValue = SanitizeValue(_valueIfDirty ? Maybe<dom::DOMStringView>(*_valueIfDirty) : std::nullopt);
+    auto newValue = SanitizeValue(_valueIfDirty ? Maybe<DOMStringView>(*_valueIfDirty) : std::nullopt);
     krys_debug_assert(_valueIfDirty || !newValue);
     if (newValue != _valueIfDirty)
     {
-      (void)SetValue(newValue.value_or(dom::DOMString()));
+      (void)SetValue(newValue.value_or(DOMString()));
     }
   }
 
@@ -1547,14 +1547,14 @@ namespace krys::boo::html
 
 #pragma region Forms
 
-  Maybe<dom::DOMString> HTMLInputElement::ResultForDialogSubmit() const noexcept
+  Maybe<DOMString> HTMLInputElement::ResultForDialogSubmit() const noexcept
   {
     return _inputType->ResultForDialogSubmit();
   }
 
-  bool HTMLInputElement::AppendFormData(DOMFormData &formData) noexcept
+  bool HTMLInputElement::AppendFormData(html::DOMFormData &formData) noexcept
   {
-    Ref<InputType> protectedInputType = ShareRef(*_inputType);
+    Ref<html::InputType> protectedInputType = ShareRef(*_inputType);
     return _inputType->IsFormDataAppendable() && _inputType->AppendFormData(formData);
   }
 
@@ -1659,20 +1659,20 @@ namespace krys::boo::html
     // The input is not managed by a RadioButtonGroups, we'll need to traverse the tree.
     RefPtr<HTMLInputElement> checkedRadio;
     auto &root = dom::TreeQueries::Root(const_cast<HTMLInputElement &>(*this));
-    RadioInputType::ForEachButtonInDetachedGroup(Downcast<dom::ContainerNode>(root), name,
-                                                 [&](HTMLInputElement &input)
-                                                 {
-                                                   if (input.Checked())
-                                                   {
-                                                     checkedRadio = ShareRefPtr(&input);
-                                                     return false;
-                                                   }
-                                                   return true;
-                                                 });
+    html::RadioInputType::ForEachButtonInDetachedGroup(Downcast<ContainerNode>(root), name,
+                                                       [&](HTMLInputElement &input)
+                                                       {
+                                                         if (input.Checked())
+                                                         {
+                                                           checkedRadio = ShareRefPtr(&input);
+                                                           return false;
+                                                         }
+                                                         return true;
+                                                       });
     return checkedRadio;
   }
 
-  RadioButtonGroups *HTMLInputElement::RadioButtonGroups() const noexcept
+  html::RadioButtonGroups *HTMLInputElement::RadioButtonGroups() const noexcept
   {
     if (!IsRadioButton())
     {
@@ -1709,10 +1709,10 @@ namespace krys::boo::html
 
 #pragma region Type changes
 
-  void HTMLInputElement::UpdateType(dom::DOMStringView typeAttributeValue) noexcept
+  void HTMLInputElement::UpdateType(DOMStringView typeAttributeValue) noexcept
   {
     krys_debug_assert(_inputType);
-    auto newType = InputType::CreateIfDifferent(*this, typeAttributeValue, _inputType.get());
+    auto newType = html::InputType::CreateIfDifferent(*this, typeAttributeValue, _inputType.get());
     if (!newType)
     {
       return;
@@ -1773,8 +1773,7 @@ namespace krys::boo::html
     if (!didStoreValue && willStoreValue)
     {
       auto valueAttribute = GetAttribute(u8"value");
-      _valueIfDirty =
-        SanitizeValue(valueAttribute ? Maybe<dom::DOMStringView>(*valueAttribute) : std::nullopt);
+      _valueIfDirty = SanitizeValue(valueAttribute ? Maybe<DOMStringView>(*valueAttribute) : std::nullopt);
     }
     else
     {
@@ -1783,7 +1782,8 @@ namespace krys::boo::html
     _inputType->CreateShadowSubtreeIfNeeded();
 
     // https://html.spec.whatwg.org/multipage/dom.html#auto-directionality
-    if (oldType == InputType::Type::Telephone || _inputType->GetType() == InputType::Type::Telephone
+    if (oldType == html::InputType::Type::Telephone
+        || _inputType->GetType() == html::InputType::Type::Telephone
         || (HasAutoTextDirectionState() && didDirAutoUseValue != _inputType->DirAutoUsesValue()))
     {
       UpdateEffectiveTextDirection();
@@ -1829,12 +1829,12 @@ namespace krys::boo::html
     // position to the beginning of the text control, and set its selection direction to "none".
     if (!previouslySelectable && nowSelectable)
     {
-      auto direction = TextFieldSelectionDirection::SelectionHasNoDirection;
+      auto direction = html::TextFieldSelectionDirection::SelectionHasNoDirection;
       // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#set-the-selection-direction
       if (IsTextField() && NodeDocument().Frame()
           && NodeDocument().GetEditor().Behavior().ShouldConsiderSelectionAsDirectional())
       {
-        direction = TextFieldSelectionDirection::SelectionHasForwardDirection;
+        direction = html::TextFieldSelectionDirection::SelectionHasForwardDirection;
       }
       CacheSelection(0, 0, direction);
     }
@@ -1875,10 +1875,9 @@ namespace krys::boo::html
 
 #pragma region DOM hooks
 
-  void HTMLInputElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                            Maybe<dom::DOMStringView> oldValue,
-                                            Maybe<dom::DOMStringView> value,
-                                            const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLInputElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                            Maybe<DOMStringView> value,
+                                            const DOMStringAtom &namespaceURI) noexcept
   {
     if (oldValue == value)
     {
@@ -1886,7 +1885,7 @@ namespace krys::boo::html
     }
 
     krys_debug_assert(_inputType);
-    Ref<InputType> protectedInputType = ShareRef(*_inputType);
+    Ref<html::InputType> protectedInputType = ShareRef(*_inputType);
 
     HTMLTextFormControlElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
@@ -1896,7 +1895,7 @@ namespace krys::boo::html
 
     if (localName == u8"type")
     {
-      UpdateType(value.value_or(dom::DOMStringView()));
+      UpdateType(value.value_or(DOMStringView()));
     }
     else if (localName == u8"value")
     {
@@ -1916,7 +1915,7 @@ namespace krys::boo::html
     else if (localName == u8"name")
     {
       RemoveFromRadioButtonGroup();
-      _name = dom::DOMString(value.value_or(dom::DOMStringView()));
+      _name = DOMString(value.value_or(DOMStringView()));
       AddToRadioButtonGroup();
     }
     else if (localName == u8"checked")
@@ -1931,7 +1930,7 @@ namespace krys::boo::html
     }
     else if (localName == u8"autocomplete")
     {
-      auto newValue = value.value_or(dom::DOMStringView());
+      auto newValue = value.value_or(DOMStringView());
       if (text::IsASCIICaselessEqual(newValue, u8"off"))
       {
         _autocomplete = Off;
@@ -2016,7 +2015,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLInputElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLInputElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLTextFormControlElement::OnRemove(isSubtreeRoot, oldAncestor);
     bool disconnectedFromDocument = oldAncestor.IsConnected();
@@ -2053,7 +2052,7 @@ namespace krys::boo::html
     return DynamicDowncast<HTMLDataListElement>(ResolvedElementForAttribute(u8"list"));
   }
 
-  RefPtr<dom::Element> HTMLInputElement::ListForBindings() const noexcept
+  RefPtr<boo::Element> HTMLInputElement::ListForBindings() const noexcept
   {
     // The getter steps are to return the result of retargeting this's suggestions source element against
     // this, if there is one; otherwise null.
@@ -2063,7 +2062,7 @@ namespace krys::boo::html
 
   void HTMLInputElement::DataListMayHaveChanged() noexcept
   {
-    Ref<InputType> protectedInputType = ShareRef(*_inputType);
+    Ref<html::InputType> protectedInputType = ShareRef(*_inputType);
     protectedInputType->DataListMayHaveChanged();
   }
 
@@ -2074,7 +2073,7 @@ namespace krys::boo::html
     {
       return {};
     }
-    return ParseToDoubleForNumberType(SanitizeValue(dom::DOMStringView(value)).value_or(dom::DOMString()));
+    return html::ParseToDoubleForNumberType(SanitizeValue(DOMStringView(value)).value_or(DOMString()));
   }
 
   Maybe<Decimal> HTMLInputElement::FindClosestTickMarkValue(const Decimal &value) noexcept
@@ -2089,14 +2088,14 @@ namespace krys::boo::html
       if (auto list = GetAttribute(u8"list"))
       {
         _listAttributeTargetObserver =
-          CreateUnique<ListAttributeTargetObserver>(dom::DOMStringAtom(*list), *this);
+          CreateUnique<html::ListAttributeTargetObserver>(DOMStringAtom(*list), *this);
         return;
       }
     }
     _listAttributeTargetObserver = nullptr;
   }
 
-  void HTMLInputElement::OnAdopt(dom::Document &oldDocument) noexcept
+  void HTMLInputElement::OnAdopt(Document &oldDocument) noexcept
   {
     HTMLTextFormControlElement::OnAdopt(oldDocument);
     if (_imageLoader)
@@ -2110,7 +2109,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLInputElement::OnClone(dom::Node &copy, bool subtree) noexcept
+  void HTMLInputElement::OnClone(Node &copy, bool subtree) noexcept
   {
     HTMLTextFormControlElement::OnClone(copy, subtree);
 
@@ -2185,7 +2184,7 @@ namespace krys::boo::html
       }
     }
 
-    Ref<InputType> protectedInputType = ShareRef(*_inputType);
+    Ref<html::InputType> protectedInputType = ShareRef(*_inputType);
 
     // 1. If element is not mutable, and element's type attribute is neither in the Checkbox nor in the Radio
     //    state, then return.
@@ -2202,7 +2201,7 @@ namespace krys::boo::html
     _inputType->HandleActivationBehavior(event);
 
     // 3. If element has a form owner and element's type attribute is not in the Button state, then return.
-    if (Form() && _inputType->GetType() != InputType::Type::Button)
+    if (Form() && _inputType->GetType() != html::InputType::Type::Button)
     {
       return;
     }
@@ -2224,7 +2223,7 @@ namespace krys::boo::html
     //    if there was no such element, or that element is no longer in this element's radio button group, or
     //    if this element no longer has a radio button group, set this element's checkedness to false.
     // (The checkbox and radio input types' DidDispatchClick, for a canceled click.)
-    Ref<InputType> protectedInputType = ShareRef(*_inputType);
+    Ref<html::InputType> protectedInputType = ShareRef(*_inputType);
     if (std::exchange(_clickHandlingState.Stateful, false))
     {
       _inputType->DidDispatchClick(event, _clickHandlingState);
@@ -2234,7 +2233,7 @@ namespace krys::boo::html
 
   void HTMLInputElement::DefaultEventHandler(dom::Event &event) noexcept
   {
-    Ref<InputType> protectedInputType = ShareRef(*_inputType);
+    Ref<html::InputType> protectedInputType = ShareRef(*_inputType);
 
     if (auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event); mouseEvent && mouseEvent->Button() == 0)
     {
@@ -2258,7 +2257,8 @@ namespace krys::boo::html
         keyboardEvent && keyboardEvent->Type() == event_names::KeyDown)
     {
       auto shouldCallBaseEventHandler = _inputType->HandleKeydownEvent(*keyboardEvent);
-      if (event.DefaultHandled() || shouldCallBaseEventHandler == InputType::ShouldCallBaseEventHandler::No)
+      if (event.DefaultHandled()
+          || shouldCallBaseEventHandler == html::InputType::ShouldCallBaseEventHandler::No)
       {
         return;
       }
@@ -2336,32 +2336,32 @@ namespace krys::boo::html
 
 #pragma region HTMLInputElement Obsolete members
 
-  dom::DOMString HTMLInputElement::Align() const noexcept
+  DOMString HTMLInputElement::Align() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLInputElement::Align(dom::DOMString value) noexcept
+  void HTMLInputElement::Align(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"align", krys::move(value));
   }
 
-  dom::DOMString HTMLInputElement::UseMap() const noexcept
+  DOMString HTMLInputElement::UseMap() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"usemap").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"usemap").value_or(u8"");
   }
 
-  void HTMLInputElement::UseMap(dom::DOMString value) noexcept
+  void HTMLInputElement::UseMap(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"usemap", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"usemap", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region Presentational hints
 
-  bool HTMLInputElement::HasPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool HTMLInputElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                            const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null)
     {
@@ -2378,12 +2378,12 @@ namespace krys::boo::html
     return HTMLTextFormControlElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLInputElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                                const dom::DOMStringAtom &namespaceURI,
-                                                                dom::DOMStringView value,
+  void HTMLInputElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                                const DOMStringAtom &namespaceURI,
+                                                                DOMStringView value,
                                                                 css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLTextFormControlElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value,

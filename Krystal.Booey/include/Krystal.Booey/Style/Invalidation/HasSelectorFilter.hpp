@@ -34,7 +34,7 @@ namespace krys::boo::css
   class Selector;
 }
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
 }
@@ -61,7 +61,7 @@ namespace krys::boo::style
     BloomFilter<12> _filter;
 
   public:
-    HasSelectorFilter(const dom::Element &element, Type type) noexcept;
+    HasSelectorFilter(const Element &element, Type type) noexcept;
 
     KRYS_NODISCARD Type GetType() const noexcept
     {
@@ -83,6 +83,6 @@ namespace krys::boo::style
     }
 
   private:
-    void Add(const dom::Element &element) noexcept;
+    void Add(const Element &element) noexcept;
   };
 }

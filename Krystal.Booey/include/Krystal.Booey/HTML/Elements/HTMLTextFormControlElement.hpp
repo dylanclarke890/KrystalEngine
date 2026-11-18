@@ -68,7 +68,10 @@ namespace krys::boo::html
     Clamp,
     DoNotSet,
   };
+}
 
+namespace krys::boo
+{
   /// @brief A form control whose value is text: an input or a textarea. Its text is in an inner text element
   /// in its user agent shadow tree, which the user edits, and its selection is the frame's selection there
   /// while it's focused (and a cached one while it isn't).
@@ -80,8 +83,8 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTextFormControlElement);
 
   private:
-    TextFieldSelectionDirection _cachedSelectionDirection {
-      TextFieldSelectionDirection::SelectionHasNoDirection};
+    html::TextFieldSelectionDirection _cachedSelectionDirection {
+      html::TextFieldSelectionDirection::SelectionHasNoDirection};
     bool _lastChangeWasUserEdit : 1 {false};
     bool _isPlaceholderVisible : 1 {false};
     bool _canShowPlaceholder : 1 {true};
@@ -92,7 +95,7 @@ namespace krys::boo::html
     int32 _minLength {-1};
     uint32 _cachedSelectionStart {0};
     uint32 _cachedSelectionEnd {0};
-    Maybe<dom::DOMString> _textAsOfLastFormControlChangeEvent;
+    Maybe<DOMString> _textAsOfLastFormControlChangeEvent;
 
   public:
     /// @brief Whether TooLong() and TooShort() check the dirty value flag.
@@ -128,7 +131,7 @@ namespace krys::boo::html
     /// user can select in the control from its border or padding).
     void ForwardEvent(dom::Event &event) noexcept;
 
-    KRYS_NODISCARD virtual html::HTMLElement *PlaceholderElement() const noexcept = 0;
+    KRYS_NODISCARD virtual HTMLElement *PlaceholderElement() const noexcept = 0;
 
     void SetCanShowPlaceholder(bool canShowPlaceholder) noexcept;
 
@@ -149,65 +152,67 @@ namespace krys::boo::html
 
     /// @brief "forward", "backward" or "none".
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectiondirection
-    KRYS_NODISCARD dom::DOMStringView SelectionDirection() const noexcept;
+    KRYS_NODISCARD DOMStringView SelectionDirection() const noexcept;
 
     void SetSelectionStart(uint32 start) noexcept;
 
     void SetSelectionEnd(uint32 end) noexcept;
 
-    void SetSelectionDirection(dom::DOMStringView direction) noexcept;
+    void SetSelectionDirection(DOMStringView direction) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-select
     void Select(SelectionRevealMode revealMode = SelectionRevealMode::DoNotReveal) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-setrangetext
-    dom::ExceptionOr<void> SetRangeText(dom::DOMStringView replacement) noexcept;
+    dom::ExceptionOr<void> SetRangeText(DOMStringView replacement) noexcept;
 
     /// @param selectionMode "select", "start", "end" or "preserve".
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-setrangetext
-    virtual dom::ExceptionOr<void> SetRangeText(dom::DOMStringView replacement, uint32 start, uint32 end,
-                                                dom::DOMStringView selectionMode) noexcept;
+    virtual dom::ExceptionOr<void> SetRangeText(DOMStringView replacement, uint32 start, uint32 end,
+                                                DOMStringView selectionMode) noexcept;
 
     /// @param direction "forward", "backward", or anything else for none.
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-setselectionrange
-    void SetSelectionRange(uint32 start, uint32 end, dom::DOMStringView direction,
-                           ForBindings forBindings = ForBindings::No) noexcept;
+    void SetSelectionRange(uint32 start, uint32 end, DOMStringView direction,
+                           html::ForBindings forBindings = html::ForBindings::No) noexcept;
 
     /// @brief Selects the text from @p start to @p end, clamped to the value (and to whole characters).
     /// @return Whether the cached selection changed.
-    bool SetSelectionRange(
-      uint32 start, uint32 end,
-      TextFieldSelectionDirection direction = TextFieldSelectionDirection::SelectionHasNoDirection,
-      SelectionRevealMode revealMode = SelectionRevealMode::DoNotReveal,
-      ForBindings forBindings = ForBindings::No) noexcept;
+    bool SetSelectionRange(uint32 start, uint32 end,
+                           html::TextFieldSelectionDirection direction =
+                             html::TextFieldSelectionDirection::SelectionHasNoDirection,
+                           SelectionRevealMode revealMode = SelectionRevealMode::DoNotReveal,
+                           html::ForBindings forBindings = html::ForBindings::No) noexcept;
 
     void ScheduleSelectionChangeEvent() noexcept;
 
-    KRYS_NODISCARD TextFieldSelectionDirection ComputeSelectionDirection() const noexcept;
+    KRYS_NODISCARD html::TextFieldSelectionDirection ComputeSelectionDirection() const noexcept;
 
     /// @brief The cached selection as a range in the inner text, or nothing if there's none.
     KRYS_NODISCARD Maybe<dom::SimpleRange> Selection() const noexcept;
 
-    KRYS_NODISCARD dom::DOMString SelectedText() const noexcept;
+    KRYS_NODISCARD DOMString SelectedText() const noexcept;
 
     void DispatchFormControlChangeEvent() noexcept final;
 
     void ScheduleSelectEvent() noexcept;
 
-    KRYS_NODISCARD virtual dom::DOMString Value() const noexcept = 0;
+    KRYS_NODISCARD virtual DOMString Value() const noexcept = 0;
 
     /// @brief Whether the control's auto directionality comes from its value rather than its text.
     /// @see https://html.spec.whatwg.org/#auto-directionality-form-associated-elements
     KRYS_NODISCARD virtual bool DirAutoUsesValue() const noexcept = 0;
 
-    virtual dom::ExceptionOr<void> SetValue(
-      dom::DOMStringView value,
-      TextFieldEventBehavior eventBehavior = TextFieldEventBehavior::DispatchNoEvent,
-      TextControlSetValueSelection selection = TextControlSetValueSelection::SetSelectionToEnd) noexcept = 0;
+    virtual dom::ExceptionOr<void>
+      SetValue(DOMStringView value,
+               html::TextFieldEventBehavior eventBehavior = html::TextFieldEventBehavior::DispatchNoEvent,
+               html::TextControlSetValueSelection selection =
+                 html::TextControlSetValueSelection::SetSelectionToEnd) noexcept = 0;
 
-    KRYS_NODISCARD virtual RefPtr<TextControlInnerTextElement> InnerTextElement() const noexcept = 0;
+    KRYS_NODISCARD virtual RefPtr<html::TextControlInnerTextElement> InnerTextElement() const noexcept = 0;
 
-    virtual RefPtr<TextControlInnerTextElement> InnerTextElementCreatingShadowSubtreeIfNeeded() noexcept = 0;
+    virtual RefPtr<html::TextControlInnerTextElement>
+      InnerTextElementCreatingShadowSubtreeIfNeeded() noexcept = 0;
 
     /// @brief The style of the inner text element, from the control's.
     KRYS_NODISCARD virtual RenderStyle CreateInnerTextStyle(const RenderStyle &style) noexcept = 0;
@@ -222,10 +227,10 @@ namespace krys::boo::html
     KRYS_NODISCARD bool WasEverChangedByUserEdit() const noexcept;
 
     /// @brief Replaces the inner text with @p value (with a `<br>` after a trailing line break).
-    void SetInnerTextValue(dom::DOMString value) noexcept;
+    void SetInnerTextValue(DOMString value) noexcept;
 
     /// @brief The inner text: its text, with a line break for each `<br>` but a trailing one.
-    KRYS_NODISCARD dom::DOMString InnerTextValue() const noexcept;
+    KRYS_NODISCARD DOMString InnerTextValue() const noexcept;
 
     KRYS_NODISCARD virtual bool IsInnerTextElementEditable() const noexcept;
 
@@ -240,12 +245,12 @@ namespace krys::boo::html
     void UpdatePlaceholderVisibility() noexcept;
 
     /// @brief The directionality the `dirname` attribute submits: "ltr" or "rtl".
-    KRYS_NODISCARD dom::DOMString DirectionForFormData() const noexcept;
+    KRYS_NODISCARD DOMString DirectionForFormData() const noexcept;
 
     /// @brief The length of @p text in UTF-16 code units, as script measures strings.
-    KRYS_NODISCARD static size_t LengthForAPIValue(dom::DOMStringView text) noexcept;
+    KRYS_NODISCARD static size_t LengthForAPIValue(DOMStringView text) noexcept;
 
-    void SetTextAsOfLastFormControlChangeEvent(dom::DOMString text) noexcept
+    void SetTextAsOfLastFormControlChangeEvent(DOMString text) noexcept
     {
       _textAsOfLastFormControlChangeEvent = krys::move(text);
     }
@@ -254,7 +259,7 @@ namespace krys::boo::html
     KRYS_NODISCARD bool PlaceholderShouldBeVisible() const noexcept;
 
   protected:
-    HTMLTextFormControlElement(dom::Document &document, HTMLElementInterface interface) noexcept;
+    HTMLTextFormControlElement(Document &document, html::HTMLElementInterface interface) noexcept;
 
     KRYS_NODISCARD bool IsPlaceholderEmpty() const noexcept;
 
@@ -271,7 +276,7 @@ namespace krys::boo::html
 
     void UpdateInnerTextElementEditability() noexcept;
 
-    bool CacheSelection(uint32 start, uint32 end, TextFieldSelectionDirection direction) noexcept;
+    bool CacheSelection(uint32 start, uint32 end, html::TextFieldSelectionDirection direction) noexcept;
 
     void RestoreCachedSelection(SelectionRevealMode revealMode) noexcept;
 
@@ -287,13 +292,13 @@ namespace krys::boo::html
     virtual void SubtreeHasChanged() noexcept = 0;
 
     /// @brief The value with a line break where each line wraps, for `wrap="hard"`.
-    KRYS_NODISCARD dom::DOMString ValueWithHardLineBreaks() const noexcept;
+    KRYS_NODISCARD DOMString ValueWithHardLineBreaks() const noexcept;
 
     static void AdjustInnerTextStyle(const RenderStyle &parentStyle, RenderStyle &textBlockStyle) noexcept;
 
     void OnInsert() noexcept override;
 
-    KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &child) const noexcept override;
+    KRYS_NODISCARD bool ChildShouldCreateRenderer(const Node &child) const noexcept override;
 
     void DispatchFocusEvent(dom::EventTarget *relatedTarget,
                             const dom::FocusOptions &options) noexcept override;
@@ -305,7 +310,7 @@ namespace krys::boo::html
 
     // Called in DispatchFocusEvent(), after placeholder process, before calling parent's
     // DispatchFocusEvent().
-    virtual void HandleFocusEvent(dom::Node * /* oldFocusedNode */) noexcept
+    virtual void HandleFocusEvent(Node * /* oldFocusedNode */) noexcept
     {
     }
 
@@ -314,9 +319,8 @@ namespace krys::boo::html
     {
     }
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
     void SetLastChangeWasNotUserEdit() noexcept
     {
@@ -334,35 +338,38 @@ namespace krys::boo::html
     }
 
     /// @brief The value of a `maxlength` or `minlength` attribute: a valid non-negative integer, or -1.
-    KRYS_NODISCARD static int32 ParseLengthAttribute(Maybe<dom::DOMStringView> value) noexcept;
+    KRYS_NODISCARD static int32 ParseLengthAttribute(Maybe<DOMStringView> value) noexcept;
 
   private:
     KRYS_NODISCARD uint32 IndexForPosition(const dom::Position &position) const noexcept;
   };
+}
 
+namespace krys::boo::html
+{
   /// @brief The text control whose inner text @p position is in, or null.
   KRYS_NODISCARD HTMLTextFormControlElement *EnclosingTextFormControl(const dom::Position &position) noexcept;
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLTextFormControlElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLTextFormControlElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
     if (!target.IsHTMLElement())
     {
       return false;
     }
-    auto &element = Downcast<krys::boo::html::HTMLElement>(target);
+    auto &element = Downcast<krys::boo::HTMLElement>(target);
     return element.IsHTMLInputElement() || element.IsHTMLTextAreaElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLInputElement() || target.IsHTMLTextAreaElement();
   }
 
   KRYS_NODISCARD static bool IsType(const krys::boo::dom::EventTarget &target) noexcept
   {
-    auto *node = DynamicDowncast<krys::boo::dom::Node>(target);
+    auto *node = DynamicDowncast<krys::boo::Node>(target);
     return node && IsType(*node);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

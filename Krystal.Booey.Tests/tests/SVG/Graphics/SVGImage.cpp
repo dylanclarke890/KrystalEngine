@@ -33,13 +33,12 @@ namespace krys::boo::svg::tests
       return text.contains(part);
     }
 
-    KRYS_NODISCARD html::HTMLImageElement &ImageById(PageInFrameFixture &fixture,
-                                                     dom::DOMStringView id) noexcept
+    KRYS_NODISCARD HTMLImageElement &ImageById(PageInFrameFixture &fixture, DOMStringView id) noexcept
     {
-      return Downcast<html::HTMLImageElement>(Downcast<html::HTMLElement>(fixture.ById(id)));
+      return Downcast<HTMLImageElement>(Downcast<HTMLElement>(fixture.ById(id)));
     }
 
-    KRYS_NODISCARD SVGImage *SVGImageOf(html::HTMLImageElement &image) noexcept
+    KRYS_NODISCARD SVGImage *SVGImageOf(HTMLImageElement &image) noexcept
     {
       auto *cachedImage = image.GetCachedImage();
       return cachedImage ? DynamicDowncast<SVGImage>(cachedImage->GetImage()) : nullptr;

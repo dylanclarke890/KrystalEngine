@@ -73,7 +73,7 @@ namespace krys::boo::html::tests
     auto &a = fixture.Get<HTMLAnchorElement>(u8"a");
     auto href = [&]
     {
-      return Str(a.GetAttribute(u8"href").value_or(dom::DOMString()));
+      return Str(a.GetAttribute(u8"href").value_or(DOMString()));
     };
 
     a.Hash(u8"#x");
@@ -125,11 +125,11 @@ namespace krys::boo::html::tests
     // An invalid URL keeps its scheme.
     auto &bad = fixture.Get<HTMLAnchorElement>(u8"bad");
     bad.Protocol(u8"https");
-    CHECK(Str(bad.GetAttribute(u8"href").value_or(dom::DOMString())) == "http://[bad");
+    CHECK(Str(bad.GetAttribute(u8"href").value_or(DOMString())) == "http://[bad");
 
     auto &area = fixture.Get<HTMLAreaElement>(u8"area");
     area.Hash(u8"z");
-    CHECK(Str(area.GetAttribute(u8"href").value_or(dom::DOMString())) == "https://example.com/p#z");
+    CHECK(Str(area.GetAttribute(u8"href").value_or(DOMString())) == "https://example.com/p#z");
 
     a.Href(u8"rel/ative");
     CHECK(href() == "rel/ative");

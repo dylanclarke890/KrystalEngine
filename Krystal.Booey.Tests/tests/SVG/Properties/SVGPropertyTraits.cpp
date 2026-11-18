@@ -29,7 +29,7 @@ namespace krys::boo::svg::tests
 
     CHECK(SVGPropertyTraits<float>::FromString(element, u8"1.5") == 1.5f);
     CHECK(SVGPropertyTraits<float>::FromString(element, u8"abc") == 0);
-    dom::QualifiedName name(null, null, u8"x");
+    QualifiedName name(null, null, u8"x");
     CHECK_FALSE(SVGPropertyTraits<float>::Parse(name, u8"abc"));
     CHECK(SVGPropertyTraits<float>::Parse(name, u8"2") == 2.f);
     CHECK(SVGPropertyTraits<float>::ToString(0.25f) == u8"0.25");
@@ -42,7 +42,7 @@ namespace krys::boo::svg::tests
     CHECK(SVGPropertyTraits<FloatRect>::FromString(element, u8"0 0 100 50") == FloatRect(0, 0, 100, 50));
     CHECK(SVGPropertyTraits<FloatRect>::FromString(element, u8"0 0 100") == FloatRect());
     CHECK(SVGPropertyTraits<FloatRect>::ToString(FloatRect(1, 2, 3, 4)) == u8"1 2 3 4");
-    CHECK(SVGPropertyTraits<dom::DOMString>::FromString(element, u8" a ") == u8" a ");
+    CHECK(SVGPropertyTraits<DOMString>::FromString(element, u8" a ") == u8" a ");
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "SVGPropertyTraits: colours", "[SVG][SVGPropertyTraits]")

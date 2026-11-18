@@ -60,7 +60,7 @@ namespace krys::boo::html::tests
           }
           else
           {
-            Entries.push_back(Str(item.Name) + "=" + Str(std::get<dom::DOMString>(item.Data)));
+            Entries.push_back(Str(item.Name) + "=" + Str(std::get<DOMString>(item.Data)));
           }
         }
       }

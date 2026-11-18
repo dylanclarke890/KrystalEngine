@@ -24,17 +24,17 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD RenderBlockFlow &BlockOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderBlockFlow &BlockOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       return Downcast<RenderBlockFlow>(*fixture.ById(id).Renderer());
     }
 
-    KRYS_NODISCARD RenderElement &RendererOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderElement &RendererOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       return *fixture.ById(id).Renderer();
     }
 
-    KRYS_NODISCARD const layout::ElementBox &BoxOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD const layout::ElementBox &BoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       auto box = RendererOf(fixture, id).LayoutBox();
       REQUIRE(box);

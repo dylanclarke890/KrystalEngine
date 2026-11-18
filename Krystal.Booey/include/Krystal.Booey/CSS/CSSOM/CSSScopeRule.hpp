@@ -32,7 +32,10 @@
 namespace krys::boo::css
 {
   class ScopeRule;
+}
 
+namespace krys::boo
+{
   /// @brief An `@scope` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-cascade-6/#the-cssscoperule-interface
   class CSSScopeRule final : public CSSGroupingRule
@@ -52,15 +55,15 @@ namespace krys::boo::css
   private:
     KRYS_NODISCARD const css::ScopeRule &GetScopeRule() const noexcept;
 
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::Scope;
+      return css::RuleType::Scope;
     }
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSScopeRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSScopeRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::Scope;
   }

@@ -38,7 +38,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -111,7 +111,7 @@ namespace krys::boo::css
     /// @p parserModeOverride gives one; empty if it isn't one (`inherit` and `initial` aren't).
     /// @note What the canvas 2D context's `font` is set with.
     KRYS_NODISCARD Maybe<UnresolvedFont>
-      ParseUnresolvedFont(const CSSOMString &string, const dom::Document &document,
+      ParseUnresolvedFont(const CSSOMString &string, const Document &document,
                           Maybe<ParserMode> parserModeOverride = {}) noexcept;
 
     // MARK: 'font-style'

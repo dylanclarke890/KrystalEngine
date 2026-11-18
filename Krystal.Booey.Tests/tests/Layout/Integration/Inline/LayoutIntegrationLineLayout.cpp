@@ -32,12 +32,12 @@ namespace krys::boo::layout_integration::tests
       return layout::tests::AhemDocument(style, body);
     }
 
-    KRYS_NODISCARD RenderBlockFlow &BlockFlowOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderBlockFlow &BlockFlowOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       return Downcast<RenderBlockFlow>(*fixture.ById(id).Renderer());
     }
 
-    KRYS_NODISCARD RenderText &FirstTextIn(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderText &FirstTextIn(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       return Downcast<RenderText>(*fixture.ById(id).Renderer()->FirstChildSlow());
     }
@@ -243,13 +243,13 @@ layer at (0,0) size 800x60
         + u8"</svg></body>"};
       auto painted = fixture.Painted();
 
-      auto &element = Downcast<svg::SVGElement>(*fixture.Document->GetElementById(u8"t"));
+      auto &element = Downcast<SVGElement>(*fixture.Document->GetElementById(u8"t"));
       auto &flow = Downcast<RenderBlockFlow>(*element.Renderer());
       CHECK(flow.HasSvgTextLayout() == !inlineFormattingContext);
       CHECK((flow.InlineLayout() != nullptr) == inlineFormattingContext);
 
-      auto &text = Downcast<svg::SVGTextContentElement>(element);
-      auto box = Downcast<svg::SVGGraphicsElement>(element).GetBBox();
+      auto &text = Downcast<SVGTextContentElement>(element);
+      auto box = Downcast<SVGGraphicsElement>(element).GetBBox();
       std::string result = "length " + std::to_string(text.GetComputedTextLength()) + ", box "
                            + std::to_string(box.X()) + " " + std::to_string(box.Y()) + " "
                            + std::to_string(box.Width()) + " " + std::to_string(box.Height());

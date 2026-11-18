@@ -1,20 +1,20 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLDirectoryElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLDirectoryElement::HTMLDirectoryElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Directory)
+  HTMLDirectoryElement::HTMLDirectoryElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Directory)
   {
   }
 
   bool HTMLDirectoryElement::Compact() const noexcept
   {
-    return Reflect<bool>(*this, u8"compact");
+    return html::Reflect<bool>(*this, u8"compact");
   }
 
   void HTMLDirectoryElement::Compact(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"compact", krys::move(value));
+    html::Reflect<bool>(*this, u8"compact", krys::move(value));
   }
 }

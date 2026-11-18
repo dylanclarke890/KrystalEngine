@@ -2,10 +2,10 @@
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   Attr::Attr(Document &document, const QualifiedName &qualifiedName, DOMString value) noexcept
-      : Node(document, NodeType::ATTRIBUTE_NODE, NodeFlags::None), _name {qualifiedName},
+      : Node(document, dom::NodeType::ATTRIBUTE_NODE, dom::NodeFlags::None), _name {qualifiedName},
         _value {krys::move(value)}
   {
     // 1. Let attribute be the result of creating a node that implements Attr, given document.
@@ -39,7 +39,7 @@ namespace krys::boo::dom
       // 4. (Skipped: without step 3, attribute's element can't have changed.)
 
       // 5. Change attribute to verifiedValue.
-      ElementAlgorithms::ChangeAttribute(attribute, krys::move(value));
+      dom::ElementAlgorithms::ChangeAttribute(attribute, krys::move(value));
     }
   }
 }

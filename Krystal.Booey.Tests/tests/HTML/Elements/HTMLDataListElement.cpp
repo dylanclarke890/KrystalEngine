@@ -12,13 +12,13 @@ namespace krys::boo::tests
   {
     EditorFixture fixture(u8"<datalist id=d><option>A</option><div><option>B</option></div>"
                           u8"<input id=i required></datalist>");
-    auto &datalist = Downcast<html::HTMLDataListElement>(fixture.ById(u8"d"));
+    auto &datalist = Downcast<HTMLDataListElement>(fixture.ById(u8"d"));
     auto options = datalist.Options();
     CHECK(options->Length() == 2uz);
     CHECK(datalist.Options().get() == options.get());
 
     // Its descendants are barred from constraint validation.
-    CHECK_FALSE(Downcast<html::HTMLInputElement>(fixture.ById(u8"i")).WillValidate());
+    CHECK_FALSE(Downcast<HTMLInputElement>(fixture.ById(u8"i")).WillValidate());
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLDataListElement: suggestions",
@@ -28,7 +28,7 @@ namespace krys::boo::tests
     EditorFixture fixture(u8"<datalist id=d><option value=a></option><option disabled value=b></option>"
                           u8"<option></option><optgroup disabled><option value=c></option></optgroup>"
                           u8"<div><option>d</option></div></datalist>");
-    auto suggestions = Downcast<html::HTMLDataListElement>(fixture.ById(u8"d")).Suggestions();
+    auto suggestions = Downcast<HTMLDataListElement>(fixture.ById(u8"d")).Suggestions();
     REQUIRE(suggestions.size() == 2uz);
     CHECK(suggestions[0]->Value() == u8"a");
     CHECK(suggestions[1]->Value() == u8"d");
@@ -38,7 +38,7 @@ namespace krys::boo::tests
                    "[HTML][HTMLInputElement][html:dom-input-list][html:attr-input-list]")
   {
     EditorFixture fixture(u8"<datalist id=d></datalist><p id=p></p><input id=i list=d>");
-    auto &input = Downcast<html::HTMLInputElement>(fixture.ById(u8"i"));
+    auto &input = Downcast<HTMLInputElement>(fixture.ById(u8"i"));
     auto &datalist = fixture.ById(u8"d");
     CHECK(input.List().get() == &datalist);
 

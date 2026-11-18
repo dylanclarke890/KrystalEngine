@@ -63,8 +63,7 @@ namespace krys::boo::tests
   }
 
   /// @brief The border box of the element @p id in @p fixture, relative to the viewport.
-  KRYS_NODISCARD inline FloatRect BoxOf(style::tests::ResolverFixture &fixture,
-                                        dom::DOMStringView id) noexcept
+  KRYS_NODISCARD inline FloatRect BoxOf(style::tests::ResolverFixture &fixture, DOMStringView id) noexcept
   {
     (void)fixture.Document->UpdateLayout();
     return fixture.ById(id).BoundingClientRect();

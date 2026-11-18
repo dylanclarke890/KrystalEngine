@@ -40,7 +40,7 @@ namespace krys::boo::xml
     constexpr size_t MaxXMLTreeDepth = 5'000;
   }
 
-  void XMLDocumentParser::PushCurrentNode(dom::ContainerNode *n) noexcept
+  void XMLDocumentParser::PushCurrentNode(ContainerNode *n) noexcept
   {
     krys_debug_assert(n);
     krys_debug_assert(_currentNode);
@@ -70,7 +70,7 @@ namespace krys::boo::xml
     _currentNodeStack.clear();
   }
 
-  void XMLDocumentParser::Append(dom::DOMString source) noexcept
+  void XMLDocumentParser::Append(DOMString source) noexcept
   {
     if (IsStopped())
     {
@@ -105,8 +105,8 @@ namespace krys::boo::xml
     }
 
     krys_debug_assert(_bufferedText.empty());
-    _leafTextNode = CreateRef<dom::Text>(_currentNode->NodeDocument(), dom::DOMString());
-    if (RefPtr<dom::ContainerNode> currentNode = _currentNode)
+    _leafTextNode = CreateRef<Text>(_currentNode->NodeDocument(), DOMString());
+    if (RefPtr<ContainerNode> currentNode = _currentNode)
     {
       (void)dom::MutationAlgorithms::Append(*_leafTextNode, *currentNode);
     }
@@ -124,7 +124,7 @@ namespace krys::boo::xml
       return true;
     }
 
-    RefPtr<dom::Text> leafTextNode = _leafTextNode;
+    RefPtr<Text> leafTextNode = _leafTextNode;
     (void)leafTextNode->AppendData(krys::move(_bufferedText));
     _bufferedText.clear();
 
@@ -174,7 +174,7 @@ namespace krys::boo::xml
       PrepareToStopParsing();
     }
     ClearCurrentNodeStack();
-    Ref<dom::Document> document = ShareRef(*Document());
+    Ref<boo::Document> document = ShareRef(*Document());
     document->FinishedParsing();
   }
 
@@ -197,11 +197,11 @@ namespace krys::boo::xml
   {
     struct XMLParsingNamespaces
     {
-      dom::DOMStringAtom DefaultNamespace {null};
-      HashMap<dom::DOMStringAtom, dom::DOMStringAtom> PrefixNamespaces;
+      DOMStringAtom DefaultNamespace {null};
+      HashMap<DOMStringAtom, DOMStringAtom> PrefixNamespaces;
     };
 
-    KRYS_NODISCARD XMLParsingNamespaces FindXMLParsingNamespaces(dom::Element *contextElement) noexcept
+    KRYS_NODISCARD XMLParsingNamespaces FindXMLParsingNamespaces(Element *contextElement) noexcept
     {
       if (!contextElement)
       {
@@ -223,8 +223,7 @@ namespace krys::boo::xml
           // A declaration nearer the context element hides an ancestor's for the same prefix.
           if (attribute->Prefix() == infra::namespace_prefixes::XMLNS)
           {
-            result.PrefixNamespaces.try_emplace(attribute->LocalName(),
-                                                dom::DOMStringAtom(attribute->Value()));
+            result.PrefixNamespaces.try_emplace(attribute->LocalName(), DOMStringAtom(attribute->Value()));
           }
         }
       }
@@ -233,8 +232,8 @@ namespace krys::boo::xml
     }
   }
 
-  bool XMLDocumentParser::ParseDocumentFragment(dom::DOMStringView chunk, dom::DocumentFragment &fragment,
-                                                dom::Element *contextElement) noexcept
+  bool XMLDocumentParser::ParseDocumentFragment(DOMStringView chunk, DocumentFragment &fragment,
+                                                Element *contextElement) noexcept
   {
     if (chunk.empty())
     {

@@ -76,15 +76,15 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD html::TagName RenderObjectTagName(const dom::Node *node) noexcept
+    KRYS_NODISCARD html::TagName RenderObjectTagName(const Node *node) noexcept
     {
-      auto *element = DynamicDowncast<html::HTMLElement>(node);
+      auto *element = DynamicDowncast<HTMLElement>(node);
       return element ? element->TagQualifiedName().TagName() : html::TagName::Unknown;
     }
 
     /// @brief Whether an alt text (on an image, or from CSS) includes the object or leaves it out: an empty
     /// one marks it decorative.
-    KRYS_NODISCARD AXObjectInclusion ObjectInclusionFromAltText(const Maybe<dom::DOMString> &altText) noexcept
+    KRYS_NODISCARD AXObjectInclusion ObjectInclusionFromAltText(const Maybe<DOMString> &altText) noexcept
     {
       if (!altText)
       {
@@ -105,13 +105,12 @@ namespace krys::boo
     return AdoptRef(*new AXRenderObject(id, &renderer, renderer.GetNode(), cache));
   }
 
-  Ref<AXRenderObject> AXRenderObject::Create(AXId id, dom::Node &node, AXObjectCache &cache) noexcept
+  Ref<AXRenderObject> AXRenderObject::Create(AXId id, Node &node, AXObjectCache &cache) noexcept
   {
     return AdoptRef(*new AXRenderObject(id, nullptr, &node, cache));
   }
 
-  AXRenderObject::AXRenderObject(AXId id, RenderObject *renderer, dom::Node *node,
-                                 AXObjectCache &cache) noexcept
+  AXRenderObject::AXRenderObject(AXId id, RenderObject *renderer, Node *node, AXObjectCache &cache) noexcept
       : AXNodeObject(id, node, cache), _renderer(CreateWeakPtr(renderer))
   {
   }
@@ -147,7 +146,7 @@ namespace krys::boo
     {
       return nullptr;
     }
-    auto *svgImage = DynamicDowncast<svg::SVGImage>(cachedImage->GetImage());
+    auto *svgImage = DynamicDowncast<SVGImage>(cachedImage->GetImage());
     auto root = svgImage ? svgImage->RootElement() : nullptr;
     auto *rootRenderer = root ? root->Renderer() : nullptr;
     if (!rootRenderer)
@@ -221,7 +220,7 @@ namespace krys::boo
     return AXNodeObject::ElementAccessibilityHitTest(point);
   }
 
-  dom::Document *AXRenderObject::GetDocument() const noexcept
+  Document *AXRenderObject::GetDocument() const noexcept
   {
     if (auto *renderer = _renderer.get())
     {
@@ -241,7 +240,7 @@ namespace krys::boo
 
     // ::before and ::after are the first and last children of the element that generates them (see
     // AddChildren), not siblings of it as their renderers are.
-    if (auto *pseudo = DynamicDowncast<dom::PseudoElement>(GetNode()))
+    if (auto *pseudo = DynamicDowncast<PseudoElement>(GetNode()))
     {
       return cache->GetOrCreate(pseudo->HostElement());
     }
@@ -327,8 +326,8 @@ namespace krys::boo
       return;
     }
 
-    auto *node = DynamicDowncast<dom::ContainerNode>(GetNode());
-    auto *element = DynamicDowncast<dom::Element>(GetNode());
+    auto *node = DynamicDowncast<ContainerNode>(GetNode());
+    auto *element = DynamicDowncast<Element>(GetNode());
 
     // ::before and ::after are the first and last children of the element that generates them.
     if (auto *before = element ? element->BeforePseudoElement() : nullptr)
@@ -342,9 +341,9 @@ namespace krys::boo
       AddChild(cache->GetOrCreate(*marker));
     }
 
-    if (node && !Is<dom::PseudoElement>(*node))
+    if (node && !Is<PseudoElement>(*node))
     {
-      auto *select = DynamicDowncast<html::HTMLSelectElement>(*node);
+      auto *select = DynamicDowncast<HTMLSelectElement>(*node);
       if (select && Role() == AXRole::ListBox)
       {
         // A list box's children are its options (and option groups), wherever they are.
@@ -509,7 +508,7 @@ namespace krys::boo
     if (renderer->IsRenderListItem())
     {
       // The details' disclosure triangle is a list item, but it's the summary.
-      auto *summary = DynamicDowncast<html::HTMLSummaryElement>(node);
+      auto *summary = DynamicDowncast<HTMLSummaryElement>(node);
       if (!summary || !summary->IsActiveSummary())
       {
         return AXRole::ListItem;
@@ -524,13 +523,13 @@ namespace krys::boo
       return AXRole::LineBreak;
     }
     if (RenderObjectTagName(node) == html::TagName::img
-        && DynamicDowncast<dom::Element>(node)->HasAttribute(u8"usemap"))
+        && DynamicDowncast<Element>(node)->HasAttribute(u8"usemap"))
     {
       return AXRole::ImageMap;
     }
     if (renderer->IsRenderImage())
     {
-      if (Is<html::HTMLInputElement>(node))
+      if (Is<HTMLInputElement>(node))
       {
         return HasPopup() ? AXRole::PopUpButton : AXRole::Button;
       }
@@ -547,7 +546,7 @@ namespace krys::boo
     }
     if (renderer->IsRenderTextControlSingleLine())
     {
-      if (auto *input = DynamicDowncast<html::HTMLInputElement>(node))
+      if (auto *input = DynamicDowncast<HTMLInputElement>(node))
       {
         return RoleFromInputElement(*input);
       }
@@ -792,7 +791,7 @@ namespace krys::boo
       // A decorative image (alt="") is ignored even if a title, aria-label and so on is given.
       auto *element = GetElement();
       auto inclusion =
-        ObjectInclusionFromAltText(element ? element->GetAttribute(u8"alt") : Maybe<dom::DOMString> {});
+        ObjectInclusionFromAltText(element ? element->GetAttribute(u8"alt") : Maybe<DOMString> {});
       if (inclusion == AXObjectInclusion::IgnoreObject)
       {
         return true;
@@ -870,7 +869,7 @@ namespace krys::boo
       {
         for (auto *child = element->FirstChild(); child; child = child->NextSibling())
         {
-          if (Is<dom::Element>(*child))
+          if (Is<Element>(*child))
           {
             return false;
           }
@@ -912,7 +911,7 @@ namespace krys::boo
       // The generic div a user agent renders within a text input is still ignored.
       auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(*node);
       if (shadowRoot && shadowRoot->Mode() == dom::ShadowRootMode::UserAgent
-          && Is<html::HTMLInputElement>(shadowRoot->Host()))
+          && Is<HTMLInputElement>(shadowRoot->Host()))
       {
         return true;
       }
@@ -972,7 +971,7 @@ namespace krys::boo
     // The map's areas that are links.
     for (auto &node : dom::DescendantRange(*map))
     {
-      if (auto *area = DynamicDowncast<html::HTMLAreaElement>(node); area && css::IsLink(*area))
+      if (auto *area = DynamicDowncast<HTMLAreaElement>(node); area && css::IsLink(*area))
       {
         AddChild(cache->GetOrCreate(*area));
       }
@@ -981,7 +980,7 @@ namespace krys::boo
 
   void AXRenderObject::AddTextFieldChildren() noexcept
   {
-    auto *input = DynamicDowncast<html::HTMLInputElement>(GetNode());
+    auto *input = DynamicDowncast<HTMLInputElement>(GetNode());
     auto *spinButtonElement =
       input ? DynamicDowncast<html::SpinButtonElement>(input->InnerSpinButtonElement()) : nullptr;
     auto *cache = AxObjectCache();
@@ -1009,7 +1008,7 @@ namespace krys::boo
     }
     for (auto *node = GetNode(); node; node = node->ParentNode())
     {
-      if (auto *label = DynamicDowncast<html::HTMLLabelElement>(*node))
+      if (auto *label = DynamicDowncast<HTMLLabelElement>(*node))
       {
         auto control = label->Control();
         // A control that's a descendant of the label, being destroyed, doesn't count.
@@ -1079,7 +1078,7 @@ namespace krys::boo
     return false;
   }
 
-  dom::DOMString AXRenderObject::StringValue() const noexcept
+  DOMString AXRenderObject::StringValue() const noexcept
   {
     auto *renderer = _renderer.get();
     if (!renderer)
@@ -1094,11 +1093,11 @@ namespace krys::boo
     if (auto *text = DynamicDowncast<RenderText>(*renderer))
     {
       // The rendered text (after text-transform and whitespace processing).
-      return dom::DOMString(text->Text());
+      return DOMString(text->Text());
     }
     if (auto *marker = DynamicDowncast<RenderListMarker>(*renderer))
     {
-      return dom::DOMString(marker->TextWithSuffix());
+      return DOMString(marker->TextWithSuffix());
     }
     return AXNodeObject::StringValue();
   }
@@ -1137,13 +1136,13 @@ namespace krys::boo
                                        HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active,
                                        HitTestRequest::Type::AccessibilityHitTest}),
                                      hitTestResult);
-    dom::Node *node = hitTestResult.InnerNode();
+    Node *node = hitTestResult.InnerNode();
     if (!node)
     {
       return nullptr;
     }
     // An option is part of its list box.
-    if (auto *option = DynamicDowncast<html::HTMLOptionElement>(*node))
+    if (auto *option = DynamicDowncast<HTMLOptionElement>(*node))
     {
       node = option->OwnerSelectElement();
     }
@@ -1175,9 +1174,9 @@ namespace krys::boo
     return hit && hit->IsIgnored() ? hit->ParentObjectUnignored() : hit;
   }
 
-  bool AXRenderObject::SetValue(dom::DOMStringView value) noexcept
+  bool AXRenderObject::SetValue(DOMStringView value) noexcept
   {
-    RefPtr<dom::Element> element = ShareRefPtr(GetElement());
+    RefPtr<Element> element = ShareRefPtr(GetElement());
     if (!element)
     {
       return false;
@@ -1190,12 +1189,12 @@ namespace krys::boo
       (void)document.GetEditor().InsertText(value, nullptr);
       return true;
     }
-    if (auto *input = DynamicDowncast<html::HTMLInputElement>(*element); input && input->IsTextField())
+    if (auto *input = DynamicDowncast<HTMLInputElement>(*element); input && input->IsTextField())
     {
       (void)input->SetValue(value, html::TextFieldEventBehavior::DispatchInputAndChangeEvent);
       return true;
     }
-    if (auto *textArea = DynamicDowncast<html::HTMLTextAreaElement>(*element))
+    if (auto *textArea = DynamicDowncast<HTMLTextAreaElement>(*element))
     {
       (void)textArea->SetValue(value, html::TextFieldEventBehavior::DispatchInputAndChangeEvent);
       return true;
@@ -1214,7 +1213,7 @@ namespace krys::boo
     LayoutRect rect(renderer->AbsoluteBoundingBoxRect());
     // An SVG element's box is its bounding box, as for getBoundingClientRect (an SVG text renderer's quads
     // leave out where its text is).
-    if (auto *svgElement = DynamicDowncast<svg::SVGElement>(GetElement());
+    if (auto *svgElement = DynamicDowncast<SVGElement>(GetElement());
         svgElement && svgElement->HasAssociatedSVGLayoutBox())
     {
       if (auto box = svgElement->GetBoundingBox())
@@ -1229,8 +1228,8 @@ namespace krys::boo
     // An SVG image's objects are where the image showing it is.
     auto *document = GetDocument();
     auto documentElement = document ? document->DocumentElement() : nullptr;
-    auto *svgElement = DynamicDowncast<svg::SVGElement>(documentElement.get());
-    if (svgElement && Is<svg::SVGSvgElement>(*svgElement))
+    auto *svgElement = DynamicDowncast<SVGElement>(documentElement.get());
+    if (svgElement && Is<SVGSvgElement>(*svgElement))
     {
       OffsetForRemoteSVGElement(rect);
     }

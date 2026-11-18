@@ -40,7 +40,7 @@ namespace krys::boo::html
   namespace
   {
     /// @see https://html.spec.whatwg.org/#upgrade-particular-elements-within-a-document
-    void EnqueueUpgradeInShadowIncludingTreeOrder(dom::ContainerNode &node,
+    void EnqueueUpgradeInShadowIncludingTreeOrder(ContainerNode &node,
                                                   CustomElementInterface &elementInterface,
                                                   CustomElementRegistry &registry) noexcept
     {
@@ -52,7 +52,7 @@ namespace krys::boo::html
       // (Only undefined elements, as the others would return from upgrading.)
       for (auto &descendant : dom::ShadowIncludingDescendantRange(node))
       {
-        auto *element = DynamicDowncast<dom::Element>(descendant);
+        auto *element = DynamicDowncast<Element>(descendant);
         if (element != nullptr && element->IsCustomElementUpgradeCandidate()
             && element->CustomElementRegistry().get() == &registry
             && element->TagQualifiedName().LocalName() == elementInterface.Name().LocalName()
@@ -65,7 +65,7 @@ namespace krys::boo::html
 
     /// @brief Tries to upgrade @p element if its registry is @p registry (and it's undefined, which only an
     /// element that can be upgraded is).
-    void UpgradeElementIfPossible(CustomElementRegistry &registry, dom::Element &element) noexcept
+    void UpgradeElementIfPossible(CustomElementRegistry &registry, Element &element) noexcept
     {
       if (element.IsCustomElementUpgradeCandidate() && element.CustomElementRegistry().get() == &registry)
       {
@@ -74,7 +74,7 @@ namespace krys::boo::html
     }
   }
 
-  CustomElementRegistry::CustomElementRegistry(dom::Document &document) noexcept
+  CustomElementRegistry::CustomElementRegistry(boo::Document &document) noexcept
       : _document(CreateWeakPtr(&document))
   {
   }
@@ -85,13 +85,13 @@ namespace krys::boo::html
 
   CustomElementRegistry::~CustomElementRegistry() noexcept = default;
 
-  dom::Document *CustomElementRegistry::Document() const noexcept
+  boo::Document *CustomElementRegistry::Document() const noexcept
   {
     return _document.get();
   }
 
   // https://html.spec.whatwg.org/#dom-customelementregistry-define
-  dom::ExceptionOr<void> CustomElementRegistry::Define(const dom::DOMStringAtom &name,
+  dom::ExceptionOr<void> CustomElementRegistry::Define(const DOMStringAtom &name,
                                                        CustomElementFactory &&factory,
                                                        CustomElementOptions &&options) noexcept
   {
@@ -189,7 +189,7 @@ namespace krys::boo::html
     }
   }
 
-  CustomElementInterface *CustomElementRegistry::FindInterface(const dom::QualifiedName &name) const noexcept
+  CustomElementInterface *CustomElementRegistry::FindInterface(const QualifiedName &name) const noexcept
   {
     if (name.NamespaceURI() != infra::namespaces::HTML)
     {
@@ -198,14 +198,14 @@ namespace krys::boo::html
     return FindInterface(name.LocalName());
   }
 
-  CustomElementInterface *CustomElementRegistry::FindInterface(const dom::DOMStringAtom &name) const noexcept
+  CustomElementInterface *CustomElementRegistry::FindInterface(const DOMStringAtom &name) const noexcept
   {
     auto it = _nameMap.find(name);
     return it != _nameMap.end() ? it->second.get() : nullptr;
   }
 
   // https://html.spec.whatwg.org/#dom-customelementregistry-get
-  CustomElementInterface *CustomElementRegistry::Get(dom::DOMStringAtom name) const noexcept
+  CustomElementInterface *CustomElementRegistry::Get(DOMStringAtom name) const noexcept
   {
     // 1. If this's custom element definition set contains an item with name name, then return that item's
     //    constructor.
@@ -215,8 +215,7 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#dom-customelementregistry-getname
   // (Given the definition rather than its constructor.)
-  dom::DOMStringAtom
-    CustomElementRegistry::GetName(const CustomElementInterface &elementInterface) const noexcept
+  DOMStringAtom CustomElementRegistry::GetName(const CustomElementInterface &elementInterface) const noexcept
   {
     // 1. If this's custom element definition set contains an item with constructor constructor, then return
     //    that item's name.
@@ -227,7 +226,7 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#dom-customelementregistry-whendefined
   // (The promise is a callback, called in a microtask once the name is defined.)
-  dom::ExceptionOr<void> CustomElementRegistry::WhenDefined(const dom::DOMStringAtom &name,
+  dom::ExceptionOr<void> CustomElementRegistry::WhenDefined(const DOMStringAtom &name,
                                                             WhenDefinedCallback &&callback) noexcept
   {
     // 1. If name is not a valid custom element name, then return a promise rejected with a "SyntaxError"
@@ -255,11 +254,11 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-customelementregistry-upgrade
-  void CustomElementRegistry::Upgrade(dom::Node &root) noexcept
+  void CustomElementRegistry::Upgrade(Node &root) noexcept
   {
     CEReactionsScope ceReactions;
 
-    auto *containerNode = DynamicDowncast<dom::ContainerNode>(root);
+    auto *containerNode = DynamicDowncast<ContainerNode>(root);
     if (containerNode == nullptr)
     {
       return;
@@ -269,14 +268,14 @@ namespace krys::boo::html
     // 1a. If candidate is not an Element node, then continue.
     // 1b. If candidate's custom element registry is not this, then continue.
     // 1c. Try to upgrade candidate.
-    if (auto *element = DynamicDowncast<dom::Element>(*containerNode))
+    if (auto *element = DynamicDowncast<Element>(*containerNode))
     {
       UpgradeElementIfPossible(*this, *element);
     }
 
     for (auto &descendant : dom::ShadowIncludingDescendantRange(*containerNode))
     {
-      if (auto *element = DynamicDowncast<dom::Element>(descendant))
+      if (auto *element = DynamicDowncast<Element>(descendant))
       {
         UpgradeElementIfPossible(*this, *element);
       }
@@ -284,13 +283,13 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-customelementregistry-initialize
-  dom::ExceptionOr<void> CustomElementRegistry::Initialize(dom::Node &root) noexcept
+  dom::ExceptionOr<void> CustomElementRegistry::Initialize(Node &root) noexcept
   {
     CEReactionsScope ceReactions;
 
     // 1. If this's is scoped is false and either root is a Document node or root's node document's custom
     //    element registry is not this, then throw a "NotSupportedError" DOMException.
-    if (!IsScoped() && (Is<dom::Document>(root) || this != root.NodeDocument().CustomElementRegistry().get()))
+    if (!IsScoped() && (Is<boo::Document>(root) || this != root.NodeDocument().CustomElementRegistry().get()))
     {
       return dom::Exception {dom::ExceptionCode::NotSupportedError};
     }
@@ -300,14 +299,14 @@ namespace krys::boo::html
     // 3. Otherwise, if root is a ShadowRoot node whose custom element registry is null, then set root's
     // custom
     //    element registry to this.
-    if (auto *document = DynamicDowncast<dom::Document>(root); document != nullptr)
+    if (auto *document = DynamicDowncast<boo::Document>(root); document != nullptr)
     {
       if (document->CustomElementRegistry() == nullptr)
       {
         document->SetCustomElementRegistry(ShareRef(*this));
       }
     }
-    else if (auto *shadowRoot = DynamicDowncast<dom::ShadowRoot>(root); shadowRoot != nullptr)
+    else if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(root); shadowRoot != nullptr)
     {
       if (shadowRoot->CustomElementRegistry() == nullptr)
       {
@@ -323,7 +322,7 @@ namespace krys::boo::html
     //        document set.
     // 4c. If inclusiveDescendant's custom element registry is not this, then continue.
     // 4d. Try to upgrade inclusiveDescendant.
-    auto updateRegistryIfNeeded = [&](dom::Element &element)
+    auto updateRegistryIfNeeded = [&](Element &element)
     {
       if (element.CustomElementRegistry() == nullptr)
       {
@@ -335,17 +334,17 @@ namespace krys::boo::html
       }
     };
 
-    if (auto *element = DynamicDowncast<dom::Element>(root))
+    if (auto *element = DynamicDowncast<Element>(root))
     {
       updateRegistryIfNeeded(*element);
       UpgradeElementIfPossible(*this, *element);
     }
 
-    if (auto *containerRoot = DynamicDowncast<dom::ContainerNode>(root))
+    if (auto *containerRoot = DynamicDowncast<ContainerNode>(root))
     {
       for (auto &descendant : dom::DescendantRange(*containerRoot))
       {
-        if (auto *element = DynamicDowncast<dom::Element>(descendant))
+        if (auto *element = DynamicDowncast<Element>(descendant))
         {
           updateRegistryIfNeeded(*element);
           UpgradeElementIfPossible(*this, *element);
@@ -356,7 +355,7 @@ namespace krys::boo::html
     return {};
   }
 
-  void CustomElementRegistry::AppendToScopedDocumentSet(dom::Document &document) noexcept
+  void CustomElementRegistry::AppendToScopedDocumentSet(boo::Document &document) noexcept
   {
     krys_debug_assert(IsScoped());
     for (auto &member : _scopedDocumentSet)
@@ -366,7 +365,7 @@ namespace krys::boo::html
         return;
       }
     }
-    std::erase_if(_scopedDocumentSet, [](const WeakPtr<dom::Document> &member) { return !member; });
+    std::erase_if(_scopedDocumentSet, [](const WeakPtr<boo::Document> &member) { return !member; });
     _scopedDocumentSet.push_back(CreateWeakPtr(&document));
   }
 }

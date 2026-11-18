@@ -26,7 +26,7 @@
 #include "Krystal.Core/Types/Span.hpp"
 #include <cstring>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief Reads the segments back out of an `SVGPathByteStream`.
   class SVGPathByteStreamSource final : public SVGPathSource

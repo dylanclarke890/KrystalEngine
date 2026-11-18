@@ -28,9 +28,9 @@ namespace krys::boo::style::tests
 
   namespace
   {
-    Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
+    Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       parser->PumpTokenizer();
@@ -42,16 +42,16 @@ namespace krys::boo::style::tests
       html::EventLoop::Current().RunUntilIdle();
     }
 
-    Ref<html::HTMLStyleElement> CreateStyle(dom::Document &document, dom::DOMString &&text) noexcept
+    Ref<HTMLStyleElement> CreateStyle(boo::Document &document, DOMString &&text) noexcept
     {
-      auto style = CreateRef<html::HTMLStyleElement>(document);
+      auto style = CreateRef<HTMLStyleElement>(document);
       REQUIRE_FALSE(style->TextContent(krys::move(text)).HasException());
       return style;
     }
 
-    KRYS_NODISCARD css::CSSOMStringAtom Atom(utf8_stringview string)
+    KRYS_NODISCARD CSSOMStringAtom Atom(utf8_stringview string)
     {
-      return css::CSSOMStringAtom(string);
+      return CSSOMStringAtom(string);
     }
 
     KRYS_NODISCARD bool HasClassRule(const Resolver &resolver, utf8_stringview className)
@@ -108,7 +108,7 @@ namespace krys::boo::style::tests
 
     SECTION("Sheets inserted before others reset the author style")
     {
-      RefPtr<dom::Element> head = document->DocumentElement()->FirstElementChild();
+      RefPtr<Element> head = document->DocumentElement()->FirstElementChild();
       REQUIRE_FALSE(
         head->InsertBefore(*CreateStyle(*document, u8".e {}"), head->FirstChild()).HasException());
       scope.FlushPendingUpdate();
@@ -121,7 +121,7 @@ namespace krys::boo::style::tests
 
     SECTION("Removing a sheet reconstructs the resolver")
     {
-      RefPtr<dom::Element> head = document->DocumentElement()->FirstElementChild();
+      RefPtr<Element> head = document->DocumentElement()->FirstElementChild();
       REQUIRE_FALSE(head->RemoveChild(*head->FirstChild()).HasException());
       scope.FlushPendingUpdate();
       REQUIRE_FALSE(scope.ResolverIfExists());
@@ -190,7 +190,7 @@ namespace krys::boo::style::tests
   {
     RunTasks();
     auto document = Parse(u8"<!DOCTYPE html><div id=one></div><div id=two></div><div id=three></div>");
-    auto attach = [&](utf8_stringview id, dom::DOMString &&text)
+    auto attach = [&](utf8_stringview id, DOMString &&text)
     {
       auto host = document->GetElementById(id);
       auto shadow = host->AttachShadow({}).ReleaseValue();
@@ -241,7 +241,7 @@ namespace krys::boo::style::tests
                           u8"html { overflow: hidden }</style><style>@media screen { .screen {} }</style>");
     auto frame = LocalFrame::Create();
     frame->CreateView({800, 600});
-    frame->SetDocument(ShareRefPtr<dom::Document>(document.get()));
+    frame->SetDocument(ShareRefPtr<boo::Document>(document.get()));
     (void)document->UpdateLayout();
     auto &scope = document->StyleScope();
     scope.FlushPendingUpdate();
@@ -443,7 +443,7 @@ namespace krys::boo::style::tests
     auto a = document->GetElementById(u8"a");
     auto b = document->GetElementById(u8"b");
     css::calc::RandomCachingKey key {
-      Variant<css::calc::Random::SharingOptions::Auto, css::CSSOMStringAtom> {css::CSSOMStringAtom(u8"x")}};
+      Variant<css::calc::Random::SharingOptions::Auto, CSSOMStringAtom> {CSSOMStringAtom(u8"x")}};
 
     CHECK_FALSE(a->HasRandomCachingKeyMap());
     auto value = a->LookupCSSRandomBaseValue({}, key);

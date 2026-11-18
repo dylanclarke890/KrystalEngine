@@ -23,7 +23,7 @@
 
 #include "Krystal.Core/Numeric.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief An SVG path command. The values are stored in path byte streams, and match the `SVGPathSeg`
   /// `PATHSEG_*` constants.

@@ -28,7 +28,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGDecoratedProperty.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyTraits.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief A decorated property kept as a `TProperty` and converted to and from `TDecoration` by a cast.
   template <typename TDecoration, typename TProperty>
@@ -57,7 +57,7 @@ namespace krys::boo::svg
       return static_cast<TDecoration>(_value);
     }
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept override
     {
       return SVGPropertyTraits<TProperty>::ToString(_value);
     }

@@ -43,7 +43,7 @@ namespace krys::boo::html
     {
     }
 
-    KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
+    KRYS_NODISCARD DOMStringView FormControlType() const noexcept final
     {
       return input_type_names::Week;
     }
@@ -56,14 +56,12 @@ namespace krys::boo::html
     KRYS_NODISCARD StepRange CreateStepRange(AnyStepHandling anyStepHandling) const noexcept final;
 
   private:
-    KRYS_NODISCARD Maybe<DateComponents>
-      ParseToDateComponents(dom::DOMStringView source) const noexcept final;
+    KRYS_NODISCARD Maybe<DateComponents> ParseToDateComponents(DOMStringView source) const noexcept final;
 
     KRYS_NODISCARD Maybe<DateComponents> SetMillisecondToDateComponents(double value) const noexcept final;
 
     // DateTimeEditElementEditControlOwner functions:
-    KRYS_NODISCARD dom::DOMString
-      FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept final;
+    KRYS_NODISCARD DOMString FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept final;
 
     // BaseDateAndTimeInputType functions:
     void SetupLayoutParameters(DateTimeEditElement::LayoutParameters &layoutParameters,

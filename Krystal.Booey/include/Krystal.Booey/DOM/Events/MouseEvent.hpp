@@ -35,14 +35,13 @@
 
 namespace krys::boo
 {
+  class Element;
+  class Node;
   class PlatformMouseEvent;
 }
 
 namespace krys::boo::dom
 {
-  class Element;
-  class Node;
-
   /// @brief Whether @p eventType is `click` or `auxclick`.
   KRYS_NODISCARD bool IsAnyClick(const DOMStringAtom &eventType) noexcept;
 

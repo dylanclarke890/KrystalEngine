@@ -22,25 +22,22 @@
 
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLElement;
   class HTMLMeterElement;
-}
 
-namespace krys::boo
-{
   /// @brief The renderer of a `<meter>` the theme draws itself.
   class RenderMeter final : public RenderBlockFlow
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderMeter);
 
   public:
-    RenderMeter(html::HTMLElement &, RenderStyle &&) noexcept;
+    RenderMeter(HTMLElement &, RenderStyle &&) noexcept;
 
     ~RenderMeter() noexcept override;
 
-    KRYS_NODISCARD html::HTMLMeterElement *MeterElement() const noexcept;
+    KRYS_NODISCARD HTMLMeterElement *MeterElement() const noexcept;
 
     void UpdateFromElement() noexcept override;
 

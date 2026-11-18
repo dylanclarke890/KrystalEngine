@@ -49,7 +49,7 @@ namespace krys::boo::css::tests
                    "[CSS][TypedOM][css-typed-om:inline-stylepropertymap-objects]")
   {
     style::tests::ResolverFixture fixture {utf8_string(StyleMapMarkup)};
-    auto &element = Downcast<dom::StyledElement>(fixture.ById(u8"a"));
+    auto &element = Downcast<StyledElement>(fixture.ById(u8"a"));
     auto &map = element.AttributeStyleMap();
     CHECK(&map == &element.AttributeStyleMap());
 
@@ -74,7 +74,7 @@ namespace krys::boo::css::tests
     {
       REQUIRE_FALSE(map.Set(u8"height", Strings({u8"20px"})).HasException());
       CHECK(Get(map, u8"height") == "20px");
-      CHECK(ToNarrow(element.GetAttribute(u8"style").value_or(dom::DOMString())).contains("height: 20px"));
+      CHECK(ToNarrow(element.GetAttribute(u8"style").value_or(DOMString())).contains("height: 20px"));
 
       REQUIRE_FALSE(map.Set(u8"height", Values(CSSNumericFactory::Px(30))).HasException());
       CHECK(Get(map, u8"height") == "30px");

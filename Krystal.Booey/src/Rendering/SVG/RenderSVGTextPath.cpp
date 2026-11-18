@@ -25,7 +25,7 @@
 
 namespace krys::boo
 {
-  RenderSVGTextPath::RenderSVGTextPath(svg::SVGTextPathElement &element, RenderStyle &&style) noexcept
+  RenderSVGTextPath::RenderSVGTextPath(SVGTextPathElement &element, RenderStyle &&style) noexcept
       : RenderSVGInline(Type::SVGTextPath, element, krys::move(style))
   {
     krys_debug_assert(IsRenderSVGTextPath());
@@ -33,17 +33,17 @@ namespace krys::boo
 
   RenderSVGTextPath::~RenderSVGTextPath() noexcept = default;
 
-  svg::SVGTextPathElement &RenderSVGTextPath::TextPathElement() const noexcept
+  SVGTextPathElement &RenderSVGTextPath::TextPathElement() const noexcept
   {
-    return Downcast<svg::SVGTextPathElement>(RenderSVGInline::GraphicsElement());
+    return Downcast<SVGTextPathElement>(RenderSVGInline::GraphicsElement());
   }
 
-  svg::SVGGeometryElement *RenderSVGTextPath::TargetElement() const noexcept
+  SVGGeometryElement *RenderSVGTextPath::TargetElement() const noexcept
   {
-    auto target = svg::SVGURIReference::TargetElementFromIRIString(
-      TextPathElement().Href(), TextPathElement().TreeScopeForSVGReferences());
-    auto *svgElement = DynamicDowncast<svg::SVGElement>(target.Element.get());
-    return svgElement ? DynamicDowncast<svg::SVGGeometryElement>(*svgElement) : nullptr;
+    auto target = SVGURIReference::TargetElementFromIRIString(TextPathElement().Href(),
+                                                              TextPathElement().TreeScopeForSVGReferences());
+    auto *svgElement = DynamicDowncast<SVGElement>(target.Element.get());
+    return svgElement ? DynamicDowncast<SVGGeometryElement>(*svgElement) : nullptr;
   }
 
   Path RenderSVGTextPath::LayoutPath() const noexcept
@@ -65,7 +65,7 @@ namespace krys::boo
     return path;
   }
 
-  const svg::SVGLengthValue &RenderSVGTextPath::StartOffset() const noexcept
+  const SVGLengthValue &RenderSVGTextPath::StartOffset() const noexcept
   {
     return TextPathElement().StartOffset();
   }
