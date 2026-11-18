@@ -78,7 +78,6 @@ target_sources(Krystal.Core
       include/Krystal.Core/Enum.hpp
       include/Krystal.Core/Hash.hpp
       include/Krystal.Core/Macros.hpp
-      include/Krystal.Core/MagicEnum.hpp
       include/Krystal.Core/Numeric.hpp
       include/Krystal.Core/RefCounted.hpp
       include/Krystal.Core/TriState.hpp

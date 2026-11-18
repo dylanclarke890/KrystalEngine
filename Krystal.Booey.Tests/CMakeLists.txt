@@ -1,7 +1,8 @@
 ﻿add_executable(Krystal.Booey.Tests)
 
-# Third-party - RapidJSON (WPT URL test data)
+# Third-party - RapidJSON (WPT URL test data), magic_enum (tokenizer test state names)
 find_package(RapidJSON CONFIG REQUIRED)
+find_package(magic_enum CONFIG REQUIRED)
 
 target_link_libraries(Krystal.Booey.Tests
   PRIVATE
@@ -9,6 +10,7 @@ target_link_libraries(Krystal.Booey.Tests
 		Krystal.Booey
    	Catch2::Catch2WithMain
 		rapidjson
+		magic_enum::magic_enum
 )
 
 set_target_properties(Krystal.Booey.Tests

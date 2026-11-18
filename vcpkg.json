@@ -10,6 +10,7 @@
     "icu",
     "lcms",
     "libjpeg-turbo",
+    "magic-enum",
     {
       "name": "libxml2",
       "default-features": false
