@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/CSS/CSSOM/CSSPositionTryRule.hpp"
-#include "Krystal.Booey/CSS/Descriptors/CSSPositionTryDescriptors.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSPositionTryDescriptors.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"

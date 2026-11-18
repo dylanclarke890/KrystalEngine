@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Descriptors/PropertySetCSSDescriptors.hpp"
+#include "Krystal.Booey/CSS/CSSOM/PropertySetCSSDescriptors.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 

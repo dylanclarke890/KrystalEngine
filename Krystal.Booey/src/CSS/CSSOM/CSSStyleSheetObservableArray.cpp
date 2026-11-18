@@ -23,7 +23,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheetObservableArray.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheetObservableArray.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"

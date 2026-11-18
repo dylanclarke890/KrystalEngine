@@ -18,12 +18,12 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "Krystal.Booey/CSS/Media/MediaList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/MediaList.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSImportRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSMediaRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"

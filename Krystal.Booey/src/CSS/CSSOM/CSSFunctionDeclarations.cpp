@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/CSS/CSSOM/CSSFunctionDeclarations.hpp"
-#include "Krystal.Booey/CSS/Descriptors/CSSFunctionDescriptors.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSFunctionDescriptors.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/FunctionRule.hpp"

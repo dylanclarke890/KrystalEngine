@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Media/MediaList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/MediaList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/StyleSheet.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheet.hpp"
 #include "Krystal.Booey/CSS/Types/MediaListOrDOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"

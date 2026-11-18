@@ -1,5 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"

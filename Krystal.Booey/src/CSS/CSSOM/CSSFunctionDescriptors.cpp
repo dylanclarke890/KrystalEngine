@@ -23,7 +23,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/CSS/Descriptors/CSSFunctionDescriptors.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSFunctionDescriptors.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSFunctionDeclarations.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 

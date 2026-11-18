@@ -18,7 +18,7 @@
  */
 
 #include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
-#include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"

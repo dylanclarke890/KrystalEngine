@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheetList.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheet.hpp"
+#include "Krystal.Booey/CSS/CSSOM/StyleSheetList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/StyleSheet.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"

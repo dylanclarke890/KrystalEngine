@@ -22,7 +22,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/CSS/Descriptors/CSSFontFaceDescriptors.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSFontFaceDescriptors.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSFontFaceRule.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 

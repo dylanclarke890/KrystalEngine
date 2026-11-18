@@ -21,7 +21,7 @@
  */
 
 #include "Krystal.Booey/CSS/CSSOM/CSSMediaRule.hpp"
-#include "Krystal.Booey/CSS/Media/MediaList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/MediaList.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/CSSOM/CSSFontFaceRule.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/CSSOMTestUtils.hpp"
-#include "Krystal.Booey/CSS/Descriptors/CSSFontFaceDescriptors.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSFontFaceDescriptors.hpp"
 
 namespace krys::boo::css::tests
 {

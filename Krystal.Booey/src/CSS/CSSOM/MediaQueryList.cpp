@@ -17,8 +17,8 @@
  *  Boston, MA 02110-1301, USA.
  */
 
-#include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
-#include "Krystal.Booey/CSS/Media/MediaQueryListEvent.hpp"
+#include "Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/MediaQueryListEvent.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"

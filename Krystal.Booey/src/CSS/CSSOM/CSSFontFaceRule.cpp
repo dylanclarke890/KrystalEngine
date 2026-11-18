@@ -20,7 +20,7 @@
  */
 
 #include "Krystal.Booey/CSS/CSSOM/CSSFontFaceRule.hpp"
-#include "Krystal.Booey/CSS/Descriptors/CSSFontFaceDescriptors.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSFontFaceDescriptors.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"

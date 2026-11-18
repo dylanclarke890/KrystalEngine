@@ -27,9 +27,9 @@
 
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/CSSOM/StyleSheet.hpp"
 #include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"

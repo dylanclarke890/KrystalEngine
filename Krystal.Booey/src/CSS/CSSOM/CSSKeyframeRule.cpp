@@ -26,9 +26,9 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSKeyframeRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSKeyframesRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Core/Assert.hpp"
 
 namespace krys::boo

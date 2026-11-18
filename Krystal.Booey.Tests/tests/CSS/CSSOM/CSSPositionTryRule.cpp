@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/CSSOM/CSSPositionTryRule.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/CSSOMTestUtils.hpp"
-#include "Krystal.Booey/CSS/Descriptors/CSSPositionTryDescriptors.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSPositionTryDescriptors.hpp"
 
 namespace krys::boo::css::tests
 {
