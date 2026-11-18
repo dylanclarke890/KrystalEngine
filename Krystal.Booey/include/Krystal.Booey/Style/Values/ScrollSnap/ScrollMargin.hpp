@@ -41,10 +41,6 @@ namespace krys::boo
     {
       using Fixed = Length<>;
 
-      ScrollMarginEdge(Fixed &&fixed) noexcept : _value(fixed)
-      {
-      }
-
       ScrollMarginEdge(const Fixed &fixed) noexcept : _value(fixed)
       {
       }

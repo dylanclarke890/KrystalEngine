@@ -64,6 +64,7 @@ namespace krys
     }
 
     template <typename X>
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): taken over by exchange.
     KRYS_ALWAYS_INLINE constexpr CompactPtr(CompactPtr<X> &&other) noexcept : _ptr(other._ptr)
     {
       static_assert(ConvertibleTo<X *, T *>);
@@ -222,6 +223,7 @@ namespace krys
     constexpr static bool Is32Bit = storage_type::Is32Bit;
 
     template <typename U>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): a pointer, copied either way.
     KRYS_ALWAYS_INLINE constexpr static T *exchange(storage_type &ptr, U &&newValue) noexcept
     {
       return ptr.exchange(newValue);
@@ -286,6 +288,7 @@ namespace krys
 
     template <typename TOther>
     requires(CompactablePtr<TOther> && ConvertibleTo<TOther, TPtr>)
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): taken over by exchange.
     CompactPtrTuple(CompactPtrTuple<TOther, TData> &&other) noexcept : _data {std::exchange(other._data, {})}
     {
     }

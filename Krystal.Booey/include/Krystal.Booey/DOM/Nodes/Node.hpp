@@ -312,6 +312,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-node-nodevalue
+    // NOLINTNEXTLINE(performance-unnecessary-value-param): a sink in the overrides.
     virtual ExceptionOr<void> NodeValue(DOMString value) noexcept
     {
       (void)value; // still want it in the signature
@@ -330,6 +331,7 @@ namespace krys::boo::dom
     /// interfaces.
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
     /// @see https://dom.spec.whatwg.org/#set-text-content
+    // NOLINTNEXTLINE(performance-unnecessary-value-param): a sink in the overrides.
     virtual ExceptionOr<void> TextContent(DOMString value) noexcept
     {
       (void)value; // still want it in the signature

@@ -31,8 +31,8 @@ namespace krys::boo::html
   {
   }
 
-  bool HTMLPlugInElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                             dom::DOMStringAtom namespaceURI) const noexcept
+  bool HTMLPlugInElement::HasPresentationalHintsForAttribute(
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == u8"width" || localName == u8"height" || localName == u8"vspace"
@@ -43,8 +43,8 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLPlugInElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                                 dom::DOMStringAtom namespaceURI,
+  void HTMLPlugInElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                                 const dom::DOMStringAtom &namespaceURI,
                                                                  dom::DOMStringView value,
                                                                  css::MutableStyleProperties &style) noexcept
   {

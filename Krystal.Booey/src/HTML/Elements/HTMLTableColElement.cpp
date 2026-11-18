@@ -127,8 +127,8 @@ namespace krys::boo::html
 
 #pragma region Presentational hints
 
-  bool HTMLTableColElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                               dom::DOMStringAtom namespaceURI) const noexcept
+  bool HTMLTableColElement::HasPresentationalHintsForAttribute(
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && (localName == u8"width"))
     {
@@ -138,7 +138,7 @@ namespace krys::boo::html
   }
 
   void HTMLTableColElement::CollectPresentationalHintsForAttribute(
-    dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI, dom::DOMStringView value,
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI, dom::DOMStringView value,
     css::MutableStyleProperties &style) noexcept
   {
     using namespace presentational_hints;

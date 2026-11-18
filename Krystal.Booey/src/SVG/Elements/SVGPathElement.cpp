@@ -169,8 +169,8 @@ namespace krys::boo::svg
     return _pathSegList->CurrentPath();
   }
 
-  void SVGPathElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                              dom::DOMStringAtom namespaceURI,
+  void SVGPathElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                              const dom::DOMStringAtom &namespaceURI,
                                                               dom::DOMStringView value,
                                                               css::MutableStyleProperties &style) noexcept
   {

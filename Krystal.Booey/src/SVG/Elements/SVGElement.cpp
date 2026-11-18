@@ -1249,8 +1249,8 @@ namespace krys::boo::svg
     return it == map.end() ? css::PropertyId::Invalid : it->second;
   }
 
-  bool SVGElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                      dom::DOMStringAtom namespaceURI) const noexcept
+  bool SVGElement::HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                      const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (CssPropertyIdForSVGAttributeName(localName, namespaceURI) != css::PropertyId::Invalid)
     {
@@ -1259,8 +1259,8 @@ namespace krys::boo::svg
     return StyledElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void SVGElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                          dom::DOMStringAtom namespaceURI,
+  void SVGElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                          const dom::DOMStringAtom &namespaceURI,
                                                           dom::DOMStringView value,
                                                           css::MutableStyleProperties &style) noexcept
   {

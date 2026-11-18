@@ -289,8 +289,8 @@ namespace krys::boo::svg
     KRYS_NODISCARD static bool IsSupportedAttribute(const dom::QualifiedName &) noexcept;
 
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                         dom::DOMStringAtom namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
 
     KRYS_NODISCARD dom::QualifiedName ConstructAttributeName() const noexcept;
 

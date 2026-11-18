@@ -502,7 +502,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD static uint64
-      EncodedOutOfLineComponents(Ref<OutOfLineComponents> &&outOfLineComponents) noexcept
+      EncodedOutOfLineComponents(Ref<OutOfLineComponents> outOfLineComponents) noexcept
     {
       return std::bit_cast<uint64>(outOfLineComponents.release());
     }

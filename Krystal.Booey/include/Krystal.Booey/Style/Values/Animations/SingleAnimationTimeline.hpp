@@ -42,7 +42,7 @@ namespace krys::boo::style
     {
     }
 
-    SingleAnimationTimeline(css::CustomIdentifier &&identifier) noexcept : _value {identifier}
+    SingleAnimationTimeline(css::CustomIdentifier identifier) noexcept : _value {krys::move(identifier)}
     {
     }
 

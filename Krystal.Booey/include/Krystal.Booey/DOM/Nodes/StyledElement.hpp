@@ -130,7 +130,8 @@ namespace krys::boo::dom
 
   protected:
     /// @brief Adds the declarations the attribute maps to, if it's a presentational attribute of the element.
-    virtual void CollectPresentationalHintsForAttribute(DOMStringAtom localName, DOMStringAtom namespaceURI,
+    virtual void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                        const DOMStringAtom &namespaceURI,
                                                         DOMStringView value,
                                                         css::MutableStyleProperties &style) noexcept
     {
@@ -147,8 +148,9 @@ namespace krys::boo::dom
     }
 
     /// @brief Whether a change to the attribute changes the element's presentational hints.
-    KRYS_NODISCARD virtual bool HasPresentationalHintsForAttribute(DOMStringAtom localName,
-                                                                   DOMStringAtom namespaceURI) const noexcept
+    KRYS_NODISCARD virtual bool
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept
     {
       (void)localName;
       (void)namespaceURI;

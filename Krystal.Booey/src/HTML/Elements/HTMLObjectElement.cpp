@@ -260,8 +260,8 @@ namespace krys::boo::html
 
 #pragma region Presentational hints
 
-  bool HTMLObjectElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                             dom::DOMStringAtom namespaceURI) const noexcept
+  bool HTMLObjectElement::HasPresentationalHintsForAttribute(
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && (localName == u8"border"))
     {
@@ -270,8 +270,8 @@ namespace krys::boo::html
     return HTMLPlugInElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLObjectElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                                 dom::DOMStringAtom namespaceURI,
+  void HTMLObjectElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                                 const dom::DOMStringAtom &namespaceURI,
                                                                  dom::DOMStringView value,
                                                                  css::MutableStyleProperties &style) noexcept
   {

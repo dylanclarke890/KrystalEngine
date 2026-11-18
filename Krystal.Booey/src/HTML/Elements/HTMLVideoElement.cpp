@@ -96,8 +96,8 @@ namespace krys::boo::html
 
 #pragma region Presentational hints
 
-  bool HTMLVideoElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                            dom::DOMStringAtom namespaceURI) const noexcept
+  bool HTMLVideoElement::HasPresentationalHintsForAttribute(
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && (localName == u8"width" || localName == u8"height"))
     {
@@ -106,8 +106,8 @@ namespace krys::boo::html
     return HTMLMediaElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLVideoElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                                dom::DOMStringAtom namespaceURI,
+  void HTMLVideoElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                                const dom::DOMStringAtom &namespaceURI,
                                                                 dom::DOMStringView value,
                                                                 css::MutableStyleProperties &style) noexcept
   {

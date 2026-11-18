@@ -80,7 +80,8 @@ namespace krys::boo::svg
 
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
 
-    void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                const dom::DOMStringAtom &namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept final;
 

@@ -52,8 +52,9 @@ namespace krys::boo::html::tests
       _log.push_back(u8"adopted " + Id());
     }
 
-    void AttributeChangedCallback(dom::DOMStringAtom localName, dom::DOMStringAtom oldValue,
-                                  dom::DOMStringAtom newValue, dom::DOMStringAtom) noexcept override
+    void AttributeChangedCallback(const dom::DOMStringAtom &localName, const dom::DOMStringAtom &oldValue,
+                                  const dom::DOMStringAtom &newValue,
+                                  const dom::DOMStringAtom &) noexcept override
     {
       _log.push_back(u8"attribute " + localName.ToString() + u8" " + Text(oldValue) + u8" " + Text(newValue));
     }

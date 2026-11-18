@@ -228,8 +228,9 @@ namespace krys::boo::svg
     }
   }
 
-  bool SVGSMILElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                          dom::DOMStringAtom namespaceURI) const noexcept
+  bool
+    SVGSMILElement::HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                       const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     // https://svgwg.org/svg2-draft/styling.html#PresentationAttributes
     if (localName == SVGNames::FillAttr().LocalName() && namespaceURI == null)

@@ -204,8 +204,8 @@ namespace krys::boo::html
 
 #pragma region Presentational hints
 
-  bool HTMLIFrameElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                             dom::DOMStringAtom namespaceURI) const noexcept
+  bool HTMLIFrameElement::HasPresentationalHintsForAttribute(
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == u8"width" || localName == u8"height" || localName == u8"frameborder"))
@@ -215,8 +215,8 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLIFrameElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                                 dom::DOMStringAtom namespaceURI,
+  void HTMLIFrameElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                                 const dom::DOMStringAtom &namespaceURI,
                                                                  dom::DOMStringView value,
                                                                  css::MutableStyleProperties &style) noexcept
   {

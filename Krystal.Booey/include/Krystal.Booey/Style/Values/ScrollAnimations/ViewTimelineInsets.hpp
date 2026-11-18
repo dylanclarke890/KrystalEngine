@@ -56,7 +56,7 @@ namespace krys::boo
       {
       }
 
-      ViewTimelineInsetItem(Length &&length) noexcept : Value {length, length}
+      ViewTimelineInsetItem(Length length) noexcept : Value {length, krys::move(length)}
       {
       }
 

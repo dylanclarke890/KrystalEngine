@@ -675,8 +675,8 @@ namespace krys::boo::html
 
 #pragma region Presentational hints
 
-  bool HTMLTextAreaElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                               dom::DOMStringAtom namespaceURI) const noexcept
+  bool HTMLTextAreaElement::HasPresentationalHintsForAttribute(
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null)
     {
@@ -694,7 +694,7 @@ namespace krys::boo::html
   }
 
   void HTMLTextAreaElement::CollectPresentationalHintsForAttribute(
-    dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI, dom::DOMStringView value,
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI, dom::DOMStringView value,
     css::MutableStyleProperties &style) noexcept
   {
     using namespace presentational_hints;

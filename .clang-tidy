@@ -145,6 +145,8 @@ CheckOptions:
   cppcoreguidelines-rvalue-reference-param-not-moved.MoveFunction: '::krys::move'
   # Moving a member out counts as consuming the parameter (std::get(variant &&) and the like).
   cppcoreguidelines-rvalue-reference-param-not-moved.AllowPartialMove: true
+  # An unnamed && parameter only selects an overload (a tag, or catching temporaries), so there's nothing to move.
+  cppcoreguidelines-rvalue-reference-param-not-moved.IgnoreUnnamedParams: true
   clang-analyzer-cplusplus.Move:WarnOn: All
 
   # Iterators are cheap to copy and conventionally by value. The check's move fixes insert std::move:

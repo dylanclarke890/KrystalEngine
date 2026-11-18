@@ -76,7 +76,7 @@ namespace krys::boo
       }
 
       template <typename F>
-      decltype(auto) SwitchOn(F &&functor) const noexcept
+      decltype(auto) SwitchOn(F functor) const noexcept
       {
         if (*this == CornerShapeValue(css::keywords::Round {}))
         {

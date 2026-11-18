@@ -77,6 +77,7 @@ namespace krys
       RefPtr<T>::ref_policy::SubRef(old);
     }
 
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): taken over by release().
     constexpr void SetPtr(RefPtr<T> &&ptr) noexcept
     {
       auto *old = _data.Ptr();
@@ -84,6 +85,7 @@ namespace krys
       RefPtr<T>::ref_policy::SubRef(old);
     }
 
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): taken over by release().
     constexpr void SetPtr(Ref<T> &&ptr) noexcept
     {
       auto *old = _data.Ptr();

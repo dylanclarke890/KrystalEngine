@@ -215,10 +215,10 @@ namespace krys::boo::css::mq
   };
 
   template <typename TraverseFunction>
-  void TraverseFeatures(const Condition &, TraverseFunction &&) noexcept;
+  void TraverseFeatures(const Condition &, TraverseFunction) noexcept;
 
   template <typename TraverseFunction>
-  void TraverseFeatures(const QueryInParens &queryInParens, TraverseFunction &&function) noexcept
+  void TraverseFeatures(const QueryInParens &queryInParens, TraverseFunction function) noexcept
   {
     krys::SwitchOn(
       queryInParens, [&](const Condition &condition) { TraverseFeatures(condition, function); },
@@ -252,7 +252,7 @@ namespace krys::boo::css::mq
   }
 
   template <typename TraverseFunction>
-  void TraverseFeatures(const Condition &condition, TraverseFunction &&function) noexcept
+  void TraverseFeatures(const Condition &condition, TraverseFunction function) noexcept
   {
     for (auto &queryInParens : condition.Queries)
     {

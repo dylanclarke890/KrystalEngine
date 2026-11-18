@@ -651,8 +651,8 @@ namespace krys::boo::html
     }
   }
 
-  bool HTMLTableElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                            dom::DOMStringAtom namespaceURI) const noexcept
+  bool HTMLTableElement::HasPresentationalHintsForAttribute(
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == u8"width" || localName == u8"height" || localName == u8"bgcolor"
@@ -665,8 +665,8 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLTableElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                                dom::DOMStringAtom namespaceURI,
+  void HTMLTableElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                                const dom::DOMStringAtom &namespaceURI,
                                                                 dom::DOMStringView value,
                                                                 css::MutableStyleProperties &style) noexcept
   {

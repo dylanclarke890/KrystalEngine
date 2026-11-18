@@ -599,7 +599,8 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    static SpaceSeparatedList map(SizedRange &&range, Mapper &&mapper)
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
+    static SpaceSeparatedList map(SizedRange &&range, Mapper mapper)
     {
       Container result;
       if constexpr (std::ranges::sized_range<SizedRange>)
@@ -624,7 +625,7 @@ namespace krys::boo::css
     }
 
     template <typename Mapper>
-    auto map(Mapper &&mapper) const
+    auto map(Mapper mapper) const
     {
       using Result = std::remove_cvref_t<std::invoke_result_t<Mapper, const T &>>;
       SmallList<Result, inlineCapacity> result;
@@ -712,7 +713,8 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    static CommaSeparatedList map(SizedRange &&range, Mapper &&mapper)
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
+    static CommaSeparatedList map(SizedRange &&range, Mapper mapper)
     {
       Container result;
       if constexpr (std::ranges::sized_range<SizedRange>)
@@ -737,7 +739,7 @@ namespace krys::boo::css
     }
 
     template <typename Mapper>
-    auto map(Mapper &&mapper) const
+    auto map(Mapper mapper) const
     {
       using Result = std::remove_cvref_t<std::invoke_result_t<Mapper, const T &>>;
       SmallList<Result, inlineCapacity> result;
@@ -788,7 +790,8 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    static SpaceSeparatedListHashSet map(SizedRange &&range, Mapper &&mapper)
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
+    static SpaceSeparatedListHashSet map(SizedRange &&range, Mapper mapper)
     {
       Container result;
       for (auto &&item : range)
@@ -858,7 +861,8 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    static CommaSeparatedListHashSet map(SizedRange &&range, Mapper &&mapper)
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
+    static CommaSeparatedListHashSet map(SizedRange &&range, Mapper mapper)
     {
       Container result;
       for (auto &&item : range)
@@ -930,13 +934,13 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    static SpaceSeparatedFixedList map(SizedRange &&range, KRYS_NOESCAPE Mapper &&mapper)
+    static SpaceSeparatedFixedList map(SizedRange &&range, KRYS_NOESCAPE Mapper mapper)
     {
       return Container::map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
     }
 
     template <typename SizedRange, typename Mapper>
-    static SpaceSeparatedFixedList Map(SizedRange &&range, Mapper &&mapper)
+    static SpaceSeparatedFixedList Map(SizedRange &&range, Mapper mapper)
     {
       return map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
     }
@@ -1047,13 +1051,13 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    static CommaSeparatedFixedList map(SizedRange &&range, KRYS_NOESCAPE Mapper &&mapper)
+    static CommaSeparatedFixedList map(SizedRange &&range, KRYS_NOESCAPE Mapper mapper)
     {
       return Container::map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
     }
 
     template <typename SizedRange, typename Mapper>
-    static CommaSeparatedFixedList Map(SizedRange &&range, Mapper &&mapper)
+    static CommaSeparatedFixedList Map(SizedRange &&range, Mapper mapper)
     {
       return map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
     }
@@ -1164,7 +1168,7 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    static SpaceSeparatedRefCountedFixedVector map(SizedRange &&range, KRYS_NOESCAPE Mapper &&mapper)
+    static SpaceSeparatedRefCountedFixedVector map(SizedRange &&range, KRYS_NOESCAPE Mapper mapper)
     {
       return Container::map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
     }
@@ -1259,7 +1263,7 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    static CommaSeparatedRefCountedFixedVector map(SizedRange &&range, KRYS_NOESCAPE Mapper &&mapper)
+    static CommaSeparatedRefCountedFixedVector map(SizedRange &&range, KRYS_NOESCAPE Mapper mapper)
     {
       return Container::map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
     }
@@ -2489,7 +2493,8 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    KRYS_NODISCARD static SpaceSeparatedEnumSet Map(SizedRange &&range, Mapper &&mapper) noexcept
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
+    KRYS_NODISCARD static SpaceSeparatedEnumSet Map(SizedRange &&range, Mapper mapper) noexcept
     {
       Container result;
       for (auto &&Value : range)
@@ -2604,7 +2609,8 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    KRYS_NODISCARD constexpr static CommaSeparatedEnumSet Map(SizedRange &&range, Mapper &&mapper) noexcept
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
+    KRYS_NODISCARD constexpr static CommaSeparatedEnumSet Map(SizedRange &&range, Mapper mapper) noexcept
     {
       Container result;
       for (auto &&Value : range)

@@ -90,7 +90,7 @@ namespace krys::boo::svg
   }
 
   void SVGTextPositioningElement::CollectPresentationalHintsForAttribute(
-    dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI, dom::DOMStringView value,
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI, dom::DOMStringView value,
     css::MutableStyleProperties &style) noexcept
   {
     if (IsXOrYAttribute(localName, namespaceURI))
@@ -101,7 +101,7 @@ namespace krys::boo::svg
   }
 
   bool SVGTextPositioningElement::HasPresentationalHintsForAttribute(
-    dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI) const noexcept
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (IsXOrYAttribute(localName, namespaceURI))
     {

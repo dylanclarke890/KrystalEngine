@@ -58,8 +58,8 @@ namespace krys::boo::style
     {
     }
 
-    BackgroundSize(BackgroundSizeLength &&value) noexcept
-        : _value {LengthSize {value, css::keywords::Auto {}}}
+    BackgroundSize(BackgroundSizeLength value) noexcept
+        : _value {LengthSize {krys::move(value), css::keywords::Auto {}}}
     {
     }
 

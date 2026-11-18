@@ -70,7 +70,7 @@ namespace krys::boo::style
     Type ChangeType;
     InvalidationRuleSetVector InvalidationRuleSets;
 
-    void Append(DynamicMediaQueryEvaluationChanges &&other) noexcept
+    void Append(DynamicMediaQueryEvaluationChanges other) noexcept
     {
       ChangeType = std::max(ChangeType, other.ChangeType);
       if (ChangeType == Type::ResetStyle)

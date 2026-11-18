@@ -230,8 +230,8 @@ namespace krys::boo::html
 
   void CustomElementInterface::InvokeAttributeChangedCallback(dom::Element &element,
                                                               const dom::QualifiedName &attributeName,
-                                                              dom::DOMStringAtom oldValue,
-                                                              dom::DOMStringAtom newValue) noexcept
+                                                              const dom::DOMStringAtom &oldValue,
+                                                              const dom::DOMStringAtom &newValue) noexcept
   {
     InvokeCallback(element,
                    [&](CustomElement &customElement)

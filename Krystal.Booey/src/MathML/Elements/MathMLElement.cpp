@@ -159,8 +159,9 @@ namespace krys::boo::mathml
     };
   }
 
-  bool MathMLElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                         dom::DOMStringAtom namespaceURI) const noexcept
+  bool
+    MathMLElement::HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                      const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == MathMLNames::DirAttr().LocalName()
@@ -175,8 +176,8 @@ namespace krys::boo::mathml
     return StyledElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void MathMLElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                             dom::DOMStringAtom namespaceURI,
+  void MathMLElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                             const dom::DOMStringAtom &namespaceURI,
                                                              dom::DOMStringView value,
                                                              css::MutableStyleProperties &style) noexcept
   {

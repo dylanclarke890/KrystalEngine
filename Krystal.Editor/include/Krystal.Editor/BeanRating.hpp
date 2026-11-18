@@ -85,8 +85,9 @@ namespace krys
       }
     }
 
-    void AttributeChangedCallback(boo::dom::DOMStringAtom localName, boo::dom::DOMStringAtom,
-                                  boo::dom::DOMStringAtom newValue, boo::dom::DOMStringAtom) noexcept override
+    void AttributeChangedCallback(const boo::dom::DOMStringAtom &localName, const boo::dom::DOMStringAtom &,
+                                  const boo::dom::DOMStringAtom &newValue,
+                                  const boo::dom::DOMStringAtom &) noexcept override
     {
       if (localName == u8"value")
       {

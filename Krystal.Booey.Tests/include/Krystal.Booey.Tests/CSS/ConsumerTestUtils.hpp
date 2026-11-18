@@ -30,7 +30,7 @@ namespace krys::boo::css::tests
   /// @return The serialised value, "<null>" if the consumer failed, or "<partial>" if it succeeded without
   /// consuming the whole input.
   template <typename F>
-  KRYS_NODISCARD std::string ConsumeToText(utf8_stringview css, F &&consumer, const ParserContext &context,
+  KRYS_NODISCARD std::string ConsumeToText(utf8_stringview css, F consumer, const ParserContext &context,
                                            PropertyId property = PropertyId::Invalid)
   {
     PropertyParserState state {.Context = context, .CurrentProperty = property};
@@ -52,7 +52,7 @@ namespace krys::boo::css::tests
 
   /// @brief As above, with a standard-mode context.
   template <typename F>
-  KRYS_NODISCARD std::string ConsumeToText(utf8_stringview css, F &&consumer)
+  KRYS_NODISCARD std::string ConsumeToText(utf8_stringview css, F consumer)
   {
     ParserContext context {ParserMode::HTMLStandard};
     return ConsumeToText(css, consumer, context);

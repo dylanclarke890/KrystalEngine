@@ -193,8 +193,9 @@ namespace krys::boo::html
     }
   }
 
-  bool HTMLFontElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                           dom::DOMStringAtom namespaceURI) const noexcept
+  bool
+    HTMLFontElement::HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                        const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && (localName == u8"size" || localName == u8"color" || localName == u8"face"))
     {
@@ -203,8 +204,8 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLFontElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                               dom::DOMStringAtom namespaceURI,
+  void HTMLFontElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                               const dom::DOMStringAtom &namespaceURI,
                                                                dom::DOMStringView value,
                                                                css::MutableStyleProperties &style) noexcept
   {

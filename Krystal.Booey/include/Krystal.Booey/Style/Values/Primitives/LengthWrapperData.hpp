@@ -243,6 +243,7 @@ namespace krys::boo::style
     }
   }
 
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): the move itself, by exchange.
   inline void LengthWrapperData::Initialise(LengthWrapperData &&other) noexcept
   {
     _opaqueType = other._opaqueType;

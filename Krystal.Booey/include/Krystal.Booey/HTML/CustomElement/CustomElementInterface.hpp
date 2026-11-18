@@ -118,7 +118,8 @@ namespace krys::boo::html
                                dom::Document &newDocument) noexcept;
 
     void InvokeAttributeChangedCallback(dom::Element &element, const dom::QualifiedName &attributeName,
-                                        dom::DOMStringAtom oldValue, dom::DOMStringAtom newValue) noexcept;
+                                        const dom::DOMStringAtom &oldValue,
+                                        const dom::DOMStringAtom &newValue) noexcept;
 
     void InvokeFormAssociatedCallback(dom::Element &element, HTMLFormElement *form) noexcept;
 

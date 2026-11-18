@@ -2360,8 +2360,8 @@ namespace krys::boo::html
 
 #pragma region Presentational hints
 
-  bool HTMLInputElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                            dom::DOMStringAtom namespaceURI) const noexcept
+  bool HTMLInputElement::HasPresentationalHintsForAttribute(
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null)
     {
@@ -2378,8 +2378,8 @@ namespace krys::boo::html
     return HTMLTextFormControlElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLInputElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                                dom::DOMStringAtom namespaceURI,
+  void HTMLInputElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                                const dom::DOMStringAtom &namespaceURI,
                                                                 dom::DOMStringView value,
                                                                 css::MutableStyleProperties &style) noexcept
   {

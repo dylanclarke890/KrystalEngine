@@ -1734,8 +1734,8 @@ namespace krys::boo::html
     }
   }
 
-  bool HTMLElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                       dom::DOMStringAtom namespaceURI) const noexcept
+  bool HTMLElement::HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                       const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null)
     {
@@ -1752,8 +1752,8 @@ namespace krys::boo::html
     return StyledElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                           dom::DOMStringAtom namespaceURI,
+  void HTMLElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                           const dom::DOMStringAtom &namespaceURI,
                                                            dom::DOMStringView value,
                                                            css::MutableStyleProperties &style) noexcept
   {

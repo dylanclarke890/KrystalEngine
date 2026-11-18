@@ -124,7 +124,7 @@ namespace krys::boo::dom
     {
       if (Aborted())
       {
-        throw Reason();
+        throw krys::Any(Reason());
       }
     }
 

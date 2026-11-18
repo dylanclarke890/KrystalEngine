@@ -440,8 +440,8 @@ namespace krys::boo::html
     Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
   }
 
-  bool HTMLMarqueeElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                              dom::DOMStringAtom namespaceURI) const noexcept
+  bool HTMLMarqueeElement::HasPresentationalHintsForAttribute(
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == u8"width" || localName == u8"height" || localName == u8"bgcolor"
@@ -452,8 +452,8 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLMarqueeElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                                  dom::DOMStringAtom namespaceURI,
+  void HTMLMarqueeElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                                  const dom::DOMStringAtom &namespaceURI,
                                                                   dom::DOMStringView value,
                                                                   css::MutableStyleProperties &style) noexcept
   {
