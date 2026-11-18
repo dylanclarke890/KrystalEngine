@@ -274,7 +274,7 @@ namespace krys::boo
     uint32 _originatingTouchPointTargetKey {0};
     bool _touchPressed {false};
     /// @brief The pointers of the touches that ended, forgotten at the next touch event.
-    List<PointerID> _endedTouchPointerIds;
+    List<PointerId> _endedTouchPointerIds;
 
   public:
     explicit EventHandler(LocalFrame &frame) noexcept;

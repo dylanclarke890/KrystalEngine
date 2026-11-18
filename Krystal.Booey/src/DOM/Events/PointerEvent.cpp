@@ -43,7 +43,7 @@ namespace krys::boo
     constexpr double RadiansPerTurn = 2 * std::numbers::pi;
 
     // The touches' pointer ids follow the mouse's and the pen's: the host numbers its touches from 0.
-    constexpr PointerID TouchMinimumPointerID = PenPointerID + 1;
+    constexpr boo::PointerId TouchMinimumPointerId = PenPointerId + 1;
 
     // https://w3c.github.io/pointerevents/#dom-pointerevent-width
     // If the hardware cannot report contact geometry, a default value of 1 is used.
@@ -81,7 +81,7 @@ namespace krys::boo
     KRYS_NODISCARD List<Ref<PointerEvent>> CreateCoalescedPointerEvents(const DOMStringAtom &type,
                                                                         MouseButton button,
                                                                         const MouseEvent &mouseEvent,
-                                                                        PointerID pointerId,
+                                                                        boo::PointerId pointerId,
                                                                         const DOMString &pointerType) noexcept
     {
       if (type != event_names::PointerMove && type != event_names::PointerRawUpdate)
@@ -105,7 +105,7 @@ namespace krys::boo
     KRYS_NODISCARD List<Ref<PointerEvent>> CreatePredictedPointerEvents(const DOMStringAtom &type,
                                                                         MouseButton button,
                                                                         const MouseEvent &mouseEvent,
-                                                                        PointerID pointerId,
+                                                                        boo::PointerId pointerId,
                                                                         const DOMString &pointerType) noexcept
     {
       if (type != event_names::PointerMove)
@@ -180,7 +180,7 @@ namespace krys::boo
   }
 
   Ref<PointerEvent> PointerEvent::CreateForPointerCapture(DOMStringAtom type, LocalDOMWindow *view,
-                                                          PointerID pointerId, bool isPrimary,
+                                                          boo::PointerId pointerId, bool isPrimary,
                                                           const DOMString &pointerType) noexcept
   {
     PointerEventInit initializer;
@@ -196,7 +196,7 @@ namespace krys::boo
   }
 
   RefPtr<PointerEvent> PointerEvent::Create(MouseButton button, const MouseEvent &mouseEvent,
-                                            PointerID pointerId, const DOMString &pointerType) noexcept
+                                            boo::PointerId pointerId, const DOMString &pointerType) noexcept
   {
     auto type = TypeFromMouseEventType(mouseEvent.Type());
     if (type.View().empty())
@@ -208,7 +208,7 @@ namespace krys::boo
   }
 
   Ref<PointerEvent> PointerEvent::Create(const DOMStringAtom &type, MouseButton button,
-                                         const MouseEvent &mouseEvent, PointerID pointerId,
+                                         const MouseEvent &mouseEvent, boo::PointerId pointerId,
                                          const DOMString &pointerType) noexcept
   {
     return Create(type, button, mouseEvent, pointerId, pointerType, TypeCanBubble(type),
@@ -216,7 +216,7 @@ namespace krys::boo
   }
 
   Ref<PointerEvent> PointerEvent::Create(const DOMStringAtom &type, MouseButton button,
-                                         const MouseEvent &mouseEvent, PointerID pointerId,
+                                         const MouseEvent &mouseEvent, boo::PointerId pointerId,
                                          const DOMString &pointerType, bool canBubble,
                                          bool isCancelable) noexcept
   {
@@ -224,7 +224,7 @@ namespace krys::boo
                                       isCancelable, TypeIsComposed(type)));
   }
 
-  Ref<PointerEvent> PointerEvent::Create(DOMStringAtom type, LocalDOMWindow *view, PointerID pointerId,
+  Ref<PointerEvent> PointerEvent::Create(DOMStringAtom type, LocalDOMWindow *view, boo::PointerId pointerId,
                                          const DOMString &pointerType, IsPrimary isPrimary) noexcept
   {
     Ref<PointerEvent> event =
@@ -280,9 +280,9 @@ namespace krys::boo
     return PointerEventType(point.GetState());
   }
 
-  PointerID PointerEvent::PointerIdForTouch(const PlatformTouchPoint &point) noexcept
+  boo::PointerId PointerEvent::PointerIdForTouch(const PlatformTouchPoint &point) noexcept
   {
-    return TouchMinimumPointerID + point.Id();
+    return TouchMinimumPointerId + point.Id();
   }
 
   // Calculated in accordance with
@@ -350,7 +350,7 @@ namespace krys::boo
   }
 
   PointerEvent::PointerEvent(const DOMStringAtom &type, const PointerEventInit &initializer) noexcept
-      : MouseEvent(type, initializer), _pointerId(static_cast<PointerID>(initializer.PointerId)),
+      : MouseEvent(type, initializer), _pointerId(static_cast<boo::PointerId>(initializer.PointerId)),
         _width(initializer.Width), _height(initializer.Height), _pressure(initializer.Pressure),
         _tangentialPressure(initializer.TangentialPressure), _tiltX(initializer.TiltX),
         _tiltY(initializer.TiltY), _twist(initializer.Twist), _altitudeAngle(initializer.AltitudeAngle),
@@ -379,7 +379,7 @@ namespace krys::boo
   }
 
   PointerEvent::PointerEvent(const DOMStringAtom &type, MouseButton button, const MouseEvent &mouseEvent,
-                             PointerID pointerId, const DOMString &pointerType, bool canBubble,
+                             boo::PointerId pointerId, const DOMString &pointerType, bool canBubble,
                              bool isCancelable, bool isComposed) noexcept
       : MouseEvent(type, TrustedInit(canBubble, isCancelable, isComposed, mouseEvent.Detail()),
                    mouseEvent.FrameView(), mouseEvent.ScreenLocation(), mouseEvent.WindowLocation(),
@@ -415,7 +415,7 @@ namespace krys::boo
     }
   }
 
-  PointerEvent::PointerEvent(const DOMStringAtom &type, PointerID pointerId, DOMString pointerType,
+  PointerEvent::PointerEvent(const DOMStringAtom &type, boo::PointerId pointerId, DOMString pointerType,
                              IsPrimary isPrimary) noexcept
       : MouseEvent(type, TrustedInit(TypeCanBubble(type), TypeIsCancelable(type), TypeIsComposed(type)),
                    nullptr, {}, {}, 0, 0, {}, ButtonForType(type), ButtonsForType(type), nullptr, 0,

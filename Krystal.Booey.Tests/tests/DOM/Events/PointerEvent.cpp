@@ -129,20 +129,20 @@ namespace krys::boo::dom::tests
       CHECK(PointerEvent::TypeFromMouseEventType(u8"contextmenu") == u8"contextmenu");
       CHECK(PointerEvent::TypeFromMouseEventType(u8"dblclick") == null);
       CHECK_FALSE(PointerEvent::Create(MouseButton::Left, *mouseEvent(u8"dblclick", MouseButton::Left, 0),
-                                       MousePointerID, MousePointerEventType()));
+                                       MousePointerId, MousePointerEventType()));
     }
 
     SECTION("a press")
     {
       auto source = mouseEvent(u8"mousedown", MouseButton::Left, 1);
-      auto event = PointerEvent::Create(MouseButton::Left, *source, MousePointerID, MousePointerEventType());
+      auto event = PointerEvent::Create(MouseButton::Left, *source, MousePointerId, MousePointerEventType());
       REQUIRE(event);
       CHECK(event->Type() == u8"pointerdown");
       CHECK(event->IsTrusted());
       CHECK(event->Bubbles());
       CHECK(event->Cancelable());
       CHECK(event->Composed());
-      CHECK(event->PointerId() == MousePointerID);
+      CHECK(event->PointerId() == MousePointerId);
       CHECK(event->PointerType() == u8"mouse");
       CHECK(event->GetIsPrimary());
       CHECK(event->Button() == 0);
@@ -159,7 +159,7 @@ namespace krys::boo::dom::tests
     SECTION("enter and leave don't bubble, and a move without buttons has no pressure")
     {
       auto enter = PointerEvent::Create(MouseButton::PointerHasNotChanged,
-                                        *mouseEvent(u8"mouseenter", MouseButton::None, 0), MousePointerID,
+                                        *mouseEvent(u8"mouseenter", MouseButton::None, 0), MousePointerId,
                                         MousePointerEventType());
       REQUIRE(enter);
       CHECK_FALSE(enter->Bubbles());
@@ -173,7 +173,7 @@ namespace krys::boo::dom::tests
     SECTION("clicks have whole coordinates")
     {
       auto click = PointerEvent::Create(MouseButton::Left, *mouseEvent(u8"click", MouseButton::Left, 0),
-                                        MousePointerID, MousePointerEventType());
+                                        MousePointerId, MousePointerEventType());
       REQUIRE(click);
       CHECK(click->ClientX() == 10);
       CHECK(click->ClientY() == 20);
@@ -198,7 +198,7 @@ namespace krys::boo::dom::tests
                                   PlatformEvent::Type::MouseMoved, 0, {}, MonotonicTime::Now());
       auto coalesced = MouseEvent::Create(u8"mousemove", view, platform, {}, {}, 0, nullptr);
       auto source = MouseEvent::Create(u8"mousemove", view, platform, {coalesced}, {}, 0, nullptr);
-      auto event = PointerEvent::Create(MouseButton::PointerHasNotChanged, *source, MousePointerID,
+      auto event = PointerEvent::Create(MouseButton::PointerHasNotChanged, *source, MousePointerId,
                                         MousePointerEventType());
       REQUIRE(event);
       auto coalescedEvents = event->GetCoalescedEvents();

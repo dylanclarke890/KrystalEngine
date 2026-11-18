@@ -305,11 +305,11 @@ namespace krys::boo::tests
     {
       auto &b = fixture.ById(u8"b");
       (void)fixture.Handler().HandleMousePressEvent(LockFixture::Mouse(Type::MousePressed, 50, 75, {}, 1));
-      REQUIRE_FALSE(b.SetPointerCapture(MousePointerID).HasException());
+      REQUIRE_FALSE(b.SetPointerCapture(MousePointerId).HasException());
       (void)fixture.Handler().MouseMoved(LockFixture::Mouse(Type::MouseMoved, 50, 25, {}, 1));
       (void)fixture.Take();
       CHECK(fixture.TestPage->GetPointerCaptureController().PointerCaptureElement(fixture.Document.get(),
-                                                                                  MousePointerID)
+                                                                                  MousePointerId)
             == &b);
 
       // As if releasePointerCapture() were called, but the locked pointer's events don't process the release,
@@ -317,9 +317,9 @@ namespace krys::boo::tests
       fixture.Activate();
       CHECK(fixture.Lock(a) == "ok");
       CHECK(fixture.Take() == Strings {"lostpointercapture:b", "pointerlockchange:document"});
-      CHECK_FALSE(b.HasPointerCapture(MousePointerID));
+      CHECK_FALSE(b.HasPointerCapture(MousePointerId));
       CHECK_FALSE(fixture.TestPage->GetPointerCaptureController().PointerCaptureElement(
-        fixture.Document.get(), MousePointerID));
+        fixture.Document.get(), MousePointerId));
     }
 
     SECTION("a host that doesn't lock the pointer")

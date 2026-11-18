@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
 #include "Krystal.Booey/Page/MouseEventTypes.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformEvent.hpp"
-#include "Krystal.Booey/Platform/Events/PointerID.hpp"
+#include "Krystal.Booey/Platform/Events/PointerId.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
@@ -48,7 +48,7 @@ namespace krys::boo
     DoublePoint _unadjustedMovementDelta;
     double _force {0};
     PenOrientation _penOrientation;
-    PointerID _pointerId {MousePointerID};
+    boo::PointerId _pointerId {MousePointerId};
     DOMString _pointerType {dom::MousePointerEventType()};
     int32 _clickCount {0};
     uint16 _buttons {0};
@@ -69,7 +69,7 @@ namespace krys::boo
                        MonotonicTime::duration timestamp, uint16 buttons = 0,
                        const DoublePoint &movementDelta = {}, double force = 0,
                        SyntheticClickType syntheticClickType = SyntheticClickType::NoTap,
-                       PointerID pointerId = MousePointerID,
+                       boo::PointerId pointerId = MousePointerId,
                        DOMString pointerType = dom::MousePointerEventType()) noexcept
         : PlatformEvent(type, modifiers, timestamp), _button(button), _syntheticClickType(syntheticClickType),
           _position(position), _globalPosition(globalPosition), _movementDelta(movementDelta), _force(force),
@@ -142,7 +142,7 @@ namespace krys::boo
       return _syntheticClickType;
     }
 
-    KRYS_NODISCARD PointerID PointerId() const noexcept
+    KRYS_NODISCARD boo::PointerId PointerId() const noexcept
     {
       return _pointerId;
     }

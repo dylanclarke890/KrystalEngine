@@ -2636,7 +2636,7 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/Events/PlatformTouchEvent.hpp
   include/Krystal.Booey/Platform/Events/PlatformTouchPoint.hpp
   include/Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp
-  include/Krystal.Booey/Platform/Events/PointerID.hpp
+  include/Krystal.Booey/Platform/Events/PointerId.hpp
   include/Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp
   include/Krystal.Booey/Platform/GraphicsClient.hpp
   include/Krystal.Booey/Platform/ImageDecoders/BMPImageDecoder.hpp

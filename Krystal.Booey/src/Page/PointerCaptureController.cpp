@@ -45,7 +45,7 @@ namespace krys::boo
     Reset();
   }
 
-  auto PointerCaptureController::CapturingDataFor(PointerID pointerId) const noexcept -> RefPtr<CapturingData>
+  auto PointerCaptureController::CapturingDataFor(PointerId pointerId) const noexcept -> RefPtr<CapturingData>
   {
     auto it = _activePointerIdsToCapturingData.find(pointerId);
     if (it == _activePointerIdsToCapturingData.end())
@@ -56,7 +56,7 @@ namespace krys::boo
   }
 
   Element *PointerCaptureController::PointerCaptureElement(Document *document,
-                                                           PointerID pointerId) const noexcept
+                                                           PointerId pointerId) const noexcept
   {
     if (auto capturingData = CapturingDataFor(pointerId))
     {
@@ -69,7 +69,7 @@ namespace krys::boo
   }
 
   ExceptionOr<void> PointerCaptureController::SetPointerCapture(Element *capturingTarget,
-                                                                PointerID pointerId) noexcept
+                                                                PointerId pointerId) noexcept
   {
     // https://w3c.github.io/pointerevents/#setting-pointer-capture
 
@@ -115,7 +115,7 @@ namespace krys::boo
   }
 
   ExceptionOr<void> PointerCaptureController::ReleasePointerCapture(Element *capturingTarget,
-                                                                    PointerID pointerId) noexcept
+                                                                    PointerId pointerId) noexcept
   {
     // https://w3c.github.io/pointerevents/#releasing-pointer-capture
 
@@ -150,7 +150,7 @@ namespace krys::boo
   }
 
   bool PointerCaptureController::HasPointerCapture(Element *capturingTarget,
-                                                   PointerID pointerId) const noexcept
+                                                   PointerId pointerId) const noexcept
   {
     // https://w3c.github.io/pointerevents/#dom-element-haspointercapture
 
@@ -176,13 +176,13 @@ namespace krys::boo
     // captured.
     // (The locked pointer's events don't run the process pending pointer capture steps, so they run now, to
     // fire lostpointercapture and clear the pointer capture target override.)
-    List<PointerID> capturedPointers;
+    List<PointerId> capturedPointers;
     for (auto &[pointerId, capturingData] : _activePointerIdsToCapturingData)
     {
       if (capturingData->PendingTargetOverride || capturingData->TargetOverride)
       {
         capturingData->PendingTargetOverride = nullptr;
-        capturedPointers.push_back(static_cast<PointerID>(pointerId));
+        capturedPointers.push_back(static_cast<PointerId>(pointerId));
       }
     }
     for (auto pointerId : capturedPointers)
@@ -206,7 +206,7 @@ namespace krys::boo
         // When the pointer capture target override is no longer connected, the pending pointer capture target
         // override and pointer capture target override nodes SHOULD be cleared and also a PointerEvent named
         // lostpointercapture corresponding to the captured pointer SHOULD be fired at the document.
-        auto id = static_cast<PointerID>(pointerId);
+        auto id = static_cast<PointerId>(pointerId);
         auto pointerType = capturingData->PointerType;
         (void)ReleasePointerCapture(&element, id);
         // FIXME: Spec doesn't specify which task source to use.
@@ -224,7 +224,7 @@ namespace krys::boo
     _activePointerIdsToCapturingData.clear();
     _haveAnyCapturingElement = false;
 
-    _activePointerIdsToCapturingData.emplace(MousePointerID,
+    _activePointerIdsToCapturingData.emplace(MousePointerId,
                                              CapturingData::Create(dom::MousePointerEventType()));
   }
 
@@ -234,26 +234,26 @@ namespace krys::boo
                                                    { return entry.second->HasAnyElement(); });
   }
 
-  void PointerCaptureController::TouchWithIdentifierWasRemoved(PointerID pointerId) noexcept
+  void PointerCaptureController::TouchWithIdentifierWasRemoved(PointerId pointerId) noexcept
   {
     _activePointerIdsToCapturingData.erase(pointerId);
     UpdateHaveAnyCapturingElement();
   }
 
-  bool PointerCaptureController::HasCancelledPointerEventForIdentifier(PointerID pointerId) const noexcept
+  bool PointerCaptureController::HasCancelledPointerEventForIdentifier(PointerId pointerId) const noexcept
   {
     auto capturingData = CapturingDataFor(pointerId);
     return capturingData && capturingData->CurrentState == CapturingData::State::Cancelled;
   }
 
   bool PointerCaptureController::PreventsCompatibilityMouseEventsForIdentifier(
-    PointerID pointerId) const noexcept
+    PointerId pointerId) const noexcept
   {
     auto capturingData = CapturingDataFor(pointerId);
     return capturingData && capturingData->PreventsCompatibilityMouseEvents;
   }
 
-  void PointerCaptureController::ClearUnmatchedMouseDown(PointerID pointerId) noexcept
+  void PointerCaptureController::ClearUnmatchedMouseDown(PointerId pointerId) noexcept
   {
     if (auto capturingData = CapturingDataFor(pointerId))
     {
@@ -262,7 +262,7 @@ namespace krys::boo
   }
 
   RefPtr<PointerEvent>
-    PointerCaptureController::PointerEventForMouseEvent(const MouseEvent &mouseEvent, PointerID pointerId,
+    PointerCaptureController::PointerEventForMouseEvent(const MouseEvent &mouseEvent, PointerId pointerId,
                                                         const DOMString &pointerType) noexcept
   {
     if (HasActiveTouch())
@@ -330,7 +330,7 @@ namespace krys::boo
   }
 
   MouseButton PointerCaptureController::ButtonForMouseEvent(const MouseEvent &mouseEvent,
-                                                            PointerID pointerId) const noexcept
+                                                            PointerId pointerId) const noexcept
   {
     auto capturingData = CapturingDataFor(pointerId);
     bool pointerIsPressed = capturingData ? capturingData->PointerIsPressed : false;
@@ -350,7 +350,7 @@ namespace krys::boo
   }
 
   void PointerCaptureController::DispatchPointerRawUpdateForMouseEvent(const MouseEvent &mouseEvent,
-                                                                       PointerID pointerId,
+                                                                       PointerId pointerId,
                                                                        const DOMString &pointerType,
                                                                        Element &target) noexcept
   {
@@ -366,7 +366,7 @@ namespace krys::boo
   }
 
   bool PointerCaptureController::SkipPointerMoveForMouseEvent(const MouseEvent &mouseEvent,
-                                                              PointerID pointerId,
+                                                              PointerId pointerId,
                                                               const DOMString &pointerType,
                                                               Element &target) noexcept
   {
@@ -708,7 +708,7 @@ namespace krys::boo
     element->NodeDocument().HandleLightDismiss(event, *element);
   }
 
-  auto PointerCaptureController::EnsureCapturingData(PointerID pointerId,
+  auto PointerCaptureController::EnsureCapturingData(PointerId pointerId,
                                                      const DOMString &pointerType) noexcept
     -> Ref<CapturingData>
   {
@@ -764,7 +764,7 @@ namespace krys::boo
     }
   }
 
-  void PointerCaptureController::CancelPointer(PointerID pointerId, const IntPoint &documentPoint,
+  void PointerCaptureController::CancelPointer(PointerId pointerId, const IntPoint &documentPoint,
                                                PointerEvent *existingCancelEvent) noexcept
   {
     // https://w3c.github.io/pointerevents/#the-pointercancel-event
@@ -856,7 +856,7 @@ namespace krys::boo
     ProcessPendingPointerCapture(pointerId);
   }
 
-  void PointerCaptureController::ProcessPendingPointerCapture(PointerID pointerId) noexcept
+  void PointerCaptureController::ProcessPendingPointerCapture(PointerId pointerId) noexcept
   {
     auto capturingData = CapturingDataFor(pointerId);
     if (!capturingData)

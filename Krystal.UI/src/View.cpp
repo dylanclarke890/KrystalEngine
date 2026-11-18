@@ -1487,7 +1487,7 @@ namespace krys::ui
         _penButton = boo::MouseButton::None;
         _penButtons = 0;
         handler.CancelMousePress();
-        _page->GetPointerCaptureController().CancelPointer(boo::PenPointerID,
+        _page->GetPointerCaptureController().CancelPointer(boo::PenPointerId,
                                                            _frame->View()->WindowToContents(intPoint));
         break;
       }
@@ -2788,7 +2788,7 @@ namespace krys::ui
     double force = input.Pressure ? *input.Pressure : (input.InContact ? 0.5 : 0);
     boo::PlatformMouseEvent event(point, ToScreen(point), button, type, clickCount,
                                   input::ToBooey(input.Modifiers), boo::html::EventLoop::Current().Now(),
-                                  _penButtons, {}, force, boo::SyntheticClickType::NoTap, boo::PenPointerID,
+                                  _penButtons, {}, force, boo::SyntheticClickType::NoTap, boo::PenPointerId,
                                   boo::dom::PenPointerEventType());
     event.SetPenOrientation({static_cast<int32>(std::round(input.TiltX)),
                              static_cast<int32>(std::round(input.TiltY)),

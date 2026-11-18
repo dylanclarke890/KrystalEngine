@@ -1079,7 +1079,7 @@ namespace krys::boo
       if (auto *page = element.NodeDocument().GetPage())
       {
         auto &pointerCaptureController = page->GetPointerCaptureController();
-        if (platformEvent.PointerId() != MousePointerID && !dom::IsAnyClick(mouseEvent)
+        if (platformEvent.PointerId() != MousePointerId && !dom::IsAnyClick(mouseEvent)
             && pointerCaptureController.PreventsCompatibilityMouseEventsForIdentifier(
               platformEvent.PointerId()))
         {
@@ -2787,7 +2787,7 @@ namespace krys::boo
   {
     if (auto *page = NodeDocument().GetPage())
     {
-      return page->GetPointerCaptureController().SetPointerCapture(this, static_cast<PointerID>(pointerId));
+      return page->GetPointerCaptureController().SetPointerCapture(this, static_cast<PointerId>(pointerId));
     }
     return {};
   }
@@ -2797,7 +2797,7 @@ namespace krys::boo
     if (auto *page = NodeDocument().GetPage())
     {
       return page->GetPointerCaptureController().ReleasePointerCapture(this,
-                                                                       static_cast<PointerID>(pointerId));
+                                                                       static_cast<PointerId>(pointerId));
     }
     return {};
   }
@@ -2806,7 +2806,7 @@ namespace krys::boo
   {
     if (auto *page = NodeDocument().GetPage())
     {
-      return page->GetPointerCaptureController().HasPointerCapture(this, static_cast<PointerID>(pointerId));
+      return page->GetPointerCaptureController().HasPointerCapture(this, static_cast<PointerId>(pointerId));
     }
     return false;
   }
