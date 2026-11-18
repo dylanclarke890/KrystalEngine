@@ -126,7 +126,7 @@ namespace krys::boo
     auto resource = RequestResource(CachedResource::Type::ImageResource, krys::move(request), imageLoading);
     if (!resource)
     {
-      return Unexpected(resource.error());
+      return Unexpected<ResourceError>(resource.error());
     }
     return CachedResourceHandle<CachedImage>(Downcast<CachedImage>(resource->get()));
   }
@@ -147,7 +147,7 @@ namespace krys::boo
     auto resource = RequestResource(CachedResource::Type::CSSStyleSheet, krys::move(request));
     if (!resource)
     {
-      return Unexpected(resource.error());
+      return Unexpected<ResourceError>(resource.error());
     }
     return CachedResourceHandle<CachedCSSStyleSheet>(Downcast<CachedCSSStyleSheet>(resource->get()));
   }
@@ -158,7 +158,7 @@ namespace krys::boo
     auto resource = RequestResource(CachedResource::Type::FontResource, krys::move(request));
     if (!resource)
     {
-      return Unexpected(resource.error());
+      return Unexpected<ResourceError>(resource.error());
     }
     return CachedResourceHandle<CachedFont>(Downcast<CachedFont>(resource->get()));
   }
@@ -169,7 +169,7 @@ namespace krys::boo
     auto resource = RequestResource(CachedResource::Type::SVGDocumentResource, krys::move(request));
     if (!resource)
     {
-      return Unexpected(resource.error());
+      return Unexpected<ResourceError>(resource.error());
     }
     return CachedResourceHandle<CachedSVGDocument>(Downcast<CachedSVGDocument>(resource->get()));
   }
@@ -180,7 +180,7 @@ namespace krys::boo
     auto resource = RequestResource(CachedResource::Type::Icon, krys::move(request));
     if (!resource)
     {
-      return Unexpected(resource.error());
+      return Unexpected<ResourceError>(resource.error());
     }
     return CachedResourceHandle<CachedRawResource>(Downcast<CachedRawResource>(resource->get()));
   }
@@ -192,13 +192,14 @@ namespace krys::boo
     url::URL url = request.GetResourceRequest().URL();
     if (!Frame())
     {
-      return Unexpected(
+      return Unexpected<ResourceError>(
         ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"Invalid loader state"));
     }
 
     if (!url.IsValid())
     {
-      return Unexpected(ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"URL is invalid"));
+      return Unexpected<ResourceError>(
+        ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"URL is invalid"));
     }
 
     // SVG Images have unique security rules that prevent all subresource requests except for data urls.
@@ -207,9 +208,9 @@ namespace krys::boo
       if (auto *page = Frame()->GetPage();
           page && page->GetChromeClient().IsSVGImageChromeClient() && !url.ProtocolIsData())
       {
-        return Unexpected(ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url,
-                                        u8"Not allowed to request resource",
-                                        ResourceError::Type::AccessControl));
+        return Unexpected<ResourceError>(ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url,
+                                                       u8"Not allowed to request resource",
+                                                       ResourceError::Type::AccessControl));
       }
     }
 
@@ -254,9 +255,9 @@ namespace krys::boo
         // Synchronous cancellations are likely due to access control.
         if (resourceError.IsNull() || resourceError.IsCancellation())
         {
-          return Unexpected(ResourceError({}, 0, url, {}, ResourceError::Type::AccessControl));
+          return Unexpected<ResourceError>(ResourceError({}, 0, url, {}, ResourceError::Type::AccessControl));
         }
-        return Unexpected(resourceError);
+        return Unexpected<ResourceError>(resourceError);
       }
     }
 

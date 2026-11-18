@@ -87,7 +87,7 @@ namespace krys::boo::tests
       auto found = Resources.find(key);
       if (found == Resources.end())
       {
-        completionHandler(Unexpected(ResourceError(u8"Test", 404, url, u8"Not found")));
+        completionHandler(Unexpected<ResourceError>(ResourceError(u8"Test", 404, url, u8"Not found")));
         return;
       }
       auto mimeType = MimeTypes.find(key);

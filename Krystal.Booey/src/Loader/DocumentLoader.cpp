@@ -236,8 +236,8 @@ namespace krys::boo
       auto decoded = data_url_decoder::Decode(url);
       if (!decoded)
       {
-        finish(
-          Unexpected(ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"Invalid data URL")));
+        finish(Unexpected<ResourceError>(
+          ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"Invalid data URL")));
         return;
       }
       auto size = static_cast<int64>(decoded->Data.size());
@@ -250,8 +250,8 @@ namespace krys::boo
     auto *loaderStrategy = PlatformStrategies::Singleton().GetLoaderStrategy();
     if (!loaderStrategy)
     {
-      finish(
-        Unexpected(ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"No loader strategy")));
+      finish(Unexpected<ResourceError>(
+        ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"No loader strategy")));
       return;
     }
 

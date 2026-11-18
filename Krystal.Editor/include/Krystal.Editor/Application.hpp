@@ -38,7 +38,7 @@ namespace krys
     }
     catch (const std::exception &e)
     {
-      return Unexpected("Exception during application creation: " + string(e.what()));
+      return Unexpected<string>("Exception during application creation: " + string(e.what()));
     }
   }
 

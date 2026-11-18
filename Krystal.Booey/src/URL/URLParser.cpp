@@ -2224,7 +2224,7 @@ namespace krys::boo::url
     constexpr uint64 max = std::numeric_limits<uint32>::max();
     if (!iterator.AtEnd() && *iterator == '.')
     {
-      return Unexpected(IPv4PieceParsingError::Failure);
+      return Unexpected<IPv4PieceParsingError>(IPv4PieceParsingError::Failure);
     }
     while (!iterator.AtEnd())
     {
@@ -2263,12 +2263,12 @@ namespace krys::boo::url
         case State::Decimal:
           if (!text::IsASCIIDigit(*iterator))
           {
-            return Unexpected(IPv4PieceParsingError::Failure);
+            return Unexpected<IPv4PieceParsingError>(IPv4PieceParsingError::Failure);
           }
           value = value * 10 + (*iterator - '0');
           if (value > max) KRYS_UNLIKELY
           {
-            return Unexpected(IPv4PieceParsingError::Overflow);
+            return Unexpected<IPv4PieceParsingError>(IPv4PieceParsingError::Overflow);
           }
           ++iterator;
           break;
@@ -2276,12 +2276,12 @@ namespace krys::boo::url
           krys_debug_assert(didSeeSyntaxViolation);
           if (*iterator < '0' || *iterator > '7')
           {
-            return Unexpected(IPv4PieceParsingError::Failure);
+            return Unexpected<IPv4PieceParsingError>(IPv4PieceParsingError::Failure);
           }
           value = value * 8 + (*iterator - '0');
           if (value > max) KRYS_UNLIKELY
           {
-            return Unexpected(IPv4PieceParsingError::Overflow);
+            return Unexpected<IPv4PieceParsingError>(IPv4PieceParsingError::Overflow);
           }
           ++iterator;
           break;
@@ -2289,12 +2289,12 @@ namespace krys::boo::url
           krys_debug_assert(didSeeSyntaxViolation);
           if (!text::IsASCIIHexDigit(*iterator))
           {
-            return Unexpected(IPv4PieceParsingError::Failure);
+            return Unexpected<IPv4PieceParsingError>(IPv4PieceParsingError::Failure);
           }
           value = value * 16 + text::ToASCIIHexValue(*iterator);
           if (value > max) KRYS_UNLIKELY
           {
-            return Unexpected(IPv4PieceParsingError::Overflow);
+            return Unexpected<IPv4PieceParsingError>(IPv4PieceParsingError::Overflow);
           }
           ++iterator;
           break;
@@ -2318,7 +2318,7 @@ namespace krys::boo::url
     bool didSeeSyntaxViolation = false;
     if (!iterator.AtEnd() && *iterator == '.')
     {
-      return Unexpected(IPv4ParsingError::NotIPv4);
+      return Unexpected<IPv4ParsingError>(IPv4ParsingError::NotIPv4);
     }
     while (!iterator.AtEnd())
     {
@@ -2330,7 +2330,7 @@ namespace krys::boo::url
       }
       if (items.size() >= 4)
       {
-        return Unexpected(IPv4ParsingError::NotIPv4);
+        return Unexpected<IPv4ParsingError>(IPv4ParsingError::NotIPv4);
       }
       items.push_back(ParseIPv4Piece(iterator, didSeeSyntaxViolation));
       if (!iterator.AtEnd() && *iterator == '.')
@@ -2342,26 +2342,26 @@ namespace krys::boo::url
         }
         else if (*iterator == '.')
         {
-          return Unexpected(IPv4ParsingError::NotIPv4);
+          return Unexpected<IPv4ParsingError>(IPv4ParsingError::NotIPv4);
         }
       }
     }
     if (!iterator.AtEnd() || items.empty() || items.size() > 4)
     {
-      return Unexpected(IPv4ParsingError::NotIPv4);
+      return Unexpected<IPv4ParsingError>(IPv4ParsingError::NotIPv4);
     }
     for (const auto &item : items)
     {
       if (!item.has_value() && item.error() == IPv4PieceParsingError::Failure)
       {
-        return Unexpected(IPv4ParsingError::NotIPv4);
+        return Unexpected<IPv4ParsingError>(IPv4ParsingError::NotIPv4);
       }
     }
     for (const auto &item : items)
     {
       if (!item.has_value() && item.error() == IPv4PieceParsingError::Overflow)
       {
-        return Unexpected(IPv4ParsingError::Failure);
+        return Unexpected<IPv4ParsingError>(IPv4ParsingError::Failure);
       }
     }
     if (items.size() > 1)
@@ -2370,13 +2370,13 @@ namespace krys::boo::url
       {
         if (items[i].value() > 255)
         {
-          return Unexpected(IPv4ParsingError::Failure);
+          return Unexpected<IPv4ParsingError>(IPv4ParsingError::Failure);
         }
       }
     }
     if (items[items.size() - 1].value() >= Pow256(5 - items.size()))
     {
-      return Unexpected(IPv4ParsingError::Failure);
+      return Unexpected<IPv4ParsingError>(IPv4ParsingError::Failure);
     }
 
     if (didSeeSyntaxViolation)

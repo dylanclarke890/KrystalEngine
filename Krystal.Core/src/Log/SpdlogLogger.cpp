@@ -97,12 +97,12 @@ namespace krys::log
   {
     if (settings.Name.empty())
     {
-      return Unexpected("Logger name cannot be empty.");
+      return Unexpected<string>("Logger name cannot be empty.");
     }
 
     if (settings.FilePath.empty() && !settings.OutputToConsole)
     {
-      return Unexpected("At least one sink (console or file) must be enabled.");
+      return Unexpected<string>("At least one sink (console or file) must be enabled.");
     }
 
     try
@@ -111,7 +111,7 @@ namespace krys::log
     }
     catch (const std::exception &e)
     {
-      return Unexpected(e.what());
+      return Unexpected<string>(e.what());
     }
   }
 

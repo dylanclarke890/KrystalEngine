@@ -754,18 +754,18 @@ namespace krys::boo
   {
     if (!_decoder)
     {
-      return Unexpected(DecodingStatus::Invalid);
+      return Unexpected<DecodingStatus>(DecodingStatus::Invalid);
     }
 
     if (index >= _frames.size())
     {
-      return Unexpected(DecodingStatus::Invalid);
+      return Unexpected<DecodingStatus>(DecodingStatus::Invalid);
     }
 
     // Never decode the same frame from two different threads.
     if (IsPendingDecodingAtIndex(index, subsamplingLevel, options))
     {
-      return Unexpected(DecodingStatus::Decoding);
+      return Unexpected<DecodingStatus>(DecodingStatus::Decoding);
     }
 
     if (!IsCompatibleWithOptionsAtIndex(index, subsamplingLevel, options))
@@ -777,7 +777,7 @@ namespace krys::boo
       RefPtr<NativeImage> nativeImage = NativeImage::Create(krys::move(platformImage));
       if (!nativeImage)
       {
-        return Unexpected(DecodingStatus::Invalid);
+        return Unexpected<DecodingStatus>(DecodingStatus::Invalid);
       }
 
       CacheNativeImageAtIndex(index, subsamplingLevel, decodingOptions, krys::move(nativeImage));
@@ -788,7 +788,7 @@ namespace krys::boo
       return krys::move(nativeImage);
     }
 
-    return Unexpected(DecodingStatus::Invalid);
+    return Unexpected<DecodingStatus>(DecodingStatus::Invalid);
   }
 
   DecodingStatus BitmapImageSource::RequestNativeImageAtIndex(uint32 index, SubsamplingLevel subsamplingLevel,
@@ -835,14 +835,14 @@ namespace krys::boo
   {
     if (!_decoder)
     {
-      return Unexpected(DecodingStatus::Invalid);
+      return Unexpected<DecodingStatus>(DecodingStatus::Invalid);
     }
 
     auto status =
       RequestNativeImageAtIndexIfNeeded(index, subsamplingLevel, ImageAnimatingState::No, options);
     if (status == DecodingStatus::Invalid || status == DecodingStatus::Decoding)
     {
-      return Unexpected(status);
+      return Unexpected<DecodingStatus>(status);
     }
 
     if (RefPtr<NativeImage> nativeImage = FrameAtIndex(index).GetNativeImage())
@@ -850,7 +850,7 @@ namespace krys::boo
       return krys::move(nativeImage);
     }
 
-    return Unexpected(DecodingStatus::Invalid);
+    return Unexpected<DecodingStatus>(DecodingStatus::Invalid);
   }
 
   Expected<Ref<NativeImage>, DecodingStatus>

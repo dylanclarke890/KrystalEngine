@@ -28,7 +28,7 @@ namespace krys::io
       stream.Open();
       if (!stream.IsOpen())
       {
-        return Unexpected("Failed to open stream.");
+        return Unexpected<string>("Failed to open stream.");
       }
 
       auto size = stream.Size();
@@ -39,7 +39,7 @@ namespace krys::io
 
       if (size % sizeof(T) != 0)
       {
-        return Unexpected("Stream size is not a multiple of the type size.");
+        return Unexpected<string>("Stream size is not a multiple of the type size.");
       }
 
       List<byte> buffer(size);
@@ -47,7 +47,7 @@ namespace krys::io
 
       if (bytesRead != size)
       {
-        return Unexpected("Failed to read all bytes from the stream.");
+        return Unexpected<string>("Failed to read all bytes from the stream.");
       }
 
       stream.Close();
@@ -61,7 +61,7 @@ namespace krys::io
       stream.Open();
       if (!stream.IsOpen())
       {
-        return Unexpected("Failed to open stream.");
+        return Unexpected<string>("Failed to open stream.");
       }
 
       auto size = stream.Size();
@@ -75,7 +75,7 @@ namespace krys::io
 
       if (bytesRead != size)
       {
-        return Unexpected("Failed to read all bytes from the stream.");
+        return Unexpected<string>("Failed to read all bytes from the stream.");
       }
 
       stream.Close();
