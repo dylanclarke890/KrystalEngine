@@ -29,7 +29,7 @@
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Events/PointerEventTypeNames.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/Platform/Events/PointerID.hpp"
+#include "Krystal.Booey/Platform/Events/PointerId.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include <numbers>
@@ -90,7 +90,7 @@ namespace krys::boo
       double AzimuthAngle;
     };
 
-    PointerID _pointerId {MousePointerID};
+    boo::PointerId _pointerId {MousePointerId};
     double _width {1};
     double _height {1};
     float _pressure {0};
@@ -114,7 +114,7 @@ namespace krys::boo
 
     /// @brief A trusted `gotpointercapture` or `lostpointercapture` event for @p pointerId.
     KRYS_NODISCARD static Ref<PointerEvent> CreateForPointerCapture(DOMStringAtom type, LocalDOMWindow *view,
-                                                                    PointerID pointerId, bool isPrimary,
+                                                                    boo::PointerId pointerId, bool isPrimary,
                                                                     const DOMString &pointerType) noexcept;
 
     /// @brief The pointer event type a mouse event type maps to, or null if none: `pointerdown` for
@@ -124,21 +124,21 @@ namespace krys::boo
     /// @brief The pointer event @p mouseEvent maps to, or null if it maps to none.
     /// @param button The button that changed, or `PointerHasNotChanged`.
     KRYS_NODISCARD static RefPtr<PointerEvent> Create(MouseButton button, const MouseEvent &mouseEvent,
-                                                      PointerID pointerId,
+                                                      boo::PointerId pointerId,
                                                       const DOMString &pointerType) noexcept;
 
     KRYS_NODISCARD static Ref<PointerEvent> Create(const DOMStringAtom &type, MouseButton button,
-                                                   const MouseEvent &mouseEvent, PointerID pointerId,
+                                                   const MouseEvent &mouseEvent, boo::PointerId pointerId,
                                                    const DOMString &pointerType) noexcept;
 
     KRYS_NODISCARD static Ref<PointerEvent> Create(const DOMStringAtom &type, MouseButton button,
-                                                   const MouseEvent &mouseEvent, PointerID pointerId,
+                                                   const MouseEvent &mouseEvent, boo::PointerId pointerId,
                                                    const DOMString &pointerType, bool canBubble,
                                                    bool isCancelable) noexcept;
 
     /// @brief A trusted event with no position, as `pointercancel` after a pointer is cancelled.
     KRYS_NODISCARD static Ref<PointerEvent> Create(DOMStringAtom type, LocalDOMWindow *view,
-                                                   PointerID pointerId, const DOMString &pointerType,
+                                                   boo::PointerId pointerId, const DOMString &pointerType,
                                                    IsPrimary isPrimary = IsPrimary::No) noexcept;
 
     /// @brief The trusted event for the touch at @p touchIndex in @p event: `pointerdown` for a touch
@@ -176,10 +176,10 @@ namespace krys::boo
     KRYS_NODISCARD static DOMStringAtom TypeForTouchPoint(const PlatformTouchPoint &point) noexcept;
 
     /// @brief The pointer id of @p point's touch.
-    KRYS_NODISCARD static PointerID PointerIdForTouch(const PlatformTouchPoint &point) noexcept;
+    KRYS_NODISCARD static boo::PointerId PointerIdForTouch(const PlatformTouchPoint &point) noexcept;
 
     /// @see https://w3c.github.io/pointerevents/#dom-pointerevent-pointerid
-    KRYS_NODISCARD PointerID PointerId() const noexcept
+    KRYS_NODISCARD boo::PointerId PointerId() const noexcept
     {
       return _pointerId;
     }
@@ -342,7 +342,7 @@ namespace krys::boo
     }
 
     PointerEvent(const DOMStringAtom &type, MouseButton button, const MouseEvent &mouseEvent,
-                 PointerID pointerId, const DOMString &pointerType, bool canBubble, bool isCancelable,
+                 boo::PointerId pointerId, const DOMString &pointerType, bool canBubble, bool isCancelable,
                  bool isComposed) noexcept;
 
     void ReceivedTarget() noexcept override;
@@ -379,7 +379,7 @@ namespace krys::boo
 
     KRYS_NODISCARD double AdjustedCoordinateForType(double coordinate) const noexcept;
 
-    PointerEvent(const DOMStringAtom &type, PointerID pointerId, DOMString pointerType,
+    PointerEvent(const DOMStringAtom &type, boo::PointerId pointerId, DOMString pointerType,
                  IsPrimary isPrimary) noexcept;
 
     PointerEvent(const DOMStringAtom &type, const PlatformTouchEvent &event,

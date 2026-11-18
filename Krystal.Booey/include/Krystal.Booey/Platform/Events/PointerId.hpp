@@ -30,11 +30,11 @@
 namespace krys::boo
 {
   /// @brief Identifies a pointer: the mouse, a pen or a touch.
-  using PointerID = uint32;
+  using PointerId = uint32;
 
   /// @brief The mouse's pointer.
-  constexpr static PointerID MousePointerID = 1;
+  constexpr static PointerId MousePointerId = 1;
 
   /// @brief The pen's pointer.
-  constexpr static PointerID PenPointerID = 2;
+  constexpr static PointerId PenPointerId = 2;
 }

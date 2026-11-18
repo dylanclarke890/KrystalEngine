@@ -186,13 +186,13 @@ namespace krys::boo::tests
       fixture.Press(10.5, 20.5);
       fixture.Release(10.5, 20.5);
       REQUIRE(down);
-      CHECK(down->PointerId() == MousePointerID);
+      CHECK(down->PointerId() == MousePointerId);
       CHECK(down->PointerType() == u8"mouse");
       CHECK(down->GetIsPrimary());
       CHECK(down->Pressure() == 0.5f);
       CHECK(down->ClientX() == 10.5);
       REQUIRE(click);
-      CHECK(click->PointerId() == MousePointerID);
+      CHECK(click->PointerId() == MousePointerId);
       CHECK(click->Detail() == 1);
       CHECK(click->ClientX() == 10);
     }
@@ -273,7 +273,7 @@ namespace krys::boo::tests
       fixture.On(a, u8"click", [&](Event &event) { click = ShareRefPtr(&Downcast<PointerEvent>(event)); });
       Downcast<HTMLElement>(a).Click();
       REQUIRE(click);
-      CHECK(click->PointerId() == static_cast<PointerID>(-1));
+      CHECK(click->PointerId() == static_cast<PointerId>(-1));
       CHECK(click->PointerType().empty());
       CHECK_FALSE(click->IsTrusted());
       CHECK(click->ClientX() == 0);
@@ -314,7 +314,7 @@ namespace krys::boo::tests
       fixture.Move(10, 10);
       fixture.Press(10, 10);
       (void)fixture.Take();
-      REQUIRE_FALSE(a.SetPointerCapture(MousePointerID).HasException());
+      REQUIRE_FALSE(a.SetPointerCapture(MousePointerId).HasException());
       fixture.Move(10, 70, 1);
       CHECK(fixture.Take() == Strings {"gotpointercapture!:a", "mousemove:a"});
     }
@@ -395,8 +395,8 @@ namespace krys::boo::tests
       // Capture takes effect before the next event, which goes to the capturing element wherever it is.
       fixture.Move(10, 70, 1);
       CHECK(fixture.Take() == Strings {"gotpointercapture!:a", "pointermove!:a", "mousemove:a"});
-      CHECK(fixture.Controller().PointerCaptureElement(fixture.Document.get(), MousePointerID) == &a);
-      CHECK(a.HasPointerCapture(MousePointerID));
+      CHECK(fixture.Controller().PointerCaptureElement(fixture.Document.get(), MousePointerId) == &a);
+      CHECK(a.HasPointerCapture(MousePointerId));
 
       // The release releases it implicitly, and the click goes to the capturing element.
       fixture.Release(10, 70);
@@ -405,8 +405,8 @@ namespace krys::boo::tests
       CHECK(records[0] == "pointerup!:a");
       CHECK(records[1] == "lostpointercapture!:a");
       CHECK(std::ranges::find(records, "click!:a") != records.end());
-      CHECK_FALSE(a.HasPointerCapture(MousePointerID));
-      CHECK_FALSE(fixture.Controller().PointerCaptureElement(fixture.Document.get(), MousePointerID));
+      CHECK_FALSE(a.HasPointerCapture(MousePointerId));
+      CHECK_FALSE(fixture.Controller().PointerCaptureElement(fixture.Document.get(), MousePointerId));
 
       // Then the mouse's events go where it is.
       fixture.Move(10, 75);
@@ -420,17 +420,17 @@ namespace krys::boo::tests
       fixture.Press(10, 10);
       fixture.Move(10, 70, 1);
       (void)fixture.Take();
-      CHECK_FALSE(a.ReleasePointerCapture(MousePointerID).HasException());
-      CHECK_FALSE(a.HasPointerCapture(MousePointerID));
+      CHECK_FALSE(a.ReleasePointerCapture(MousePointerId).HasException());
+      CHECK_FALSE(a.HasPointerCapture(MousePointerId));
       // The capture lasts until the pointer's next event, as the release is only pending.
       CHECK(fixture.Take().empty());
-      CHECK(fixture.Controller().PointerCaptureElement(fixture.Document.get(), MousePointerID) == &a);
+      CHECK(fixture.Controller().PointerCaptureElement(fixture.Document.get(), MousePointerId) == &a);
       fixture.Move(10, 75, 1);
       auto records = fixture.Take();
       REQUIRE_FALSE(records.empty());
       CHECK(records[0] == "lostpointercapture!:a");
       CHECK(std::ranges::find(records, "pointermove!:b") != records.end());
-      CHECK_FALSE(fixture.Controller().PointerCaptureElement(fixture.Document.get(), MousePointerID));
+      CHECK_FALSE(fixture.Controller().PointerCaptureElement(fixture.Document.get(), MousePointerId));
     }
 
     SECTION("removing the capturing element fires lostpointercapture at the document")
@@ -441,7 +441,7 @@ namespace krys::boo::tests
       (void)fixture.Take();
       Ref protectedA = ShareRef(a);
       (void)a.Remove();
-      CHECK_FALSE(a.HasPointerCapture(MousePointerID));
+      CHECK_FALSE(a.HasPointerCapture(MousePointerId));
       html::EventLoop::Current().RunUntilIdle();
       CHECK(fixture.Take() == Strings {"lostpointercapture!:document"});
     }
@@ -456,13 +456,13 @@ namespace krys::boo::tests
       CHECK(unknownRelease.GetException().Code() == ExceptionCode::NotFoundError);
 
       auto disconnected = fixture.Document->CreateElement(u8"div").ReleaseValue();
-      auto result = disconnected->SetPointerCapture(MousePointerID);
+      auto result = disconnected->SetPointerCapture(MousePointerId);
       REQUIRE(result.HasException());
       CHECK(result.GetException().Code() == ExceptionCode::InvalidStateError);
 
       // The mouse isn't pressed, so nothing captures it.
-      CHECK_FALSE(a.SetPointerCapture(MousePointerID).HasException());
-      CHECK_FALSE(a.HasPointerCapture(MousePointerID));
+      CHECK_FALSE(a.SetPointerCapture(MousePointerId).HasException());
+      CHECK_FALSE(a.HasPointerCapture(MousePointerId));
     }
 
     SECTION("cancelling a pointer")
@@ -470,16 +470,16 @@ namespace krys::boo::tests
       fixture.Move(10, 10);
       fixture.Press(10, 10);
       (void)fixture.Take();
-      fixture.Controller().CancelPointer(MousePointerID, IntPoint(10, 10));
+      fixture.Controller().CancelPointer(MousePointerId, IntPoint(10, 10));
       CHECK(fixture.Take() == Strings {"pointercancel!:a", "pointerout!:a", "pointerleave!:a"});
-      CHECK(fixture.Controller().HasCancelledPointerEventForIdentifier(MousePointerID));
+      CHECK(fixture.Controller().HasCancelledPointerEventForIdentifier(MousePointerId));
       // Only once.
-      fixture.Controller().CancelPointer(MousePointerID, IntPoint(10, 10));
+      fixture.Controller().CancelPointer(MousePointerId, IntPoint(10, 10));
       CHECK(fixture.Take().empty());
 
       // The page's main document changing forgets it.
       fixture.TestPage->DidChangeMainDocument(fixture.Document.get());
-      CHECK_FALSE(fixture.Controller().HasCancelledPointerEventForIdentifier(MousePointerID));
+      CHECK_FALSE(fixture.Controller().HasCancelledPointerEventForIdentifier(MousePointerId));
     }
   }
 }

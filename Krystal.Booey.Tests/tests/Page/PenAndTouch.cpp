@@ -426,7 +426,7 @@ namespace krys::boo::tests
     {
       PlatformMouseEvent event(DoublePoint(10, 10), DoublePoint(10, 10), button, type,
                                type == PlatformEvent::Type::MouseMoved ? 0 : 1, {}, MonotonicTime::Now(),
-                               buttons, {}, force, SyntheticClickType::NoTap, PenPointerID,
+                               buttons, {}, force, SyntheticClickType::NoTap, PenPointerId,
                                dom::PenPointerEventType());
       event.SetPenOrientation({30, 0, 45});
       if (type == PlatformEvent::Type::MouseMoved)
@@ -445,7 +445,7 @@ namespace krys::boo::tests
     (void)fixture.Handler().MouseMoved(penEvent(PlatformEvent::Type::MouseMoved, MouseButton::None, 0, 0));
     REQUIRE(move);
     CHECK(move->PointerType() == u8"pen");
-    CHECK(move->PointerId() == PenPointerID);
+    CHECK(move->PointerId() == PenPointerId);
     CHECK(move->Pressure() == 0);
     CHECK(move->Buttons() == 0);
     CHECK(move->TiltX() == 30);

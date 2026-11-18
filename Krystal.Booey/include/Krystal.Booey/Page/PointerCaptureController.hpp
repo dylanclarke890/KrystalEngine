@@ -27,7 +27,7 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Page/MouseEventTypes.hpp"
-#include "Krystal.Booey/Platform/Events/PointerID.hpp"
+#include "Krystal.Booey/Platform/Events/PointerId.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
@@ -94,7 +94,7 @@ namespace krys::boo
 
   private:
     WeakPtr<Page> _page;
-    // While PointerID is defined as int32_t, we use int64_t here so that we may use a value outside of the
+    // While PointerId is defined as int32_t, we use int64_t here so that we may use a value outside of the
     // int32_t range to have safe empty and removed values, allowing any int32_t to be provided through the
     // API for lookup in this hashmap.
     HashMap<int64, Ref<CapturingData>> _activePointerIdsToCapturingData;
@@ -105,16 +105,16 @@ namespace krys::boo
     explicit PointerCaptureController(Page &page) noexcept;
 
     /// @brief The element capturing @p pointerId, if it's in @p document.
-    KRYS_NODISCARD Element *PointerCaptureElement(Document *document, PointerID pointerId) const noexcept;
+    KRYS_NODISCARD Element *PointerCaptureElement(Document *document, PointerId pointerId) const noexcept;
 
     /// @see https://w3c.github.io/pointerevents/#setting-pointer-capture
-    ExceptionOr<void> SetPointerCapture(Element *capturingTarget, PointerID pointerId) noexcept;
+    ExceptionOr<void> SetPointerCapture(Element *capturingTarget, PointerId pointerId) noexcept;
 
     /// @see https://w3c.github.io/pointerevents/#releasing-pointer-capture
-    ExceptionOr<void> ReleasePointerCapture(Element *capturingTarget, PointerID pointerId) noexcept;
+    ExceptionOr<void> ReleasePointerCapture(Element *capturingTarget, PointerId pointerId) noexcept;
 
     /// @see https://w3c.github.io/pointerevents/#dom-element-haspointercapture
-    KRYS_NODISCARD bool HasPointerCapture(Element *capturingTarget, PointerID pointerId) const noexcept;
+    KRYS_NODISCARD bool HasPointerCapture(Element *capturingTarget, PointerId pointerId) const noexcept;
 
     /// @brief Forgets every pointer but the mouse, as when the page's main document changes.
     void Reset() noexcept;
@@ -132,19 +132,19 @@ namespace krys::boo
 
     /// @brief The pointer event to dispatch before @p mouseEvent, or null if none.
     KRYS_NODISCARD RefPtr<PointerEvent> PointerEventForMouseEvent(const MouseEvent &mouseEvent,
-                                                                  PointerID pointerId,
+                                                                  PointerId pointerId,
                                                                   const DOMString &pointerType) noexcept;
 
     /// @brief Dispatches `pointerrawupdate` for @p mouseEvent, which moved the pointer, at @p target, if
     /// anything in its document listens for it.
     /// @see https://w3c.github.io/pointerevents/#the-pointerrawupdate-event
-    void DispatchPointerRawUpdateForMouseEvent(const MouseEvent &mouseEvent, PointerID pointerId,
+    void DispatchPointerRawUpdateForMouseEvent(const MouseEvent &mouseEvent, PointerId pointerId,
                                                const DOMString &pointerType, Element &target) noexcept;
 
     /// @brief Keeps the pointer's state without an event, if @p mouseEvent is a `mousemove` and nothing in
     /// @p target's document listens for `pointermove`.
     /// @return Whether it did, so there's no `pointermove` to create.
-    KRYS_NODISCARD bool SkipPointerMoveForMouseEvent(const MouseEvent &mouseEvent, PointerID pointerId,
+    KRYS_NODISCARD bool SkipPointerMoveForMouseEvent(const MouseEvent &mouseEvent, PointerId pointerId,
                                                      const DOMString &pointerType, Element &target) noexcept;
 
     /// @brief Dispatches the pointer events for the touch at @p index in @p event at @p target: `pointerover`
@@ -155,11 +155,11 @@ namespace krys::boo
                                       bool isPrimary, LocalFrameView *view,
                                       const DoublePoint &touchDelta) noexcept;
 
-    void TouchWithIdentifierWasRemoved(PointerID pointerId) noexcept;
+    void TouchWithIdentifierWasRemoved(PointerId pointerId) noexcept;
 
-    KRYS_NODISCARD bool HasCancelledPointerEventForIdentifier(PointerID pointerId) const noexcept;
+    KRYS_NODISCARD bool HasCancelledPointerEventForIdentifier(PointerId pointerId) const noexcept;
 
-    KRYS_NODISCARD bool PreventsCompatibilityMouseEventsForIdentifier(PointerID pointerId) const noexcept;
+    KRYS_NODISCARD bool PreventsCompatibilityMouseEventsForIdentifier(PointerId pointerId) const noexcept;
 
     /// @brief Dispatches @p event at @p target, keeping the pointer's state.
     void DispatchEvent(PointerEvent &event, EventTarget *target) noexcept;
@@ -167,27 +167,27 @@ namespace krys::boo
     /// @brief Fires `pointercancel`, `pointerout` and `pointerleave` for @p pointerId, at its capturing
     /// element or else the element at @p documentPoint, and releases its capture.
     /// @see https://w3c.github.io/pointerevents/#the-pointercancel-event
-    void CancelPointer(PointerID pointerId, const IntPoint &documentPoint,
+    void CancelPointer(PointerId pointerId, const IntPoint &documentPoint,
                        PointerEvent *existingCancelEvent = nullptr) noexcept;
 
     /// @see https://w3c.github.io/pointerevents/#process-pending-pointer-capture
-    void ProcessPendingPointerCapture(PointerID pointerId) noexcept;
+    void ProcessPendingPointerCapture(PointerId pointerId) noexcept;
 
     // Used for mouse presses that trigger contextmenu, causing
     // the matching release to be suppressed.
-    void ClearUnmatchedMouseDown(PointerID pointerId) noexcept;
+    void ClearUnmatchedMouseDown(PointerId pointerId) noexcept;
 
   private:
-    KRYS_NODISCARD RefPtr<CapturingData> CapturingDataFor(PointerID pointerId) const noexcept;
+    KRYS_NODISCARD RefPtr<CapturingData> CapturingDataFor(PointerId pointerId) const noexcept;
 
-    Ref<CapturingData> EnsureCapturingData(PointerID pointerId, const DOMString &pointerType) noexcept;
+    Ref<CapturingData> EnsureCapturingData(PointerId pointerId, const DOMString &pointerType) noexcept;
 
     Ref<CapturingData> EnsureCapturingDataForPointerEvent(const PointerEvent &event) noexcept;
 
     KRYS_NODISCARD bool HasActiveTouch() const noexcept;
 
     KRYS_NODISCARD MouseButton ButtonForMouseEvent(const MouseEvent &mouseEvent,
-                                                   PointerID pointerId) const noexcept;
+                                                   PointerId pointerId) const noexcept;
 
     /// @brief What dispatching a `pointermove` at an element of @p document would do to the pointer's state.
     static void PointerMoveWasSkipped(CapturingData &capturingData, Document &document,
