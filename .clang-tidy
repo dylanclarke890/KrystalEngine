@@ -48,6 +48,7 @@ Checks: >
   modernize-avoid-setjmp-longjmp,
   modernize-avoid-variadic-functions,
   modernize-concat-nested-namespaces,
+  modernize-deprecated-headers,
   modernize-deprecated-ios-base-aliases,
   modernize-min-max-use-initializer-list,
   modernize-pass-by-value,
@@ -121,14 +122,12 @@ CheckOptions:
 #   bugprone-easily-swappable-parameters,
 #   cppcoreguidelines-virtual-class-destructor,
 #   misc-const-correctness,
-#   misc-include-cleaner, Tune IgnoreHeaders for the PCH and unity build first.
 #   misc-unused-parameters,
 #   modernize-avoid-c-arrays,
 #   modernize-avoid-c-style-cast,
-#   modernize-deprecated-headers,
 #   modernize-loop-convert,
-#   modernize-make-shared, Configure MakeSmartPtrFunction first.
-#   modernize-make-unique, Configure MakeSmartPtrFunction for CreateUnique first.
+#   modernize-make-shared,						# NOTE: Configure MakeSmartPtrFunction first.
+#   modernize-make-unique,						# NOTE: Configure MakeSmartPtrFunction for CreateUnique first.
 #   modernize-raw-string-literal,
 #   modernize-return-braced-init-list,
 #   modernize-use-designated-initializers,
@@ -144,3 +143,4 @@ CheckOptions:
 # Not wanted.
 # bugprone-narrowing-conversions,     # MSVC already guards against these; the remainder are mainly noise
 # bugprone-unchecked-optional-access, # Triggers a lot of false positives, particularly with Catch2's CHECK and REQUIRE macros.
+# misc-include-cleaner,				  # Can't enable as-is and causes a lot of false positives
