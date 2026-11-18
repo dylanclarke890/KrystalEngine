@@ -103,7 +103,7 @@ namespace krys::ui
     auto contentsRenderer = gfx::Renderer2D::Create(device);
     if (!contentsRenderer)
     {
-      return Unexpected(contentsRenderer.error());
+      return Unexpected<string>(contentsRenderer.error());
     }
     return UniquePtr<TextureMapper>(new TextureMapper(device, fonts, krys::move(*contentsRenderer)));
   }

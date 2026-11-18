@@ -672,7 +672,7 @@ namespace krys::ui
     std::error_code error;
     if (!std::filesystem::is_regular_file(path, error))
     {
-      return Unexpected(std::format("Couldn't open {}", path.string()));
+      return Unexpected<string>(std::format("Couldn't open {}", path.string()));
     }
     auto absolutePath = std::filesystem::absolute(path).generic_u8string();
     Load(boo::url::URL::FileURLWithFileSystemPath(absolutePath), cachePolicy);
@@ -766,14 +766,14 @@ namespace krys::ui
   {
     if (!boo::dom::NameValidation::IsValidCustomElementName(name.View()))
     {
-      return Unexpected(std::format("{} isn't a valid custom element name",
-                                    std::string(name.View().begin(), name.View().end())));
+      return Unexpected<string>(std::format("{} isn't a valid custom element name",
+                                            std::string(name.View().begin(), name.View().end())));
     }
     for (auto &definition : _customElements)
     {
       if (definition.Name == name)
       {
-        return Unexpected(
+        return Unexpected<string>(
           std::format("{} is already defined", std::string(name.View().begin(), name.View().end())));
       }
     }

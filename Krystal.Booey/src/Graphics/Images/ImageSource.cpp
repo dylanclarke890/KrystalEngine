@@ -34,7 +34,7 @@ namespace krys::boo
     {
       return krys::move(nativeImage);
     }
-    return Unexpected(DecodingStatus::Invalid);
+    return Unexpected<DecodingStatus>(DecodingStatus::Invalid);
   }
 
   Expected<Ref<NativeImage>, DecodingStatus>

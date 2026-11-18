@@ -54,7 +54,8 @@ namespace krys::ui
     {
       if (!contents)
       {
-        return Unexpected(boo::ResourceError(utf8_string(ErrorDomain), 0, url, u8"Couldn't open the file"));
+        return Unexpected<boo::ResourceError>(
+          boo::ResourceError(utf8_string(ErrorDomain), 0, url, u8"Couldn't open the file"));
       }
 
       // The type is the extension's, without its dot.
@@ -81,8 +82,8 @@ namespace krys::ui
     const auto &url = request.URL();
     if (!url.ProtocolIsFile())
     {
-      completionHandler(
-        Unexpected(boo::ResourceError(utf8_string(ErrorDomain), 0, url, u8"Only file URLs load")));
+      completionHandler(Unexpected<boo::ResourceError>(
+        boo::ResourceError(utf8_string(ErrorDomain), 0, url, u8"Only file URLs load")));
       return;
     }
 

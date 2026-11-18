@@ -230,7 +230,7 @@ namespace krys::boo::style
       syntax, tokenRange, document.CssParserContext());
     if (!dependencies.IsComputationallyIndependent())
     {
-      return Unexpected {ParseInitialValueError::NotComputationallyIndependent};
+      return Unexpected<ParseInitialValueError> {ParseInitialValueError::NotComputationallyIndependent};
     }
 
     // We don't need to provide a real context style since only computationally independent values are allowed
@@ -243,7 +243,7 @@ namespace krys::boo::style
       propertyName, syntax, tokenRange, *dummyState, document.CssParserContext());
     if (!initialValue)
     {
-      return Unexpected {ParseInitialValueError::DidNotParse};
+      return Unexpected<ParseInitialValueError> {ParseInitialValueError::DidNotParse};
     }
 
     return Pair {krys::move(initialValue),

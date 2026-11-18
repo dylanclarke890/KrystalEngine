@@ -102,8 +102,8 @@ namespace krys::boo
       auto decoded = data_url_decoder::Decode(URL());
       if (!decoded)
       {
-        completeAsNetworkingTask(
-          Unexpected(ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, URL(), u8"Invalid data URL")));
+        completeAsNetworkingTask(Unexpected<ResourceError>(
+          ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, URL(), u8"Invalid data URL")));
         return;
       }
       auto size = static_cast<int64>(decoded->Data.size());

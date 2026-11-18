@@ -66,7 +66,7 @@ namespace krys::io
                                               &image.Channels, settings.DesiredComponents);
       if (data == nullptr)
       {
-        return Unexpected(stbi_failure_reason());
+        return Unexpected<string>(stbi_failure_reason());
       }
 
       const size_t count = static_cast<size_t>(image.Width) * image.Height * image.Channels;
@@ -80,7 +80,7 @@ namespace krys::io
                                                &image.Channels, settings.DesiredComponents);
       if (data == nullptr)
       {
-        return Unexpected(stbi_failure_reason());
+        return Unexpected<string>(stbi_failure_reason());
       }
 
       const size_t count = static_cast<size_t>(image.Width) * image.Height * image.Channels;

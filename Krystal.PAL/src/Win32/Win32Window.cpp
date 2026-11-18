@@ -480,7 +480,7 @@ namespace krys::pal
     }
     catch (const std::exception &e)
     {
-      return Unexpected(e.what());
+      return Unexpected<string>(e.what());
     }
   }
 

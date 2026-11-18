@@ -54,11 +54,11 @@ namespace krys::boo::dom
     {
     }
 
-    constexpr ExceptionOr(Exception &&ex) noexcept : _value {Unexpected(krys::move(ex))}
+    constexpr ExceptionOr(Exception &&ex) noexcept : _value {Unexpected<Exception>(krys::move(ex))}
     {
     }
 
-    constexpr ExceptionOr(ExceptionCode code) noexcept : _value {Unexpected(Exception(code))}
+    constexpr ExceptionOr(ExceptionCode code) noexcept : _value {Unexpected<Exception>(Exception(code))}
     {
     }
 
@@ -300,11 +300,11 @@ namespace krys::boo::dom
 
     constexpr ExceptionOr() = default;
 
-    constexpr ExceptionOr(Exception &&ex) noexcept : _value {Unexpected(krys::move(ex))}
+    constexpr ExceptionOr(Exception &&ex) noexcept : _value {Unexpected<Exception>(krys::move(ex))}
     {
     }
 
-    constexpr ExceptionOr(ExceptionCode code) noexcept : _value {Unexpected(Exception(code))}
+    constexpr ExceptionOr(ExceptionCode code) noexcept : _value {Unexpected<Exception>(Exception(code))}
     {
     }
 
