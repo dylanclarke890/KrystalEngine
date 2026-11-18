@@ -35,7 +35,7 @@ layer at (0,0) size 800x18
 )");
 
     // Changing the value changes the text.
-    auto &submit = Downcast<html::HTMLInputElement>(fixture.ById(u8"submit"));
+    auto &submit = Downcast<HTMLInputElement>(fixture.ById(u8"submit"));
     submit.SetAttribute(u8"value", u8"Go");
     (void)fixture.Document->UpdateLayout();
     auto &button = Downcast<RenderButton>(*submit.Renderer());

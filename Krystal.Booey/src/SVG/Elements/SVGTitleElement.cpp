@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/SVG/Elements/SVGTitleElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGTitleElement::SVGTitleElement(dom::Document &document) noexcept
+  SVGTitleElement::SVGTitleElement(Document &document) noexcept
       : SVGElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Title)
   {
   }

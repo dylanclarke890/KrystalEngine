@@ -55,12 +55,12 @@ namespace krys::boo::style
 {
   namespace
   {
-    KRYS_NODISCARD bool IsHTMLElement(const dom::Element *element, html::TagName tagName) noexcept
+    KRYS_NODISCARD bool IsHTMLElement(const Element *element, html::TagName tagName) noexcept
     {
-      return element && Is<html::HTMLElement>(*element) && element->TagQualifiedName().TagName() == tagName;
+      return element && Is<HTMLElement>(*element) && element->TagQualifiedName().TagName() == tagName;
     }
 
-    KRYS_NODISCARD bool HasLocalName(const dom::Element *element, html::TagName tagName) noexcept
+    KRYS_NODISCARD bool HasLocalName(const Element *element, html::TagName tagName) noexcept
     {
       return element && element->TagQualifiedName().TagName() == tagName;
     }
@@ -145,7 +145,7 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD bool ShouldInheritTextDecorationsInEffect(const RenderStyle &style,
-                                                             const dom::Element *element) noexcept
+                                                             const Element *element) noexcept
     {
       if (style.IsFloating() || style.HasOutOfFlowPosition())
       {
@@ -156,7 +156,7 @@ namespace krys::boo::style
       // media.
 
       // Outermost <svg> roots are considered to be atomic inline-level.
-      if (auto *svgElement = DynamicDowncast<svg::SVGElement>(element);
+      if (auto *svgElement = DynamicDowncast<SVGElement>(element);
           svgElement && svgElement->IsOutermostSVGSVGElement())
       {
         return false;
@@ -243,7 +243,7 @@ namespace krys::boo::style
       return hasRubyParent && !style.HasOutOfFlowPosition() && !style.IsFloating();
     }
 
-    KRYS_NODISCARD bool HasUnsupportedRubyDisplay(DisplayType display, const dom::Element *element) noexcept
+    KRYS_NODISCARD bool HasUnsupportedRubyDisplay(DisplayType display, const Element *element) noexcept
     {
       // Only allow ruby elements to have ruby display types for now.
       switch (display)
@@ -283,21 +283,21 @@ namespace krys::boo::style
              || style.GetWillChange().CanCreateStackingContext();
     }
 
-    KRYS_NODISCARD bool HasEffectiveDisplayNoneForDisplayContents(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool HasEffectiveDisplayNoneForDisplayContents(const Element &element) noexcept
     {
       // https://drafts.csswg.org/css-display-3/#unbox-svg
       // FIXME: <g>, <use> and <tspan> have special (?) behavior for display:contents in the current draft
       // spec.
-      if (Is<svg::SVGElement>(element))
+      if (Is<SVGElement>(element))
       {
         return true;
       }
       // Not sure MathML code can handle it.
-      if (Is<mathml::MathMLElement>(element))
+      if (Is<MathMLElement>(element))
       {
         return true;
       }
-      if (!Is<html::HTMLElement>(element))
+      if (!Is<HTMLElement>(element))
       {
         return false;
       }
@@ -329,15 +329,15 @@ namespace krys::boo::style
     }
   }
 
-  Adjuster::Adjuster(const dom::Document &document, const RenderStyle &parentStyle,
-                     const RenderStyle *parentBoxStyle, dom::Element *element) noexcept
+  Adjuster::Adjuster(const Document &document, const RenderStyle &parentStyle,
+                     const RenderStyle *parentBoxStyle, Element *element) noexcept
       : _document(ShareCheckedRef(document)), _parentStyle(parentStyle),
         _parentBoxStyle(parentBoxStyle ? *parentBoxStyle : _parentStyle), _element(ShareRefPtr(element))
   {
   }
 
   bool Adjuster::AdjustEventListenerRegionTypesForRootStyle(RenderStyle &rootStyle,
-                                                            const dom::Document &document) noexcept
+                                                            const Document &document) noexcept
   {
     auto regionTypes = ComputeEventListenerRegionTypes(document, rootStyle, document, {});
     if (auto *window = document.Window())
@@ -351,8 +351,7 @@ namespace krys::boo::style
   }
 
   EnumSet<EventListenerRegionType>
-    Adjuster::ComputeEventListenerRegionTypes(const dom::Document &, const RenderStyle &,
-                                              const dom::EventTarget &,
+    Adjuster::ComputeEventListenerRegionTypes(const Document &, const RenderStyle &, const EventTarget &,
                                               EnumSet<EventListenerRegionType> parentTypes) noexcept
   {
     // Event listener regions (wheel, touch and interaction regions) are platform features that aren't
@@ -635,7 +634,7 @@ namespace krys::boo::style
         style.SetOverflowY(style.OverflowY() == Overflow::Visible ? Overflow::Auto : style.OverflowY());
       }
 
-      if (auto *input = DynamicDowncast<html::HTMLInputElement>(DynamicDowncast<html::HTMLElement>(element));
+      if (auto *input = DynamicDowncast<HTMLInputElement>(DynamicDowncast<HTMLElement>(element));
           input && input->IsPasswordField())
       {
         style.SetTextSecurity(style.GetInputSecurity() == InputSecurity::Auto ? TextSecurity::Disc
@@ -645,7 +644,7 @@ namespace krys::boo::style
       // Disallow -internal-user-modify on ::pseudo elements, except if that pseudo-element targets a slot,
       // in which case we want the editability to be passed onto the slotted contents.
       if (element->IsInUserAgentShadowTree() && element->UserAgentPart() != null
-          && !Is<html::HTMLSlotElement>(*element))
+          && !Is<HTMLSlotElement>(*element))
       {
         style.SetUserModify(UserModify::ReadOnly);
       }
@@ -674,7 +673,7 @@ namespace krys::boo::style
         style.SetAutoRevealsWhenFound();
       }
 
-      if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
+      if (auto *htmlElement = DynamicDowncast<HTMLElement>(element);
           htmlElement && htmlElement->IsHiddenUntilFound())
       {
         style.SetAutoRevealsWhenFound();
@@ -765,7 +764,7 @@ namespace krys::boo::style
     style.SetIsEffectivelyTransparent(style.GetOpacity().IsTransparent()
                                       || _parentStyle.IsEffectivelyTransparent());
 
-    if (auto *element = DynamicDowncast<svg::SVGElement>(_element.get()))
+    if (auto *element = DynamicDowncast<SVGElement>(_element.get()))
     {
       AdjustSVGElementStyle(style, *element);
     }
@@ -781,12 +780,12 @@ namespace krys::boo::style
     style.SetUsedTouchAction(ComputeUsedTouchAction(style, _parentStyle.UsedTouchAction()));
 
     // Counterpart in Element::addToTopLayer/removeFromTopLayer!
-    auto hasInertAttribute = [](const dom::Element *element) -> bool
+    auto hasInertAttribute = [](const Element *element) -> bool
     {
-      return element && Is<html::HTMLElement>(*element) && element->HasAttribute(u8"inert");
+      return element && Is<HTMLElement>(*element) && element->HasAttribute(u8"inert");
     };
     // FIXME: Fullscreen elements, once there are any.
-    auto isInertSubtreeRoot = [&](const dom::Element *element) -> bool
+    auto isInertSubtreeRoot = [&](const Element *element) -> bool
     {
       if (_document->ActiveModalDialog() && element && element == _document->DocumentElement().get())
       {
@@ -800,8 +799,8 @@ namespace krys::boo::style
     }
     // https://html.spec.whatwg.org/#the-button-element
     // If a button element is the first child which is an element of a select element, then it is inert.
-    if (auto *button = DynamicDowncast<html::HTMLButtonElement>(_element.get());
-        button && Is<html::HTMLSelectElement>(button->ParentNode())
+    if (auto *button = DynamicDowncast<HTMLButtonElement>(_element.get());
+        button && Is<HTMLSelectElement>(button->ParentNode())
         && dom::TreeQueries::FirstElementChild(*button->ParentNode()) == button)
     {
       style.SetEffectiveInert(true);
@@ -855,7 +854,7 @@ namespace krys::boo::style
     }
   }
 
-  void Adjuster::AdjustSVGElementStyle(RenderStyle &style, const svg::SVGElement &svgElement) noexcept
+  void Adjuster::AdjustSVGElementStyle(RenderStyle &style, const SVGElement &svgElement) noexcept
   {
     // Only the root <svg> element in an SVG document fragment tree honors css position
     if (!svgElement.IsOutermostSVGSVGElement())
@@ -865,7 +864,7 @@ namespace krys::boo::style
 
     // (Legacy)RenderSVGRoot handles zooming for the whole SVG subtree, so foreignObject content should
     // not be scaled again.
-    if (Is<svg::SVGForeignObjectElement>(svgElement))
+    if (Is<SVGForeignObjectElement>(svgElement))
     {
       std::ignore = style.SetUsedZoom(Evaluate<float>(ComputedStyle::InitialZoom()));
     }
@@ -873,7 +872,7 @@ namespace krys::boo::style
     // SVG text layout code expects us to be a block-level style element.
     // While in theory any block level element would work (flex, grid etc), since we construct RenderBlockFlow
     // for both foreign object and svg text, in practice only block layout happens here.
-    if ((Is<svg::SVGForeignObjectElement>(svgElement)
+    if ((Is<SVGForeignObjectElement>(svgElement)
          || svgElement.TagQualifiedName().LocalName().View() == u8"text")
         && GeneratesBox(style))
     {
@@ -919,7 +918,7 @@ namespace krys::boo::style
   }
 
   void Adjuster::PropagateToDocumentElementAndInitialContainingBlock(Update &update,
-                                                                     const dom::Document &document) noexcept
+                                                                     const Document &document) noexcept
   {
     auto body = document.Body();
     auto *bodyStyle = body ? update.ElementStyle(*body) : nullptr;
@@ -985,7 +984,7 @@ namespace krys::boo::style
     if (writingMode != documentElementStyle->GetWritingMode().ComputedWritingMode()
         || direction != documentElementStyle->GetWritingMode().ComputedTextDirection())
     {
-      auto documentElement = const_cast<dom::Document &>(document).DocumentElement();
+      auto documentElement = const_cast<Document &>(document).DocumentElement();
       auto *documentElementUpdate = update.GetElementUpdate(*documentElement);
       if (!documentElementUpdate)
       {

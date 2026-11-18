@@ -29,22 +29,21 @@
 namespace krys::boo
 {
   class Path;
+  class SVGPathByteStream;
 }
 
 namespace krys::boo::svg
 {
-  class SVGPathByteStream;
-
   // String/SVGPathByteStream -> Path
-  KRYS_NODISCARD Path BuildPathFromString(dom::DOMStringView d) noexcept;
+  KRYS_NODISCARD Path BuildPathFromString(DOMStringView d) noexcept;
 
   KRYS_NODISCARD Path BuildPathFromByteStream(const SVGPathByteStream &stream) noexcept;
 
   // SVGPathByteStream <-> String
-  KRYS_NODISCARD bool BuildSVGPathByteStreamFromString(dom::DOMStringView d, SVGPathByteStream &result,
+  KRYS_NODISCARD bool BuildSVGPathByteStreamFromString(DOMStringView d, SVGPathByteStream &result,
                                                        PathParsingMode parsingMode) noexcept;
 
-  KRYS_NODISCARD bool BuildStringFromByteStream(const SVGPathByteStream &stream, dom::DOMString &result,
+  KRYS_NODISCARD bool BuildStringFromByteStream(const SVGPathByteStream &stream, DOMString &result,
                                                 PathParsingMode parsingMode,
                                                 bool checkForInitialMoveTo = true) noexcept;
 

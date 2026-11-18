@@ -32,19 +32,19 @@
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
-  const QualifiedName &PseudoElementTagName() noexcept
+  const QualifiedName &dom::PseudoElementTagName() noexcept
   {
     static NeverDestroyed<const QualifiedName> name {null, null, u8"<pseudo>"};
     return name;
   }
 
   PseudoElement::PseudoElement(Element &host, PseudoElementType pseudoElementType) noexcept
-      : Element(host.NodeDocument(), PseudoElementTagName(), NodeFlags::IsPseudoElement),
+      : Element(host.NodeDocument(), dom::PseudoElementTagName(), dom::NodeFlags::IsPseudoElement),
         _hostElement(CreateWeakPtr(&host)), _pseudoElementType(pseudoElementType)
   {
-    SetNodeFlag(NodeFlags::IsConnected);
+    SetNodeFlag(dom::NodeFlags::IsConnected);
     krys_debug_assert(pseudoElementType == PseudoElementType::Before
                       || pseudoElementType == PseudoElementType::After);
   }

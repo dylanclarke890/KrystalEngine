@@ -24,14 +24,10 @@
 
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLElement;
   class HTMLInputElement;
-}
-
-namespace krys::boo
-{
   class RenderTextControlInnerBlock;
 
   /// @brief The renderer of a text field: one line of text, centred in the field's content box, scrolled
@@ -41,7 +37,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderTextControlSingleLine);
 
   public:
-    RenderTextControlSingleLine(Type type, html::HTMLInputElement &element, RenderStyle &&style) noexcept;
+    RenderTextControlSingleLine(Type type, HTMLInputElement &element, RenderStyle &&style) noexcept;
 
     ~RenderTextControlSingleLine() noexcept override;
 
@@ -66,19 +62,19 @@ namespace krys::boo
                            const ScrollPositionChangeOptions &options) noexcept override;
 
     bool Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
-                dom::Element **stopElement = nullptr,
+                Element **stopElement = nullptr,
                 ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept final;
 
     bool LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
-                       dom::Element **stopElement = nullptr,
+                       Element **stopElement = nullptr,
                        ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept final;
 
   protected:
-    KRYS_NODISCARD html::HTMLElement *ContainerElement() const noexcept;
+    KRYS_NODISCARD HTMLElement *ContainerElement() const noexcept;
 
-    KRYS_NODISCARD html::HTMLElement *InnerBlockElement() const noexcept;
+    KRYS_NODISCARD HTMLElement *InnerBlockElement() const noexcept;
 
-    KRYS_NODISCARD html::HTMLInputElement &InputElement() const noexcept;
+    KRYS_NODISCARD HTMLInputElement &InputElement() const noexcept;
 
   private:
     KRYS_NODISCARD bool HasControlClip() const noexcept override;
@@ -102,7 +98,7 @@ namespace krys::boo
 
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
 
-    KRYS_NODISCARD html::HTMLElement *InnerSpinButtonElement() const noexcept;
+    KRYS_NODISCARD HTMLElement *InnerSpinButtonElement() const noexcept;
   };
 
   /// @brief The renderer of a text control's inner text element: a block that always has a line, so the caret
@@ -112,7 +108,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderTextControlInnerBlock);
 
   public:
-    RenderTextControlInnerBlock(dom::Element &element, RenderStyle &&style) noexcept;
+    RenderTextControlInnerBlock(Element &element, RenderStyle &&style) noexcept;
 
     ~RenderTextControlInnerBlock() noexcept override;
 

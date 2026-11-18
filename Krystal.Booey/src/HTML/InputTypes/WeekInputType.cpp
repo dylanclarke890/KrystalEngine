@@ -47,9 +47,9 @@ namespace krys::boo::html
   {
     krys_debug_assert(Element());
     auto &element = *Element();
-    auto attribute = [&](dom::DOMStringAtom name)
+    auto attribute = [&](DOMStringAtom name)
     {
-      return element.GetAttribute(krys::move(name)).value_or(dom::DOMString());
+      return element.GetAttribute(krys::move(name)).value_or(DOMString());
     };
     const Decimal stepBase = FindStepBase(Decimal(-259'200'000));
     const Decimal minimum =
@@ -61,7 +61,7 @@ namespace krys::boo::html
     return StepRange(stepBase, RangeLimitations::Valid, minimum, maximum, step, WeekInputTypeStepDescription);
   }
 
-  Maybe<DateComponents> WeekInputType::ParseToDateComponents(dom::DOMStringView source) const noexcept
+  Maybe<DateComponents> WeekInputType::ParseToDateComponents(DOMStringView source) const noexcept
   {
     return DateComponents::FromParsingWeek(source);
   }
@@ -77,7 +77,7 @@ namespace krys::boo::html
       {DateTimeFormatValidationResults::HasYear, DateTimeFormatValidationResults::HasWeek});
   }
 
-  dom::DOMString WeekInputType::FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept
+  DOMString WeekInputType::FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept
   {
     if (!state.Year || !state.Week)
     {

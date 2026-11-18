@@ -54,11 +54,11 @@ namespace krys::ui::tests
       }
     };
 
-    struct Counter : boo::dom::EventListenerCallback
+    struct Counter : boo::EventListenerCallback
     {
       int32 Count {0};
 
-      void HandleEvent(boo::dom::Event &) noexcept override
+      void HandleEvent(boo::Event &) noexcept override
       {
         ++Count;
       }
@@ -80,7 +80,7 @@ namespace krys::ui::tests
       u8"<div style='height: 2000px'></div>");
     WaitForLoad(view);
     view.UpdateRendering();
-    auto byId = [&view](boo::dom::DOMStringView id)
+    auto byId = [&view](boo::DOMStringView id)
     {
       auto element = view.Document().GetElementById(id);
       REQUIRE(element);
@@ -90,9 +90,9 @@ namespace krys::ui::tests
     {
       return view.Document().FocusedElement();
     };
-    auto focus = [&byId](boo::dom::DOMStringView id)
+    auto focus = [&byId](boo::DOMStringView id)
     {
-      Downcast<boo::html::HTMLElement>(*byId(id)).Focus();
+      Downcast<boo::HTMLElement>(*byId(id)).Focus();
     };
 
     EventManager events;
@@ -187,11 +187,11 @@ namespace krys::ui::tests
     CHECK(popup->HighlightedIndex() == 1);
     press(pal::GamepadButton::South, 2s);
     CHECK_FALSE(view.ShownOverlay());
-    CHECK(Downcast<boo::html::HTMLSelectElement>(*byId(u8"s")).SelectedIndex() == 1);
+    CHECK(Downcast<boo::HTMLSelectElement>(*byId(u8"s")).SelectedIndex() == 1);
     CHECK(focused() == byId(u8"s").get());
 
     // B is a close request: it closes a modal dialog.
-    auto &dialog = Downcast<boo::html::HTMLDialogElement>(*byId(u8"d"));
+    auto &dialog = Downcast<boo::HTMLDialogElement>(*byId(u8"d"));
     REQUIRE_FALSE(dialog.ShowModal().HasException());
     CHECK(focused() == byId(u8"inside").get());
     press(pal::GamepadButton::East, 2s);

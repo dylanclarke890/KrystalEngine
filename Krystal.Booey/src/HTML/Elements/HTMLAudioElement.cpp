@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLAudioElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLAudioElement::HTMLAudioElement(dom::Document &document) noexcept
-      : HTMLMediaElement(document, HTMLElementInterface::Audio)
+  HTMLAudioElement::HTMLAudioElement(Document &document) noexcept
+      : HTMLMediaElement(document, html::HTMLElementInterface::Audio)
   {
   }
 }

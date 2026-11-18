@@ -37,7 +37,7 @@
 
 namespace krys::boo::html
 {
-  void ResetInputType::HandleActivationBehavior(dom::Event &event) noexcept
+  void ResetInputType::HandleActivationBehavior(Event &event) noexcept
   {
     krys_debug_assert(Element());
     if (Element()->IsDisabledFormControl())
@@ -55,7 +55,7 @@ namespace krys::boo::html
     event.SetDefaultHandled();
   }
 
-  Maybe<dom::DOMString> ResetInputType::DefaultValue() const noexcept
+  Maybe<DOMString> ResetInputType::DefaultValue() const noexcept
   {
     return ResetButtonDefaultLabel();
   }

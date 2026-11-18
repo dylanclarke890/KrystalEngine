@@ -152,7 +152,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD int SpanPosition() const noexcept;
 
-    KRYS_NODISCARD css::CSSOMString NamedGridLine() const noexcept;
+    KRYS_NODISCARD CSSOMString NamedGridLine() const noexcept;
 
     KRYS_NODISCARD bool ShouldBeResolvedAgainstOppositePosition() const noexcept
     {

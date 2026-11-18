@@ -88,9 +88,9 @@ namespace krys::boo::html::tests
     FormFixture fixture(u8R"(<input id=before form=h><x-host id=h></x-host><input id=a form=h>
       <fieldset form=h><legend id=legend></legend></fieldset><select id=s form=h><option id=o></select>)");
     // A shadow root on the element with ID @p id, its reference target @p target, holding @p markup.
-    auto attach = [&](dom::DOMStringView id, const char8_t *target, const char8_t *markup)
+    auto attach = [&](DOMStringView id, const char8_t *target, const char8_t *markup)
     {
-      auto shadow = fixture.ById(id).AttachShadow({.ReferenceTarget = dom::DOMString(target)}).ReleaseValue();
+      auto shadow = fixture.ById(id).AttachShadow({.ReferenceTarget = DOMString(target)}).ReleaseValue();
       REQUIRE_FALSE(shadow->SetHTMLUnsafe(markup).HasException());
       return shadow;
     };
@@ -130,7 +130,7 @@ namespace krys::boo::html::tests
     {
       shadow->SetReferenceTarget(null);
       CHECK(a.Form() == nullptr);
-      shadow->SetReferenceTarget(dom::DOMString(u8"f"));
+      shadow->SetReferenceTarget(DOMString(u8"f"));
       CHECK(a.Form() == &form);
     }
 

@@ -116,8 +116,7 @@ namespace krys::boo
     StyleCachedImage(style::URL &&, Ref<css::ImageValue> &&, float) noexcept;
 
     KRYS_NODISCARD LegacyRenderSVGResourceContainer *
-      UncheckedRenderSVGResource(dom::DocumentOrShadowRoot &,
-                                 const dom::DOMStringAtom &fragment) const noexcept;
+      UncheckedRenderSVGResource(dom::DocumentOrShadowRoot &, const DOMStringAtom &fragment) const noexcept;
 
     KRYS_NODISCARD LegacyRenderSVGResourceContainer *
       UncheckedRenderSVGResource(const RenderElement *) const noexcept;

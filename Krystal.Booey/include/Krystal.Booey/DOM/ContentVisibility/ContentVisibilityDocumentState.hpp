@@ -33,11 +33,14 @@
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
   class Element;
+}
 
+namespace krys::boo::dom
+{
   enum class DidUpdateAnyContentRelevancy : bool
   {
     No,

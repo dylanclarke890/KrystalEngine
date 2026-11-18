@@ -107,7 +107,7 @@ namespace krys::boo::html
 
     struct InputTypeFactory
     {
-      dom::DOMStringView Name;
+      DOMStringView Name;
       InputTypeFactoryFunction FactoryFunction;
     };
 
@@ -136,7 +136,7 @@ namespace krys::boo::html
       {input_type_names::Week, &CreateInputType<WeekInputType>},
     }};
 
-    KRYS_NODISCARD const InputTypeFactory *FindFactory(dom::DOMStringView typeName) noexcept
+    KRYS_NODISCARD const InputTypeFactory *FindFactory(DOMStringView typeName) noexcept
     {
       for (auto &factory : InputTypeFactories)
       {
@@ -149,12 +149,12 @@ namespace krys::boo::html
     }
   }
 
-  RefPtr<InputType> InputType::CreateIfDifferent(HTMLInputElement &element, dom::DOMStringView typeName,
+  RefPtr<InputType> InputType::CreateIfDifferent(HTMLInputElement &element, DOMStringView typeName,
                                                  InputType *currentInputType) noexcept
   {
     if (!typeName.empty())
     {
-      auto currentTypeName = currentInputType ? currentInputType->FormControlType() : dom::DOMStringView();
+      auto currentTypeName = currentInputType ? currentInputType->FormControlType() : DOMStringView();
       if (typeName == currentTypeName)
       {
         return nullptr;
@@ -212,7 +212,7 @@ namespace krys::boo::html
     return ActivationBehaviorTypes.Contains(_type);
   }
 
-  bool InputType::IsValidValue(dom::DOMStringView value) const noexcept
+  bool InputType::IsValidValue(DOMStringView value) const noexcept
   {
     krys_debug_assert(CanSetStringValue());
     return !TypeMismatchFor(value) && !StepMismatch(value) && !RangeUnderflow(value) && !RangeOverflow(value)
@@ -232,7 +232,7 @@ namespace krys::boo::html
     return false;
   }
 
-  dom::DOMString InputType::DisplayString() const noexcept
+  DOMString InputType::DisplayString() const noexcept
   {
     krys_debug_assert(false);
     return {};
@@ -252,9 +252,9 @@ namespace krys::boo::html
     return std::numeric_limits<double>::quiet_NaN();
   }
 
-  dom::ExceptionOr<void> InputType::SetValueAsDate(double) const noexcept
+  ExceptionOr<void> InputType::SetValueAsDate(double) const noexcept
   {
-    return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    return Exception {ExceptionCode::InvalidStateError};
   }
 
   double InputType::ValueAsDouble() const noexcept
@@ -262,15 +262,15 @@ namespace krys::boo::html
     return std::numeric_limits<double>::quiet_NaN();
   }
 
-  dom::ExceptionOr<void> InputType::SetValueAsDouble(double doubleValue,
-                                                     TextFieldEventBehavior eventBehavior) const noexcept
+  ExceptionOr<void> InputType::SetValueAsDouble(double doubleValue,
+                                                TextFieldEventBehavior eventBehavior) const noexcept
   {
     return SetValueAsDecimal(Decimal::FromDouble(doubleValue), eventBehavior);
   }
 
-  dom::ExceptionOr<void> InputType::SetValueAsDecimal(const Decimal &, TextFieldEventBehavior) const noexcept
+  ExceptionOr<void> InputType::SetValueAsDecimal(const Decimal &, TextFieldEventBehavior) const noexcept
   {
-    return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    return Exception {ExceptionCode::InvalidStateError};
   }
 
   bool InputType::SupportsRequired() const noexcept
@@ -279,7 +279,7 @@ namespace krys::boo::html
     return SupportsValidation();
   }
 
-  bool InputType::RangeUnderflow(dom::DOMStringView value) const noexcept
+  bool InputType::RangeUnderflow(DOMStringView value) const noexcept
   {
     if (!IsSteppable())
     {
@@ -301,7 +301,7 @@ namespace krys::boo::html
     return numericValue < range.Minimum();
   }
 
-  bool InputType::RangeOverflow(dom::DOMStringView value) const noexcept
+  bool InputType::RangeOverflow(DOMStringView value) const noexcept
   {
     if (!IsSteppable())
     {
@@ -323,7 +323,7 @@ namespace krys::boo::html
     return numericValue > range.Maximum();
   }
 
-  bool InputType::IsInvalid(dom::DOMStringView value) const noexcept
+  bool InputType::IsInvalid(DOMStringView value) const noexcept
   {
     return TypeMismatch() || StepMismatch(value) || RangeUnderflow(value) || RangeOverflow(value)
            || PatternMismatch(value) || ValueMissing(value) || HasBadInput();
@@ -344,7 +344,7 @@ namespace krys::boo::html
     return CreateStepRange(AnyStepHandling::Reject).Maximum().ToDouble();
   }
 
-  bool InputType::IsInRange(dom::DOMStringView value) const noexcept
+  bool InputType::IsInRange(DOMStringView value) const noexcept
   {
     if (!IsSteppable())
     {
@@ -368,7 +368,7 @@ namespace krys::boo::html
     return numericValue >= stepRange.Minimum() && numericValue <= stepRange.Maximum();
   }
 
-  bool InputType::IsOutOfRange(dom::DOMStringView value) const noexcept
+  bool InputType::IsOutOfRange(DOMStringView value) const noexcept
   {
     if (!IsSteppable() || value.empty())
     {
@@ -392,7 +392,7 @@ namespace krys::boo::html
     return numericValue < stepRange.Minimum() || numericValue > stepRange.Maximum();
   }
 
-  bool InputType::StepMismatch(dom::DOMStringView value) const noexcept
+  bool InputType::StepMismatch(DOMStringView value) const noexcept
   {
     if (!IsSteppable())
     {
@@ -408,23 +408,23 @@ namespace krys::boo::html
     return CreateStepRange(AnyStepHandling::Reject).StepMismatch(numericValue);
   }
 
-  dom::DOMString InputType::BadInputText() const noexcept
+  DOMString InputType::BadInputText() const noexcept
   {
     krys_debug_assert(false);
     return ValidationMessageTypeMismatchText();
   }
 
-  dom::DOMString InputType::TypeMismatchText() const noexcept
+  DOMString InputType::TypeMismatchText() const noexcept
   {
     return ValidationMessageTypeMismatchText();
   }
 
-  dom::DOMString InputType::ValueMissingText() const noexcept
+  DOMString InputType::ValueMissingText() const noexcept
   {
     return ValidationMessageValueMissingText();
   }
 
-  dom::DOMString InputType::ValidationMessage() const noexcept
+  DOMString InputType::ValidationMessage() const noexcept
   {
     krys_debug_assert(Element());
     auto &element = *Element();
@@ -450,7 +450,7 @@ namespace krys::boo::html
     if (PatternMismatch(value))
     {
       auto title = infra::StringAlgorithms::StripAndCollapseASCIIWhitespace(
-        element.GetAttribute(u8"title").value_or(dom::DOMString()));
+        element.GetAttribute(u8"title").value_or(DOMString()));
       if (title.empty())
       {
         return ValidationMessagePatternMismatchText();
@@ -496,44 +496,44 @@ namespace krys::boo::html
     {
       auto stepString = stepRange.HasStep()
                           ? SerializeForNumberType(stepRange.Step() / Decimal(stepRange.StepScaleFactor()))
-                          : dom::DOMString();
+                          : DOMString();
       return ValidationMessageStepMismatchText(Serialize(stepRange.StepBase()), stepString);
     }
 
     return {};
   }
 
-  InputType::ShouldCallBaseEventHandler InputType::HandleKeydownEvent(dom::KeyboardEvent &) noexcept
+  InputType::ShouldCallBaseEventHandler InputType::HandleKeydownEvent(KeyboardEvent &) noexcept
   {
     return ShouldCallBaseEventHandler::Yes;
   }
 
-  void InputType::HandleKeypressEvent(dom::KeyboardEvent &) noexcept
+  void InputType::HandleKeypressEvent(KeyboardEvent &) noexcept
   {
   }
 
-  void InputType::HandleKeyupEvent(dom::KeyboardEvent &) noexcept
+  void InputType::HandleKeyupEvent(KeyboardEvent &) noexcept
   {
   }
 
-  bool InputType::ShouldSubmitImplicitly(dom::Event &event) noexcept
+  bool InputType::ShouldSubmitImplicitly(Event &event) noexcept
   {
-    auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event);
+    auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event);
     return keyboardEvent && event.Type() == event_names::KeyPress && keyboardEvent->CharCode() == '\r';
   }
 
-  Decimal InputType::ParseToNumber(dom::DOMStringView, const Decimal &defaultValue) const noexcept
+  Decimal InputType::ParseToNumber(DOMStringView, const Decimal &defaultValue) const noexcept
   {
     krys_debug_assert(false);
     return defaultValue;
   }
 
-  Decimal InputType::ParseToNumberOrNaN(dom::DOMStringView string) const noexcept
+  Decimal InputType::ParseToNumberOrNaN(DOMStringView string) const noexcept
   {
     return ParseToNumber(string, Decimal::NaN());
   }
 
-  dom::DOMString InputType::Serialize(const Decimal &) const noexcept
+  DOMString InputType::Serialize(const Decimal &) const noexcept
   {
     krys_debug_assert(false);
     return {};
@@ -544,7 +544,7 @@ namespace krys::boo::html
     return DateComponentsType::Invalid;
   }
 
-  void InputType::DispatchSimulatedClickIfActive(dom::KeyboardEvent &event) const noexcept
+  void InputType::DispatchSimulatedClickIfActive(KeyboardEvent &event) const noexcept
   {
     krys_debug_assert(Element());
     auto &element = *Element();
@@ -793,12 +793,12 @@ namespace krys::boo::html
     return true;
   }
 
-  Maybe<dom::DOMString> InputType::FallbackValue() const noexcept
+  Maybe<DOMString> InputType::FallbackValue() const noexcept
   {
     return std::nullopt;
   }
 
-  Maybe<dom::DOMString> InputType::DefaultValue() const noexcept
+  Maybe<DOMString> InputType::DefaultValue() const noexcept
   {
     return std::nullopt;
   }
@@ -813,7 +813,7 @@ namespace krys::boo::html
     return true;
   }
 
-  void InputType::SetValue(dom::DOMStringView sanitizedValue, bool valueChanged,
+  void InputType::SetValue(DOMStringView sanitizedValue, bool valueChanged,
                            TextFieldEventBehavior eventBehavior, TextControlSetValueSelection) noexcept
   {
     auto *element = Element();
@@ -862,15 +862,15 @@ namespace krys::boo::html
     }
   }
 
-  dom::DOMString InputType::VisibleValue() const noexcept
+  DOMString InputType::VisibleValue() const noexcept
   {
     krys_debug_assert(Element());
     return Element()->Value();
   }
 
-  dom::DOMString InputType::LocalizeValue(dom::DOMStringView proposedValue) const noexcept
+  DOMString InputType::LocalizeValue(DOMStringView proposedValue) const noexcept
   {
-    return dom::DOMString(proposedValue);
+    return DOMString(proposedValue);
   }
 
   ChromeClient *InputType::GetChromeClient() const noexcept
@@ -889,9 +889,9 @@ namespace krys::boo::html
     return window && window->HasTransientActivation();
   }
 
-  dom::DOMString InputType::SanitizeValue(dom::DOMStringView proposedValue) const noexcept
+  DOMString InputType::SanitizeValue(DOMStringView proposedValue) const noexcept
   {
-    return dom::DOMString(proposedValue);
+    return DOMString(proposedValue);
   }
 
   bool InputType::IsInteractiveContent() const noexcept
@@ -959,8 +959,8 @@ namespace krys::boo::html
     return 0;
   }
 
-  dom::ExceptionOr<void> InputType::ApplyStep(int count, AnyStepHandling anyStepHandling,
-                                              TextFieldEventBehavior eventBehavior) noexcept
+  ExceptionOr<void> InputType::ApplyStep(int count, AnyStepHandling anyStepHandling,
+                                         TextFieldEventBehavior eventBehavior) noexcept
   {
     // https://html.spec.whatwg.org/#dom-input-stepup
 
@@ -970,7 +970,7 @@ namespace krys::boo::html
     // steps.
     if (!stepRange.HasStep())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     // 3. If the element has a minimum and a maximum and the minimum is greater than the maximum, then abort
@@ -996,8 +996,8 @@ namespace krys::boo::html
     Decimal step = stepRange.Step();
 
     Decimal newValue = current;
-    auto stepString = element->GetAttribute(u8"step").value_or(dom::DOMString());
-    bool isAnyStep = text::IsASCIICaselessEqual(dom::DOMStringView(stepString), u8"any");
+    auto stepString = element->GetAttribute(u8"step").value_or(DOMString());
+    bool isAnyStep = text::IsASCIICaselessEqual(DOMStringView(stepString), u8"any");
     if (!isAnyStep && stepRange.StepMismatch(current))
     {
       // Snap-to-step / clamping steps
@@ -1072,17 +1072,17 @@ namespace krys::boo::html
     return StepRange();
   }
 
-  dom::ExceptionOr<void> InputType::StepUp(int n) noexcept
+  ExceptionOr<void> InputType::StepUp(int n) noexcept
   {
     if (!IsSteppable())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     return ApplyStep(n, AnyStepHandling::Reject, TextFieldEventBehavior::DispatchNoEvent);
   }
 
-  Maybe<dom::DOMString> InputType::ResultForDialogSubmit() const noexcept
+  Maybe<DOMString> InputType::ResultForDialogSubmit() const noexcept
   {
     krys_debug_assert(Element());
     return Element()->Value();
@@ -1091,11 +1091,10 @@ namespace krys::boo::html
   Decimal InputType::FindStepBase(const Decimal &defaultValue) const noexcept
   {
     auto &element = *Element();
-    Decimal stepBase =
-      ParseToNumber(element.GetAttribute(u8"min").value_or(dom::DOMString()), Decimal::NaN());
+    Decimal stepBase = ParseToNumber(element.GetAttribute(u8"min").value_or(DOMString()), Decimal::NaN());
     if (!stepBase.IsFinite())
     {
-      stepBase = ParseToNumber(element.GetAttribute(u8"value").value_or(dom::DOMString()), defaultValue);
+      stepBase = ParseToNumber(element.GetAttribute(u8"value").value_or(DOMString()), defaultValue);
     }
     return stepBase;
   }

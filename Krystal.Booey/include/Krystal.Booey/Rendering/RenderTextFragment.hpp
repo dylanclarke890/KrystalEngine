@@ -51,12 +51,11 @@ namespace krys::boo
     WeakPtr<RenderBoxModelObject> _firstLetter;
 
   public:
-    RenderTextFragment(dom::Text &textNode, utf8_stringview text, size_t startOffset, size_t length) noexcept;
+    RenderTextFragment(boo::Text &textNode, utf8_stringview text, size_t startOffset, size_t length) noexcept;
 
-    RenderTextFragment(dom::Document &document, utf8_stringview text, size_t startOffset,
-                       size_t length) noexcept;
+    RenderTextFragment(Document &document, utf8_stringview text, size_t startOffset, size_t length) noexcept;
 
-    RenderTextFragment(dom::Document &document, utf8_string text) noexcept;
+    RenderTextFragment(Document &document, utf8_string text) noexcept;
 
     ~RenderTextFragment() noexcept override;
 

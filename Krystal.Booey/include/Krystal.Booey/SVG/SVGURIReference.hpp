@@ -29,11 +29,15 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
-  class DocumentOrShadowRoot;
   class Element;
+}
+
+namespace krys::boo::dom
+{
+  class DocumentOrShadowRoot;
 }
 
 namespace krys::boo::style
@@ -42,10 +46,9 @@ namespace krys::boo::style
   struct URL;
 }
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGElement;
-
   template <typename TOwner, typename... TBaseTypes>
   class SVGPropertyOwnerRegistry;
 
@@ -61,38 +64,37 @@ namespace krys::boo::svg
   public:
     virtual ~SVGURIReference() noexcept = default;
 
-    void ParseAttribute(const dom::QualifiedName &name, Maybe<dom::DOMStringView> value) noexcept;
+    void ParseAttribute(const QualifiedName &name, Maybe<DOMStringView> value) noexcept;
 
-    KRYS_NODISCARD static dom::DOMStringAtom
-      FragmentIdentifierFromIRIString(dom::DOMStringView url, const dom::Document &document) noexcept;
+    KRYS_NODISCARD static DOMStringAtom FragmentIdentifierFromIRIString(DOMStringView url,
+                                                                        const Document &document) noexcept;
 
-    KRYS_NODISCARD static dom::DOMStringAtom
-      FragmentIdentifierFromIRIString(const style::URL &url, const dom::Document &document) noexcept;
+    KRYS_NODISCARD static DOMStringAtom FragmentIdentifierFromIRIString(const style::URL &url,
+                                                                        const Document &document) noexcept;
 
-    KRYS_NODISCARD static dom::DOMStringAtom
+    KRYS_NODISCARD static DOMStringAtom
       FragmentIdentifierFromIRIString(const style::SVGMarkerResource &markerResource,
-                                      const dom::Document &document) noexcept;
+                                      const Document &document) noexcept;
 
     struct TargetElementResult
     {
-      RefPtr<dom::Element> Element;
-      dom::DOMStringAtom Identifier {null};
+      RefPtr<boo::Element> Element;
+      DOMStringAtom Identifier {null};
     };
 
     KRYS_NODISCARD static TargetElementResult
-      TargetElementFromIRIString(dom::DOMStringView iri, const dom::DocumentOrShadowRoot &treeScope,
-                                 const RefPtr<dom::Document> &externalDocument = nullptr) noexcept;
+      TargetElementFromIRIString(DOMStringView iri, const dom::DocumentOrShadowRoot &treeScope,
+                                 const RefPtr<Document> &externalDocument = nullptr) noexcept;
 
     KRYS_NODISCARD static TargetElementResult
       TargetElementFromIRIString(const style::URL &iri, const dom::DocumentOrShadowRoot &treeScope,
-                                 const RefPtr<dom::Document> &externalDocument = nullptr) noexcept;
+                                 const RefPtr<Document> &externalDocument = nullptr) noexcept;
 
-    KRYS_NODISCARD static bool IsExternalURIReference(dom::DOMStringView uri,
-                                                      const dom::Document &document) noexcept;
+    KRYS_NODISCARD static bool IsExternalURIReference(DOMStringView uri, const Document &document) noexcept;
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGURIReference>;
 
-    KRYS_NODISCARD const dom::DOMString &Href() const noexcept
+    KRYS_NODISCARD const DOMString &Href() const noexcept
     {
       return _href->CurrentValue();
     }
@@ -105,7 +107,7 @@ namespace krys::boo::svg
   protected:
     explicit SVGURIReference(SVGElement *contextElement) noexcept;
 
-    KRYS_NODISCARD static bool IsKnownAttribute(const dom::QualifiedName &attributeName) noexcept;
+    KRYS_NODISCARD static bool IsKnownAttribute(const QualifiedName &attributeName) noexcept;
 
     KRYS_NODISCARD virtual bool HaveFiredLoadEvent() const noexcept
     {

@@ -13,7 +13,7 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD dom::Element &ElementById(dom::Document &document, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD Element &ElementById(Document &document, DOMStringView id) noexcept
     {
       auto element = document.GetElementById(id);
       krys_assert(element);

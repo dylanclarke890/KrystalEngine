@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlmodelement
   class HTMLModElement : public HTMLElement
@@ -11,7 +11,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLModElement);
 
   public:
-    HTMLModElement(dom::Document &document) noexcept;
+    HTMLModElement(Document &document) noexcept;
 
 #pragma region HTMLModElement - https://html.spec.whatwg.org/#htmlmodelement
 
@@ -22,17 +22,17 @@ namespace krys::boo::html
     void Cite(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-mod-datetime
-    KRYS_NODISCARD dom::DOMString DateTime() const noexcept;
+    KRYS_NODISCARD DOMString DateTime() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-mod-datetime
-    void DateTime(dom::DOMString value) noexcept;
+    void DateTime(DOMString value) noexcept;
 
 #pragma endregion
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLModElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLModElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLModElement();
   }

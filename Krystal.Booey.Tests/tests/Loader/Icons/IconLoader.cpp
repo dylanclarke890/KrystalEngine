@@ -103,7 +103,7 @@ namespace krys::boo::tests
     LoadFixture fixture;
     LoadPage(fixture, u8"<!DOCTYPE html><link id=l rel=icon href=a.png>");
     REQUIRE(fixture.Client->IconDecisions.size() == 1);
-    auto &link = Downcast<html::HTMLLinkElement>(*fixture.Document().GetElementById(u8"l"));
+    auto &link = Downcast<HTMLLinkElement>(*fixture.Document().GetElementById(u8"l"));
 
     // The same icons aren't decided on again.
     (void)link.SetAttribute(u8"href", u8"a.png");
@@ -153,6 +153,6 @@ namespace krys::boo::tests
   {
     LoadFixture fixture;
     auto link = fixture.Document().CreateElement(u8"link").ReleaseValue();
-    CHECK(Downcast<html::HTMLLinkElement>(*link).RelList().Supports(u8"icon").ReleaseValue());
+    CHECK(Downcast<HTMLLinkElement>(*link).RelList().Supports(u8"icon").ReleaseValue());
   }
 }

@@ -40,17 +40,13 @@
 namespace krys::boo
 {
   struct CompositionUnderline;
+  class Document;
   class FontCascade;
   struct PaintInfo;
   class RenderStyle;
   class RenderText;
   struct StyledMarkedText;
   class TextPainter;
-
-  namespace dom
-  {
-    class Document;
-  }
 
   namespace inline_display
   {
@@ -74,7 +70,7 @@ namespace krys::boo
     // FIXME: We could just talk to the display box directly.
     const inline_iterator::BoxModernPath _textBox;
     const RenderText &_renderer;
-    const dom::Document &_document;
+    const boo::Document &_document;
     const RenderStyle &_style;
     const FloatRect _logicalRect;
     const TextRun _paintTextRun;

@@ -27,11 +27,10 @@
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
 #include "Krystal.Core/Text/StringToIntegerConversion.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  Maybe<float> SVGAnimationColorFunction::CalculateDistance(SVGElement &targetElement,
-                                                            dom::DOMStringView from,
-                                                            dom::DOMStringView to) const noexcept
+  Maybe<float> SVGAnimationColorFunction::CalculateDistance(SVGElement &targetElement, DOMStringView from,
+                                                            DOMStringView to) const noexcept
   {
     auto simpleFrom =
       SVGPropertyTraits<Color>::FromString(targetElement, from).ToColorTypeLossy<SRGBA<uint8>>().Resolved();
@@ -45,16 +44,17 @@ namespace krys::boo::svg
     return std::hypot(red, green, blue);
   }
 
-  Maybe<float> SVGAnimationIntegerFunction::CalculateDistance(SVGElement &, dom::DOMStringView from,
-                                                              dom::DOMStringView to) const noexcept
+  Maybe<float> SVGAnimationIntegerFunction::CalculateDistance(SVGElement &, DOMStringView from,
+                                                              DOMStringView to) const noexcept
   {
     return static_cast<float>(
       std::abs(text::ParseInteger<int32>(to).value_or(0) - text::ParseInteger<int32>(from).value_or(0)));
   }
 
-  Maybe<float> SVGAnimationNumberFunction::CalculateDistance(SVGElement &, dom::DOMStringView from,
-                                                             dom::DOMStringView to) const noexcept
+  Maybe<float> SVGAnimationNumberFunction::CalculateDistance(SVGElement &, DOMStringView from,
+                                                             DOMStringView to) const noexcept
   {
-    return std::abs(ParseNumberFromString(to).value_or(0) - ParseNumberFromString(from).value_or(0));
+    return std::abs(svg::ParseNumberFromString(to).value_or(0)
+                    - svg::ParseNumberFromString(from).value_or(0));
   }
 }

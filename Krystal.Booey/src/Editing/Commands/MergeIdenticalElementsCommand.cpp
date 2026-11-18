@@ -34,14 +34,13 @@
 
 namespace krys::boo
 {
-  Ref<MergeIdenticalElementsCommand> MergeIdenticalElementsCommand::Create(dom::Element &element1,
-                                                                           dom::Element &element2) noexcept
+  Ref<MergeIdenticalElementsCommand> MergeIdenticalElementsCommand::Create(Element &element1,
+                                                                           Element &element2) noexcept
   {
     return CreateRef<MergeIdenticalElementsCommand>(element1, element2);
   }
 
-  MergeIdenticalElementsCommand::MergeIdenticalElementsCommand(dom::Element &first,
-                                                               dom::Element &second) noexcept
+  MergeIdenticalElementsCommand::MergeIdenticalElementsCommand(Element &first, Element &second) noexcept
       : SimpleEditCommand(first.NodeDocument()), _element1(ShareRef(first)), _element2(ShareRef(second))
   {
     krys_debug_assert(_element1->NextSibling() == _element2.get());
@@ -57,7 +56,7 @@ namespace krys::boo
 
     _atChild = ShareRefPtr(_element2->FirstChild());
 
-    List<Ref<dom::Node>> children;
+    List<Ref<Node>> children;
     for (auto *child = _element1->FirstChild(); child; child = child->NextSibling())
     {
       children.push_back(ShareRef(*child));
@@ -73,9 +72,9 @@ namespace krys::boo
 
   void MergeIdenticalElementsCommand::DoUnapply() noexcept
   {
-    RefPtr<dom::Node> atChild = krys::move(_atChild);
+    RefPtr<Node> atChild = krys::move(_atChild);
 
-    RefPtr<dom::ContainerNode> parent = ShareRefPtr(_element2->ParentNode());
+    RefPtr<ContainerNode> parent = ShareRefPtr(_element2->ParentNode());
     if (!parent || !parent->HasEditableStyle())
     {
       return;
@@ -86,7 +85,7 @@ namespace krys::boo
       return;
     }
 
-    List<Ref<dom::Node>> children;
+    List<Ref<Node>> children;
     for (auto *child = _element2->FirstChild(); child && child != atChild.get(); child = child->NextSibling())
     {
       children.push_back(ShareRef(*child));

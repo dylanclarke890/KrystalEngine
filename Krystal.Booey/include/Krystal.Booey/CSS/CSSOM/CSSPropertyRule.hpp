@@ -34,7 +34,10 @@
 namespace krys::boo::css
 {
   class PropertyRule;
+}
 
+namespace krys::boo
+{
   /// @brief An `@property` rule, exposed to scripts.
   /// @see https://drafts.css-houdini.org/css-properties-values-api/#the-css-property-rule-interface
   class CSSPropertyRule final : public CSSRule
@@ -62,17 +65,17 @@ namespace krys::boo::css
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
   private:
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::Property;
+      return css::RuleType::Property;
     }
 
-    void Reattach(Rule &rule) noexcept final;
+    void Reattach(css::Rule &rule) noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSPropertyRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSPropertyRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::Property;
   }

@@ -34,7 +34,7 @@
 
 namespace krys::boo::html
 {
-  DateTimeSymbolicFieldElement::DateTimeSymbolicFieldElement(dom::Document &document,
+  DateTimeSymbolicFieldElement::DateTimeSymbolicFieldElement(Document &document,
                                                              DateTimeFieldElementFieldOwner &fieldOwner,
                                                              const List<utf8_string> &symbols,
                                                              int placeholderIndex) noexcept
@@ -95,7 +95,7 @@ namespace krys::boo::html
     SetValueAsInteger(newValue, EventBehavior::DispatchInputAndChangeEvents);
   }
 
-  dom::DOMString DateTimeSymbolicFieldElement::Value() const noexcept
+  DOMString DateTimeSymbolicFieldElement::Value() const noexcept
   {
     if (HasValue())
     {
@@ -104,12 +104,12 @@ namespace krys::boo::html
     return {};
   }
 
-  dom::DOMString DateTimeSymbolicFieldElement::PlaceholderValue() const noexcept
+  DOMString DateTimeSymbolicFieldElement::PlaceholderValue() const noexcept
   {
     return _symbols[static_cast<size_t>(_placeholderIndex)];
   }
 
-  void DateTimeSymbolicFieldElement::HandleKeyboardEvent(dom::KeyboardEvent &keyboardEvent) noexcept
+  void DateTimeSymbolicFieldElement::HandleKeyboardEvent(KeyboardEvent &keyboardEvent) noexcept
   {
     if (keyboardEvent.Type() != event_names::KeyPress)
     {
@@ -146,7 +146,7 @@ namespace krys::boo::html
     return static_cast<int32>(_symbols.size());
   }
 
-  dom::DOMString DateTimeSymbolicFieldElement::OptionAtIndex(int32 index) const noexcept
+  DOMString DateTimeSymbolicFieldElement::OptionAtIndex(int32 index) const noexcept
   {
     return _symbols[static_cast<size_t>(index)];
   }

@@ -33,15 +33,15 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCustomPropertyData.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSComputedStyleDeclaration::CSSComputedStyleDeclaration(dom::Element &element, IsEmpty isEmpty) noexcept
+  CSSComputedStyleDeclaration::CSSComputedStyleDeclaration(Element &element, IsEmpty isEmpty) noexcept
       : _element(ShareRef(element)), _isEmpty(isEmpty == IsEmpty::Yes)
   {
   }
 
   CSSComputedStyleDeclaration::CSSComputedStyleDeclaration(
-    dom::Element &element, const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
+    Element &element, const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
       : _element(ShareRef(element)), _pseudoElementIdentifier(pseudoElementIdentifier)
   {
   }
@@ -49,12 +49,12 @@ namespace krys::boo::css
   CSSComputedStyleDeclaration::~CSSComputedStyleDeclaration() noexcept = default;
 
   Ref<CSSComputedStyleDeclaration> CSSComputedStyleDeclaration::Create(
-    dom::Element &element, const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
+    Element &element, const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
   {
     return AdoptRef(*new CSSComputedStyleDeclaration(element, pseudoElementIdentifier));
   }
 
-  Ref<CSSComputedStyleDeclaration> CSSComputedStyleDeclaration::CreateEmpty(dom::Element &element) noexcept
+  Ref<CSSComputedStyleDeclaration> CSSComputedStyleDeclaration::CreateEmpty(Element &element) noexcept
   {
     return AdoptRef(*new CSSComputedStyleDeclaration(element, IsEmpty::Yes));
   }
@@ -69,33 +69,34 @@ namespace krys::boo::css
     return {};
   }
 
-  dom::ExceptionOr<void> CSSComputedStyleDeclaration::SetCssText(const CSSOMString &) noexcept
+  ExceptionOr<void> CSSComputedStyleDeclaration::SetCssText(const CSSOMString &) noexcept
   {
-    return dom::ExceptionCode::NoModificationAllowedError;
+    return ExceptionCode::NoModificationAllowedError;
   }
 
-  Ref<MutableStyleProperties> CSSComputedStyleDeclaration::CopyProperties() const noexcept
+  Ref<css::MutableStyleProperties> CSSComputedStyleDeclaration::CopyProperties() const noexcept
   {
     if (_isEmpty)
     {
-      return MutableStyleProperties::Create();
+      return css::MutableStyleProperties::Create();
     }
     return GetExtractor().CopyProperties();
   }
 
-  const FixedVector<PropertyId> &CSSComputedStyleDeclaration::ExposedComputedCSSPropertyIds() const noexcept
+  const FixedVector<css::PropertyId> &
+    CSSComputedStyleDeclaration::ExposedComputedCSSPropertyIds() const noexcept
   {
     return ProtectedElement()->NodeDocument().ExposedComputedCSSPropertyIds();
   }
 
-  CSSOMString CSSComputedStyleDeclaration::GetPropertyValue(PropertyId propertyID) const noexcept
+  CSSOMString CSSComputedStyleDeclaration::GetPropertyValue(css::PropertyId propertyID) const noexcept
   {
     if (_isEmpty)
     {
       return {}; // FIXME: Should this be null instead, as it is in StyleProperties::GetPropertyValue?
     }
 
-    return GetExtractor().PropertyValueSerialisation(propertyID, DefaultSerialisationContext());
+    return GetExtractor().PropertyValueSerialisation(propertyID, css::DefaultSerialisationContext());
   }
 
   uint32 CSSComputedStyleDeclaration::Length() const noexcept
@@ -105,7 +106,7 @@ namespace krys::boo::css
       return 0;
     }
 
-    style::Extractor::UpdateStyleIfNeededForProperty(*_element, PropertyId::Custom);
+    style::Extractor::UpdateStyleIfNeededForProperty(*_element, css::PropertyId::Custom);
 
     const auto *style = ProtectedElement()->ComputedStyle(_pseudoElementIdentifier);
     if (!style)
@@ -169,19 +170,19 @@ namespace krys::boo::css
       return {};
     }
 
-    if (IsCustomPropertyName(propertyName))
+    if (css::IsCustomPropertyName(propertyName))
     {
       return GetExtractor().CustomPropertyValueSerialisation(CSSOMStringAtom {propertyName},
-                                                             DefaultSerialisationContext());
+                                                             css::DefaultSerialisationContext());
     }
 
-    auto propertyID = PropertyIdFromName(propertyName);
-    if (propertyID == PropertyId::Invalid)
+    auto propertyID = css::PropertyIdFromName(propertyName);
+    if (propertyID == css::PropertyId::Invalid)
     {
       return {};
     }
 
-    return GetExtractor().PropertyValueSerialisation(propertyID, DefaultSerialisationContext());
+    return GetExtractor().PropertyValueSerialisation(propertyID, css::DefaultSerialisationContext());
   }
 
   CSSOMString CSSComputedStyleDeclaration::GetPropertyPriority(const CSSOMString &) noexcept
@@ -200,25 +201,25 @@ namespace krys::boo::css
     return false;
   }
 
-  dom::ExceptionOr<void> CSSComputedStyleDeclaration::SetProperty(const CSSOMString &, const CSSOMString &,
-                                                                  const CSSOMString &) noexcept
+  ExceptionOr<void> CSSComputedStyleDeclaration::SetProperty(const CSSOMString &, const CSSOMString &,
+                                                             const CSSOMString &) noexcept
   {
-    return dom::ExceptionCode::NoModificationAllowedError;
+    return ExceptionCode::NoModificationAllowedError;
   }
 
-  dom::ExceptionOr<CSSOMString> CSSComputedStyleDeclaration::RemoveProperty(const CSSOMString &) noexcept
+  ExceptionOr<CSSOMString> CSSComputedStyleDeclaration::RemoveProperty(const CSSOMString &) noexcept
   {
-    return dom::ExceptionCode::NoModificationAllowedError;
+    return ExceptionCode::NoModificationAllowedError;
   }
 
-  CSSOMString CSSComputedStyleDeclaration::GetPropertyValueInternal(PropertyId propertyID) noexcept
+  CSSOMString CSSComputedStyleDeclaration::GetPropertyValueInternal(css::PropertyId propertyID) noexcept
   {
     return GetPropertyValue(propertyID);
   }
 
-  dom::ExceptionOr<void> CSSComputedStyleDeclaration::SetPropertyInternal(PropertyId, const CSSOMString &,
-                                                                          IsImportant) noexcept
+  ExceptionOr<void> CSSComputedStyleDeclaration::SetPropertyInternal(css::PropertyId, const CSSOMString &,
+                                                                     css::IsImportant) noexcept
   {
-    return dom::ExceptionCode::NoModificationAllowedError;
+    return ExceptionCode::NoModificationAllowedError;
   }
 }

@@ -37,10 +37,10 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(DateTimeDayFieldElement);
 
   public:
-    DateTimeDayFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+    DateTimeDayFieldElement(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
     KRYS_NODISCARD static Ref<DateTimeDayFieldElement>
-      Create(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+      Create(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
   private:
     // DateTimeFieldElement functions:
@@ -56,10 +56,10 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(DateTimeHourFieldElement);
 
   public:
-    DateTimeHourFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner, int minimum,
+    DateTimeHourFieldElement(Document &document, DateTimeFieldElementFieldOwner &fieldOwner, int minimum,
                              int maximum) noexcept;
 
-    KRYS_NODISCARD static Ref<DateTimeHourFieldElement> Create(dom::Document &document,
+    KRYS_NODISCARD static Ref<DateTimeHourFieldElement> Create(Document &document,
                                                                DateTimeFieldElementFieldOwner &fieldOwner,
                                                                int minimum, int maximum) noexcept;
 
@@ -77,10 +77,10 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(DateTimeMeridiemFieldElement);
 
   public:
-    DateTimeMeridiemFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner,
+    DateTimeMeridiemFieldElement(Document &document, DateTimeFieldElementFieldOwner &fieldOwner,
                                  const List<utf8_string> &labels) noexcept;
 
-    KRYS_NODISCARD static Ref<DateTimeMeridiemFieldElement> Create(dom::Document &document,
+    KRYS_NODISCARD static Ref<DateTimeMeridiemFieldElement> Create(Document &document,
                                                                    DateTimeFieldElementFieldOwner &fieldOwner,
                                                                    const List<utf8_string> &labels) noexcept;
 
@@ -98,11 +98,10 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(DateTimeMillisecondFieldElement);
 
   public:
-    DateTimeMillisecondFieldElement(dom::Document &document,
-                                    DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+    DateTimeMillisecondFieldElement(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
     KRYS_NODISCARD static Ref<DateTimeMillisecondFieldElement>
-      Create(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+      Create(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
   private:
     // DateTimeFieldElement functions:
@@ -118,10 +117,10 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(DateTimeMinuteFieldElement);
 
   public:
-    DateTimeMinuteFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+    DateTimeMinuteFieldElement(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
     KRYS_NODISCARD static Ref<DateTimeMinuteFieldElement>
-      Create(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+      Create(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
   private:
     // DateTimeFieldElement functions:
@@ -137,10 +136,10 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(DateTimeMonthFieldElement);
 
   public:
-    DateTimeMonthFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+    DateTimeMonthFieldElement(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
     KRYS_NODISCARD static Ref<DateTimeMonthFieldElement>
-      Create(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+      Create(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
   private:
     // DateTimeFieldElement functions:
@@ -156,10 +155,10 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(DateTimeSecondFieldElement);
 
   public:
-    DateTimeSecondFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+    DateTimeSecondFieldElement(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
     KRYS_NODISCARD static Ref<DateTimeSecondFieldElement>
-      Create(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+      Create(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
   private:
     // DateTimeFieldElement functions:
@@ -175,11 +174,11 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(DateTimeSymbolicMonthFieldElement);
 
   public:
-    DateTimeSymbolicMonthFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner,
+    DateTimeSymbolicMonthFieldElement(Document &document, DateTimeFieldElementFieldOwner &fieldOwner,
                                       const List<utf8_string> &labels) noexcept;
 
     KRYS_NODISCARD static Ref<DateTimeSymbolicMonthFieldElement>
-      Create(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner,
+      Create(Document &document, DateTimeFieldElementFieldOwner &fieldOwner,
              const List<utf8_string> &labels) noexcept;
 
   private:
@@ -196,10 +195,10 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(DateTimeWeekFieldElement);
 
   public:
-    DateTimeWeekFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+    DateTimeWeekFieldElement(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
     KRYS_NODISCARD static Ref<DateTimeWeekFieldElement>
-      Create(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+      Create(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
   private:
     // DateTimeFieldElement functions:
@@ -215,10 +214,10 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(DateTimeYearFieldElement);
 
   public:
-    DateTimeYearFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+    DateTimeYearFieldElement(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
     KRYS_NODISCARD static Ref<DateTimeYearFieldElement>
-      Create(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+      Create(Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
     void StepDown() noexcept final;
 

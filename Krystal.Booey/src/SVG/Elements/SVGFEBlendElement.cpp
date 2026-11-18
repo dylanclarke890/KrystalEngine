@@ -25,9 +25,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFEBlendElement::SVGFEBlendElement(dom::Document &document) noexcept
+  SVGFEBlendElement::SVGFEBlendElement(Document &document) noexcept
       : SVGFilterPrimitiveStandardAttributes(document, CreateUnique<PropertyRegistry>(*this),
                                              SVGElementInterface::FEBlend),
         _in1(SVGAnimatedString::Create(this)), _in2(SVGAnimatedString::Create(this)),
@@ -43,10 +43,10 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGFEBlendElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                           Maybe<dom::DOMStringView> value) noexcept
+  void SVGFEBlendElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                           Maybe<DOMStringView> value) noexcept
   {
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::ModeAttr())
     {
@@ -58,18 +58,18 @@ namespace krys::boo::svg
     }
     else if (name == SVGNames::InAttr())
     {
-      _in1->SetBaseValInternal(dom::DOMString(string));
+      _in1->SetBaseValInternal(DOMString(string));
     }
     else if (name == SVGNames::In2Attr())
     {
-      _in2->SetBaseValInternal(dom::DOMString(string));
+      _in2->SetBaseValInternal(DOMString(string));
     }
 
     SVGFilterPrimitiveStandardAttributes::AttributeChanged(name, oldValue, value);
   }
 
   bool SVGFEBlendElement::SetFilterEffectAttribute(FilterEffect &effect,
-                                                   const dom::QualifiedName &attributeName) noexcept
+                                                   const QualifiedName &attributeName) noexcept
   {
     auto &feBlend = Downcast<FEBlend>(effect);
     if (attributeName == SVGNames::ModeAttr())
@@ -81,7 +81,7 @@ namespace krys::boo::svg
     return false;
   }
 
-  void SVGFEBlendElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGFEBlendElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {

@@ -84,7 +84,7 @@
 
 namespace krys::boo::html
 {
-  RefPtr<HTMLElement> HTMLElementFactory::TryCreate(dom::Document &document, TagName elementName) noexcept
+  RefPtr<HTMLElement> HTMLElementFactory::TryCreate(Document &document, TagName elementName) noexcept
   {
     // 4. Otherwise, if this specification defines an interface appropriate for the element type corresponding
     //    to the local name name, then return that interface.

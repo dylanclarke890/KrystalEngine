@@ -21,7 +21,7 @@ namespace krys::boo::tests
       return renderer;
     }
 
-    KRYS_NODISCARD dom::Element &ElementById(dom::Document &document, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD Element &ElementById(Document &document, DOMStringView id) noexcept
     {
       auto element = document.GetElementById(id);
       krys_assert(element);
@@ -29,7 +29,7 @@ namespace krys::boo::tests
     }
 
     template <typename T>
-    KRYS_NODISCARD T &RendererById(dom::Document &document, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD T &RendererById(Document &document, DOMStringView id) noexcept
     {
       auto *renderer = ElementById(document, id).Renderer();
       krys_assert(renderer);

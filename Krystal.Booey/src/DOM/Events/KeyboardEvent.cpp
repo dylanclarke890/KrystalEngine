@@ -30,7 +30,7 @@
 #include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   namespace
   {

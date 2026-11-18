@@ -5,12 +5,19 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
   class Element;
-  class HTMLCollection;
+}
 
+namespace krys::boo::dom
+{
+  class HTMLCollection;
+}
+
+namespace krys::boo
+{
   /// @see https://dom.spec.whatwg.org/#interface-documentfragment
   class DocumentFragment : public ContainerNode
   {
@@ -23,7 +30,7 @@ namespace krys::boo::dom
     WeakPtr<Element> _host;
 
   protected:
-    DocumentFragment(Document &document, NodeFlags flags) noexcept;
+    DocumentFragment(Document &document, dom::NodeFlags flags) noexcept;
 
   public:
     /// @brief The host of a shadow root or a template's template contents; null otherwise.
@@ -64,7 +71,7 @@ namespace krys::boo::dom
 
     /// @brief Returns the child elements.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-children
-    KRYS_NODISCARD Ref<HTMLCollection> Children() noexcept;
+    KRYS_NODISCARD Ref<dom::HTMLCollection> Children() noexcept;
 
     /// @brief Returns the first child that is an element; otherwise null.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-firstelementchild
@@ -90,19 +97,19 @@ namespace krys::boo::dom
     /// equivalent Text nodes.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-prepend
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
-    ExceptionOr<void> Prepend(const List<NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> Prepend(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Inserts `nodes` after the last child of `this`, while replacing strings in `nodes` with
     /// equivalent Text nodes.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-append
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
-    ExceptionOr<void> Append(const List<NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> Append(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Replace all children of `this` with `nodes`, while replacing strings in `nodes` with equivalent
     /// Text nodes.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-replacechildren
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
-    ExceptionOr<void> ReplaceChildren(const List<NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> ReplaceChildren(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Moves, without first removing, `movedNode` into `this` after `child` if `child` is non-null;
     /// otherwise after the last child of node. This method preserves state associated with `movedNode`.
@@ -117,7 +124,7 @@ namespace krys::boo::dom
 
     /// @brief Returns all element descendants of `this` that match `selectors`.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-queryselectorall
-    KRYS_NODISCARD ExceptionOr<Ref<NodeList>> QuerySelectorAll(DOMStringView selectors) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<dom::NodeList>> QuerySelectorAll(DOMStringView selectors) noexcept;
 
 #pragma endregion
 
@@ -135,8 +142,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::DocumentFragment)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::DocumentFragment)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
     return node.IsDocumentFragmentNode();
   }

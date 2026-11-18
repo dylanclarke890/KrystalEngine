@@ -40,7 +40,7 @@
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -61,7 +61,7 @@ namespace krys::boo
 
   /// @brief An animation: it plays an animation effect, and gives it its time from a timeline.
   /// @see https://drafts.csswg.org/web-animations-1/#animations
-  class WebAnimation : public dom::EventTarget
+  class WebAnimation : public EventTarget
   {
   public:
     enum class PlayState : uint8
@@ -129,7 +129,7 @@ namespace krys::boo
     RefPtr<css::Value> _specifiedRangeStart;
     RefPtr<css::Value> _specifiedRangeEnd;
     double _playbackRate {1};
-    dom::DOMString _id;
+    DOMString _id;
     int32 _suspendCount {0};
     bool _isSuspended {false};
     bool _finishNotificationStepsMicrotaskPending {false};
@@ -141,22 +141,22 @@ namespace krys::boo
     TimeToRunPendingTask _timeToRunPendingPauseTask {TimeToRunPendingTask::NotScheduled};
     ReplaceState _replaceState {ReplaceState::Active};
     uint64 _globalPosition {0};
-    WeakPtr<dom::Document> _document;
+    WeakPtr<Document> _document;
     style::SingleAnimationRange _timelineRange {
       .Start = {css::keywords::Normal {}},
       .End = {css::keywords::Normal {}},
     };
 
   protected:
-    explicit WebAnimation(dom::Document &document) noexcept;
+    explicit WebAnimation(Document &document) noexcept;
 
   public:
     ~WebAnimation() noexcept override;
 
     /// @brief An animation of @p effect on @p document's default timeline.
-    KRYS_NODISCARD static Ref<WebAnimation> Create(dom::Document &document, AnimationEffect *effect) noexcept;
+    KRYS_NODISCARD static Ref<WebAnimation> Create(Document &document, AnimationEffect *effect) noexcept;
 
-    KRYS_NODISCARD static Ref<WebAnimation> Create(dom::Document &document, AnimationEffect *effect,
+    KRYS_NODISCARD static Ref<WebAnimation> Create(Document &document, AnimationEffect *effect,
                                                    AnimationTimeline *timeline) noexcept;
 
     /// @brief Every animation that exists.
@@ -164,7 +164,7 @@ namespace krys::boo
 
     /// @brief Stops every animation of a document that's going away: they lose their listeners and effects,
     /// and with them what those hold on to, even if something still holds the animation.
-    static void StopAnimationsOfDocument(const dom::Document &document) noexcept;
+    static void StopAnimationsOfDocument(const Document &document) noexcept;
 
     KRYS_NODISCARD virtual bool IsStyleOriginatedAnimation() const noexcept
     {
@@ -184,12 +184,12 @@ namespace krys::boo
     KRYS_NODISCARD bool IsSkippedContentAnimation() const noexcept;
 
     /// @see https://drafts.csswg.org/web-animations-1/#dom-animation-id
-    KRYS_NODISCARD const dom::DOMString &Id() const noexcept
+    KRYS_NODISCARD const DOMString &Id() const noexcept
     {
       return _id;
     }
 
-    void SetId(dom::DOMString id) noexcept;
+    void SetId(DOMString id) noexcept;
 
     KRYS_NODISCARD AnimationEffect *BindingsEffect() const noexcept
     {
@@ -230,7 +230,7 @@ namespace krys::boo
       CurrentTime(UseCachedCurrentTime useCachedCurrentTime = UseCachedCurrentTime::Yes) const noexcept;
 
     /// @see https://drafts.csswg.org/web-animations-2/#setting-the-current-time-of-an-animation
-    dom::ExceptionOr<void> SetCurrentTime(Maybe<WebAnimationTime> seekTime) noexcept;
+    ExceptionOr<void> SetCurrentTime(Maybe<WebAnimationTime> seekTime) noexcept;
 
     KRYS_NODISCARD double PlaybackRate() const noexcept
     {
@@ -281,22 +281,22 @@ namespace krys::boo
     virtual void Cancel(Silently silently = Silently::No) noexcept;
 
     /// @see https://drafts.csswg.org/web-animations-1/#finish-an-animation
-    dom::ExceptionOr<void> Finish() noexcept;
+    ExceptionOr<void> Finish() noexcept;
 
     /// @see https://drafts.csswg.org/web-animations-2/#play-an-animation
-    dom::ExceptionOr<void> Play() noexcept;
+    ExceptionOr<void> Play() noexcept;
 
     /// @see https://drafts.csswg.org/web-animations/#seamlessly-update-the-playback-rate
     void UpdatePlaybackRate(double newPlaybackRate) noexcept;
 
     /// @see https://drafts.csswg.org/web-animations-2/#pause-an-animation
-    dom::ExceptionOr<void> Pause() noexcept;
+    ExceptionOr<void> Pause() noexcept;
 
     /// @brief Reverses the animation, as `reverse()` does.
-    virtual dom::ExceptionOr<void> BindingsReverse() noexcept;
+    virtual ExceptionOr<void> BindingsReverse() noexcept;
 
     /// @see https://drafts.csswg.org/web-animations-1/#reverse-an-animation
-    dom::ExceptionOr<void> Reverse() noexcept;
+    ExceptionOr<void> Reverse() noexcept;
 
     /// @see https://drafts.csswg.org/web-animations-1/#dom-animation-persist
     void Persist() noexcept;
@@ -305,7 +305,7 @@ namespace krys::boo
     /// @return A `NoModificationAllowedError` if the target can't have a style attribute (a pseudo-element),
     /// or an `InvalidStateError` if it isn't rendered.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-animation-commitstyles
-    dom::ExceptionOr<void> CommitStyles() noexcept;
+    ExceptionOr<void> CommitStyles() noexcept;
 
     /// @brief The start time, as `startTime` gives it: the style of a style-originated animation is brought
     /// up to date first.
@@ -316,7 +316,7 @@ namespace krys::boo
 
     /// @return A `TypeError` if @p startTime isn't valid for the timeline: a percentage on a monotonic
     /// timeline, or a time on a progress-based one.
-    virtual dom::ExceptionOr<void> SetBindingsStartTime(const Maybe<WebAnimationTime> &startTime) noexcept;
+    virtual ExceptionOr<void> SetBindingsStartTime(const Maybe<WebAnimationTime> &startTime) noexcept;
 
     KRYS_NODISCARD virtual Maybe<WebAnimationTime> BindingsCurrentTime() const noexcept
     {
@@ -325,8 +325,7 @@ namespace krys::boo
 
     /// @return A `TypeError` if @p currentTime isn't valid for the timeline, or if it's unresolved while the
     /// current time is resolved.
-    virtual dom::ExceptionOr<void>
-      SetBindingsCurrentTime(const Maybe<WebAnimationTime> &currentTime) noexcept;
+    virtual ExceptionOr<void> SetBindingsCurrentTime(const Maybe<WebAnimationTime> &currentTime) noexcept;
 
     KRYS_NODISCARD virtual PlayState BindingsPlayState() const noexcept
     {
@@ -356,13 +355,13 @@ namespace krys::boo
     }
 
     /// @brief Plays the animation, as `play()` does.
-    virtual dom::ExceptionOr<void> BindingsPlay() noexcept
+    virtual ExceptionOr<void> BindingsPlay() noexcept
     {
       return Play();
     }
 
     /// @brief Pauses the animation, as `pause()` does.
-    virtual dom::ExceptionOr<void> BindingsPause() noexcept
+    virtual ExceptionOr<void> BindingsPause() noexcept
     {
       return Pause();
     }
@@ -473,7 +472,7 @@ namespace krys::boo
     /// @brief Disassociates the animation from its effect and timeline.
     void Remove() noexcept;
 
-    void EnqueueAnimationPlaybackEvent(const dom::DOMStringAtom &type, Maybe<WebAnimationTime> currentTime,
+    void EnqueueAnimationPlaybackEvent(const DOMStringAtom &type, Maybe<WebAnimationTime> currentTime,
                                        Maybe<WebAnimationTime> scheduledTime) noexcept;
 
     /// @brief The animation's position in the global animation list, or zero if it has none.
@@ -520,7 +519,7 @@ namespace krys::boo
                   UseCachedCurrentTime useCachedCurrentTime = UseCachedCurrentTime::Yes) const noexcept;
 
     /// @see https://drafts.csswg.org/web-animations-2/#silently-set-the-current-time
-    dom::ExceptionOr<void> SilentlySetCurrentTime(Maybe<WebAnimationTime> seekTime) noexcept;
+    ExceptionOr<void> SilentlySetCurrentTime(Maybe<WebAnimationTime> seekTime) noexcept;
 
     /// @see https://drafts.csswg.org/web-animations-1/#finish-notification-steps
     void FinishNotificationSteps() noexcept;
@@ -535,7 +534,7 @@ namespace krys::boo
       return _timeToRunPendingPlayTask != TimeToRunPendingTask::NotScheduled;
     }
 
-    dom::ExceptionOr<void> Play(AutoRewind autoRewind) noexcept;
+    ExceptionOr<void> Play(AutoRewind autoRewind) noexcept;
 
     void RunPendingPauseTask() noexcept;
 

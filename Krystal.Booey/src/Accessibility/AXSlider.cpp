@@ -105,9 +105,9 @@ namespace krys::boo
     return input ? static_cast<float>(input->Minimum()) : 0;
   }
 
-  html::HTMLInputElement *AXSlider::InputElement() const noexcept
+  HTMLInputElement *AXSlider::InputElement() const noexcept
   {
-    return DynamicDowncast<html::HTMLInputElement>(GetNode());
+    return DynamicDowncast<HTMLInputElement>(GetNode());
   }
 
   Ref<AXSliderThumb> AXSliderThumb::Create(AXId id, AXObjectCache &cache) noexcept
@@ -119,9 +119,9 @@ namespace krys::boo
   {
   }
 
-  bool AXSlider::SetValue(dom::DOMStringView value) noexcept
+  bool AXSlider::SetValue(DOMStringView value) noexcept
   {
-    RefPtr<html::HTMLInputElement> input = ShareRefPtr(InputElement());
+    RefPtr<HTMLInputElement> input = ShareRefPtr(InputElement());
     if (!input)
     {
       return false;
@@ -136,7 +136,7 @@ namespace krys::boo
   LayoutRect AXSliderThumb::ElementRect() const noexcept
   {
     auto *parent = _parent.get();
-    auto *input = parent ? DynamicDowncast<html::HTMLInputElement>(parent->GetNode()) : nullptr;
+    auto *input = parent ? DynamicDowncast<HTMLInputElement>(parent->GetNode()) : nullptr;
     auto *thumb = input ? input->SliderThumbElement() : nullptr;
     auto *renderer = thumb ? thumb->Renderer() : nullptr;
     return renderer ? LayoutRect(renderer->AbsoluteBoundingBoxRect()) : LayoutRect();

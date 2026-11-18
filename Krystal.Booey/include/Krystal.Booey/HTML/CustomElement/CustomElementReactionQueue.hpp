@@ -35,17 +35,17 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
   class Element;
+  class HTMLFormElement;
 }
 
 namespace krys::boo::html
 {
   class CustomElementInterface;
   class ElementInternals;
-  class HTMLFormElement;
 
   /// @brief A custom element reaction: an upgrade, or a callback with its arguments.
   /// @see https://html.spec.whatwg.org/#custom-element-reactions
@@ -70,15 +70,15 @@ namespace krys::boo::html
 
     struct AdoptedPayload
     {
-      Ref<dom::Document> OldDocument;
-      Ref<dom::Document> NewDocument;
+      Ref<Document> OldDocument;
+      Ref<Document> NewDocument;
     };
 
     struct AttributeChangedPayload
     {
-      dom::QualifiedName Name;
-      dom::DOMStringAtom OldValue;
-      dom::DOMStringAtom NewValue;
+      QualifiedName Name;
+      DOMStringAtom OldValue;
+      DOMStringAtom NewValue;
     };
 
     struct FormAssociatedPayload
@@ -113,7 +113,7 @@ namespace krys::boo::html
       return _type;
     }
 
-    void Invoke(dom::Element &element, CustomElementInterface &elementInterface) noexcept;
+    void Invoke(Element &element, CustomElementInterface &elementInterface) noexcept;
   };
 
   /// @see https://html.spec.whatwg.org/#element-queue
@@ -122,7 +122,7 @@ namespace krys::boo::html
     KRYS_NON_COPY_MOVABLE(CustomElementQueue);
 
   private:
-    List<Ref<dom::Element>> _elements;
+    List<Ref<Element>> _elements;
     bool _invoking {false};
 
   public:
@@ -135,13 +135,13 @@ namespace krys::boo::html
       return _elements.empty();
     }
 
-    void Add(dom::Element &element) noexcept;
+    void Add(Element &element) noexcept;
 
     /// @brief Invokes the reactions of the queue's elements, in order, and empties it.
     /// @see https://html.spec.whatwg.org/#invoke-custom-element-reactions
     void ProcessQueue() noexcept;
 
-    KRYS_NODISCARD List<Ref<dom::Element>> TakeElements() noexcept;
+    KRYS_NODISCARD List<Ref<Element>> TakeElements() noexcept;
 
   private:
     void InvokeAll() noexcept;
@@ -167,36 +167,35 @@ namespace krys::boo::html
     ~CustomElementReactionQueue() noexcept;
 
     /// @see https://html.spec.whatwg.org/#enqueue-a-custom-element-upgrade-reaction
-    static void EnqueueElementUpgrade(dom::Element &element, bool alreadyScheduledToUpgrade) noexcept;
+    static void EnqueueElementUpgrade(Element &element, bool alreadyScheduledToUpgrade) noexcept;
 
     /// @see https://html.spec.whatwg.org/#concept-try-upgrade
-    static void TryToUpgradeElement(dom::Element &element) noexcept;
+    static void TryToUpgradeElement(Element &element) noexcept;
 
     /// @see https://html.spec.whatwg.org/#enqueue-a-custom-element-callback-reaction
-    static void EnqueueConnectedCallbackIfNeeded(dom::Element &element) noexcept;
+    static void EnqueueConnectedCallbackIfNeeded(Element &element) noexcept;
 
-    static void EnqueueDisconnectedCallbackIfNeeded(dom::Element &element) noexcept;
+    static void EnqueueDisconnectedCallbackIfNeeded(Element &element) noexcept;
 
-    static void EnqueueConnectedMoveCallbackIfNeeded(dom::Element &element) noexcept;
+    static void EnqueueConnectedMoveCallbackIfNeeded(Element &element) noexcept;
 
-    static void EnqueueAdoptedCallbackIfNeeded(dom::Element &element, dom::Document &oldDocument,
-                                               dom::Document &newDocument) noexcept;
+    static void EnqueueAdoptedCallbackIfNeeded(Element &element, Document &oldDocument,
+                                               Document &newDocument) noexcept;
 
-    static void EnqueueAttributeChangedCallbackIfNeeded(dom::Element &element,
-                                                        const dom::QualifiedName &attributeName,
-                                                        dom::DOMStringAtom oldValue,
-                                                        dom::DOMStringAtom newValue) noexcept;
+    static void EnqueueAttributeChangedCallbackIfNeeded(Element &element, const QualifiedName &attributeName,
+                                                        DOMStringAtom oldValue,
+                                                        DOMStringAtom newValue) noexcept;
 
-    static void EnqueueFormAssociatedCallbackIfNeeded(dom::Element &element, HTMLFormElement *form) noexcept;
+    static void EnqueueFormAssociatedCallbackIfNeeded(Element &element, HTMLFormElement *form) noexcept;
 
-    static void EnqueueFormDisabledCallbackIfNeeded(dom::Element &element, bool isDisabled) noexcept;
+    static void EnqueueFormDisabledCallbackIfNeeded(Element &element, bool isDisabled) noexcept;
 
-    static void EnqueueFormResetCallbackIfNeeded(dom::Element &element) noexcept;
+    static void EnqueueFormResetCallbackIfNeeded(Element &element) noexcept;
 
     /// @brief Enqueues the callbacks an upgrade implies: an attribute change for each observed attribute the
     /// element has, then the connection if it's connected.
     /// @see https://html.spec.whatwg.org/#concept-upgrade-an-element (steps 4 and 5)
-    static void EnqueuePostUpgradeReactions(dom::Element &element) noexcept;
+    static void EnqueuePostUpgradeReactions(Element &element) noexcept;
 
     KRYS_NODISCARD bool ObservesStyleAttribute() const noexcept;
 
@@ -216,7 +215,7 @@ namespace krys::boo::html
       return *_interface;
     }
 
-    void InvokeAll(dom::Element &element) noexcept;
+    void InvokeAll(Element &element) noexcept;
 
     void Clear() noexcept;
 
@@ -230,11 +229,11 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#backup-element-queue
     static void ProcessBackupQueue(CustomElementQueue &backupElementQueue) noexcept;
 
-    static void EnqueueElementsOnAppropriateElementQueue(const List<Ref<dom::Element>> &elements) noexcept;
+    static void EnqueueElementsOnAppropriateElementQueue(const List<Ref<Element>> &elements) noexcept;
 
   private:
     /// @see https://html.spec.whatwg.org/#enqueue-an-element-on-the-appropriate-element-queue
-    static void EnqueueElementOnAppropriateElementQueue(dom::Element &element) noexcept;
+    static void EnqueueElementOnAppropriateElementQueue(Element &element) noexcept;
   };
 
   /// @brief While one is alive (in debug builds), no custom element reactions may be enqueued: the scopes of
@@ -322,7 +321,7 @@ namespace krys::boo::html
       return s_currentProcessingStack != nullptr;
     }
 
-    KRYS_NODISCARD List<Ref<dom::Element>> TakeElements() noexcept
+    KRYS_NODISCARD List<Ref<Element>> TakeElements() noexcept
     {
       return _queue.TakeElements();
     }

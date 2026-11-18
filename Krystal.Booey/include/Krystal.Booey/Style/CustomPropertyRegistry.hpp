@@ -35,12 +35,8 @@
 
 namespace krys::boo
 {
-  class RenderStyle;
-}
-
-namespace krys::boo::dom
-{
   class Document;
+  class RenderStyle;
 }
 
 namespace krys::boo::style
@@ -70,8 +66,8 @@ namespace krys::boo::style
   private:
     Scope &_scope;
 
-    HashMap<css::CSSOMStringAtom, UniquePtr<css::RegisteredCustomProperty>> _propertiesFromAPI;
-    HashMap<css::CSSOMStringAtom, UniquePtr<css::RegisteredCustomProperty>> _propertiesFromStylesheet;
+    HashMap<CSSOMStringAtom, UniquePtr<css::RegisteredCustomProperty>> _propertiesFromAPI;
+    HashMap<CSSOMStringAtom, UniquePtr<css::RegisteredCustomProperty>> _propertiesFromStylesheet;
 
     mutable UniquePtr<RenderStyle> _initialValuePrototypeStyle;
     mutable bool _hasInvalidPrototypeStyle {false};
@@ -81,9 +77,9 @@ namespace krys::boo::style
 
     ~CustomPropertyRegistry() noexcept;
 
-    KRYS_NODISCARD const css::RegisteredCustomProperty *Get(const css::CSSOMStringAtom &) const noexcept;
+    KRYS_NODISCARD const css::RegisteredCustomProperty *Get(const CSSOMStringAtom &) const noexcept;
 
-    KRYS_NODISCARD bool IsInherited(const css::CSSOMStringAtom &) const noexcept;
+    KRYS_NODISCARD bool IsInherited(const CSSOMStringAtom &) const noexcept;
 
     bool RegisterFromAPI(css::RegisteredCustomProperty &&) noexcept;
 
@@ -93,16 +89,16 @@ namespace krys::boo::style
 
     KRYS_NODISCARD const RenderStyle &InitialValuePrototypeStyle() const noexcept;
 
-    bool InvalidatePropertiesWithViewportUnits(dom::Document &) noexcept;
+    bool InvalidatePropertiesWithViewportUnits(Document &) noexcept;
 
     KRYS_NODISCARD static Expected<Pair<RefPtr<const CustomProperty>, ViewportUnitDependency>,
                                    ParseInitialValueError>
-      ParseInitialValue(const dom::Document &, const css::CSSOMStringAtom &propertyName,
+      ParseInitialValue(const Document &, const CSSOMStringAtom &propertyName,
                         const css::CustomPropertySyntax &, css::TokenRange) noexcept;
 
   private:
-    void Invalidate(const css::CSSOMStringAtom &) noexcept;
+    void Invalidate(const CSSOMStringAtom &) noexcept;
 
-    void NotifyAnimationsOfCustomPropertyRegistration(const css::CSSOMStringAtom &) noexcept;
+    void NotifyAnimationsOfCustomPropertyRegistration(const CSSOMStringAtom &) noexcept;
   };
 }

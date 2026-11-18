@@ -231,9 +231,9 @@ namespace krys::ui
     (void)_view->Document().UpdateLayout();
 
     _itemElements.assign(static_cast<size_t>(listSize), nullptr);
-    for (boo::dom::Node *node = _view->Document().DocumentElement().get(); node;)
+    for (boo::Node *node = _view->Document().DocumentElement().get(); node;)
     {
-      if (auto *element = DynamicDowncast<boo::dom::Element>(*node))
+      if (auto *element = DynamicDowncast<boo::Element>(*node))
       {
         if (auto index = element->GetAttribute(u8"data-index"))
         {
@@ -369,7 +369,7 @@ namespace krys::ui
         return;
       }
       auto &element = *_itemElements[static_cast<size_t>(i)];
-      auto classes = element.GetAttribute(u8"class").value_or(boo::dom::DOMString());
+      auto classes = element.GetAttribute(u8"class").value_or(boo::DOMString());
       constexpr utf8_stringview suffix = u8" highlighted";
       if (highlighted && !classes.ends_with(suffix))
       {

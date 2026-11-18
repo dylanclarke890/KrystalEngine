@@ -31,13 +31,9 @@
 
 namespace krys::boo
 {
+  class Document;
   class RenderElement;
   class RenderStyle;
-
-  namespace dom
-  {
-    class Document;
-  }
 }
 
 namespace krys::boo::style::interpolation
@@ -49,7 +45,7 @@ namespace krys::boo::style::interpolation
   public:
     virtual ~Client() noexcept = default;
 
-    KRYS_NODISCARD virtual dom::Document *Document() const noexcept = 0;
+    KRYS_NODISCARD virtual boo::Document *Document() const noexcept = 0;
 
     KRYS_NODISCARD virtual RenderElement *Renderer() const noexcept = 0;
 

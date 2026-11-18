@@ -37,7 +37,7 @@
 
 namespace krys::boo
 {
-  RenderLayerModelObject::RenderLayerModelObject(Type type, dom::Element &element, RenderStyle &&style,
+  RenderLayerModelObject::RenderLayerModelObject(Type type, Element &element, RenderStyle &&style,
                                                  EnumSet<TypeFlag> baseTypeFlags,
                                                  TypeSpecificFlags typeSpecificFlags) noexcept
       : RenderElement(type, element, krys::move(style), baseTypeFlags | TypeFlag::IsLayerModelObject,
@@ -46,7 +46,7 @@ namespace krys::boo
     krys_debug_assert(IsRenderLayerModelObject());
   }
 
-  RenderLayerModelObject::RenderLayerModelObject(Type type, dom::Document &document, RenderStyle &&style,
+  RenderLayerModelObject::RenderLayerModelObject(Type type, Document &document, RenderStyle &&style,
                                                  EnumSet<TypeFlag> baseTypeFlags,
                                                  TypeSpecificFlags typeSpecificFlags) noexcept
       : RenderElement(type, document, krys::move(style), baseTypeFlags | TypeFlag::IsLayerModelObject,

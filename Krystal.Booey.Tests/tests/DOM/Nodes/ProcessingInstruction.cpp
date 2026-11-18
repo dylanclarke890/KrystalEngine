@@ -13,8 +13,8 @@ namespace krys::boo::dom::tests
       Ref<Document> Document;
       Ref<ProcessingInstruction> Node;
 
-      CommonTestData(dom::DOMString &&target, dom::DOMString &&value)
-          : Document(CreateRef<dom::Document>()),
+      CommonTestData(DOMString &&target, DOMString &&value)
+          : Document(CreateRef<boo::Document>()),
             Node(*Document->CreateProcessingInstruction(krys::move(target), krys::move(value)))
       {
       }

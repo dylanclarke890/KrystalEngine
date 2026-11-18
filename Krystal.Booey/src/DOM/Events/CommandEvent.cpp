@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   CommandEvent::CommandEvent(DOMStringAtom type, const CommandEventInit &eventInitDict) noexcept
       : Event(krys::move(type), eventInitDict), _source(eventInitDict.Source), _command(eventInitDict.Command)
@@ -32,6 +32,6 @@ namespace krys::boo::dom
       target = &_source->NodeDocument();
     }
     return DynamicDowncast<Element>(
-      DynamicDowncast<Node>(EventTargetAlgorithms::Retarget(_source.get(), *target)));
+      DynamicDowncast<Node>(dom::EventTargetAlgorithms::Retarget(_source.get(), *target)));
   }
 }

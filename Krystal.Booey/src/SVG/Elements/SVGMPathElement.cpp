@@ -24,9 +24,9 @@
 #include "Krystal.Booey/SVG/Elements/SVGPathElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGMPathElement::SVGMPathElement(dom::Document &document) noexcept
+  SVGMPathElement::SVGMPathElement(Document &document) noexcept
       : SVGElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::MPath),
         SVGURIReference(this)
   {
@@ -80,7 +80,7 @@ namespace krys::boo::svg
     BuildPendingResource();
   }
 
-  void SVGMPathElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void SVGMPathElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     bool disconnectedFromDocument = oldAncestor.IsConnected() && !IsConnected();
     SVGElement::OnRemove(isSubtreeRoot, oldAncestor);
@@ -90,14 +90,14 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGMPathElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                         Maybe<dom::DOMStringView> value) noexcept
+  void SVGMPathElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                         Maybe<DOMStringView> value) noexcept
   {
     SVGURIReference::ParseAttribute(name, value);
     SVGElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGMPathElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGMPathElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (SVGURIReference::IsKnownAttribute(attributeName))
     {

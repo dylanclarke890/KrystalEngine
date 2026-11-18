@@ -42,14 +42,13 @@ namespace krys::boo
     constexpr int32 ButtonShadowHeight = 2;
     constexpr int32 DefaultWidthNumChars = 34;
 
-    KRYS_NODISCARD int32 NodeLogicalWidth(dom::Node *node) noexcept
+    KRYS_NODISCARD int32 NodeLogicalWidth(Node *node) noexcept
     {
       return (node && node->GetRenderBox()) ? RoundToInt(node->GetRenderBox()->LogicalSize().Width()) : 0;
     }
   }
 
-  RenderFileUploadControl::RenderFileUploadControl(html::HTMLInputElement &input,
-                                                   RenderStyle &&style) noexcept
+  RenderFileUploadControl::RenderFileUploadControl(HTMLInputElement &input, RenderStyle &&style) noexcept
       : RenderBlockFlow(Type::FileUploadControl, input, krys::move(style)),
         _canReceiveDroppedFiles(input.CanReceiveDroppedFiles())
   {
@@ -58,9 +57,9 @@ namespace krys::boo
 
   RenderFileUploadControl::~RenderFileUploadControl() noexcept = default;
 
-  html::HTMLInputElement &RenderFileUploadControl::InputElement() const noexcept
+  HTMLInputElement &RenderFileUploadControl::InputElement() const noexcept
   {
-    return Downcast<html::HTMLInputElement>(NodeForNonAnonymous());
+    return Downcast<HTMLInputElement>(NodeForNonAnonymous());
   }
 
   void RenderFileUploadControl::UpdateFromElement() noexcept
@@ -320,14 +319,14 @@ namespace krys::boo
     return {};
   }
 
-  html::HTMLInputElement *RenderFileUploadControl::UploadButton() const noexcept
+  HTMLInputElement *RenderFileUploadControl::UploadButton() const noexcept
   {
     krys_debug_assert(InputElement().UserAgentShadowRoot());
     auto *root = InputElement().UserAgentShadowRoot();
-    return root ? DynamicDowncast<html::HTMLInputElement>(root->FirstChild()) : nullptr;
+    return root ? DynamicDowncast<HTMLInputElement>(root->FirstChild()) : nullptr;
   }
 
-  dom::DOMString RenderFileUploadControl::ButtonValue() const noexcept
+  DOMString RenderFileUploadControl::ButtonValue() const noexcept
   {
     if (auto *button = UploadButton())
     {

@@ -57,7 +57,7 @@ namespace krys::boo::ax::tests
     CHECK(tabs.SelectedChildren().empty());
 
     // A tab is selected while the focus is in a panel it controls.
-    Downcast<html::HTMLElement>(page.ById(u8"inside")).Focus();
+    Downcast<HTMLElement>(page.ById(u8"inside")).Focus();
     CHECK(page.Object(u8"t2").IsSelected());
     CHECK_FALSE(page.Object(u8"t1").IsSelected());
     CHECK(tabs.SelectedTabItem() == &page.Object(u8"t2"));
@@ -77,7 +77,7 @@ namespace krys::boo::ax::tests
 
     // Without an active descendant, the focused item is the selected one.
     page.ById(u8"menu").RemoveAttribute(u8"aria-activedescendant");
-    Downcast<html::HTMLElement>(page.ById(u8"m1")).Focus();
+    Downcast<HTMLElement>(page.ById(u8"m1")).Focus();
     (void)page.TakeNotifications();
     CHECK(page.Object(u8"m1").IsSelected());
     CHECK(Ids(menu.SelectedChildren()) == "m1");

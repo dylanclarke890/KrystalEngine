@@ -40,29 +40,29 @@ namespace krys::boo::svg
     Skip,
   };
 
-  KRYS_NODISCARD Maybe<float> ParseNumber(dom::DOMStringView &buffer,
+  KRYS_NODISCARD Maybe<float> ParseNumber(DOMStringView &buffer,
                                           SuffixSkippingPolicy skip = SuffixSkippingPolicy::Skip) noexcept;
 
   /// @brief Parses the whole of `string` as a number.
   KRYS_NODISCARD Maybe<float>
-    ParseNumberFromString(dom::DOMStringView string,
+    ParseNumberFromString(DOMStringView string,
                           SuffixSkippingPolicy skip = SuffixSkippingPolicy::Skip) noexcept;
 
-  KRYS_NODISCARD Maybe<std::pair<float, float>> ParseNumberOptionalNumber(dom::DOMStringView string) noexcept;
+  KRYS_NODISCARD Maybe<std::pair<float, float>> ParseNumberOptionalNumber(DOMStringView string) noexcept;
 
   /// @brief The number `string` is, after any leading whitespace; 0 if it isn't one.
-  KRYS_NODISCARD float ToFloatOrZero(dom::DOMStringView string) noexcept;
+  KRYS_NODISCARD float ToFloatOrZero(DOMStringView string) noexcept;
 
   /// @brief The number @p string spells, after any leading whitespace; null if anything else follows it.
-  KRYS_NODISCARD Maybe<double> ToDouble(dom::DOMStringView string) noexcept;
+  KRYS_NODISCARD Maybe<double> ToDouble(DOMStringView string) noexcept;
 
-  KRYS_NODISCARD Maybe<bool> ParseArcFlag(dom::DOMStringView &buffer) noexcept;
+  KRYS_NODISCARD Maybe<bool> ParseArcFlag(DOMStringView &buffer) noexcept;
 
-  KRYS_NODISCARD Maybe<FloatPoint> ParsePoint(dom::DOMStringView string) noexcept;
+  KRYS_NODISCARD Maybe<FloatPoint> ParsePoint(DOMStringView string) noexcept;
 
-  KRYS_NODISCARD Maybe<FloatRect> ParseRect(dom::DOMStringView string) noexcept;
+  KRYS_NODISCARD Maybe<FloatRect> ParseRect(DOMStringView string) noexcept;
 
-  KRYS_NODISCARD Maybe<FloatPoint> ParseFloatPoint(dom::DOMStringView &buffer) noexcept;
+  KRYS_NODISCARD Maybe<FloatPoint> ParseFloatPoint(DOMStringView &buffer) noexcept;
 
   template <typename TChar>
   KRYS_NODISCARD constexpr bool IsSVGSpaceOrComma(TChar c) noexcept
@@ -70,7 +70,7 @@ namespace krys::boo::svg
     return text::IsASCIIWhitespace(c) || c == ',';
   }
 
-  constexpr bool SkipOptionalSVGSpaces(dom::DOMStringView &characters) noexcept
+  constexpr bool SkipOptionalSVGSpaces(DOMStringView &characters) noexcept
   {
     while (!characters.empty() && text::IsASCIIWhitespace(characters.front()))
     {
@@ -79,8 +79,7 @@ namespace krys::boo::svg
     return !characters.empty();
   }
 
-  constexpr bool SkipOptionalSVGSpacesOrDelimiter(dom::DOMStringView &characters,
-                                                  char delimiter = ',') noexcept
+  constexpr bool SkipOptionalSVGSpacesOrDelimiter(DOMStringView &characters, char delimiter = ',') noexcept
   {
     if (characters.empty())
     {

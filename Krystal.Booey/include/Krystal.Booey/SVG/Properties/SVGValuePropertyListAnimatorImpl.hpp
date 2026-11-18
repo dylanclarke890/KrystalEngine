@@ -28,7 +28,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGAnimationAdditiveListFunctionImpl.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGValuePropertyListAnimator.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGLengthListAnimator final
       : public SVGValuePropertyListAnimator<SVGLengthList, SVGAnimationLengthListFunction>
@@ -39,10 +39,11 @@ namespace krys::boo::svg
     using Base::Base;
 
   public:
-    KRYS_NODISCARD static Ref<SVGLengthListAnimator> Create(const dom::QualifiedName &attributeName,
+    KRYS_NODISCARD static Ref<SVGLengthListAnimator> Create(const QualifiedName &attributeName,
                                                             Ref<SVGProperty> &&property,
-                                                            AnimationMode animationMode, CalcMode calcMode,
-                                                            bool isAccumulated, bool isAdditive) noexcept
+                                                            svg::AnimationMode animationMode,
+                                                            svg::CalcMode calcMode, bool isAccumulated,
+                                                            bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGLengthListAnimator(attributeName, krys::move(property), animationMode, calcMode,
                                                  isAccumulated, isAdditive, SVGLengthMode::Other));
@@ -50,7 +51,7 @@ namespace krys::boo::svg
 
     void Start(SVGElement &targetElement) noexcept final
     {
-      dom::DOMString baseValue =
+      DOMString baseValue =
         ComputeCSSPropertyValue(targetElement, css::PropertyIdFromName(_attributeName.LocalName().View()));
       if (!_list->Parse(baseValue))
       {

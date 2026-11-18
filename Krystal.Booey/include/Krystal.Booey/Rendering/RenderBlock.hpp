@@ -439,7 +439,7 @@ namespace krys::boo
       PositionForPointWithInlineChildren(const LayoutPoint &pointInLogicalContents,
                                          HitTestSource source) noexcept;
 
-    KRYS_NODISCARD dom::Node *NodeForHitTest() const noexcept override;
+    KRYS_NODISCARD Node *NodeForHitTest() const noexcept override;
 
   protected:
     virtual bool HitTestChildren(const HitTestRequest &request, HitTestResult &result,
@@ -650,10 +650,10 @@ namespace krys::boo
 #pragma endregion
 
   protected:
-    RenderBlock(Type type, dom::Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags = {},
+    RenderBlock(Type type, Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags = {},
                 TypeSpecificFlags typeSpecificFlags = {}) noexcept;
 
-    RenderBlock(Type type, dom::Document &document, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags = {},
+    RenderBlock(Type type, Document &document, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags = {},
                 TypeSpecificFlags typeSpecificFlags = {}) noexcept;
 
     void WillBeDestroyed() noexcept override;

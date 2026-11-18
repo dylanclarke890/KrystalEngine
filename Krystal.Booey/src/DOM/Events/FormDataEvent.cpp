@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Events/FormDataEvent.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   FormDataEvent::FormDataEvent(DOMStringAtom type, const FormDataEventInit &eventInitDict) noexcept
       : Event(krys::move(type), eventInitDict),

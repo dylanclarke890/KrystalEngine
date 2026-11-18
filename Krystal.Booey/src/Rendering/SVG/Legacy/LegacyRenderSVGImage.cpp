@@ -51,7 +51,7 @@
 
 namespace krys::boo
 {
-  LegacyRenderSVGImage::LegacyRenderSVGImage(svg::SVGImageElement &element, RenderStyle &&style) noexcept
+  LegacyRenderSVGImage::LegacyRenderSVGImage(SVGImageElement &element, RenderStyle &&style) noexcept
       : LegacyRenderSVGModelObject(Type::LegacySVGImage, element, krys::move(style),
                                    {SVGModelObjectFlag::UsesBoundaryCaching}),
         _imageResource(CreateUnique<RenderImageResource>())
@@ -83,9 +83,9 @@ namespace krys::boo
     LegacyRenderSVGModelObject::WillBeDestroyed();
   }
 
-  svg::SVGImageElement &LegacyRenderSVGImage::ImageElement() const noexcept
+  SVGImageElement &LegacyRenderSVGImage::ImageElement() const noexcept
   {
-    return Downcast<svg::SVGImageElement>(LegacyRenderSVGModelObject::GetElement());
+    return Downcast<SVGImageElement>(LegacyRenderSVGModelObject::GetElement());
   }
 
   FloatRect LegacyRenderSVGImage::CalculateObjectBoundingBox() const noexcept
@@ -97,7 +97,7 @@ namespace krys::boo
     }
 
     auto &imageElement = ImageElement();
-    svg::SVGLengthContext lengthContext(&imageElement);
+    SVGLengthContext lengthContext(&imageElement);
 
     auto &style = Style();
     auto &width = style.Width();
@@ -107,11 +107,11 @@ namespace krys::boo
     float concreteWidth;
     if (!width.IsAuto())
     {
-      concreteWidth = lengthContext.ValueForLength(width, usedZoom, svg::SVGLengthMode::Width);
+      concreteWidth = lengthContext.ValueForLength(width, usedZoom, SVGLengthMode::Width);
     }
     else if (!height.IsAuto() && !intrinsicSize.IsEmpty())
     {
-      concreteWidth = lengthContext.ValueForLength(height, usedZoom, svg::SVGLengthMode::Height)
+      concreteWidth = lengthContext.ValueForLength(height, usedZoom, SVGLengthMode::Height)
                       * intrinsicSize.Width() / intrinsicSize.Height();
     }
     else
@@ -122,11 +122,11 @@ namespace krys::boo
     float concreteHeight;
     if (!height.IsAuto())
     {
-      concreteHeight = lengthContext.ValueForLength(height, usedZoom, svg::SVGLengthMode::Height);
+      concreteHeight = lengthContext.ValueForLength(height, usedZoom, SVGLengthMode::Height);
     }
     else if (!width.IsAuto() && !intrinsicSize.IsEmpty())
     {
-      concreteHeight = lengthContext.ValueForLength(width, usedZoom, svg::SVGLengthMode::Width)
+      concreteHeight = lengthContext.ValueForLength(width, usedZoom, SVGLengthMode::Width)
                        * intrinsicSize.Height() / intrinsicSize.Width();
     }
     else
@@ -144,14 +144,13 @@ namespace krys::boo
     _objectBoundingBox = CalculateObjectBoundingBox();
 
     bool updatedViewport = false;
-    auto imageSourceURL =
-      GetDocument().CompleteURL(ImageElement().ImageSourceURL().value_or(dom::DOMString {}));
+    auto imageSourceURL = GetDocument().CompleteURL(ImageElement().ImageSourceURL().value_or(DOMString {}));
 
     // Images with preserveAspectRatio=none should force non-uniform scaling. This can be achieved
     // by setting the image's container size to its intrinsic size.
     // See: http://www.w3.org/TR/SVG/single-page.html, 7.8 The ‘preserveAspectRatio’ attribute.
     if (ImageElement().PreserveAspectRatio().Align()
-        == svg::SVGPreserveAspectRatioValue::SVG_PRESERVEASPECTRATIO_NONE)
+        == SVGPreserveAspectRatioValue::SVG_PRESERVEASPECTRATIO_NONE)
     {
       if (auto *cachedImage = ImageResource().GetCachedImage())
       {

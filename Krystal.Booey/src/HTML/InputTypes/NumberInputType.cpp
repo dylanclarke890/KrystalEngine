@@ -114,22 +114,22 @@ namespace krys::boo::html
       return ch == U'.';
     }
 
-    KRYS_NODISCARD bool HasTwoSignChars(dom::DOMStringView string) noexcept
+    KRYS_NODISCARD bool HasTwoSignChars(DOMStringView string) noexcept
     {
       return std::ranges::count_if(string, [](char8 character) { return IsSignPrefix(character); }) >= 2;
     }
 
-    KRYS_NODISCARD bool HasDecimalSeparator(dom::DOMStringView string) noexcept
+    KRYS_NODISCARD bool HasDecimalSeparator(DOMStringView string) noexcept
     {
       return string.contains(u8'.');
     }
 
-    KRYS_NODISCARD bool HasE(dom::DOMStringView string) noexcept
+    KRYS_NODISCARD bool HasE(DOMStringView string) noexcept
     {
-      return string.find_first_of(u8"eE") != dom::DOMStringView::npos;
+      return string.find_first_of(u8"eE") != DOMStringView::npos;
     }
 
-    KRYS_NODISCARD bool HasSignNotAfterE(dom::DOMStringView string) noexcept
+    KRYS_NODISCARD bool HasSignNotAfterE(DOMStringView string) noexcept
     {
       for (size_t i = 0; i < string.size(); ++i)
       {
@@ -142,10 +142,10 @@ namespace krys::boo::html
     }
 
     /// @brief @p input with the characters a number can't have dropped.
-    KRYS_NODISCARD dom::DOMString StripInvalidNumberCharacters(dom::DOMStringView input) noexcept
+    KRYS_NODISCARD DOMString StripInvalidNumberCharacters(DOMStringView input) noexcept
     {
-      constexpr dom::DOMStringView allowedChars = u8"0123456789.Ee-+";
-      dom::DOMString result;
+      constexpr DOMStringView allowedChars = u8"0123456789.Ee-+";
+      DOMString result;
       result.reserve(input.size());
       for (char8 character : input)
       {
@@ -158,7 +158,7 @@ namespace krys::boo::html
     }
 
     /// @brief @p input with full-width digits, full stops and minus-like characters made ASCII.
-    KRYS_NODISCARD dom::DOMString NormalizeFullWidthNumberChars(dom::DOMStringView input) noexcept
+    KRYS_NODISCARD DOMString NormalizeFullWidthNumberChars(DOMStringView input) noexcept
     {
       constexpr char32 fullwidthDigitZero = 0xFF10;
       constexpr char32 fullwidthDigitNine = 0xFF19;
@@ -204,7 +204,7 @@ namespace krys::boo::html
     }
   }
 
-  void NumberInputType::SetValue(dom::DOMStringView sanitizedValue, bool valueChanged,
+  void NumberInputType::SetValue(DOMStringView sanitizedValue, bool valueChanged,
                                  TextFieldEventBehavior eventBehavior,
                                  TextControlSetValueSelection selection) noexcept
   {
@@ -222,21 +222,19 @@ namespace krys::boo::html
 
     krys_debug_assert(Element());
     auto &element = *Element();
-    auto stepString = element.GetAttribute(u8"step").value_or(dom::DOMString {});
+    auto stepString = element.GetAttribute(u8"step").value_or(DOMString {});
     if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(stepString, u8"any"))
     {
       return false;
     }
 
-    const Decimal minimum =
-      ParseToDecimalForNumberType(element.GetAttribute(u8"min").value_or(dom::DOMString {}));
+    const Decimal minimum = ParseToDecimalForNumberType(element.GetAttribute(u8"min").value_or(DOMString {}));
     if (!minimum.IsFinite())
     {
       return false;
     }
 
-    const Decimal maximum =
-      ParseToDecimalForNumberType(element.GetAttribute(u8"max").value_or(dom::DOMString {}));
+    const Decimal maximum = ParseToDecimalForNumberType(element.GetAttribute(u8"max").value_or(DOMString {}));
     if (!maximum.IsFinite())
     {
       return false;
@@ -285,8 +283,7 @@ namespace krys::boo::html
     return width;
   }
 
-  InputType::ShouldCallBaseEventHandler
-    NumberInputType::HandleKeydownEvent(dom::KeyboardEvent &event) noexcept
+  InputType::ShouldCallBaseEventHandler NumberInputType::HandleKeydownEvent(KeyboardEvent &event) noexcept
   {
     HandleKeydownEventForSpinButton(event);
     if (!event.DefaultHandled())
@@ -296,7 +293,7 @@ namespace krys::boo::html
     return ShouldCallBaseEventHandler::Yes;
   }
 
-  void NumberInputType::HandleBeforeTextInsertedEvent(dom::BeforeTextInsertedEvent &event) noexcept
+  void NumberInputType::HandleBeforeTextInsertedEvent(BeforeTextInsertedEvent &event) noexcept
   {
     // Normalize full-width digits and minus sign to ASCII
     auto normalizedText = NormalizeFullWidthNumberChars(event.Text());
@@ -325,7 +322,7 @@ namespace krys::boo::html
     auto rightHalf = originalValue.substr(selectionEnd);
 
     // Process 1 char at a time
-    dom::DOMString finalEventText;
+    DOMString finalEventText;
     for (char8 character : updatedEventText)
     {
       if (IsDecimalSeparator(character))
@@ -450,39 +447,39 @@ namespace krys::boo::html
   namespace
   {
     // Scientific notation isn't localised.
-    KRYS_NODISCARD bool HasExponent(dom::DOMStringView value) noexcept
+    KRYS_NODISCARD bool HasExponent(DOMStringView value) noexcept
     {
-      return value.find_first_of(u8"eE") != dom::DOMStringView::npos;
+      return value.find_first_of(u8"eE") != DOMStringView::npos;
     }
   }
 
-  dom::DOMString NumberInputType::LocalizeValue(dom::DOMStringView proposedValue) const noexcept
+  DOMString NumberInputType::LocalizeValue(DOMStringView proposedValue) const noexcept
   {
     if (proposedValue.empty() || HasExponent(proposedValue))
     {
-      return dom::DOMString(proposedValue);
+      return DOMString(proposedValue);
     }
     krys_debug_assert(Element());
-    return dom::DOMString(Element()->GetLocale().ConvertToLocalizedNumber(proposedValue));
+    return DOMString(Element()->GetLocale().ConvertToLocalizedNumber(proposedValue));
   }
 
-  dom::DOMString NumberInputType::VisibleValue() const noexcept
+  DOMString NumberInputType::VisibleValue() const noexcept
   {
     krys_debug_assert(Element());
     return LocalizeValue(Element()->Value());
   }
 
-  dom::DOMString NumberInputType::ConvertFromVisibleValue(dom::DOMStringView visibleValue) const noexcept
+  DOMString NumberInputType::ConvertFromVisibleValue(DOMStringView visibleValue) const noexcept
   {
     if (visibleValue.empty() || HasExponent(visibleValue))
     {
-      return dom::DOMString(visibleValue);
+      return DOMString(visibleValue);
     }
     krys_debug_assert(Element());
-    return dom::DOMString(Element()->GetLocale().ConvertFromLocalizedNumber(visibleValue));
+    return DOMString(Element()->GetLocale().ConvertFromLocalizedNumber(visibleValue));
   }
 
-  void NumberInputType::AttributeChanged(const dom::DOMStringAtom &name) noexcept
+  void NumberInputType::AttributeChanged(const DOMStringAtom &name) noexcept
   {
     krys_debug_assert(Element());
     if (name == u8"max" || name == u8"min")
@@ -516,24 +513,23 @@ namespace krys::boo::html
     return ParseToDoubleForNumberType(Element()->Value());
   }
 
-  dom::ExceptionOr<void>
-    NumberInputType::SetValueAsDouble(double newValue, TextFieldEventBehavior eventBehavior) const noexcept
+  ExceptionOr<void> NumberInputType::SetValueAsDouble(double newValue,
+                                                      TextFieldEventBehavior eventBehavior) const noexcept
   {
     krys_debug_assert(Element());
     (void)Element()->SetValue(SerializeForNumberType(newValue), eventBehavior);
     return {};
   }
 
-  dom::ExceptionOr<void>
-    NumberInputType::SetValueAsDecimal(const Decimal &newValue,
-                                       TextFieldEventBehavior eventBehavior) const noexcept
+  ExceptionOr<void> NumberInputType::SetValueAsDecimal(const Decimal &newValue,
+                                                       TextFieldEventBehavior eventBehavior) const noexcept
   {
     krys_debug_assert(Element());
     (void)Element()->SetValue(SerializeForNumberType(newValue), eventBehavior);
     return {};
   }
 
-  bool NumberInputType::TypeMismatchFor(dom::DOMStringView value) const noexcept
+  bool NumberInputType::TypeMismatchFor(DOMStringView value) const noexcept
   {
     return !value.empty() && !std::isfinite(ParseToDoubleForNumberType(value));
   }
@@ -557,10 +553,10 @@ namespace krys::boo::html
     auto &element = *Element();
 
     RangeLimitations rangeLimitations = RangeLimitations::Invalid;
-    auto extractBound = [&](dom::DOMStringAtom attributeName, const Decimal &defaultValue) -> Decimal
+    auto extractBound = [&](DOMStringAtom attributeName, const Decimal &defaultValue) -> Decimal
     {
       Decimal valueFromAttribute =
-        ParseToNumberOrNaN(element.GetAttribute(krys::move(attributeName)).value_or(dom::DOMString()));
+        ParseToNumberOrNaN(element.GetAttribute(krys::move(attributeName)).value_or(DOMString()));
       if (valueFromAttribute.IsFinite())
       {
         rangeLimitations = RangeLimitations::Valid;
@@ -576,13 +572,12 @@ namespace krys::boo::html
     return StepRange(stepBase, rangeLimitations, minimum, maximum, step, stepDescription);
   }
 
-  Decimal NumberInputType::ParseToNumber(dom::DOMStringView string,
-                                         const Decimal &defaultValue) const noexcept
+  Decimal NumberInputType::ParseToNumber(DOMStringView string, const Decimal &defaultValue) const noexcept
   {
     return ParseToDecimalForNumberType(string, defaultValue);
   }
 
-  dom::DOMString NumberInputType::Serialize(const Decimal &value) const noexcept
+  DOMString NumberInputType::Serialize(const Decimal &value) const noexcept
   {
     if (!value.IsFinite())
     {
@@ -591,7 +586,7 @@ namespace krys::boo::html
     return SerializeForNumberType(value);
   }
 
-  dom::DOMString NumberInputType::SanitizeValue(dom::DOMStringView proposedValue) const noexcept
+  DOMString NumberInputType::SanitizeValue(DOMStringView proposedValue) const noexcept
   {
     if (proposedValue.empty())
     {
@@ -599,7 +594,7 @@ namespace krys::boo::html
     }
     if (std::isfinite(ParseToDoubleForNumberType(proposedValue)))
     {
-      return dom::DOMString(proposedValue);
+      return DOMString(proposedValue);
     }
     return {};
   }
@@ -611,7 +606,7 @@ namespace krys::boo::html
     return !standardValue.empty() && !std::isfinite(ParseToDoubleForNumberType(standardValue));
   }
 
-  dom::DOMString NumberInputType::BadInputText() const noexcept
+  DOMString NumberInputType::BadInputText() const noexcept
   {
     return ValidationMessageBadInputForNumberText();
   }

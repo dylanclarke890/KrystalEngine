@@ -35,7 +35,7 @@
 
 namespace krys::boo::css
 {
-  dom::ExceptionOr<Ref<DOMMatrixReadOnly>>
+  ExceptionOr<Ref<DOMMatrixReadOnly>>
     DOMMatrixReadOnly::Create(Maybe<Variant<CSSOMString, List<double>>> init) noexcept
   {
     if (!init)
@@ -45,7 +45,7 @@ namespace krys::boo::css
 
     return SwitchOn(
       *init,
-      [](const CSSOMString &init) -> dom::ExceptionOr<Ref<DOMMatrixReadOnly>>
+      [](const CSSOMString &init) -> ExceptionOr<Ref<DOMMatrixReadOnly>>
       {
         auto parseResult = ParseStringIntoAbstractMatrix(init);
         if (parseResult.HasException())
@@ -55,7 +55,7 @@ namespace krys::boo::css
         return AdoptRef(*new DOMMatrixReadOnly(parseResult.Value().Matrix,
                                                parseResult.Value().Is2D ? Is2D::Yes : Is2D::No));
       },
-      [](const List<double> &init) -> dom::ExceptionOr<Ref<DOMMatrixReadOnly>>
+      [](const List<double> &init) -> ExceptionOr<Ref<DOMMatrixReadOnly>>
       { return FromArrayHelper<DOMMatrixReadOnly, double>(Span<const double>(init)); });
   }
 
@@ -80,11 +80,8 @@ namespace krys::boo::css
     return a == b;
   }
 
-  dom::ExceptionOr<void> DOMMatrixReadOnly::ValidateAndFixup(DOMMatrix2DInit &init) noexcept
+  ExceptionOr<void> DOMMatrixReadOnly::ValidateAndFixup(DOMMatrix2DInit &init) noexcept
   {
-    using dom::Exception;
-    using dom::ExceptionCode;
-
     if (init.A && init.M11 && !SameValueZero(init.A.value(), init.M11.value()))
     {
       return Exception {ExceptionCode::TypeError, u8"init.a and init.m11 do not match"};
@@ -138,11 +135,8 @@ namespace krys::boo::css
     return {};
   }
 
-  dom::ExceptionOr<void> DOMMatrixReadOnly::ValidateAndFixup(DOMMatrixInit &init) noexcept
+  ExceptionOr<void> DOMMatrixReadOnly::ValidateAndFixup(DOMMatrixInit &init) noexcept
   {
-    using dom::Exception;
-    using dom::ExceptionCode;
-
     auto validate2D = ValidateAndFixup(static_cast<DOMMatrix2DInit &>(init));
     if (validate2D.HasException())
     {
@@ -208,19 +202,17 @@ namespace krys::boo::css
     return {};
   }
 
-  dom::ExceptionOr<Ref<DOMMatrixReadOnly>> DOMMatrixReadOnly::FromMatrix(DOMMatrixInit &&init) noexcept
+  ExceptionOr<Ref<DOMMatrixReadOnly>> DOMMatrixReadOnly::FromMatrix(DOMMatrixInit &&init) noexcept
   {
     return FromMatrixHelper<DOMMatrixReadOnly>(krys::move(init));
   }
 
-  dom::ExceptionOr<Ref<DOMMatrixReadOnly>>
-    DOMMatrixReadOnly::FromFloat32Array(Span<const float> array32) noexcept
+  ExceptionOr<Ref<DOMMatrixReadOnly>> DOMMatrixReadOnly::FromFloat32Array(Span<const float> array32) noexcept
   {
     return FromArrayHelper<DOMMatrixReadOnly>(array32);
   }
 
-  dom::ExceptionOr<Ref<DOMMatrixReadOnly>>
-    DOMMatrixReadOnly::FromFloat64Array(Span<const double> array64) noexcept
+  ExceptionOr<Ref<DOMMatrixReadOnly>> DOMMatrixReadOnly::FromFloat64Array(Span<const double> array64) noexcept
   {
     return FromArrayHelper<DOMMatrixReadOnly>(array64);
   }
@@ -230,7 +222,7 @@ namespace krys::boo::css
     return _matrix.IsIdentity();
   }
 
-  dom::ExceptionOr<DOMMatrixReadOnly::AbstractMatrix>
+  ExceptionOr<DOMMatrixReadOnly::AbstractMatrix>
     DOMMatrixReadOnly::ParseStringIntoAbstractMatrix(const CSSOMString &string) noexcept
   {
     if (string.empty())
@@ -241,7 +233,7 @@ namespace krys::boo::css
     auto transform = parse_property::ParseTransformRaw(string, ParserContext(ParserMode::HTMLStandard));
     if (!transform)
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError};
+      return Exception {ExceptionCode::SyntaxError};
     }
 
     // Check for an empty transform operations list, in which case we can use the default identity matrix.
@@ -253,7 +245,7 @@ namespace krys::boo::css
     auto [isWidthDependent, isHeightDependent] = transform->ComputeSizeDependencies();
     if (isWidthDependent || isHeightDependent)
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError};
+      return Exception {ExceptionCode::SyntaxError};
     }
 
     AbstractMatrix matrix;
@@ -268,7 +260,7 @@ namespace krys::boo::css
     return matrix;
   }
 
-  dom::ExceptionOr<void> DOMMatrixReadOnly::SetMatrixValue(const CSSOMString &string) noexcept
+  ExceptionOr<void> DOMMatrixReadOnly::SetMatrixValue(const CSSOMString &string) noexcept
   {
     auto parseResult = ParseStringIntoAbstractMatrix(string);
     if (parseResult.HasException())
@@ -303,7 +295,7 @@ namespace krys::boo::css
     return matrix;
   }
 
-  dom::ExceptionOr<Ref<DOMMatrix>> DOMMatrixReadOnly::Multiply(DOMMatrixInit &&other) const noexcept
+  ExceptionOr<Ref<DOMMatrix>> DOMMatrixReadOnly::Multiply(DOMMatrixInit &&other) const noexcept
   {
     auto matrix = CloneAsDOMMatrix();
     return matrix->MultiplySelf(krys::move(other));
@@ -389,13 +381,13 @@ namespace krys::boo::css
             _matrix.M41(), _matrix.M42(), _matrix.M43(), _matrix.M44()};
   }
 
-  dom::ExceptionOr<CSSOMString> DOMMatrixReadOnly::ToString() const noexcept
+  ExceptionOr<CSSOMString> DOMMatrixReadOnly::ToString() const noexcept
   {
     using namespace std::string_view_literals;
 
     if (!_matrix.ContainsOnlyFiniteValues())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError, u8"Matrix contains non-finite values"};
+      return Exception {ExceptionCode::InvalidStateError, u8"Matrix contains non-finite values"};
     }
 
     StringBuilder builder;

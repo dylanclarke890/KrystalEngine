@@ -56,7 +56,7 @@ namespace krys::boo::html
     /// @brief The list of suggestions, while it's shown.
     RefPtr<DataListSuggestionPicker> _suggestionPicker;
     /// @brief The suggestions for the text they were found for.
-    Maybe<Pair<dom::DOMString, List<DataListSuggestion>>> _cachedSuggestions;
+    Maybe<Pair<DOMString, List<DataListSuggestion>>> _cachedSuggestions;
 
   public:
     ~TextFieldInputType() noexcept override;
@@ -66,7 +66,7 @@ namespace krys::boo::html
       return true;
     }
 
-    KRYS_NODISCARD bool ValueMissing(dom::DOMStringView value) const noexcept final;
+    KRYS_NODISCARD bool ValueMissing(DOMStringView value) const noexcept final;
 
     void DataListMayHaveChanged() noexcept final;
 
@@ -81,12 +81,12 @@ namespace krys::boo::html
   protected:
     TextFieldInputType(Type type, HTMLInputElement &element) noexcept;
 
-    ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept override;
+    ShouldCallBaseEventHandler HandleKeydownEvent(KeyboardEvent &event) noexcept override;
 
     /// @brief Steps the value with the up and down arrow keys, as the spin button would.
-    void HandleKeydownEventForSpinButton(dom::KeyboardEvent &event) noexcept;
+    void HandleKeydownEventForSpinButton(KeyboardEvent &event) noexcept;
 
-    void HandleClickEvent(dom::MouseEvent &event) noexcept final;
+    void HandleClickEvent(MouseEvent &event) noexcept final;
 
     KRYS_NODISCARD HTMLElement *ContainerElement() const noexcept final;
 
@@ -102,7 +102,7 @@ namespace krys::boo::html
 
     void RemoveShadowSubtree() noexcept override;
 
-    void AttributeChanged(const dom::DOMStringAtom &name) noexcept override;
+    void AttributeChanged(const DOMStringAtom &name) noexcept override;
 
     void DisabledStateChanged() noexcept final;
 
@@ -112,30 +112,29 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool ShouldUseInputMethod() const noexcept override;
 
-    void HandleFocusEvent(dom::Node *oldFocusedNode) noexcept final;
+    void HandleFocusEvent(Node *oldFocusedNode) noexcept final;
 
     void HandleBlurEvent() noexcept final;
 
-    void SetValue(dom::DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,
+    void SetValue(DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,
                   TextControlSetValueSelection selection) noexcept override;
 
     void UpdateInnerTextValue() noexcept final;
 
-    KRYS_NODISCARD dom::DOMString SanitizeValue(dom::DOMStringView proposedValue) const noexcept override;
+    KRYS_NODISCARD DOMString SanitizeValue(DOMStringView proposedValue) const noexcept override;
 
-    KRYS_NODISCARD virtual dom::DOMString
-      ConvertFromVisibleValue(dom::DOMStringView visibleValue) const noexcept;
+    KRYS_NODISCARD virtual DOMString ConvertFromVisibleValue(DOMStringView visibleValue) const noexcept;
 
     virtual void DidSetValueByUserEdit() noexcept;
 
   private:
     KRYS_NODISCARD bool IsEmptyValue() const noexcept final;
 
-    void HandleBeforeTextInsertedEvent(dom::BeforeTextInsertedEvent &event) noexcept override;
+    void HandleBeforeTextInsertedEvent(BeforeTextInsertedEvent &event) noexcept override;
 
-    void ForwardEvent(dom::Event &event) noexcept final;
+    void ForwardEvent(Event &event) noexcept final;
 
-    KRYS_NODISCARD bool ShouldSubmitImplicitly(dom::Event &event) noexcept final;
+    KRYS_NODISCARD bool ShouldSubmitImplicitly(Event &event) noexcept final;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateInputRenderer(RenderStyle &&style) noexcept override;
 

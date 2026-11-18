@@ -35,7 +35,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "CSS.supports(property, value)",
                    "[CSS][CSSOM][css-conditional:dom-css-supports]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto supports = [&](const char8_t *property, const char8_t *value)
     {
       return DOMCSSNamespace::Supports(*document, property, value);
@@ -61,7 +61,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "CSS.supports(conditionText)",
                    "[CSS][CSSOM][css-conditional:dom-css-supports-conditiontext]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto supports = [&](const char8_t *condition)
     {
       return DOMCSSNamespace::Supports(*document, condition);
@@ -81,7 +81,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "CSS.registerProperty()",
                    "[CSS][CSSOM][css-properties-values-api:dom-css-registerproperty]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto &registry = document->StyleScope().GetCustomPropertyRegistry();
     auto exceptionCode = [&](const PropertyDefinition &definition)
     {
@@ -107,7 +107,7 @@ namespace krys::boo::css::tests
 
       // The first registration wins.
       CHECK(exceptionCode({.Name = u8"--size", .Syntax = u8"<color>", .InitialValue = CSSOMString(u8"red")})
-            == dom::ExceptionCode::InvalidModificationError);
+            == ExceptionCode::InvalidModificationError);
       CHECK(registry.Get(u8"--size")->Inherits);
     }
 
@@ -121,7 +121,7 @@ namespace krys::boo::css::tests
 
     SECTION("invalid definitions throw a SyntaxError")
     {
-      constexpr auto syntaxError = dom::ExceptionCode::SyntaxError;
+      constexpr auto syntaxError = ExceptionCode::SyntaxError;
       CHECK(exceptionCode({.Name = u8"size", .InitialValue = CSSOMString(u8"1px")}) == syntaxError);
       CHECK(exceptionCode({.Name = u8"--x", .Syntax = u8"<nonsense>", .InitialValue = CSSOMString(u8"1px")})
             == syntaxError);

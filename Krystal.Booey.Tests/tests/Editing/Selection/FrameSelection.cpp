@@ -31,9 +31,9 @@ namespace krys::boo::tests
         (void)Document->UpdateLayout();
       }
 
-      KRYS_NODISCARD dom::Text &TextIn(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD Text &TextIn(DOMStringView id) noexcept
       {
-        return Downcast<dom::Text>(*ById(id).FirstChild());
+        return Downcast<Text>(*ById(id).FirstChild());
       }
 
       KRYS_NODISCARD FrameSelection &Selection() noexcept
@@ -49,7 +49,7 @@ namespace krys::boo::tests
       }
     };
 
-    KRYS_NODISCARD dom::Position At(dom::Node &node, uint32 offset) noexcept
+    KRYS_NODISCARD dom::Position At(Node &node, uint32 offset) noexcept
     {
       return dom::MakeContainerOffsetPosition(ShareRefPtr(&node), offset);
     }
@@ -133,8 +133,8 @@ namespace krys::boo::tests
                                   u8"<option>b</option></select><select id=single size=2><option>a</option>"
                                   u8"<option>b</option></select>");
     auto &selection = fixture.Selection();
-    auto &multiple = Downcast<html::HTMLSelectElement>(fixture.ById(u8"multiple"));
-    auto &single = Downcast<html::HTMLSelectElement>(fixture.ById(u8"single"));
+    auto &multiple = Downcast<HTMLSelectElement>(fixture.ById(u8"multiple"));
+    auto &single = Downcast<HTMLSelectElement>(fixture.ById(u8"single"));
 
     // A focused list box that can select several options selects them all, and the document's selection
     // stays as it was.
@@ -170,9 +170,9 @@ namespace krys::boo::tests
       selection.MoveTo(At(first, 2), At(middle, 3), Affinity::Downstream);
       fixture.UpdateRendering();
       // Removing the span drops the tree's references to it and its text.
-      Ref<dom::Node> span = ShareRef<dom::Node>(fixture.ById(u8"s"));
-      Ref<dom::Node> keepMiddle = ShareRef<dom::Node>(middle);
-      REQUIRE_FALSE(Downcast<dom::Element>(*span).Remove().HasException());
+      Ref<Node> span = ShareRef<Node>(fixture.ById(u8"s"));
+      Ref<Node> keepMiddle = ShareRef<Node>(middle);
+      REQUIRE_FALSE(Downcast<Element>(*span).Remove().HasException());
       CHECK(selection.Selection().Start().DeprecatedNode() == &first);
       CHECK(!middle.ContainsSelectionEndPoint());
       // The render tree's selection is cleared, to be set again at the next update.
@@ -184,8 +184,8 @@ namespace krys::boo::tests
     SECTION("Removing everything selected collapses it where it was")
     {
       selection.MoveTo(At(middle, 1), At(middle, 3), Affinity::Downstream);
-      Ref<dom::Node> paragraph = ShareRef<dom::Node>(fixture.ById(u8"a"));
-      REQUIRE_FALSE(Downcast<dom::Element>(*paragraph).Remove().HasException());
+      Ref<Node> paragraph = ShareRef<Node>(fixture.ById(u8"a"));
+      REQUIRE_FALSE(Downcast<Element>(*paragraph).Remove().HasException());
       CHECK(selection.IsCaret());
       CHECK(selection.Selection().Start().DeprecatedNode() == fixture.Document->Body());
     }
@@ -211,12 +211,12 @@ namespace krys::boo::tests
     using Alteration = FrameSelection::Alteration;
 
     /// @brief Counts `selectstart` events, cancelling them if asked.
-    struct ModifySelectStartListener : public dom::EventListenerCallback
+    struct ModifySelectStartListener : public EventListenerCallback
     {
       int32 Count {0};
       bool Cancel {false};
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         ++Count;
         if (Cancel)
@@ -405,9 +405,9 @@ namespace krys::boo::tests
         return Document->Selection();
       }
 
-      KRYS_NODISCARD dom::Text &TextIn(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD Text &TextIn(DOMStringView id) noexcept
       {
-        return Downcast<dom::Text>(*ById(id).FirstChild());
+        return Downcast<Text>(*ById(id).FirstChild());
       }
 
       /// @brief Whether the view paints a caret: a rect 1px wide, filled with @p colour.
@@ -567,7 +567,7 @@ namespace krys::boo::tests
 
     SECTION("focus() places a caret at its start")
     {
-      Downcast<html::HTMLElement>(host).Focus();
+      Downcast<HTMLElement>(host).Focus();
       CHECK(fixture.Document->FocusedElement() == &host);
       CHECK(selection.IsCaret());
       CHECK(selection.Selection().RootEditableElement() == &host);
@@ -576,7 +576,7 @@ namespace krys::boo::tests
 
     SECTION("Focusing something else leaves the selection")
     {
-      Downcast<html::HTMLElement>(fixture.ById(u8"b")).Focus();
+      Downcast<HTMLElement>(fixture.ById(u8"b")).Focus();
       CHECK(selection.IsNone());
     }
 
@@ -618,7 +618,7 @@ namespace krys::boo::tests
       u8"<div id=clipped contenteditable style=overflow:hidden>Text</div>"
       u8"<div id=padded contenteditable style='overflow:hidden;padding-right:4px'>Text</div>"
       u8"<div id=visible contenteditable>Text</div><div id=plain style=overflow:hidden>Text</div>");
-    auto padding = [&](dom::DOMStringView id)
+    auto padding = [&](DOMStringView id)
     {
       return Downcast<RenderBlockFlow>(*fixture.ById(id).Renderer()).EndPaddingWidthForCaret();
     };

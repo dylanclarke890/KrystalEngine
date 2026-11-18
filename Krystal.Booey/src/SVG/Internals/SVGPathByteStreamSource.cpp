@@ -19,7 +19,7 @@
 
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStreamSource.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   SVGPathByteStreamSource::SVGPathByteStreamSource(const SVGPathByteStream &stream) noexcept
       : _streamCurrent(stream.GetBytes())

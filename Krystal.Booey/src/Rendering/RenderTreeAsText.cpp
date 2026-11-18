@@ -85,7 +85,7 @@ namespace krys::boo
       ts << ' ';
     }
 
-    KRYS_NODISCARD utf8_string GetTagName(dom::Node *n) noexcept
+    KRYS_NODISCARD utf8_string GetTagName(Node *n) noexcept
     {
       if (n->NodeType() == dom::NodeType::DOCUMENT_NODE)
       {
@@ -371,7 +371,7 @@ namespace krys::boo
   {
     if (behavior.Contains(RenderAsTextFlag::ShowIDAndClass))
     {
-      if (auto *element = DynamicDowncast<dom::Element>(object.GetNode()))
+      if (auto *element = DynamicDowncast<boo::Element>(object.GetNode()))
       {
         if (element->HasAttribute(u8"id"))
         {
@@ -833,7 +833,7 @@ namespace krys::boo
       }
     }
 
-    KRYS_NODISCARD TextStream CreateTextStream(const dom::Document &) noexcept
+    KRYS_NODISCARD TextStream CreateTextStream(const Document &) noexcept
     {
       return TextStream {
         TextStream::LineMode::MultipleLine,
@@ -895,7 +895,7 @@ namespace krys::boo
     }
   }
 
-  utf8_string ExternalRepresentation(dom::Element *element, EnumSet<RenderAsTextFlag> behavior) noexcept
+  utf8_string ExternalRepresentation(boo::Element *element, EnumSet<RenderAsTextFlag> behavior) noexcept
   {
     krys_debug_assert(element);
 
@@ -938,7 +938,7 @@ namespace krys::boo
     }
   }
 
-  utf8_string CounterValueForElement(dom::Element *element) noexcept
+  utf8_string CounterValueForElement(boo::Element *element) noexcept
   {
     // Make sure the element is not freed during the layout.
     auto elementRef = ShareRef(*element);
@@ -957,7 +957,7 @@ namespace krys::boo
     return stream.Release();
   }
 
-  utf8_string MarkerTextForListItem(dom::Element *element) noexcept
+  utf8_string MarkerTextForListItem(boo::Element *element) noexcept
   {
     // Make sure the element is not freed during the layout.
     auto protectedElement = ShareRef(*element);

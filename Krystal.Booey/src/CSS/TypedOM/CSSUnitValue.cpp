@@ -36,30 +36,30 @@
 #include "Krystal.Booey/CSS/Values/Units.hpp"
 #include <cmath>
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  UnitType CSSUnitValue::ParseUnit(const CSSOMString &unit) noexcept
+  css::UnitType CSSUnitValue::ParseUnit(const CSSOMString &unit) noexcept
   {
     if (unit == u8"number")
     {
-      return UnitType::Number;
+      return css::UnitType::Number;
     }
     if (unit == u8"percent")
     {
-      return UnitType::Percentage;
+      return css::UnitType::Percentage;
     }
-    return ParseUnitType(unit);
+    return css::ParseUnitType(unit);
   }
 
   CSSOMStringView CSSUnitValue::Unit() const noexcept
   {
     switch (_unit)
     {
-      case UnitType::Number:
+      case css::UnitType::Number:
       {
         return u8"number";
       }
-      case UnitType::Percentage:
+      case css::UnitType::Percentage:
       {
         return u8"percent";
       }
@@ -73,7 +73,7 @@ namespace krys::boo::css
 
   CSSOMStringView CSSUnitValue::UnitSerialisation() const noexcept
   {
-    return PrimitiveValue::UnitTypeString(_unit);
+    return css::PrimitiveValue::UnitTypeString(_unit);
   }
 
   void CSSUnitValue::Serialise(StringBuilder &builder, EnumSet<SerialisationArguments>) const noexcept
@@ -82,54 +82,54 @@ namespace krys::boo::css
     builder.Append(UnitSerialisation());
   }
 
-  dom::ExceptionOr<Ref<CSSUnitValue>> CSSUnitValue::Create(double value, const CSSOMString &unit) noexcept
+  ExceptionOr<Ref<CSSUnitValue>> CSSUnitValue::Create(double value, const CSSOMString &unit) noexcept
   {
     auto parsedUnit = ParseUnit(unit);
-    if (parsedUnit == UnitType::Unknown)
+    if (parsedUnit == css::UnitType::Unknown)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     auto type = CSSNumericType::Create(parsedUnit);
     if (!type)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     auto unitValue = AdoptRef(*new CSSUnitValue(value, parsedUnit));
     unitValue->_type = krys::move(*type);
     return unitValue;
   }
 
-  CSSUnitValue::CSSUnitValue(double value, UnitType unit) noexcept
+  CSSUnitValue::CSSUnitValue(double value, css::UnitType unit) noexcept
       : CSSNumericValue(CSSNumericType::Create(unit).value_or(CSSNumericType())), _value(value), _unit(unit)
   {
   }
 
-  RefPtr<CSSUnitValue> CSSUnitValue::ConvertTo(UnitType unit) const noexcept
+  RefPtr<CSSUnitValue> CSSUnitValue::ConvertTo(css::UnitType unit) const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#convert-a-cssunitvalue
-    if (UnitCategoryForType(UnitEnum()) != UnitCategoryForType(unit))
+    if (css::UnitCategoryForType(UnitEnum()) != css::UnitCategoryForType(unit))
     {
       return nullptr;
     }
 
-    return Create(_value * ConversionToCanonicalUnitsScaleFactor(UnitEnum())
-                    / ConversionToCanonicalUnitsScaleFactor(unit),
+    return Create(_value * css::ConversionToCanonicalUnitsScaleFactor(UnitEnum())
+                    / css::ConversionToCanonicalUnitsScaleFactor(unit),
                   unit);
   }
 
   auto CSSUnitValue::ToSumValue() const noexcept -> Maybe<SumValue>
   {
     // https://drafts.css-houdini.org/css-typed-om/#create-a-sum-value
-    auto canonicalUnit = CanonicalUnitTypeForUnitType(_unit);
-    if (canonicalUnit == UnitType::Unknown)
+    auto canonicalUnit = css::CanonicalUnitTypeForUnitType(_unit);
+    if (canonicalUnit == css::UnitType::Unknown)
     {
       canonicalUnit = _unit;
     }
 
-    auto convertedValue = _value * ConversionToCanonicalUnitsScaleFactor(UnitEnum())
-                          / ConversionToCanonicalUnitsScaleFactor(canonicalUnit);
+    auto convertedValue = _value * css::ConversionToCanonicalUnitsScaleFactor(UnitEnum())
+                          / css::ConversionToCanonicalUnitsScaleFactor(canonicalUnit);
 
-    if (_unit == UnitType::Number)
+    if (_unit == css::UnitType::Number)
     {
       return SumValue {Addend {convertedValue, {}}};
     }
@@ -149,14 +149,14 @@ namespace krys::boo::css
 
   RefPtr<css::Value> CSSUnitValue::ToCSSValue() const noexcept
   {
-    return PrimitiveValue::Create(_value, _unit);
+    return css::PrimitiveValue::Create(_value, _unit);
   }
 
   // FIXME: This function could be mostly generated from the property definitions.
-  KRYS_NODISCARD static bool IsValueOutOfRangeForProperty(PropertyId propertyId, double value,
-                                                          UnitType unit) noexcept
+  KRYS_NODISCARD static bool IsValueOutOfRangeForProperty(css::PropertyId propertyId, double value,
+                                                          css::UnitType unit) noexcept
   {
-    auto valueRange = ParserFastPaths::LengthValueRangeForPropertiesSupportingSimpleLengths(propertyId);
+    auto valueRange = css::ParserFastPaths::LengthValueRangeForPropertiesSupportingSimpleLengths(propertyId);
     if (valueRange && (value < valueRange->Min || value > valueRange->Max))
     {
       return true;
@@ -164,83 +164,83 @@ namespace krys::boo::css
 
     switch (propertyId)
     {
-      case PropertyId::Order:
-      case PropertyId::ZIndex:
+      case css::PropertyId::Order:
+      case css::PropertyId::ZIndex:
       {
         return std::round(value) != value;
       }
-      case PropertyId::TabSize:
+      case css::PropertyId::TabSize:
       {
-        return value < 0 || (unit == UnitType::Number && std::round(value) != value);
+        return value < 0 || (unit == css::UnitType::Number && std::round(value) != value);
       }
-      case PropertyId::Orphans:
-      case PropertyId::Widows:
-      case PropertyId::ColumnCount:
+      case css::PropertyId::Orphans:
+      case css::PropertyId::Widows:
+      case css::PropertyId::ColumnCount:
       {
         return std::round(value) != value || value < 1;
       }
-      case PropertyId::AnimationDuration:
-      case PropertyId::AnimationIterationCount:
-      case PropertyId::BackgroundSize:
-      case PropertyId::BlockSize:
-      case PropertyId::BorderBlockEndWidth:
-      case PropertyId::BorderBlockStartWidth:
-      case PropertyId::BorderBottomLeftRadius:
-      case PropertyId::BorderBottomRightRadius:
-      case PropertyId::BorderBottomWidth:
-      case PropertyId::BorderImageOutset:
-      case PropertyId::BorderImageSlice:
-      case PropertyId::BorderImageWidth:
-      case PropertyId::BorderInlineEndWidth:
-      case PropertyId::BorderInlineStartWidth:
-      case PropertyId::BorderLeftWidth:
-      case PropertyId::BorderRightWidth:
-      case PropertyId::BorderTopLeftRadius:
-      case PropertyId::BorderTopRightRadius:
-      case PropertyId::BorderTopWidth:
-      case PropertyId::ColumnGap:
-      case PropertyId::ColumnRuleWidth:
-      case PropertyId::ColumnWidth:
-      case PropertyId::FlexBasis:
-      case PropertyId::FlexGrow:
-      case PropertyId::FlexShrink:
-      case PropertyId::FontSize:
-      case PropertyId::FontSizeAdjust:
-      case PropertyId::FontWidth:
-      case PropertyId::GridAutoColumns:
-      case PropertyId::GridAutoRows:
-      case PropertyId::GridTemplateColumns:
-      case PropertyId::GridTemplateRows:
-      case PropertyId::InlineSize:
-      case PropertyId::LineHeight:
-      case PropertyId::MaxBlockSize:
-      case PropertyId::MaxInlineSize:
-      case PropertyId::MaxHeight:
-      case PropertyId::MaxWidth:
-      case PropertyId::MinBlockSize:
-      case PropertyId::MinInlineSize:
-      case PropertyId::OutlineWidth:
-      case PropertyId::Perspective:
-      case PropertyId::R:
-      case PropertyId::RowGap:
-      case PropertyId::Rx:
-      case PropertyId::Ry:
-      case PropertyId::ScrollPaddingBlockEnd:
-      case PropertyId::ScrollPaddingBlockStart:
-      case PropertyId::ScrollPaddingBottom:
-      case PropertyId::ScrollPaddingInlineEnd:
-      case PropertyId::ScrollPaddingInlineStart:
-      case PropertyId::ScrollPaddingLeft:
-      case PropertyId::ScrollPaddingRight:
-      case PropertyId::ScrollPaddingTop:
-      case PropertyId::StrokeDasharray:
-      case PropertyId::StrokeMiterlimit:
-      case PropertyId::StrokeWidth:
-      case PropertyId::TransitionDuration:
+      case css::PropertyId::AnimationDuration:
+      case css::PropertyId::AnimationIterationCount:
+      case css::PropertyId::BackgroundSize:
+      case css::PropertyId::BlockSize:
+      case css::PropertyId::BorderBlockEndWidth:
+      case css::PropertyId::BorderBlockStartWidth:
+      case css::PropertyId::BorderBottomLeftRadius:
+      case css::PropertyId::BorderBottomRightRadius:
+      case css::PropertyId::BorderBottomWidth:
+      case css::PropertyId::BorderImageOutset:
+      case css::PropertyId::BorderImageSlice:
+      case css::PropertyId::BorderImageWidth:
+      case css::PropertyId::BorderInlineEndWidth:
+      case css::PropertyId::BorderInlineStartWidth:
+      case css::PropertyId::BorderLeftWidth:
+      case css::PropertyId::BorderRightWidth:
+      case css::PropertyId::BorderTopLeftRadius:
+      case css::PropertyId::BorderTopRightRadius:
+      case css::PropertyId::BorderTopWidth:
+      case css::PropertyId::ColumnGap:
+      case css::PropertyId::ColumnRuleWidth:
+      case css::PropertyId::ColumnWidth:
+      case css::PropertyId::FlexBasis:
+      case css::PropertyId::FlexGrow:
+      case css::PropertyId::FlexShrink:
+      case css::PropertyId::FontSize:
+      case css::PropertyId::FontSizeAdjust:
+      case css::PropertyId::FontWidth:
+      case css::PropertyId::GridAutoColumns:
+      case css::PropertyId::GridAutoRows:
+      case css::PropertyId::GridTemplateColumns:
+      case css::PropertyId::GridTemplateRows:
+      case css::PropertyId::InlineSize:
+      case css::PropertyId::LineHeight:
+      case css::PropertyId::MaxBlockSize:
+      case css::PropertyId::MaxInlineSize:
+      case css::PropertyId::MaxHeight:
+      case css::PropertyId::MaxWidth:
+      case css::PropertyId::MinBlockSize:
+      case css::PropertyId::MinInlineSize:
+      case css::PropertyId::OutlineWidth:
+      case css::PropertyId::Perspective:
+      case css::PropertyId::R:
+      case css::PropertyId::RowGap:
+      case css::PropertyId::Rx:
+      case css::PropertyId::Ry:
+      case css::PropertyId::ScrollPaddingBlockEnd:
+      case css::PropertyId::ScrollPaddingBlockStart:
+      case css::PropertyId::ScrollPaddingBottom:
+      case css::PropertyId::ScrollPaddingInlineEnd:
+      case css::PropertyId::ScrollPaddingInlineStart:
+      case css::PropertyId::ScrollPaddingLeft:
+      case css::PropertyId::ScrollPaddingRight:
+      case css::PropertyId::ScrollPaddingTop:
+      case css::PropertyId::StrokeDasharray:
+      case css::PropertyId::StrokeMiterlimit:
+      case css::PropertyId::StrokeWidth:
+      case css::PropertyId::TransitionDuration:
       {
         return value < 0;
       }
-      case PropertyId::FontWeight:
+      case css::PropertyId::FontWeight:
       {
         return value < 1 || value > 1'000;
       }
@@ -251,188 +251,190 @@ namespace krys::boo::css
     }
   }
 
-  KRYS_NODISCARD static Range RangeForProperty(PropertyId propertyId, UnitType) noexcept
+  KRYS_NODISCARD static css::Range RangeForProperty(css::PropertyId propertyId, css::UnitType) noexcept
   {
     // FIXME: Merge with IsValueOutOfRangeForProperty.
 
-    if (auto valueRange = ParserFastPaths::LengthValueRangeForPropertiesSupportingSimpleLengths(propertyId))
+    if (auto valueRange =
+          css::ParserFastPaths::LengthValueRangeForPropertiesSupportingSimpleLengths(propertyId))
     {
       return *valueRange;
     }
 
     switch (propertyId)
     {
-      case PropertyId::AnimationDuration:
-      case PropertyId::AnimationIterationCount:
-      case PropertyId::BackgroundSize:
-      case PropertyId::BlockSize:
-      case PropertyId::BorderBlockEndWidth:
-      case PropertyId::BorderBlockStartWidth:
-      case PropertyId::BorderBottomLeftRadius:
-      case PropertyId::BorderBottomRightRadius:
-      case PropertyId::BorderBottomWidth:
-      case PropertyId::BorderImageOutset:
-      case PropertyId::BorderImageSlice:
-      case PropertyId::BorderImageWidth:
-      case PropertyId::BorderInlineEndWidth:
-      case PropertyId::BorderInlineStartWidth:
-      case PropertyId::BorderLeftWidth:
-      case PropertyId::BorderRightWidth:
-      case PropertyId::BorderTopLeftRadius:
-      case PropertyId::BorderTopRightRadius:
-      case PropertyId::BorderTopWidth:
-      case PropertyId::ColumnGap:
-      case PropertyId::ColumnRuleWidth:
-      case PropertyId::ColumnWidth:
-      case PropertyId::FlexBasis:
-      case PropertyId::FlexGrow:
-      case PropertyId::FlexShrink:
-      case PropertyId::FontSize:
-      case PropertyId::FontSizeAdjust:
-      case PropertyId::FontWidth:
-      case PropertyId::GridAutoColumns:
-      case PropertyId::GridAutoRows:
-      case PropertyId::GridTemplateColumns:
-      case PropertyId::GridTemplateRows:
-      case PropertyId::InlineSize:
-      case PropertyId::LineHeight:
-      case PropertyId::MaxBlockSize:
-      case PropertyId::MaxInlineSize:
-      case PropertyId::MaxHeight:
-      case PropertyId::MaxWidth:
-      case PropertyId::MinBlockSize:
-      case PropertyId::MinInlineSize:
-      case PropertyId::OutlineWidth:
-      case PropertyId::Perspective:
-      case PropertyId::R:
-      case PropertyId::RowGap:
-      case PropertyId::Rx:
-      case PropertyId::Ry:
-      case PropertyId::ScrollPaddingBlockEnd:
-      case PropertyId::ScrollPaddingBlockStart:
-      case PropertyId::ScrollPaddingBottom:
-      case PropertyId::ScrollPaddingInlineEnd:
-      case PropertyId::ScrollPaddingInlineStart:
-      case PropertyId::ScrollPaddingLeft:
-      case PropertyId::ScrollPaddingRight:
-      case PropertyId::ScrollPaddingTop:
-      case PropertyId::StrokeDasharray:
-      case PropertyId::StrokeMiterlimit:
-      case PropertyId::StrokeWidth:
-      case PropertyId::TransitionDuration:
-      case PropertyId::TabSize:
-      case PropertyId::FontWeight:  // FIXME: Support more fine-grain ranges: `<number [1,1000]>`
-      case PropertyId::Orphans:     // FIXME: Support more fine-grain ranges: `<integer [1,∞]>`
-      case PropertyId::Widows:      // FIXME: Support more fine-grain ranges: `<integer [1,∞]>`
-      case PropertyId::ColumnCount: // FIXME: Support more fine-grain ranges: `<integer [1,∞]>`
+      case css::PropertyId::AnimationDuration:
+      case css::PropertyId::AnimationIterationCount:
+      case css::PropertyId::BackgroundSize:
+      case css::PropertyId::BlockSize:
+      case css::PropertyId::BorderBlockEndWidth:
+      case css::PropertyId::BorderBlockStartWidth:
+      case css::PropertyId::BorderBottomLeftRadius:
+      case css::PropertyId::BorderBottomRightRadius:
+      case css::PropertyId::BorderBottomWidth:
+      case css::PropertyId::BorderImageOutset:
+      case css::PropertyId::BorderImageSlice:
+      case css::PropertyId::BorderImageWidth:
+      case css::PropertyId::BorderInlineEndWidth:
+      case css::PropertyId::BorderInlineStartWidth:
+      case css::PropertyId::BorderLeftWidth:
+      case css::PropertyId::BorderRightWidth:
+      case css::PropertyId::BorderTopLeftRadius:
+      case css::PropertyId::BorderTopRightRadius:
+      case css::PropertyId::BorderTopWidth:
+      case css::PropertyId::ColumnGap:
+      case css::PropertyId::ColumnRuleWidth:
+      case css::PropertyId::ColumnWidth:
+      case css::PropertyId::FlexBasis:
+      case css::PropertyId::FlexGrow:
+      case css::PropertyId::FlexShrink:
+      case css::PropertyId::FontSize:
+      case css::PropertyId::FontSizeAdjust:
+      case css::PropertyId::FontWidth:
+      case css::PropertyId::GridAutoColumns:
+      case css::PropertyId::GridAutoRows:
+      case css::PropertyId::GridTemplateColumns:
+      case css::PropertyId::GridTemplateRows:
+      case css::PropertyId::InlineSize:
+      case css::PropertyId::LineHeight:
+      case css::PropertyId::MaxBlockSize:
+      case css::PropertyId::MaxInlineSize:
+      case css::PropertyId::MaxHeight:
+      case css::PropertyId::MaxWidth:
+      case css::PropertyId::MinBlockSize:
+      case css::PropertyId::MinInlineSize:
+      case css::PropertyId::OutlineWidth:
+      case css::PropertyId::Perspective:
+      case css::PropertyId::R:
+      case css::PropertyId::RowGap:
+      case css::PropertyId::Rx:
+      case css::PropertyId::Ry:
+      case css::PropertyId::ScrollPaddingBlockEnd:
+      case css::PropertyId::ScrollPaddingBlockStart:
+      case css::PropertyId::ScrollPaddingBottom:
+      case css::PropertyId::ScrollPaddingInlineEnd:
+      case css::PropertyId::ScrollPaddingInlineStart:
+      case css::PropertyId::ScrollPaddingLeft:
+      case css::PropertyId::ScrollPaddingRight:
+      case css::PropertyId::ScrollPaddingTop:
+      case css::PropertyId::StrokeDasharray:
+      case css::PropertyId::StrokeMiterlimit:
+      case css::PropertyId::StrokeWidth:
+      case css::PropertyId::TransitionDuration:
+      case css::PropertyId::TabSize:
+      case css::PropertyId::FontWeight:  // FIXME: Support more fine-grain ranges: `<number [1,1000]>`
+      case css::PropertyId::Orphans:     // FIXME: Support more fine-grain ranges: `<integer [1,∞]>`
+      case css::PropertyId::Widows:      // FIXME: Support more fine-grain ranges: `<integer [1,∞]>`
+      case css::PropertyId::ColumnCount: // FIXME: Support more fine-grain ranges: `<integer [1,∞]>`
       {
-        return NonNegative;
+        return css::NonNegative;
       }
 
-      case PropertyId::Order:  // FIXME: Support more fine-grain ranges: `<integer>`
-      case PropertyId::ZIndex: // FIXME: Support more fine-grain ranges: `<integer>`
+      case css::PropertyId::Order:  // FIXME: Support more fine-grain ranges: `<integer>`
+      case css::PropertyId::ZIndex: // FIXME: Support more fine-grain ranges: `<integer>`
       default:
       {
-        return All;
+        return css::All;
       }
     }
   }
 
-  KRYS_NODISCARD static Category CalculationCategoryForProperty(PropertyId, UnitType unit) noexcept
+  KRYS_NODISCARD static css::Category CalculationCategoryForProperty(css::PropertyId,
+                                                                     css::UnitType unit) noexcept
   {
     // FIXME: This should be looking up the supported calculation categories for the PropertyId and picking
     // the one that best matches the unit.
 
     switch (unit)
     {
-      case UnitType::Number:
-      case UnitType::Integer:
+      case css::UnitType::Number:
+      case css::UnitType::Integer:
       {
-        return Category::Number;
+        return css::Category::Number;
       }
-      case UnitType::em:
-      case UnitType::ex:
-      case UnitType::px:
-      case UnitType::cm:
-      case UnitType::mm:
-      case UnitType::in:
-      case UnitType::pt:
-      case UnitType::pc:
-      case UnitType::Q:
-      case UnitType::lh:
-      case UnitType::cap:
-      case UnitType::ch:
-      case UnitType::ic:
-      case UnitType::rcap:
-      case UnitType::rch:
-      case UnitType::rem:
-      case UnitType::rex:
-      case UnitType::ric:
-      case UnitType::rlh:
-      case UnitType::vw:
-      case UnitType::vh:
-      case UnitType::vmin:
-      case UnitType::vmax:
-      case UnitType::vb:
-      case UnitType::vi:
-      case UnitType::svw:
-      case UnitType::svh:
-      case UnitType::svmin:
-      case UnitType::svmax:
-      case UnitType::svb:
-      case UnitType::svi:
-      case UnitType::lvw:
-      case UnitType::lvh:
-      case UnitType::lvmin:
-      case UnitType::lvmax:
-      case UnitType::lvb:
-      case UnitType::lvi:
-      case UnitType::dvw:
-      case UnitType::dvh:
-      case UnitType::dvmin:
-      case UnitType::dvmax:
-      case UnitType::dvb:
-      case UnitType::dvi:
-      case UnitType::cqw:
-      case UnitType::cqh:
-      case UnitType::cqi:
-      case UnitType::cqb:
-      case UnitType::cqmin:
-      case UnitType::cqmax:
+      case css::UnitType::em:
+      case css::UnitType::ex:
+      case css::UnitType::px:
+      case css::UnitType::cm:
+      case css::UnitType::mm:
+      case css::UnitType::in:
+      case css::UnitType::pt:
+      case css::UnitType::pc:
+      case css::UnitType::Q:
+      case css::UnitType::lh:
+      case css::UnitType::cap:
+      case css::UnitType::ch:
+      case css::UnitType::ic:
+      case css::UnitType::rcap:
+      case css::UnitType::rch:
+      case css::UnitType::rem:
+      case css::UnitType::rex:
+      case css::UnitType::ric:
+      case css::UnitType::rlh:
+      case css::UnitType::vw:
+      case css::UnitType::vh:
+      case css::UnitType::vmin:
+      case css::UnitType::vmax:
+      case css::UnitType::vb:
+      case css::UnitType::vi:
+      case css::UnitType::svw:
+      case css::UnitType::svh:
+      case css::UnitType::svmin:
+      case css::UnitType::svmax:
+      case css::UnitType::svb:
+      case css::UnitType::svi:
+      case css::UnitType::lvw:
+      case css::UnitType::lvh:
+      case css::UnitType::lvmin:
+      case css::UnitType::lvmax:
+      case css::UnitType::lvb:
+      case css::UnitType::lvi:
+      case css::UnitType::dvw:
+      case css::UnitType::dvh:
+      case css::UnitType::dvmin:
+      case css::UnitType::dvmax:
+      case css::UnitType::dvb:
+      case css::UnitType::dvi:
+      case css::UnitType::cqw:
+      case css::UnitType::cqh:
+      case css::UnitType::cqi:
+      case css::UnitType::cqb:
+      case css::UnitType::cqmin:
+      case css::UnitType::cqmax:
       {
-        return Category::Length;
+        return css::Category::Length;
       }
-      case UnitType::Percentage:
+      case css::UnitType::Percentage:
       {
-        return Category::Percentage;
+        return css::Category::Percentage;
       }
-      case UnitType::deg:
-      case UnitType::rad:
-      case UnitType::grad:
-      case UnitType::turn:
+      case css::UnitType::deg:
+      case css::UnitType::rad:
+      case css::UnitType::grad:
+      case css::UnitType::turn:
       {
-        return Category::Angle;
+        return css::Category::Angle;
       }
-      case UnitType::ms:
-      case UnitType::s:
+      case css::UnitType::ms:
+      case css::UnitType::s:
       {
-        return Category::Time;
+        return css::Category::Time;
       }
-      case UnitType::hz:
-      case UnitType::khz:
+      case css::UnitType::hz:
+      case css::UnitType::khz:
       {
-        return Category::Frequency;
+        return css::Category::Frequency;
       }
-      case UnitType::dppx:
-      case UnitType::x:
-      case UnitType::dpi:
-      case UnitType::dpcm:
+      case css::UnitType::dppx:
+      case css::UnitType::x:
+      case css::UnitType::dpi:
+      case css::UnitType::dpcm:
       {
-        return Category::Resolution;
+        return css::Category::Resolution;
       }
-      case UnitType::fr:
+      case css::UnitType::fr:
       {
-        return Category::Flex;
+        return css::Category::Flex;
       }
       default:
       {
@@ -441,10 +443,10 @@ namespace krys::boo::css
     }
 
     krys_debug_assert(false);
-    return Category::Number;
+    return css::Category::Number;
   }
 
-  RefPtr<css::Value> CSSUnitValue::ToCSSValueWithProperty(PropertyId propertyId) const noexcept
+  RefPtr<css::Value> CSSUnitValue::ToCSSValueWithProperty(css::PropertyId propertyId) const noexcept
   {
     if (IsValueOutOfRangeForProperty(propertyId, _value, _unit))
     {
@@ -452,7 +454,7 @@ namespace krys::boo::css
 
       auto node = ToCalcTreeNode();
       krys_debug_assert(node);
-      auto type = calc::GetType(*node);
+      auto type = css::calc::GetType(*node);
 
       auto range = RangeForProperty(propertyId, _unit);
       auto category = CalculationCategoryForProperty(propertyId, _unit);
@@ -462,22 +464,22 @@ namespace krys::boo::css
         return nullptr;
       }
 
-      List<calc::Child> sumChildren;
+      List<css::calc::Child> sumChildren;
       sumChildren.push_back(krys::move(*node));
-      auto sum = calc::CreateChild(calc::Sum {.Children = krys::move(sumChildren)}, type);
+      auto sum = css::calc::CreateChild(css::calc::Sum {.Children = krys::move(sumChildren)}, type);
 
-      return PrimitiveValue::Create(calc::Value::Create(category, range,
-                                                        calc::Tree {
-                                                          .Root = krys::move(sum),
-                                                          .Type = type,
-                                                          .Stage = calc::Stage::Specified,
-                                                        }));
+      return css::PrimitiveValue::Create(css::calc::Value::Create(category, range,
+                                                                  css::calc::Tree {
+                                                                    .Root = krys::move(sum),
+                                                                    .Type = type,
+                                                                    .Stage = css::calc::Stage::Specified,
+                                                                  }));
     }
     return ToCSSValue();
   }
 
-  Maybe<calc::Child> CSSUnitValue::ToCalcTreeNode() const noexcept
+  Maybe<css::calc::Child> CSSUnitValue::ToCalcTreeNode() const noexcept
   {
-    return calc::CreateNumeric(_value, _unit);
+    return css::calc::CreateNumeric(_value, _unit);
   }
 }

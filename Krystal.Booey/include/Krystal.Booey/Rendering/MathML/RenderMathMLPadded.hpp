@@ -32,10 +32,7 @@
 
 namespace krys::boo
 {
-  namespace mathml
-  {
-    class MathMLPaddedElement;
-  }
+  class MathMLPaddedElement;
 
   /// @brief The renderer of `<mpadded>`: a row whose size and position are set by the element's attributes.
   class RenderMathMLPadded final : public RenderMathMLRow
@@ -44,7 +41,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderMathMLPadded);
 
   public:
-    RenderMathMLPadded(mathml::MathMLPaddedElement &element, RenderStyle &&style) noexcept;
+    RenderMathMLPadded(boo::MathMLPaddedElement &element, RenderStyle &&style) noexcept;
 
     ~RenderMathMLPadded() noexcept override;
 
@@ -60,7 +57,7 @@ namespace krys::boo
 
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept final;
 
-    KRYS_NODISCARD mathml::MathMLPaddedElement &GetElement() const noexcept;
+    KRYS_NODISCARD boo::MathMLPaddedElement &GetElement() const noexcept;
 
     KRYS_NODISCARD LayoutUnit Voffset() const noexcept;
 

@@ -21,27 +21,27 @@ namespace krys::boo::html::tests
   {
     /// @brief Dispatches a trusted-looking click of @p button at @p target, with Ctrl held if @p ctrlKey and
     /// Shift if @p shiftKey.
-    void Click(dom::Element &target, int16 button = 0, bool ctrlKey = false, bool shiftKey = false) noexcept
+    void Click(Element &target, int16 button = 0, bool ctrlKey = false, bool shiftKey = false) noexcept
     {
-      dom::MouseEventInit init;
+      MouseEventInit init;
       init.Bubbles = true;
       init.Cancelable = true;
       init.Composed = true;
       init.Button = button;
       init.CtrlKey = ctrlKey;
       init.ShiftKey = shiftKey;
-      auto type = button == 0 ? dom::DOMStringAtom(u8"click") : dom::DOMStringAtom(u8"auxclick");
-      (void)target.DispatchEvent(*CreateRef<dom::MouseEvent>(type, init));
+      auto type = button == 0 ? DOMStringAtom(u8"click") : DOMStringAtom(u8"auxclick");
+      (void)target.DispatchEvent(*CreateRef<MouseEvent>(type, init));
     }
 
     /// @brief Dispatches a mouse press at @p target, with Shift held if @p shiftKey.
-    void MouseDown(dom::Element &target, bool shiftKey) noexcept
+    void MouseDown(Element &target, bool shiftKey) noexcept
     {
-      dom::MouseEventInit init;
+      MouseEventInit init;
       init.Bubbles = true;
       init.Cancelable = true;
       init.ShiftKey = shiftKey;
-      (void)target.DispatchEvent(*CreateRef<dom::MouseEvent>(u8"mousedown", init));
+      (void)target.DispatchEvent(*CreateRef<MouseEvent>(u8"mousedown", init));
     }
   }
 
@@ -81,7 +81,7 @@ namespace krys::boo::html::tests
     SECTION("a canceled click isn't followed")
     {
       auto handle =
-        fixture.ById(u8"a").AddEventListener(u8"click", [](dom::Event &event) { event.PreventDefault(); });
+        fixture.ById(u8"a").AddEventListener(u8"click", [](Event &event) { event.PreventDefault(); });
       Click(fixture.ById(u8"inner"));
       CHECK(fixture.Navigations().empty());
     }
@@ -178,12 +178,12 @@ namespace krys::boo::html::tests
     a.Focus();
     REQUIRE(a.Focused());
 
-    dom::KeyboardEventInit init;
+    KeyboardEventInit init;
     init.Bubbles = true;
     init.Cancelable = true;
     init.KeyIdentifier = u8"Enter";
     init.ShiftKey = true;
-    (void)a.DispatchEvent(*CreateRef<dom::KeyboardEvent>(u8"keydown", init));
+    (void)a.DispatchEvent(*CreateRef<KeyboardEvent>(u8"keydown", init));
 
     REQUIRE(fixture.Navigations().size() == 1);
     auto &navigation = fixture.Navigations()[0];
@@ -270,7 +270,7 @@ namespace krys::boo::html::tests
     CHECK(Str(a.Text()) == "New");
     REQUIRE(a.FirstChild());
     CHECK(a.FirstChild() == a.LastChild());
-    CHECK(Is<dom::Text>(*a.FirstChild()));
+    CHECK(Is<boo::Text>(*a.FirstChild()));
   }
 
   TEST_CASE("HTMLImageElement::IsServerMap", "[HTML][HTMLImageElement]")

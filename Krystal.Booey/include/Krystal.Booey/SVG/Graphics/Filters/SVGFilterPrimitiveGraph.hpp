@@ -32,13 +32,13 @@
 namespace krys::boo
 {
   /// @brief The graph of a filter's primitive elements, before they create their effects.
-  class SVGFilterPrimitiveGraph final : public SVGFilterGraph<svg::SVGFilterPrimitiveStandardAttributes>
+  class SVGFilterPrimitiveGraph final : public SVGFilterGraph<SVGFilterPrimitiveStandardAttributes>
   {
   public:
     SVGFilterPrimitiveGraph() noexcept = default;
 
-    void AddNamedNode(const dom::DOMStringAtom &name,
-                      Ref<svg::SVGFilterPrimitiveStandardAttributes> &&node) noexcept override
+    void AddNamedNode(const DOMStringAtom &name,
+                      Ref<SVGFilterPrimitiveStandardAttributes> &&node) noexcept override
     {
       if (name.View().empty())
       {
@@ -47,12 +47,12 @@ namespace krys::boo
       }
 
       _lastNode = krys::move(node);
-      _namedNodes.insert_or_assign(name, Ref<svg::SVGFilterPrimitiveStandardAttributes>(_lastNode));
+      _namedNodes.insert_or_assign(name, Ref<SVGFilterPrimitiveStandardAttributes>(_lastNode));
     }
 
   private:
-    KRYS_NODISCARD RefPtr<svg::SVGFilterPrimitiveStandardAttributes>
-      GetNamedNode(const dom::DOMStringAtom &name) const noexcept override
+    KRYS_NODISCARD RefPtr<SVGFilterPrimitiveStandardAttributes>
+      GetNamedNode(const DOMStringAtom &name) const noexcept override
     {
       if (name.View().empty())
       {
@@ -60,8 +60,7 @@ namespace krys::boo
       }
 
       auto it = _namedNodes.find(name);
-      return it != _namedNodes.end() ? RefPtr<svg::SVGFilterPrimitiveStandardAttributes>(it->second)
-                                     : nullptr;
+      return it != _namedNodes.end() ? RefPtr<SVGFilterPrimitiveStandardAttributes>(it->second) : nullptr;
     }
   };
 }

@@ -74,7 +74,7 @@ namespace krys::boo
     bool PaintNinePieceImage(const LayoutRect &, const RenderStyle &, const style::MaskBorder &,
                              CompositeOperator = CompositeOperator::SourceOver) const noexcept;
 
-    static void DrawLineForBoxSide(GraphicsContext &, const dom::Document &, const FloatRect &, BoxSide,
+    static void DrawLineForBoxSide(GraphicsContext &, const boo::Document &, const FloatRect &, BoxSide,
                                    Color, BorderStyle, float adjacentWidth1, float adjacentWidth2,
                                    bool antialias = false) noexcept;
 
@@ -116,7 +116,7 @@ namespace krys::boo
     KRYS_NODISCARD static Color CalculateBorderStyleColor(const BorderStyle &, const BoxSide &,
                                                           const Color &) noexcept;
 
-    KRYS_NODISCARD const dom::Document &Document() const noexcept;
+    KRYS_NODISCARD const boo::Document &Document() const noexcept;
   };
 
   /// @brief @p rect inset by a device pixel on each side.

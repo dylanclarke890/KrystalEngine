@@ -172,12 +172,19 @@ namespace krys::boo::css
       return Identifier == null;
     }
   };
+}
 
-  KRYS_NODISCARD inline bool operator==(const PossiblyQuotedIdentifier &a, const CSSOMStringAtom &b) noexcept
+namespace krys::boo
+{
+  KRYS_NODISCARD inline bool operator==(const css::PossiblyQuotedIdentifier &a,
+                                        const CSSOMStringAtom &b) noexcept
   {
     return a.Identifier == b;
   }
+}
 
+namespace krys::boo::css
+{
   enum class SelectorSpecificityIncrement : uint32
   {
     ClassA = 0x10000,
@@ -210,7 +217,7 @@ namespace krys::boo::css
       int32 NthB {0};
 
       // Used for attribute selector
-      dom::QualifiedName Attribute;
+      QualifiedName Attribute;
 
       // Used for :contains and :nth-*
       CSSOMStringAtom Argument {null};
@@ -269,7 +276,7 @@ namespace krys::boo::css
     union DataUnion
     {
       StringAtomStorage Value {nullptr};
-      dom::QualifiedNameStorage *TagQualifiedName;
+      QualifiedNameStorage *TagQualifiedName;
       RareData *Rare;
     } _data;
 
@@ -280,7 +287,7 @@ namespace krys::boo::css
 
     Selector(const Selector &other, MutableSelectorCopyTag) noexcept;
 
-    explicit Selector(const dom::QualifiedName &name, bool tagIsForNamespaceRule = false) noexcept;
+    explicit Selector(const QualifiedName &name, bool tagIsForNamespaceRule = false) noexcept;
 
     Selector &operator=(const Selector &) = delete;
 
@@ -349,7 +356,7 @@ namespace krys::boo::css
 
 #pragma endregion
 
-    KRYS_NODISCARD const dom::QualifiedName &TagQualifiedName() const noexcept;
+    KRYS_NODISCARD const QualifiedName &TagQualifiedName() const noexcept;
 
     KRYS_NODISCARD const CSSOMStringAtom &TagLocalNameLower() const noexcept;
 
@@ -357,7 +364,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD const CSSOMStringAtom &SerialisingValue() const noexcept;
 
-    KRYS_NODISCARD const dom::QualifiedName &Attribute() const noexcept;
+    KRYS_NODISCARD const QualifiedName &Attribute() const noexcept;
 
     KRYS_NODISCARD const CSSOMStringAtom &Argument() const noexcept KRYS_LIFETIME_BOUND
     {
@@ -495,7 +502,7 @@ namespace krys::boo::css
 
     void SetValue(const CSSOMStringAtom &value, MatchLowercase matchLowercase = MatchLowercase::No) noexcept;
 
-    void SetAttribute(const dom::QualifiedName &name, AttributeCaseFlag caseFlag) noexcept;
+    void SetAttribute(const QualifiedName &name, AttributeCaseFlag caseFlag) noexcept;
 
     void SetNth(int32 a, int32 b) noexcept;
 
@@ -593,7 +600,7 @@ namespace krys::boo::css
 
   KRYS_NODISCARD bool IsElementBackedPseudoElement(SelectorPseudoElement pseudoElement) noexcept;
 
-  inline const dom::QualifiedName &Selector::Attribute() const noexcept
+  inline const QualifiedName &Selector::Attribute() const noexcept
   {
     krys_debug_assert(IsAttributeSelector());
     krys_debug_assert(HasRareData());
@@ -657,11 +664,11 @@ namespace krys::boo::css
     }
   }
 
-  inline const dom::QualifiedName &Selector::TagQualifiedName() const noexcept
+  inline const QualifiedName &Selector::TagQualifiedName() const noexcept
   {
     krys_debug_assert(Match() == SelectorMatch::Type);
     // QualifiedName is just a pointer to its storage, so the cast below is safe.
-    return *reinterpret_cast<const dom::QualifiedName *>(&_data.TagQualifiedName);
+    return *reinterpret_cast<const QualifiedName *>(&_data.TagQualifiedName);
   }
 
   inline const CSSOMStringAtom &Selector::TagLocalNameLower() const noexcept

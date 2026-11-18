@@ -134,8 +134,8 @@ namespace krys::boo::style
   }
 
   template <typename D>
-  KRYS_NODISCARD css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
-                                                                  const RelativeColor<D> &relative) noexcept
+  KRYS_NODISCARD CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
+                                                             const RelativeColor<D> &relative) noexcept
   {
     StringBuilder builder;
     SerialisationForCSSTokenization(builder, context, relative);

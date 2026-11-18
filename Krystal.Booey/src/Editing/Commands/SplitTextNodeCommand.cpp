@@ -34,12 +34,12 @@
 
 namespace krys::boo
 {
-  Ref<SplitTextNodeCommand> SplitTextNodeCommand::Create(dom::Text &node, uint32 offset) noexcept
+  Ref<SplitTextNodeCommand> SplitTextNodeCommand::Create(Text &node, uint32 offset) noexcept
   {
     return CreateRef<SplitTextNodeCommand>(node, offset);
   }
 
-  SplitTextNodeCommand::SplitTextNodeCommand(dom::Text &text, uint32 offset) noexcept
+  SplitTextNodeCommand::SplitTextNodeCommand(Text &text, uint32 offset) noexcept
       : SimpleEditCommand(text.NodeDocument()), _text2(ShareRef(text)), _offset(offset)
   {
     // NOTE: Various callers rely on the fact that the original node becomes
@@ -79,7 +79,7 @@ namespace krys::boo
 
   void SplitTextNodeCommand::DoUnapply() noexcept
   {
-    RefPtr<dom::Text> text1 = _text1;
+    RefPtr<Text> text1 = _text1;
     if (!text1 || !text1->HasEditableStyle())
     {
       return;

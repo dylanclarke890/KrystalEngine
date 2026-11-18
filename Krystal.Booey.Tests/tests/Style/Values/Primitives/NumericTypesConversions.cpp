@@ -24,7 +24,7 @@ namespace krys::boo::style::tests
     template <typename CalcType>
     CalcType ParseCalc(utf8_stringview text, css::Category category)
     {
-      css::InputStream input {css::CSSOMString(text)};
+      css::InputStream input {CSSOMString(text)};
       css::Tokenizer tokenizer {input};
       REQUIRE(tokenizer.PumpTokenizer());
 

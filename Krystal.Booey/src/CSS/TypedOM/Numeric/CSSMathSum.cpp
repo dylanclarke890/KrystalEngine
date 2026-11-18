@@ -28,9 +28,9 @@
 #include "Krystal.Booey/CSS/TypedOM/Numeric/CSSMathNegate.hpp"
 #include <algorithm>
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  dom::ExceptionOr<Ref<CSSMathSum>> CSSMathSum::Create(List<CSSNumberish> numberishes) noexcept
+  ExceptionOr<Ref<CSSMathSum>> CSSMathSum::Create(List<CSSNumberish> numberishes) noexcept
   {
     List<Ref<CSSNumericValue>> values;
     values.reserve(numberishes.size());
@@ -41,17 +41,17 @@ namespace krys::boo::css
     return Create(krys::move(values));
   }
 
-  dom::ExceptionOr<Ref<CSSMathSum>> CSSMathSum::Create(List<Ref<CSSNumericValue>> &&values) noexcept
+  ExceptionOr<Ref<CSSMathSum>> CSSMathSum::Create(List<Ref<CSSNumericValue>> &&values) noexcept
   {
     if (values.empty())
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError};
+      return Exception {ExceptionCode::SyntaxError};
     }
 
     auto type = CSSNumericType::AddTypes(values);
     if (!type)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     return AdoptRef(*new CSSMathSum(krys::move(values), krys::move(*type)));
@@ -164,9 +164,9 @@ namespace krys::boo::css
     return values;
   }
 
-  Maybe<calc::Child> CSSMathSum::ToCalcTreeNode() const noexcept
+  Maybe<css::calc::Child> CSSMathSum::ToCalcTreeNode() const noexcept
   {
-    List<calc::Child> children;
+    List<css::calc::Child> children;
     for (const auto &child : _values->Array())
     {
       if (auto node = child->ToCalcTreeNode())
@@ -179,13 +179,13 @@ namespace krys::boo::css
       return null;
     }
 
-    auto operation = calc::Sum {.Children = krys::move(children)};
-    auto type = calc::ToType(operation);
+    auto operation = css::calc::Sum {.Children = krys::move(children)};
+    auto type = css::calc::ToType(operation);
     if (!type)
     {
       return null;
     }
 
-    return calc::CreateChild(krys::move(operation), *type);
+    return css::calc::CreateChild(krys::move(operation), *type);
   }
 }

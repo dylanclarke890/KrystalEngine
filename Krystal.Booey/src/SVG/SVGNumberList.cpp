@@ -27,17 +27,17 @@
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  bool SVGNumberList::Parse(dom::DOMStringView value) noexcept
+  bool SVGNumberList::Parse(DOMStringView value) noexcept
   {
     ClearItems();
 
     auto buffer = value;
-    SkipOptionalSVGSpaces(buffer);
+    svg::SkipOptionalSVGSpaces(buffer);
     while (!buffer.empty())
     {
-      auto number = ParseNumber(buffer);
+      auto number = svg::ParseNumber(buffer);
       if (!number)
       {
         break;
@@ -49,7 +49,7 @@ namespace krys::boo::svg
     return buffer.empty();
   }
 
-  dom::DOMString SVGNumberList::ValueAsString() const noexcept
+  DOMString SVGNumberList::ValueAsString() const noexcept
   {
     StringBuilder builder;
     for (const auto &number : _items)

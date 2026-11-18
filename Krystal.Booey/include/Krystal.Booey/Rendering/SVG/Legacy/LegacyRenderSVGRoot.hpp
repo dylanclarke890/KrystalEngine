@@ -29,14 +29,10 @@
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::svg
-{
-  class SVGSvgElement;
-}
-
 namespace krys::boo
 {
   class LegacyRenderSVGResourceContainer;
+  class SVGSvgElement;
 
   /// @brief The renderer of an outermost `<svg>`: a replaced box that lays out and paints its SVG children.
   class LegacyRenderSVGRoot final : public RenderReplaced
@@ -59,11 +55,11 @@ namespace krys::boo
     bool _hasBoxDecorations : 1 {false};
 
   public:
-    LegacyRenderSVGRoot(svg::SVGSvgElement &, RenderStyle &&) noexcept;
+    LegacyRenderSVGRoot(SVGSvgElement &, RenderStyle &&) noexcept;
 
     ~LegacyRenderSVGRoot() noexcept override;
 
-    KRYS_NODISCARD svg::SVGSvgElement &SvgSvgElement() const noexcept;
+    KRYS_NODISCARD SVGSvgElement &SvgSvgElement() const noexcept;
 
     KRYS_NODISCARD bool IsEmbeddedThroughSVGImage() const noexcept;
 

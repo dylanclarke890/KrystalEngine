@@ -23,13 +23,10 @@
 
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
 
-namespace krys::boo::html
-{
-  class HTMLTextAreaElement;
-}
-
 namespace krys::boo
 {
+  class HTMLTextAreaElement;
+
   /// @brief The renderer of a `<textarea>`: lines of text that wrap and scroll, sized by its `cols` and
   /// `rows`.
   class RenderTextControlMultiLine final : public RenderTextControl
@@ -37,11 +34,11 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderTextControlMultiLine);
 
   public:
-    RenderTextControlMultiLine(html::HTMLTextAreaElement &element, RenderStyle &&style) noexcept;
+    RenderTextControlMultiLine(HTMLTextAreaElement &element, RenderStyle &&style) noexcept;
 
     ~RenderTextControlMultiLine() noexcept override;
 
-    KRYS_NODISCARD html::HTMLTextAreaElement &TextAreaElement() const noexcept;
+    KRYS_NODISCARD HTMLTextAreaElement &TextAreaElement() const noexcept;
 
   private:
     bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,

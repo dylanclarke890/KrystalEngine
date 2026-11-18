@@ -6,7 +6,7 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   /// @see https://w3c.github.io/uievents/#dictdef-compositioneventinit
   struct CompositionEventInit : UIEventInit
@@ -54,8 +54,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::CompositionEvent)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CompositionEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Event &event) noexcept
   {
     return event.IsCompositionEvent();
   }

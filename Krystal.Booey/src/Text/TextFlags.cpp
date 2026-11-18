@@ -138,7 +138,7 @@ namespace krys::boo
 
       if (fontFeatureValues)
       {
-        auto lookupTags = [](const css::CSSOMString &name,
+        auto lookupTags = [](const CSSOMString &name,
                              const FontFeatureValues::Tags &tags) -> Span<const uint32>
         {
           auto found = tags.find(name);
@@ -150,8 +150,8 @@ namespace krys::boo
           return found->second;
         };
 
-        auto addFeatureTagWithValue = [&](const Maybe<css::CSSOMString> &name,
-                                          const FontFeatureValues::Tags &tags, const FontTag &codename)
+        auto addFeatureTagWithValue =
+          [&](const Maybe<CSSOMString> &name, const FontFeatureValues::Tags &tags, const FontTag &codename)
         {
           if (!name)
           {
@@ -178,8 +178,8 @@ namespace krys::boo
         };
 
         // For styleset and character-variant, the tag name itself is the actual conveyor of information.
-        auto addFeatureTags = [&](const List<css::CSSOMString> &names, const FontFeatureValues::Tags &tags,
-                                  Array<char, 2> codename)
+        auto addFeatureTags =
+          [&](const List<CSSOMString> &names, const FontFeatureValues::Tags &tags, Array<char, 2> codename)
         {
           for (const auto &name : names)
           {
@@ -241,11 +241,11 @@ namespace krys
   size_t
     DefaultHash<boo::FontVariantAlternatesValues>::Hash(const boo::FontVariantAlternatesValues &key) noexcept
   {
-    auto hashString = [](const Maybe<boo::css::CSSOMString> &string) -> size_t
+    auto hashString = [](const Maybe<boo::CSSOMString> &string) -> size_t
     {
       return string ? krys::Hash::Combine(true, *string) : krys::Hash::Combine(false);
     };
-    auto hashList = [](const List<boo::css::CSSOMString> &list) -> size_t
+    auto hashList = [](const List<boo::CSSOMString> &list) -> size_t
     {
       size_t seed = list.size();
       for (const auto &string : list)

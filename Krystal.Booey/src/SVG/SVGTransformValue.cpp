@@ -25,7 +25,7 @@
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   void SVGTransformValue::AppendFixedPrecisionNumbers(StringBuilder &builder) noexcept
   {
@@ -47,7 +47,7 @@ namespace krys::boo::svg
     AppendFixedPrecisionNumbers(builder, numbers...);
   }
 
-  dom::DOMString SVGTransformValue::ValueAsString() const noexcept
+  DOMString SVGTransformValue::ValueAsString() const noexcept
   {
     StringBuilder builder;
     builder.Append(PrefixForTransformType(_type));
@@ -61,7 +61,7 @@ namespace krys::boo::svg
       case SVG_TRANSFORM_SKEWX:     AppendSkewX(builder); break;
       case SVG_TRANSFORM_SKEWY:     AppendSkewY(builder); break;
     }
-    return dom::DOMString(krys::move(builder).ToString());
+    return DOMString(krys::move(builder).ToString());
   }
 
   utf8_stringview SVGTransformValue::PrefixForTransformType(SVGTransformType type) noexcept

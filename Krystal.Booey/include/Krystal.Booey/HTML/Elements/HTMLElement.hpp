@@ -34,9 +34,10 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
+  class HTMLElement;
 }
 
 namespace krys::boo::dom
@@ -46,8 +47,6 @@ namespace krys::boo::dom
 
 namespace krys::boo::html
 {
-  class HTMLElement;
-
   /// @see https://html.spec.whatwg.org/multipage/dom.html#showpopoveroptions
   struct ShowPopoverOptions
   {
@@ -157,43 +156,47 @@ namespace krys::boo::html
   class FormAssociatedElement;
   class FormListedElement;
   class ValidatedFormListedElement;
+}
 
+namespace krys::boo
+{
   /// @see https://html.spec.whatwg.org/#htmlelement
-  class HTMLElement : public dom::StyledElement
+  class HTMLElement : public StyledElement
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLElement);
 
   private:
-    HTMLElementFlags _flags : BitCount<HTMLElementFlags>() {HTMLElementFlags::None};
-    HTMLElementInterface _interface : BitCount<HTMLElementInterface>() {HTMLElementInterface::None};
+    html::HTMLElementFlags _flags : BitCount<html::HTMLElementFlags>() {html::HTMLElementFlags::None};
+    html::HTMLElementInterface _interface
+      : BitCount<html::HTMLElementInterface>() {html::HTMLElementInterface::None};
 
   protected:
-    HTMLElement(dom::Document &document, HTMLElementInterface interface,
-                HTMLElementFlags flags = HTMLElementFlags::None,
+    HTMLElement(Document &document, html::HTMLElementInterface interface,
+                html::HTMLElementFlags flags = html::HTMLElementFlags::None,
                 dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
 
     /// @brief Constructs an element with its tag name, for elements made outside the element factory (the
     /// elements of user agent shadow trees), which otherwise gives elements their names.
-    HTMLElement(dom::Document &document, HTMLElementInterface interface, dom::DOMStringAtom localName,
-                HTMLElementFlags flags, dom::NodeFlags nodeFlags) noexcept;
+    HTMLElement(Document &document, html::HTMLElementInterface interface, DOMStringAtom localName,
+                html::HTMLElementFlags flags, dom::NodeFlags nodeFlags) noexcept;
 
   public:
-    HTMLElement(dom::Document &document) noexcept;
+    HTMLElement(Document &document) noexcept;
 
 #pragma region HTMLElement - https://html.spec.whatwg.org/#htmlelement
 
     /// @see https://html.spec.whatwg.org/#dom-title
-    KRYS_NODISCARD dom::DOMString Title() const noexcept;
+    KRYS_NODISCARD DOMString Title() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-title
-    void Title(dom::DOMString value) noexcept;
+    void Title(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-lang
-    KRYS_NODISCARD dom::DOMString Lang() const noexcept;
+    KRYS_NODISCARD DOMString Lang() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-lang
-    void Lang(dom::DOMString value) noexcept;
+    void Lang(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-translate
     KRYS_NODISCARD bool Translate() const noexcept;
@@ -202,22 +205,22 @@ namespace krys::boo::html
     /// state of the nearest inclusive ancestor HTML element whose `translate` attribute is `yes` or `no`, or
     /// translate-enabled if there's none.
     /// @see https://html.spec.whatwg.org/#translation-mode
-    KRYS_NODISCARD static bool IsTranslateEnabled(const dom::Element &element) noexcept;
+    KRYS_NODISCARD static bool IsTranslateEnabled(const Element &element) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-translate
     void Translate(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-dir
-    KRYS_NODISCARD dom::DOMString Dir() const noexcept;
+    KRYS_NODISCARD DOMString Dir() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-dir
-    void Dir(dom::DOMString value) noexcept;
+    void Dir(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hidden
-    KRYS_NODISCARD BoolOr<dom::DOMString> Hidden() const noexcept;
+    KRYS_NODISCARD BoolOr<DOMString> Hidden() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hidden
-    void Hidden(const dom::DOMString &value) noexcept;
+    void Hidden(const DOMString &value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hidden
     void Hidden(bool value) noexcept;
@@ -238,21 +241,21 @@ namespace krys::boo::html
     void Click() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-accesskey
-    KRYS_NODISCARD dom::DOMString AccessKey() const noexcept;
+    KRYS_NODISCARD DOMString AccessKey() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-accesskey
-    void AccessKey(dom::DOMString value) noexcept;
+    void AccessKey(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-accesskeylabel
-    KRYS_NODISCARD dom::DOMString AccessKeyLabel() const noexcept;
+    KRYS_NODISCARD DOMString AccessKeyLabel() const noexcept;
 
     /// @brief The state of the `contenteditable` attribute: `true`, `plaintext-only`, `false` or `inherit`.
     /// @note `isContentEditable` is `Node::IsContentEditable`.
     /// @see https://html.spec.whatwg.org/#dom-contenteditable
-    KRYS_NODISCARD dom::DOMString ContentEditable() const noexcept;
+    KRYS_NODISCARD DOMString ContentEditable() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-contenteditable
-    dom::ExceptionOr<void> ContentEditable(dom::DOMStringView value) noexcept;
+    ExceptionOr<void> ContentEditable(DOMStringView value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-draggable
     KRYS_NODISCARD bool Draggable() const noexcept;
@@ -267,16 +270,16 @@ namespace krys::boo::html
     void SpellCheck(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-writingsuggestions
-    KRYS_NODISCARD dom::DOMString WritingSuggestions() const noexcept;
+    KRYS_NODISCARD DOMString WritingSuggestions() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-writingsuggestions
-    void WritingSuggestions(dom::DOMString value) noexcept;
+    void WritingSuggestions(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-autocapitalize
-    KRYS_NODISCARD dom::DOMString Autocapitalize() const noexcept;
+    KRYS_NODISCARD DOMString Autocapitalize() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-autocapitalize
-    void Autocapitalize(dom::DOMString value) noexcept;
+    void Autocapitalize(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-autocorrect
     KRYS_NODISCARD bool Autocorrect() const noexcept;
@@ -285,64 +288,64 @@ namespace krys::boo::html
     void Autocorrect(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-inputmode
-    KRYS_NODISCARD dom::DOMString InputMode() const noexcept;
+    KRYS_NODISCARD DOMString InputMode() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-inputmode
-    void InputMode(dom::DOMString value) noexcept;
+    void InputMode(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-enterkeyhint
-    KRYS_NODISCARD dom::DOMString EnterKeyHint() const noexcept;
+    KRYS_NODISCARD DOMString EnterKeyHint() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-enterkeyhint
-    void EnterKeyHint(dom::DOMString value) noexcept;
+    void EnterKeyHint(DOMString value) noexcept;
 
     /// @brief The element's rendered text: its text as laid out, with line breaks and tabs for its boxes, or
     /// its descendant text content if it isn't being rendered.
     /// @see https://html.spec.whatwg.org/#dom-innertext
     /// @see https://html.spec.whatwg.org/#get-the-text-steps
     /// @see https://html.spec.whatwg.org/#rendered-text-collection-steps
-    KRYS_NODISCARD dom::DOMString InnerText() const noexcept;
+    KRYS_NODISCARD DOMString InnerText() const noexcept;
 
     /// @brief Replaces the element's children with @p value's text, with a `<br>` for each line break.
     /// @see https://html.spec.whatwg.org/#dom-innertext
     /// @see https://html.spec.whatwg.org/#set-the-inner-text-steps
-    void InnerText(const dom::DOMString &value) noexcept;
+    void InnerText(const DOMString &value) noexcept;
 
     /// @brief The same as `InnerText()`.
     /// @see https://html.spec.whatwg.org/#dom-outertext
-    KRYS_NODISCARD dom::DOMString OuterText() const noexcept;
+    KRYS_NODISCARD DOMString OuterText() const noexcept;
 
     /// @brief Replaces the element itself with @p value's text, with a `<br>` for each line break, merged
     /// with the text around it; `NoModificationAllowedError` if the element has no parent.
     /// @see https://html.spec.whatwg.org/#dom-outertext
-    dom::ExceptionOr<void> OuterText(const dom::DOMString &value) noexcept;
+    ExceptionOr<void> OuterText(const DOMString &value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-attachinternals
-    KRYS_NODISCARD dom::ExceptionOr<Ref<ElementInternals>> AttachInternals() noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<html::ElementInternals>> AttachInternals() noexcept;
 
     /// @brief Shows the popover, invoked by @p options' source.
     /// @return A `NotSupportedError` if the element isn't a popover; an `InvalidStateError` if it isn't
     /// connected, its document isn't fully active, it's a modal dialog, another popover is being shown or
     /// hidden, or its `popover` attribute changes as other popovers hide.
     /// @see https://html.spec.whatwg.org/#dom-showpopover
-    dom::ExceptionOr<void> ShowPopover(const ShowPopoverOptions &options = {}) noexcept;
+    ExceptionOr<void> ShowPopover(const html::ShowPopoverOptions &options = {}) noexcept;
 
     /// @return A `NotSupportedError` if the element isn't a popover; an `InvalidStateError` if it's a modal
     /// dialog.
     /// @see https://html.spec.whatwg.org/#dom-hidepopover
-    dom::ExceptionOr<void> HidePopover() noexcept;
+    ExceptionOr<void> HidePopover() noexcept;
 
     /// @brief Hides the popover if it's showing, else shows it, unless @p options forces one or the other.
     /// @return Whether the popover is showing, or the exceptions of `ShowPopover` and `HidePopover`.
     /// @see https://html.spec.whatwg.org/#dom-togglepopover
-    dom::ExceptionOr<bool>
-      TogglePopover(const TogglePopoverOptionsOrBool &options = TogglePopoverOptions {}) noexcept;
+    ExceptionOr<bool>
+      TogglePopover(const html::TogglePopoverOptionsOrBool &options = html::TogglePopoverOptions {}) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-popover
-    KRYS_NODISCARD Maybe<dom::DOMString> Popover() const noexcept;
+    KRYS_NODISCARD Maybe<DOMString> Popover() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-popover
-    void Popover(Maybe<dom::DOMString> value) noexcept;
+    void Popover(Maybe<DOMString> value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-headingoffset
     KRYS_NODISCARD uint32 HeadingOffset() const noexcept;
@@ -360,7 +363,7 @@ namespace krys::boo::html
 
     /// @brief The colour a presentational attribute (`bgcolor`, `color`, `text`, ...) specifies, if any.
     /// @see https://html.spec.whatwg.org/#rules-for-parsing-a-legacy-colour-value
-    KRYS_NODISCARD static Maybe<SRGBA<uint8>> ParseLegacyColorValue(dom::DOMStringView string) noexcept;
+    KRYS_NODISCARD static Maybe<SRGBA<uint8>> ParseLegacyColorValue(DOMStringView string) noexcept;
 
 #pragma region HTMLOrSVGOrMathMLElement Mixin - https://html.spec.whatwg.org/#htmlorsvgormathmlelement
 
@@ -418,8 +421,7 @@ namespace krys::boo::html
 
     /// @brief The editability of @p node from the `contenteditable` attributes of it and its ancestors, for
     /// nodes in shadow trees (whose style isn't used for editability).
-    KRYS_NODISCARD static dom::Node::Editability
-      EditabilityFromContentEditableAttr(const dom::Node &node) noexcept;
+    KRYS_NODISCARD static Node::Editability EditabilityFromContentEditableAttr(const Node &node) noexcept;
 
   protected:
 #pragma region Presentational hints - https://html.spec.whatwg.org/#presentational-hints
@@ -431,65 +433,63 @@ namespace krys::boo::html
     };
 
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
     /// @param value The `border` attribute's value, or null if there isn't one.
-    KRYS_NODISCARD uint32 ParseBorderWidthAttribute(Maybe<dom::DOMStringView> value) const noexcept;
+    KRYS_NODISCARD uint32 ParseBorderWidthAttribute(Maybe<DOMStringView> value) const noexcept;
 
-    void ApplyBorderAttributeToStyle(dom::DOMStringView value, css::MutableStyleProperties &style) noexcept;
+    void ApplyBorderAttributeToStyle(DOMStringView value, css::MutableStyleProperties &style) noexcept;
 
-    void ApplyAlignmentAttributeToStyle(dom::DOMStringView alignment,
-                                        css::MutableStyleProperties &style) noexcept;
+    void ApplyAlignmentAttributeToStyle(DOMStringView alignment, css::MutableStyleProperties &style) noexcept;
 
-    void ApplyAspectRatioFromWidthAndHeightAttributesToStyle(dom::DOMStringView widthAttribute,
-                                                             dom::DOMStringView heightAttribute,
+    void ApplyAspectRatioFromWidthAndHeightAttributesToStyle(DOMStringView widthAttribute,
+                                                             DOMStringView heightAttribute,
                                                              css::MutableStyleProperties &style) noexcept;
 
     void ApplyAspectRatioWithoutDimensionalRulesFromWidthAndHeightAttributesToStyle(
-      dom::DOMStringView widthAttribute, dom::DOMStringView heightAttribute,
+      DOMStringView widthAttribute, DOMStringView heightAttribute,
       css::MutableStyleProperties &style) noexcept;
 
     // https://www.w3.org/TR/html4/sgml/dtd.html#Length, including pixel and percentage values.
     void AddHTMLLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                              dom::DOMStringView value,
+                              DOMStringView value,
                               AllowZeroValue allowZeroValue = AllowZeroValue::Yes) noexcept;
 
     // https://www.w3.org/TR/html4/sgml/dtd.html#MultiLength, including pixel, percentage, and relative
     // values.
     void AddHTMLMultiLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                                   dom::DOMStringView value) noexcept;
+                                   DOMStringView value) noexcept;
 
     // https://www.w3.org/TR/html4/sgml/dtd.html#Pixels, including pixel value.
     void AddHTMLPixelsToStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                              dom::DOMStringView value) noexcept;
+                              DOMStringView value) noexcept;
 
     static void AddHTMLColorToStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                                    dom::DOMStringView attributeValue) noexcept;
+                                    DOMStringView attributeValue) noexcept;
 
     /// @brief The value of the attribute in the null namespace, or an empty view if there isn't one.
-    KRYS_NODISCARD dom::DOMString AttributeOrEmpty(dom::DOMStringView localName) const noexcept;
+    KRYS_NODISCARD DOMString AttributeOrEmpty(DOMStringView localName) const noexcept;
 
 #pragma endregion
 
 #pragma region HTMLElement Flags
 
-    void SetHTMLElementFlag(HTMLElementFlags flag) noexcept
+    void SetHTMLElementFlag(html::HTMLElementFlags flag) noexcept
     {
       _flags = _flags | flag;
     }
 
-    void ClearHTMLElementFlag(HTMLElementFlags flag) noexcept
+    void ClearHTMLElementFlag(html::HTMLElementFlags flag) noexcept
     {
       _flags = _flags & ~flag;
     }
 
-    KRYS_NODISCARD bool HasHTMLElementFlag(HTMLElementFlags flag) const noexcept
+    KRYS_NODISCARD bool HasHTMLElementFlag(html::HTMLElementFlags flag) const noexcept
     {
       return HasFlag(_flags, flag);
     }
@@ -502,15 +502,15 @@ namespace krys::boo::html
     /// @brief Shows the popover, invoked by @p source; the exceptions of `ShowPopover` are returned only if
     /// @p throwExceptions.
     /// @see https://html.spec.whatwg.org/#show-popover
-    dom::ExceptionOr<void> ShowPopoverInternal(HTMLElement *source, bool throwExceptions = true) noexcept;
+    ExceptionOr<void> ShowPopoverInternal(HTMLElement *source, bool throwExceptions = true) noexcept;
 
     /// @brief Hides the popover, and the popovers above it in its stack; the exceptions of `HidePopover` are
     /// returned only if @p throwExceptions.
     /// @param source The element that hid it, which `beforetoggle` and `toggle` carry.
     /// @see https://html.spec.whatwg.org/#hide-popover-algorithm
-    dom::ExceptionOr<void> HidePopoverInternal(dom::FocusPreviousElement focusPreviousElement,
-                                               dom::FireEvents fireEvents, bool throwExceptions,
-                                               HTMLElement *source) noexcept;
+    ExceptionOr<void> HidePopoverInternal(dom::FocusPreviousElement focusPreviousElement,
+                                          dom::FireEvents fireEvents, bool throwExceptions,
+                                          HTMLElement *source) noexcept;
 
     /// @brief The popover commands, for a popover.
     KRYS_NODISCARD bool IsValidCommandType(dom::CommandType command) const noexcept override;
@@ -523,9 +523,8 @@ namespace krys::boo::html
 
 #pragma region Extensibility Hooks
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
     /// @see https://html.spec.whatwg.org/#html-element-insertion-steps
     void OnInsert() noexcept override
@@ -535,7 +534,7 @@ namespace krys::boo::html
       //    element insertion steps for insertedNode's local name, then run the corresponding HTML element
       //    insertion steps given insertedNode.
       // (Elements with insertion steps override this, and the autofocus insertion steps run for all of them.)
-      FocusAlgorithms::AutofocusInsertionSteps(*this);
+      html::FocusAlgorithms::AutofocusInsertionSteps(*this);
 
       // 2. If insertedNode is a form-associated element or the ancestor of a form-associated element: if the
       //    form-associated element's parser inserted flag is set, then return; reset the form owner of the
@@ -548,7 +547,7 @@ namespace krys::boo::html
     }
 
     /// @see https://html.spec.whatwg.org/#html-element-removing-steps
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override
     {
       (void)isSubtreeRoot;
       (void)oldAncestor;
@@ -578,7 +577,7 @@ namespace krys::boo::html
     }
 
     /// @see https://html.spec.whatwg.org/#html-element-moving-steps
-    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override
+    void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override
     {
       (void)isSubtreeRoot;
       (void)oldAncestor;
@@ -630,17 +629,17 @@ namespace krys::boo::html
 
 #pragma region Form Controls
 
-    KRYS_NODISCARD virtual FormAssociatedElement *AsFormAssociatedElement() noexcept
+    KRYS_NODISCARD virtual html::FormAssociatedElement *AsFormAssociatedElement() noexcept
     {
       return nullptr;
     }
 
-    KRYS_NODISCARD virtual FormListedElement *AsFormListedElement() noexcept
+    KRYS_NODISCARD virtual html::FormListedElement *AsFormListedElement() noexcept
     {
       return nullptr;
     }
 
-    KRYS_NODISCARD virtual ValidatedFormListedElement *AsValidatedFormListedElement() noexcept
+    KRYS_NODISCARD virtual html::ValidatedFormListedElement *AsValidatedFormListedElement() noexcept
     {
       return nullptr;
     }
@@ -678,385 +677,390 @@ namespace krys::boo::html
     /// @brief Whether the element is a form control: a button, fieldset, input, output, select or textarea.
     KRYS_NODISCARD bool IsFormControlElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Button || _interface == HTMLElementInterface::FieldSet
-             || _interface == HTMLElementInterface::Input || _interface == HTMLElementInterface::Output
-             || _interface == HTMLElementInterface::Select || _interface == HTMLElementInterface::TextArea;
+      return _interface == html::HTMLElementInterface::Button
+             || _interface == html::HTMLElementInterface::FieldSet
+             || _interface == html::HTMLElementInterface::Input
+             || _interface == html::HTMLElementInterface::Output
+             || _interface == html::HTMLElementInterface::Select
+             || _interface == html::HTMLElementInterface::TextArea;
     }
 
     KRYS_NODISCARD bool IsHTMLFontElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Font;
+      return _interface == html::HTMLElementInterface::Font;
     }
 
     KRYS_NODISCARD bool IsHTMLFrameSetElement() const noexcept
     {
-      return _interface == HTMLElementInterface::FrameSet;
+      return _interface == html::HTMLElementInterface::FrameSet;
     }
 
     KRYS_NODISCARD bool IsHTMLMarqueeElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Marquee;
+      return _interface == html::HTMLElementInterface::Marquee;
     }
 
     KRYS_NODISCARD bool IsHTMLTablePartElement() const noexcept
     {
-      return _interface == HTMLElementInterface::TableCell || _interface == HTMLElementInterface::TableCol
-             || _interface == HTMLElementInterface::TableRow
-             || _interface == HTMLElementInterface::TableSection;
+      return _interface == html::HTMLElementInterface::TableCell
+             || _interface == html::HTMLElementInterface::TableCol
+             || _interface == html::HTMLElementInterface::TableRow
+             || _interface == html::HTMLElementInterface::TableSection;
     }
 
     KRYS_NODISCARD bool IsHTMLPlugInElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Embed || _interface == HTMLElementInterface::Object;
+      return _interface == html::HTMLElementInterface::Embed
+             || _interface == html::HTMLElementInterface::Object;
     }
 
     KRYS_NODISCARD bool IsHTMLAreaElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Area;
+      return _interface == html::HTMLElementInterface::Area;
     }
 
     KRYS_NODISCARD bool IsHTMLAudioElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Audio;
+      return _interface == html::HTMLElementInterface::Audio;
     }
 
     KRYS_NODISCARD bool IsHTMLAnchorElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Anchor;
+      return _interface == html::HTMLElementInterface::Anchor;
     }
 
     KRYS_NODISCARD bool IsHTMLBaseElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Base;
+      return _interface == html::HTMLElementInterface::Base;
     }
 
     KRYS_NODISCARD bool IsHTMLBodyElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Body;
+      return _interface == html::HTMLElementInterface::Body;
     }
 
     KRYS_NODISCARD bool IsHTMLBRElement() const noexcept
     {
-      return _interface == HTMLElementInterface::BR;
+      return _interface == html::HTMLElementInterface::BR;
     }
 
     KRYS_NODISCARD bool IsHTMLButtonElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Button;
+      return _interface == html::HTMLElementInterface::Button;
     }
 
     KRYS_NODISCARD bool IsHTMLCanvasElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Canvas;
+      return _interface == html::HTMLElementInterface::Canvas;
     }
 
     KRYS_NODISCARD bool IsHTMLDataElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Data;
+      return _interface == html::HTMLElementInterface::Data;
     }
 
     KRYS_NODISCARD bool IsHTMLDataListElement() const noexcept
     {
-      return _interface == HTMLElementInterface::DataList;
+      return _interface == html::HTMLElementInterface::DataList;
     }
 
     KRYS_NODISCARD bool IsHTMLDetailsElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Details;
+      return _interface == html::HTMLElementInterface::Details;
     }
 
     KRYS_NODISCARD bool IsHTMLDialogElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Dialog;
+      return _interface == html::HTMLElementInterface::Dialog;
     }
 
     KRYS_NODISCARD bool IsHTMLDirectoryElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Directory;
+      return _interface == html::HTMLElementInterface::Directory;
     }
 
     KRYS_NODISCARD bool IsHTMLDivElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Div;
+      return _interface == html::HTMLElementInterface::Div;
     }
 
     KRYS_NODISCARD bool IsHTMLDListElement() const noexcept
     {
-      return _interface == HTMLElementInterface::DList;
+      return _interface == html::HTMLElementInterface::DList;
     }
 
     KRYS_NODISCARD bool IsHTMLEmbedElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Embed;
+      return _interface == html::HTMLElementInterface::Embed;
     }
 
     KRYS_NODISCARD bool IsHTMLFieldSetElement() const noexcept
     {
-      return _interface == HTMLElementInterface::FieldSet;
+      return _interface == html::HTMLElementInterface::FieldSet;
     }
 
     KRYS_NODISCARD bool IsHTMLFormElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Form;
+      return _interface == html::HTMLElementInterface::Form;
     }
 
     KRYS_NODISCARD bool IsHTMLHeadElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Head;
+      return _interface == html::HTMLElementInterface::Head;
     }
 
     KRYS_NODISCARD bool IsHTMLHeadingElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Heading;
+      return _interface == html::HTMLElementInterface::Heading;
     }
 
     KRYS_NODISCARD bool IsHTMLHRElement() const noexcept
     {
-      return _interface == HTMLElementInterface::HR;
+      return _interface == html::HTMLElementInterface::HR;
     }
 
     KRYS_NODISCARD bool IsHTMLHtmlElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Html;
+      return _interface == html::HTMLElementInterface::Html;
     }
 
     KRYS_NODISCARD bool IsHTMLIFrameElement() const noexcept
     {
-      return _interface == HTMLElementInterface::IFrame;
+      return _interface == html::HTMLElementInterface::IFrame;
     }
 
     KRYS_NODISCARD bool IsHTMLImageElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Image;
+      return _interface == html::HTMLElementInterface::Image;
     }
 
     KRYS_NODISCARD bool IsHTMLInputElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Input;
+      return _interface == html::HTMLElementInterface::Input;
     }
 
     KRYS_NODISCARD bool IsHTMLLabelElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Label;
+      return _interface == html::HTMLElementInterface::Label;
     }
 
     KRYS_NODISCARD bool IsHTMLLegendElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Legend;
+      return _interface == html::HTMLElementInterface::Legend;
     }
 
     KRYS_NODISCARD bool IsHTMLLIElement() const noexcept
     {
-      return _interface == HTMLElementInterface::LI;
+      return _interface == html::HTMLElementInterface::LI;
     }
 
     KRYS_NODISCARD bool IsHTMLLinkElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Link;
+      return _interface == html::HTMLElementInterface::Link;
     }
 
     KRYS_NODISCARD bool IsHTMLMapElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Map;
+      return _interface == html::HTMLElementInterface::Map;
     }
 
     KRYS_NODISCARD bool IsHTMLMediaElement() const noexcept
     {
-      return HasFlag(_flags, HTMLElementFlags::IsMediaElement);
+      return HasFlag(_flags, html::HTMLElementFlags::IsMediaElement);
     }
 
     KRYS_NODISCARD bool IsHTMLMenuElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Menu;
+      return _interface == html::HTMLElementInterface::Menu;
     }
 
     KRYS_NODISCARD bool IsHTMLMetaElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Meta;
+      return _interface == html::HTMLElementInterface::Meta;
     }
 
     KRYS_NODISCARD bool IsHTMLMeterElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Meter;
+      return _interface == html::HTMLElementInterface::Meter;
     }
 
     KRYS_NODISCARD bool IsHTMLModElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Mod;
+      return _interface == html::HTMLElementInterface::Mod;
     }
 
     KRYS_NODISCARD bool IsHTMLObjectElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Object;
+      return _interface == html::HTMLElementInterface::Object;
     }
 
     KRYS_NODISCARD bool IsHTMLOListElement() const noexcept
     {
-      return _interface == HTMLElementInterface::OList;
+      return _interface == html::HTMLElementInterface::OList;
     }
 
     KRYS_NODISCARD bool IsHTMLOptGroupElement() const noexcept
     {
-      return _interface == HTMLElementInterface::OptGroup;
+      return _interface == html::HTMLElementInterface::OptGroup;
     }
 
     KRYS_NODISCARD bool IsHTMLOptionElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Option;
+      return _interface == html::HTMLElementInterface::Option;
     }
 
     KRYS_NODISCARD bool IsHTMLOutputElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Output;
+      return _interface == html::HTMLElementInterface::Output;
     }
 
     KRYS_NODISCARD bool IsHTMLParagraphElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Paragraph;
+      return _interface == html::HTMLElementInterface::Paragraph;
     }
 
     KRYS_NODISCARD bool IsHTMLParamElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Param;
+      return _interface == html::HTMLElementInterface::Param;
     }
 
     KRYS_NODISCARD bool IsHTMLPictureElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Picture;
+      return _interface == html::HTMLElementInterface::Picture;
     }
 
     KRYS_NODISCARD bool IsHTMLPreElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Pre;
+      return _interface == html::HTMLElementInterface::Pre;
     }
 
     KRYS_NODISCARD bool IsHTMLProgressElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Progress;
+      return _interface == html::HTMLElementInterface::Progress;
     }
 
     KRYS_NODISCARD bool IsHTMLQuoteElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Quote;
+      return _interface == html::HTMLElementInterface::Quote;
     }
 
     KRYS_NODISCARD bool IsHTMLScriptElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Script;
+      return _interface == html::HTMLElementInterface::Script;
     }
 
     KRYS_NODISCARD bool IsHTMLSelectElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Select;
+      return _interface == html::HTMLElementInterface::Select;
     }
 
     KRYS_NODISCARD bool IsHTMLSelectedContentElement() const noexcept
     {
-      return _interface == HTMLElementInterface::SelectedContent;
+      return _interface == html::HTMLElementInterface::SelectedContent;
     }
 
     // NOTE: HTMLSlotElement type check is not needed here as Node already has it.
 
     KRYS_NODISCARD bool IsHTMLSourceElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Source;
+      return _interface == html::HTMLElementInterface::Source;
     }
 
     KRYS_NODISCARD bool IsHTMLSpanElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Span;
+      return _interface == html::HTMLElementInterface::Span;
     }
 
     KRYS_NODISCARD bool IsHTMLStyleElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Style;
+      return _interface == html::HTMLElementInterface::Style;
     }
 
     KRYS_NODISCARD bool IsHTMLSummaryElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Summary;
+      return _interface == html::HTMLElementInterface::Summary;
     }
 
     KRYS_NODISCARD bool IsHTMLTableElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Table;
+      return _interface == html::HTMLElementInterface::Table;
     }
 
     KRYS_NODISCARD bool IsHTMLTableCaptionElement() const noexcept
     {
-      return _interface == HTMLElementInterface::TableCaption;
+      return _interface == html::HTMLElementInterface::TableCaption;
     }
 
     KRYS_NODISCARD bool IsHTMLTableCellElement() const noexcept
     {
-      return _interface == HTMLElementInterface::TableCell;
+      return _interface == html::HTMLElementInterface::TableCell;
     }
 
     KRYS_NODISCARD bool IsHTMLTableColElement() const noexcept
     {
-      return _interface == HTMLElementInterface::TableCol;
+      return _interface == html::HTMLElementInterface::TableCol;
     }
 
     KRYS_NODISCARD bool IsHTMLTableRowElement() const noexcept
     {
-      return _interface == HTMLElementInterface::TableRow;
+      return _interface == html::HTMLElementInterface::TableRow;
     }
 
     KRYS_NODISCARD bool IsHTMLTableSectionElement() const noexcept
     {
-      return _interface == HTMLElementInterface::TableSection;
+      return _interface == html::HTMLElementInterface::TableSection;
     }
 
     KRYS_NODISCARD bool IsHTMLTemplateElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Template;
+      return _interface == html::HTMLElementInterface::Template;
     }
 
     KRYS_NODISCARD bool IsHTMLTextAreaElement() const noexcept
     {
-      return _interface == HTMLElementInterface::TextArea;
+      return _interface == html::HTMLElementInterface::TextArea;
     }
 
     KRYS_NODISCARD bool IsHTMLTitleElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Title;
+      return _interface == html::HTMLElementInterface::Title;
     }
 
     KRYS_NODISCARD bool IsHTMLTimeElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Time;
+      return _interface == html::HTMLElementInterface::Time;
     }
 
     KRYS_NODISCARD bool IsHTMLTrackElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Track;
+      return _interface == html::HTMLElementInterface::Track;
     }
 
     KRYS_NODISCARD bool IsHTMLUListElement() const noexcept
     {
-      return _interface == HTMLElementInterface::UList;
+      return _interface == html::HTMLElementInterface::UList;
     }
 
     KRYS_NODISCARD bool IsHTMLMaybeFormAssociatedCustomElement() const noexcept
     {
-      return _interface == HTMLElementInterface::MaybeFormAssociatedCustom;
+      return _interface == html::HTMLElementInterface::MaybeFormAssociatedCustom;
     }
 
     // NOTE: HTMLUnknownElement type check is not needed here as Node already has it.
 
     KRYS_NODISCARD bool IsHTMLVideoElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Video;
+      return _interface == html::HTMLElementInterface::Video;
     }
 
     KRYS_NODISCARD bool IsHTMLBDIElement() const noexcept
     {
-      return _interface == HTMLElementInterface::BDI;
+      return _interface == html::HTMLElementInterface::BDI;
     }
 
     KRYS_NODISCARD bool IsHTMLWBRElement() const noexcept
     {
-      return _interface == HTMLElementInterface::WBR;
+      return _interface == html::HTMLElementInterface::WBR;
     }
 
 #pragma endregion
@@ -1081,20 +1085,20 @@ namespace krys::boo::html
     };
 
     void AddHTMLLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                              dom::DOMStringView value, AllowPercentage allowPercentage,
+                              DOMStringView value, AllowPercentage allowPercentage,
                               UseCSSPXAsUnitType useCSSPX, IsMultiLength isMultiLength,
                               AllowZeroValue allowZeroValue = AllowZeroValue::Yes) noexcept;
 
     static void AddParsedWidthAndHeightToAspectRatioList(double width, double height,
                                                          css::MutableStyleProperties &style) noexcept;
 
-    void MapLanguageAttributeToLocale(dom::DOMStringView value, css::MutableStyleProperties &style) noexcept;
+    void MapLanguageAttributeToLocale(DOMStringView value, css::MutableStyleProperties &style) noexcept;
 
     /// @brief Whether the popover can be shown (@p expectedToBeShowing false) or hidden: false if it already
     /// is.
     /// @see https://html.spec.whatwg.org/#check-popover-validity
-    KRYS_NODISCARD dom::ExceptionOr<bool>
-      CheckPopoverValidity(bool expectedToBeShowing, dom::Document *expectedDocument) const noexcept;
+    KRYS_NODISCARD ExceptionOr<bool> CheckPopoverValidity(bool expectedToBeShowing,
+                                                          Document *expectedDocument) const noexcept;
 
     /// @see https://html.spec.whatwg.org/#popover-focusing-steps
     void RunPopoverFocusingSteps() noexcept;
@@ -1110,12 +1114,12 @@ namespace krys::boo::html
     /// @brief Sets the popover's trigger, which becomes its invoked popover's invoker.
     void SetInvoker(HTMLElement *invoker) noexcept;
 
-    void PopoverAttributeChanged(Maybe<dom::DOMStringView> value) noexcept;
+    void PopoverAttributeChanged(Maybe<DOMStringView> value) noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
     return target.IsHTMLElement();
   }

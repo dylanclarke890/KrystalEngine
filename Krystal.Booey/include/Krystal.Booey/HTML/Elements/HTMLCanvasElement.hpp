@@ -43,18 +43,21 @@ namespace krys::boo::html
 {
   class CanvasRenderingContext2D;
   class EngineTextureRenderingContext;
+}
 
+namespace krys::boo
+{
   /// @brief A `<canvas>`: a replaced element whose pixels a rendering context draws. Its children are
   /// fallback content, which isn't rendered.
   /// @see https://html.spec.whatwg.org/#htmlcanvaselement
-  class HTMLCanvasElement : public HTMLElement, public CanvasBase
+  class HTMLCanvasElement : public HTMLElement, public html::CanvasBase
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLCanvasElement);
 
   private:
     bool _isSnapshotting {false};
     mutable bool _didClearImageBuffer {false};
-    UniquePtr<CanvasRenderingContext> _context;
+    UniquePtr<html::CanvasRenderingContext> _context;
     mutable RefPtr<Image> _copiedImage;
 
   public:
@@ -62,7 +65,7 @@ namespace krys::boo::html
     constexpr static uint32 DefaultWidth = 300;
     constexpr static uint32 DefaultHeight = 150;
 
-    HTMLCanvasElement(dom::Document &document) noexcept;
+    HTMLCanvasElement(Document &document) noexcept;
 
     ~HTMLCanvasElement() noexcept override;
 
@@ -102,7 +105,7 @@ namespace krys::boo::html
       return true;
     }
 
-    KRYS_NODISCARD CanvasRenderingContext *RenderingContext() const noexcept final
+    KRYS_NODISCARD html::CanvasRenderingContext *RenderingContext() const noexcept final
     {
       return _context.get();
     }
@@ -125,21 +128,20 @@ namespace krys::boo::html
     /// has a context of another type, or there's no such type.
     /// @see https://html.spec.whatwg.org/#dom-canvas-getcontext
     /// @note The engine texture context is `"krystal-texture"`.
-    KRYS_NODISCARD RefPtr<CanvasRenderingContext> GetContext(dom::DOMStringView contextId) noexcept;
+    KRYS_NODISCARD RefPtr<html::CanvasRenderingContext> GetContext(DOMStringView contextId) noexcept;
 
     /// @brief The canvas's 2D context, made with @p settings on the first call; null if the canvas has a
     /// context of another type.
     /// @see https://html.spec.whatwg.org/#dom-canvas-getcontext
-    KRYS_NODISCARD RefPtr<CanvasRenderingContext2D>
-      GetContext2d(CanvasRenderingContext2DSettings &&settings = {}) noexcept;
+    KRYS_NODISCARD RefPtr<html::CanvasRenderingContext2D>
+      GetContext2d(html::CanvasRenderingContext2DSettings &&settings = {}) noexcept;
 
-    KRYS_NODISCARD static bool Is2dType(dom::DOMStringView type) noexcept;
+    KRYS_NODISCARD static bool Is2dType(DOMStringView type) noexcept;
 
     /// @brief The canvas's pixels as a `data:` URL of an image of @p mimeType (PNG, JPEG or WebP; PNG for any
     /// other), at @p quality (0 to 1) for JPEG and WebP; `data:,` if the canvas has no pixels.
     /// @see https://html.spec.whatwg.org/#dom-canvas-todataurl
-    KRYS_NODISCARD dom::DOMString ToDataURL(dom::DOMStringView mimeType = {},
-                                            Maybe<double> quality = {}) noexcept;
+    KRYS_NODISCARD DOMString ToDataURL(DOMStringView mimeType = {}, Maybe<double> quality = {}) noexcept;
     // transferControlToOffscreen() isn't planned.
 
 #pragma endregion
@@ -148,7 +150,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD const css::ParserContext &CssParserContext() const noexcept final;
 
-    KRYS_NODISCARD dom::Document *CanvasDocument() const noexcept final;
+    KRYS_NODISCARD Document *CanvasDocument() const noexcept final;
 
     /// @brief Whether the context has work to do before its pixels are composited.
     KRYS_NODISCARD bool NeedsPreparationForDisplay() const noexcept;
@@ -169,28 +171,26 @@ namespace krys::boo::html
     }
 
   protected:
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
-    void OnAdopt(dom::Document &oldDocument) noexcept override;
+    void OnAdopt(Document &oldDocument) noexcept override;
 
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
 
   private:
-    KRYS_NODISCARD CanvasRenderingContext2D *
-      CreateContext2d(CanvasRenderingContext2DSettings &&settings) noexcept;
+    KRYS_NODISCARD html::CanvasRenderingContext2D *
+      CreateContext2d(html::CanvasRenderingContext2DSettings &&settings) noexcept;
 
-    KRYS_NODISCARD EngineTextureRenderingContext *CreateContextEngineTexture() noexcept;
+    KRYS_NODISCARD html::EngineTextureRenderingContext *CreateContextEngineTexture() noexcept;
 
     void CreateImageBuffer() const noexcept final;
 
@@ -210,14 +210,14 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLCanvasElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLCanvasElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLCanvasElement();
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    auto *element = krys::DynamicDowncast<krys::boo::html::HTMLElement>(target);
+    auto *element = krys::DynamicDowncast<krys::boo::HTMLElement>(target);
     return element && element->IsHTMLCanvasElement();
   }
   KRYS_NODISCARD static bool IsType(const krys::boo::html::CanvasBase &target) noexcept

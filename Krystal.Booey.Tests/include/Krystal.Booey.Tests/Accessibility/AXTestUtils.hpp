@@ -88,7 +88,7 @@ namespace krys::boo::ax::tests
     }
 
     /// @brief The object for the element with @p id, created if needed; fails the test if there's none.
-    KRYS_NODISCARD AXObject &Object(dom::DOMStringView id) noexcept
+    KRYS_NODISCARD AXObject &Object(DOMStringView id) noexcept
     {
       auto *object = Cache().GetOrCreate(ById(id));
       REQUIRE(object);

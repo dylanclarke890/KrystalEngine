@@ -71,7 +71,7 @@ namespace krys::boo
     }
   }
 
-  LegacyRenderSVGContainer::LegacyRenderSVGContainer(Type type, svg::SVGElement &element, RenderStyle &&style,
+  LegacyRenderSVGContainer::LegacyRenderSVGContainer(Type type, SVGElement &element, RenderStyle &&style,
                                                      EnumSet<SVGModelObjectFlag> svgFlags) noexcept
       : LegacyRenderSVGModelObject(type, element, krys::move(style),
                                    svgFlags | SVGModelObjectFlag::IsContainer

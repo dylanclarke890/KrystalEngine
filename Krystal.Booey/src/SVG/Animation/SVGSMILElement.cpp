@@ -46,13 +46,13 @@
 #include <cmath>
 #include <limits>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD SMILEventSender &SmilEventSender() noexcept
+    KRYS_NODISCARD svg::SMILEventSender &SmilEventSender() noexcept
     {
-      static NeverDestroyed<SMILEventSender> sender;
+      static NeverDestroyed<svg::SMILEventSender> sender;
       return sender;
     }
 
@@ -61,7 +61,7 @@ namespace krys::boo::svg
     // This is used for duration type time values that can't be negative.
     constexpr double InvalidCachedTime = -1.;
 
-    KRYS_NODISCARD dom::DOMStringView Trim(dom::DOMStringView string) noexcept
+    KRYS_NODISCARD DOMStringView Trim(DOMStringView string) noexcept
     {
       while (!string.empty() && text::IsUnicodeCompatibleASCIIWhitespace(string.front()))
       {
@@ -74,35 +74,35 @@ namespace krys::boo::svg
       return string;
     }
 
-    void ClearTimesWithDynamicOrigins(List<SMILTimeWithOrigin> &timeList) noexcept
+    void ClearTimesWithDynamicOrigins(List<svg::SMILTimeWithOrigin> &timeList) noexcept
     {
-      std::erase_if(timeList, [](const SMILTimeWithOrigin &time) { return time.OriginIsScript(); });
+      std::erase_if(timeList, [](const svg::SMILTimeWithOrigin &time) { return time.OriginIsScript(); });
     }
 
-    void InsertSorted(List<SMILTimeWithOrigin> &list, SMILTimeWithOrigin time) noexcept
+    void InsertSorted(List<svg::SMILTimeWithOrigin> &list, svg::SMILTimeWithOrigin time) noexcept
     {
       krys_debug_assert(std::is_sorted(list.begin(), list.end()));
       list.insert(std::lower_bound(list.begin(), list.end(), time), time);
     }
 
-    KRYS_NODISCARD const dom::QualifiedName &AnyQName() noexcept
+    KRYS_NODISCARD const QualifiedName &AnyQName() noexcept
     {
-      static const NeverDestroyed<dom::QualifiedName> anyName {dom::DOMStringAtom(u8"*"), u8"*", u8"*"};
+      static const NeverDestroyed<QualifiedName> anyName {DOMStringAtom(u8"*"), u8"*", u8"*"};
       return anyName;
     }
   }
 
-  class ConditionEventListener final : public dom::EventListenerCallback
+  class svg::ConditionEventListener final : public EventListenerCallback
   {
   private:
     WeakPtr<SVGSMILElement> _animation;
     SVGSMILElement::Condition *_condition;
 
   public:
-    KRYS_NODISCARD static Ref<ConditionEventListener> Create(SVGSMILElement *animation,
-                                                             SVGSMILElement::Condition *condition) noexcept
+    KRYS_NODISCARD static Ref<svg::ConditionEventListener>
+      Create(SVGSMILElement *animation, SVGSMILElement::Condition *condition) noexcept
     {
-      return AdoptRef(*new ConditionEventListener(animation, condition));
+      return AdoptRef(*new svg::ConditionEventListener(animation, condition));
     }
 
     void DisconnectAnimation() noexcept
@@ -116,7 +116,7 @@ namespace krys::boo::svg
     {
     }
 
-    void HandleEvent(dom::Event &) noexcept final
+    void HandleEvent(Event &) noexcept final
     {
       if (RefPtr animation = ShareRefPtr(_animation.get()))
       {
@@ -126,14 +126,14 @@ namespace krys::boo::svg
     }
   };
 
-  SVGSMILElement::Condition::Condition(Type type, BeginOrEnd beginOrEnd, dom::DOMString baseID,
-                                       dom::DOMStringAtom name, SMILTime offset, int32 repeats) noexcept
+  SVGSMILElement::Condition::Condition(Type type, BeginOrEnd beginOrEnd, DOMString baseID, DOMStringAtom name,
+                                       svg::SMILTime offset, int32 repeats) noexcept
       : ConditionType(type), ConditionBeginOrEnd(beginOrEnd), BaseID(krys::move(baseID)),
         Name(krys::move(name)), Offset(offset), Repeats(repeats)
   {
   }
 
-  SVGSMILElement::SVGSMILElement(dom::Document &document, UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
+  SVGSMILElement::SVGSMILElement(Document &document, UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
                                  SVGElementInterface interface) noexcept
       : SVGElement(document, krys::move(propertyRegistry), interface), _attributeName(AnyQName()),
         _cachedDur(InvalidCachedTime), _cachedRepeatDur(InvalidCachedTime),
@@ -152,12 +152,12 @@ namespace krys::boo::svg
     }
   }
 
-  SMILTimeContainer *SVGSMILElement::TimeContainer() noexcept
+  svg::SMILTimeContainer *SVGSMILElement::TimeContainer() noexcept
   {
     return _timeContainer.get();
   }
 
-  Maybe<dom::DOMString> SVGSMILElement::AttributeValue(const dom::QualifiedName &name) const noexcept
+  Maybe<DOMString> SVGSMILElement::AttributeValue(const QualifiedName &name) const noexcept
   {
     return GetAttributeNS(name.NamespaceURI(), name.LocalName());
   }
@@ -183,12 +183,12 @@ namespace krys::boo::svg
       return;
     }
 
-    dom::DOMStringAtom id = null;
-    RefPtr<dom::Element> target;
+    DOMStringAtom id = null;
+    RefPtr<Element> target;
     auto href = AttributeValue(SVGNames::HrefAttr());
     if (!href)
     {
-      href = AttributeValue(XLinkNames::HrefAttr());
+      href = AttributeValue(svg::XLinkNames::HrefAttr());
     }
     if (!href || href->empty())
     {
@@ -228,9 +228,8 @@ namespace krys::boo::svg
     }
   }
 
-  bool
-    SVGSMILElement::HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                       const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool SVGSMILElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                          const DOMStringAtom &namespaceURI) const noexcept
   {
     // https://svgwg.org/svg2-draft/styling.html#PresentationAttributes
     if (localName == SVGNames::FillAttr().LocalName() && namespaceURI == null)
@@ -241,15 +240,15 @@ namespace krys::boo::svg
     return StyledElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  dom::QualifiedName SVGSMILElement::ConstructAttributeName() const noexcept
+  QualifiedName SVGSMILElement::ConstructAttributeName() const noexcept
   {
-    auto value = AttributeValue(SVGNames::AttributeNameAttr()).value_or(dom::DOMString {});
-    dom::DOMStringView qualifiedName = value;
+    auto value = AttributeValue(SVGNames::AttributeNameAttr()).value_or(DOMString {});
+    DOMStringView qualifiedName = value;
 
     auto colon = qualifiedName.find(u8':');
-    dom::DOMStringView prefix;
-    dom::DOMStringView localName = qualifiedName;
-    if (colon != dom::DOMStringView::npos)
+    DOMStringView prefix;
+    DOMStringView localName = qualifiedName;
+    if (colon != DOMStringView::npos)
     {
       prefix = qualifiedName.substr(0, colon);
       localName = qualifiedName.substr(colon + 1);
@@ -265,16 +264,16 @@ namespace krys::boo::svg
 
     if (prefix.empty())
     {
-      return {null, null, dom::DOMStringAtom(localName)};
+      return {null, null, DOMStringAtom(localName)};
     }
 
-    auto namespaceURI = LookupNamespaceURI(dom::DOMStringAtom(prefix));
+    auto namespaceURI = LookupNamespaceURI(DOMStringAtom(prefix));
     if (namespaceURI.View().empty())
     {
       return AnyQName();
     }
 
-    return {namespaceURI, null, dom::DOMStringAtom(localName)};
+    return {namespaceURI, null, DOMStringAtom(localName)};
   }
 
   void SVGSMILElement::UpdateAttributeName() noexcept
@@ -288,9 +287,9 @@ namespace krys::boo::svg
 
     _activeState = Inactive;
     _isWaitingForFirstInterval = true;
-    _intervalBegin = SMILTime::Unresolved();
-    _intervalEnd = SMILTime::Unresolved();
-    _previousIntervalBegin = SMILTime::Unresolved();
+    _intervalBegin = svg::SMILTime::Unresolved();
+    _intervalEnd = svg::SMILTime::Unresolved();
+    _previousIntervalBegin = svg::SMILTime::Unresolved();
     _lastPercent = 0;
     _lastRepeat = 0;
     _nextProgressTime = 0;
@@ -344,7 +343,7 @@ namespace krys::boo::svg
     BuildPendingResource();
   }
 
-  void SVGSMILElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void SVGSMILElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     if (oldAncestor.IsConnected() && !IsConnected())
     {
@@ -364,106 +363,107 @@ namespace krys::boo::svg
     return AttributeName() != AnyQName();
   }
 
-  SMILTime SVGSMILElement::ParseOffsetValue(dom::DOMStringView data) noexcept
+  svg::SMILTime SVGSMILElement::ParseOffsetValue(DOMStringView data) noexcept
   {
     Maybe<double> result;
     auto parse = Trim(data);
     if (parse.ends_with(u8'h'))
     {
-      result =
-        ToDouble(parse.substr(0, parse.size() - 1)).transform([](double value) { return value * 60 * 60; });
+      result = svg::ToDouble(parse.substr(0, parse.size() - 1))
+                 .transform([](double value) { return value * 60 * 60; });
     }
     else if (parse.ends_with(u8"min"))
     {
-      result = ToDouble(parse.substr(0, parse.size() - 3)).transform([](double value) { return value * 60; });
+      result =
+        svg::ToDouble(parse.substr(0, parse.size() - 3)).transform([](double value) { return value * 60; });
     }
     else if (parse.ends_with(u8"ms"))
     {
-      result =
-        ToDouble(parse.substr(0, parse.size() - 2)).transform([](double value) { return value / 1'000; });
+      result = svg::ToDouble(parse.substr(0, parse.size() - 2))
+                 .transform([](double value) { return value / 1'000; });
     }
     else if (parse.ends_with(u8's'))
     {
-      result = ToDouble(parse.substr(0, parse.size() - 1));
+      result = svg::ToDouble(parse.substr(0, parse.size() - 1));
     }
     else
     {
-      result = ToDouble(parse);
+      result = svg::ToDouble(parse);
     }
-    if (!result || std::isnan(*result) || !SMILTime(*result).IsFinite())
+    if (!result || std::isnan(*result) || !svg::SMILTime(*result).IsFinite())
     {
-      return SMILTime::Unresolved();
+      return svg::SMILTime::Unresolved();
     }
     return *result;
   }
 
-  SMILTime SVGSMILElement::ParseClockValue(Maybe<dom::DOMStringView> data) noexcept
+  svg::SMILTime SVGSMILElement::ParseClockValue(Maybe<DOMStringView> data) noexcept
   {
     if (!data)
     {
-      return SMILTime::Unresolved();
+      return svg::SMILTime::Unresolved();
     }
 
     auto parse = Trim(*data);
     if (parse == IndefiniteValue)
     {
-      return SMILTime::Indefinite();
+      return svg::SMILTime::Indefinite();
     }
 
     Maybe<double> seconds;
     double result = 0;
     auto doublePointOne = parse.find(u8':');
     auto doublePointTwo =
-      doublePointOne == dom::DOMStringView::npos ? doublePointOne : parse.find(u8':', doublePointOne + 1);
+      doublePointOne == DOMStringView::npos ? doublePointOne : parse.find(u8':', doublePointOne + 1);
     if (doublePointOne == 2 && doublePointTwo == 5 && parse.size() >= 8)
     {
       auto hour = text::ParseInteger<uint8>(parse.substr(0, 2));
       auto minute = text::ParseInteger<uint8>(parse.substr(3, 2));
       if (!hour || !minute)
       {
-        return SMILTime::Unresolved();
+        return svg::SMILTime::Unresolved();
       }
-      seconds = ToDouble(parse.substr(6));
+      seconds = svg::ToDouble(parse.substr(6));
       result = *hour * 60 * 60 + *minute * 60 + seconds.value_or(0);
     }
-    else if (doublePointOne == 2 && doublePointTwo == dom::DOMStringView::npos && parse.size() >= 5)
+    else if (doublePointOne == 2 && doublePointTwo == DOMStringView::npos && parse.size() >= 5)
     {
       auto minute = text::ParseInteger<uint8>(parse.substr(0, 2));
       if (!minute)
       {
-        return SMILTime::Unresolved();
+        return svg::SMILTime::Unresolved();
       }
-      seconds = ToDouble(parse.substr(3));
+      seconds = svg::ToDouble(parse.substr(3));
       result = *minute * 60 + seconds.value_or(0);
     }
     else
     {
       return ParseOffsetValue(parse);
     }
-    if (!seconds || std::isnan(result) || !SMILTime(result).IsFinite())
+    if (!seconds || std::isnan(result) || !svg::SMILTime(result).IsFinite())
     {
-      return SMILTime::Unresolved();
+      return svg::SMILTime::Unresolved();
     }
     return result;
   }
 
-  bool SVGSMILElement::ParseCondition(dom::DOMStringView value, BeginOrEnd beginOrEnd) noexcept
+  bool SVGSMILElement::ParseCondition(DOMStringView value, BeginOrEnd beginOrEnd) noexcept
   {
     auto parseString = Trim(value);
 
     double sign = 1.;
     auto pos = parseString.find(u8'+');
-    if (pos == dom::DOMStringView::npos)
+    if (pos == DOMStringView::npos)
     {
       pos = parseString.find(u8'-');
-      if (pos != dom::DOMStringView::npos)
+      if (pos != DOMStringView::npos)
       {
         sign = -1.;
       }
     }
-    dom::DOMStringView conditionString;
-    SMILTime offset = 0;
-    if (pos == dom::DOMStringView::npos)
+    DOMStringView conditionString;
+    svg::SMILTime offset = 0;
+    if (pos == DOMStringView::npos)
     {
       conditionString = parseString;
     }
@@ -484,9 +484,9 @@ namespace krys::boo::svg
     }
     pos = conditionString.find(u8'.');
 
-    dom::DOMStringView baseID;
-    dom::DOMStringView nameView;
-    if (pos == dom::DOMStringView::npos)
+    DOMStringView baseID;
+    DOMStringView nameView;
+    if (pos == DOMStringView::npos)
     {
       nameView = conditionString;
     }
@@ -500,7 +500,7 @@ namespace krys::boo::svg
       return false;
     }
 
-    dom::DOMStringAtom nameString = null;
+    DOMStringAtom nameString = null;
     Condition::Type type;
     int32 repeats = -1;
     if (nameView.starts_with(u8"repeat(") && nameView.ends_with(u8')'))
@@ -524,22 +524,21 @@ namespace krys::boo::svg
         return false;
       }
       type = Condition::Syncbase;
-      nameString = dom::DOMStringAtom(nameView);
+      nameString = DOMStringAtom(nameView);
     }
     else if (nameView.starts_with(u8"accesskey("))
     {
       // FIXME: accesskey() support.
       type = Condition::AccessKey;
-      nameString = dom::DOMStringAtom(nameView);
+      nameString = DOMStringAtom(nameView);
     }
     else
     {
       type = Condition::EventBase;
-      nameString = dom::DOMStringAtom(nameView);
+      nameString = DOMStringAtom(nameView);
     }
 
-    _conditions.emplace_back(type, beginOrEnd, dom::DOMString(baseID), krys::move(nameString), offset,
-                             repeats);
+    _conditions.emplace_back(type, beginOrEnd, DOMString(baseID), krys::move(nameString), offset, repeats);
 
     if (type == Condition::EventBase && beginOrEnd == End)
     {
@@ -549,7 +548,7 @@ namespace krys::boo::svg
     return true;
   }
 
-  void SVGSMILElement::ParseBeginOrEnd(dom::DOMStringView parseString, BeginOrEnd beginOrEnd) noexcept
+  void SVGSMILElement::ParseBeginOrEnd(DOMStringView parseString, BeginOrEnd beginOrEnd) noexcept
   {
     auto &timeList = beginOrEnd == Begin ? _beginTimes : _endTimes;
     if (beginOrEnd == End)
@@ -567,17 +566,17 @@ namespace krys::boo::svg
       auto string = parseString.substr(0, separator);
       if (!string.empty())
       {
-        SMILTime value = ParseClockValue(string);
+        svg::SMILTime value = ParseClockValue(string);
         if (value.IsUnresolved())
         {
           (void)ParseCondition(string, beginOrEnd);
         }
         else if (std::ranges::find(existing, value.Value()) == existing.end())
         {
-          timeList.emplace_back(value, SMILTimeWithOrigin::Origin::Parser);
+          timeList.emplace_back(value, svg::SMILTimeWithOrigin::Origin::Parser);
         }
       }
-      if (separator == dom::DOMStringView::npos)
+      if (separator == DOMStringView::npos)
       {
         break;
       }
@@ -586,20 +585,20 @@ namespace krys::boo::svg
     std::sort(timeList.begin(), timeList.end());
   }
 
-  bool SVGSMILElement::IsSupportedAttribute(const dom::QualifiedName &attrName) noexcept
+  bool SVGSMILElement::IsSupportedAttribute(const QualifiedName &attrName) noexcept
   {
     static const Array supportedAttributes {
-      &SVGNames::BeginAttr(),     &SVGNames::EndAttr(),           &SVGNames::DurAttr(),
-      &SVGNames::RepeatDurAttr(), &SVGNames::RepeatCountAttr(),   &SVGNames::MinAttr(),
-      &SVGNames::MaxAttr(),       &SVGNames::AttributeNameAttr(), &SVGNames::HrefAttr(),
-      &XLinkNames::HrefAttr(),
+      &SVGNames::BeginAttr(),       &SVGNames::EndAttr(),           &SVGNames::DurAttr(),
+      &SVGNames::RepeatDurAttr(),   &SVGNames::RepeatCountAttr(),   &SVGNames::MinAttr(),
+      &SVGNames::MaxAttr(),         &SVGNames::AttributeNameAttr(), &SVGNames::HrefAttr(),
+      &svg::XLinkNames::HrefAttr(),
     };
     return std::ranges::any_of(supportedAttributes,
                                [&](const auto *name) { return name->Matches(attrName); });
   }
 
-  void SVGSMILElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                        Maybe<dom::DOMStringView> value) noexcept
+  void SVGSMILElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                        Maybe<DOMStringView> value) noexcept
   {
     SVGElement::AttributeChanged(name, oldValue, value);
 
@@ -609,9 +608,9 @@ namespace krys::boo::svg
       {
         DisconnectConditions();
         _conditions.clear();
-        ParseBeginOrEnd(AttributeValue(SVGNames::EndAttr()).value_or(dom::DOMString {}), End);
+        ParseBeginOrEnd(AttributeValue(SVGNames::EndAttr()).value_or(DOMString {}), End);
       }
-      ParseBeginOrEnd(value.value_or(dom::DOMStringView {}), Begin);
+      ParseBeginOrEnd(value.value_or(DOMStringView {}), Begin);
       if (IsConnected())
       {
         ConnectConditions();
@@ -623,9 +622,9 @@ namespace krys::boo::svg
       {
         DisconnectConditions();
         _conditions.clear();
-        ParseBeginOrEnd(AttributeValue(SVGNames::BeginAttr()).value_or(dom::DOMString {}), Begin);
+        ParseBeginOrEnd(AttributeValue(SVGNames::BeginAttr()).value_or(DOMString {}), Begin);
       }
-      ParseBeginOrEnd(value.value_or(dom::DOMStringView {}), End);
+      ParseBeginOrEnd(value.value_or(DOMStringView {}), End);
       if (IsConnected())
       {
         ConnectConditions();
@@ -634,7 +633,7 @@ namespace krys::boo::svg
     // NOTE: onbegin, onend and onrepeat need scripting.
   }
 
-  void SVGSMILElement::SVGAttributeChanged(const dom::QualifiedName &attrName) noexcept
+  void SVGSMILElement::SVGAttributeChanged(const QualifiedName &attrName) noexcept
   {
     if (!IsSupportedAttribute(attrName))
     {
@@ -666,7 +665,7 @@ namespace krys::boo::svg
     {
       UpdateAttributeName();
     }
-    else if (attrName.Matches(SVGNames::HrefAttr()) || attrName.Matches(XLinkNames::HrefAttr()))
+    else if (attrName.Matches(SVGNames::HrefAttr()) || attrName.Matches(svg::XLinkNames::HrefAttr()))
     {
       InstanceInvalidationGuard guard(*this);
       BuildPendingResource();
@@ -688,7 +687,7 @@ namespace krys::boo::svg
     AnimationAttributeChanged();
   }
 
-  RefPtr<dom::Element> SVGSMILElement::EventBaseFor(const Condition &condition) noexcept
+  RefPtr<Element> SVGSMILElement::EventBaseFor(const Condition &condition) noexcept
   {
     if (condition.BaseID.empty())
     {
@@ -715,10 +714,9 @@ namespace krys::boo::svg
           continue;
         }
         krys_debug_assert(!condition.EventListener);
-        condition.EventListener = ConditionEventListener::Create(this, &condition);
+        condition.EventListener = svg::ConditionEventListener::Create(this, &condition);
         eventBase->AddEventListener(
-          condition.Name, ShareRef(static_cast<dom::EventListenerCallback &>(*condition.EventListener)),
-          false);
+          condition.Name, ShareRef(static_cast<EventListenerCallback &>(*condition.EventListener)), false);
       }
       else if (condition.ConditionType == Condition::Syncbase)
       {
@@ -764,8 +762,7 @@ namespace krys::boo::svg
         if (RefPtr eventBase = EventBaseFor(condition))
         {
           eventBase->RemoveEventListener(
-            condition.Name, ShareRef(static_cast<dom::EventListenerCallback &>(*condition.EventListener)),
-            false);
+            condition.Name, ShareRef(static_cast<EventListenerCallback &>(*condition.EventListener)), false);
         }
         condition.EventListener->DisconnectAnimation();
         condition.EventListener = nullptr;
@@ -781,7 +778,7 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGSMILElement::SetAttributeName(const dom::QualifiedName &attributeName) noexcept
+  void SVGSMILElement::SetAttributeName(const QualifiedName &attributeName) noexcept
   {
     if (RefPtr timeContainer = _timeContainer;
         timeContainer && _targetElement && _attributeName != attributeName)
@@ -839,7 +836,7 @@ namespace krys::boo::svg
     _targetElement = CreateWeakPtr(target);
   }
 
-  SMILTime SVGSMILElement::Elapsed() const noexcept
+  svg::SMILTime SVGSMILElement::Elapsed() const noexcept
   {
     return _timeContainer ? _timeContainer->Elapsed() : 0;
   }
@@ -869,31 +866,31 @@ namespace krys::boo::svg
     return value == u8"freeze" ? FillFreeze : FillRemove;
   }
 
-  SMILTime SVGSMILElement::Dur() const noexcept
+  svg::SMILTime SVGSMILElement::Dur() const noexcept
   {
     if (_cachedDur != InvalidCachedTime)
     {
       return _cachedDur;
     }
     auto value = AttributeValue(SVGNames::DurAttr());
-    SMILTime clockValue = ParseClockValue(value);
-    return _cachedDur = clockValue <= 0 ? SMILTime::Unresolved() : clockValue;
+    svg::SMILTime clockValue = ParseClockValue(value);
+    return _cachedDur = clockValue <= 0 ? svg::SMILTime::Unresolved() : clockValue;
   }
 
-  SMILTime SVGSMILElement::RepeatDur() const noexcept
+  svg::SMILTime SVGSMILElement::RepeatDur() const noexcept
   {
     if (_cachedRepeatDur != InvalidCachedTime)
     {
       return _cachedRepeatDur;
     }
     auto value = AttributeValue(SVGNames::RepeatDurAttr());
-    SMILTime clockValue = ParseClockValue(value);
-    _cachedRepeatDur = clockValue <= 0 ? SMILTime::Unresolved() : clockValue;
+    svg::SMILTime clockValue = ParseClockValue(value);
+    _cachedRepeatDur = clockValue <= 0 ? svg::SMILTime::Unresolved() : clockValue;
     return _cachedRepeatDur;
   }
 
   // So a count is not really a time but let just all pretend we did not notice.
-  SMILTime SVGSMILElement::RepeatCount() const noexcept
+  svg::SMILTime SVGSMILElement::RepeatCount() const noexcept
   {
     if (_cachedRepeatCount != InvalidCachedTime)
     {
@@ -902,54 +899,55 @@ namespace krys::boo::svg
     auto value = AttributeValue(SVGNames::RepeatCountAttr());
     if (!value)
     {
-      return SMILTime::Unresolved();
+      return svg::SMILTime::Unresolved();
     }
 
     if (*value == IndefiniteValue)
     {
-      return SMILTime::Indefinite();
+      return svg::SMILTime::Indefinite();
     }
-    auto result = ToDouble(*value);
-    return _cachedRepeatCount =
-             (result && *result > 0 && std::isfinite(*result)) ? SMILTime(*result) : SMILTime::Unresolved();
+    auto result = svg::ToDouble(*value);
+    return _cachedRepeatCount = (result && *result > 0 && std::isfinite(*result))
+                                  ? svg::SMILTime(*result)
+                                  : svg::SMILTime::Unresolved();
   }
 
-  SMILTime SVGSMILElement::MaxValue() const noexcept
+  svg::SMILTime SVGSMILElement::MaxValue() const noexcept
   {
     if (_cachedMax != InvalidCachedTime)
     {
       return _cachedMax;
     }
     auto value = AttributeValue(SVGNames::MaxAttr());
-    SMILTime result = ParseClockValue(value);
-    return _cachedMax = (result.IsUnresolved() || result <= 0) ? SMILTime::Indefinite() : result;
+    svg::SMILTime result = ParseClockValue(value);
+    return _cachedMax = (result.IsUnresolved() || result <= 0) ? svg::SMILTime::Indefinite() : result;
   }
 
-  SMILTime SVGSMILElement::MinValue() const noexcept
+  svg::SMILTime SVGSMILElement::MinValue() const noexcept
   {
     if (_cachedMin != InvalidCachedTime)
     {
       return _cachedMin;
     }
     auto value = AttributeValue(SVGNames::MinAttr());
-    SMILTime result = ParseClockValue(value);
-    return _cachedMin = (result.IsUnresolved() || result < 0) ? SMILTime(0) : result;
+    svg::SMILTime result = ParseClockValue(value);
+    return _cachedMin = (result.IsUnresolved() || result < 0) ? svg::SMILTime(0) : result;
   }
 
-  SMILTime SVGSMILElement::SimpleDuration() const noexcept
+  svg::SMILTime SVGSMILElement::SimpleDuration() const noexcept
   {
-    return std::min(Dur(), SMILTime::Indefinite());
+    return std::min(Dur(), svg::SMILTime::Indefinite());
   }
 
-  void SVGSMILElement::AddInstanceTime(BeginOrEnd beginOrEnd, SMILTime time,
-                                       SMILTimeWithOrigin::Origin origin) noexcept
+  void SVGSMILElement::AddInstanceTime(BeginOrEnd beginOrEnd, svg::SMILTime time,
+                                       svg::SMILTimeWithOrigin::Origin origin) noexcept
   {
-    SMILTime elapsed = Elapsed();
+    svg::SMILTime elapsed = Elapsed();
     if (elapsed.IsUnresolved())
     {
       return;
     }
-    InsertSorted(beginOrEnd == Begin ? _beginTimes : _endTimes, SMILTimeWithOrigin(time, origin));
+    InsertSorted(beginOrEnd == Begin ? _beginTimes : _endTimes, svg::SMILTimeWithOrigin(time, origin));
     if (beginOrEnd == Begin)
     {
       BeginListChanged(elapsed);
@@ -960,21 +958,21 @@ namespace krys::boo::svg
     }
   }
 
-  SMILTime SVGSMILElement::FindInstanceTime(BeginOrEnd beginOrEnd, SMILTime minimumTime,
-                                            bool equalsMinimumOK) const noexcept
+  svg::SMILTime SVGSMILElement::FindInstanceTime(BeginOrEnd beginOrEnd, svg::SMILTime minimumTime,
+                                                 bool equalsMinimumOK) const noexcept
   {
     const auto &list = beginOrEnd == Begin ? _beginTimes : _endTimes;
     auto sizeOfList = static_cast<int32>(list.size());
 
     if (!sizeOfList)
     {
-      return beginOrEnd == Begin ? SMILTime::Unresolved() : SMILTime::Indefinite();
+      return beginOrEnd == Begin ? svg::SMILTime::Unresolved() : svg::SMILTime::Indefinite();
     }
 
     // Find an item close to minimumTime, as approximateBinarySearch does: the first item that isn't smaller,
     // or the last item.
     auto position = std::lower_bound(list.begin(), list.end(), minimumTime,
-                                     [](const SMILTimeWithOrigin &item, const SMILTime &time)
+                                     [](const svg::SMILTimeWithOrigin &item, const svg::SMILTime &time)
                                      { return item.Time() < time; });
     int32 indexOfResult = std::min(static_cast<int32>(position - list.begin()), sizeOfList - 1);
 
@@ -983,17 +981,17 @@ namespace krys::boo::svg
       ++indexOfResult;
     }
 
-    const SMILTime &currentTime = list[indexOfResult].Time();
+    const svg::SMILTime &currentTime = list[indexOfResult].Time();
 
     // The special value "indefinite" does not yield an instance time in the begin list.
     if (currentTime.IsIndefinite() && beginOrEnd == Begin)
     {
-      return SMILTime::Unresolved();
+      return svg::SMILTime::Unresolved();
     }
 
     if (currentTime < minimumTime)
     {
-      return SMILTime::Unresolved();
+      return svg::SMILTime::Unresolved();
     }
     if (currentTime > minimumTime)
     {
@@ -1007,7 +1005,7 @@ namespace krys::boo::svg
     }
 
     // If the equals is not accepted, return the next bigger item in the list.
-    SMILTime nextTime = currentTime;
+    svg::SMILTime nextTime = currentTime;
     while (indexOfResult < sizeOfList - 1)
     {
       nextTime = list[indexOfResult + 1].Time();
@@ -1018,29 +1016,30 @@ namespace krys::boo::svg
       ++indexOfResult;
     }
 
-    return beginOrEnd == Begin ? SMILTime::Unresolved() : SMILTime::Indefinite();
+    return beginOrEnd == Begin ? svg::SMILTime::Unresolved() : svg::SMILTime::Indefinite();
   }
 
-  SMILTime SVGSMILElement::RepeatingDuration() const noexcept
+  svg::SMILTime SVGSMILElement::RepeatingDuration() const noexcept
   {
     // Computing the active duration
     // http://www.w3.org/TR/SMIL2/smil-timing.html#Timing-ComputingActiveDur
-    SMILTime repeatCount = RepeatCount();
-    SMILTime repeatDur = RepeatDur();
-    SMILTime simpleDuration = SimpleDuration();
+    svg::SMILTime repeatCount = RepeatCount();
+    svg::SMILTime repeatDur = RepeatDur();
+    svg::SMILTime simpleDuration = SimpleDuration();
     if (!simpleDuration || (repeatDur.IsUnresolved() && repeatCount.IsUnresolved()))
     {
       return simpleDuration;
     }
-    SMILTime repeatCountDuration = simpleDuration * repeatCount;
-    return std::min(repeatCountDuration, std::min(repeatDur, SMILTime::Indefinite()));
+    svg::SMILTime repeatCountDuration = simpleDuration * repeatCount;
+    return std::min(repeatCountDuration, std::min(repeatDur, svg::SMILTime::Indefinite()));
   }
 
-  SMILTime SVGSMILElement::ResolveActiveEnd(SMILTime resolvedBegin, SMILTime resolvedEnd) const noexcept
+  svg::SMILTime SVGSMILElement::ResolveActiveEnd(svg::SMILTime resolvedBegin,
+                                                 svg::SMILTime resolvedEnd) const noexcept
   {
     // Computing the active duration
     // http://www.w3.org/TR/SMIL2/smil-timing.html#Timing-ComputingActiveDur
-    SMILTime preliminaryActiveDuration;
+    svg::SMILTime preliminaryActiveDuration;
     if (!resolvedEnd.IsUnresolved() && Dur().IsUnresolved() && RepeatDur().IsUnresolved()
         && RepeatCount().IsUnresolved())
     {
@@ -1055,32 +1054,33 @@ namespace krys::boo::svg
       preliminaryActiveDuration = std::min(RepeatingDuration(), resolvedEnd - resolvedBegin);
     }
 
-    SMILTime minValue = MinValue();
-    SMILTime maxValue = MaxValue();
+    svg::SMILTime minValue = MinValue();
+    svg::SMILTime maxValue = MaxValue();
     if (minValue > maxValue)
     {
       // Ignore both.
       // http://www.w3.org/TR/2001/REC-smil-animation-20010904/#MinMax
       minValue = 0;
-      maxValue = SMILTime::Indefinite();
+      maxValue = svg::SMILTime::Indefinite();
     }
     return resolvedBegin + std::min(maxValue, std::max(minValue, preliminaryActiveDuration));
   }
 
-  void SVGSMILElement::ResolveInterval(bool first, SMILTime &beginResult, SMILTime &endResult) const noexcept
+  void SVGSMILElement::ResolveInterval(bool first, svg::SMILTime &beginResult,
+                                       svg::SMILTime &endResult) const noexcept
   {
     // See the pseudocode in http://www.w3.org/TR/SMIL3/smil-timing.html#q90.
-    SMILTime beginAfter = first ? -std::numeric_limits<double>::infinity() : _intervalEnd;
-    SMILTime lastIntervalTempEnd = std::numeric_limits<double>::infinity();
+    svg::SMILTime beginAfter = first ? -std::numeric_limits<double>::infinity() : _intervalEnd;
+    svg::SMILTime lastIntervalTempEnd = std::numeric_limits<double>::infinity();
     while (true)
     {
       bool equalsMinimumOK = !first || _intervalEnd > _intervalBegin;
-      SMILTime tempBegin = FindInstanceTime(Begin, beginAfter, equalsMinimumOK);
+      svg::SMILTime tempBegin = FindInstanceTime(Begin, beginAfter, equalsMinimumOK);
       if (tempBegin.IsUnresolved())
       {
         break;
       }
-      SMILTime tempEnd = FindInstanceTime(End, tempBegin, true);
+      svg::SMILTime tempEnd = FindInstanceTime(End, tempBegin, true);
       if (!_endTimes.empty())
       {
         if ((first && tempBegin == tempEnd && tempEnd == lastIntervalTempEnd)
@@ -1094,7 +1094,7 @@ namespace krys::boo::svg
         }
       }
       tempEnd = ResolveActiveEnd(tempBegin, tempEnd);
-      if (!first || tempEnd > SMILTime() || (!tempBegin.Value() && !tempEnd.Value()))
+      if (!first || tempEnd > svg::SMILTime() || (!tempBegin.Value() && !tempEnd.Value()))
       {
         beginResult = tempBegin;
         endResult = tempEnd;
@@ -1104,14 +1104,14 @@ namespace krys::boo::svg
       beginAfter = tempEnd;
       lastIntervalTempEnd = tempEnd;
     }
-    beginResult = SMILTime::Unresolved();
-    endResult = SMILTime::Unresolved();
+    beginResult = svg::SMILTime::Unresolved();
+    endResult = svg::SMILTime::Unresolved();
   }
 
   void SVGSMILElement::ResolveFirstInterval() noexcept
   {
-    SMILTime begin;
-    SMILTime end;
+    svg::SMILTime begin;
+    svg::SMILTime end;
     ResolveInterval(true, begin, end);
     krys_debug_assert(!begin.IsIndefinite());
 
@@ -1133,8 +1133,8 @@ namespace krys::boo::svg
 
   bool SVGSMILElement::ResolveNextInterval() noexcept
   {
-    SMILTime begin;
-    SMILTime end;
+    svg::SMILTime begin;
+    svg::SMILTime end;
     ResolveInterval(false, begin, end);
     krys_debug_assert(!begin.IsIndefinite());
 
@@ -1149,12 +1149,12 @@ namespace krys::boo::svg
     return false;
   }
 
-  SMILTime SVGSMILElement::NextProgressTime() const noexcept
+  svg::SMILTime SVGSMILElement::NextProgressTime() const noexcept
   {
     return _nextProgressTime;
   }
 
-  void SVGSMILElement::BeginListChanged(SMILTime eventTime) noexcept
+  void SVGSMILElement::BeginListChanged(svg::SMILTime eventTime) noexcept
   {
     if (_isWaitingForFirstInterval)
     {
@@ -1167,11 +1167,11 @@ namespace krys::boo::svg
         return;
       }
 
-      SMILTime newBegin = FindInstanceTime(Begin, eventTime, true);
+      svg::SMILTime newBegin = FindInstanceTime(Begin, eventTime, true);
       if (newBegin.IsFinite() && (_intervalEnd <= eventTime || newBegin < _intervalBegin))
       {
         // Begin time changed, re-resolve the interval.
-        SMILTime oldBegin = _intervalBegin;
+        svg::SMILTime oldBegin = _intervalBegin;
         _intervalEnd = eventTime;
         ResolveInterval(false, _intervalBegin, _intervalEnd);
         krys_debug_assert(!_intervalBegin.IsUnresolved());
@@ -1197,16 +1197,16 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGSMILElement::EndListChanged(SMILTime) noexcept
+  void SVGSMILElement::EndListChanged(svg::SMILTime) noexcept
   {
-    SMILTime elapsed = Elapsed();
+    svg::SMILTime elapsed = Elapsed();
     if (_isWaitingForFirstInterval)
     {
       ResolveFirstInterval();
     }
     else if (elapsed < _intervalEnd && _intervalBegin.IsFinite())
     {
-      SMILTime newEnd = FindInstanceTime(End, _intervalBegin, false);
+      svg::SMILTime newEnd = FindInstanceTime(End, _intervalBegin, false);
       if (newEnd < _intervalEnd)
       {
         newEnd = ResolveActiveEnd(_intervalBegin, newEnd);
@@ -1225,7 +1225,7 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGSMILElement::CheckRestart(SMILTime elapsed) noexcept
+  void SVGSMILElement::CheckRestart(svg::SMILTime elapsed) noexcept
   {
     krys_debug_assert(!_isWaitingForFirstInterval);
     krys_debug_assert(elapsed >= _intervalBegin);
@@ -1242,7 +1242,7 @@ namespace krys::boo::svg
       {
         return;
       }
-      SMILTime nextBegin = FindInstanceTime(Begin, _intervalBegin, false);
+      svg::SMILTime nextBegin = FindInstanceTime(Begin, _intervalBegin, false);
       if (nextBegin < _intervalEnd)
       {
         _intervalEnd = nextBegin;
@@ -1256,7 +1256,7 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGSMILElement::SeekToIntervalCorrespondingToTime(SMILTime elapsed) noexcept
+  void SVGSMILElement::SeekToIntervalCorrespondingToTime(svg::SMILTime elapsed) noexcept
   {
     krys_debug_assert(!_isWaitingForFirstInterval);
     krys_debug_assert(elapsed >= _intervalBegin);
@@ -1265,7 +1265,7 @@ namespace krys::boo::svg
     while (true)
     {
       // Figure out the next value in the begin time list after the current interval begin.
-      SMILTime nextBegin = FindInstanceTime(Begin, _intervalBegin, false);
+      svg::SMILTime nextBegin = FindInstanceTime(Begin, _intervalBegin, false);
 
       // If the 'nextBegin' time is unresolved (eg. just one defined interval), we're done seeking.
       if (nextBegin.IsUnresolved())
@@ -1300,9 +1300,10 @@ namespace krys::boo::svg
     }
   }
 
-  float SVGSMILElement::CalculateAnimationPercentAndRepeat(SMILTime elapsed, uint32 &repeat) const noexcept
+  float SVGSMILElement::CalculateAnimationPercentAndRepeat(svg::SMILTime elapsed,
+                                                           uint32 &repeat) const noexcept
   {
-    SMILTime simpleDuration = SimpleDuration();
+    svg::SMILTime simpleDuration = SimpleDuration();
     repeat = 0;
     if (simpleDuration.IsIndefinite())
     {
@@ -1316,8 +1317,8 @@ namespace krys::boo::svg
     }
     krys_debug_assert(_intervalBegin.IsFinite());
     krys_debug_assert(simpleDuration.IsFinite());
-    SMILTime activeTime = elapsed - _intervalBegin;
-    SMILTime repeatingDuration = RepeatingDuration();
+    svg::SMILTime activeTime = elapsed - _intervalBegin;
+    svg::SMILTime repeatingDuration = RepeatingDuration();
 
     if ((elapsed >= _intervalEnd && !repeatingDuration.IsIndefinite()) || activeTime > repeatingDuration)
     {
@@ -1347,22 +1348,22 @@ namespace krys::boo::svg
     }
     else
     {
-      SMILTime simpleTime = std::fmod(activeTime.Value(), simpleDuration.Value());
+      svg::SMILTime simpleTime = std::fmod(activeTime.Value(), simpleDuration.Value());
       percent = simpleTime.Value() / simpleDuration.Value();
     }
 
     return static_cast<float>(percent);
   }
 
-  SMILTime SVGSMILElement::CalculateNextProgressTime(SMILTime elapsed) const noexcept
+  svg::SMILTime SVGSMILElement::CalculateNextProgressTime(svg::SMILTime elapsed) const noexcept
   {
     if (_timeContainer && _activeState == Active)
     {
       // If duration is indefinite the value does not actually change over time. Same is true for <set>.
-      SMILTime simpleDuration = SimpleDuration();
+      svg::SMILTime simpleDuration = SimpleDuration();
       if (simpleDuration.IsIndefinite() || Interface() == SVGElementInterface::Set)
       {
-        SMILTime repeatingDurationEnd = _intervalBegin + RepeatingDuration();
+        svg::SMILTime repeatingDurationEnd = _intervalBegin + RepeatingDuration();
         // We are supposed to do freeze semantics when repeating ends, even if the element is still active.
         // Take care that we get a timer callback at that point.
         if (elapsed < repeatingDurationEnd && repeatingDurationEnd < _intervalEnd
@@ -1375,10 +1376,10 @@ namespace krys::boo::svg
       // It changes continuously: it's sampled in every frame.
       return elapsed;
     }
-    return _intervalBegin >= elapsed ? _intervalBegin : SMILTime::Unresolved();
+    return _intervalBegin >= elapsed ? _intervalBegin : svg::SMILTime::Unresolved();
   }
 
-  SVGSMILElement::ActiveState SVGSMILElement::DetermineActiveState(SMILTime elapsed) const noexcept
+  SVGSMILElement::ActiveState SVGSMILElement::DetermineActiveState(svg::SMILTime elapsed) const noexcept
   {
     if (elapsed >= _intervalBegin && elapsed < _intervalEnd)
     {
@@ -1388,7 +1389,7 @@ namespace krys::boo::svg
     return Fill() == FillFreeze ? Frozen : Inactive;
   }
 
-  bool SVGSMILElement::IsContributing(SMILTime elapsed) const noexcept
+  bool SVGSMILElement::IsContributing(svg::SMILTime elapsed) const noexcept
   {
     // Animation does not contribute during the active time if it is past its repeating duration and has
     // fill=remove.
@@ -1397,7 +1398,8 @@ namespace krys::boo::svg
            || _activeState == Frozen;
   }
 
-  bool SVGSMILElement::Progress(SMILTime elapsed, SVGSMILElement &firstAnimation, bool seekToTime) noexcept
+  bool SVGSMILElement::Progress(svg::SMILTime elapsed, SVGSMILElement &firstAnimation,
+                                bool seekToTime) noexcept
   {
     krys_debug_assert(_timeContainer);
     krys_debug_assert(_isWaitingForFirstInterval || _intervalBegin.IsFinite());
@@ -1410,7 +1412,7 @@ namespace krys::boo::svg
     if (!_intervalBegin.IsFinite())
     {
       krys_debug_assert(_activeState == Inactive);
-      _nextProgressTime = SMILTime::Unresolved();
+      _nextProgressTime = svg::SMILTime::Unresolved();
       return false;
     }
 
@@ -1459,9 +1461,9 @@ namespace krys::boo::svg
     _activeState = DetermineActiveState(elapsed);
     bool animationIsContributing = IsContributing(elapsed);
 
-    auto beginEvent = dom::DOMStringAtom(event_names::BeginEvent);
-    auto endEvent = dom::DOMStringAtom(event_names::EndEvent);
-    auto repeatEvent = dom::DOMStringAtom(event_names::RepeatEvent);
+    auto beginEvent = DOMStringAtom(event_names::BeginEvent);
+    auto endEvent = DOMStringAtom(event_names::EndEvent);
+    auto repeatEvent = DOMStringAtom(event_names::RepeatEvent);
 
     if (animationIsContributing)
     {
@@ -1569,7 +1571,7 @@ namespace krys::boo::svg
       {
         krys_debug_assert(condition.Name == u8"begin" || condition.Name == u8"end");
         // No nested time containers in SVG, no need for crazy time space conversions. Phew!
-        SMILTime time = 0;
+        svg::SMILTime time = 0;
         if (condition.Name == u8"begin")
         {
           time = syncbase->_intervalBegin + condition.Offset;
@@ -1618,11 +1620,11 @@ namespace krys::boo::svg
     ClearTimesWithDynamicOrigins(_endTimes);
   }
 
-  void SVGSMILElement::DispatchPendingEvent(KRYS_MAYBE_UNUSED SMILEventSender *eventSender,
+  void SVGSMILElement::DispatchPendingEvent(KRYS_MAYBE_UNUSED svg::SMILEventSender *eventSender,
                                             const StringAtom &eventType) noexcept
   {
     krys_debug_assert(eventSender == &SmilEventSender());
-    auto event = dom::Event::Create(eventType, false, false);
+    auto event = Event::Create(eventType, false, false);
     (void)DispatchEvent(*event);
   }
 }

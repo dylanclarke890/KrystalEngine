@@ -31,15 +31,11 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
-{
-  class Document;
-}
-
 namespace krys::boo
 {
   class AnimationEventBase;
   class CSSTransition;
+  class Document;
 
   using AnimationEvents = List<Ref<AnimationEventBase>>;
 
@@ -52,25 +48,25 @@ namespace krys::boo
     Timer _tickScheduleTimer;
     AnimationEvents _pendingAnimationEvents;
     HashSet<RefPtr<WebAnimation>> _acceleratedAnimationsPendingRunningStateChange;
-    WeakPtr<dom::Document> _document;
+    WeakPtr<boo::Document> _document;
     Seconds _originTime;
     bool _animationResolutionScheduled {false};
     bool _shouldScheduleAnimationResolutionForNewPendingEvents {true};
 
-    DocumentTimeline(dom::Document &document, Seconds originTime) noexcept;
+    DocumentTimeline(boo::Document &document, Seconds originTime) noexcept;
 
   public:
     ~DocumentTimeline() noexcept override;
 
-    KRYS_NODISCARD static Ref<DocumentTimeline> Create(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<DocumentTimeline> Create(boo::Document &document) noexcept;
 
     /// @brief The `DocumentTimeline(options)` constructor: a timeline whose zero time is the options' origin
     /// time.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-documenttimeline-documenttimeline
-    KRYS_NODISCARD static Ref<DocumentTimeline> Create(dom::Document &document,
+    KRYS_NODISCARD static Ref<DocumentTimeline> Create(boo::Document &document,
                                                        DocumentTimelineOptions options) noexcept;
 
-    KRYS_NODISCARD dom::Document *Document() const noexcept
+    KRYS_NODISCARD boo::Document *Document() const noexcept
     {
       return _document.get();
     }

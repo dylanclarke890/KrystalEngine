@@ -108,7 +108,7 @@ namespace krys::boo::style
       ApplyProperties(id, id);
     }
 
-    void ApplyCustomProperty(const css::CSSOMStringAtom &name) noexcept;
+    void ApplyCustomProperty(const CSSOMStringAtom &name) noexcept;
 
     KRYS_NODISCARD RefPtr<const CustomProperty>
       ResolveCustomPropertyForContainerQueries(const css::CustomPropertyValue &) noexcept;
@@ -130,7 +130,7 @@ namespace krys::boo::style
 
     void ApplyCustomProperties() noexcept;
 
-    void ApplyCustomPropertyImpl(const css::CSSOMStringAtom &, const PropertyCascade::Property &) noexcept;
+    void ApplyCustomPropertyImpl(const CSSOMStringAtom &, const PropertyCascade::Property &) noexcept;
 
     template <CustomPropertyCycleTracking trackCycles>
     void ApplyPropertiesImpl(css::PropertyId firstProperty, css::PropertyId lastProperty) noexcept;
@@ -140,11 +140,11 @@ namespace krys::boo::style
     KRYS_NODISCARD bool ApplyRollbackCascadeProperty(const PropertyCascade &, css::PropertyId) noexcept;
 
     KRYS_NODISCARD bool ApplyRollbackCascadeCustomProperty(const PropertyCascade &,
-                                                           const css::CSSOMStringAtom &) noexcept;
+                                                           const CSSOMStringAtom &) noexcept;
 
     void ApplyProperty(css::PropertyId, css::Value &, PropertyCascade::Origin) noexcept;
 
-    void ApplyCustomProperty(const css::CSSOMStringAtom &name, ResolvedCustomProperty &&) noexcept;
+    void ApplyCustomProperty(const CSSOMStringAtom &name, ResolvedCustomProperty &&) noexcept;
 
     KRYS_NODISCARD Ref<css::Value> ResolveInternalAutoBaseFunction(css::Value &) noexcept;
 

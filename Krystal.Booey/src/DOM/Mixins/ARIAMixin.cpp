@@ -7,35 +7,34 @@
 namespace krys::boo::dom::mixins
 {
   template <typename TTarget>
-  RefPtr<dom::Element> ARIAMixin<TTarget>::AriaActiveDescendantElement() const noexcept
+  RefPtr<Element> ARIAMixin<TTarget>::AriaActiveDescendantElement() const noexcept
   {
     // The getter steps are to return the result of running this's get the attr-associated element.
     return ReflectedTarget().ElementForAttributeInternal(u8"aria-activedescendant");
   }
 
   template <typename TTarget>
-  void ARIAMixin<TTarget>::AriaActiveDescendantElement(dom::Element *element) noexcept
+  void ARIAMixin<TTarget>::AriaActiveDescendantElement(Element *element) noexcept
   {
     html::CEReactionsScope ceReactions;
     ReflectedTarget().SetElementAttribute(u8"aria-activedescendant", element);
   }
 
   template <typename TTarget>
-  Maybe<dom::DOMString> ARIAMixin<TTarget>::ReflectedString(dom::DOMStringAtom name) const noexcept
+  Maybe<DOMString> ARIAMixin<TTarget>::ReflectedString(DOMStringAtom name) const noexcept
   {
-    return html::Reflect<Maybe<dom::DOMString>>(ReflectedTarget(), krys::move(name));
+    return html::Reflect<Maybe<DOMString>>(ReflectedTarget(), krys::move(name));
   }
 
   template <typename TTarget>
-  void ARIAMixin<TTarget>::SetReflectedString(dom::DOMStringAtom name, Maybe<dom::DOMString> value) noexcept
+  void ARIAMixin<TTarget>::SetReflectedString(DOMStringAtom name, Maybe<DOMString> value) noexcept
   {
     html::CEReactionsScope ceReactions;
-    html::Reflect<Maybe<dom::DOMString>>(ReflectedTarget(), krys::move(name), krys::move(value));
+    html::Reflect<Maybe<DOMString>>(ReflectedTarget(), krys::move(name), krys::move(value));
   }
 
   template <typename TTarget>
-  Maybe<List<Ref<dom::Element>>>
-    ARIAMixin<TTarget>::AttrAssociatedElements(dom::DOMStringAtom name) const noexcept
+  Maybe<List<Ref<Element>>> ARIAMixin<TTarget>::AttrAssociatedElements(DOMStringAtom name) const noexcept
   {
     // 1. Let elements be the result of running this's get the attr-associated elements.
     // 2. If the contents of elements is equal to the contents of this's cached attr-associated elements, then
@@ -49,13 +48,13 @@ namespace krys::boo::dom::mixins
   }
 
   template <typename TTarget>
-  void ARIAMixin<TTarget>::SetAttrAssociatedElements(dom::DOMStringAtom name,
-                                                     const Maybe<List<Ref<dom::Element>>> &elements) noexcept
+  void ARIAMixin<TTarget>::SetAttrAssociatedElements(DOMStringAtom name,
+                                                     const Maybe<List<Ref<Element>>> &elements) noexcept
   {
     html::CEReactionsScope ceReactions;
     ReflectedTarget().SetElementsArrayAttribute(krys::move(name), elements);
   }
 
-  template class ARIAMixin<dom::Element>;
+  template class ARIAMixin<Element>;
   template class ARIAMixin<html::ElementInternals>;
 }

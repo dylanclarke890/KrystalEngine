@@ -33,15 +33,12 @@
 #include "Krystal.Booey/Page/MouseEventTypes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Event;
   class MouseEvent;
   class UIEventWithKeyState;
-}
 
-namespace krys::boo
-{
   /// @brief A navigation as the host is asked about it: the URL, what started it (a link, a form) and the
   /// input event that did.
   class NavigationAction : public FrameLoadRequestBase
@@ -56,7 +53,7 @@ namespace krys::boo
       bool AltKey {false};
       bool MetaKey {false};
 
-      explicit UIEventWithKeyStateData(const dom::UIEventWithKeyState &uiEvent) noexcept;
+      explicit UIEventWithKeyStateData(const UIEventWithKeyState &uiEvent) noexcept;
     };
 
     /// @brief The mouse event that started a navigation.
@@ -67,7 +64,7 @@ namespace krys::boo
       MouseButton Button {MouseButton::None};
       bool ButtonDown {false};
 
-      explicit MouseEventData(const dom::MouseEvent &mouseEvent) noexcept;
+      explicit MouseEventData(const MouseEvent &mouseEvent) noexcept;
     };
 
   private:
@@ -79,9 +76,8 @@ namespace krys::boo
   public:
     NavigationAction() noexcept;
 
-    NavigationAction(ResourceRequest originalRequest, bool isFormSubmission, dom::Event *event = nullptr,
-                     dom::DOMStringAtom downloadAttribute = null,
-                     dom::Element *sourceElement = nullptr) noexcept;
+    NavigationAction(ResourceRequest originalRequest, bool isFormSubmission, Event *event = nullptr,
+                     DOMStringAtom downloadAttribute = null, Element *sourceElement = nullptr) noexcept;
 
     ~NavigationAction() noexcept;
 

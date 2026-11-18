@@ -175,9 +175,9 @@ namespace krys::boo::tests
         RunNetworkingTasks();
       }
 
-      KRYS_NODISCARD html::HTMLImageElement &Image() const noexcept
+      KRYS_NODISCARD HTMLImageElement &Image() const noexcept
       {
-        return Downcast<html::HTMLImageElement>(Fixture->ById(u8"i"));
+        return Downcast<HTMLImageElement>(Fixture->ById(u8"i"));
       }
     };
 

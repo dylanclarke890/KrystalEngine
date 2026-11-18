@@ -24,7 +24,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
 #include "Krystal.Booey/SVG/SVGUnitTypes.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<clipPath>` element: the shapes that clip the elements that reference it.
   /// @see https://drafts.fxtf.org/css-masking/#InterfaceSVGClipPathElement
@@ -36,7 +36,7 @@ namespace krys::boo::svg
     Ref<SVGAnimatedEnumeration> _clipPathUnits;
 
   public:
-    explicit SVGClipPathElement(dom::Document &document) noexcept;
+    explicit SVGClipPathElement(Document &document) noexcept;
 
     KRYS_NODISCARD SVGUnitTypes::SVGUnitType ClipPathUnits() const noexcept
     {
@@ -51,10 +51,10 @@ namespace krys::boo::svg
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGClipPathElement, SVGGraphicsElement>;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
     void OnChildrenChanged() noexcept final;
 
@@ -72,8 +72,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGClipPathElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGClipPathElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGClipPathElement();
   }

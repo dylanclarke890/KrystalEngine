@@ -18,7 +18,7 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief Records whether each type of event had the window as its view.
-    struct ViewRecorder : dom::EventListenerCallback
+    struct ViewRecorder : EventListenerCallback
     {
       std::map<std::string, bool> &Records;
       LocalDOMWindow *Window;
@@ -28,9 +28,9 @@ namespace krys::boo::tests
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
-        auto *uiEvent = DynamicDowncast<dom::UIEvent>(event);
+        auto *uiEvent = DynamicDowncast<UIEvent>(event);
         auto type = std::string(event.Type().View().begin(), event.Type().View().end());
         Records[type] = uiEvent && uiEvent->View() == Window;
       }
@@ -43,23 +43,23 @@ namespace krys::boo::tests
                           u8"<div id=editable contenteditable>text</div>");
     auto *window = fixture.Document->Window();
     REQUIRE(window);
-    dom::DOMStringAtom type(u8"x");
+    DOMStringAtom type(u8"x");
 
     SECTION("it's what the dictionary says, and null without one")
     {
-      CHECK_FALSE(CreateRef<dom::UIEvent>(type)->View());
-      dom::UIEventInit init;
+      CHECK_FALSE(CreateRef<UIEvent>(type)->View());
+      UIEventInit init;
       init.View = window;
-      CHECK(CreateRef<dom::UIEvent>(type, init)->View() == window);
+      CHECK(CreateRef<UIEvent>(type, init)->View() == window);
 
-      dom::FocusEventInit focusInit;
+      FocusEventInit focusInit;
       focusInit.View = window;
-      CHECK(CreateRef<dom::FocusEvent>(type, focusInit)->View() == window);
+      CHECK(CreateRef<FocusEvent>(type, focusInit)->View() == window);
     }
 
     SECTION("the legacy initializers set it")
     {
-      auto event = CreateRef<dom::UIEvent>(type);
+      auto event = CreateRef<UIEvent>(type);
       event->InitUIEvent(type, true, true, window, 3);
       CHECK(event->View() == window);
       CHECK(event->Detail() == 3);
@@ -67,11 +67,11 @@ namespace krys::boo::tests
       CHECK_FALSE(event->View());
       CHECK(event->Detail() == 4);
 
-      auto keyboard = CreateRef<dom::KeyboardEvent>(type);
+      auto keyboard = CreateRef<KeyboardEvent>(type);
       keyboard->InitKeyboardEvent(type, false, false, window, u8"a", 0, false, false, false, false);
       CHECK(keyboard->View() == window);
 
-      auto composition = CreateRef<dom::CompositionEvent>(type);
+      auto composition = CreateRef<CompositionEvent>(type);
       composition->InitCompositionEvent(type, false, false, window, u8"a");
       CHECK(composition->View() == window);
     }
@@ -79,19 +79,19 @@ namespace krys::boo::tests
     SECTION("a mouse event's page position needs it, for the scroll offset")
     {
       window->ScrollTo(0, 50);
-      dom::MouseEventInit init;
+      MouseEventInit init;
       init.ClientX = 5;
       init.ClientY = 6;
-      auto withoutView = CreateRef<dom::MouseEvent>(type, init);
+      auto withoutView = CreateRef<MouseEvent>(type, init);
       CHECK_FALSE(withoutView->View());
       CHECK(withoutView->PageY() == 6);
 
       init.View = window;
-      auto withView = CreateRef<dom::MouseEvent>(type, init);
+      auto withView = CreateRef<MouseEvent>(type, init);
       CHECK(withView->View() == window);
       CHECK(withView->PageY() == 56);
 
-      auto initialized = CreateRef<dom::MouseEvent>(type);
+      auto initialized = CreateRef<MouseEvent>(type);
       initialized->InitMouseEvent(type, false, false, window, 1, 0, 0, 5, 6, false, false, false, false, 0,
                                   nullptr);
       CHECK(initialized->View() == window);
@@ -105,12 +105,12 @@ namespace krys::boo::tests
     SECTION("the events the user agent fires have the window")
     {
       std::map<std::string, bool> records;
-      Ref<dom::EventListenerCallback> recorder = CreateRef<ViewRecorder>(records, window);
+      Ref<EventListenerCallback> recorder = CreateRef<ViewRecorder>(records, window);
       for (auto name : {u8"focus", u8"focusin", u8"blur", u8"focusout", u8"click", u8"keydown", u8"keyup",
                         u8"beforeinput", u8"input", u8"textInput", u8"compositionstart",
                         u8"compositionupdate", u8"compositionend"})
       {
-        window->AddEventListener(dom::DOMStringAtom(name), Ref {recorder}, true);
+        window->AddEventListener(DOMStringAtom(name), Ref {recorder}, true);
       }
       auto all = [&](std::initializer_list<const char *> names)
       {
@@ -126,7 +126,7 @@ namespace krys::boo::tests
       html::FocusAlgorithms::FocusingSteps(fixture.ById(u8"button"));
       all({"focus", "focusin", "blur", "focusout"});
 
-      Downcast<html::HTMLElement>(fixture.ById(u8"button")).Click();
+      Downcast<HTMLElement>(fixture.ById(u8"button")).Click();
       all({"click"});
 
       using Type = PlatformEvent::Type;

@@ -31,7 +31,10 @@ namespace krys::boo
 namespace krys::boo::html
 {
   class ProgressValueElement;
+}
 
+namespace krys::boo
+{
   /// @see https://html.spec.whatwg.org/#htmlprogresselement
   class HTMLProgressElement : public HTMLElement
   {
@@ -42,7 +45,7 @@ namespace krys::boo::html
     constexpr static double InvalidPosition = -2;
 
   private:
-    WeakPtr<ProgressValueElement> _valueElement;
+    WeakPtr<html::ProgressValueElement> _valueElement;
     bool _isDeterminate {false};
 
   public:
@@ -51,11 +54,11 @@ namespace krys::boo::html
       return false;
     }
 
-    explicit HTMLProgressElement(dom::Document &document) noexcept;
+    explicit HTMLProgressElement(Document &document) noexcept;
 
     ~HTMLProgressElement() noexcept override;
 
-    KRYS_NODISCARD static Ref<HTMLProgressElement> Create(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<HTMLProgressElement> Create(Document &document) noexcept;
 
     /// @brief A progress bar without a valid value is indeterminate.
     KRYS_NODISCARD bool MatchesIndeterminatePseudoClass() const noexcept final;
@@ -87,16 +90,15 @@ namespace krys::boo::html
 #pragma endregion
 
   protected:
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
 
     void DidAttachRenderers() noexcept override;
 
-    void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept override;
+    void DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept override;
 
     void UpdateDeterminateState() noexcept;
 
@@ -106,13 +108,13 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLProgressElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLProgressElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLProgressElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLProgressElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLProgressElement();
   }

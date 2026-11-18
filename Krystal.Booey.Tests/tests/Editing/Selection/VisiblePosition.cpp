@@ -25,9 +25,9 @@ namespace krys::boo::tests
         (void)Document->UpdateLayout();
       }
 
-      KRYS_NODISCARD dom::Text &TextIn(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD Text &TextIn(DOMStringView id) noexcept
       {
-        return Downcast<dom::Text>(*ById(id).FirstChild());
+        return Downcast<Text>(*ById(id).FirstChild());
       }
 
       /// @brief The visible position for the absolute @p point, through the render view.
@@ -38,7 +38,7 @@ namespace krys::boo::tests
       }
     };
 
-    KRYS_NODISCARD dom::Position At(dom::Node &node, uint32 offset) noexcept
+    KRYS_NODISCARD dom::Position At(Node &node, uint32 offset) noexcept
     {
       return dom::MakeContainerOffsetPosition(ShareRefPtr(&node), offset);
     }

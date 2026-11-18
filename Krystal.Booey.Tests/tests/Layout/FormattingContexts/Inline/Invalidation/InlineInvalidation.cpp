@@ -18,9 +18,9 @@ namespace krys::boo::layout::tests
       return Downcast<RenderBlockFlow>(*fixture.ById(u8"d").Renderer());
     }
 
-    KRYS_NODISCARD dom::Text &TextIn(ResolverFixture &fixture) noexcept
+    KRYS_NODISCARD boo::Text &TextIn(ResolverFixture &fixture) noexcept
     {
-      return Downcast<dom::Text>(*fixture.ById(u8"d").FirstChild());
+      return Downcast<boo::Text>(*fixture.ById(u8"d").FirstChild());
     }
 
     struct Mutation

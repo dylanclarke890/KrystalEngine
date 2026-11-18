@@ -71,16 +71,15 @@ namespace krys::boo::html
     return ParseToDoubleForNumberType(Element()->Value());
   }
 
-  dom::ExceptionOr<void>
-    RangeInputType::SetValueAsDecimal(const Decimal &newValue,
-                                      TextFieldEventBehavior eventBehavior) const noexcept
+  ExceptionOr<void> RangeInputType::SetValueAsDecimal(const Decimal &newValue,
+                                                      TextFieldEventBehavior eventBehavior) const noexcept
   {
     krys_debug_assert(Element());
     (void)Element()->SetValue(Serialize(newValue), eventBehavior);
     return {};
   }
 
-  bool RangeInputType::TypeMismatchFor(dom::DOMStringView value) const noexcept
+  bool RangeInputType::TypeMismatchFor(DOMStringView value) const noexcept
   {
     return !value.empty() && !std::isfinite(ParseToDoubleForNumberType(value));
   }
@@ -94,9 +93,9 @@ namespace krys::boo::html
   {
     krys_debug_assert(Element());
     auto &element = *Element();
-    auto attribute = [&](dom::DOMStringAtom name)
+    auto attribute = [&](DOMStringAtom name)
     {
-      return element.GetAttribute(krys::move(name)).value_or(dom::DOMString());
+      return element.GetAttribute(krys::move(name)).value_or(DOMString());
     };
     const Decimal stepBase = FindStepBase(Decimal(RangeDefaultStepBase));
     const Decimal minimum = ParseToNumber(attribute(u8"min"), Decimal(RangeDefaultMinimum));
@@ -108,7 +107,7 @@ namespace krys::boo::html
     return StepRange(stepBase, RangeLimitations::Valid, minimum, maximum, step, RangeStepDescription);
   }
 
-  InputType::ShouldCallBaseEventHandler RangeInputType::HandleKeydownEvent(dom::KeyboardEvent &event) noexcept
+  InputType::ShouldCallBaseEventHandler RangeInputType::HandleKeydownEvent(KeyboardEvent &event) noexcept
   {
     krys_debug_assert(Element());
     Ref<HTMLInputElement> element = ShareRef(*Element());
@@ -127,7 +126,7 @@ namespace krys::boo::html
     // FIXME: We can't use stepUp() for the step value "any". So, we increase or decrease the value by 1/100
     // of the value range. Is it reasonable?
     bool isAnyStep = text::IsASCIICaselessEqual(
-      dom::DOMStringView(element->GetAttribute(u8"step").value_or(dom::DOMString())), u8"any");
+      DOMStringView(element->GetAttribute(u8"step").value_or(DOMString())), u8"any");
     const Decimal step =
       isAnyStep ? (stepRange.Maximum() - stepRange.Minimum()) / Decimal(100) : stepRange.Step();
     const Decimal bigStep = std::max((stepRange.Maximum() - stepRange.Minimum()) / Decimal(10), step);
@@ -187,12 +186,12 @@ namespace krys::boo::html
     return ShouldCallBaseEventHandler::Yes;
   }
 
-  Decimal RangeInputType::ParseToNumber(dom::DOMStringView string, const Decimal &defaultValue) const noexcept
+  Decimal RangeInputType::ParseToNumber(DOMStringView string, const Decimal &defaultValue) const noexcept
   {
     return ParseToDecimalForNumberType(string, defaultValue);
   }
 
-  dom::DOMString RangeInputType::Serialize(const Decimal &value) const noexcept
+  DOMString RangeInputType::Serialize(const Decimal &value) const noexcept
   {
     if (!value.IsFinite())
     {
@@ -201,7 +200,7 @@ namespace krys::boo::html
     return SerializeForNumberType(value);
   }
 
-  void RangeInputType::AttributeChanged(const dom::DOMStringAtom &localName) noexcept
+  void RangeInputType::AttributeChanged(const DOMStringAtom &localName) noexcept
   {
     if (localName == u8"max" || localName == u8"min" || localName == u8"value")
     {
@@ -221,8 +220,7 @@ namespace krys::boo::html
     InputType::AttributeChanged(localName);
   }
 
-  void RangeInputType::SetValue(dom::DOMStringView value, bool valueChanged,
-                                TextFieldEventBehavior eventBehavior,
+  void RangeInputType::SetValue(DOMStringView value, bool valueChanged, TextFieldEventBehavior eventBehavior,
                                 TextControlSetValueSelection selection) noexcept
   {
     InputType::SetValue(value, valueChanged, eventBehavior, selection);
@@ -235,7 +233,7 @@ namespace krys::boo::html
     if (eventBehavior == TextFieldEventBehavior::DispatchNoEvent)
     {
       krys_debug_assert(Element());
-      Element()->SetTextAsOfLastFormControlChangeEvent(dom::DOMString(value));
+      Element()->SetTextAsOfLastFormControlChangeEvent(DOMString(value));
     }
 
     if (HasCreatedShadowSubtree())
@@ -245,7 +243,7 @@ namespace krys::boo::html
   }
 
   // FIXME: Should this work for untrusted input?
-  void RangeInputType::HandleMouseDownEvent(dom::MouseEvent &event) noexcept
+  void RangeInputType::HandleMouseDownEvent(MouseEvent &event) noexcept
   {
     krys_debug_assert(Element());
 
@@ -260,7 +258,7 @@ namespace krys::boo::html
       return;
     }
 
-    auto *targetNode = DynamicDowncast<dom::Node>(event.Target().get());
+    auto *targetNode = DynamicDowncast<Node>(event.Target().get());
     if (!targetNode)
     {
       return;
@@ -354,12 +352,12 @@ namespace krys::boo::html
     return CreateRenderer<RenderSlider>(*Element(), krys::move(style));
   }
 
-  Maybe<dom::DOMString> RangeInputType::FallbackValue() const noexcept
+  Maybe<DOMString> RangeInputType::FallbackValue() const noexcept
   {
     return SerializeForNumberType(CreateStepRange(AnyStepHandling::Reject).DefaultValue());
   }
 
-  dom::DOMString RangeInputType::SanitizeValue(dom::DOMStringView proposedValue) const noexcept
+  DOMString RangeInputType::SanitizeValue(DOMStringView proposedValue) const noexcept
   {
     StepRange stepRange(CreateStepRange(AnyStepHandling::Reject));
     const Decimal proposedNumericValue = ParseToNumber(proposedValue, stepRange.DefaultValue());

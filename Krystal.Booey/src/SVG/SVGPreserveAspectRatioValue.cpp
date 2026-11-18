@@ -29,9 +29,9 @@
 #include "Krystal.Core/Text/ParsingUtilities.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGPreserveAspectRatioValue::SVGPreserveAspectRatioValue(dom::DOMStringView value) noexcept
+  SVGPreserveAspectRatioValue::SVGPreserveAspectRatioValue(DOMStringView value) noexcept
   {
     Parse(value);
   }
@@ -42,39 +42,39 @@ namespace krys::boo::svg
   {
   }
 
-  dom::ExceptionOr<void> SVGPreserveAspectRatioValue::SetAlign(uint16 align) noexcept
+  ExceptionOr<void> SVGPreserveAspectRatioValue::SetAlign(uint16 align) noexcept
   {
     if (align == SVG_PRESERVEASPECTRATIO_UNKNOWN || align > SVG_PRESERVEASPECTRATIO_XMAXYMAX)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     _align = static_cast<SVGPreserveAspectRatioType>(align);
     return {};
   }
 
-  dom::ExceptionOr<void> SVGPreserveAspectRatioValue::SetMeetOrSlice(uint16 meetOrSlice) noexcept
+  ExceptionOr<void> SVGPreserveAspectRatioValue::SetMeetOrSlice(uint16 meetOrSlice) noexcept
   {
     if (meetOrSlice == SVG_MEETORSLICE_UNKNOWN || meetOrSlice > SVG_MEETORSLICE_SLICE)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     _meetOrSlice = static_cast<SVGMeetOrSliceType>(meetOrSlice);
     return {};
   }
 
-  bool SVGPreserveAspectRatioValue::Parse(dom::DOMStringView value) noexcept
+  bool SVGPreserveAspectRatioValue::Parse(DOMStringView value) noexcept
   {
     return ParseInternal(value, true);
   }
 
-  bool SVGPreserveAspectRatioValue::Parse(dom::DOMStringView &buffer, bool validate) noexcept
+  bool SVGPreserveAspectRatioValue::Parse(DOMStringView &buffer, bool validate) noexcept
   {
     return ParseInternal(buffer, validate);
   }
 
-  bool SVGPreserveAspectRatioValue::ParseInternal(dom::DOMStringView &buffer, bool validate) noexcept
+  bool SVGPreserveAspectRatioValue::ParseInternal(DOMStringView &buffer, bool validate) noexcept
   {
     SVGPreserveAspectRatioType align = SVG_PRESERVEASPECTRATIO_XMIDYMID;
     SVGMeetOrSliceType meetOrSlice = SVG_MEETORSLICE_MEET;
@@ -82,7 +82,7 @@ namespace krys::boo::svg
     _align = align;
     _meetOrSlice = meetOrSlice;
 
-    if (!SkipOptionalSVGSpaces(buffer))
+    if (!svg::SkipOptionalSVGSpaces(buffer))
     {
       return false;
     }
@@ -94,7 +94,7 @@ namespace krys::boo::svg
         return false;
       }
       align = SVG_PRESERVEASPECTRATIO_NONE;
-      SkipOptionalSVGSpaces(buffer);
+      svg::SkipOptionalSVGSpaces(buffer);
     }
     else if (buffer.front() == u8'x')
     {
@@ -196,7 +196,7 @@ namespace krys::boo::svg
         return false;
       }
       buffer.remove_prefix(8);
-      SkipOptionalSVGSpaces(buffer);
+      svg::SkipOptionalSVGSpaces(buffer);
     }
     else
     {
@@ -211,7 +211,7 @@ namespace krys::boo::svg
         {
           return false;
         }
-        SkipOptionalSVGSpaces(buffer);
+        svg::SkipOptionalSVGSpaces(buffer);
       }
       else if (buffer.front() == u8's')
       {
@@ -219,7 +219,7 @@ namespace krys::boo::svg
         {
           return false;
         }
-        SkipOptionalSVGSpaces(buffer);
+        svg::SkipOptionalSVGSpaces(buffer);
         if (align != SVG_PRESERVEASPECTRATIO_NONE)
         {
           meetOrSlice = SVG_MEETORSLICE_SLICE;
@@ -463,9 +463,9 @@ namespace krys::boo::svg
     return transform;
   }
 
-  dom::DOMString SVGPreserveAspectRatioValue::ValueAsString() const noexcept
+  DOMString SVGPreserveAspectRatioValue::ValueAsString() const noexcept
   {
-    auto alignType = [&]() -> dom::DOMStringView
+    auto alignType = [&]() -> DOMStringView
     {
       switch (_align)
       {

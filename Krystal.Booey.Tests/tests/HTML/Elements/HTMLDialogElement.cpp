@@ -22,7 +22,7 @@ namespace krys::boo::html::tests
 
   namespace
   {
-    KRYS_NODISCARD std::string Narrow(dom::DOMStringView string)
+    KRYS_NODISCARD std::string Narrow(DOMStringView string)
     {
       return std::string(reinterpret_cast<const char *>(string.data()), string.size());
     }
@@ -31,7 +31,7 @@ namespace krys::boo::html::tests
     struct DialogEventLog
     {
       List<std::string> Events;
-      List<dom::EventListenerHandle> Handles;
+      List<EventListenerHandle> Handles;
       bool PreventCancel {false};
       bool PreventBeforeToggle {false};
 
@@ -41,9 +41,9 @@ namespace krys::boo::html::tests
         {
           Handles.push_back(dialog.AddEventListener(
             type,
-            [this](dom::Event &event)
+            [this](Event &event)
             {
-              auto &toggle = Downcast<dom::ToggleEvent>(event);
+              auto &toggle = Downcast<ToggleEvent>(event);
               Events.push_back(Narrow(event.Type().View()) + ":" + Narrow(toggle.OldState()) + ">"
                                + Narrow(toggle.NewState()));
               if (PreventBeforeToggle && event.Type() == u8"beforetoggle")
@@ -53,7 +53,7 @@ namespace krys::boo::html::tests
             }));
         }
         Handles.push_back(dialog.AddEventListener(u8"cancel",
-                                                  [this](dom::Event &event)
+                                                  [this](Event &event)
                                                   {
                                                     Events.emplace_back(event.Cancelable() ? "cancel!"
                                                                                            : "cancel");
@@ -63,7 +63,7 @@ namespace krys::boo::html::tests
                                                     }
                                                   }));
         Handles.push_back(
-          dialog.AddEventListener(u8"close", [this](dom::Event &) { Events.emplace_back("close"); }));
+          dialog.AddEventListener(u8"close", [this](Event &) { Events.emplace_back("close"); }));
       }
 
       /// @brief The events so far, after running the queued tasks (toggle and close are queued).
@@ -119,7 +119,7 @@ namespace krys::boo::html::tests
       REQUIRE_FALSE(dialog.Show().HasException());
       auto result = dialog.ShowModal();
       REQUIRE(result.HasException());
-      CHECK(result.GetException().Code() == dom::ExceptionCode::InvalidStateError);
+      CHECK(result.GetException().Code() == ExceptionCode::InvalidStateError);
       CHECK(log.Take().empty());
     }
 
@@ -189,7 +189,7 @@ namespace krys::boo::html::tests
       auto detached = document.CreateElement(u8"dialog").ReleaseValue();
       auto result = Downcast<HTMLDialogElement>(*detached).ShowModal();
       REQUIRE(result.HasException());
-      CHECK(result.GetException().Code() == dom::ExceptionCode::InvalidStateError);
+      CHECK(result.GetException().Code() == ExceptionCode::InvalidStateError);
     }
 
     before.Focus();
@@ -300,10 +300,9 @@ namespace krys::boo::html::tests
     auto &dialog = fixture.Get<HTMLDialogElement>(u8"d");
     bool bubbled = false;
     bool cancelable = true;
-    auto handle =
-      dialog.AddEventListener(u8"close", [&](dom::Event &event) { cancelable = event.Cancelable(); });
+    auto handle = dialog.AddEventListener(u8"close", [&](Event &event) { cancelable = event.Cancelable(); });
     auto parentHandle =
-      fixture.ById(u8"parent").AddEventListener(u8"close", [&](dom::Event &) { bubbled = true; });
+      fixture.ById(u8"parent").AddEventListener(u8"close", [&](Event &) { bubbled = true; });
 
     dialog.Close();
     html::EventLoop::Current().RunUntilIdle();

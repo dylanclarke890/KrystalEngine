@@ -36,29 +36,32 @@ namespace krys::boo::css
   struct CounterStyleDescriptors;
   class CounterStyleRule;
   class Value;
+}
 
+namespace krys::boo
+{
   /// @brief An `@counter-style` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-counter-styles/#the-csscounterstylerule-interface
   class CSSCounterStyleRule final : public CSSRule
   {
   private:
-    Ref<CounterStyleRule> _counterStyleRule;
+    Ref<css::CounterStyleRule> _counterStyleRule;
 
-    CSSCounterStyleRule(CounterStyleRule &counterStyleRule, CSSStyleSheet *parent) noexcept;
+    CSSCounterStyleRule(css::CounterStyleRule &counterStyleRule, CSSStyleSheet *parent) noexcept;
 
   public:
     ~CSSCounterStyleRule() noexcept override;
 
-    KRYS_NODISCARD static Ref<CSSCounterStyleRule> Create(CounterStyleRule &rule,
+    KRYS_NODISCARD static Ref<CSSCounterStyleRule> Create(css::CounterStyleRule &rule,
                                                           CSSStyleSheet *sheet) noexcept;
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
-    void Reattach(Rule &rule) noexcept final;
+    void Reattach(css::Rule &rule) noexcept final;
 
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::CounterStyle;
+      return css::RuleType::CounterStyle;
     }
 
     KRYS_NODISCARD CSSOMString Name() const noexcept;
@@ -106,17 +109,17 @@ namespace krys::boo::css
     void SetSpeakAs(const CSSOMString &text) noexcept;
 
   private:
-    KRYS_NODISCARD RefPtr<Value> CSSValueFromText(PropertyId property,
-                                                  const CSSOMString &text) const noexcept;
+    KRYS_NODISCARD RefPtr<css::Value> CSSValueFromText(css::PropertyId property,
+                                                       const CSSOMString &text) const noexcept;
 
-    KRYS_NODISCARD const CounterStyleDescriptors &Descriptors() const noexcept;
+    KRYS_NODISCARD const css::CounterStyleDescriptors &Descriptors() const noexcept;
 
-    KRYS_NODISCARD CounterStyleDescriptors &MutableDescriptors() noexcept;
+    KRYS_NODISCARD css::CounterStyleDescriptors &MutableDescriptors() noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSCounterStyleRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSCounterStyleRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::CounterStyle;
   }

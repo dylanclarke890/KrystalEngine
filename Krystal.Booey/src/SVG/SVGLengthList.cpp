@@ -28,18 +28,18 @@
 #include "Krystal.Booey/SVG/SVGParsingError.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  bool SVGLengthList::Parse(dom::DOMStringView value) noexcept
+  bool SVGLengthList::Parse(DOMStringView value) noexcept
   {
     ClearItems();
 
     auto buffer = value;
-    SkipOptionalSVGSpaces(buffer);
+    svg::SkipOptionalSVGSpaces(buffer);
     while (!buffer.empty())
     {
       auto start = buffer;
-      while (!buffer.empty() && !IsSVGSpaceOrComma(buffer.front()))
+      while (!buffer.empty() && !svg::IsSVGSpaceOrComma(buffer.front()))
       {
         buffer.remove_prefix(1);
       }
@@ -58,14 +58,14 @@ namespace krys::boo::svg
       }
 
       Append(SVGLength::Create(krys::move(length)));
-      SkipOptionalSVGSpacesOrDelimiter(buffer);
+      svg::SkipOptionalSVGSpacesOrDelimiter(buffer);
     }
 
     // FIXME: Should this ClearItems() on failure like SVGTransformList does?
     return buffer.empty();
   }
 
-  dom::DOMString SVGLengthList::ValueAsString() const noexcept
+  DOMString SVGLengthList::ValueAsString() const noexcept
   {
     StringBuilder builder;
     for (const auto &length : _items)

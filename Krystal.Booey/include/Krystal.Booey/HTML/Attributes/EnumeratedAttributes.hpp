@@ -266,7 +266,7 @@ namespace krys::boo::html
   template <IsEnum TState>
   struct KeywordStateMapping
   {
-    dom::DOMStringAtom Keyword = null;
+    DOMStringAtom Keyword = null;
     TState State;
   };
 
@@ -322,9 +322,8 @@ namespace krys::boo::html
     /// (`ReflectEnumerated`'s step 4). Without one, it's null for a `DOMString?` and the empty string for a
     /// `DOMString`.
     /// @see https://html.spec.whatwg.org/#limited-to-only-known-values
-    template <OneOf<dom::DOMString, Maybe<dom::DOMString>> TResult>
-    KRYS_NODISCARD static TResult
-      ResolveCanonicalKeyword(Maybe<dom::DOMStringView> contentAttributeValue) noexcept
+    template <OneOf<DOMString, Maybe<DOMString>> TResult>
+    KRYS_NODISCARD static TResult ResolveCanonicalKeyword(Maybe<DOMStringView> contentAttributeValue) noexcept
     {
       Maybe<State> state = ResolveState(contentAttributeValue);
       auto keyword = state ? ResolveCanonicalKeywordForState(*state) : null;
@@ -339,7 +338,7 @@ namespace krys::boo::html
     /// specified); no state is null.
     /// @see https://html.spec.whatwg.org/#empty-value-default
     KRYS_NODISCARD static conditional_t<CanReturnNullResolvedState<Traits>, Maybe<State>, State>
-      ResolveState(Maybe<dom::DOMStringView> contentAttributeValue) noexcept
+      ResolveState(Maybe<DOMStringView> contentAttributeValue) noexcept
     {
       // 1. If the attribute is not specified:
       if (contentAttributeValue == null)
@@ -397,7 +396,7 @@ namespace krys::boo::html
     /// conforming one that isn't empty (where an empty keyword is an empty value default here), or the one
     /// the specification gives explicitly, so `StateMappings` lists it first.
     /// @see https://html.spec.whatwg.org/#canonical-keyword
-    KRYS_NODISCARD static dom::DOMStringAtom ResolveCanonicalKeywordForState(State state) noexcept
+    KRYS_NODISCARD static DOMStringAtom ResolveCanonicalKeywordForState(State state) noexcept
     {
       auto it =
         std::ranges::find_if(Traits::StateMappings, [&](auto &mapping) { return mapping.State == state; });

@@ -24,7 +24,7 @@
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGElement;
   class SVGTransformList;
@@ -36,7 +36,7 @@ namespace krys::boo::svg
   {
   private:
     WeakPtr<SVGElement> _contextElement;
-    dom::DOMString _viewTargetString;
+    DOMString _viewTargetString;
     Ref<SVGTransformList> _transform;
 
   public:
@@ -45,7 +45,7 @@ namespace krys::boo::svg
       return AdoptRef(*new SVGViewSpec(contextElement));
     }
 
-    bool ParseViewSpec(dom::DOMStringView) noexcept;
+    bool ParseViewSpec(DOMStringView) noexcept;
 
     void Reset() noexcept;
 
@@ -56,12 +56,12 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD RefPtr<SVGElement> ViewTarget() const noexcept;
 
-    KRYS_NODISCARD const dom::DOMString &ViewTargetString() const noexcept
+    KRYS_NODISCARD const DOMString &ViewTargetString() const noexcept
     {
       return _viewTargetString;
     }
 
-    KRYS_NODISCARD dom::DOMString TransformString() const noexcept;
+    KRYS_NODISCARD DOMString TransformString() const noexcept;
 
     KRYS_NODISCARD Ref<SVGTransformList> &Transform() noexcept
     {

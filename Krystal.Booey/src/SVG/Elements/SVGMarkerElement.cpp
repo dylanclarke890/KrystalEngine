@@ -27,9 +27,9 @@
 #include "Krystal.Booey/SVG/SVGAngle.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGMarkerElement::SVGMarkerElement(dom::Document &document) noexcept
+  SVGMarkerElement::SVGMarkerElement(Document &document) noexcept
       : SVGElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Marker),
         SVGFitToViewBox(this), _refX(SVGAnimatedLength::Create(this, SVGLengthMode::Width)),
         _refY(SVGAnimatedLength::Create(this, SVGLengthMode::Height)),
@@ -61,11 +61,11 @@ namespace krys::boo::svg
     return SVGFitToViewBox::ViewBoxToViewTransform(ViewBox(), PreserveAspectRatio(), viewWidth, viewHeight);
   }
 
-  void SVGMarkerElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                          Maybe<dom::DOMStringView> value) noexcept
+  void SVGMarkerElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                          Maybe<DOMStringView> value) noexcept
   {
     auto parseError = SVGParsingError::None;
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::MarkerUnitsAttr())
     {
@@ -112,7 +112,7 @@ namespace krys::boo::svg
     UpdateSVGRendererForElementChange();
   }
 
-  void SVGMarkerElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGMarkerElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {
@@ -155,13 +155,13 @@ namespace krys::boo::svg
     InvalidateMarkerResource();
   }
 
-  dom::DOMStringAtom SVGMarkerElement::Orient() const noexcept
+  DOMStringAtom SVGMarkerElement::Orient() const noexcept
   {
     auto orient = GetAttribute(SVGNames::OrientAttr().LocalName());
-    return orient ? dom::DOMStringAtom(*orient) : null;
+    return orient ? DOMStringAtom(*orient) : null;
   }
 
-  void SVGMarkerElement::SetOrient(const dom::DOMStringAtom &orient) noexcept
+  void SVGMarkerElement::SetOrient(const DOMStringAtom &orient) noexcept
   {
     (void)SetAttribute(SVGNames::OrientAttr().LocalName(), orient.ToString());
   }

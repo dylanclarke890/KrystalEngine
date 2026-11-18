@@ -13,12 +13,12 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD RenderListItem &Item(ResolverFixture &fixture, dom::DOMStringView id)
+    KRYS_NODISCARD RenderListItem &Item(ResolverFixture &fixture, DOMStringView id)
     {
       return Downcast<RenderListItem>(*fixture.ById(id).Renderer());
     }
 
-    KRYS_NODISCARD std::string MarkerText(ResolverFixture &fixture, dom::DOMStringView id)
+    KRYS_NODISCARD std::string MarkerText(ResolverFixture &fixture, DOMStringView id)
     {
       auto *marker = Item(fixture, id).MarkerRenderer();
       if (!marker)
@@ -90,7 +90,7 @@ namespace krys::boo::tests
       REQUIRE_FALSE(ol.SetAttribute(u8"start", u8"7").HasException());
       CHECK(Item(fixture, u8"l1").Value() == 7);
       CHECK(Item(fixture, u8"l2").Value() == 8);
-      CHECK(Downcast<html::HTMLOListElement>(Downcast<html::HTMLElement>(ol)).StartValue() == 7);
+      CHECK(Downcast<HTMLOListElement>(Downcast<HTMLElement>(ol)).StartValue() == 7);
 
       REQUIRE_FALSE(ol.SetAttribute(u8"reversed", u8"").HasException());
       ol.RemoveAttribute(u8"start");
@@ -134,8 +134,8 @@ namespace krys::boo::tests
 
     SECTION("The li value attribute reflects as an integer")
     {
-      auto &l3 = Downcast<html::HTMLElement>(fixture.ById(u8"l3"));
-      CHECK(Downcast<html::HTMLLIElement>(l3).Value() == 10);
+      auto &l3 = Downcast<HTMLElement>(fixture.ById(u8"l3"));
+      CHECK(Downcast<HTMLLIElement>(l3).Value() == 10);
     }
   }
 

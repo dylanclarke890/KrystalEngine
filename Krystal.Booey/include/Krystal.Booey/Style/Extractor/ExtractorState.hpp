@@ -31,6 +31,7 @@
 
 namespace krys::boo
 {
+  class Element;
   class RenderElement;
   class RenderStyle;
 }
@@ -38,11 +39,6 @@ namespace krys::boo
 namespace krys::boo::css
 {
   class ValuePool;
-}
-
-namespace krys::boo::dom
-{
-  class Element;
 }
 
 namespace krys::boo::style
@@ -60,7 +56,7 @@ namespace krys::boo::style
 
     const RenderStyle &Style;
 
-    Ref<dom::Element> Element;
+    Ref<boo::Element> Element;
     const Maybe<style::PseudoElementIdentifier> &PseudoElementIdentifier;
 
     const RenderElement *Renderer;

@@ -86,7 +86,7 @@ namespace krys::boo
                                          style::ConvertToCSS(_originalURL, style));
   }
 
-  ImageWithScale StyleCursorImage::SelectBestFitImage(const dom::Document &document) noexcept
+  ImageWithScale StyleCursorImage::SelectBestFitImage(const Document &document) noexcept
   {
     if (auto *imageSet = DynamicDowncast<StyleImageSet>(_image.get()))
     {

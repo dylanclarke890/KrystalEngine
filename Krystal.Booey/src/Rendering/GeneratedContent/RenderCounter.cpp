@@ -42,12 +42,11 @@ namespace krys::boo
 {
   namespace
   {
-    using CounterMap = HashMap<css::CSSOMStringAtom, Ref<CounterNode>>;
+    using CounterMap = HashMap<CSSOMStringAtom, Ref<CounterNode>>;
     // Entries are removed when their renderer is destroyed (RenderElement::WillBeDestroyed).
     using CounterMaps = HashMap<const RenderElement *, UniquePtr<CounterMap>>;
 
-    KRYS_NODISCARD CounterNode *MakeCounterNode(RenderElement &renderer,
-                                                const css::CSSOMStringAtom &identifier,
+    KRYS_NODISCARD CounterNode *MakeCounterNode(RenderElement &renderer, const CSSOMStringAtom &identifier,
                                                 bool alwaysCreateCounter) noexcept;
 
     KRYS_NODISCARD CounterMaps &GetCounterMaps() noexcept
@@ -57,7 +56,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD CounterNode *CounterFor(const RenderElement &renderer,
-                                           const css::CSSOMStringAtom &identifier) noexcept
+                                           const CSSOMStringAtom &identifier) noexcept
     {
       auto &maps = GetCounterMaps();
       auto map = maps.find(&renderer);
@@ -70,17 +69,17 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD CounterDirectives DirectivesFor(const RenderStyle &style,
-                                                   const css::CSSOMStringAtom &identifier) noexcept
+                                                   const CSSOMStringAtom &identifier) noexcept
     {
       auto &map = style.GetCounterDirectives().Map;
       auto it = map.find(identifier);
       return it != map.end() ? it->second : CounterDirectives {};
     }
 
-    KRYS_NODISCARD dom::Element *AncestorStyleContainmentObject(const dom::Element &element) noexcept
+    KRYS_NODISCARD Element *AncestorStyleContainmentObject(const Element &element) noexcept
     {
-      auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(element);
-      dom::Element *ancestor = pseudoElement ? pseudoElement->HostElement() : element.ParentElement();
+      auto *pseudoElement = DynamicDowncast<PseudoElement>(element);
+      Element *ancestor = pseudoElement ? pseudoElement->HostElement() : element.ParentElement();
       while (ancestor)
       {
         if (auto *style = ancestor->ExistingComputedStyle())
@@ -103,8 +102,8 @@ namespace krys::boo
       PreviousInPreOrderRespectingContainment(const RenderElement &renderer) noexcept
     {
       krys_debug_assert(renderer.GetElement());
-      dom::Element *previous = dom::TreeQueries::PreviousElementIncludingPseudo(*renderer.GetElement());
-      dom::Element *styleContainmentAncestor = AncestorStyleContainmentObject(*renderer.GetElement());
+      Element *previous = dom::TreeQueries::PreviousElementIncludingPseudo(*renderer.GetElement());
+      Element *styleContainmentAncestor = AncestorStyleContainmentObject(*renderer.GetElement());
 
       while (previous)
       {
@@ -132,7 +131,7 @@ namespace krys::boo
       return nullptr;
     }
 
-    KRYS_NODISCARD dom::Element *ParentOrPseudoHostElement(const RenderElement &renderer) noexcept
+    KRYS_NODISCARD Element *ParentOrPseudoHostElement(const RenderElement &renderer) noexcept
     {
       if (renderer.IsPseudoElement())
       {
@@ -141,7 +140,7 @@ namespace krys::boo
       return renderer.GetElement() ? renderer.GetElement()->ParentElement() : nullptr;
     }
 
-    KRYS_NODISCARD dom::Element *PreviousSiblingOrParentElement(const dom::Element &element) noexcept
+    KRYS_NODISCARD Element *PreviousSiblingOrParentElement(const Element &element) noexcept
     {
       if (auto *previous = dom::TreeQueries::PseudoAwarePreviousElementSibling(element))
       {
@@ -156,7 +155,7 @@ namespace krys::boo
         }
       }
 
-      if (auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(element))
+      if (auto *pseudoElement = DynamicDowncast<PseudoElement>(element))
       {
         auto *hostElement = pseudoElement->HostElement();
         krys_debug_assert(hostElement);
@@ -198,19 +197,18 @@ namespace krys::boo
 
     // This function processes the renderer tree in the order of the DOM tree
     // including pseudo elements as defined in CSS 2.1.
-    KRYS_NODISCARD RenderElement *NextInPreOrder(const RenderElement &renderer,
-                                                 const dom::Element *stayWithin,
+    KRYS_NODISCARD RenderElement *NextInPreOrder(const RenderElement &renderer, const Element *stayWithin,
                                                  bool skipDescendants = false) noexcept
     {
       krys_debug_assert(renderer.GetElement());
-      dom::Element &self = *renderer.GetElement();
-      auto advance = [&](const dom::Element &current)
+      Element &self = *renderer.GetElement();
+      auto advance = [&](const Element &current)
       {
         return skipDescendants
                  ? dom::TreeQueries::NextElementIncludingPseudoSkippingChildren(current, stayWithin)
                  : dom::TreeQueries::NextElementIncludingPseudo(current, stayWithin);
       };
-      dom::Element *next = advance(self);
+      Element *next = advance(self);
       while (next && !next->Renderer())
       {
         next = advance(*next);
@@ -230,8 +228,8 @@ namespace krys::boo
       }
       if (auto *element = renderer.GetElement())
       {
-        auto *htmlElement = DynamicDowncast<html::HTMLElement>(*element);
-        if (auto *list = htmlElement ? DynamicDowncast<html::HTMLOListElement>(*htmlElement) : nullptr)
+        auto *htmlElement = DynamicDowncast<HTMLElement>(*element);
+        if (auto *list = htmlElement ? DynamicDowncast<HTMLOListElement>(*htmlElement) : nullptr)
         {
           return {
             .ResetValue = list->StartValue(),
@@ -258,10 +256,10 @@ namespace krys::boo
     };
 
     KRYS_NODISCARD Maybe<CounterPlan> PlanCounter(RenderElement &renderer,
-                                                  const css::CSSOMStringAtom &identifier) noexcept
+                                                  const CSSOMStringAtom &identifier) noexcept
     {
       // We must have a generating node or else we cannot have a counter.
-      dom::Element *generatingElement = renderer.GeneratingElement();
+      Element *generatingElement = renderer.GeneratingElement();
       if (!generatingElement)
       {
         return null;
@@ -361,7 +359,7 @@ namespace krys::boo
     };
 
     KRYS_NODISCARD CounterInsertionPoint FindPlaceForCounter(RenderElement &counterOwner,
-                                                             const css::CSSOMStringAtom &identifier,
+                                                             const CSSOMStringAtom &identifier,
                                                              EnumSet<CounterNode::Type> type) noexcept
     {
       // We cannot stop searching for counters with the same identifier before we also
@@ -517,7 +515,7 @@ namespace krys::boo
       return {};
     }
 
-    CounterNode *MakeCounterNode(RenderElement &renderer, const css::CSSOMStringAtom &identifier,
+    CounterNode *MakeCounterNode(RenderElement &renderer, const CSSOMStringAtom &identifier,
                                  bool alwaysCreateCounter) noexcept
     {
       if (renderer.HasCounterNodeMap())
@@ -591,8 +589,7 @@ namespace krys::boo
       return newNode.get();
     }
 
-    void DestroyCounterNodeWithoutMapRemoval(const css::CSSOMStringAtom &identifier,
-                                             CounterNode &node) noexcept
+    void DestroyCounterNodeWithoutMapRemoval(const CSSOMStringAtom &identifier, CounterNode &node) noexcept
     {
       RefPtr<CounterNode> previous;
       for (auto child = ShareRefPtr(node.LastDescendant()); child && child != &node;
@@ -611,7 +608,7 @@ namespace krys::boo
     }
   }
 
-  RenderCounter::RenderCounter(dom::Document &document, style::Content::Counter counter) noexcept
+  RenderCounter::RenderCounter(Document &document, style::Content::Counter counter) noexcept
       : RenderText(Type::Counter, document, u8""), _counter(krys::move(counter))
   {
     krys_debug_assert(IsRenderCounter());
@@ -713,8 +710,7 @@ namespace krys::boo
     owner.SetHasCounterNodeMap(false);
   }
 
-  void RenderCounter::DestroyCounterNode(RenderElement &owner,
-                                         const css::CSSOMStringAtom &identifier) noexcept
+  void RenderCounter::DestroyCounterNode(RenderElement &owner, const CSSOMStringAtom &identifier) noexcept
   {
     auto &maps = GetCounterMaps();
     auto map = maps.find(&owner);
@@ -752,7 +748,7 @@ namespace krys::boo
   void RenderCounter::RendererStyleChangedSlowCase(RenderElement &renderer, const RenderStyle *oldStyle,
                                                    const RenderStyle &newStyle) noexcept
   {
-    dom::Element *element = renderer.GeneratingElement();
+    Element *element = renderer.GeneratingElement();
     if (!element || !element->Renderer())
     {
       return; // cannot have generated content or if it can have, it will be handled during attaching

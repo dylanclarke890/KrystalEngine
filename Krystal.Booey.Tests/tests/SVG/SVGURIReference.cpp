@@ -11,7 +11,7 @@ namespace krys::boo::svg::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "SVGURIReference: references", "[SVG][SVGURIReference]")
   {
     auto document = ResolverFixture::Parse(u8"<svg><g id=target /></svg>");
-    auto documentURL = dom::DOMString {document->GetURL().String()};
+    auto documentURL = DOMString {document->GetURL().String()};
 
     CHECK(SVGURIReference::FragmentIdentifierFromIRIString(u8"#target", *document) == u8"target");
     CHECK(SVGURIReference::FragmentIdentifierFromIRIString(documentURL + u8"#target", *document)

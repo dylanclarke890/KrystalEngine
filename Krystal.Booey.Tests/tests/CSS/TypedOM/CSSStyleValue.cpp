@@ -18,7 +18,7 @@ namespace krys::boo::css::tests
       return ToNarrow(value.ToString());
     }
 
-    KRYS_NODISCARD Ref<CSSStyleValue> Parsed(dom::Document &document, CSSOMStringView property,
+    KRYS_NODISCARD Ref<CSSStyleValue> Parsed(Document &document, CSSOMStringView property,
                                              CSSOMStringView cssText)
     {
       auto result = CSSStyleValue::Parse(document, property, cssText);
@@ -26,8 +26,8 @@ namespace krys::boo::css::tests
       return result.ReleaseValue();
     }
 
-    KRYS_NODISCARD dom::ExceptionCode ParseError(dom::Document &document, CSSOMStringView property,
-                                                 CSSOMStringView cssText)
+    KRYS_NODISCARD ExceptionCode ParseError(Document &document, CSSOMStringView property,
+                                            CSSOMStringView cssText)
     {
       auto result = CSSStyleValue::Parse(document, property, cssText);
       REQUIRE(result.HasException());
@@ -38,7 +38,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "CSSStyleValue: parse",
                    "[CSS][TypedOM][css-typed-om:dom-cssstylevalue-parse]")
   {
-    auto document = CreateRef<dom::Document>();
+    auto document = CreateRef<Document>();
 
     SECTION("numeric values")
     {
@@ -102,16 +102,16 @@ namespace krys::boo::css::tests
 
     SECTION("errors")
     {
-      CHECK(ParseError(*document, u8"not-a-property", u8"1") == dom::ExceptionCode::TypeError);
-      CHECK(ParseError(*document, u8"width", u8"red") == dom::ExceptionCode::TypeError);
-      CHECK(ParseError(*document, u8"width", u8"") == dom::ExceptionCode::TypeError);
+      CHECK(ParseError(*document, u8"not-a-property", u8"1") == ExceptionCode::TypeError);
+      CHECK(ParseError(*document, u8"width", u8"red") == ExceptionCode::TypeError);
+      CHECK(ParseError(*document, u8"width", u8"") == ExceptionCode::TypeError);
     }
   }
 
   TEST_CASE_METHOD(ValueFixture, "CSSStyleValue: parseAll",
                    "[CSS][TypedOM][css-typed-om:dom-cssstylevalue-parseall]")
   {
-    auto document = CreateRef<dom::Document>();
+    auto document = CreateRef<Document>();
 
     // A list-valued property's value is subdivided into its iterations.
     auto all = CSSStyleValue::ParseAll(*document, u8"transition-duration", u8"1s, 2s");

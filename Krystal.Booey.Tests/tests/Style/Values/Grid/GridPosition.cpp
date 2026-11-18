@@ -7,7 +7,7 @@ namespace krys::boo::style::tests
   {
     css::CustomIdentifier Ident(const char8 *name)
     {
-      return css::CustomIdentifier {css::CSSOMStringAtom {name}};
+      return css::CustomIdentifier {CSSOMStringAtom {name}};
     }
 
     css::CustomIdentifier NoName()

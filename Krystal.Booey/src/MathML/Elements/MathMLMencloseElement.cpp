@@ -31,9 +31,9 @@
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
-  MathMLMencloseElement::MathMLMencloseElement(dom::Document &document) noexcept
+  MathMLMencloseElement::MathMLMencloseElement(Document &document) noexcept
       : MathMLRowElement(document, MathMLElementInterface::Menclose)
   {
     // By default we draw a longdiv.
@@ -41,7 +41,7 @@ namespace krys::boo::mathml
     AddNotation(LongDiv);
   }
 
-  void MathMLMencloseElement::AddNotationFlags(dom::DOMStringView notation) noexcept
+  void MathMLMencloseElement::AddNotationFlags(DOMStringView notation) noexcept
   {
     krys_debug_assert(_notationFlags);
     if (notation == u8"longdiv")
@@ -126,7 +126,7 @@ namespace krys::boo::mathml
     }
 
     // We parse the list of whitespace-separated notation names.
-    dom::DOMStringView value = *attribute;
+    DOMStringView value = *attribute;
     size_t length = value.size();
     size_t start = 0;
     while (start < length)
@@ -155,9 +155,8 @@ namespace krys::boo::mathml
     return *_notationFlags & notationFlag;
   }
 
-  void MathMLMencloseElement::AttributeChanged(const dom::QualifiedName &name,
-                                               Maybe<dom::DOMStringView> oldValue,
-                                               Maybe<dom::DOMStringView> value) noexcept
+  void MathMLMencloseElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                               Maybe<DOMStringView> value) noexcept
   {
     if (name == MathMLNames::NotationAttr())
     {

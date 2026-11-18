@@ -29,7 +29,7 @@
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   CSSContainerRule::CSSContainerRule(css::ContainerRule &rule, CSSStyleSheet *parent) noexcept
       : CSSConditionRule(rule, parent)
@@ -50,7 +50,7 @@ namespace krys::boo::css
   {
     StringBuilder builder;
     builder.Append(u8"@container ");
-    cq::Serialise(builder, GetContainerRule().ContainerQueries());
+    css::cq::Serialise(builder, GetContainerRule().ContainerQueries());
     AppendCSSTextForItems(builder);
     return krys::move(builder).ToString();
   }
@@ -58,7 +58,7 @@ namespace krys::boo::css
   CSSOMString CSSContainerRule::ConditionText() const noexcept
   {
     StringBuilder builder;
-    cq::Serialise(builder, GetContainerRule().ContainerQueries());
+    css::cq::Serialise(builder, GetContainerRule().ContainerQueries());
     return krys::move(builder).ToString();
   }
 
@@ -84,10 +84,10 @@ namespace krys::boo::css
       StringBuilder name;
       if (query.Name != null && !query.Name.View().empty())
       {
-        SerialiseIdentifier(query.Name.ToString(), name);
+        css::SerialiseIdentifier(query.Name.ToString(), name);
       }
       StringBuilder condition;
-      mq::Serialise(condition, query.Condition);
+      css::mq::Serialise(condition, query.Condition);
       conditions.push_back({krys::move(name).ToString(), krys::move(condition).ToString()});
     }
     return conditions;

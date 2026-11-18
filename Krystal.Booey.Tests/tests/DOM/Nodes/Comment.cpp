@@ -16,11 +16,11 @@ namespace krys::boo::dom::tests
   {
     struct CommonTestData
     {
-      Ref<dom::Document> Document;
-      Ref<dom::Comment> Node;
+      Ref<boo::Document> Document;
+      Ref<Comment> Node;
 
-      CommonTestData(dom::DOMString &&value)
-          : Document(CreateRef<dom::Document>()), Node(CreateRef<dom::Comment>(*Document, krys::move(value)))
+      CommonTestData(DOMString &&value)
+          : Document(CreateRef<boo::Document>()), Node(CreateRef<Comment>(*Document, krys::move(value)))
       {
       }
     };
@@ -29,7 +29,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Comment: constructed, or created as a comment node, with the data in the document",
             "[DOM][Comment][dom:interface-comment][dom:dom-comment-comment][dom:create-a-comment-node]")
   {
-    auto document = CreateRef<dom::Document>();
+    auto document = CreateRef<Document>();
 
     auto constructed = CreateRef<Comment>(*document, u8"data");
     CHECK(constructed->Data() == u8"data");

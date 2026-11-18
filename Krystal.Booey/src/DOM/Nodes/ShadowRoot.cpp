@@ -28,8 +28,8 @@
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheetList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/CSSOM/StyleSheetList.hpp"
 #include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
@@ -48,14 +48,14 @@
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   ShadowRoot::ShadowRoot(Document &document, RefPtr<html::CustomElementRegistry> &&registry,
-                         NodeFlags flags) noexcept
-      : DocumentFragment(document, flags | NodeFlags::IsShadowRoot),
+                         dom::NodeFlags flags) noexcept
+      : DocumentFragment(document, flags | dom::NodeFlags::IsShadowRoot),
         DocumentOrShadowRoot(*this, krys::move(registry))
   {
-    SetNodeFlag(NodeFlags::IsInShadowTree);
+    SetNodeFlag(dom::NodeFlags::IsInShadowTree);
     _containingShadowRoot = this;
     _styleScope = CreateUnique<style::Scope>(*this);
   }
@@ -68,7 +68,7 @@ namespace krys::boo::dom
     }
 
     // Children are detached without the removing steps, and something else may hold one.
-    for (auto &node : DescendantRange(*this))
+    for (auto &node : dom::DescendantRange(*this))
     {
       node._containingShadowRoot = nullptr;
     }
@@ -76,19 +76,19 @@ namespace krys::boo::dom
 
 #pragma region DocumentOrShadowRoot Mixin (CSSOM)
 
-  css::StyleSheetList &ShadowRoot::StyleSheets() noexcept
+  StyleSheetList &ShadowRoot::StyleSheets() noexcept
   {
     if (!_styleSheetList)
     {
-      _styleSheetList = css::StyleSheetList::Create(*this);
+      _styleSheetList = StyleSheetList::Create(*this);
     }
     return *_styleSheetList;
   }
 
   List<RefPtr<WebAnimation>> ShadowRoot::GetAnimations() noexcept
   {
-    return NodeDocument().MatchingAnimations([&](Element &target) -> bool
-                                             { return TreeQueries::ContainingShadowRoot(target) == this; });
+    return NodeDocument().MatchingAnimations(
+      [&](Element &target) -> bool { return dom::TreeQueries::ContainingShadowRoot(target) == this; });
   }
 
 #pragma endregion
@@ -200,7 +200,7 @@ namespace krys::boo::dom
       html::FragmentParserMode::Unsafe);
   }
 
-  DOMString ShadowRoot::GetHTML(GetHTMLOptions options) const noexcept
+  DOMString ShadowRoot::GetHTML(dom::GetHTMLOptions options) const noexcept
   {
     return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
                              ResolveURLs::NoExcludingURLsForPrivacy, SerializationSyntax::HTML,
@@ -226,11 +226,11 @@ namespace krys::boo::dom
 
   ExceptionOr<void>
     ShadowRoot::ReplaceChildrenWithMarkup(DOMStringView markup,
-                                          EnumSet<ParserContentPolicy> parserContentPolicy) noexcept
+                                          EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept
   {
     if (markup.empty())
     {
-      return MutationAlgorithms::ReplaceAll(nullptr, *this);
+      return dom::MutationAlgorithms::ReplaceAll(nullptr, *this);
     }
 
     RefPtr<Element> host = ShareRefPtr(Host());
@@ -286,7 +286,7 @@ namespace krys::boo::dom
         auto &firstItem = event._path[0];
         if (auto *invocationTargetNode = DynamicDowncast<Node>(firstItem.InvocationTarget()))
         {
-          if (&TreeQueries::Root(*invocationTargetNode) == this)
+          if (&dom::TreeQueries::Root(*invocationTargetNode) == this)
           {
             return nullptr;
           }
@@ -386,13 +386,13 @@ namespace krys::boo::dom
     return *_partMappings;
   }
 
-  List<Ref<ShadowRoot>> AssignedShadowRootsIfSlotted(const Node &node) noexcept
+  List<Ref<ShadowRoot>> dom::AssignedShadowRootsIfSlotted(const Node &node) noexcept
   {
     List<Ref<ShadowRoot>> result;
-    for (auto *slot = SlotAlgorithms::GetAssignedSlot(node); slot;
-         slot = SlotAlgorithms::GetAssignedSlot(*slot))
+    for (auto *slot = dom::SlotAlgorithms::GetAssignedSlot(node); slot;
+         slot = dom::SlotAlgorithms::GetAssignedSlot(*slot))
     {
-      auto *shadowRoot = TreeQueries::ContainingShadowRoot(*slot);
+      auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(*slot);
       krys_debug_assert(shadowRoot);
       result.push_back(ShareRef(*shadowRoot));
     }

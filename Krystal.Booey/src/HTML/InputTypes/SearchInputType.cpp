@@ -86,8 +86,7 @@ namespace krys::boo::html
     return _cancelButton.get();
   }
 
-  InputType::ShouldCallBaseEventHandler
-    SearchInputType::HandleKeydownEvent(dom::KeyboardEvent &event) noexcept
+  InputType::ShouldCallBaseEventHandler SearchInputType::HandleKeydownEvent(KeyboardEvent &event) noexcept
   {
     krys_debug_assert(Element());
     auto &element = *Element();
@@ -170,7 +169,7 @@ namespace krys::boo::html
     return width;
   }
 
-  void SearchInputType::SetValue(dom::DOMStringView sanitizedValue, bool valueChanged,
+  void SearchInputType::SetValue(DOMStringView sanitizedValue, bool valueChanged,
                                  TextFieldEventBehavior eventBehavior,
                                  TextControlSetValueSelection selection) noexcept
   {

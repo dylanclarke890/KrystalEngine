@@ -41,7 +41,7 @@ namespace krys::boo
     List<MarkerPosition> _markerPositions;
 
   public:
-    LegacyRenderSVGPath(svg::SVGGraphicsElement &, RenderStyle &&) noexcept;
+    LegacyRenderSVGPath(SVGGraphicsElement &, RenderStyle &&) noexcept;
 
     ~LegacyRenderSVGPath() noexcept override;
 

@@ -407,7 +407,7 @@ namespace krys::boo::layout_integration
         return null;
       }
 
-      if (Is<html::HTMLFormControlElement>(renderBox.GetElement()))
+      if (Is<HTMLFormControlElement>(renderBox.GetElement()))
       {
         // For "leaf" theme objects like checkbox, let the theme decide what the baseline position is.
         auto &theme = RenderTheme::Singleton();
@@ -433,7 +433,7 @@ namespace krys::boo::layout_integration
 
       if (auto *element = renderBox.GetElement())
       {
-        if (Is<html::HTMLFormControlElement>(dom::TreeQueries::ShadowHost(*element)))
+        if (Is<HTMLFormControlElement>(dom::TreeQueries::ShadowHost(*element)))
         {
           // Inside RenderTextControl's shadow DOM (e.g. strong-password text)
           auto lastBaseline = Maybe<LayoutUnit> {};

@@ -43,7 +43,7 @@ namespace krys::boo::style
         case css::ValueId::All:  return {css::keywords::All {}, state.StyleScopeOrdinal()};
         case css::ValueId::Invalid:
           return {css::CommaSeparatedListHashSet<css::CustomIdentifier> {
-                    {css::CSSOMStringAtom {primitiveValue->StringValue()}}},
+                    {CSSOMStringAtom {primitiveValue->StringValue()}}},
                   state.StyleScopeOrdinal()};
         default: state.SetCurrentPropertyInvalidAtComputedValueTime(); return css::keywords::None {};
       }
@@ -58,7 +58,7 @@ namespace krys::boo::style
     css::CommaSeparatedListHashSet<css::CustomIdentifier> names;
     for (const auto &item : *list)
     {
-      names.Value.add({css::CSSOMStringAtom {item.StringValue()}});
+      names.Value.add({CSSOMStringAtom {item.StringValue()}});
     }
 
     return {krys::move(names), state.StyleScopeOrdinal()};

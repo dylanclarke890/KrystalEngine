@@ -204,7 +204,7 @@ namespace krys::boo::dom::tests
                                      UnsafeWithConfig({.ReplaceWithChildrenElements =
                                                          List<html::SanitizerElementNamespace> {u8"p"}}))
                       .HasException());
-      auto *templateElement = DynamicDowncast<html::HTMLTemplateElement>(div.FirstChild());
+      auto *templateElement = DynamicDowncast<HTMLTemplateElement>(div.FirstChild());
       REQUIRE(templateElement);
       CHECK(InsertedMarkup(templateElement->InnerHTML().ReleaseValue()) == "<b>s</b>");
     }
@@ -332,7 +332,7 @@ namespace krys::boo::dom::tests
     {
       auto templateElement = data.Document->CreateElement(u8"template").ReleaseValue();
       REQUIRE_FALSE(templateElement->SetHTMLUnsafe(u8"<span>a</span>").HasException());
-      auto &contents = Downcast<html::HTMLTemplateElement>(*templateElement).TemplateContents();
+      auto &contents = Downcast<HTMLTemplateElement>(*templateElement).TemplateContents();
       REQUIRE(contents.Host() == templateElement.get());
       auto span = contents.FirstElementChild();
       REQUIRE_FALSE(span->AfterHTML(u8"<b>b</b>").HasException());

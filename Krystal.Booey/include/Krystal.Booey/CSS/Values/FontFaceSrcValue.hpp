@@ -35,12 +35,8 @@
 namespace krys::boo
 {
   class CachedFont;
+  class Document;
   class FontLoadRequest;
-
-  namespace dom
-  {
-    class Document;
-  }
 }
 
 namespace krys::boo::css
@@ -133,7 +129,7 @@ namespace krys::boo::css
 
     /// @brief A request for the source's font file, or null if its format or technologies aren't supported.
     KRYS_NODISCARD RefPtr<FontLoadRequest>
-      GetFontLoadRequest(dom::Document &context, bool isInitiatingElementInUserAgentShadowTree) noexcept;
+      GetFontLoadRequest(boo::Document &context, bool isInitiatingElementInUserAgentShadowTree) noexcept;
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
 

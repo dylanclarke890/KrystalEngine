@@ -25,7 +25,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   namespace
   {
@@ -48,7 +48,7 @@ namespace krys::boo::svg
     }
   }
 
-  SVGFEComponentTransferElement::SVGFEComponentTransferElement(dom::Document &document) noexcept
+  SVGFEComponentTransferElement::SVGFEComponentTransferElement(Document &document) noexcept
       : SVGFilterPrimitiveStandardAttributes(document, CreateUnique<PropertyRegistry>(*this),
                                              SVGElementInterface::FEComponentTransfer),
         _in1(SVGAnimatedString::Create(this))
@@ -61,19 +61,19 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGFEComponentTransferElement::AttributeChanged(const dom::QualifiedName &name,
-                                                       Maybe<dom::DOMStringView> oldValue,
-                                                       Maybe<dom::DOMStringView> value) noexcept
+  void SVGFEComponentTransferElement::AttributeChanged(const QualifiedName &name,
+                                                       Maybe<DOMStringView> oldValue,
+                                                       Maybe<DOMStringView> value) noexcept
   {
     if (name == SVGNames::InAttr())
     {
-      _in1->SetBaseValInternal(dom::DOMString(value.value_or(dom::DOMStringView {})));
+      _in1->SetBaseValInternal(DOMString(value.value_or(DOMStringView {})));
     }
 
     SVGFilterPrimitiveStandardAttributes::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGFEComponentTransferElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGFEComponentTransferElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (attributeName == SVGNames::InAttr())
     {
@@ -103,8 +103,7 @@ namespace krys::boo::svg
   }
 
   bool SVGFEComponentTransferElement::SetFilterEffectAttributeFromChild(
-    FilterEffect &filterEffect, const dom::Element &childElement,
-    const dom::QualifiedName &attributeName) noexcept
+    FilterEffect &filterEffect, const Element &childElement, const QualifiedName &attributeName) noexcept
   {
     auto *child = DynamicDowncast<SVGComponentTransferFunctionElement>(childElement);
     krys_debug_assert(child);
@@ -150,7 +149,7 @@ namespace krys::boo::svg
   }
 
   void SVGFEComponentTransferElement::TransferFunctionAttributeChanged(
-    SVGComponentTransferFunctionElement &child, const dom::QualifiedName &attributeName) noexcept
+    SVGComponentTransferFunctionElement &child, const QualifiedName &attributeName) noexcept
   {
     krys_debug_assert(child.ParentNode() == this);
 

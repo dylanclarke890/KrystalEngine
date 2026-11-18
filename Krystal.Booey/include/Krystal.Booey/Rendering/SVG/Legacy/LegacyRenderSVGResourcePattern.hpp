@@ -27,14 +27,10 @@
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::svg
-{
-  class SVGPatternElement;
-}
-
 namespace krys::boo
 {
   class ImageBuffer;
+  class SVGPatternElement;
 
   /// @brief A pattern built for one client, and its transform from pattern space.
   struct PatternData
@@ -54,11 +50,11 @@ namespace krys::boo
     bool _shouldCollectPatternAttributes {true};
 
   public:
-    LegacyRenderSVGResourcePattern(svg::SVGPatternElement &, RenderStyle &&) noexcept;
+    LegacyRenderSVGResourcePattern(SVGPatternElement &, RenderStyle &&) noexcept;
 
     ~LegacyRenderSVGResourcePattern() noexcept override;
 
-    KRYS_NODISCARD svg::SVGPatternElement &PatternElement() const noexcept;
+    KRYS_NODISCARD SVGPatternElement &PatternElement() const noexcept;
 
     void RemoveAllClientsFromCache() noexcept override;
 
@@ -95,7 +91,7 @@ namespace krys::boo
     }
 
     static bool BuildTileImageTransform(RenderElement &, const svg::PatternAttributes &,
-                                        const svg::SVGPatternElement &, FloatRect &patternBoundaries,
+                                        const SVGPatternElement &, FloatRect &patternBoundaries,
                                         AffineTransform &tileImageTransform) noexcept;
 
     KRYS_NODISCARD static RefPtr<ImageBuffer> CreateTileImage(GraphicsContext &, const FloatSize &,

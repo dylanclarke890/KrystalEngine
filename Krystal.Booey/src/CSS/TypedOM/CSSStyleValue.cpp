@@ -32,10 +32,10 @@
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  dom::ExceptionOr<Ref<CSSStyleValue>> CSSStyleValue::Parse(dom::Document &document, CSSOMStringView property,
-                                                            CSSOMStringView cssText) noexcept
+  ExceptionOr<Ref<CSSStyleValue>> CSSStyleValue::Parse(Document &document, CSSOMStringView property,
+                                                       CSSOMStringView cssText) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssstylevalue-parse
     auto result = CSSStyleValueFactory::ParseStyleValue(document, property, cssText, false);
@@ -47,20 +47,19 @@ namespace krys::boo::css
     // A shorthand that serialises to nothing gives no values.
     if (values.empty())
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError};
+      return Exception {ExceptionCode::SyntaxError};
     }
     return krys::move(values.front());
   }
 
-  dom::ExceptionOr<List<Ref<CSSStyleValue>>> CSSStyleValue::ParseAll(dom::Document &document,
-                                                                     CSSOMStringView property,
-                                                                     CSSOMStringView cssText) noexcept
+  ExceptionOr<List<Ref<CSSStyleValue>>> CSSStyleValue::ParseAll(Document &document, CSSOMStringView property,
+                                                                CSSOMStringView cssText) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssstylevalue-parseall
     return CSSStyleValueFactory::ParseStyleValue(document, property, cssText, true);
   }
 
-  Ref<CSSStyleValue> CSSStyleValue::Create(RefPtr<Value> &&cssValue, CSSOMString &&property) noexcept
+  Ref<CSSStyleValue> CSSStyleValue::Create(RefPtr<css::Value> &&cssValue, CSSOMString &&property) noexcept
   {
     return AdoptRef(*new CSSStyleValue(krys::move(cssValue), krys::move(property)));
   }
@@ -70,7 +69,7 @@ namespace krys::boo::css
     return AdoptRef(*new CSSStyleValue());
   }
 
-  CSSStyleValue::CSSStyleValue(RefPtr<Value> &&cssValue, CSSOMString &&property) noexcept
+  CSSStyleValue::CSSStyleValue(RefPtr<css::Value> &&cssValue, CSSOMString &&property) noexcept
       : _customPropertyName(krys::move(property)), _propertyValue(krys::move(cssValue))
   {
   }
@@ -90,11 +89,11 @@ namespace krys::boo::css
   {
     if (_propertyValue)
     {
-      builder.Append(_propertyValue->CssText(DefaultSerialisationContext()));
+      builder.Append(_propertyValue->CssText(css::DefaultSerialisationContext()));
     }
   }
 
-  RefPtr<Value> CSSStyleValue::ToCSSValue() const noexcept
+  RefPtr<css::Value> CSSStyleValue::ToCSSValue() const noexcept
   {
     return _propertyValue;
   }

@@ -50,7 +50,7 @@ namespace krys::boo::html
     {
     }
 
-    KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
+    KRYS_NODISCARD DOMStringView FormControlType() const noexcept final
     {
       return input_type_names::Image;
     }
@@ -60,7 +60,7 @@ namespace krys::boo::html
     bool AppendFormData(DOMFormData &formData) const noexcept final;
 
     /// @brief Where the button was clicked, as `"x,y"`.
-    KRYS_NODISCARD Maybe<dom::DOMString> ResultForDialogSubmit() const noexcept final;
+    KRYS_NODISCARD Maybe<DOMString> ResultForDialogSubmit() const noexcept final;
 
     KRYS_NODISCARD bool DirAutoUsesValue() const noexcept final;
 
@@ -69,7 +69,7 @@ namespace krys::boo::html
       return false;
     }
 
-    void HandleActivationBehavior(dom::Event &event) noexcept final;
+    void HandleActivationBehavior(Event &event) noexcept final;
 
     KRYS_NODISCARD bool ShouldRespectHeightAndWidthAttributes() noexcept final;
 
@@ -85,6 +85,6 @@ namespace krys::boo::html
 
     void Attach() noexcept final;
 
-    void AttributeChanged(const dom::DOMStringAtom &localName) noexcept final;
+    void AttributeChanged(const DOMStringAtom &localName) noexcept final;
   };
 }

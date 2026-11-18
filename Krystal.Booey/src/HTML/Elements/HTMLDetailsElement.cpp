@@ -35,21 +35,21 @@
 #include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   namespace
   {
     constexpr utf8_stringview SummarySlotName = u8"summarySlot";
   }
 
-  HTMLDetailsElement::HTMLDetailsElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Details)
+  HTMLDetailsElement::HTMLDetailsElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Details)
   {
   }
 
   HTMLDetailsElement::~HTMLDetailsElement() noexcept = default;
 
-  Ref<HTMLDetailsElement> HTMLDetailsElement::Create(dom::Document &document) noexcept
+  Ref<HTMLDetailsElement> HTMLDetailsElement::Create(Document &document) noexcept
   {
     auto details = CreateRef<HTMLDetailsElement>(document);
     details->EnsureUserAgentShadowRoot();
@@ -58,38 +58,37 @@ namespace krys::boo::html
 
 #pragma region HTMLDetailsElement
 
-  dom::DOMString HTMLDetailsElement::Name() const noexcept
+  DOMString HTMLDetailsElement::Name() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLDetailsElement::Name(dom::DOMString value) noexcept
+  void HTMLDetailsElement::Name(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"name", krys::move(value));
   }
 
   bool HTMLDetailsElement::Open() const noexcept
   {
-    return Reflect<bool>(*this, u8"open");
+    return html::Reflect<bool>(*this, u8"open");
   }
 
   void HTMLDetailsElement::Open(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"open", krys::move(value));
+    html::Reflect<bool>(*this, u8"open", krys::move(value));
   }
 
 #pragma endregion
 
-  void HTMLDetailsElement::DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept
+  void HTMLDetailsElement::DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept
   {
     auto &document = NodeDocument();
 
     auto summarySlot = dom::ElementFactory::CreateHTMLElement<HTMLSlotElement>(document, u8"slot");
-    summarySlot->Name(dom::DOMString(SummarySlotName));
+    summarySlot->Name(DOMString(SummarySlotName));
 
     auto defaultSummary = dom::ElementFactory::CreateHTMLElement<HTMLSummaryElement>(document, u8"summary");
-    (void)defaultSummary->AppendChild(
-      *CreateRef<dom::Text>(document, dom::DOMString(DefaultDetailsSummaryText())));
+    (void)defaultSummary->AppendChild(*CreateRef<Text>(document, DOMString(DefaultDetailsSummaryText())));
     _defaultSummary = CreateWeakPtr(defaultSummary.get());
 
     (void)summarySlot->AppendChild(*defaultSummary);
@@ -105,7 +104,7 @@ namespace krys::boo::html
     _defaultSlot = krys::move(defaultSlot);
 
     auto style = document.CreateElementNS(infra::namespaces::HTML, u8"style").ReleaseValue();
-    (void)style->TextContent(dom::DOMString(css::DetailsElementShadowUserAgentStyleSheet));
+    (void)style->TextContent(DOMString(css::DetailsElementShadowUserAgentStyleSheet));
     (void)root.AppendChild(*style);
   }
 
@@ -133,7 +132,7 @@ namespace krys::boo::html
     return dom::SlotAlgorithms::GetAssignedSlot(summary) == summarySlot;
   }
 
-  HTMLSlotElement *HTMLDetailsElement::SlotForHostChild(const dom::Node &child) const noexcept
+  HTMLSlotElement *HTMLDetailsElement::SlotForHostChild(const Node &child) const noexcept
   {
     krys_debug_assert(child.ParentNode() == this);
 
@@ -177,10 +176,9 @@ namespace krys::boo::html
     _toggleEventTask->Queue(oldState, newState);
   }
 
-  void HTMLDetailsElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                              Maybe<dom::DOMStringView> oldValue,
-                                              Maybe<dom::DOMStringView> value,
-                                              const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLDetailsElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                              Maybe<DOMStringView> value,
+                                              const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 
@@ -226,7 +224,7 @@ namespace krys::boo::html
           // 4a.i. Assert: otherElement is the only element in groupMembers that has the open attribute set.
           // 4a.ii. Remove the open attribute on otherElement.
           // (Removing it from every member is the same, given the assertion.)
-          if (!GetAttribute(u8"name").value_or(dom::DOMString()).empty())
+          if (!GetAttribute(u8"name").value_or(DOMString()).empty())
           {
             for (auto &otherDetailsElement : OtherElementsInNameGroup())
             {
@@ -283,7 +281,7 @@ namespace krys::boo::html
   {
     // 1. If element does not have an open attribute, then return.
     // 2. If element does not have a name attribute, or its name attribute is the empty string, then return.
-    if (HasAttribute(u8"open") && !GetAttribute(u8"name").value_or(dom::DOMString()).empty())
+    if (HasAttribute(u8"open") && !GetAttribute(u8"name").value_or(DOMString()).empty())
     {
       // 3. Let groupMembers be a list of elements, containing all elements in element's details name group
       //    except for element, in tree order.

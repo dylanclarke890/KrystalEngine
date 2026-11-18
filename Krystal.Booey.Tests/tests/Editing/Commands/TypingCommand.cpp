@@ -11,16 +11,16 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief Records the input types of the `beforeinput` and `input` events, cancelling them if asked.
-    struct InputTypeListener : public dom::EventListenerCallback
+    struct InputTypeListener : public EventListenerCallback
     {
       List<utf8_string> InputTypes;
       bool Cancel {false};
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         if (event.IsInputEvent())
         {
-          InputTypes.emplace_back(Downcast<dom::InputEvent>(event).InputType());
+          InputTypes.emplace_back(Downcast<InputEvent>(event).InputType());
         }
         if (Cancel)
         {
@@ -225,8 +225,8 @@ namespace krys::boo::tests
 
     SECTION("A cancelled typing step doesn't keep the view from following its contents")
     {
-      auto cancel = root.AddEventListener(
-        u8"beforeinput", Func<void(dom::Event &)>([](dom::Event &event) { event.PreventDefault(); }));
+      auto cancel = root.AddEventListener(u8"beforeinput",
+                                          Func<void(Event &)>([](Event &event) { event.PreventDefault(); }));
       (void)fixture.Run(u8"InsertParagraph");
       CHECK(Narrow(fixture.InnerHTML(root)) == "<div id=\"a\">abc</div>");
 
@@ -292,7 +292,7 @@ namespace krys::boo::tests
 
       // Each line of the text is added to the open command in turn.
       List<std::string> htmlAtInput;
-      auto handle = root.AddEventListener(event_names::Input, [&](dom::Event &)
+      auto handle = root.AddEventListener(event_names::Input, [&](Event &)
                                           { htmlAtInput.push_back(Narrow(fixture.InnerHTML(root))); });
       (void)editor.InsertText(u8"e\nf", nullptr);
 

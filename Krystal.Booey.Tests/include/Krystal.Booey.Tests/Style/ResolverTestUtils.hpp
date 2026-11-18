@@ -31,7 +31,7 @@ namespace krys::boo::style::tests
   /// in an 800x600 view unless the test asks for none.
   struct ResolverFixture : css::tests::ValueFixture
   {
-    Ref<dom::HTMLDocument> Document;
+    Ref<HTMLDocument> Document;
     RefPtr<LocalFrame> Frame;
 
     explicit ResolverFixture(utf8_string &&markup, WithView withView = WithView::Yes) noexcept
@@ -42,14 +42,14 @@ namespace krys::boo::style::tests
       {
         Frame = LocalFrame::Create();
         Frame->CreateView({800, 600});
-        Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+        Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
       }
     }
 
-    KRYS_NODISCARD static Ref<dom::HTMLDocument> Parse(utf8_string &&markup) noexcept
+    KRYS_NODISCARD static Ref<HTMLDocument> Parse(utf8_string &&markup) noexcept
     {
       html::EventLoop::Current().RunUntilIdle();
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(markup), IsEOF::Yes);
       parser->PumpTokenizer();
@@ -61,7 +61,7 @@ namespace krys::boo::style::tests
       return Document->StyleScope().GetResolver();
     }
 
-    KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) noexcept
+    KRYS_NODISCARD Element &ById(DOMStringView id) noexcept
     {
       auto element = Document->GetElementById(id);
       krys_assert(element);
@@ -71,8 +71,8 @@ namespace krys::boo::style::tests
     /// @brief The resolved style of @p element, resolving its ancestors' styles first as the tree resolver
     /// does: each element inherits from its parent's style, and root-relative units use the document
     /// element's.
-    KRYS_NODISCARD ResolvedStyle Resolve(
-      dom::Element &element, RuleMatchingBehavior behavior = RuleMatchingBehavior::MatchAllRules) noexcept
+    KRYS_NODISCARD ResolvedStyle
+      Resolve(Element &element, RuleMatchingBehavior behavior = RuleMatchingBehavior::MatchAllRules) noexcept
     {
       auto documentElement = Document->DocumentElement();
       krys_assert(documentElement);

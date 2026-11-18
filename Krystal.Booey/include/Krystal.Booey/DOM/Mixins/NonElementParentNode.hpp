@@ -4,7 +4,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class Element;

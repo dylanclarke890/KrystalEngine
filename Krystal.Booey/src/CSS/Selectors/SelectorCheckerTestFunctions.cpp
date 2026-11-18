@@ -45,48 +45,48 @@ namespace krys::boo::css
   namespace
   {
     template <typename T>
-    KRYS_NODISCARD const T *DynamicDowncastHTML(const dom::Element &element) noexcept
+    KRYS_NODISCARD const T *DynamicDowncastHTML(const Element &element) noexcept
     {
-      auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
+      auto *htmlElement = DynamicDowncast<HTMLElement>(element);
       return htmlElement ? DynamicDowncast<T>(*htmlElement) : nullptr;
     }
 
-    KRYS_NODISCARD bool IsHTMLElement(const dom::Element &element, html::TagName tagName) noexcept
+    KRYS_NODISCARD bool IsHTMLElement(const Element &element, html::TagName tagName) noexcept
     {
-      return Is<html::HTMLElement>(element) && element.TagQualifiedName().TagName() == tagName;
+      return Is<HTMLElement>(element) && element.TagQualifiedName().TagName() == tagName;
     }
   }
 
-  bool IsFrameFocused(const dom::Element &element) noexcept
+  bool IsFrameFocused(const Element &element) noexcept
   {
     return element.NodeDocument().IsFocusedAndActive();
   }
 
   namespace
   {
-    KRYS_NODISCARD bool DoesShadowTreeContainFocusedElement(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool DoesShadowTreeContainFocusedElement(const Element &element) noexcept
     {
       auto *shadowRoot = dom::TreeQueries::GetShadowRoot(element);
       return shadowRoot && shadowRoot->ContainsFocusedElement();
     }
   }
 
-  bool MatchesFocusPseudoClass(const dom::Element &element) noexcept
+  bool MatchesFocusPseudoClass(const Element &element) noexcept
   {
     return (element.Focused() || DoesShadowTreeContainFocusedElement(element)) && IsFrameFocused(element);
   }
 
-  bool MatchesFocusVisiblePseudoClass(const dom::Element &element) noexcept
+  bool MatchesFocusVisiblePseudoClass(const Element &element) noexcept
   {
     return element.HasFocusVisible() && IsFrameFocused(element);
   }
 
-  bool MatchesFocusWithinPseudoClass(const dom::Element &element) noexcept
+  bool MatchesFocusWithinPseudoClass(const Element &element) noexcept
   {
     return element.HasFocusWithin() && IsFrameFocused(element);
   }
 
-  bool IsLink(const dom::Element &element) noexcept
+  bool IsLink(const Element &element) noexcept
   {
     // Links in SVG images aren't links (shouldProhibitLinks).
     if (IsHTMLElement(element, html::TagName::a) || IsHTMLElement(element, html::TagName::area))
@@ -101,63 +101,63 @@ namespace krys::boo::css
     return false;
   }
 
-  bool MatchesDefaultPseudoClass(const dom::Element &element) noexcept
+  bool MatchesDefaultPseudoClass(const Element &element) noexcept
   {
     return element.MatchesDefaultPseudoClass();
   }
 
-  bool MatchesDisabledPseudoClass(const dom::Element &element) noexcept
+  bool MatchesDisabledPseudoClass(const Element &element) noexcept
   {
-    auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
+    auto *htmlElement = DynamicDowncast<HTMLElement>(element);
     return htmlElement && htmlElement->IsActuallyDisabled();
   }
 
-  bool MatchesEnabledPseudoClass(const dom::Element &element) noexcept
+  bool MatchesEnabledPseudoClass(const Element &element) noexcept
   {
-    auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
+    auto *htmlElement = DynamicDowncast<HTMLElement>(element);
     return htmlElement && htmlElement->CanBeActuallyDisabled() && !htmlElement->IsActuallyDisabled();
   }
 
-  bool IsDefinedElement(const dom::Element &element) noexcept
+  bool IsDefinedElement(const Element &element) noexcept
   {
     auto state = element.GetCustomElementState();
     return state == dom::CustomElementState::Custom || state == dom::CustomElementState::Uncustomized;
   }
 
-  bool IsChecked(const dom::Element &element) noexcept
+  bool IsChecked(const Element &element) noexcept
   {
     // Even though WinIE allows checked and indeterminate to co-exist, the CSS selector spec says that you
     // can't be both checked and indeterminate. We will behave like WinIE behind the scenes and just obey the
     // CSS spec here in the test for matching the pseudo.
-    if (auto *input = DynamicDowncastHTML<html::HTMLInputElement>(element))
+    if (auto *input = DynamicDowncastHTML<HTMLInputElement>(element))
     {
       return input->MatchesCheckedPseudoClass();
     }
-    if (auto *option = DynamicDowncastHTML<html::HTMLOptionElement>(element))
+    if (auto *option = DynamicDowncastHTML<HTMLOptionElement>(element))
     {
       return option->Selected(html::AllowStyleInvalidation::No);
     }
     return false;
   }
 
-  bool IsOptionalFormControl(const dom::Element &element) noexcept
+  bool IsOptionalFormControl(const Element &element) noexcept
   {
     return element.IsOptionalFormControl();
   }
 
-  bool IsRequiredFormControl(const dom::Element &element) noexcept
+  bool IsRequiredFormControl(const Element &element) noexcept
   {
     return element.IsRequiredFormControl();
   }
 
-  bool IsPlaceholderShown(const dom::Element &element) noexcept
+  bool IsPlaceholderShown(const Element &element) noexcept
   {
-    auto *formControl = DynamicDowncastHTML<html::HTMLTextFormControlElement>(element);
+    auto *formControl = DynamicDowncastHTML<HTMLTextFormControlElement>(element);
     return formControl && formControl->IsPlaceholderVisible();
   }
 
-  bool ContainsLanguageSubtagMatchingRange(dom::DOMStringView language, dom::DOMStringView range,
-                                           uint32 languageLength, uint32 &position) noexcept
+  bool ContainsLanguageSubtagMatchingRange(DOMStringView language, DOMStringView range, uint32 languageLength,
+                                           uint32 &position) noexcept
   {
     uint32 languageSubtagsStartIndex = position;
     uint32 languageSubtagsEndIndex = languageLength;
@@ -199,7 +199,7 @@ namespace krys::boo::css
     return false;
   }
 
-  bool MatchesLangPseudoClass(const dom::Element &element,
+  bool MatchesLangPseudoClass(const Element &element,
                               const FixedVector<PossiblyQuotedIdentifier> &langList) noexcept
   {
     // FIXME: WebVTT elements use their cue's language.
@@ -212,7 +212,7 @@ namespace krys::boo::css
 
     // Implement basic and extended filterings of given language tags as specified in
     // www.ietf.org/rfc/rfc4647.txt.
-    dom::DOMStringView languageStringView = language;
+    DOMStringView languageStringView = language;
     auto languageLength = static_cast<uint32>(language.size());
     for (auto &range : langList)
     {
@@ -266,7 +266,7 @@ namespace krys::boo::css
     return false;
   }
 
-  bool MatchesDirPseudoClass(const dom::Element &element, const CSSOMStringAtom &argument) noexcept
+  bool MatchesDirPseudoClass(const Element &element, const CSSOMStringAtom &argument) noexcept
   {
     switch (element.EffectiveTextDirection())
     {
@@ -277,21 +277,21 @@ namespace krys::boo::css
     return false;
   }
 
-  bool MatchesReadWritePseudoClass(const dom::Element &element) noexcept
+  bool MatchesReadWritePseudoClass(const Element &element) noexcept
   {
     return element.MatchesReadWritePseudoClass();
   }
 
-  bool MatchesIndeterminatePseudoClass(const dom::Element &element) noexcept
+  bool MatchesIndeterminatePseudoClass(const Element &element) noexcept
   {
     return element.MatchesIndeterminatePseudoClass();
   }
 
-  dom::DOMString EffectiveLang(const dom::Element &element) noexcept
+  DOMString EffectiveLang(const Element &element) noexcept
   {
     // To determine the language of a node, user agents must use the first appropriate step in the following
     // list:
-    dom::DOMStringAtom xmlNamespace(infra::namespaces::XML);
+    DOMStringAtom xmlNamespace(infra::namespaces::XML);
     for (auto *ancestor = &element; ancestor;
          ancestor = dom::TreeQueries::ParentOrShadowHostElement(*ancestor))
     {

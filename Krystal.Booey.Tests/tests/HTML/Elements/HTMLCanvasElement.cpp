@@ -16,9 +16,9 @@ namespace krys::boo::tests
     {
       using PageInFrameFixture::PageInFrameFixture;
 
-      KRYS_NODISCARD html::HTMLCanvasElement &Canvas(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD HTMLCanvasElement &Canvas(DOMStringView id) noexcept
       {
-        return Downcast<html::HTMLCanvasElement>(ById(id));
+        return Downcast<HTMLCanvasElement>(ById(id));
       }
     };
 

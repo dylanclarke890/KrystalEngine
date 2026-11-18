@@ -60,7 +60,7 @@ namespace krys::boo::tests
     ResolverFixture fixture {u8R"html(<!DOCTYPE html><body><div id=ltr></div><div id=rtl dir=rtl></div>
     <div id=vrl style="writing-mode: vertical-rl"></div><div id=vlr style="writing-mode: vertical-lr"></div></body>)html"};
 
-    auto writingModeOf = [&](dom::DOMStringView id)
+    auto writingModeOf = [&](DOMStringView id)
     {
       return fixture.ById(id).Renderer()->Style().GetWritingMode();
     };

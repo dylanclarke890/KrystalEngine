@@ -45,42 +45,42 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   namespace
   {
     /// @brief Rectifies a colour component: a number is @p numberToValue's value, a numeric value must match
     /// @p matches, and a keyword must be `none`.
     template <typename TNumberToValue, typename TMatches>
-    KRYS_NODISCARD dom::ExceptionOr<RectifiedCSSColorComponent> RectifyCSSColorComponent(
+    KRYS_NODISCARD ExceptionOr<RectifiedCSSColorComponent> RectifyCSSColorComponent(
       Variant<double, RefPtr<CSSNumericValue>, CSSOMString, RefPtr<CSSKeywordValue>> component,
       const TNumberToValue &numberToValue, const TMatches &matches) noexcept
     {
-      auto keyword = [](Ref<CSSKeywordValue> value) -> dom::ExceptionOr<RectifiedCSSColorComponent>
+      auto keyword = [](Ref<CSSKeywordValue> value) -> ExceptionOr<RectifiedCSSColorComponent>
       {
         if (!infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value->Value(), u8"none"))
         {
-          return dom::Exception {dom::ExceptionCode::SyntaxError};
+          return Exception {ExceptionCode::SyntaxError};
         }
         return RectifiedCSSColorComponent {RefPtr<CSSKeywordValue>(krys::move(value))};
       };
       return krys::SwitchOn(
-        krys::move(component), [&](double value) -> dom::ExceptionOr<RectifiedCSSColorComponent>
+        krys::move(component), [&](double value) -> ExceptionOr<RectifiedCSSColorComponent>
         { return RectifiedCSSColorComponent {RefPtr<CSSNumericValue>(numberToValue(value))}; },
-        [&](RefPtr<CSSNumericValue> &&value) -> dom::ExceptionOr<RectifiedCSSColorComponent>
+        [&](RefPtr<CSSNumericValue> &&value) -> ExceptionOr<RectifiedCSSColorComponent>
         {
           if (!value || !matches(value->Type()))
           {
-            return dom::Exception {dom::ExceptionCode::SyntaxError};
+            return Exception {ExceptionCode::SyntaxError};
           }
           return RectifiedCSSColorComponent {krys::move(value)};
         },
         [&](CSSOMString &&value) { return keyword(CSSKeywordValue::RectifyKeywordish(krys::move(value))); },
-        [&](RefPtr<CSSKeywordValue> &&value) -> dom::ExceptionOr<RectifiedCSSColorComponent>
+        [&](RefPtr<CSSKeywordValue> &&value) -> ExceptionOr<RectifiedCSSColorComponent>
         {
           if (!value)
           {
-            return dom::Exception {dom::ExceptionCode::SyntaxError};
+            return Exception {ExceptionCode::SyntaxError};
           }
           return keyword(Ref<CSSKeywordValue>(krys::move(value)));
         });
@@ -108,11 +108,11 @@ namespace krys::boo::css
     /// @brief The component values of a colour function's arguments, and those after its slash (its alpha).
     struct ColorFunctionArguments
     {
-      List<TokenRange> Components;
-      Maybe<TokenRange> Alpha;
+      List<css::TokenRange> Components;
+      Maybe<css::TokenRange> Alpha;
     };
 
-    KRYS_NODISCARD ColorFunctionArguments SplitColorFunctionArguments(TokenRange arguments) noexcept
+    KRYS_NODISCARD ColorFunctionArguments SplitColorFunctionArguments(css::TokenRange arguments) noexcept
     {
       ColorFunctionArguments split;
       bool afterSlash = false;
@@ -124,12 +124,12 @@ namespace krys::boo::css
           break;
         }
         const auto &token = arguments.Peek();
-        if (token.Type() == TokenType::Comma)
+        if (token.Type() == css::TokenType::Comma)
         {
           arguments.Discard();
           continue;
         }
-        if (token.Type() == TokenType::Delim && token.Delimiter() == U'/')
+        if (token.Type() == css::TokenType::Delim && token.Delimiter() == U'/')
         {
           arguments.Discard();
           afterSlash = true;
@@ -158,16 +158,17 @@ namespace krys::boo::css
 
     /// @brief @p component reified for @p slot: `none`, or its numeric value, a number or percentage given
     /// for the other being converted; null if it can't be (a calculation of the other type).
-    KRYS_NODISCARD Maybe<CSSColorPercent> ReifyColorComponent(dom::Document &document, TokenRange component,
+    KRYS_NODISCARD Maybe<CSSColorPercent> ReifyColorComponent(Document &document, css::TokenRange component,
                                                               ColorComponentSlot slot) noexcept
     {
       const auto &token = component.Peek();
-      if (token.Type() == TokenType::Ident)
+      if (token.Type() == css::TokenType::Ident)
       {
         return CSSColorPercent {
           RefPtr<CSSKeywordValue>(CSSKeywordValue::RectifyKeywordish(CSSOMString(token.IdentCodePoints())))};
       }
-      auto parsed = CSSNumericValue::Parse(document, component.Serialise(TokenSerialisationMode::Normal));
+      auto parsed =
+        CSSNumericValue::Parse(document, component.Serialise(css::TokenSerialisationMode::Normal));
       if (parsed.HasException())
       {
         return null;
@@ -176,17 +177,17 @@ namespace krys::boo::css
       if (auto *unit = DynamicDowncast<CSSUnitValue>(value.get()))
       {
         const auto unitType = unit->UnitEnum();
-        if (slot.SlotKind == SlotKind::Percent && unitType == UnitType::Number)
+        if (slot.SlotKind == SlotKind::Percent && unitType == css::UnitType::Number)
         {
-          value = CSSUnitValue::Create(unit->Value() * 100 / slot.Reference, UnitType::Percentage);
+          value = CSSUnitValue::Create(unit->Value() * 100 / slot.Reference, css::UnitType::Percentage);
         }
-        else if (slot.SlotKind == SlotKind::Number && unitType == UnitType::Percentage)
+        else if (slot.SlotKind == SlotKind::Number && unitType == css::UnitType::Percentage)
         {
-          value = CSSUnitValue::Create(unit->Value() / 100 * slot.Reference, UnitType::Number);
+          value = CSSUnitValue::Create(unit->Value() / 100 * slot.Reference, css::UnitType::Number);
         }
-        else if (slot.SlotKind == SlotKind::Angle && unitType == UnitType::Number)
+        else if (slot.SlotKind == SlotKind::Angle && unitType == css::UnitType::Number)
         {
-          value = CSSUnitValue::Create(unit->Value(), UnitType::deg);
+          value = CSSUnitValue::Create(unit->Value(), css::UnitType::deg);
         }
       }
       return CSSColorPercent {krys::move(value)};
@@ -195,7 +196,7 @@ namespace krys::boo::css
     /// @brief The components of a colour function reified for @p slots (and its alpha as a percentage, 100%
     /// when it has none); null if one can't be, or their number isn't the slots'.
     KRYS_NODISCARD Maybe<List<CSSColorPercent>>
-      ReifyColorComponents(dom::Document &document, const ColorFunctionArguments &arguments,
+      ReifyColorComponents(Document &document, const ColorFunctionArguments &arguments,
                            std::initializer_list<ColorComponentSlot> slots) noexcept
     {
       if (arguments.Components.size() != slots.size())
@@ -231,7 +232,7 @@ namespace krys::boo::css
 
     /// @brief The colour value a successful construction made, or null.
     template <typename T>
-    KRYS_NODISCARD RefPtr<CSSStyleValue> Made(dom::ExceptionOr<Ref<T>> made) noexcept
+    KRYS_NODISCARD RefPtr<CSSStyleValue> Made(ExceptionOr<Ref<T>> made) noexcept
     {
       if (made.HasException())
       {
@@ -241,12 +242,12 @@ namespace krys::boo::css
     }
 
     /// @brief A colour function reified as its colour value, or null if its components don't fit one.
-    KRYS_NODISCARD RefPtr<CSSStyleValue> ReifyColorFunction(dom::Document &document, ValueId function,
-                                                            TokenRange arguments) noexcept
+    KRYS_NODISCARD RefPtr<CSSStyleValue> ReifyColorFunction(Document &document, css::ValueId function,
+                                                            css::TokenRange arguments) noexcept
     {
       auto split = SplitColorFunctionArguments(arguments);
       // A relative colour (`rgb(from ...)`) has no colour value.
-      if (!split.Components.empty() && split.Components.front().Peek().Type() == TokenType::Ident
+      if (!split.Components.empty() && split.Components.front().Peek().Type() == css::TokenType::Ident
           && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(
             split.Components.front().Peek().IdentCodePoints(), u8"from"))
       {
@@ -272,23 +273,23 @@ namespace krys::boo::css
       switch (function)
       {
         // 1. If value is a hex color, rgb() function, or rgba() function: return a new CSSRGB.
-        case ValueId::Rgb:
-        case ValueId::Rgba:
+        case css::ValueId::Rgb:
+        case css::ValueId::Rgba:
           if (auto c = ReifyColorComponents(document, split, {rgb, rgb, rgb}))
           {
             return Made(CSSRGB::Create(take(*c, 0), take(*c, 1), take(*c, 2), take(*c, 3)));
           }
           return nullptr;
         // 2. If value is an hsl() or hsla() function: return a new CSSHSL.
-        case ValueId::Hsl:
-        case ValueId::Hsla:
+        case css::ValueId::Hsl:
+        case css::ValueId::Hsla:
           if (auto c = ReifyColorComponents(document, split, {angle, percent(100), percent(100)}))
           {
             return Made(CSSHSL::Create(take(*c, 0), take(*c, 1), take(*c, 2), take(*c, 3)));
           }
           return nullptr;
         // 3. If value is an hwb() function: return a new CSSHWB.
-        case ValueId::Hwb:
+        case css::ValueId::Hwb:
           if (auto c = ReifyColorComponents(document, split, {angle, percent(100), percent(100)}))
           {
             // Its components are numeric values, without `none`.
@@ -316,28 +317,28 @@ namespace krys::boo::css
           }
           return nullptr;
         // 4. If value is an lch() function: return a new CSSLCH.
-        case ValueId::Lch:
+        case css::ValueId::Lch:
           if (auto c = ReifyColorComponents(document, split, {percent(100), percent(150), angle}))
           {
             return Made(CSSLCH::Create(take(*c, 0), take(*c, 1), take(*c, 2), take(*c, 3)));
           }
           return nullptr;
         // 5. If value is an lab() function: return a new CSSLab.
-        case ValueId::Lab:
+        case css::ValueId::Lab:
           if (auto c = ReifyColorComponents(document, split, {percent(100), number(125), number(125)}))
           {
             return Made(CSSLab::Create(take(*c, 0), take(*c, 1), take(*c, 2), take(*c, 3)));
           }
           return nullptr;
         // 6. If value is an oklch() function: return a new CSSOKLCH.
-        case ValueId::Oklch:
+        case css::ValueId::Oklch:
           if (auto c = ReifyColorComponents(document, split, {percent(1), percent(0.4), angle}))
           {
             return Made(CSSOKLCH::Create(take(*c, 0), take(*c, 1), take(*c, 2), take(*c, 3)));
           }
           return nullptr;
         // 7. If value is an oklab() function: return a new CSSOKLab.
-        case ValueId::Oklab:
+        case css::ValueId::Oklab:
           if (auto c = ReifyColorComponents(document, split, {percent(1), number(0.4), number(0.4)}))
           {
             return Made(CSSOKLab::Create(take(*c, 0), take(*c, 1), take(*c, 2), take(*c, 3)));
@@ -345,9 +346,9 @@ namespace krys::boo::css
           return nullptr;
         // 8. If value is a color() function: return a new CSSColor, its colorSpace the colour space's
         //    identifier reified, its channels the components other than alpha, and its alpha.
-        case ValueId::Color:
+        case css::ValueId::Color:
         {
-          if (split.Components.empty() || split.Components.front().Peek().Type() != TokenType::Ident)
+          if (split.Components.empty() || split.Components.front().Peek().Type() != css::TokenType::Ident)
           {
             return nullptr;
           }
@@ -386,51 +387,50 @@ namespace krys::boo::css
       auto [red, green, blue, alpha] = color.ToColorTypeLossy<SRGBA<uint8>>().Resolved();
       auto channel = [](uint8 value)
       {
-        return CSSColorRGBComp {RefPtr<CSSNumericValue>(CSSUnitValue::Create(value, UnitType::Number))};
+        return CSSColorRGBComp {RefPtr<CSSNumericValue>(CSSUnitValue::Create(value, css::UnitType::Number))};
       };
       return Made(
         CSSRGB::Create(channel(red), channel(green), channel(blue), CSSColorPercent {alpha / 255.0}));
     }
   }
 
-  dom::ExceptionOr<Ref<CSSStyleValue>> CSSColorValue::Parse(dom::Document &document,
-                                                            CSSOMStringView cssText) noexcept
+  ExceptionOr<Ref<CSSStyleValue>> CSSColorValue::Parse(Document &document, CSSOMStringView cssText) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csscolorvalue-parse
     // 1. Let result be the result of parsing cssText as a <color>. If result is a syntax error, throw a
     //    SyntaxError and abort this algorithm.
-    InputStream inputStream {CSSOMString(cssText)};
-    Tokenizer tokenizer(inputStream);
+    css::InputStream inputStream {CSSOMString(cssText)};
+    css::Tokenizer tokenizer(inputStream);
     std::ignore = tokenizer.PumpTokenizer();
     auto tokens = tokenizer.Tokens();
     tokens.DiscardWhitespace();
     auto colorTokens = tokens;
-    auto parserContext = ParserContext {document};
-    auto parserState = PropertyParserState {.Context = parserContext};
-    auto result = parse_property::ConsumeColor(tokens, parserState);
+    auto parserContext = css::ParserContext {document};
+    auto parserState = css::PropertyParserState {.Context = parserContext};
+    auto result = css::parse_property::ConsumeColor(tokens, parserState);
     tokens.DiscardWhitespace();
     if (!result || !tokens.IsAtEnd())
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError, u8"Failed to parse CSS text as a colour"};
+      return Exception {ExceptionCode::SyntaxError, u8"Failed to parse CSS text as a colour"};
     }
 
     // 2. Reify a color value from result, and return the result.
     // https://drafts.css-houdini.org/css-typed-om/#reify-a-color-value
     const auto &first = colorTokens.Peek();
-    if (first.Type() == TokenType::Hash)
+    if (first.Type() == css::TokenType::Hash)
     {
       // 1. (A hex color.)
-      if (auto reified = ReifySRGBColor(parse_property::ParseColorRaw(cssText, parserContext)))
+      if (auto reified = ReifySRGBColor(css::parse_property::ParseColorRaw(cssText, parserContext)))
       {
         return Ref<CSSStyleValue>(krys::move(reified));
       }
     }
-    else if (first.Type() == TokenType::Ident)
+    else if (first.Type() == css::TokenType::Ident)
     {
       // 9. If value is a named color or the transparent keyword, return a new CSSRGB with its color.
-      if (IsAbsoluteColorKeyword(first.ValueId()))
+      if (css::IsAbsoluteColorKeyword(first.ValueId()))
       {
-        if (auto reified = ReifySRGBColor(parse_property::ParseColorRaw(cssText, parserContext)))
+        if (auto reified = ReifySRGBColor(css::parse_property::ParseColorRaw(cssText, parserContext)))
         {
           return Ref<CSSStyleValue>(krys::move(reified));
         }
@@ -438,7 +438,7 @@ namespace krys::boo::css
       // 10. Otherwise (any other color keyword), reify an identifier from value.
       return Ref<CSSStyleValue>(CSSKeywordValue::RectifyKeywordish(CSSOMString(first.IdentCodePoints())));
     }
-    else if (first.Type() == TokenType::Function)
+    else if (first.Type() == css::TokenType::Function)
     {
       const auto function = first.FunctionId();
       auto arguments = colorTokens.ConsumeBlock();
@@ -460,7 +460,7 @@ namespace krys::boo::css
     {
       krys::SwitchOn(
         component,
-        [&](double value) { builder.Append(CSSUnitValue::Create(value, UnitType::Number)->ToString()); },
+        [&](double value) { builder.Append(CSSUnitValue::Create(value, css::UnitType::Number)->ToString()); },
         [&](const RefPtr<CSSNumericValue> &value) { builder.Append(value->ToString()); },
         [&](const CSSOMString &value) { builder.Append(value); },
         [&](const RefPtr<CSSKeywordValue> &value) { builder.Append(value->Value()); });
@@ -482,31 +482,29 @@ namespace krys::boo::css
     return krys::move(builder).ToString();
   }
 
-  dom::ExceptionOr<RectifiedCSSColorComponent>
+  ExceptionOr<RectifiedCSSColorComponent>
     CSSColorValue::RectifyCSSColorPercent(CSSColorPercent percent) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#rectify-a-csscolorpercent
     return RectifyCSSColorComponent(
       krys::move(percent),
-      [](double value) { return CSSUnitValue::Create(value * 100, UnitType::Percentage); },
+      [](double value) { return CSSUnitValue::Create(value * 100, css::UnitType::Percentage); },
       [](const CSSNumericType &type) { return type.Matches<CSSNumericBaseType::Percent>(); });
   }
 
-  dom::ExceptionOr<RectifiedCSSColorComponent>
-    CSSColorValue::RectifyCSSColorAngle(CSSColorAngle angle) noexcept
+  ExceptionOr<RectifiedCSSColorComponent> CSSColorValue::RectifyCSSColorAngle(CSSColorAngle angle) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#rectify-a-csscolorangle
     return RectifyCSSColorComponent(
-      krys::move(angle), [](double value) { return CSSUnitValue::Create(value, UnitType::deg); },
+      krys::move(angle), [](double value) { return CSSUnitValue::Create(value, css::UnitType::deg); },
       [](const CSSNumericType &type) { return type.Matches<CSSNumericBaseType::Angle>(); });
   }
 
-  dom::ExceptionOr<RectifiedCSSColorComponent>
-    CSSColorValue::RectifyCSSColorNumber(CSSColorNumber number) noexcept
+  ExceptionOr<RectifiedCSSColorComponent> CSSColorValue::RectifyCSSColorNumber(CSSColorNumber number) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#rectify-a-csscolornumber
     return RectifyCSSColorComponent(
-      krys::move(number), [](double value) { return CSSUnitValue::Create(value, UnitType::Number); },
+      krys::move(number), [](double value) { return CSSUnitValue::Create(value, css::UnitType::Number); },
       [](const CSSNumericType &type) { return type.MatchesNumber(); });
   }
 
@@ -524,16 +522,16 @@ namespace krys::boo::css
       [](const RefPtr<CSSNumericValue> &value) { return CSSColorPercent {value}; });
   }
 
-  RefPtr<Value> CSSColorValue::ToCSSValue() const noexcept
+  RefPtr<css::Value> CSSColorValue::ToCSSValue() const noexcept
   {
     // The colour function its components make, parsed as a `<color>`; null if they don't make one.
-    InputStream inputStream {ColorFunctionText()};
-    Tokenizer tokenizer(inputStream);
+    css::InputStream inputStream {ColorFunctionText()};
+    css::Tokenizer tokenizer(inputStream);
     std::ignore = tokenizer.PumpTokenizer();
     auto tokens = tokenizer.Tokens();
-    auto parserContext = ParserContext {ParserMode::HTMLStandard};
-    auto parserState = PropertyParserState {.Context = parserContext};
-    auto value = parse_property::ConsumeColor(tokens, parserState);
+    auto parserContext = css::ParserContext {css::ParserMode::HTMLStandard};
+    auto parserState = css::PropertyParserState {.Context = parserContext};
+    auto value = css::parse_property::ConsumeColor(tokens, parserState);
     tokens.DiscardWhitespace();
     return tokens.IsAtEnd() ? value : nullptr;
   }
@@ -542,7 +540,7 @@ namespace krys::boo::css
   {
     if (auto value = ToCSSValue())
     {
-      builder.Append(value->CssText(DefaultSerialisationContext()));
+      builder.Append(value->CssText(css::DefaultSerialisationContext()));
     }
   }
 }

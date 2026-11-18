@@ -35,14 +35,10 @@
 #include "Krystal.Core/Visitor.hpp"
 #include <cmath>
 
-namespace krys::boo::dom
-{
-  class Document;
-}
-
 namespace krys::boo
 {
   class AnimationEventBase;
+  class Document;
   class RenderStyle;
   class WebAnimation;
 
@@ -71,22 +67,21 @@ namespace krys::boo
   KRYS_NODISCARD bool CompareAnimationEventsByCompositeOrder(const AnimationEventBase &a,
                                                              const AnimationEventBase &b) noexcept;
 
-  KRYS_NODISCARD css::CSSOMString PseudoElementIdentifierAsString(
+  KRYS_NODISCARD CSSOMString PseudoElementIdentifierAsString(
     const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
 
   /// @return Whether @p pseudoElement parsed, and the pseudo-element it identifies if it did.
   /// @see https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-pseudoelement
   KRYS_NODISCARD Pair<bool, Maybe<style::PseudoElementIdentifier>>
-    PseudoElementIdentifierFromString(const css::CSSOMString &pseudoElement,
-                                      const dom::Document *document) noexcept;
+    PseudoElementIdentifierFromString(const CSSOMString &pseudoElement, const Document *document) noexcept;
 
   /// @brief The name of an animatable property: the property's name, or the custom property's name.
-  KRYS_NODISCARD inline css::CSSOMStringAtom
+  KRYS_NODISCARD inline CSSOMStringAtom
     AnimatablePropertyAsString(const AnimatableCSSProperty &property) noexcept
   {
     return krys::SwitchOn(
-      property, [](css::PropertyId propertyId) { return css::CSSOMStringAtom {css::ToString(propertyId)}; },
-      [](const css::CSSOMStringAtom &customProperty) { return customProperty; });
+      property, [](css::PropertyId propertyId) { return CSSOMStringAtom {css::ToString(propertyId)}; },
+      [](const CSSOMStringAtom &customProperty) { return customProperty; });
   }
 
   KRYS_NODISCARD bool

@@ -31,11 +31,11 @@
 
 namespace krys::boo::style
 {
-  // Specialization for `css::CSSOMString`.
+  // Specialization for `CSSOMString`.
   template <>
-  struct CSSValueConversion<css::CSSOMString>
+  struct CSSValueConversion<CSSOMString>
   {
-    KRYS_NODISCARD css::CSSOMString operator()(BuilderState &state, const css::PrimitiveValue &value) noexcept
+    KRYS_NODISCARD CSSOMString operator()(BuilderState &state, const css::PrimitiveValue &value) noexcept
     {
       if (!value.IsString()) KRYS_UNLIKELY
       {
@@ -45,7 +45,7 @@ namespace krys::boo::style
       return value.StringValue();
     }
 
-    KRYS_NODISCARD css::CSSOMString operator()(BuilderState &state, const css::Value &value) noexcept
+    KRYS_NODISCARD CSSOMString operator()(BuilderState &state, const css::Value &value) noexcept
     {
       auto *primitiveValue = RequiredDowncast<css::PrimitiveValue>(state, value);
       if (!primitiveValue) KRYS_UNLIKELY
@@ -56,27 +56,26 @@ namespace krys::boo::style
     }
   };
 
-  // Specialization for `css::CSSOMStringAtom`.
+  // Specialization for `CSSOMStringAtom`.
   template <>
-  struct CSSValueConversion<css::CSSOMStringAtom>
+  struct CSSValueConversion<CSSOMStringAtom>
   {
-    KRYS_NODISCARD css::CSSOMStringAtom operator()(BuilderState &state,
-                                                   const css::PrimitiveValue &value) noexcept
+    KRYS_NODISCARD CSSOMStringAtom operator()(BuilderState &state, const css::PrimitiveValue &value) noexcept
     {
       if (!value.IsString()) KRYS_UNLIKELY
       {
         state.SetCurrentPropertyInvalidAtComputedValueTime();
-        return css::CSSOMStringAtom::Empty();
+        return CSSOMStringAtom::Empty();
       }
-      return css::CSSOMStringAtom {value.StringValue()};
+      return CSSOMStringAtom {value.StringValue()};
     }
 
-    KRYS_NODISCARD css::CSSOMStringAtom operator()(BuilderState &state, const css::Value &value) noexcept
+    KRYS_NODISCARD CSSOMStringAtom operator()(BuilderState &state, const css::Value &value) noexcept
     {
       auto *primitiveValue = RequiredDowncast<css::PrimitiveValue>(state, value);
       if (!primitiveValue) KRYS_UNLIKELY
       {
-        return css::CSSOMStringAtom::Empty();
+        return CSSOMStringAtom::Empty();
       }
       return (*this)(state, *primitiveValue);
     }
@@ -92,9 +91,9 @@ namespace krys::boo::style
       if (!value.IsCustomIdent()) KRYS_UNLIKELY
       {
         state.SetCurrentPropertyInvalidAtComputedValueTime();
-        return {.Value = css::CSSOMStringAtom::Empty()};
+        return {.Value = CSSOMStringAtom::Empty()};
       }
-      return {.Value = css::CSSOMStringAtom {value.CustomIdent()}};
+      return {.Value = CSSOMStringAtom {value.CustomIdent()}};
     }
 
     KRYS_NODISCARD css::CustomIdentifier operator()(BuilderState &state, const css::Value &value) noexcept
@@ -102,7 +101,7 @@ namespace krys::boo::style
       auto *primitiveValue = RequiredDowncast<css::PrimitiveValue>(state, value);
       if (!primitiveValue) KRYS_UNLIKELY
       {
-        return {.Value = css::CSSOMStringAtom::Empty()};
+        return {.Value = CSSOMStringAtom::Empty()};
       }
       return (*this)(state, *primitiveValue);
     }

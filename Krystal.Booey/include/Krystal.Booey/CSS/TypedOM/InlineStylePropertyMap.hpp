@@ -28,22 +28,19 @@
 #include "Krystal.Booey/CSS/TypedOM/StylePropertyMap.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class StyledElement;
-}
 
-namespace krys::boo::css
-{
   /// @brief An element's inline style (`attributeStyleMap`), as a property map.
   /// @see https://drafts.css-houdini.org/css-typed-om/#inline-stylepropertymap-objects
   class InlineStylePropertyMap final : public StylePropertyMap
   {
   private:
-    WeakPtr<dom::StyledElement> _element;
+    WeakPtr<StyledElement> _element;
 
   public:
-    KRYS_NODISCARD static Ref<InlineStylePropertyMap> Create(dom::StyledElement &element) noexcept;
+    KRYS_NODISCARD static Ref<InlineStylePropertyMap> Create(StyledElement &element) noexcept;
 
     ~InlineStylePropertyMap() noexcept override;
 
@@ -59,31 +56,33 @@ namespace krys::boo::css
     void Clear() noexcept final;
 
   private:
-    explicit InlineStylePropertyMap(dom::StyledElement &element) noexcept;
+    explicit InlineStylePropertyMap(StyledElement &element) noexcept;
 
-    KRYS_NODISCARD dom::Document *Document() const noexcept final;
+    KRYS_NODISCARD boo::Document *Document() const noexcept final;
 
-    KRYS_NODISCARD RefPtr<Value> PropertyValue(PropertyId property) const noexcept final;
+    KRYS_NODISCARD RefPtr<css::Value> PropertyValue(css::PropertyId property) const noexcept final;
 
-    KRYS_NODISCARD CSSOMString ShorthandPropertySerialisation(PropertyId property) const noexcept final;
+    KRYS_NODISCARD CSSOMString ShorthandPropertySerialisation(css::PropertyId property) const noexcept final;
 
-    KRYS_NODISCARD RefPtr<Value> CustomPropertyValue(const CSSOMStringAtom &property) const noexcept final;
+    KRYS_NODISCARD RefPtr<css::Value>
+      CustomPropertyValue(const CSSOMStringAtom &property) const noexcept final;
 
-    void RemoveProperty(PropertyId property) noexcept final;
+    void RemoveProperty(css::PropertyId property) noexcept final;
 
     void RemoveCustomProperty(const CSSOMStringAtom &property) noexcept final;
 
-    bool SetShorthandProperty(PropertyId property, const CSSOMString &value) noexcept final;
+    bool SetShorthandProperty(css::PropertyId property, const CSSOMString &value) noexcept final;
 
-    bool SetProperty(PropertyId property, Ref<Value> value) noexcept final;
+    bool SetProperty(css::PropertyId property, Ref<css::Value> value) noexcept final;
 
-    bool SetCustomProperty(const CSSOMStringAtom &property, Ref<VariableReferenceValue> value) noexcept final;
+    bool SetCustomProperty(const CSSOMStringAtom &property,
+                           Ref<css::VariableReferenceValue> value) noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::InlineStylePropertyMap)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::StylePropertyMapReadOnly &map) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::InlineStylePropertyMap)
+  KRYS_NODISCARD static bool IsType(const krys::boo::StylePropertyMapReadOnly &map) noexcept
   {
-    return map.MapType() == krys::boo::css::StylePropertyMapReadOnly::Type::Inline;
+    return map.MapType() == krys::boo::StylePropertyMapReadOnly::Type::Inline;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

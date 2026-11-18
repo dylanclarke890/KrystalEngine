@@ -32,7 +32,7 @@
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGPoint.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   namespace
   {
@@ -41,7 +41,7 @@ namespace krys::boo::svg
       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible};
   }
 
-  SVGPathElement::SVGPathElement(dom::Document &document) noexcept
+  SVGPathElement::SVGPathElement(Document &document) noexcept
       : SVGGeometryElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Path),
         _pathSegList(SVGAnimatedPathSegList::Create(this))
   {
@@ -53,12 +53,12 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGPathElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                        Maybe<dom::DOMStringView> value) noexcept
+  void SVGPathElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                        Maybe<DOMStringView> value) noexcept
   {
     if (name == SVGNames::DAttr())
     {
-      auto string = value.value_or(dom::DOMStringView {});
+      auto string = value.value_or(DOMStringView {});
       if (string.empty())
       {
         _pathSegList->BaseVal()->ClearByteStreamData();
@@ -72,7 +72,7 @@ namespace krys::boo::svg
     SVGGeometryElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGPathElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGPathElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {
@@ -97,24 +97,24 @@ namespace krys::boo::svg
   {
     (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets(PathQueryLayoutOptions, this);
 
-    return GetTotalLengthOfSVGPathByteStream(PathByteStream());
+    return svg::GetTotalLengthOfSVGPathByteStream(PathByteStream());
   }
 
-  dom::ExceptionOr<Ref<SVGPoint>> SVGPathElement::GetPointAtLength(float distance) const noexcept
+  ExceptionOr<Ref<SVGPoint>> SVGPathElement::GetPointAtLength(float distance) const noexcept
   {
     (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets(PathQueryLayoutOptions, this);
 
     // Spec: If it is not able to compute the total length of path, then throw.
     if (PathByteStream().IsEmpty())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError, u8"The element's path is empty."};
+      return Exception {ExceptionCode::InvalidStateError, u8"The element's path is empty."};
     }
 
     // Spec: Clamp distance to [0, length].
     distance = std::clamp<float>(distance, 0, GetTotalLength());
 
     // Spec: Return a newly created, detached SVGPoint object.
-    return SVGPoint::Create(GetPointAtLengthOfSVGPathByteStream(PathByteStream(), distance));
+    return SVGPoint::Create(svg::GetPointAtLengthOfSVGPathByteStream(PathByteStream(), distance));
   }
 
   FloatRect SVGPathElement::GetBBox(StyleUpdateStrategy styleUpdateStrategy) noexcept
@@ -169,9 +169,9 @@ namespace krys::boo::svg
     return _pathSegList->CurrentPath();
   }
 
-  void SVGPathElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                              const dom::DOMStringAtom &namespaceURI,
-                                                              dom::DOMStringView value,
+  void SVGPathElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                              const DOMStringAtom &namespaceURI,
+                                                              DOMStringView value,
                                                               css::MutableStyleProperties &style) noexcept
   {
     if (localName == SVGNames::DAttr().LocalName() && namespaceURI == null)
@@ -224,7 +224,7 @@ namespace krys::boo::svg
     InvalidateMPathDependencies();
   }
 
-  void SVGPathElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void SVGPathElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     SVGGeometryElement::OnRemove(isSubtreeRoot, oldAncestor);
     InvalidateMPathDependencies();

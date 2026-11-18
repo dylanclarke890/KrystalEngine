@@ -55,14 +55,14 @@ namespace krys::boo::tests
       return defaultValue;
     }
 
-    bool HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept final
+    bool HandleKeyboardEvent(KeyboardEvent &event) noexcept final
     {
       ++KeyEvents;
       if (event.Type() != event_names::KeyDown || event.KeyCode() != vk::Right || !event.ShiftKey())
       {
         return false;
       }
-      auto &document = Downcast<dom::Node>(*event.Target()).NodeDocument();
+      auto &document = Downcast<Node>(*event.Target()).NodeDocument();
       return document.GetEditor().GetCommand(u8"MoveRightAndModifySelection").Execute(&event);
     }
 
@@ -91,7 +91,7 @@ namespace krys::boo::tests
       }
     }
 
-    void DiscardedComposition(const dom::Document &) noexcept final
+    void DiscardedComposition(const Document &) noexcept final
     {
       ++DiscardedCompositions;
     }
@@ -101,7 +101,7 @@ namespace krys::boo::tests
       ++CompositionUpdates;
     }
 
-    void HandleInputMethodKeydown(dom::KeyboardEvent &event) noexcept final
+    void HandleInputMethodKeydown(KeyboardEvent &event) noexcept final
     {
       auto *platformEvent = event.UnderlyingPlatformEvent();
       if (platformEvent && platformEvent->HandledByInputMethod())
@@ -110,10 +110,10 @@ namespace krys::boo::tests
       }
     }
 
-    void DidDispatchInputMethodKeydown(dom::KeyboardEvent &event) noexcept final
+    void DidDispatchInputMethodKeydown(KeyboardEvent &event) noexcept final
     {
       auto *platformEvent = event.UnderlyingPlatformEvent();
-      auto &editor = Downcast<dom::Node>(*event.Target()).NodeDocument().GetEditor();
+      auto &editor = Downcast<Node>(*event.Target()).NodeDocument().GetEditor();
       if (const auto &underlines = platformEvent->PreeditUnderlines())
       {
         auto rangeStart = static_cast<uint32>(platformEvent->PreeditSelectionRangeStart().value_or(0));
@@ -126,7 +126,7 @@ namespace krys::boo::tests
       }
     }
 
-    void SetInputMethodState(dom::Element *element) noexcept final
+    void SetInputMethodState(Element *element) noexcept final
     {
       InputMethodEnabled = element && element->ShouldUseInputMethod();
     }
@@ -197,32 +197,32 @@ namespace krys::boo::tests
     /// @brief The text control notifications, in order.
     List<std::string> TextControlNotifications;
 
-    void TextFieldDidBeginEditing(boo::dom::Element &) noexcept final
+    void TextFieldDidBeginEditing(boo::Element &) noexcept final
     {
       TextControlNotifications.emplace_back("begin editing");
     }
 
-    void TextFieldDidEndEditing(boo::dom::Element &) noexcept final
+    void TextFieldDidEndEditing(boo::Element &) noexcept final
     {
       TextControlNotifications.emplace_back("end editing");
     }
 
-    void TextDidChangeInTextField(boo::dom::Element &) noexcept final
+    void TextDidChangeInTextField(boo::Element &) noexcept final
     {
       TextControlNotifications.emplace_back("field changed");
     }
 
-    bool DoTextFieldCommandFromEvent(boo::dom::Element &, boo::dom::KeyboardEvent *) noexcept final
+    bool DoTextFieldCommandFromEvent(boo::Element &, boo::KeyboardEvent *) noexcept final
     {
       return false;
     }
 
-    void TextWillBeDeletedInTextField(boo::dom::Element &) noexcept final
+    void TextWillBeDeletedInTextField(boo::Element &) noexcept final
     {
       TextControlNotifications.emplace_back("will delete");
     }
 
-    void TextDidChangeInTextArea(boo::dom::Element &) noexcept final
+    void TextDidChangeInTextArea(boo::Element &) noexcept final
     {
       TextControlNotifications.emplace_back("area changed");
     }
@@ -368,13 +368,13 @@ namespace krys::boo::tests
   };
 
   /// @brief Counts the events of a type, cancelling them if asked.
-  struct CountingListener : public dom::EventListenerCallback
+  struct CountingListener : public EventListenerCallback
   {
     int32 Count {0};
     bool Cancel {false};
     bool LastWasTrustedClipboardEvent {false};
 
-    void HandleEvent(dom::Event &event) noexcept override
+    void HandleEvent(Event &event) noexcept override
     {
       ++Count;
       LastWasTrustedClipboardEvent = event.IsClipboardEvent() && event.IsTrusted() && event.Bubbles()
@@ -404,7 +404,7 @@ namespace krys::boo::tests
       TestPage = Page::Create(krys::move(chromeClient), krys::move(client));
       Frame = ShareRefPtr(&TestPage->MainFrame());
       Frame->CreateView({400, 300});
-      Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+      Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
       (void)Document->UpdateLayout();
       PlatformStrategies::Singleton().SetPasteboardStrategy(&Pasteboard);
     }
@@ -414,9 +414,9 @@ namespace krys::boo::tests
       PlatformStrategies::Singleton().SetPasteboardStrategy(nullptr);
     }
 
-    KRYS_NODISCARD dom::Text &TextIn(dom::DOMStringView id) noexcept
+    KRYS_NODISCARD boo::Text &TextIn(DOMStringView id) noexcept
     {
-      return Downcast<dom::Text>(*ById(id).FirstChild());
+      return Downcast<boo::Text>(*ById(id).FirstChild());
     }
 
     KRYS_NODISCARD Editor &GetEditor() noexcept
@@ -429,30 +429,30 @@ namespace krys::boo::tests
       return Document->Selection();
     }
 
-    void Select(dom::Node &node, uint32 start, uint32 end) noexcept
+    void Select(Node &node, uint32 start, uint32 end) noexcept
     {
       Selection().MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&node), start),
                          dom::MakeContainerOffsetPosition(ShareRefPtr(&node), end), Affinity::Downstream);
     }
 
-    KRYS_NODISCARD html::HTMLBodyElement &Body() noexcept
+    KRYS_NODISCARD HTMLBodyElement &Body() noexcept
     {
       auto *body = Document->Body().get(); // The document keeps it alive.
       return *body;
     }
 
     /// @brief The markup of @p element's children.
-    KRYS_NODISCARD static utf8_string InnerHTML(const dom::Node &node) noexcept
+    KRYS_NODISCARD static utf8_string InnerHTML(const Node &node) noexcept
     {
       return SerializeFragment(node, SerializedNodes::SubtreesOfChildren);
     }
 
-    KRYS_NODISCARD static dom::SimpleRange CollapsedRange(dom::Node &node, uint64 offset) noexcept
+    KRYS_NODISCARD static dom::SimpleRange CollapsedRange(Node &node, uint64 offset) noexcept
     {
       return {{ShareRef(node), offset}, {ShareRef(node), offset}};
     }
 
-    void SetCaret(dom::Node &node, uint32 offset) noexcept
+    void SetCaret(Node &node, uint32 offset) noexcept
     {
       Selection().MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&node), offset), Affinity::Downstream);
     }
@@ -466,7 +466,7 @@ namespace krys::boo::tests
     KRYS_NODISCARD Ref<CountingListener> Listen(utf8_stringview type) noexcept
     {
       auto listener = CreateRef<CountingListener>();
-      Document->AddEventListener(dom::DOMStringAtom(type), listener, true);
+      Document->AddEventListener(DOMStringAtom(type), listener, true);
       return listener;
     }
   };

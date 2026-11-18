@@ -26,22 +26,22 @@ namespace krys::boo::tests
     {
       constexpr static IntSize ViewSize {200, 100};
       Ref<Page> TestPage;
-      Ref<dom::HTMLDocument> Document;
+      Ref<HTMLDocument> Document;
 
       explicit ContentVisibilityFixture(utf8_string &&markup) noexcept
-          : TestPage(Page::Create()), Document(CreateRef<dom::HTMLDocument>())
+          : TestPage(Page::Create()), Document(CreateRef<HTMLDocument>())
       {
         html::EventLoop::Current().RunUntilIdle();
         auto &frame = TestPage->MainFrame();
         frame.CreateView(ViewSize);
-        frame.SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+        frame.SetDocument(ShareRefPtr<boo::Document>(Document.get()));
         auto parser = CreateRef<html::DocumentParser>(*Document);
         parser->InputStream().Append(u8"<!DOCTYPE html>" + krys::move(markup), IsEOF::Yes);
         parser->PumpTokenizer();
         Document->StyleScope().FlushPendingUpdate();
       }
 
-      KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) const noexcept
+      KRYS_NODISCARD Element &ById(DOMStringView id) const noexcept
       {
         auto element = Document->GetElementById(id);
         krys_assert(element);
@@ -56,7 +56,7 @@ namespace krys::boo::tests
       }
 
       /// @brief Whether @p id's renderer was skipped by the last layout.
-      KRYS_NODISCARD bool WasSkipped(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD bool WasSkipped(DOMStringView id) noexcept
       {
         auto *renderer = ById(id).Renderer();
         krys_assert(renderer);
@@ -79,12 +79,12 @@ namespace krys::boo::tests
     struct StateChanges
     {
       List<bool> Skipped;
-      dom::EventListenerHandle Handle;
+      EventListenerHandle Handle;
 
-      explicit StateChanges(dom::Element &element) noexcept
+      explicit StateChanges(Element &element) noexcept
           : Handle(element.AddEventListener(
-              u8"contentvisibilityautostatechange", [this](dom::Event &event)
-              { Skipped.push_back(Downcast<dom::ContentVisibilityAutoStateChangeEvent>(event).Skipped()); }))
+              u8"contentvisibilityautostatechange", [this](Event &event)
+              { Skipped.push_back(Downcast<ContentVisibilityAutoStateChangeEvent>(event).Skipped()); }))
       {
       }
     };
@@ -193,11 +193,11 @@ namespace krys::boo::tests
 
     SECTION("Focus")
     {
-      Downcast<html::HTMLElement>(fixture.ById(u8"button")).Focus({.PreventScroll = true});
+      Downcast<HTMLElement>(fixture.ById(u8"button")).Focus({.PreventScroll = true});
       fixture.UpdateRendering();
       CHECK(far.GetContentRelevancy() == EnumSet<dom::ContentRelevancy> {dom::ContentRelevancy::Focused});
 
-      Downcast<html::HTMLElement>(fixture.ById(u8"button")).Blur();
+      Downcast<HTMLElement>(fixture.ById(u8"button")).Blur();
       fixture.UpdateRendering();
       CHECK_FALSE(far.IsRelevantToUser());
     }
@@ -216,7 +216,7 @@ namespace krys::boo::tests
 
     SECTION("The top layer")
     {
-      auto &dialog = Downcast<html::HTMLDialogElement>(fixture.ById(u8"dialog"));
+      auto &dialog = Downcast<HTMLDialogElement>(fixture.ById(u8"dialog"));
       REQUIRE_FALSE(dialog.ShowModal().HasException());
       fixture.UpdateRendering();
       CHECK(far.GetContentRelevancy()

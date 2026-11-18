@@ -28,17 +28,9 @@
 
 namespace krys::boo
 {
-  class SVGResourcesCache;
-}
-
-namespace krys::boo::dom
-{
   class Document;
-}
-
-namespace krys::boo::svg
-{
   class SVGElement;
+  class SVGResourcesCache;
   class SVGSvgElement;
 
   /// @brief What a document keeps for its SVG content: its resources, the elements whose references wait to
@@ -48,7 +40,7 @@ namespace krys::boo::svg
     KRYS_NON_COPY_MOVABLE(SVGDocumentExtensions);
 
   private:
-    WeakPtr<dom::Document> _document;
+    WeakPtr<Document> _document;
     UniquePtr<SVGResourcesCache> _resourcesCache;
     List<Ref<SVGElement>> _rebuildElements;
     // For SVG 1.2 support this will need to be made more general.
@@ -56,7 +48,7 @@ namespace krys::boo::svg
     bool _areAnimationsPaused;
 
   public:
-    explicit SVGDocumentExtensions(dom::Document &) noexcept;
+    explicit SVGDocumentExtensions(Document &) noexcept;
 
     ~SVGDocumentExtensions() noexcept;
 

@@ -13,7 +13,7 @@ namespace krys::boo::style::tests
   {
     const boo::Color Blue {boo::Color::blue};
 
-    KRYS_NODISCARD const RenderStyle &Rendered(const dom::Element &element)
+    KRYS_NODISCARD const RenderStyle &Rendered(const Element &element)
     {
       auto *style = element.GetRenderStyle();
       REQUIRE(style);
@@ -149,9 +149,9 @@ namespace krys::boo::style::tests
 
     SECTION("Inline style changes synchronise the style attribute for non-subject [style] selectors")
     {
-      auto &b = Downcast<dom::StyledElement>(fixture.ById(u8"b"));
+      auto &b = Downcast<StyledElement>(fixture.ById(u8"b"));
       auto &i = fixture.ById(u8"i");
-      REQUIRE(b.SetInlineStyleProperty(css::PropertyId::Color, css::CSSOMString(u8"red")));
+      REQUIRE(b.SetInlineStyleProperty(css::PropertyId::Color, CSSOMString(u8"red")));
       CHECK(b.HasAttribute(u8"style"));
       CHECK(i.StyleValidity() == Validity::ElementInvalid);
       document.UpdateStyleIfNeeded();

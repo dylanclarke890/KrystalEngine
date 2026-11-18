@@ -27,15 +27,14 @@
 #include "Krystal.Booey/DOM/Collections/LiveNodeList.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
+  class HTMLElement;
 }
 
 namespace krys::boo::html
 {
-  class HTMLElement;
-
   /// @brief The labels of a labelable element: the `label` elements in its tree whose labeled control it is,
   /// in tree order.
   /// @see https://html.spec.whatwg.org/#dom-lfe-labels
@@ -47,6 +46,6 @@ namespace krys::boo::html
   public:
     explicit LabelsNodeList(HTMLElement &ownerNode) noexcept;
 
-    KRYS_NODISCARD bool ElementMatches(const dom::Element &testNode) const noexcept;
+    KRYS_NODISCARD bool ElementMatches(const Element &testNode) const noexcept;
   };
 }

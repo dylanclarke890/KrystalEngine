@@ -37,18 +37,18 @@
 namespace krys::boo
 {
   using MathConstant = OpenTypeMathData::MathConstant;
-  using ScriptType = mathml::MathMLScriptsElement::ScriptType;
+  using ScriptType = MathMLScriptsElement::ScriptType;
 
   namespace
   {
     KRYS_NODISCARD bool IsPrescriptDelimiter(const RenderObject &renderObject) noexcept
     {
-      auto *element = DynamicDowncast<mathml::MathMLElement>(renderObject.GetNode());
+      auto *element = DynamicDowncast<MathMLElement>(renderObject.GetNode());
       return element && element->HasTagName(html::TagName::mprescripts);
     }
   }
 
-  RenderMathMLScripts::RenderMathMLScripts(Type type, mathml::MathMLScriptsElement &element,
+  RenderMathMLScripts::RenderMathMLScripts(Type type, MathMLScriptsElement &element,
                                            RenderStyle &&style) noexcept
       : RenderMathMLRow(type, element, krys::move(style))
   {
@@ -56,9 +56,9 @@ namespace krys::boo
 
   RenderMathMLScripts::~RenderMathMLScripts() noexcept = default;
 
-  mathml::MathMLScriptsElement &RenderMathMLScripts::GetElement() const noexcept
+  MathMLScriptsElement &RenderMathMLScripts::GetElement() const noexcept
   {
-    return static_cast<mathml::MathMLScriptsElement &>(NodeForNonAnonymous());
+    return static_cast<MathMLScriptsElement &>(NodeForNonAnonymous());
   }
 
   ScriptType RenderMathMLScripts::GetScriptType() const noexcept

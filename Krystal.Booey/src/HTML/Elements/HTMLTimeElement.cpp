@@ -1,23 +1,23 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLTimeElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLTimeElement::HTMLTimeElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Time)
+  HTMLTimeElement::HTMLTimeElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Time)
   {
   }
 
 #pragma region HTMLTimeElement
 
-  dom::DOMString HTMLTimeElement::DateTime() const noexcept
+  DOMString HTMLTimeElement::DateTime() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"datetime").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"datetime").value_or(u8"");
   }
 
-  void HTMLTimeElement::DateTime(dom::DOMString value) noexcept
+  void HTMLTimeElement::DateTime(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"datetime", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"datetime", krys::move(value));
   }
 
 #pragma endregion

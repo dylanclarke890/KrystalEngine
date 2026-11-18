@@ -41,7 +41,7 @@ namespace krys::boo::html::tests
       Define(u8"x-a");
       auto again = Registry().Define(u8"x-a", [](HTMLElement &) { return UniquePtr<CustomElement> {}; });
       REQUIRE(again.HasException());
-      CHECK(again.GetException().Code() == dom::ExceptionCode::NotSupportedError);
+      CHECK(again.GetException().Code() == ExceptionCode::NotSupportedError);
     }
 
     SECTION("get and getName")
@@ -114,7 +114,7 @@ namespace krys::boo::html::tests
       (void)TakeCalls();
       auto clone = ById(u8"a").CloneNode(false);
       REQUIRE_FALSE(clone.HasException());
-      auto &cloned = Downcast<dom::Element>(*clone.Value());
+      auto &cloned = Downcast<Element>(*clone.Value());
       CHECK(cloned.IsDefinedCustomElement());
       CHECK(TakeCalls() == Log {u8"constructed", u8"attribute value null 1"});
     }
@@ -137,7 +137,7 @@ namespace krys::boo::html::tests
     SECTION("defining a name upgrades the document's elements in tree order")
     {
       Parse(u8"<x-late id=a value=1><x-late id=b></x-late></x-late><div><x-late id=c></x-late></div>");
-      Ref<dom::Element> first = ShareRef(ById(u8"a"));
+      Ref<Element> first = ShareRef(ById(u8"a"));
       CHECK(first->IsCustomElementUpgradeCandidate());
       CHECK_FALSE(first->Matches(u8":defined").ReleaseValue());
 
@@ -253,7 +253,7 @@ namespace krys::boo::html::tests
 
     SECTION("adopting it into another document")
     {
-      auto other = CreateRef<dom::HTMLDocument>();
+      auto other = CreateRef<HTMLDocument>();
       REQUIRE_FALSE(other->AdoptNode(element).HasException());
       CHECK(TakeCalls() == Log {u8"disconnected a", u8"adopted a"});
     }
@@ -262,12 +262,12 @@ namespace krys::boo::html::tests
     {
       Calls.clear();
 
-      struct Reenter : dom::EventListenerCallback
+      struct Reenter : EventListenerCallback
       {
-        dom::Element *Target {nullptr};
+        Element *Target {nullptr};
         Log *Calls {nullptr};
 
-        void HandleEvent(dom::Event &) noexcept override
+        void HandleEvent(Event &) noexcept override
         {
           (void)Target->SetAttribute(u8"value", u8"from-listener");
           Calls->emplace_back(u8"returned");
@@ -278,7 +278,7 @@ namespace krys::boo::html::tests
       listener->Target = &element;
       listener->Calls = &Calls;
       element.AddEventListener(u8"custom", listener, false);
-      auto event = CreateRef<dom::Event>(u8"custom");
+      auto event = CreateRef<Event>(u8"custom");
       (void)element.DispatchEvent(*event);
       CHECK(TakeCalls() == Log {u8"attribute value null from-listener", u8"returned"});
     }
@@ -313,7 +313,7 @@ namespace krys::boo::html::tests
     auto element = Create(u8"x-closed");
     auto shadow = element->AttachShadow({});
     REQUIRE(shadow.HasException());
-    CHECK(shadow.GetException().Code() == dom::ExceptionCode::NotSupportedError);
+    CHECK(shadow.GetException().Code() == ExceptionCode::NotSupportedError);
 
     SECTION("an element with a shadow root fails to upgrade")
     {
@@ -354,7 +354,7 @@ namespace krys::boo::html::tests
     {
       auto initializeDocument = Registry().Initialize(*Document);
       REQUIRE(initializeDocument.HasException());
-      CHECK(initializeDocument.GetException().Code() == dom::ExceptionCode::NotSupportedError);
+      CHECK(initializeDocument.GetException().Code() == ExceptionCode::NotSupportedError);
 
       REQUIRE_FALSE(scoped->Initialize(*global).HasException());
       CHECK(global->CustomElementRegistry().get() == &Registry());

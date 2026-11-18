@@ -37,9 +37,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFEImageElement::SVGFEImageElement(dom::Document &document) noexcept
+  SVGFEImageElement::SVGFEImageElement(Document &document) noexcept
       : SVGFilterPrimitiveStandardAttributes(document, CreateUnique<PropertyRegistry>(*this),
                                              SVGElementInterface::FEImage),
         SVGURIReference(this), _preserveAspectRatio(SVGAnimatedPreserveAspectRatio::Create(this))
@@ -126,20 +126,20 @@ namespace krys::boo::svg
     UpdateSVGRendererForElementChange();
   }
 
-  void SVGFEImageElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                           Maybe<dom::DOMStringView> value) noexcept
+  void SVGFEImageElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                           Maybe<DOMStringView> value) noexcept
   {
     if (name == SVGNames::PreserveAspectRatioAttr())
     {
       _preserveAspectRatio->SetBaseValInternal(
-        SVGPreserveAspectRatioValue {value.value_or(dom::DOMStringView {})});
+        SVGPreserveAspectRatioValue {value.value_or(DOMStringView {})});
     }
 
     SVGURIReference::ParseAttribute(name, value);
     SVGFilterPrimitiveStandardAttributes::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGFEImageElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGFEImageElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {
@@ -166,7 +166,7 @@ namespace krys::boo::svg
     BuildPendingResource();
   }
 
-  void SVGFEImageElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void SVGFEImageElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     bool disconnectedFromDocument = oldAncestor.IsConnected() && !IsConnected();
     SVGFilterPrimitiveStandardAttributes::OnRemove(isSubtreeRoot, oldAncestor);

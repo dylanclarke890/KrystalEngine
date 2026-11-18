@@ -24,9 +24,9 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::Namespace, 8uz);
 
 namespace krys::boo::html
 {
-  KRYS_NODISCARD constexpr Namespace ParseNamespace(dom::DOMStringView name) noexcept
+  KRYS_NODISCARD constexpr Namespace ParseNamespace(DOMStringView name) noexcept
   {
-    if (name == dom::DOMStringAtom::Empty())
+    if (name == DOMStringAtom::Empty())
     {
       return Namespace::None;
     }

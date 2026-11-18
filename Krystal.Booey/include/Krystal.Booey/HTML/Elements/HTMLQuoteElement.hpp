@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlquoteelement
   class HTMLQuoteElement : public HTMLElement
@@ -11,7 +11,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLQuoteElement);
 
   public:
-    HTMLQuoteElement(dom::Document &document) noexcept;
+    HTMLQuoteElement(Document &document) noexcept;
 
 #pragma region HTMLQuoteElement - https://html.spec.whatwg.org/#htmlquoteelement
 
@@ -25,8 +25,8 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLQuoteElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLQuoteElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLQuoteElement();
   }

@@ -32,21 +32,24 @@
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
+  class CSSStyleSheet;
   template <typename>
   class ExceptionOr;
 }
 
 namespace krys::boo::css
 {
-  class CSSStyleSheet;
   struct ParserContext;
   class Rule;
   struct SerialisationContext;
   class StyleRule;
   class StyleRuleWithNesting;
+}
 
+namespace krys::boo
+{
   /// @brief The base of the rules exposed to scripts. Each wraps a rule of the internal rule model.
   /// @see https://drafts.csswg.org/cssom/#the-cssrule-interface
   class CSSRule : public RefCounted<CSSRule>, public CanMakeWeakPtr<CSSRule>
@@ -82,14 +85,14 @@ namespace krys::boo::css
 
     KRYS_NODISCARD virtual CSSOMString CssText() const noexcept = 0;
 
-    KRYS_NODISCARD virtual CSSOMString CssText(const SerialisationContext &) const noexcept
+    KRYS_NODISCARD virtual CSSOMString CssText(const css::SerialisationContext &) const noexcept
     {
       return CssText();
     }
 
     /// @brief Points the wrapper at @p rule, the copy of its rule made when the style sheet was copied on
     /// write.
-    virtual void Reattach(Rule &rule) noexcept = 0;
+    virtual void Reattach(css::Rule &rule) noexcept = 0;
 
     void SetParentStyleSheet(CSSStyleSheet *styleSheet) noexcept
     {
@@ -124,14 +127,14 @@ namespace krys::boo::css
 
     /// @brief Replaces the child @p rule with a style rule that can hold nested rules.
     /// @return The new rule, or null if @p rule isn't a child of this rule.
-    KRYS_NODISCARD virtual RefPtr<StyleRuleWithNesting>
-      PrepareChildStyleRuleForNesting(StyleRule &rule) noexcept;
+    KRYS_NODISCARD virtual RefPtr<css::StyleRuleWithNesting>
+      PrepareChildStyleRuleForNesting(css::StyleRule &rule) noexcept;
 
     virtual void GetChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &) noexcept
     {
     }
 
-    static dom::ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept;
+    static ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept;
 
   protected:
     KRYS_NODISCARD bool HasCachedSelectorText() const noexcept
@@ -144,6 +147,6 @@ namespace krys::boo::css
       _hasCachedSelectorText = hasCachedSelectorText;
     }
 
-    KRYS_NODISCARD const ParserContext &GetParserContext() const noexcept;
+    KRYS_NODISCARD const css::ParserContext &GetParserContext() const noexcept;
   };
 }

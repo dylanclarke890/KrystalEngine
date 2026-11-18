@@ -42,7 +42,7 @@ namespace krys::boo
     KRYS_NODISCARD inline const RenderObject *RendererFromPosition(const dom::Position &position) noexcept
     {
       krys_debug_assert(position.IsNotNull());
-      dom::Node *rendererNode = nullptr;
+      Node *rendererNode = nullptr;
       switch (position.GetAnchorType())
       {
         case dom::Position::AnchorType::PositionIsOffsetInAnchor:

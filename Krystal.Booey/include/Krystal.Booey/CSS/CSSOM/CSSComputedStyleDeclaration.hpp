@@ -27,7 +27,7 @@
 #include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
 }
@@ -35,7 +35,10 @@ namespace krys::boo::dom
 namespace krys::boo::css
 {
   class MutableStyleProperties;
+}
 
+namespace krys::boo
+{
   /// @brief The read-only declaration block of an element's resolved values, as returned by
   /// `getComputedStyle()`.
   class CSSComputedStyleDeclaration final : public CSSStyleProperties,
@@ -48,7 +51,7 @@ namespace krys::boo::css
       Yes,
     };
 
-    const Ref<dom::Element> _element;
+    const Ref<Element> _element;
     Maybe<style::PseudoElementIdentifier> _pseudoElementIdentifier {null};
     bool _isEmpty {false};
 
@@ -69,18 +72,18 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static Ref<CSSComputedStyleDeclaration>
-      Create(dom::Element &, const Maybe<style::PseudoElementIdentifier> &) noexcept;
+      Create(Element &, const Maybe<style::PseudoElementIdentifier> &) noexcept;
 
-    KRYS_NODISCARD static Ref<CSSComputedStyleDeclaration> CreateEmpty(dom::Element &) noexcept;
+    KRYS_NODISCARD static Ref<CSSComputedStyleDeclaration> CreateEmpty(Element &) noexcept;
 
     ~CSSComputedStyleDeclaration() noexcept override;
 
-    KRYS_NODISCARD CSSOMString GetPropertyValue(PropertyId) const noexcept;
+    KRYS_NODISCARD CSSOMString GetPropertyValue(css::PropertyId) const noexcept;
 
   private:
-    CSSComputedStyleDeclaration(dom::Element &, IsEmpty) noexcept;
+    CSSComputedStyleDeclaration(Element &, IsEmpty) noexcept;
 
-    CSSComputedStyleDeclaration(dom::Element &, const Maybe<style::PseudoElementIdentifier> &) noexcept;
+    CSSComputedStyleDeclaration(Element &, const Maybe<style::PseudoElementIdentifier> &) noexcept;
 
     // CSSOM functions. Don't make these public.
     KRYS_NODISCARD CSSRule *ParentRule() const noexcept final;
@@ -97,28 +100,28 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsPropertyImplicit(const CSSOMString &propertyName) noexcept final;
 
-    dom::ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
-                                       const CSSOMString &priority) noexcept final;
+    ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
+                                  const CSSOMString &priority) noexcept final;
 
-    dom::ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &propertyName) noexcept final;
+    ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &propertyName) noexcept final;
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
-    dom::ExceptionOr<void> SetCssText(const CSSOMString &) noexcept final;
+    ExceptionOr<void> SetCssText(const CSSOMString &) noexcept final;
 
-    KRYS_NODISCARD CSSOMString GetPropertyValueInternal(PropertyId) noexcept final;
+    KRYS_NODISCARD CSSOMString GetPropertyValueInternal(css::PropertyId) noexcept final;
 
-    dom::ExceptionOr<void> SetPropertyInternal(PropertyId, const CSSOMString &value,
-                                               IsImportant) noexcept final;
+    ExceptionOr<void> SetPropertyInternal(css::PropertyId, const CSSOMString &value,
+                                          css::IsImportant) noexcept final;
 
-    KRYS_NODISCARD Ref<MutableStyleProperties> CopyProperties() const noexcept final;
+    KRYS_NODISCARD Ref<css::MutableStyleProperties> CopyProperties() const noexcept final;
 
-    KRYS_NODISCARD Ref<dom::Element> ProtectedElement() const noexcept
+    KRYS_NODISCARD Ref<Element> ProtectedElement() const noexcept
     {
       return _element;
     }
 
-    KRYS_NODISCARD const FixedVector<PropertyId> &ExposedComputedCSSPropertyIds() const noexcept;
+    KRYS_NODISCARD const FixedVector<css::PropertyId> &ExposedComputedCSSPropertyIds() const noexcept;
 
     KRYS_NODISCARD style::Extractor GetExtractor() const noexcept;
   };

@@ -25,7 +25,7 @@
 #include "Krystal.Booey/SVG/SVGAnimateElementBase.hpp"
 #include "Krystal.Booey/SVG/SVGTransformValue.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<animateTransform>` element: animates one kind of transform on its target's transform list.
   /// @see https://svgwg.org/specs/animations/#AnimateTransformElement
@@ -37,7 +37,7 @@ namespace krys::boo::svg
     SVGTransformValue::SVGTransformType _type {SVGTransformValue::SVG_TRANSFORM_TRANSLATE};
 
   public:
-    explicit SVGAnimateTransformElement(dom::Document &) noexcept;
+    explicit SVGAnimateTransformElement(Document &) noexcept;
 
     KRYS_NODISCARD SVGTransformValue::SVGTransformType TransformType() const noexcept
     {
@@ -47,21 +47,21 @@ namespace krys::boo::svg
   private:
     KRYS_NODISCARD bool HasValidAttributeType() const noexcept final;
 
-    void AttributeChanged(const dom::QualifiedName &, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    KRYS_NODISCARD dom::DOMString AnimateRangeString(dom::DOMStringView) const noexcept final;
+    KRYS_NODISCARD DOMString AnimateRangeString(DOMStringView) const noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGAnimateTransformElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &element) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGAnimateTransformElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &element) noexcept
   {
-    return element.Interface() == krys::boo::svg::SVGElementInterface::AnimateTransform;
+    return element.Interface() == krys::boo::SVGElementInterface::AnimateTransform;
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    auto *svgElement = krys::DynamicDowncast<krys::boo::svg::SVGElement>(node);
+    auto *svgElement = krys::DynamicDowncast<krys::boo::SVGElement>(node);
     return svgElement && IsType(*svgElement);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

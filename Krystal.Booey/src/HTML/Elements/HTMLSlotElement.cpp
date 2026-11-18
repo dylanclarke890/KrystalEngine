@@ -4,33 +4,33 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLSlotElement::HTMLSlotElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Slot, HTMLElementFlags::None,
+  HTMLSlotElement::HTMLSlotElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Slot, html::HTMLElementFlags::None,
                     dom::NodeFlags::IsHTMLSlotElement)
   {
   }
 
 #pragma region HTMLSlotElement
 
-  dom::DOMString HTMLSlotElement::Name() const noexcept
+  DOMString HTMLSlotElement::Name() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLSlotElement::Name(dom::DOMString name) noexcept
+  void HTMLSlotElement::Name(DOMString name) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"name", krys::move(name));
+    html::Reflect<DOMString>(*this, u8"name", krys::move(name));
   }
 
   // https://html.spec.whatwg.org/#dom-slot-assignednodes
-  List<Ref<dom::Node>> HTMLSlotElement::AssignedNodes(const AssignedNodesOptions &options) noexcept
+  List<Ref<Node>> HTMLSlotElement::AssignedNodes(const html::AssignedNodesOptions &options) noexcept
   {
     // 1. If options["flatten"] is false, then return this's assigned nodes.
     if (!options.Flatten)
     {
-      List<Ref<dom::Node>> nodes;
+      List<Ref<Node>> nodes;
       nodes.reserve(_assignedNodes.size());
       for (auto &weakNode : _assignedNodes)
       {
@@ -47,15 +47,15 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-slot-assignedelements
-  List<Ref<dom::Element>> HTMLSlotElement::AssignedElements(const AssignedNodesOptions &options) noexcept
+  List<Ref<Element>> HTMLSlotElement::AssignedElements(const html::AssignedNodesOptions &options) noexcept
   {
     // 1. If options["flatten"] is false, then return this's assigned nodes, filtered to contain only Element
     //    nodes.
     // 2. Return the result of finding flattened slottables with this, filtered to contain only Element nodes.
-    List<Ref<dom::Element>> elements;
+    List<Ref<Element>> elements;
     for (auto &node : AssignedNodes(options))
     {
-      if (auto *element = DynamicDowncast<dom::Element>(*node))
+      if (auto *element = DynamicDowncast<Element>(*node))
       {
         elements.push_back(ShareRef(*element));
       }
@@ -76,12 +76,12 @@ namespace krys::boo::html
     }
 
     // 2. Let nodesSet be a new ordered set.
-    List<WeakRef<dom::Node>> nodesSet;
+    List<WeakRef<Node>> nodesSet;
 
     // 3. For each node of nodes:
     for (auto &item : nodes)
     {
-      dom::Node &node = std::visit([](auto &slottable) -> dom::Node & { return *slottable; }, item);
+      Node &node = std::visit([](auto &slottable) -> Node & { return *slottable; }, item);
 
       // 3a. If node's manual slot assignment refers to a slot, then remove node from that slot's manually
       //     assigned nodes.
@@ -97,7 +97,7 @@ namespace krys::boo::html
       // 3c. Append node to nodesSet.
       if (!std::ranges::any_of(nodesSet, [&](const auto &weakNode) { return weakNode.get() == &node; }))
       {
-        nodesSet.push_back(CreateWeakRef<dom::Node>(node));
+        nodesSet.push_back(CreateWeakRef<Node>(node));
       }
     }
 
@@ -110,10 +110,9 @@ namespace krys::boo::html
 
 #pragma endregion
 
-  void HTMLSlotElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                           Maybe<dom::DOMStringView> oldValue,
-                                           Maybe<dom::DOMStringView> value,
-                                           const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLSlotElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                           Maybe<DOMStringView> value,
+                                           const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 

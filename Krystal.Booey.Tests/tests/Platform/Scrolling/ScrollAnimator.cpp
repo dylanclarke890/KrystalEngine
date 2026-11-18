@@ -28,11 +28,11 @@ namespace krys::boo::tests
       u8"<!DOCTYPE html><style>body{margin:0}#s{width:100px;height:100px;overflow:auto}#c{height:1000px}"
       u8".smooth{scroll-behavior:smooth}</style><div id=s tabindex=0><div id=c></div></div>";
 
-    struct EventCounter final : dom::EventListenerCallback
+    struct EventCounter final : EventListenerCallback
     {
       int32 Count {0};
 
-      void HandleEvent(dom::Event &) noexcept override
+      void HandleEvent(Event &) noexcept override
       {
         ++Count;
       }
@@ -45,7 +45,7 @@ namespace krys::boo::tests
       return options;
     }
 
-    KRYS_NODISCARD ScrollableArea &AreaOf(dom::Element &element) noexcept
+    KRYS_NODISCARD ScrollableArea &AreaOf(Element &element) noexcept
     {
       auto *area = Downcast<RenderBox>(*element.Renderer()).Layer()->GetScrollableArea();
       REQUIRE(area);
@@ -74,9 +74,8 @@ namespace krys::boo::tests
     auto &scroller = fixture.ById(u8"s");
     auto scroll = CreateRef<EventCounter>();
     auto scrollEnd = CreateRef<EventCounter>();
-    scroller.AddEventListener(event_names::Scroll, ShareRef<dom::EventListenerCallback>(*scroll), false);
-    scroller.AddEventListener(event_names::ScrollEnd, ShareRef<dom::EventListenerCallback>(*scrollEnd),
-                              false);
+    scroller.AddEventListener(event_names::Scroll, ShareRef<EventListenerCallback>(*scroll), false);
+    scroller.AddEventListener(event_names::ScrollEnd, ShareRef<EventListenerCallback>(*scrollEnd), false);
 
     SECTION("moves over frames, and ends with one scrollend")
     {
@@ -278,8 +277,8 @@ namespace krys::boo::tests
     auto &view = *fixture.Document->View();
     auto &window = *fixture.Document->Window();
     auto scrollEnd = CreateRef<EventCounter>();
-    fixture.Document->AddEventListener(event_names::ScrollEnd,
-                                       ShareRef<dom::EventListenerCallback>(*scrollEnd), false);
+    fixture.Document->AddEventListener(event_names::ScrollEnd, ShareRef<EventListenerCallback>(*scrollEnd),
+                                       false);
 
     SECTION("scrollTo with smooth")
     {
@@ -312,7 +311,7 @@ namespace krys::boo::tests
   {
     AnimationPageFixture fixture {utf8_string(Page)};
     auto &scroller = fixture.ById(u8"s");
-    Downcast<html::HTMLElement>(scroller).Focus();
+    Downcast<HTMLElement>(scroller).Focus();
 
     SECTION("an arrow key")
     {
@@ -413,13 +412,13 @@ namespace krys::boo::tests
       u8"<!DOCTYPE html><style>body{margin:0}</style><select id=s size=3><option>0</option><option>1</option>"
       u8"<option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>"
       u8"<option>7</option><option>8</option><option>9</option></select>")};
-    auto &select = Downcast<html::HTMLSelectElement>(fixture.ById(u8"s"));
+    auto &select = Downcast<HTMLSelectElement>(fixture.ById(u8"s"));
     auto &listBox = Downcast<RenderListBox>(*select.Renderer());
     auto &area = static_cast<ScrollableArea &>(listBox);
     int32 itemHeight =
       (listBox.ItemBoundingBoxRect({}, 1).Y() - listBox.ItemBoundingBoxRect({}, 0).Y()).ToInt();
     auto scrollEnd = CreateRef<EventCounter>();
-    select.AddEventListener(event_names::ScrollEnd, ShareRef<dom::EventListenerCallback>(*scrollEnd), false);
+    select.AddEventListener(event_names::ScrollEnd, ShareRef<EventListenerCallback>(*scrollEnd), false);
 
     SECTION("scrollTop, with scroll-behavior: smooth, moves over frames and ends with one scrollend")
     {

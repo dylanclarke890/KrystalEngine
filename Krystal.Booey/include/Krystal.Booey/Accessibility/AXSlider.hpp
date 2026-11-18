@@ -31,13 +31,10 @@
 #include "Krystal.Booey/Accessibility/AXMockObject.hpp"
 #include "Krystal.Booey/Accessibility/AXRenderObject.hpp"
 
-namespace krys::boo::html
-{
-  class HTMLInputElement;
-}
-
 namespace krys::boo
 {
+  class HTMLInputElement;
+
   /// @brief An `input type=range`: a slider whose only child is its thumb.
   class AXSlider final : public AXRenderObject
   {
@@ -57,7 +54,7 @@ namespace krys::boo
 
     using AXRenderObject::SetValue;
 
-    bool SetValue(dom::DOMStringView value) noexcept override;
+    bool SetValue(DOMStringView value) noexcept override;
 
   private:
     AXSlider(AXId id, RenderObject &renderer, AXObjectCache &cache) noexcept;
@@ -67,7 +64,7 @@ namespace krys::boo
       return AXRole::Slider;
     }
 
-    KRYS_NODISCARD html::HTMLInputElement *InputElement() const noexcept;
+    KRYS_NODISCARD HTMLInputElement *InputElement() const noexcept;
   };
 
   /// @brief A slider's thumb, whose bounds are the thumb element's.

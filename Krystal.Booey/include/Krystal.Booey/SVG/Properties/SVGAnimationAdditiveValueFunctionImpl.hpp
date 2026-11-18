@@ -36,7 +36,7 @@
 #include "Krystal.Booey/SVG/SVGLengthValue.hpp"
 #include <cmath>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGAnimatedAngleOrientAnimator;
   class SVGAnimatedIntegerPairAnimator;
@@ -50,7 +50,7 @@ namespace krys::boo::svg
     using Base = SVGAnimationAdditiveValueFunction<SVGAngleValue>;
     using Base::Base;
 
-    void SetFromAndToValues(SVGElement &, dom::DOMStringView, dom::DOMStringView) noexcept override
+    void SetFromAndToValues(SVGElement &, DOMStringView, DOMStringView) noexcept override
     {
       // Values will be set by SVGAnimatedAngleOrientAnimator.
       krys_debug_assert_msg(false, "The angle's values are set by its orient animator");
@@ -77,15 +77,14 @@ namespace krys::boo::svg
     using Base = SVGAnimationAdditiveValueFunction<Color>;
     using Base::Base;
 
-    void SetFromAndToValues(SVGElement &targetElement, dom::DOMStringView from,
-                            dom::DOMStringView to) noexcept override
+    void SetFromAndToValues(SVGElement &targetElement, DOMStringView from, DOMStringView to) noexcept override
     {
       _from = SVGPropertyTraits<Color>::FromString(targetElement, from);
       _to = SVGPropertyTraits<Color>::FromString(targetElement, to);
     }
 
     void SetToAtEndOfDurationValue(SVGElement &targetElement,
-                                   dom::DOMStringView toAtEndOfDuration) noexcept override
+                                   DOMStringView toAtEndOfDuration) noexcept override
     {
       _toAtEndOfDuration = SVGPropertyTraits<Color>::FromString(targetElement, toAtEndOfDuration);
     }
@@ -93,7 +92,7 @@ namespace krys::boo::svg
     void Animate(SVGElement &, float progress, uint32 repeatCount, Color &animated) noexcept
     {
       auto simpleAnimated = animated.ToColorTypeLossy<SRGBA<uint8>>().Resolved();
-      auto simpleFrom = _animationMode == AnimationMode::To
+      auto simpleFrom = _animationMode == svg::AnimationMode::To
                           ? simpleAnimated
                           : _from.ToColorTypeLossy<SRGBA<uint8>>().Resolved();
       auto simpleTo = _to.ToColorTypeLossy<SRGBA<uint8>>().Resolved();
@@ -112,8 +111,8 @@ namespace krys::boo::svg
                                                             std::lround(blue), std::lround(alpha));
     }
 
-    KRYS_NODISCARD Maybe<float> CalculateDistance(SVGElement &, dom::DOMStringView from,
-                                                  dom::DOMStringView to) const noexcept override;
+    KRYS_NODISCARD Maybe<float> CalculateDistance(SVGElement &, DOMStringView from,
+                                                  DOMStringView to) const noexcept override;
 
   private:
     void AddFromAndToValues(SVGElement &) noexcept override
@@ -135,15 +134,13 @@ namespace krys::boo::svg
     using Base = SVGAnimationAdditiveValueFunction<int32>;
     using Base::Base;
 
-    void SetFromAndToValues(SVGElement &targetElement, dom::DOMStringView from,
-                            dom::DOMStringView to) noexcept override
+    void SetFromAndToValues(SVGElement &targetElement, DOMStringView from, DOMStringView to) noexcept override
     {
       _from = SVGPropertyTraits<int32>::FromString(targetElement, from);
       _to = SVGPropertyTraits<int32>::FromString(targetElement, to);
     }
 
-    void SetToAtEndOfDurationValue(SVGElement &targetElement,
-                                   dom::DOMStringView toAtEndOfDuration) noexcept final
+    void SetToAtEndOfDurationValue(SVGElement &targetElement, DOMStringView toAtEndOfDuration) noexcept final
     {
       _toAtEndOfDuration = SVGPropertyTraits<int32>::FromString(targetElement, toAtEndOfDuration);
     }
@@ -155,8 +152,8 @@ namespace krys::boo::svg
                                   static_cast<float>(ToAtEndOfDuration()), static_cast<float>(animated))));
     }
 
-    KRYS_NODISCARD Maybe<float> CalculateDistance(SVGElement &, dom::DOMStringView,
-                                                  dom::DOMStringView) const noexcept final;
+    KRYS_NODISCARD Maybe<float> CalculateDistance(SVGElement &, DOMStringView,
+                                                  DOMStringView) const noexcept final;
 
   private:
     void AddFromAndToValues(SVGElement &) noexcept final
@@ -173,19 +170,19 @@ namespace krys::boo::svg
     SVGLengthMode _lengthMode;
 
   public:
-    SVGAnimationLengthFunction(AnimationMode animationMode, CalcMode calcMode, bool isAccumulated,
+    SVGAnimationLengthFunction(svg::AnimationMode animationMode, svg::CalcMode calcMode, bool isAccumulated,
                                bool isAdditive, SVGLengthMode lengthMode) noexcept
         : Base(animationMode, calcMode, isAccumulated, isAdditive), _lengthMode(lengthMode)
     {
     }
 
-    void SetFromAndToValues(SVGElement &, dom::DOMStringView from, dom::DOMStringView to) noexcept override
+    void SetFromAndToValues(SVGElement &, DOMStringView from, DOMStringView to) noexcept override
     {
       _from = SVGLengthValue(_lengthMode, from);
       _to = SVGLengthValue(_lengthMode, to);
     }
 
-    void SetToAtEndOfDurationValue(SVGElement &, dom::DOMStringView toAtEndOfDuration) noexcept override
+    void SetToAtEndOfDurationValue(SVGElement &, DOMStringView toAtEndOfDuration) noexcept override
     {
       _toAtEndOfDuration = SVGLengthValue(_lengthMode, toAtEndOfDuration);
     }
@@ -196,7 +193,7 @@ namespace krys::boo::svg
       SVGLengthContext lengthContext(&targetElement);
       SVGLengthType lengthType = progress < 0.5 ? _from.LengthType() : _to.LengthType();
 
-      float from = (_animationMode == AnimationMode::To ? animated : _from).Value(lengthContext);
+      float from = (_animationMode == svg::AnimationMode::To ? animated : _from).Value(lengthContext);
       float to = _to.Value(lengthContext);
       float toAtEndOfDuration = ToAtEndOfDuration().Value(lengthContext);
       float value = animated.Value(lengthContext);
@@ -205,8 +202,8 @@ namespace krys::boo::svg
       animated = {lengthContext, value, lengthType, _lengthMode};
     }
 
-    KRYS_NODISCARD Maybe<float> CalculateDistance(SVGElement &targetElement, dom::DOMStringView from,
-                                                  dom::DOMStringView to) const noexcept override
+    KRYS_NODISCARD Maybe<float> CalculateDistance(SVGElement &targetElement, DOMStringView from,
+                                                  DOMStringView to) const noexcept override
     {
       SVGLengthContext lengthContext(&targetElement);
       auto fromLength = SVGLengthValue(_lengthMode, from);
@@ -230,27 +227,26 @@ namespace krys::boo::svg
     using Base = SVGAnimationAdditiveValueFunction<float>;
     using Base::Base;
 
-    void SetFromAndToValues(SVGElement &targetElement, dom::DOMStringView from,
-                            dom::DOMStringView to) noexcept override
+    void SetFromAndToValues(SVGElement &targetElement, DOMStringView from, DOMStringView to) noexcept override
     {
       _from = SVGPropertyTraits<float>::FromString(targetElement, from);
       _to = SVGPropertyTraits<float>::FromString(targetElement, to);
     }
 
     void SetToAtEndOfDurationValue(SVGElement &targetElement,
-                                   dom::DOMStringView toAtEndOfDuration) noexcept override
+                                   DOMStringView toAtEndOfDuration) noexcept override
     {
       _toAtEndOfDuration = SVGPropertyTraits<float>::FromString(targetElement, toAtEndOfDuration);
     }
 
     void Animate(SVGElement &, float progress, uint32 repeatCount, float &animated) noexcept
     {
-      float from = _animationMode == AnimationMode::To ? animated : _from;
+      float from = _animationMode == svg::AnimationMode::To ? animated : _from;
       animated = Base::Animate(progress, repeatCount, from, _to, ToAtEndOfDuration(), animated);
     }
 
-    KRYS_NODISCARD Maybe<float> CalculateDistance(SVGElement &, dom::DOMStringView from,
-                                                  dom::DOMStringView to) const noexcept override;
+    KRYS_NODISCARD Maybe<float> CalculateDistance(SVGElement &, DOMStringView from,
+                                                  DOMStringView to) const noexcept override;
 
   private:
     void AddFromAndToValues(SVGElement &) noexcept override
@@ -265,13 +261,13 @@ namespace krys::boo::svg
     using Base = SVGAnimationAdditiveValueFunction<SVGPathByteStream>;
     using Base::Base;
 
-    void SetFromAndToValues(SVGElement &, dom::DOMStringView from, dom::DOMStringView to) noexcept override
+    void SetFromAndToValues(SVGElement &, DOMStringView from, DOMStringView to) noexcept override
     {
       _from = SVGPathByteStream(from);
       _to = SVGPathByteStream(to);
     }
 
-    void SetToAtEndOfDurationValue(SVGElement &, dom::DOMStringView toAtEndOfDuration) noexcept override
+    void SetToAtEndOfDurationValue(SVGElement &, DOMStringView toAtEndOfDuration) noexcept override
     {
       _toAtEndOfDuration = SVGPathByteStream(toAtEndOfDuration);
     }
@@ -279,32 +275,32 @@ namespace krys::boo::svg
     void Animate(SVGElement &, float progress, uint32 repeatCount, SVGPathByteStream &animated) noexcept
     {
       SVGPathByteStream underlyingPath;
-      if (_animationMode == AnimationMode::To)
+      if (_animationMode == svg::AnimationMode::To)
       {
         underlyingPath = animated;
       }
 
-      const SVGPathByteStream &from = _animationMode == AnimationMode::To ? underlyingPath : _from;
+      const SVGPathByteStream &from = _animationMode == svg::AnimationMode::To ? underlyingPath : _from;
 
       // Cache the current animated value before the buildAnimatedSVGPathByteStream() clears animatedPath.
       SVGPathByteStream lastAnimated;
-      if (!from.Size() || (_isAdditive && _animationMode != AnimationMode::To))
+      if (!from.Size() || (_isAdditive && _animationMode != svg::AnimationMode::To))
       {
         lastAnimated = animated;
       }
 
-      (void)BuildAnimatedSVGPathByteStream(from, _to, animated, progress);
+      (void)svg::BuildAnimatedSVGPathByteStream(from, _to, animated, progress);
 
       // Handle additive='sum'.
       if (!lastAnimated.IsEmpty())
       {
-        (void)AddToSVGPathByteStream(animated, lastAnimated);
+        (void)svg::AddToSVGPathByteStream(animated, lastAnimated);
       }
 
       // Handle accumulate='sum'.
       if (_isAccumulated && repeatCount)
       {
-        (void)AddToSVGPathByteStream(animated, ToAtEndOfDuration(), repeatCount);
+        (void)svg::AddToSVGPathByteStream(animated, ToAtEndOfDuration(), repeatCount);
       }
     }
 
@@ -315,7 +311,7 @@ namespace krys::boo::svg
       {
         return;
       }
-      (void)AddToSVGPathByteStream(_to, _from);
+      (void)svg::AddToSVGPathByteStream(_to, _from);
     }
   };
 
@@ -325,22 +321,21 @@ namespace krys::boo::svg
     using Base = SVGAnimationAdditiveValueFunction<FloatRect>;
     using Base::Base;
 
-    void SetFromAndToValues(SVGElement &targetElement, dom::DOMStringView from,
-                            dom::DOMStringView to) noexcept override
+    void SetFromAndToValues(SVGElement &targetElement, DOMStringView from, DOMStringView to) noexcept override
     {
       _from = SVGPropertyTraits<FloatRect>::FromString(targetElement, from);
       _to = SVGPropertyTraits<FloatRect>::FromString(targetElement, to);
     }
 
     void SetToAtEndOfDurationValue(SVGElement &targetElement,
-                                   dom::DOMStringView toAtEndOfDuration) noexcept override
+                                   DOMStringView toAtEndOfDuration) noexcept override
     {
       _toAtEndOfDuration = SVGPropertyTraits<FloatRect>::FromString(targetElement, toAtEndOfDuration);
     }
 
     void Animate(SVGElement &, float progress, uint32 repeatCount, FloatRect &animated) noexcept
     {
-      FloatRect from = _animationMode == AnimationMode::To ? animated : _from;
+      FloatRect from = _animationMode == svg::AnimationMode::To ? animated : _from;
 
       float x =
         Base::Animate(progress, repeatCount, from.X(), _to.X(), ToAtEndOfDuration().X(), animated.X());

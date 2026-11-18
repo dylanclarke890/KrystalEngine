@@ -29,6 +29,7 @@
 
 namespace krys::boo
 {
+  class HTMLCanvasElement;
   class Path;
   class RenderStyle;
   enum class TextDirection : bool;
@@ -36,7 +37,6 @@ namespace krys::boo
 
 namespace krys::boo::html
 {
-  class HTMLCanvasElement;
   class Path2D;
 
   /// @brief A `<canvas>`'s 2D context, `GetContext(u8"2d")`.
@@ -56,34 +56,33 @@ namespace krys::boo::html
 
     /// @brief Sets the font, a CSS `font` value relative to the canvas's font; ignored if it isn't one.
     /// @see https://html.spec.whatwg.org/#dom-context-2d-font
-    void SetFont(dom::DOMStringView) noexcept;
+    void SetFont(DOMStringView) noexcept;
 
     /// @brief Draws a focus ring along the current path if @p element, which must be the canvas's fallback
     /// content, has the focus.
     /// @see https://html.spec.whatwg.org/#dom-context-2d-drawfocusifneeded
-    void DrawFocusIfNeeded(dom::Element &element) noexcept;
+    void DrawFocusIfNeeded(Element &element) noexcept;
 
     /// @brief Draws a focus ring along @p path if @p element, which must be the canvas's fallback content,
     /// has the focus.
-    void DrawFocusIfNeeded(Path2D &path, dom::Element &element) noexcept;
+    void DrawFocusIfNeeded(Path2D &path, Element &element) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-context-2d-direction
     KRYS_NODISCARD CanvasDirection GetDirection() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-context-2d-filltext
-    void FillText(dom::DOMStringView text, double x, double y, Maybe<double> maxWidth = null) noexcept;
+    void FillText(DOMStringView text, double x, double y, Maybe<double> maxWidth = null) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-context-2d-stroketext
-    void StrokeText(dom::DOMStringView text, double x, double y, Maybe<double> maxWidth = null) noexcept;
+    void StrokeText(DOMStringView text, double x, double y, Maybe<double> maxWidth = null) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-context-2d-measuretext
-    KRYS_NODISCARD Ref<TextMetrics> MeasureText(dom::DOMStringView text) noexcept;
+    KRYS_NODISCARD Ref<TextMetrics> MeasureText(DOMStringView text) noexcept;
 
   private:
     KRYS_NODISCARD const FontProxy *GetFontProxy() noexcept final;
 
-    KRYS_NODISCARD Maybe<style::Filter>
-      SetFilterStringWithoutUpdatingStyle(dom::DOMStringView) noexcept override;
+    KRYS_NODISCARD Maybe<style::Filter> SetFilterStringWithoutUpdatingStyle(DOMStringView) noexcept override;
 
     KRYS_NODISCARD RefPtr<boo::Filter> CreateFilter(const FloatRect &bounds) const noexcept override;
 
@@ -91,11 +90,11 @@ namespace krys::boo::html
 
     KRYS_NODISCARD StringAtom InheritedLanguage() const noexcept final;
 
-    void SetFontWithoutUpdatingStyle(dom::DOMStringView) noexcept;
+    void SetFontWithoutUpdatingStyle(DOMStringView) noexcept;
 
-    void DrawFocusIfNeededInternal(const Path &, dom::Element &) noexcept;
+    void DrawFocusIfNeededInternal(const Path &, Element &) noexcept;
 
-    void DrawTextInternal(dom::DOMStringView text, double x, double y, bool fill,
+    void DrawTextInternal(DOMStringView text, double x, double y, bool fill,
                           Maybe<double> maxWidth = null) noexcept;
 
     KRYS_NODISCARD TextDirection ToTextDirection(Direction,

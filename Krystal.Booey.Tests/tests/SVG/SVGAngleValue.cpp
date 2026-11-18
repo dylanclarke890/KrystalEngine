@@ -41,10 +41,10 @@ namespace krys::boo::svg::tests
     CHECK(angle.ValueInSpecifiedUnits() == -45);
 
     // Spaces, other units and missing numbers are errors, and change nothing.
-    CHECK(angle.SetValueAsString(u8"45 deg") == dom::ExceptionCode::SyntaxError);
-    CHECK(angle.SetValueAsString(u8"45px") == dom::ExceptionCode::SyntaxError);
-    CHECK(angle.SetValueAsString(u8"deg") == dom::ExceptionCode::SyntaxError);
-    CHECK(angle.SetValueAsString(u8" 45deg") == dom::ExceptionCode::SyntaxError);
+    CHECK(angle.SetValueAsString(u8"45 deg") == ExceptionCode::SyntaxError);
+    CHECK(angle.SetValueAsString(u8"45px") == ExceptionCode::SyntaxError);
+    CHECK(angle.SetValueAsString(u8"deg") == ExceptionCode::SyntaxError);
+    CHECK(angle.SetValueAsString(u8" 45deg") == ExceptionCode::SyntaxError);
     CHECK(angle.ValueInSpecifiedUnits() == -45);
   }
 
@@ -58,11 +58,11 @@ namespace krys::boo::svg::tests
 
     // As upstream, the bindings can't choose turns, or an unknown unit.
     CHECK(angle.NewValueSpecifiedUnits(SVGAngleValue::SVG_ANGLETYPE_TURN, 1)
-          == dom::ExceptionCode::NotSupportedError);
+          == ExceptionCode::NotSupportedError);
     CHECK(angle.NewValueSpecifiedUnits(SVGAngleValue::SVG_ANGLETYPE_UNKNOWN, 1)
-          == dom::ExceptionCode::NotSupportedError);
+          == ExceptionCode::NotSupportedError);
     CHECK(angle.ConvertToSpecifiedUnits(SVGAngleValue::SVG_ANGLETYPE_TURN)
-          == dom::ExceptionCode::NotSupportedError);
+          == ExceptionCode::NotSupportedError);
 
     REQUIRE_FALSE(angle.NewValueSpecifiedUnits(SVGAngleValue::SVG_ANGLETYPE_DEG, 180).HasException());
     REQUIRE_FALSE(angle.ConvertToSpecifiedUnits(SVGAngleValue::SVG_ANGLETYPE_RAD).HasException());

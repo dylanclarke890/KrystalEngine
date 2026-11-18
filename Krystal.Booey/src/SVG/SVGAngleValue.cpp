@@ -25,7 +25,7 @@
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   float SVGAngleValue::Value() const noexcept
   {
@@ -84,7 +84,7 @@ namespace krys::boo::svg
     krys_assert_msg(false, "Not reached");
   }
 
-  dom::DOMString SVGAngleValue::ValueAsString() const noexcept
+  DOMString SVGAngleValue::ValueAsString() const noexcept
   {
     StringBuilder builder;
     switch (_unitType)
@@ -121,7 +121,7 @@ namespace krys::boo::svg
 
   namespace
   {
-    KRYS_NODISCARD SVGAngleValue::Type ParseAngleType(dom::DOMStringView buffer) noexcept
+    KRYS_NODISCARD SVGAngleValue::Type ParseAngleType(DOMStringView buffer) noexcept
     {
       switch (buffer.size())
       {
@@ -158,7 +158,7 @@ namespace krys::boo::svg
     }
   }
 
-  dom::ExceptionOr<void> SVGAngleValue::SetValueAsString(dom::DOMStringView value) noexcept
+  ExceptionOr<void> SVGAngleValue::SetValueAsString(DOMStringView value) noexcept
   {
     if (value.empty())
     {
@@ -167,16 +167,16 @@ namespace krys::boo::svg
     }
 
     auto buffer = value;
-    auto valueInSpecifiedUnits = ParseNumber(buffer, SuffixSkippingPolicy::DontSkip);
+    auto valueInSpecifiedUnits = svg::ParseNumber(buffer, svg::SuffixSkippingPolicy::DontSkip);
     if (!valueInSpecifiedUnits)
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError};
+      return Exception {ExceptionCode::SyntaxError};
     }
 
     auto unitType = ParseAngleType(buffer);
     if (unitType == SVGAngleValue::SVG_ANGLETYPE_UNKNOWN)
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError};
+      return Exception {ExceptionCode::SyntaxError};
     }
 
     _unitType = unitType;
@@ -184,12 +184,12 @@ namespace krys::boo::svg
     return {};
   }
 
-  dom::ExceptionOr<void> SVGAngleValue::NewValueSpecifiedUnits(uint16 unitType,
-                                                               float valueInSpecifiedUnits) noexcept
+  ExceptionOr<void> SVGAngleValue::NewValueSpecifiedUnits(uint16 unitType,
+                                                          float valueInSpecifiedUnits) noexcept
   {
     if (unitType == SVG_ANGLETYPE_UNKNOWN || unitType > SVG_ANGLETYPE_GRAD)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     _unitType = static_cast<Type>(unitType);
@@ -197,12 +197,12 @@ namespace krys::boo::svg
     return {};
   }
 
-  dom::ExceptionOr<void> SVGAngleValue::ConvertToSpecifiedUnits(uint16 unitType) noexcept
+  ExceptionOr<void> SVGAngleValue::ConvertToSpecifiedUnits(uint16 unitType) noexcept
   {
     if (unitType == SVG_ANGLETYPE_UNKNOWN || _unitType == SVG_ANGLETYPE_UNKNOWN
         || unitType > SVG_ANGLETYPE_GRAD)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     if (unitType == _unitType)

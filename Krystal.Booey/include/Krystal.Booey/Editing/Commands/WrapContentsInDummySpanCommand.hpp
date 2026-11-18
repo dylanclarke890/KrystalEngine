@@ -27,24 +27,21 @@
 
 #include "Krystal.Booey/Editing/Commands/EditCommand.hpp"
 
-namespace krys::boo::dom
-{
-  class Element;
-}
-
 namespace krys::boo
 {
+  class Element;
+
   /// @brief Wraps an element's children in a style span.
   class WrapContentsInDummySpanCommand final : public SimpleEditCommand
   {
   private:
-    const Ref<dom::Element> _element;
-    RefPtr<dom::Element> _dummySpan;
+    const Ref<Element> _element;
+    RefPtr<Element> _dummySpan;
 
   public:
-    KRYS_NODISCARD static Ref<WrapContentsInDummySpanCommand> Create(dom::Element &element) noexcept;
+    KRYS_NODISCARD static Ref<WrapContentsInDummySpanCommand> Create(Element &element) noexcept;
 
-    explicit WrapContentsInDummySpanCommand(dom::Element &element) noexcept;
+    explicit WrapContentsInDummySpanCommand(Element &element) noexcept;
 
   private:
     void DoApply() noexcept override;

@@ -15,7 +15,7 @@ namespace krys::boo::html::tests
 {
   using Log = List<utf8_string>;
 
-  inline utf8_string Text(const dom::DOMStringAtom &value) noexcept
+  inline utf8_string Text(const DOMStringAtom &value) noexcept
   {
     return value == null ? utf8_string(u8"null") : value.ToString();
   }
@@ -47,14 +47,13 @@ namespace krys::boo::html::tests
       _log.push_back(u8"moved " + Id());
     }
 
-    void AdoptedCallback(dom::Document &, dom::Document &) noexcept override
+    void AdoptedCallback(boo::Document &, boo::Document &) noexcept override
     {
       _log.push_back(u8"adopted " + Id());
     }
 
-    void AttributeChangedCallback(const dom::DOMStringAtom &localName, const dom::DOMStringAtom &oldValue,
-                                  const dom::DOMStringAtom &newValue,
-                                  const dom::DOMStringAtom &) noexcept override
+    void AttributeChangedCallback(const DOMStringAtom &localName, const DOMStringAtom &oldValue,
+                                  const DOMStringAtom &newValue, const DOMStringAtom &) noexcept override
     {
       _log.push_back(u8"attribute " + localName.ToString() + u8" " + Text(oldValue) + u8" " + Text(newValue));
     }
@@ -71,14 +70,14 @@ namespace krys::boo::html::tests
   struct CustomElementFixture : css::tests::ValueFixture
   {
     RefPtr<LocalFrame> Frame;
-    Ref<dom::HTMLDocument> Document;
+    Ref<HTMLDocument> Document;
     Log Calls;
 
-    CustomElementFixture() noexcept : Frame(LocalFrame::Create()), Document(CreateRef<dom::HTMLDocument>())
+    CustomElementFixture() noexcept : Frame(LocalFrame::Create()), Document(CreateRef<HTMLDocument>())
     {
       EventLoop::Current().RunUntilIdle();
       Frame->CreateView({200, 100});
-      Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+      Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
     }
 
     ~CustomElementFixture() noexcept
@@ -92,7 +91,7 @@ namespace krys::boo::html::tests
       return *registry;
     }
 
-    void Define(dom::DOMStringAtom name, List<dom::DOMStringAtom> observed = {}) noexcept
+    void Define(DOMStringAtom name, List<DOMStringAtom> observed = {}) noexcept
     {
       auto result = Registry().Define(krys::move(name), [this](HTMLElement &element)
                                       { return CreateUnique<LoggingElement>(element, Calls); },
@@ -118,14 +117,14 @@ namespace krys::boo::html::tests
       return *body;
     }
 
-    dom::Element &ById(dom::DOMStringView id) const noexcept
+    boo::Element &ById(DOMStringView id) const noexcept
     {
       auto element = Document->GetElementById(id);
       REQUIRE(element);
       return *element;
     }
 
-    Ref<dom::Element> Create(dom::DOMStringAtom name) noexcept
+    Ref<boo::Element> Create(DOMStringAtom name) noexcept
     {
       auto element = Document->CreateElement(krys::move(name));
       REQUIRE_FALSE(element.HasException());

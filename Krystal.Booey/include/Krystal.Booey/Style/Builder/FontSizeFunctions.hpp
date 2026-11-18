@@ -30,15 +30,11 @@
 
 namespace krys::boo
 {
+  class Document;
   class FontMetrics;
   struct FontSizeAdjust;
   class RenderStyle;
   struct SettingsValues;
-}
-
-namespace krys::boo::dom
-{
-  class Document;
 }
 
 namespace krys::boo::style
@@ -62,12 +58,12 @@ namespace krys::boo::style
 
   KRYS_NODISCARD ComputedFontSize ComputedFontSizeFromSpecifiedSize(float specifiedSize, bool isAbsoluteSize,
                                                                     bool useSVGZoomRules, const RenderStyle *,
-                                                                    const dom::Document &) noexcept;
+                                                                    const Document &) noexcept;
 
   KRYS_NODISCARD float ComputedFontSizeFromSpecifiedSizeForSVGInlineText(float specifiedSize,
                                                                          bool isAbsoluteSize,
                                                                          float zoomFactor,
-                                                                         const dom::Document &) noexcept;
+                                                                         const Document &) noexcept;
 
   KRYS_NODISCARD float AdjustedFontSize(float size, const boo::FontSizeAdjust &,
                                         const FontMetrics &) noexcept;
@@ -78,9 +74,9 @@ namespace krys::boo::style
                                           const SettingsValues &, bool inQuirksMode = false) noexcept;
 
   KRYS_NODISCARD float FontSizeForKeyword(uint32 keywordID, bool shouldUseFixedDefaultSize,
-                                          const dom::Document &) noexcept;
+                                          const Document &) noexcept;
 
   // Given a font size in pixel, this function will return legacy font size between 1 and 7.
   KRYS_NODISCARD int32 LegacyFontSizeForPixelSize(int32 pixelFontSize, bool shouldUseFixedDefaultSize,
-                                                  const dom::Document &) noexcept;
+                                                  const Document &) noexcept;
 }

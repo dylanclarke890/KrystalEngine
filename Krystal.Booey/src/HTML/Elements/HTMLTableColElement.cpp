@@ -28,19 +28,18 @@
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableCol.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLTableColElement::HTMLTableColElement(dom::Document &document) noexcept
-      : HTMLTablePartElement(document, HTMLElementInterface::TableCol)
+  HTMLTableColElement::HTMLTableColElement(Document &document) noexcept
+      : HTMLTablePartElement(document, html::HTMLElementInterface::TableCol)
   {
   }
 
 #pragma region HTMLTableColElement
 
-  void HTMLTableColElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                               Maybe<dom::DOMStringView> oldValue,
-                                               Maybe<dom::DOMStringView> value,
-                                               const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLTableColElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                               Maybe<DOMStringView> value,
+                                               const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLTablePartElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
@@ -61,74 +60,76 @@ namespace krys::boo::html
 
   uint32 HTMLTableColElement::Span() const noexcept
   {
-    return Reflect<uint32, ReflectDefault<uint32> {1}, ReflectRange<uint32> {1u, 1'000u}>(*this, u8"span");
+    return html::Reflect<uint32, html::ReflectDefault<uint32> {1}, html::ReflectRange<uint32> {1u, 1'000u}>(
+      *this, u8"span");
   }
 
   void HTMLTableColElement::Span(uint32 value) noexcept
   {
-    Reflect<uint32, ReflectDefault<uint32> {1}>(*this, u8"span", krys::move(value));
+    html::Reflect<uint32, html::ReflectDefault<uint32> {1}>(*this, u8"span", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region HTMLTableColElement Obsolete members
 
-  dom::DOMString HTMLTableColElement::Align() const noexcept
+  DOMString HTMLTableColElement::Align() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLTableColElement::Align(dom::DOMString value) noexcept
+  void HTMLTableColElement::Align(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"align", krys::move(value));
   }
 
-  dom::DOMString HTMLTableColElement::Char() const noexcept
+  DOMString HTMLTableColElement::Char() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"char").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"char").value_or(u8"");
   }
 
-  void HTMLTableColElement::Char(dom::DOMString value) noexcept
+  void HTMLTableColElement::Char(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"char", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"char", krys::move(value));
   }
 
-  dom::DOMString HTMLTableColElement::CharOff() const noexcept
+  DOMString HTMLTableColElement::CharOff() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"charoff").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"charoff").value_or(u8"");
   }
 
-  void HTMLTableColElement::CharOff(dom::DOMString value) noexcept
+  void HTMLTableColElement::CharOff(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"charoff", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"charoff", krys::move(value));
   }
 
-  dom::DOMString HTMLTableColElement::VAlign() const noexcept
+  DOMString HTMLTableColElement::VAlign() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"valign").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"valign").value_or(u8"");
   }
 
-  void HTMLTableColElement::VAlign(dom::DOMString value) noexcept
+  void HTMLTableColElement::VAlign(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"valign", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"valign", krys::move(value));
   }
 
-  dom::DOMString HTMLTableColElement::Width() const noexcept
+  DOMString HTMLTableColElement::Width() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"width").value_or(u8"");
   }
 
-  void HTMLTableColElement::Width(dom::DOMString value) noexcept
+  void HTMLTableColElement::Width(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"width", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region Presentational hints
 
-  bool HTMLTableColElement::HasPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool
+    HTMLTableColElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                            const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && (localName == u8"width"))
     {
@@ -138,10 +139,10 @@ namespace krys::boo::html
   }
 
   void HTMLTableColElement::CollectPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI, dom::DOMStringView value,
+    const DOMStringAtom &localName, const DOMStringAtom &namespaceURI, DOMStringView value,
     css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLTablePartElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
@@ -162,7 +163,7 @@ namespace krys::boo::html
 
   const css::MutableStyleProperties *HTMLTableColElement::AdditionalPresentationalHintStyle() const noexcept
   {
-    if (TagQualifiedName().TagName() != TagName::colgroup)
+    if (TagQualifiedName().TagName() != html::TagName::colgroup)
     {
       return nullptr;
     }

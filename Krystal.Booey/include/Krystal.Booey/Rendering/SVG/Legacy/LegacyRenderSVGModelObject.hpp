@@ -32,13 +32,10 @@
 
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 
-namespace krys::boo::svg
-{
-  class SVGElement;
-}
-
 namespace krys::boo
 {
+  class SVGElement;
+
   // Most renderers in the SVG rendering tree will inherit from this class
   // but not all. (e.g. LegacyRenderSVGForeignObject, RenderSVGBlock) thus methods
   // required by SVG renders need to be declared on RenderObject, but shared
@@ -79,14 +76,13 @@ namespace krys::boo
 
     KRYS_NODISCARD static bool CheckEnclosure(RenderElement *, const FloatRect &) noexcept;
 
-    KRYS_NODISCARD svg::SVGElement &GetElement() const noexcept;
+    KRYS_NODISCARD SVGElement &GetElement() const noexcept;
 
     virtual void AddFocusRingRects(List<LayoutRect> &, const LayoutPoint &additionalOffset,
                                    const RenderLayerModelObject *paintContainer = nullptr) const noexcept;
 
   protected:
-    LegacyRenderSVGModelObject(Type, svg::SVGElement &, RenderStyle &&,
-                               EnumSet<SVGModelObjectFlag> = {}) noexcept;
+    LegacyRenderSVGModelObject(Type, SVGElement &, RenderStyle &&, EnumSet<SVGModelObjectFlag> = {}) noexcept;
 
     void WillBeDestroyed() noexcept override;
 

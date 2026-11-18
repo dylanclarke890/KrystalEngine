@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLSelectElement;
 
@@ -16,7 +16,7 @@ namespace krys::boo::html
     bool _disabled {false};
 
   public:
-    HTMLSelectedContentElement(dom::Document &document) noexcept;
+    HTMLSelectedContentElement(Document &document) noexcept;
 
     /// @brief Whether the element is in an option, another selectedcontent, or a select inside another
     /// select, so that it mirrors no option.
@@ -32,7 +32,7 @@ namespace krys::boo::html
 
     void OnPostConnection() noexcept override;
 
-    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
 #pragma endregion
 
@@ -43,15 +43,14 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLSelectedContentElement)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLSelectedContentElement)
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement()
-           && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLSelectedContentElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLSelectedContentElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLSelectedContentElement();
   }

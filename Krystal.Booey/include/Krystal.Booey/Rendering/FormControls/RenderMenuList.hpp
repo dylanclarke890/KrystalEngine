@@ -31,13 +31,9 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::html
-{
-  class HTMLSelectElement;
-}
-
 namespace krys::boo
 {
+  class HTMLSelectElement;
   class RenderText;
 
   /// @brief The renderer of a select drawn as a drop-down: the selected option's text in an anonymous block,
@@ -61,11 +57,11 @@ namespace krys::boo
     bool _popupIsVisible {false};
 
   public:
-    RenderMenuList(html::HTMLSelectElement &element, RenderStyle &&style) noexcept;
+    RenderMenuList(HTMLSelectElement &element, RenderStyle &&style) noexcept;
 
     ~RenderMenuList() noexcept override;
 
-    KRYS_NODISCARD html::HTMLSelectElement &SelectElement() const noexcept;
+    KRYS_NODISCARD HTMLSelectElement &SelectElement() const noexcept;
 
     KRYS_NODISCARD bool PopupIsVisible() const noexcept
     {

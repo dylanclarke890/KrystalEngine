@@ -45,7 +45,7 @@ namespace krys::boo::dom
   {
     KRYS_NODISCARD bool HasHTMLTagName(const Node &node, html::TagName tagName) noexcept
     {
-      auto *element = DynamicDowncast<html::HTMLElement>(node);
+      auto *element = DynamicDowncast<HTMLElement>(node);
       return element && element->TagQualifiedName().TagName() == tagName;
     }
 
@@ -58,7 +58,7 @@ namespace krys::boo::dom
       {
         auto *element = DynamicDowncast<Element>(*node);
 
-        if (element && (Is<html::HTMLBDIElement>(*element) || ElementHasValidTextDirectionState(*element)))
+        if (element && (Is<HTMLBDIElement>(*element) || ElementHasValidTextDirectionState(*element)))
         {
           node = TreeQueries::NextSkippingChildren(*node, &firstNode);
           continue;
@@ -89,8 +89,7 @@ namespace krys::boo::dom
 
         case TextDirectionState::Undefined:
           if (element.SelfOrPrecedingNodesAffectDirAuto()
-              && !(parent && parent->SelfOrPrecedingNodesAffectDirAuto())
-              && !Is<html::HTMLBDIElement>(element))
+              && !(parent && parent->SelfOrPrecedingNodesAffectDirAuto()) && !Is<HTMLBDIElement>(element))
           {
             UpdateHasDirAutoFlagForSubtree(element, textDirectionState);
           }
@@ -138,14 +137,13 @@ namespace krys::boo::dom
           // 1. Let result be the auto directionality of element.
           // 2. If result is null, then return 'ltr'.
           // 3. Return result.
-          if (Is<html::HTMLBDIElement>(element))
+          if (Is<HTMLBDIElement>(element))
           {
             return ComputeAutoDirectionality(element).value_or(TextDirection::LTR);
           }
 
           // If element is an input element whose type attribute is in the Telephone state: Return 'ltr'.
-          if (auto *input = DynamicDowncast<html::HTMLInputElement>(element);
-              input && input->IsTelephoneField())
+          if (auto *input = DynamicDowncast<HTMLInputElement>(element); input && input->IsTelephoneField())
           {
             return TextDirection::LTR;
           }
@@ -205,7 +203,7 @@ namespace krys::boo::dom
 
         // 1b. If descendant is a slot element whose root is a shadow root, then return the directionality of
         //     that shadow root's host.
-        if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(*descendant))
+        if (auto *slot = DynamicDowncast<HTMLSlotElement>(*descendant))
         {
           if (auto *host = TreeQueries::ShadowHost(*slot))
           {
@@ -235,7 +233,7 @@ namespace krys::boo::dom
   Maybe<TextDirection> ComputeAutoDirectionality(const Element &element) noexcept
   {
     // 1. If element is an auto-directionality form-associated element:
-    if (auto *textFormControl = DynamicDowncast<html::HTMLTextFormControlElement>(element);
+    if (auto *textFormControl = DynamicDowncast<HTMLTextFormControlElement>(element);
         textFormControl && textFormControl->DirAutoUsesValue())
     {
       // 1a. If element's value contains a character of bidirectional character type AL or R, and there is no
@@ -251,7 +249,7 @@ namespace krys::boo::dom
     }
 
     // 2. If element is a slot element whose root is a shadow root and element's assigned nodes are not empty:
-    if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(element))
+    if (auto *slot = DynamicDowncast<HTMLSlotElement>(element))
     {
       if (auto *nodes = slot->AssignedNodes(); nodes && slot->IsInShadowTree())
       {

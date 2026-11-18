@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLModElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLModElement::HTMLModElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Mod)
+  HTMLModElement::HTMLModElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Mod)
   {
   }
 
@@ -12,22 +12,22 @@ namespace krys::boo::html
 
   dom::USVString HTMLModElement::Cite() const noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"cite");
+    return html::ReflectURL<dom::USVString>(*this, u8"cite");
   }
 
   void HTMLModElement::Cite(dom::USVString value) noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"cite", krys::move(value));
+    return html::ReflectURL<dom::USVString>(*this, u8"cite", krys::move(value));
   }
 
-  dom::DOMString HTMLModElement::DateTime() const noexcept
+  DOMString HTMLModElement::DateTime() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"datetime").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"datetime").value_or(u8"");
   }
 
-  void HTMLModElement::DateTime(dom::DOMString value) noexcept
+  void HTMLModElement::DateTime(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"datetime", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"datetime", krys::move(value));
   }
 
 #pragma endregion

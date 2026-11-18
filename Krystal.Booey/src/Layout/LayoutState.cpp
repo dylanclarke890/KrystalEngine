@@ -31,7 +31,7 @@
 
 namespace krys::boo::layout
 {
-  LayoutState::LayoutState(const dom::Document &document, const ElementBox &rootContainer, Type type,
+  LayoutState::LayoutState(const Document &document, const ElementBox &rootContainer, Type type,
                            FormattingContextLayoutFunction &&formattingContextLayoutFunction,
                            FormattingContextLogicalWidthFunction &&formattingContextLogicalWidthFunction,
                            FormattingContextLogicalHeightFunction &&formattingContextLogicalHeightFunction,
@@ -52,7 +52,7 @@ namespace krys::boo::layout
 
   LayoutState::~LayoutState() noexcept = default;
 
-  void LayoutState::UpdateQuirksMode(const dom::Document &document) noexcept
+  void LayoutState::UpdateQuirksMode(const Document &document) noexcept
   {
     auto quirksMode = [&]
     {

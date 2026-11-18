@@ -28,29 +28,34 @@
 
 namespace krys::boo::html
 {
+  class TreeBuilder;
+}
+
+namespace krys::boo
+{
   /// @see https://html.spec.whatwg.org/#htmlscriptelement
   class HTMLScriptElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLScriptElement);
 
-    friend class TreeBuilder;
+    friend class html::TreeBuilder;
 
   private:
     UniquePtr<dom::DOMTokenList> _blocking;
-    dom::Document *_parserDocument {nullptr};
+    Document *_parserDocument {nullptr};
     bool _forceAsync : 1 {true};
     bool _alreadyStarted : 1 {false};
 
   public:
-    HTMLScriptElement(dom::Document &document) noexcept;
+    HTMLScriptElement(Document &document) noexcept;
 
 #pragma region HTMLScriptElement - https://html.spec.whatwg.org/#htmlscriptelement
 
     /// @see https://html.spec.whatwg.org/#dom-script-type
-    KRYS_NODISCARD dom::DOMString Type() const noexcept;
+    KRYS_NODISCARD DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-type
-    void Type(dom::DOMString value) noexcept;
+    void Type(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-src
     KRYS_NODISCARD dom::USVString Src() const noexcept;
@@ -80,80 +85,79 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMTokenList &Blocking() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-crossorigin
-    KRYS_NODISCARD Maybe<dom::DOMString> CrossOrigin() const noexcept;
+    KRYS_NODISCARD Maybe<DOMString> CrossOrigin() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-crossorigin
-    void CrossOrigin(Maybe<dom::DOMString> value) noexcept;
+    void CrossOrigin(Maybe<DOMString> value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-referrerpolicy
-    KRYS_NODISCARD dom::DOMString ReferrerPolicy() const noexcept;
+    KRYS_NODISCARD DOMString ReferrerPolicy() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-referrerpolicy
-    void ReferrerPolicy(dom::DOMString value) noexcept;
+    void ReferrerPolicy(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-integrity
-    KRYS_NODISCARD dom::DOMString Integrity() const noexcept;
+    KRYS_NODISCARD DOMString Integrity() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-integrity
-    void Integrity(dom::DOMString value) noexcept;
+    void Integrity(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-fetchpriority
-    KRYS_NODISCARD dom::DOMString FetchPriority() const noexcept;
+    KRYS_NODISCARD DOMString FetchPriority() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-fetchpriority
-    void FetchPriority(dom::DOMString value) noexcept;
+    void FetchPriority(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-text
-    KRYS_NODISCARD dom::DOMString Text() const noexcept;
+    KRYS_NODISCARD DOMString Text() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-text
-    void Text(dom::DOMString value) noexcept;
+    void Text(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-supports
-    KRYS_NODISCARD static bool Supports(dom::DOMStringView type) noexcept;
+    KRYS_NODISCARD static bool Supports(DOMStringView type) noexcept;
 
 #pragma endregion
 
 #pragma region HTMLScriptElement Obsolete members  - https://html.spec.whatwg.org/#HTMLScriptElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-script-charset
-    KRYS_NODISCARD dom::DOMString Charset() const noexcept;
+    KRYS_NODISCARD DOMString Charset() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-charset
-    void Charset(dom::DOMString value) noexcept;
+    void Charset(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-event
-    KRYS_NODISCARD dom::DOMString Event() const noexcept;
+    KRYS_NODISCARD DOMString Event() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-event
-    void Event(dom::DOMString value) noexcept;
+    void Event(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-htmlfor
-    KRYS_NODISCARD dom::DOMString HtmlFor() const noexcept;
+    KRYS_NODISCARD DOMString HtmlFor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-htmlfor
-    void HtmlFor(dom::DOMString value) noexcept;
+    void HtmlFor(DOMString value) noexcept;
 
 #pragma endregion
 
   protected:
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
-    void OnClone(dom::Node &copy, bool subtree) noexcept override;
+    void OnClone(Node &copy, bool subtree) noexcept override;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLScriptElement)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLScriptElement)
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return Is<krys::boo::html::HTMLElement>(target)
-           && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLScriptElement();
+    return Is<krys::boo::HTMLElement>(target)
+           && Downcast<krys::boo::HTMLElement>(target).IsHTMLScriptElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLScriptElement();
   }

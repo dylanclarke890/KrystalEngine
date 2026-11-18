@@ -41,7 +41,7 @@ namespace krys::boo::style
       Anonymous,
     };
 
-    void LoadPendingImage(dom::Document &document, const StyleImage *styleImage, const dom::Element *,
+    void LoadPendingImage(boo::Document &document, const StyleImage *styleImage, const boo::Element *,
                           LoadPolicy = LoadPolicy::NoCORS) noexcept
     {
       if (!styleImage || !styleImage->IsPending())
@@ -55,7 +55,7 @@ namespace krys::boo::style
     }
   }
 
-  void LoadPendingResources(RenderStyle &style, dom::Document &document, const dom::Element *element) noexcept
+  void LoadPendingResources(RenderStyle &style, boo::Document &document, const boo::Element *element) noexcept
   {
     for (auto &backgroundLayer : style.GetBackgroundLayers().UsedValues())
     {

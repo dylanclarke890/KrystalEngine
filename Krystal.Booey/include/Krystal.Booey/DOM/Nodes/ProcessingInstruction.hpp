@@ -32,12 +32,18 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSStyleSheet;
 }
 
 namespace krys::boo::dom
+{
+  class NodeAlgorithms;
+  class TextAlgorithms;
+}
+
+namespace krys::boo
 {
   /// @brief A processing instruction (`<?target data?>`), whose data holds pseudo-attributes.
   /// @see https://dom.spec.whatwg.org/#interface-processinginstruction
@@ -45,8 +51,8 @@ namespace krys::boo::dom
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ProcessingInstruction);
     friend class Document;
-    friend class NodeAlgorithms;
-    friend class TextAlgorithms;
+    friend class dom::NodeAlgorithms;
+    friend class dom::TextAlgorithms;
 
   private:
     /// @see https://dom.spec.whatwg.org/#concept-pi-target
@@ -58,7 +64,7 @@ namespace krys::boo::dom
     DOMString _title;
     DOMString _media;
     CachedResourceHandle<CachedCSSStyleSheet> _cachedSheet;
-    RefPtr<css::CSSStyleSheet> _sheet;
+    RefPtr<CSSStyleSheet> _sheet;
     bool _loading {false};
     bool _alternate {false};
     bool _createdByParser {false};
@@ -117,7 +123,7 @@ namespace krys::boo::dom
 #pragma region LinkStyle - https://drafts.csswg.org/cssom/#the-linkstyle-interface
 
     /// @see https://drafts.csswg.org/cssom/#dom-linkstyle-sheet
-    KRYS_NODISCARD css::CSSStyleSheet *Sheet() const noexcept;
+    KRYS_NODISCARD CSSStyleSheet *Sheet() const noexcept;
 
 #pragma endregion
 
@@ -176,8 +182,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::ProcessingInstruction)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::ProcessingInstruction)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
     return node.IsProcessingInstructionNode();
   }

@@ -53,9 +53,9 @@ namespace krys::boo::dom::tests
       return value ? ToNarrow(*value) : std::string("(null)");
     }
 
-    std::string PropertyValue(css::CSSStyleDeclaration &style, css::CSSOMStringView name) noexcept
+    std::string PropertyValue(CSSStyleDeclaration &style, CSSOMStringView name) noexcept
     {
-      return ToNarrow(style.GetPropertyValue(css::CSSOMString(name)));
+      return ToNarrow(style.GetPropertyValue(CSSOMString(name)));
     }
 
     struct Observed
@@ -86,8 +86,8 @@ namespace krys::boo::dom::tests
       REQUIRE(Is<StyledElement>(static_cast<Node &>(*html)));
       REQUIRE(Is<StyledElement>(static_cast<Node &>(*svg)));
       REQUIRE(Is<StyledElement>(static_cast<Node &>(*math)));
-      REQUIRE(Is<svg::SVGElement>(static_cast<Node &>(*svg)));
-      REQUIRE(Is<mathml::MathMLElement>(static_cast<Node &>(*math)));
+      REQUIRE(Is<SVGElement>(static_cast<Node &>(*svg)));
+      REQUIRE(Is<MathMLElement>(static_cast<Node &>(*math)));
       REQUIRE(math->NamespaceURI() == infra::namespaces::MathML);
       REQUIRE(math->LocalName() == u8"math");
     }
@@ -333,12 +333,12 @@ namespace krys::boo::dom::tests
 
     REQUIRE(element->SetInlineStyleProperty(css::PropertyId::Display, css::ValueId::None));
     REQUIRE(element->SetInlineStyleProperty(css::PropertyId::Width, 10.0, css::UnitType::px));
-    REQUIRE(element->SetInlineStyleProperty(css::PropertyId::Color, css::CSSOMString(u8"red")));
+    REQUIRE(element->SetInlineStyleProperty(css::PropertyId::Color, CSSOMString(u8"red")));
     REQUIRE(element->SetInlineStyleCustomProperty(u8"--x", u8"1", css::IsImportant::Yes));
     REQUIRE(StyleAttribute(*element) == "display: none; width: 10px; color: red; --x: 1 !important;");
 
     bool didFailParsing = false;
-    REQUIRE_FALSE(element->SetInlineStyleProperty(css::PropertyId::Color, css::CSSOMString(u8"nonsense"),
+    REQUIRE_FALSE(element->SetInlineStyleProperty(css::PropertyId::Color, CSSOMString(u8"nonsense"),
                                                   css::IsImportant::No, &didFailParsing));
     REQUIRE(didFailParsing);
 

@@ -105,8 +105,8 @@ namespace krys::boo
       return {};
     }
 
-    KRYS_NODISCARD Maybe<dom::DOMString>
-      InputEventDataForEditingStyleAndAction(const css::StyleProperties *style, EditAction action) noexcept
+    KRYS_NODISCARD Maybe<DOMString> InputEventDataForEditingStyleAndAction(const css::StyleProperties *style,
+                                                                           EditAction action) noexcept
     {
       if (!style)
       {
@@ -115,48 +115,47 @@ namespace krys::boo
 
       switch (action)
       {
-        case EditAction::SetColor: return dom::DOMString(style->GetPropertyValue(css::PropertyId::Color));
+        case EditAction::SetColor: return DOMString(style->GetPropertyValue(css::PropertyId::Color));
         case EditAction::SetInlineWritingDirection:
         case EditAction::SetBlockWritingDirection:
-          return dom::DOMString(style->GetPropertyValue(css::PropertyId::Direction));
+          return DOMString(style->GetPropertyValue(css::PropertyId::Direction));
         default: return null;
       }
     }
 
-    bool DispatchBeforeInputEvent(dom::Element &element, utf8_stringview inputType,
+    bool DispatchBeforeInputEvent(Element &element, utf8_stringview inputType,
                                   dom::IsInputMethodComposing isInputMethodComposing,
-                                  Maybe<dom::DOMString> data = null,
+                                  Maybe<DOMString> data = null,
                                   RefPtr<dom::DataTransfer> &&dataTransfer = nullptr,
                                   const List<RefPtr<dom::StaticRange>> &targetRanges = {},
                                   bool cancelable = true) noexcept
     {
-      auto event = dom::InputEvent::Create(event_names::BeforeInput, element.NodeDocument().Window(),
-                                           inputType, cancelable, krys::move(data), krys::move(dataTransfer),
-                                           targetRanges, 0, isInputMethodComposing);
+      auto event = InputEvent::Create(event_names::BeforeInput, element.NodeDocument().Window(), inputType,
+                                      cancelable, krys::move(data), krys::move(dataTransfer), targetRanges, 0,
+                                      isInputMethodComposing);
       (void)dom::EventDispatcher::DispatchToTarget(*event, &element);
       return !event->DefaultPrevented();
     }
 
     // `input` goes through the scoped event queue: typing added to an open typing command fires it from
     // within the command, so it waits until the typing is applied.
-    void DispatchInputEvent(dom::Element &element, utf8_stringview inputType,
-                            dom::IsInputMethodComposing isInputMethodComposing,
-                            Maybe<dom::DOMString> data = null,
+    void DispatchInputEvent(Element &element, utf8_stringview inputType,
+                            dom::IsInputMethodComposing isInputMethodComposing, Maybe<DOMString> data = null,
                             RefPtr<dom::DataTransfer> &&dataTransfer = nullptr,
                             const List<RefPtr<dom::StaticRange>> &targetRanges = {}) noexcept
     {
-      auto event = dom::InputEvent::Create(event_names::Input, element.NodeDocument().Window(), inputType,
-                                           false, krys::move(data), krys::move(dataTransfer), targetRanges, 0,
-                                           isInputMethodComposing);
+      auto event = InputEvent::Create(event_names::Input, element.NodeDocument().Window(), inputType, false,
+                                      krys::move(data), krys::move(dataTransfer), targetRanges, 0,
+                                      isInputMethodComposing);
       dom::ScopedEventQueue::DispatchOrQueue(krys::move(event), ShareRef(element));
     }
 
     // By value: they keep the roots alive while script runs.
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
-    bool DispatchBeforeInputEvents(RefPtr<dom::Element> startRoot, RefPtr<dom::Element> endRoot,
+    bool DispatchBeforeInputEvents(RefPtr<Element> startRoot, RefPtr<Element> endRoot,
                                    utf8_stringview inputTypeName,
                                    dom::IsInputMethodComposing isInputMethodComposing,
-                                   const Maybe<dom::DOMString> &data = null,
+                                   const Maybe<DOMString> &data = null,
                                    const RefPtr<dom::DataTransfer> &dataTransfer = nullptr,
                                    const List<RefPtr<dom::StaticRange>> &targetRanges = {},
                                    bool cancelable = true) noexcept
@@ -179,10 +178,10 @@ namespace krys::boo
 
     // By value: they keep the roots alive while script runs.
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
-    void DispatchInputEvents(RefPtr<dom::Element> startRoot, RefPtr<dom::Element> endRoot,
+    void DispatchInputEvents(RefPtr<Element> startRoot, RefPtr<Element> endRoot,
                              utf8_stringview inputTypeName,
                              dom::IsInputMethodComposing isInputMethodComposing,
-                             const Maybe<dom::DOMString> &data = null,
+                             const Maybe<DOMString> &data = null,
                              const RefPtr<dom::DataTransfer> &dataTransfer = nullptr) noexcept
     {
       if (startRoot)
@@ -197,7 +196,7 @@ namespace krys::boo
       }
     }
 
-    KRYS_NODISCARD Maybe<dom::DOMString> InputEventData(const CompositeEditCommand &command) noexcept
+    KRYS_NODISCARD Maybe<DOMString> InputEventData(const CompositeEditCommand &command) noexcept
     {
       auto data = command.InputEventData();
       if (data.empty())
@@ -208,7 +207,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD Ref<dom::DataTransfer>
-      CreateDataTransferForClipboardEvent(dom::Document &document, ClipboardEventKind kind) noexcept
+      CreateDataTransferForClipboardEvent(Document &document, ClipboardEventKind kind) noexcept
     {
       using StoreMode = dom::DataTransfer::StoreMode;
       switch (kind)
@@ -243,7 +242,7 @@ namespace krys::boo
     }
   }
 
-  Editor::Editor(dom::Document &document) noexcept : _document(document)
+  Editor::Editor(Document &document) noexcept : _document(document)
   {
   }
 
@@ -258,7 +257,7 @@ namespace krys::boo
     return nullptr;
   }
 
-  bool Editor::HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept
+  bool Editor::HandleKeyboardEvent(KeyboardEvent &event) noexcept
   {
     if (auto *client = Client())
     {
@@ -267,7 +266,7 @@ namespace krys::boo
     return false;
   }
 
-  void Editor::HandleInputMethodKeydown(dom::KeyboardEvent &event) noexcept
+  void Editor::HandleInputMethodKeydown(KeyboardEvent &event) noexcept
   {
     if (auto *client = Client())
     {
@@ -275,7 +274,7 @@ namespace krys::boo
     }
   }
 
-  void Editor::DidDispatchInputMethodKeydown(dom::KeyboardEvent &event) noexcept
+  void Editor::DidDispatchInputMethodKeydown(KeyboardEvent &event) noexcept
   {
     if (auto *client = Client())
     {
@@ -286,7 +285,7 @@ namespace krys::boo
   // Returns whether caller should continue with "the default processing", which is the same as
   // the event handler NOT setting the return value to false
   // https://w3c.github.io/clipboard-apis/#fire-a-clipboard-event
-  bool Editor::DispatchClipboardEvent(const RefPtr<dom::Element> &target, ClipboardEventKind kind,
+  bool Editor::DispatchClipboardEvent(const RefPtr<Element> &target, ClipboardEventKind kind,
                                       const Ref<dom::DataTransfer> &dataTransfer) noexcept
   {
     // FIXME: Move the target selection code here.
@@ -295,8 +294,7 @@ namespace krys::boo
       return true;
     }
 
-    auto event =
-      dom::ClipboardEvent::Create(dom::DOMStringAtom(EventNameForClipboardEvent(kind)), Ref(dataTransfer));
+    auto event = ClipboardEvent::Create(DOMStringAtom(EventNameForClipboardEvent(kind)), Ref(dataTransfer));
 
     (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
     bool noDefaultProcessing = event->DefaultPrevented();
@@ -311,7 +309,7 @@ namespace krys::boo
     return !noDefaultProcessing;
   }
 
-  bool Editor::DispatchClipboardEvent(RefPtr<dom::Element> target, ClipboardEventKind kind) noexcept
+  bool Editor::DispatchClipboardEvent(RefPtr<Element> target, ClipboardEventKind kind) noexcept
   {
     if (!target)
     {
@@ -390,18 +388,18 @@ namespace krys::boo
     return !DispatchClipboardEvent(FindEventTargetFromSelection(), ClipboardEventKind::Cut);
   }
 
-  RefPtr<dom::Element> Editor::FindEventTargetFrom(const VisibleSelection &selection) const noexcept
+  RefPtr<Element> Editor::FindEventTargetFrom(const VisibleSelection &selection) const noexcept
   {
-    RefPtr<dom::Element> target {selection.Start().AnchorElementAncestor()};
+    RefPtr<Element> target {selection.Start().AnchorElementAncestor()};
     if (!target)
     {
-      target = ShareRefPtr<dom::Element>(_document.BodyOrFrameset());
+      target = ShareRefPtr<Element>(_document.BodyOrFrameset());
     }
 
     return target;
   }
 
-  RefPtr<dom::Element> Editor::FindEventTargetFromSelection() const noexcept
+  RefPtr<Element> Editor::FindEventTargetFromSelection() const noexcept
   {
     return FindEventTargetFrom(_document.Selection().Selection());
   }
@@ -483,13 +481,13 @@ namespace krys::boo
 
   void Editor::PasteAsPlainText(utf8_stringview pastingText, bool smartReplace) noexcept
   {
-    RefPtr<dom::Element> target = FindEventTargetFromSelection();
+    RefPtr<Element> target = FindEventTargetFromSelection();
     if (!target)
     {
       return;
     }
     auto event =
-      dom::TextEvent::CreateForPlainTextPaste(target->NodeDocument().Window(), pastingText, smartReplace);
+      TextEvent::CreateForPlainTextPaste(target->NodeDocument().Window(), pastingText, smartReplace);
     (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
     if (!event->DefaultPrevented())
     {
@@ -498,17 +496,17 @@ namespace krys::boo
   }
 
   // FIXME: The edit action of the paste (the event's input type), with removing backgrounds.
-  void Editor::PasteAsFragment(Ref<dom::DocumentFragment> &&pastingFragment, bool smartReplace,
-                               bool matchStyle, EditAction) noexcept
+  void Editor::PasteAsFragment(Ref<DocumentFragment> &&pastingFragment, bool smartReplace, bool matchStyle,
+                               EditAction) noexcept
   {
-    RefPtr<dom::Element> target = FindEventTargetFromSelection();
+    RefPtr<Element> target = FindEventTargetFromSelection();
     if (!target)
     {
       return;
     }
     auto event =
-      dom::TextEvent::CreateForFragmentPaste(target->NodeDocument().Window(), krys::move(pastingFragment),
-                                             dom::TextEventInputType::Paste, smartReplace, matchStyle);
+      TextEvent::CreateForFragmentPaste(target->NodeDocument().Window(), krys::move(pastingFragment),
+                                        dom::TextEventInputType::Paste, smartReplace, matchStyle);
     (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
     if (!event->DefaultPrevented())
     {
@@ -570,26 +568,25 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD dom::DOMString ElementURL(dom::Element &element) noexcept
+    KRYS_NODISCARD DOMString ElementURL(Element &element) noexcept
     {
-      if (Is<html::HTMLImageElement>(element) || Is<html::HTMLInputElement>(element))
+      if (Is<HTMLImageElement>(element) || Is<HTMLInputElement>(element))
       {
-        return element.GetAttribute(u8"src").value_or(dom::DOMString());
+        return element.GetAttribute(u8"src").value_or(DOMString());
       }
-      if (Is<svg::SVGImageElement>(DynamicDowncast<svg::SVGElement>(&element)))
+      if (Is<SVGImageElement>(DynamicDowncast<SVGElement>(&element)))
       {
-        return element.GetAttributeNS(infra::namespaces::XLink, u8"href").value_or(dom::DOMString());
+        return element.GetAttributeNS(infra::namespaces::XLink, u8"href").value_or(DOMString());
       }
-      if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
-          htmlElement
-          && (Is<html::HTMLEmbedElement>(*htmlElement) || Is<html::HTMLObjectElement>(*htmlElement)))
+      if (auto *htmlElement = DynamicDowncast<HTMLElement>(element);
+          htmlElement && (Is<HTMLEmbedElement>(*htmlElement) || Is<HTMLObjectElement>(*htmlElement)))
       {
-        return element.ImageSourceURL().value_or(dom::DOMString());
+        return element.ImageSourceURL().value_or(DOMString());
       }
       return {};
     }
 
-    KRYS_NODISCARD bool HasImageForElement(dom::Element &element) noexcept
+    KRYS_NODISCARD bool HasImageForElement(Element &element) noexcept
     {
       auto *renderer = DynamicDowncast<RenderImage>(element.Renderer());
       if (!renderer)
@@ -607,7 +604,7 @@ namespace krys::boo
     }
   }
 
-  void Editor::WriteImageToPasteboard(Pasteboard &pasteboard, dom::Element &imageElement, const url::URL &,
+  void Editor::WriteImageToPasteboard(Pasteboard &pasteboard, Element &imageElement, const url::URL &,
                                       utf8_stringview title) noexcept
   {
     PasteboardImage pasteboardImage;
@@ -624,10 +621,10 @@ namespace krys::boo
     pasteboard.Write(pasteboardImage);
   }
 
-  RefPtr<dom::DocumentFragment> Editor::WebContentFromPasteboard(Pasteboard &pasteboard,
-                                                                 const dom::SimpleRange &context,
-                                                                 bool allowPlainText,
-                                                                 bool &chosePlainText) noexcept
+  RefPtr<DocumentFragment> Editor::WebContentFromPasteboard(Pasteboard &pasteboard,
+                                                            const dom::SimpleRange &context,
+                                                            bool allowPlainText,
+                                                            bool &chosePlainText) noexcept
   {
     WebContentReader reader(*_document.Frame(), context, allowPlainText);
     pasteboard.Read(reader);
@@ -649,7 +646,7 @@ namespace krys::boo
 
   // FIXME: Asking the editor client (shouldInsertText and shouldInsertNode), with the editor client's
   // delegate callbacks.
-  bool Editor::ShouldInsertFragment(dom::DocumentFragment &fragment,
+  bool Editor::ShouldInsertFragment(DocumentFragment &fragment,
                                     const Maybe<dom::SimpleRange> &replacingDOMRange) const noexcept
   {
     if (!Client())
@@ -657,9 +654,9 @@ namespace krys::boo
       return false;
     }
     if (auto *child = fragment.FirstChild();
-        child && fragment.LastChild() == child && Is<dom::CharacterData>(*child))
+        child && fragment.LastChild() == child && Is<CharacterData>(*child))
     {
-      return ShouldInsertText(Downcast<dom::CharacterData>(*child).Data(), replacingDOMRange);
+      return ShouldInsertText(Downcast<CharacterData>(*child).Data(), replacingDOMRange);
     }
     return true;
   }
@@ -688,7 +685,7 @@ namespace krys::boo
 
     if (action == EditorActionSpecifier::CutAction)
     {
-      dom::DOMString text;
+      DOMString text;
       if (AXObjectCache::AccessibilityEnabled())
       {
         const auto &cutSelection = _document.Selection().Selection();
@@ -710,7 +707,7 @@ namespace krys::boo
     return EditingBehavior(_document.GetSettings().EditingBehaviorType);
   }
 
-  void Editor::TextFieldDidBeginEditing(dom::Element &e) noexcept
+  void Editor::TextFieldDidBeginEditing(Element &e) noexcept
   {
     if (auto *client = Client())
     {
@@ -718,7 +715,7 @@ namespace krys::boo
     }
   }
 
-  void Editor::TextFieldDidEndEditing(dom::Element &e) noexcept
+  void Editor::TextFieldDidEndEditing(Element &e) noexcept
   {
     // (There's no correction panel to dismiss, as there's no spelling correction; see DIFFERENCES.md.)
     if (auto *client = Client())
@@ -727,7 +724,7 @@ namespace krys::boo
     }
   }
 
-  void Editor::TextDidChangeInTextField(dom::Element &e) noexcept
+  void Editor::TextDidChangeInTextField(Element &e) noexcept
   {
     if (auto *client = Client())
     {
@@ -735,7 +732,7 @@ namespace krys::boo
     }
   }
 
-  bool Editor::DoTextFieldCommandFromEvent(dom::Element &e, dom::KeyboardEvent *event) noexcept
+  bool Editor::DoTextFieldCommandFromEvent(Element &e, KeyboardEvent *event) noexcept
   {
     if (auto *client = Client())
     {
@@ -745,7 +742,7 @@ namespace krys::boo
     return false;
   }
 
-  void Editor::TextWillBeDeletedInTextField(dom::Element &input) noexcept
+  void Editor::TextWillBeDeletedInTextField(Element &input) noexcept
   {
     if (auto *client = Client())
     {
@@ -753,7 +750,7 @@ namespace krys::boo
     }
   }
 
-  void Editor::TextDidChangeInTextArea(dom::Element &e) noexcept
+  void Editor::TextDidChangeInTextArea(Element &e) noexcept
   {
     if (auto *client = Client())
     {
@@ -802,12 +799,11 @@ namespace krys::boo
 
   namespace
   {
-    void NotifyTextFromControls(dom::Element *startRoot, dom::Element *endRoot,
-                                bool wasUserEdit = true) noexcept
+    void NotifyTextFromControls(Element *startRoot, Element *endRoot, bool wasUserEdit = true) noexcept
     {
-      RefPtr<html::HTMLTextFormControlElement> startingTextControl =
+      RefPtr<HTMLTextFormControlElement> startingTextControl =
         ShareRefPtr(html::EnclosingTextFormControl(FirstPositionInOrBeforeNode(startRoot)));
-      RefPtr<html::HTMLTextFormControlElement> endingTextControl =
+      RefPtr<HTMLTextFormControlElement> endingTextControl =
         ShareRefPtr(html::EnclosingTextFormControl(FirstPositionInOrBeforeNode(endRoot)));
       if (startingTextControl)
       {
@@ -1061,7 +1057,7 @@ namespace krys::boo
                                     ? dom::IsInputMethodComposing::Yes
                                     : dom::IsInputMethodComposing::No;
     auto inputEventData = InputEventDataForEditingStyleAndAction(style->Style(), editingAction);
-    RefPtr<dom::Element> element = ShareRefPtr(selection.Selection().RootEditableElement());
+    RefPtr<Element> element = ShareRefPtr(selection.Selection().RootEditableElement());
 
     if (element && !DispatchBeforeInputEvent(*element, inputTypeName, isInputMethodComposing, inputEventData))
     {
@@ -1106,7 +1102,7 @@ namespace krys::boo
                                     ? dom::IsInputMethodComposing::Yes
                                     : dom::IsInputMethodComposing::No;
     auto inputEventData = InputEventDataForEditingStyleAndAction(style, editingAction);
-    RefPtr<dom::Element> element = ShareRefPtr(selection.Selection().RootEditableElement());
+    RefPtr<Element> element = ShareRefPtr(selection.Selection().RootEditableElement());
     if (element && !DispatchBeforeInputEvent(*element, inputTypeName, isInputMethodComposing, inputEventData))
     {
       return;
@@ -1179,7 +1175,7 @@ namespace krys::boo
 
   void Editor::SetBaseWritingDirection(WritingDirection direction) noexcept
   {
-    if (auto *focusedElement = DynamicDowncast<html::HTMLTextFormControlElement>(_document.FocusedElement());
+    if (auto *focusedElement = DynamicDowncast<HTMLTextFormControlElement>(_document.FocusedElement());
         focusedElement && focusedElement->IsTextField())
     {
       if (direction == WritingDirection::Natural)
@@ -1192,14 +1188,14 @@ namespace krys::boo
       auto writingDirectionInputTypeName =
         InputTypeNameForEditingAction(EditAction::SetBlockWritingDirection);
       if (!DispatchBeforeInputEvent(*element, writingDirectionInputTypeName, dom::IsInputMethodComposing::No,
-                                    dom::DOMString(directionValue)))
+                                    DOMString(directionValue)))
       {
         return;
       }
 
       (void)element->SetAttribute(u8"dir", directionValue);
       DispatchInputEvent(*element, writingDirectionInputTypeName, dom::IsInputMethodComposing::No,
-                         dom::DOMString(directionValue));
+                         DOMString(directionValue));
       (void)_document.UpdateStyleIfNeeded();
       return;
     }
@@ -1280,14 +1276,14 @@ namespace krys::boo
     return Client();
   }
 
-  bool Editor::InsertText(utf8_stringview text, dom::Event *triggeringEvent,
+  bool Editor::InsertText(utf8_stringview text, Event *triggeringEvent,
                           dom::TextEventInputType inputType) noexcept
   {
     auto *frame = _document.Frame();
     return frame && frame->GetEventHandler().HandleTextInputEvent(text, triggeringEvent, inputType);
   }
 
-  bool Editor::InsertText(utf8_stringview text, dom::Event *triggeringEvent) noexcept
+  bool Editor::InsertText(utf8_stringview text, Event *triggeringEvent) noexcept
   {
     return InsertText(text, triggeringEvent, dom::TextEventInputType::Keyboard);
   }
@@ -1295,7 +1291,7 @@ namespace krys::boo
   // FIXME: Revealing the selection when the client asks (shouldRevealCurrentSelectionAfterInsertion), with
   // the rest of the editor client. (There's no dictation or autocorrection; see DIFFERENCES.md.)
   bool Editor::InsertTextWithoutSendingTextEvent(utf8_stringview text, bool selectInsertedText,
-                                                 dom::TextEvent *triggeringEvent) noexcept
+                                                 TextEvent *triggeringEvent) noexcept
   {
     if (text.empty())
     {
@@ -1321,7 +1317,7 @@ namespace krys::boo
     {
       if (auto *selectionStart = selection.Start().DeprecatedNode())
       {
-        Ref<dom::Document> document = ShareRef(selectionStart->NodeDocument());
+        Ref<Document> document = ShareRef(selectionStart->NodeDocument());
 
         // Insert the text
         EnumSet<TypingCommand::Option> options {TypingCommand::Option::RetainAutocorrectionIndicator};
@@ -1401,7 +1397,7 @@ namespace krys::boo
     return true;
   }
 
-  bool Editor::HandleTextEvent(dom::TextEvent &event) noexcept
+  bool Editor::HandleTextEvent(TextEvent &event) noexcept
   {
     // Default event handling for Drag and Drop will be handled by DragController
     // so we leave the event for it.
@@ -1516,7 +1512,7 @@ namespace krys::boo
 
   // FIXME: Waiting for the inserted images to load before revealing the selection. (There's no spell
   // checking; see DIFFERENCES.md.)
-  void Editor::ReplaceSelectionWithFragment(dom::DocumentFragment &fragment, bool selectReplacement,
+  void Editor::ReplaceSelectionWithFragment(DocumentFragment &fragment, bool selectReplacement,
                                             bool smartReplace, bool matchStyle,
                                             EditAction editingAction) noexcept
   {
@@ -1559,7 +1555,7 @@ namespace krys::boo
     {
       return;
     }
-    dom::DOMString text;
+    DOMString text;
     if (editingAction == EditAction::Paste)
     {
       const auto &inserted = command->VisibleSelectionForInsertedText();
@@ -1611,14 +1607,14 @@ namespace krys::boo
     return CompositionNode();
   }
 
-  dom::Text *Editor::CompositionNode() const noexcept
+  Text *Editor::CompositionNode() const noexcept
   {
     if (!_compositionRange || _compositionRange->Collapsed()
         || _compositionRange->StartContainer() != _compositionRange->EndContainer())
     {
       return nullptr;
     }
-    auto *node = DynamicDowncast<dom::Text>(_compositionRange->StartContainer());
+    auto *node = DynamicDowncast<Text>(_compositionRange->StartContainer());
     return node && node->IsConnected() ? node : nullptr;
   }
 
@@ -1680,7 +1676,7 @@ namespace krys::boo
       return;
     }
 
-    RefPtr<dom::Document> document = ShareRefPtr(&_document);
+    RefPtr<Document> document = ShareRefPtr(&_document);
     auto *frame = document->Frame();
     if (!frame)
     {
@@ -1749,10 +1745,10 @@ namespace krys::boo
       KRYS_NON_COPY_MOVABLE(SetCompositionScope);
 
     private:
-      Ref<dom::Document> _document;
+      Ref<Document> _document;
 
     public:
-      explicit SetCompositionScope(dom::Document &document) noexcept : _document(ShareRef(document))
+      explicit SetCompositionScope(Document &document) noexcept : _document(ShareRef(document))
       {
         _document->GetEditor().SetIgnoreSelectionChanges(true);
       }
@@ -1770,7 +1766,7 @@ namespace krys::boo
 
   void Editor::SetComposition(utf8_stringview text, SetCompositionMode mode) noexcept
   {
-    Ref<dom::Document> document = ShareRef(_document);
+    Ref<Document> document = ShareRef(_document);
     SetCompositionScope setCompositionScope(*document);
 
     if (mode == SetCompositionMode::CancelComposition)
@@ -1807,10 +1803,10 @@ namespace krys::boo
       (void)InsertTextForConfirmedComposition(text);
     }
 
-    if (RefPtr<dom::Element> target = ShareRefPtr(document->FocusedElement()))
+    if (RefPtr<Element> target = ShareRefPtr(document->FocusedElement()))
     {
       auto event =
-        dom::CompositionEvent::Create(event_names::CompositionEnd, target->NodeDocument().Window(), text);
+        CompositionEvent::Create(event_names::CompositionEnd, target->NodeDocument().Window(), text);
       (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
     }
 
@@ -1836,7 +1832,7 @@ namespace krys::boo
       CancelComposition();
     }
 
-    Ref<dom::Document> document = ShareRef(_document);
+    Ref<Document> document = ShareRef(_document);
     SetCompositionScope setCompositionScope(*document);
 
     // Updates styles before setting selection for composition to prevent
@@ -1867,8 +1863,8 @@ namespace krys::boo
       }
     }
 
-    RefPtr<dom::CompositionEvent> event;
-    RefPtr<dom::Element> target = ShareRefPtr(document->FocusedElement());
+    RefPtr<CompositionEvent> event;
+    RefPtr<Element> target = ShareRefPtr(document->FocusedElement());
     if (target)
     {
       // Dispatch an appropriate composition event to the focused node.
@@ -1892,17 +1888,17 @@ namespace krys::boo
         // function doesn't create a composition node when the text is empty.
         if (!text.empty())
         {
-          auto start = dom::CompositionEvent::Create(event_names::CompositionStart,
-                                                     target->NodeDocument().Window(), originalText);
+          auto start = CompositionEvent::Create(event_names::CompositionStart,
+                                                target->NodeDocument().Window(), originalText);
           (void)dom::EventDispatcher::DispatchToTarget(*start, target.get());
-          event = dom::CompositionEvent::Create(event_names::CompositionUpdate,
-                                                target->NodeDocument().Window(), text);
+          event =
+            CompositionEvent::Create(event_names::CompositionUpdate, target->NodeDocument().Window(), text);
         }
       }
       else if (!text.empty())
       {
-        event = dom::CompositionEvent::Create(event_names::CompositionUpdate, target->NodeDocument().Window(),
-                                              text);
+        event =
+          CompositionEvent::Create(event_names::CompositionUpdate, target->NodeDocument().Window(), text);
       }
 
       if (event)
@@ -1920,7 +1916,7 @@ namespace krys::boo
       if (target)
       {
         auto end =
-          dom::CompositionEvent::Create(event_names::CompositionEnd, target->NodeDocument().Window(), text);
+          CompositionEvent::Create(event_names::CompositionEnd, target->NodeDocument().Window(), text);
         (void)dom::EventDispatcher::DispatchToTarget(*end, target.get());
       }
     }
@@ -1938,17 +1934,17 @@ namespace krys::boo
       // Find out what node has the composition now.
       auto base = document->Selection().Selection().CanonicalAnchor().Downstream();
       auto extent = document->Selection().Selection().CanonicalFocus();
-      RefPtr<dom::Node> baseNode = ShareRefPtr(base.DeprecatedNode());
+      RefPtr<Node> baseNode = ShareRefPtr(base.DeprecatedNode());
       auto baseOffset = static_cast<uint32>(base.DeprecatedEditingOffset());
-      RefPtr<dom::Node> extentNode = ShareRefPtr(extent.DeprecatedNode());
+      RefPtr<Node> extentNode = ShareRefPtr(extent.DeprecatedNode());
       auto extentOffset = static_cast<uint32>(extent.DeprecatedEditingOffset());
 
-      if (auto *baseTextNode = DynamicDowncast<dom::Text>(baseNode.get());
+      if (auto *baseTextNode = DynamicDowncast<Text>(baseNode.get());
           baseTextNode && baseNode == extentNode && baseOffset + text.size() == extentOffset)
       {
         _compositionRange =
-          CreateRef<dom::Range>(dom::BoundaryPoint {ShareRef<dom::Node>(*baseTextNode), baseOffset},
-                                dom::BoundaryPoint {ShareRef<dom::Node>(*baseTextNode), extentOffset});
+          CreateRef<dom::Range>(dom::BoundaryPoint {ShareRef<Node>(*baseTextNode), baseOffset},
+                                dom::BoundaryPoint {ShareRef<Node>(*baseTextNode), extentOffset});
         _customCompositionUnderlines = underlines;
 
         if (auto *renderer = baseTextNode->Renderer())
@@ -2076,7 +2072,7 @@ namespace krys::boo
     return RenderedPosition(start).AbsoluteRect(CaretRectMode::ExpandToEndOfLine);
   }
 
-  VisibleSelection Editor::SelectionForCommand(dom::Event *event) const noexcept
+  VisibleSelection Editor::SelectionForCommand(Event *event) const noexcept
   {
     auto selection = _document.Selection().Selection();
     if (!event)
@@ -2085,7 +2081,7 @@ namespace krys::boo
     }
     // If the target is a text control, and the current selection is outside of its shadow tree,
     // then use the saved selection for that text control.
-    if (auto *target = DynamicDowncast<html::HTMLTextFormControlElement>(event->Target().get());
+    if (auto *target = DynamicDowncast<HTMLTextFormControlElement>(event->Target().get());
         target && target->IsTextField())
     {
       auto start = selection.Start();

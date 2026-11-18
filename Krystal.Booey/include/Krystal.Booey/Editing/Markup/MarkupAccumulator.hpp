@@ -35,7 +35,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Attr;
   class Element;
@@ -43,13 +43,10 @@ namespace krys::boo::dom
   class QualifiedName;
   class ShadowRoot;
   class Text;
-}
 
-namespace krys::boo
-{
   /// @brief Prefixes by namespace and namespaces by prefix (the default namespace's prefix is empty), as in
   /// scope while serializing XML.
-  using Namespaces = HashMap<dom::DOMStringAtom, dom::DOMStringAtom>;
+  using Namespaces = HashMap<DOMStringAtom, DOMStringAtom>;
 
   enum class EntityMask : uint8
   {
@@ -92,7 +89,7 @@ namespace krys::boo
     KRYS_NON_COPYABLE(MarkupAccumulator);
 
   protected:
-    List<Ref<dom::Node>> *const _nodes;
+    List<Ref<Node>> *const _nodes;
 
   private:
     utf8_string _markup;
@@ -100,20 +97,20 @@ namespace krys::boo
     const SerializationSyntax _serializationSyntax;
     uint32 _prefixLevel {0};
     SerializeShadowRoots _serializeShadowRoots;
-    List<Ref<dom::ShadowRoot>> _explicitShadowRoots;
+    List<Ref<ShadowRoot>> _explicitShadowRoots;
     const RequireWellFormed _requireWellFormed;
     bool _wellFormed {true};
 
   public:
-    MarkupAccumulator(List<Ref<dom::Node>> *nodes, ResolveURLs resolveURLs,
+    MarkupAccumulator(List<Ref<Node>> *nodes, ResolveURLs resolveURLs,
                       SerializationSyntax serializationSyntax,
                       SerializeShadowRoots serializeShadowRoots = SerializeShadowRoots::Explicit,
-                      List<Ref<dom::ShadowRoot>> &&explicitShadowRoots = {},
+                      List<Ref<ShadowRoot>> &&explicitShadowRoots = {},
                       RequireWellFormed requireWellFormed = RequireWellFormed::No) noexcept;
 
     virtual ~MarkupAccumulator() noexcept;
 
-    KRYS_NODISCARD utf8_string SerializeNodes(dom::Node &targetNode, SerializedNodes root) noexcept;
+    KRYS_NODISCARD utf8_string SerializeNodes(Node &targetNode, SerializedNodes root) noexcept;
 
     /// @brief False if the serialization required well-formed XML and met one of the error cases.
     /// @see https://html.spec.whatwg.org/#xml-fragment-serialisation-algorithm
@@ -125,7 +122,7 @@ namespace krys::boo
     static void AppendCharactersReplacingEntities(utf8_string &result, utf8_stringview source,
                                                   EnumSet<EntityMask> entityMask) noexcept;
 
-    KRYS_NODISCARD static SerializationSyntax GetSerializationSyntax(dom::Document &document) noexcept;
+    KRYS_NODISCARD static SerializationSyntax GetSerializationSyntax(Document &document) noexcept;
 
   protected:
     KRYS_NODISCARD size_t Length() const noexcept
@@ -143,48 +140,46 @@ namespace krys::boo
       (_markup.append(std::forward<TStrings>(strings)), ...);
     }
 
-    void StartAppendingNode(const dom::Node &node, Namespaces *namespaces = nullptr) noexcept;
+    void StartAppendingNode(const Node &node, Namespaces *namespaces = nullptr) noexcept;
 
-    void EndAppendingNode(const dom::Node &node) noexcept;
+    void EndAppendingNode(const Node &node) noexcept;
 
-    virtual void AppendStartTag(utf8_string &result, const dom::Element &element,
-                                Namespaces *namespaces) noexcept;
+    virtual void AppendStartTag(utf8_string &result, const Element &element, Namespaces *namespaces) noexcept;
 
-    virtual void AppendEndTag(utf8_string &result, const dom::Element &element) noexcept;
+    virtual void AppendEndTag(utf8_string &result, const Element &element) noexcept;
 
-    virtual void AppendCustomAttributes(utf8_string &result, const dom::Element &element,
+    virtual void AppendCustomAttributes(utf8_string &result, const Element &element,
                                         Namespaces *namespaces) noexcept;
 
-    virtual void AppendText(utf8_string &result, const dom::Text &text) noexcept;
+    virtual void AppendText(utf8_string &result, const Text &text) noexcept;
 
-    virtual bool AppendContentsForNode(utf8_string &result, const dom::Node &node) noexcept;
+    virtual bool AppendContentsForNode(utf8_string &result, const Node &node) noexcept;
 
-    void AppendOpenTag(utf8_string &result, const dom::Element &element, Namespaces *namespaces) noexcept;
+    void AppendOpenTag(utf8_string &result, const Element &element, Namespaces *namespaces) noexcept;
 
-    void AppendCloseTag(utf8_string &result, const dom::Element &element) noexcept;
+    void AppendCloseTag(utf8_string &result, const Element &element) noexcept;
 
-    void AppendNonElementNode(utf8_string &result, const dom::Node &node, Namespaces *namespaces) noexcept;
+    void AppendNonElementNode(utf8_string &result, const Node &node, Namespaces *namespaces) noexcept;
 
     void AppendAttributeValue(utf8_string &result, utf8_stringview attribute) noexcept;
 
-    bool AppendAttribute(utf8_string &result, const dom::Element &element, const dom::Attr &attribute,
+    bool AppendAttribute(utf8_string &result, const Element &element, const Attr &attribute,
                          Namespaces *namespaces) noexcept;
 
-    KRYS_NODISCARD EnumSet<EntityMask> EntityMaskForText(const dom::Text &text) const noexcept;
+    KRYS_NODISCARD EnumSet<EntityMask> EntityMaskForText(const Text &text) const noexcept;
 
   private:
-    void AppendNamespace(utf8_string &result, const dom::DOMStringAtom &prefix,
-                         const dom::DOMStringAtom &namespaceURI, Namespaces &namespaces,
-                         bool allowEmptyDefaultNS = false) noexcept;
+    void AppendNamespace(utf8_string &result, const DOMStringAtom &prefix, const DOMStringAtom &namespaceURI,
+                         Namespaces &namespaces, bool allowEmptyDefaultNS = false) noexcept;
 
-    KRYS_NODISCARD utf8_string ResolveURLIfNeeded(const dom::Element &element,
+    KRYS_NODISCARD utf8_string ResolveURLIfNeeded(const Element &element,
                                                   utf8_stringview urlString) const noexcept;
 
     KRYS_NODISCARD bool ShouldIncludeShadowRoots() const noexcept;
 
-    KRYS_NODISCARD bool IncludeShadowRoot(const dom::ShadowRoot &shadowRoot) const noexcept;
+    KRYS_NODISCARD bool IncludeShadowRoot(const ShadowRoot &shadowRoot) const noexcept;
 
-    void SerializeNodesWithNamespaces(dom::Node &targetNode, SerializedNodes root,
+    void SerializeNodesWithNamespaces(Node &targetNode, SerializedNodes root,
                                       const Namespaces *namespaces) noexcept;
 
     KRYS_NODISCARD bool InXMLFragmentSerialization() const noexcept
@@ -203,11 +198,11 @@ namespace krys::boo
       }
     }
 
-    KRYS_NODISCARD dom::DOMStringAtom GenerateUniquePrefix(const Namespaces &namespaces) noexcept;
+    KRYS_NODISCARD DOMStringAtom GenerateUniquePrefix(const Namespaces &namespaces) noexcept;
 
-    KRYS_NODISCARD utf8_string XMLAttributeSerialization(const dom::Attr &attribute, Namespaces *namespaces,
-                                                         dom::DOMStringAtom &prefix) noexcept;
+    KRYS_NODISCARD utf8_string XMLAttributeSerialization(const Attr &attribute, Namespaces *namespaces,
+                                                         DOMStringAtom &prefix) noexcept;
 
-    KRYS_NODISCARD const dom::ShadowRoot *SuitableShadowRoot(const dom::Node &node) const noexcept;
+    KRYS_NODISCARD const ShadowRoot *SuitableShadowRoot(const Node &node) const noexcept;
   };
 }

@@ -30,15 +30,15 @@
 
 #include "Krystal.Booey/CSS/CSSOM/CSSGroupingRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/Parser.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   CSSGroupingRule::CSSGroupingRule(css::GroupRule &groupRule, CSSStyleSheet *parent) noexcept
       : CSSRule(parent), _groupRule(ShareRef(groupRule)),
@@ -58,14 +58,14 @@ namespace krys::boo::css
     }
   }
 
-  dom::ExceptionOr<uint32> CSSGroupingRule::InsertRule(const CSSOMString &ruleString, uint32 index) noexcept
+  ExceptionOr<uint32> CSSGroupingRule::InsertRule(const CSSOMString &ruleString, uint32 index) noexcept
   {
     krys_debug_assert(_childRuleCSSOMWrappers.size() == _groupRule->ChildRules().size());
 
     if (index > _groupRule->ChildRules().size())
     {
       // IndexSizeError: Raised if the specified index is not a valid insertion point.
-      return dom::ExceptionCode::IndexSizeError;
+      return ExceptionCode::IndexSizeError;
     }
 
     auto *styleSheet = ParentStyleSheet();
@@ -75,12 +75,12 @@ namespace krys::boo::css
       {
         // This is handled in CSSStyleRule.
         krys_debug_assert(false);
-        return NestedParserContextType::Style;
+        return css::NestedParserContextType::Style;
       }
 
       if (_groupRule->IsScopeRule())
       {
-        return NestedParserContextType::Scope;
+        return css::NestedParserContextType::Scope;
       }
 
       // Find the context in the ancestor chain.
@@ -88,21 +88,21 @@ namespace krys::boo::css
     }();
 
     auto newRule =
-      Parser::ParseRule(ruleString, GetParserContext(), styleSheet ? &styleSheet->Contents() : nullptr,
-                        Parser::AllowedRules::ImportRules, nestedContextWithCurrentRule);
+      css::Parser::ParseRule(ruleString, GetParserContext(), styleSheet ? &styleSheet->Contents() : nullptr,
+                             css::Parser::AllowedRules::ImportRules, nestedContextWithCurrentRule);
     if (!newRule)
     {
       // CSSNestedDeclarations parsing is allowed if there is an ancestor style rule or an ancestor scope
       // rule.
       if (!nestedContextWithCurrentRule)
       {
-        return dom::ExceptionCode::SyntaxError;
+        return ExceptionCode::SyntaxError;
       }
 
-      newRule = Parser::ParseNestedDeclarations(GetParserContext(), ruleString);
+      newRule = css::Parser::ParseNestedDeclarations(GetParserContext(), ruleString);
       if (!newRule)
       {
-        return dom::ExceptionCode::SyntaxError;
+        return ExceptionCode::SyntaxError;
       }
     }
 
@@ -115,13 +115,13 @@ namespace krys::boo::css
       // HierarchyRequestError: Raised if the rule cannot be inserted at the specified
       // index, e.g., if an @import rule is inserted after a standard rule set or other
       // at-rule.
-      return dom::ExceptionCode::HierarchyRequestError;
+      return ExceptionCode::HierarchyRequestError;
     }
 
     if (HasStyleRuleAncestor() && !newRule->IsStyleRule() && !newRule->IsGroupRule()
         && !newRule->IsNestedDeclarationsRule())
     {
-      return dom::ExceptionCode::HierarchyRequestError;
+      return ExceptionCode::HierarchyRequestError;
     }
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
@@ -132,7 +132,7 @@ namespace krys::boo::css
     return index;
   }
 
-  dom::ExceptionOr<void> CSSGroupingRule::DeleteRule(uint32 index) noexcept
+  ExceptionOr<void> CSSGroupingRule::DeleteRule(uint32 index) noexcept
   {
     krys_debug_assert(_childRuleCSSOMWrappers.size() == _groupRule->ChildRules().size());
 
@@ -140,7 +140,7 @@ namespace krys::boo::css
     {
       // IndexSizeError: Raised if the specified index does not correspond to a
       // rule in the media rule list.
-      return dom::ExceptionCode::IndexSizeError;
+      return ExceptionCode::IndexSizeError;
     }
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
@@ -190,15 +190,15 @@ namespace krys::boo::css
   }
 
   void CSSGroupingRule::AppendCSSTextWithReplacementURLsForItems(
-    StringBuilder &builder, const SerialisationContext &context) const noexcept
+    StringBuilder &builder, const css::SerialisationContext &context) const noexcept
   {
     StringBuilder rules;
     CssTextForRulesWithReplacementURLs(rules, context);
     AppendCSSTextForItemsInternal(builder, rules);
   }
 
-  void CSSGroupingRule::CssTextForRulesWithReplacementURLs(StringBuilder &rules,
-                                                           const SerialisationContext &context) const noexcept
+  void CSSGroupingRule::CssTextForRulesWithReplacementURLs(
+    StringBuilder &rules, const css::SerialisationContext &context) const noexcept
   {
     const auto &childRules = _groupRule->ChildRules();
     for (uint32 index = 0; index < childRules.size(); index++)
@@ -208,7 +208,8 @@ namespace krys::boo::css
     }
   }
 
-  RefPtr<StyleRuleWithNesting> CSSGroupingRule::PrepareChildStyleRuleForNesting(StyleRule &styleRule) noexcept
+  RefPtr<css::StyleRuleWithNesting>
+    CSSGroupingRule::PrepareChildStyleRuleForNesting(css::StyleRule &styleRule) noexcept
   {
     CSSStyleSheet::RuleMutationScope scope(this);
     auto &rules = _groupRule->_childRules;
@@ -216,7 +217,7 @@ namespace krys::boo::css
     {
       if (rule.get() == &styleRule)
       {
-        auto styleRuleWithNesting = StyleRuleWithNesting::Create(krys::move(styleRule));
+        auto styleRuleWithNesting = css::StyleRuleWithNesting::Create(krys::move(styleRule));
         rule = styleRuleWithNesting;
         return styleRuleWithNesting;
       }
@@ -255,7 +256,7 @@ namespace krys::boo::css
     return *_ruleListCSSOMWrapper;
   }
 
-  void CSSGroupingRule::Reattach(Rule &rule) noexcept
+  void CSSGroupingRule::Reattach(css::Rule &rule) noexcept
   {
     _groupRule = ShareRef(Downcast<css::GroupRule>(rule));
     for (uint32 i = 0; i < _childRuleCSSOMWrappers.size(); ++i)

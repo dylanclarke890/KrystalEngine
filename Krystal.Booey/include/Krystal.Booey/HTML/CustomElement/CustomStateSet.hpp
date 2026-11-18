@@ -30,7 +30,7 @@
 #include "Krystal.Core/Types/ListHashSet.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
 }
@@ -42,33 +42,33 @@ namespace krys::boo::html
   class CustomStateSet : public RefCounted<CustomStateSet>
   {
   private:
-    ListHashSet<dom::DOMStringAtom> _states;
-    WeakPtr<dom::Element> _element;
+    ListHashSet<DOMStringAtom> _states;
+    WeakPtr<Element> _element;
 
   public:
-    explicit CustomStateSet(dom::Element &element) noexcept;
+    explicit CustomStateSet(Element &element) noexcept;
 
     ~CustomStateSet() noexcept;
 
-    KRYS_NODISCARD static Ref<CustomStateSet> Create(dom::Element &element) noexcept
+    KRYS_NODISCARD static Ref<CustomStateSet> Create(Element &element) noexcept
     {
       return CreateRef<CustomStateSet>(element);
     }
 
     /// @return Whether @p state wasn't in the set.
-    bool Add(const dom::DOMStringAtom &state) noexcept;
+    bool Add(const DOMStringAtom &state) noexcept;
 
     /// @return Whether @p state was in the set.
-    bool Delete(const dom::DOMStringAtom &state) noexcept;
+    bool Delete(const DOMStringAtom &state) noexcept;
 
     void Clear() noexcept;
 
-    KRYS_NODISCARD bool Has(const dom::DOMStringAtom &state) const noexcept;
+    KRYS_NODISCARD bool Has(const DOMStringAtom &state) const noexcept;
 
     KRYS_NODISCARD size_t Size() const noexcept;
 
     /// @brief The states, in the order they were added.
-    KRYS_NODISCARD const ListHashSet<dom::DOMStringAtom> &States() const noexcept
+    KRYS_NODISCARD const ListHashSet<DOMStringAtom> &States() const noexcept
     {
       return _states;
     }

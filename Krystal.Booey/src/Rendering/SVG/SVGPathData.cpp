@@ -37,7 +37,7 @@ namespace krys::boo
 {
   namespace
   {
-    Path PathFromCircleElement(const svg::SVGCircleElement &element) noexcept
+    Path PathFromCircleElement(const SVGCircleElement &element) noexcept
     {
       RenderElement *renderer = element.Renderer();
       if (!renderer)
@@ -47,18 +47,18 @@ namespace krys::boo
 
       Path path;
       const auto &style = renderer->Style();
-      svg::SVGLengthContext lengthContext(&element);
+      SVGLengthContext lengthContext(&element);
       float r = lengthContext.ValueForLength(style.R(), style::ZoomNeeded {});
       if (r > 0)
       {
-        float cx = lengthContext.ValueForLength(style.Cx(), style::ZoomNeeded {}, svg::SVGLengthMode::Width);
-        float cy = lengthContext.ValueForLength(style.Cy(), style::ZoomNeeded {}, svg::SVGLengthMode::Height);
+        float cx = lengthContext.ValueForLength(style.Cx(), style::ZoomNeeded {}, SVGLengthMode::Width);
+        float cy = lengthContext.ValueForLength(style.Cy(), style::ZoomNeeded {}, SVGLengthMode::Height);
         path.AddEllipseInRect(FloatRect(cx - r, cy - r, r * 2, r * 2));
       }
       return path;
     }
 
-    Path PathFromEllipseElement(const svg::SVGEllipseElement &element) noexcept
+    Path PathFromEllipseElement(const SVGEllipseElement &element) noexcept
     {
       RenderElement *renderer = element.Renderer();
       if (!renderer)
@@ -67,41 +67,41 @@ namespace krys::boo
       }
 
       const auto &style = renderer->Style();
-      svg::SVGLengthContext lengthContext(&element);
-      float rx = lengthContext.ValueForLength(style.Rx(), style::ZoomNeeded {}, svg::SVGLengthMode::Width);
+      SVGLengthContext lengthContext(&element);
+      float rx = lengthContext.ValueForLength(style.Rx(), style::ZoomNeeded {}, SVGLengthMode::Width);
       if (rx <= 0)
       {
         return {};
       }
 
-      float ry = lengthContext.ValueForLength(style.Ry(), style::ZoomNeeded {}, svg::SVGLengthMode::Height);
+      float ry = lengthContext.ValueForLength(style.Ry(), style::ZoomNeeded {}, SVGLengthMode::Height);
       if (ry <= 0)
       {
         return {};
       }
 
       Path path;
-      float cx = lengthContext.ValueForLength(style.Cx(), style::ZoomNeeded {}, svg::SVGLengthMode::Width);
-      float cy = lengthContext.ValueForLength(style.Cy(), style::ZoomNeeded {}, svg::SVGLengthMode::Height);
+      float cx = lengthContext.ValueForLength(style.Cx(), style::ZoomNeeded {}, SVGLengthMode::Width);
+      float cy = lengthContext.ValueForLength(style.Cy(), style::ZoomNeeded {}, SVGLengthMode::Height);
       path.AddEllipseInRect(FloatRect(cx - rx, cy - ry, rx * 2, ry * 2));
       return path;
     }
 
-    Path PathFromLineElement(const svg::SVGLineElement &element) noexcept
+    Path PathFromLineElement(const SVGLineElement &element) noexcept
     {
       Path path;
-      svg::SVGLengthContext lengthContext(&element);
+      SVGLengthContext lengthContext(&element);
       path.MoveTo(FloatPoint(element.X1().Value(lengthContext), element.Y1().Value(lengthContext)));
       path.AddLineTo(FloatPoint(element.X2().Value(lengthContext), element.Y2().Value(lengthContext)));
       return path;
     }
 
-    Path PathFromPathElement(const svg::SVGPathElement &element) noexcept
+    Path PathFromPathElement(const SVGPathElement &element) noexcept
     {
       return element.GetPath();
     }
 
-    Path PathFromPolygonElement(const svg::SVGPolygonElement &element) noexcept
+    Path PathFromPolygonElement(const SVGPolygonElement &element) noexcept
     {
       const auto &points = element.Points().Items();
       if (points.empty())
@@ -122,7 +122,7 @@ namespace krys::boo
       return path;
     }
 
-    Path PathFromPolylineElement(const svg::SVGPolylineElement &element) noexcept
+    Path PathFromPolylineElement(const SVGPolylineElement &element) noexcept
     {
       const auto &points = element.Points().Items();
       if (points.empty())
@@ -141,7 +141,7 @@ namespace krys::boo
       return path;
     }
 
-    Path PathFromRectElement(const svg::SVGRectElement &element) noexcept
+    Path PathFromRectElement(const SVGRectElement &element) noexcept
     {
       RenderElement *renderer = element.Renderer();
       if (!renderer)
@@ -151,23 +151,22 @@ namespace krys::boo
 
       const auto &style = renderer->Style();
       auto usedZoom = style.UsedZoomForLength();
-      svg::SVGLengthContext lengthContext(&element);
-      auto size =
-        FloatSize {lengthContext.ValueForLength(style.Width(), usedZoom, svg::SVGLengthMode::Width),
-                   lengthContext.ValueForLength(style.Height(), usedZoom, svg::SVGLengthMode::Height)};
+      SVGLengthContext lengthContext(&element);
+      auto size = FloatSize {lengthContext.ValueForLength(style.Width(), usedZoom, SVGLengthMode::Width),
+                             lengthContext.ValueForLength(style.Height(), usedZoom, SVGLengthMode::Height)};
 
       if (size.IsEmpty())
       {
         return {};
       }
 
-      auto location = FloatPoint {
-        lengthContext.ValueForLength(style.X(), style::ZoomNeeded {}, svg::SVGLengthMode::Width),
-        lengthContext.ValueForLength(style.Y(), style::ZoomNeeded {}, svg::SVGLengthMode::Height)};
+      auto location =
+        FloatPoint {lengthContext.ValueForLength(style.X(), style::ZoomNeeded {}, SVGLengthMode::Width),
+                    lengthContext.ValueForLength(style.Y(), style::ZoomNeeded {}, SVGLengthMode::Height)};
 
-      auto radii = FloatSize {
-        lengthContext.ValueForLength(style.Rx(), style::ZoomNeeded {}, svg::SVGLengthMode::Width),
-        lengthContext.ValueForLength(style.Ry(), style::ZoomNeeded {}, svg::SVGLengthMode::Height)};
+      auto radii =
+        FloatSize {lengthContext.ValueForLength(style.Rx(), style::ZoomNeeded {}, SVGLengthMode::Width),
+                   lengthContext.ValueForLength(style.Ry(), style::ZoomNeeded {}, SVGLengthMode::Height)};
 
       // Per SVG spec: if one of radii.x() and radii.y() is auto or negative, then the other corner
       // radius value is used. If both are auto or negative, then they are both set to 0.
@@ -201,15 +200,15 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD Path PathFromUseElement(const svg::SVGUseElement &element) noexcept
+    KRYS_NODISCARD Path PathFromUseElement(const SVGUseElement &element) noexcept
     {
-      RefPtr<svg::SVGElement> clipChildElement = element.ClipChild();
+      RefPtr<SVGElement> clipChildElement = element.ClipChild();
       if (!clipChildElement)
       {
         return {};
       }
 
-      svg::SVGLengthContext lengthContext(&element);
+      SVGLengthContext lengthContext(&element);
       auto x = element.X().Value(lengthContext);
       auto y = element.Y().Value(lengthContext);
 
@@ -223,37 +222,37 @@ namespace krys::boo
     }
   }
 
-  Path PathFromGraphicsElement(const svg::SVGElement &element) noexcept
+  Path PathFromGraphicsElement(const SVGElement &element) noexcept
   {
-    if (auto *circle = DynamicDowncast<svg::SVGCircleElement>(element))
+    if (auto *circle = DynamicDowncast<SVGCircleElement>(element))
     {
       return PathFromCircleElement(*circle);
     }
-    if (auto *ellipse = DynamicDowncast<svg::SVGEllipseElement>(element))
+    if (auto *ellipse = DynamicDowncast<SVGEllipseElement>(element))
     {
       return PathFromEllipseElement(*ellipse);
     }
-    if (auto *line = DynamicDowncast<svg::SVGLineElement>(element))
+    if (auto *line = DynamicDowncast<SVGLineElement>(element))
     {
       return PathFromLineElement(*line);
     }
-    if (auto *path = DynamicDowncast<svg::SVGPathElement>(element))
+    if (auto *path = DynamicDowncast<SVGPathElement>(element))
     {
       return PathFromPathElement(*path);
     }
-    if (auto *polygon = DynamicDowncast<svg::SVGPolygonElement>(element))
+    if (auto *polygon = DynamicDowncast<SVGPolygonElement>(element))
     {
       return PathFromPolygonElement(*polygon);
     }
-    if (auto *polyline = DynamicDowncast<svg::SVGPolylineElement>(element))
+    if (auto *polyline = DynamicDowncast<SVGPolylineElement>(element))
     {
       return PathFromPolylineElement(*polyline);
     }
-    if (auto *rect = DynamicDowncast<svg::SVGRectElement>(element))
+    if (auto *rect = DynamicDowncast<SVGRectElement>(element))
     {
       return PathFromRectElement(*rect);
     }
-    if (auto *use = DynamicDowncast<svg::SVGUseElement>(element))
+    if (auto *use = DynamicDowncast<SVGUseElement>(element))
     {
       return PathFromUseElement(*use);
     }

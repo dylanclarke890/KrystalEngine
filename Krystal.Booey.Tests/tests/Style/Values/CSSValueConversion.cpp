@@ -40,40 +40,37 @@ namespace krys::boo::style::tests
   {
     SECTION("Strings")
     {
-      CHECK(ConvertCSSValueToStyle<css::CSSOMString>(*State,
-                                                     *css::PrimitiveValue::Create(css::CSSOMString {u8"abc"}))
+      CHECK(ConvertCSSValueToStyle<CSSOMString>(*State, *css::PrimitiveValue::Create(CSSOMString {u8"abc"}))
             == u8"abc");
-      CHECK(ConvertCSSValueToStyle<css::CSSOMStringAtom>(
-              *State, *css::PrimitiveValue::Create(css::CSSOMString {u8"abc"}))
-            == u8"abc");
+      CHECK(
+        ConvertCSSValueToStyle<CSSOMStringAtom>(*State, *css::PrimitiveValue::Create(CSSOMString {u8"abc"}))
+        == u8"abc");
       CHECK_FALSE(IsInvalid());
     }
 
     SECTION("A string from a non-string is invalid at computed-value time")
     {
-      CHECK(ConvertCSSValueToStyle<css::CSSOMString>(*State, *css::PrimitiveValue::Create(ValueId::Auto))
-              .empty());
+      CHECK(ConvertCSSValueToStyle<CSSOMString>(*State, *css::PrimitiveValue::Create(ValueId::Auto)).empty());
       CHECK(IsInvalid());
     }
 
     SECTION("A string from a non-primitive value is invalid at computed-value time")
     {
-      CHECK(
-        ConvertCSSValueToStyle<css::CSSOMString>(*State, *css::ValueList::CreateSpaceSeparated({})).empty());
+      CHECK(ConvertCSSValueToStyle<CSSOMString>(*State, *css::ValueList::CreateSpaceSeparated({})).empty());
       CHECK(IsInvalid());
     }
 
     SECTION("Custom identifiers")
     {
       CHECK(ConvertCSSValueToStyle<css::CustomIdentifier>(
-              *State, *css::PrimitiveValue::CreateCustomIdent(css::CSSOMString {u8"foo"}))
+              *State, *css::PrimitiveValue::CreateCustomIdent(CSSOMString {u8"foo"}))
               .Value
             == u8"foo");
       CHECK_FALSE(IsInvalid());
 
       CHECK(ConvertCSSValueToStyle<css::CustomIdentifier>(*State, *css::PrimitiveValue::Create(ValueId::Auto))
               .Value
-            == css::CSSOMStringAtom::Empty());
+            == CSSOMStringAtom::Empty());
       CHECK(IsInvalid());
     }
 
@@ -257,7 +254,7 @@ namespace krys::boo::style::tests
 
     SECTION("Deprecated conversion without a renderer")
     {
-      RefPtr<dom::Element> element;
+      RefPtr<boo::Element> element;
       auto px =
         DeprecatedCSSValueConversion<ConversionTestSize> {}(element, *Parse(PropertyId::Width, u8"10px"));
       REQUIRE(px);

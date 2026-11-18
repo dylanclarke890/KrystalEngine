@@ -53,13 +53,13 @@
 
 namespace krys::boo
 {
-  RenderTreeUpdater::Parent::Parent(dom::ContainerNode &root) noexcept
-      : Element(DynamicDowncast<dom::Element>(root)),
+  RenderTreeUpdater::Parent::Parent(ContainerNode &root) noexcept
+      : Element(DynamicDowncast<boo::Element>(root)),
         Position(RenderTreePosition(Downcast<RenderElement>(*root.Renderer())))
   {
   }
 
-  RenderTreeUpdater::Parent::Parent(dom::Element &element, const style::ElementUpdate *update) noexcept
+  RenderTreeUpdater::Parent::Parent(boo::Element &element, const style::ElementUpdate *update) noexcept
       : Element(&element), Update(update)
   {
     if (auto *renderer = element.Renderer())
@@ -68,8 +68,7 @@ namespace krys::boo
     }
   }
 
-  RenderTreeUpdater::RenderTreeUpdater(dom::Document &document,
-                                       style::PostResolutionCallbackDisabler &) noexcept
+  RenderTreeUpdater::RenderTreeUpdater(Document &document, style::PostResolutionCallbackDisabler &) noexcept
       : _document(ShareRef(document)), _generatedContent(CreateUnique<GeneratedContent>(*this))
   {
     if (auto *renderView = document.GetRenderView())
@@ -80,7 +79,7 @@ namespace krys::boo
 
   RenderTreeUpdater::~RenderTreeUpdater() noexcept = default;
 
-  static dom::Element *FindRenderingAncestor(dom::Node &node) noexcept
+  static boo::Element *FindRenderingAncestor(Node &node) noexcept
   {
     for (auto &ancestor : dom::ComposedTreeAncestors(node))
     {
@@ -96,7 +95,7 @@ namespace krys::boo
     return nullptr;
   }
 
-  static dom::ContainerNode *FindRenderingRoot(dom::ContainerNode &node) noexcept
+  static ContainerNode *FindRenderingRoot(ContainerNode &node) noexcept
   {
     if (node.Renderer())
     {
@@ -149,7 +148,7 @@ namespace krys::boo
 
   void RenderTreeUpdater::UpdateRebuildRoots() noexcept
   {
-    auto findNewRebuildRoot = [&](dom::Element &root) -> dom::Element *
+    auto findNewRebuildRoot = [&](boo::Element &root) -> boo::Element *
     {
       auto *renderingAncestor = FindRenderingAncestor(root);
       if (!renderingAncestor)
@@ -191,7 +190,7 @@ namespace krys::boo
       return nullptr;
     };
 
-    auto addForRebuild = [&](dom::Element &element)
+    auto addForRebuild = [&](boo::Element &element)
     {
       auto *existingUpdate = _styleUpdate->GetElementUpdate(element);
       if (existingUpdate)
@@ -219,7 +218,7 @@ namespace krys::boo
       return true;
     };
 
-    auto addSubtreeForRebuild = [&](dom::Element &root)
+    auto addSubtreeForRebuild = [&](boo::Element &root)
     {
       if (!addForRebuild(root))
       {
@@ -230,7 +229,7 @@ namespace krys::boo
       auto end = descendants.end();
       while (it != end)
       {
-        auto *descendant = DynamicDowncast<dom::Element>(*it);
+        auto *descendant = DynamicDowncast<boo::Element>(*it);
         if (!descendant)
         {
           it.TraverseNext();
@@ -262,10 +261,10 @@ namespace krys::boo
     }
   }
 
-  static bool ShouldCreateRenderer(const dom::Element &element, const RenderElement &parentRenderer) noexcept
+  static bool ShouldCreateRenderer(const boo::Element &element, const RenderElement &parentRenderer) noexcept
   {
     if (!parentRenderer.CanHaveChildren()
-        && !(Is<dom::PseudoElement>(element) && parentRenderer.CanHaveGeneratedChildren()))
+        && !(Is<PseudoElement>(element) && parentRenderer.CanHaveGeneratedChildren()))
     {
       return false;
     }
@@ -276,7 +275,7 @@ namespace krys::boo
     return true;
   }
 
-  void RenderTreeUpdater::UpdateRenderTree(dom::ContainerNode &root) noexcept
+  void RenderTreeUpdater::UpdateRenderTree(ContainerNode &root) noexcept
   {
     krys_debug_assert(root.Renderer());
     krys_debug_assert(_parentStack.empty());
@@ -297,12 +296,12 @@ namespace krys::boo
       {
         GetRenderTreePosition().InvalidateNextSibling(*renderer);
       }
-      else if (auto *element = DynamicDowncast<dom::Element>(node); element && element->HasDisplayContents())
+      else if (auto *element = DynamicDowncast<boo::Element>(node); element && element->HasDisplayContents())
       {
         GetRenderTreePosition().InvalidateNextSibling();
       }
 
-      if (auto *text = DynamicDowncast<dom::Text>(node))
+      if (auto *text = DynamicDowncast<Text>(node))
       {
         auto *textUpdate = _styleUpdate->GetTextUpdate(*text);
         bool didCreateParent =
@@ -319,7 +318,7 @@ namespace krys::boo
         continue;
       }
 
-      auto &element = Downcast<dom::Element>(node);
+      auto &element = Downcast<boo::Element>(node);
 
       bool needsSVGRendererUpdate = element.NeedsSVGRendererUpdate();
       if (needsSVGRendererUpdate)
@@ -387,7 +386,7 @@ namespace krys::boo
     return *RenderingParent().Position;
   }
 
-  void RenderTreeUpdater::PushParent(dom::Element &element, const style::ElementUpdate *update) noexcept
+  void RenderTreeUpdater::PushParent(boo::Element &element, const style::ElementUpdate *update) noexcept
   {
     _parentStack.emplace_back(element, update);
 
@@ -420,7 +419,7 @@ namespace krys::boo
     }
   }
 
-  void RenderTreeUpdater::UpdateBeforeDescendants(dom::Element &element,
+  void RenderTreeUpdater::UpdateBeforeDescendants(boo::Element &element,
                                                   const style::ElementUpdate *update) noexcept
   {
     if (update)
@@ -434,7 +433,7 @@ namespace krys::boo
     }
   }
 
-  void RenderTreeUpdater::UpdateAfterDescendants(dom::Element &element,
+  void RenderTreeUpdater::UpdateAfterDescendants(boo::Element &element,
                                                  const style::ElementUpdate *update) noexcept
   {
     if (update)
@@ -473,7 +472,7 @@ namespace krys::boo
     _builder->NormalizeTreeAfterStyleChange(renderer, oldStyle);
   }
 
-  void RenderTreeUpdater::UpdateSVGRenderer(dom::Element &element) noexcept
+  void RenderTreeUpdater::UpdateSVGRenderer(boo::Element &element) noexcept
   {
     krys_debug_assert(element.NeedsSVGRendererUpdate());
     element.SetNeedsSVGRendererUpdate(false);
@@ -487,7 +486,7 @@ namespace krys::boo
     LegacyRenderSVGResource::MarkForLayoutAndParentResourceInvalidation(*renderer);
   }
 
-  void RenderTreeUpdater::UpdateElementRenderer(dom::Element &element,
+  void RenderTreeUpdater::UpdateElementRenderer(boo::Element &element,
                                                 const style::ElementUpdate &elementUpdate) noexcept
   {
     if (!elementUpdate.Style)
@@ -605,7 +604,7 @@ namespace krys::boo
     UpdateRendererStyle(*renderer, krys::move(elementUpdateStyle), style::DifferenceResult::Equal);
   }
 
-  void RenderTreeUpdater::CreateRenderer(dom::Element &element, RenderStyle &&style) noexcept
+  void RenderTreeUpdater::CreateRenderer(boo::Element &element, RenderStyle &&style) noexcept
   {
     auto computeInsertionPosition = [this, &element]() -> RenderTreePosition &
     {
@@ -649,7 +648,7 @@ namespace krys::boo
     }
   }
 
-  bool RenderTreeUpdater::TextRendererIsNeeded(const dom::Text &textNode) noexcept
+  bool RenderTreeUpdater::TextRendererIsNeeded(const Text &textNode) noexcept
   {
     auto &renderingParent = RenderingParent();
     auto &parentRenderer = renderingParent.Position->Parent();
@@ -737,8 +736,7 @@ namespace krys::boo
     return renderingParent.HasPrecedingInFlowChild;
   }
 
-  void RenderTreeUpdater::CreateTextRenderer(dom::Text &textNode,
-                                             const style::TextUpdate *textUpdate) noexcept
+  void RenderTreeUpdater::CreateTextRenderer(Text &textNode, const style::TextUpdate *textUpdate) noexcept
   {
     krys_debug_assert(!textNode.Renderer());
 
@@ -780,8 +778,8 @@ namespace krys::boo
     }
   }
 
-  void RenderTreeUpdater::UpdateTextRenderer(dom::Text &text, const style::TextUpdate *textUpdate,
-                                             const dom::ContainerNode *root) noexcept
+  void RenderTreeUpdater::UpdateTextRenderer(Text &text, const style::TextUpdate *textUpdate,
+                                             const ContainerNode *root) noexcept
   {
     auto *existingRenderer = text.Renderer();
     bool needsRenderer = TextRendererIsNeeded(text);
@@ -818,7 +816,7 @@ namespace krys::boo
     RenderingParent().DidCreateOrDestroyChildRenderer = true;
   }
 
-  void RenderTreeUpdater::StorePreviousRenderer(dom::Node &node) noexcept
+  void RenderTreeUpdater::StorePreviousRenderer(Node &node) noexcept
   {
     auto *renderer = node.Renderer();
     if (!renderer)
@@ -846,7 +844,7 @@ namespace krys::boo
     return *_document->GetRenderView();
   }
 
-  static void InvalidateRebuildRootIfNeeded(dom::Node &node) noexcept
+  static void InvalidateRebuildRootIfNeeded(Node &node) noexcept
   {
     auto *ancestor = FindRenderingAncestor(node);
     if (!ancestor)
@@ -860,7 +858,7 @@ namespace krys::boo
     ancestor->InvalidateRenderer();
   }
 
-  void RenderTreeUpdater::TearDownRenderers(dom::Element &root, TeardownType teardownType) noexcept
+  void RenderTreeUpdater::TearDownRenderers(boo::Element &root, TeardownType teardownType) noexcept
   {
     if (!root.Renderer() && !root.HasDisplayContents())
     {
@@ -877,24 +875,24 @@ namespace krys::boo
     InvalidateRebuildRootIfNeeded(root);
   }
 
-  void RenderTreeUpdater::TearDownRenderers(dom::Element &root) noexcept
+  void RenderTreeUpdater::TearDownRenderers(boo::Element &root) noexcept
   {
     TearDownRenderers(root, TeardownType::Full);
   }
 
-  void RenderTreeUpdater::TearDownRenderersForShadowRootInsertion(dom::Element &host) noexcept
+  void RenderTreeUpdater::TearDownRenderersForShadowRootInsertion(boo::Element &host) noexcept
   {
     krys_debug_assert(!dom::TreeQueries::GetShadowRoot(host));
     TearDownRenderers(host, TeardownType::FullAfterSlotOrShadowRootChange);
   }
 
-  void RenderTreeUpdater::TearDownRenderersAfterSlotChange(dom::Element &host) noexcept
+  void RenderTreeUpdater::TearDownRenderersAfterSlotChange(boo::Element &host) noexcept
   {
     krys_debug_assert(dom::TreeQueries::GetShadowRoot(host));
     TearDownRenderers(host, TeardownType::FullAfterSlotOrShadowRootChange);
   }
 
-  void RenderTreeUpdater::TearDownRenderer(dom::Text &text) noexcept
+  void RenderTreeUpdater::TearDownRenderer(Text &text) noexcept
   {
     auto *view = text.NodeDocument().GetRenderView();
     if (!view)
@@ -914,7 +912,7 @@ namespace krys::boo
   };
 
   static Maybe<DidRepaintAndMarkContainingBlock>
-    RepaintAndMarkContainingBlockDirtyBeforeTearDown(const dom::Element &root,
+    RepaintAndMarkContainingBlockDirtyBeforeTearDown(const boo::Element &root,
                                                      const auto &composedTreeDescendants) noexcept
   {
     auto *destroyRootRenderer = root.Renderer();
@@ -1040,12 +1038,12 @@ namespace krys::boo
     return destroyRootRenderer ? DidRepaintAndMarkContainingBlock::Yes : DidRepaintAndMarkContainingBlock::No;
   }
 
-  void RenderTreeUpdater::TearDownRenderers(dom::Element &root, TeardownType teardownType,
+  void RenderTreeUpdater::TearDownRenderers(boo::Element &root, TeardownType teardownType,
                                             RenderTreeBuilder &builder) noexcept
   {
-    List<dom::Element *> teardownStack;
+    List<boo::Element *> teardownStack;
 
-    auto push = [&](dom::Element &element)
+    auto push = [&](boo::Element &element)
     {
       element.WillDetachRenderers();
       teardownStack.push_back(&element);
@@ -1060,7 +1058,7 @@ namespace krys::boo
 
         // Make sure we don't leave any renderers behind in nodes outside the composed tree.
         // See ComposedTreeIterator::ComposedTreeIterator().
-        if (Is<html::HTMLSlotElement>(element) || dom::TreeQueries::GetShadowRoot(element))
+        if (Is<HTMLSlotElement>(element) || dom::TreeQueries::GetShadowRoot(element))
         {
           TearDownLeftoverChildrenOfComposedTree(element, builder);
         }
@@ -1091,7 +1089,7 @@ namespace krys::boo
         GeneratedContent::RemoveBeforePseudoElement(element, builder);
         GeneratedContent::RemoveAfterPseudoElement(element, builder);
 
-        if (!Is<dom::PseudoElement>(element))
+        if (!Is<PseudoElement>(element))
         {
           // ::before and ::after cannot have a ::marker pseudo-element addressable via CSS selectors, and as
           // such cannot possibly have animations on them. Additionally, we cannot create a Styleable with a
@@ -1105,12 +1103,12 @@ namespace krys::boo
             }
           }
           // Nor can they have a ::checkmark or ::picker-icon.
-          if (Is<html::HTMLOptionElement>(element))
+          if (Is<HTMLOptionElement>(element))
           {
             style::Styleable(element, style::PseudoElementIdentifier {PseudoElementType::Checkmark})
               .CancelStyleOriginatedAnimations();
           }
-          else if (Is<html::HTMLSelectElement>(element))
+          else if (Is<HTMLSelectElement>(element))
           {
             style::Styleable(element, style::PseudoElementIdentifier {PseudoElementType::PickerIcon})
               .CancelStyleOriginatedAnimations();
@@ -1152,19 +1150,19 @@ namespace krys::boo
     {
       pop(it.Depth(), needsDescendantRepaintAndLayout);
 
-      if (auto *text = DynamicDowncast<dom::Text>(*it))
+      if (auto *text = DynamicDowncast<Text>(*it))
       {
         TearDownTextRenderer(*text, &root, builder, needsDescendantRepaintAndLayout);
         continue;
       }
 
-      push(Downcast<dom::Element>(*it));
+      push(Downcast<boo::Element>(*it));
     }
 
     pop(0, needsDescendantRepaintAndLayout);
   }
 
-  void RenderTreeUpdater::TearDownLeftoverChildrenOfComposedTree(dom::Element &element,
+  void RenderTreeUpdater::TearDownLeftoverChildrenOfComposedTree(boo::Element &element,
                                                                  RenderTreeBuilder &builder) noexcept
   {
     for (auto *child = element.FirstChild(); child; child = child->NextSibling())
@@ -1173,19 +1171,19 @@ namespace krys::boo
       {
         continue;
       }
-      if (auto *text = DynamicDowncast<dom::Text>(*child))
+      if (auto *text = DynamicDowncast<Text>(*child))
       {
         TearDownTextRenderer(*text, &element, builder, NeedsRepaintAndLayout::No);
         continue;
       }
-      if (auto *childElement = DynamicDowncast<dom::Element>(*child))
+      if (auto *childElement = DynamicDowncast<boo::Element>(*child))
       {
         TearDownRenderers(*childElement, TeardownType::Full, builder);
       }
     }
   }
 
-  void RenderTreeUpdater::TearDownTextRenderer(dom::Text &text, const dom::ContainerNode *root,
+  void RenderTreeUpdater::TearDownTextRenderer(Text &text, const ContainerNode *root,
                                                RenderTreeBuilder &builder,
                                                NeedsRepaintAndLayout needsRepaintAndLayout) noexcept
   {

@@ -91,9 +91,9 @@ namespace krys::boo
     return EnsureCustomFontData(_data.get());
   }
 
-  css::CSSOMString CachedFont::CalculateItemInCollection() const noexcept
+  CSSOMString CachedFont::CalculateItemInCollection() const noexcept
   {
-    return css::CSSOMString(URL().FragmentIdentifier());
+    return CSSOMString(URL().FragmentIdentifier());
   }
 
   bool CachedFont::EnsureCustomFontData(SharedBuffer *data) noexcept
@@ -113,7 +113,7 @@ namespace krys::boo
   }
 
   RefPtr<FontCustomPlatformData> CachedFont::CreateCustomFontData(SharedBuffer &bytes,
-                                                                  const css::CSSOMString &itemInCollection,
+                                                                  const CSSOMString &itemInCollection,
                                                                   bool &wrapping) noexcept
   {
     RefPtr<SharedBuffer> buffer = ShareRefPtr(&bytes);

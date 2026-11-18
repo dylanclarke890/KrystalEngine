@@ -10,12 +10,12 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       return Downcast<RenderBox>(*fixture.ById(id).Renderer());
     }
 
-    KRYS_NODISCARD const LayoutShape &ShapeOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD const LayoutShape &ShapeOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       auto *info = BoxOf(fixture, id).GetShapeOutsideInfo();
       krys_assert(info);

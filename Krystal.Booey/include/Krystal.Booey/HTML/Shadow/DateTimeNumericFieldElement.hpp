@@ -47,15 +47,15 @@ namespace krys::boo::html
 
   private:
     const Range _range;
-    const dom::DOMString _placeholder;
+    const DOMString _placeholder;
     int _placeholderValue {0};
     int _value {0};
     bool _hasValue {false};
-    dom::DOMString _typeAheadBuffer;
+    DOMString _typeAheadBuffer;
     MonotonicTime::duration _lastDigitCharTime {};
 
   protected:
-    DateTimeNumericFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner,
+    DateTimeNumericFieldElement(Document &document, DateTimeFieldElementFieldOwner &fieldOwner,
                                 const Range &range, int placeholder) noexcept;
 
     KRYS_NODISCARD int Maximum() const noexcept;
@@ -86,15 +86,15 @@ namespace krys::boo::html
     // DateTimeFieldElement functions:
     void AdjustMinInlineSize(RenderStyle &style) const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString Value() const noexcept final;
+    KRYS_NODISCARD DOMString Value() const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString PlaceholderValue() const noexcept final;
+    KRYS_NODISCARD DOMString PlaceholderValue() const noexcept final;
 
-    void HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept final;
+    void HandleKeyboardEvent(KeyboardEvent &event) noexcept final;
 
-    void HandleBlurEvent(dom::Event &event) noexcept final;
+    void HandleBlurEvent(Event &event) noexcept final;
 
-    KRYS_NODISCARD dom::DOMString FormatValue(int value) const noexcept;
+    KRYS_NODISCARD DOMString FormatValue(int value) const noexcept;
 
     void SetValueAsIntegerByStepping(int value) noexcept;
   };

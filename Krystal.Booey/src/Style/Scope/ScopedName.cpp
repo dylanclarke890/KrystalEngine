@@ -41,7 +41,7 @@ namespace krys::boo::style
       return ScopedName {null};
     }
 
-    return {.Name = css::CSSOMStringAtom {primitiveValue.StringValue()},
+    return {.Name = CSSOMStringAtom {primitiveValue.StringValue()},
             .ScopeOrdinal = state.StyleScopeOrdinal()};
   }
 

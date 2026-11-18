@@ -588,7 +588,7 @@ Status: reviewed (2026-11-01)
 ##### [4.10.22.11 The FormDataEvent interface](https://html.spec.whatwg.org/#the-formdataevent-interface)
 
 Status: reviewed (2026-11-01)
-> `dom::FormDataEvent`.
+> `FormDataEvent`.
 
 - [x] [FormDataEvent.formData](https://html.spec.whatwg.org/#dom-formdataevent-formdata) — The formData attribute must return the value it was initialized to. It represents a FormData object associated to the entry list that is constructed when the form is submitted.
 

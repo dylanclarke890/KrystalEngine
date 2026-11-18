@@ -168,13 +168,13 @@ namespace krys::boo
     WebAnimation::BindingsWhenFinished(krys::move(onFinished), krys::move(onError));
   }
 
-  dom::ExceptionOr<void> StyleOriginatedAnimation::BindingsPlay() noexcept
+  ExceptionOr<void> StyleOriginatedAnimation::BindingsPlay() noexcept
   {
     FlushPendingStyleChanges();
     return WebAnimation::BindingsPlay();
   }
 
-  dom::ExceptionOr<void> StyleOriginatedAnimation::BindingsPause() noexcept
+  ExceptionOr<void> StyleOriginatedAnimation::BindingsPause() noexcept
   {
     FlushPendingStyleChanges();
     return WebAnimation::BindingsPause();
@@ -480,7 +480,7 @@ namespace krys::boo
     _previousIteration = iteration;
   }
 
-  void StyleOriginatedAnimation::EnqueueDOMEvent(dom::DOMStringAtom eventType, WebAnimationTime elapsedTime,
+  void StyleOriginatedAnimation::EnqueueDOMEvent(DOMStringAtom eventType, WebAnimationTime elapsedTime,
                                                  WebAnimationTime scheduledEffectTime) noexcept
   {
     if (!_owningElement)
@@ -512,7 +512,7 @@ namespace krys::boo
 
     auto event =
       CreateEvent(krys::move(eventType), scheduledTimelineTime, time(), _owningPseudoElementIdentifier);
-    event->SetTarget(ShareRefPtr<dom::EventTarget>(_owningElement.get()));
+    event->SetTarget(ShareRefPtr<EventTarget>(_owningElement.get()));
     EnqueueAnimationEvent(krys::move(event));
   }
 }

@@ -67,9 +67,9 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("QualifiedNameCache: Storage properties are accessible", "[HTML][QualifiedNameCache]")
   {
-    auto namespaceURI = dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml");
-    auto prefix = dom::DOMStringAtom(u8"xhtml");
-    auto localName = dom::DOMStringAtom(u8"div");
+    auto namespaceURI = DOMStringAtom(u8"http://www.w3.org/1999/xhtml");
+    auto prefix = DOMStringAtom(u8"xhtml");
+    auto localName = DOMStringAtom(u8"div");
 
     auto qn = QualifiedName(namespaceURI, prefix, localName);
 

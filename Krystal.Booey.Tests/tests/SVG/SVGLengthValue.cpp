@@ -21,7 +21,7 @@ namespace krys::boo::svg::tests
     CHECK(length.ValueAsString() == u8"0");
     CHECK(length.IsZero());
 
-    auto check = [&](dom::DOMStringView string, SVGLengthType type, dom::DOMStringView serialised)
+    auto check = [&](DOMStringView string, SVGLengthType type, DOMStringView serialised)
     {
       INFO(std::string(string.begin(), string.end()));
       REQUIRE_FALSE(length.SetValueAsString(string).HasException());
@@ -48,13 +48,13 @@ namespace krys::boo::svg::tests
     check(u8"-45e58", SVGLengthType::Number, u8"0");
 
     REQUIRE_FALSE(length.SetValueAsString(u8"7px").HasException());
-    CHECK(length.SetValueAsString(u8"") == dom::ExceptionCode::SyntaxError);
-    CHECK(length.SetValueAsString(u8"   ") == dom::ExceptionCode::SyntaxError);
-    CHECK(length.SetValueAsString(u8"10 px") == dom::ExceptionCode::SyntaxError);
-    CHECK(length.SetValueAsString(u8"10px 2") == dom::ExceptionCode::SyntaxError);
-    CHECK(length.SetValueAsString(u8"calc(1px + 2px)") == dom::ExceptionCode::SyntaxError);
-    CHECK(length.SetValueAsString(u8"auto") == dom::ExceptionCode::SyntaxError);
-    CHECK(length.SetValueAsString(u8"10deg") == dom::ExceptionCode::SyntaxError);
+    CHECK(length.SetValueAsString(u8"") == ExceptionCode::SyntaxError);
+    CHECK(length.SetValueAsString(u8"   ") == ExceptionCode::SyntaxError);
+    CHECK(length.SetValueAsString(u8"10 px") == ExceptionCode::SyntaxError);
+    CHECK(length.SetValueAsString(u8"10px 2") == ExceptionCode::SyntaxError);
+    CHECK(length.SetValueAsString(u8"calc(1px + 2px)") == ExceptionCode::SyntaxError);
+    CHECK(length.SetValueAsString(u8"auto") == ExceptionCode::SyntaxError);
+    CHECK(length.SetValueAsString(u8"10deg") == ExceptionCode::SyntaxError);
     CHECK(length.ValueAsString() == u8"7px");
   }
 
@@ -104,7 +104,7 @@ namespace krys::boo::svg::tests
                                        SVGLengthNegativeValuesMode::Forbid, u8"100%");
     CHECK(error == SVGParsingError::ForbiddenNegativeValue);
     CHECK(length.ValueAsString() == u8"100%");
-    length = SVGLengthValue::Construct(SVGLengthMode::Width, dom::DOMStringView {}, error,
+    length = SVGLengthValue::Construct(SVGLengthMode::Width, DOMStringView {}, error,
                                        SVGLengthNegativeValuesMode::Allow, u8"100%");
     CHECK(length.ValueAsString() == u8"100%");
     length = SVGLengthValue::Construct(SVGLengthMode::Width, u8"5", error, SVGLengthNegativeValuesMode::Allow,
@@ -127,12 +127,12 @@ namespace krys::boo::svg::tests
     // Font-relative units need an element with a style.
     CHECK(SVGLengthValue(SVGLengthMode::Other, u8"2em").Value(context) == 0);
     CHECK(SVGLengthValue(SVGLengthMode::Other, u8"2ex").ValueForBindings(context)
-          == dom::ExceptionCode::NotSupportedError);
+          == ExceptionCode::NotSupportedError);
 
     // Without a viewport, percentages don't resolve.
     SVGLengthContext noViewport(nullptr);
     CHECK(SVGLengthValue(SVGLengthMode::Width, u8"50%").ValueForBindings(noViewport)
-          == dom::ExceptionCode::NotSupportedError);
+          == ExceptionCode::NotSupportedError);
 
     SECTION("Converting units")
     {
@@ -144,7 +144,7 @@ namespace krys::boo::svg::tests
       REQUIRE_FALSE(length.ConvertToSpecifiedUnits(context, SVGLengthType::Number).HasException());
       CHECK(length.ValueAsString() == u8"100");
       CHECK(length.ConvertToSpecifiedUnits(noViewport, SVGLengthType::Percentage)
-            == dom::ExceptionCode::NotSupportedError);
+            == ExceptionCode::NotSupportedError);
     }
 
     SECTION("Setting user units")

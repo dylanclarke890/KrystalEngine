@@ -41,30 +41,29 @@ namespace krys::boo::style
 
   private:
     const bool _isEnabled;
-    const Ref<dom::Element> _element;
+    const Ref<Element> _element;
 
     Invalidator::MatchElementRuleSets _matchElementRuleSets;
 
   public:
     /// @param oldValue The value before the change, or null if the attribute is being added.
     /// @param newValue The value after the change, or null if the attribute is being removed.
-    AttributeChangeInvalidation(dom::Element &element, const dom::QualifiedName &attributeName,
-                                Maybe<dom::DOMStringView> oldValue,
-                                Maybe<dom::DOMStringView> newValue) noexcept;
+    AttributeChangeInvalidation(Element &element, const QualifiedName &attributeName,
+                                Maybe<DOMStringView> oldValue, Maybe<DOMStringView> newValue) noexcept;
 
     ~AttributeChangeInvalidation() noexcept;
 
   private:
-    void InvalidateStyle(const dom::QualifiedName &attributeName, Maybe<dom::DOMStringView> oldValue,
-                         Maybe<dom::DOMStringView> newValue) noexcept;
+    void InvalidateStyle(const QualifiedName &attributeName, Maybe<DOMStringView> oldValue,
+                         Maybe<DOMStringView> newValue) noexcept;
 
     void InvalidateStyleWithRuleSets() noexcept;
   };
 
-  inline AttributeChangeInvalidation::AttributeChangeInvalidation(dom::Element &element,
-                                                                  const dom::QualifiedName &attributeName,
-                                                                  Maybe<dom::DOMStringView> oldValue,
-                                                                  Maybe<dom::DOMStringView> newValue) noexcept
+  inline AttributeChangeInvalidation::AttributeChangeInvalidation(Element &element,
+                                                                  const QualifiedName &attributeName,
+                                                                  Maybe<DOMStringView> oldValue,
+                                                                  Maybe<DOMStringView> newValue) noexcept
       : _isEnabled(element.NeedsStyleInvalidation()), _element(ShareRef(element))
   {
     if (!_isEnabled)

@@ -248,7 +248,7 @@ namespace krys::boo::style
              : null;
   }
 
-  inline const css::CSSOMStringAtom &ComputedStyleBase::PseudoElementNameArgument() const
+  inline const CSSOMStringAtom &ComputedStyleBase::PseudoElementNameArgument() const
   {
     return _nonInheritedData->RareData->PseudoElementNameArgument;
   }

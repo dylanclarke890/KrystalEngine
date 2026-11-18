@@ -67,7 +67,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "Markup: serialising a selection", "[Editing][Markup]")
   {
     EditorFixture fixture(u8"<p id=a>The <b id=b>quick</b> fox</p>");
-    auto &bold = Downcast<dom::Text>(*fixture.ById(u8"b").FirstChild());
+    auto &bold = Downcast<Text>(*fixture.ById(u8"b").FirstChild());
 
     fixture.Select(bold, 1, 5);
     auto markup = Narrow(SerializePreservingVisualAppearance(fixture.Selection().Selection()));

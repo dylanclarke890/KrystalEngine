@@ -309,7 +309,7 @@ namespace krys::boo
     }
   }
 
-  RenderQuote::RenderQuote(dom::Document &document, RenderStyle &&style, QuoteType quote) noexcept
+  RenderQuote::RenderQuote(Document &document, RenderStyle &&style, QuoteType quote) noexcept
       : RenderInline(Type::Quote, document, krys::move(style)), _type(quote)
   {
     krys_debug_assert(IsRenderQuote());

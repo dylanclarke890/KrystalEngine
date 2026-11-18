@@ -41,7 +41,7 @@ namespace krys::boo::html
       URegularExpression *_regex {nullptr};
 
     public:
-      explicit CompiledPattern(dom::DOMStringView rawPattern) noexcept
+      explicit CompiledPattern(DOMStringView rawPattern) noexcept
       {
         UErrorCode status = U_ZERO_ERROR;
         UText pattern = UTEXT_INITIALIZER;
@@ -72,7 +72,7 @@ namespace krys::boo::html
       }
 
       /// @brief Whether the pattern matches the whole of @p value (as if anchored with `^(?:` and `)$`).
-      KRYS_NODISCARD bool Matches(dom::DOMStringView value) const noexcept
+      KRYS_NODISCARD bool Matches(DOMStringView value) const noexcept
       {
         krys_debug_assert(_regex);
         UErrorCode status = U_ZERO_ERROR;
@@ -87,7 +87,7 @@ namespace krys::boo::html
     };
   }
 
-  bool BaseTextInputType::PatternMismatch(dom::DOMStringView value) const noexcept
+  bool BaseTextInputType::PatternMismatch(DOMStringView value) const noexcept
   {
     krys_debug_assert(Element());
     auto &element = *Element();
@@ -103,7 +103,7 @@ namespace krys::boo::html
       return false;
     }
 
-    auto valuePatternMismatch = [&](dom::DOMStringView value)
+    auto valuePatternMismatch = [&](DOMStringView value)
     {
       return !pattern.Matches(value);
     };

@@ -21,9 +21,9 @@ namespace krys::boo::tests
     CHECK(data.PixelFormat() == ImageDataPixelFormat::RgbaUnorm8);
     CHECK(data.Data().AsUint8ClampedArray()->Item(23) == 0);
 
-    CHECK(ImageData::Create(0u, 2u, {}).GetException().Code() == dom::ExceptionCode::IndexSizeError);
-    CHECK(ImageData::Create(2u, 0u, {}).GetException().Code() == dom::ExceptionCode::IndexSizeError);
-    CHECK(ImageData::Create(100'000u, 100'000u, {}).GetException().Code() == dom::ExceptionCode::RangeError);
+    CHECK(ImageData::Create(0u, 2u, {}).GetException().Code() == ExceptionCode::IndexSizeError);
+    CHECK(ImageData::Create(2u, 0u, {}).GetException().Code() == ExceptionCode::IndexSizeError);
+    CHECK(ImageData::Create(100'000u, 100'000u, {}).GetException().Code() == ExceptionCode::RangeError);
 
     // The settings' colour space and format are kept.
     auto p3 = ImageData::Create(1u, 1u,
@@ -52,19 +52,19 @@ namespace krys::boo::tests
           == 2);
     CHECK(
       ImageData::Create(ImageDataArray(Ref<dom::Uint8ClampedArray>(bytes)), 2u, 3u, {}).GetException().Code()
-      == dom::ExceptionCode::IndexSizeError);
+      == ExceptionCode::IndexSizeError);
     CHECK(
       ImageData::Create(ImageDataArray(Ref<dom::Uint8ClampedArray>(bytes)), 3u, {}, {}).GetException().Code()
-      == dom::ExceptionCode::IndexSizeError);
+      == ExceptionCode::IndexSizeError);
     CHECK(
       ImageData::Create(ImageDataArray(Ref<dom::Uint8ClampedArray>(bytes)), 0u, {}, {}).GetException().Code()
-      == dom::ExceptionCode::IndexSizeError);
+      == ExceptionCode::IndexSizeError);
     CHECK(
       ImageData::Create(ImageDataArray(dom::Uint8ClampedArray::Create(6u)), 1u, {}, {}).GetException().Code()
-      == dom::ExceptionCode::InvalidStateError);
+      == ExceptionCode::InvalidStateError);
     CHECK(
       ImageData::Create(ImageDataArray(dom::Uint8ClampedArray::Create(0u)), 1u, {}, {}).GetException().Code()
-      == dom::ExceptionCode::InvalidStateError);
+      == ExceptionCode::InvalidStateError);
 
     // A copy of bytes.
     const uint8 source[] {9, 8, 7, 6};

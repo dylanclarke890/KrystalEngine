@@ -45,14 +45,14 @@ namespace krys::boo::tests
     auto &document = fixture.Document();
     auto &eventLoop = html::EventLoop::Current();
     uint32 fired = 0;
-    auto listener = fixture.Window().AddEventListener(u8"custom", [&](dom::Event &) { ++fired; });
+    auto listener = fixture.Window().AddEventListener(u8"custom", [&](Event &) { ++fired; });
 
     document.Suspend(Reason);
     CHECK(document.IsSuspended());
     CHECK(document.ScheduledTasksAreSuspended());
     CHECK(document.ReasonForSuspendingActiveDOMObjects() == Reason);
     document.QueueTaskToDispatchEventOnWindow(html::TaskSource::DOMManipulation,
-                                              dom::Event::Create(u8"custom", false, false));
+                                              Event::Create(u8"custom", false, false));
     eventLoop.RunUntilIdle();
     CHECK(fired == 0);
     CHECK_FALSE(eventLoop.HasPendingTasks());
@@ -157,7 +157,7 @@ namespace krys::boo::tests
     (void)document.Body()->AppendChild(*link);
     html::EventLoop::Current().RunUntilIdle();
     RunNetworkingTasks();
-    auto &linkElement = Downcast<html::HTMLLinkElement>(*link);
+    auto &linkElement = Downcast<HTMLLinkElement>(*link);
     CHECK_FALSE(linkElement.Sheet());
 
     document.Resume(Reason);
@@ -171,7 +171,7 @@ namespace krys::boo::tests
     SuspensionFixture fixture;
     auto &document = fixture.Document();
 
-    auto signal = dom::AbortSignal::Timeout(document, 100);
+    auto signal = AbortSignal::Timeout(document, 100);
     Advance(60ms);
     document.Suspend(Reason);
     Advance(100ms);

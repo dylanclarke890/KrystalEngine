@@ -19,7 +19,7 @@ namespace krys::boo::dom::tests
       Ref<Document> Document;
       Ref<Element> Parent;
       Ref<Element> Child1;
-      Ref<krys::boo::dom::Text> Child2;
+      Ref<krys::boo::Text> Child2;
       Ref<Element> Child3;
 
       CommonTestData()

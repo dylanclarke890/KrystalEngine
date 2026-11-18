@@ -30,13 +30,20 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSKeyframesRule;
   class CSSStyleProperties;
-  class KeyframeRule;
   class StyleRuleCSSStyleProperties;
+}
 
+namespace krys::boo::css
+{
+  class KeyframeRule;
+}
+
+namespace krys::boo
+{
   /// @brief A keyframe of an `@keyframes` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-animations/#interface-csskeyframerule
   class CSSKeyframeRule final : public CSSRule
@@ -44,35 +51,35 @@ namespace krys::boo::css
     friend class CSSKeyframesRule;
 
   private:
-    const Ref<KeyframeRule> _keyframe;
+    const Ref<css::KeyframeRule> _keyframe;
     mutable RefPtr<StyleRuleCSSStyleProperties> _propertiesCSSOMWrapper;
 
-    CSSKeyframeRule(KeyframeRule &keyframe, CSSKeyframesRule *parent) noexcept;
+    CSSKeyframeRule(css::KeyframeRule &keyframe, CSSKeyframesRule *parent) noexcept;
 
   public:
     ~CSSKeyframeRule() noexcept override;
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
-    void Reattach(Rule &rule) noexcept final;
+    void Reattach(css::Rule &rule) noexcept final;
 
     KRYS_NODISCARD CSSOMString KeyText() const noexcept;
 
     /// @see https://drafts.csswg.org/css-animations-1/#dom-csskeyframerule-keytext
-    dom::ExceptionOr<void> SetKeyText(const CSSOMString &text) noexcept;
+    ExceptionOr<void> SetKeyText(const CSSOMString &text) noexcept;
 
     KRYS_NODISCARD CSSStyleProperties &Style() noexcept;
 
   private:
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::Keyframe;
+      return css::RuleType::Keyframe;
     }
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSKeyframeRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSKeyframeRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::Keyframe;
   }

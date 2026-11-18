@@ -13,20 +13,20 @@ namespace krys::boo::html::tests
     class TestHTMLElement : public HTMLElement
     {
     public:
-      TestHTMLElement(dom::Document &document) : HTMLElement(document)
+      TestHTMLElement(Document &document) : HTMLElement(document)
       {
       }
     };
 
-    dom::DOMStringAtom TestAttribute = u8"test-attr";
+    DOMStringAtom TestAttribute = u8"test-attr";
 
     struct TestData
     {
-      Ref<dom::Document> Document;
-      Ref<html::HTMLElement> Element;
+      Ref<boo::Document> Document;
+      Ref<HTMLElement> Element;
 
-      TestData(Maybe<dom::DOMString> initialValue = null)
-          : Document(CreateRef<dom::Document>()), Element(CreateRef<TestHTMLElement>(*Document))
+      TestData(Maybe<DOMString> initialValue = null)
+          : Document(CreateRef<boo::Document>()), Element(CreateRef<TestHTMLElement>(*Document))
       {
         if (initialValue != null)
         {
@@ -46,22 +46,22 @@ namespace krys::boo::html::tests
       SECTION("DOMString")
       {
         TestData data {u8"initial value"};
-        REQUIRE(Reflect<dom::DOMString>(*data.Element, TestAttribute) == u8"initial value");
+        REQUIRE(Reflect<DOMString>(*data.Element, TestAttribute) == u8"initial value");
 
-        Reflect<dom::DOMString>(*data.Element, TestAttribute, u8"new value");
-        REQUIRE(Reflect<dom::DOMString>(*data.Element, TestAttribute) == u8"new value");
+        Reflect<DOMString>(*data.Element, TestAttribute, u8"new value");
+        REQUIRE(Reflect<DOMString>(*data.Element, TestAttribute) == u8"new value");
       }
 
-      SECTION("Maybe<dom::DOMString>")
+      SECTION("Maybe<DOMString>")
       {
         TestData data;
-        REQUIRE(Reflect<Maybe<dom::DOMString>>(*data.Element, TestAttribute) == null);
+        REQUIRE(Reflect<Maybe<DOMString>>(*data.Element, TestAttribute) == null);
 
-        Reflect<Maybe<dom::DOMString>>(*data.Element, TestAttribute, u8"new value");
-        REQUIRE(Reflect<Maybe<dom::DOMString>>(*data.Element, TestAttribute) == u8"new value");
+        Reflect<Maybe<DOMString>>(*data.Element, TestAttribute, u8"new value");
+        REQUIRE(Reflect<Maybe<DOMString>>(*data.Element, TestAttribute) == u8"new value");
 
-        Reflect<Maybe<dom::DOMString>>(*data.Element, TestAttribute, null);
-        REQUIRE(Reflect<Maybe<dom::DOMString>>(*data.Element, TestAttribute) == null);
+        Reflect<Maybe<DOMString>>(*data.Element, TestAttribute, null);
+        REQUIRE(Reflect<Maybe<DOMString>>(*data.Element, TestAttribute) == null);
       }
 
       SECTION("USVString")
@@ -237,15 +237,15 @@ namespace krys::boo::html::tests
     for (auto value : {u8"-2147483649", u8"2147483648", u8"99999999999999999999", u8"x"})
     {
       INFO(reinterpret_cast<const char *>(value));
-      TestData data {dom::DOMString(value)};
+      TestData data {DOMString(value)};
       CHECK(Reflect<int32>(*data.Element, TestAttribute) == 0);
       CHECK(ReflectNonNegative<int32>(*data.Element, TestAttribute) == -1);
     }
-    TestData data {dom::DOMString(u8" -2147483648")};
+    TestData data {DOMString(u8" -2147483648")};
     CHECK(Reflect<int32>(*data.Element, TestAttribute) == -2'147'483'648);
     // Negative values aren't non-negative, but negative zero is zero.
     CHECK(ReflectNonNegative<int32>(*data.Element, TestAttribute) == -1);
-    TestData zero {dom::DOMString(u8"-0")};
+    TestData zero {DOMString(u8"-0")};
     CHECK(ReflectNonNegative<int32>(*zero.Element, TestAttribute) == 0);
   }
 
@@ -270,7 +270,7 @@ namespace krys::boo::html::tests
                                    std::pair {u8"0", 1u}, std::pair {u8"-5", 1u}, std::pair {u8"x", 1u}})
     {
       INFO(reinterpret_cast<const char *>(value));
-      TestData data {dom::DOMString(value)};
+      TestData data {DOMString(value)};
       CHECK(Reflect<uint32, Range>(*data.Element, TestAttribute) == expected);
     }
   }
@@ -298,7 +298,7 @@ namespace krys::boo::html::tests
   {
     for (auto value : {u8"", u8"false", u8"test-attr", u8"no"})
     {
-      TestData data {dom::DOMString(value)};
+      TestData data {DOMString(value)};
       CHECK(Reflect<bool>(*data.Element, TestAttribute));
     }
 
@@ -464,8 +464,8 @@ namespace krys::boo::html::tests
     SECTION("DOMString")
     {
       TestData data;
-      ReflectSetter<dom::DOMString>(*data.Element, TestAttribute, u8"setter value");
-      REQUIRE(Reflect<dom::DOMString>(*data.Element, TestAttribute) == u8"setter value");
+      ReflectSetter<DOMString>(*data.Element, TestAttribute, u8"setter value");
+      REQUIRE(Reflect<DOMString>(*data.Element, TestAttribute) == u8"setter value");
     }
 
     SECTION("USVString")

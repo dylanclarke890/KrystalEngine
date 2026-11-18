@@ -25,7 +25,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyTraits.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGValueProperty.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The deprecated alias of `DOMRect` that SVG's interfaces still use.
   /// @see https://svgwg.org/svg2-draft/types.html#InterfaceSVGAnimatedRect
@@ -48,7 +48,7 @@ namespace krys::boo::svg
     }
 
     template <typename T>
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<SVGRect>> Create(dom::ExceptionOr<T> value) noexcept
+    KRYS_NODISCARD static ExceptionOr<Ref<SVGRect>> Create(ExceptionOr<T> value) noexcept
     {
       if (value.HasException())
       {
@@ -62,11 +62,11 @@ namespace krys::boo::svg
       return _value.X();
     }
 
-    dom::ExceptionOr<void> SetX(float xValue) noexcept
+    ExceptionOr<void> SetX(float xValue) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetX(xValue);
@@ -79,11 +79,11 @@ namespace krys::boo::svg
       return _value.Y();
     }
 
-    dom::ExceptionOr<void> SetY(float yValue) noexcept
+    ExceptionOr<void> SetY(float yValue) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetY(yValue);
@@ -96,11 +96,11 @@ namespace krys::boo::svg
       return _value.Width();
     }
 
-    dom::ExceptionOr<void> SetWidth(float widthValue) noexcept
+    ExceptionOr<void> SetWidth(float widthValue) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetWidth(widthValue);
@@ -113,11 +113,11 @@ namespace krys::boo::svg
       return _value.Height();
     }
 
-    dom::ExceptionOr<void> SetHeight(float heightValue) noexcept
+    ExceptionOr<void> SetHeight(float heightValue) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetHeight(heightValue);
@@ -125,7 +125,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept override
     {
       return SVGPropertyTraits<FloatRect>::ToString(_value);
     }

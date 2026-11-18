@@ -48,9 +48,9 @@ namespace krys::boo::html
     DataListButtonOwner *_owner {nullptr};
 
   public:
-    DataListButtonElement(dom::Document &document, DataListButtonOwner &owner) noexcept;
+    DataListButtonElement(Document &document, DataListButtonOwner &owner) noexcept;
 
-    KRYS_NODISCARD static Ref<DataListButtonElement> Create(dom::Document &document,
+    KRYS_NODISCARD static Ref<DataListButtonElement> Create(Document &document,
                                                             DataListButtonOwner &owner) noexcept;
 
     /// @brief The owner's going away.
@@ -59,7 +59,7 @@ namespace krys::boo::html
       _owner = nullptr;
     }
 
-    void DefaultEventHandler(dom::Event &event) noexcept override;
+    void DefaultEventHandler(Event &event) noexcept override;
 
     /// @brief Disabled with its field.
     KRYS_NODISCARD bool IsDisabledFormControl() const noexcept override;

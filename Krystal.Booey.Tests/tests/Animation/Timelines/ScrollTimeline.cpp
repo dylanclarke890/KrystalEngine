@@ -150,13 +150,13 @@ namespace krys::boo::tests
       REQUIRE(std::holds_alternative<TimelineRangeOffset>(rangeEnd));
       auto &rangeEndOffset = std::get<TimelineRangeOffset>(rangeEnd);
       CHECK(rangeEndOffset.RangeName == u8"omitted");
-      auto *offset = DynamicDowncast<css::CSSUnitValue>(rangeEndOffset.Offset.get());
+      auto *offset = DynamicDowncast<CSSUnitValue>(rangeEndOffset.Offset.get());
       REQUIRE(offset);
       CHECK(offset->Value() == 100);
       CHECK(offset->UnitEnum() == css::UnitType::px);
       auto rangeStart = animation->BindingsRangeStart();
-      REQUIRE(std::holds_alternative<dom::DOMString>(rangeStart));
-      CHECK(std::get<dom::DOMString>(rangeStart) == u8"normal");
+      REQUIRE(std::holds_alternative<DOMString>(rangeStart));
+      CHECK(std::get<DOMString>(rangeStart) == u8"normal");
     }
 
     animation->Cancel(WebAnimation::Silently::Yes);

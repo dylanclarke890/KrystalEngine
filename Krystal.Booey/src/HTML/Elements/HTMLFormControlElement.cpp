@@ -38,21 +38,21 @@
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/TreeResolver.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   template <>
-  struct EnumeratedAttributeTraits<"popovertargetaction", HTMLFormControlElement>
+  struct html::EnumeratedAttributeTraits<"popovertargetaction", HTMLFormControlElement>
   {
-    using State = PopoverTargetActionAttributeState;
-    static inline const KeywordStateMapping<State> StateMappings[] = {
+    using State = html::PopoverTargetActionAttributeState;
+    static inline const html::KeywordStateMapping<State> StateMappings[] = {
       {u8"toggle", State::Toggle}, {u8"show", State::Show}, {u8"hide", State::Hide}};
 
     constexpr static State MissingValueDefault = State::Toggle;
     constexpr static State InvalidValueDefault = State::Toggle;
   };
 
-  HTMLFormControlElement::HTMLFormControlElement(dom::Document &document, HTMLElementInterface interface,
-                                                 HTMLElementFlags flags) noexcept
+  HTMLFormControlElement::HTMLFormControlElement(Document &document, html::HTMLElementInterface interface,
+                                                 html::HTMLElementFlags flags) noexcept
       : HTMLElement(document, interface, flags, dom::NodeFlags::HasCustomStyleResolveCallbacks)
   {
   }
@@ -90,7 +90,7 @@ namespace krys::boo::html
     ClearForm();
   }
 
-  void HTMLFormControlElement::DispatchBlurEvent(dom::EventTarget *relatedTarget) noexcept
+  void HTMLFormControlElement::DispatchBlurEvent(EventTarget *relatedTarget) noexcept
   {
     HTMLElement::DispatchBlurEvent(relatedTarget);
     HideVisibleValidationMessage();
@@ -106,48 +106,47 @@ namespace krys::boo::html
     HTMLElement::OnInsert();
     if (auto *parent = ParentNode())
     {
-      ValidatedFormListedElement::InsertedIntoAncestor(IsConnected(), *parent);
+      html::ValidatedFormListedElement::InsertedIntoAncestor(IsConnected(), *parent);
     }
   }
 
   void HTMLFormControlElement::OnPostConnection() noexcept
   {
     HTMLElement::OnPostConnection();
-    ValidatedFormListedElement::DidFinishInsertingNode();
+    html::ValidatedFormListedElement::DidFinishInsertingNode();
   }
 
-  void HTMLFormControlElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLFormControlElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
-    ValidatedFormListedElement::RemovedFromAncestor(oldAncestor.IsConnected(), oldAncestor);
+    html::ValidatedFormListedElement::RemovedFromAncestor(oldAncestor.IsConnected(), oldAncestor);
   }
 
-  void HTMLFormControlElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLFormControlElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
 
     // A move is a removal and an insertion that keep the element connected.
-    ValidatedFormListedElement::RemovedFromAncestor(false, oldAncestor);
+    html::ValidatedFormListedElement::RemovedFromAncestor(false, oldAncestor);
     if (auto *parent = ParentNode())
     {
-      ValidatedFormListedElement::InsertedIntoAncestor(IsConnected(), *parent);
+      html::ValidatedFormListedElement::InsertedIntoAncestor(IsConnected(), *parent);
     }
     if (IsConnected())
     {
-      ValidatedFormListedElement::DidFinishInsertingNode();
+      html::ValidatedFormListedElement::DidFinishInsertingNode();
     }
   }
 
-  void HTMLFormControlElement::OnAdopt(dom::Document &oldDocument) noexcept
+  void HTMLFormControlElement::OnAdopt(Document &oldDocument) noexcept
   {
     HTMLElement::OnAdopt(oldDocument);
-    ValidatedFormListedElement::DidMoveToNewDocument();
+    html::ValidatedFormListedElement::DidMoveToNewDocument();
   }
 
-  void HTMLFormControlElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                                  Maybe<dom::DOMStringView> oldValue,
-                                                  Maybe<dom::DOMStringView> value,
-                                                  const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLFormControlElement::OnAttributeChanged(const DOMStringAtom &localName,
+                                                  Maybe<DOMStringView> oldValue, Maybe<DOMStringView> value,
+                                                  const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
@@ -171,13 +170,13 @@ namespace krys::boo::html
     }
     else
     {
-      ValidatedFormListedElement::ParseAttribute(localName, value);
+      html::ValidatedFormListedElement::ParseAttribute(localName, value);
     }
   }
 
   void HTMLFormControlElement::DisabledStateChanged() noexcept
   {
-    ValidatedFormListedElement::DisabledStateChanged();
+    html::ValidatedFormListedElement::DisabledStateChanged();
     if (auto *renderer = Renderer(); renderer && renderer->Style().HasUsedAppearance())
     {
       renderer->Repaint();
@@ -186,7 +185,7 @@ namespace krys::boo::html
 
   void HTMLFormControlElement::ReadOnlyStateChanged() noexcept
   {
-    ValidatedFormListedElement::ReadOnlyStateChanged();
+    html::ValidatedFormListedElement::ReadOnlyStateChanged();
 
     // Some input pseudo-classes, like :in-range and :out-of-range, depend on the readonly state.
     // FIXME: Use PseudoClassChangeInvalidation instead for :has() support and more efficiency.
@@ -205,13 +204,12 @@ namespace krys::boo::html
 
   void HTMLFormControlElement::DispatchChangeEvent() noexcept
   {
-    dom::ScopedEventQueue::DispatchOrQueue(dom::Event::Create(event_names::Change, true, false),
-                                           ShareRef(*this));
+    dom::ScopedEventQueue::DispatchOrQueue(Event::Create(event_names::Change, true, false), ShareRef(*this));
   }
 
   void HTMLFormControlElement::DispatchCancelEvent() noexcept
   {
-    auto event = dom::Event::Create(event_names::Cancel, true, false);
+    auto event = Event::Create(event_names::Cancel, true, false);
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
   }
 
@@ -225,11 +223,11 @@ namespace krys::boo::html
   void HTMLFormControlElement::DispatchFormControlInputEvent() noexcept
   {
     SetChangedSinceLastFormControlChangeEvent(true);
-    dom::ScopedEventQueue::DispatchOrQueue(dom::Event::Create(event_names::Input, true, false, true),
+    dom::ScopedEventQueue::DispatchOrQueue(Event::Create(event_names::Input, true, false, true),
                                            ShareRef(*this));
   }
 
-  Maybe<dom::DOMString> HTMLFormControlElement::ResultForDialogSubmit() const noexcept
+  Maybe<DOMString> HTMLFormControlElement::ResultForDialogSubmit() const noexcept
   {
     return GetAttribute(u8"value");
   }
@@ -266,7 +264,7 @@ namespace krys::boo::html
     // 5. If popoverElement is null, then return null.
     // 6. If popoverElement's popover attribute is in the No Popover state, then return null.
     // 7. Return popoverElement.
-    RefPtr<dom::Element> element = ResolvedElementForAttribute(u8"popovertarget");
+    RefPtr<boo::Element> element = ResolvedElementForAttribute(u8"popovertarget");
     auto *popover = element ? DynamicDowncast<HTMLElement>(*element) : nullptr;
     if (popover && popover->GetPopoverState() != dom::PopoverState::None)
     {
@@ -275,35 +273,35 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  RefPtr<dom::Element> HTMLFormControlElement::PopoverTargetElementForBindings() const noexcept
+  RefPtr<boo::Element> HTMLFormControlElement::PopoverTargetElementForBindings() const noexcept
   {
     // The getter steps are to return the result of running this's get the unresolved popovertarget target
     // element (a host, not what its reference target names).
     return ElementForAttributeInternal(u8"popovertarget");
   }
 
-  void HTMLFormControlElement::PopoverTargetElementForBindings(dom::Element *element) noexcept
+  void HTMLFormControlElement::PopoverTargetElementForBindings(boo::Element *element) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     SetElementAttribute(u8"popovertarget", element);
   }
 
   // https://html.spec.whatwg.org/#dom-popovertargetaction
   // The popoverTargetAction IDL attribute must reflect the popovertargetaction attribute, limited to only
   // known values.
-  dom::DOMString HTMLFormControlElement::PopoverTargetAction() const noexcept
+  DOMString HTMLFormControlElement::PopoverTargetAction() const noexcept
   {
-    return ReflectEnumerated<"popovertargetaction", HTMLFormControlElement>(*this);
+    return html::ReflectEnumerated<"popovertargetaction", HTMLFormControlElement>(*this);
   }
 
-  void HTMLFormControlElement::PopoverTargetAction(dom::DOMString value) noexcept
+  void HTMLFormControlElement::PopoverTargetAction(DOMString value) noexcept
   {
-    CEReactionsScope ceReactions;
-    Reflect<dom::DOMString>(*this, u8"popovertargetaction", krys::move(value));
+    html::CEReactionsScope ceReactions;
+    html::Reflect<DOMString>(*this, u8"popovertargetaction", krys::move(value));
   }
 
   // https://html.spec.whatwg.org/#popover-target-attribute-activation-behavior
-  void HTMLFormControlElement::HandlePopoverTargetAction(dom::EventTarget *eventTarget) noexcept
+  void HTMLFormControlElement::HandlePopoverTargetAction(EventTarget *eventTarget) noexcept
   {
     // 1. Let popover be node's popover target element.
     // 2. If popover is null, then return.
@@ -316,24 +314,24 @@ namespace krys::boo::html
 
     // 3. If eventTarget is a shadow-including inclusive descendant of popover and popover is a
     //    shadow-including descendant of node, then return.
-    if (auto *eventTargetNode = DynamicDowncast<dom::Node>(eventTarget);
+    if (auto *eventTargetNode = DynamicDowncast<Node>(eventTarget);
         eventTargetNode && dom::TreeQueries::IsShadowIncludingInclusiveDescendant(*eventTargetNode, *popover)
         && dom::TreeQueries::IsShadowIncludingDescendant(*popover, *this))
     {
       return;
     }
 
-    auto action = EnumeratedAttribute<"popovertargetaction", HTMLFormControlElement>::ResolveState(
+    auto action = html::EnumeratedAttribute<"popovertargetaction", HTMLFormControlElement>::ResolveState(
       GetAttribute(u8"popovertargetaction"));
     // 4. If node's popovertargetaction attribute is in the show state and popover's popover visibility state
     //    is showing, then return.
-    if (action == PopoverTargetActionAttributeState::Show && popover->IsPopoverShowing())
+    if (action == html::PopoverTargetActionAttributeState::Show && popover->IsPopoverShowing())
     {
       return;
     }
     // 5. If node's popovertargetaction attribute is in the hide state and popover's popover visibility state
     //    is hidden, then return.
-    if (action == PopoverTargetActionAttributeState::Hide && !popover->IsPopoverShowing())
+    if (action == html::PopoverTargetActionAttributeState::Hide && !popover->IsPopoverShowing())
     {
       return;
     }

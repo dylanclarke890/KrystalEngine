@@ -30,7 +30,7 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   /// @see https://w3c.github.io/uievents/#dictdef-wheeleventinit
   struct WheelEventInit : MouseEventInit
@@ -118,8 +118,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::WheelEvent)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::WheelEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Event &event) noexcept
   {
     return event.IsWheelEvent();
   }

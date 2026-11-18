@@ -27,7 +27,7 @@ namespace krys::boo::tests
     struct AnimationFixture
     {
       Ref<Page> TestPage {Page::Create()};
-      RefPtr<dom::HTMLDocument> Document;
+      RefPtr<HTMLDocument> Document;
       RefPtr<KeyframeEffect> Effect;
       RefPtr<WebAnimation> Animation;
 
@@ -35,8 +35,8 @@ namespace krys::boo::tests
       {
         auto &frame = TestPage->MainFrame();
         frame.CreateView({200, 100});
-        Document = CreateRef<dom::HTMLDocument>();
-        frame.SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+        Document = CreateRef<HTMLDocument>();
+        frame.SetDocument(ShareRefPtr<boo::Document>(Document.get()));
         auto parser = CreateRef<html::DocumentParser>(*Document);
         parser->InputStream().Append(u8"<!DOCTYPE html><div id=target></div>", IsEOF::Yes);
         parser->PumpTokenizer();
@@ -79,11 +79,11 @@ namespace krys::boo::tests
     };
 
     /// @brief Records the types of the events fired at a target.
-    struct EventRecorder : dom::EventListenerCallback
+    struct EventRecorder : EventListenerCallback
     {
       List<std::string> Records;
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         auto type = event.Type().View();
         Records.emplace_back(type.begin(), type.end());
@@ -148,7 +148,7 @@ namespace krys::boo::tests
     {
       Maybe<WebAnimationTime> eventTimelineTime;
       auto handle = animation.AddEventListener(
-        u8"finish", [&](dom::Event &event)
+        u8"finish", [&](Event &event)
         { eventTimelineTime = static_cast<AnimationPlaybackEvent &>(event).TimelineTime(); });
       REQUIRE_FALSE(animation.Play().HasException());
       fixture.Frame();
@@ -238,8 +238,7 @@ namespace krys::boo::tests
     auto recorder = CreateRef<EventRecorder>();
     for (auto type : {u8"finish", u8"cancel"})
     {
-      animation.AddEventListener(dom::DOMStringAtom(type), ShareRef<dom::EventListenerCallback>(*recorder),
-                                 false);
+      animation.AddEventListener(DOMStringAtom(type), ShareRef<EventListenerCallback>(*recorder), false);
     }
 
     REQUIRE_FALSE(animation.Play().HasException());
@@ -360,7 +359,7 @@ namespace krys::boo::tests
       auto noTimeline = WebAnimation::Create(
         document, KeyframeEffect::Create(*document.GetElementById(u8"target"), null).get(), nullptr);
       int32 fired = 0;
-      auto listener = [&](dom::Event &)
+      auto listener = [&](Event &)
       {
         ++fired;
       };
@@ -373,8 +372,8 @@ namespace krys::boo::tests
 
       CHECK_FALSE(animation.Effect());
       CHECK_FALSE(noTimeline->Effect());
-      (void)animation.DispatchEvent(*dom::Event::Create(u8"custom", false, false));
-      (void)noTimeline->DispatchEvent(*dom::Event::Create(u8"custom", false, false));
+      (void)animation.DispatchEvent(*Event::Create(u8"custom", false, false));
+      (void)noTimeline->DispatchEvent(*Event::Create(u8"custom", false, false));
       CHECK(fired == 0);
     }
   }

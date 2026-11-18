@@ -24,7 +24,7 @@
 
 namespace krys::boo
 {
-  RenderSVGGradientStop::RenderSVGGradientStop(svg::SVGStopElement &element, RenderStyle &&style) noexcept
+  RenderSVGGradientStop::RenderSVGGradientStop(SVGStopElement &element, RenderStyle &&style) noexcept
       : RenderElement(Type::SVGGradientStop, element, krys::move(style), {}, {})
   {
     krys_debug_assert(IsRenderSVGGradientStop());
@@ -32,9 +32,9 @@ namespace krys::boo
 
   RenderSVGGradientStop::~RenderSVGGradientStop() noexcept = default;
 
-  svg::SVGStopElement &RenderSVGGradientStop::GetElement() const noexcept
+  SVGStopElement &RenderSVGGradientStop::GetElement() const noexcept
   {
-    return Downcast<svg::SVGStopElement>(Downcast<svg::SVGElement>(NodeForNonAnonymous()));
+    return Downcast<SVGStopElement>(Downcast<SVGElement>(NodeForNonAnonymous()));
   }
 
   void RenderSVGGradientStop::StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept
@@ -48,7 +48,7 @@ namespace krys::boo
     // <stop> elements should only be allowed to make renderers under gradient elements
     // but I can imagine a few cases we might not be catching, so let's not crash if our parent isn't a
     // gradient.
-    RefPtr<svg::SVGGradientElement> gradient = ShareRefPtr(GradientElement());
+    RefPtr<SVGGradientElement> gradient = ShareRefPtr(GradientElement());
     if (!gradient)
     {
       return;
@@ -68,8 +68,8 @@ namespace krys::boo
     ClearNeedsLayout();
   }
 
-  svg::SVGGradientElement *RenderSVGGradientStop::GradientElement() const noexcept
+  SVGGradientElement *RenderSVGGradientStop::GradientElement() const noexcept
   {
-    return DynamicDowncast<svg::SVGGradientElement>(GetElement().ParentElement());
+    return DynamicDowncast<SVGGradientElement>(GetElement().ParentElement());
   }
 }

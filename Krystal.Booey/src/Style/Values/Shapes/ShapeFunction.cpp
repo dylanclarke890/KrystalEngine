@@ -96,7 +96,7 @@ namespace krys::boo::style
 
   // MARK: - ShapeSVGPathSource
 
-  class ShapeSVGPathSource final : public svg::SVGPathSource
+  class ShapeSVGPathSource final : public SVGPathSource
   {
   public:
     explicit ShapeSVGPathSource(Position startPoint, const Shape &shape, const FloatSize &boxSize) noexcept
@@ -115,18 +115,18 @@ namespace krys::boo::style
       return true;
     }
 
-    KRYS_NODISCARD svg::SVGPathSegType NextCommand(svg::SVGPathSegType) noexcept override
+    KRYS_NODISCARD SVGPathSegType NextCommand(SVGPathSegType) noexcept override
     {
       auto type = SegmentTypeAtIndex(_nextIndex);
       ++_nextIndex;
       return type;
     }
 
-    KRYS_NODISCARD Maybe<svg::SVGPathSegType> ParseSVGSegmentType() noexcept override
+    KRYS_NODISCARD Maybe<SVGPathSegType> ParseSVGSegmentType() noexcept override
     {
       // This represents the initial move to to set the "from" position.
       krys_debug_assert(!_nextIndex);
-      return svg::SVGPathSegType::MoveToAbs;
+      return SVGPathSegType::MoveToAbs;
     }
 
     KRYS_NODISCARD Maybe<MoveToSegment> ParseMoveToSegment(FloatPoint) noexcept override
@@ -242,36 +242,34 @@ namespace krys::boo::style
                              Evaluate<FloatPoint>(arcCommand.ToBy, _boxSize, style::ZoomNeeded {})};
     }
 
-    KRYS_NODISCARD svg::SVGPathSegType SegmentTypeAtIndex(size_t index) const noexcept
+    KRYS_NODISCARD SVGPathSegType SegmentTypeAtIndex(size_t index) const noexcept
     {
       if (index >= _shape.Commands.size())
       {
-        return svg::SVGPathSegType::Unknown;
+        return SVGPathSegType::Unknown;
       }
 
       return krys::SwitchOn(
         _shape.Commands[index],
         [&](const MoveCommand &command)
         {
-          return std::holds_alternative<MoveCommand::To>(command.ToBy) ? svg::SVGPathSegType::MoveToAbs
-                                                                       : svg::SVGPathSegType::MoveToRel;
+          return std::holds_alternative<MoveCommand::To>(command.ToBy) ? SVGPathSegType::MoveToAbs
+                                                                       : SVGPathSegType::MoveToRel;
         },
         [&](const LineCommand &command)
         {
-          return std::holds_alternative<LineCommand::To>(command.ToBy) ? svg::SVGPathSegType::LineToAbs
-                                                                       : svg::SVGPathSegType::LineToRel;
+          return std::holds_alternative<LineCommand::To>(command.ToBy) ? SVGPathSegType::LineToAbs
+                                                                       : SVGPathSegType::LineToRel;
         },
         [&](const HLineCommand &command)
         {
-          return std::holds_alternative<HLineCommand::To>(command.ToBy)
-                   ? svg::SVGPathSegType::LineToHorizontalAbs
-                   : svg::SVGPathSegType::LineToHorizontalRel;
+          return std::holds_alternative<HLineCommand::To>(command.ToBy) ? SVGPathSegType::LineToHorizontalAbs
+                                                                        : SVGPathSegType::LineToHorizontalRel;
         },
         [&](const VLineCommand &command)
         {
-          return std::holds_alternative<VLineCommand::To>(command.ToBy)
-                   ? svg::SVGPathSegType::LineToVerticalAbs
-                   : svg::SVGPathSegType::LineToVerticalRel;
+          return std::holds_alternative<VLineCommand::To>(command.ToBy) ? SVGPathSegType::LineToVerticalAbs
+                                                                        : SVGPathSegType::LineToVerticalRel;
         },
         [&](const CurveCommand &command)
         {
@@ -281,12 +279,12 @@ namespace krys::boo::style
                                   if (value.ControlPoint2)
                                   {
                                     return std::holds_alternative<css::keywords::To>(value.Affinity)
-                                             ? svg::SVGPathSegType::CurveToCubicAbs
-                                             : svg::SVGPathSegType::CurveToCubicRel;
+                                             ? SVGPathSegType::CurveToCubicAbs
+                                             : SVGPathSegType::CurveToCubicRel;
                                   }
                                   return std::holds_alternative<css::keywords::To>(value.Affinity)
-                                           ? svg::SVGPathSegType::CurveToQuadraticAbs
-                                           : svg::SVGPathSegType::CurveToQuadraticRel;
+                                           ? SVGPathSegType::CurveToQuadraticAbs
+                                           : SVGPathSegType::CurveToQuadraticRel;
                                 });
         },
         [&](const SmoothCommand &command)
@@ -297,20 +295,20 @@ namespace krys::boo::style
                                   if (value.ControlPoint)
                                   {
                                     return std::holds_alternative<css::keywords::To>(value.Affinity)
-                                             ? svg::SVGPathSegType::CurveToCubicSmoothAbs
-                                             : svg::SVGPathSegType::CurveToCubicSmoothRel;
+                                             ? SVGPathSegType::CurveToCubicSmoothAbs
+                                             : SVGPathSegType::CurveToCubicSmoothRel;
                                   }
                                   return std::holds_alternative<css::keywords::To>(value.Affinity)
-                                           ? svg::SVGPathSegType::CurveToQuadraticSmoothAbs
-                                           : svg::SVGPathSegType::CurveToQuadraticSmoothRel;
+                                           ? SVGPathSegType::CurveToQuadraticSmoothAbs
+                                           : SVGPathSegType::CurveToQuadraticSmoothRel;
                                 });
         },
         [&](const ArcCommand &command)
         {
-          return std::holds_alternative<ArcCommand::To>(command.ToBy) ? svg::SVGPathSegType::ArcAbs
-                                                                      : svg::SVGPathSegType::ArcRel;
+          return std::holds_alternative<ArcCommand::To>(command.ToBy) ? SVGPathSegType::ArcAbs
+                                                                      : SVGPathSegType::ArcRel;
         },
-        [&](const CloseCommand &) { return svg::SVGPathSegType::ClosePath; });
+        [&](const CloseCommand &) { return SVGPathSegType::ClosePath; });
     }
 
     template <typename T>
@@ -330,7 +328,7 @@ namespace krys::boo::style
 
   // MARK: - ShapeConversionPathConsumer
 
-  class ShapeConversionPathConsumer final : public svg::SVGPathConsumer
+  class ShapeConversionPathConsumer final : public SVGPathConsumer
   {
   public:
     explicit ShapeConversionPathConsumer(css::CommaSeparatedList<ShapeCommand>::Container &commands) noexcept
@@ -627,8 +625,8 @@ namespace krys::boo::style
     auto pathSource = ShapeSVGPathSource(value.StartingPoint, value, boundingBox.Size());
 
     boo::Path path;
-    svg::SVGPathBuilder builder(path);
-    (void)svg::SVGPathParser::Parse(pathSource, builder);
+    SVGPathBuilder builder(path);
+    (void)SVGPathParser::Parse(pathSource, builder);
 
     path.Translate(ToFloatSize(boundingBox.Location()));
 
@@ -683,9 +681,9 @@ namespace krys::boo::style
 
     css::CommaSeparatedList<ShapeCommand>::Container shapeCommands;
     ShapeConversionPathConsumer converter(shapeCommands);
-    svg::SVGPathByteStreamSource source(path.Data.ByteStream);
+    SVGPathByteStreamSource source(path.Data.ByteStream);
 
-    if (!svg::SVGPathParser::Parse(source, converter, svg::PathParsingMode::UnalteredParsing))
+    if (!SVGPathParser::Parse(source, converter, svg::PathParsingMode::UnalteredParsing))
     {
       return {};
     }

@@ -27,10 +27,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Mixins/URLDecomposition.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlanchorelement
-  class HTMLAnchorElement : public HTMLElement, public URLDecomposition
+  class HTMLAnchorElement : public HTMLElement, public html::URLDecomposition
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLAnchorElement);
 
@@ -44,14 +44,14 @@ namespace krys::boo::html
     /// @brief Links start a selection only when editable.
     KRYS_NODISCARD bool CanStartSelection() const noexcept final;
 
-    HTMLAnchorElement(dom::Document &document) noexcept;
+    HTMLAnchorElement(Document &document) noexcept;
 
     /// @brief Follows the link, if it is one.
     /// @see https://html.spec.whatwg.org/#the-a-element:activation-behaviour
-    void ActivationBehavior(dom::Event &event) noexcept override;
+    void ActivationBehavior(Event &event) noexcept override;
 
     /// @brief Follows a focused link on Enter (as a simulated click), and on a click of the middle button.
-    void DefaultEventHandler(dom::Event &event) noexcept override;
+    void DefaultEventHandler(Event &event) noexcept override;
 
     /// @brief Whether the link is followed by a click with or without @p shiftKey: always outside editable
     /// content, and inside it as `Settings::EditableLinkBehavior` says.
@@ -66,16 +66,16 @@ namespace krys::boo::html
 #pragma region HTMLAnchorElement - https://html.spec.whatwg.org/#htmlanchorelement
 
     /// @see https://html.spec.whatwg.org/#dom-a-target
-    KRYS_NODISCARD dom::DOMString Target() const noexcept;
+    KRYS_NODISCARD DOMString Target() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-target
-    void Target(dom::DOMString value) noexcept;
+    void Target(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-download
-    KRYS_NODISCARD dom::DOMString Download() const noexcept;
+    KRYS_NODISCARD DOMString Download() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-download
-    void Download(dom::DOMString value) noexcept;
+    void Download(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-ping
     KRYS_NODISCARD dom::USVString Ping() const noexcept;
@@ -84,37 +84,37 @@ namespace krys::boo::html
     void Ping(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-rel
-    KRYS_NODISCARD dom::DOMString Rel() const noexcept;
+    KRYS_NODISCARD DOMString Rel() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-rel
-    void Rel(dom::DOMString value) noexcept;
+    void Rel(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-rellist
     KRYS_NODISCARD dom::DOMTokenList &RelList() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-hreflang
-    KRYS_NODISCARD dom::DOMString HrefLang() const noexcept;
+    KRYS_NODISCARD DOMString HrefLang() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-hreflang
-    void HrefLang(dom::DOMString value) noexcept;
+    void HrefLang(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-type
-    KRYS_NODISCARD dom::DOMString Type() const noexcept;
+    KRYS_NODISCARD DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-type
-    void Type(dom::DOMString value) noexcept;
+    void Type(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-text
-    KRYS_NODISCARD dom::DOMString Text() const noexcept;
+    KRYS_NODISCARD DOMString Text() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-text
-    dom::ExceptionOr<void> Text(dom::DOMString value) noexcept;
+    ExceptionOr<void> Text(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-referrerpolicy
-    KRYS_NODISCARD dom::DOMString ReferrerPolicy() const noexcept;
+    KRYS_NODISCARD DOMString ReferrerPolicy() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-referrerpolicy
-    void ReferrerPolicy(dom::DOMString value) noexcept;
+    void ReferrerPolicy(DOMString value) noexcept;
 
 #pragma endregion
 
@@ -135,41 +135,40 @@ namespace krys::boo::html
 #pragma region HTMLAnchorElement Obsolete members - https://html.spec.whatwg.org/#HTMLAnchorElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-a-coords
-    KRYS_NODISCARD dom::DOMString Coords() const noexcept;
+    KRYS_NODISCARD DOMString Coords() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-coords
-    void Coords(dom::DOMString value) noexcept;
+    void Coords(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-charset
-    KRYS_NODISCARD dom::DOMString Charset() const noexcept;
+    KRYS_NODISCARD DOMString Charset() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-charset
-    void Charset(dom::DOMString value) noexcept;
+    void Charset(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-name
-    KRYS_NODISCARD dom::DOMString Name() const noexcept;
+    KRYS_NODISCARD DOMString Name() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-name
-    void Name(dom::DOMString value) noexcept;
+    void Name(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-rev
-    KRYS_NODISCARD dom::DOMString Rev() const noexcept;
+    KRYS_NODISCARD DOMString Rev() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-rev
-    void Rev(dom::DOMString value) noexcept;
+    void Rev(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-shape
-    KRYS_NODISCARD dom::DOMString Shape() const noexcept;
+    KRYS_NODISCARD DOMString Shape() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-shape
-    void Shape(dom::DOMString value) noexcept;
+    void Shape(DOMString value) noexcept;
 
 #pragma endregion
 
   protected:
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
   private:
     KRYS_NODISCARD url::URL FullURL() const noexcept final;
@@ -178,13 +177,13 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLAnchorElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLAnchorElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLAnchorElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLAnchorElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLAnchorElement();
   }

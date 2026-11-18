@@ -29,7 +29,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyTraits.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGValueProperty.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @see https://svgwg.org/svg2-draft/types.html#InterfaceSVGNumber
   class SVGNumber : public SVGValueProperty<float>
@@ -51,7 +51,7 @@ namespace krys::boo::svg
     }
 
     template <typename T>
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<SVGNumber>> Create(dom::ExceptionOr<T> value) noexcept
+    KRYS_NODISCARD static ExceptionOr<Ref<SVGNumber>> Create(ExceptionOr<T> value) noexcept
     {
       if (value.HasException())
       {
@@ -70,11 +70,11 @@ namespace krys::boo::svg
       return _value;
     }
 
-    dom::ExceptionOr<void> SetValueForBindings(float value) noexcept
+    ExceptionOr<void> SetValueForBindings(float value) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value = value;
@@ -82,7 +82,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept override
     {
       return SVGPropertyTraits<float>::ToString(_value);
     }

@@ -31,13 +31,12 @@
 
 namespace krys::boo
 {
+  class Element;
   enum class TextDirection : bool;
 }
 
 namespace krys::boo::dom
 {
-  class Element;
-
   /// @brief @p element's auto directionality: from its value if it's a form control whose value decides it,
   /// otherwise from the first of its text with a strong character. Null if nothing decides it.
   /// @see https://html.spec.whatwg.org/#auto-directionality

@@ -26,7 +26,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLPictureElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   namespace
   {
@@ -44,8 +44,8 @@ namespace krys::boo::html
     }
   }
 
-  HTMLPictureElement::HTMLPictureElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Picture)
+  HTMLPictureElement::HTMLPictureElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Picture)
   {
   }
 

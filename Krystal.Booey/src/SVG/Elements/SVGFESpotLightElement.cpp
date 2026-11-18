@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/SVG/Elements/SVGFESpotLightElement.hpp"
 #include "Krystal.Booey/Graphics/Filters/SpotLightSource.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFESpotLightElement::SVGFESpotLightElement(dom::Document &document) noexcept
+  SVGFESpotLightElement::SVGFESpotLightElement(Document &document) noexcept
       : SVGFELightElement(document, SVGElementInterface::FESpotLight)
   {
   }

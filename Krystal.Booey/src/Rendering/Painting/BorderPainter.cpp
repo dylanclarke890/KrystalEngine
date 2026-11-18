@@ -1173,7 +1173,7 @@ namespace krys::boo
     graphicsContext.SetShouldAntialias(wasAntialiased);
   }
 
-  void BorderPainter::DrawLineForBoxSide(GraphicsContext &graphicsContext, const dom::Document &document,
+  void BorderPainter::DrawLineForBoxSide(GraphicsContext &graphicsContext, const boo::Document &document,
                                          const FloatRect &rect, BoxSide side, Color color,
                                          BorderStyle borderStyle, float adjacentWidth1, float adjacentWidth2,
                                          bool antialias) noexcept
@@ -1580,7 +1580,7 @@ namespace krys::boo
     return isVeryLightColor ? color : color.Lightened();
   }
 
-  const dom::Document &BorderPainter::Document() const noexcept
+  const boo::Document &BorderPainter::Document() const noexcept
   {
     return _renderer.GetDocument();
   }

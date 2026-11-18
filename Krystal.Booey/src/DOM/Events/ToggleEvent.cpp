@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   ToggleEvent::ToggleEvent(DOMStringAtom type, const ToggleEventInit &eventInitDict) noexcept
       : Event(krys::move(type), eventInitDict), _oldState(eventInitDict.OldState),
@@ -36,6 +36,6 @@ namespace krys::boo::dom
       target = &_source->NodeDocument();
     }
     return DynamicDowncast<Element>(
-      DynamicDowncast<Node>(EventTargetAlgorithms::Retarget(_source.get(), *target)));
+      DynamicDowncast<Node>(dom::EventTargetAlgorithms::Retarget(_source.get(), *target)));
   }
 }

@@ -28,10 +28,7 @@
 namespace krys::boo
 {
   class LightSource;
-}
 
-namespace krys::boo::svg
-{
   /// @brief The base of the light source elements, which light their parent `<feDiffuseLighting>` or
   /// `<feSpecularLighting>`.
   class SVGFELightElement : public SVGElement
@@ -158,7 +155,7 @@ namespace krys::boo::svg
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGFELightElement, SVGElement>;
 
   protected:
-    SVGFELightElement(dom::Document &document, SVGElementInterface interface) noexcept;
+    SVGFELightElement(Document &document, SVGElementInterface interface) noexcept;
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept override
     {
@@ -166,24 +163,24 @@ namespace krys::boo::svg
     }
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept override;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept override;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept override;
 
     void OnChildrenChanged() noexcept override;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGFELightElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGFELightElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGFEDistantLightElement() || target.IsSVGFEPointLightElement()
            || target.IsSVGFESpotLightElement();
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    auto *svgElement = krys::DynamicDowncast<krys::boo::svg::SVGElement>(node);
+    auto *svgElement = krys::DynamicDowncast<krys::boo::SVGElement>(node);
     return svgElement && IsType(*svgElement);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

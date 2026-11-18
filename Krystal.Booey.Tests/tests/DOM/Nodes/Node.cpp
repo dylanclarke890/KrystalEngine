@@ -29,7 +29,7 @@ namespace krys::boo::dom::tests
       Ref<TestElement> Node;
 
       CommonTestData(bool appendChild = false)
-          : Document(CreateRef<dom::Document>()), Node(CreateRef<TestElement>(*Document))
+          : Document(CreateRef<boo::Document>()), Node(CreateRef<TestElement>(*Document))
       {
         if (appendChild)
         {
@@ -48,7 +48,7 @@ namespace krys::boo::dom::tests
       KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(NamespaceTestElement);
 
     public:
-      NamespaceTestElement(Document &document, dom::DOMStringAtom namespacePrefix) noexcept
+      NamespaceTestElement(Document &document, DOMStringAtom namespacePrefix) noexcept
           : Element(document, {u8"http://a", krys::move(namespacePrefix), u8"test-element"}, NodeFlags::None)
       {
       }
@@ -394,7 +394,7 @@ namespace krys::boo::dom::tests
     CommonTestData data {};
     auto text = [&](DOMString &&value)
     {
-      return CreateRef<dom::Text>(*data.Document, krys::move(value));
+      return CreateRef<Text>(*data.Document, krys::move(value));
     };
     auto childData = [](Node &parent)
     {
@@ -754,7 +754,7 @@ namespace krys::boo::dom::tests
 
     SECTION("Node that is none of the above returns it's parent element's namespace prefix")
     {
-      auto textNode = CreateRef<dom::Text>(*data.Document, u8"");
+      auto textNode = CreateRef<Text>(*data.Document, u8"");
 
       SECTION("returns null if parent element is null")
       {
@@ -790,7 +790,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(element->IsDefaultNamespace(u8"foo"));
     REQUIRE_FALSE(element->IsDefaultNamespace(u8"http://a"));
     REQUIRE(element->IsDefaultNamespace(null));
-    REQUIRE(element->IsDefaultNamespace(dom::DOMStringAtom::Empty()));
+    REQUIRE(element->IsDefaultNamespace(DOMStringAtom::Empty()));
 
     auto unprefixed = CreateRef<NamespaceTestElement>(*data.Document, null);
     REQUIRE(unprefixed->IsDefaultNamespace(u8"http://a"));

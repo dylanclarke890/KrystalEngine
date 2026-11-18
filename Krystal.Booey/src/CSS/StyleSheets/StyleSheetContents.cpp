@@ -19,11 +19,11 @@
  */
 
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/Parser.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/ImportRule.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/Style/Rules/RuleData.hpp"
@@ -622,7 +622,7 @@ namespace krys::boo::css
     return const_cast<StyleSheetContents *>(root);
   }
 
-  dom::Node *StyleSheetContents::SingleOwnerNode() const noexcept
+  Node *StyleSheetContents::SingleOwnerNode() const noexcept
   {
     auto *root = RootStyleSheet();
     if (root->_clients.empty())
@@ -633,7 +633,7 @@ namespace krys::boo::css
     return root->_clients[0]->OwnerNode();
   }
 
-  dom::Document *StyleSheetContents::SingleOwnerDocument() const noexcept
+  Document *StyleSheetContents::SingleOwnerDocument() const noexcept
   {
     auto *ownerNode = SingleOwnerNode();
     return ownerNode ? &ownerNode->NodeDocument() : nullptr;

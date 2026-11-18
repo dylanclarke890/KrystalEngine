@@ -26,9 +26,9 @@ namespace krys::boo::tests
       return *time->Percentage();
     }
 
-    KRYS_NODISCARD double Px(const css::CSSNumericValue &value) noexcept
+    KRYS_NODISCARD double Px(const CSSNumericValue &value) noexcept
     {
-      const auto *unitValue = DynamicDowncast<css::CSSUnitValue>(value);
+      const auto *unitValue = DynamicDowncast<CSSUnitValue>(value);
       REQUIRE(unitValue);
       CHECK(unitValue->UnitEnum() == css::UnitType::px);
       return unitValue->Value();
@@ -41,7 +41,7 @@ namespace krys::boo::tests
     }
 
     KRYS_NODISCARD Ref<ViewTimeline> CreateTimeline(AnimationPageFixture &fixture,
-                                                    ViewTimelineInsetValue &&inset = dom::DOMString(u8"auto"))
+                                                    ViewTimelineInsetValue &&inset = DOMString(u8"auto"))
     {
       auto result = ViewTimeline::Create(
         *fixture.Document, {.Subject = ShareRefPtr(&fixture.ById(u8"subject")), .Inset = krys::move(inset)});
@@ -113,9 +113,8 @@ namespace krys::boo::tests
 
     SECTION("as a list")
     {
-      auto timeline =
-        CreateTimeline(fixture, List<ViewTimelineIndividualInset> {RefPtr<css::CSSNumericValue> {
-                                  css::CSSUnitValue::Create(10, css::UnitType::Percentage)}});
+      auto timeline = CreateTimeline(fixture, List<ViewTimelineIndividualInset> {RefPtr<CSSNumericValue> {
+                                                CSSUnitValue::Create(10, css::UnitType::Percentage)}});
       CHECK(Px(*timeline->StartOffset()) == 110);
       CHECK(Px(*timeline->EndOffset()) == 240);
       timeline->DetachFromDocument();
@@ -129,14 +128,13 @@ namespace krys::boo::tests
           ViewTimeline::Create(*fixture.Document, {.Subject = ShareRefPtr(&fixture.ById(u8"subject")),
                                                    .Inset = krys::move(inset)});
         REQUIRE(result.HasException());
-        CHECK(result.GetException().Code() == dom::ExceptionCode::TypeError);
+        CHECK(result.GetException().Code() == ExceptionCode::TypeError);
       };
-      expectTypeError(dom::DOMString());
+      expectTypeError(DOMString());
       expectTypeError(u8"lemon");
       expectTypeError(List<ViewTimelineIndividualInset> {});
-      expectTypeError(
-        List<ViewTimelineIndividualInset> {dom::DOMString(u8"auto"), u8"auto", dom::DOMString(u8"auto")});
-      expectTypeError(List<ViewTimelineIndividualInset> {dom::DOMString(u8"none")});
+      expectTypeError(List<ViewTimelineIndividualInset> {DOMString(u8"auto"), u8"auto", DOMString(u8"auto")});
+      expectTypeError(List<ViewTimelineIndividualInset> {DOMString(u8"none")});
     }
   }
 
@@ -147,10 +145,10 @@ namespace krys::boo::tests
     auto timeline = CreateTimeline(fixture);
 
     InputKeyframe from;
-    from.Offset = dom::DOMString(u8"contain 0%");
+    from.Offset = DOMString(u8"contain 0%");
     from.Properties = {{u8"opacity", u8"0"}};
     InputKeyframe to;
-    to.Offset = dom::DOMString(u8"contain 100%");
+    to.Offset = DOMString(u8"contain 100%");
     to.Properties = {{u8"opacity", u8"1"}};
     KeyframeAnimationOptions options;
     options.Timeline = ShareRefPtr<AnimationTimeline>(timeline.get());

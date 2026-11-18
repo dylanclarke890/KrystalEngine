@@ -70,15 +70,12 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/String.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
   class Element;
   class Node;
-}
 
-namespace krys::boo
-{
   /// @brief Why an accessibility object is being detached from its cache.
   enum class AXDetachmentType : uint8
   {
@@ -284,19 +281,19 @@ namespace krys::boo
 
     // The DOM and the render tree.
 
-    KRYS_NODISCARD virtual dom::Node *GetNode() const noexcept
+    KRYS_NODISCARD virtual Node *GetNode() const noexcept
     {
       return nullptr;
     }
 
-    KRYS_NODISCARD dom::Element *GetElement() const noexcept;
+    KRYS_NODISCARD Element *GetElement() const noexcept;
 
     KRYS_NODISCARD virtual RenderObject *Renderer() const noexcept
     {
       return nullptr;
     }
 
-    KRYS_NODISCARD virtual dom::Document *GetDocument() const noexcept;
+    KRYS_NODISCARD virtual Document *GetDocument() const noexcept;
 
     KRYS_NODISCARD Page *GetPage() const noexcept;
 
@@ -425,9 +422,9 @@ namespace krys::boo
     void UpdateRole() noexcept;
 
     /// @brief The first role in @p value (a space-separated list of ARIA roles) that isn't skipped.
-    KRYS_NODISCARD static AXRole AriaRoleToRole(dom::DOMStringView value) noexcept;
+    KRYS_NODISCARD static AXRole AriaRoleToRole(DOMStringView value) noexcept;
 
-    KRYS_NODISCARD static AXRole AriaRoleToRole(dom::DOMStringView value,
+    KRYS_NODISCARD static AXRole AriaRoleToRole(DOMStringView value,
                                                 const Func<bool(AXRole)> &skipRole) noexcept;
 
     /// @brief The ARIA role the object maps to (`computedrole` in WebDriver), empty for none.
@@ -719,21 +716,21 @@ namespace krys::boo
 
     /// @brief @p element's @p name attribute, or (for ARIA attributes) its custom element's default; empty if
     /// neither is set.
-    KRYS_NODISCARD static dom::DOMString AttributeWithDefaultARIA(const dom::Element &element,
-                                                                  dom::DOMStringView name) noexcept;
+    KRYS_NODISCARD static DOMString AttributeWithDefaultARIA(const Element &element,
+                                                             DOMStringView name) noexcept;
 
     /// @brief Whether the element has @p name, or (for ARIA attributes) its custom element has a default.
-    KRYS_NODISCARD bool HasAttribute(dom::DOMStringView name) const noexcept;
+    KRYS_NODISCARD bool HasAttribute(DOMStringView name) const noexcept;
 
     /// @brief The element's @p name attribute, or (for ARIA attributes) its custom element's default;
     /// empty if neither is set.
-    KRYS_NODISCARD dom::DOMString GetAttribute(dom::DOMStringView name) const noexcept;
+    KRYS_NODISCARD DOMString GetAttribute(DOMStringView name) const noexcept;
 
     /// @brief `GetAttribute` with leading and trailing ASCII whitespace stripped.
-    KRYS_NODISCARD dom::DOMString GetAttributeTrimmed(dom::DOMStringView name) const noexcept;
+    KRYS_NODISCARD DOMString GetAttributeTrimmed(DOMStringView name) const noexcept;
 
     /// @brief `GetAttribute` as an integer, 0 if it isn't one.
-    KRYS_NODISCARD int32 IntegralAttribute(dom::DOMStringView name) const noexcept;
+    KRYS_NODISCARD int32 IntegralAttribute(DOMStringView name) const noexcept;
 
     /// @brief Whether the element has any global ARIA state or property.
     KRYS_NODISCARD bool SupportsARIAAttributes() const noexcept;
@@ -742,7 +739,7 @@ namespace krys::boo
     // Indexes are bytes of the UTF-8 text a text iterator emits.
 
     /// @brief A text control's text (its value; nothing for a password) or a static text's; empty otherwise.
-    KRYS_NODISCARD virtual dom::DOMString Text() const noexcept
+    KRYS_NODISCARD virtual DOMString Text() const noexcept
     {
       return {};
     }
@@ -783,7 +780,7 @@ namespace krys::boo
       return {};
     }
 
-    KRYS_NODISCARD virtual dom::DOMString SelectedText() const noexcept
+    KRYS_NODISCARD virtual DOMString SelectedText() const noexcept
     {
       return {};
     }
@@ -796,8 +793,7 @@ namespace krys::boo
     }
 
     /// @brief The text from @p range's start to its end.
-    KRYS_NODISCARD static dom::DOMString
-      StringForVisiblePositionRange(const VisiblePositionRange &range) noexcept;
+    KRYS_NODISCARD static DOMString StringForVisiblePositionRange(const VisiblePositionRange &range) noexcept;
 
     /// @brief A text control's index of @p position; -1 if the position isn't in it or this isn't a text
     /// control.
@@ -810,7 +806,7 @@ namespace krys::boo
     }
 
     /// @brief The part of a text control's text @p range covers.
-    KRYS_NODISCARD dom::DOMString DoAXStringForRange(const CharacterRange &range) const noexcept;
+    KRYS_NODISCARD DOMString DoAXStringForRange(const CharacterRange &range) const noexcept;
 
     /// @brief The range of a text control's line @p lineNumber (from 0), with its line break if it has one.
     KRYS_NODISCARD CharacterRange DoAXRangeForLine(uint32 lineNumber) const noexcept;
@@ -831,16 +827,16 @@ namespace krys::boo
 
     /// @brief The live region status @p role has when `aria-live` isn't set: "assertive" for alerts, "polite"
     /// for logs and statuses, "off" for timers and marquees, and empty for the others.
-    KRYS_NODISCARD static dom::DOMStringView DefaultLiveRegionStatusForRole(AXRole role) noexcept;
+    KRYS_NODISCARD static DOMStringView DefaultLiveRegionStatusForRole(AXRole role) noexcept;
 
     /// @brief Whether @p status makes a region announce its changes ("polite" or "assertive").
-    KRYS_NODISCARD static bool LiveRegionStatusIsEnabled(dom::DOMStringView status) noexcept;
+    KRYS_NODISCARD static bool LiveRegionStatusIsEnabled(DOMStringView status) noexcept;
 
     /// @brief `aria-live`, or the role's default.
-    KRYS_NODISCARD dom::DOMString LiveRegionStatus() const noexcept;
+    KRYS_NODISCARD DOMString LiveRegionStatus() const noexcept;
 
     /// @brief `aria-relevant`, or its default ("additions text").
-    KRYS_NODISCARD dom::DOMString LiveRegionRelevant() const noexcept;
+    KRYS_NODISCARD DOMString LiveRegionRelevant() const noexcept;
 
     /// @brief Whether the region is announced as a whole when part of it changes: `aria-atomic`, true by
     /// default for alerts and statuses.
@@ -951,19 +947,19 @@ namespace krys::boo
     // Text.
 
     /// @brief The accessible name, as accname computes it.
-    KRYS_NODISCARD virtual dom::DOMString AccessibleName() const noexcept
+    KRYS_NODISCARD virtual DOMString AccessibleName() const noexcept
     {
       return {};
     }
 
     /// @brief The accessible description, as accname computes it.
-    KRYS_NODISCARD virtual dom::DOMString AccessibleDescription() const noexcept
+    KRYS_NODISCARD virtual DOMString AccessibleDescription() const noexcept
     {
       return {};
     }
 
     /// @brief The object's value as text (a text control's value, a static text's text and so on).
-    KRYS_NODISCARD virtual dom::DOMString StringValue() const noexcept
+    KRYS_NODISCARD virtual DOMString StringValue() const noexcept
     {
       return {};
     }
@@ -986,7 +982,7 @@ namespace krys::boo
     }
 
     /// @brief The value as text (`aria-valuetext`), if the author gave one.
-    KRYS_NODISCARD virtual dom::DOMString ValueDescription() const noexcept
+    KRYS_NODISCARD virtual DOMString ValueDescription() const noexcept
     {
       return {};
     }
@@ -1176,12 +1172,12 @@ namespace krys::boo
       return null;
     }
 
-    KRYS_NODISCARD virtual dom::DOMString AxRowIndexText() const noexcept
+    KRYS_NODISCARD virtual DOMString AxRowIndexText() const noexcept
     {
       return {};
     }
 
-    KRYS_NODISCARD virtual dom::DOMString AxColumnIndexText() const noexcept
+    KRYS_NODISCARD virtual DOMString AxColumnIndexText() const noexcept
     {
       return {};
     }
@@ -1205,7 +1201,7 @@ namespace krys::boo
     }
 
     /// @brief A cell's `scope`.
-    KRYS_NODISCARD dom::DOMString CellScope() const noexcept
+    KRYS_NODISCARD DOMString CellScope() const noexcept
     {
       return GetAttribute(u8"scope");
     }
@@ -1401,7 +1397,7 @@ namespace krys::boo
 
     /// @brief The element a press acts on: the object's control (or one the author hid inside an ARIA
     /// control), its link, or null if pressing it does nothing.
-    KRYS_NODISCARD virtual dom::Element *ActionElement() const noexcept
+    KRYS_NODISCARD virtual Element *ActionElement() const noexcept
     {
       return nullptr;
     }
@@ -1420,7 +1416,7 @@ namespace krys::boo
     }
 
     /// @brief Sets a text control's value as typing would, or a slider's value; whether it was set.
-    virtual bool SetValue(dom::DOMStringView value) noexcept
+    virtual bool SetValue(DOMStringView value) noexcept
     {
       (void)value;
       return false;
@@ -1495,7 +1491,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IgnoredFromModalPresence() const noexcept;
 
     /// @brief Whether the object is in @p modalNode (in the composed tree).
-    KRYS_NODISCARD bool IsModalDescendant(const dom::Node &modalNode) const noexcept;
+    KRYS_NODISCARD bool IsModalDescendant(const Node &modalNode) const noexcept;
 
     void PostMenuClosedNotificationIfNecessary() const noexcept;
   };

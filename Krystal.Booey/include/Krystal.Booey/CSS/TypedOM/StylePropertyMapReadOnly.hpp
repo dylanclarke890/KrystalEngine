@@ -31,13 +31,10 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
-}
 
-namespace krys::boo::css
-{
   /// @brief A read-only map of properties to their values, reified.
   /// @see https://drafts.css-houdini.org/css-typed-om/#stylepropertymapreadonly
   class StylePropertyMapReadOnly : public RefCounted<StylePropertyMapReadOnly>
@@ -66,16 +63,16 @@ namespace krys::boo::css
     /// @brief The first value of @p property, or null if it has none.
     /// @return A `TypeError` if @p property isn't a property.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymapreadonly-get
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<CSSStyleValue>> Get(CSSOMStringView property) const noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<CSSStyleValue>> Get(CSSOMStringView property) const noexcept;
 
     /// @brief The values of @p property.
     /// @return A `TypeError` if @p property isn't a property.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymapreadonly-getall
-    KRYS_NODISCARD dom::ExceptionOr<List<Ref<CSSStyleValue>>> GetAll(CSSOMStringView property) const noexcept;
+    KRYS_NODISCARD ExceptionOr<List<Ref<CSSStyleValue>>> GetAll(CSSOMStringView property) const noexcept;
 
     /// @return A `TypeError` if @p property isn't a property.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymapreadonly-has
-    KRYS_NODISCARD dom::ExceptionOr<bool> Has(CSSOMStringView property) const noexcept;
+    KRYS_NODISCARD ExceptionOr<bool> Has(CSSOMStringView property) const noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymapreadonly-size
     KRYS_NODISCARD virtual size_t Size() const noexcept = 0;
@@ -85,12 +82,14 @@ namespace krys::boo::css
     KRYS_NODISCARD virtual List<Entry> Entries() const noexcept = 0;
 
     /// @brief @p value reified for @p property, or null if there's no value or it can't be.
-    KRYS_NODISCARD static RefPtr<CSSStyleValue>
-      ReifyValue(dom::Document &document, const RefPtr<Value> &value, Maybe<PropertyId> property) noexcept;
+    KRYS_NODISCARD static RefPtr<CSSStyleValue> ReifyValue(boo::Document &document,
+                                                           const RefPtr<css::Value> &value,
+                                                           Maybe<css::PropertyId> property) noexcept;
 
     /// @brief @p value reified for @p property, its items each reified if it's a list-valued property's list.
-    KRYS_NODISCARD static List<Ref<CSSStyleValue>>
-      ReifyValueToList(dom::Document &document, RefPtr<Value> value, Maybe<PropertyId> property) noexcept;
+    KRYS_NODISCARD static List<Ref<CSSStyleValue>> ReifyValueToList(boo::Document &document,
+                                                                    RefPtr<css::Value> value,
+                                                                    Maybe<css::PropertyId> property) noexcept;
 
     KRYS_NODISCARD virtual bool IsStylePropertyMap() const noexcept
     {
@@ -102,13 +101,14 @@ namespace krys::boo::css
 
     /// @brief The document to reify values in, or null if there's none (the rule was removed, or the element
     /// destroyed).
-    KRYS_NODISCARD virtual dom::Document *Document() const noexcept = 0;
+    KRYS_NODISCARD virtual boo::Document *Document() const noexcept = 0;
 
-    KRYS_NODISCARD virtual RefPtr<Value> PropertyValue(PropertyId property) const noexcept = 0;
+    KRYS_NODISCARD virtual RefPtr<css::Value> PropertyValue(css::PropertyId property) const noexcept = 0;
 
-    KRYS_NODISCARD virtual CSSOMString ShorthandPropertySerialisation(PropertyId property) const noexcept = 0;
+    KRYS_NODISCARD virtual CSSOMString
+      ShorthandPropertySerialisation(css::PropertyId property) const noexcept = 0;
 
-    KRYS_NODISCARD virtual RefPtr<Value>
+    KRYS_NODISCARD virtual RefPtr<css::Value>
       CustomPropertyValue(const CSSOMStringAtom &property) const noexcept = 0;
   };
 }

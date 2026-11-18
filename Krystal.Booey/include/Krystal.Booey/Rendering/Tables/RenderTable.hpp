@@ -98,9 +98,9 @@ namespace krys::boo
     mutable LayoutUnit _columnOffsetHeight {-1};
 
   public:
-    RenderTable(Type type, dom::Element &element, RenderStyle &&style) noexcept;
+    RenderTable(Type type, Element &element, RenderStyle &&style) noexcept;
 
-    RenderTable(Type type, dom::Document &document, RenderStyle &&style) noexcept;
+    RenderTable(Type type, Document &document, RenderStyle &&style) noexcept;
 
     ~RenderTable() noexcept override;
 

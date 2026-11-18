@@ -38,14 +38,10 @@
 
 namespace krys::boo
 {
+  class Element;
   class Image;
   class LocalFrame;
-
-  namespace dom
-  {
-    class Element;
-    class Node;
-  }
+  class Node;
 
   namespace url
   {
@@ -85,14 +81,14 @@ namespace krys::boo
   };
 
   /// @brief A snapshot of @p node, as it's painted when dragged.
-  KRYS_NODISCARD DragImageRef CreateDragImageForNode(LocalFrame &frame, dom::Node &node) noexcept;
+  KRYS_NODISCARD DragImageRef CreateDragImageForNode(LocalFrame &frame, boo::Node &node) noexcept;
 
   /// @brief A snapshot of the frame's selection.
   KRYS_NODISCARD DragImageData CreateDragImageForSelection(LocalFrame &frame,
                                                            bool forceBlackText = false) noexcept;
 
   /// @brief A label for a dragged link: its text in bold over its URL, or the URL alone if there's no text.
-  KRYS_NODISCARD DragImageData CreateDragImageForLink(dom::Element &element, url::URL &url,
+  KRYS_NODISCARD DragImageData CreateDragImageForLink(boo::Element &element, url::URL &url,
                                                       utf8_stringview label,
                                                       float deviceScaleFactor) noexcept;
 

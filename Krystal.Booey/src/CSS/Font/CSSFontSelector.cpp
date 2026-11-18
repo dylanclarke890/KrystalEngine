@@ -56,7 +56,7 @@ namespace krys::boo::css
     uint32 FontSelectorId = 0;
   }
 
-  Ref<CSSFontSelector> CSSFontSelector::Create(dom::Document &document) noexcept
+  Ref<CSSFontSelector> CSSFontSelector::Create(Document &document) noexcept
   {
     return AdoptRef(*new CSSFontSelector(document));
   }
@@ -66,7 +66,7 @@ namespace krys::boo::css
     return Hash::Combine(std::hash<StringAtom> {}(key.Family), std::hash<StringAtom> {}(key.Name));
   }
 
-  CSSFontSelector::CSSFontSelector(dom::Document &document) noexcept
+  CSSFontSelector::CSSFontSelector(Document &document) noexcept
       : _document(CreateWeakPtr(&document)), _cssFontFaceSet(CSSFontFaceSet::Create(this)),
         _fontFaceClient(*this), _uniqueId(++FontSelectorId)
   {

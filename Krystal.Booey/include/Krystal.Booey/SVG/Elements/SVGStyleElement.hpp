@@ -24,13 +24,10 @@
 #include "Krystal.Booey/HTML/Internals/InlineStyleSheetOwner.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSStyleSheet;
-}
 
-namespace krys::boo::svg
-{
   /// @brief The `<style>` element in SVG: a style sheet made from its text, as HTML's.
   /// @see https://svgwg.org/svg2-draft/styling.html#InterfaceSVGStyleElement
   class SVGStyleElement final : public SVGElement
@@ -41,13 +38,13 @@ namespace krys::boo::svg
     html::InlineStyleSheetOwner _styleSheetOwner;
 
   public:
-    explicit SVGStyleElement(dom::Document &document) noexcept;
+    explicit SVGStyleElement(Document &document) noexcept;
 
     ~SVGStyleElement() noexcept override;
 
     /// @brief The associated CSS style sheet, if any.
     /// @see https://drafts.csswg.org/cssom/#dom-linkstyle-sheet
-    KRYS_NODISCARD css::CSSStyleSheet *Sheet() const noexcept
+    KRYS_NODISCARD CSSStyleSheet *Sheet() const noexcept
     {
       return _styleSheetOwner.Sheet();
     }
@@ -58,19 +55,19 @@ namespace krys::boo::svg
     void Disabled(bool value) const noexcept;
 
     /// @see https://svgwg.org/svg2-draft/styling.html#__svg__SVGStyleElement__type
-    KRYS_NODISCARD dom::DOMString Type() const noexcept;
+    KRYS_NODISCARD DOMString Type() const noexcept;
 
-    void Type(dom::DOMString value) noexcept;
+    void Type(DOMString value) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/styling.html#__svg__SVGStyleElement__media
-    KRYS_NODISCARD dom::DOMString Media() const noexcept;
+    KRYS_NODISCARD DOMString Media() const noexcept;
 
-    void Media(dom::DOMString value) noexcept;
+    void Media(DOMString value) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/styling.html#__svg__SVGStyleElement__title
-    KRYS_NODISCARD dom::DOMString Title() const noexcept;
+    KRYS_NODISCARD DOMString Title() const noexcept;
 
-    void Title(dom::DOMString value) noexcept;
+    void Title(DOMString value) noexcept;
 
     bool SheetLoaded() noexcept final
     {
@@ -83,12 +80,12 @@ namespace krys::boo::svg
     }
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
     void OnInsert() noexcept final;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept final;
 
     void OnChildrenChanged() noexcept final;
 
@@ -108,8 +105,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGStyleElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGStyleElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGStyleElement();
   }

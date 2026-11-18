@@ -38,7 +38,7 @@
 
 namespace krys::boo::html
 {
-  ProgressShadowElement::ProgressShadowElement(dom::Document &document) noexcept : HTMLDivElement(document)
+  ProgressShadowElement::ProgressShadowElement(Document &document) noexcept : HTMLDivElement(document)
   {
   }
 
@@ -56,8 +56,7 @@ namespace krys::boo::html
     return false;
   }
 
-  ProgressInnerElement::ProgressInnerElement(dom::Document &document) noexcept
-      : ProgressShadowElement(document)
+  ProgressInnerElement::ProgressInnerElement(Document &document) noexcept : ProgressShadowElement(document)
   {
   }
 
@@ -75,12 +74,11 @@ namespace krys::boo::html
            && HTMLDivElement::RendererIsNeeded(style);
   }
 
-  ProgressBarElement::ProgressBarElement(dom::Document &document) noexcept : ProgressShadowElement(document)
+  ProgressBarElement::ProgressBarElement(Document &document) noexcept : ProgressShadowElement(document)
   {
   }
 
-  ProgressValueElement::ProgressValueElement(dom::Document &document) noexcept
-      : ProgressShadowElement(document)
+  ProgressValueElement::ProgressValueElement(Document &document) noexcept : ProgressShadowElement(document)
   {
   }
 
@@ -89,21 +87,21 @@ namespace krys::boo::html
     (void)SetInlineStyleProperty(css::PropertyId::InlineSize, std::max(0.0, size), css::UnitType::Percentage);
   }
 
-  Ref<ProgressInnerElement> ProgressInnerElement::Create(dom::Document &document) noexcept
+  Ref<ProgressInnerElement> ProgressInnerElement::Create(Document &document) noexcept
   {
     auto result = CreateRef<ProgressInnerElement>(document);
     result->SetUserAgentPart(css::user_agent_parts::WebkitProgressInnerElement());
     return result;
   }
 
-  Ref<ProgressBarElement> ProgressBarElement::Create(dom::Document &document) noexcept
+  Ref<ProgressBarElement> ProgressBarElement::Create(Document &document) noexcept
   {
     auto result = CreateRef<ProgressBarElement>(document);
     result->SetUserAgentPart(css::user_agent_parts::WebkitProgressBar());
     return result;
   }
 
-  Ref<ProgressValueElement> ProgressValueElement::Create(dom::Document &document) noexcept
+  Ref<ProgressValueElement> ProgressValueElement::Create(Document &document) noexcept
   {
     auto result = CreateRef<ProgressValueElement>(document);
     result->SetUserAgentPart(css::user_agent_parts::WebkitProgressValue());

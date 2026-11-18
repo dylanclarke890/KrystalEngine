@@ -10,10 +10,14 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
+namespace krys::boo
+{
+  class Node;
+}
+
 namespace krys::boo::dom
 {
   class MutationObserver;
-  class Node;
 
   /// @see https://dom.spec.whatwg.org/#dictdef-mutationobserverinit
   struct MutationObserverInit

@@ -21,7 +21,7 @@ namespace krys::boo::tests
   {
     IntSize ViewSize;
     RefPtr<LocalFrame> Frame;
-    Ref<dom::HTMLDocument> Document;
+    Ref<HTMLDocument> Document;
 
     explicit PageInFrameFixture(utf8_string markup, IntSize viewSize = {200, 100},
                                 CachePolicy cachePolicy = CachePolicy::Use) noexcept
@@ -37,19 +37,19 @@ namespace krys::boo::tests
 
     PageInFrameFixture(Ref<LocalFrame> frame, utf8_string markup, IntSize viewSize,
                        CachePolicy cachePolicy) noexcept
-        : ViewSize(viewSize), Frame(krys::move(frame)), Document(CreateRef<dom::HTMLDocument>())
+        : ViewSize(viewSize), Frame(krys::move(frame)), Document(CreateRef<HTMLDocument>())
     {
       html::EventLoop::Current().RunUntilIdle();
       Frame->SetSubresourceCachePolicy(cachePolicy);
       Frame->CreateView(ViewSize);
-      Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+      Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
       auto parser = CreateRef<html::DocumentParser>(*Document);
       parser->InputStream().Append(u8"<!DOCTYPE html>" + krys::move(markup), IsEOF::Yes);
       parser->PumpTokenizer();
       Document->StyleScope().FlushPendingUpdate();
     }
 
-    KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) const noexcept
+    KRYS_NODISCARD Element &ById(DOMStringView id) const noexcept
     {
       auto element = Document->GetElementById(id);
       krys_assert(element);
@@ -57,7 +57,7 @@ namespace krys::boo::tests
     }
 
     /// @brief The size of @p id's renderer, laid out.
-    KRYS_NODISCARD IntSize RendererSize(dom::DOMStringView id) noexcept
+    KRYS_NODISCARD IntSize RendererSize(DOMStringView id) noexcept
     {
       (void)Document->UpdateLayout();
       auto *box = DynamicDowncast<RenderBox>(ById(id).Renderer());
@@ -77,12 +77,12 @@ namespace krys::boo::tests
   };
 
   /// @brief Counts an element's `load` and `error` events.
-  struct LoadEvents : dom::EventListenerCallback
+  struct LoadEvents : EventListenerCallback
   {
     int32 Loads {0};
     int32 Errors {0};
 
-    void HandleEvent(dom::Event &event) noexcept override
+    void HandleEvent(Event &event) noexcept override
     {
       if (event.Type() == u8"load")
       {
@@ -94,7 +94,7 @@ namespace krys::boo::tests
       }
     }
 
-    KRYS_NODISCARD static Ref<LoadEvents> ListenTo(dom::Element &element) noexcept
+    KRYS_NODISCARD static Ref<LoadEvents> ListenTo(Element &element) noexcept
     {
       auto events = CreateRef<LoadEvents>();
       element.AddEventListener(u8"load", events, false);

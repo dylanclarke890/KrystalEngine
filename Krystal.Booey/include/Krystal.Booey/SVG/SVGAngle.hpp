@@ -29,7 +29,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGValueProperty.hpp"
 #include "Krystal.Booey/SVG/SVGAngleValue.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @see https://svgwg.org/svg2-draft/types.html#InterfaceSVGAngle
   class SVGAngle : public SVGValueProperty<SVGAngleValue>
@@ -51,7 +51,7 @@ namespace krys::boo::svg
     }
 
     template <typename T>
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<SVGAngle>> Create(dom::ExceptionOr<T> value) noexcept
+    KRYS_NODISCARD static ExceptionOr<Ref<SVGAngle>> Create(ExceptionOr<T> value) noexcept
     {
       if (value.HasException())
       {
@@ -70,11 +70,11 @@ namespace krys::boo::svg
       return _value.UnitType();
     }
 
-    dom::ExceptionOr<void> SetValueForBindings(float value) noexcept
+    ExceptionOr<void> SetValueForBindings(float value) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetValue(value);
@@ -87,11 +87,11 @@ namespace krys::boo::svg
       return _value.Value();
     }
 
-    dom::ExceptionOr<void> SetValueInSpecifiedUnits(float valueInSpecifiedUnits) noexcept
+    ExceptionOr<void> SetValueInSpecifiedUnits(float valueInSpecifiedUnits) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetValueInSpecifiedUnits(valueInSpecifiedUnits);
@@ -104,11 +104,11 @@ namespace krys::boo::svg
       return _value.ValueInSpecifiedUnits();
     }
 
-    dom::ExceptionOr<void> SetValueAsString(dom::DOMStringView value) noexcept
+    ExceptionOr<void> SetValueAsString(DOMStringView value) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       auto result = _value.SetValueAsString(value);
@@ -121,16 +121,16 @@ namespace krys::boo::svg
       return result;
     }
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept override
     {
       return _value.ValueAsString();
     }
 
-    dom::ExceptionOr<void> NewValueSpecifiedUnits(uint16 unitType, float valueInSpecifiedUnits) noexcept
+    ExceptionOr<void> NewValueSpecifiedUnits(uint16 unitType, float valueInSpecifiedUnits) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       auto result = _value.NewValueSpecifiedUnits(unitType, valueInSpecifiedUnits);
@@ -143,11 +143,11 @@ namespace krys::boo::svg
       return result;
     }
 
-    dom::ExceptionOr<void> ConvertToSpecifiedUnits(uint16 unitType) noexcept
+    ExceptionOr<void> ConvertToSpecifiedUnits(uint16 unitType) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       auto result = _value.ConvertToSpecifiedUnits(unitType);

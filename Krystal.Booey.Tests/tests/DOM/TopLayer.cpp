@@ -16,9 +16,9 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD List<dom::Element *> TopLayer(const dom::Document &document)
+    KRYS_NODISCARD List<Element *> TopLayer(const Document &document)
     {
-      List<dom::Element *> elements;
+      List<Element *> elements;
       for (auto &element : document.TopLayerElements())
       {
         elements.push_back(element.get());
@@ -46,24 +46,24 @@ namespace krys::boo::tests
     c.AddToTopLayer();
     CHECK(a.IsInTopLayer());
     CHECK_FALSE(b.IsInTopLayer());
-    CHECK(TopLayer(document) == List<dom::Element *> {&a, &c});
+    CHECK(TopLayer(document) == List<Element *> {&a, &c});
 
     SECTION("Removing and adding again puts an element on top")
     {
       a.RemoveFromTopLayer();
       CHECK_FALSE(a.IsInTopLayer());
-      CHECK(TopLayer(document) == List<dom::Element *> {&c});
+      CHECK(TopLayer(document) == List<Element *> {&c});
       a.AddToTopLayer();
-      CHECK(TopLayer(document) == List<dom::Element *> {&c, &a});
+      CHECK(TopLayer(document) == List<Element *> {&c, &a});
     }
 
     SECTION("Elements leave the top layer, and stop being the target, when they're disconnected")
     {
       document.SetCSSTarget(&c);
-      RefPtr<dom::Element> keep = ShareRefPtr(&b);
+      RefPtr<Element> keep = ShareRefPtr(&b);
       REQUIRE_FALSE(dom::MutationAlgorithms::Remove(b).HasException());
       CHECK_FALSE(c.IsInTopLayer());
-      CHECK(TopLayer(document) == List<dom::Element *> {&a});
+      CHECK(TopLayer(document) == List<Element *> {&a});
       CHECK_FALSE(document.CSSTarget());
     }
   }
@@ -135,13 +135,13 @@ namespace krys::boo::tests
     </style><div id=top></div><div id=fade></div>)html"};
     auto &document = *fixture.Document;
     auto &viewLayer = *document.GetRenderView()->Layer();
-    auto overlayOf = [&](dom::DOMStringView id)
+    auto overlayOf = [&](DOMStringView id)
     {
       auto *renderer = fixture.ById(id).Renderer();
       REQUIRE(renderer);
       return renderer->Style().GetOverlay();
     };
-    auto isRenderedInTopLayer = [&](dom::DOMStringView id)
+    auto isRenderedInTopLayer = [&](DOMStringView id)
     {
       auto *layer = LayerOf(fixture.ById(id).Renderer());
       return layer && layer->Parent() == &viewLayer;
@@ -175,7 +175,7 @@ namespace krys::boo::tests
       top.RequestRemoveFromTopLayer();
       top.AddToTopLayer();
       CHECK_FALSE(document.IsPendingTopLayerRemoval(top));
-      CHECK(TopLayer(document) == List<dom::Element *> {&fade, &top});
+      CHECK(TopLayer(document) == List<Element *> {&fade, &top});
       fixture.Frame();
       CHECK(top.IsInTopLayer());
       CHECK(isRenderedInTopLayer(u8"top"));

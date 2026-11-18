@@ -29,15 +29,15 @@
 
 namespace krys::boo
 {
+  class Element;
+  class EventListener;
+  class EventTarget;
   class LocalDOMWindow;
 }
 
 namespace krys::boo::dom
 {
-  class Element;
-  class EventListener;
   class EventPathItem;
-  class EventTarget;
 
   /// @see https://dom.spec.whatwg.org/#dispatching-events
   class EventDispatcher

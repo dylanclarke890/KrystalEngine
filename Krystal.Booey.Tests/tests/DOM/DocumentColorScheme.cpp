@@ -28,7 +28,7 @@ namespace krys::boo::tests
         html::EventLoop::Current().RunUntilIdle();
       }
 
-      KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) const
+      KRYS_NODISCARD Element &ById(DOMStringView id) const
       {
         auto element = Document().GetElementById(id);
         REQUIRE(element.get());
@@ -36,7 +36,7 @@ namespace krys::boo::tests
       }
 
       /// @brief The colour of the paragraph @p id as 8-bit sRGB, after the document's style is updated.
-      KRYS_NODISCARD SRGBA<uint8> ColorOf(dom::DOMStringView id) const
+      KRYS_NODISCARD SRGBA<uint8> ColorOf(DOMStringView id) const
       {
         Document().UpdateStyleIfNeeded();
         auto *style = ById(id).GetRenderStyle();
@@ -49,11 +49,11 @@ namespace krys::boo::tests
         TestPage->SetUseDarkAppearance(dark);
       }
 
-      KRYS_NODISCARD Ref<dom::Element> AddMeta(dom::DOMStringView name, dom::DOMStringView content) const
+      KRYS_NODISCARD Ref<Element> AddMeta(DOMStringView name, DOMStringView content) const
       {
         auto meta = Document().CreateElement(u8"meta").ReleaseValue();
-        REQUIRE_FALSE(meta->SetAttribute(u8"name", dom::DOMString(name)).HasException());
-        REQUIRE_FALSE(meta->SetAttribute(u8"content", dom::DOMString(content)).HasException());
+        REQUIRE_FALSE(meta->SetAttribute(u8"name", DOMString(name)).HasException());
+        REQUIRE_FALSE(meta->SetAttribute(u8"content", DOMString(content)).HasException());
         REQUIRE_FALSE(ById(u8"head").AppendChild(*meta).HasException());
         return meta;
       }

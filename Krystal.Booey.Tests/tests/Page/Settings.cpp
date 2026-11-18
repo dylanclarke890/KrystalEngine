@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/Page/Settings.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -78,7 +78,7 @@ namespace krys::boo::tests
 
       auto clone = document.CloneNode();
       REQUIRE_FALSE(clone.HasException());
-      CHECK(&Downcast<dom::Document>(*clone.ReleaseValue()).GetSettings() == settings.get());
+      CHECK(&Downcast<Document>(*clone.ReleaseValue()).GetSettings() == settings.get());
     }
   }
 

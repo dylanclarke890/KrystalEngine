@@ -28,17 +28,17 @@
 
 namespace krys::boo
 {
-  CSSTransitionEvent::CSSTransitionEvent(dom::DOMStringAtom type, WebAnimation *animation,
+  CSSTransitionEvent::CSSTransitionEvent(DOMStringAtom type, WebAnimation *animation,
                                          Maybe<Seconds> scheduledTime, double elapsedTime,
                                          const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
-                                         css::CSSOMString propertyName) noexcept
+                                         CSSOMString propertyName) noexcept
       : StyleOriginatedAnimationEvent(krys::move(type), animation, scheduledTime, elapsedTime,
                                       pseudoElementIdentifier),
         _propertyName(krys::move(propertyName))
   {
   }
 
-  CSSTransitionEvent::CSSTransitionEvent(dom::DOMStringAtom type,
+  CSSTransitionEvent::CSSTransitionEvent(DOMStringAtom type,
                                          const CSSTransitionEventInit &eventInitDict) noexcept
       : StyleOriginatedAnimationEvent(krys::move(type), eventInitDict, eventInitDict.ElapsedTime,
                                       eventInitDict.PseudoElement),

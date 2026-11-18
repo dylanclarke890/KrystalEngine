@@ -55,7 +55,7 @@
 
 namespace krys::boo
 {
-  Ref<WebAnimation> WebAnimation::Create(dom::Document &document, AnimationEffect *effect) noexcept
+  Ref<WebAnimation> WebAnimation::Create(Document &document, AnimationEffect *effect) noexcept
   {
     Ref<WebAnimation> result = AdoptRef(*new WebAnimation(document));
     result->Initialize();
@@ -64,7 +64,7 @@ namespace krys::boo
     return result;
   }
 
-  Ref<WebAnimation> WebAnimation::Create(dom::Document &document, AnimationEffect *effect,
+  Ref<WebAnimation> WebAnimation::Create(Document &document, AnimationEffect *effect,
                                          AnimationTimeline *timeline) noexcept
   {
     Ref<WebAnimation> result = AdoptRef(*new WebAnimation(document));
@@ -92,7 +92,7 @@ namespace krys::boo
     _readyPromise->Resolve();
   }
 
-  WebAnimation::WebAnimation(dom::Document &document) noexcept
+  WebAnimation::WebAnimation(Document &document) noexcept
       : _readyPromise(detail::AnimationPromise::Create(*this)),
         _finishedPromise(detail::AnimationPromise::Create(*this)), _document(CreateWeakPtr(&document))
   {
@@ -105,7 +105,7 @@ namespace krys::boo
     Instances().erase(this);
   }
 
-  void WebAnimation::StopAnimationsOfDocument(const dom::Document &document) noexcept
+  void WebAnimation::StopAnimationsOfDocument(const Document &document) noexcept
   {
     List<Ref<WebAnimation>> animations;
     for (auto *animation : Instances())
@@ -153,7 +153,7 @@ namespace krys::boo
     }
   }
 
-  void WebAnimation::SetId(dom::DOMString id) noexcept
+  void WebAnimation::SetId(DOMString id) noexcept
   {
     _id = krys::move(id);
   }
@@ -454,22 +454,21 @@ namespace krys::boo
     return true;
   }
 
-  dom::ExceptionOr<void> WebAnimation::SetBindingsStartTime(const Maybe<WebAnimationTime> &startTime) noexcept
+  ExceptionOr<void> WebAnimation::SetBindingsStartTime(const Maybe<WebAnimationTime> &startTime) noexcept
   {
     if (!IsTimeValid(startTime))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     SetStartTime(startTime);
     return {};
   }
 
-  dom::ExceptionOr<void>
-    WebAnimation::SetBindingsCurrentTime(const Maybe<WebAnimationTime> &currentTime) noexcept
+  ExceptionOr<void> WebAnimation::SetBindingsCurrentTime(const Maybe<WebAnimationTime> &currentTime) noexcept
   {
     if (!IsTimeValid(currentTime))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     return SetCurrentTime(currentTime);
   }
@@ -582,7 +581,7 @@ namespace krys::boo
     return (*timelineTime - *_startTime) * _playbackRate;
   }
 
-  dom::ExceptionOr<void> WebAnimation::SilentlySetCurrentTime(Maybe<WebAnimationTime> seekTime) noexcept
+  ExceptionOr<void> WebAnimation::SilentlySetCurrentTime(Maybe<WebAnimationTime> seekTime) noexcept
   {
     // https://drafts.csswg.org/web-animations-2/#silently-set-the-current-time
 
@@ -592,7 +591,7 @@ namespace krys::boo
       // 1. If the current time is resolved, then throw a TypeError.
       if (CurrentTime())
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       // 2. Abort these steps.
       return {};
@@ -639,7 +638,7 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> WebAnimation::SetCurrentTime(Maybe<WebAnimationTime> seekTime) noexcept
+  ExceptionOr<void> WebAnimation::SetCurrentTime(Maybe<WebAnimationTime> seekTime) noexcept
   {
     // Setting the current time of an animation
     // https://drafts.csswg.org/web-animations-2/#setting-the-current-time-of-an-animation
@@ -914,7 +913,7 @@ namespace krys::boo
       {
         html::EventLoop::Current().QueueMicrotask(
           [finishedPromise = _finishedPromise]() mutable
-          { finishedPromise->Reject(dom::Exception {dom::ExceptionCode::AbortError}); });
+          { finishedPromise->Reject(Exception {ExceptionCode::AbortError}); });
       }
 
       // 4. Let current finished promise be a new (pending) Promise object.
@@ -975,13 +974,13 @@ namespace krys::boo
     }
   }
 
-  void WebAnimation::EnqueueAnimationPlaybackEvent(const dom::DOMStringAtom &type,
+  void WebAnimation::EnqueueAnimationPlaybackEvent(const DOMStringAtom &type,
                                                    Maybe<WebAnimationTime> currentTime,
                                                    Maybe<WebAnimationTime> scheduledTime) noexcept
   {
     auto timelineTime = _timeline ? _timeline->CurrentTime() : null;
     Ref event = CreateRef<AnimationPlaybackEvent>(type, this, scheduledTime, timelineTime, currentTime);
-    event->SetTarget(ShareRefPtr<dom::EventTarget>(this));
+    event->SetTarget(ShareRefPtr<EventTarget>(this));
     EnqueueAnimationEvent(krys::move(event));
   }
 
@@ -1076,7 +1075,7 @@ namespace krys::boo
       {
         if (!readyPromise->IsSettled())
         {
-          readyPromise->Reject(dom::Exception {dom::ExceptionCode::AbortError});
+          readyPromise->Reject(Exception {ExceptionCode::AbortError});
         }
       });
 
@@ -1085,7 +1084,7 @@ namespace krys::boo
     _readyPromise->Resolve();
   }
 
-  dom::ExceptionOr<void> WebAnimation::Finish() noexcept
+  ExceptionOr<void> WebAnimation::Finish() noexcept
   {
     // 3.4.15. Finishing an animation
     // https://drafts.csswg.org/web-animations-1/#finishing-an-animation-section
@@ -1098,7 +1097,7 @@ namespace krys::boo
     //    effect end is infinity, throw an InvalidStateError and abort these steps.
     if (!EffectivePlaybackRate() || (EffectivePlaybackRate() > 0 && EffectEndTime().IsInfinity()))
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     // 2. Apply any pending playback rate to animation.
@@ -1340,12 +1339,12 @@ namespace krys::boo
     EnqueueAnimationPlaybackEvent(event_names::Finish, CurrentTime(), scheduledTime);
   }
 
-  dom::ExceptionOr<void> WebAnimation::Play() noexcept
+  ExceptionOr<void> WebAnimation::Play() noexcept
   {
     return Play(AutoRewind::Yes);
   }
 
-  dom::ExceptionOr<void> WebAnimation::Play(AutoRewind autoRewind) noexcept
+  ExceptionOr<void> WebAnimation::Play(AutoRewind autoRewind) noexcept
   {
     // Playing an animation
     // https://drafts.csswg.org/web-animations-2/#playing-an-animation-section
@@ -1397,7 +1396,7 @@ namespace krys::boo
       //     Set the animation’s hold time to the animation’s associated effect end.
       if (endTime.IsInfinity())
       {
-        return dom::Exception {dom::ExceptionCode::InvalidStateError};
+        return Exception {ExceptionCode::InvalidStateError};
       }
       _holdTime = endTime;
     }
@@ -1549,7 +1548,7 @@ namespace krys::boo
     InvalidateEffect();
   }
 
-  dom::ExceptionOr<void> WebAnimation::Pause() noexcept
+  ExceptionOr<void> WebAnimation::Pause() noexcept
   {
     // Pausing an animation
     // https://drafts.csswg.org/web-animations-2/#pausing-an-animation-section
@@ -1585,7 +1584,7 @@ namespace krys::boo
       {
         // Otherwise, if target effect end for animation is positive infinity, throw an InvalidStateError and
         // abort these steps.
-        return dom::Exception {dom::ExceptionCode::InvalidStateError};
+        return Exception {ExceptionCode::InvalidStateError};
       }
       else
       {
@@ -1638,12 +1637,12 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> WebAnimation::BindingsReverse() noexcept
+  ExceptionOr<void> WebAnimation::BindingsReverse() noexcept
   {
     return Reverse();
   }
 
-  dom::ExceptionOr<void> WebAnimation::Reverse() noexcept
+  ExceptionOr<void> WebAnimation::Reverse() noexcept
   {
     // 3.4.18. Reversing an animation
     // https://drafts.csswg.org/web-animations-1/#reverse-an-animation
@@ -1654,7 +1653,7 @@ namespace krys::boo
     //    throw an InvalidStateError and abort these steps.
     if (!_timeline || !_timeline->CurrentTime())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     // 2. Let original pending playback rate be animation's pending playback rate.
@@ -2073,7 +2072,7 @@ namespace krys::boo
     UpdateRelevance();
   }
 
-  dom::ExceptionOr<void> WebAnimation::CommitStyles() noexcept
+  ExceptionOr<void> WebAnimation::CommitStyles() noexcept
   {
     // https://drafts.csswg.org/web-animations-1/#commit-computed-styles
 
@@ -2085,11 +2084,10 @@ namespace krys::boo
     // 2.1 If target is not an element capable of having a style attribute (for example, it is a
     // pseudo-element or is an element in a document format for which style attributes are not defined) throw
     // a "NoModificationAllowedError" DOMException and abort these steps.
-    RefPtr styledElement =
-      ShareRefPtr(DynamicDowncast<dom::StyledElement>(effect ? effect->Target() : nullptr));
+    RefPtr styledElement = ShareRefPtr(DynamicDowncast<StyledElement>(effect ? effect->Target() : nullptr));
     if (!styledElement || effect->TargetsPseudoElement())
     {
-      return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+      return Exception {ExceptionCode::NoModificationAllowedError};
     }
 
     // 2.2 If, after applying any pending style changes, target is not being rendered, throw an
@@ -2098,7 +2096,7 @@ namespace krys::boo
     auto *renderer = styledElement->Renderer();
     if (!renderer)
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     // 2.3 Let inline style be the result of getting the CSS declaration block corresponding to target’s style
@@ -2215,7 +2213,7 @@ namespace krys::boo
             css::Property::ResolveDirectionAwareProperty(propertyId, animatedStyle->GetWritingMode());
           return inlineStyle->SetProperty(resolvedCSSProperty, string, parserContext);
         },
-        [&](const css::CSSOMStringAtom &customProperty)
+        [&](const CSSOMStringAtom &customProperty)
         {
           auto string = computedStyleExtractor.CustomPropertyValueSerialisationInStyle(
             *animatedStyle, customProperty, css::DefaultSerialisationContext());

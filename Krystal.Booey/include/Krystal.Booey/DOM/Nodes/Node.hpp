@@ -42,9 +42,13 @@
 
 namespace krys::boo
 {
+  class ContainerNode;
+  class Document;
+  class Element;
   class RenderBox;
   class RenderObject;
   class RenderStyle;
+  class ShadowRoot;
   enum class TextDirection : bool;
 }
 
@@ -185,13 +189,20 @@ KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::DocumentPosition, 7u);
 
 namespace krys::boo::dom
 {
-  class ContainerNode;
-  class Document;
+  class DocumentAlgorithms;
   class DocumentOrShadowRoot;
-  class Element;
+  class ElementAlgorithms;
+  class ExtensibilityHooks;
+  class LiveCollection;
+  class MutationAlgorithms;
+  class MutationObserver;
+  class MutationObserverAlgorithms;
   class NodeList;
-  class ShadowRoot;
+  class TreeQueries;
+}
 
+namespace krys::boo
+{
   /// @see https://dom.spec.whatwg.org/#interface-node
   /// @see https://dom.spec.whatwg.org/#concept-node
   /// @see https://dom.spec.whatwg.org/#concept-node-tree
@@ -202,28 +213,28 @@ namespace krys::boo::dom
 
     friend class ContainerNode;
     friend class Document;
-    friend class DocumentAlgorithms;
-    friend class ElementAlgorithms;
-    friend class ExtensibilityHooks;
-    friend class LiveCollection;
-    friend class MutationAlgorithms;
-    friend class MutationObserver;
-    friend class MutationObserverAlgorithms;
+    friend class dom::DocumentAlgorithms;
+    friend class dom::ElementAlgorithms;
+    friend class dom::ExtensibilityHooks;
+    friend class dom::LiveCollection;
+    friend class dom::MutationAlgorithms;
+    friend class dom::MutationObserver;
+    friend class dom::MutationObserverAlgorithms;
     friend class ShadowRoot;
-    friend class TreeQueries;
+    friend class dom::TreeQueries;
 
   private:
-    NodeFlags _flags : BitCount<NodeFlags>() {NodeFlags::None};
-    NodeType _nodeType : BitCount<NodeType>() {NodeType::NONE};
+    dom::NodeFlags _flags : BitCount<dom::NodeFlags>() {dom::NodeFlags::None};
+    dom::NodeType _nodeType : BitCount<dom::NodeType>() {dom::NodeType::NONE};
     style::Validity _styleValidity : BitCount<style::Validity>() {style::Validity::Valid};
-    NodeStyleFlags _styleFlags : BitCount<NodeStyleFlags>() {NodeStyleFlags::None};
+    dom::NodeStyleFlags _styleFlags : BitCount<dom::NodeStyleFlags>() {dom::NodeStyleFlags::None};
     /// @brief Not owned: the document counts the nodes that refer to it (`IncrementReferencingNodeCount`)
     /// and lives while any do. A document's is itself, which it doesn't count.
     Document *_nodeDocument;
     CheckedPtr<ContainerNode> _parentNode;
     CheckedPtr<Node> _previousSibling;
     CheckedPtr<Node> _nextSibling;
-    UniquePtr<NodeRareData> _nodeRareData;
+    UniquePtr<dom::NodeRareData> _nodeRareData;
     RenderObject *_renderer {nullptr};
     /// @brief The root of the shadow tree this node is in, if any: its tree scope.
     ShadowRoot *_containingShadowRoot {nullptr};
@@ -231,7 +242,7 @@ namespace krys::boo::dom
   protected:
     /// @brief Creates a node whose node document is @p document (a document passes itself).
     /// @see https://dom.spec.whatwg.org/#create-a-node
-    Node(Document &document, NodeType type, NodeFlags flags) noexcept;
+    Node(Document &document, dom::NodeType type, dom::NodeFlags flags) noexcept;
 
     /// @brief Moves the node to @p document, which then counts it rather than its old document.
     void SetNodeDocument(Document &document) noexcept;
@@ -242,7 +253,7 @@ namespace krys::boo::dom
 #pragma region Node - https://dom.spec.whatwg.org/#node
 
     /// @see https://dom.spec.whatwg.org/#dom-node-nodetype
-    KRYS_NODISCARD NodeType NodeType() const noexcept
+    KRYS_NODISCARD dom::NodeType NodeType() const noexcept
     {
       return _nodeType;
     }
@@ -257,14 +268,14 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#connected
     KRYS_NODISCARD bool IsConnected() const noexcept
     {
-      return HasNodeFlag(NodeFlags::IsConnected);
+      return HasNodeFlag(dom::NodeFlags::IsConnected);
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-node-ownerdocument
     KRYS_NODISCARD Document *OwnerDocument() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-getrootnode
-    KRYS_NODISCARD Node &GetRootNode(const GetRootNodeOptions &options) noexcept;
+    KRYS_NODISCARD Node &GetRootNode(const dom::GetRootNodeOptions &options) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-tree-parent
     /// @see https://dom.spec.whatwg.org/#dom-node-parentnode
@@ -281,7 +292,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool HasChildNodes() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-childnodes
-    KRYS_NODISCARD Ref<NodeList> ChildNodes() noexcept;
+    KRYS_NODISCARD Ref<dom::NodeList> ChildNodes() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-tree-first-child
     /// @see https://dom.spec.whatwg.org/#dom-node-firstchild
@@ -376,7 +387,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-node-comparedocumentposition
-    KRYS_NODISCARD DocumentPosition CompareDocumentPosition(const Node &other) const noexcept;
+    KRYS_NODISCARD dom::DocumentPosition CompareDocumentPosition(const Node &other) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-contains
     KRYS_NODISCARD bool Contains(const Node *other) const noexcept;
@@ -427,47 +438,47 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD bool HasInvalidRenderer() const noexcept
     {
-      return HasNodeFlag(NodeFlags::HasInvalidRenderer);
+      return HasNodeFlag(dom::NodeFlags::HasInvalidRenderer);
     }
 
     KRYS_NODISCARD bool StyleResolutionShouldRecompositeLayer() const noexcept
     {
-      return HasNodeFlag(NodeFlags::StyleResolutionShouldRecompositeLayer);
+      return HasNodeFlag(dom::NodeFlags::StyleResolutionShouldRecompositeLayer);
     }
 
     /// @brief Whether an end point of the frame's selection is anchored in the node or a descendant.
     KRYS_NODISCARD bool ContainsSelectionEndPoint() const noexcept
     {
-      return HasNodeFlag(NodeFlags::ContainsSelectionEndPoint);
+      return HasNodeFlag(dom::NodeFlags::ContainsSelectionEndPoint);
     }
 
     void SetContainsSelectionEndPoint(bool value) noexcept
     {
       if (value)
       {
-        SetNodeFlag(NodeFlags::ContainsSelectionEndPoint);
+        SetNodeFlag(dom::NodeFlags::ContainsSelectionEndPoint);
       }
       else
       {
-        ClearNodeFlag(NodeFlags::ContainsSelectionEndPoint);
+        ClearNodeFlag(dom::NodeFlags::ContainsSelectionEndPoint);
       }
     }
 
     /// @brief Whether the node's text may decide the auto directionality of an ancestor.
     KRYS_NODISCARD bool SelfOrPrecedingNodesAffectDirAuto() const noexcept
     {
-      return HasNodeFlag(NodeFlags::SelfOrPrecedingNodesAffectDirAuto);
+      return HasNodeFlag(dom::NodeFlags::SelfOrPrecedingNodesAffectDirAuto);
     }
 
     void SetSelfOrPrecedingNodesAffectDirAuto(bool flag) noexcept
     {
       if (flag)
       {
-        SetNodeFlag(NodeFlags::SelfOrPrecedingNodesAffectDirAuto);
+        SetNodeFlag(dom::NodeFlags::SelfOrPrecedingNodesAffectDirAuto);
       }
       else
       {
-        ClearNodeFlag(NodeFlags::SelfOrPrecedingNodesAffectDirAuto);
+        ClearNodeFlag(dom::NodeFlags::SelfOrPrecedingNodesAffectDirAuto);
       }
     }
 
@@ -480,71 +491,71 @@ namespace krys::boo::dom
     /// @brief Whether the node keeps a directionality of its own.
     KRYS_NODISCARD bool UsesEffectiveTextDirection() const noexcept
     {
-      return HasNodeFlag(NodeFlags::UsesEffectiveTextDirection);
+      return HasNodeFlag(dom::NodeFlags::UsesEffectiveTextDirection);
     }
 
     void SetUsesEffectiveTextDirection(bool value) noexcept
     {
       if (value)
       {
-        SetNodeFlag(NodeFlags::UsesEffectiveTextDirection);
+        SetNodeFlag(dom::NodeFlags::UsesEffectiveTextDirection);
       }
       else
       {
-        ClearNodeFlag(NodeFlags::UsesEffectiveTextDirection);
+        ClearNodeFlag(dom::NodeFlags::UsesEffectiveTextDirection);
       }
     }
 
     KRYS_NODISCARD bool NeedsSVGRendererUpdate() const noexcept
     {
-      return HasNodeFlag(NodeFlags::NeedsSVGRendererUpdate);
+      return HasNodeFlag(dom::NodeFlags::NeedsSVGRendererUpdate);
     }
 
     void SetNeedsSVGRendererUpdate(bool flag) noexcept
     {
       if (flag)
       {
-        SetNodeFlag(NodeFlags::NeedsSVGRendererUpdate);
+        SetNodeFlag(dom::NodeFlags::NeedsSVGRendererUpdate);
       }
       else
       {
-        ClearNodeFlag(NodeFlags::NeedsSVGRendererUpdate);
+        ClearNodeFlag(dom::NodeFlags::NeedsSVGRendererUpdate);
       }
     }
 
     /// @brief Whether a descendant's style needs resolving again.
     KRYS_NODISCARD bool ChildNeedsStyleRecalc() const noexcept
     {
-      return HasStyleFlag(NodeStyleFlags::DescendantNeedsStyleResolution);
+      return HasStyleFlag(dom::NodeStyleFlags::DescendantNeedsStyleResolution);
     }
 
     /// @brief Whether a child's style needs resolving again.
     KRYS_NODISCARD bool DirectChildNeedsStyleRecalc() const noexcept
     {
-      return HasStyleFlag(NodeStyleFlags::DirectChildNeedsStyleResolution);
+      return HasStyleFlag(dom::NodeStyleFlags::DirectChildNeedsStyleResolution);
     }
 
     void SetChildNeedsStyleRecalc() noexcept
     {
-      SetStyleFlag(NodeStyleFlags::DescendantNeedsStyleResolution);
+      SetStyleFlag(dom::NodeStyleFlags::DescendantNeedsStyleResolution);
     }
 
     void SetDirectChildNeedsStyleRecalc() noexcept
     {
-      SetStyleFlag(NodeStyleFlags::DirectChildNeedsStyleResolution);
+      SetStyleFlag(dom::NodeStyleFlags::DirectChildNeedsStyleResolution);
     }
 
     void ClearChildNeedsStyleRecalc() noexcept
     {
-      ClearStyleFlags(NodeStyleFlags::DescendantNeedsStyleResolution
-                      | NodeStyleFlags::DirectChildNeedsStyleResolution);
+      ClearStyleFlags(dom::NodeStyleFlags::DescendantNeedsStyleResolution
+                      | dom::NodeStyleFlags::DirectChildNeedsStyleResolution);
     }
 
     void SetHasValidStyle() noexcept
     {
       _styleValidity = style::Validity::Valid;
-      ClearNodeFlag(NodeFlags::IsComputedStyleInvalid | NodeFlags::HasInvalidRenderer
-                    | NodeFlags::StyleResolutionShouldRecompositeLayer);
+      ClearNodeFlag(dom::NodeFlags::IsComputedStyleInvalid | dom::NodeFlags::HasInvalidRenderer
+                    | dom::NodeFlags::StyleResolutionShouldRecompositeLayer);
     }
 
     /// @brief The object the node is rendered as, or null if it isn't rendered.
@@ -729,11 +740,11 @@ namespace krys::boo::dom
 
     /// @brief The document or shadow root of the tree this node is in: its shadow root's when its root is
     /// one, its document's otherwise (even while it's disconnected).
-    KRYS_NODISCARD DocumentOrShadowRoot &TreeScope() const noexcept;
+    KRYS_NODISCARD dom::DocumentOrShadowRoot &TreeScope() const noexcept;
 
     /// @brief The tree scope the node's SVG references are looked up in: its own, or, inside a `<use>`
     /// element's shadow tree, the `<use>` element's.
-    KRYS_NODISCARD DocumentOrShadowRoot &TreeScopeForSVGReferences() const noexcept;
+    KRYS_NODISCARD dom::DocumentOrShadowRoot &TreeScopeForSVGReferences() const noexcept;
 
     /// @brief Whether the node's root is a shadow root (the node is in a shadow tree). The node tree of the
     /// shadow root's host is its light tree.
@@ -741,7 +752,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#concept-light-tree
     KRYS_NODISCARD bool IsInShadowTree() const noexcept
     {
-      return HasNodeFlag(NodeFlags::IsInShadowTree);
+      return HasNodeFlag(dom::NodeFlags::IsInShadowTree);
     }
 
     /// @brief Whether the node is in a user agent shadow tree.
@@ -781,21 +792,21 @@ namespace krys::boo::dom
 
   protected:
     /// @brief The node's rare data, if it has any; an element's is an `ElementRareData`.
-    KRYS_NODISCARD NodeRareData *RareData() const noexcept
+    KRYS_NODISCARD dom::NodeRareData *RareData() const noexcept
     {
       return _nodeRareData.get();
     }
 
     /// @brief The node's rare data, created if it has none; an element's is an `ElementRareData`.
-    KRYS_NODISCARD NodeRareData &EnsureNodeRareData() noexcept;
+    KRYS_NODISCARD dom::NodeRareData &EnsureNodeRareData() noexcept;
 
 #pragma region Registered Observers
 
     /// @see https://dom.spec.whatwg.org/#registered-observer-list
-    KRYS_NODISCARD List<Ref<RegisteredObserver>> &RegisteredObservers() noexcept;
+    KRYS_NODISCARD List<Ref<dom::RegisteredObserver>> &RegisteredObservers() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#registered-observer-list
-    KRYS_NODISCARD List<Ref<TransientRegisteredObserver>> &TransientRegisteredObservers() noexcept;
+    KRYS_NODISCARD List<Ref<dom::TransientRegisteredObserver>> &TransientRegisteredObservers() noexcept;
 
 #pragma endregion
 
@@ -838,113 +849,115 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD bool IsAttributeNode() const noexcept
     {
-      return _nodeType == NodeType::ATTRIBUTE_NODE;
+      return _nodeType == dom::NodeType::ATTRIBUTE_NODE;
     }
 
     KRYS_NODISCARD bool IsDocumentNode() const noexcept
     {
-      return _nodeType == NodeType::DOCUMENT_NODE;
+      return _nodeType == dom::NodeType::DOCUMENT_NODE;
     }
 
     KRYS_NODISCARD bool IsDocumentTypeNode() const noexcept
     {
-      return _nodeType == NodeType::DOCUMENT_TYPE_NODE;
+      return _nodeType == dom::NodeType::DOCUMENT_TYPE_NODE;
     }
 
     KRYS_NODISCARD bool IsDocumentFragmentNode() const noexcept
     {
-      return _nodeType == NodeType::DOCUMENT_FRAGMENT_NODE;
+      return _nodeType == dom::NodeType::DOCUMENT_FRAGMENT_NODE;
     }
 
     KRYS_NODISCARD bool IsContainerNode() const noexcept
     {
-      return HasNodeFlag(NodeFlags::IsContainerNode);
+      return HasNodeFlag(dom::NodeFlags::IsContainerNode);
     }
 
     KRYS_NODISCARD bool IsElementNode() const noexcept
     {
-      return _nodeType == NodeType::ELEMENT_NODE;
+      return _nodeType == dom::NodeType::ELEMENT_NODE;
     }
 
     KRYS_NODISCARD bool IsCharacterDataNode() const noexcept
     {
-      return HasNodeFlag(NodeFlags::IsCharacterData);
+      return HasNodeFlag(dom::NodeFlags::IsCharacterData);
     }
 
     KRYS_NODISCARD bool IsTextNode() const noexcept
     {
-      return _nodeType == NodeType::TEXT_NODE || _nodeType == NodeType::CDATA_SECTION_NODE;
+      return _nodeType == dom::NodeType::TEXT_NODE || _nodeType == dom::NodeType::CDATA_SECTION_NODE;
     }
 
     KRYS_NODISCARD bool IsCDATASectionNode() const noexcept
     {
-      return _nodeType == NodeType::CDATA_SECTION_NODE;
+      return _nodeType == dom::NodeType::CDATA_SECTION_NODE;
     }
 
     KRYS_NODISCARD bool IsProcessingInstructionNode() const noexcept
     {
-      return _nodeType == NodeType::PROCESSING_INSTRUCTION_NODE;
+      return _nodeType == dom::NodeType::PROCESSING_INSTRUCTION_NODE;
     }
 
     KRYS_NODISCARD bool IsCommentNode() const noexcept
     {
-      return _nodeType == NodeType::COMMENT_NODE;
+      return _nodeType == dom::NodeType::COMMENT_NODE;
     }
 
     KRYS_NODISCARD bool IsShadowRootNode() const noexcept
     {
-      return HasNodeFlag(NodeFlags::IsShadowRoot);
+      return HasNodeFlag(dom::NodeFlags::IsShadowRoot);
     }
 
     KRYS_NODISCARD bool IsUnknownElement() const noexcept
     {
-      return HasNodeFlag(NodeFlags::IsUnknownElement);
+      return HasNodeFlag(dom::NodeFlags::IsUnknownElement);
     }
 
     KRYS_NODISCARD bool IsHTMLElement() const noexcept
     {
-      return HasNodeFlag(NodeFlags::IsHTMLElement);
+      return HasNodeFlag(dom::NodeFlags::IsHTMLElement);
     }
 
     KRYS_NODISCARD bool IsHTMLSlotElement() const noexcept
     {
-      return HasNodeFlag(NodeFlags::IsHTMLSlotElement);
+      return HasNodeFlag(dom::NodeFlags::IsHTMLSlotElement);
     }
 
     KRYS_NODISCARD bool IsSVGElement() const noexcept
     {
-      return HasNodeFlag(NodeFlags::IsSVGElement);
+      return HasNodeFlag(dom::NodeFlags::IsSVGElement);
     }
 
     KRYS_NODISCARD bool IsMathMLElement() const noexcept
     {
-      return HasNodeFlag(NodeFlags::IsMathMLElement);
+      return HasNodeFlag(dom::NodeFlags::IsMathMLElement);
     }
 
     KRYS_NODISCARD bool IsPseudoElement() const noexcept
     {
-      return HasNodeFlag(NodeFlags::IsPseudoElement);
+      return HasNodeFlag(dom::NodeFlags::IsPseudoElement);
     }
 
     /// @brief Whether this is an element with an inline style (`StyledElement`).
     KRYS_NODISCARD bool IsStyledElement() const noexcept
     {
-      return !!(_flags & (NodeFlags::IsHTMLElement | NodeFlags::IsSVGElement | NodeFlags::IsMathMLElement));
+      return !!(
+        _flags
+        & (dom::NodeFlags::IsHTMLElement | dom::NodeFlags::IsSVGElement | dom::NodeFlags::IsMathMLElement));
     }
 
     KRYS_NODISCARD bool IsHTMLUnknownElement() const noexcept
     {
-      return HasNodeFlag(NodeFlags::IsHTMLElement) && HasNodeFlag(NodeFlags::IsUnknownElement);
+      return HasNodeFlag(dom::NodeFlags::IsHTMLElement) && HasNodeFlag(dom::NodeFlags::IsUnknownElement);
     }
 
     KRYS_NODISCARD bool IsSVGUnknownElement() const noexcept
     {
-      return HasNodeFlag(NodeFlags::IsSVGElement) && HasNodeFlag(NodeFlags::IsUnknownElement);
+      return HasNodeFlag(dom::NodeFlags::IsSVGElement) && HasNodeFlag(dom::NodeFlags::IsUnknownElement);
     }
 
     KRYS_NODISCARD bool IsMathMLUnknownElement() const noexcept
     {
-      return HasNodeFlag(NodeFlags::IsMathMLElement) && HasNodeFlag(NodeFlags::IsUnknownElement);
+      return HasNodeFlag(dom::NodeFlags::IsMathMLElement) && HasNodeFlag(dom::NodeFlags::IsUnknownElement);
     }
 
 #pragma endregion
@@ -982,17 +995,17 @@ namespace krys::boo::dom
 
     void MarkAncestorsForInvalidatedStyle() noexcept;
 
-    KRYS_NODISCARD bool HasStyleFlag(NodeStyleFlags flag) const noexcept
+    KRYS_NODISCARD bool HasStyleFlag(dom::NodeStyleFlags flag) const noexcept
     {
       return HasFlag(_styleFlags, flag);
     }
 
-    void SetStyleFlag(NodeStyleFlags flag) noexcept
+    void SetStyleFlag(dom::NodeStyleFlags flag) noexcept
     {
       _styleFlags = _styleFlags | flag;
     }
 
-    void ClearStyleFlags(NodeStyleFlags flags) noexcept
+    void ClearStyleFlags(dom::NodeStyleFlags flags) noexcept
     {
       _styleFlags = _styleFlags & ~flags;
     }
@@ -1001,17 +1014,17 @@ namespace krys::boo::dom
 
 #pragma region Node Flags
 
-    void SetNodeFlag(NodeFlags flag) noexcept
+    void SetNodeFlag(dom::NodeFlags flag) noexcept
     {
       _flags = _flags | flag;
     }
 
-    void ClearNodeFlag(NodeFlags flag) noexcept
+    void ClearNodeFlag(dom::NodeFlags flag) noexcept
     {
       _flags = _flags & ~flag;
     }
 
-    KRYS_NODISCARD bool HasNodeFlag(NodeFlags flag) const noexcept
+    KRYS_NODISCARD bool HasNodeFlag(dom::NodeFlags flag) const noexcept
     {
       return HasFlag(_flags, flag);
     }
@@ -1045,8 +1058,8 @@ namespace krys::boo::dom
   KRYS_NODISCARD std::partial_ordering TreeOrder(const Node &a, const Node &b) noexcept;
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::Node)
-  static bool IsType(const krys::boo::dom::EventTarget &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::Node)
+  static bool IsType(const krys::boo::EventTarget &target) noexcept
   {
     return target.IsNode();
   }

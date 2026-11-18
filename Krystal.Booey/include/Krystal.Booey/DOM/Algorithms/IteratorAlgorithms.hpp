@@ -4,9 +4,13 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Node;
+}
+
+namespace krys::boo::dom
+{
   class NodeIterator;
   struct NodePointer;
   class TraversalBase;

@@ -29,7 +29,7 @@ namespace krys::boo::detail
 
   public:
     using FulfilledCallback = Func<void(WebAnimation &animation)>;
-    using RejectedCallback = Func<void(const dom::Exception &exception)>;
+    using RejectedCallback = Func<void(const Exception &exception)>;
 
   private:
     enum class Status : uint8
@@ -42,7 +42,7 @@ namespace krys::boo::detail
     Status _status {Status::Pending};
     /// @brief Weak, as the animation holds its promises.
     WeakPtr<WebAnimation> _animation;
-    Maybe<dom::Exception> _exception;
+    Maybe<Exception> _exception;
     List<Pair<FulfilledCallback, RejectedCallback>> _callbacks;
 
     explicit AnimationPromise(WebAnimation &animation) noexcept;
@@ -66,7 +66,7 @@ namespace krys::boo::detail
     /// @brief Fulfils the promise with its animation.
     void Resolve() noexcept;
 
-    void Reject(dom::Exception exception) noexcept;
+    void Reject(Exception exception) noexcept;
 
   private:
     void Settle() noexcept;

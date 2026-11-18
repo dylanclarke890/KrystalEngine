@@ -28,7 +28,7 @@
 #include "Krystal.Booey/CSS/TypedOM/Color/CSSColorValue.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief A colour in a colour space given by name (a `color()` function).
   /// @see https://drafts.css-houdini.org/css-typed-om/#csscolor
@@ -42,7 +42,7 @@ namespace krys::boo::css
   public:
     /// @return A `SyntaxError` if a channel is neither a percentage nor `none`.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csscolor-csscolor
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSColor>>
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSColor>>
       Create(CSSKeywordish colorSpace, List<CSSColorPercent> channels, CSSNumberish alpha = 1.0) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csscolor-colorspace
@@ -76,9 +76,9 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSColor)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleValue &styleValue) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSColor)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleValue &styleValue) noexcept
   {
-    return styleValue.StyleValueType() == krys::boo::css::CSSStyleValueType::CSSColor;
+    return styleValue.StyleValueType() == krys::boo::CSSStyleValueType::CSSColor;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

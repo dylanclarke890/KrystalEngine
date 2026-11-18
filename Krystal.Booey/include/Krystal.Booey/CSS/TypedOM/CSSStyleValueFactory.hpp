@@ -32,7 +32,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -40,7 +40,10 @@ namespace krys::boo::dom
 namespace krys::boo::css
 {
   class Value;
+}
 
+namespace krys::boo
+{
   /// @brief A style value, or a string to parse as one or more.
   using CSSStyleValueOrString = Variant<RefPtr<CSSStyleValue>, CSSOMString>;
 
@@ -49,28 +52,29 @@ namespace krys::boo::css
   {
     /// @brief Reifies @p value, a value of @p property (or of no particular property).
     /// @see https://drafts.css-houdini.org/css-typed-om/#reify-as-a-cssstylevalue
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSStyleValue>>
-      ReifyValue(dom::Document &document, const Value &value, Maybe<PropertyId> property) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSStyleValue>>
+      ReifyValue(Document &document, const css::Value &value, Maybe<css::PropertyId> property) noexcept;
 
     /// @brief Parses @p cssText as a value of @p property, then reifies its first iteration, or each of them
     /// if
     /// @p parseMultiple.
     /// @return A `TypeError` if @p property isn't a property or @p cssText doesn't parse as its value.
     /// @see https://drafts.css-houdini.org/css-typed-om/#parse-a-cssstylevalue
-    KRYS_NODISCARD static dom::ExceptionOr<List<Ref<CSSStyleValue>>>
-      ParseStyleValue(dom::Document &document, CSSOMStringView property, CSSOMStringView cssText,
-                      bool parseMultiple) noexcept;
+    KRYS_NODISCARD static ExceptionOr<List<Ref<CSSStyleValue>>> ParseStyleValue(Document &document,
+                                                                                CSSOMStringView property,
+                                                                                CSSOMStringView cssText,
+                                                                                bool parseMultiple) noexcept;
 
     /// @brief A shorthand's value, from its serialisation: an unparsed value if it references variables,
     /// otherwise a generic style value. Null if @p serialisation is.
     KRYS_NODISCARD static RefPtr<CSSStyleValue>
-      ConstructStyleValueForShorthandSerialisation(dom::Document &document,
+      ConstructStyleValueForShorthandSerialisation(Document &document,
                                                    const CSSOMString &serialisation) noexcept;
 
     /// @brief @p values as style values for @p property, the strings among them parsed as each of their
     /// iterations.
-    KRYS_NODISCARD static dom::ExceptionOr<List<Ref<CSSStyleValue>>>
-      ListFromStyleValuesOrStrings(dom::Document &document, CSSOMStringView property,
+    KRYS_NODISCARD static ExceptionOr<List<Ref<CSSStyleValue>>>
+      ListFromStyleValuesOrStrings(Document &document, CSSOMStringView property,
                                    List<CSSStyleValueOrString> values) noexcept;
   };
 }

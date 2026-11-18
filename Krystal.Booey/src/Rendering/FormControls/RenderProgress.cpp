@@ -27,9 +27,9 @@
 
 namespace krys::boo
 {
-  RenderProgress::RenderProgress(html::HTMLElement &element, RenderStyle &&style) noexcept
+  RenderProgress::RenderProgress(HTMLElement &element, RenderStyle &&style) noexcept
       : RenderBlockFlow(Type::Progress, element, krys::move(style)),
-        _position(html::HTMLProgressElement::InvalidPosition),
+        _position(HTMLProgressElement::InvalidPosition),
         _animationTimer(*this, &RenderProgress::AnimationTimerFired)
   {
     krys_debug_assert(IsRenderProgress());
@@ -92,8 +92,8 @@ namespace krys::boo
 
   bool RenderProgress::IsDeterminate() const noexcept
   {
-    return (html::HTMLProgressElement::IndeterminatePosition != Position()
-            && html::HTMLProgressElement::InvalidPosition != Position());
+    return (HTMLProgressElement::IndeterminatePosition != Position()
+            && HTMLProgressElement::InvalidPosition != Position());
   }
 
   void RenderProgress::AnimationTimerFired() noexcept
@@ -131,7 +131,7 @@ namespace krys::boo
     }
   }
 
-  html::HTMLProgressElement *RenderProgress::ProgressElement() const noexcept
+  HTMLProgressElement *RenderProgress::ProgressElement() const noexcept
   {
     auto *element = GetElement();
     if (!element)
@@ -139,12 +139,12 @@ namespace krys::boo
       return nullptr;
     }
 
-    if (auto *progressElement = DynamicDowncast<html::HTMLProgressElement>(*element))
+    if (auto *progressElement = DynamicDowncast<HTMLProgressElement>(*element))
     {
       return progressElement;
     }
 
     krys_debug_assert(dom::TreeQueries::ShadowHost(*element));
-    return Downcast<html::HTMLProgressElement>(dom::TreeQueries::ShadowHost(*element));
+    return Downcast<HTMLProgressElement>(dom::TreeQueries::ShadowHost(*element));
   }
 }

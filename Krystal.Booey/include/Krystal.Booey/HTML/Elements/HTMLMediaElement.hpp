@@ -42,7 +42,7 @@ namespace krys::boo::html
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::CanPlayTypeResult, 3uz);
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlmediaelement
   class HTMLMediaElement : public HTMLElement
@@ -50,7 +50,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLMediaElement);
 
   protected:
-    HTMLMediaElement(dom::Document &document, HTMLElementInterface interface) noexcept;
+    HTMLMediaElement(Document &document, html::HTMLElementInterface interface) noexcept;
 
   public:
     KRYS_NODISCARD bool CanStartSelection() const noexcept override
@@ -58,7 +58,7 @@ namespace krys::boo::html
       return false;
     }
 
-    HTMLMediaElement(dom::Document &document) noexcept;
+    HTMLMediaElement(Document &document) noexcept;
 
     KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override
     {
@@ -69,8 +69,8 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLMediaElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLMediaElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLMediaElement();
   }

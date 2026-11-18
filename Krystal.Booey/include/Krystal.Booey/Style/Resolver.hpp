@@ -45,24 +45,24 @@
 
 namespace krys::boo
 {
+  class BlendingKeyframe;
+  class BlendingKeyframes;
+  class CSSStyleSheet;
   class RenderStyle;
+  class TimingFunction;
 }
 
 namespace krys::boo::css
 {
-  class CSSStyleSheet;
   class MutableStyleProperties;
   class StyleRule;
 }
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
   class Element;
-}
 
-namespace krys::boo
-{
   // MatchOnlyUserAgentRules is used in media queries, where relative units
   // are interpreted according to the document root element style, and styled only
   // from the User Agent Stylesheet rules.
@@ -72,13 +72,6 @@ namespace krys::boo
     MatchAllRulesExcludingSMIL,
     MatchOnlyUserAgentRules,
   };
-}
-
-namespace krys::boo
-{
-  class BlendingKeyframe;
-  class BlendingKeyframes;
-  class TimingFunction;
 }
 
 namespace krys::boo::style
@@ -103,7 +96,7 @@ namespace krys::boo::style
     bool IsSVGUseTreeRoot {false};
   };
 
-  using KeyframesRuleMap = HashMap<css::CSSOMStringAtom, RefPtr<css::KeyframesRule>>;
+  using KeyframesRuleMap = HashMap<CSSOMStringAtom, RefPtr<css::KeyframesRule>>;
 
   /// @brief Resolves the style of the elements of a document or of shadow trees from the rule sets of their
   /// style sheets.
@@ -133,7 +126,7 @@ namespace krys::boo::style
   private:
     class State;
 
-    WeakPtr<dom::Document> _document;
+    WeakPtr<boo::Document> _document;
     const ScopeType _scopeType;
 
     ScopeRuleSets _ruleSets;
@@ -148,38 +141,38 @@ namespace krys::boo::style
     bool _matchAuthorAndUserStyles {true};
     bool _isSharedBetweenShadowTrees {false};
 
-    Resolver(dom::Document &document, ScopeType scopeType) noexcept;
+    Resolver(boo::Document &document, ScopeType scopeType) noexcept;
 
   public:
     ~Resolver() noexcept;
 
-    KRYS_NODISCARD static Ref<Resolver> Create(dom::Document &document, ScopeType scopeType) noexcept;
+    KRYS_NODISCARD static Ref<Resolver> Create(boo::Document &document, ScopeType scopeType) noexcept;
 
     KRYS_NODISCARD UnadjustedStyle
-      UnadjustedStyleForElement(dom::Element &element, const ResolutionContext &context,
+      UnadjustedStyleForElement(Element &element, const ResolutionContext &context,
                                 RuleMatchingBehavior = RuleMatchingBehavior::MatchAllRules) noexcept;
 
     KRYS_NODISCARD UnadjustedStyle UnadjustedStyleForCachedMatchResult(
-      dom::Element &element, const ResolutionContext &context, CachedMatchResult cachedResult) noexcept;
+      Element &element, const ResolutionContext &context, CachedMatchResult cachedResult) noexcept;
 
     KRYS_NODISCARD ResolvedStyle
-      StyleForElement(dom::Element &element, const ResolutionContext &context,
+      StyleForElement(Element &element, const ResolutionContext &context,
                       RuleMatchingBehavior = RuleMatchingBehavior::MatchAllRules) noexcept;
 
     KRYS_NODISCARD Maybe<ResolvedStyle>
-      StyleForPseudoElement(dom::Element &element, const PseudoElementRequest &pseudoElementRequest,
+      StyleForPseudoElement(Element &element, const PseudoElementRequest &pseudoElementRequest,
                             const ResolutionContext &context) noexcept;
 
-    KRYS_NODISCARD dom::Document &Document() noexcept;
+    KRYS_NODISCARD boo::Document &Document() noexcept;
 
-    KRYS_NODISCARD const dom::Document &Document() const noexcept;
+    KRYS_NODISCARD const boo::Document &Document() const noexcept;
 
     KRYS_NODISCARD ScopeType GetScopeType() const noexcept
     {
       return _scopeType;
     }
 
-    void AppendAuthorStyleSheets(Span<const RefPtr<css::CSSStyleSheet>> styleSheets) noexcept;
+    void AppendAuthorStyleSheets(Span<const RefPtr<CSSStyleSheet>> styleSheets) noexcept;
 
     KRYS_NODISCARD ScopeRuleSets &RuleSets() noexcept
     {
@@ -196,34 +189,33 @@ namespace krys::boo::style
       return _mediaQueryEvaluator;
     }
 
-    KRYS_NODISCARD bool IsAnimationNameValid(const css::CSSOMString &name) const noexcept;
+    KRYS_NODISCARD bool IsAnimationNameValid(const CSSOMString &name) const noexcept;
 
     /// @brief Fills @p list with the keyframes of the `@keyframes` rule it names, each with its style.
     /// @return Whether there's such a rule.
-    bool KeyframeStylesForAnimation(dom::Element &element, const RenderStyle &elementStyle,
+    bool KeyframeStylesForAnimation(Element &element, const RenderStyle &elementStyle,
                                     const ResolutionContext &context, BlendingKeyframes &list,
                                     const TimingFunction *defaultTimingFunction) const noexcept;
 
     /// @brief The style of @p elementStyle with @p keyframe's declarations applied; adds the properties it
     /// animates to @p blendingKeyframe.
-    KRYS_NODISCARD UniquePtr<RenderStyle> StyleForKeyframe(dom::Element &element,
-                                                           const RenderStyle &elementStyle,
+    KRYS_NODISCARD UniquePtr<RenderStyle> StyleForKeyframe(Element &element, const RenderStyle &elementStyle,
                                                            const ResolutionContext &context,
                                                            const css::KeyframeRule &keyframe,
                                                            BlendingKeyframe &blendingKeyframe) const noexcept;
 
     KRYS_NODISCARD List<RefPtr<const css::StyleRule>>
-      StyleRulesForElement(const dom::Element *element, uint32 rulesToInclude = AllButEmptyCSSRules) noexcept;
+      StyleRulesForElement(const Element *element, uint32 rulesToInclude = AllButEmptyCSSRules) noexcept;
 
     KRYS_NODISCARD List<RefPtr<const css::StyleRule>>
-      PseudoStyleRulesForElement(const dom::Element *element,
+      PseudoStyleRulesForElement(const Element *element,
                                  const Maybe<PseudoElementRequest> &pseudoElementIdentifier,
                                  uint32 rulesToInclude = AllButEmptyCSSRules) noexcept;
 
-    KRYS_NODISCARD bool HasSelectorForId(const css::CSSOMStringAtom &idValue) const noexcept;
+    KRYS_NODISCARD bool HasSelectorForId(const CSSOMStringAtom &idValue) const noexcept;
 
-    KRYS_NODISCARD bool HasSelectorForAttribute(const dom::Element &element,
-                                                const css::CSSOMStringAtom &attributeName) const noexcept;
+    KRYS_NODISCARD bool HasSelectorForAttribute(const Element &element,
+                                                const CSSOMStringAtom &attributeName) const noexcept;
 
     KRYS_NODISCARD bool HasViewportDependentMediaQueries() const noexcept;
 
@@ -236,13 +228,13 @@ namespace krys::boo::style
     void AddKeyframeStyle(Ref<css::KeyframesRule> &&rule) noexcept;
 
     KRYS_NODISCARD List<Ref<css::KeyframeRule>>
-      KeyframeRulesForName(const css::CSSOMStringAtom &animationName,
+      KeyframeRulesForName(const CSSOMStringAtom &animationName,
                            const TimingFunction *defaultTimingFunction) const noexcept;
 
     /// @brief A style with the initial values and the document's default font (`medium`), for @p element
     /// (which may be null).
-    KRYS_NODISCARD static UniquePtr<RenderStyle> DefaultStyleForElement(const dom::Document &document,
-                                                                        const dom::Element *element) noexcept;
+    KRYS_NODISCARD static UniquePtr<RenderStyle> DefaultStyleForElement(const boo::Document &document,
+                                                                        const Element *element) noexcept;
 
     KRYS_NODISCARD bool UsesFirstLineRules() const noexcept
     {
@@ -281,8 +273,7 @@ namespace krys::boo::style
   private:
     void Initialize() noexcept;
 
-    KRYS_NODISCARD State InitializeStateAndStyle(const dom::Element &element,
-                                                 const ResolutionContext &context,
+    KRYS_NODISCARD State InitializeStateAndStyle(const Element &element, const ResolutionContext &context,
                                                  UniquePtr<RenderStyle> &&initialStyle = {}) noexcept;
 
     KRYS_NODISCARD BuilderContext GetBuilderContext(State &state) const noexcept;

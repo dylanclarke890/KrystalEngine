@@ -49,6 +49,6 @@ namespace krys::boo::style
       default:                 break;
     }
 
-    return css::CSSOMStringAtom {primitiveValue->StringValue()};
+    return CSSOMStringAtom {primitiveValue->StringValue()};
   }
 }

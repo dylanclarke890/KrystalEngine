@@ -37,22 +37,22 @@ namespace krys::boo::tests
       return fixture.TestPage->MainFrame().View()->GetScrollPosition().Y();
     }
 
-    struct WheelCounter : public dom::EventListenerCallback
+    struct WheelCounter : public EventListenerCallback
     {
       int32 Count {0};
 
-      void HandleEvent(dom::Event &) noexcept override
+      void HandleEvent(Event &) noexcept override
       {
         ++Count;
       }
     };
 
     /// @brief A listener that takes over the scrolling: it scrolls the box itself, and cancels the event.
-    struct ScriptScroller : public dom::EventListenerCallback
+    struct ScriptScroller : public EventListenerCallback
     {
-      dom::Element *Box {nullptr};
+      Element *Box {nullptr};
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         Box->SetScrollTop(Box->ScrollTop() + 10);
         event.PreventDefault();

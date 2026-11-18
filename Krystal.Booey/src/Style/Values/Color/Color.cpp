@@ -296,8 +296,8 @@ namespace krys::boo::style
 
   // MARK: - Serialisation
 
-  css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
-                                                   const Color &value) noexcept
+  CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
+                                              const Color &value) noexcept
   {
     return krys::SwitchOn(value, [&](const auto &kind)
                           { return style::SerialisationForCSSTokenization(context, kind); });
@@ -325,7 +325,7 @@ namespace krys::boo::style
     return krys::SwitchOn(value, [&](const auto &color) { return ToStyleColor(color, state); });
   }
 
-  Color ToStyleColor(const css::Color &value, Ref<const dom::Document> document, const RenderStyle &style,
+  Color ToStyleColor(const css::Color &value, Ref<const Document> document, const RenderStyle &style,
                      const css::ToLengthConversionData &conversionData) noexcept
   {
     auto resolutionState = ColorResolutionState {

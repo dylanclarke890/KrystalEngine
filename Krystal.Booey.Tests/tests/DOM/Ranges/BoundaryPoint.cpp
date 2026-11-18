@@ -19,9 +19,9 @@ namespace krys::boo::dom::tests
       Ref<TestElement> ChildB;
 
       PositionTestData()
-          : Document(CreateRef<dom::Document>()), Parent(CreateRef<TestElement>(*Document)),
+          : Document(CreateRef<boo::Document>()), Parent(CreateRef<TestElement>(*Document)),
             ChildA(CreateRef<TestElement>(*Document)), Grandchild(CreateRef<TestElement>(*Document)),
-            Text(CreateRef<dom::Text>(*Document, u8"text")), ChildB(CreateRef<TestElement>(*Document))
+            Text(CreateRef<boo::Text>(*Document, u8"text")), ChildB(CreateRef<TestElement>(*Document))
       {
         REQUIRE_FALSE(Parent->AppendChild(*ChildA).HasException());
         REQUIRE_FALSE(ChildA->AppendChild(*Grandchild).HasException());

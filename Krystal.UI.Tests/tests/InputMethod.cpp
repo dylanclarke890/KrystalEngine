@@ -24,26 +24,26 @@ namespace krys::ui::tests
     }
 
     /// @brief Records the key, composition and input events as "type data", in order.
-    struct EventLog : boo::dom::EventListenerCallback
+    struct EventLog : boo::EventListenerCallback
     {
       List<std::string> Events;
 
-      void HandleEvent(boo::dom::Event &event) noexcept override
+      void HandleEvent(boo::Event &event) noexcept override
       {
         auto type = Narrow(event.Type().View());
         if (event.IsCompositionEvent())
         {
-          Events.push_back(type + " " + Narrow(Downcast<boo::dom::CompositionEvent>(event).Data()));
+          Events.push_back(type + " " + Narrow(Downcast<boo::CompositionEvent>(event).Data()));
         }
         else if (event.IsInputEvent())
         {
-          auto &input = Downcast<boo::dom::InputEvent>(event);
+          auto &input = Downcast<boo::InputEvent>(event);
           Events.push_back(type + " " + Narrow(input.InputType())
                            + (input.IsComposing() ? " composing" : ""));
         }
         else if (event.IsKeyboardEvent())
         {
-          auto &key = Downcast<boo::dom::KeyboardEvent>(event);
+          auto &key = Downcast<boo::KeyboardEvent>(event);
           Events.push_back(type + " " + std::to_string(key.KeyCode()));
         }
       }
@@ -66,12 +66,12 @@ namespace krys::ui::tests
                       boo::event_names::CompositionEnd, boo::event_names::Input, boo::event_names::KeyDown,
                       boo::event_names::KeyPress})
     {
-      view.Document().AddEventListener(boo::dom::DOMStringAtom(type), log, true);
+      view.Document().AddEventListener(boo::DOMStringAtom(type), log, true);
     }
     int32 discarded = 0;
     view.SetCompositionDiscardedHandler([&discarded] { ++discarded; });
 
-    auto &field = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"field"));
+    auto &field = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"field"));
     auto &editor = view.Document().GetEditor();
     auto value = [&field]
     {
@@ -83,9 +83,9 @@ namespace krys::ui::tests
       CHECK_FALSE(view.AcceptsTextInput());
       field.Focus();
       CHECK(view.AcceptsTextInput());
-      Downcast<boo::html::HTMLElement>(*view.Document().GetElementById(u8"password")).Focus();
+      Downcast<boo::HTMLElement>(*view.Document().GetElementById(u8"password")).Focus();
       CHECK_FALSE(view.AcceptsTextInput());
-      Downcast<boo::html::HTMLElement>(*view.Document().GetElementById(u8"plain")).Focus();
+      Downcast<boo::HTMLElement>(*view.Document().GetElementById(u8"plain")).Focus();
       CHECK_FALSE(view.AcceptsTextInput());
     }
 
@@ -197,10 +197,10 @@ namespace krys::ui::tests
 
     SECTION("The page's edits move and end the composition")
     {
-      auto &editable = Downcast<boo::html::HTMLElement>(*view.Document().GetElementById(u8"editable"));
+      auto &editable = Downcast<boo::HTMLElement>(*view.Document().GetElementById(u8"editable"));
       editable.Focus();
       view.SetComposition(u8"ab", {}, 2);
-      auto *text = DynamicDowncast<boo::dom::Text>(editable.FirstChild());
+      auto *text = DynamicDowncast<boo::Text>(editable.FirstChild());
       REQUIRE(text);
       REQUIRE(editor.CompositionNode() == text);
 

@@ -42,7 +42,7 @@ namespace krys::boo::css::tests
     CHECK(ToNarrow(value->ToString()) == "2px var(--a) end");
     auto outOfRange = value->SetItem(5, CSSOMString(u8"x"));
     REQUIRE(outOfRange.HasException());
-    CHECK(outOfRange.GetException().Code() == dom::ExceptionCode::RangeError);
+    CHECK(outOfRange.GetException().Code() == ExceptionCode::RangeError);
 
     // Its CSS value is a variable reference.
     auto cssValue = value->ToCSSValue();
@@ -53,7 +53,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "CSSUnparsedValue: reifying tokens",
                    "[CSS][TypedOM][css-typed-om:reify-a-list-of-component-values]")
   {
-    auto document = CreateRef<dom::Document>();
+    auto document = CreateRef<Document>();
     auto parsed =
       CSSStyleValue::Parse(*document, u8"--x", u8"a var(--b, var(--c, 1px)) calc(var(--d) + 2px)");
     REQUIRE(parsed.HasValue());
@@ -81,7 +81,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "CSSVariableReferenceValue: variable",
                    "[CSS][TypedOM][css-typed-om:cssvariablereferencevalue]")
   {
-    CHECK(CSSVariableReferenceValue::Create(u8"a").GetException().Code() == dom::ExceptionCode::TypeError);
+    CHECK(CSSVariableReferenceValue::Create(u8"a").GetException().Code() == ExceptionCode::TypeError);
 
     auto reference = Reference(u8"--a", CSSUnparsedValue::Create({CSSOMString(u8"1px")}));
     CHECK(ToNarrow(reference->ToString()) == "var(--a,1px)");

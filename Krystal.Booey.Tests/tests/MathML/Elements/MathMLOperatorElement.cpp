@@ -106,7 +106,7 @@ namespace krys::boo::mathml::tests
       u8"<math><mrow><mo id=open>(</mo><mi>x</mi><mo id=plus>+</mo>"
       u8"<mi>y</mi><mo id=close>)</mo></mrow><mo id=alone>-</mo>"
       u8"<mrow><mo id=minus>-</mo><mi>a</mi></mrow><mrow><mo id=sum>∑</mo><mi>i</mi></mrow></math>");
-    auto mo = [&](dom::DOMStringView id) -> MathMLOperatorElement &
+    auto mo = [&](DOMStringView id) -> MathMLOperatorElement &
     {
       return Downcast<MathMLOperatorElement>(*document->GetElementById(id));
     };

@@ -32,10 +32,7 @@
 
 namespace krys::boo
 {
-  namespace mathml
-  {
-    class MathMLSpaceElement;
-  }
+  class MathMLSpaceElement;
 
   /// @brief The renderer of `<mspace>`: an empty box of the element's width, height and depth.
   class RenderMathMLSpace final : public RenderMathMLBlock
@@ -44,11 +41,11 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderMathMLSpace);
 
   public:
-    RenderMathMLSpace(mathml::MathMLSpaceElement &element, RenderStyle &&style) noexcept;
+    RenderMathMLSpace(boo::MathMLSpaceElement &element, RenderStyle &&style) noexcept;
 
     ~RenderMathMLSpace() noexcept override;
 
-    KRYS_NODISCARD mathml::MathMLSpaceElement &GetElement() const noexcept;
+    KRYS_NODISCARD boo::MathMLSpaceElement &GetElement() const noexcept;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept final
     {

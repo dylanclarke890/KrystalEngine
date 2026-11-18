@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
@@ -33,7 +33,7 @@ namespace krys::boo::tests
       explicit FrameFixture(utf8_string &&markup) noexcept : ResolverFixture(krys::move(markup), WithView::No)
       {
         Frame->CreateView({800, 600});
-        Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+        Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
       }
 
       KRYS_NODISCARD LocalFrameView &View() const noexcept
@@ -41,20 +41,20 @@ namespace krys::boo::tests
         return *Frame->View();
       }
 
-      KRYS_NODISCARD const RenderStyle &Rendered(dom::DOMStringView id)
+      KRYS_NODISCARD const RenderStyle &Rendered(DOMStringView id)
       {
         auto *style = ById(id).GetRenderStyle();
         REQUIRE(style);
         return *style;
       }
 
-      KRYS_NODISCARD std::string Width(dom::DOMStringView id)
+      KRYS_NODISCARD std::string Width(DOMStringView id)
       {
         auto &style = Rendered(id);
         return Serialised(style, style.Width());
       }
 
-      KRYS_NODISCARD std::string Height(dom::DOMStringView id)
+      KRYS_NODISCARD std::string Height(DOMStringView id)
       {
         auto &style = Rendered(id);
         return Serialised(style, style.Height());
@@ -96,7 +96,7 @@ namespace krys::boo::tests
     CHECK(view.Size() == IntSize {800, 600});
     CHECK(view.MediaType() == u8"screen");
 
-    frame->SetDocument(ShareRefPtr<dom::Document>(document.get()));
+    frame->SetDocument(ShareRefPtr<Document>(document.get()));
     CHECK(frame->Document() == document.get());
     CHECK(document->Frame() == frame.get());
     CHECK(document->View() == &view);
@@ -121,7 +121,7 @@ namespace krys::boo::tests
     SECTION("Replacing the document")
     {
       auto other = ResolverFixture::Parse(u8"<!DOCTYPE html><p>y</p>");
-      frame->SetDocument(ShareRefPtr<dom::Document>(other.get()));
+      frame->SetDocument(ShareRefPtr<Document>(other.get()));
       CHECK_FALSE(document->Frame());
       CHECK_FALSE(document->HasLivingRenderTree());
       CHECK(other->Frame() == frame.get());
@@ -310,11 +310,11 @@ namespace krys::boo::tests
     document.UpdateStyleIfNeeded();
     CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
 
-    CHECK(document.UpdateLayout() == dom::Document::UpdateLayoutResult::ChangesDone);
+    CHECK(document.UpdateLayout() == Document::UpdateLayoutResult::ChangesDone);
     CHECK_FALSE(layoutContext.IsLayoutPending());
     CHECK(fixture.Rendered(u8"p").GetColor() == Blue);
 
-    CHECK(document.UpdateLayout() == dom::Document::UpdateLayoutResult::NoChange);
+    CHECK(document.UpdateLayout() == Document::UpdateLayoutResult::NoChange);
 
     SECTION("A view that can show scrollbars lays out at once on a resize, to fit them")
     {
@@ -336,7 +336,7 @@ namespace krys::boo::tests
       auto frame = LocalFrame::Create();
       frame->CreateView({800, 600});
       REQUIRE_FALSE(empty->Body()->Remove().HasException());
-      frame->SetDocument(ShareRefPtr<dom::Document>(empty.get()));
+      frame->SetDocument(ShareRefPtr<Document>(empty.get()));
       CHECK_FALSE(empty->ShouldScheduleLayout());
       frame->View()->Resize({1'200, 600});
       CHECK_FALSE(frame->View()->LayoutContext().IsLayoutPending());
@@ -443,7 +443,7 @@ namespace krys::boo::tests
     REQUIRE_FALSE(layoutContext.NeedsLayout());
     auto *renderer = fixture.ById(u8"box").Renderer();
     REQUIRE(renderer);
-    auto canvasContext = Downcast<html::HTMLCanvasElement>(fixture.ById(u8"canvas")).GetContext2d();
+    auto canvasContext = Downcast<HTMLCanvasElement>(fixture.ById(u8"canvas")).GetContext2d();
     REQUIRE(canvasContext);
     canvasContext->FillRect(0, 0, 10, 10);
 

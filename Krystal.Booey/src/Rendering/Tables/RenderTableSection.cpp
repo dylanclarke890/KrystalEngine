@@ -126,19 +126,19 @@ namespace krys::boo
       {
         return true;
       }
-      return Is<html::HTMLFormControlElement>(cellDescendant.GetElement())
-             && !Is<html::HTMLFieldSetElement>(cellDescendant.GetElement());
+      return Is<HTMLFormControlElement>(cellDescendant.GetElement())
+             && !Is<HTMLFieldSetElement>(cellDescendant.GetElement());
     }
   }
 
-  RenderTableSection::RenderTableSection(dom::Element &element, RenderStyle &&style) noexcept
+  RenderTableSection::RenderTableSection(Element &element, RenderStyle &&style) noexcept
       : RenderBox(Type::TableSection, element, krys::move(style))
   {
     SetInline(false);
     krys_debug_assert(IsRenderTableSection());
   }
 
-  RenderTableSection::RenderTableSection(dom::Document &document, RenderStyle &&style) noexcept
+  RenderTableSection::RenderTableSection(Document &document, RenderStyle &&style) noexcept
       : RenderBox(Type::TableSection, document, krys::move(style))
   {
     SetInline(false);

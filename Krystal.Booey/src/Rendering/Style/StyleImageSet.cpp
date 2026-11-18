@@ -78,7 +78,7 @@ namespace krys::boo
     return css::ImageSetValue::Create(krys::move(builder));
   }
 
-  ImageWithScale StyleImageSet::SelectBestFitImage(const dom::Document &document) noexcept
+  ImageWithScale StyleImageSet::SelectBestFitImage(const Document &document) noexcept
   {
     UpdateDeviceScaleFactor(document);
 
@@ -122,7 +122,7 @@ namespace krys::boo
     return result;
   }
 
-  void StyleImageSet::UpdateDeviceScaleFactor(const dom::Document &document) noexcept
+  void StyleImageSet::UpdateDeviceScaleFactor(const Document &document) noexcept
   {
     // FIXME: In the future, we want to take much more than deviceScaleFactor into acount here.
     // All forms of scale should be included: Page::pageScaleFactor(), Frame::pageZoomFactor(),

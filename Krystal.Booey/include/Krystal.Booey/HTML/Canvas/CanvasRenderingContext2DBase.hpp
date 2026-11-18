@@ -65,23 +65,17 @@ namespace krys::boo
 {
   class ByteArrayPixelBuffer;
   class CachedImage;
+  class Document;
   class Filter;
   class GraphicsContext;
+  class HTMLCanvasElement;
+  class HTMLImageElement;
   class ImageBuffer;
   class IntPoint;
   class IntRect;
   class Path;
   class RenderElement;
   class RenderObject;
-}
-
-namespace krys::boo::dom
-{
-  class Document;
-}
-
-namespace krys::boo::svg
-{
   class SVGImageElement;
 }
 
@@ -95,8 +89,6 @@ namespace krys::boo::html
   class CanvasBase;
   class CanvasGradient;
   class CanvasPattern;
-  class HTMLCanvasElement;
-  class HTMLImageElement;
   class ImageData;
   class Path2D;
   class TextMetrics;
@@ -106,7 +98,7 @@ namespace krys::boo::html
   // FIXME: `<video>`, once there are media elements; `ImageBitmap`, `OffscreenCanvas` and video frames aren't
   // planned.
   using CanvasImageSource =
-    Variant<RefPtr<HTMLImageElement>, RefPtr<svg::SVGImageElement>, RefPtr<HTMLCanvasElement>>;
+    Variant<RefPtr<HTMLImageElement>, RefPtr<SVGImageElement>, RefPtr<HTMLCanvasElement>>;
 
   /// @brief The 2D context's state and drawing, shared by the contexts that draw like it.
   /// @see https://html.spec.whatwg.org/#canvasrenderingcontext2d
@@ -197,8 +189,8 @@ namespace krys::boo::html
     {
       State() noexcept;
 
-      dom::DOMString UnparsedStrokeColor;
-      dom::DOMString UnparsedFillColor;
+      DOMString UnparsedStrokeColor;
+      DOMString UnparsedFillColor;
       CanvasStyle StrokeStyle;
       CanvasStyle FillStyle;
       double LineWidth {1};
@@ -221,20 +213,20 @@ namespace krys::boo::html
       boo::TextBaseline TextBaseline {AlphabeticTextBaseline};
       CanvasRenderingContext2DBase::Direction Direction {Direction::Inherit};
 
-      dom::DOMString FilterString;
+      DOMString FilterString;
       style::Filter Filter;
 
-      dom::DOMString LetterSpacing;
-      dom::DOMString WordSpacing;
+      DOMString LetterSpacing;
+      DOMString WordSpacing;
 
-      dom::DOMString UnparsedFont;
+      DOMString UnparsedFont;
       FontProxy Font;
 
       CanvasFontKerning FontKerning {CanvasFontKerning::Auto};
       CanvasFontStretch FontStretch {CanvasFontStretch::Normal};
       CanvasFontVariantCaps FontVariantCaps {CanvasFontVariantCaps::Normal};
       CanvasTextRendering TextRendering {CanvasTextRendering::Auto};
-      dom::DOMString Lang;
+      DOMString Lang;
 
       RefPtr<CanvasLayerContextSwitcher> TargetSwitcher;
 
@@ -246,15 +238,15 @@ namespace krys::boo::html
 
       KRYS_NODISCARD CanvasTextBaseline GetCanvasTextBaseline() const noexcept;
 
-      KRYS_NODISCARD dom::DOMString GlobalCompositeOperationString() const noexcept;
+      KRYS_NODISCARD DOMString GlobalCompositeOperationString() const noexcept;
 
-      KRYS_NODISCARD dom::DOMString ShadowColorString() const noexcept;
+      KRYS_NODISCARD DOMString ShadowColorString() const noexcept;
 
       /// @brief The font, serialised without its line height; `10px sans-serif` until one is set.
-      KRYS_NODISCARD dom::DOMString FontString() const noexcept;
+      KRYS_NODISCARD DOMString FontString() const noexcept;
     };
 
-    using StyleVariant = Variant<dom::DOMString, RefPtr<CanvasGradient>, RefPtr<CanvasPattern>>;
+    using StyleVariant = Variant<DOMString, RefPtr<CanvasGradient>, RefPtr<CanvasPattern>>;
 
   private:
     enum class DidDrawOption : uint8
@@ -356,23 +348,23 @@ namespace krys::boo::html
 
     void SetLineDashOffset(double) noexcept;
 
-    KRYS_NODISCARD const dom::DOMString &LetterSpacing() const noexcept
+    KRYS_NODISCARD const DOMString &LetterSpacing() const noexcept
     {
       return GetState().LetterSpacing;
     }
 
     /// @brief Sets the spacing added after each character, a CSS length; ignored if it isn't one, or uses
     /// viewport, container or line-height units.
-    void SetLetterSpacing(dom::DOMStringView) noexcept;
+    void SetLetterSpacing(DOMStringView) noexcept;
 
-    KRYS_NODISCARD const dom::DOMString &WordSpacing() const noexcept
+    KRYS_NODISCARD const DOMString &WordSpacing() const noexcept
     {
       return GetState().WordSpacing;
     }
 
     /// @brief Sets the spacing added after each space, a CSS length; ignored if it isn't one, or uses
     /// viewport, container or line-height units.
-    void SetWordSpacing(dom::DOMStringView) noexcept;
+    void SetWordSpacing(DOMStringView) noexcept;
 
 #pragma endregion
 
@@ -399,12 +391,12 @@ namespace krys::boo::html
 
     void SetShadowBlur(float) noexcept;
 
-    KRYS_NODISCARD dom::DOMString ShadowColor() const noexcept
+    KRYS_NODISCARD DOMString ShadowColor() const noexcept
     {
       return GetState().ShadowColorString();
     }
 
-    void SetShadowColor(dom::DOMStringView) noexcept;
+    void SetShadowColor(DOMStringView) noexcept;
 
 #pragma endregion
 
@@ -417,12 +409,12 @@ namespace krys::boo::html
 
     void SetGlobalAlpha(double) noexcept;
 
-    KRYS_NODISCARD dom::DOMString GlobalCompositeOperation() const noexcept
+    KRYS_NODISCARD DOMString GlobalCompositeOperation() const noexcept
     {
       return GetState().GlobalCompositeOperationString();
     }
 
-    void SetGlobalCompositeOperation(dom::DOMStringView) noexcept;
+    void SetGlobalCompositeOperation(DOMStringView) noexcept;
 
 #pragma endregion
 
@@ -458,7 +450,7 @@ namespace krys::boo::html
 
     void SetTransform(double m11, double m12, double m21, double m22, double dx, double dy) noexcept;
 
-    dom::ExceptionOr<void> SetTransform(css::DOMMatrix2DInit = {}) noexcept;
+    ExceptionOr<void> SetTransform(css::DOMMatrix2DInit = {}) noexcept;
 
     void ResetTransform() noexcept;
 
@@ -505,7 +497,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD StyleVariant StrokeStyle() const noexcept;
 
-    void SetStrokeStyle(dom::DOMString) noexcept;
+    void SetStrokeStyle(DOMString) noexcept;
 
     void SetStrokeStyle(Ref<CanvasGradient> &&) noexcept;
 
@@ -513,65 +505,65 @@ namespace krys::boo::html
 
     KRYS_NODISCARD StyleVariant FillStyle() const noexcept;
 
-    void SetFillStyle(dom::DOMString) noexcept;
+    void SetFillStyle(DOMString) noexcept;
 
     void SetFillStyle(Ref<CanvasGradient> &&) noexcept;
 
     void SetFillStyle(Ref<CanvasPattern> &&) noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CanvasGradient>>
-      CreateLinearGradient(float x0, float y0, float x1, float y1) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CanvasGradient>> CreateLinearGradient(float x0, float y0, float x1,
+                                                                                float y1) noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CanvasGradient>>
+    KRYS_NODISCARD static ExceptionOr<Ref<CanvasGradient>>
       CreateRadialGradient(float x0, float y0, float r0, float x1, float y1, float r1) noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CanvasGradient>>
-      CreateConicGradient(float angleInRadians, float x, float y) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CanvasGradient>> CreateConicGradient(float angleInRadians, float x,
+                                                                               float y) noexcept;
 
     /// @brief A pattern of @p image repeated as @p repetition says; null if the image isn't ready yet.
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<CanvasPattern>>
-      CreatePattern(CanvasImageSource image, dom::DOMStringView repetition) noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(CanvasImageSource image,
+                                                                    DOMStringView repetition) noexcept;
 
 #pragma endregion
 
 #pragma region CanvasDrawImage
 
-    dom::ExceptionOr<void> DrawImage(CanvasImageSource, float dx, float dy) noexcept;
+    ExceptionOr<void> DrawImage(CanvasImageSource, float dx, float dy) noexcept;
 
-    dom::ExceptionOr<void> DrawImage(CanvasImageSource, float dx, float dy, float dw, float dh) noexcept;
+    ExceptionOr<void> DrawImage(CanvasImageSource, float dx, float dy, float dw, float dh) noexcept;
 
-    dom::ExceptionOr<void> DrawImage(CanvasImageSource, float sx, float sy, float sw, float sh, float dx,
-                                     float dy, float dw, float dh) noexcept;
+    ExceptionOr<void> DrawImage(CanvasImageSource, float sx, float sy, float sw, float sh, float dx, float dy,
+                                float dw, float dh) noexcept;
 
 #pragma endregion
 
 #pragma region CanvasImageData
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<ImageData>> CreateImageData(ImageData &) const noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<ImageData>> CreateImageData(ImageData &) const noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<ImageData>> CreateImageData(int32 width, int32 height,
-                                                                    Maybe<ImageDataSettings>) const noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<ImageData>> CreateImageData(int32 width, int32 height,
+                                                               Maybe<ImageDataSettings>) const noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<ImageData>> GetImageData(int32 sx, int32 sy, int32 sw, int32 sh,
-                                                                 Maybe<ImageDataSettings>) const noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<ImageData>> GetImageData(int32 sx, int32 sy, int32 sw, int32 sh,
+                                                            Maybe<ImageDataSettings>) const noexcept;
 
-    dom::ExceptionOr<void> PutImageData(ImageData &, int32 dx, int32 dy) noexcept;
+    ExceptionOr<void> PutImageData(ImageData &, int32 dx, int32 dy) noexcept;
 
-    dom::ExceptionOr<void> PutImageData(ImageData &, int32 dx, int32 dy, int32 dirtyX, int32 dirtyY,
-                                        int32 dirtyWidth, int32 dirtyHeight) noexcept;
+    ExceptionOr<void> PutImageData(ImageData &, int32 dx, int32 dy, int32 dirtyX, int32 dirtyY,
+                                   int32 dirtyWidth, int32 dirtyHeight) noexcept;
 
 #pragma endregion
 
 #pragma region CanvasFilters
 
-    KRYS_NODISCARD const dom::DOMString &FilterString() const noexcept
+    KRYS_NODISCARD const DOMString &FilterString() const noexcept
     {
       return GetState().FilterString;
     }
 
     /// @brief Sets the filter, a CSS `filter` value; ignored if it isn't one (or is empty).
     /// @see https://html.spec.whatwg.org/#dom-context-2d-filter
-    void SetFilterString(dom::DOMStringView) noexcept;
+    void SetFilterString(DOMStringView) noexcept;
 
 #pragma endregion
 
@@ -611,18 +603,18 @@ namespace krys::boo::html
 
     void SetDirection(Direction) noexcept;
 
-    KRYS_NODISCARD dom::DOMString Font() const noexcept
+    KRYS_NODISCARD DOMString Font() const noexcept
     {
       return GetState().FontString();
     }
 
     /// @see https://html.spec.whatwg.org/#dom-context-2d-lang
-    KRYS_NODISCARD const dom::DOMString &Lang() const noexcept
+    KRYS_NODISCARD const DOMString &Lang() const noexcept
     {
       return GetState().Lang;
     }
 
-    void SetLang(dom::DOMStringView) noexcept;
+    void SetLang(DOMStringView) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-context-2d-fontkerning
     KRYS_NODISCARD CanvasFontKerning FontKerning() const noexcept
@@ -712,8 +704,7 @@ namespace krys::boo::html
 
     /// @brief @p filterString parsed as a filter for this context; empty if it isn't one or filters aren't
     /// supported.
-    KRYS_NODISCARD virtual Maybe<style::Filter>
-      SetFilterStringWithoutUpdatingStyle(dom::DOMStringView) noexcept
+    KRYS_NODISCARD virtual Maybe<style::Filter> SetFilterStringWithoutUpdatingStyle(DOMStringView) noexcept
     {
       return null;
     }
@@ -767,7 +758,7 @@ namespace krys::boo::html
 
     /// @brief @p text with its space characters (tab, line feed, line tabulation, form feed and carriage
     /// return) replaced with U+0020 SPACE, as text preparation does.
-    KRYS_NODISCARD static dom::DOMString NormalizeSpaces(dom::DOMStringView text) noexcept;
+    KRYS_NODISCARD static DOMString NormalizeSpaces(DOMStringView text) noexcept;
 
     /// @brief Sets the font kerning, rendering mode and locale of @p fontDescription from the text drawing
     /// styles, and its width and caps too when @p includeFontLonghands is true.
@@ -812,9 +803,9 @@ namespace krys::boo::html
 
     void RealizeSavesLoop() noexcept;
 
-    void SetStrokeColorImpl(Color &&color, dom::DOMString unparsedColor = {}) noexcept;
+    void SetStrokeColorImpl(Color &&color, DOMString unparsedColor = {}) noexcept;
 
-    void SetFillColorImpl(Color &&color, dom::DOMString unparsedColor = {}) noexcept;
+    void SetFillColorImpl(Color &&color, DOMString unparsedColor = {}) noexcept;
 
     void BeginCompositeLayer() noexcept;
 
@@ -845,38 +836,36 @@ namespace krys::boo::html
     void FullCanvasCompositedDrawImage(T &image, const FloatRect &dest, const FloatRect &src,
                                        CompositeOperator) noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<RefPtr<CanvasPattern>>
+    KRYS_NODISCARD static ExceptionOr<RefPtr<CanvasPattern>>
       CreatePattern(CachedImage &, RenderElement *, bool repeatX, bool repeatY) noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(HTMLImageElement &, bool repeatX,
-                                                                         bool repeatY) noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(HTMLImageElement &, bool repeatX,
+                                                                    bool repeatY) noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(svg::SVGImageElement &, bool repeatX,
-                                                                         bool repeatY) noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(SVGImageElement &, bool repeatX,
+                                                                    bool repeatY) noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(CanvasBase &, bool repeatX,
-                                                                                bool repeatY) noexcept;
+    KRYS_NODISCARD static ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(CanvasBase &, bool repeatX,
+                                                                           bool repeatY) noexcept;
 
-    dom::ExceptionOr<void> DrawImage(HTMLImageElement &, const FloatRect &srcRect,
-                                     const FloatRect &dstRect) noexcept;
+    ExceptionOr<void> DrawImage(HTMLImageElement &, const FloatRect &srcRect,
+                                const FloatRect &dstRect) noexcept;
 
-    dom::ExceptionOr<void> DrawImage(HTMLImageElement &, const FloatRect &srcRect, const FloatRect &dstRect,
-                                     const CompositeOperator &, const BlendMode &) noexcept;
+    ExceptionOr<void> DrawImage(HTMLImageElement &, const FloatRect &srcRect, const FloatRect &dstRect,
+                                const CompositeOperator &, const BlendMode &) noexcept;
 
-    dom::ExceptionOr<void> DrawImage(svg::SVGImageElement &, const FloatRect &srcRect,
-                                     const FloatRect &dstRect) noexcept;
+    ExceptionOr<void> DrawImage(SVGImageElement &, const FloatRect &srcRect,
+                                const FloatRect &dstRect) noexcept;
 
-    dom::ExceptionOr<void> DrawImage(svg::SVGImageElement &, const FloatRect &srcRect,
-                                     const FloatRect &dstRect, const CompositeOperator &,
-                                     const BlendMode &) noexcept;
+    ExceptionOr<void> DrawImage(SVGImageElement &, const FloatRect &srcRect, const FloatRect &dstRect,
+                                const CompositeOperator &, const BlendMode &) noexcept;
 
-    dom::ExceptionOr<void> DrawImage(CanvasBase &, const FloatRect &srcRect,
-                                     const FloatRect &dstRect) noexcept;
+    ExceptionOr<void> DrawImage(CanvasBase &, const FloatRect &srcRect, const FloatRect &dstRect) noexcept;
 
-    dom::ExceptionOr<void> DrawImage(dom::Document &, CachedImage &, const RenderObject *,
-                                     const FloatRect &imageRect, const FloatRect &srcRect,
-                                     const FloatRect &dstRect, const CompositeOperator &, const BlendMode &,
-                                     ImageOrientation = ImageOrientation::Orientation::FromImage) noexcept;
+    ExceptionOr<void> DrawImage(Document &, CachedImage &, const RenderObject *, const FloatRect &imageRect,
+                                const FloatRect &srcRect, const FloatRect &dstRect, const CompositeOperator &,
+                                const BlendMode &,
+                                ImageOrientation = ImageOrientation::Orientation::FromImage) noexcept;
 
     /// @brief Keeps @p imageData's pixels, premultiplied, when they're put over the whole canvas, so that
     /// reading them back soon after needn't read the buffer; null if they aren't.

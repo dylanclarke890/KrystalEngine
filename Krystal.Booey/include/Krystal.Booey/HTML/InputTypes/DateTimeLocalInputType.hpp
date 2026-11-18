@@ -44,7 +44,7 @@ namespace krys::boo::html
     {
     }
 
-    KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
+    KRYS_NODISCARD DOMStringView FormControlType() const noexcept final
     {
       return input_type_names::DateTimeLocal;
     }
@@ -58,19 +58,17 @@ namespace krys::boo::html
 
     KRYS_NODISCARD double ValueAsDate() const noexcept final;
 
-    dom::ExceptionOr<void> SetValueAsDate(double value) const noexcept final;
+    ExceptionOr<void> SetValueAsDate(double value) const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString SanitizeValue(dom::DOMStringView proposedValue) const noexcept final;
+    KRYS_NODISCARD DOMString SanitizeValue(DOMStringView proposedValue) const noexcept final;
 
   private:
-    KRYS_NODISCARD Maybe<DateComponents>
-      ParseToDateComponents(dom::DOMStringView source) const noexcept final;
+    KRYS_NODISCARD Maybe<DateComponents> ParseToDateComponents(DOMStringView source) const noexcept final;
 
     KRYS_NODISCARD Maybe<DateComponents> SetMillisecondToDateComponents(double value) const noexcept final;
 
     // DateTimeEditElementEditControlOwner functions:
-    KRYS_NODISCARD dom::DOMString
-      FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept final;
+    KRYS_NODISCARD DOMString FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept final;
 
     // BaseDateAndTimeInputType functions:
     void SetupLayoutParameters(DateTimeEditElement::LayoutParameters &layoutParameters,

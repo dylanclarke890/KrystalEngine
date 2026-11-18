@@ -391,7 +391,7 @@ namespace krys::boo
   }
 
   RenderPtr<RenderTable>
-    RenderTreeBuilder::Table::CreateAnonymousTableWithStyle(dom::Document &document,
+    RenderTreeBuilder::Table::CreateAnonymousTableWithStyle(Document &document,
                                                             const RenderStyle &style) noexcept
   {
     auto table = CreateRenderer<RenderTable>(
@@ -403,7 +403,7 @@ namespace krys::boo
   }
 
   RenderPtr<RenderTableCell>
-    RenderTreeBuilder::Table::CreateAnonymousTableCellWithStyle(dom::Document &document,
+    RenderTreeBuilder::Table::CreateAnonymousTableCellWithStyle(Document &document,
                                                                 const RenderStyle &style) noexcept
   {
     auto cell = CreateRenderer<RenderTableCell>(
@@ -413,7 +413,7 @@ namespace krys::boo
   }
 
   RenderPtr<RenderTableRow>
-    RenderTreeBuilder::Table::CreateAnonymousTableRowWithStyle(dom::Document &document,
+    RenderTreeBuilder::Table::CreateAnonymousTableRowWithStyle(Document &document,
                                                                const RenderStyle &style) noexcept
   {
     auto row = CreateRenderer<RenderTableRow>(
@@ -423,7 +423,7 @@ namespace krys::boo
   }
 
   RenderPtr<RenderTableSection>
-    RenderTreeBuilder::Table::CreateAnonymousTableSectionWithStyle(dom::Document &document,
+    RenderTreeBuilder::Table::CreateAnonymousTableSectionWithStyle(Document &document,
                                                                    const RenderStyle &style) noexcept
   {
     auto section = CreateRenderer<RenderTableSection>(

@@ -29,12 +29,12 @@
 #include "Krystal.Booey/SVG/Properties/SVGPrimitiveList.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @see https://svgwg.org/svg2-draft/types.html#InterfaceSVGStringList
-  class SVGStringList final : public SVGPrimitiveList<dom::DOMString>
+  class SVGStringList final : public SVGPrimitiveList<DOMString>
   {
-    using Base = SVGPrimitiveList<dom::DOMString>;
+    using Base = SVGPrimitiveList<DOMString>;
     using Base::_items;
     using Base::Base;
 
@@ -44,7 +44,7 @@ namespace krys::boo::svg
       return AdoptRef(*new SVGStringList(owner));
     }
 
-    void Reset(dom::DOMStringView string) noexcept
+    void Reset(DOMStringView string) noexcept
     {
       Parse(string, u8' ');
 
@@ -55,8 +55,8 @@ namespace krys::boo::svg
       }
     }
 
-    bool Parse(dom::DOMStringView, char8 delimiter) noexcept;
+    bool Parse(DOMStringView, char8 delimiter) noexcept;
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override;
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept override;
   };
 }

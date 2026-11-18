@@ -42,9 +42,9 @@
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGAElement::SVGAElement(dom::Document &document) noexcept
+  SVGAElement::SVGAElement(Document &document) noexcept
       : SVGGraphicsElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::A),
         SVGURIReference(this), _target(SVGAnimatedString::Create(this))
   {
@@ -60,20 +60,20 @@ namespace krys::boo::svg
 
   SVGAElement::~SVGAElement() noexcept = default;
 
-  void SVGAElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                     Maybe<dom::DOMStringView> value) noexcept
+  void SVGAElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                     Maybe<DOMStringView> value) noexcept
   {
     if (name == SVGNames::TargetAttr())
     {
-      _target->SetBaseValInternal(dom::DOMString {value.value_or(dom::DOMStringView {})});
+      _target->SetBaseValInternal(DOMString {value.value_or(DOMStringView {})});
       return;
     }
     if (name == SVGNames::RelAttr())
     {
       // Update SVGAElement::relList() if more rel attributes values are supported.
-      auto hasToken = [&](dom::DOMStringView relation)
+      auto hasToken = [&](DOMStringView relation)
       {
-        dom::DOMStringView remaining = value.value_or(dom::DOMStringView {});
+        DOMStringView remaining = value.value_or(DOMStringView {});
         while (!remaining.empty())
         {
           auto start =
@@ -103,7 +103,7 @@ namespace krys::boo::svg
     SVGGraphicsElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGAElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGAElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (SVGURIReference::IsKnownAttribute(attributeName))
     {
@@ -126,7 +126,7 @@ namespace krys::boo::svg
     return CreateRenderer<LegacyRenderSVGTransformableContainer>(*this, krys::move(style));
   }
 
-  void SVGAElement::ActivationBehavior(dom::Event &event) noexcept
+  void SVGAElement::ActivationBehavior(Event &event) noexcept
   {
     if (!css::IsLink(*this))
     {
@@ -135,7 +135,7 @@ namespace krys::boo::svg
     FollowTheHyperlink(event);
   }
 
-  void SVGAElement::DefaultEventHandler(dom::Event &event) noexcept
+  void SVGAElement::DefaultEventHandler(Event &event) noexcept
   {
     if (css::IsLink(*this))
     {
@@ -148,7 +148,7 @@ namespace krys::boo::svg
 
       // A click is followed as the activation behaviour; other buttons' clicks (the middle button opening the
       // link elsewhere) are followed here, and the host decides from the button.
-      if (event.Type() == event_names::AuxClick && dom::MouseEvent::CanTriggerActivationBehavior(event))
+      if (event.Type() == event_names::AuxClick && MouseEvent::CanTriggerActivationBehavior(event))
       {
         FollowTheHyperlink(event);
         return;
@@ -158,7 +158,7 @@ namespace krys::boo::svg
     SVGGraphicsElement::DefaultEventHandler(event);
   }
 
-  void SVGAElement::FollowTheHyperlink(dom::Event &event) noexcept
+  void SVGAElement::FollowTheHyperlink(Event &event) noexcept
   {
     auto url = infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(Href());
 
@@ -173,12 +173,12 @@ namespace krys::boo::svg
       }
     }
 
-    Ref<dom::Document> document = ShareRef(NodeDocument());
+    Ref<Document> document = ShareRef(NodeDocument());
     auto completedURL = document->CompleteURL(url);
 
     auto target = Target();
     if (target.View().empty()
-        && GetAttributeNS(XLinkNames::ShowAttr().NamespaceURI(), XLinkNames::ShowAttr().LocalName())
+        && GetAttributeNS(svg::XLinkNames::ShowAttr().NamespaceURI(), svg::XLinkNames::ShowAttr().LocalName())
              == u8"new")
     {
       target = u8"_blank";
@@ -204,7 +204,7 @@ namespace krys::boo::svg
     return HasEditableStyle();
   }
 
-  bool SVGAElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
+  bool SVGAElement::ChildShouldCreateRenderer(const Node &child) const noexcept
   {
     // http://www.w3.org/2003/01/REC-SVG11-20030114-errata#linking-text-environment
     // The 'a' element may contain any element that its parent may contain, except itself.
@@ -230,7 +230,7 @@ namespace krys::boo::svg
     {
       _relList =
         dom::ElementAlgorithms::CreateDOMTokenList(*this, SVGNames::RelAttr().LocalName(),
-                                                   [](dom::Document &, dom::DOMStringView token)
+                                                   [](Document &, DOMStringView token)
                                                    {
                                                      return text::IsASCIICaselessEqual(token, u8"noreferrer")
                                                             || text::IsASCIICaselessEqual(token, u8"noopener")

@@ -36,7 +36,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class Element;
@@ -71,7 +71,7 @@ namespace krys::boo::css
 
     struct ParentStackFrame
     {
-      const dom::Element *Element {nullptr};
+      const boo::Element *Element {nullptr};
       SmallList<uint32, 4> IdentifierHashes;
     };
 
@@ -82,20 +82,20 @@ namespace krys::boo::css
     CountingBloomFilter<BloomFilterKeyBits> _ancestorIdentifierFilter;
 
   public:
-    void PushParent(const dom::Element *parent) noexcept;
+    void PushParent(const boo::Element *parent) noexcept;
 
-    void PushParentInitializingIfNeeded(const dom::Element &parent) noexcept;
+    void PushParentInitializingIfNeeded(const boo::Element &parent) noexcept;
 
     void PopParent() noexcept;
 
-    void PopParentsUntil(const dom::Element *parent) noexcept;
+    void PopParentsUntil(const boo::Element *parent) noexcept;
 
     KRYS_NODISCARD bool ParentStackIsEmpty() const noexcept
     {
       return _parentStack.empty();
     }
 
-    KRYS_NODISCARD bool ParentStackIsConsistent(const dom::ContainerNode *parentNode) const noexcept;
+    KRYS_NODISCARD bool ParentStackIsConsistent(const ContainerNode *parentNode) const noexcept;
 
     void ParentStackReserveInitialCapacity(size_t initialCapacity) noexcept
     {
@@ -106,14 +106,14 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static Hashes CollectHashes(const Selector &selector) noexcept;
 
-    static void CollectElementIdentifierHashes(const dom::Element &element,
+    static void CollectElementIdentifierHashes(const boo::Element &element,
                                                SmallList<uint32, 4> &identifierHashes) noexcept;
 
     static void CollectSimpleSelectorHash(CollectedSelectorHashes &collectedHashes,
                                           const Selector &selector) noexcept;
 
   private:
-    void InitializeParentStack(const dom::Element &parent) noexcept;
+    void InitializeParentStack(const boo::Element &parent) noexcept;
 
     static void CollectSelectorHashes(CollectedSelectorHashes &collectedHashes,
                                       const Selector &rightmostSelector,

@@ -35,7 +35,7 @@
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -54,13 +54,13 @@ namespace krys::boo::xml
     };
 
   private:
-    WeakPtr<dom::Document> _document;
+    WeakPtr<Document> _document;
     int32 _errorCount {0};
     Maybe<SourceLocation> _lastErrorPosition;
     StringBuilder _errorMessages;
 
   public:
-    explicit XMLErrors(dom::Document &) noexcept;
+    explicit XMLErrors(Document &) noexcept;
 
     void HandleError(Type, const char *message, SourceLocation) noexcept;
 

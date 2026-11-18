@@ -105,8 +105,7 @@ namespace krys::boo::css
     }
   }
 
-  SizesCalcParser::SizesCalcParser(TokenRange range, const dom::Document &document) noexcept
-      : _document(document)
+  SizesCalcParser::SizesCalcParser(TokenRange range, const Document &document) noexcept : _document(document)
   {
     _isValid = CalcToReversePolishNotation(range) && Calculate();
   }

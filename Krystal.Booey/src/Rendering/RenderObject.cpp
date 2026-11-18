@@ -76,9 +76,9 @@
 
 namespace krys::boo
 {
-  RenderObject::RenderObject(Type type, dom::Node &node, EnumSet<TypeFlag> typeFlags,
+  RenderObject::RenderObject(Type type, Node &node, EnumSet<TypeFlag> typeFlags,
                              TypeSpecificFlags typeSpecificFlags) noexcept
-      : _node(node), _typeFlags(Is<dom::Document>(node) ? (typeFlags | TypeFlag::IsAnonymous) : typeFlags),
+      : _node(node), _typeFlags(Is<Document>(node) ? (typeFlags | TypeFlag::IsAnonymous) : typeFlags),
         _type(type), _typeSpecificFlags(typeSpecificFlags)
   {
     krys_debug_assert(!typeFlags.Contains(TypeFlag::IsAnonymous));
@@ -387,8 +387,8 @@ namespace krys::boo
 
   bool RenderObject::IsFieldset() const noexcept
   {
-    auto *element = DynamicDowncast<html::HTMLElement>(GetNode());
-    return element && Is<html::HTMLFieldSetElement>(*element);
+    auto *element = DynamicDowncast<HTMLElement>(GetNode());
+    return element && Is<HTMLFieldSetElement>(*element);
   }
 
   RenderBox *RenderObject::EnclosingScrollableContainer() const noexcept
@@ -494,8 +494,8 @@ namespace krys::boo
 
   bool RenderObject::IsLegend() const noexcept
   {
-    auto *element = DynamicDowncast<html::HTMLElement>(GetNode());
-    return element && Is<html::HTMLLegendElement>(*element);
+    auto *element = DynamicDowncast<HTMLElement>(GetNode());
+    return element && Is<HTMLLegendElement>(*element);
   }
 
   const RenderStyle &RenderObject::FirstLineStyle() const noexcept
@@ -519,23 +519,23 @@ namespace krys::boo
     {
       return false;
     }
-    auto *element = DynamicDowncast<html::HTMLElement>(node);
-    return element && Is<html::HTMLBodyElement>(*element);
+    auto *element = DynamicDowncast<HTMLElement>(node);
+    return element && Is<HTMLBodyElement>(*element);
   }
 
   bool RenderObject::IsPseudoElement() const noexcept
   {
-    return GetNode() && Is<dom::PseudoElement>(*GetNode());
+    return GetNode() && Is<PseudoElement>(*GetNode());
   }
 
-  dom::Node *RenderObject::NonPseudoNode() const noexcept
+  Node *RenderObject::NonPseudoNode() const noexcept
   {
     return IsPseudoElement() ? nullptr : GetNode();
   }
 
-  dom::Element *RenderObject::NonPseudoElement() const noexcept
+  Element *RenderObject::NonPseudoElement() const noexcept
   {
-    return DynamicDowncast<dom::Element>(NonPseudoNode());
+    return DynamicDowncast<Element>(NonPseudoNode());
   }
 
   bool RenderObject::IsSelectionBorder() const noexcept
@@ -563,8 +563,8 @@ namespace krys::boo
 
   bool RenderObject::IsHR() const noexcept
   {
-    auto *element = DynamicDowncast<html::HTMLElement>(GetNode());
-    return element && Is<html::HTMLHRElement>(*element);
+    auto *element = DynamicDowncast<HTMLElement>(GetNode());
+    return element && Is<HTMLHRElement>(*element);
   }
 
 #pragma region Editing
@@ -1162,7 +1162,7 @@ namespace krys::boo
   namespace
   {
     KRYS_NODISCARD List<FloatRect>
-      AbsoluteRectsForRangeInText(const dom::SimpleRange &range, dom::Text &node,
+      AbsoluteRectsForRangeInText(const dom::SimpleRange &range, Text &node,
                                   EnumSet<RenderObject::BoundingRectBehavior> behavior) noexcept
     {
       auto *renderer = node.Renderer();
@@ -1193,7 +1193,7 @@ namespace krys::boo
       return BoundingBoxes(textQuads);
     }
 
-    KRYS_NODISCARD RefPtr<dom::Node> NodeAfter(const dom::BoundaryPoint &point) noexcept
+    KRYS_NODISCARD RefPtr<Node> NodeAfter(const dom::BoundaryPoint &point) noexcept
     {
       if (auto node = point.Container->TraverseToChildAt(static_cast<uint32>(point.Offset + 1)))
       {
@@ -1218,10 +1218,10 @@ namespace krys::boo
 
       bool useVisibleBounds = behavior.Contains(RenderObject::BoundingRectBehavior::UseVisibleBounds);
 
-      HashSet<const dom::Element *> selectedElementsSet;
+      HashSet<const Element *> selectedElementsSet;
       for (auto &node : dom::IntersectingNodesWithDeprecatedZeroOffsetStartQuirk(range))
       {
-        if (auto *element = DynamicDowncast<dom::Element>(node))
+        if (auto *element = DynamicDowncast<Element>(node))
         {
           selectedElementsSet.insert(element);
         }
@@ -1232,7 +1232,7 @@ namespace krys::boo
       // logic is not quite right in other respects, too.
       if (auto lastNode = NodeAfter(range.End))
       {
-        auto *ancestor = DynamicDowncast<dom::Element>(*lastNode);
+        auto *ancestor = DynamicDowncast<Element>(*lastNode);
         if (!ancestor)
         {
           ancestor = lastNode->ParentElement();
@@ -1245,7 +1245,7 @@ namespace krys::boo
 
       for (auto &node : dom::IntersectingNodesWithDeprecatedZeroOffsetStartQuirk(range))
       {
-        auto *element = DynamicDowncast<dom::Element>(node);
+        auto *element = DynamicDowncast<Element>(node);
         if (element && selectedElementsSet.contains(element)
             && (useVisibleBounds || !node.ParentElement()
                 || !selectedElementsSet.contains(node.ParentElement())))
@@ -1286,7 +1286,7 @@ namespace krys::boo
           auto boxes = BoundingBoxes(elementQuads);
           rects.insert(rects.end(), boxes.begin(), boxes.end());
         }
-        else if (auto *textNode = DynamicDowncast<dom::Text>(node))
+        else if (auto *textNode = DynamicDowncast<Text>(node))
         {
           if (auto *renderer = textNode->Renderer())
           {
@@ -1474,7 +1474,7 @@ namespace krys::boo
   }
 
   VisibleInViewportState
-    RenderObject::CachedImageListener::ImageVisibleInViewport(const dom::Document &document) const noexcept
+    RenderObject::CachedImageListener::ImageVisibleInViewport(const Document &document) const noexcept
   {
     return _renderer.ImageVisibleInViewport(document);
   }
@@ -2222,7 +2222,7 @@ namespace krys::boo
     delete this;
   }
 
-  dom::Document &RenderObject::GetDocument() const noexcept
+  Document &RenderObject::GetDocument() const noexcept
   {
     return _node.NodeDocument();
   }
@@ -2608,7 +2608,7 @@ namespace krys::boo
     return inside;
   }
 
-  dom::Node *RenderObject::NodeForHitTest() const noexcept
+  Node *RenderObject::NodeForHitTest() const noexcept
   {
     auto *node = GetNode();
     // If we hit the anonymous renderers inside generated content we should

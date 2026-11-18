@@ -136,7 +136,7 @@ namespace krys::boo
       return end - startOffset;
     }
 
-    KRYS_NODISCARD utf8_string ConvertCase(utf8_stringview text, const css::CSSOMStringAtom &locale,
+    KRYS_NODISCARD utf8_string ConvertCase(utf8_stringview text, const CSSOMStringAtom &locale,
                                            bool toUpper) noexcept
     {
       std::string localeName;
@@ -438,7 +438,7 @@ namespace krys::boo
     return modified;
   }
 
-  RenderText::RenderText(Type type, dom::Node &node, utf8_string text) noexcept
+  RenderText::RenderText(Type type, Node &node, utf8_string text) noexcept
       : RenderObject(type, node, TypeFlag::IsText, {}), _text(krys::move(text)),
         _containsOnlyASCII(text::IsASCII(utf8_stringview {_text}))
   {
@@ -446,13 +446,13 @@ namespace krys::boo
     krys_debug_assert(IsRenderText());
   }
 
-  RenderText::RenderText(Type type, dom::Text &textNode, utf8_string text) noexcept
-      : RenderText(type, static_cast<dom::Node &>(textNode), krys::move(text))
+  RenderText::RenderText(Type type, boo::Text &textNode, utf8_string text) noexcept
+      : RenderText(type, static_cast<Node &>(textNode), krys::move(text))
   {
   }
 
-  RenderText::RenderText(Type type, dom::Document &document, utf8_string text) noexcept
-      : RenderText(type, static_cast<dom::Node &>(document), krys::move(text))
+  RenderText::RenderText(Type type, Document &document, utf8_string text) noexcept
+      : RenderText(type, static_cast<Node &>(document), krys::move(text))
   {
   }
 
@@ -546,9 +546,9 @@ namespace krys::boo
     _fontCodePath = FontCascade::CharacterRangeCodePath(_text);
   }
 
-  dom::Text *RenderText::TextNode() const noexcept
+  boo::Text *RenderText::TextNode() const noexcept
   {
-    return Downcast<dom::Text>(GetNode());
+    return Downcast<boo::Text>(GetNode());
   }
 
   bool RenderText::ComputeUseBackslashAsYenSymbol() noexcept

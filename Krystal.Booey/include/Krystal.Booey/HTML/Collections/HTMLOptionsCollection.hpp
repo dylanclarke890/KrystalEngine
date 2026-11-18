@@ -27,13 +27,16 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLElement;
   class HTMLOptGroupElement;
   class HTMLOptionElement;
   class HTMLSelectElement;
+}
 
+namespace krys::boo::html
+{
   /// @brief A select's `options`: the options in its list of options.
   /// @see https://html.spec.whatwg.org/#htmloptionscollection
   class HTMLOptionsCollection final : public dom::LiveHTMLCollection
@@ -54,16 +57,16 @@ namespace krys::boo::html
     }
 
     /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-length
-    dom::ExceptionOr<void> Length(uint32 length) noexcept;
+    ExceptionOr<void> Length(uint32 length) noexcept;
 
     using LiveHTMLCollection::Length;
 
     /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-setter
-    dom::ExceptionOr<void> SetItem(uint32 index, HTMLOptionElement *option) noexcept;
+    ExceptionOr<void> SetItem(uint32 index, HTMLOptionElement *option) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-add
-    dom::ExceptionOr<void> Add(const OptionOrOptGroupElement &element,
-                               const Maybe<HTMLElementOrInt> &before = {}) noexcept;
+    ExceptionOr<void> Add(const OptionOrOptGroupElement &element,
+                          const Maybe<HTMLElementOrInt> &before = {}) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-remove
     void Remove(int32 index) noexcept;

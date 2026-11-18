@@ -21,14 +21,14 @@ namespace krys::boo::svg::tests
     CHECK(length->UnitType() == SVGLength::SVG_LENGTHTYPE_UNKNOWN);
     CHECK(length->ValueAsString() == u8"3ch");
 
-    CHECK(length->SetValueAsString(u8"3 px").GetException().Code() == dom::ExceptionCode::SyntaxError);
+    CHECK(length->SetValueAsString(u8"3 px").GetException().Code() == ExceptionCode::SyntaxError);
 
     REQUIRE_FALSE(length->NewValueSpecifiedUnits(SVGLength::SVG_LENGTHTYPE_PX, 12).HasException());
     CHECK(length->ValueAsString() == u8"12px");
     CHECK(length->NewValueSpecifiedUnits(SVGLength::SVG_LENGTHTYPE_UNKNOWN, 1).GetException().Code()
-          == dom::ExceptionCode::NotSupportedError);
+          == ExceptionCode::NotSupportedError);
     CHECK(length->NewValueSpecifiedUnits(SVGLength::SVG_LENGTHTYPE_PC + 1, 1).GetException().Code()
-          == dom::ExceptionCode::NotSupportedError);
+          == ExceptionCode::NotSupportedError);
 
     auto value = length->ValueForBindings();
     REQUIRE_FALSE(value.HasException());
@@ -39,7 +39,7 @@ namespace krys::boo::svg::tests
 
     REQUIRE_FALSE(length->ConvertToSpecifiedUnits(SVGLength::SVG_LENGTHTYPE_PT).HasException());
     CHECK(length->ValueAsString() == u8"18pt");
-    CHECK(length->ConvertToSpecifiedUnits(0).GetException().Code() == dom::ExceptionCode::NotSupportedError);
+    CHECK(length->ConvertToSpecifiedUnits(0).GetException().Code() == ExceptionCode::NotSupportedError);
 
     REQUIRE_FALSE(length->SetValueInSpecifiedUnits(9).HasException());
     CHECK(length->ValueAsString() == u8"9pt");
@@ -67,11 +67,11 @@ namespace krys::boo::svg::tests
 
     // The owner marks the property dirty; synchronising gives the attribute's new value once.
     length->SetDirty();
-    CHECK(length->Synchronize() == dom::DOMString(u8"2mm"));
+    CHECK(length->Synchronize() == DOMString(u8"2mm"));
     CHECK_FALSE(length->Synchronize());
 
     auto readOnly = SVGLength::Create(&owner, SVGPropertyAccess::ReadOnly);
-    auto code = dom::ExceptionCode::NoModificationAllowedError;
+    auto code = ExceptionCode::NoModificationAllowedError;
     CHECK(readOnly->SetValueAsString(u8"1px").GetException().Code() == code);
     CHECK(readOnly->SetValueForBindings(1).GetException().Code() == code);
     CHECK(readOnly->SetValueInSpecifiedUnits(1).GetException().Code() == code);

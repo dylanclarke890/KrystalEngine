@@ -70,9 +70,8 @@ namespace krys::boo::style::tests
     SECTION("Elements with random() values")
     {
       (void)x.LookupCSSRandomBaseValue(
-        {},
-        css::calc::RandomCachingKey {Variant<css::calc::Random::SharingOptions::Auto, css::CSSOMStringAtom> {
-          css::CSSOMStringAtom(u8"k")}});
+        {}, css::calc::RandomCachingKey {
+              Variant<css::calc::Random::SharingOptions::Auto, CSSOMStringAtom> {CSSOMStringAtom(u8"k")}});
       CHECK_FALSE(MatchedDeclarationsCache::IsCacheable(x, *style, *parentStyle));
     }
   }

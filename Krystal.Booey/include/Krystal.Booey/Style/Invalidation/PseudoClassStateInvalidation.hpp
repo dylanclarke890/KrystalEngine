@@ -21,8 +21,7 @@ namespace krys::boo::style
   /// @param oldValue The value before the change, or null if the attribute is being added.
   /// @param newValue The value after the change, or null if the attribute is being removed.
   void InvalidatePseudoClassesForAttributeChange(PseudoClassChangeInvalidations &invalidations,
-                                                 dom::Element &element,
-                                                 const dom::QualifiedName &attributeName,
-                                                 Maybe<dom::DOMStringView> oldValue,
-                                                 Maybe<dom::DOMStringView> newValue) noexcept;
+                                                 Element &element, const QualifiedName &attributeName,
+                                                 Maybe<DOMStringView> oldValue,
+                                                 Maybe<DOMStringView> newValue) noexcept;
 }

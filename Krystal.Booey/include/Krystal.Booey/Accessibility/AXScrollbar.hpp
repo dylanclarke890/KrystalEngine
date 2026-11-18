@@ -52,7 +52,7 @@ namespace krys::boo
       return *_scrollbar;
     }
 
-    KRYS_NODISCARD dom::Document *GetDocument() const noexcept override;
+    KRYS_NODISCARD Document *GetDocument() const noexcept override;
 
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
 

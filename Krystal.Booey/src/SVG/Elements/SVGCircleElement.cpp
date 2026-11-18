@@ -24,9 +24,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGCircleElement::SVGCircleElement(dom::Document &document) noexcept
+  SVGCircleElement::SVGCircleElement(Document &document) noexcept
       : SVGGeometryElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Circle),
         _cx(SVGAnimatedLength::Create(this, SVGLengthMode::Width)),
         _cy(SVGAnimatedLength::Create(this, SVGLengthMode::Height)),
@@ -42,7 +42,7 @@ namespace krys::boo::svg
     }
   }
 
-  SVGAnimatedProperty *SVGCircleElement::PropertyForAttribute(const dom::QualifiedName &name) const noexcept
+  SVGAnimatedProperty *SVGCircleElement::PropertyForAttribute(const QualifiedName &name) const noexcept
   {
     if (name == SVGNames::CxAttr())
     {
@@ -59,11 +59,11 @@ namespace krys::boo::svg
     return nullptr;
   }
 
-  void SVGCircleElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                          Maybe<dom::DOMStringView> value) noexcept
+  void SVGCircleElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                          Maybe<DOMStringView> value) noexcept
   {
     auto parseError = SVGParsingError::None;
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::CxAttr())
     {
@@ -83,7 +83,7 @@ namespace krys::boo::svg
     SVGGeometryElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGCircleElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGCircleElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {

@@ -10,7 +10,7 @@ namespace krys::boo::html::tests
 
   namespace
   {
-    KRYS_NODISCARD std::string Str(dom::DOMStringView text) noexcept
+    KRYS_NODISCARD std::string Str(DOMStringView text) noexcept
     {
       return std::string(reinterpret_cast<const char *>(text.data()), text.size());
     }
@@ -44,7 +44,7 @@ namespace krys::boo::html::tests
 
     // The default value is the child text content, not the descendant text content.
     auto span = fixture.Document->CreateElement(u8"span").ReleaseValue();
-    REQUIRE_FALSE(span->AppendChild(*CreateRef<dom::Text>(*fixture.Document, u8"x")).HasException());
+    REQUIRE_FALSE(span->AppendChild(*CreateRef<Text>(*fixture.Document, u8"x")).HasException());
     REQUIRE_FALSE(textarea.AppendChild(*span).HasException());
     CHECK(Str(textarea.DefaultValue()) == "a\nb");
 

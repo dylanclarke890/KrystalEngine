@@ -24,26 +24,33 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSStyleProperties;
-  class NestedDeclarationsRule;
   class StyleRuleCSSStyleProperties;
+}
 
+namespace krys::boo::css
+{
+  class NestedDeclarationsRule;
+}
+
+namespace krys::boo
+{
   /// @brief Declarations that follow nested rules, exposed to scripts.
   /// @see https://drafts.csswg.org/css-nesting/#the-cssnestrule
   class CSSNestedDeclarations final : public CSSRule
   {
   private:
-    Ref<NestedDeclarationsRule> _styleRule;
+    Ref<css::NestedDeclarationsRule> _styleRule;
     RefPtr<StyleRuleCSSStyleProperties> _propertiesCSSOMWrapper;
 
-    CSSNestedDeclarations(NestedDeclarationsRule &rule, CSSStyleSheet *parent) noexcept;
+    CSSNestedDeclarations(css::NestedDeclarationsRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
     ~CSSNestedDeclarations() noexcept override;
 
-    KRYS_NODISCARD static Ref<CSSNestedDeclarations> Create(NestedDeclarationsRule &rule,
+    KRYS_NODISCARD static Ref<CSSNestedDeclarations> Create(css::NestedDeclarationsRule &rule,
                                                             CSSStyleSheet *sheet) noexcept;
 
     KRYS_NODISCARD CSSStyleProperties &Style() noexcept;
@@ -51,17 +58,17 @@ namespace krys::boo::css
   private:
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
-    void Reattach(Rule &rule) noexcept final;
+    void Reattach(css::Rule &rule) noexcept final;
 
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::NestedDeclarations;
+      return css::RuleType::NestedDeclarations;
     }
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSNestedDeclarations)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSNestedDeclarations)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::NestedDeclarations;
   }

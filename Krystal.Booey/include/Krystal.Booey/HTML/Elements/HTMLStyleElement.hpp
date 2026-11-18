@@ -26,13 +26,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Internals/InlineStyleSheetOwner.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSStyleSheet;
-}
 
-namespace krys::boo::html
-{
   /// @see https://html.spec.whatwg.org/#htmlstyleelement
   class HTMLStyleElement : public HTMLElement
   {
@@ -40,13 +37,13 @@ namespace krys::boo::html
 
   private:
     UniquePtr<dom::DOMTokenList> _blocking;
-    InlineStyleSheetOwner _styleSheetOwner;
+    html::InlineStyleSheetOwner _styleSheetOwner;
     bool _loadedSheet {false};
     bool _createdByParser {false};
     bool _isRenderBlocking {false};
 
   public:
-    HTMLStyleElement(dom::Document &document) noexcept;
+    HTMLStyleElement(Document &document) noexcept;
 
     ~HTMLStyleElement() noexcept override;
 
@@ -59,10 +56,10 @@ namespace krys::boo::html
     void Disabled(bool value) const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-style-media
-    KRYS_NODISCARD dom::DOMString Media() const noexcept;
+    KRYS_NODISCARD DOMString Media() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-style-media
-    void Media(dom::DOMString value) noexcept;
+    void Media(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-style-blocking
     KRYS_NODISCARD dom::DOMTokenList &Blocking() noexcept;
@@ -72,10 +69,10 @@ namespace krys::boo::html
 #pragma region HTMLStyleElement Obsolete members - https://html.spec.whatwg.org/#HTMLStyleElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-style-type
-    KRYS_NODISCARD dom::DOMString Type() const noexcept;
+    KRYS_NODISCARD DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-style-type
-    void Type(dom::DOMString value) noexcept;
+    void Type(DOMString value) noexcept;
 
 #pragma endregion
 
@@ -83,18 +80,17 @@ namespace krys::boo::html
 
     /// @brief The associated CSS style sheet, if any.
     /// @see https://drafts.csswg.org/cssom/#dom-linkstyle-sheet
-    KRYS_NODISCARD css::CSSStyleSheet *Sheet() const noexcept;
+    KRYS_NODISCARD CSSStyleSheet *Sheet() const noexcept;
 
 #pragma endregion
 
   protected:
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
     void OnInsert() noexcept override;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
     void OnChildrenChanged() noexcept override;
 
@@ -117,14 +113,14 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLStyleElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLStyleElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLStyleElement();
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    auto *element = krys::DynamicDowncast<krys::boo::html::HTMLElement>(target);
+    auto *element = krys::DynamicDowncast<krys::boo::HTMLElement>(target);
     return element && element->IsHTMLStyleElement();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

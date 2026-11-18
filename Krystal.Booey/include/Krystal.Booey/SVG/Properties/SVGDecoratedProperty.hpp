@@ -30,7 +30,7 @@
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief A value that the DOM sees as a `TDecoration` (an enumeration's `unsigned short`) and that is kept
   /// as another type.
@@ -59,7 +59,7 @@ namespace krys::boo::svg
       return ValueInternal();
     }
 
-    KRYS_NODISCARD virtual dom::DOMString ValueAsString() const noexcept = 0;
+    KRYS_NODISCARD virtual DOMString ValueAsString() const noexcept = 0;
 
     KRYS_NODISCARD virtual Ref<SVGDecoratedProperty<TDecoration>> Clone() noexcept = 0;
   };

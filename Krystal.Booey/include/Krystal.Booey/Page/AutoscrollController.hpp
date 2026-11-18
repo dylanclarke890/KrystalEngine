@@ -31,14 +31,10 @@
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
-{
-  class Node;
-}
-
 namespace krys::boo
 {
   class LocalFrame;
+  class Node;
   class PlatformMouseEvent;
   class RenderBox;
   class RenderObject;
@@ -96,7 +92,7 @@ namespace krys::boo
 
     /// @brief A drag and drop moved over @p targetNode at @p eventPosition (in the window): scrolls the box
     /// it's near the edge of, after a moment.
-    void UpdateDragAndDrop(dom::Node *targetNode, const IntPoint &eventPosition,
+    void UpdateDragAndDrop(Node *targetNode, const IntPoint &eventPosition,
                            MonotonicTime::duration eventTime) noexcept;
 
     void StopAutoscrollTimer(bool rendererIsBeingDestroyed = false) noexcept;

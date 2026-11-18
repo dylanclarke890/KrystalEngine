@@ -11,7 +11,7 @@ namespace krys::boo::css::tests
     "EffectiveLang: xml:lang anywhere, lang on HTML and SVG elements, then ancestors and the pragma",
     "[CSS][Selectors][SelectorCheckerTestFunctions][html:language][html:attr-lang][html:attr-xml-lang]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto html = document->CreateElement(u8"html").ReleaseValue();
     REQUIRE_FALSE(document->AppendChild(*html).HasException());
 

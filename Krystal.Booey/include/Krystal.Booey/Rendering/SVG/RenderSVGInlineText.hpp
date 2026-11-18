@@ -44,13 +44,13 @@ namespace krys::boo
     RenderTextLineBoxes _legacyLineBoxes;
 
   public:
-    RenderSVGInlineText(dom::Text &, const utf8_string &) noexcept;
+    RenderSVGInlineText(boo::Text &, const utf8_string &) noexcept;
 
     ~RenderSVGInlineText() noexcept override;
 
-    KRYS_NODISCARD dom::Text &TextNode() const noexcept
+    KRYS_NODISCARD boo::Text &TextNode() const noexcept
     {
-      return Downcast<dom::Text>(NodeForNonAnonymous());
+      return Downcast<boo::Text>(NodeForNonAnonymous());
     }
 
     KRYS_NODISCARD bool CharacterStartsNewTextChunk(int32 position) const noexcept;

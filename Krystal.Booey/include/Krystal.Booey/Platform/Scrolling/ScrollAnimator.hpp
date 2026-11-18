@@ -67,8 +67,8 @@ namespace krys::boo
 
     Maybe<ScrollSnapOffsetsInfo> _snapOffsetsInfo;
     /// @brief What the area is snapped to on each axis, followed when layout moves the snap positions.
-    List<WeakPtr<dom::Element>> _horizontalSnapTargets;
-    List<WeakPtr<dom::Element>> _verticalSnapTargets;
+    List<WeakPtr<Element>> _horizontalSnapTargets;
+    List<WeakPtr<Element>> _verticalSnapTargets;
 
   public:
     explicit ScrollAnimator(ScrollableArea &scrollableArea) noexcept;

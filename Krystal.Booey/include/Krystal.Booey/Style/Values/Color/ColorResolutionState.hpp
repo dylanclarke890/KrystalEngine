@@ -32,12 +32,8 @@
 
 namespace krys::boo
 {
-  class RenderStyle;
-}
-
-namespace krys::boo::dom
-{
   class Document;
+  class RenderStyle;
 }
 
 namespace krys::boo::style
@@ -45,7 +41,7 @@ namespace krys::boo::style
   /// @brief Used to resolve a `css::Color` to a `style::Color` during style building.
   struct ColorResolutionState
   {
-    Ref<const dom::Document> Document;
+    Ref<const boo::Document> Document;
     const RenderStyle &Style;
     css::ToLengthConversionData ConversionData;
     uint32 NestingLevel {0};

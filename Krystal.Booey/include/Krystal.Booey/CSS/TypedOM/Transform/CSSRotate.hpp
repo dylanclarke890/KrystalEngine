@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Transform/CSSTransformComponent.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief A `rotate()`, `rotate3d()` or single-axis rotation.
   /// @see https://drafts.css-houdini.org/css-typed-om/#cssrotate
@@ -43,17 +43,17 @@ namespace krys::boo::css
     /// @brief A 3D rotation by @p angle about the vector (@p x, @p y, @p z).
     /// @return A `TypeError` if @p angle isn't an angle, or @p x, @p y or @p z isn't a number.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssrotate-cssrotate-x-y-z-angle
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSRotate>>
-      Create(CSSNumberish x, CSSNumberish y, CSSNumberish z, Ref<CSSNumericValue> angle) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSRotate>> Create(CSSNumberish x, CSSNumberish y, CSSNumberish z,
+                                                             Ref<CSSNumericValue> angle) noexcept;
 
     /// @brief A 2D rotation by @p angle.
     /// @return A `TypeError` if @p angle isn't an angle.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssrotate-cssrotate-angle
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSRotate>> Create(Ref<CSSNumericValue> angle) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSRotate>> Create(Ref<CSSNumericValue> angle) noexcept;
 
     /// @brief Reifies a rotation function.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSRotate>> Create(const FunctionValue &function,
-                                                                  dom::Document &document) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSRotate>> Create(const css::FunctionValue &function,
+                                                             Document &document) noexcept;
 
     KRYS_NODISCARD const CSSNumericValue &X() const noexcept
     {
@@ -76,27 +76,27 @@ namespace krys::boo::css
     }
 
     /// @return A `TypeError` if @p x isn't a number.
-    dom::ExceptionOr<void> SetX(CSSNumberish x) noexcept;
+    ExceptionOr<void> SetX(CSSNumberish x) noexcept;
 
     /// @return A `TypeError` if @p y isn't a number.
-    dom::ExceptionOr<void> SetY(CSSNumberish y) noexcept;
+    ExceptionOr<void> SetY(CSSNumberish y) noexcept;
 
     /// @return A `TypeError` if @p z isn't a number.
-    dom::ExceptionOr<void> SetZ(CSSNumberish z) noexcept;
+    ExceptionOr<void> SetZ(CSSNumberish z) noexcept;
 
     /// @return A `TypeError` if @p angle isn't an angle.
-    dom::ExceptionOr<void> SetAngle(Ref<CSSNumericValue> angle) noexcept;
+    ExceptionOr<void> SetAngle(Ref<CSSNumericValue> angle) noexcept;
 
     void Serialise(StringBuilder &builder) const noexcept final;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<DOMMatrix>> ToMatrix() const noexcept final;
+    KRYS_NODISCARD ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
 
     KRYS_NODISCARD CSSTransformType TransformType() const noexcept final
     {
       return CSSTransformType::Rotate;
     }
 
-    KRYS_NODISCARD RefPtr<Value> ToCSSValue() const noexcept final;
+    KRYS_NODISCARD RefPtr<css::Value> ToCSSValue() const noexcept final;
 
   private:
     CSSRotate(bool is2D, Ref<CSSNumericValue> x, Ref<CSSNumericValue> y, Ref<CSSNumericValue> z,
@@ -104,9 +104,9 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSRotate)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSTransformComponent &component) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSRotate)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSTransformComponent &component) noexcept
   {
-    return component.TransformType() == krys::boo::css::CSSTransformType::Rotate;
+    return component.TransformType() == krys::boo::CSSTransformType::Rotate;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

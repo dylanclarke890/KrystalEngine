@@ -96,7 +96,7 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#close-request-steps
   // (Run from the Escape keydown's default action, so once it fired uncanceled.)
-  bool CloseWatcherManager::EscapeKeyHandler(dom::KeyboardEvent &event) noexcept
+  bool CloseWatcherManager::EscapeKeyHandler(KeyboardEvent &event) noexcept
   {
     // 1. If document's fullscreen element is not null: fully exit fullscreen given document's node
     //    navigable's top-level traversable's active document, and return.

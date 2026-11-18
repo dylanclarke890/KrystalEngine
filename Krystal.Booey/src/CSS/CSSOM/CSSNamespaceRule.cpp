@@ -28,16 +28,16 @@
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSNamespaceRule::CSSNamespaceRule(NamespaceRule &namespaceRule, CSSStyleSheet *parent) noexcept
+  CSSNamespaceRule::CSSNamespaceRule(css::NamespaceRule &namespaceRule, CSSStyleSheet *parent) noexcept
       : CSSRule(parent), _namespaceRule(ShareRef(namespaceRule))
   {
   }
 
   CSSNamespaceRule::~CSSNamespaceRule() noexcept = default;
 
-  Ref<CSSNamespaceRule> CSSNamespaceRule::Create(NamespaceRule &rule, CSSStyleSheet *sheet) noexcept
+  Ref<CSSNamespaceRule> CSSNamespaceRule::Create(css::NamespaceRule &rule, CSSStyleSheet *sheet) noexcept
   {
     return AdoptRef(*new CSSNamespaceRule(rule, sheet));
   }
@@ -61,14 +61,14 @@ namespace krys::boo::css
     result.Append(u8"@namespace ");
     if (!prefixIsEmpty)
     {
-      SerialiseIdentifier(prefix.ToString(), result);
+      css::SerialiseIdentifier(prefix.ToString(), result);
     }
     result.Append(prefixIsEmpty ? u8"" : u8" ", u8"url(");
-    result.Append(SerialiseString(NamespaceURI().ToString()), u8");");
+    result.Append(css::SerialiseString(NamespaceURI().ToString()), u8");");
     return krys::move(result).ToString();
   }
 
-  void CSSNamespaceRule::Reattach(Rule &) noexcept
+  void CSSNamespaceRule::Reattach(css::Rule &) noexcept
   {
   }
 }

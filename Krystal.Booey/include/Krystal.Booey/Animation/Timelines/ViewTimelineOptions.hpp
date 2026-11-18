@@ -9,20 +9,16 @@
 
 namespace krys::boo
 {
-  namespace dom
-  {
-    class Element;
-  }
+  class Element;
 
-  using ViewTimelineIndividualInset =
-    Variant<RefPtr<css::CSSNumericValue>, dom::DOMString, RefPtr<css::CSSKeywordValue>>;
-  using ViewTimelineInsetValue = Variant<dom::DOMString, List<ViewTimelineIndividualInset>>;
+  using ViewTimelineIndividualInset = Variant<RefPtr<CSSNumericValue>, DOMString, RefPtr<CSSKeywordValue>>;
+  using ViewTimelineInsetValue = Variant<DOMString, List<ViewTimelineIndividualInset>>;
 
   /// @see https://drafts.csswg.org/scroll-animations-1/#dictdef-viewtimelineoptions
   struct ViewTimelineOptions
   {
-    RefPtr<dom::Element> Subject;
+    RefPtr<boo::Element> Subject;
     ScrollAxis Axis {ScrollAxis::Block};
-    ViewTimelineInsetValue Inset {dom::DOMString(u8"auto")};
+    ViewTimelineInsetValue Inset {DOMString(u8"auto")};
   };
 }

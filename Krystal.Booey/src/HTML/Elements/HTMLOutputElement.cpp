@@ -35,10 +35,10 @@
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLOutputElement::HTMLOutputElement(dom::Document &document) noexcept
-      : HTMLFormControlElement(document, HTMLElementInterface::Output)
+  HTMLOutputElement::HTMLOutputElement(Document &document) noexcept
+      : HTMLFormControlElement(document, html::HTMLElementInterface::Output)
   {
   }
 
@@ -68,10 +68,9 @@ namespace krys::boo::html
     return *_htmlFor;
   }
 
-  void HTMLOutputElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                             Maybe<dom::DOMStringView> oldValue,
-                                             Maybe<dom::DOMStringView> value,
-                                             const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLOutputElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                             Maybe<DOMStringView> value,
+                                             const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLFormControlElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI == null && localName == u8"for" && _htmlFor)
@@ -80,27 +79,27 @@ namespace krys::boo::html
     }
   }
 
-  dom::DOMString HTMLOutputElement::Name() const noexcept
+  DOMString HTMLOutputElement::Name() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLOutputElement::Name(dom::DOMString value) noexcept
+  void HTMLOutputElement::Name(DOMString value) noexcept
   {
-    Reflect(*this, u8"name", krys::move(value));
+    html::Reflect(*this, u8"name", krys::move(value));
   }
 
   // https://html.spec.whatwg.org/#dom-output-value
-  dom::DOMString HTMLOutputElement::Value() const noexcept
+  DOMString HTMLOutputElement::Value() const noexcept
   {
     // Return this's descendant text content.
-    return TextContent().value_or(dom::DOMString());
+    return TextContent().value_or(DOMString());
   }
 
   // https://html.spec.whatwg.org/#dom-output-value
-  void HTMLOutputElement::Value(dom::DOMString value) noexcept
+  void HTMLOutputElement::Value(DOMString value) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
 
     // 1. Set this's default value override to its default value.
     _defaultValueOverride = DefaultValue();
@@ -110,17 +109,17 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#concept-output-default-value
-  dom::DOMString HTMLOutputElement::DefaultValue() const noexcept
+  DOMString HTMLOutputElement::DefaultValue() const noexcept
   {
     // 1. If this element's default value override is non-null, then return it.
     // 2. Return this element's descendant text content.
-    return _defaultValueOverride ? *_defaultValueOverride : TextContent().value_or(dom::DOMString());
+    return _defaultValueOverride ? *_defaultValueOverride : TextContent().value_or(DOMString());
   }
 
   // https://html.spec.whatwg.org/#dom-output-defaultvalue
-  void HTMLOutputElement::DefaultValue(dom::DOMString value) noexcept
+  void HTMLOutputElement::DefaultValue(DOMString value) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
 
     // 1. If this's default value override is null, then string replace all with the given value within this
     // and

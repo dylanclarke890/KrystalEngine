@@ -51,7 +51,7 @@ namespace krys::boo::html
   }
 
   InputType::ShouldCallBaseEventHandler
-    BaseCheckableInputType::HandleKeydownEvent(dom::KeyboardEvent &event) noexcept
+    BaseCheckableInputType::HandleKeydownEvent(KeyboardEvent &event) noexcept
   {
     if (event.KeyIdentifier() == u8"U+0020")
     {
@@ -63,7 +63,7 @@ namespace krys::boo::html
     return ShouldCallBaseEventHandler::Yes;
   }
 
-  void BaseCheckableInputType::HandleKeypressEvent(dom::KeyboardEvent &event) noexcept
+  void BaseCheckableInputType::HandleKeypressEvent(KeyboardEvent &event) noexcept
   {
     if (event.CharCode() == ' ')
     {
@@ -77,9 +77,9 @@ namespace krys::boo::html
     return false;
   }
 
-  Maybe<dom::DOMString> BaseCheckableInputType::FallbackValue() const noexcept
+  Maybe<DOMString> BaseCheckableInputType::FallbackValue() const noexcept
   {
-    return dom::DOMString(u8"on");
+    return DOMString(u8"on");
   }
 
   bool BaseCheckableInputType::StoresValueSeparateFromAttribute() noexcept
@@ -87,11 +87,11 @@ namespace krys::boo::html
     return false;
   }
 
-  void BaseCheckableInputType::SetValue(dom::DOMStringView sanitizedValue, bool, TextFieldEventBehavior,
+  void BaseCheckableInputType::SetValue(DOMStringView sanitizedValue, bool, TextFieldEventBehavior,
                                         TextControlSetValueSelection) noexcept
   {
     krys_debug_assert(Element());
-    (void)Element()->SetAttribute(u8"value", dom::DOMString(sanitizedValue));
+    (void)Element()->SetAttribute(u8"value", DOMString(sanitizedValue));
   }
 
   void BaseCheckableInputType::FireInputAndChangeEvents() noexcept
@@ -109,7 +109,7 @@ namespace krys::boo::html
 
     Ref<InputType> protectedThis = ShareRef(*this);
     element->SetTextAsOfLastFormControlChangeEvent({});
-    auto event = dom::Event::Create(event_names::Input, true, false, true);
+    auto event = Event::Create(event_names::Input, true, false, true);
     (void)dom::EventDispatcher::DispatchToTarget(*event, element.get());
     if (auto *currentElement = Element())
     {

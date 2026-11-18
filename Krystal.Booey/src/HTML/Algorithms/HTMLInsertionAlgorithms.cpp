@@ -13,8 +13,8 @@ namespace krys::boo::html
   namespace
   {
     // https://html.spec.whatwg.org/#html-fragment-parsing-algorithm-steps
-    KRYS_NODISCARD dom::ExceptionOr<Ref<dom::DocumentFragment>>
-      RunFragmentParsingAlgorithmSteps(dom::ContainerNode &target, dom::DOMStringView markup,
+    KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>>
+      RunFragmentParsingAlgorithmSteps(ContainerNode &target, DOMStringView markup,
                                        const SanitizerInput *sanitizer, FragmentParserMode mode) noexcept
     {
       // 1. If mode is Legacy and target's node document is an XML document, then return the result of
@@ -46,7 +46,7 @@ namespace krys::boo::html
     }
   }
 
-  dom::ContainerNode &HTMLInsertionAlgorithms::TargetForHTMLInsertion(dom::Element &element) noexcept
+  ContainerNode &HTMLInsertionAlgorithms::TargetForHTMLInsertion(Element &element) noexcept
   {
     // 1. If element is a template element, then return element's template contents.
     if (auto *templateElement = DynamicDowncast<HTMLTemplateElement>(element))
@@ -58,8 +58,7 @@ namespace krys::boo::html
     return element;
   }
 
-  dom::ExceptionOr<dom::ContainerNode *>
-    HTMLInsertionAlgorithms::ParentForHTMLInsertion(dom::Node &node) noexcept
+  ExceptionOr<ContainerNode *> HTMLInsertionAlgorithms::ParentForHTMLInsertion(Node &node) noexcept
   {
     // 1. Let parent be node's parent.
     auto *parent = node.ParentNode();
@@ -67,33 +66,32 @@ namespace krys::boo::html
     // 2. If parent is null, then return null.
     if (!parent)
     {
-      return static_cast<dom::ContainerNode *>(nullptr);
+      return static_cast<ContainerNode *>(nullptr);
     }
 
     // 3. If parent is a template element, then throw a "HierarchyRequestError" DOMException.
     if (Is<HTMLTemplateElement>(*parent))
     {
-      return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
+      return Exception {ExceptionCode::HierarchyRequestError};
     }
 
     // 4. If parent is an Element, or a DocumentFragment with a non-null host, then return parent.
-    if (Is<dom::Element>(*parent))
+    if (Is<Element>(*parent))
     {
       return parent;
     }
-    if (auto *fragment = DynamicDowncast<dom::DocumentFragment>(*parent); fragment && fragment->Host())
+    if (auto *fragment = DynamicDowncast<DocumentFragment>(*parent); fragment && fragment->Host())
     {
       return parent;
     }
 
     // 5. Throw a "HierarchyRequestError" DOMException.
-    return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
+    return Exception {ExceptionCode::HierarchyRequestError};
   }
 
-  dom::ExceptionOr<void> HTMLInsertionAlgorithms::FilterAndSetHTML(dom::ContainerNode &target,
-                                                                   dom::DOMStringView html,
-                                                                   const SanitizerInput *sanitizer,
-                                                                   FragmentParserMode mode) noexcept
+  ExceptionOr<void> HTMLInsertionAlgorithms::FilterAndSetHTML(ContainerNode &target, DOMStringView html,
+                                                              const SanitizerInput *sanitizer,
+                                                              FragmentParserMode mode) noexcept
   {
     // 1. Let fragment be the result of parsing HTML for insertion given target, html, options, and mode.
     auto fragment = ParseHTMLForInsertion(target, html, sanitizer, mode);
@@ -110,16 +108,15 @@ namespace krys::boo::html
     return {};
   }
 
-  dom::ExceptionOr<void> HTMLInsertionAlgorithms::FilterAndPreInsertHTML(dom::ContainerNode &parent,
-                                                                         dom::Node *child,
-                                                                         dom::DOMStringView html,
-                                                                         const SanitizerInput *sanitizer,
-                                                                         FragmentParserMode mode) noexcept
+  ExceptionOr<void> HTMLInsertionAlgorithms::FilterAndPreInsertHTML(ContainerNode &parent, Node *child,
+                                                                    DOMStringView html,
+                                                                    const SanitizerInput *sanitizer,
+                                                                    FragmentParserMode mode) noexcept
   {
     // 1. If parent is an html element, then throw a "HierarchyRequestError" DOMException.
     if (Is<HTMLHtmlElement>(parent))
     {
-      return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
+      return Exception {ExceptionCode::HierarchyRequestError};
     }
 
     // 2. Let fragment be the result of parsing HTML for insertion given parent, html, options, and mode.
@@ -140,16 +137,15 @@ namespace krys::boo::html
     return {};
   }
 
-  dom::ExceptionOr<void> HTMLInsertionAlgorithms::FilterAndReplaceWithHTML(dom::ContainerNode &parent,
-                                                                           dom::Node &node,
-                                                                           dom::DOMStringView html,
-                                                                           const SanitizerInput *sanitizer,
-                                                                           FragmentParserMode mode) noexcept
+  ExceptionOr<void> HTMLInsertionAlgorithms::FilterAndReplaceWithHTML(ContainerNode &parent, Node &node,
+                                                                      DOMStringView html,
+                                                                      const SanitizerInput *sanitizer,
+                                                                      FragmentParserMode mode) noexcept
   {
     // 1. If parent is an html element, then throw a "HierarchyRequestError" DOMException.
     if (Is<HTMLHtmlElement>(parent))
     {
-      return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
+      return Exception {ExceptionCode::HierarchyRequestError};
     }
 
     // 2. Let fragment be the result of parsing HTML for insertion given parent, html, options, and mode.
@@ -170,8 +166,8 @@ namespace krys::boo::html
     return {};
   }
 
-  dom::ExceptionOr<RefPtr<dom::DocumentFragment>>
-    HTMLInsertionAlgorithms::ParseHTMLForInsertion(dom::ContainerNode &target, dom::DOMStringView html,
+  ExceptionOr<RefPtr<DocumentFragment>>
+    HTMLInsertionAlgorithms::ParseHTMLForInsertion(ContainerNode &target, DOMStringView html,
                                                    const SanitizerInput *sanitizer,
                                                    FragmentParserMode mode) noexcept
   {
@@ -179,10 +175,10 @@ namespace krys::boo::html
     if (mode == FragmentParserMode::Safe)
     {
       // 1a. Let context be target if target is an Element; otherwise target's host.
-      auto *context = DynamicDowncast<dom::Element>(target);
+      auto *context = DynamicDowncast<Element>(target);
       if (!context)
       {
-        context = Downcast<dom::DocumentFragment>(target).Host();
+        context = Downcast<DocumentFragment>(target).Host();
       }
 
       // 1b. Assert: context is non-null.
@@ -194,7 +190,7 @@ namespace krys::boo::html
           && (context->NamespaceURI() == infra::namespaces::HTML
               || context->NamespaceURI() == infra::namespaces::SVG))
       {
-        return RefPtr<dom::DocumentFragment> {};
+        return RefPtr<DocumentFragment> {};
       }
     }
 
@@ -205,12 +201,12 @@ namespace krys::boo::html
     {
       return fragment.ReleaseException();
     }
-    return RefPtr<dom::DocumentFragment> {fragment.ReleaseValue()};
+    return RefPtr<DocumentFragment> {fragment.ReleaseValue()};
   }
 
-  dom::ExceptionOr<void> HTMLInsertionAlgorithms::BeforeHTML(dom::Node &node, dom::DOMStringView html,
-                                                             const SanitizerInput *sanitizer,
-                                                             FragmentParserMode mode) noexcept
+  ExceptionOr<void> HTMLInsertionAlgorithms::BeforeHTML(Node &node, DOMStringView html,
+                                                        const SanitizerInput *sanitizer,
+                                                        FragmentParserMode mode) noexcept
   {
     // 1. Let parent be the parent for HTML insertion given this.
     auto parent = ParentForHTMLInsertion(node);
@@ -229,9 +225,9 @@ namespace krys::boo::html
     return FilterAndPreInsertHTML(*parent.Value(), &node, html, sanitizer, mode);
   }
 
-  dom::ExceptionOr<void> HTMLInsertionAlgorithms::AfterHTML(dom::Node &node, dom::DOMStringView html,
-                                                            const SanitizerInput *sanitizer,
-                                                            FragmentParserMode mode) noexcept
+  ExceptionOr<void> HTMLInsertionAlgorithms::AfterHTML(Node &node, DOMStringView html,
+                                                       const SanitizerInput *sanitizer,
+                                                       FragmentParserMode mode) noexcept
   {
     // 1. Let parent be the parent for HTML insertion given this.
     auto parent = ParentForHTMLInsertion(node);
@@ -250,9 +246,9 @@ namespace krys::boo::html
     return FilterAndPreInsertHTML(*parent.Value(), node.NextSibling(), html, sanitizer, mode);
   }
 
-  dom::ExceptionOr<void> HTMLInsertionAlgorithms::ReplaceWithHTML(dom::Node &node, dom::DOMStringView html,
-                                                                  const SanitizerInput *sanitizer,
-                                                                  FragmentParserMode mode) noexcept
+  ExceptionOr<void> HTMLInsertionAlgorithms::ReplaceWithHTML(Node &node, DOMStringView html,
+                                                             const SanitizerInput *sanitizer,
+                                                             FragmentParserMode mode) noexcept
   {
     // 1. Let parent be the parent for HTML insertion given this.
     auto parent = ParentForHTMLInsertion(node);

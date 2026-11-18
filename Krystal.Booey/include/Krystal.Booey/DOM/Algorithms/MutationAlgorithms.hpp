@@ -4,11 +4,14 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class Node;
+}
 
+namespace krys::boo::dom
+{
   /// @see https://dom.spec.whatwg.org/#insert-suppressobservers
   /// @see https://dom.spec.whatwg.org/#remove-suppressobservers
   enum class SuppressObservers : bool

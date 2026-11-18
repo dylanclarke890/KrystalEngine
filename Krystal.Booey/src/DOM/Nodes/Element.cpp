@@ -129,10 +129,10 @@
 #include "Krystal.Core/Utils/Move.hpp"
 #include <ranges>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
-  Element::Element(Document &document, const QualifiedName &name, NodeFlags nodeFlags) noexcept
-      : ContainerNode(document, NodeType::ELEMENT_NODE, nodeFlags), _qualifiedName(name)
+  Element::Element(Document &document, const QualifiedName &name, dom::NodeFlags nodeFlags) noexcept
+      : ContainerNode(document, dom::NodeType::ELEMENT_NODE, nodeFlags), _qualifiedName(name)
   {
   }
 
@@ -165,23 +165,23 @@ namespace krys::boo::dom
     }
   }
 
-  ElementRareData *Element::GetElementRareData() const noexcept
+  dom::ElementRareData *Element::GetElementRareData() const noexcept
   {
-    return static_cast<ElementRareData *>(RareData());
+    return static_cast<dom::ElementRareData *>(RareData());
   }
 
-  ElementRareData &Element::EnsureElementRareData() noexcept
+  dom::ElementRareData &Element::EnsureElementRareData() noexcept
   {
-    return static_cast<ElementRareData &>(EnsureNodeRareData());
+    return static_cast<dom::ElementRareData &>(EnsureNodeRareData());
   }
 
 #pragma region Custom elements
 
-  void Element::SetCustomElementState(CustomElementState state) noexcept
+  void Element::SetCustomElementState(dom::CustomElementState state) noexcept
   {
-    style::PseudoClassChangeInvalidation styleInvalidation(*this, css::SelectorPseudoClass::Defined,
-                                                           state == CustomElementState::Custom
-                                                             || state == CustomElementState::Uncustomized);
+    style::PseudoClassChangeInvalidation styleInvalidation(
+      *this, css::SelectorPseudoClass::Defined,
+      state == dom::CustomElementState::Custom || state == dom::CustomElementState::Uncustomized);
     _customElementState = state;
     // Whether it's a listed element can depend on it.
     InvalidateLiveCollectionCachesInAncestors();
@@ -207,7 +207,7 @@ namespace krys::boo::dom
 
   void Element::SetIsDefinedCustomElement(html::CustomElementInterface &elementInterface) noexcept
   {
-    SetCustomElementState(CustomElementState::Custom);
+    SetCustomElementState(dom::CustomElementState::Custom);
     auto &data = EnsureElementRareData();
     if (!data.CustomElementReactionQueue())
     {
@@ -224,20 +224,20 @@ namespace krys::boo::dom
 
   void Element::SetIsFailedCustomElementWithoutClearingReactionQueue() noexcept
   {
-    krys_debug_assert(_customElementState == CustomElementState::Undefined
-                      || _customElementState == CustomElementState::Precustomized);
-    SetCustomElementState(CustomElementState::Failed);
+    krys_debug_assert(_customElementState == dom::CustomElementState::Undefined
+                      || _customElementState == dom::CustomElementState::Precustomized);
+    SetCustomElementState(dom::CustomElementState::Failed);
   }
 
   void Element::SetIsPrecustomizedCustomElement() noexcept
   {
-    krys_debug_assert(_customElementState == CustomElementState::Failed);
-    SetCustomElementState(CustomElementState::Precustomized);
+    krys_debug_assert(_customElementState == dom::CustomElementState::Failed);
+    SetCustomElementState(dom::CustomElementState::Precustomized);
   }
 
   void Element::ClearReactionQueueFromFailedCustomElement() noexcept
   {
-    krys_debug_assert(_customElementState == CustomElementState::Failed);
+    krys_debug_assert(_customElementState == dom::CustomElementState::Failed);
     if (GetElementRareData())
     {
       // Clear the queue instead of deleting it since this function can be called inside
@@ -251,8 +251,8 @@ namespace krys::boo::dom
 
   void Element::SetIsCustomElementUpgradeCandidate() noexcept
   {
-    krys_debug_assert(_customElementState == CustomElementState::Uncustomized);
-    SetCustomElementState(CustomElementState::Undefined);
+    krys_debug_assert(_customElementState == dom::CustomElementState::Uncustomized);
+    SetCustomElementState(dom::CustomElementState::Undefined);
   }
 
   void Element::EnqueueToUpgrade(html::CustomElementInterface &elementInterface) noexcept
@@ -333,18 +333,18 @@ namespace krys::boo::dom
 
   bool Element::HasValidTextDirectionState() const noexcept
   {
-    return ElementHasValidTextDirectionState(*this);
+    return dom::ElementHasValidTextDirectionState(*this);
   }
 
   bool Element::HasAutoTextDirectionState() const noexcept
   {
-    return ElementHasAutoTextDirectionState(*this);
+    return dom::ElementHasAutoTextDirectionState(*this);
   }
 
   void Element::UpdateEffectiveTextDirection() noexcept
   {
-    auto textDirectionState = ElementTextDirectionState(*this);
-    UpdateEffectiveTextDirectionState(*this, textDirectionState);
+    auto textDirectionState = dom::ElementTextDirectionState(*this);
+    dom::UpdateEffectiveTextDirectionState(*this, textDirectionState);
   }
 
   void Element::UpdateEffectiveTextDirectionIfNeeded() noexcept
@@ -355,19 +355,19 @@ namespace krys::boo::dom
       return;
     }
 
-    auto *parent = TreeQueries::ParentOrShadowHostElement(*this);
+    auto *parent = dom::TreeQueries::ParentOrShadowHostElement(*this);
     if (!(parent && parent->UsesEffectiveTextDirection()))
     {
       return;
     }
 
-    if (HasAttribute(u8"dir") || TreeQueries::GetShadowRoot(*this))
+    if (HasAttribute(u8"dir") || dom::TreeQueries::GetShadowRoot(*this))
     {
       UpdateEffectiveTextDirection();
       return;
     }
 
-    if (auto *input = DynamicDowncast<html::HTMLInputElement>(*this); input && input->IsTelephoneField())
+    if (auto *input = DynamicDowncast<HTMLInputElement>(*this); input && input->IsTelephoneField())
     {
       UpdateEffectiveTextDirection();
       return;
@@ -483,7 +483,7 @@ namespace krys::boo::dom
       }
 
       auto documentElement = document->DocumentElement();
-      if (!documentElement || documentElement->HasNodeFlag(NodeFlags::IsComputedStyleInvalid))
+      if (!documentElement || documentElement->HasNodeFlag(dom::NodeFlags::IsComputedStyleInvalid))
       {
         return documentElement;
       }
@@ -493,7 +493,7 @@ namespace krys::boo::dom
       for (auto element = ShareRefPtr<const Element>(this); element;
            element = ShareRefPtr<const Element>(element->ParentElementInComposedTree()))
       {
-        if (element->HasNodeFlag(NodeFlags::IsComputedStyleInvalid))
+        if (element->HasNodeFlag(dom::NodeFlags::IsComputedStyleInvalid))
         {
           rootmost = element;
           continue;
@@ -560,17 +560,17 @@ namespace krys::boo::dom
         changes.Remove(style::Change::NonInherited);
         if (!changes.IsEmpty())
         {
-          for (auto &child : ComposedTreeChildren(*element))
+          for (auto &child : dom::ComposedTreeChildren(*element))
           {
             if (auto *childElement = DynamicDowncast<Element>(child))
             {
-              childElement->SetNodeFlag(NodeFlags::IsComputedStyleInvalid);
+              childElement->SetNodeFlag(dom::NodeFlags::IsComputedStyleInvalid);
             }
           }
         }
       }
       rareData.SetComputedStyle(krys::move(style));
-      element->ClearNodeFlag(NodeFlags::IsComputedStyleInvalid);
+      element->ClearNodeFlag(dom::NodeFlags::IsComputedStyleInvalid);
 
       if (mode == ResolveComputedStyleMode::RenderedOnly && computedStyle->Display() == DisplayType::None)
       {
@@ -651,8 +651,8 @@ namespace krys::boo::dom
 
     WillResetComputedStyle();
     GetElementRareData()->SetComputedStyle(nullptr);
-    for (auto *descendant = TreeQueries::Next(*this, this); descendant;
-         descendant = TreeQueries::Next(*descendant, this))
+    for (auto *descendant = dom::TreeQueries::Next(*this, this); descendant;
+         descendant = dom::TreeQueries::Next(*descendant, this))
     {
       auto *child = DynamicDowncast<Element>(*descendant);
       if (!child || !child->GetElementRareData() || !child->GetElementRareData()->ComputedStyle()
@@ -667,8 +667,8 @@ namespace krys::boo::dom
 
   void Element::ResetStyleRelations() noexcept
   {
-    ClearStyleFlags(NodeStyleFlags::StyleAffectedByEmpty);
-    ClearStyleFlags(NodeStyleFlags::AffectedByHasWithPositionalPseudoClass);
+    ClearStyleFlags(dom::NodeStyleFlags::StyleAffectedByEmpty);
+    ClearStyleFlags(dom::NodeStyleFlags::AffectedByHasWithPositionalPseudoClass);
     if (!GetElementRareData())
     {
       return;
@@ -678,18 +678,18 @@ namespace krys::boo::dom
 
   void Element::ResetChildStyleRelations() noexcept
   {
-    ClearStyleFlags(NodeStyleFlags::ChildrenAffectedByFirstChildRules
-                    | NodeStyleFlags::ChildrenAffectedByLastChildRules
-                    | NodeStyleFlags::ChildrenAffectedByForwardPositionalRules
-                    | NodeStyleFlags::ChildrenAffectedByBackwardPositionalRules);
+    ClearStyleFlags(dom::NodeStyleFlags::ChildrenAffectedByFirstChildRules
+                    | dom::NodeStyleFlags::ChildrenAffectedByLastChildRules
+                    | dom::NodeStyleFlags::ChildrenAffectedByForwardPositionalRules
+                    | dom::NodeStyleFlags::ChildrenAffectedByBackwardPositionalRules);
   }
 
   void Element::ResetAllDescendantStyleRelations() noexcept
   {
     ResetChildStyleRelations();
 
-    ClearStyleFlags(NodeStyleFlags::DescendantsAffectedByForwardPositionalRules
-                    | NodeStyleFlags::DescendantsAffectedByBackwardPositionalRules);
+    ClearStyleFlags(dom::NodeStyleFlags::DescendantsAffectedByForwardPositionalRules
+                    | dom::NodeStyleFlags::DescendantsAffectedByBackwardPositionalRules);
   }
 
   bool Element::HasDisplayContents() const noexcept
@@ -743,7 +743,7 @@ namespace krys::boo::dom
     return style.Display() != DisplayType::None && style.Display() != DisplayType::Contents;
   }
 
-  void Element::DispatchFocusEvent(EventTarget *relatedTarget, const FocusOptions &) noexcept
+  void Element::DispatchFocusEvent(EventTarget *relatedTarget, const dom::FocusOptions &) noexcept
   {
     // While the document's window doesn't have system focus, the focus moves without events, as in Chrome:
     // the element gets them when the window gets system focus (FocusAlgorithms::SystemFocusChanged).
@@ -762,7 +762,7 @@ namespace krys::boo::dom
     }
   }
 
-  void Element::FindTargetAndUpdateFocusAppearance(SelectionRestorationMode restorationMode,
+  void Element::FindTargetAndUpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
                                                    SelectionRevealMode revealMode) noexcept
   {
     auto target = FocusAppearanceUpdateTarget();
@@ -779,7 +779,7 @@ namespace krys::boo::dom
     return ShareRefPtr(this);
   }
 
-  void Element::UpdateFocusAppearance(SelectionRestorationMode, SelectionRevealMode revealMode) noexcept
+  void Element::UpdateFocusAppearance(dom::SelectionRestorationMode, SelectionRevealMode revealMode) noexcept
   {
     if (IsRootEditableElement())
     {
@@ -963,7 +963,7 @@ namespace krys::boo::dom
         return;
       }
 
-      InvalidateForSiblingCombinators(TreeQueries::NextElementSibling(element));
+      dom::InvalidateForSiblingCombinators(dom::TreeQueries::NextElementSibling(element));
     }
   }
 
@@ -1010,7 +1010,7 @@ namespace krys::boo::dom
     // FIXME: Ideally we would just recompute things that are actually affected by containers queries within
     // the subtree.
     Node::InvalidateStyle(style::Validity::SubtreeInvalid);
-    SetNodeFlag(NodeFlags::NeedsUpdateQueryContainerDependentStyle);
+    SetNodeFlag(dom::NodeFlags::NeedsUpdateQueryContainerDependentStyle);
   }
 
   void Element::InvalidateForResumingQueryContainerResolution() noexcept
@@ -1032,7 +1032,7 @@ namespace krys::boo::dom
 
   void Element::FinishParsingChildren() noexcept
   {
-    ClearNodeFlag(NodeFlags::IsParsingChildren);
+    ClearNodeFlag(dom::NodeFlags::IsParsingChildren);
     style::ChildChangeInvalidation::InvalidateAfterFinishedParsingChildren(*this);
   }
 
@@ -1062,7 +1062,7 @@ namespace krys::boo::dom
     {
       // https://www.w3.org/TR/pointerevents/#compatibility-mapping-with-mouse-events
       auto type = mouseEvent.Type();
-      return !IsAnyClick(mouseEvent) && type != event_names::MouseOver && type != event_names::MouseOut
+      return !dom::IsAnyClick(mouseEvent) && type != event_names::MouseOver && type != event_names::MouseOut
              && type != event_names::MouseEnter && type != event_names::MouseLeave;
     }
 
@@ -1079,14 +1079,14 @@ namespace krys::boo::dom
       if (auto *page = element.NodeDocument().GetPage())
       {
         auto &pointerCaptureController = page->GetPointerCaptureController();
-        if (platformEvent.PointerId() != MousePointerID && !IsAnyClick(mouseEvent)
+        if (platformEvent.PointerId() != MousePointerID && !dom::IsAnyClick(mouseEvent)
             && pointerCaptureController.PreventsCompatibilityMouseEventsForIdentifier(
               platformEvent.PointerId()))
         {
           return ShouldIgnoreMouseEvent::Yes;
         }
 
-        if (platformEvent.GetSyntheticClickType() != SyntheticClickType::NoTap && !IsAnyClick(mouseEvent)
+        if (platformEvent.GetSyntheticClickType() != SyntheticClickType::NoTap && !dom::IsAnyClick(mouseEvent)
             && mouseEvent.Type() != event_names::ContextMenu)
         {
           return ShouldIgnoreMouseEvent::No;
@@ -1183,11 +1183,11 @@ namespace krys::boo::dom
     }
 
     bool shouldNotDispatchMouseEvent =
-      IsAnyClick(*mouseEvent) || mouseEvent->Type() == event_names::ContextMenu;
+      dom::IsAnyClick(*mouseEvent) || mouseEvent->Type() == event_names::ContextMenu;
     if (!shouldNotDispatchMouseEvent)
     {
       krys_debug_assert(!mouseEvent->Target() || mouseEvent->Target() != relatedTarget);
-      (void)EventDispatcher::DispatchToTarget(*mouseEvent, this);
+      (void)dom::EventDispatcher::DispatchToTarget(*mouseEvent, this);
       if (mouseEvent->DefaultPrevented())
       {
         eventIsDefaultPrevented = EventIsDefaultPrevented::Yes;
@@ -1216,7 +1216,7 @@ namespace krys::boo::dom
         doubleClickEvent->SetDefaultHandled();
       }
 
-      (void)EventDispatcher::DispatchToTarget(*doubleClickEvent, this);
+      (void)dom::EventDispatcher::DispatchToTarget(*doubleClickEvent, this);
       if (doubleClickEvent->DefaultHandled() || doubleClickEvent->DefaultPrevented())
       {
         return {EventIsDispatched::No, eventIsDefaultPrevented};
@@ -1247,7 +1247,7 @@ namespace krys::boo::dom
     }
 
     Ref protectedThis = ShareRef(*this);
-    (void)EventDispatcher::DispatchToTarget(*event, this);
+    (void)dom::EventDispatcher::DispatchToTarget(*event, this);
 
     if (event->DefaultPrevented())
     {
@@ -1260,7 +1260,7 @@ namespace krys::boo::dom
     Node *startNode = this;
     while (startNode && !startNode->Renderer())
     {
-      startNode = TreeQueries::ParentOrShadowHostElement(*startNode);
+      startNode = dom::TreeQueries::ParentOrShadowHostElement(*startNode);
     }
     if (startNode)
     {
@@ -1274,17 +1274,18 @@ namespace krys::boo::dom
     return true;
   }
 
-  bool Element::DispatchSimulatedClick(Event *underlyingEvent, SimulatedClickMouseEventOptions eventOptions,
-                                       SimulatedClickVisualOptions visualOptions) noexcept
+  bool Element::DispatchSimulatedClick(Event *underlyingEvent,
+                                       dom::SimulatedClickMouseEventOptions eventOptions,
+                                       dom::SimulatedClickVisualOptions visualOptions) noexcept
   {
-    return SimulateClick(*this, underlyingEvent, eventOptions, visualOptions,
-                         SimulatedClickSource::UserAgent);
+    return dom::SimulateClick(*this, underlyingEvent, eventOptions, visualOptions,
+                              dom::SimulatedClickSource::UserAgent);
   }
 
   bool Element::DispatchKeyEvent(const PlatformKeyboardEvent &platformEvent) noexcept
   {
     Ref<KeyboardEvent> event = KeyboardEvent::Create(platformEvent, NodeDocument().Window());
-    (void)EventDispatcher::DispatchToTarget(*event, this);
+    (void)dom::EventDispatcher::DispatchToTarget(*event, this);
     if (event->DefaultPrevented() || event->DefaultHandled())
     {
       return false;
@@ -1346,7 +1347,7 @@ namespace krys::boo::dom
     /// @brief Whether @p element is a text field: a text area, or an input of a text-like type.
     KRYS_NODISCARD bool IsTextField(const Element &element) noexcept
     {
-      if (!Is<html::HTMLElement>(element))
+      if (!Is<HTMLElement>(element))
       {
         return false;
       }
@@ -1373,7 +1374,7 @@ namespace krys::boo::dom
       {
         return true;
       }
-      if (!Is<html::HTMLElement>(element))
+      if (!Is<HTMLElement>(element))
       {
         return false;
       }
@@ -1388,7 +1389,7 @@ namespace krys::boo::dom
     }
   }
 
-  void Element::SetFocus(bool value, FocusVisibility visibility) noexcept
+  void Element::SetFocus(bool value, dom::FocusVisibility visibility) noexcept
   {
     if (value == Focused())
     {
@@ -1400,8 +1401,8 @@ namespace krys::boo::dom
     NodeDocument().UserActionElements().SetFocused(*this, value);
 
     // Shadow host with a slot that contain focused element is not considered focused.
-    for (auto *root = TreeQueries::ContainingShadowRoot(*this); root;
-         root = TreeQueries::ContainingShadowRoot(*root->Host()))
+    for (auto *root = dom::TreeQueries::ContainingShadowRoot(*this); root;
+         root = dom::TreeQueries::ContainingShadowRoot(*root->Host()))
     {
       root->SetContainsFocusedElement(value);
       root->Host()->InvalidateStyle();
@@ -1412,10 +1413,10 @@ namespace krys::boo::dom
       element->SetHasFocusWithin(value);
     }
 
-    SetHasFocusVisible(
-      value
-      && (visibility == FocusVisibility::Visible
-          || (visibility == FocusVisibility::Invisible && ShouldAlwaysHaveFocusVisibleWhenFocused(*this))));
+    SetHasFocusVisible(value
+                       && (visibility == dom::FocusVisibility::Visible
+                           || (visibility == dom::FocusVisibility::Invisible
+                               && ShouldAlwaysHaveFocusVisibleWhenFocused(*this))));
   }
 
   void Element::SetHasFocusVisible(bool value) noexcept
@@ -1507,7 +1508,7 @@ namespace krys::boo::dom
     {
       return false;
     }
-    auto *documentElement = TreeQueries::DocumentElement(NodeDocument());
+    auto *documentElement = dom::TreeQueries::DocumentElement(NodeDocument());
     if (documentElement && documentElement->StyleValidity() >= style::Validity::SubtreeInvalid)
     {
       return false;
@@ -1522,7 +1523,7 @@ namespace krys::boo::dom
 
   style::Resolver &Element::StyleResolver() noexcept
   {
-    if (auto *shadowRoot = TreeQueries::ContainingShadowRoot(*this))
+    if (auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(*this))
     {
       return shadowRoot->StyleScope().GetResolver();
     }
@@ -1552,9 +1553,9 @@ namespace krys::boo::dom
     return null;
   }
 
-  void InvalidateForSiblingCombinators(Element *sibling) noexcept
+  void dom::InvalidateForSiblingCombinators(Element *sibling) noexcept
   {
-    for (auto *element = sibling; element; element = TreeQueries::NextElementSibling(*element))
+    for (auto *element = sibling; element; element = dom::TreeQueries::NextElementSibling(*element))
     {
       if (element->StyleIsAffectedByPreviousSibling())
       {
@@ -1562,8 +1563,8 @@ namespace krys::boo::dom
       }
       if (element->DescendantsAffectedByPreviousSibling())
       {
-        for (auto *siblingChild = TreeQueries::FirstElementChild(*element); siblingChild;
-             siblingChild = TreeQueries::NextElementSibling(*siblingChild))
+        for (auto *siblingChild = dom::TreeQueries::FirstElementChild(*element); siblingChild;
+             siblingChild = dom::TreeQueries::NextElementSibling(*siblingChild))
         {
           siblingChild->InvalidateStyleForSubtreeInternal();
         }
@@ -1928,12 +1929,12 @@ namespace krys::boo::dom
   void Element::Id(DOMString id) noexcept
   {
     html::CEReactionsScope ceReactions;
-    ElementAlgorithms::SetAttributeValue(*this, u8"id", krys::move(id));
+    dom::ElementAlgorithms::SetAttributeValue(*this, u8"id", krys::move(id));
   }
 
   DOMString Element::Id() const noexcept
   {
-    return ElementAlgorithms::GetAttributeValue(*this, u8"id");
+    return dom::ElementAlgorithms::GetAttributeValue(*this, u8"id");
   }
 
   bool Element::HasClassName(DOMStringView className) const noexcept
@@ -2010,62 +2011,62 @@ namespace krys::boo::dom
   void Element::ClassName(DOMString className) noexcept
   {
     html::CEReactionsScope ceReactions;
-    ElementAlgorithms::SetAttributeValue(*this, u8"class", krys::move(className));
+    dom::ElementAlgorithms::SetAttributeValue(*this, u8"class", krys::move(className));
   }
 
   DOMString Element::ClassName() const noexcept
   {
-    return ElementAlgorithms::GetAttributeValue(*this, u8"class");
+    return dom::ElementAlgorithms::GetAttributeValue(*this, u8"class");
   }
 
-  DOMTokenList &Element::ClassList() noexcept
+  dom::DOMTokenList &Element::ClassList() noexcept
   {
     if (_domTokenList == nullptr)
     {
-      _domTokenList = ElementAlgorithms::CreateDOMTokenList(*this, u8"class");
+      _domTokenList = dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"class");
     }
 
     return *_domTokenList;
   }
 
-  DOMTokenList &Element::Part() noexcept
+  dom::DOMTokenList &Element::Part() noexcept
   {
     auto &rareData = EnsureElementRareData();
     if (!rareData.PartList())
     {
-      rareData.SetPartList(ElementAlgorithms::CreateDOMTokenList(*this, u8"part"));
+      rareData.SetPartList(dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"part"));
     }
     return *rareData.PartList();
   }
 
-  DatasetDOMStringMap &Element::Dataset() noexcept
+  dom::DatasetDOMStringMap &Element::Dataset() noexcept
   {
     auto &rareData = EnsureElementRareData();
     if (!rareData.Dataset())
     {
-      rareData.SetDataset(CreateUnique<DatasetDOMStringMap>(*this));
+      rareData.SetDataset(CreateUnique<dom::DatasetDOMStringMap>(*this));
     }
     return *rareData.Dataset();
   }
 
-  css::StylePropertyMapReadOnly &Element::ComputedStyleMap() noexcept
+  StylePropertyMapReadOnly &Element::ComputedStyleMap() noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-element-computedstylemap
     auto &rareData = EnsureElementRareData();
     if (!rareData.ComputedStyleMap())
     {
-      rareData.SetComputedStyleMap(css::ComputedStylePropertyMapReadOnly::Create(*this));
+      rareData.SetComputedStyleMap(ComputedStylePropertyMapReadOnly::Create(*this));
     }
     return *rareData.ComputedStyleMap();
   }
 
-  css::StylePropertyMap *Element::ExistingAttributeStyleMap() const noexcept
+  StylePropertyMap *Element::ExistingAttributeStyleMap() const noexcept
   {
     auto *rareData = GetElementRareData();
     return rareData ? rareData->AttributeStyleMap() : nullptr;
   }
 
-  void Element::SetAttributeStyleMap(Ref<css::StylePropertyMap> map) noexcept
+  void Element::SetAttributeStyleMap(Ref<StylePropertyMap> map) noexcept
   {
     EnsureElementRareData().SetAttributeStyleMap(krys::move(map));
   }
@@ -2073,12 +2074,12 @@ namespace krys::boo::dom
   void Element::Slot(DOMString slot) noexcept
   {
     html::CEReactionsScope ceReactions;
-    ElementAlgorithms::SetAttributeValue(*this, u8"slot", krys::move(slot));
+    dom::ElementAlgorithms::SetAttributeValue(*this, u8"slot", krys::move(slot));
   }
 
   DOMString Element::Slot() const noexcept
   {
-    return ElementAlgorithms::GetAttributeValue(*this, u8"slot");
+    return dom::ElementAlgorithms::GetAttributeValue(*this, u8"slot");
   }
 
   bool Element::HasAttributes() const noexcept
@@ -2087,11 +2088,11 @@ namespace krys::boo::dom
     return !_attributes.empty();
   }
 
-  NamedNodeMap &Element::Attributes() noexcept
+  dom::NamedNodeMap &Element::Attributes() noexcept
   {
     if (_namedNodeMap == nullptr)
     {
-      _namedNodeMap = UniquePtr<NamedNodeMap>(new NamedNodeMap(*this));
+      _namedNodeMap = UniquePtr<dom::NamedNodeMap>(new dom::NamedNodeMap(*this));
     }
 
     return *_namedNodeMap;
@@ -2107,7 +2108,7 @@ namespace krys::boo::dom
   Maybe<DOMString> Element::GetAttribute(DOMStringAtom qualifiedName) const noexcept
   {
     // 1. Let attr be the result of getting an attribute given qualifiedName and this.
-    Attr *attr = ElementAlgorithms::GetAttributeByName(krys::move(qualifiedName), *this);
+    Attr *attr = dom::ElementAlgorithms::GetAttributeByName(krys::move(qualifiedName), *this);
     // 2. If attr is null, return null.
     if (attr == nullptr)
     {
@@ -2122,7 +2123,7 @@ namespace krys::boo::dom
   {
     // 1. Let attr be the result of getting an attribute given namespace, localName, and this.
     Attr *attr =
-      ElementAlgorithms::GetAttributeByNamespace(krys::move(namespaceURI), krys::move(localName), *this);
+      dom::ElementAlgorithms::GetAttributeByNamespace(krys::move(namespaceURI), krys::move(localName), *this);
     // 2. If attr is null, return null.
     if (attr == nullptr)
     {
@@ -2138,7 +2139,7 @@ namespace krys::boo::dom
     html::CEReactionsScope ceReactions;
     // 1. If qualifiedName is not a valid attribute local name, then throw an "InvalidCharacterError"
     //    DOMException.
-    if (!NameValidation::IsValidAttributeLocalName(qualifiedName.View()))
+    if (!dom::NameValidation::IsValidAttributeLocalName(qualifiedName.View()))
     {
       return Exception {ExceptionCode::InvalidCharacterError};
     }
@@ -2160,7 +2161,7 @@ namespace krys::boo::dom
     // 5. If attribute is non-null, then change attribute to verifiedValue and return.
     if (it != _attributes.end())
     {
-      ElementAlgorithms::ChangeAttribute(**it, krys::move(value));
+      dom::ElementAlgorithms::ChangeAttribute(**it, krys::move(value));
     }
     else
     {
@@ -2169,7 +2170,7 @@ namespace krys::boo::dom
       // 7. Append attribute to this.
       auto attr = AdoptRef<Attr>(
         *new Attr(NodeDocument(), QualifiedName {null, null, qualifiedName}, krys::move(value)));
-      ElementAlgorithms::AppendAttribute(*attr, *this);
+      dom::ElementAlgorithms::AppendAttribute(*attr, *this);
     }
 
     return {};
@@ -2181,8 +2182,8 @@ namespace krys::boo::dom
     html::CEReactionsScope ceReactions;
     // 1. Let (namespace, prefix, localName) be the result of validating and extracting namespace and
     //    qualifiedName given "attribute".
-    auto validateAndExtractResult = NameValidation::ValidateAndExtract(
-      krys::move(namespaceURI), krys::move(qualifiedName), ValidateAndExtractContext::Attribute);
+    auto validateAndExtractResult = dom::NameValidation::ValidateAndExtract(
+      krys::move(namespaceURI), krys::move(qualifiedName), dom::ValidateAndExtractContext::Attribute);
 
     if (validateAndExtractResult.HasException())
     {
@@ -2193,8 +2194,8 @@ namespace krys::boo::dom
 
     // 3. Set an attribute value for this using localName, verifiedValue, prefix, and namespace.
     const auto &qName = validateAndExtractResult.Value();
-    ElementAlgorithms::SetAttributeValue(*this, qName.LocalName(), krys::move(value), qName.NamespacePrefix(),
-                                         qName.NamespaceURI());
+    dom::ElementAlgorithms::SetAttributeValue(*this, qName.LocalName(), krys::move(value),
+                                              qName.NamespacePrefix(), qName.NamespaceURI());
 
     return {};
   }
@@ -2202,13 +2203,14 @@ namespace krys::boo::dom
   void Element::RemoveAttribute(DOMStringAtom qualifiedName) noexcept
   {
     html::CEReactionsScope ceReactions;
-    ElementAlgorithms::RemoveAttributeByName(krys::move(qualifiedName), *this);
+    dom::ElementAlgorithms::RemoveAttributeByName(krys::move(qualifiedName), *this);
   }
 
   void Element::RemoveAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) noexcept
   {
     html::CEReactionsScope ceReactions;
-    ElementAlgorithms::RemoveAttributeByNamespace(krys::move(namespaceURI), krys::move(localName), *this);
+    dom::ElementAlgorithms::RemoveAttributeByNamespace(krys::move(namespaceURI), krys::move(localName),
+                                                       *this);
   }
 
   ExceptionOr<bool> Element::ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept
@@ -2216,7 +2218,7 @@ namespace krys::boo::dom
     html::CEReactionsScope ceReactions;
     // 1. If qualifiedName is not a valid attribute local name, then throw an "InvalidCharacterError"
     //    DOMException.
-    if (!NameValidation::IsValidAttributeLocalName(qualifiedName.View()))
+    if (!dom::NameValidation::IsValidAttributeLocalName(qualifiedName.View()))
     {
       return Exception {ExceptionCode::InvalidCharacterError};
     }
@@ -2243,7 +2245,7 @@ namespace krys::boo::dom
       {
         auto attr =
           AdoptRef<Attr>(*new Attr(NodeDocument(), QualifiedName {null, null, qualifiedName}, u8""));
-        ElementAlgorithms::AppendAttribute(*attr, *this);
+        dom::ElementAlgorithms::AppendAttribute(*attr, *this);
         return true;
       }
 
@@ -2255,7 +2257,7 @@ namespace krys::boo::dom
     //    false.
     if (!force.has_value() || !force.value())
     {
-      ElementAlgorithms::RemoveAttribute(**it);
+      dom::ElementAlgorithms::RemoveAttribute(**it);
       return false;
     }
 
@@ -2294,24 +2296,25 @@ namespace krys::boo::dom
 
   Attr *Element::GetAttributeNode(DOMStringAtom qualifiedName) const noexcept
   {
-    return ElementAlgorithms::GetAttributeByName(krys::move(qualifiedName), *this);
+    return dom::ElementAlgorithms::GetAttributeByName(krys::move(qualifiedName), *this);
   }
 
   Attr *Element::GetAttributeNodeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) const noexcept
   {
-    return ElementAlgorithms::GetAttributeByNamespace(krys::move(namespaceURI), krys::move(localName), *this);
+    return dom::ElementAlgorithms::GetAttributeByNamespace(krys::move(namespaceURI), krys::move(localName),
+                                                           *this);
   }
 
   ExceptionOr<RefPtr<Attr>> Element::SetAttributeNode(Attr &attr) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return ElementAlgorithms::SetAttribute(attr, *this);
+    return dom::ElementAlgorithms::SetAttribute(attr, *this);
   }
 
   ExceptionOr<RefPtr<Attr>> Element::SetAttributeNodeNS(Attr &attr) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return ElementAlgorithms::SetAttribute(attr, *this);
+    return dom::ElementAlgorithms::SetAttribute(attr, *this);
   }
 
   ExceptionOr<Ref<Attr>> Element::RemoveAttributeNode(Attr &attr) noexcept
@@ -2324,7 +2327,7 @@ namespace krys::boo::dom
     }
 
     // 2. Remove attr.
-    ElementAlgorithms::RemoveAttribute(attr);
+    dom::ElementAlgorithms::RemoveAttribute(attr);
 
     // 3. Return attr.
     return ShareRef(attr);
@@ -2335,7 +2338,7 @@ namespace krys::boo::dom
     return NodeDocument().GetCachedLocale(css::EffectiveLang(*this));
   }
 
-  ExceptionOr<Ref<ShadowRoot>> Element::AttachShadow(const ShadowRootInit &init) noexcept
+  ExceptionOr<Ref<ShadowRoot>> Element::AttachShadow(const dom::ShadowRootInit &init) noexcept
   {
     // 1. Let registry be this's node document's custom element registry.
     // 2. If init["customElementRegistry"] exists, then set registry to it.
@@ -2351,7 +2354,7 @@ namespace krys::boo::dom
 
     // 4. Run attach a shadow root with this, init["mode"], init["delegatesFocus"], init["serializable"],
     //    init["slotAssignment"], init["clonable"], init["referenceTarget"], and registry.
-    if (auto attachResult = ElementAlgorithms::AttachShadowRoot(
+    if (auto attachResult = dom::ElementAlgorithms::AttachShadowRoot(
           *this, init.Mode, init.Clonable, init.Serialisable, init.DelegatesFocus, init.SlotAssignment,
           init.ReferenceTarget, registry);
         attachResult.HasException())
@@ -2368,7 +2371,7 @@ namespace krys::boo::dom
     // 1. Let shadow be this's shadow root.
     // 2. If shadow is null or its mode is "closed", then return null. (A user agent shadow root counts as
     //    closed.)
-    if (!_shadowRoot || _shadowRoot->Mode() != ShadowRootMode::Open)
+    if (!_shadowRoot || _shadowRoot->Mode() != dom::ShadowRootMode::Open)
     {
       return nullptr;
     }
@@ -2379,7 +2382,7 @@ namespace krys::boo::dom
 
   ShadowRoot *Element::UserAgentShadowRoot() const noexcept
   {
-    krys_debug_assert(!_shadowRoot || _shadowRoot->Mode() == ShadowRootMode::UserAgent);
+    krys_debug_assert(!_shadowRoot || _shadowRoot->Mode() == dom::ShadowRootMode::UserAgent);
     return _shadowRoot.get();
   }
 
@@ -2395,7 +2398,7 @@ namespace krys::boo::dom
   ShadowRoot &Element::CreateUserAgentShadowRoot() noexcept
   {
     krys_debug_assert(!UserAgentShadowRoot());
-    return ElementAlgorithms::AttachUserAgentShadowRoot(*this);
+    return dom::ElementAlgorithms::AttachUserAgentShadowRoot(*this);
   }
 
   DOMStringAtom Element::UserAgentPart() const noexcept
@@ -2432,26 +2435,28 @@ namespace krys::boo::dom
     return query.Value().Matches(*this);
   }
 
-  Ref<HTMLCollection> Element::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept
+  Ref<dom::HTMLCollection> Element::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept
   {
-    return NodeAlgorithms::GetElementsByTagName(*this, krys::move(qualifiedName));
+    return dom::NodeAlgorithms::GetElementsByTagName(*this, krys::move(qualifiedName));
   }
 
-  Ref<HTMLCollection> Element::GetElementsByTagNameNS(DOMStringAtom namespaceURI,
-                                                      DOMStringAtom localName) noexcept
+  Ref<dom::HTMLCollection> Element::GetElementsByTagNameNS(DOMStringAtom namespaceURI,
+                                                           DOMStringAtom localName) noexcept
   {
-    return NodeAlgorithms::GetElementsByTagNameNS(*this, krys::move(namespaceURI), krys::move(localName));
+    return dom::NodeAlgorithms::GetElementsByTagNameNS(*this, krys::move(namespaceURI),
+                                                       krys::move(localName));
   }
 
-  Ref<HTMLCollection> Element::GetElementsByClassName(DOMStringAtom classNames) noexcept
+  Ref<dom::HTMLCollection> Element::GetElementsByClassName(DOMStringAtom classNames) noexcept
   {
-    return NodeAlgorithms::GetElementsByClassName(*this, krys::move(classNames));
+    return dom::NodeAlgorithms::GetElementsByClassName(*this, krys::move(classNames));
   }
 
-  ExceptionOr<Element *> Element::InsertAdjacentElement(InsertAdjacentWhere where, Element &element) noexcept
+  ExceptionOr<Element *> Element::InsertAdjacentElement(dom::InsertAdjacentWhere where,
+                                                        Element &element) noexcept
   {
     html::CEReactionsScope ceReactions;
-    auto result = ElementAlgorithms::InsertAdjacent(*this, where, element);
+    auto result = dom::ElementAlgorithms::InsertAdjacent(*this, where, element);
     if (result.HasException())
     {
       return result.ReleaseException();
@@ -2461,13 +2466,13 @@ namespace krys::boo::dom
     return result.Value() ? &element : nullptr;
   }
 
-  ExceptionOr<void> Element::InsertAdjacentText(InsertAdjacentWhere where, DOMString data) noexcept
+  ExceptionOr<void> Element::InsertAdjacentText(dom::InsertAdjacentWhere where, DOMString data) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let text be the result of creating a text node given this's node document and data.
     auto textNode = CreateRef<Text>(NodeDocument(), krys::move(data));
     // 2. Run insert adjacent, given this, where, and text.
-    if (auto result = ElementAlgorithms::InsertAdjacent(*this, where, *textNode); result.HasException())
+    if (auto result = dom::ElementAlgorithms::InsertAdjacent(*this, where, *textNode); result.HasException())
     {
       return result.ReleaseException();
     }
@@ -2485,10 +2490,10 @@ namespace krys::boo::dom
     // beforebegin and afterend, with a body element in place of a context that isn't an element or is an
     // html element in an HTML document.
     KRYS_NODISCARD ExceptionOr<Ref<Element>>
-      ContextElementForInsertAdjacentHTML(Element &element, InsertAdjacentWhere where) noexcept
+      ContextElementForInsertAdjacentHTML(Element &element, dom::InsertAdjacentWhere where) noexcept
     {
       Ref<ContainerNode> contextNode = ShareRef<ContainerNode>(element);
-      if (where == InsertAdjacentWhere::BeforeBegin || where == InsertAdjacentWhere::AfterEnd)
+      if (where == dom::InsertAdjacentWhere::BeforeBegin || where == dom::InsertAdjacentWhere::AfterEnd)
       {
         auto *parent = element.ParentNode();
         if (!parent || Is<Document>(*parent))
@@ -2500,7 +2505,7 @@ namespace krys::boo::dom
 
       auto *contextElement = DynamicDowncast<Element>(contextNode.get());
       if (!contextElement
-          || (Is<HTMLDocument>(contextNode->NodeDocument()) && Is<html::HTMLHtmlElement>(*contextElement)))
+          || (Is<HTMLDocument>(contextNode->NodeDocument()) && Is<HTMLHtmlElement>(*contextElement)))
       {
         return CreateHTMLElement(contextNode->NodeDocument(), u8"body");
       }
@@ -2526,19 +2531,19 @@ namespace krys::boo::dom
 
   ExceptionOr<void>
     Element::ReplaceChildrenWithMarkup(DOMStringView markup,
-                                       EnumSet<ParserContentPolicy> parserContentPolicy) noexcept
+                                       EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept
   {
     Ref<ContainerNode> container = ShareRef<ContainerNode>(*this);
-    if (auto *templateElement = DynamicDowncast<html::HTMLTemplateElement>(*this))
+    if (auto *templateElement = DynamicDowncast<HTMLTemplateElement>(*this))
     {
       container = ShareRef<ContainerNode>(*templateElement->Content());
     }
 
     // Parsing empty string creates additional elements only inside <html> container
     // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhtml
-    if (markup.empty() && !Is<html::HTMLHtmlElement>(*container))
+    if (markup.empty() && !Is<HTMLHtmlElement>(*container))
     {
-      return MutationAlgorithms::ReplaceAll(nullptr, *container);
+      return dom::MutationAlgorithms::ReplaceAll(nullptr, *container);
     }
 
     auto fragment = CreateFragmentForInnerOuterHTML(*this, markup, parserContentPolicy);
@@ -2667,7 +2672,7 @@ namespace krys::boo::dom
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
-  DOMString Element::GetHTML(GetHTMLOptions options) const noexcept
+  DOMString Element::GetHTML(dom::GetHTMLOptions options) const noexcept
   {
     return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
                              ResolveURLs::NoExcludingURLsForPrivacy, SerializationSyntax::HTML,
@@ -2746,7 +2751,7 @@ namespace krys::boo::dom
     return {};
   }
 
-  ExceptionOr<void> Element::InsertAdjacentHTML(InsertAdjacentWhere where, DOMStringView markup) noexcept
+  ExceptionOr<void> Element::InsertAdjacentHTML(dom::InsertAdjacentWhere where, DOMStringView markup) noexcept
   {
     html::CEReactionsScope ceReactions;
 
@@ -2766,7 +2771,8 @@ namespace krys::boo::dom
 
     // Step 4.
     Ref<DocumentFragment> newChildren = fragment.ReleaseValue();
-    if (auto result = ElementAlgorithms::InsertAdjacent(*this, where, *newChildren); result.HasException())
+    if (auto result = dom::ElementAlgorithms::InsertAdjacent(*this, where, *newChildren);
+        result.HasException())
     {
       return result.ReleaseException();
     }
@@ -2809,12 +2815,12 @@ namespace krys::boo::dom
 
 #pragma region Element (Pointer Lock)
 
-  void Element::RequestPointerLock(PointerLockOptions options,
+  void Element::RequestPointerLock(dom::PointerLockOptions options,
                                    Func<void(ExceptionOr<void> &&)> &&promise) noexcept
   {
     if (auto *page = NodeDocument().GetPage())
     {
-      page->GetPointerLockController().RequestPointerLock(this, Maybe<PointerLockOptions>(options),
+      page->GetPointerLockController().RequestPointerLock(this, Maybe<dom::PointerLockOptions>(options),
                                                           krys::move(promise));
     }
   }
@@ -2830,41 +2836,41 @@ namespace krys::boo::dom
 
   Maybe<DOMString> Element::TextContent() const noexcept
   {
-    return TextAlgorithms::DescendantTextContent(*this);
+    return dom::TextAlgorithms::DescendantTextContent(*this);
   }
 
   ExceptionOr<void> Element::TextContent(DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return NodeAlgorithms::StringReplaceAll(krys::move(value), *this);
+    return dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *this);
   }
 
 #pragma endregion
 
 #pragma region ChildNode
 
-  ExceptionOr<void> Element::Before(const List<NodeOrString> &nodes) noexcept
+  ExceptionOr<void> Element::Before(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return mixins::ChildNode::Before(*this, nodes);
+    return dom::mixins::ChildNode::Before(*this, nodes);
   }
 
-  ExceptionOr<void> Element::After(const List<NodeOrString> &nodes) noexcept
+  ExceptionOr<void> Element::After(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return mixins::ChildNode::After(*this, nodes);
+    return dom::mixins::ChildNode::After(*this, nodes);
   }
 
-  ExceptionOr<void> Element::ReplaceWith(const List<NodeOrString> &nodes) noexcept
+  ExceptionOr<void> Element::ReplaceWith(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return mixins::ChildNode::ReplaceWith(*this, nodes);
+    return dom::mixins::ChildNode::ReplaceWith(*this, nodes);
   }
 
   ExceptionOr<void> Element::Remove() noexcept
   {
     html::CEReactionsScope ceReactions;
-    return mixins::ChildNode::Remove(*this);
+    return dom::mixins::ChildNode::Remove(*this);
   }
 
 #pragma endregion
@@ -2873,99 +2879,99 @@ namespace krys::boo::dom
 
   RefPtr<const Element> Element::PreviousElementSibling() const noexcept
   {
-    return mixins::NonDocumentTypeChildNode::PreviousElementSibling(*this);
+    return dom::mixins::NonDocumentTypeChildNode::PreviousElementSibling(*this);
   }
 
   RefPtr<Element> Element::PreviousElementSibling() noexcept
   {
-    return mixins::NonDocumentTypeChildNode::PreviousElementSibling(*this);
+    return dom::mixins::NonDocumentTypeChildNode::PreviousElementSibling(*this);
   }
 
   RefPtr<const Element> Element::NextElementSibling() const noexcept
   {
-    return mixins::NonDocumentTypeChildNode::NextElementSibling(*this);
+    return dom::mixins::NonDocumentTypeChildNode::NextElementSibling(*this);
   }
 
   RefPtr<Element> Element::NextElementSibling() noexcept
   {
-    return mixins::NonDocumentTypeChildNode::NextElementSibling(*this);
+    return dom::mixins::NonDocumentTypeChildNode::NextElementSibling(*this);
   }
 
 #pragma endregion
 
 #pragma region ParentNode
 
-  Ref<HTMLCollection> Element::Children() noexcept
+  Ref<dom::HTMLCollection> Element::Children() noexcept
   {
     return EnsureElementRareData().Children(*this);
   }
 
   RefPtr<const Element> Element::FirstElementChild() const noexcept
   {
-    return mixins::ParentNode::FirstElementChild(*this);
+    return dom::mixins::ParentNode::FirstElementChild(*this);
   }
 
   RefPtr<Element> Element::FirstElementChild() noexcept
   {
-    return mixins::ParentNode::FirstElementChild(*this);
+    return dom::mixins::ParentNode::FirstElementChild(*this);
   }
 
   RefPtr<const Element> Element::LastElementChild() const noexcept
   {
-    return mixins::ParentNode::LastElementChild(*this);
+    return dom::mixins::ParentNode::LastElementChild(*this);
   }
 
   RefPtr<Element> Element::LastElementChild() noexcept
   {
-    return mixins::ParentNode::LastElementChild(*this);
+    return dom::mixins::ParentNode::LastElementChild(*this);
   }
 
   size_t Element::ChildElementCount() const noexcept
   {
-    return mixins::ParentNode::ChildElementCount(*this);
+    return dom::mixins::ParentNode::ChildElementCount(*this);
   }
 
-  ExceptionOr<void> Element::Prepend(const List<NodeOrString> &nodes) noexcept
+  ExceptionOr<void> Element::Prepend(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return mixins::ParentNode::Prepend(*this, nodes);
+    return dom::mixins::ParentNode::Prepend(*this, nodes);
   }
 
-  ExceptionOr<void> Element::Append(const List<NodeOrString> &nodes) noexcept
+  ExceptionOr<void> Element::Append(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return mixins::ParentNode::Append(*this, nodes);
+    return dom::mixins::ParentNode::Append(*this, nodes);
   }
 
-  ExceptionOr<void> Element::ReplaceChildren(const List<NodeOrString> &nodes) noexcept
+  ExceptionOr<void> Element::ReplaceChildren(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return mixins::ParentNode::ReplaceChildren(*this, nodes);
+    return dom::mixins::ParentNode::ReplaceChildren(*this, nodes);
   }
 
   ExceptionOr<void> Element::MoveBefore(Node &node, Node *refChild) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return mixins::ParentNode::MoveBefore(*this, node, refChild);
+    return dom::mixins::ParentNode::MoveBefore(*this, node, refChild);
   }
 
   ExceptionOr<RefPtr<Element>> Element::QuerySelector(DOMStringView selectors) noexcept
   {
-    return mixins::ParentNode::QuerySelector(*this, selectors);
+    return dom::mixins::ParentNode::QuerySelector(*this, selectors);
   }
 
-  ExceptionOr<Ref<NodeList>> Element::QuerySelectorAll(DOMStringView selectors) noexcept
+  ExceptionOr<Ref<dom::NodeList>> Element::QuerySelectorAll(DOMStringView selectors) noexcept
   {
-    return mixins::ParentNode::QuerySelectorAll(*this, selectors);
+    return dom::mixins::ParentNode::QuerySelectorAll(*this, selectors);
   }
 
 #pragma endregion
 
 #pragma region Slottable
 
-  RefPtr<html::HTMLSlotElement> Element::AssignedSlot() noexcept
+  RefPtr<HTMLSlotElement> Element::AssignedSlot() noexcept
   {
-    return mixins::Slottable::AssignedSlot(*this);
+    return dom::mixins::Slottable::AssignedSlot(*this);
   }
 
 #pragma endregion
@@ -3012,8 +3018,8 @@ namespace krys::boo::dom
 
   void Element::SynchronizeAnimatedSVGAttributes() const noexcept
   {
-    auto &svgElement = const_cast<svg::SVGElement &>(Downcast<svg::SVGElement>(*this));
-    svgElement.ClearNodeFlag(NodeFlags::AnimatedSVGAttributesAreDirty);
+    auto &svgElement = const_cast<SVGElement &>(Downcast<SVGElement>(*this));
+    svgElement.ClearNodeFlag(dom::NodeFlags::AnimatedSVGAttributesAreDirty);
     svgElement.SynchronizeAllSVGAttributes();
   }
 
@@ -3109,17 +3115,17 @@ namespace krys::boo::dom
       }
 
       // 1f. If element is assigned, then run assign slottables for element's assigned slot.
-      if (auto *assignedSlot = SlotAlgorithms::GetAssignedSlot(*this))
+      if (auto *assignedSlot = dom::SlotAlgorithms::GetAssignedSlot(*this))
       {
-        SlotAlgorithms::AssignSlottables(*assignedSlot);
+        dom::SlotAlgorithms::AssignSlottables(*assignedSlot);
       }
 
       // 1g. Run assign a slot for element.
-      SlotAlgorithms::AssignSlot(*this);
+      dom::SlotAlgorithms::AssignSlot(*this);
     }
     else if (localName == u8"dir")
     {
-      TextDirectionStateChanged(*this, ParseTextDirectionState(value));
+      dom::TextDirectionStateChanged(*this, dom::ParseTextDirectionState(value));
     }
     else if (localName.View() == u8"part")
     {
@@ -3135,7 +3141,7 @@ namespace krys::boo::dom
     }
     else if (localName.View() == u8"exportparts")
     {
-      if (auto *shadowRoot = TreeQueries::GetShadowRoot(*this))
+      if (auto *shadowRoot = dom::TreeQueries::GetShadowRoot(*this))
       {
         shadowRoot->InvalidatePartMappings();
         style::Invalidator::InvalidateShadowParts(*shadowRoot);
@@ -3178,9 +3184,9 @@ namespace krys::boo::dom
 
     Ref<Document> document = ShareRef(NodeDocument());
     document->AddTopLayerElement(*this);
-    SetEventTargetFlag(EventTargetFlags::IsInTopLayer);
+    SetEventTargetFlag(dom::EventTargetFlags::IsInTopLayer);
 
-    document->ScheduleContentRelevancyUpdate(ContentRelevancy::IsInTopLayer);
+    document->ScheduleContentRelevancyUpdate(dom::ContentRelevancy::IsInTopLayer);
 
     // Invalidate inert state
     InvalidateStyleInternal();
@@ -3227,9 +3233,9 @@ namespace krys::boo::dom
 
     // Unable to protect the document as it may have started destruction.
     NodeDocument().RemoveTopLayerElement(*this);
-    ClearEventTargetFlag(EventTargetFlags::IsInTopLayer);
+    ClearEventTargetFlag(dom::EventTargetFlags::IsInTopLayer);
 
-    NodeDocument().ScheduleContentRelevancyUpdate(ContentRelevancy::IsInTopLayer);
+    NodeDocument().ScheduleContentRelevancyUpdate(dom::ContentRelevancy::IsInTopLayer);
 
     // Invalidate inert state
     InvalidateStyleInternal();
@@ -3249,17 +3255,17 @@ namespace krys::boo::dom
 
 #pragma region Popovers
 
-  PopoverData *Element::GetPopoverData() const noexcept
+  dom::PopoverData *Element::GetPopoverData() const noexcept
   {
     return GetElementRareData() ? GetElementRareData()->GetPopoverData() : nullptr;
   }
 
-  PopoverData &Element::EnsurePopoverData() noexcept
+  dom::PopoverData &Element::EnsurePopoverData() noexcept
   {
     auto &rareData = EnsureElementRareData();
     if (!rareData.GetPopoverData())
     {
-      rareData.SetPopoverData(CreateUnique<PopoverData>());
+      rareData.SetPopoverData(CreateUnique<dom::PopoverData>());
     }
     return *rareData.GetPopoverData();
   }
@@ -3275,13 +3281,13 @@ namespace krys::boo::dom
   bool Element::IsPopoverShowing() const noexcept
   {
     auto *popoverData = GetPopoverData();
-    return popoverData && popoverData->VisibilityState() == PopoverVisibilityState::Showing;
+    return popoverData && popoverData->VisibilityState() == dom::PopoverVisibilityState::Showing;
   }
 
-  PopoverState Element::GetPopoverState() const noexcept
+  dom::PopoverState Element::GetPopoverState() const noexcept
   {
     auto *popoverData = GetPopoverData();
-    return popoverData ? popoverData->GetPopoverState() : PopoverState::None;
+    return popoverData ? popoverData->GetPopoverState() : dom::PopoverState::None;
   }
 
   Element *Element::InvokedPopover() const noexcept
@@ -3298,8 +3304,7 @@ namespace krys::boo::dom
   }
 
   // https://html.spec.whatwg.org/#topmost-popover-ancestor
-  RefPtr<html::HTMLElement> Element::TopmostPopoverAncestor(html::HTMLElement *source,
-                                                            bool isPopover) noexcept
+  RefPtr<HTMLElement> Element::TopmostPopoverAncestor(HTMLElement *source, bool isPopover) noexcept
   {
     // 1. If isPopover is true: assert: newPopoverOrTopLayerElement is an HTML element; its popover attribute
     //    is not in the No Popover State or the Manual state; its popover visibility state is not in the
@@ -3443,7 +3448,7 @@ namespace krys::boo::dom
     return false;
   }
 
-  Maybe<EnumSet<ContentRelevancy>> Element::GetContentRelevancy() const noexcept
+  Maybe<EnumSet<dom::ContentRelevancy>> Element::GetContentRelevancy() const noexcept
   {
     if (!GetElementRareData())
     {
@@ -3452,7 +3457,7 @@ namespace krys::boo::dom
     return GetElementRareData()->GetContentRelevancy();
   }
 
-  void Element::SetContentRelevancy(EnumSet<ContentRelevancy> contentRelevancy) noexcept
+  void Element::SetContentRelevancy(EnumSet<dom::ContentRelevancy> contentRelevancy) noexcept
   {
     EnsureElementRareData().SetContentRelevancy(contentRelevancy);
   }
@@ -3546,7 +3551,7 @@ namespace krys::boo::dom
       return nullptr;
     }
     // Retargeting an element gives it or a shadow host, an element either way.
-    auto *retargeted = EventTargetAlgorithms::Retarget(element, const_cast<Element &>(*this));
+    auto *retargeted = dom::EventTargetAlgorithms::Retarget(element, const_cast<Element &>(*this));
     return ShareRefPtr(&Downcast<Element>(Downcast<Node>(*retargeted)));
   }
 
@@ -3554,7 +3559,7 @@ namespace krys::boo::dom
   {
     // 1. If element is not a shadow host, or element's shadow root's reference target is null, then return
     //    element.
-    auto *shadowRoot = TreeQueries::GetShadowRoot(*this);
+    auto *shadowRoot = dom::TreeQueries::GetShadowRoot(*this);
     if (!shadowRoot || !shadowRoot->ReferenceTarget())
     {
       return ShareRefPtr(this);
@@ -3583,7 +3588,8 @@ namespace krys::boo::dom
       {
         auto *explicitlySetElement = it->second.get();
         if (explicitlySetElement
-            && TreeQueries::IsShadowIncludingDescendant(*this, TreeQueries::Root(*explicitlySetElement)))
+            && dom::TreeQueries::IsShadowIncludingDescendant(*this,
+                                                             dom::TreeQueries::Root(*explicitlySetElement)))
         {
           return ShareRefPtr(explicitlySetElement);
         }
@@ -3606,7 +3612,7 @@ namespace krys::boo::dom
     {
       return nullptr;
     }
-    auto &root = TreeQueries::Root(const_cast<Element &>(*this));
+    auto &root = dom::TreeQueries::Root(const_cast<Element &>(*this));
     if (auto *document = DynamicDowncast<Document>(root))
     {
       return document->GetElementById(id);
@@ -3615,7 +3621,7 @@ namespace krys::boo::dom
     {
       return fragment->GetElementById(id);
     }
-    for (auto *node = &root; node; node = TreeQueries::Next(*node, &root))
+    for (auto *node = &root; node; node = dom::TreeQueries::Next(*node, &root))
     {
       if (auto *element = DynamicDowncast<Element>(*node);
           element && element->GetAttribute(u8"id") == DOMString(id))
@@ -3674,7 +3680,7 @@ namespace krys::boo::dom
           //       continue.
           auto *attrElement = weakElement.get();
           if (!attrElement
-              || !TreeQueries::IsShadowIncludingDescendant(*this, TreeQueries::Root(*attrElement)))
+              || !dom::TreeQueries::IsShadowIncludingDescendant(*this, dom::TreeQueries::Root(*attrElement)))
           {
             continue;
           }
@@ -3765,7 +3771,7 @@ namespace krys::boo::dom
 
 #pragma endregion
 
-  bool IsInTopLayerOrBackdrop(const RenderStyle &style, const Element *element) noexcept
+  bool dom::IsInTopLayerOrBackdrop(const RenderStyle &style, const Element *element) noexcept
   {
     // Elements in the top layer are rendered there while their overlay is auto.
     // https://drafts.csswg.org/css-position-4/#rendered-in-the-top-layer
@@ -3943,12 +3949,12 @@ namespace krys::boo::dom
     /// the trees its shadow-including ancestors are in.
     KRYS_NODISCARD bool IsAncestorTreeScope(const Node &ancestorRoot, const Node &node) noexcept
     {
-      return TreeQueries::IsShadowIncludingInclusiveAncestor(ancestorRoot, node);
+      return dom::TreeQueries::IsShadowIncludingInclusiveAncestor(ancestorRoot, node);
     }
 
-    KRYS_NODISCARD const svg::SVGElement *ElementWithSVGLayoutBox(const Element &element) noexcept
+    KRYS_NODISCARD const SVGElement *ElementWithSVGLayoutBox(const Element &element) noexcept
     {
-      auto *svg = DynamicDowncast<svg::SVGElement>(element);
+      auto *svg = DynamicDowncast<SVGElement>(element);
       return svg && svg->HasAssociatedSVGLayoutBox() ? svg : nullptr;
     }
 
@@ -3974,13 +3980,13 @@ namespace krys::boo::dom
   namespace
   {
     /// @brief The select element whose list box draws @p element, an option or optgroup.
-    KRYS_NODISCARD html::HTMLSelectElement *OwningSelectElementOfListBoxItem(const Element &element) noexcept
+    KRYS_NODISCARD HTMLSelectElement *OwningSelectElementOfListBoxItem(const Element &element) noexcept
     {
-      if (auto *optionElement = DynamicDowncast<html::HTMLOptionElement>(element))
+      if (auto *optionElement = DynamicDowncast<HTMLOptionElement>(element))
       {
         return optionElement->OwnerSelectElement();
       }
-      if (auto *optGroupElement = DynamicDowncast<html::HTMLOptGroupElement>(element))
+      if (auto *optGroupElement = DynamicDowncast<HTMLOptGroupElement>(element))
       {
         return optGroupElement->OwnerSelectElement();
       }
@@ -4004,11 +4010,11 @@ namespace krys::boo::dom
       }
 
       Maybe<LayoutRect> boundingBox;
-      if (auto *optionElement = DynamicDowncast<html::HTMLOptionElement>(element))
+      if (auto *optionElement = DynamicDowncast<HTMLOptionElement>(element))
       {
         boundingBox = listBoxRenderer->LocalBoundsOfOption(*optionElement);
       }
-      else if (auto *optGroupElement = DynamicDowncast<html::HTMLOptGroupElement>(element))
+      else if (auto *optGroupElement = DynamicDowncast<HTMLOptGroupElement>(element))
       {
         boundingBox = listBoxRenderer->LocalBoundsOfOptGroup(*optGroupElement);
       }
@@ -4054,11 +4060,12 @@ namespace krys::boo::dom
     }
   }
 
-  Ref<DOMRectList> Element::GetClientRects() noexcept
+  Ref<dom::DOMRectList> Element::GetClientRects() noexcept
   {
-    NodeDocument().UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                         LayoutOptions::TreatContentVisibilityAutoAsVisible},
-                                                        this);
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets(
+      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      this);
 
     auto *renderer = Renderer();
 
@@ -4085,11 +4092,11 @@ namespace krys::boo::dom
 
     if (quads.empty())
     {
-      return DOMRectList::Create();
+      return dom::DOMRectList::Create();
     }
 
     NodeDocument().ConvertAbsoluteToClientQuads(quads, renderer->Style());
-    return DOMRectList::Create(quads);
+    return dom::DOMRectList::Create(quads);
   }
 
   Maybe<Pair<RenderElement *, FloatRect>> Element::BoundingAbsoluteRectWithoutLayout() const noexcept
@@ -4145,8 +4152,8 @@ namespace krys::boo::dom
   FloatRect Element::BoundingClientRect() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                   LayoutOptions::TreatContentVisibilityAutoAsVisible},
+    document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                   dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
                                                   this);
     auto pair = BoundingAbsoluteRectWithoutLayout();
     if (!pair)
@@ -4170,9 +4177,9 @@ namespace krys::boo::dom
     return view->ContentsToScreen(renderer->AbsoluteBoundingBoxRect());
   }
 
-  Ref<DOMRect> Element::GetBoundingClientRect() noexcept
+  Ref<dom::DOMRect> Element::GetBoundingClientRect() noexcept
   {
-    return DOMRect::Create(BoundingClientRect());
+    return dom::DOMRect::Create(BoundingClientRect());
   }
 
   void Element::ScrollIntoView(const ScrollIntoViewOptions &options) noexcept
@@ -4379,9 +4386,10 @@ namespace krys::boo::dom
   int32 Element::OffsetLeft() noexcept
   {
     auto offset = 0;
-    NodeDocument().UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                         LayoutOptions::TreatContentVisibilityAutoAsVisible},
-                                                        this);
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets(
+      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      this);
     if (auto *renderer = DynamicDowncast<RenderBoxModelObject>(Renderer()))
     {
       offset = AdjustOffsetForZoomAndSubpixelLayout(*renderer, renderer->OffsetLeft());
@@ -4389,12 +4397,12 @@ namespace krys::boo::dom
 
     // Add the offsets of the offset parents in shadow trees the element isn't in.
     auto *parent = OffsetParentIgnoringShadowTrees();
-    if (!parent || !parent->IsInShadowTree() || TreeQueries::SameRoot(*parent, *this))
+    if (!parent || !parent->IsInShadowTree() || dom::TreeQueries::SameRoot(*parent, *this))
     {
       return offset;
     }
 
-    while (parent && !IsAncestorTreeScope(TreeQueries::Root(*parent), *this))
+    while (parent && !IsAncestorTreeScope(dom::TreeQueries::Root(*parent), *this))
     {
       if (auto *parentRenderer = DynamicDowncast<RenderBoxModelObject>(parent->Renderer()))
       {
@@ -4409,9 +4417,10 @@ namespace krys::boo::dom
   int32 Element::OffsetTop() noexcept
   {
     auto offset = 0;
-    NodeDocument().UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                         LayoutOptions::TreatContentVisibilityAutoAsVisible},
-                                                        this);
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets(
+      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      this);
     if (auto *renderer = DynamicDowncast<RenderBoxModelObject>(Renderer()))
     {
       offset = AdjustOffsetForZoomAndSubpixelLayout(*renderer, renderer->OffsetTop());
@@ -4419,12 +4428,12 @@ namespace krys::boo::dom
 
     // Add the offsets of the offset parents in shadow trees the element isn't in.
     auto *parent = OffsetParentIgnoringShadowTrees();
-    if (!parent || !parent->IsInShadowTree() || TreeQueries::SameRoot(*parent, *this))
+    if (!parent || !parent->IsInShadowTree() || dom::TreeQueries::SameRoot(*parent, *this))
     {
       return offset;
     }
 
-    while (parent && !IsAncestorTreeScope(TreeQueries::Root(*parent), *this))
+    while (parent && !IsAncestorTreeScope(dom::TreeQueries::Root(*parent), *this))
     {
       if (auto *parentRenderer = DynamicDowncast<RenderBoxModelObject>(parent->Renderer()))
       {
@@ -4438,9 +4447,10 @@ namespace krys::boo::dom
 
   int32 Element::OffsetWidth() noexcept
   {
-    NodeDocument().UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                         LayoutOptions::TreatContentVisibilityAutoAsVisible},
-                                                        this);
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets(
+      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      this);
     if (auto *renderer = DynamicDowncast<RenderBoxModelObject>(Renderer()))
     {
       auto offsetWidth = LayoutUnit(RoundToInt(renderer->OffsetWidth()));
@@ -4452,9 +4462,10 @@ namespace krys::boo::dom
 
   int32 Element::OffsetHeight() noexcept
   {
-    NodeDocument().UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                         LayoutOptions::TreatContentVisibilityAutoAsVisible},
-                                                        this);
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets(
+      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      this);
     if (auto *renderer = DynamicDowncast<RenderBoxModelObject>(Renderer()))
     {
       auto offsetHeight = LayoutUnit(RoundToInt(renderer->OffsetHeight()));
@@ -4471,7 +4482,7 @@ namespace krys::boo::dom
     {
       return element;
     }
-    while (element && !TreeQueries::IsShadowIncludingDescendant(*this, TreeQueries::Root(*element)))
+    while (element && !dom::TreeQueries::IsShadowIncludingDescendant(*this, dom::TreeQueries::Root(*element)))
     {
       element = element->OffsetParentIgnoringShadowTrees();
     }
@@ -4480,9 +4491,10 @@ namespace krys::boo::dom
 
   Element *Element::OffsetParentIgnoringShadowTrees() noexcept
   {
-    NodeDocument().UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                         LayoutOptions::TreatContentVisibilityAutoAsVisible},
-                                                        this);
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets(
+      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      this);
     auto *renderer = Renderer();
     if (!renderer)
     {
@@ -4494,9 +4506,10 @@ namespace krys::boo::dom
 
   int32 Element::ClientLeft() noexcept
   {
-    NodeDocument().UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                         LayoutOptions::TreatContentVisibilityAutoAsVisible},
-                                                        this);
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets(
+      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      this);
 
     if (auto *renderer = RenderBoxOf(*this))
     {
@@ -4518,9 +4531,10 @@ namespace krys::boo::dom
 
   int32 Element::ClientTop() noexcept
   {
-    NodeDocument().UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                         LayoutOptions::TreatContentVisibilityAutoAsVisible},
-                                                        this);
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets(
+      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      this);
 
     if (auto *renderer = RenderBoxOf(*this))
     {
@@ -4538,8 +4552,8 @@ namespace krys::boo::dom
   int32 Element::ClientWidth() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                   LayoutOptions::TreatContentVisibilityAutoAsVisible},
+    document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                   dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
                                                   this);
 
     if (!document.HasLivingRenderTree())
@@ -4593,8 +4607,8 @@ namespace krys::boo::dom
   int32 Element::ClientHeight() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                   LayoutOptions::TreatContentVisibilityAutoAsVisible},
+    document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                   dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
                                                   this);
 
     if (!document.HasLivingRenderTree())
@@ -4639,8 +4653,8 @@ namespace krys::boo::dom
   int32 Element::ScrollLeft() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                   LayoutOptions::TreatContentVisibilityAutoAsVisible},
+    document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                   dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
                                                   this);
 
     if (document.ScrollingElement() == this)
@@ -4662,8 +4676,8 @@ namespace krys::boo::dom
   int32 Element::ScrollTop() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                   LayoutOptions::TreatContentVisibilityAutoAsVisible},
+    document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                   dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
                                                   this);
 
     if (document.ScrollingElement() == this)
@@ -4685,8 +4699,8 @@ namespace krys::boo::dom
   void Element::SetScrollLeft(int32 newLeft) noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                   LayoutOptions::TreatContentVisibilityAutoAsVisible},
+    document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                   dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
                                                   this);
 
     auto options = ScrollPositionChangeOptions::CreateProgrammaticWithOptions(
@@ -4717,8 +4731,8 @@ namespace krys::boo::dom
   void Element::SetScrollTop(int32 newTop) noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                   LayoutOptions::TreatContentVisibilityAutoAsVisible},
+    document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                   dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
                                                   this);
 
     auto options = ScrollPositionChangeOptions::CreateProgrammaticWithOptions(
@@ -4749,8 +4763,8 @@ namespace krys::boo::dom
   int32 Element::ScrollWidth() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                   LayoutOptions::TreatContentVisibilityAutoAsVisible},
+    document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                   dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
                                                   this);
 
     if (document.ScrollingElement() == this)
@@ -4772,8 +4786,8 @@ namespace krys::boo::dom
   int32 Element::ScrollHeight() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                   LayoutOptions::TreatContentVisibilityAutoAsVisible},
+    document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                   dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
                                                   this);
 
     if (document.ScrollingElement() == this)

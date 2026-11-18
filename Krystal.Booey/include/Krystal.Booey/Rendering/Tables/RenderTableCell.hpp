@@ -34,15 +34,11 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
-namespace krys::boo::html
-{
-  class HTMLTableCellElement;
-}
-
 namespace krys::boo
 {
   struct BorderValue;
   enum class CollapsedBorderSide : uint8;
+  class HTMLTableCellElement;
   class RenderTable;
   class RenderTableCol;
   class RenderTableRow;
@@ -83,9 +79,9 @@ namespace krys::boo
     mutable Maybe<LayoutUnit> _orthogonalCellContentIntrinsicHeight;
 
   public:
-    RenderTableCell(dom::Element &element, RenderStyle &&style) noexcept;
+    RenderTableCell(Element &element, RenderStyle &&style) noexcept;
 
-    RenderTableCell(dom::Document &document, RenderStyle &&style) noexcept;
+    RenderTableCell(Document &document, RenderStyle &&style) noexcept;
 
     ~RenderTableCell() noexcept override;
 
@@ -372,7 +368,7 @@ namespace krys::boo
 
     KRYS_NODISCARD CollapsedBorderValue CachedCollapsedBottomBorder(WritingMode writingMode) const noexcept;
 
-    KRYS_NODISCARD const html::HTMLTableCellElement *TableCellElement() const noexcept;
+    KRYS_NODISCARD const HTMLTableCellElement *TableCellElement() const noexcept;
 
     void UpdateColAndRowSpanFlags() noexcept;
 

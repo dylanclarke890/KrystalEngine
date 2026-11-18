@@ -17,8 +17,8 @@
  *  Boston, MA 02110-1301, USA.
  */
 
-#include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
-#include "Krystal.Booey/CSS/Media/MediaQueryListEvent.hpp"
+#include "Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/MediaQueryListEvent.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
@@ -26,9 +26,9 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  MediaQueryList::MediaQueryList(MediaQueryMatcher &matcher, mq::MediaQueryList &&mediaQueries,
+  MediaQueryList::MediaQueryList(css::MediaQueryMatcher &matcher, css::mq::MediaQueryList &&mediaQueries,
                                  bool matches) noexcept
       : _matcher(ShareRefPtr(&matcher)), _mediaQueries(krys::move(mediaQueries)),
         _evaluationRound(matcher.EvaluationRound()),
@@ -38,8 +38,8 @@ namespace krys::boo::css
     matcher.AddMediaQueryList(*this);
   }
 
-  Ref<MediaQueryList> MediaQueryList::Create(MediaQueryMatcher &matcher, mq::MediaQueryList &&mediaQueries,
-                                             bool matches) noexcept
+  Ref<MediaQueryList> MediaQueryList::Create(css::MediaQueryMatcher &matcher,
+                                             css::mq::MediaQueryList &&mediaQueries, bool matches) noexcept
   {
     return AdoptRef(*new MediaQueryList(matcher, krys::move(mediaQueries), matches));
   }
@@ -60,34 +60,34 @@ namespace krys::boo::css
   CSSOMString MediaQueryList::Media() const noexcept
   {
     StringBuilder builder;
-    mq::Serialise(builder, _mediaQueries);
+    css::mq::Serialise(builder, _mediaQueries);
     return krys::move(builder).ToString();
   }
 
-  void MediaQueryList::AddListener(RefPtr<dom::EventListenerCallback> &&listener) noexcept
+  void MediaQueryList::AddListener(RefPtr<EventListenerCallback> &&listener) noexcept
   {
     if (!listener)
     {
       return;
     }
 
-    Ref<dom::EventListenerCallback> callback = krys::move(listener);
+    Ref<EventListenerCallback> callback = krys::move(listener);
     AddEventListener(event_names::Change, krys::move(callback), false);
   }
 
-  void MediaQueryList::RemoveListener(RefPtr<dom::EventListenerCallback> &&listener) noexcept
+  void MediaQueryList::RemoveListener(RefPtr<EventListenerCallback> &&listener) noexcept
   {
     if (!listener)
     {
       return;
     }
 
-    Ref<dom::EventListenerCallback> callback = krys::move(listener);
+    Ref<EventListenerCallback> callback = krys::move(listener);
     RemoveEventListener(event_names::Change, krys::move(callback), false);
   }
 
-  void MediaQueryList::Evaluate(mq::MediaQueryEvaluator &evaluator,
-                                MediaQueryMatcher::EventMode eventMode) noexcept
+  void MediaQueryList::Evaluate(css::mq::MediaQueryEvaluator &evaluator,
+                                css::MediaQueryMatcher::EventMode eventMode) noexcept
   {
     krys_assert(_matcher);
     if (_evaluationRound != _matcher->EvaluationRound())
@@ -96,11 +96,11 @@ namespace krys::boo::css
     }
 
     _needsNotification = _changeRound == _matcher->EvaluationRound() || _needsNotification;
-    if (!_needsNotification || eventMode == MediaQueryMatcher::EventMode::Schedule)
+    if (!_needsNotification || eventMode == css::MediaQueryMatcher::EventMode::Schedule)
     {
       return;
     }
-    krys_debug_assert(eventMode == MediaQueryMatcher::EventMode::DispatchNow);
+    krys_debug_assert(eventMode == css::MediaQueryMatcher::EventMode::DispatchNow);
 
     // https://drafts.csswg.org/cssom-view/#evaluate-media-queries-and-report-changes
     MediaQueryListEventInit attributes;

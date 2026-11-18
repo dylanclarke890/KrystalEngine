@@ -39,7 +39,7 @@ namespace krys::boo::tests
     (void)fixture.Document->UpdateLayout();
 
     display_list::RecorderImpl recorder(FloatSize(200, 100));
-    auto quality = [&](dom::DOMStringView id)
+    auto quality = [&](DOMStringView id)
     {
       auto *renderer = DynamicDowncast<RenderImage>(fixture.ById(id).Renderer());
       REQUIRE(renderer);
@@ -75,7 +75,7 @@ namespace krys::boo::tests
     RunNetworkingTasks();
     (void)fixture.Document->UpdateLayout();
 
-    auto layerOf = [&](dom::DOMStringView id)
+    auto layerOf = [&](DOMStringView id)
     {
       auto *renderer = DynamicDowncast<RenderImage>(fixture.ById(id).Renderer());
       REQUIRE(renderer);

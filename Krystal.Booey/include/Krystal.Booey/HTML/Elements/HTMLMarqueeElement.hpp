@@ -6,12 +6,8 @@
 
 namespace krys::boo
 {
-  class WebAnimation;
-}
-
-namespace krys::boo::html
-{
   class HTMLDivElement;
+  class WebAnimation;
 
   /// @brief A marquee: its contents, in a mover in its shadow tree, scroll across it, bounce in it or slide
   /// into it, as a Web Animation of the mover's transform, one loop at a time, as Chrome moves them.
@@ -30,41 +26,41 @@ namespace krys::boo::html
     int32 _currentLoopIndex {0};
 
   public:
-    HTMLMarqueeElement(dom::Document &document) noexcept;
+    HTMLMarqueeElement(Document &document) noexcept;
 
     ~HTMLMarqueeElement() noexcept override;
 
-    KRYS_NODISCARD static Ref<HTMLMarqueeElement> Create(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<HTMLMarqueeElement> Create(Document &document) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-behavior
-    KRYS_NODISCARD dom::DOMString Behavior() const noexcept;
+    KRYS_NODISCARD DOMString Behavior() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-behavior
-    void Behavior(dom::DOMString value) noexcept;
+    void Behavior(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-bgcolor
-    KRYS_NODISCARD dom::DOMString BgColor() const noexcept;
+    KRYS_NODISCARD DOMString BgColor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-bgcolor
-    void BgColor(dom::DOMString value) noexcept;
+    void BgColor(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-direction
-    KRYS_NODISCARD dom::DOMString Direction() const noexcept;
+    KRYS_NODISCARD DOMString Direction() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-direction
-    void Direction(dom::DOMString value) noexcept;
+    void Direction(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-height
-    KRYS_NODISCARD dom::DOMString Height() const noexcept;
+    KRYS_NODISCARD DOMString Height() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-height
-    void Height(dom::DOMString value) noexcept;
+    void Height(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-width
-    KRYS_NODISCARD dom::DOMString Width() const noexcept;
+    KRYS_NODISCARD DOMString Width() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-width
-    void Width(dom::DOMString value) noexcept;
+    void Width(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-hspace
     KRYS_NODISCARD uint32 HSpace() const noexcept;
@@ -120,19 +116,18 @@ namespace krys::boo::html
     KRYS_NODISCARD HTMLDivElement *Mover() const noexcept;
 
   protected:
-    void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept override;
+    void DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept override;
 
     void OnInsert() noexcept override;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
   private:
@@ -144,14 +139,14 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLMarqueeElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLMarqueeElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLMarqueeElement();
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    auto *element = krys::DynamicDowncast<krys::boo::html::HTMLElement>(target);
+    auto *element = krys::DynamicDowncast<krys::boo::HTMLElement>(target);
     return element && element->IsHTMLMarqueeElement();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

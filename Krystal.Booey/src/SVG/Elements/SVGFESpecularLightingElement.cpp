@@ -30,9 +30,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFESpecularLightingElement::SVGFESpecularLightingElement(dom::Document &document) noexcept
+  SVGFESpecularLightingElement::SVGFESpecularLightingElement(Document &document) noexcept
       : SVGFilterPrimitiveStandardAttributes(document, CreateUnique<PropertyRegistry>(*this),
                                              SVGElementInterface::FESpecularLighting),
         _in1(SVGAnimatedString::Create(this)), _specularConstant(SVGAnimatedNumber::Create(this, 1)),
@@ -58,31 +58,31 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGFESpecularLightingElement::AttributeChanged(const dom::QualifiedName &name,
-                                                      Maybe<dom::DOMStringView> oldValue,
-                                                      Maybe<dom::DOMStringView> value) noexcept
+  void SVGFESpecularLightingElement::AttributeChanged(const QualifiedName &name,
+                                                      Maybe<DOMStringView> oldValue,
+                                                      Maybe<DOMStringView> value) noexcept
   {
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::InAttr())
     {
-      _in1->SetBaseValInternal(dom::DOMString(string));
+      _in1->SetBaseValInternal(DOMString(string));
     }
     else if (name == SVGNames::SurfaceScaleAttr())
     {
-      _surfaceScale->SetBaseValInternal(ToFloatOrZero(string));
+      _surfaceScale->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::SpecularConstantAttr())
     {
-      _specularConstant->SetBaseValInternal(ToFloatOrZero(string));
+      _specularConstant->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::SpecularExponentAttr())
     {
-      _specularExponent->SetBaseValInternal(ToFloatOrZero(string));
+      _specularExponent->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::KernelUnitLengthAttr())
     {
-      if (auto result = ParseNumberOptionalNumber(string))
+      if (auto result = svg::ParseNumberOptionalNumber(string))
       {
         _kernelUnitLengthX->SetBaseValInternal(result->first);
         _kernelUnitLengthY->SetBaseValInternal(result->second);
@@ -92,9 +92,8 @@ namespace krys::boo::svg
     SVGFilterPrimitiveStandardAttributes::AttributeChanged(name, oldValue, value);
   }
 
-  bool
-    SVGFESpecularLightingElement::SetFilterEffectAttribute(FilterEffect &filterEffect,
-                                                           const dom::QualifiedName &attributeName) noexcept
+  bool SVGFESpecularLightingElement::SetFilterEffectAttribute(FilterEffect &filterEffect,
+                                                              const QualifiedName &attributeName) noexcept
   {
     auto &effect = Downcast<FESpecularLighting>(filterEffect);
     auto lightElement = [this]
@@ -161,7 +160,7 @@ namespace krys::boo::svg
     return false;
   }
 
-  void SVGFESpecularLightingElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGFESpecularLightingElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {
@@ -184,8 +183,8 @@ namespace krys::boo::svg
     SVGFilterPrimitiveStandardAttributes::SVGAttributeChanged(attributeName);
   }
 
-  void SVGFESpecularLightingElement::LightElementAttributeChanged(
-    const SVGFELightElement *lightElement, const dom::QualifiedName &attributeName) noexcept
+  void SVGFESpecularLightingElement::LightElementAttributeChanged(const SVGFELightElement *lightElement,
+                                                                  const QualifiedName &attributeName) noexcept
   {
     if (SVGFELightElement::FindLightElement(this) != lightElement)
     {

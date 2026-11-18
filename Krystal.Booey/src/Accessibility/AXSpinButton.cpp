@@ -54,7 +54,7 @@ namespace krys::boo
 
   void AXSpinButton::SetSpinButtonElement(html::SpinButtonElement *spinButton) noexcept
   {
-    _spinButtonElement = CreateWeakPtr<dom::Node>(spinButton);
+    _spinButtonElement = CreateWeakPtr<boo::Node>(spinButton);
   }
 
   AXSpinButtonPart *AXSpinButton::IncrementButton() const noexcept

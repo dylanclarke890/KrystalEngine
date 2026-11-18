@@ -33,16 +33,16 @@
 
 namespace krys::boo
 {
-  LegacyRenderSVGRect::LegacyRenderSVGRect(svg::SVGRectElement &element, RenderStyle &&style) noexcept
+  LegacyRenderSVGRect::LegacyRenderSVGRect(SVGRectElement &element, RenderStyle &&style) noexcept
       : LegacyRenderSVGShape(Type::LegacySVGRect, element, krys::move(style))
   {
   }
 
   LegacyRenderSVGRect::~LegacyRenderSVGRect() noexcept = default;
 
-  svg::SVGRectElement &LegacyRenderSVGRect::RectElement() const noexcept
+  SVGRectElement &LegacyRenderSVGRect::RectElement() const noexcept
   {
-    return Downcast<svg::SVGRectElement>(LegacyRenderSVGShape::GraphicsElement());
+    return Downcast<SVGRectElement>(LegacyRenderSVGShape::GraphicsElement());
   }
 
   void LegacyRenderSVGRect::UpdateShapeFromElement() noexcept
@@ -55,12 +55,11 @@ namespace krys::boo
     _strokeBoundingBox = null;
     _approximateStrokeBoundingBox = null;
 
-    svg::SVGLengthContext lengthContext(&RectElement());
+    SVGLengthContext lengthContext(&RectElement());
     const auto &style = Style();
     auto usedZoom = style.UsedZoomForLength();
-    FloatSize boundingBoxSize(
-      lengthContext.ValueForLength(style.Width(), usedZoom, svg::SVGLengthMode::Width),
-      lengthContext.ValueForLength(style.Height(), usedZoom, svg::SVGLengthMode::Height));
+    FloatSize boundingBoxSize(lengthContext.ValueForLength(style.Width(), usedZoom, SVGLengthMode::Width),
+                              lengthContext.ValueForLength(style.Height(), usedZoom, SVGLengthMode::Height));
 
     // Spec: "A negative value is illegal. A value of zero disables rendering of the element."
     if (boundingBoxSize.IsEmpty())
@@ -68,8 +67,8 @@ namespace krys::boo
       return;
     }
 
-    if (lengthContext.ValueForLength(style.Rx(), style::ZoomNeeded {}, svg::SVGLengthMode::Width) > 0
-        || lengthContext.ValueForLength(style.Ry(), style::ZoomNeeded {}, svg::SVGLengthMode::Height) > 0)
+    if (lengthContext.ValueForLength(style.Rx(), style::ZoomNeeded {}, SVGLengthMode::Width) > 0
+        || lengthContext.ValueForLength(style.Ry(), style::ZoomNeeded {}, SVGLengthMode::Height) > 0)
     {
       _shapeType = ShapeType::RoundedRectangle;
     }
@@ -86,8 +85,8 @@ namespace krys::boo
     }
 
     _fillBoundingBox = FloatRect(
-      FloatPoint(lengthContext.ValueForLength(style.X(), style::ZoomNeeded {}, svg::SVGLengthMode::Width),
-                 lengthContext.ValueForLength(style.Y(), style::ZoomNeeded {}, svg::SVGLengthMode::Height)),
+      FloatPoint(lengthContext.ValueForLength(style.X(), style::ZoomNeeded {}, SVGLengthMode::Width),
+                 lengthContext.ValueForLength(style.Y(), style::ZoomNeeded {}, SVGLengthMode::Height)),
       boundingBoxSize);
 
     auto strokeBoundingBox = _fillBoundingBox;

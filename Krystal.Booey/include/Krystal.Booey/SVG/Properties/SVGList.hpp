@@ -29,7 +29,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGProperty.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The list interface the SVG DOM's lists share (`SVGLengthList`, `SVGStringList`, ...).
   /// @see https://svgwg.org/svg2-draft/types.html#ListInterfaces
@@ -50,7 +50,7 @@ namespace krys::boo::svg
       return static_cast<uint32>(_items.size());
     }
 
-    dom::ExceptionOr<void> Clear() noexcept
+    ExceptionOr<void> Clear() noexcept
     {
       auto result = CanAlterList();
       if (result.HasException())
@@ -64,7 +64,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    dom::ExceptionOr<TItem> GetItem(uint32 index) noexcept
+    ExceptionOr<TItem> GetItem(uint32 index) noexcept
     {
       auto result = CanGetItem(index);
       if (result.HasException())
@@ -76,7 +76,7 @@ namespace krys::boo::svg
       return At(index);
     }
 
-    dom::ExceptionOr<TItem> Initialize(TItem &&newItem) noexcept
+    ExceptionOr<TItem> Initialize(TItem &&newItem) noexcept
     {
       auto result = CanAlterList();
       if (result.HasException())
@@ -92,7 +92,7 @@ namespace krys::boo::svg
       return item;
     }
 
-    dom::ExceptionOr<TItem> InsertItemBefore(TItem &&newItem, uint32 index) noexcept
+    ExceptionOr<TItem> InsertItemBefore(TItem &&newItem, uint32 index) noexcept
     {
       auto result = CanAlterList();
       if (result.HasException())
@@ -113,7 +113,7 @@ namespace krys::boo::svg
       return item;
     }
 
-    dom::ExceptionOr<TItem> ReplaceItem(TItem &&newItem, uint32 index) noexcept
+    ExceptionOr<TItem> ReplaceItem(TItem &&newItem, uint32 index) noexcept
     {
       auto result = CanReplaceItem(index);
       if (result.HasException())
@@ -127,7 +127,7 @@ namespace krys::boo::svg
       return item;
     }
 
-    dom::ExceptionOr<TItem> RemoveItem(uint32 index) noexcept
+    ExceptionOr<TItem> RemoveItem(uint32 index) noexcept
     {
       auto result = CanRemoveItem(index);
       if (result.HasException())
@@ -141,7 +141,7 @@ namespace krys::boo::svg
       return item;
     }
 
-    dom::ExceptionOr<TItem> AppendItem(TItem &&newItem) noexcept
+    ExceptionOr<TItem> AppendItem(TItem &&newItem) noexcept
     {
       auto result = CanAlterList();
       if (result.HasException())
@@ -155,7 +155,7 @@ namespace krys::boo::svg
       return item;
     }
 
-    dom::ExceptionOr<void> SetItem(uint32 index, TItem &&newItem) noexcept
+    ExceptionOr<void> SetItem(uint32 index, TItem &&newItem) noexcept
     {
       auto result = ReplaceItem(krys::move(newItem), index);
       if (result.HasException())
@@ -200,41 +200,25 @@ namespace krys::boo::svg
   protected:
     using SVGProperty::SVGProperty;
 
-    KRYS_NODISCARD dom::ExceptionOr<bool> CanAlterList() const noexcept
+    KRYS_NODISCARD ExceptionOr<bool> CanAlterList() const noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
       return true;
     }
 
-    KRYS_NODISCARD dom::ExceptionOr<bool> CanGetItem(uint32 index) noexcept
+    KRYS_NODISCARD ExceptionOr<bool> CanGetItem(uint32 index) noexcept
     {
       if (index >= _items.size())
       {
-        return dom::Exception {dom::ExceptionCode::IndexSizeError};
+        return Exception {ExceptionCode::IndexSizeError};
       }
       return true;
     }
 
-    KRYS_NODISCARD dom::ExceptionOr<bool> CanReplaceItem(uint32 index) noexcept
-    {
-      auto result = CanAlterList();
-      if (result.HasException())
-      {
-        return result.ReleaseException();
-      }
-      krys_assert(result.ReleaseValue());
-
-      if (index >= _items.size())
-      {
-        return dom::Exception {dom::ExceptionCode::IndexSizeError};
-      }
-      return true;
-    }
-
-    KRYS_NODISCARD dom::ExceptionOr<bool> CanRemoveItem(uint32 index) noexcept
+    KRYS_NODISCARD ExceptionOr<bool> CanReplaceItem(uint32 index) noexcept
     {
       auto result = CanAlterList();
       if (result.HasException())
@@ -245,7 +229,23 @@ namespace krys::boo::svg
 
       if (index >= _items.size())
       {
-        return dom::Exception {dom::ExceptionCode::IndexSizeError};
+        return Exception {ExceptionCode::IndexSizeError};
+      }
+      return true;
+    }
+
+    KRYS_NODISCARD ExceptionOr<bool> CanRemoveItem(uint32 index) noexcept
+    {
+      auto result = CanAlterList();
+      if (result.HasException())
+      {
+        return result.ReleaseException();
+      }
+      krys_assert(result.ReleaseValue());
+
+      if (index >= _items.size())
+      {
+        return Exception {ExceptionCode::IndexSizeError};
       }
       return true;
     }

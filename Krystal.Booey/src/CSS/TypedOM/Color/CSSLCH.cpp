@@ -25,10 +25,10 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Color/CSSLCH.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  dom::ExceptionOr<Ref<CSSLCH>> CSSLCH::Create(CSSColorPercent lightness, CSSColorPercent chroma,
-                                               CSSColorAngle hue, CSSColorPercent alpha) noexcept
+  ExceptionOr<Ref<CSSLCH>> CSSLCH::Create(CSSColorPercent lightness, CSSColorPercent chroma,
+                                          CSSColorAngle hue, CSSColorPercent alpha) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csslch-csslch
     auto rectifiedLightness = RectifyCSSColorPercent(krys::move(lightness));
@@ -67,7 +67,7 @@ namespace krys::boo::css
     return ToCSSColorComponent(_lightness);
   }
 
-  dom::ExceptionOr<void> CSSLCH::SetL(CSSColorPercent lightness) noexcept
+  ExceptionOr<void> CSSLCH::SetL(CSSColorPercent lightness) noexcept
   {
     auto rectified = RectifyCSSColorPercent(krys::move(lightness));
     if (rectified.HasException())
@@ -83,7 +83,7 @@ namespace krys::boo::css
     return ToCSSColorComponent(_chroma);
   }
 
-  dom::ExceptionOr<void> CSSLCH::SetC(CSSColorPercent chroma) noexcept
+  ExceptionOr<void> CSSLCH::SetC(CSSColorPercent chroma) noexcept
   {
     auto rectified = RectifyCSSColorPercent(krys::move(chroma));
     if (rectified.HasException())
@@ -99,7 +99,7 @@ namespace krys::boo::css
     return ToCSSColorComponent(_hue);
   }
 
-  dom::ExceptionOr<void> CSSLCH::SetH(CSSColorAngle hue) noexcept
+  ExceptionOr<void> CSSLCH::SetH(CSSColorAngle hue) noexcept
   {
     auto rectified = RectifyCSSColorAngle(krys::move(hue));
     if (rectified.HasException())
@@ -115,7 +115,7 @@ namespace krys::boo::css
     return ToCSSColorComponent(_alpha);
   }
 
-  dom::ExceptionOr<void> CSSLCH::SetAlpha(CSSColorPercent alpha) noexcept
+  ExceptionOr<void> CSSLCH::SetAlpha(CSSColorPercent alpha) noexcept
   {
     auto rectified = RectifyCSSColorPercent(krys::move(alpha));
     if (rectified.HasException())

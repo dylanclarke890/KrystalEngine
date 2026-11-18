@@ -29,7 +29,7 @@
 
 namespace krys::boo
 {
-  RenderMathMLMath::RenderMathMLMath(mathml::MathMLRowElement &element, RenderStyle &&style) noexcept
+  RenderMathMLMath::RenderMathMLMath(boo::MathMLRowElement &element, RenderStyle &&style) noexcept
       : RenderMathMLRow(Type::MathMLMath, element, krys::move(style))
   {
     krys_debug_assert(IsRenderMathMLMath());

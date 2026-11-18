@@ -176,7 +176,7 @@ namespace krys::boo
 
     ViewportContentsChanged();
 
-    if (auto *imageDocument = DynamicDowncast<html::ImageDocument>(Frame().Document()))
+    if (auto *imageDocument = DynamicDowncast<ImageDocument>(Frame().Document()))
     {
       imageDocument->DidChangeViewSize();
     }
@@ -1591,12 +1591,11 @@ namespace krys::boo
       return;
     }
 
-    if (Is<html::HTMLBodyElement>(*bodyOrFrameset) && rootRenderer)
+    if (Is<HTMLBodyElement>(*bodyOrFrameset) && rootRenderer)
     {
       // It's sufficient to just check the X overflow, since it's illegal to have visible in only one
       // direction.
-      if (rootRenderer->EffectiveOverflowX() == Overflow::Visible
-          && Is<html::HTMLHtmlElement>(*documentElement))
+      if (rootRenderer->EffectiveOverflowX() == Overflow::Visible && Is<HTMLHtmlElement>(*documentElement))
       {
         if (auto *bodyRenderer = bodyOrFrameset->Renderer())
         {
@@ -1827,7 +1826,7 @@ namespace krys::boo
     _isPainting = false;
   }
 
-  void LocalFrameView::SetNodeToDraw(dom::Node *node) noexcept
+  void LocalFrameView::SetNodeToDraw(Node *node) noexcept
   {
     _nodeToDraw = ShareRefPtr(node);
   }
@@ -1907,7 +1906,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::SetMediaType(const css::CSSOMStringAtom &mediaType) noexcept
+  void LocalFrameView::SetMediaType(const CSSOMStringAtom &mediaType) noexcept
   {
     if (_mediaType == mediaType)
     {
@@ -2834,7 +2833,7 @@ namespace krys::boo
       return;
     }
 
-    RefPtr<dom::Document> document = ShareRefPtr(Frame().Document());
+    RefPtr<boo::Document> document = ShareRefPtr(Frame().Document());
     if (userScrollType && document)
     {
       document->SetGotoAnchorNeededAfterStylesheetsLoad(false);
@@ -3063,13 +3062,12 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD RefPtr<svg::SVGSvgElement> SVGRootElement(const dom::Document &document) noexcept
+    KRYS_NODISCARD RefPtr<SVGSvgElement> SVGRootElement(const Document &document) noexcept
     {
       auto documentElement = document.DocumentElement();
-      auto *svgElement = documentElement ? DynamicDowncast<svg::SVGElement>(*documentElement) : nullptr;
-      return svgElement
-               ? ShareRefPtr(DynamicDowncast<svg::SVGSvgElement>(const_cast<svg::SVGElement &>(*svgElement)))
-               : nullptr;
+      auto *svgElement = documentElement ? DynamicDowncast<SVGElement>(*documentElement) : nullptr;
+      return svgElement ? ShareRefPtr(DynamicDowncast<SVGSvgElement>(const_cast<SVGElement &>(*svgElement)))
+                        : nullptr;
     }
   }
 
@@ -3115,7 +3113,7 @@ namespace krys::boo
     return false;
   }
 
-  bool LocalFrameView::ScrollToAnchorFragment(dom::DOMStringView fragmentIdentifier) noexcept
+  bool LocalFrameView::ScrollToAnchorFragment(DOMStringView fragmentIdentifier) noexcept
   {
     // If our URL has no ref, then we have no place we need to jump to.
     if (!fragmentIdentifier.data())
@@ -3126,7 +3124,7 @@ namespace krys::boo
     auto &document = *Frame().Document();
     krys_debug_assert(document.HaveStylesheetsLoaded());
 
-    RefPtr<dom::Element> anchorElement = ShareRefPtr(document.FindAnchor(fragmentIdentifier));
+    RefPtr<Element> anchorElement = ShareRefPtr(document.FindAnchor(fragmentIdentifier));
 
     // https://html.spec.whatwg.org/#scroll-to-the-fragment-identifier
     // 1. If document's indicated part is null, then set document's target element to null.
@@ -3136,7 +3134,7 @@ namespace krys::boo
     // 3c. Set document's target element to target.
     document.SetCSSTarget(anchorElement.get());
 
-    if (Is<svg::SVGDocument>(document))
+    if (Is<SVGDocument>(document))
     {
       if (fragmentIdentifier.empty())
       {
@@ -3173,7 +3171,7 @@ namespace krys::boo
     // 3e. Scroll target into view, with behavior set to "auto", block set to "start", and inline set to
     //     "nearest".
     // (The scroll position is kept at the anchor while layout changes, until the user scrolls.)
-    dom::ContainerNode *scrollPositionAnchor = anchorElement.get();
+    ContainerNode *scrollPositionAnchor = anchorElement.get();
     if (!scrollPositionAnchor)
     {
       scrollPositionAnchor = &document;
@@ -3193,7 +3191,7 @@ namespace krys::boo
     return true;
   }
 
-  void LocalFrameView::MaintainScrollPositionAtAnchor(dom::ContainerNode *anchorNode) noexcept
+  void LocalFrameView::MaintainScrollPositionAtAnchor(ContainerNode *anchorNode) noexcept
   {
     _maintainScrollPositionAnchor = CreateWeakPtr(anchorNode);
     if (!anchorNode)
@@ -3203,7 +3201,7 @@ namespace krys::boo
 
     CancelScheduledScrolls();
 
-    if (auto *element = DynamicDowncast<dom::Element>(anchorNode))
+    if (auto *element = DynamicDowncast<Element>(anchorNode))
     {
       Frame().Document()->UpdateContentRelevancyForScrollIfNeeded(*element);
     }
@@ -3349,7 +3347,7 @@ namespace krys::boo
 
   void LocalFrameView::ScrollToAnchor() noexcept
   {
-    RefPtr<dom::ContainerNode> anchorNode = ShareRefPtr(_maintainScrollPositionAnchor.get());
+    RefPtr<ContainerNode> anchorNode = ShareRefPtr(_maintainScrollPositionAnchor.get());
     if (!anchorNode)
     {
       return;
@@ -3574,7 +3572,7 @@ namespace krys::boo
     // set (see bug 11321).
     document.SetCSSTarget(nullptr);
 
-    if (Is<svg::SVGDocument>(document))
+    if (Is<SVGDocument>(document))
     {
       if (auto rootElement = SVGRootElement(document))
       {

@@ -10,12 +10,12 @@
 
 namespace krys::boo::dom::mixins
 {
-  RefPtr<html::HTMLSlotElement> Slottable::AssignedSlot(Text &node) noexcept
+  RefPtr<HTMLSlotElement> Slottable::AssignedSlot(Text &node) noexcept
   {
     return ShareRefPtr(SlotAlgorithms::FindSlot(node, true));
   }
 
-  RefPtr<html::HTMLSlotElement> Slottable::AssignedSlot(Element &node) noexcept
+  RefPtr<HTMLSlotElement> Slottable::AssignedSlot(Element &node) noexcept
   {
     return ShareRefPtr(SlotAlgorithms::FindSlot(node, true));
   }

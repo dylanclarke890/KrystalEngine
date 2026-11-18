@@ -33,7 +33,7 @@ namespace krys::boo::tests
       auto &p = fixture.ById(u8"p");
       auto *renderer = p.Renderer();
       REQUIRE(renderer);
-      CHECK(static_cast<dom::Node &>(p).Renderer() == renderer);
+      CHECK(static_cast<Node &>(p).Renderer() == renderer);
       CHECK(renderer->GetElement() == &p);
       CHECK(renderer->GetNode() == &p);
       CHECK(&renderer->GetDocument() == &document);
@@ -78,7 +78,7 @@ namespace krys::boo::tests
     {
       auto &p = fixture.ById(u8"p");
       auto *text = p.FirstChild();
-      REQUIRE(Is<dom::Text>(text));
+      REQUIRE(Is<Text>(text));
       REQUIRE(text->Renderer());
       CHECK(text->Renderer()->Parent() == p.Renderer());
       CHECK(text->GetRenderStyle() == &p.Renderer()->Style());

@@ -36,7 +36,7 @@ namespace krys::boo::style
 {
   /// @brief Calls @p function with the features of @p element's shadow tree, if that tree has `:host` rules.
   template <typename TFunction>
-  inline void TraverseRuleFeaturesInShadowTree(dom::Element &element, TFunction function) noexcept
+  inline void TraverseRuleFeaturesInShadowTree(Element &element, TFunction function) noexcept
   {
     auto *shadowRoot = dom::TreeQueries::GetShadowRoot(element);
     if (!shadowRoot)
@@ -61,7 +61,7 @@ namespace krys::boo::style
   /// @brief Calls @p function with the features of the shadow trees @p element is slotted into, for those
   /// with `::slotted()` rules.
   template <typename TFunction>
-  inline void TraverseRuleFeaturesForSlotted(dom::Element &element, TFunction function) noexcept
+  inline void TraverseRuleFeaturesForSlotted(Element &element, TFunction function) noexcept
   {
     auto assignedShadowRoots = dom::AssignedShadowRootsIfSlotted(element);
     for (auto &assignedShadowRoot : assignedShadowRoots)
@@ -81,7 +81,7 @@ namespace krys::boo::style
   /// its shadow tree's and those of the shadow trees it's slotted into. The second argument says whether the
   /// rules may also affect the element's (user agent) shadow tree.
   template <typename TFunction>
-  inline void TraverseRuleFeatures(dom::Element &element, TFunction function) noexcept
+  inline void TraverseRuleFeatures(Element &element, TFunction function) noexcept
   {
     auto &ruleSets = element.StyleResolver().RuleSets();
 

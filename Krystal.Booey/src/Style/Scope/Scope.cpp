@@ -27,9 +27,9 @@
 
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/CSSOM/StyleSheet.hpp"
 #include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
@@ -89,17 +89,17 @@ namespace krys::boo::style
       return std::ranges::none_of(list, [](const WeakPtr<T> &item) { return item.get() != nullptr; });
     }
 
-    KRYS_NODISCARD bool ContainsAlternate(const Maybe<dom::DOMString> &rel) noexcept
+    KRYS_NODISCARD bool ContainsAlternate(const Maybe<DOMString> &rel) noexcept
     {
       return rel && rel->contains(u8"alternate");
     }
 
-    void FilterEnabledNonemptyCSSStyleSheets(List<RefPtr<css::CSSStyleSheet>> &result,
-                                             const List<RefPtr<css::StyleSheet>> &sheets) noexcept
+    void FilterEnabledNonemptyCSSStyleSheets(List<RefPtr<CSSStyleSheet>> &result,
+                                             const List<RefPtr<StyleSheet>> &sheets) noexcept
     {
       for (auto &sheet : sheets)
       {
-        auto *styleSheet = DynamicDowncast<css::CSSStyleSheet>(*sheet);
+        auto *styleSheet = DynamicDowncast<CSSStyleSheet>(*sheet);
         if (!styleSheet)
         {
           continue;
@@ -127,13 +127,13 @@ namespace krys::boo::style
     return ScopeIdentifier {++next};
   }
 
-  Scope::Scope(dom::Document &document) noexcept
+  Scope::Scope(boo::Document &document) noexcept
       : _document(&document), _customPropertyRegistry(CreateUnique<CustomPropertyRegistry>(*this)),
         _counterStyleRegistry(CreateUnique<css::CounterStyleRegistry>())
   {
   }
 
-  Scope::Scope(dom::ShadowRoot &shadowRoot) noexcept
+  Scope::Scope(boo::ShadowRoot &shadowRoot) noexcept
       : _document(&shadowRoot.NodeDocument()), _shadowRoot(&shadowRoot),
         _customPropertyRegistry(CreateUnique<CustomPropertyRegistry>(*this)),
         _counterStyleRegistry(CreateUnique<css::CounterStyleRegistry>())
@@ -324,9 +324,9 @@ namespace krys::boo::style
     _matchResultCache = nullptr;
   }
 
-  Scope *Scope::ForOrdinal(dom::Element &element, ScopeOrdinal ordinal) noexcept
+  Scope *Scope::ForOrdinal(Element &element, ScopeOrdinal ordinal) noexcept
   {
-    if (auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(element))
+    if (auto *pseudoElement = DynamicDowncast<PseudoElement>(element))
     {
       return pseudoElement->HostElement() ? ForOrdinal(*pseudoElement->HostElement(), ordinal) : nullptr;
     }
@@ -349,26 +349,26 @@ namespace krys::boo::style
     return slot ? &ForNode(*slot) : nullptr;
   }
 
-  const Scope *Scope::ForOrdinal(const dom::Element &element, ScopeOrdinal ordinal) noexcept
+  const Scope *Scope::ForOrdinal(const Element &element, ScopeOrdinal ordinal) noexcept
   {
-    return ForOrdinal(const_cast<dom::Element &>(element), ordinal);
+    return ForOrdinal(const_cast<Element &>(element), ordinal);
   }
 
-  Scope &Scope::ForNode(dom::Node &node) noexcept
+  Scope &Scope::ForNode(Node &node) noexcept
   {
-    if (auto *shadowRoot = DynamicDowncast<dom::ShadowRoot>(dom::TreeQueries::Root(node)))
+    if (auto *shadowRoot = DynamicDowncast<boo::ShadowRoot>(dom::TreeQueries::Root(node)))
     {
       return shadowRoot->StyleScope();
     }
     return node.NodeDocument().StyleScope();
   }
 
-  const Scope &Scope::ForNode(const dom::Node &node) noexcept
+  const Scope &Scope::ForNode(const Node &node) noexcept
   {
-    return ForNode(const_cast<dom::Node &>(node));
+    return ForNode(const_cast<Node &>(node));
   }
 
-  void Scope::SetPreferredStylesheetSetName(const dom::DOMString &name) noexcept
+  void Scope::SetPreferredStylesheetSetName(const DOMString &name) noexcept
   {
     if (_preferredStylesheetSetName == name)
     {
@@ -378,14 +378,14 @@ namespace krys::boo::style
     DidChangeActiveStyleSheetCandidates();
   }
 
-  void Scope::AddPendingSheet(const dom::Element &element) noexcept
+  void Scope::AddPendingSheet(const Element &element) noexcept
   {
     krys_debug_assert(!HasPendingSheet(element));
 
     bool isInHead = false;
     for (auto *ancestor = element.ParentElement(); ancestor; ancestor = ancestor->ParentElement())
     {
-      if (Is<html::HTMLHeadElement>(*ancestor))
+      if (Is<HTMLHeadElement>(*ancestor))
       {
         isInHead = true;
         break;
@@ -403,7 +403,7 @@ namespace krys::boo::style
   }
 
   // This method is called whenever a top-level stylesheet has finished loading.
-  void Scope::RemovePendingSheet(const dom::Element &element) noexcept
+  void Scope::RemovePendingSheet(const Element &element) noexcept
   {
     krys_debug_assert(HasPendingSheet(element));
 
@@ -415,14 +415,14 @@ namespace krys::boo::style
     DidRemovePendingStylesheet();
   }
 
-  void Scope::AddPendingSheet(const dom::ProcessingInstruction &processingInstruction) noexcept
+  void Scope::AddPendingSheet(const ProcessingInstruction &processingInstruction) noexcept
   {
     krys_debug_assert(!HasPendingSheet(processingInstruction));
 
     _processingInstructionsWithPendingSheets.emplace_back(CreateWeakPtr(&processingInstruction));
   }
 
-  void Scope::RemovePendingSheet(const dom::ProcessingInstruction &processingInstruction) noexcept
+  void Scope::RemovePendingSheet(const ProcessingInstruction &processingInstruction) noexcept
   {
     krys_debug_assert(HasPendingSheet(processingInstruction));
 
@@ -462,29 +462,29 @@ namespace krys::boo::style
     }
   }
 
-  bool Scope::HasPendingSheet(const dom::Element &element) const noexcept
+  bool Scope::HasPendingSheet(const Element &element) const noexcept
   {
     return Contains(_elementsInHeadWithPendingSheets, element) || HasPendingSheetInBody(element);
   }
 
-  bool Scope::HasPendingSheetInBody(const dom::Element &element) const noexcept
+  bool Scope::HasPendingSheetInBody(const Element &element) const noexcept
   {
     return Contains(_elementsInBodyWithPendingSheets, element);
   }
 
-  bool Scope::HasPendingSheet(const dom::ProcessingInstruction &processingInstruction) const noexcept
+  bool Scope::HasPendingSheet(const ProcessingInstruction &processingInstruction) const noexcept
   {
     return Contains(_processingInstructionsWithPendingSheets, processingInstruction);
   }
 
-  void Scope::AddStyleSheetCandidateNode(dom::Node &node, bool createdByParser) noexcept
+  void Scope::AddStyleSheetCandidateNode(Node &node, bool createdByParser) noexcept
   {
     if (!node.IsConnected())
     {
       return;
     }
 
-    std::erase_if(_styleSheetCandidateNodes, [](const WeakPtr<dom::Node> &candidate) { return !candidate; });
+    std::erase_if(_styleSheetCandidateNodes, [](const WeakPtr<Node> &candidate) { return !candidate; });
 
     // Until the <body> exists, we have no choice but to compare document positions,
     // since styles outside of the body and head continue to be shunted into the head
@@ -510,7 +510,7 @@ namespace krys::boo::style
     _styleSheetCandidateNodes.insert(_styleSheetCandidateNodes.begin(), CreateWeakPtr(&node));
   }
 
-  void Scope::RemoveStyleSheetCandidateNode(dom::Node &node) noexcept
+  void Scope::RemoveStyleSheetCandidateNode(Node &node) noexcept
   {
     if (Remove(_styleSheetCandidateNodes, node))
     {
@@ -520,8 +520,8 @@ namespace krys::boo::style
 
   auto Scope::CollectActiveStyleSheets() noexcept -> ActiveStyleSheetCollection
   {
-    List<RefPtr<css::StyleSheet>> sheets;
-    List<RefPtr<css::StyleSheet>> styleSheetsForStyleSheetsList;
+    List<RefPtr<StyleSheet>> sheets;
+    List<RefPtr<StyleSheet>> styleSheetsForStyleSheetsList;
 
     for (auto &candidate : _styleSheetCandidateNodes)
     {
@@ -531,8 +531,8 @@ namespace krys::boo::style
       }
       auto &node = *candidate;
 
-      RefPtr<css::StyleSheet> sheet;
-      if (auto *processingInstruction = DynamicDowncast<dom::ProcessingInstruction>(node))
+      RefPtr<StyleSheet> sheet;
+      if (auto *processingInstruction = DynamicDowncast<ProcessingInstruction>(node))
       {
         if (!processingInstruction->IsCSS())
         {
@@ -549,24 +549,24 @@ namespace krys::boo::style
         continue;
       }
 
-      auto *element = DynamicDowncast<dom::Element>(node);
+      auto *element = DynamicDowncast<Element>(node);
       if (!element)
       {
         continue;
       }
 
-      auto *htmlElement = DynamicDowncast<html::HTMLElement>(*element);
-      auto *linkElement = htmlElement ? DynamicDowncast<html::HTMLLinkElement>(*htmlElement) : nullptr;
-      auto *styleElement = htmlElement ? DynamicDowncast<html::HTMLStyleElement>(*htmlElement) : nullptr;
-      auto *svgElement = DynamicDowncast<svg::SVGElement>(*element);
-      auto *svgStyleElement = svgElement ? DynamicDowncast<svg::SVGStyleElement>(*svgElement) : nullptr;
+      auto *htmlElement = DynamicDowncast<HTMLElement>(*element);
+      auto *linkElement = htmlElement ? DynamicDowncast<HTMLLinkElement>(*htmlElement) : nullptr;
+      auto *styleElement = htmlElement ? DynamicDowncast<HTMLStyleElement>(*htmlElement) : nullptr;
+      auto *svgElement = DynamicDowncast<SVGElement>(*element);
+      auto *svgStyleElement = svgElement ? DynamicDowncast<SVGStyleElement>(*svgElement) : nullptr;
       if (!linkElement && !styleElement && !svgStyleElement)
       {
         continue;
       }
 
       auto title = dom::TreeQueries::IsInShadowTree(*element)
-                     ? dom::DOMString()
+                     ? DOMString()
                      : element->GetAttribute(u8"title").value_or(u8"");
       bool enabledViaScript = false;
       if (linkElement)
@@ -649,7 +649,7 @@ namespace krys::boo::style
       }
     }
 
-    auto canActivateAdoptedStyleSheet = [&](const css::CSSStyleSheet &sheet)
+    auto canActivateAdoptedStyleSheet = [&](const CSSStyleSheet &sheet)
     {
       if (sheet.Disabled())
       {
@@ -689,7 +689,7 @@ namespace krys::boo::style
 
     auto collection = CollectActiveStyleSheets();
 
-    List<RefPtr<css::CSSStyleSheet>> activeCSSStyleSheets;
+    List<RefPtr<CSSStyleSheet>> activeCSSStyleSheets;
 
     // FIXME: The injected author style sheets, once there are extension style sheets.
 
@@ -729,9 +729,9 @@ namespace krys::boo::style
     // The first body or frameset child of the html element.
     auto hasBodyOrFrameset = [&]
     {
-      auto isHTMLElement = [](const dom::Element &element, html::TagName tagName)
+      auto isHTMLElement = [](const Element &element, html::TagName tagName)
       {
-        return Is<html::HTMLElement>(element) && element.TagQualifiedName().TagName() == tagName;
+        return Is<HTMLElement>(element) && element.TagQualifiedName().TagName() == tagName;
       };
       auto *documentElement = dom::TreeQueries::DocumentElement(*_document);
       if (!documentElement || !isHTMLElement(*documentElement, html::TagName::html))
@@ -764,7 +764,7 @@ namespace krys::boo::style
   }
 
   Scope::StyleSheetChange
-    Scope::AnalyzeStyleSheetChange(const List<RefPtr<css::CSSStyleSheet>> &newStylesheets) noexcept
+    Scope::AnalyzeStyleSheetChange(const List<RefPtr<CSSStyleSheet>> &newStylesheets) noexcept
   {
     size_t newStylesheetCount = newStylesheets.size();
 
@@ -819,7 +819,7 @@ namespace krys::boo::style
             krys::move(addedSheets)};
   }
 
-  void Scope::UpdateResolver(Span<const RefPtr<css::CSSStyleSheet>> activeStyleSheets,
+  void Scope::UpdateResolver(Span<const RefPtr<CSSStyleSheet>> activeStyleSheets,
                              ResolverUpdateType updateType) noexcept
   {
     if (updateType == ResolverUpdateType::Reconstruct)
@@ -854,10 +854,10 @@ namespace krys::boo::style
     _isUpdatingStyleResolver = isUpdatingStyleResolver;
   }
 
-  bool Scope::ActiveStyleSheetsContains(const css::CSSStyleSheet &sheet) const noexcept
+  bool Scope::ActiveStyleSheetsContains(const CSSStyleSheet &sheet) const noexcept
   {
-    return std::ranges::any_of(_activeStyleSheets, [&](const RefPtr<css::CSSStyleSheet> &active)
-                               { return active.get() == &sheet; });
+    return std::ranges::any_of(_activeStyleSheets,
+                               [&](const RefPtr<CSSStyleSheet> &active) { return active.get() == &sheet; });
   }
 
   void Scope::FlushPendingUpdate() noexcept
@@ -972,7 +972,7 @@ namespace krys::boo::style
     ScheduleUpdate(UpdateType::ContentsOrInterpretation);
   }
 
-  auto Scope::MediaQueryViewportStateForDocument(const dom::Document &document) noexcept
+  auto Scope::MediaQueryViewportStateForDocument(const boo::Document &document) noexcept
     -> MediaQueryViewportState
   {
     // These things affect evaluation of viewport dependent media queries.
@@ -1080,7 +1080,7 @@ namespace krys::boo::style
 
   void Scope::DidChangeViewportSize() noexcept
   {
-    dom::ContainerNode *rootNode = _document;
+    ContainerNode *rootNode = _document;
     if (_shadowRoot)
     {
       rootNode = _shadowRoot;
@@ -1148,9 +1148,9 @@ namespace krys::boo::style
                           [](const auto &entry) { return entry.second && UsesViewportUnits(*entry.second); });
   }
 
-  void Scope::AddElementWithViewportUnits(dom::Element &element) noexcept
+  void Scope::AddElementWithViewportUnits(Element &element) noexcept
   {
-    _elementsWithViewportUnits.insert_or_assign(&element, CreateWeakPtr<dom::Element>(&element));
+    _elementsWithViewportUnits.insert_or_assign(&element, CreateWeakPtr<Element>(&element));
     if (_elementsWithViewportUnits.size() >= _elementsWithViewportUnitsPruneSize)
     {
       std::erase_if(_elementsWithViewportUnits, [](const auto &entry) { return !entry.second.get(); });
@@ -1158,7 +1158,7 @@ namespace krys::boo::style
     }
   }
 
-  const List<RefPtr<css::StyleSheet>> &Scope::StyleSheetsForStyleSheetList() noexcept
+  const List<RefPtr<StyleSheet>> &Scope::StyleSheetsForStyleSheetList() noexcept
   {
     // FIXME: StyleSheetList content should be updated separately from style resolver updates.
     FlushPendingUpdate();
@@ -1188,8 +1188,7 @@ namespace krys::boo::style
     return &ForNode(*_shadowRoot->Host());
   }
 
-  html::HTMLSlotElement *AssignedSlotForScopeOrdinal(const dom::Element &element,
-                                                     ScopeOrdinal scopeOrdinal) noexcept
+  HTMLSlotElement *AssignedSlotForScopeOrdinal(const Element &element, ScopeOrdinal scopeOrdinal) noexcept
   {
     krys_debug_assert(scopeOrdinal >= ScopeOrdinal::FirstSlot);
     auto *slot = dom::SlotAlgorithms::GetAssignedSlot(element);
@@ -1200,7 +1199,7 @@ namespace krys::boo::style
     return slot;
   }
 
-  dom::Element *HostForScopeOrdinal(const dom::Element &element, ScopeOrdinal scopeOrdinal) noexcept
+  Element *HostForScopeOrdinal(const Element &element, ScopeOrdinal scopeOrdinal) noexcept
   {
     krys_debug_assert(scopeOrdinal <= ScopeOrdinal::ContainingHost);
     auto *host = dom::TreeQueries::ShadowHost(element);
@@ -1233,14 +1232,14 @@ namespace krys::boo::style
     auto previousQueryContainerDimensions = krys::move(_queryContainerDimensionsOnLastUpdate);
     _queryContainerDimensionsOnLastUpdate.clear();
 
-    List<dom::Element *> containersToInvalidate;
+    List<Element *> containersToInvalidate;
 
     for (const auto *containerRenderer : renderView->ContainerQueryBoxes())
     {
       auto *containerElement = containerRenderer->GetElement();
 
       // Invalidation uses real elements, replace ::before/::after with its host.
-      if (auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(containerElement))
+      if (auto *pseudoElement = DynamicDowncast<PseudoElement>(containerElement))
       {
         containerElement = pseudoElement->HostElement();
       }
@@ -1272,8 +1271,8 @@ namespace krys::boo::style
         containersToInvalidate.push_back(containerElement);
       }
       _queryContainerDimensionsOnLastUpdate.insert_or_assign(
-        containerElement, Pair<WeakPtr<const dom::Element>, LayoutSize> {
-                            CreateWeakPtr<const dom::Element>(containerElement), size});
+        containerElement,
+        Pair<WeakPtr<const Element>, LayoutSize> {CreateWeakPtr<const Element>(containerElement), size});
     }
 
     for (auto *toInvalidate : containersToInvalidate)
@@ -1297,7 +1296,7 @@ namespace krys::boo::style
     auto previousAnchorPositions = krys::move(_anchorPositionsOnLastUpdate);
     _anchorPositionsOnLastUpdate.clear();
 
-    List<Ref<dom::Element>> anchoredElementsToInvalidate;
+    List<Ref<Element>> anchoredElementsToInvalidate;
 
     if (renderView->Anchors().empty())
     {
@@ -1387,7 +1386,7 @@ namespace krys::boo::style
       }
 
       auto *element = box->GetElement();
-      if (auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(element))
+      if (auto *pseudoElement = DynamicDowncast<PseudoElement>(element))
       {
         element = pseudoElement->HostElement();
       }
@@ -1420,7 +1419,7 @@ namespace krys::boo::style
 
   Maybe<size_t> Scope::LastSuccessfulPositionOptionIndexFor(const Styleable &styleable) const noexcept
   {
-    AnchorPositionedKey key {ShareRefPtr<const dom::Element>(&styleable.Element),
+    AnchorPositionedKey key {ShareRefPtr<const boo::Element>(&styleable.Element),
                              styleable.PseudoElementIdentifier};
     auto it = _lastSuccessfulPositionOptionIndexes.find(key);
     if (it == _lastSuccessfulPositionOptionIndexes.end())
@@ -1438,7 +1437,7 @@ namespace krys::boo::style
 
   void Scope::ForgetLastSuccessfulPositionOptionIndex(const Styleable &styleable) noexcept
   {
-    AnchorPositionedKey key {ShareRefPtr<const dom::Element>(&styleable.Element),
+    AnchorPositionedKey key {ShareRefPtr<const boo::Element>(&styleable.Element),
                              styleable.PseudoElementIdentifier};
     _lastSuccessfulPositionOptionIndexes.erase(key);
   }

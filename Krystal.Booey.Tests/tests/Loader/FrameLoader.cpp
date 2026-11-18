@@ -10,7 +10,7 @@ namespace krys::boo::tests
   namespace
   {
     void Navigate(NavigationFixture &fixture, utf8_stringview url,
-                  dom::DOMStringAtom target = dom::DOMStringAtom::Empty()) noexcept
+                  DOMStringAtom target = DOMStringAtom::Empty()) noexcept
     {
       fixture.Frame->Loader().ChangeLocation(url::URL(fixture.Document->GetURL(), url), krys::move(target),
                                              nullptr, ReferrerPolicy::EmptyString, null);
@@ -82,7 +82,7 @@ namespace krys::boo::tests
       <form id=post action="submit" method=post target=results><input name=n value=v></form>)");
 
     // A submission reaches the host on a later task, even to a fragment of the document.
-    fixture.Get<html::HTMLFormElement>(u8"get").Submit();
+    fixture.Get<HTMLFormElement>(u8"get").Submit();
     CHECK(fixture.Client->Navigations.empty());
     REQUIRE(fixture.Navigations().size() == 1);
     auto &get = fixture.Navigations()[0];
@@ -96,7 +96,7 @@ namespace krys::boo::tests
     CHECK_FALSE(get.IsNewWindow);
     CHECK(fixture.DocumentURL() == "https://example.com/dir/page.html");
 
-    fixture.Get<html::HTMLFormElement>(u8"post").Submit();
+    fixture.Get<HTMLFormElement>(u8"post").Submit();
     REQUIRE(fixture.Navigations().size() == 2);
     auto &post = fixture.Navigations()[1];
     CHECK(post.URL == "https://example.com/dir/submit");
@@ -108,7 +108,7 @@ namespace krys::boo::tests
   TEST_CASE("FrameLoader: a later submission of a form cancels the planned one", "[Loader][FrameLoader]")
   {
     NavigationFixture fixture(u8R"(<form id=form action="first"><input name=n value=v></form>)");
-    auto &form = fixture.Get<html::HTMLFormElement>(u8"form");
+    auto &form = fixture.Get<HTMLFormElement>(u8"form");
     (void)form.RequestSubmit();
     form.Action(u8"second");
     (void)form.RequestSubmit();

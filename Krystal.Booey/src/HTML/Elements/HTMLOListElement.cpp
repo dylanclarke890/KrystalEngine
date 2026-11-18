@@ -26,17 +26,16 @@
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLOListElement::HTMLOListElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::OList)
+  HTMLOListElement::HTMLOListElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::OList)
   {
   }
 
-  void HTMLOListElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                            Maybe<dom::DOMStringView> oldValue,
-                                            Maybe<dom::DOMStringView> value,
-                                            const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLOListElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                            Maybe<DOMStringView> value,
+                                            const DOMStringAtom &namespaceURI) noexcept
   {
     if (namespaceURI == null)
     {
@@ -46,7 +45,7 @@ namespace krys::boo::html
         _start = null;
         if (value)
         {
-          if (auto parsed = Numbers::ParseInteger(*value);
+          if (auto parsed = html::Numbers::ParseInteger(*value);
               parsed.Success() && parsed.Value >= std::numeric_limits<int32>::min()
               && parsed.Value <= std::numeric_limits<int32>::max())
           {
@@ -85,32 +84,32 @@ namespace krys::boo::html
 
   bool HTMLOListElement::Reversed() const noexcept
   {
-    return Reflect<bool>(*this, u8"reversed");
+    return html::Reflect<bool>(*this, u8"reversed");
   }
 
   void HTMLOListElement::Reversed(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"reversed", krys::move(value));
+    html::Reflect<bool>(*this, u8"reversed", krys::move(value));
   }
 
   int32 HTMLOListElement::Start() const noexcept
   {
-    return Reflect<int32, ReflectDefault<int32>(1)>(*this, u8"start");
+    return html::Reflect<int32, html::ReflectDefault<int32>(1)>(*this, u8"start");
   }
 
   void HTMLOListElement::Start(int32 value) noexcept
   {
-    Reflect<int32>(*this, u8"start", krys::move(value));
+    html::Reflect<int32>(*this, u8"start", krys::move(value));
   }
 
-  dom::DOMString HTMLOListElement::Type() const noexcept
+  DOMString HTMLOListElement::Type() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"type").value_or(u8"");
   }
 
-  void HTMLOListElement::Type(dom::DOMString value) noexcept
+  void HTMLOListElement::Type(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"type", krys::move(value));
   }
 
 #pragma endregion
@@ -119,20 +118,20 @@ namespace krys::boo::html
 
   bool HTMLOListElement::Compact() const noexcept
   {
-    return Reflect<bool>(*this, u8"compact");
+    return html::Reflect<bool>(*this, u8"compact");
   }
 
   void HTMLOListElement::Compact(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"compact", krys::move(value));
+    html::Reflect<bool>(*this, u8"compact", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region Presentational hints
 
-  bool HTMLOListElement::HasPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool HTMLOListElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                            const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && (localName == u8"type"))
     {
@@ -141,12 +140,12 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLOListElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                                const dom::DOMStringAtom &namespaceURI,
-                                                                dom::DOMStringView value,
+  void HTMLOListElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                                const DOMStringAtom &namespaceURI,
+                                                                DOMStringView value,
                                                                 css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);

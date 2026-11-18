@@ -85,10 +85,10 @@ namespace krys::boo::style
 
   struct BuilderContext
   {
-    RefPtr<const dom::Document> Document;
+    RefPtr<const boo::Document> Document;
     const RenderStyle *ParentStyle {};
     const RenderStyle *RootElementStyle {};
-    RefPtr<const dom::Element> Element;
+    RefPtr<const boo::Element> Element;
     style::TreeResolutionState *TreeResolutionState {};
     Maybe<BuilderPositionTryFallback> PositionTryFallback;
   };
@@ -108,16 +108,16 @@ namespace krys::boo::style
 
     const css::ToLengthConversionData _cssToLengthConversionData;
 
-    HashSet<css::CSSOMStringAtom> _appliedCustomProperties;
-    HashSet<css::CSSOMStringAtom> _inProgressCustomProperties;
-    HashSet<css::CSSOMStringAtom> _inCycleCustomProperties;
+    HashSet<CSSOMStringAtom> _appliedCustomProperties;
+    HashSet<CSSOMStringAtom> _inProgressCustomProperties;
+    HashSet<CSSOMStringAtom> _inCycleCustomProperties;
     std::bitset<css::TotalPropertyIdValues> _inProgressProperties;
     std::bitset<css::TotalPropertyIdValues> _invalidAtComputedValueTimeProperties;
 
     const PropertyCascade::Property *_currentProperty {nullptr};
 
     bool _fontDirty {false};
-    List<css::CSSOMStringAtom> _registeredContentAttributes;
+    List<CSSOMStringAtom> _registeredContentAttributes;
 
     bool _isBuildingKeyframeStyle {false};
 
@@ -148,12 +148,12 @@ namespace krys::boo::style
       return _context.RootElementStyle;
     }
 
-    KRYS_NODISCARD const dom::Document &GetDocument() const noexcept
+    KRYS_NODISCARD const boo::Document &GetDocument() const noexcept
     {
       return *_context.Document;
     }
 
-    KRYS_NODISCARD const dom::Element *GetElement() const noexcept
+    KRYS_NODISCARD const boo::Element *GetElement() const noexcept
     {
       return _context.Element.get();
     }
@@ -193,12 +193,12 @@ namespace krys::boo::style
 
     KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const css::Value &) const noexcept;
 
-    KRYS_NODISCARD const List<css::CSSOMStringAtom> &RegisteredContentAttributes() const noexcept
+    KRYS_NODISCARD const List<CSSOMStringAtom> &RegisteredContentAttributes() const noexcept
     {
       return _registeredContentAttributes;
     }
 
-    void RegisterContentAttribute(const css::CSSOMStringAtom &attributeLocalName) noexcept;
+    void RegisterContentAttribute(const CSSOMStringAtom &attributeLocalName) noexcept;
 
     KRYS_NODISCARD const css::ToLengthConversionData &CssToLengthConversionData() const noexcept
     {

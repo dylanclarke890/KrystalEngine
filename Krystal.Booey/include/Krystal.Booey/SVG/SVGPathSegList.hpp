@@ -27,7 +27,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The path data a `<path>` element's `d` attribute reflects, as a byte stream, which an animation
   /// of `d` interpolates.
@@ -76,25 +76,26 @@ namespace krys::boo::svg
       return _pathByteStream;
     }
 
-    bool Parse(dom::DOMStringView value) noexcept
+    bool Parse(DOMStringView value) noexcept
     {
       PathByteStreamWillChange();
-      return BuildSVGPathByteStreamFromString(value, _pathByteStream, PathParsingMode::UnalteredParsing);
+      return svg::BuildSVGPathByteStreamFromString(value, _pathByteStream,
+                                                   svg::PathParsingMode::UnalteredParsing);
     }
 
     KRYS_NODISCARD Path GetPath() const noexcept
     {
       if (!_path)
       {
-        _path = BuildPathFromByteStream(PathByteStream());
+        _path = svg::BuildPathFromByteStream(PathByteStream());
       }
       return *_path;
     }
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept override
     {
-      dom::DOMString value;
-      (void)BuildStringFromByteStream(PathByteStream(), value, PathParsingMode::UnalteredParsing);
+      DOMString value;
+      (void)svg::BuildStringFromByteStream(PathByteStream(), value, svg::PathParsingMode::UnalteredParsing);
       return value;
     }
 

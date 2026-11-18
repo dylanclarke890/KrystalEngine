@@ -84,7 +84,7 @@ namespace krys::boo
   {
     // The root's and body's scrolling is the frame view's, which anchors itself.
     auto *element = layer.Renderer().GetElement();
-    if (!Is<html::HTMLHtmlElement>(element) && !Is<html::HTMLBodyElement>(element))
+    if (!Is<HTMLHtmlElement>(element) && !Is<HTMLBodyElement>(element))
     {
       _scrollAnchoringController = CreateUnique<ScrollAnchoringController>(*this);
     }

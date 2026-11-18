@@ -96,7 +96,7 @@ namespace krys::boo::dom::tests
 
     auto html = document->CreateElementNS(infra::namespaces::HTML, u8"DIV").ReleaseValue();
     CHECK(html->LocalName() == u8"DIV");
-    CHECK(Is<html::HTMLElement>(*html));
+    CHECK(Is<HTMLElement>(*html));
 
     CHECK(Throws(document->CreateElementNS(u8"urn:x", u8"1a"), ExceptionCode::InvalidCharacterError));
     CHECK(Throws(document->CreateElementNS(null, u8"p:a"), ExceptionCode::NamespaceError));

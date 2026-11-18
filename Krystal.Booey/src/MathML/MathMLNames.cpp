@@ -2,13 +2,13 @@
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 #define KRYS_DEFINE_MATHML_ATTRIBUTE_NAME(Name, localName)                                                   \
-  const dom::QualifiedName &MathMLNames::Name() noexcept                                                     \
+  const krys::boo::QualifiedName &MathMLNames::Name() noexcept                                               \
   {                                                                                                          \
-    static NeverDestroyed<const dom::QualifiedName> name {null, null, localName};                            \
+    static NeverDestroyed<const krys::boo::QualifiedName> name {null, null, localName};                      \
     return name;                                                                                             \
   }
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   KRYS_DEFINE_MATHML_ATTRIBUTE_NAME(AccentAttr, u8"accent")
   KRYS_DEFINE_MATHML_ATTRIBUTE_NAME(AccentunderAttr, u8"accentunder")

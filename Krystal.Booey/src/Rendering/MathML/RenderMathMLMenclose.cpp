@@ -37,7 +37,7 @@
 
 namespace krys::boo
 {
-  using Notation = mathml::MathMLMencloseElement::MencloseNotationFlag;
+  using Notation = MathMLMencloseElement::MencloseNotationFlag;
 
   namespace
   {
@@ -46,8 +46,7 @@ namespace krys::boo
     constexpr uint16 LongDivLeftSpace = 10;
   }
 
-  RenderMathMLMenclose::RenderMathMLMenclose(mathml::MathMLMencloseElement &element,
-                                             RenderStyle &&style) noexcept
+  RenderMathMLMenclose::RenderMathMLMenclose(MathMLMencloseElement &element, RenderStyle &&style) noexcept
       : RenderMathMLRow(Type::MathMLMenclose, element, krys::move(style))
   {
     krys_debug_assert(IsRenderMathMLMenclose());

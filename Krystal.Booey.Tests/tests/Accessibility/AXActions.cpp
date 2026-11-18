@@ -12,26 +12,25 @@ namespace krys::boo::ax::tests
   namespace
   {
     /// @brief Calls a function with each event it handles.
-    struct FunctionListener final : dom::EventListenerCallback
+    struct FunctionListener final : EventListenerCallback
     {
-      Func<void(dom::Event &)> Function;
+      Func<void(Event &)> Function;
 
-      explicit FunctionListener(Func<void(dom::Event &)> &&function) noexcept : Function(krys::move(function))
+      explicit FunctionListener(Func<void(Event &)> &&function) noexcept : Function(krys::move(function))
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         Function(event);
       }
     };
 
-    void ListenWith(dom::Element &element, dom::DOMStringAtom type,
-                    Func<void(dom::Event &)> &&function) noexcept
+    void ListenWith(Element &element, DOMStringAtom type, Func<void(Event &)> &&function) noexcept
     {
-      element.AddEventListener(
-        krys::move(type), Ref<dom::EventListenerCallback>(CreateRef<FunctionListener>(krys::move(function))),
-        false);
+      element.AddEventListener(krys::move(type),
+                               Ref<EventListenerCallback>(CreateRef<FunctionListener>(krys::move(function))),
+                               false);
     }
   }
 
@@ -41,12 +40,12 @@ namespace krys::boo::ax::tests
                    u8"<div id=group role=button><span>Inside</span><button id=inner>Real</button></div>"
                    u8"<p id=text>Text</p>");
     int clicks = 0;
-    ListenWith(page.ById(u8"button"), u8"click", [&](dom::Event &) { ++clicks; });
+    ListenWith(page.ById(u8"button"), u8"click", [&](Event &) { ++clicks; });
     CHECK(page.Object(u8"button").Press());
     CHECK(clicks == 1);
 
     CHECK(page.Object(u8"box").Press());
-    CHECK(Downcast<html::HTMLInputElement>(page.ById(u8"box")).Checked());
+    CHECK(Downcast<HTMLInputElement>(page.ById(u8"box")).Checked());
 
     // The real control the author hid in an ARIA one is pressed.
     CHECK(page.Object(u8"group").ActionElement() == &page.ById(u8"inner"));
@@ -74,13 +73,13 @@ namespace krys::boo::ax::tests
     auto &input = page.Object(u8"input");
     CHECK(input.CanSetValueAttribute());
     CHECK_FALSE(page.Object(u8"readonly").CanSetValueAttribute());
-    CHECK(input.SetValue(dom::DOMStringView(u8"new")));
-    CHECK(Downcast<html::HTMLInputElement>(page.ById(u8"input")).Value() == u8"new");
+    CHECK(input.SetValue(DOMStringView(u8"new")));
+    CHECK(Downcast<HTMLInputElement>(page.ById(u8"input")).Value() == u8"new");
 
     // A focused field is typed into.
     input.SetFocused(true);
-    CHECK(input.SetValue(dom::DOMStringView(u8"typed")));
-    CHECK(Downcast<html::HTMLInputElement>(page.ById(u8"input")).Value() == u8"typed");
+    CHECK(input.SetValue(DOMStringView(u8"typed")));
+    CHECK(Downcast<HTMLInputElement>(page.ById(u8"input")).Value() == u8"typed");
 
     auto &range = page.Object(u8"range");
     CHECK(range.SetValue(30.0f));
@@ -94,7 +93,7 @@ namespace krys::boo::ax::tests
     {
       utf8_string key;
       ListenWith(page.ById(u8"aria"), u8"keydown",
-                 [&](dom::Event &event) { key = Downcast<dom::KeyboardEvent>(event).Key(); });
+                 [&](Event &event) { key = Downcast<KeyboardEvent>(event).Key(); });
       page.Object(u8"aria").Increment();
       CHECK(key == u8"ArrowRight");
     }
@@ -107,7 +106,7 @@ namespace krys::boo::ax::tests
     auto &list = page.Object(u8"list");
     REQUIRE(list.Children().size() == 2);
     list.Children()[1]->SetSelected(true);
-    CHECK(Downcast<html::HTMLSelectElement>(page.ById(u8"list")).SelectedIndex() == 1);
+    CHECK(Downcast<HTMLSelectElement>(page.ById(u8"list")).SelectedIndex() == 1);
 
     auto &details = page.Object(u8"details");
     details.SetIsExpanded(true);

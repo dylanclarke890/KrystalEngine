@@ -20,14 +20,14 @@ namespace krys::boo::tests
                    u8"value=1.5><input type=number id=exp lang=de value=1e3>")
         .HasException());
     (void)fixture.Document->UpdateLayout();
-    auto &german = Downcast<html::HTMLInputElement>(fixture.ById(u8"de"));
+    auto &german = Downcast<HTMLInputElement>(fixture.ById(u8"de"));
 
     // The field shows the value with the locale's decimal separator; the value stays an HTML number.
     CHECK(german.InnerTextValue() == u8"1,5");
     CHECK(german.Value() == u8"1.5");
-    CHECK(Downcast<html::HTMLInputElement>(fixture.ById(u8"en")).InnerTextValue() == u8"1.5");
+    CHECK(Downcast<HTMLInputElement>(fixture.ById(u8"en")).InnerTextValue() == u8"1.5");
     // Scientific notation isn't localised.
-    CHECK(Downcast<html::HTMLInputElement>(fixture.ById(u8"exp")).InnerTextValue() == u8"1e3");
+    CHECK(Downcast<HTMLInputElement>(fixture.ById(u8"exp")).InnerTextValue() == u8"1e3");
 
     // What the user types in the locale's way is read back as a number.
     german.Focus();

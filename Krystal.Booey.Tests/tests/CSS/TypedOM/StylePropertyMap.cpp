@@ -3,8 +3,8 @@
 #include "Krystal.Booey.Tests/CSS/CSSOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheetList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/CSSOM/StyleSheetList.hpp"
 #include "Krystal.Booey/CSS/TypedOM/Color/CSSRGB.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSNumericFactory.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
@@ -49,7 +49,7 @@ namespace krys::boo::css::tests
                    "[CSS][TypedOM][css-typed-om:inline-stylepropertymap-objects]")
   {
     style::tests::ResolverFixture fixture {utf8_string(StyleMapMarkup)};
-    auto &element = Downcast<dom::StyledElement>(fixture.ById(u8"a"));
+    auto &element = Downcast<StyledElement>(fixture.ById(u8"a"));
     auto &map = element.AttributeStyleMap();
     CHECK(&map == &element.AttributeStyleMap());
 
@@ -60,7 +60,7 @@ namespace krys::boo::css::tests
       CHECK(Get(map, u8"WIDTH") == "10px");
       CHECK(Get(map, u8"height") == "undefined");
       CHECK(Get(map, u8"--x") == "foo");
-      CHECK(map.Get(u8"bogus").GetException().Code() == dom::ExceptionCode::TypeError);
+      CHECK(map.Get(u8"bogus").GetException().Code() == ExceptionCode::TypeError);
       CHECK(map.Has(u8"width").Value());
       CHECK_FALSE(map.Has(u8"height").Value());
 
@@ -74,7 +74,7 @@ namespace krys::boo::css::tests
     {
       REQUIRE_FALSE(map.Set(u8"height", Strings({u8"20px"})).HasException());
       CHECK(Get(map, u8"height") == "20px");
-      CHECK(ToNarrow(element.GetAttribute(u8"style").value_or(dom::DOMString())).contains("height: 20px"));
+      CHECK(ToNarrow(element.GetAttribute(u8"style").value_or(DOMString())).contains("height: 20px"));
 
       REQUIRE_FALSE(map.Set(u8"height", Values(CSSNumericFactory::Px(30))).HasException());
       CHECK(Get(map, u8"height") == "30px");
@@ -83,11 +83,11 @@ namespace krys::boo::css::tests
       auto red = CSSRGB::Create(1.0, 0.0, 0.0).ReleaseValue();
       REQUIRE_FALSE(map.Set(u8"color", Values(red)).HasException());
       CHECK(Get(map, u8"color") == "rgb(255, 0, 0)");
-      CHECK(map.Set(u8"height", Values(red)).GetException().Code() == dom::ExceptionCode::TypeError);
+      CHECK(map.Set(u8"height", Values(red)).GetException().Code() == ExceptionCode::TypeError);
 
       // A number isn't a length, and a single-valued property takes one value.
       CHECK(map.Set(u8"height", Values(CSSNumericFactory::Number(3))).GetException().Code()
-            == dom::ExceptionCode::TypeError);
+            == ExceptionCode::TypeError);
       CHECK(map.Set(u8"height", Strings({u8"1px", u8"2px"})).HasException());
       CHECK(map.Set(u8"height", Strings({u8"red"})).HasException());
       CHECK(map.Set(u8"bogus", Strings({u8"1px"})).HasException());

@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/SVG/Elements/SVGFEDistantLightElement.hpp"
 #include "Krystal.Booey/Graphics/Filters/DistantLightSource.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFEDistantLightElement::SVGFEDistantLightElement(dom::Document &document) noexcept
+  SVGFEDistantLightElement::SVGFEDistantLightElement(Document &document) noexcept
       : SVGFELightElement(document, SVGElementInterface::FEDistantLight)
   {
   }

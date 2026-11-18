@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlmenuelement
   class HTMLMenuElement : public HTMLElement
@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLMenuElement);
 
   public:
-    HTMLMenuElement(dom::Document &document) noexcept;
+    HTMLMenuElement(Document &document) noexcept;
 
 #pragma region HTMLMenuElement Obsolete members - https://html.spec.whatwg.org/#HTMLMenuElement-partial
 
@@ -24,8 +24,8 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLMenuElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLMenuElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLMenuElement();
   }

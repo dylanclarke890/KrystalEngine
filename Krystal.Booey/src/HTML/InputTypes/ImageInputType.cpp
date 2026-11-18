@@ -41,10 +41,10 @@ namespace krys::boo::html
 {
   namespace
   {
-    KRYS_NODISCARD dom::DOMString ToDecimalString(int32 value) noexcept
+    KRYS_NODISCARD DOMString ToDecimalString(int32 value) noexcept
     {
       auto string = std::to_string(value);
-      return dom::DOMString(reinterpret_cast<const char8 *>(string.data()), string.size());
+      return DOMString(reinterpret_cast<const char8 *>(string.data()), string.size());
     }
 
     /// @brief The width (or height, if @p height) of the dimensions of the image button @p element.
@@ -79,8 +79,7 @@ namespace krys::boo::html
       // 5a. Let attributeHeight be the result of parsing that attribute's value.
       // 5b. If attributeHeight is not an error, then set height to attributeHeight.
       auto attribute = element.GetAttribute(height ? u8"height" : u8"width");
-      if (auto value = Numbers::ParseNonNegativeInteger(attribute.value_or(dom::DOMString()));
-          value.Success())
+      if (auto value = Numbers::ParseNonNegativeInteger(attribute.value_or(DOMString())); value.Success())
       {
         return static_cast<uint32>(std::min<uint64>(value.Value, std::numeric_limits<int32>::max()));
       }
@@ -112,7 +111,7 @@ namespace krys::boo::html
     return true;
   }
 
-  Maybe<dom::DOMString> ImageInputType::ResultForDialogSubmit() const noexcept
+  Maybe<DOMString> ImageInputType::ResultForDialogSubmit() const noexcept
   {
     return ToDecimalString(_clickLocation.X()) + u8"," + ToDecimalString(_clickLocation.Y());
   }
@@ -145,7 +144,7 @@ namespace krys::boo::html
     return true;
   }
 
-  void ImageInputType::HandleActivationBehavior(dom::Event &event) noexcept
+  void ImageInputType::HandleActivationBehavior(Event &event) noexcept
   {
     krys_debug_assert(Element());
     Ref<HTMLInputElement> element = ShareRef(*Element());
@@ -157,7 +156,7 @@ namespace krys::boo::html
     Ref<HTMLFormElement> protectedForm = ShareRef(*element->Form());
 
     _clickLocation = IntPoint();
-    if (auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event))
+    if (auto *mouseEvent = DynamicDowncast<MouseEvent>(event))
     {
       if (!mouseEvent->IsSimulated())
       {
@@ -227,7 +226,7 @@ namespace krys::boo::html
     }
   }
 
-  void ImageInputType::AttributeChanged(const dom::DOMStringAtom &localName) noexcept
+  void ImageInputType::AttributeChanged(const DOMStringAtom &localName) noexcept
   {
     krys_debug_assert(Element());
     if (localName == u8"alt")

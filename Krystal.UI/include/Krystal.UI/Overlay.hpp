@@ -7,7 +7,7 @@
 #include "Krystal.PAL/KeyModifiers.hpp"
 #include "Krystal.PAL/Keys.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
 }
@@ -77,17 +77,17 @@ namespace krys::ui
     static void SizeContentView(View &view, const View &owner, const boo::IntSize &size) noexcept;
 
     /// @brief The topmost element at @p point (in CSS pixels) in @p view, or null.
-    KRYS_NODISCARD static boo::dom::Element *HitTest(View &view, const boo::IntPoint &point) noexcept;
+    KRYS_NODISCARD static boo::Element *HitTest(View &view, const boo::IntPoint &point) noexcept;
 
     /// @brief Turns the wheel at @p point (in CSS pixels) in @p view, as `View::MouseWheel` does.
     static bool WheelView(View &view, const boo::IntPoint &point, float notchesX, float notchesY) noexcept;
 
     /// @brief The element at @p point in @p view, or its nearest ancestor, with the attribute @p name.
-    KRYS_NODISCARD static boo::dom::Element *ElementWithAttributeAt(View &view, const boo::IntPoint &point,
-                                                                    utf8_stringview name) noexcept;
+    KRYS_NODISCARD static boo::Element *ElementWithAttributeAt(View &view, const boo::IntPoint &point,
+                                                               utf8_stringview name) noexcept;
 
     /// @brief Adds the class @p className to @p element's classes, or removes it.
-    static void SetClass(boo::dom::Element &element, utf8_stringview className, bool on) noexcept;
+    static void SetClass(boo::Element &element, utf8_stringview className, bool on) noexcept;
 
     /// @brief Appends @p text to @p html, escaped.
     static void AppendEscaped(utf8_string &html, utf8_stringview text) noexcept;

@@ -32,7 +32,7 @@
 
 namespace krys::boo
 {
-  void RenderTreePosition::ComputeNextSibling(const dom::Node &node) noexcept
+  void RenderTreePosition::ComputeNextSibling(const Node &node) noexcept
   {
     krys_debug_assert(!node.Renderer());
     if (_hasValidNextSibling)
@@ -57,7 +57,7 @@ namespace krys::boo
     }
   }
 
-  RenderObject *RenderTreePosition::NextSiblingRenderer(const dom::Node &node) const noexcept
+  RenderObject *RenderTreePosition::NextSiblingRenderer(const Node &node) const noexcept
   {
     krys_debug_assert(!node.Renderer());
 
@@ -72,7 +72,7 @@ namespace krys::boo
       return nullptr;
     }
 
-    List<dom::Element *> elementStack;
+    List<Element *> elementStack;
 
     // In the common case ancestor == parentElement immediately and this just pushes parentElement into stack.
     auto *ancestor = node.ParentElementInComposedTree();
@@ -92,7 +92,7 @@ namespace krys::boo
 
     auto initializeIteratorConsideringPseudoElements = [&]
     {
-      if (auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(node))
+      if (auto *pseudoElement = DynamicDowncast<PseudoElement>(node))
       {
         auto *host = pseudoElement->HostElement();
         if (pseudoElement->GetPseudoElementType() == PseudoElementType::Before)
@@ -114,9 +114,9 @@ namespace krys::boo
       return composedDescendants.at(node).TraverseNextSkippingChildren();
     };
 
-    auto pushCheckingForAfterPseudoElementRenderer = [&](dom::Element &element) -> RenderElement *
+    auto pushCheckingForAfterPseudoElementRenderer = [&](Element &element) -> RenderElement *
     {
-      krys_debug_assert(!Is<dom::PseudoElement>(element));
+      krys_debug_assert(!Is<PseudoElement>(element));
       if (auto *before = element.BeforePseudoElement())
       {
         if (auto *renderer = before->Renderer())
@@ -160,7 +160,7 @@ namespace krys::boo
         return renderer;
       }
 
-      if (auto *element = DynamicDowncast<dom::Element>(*it))
+      if (auto *element = DynamicDowncast<Element>(*it))
       {
         if (element->HasDisplayContents())
         {

@@ -25,7 +25,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyImpl.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<stop>` element: a gradient's colour at an offset.
   /// @see https://svgwg.org/svg2-draft/pservers.html#InterfaceSVGStopElement
@@ -37,7 +37,7 @@ namespace krys::boo::svg
     Ref<SVGAnimatedNumber> _offset;
 
   public:
-    explicit SVGStopElement(dom::Document &document) noexcept;
+    explicit SVGStopElement(Document &document) noexcept;
 
     KRYS_NODISCARD Color StopColorIncludingOpacity() const noexcept;
 
@@ -54,10 +54,10 @@ namespace krys::boo::svg
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGStopElement, SVGElement>;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
 
@@ -65,8 +65,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGStopElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGStopElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGStopElement();
   }

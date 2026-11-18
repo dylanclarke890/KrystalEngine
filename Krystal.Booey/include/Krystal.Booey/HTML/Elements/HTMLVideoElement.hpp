@@ -28,7 +28,7 @@
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMediaElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   // FIXME: The poster frame (its loading, events and renderer) and decoded video, with a host media player.
   /// @see https://html.spec.whatwg.org/#htmlvideoelement
@@ -37,7 +37,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLVideoElement);
 
   public:
-    HTMLVideoElement(dom::Document &document) noexcept;
+    HTMLVideoElement(Document &document) noexcept;
 
 #pragma region HTMLVideoElement - https://html.spec.whatwg.org/#htmlvideoelement
 
@@ -75,18 +75,17 @@ namespace krys::boo::html
 
   protected:
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLVideoElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLVideoElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLVideoElement();
   }

@@ -29,10 +29,10 @@
 
 namespace krys::boo
 {
-  RenderLineBreak::RenderLineBreak(html::HTMLElement &element, RenderStyle &&style) noexcept
+  RenderLineBreak::RenderLineBreak(boo::HTMLElement &element, RenderStyle &&style) noexcept
       : RenderBoxModelObject(Type::LineBreak, element, krys::move(style), {},
-                             Is<html::HTMLWBRElement>(element) ? EnumSet<LineBreakFlag> {LineBreakFlag::IsWBR}
-                                                               : EnumSet<LineBreakFlag> {})
+                             Is<HTMLWBRElement>(element) ? EnumSet<LineBreakFlag> {LineBreakFlag::IsWBR}
+                                                         : EnumSet<LineBreakFlag> {})
   {
     krys_debug_assert(IsRenderLineBreak());
   }

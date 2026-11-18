@@ -33,8 +33,7 @@
 
 namespace krys::boo
 {
-  TextInsertionBaseCommand::TextInsertionBaseCommand(dom::Document &document,
-                                                     EditAction editingAction) noexcept
+  TextInsertionBaseCommand::TextInsertionBaseCommand(Document &document, EditAction editingAction) noexcept
       : CompositeEditCommand(document, editingAction)
   {
   }
@@ -68,12 +67,12 @@ namespace krys::boo
     }
 
     utf8_string newText(text);
-    if (RefPtr<dom::Node> startNode = ShareRefPtr(selectionForInsertion.Start().GetContainerNode()))
+    if (RefPtr<boo::Node> startNode = ShareRefPtr(selectionForInsertion.Start().GetContainerNode()))
     {
-      if (RefPtr<dom::Element> rootEditableElement = ShareRefPtr(startNode->RootEditableElement()))
+      if (RefPtr<Element> rootEditableElement = ShareRefPtr(startNode->RootEditableElement()))
       {
         // Send BeforeTextInsertedEvent. The event handler will update text if necessary.
-        auto event = dom::BeforeTextInsertedEvent::Create(text);
+        auto event = BeforeTextInsertedEvent::Create(text);
         (void)dom::EventDispatcher::DispatchToTarget(*event, rootEditableElement.get());
         newText = event->Text();
       }
@@ -83,13 +82,13 @@ namespace krys::boo
 
   bool CanAppendNewLineFeedToSelection(const VisibleSelection &selection) noexcept
   {
-    RefPtr<dom::Element> node = ShareRefPtr(selection.RootEditableElement());
+    RefPtr<Element> node = ShareRefPtr(selection.RootEditableElement());
     if (!node)
     {
       return false;
     }
 
-    auto event = dom::BeforeTextInsertedEvent::Create(u8"\n");
+    auto event = BeforeTextInsertedEvent::Create(u8"\n");
     (void)dom::EventDispatcher::DispatchToTarget(*event, node.get());
     return !event->Text().empty();
   }

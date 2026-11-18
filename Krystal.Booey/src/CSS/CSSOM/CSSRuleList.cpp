@@ -22,7 +22,7 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   CSSRuleList::CSSRuleList() noexcept = default;
 

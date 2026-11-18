@@ -61,7 +61,7 @@ namespace krys::ui::tests
     struct DragLog
     {
       std::string Text;
-      List<boo::dom::EventListenerHandle> Handles;
+      List<boo::EventListenerHandle> Handles;
 
       explicit DragLog(View &view) noexcept
       {
@@ -69,17 +69,16 @@ namespace krys::ui::tests
         {
           Handles.push_back(view.Document().AddEventListener(
             type,
-            [this](boo::dom::Event &event)
+            [this](boo::Event &event)
             {
-              auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
-              auto *element = DynamicDowncast<boo::dom::Element>(node);
+              auto *node = DynamicDowncast<boo::Node>(event.Target().get());
+              auto *element = DynamicDowncast<boo::Element>(node);
               if (!Text.empty())
               {
                 Text += ' ';
               }
-              Text +=
-                Narrow(event.Type().View()) + "@"
-                + (element ? Narrow(element->GetAttribute(u8"id").value_or(boo::dom::DOMString())) : "");
+              Text += Narrow(event.Type().View()) + "@"
+                      + (element ? Narrow(element->GetAttribute(u8"id").value_or(boo::DOMString())) : "");
             }));
         }
       }
@@ -96,9 +95,9 @@ namespace krys::ui::tests
 
     auto dragStart =
       view.Document().AddEventListener(u8"dragstart",
-                                       [&](boo::dom::Event &event)
+                                       [&](boo::Event &event)
                                        {
-                                         Downcast<boo::dom::DragEvent>(event).GetDataTransfer()->SetData(
+                                         Downcast<boo::DragEvent>(event).GetDataTransfer()->SetData(
                                            view.Document(), u8"text/plain", u8"payload");
                                        });
 
@@ -112,13 +111,13 @@ namespace krys::ui::tests
     SECTION("Dropping on a target that takes it")
     {
       std::string dropped;
-      auto accept = [](boo::dom::Event &event)
+      auto accept = [](boo::Event &event)
       {
-        auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
-        auto *element = DynamicDowncast<boo::dom::Element>(node);
-        if (element && element->GetAttribute(u8"id") == boo::dom::DOMString(u8"dst"))
+        auto *node = DynamicDowncast<boo::Node>(event.Target().get());
+        auto *element = DynamicDowncast<boo::Element>(node);
+        if (element && element->GetAttribute(u8"id") == boo::DOMString(u8"dst"))
         {
-          Downcast<boo::dom::DragEvent>(event).GetDataTransfer()->SetDropEffect(u8"copy");
+          Downcast<boo::DragEvent>(event).GetDataTransfer()->SetDropEffect(u8"copy");
           event.PreventDefault();
         }
       };
@@ -126,10 +125,10 @@ namespace krys::ui::tests
       auto over = view.Document().AddEventListener(u8"dragover", accept);
       auto drop = view.Document().AddEventListener(
         u8"drop",
-        [&](boo::dom::Event &event)
+        [&](boo::Event &event)
         {
           dropped = Narrow(
-            Downcast<boo::dom::DragEvent>(event).GetDataTransfer()->GetData(view.Document(), u8"text/plain"));
+            Downcast<boo::DragEvent>(event).GetDataTransfer()->GetData(view.Document(), u8"text/plain"));
           event.PreventDefault();
         });
 
@@ -255,11 +254,11 @@ namespace krys::ui::tests
     {
       std::string text, uriList, types;
       size_t files = 0;
-      auto accept = [](boo::dom::Event &event)
+      auto accept = [](boo::Event &event)
       {
-        auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
-        auto *element = DynamicDowncast<boo::dom::Element>(node);
-        if (element && element->GetAttribute(u8"id") == boo::dom::DOMString(u8"dst"))
+        auto *node = DynamicDowncast<boo::Node>(event.Target().get());
+        auto *element = DynamicDowncast<boo::Element>(node);
+        if (element && element->GetAttribute(u8"id") == boo::DOMString(u8"dst"))
         {
           event.PreventDefault();
         }
@@ -268,9 +267,9 @@ namespace krys::ui::tests
       auto over = view.Document().AddEventListener(u8"dragover", accept);
       auto drop = view.Document().AddEventListener(
         u8"drop",
-        [&](boo::dom::Event &event)
+        [&](boo::Event &event)
         {
-          auto &dataTransfer = *Downcast<boo::dom::DragEvent>(event).GetDataTransfer();
+          auto &dataTransfer = *Downcast<boo::DragEvent>(event).GetDataTransfer();
           text = Narrow(dataTransfer.GetData(view.Document(), u8"text/plain"));
           uriList = Narrow(dataTransfer.GetData(view.Document(), u8"text/uri-list"));
           for (auto &type : dataTransfer.Types(view.Document()))

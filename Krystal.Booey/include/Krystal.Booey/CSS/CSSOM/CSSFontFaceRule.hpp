@@ -26,46 +26,53 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSFontFaceDescriptors;
-  class FontFaceRule;
+}
 
+namespace krys::boo::css
+{
+  class FontFaceRule;
+}
+
+namespace krys::boo
+{
   /// @brief An `@font-face` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-fonts/#cssfontfacerule
   class CSSFontFaceRule final : public CSSRule
   {
   private:
-    Ref<FontFaceRule> _fontFaceRule;
+    Ref<css::FontFaceRule> _fontFaceRule;
     RefPtr<CSSFontFaceDescriptors> _propertiesCSSOMWrapper;
 
-    CSSFontFaceRule(FontFaceRule &rule, CSSStyleSheet *parent) noexcept;
+    CSSFontFaceRule(css::FontFaceRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
     ~CSSFontFaceRule() noexcept override;
 
-    KRYS_NODISCARD static Ref<CSSFontFaceRule> Create(FontFaceRule &rule, CSSStyleSheet *sheet) noexcept;
+    KRYS_NODISCARD static Ref<CSSFontFaceRule> Create(css::FontFaceRule &rule, CSSStyleSheet *sheet) noexcept;
 
     KRYS_NODISCARD CSSFontFaceDescriptors &Style() noexcept;
 
   private:
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::FontFace;
+      return css::RuleType::FontFace;
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
-    KRYS_NODISCARD CSSOMString CssText(const SerialisationContext &context) const noexcept final;
+    KRYS_NODISCARD CSSOMString CssText(const css::SerialisationContext &context) const noexcept final;
 
     KRYS_NODISCARD static CSSOMString CssTextInternal(const CSSOMString &declarations) noexcept;
 
-    void Reattach(Rule &rule) noexcept final;
+    void Reattach(css::Rule &rule) noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSFontFaceRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSFontFaceRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::FontFace;
   }

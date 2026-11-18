@@ -8,7 +8,7 @@ namespace krys::boo::style::tests
 {
   TEST_CASE_METHOD(css::tests::ValueFixture, "ResolveForDocument", "[Style][ResolveForDocument]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto style = ResolveForDocument(*document);
 
     CHECK(style.Display() == DisplayType::Block);
@@ -28,7 +28,7 @@ namespace krys::boo::style::tests
 
     SECTION("SVG documents use the SVG zoom rules")
     {
-      auto svgDocument = CreateRef<svg::SVGDocument>();
+      auto svgDocument = CreateRef<SVGDocument>();
       CHECK(ResolveForDocument(*svgDocument).ComputedFontSize() == 16);
     }
   }

@@ -33,21 +33,21 @@
 
 namespace krys::boo
 {
-  RenderTextFragment::RenderTextFragment(dom::Text &textNode, utf8_stringview text, size_t startOffset,
+  RenderTextFragment::RenderTextFragment(boo::Text &textNode, utf8_stringview text, size_t startOffset,
                                          size_t length) noexcept
       : RenderText(Type::TextFragment, textNode, utf8_string(text.substr(startOffset, length))),
         _start(startOffset), _end(length)
   {
   }
 
-  RenderTextFragment::RenderTextFragment(dom::Document &document, utf8_stringview text, size_t startOffset,
+  RenderTextFragment::RenderTextFragment(Document &document, utf8_stringview text, size_t startOffset,
                                          size_t length) noexcept
       : RenderText(Type::TextFragment, document, utf8_string(text.substr(startOffset, length))),
         _start(startOffset), _end(length)
   {
   }
 
-  RenderTextFragment::RenderTextFragment(dom::Document &document, utf8_string text) noexcept
+  RenderTextFragment::RenderTextFragment(Document &document, utf8_string text) noexcept
       : RenderText(Type::TextFragment, document, text), _start(0), _end(text.size()),
         _contentString(krys::move(text))
   {

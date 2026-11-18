@@ -91,22 +91,22 @@
 
 namespace krys::boo
 {
-  RenderElement::RenderElement(Type type, dom::ContainerNode &elementOrDocument, RenderStyle &&style,
+  RenderElement::RenderElement(Type type, ContainerNode &elementOrDocument, RenderStyle &&style,
                                EnumSet<TypeFlag> flags, TypeSpecificFlags typeSpecificFlags) noexcept
       : RenderObject(type, elementOrDocument, flags, typeSpecificFlags), _style(krys::move(style))
   {
   }
 
-  RenderElement::RenderElement(Type type, dom::Element &element, RenderStyle &&style,
+  RenderElement::RenderElement(Type type, Element &element, RenderStyle &&style,
                                EnumSet<TypeFlag> baseTypeFlags, TypeSpecificFlags typeSpecificFlags) noexcept
-      : RenderElement(type, static_cast<dom::ContainerNode &>(element), krys::move(style), baseTypeFlags,
+      : RenderElement(type, static_cast<ContainerNode &>(element), krys::move(style), baseTypeFlags,
                       typeSpecificFlags)
   {
   }
 
-  RenderElement::RenderElement(Type type, dom::Document &document, RenderStyle &&style,
+  RenderElement::RenderElement(Type type, Document &document, RenderStyle &&style,
                                EnumSet<TypeFlag> baseTypeFlags, TypeSpecificFlags typeSpecificFlags) noexcept
-      : RenderElement(type, static_cast<dom::ContainerNode &>(document), krys::move(style), baseTypeFlags,
+      : RenderElement(type, static_cast<ContainerNode &>(document), krys::move(style), baseTypeFlags,
                       typeSpecificFlags)
   {
   }
@@ -145,13 +145,13 @@ namespace krys::boo
   }
 
   RenderPtr<RenderElement>
-    RenderElement::CreateFor(dom::Element &element, RenderStyle &&style,
+    RenderElement::CreateFor(Element &element, RenderStyle &&style,
                              EnumSet<ConstructBlockLevelRendererFor> rendererTypeOverride) noexcept
   {
     if (rendererTypeOverride.IsEmpty())
     {
       if (RefPtr styleImage = MinimallySupportedContentDataImage(style.GetContent());
-          styleImage && !Is<dom::PseudoElement>(element))
+          styleImage && !Is<PseudoElement>(element))
       {
         style::LoadPendingResources(style, element.NodeDocument(), &element);
         auto image = CreateRenderer<RenderImage>(Type::Image, element, krys::move(style), styleImage.get());
@@ -339,8 +339,8 @@ namespace krys::boo
     {
       return false;
     }
-    auto *htmlElement = DynamicDowncast<html::HTMLElement>(*element);
-    return htmlElement && Is<html::HTMLMarqueeElement>(*htmlElement);
+    auto *htmlElement = DynamicDowncast<HTMLElement>(*element);
+    return htmlElement && Is<HTMLMarqueeElement>(*htmlElement);
   }
 
   boo::ImageOrientation RenderElement::GetImageOrientation() const noexcept
@@ -1611,9 +1611,8 @@ namespace krys::boo
                    && !(IsFixedPositioned() ? current->CanContainFixedPositionObjects()
                                             : current->CanContainAbsolutelyPositionedObjects()))))
     {
-      auto *element = DynamicDowncast<html::HTMLElement>(current->GetElement());
-      if (!skipTables && element
-          && (Is<html::HTMLTableElement>(*element) || Is<html::HTMLTableCellElement>(*element)))
+      auto *element = DynamicDowncast<HTMLElement>(current->GetElement());
+      if (!skipTables && element && (Is<HTMLTableElement>(*element) || Is<HTMLTableCellElement>(*element)))
       {
         break;
       }
@@ -1751,9 +1750,9 @@ namespace krys::boo
     return IsBeforeContent() || IsAfterContent();
   }
 
-  dom::Element *RenderElement::GeneratingElement() const noexcept
+  Element *RenderElement::GeneratingElement() const noexcept
   {
-    return IsPseudoElement() ? static_cast<dom::PseudoElement &>(*GetElement()).HostElement() : GetElement();
+    return IsPseudoElement() ? static_cast<PseudoElement &>(*GetElement()).HostElement() : GetElement();
   }
 
 #pragma region Selection
@@ -2071,9 +2070,9 @@ namespace krys::boo
     return false;
   }
 
-  dom::Element *RenderElement::GetElement() const noexcept
+  Element *RenderElement::GetElement() const noexcept
   {
-    return static_cast<dom::Element *>(GetNode());
+    return static_cast<Element *>(GetNode());
   }
 
   layout::ElementBox *RenderElement::LayoutBox() noexcept
@@ -2250,7 +2249,7 @@ namespace krys::boo
     return isVisible ? VisibleInViewportState::Yes : VisibleInViewportState::No;
   }
 
-  VisibleInViewportState RenderElement::ImageVisibleInViewport(const dom::Document &document) const noexcept
+  VisibleInViewportState RenderElement::ImageVisibleInViewport(const Document &document) const noexcept
   {
     if (&GetDocument() != &document)
     {
@@ -2287,7 +2286,7 @@ namespace krys::boo
 
     if (RefPtr<Image> image = ShareRefPtr(cachedImage.GetImage()))
     {
-      if (auto *svgImage = DynamicDowncast<svg::SVGImage>(*image))
+      if (auto *svgImage = DynamicDowncast<SVGImage>(*image))
       {
         svgImage->ScheduleStartAnimation();
       }
@@ -2351,16 +2350,16 @@ namespace krys::boo
   FloatRect RenderElement::ReferenceBoxRect(CSSBoxType boxType) const noexcept
   {
     // CSS box model code is implemented in RenderBox::referenceBoxRect().
-    if (GetElement() && !Is<svg::SVGElement>(GetElement()))
+    if (GetElement() && !Is<SVGElement>(GetElement()))
     {
       return {};
     }
 
     auto determineSVGViewport = [&]
     {
-      auto *viewportElement = Downcast<svg::SVGElement>(GetElement());
+      auto *viewportElement = Downcast<SVGElement>(GetElement());
       krys_assert(viewportElement);
-      auto viewportSize = svg::SVGLengthContext(viewportElement).ViewportSize().value_or(FloatSize {});
+      auto viewportSize = SVGLengthContext(viewportElement).ViewportSize().value_or(FloatSize {});
       return FloatRect {{}, viewportSize};
     };
 

@@ -78,12 +78,12 @@ namespace krys::boo::style
       return staticPrintEval;
     }
 
-    KRYS_NODISCARD css::StyleSheetContents *ParseUASheet(css::CSSOMStringView string) noexcept
+    KRYS_NODISCARD css::StyleSheetContents *ParseUASheet(CSSOMStringView string) noexcept
     {
       // leak the sheet on purpose
       css::StyleSheetContents &sheet =
         *css::StyleSheetContents::Create(css::ParserContext(css::ParserMode::UASheet)).release();
-      sheet.ParseString(css::CSSOMString(string));
+      sheet.ParseString(CSSOMString(string));
       return &sheet;
     }
 
@@ -113,7 +113,7 @@ namespace krys::boo::style
 
     /// @brief Whether @p element is a form control (button, fieldset, input, output, select or textarea), a
     /// meter or a progress element.
-    KRYS_NODISCARD bool IsFormControlMeterOrProgress(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool IsFormControlMeterOrProgress(const Element &element) noexcept
     {
       switch (element.TagQualifiedName().TagName())
       {
@@ -204,9 +204,9 @@ namespace krys::boo::style
     ++DefaultStyleVersion;
   }
 
-  void UserAgentStyle::EnsureDefaultStyleSheetsForElement(const dom::Element &element) noexcept
+  void UserAgentStyle::EnsureDefaultStyleSheetsForElement(const Element &element) noexcept
   {
-    if (Is<html::HTMLElement>(element))
+    if (Is<HTMLElement>(element))
     {
       // FIXME: The switch control style sheet, for checkboxes with the switch attribute, once there are
       // settings (SwitchControlEnabled is off by default).
@@ -227,7 +227,7 @@ namespace krys::boo::style
         }
       }
     }
-    else if (Is<svg::SVGElement>(element))
+    else if (Is<SVGElement>(element))
     {
       if (!SVGStyleSheet)
       {
@@ -235,7 +235,7 @@ namespace krys::boo::style
         AddToDefaultStyle(*SVGStyleSheet);
       }
     }
-    else if (Is<mathml::MathMLElement>(element))
+    else if (Is<MathMLElement>(element))
     {
       if (!MathMLStyleSheet)
       {

@@ -3123,7 +3123,7 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD dom::Element *FlattenedParent(dom::Element *element) noexcept
+    KRYS_NODISCARD Element *FlattenedParent(Element *element) noexcept
     {
       if (!element)
       {
@@ -4819,8 +4819,8 @@ namespace krys::boo
     }
 
     // FIXME: This should be possible on all elements but is not right now.
-    RefPtr<dom::StyledElement> styledElement =
-      ShareRefPtr(DynamicDowncast<dom::StyledElement>(Renderer().GetElement()));
+    RefPtr<StyledElement> styledElement =
+      ShareRefPtr(DynamicDowncast<StyledElement>(Renderer().GetElement()));
     if (!styledElement)
     {
       return;
@@ -4828,7 +4828,7 @@ namespace krys::boo
 
     auto *renderer = Downcast<RenderBox>(styledElement->Renderer());
 
-    Ref<dom::Document> document = ShareRef(styledElement->NodeDocument());
+    Ref<Document> document = ShareRef(styledElement->NodeDocument());
     if (!document->Frame()->GetEventHandler().MousePressed())
     {
       return;
@@ -4858,7 +4858,7 @@ namespace krys::boo
       - currentSize;
 
     // One mutation record for the style attribute, however many of its properties change.
-    css::StyleAttributeMutationScope mutationScope {styledElement.get()};
+    StyleAttributeMutationScope mutationScope {styledElement.get()};
     bool isBoxSizingBorder = renderer->Style().GetBoxSizing() == BoxSizing::BorderBox;
 
     auto resize = renderer->Style().GetResize();
@@ -4867,7 +4867,7 @@ namespace krys::boo
                                                                   : resize == style::Resize::Block);
     if (canResizeWidth && difference.Width())
     {
-      if (Is<html::HTMLFormControlElement>(*styledElement))
+      if (Is<HTMLFormControlElement>(*styledElement))
       {
         // Make implicit margins from the theme explicit (see <http://bugs.webkit.org/show_bug.cgi?id=9547>).
         (void)styledElement->SetInlineStyleProperty(
@@ -4891,7 +4891,7 @@ namespace krys::boo
                                                                    : resize == style::Resize::Inline);
     if (canResizeHeight && difference.Height())
     {
-      if (Is<html::HTMLFormControlElement>(*styledElement))
+      if (Is<HTMLFormControlElement>(*styledElement))
       {
         // Make implicit margins from the theme explicit (see <http://bugs.webkit.org/show_bug.cgi?id=9547>).
         (void)styledElement->SetInlineStyleProperty(
@@ -6805,11 +6805,11 @@ namespace krys::boo
 
     /// @brief The nearest link at or above @p node in the composed tree.
     // FIXME: Images (which are never the link: an image map's area is).
-    KRYS_NODISCARD dom::Element *EnclosingLinkEventParentOrSelf(dom::Node &node) noexcept
+    KRYS_NODISCARD Element *EnclosingLinkEventParentOrSelf(Node &node) noexcept
     {
-      for (dom::Node *current = &node; current; current = current->ParentInComposedTree())
+      for (Node *current = &node; current; current = current->ParentInComposedTree())
       {
-        if (auto *element = DynamicDowncast<dom::Element>(*current); element && css::IsLink(*element))
+        if (auto *element = DynamicDowncast<Element>(*current); element && css::IsLink(*element))
         {
           return element;
         }
@@ -6894,7 +6894,7 @@ namespace krys::boo
     return insideLayer.Layer;
   }
 
-  dom::Element *RenderLayer::EnclosingElement() const noexcept
+  Element *RenderLayer::EnclosingElement() const noexcept
   {
     for (RenderElement *r = &Renderer(); r; r = r->Parent())
     {

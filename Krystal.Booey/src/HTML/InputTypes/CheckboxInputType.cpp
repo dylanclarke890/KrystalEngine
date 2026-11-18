@@ -37,18 +37,18 @@
 
 namespace krys::boo::html
 {
-  bool CheckboxInputType::ValueMissing(dom::DOMStringView) const noexcept
+  bool CheckboxInputType::ValueMissing(DOMStringView) const noexcept
   {
     krys_debug_assert(Element());
     return Element()->IsRequired() && !Element()->Checked();
   }
 
-  dom::DOMString CheckboxInputType::ValueMissingText() const noexcept
+  DOMString CheckboxInputType::ValueMissingText() const noexcept
   {
     return ValidationMessageValueMissingForCheckboxText();
   }
 
-  void CheckboxInputType::HandleKeyupEvent(dom::KeyboardEvent &event) noexcept
+  void CheckboxInputType::HandleKeyupEvent(KeyboardEvent &event) noexcept
   {
     if (event.KeyIdentifier() != u8"U+0020")
     {
@@ -76,7 +76,7 @@ namespace krys::boo::html
     element.SetChecked(!state.Checked, state.Trusted ? WasSetByJavaScript::No : WasSetByJavaScript::Yes);
   }
 
-  void CheckboxInputType::DidDispatchClick(dom::Event &event, const InputElementClickState &state) noexcept
+  void CheckboxInputType::DidDispatchClick(Event &event, const InputElementClickState &state) noexcept
   {
     if (event.DefaultPrevented() || event.DefaultHandled())
     {

@@ -30,7 +30,7 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -39,7 +39,10 @@ namespace krys::boo::css
 {
   class DOMMatrix;
   class TransformListValue;
+}
 
+namespace krys::boo
+{
   /// @brief A `<transform-list>`, as a list of transform components.
   /// @see https://drafts.css-houdini.org/css-typed-om/#csstransformvalue
   class CSSTransformValue final : public CSSStyleValue
@@ -50,12 +53,12 @@ namespace krys::boo::css
   public:
     /// @brief Reifies a transform list.
     /// @see https://drafts.css-houdini.org/css-typed-om/#reify-a-transform-list
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSTransformValue>> Create(const TransformListValue &list,
-                                                                          dom::Document &document) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSTransformValue>> Create(const css::TransformListValue &list,
+                                                                     Document &document) noexcept;
 
     /// @return A `TypeError` if @p transforms is empty.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csstransformvalue-csstransformvalue
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSTransformValue>>
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSTransformValue>>
       Create(List<Ref<CSSTransformComponent>> transforms) noexcept;
 
     ~CSSTransformValue() noexcept override;
@@ -76,8 +79,8 @@ namespace krys::boo::css
 
     /// @brief Replaces the component at @p index, or appends one at the end.
     /// @return A `RangeError` if @p index is past the end.
-    dom::ExceptionOr<Ref<CSSTransformComponent>> SetItem(size_t index,
-                                                         Ref<CSSTransformComponent> component) noexcept;
+    ExceptionOr<Ref<CSSTransformComponent>> SetItem(size_t index,
+                                                    Ref<CSSTransformComponent> component) noexcept;
 
     KRYS_NODISCARD const List<Ref<CSSTransformComponent>> &Components() const noexcept
     {
@@ -90,14 +93,14 @@ namespace krys::boo::css
     /// @brief The components' matrices, multiplied in order.
     /// @return A `TypeError` if a component has no matrix.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csstransformvalue-tomatrix
-    KRYS_NODISCARD dom::ExceptionOr<Ref<DOMMatrix>> ToMatrix() const noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept;
 
     KRYS_NODISCARD CSSStyleValueType StyleValueType() const noexcept final
     {
       return CSSStyleValueType::CSSTransformValue;
     }
 
-    KRYS_NODISCARD RefPtr<Value> ToCSSValue() const noexcept final;
+    KRYS_NODISCARD RefPtr<css::Value> ToCSSValue() const noexcept final;
 
     void Serialise(StringBuilder &builder, EnumSet<SerialisationArguments> arguments) const noexcept final;
 
@@ -106,9 +109,9 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSTransformValue)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleValue &styleValue) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSTransformValue)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleValue &styleValue) noexcept
   {
-    return styleValue.StyleValueType() == krys::boo::css::CSSStyleValueType::CSSTransformValue;
+    return styleValue.StyleValueType() == krys::boo::CSSStyleValueType::CSSTransformValue;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

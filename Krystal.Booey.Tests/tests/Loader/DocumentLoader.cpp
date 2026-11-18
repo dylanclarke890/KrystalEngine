@@ -88,18 +88,18 @@ namespace krys::boo::tests
 
     auto body = fixture.Document().Body();
     REQUIRE(body);
-    auto *pre = DynamicDowncast<html::HTMLElement>(body->FirstChild());
+    auto *pre = DynamicDowncast<HTMLElement>(body->FirstChild());
     REQUIRE(pre);
     CHECK(pre->LocalName() == u8"pre");
     CHECK(pre->TextContent() == u8"<b>bold</b>\n& more");
-    CHECK(fixture.Document().ContentType() == dom::DOMString(mimeType));
+    CHECK(fixture.Document().ContentType() == DOMString(mimeType));
   }
 
   TEST_CASE("A document loads on a later task, and commits", "[Loader][DocumentLoader]")
   {
     LoadFixture fixture;
     auto &loader = fixture.Frame().Loader();
-    RefPtr<dom::Document> initial = ShareRefPtr(&fixture.Document());
+    RefPtr<boo::Document> initial = ShareRefPtr(&fixture.Document());
     auto *initialWindow = initial->Window();
 
     fixture.LoadMarkup(u8"<!DOCTYPE html><p id=text>Hello</p>", u8"https://example.com/page.html");
@@ -160,7 +160,7 @@ namespace krys::boo::tests
 
     SECTION("a failure keeps the old document")
     {
-      RefPtr<dom::Document> before = ShareRefPtr(&fixture.Document());
+      RefPtr<boo::Document> before = ShareRefPtr(&fixture.Document());
       fixture.LoadURL(u8"https://example.com/missing.html");
       html::EventLoop::Current().RunUntilIdle();
       CHECK(&fixture.Document() == before.get());
@@ -175,7 +175,7 @@ namespace krys::boo::tests
     fixture.Strategy.Defer = true;
     fixture.Strategy.AddText(u8"https://example.com/a.html", u8"<p id=a>", u8"text/html");
     fixture.Strategy.AddText(u8"https://example.com/b.html", u8"<p id=b>", u8"text/html");
-    RefPtr<dom::Document> before = ShareRefPtr(&fixture.Document());
+    RefPtr<boo::Document> before = ShareRefPtr(&fixture.Document());
 
     SECTION("a stopped load's data is dropped")
     {
@@ -281,7 +281,7 @@ namespace krys::boo::tests
     struct EndRecorder
     {
       List<std::string> Events;
-      List<dom::EventListenerHandle> Handles;
+      List<EventListenerHandle> Handles;
 
       void Attach(LoadFixture &fixture) noexcept
       {
@@ -291,7 +291,7 @@ namespace krys::boo::tests
           auto &document = fixture.Document();
           auto *window = document.Window();
           Handles.push_back(document.AddEventListener(u8"readystatechange",
-                                                      [this, &document](dom::Event &)
+                                                      [this, &document](Event &)
                                                       {
                                                         switch (document.ReadyState())
                                                         {
@@ -307,29 +307,28 @@ namespace krys::boo::tests
                                                         }
                                                       }));
           Handles.push_back(document.AddEventListener(u8"DOMContentLoaded",
-                                                      [this](dom::Event &event)
+                                                      [this](Event &event)
                                                       {
                                                         CHECK(event.Bubbles());
                                                         Events.emplace_back("DOMContentLoaded");
                                                       }));
           Handles.push_back(window->AddEventListener(u8"load",
-                                                     [this, &document, window](dom::Event &event)
+                                                     [this, &document, window](Event &event)
                                                      {
                                                        CHECK(event.Target().get() == &document);
                                                        CHECK(event.CurrentTarget().get() == window);
                                                        Events.emplace_back("load");
                                                      }));
-          Handles.push_back(
-            window->AddEventListener<html::PageTransitionEvent>(u8"pageshow",
-                                                                [this](html::PageTransitionEvent &event)
-                                                                {
-                                                                  CHECK_FALSE(event.Persisted());
-                                                                  CHECK(event.Bubbles());
-                                                                  CHECK(event.Cancelable());
-                                                                  Events.emplace_back("pageshow");
-                                                                }));
+          Handles.push_back(window->AddEventListener<PageTransitionEvent>(u8"pageshow",
+                                                                          [this](PageTransitionEvent &event)
+                                                                          {
+                                                                            CHECK_FALSE(event.Persisted());
+                                                                            CHECK(event.Bubbles());
+                                                                            CHECK(event.Cancelable());
+                                                                            Events.emplace_back("pageshow");
+                                                                          }));
           // load doesn't reach the window from the document's own listeners, and DOMContentLoaded does.
-          Handles.push_back(window->AddEventListener(u8"DOMContentLoaded", [this](dom::Event &)
+          Handles.push_back(window->AddEventListener(u8"DOMContentLoaded", [this](Event &)
                                                      { Events.emplace_back("window heard"); }));
         };
       }
@@ -401,7 +400,7 @@ namespace krys::boo::tests
     LoadFixture fixture;
     fixture.LoadMarkup(u8"<!DOCTYPE html><body><p>First</p></body>", u8"https://example.com/first.html");
     html::EventLoop::Current().RunUntilIdle();
-    RefPtr<dom::Document> first = ShareRefPtr(&fixture.Document());
+    RefPtr<boo::Document> first = ShareRefPtr(&fixture.Document());
     auto *window = first->Window();
     fixture.Events.clear();
 
@@ -410,38 +409,38 @@ namespace krys::boo::tests
     auto tryToNavigate = [&]
     {
       fixture.Frame().Loader().ChangeLocation(url::URL(u8"https://example.com/elsewhere.html"),
-                                              dom::DOMStringAtom::Empty(), nullptr,
-                                              ReferrerPolicy::EmptyString, null);
+                                              DOMStringAtom::Empty(), nullptr, ReferrerPolicy::EmptyString,
+                                              null);
     };
-    auto pageHide = window->AddEventListener<html::PageTransitionEvent>(u8"pagehide",
-                                                                        [&](html::PageTransitionEvent &event)
-                                                                        {
-                                                                          CHECK_FALSE(event.Persisted());
-                                                                          CHECK(event.Bubbles());
-                                                                          CHECK(event.Cancelable());
-                                                                          events.emplace_back("pagehide");
-                                                                          tryToNavigate();
-                                                                        });
+    auto pageHide = window->AddEventListener<PageTransitionEvent>(u8"pagehide",
+                                                                  [&](PageTransitionEvent &event)
+                                                                  {
+                                                                    CHECK_FALSE(event.Persisted());
+                                                                    CHECK(event.Bubbles());
+                                                                    CHECK(event.Cancelable());
+                                                                    events.emplace_back("pagehide");
+                                                                    tryToNavigate();
+                                                                  });
     auto unload = window->AddEventListener(u8"unload",
-                                           [&](dom::Event &event)
+                                           [&](Event &event)
                                            {
                                              CHECK(event.Target().get() == first.get());
                                              events.emplace_back("unload");
                                              tryToNavigate();
                                            });
 
-    RefPtr<dom::Element> paragraph = first->QuerySelector(u8"p").ReleaseValue();
+    RefPtr<Element> paragraph = first->QuerySelector(u8"p").ReleaseValue();
     REQUIRE(paragraph);
-    auto onDocument = first->AddEventListener(u8"click", [](dom::Event &) {});
+    auto onDocument = first->AddEventListener(u8"click", [](Event &) {});
     CHECK(first->VisibilityState() == html::DocumentVisibilityState::Visible);
     auto visibilityChange = first->AddEventListener(u8"visibilitychange",
-                                                    [&](dom::Event &event)
+                                                    [&](Event &event)
                                                     {
                                                       CHECK(event.Bubbles());
                                                       CHECK(first->Hidden());
                                                       events.emplace_back("visibilitychange");
                                                     });
-    auto onParagraph = paragraph->AddEventListener(u8"click", [](dom::Event &) {});
+    auto onParagraph = paragraph->AddEventListener(u8"click", [](Event &) {});
 
     // A document is unloaded as the next one commits.
     fixture.LoadMarkup(u8"<!DOCTYPE html><p>Second</p>", u8"https://example.com/second.html");

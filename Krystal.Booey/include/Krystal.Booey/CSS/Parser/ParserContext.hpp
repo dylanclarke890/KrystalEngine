@@ -36,7 +36,7 @@
 #include "Krystal.Core/Utils/Tags.hpp"
 #include <memory>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -76,12 +76,11 @@ namespace krys::boo::css
     explicit ParserContext(ParserMode mode, url::URL baseURL = {}) noexcept;
 
     /// @brief The document's context (`Document::CssParserContext()`).
-    explicit ParserContext(const dom::Document &document) noexcept;
+    explicit ParserContext(const Document &document) noexcept;
 
     /// @brief A context for a sheet in @p document: @p sheetBaseURL (or the document base URL if it's null),
     /// the document's mode and settings.
-    ParserContext(const dom::Document &document, const url::URL &sheetBaseURL,
-                  utf8_stringview charset) noexcept;
+    ParserContext(const Document &document, const url::URL &sheetBaseURL, utf8_stringview charset) noexcept;
 
     /// @brief Switches to the UA sheet mode and enables the features UA sheets rely on.
     void SetUASheetMode() noexcept;

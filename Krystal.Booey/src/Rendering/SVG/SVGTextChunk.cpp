@@ -68,16 +68,16 @@ namespace krys::boo
     }
 
     if (RefPtr textContentElement =
-          ShareRefPtr(svg::SVGTextContentElement::ElementFromRenderer(firstBox->Renderer().Parent())))
+          ShareRefPtr(SVGTextContentElement::ElementFromRenderer(firstBox->Renderer().Parent())))
     {
-      svg::SVGLengthContext lengthContext(textContentElement.get());
+      SVGLengthContext lengthContext(textContentElement.get());
       _desiredTextLength = textContentElement->SpecifiedTextLength().Value(lengthContext);
 
       switch (textContentElement->LengthAdjust())
       {
-        case svg::SVGLengthAdjustUnknown:          break;
-        case svg::SVGLengthAdjustSpacing:          _chunkStyle |= LengthAdjustSpacing; break;
-        case svg::SVGLengthAdjustSpacingAndGlyphs: _chunkStyle |= LengthAdjustSpacingAndGlyphs; break;
+        case SVGLengthAdjustUnknown:          break;
+        case SVGLengthAdjustSpacing:          _chunkStyle |= LengthAdjustSpacing; break;
+        case SVGLengthAdjustSpacingAndGlyphs: _chunkStyle |= LengthAdjustSpacingAndGlyphs; break;
       }
     }
 

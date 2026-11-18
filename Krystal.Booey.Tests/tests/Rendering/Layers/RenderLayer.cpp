@@ -15,7 +15,7 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD RenderLayer *LayerOf(ResolverFixture &fixture, dom::DOMStringView id)
+    KRYS_NODISCARD RenderLayer *LayerOf(ResolverFixture &fixture, DOMStringView id)
     {
       auto *renderer = DynamicDowncast<RenderLayerModelObject>(fixture.ById(id).Renderer());
       return renderer ? renderer->Layer() : nullptr;
@@ -545,7 +545,7 @@ namespace krys::boo::tests
       return PlatformMouseEvent(point, point, MouseButton::Left, type,
                                 type == PlatformEvent::Type::MousePressed ? 1 : 0, {}, MonotonicTime::Now());
     };
-    auto autoscroll = [&](dom::DOMStringView id)
+    auto autoscroll = [&](DOMStringView id)
     {
       auto &element = fixture.ById(id);
       auto &box = Downcast<RenderBox>(*element.Renderer());

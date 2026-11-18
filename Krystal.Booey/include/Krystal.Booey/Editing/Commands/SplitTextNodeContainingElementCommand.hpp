@@ -34,13 +34,13 @@ namespace krys::boo
   class SplitTextNodeContainingElementCommand final : public CompositeEditCommand
   {
   private:
-    const Ref<dom::Text> _text;
+    const Ref<Text> _text;
     uint32 _offset;
 
   public:
-    SplitTextNodeContainingElementCommand(dom::Text &text, uint32 offset) noexcept;
+    SplitTextNodeContainingElementCommand(Text &text, uint32 offset) noexcept;
 
-    KRYS_NODISCARD static Ref<SplitTextNodeContainingElementCommand> Create(dom::Text &text,
+    KRYS_NODISCARD static Ref<SplitTextNodeContainingElementCommand> Create(Text &text,
                                                                             uint32 offset) noexcept;
 
   private:

@@ -47,18 +47,18 @@ namespace krys::boo
     constexpr auto Infinity = Seconds {std::numeric_limits<double>::infinity()};
   }
 
-  Ref<DocumentTimeline> DocumentTimeline::Create(dom::Document &document) noexcept
+  Ref<DocumentTimeline> DocumentTimeline::Create(boo::Document &document) noexcept
   {
     return AdoptRef(*new DocumentTimeline(document, Seconds {0}));
   }
 
-  Ref<DocumentTimeline> DocumentTimeline::Create(dom::Document &document,
+  Ref<DocumentTimeline> DocumentTimeline::Create(boo::Document &document,
                                                  DocumentTimelineOptions options) noexcept
   {
     return AdoptRef(*new DocumentTimeline(document, Seconds {options.OriginTime / 1'000}));
   }
 
-  DocumentTimeline::DocumentTimeline(dom::Document &document, Seconds originTime) noexcept
+  DocumentTimeline::DocumentTimeline(boo::Document &document, Seconds originTime) noexcept
       : _tickScheduleTimer(*this, &DocumentTimeline::ScheduleAnimationResolution),
         _document(CreateWeakPtr(&document)), _originTime(originTime)
   {

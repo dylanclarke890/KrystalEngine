@@ -24,7 +24,7 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlolistelement
   class HTMLOListElement : public HTMLElement
@@ -37,7 +37,7 @@ namespace krys::boo::html
     bool _isReversed {false};
 
   public:
-    HTMLOListElement(dom::Document &document) noexcept;
+    HTMLOListElement(Document &document) noexcept;
 
 #pragma region HTMLOListElement https://html.spec.whatwg.org/#htmlolistelement
 
@@ -54,10 +54,10 @@ namespace krys::boo::html
     void Start(int32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-ol-type
-    KRYS_NODISCARD dom::DOMString Type() const noexcept;
+    KRYS_NODISCARD DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-ol-type
-    void Type(dom::DOMString value) noexcept;
+    void Type(DOMString value) noexcept;
 
 #pragma endregion
 
@@ -107,17 +107,15 @@ namespace krys::boo::html
     }
 
   protected:
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
   private:
@@ -125,8 +123,8 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLOListElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLOListElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLOListElement();
   }

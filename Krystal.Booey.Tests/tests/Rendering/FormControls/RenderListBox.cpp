@@ -62,7 +62,7 @@ namespace krys::boo::layout::tests
       u8"<option>Cherry</option></optgroup><option>Date</option><option>Elderberry</option>"
       u8"</select>");
 
-    auto &select = Downcast<html::HTMLSelectElement>(fixture.ById(u8"s"));
+    auto &select = Downcast<HTMLSelectElement>(fixture.ById(u8"s"));
     auto &listBox = Downcast<RenderListBox>(*select.Renderer());
     auto &handler = fixture.Frame->GetEventHandler();
 
@@ -126,7 +126,7 @@ layer at (0,0) size 400x37
     {
       auto &settings = fixture.Document->GetSettings();
       settings.ScrollAnimatorEnabled = false;
-      auto bounds = [](dom::Element &element)
+      auto bounds = [](Element &element)
       {
         auto rect = element.GetBoundingClientRect();
         return FloatRect(static_cast<float>(rect->X()), static_cast<float>(rect->Y()),
@@ -185,7 +185,7 @@ layer at (0,0) size 400x37
                           u8"<select id=s multiple><option>A</option><option>B</option><option>C</option>"
                           u8"<option>D</option></select>");
 
-    auto &select = Downcast<html::HTMLSelectElement>(fixture.ById(u8"s"));
+    auto &select = Downcast<HTMLSelectElement>(fixture.ById(u8"s"));
     auto &listBox = Downcast<RenderListBox>(*select.Renderer());
     auto &handler = fixture.Frame->GetEventHandler();
     CHECK(listBox.Size() == 4u);

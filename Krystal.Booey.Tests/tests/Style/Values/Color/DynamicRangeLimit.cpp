@@ -27,7 +27,7 @@ namespace krys::boo::style::tests
     /// consumed.
     DynamicRangeLimit Convert(utf8_stringview text)
     {
-      css::InputStream input {css::CSSOMString(text)};
+      css::InputStream input {CSSOMString(text)};
       css::Tokenizer tokenizer {input};
       tokenizer.PumpTokenizer();
       auto tokens = tokenizer.Tokens();

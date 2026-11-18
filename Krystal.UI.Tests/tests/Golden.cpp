@@ -41,7 +41,7 @@ namespace krys::ui::tests
   {
     /// @brief Clicks @p element as a user does, with the window's transient activation that opening a picker
     /// needs.
-    void UserClick(boo::html::HTMLElement &element) noexcept
+    void UserClick(boo::HTMLElement &element) noexcept
     {
       element.NodeDocument().Window()->NotifyActivated();
       element.Click();
@@ -290,7 +290,7 @@ namespace krys::ui::tests
       for (const auto &[id, chromeRectList] : expected)
       {
         auto chromeRects = MergeTouchingRects(chromeRectList);
-        auto element = view.Document().GetElementById(boo::dom::DOMString(id.begin(), id.end()));
+        auto element = view.Document().GetElementById(boo::DOMString(id.begin(), id.end()));
         if (!element)
         {
           mismatches += std::format("{}: no element\n", id);
@@ -420,9 +420,9 @@ namespace krys::ui::tests
   void Compose(View &view, const List<boo::CompositionUnderline> &underlines)
   {
     auto &document = view.Document();
-    auto &field = Downcast<boo::html::HTMLElement>(*document.GetElementById(u8"field"));
+    auto &field = Downcast<boo::HTMLElement>(*document.GetElementById(u8"field"));
     field.Focus();
-    auto &text = Downcast<boo::dom::Text>(*field.FirstChild());
+    auto &text = Downcast<boo::Text>(*field.FirstChild());
     document.Selection().MoveTo(
       boo::dom::MakeContainerOffsetPosition(ShareRefPtr(&text), static_cast<uint32>(text.Length())),
       boo::Affinity::Downstream);
@@ -598,13 +598,13 @@ namespace krys::ui::tests
   {
     // The controls are drawn by the Adwaita theme, which isn't Chrome's look, so Chrome's golden is only
     // reported. The scene's script makes a checkbox indeterminate for Chrome; it's done the same way here.
-    CheckPage("controls", 360u, 240u, true,
-              [](View &view)
-              {
-                Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"mixed"))
-                  .SetIndeterminate(true);
-                view.UpdateRendering();
-              });
+    CheckPage(
+      "controls", 360u, 240u, true,
+      [](View &view)
+      {
+        Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"mixed")).SetIndeterminate(true);
+        view.UpdateRendering();
+      });
   }
 
   TEST_CASE("Golden: ranges", "[UI][GPU][Golden]")
@@ -633,7 +633,7 @@ namespace krys::ui::tests
                 boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
                 view.MousePressed(inside, pal::MouseButton::Left);
                 view.MouseReleased(inside, pal::MouseButton::Left);
-                REQUIRE(Downcast<boo::html::HTMLSelectElement>(*select).IsPickerOpen());
+                REQUIRE(Downcast<boo::HTMLSelectElement>(*select).IsPickerOpen());
                 view.UpdateRendering();
               });
   }
@@ -692,8 +692,7 @@ namespace krys::ui::tests
     CheckPage("date-picker", 280u, 260u, true,
               [](View &view)
               {
-                auto &input =
-                  Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"date"));
+                auto &input = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"date"));
                 UserClick(input);
                 REQUIRE(view.ShownOverlay());
                 // The highlight moves to the 12th.
@@ -711,8 +710,7 @@ namespace krys::ui::tests
     CheckPage("color-picker", 240u, 200u, true,
               [](View &view)
               {
-                auto &input =
-                  Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"color"));
+                auto &input = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"color"));
                 UserClick(input);
                 REQUIRE(view.ShownOverlay());
                 view.UpdateRendering();
@@ -745,8 +743,7 @@ namespace krys::ui::tests
     CheckPage("bidi-date-picker", 280u, 260u, true,
               [](View &view)
               {
-                auto &input =
-                  Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"date"));
+                auto &input = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"date"));
                 UserClick(input);
                 REQUIRE(view.ShownOverlay());
                 // Mirrored, the left arrow moves on: the highlight moves to the 12th.
@@ -765,8 +762,7 @@ namespace krys::ui::tests
     CheckPage("bidi-color-picker", 240u, 200u, true,
               [](View &view)
               {
-                auto &input =
-                  Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"color"));
+                auto &input = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"color"));
                 UserClick(input);
                 REQUIRE(view.ShownOverlay());
                 // Mirrored, the left arrow moves on, to the next swatch.
@@ -881,8 +877,7 @@ namespace krys::ui::tests
           auto texture = CreateEngineTexture(device, premultiplied);
           REQUIRE(texture.IsValid());
           textures.push_back(texture);
-          auto *canvas =
-            DynamicDowncast<boo::html::HTMLCanvasElement>(view.Document().GetElementById(id).get());
+          auto *canvas = DynamicDowncast<boo::HTMLCanvasElement>(view.Document().GetElementById(id).get());
           REQUIRE(canvas);
           auto context = canvas->GetContext(boo::html::EngineTextureRenderingContext::ContextType);
           REQUIRE(context);
@@ -902,8 +897,8 @@ namespace krys::ui::tests
     CheckPageOnDevice("canvas-2d", 360u, 200u, false,
                       [](View &view, gfx::Device &, List<gfx::TextureHandle> &)
                       {
-                        using boo::dom::DOMString;
-                        auto *canvas = DynamicDowncast<boo::html::HTMLCanvasElement>(
+                        using boo::DOMString;
+                        auto *canvas = DynamicDowncast<boo::HTMLCanvasElement>(
                           view.Document().GetElementById(u8"canvas").get());
                         REQUIRE(canvas);
                         auto context = canvas->GetContext2d();
@@ -974,15 +969,13 @@ namespace krys::ui::tests
       "canvas-images", 360u, 200u, false,
       [](View &view, gfx::Device &device, List<gfx::TextureHandle> &)
       {
-        using boo::dom::DOMString;
+        using boo::DOMString;
         // The canvases are read back and drawn into each other before the view first paints.
         view.SetDevice(device);
         auto &document = view.Document();
-        auto *canvas =
-          DynamicDowncast<boo::html::HTMLCanvasElement>(document.GetElementById(u8"canvas").get());
-        auto *tileCanvas =
-          DynamicDowncast<boo::html::HTMLCanvasElement>(document.GetElementById(u8"tile").get());
-        auto *photo = DynamicDowncast<boo::html::HTMLImageElement>(document.GetElementById(u8"photo").get());
+        auto *canvas = DynamicDowncast<boo::HTMLCanvasElement>(document.GetElementById(u8"canvas").get());
+        auto *tileCanvas = DynamicDowncast<boo::HTMLCanvasElement>(document.GetElementById(u8"tile").get());
+        auto *photo = DynamicDowncast<boo::HTMLImageElement>(document.GetElementById(u8"photo").get());
         REQUIRE(canvas);
         REQUIRE(tileCanvas);
         REQUIRE(photo);
@@ -1043,8 +1036,8 @@ namespace krys::ui::tests
     CheckPageOnDevice("canvas-text", 360u, 200u, true,
                       [](View &view, gfx::Device &, List<gfx::TextureHandle> &)
                       {
-                        using boo::dom::DOMString;
-                        auto *canvas = DynamicDowncast<boo::html::HTMLCanvasElement>(
+                        using boo::DOMString;
+                        auto *canvas = DynamicDowncast<boo::HTMLCanvasElement>(
                           view.Document().GetElementById(u8"canvas").get());
                         REQUIRE(canvas);
                         auto context = canvas->GetContext2d();
@@ -1091,8 +1084,8 @@ namespace krys::ui::tests
     CheckPageOnDevice("canvas-filters", 360u, 200u, false,
                       [](View &view, gfx::Device &, List<gfx::TextureHandle> &)
                       {
-                        using boo::dom::DOMString;
-                        auto *canvas = DynamicDowncast<boo::html::HTMLCanvasElement>(
+                        using boo::DOMString;
+                        auto *canvas = DynamicDowncast<boo::HTMLCanvasElement>(
                           view.Document().GetElementById(u8"canvas").get());
                         REQUIRE(canvas);
                         auto context = canvas->GetContext2d();

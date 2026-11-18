@@ -68,36 +68,35 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD bool IsHTMLBodyElement(const dom::Node *node) noexcept
+    KRYS_NODISCARD bool IsHTMLBodyElement(const Node *node) noexcept
     {
       return IsHTMLElementOfType(node, html::TagName::body);
     }
   }
 
-  bool CanHaveChildrenForEditing(const dom::Node &node) noexcept
+  bool CanHaveChildrenForEditing(const Node &node) noexcept
   {
-    return !Is<dom::Text>(node) && !IsHTMLElementOfType(&node, html::TagName::picture)
+    return !Is<Text>(node) && !IsHTMLElementOfType(&node, html::TagName::picture)
            && node.CanContainRangeEndPoint();
   }
 
   // Atomic means that the node has no children, or has children which are ignored for the purposes of
   // editing.
-  bool IsAtomicNode(const dom::Node *node) noexcept
+  bool IsAtomicNode(const Node *node) noexcept
   {
     return node && (!node->HasChildNodes() || EditingIgnoresContent(*node));
   }
 
-  RefPtr<dom::ContainerNode> HighestEditableRoot(const dom::Position &position,
-                                                 EditableType editableType) noexcept
+  RefPtr<ContainerNode> HighestEditableRoot(const dom::Position &position, EditableType editableType) noexcept
   {
-    RefPtr<dom::ContainerNode> highestEditableRoot =
-      ShareRefPtr<dom::ContainerNode>(EditableRootForPosition(position, editableType));
+    RefPtr<ContainerNode> highestEditableRoot =
+      ShareRefPtr<ContainerNode>(EditableRootForPosition(position, editableType));
     if (!highestEditableRoot)
     {
       return nullptr;
     }
 
-    for (dom::ContainerNode *node = highestEditableRoot.get(); !IsHTMLBodyElement(node);)
+    for (ContainerNode *node = highestEditableRoot.get(); !IsHTMLBodyElement(node);)
     {
       node = node->ParentNode();
       if (!node)
@@ -114,7 +113,7 @@ namespace krys::boo
     return highestEditableRoot;
   }
 
-  dom::Element *LowestEditableAncestor(dom::Node *node) noexcept
+  Element *LowestEditableAncestor(Node *node) noexcept
   {
     for (; node; node = node->ParentNode())
     {
@@ -132,11 +131,11 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD bool ComputeEditability(const dom::Node &node, EditableType editableType,
-                                           dom::Node::ShouldUpdateStyle shouldUpdateStyle) noexcept
+    KRYS_NODISCARD bool ComputeEditability(const Node &node, EditableType editableType,
+                                           Node::ShouldUpdateStyle shouldUpdateStyle) noexcept
     {
-      if (node.ComputeEditability(dom::Node::UserSelectAllTreatment::NotEditable, shouldUpdateStyle)
-          != dom::Node::Editability::ReadOnly)
+      if (node.ComputeEditability(Node::UserSelectAllTreatment::NotEditable, shouldUpdateStyle)
+          != Node::Editability::ReadOnly)
       {
         return true;
       }
@@ -155,20 +154,20 @@ namespace krys::boo
     }
   }
 
-  bool HasEditableStyle(const dom::Node &node, EditableType editableType) noexcept
+  bool HasEditableStyle(const Node &node, EditableType editableType) noexcept
   {
-    return ComputeEditability(node, editableType, dom::Node::ShouldUpdateStyle::DoNotUpdate);
+    return ComputeEditability(node, editableType, Node::ShouldUpdateStyle::DoNotUpdate);
   }
 
-  bool IsEditableNode(const dom::Node &node) noexcept
+  bool IsEditableNode(const Node &node) noexcept
   {
-    return ComputeEditability(node, EditableType::ContentIsEditable, dom::Node::ShouldUpdateStyle::Update);
+    return ComputeEditability(node, EditableType::ContentIsEditable, Node::ShouldUpdateStyle::Update);
   }
 
   bool IsEditablePosition(const dom::Position &position, EditableType editableType) noexcept
   {
     auto *node = position.GetContainerNode();
-    return node && ComputeEditability(*node, editableType, dom::Node::ShouldUpdateStyle::Update);
+    return node && ComputeEditability(*node, editableType, Node::ShouldUpdateStyle::Update);
   }
 
   bool IsAtUnsplittableElement(const dom::Position &position) noexcept
@@ -184,7 +183,7 @@ namespace krys::boo
     return node && node->HasRichlyEditableStyle();
   }
 
-  dom::Element *EditableRootForPosition(const dom::Position &position, EditableType editableType) noexcept
+  Element *EditableRootForPosition(const dom::Position &position, EditableType editableType) noexcept
   {
     auto *node = position.GetContainerNode();
     if (!node)
@@ -208,13 +207,13 @@ namespace krys::boo
   // Finds the enclosing element until which the tree can be split.
   // When a user hits ENTER, he/she won't expect this element to be split into two.
   // You may pass it as the second argument of splitTreeToNode.
-  RefPtr<dom::Element> UnsplittableElementForPosition(const dom::Position &position) noexcept
+  RefPtr<Element> UnsplittableElementForPosition(const dom::Position &position) noexcept
   {
     // Since enclosingNodeOfType won't search beyond the highest root editable node,
     // this code works even if the closest table cell was outside of the root editable node.
     if (auto enclosingCell = EnclosingNodeOfType(position, &IsTableCell))
     {
-      return ShareRefPtr(&Downcast<dom::Element>(*enclosingCell));
+      return ShareRefPtr(&Downcast<Element>(*enclosingCell));
     }
     return ShareRefPtr(EditableRootForPosition(position));
   }
@@ -251,8 +250,7 @@ namespace krys::boo
         {
           if (skipDisplayContents == SkipDisplayContents::No)
           {
-            if (auto *element = DynamicDowncast<dom::Element>(*node);
-                element && element->HasDisplayContents())
+            if (auto *element = DynamicDowncast<Element>(*node); element && element->HasDisplayContents())
             {
               continue;
             }
@@ -305,7 +303,7 @@ namespace krys::boo
   {
     /// @brief The node in @p root's tree that is or contains @p node, when @p node is in a shadow tree inside
     /// it.
-    KRYS_NODISCARD dom::Node *AncestorNodeInTreeOf(const dom::Node &root, dom::Node *node) noexcept
+    KRYS_NODISCARD Node *AncestorNodeInTreeOf(const Node &root, Node *node) noexcept
     {
       auto &rootTreeRoot = dom::TreeQueries::Root(root);
       for (auto *current = node; current;)
@@ -321,7 +319,7 @@ namespace krys::boo
   }
 
   dom::Position FirstEditablePositionAfterPositionInRoot(const dom::Position &position,
-                                                         dom::ContainerNode *highestRoot) noexcept
+                                                         ContainerNode *highestRoot) noexcept
   {
     if (!highestRoot)
     {
@@ -364,7 +362,7 @@ namespace krys::boo
   }
 
   dom::Position LastEditablePositionBeforePositionInRoot(const dom::Position &position,
-                                                         dom::ContainerNode *highestRoot) noexcept
+                                                         ContainerNode *highestRoot) noexcept
   {
     if (!highestRoot)
     {
@@ -408,12 +406,12 @@ namespace krys::boo
 
   // FIXME: The function name, comment, and code say three different things here!
   // Whether or not content before and after this node will collapse onto the same line as it.
-  bool IsBlock(const dom::Node &node) noexcept
+  bool IsBlock(const Node &node) noexcept
   {
     return node.Renderer() && !node.Renderer()->IsInline();
   }
 
-  bool IsInline(const dom::Node &node) noexcept
+  bool IsInline(const Node &node) noexcept
   {
     return node.Renderer() && node.Renderer()->IsInline();
   }
@@ -423,14 +421,13 @@ namespace krys::boo
   // FIXME: Pass a position to this function. The enclosing block of [table, x] for example, should be the
   // block that contains the table and not the table, and this function should be the only one responsible for
   // knowing about these kinds of special cases.
-  RefPtr<dom::Element> EnclosingBlock(const RefPtr<dom::Node> &node,
-                                      EditingBoundaryCrossingRule rule) noexcept
+  RefPtr<Element> EnclosingBlock(const RefPtr<Node> &node, EditingBoundaryCrossingRule rule) noexcept
   {
     auto block = EnclosingNodeOfType(FirstPositionInOrBeforeNode(node.get()), IsBlock, rule);
-    return DynamicDowncast<dom::Element>(krys::move(block));
+    return DynamicDowncast<Element>(krys::move(block));
   }
 
-  dom::Node *AncestorNodeInThisScope(const dom::Node &scopeRoot, dom::Node *node) noexcept
+  Node *AncestorNodeInThisScope(const Node &scopeRoot, Node *node) noexcept
   {
     for (; node; node = dom::TreeQueries::ShadowHost(*node))
     {
@@ -465,9 +462,9 @@ namespace krys::boo
   // in a node. It returns 1 for some elements even though they do not have children, which
   // creates technically invalid DOM Positions. Be sure to call parentAnchoredEquivalent
   // on a Position before using it to create a DOM Range, or an exception will be thrown.
-  int32 LastOffsetForEditing(const dom::Node &node) noexcept
+  int32 LastOffsetForEditing(const Node &node) noexcept
   {
-    if (Is<dom::CharacterData>(node) || node.HasChildNodes())
+    if (Is<CharacterData>(node) || node.HasChildNodes())
     {
       return static_cast<int32>(node.Length());
     }
@@ -494,7 +491,7 @@ namespace krys::boo
                              : u_charDirection(static_cast<UChar32>(character)) == U_WHITE_SPACE_NEUTRAL;
   }
 
-  bool IsTableStructureNode(const dom::Node &node) noexcept
+  bool IsTableStructureNode(const Node &node) noexcept
   {
     auto *renderer = node.Renderer();
     return renderer
@@ -502,7 +499,7 @@ namespace krys::boo
                || renderer->IsRenderTableSection() || renderer->IsRenderTableCol());
   }
 
-  RefPtr<dom::Element> IsFirstPositionAfterTable(const VisiblePosition &position) noexcept
+  RefPtr<Element> IsFirstPositionAfterTable(const VisiblePosition &position) noexcept
   {
     dom::Position upstream(position.DeepEquivalent().Upstream());
     auto *node = upstream.DeprecatedNode();
@@ -515,10 +512,10 @@ namespace krys::boo
     {
       return nullptr;
     }
-    return ShareRefPtr(&Downcast<dom::Element>(*node));
+    return ShareRefPtr(&Downcast<Element>(*node));
   }
 
-  RefPtr<dom::Element> IsLastPositionBeforeTable(const VisiblePosition &position) noexcept
+  RefPtr<Element> IsLastPositionBeforeTable(const VisiblePosition &position) noexcept
   {
     dom::Position downstream(position.DeepEquivalent().Downstream());
     auto *node = downstream.DeprecatedNode();
@@ -531,34 +528,34 @@ namespace krys::boo
     {
       return nullptr;
     }
-    return ShareRefPtr(&Downcast<dom::Element>(*node));
+    return ShareRefPtr(&Downcast<Element>(*node));
   }
 
   // Returns the visible position at the beginning of a node
-  VisiblePosition VisiblePositionBeforeNode(dom::Node &node) noexcept
+  VisiblePosition VisiblePositionBeforeNode(Node &node) noexcept
   {
     if (node.HasChildNodes())
     {
       return VisiblePosition(FirstPositionInOrBeforeNode(&node));
     }
     krys_debug_assert(node.ParentNode());
-    krys_debug_assert(!Is<dom::ShadowRoot>(*node.ParentNode()));
+    krys_debug_assert(!Is<ShadowRoot>(*node.ParentNode()));
     return dom::PositionInParentBeforeNode(&node);
   }
 
   // Returns the visible position at the ending of a node
-  VisiblePosition VisiblePositionAfterNode(dom::Node &node) noexcept
+  VisiblePosition VisiblePositionAfterNode(Node &node) noexcept
   {
     if (node.HasChildNodes())
     {
       return VisiblePosition(LastPositionInOrAfterNode(&node));
     }
     krys_debug_assert(node.ParentNode());
-    krys_debug_assert(!Is<dom::ShadowRoot>(*node.ParentNode()));
+    krys_debug_assert(!Is<ShadowRoot>(*node.ParentNode()));
     return dom::PositionInParentAfterNode(&node);
   }
 
-  VisiblePosition ClosestEditablePositionInElementForAbsolutePoint(const dom::Element &element,
+  VisiblePosition ClosestEditablePositionInElementForAbsolutePoint(const Element &element,
                                                                    const IntPoint &point) noexcept
   {
     // FIXME: The frame check (element.document().frame()), once documents know their frames.
@@ -572,7 +569,7 @@ namespace krys::boo
 
     RenderObject *renderer = element.Renderer();
     // Look at the inner element of a form control, not the control itself, as it is the editable part.
-    if (auto *formControlElement = DynamicDowncast<html::HTMLTextFormControlElement>(element))
+    if (auto *formControlElement = DynamicDowncast<HTMLTextFormControlElement>(element))
     {
       if (!formControlElement->IsInnerTextElementEditable())
       {
@@ -597,21 +594,20 @@ namespace krys::boo
     return IsEditablePosition(visiblePosition.DeepEquivalent()) ? visiblePosition : VisiblePosition {};
   }
 
-  bool IsListHTMLElement(dom::Node *node) noexcept
+  bool IsListHTMLElement(Node *node) noexcept
   {
     return node
            && (IsHTMLElementOfType(node, html::TagName::ul) || IsHTMLElementOfType(node, html::TagName::ol)
                || IsHTMLElementOfType(node, html::TagName::dl));
   }
 
-  bool IsListItem(const dom::Node &node) noexcept
+  bool IsListItem(const Node &node) noexcept
   {
     return IsListHTMLElement(node.ParentNode()) || (node.Renderer() && node.Renderer()->IsRenderListItem());
   }
 
-  RefPtr<dom::Node> EnclosingNodeOfType(const dom::Position &position,
-                                        bool (*nodeIsOfType)(const dom::Node &),
-                                        EditingBoundaryCrossingRule rule) noexcept
+  RefPtr<Node> EnclosingNodeOfType(const dom::Position &position, bool (*nodeIsOfType)(const Node &),
+                                   EditingBoundaryCrossingRule rule) noexcept
   {
     // FIXME: support CanSkipCrossEditingBoundary
     krys_debug_assert(rule == EditingBoundaryCrossingRule::CanCrossEditingBoundary
@@ -639,12 +635,10 @@ namespace krys::boo
     return nullptr;
   }
 
-  RefPtr<dom::Node> HighestEnclosingNodeOfType(const dom::Position &position,
-                                               bool (*nodeIsOfType)(const dom::Node &),
-                                               EditingBoundaryCrossingRule rule,
-                                               dom::Node *stayWithin) noexcept
+  RefPtr<Node> HighestEnclosingNodeOfType(const dom::Position &position, bool (*nodeIsOfType)(const Node &),
+                                          EditingBoundaryCrossingRule rule, Node *stayWithin) noexcept
   {
-    dom::Node *highest = nullptr;
+    Node *highest = nullptr;
     auto root = rule == EditingBoundaryCrossingRule::CannotCrossEditingBoundary
                   ? HighestEditableRoot(position)
                   : nullptr;
@@ -666,17 +660,17 @@ namespace krys::boo
     return ShareRefPtr(highest);
   }
 
-  RefPtr<dom::Element> EnclosingTableCell(const dom::Position &position) noexcept
+  RefPtr<Element> EnclosingTableCell(const dom::Position &position) noexcept
   {
     auto node = EnclosingNodeOfType(position, IsTableCell);
-    return node ? ShareRefPtr(&Downcast<dom::Element>(*node)) : nullptr;
+    return node ? ShareRefPtr(&Downcast<Element>(*node)) : nullptr;
   }
 
-  RefPtr<dom::Element> EnclosingAnchorElement(const dom::Position &position) noexcept
+  RefPtr<Element> EnclosingAnchorElement(const dom::Position &position) noexcept
   {
     for (auto *node = position.DeprecatedNode(); node; node = node->ParentNode())
     {
-      if (auto *element = DynamicDowncast<dom::Element>(*node); element && css::IsLink(*element))
+      if (auto *element = DynamicDowncast<Element>(*node); element && css::IsLink(*element))
       {
         return ShareRefPtr(element);
       }
@@ -686,7 +680,7 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD dom::Node *PreviousNodeConsideringAtomicNodes(const dom::Node *node) noexcept
+    KRYS_NODISCARD Node *PreviousNodeConsideringAtomicNodes(const Node *node) noexcept
     {
       if (node->PreviousSibling())
       {
@@ -701,7 +695,7 @@ namespace krys::boo
       return node->ParentNode();
     }
 
-    KRYS_NODISCARD dom::Node *NextNodeConsideringAtomicNodes(const dom::Node *node) noexcept
+    KRYS_NODISCARD Node *NextNodeConsideringAtomicNodes(const Node *node) noexcept
     {
       if (!IsAtomicNode(node) && node->FirstChild())
       {
@@ -711,7 +705,7 @@ namespace krys::boo
       {
         return node->NextSibling();
       }
-      const dom::Node *n = node;
+      const Node *n = node;
       while (n && !n->NextSibling())
       {
         n = n->ParentNode();
@@ -724,34 +718,34 @@ namespace krys::boo
     }
   }
 
-  dom::Node *PreviousLeafNode(const dom::Node *node) noexcept
+  Node *PreviousLeafNode(const Node *node) noexcept
   {
     while ((node = PreviousNodeConsideringAtomicNodes(node)))
     {
       if (IsAtomicNode(node))
       {
-        return const_cast<dom::Node *>(node);
+        return const_cast<Node *>(node);
       }
     }
     return nullptr;
   }
 
-  dom::Node *NextLeafNode(const dom::Node *node) noexcept
+  Node *NextLeafNode(const Node *node) noexcept
   {
     while ((node = NextNodeConsideringAtomicNodes(node)))
     {
       if (IsAtomicNode(node))
       {
-        return const_cast<dom::Node *>(node);
+        return const_cast<Node *>(node);
       }
     }
     return nullptr;
   }
 
   // FIXME: Do not require renderer, so that this can be used within fragments.
-  bool IsRenderedTable(const dom::Node *node) noexcept
+  bool IsRenderedTable(const Node *node) noexcept
   {
-    auto *element = DynamicDowncast<html::HTMLElement>(node);
+    auto *element = DynamicDowncast<HTMLElement>(node);
     if (!element)
     {
       return false;
@@ -760,7 +754,7 @@ namespace krys::boo
     return renderer && renderer->IsRenderTable();
   }
 
-  bool IsTableCell(const dom::Node &node) noexcept
+  bool IsTableCell(const Node &node) noexcept
   {
     auto *renderer = node.Renderer();
     if (!renderer)
@@ -770,7 +764,7 @@ namespace krys::boo
     return renderer->IsRenderTableCell();
   }
 
-  bool IsEmptyTableCell(const dom::Node *node) noexcept
+  bool IsEmptyTableCell(const Node *node) noexcept
   {
     // Returns true IFF the passed in node is one of:
     //   .) a table cell with no children,
@@ -817,13 +811,13 @@ namespace krys::boo
     return !childRenderer->NextSibling();
   }
 
-  void UpdatePositionForNodeRemoval(dom::Position &position, dom::Node &node) noexcept
+  void UpdatePositionForNodeRemoval(dom::Position &position, Node &node) noexcept
   {
     if (position.IsNull())
     {
       return;
     }
-    auto isShadowIncludingInclusiveAncestorOf = [&](const dom::Node *other)
+    auto isShadowIncludingInclusiveAncestorOf = [&](const Node *other)
     {
       return other && (other == &node || other->IsShadowIncludingDescendantOf(&node));
     };
@@ -862,10 +856,10 @@ namespace krys::boo
     }
   }
 
-  int32 CaretMinOffset(const dom::Node &node) noexcept
+  int32 CaretMinOffset(const Node &node) noexcept
   {
     auto *renderer = node.Renderer();
-    krys_debug_assert(!Is<dom::CharacterData>(node) || !renderer || renderer->IsRenderText());
+    krys_debug_assert(!Is<CharacterData>(node) || !renderer || renderer->IsRenderText());
 
     if (renderer && renderer->IsRenderText())
     {
@@ -888,10 +882,10 @@ namespace krys::boo
 
   // If a node can contain candidates for VisiblePositions, return the offset of the last candidate, otherwise
   // return the number of children for container nodes and the length for unrendered text nodes.
-  int32 CaretMaxOffset(const dom::Node &node) noexcept
+  int32 CaretMaxOffset(const Node &node) noexcept
   {
     // For rendered text nodes, return the last position that a caret could occupy.
-    if (auto *text = DynamicDowncast<dom::Text>(node))
+    if (auto *text = DynamicDowncast<Text>(node))
     {
       if (auto *renderer = text->Renderer())
       {
@@ -924,7 +918,7 @@ namespace krys::boo
       return false;
     }
 
-    auto *textNode = DynamicDowncast<dom::Text>(*position.AnchorNode());
+    auto *textNode = DynamicDowncast<Text>(*position.AnchorNode());
     if (!textNode || !textNode->Renderer()->Style().PreserveNewline())
     {
       return false;
@@ -942,8 +936,7 @@ namespace krys::boo
   // functions need to be changed to iterate using actual VisiblePositions.
   // FIXME: Deploy these functions everywhere that TextIterators are used to convert between VisiblePositions
   // and indices.
-  int32 IndexForVisiblePosition(const VisiblePosition &visiblePosition,
-                                RefPtr<dom::ContainerNode> &scope) noexcept
+  int32 IndexForVisiblePosition(const VisiblePosition &visiblePosition, RefPtr<ContainerNode> &scope) noexcept
   {
     if (visiblePosition.IsNull())
     {
@@ -964,12 +957,12 @@ namespace krys::boo
     {
       if (position.GetContainerNode()->IsInShadowTree())
       {
-        scope = ShareRefPtr<dom::ContainerNode>(
-          dom::TreeQueries::ContainingShadowRoot(*position.GetContainerNode()));
+        scope =
+          ShareRefPtr<ContainerNode>(dom::TreeQueries::ContainingShadowRoot(*position.GetContainerNode()));
       }
       else
       {
-        scope = ShareRefPtr<dom::ContainerNode>(&document);
+        scope = ShareRefPtr<ContainerNode>(&document);
       }
     }
 
@@ -979,7 +972,7 @@ namespace krys::boo
   }
 
   // FIXME: Merge this function with the one above.
-  int32 IndexForVisiblePosition(dom::Node &node, const VisiblePosition &visiblePosition,
+  int32 IndexForVisiblePosition(Node &node, const VisiblePosition &visiblePosition,
                                 TextIteratorBehaviors behaviors) noexcept
   {
     if (visiblePosition.IsNull())
@@ -993,7 +986,7 @@ namespace krys::boo
 
   VisiblePosition VisiblePositionForPositionWithOffset(const VisiblePosition &position, int32 offset) noexcept
   {
-    RefPtr<dom::ContainerNode> root;
+    RefPtr<ContainerNode> root;
     uint32 startIndex = static_cast<uint32>(IndexForVisiblePosition(position, root));
     if (!root)
     {
@@ -1003,8 +996,7 @@ namespace krys::boo
     return VisiblePositionForIndex(static_cast<int32>(startIndex) + offset, root.get());
   }
 
-  VisiblePosition VisiblePositionForIndex(int32 index, dom::Node *scope,
-                                          TextIteratorBehaviors behaviors) noexcept
+  VisiblePosition VisiblePositionForIndex(int32 index, Node *scope, TextIteratorBehaviors behaviors) noexcept
   {
     if (!scope)
     {
@@ -1014,7 +1006,7 @@ namespace krys::boo
       dom::MakeRangeSelectingNodeContents(*scope), static_cast<uint64>(index), behaviors))};
   }
 
-  VisiblePosition VisiblePositionForIndexUsingCharacterIterator(dom::Node &node, int32 index) noexcept
+  VisiblePosition VisiblePositionForIndexUsingCharacterIterator(Node &node, int32 index) noexcept
   {
     if (index <= 0)
     {
@@ -1044,7 +1036,7 @@ namespace krys::boo
 
   // Determines whether a node is inside a range or visibly starts and ends at the boundaries of the range.
   // Call this function to determine whether a node is visibly fit inside selectedRange
-  bool IsNodeVisiblyContainedWithin(dom::Node &node, const dom::SimpleRange &range) noexcept
+  bool IsNodeVisiblyContainedWithin(Node &node, const dom::SimpleRange &range) noexcept
   {
     if (dom::Contains<dom::TreeType::ComposedTree>(range, node))
     {
@@ -1069,7 +1061,7 @@ namespace krys::boo
     return startIsVisuallySame && endIsVisuallySame;
   }
 
-  bool IsRenderedAsNonInlineTableImageOrHR(const dom::Node *node) noexcept
+  bool IsRenderedAsNonInlineTableImageOrHR(const Node *node) noexcept
   {
     if (!node)
     {
@@ -1083,9 +1075,9 @@ namespace krys::boo
   namespace
   {
     // FIXME: Should this be deprecated like deprecatedEnclosingBlockFlowElement is?
-    KRYS_NODISCARD dom::Element *ElementIfBlockFlow(dom::Node &node) noexcept
+    KRYS_NODISCARD Element *ElementIfBlockFlow(Node &node) noexcept
     {
-      auto *element = DynamicDowncast<dom::Element>(node);
+      auto *element = DynamicDowncast<Element>(node);
       if (!element)
       {
         return nullptr;
@@ -1095,12 +1087,12 @@ namespace krys::boo
     }
   }
 
-  bool IsBlockFlowElement(const dom::Node &node) noexcept
+  bool IsBlockFlowElement(const Node &node) noexcept
   {
-    return ElementIfBlockFlow(const_cast<dom::Node &>(node));
+    return ElementIfBlockFlow(const_cast<Node &>(node));
   }
 
-  dom::Element *DeprecatedEnclosingBlockFlowElement(dom::Node *node) noexcept
+  Element *DeprecatedEnclosingBlockFlowElement(Node *node) noexcept
   {
     if (!node)
     {
@@ -1118,7 +1110,7 @@ namespace krys::boo
       }
       if (IsHTMLBodyElement(node))
       {
-        return &Downcast<dom::Element>(*node);
+        return &Downcast<Element>(*node);
       }
     }
     return nullptr;
@@ -1126,13 +1118,13 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD inline bool CaretRendersInsideNode(const dom::Node &node) noexcept
+    KRYS_NODISCARD inline bool CaretRendersInsideNode(const Node &node) noexcept
     {
       return !IsRenderedTable(&node) && !EditingIgnoresContent(node);
     }
   }
 
-  RenderBlock *RendererForCaretPainting(const dom::Node *node) noexcept
+  RenderBlock *RendererForCaretPainting(const Node *node) noexcept
   {
     if (!node)
     {
@@ -1169,7 +1161,7 @@ namespace krys::boo
                                            renderer, caretPainter);
   }
 
-  LayoutRect LocalCaretRectInRendererForRect(LayoutRect &localRect, dom::Node *node, RenderObject *renderer,
+  LayoutRect LocalCaretRectInRendererForRect(LayoutRect &localRect, Node *node, RenderObject *renderer,
                                              RenderBlock *&caretPainter) noexcept
   {
     // Get the renderer that will be responsible for painting the caret
@@ -1219,20 +1211,20 @@ namespace krys::boo
 
 #pragma region Elements editing makes
 
-  bool IsHTMLElementOfType(const dom::Node *node, html::TagName tagName) noexcept
+  bool IsHTMLElementOfType(const Node *node, html::TagName tagName) noexcept
   {
-    auto *element = DynamicDowncast<html::HTMLElement>(node);
+    auto *element = DynamicDowncast<HTMLElement>(node);
     return element && element->TagQualifiedName().TagName() == tagName;
   }
 
-  Ref<dom::Element> CreateHTMLElement(dom::Document &document, dom::DOMStringView localName) noexcept
+  Ref<Element> CreateHTMLElement(Document &document, DOMStringView localName) noexcept
   {
-    auto element = document.CreateElementNS(infra::namespaces::HTML, dom::DOMStringAtom(localName));
+    auto element = document.CreateElementNS(infra::namespaces::HTML, DOMStringAtom(localName));
     krys_debug_assert(!element.HasException());
     return element.ReleaseValue();
   }
 
-  Ref<dom::Element> CreateDefaultParagraphElement(dom::Document &document) noexcept
+  Ref<Element> CreateDefaultParagraphElement(Document &document) noexcept
   {
     switch (document.GetEditor().DefaultParagraphSeparator())
     {
@@ -1244,12 +1236,11 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD Ref<dom::Element> CreateTabSpanElement(dom::Document &document,
-                                                          dom::Text &tabTextNode) noexcept
+    KRYS_NODISCARD Ref<Element> CreateTabSpanElement(Document &document, Text &tabTextNode) noexcept
     {
       auto spanElement = CreateHTMLElement(document, u8"span");
 
-      (void)spanElement->SetAttribute(u8"class", dom::DOMString(AppleTabSpanClass));
+      (void)spanElement->SetAttribute(u8"class", DOMString(AppleTabSpanClass));
       (void)spanElement->SetAttribute(u8"style", u8"white-space:pre");
 
       (void)spanElement->AppendChild(tabTextNode);
@@ -1257,7 +1248,7 @@ namespace krys::boo
       return spanElement;
     }
 
-    KRYS_NODISCARD bool HasARenderedDescendant(dom::Node *node, dom::Node *excludedNode) noexcept
+    KRYS_NODISCARD bool HasARenderedDescendant(Node *node, Node *excludedNode) noexcept
     {
       for (auto *n = node->FirstChild(); n;)
       {
@@ -1276,21 +1267,20 @@ namespace krys::boo
     }
   }
 
-  Ref<dom::Element> CreateTabSpanElement(dom::Document &document, utf8_string tabText) noexcept
+  Ref<Element> CreateTabSpanElement(Document &document, utf8_string tabText) noexcept
   {
     return CreateTabSpanElement(document, *document.CreateTextNode(krys::move(tabText)));
   }
 
   // FIXME: An editing text node (createEditingTextNode, which echoes passwords).
-  Ref<dom::Element> CreateTabSpanElement(dom::Document &document) noexcept
+  Ref<Element> CreateTabSpanElement(Document &document) noexcept
   {
     return CreateTabSpanElement(document, *document.CreateTextNode(u8"\t"));
   }
 
   namespace
   {
-    KRYS_NODISCARD bool HasEquivalentAttributes(const dom::Element &first,
-                                                const dom::Element &second) noexcept
+    KRYS_NODISCARD bool HasEquivalentAttributes(const Element &first, const Element &second) noexcept
     {
       const auto &firstAttributes = first.AttributeList();
       const auto &secondAttributes = second.AttributeList();
@@ -1310,30 +1300,30 @@ namespace krys::boo
     }
   }
 
-  Ref<dom::Element> CloneElementWithoutChildren(dom::Element &element) noexcept
+  Ref<Element> CloneElementWithoutChildren(Element &element) noexcept
   {
     auto clone = dom::NodeAlgorithms::CloneNode(element, &element.NodeDocument(), false);
     krys_debug_assert(!clone.HasException());
     auto node = clone.ReleaseValue();
-    return Downcast<dom::Element>(krys::move(node));
+    return Downcast<Element>(krys::move(node));
   }
 
-  void CloneDataFromElement(dom::Element &target, const dom::Element &source) noexcept
+  void CloneDataFromElement(Element &target, const Element &source) noexcept
   {
     source.SynchronizeAllAttributes();
     for (const auto &attribute : source.AttributeList())
     {
-      (void)target.SetAttributeNS(attribute->NamespaceURI(), dom::DOMStringAtom(attribute->Name()),
-                                  dom::DOMString(attribute->Value()));
+      (void)target.SetAttributeNS(attribute->NamespaceURI(), DOMStringAtom(attribute->Name()),
+                                  DOMString(attribute->Value()));
     }
   }
 
-  dom::Element *TabSpanNode(dom::Node *node) noexcept
+  Element *TabSpanNode(Node *node) noexcept
   {
     if (IsHTMLElementOfType(node, html::TagName::span))
     {
-      auto &span = Downcast<dom::Element>(*node);
-      if (span.GetAttribute(u8"class") == dom::DOMString(AppleTabSpanClass))
+      auto &span = Downcast<Element>(*node);
+      if (span.GetAttribute(u8"class") == DOMString(AppleTabSpanClass))
       {
         return &span;
       }
@@ -1341,12 +1331,12 @@ namespace krys::boo
     return nullptr;
   }
 
-  dom::Element *ParentTabSpanNode(dom::Node *node) noexcept
+  Element *ParentTabSpanNode(Node *node) noexcept
   {
-    return Is<dom::Text>(node) ? TabSpanNode(node->ParentNode()) : nullptr;
+    return Is<Text>(node) ? TabSpanNode(node->ParentNode()) : nullptr;
   }
 
-  RefPtr<dom::Element> EnclosingList(dom::Node *node) noexcept
+  RefPtr<Element> EnclosingList(Node *node) noexcept
   {
     if (!node)
     {
@@ -1360,7 +1350,7 @@ namespace krys::boo
       if (IsHTMLElementOfType(ancestor, html::TagName::ul)
           || IsHTMLElementOfType(ancestor, html::TagName::ol))
       {
-        return ShareRefPtr(&Downcast<dom::Element>(*ancestor));
+        return ShareRefPtr(&Downcast<Element>(*ancestor));
       }
       if (ancestor == root)
       {
@@ -1371,7 +1361,7 @@ namespace krys::boo
     return nullptr;
   }
 
-  RefPtr<dom::Node> EnclosingListChild(dom::Node *node) noexcept
+  RefPtr<Node> EnclosingListChild(Node *node) noexcept
   {
     if (!node)
     {
@@ -1398,10 +1388,10 @@ namespace krys::boo
     return nullptr;
   }
 
-  RefPtr<dom::Node> EnclosingEmptyListItem(const VisiblePosition &position) noexcept
+  RefPtr<Node> EnclosingEmptyListItem(const VisiblePosition &position) noexcept
   {
     // Check that position is on a line by itself inside a list item
-    RefPtr<dom::Node> listChildNode = EnclosingListChild(position.DeepEquivalent().DeprecatedNode());
+    RefPtr<Node> listChildNode = EnclosingListChild(position.DeepEquivalent().DeprecatedNode());
     if (!listChildNode || !IsStartOfParagraph(position) || !IsEndOfParagraph(position))
     {
       return nullptr;
@@ -1418,15 +1408,15 @@ namespace krys::boo
     return listChildNode;
   }
 
-  RefPtr<dom::Element> OutermostEnclosingList(dom::Node *node, dom::Node *rootList) noexcept
+  RefPtr<Element> OutermostEnclosingList(Node *node, Node *rootList) noexcept
   {
-    RefPtr<dom::Element> list = EnclosingList(node);
+    RefPtr<Element> list = EnclosingList(node);
     if (!list)
     {
       return nullptr;
     }
 
-    while (RefPtr<dom::Element> nextList = EnclosingList(list.get()))
+    while (RefPtr<Element> nextList = EnclosingList(list.get()))
     {
       if (nextList.get() == rootList)
       {
@@ -1438,10 +1428,10 @@ namespace krys::boo
     return list;
   }
 
-  bool CanMergeLists(dom::Element *firstList, dom::Element *secondList) noexcept
+  bool CanMergeLists(Element *firstList, Element *secondList) noexcept
   {
-    auto *first = DynamicDowncast<html::HTMLElement>(firstList);
-    auto *second = DynamicDowncast<html::HTMLElement>(secondList);
+    auto *first = DynamicDowncast<HTMLElement>(firstList);
+    auto *second = DynamicDowncast<HTMLElement>(secondList);
     if (!first || !second)
     {
       return false;
@@ -1455,9 +1445,9 @@ namespace krys::boo
                                 dom::PositionInParentBeforeNode(second));
   }
 
-  dom::Element *ElementIfEquivalent(const dom::Element &first, dom::Node &second) noexcept
+  Element *ElementIfEquivalent(const Element &first, Node &second) noexcept
   {
-    auto *secondElement = DynamicDowncast<dom::Element>(second);
+    auto *secondElement = DynamicDowncast<Element>(second);
     if (secondElement && first.TagQualifiedName() == secondElement->TagQualifiedName()
         && HasEquivalentAttributes(first, *secondElement))
     {
@@ -1466,7 +1456,7 @@ namespace krys::boo
     return nullptr;
   }
 
-  dom::Element *EnclosingElementWithTag(const dom::Position &position, html::TagName tagName) noexcept
+  Element *EnclosingElementWithTag(const dom::Position &position, html::TagName tagName) noexcept
   {
     auto root = HighestEditableRoot(position);
     for (auto *node = position.DeprecatedNode(); node; node = node->ParentNode())
@@ -1475,7 +1465,7 @@ namespace krys::boo
       {
         continue;
       }
-      auto *element = DynamicDowncast<dom::Element>(*node);
+      auto *element = DynamicDowncast<Element>(*node);
       if (!element)
       {
         continue;
@@ -1492,7 +1482,7 @@ namespace krys::boo
     return nullptr;
   }
 
-  bool IsNonTableCellHTMLBlockElement(const dom::Node *node) noexcept
+  bool IsNonTableCellHTMLBlockElement(const Node *node) noexcept
   {
     using html::TagName;
     for (auto tagName : {TagName::listing, TagName::ol, TagName::pre, TagName::table, TagName::ul,
@@ -1537,12 +1527,12 @@ namespace krys::boo
     return visiblePosition.DeepEquivalent().Downstream();
   }
 
-  RefPtr<dom::Node> HighestNodeToRemoveInPruning(dom::Node *node) noexcept
+  RefPtr<Node> HighestNodeToRemoveInPruning(Node *node) noexcept
   {
-    RefPtr<dom::Node> previousNode;
+    RefPtr<Node> previousNode;
     auto *rootEditableElement = node ? node->RootEditableElement() : nullptr;
-    for (RefPtr<dom::Node> currentNode = ShareRefPtr(node); currentNode;
-         currentNode = ShareRefPtr<dom::Node>(currentNode->ParentNode()))
+    for (RefPtr<Node> currentNode = ShareRefPtr(node); currentNode;
+         currentNode = ShareRefPtr<Node>(currentNode->ParentNode()))
     {
       if (auto *renderer = currentNode->Renderer())
       {

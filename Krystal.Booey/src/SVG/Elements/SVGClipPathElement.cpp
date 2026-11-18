@@ -25,9 +25,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGClipPathElement::SVGClipPathElement(dom::Document &document) noexcept
+  SVGClipPathElement::SVGClipPathElement(Document &document) noexcept
       : SVGGraphicsElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::ClipPath),
         _clipPathUnits(SVGAnimatedEnumeration::Create(this, SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE))
   {
@@ -40,14 +40,13 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGClipPathElement::AttributeChanged(const dom::QualifiedName &name,
-                                            Maybe<dom::DOMStringView> oldValue,
-                                            Maybe<dom::DOMStringView> value) noexcept
+  void SVGClipPathElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                            Maybe<DOMStringView> value) noexcept
   {
     if (name == SVGNames::ClipPathUnitsAttr())
     {
-      auto propertyValue = SVGPropertyTraits<SVGUnitTypes::SVGUnitType>::FromString(
-        *this, value.value_or(dom::DOMStringView {}));
+      auto propertyValue =
+        SVGPropertyTraits<SVGUnitTypes::SVGUnitType>::FromString(*this, value.value_or(DOMStringView {}));
       if (propertyValue > 0)
       {
         _clipPathUnits->SetBaseValInternal<SVGUnitTypes::SVGUnitType>(propertyValue);
@@ -57,7 +56,7 @@ namespace krys::boo::svg
     SVGGraphicsElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGClipPathElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGClipPathElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {

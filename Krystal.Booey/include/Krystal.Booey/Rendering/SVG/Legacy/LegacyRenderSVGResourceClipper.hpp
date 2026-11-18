@@ -27,14 +27,10 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include <array>
 
-namespace krys::boo::svg
-{
-  class SVGClipPathElement;
-}
-
 namespace krys::boo
 {
   class ImageBuffer;
+  class SVGClipPathElement;
 
   /// @brief The mask a clip path drew for one client, and what it was drawn for.
   struct ClipperData
@@ -67,11 +63,11 @@ namespace krys::boo
     HashMap<const RenderObject *, UniquePtr<ClipperData>> _clipperMap;
 
   public:
-    LegacyRenderSVGResourceClipper(svg::SVGClipPathElement &, RenderStyle &&) noexcept;
+    LegacyRenderSVGResourceClipper(SVGClipPathElement &, RenderStyle &&) noexcept;
 
     ~LegacyRenderSVGResourceClipper() noexcept override;
 
-    KRYS_NODISCARD svg::SVGClipPathElement &ClipPathElement() const noexcept;
+    KRYS_NODISCARD SVGClipPathElement &ClipPathElement() const noexcept;
 
     void RemoveAllClientsFromCache() noexcept override;
 
@@ -101,7 +97,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HitTestClipContent(const FloatRect &, const FloatPoint &) noexcept;
 
-    KRYS_NODISCARD svg::SVGUnitTypes::SVGUnitType ClipPathUnits() const noexcept;
+    KRYS_NODISCARD SVGUnitTypes::SVGUnitType ClipPathUnits() const noexcept;
 
     void GetElement() const = delete;
 

@@ -28,9 +28,9 @@
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  bool SVGStringList::Parse(dom::DOMStringView data, char8 delimiter) noexcept
+  bool SVGStringList::Parse(DOMStringView data, char8 delimiter) noexcept
   {
     ClearItems();
 
@@ -40,7 +40,7 @@ namespace krys::boo::svg
     };
 
     auto buffer = data;
-    SkipOptionalSVGSpaces(buffer);
+    svg::SkipOptionalSVGSpaces(buffer);
     while (!buffer.empty())
     {
       auto start = buffer;
@@ -56,14 +56,14 @@ namespace krys::boo::svg
       }
 
       _items.emplace_back(start.substr(0, start.size() - buffer.size()));
-      SkipOptionalSVGSpacesOrDelimiter(buffer, static_cast<char>(delimiter));
+      svg::SkipOptionalSVGSpacesOrDelimiter(buffer, static_cast<char>(delimiter));
     }
 
     // FIXME: Should this ClearItems() on failure like SVGTransformList does?
     return buffer.empty();
   }
 
-  dom::DOMString SVGStringList::ValueAsString() const noexcept
+  DOMString SVGStringList::ValueAsString() const noexcept
   {
     StringBuilder builder;
     for (const auto &string : _items)

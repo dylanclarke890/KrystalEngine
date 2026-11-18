@@ -60,7 +60,7 @@ namespace krys::boo::html
     return false;
   }
 
-  void SubmitInputType::HandleActivationBehavior(dom::Event &event) noexcept
+  void SubmitInputType::HandleActivationBehavior(Event &event) noexcept
   {
     krys_debug_assert(Element());
     Ref<HTMLInputElement> element = ShareRef(*Element());
@@ -87,7 +87,7 @@ namespace krys::boo::html
     return true;
   }
 
-  Maybe<dom::DOMString> SubmitInputType::DefaultValue() const noexcept
+  Maybe<DOMString> SubmitInputType::DefaultValue() const noexcept
   {
     return SubmitButtonDefaultLabel();
   }

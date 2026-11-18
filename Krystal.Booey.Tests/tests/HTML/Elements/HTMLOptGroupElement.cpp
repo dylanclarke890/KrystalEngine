@@ -12,9 +12,9 @@ namespace krys::boo::tests
   {
     EditorFixture fixture(
       u8"<select id=s><optgroup id=g disabled><option id=a>A</option></optgroup></select>");
-    auto &select = Downcast<html::HTMLSelectElement>(fixture.ById(u8"s"));
-    auto &group = Downcast<html::HTMLOptGroupElement>(fixture.ById(u8"g"));
-    CHECK(Downcast<html::HTMLOptionElement>(fixture.ById(u8"a")).IsDisabledFormControl());
+    auto &select = Downcast<HTMLSelectElement>(fixture.ById(u8"s"));
+    auto &group = Downcast<HTMLOptGroupElement>(fixture.ById(u8"g"));
+    CHECK(Downcast<HTMLOptionElement>(fixture.ById(u8"a")).IsDisabledFormControl());
     CHECK(select.SelectedIndex() == -1);
     group.Disabled(false);
     CHECK(select.SelectedIndex() == 0);

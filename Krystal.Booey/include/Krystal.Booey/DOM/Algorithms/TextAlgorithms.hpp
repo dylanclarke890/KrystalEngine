@@ -6,13 +6,16 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class CharacterData;
   class ContainerNode;
   class Node;
   class Text;
+}
 
+namespace krys::boo::dom
+{
   /// @brief Implementations of the CharacterData/Text node interface algorithms.
   /// @see https://dom.spec.whatwg.org/#interface-characterdata
   /// @see https://dom.spec.whatwg.org/#interface-text

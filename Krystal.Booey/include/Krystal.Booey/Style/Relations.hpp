@@ -32,12 +32,8 @@
 
 namespace krys::boo
 {
-  class RenderStyle;
-}
-
-namespace krys::boo::dom
-{
   class Element;
+  class RenderStyle;
 }
 
 namespace krys::boo::style
@@ -66,11 +62,11 @@ namespace krys::boo::style
       AffectedByHasWithPositionalPseudoClass,
     };
 
-    const dom::Element *Element;
+    const boo::Element *Element;
     Type RelationType;
     uint32 Value;
 
-    Relation(const dom::Element &element, Type type, uint32 value = 1) noexcept
+    Relation(const boo::Element &element, Type type, uint32 value = 1) noexcept
         : Element(&element), RelationType(type), Value(value)
     {
     }
@@ -83,7 +79,7 @@ namespace krys::boo::style
   /// @return The relations left to commit to the elements once the style is applied, or null if there are
   /// none.
   KRYS_NODISCARD UniquePtr<Relations> CommitRelationsToRenderStyle(RenderStyle &style,
-                                                                   const dom::Element &element,
+                                                                   const boo::Element &element,
                                                                    const Relations &relations) noexcept;
 
   /// @brief Copies the relation state (`:empty`, `:first-child`, `:last-child`) of @p from to @p to.

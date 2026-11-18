@@ -29,7 +29,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGValuePropertyAnimator.hpp"
 #include "Krystal.Booey/SVG/SVGLength.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGLengthAnimator final : public SVGValuePropertyAnimator<SVGLength, SVGAnimationLengthFunction>
   {
@@ -39,10 +39,11 @@ namespace krys::boo::svg
     using Base::Base;
 
   public:
-    KRYS_NODISCARD static Ref<SVGLengthAnimator> Create(const dom::QualifiedName &attributeName,
+    KRYS_NODISCARD static Ref<SVGLengthAnimator> Create(const QualifiedName &attributeName,
                                                         Ref<SVGProperty> &&property,
-                                                        AnimationMode animationMode, CalcMode calcMode,
-                                                        bool isAccumulated, bool isAdditive) noexcept
+                                                        svg::AnimationMode animationMode,
+                                                        svg::CalcMode calcMode, bool isAccumulated,
+                                                        bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGLengthAnimator(attributeName, krys::move(property), animationMode, calcMode,
                                              isAccumulated, isAdditive, SVGLengthMode::Other));
@@ -50,7 +51,7 @@ namespace krys::boo::svg
 
     void Start(SVGElement &targetElement) noexcept override
     {
-      dom::DOMString baseValue =
+      DOMString baseValue =
         ComputeCSSPropertyValue(targetElement, css::PropertyIdFromName(_attributeName.LocalName().View()));
       SVGLengthValue value(SVGLengthMode::Other);
       if (!value.SetValueAsString(baseValue).HasException())

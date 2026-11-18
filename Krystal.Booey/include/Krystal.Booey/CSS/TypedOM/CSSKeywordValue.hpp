@@ -29,7 +29,7 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSKeywordValue;
 
@@ -46,7 +46,7 @@ namespace krys::boo::css
 
   public:
     /// @return A `TypeError` if @p value is empty.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSKeywordValue>> Create(const CSSOMString &value) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSKeywordValue>> Create(const CSSOMString &value) noexcept;
 
     KRYS_NODISCARD const CSSOMString &Value() const noexcept
     {
@@ -54,7 +54,7 @@ namespace krys::boo::css
     }
 
     /// @return A `TypeError`, leaving the value unchanged, if @p value is empty.
-    dom::ExceptionOr<void> SetValue(const CSSOMString &value) noexcept;
+    ExceptionOr<void> SetValue(const CSSOMString &value) noexcept;
 
     KRYS_NODISCARD CSSStyleValueType StyleValueType() const noexcept final
     {
@@ -75,9 +75,9 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSKeywordValue)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleValue &styleValue) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSKeywordValue)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleValue &styleValue) noexcept
   {
-    return styleValue.StyleValueType() == krys::boo::css::CSSStyleValueType::CSSKeywordValue;
+    return styleValue.StyleValueType() == krys::boo::CSSStyleValueType::CSSKeywordValue;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

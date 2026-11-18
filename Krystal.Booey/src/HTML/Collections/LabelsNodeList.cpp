@@ -31,9 +31,9 @@ namespace krys::boo::html
   LabelsNodeList::LabelsNodeList(HTMLElement &ownerNode) noexcept
       : LiveNodeList(
           ownerNode,
-          [this](const dom::Node &node)
+          [this](const Node &node)
           {
-            auto *element = DynamicDowncast<dom::Element>(node);
+            auto *element = DynamicDowncast<Element>(node);
             return element && ElementMatches(*element);
           },
           dom::LiveCollectionInvalidation::Labels, dom::LiveCollectionTraversal::OwnerTree),
@@ -41,7 +41,7 @@ namespace krys::boo::html
   {
   }
 
-  bool LabelsNodeList::ElementMatches(const dom::Element &testNode) const noexcept
+  bool LabelsNodeList::ElementMatches(const Element &testNode) const noexcept
   {
     auto *label = DynamicDowncast<HTMLLabelElement>(testNode);
     return label && label->Control().get() == _ownerNode.get();

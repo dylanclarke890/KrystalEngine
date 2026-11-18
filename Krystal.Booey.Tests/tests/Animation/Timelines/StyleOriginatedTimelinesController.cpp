@@ -34,7 +34,7 @@ namespace krys::boo::tests
       fixture.TestPage->UpdateRendering();
     }
 
-    KRYS_NODISCARD CSSAnimation &OnlyAnimation(dom::Element &element) noexcept
+    KRYS_NODISCARD CSSAnimation &OnlyAnimation(Element &element) noexcept
     {
       auto animations = element.GetAnimations();
       REQUIRE(animations.size() == 1);

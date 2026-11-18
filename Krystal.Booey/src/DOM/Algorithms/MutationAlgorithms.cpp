@@ -141,8 +141,8 @@ namespace krys::boo::dom
     void RebuildSVGExtensionsElementsIfNecessary(ContainerNode &parent) noexcept
     {
       auto *extensions = parent.NodeDocument().SVGExtensionsIfExists();
-      auto *svgHost = DynamicDowncast<svg::SVGElement>(TreeQueries::ShadowHost(parent));
-      if (extensions && !(svgHost && Is<svg::SVGUseElement>(*svgHost)))
+      auto *svgHost = DynamicDowncast<SVGElement>(TreeQueries::ShadowHost(parent));
+      if (extensions && !(svgHost && Is<SVGUseElement>(*svgHost)))
       {
         extensions->RebuildElements();
       }
@@ -357,7 +357,7 @@ namespace krys::boo::dom
     bool isParentShadowHost = TreeQueries::IsShadowHost(parent);
     bool isParentRootShadowRoot = Is<ShadowRoot>(TreeQueries::Root(parent));
 
-    auto *slotParent = DynamicDowncast<html::HTMLSlotElement>(parent);
+    auto *slotParent = DynamicDowncast<HTMLSlotElement>(parent);
 
     // 7. For each node in nodes, in tree order:
     for (auto &target : nodes)
@@ -656,15 +656,14 @@ namespace krys::boo::dom
       auto &oldParentRoot = TreeQueries::Root(oldParent);
       if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(oldParentRoot))
       {
-        if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(oldParent);
-            slot && slot->_assignedNodes.empty())
+        if (auto *slot = DynamicDowncast<HTMLSlotElement>(oldParent); slot && slot->_assignedNodes.empty())
         {
           SlotAlgorithms::SignalSlotChange(*slot);
         }
       }
 
       // 16. If node has an inclusive descendant that is a slot:
-      if (HasNodeOfType<html::HTMLSlotElement>(ConstInclusiveDescendantRange(node)))
+      if (HasNodeOfType<HTMLSlotElement>(ConstInclusiveDescendantRange(node)))
       {
         // 16a. Run assign slottables for a tree with oldParent's root.
         SlotAlgorithms::AssignSlottablesForTree(oldParentRoot);
@@ -743,7 +742,7 @@ namespace krys::boo::dom
 
       // 23. If newParent's root is a shadow root, and newParent is a slot whose assigned nodes is empty, then
       //     run signal a slot change for newParent.
-      if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(newParent);
+      if (auto *slot = DynamicDowncast<HTMLSlotElement>(newParent);
           slot && Is<ShadowRoot>(TreeQueries::Root(newParent)) && slot->_assignedNodes.empty())
       {
         SlotAlgorithms::SignalSlotChange(*slot);
@@ -997,14 +996,14 @@ namespace krys::boo::dom
       auto &parentRoot = TreeQueries::Root(parent);
       if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(parentRoot))
       {
-        if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(parent); slot && slot->_assignedNodes.empty())
+        if (auto *slot = DynamicDowncast<HTMLSlotElement>(parent); slot && slot->_assignedNodes.empty())
         {
           SlotAlgorithms::SignalSlotChange(*slot);
         }
       }
 
       // 10. If node has an inclusive descendant that is a slot:
-      if (HasNodeOfType<html::HTMLSlotElement>(ConstInclusiveDescendantRange(node)))
+      if (HasNodeOfType<HTMLSlotElement>(ConstInclusiveDescendantRange(node)))
       {
         // 10a. Run assign slottables for a tree with parent's root.
         SlotAlgorithms::AssignSlottablesForTree(parentRoot);

@@ -69,7 +69,7 @@ namespace krys::boo::html
     }
 
     /// @see https://html.spec.whatwg.org/#dom-canvasgradient-addcolorstop
-    dom::ExceptionOr<void> AddColorStop(double value, dom::DOMStringView color) noexcept;
+    ExceptionOr<void> AddColorStop(double value, DOMStringView color) noexcept;
 
   private:
     CanvasGradient(const FloatPoint &p0, const FloatPoint &p1) noexcept;

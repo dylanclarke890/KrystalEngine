@@ -205,7 +205,7 @@ namespace krys::ui::tests
 
     auto element = view.Document().GetElementById(u8"d");
     REQUIRE(element);
-    auto &dialog = Downcast<boo::html::HTMLDialogElement>(*element);
+    auto &dialog = Downcast<boo::HTMLDialogElement>(*element);
 
     REQUIRE_FALSE(dialog.ShowModal().HasException());
     frame();
@@ -1240,7 +1240,7 @@ namespace krys::ui::tests
     fill(0xFF'33'66'99u);
 
     auto canvas = view.Document().GetElementById(u8"canvas");
-    auto context = Downcast<boo::html::HTMLCanvasElement>(*canvas).GetContext(
+    auto context = Downcast<boo::HTMLCanvasElement>(*canvas).GetContext(
       boo::html::EngineTextureRenderingContext::ContextType);
     REQUIRE(context);
     auto &textureContext = Downcast<boo::html::EngineTextureRenderingContext>(*context);
@@ -1287,10 +1287,10 @@ namespace krys::ui::tests
     };
     (void)frame();
 
-    auto &canvas = Downcast<boo::html::HTMLCanvasElement>(*view.Document().GetElementById(u8"canvas"));
+    auto &canvas = Downcast<boo::HTMLCanvasElement>(*view.Document().GetElementById(u8"canvas"));
     auto context = canvas.GetContext2d();
     REQUIRE(context);
-    context->SetFillStyle(boo::dom::DOMString(u8"#336699"));
+    context->SetFillStyle(boo::DOMString(u8"#336699"));
     context->FillRect(0, 0, 40, 20);
     auto before = frame();
     // Composited and painted the whole page again, which draws the canvas's texture as an image, the page is
@@ -1301,7 +1301,7 @@ namespace krys::ui::tests
     repaints.Reset();
 
     // Drawing redraws only the canvas's contents.
-    context->SetFillStyle(boo::dom::DOMString(u8"#ee7733"));
+    context->SetFillStyle(boo::DOMString(u8"#ee7733"));
     context->FillRect(0, 0, 40, 20);
     auto after = frame();
     CHECK(repaints.Bounds().IsEmpty());

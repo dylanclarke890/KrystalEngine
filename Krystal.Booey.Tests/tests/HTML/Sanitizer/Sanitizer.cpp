@@ -8,9 +8,9 @@ namespace krys::boo::html::tests
 {
   namespace
   {
-    const dom::DOMStringAtom SVG {infra::namespaces::SVG};
-    const dom::DOMStringAtom MathML {infra::namespaces::MathML};
-    const dom::DOMStringAtom XLink {infra::namespaces::XLink};
+    const DOMStringAtom SVG {infra::namespaces::SVG};
+    const DOMStringAtom MathML {infra::namespaces::MathML};
+    const DOMStringAtom XLink {infra::namespaces::XLink};
 
     KRYS_NODISCARD Ref<Sanitizer> Make(const SanitizerConfig &config)
     {
@@ -19,9 +19,9 @@ namespace krys::boo::html::tests
       return sanitizer.ReleaseValue();
     }
 
-    KRYS_NODISCARD List<dom::DOMString> Names(const List<SanitizerElementNamespace> &list) noexcept
+    KRYS_NODISCARD List<DOMString> Names(const List<SanitizerElementNamespace> &list) noexcept
     {
-      List<dom::DOMString> names;
+      List<DOMString> names;
       for (auto &item : list)
       {
         names.push_back(item.Name);
@@ -29,9 +29,9 @@ namespace krys::boo::html::tests
       return names;
     }
 
-    KRYS_NODISCARD List<dom::DOMString> Names(const List<SanitizerAttributeNamespace> &list) noexcept
+    KRYS_NODISCARD List<DOMString> Names(const List<SanitizerAttributeNamespace> &list) noexcept
     {
-      List<dom::DOMString> names;
+      List<DOMString> names;
       for (auto &item : list)
       {
         names.push_back(item.Name);
@@ -39,10 +39,10 @@ namespace krys::boo::html::tests
       return names;
     }
 
-    KRYS_NODISCARD bool Allows(const SanitizerConfig &config, dom::DOMStringView attribute,
-                               dom::DOMStringView value = u8"", dom::DOMStringView element = u8"div",
-                               dom::DOMStringAtom elementNamespace = infra::namespaces::HTML,
-                               dom::DOMStringAtom attributeNamespace = null) noexcept
+    KRYS_NODISCARD bool Allows(const SanitizerConfig &config, DOMStringView attribute,
+                               DOMStringView value = u8"", DOMStringView element = u8"div",
+                               DOMStringAtom elementNamespace = infra::namespaces::HTML,
+                               DOMStringAtom attributeNamespace = null) noexcept
     {
       return SanitizerAlgorithms::AllowsAttribute(attribute, krys::move(attributeNamespace), value, element,
                                                   krys::move(elementNamespace), config);
@@ -118,7 +118,7 @@ namespace krys::boo::html::tests
     auto invalid = [](const SanitizerConfig &config)
     {
       auto result = Sanitizer::Create(config);
-      return result.HasException() && result.GetException().Code() == dom::ExceptionCode::TypeError;
+      return result.HasException() && result.GetException().Code() == ExceptionCode::TypeError;
     };
 
     CHECK(invalid({.Elements = List<SanitizerElementNamespaceWithAttributes> {u8"p"},
@@ -161,7 +161,7 @@ namespace krys::boo::html::tests
   {
     auto config = Sanitizer::Create()->Get();
     REQUIRE(config.Elements);
-    auto has = [&](dom::DOMStringView name, dom::DOMStringAtom namespaceURI)
+    auto has = [&](DOMStringView name, DOMStringAtom namespaceURI)
     {
       return SanitizerAlgorithms::ActionForElementName(name, krys::move(namespaceURI), config)
              == SanitizerAction::Keep;
@@ -193,8 +193,8 @@ namespace krys::boo::html::tests
       Make({.RemoveElements = List<SanitizerElementNamespace> {u8"u", {u8"g", SVG}, u8"b"},
             .RemoveAttributes = List<SanitizerAttributeNamespace> {u8"z", {u8"href", XLink}, u8"a"}});
     auto config = sanitizer->Get();
-    CHECK(Names(*config.RemoveElements) == List<dom::DOMString> {u8"b", u8"u", u8"g"});
-    CHECK(Names(*config.RemoveAttributes) == List<dom::DOMString> {u8"a", u8"z", u8"href"});
+    CHECK(Names(*config.RemoveElements) == List<DOMString> {u8"b", u8"u", u8"g"});
+    CHECK(Names(*config.RemoveAttributes) == List<DOMString> {u8"a", u8"z", u8"href"});
   }
 
   TEST_CASE("Sanitizer: modifying a configuration",
@@ -221,7 +221,7 @@ namespace krys::boo::html::tests
       CHECK(sanitizer->AllowAttribute(u8"class"));
       CHECK_FALSE(sanitizer->AllowAttribute(u8"class"));
       CHECK(sanitizer->RemoveAttribute(u8"id"));
-      CHECK(Names(*sanitizer->Get().Attributes) == List<dom::DOMString> {u8"class"});
+      CHECK(Names(*sanitizer->Get().Attributes) == List<DOMString> {u8"class"});
 
       // Allowing an element's local attributes that the global list has drops them.
       SanitizerElementNamespaceWithAttributes span {u8"span"};
@@ -232,7 +232,7 @@ namespace krys::boo::html::tests
       auto it =
         std::ranges::find_if(*config.Elements, [](const auto &element) { return element.Name == u8"span"; });
       REQUIRE(it != config.Elements->end());
-      CHECK(Names(*it->Attributes) == List<dom::DOMString> {u8"title"});
+      CHECK(Names(*it->Attributes) == List<DOMString> {u8"title"});
     }
 
     SECTION("with a remove-list")
@@ -257,7 +257,7 @@ namespace krys::boo::html::tests
       CHECK(sanitizer->SetComments(false));
       CHECK_FALSE(sanitizer->SetDataAttributes(false));
       CHECK(sanitizer->SetDataAttributes(true));
-      CHECK(Names(*sanitizer->Get().Attributes) == List<dom::DOMString> {u8"id"});
+      CHECK(Names(*sanitizer->Get().Attributes) == List<DOMString> {u8"id"});
       CHECK(sanitizer->SetJavascriptURLs(false));
       CHECK_FALSE(Make({})->SetDataAttributes(true));
     }

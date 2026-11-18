@@ -4,8 +4,8 @@
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheetList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/CSSOM/StyleSheetList.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
@@ -26,9 +26,6 @@
 
 namespace krys::boo::tests
 {
-  using html::HTMLOptionElement;
-  using html::HTMLSelectElement;
-
   namespace
   {
     KRYS_NODISCARD HTMLSelectElement &SelectById(EditorFixture &fixture, utf8_stringview id) noexcept
@@ -75,11 +72,11 @@ namespace krys::boo::tests
     }
 
     /// @brief Counts the events of a type fired at a target.
-    struct EventCounter final : dom::EventListenerCallback
+    struct EventCounter final : EventListenerCallback
     {
       int32 Count {0};
 
-      void HandleEvent(dom::Event &) noexcept override
+      void HandleEvent(Event &) noexcept override
       {
         ++Count;
       }
@@ -162,7 +159,7 @@ namespace krys::boo::tests
     // An option in a disabled optgroup is disabled, and its label is indented.
     CHECK(OptionById(fixture, u8"c").IsDisabledFormControl());
     CHECK(OptionById(fixture, u8"b").TextIndentedToRespectGroupLabel() == u8"    B");
-    CHECK(Downcast<html::HTMLOptGroupElement>(fixture.ById(u8"g")).GroupLabelText() == u8"Group one");
+    CHECK(Downcast<HTMLOptGroupElement>(fixture.ById(u8"g")).GroupLabelText() == u8"Group one");
     REQUIRE_FALSE(fixture.ById(u8"g").SetAttribute(u8"disabled", u8"").HasException());
     CHECK(OptionById(fixture, u8"b").IsDisabledFormControl());
 
@@ -224,12 +221,12 @@ namespace krys::boo::tests
     auto newOption = [&](utf8_stringview id)
     {
       auto option = CreateRef<HTMLOptionElement>(*fixture.Document);
-      REQUIRE_FALSE(option->SetAttribute(u8"id", dom::DOMString(id)).HasException());
+      REQUIRE_FALSE(option->SetAttribute(u8"id", DOMString(id)).HasException());
       return option;
     };
     auto before = [&](utf8_stringview id)
     {
-      return HTMLSelectElement::HTMLElementOrInt {ShareRefPtr<html::HTMLElement>(&OptionById(fixture, id))};
+      return HTMLSelectElement::HTMLElementOrInt {ShareRefPtr<HTMLElement>(&OptionById(fixture, id))};
     };
 
     SECTION("add() inserts into the parent of the element or indexth option it goes before")
@@ -256,7 +253,7 @@ namespace krys::boo::tests
     {
       auto result = select.Add(RefPtr<HTMLOptionElement>(newOption(u8"n")), before(u8"o"));
       REQUIRE(result.HasException());
-      CHECK(result.GetException().Code() == dom::ExceptionCode::NotFoundError);
+      CHECK(result.GetException().Code() == ExceptionCode::NotFoundError);
       REQUIRE_FALSE(select.Add(ShareRefPtr(&OptionById(fixture, u8"c")), before(u8"c")).HasException());
       CHECK(ListItemIds(select) == u8"a g b c");
     }
@@ -475,7 +472,7 @@ namespace krys::boo::tests
     EditorFixture fixture(u8"<select id=s><option>A</option><option>B</option></select>");
     auto &select = SelectById(fixture, u8"s");
     List<std::string> events;
-    auto log = [&](dom::Event &event)
+    auto log = [&](Event &event)
     {
       events.push_back(Narrow(event.Type().View()) + (event.Bubbles() ? " bubbles" : "")
                        + (event.Composed() ? " composed" : ""));
@@ -499,8 +496,8 @@ namespace krys::boo::tests
     auto &select = SelectById(fixture, u8"s");
     auto input = CreateRef<EventCounter>();
     auto change = CreateRef<EventCounter>();
-    select.AddEventListener(event_names::Input, ShareRef<dom::EventListenerCallback>(*input), false);
-    select.AddEventListener(event_names::Change, ShareRef<dom::EventListenerCallback>(*change), false);
+    select.AddEventListener(event_names::Input, ShareRef<EventListenerCallback>(*input), false);
+    select.AddEventListener(event_names::Change, ShareRef<EventListenerCallback>(*change), false);
     select.Focus();
     REQUIRE(fixture.Document->FocusedElement() == &select);
 
@@ -538,7 +535,7 @@ namespace krys::boo::tests
     // Without a user gesture it's not allowed.
     auto result = select.ShowPicker();
     REQUIRE(result.HasException());
-    CHECK(result.GetException().Code() == dom::ExceptionCode::NotAllowedError);
+    CHECK(result.GetException().Code() == ExceptionCode::NotAllowedError);
 
     // A gesture allows one call, which uses it up.
     window.NotifyActivated();
@@ -550,7 +547,7 @@ namespace krys::boo::tests
     window.NotifyActivated();
     auto disabled = select.ShowPicker();
     REQUIRE(disabled.HasException());
-    CHECK(disabled.GetException().Code() == dom::ExceptionCode::InvalidStateError);
+    CHECK(disabled.GetException().Code() == ExceptionCode::InvalidStateError);
   }
 
   namespace
@@ -558,7 +555,7 @@ namespace krys::boo::tests
     constexpr utf8_stringview BaseSelectStyle = u8"<style>select{appearance:base-select;width:100px}</style>";
 
     /// @brief Presses and releases the left button at the centre of @p element.
-    void ClickElement(EditorFixture &fixture, dom::Element &element) noexcept
+    void ClickElement(EditorFixture &fixture, boo::Element &element) noexcept
     {
       (void)fixture.Document->UpdateLayout();
       auto rect = element.Renderer()->AbsoluteBoundingBoxRect();
@@ -630,7 +627,7 @@ namespace krys::boo::tests
       EditorFixture fixture(u8"<style>::picker(select){color:red}select::picker-icon{color:red}"
                             u8"::picker(select):popover-open{color:red}::picker(select)::backdrop{color:red}"
                             u8"::picker(other){color:red}</style>");
-      auto *sheet = DynamicDowncast<css::CSSStyleSheet>(fixture.Document->StyleSheets().Item(1));
+      auto *sheet = DynamicDowncast<CSSStyleSheet>(fixture.Document->StyleSheets().Item(1));
       REQUIRE(sheet);
       REQUIRE(sheet->CssRules()->Length() == 4);
       CHECK(css::tests::ToNarrow(sheet->CssRules()->Item(0)->CssText())
@@ -705,7 +702,7 @@ namespace krys::boo::tests
       SECTION("clicking an option picks it, firing events and closing")
       {
         auto counter = CreateRef<EventCounter>();
-        select.AddEventListener(event_names::Change, ShareRef<dom::EventListenerCallback>(*counter), false);
+        select.AddEventListener(event_names::Change, ShareRef<EventListenerCallback>(*counter), false);
         ClickElement(fixture, d);
         html::EventLoop::Current().RunUntilIdle();
         CHECK(select.SelectedIndex() == 3);
@@ -825,7 +822,7 @@ namespace krys::boo::tests
     {
       auto &option = OptionById(fixture, u8"a");
       option.RemoveAttribute(u8"label");
-      (void)option.TextContent(dom::DOMString(u8"Replaced"));
+      (void)option.TextContent(DOMString(u8"Replaced"));
       (void)fixture.Document->UpdateLayout();
       CHECK_FALSE(layout::tests::DumpWithIds(fixture).contains(u8"\"Contents\""));
       CHECK(Dumps(fixture, u8"\"Replaced\""));
@@ -883,7 +880,7 @@ namespace krys::boo::tests
     {
       REQUIRE(fixture.ById(u8"c").Renderer());
       CHECK(Dumps(fixture, u8"\"Alpha\""));
-      CHECK(button.TextContent().value_or(dom::DOMString()) == u8"Alpha");
+      CHECK(button.TextContent().value_or(DOMString()) == u8"Alpha");
     }
 
     SECTION("is inert, so the press is the select's")

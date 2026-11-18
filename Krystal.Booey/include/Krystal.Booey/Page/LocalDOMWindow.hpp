@@ -45,16 +45,16 @@
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSStyleDeclaration;
+  class Document;
+  class Element;
   class MediaQueryList;
 }
 
 namespace krys::boo::dom
 {
-  class Document;
-  class Element;
   class EventDispatcher;
   class HTMLCollection;
 }
@@ -76,13 +76,13 @@ namespace krys::boo
   /// (`load`, `resize` and the others) fire at, and which the document's events bubble to.
   /// @note The document makes its window as it becomes a frame's document, and keeps it.
   /// @see https://html.spec.whatwg.org/#the-window-object
-  class LocalDOMWindow final : public dom::EventTarget
+  class LocalDOMWindow final : public EventTarget
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_NON_COPY_MOVABLE(LocalDOMWindow);
 
   private:
-    WeakPtr<dom::Document> _document;
+    WeakPtr<boo::Document> _document;
     RefPtr<html::CustomElementRegistry> _customElementRegistry;
     mutable RefPtr<html::CloseWatcherManager> _closeWatcherManager;
     mutable RefPtr<VisualViewport> _visualViewport;
@@ -99,17 +99,17 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#last-history-action-activation-timestamp
     dom::DOMHighResTimeStamp _lastHistoryActionActivationTimestamp;
 
-    explicit LocalDOMWindow(dom::Document &document) noexcept;
+    explicit LocalDOMWindow(boo::Document &document) noexcept;
 
   public:
     ~LocalDOMWindow() noexcept override;
 
     /// @brief A window for @p document, which must be in a frame.
-    KRYS_NODISCARD static Ref<LocalDOMWindow> Create(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<LocalDOMWindow> Create(boo::Document &document) noexcept;
 
     /// @brief The window's document (its associated `Document`), unless it has been destroyed.
     /// @see https://html.spec.whatwg.org/#concept-document-window
-    KRYS_NODISCARD dom::Document *Document() const noexcept;
+    KRYS_NODISCARD boo::Document *Document() const noexcept;
 
     /// @brief The frame showing the window's document (its navigable), if any.
     KRYS_NODISCARD LocalFrame *Frame() const noexcept;
@@ -150,12 +150,12 @@ namespace krys::boo
     /// their `name`, and HTML elements by their ID): the element if there's one, an `HTMLCollection` of them
     /// if there are several, nothing if there are none.
     /// @see https://html.spec.whatwg.org/#dom-window-nameditem
-    KRYS_NODISCARD Maybe<Variant<RefPtr<dom::Element>, RefPtr<dom::HTMLCollection>>>
-      NamedItem(dom::DOMStringView name) const noexcept;
+    KRYS_NODISCARD Maybe<Variant<RefPtr<Element>, RefPtr<dom::HTMLCollection>>>
+      NamedItem(DOMStringView name) const noexcept;
 
     /// @brief The names `NamedItem` finds something for, in tree order.
     /// @see https://html.spec.whatwg.org/#named-access-on-the-window-object
-    KRYS_NODISCARD List<dom::DOMString> SupportedPropertyNames() const noexcept;
+    KRYS_NODISCARD List<DOMString> SupportedPropertyNames() const noexcept;
 
 #pragma endregion
 
@@ -171,7 +171,7 @@ namespace krys::boo
     /// @brief A new `MediaQueryList` for @p query, evaluated against the window's document; null if the
     /// document has been destroyed.
     /// @see https://drafts.csswg.org/cssom-view/#dom-window-matchmedia
-    KRYS_NODISCARD RefPtr<css::MediaQueryList> MatchMedia(dom::DOMStringView query) noexcept;
+    KRYS_NODISCARD RefPtr<MediaQueryList> MatchMedia(DOMStringView query) noexcept;
 
     /// @see https://drafts.csswg.org/cssom-view/#dom-window-visualviewport
     KRYS_NODISCARD VisualViewport &GetVisualViewport() const noexcept;
@@ -310,24 +310,24 @@ namespace krys::boo
     /// @brief The resolved values of @p element's properties, or of its pseudo-element @p pseudoElement (such
     /// as `::before`).
     /// @see https://drafts.csswg.org/cssom/#dom-window-getcomputedstyle
-    KRYS_NODISCARD static Ref<css::CSSStyleDeclaration>
-      GetComputedStyle(dom::Element &element, const css::CSSOMString &pseudoElement = {}) noexcept;
+    KRYS_NODISCARD static Ref<CSSStyleDeclaration>
+      GetComputedStyle(Element &element, const CSSOMString &pseudoElement = {}) noexcept;
 
     /// @brief The document's selection, while the window's document is its frame's.
     /// @see https://w3c.github.io/selection-api/#dom-window-getselection
     KRYS_NODISCARD DOMSelection *GetSelection() const noexcept;
 
   protected:
-    void DidAddEventListener(const dom::EventListener &listener) noexcept final;
+    void DidAddEventListener(const EventListener &listener) noexcept final;
 
   private:
     /// @brief Whether @p element is a named object of the window with the name @p name.
-    KRYS_NODISCARD static bool IsNamedObject(const dom::Element &element, dom::DOMStringView name) noexcept;
+    KRYS_NODISCARD static bool IsNamedObject(const Element &element, DOMStringView name) noexcept;
   };
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::LocalDOMWindow)
-  static bool IsType(const krys::boo::dom::EventTarget &target) noexcept
+  static bool IsType(const krys::boo::EventTarget &target) noexcept
   {
     return target.IsWindow();
   }

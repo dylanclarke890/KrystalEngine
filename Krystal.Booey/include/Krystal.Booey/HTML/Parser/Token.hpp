@@ -85,17 +85,17 @@ namespace krys::boo::html
     /// AdjustForeignAttributes() in the tree builder; checked when creating elements.
     ParsedAttributeFlags Flags {ParsedAttributeFlags::None};
 
-    dom::DOMStringView NameView() const noexcept
+    DOMStringView NameView() const noexcept
     {
-      return dom::DOMStringView(Name.begin(), Name.end());
+      return DOMStringView(Name.begin(), Name.end());
     }
 
-    dom::DOMStringView ValueView() const noexcept
+    DOMStringView ValueView() const noexcept
     {
-      return dom::DOMStringView(Value.begin(), Value.end());
+      return DOMStringView(Value.begin(), Value.end());
     }
 
-    void SetName(dom::DOMStringView characters) noexcept
+    void SetName(DOMStringView characters) noexcept
     {
       Name.clear();
       Name.append(characters.begin(), characters.end());
@@ -135,12 +135,12 @@ namespace krys::boo::html
       return _type;
     }
 
-    KRYS_NODISCARD dom::DOMStringView Name() const noexcept
+    KRYS_NODISCARD DOMStringView Name() const noexcept
     {
       krys_debug_assert(_type == TokenType::StartTag || _type == TokenType::EndTag
                         || _type == TokenType::DOCTYPE);
 
-      return dom::DOMStringView(_data.begin(), _data.end());
+      return DOMStringView(_data.begin(), _data.end());
     }
 
     KRYS_NODISCARD const DataBuffer &Data() const noexcept

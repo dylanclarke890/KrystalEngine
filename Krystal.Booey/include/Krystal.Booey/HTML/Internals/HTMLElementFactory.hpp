@@ -6,15 +6,15 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
+  class HTMLElement;
 }
 
 namespace krys::boo::html
 {
   class CustomElementRegistry;
-  class HTMLElement;
 
   class HTMLElementFactory
   {
@@ -22,7 +22,6 @@ namespace krys::boo::html
     /// @brief An element of the element interface for @p elementName in the HTML namespace, or null if it
     /// has none (a custom element name, or an unknown element).
     /// @see https://html.spec.whatwg.org/#referenced
-    KRYS_NODISCARD static RefPtr<HTMLElement> TryCreate(dom::Document &document,
-                                                        TagName elementName) noexcept;
+    KRYS_NODISCARD static RefPtr<HTMLElement> TryCreate(Document &document, TagName elementName) noexcept;
   };
 }

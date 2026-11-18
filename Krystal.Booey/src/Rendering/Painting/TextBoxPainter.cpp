@@ -910,10 +910,9 @@ namespace krys::boo
                                                                  const RenderStyle &styleToUse) noexcept
   {
     using Flag = style::TextDecorationLine::Flag;
-    auto *element = DynamicDowncast<html::HTMLElement>(inlineBox.Renderer().GetElement());
+    auto *element = DynamicDowncast<HTMLElement>(inlineBox.Renderer().GetElement());
     if (element
-        && (Is<html::HTMLAnchorElement>(*element)
-            || element->TagQualifiedName().TagName() == html::TagName::font))
+        && (Is<HTMLAnchorElement>(*element) || element->TagQualifiedName().TagName() == html::TagName::font))
     {
       // <font> and <a> are always considered decorating boxes.
       return true;

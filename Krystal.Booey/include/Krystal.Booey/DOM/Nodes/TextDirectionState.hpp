@@ -30,10 +30,13 @@
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
+}
 
+namespace krys::boo::dom
+{
   /// @brief The state of an element's `dir` attribute.
   /// @see https://html.spec.whatwg.org/#attr-dir
   enum class TextDirectionState : uint8

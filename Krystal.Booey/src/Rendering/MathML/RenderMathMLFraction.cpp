@@ -41,7 +41,7 @@ namespace krys::boo
 {
   using MathConstant = OpenTypeMathData::MathConstant;
 
-  RenderMathMLFraction::RenderMathMLFraction(mathml::MathMLFractionElement &element,
+  RenderMathMLFraction::RenderMathMLFraction(boo::MathMLFractionElement &element,
                                              RenderStyle &&style) noexcept
       : RenderMathMLRow(Type::MathMLFraction, element, krys::move(style))
   {
@@ -213,9 +213,9 @@ namespace krys::boo
     return mathMLBlock ? mathMLBlock->UnembellishedOperator() : nullptr;
   }
 
-  mathml::MathMLFractionElement &RenderMathMLFraction::GetElement() const noexcept
+  boo::MathMLFractionElement &RenderMathMLFraction::GetElement() const noexcept
   {
-    return static_cast<mathml::MathMLFractionElement &>(NodeForNonAnonymous());
+    return static_cast<boo::MathMLFractionElement &>(NodeForNonAnonymous());
   }
 
   void RenderMathMLFraction::ComputePreferredLogicalWidths() noexcept

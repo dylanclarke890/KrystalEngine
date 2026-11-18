@@ -48,16 +48,16 @@ namespace krys::boo::style
   /// @brief An element, or one of its pseudo-elements: something that is styled.
   struct Styleable
   {
-    dom::Element &Element;
+    boo::Element &Element;
     Maybe<style::PseudoElementIdentifier> PseudoElementIdentifier;
 
-    Styleable(dom::Element &element,
+    Styleable(boo::Element &element,
               const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
         : Element(element), PseudoElementIdentifier(pseudoElementIdentifier)
     {
     }
 
-    KRYS_NODISCARD static const Styleable FromElement(dom::Element &element) noexcept
+    KRYS_NODISCARD static const Styleable FromElement(boo::Element &element) noexcept
     {
       return Styleable(element, null);
     }
@@ -70,7 +70,7 @@ namespace krys::boo::style
       return &Element == &other.Element && PseudoElementIdentifier == other.PseudoElementIdentifier;
     }
 
-    KRYS_NODISCARD Ref<dom::Element> ProtectedElement() const noexcept
+    KRYS_NODISCARD Ref<boo::Element> ProtectedElement() const noexcept
     {
       return ShareRef(Element);
     }
@@ -234,7 +234,7 @@ namespace krys::boo::style
   class WeakStyleable
   {
   private:
-    WeakPtr<dom::Element> _element;
+    WeakPtr<boo::Element> _element;
     Maybe<style::PseudoElementIdentifier> _pseudoElementIdentifier;
 
   public:
@@ -269,7 +269,7 @@ namespace krys::boo::style
       return Styleable(*_element, _pseudoElementIdentifier);
     }
 
-    KRYS_NODISCARD const WeakPtr<dom::Element> &GetElement() const noexcept
+    KRYS_NODISCARD const WeakPtr<boo::Element> &GetElement() const noexcept
     {
       return _element;
     }

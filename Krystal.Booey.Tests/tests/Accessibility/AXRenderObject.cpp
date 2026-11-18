@@ -82,7 +82,7 @@ namespace krys::boo::ax::tests
                    u8"<div id=aria role=list><div role=listitem>A</div></div>"
                    u8"<div id=empty role=list></div>"
                    u8"<dl id=dl><dt>A</dt><dd>B</dd></dl>");
-    auto roleOf = [&](dom::DOMStringView id)
+    auto roleOf = [&](DOMStringView id)
     {
       auto &object = page.Object(id);
       (void)object.Children();
@@ -157,7 +157,7 @@ namespace krys::boo::ax::tests
     CHECK(page.Object(u8"text").ActionElement() == nullptr);
     CHECK(page.Object(u8"empty").IsIgnored());
 
-    auto listener = page.ById(u8"clickable").AddEventListener(event_names::Click, [](dom::Event &) {});
+    auto listener = page.ById(u8"clickable").AddEventListener(event_names::Click, [](Event &) {});
     // The clickable element is what pressing its descendants presses, and keeps empty blocks in the tree.
     CHECK(page.Object(u8"text").ActionElement() == &page.ById(u8"clickable"));
     CHECK(page.Object(u8"text").ClickableSelfOrAncestor() == &page.Object(u8"clickable"));

@@ -49,7 +49,7 @@ namespace krys::boo::html
       return false;
     }
 
-    KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
+    KRYS_NODISCARD DOMStringView FormControlType() const noexcept final
     {
       return input_type_names::Password;
     }

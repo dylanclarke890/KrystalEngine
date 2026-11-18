@@ -36,13 +36,13 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   StylePropertyMapReadOnly::~StylePropertyMapReadOnly() noexcept = default;
 
-  RefPtr<CSSStyleValue> StylePropertyMapReadOnly::ReifyValue(dom::Document &document,
-                                                             const RefPtr<Value> &value,
-                                                             Maybe<PropertyId> property) noexcept
+  RefPtr<CSSStyleValue> StylePropertyMapReadOnly::ReifyValue(boo::Document &document,
+                                                             const RefPtr<css::Value> &value,
+                                                             Maybe<css::PropertyId> property) noexcept
   {
     if (!value)
     {
@@ -56,21 +56,21 @@ namespace krys::boo::css
     return result.ReleaseValue();
   }
 
-  List<Ref<CSSStyleValue>> StylePropertyMapReadOnly::ReifyValueToList(dom::Document &document,
-                                                                      RefPtr<Value> value,
-                                                                      Maybe<PropertyId> property) noexcept
+  List<Ref<CSSStyleValue>>
+    StylePropertyMapReadOnly::ReifyValueToList(boo::Document &document, RefPtr<css::Value> value,
+                                               Maybe<css::PropertyId> property) noexcept
   {
     List<Ref<CSSStyleValue>> values;
     if (!value)
     {
       return values;
     }
-    const auto *list = DynamicDowncast<ValueList>(*value);
-    if (list && property && Property::IsListValuedProperty(*property))
+    const auto *list = DynamicDowncast<css::ValueList>(*value);
+    if (list && property && css::Property::IsListValuedProperty(*property))
     {
       for (const auto &item : *list)
       {
-        if (auto reified = ReifyValue(document, ShareRefPtr(const_cast<Value *>(&item)), property))
+        if (auto reified = ReifyValue(document, ShareRefPtr(const_cast<css::Value *>(&item)), property))
         {
           values.emplace_back(krys::move(reified));
         }
@@ -84,8 +84,7 @@ namespace krys::boo::css
     return values;
   }
 
-  dom::ExceptionOr<RefPtr<CSSStyleValue>>
-    StylePropertyMapReadOnly::Get(CSSOMStringView property) const noexcept
+  ExceptionOr<RefPtr<CSSStyleValue>> StylePropertyMapReadOnly::Get(CSSOMStringView property) const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymapreadonly-get
     auto *document = Document();
@@ -94,16 +93,16 @@ namespace krys::boo::css
       return RefPtr<CSSStyleValue>();
     }
 
-    if (IsCustomPropertyName(property))
+    if (css::IsCustomPropertyName(property))
     {
-      return ReifyValue(*document, CustomPropertyValue(CSSOMStringAtom(property)), PropertyId::Custom);
+      return ReifyValue(*document, CustomPropertyValue(CSSOMStringAtom(property)), css::PropertyId::Custom);
     }
 
-    auto propertyId = PropertyIdFromName(text::ToASCIILower(property));
-    if (propertyId == PropertyId::Invalid
-        || !IsExposed(propertyId, ParserContext(*document).PropertySettings))
+    auto propertyId = css::PropertyIdFromName(text::ToASCIILower(property));
+    if (propertyId == css::PropertyId::Invalid
+        || !IsExposed(propertyId, css::ParserContext(*document).PropertySettings))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     // A shorthand's value is its serialisation.
@@ -116,7 +115,7 @@ namespace krys::boo::css
     return ReifyValue(*document, PropertyValue(propertyId), propertyId);
   }
 
-  dom::ExceptionOr<List<Ref<CSSStyleValue>>>
+  ExceptionOr<List<Ref<CSSStyleValue>>>
     StylePropertyMapReadOnly::GetAll(CSSOMStringView property) const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymapreadonly-getall
@@ -126,16 +125,17 @@ namespace krys::boo::css
       return List<Ref<CSSStyleValue>> {};
     }
 
-    if (IsCustomPropertyName(property))
+    if (css::IsCustomPropertyName(property))
     {
-      return ReifyValueToList(*document, CustomPropertyValue(CSSOMStringAtom(property)), PropertyId::Custom);
+      return ReifyValueToList(*document, CustomPropertyValue(CSSOMStringAtom(property)),
+                              css::PropertyId::Custom);
     }
 
-    auto propertyId = PropertyIdFromName(text::ToASCIILower(property));
-    if (propertyId == PropertyId::Invalid
-        || !IsExposed(propertyId, ParserContext(*document).PropertySettings))
+    auto propertyId = css::PropertyIdFromName(text::ToASCIILower(property));
+    if (propertyId == css::PropertyId::Invalid
+        || !IsExposed(propertyId, css::ParserContext(*document).PropertySettings))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     if (IsShorthand(propertyId))
@@ -152,7 +152,7 @@ namespace krys::boo::css
     return ReifyValueToList(*document, PropertyValue(propertyId), propertyId);
   }
 
-  dom::ExceptionOr<bool> StylePropertyMapReadOnly::Has(CSSOMStringView property) const noexcept
+  ExceptionOr<bool> StylePropertyMapReadOnly::Has(CSSOMStringView property) const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymapreadonly-has
     auto result = Get(property);

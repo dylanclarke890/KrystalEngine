@@ -10,10 +10,13 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
+}
 
+namespace krys::boo::dom
+{
   /// @brief A timer started from C++ in a document: it runs its action as a task on the timer task source,
   /// once or every interval, until it's stopped. It waits while its document is suspended, keeping the time
   /// it had left, and stops for good when its document leaves its frame.

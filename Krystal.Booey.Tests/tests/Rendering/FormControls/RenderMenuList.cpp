@@ -100,7 +100,7 @@ namespace krys::boo::layout::tests
                           u8"<select id=s><option>Apple</option><option id=b>Banana split</option></select>",
                           krys::move(chromeClient));
 
-    auto &select = Downcast<html::HTMLSelectElement>(fixture.ById(u8"s"));
+    auto &select = Downcast<HTMLSelectElement>(fixture.ById(u8"s"));
     auto &menuList = Downcast<RenderMenuList>(*select.Renderer());
     CHECK(menuList.Text() == u8"Apple");
 
@@ -136,7 +136,7 @@ layer at (0,0) size 400x23
                           u8"<optgroup label=Group><option>Cherry</option></optgroup><hr></select>",
                           krys::move(chromeClient));
 
-    auto &select = Downcast<html::HTMLSelectElement>(fixture.ById(u8"s"));
+    auto &select = Downcast<HTMLSelectElement>(fixture.ById(u8"s"));
     auto &menuList = Downcast<RenderMenuList>(*select.Renderer());
     auto &handler = fixture.Frame->GetEventHandler();
     auto inputs = fixture.Listen(event_names::Input);

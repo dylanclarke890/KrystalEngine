@@ -17,12 +17,12 @@ namespace krys::boo::tests
       {
       }
 
-      KRYS_NODISCARD html::HTMLCanvasElement &Canvas(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD HTMLCanvasElement &Canvas(DOMStringView id) noexcept
       {
-        return Downcast<html::HTMLCanvasElement>(ById(id));
+        return Downcast<HTMLCanvasElement>(ById(id));
       }
 
-      KRYS_NODISCARD RenderHTMLCanvas &Renderer(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD RenderHTMLCanvas &Renderer(DOMStringView id) noexcept
       {
         (void)Document->UpdateLayout();
         auto *renderer = DynamicDowncast<RenderHTMLCanvas>(ById(id).Renderer());

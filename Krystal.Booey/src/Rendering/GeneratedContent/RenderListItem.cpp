@@ -43,18 +43,18 @@ namespace krys::boo
       return it != map.end() ? it->second : CounterDirectives {};
     }
 
-    KRYS_NODISCARD html::HTMLOListElement *AsOrderedList(dom::Element *element) noexcept
+    KRYS_NODISCARD HTMLOListElement *AsOrderedList(Element *element) noexcept
     {
-      auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
-      return htmlElement ? DynamicDowncast<html::HTMLOListElement>(*htmlElement) : nullptr;
+      auto *htmlElement = DynamicDowncast<HTMLElement>(element);
+      return htmlElement ? DynamicDowncast<HTMLOListElement>(*htmlElement) : nullptr;
     }
 
     // Returns the enclosing list with respect to the DOM order.
     // See https://html.spec.whatwg.org/#list-owner.
-    KRYS_NODISCARD dom::Element *EnclosingList(const RenderListItem &listItem) noexcept
+    KRYS_NODISCARD Element *EnclosingList(const RenderListItem &listItem) noexcept
     {
       auto *element = listItem.GetElement();
-      auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(element);
+      auto *pseudoElement = DynamicDowncast<PseudoElement>(element);
       auto *parent = pseudoElement ? pseudoElement->HostElement() : element->ParentElement();
       for (auto *ancestor = parent; ancestor; ancestor = ancestor->ParentElement())
       {
@@ -71,10 +71,9 @@ namespace krys::boo
       return parent;
     }
 
-    KRYS_NODISCARD RenderListItem *NextListItemHelper(const dom::Element &list,
-                                                      const dom::Element &element) noexcept
+    KRYS_NODISCARD RenderListItem *NextListItemHelper(const Element &list, const Element &element) noexcept
     {
-      const dom::Element *current = &element;
+      const Element *current = &element;
       auto advance = [&]
       {
         if (!current->RenderOrDisplayContentsStyle())
@@ -115,20 +114,19 @@ namespace krys::boo
       return nullptr;
     }
 
-    KRYS_NODISCARD RenderListItem *NextListItem(const dom::Element &list, const RenderListItem &item) noexcept
+    KRYS_NODISCARD RenderListItem *NextListItem(const Element &list, const RenderListItem &item) noexcept
     {
       return NextListItemHelper(list, *item.GetElement());
     }
 
-    KRYS_NODISCARD RenderListItem *FirstListItem(const dom::Element &list) noexcept
+    KRYS_NODISCARD RenderListItem *FirstListItem(const Element &list) noexcept
     {
       return NextListItemHelper(list, list);
     }
 
-    KRYS_NODISCARD RenderListItem *PreviousListItem(const dom::Element &list,
-                                                    const RenderListItem &item) noexcept
+    KRYS_NODISCARD RenderListItem *PreviousListItem(const Element &list, const RenderListItem &item) noexcept
     {
-      const dom::Element *current = item.GetElement();
+      const Element *current = item.GetElement();
       auto advance = [&]
       {
         current = dom::TreeQueries::PreviousElementIncludingPseudo(*current, &list);
@@ -164,7 +162,7 @@ namespace krys::boo
     }
   }
 
-  RenderListItem::RenderListItem(dom::Element &element, RenderStyle &&style) noexcept
+  RenderListItem::RenderListItem(Element &element, RenderStyle &&style) noexcept
       : RenderBlockFlow(Type::ListItem, element, krys::move(style))
   {
     krys_debug_assert(IsRenderListItem());
@@ -189,7 +187,7 @@ namespace krys::boo
 
   RenderStyle RenderListItem::ComputeMarkerStyle() const noexcept
   {
-    if (!Is<dom::PseudoElement>(GetElement()))
+    if (!Is<PseudoElement>(GetElement()))
     {
       if (auto *markerStyle = GetCachedPseudoStyle({PseudoElementType::Marker}, &Style()))
       {
@@ -215,13 +213,13 @@ namespace krys::boo
     return markerStyle;
   }
 
-  bool IsHTMLListElement(const dom::Node &node) noexcept
+  bool IsHTMLListElement(const Node &node) noexcept
   {
-    auto *element = DynamicDowncast<html::HTMLElement>(node);
-    return element && (Is<html::HTMLUListElement>(*element) || Is<html::HTMLOListElement>(*element));
+    auto *element = DynamicDowncast<HTMLElement>(node);
+    return element && (Is<HTMLUListElement>(*element) || Is<HTMLOListElement>(*element));
   }
 
-  void RenderListItem::UpdateItemValuesForOrderedList(const html::HTMLOListElement &list) noexcept
+  void RenderListItem::UpdateItemValuesForOrderedList(const HTMLOListElement &list) noexcept
   {
     for (auto *listItem = FirstListItem(list); listItem; listItem = NextListItem(list, *listItem))
     {
@@ -229,7 +227,7 @@ namespace krys::boo
     }
   }
 
-  uint32 RenderListItem::ItemCountForOrderedList(const html::HTMLOListElement &list) noexcept
+  uint32 RenderListItem::ItemCountForOrderedList(const HTMLOListElement &list) noexcept
   {
     uint32 itemCount = 0;
     for (auto *listItem = FirstListItem(list); listItem; listItem = NextListItem(list, *listItem))

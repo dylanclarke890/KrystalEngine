@@ -161,11 +161,10 @@ namespace krys::boo
     RenderObject *currentParent = parent;
     while (currentParent)
     {
-      if (RefPtr textContentElement =
-            ShareRefPtr(svg::SVGTextContentElement::ElementFromRenderer(currentParent)))
+      if (RefPtr textContentElement = ShareRefPtr(SVGTextContentElement::ElementFromRenderer(currentParent)))
       {
-        svg::SVGLengthContext lengthContext(textContentElement.get());
-        if (textContentElement->LengthAdjust() == svg::SVGLengthAdjustSpacing
+        SVGLengthContext lengthContext(textContentElement.get());
+        if (textContentElement->LengthAdjust() == SVGLengthAdjustSpacing
             && textContentElement->SpecifiedTextLength().Value(lengthContext) > 0)
         {
           return true;
@@ -198,7 +197,7 @@ namespace krys::boo
     const auto &startOffset = textPath.StartOffset();
     _textPathLength = _textPath.Length();
 
-    if (textPath.StartOffset().LengthType() == svg::SVGLengthType::Percentage)
+    if (textPath.StartOffset().LengthType() == SVGLengthType::Percentage)
     {
       _textPathStartOffset = startOffset.ValueAsPercentage() * _textPathLength;
     }
@@ -223,13 +222,13 @@ namespace krys::boo
     _textPathCurrentOffset = _textPathStartOffset;
 
     // Eventually handle textLength adjustments.
-    RefPtr textContentElement = ShareRefPtr(svg::SVGTextContentElement::ElementFromRenderer(&textPath));
+    RefPtr textContentElement = ShareRefPtr(SVGTextContentElement::ElementFromRenderer(&textPath));
     if (!textContentElement)
     {
       return;
     }
 
-    svg::SVGLengthContext lengthContext(textContentElement.get());
+    SVGLengthContext lengthContext(textContentElement.get());
     float desiredTextLength = textContentElement->SpecifiedTextLength().Value(lengthContext);
     if (!desiredTextLength)
     {
@@ -239,7 +238,7 @@ namespace krys::boo
     float totalLength = lineLayout._chunkLayoutBuilder.TotalLength();
     uint32 totalCharacters = lineLayout._chunkLayoutBuilder.TotalCharacters();
 
-    if (textContentElement->LengthAdjust() == svg::SVGLengthAdjustSpacing)
+    if (textContentElement->LengthAdjust() == SVGLengthAdjustSpacing)
     {
       if (totalCharacters > 1)
       {
@@ -268,7 +267,7 @@ namespace krys::boo
     auto &text = textBox->Renderer();
     krys_debug_assert(text.Parent());
     krys_debug_assert(text.Parent()->GetElement());
-    krys_debug_assert(Is<svg::SVGElement>(*text.Parent()->GetElement()));
+    krys_debug_assert(Is<SVGElement>(*text.Parent()->GetElement()));
 
     const RenderStyle &style = text.Style();
 
@@ -544,13 +543,13 @@ namespace krys::boo
         }
 
         RefPtr textContentElement =
-          ShareRefPtr(svg::SVGTextContentElement::ElementFromRenderer(&previousBoxOnLine->Renderer()));
+          ShareRefPtr(SVGTextContentElement::ElementFromRenderer(&previousBoxOnLine->Renderer()));
         if (!textContentElement)
         {
           return;
         }
 
-        svg::SVGLengthContext lengthContext(textContentElement.get());
+        SVGLengthContext lengthContext(textContentElement.get());
         auto specifiedTextLength = textContentElement->SpecifiedTextLength().Value(lengthContext);
 
         if (_lastChunkIsVerticalText)

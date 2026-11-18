@@ -61,7 +61,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool ContainsElement(const List<style::WeakStyleable> &timelineScopeElements,
-                                        const dom::Element *matchElement) noexcept
+                                        const Element *matchElement) noexcept
     {
       return std::ranges::any_of(timelineScopeElements, [matchElement](const style::WeakStyleable &entry)
                                  { return entry.GetElement().get() == matchElement; });
@@ -105,7 +105,7 @@ namespace krys::boo
   }
 
   ScrollTimeline &
-    StyleOriginatedTimelinesController::InactiveNamedTimeline(const css::CSSOMStringAtom &name) noexcept
+    StyleOriginatedTimelinesController::InactiveNamedTimeline(const CSSOMStringAtom &name) noexcept
   {
     auto &timelines = TimelinesForName(name);
     timelines.push_back(ScrollTimeline::CreateInactiveStyleOriginatedTimeline(name));
@@ -200,13 +200,14 @@ namespace krys::boo
   }
 
   List<Ref<ScrollTimeline>> &
-    StyleOriginatedTimelinesController::TimelinesForName(const css::CSSOMStringAtom &name) noexcept
+    StyleOriginatedTimelinesController::TimelinesForName(const CSSOMStringAtom &name) noexcept
   {
     return _nameToTimelineMap[name];
   }
 
-  void StyleOriginatedTimelinesController::UpdateTimelineForTimelineScope(
-    const Ref<ScrollTimeline> &timeline, const css::CSSOMStringAtom &name) noexcept
+  void
+    StyleOriginatedTimelinesController::UpdateTimelineForTimelineScope(const Ref<ScrollTimeline> &timeline,
+                                                                       const CSSOMStringAtom &name) noexcept
   {
     List<style::Styleable> matchedTimelineScopeElements;
     auto timelineElement = OriginatingElementExcludingTimelineScope(timeline).GetStyleable();
@@ -247,7 +248,7 @@ namespace krys::boo
     }
   }
 
-  void StyleOriginatedTimelinesController::RegisterNamedScrollTimeline(const css::CSSOMStringAtom &name,
+  void StyleOriginatedTimelinesController::RegisterNamedScrollTimeline(const CSSOMStringAtom &name,
                                                                        const style::Styleable &source,
                                                                        ScrollAxis axis) noexcept
   {
@@ -276,7 +277,7 @@ namespace krys::boo
   }
 
   void StyleOriginatedTimelinesController::UpdateCSSAnimationsAssociatedWithNamedTimeline(
-    const css::CSSOMStringAtom &name) noexcept
+    const CSSOMStringAtom &name) noexcept
   {
     // First, we need to gather all CSS Animations attached to existing timelines with the specified name. We
     // do this prior to updating animation-to-timeline relationship because this could mutate the timeline's
@@ -351,7 +352,7 @@ namespace krys::boo
   }
 
   void StyleOriginatedTimelinesController::RegisterNamedViewTimeline(
-    const css::CSSOMStringAtom &name, const style::Styleable &subject, ScrollAxis axis,
+    const CSSOMStringAtom &name, const style::Styleable &subject, ScrollAxis axis,
     const style::ViewTimelineInsetItem &insets) noexcept
   {
     auto &timelines = TimelinesForName(name);
@@ -389,7 +390,7 @@ namespace krys::boo
     }
   }
 
-  void StyleOriginatedTimelinesController::UnregisterNamedTimeline(const css::CSSOMStringAtom &name,
+  void StyleOriginatedTimelinesController::UnregisterNamedTimeline(const CSSOMStringAtom &name,
                                                                    const style::Styleable &styleable) noexcept
   {
     auto it = _nameToTimelineMap.find(name);

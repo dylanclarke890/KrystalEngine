@@ -29,7 +29,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyTraits.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGValueProperty.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief Animates a presentation attribute whose value is a primitive (a colour, number or string).
   template <typename TProperty, typename TAnimationFunction>
@@ -47,15 +47,15 @@ namespace krys::boo::svg
 
   public:
     KRYS_NODISCARD static Ref<SVGPrimitivePropertyAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGProperty> property, AnimationMode animationMode,
-             CalcMode calcMode, bool isAccumulated, bool isAdditive) noexcept
+      Create(const QualifiedName &attributeName, Ref<SVGProperty> property, svg::AnimationMode animationMode,
+             svg::CalcMode calcMode, bool isAccumulated, bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGPrimitivePropertyAnimator(attributeName, krys::move(property), animationMode,
                                                         calcMode, isAccumulated, isAdditive));
     }
 
     template <typename... TArgs>
-    SVGPrimitivePropertyAnimator(const dom::QualifiedName &attributeName, const Ref<SVGProperty> &property,
+    SVGPrimitivePropertyAnimator(const QualifiedName &attributeName, const Ref<SVGProperty> &property,
                                  TArgs &&...arguments) noexcept
         : Base(attributeName, std::forward<TArgs>(arguments)...),
           _property(ShareRef(static_cast<ValuePropertyType &>(*property)))
@@ -64,7 +64,7 @@ namespace krys::boo::svg
 
     void Start(SVGElement &targetElement) noexcept override
     {
-      dom::DOMString baseValue =
+      DOMString baseValue =
         ComputeCSSPropertyValue(targetElement, css::PropertyIdFromName(_attributeName.LocalName().View()));
       _property->SetValue(SVGPropertyTraits<TProperty>::FromString(targetElement, baseValue));
     }

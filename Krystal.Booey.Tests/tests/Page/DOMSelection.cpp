@@ -15,11 +15,11 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief Counts the events it hears.
-    struct EventCounter : public dom::EventListenerCallback
+    struct EventCounter : public EventListenerCallback
     {
       int32 Count {0};
 
-      void HandleEvent(dom::Event &) noexcept override
+      void HandleEvent(Event &) noexcept override
       {
         ++Count;
       }
@@ -46,9 +46,9 @@ namespace krys::boo::tests
         return *Document->GetSelection();
       }
 
-      KRYS_NODISCARD dom::Text &TextIn(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD Text &TextIn(DOMStringView id) noexcept
       {
-        return Downcast<dom::Text>(*ById(id).FirstChild());
+        return Downcast<Text>(*ById(id).FirstChild());
       }
     };
   }
@@ -125,7 +125,7 @@ namespace krys::boo::tests
       REQUIRE(!selection.CollapseToStart().HasException());
       CHECK(selection.AnchorOffset() == 4);
       selection.Empty();
-      CHECK(selection.CollapseToStart() == dom::ExceptionCode::InvalidStateError);
+      CHECK(selection.CollapseToStart() == ExceptionCode::InvalidStateError);
     }
 
     SECTION("selectAllChildren and modify")
@@ -151,12 +151,12 @@ namespace krys::boo::tests
 
     SECTION("Errors")
     {
-      CHECK(selection.Collapse(&text, 100) == dom::ExceptionCode::IndexSizeError);
-      CHECK(selection.Extend(text, 1) == dom::ExceptionCode::InvalidStateError);
-      CHECK(selection.GetRangeAt(0) == dom::ExceptionCode::IndexSizeError);
-      auto other = CreateRef<dom::Range>(dom::BoundaryPoint {ShareRef<dom::Node>(text), 0},
-                                         dom::BoundaryPoint {ShareRef<dom::Node>(text), 1});
-      CHECK(selection.RemoveRange(*other) == dom::ExceptionCode::NotFoundError);
+      CHECK(selection.Collapse(&text, 100) == ExceptionCode::IndexSizeError);
+      CHECK(selection.Extend(text, 1) == ExceptionCode::InvalidStateError);
+      CHECK(selection.GetRangeAt(0) == ExceptionCode::IndexSizeError);
+      auto other = CreateRef<dom::Range>(dom::BoundaryPoint {ShareRef<Node>(text), 0},
+                                         dom::BoundaryPoint {ShareRef<Node>(text), 1});
+      CHECK(selection.RemoveRange(*other) == ExceptionCode::NotFoundError);
     }
   }
 
@@ -192,15 +192,15 @@ namespace krys::boo::tests
 
     SECTION("addRange, removeRange and deleteFromDocument")
     {
-      auto liveRange = CreateRef<dom::Range>(dom::BoundaryPoint {ShareRef<dom::Node>(text), 4},
-                                             dom::BoundaryPoint {ShareRef<dom::Node>(text), 10});
+      auto liveRange = CreateRef<dom::Range>(dom::BoundaryPoint {ShareRef<Node>(text), 4},
+                                             dom::BoundaryPoint {ShareRef<Node>(text), 10});
       selection.AddRange(*liveRange);
       CHECK(selection.RangeCount() == 1);
       CHECK(selection.ToString() == u8"quick ");
 
       // A selection that's already there isn't replaced.
-      auto second = CreateRef<dom::Range>(dom::BoundaryPoint {ShareRef<dom::Node>(text), 0},
-                                          dom::BoundaryPoint {ShareRef<dom::Node>(text), 3});
+      auto second = CreateRef<dom::Range>(dom::BoundaryPoint {ShareRef<Node>(text), 0},
+                                          dom::BoundaryPoint {ShareRef<Node>(text), 3});
       selection.AddRange(*second);
       CHECK(selection.ToString() == u8"quick ");
 
@@ -254,7 +254,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "DOMSelection: a document without a frame has none",
                    "[Page][DOMSelection]")
   {
-    auto document = CreateRef<dom::Document>();
+    auto document = CreateRef<Document>();
     CHECK(document->GetSelection() == nullptr);
   }
 }

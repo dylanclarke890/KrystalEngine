@@ -39,10 +39,10 @@
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLOptGroupElement::HTMLOptGroupElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::OptGroup)
+  HTMLOptGroupElement::HTMLOptGroupElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::OptGroup)
   {
   }
 
@@ -50,27 +50,27 @@ namespace krys::boo::html
 
   bool HTMLOptGroupElement::Disabled() const noexcept
   {
-    return Reflect<bool>(*this, u8"disabled");
+    return html::Reflect<bool>(*this, u8"disabled");
   }
 
   void HTMLOptGroupElement::Disabled(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"disabled", krys::move(value));
+    html::Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 
-  dom::DOMString HTMLOptGroupElement::Label() const noexcept
+  DOMString HTMLOptGroupElement::Label() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"label").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"label").value_or(u8"");
   }
 
-  void HTMLOptGroupElement::Label(dom::DOMString value) noexcept
+  void HTMLOptGroupElement::Label(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"label", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"label", krys::move(value));
   }
 
 #pragma endregion
 
-  Ref<HTMLOptGroupElement> HTMLOptGroupElement::Create(dom::Document &document) noexcept
+  Ref<HTMLOptGroupElement> HTMLOptGroupElement::Create(Document &document) noexcept
   {
     auto optgroup = CreateRef<HTMLOptGroupElement>(document);
     optgroup->EnsureUserAgentShadowRoot();
@@ -78,14 +78,14 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#the-select-element-2
-  void HTMLOptGroupElement::DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept
+  void HTMLOptGroupElement::DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept
   {
     auto &document = NodeDocument();
     auto legendSlot = dom::ElementFactory::CreateHTMLElement<HTMLSlotElement>(document, u8"slot");
     _legendSlot = CreateWeakPtr(legendSlot.get());
     auto labelElement = dom::ElementFactory::CreateHTMLElement<HTMLDivElement>(document, u8"div");
     labelElement->SetUserAgentPart(css::user_agent_parts::InternalOptgroupLabel());
-    _labelElement = CreateWeakPtr<dom::Element>(labelElement.get());
+    _labelElement = CreateWeakPtr<Element>(labelElement.get());
     (void)legendSlot->AppendChild(*labelElement);
     (void)root.AppendChild(*legendSlot);
     auto contentsSlot = dom::ElementFactory::CreateHTMLElement<HTMLSlotElement>(document, u8"slot");
@@ -93,7 +93,7 @@ namespace krys::boo::html
     (void)root.AppendChild(*contentsSlot);
   }
 
-  HTMLSlotElement *HTMLOptGroupElement::SlotForHostChild(const dom::Node &child) const noexcept
+  HTMLSlotElement *HTMLOptGroupElement::SlotForHostChild(const Node &child) const noexcept
   {
     krys_debug_assert(child.ParentNode() == this);
     if (Is<HTMLLegendElement>(child) && dom::TreeQueries::FirstElementChild(*this) == &child)
@@ -119,7 +119,7 @@ namespace krys::boo::html
     HTMLElement::OnChildrenChanged();
   }
 
-  bool HTMLOptGroupElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
+  bool HTMLOptGroupElement::ChildShouldCreateRenderer(const Node &child) const noexcept
   {
     if (&child != _labelElement.get())
     {
@@ -130,13 +130,13 @@ namespace krys::boo::html
     return select && select->ContentsUseBaseAppearance();
   }
 
-  dom::DOMString HTMLOptGroupElement::GroupLabelText() const noexcept
+  DOMString HTMLOptGroupElement::GroupLabelText() const noexcept
   {
     // FIXME: A legend first child's text (get an optgroup element's label), once there are customizable
     // selects.
     // Leading and trailing white space is ignored in options and optgroups, and the rest is collapsed.
     return infra::StringAlgorithms::StripAndCollapseASCIIWhitespace(
-      GetAttribute(u8"label").value_or(dom::DOMString()));
+      GetAttribute(u8"label").value_or(DOMString()));
   }
 
   bool HTMLOptGroupElement::AccessKeyAction(bool) noexcept
@@ -169,13 +169,13 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLOptGroupElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLOptGroupElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
     UpdateOwnerSelect();
   }
 
-  void HTMLOptGroupElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLOptGroupElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
     UpdateOwnerSelect();
@@ -203,16 +203,15 @@ namespace krys::boo::html
     select->SetRecalcListItems();
   }
 
-  void HTMLOptGroupElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                               Maybe<dom::DOMStringView> oldValue,
-                                               Maybe<dom::DOMStringView> value,
-                                               const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLOptGroupElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                               Maybe<DOMStringView> value,
+                                               const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 
     if (namespaceURI == null && localName == u8"label" && _labelElement)
     {
-      (void)_labelElement->TextContent(dom::DOMString(value.value_or(dom::DOMStringView())));
+      (void)_labelElement->TextContent(DOMString(value.value_or(DOMStringView())));
     }
 
     if (bool newDisabled = value.has_value();

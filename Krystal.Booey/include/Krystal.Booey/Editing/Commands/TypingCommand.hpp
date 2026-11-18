@@ -29,13 +29,10 @@
 #include "Krystal.Booey/Editing/Selection/TextGranularity.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 
-namespace krys::boo::dom
-{
-  class Event;
-}
-
 namespace krys::boo
 {
+  class Event;
+
   enum class TypingCommandOption : uint8
   {
     SelectInsertedText,
@@ -103,34 +100,33 @@ namespace krys::boo
     bool _triggeringEventIsUntrusted {false};
 
   public:
-    TypingCommand(dom::Document &document, Type commandType, utf8_stringview textToInsert,
-                  EnumSet<Option> options, TextGranularity granularity,
-                  TextCompositionType compositionType) noexcept;
+    TypingCommand(Document &document, Type commandType, utf8_stringview textToInsert, EnumSet<Option> options,
+                  TextGranularity granularity, TextCompositionType compositionType) noexcept;
 
-    static void DeleteSelection(dom::Document &document, EnumSet<Option> options = {},
+    static void DeleteSelection(Document &document, EnumSet<Option> options = {},
                                 TextCompositionType compositionType = TextCompositionType::None) noexcept;
 
     static void
-      DeleteKeyPressed(dom::Document &document, EnumSet<Option> options = {},
+      DeleteKeyPressed(Document &document, EnumSet<Option> options = {},
                        TextGranularity granularity = TextGranularity::CharacterGranularity) noexcept;
 
     static void
-      ForwardDeleteKeyPressed(dom::Document &document, EnumSet<Option> options = {},
+      ForwardDeleteKeyPressed(Document &document, EnumSet<Option> options = {},
                               TextGranularity granularity = TextGranularity::CharacterGranularity) noexcept;
 
-    static void InsertText(dom::Document &document, utf8_stringview text, dom::Event *triggeringEvent,
+    static void InsertText(Document &document, utf8_stringview text, Event *triggeringEvent,
                            EnumSet<Option> options,
                            TextCompositionType compositionType = TextCompositionType::None) noexcept;
 
-    static void InsertText(dom::Document &document, utf8_stringview text, dom::Event *triggeringEvent,
+    static void InsertText(Document &document, utf8_stringview text, Event *triggeringEvent,
                            const VisibleSelection &selectionForInsertion, EnumSet<Option> options,
                            TextCompositionType compositionType = TextCompositionType::None) noexcept;
 
-    static void InsertLineBreak(dom::Document &document, EnumSet<Option> options) noexcept;
+    static void InsertLineBreak(Document &document, EnumSet<Option> options) noexcept;
 
-    static void InsertParagraphSeparator(dom::Document &document, EnumSet<Option> options) noexcept;
+    static void InsertParagraphSeparator(Document &document, EnumSet<Option> options) noexcept;
 
-    static void CloseTyping(dom::Document &document) noexcept;
+    static void CloseTyping(Document &document) noexcept;
 
     void InsertText(utf8_stringview text, bool selectInsertedText) noexcept;
 
@@ -180,12 +176,12 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD static Ref<TypingCommand>
-      Create(dom::Document &document, Type command, utf8_stringview text = {}, EnumSet<Option> options = {},
+      Create(Document &document, Type command, utf8_stringview text = {}, EnumSet<Option> options = {},
              TextGranularity granularity = TextGranularity::CharacterGranularity,
              TextCompositionType compositionType = TextCompositionType::None) noexcept;
 
-    KRYS_NODISCARD static Ref<TypingCommand> Create(dom::Document &document, Type command,
-                                                    utf8_stringview text, EnumSet<Option> options,
+    KRYS_NODISCARD static Ref<TypingCommand> Create(Document &document, Type command, utf8_stringview text,
+                                                    EnumSet<Option> options,
                                                     TextCompositionType compositionType) noexcept;
 
     void SetSmartDelete(bool smartDelete) noexcept
@@ -204,7 +200,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD static RefPtr<TypingCommand>
-      LastTypingCommandIfStillOpenForTyping(dom::Document &document) noexcept;
+      LastTypingCommandIfStillOpenForTyping(Document &document) noexcept;
 
     void DoApply() noexcept final;
 
@@ -234,16 +230,16 @@ namespace krys::boo
       _shouldPreventSpellChecking = prevent;
     }
 
-    KRYS_NODISCARD dom::DOMString InputEventTypeName() const noexcept final;
+    KRYS_NODISCARD DOMString InputEventTypeName() const noexcept final;
 
     KRYS_NODISCARD bool IsInputMethodComposing() const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString InputEventData() const noexcept final;
+    KRYS_NODISCARD DOMString InputEventData() const noexcept final;
 
     KRYS_NODISCARD bool IsBeforeInputEventCancelable() const noexcept final;
 
     static void UpdateSelectionIfDifferentFromCurrentSelection(TypingCommand *typingCommand,
-                                                               dom::Document &document) noexcept;
+                                                               Document &document) noexcept;
 
     void UpdatePreservesTypingStyle(Type commandType) noexcept;
 

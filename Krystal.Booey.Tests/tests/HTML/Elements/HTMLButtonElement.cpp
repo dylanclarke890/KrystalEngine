@@ -20,17 +20,17 @@ namespace krys::boo::html::tests
 
   namespace
   {
-    KRYS_NODISCARD std::string Narrow(dom::DOMStringView string)
+    KRYS_NODISCARD std::string Narrow(DOMStringView string)
     {
       return std::string(reinterpret_cast<const char *>(string.data()), string.size());
     }
 
-    KRYS_NODISCARD std::string NarrowOrNull(const Maybe<dom::DOMString> &string)
+    KRYS_NODISCARD std::string NarrowOrNull(const Maybe<DOMString> &string)
     {
-      return string ? Narrow(dom::DOMStringView(*string)) : std::string("null");
+      return string ? Narrow(DOMStringView(*string)) : std::string("null");
     }
 
-    KRYS_NODISCARD std::string IdOf(const dom::Element *element)
+    KRYS_NODISCARD std::string IdOf(const boo::Element *element)
     {
       return element ? NarrowOrNull(element->GetAttribute(u8"id")) : std::string("null");
     }
@@ -40,17 +40,17 @@ namespace krys::boo::html::tests
     struct CommandLog
     {
       List<std::string> Events;
-      List<dom::EventListenerHandle> Handles;
+      List<EventListenerHandle> Handles;
       bool PreventCommand {false};
 
-      void Watch(dom::Element &element) noexcept
+      void Watch(boo::Element &element) noexcept
       {
         auto id = IdOf(&element);
         Handles.push_back(element.AddEventListener(
           u8"command",
-          [this, id](dom::Event &event)
+          [this, id](Event &event)
           {
-            auto &command = Downcast<dom::CommandEvent>(event);
+            auto &command = Downcast<CommandEvent>(event);
             CHECK_FALSE(event.Bubbles());
             CHECK(event.Cancelable());
             CHECK(event.IsTrusted());
@@ -61,8 +61,8 @@ namespace krys::boo::html::tests
             }
           }));
         Handles.push_back(element.AddEventListener(
-          u8"beforetoggle", [this, id](dom::Event &event)
-          { Events.push_back(id + ":beforetoggle:" + IdOf(Downcast<dom::ToggleEvent>(event).Source())); }));
+          u8"beforetoggle", [this, id](Event &event)
+          { Events.push_back(id + ":beforetoggle:" + IdOf(Downcast<ToggleEvent>(event).Source())); }));
       }
 
       /// @brief The events so far, after running the queued tasks.
@@ -109,7 +109,7 @@ namespace krys::boo::html::tests
   TEST_CASE("HTMLButtonElement: a button whose parent is a select isn't a submit button in the Auto state",
             "[HTML][HTMLButtonElement][html:concept-submit-button]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto select = document->CreateElement(u8"select").ReleaseValue();
     auto div = document->CreateElement(u8"div").ReleaseValue();
     auto button = document->CreateElement(u8"button").ReleaseValue();
@@ -149,7 +149,7 @@ namespace krys::boo::html::tests
   TEST_CASE("HTMLButtonElement: a button in a document that isn't fully active does nothing",
             "[HTML][HTMLButtonElement][html:the-button-element]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto button = document->CreateElement(u8"button").ReleaseValue();
     auto target = document->CreateElement(u8"div").ReleaseValue();
     REQUIRE_FALSE(target->SetAttribute(u8"id", u8"t").HasException());
@@ -162,7 +162,7 @@ namespace krys::boo::html::tests
     REQUIRE(Downcast<HTMLButtonElement>(*button).CommandForElement().get() == target.get());
 
     int commands = 0;
-    auto listener = target->AddEventListener(u8"command", [&](dom::Event &) { ++commands; });
+    auto listener = target->AddEventListener(u8"command", [&](Event &) { ++commands; });
     Downcast<HTMLElement>(*button).Click();
     CHECK(commands == 0);
   }
@@ -315,7 +315,7 @@ namespace krys::boo::html::tests
       u8"<dialog id=pd popover></dialog><button id=pdmodal commandfor=pd command=show-modal>P</button>"
       u8"<button id=pdtoggle commandfor=pd command=toggle-popover>Q</button>");
     auto &dialog = fixture.Get<HTMLDialogElement>(u8"d");
-    auto click = [&](dom::DOMStringView id)
+    auto click = [&](DOMStringView id)
     {
       fixture.Get<HTMLButtonElement>(id).Click();
     };
@@ -323,7 +323,7 @@ namespace krys::boo::html::tests
     log.Watch(dialog);
     List<std::string> cancels;
     auto cancelListener =
-      dialog.AddEventListener(u8"cancel", [&](dom::Event &) { cancels.emplace_back("cancel"); });
+      dialog.AddEventListener(u8"cancel", [&](Event &) { cancels.emplace_back("cancel"); });
 
     SECTION("show-modal shows it modally, and close closes it with the button's value")
     {
@@ -386,9 +386,9 @@ namespace krys::boo::html::tests
     NavigationFixture fixture(
       u8"<button id=t commandfor=h command=toggle-popover>T</button><x-host id=h></x-host>");
     // A shadow root on the element with ID @p id, its reference target @p target, holding @p markup.
-    auto attach = [&](dom::DOMStringView id, const char8_t *target, const char8_t *markup)
+    auto attach = [&](DOMStringView id, const char8_t *target, const char8_t *markup)
     {
-      auto shadow = fixture.ById(id).AttachShadow({.ReferenceTarget = dom::DOMString(target)}).ReleaseValue();
+      auto shadow = fixture.ById(id).AttachShadow({.ReferenceTarget = DOMString(target)}).ReleaseValue();
       REQUIRE_FALSE(shadow->SetHTMLUnsafe(markup).HasException());
       return shadow;
     };
@@ -408,14 +408,14 @@ namespace krys::boo::html::tests
   {
     NavigationFixture fixture(u8"<button id=t commandfor=h command=--go>T</button><x-host id=h></x-host>");
     auto &host = fixture.ById(u8"h");
-    auto shadow = host.AttachShadow({.ReferenceTarget = dom::DOMString(u8"p")}).ReleaseValue();
+    auto shadow = host.AttachShadow({.ReferenceTarget = DOMString(u8"p")}).ReleaseValue();
     REQUIRE_FALSE(
       shadow->SetHTMLUnsafe(u8"<div id=p></div><button id=inner commandfor=p command=--go></button>")
         .HasException());
     int32 heardAtHost = 0;
     bool composed = false;
     auto onHost = host.AddEventListener(u8"command",
-                                        [&](dom::Event &event)
+                                        [&](Event &event)
                                         {
                                           ++heardAtHost;
                                           composed = event.Composed();

@@ -132,16 +132,16 @@ namespace krys::boo
     KRYS_NODISCARD bool ReplacedMaxLogicalHeightComputesAsNone() const noexcept;
 
   protected:
-    RenderReplaced(Type type, dom::Element &element, RenderStyle &&style,
+    RenderReplaced(Type type, Element &element, RenderStyle &&style,
                    EnumSet<ReplacedFlag> flags = {}) noexcept;
 
     KRYS_NODISCARD RepaintRects
       LocalRectsForRepaint(RepaintOutlineBounds repaintOutlineBounds) const noexcept override;
 
-    RenderReplaced(Type type, dom::Element &element, RenderStyle &&style, const LayoutSize &intrinsicSize,
+    RenderReplaced(Type type, Element &element, RenderStyle &&style, const LayoutSize &intrinsicSize,
                    EnumSet<ReplacedFlag> flags = {}) noexcept;
 
-    RenderReplaced(Type type, dom::Document &document, RenderStyle &&style, const LayoutSize &intrinsicSize,
+    RenderReplaced(Type type, Document &document, RenderStyle &&style, const LayoutSize &intrinsicSize,
                    EnumSet<ReplacedFlag> flags = {}) noexcept;
 
     void Layout() noexcept override;

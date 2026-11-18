@@ -51,20 +51,20 @@ namespace krys::boo
     using infra::StringAlgorithms;
 
     /// @see https://dom.spec.whatwg.org/#concept-range-bp-set (its first two steps)
-    KRYS_NODISCARD dom::ExceptionOr<void> CheckNodeOffsetPair(const dom::Node &node, uint32 offset) noexcept
+    KRYS_NODISCARD ExceptionOr<void> CheckNodeOffsetPair(const Node &node, uint32 offset) noexcept
     {
-      if (Is<dom::DocumentType>(node))
+      if (Is<DocumentType>(node))
       {
-        return dom::Exception(dom::ExceptionCode::InvalidNodeTypeError);
+        return Exception(ExceptionCode::InvalidNodeTypeError);
       }
       if (offset > dom::TreeQueries::Length(node))
       {
-        return dom::Exception(dom::ExceptionCode::IndexSizeError);
+        return Exception(ExceptionCode::IndexSizeError);
       }
       return {};
     }
 
-    KRYS_NODISCARD RefPtr<dom::Node> SelectionShadowAncestor(LocalFrame &frame) noexcept
+    KRYS_NODISCARD RefPtr<Node> SelectionShadowAncestor(LocalFrame &frame) noexcept
     {
       auto *node = frame.Document()->Selection().Selection().CanonicalAnchor().AnchorNode();
       if (!node || !node->IsInShadowTree())
@@ -76,7 +76,7 @@ namespace krys::boo
 
     KRYS_NODISCARD RefPtr<dom::Range> CreateLiveRangeBeforeShadowHostWithSelection(LocalFrame &frame) noexcept
     {
-      if (RefPtr<dom::Node> shadowAncestor = SelectionShadowAncestor(frame))
+      if (RefPtr<Node> shadowAncestor = SelectionShadowAncestor(frame))
       {
         auto *parent = shadowAncestor->ParentNode();
         dom::BoundaryPoint point {ShareRef(*parent), shadowAncestor->ComputeNodeIndex()};
@@ -87,7 +87,7 @@ namespace krys::boo
     }
   }
 
-  DOMSelection::DOMSelection(dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
+  DOMSelection::DOMSelection(Document &document) noexcept : _document(CreateWeakPtr(&document))
   {
   }
 
@@ -132,7 +132,7 @@ namespace krys::boo
     return frame->Document()->Selection().Selection().Focus();
   }
 
-  RefPtr<dom::Node> DOMSelection::AnchorNode() const noexcept
+  RefPtr<Node> DOMSelection::AnchorNode() const noexcept
   {
     return ShadowAdjustedNode(AnchorPosition());
   }
@@ -142,7 +142,7 @@ namespace krys::boo
     return ShadowAdjustedOffset(AnchorPosition());
   }
 
-  RefPtr<dom::Node> DOMSelection::FocusNode() const noexcept
+  RefPtr<Node> DOMSelection::FocusNode() const noexcept
   {
     return ShadowAdjustedNode(FocusPosition());
   }
@@ -162,7 +162,7 @@ namespace krys::boo
     return !range || range->Collapsed();
   }
 
-  dom::DOMString DOMSelection::Type() const noexcept
+  DOMString DOMSelection::Type() const noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -181,7 +181,7 @@ namespace krys::boo
     return u8"Range";
   }
 
-  dom::DOMString DOMSelection::Direction() const noexcept
+  DOMString DOMSelection::Direction() const noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -215,7 +215,7 @@ namespace krys::boo
     return 0;
   }
 
-  dom::ExceptionOr<void> DOMSelection::Collapse(dom::Node *node, uint32 offset) noexcept
+  ExceptionOr<void> DOMSelection::Collapse(Node *node, uint32 offset) noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -242,7 +242,7 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> DOMSelection::CollapseToEnd() noexcept
+  ExceptionOr<void> DOMSelection::CollapseToEnd() noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -252,14 +252,14 @@ namespace krys::boo
     auto &selection = frame->Document()->Selection();
     if (selection.IsNone())
     {
-      return dom::Exception(dom::ExceptionCode::InvalidStateError);
+      return Exception(ExceptionCode::InvalidStateError);
     }
     selection.DisassociateLiveRange();
     selection.MoveTo(selection.Selection().UncanonicalizedEnd(), Affinity::Downstream);
     return {};
   }
 
-  dom::ExceptionOr<void> DOMSelection::CollapseToStart() noexcept
+  ExceptionOr<void> DOMSelection::CollapseToStart() noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -269,7 +269,7 @@ namespace krys::boo
     auto &selection = frame->Document()->Selection();
     if (selection.IsNone())
     {
-      return dom::Exception(dom::ExceptionCode::InvalidStateError);
+      return Exception(ExceptionCode::InvalidStateError);
     }
     selection.DisassociateLiveRange();
     selection.MoveTo(selection.Selection().UncanonicalizedStart(), Affinity::Downstream);
@@ -281,8 +281,8 @@ namespace krys::boo
     RemoveAllRanges();
   }
 
-  dom::ExceptionOr<void> DOMSelection::SetBaseAndExtent(dom::Node &anchorNode, uint32 anchorOffset,
-                                                        dom::Node &focusNode, uint32 focusOffset) noexcept
+  ExceptionOr<void> DOMSelection::SetBaseAndExtent(Node &anchorNode, uint32 anchorOffset, Node &focusNode,
+                                                   uint32 focusOffset) noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -311,13 +311,13 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> DOMSelection::SetPosition(dom::Node *node, uint32 offset) noexcept
+  ExceptionOr<void> DOMSelection::SetPosition(Node *node, uint32 offset) noexcept
   {
     return Collapse(node, offset);
   }
 
-  void DOMSelection::Modify(dom::DOMStringView alterString, dom::DOMStringView directionString,
-                            dom::DOMStringView granularityString) noexcept
+  void DOMSelection::Modify(DOMStringView alterString, DOMStringView directionString,
+                            DOMStringView granularityString) noexcept
   {
     FrameSelection::Alteration alter;
     if (StringAlgorithms::ASCIICaseInsensitiveMatch(alterString, u8"extend"))
@@ -403,7 +403,7 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<void> DOMSelection::Extend(dom::Node &node, uint32 offset) noexcept
+  ExceptionOr<void> DOMSelection::Extend(Node &node, uint32 offset) noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -413,8 +413,8 @@ namespace krys::boo
 
     if (RangeCount() < 1 && !frame->Document()->Selection().IsCaretOrRange())
     {
-      return dom::Exception(dom::ExceptionCode::InvalidStateError,
-                            u8"extend() requires a Range to be added to the Selection");
+      return Exception(ExceptionCode::InvalidStateError,
+                       u8"extend() requires a Range to be added to the Selection");
     }
 
     if (!(node.IsConnected() && frame->Document() == &node.NodeDocument())
@@ -434,11 +434,11 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<Ref<dom::Range>> DOMSelection::GetRangeAt(uint32 index) noexcept
+  ExceptionOr<Ref<dom::Range>> DOMSelection::GetRangeAt(uint32 index) noexcept
   {
     if (index >= RangeCount())
     {
-      return dom::Exception(dom::ExceptionCode::IndexSizeError);
+      return Exception(ExceptionCode::IndexSizeError);
     }
     auto &frame = *Frame();
     if (RefPtr<dom::Range> liveRange = frame.Document()->Selection().AssociatedLiveRange())
@@ -470,7 +470,7 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<void> DOMSelection::RemoveRange(dom::Range &liveRange) noexcept
+  ExceptionOr<void> DOMSelection::RemoveRange(dom::Range &liveRange) noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -479,14 +479,14 @@ namespace krys::boo
     }
     if (&liveRange != frame->Document()->Selection().AssociatedLiveRange().get())
     {
-      return dom::Exception(dom::ExceptionCode::NotFoundError);
+      return Exception(ExceptionCode::NotFoundError);
     }
     RemoveAllRanges();
     return {};
   }
 
   List<Ref<dom::StaticRange>>
-    DOMSelection::GetComposedRanges(const List<Ref<dom::ShadowRoot>> &shadowRoots) noexcept
+    DOMSelection::GetComposedRanges(const List<Ref<ShadowRoot>> &shadowRoots) noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -499,13 +499,13 @@ namespace krys::boo
       return {};
     }
 
-    auto isListed = [&](const dom::ShadowRoot *shadowRoot)
+    auto isListed = [&](const ShadowRoot *shadowRoot)
     {
       return std::ranges::any_of(shadowRoots,
-                                 [&](const Ref<dom::ShadowRoot> &root) { return root.get() == shadowRoot; });
+                                 [&](const Ref<ShadowRoot> &root) { return root.get() == shadowRoot; });
     };
 
-    Ref<dom::Node> startNode = range->Start.Container;
+    Ref<Node> startNode = range->Start.Container;
     uint32 startOffset = static_cast<uint32>(range->Start.Offset);
     while (startNode->IsInShadowTree() && !isListed(dom::TreeQueries::ContainingShadowRoot(*startNode)))
     {
@@ -515,7 +515,7 @@ namespace krys::boo
       startOffset = host->ComputeNodeIndex();
     }
 
-    Ref<dom::Node> endNode = range->End.Container;
+    Ref<Node> endNode = range->End.Container;
     uint32 endOffset = static_cast<uint32>(range->End.Offset);
     while (endNode->IsInShadowTree() && !isListed(dom::TreeQueries::ContainingShadowRoot(*endNode)))
     {
@@ -545,13 +545,13 @@ namespace krys::boo
     }
   }
 
-  bool DOMSelection::ContainsNode(dom::Node &node, bool allowPartial) const noexcept
+  bool DOMSelection::ContainsNode(Node &node, bool allowPartial) const noexcept
   {
     auto range = GetRange();
     return range && (allowPartial ? Intersects(*range, node) : Contains(*range, node));
   }
 
-  dom::ExceptionOr<void> DOMSelection::SelectAllChildren(dom::Node &node) noexcept
+  ExceptionOr<void> DOMSelection::SelectAllChildren(Node &node) noexcept
   {
     // This doesn't (and shouldn't) select the characters in a node if passed a text node.
     // Selection API specification seems to have this wrong: https://github.com/w3c/selection-api/issues/125
@@ -559,7 +559,7 @@ namespace krys::boo
   }
 
   // FIXME: Copying text that isn't selectable (the needsToCopyUserSelectNoneQuirk), with quirks.
-  dom::DOMString DOMSelection::ToString() const noexcept
+  DOMString DOMSelection::ToString() const noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -570,10 +570,10 @@ namespace krys::boo
     TextIteratorBehaviors options {TextIteratorBehavior::IgnoresUserSelectNone};
 
     auto range = frame->Document()->Selection().Selection().Range();
-    return range ? PlainText(*range, options) : dom::DOMString();
+    return range ? PlainText(*range, options) : DOMString();
   }
 
-  RefPtr<dom::Node> DOMSelection::ShadowAdjustedNode(const dom::Position &position) const noexcept
+  RefPtr<Node> DOMSelection::ShadowAdjustedNode(const dom::Position &position) const noexcept
   {
     if (position.IsNull())
     {

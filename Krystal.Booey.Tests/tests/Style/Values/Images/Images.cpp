@@ -250,7 +250,7 @@ namespace krys::boo::style::tests
       <div id=current style="color: green; list-style-image: linear-gradient(currentcolor, blue)"></div>)html"};
     fixture.Document->UpdateStyleIfNeeded();
     display_list::RecorderImpl context(FloatSize(10, 10));
-    auto imageFor = [&](dom::DOMStringView id, FloatSize size)
+    auto imageFor = [&](DOMStringView id, FloatSize size)
     {
       auto *renderer = fixture.ById(id).Renderer();
       REQUIRE(renderer);

@@ -33,7 +33,7 @@ namespace krys::boo::tests
       {
         Frame = ShareRefPtr(&TestPage->MainFrame());
         Frame->CreateView({400, 300});
-        Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+        Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
         (void)Document->UpdateLayout();
       }
     };

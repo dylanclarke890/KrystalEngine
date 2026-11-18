@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/LoadTestUtils.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheetList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/CSSOM/StyleSheetList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/CDATASection.hpp"
 #include "Krystal.Booey/DOM/Nodes/Comment.hpp"
@@ -35,13 +35,13 @@ namespace krys::boo::tests
     }
 
     template <typename T>
-    KRYS_NODISCARD bool IsSVG(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool IsSVG(const Element &element) noexcept
     {
-      auto *svgElement = DynamicDowncast<svg::SVGElement>(element);
+      auto *svgElement = DynamicDowncast<SVGElement>(element);
       return svgElement && Is<T>(*svgElement);
     }
 
-    KRYS_NODISCARD std::string Serialize(const dom::Node &node) noexcept
+    KRYS_NODISCARD std::string Serialize(const Node &node) noexcept
     {
       return Narrow(SerializeFragment(node, SerializedNodes::SubtreeIncludingNode));
     }
@@ -58,27 +58,27 @@ namespace krys::boo::tests
                  u8"image/svg+xml");
 
     auto &document = fixture.Document();
-    REQUIRE(Is<svg::SVGDocument>(document));
+    REQUIRE(Is<SVGDocument>(document));
     CHECK(document.ContentType() == u8"image/svg+xml");
     CHECK(document.ReadyState() == html::DocumentReadyState::Complete);
 
     auto root = document.DocumentElement();
     REQUIRE(root);
-    CHECK(IsSVG<svg::SVGSvgElement>(*root));
+    CHECK(IsSVG<SVGSvgElement>(*root));
     CHECK(root->NamespaceURI() == infra::namespaces::SVG);
-    CHECK(Is<dom::Comment>(root->FirstChild()));
+    CHECK(Is<boo::Comment>(root->FirstChild()));
 
     auto circle = document.GetElementById(u8"c");
     REQUIRE(circle);
-    CHECK(IsSVG<svg::SVGCircleElement>(*circle));
+    CHECK(IsSVG<SVGCircleElement>(*circle));
     CHECK(circle->GetAttributeNS(infra::namespaces::XLink, u8"title") == u8"dot");
 
     auto *desc = circle->NextSibling();
     REQUIRE(desc);
-    REQUIRE(Is<dom::Text>(desc->FirstChild()));
-    CHECK(Downcast<dom::Text>(*desc->FirstChild()).Data() == u8"A & B");
-    REQUIRE(Is<dom::CDATASection>(desc->LastChild()));
-    CHECK(Downcast<dom::CDATASection>(*desc->LastChild()).Data() == u8" <raw> ");
+    REQUIRE(Is<Text>(desc->FirstChild()));
+    CHECK(Downcast<Text>(*desc->FirstChild()).Data() == u8"A & B");
+    REQUIRE(Is<CDATASection>(desc->LastChild()));
+    CHECK(Downcast<CDATASection>(*desc->LastChild()).Data() == u8" <raw> ");
   }
 
   TEST_CASE("An XML document keeps its declaration and doctype",
@@ -91,8 +91,8 @@ namespace krys::boo::tests
                  u8"application/xml");
 
     auto &document = fixture.Document();
-    REQUIRE(Is<dom::XMLDocument>(document));
-    CHECK_FALSE(Is<svg::SVGDocument>(document));
+    REQUIRE(Is<XMLDocument>(document));
+    CHECK_FALSE(Is<SVGDocument>(document));
     CHECK(document.ContentType() == u8"application/xml");
     CHECK(document.HasXMLDeclaration());
     CHECK(document.XMLVersion() == u8"1.0");
@@ -100,16 +100,16 @@ namespace krys::boo::tests
     CHECK(document.XMLStandalone());
 
     auto *doctype = document.FirstChild();
-    REQUIRE(Is<dom::DocumentType>(doctype));
-    CHECK(Downcast<dom::DocumentType>(*doctype).Name() == u8"note");
-    CHECK(Downcast<dom::DocumentType>(*doctype).SystemId() == u8"note.dtd");
+    REQUIRE(Is<DocumentType>(doctype));
+    CHECK(Downcast<DocumentType>(*doctype).Name() == u8"note");
+    CHECK(Downcast<DocumentType>(*doctype).SystemId() == u8"note.dtd");
 
     auto root = document.DocumentElement();
     REQUIRE(root);
     CHECK(root->NamespaceURI() == null);
     CHECK(root->LocalName() == u8"note");
-    REQUIRE(Is<dom::ProcessingInstruction>(root->FirstChild()));
-    CHECK(Downcast<dom::ProcessingInstruction>(*root->FirstChild()).Target() == u8"app");
+    REQUIRE(Is<boo::ProcessingInstruction>(root->FirstChild()));
+    CHECK(Downcast<boo::ProcessingInstruction>(*root->FirstChild()).Target() == u8"app");
 
     CHECK(
       Serialize(document)
@@ -128,9 +128,9 @@ namespace krys::boo::tests
     REQUIRE(root);
     CHECK(root->LocalName() == u8"root");
     auto *error = root->FirstChild();
-    REQUIRE(Is<dom::Element>(error));
-    CHECK(Downcast<dom::Element>(*error).LocalName() == u8"parsererror");
-    CHECK(Downcast<dom::Element>(*error).NamespaceURI() == infra::namespaces::HTML);
+    REQUIRE(Is<Element>(error));
+    CHECK(Downcast<Element>(*error).LocalName() == u8"parsererror");
+    CHECK(Downcast<Element>(*error).NamespaceURI() == infra::namespaces::HTML);
     CHECK(error->TextContent().value_or(u8"").contains(u8"error on line 1"));
   }
 
@@ -143,12 +143,12 @@ namespace krys::boo::tests
     REQUIRE(root);
     CHECK(root->LocalName() == u8"html");
     auto body = root->LastChild();
-    REQUIRE(Is<dom::Element>(body));
-    CHECK(Downcast<dom::Element>(*body).LocalName() == u8"body");
-    REQUIRE(Is<dom::Element>(body->FirstChild()));
-    CHECK(Downcast<dom::Element>(*body->FirstChild()).LocalName() == u8"parsererror");
-    REQUIRE(Is<dom::Element>(body->LastChild()));
-    CHECK(IsSVG<svg::SVGSvgElement>(Downcast<dom::Element>(*body->LastChild())));
+    REQUIRE(Is<Element>(body));
+    CHECK(Downcast<Element>(*body).LocalName() == u8"body");
+    REQUIRE(Is<Element>(body->FirstChild()));
+    CHECK(Downcast<Element>(*body->FirstChild()).LocalName() == u8"parsererror");
+    REQUIRE(Is<Element>(body->LastChild()));
+    CHECK(IsSVG<SVGSvgElement>(Downcast<Element>(*body->LastChild())));
   }
 
   TEST_CASE("An XHTML document has HTML elements and HTML's named entities",
@@ -163,10 +163,10 @@ namespace krys::boo::tests
       u8"application/xhtml+xml");
 
     auto &document = fixture.Document();
-    REQUIRE(Is<dom::XHTMLDocument>(document));
+    REQUIRE(Is<XHTMLDocument>(document));
     auto paragraph = document.GetElementById(u8"p");
     REQUIRE(paragraph);
-    CHECK(Is<html::HTMLElement>(*paragraph));
+    CHECK(Is<HTMLElement>(*paragraph));
     CHECK(paragraph->TextContent() == u8"a b&c");
   }
 
@@ -178,8 +178,8 @@ namespace krys::boo::tests
 
     auto root = fixture.Document().DocumentElement();
     REQUIRE(root);
-    REQUIRE(Is<dom::Element>(root->FirstChild()));
-    CHECK(Downcast<dom::Element>(*root->FirstChild()).LocalName() == u8"parsererror");
+    REQUIRE(Is<Element>(root->FirstChild()));
+    CHECK(Downcast<Element>(*root->FirstChild()).LocalName() == u8"parsererror");
   }
 
   TEST_CASE("xml-stylesheet processing instructions load their sheets", "[XML][XMLDocumentParser]")
@@ -193,17 +193,17 @@ namespace krys::boo::tests
                  u8"image/svg+xml");
 
     auto &document = fixture.Document();
-    REQUIRE(Is<dom::ProcessingInstruction>(document.FirstChild()));
-    Ref<dom::ProcessingInstruction> protectedInstruction =
-      ShareRef(Downcast<dom::ProcessingInstruction>(*document.FirstChild()));
+    REQUIRE(Is<boo::ProcessingInstruction>(document.FirstChild()));
+    Ref<boo::ProcessingInstruction> protectedInstruction =
+      ShareRef(Downcast<boo::ProcessingInstruction>(*document.FirstChild()));
     auto &instruction = *protectedInstruction;
     CHECK(instruction.IsCSS());
     REQUIRE(instruction.Sheet());
     CHECK(instruction.Sheet()->Length() == 1);
 
     // The alternate sheet without a title loads nothing.
-    REQUIRE(Is<dom::ProcessingInstruction>(document.FirstChild()->NextSibling()));
-    CHECK_FALSE(Downcast<dom::ProcessingInstruction>(*document.FirstChild()->NextSibling()).Sheet());
+    REQUIRE(Is<boo::ProcessingInstruction>(document.FirstChild()->NextSibling()));
+    CHECK_FALSE(Downcast<boo::ProcessingInstruction>(*document.FirstChild()->NextSibling()).Sheet());
 
     REQUIRE(document.StyleSheets().Length() == 1);
     CHECK(document.StyleSheets().Item(0) == instruction.Sheet());
@@ -227,19 +227,19 @@ namespace krys::boo::tests
       auto result = CreateContextualFragment(*root, u8"<a:item>x</a:item><plain/>");
       REQUIRE_FALSE(result.HasException());
       auto fragment = result.ReleaseValue();
-      REQUIRE(Is<dom::Element>(fragment->FirstChild()));
-      auto &item = Downcast<dom::Element>(*fragment->FirstChild());
+      REQUIRE(Is<Element>(fragment->FirstChild()));
+      auto &item = Downcast<Element>(*fragment->FirstChild());
       CHECK(item.NamespaceURI() == u8"urn:a");
       CHECK(item.LocalName() == u8"item");
-      REQUIRE(Is<dom::Element>(fragment->LastChild()));
-      CHECK(Downcast<dom::Element>(*fragment->LastChild()).NamespaceURI() == null);
+      REQUIRE(Is<Element>(fragment->LastChild()));
+      CHECK(Downcast<Element>(*fragment->LastChild()).NamespaceURI() == null);
     }
 
     SECTION("malformed")
     {
       auto result = CreateContextualFragment(*root, u8"<open>");
       REQUIRE(result.HasException());
-      CHECK(result.ReleaseException().Code() == dom::ExceptionCode::SyntaxError);
+      CHECK(result.ReleaseException().Code() == ExceptionCode::SyntaxError);
     }
   }
 
@@ -255,8 +255,8 @@ namespace krys::boo::tests
 
     auto root = fixture.Document().DocumentElement();
     REQUIRE(root);
-    REQUIRE(IsSVG<svg::SVGSvgElement>(*root));
-    auto &svg = Downcast<svg::SVGSvgElement>(Downcast<svg::SVGElement>(*root));
+    REQUIRE(IsSVG<SVGSvgElement>(*root));
+    auto &svg = Downcast<SVGSvgElement>(Downcast<SVGElement>(*root));
     CHECK(svg.CurrentViewBoxRect() == FloatRect(0, 0, 10, 5));
   }
 }

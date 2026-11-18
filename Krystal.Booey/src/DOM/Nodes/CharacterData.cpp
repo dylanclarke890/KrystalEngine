@@ -9,11 +9,11 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   CharacterData::CharacterData(Document &document, DOMString data, dom::NodeType type,
-                               NodeFlags flags) noexcept
-      : Node(document, type, flags | NodeFlags::IsCharacterData), _data {krys::move(data)}
+                               dom::NodeFlags flags) noexcept
+      : Node(document, type, flags | dom::NodeFlags::IsCharacterData), _data {krys::move(data)}
   {
   }
 
@@ -21,60 +21,60 @@ namespace krys::boo::dom
 
   ExceptionOr<void> CharacterData::Data(DOMString data) noexcept
   {
-    return TextAlgorithms::Replace(*this, 0uz, Length(), krys::move(data));
+    return dom::TextAlgorithms::Replace(*this, 0uz, Length(), krys::move(data));
   }
 
   ExceptionOr<DOMString> CharacterData::SubstringData(size_t offset, size_t count) const noexcept
   {
-    return TextAlgorithms::Substring(*this, offset, count);
+    return dom::TextAlgorithms::Substring(*this, offset, count);
   }
 
   ExceptionOr<void> CharacterData::AppendData(DOMString data) noexcept
   {
-    return TextAlgorithms::Replace(*this, _data.size(), 0uz, krys::move(data));
+    return dom::TextAlgorithms::Replace(*this, _data.size(), 0uz, krys::move(data));
   }
 
   ExceptionOr<void> CharacterData::InsertData(size_t offset, DOMString data) noexcept
   {
-    return TextAlgorithms::Replace(*this, offset, 0uz, krys::move(data));
+    return dom::TextAlgorithms::Replace(*this, offset, 0uz, krys::move(data));
   }
 
   ExceptionOr<void> CharacterData::DeleteData(size_t offset, size_t count) noexcept
   {
-    return TextAlgorithms::Replace(*this, offset, count, u8"");
+    return dom::TextAlgorithms::Replace(*this, offset, count, u8"");
   }
 
   ExceptionOr<void> CharacterData::ReplaceData(size_t offset, size_t count, DOMString data) noexcept
   {
-    return TextAlgorithms::Replace(*this, offset, count, krys::move(data));
+    return dom::TextAlgorithms::Replace(*this, offset, count, krys::move(data));
   }
 
 #pragma endregion
 
 #pragma region ChildNode
 
-  ExceptionOr<void> CharacterData::Before(const List<NodeOrString> &nodes) noexcept
+  ExceptionOr<void> CharacterData::Before(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return mixins::ChildNode::Before(*this, nodes);
+    return dom::mixins::ChildNode::Before(*this, nodes);
   }
 
-  ExceptionOr<void> CharacterData::After(const List<NodeOrString> &nodes) noexcept
+  ExceptionOr<void> CharacterData::After(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return mixins::ChildNode::After(*this, nodes);
+    return dom::mixins::ChildNode::After(*this, nodes);
   }
 
-  ExceptionOr<void> CharacterData::ReplaceWith(const List<NodeOrString> &nodes) noexcept
+  ExceptionOr<void> CharacterData::ReplaceWith(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return mixins::ChildNode::ReplaceWith(*this, nodes);
+    return dom::mixins::ChildNode::ReplaceWith(*this, nodes);
   }
 
   ExceptionOr<void> CharacterData::Remove() noexcept
   {
     html::CEReactionsScope ceReactions;
-    return mixins::ChildNode::Remove(*this);
+    return dom::mixins::ChildNode::Remove(*this);
   }
 
   ExceptionOr<void> CharacterData::BeforeHTML(DOMStringView html,
@@ -130,22 +130,22 @@ namespace krys::boo::dom
 
   RefPtr<const Element> CharacterData::PreviousElementSibling() const noexcept
   {
-    return mixins::NonDocumentTypeChildNode::PreviousElementSibling(*this);
+    return dom::mixins::NonDocumentTypeChildNode::PreviousElementSibling(*this);
   }
 
   RefPtr<Element> CharacterData::PreviousElementSibling() noexcept
   {
-    return mixins::NonDocumentTypeChildNode::PreviousElementSibling(*this);
+    return dom::mixins::NonDocumentTypeChildNode::PreviousElementSibling(*this);
   }
 
   RefPtr<const Element> CharacterData::NextElementSibling() const noexcept
   {
-    return mixins::NonDocumentTypeChildNode::NextElementSibling(*this);
+    return dom::mixins::NonDocumentTypeChildNode::NextElementSibling(*this);
   }
 
   RefPtr<Element> CharacterData::NextElementSibling() noexcept
   {
-    return mixins::NonDocumentTypeChildNode::NextElementSibling(*this);
+    return dom::mixins::NonDocumentTypeChildNode::NextElementSibling(*this);
   }
 
 #pragma endregion

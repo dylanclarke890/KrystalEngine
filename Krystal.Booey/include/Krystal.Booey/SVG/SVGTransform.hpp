@@ -31,7 +31,7 @@
 #include "Krystal.Booey/SVG/SVGMatrix.hpp"
 #include "Krystal.Booey/SVG/SVGTransformValue.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @see https://svgwg.org/svg2-draft/coords.html#InterfaceSVGTransform
   class SVGTransform : public SVGValueProperty<SVGTransformValue>, public SVGPropertyOwner
@@ -61,7 +61,7 @@ namespace krys::boo::svg
     }
 
     template <typename T>
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<SVGTransform>> Create(dom::ExceptionOr<T> value) noexcept
+    KRYS_NODISCARD static ExceptionOr<Ref<SVGTransform>> Create(ExceptionOr<T> value) noexcept
     {
       if (value.HasException())
       {
@@ -100,11 +100,11 @@ namespace krys::boo::svg
       return ShareRef(Matrix());
     }
 
-    dom::ExceptionOr<void> SetMatrix(css::DOMMatrix2DInit matrixInit) noexcept
+    ExceptionOr<void> SetMatrix(css::DOMMatrix2DInit matrixInit) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       AffineTransform transform;
@@ -138,11 +138,11 @@ namespace krys::boo::svg
       return {};
     }
 
-    dom::ExceptionOr<void> SetTranslate(float tx, float ty) noexcept
+    ExceptionOr<void> SetTranslate(float tx, float ty) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetTranslate(tx, ty);
@@ -150,11 +150,11 @@ namespace krys::boo::svg
       return {};
     }
 
-    dom::ExceptionOr<void> SetScale(float sx, float sy) noexcept
+    ExceptionOr<void> SetScale(float sx, float sy) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetScale(sx, sy);
@@ -162,11 +162,11 @@ namespace krys::boo::svg
       return {};
     }
 
-    dom::ExceptionOr<void> SetRotate(float angle, float cx, float cy) noexcept
+    ExceptionOr<void> SetRotate(float angle, float cx, float cy) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetRotate(angle, cx, cy);
@@ -174,11 +174,11 @@ namespace krys::boo::svg
       return {};
     }
 
-    dom::ExceptionOr<void> SetSkewX(float angle) noexcept
+    ExceptionOr<void> SetSkewX(float angle) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetSkewX(angle);
@@ -186,11 +186,11 @@ namespace krys::boo::svg
       return {};
     }
 
-    dom::ExceptionOr<void> SetSkewY(float angle) noexcept
+    ExceptionOr<void> SetSkewY(float angle) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetSkewY(angle);
@@ -240,7 +240,7 @@ namespace krys::boo::svg
       _value.MatrixDidChange();
     }
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept override
     {
       return _value.ValueAsString();
     }

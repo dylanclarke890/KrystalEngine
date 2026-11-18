@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Events/CompositionEvent.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   CompositionEvent::CompositionEvent(DOMStringAtom type, const CompositionEventInit &initializer) noexcept
       : UIEvent(krys::move(type), initializer), _data(initializer.Data)

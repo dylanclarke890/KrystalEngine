@@ -20,15 +20,15 @@
  */
 
 #include "Krystal.Booey/CSS/CSSOM/CSSFontFaceRule.hpp"
-#include "Krystal.Booey/CSS/Descriptors/CSSFontFaceDescriptors.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSFontFaceDescriptors.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSFontFaceRule::CSSFontFaceRule(FontFaceRule &fontFaceRule, CSSStyleSheet *parent) noexcept
+  CSSFontFaceRule::CSSFontFaceRule(css::FontFaceRule &fontFaceRule, CSSStyleSheet *parent) noexcept
       : CSSRule(parent), _fontFaceRule(ShareRef(fontFaceRule))
   {
   }
@@ -41,7 +41,7 @@ namespace krys::boo::css
     }
   }
 
-  Ref<CSSFontFaceRule> CSSFontFaceRule::Create(FontFaceRule &rule, CSSStyleSheet *sheet) noexcept
+  Ref<CSSFontFaceRule> CSSFontFaceRule::Create(css::FontFaceRule &rule, CSSStyleSheet *sheet) noexcept
   {
     return AdoptRef(*new CSSFontFaceRule(rule, sheet));
   }
@@ -57,10 +57,10 @@ namespace krys::boo::css
 
   CSSOMString CSSFontFaceRule::CssText() const noexcept
   {
-    return CssTextInternal(_fontFaceRule->Properties().AsText(DefaultSerialisationContext()));
+    return CssTextInternal(_fontFaceRule->Properties().AsText(css::DefaultSerialisationContext()));
   }
 
-  CSSOMString CSSFontFaceRule::CssText(const SerialisationContext &context) const noexcept
+  CSSOMString CSSFontFaceRule::CssText(const css::SerialisationContext &context) const noexcept
   {
     return CssTextInternal(_fontFaceRule->Properties().AsText(context));
   }
@@ -77,9 +77,9 @@ namespace krys::boo::css
     return result;
   }
 
-  void CSSFontFaceRule::Reattach(Rule &rule) noexcept
+  void CSSFontFaceRule::Reattach(css::Rule &rule) noexcept
   {
-    _fontFaceRule = ShareRef(Downcast<FontFaceRule>(rule));
+    _fontFaceRule = ShareRef(Downcast<css::FontFaceRule>(rule));
     if (_propertiesCSSOMWrapper)
     {
       _propertiesCSSOMWrapper->Reattach(_fontFaceRule->MutableProperties());

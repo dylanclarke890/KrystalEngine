@@ -33,10 +33,13 @@
 
 #include "Krystal.Booey/DOM/MutationObservers/MutationRecord.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
+}
 
+namespace krys::boo::dom
+{
   class ChildListMutationRecord final : public MutationRecord
   {
   private:

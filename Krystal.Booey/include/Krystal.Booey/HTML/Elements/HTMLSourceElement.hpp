@@ -29,7 +29,7 @@
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLPictureElement;
 
@@ -47,7 +47,7 @@ namespace krys::boo::html
     bool _shouldCallSourcesChanged {false};
 
   public:
-    HTMLSourceElement(dom::Document &document) noexcept;
+    HTMLSourceElement(Document &document) noexcept;
 
 #pragma region HTMLSourceElement - https://html.spec.whatwg.org/#htmlsourceelement
 
@@ -58,10 +58,10 @@ namespace krys::boo::html
     void Src(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-type
-    KRYS_NODISCARD dom::DOMString Type() const noexcept;
+    KRYS_NODISCARD DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-type
-    void Type(dom::DOMString value) noexcept;
+    void Type(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-srcset
     KRYS_NODISCARD dom::USVString SrcSet() const noexcept;
@@ -70,16 +70,16 @@ namespace krys::boo::html
     void SrcSet(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-sizes
-    KRYS_NODISCARD dom::DOMString Sizes() const noexcept;
+    KRYS_NODISCARD DOMString Sizes() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-sizes
-    void Sizes(dom::DOMString value) noexcept;
+    void Sizes(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-media
-    KRYS_NODISCARD dom::DOMString Media() const noexcept;
+    KRYS_NODISCARD DOMString Media() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-media
-    void Media(dom::DOMString value) noexcept;
+    void Media(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-width
     KRYS_NODISCARD uint32 Width() const noexcept;
@@ -98,18 +98,16 @@ namespace krys::boo::html
     /// @brief The `media` attribute, parsed: an empty or all-whitespace one is an empty list, which matches
     /// the environment.
     /// @see https://html.spec.whatwg.org/#matches-the-environment
-    KRYS_NODISCARD const css::mq::MediaQueryList &
-      ParsedMediaAttribute(dom::Document &document) const noexcept;
+    KRYS_NODISCARD const css::mq::MediaQueryList &ParsedMediaAttribute(Document &document) const noexcept;
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
     void OnInsert() noexcept override;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
-    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
   private:
     /// @brief Records that the source is in @p pictureElement, and whether it's one of its image's sources
@@ -118,14 +116,14 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLSourceElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLSourceElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLSourceElement();
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    auto *element = krys::DynamicDowncast<krys::boo::html::HTMLElement>(target);
+    auto *element = krys::DynamicDowncast<krys::boo::HTMLElement>(target);
     return element && element->IsHTMLSourceElement();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

@@ -474,7 +474,7 @@ namespace krys::boo
 
       KRYS_NODISCARD inline Maybe<PseudoElementType> GetPseudoElementType() const noexcept;
 
-      const css::CSSOMStringAtom &PseudoElementNameArgument() const;
+      const CSSOMStringAtom &PseudoElementNameArgument() const;
 
       KRYS_NODISCARD Maybe<PseudoElementIdentifier> GetPseudoElementIdentifier() const noexcept;
 
@@ -506,12 +506,12 @@ namespace krys::boo
 
       inline const CustomPropertyData &NonInheritedCustomProperties() const;
 
-      KRYS_NODISCARD const CustomProperty *CustomPropertyValue(const css::CSSOMStringAtom &) const noexcept;
+      KRYS_NODISCARD const CustomProperty *CustomPropertyValue(const CSSOMStringAtom &) const noexcept;
 
       void SetCustomPropertyValue(Ref<const CustomProperty> &&, bool isInherited) noexcept;
 
       KRYS_NODISCARD bool CustomPropertyValueEqual(const ComputedStyleBase &,
-                                                   const css::CSSOMStringAtom &) const noexcept;
+                                                   const CSSOMStringAtom &) const noexcept;
 
       KRYS_NODISCARD bool CustomPropertiesEqual(const ComputedStyleBase &) const noexcept;
 
@@ -519,7 +519,7 @@ namespace krys::boo
 
       // MARK: - Custom paint
 
-      void AddCustomPaintWatchProperty(const css::CSSOMStringAtom &) noexcept;
+      void AddCustomPaintWatchProperty(const CSSOMStringAtom &) noexcept;
 
       // MARK: - Zoom
 

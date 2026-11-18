@@ -168,7 +168,7 @@ namespace krys::boo::style::tests
     CHECK(animation.GetTimingFunction() == Animation::InitialTimingFunction());
     CHECK(animation.IsNameUnset());
 
-    Animation named {SingleAnimationName {ScopedName {css::CSSOMStringAtom {u8"spin"}}}};
+    Animation named {SingleAnimationName {ScopedName {CSSOMStringAtom {u8"spin"}}}};
     CHECK_FALSE(named.IsInitial());
     CHECK(named.IsNameSet());
 

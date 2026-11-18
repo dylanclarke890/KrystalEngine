@@ -22,7 +22,7 @@
 #include "Krystal.Booey/CSS/Values/NumberFormatting.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   namespace
   {
@@ -45,10 +45,10 @@ namespace krys::boo::svg
       AppendNumber(stringBuilder, point.Y());
     }
 
-    void AppendCommand(StringBuilder &stringBuilder, PathCoordinateMode mode, char8_t absolute,
+    void AppendCommand(StringBuilder &stringBuilder, svg::PathCoordinateMode mode, char8_t absolute,
                        char8_t relative) noexcept
     {
-      stringBuilder.Append(mode == PathCoordinateMode::AbsoluteCoordinates ? absolute : relative);
+      stringBuilder.Append(mode == svg::PathCoordinateMode::AbsoluteCoordinates ? absolute : relative);
       stringBuilder.Append(u8' ');
     }
   }
@@ -57,7 +57,7 @@ namespace krys::boo::svg
 
   SVGPathStringBuilder::~SVGPathStringBuilder() noexcept = default;
 
-  dom::DOMString SVGPathStringBuilder::Result() noexcept
+  DOMString SVGPathStringBuilder::Result() noexcept
   {
     auto size = _stringBuilder.Length();
     if (!size)
@@ -79,32 +79,34 @@ namespace krys::boo::svg
     return true;
   }
 
-  void SVGPathStringBuilder::MoveTo(const FloatPoint &targetPoint, bool, PathCoordinateMode mode) noexcept
+  void SVGPathStringBuilder::MoveTo(const FloatPoint &targetPoint, bool,
+                                    svg::PathCoordinateMode mode) noexcept
   {
     AppendCommand(_stringBuilder, mode, u8'M', u8'm');
     AppendPoint(_stringBuilder, targetPoint);
   }
 
-  void SVGPathStringBuilder::LineTo(const FloatPoint &targetPoint, PathCoordinateMode mode) noexcept
+  void SVGPathStringBuilder::LineTo(const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept
   {
     AppendCommand(_stringBuilder, mode, u8'L', u8'l');
     AppendPoint(_stringBuilder, targetPoint);
   }
 
-  void SVGPathStringBuilder::LineToHorizontal(float x, PathCoordinateMode mode) noexcept
+  void SVGPathStringBuilder::LineToHorizontal(float x, svg::PathCoordinateMode mode) noexcept
   {
     AppendCommand(_stringBuilder, mode, u8'H', u8'h');
     AppendNumber(_stringBuilder, x);
   }
 
-  void SVGPathStringBuilder::LineToVertical(float y, PathCoordinateMode mode) noexcept
+  void SVGPathStringBuilder::LineToVertical(float y, svg::PathCoordinateMode mode) noexcept
   {
     AppendCommand(_stringBuilder, mode, u8'V', u8'v');
     AppendNumber(_stringBuilder, y);
   }
 
   void SVGPathStringBuilder::CurveToCubic(const FloatPoint &point1, const FloatPoint &point2,
-                                          const FloatPoint &targetPoint, PathCoordinateMode mode) noexcept
+                                          const FloatPoint &targetPoint,
+                                          svg::PathCoordinateMode mode) noexcept
   {
     AppendCommand(_stringBuilder, mode, u8'C', u8'c');
     AppendPoint(_stringBuilder, point1);
@@ -113,7 +115,7 @@ namespace krys::boo::svg
   }
 
   void SVGPathStringBuilder::CurveToCubicSmooth(const FloatPoint &point2, const FloatPoint &targetPoint,
-                                                PathCoordinateMode mode) noexcept
+                                                svg::PathCoordinateMode mode) noexcept
   {
     AppendCommand(_stringBuilder, mode, u8'S', u8's');
     AppendPoint(_stringBuilder, point2);
@@ -121,7 +123,7 @@ namespace krys::boo::svg
   }
 
   void SVGPathStringBuilder::CurveToQuadratic(const FloatPoint &point1, const FloatPoint &targetPoint,
-                                              PathCoordinateMode mode) noexcept
+                                              svg::PathCoordinateMode mode) noexcept
   {
     AppendCommand(_stringBuilder, mode, u8'Q', u8'q');
     AppendPoint(_stringBuilder, point1);
@@ -129,14 +131,14 @@ namespace krys::boo::svg
   }
 
   void SVGPathStringBuilder::CurveToQuadraticSmooth(const FloatPoint &targetPoint,
-                                                    PathCoordinateMode mode) noexcept
+                                                    svg::PathCoordinateMode mode) noexcept
   {
     AppendCommand(_stringBuilder, mode, u8'T', u8't');
     AppendPoint(_stringBuilder, targetPoint);
   }
 
   void SVGPathStringBuilder::ArcTo(float r1, float r2, float angle, bool largeArcFlag, bool sweepFlag,
-                                   const FloatPoint &targetPoint, PathCoordinateMode mode) noexcept
+                                   const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept
   {
     AppendCommand(_stringBuilder, mode, u8'A', u8'a');
     AppendNumber(_stringBuilder, r1);

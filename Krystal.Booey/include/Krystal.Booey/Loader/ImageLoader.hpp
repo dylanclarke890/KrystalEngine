@@ -37,13 +37,9 @@
 
 namespace krys::boo
 {
+  class Document;
+  class Element;
   class RenderImageResource;
-
-  namespace dom
-  {
-    class Document;
-    class Element;
-  }
 
   class ImageLoader;
   using ImageEventSender = dom::EventSender<ImageLoader>;
@@ -72,15 +68,15 @@ namespace krys::boo
   public:
     /// @brief Settles a `decode()` promise: with nothing once the image is decoded, or with an
     /// `EncodingError`.
-    using DecodePromise = Func<void(dom::ExceptionOr<void> &&)>;
+    using DecodePromise = Func<void(ExceptionOr<void> &&)>;
 
   private:
-    dom::Element &_element;
+    boo::Element &_element;
     CachedResourceHandle<CachedImage> _image;
     Timer _derefElementTimer;
-    RefPtr<dom::Element> _protectedElement;
-    dom::DOMString _failedLoadURL;
-    dom::DOMString _pendingURL;
+    RefPtr<boo::Element> _protectedElement;
+    DOMString _failedLoadURL;
+    DOMString _pendingURL;
     bool _hasPendingLoadEvent : 1 {false};
     bool _hasPendingErrorEvent : 1 {false};
     bool _imageComplete : 1 {true};
@@ -110,14 +106,14 @@ namespace krys::boo
 
     void UpdateFromElementIgnoringPreviousErrorToSameValue() noexcept;
 
-    void ElementDidMoveToNewDocument(dom::Document &oldDocument) noexcept;
+    void ElementDidMoveToNewDocument(boo::Document &oldDocument) noexcept;
 
-    KRYS_NODISCARD dom::Element &GetElement() noexcept
+    KRYS_NODISCARD boo::Element &GetElement() noexcept
     {
       return _element;
     }
 
-    KRYS_NODISCARD const dom::Element &GetElement() const noexcept
+    KRYS_NODISCARD const boo::Element &GetElement() const noexcept
     {
       return _element;
     }
@@ -148,7 +144,7 @@ namespace krys::boo
     /// @brief Dispatches the `load` and `error` events waiting to be dispatched soon, of every element.
     static void DispatchPendingLoadEvents() noexcept;
 
-    KRYS_NODISCARD dom::Document &GetDocument() noexcept;
+    KRYS_NODISCARD boo::Document &GetDocument() noexcept;
 
     /// @brief Starts the deferred load of a lazily loaded image, once it intersects the viewport.
     void LoadDeferredImage() noexcept;
@@ -161,7 +157,7 @@ namespace krys::boo
     }
 
   protected:
-    explicit ImageLoader(dom::Element &element) noexcept;
+    explicit ImageLoader(boo::Element &element) noexcept;
 
     void NotifyFinished(CachedResource &resource) noexcept override;
 
@@ -189,7 +185,7 @@ namespace krys::boo
 
     void SetImageCompleteAndMaybeUpdateRenderer() noexcept;
 
-    void ResetLazyImageLoading(dom::Document &document) noexcept;
+    void ResetLazyImageLoading(boo::Document &document) noexcept;
 
     /// @brief Decodes the loaded image for the waiting `decode()` promises, settling them once it's decoded.
     void DecodeImage() noexcept;

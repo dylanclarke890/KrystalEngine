@@ -31,9 +31,9 @@ namespace krys::boo::tests
         StartAnimations();
       }
 
-      KRYS_NODISCARD html::HTMLMarqueeElement &Marquee() noexcept
+      KRYS_NODISCARD HTMLMarqueeElement &Marquee() noexcept
       {
-        return Downcast<html::HTMLMarqueeElement>(ById(u8"m"));
+        return Downcast<HTMLMarqueeElement>(ById(u8"m"));
       }
 
       /// @brief The mover's animations, oldest first.
@@ -70,7 +70,7 @@ namespace krys::boo::tests
                    "[HTML][HTMLMarqueeElement][html:the-marquee-element]")
   {
     AnimationPageFixture fixture(u8"<!DOCTYPE html><marquee id=m></marquee>");
-    auto &marquee = Downcast<html::HTMLMarqueeElement>(fixture.ById(u8"m"));
+    auto &marquee = Downcast<HTMLMarqueeElement>(fixture.ById(u8"m"));
     CHECK(marquee.Loop() == -1);
     CHECK(marquee.ScrollAmount() == 6);
     CHECK(marquee.ScrollDelay() == 85);
@@ -97,7 +97,7 @@ namespace krys::boo::tests
                    "[HTML][HTMLMarqueeElement][html:dom-marquee-loop][html:marquee-loop-count]")
   {
     AnimationPageFixture fixture(u8"<!DOCTYPE html><marquee id=m></marquee>");
-    auto &marquee = Downcast<html::HTMLMarqueeElement>(fixture.ById(u8"m"));
+    auto &marquee = Downcast<HTMLMarqueeElement>(fixture.ById(u8"m"));
     marquee.Loop(5);
     CHECK(marquee.Loop() == 5);
     CHECK(marquee.GetAttribute(u8"loop") == u8"5");
@@ -114,7 +114,7 @@ namespace krys::boo::tests
                    "[HTML][HTMLMarqueeElement][html:marquee-scroll-interval]")
   {
     AnimationPageFixture fixture(u8"<!DOCTYPE html><marquee id=m></marquee>");
-    auto &marquee = Downcast<html::HTMLMarqueeElement>(fixture.ById(u8"m"));
+    auto &marquee = Downcast<HTMLMarqueeElement>(fixture.ById(u8"m"));
     CHECK(marquee.ScrollInterval() == 85);
     marquee.ScrollDelay(10);
     CHECK(marquee.ScrollInterval() == 60);

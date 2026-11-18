@@ -31,7 +31,7 @@
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include <charconv>
 
-namespace krys::boo::css
+namespace krys::boo
 {
 #pragma region CSSFontFeatureValuesRule
 
@@ -86,7 +86,7 @@ namespace krys::boo::css
         {
           builder.Append(separator);
         }
-        builder.Append(SerialiseFontFamily(element.ToString()));
+        builder.Append(css::SerialiseFontFamily(element.ToString()));
         first = false;
       }
     };
@@ -101,7 +101,7 @@ namespace krys::boo::css
         builder.Append(u8"@", variantName, u8" { ");
         for (const auto &[key, integers] : tags)
         {
-          SerialiseIdentifier(key, builder);
+          css::SerialiseIdentifier(key, builder);
           builder.Append(u8':');
           for (auto integer : integers)
           {
@@ -126,7 +126,7 @@ namespace krys::boo::css
     return krys::move(builder).ToString();
   }
 
-  void CSSFontFeatureValuesRule::Reattach(Rule &rule) noexcept
+  void CSSFontFeatureValuesRule::Reattach(css::Rule &rule) noexcept
   {
     _fontFeatureValuesRule = ShareRef(Downcast<css::FontFeatureValuesRule>(rule));
   }
@@ -157,7 +157,7 @@ namespace krys::boo::css
     return {};
   }
 
-  void CSSFontFeatureValuesBlockRule::Reattach(Rule &rule) noexcept
+  void CSSFontFeatureValuesBlockRule::Reattach(css::Rule &rule) noexcept
   {
     _fontFeatureValuesBlockRule = ShareRef(Downcast<css::FontFeatureValuesBlockRule>(rule));
   }

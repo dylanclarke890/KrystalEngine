@@ -37,8 +37,8 @@ namespace krys::boo
 {
   namespace
   {
-    void SetOrRemoveAttribute(dom::Element &element, const dom::DOMStringAtom &attribute,
-                              const Maybe<dom::DOMString> &value) noexcept
+    void SetOrRemoveAttribute(Element &element, const DOMStringAtom &attribute,
+                              const Maybe<DOMString> &value) noexcept
     {
       if (value)
       {
@@ -51,15 +51,15 @@ namespace krys::boo
     }
   }
 
-  Ref<SetNodeAttributeCommand> SetNodeAttributeCommand::Create(dom::Element &element,
-                                                               const dom::DOMStringAtom &attribute,
-                                                               Maybe<dom::DOMString> value) noexcept
+  Ref<SetNodeAttributeCommand> SetNodeAttributeCommand::Create(Element &element,
+                                                               const DOMStringAtom &attribute,
+                                                               Maybe<DOMString> value) noexcept
   {
     return CreateRef<SetNodeAttributeCommand>(element, attribute, krys::move(value));
   }
 
-  SetNodeAttributeCommand::SetNodeAttributeCommand(dom::Element &element, dom::DOMStringAtom attribute,
-                                                   Maybe<dom::DOMString> value) noexcept
+  SetNodeAttributeCommand::SetNodeAttributeCommand(Element &element, DOMStringAtom attribute,
+                                                   Maybe<DOMString> value) noexcept
       : SimpleEditCommand(element.NodeDocument()), _element(ShareRef(element)),
         _attribute(krys::move(attribute)), _value(krys::move(value))
   {

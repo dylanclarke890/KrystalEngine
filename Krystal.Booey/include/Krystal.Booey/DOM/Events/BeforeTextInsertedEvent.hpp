@@ -29,7 +29,7 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   /// @brief The text an edit is about to insert, dispatched at the editing host before the edit so that a
   /// text control can change it (to keep within its maximum length, or drop line breaks a field can't hold).
@@ -63,8 +63,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::BeforeTextInsertedEvent)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::BeforeTextInsertedEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Event &event) noexcept
   {
     return event.IsBeforeTextInsertedEvent();
   }

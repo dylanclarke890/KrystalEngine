@@ -25,34 +25,36 @@
 
 #include "Krystal.Booey/CSS/CSSOM/CSSCounterStyleRule.hpp"
 #include "Krystal.Booey/CSS/Counter/CounterStyleDescriptors.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/CounterStyles.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
 #include "Krystal.Booey/CSS/Rules/CounterStyleRule.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSCounterStyleRule::CSSCounterStyleRule(CounterStyleRule &counterStyleRule, CSSStyleSheet *parent) noexcept
+  CSSCounterStyleRule::CSSCounterStyleRule(css::CounterStyleRule &counterStyleRule,
+                                           CSSStyleSheet *parent) noexcept
       : CSSRule(parent), _counterStyleRule(ShareRef(counterStyleRule))
   {
   }
 
   CSSCounterStyleRule::~CSSCounterStyleRule() noexcept = default;
 
-  Ref<CSSCounterStyleRule> CSSCounterStyleRule::Create(CounterStyleRule &rule, CSSStyleSheet *sheet) noexcept
+  Ref<CSSCounterStyleRule> CSSCounterStyleRule::Create(css::CounterStyleRule &rule,
+                                                       CSSStyleSheet *sheet) noexcept
   {
     return AdoptRef(*new CSSCounterStyleRule(rule, sheet));
   }
 
-  const CounterStyleDescriptors &CSSCounterStyleRule::Descriptors() const noexcept
+  const css::CounterStyleDescriptors &CSSCounterStyleRule::Descriptors() const noexcept
   {
     return _counterStyleRule->Descriptors();
   }
 
-  CounterStyleDescriptors &CSSCounterStyleRule::MutableDescriptors() noexcept
+  css::CounterStyleDescriptors &CSSCounterStyleRule::MutableDescriptors() noexcept
   {
     return _counterStyleRule->MutableDescriptors();
   }
@@ -140,25 +142,25 @@ namespace krys::boo::css
     return result;
   }
 
-  void CSSCounterStyleRule::Reattach(Rule &rule) noexcept
+  void CSSCounterStyleRule::Reattach(css::Rule &rule) noexcept
   {
-    _counterStyleRule = ShareRef(Downcast<CounterStyleRule>(rule));
+    _counterStyleRule = ShareRef(Downcast<css::CounterStyleRule>(rule));
   }
 
-  RefPtr<Value> CSSCounterStyleRule::CSSValueFromText(PropertyId property,
-                                                      const CSSOMString &text) const noexcept
+  RefPtr<css::Value> CSSCounterStyleRule::CSSValueFromText(css::PropertyId property,
+                                                           const CSSOMString &text) const noexcept
   {
-    return PropertyParser::ParseCounterStyleDescriptor(property, text, GetParserContext());
+    return css::PropertyParser::ParseCounterStyleDescriptor(property, text, GetParserContext());
   }
 
   // https://drafts.csswg.org/css-counter-styles-3/#dom-csscounterstylerule-name
   void CSSCounterStyleRule::SetName(const CSSOMString &text) noexcept
   {
-    InputStream inputStream {CSSOMString(text)};
-    Tokenizer tokenizer(inputStream);
+    css::InputStream inputStream {CSSOMString(text)};
+    css::Tokenizer tokenizer(inputStream);
     std::ignore = tokenizer.PumpTokenizer();
     auto tokenRange = tokenizer.Tokens();
-    auto name = parse_property::ConsumeCounterStyleNameInPrelude(tokenRange);
+    auto name = css::parse_property::ConsumeCounterStyleNameInPrelude(tokenRange);
     if (name == null)
     {
       return;
@@ -171,13 +173,13 @@ namespace krys::boo::css
 
   void CSSCounterStyleRule::SetSystem(const CSSOMString &text) noexcept
   {
-    auto systemValue = CSSValueFromText(PropertyId::System, text);
+    auto systemValue = CSSValueFromText(css::PropertyId::System, text);
     if (!systemValue)
     {
       return;
     }
 
-    auto system = ToCounterStyleSystemEnum(systemValue.get());
+    auto system = css::ToCounterStyleSystemEnum(systemValue.get());
     // If the attribute being set is `system`, and the new value would change the algorithm used, do nothing
     // and abort these steps.
     // (It's okay to change an aspect of the algorithm, like the first symbol value of a `fixed` system.)
@@ -187,26 +189,26 @@ namespace krys::boo::css
       return;
     }
 
-    auto systemData = ExtractSystemDataFromValue(krys::move(systemValue), system);
+    auto systemData = css::ExtractSystemDataFromValue(krys::move(systemValue), system);
     CSSStyleSheet::RuleMutationScope mutationScope(this);
     MutableDescriptors().SetSystemData(krys::move(systemData));
   }
 
   void CSSCounterStyleRule::SetNegative(const CSSOMString &text) noexcept
   {
-    auto newValue = CSSValueFromText(PropertyId::Negative, text);
+    auto newValue = CSSValueFromText(css::PropertyId::Negative, text);
     if (!newValue)
     {
       return;
     }
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
-    MutableDescriptors().SetNegative(NegativeSymbolsFromValue(krys::move(newValue)));
+    MutableDescriptors().SetNegative(css::NegativeSymbolsFromValue(krys::move(newValue)));
   }
 
   void CSSCounterStyleRule::SetPrefix(const CSSOMString &text) noexcept
   {
-    auto newValue = CSSValueFromText(PropertyId::Prefix, text);
+    auto newValue = CSSValueFromText(css::PropertyId::Prefix, text);
     if (!newValue)
     {
       return;
@@ -218,7 +220,7 @@ namespace krys::boo::css
 
   void CSSCounterStyleRule::SetSuffix(const CSSOMString &text) noexcept
   {
-    auto newValue = CSSValueFromText(PropertyId::Suffix, text);
+    auto newValue = CSSValueFromText(css::PropertyId::Suffix, text);
     if (!newValue)
     {
       return;
@@ -230,62 +232,62 @@ namespace krys::boo::css
 
   void CSSCounterStyleRule::SetRange(const CSSOMString &text) noexcept
   {
-    auto newValue = CSSValueFromText(PropertyId::Range, text);
+    auto newValue = CSSValueFromText(css::PropertyId::Range, text);
     if (!newValue)
     {
       return;
     }
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
-    MutableDescriptors().SetRanges(RangeFromValue(krys::move(newValue)));
+    MutableDescriptors().SetRanges(css::RangeFromValue(krys::move(newValue)));
   }
 
   void CSSCounterStyleRule::SetPad(const CSSOMString &text) noexcept
   {
-    auto newValue = CSSValueFromText(PropertyId::Pad, text);
+    auto newValue = CSSValueFromText(css::PropertyId::Pad, text);
     if (!newValue)
     {
       return;
     }
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
-    MutableDescriptors().SetPad(PadFromValue(krys::move(newValue)));
+    MutableDescriptors().SetPad(css::PadFromValue(krys::move(newValue)));
   }
 
   void CSSCounterStyleRule::SetFallback(const CSSOMString &text) noexcept
   {
-    auto newValue = CSSValueFromText(PropertyId::Fallback, text);
+    auto newValue = CSSValueFromText(css::PropertyId::Fallback, text);
     if (!newValue)
     {
       return;
     }
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
-    MutableDescriptors().SetFallbackName(FallbackNameFromValue(newValue));
+    MutableDescriptors().SetFallbackName(css::FallbackNameFromValue(newValue));
   }
 
   void CSSCounterStyleRule::SetSymbols(const CSSOMString &text) noexcept
   {
-    auto newValue = CSSValueFromText(PropertyId::Symbols, text);
+    auto newValue = CSSValueFromText(css::PropertyId::Symbols, text);
     if (!newValue)
     {
       return;
     }
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
-    MutableDescriptors().SetSymbols(SymbolsFromValue(krys::move(newValue)));
+    MutableDescriptors().SetSymbols(css::SymbolsFromValue(krys::move(newValue)));
   }
 
   void CSSCounterStyleRule::SetAdditiveSymbols(const CSSOMString &text) noexcept
   {
-    auto newValue = CSSValueFromText(PropertyId::AdditiveSymbols, text);
+    auto newValue = CSSValueFromText(css::PropertyId::AdditiveSymbols, text);
     if (!newValue)
     {
       return;
     }
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
-    MutableDescriptors().SetAdditiveSymbols(AdditiveSymbolsFromValue(krys::move(newValue)));
+    MutableDescriptors().SetAdditiveSymbols(css::AdditiveSymbolsFromValue(krys::move(newValue)));
   }
 
   void CSSCounterStyleRule::SetSpeakAs(const CSSOMString &) noexcept

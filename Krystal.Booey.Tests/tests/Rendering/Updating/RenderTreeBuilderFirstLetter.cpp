@@ -95,7 +95,7 @@ namespace krys::boo::tests
     SECTION("A change to the text rebuilds the first letter")
     {
       auto &p = fixture.ById(u8"p");
-      REQUIRE_FALSE(Downcast<dom::Text>(*p.FirstChild()).Data(u8"Bye").HasException());
+      REQUIRE_FALSE(Downcast<Text>(*p.FirstChild()).Data(u8"Bye").HasException());
       document.UpdateStyleIfNeeded();
       auto *firstLetter = DynamicDowncast<RenderInline>(p.Renderer()->FirstChild());
       REQUIRE(firstLetter);

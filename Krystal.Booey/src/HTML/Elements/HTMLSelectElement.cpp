@@ -67,7 +67,7 @@
 #include <climits>
 #include <unicode/uchar.h>
 
-namespace krys::boo::html
+namespace krys::boo
 {
   namespace
   {
@@ -80,7 +80,7 @@ namespace krys::boo::html
     public:
       explicit SelectedOptionsCollection(HTMLSelectElement &select) noexcept
           : LiveHTMLCollection(select,
-                               [&select](const dom::Element &element)
+                               [&select](const boo::Element &element)
                                {
                                  auto *option = DynamicDowncast<HTMLOptionElement>(element);
                                  return option && option->OwnerSelectElement() == &select
@@ -102,13 +102,13 @@ namespace krys::boo::html
     // Upper limit agreed upon with representatives of Opera and Mozilla.
     constexpr uint32 MaxSelectItems = 100'000u;
 
-    KRYS_NODISCARD uint32 LimitToOnlyHTMLNonNegative(Maybe<dom::DOMStringView> value) noexcept
+    KRYS_NODISCARD uint32 LimitToOnlyHTMLNonNegative(Maybe<DOMStringView> value) noexcept
     {
       if (!value)
       {
         return 0u;
       }
-      auto result = Numbers::ParseNonNegativeInteger(*value);
+      auto result = html::Numbers::ParseNonNegativeInteger(*value);
       if (!result.Success() || result.Value > static_cast<int64>(INT32_MAX))
       {
         return 0u;
@@ -117,8 +117,8 @@ namespace krys::boo::html
     }
   }
 
-  HTMLSelectElement::HTMLSelectElement(dom::Document &document) noexcept
-      : HTMLFormControlElement(document, HTMLElementInterface::Select), _typeAhead(this)
+  HTMLSelectElement::HTMLSelectElement(Document &document) noexcept
+      : HTMLFormControlElement(document, html::HTMLElementInterface::Select), _typeAhead(this)
   {
   }
 
@@ -132,7 +132,7 @@ namespace krys::boo::html
     public:
       using HTMLDivElement::HTMLDivElement;
 
-      void DefaultEventHandler(dom::Event &event) noexcept final
+      void DefaultEventHandler(Event &event) noexcept final
       {
         if (event.Type() == event_names::MouseDown)
         {
@@ -144,7 +144,7 @@ namespace krys::boo::html
     };
   }
 
-  Ref<HTMLSelectElement> HTMLSelectElement::Create(dom::Document &document) noexcept
+  Ref<HTMLSelectElement> HTMLSelectElement::Create(Document &document) noexcept
   {
     auto select = CreateRef<HTMLSelectElement>(document);
     select->EnsureUserAgentShadowRoot();
@@ -152,14 +152,14 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#the-select-element-2
-  void HTMLSelectElement::DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept
+  void HTMLSelectElement::DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept
   {
     auto &document = NodeDocument();
 
     auto selectButtonSlot = dom::ElementFactory::CreateHTMLElement<HTMLSlotElement>(document, u8"slot");
     _selectButtonSlot = CreateWeakPtr(selectButtonSlot.get());
     auto fallbackButtonText = dom::ElementFactory::CreateHTMLElement<HTMLDivElement>(document, u8"div");
-    _selectFallbackButtonText = CreateWeakPtr<dom::Element>(fallbackButtonText.get());
+    _selectFallbackButtonText = CreateWeakPtr<boo::Element>(fallbackButtonText.get());
     (void)selectButtonSlot->AppendChild(*fallbackButtonText);
     (void)root.AppendChild(*selectButtonSlot);
 
@@ -178,7 +178,7 @@ namespace krys::boo::html
     (void)root.AppendChild(*selectListBoxSlot);
   }
 
-  HTMLSlotElement *HTMLSelectElement::SlotForHostChild(const dom::Node &child) const noexcept
+  HTMLSlotElement *HTMLSelectElement::SlotForHostChild(const Node &child) const noexcept
   {
     krys_debug_assert(child.ParentNode() == this);
     if (!UsesMenuList())
@@ -241,10 +241,10 @@ namespace krys::boo::html
     auto *option = FirstSelectedOption();
     // 2. Let text be the empty string.
     // 3. If option is not null, then set text to option's label.
-    dom::DOMString text = option ? dom::DOMString(option->Label()) : dom::DOMString();
+    DOMString text = option ? DOMString(option->Label()) : DOMString();
     // 4. Set select's select fallback button text to text.
     if (auto *fallbackButtonText = _selectFallbackButtonText.get();
-        fallbackButtonText && fallbackButtonText->TextContent().value_or(dom::DOMString()) != text)
+        fallbackButtonText && fallbackButtonText->TextContent().value_or(DOMString()) != text)
     {
       (void)fallbackButtonText->TextContent(krys::move(text));
     }
@@ -327,7 +327,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#focus-another-option
-  void HTMLSelectElement::FocusOptionForKey(dom::DOMStringView keyIdentifier) noexcept
+  void HTMLSelectElement::FocusOptionForKey(DOMStringView keyIdentifier) noexcept
   {
     List<HTMLOptionElement *> options;
     for (auto &item : ListItems())
@@ -384,11 +384,11 @@ namespace krys::boo::html
     options[static_cast<size_t>(std::clamp(next, 0, lastIndex))]->Focus();
   }
 
-  void HTMLSelectElement::BaseAppearanceDefaultEventHandler(dom::Event &event) noexcept
+  void HTMLSelectElement::BaseAppearanceDefaultEventHandler(Event &event) noexcept
   {
     if (event.Type() == event_names::MouseDown)
     {
-      auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
+      auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
       if (!mouseEvent || mouseEvent->Button() != 0)
       {
         return;
@@ -409,7 +409,7 @@ namespace krys::boo::html
     {
       return;
     }
-    auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event);
+    auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event);
     if (!keyboardEvent)
     {
       return;
@@ -450,7 +450,7 @@ namespace krys::boo::html
     }
   }
 
-  HTMLSelectElement *HTMLSelectElement::FindOwnerSelect(dom::ContainerNode *startNode,
+  HTMLSelectElement *HTMLSelectElement::FindOwnerSelect(ContainerNode *startNode,
                                                         ExcludeOptGroup excludeOptGroup) noexcept
   {
     if (!startNode)
@@ -486,7 +486,7 @@ namespace krys::boo::html
     HTMLFormControlElement::DidRecalcStyle(styleChange);
   }
 
-  dom::DOMString HTMLSelectElement::FormControlType() const noexcept
+  DOMString HTMLSelectElement::FormControlType() const noexcept
   {
     return _multiple ? u8"select-multiple" : u8"select-one";
   }
@@ -623,11 +623,11 @@ namespace krys::boo::html
     return LastSelectedListIndex();
   }
 
-  dom::ExceptionOr<void> HTMLSelectElement::Add(const OptionOrOptGroupElement &element,
-                                                const Maybe<HTMLElementOrInt> &before) noexcept
+  ExceptionOr<void> HTMLSelectElement::Add(const OptionOrOptGroupElement &element,
+                                           const Maybe<HTMLElementOrInt> &before) noexcept
   {
     // The options collection's add(element, before), which this acts like.
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     Ref<HTMLElement> toInsert = std::visit([](const auto &htmlElement) -> Ref<HTMLElement>
                                            { return ShareRef<HTMLElement>(*htmlElement); }, element);
     RefPtr<HTMLElement> beforeElement;
@@ -640,14 +640,14 @@ namespace krys::boo::html
     //    "HierarchyRequestError" DOMException.
     if (dom::TreeQueries::IsAncestor(*toInsert, *this))
     {
-      return dom::ExceptionCode::HierarchyRequestError;
+      return ExceptionCode::HierarchyRequestError;
     }
 
     // 2. If before is an element, but that element isn't a descendant of the select element on which this is
     //    rooted, then throw a "NotFoundError" DOMException.
     if (beforeElement && !dom::TreeQueries::IsDescendant(*beforeElement, *this))
     {
-      return dom::ExceptionCode::NotFoundError;
+      return ExceptionCode::NotFoundError;
     }
 
     // 3. If element and before are the same element, then return.
@@ -668,8 +668,8 @@ namespace krys::boo::html
     // 6. Let parent be reference's parent node if reference is not null; otherwise the select element on
     // which
     //    this is rooted.
-    Ref<dom::ContainerNode> parent =
-      reference ? ShareRef(*reference->ParentNode()) : ShareRef<dom::ContainerNode>(*this);
+    Ref<ContainerNode> parent =
+      reference ? ShareRef(*reference->ParentNode()) : ShareRef<ContainerNode>(*this);
 
     // 7. Pre-insert element into parent node before reference.
     auto result = parent->InsertBefore(*toInsert, reference.get());
@@ -684,7 +684,7 @@ namespace krys::boo::html
   {
     // To remove an option from the options collection given index:
     // https://html.spec.whatwg.org/#htmloptionscollection-remove-an-option
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
 
     // 1. If the number of nodes represented by collection is 0, then return.
     // 2. If index is not a number greater than or equal to 0 and less than the number of nodes represented by
@@ -701,7 +701,7 @@ namespace krys::boo::html
     (void)item->Remove();
   }
 
-  dom::DOMString HTMLSelectElement::Value() const noexcept
+  DOMString HTMLSelectElement::Value() const noexcept
   {
     for (auto &item : ListItems())
     {
@@ -717,7 +717,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-select-value
-  void HTMLSelectElement::Value(dom::DOMStringView value) noexcept
+  void HTMLSelectElement::Value(DOMStringView value) noexcept
   {
     // 1. Let firstMatchingOption be null.
     // 2. For each option of this's list of options:
@@ -755,10 +755,9 @@ namespace krys::boo::html
     InvalidateStyleForSubtree();
   }
 
-  void HTMLSelectElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                             Maybe<dom::DOMStringView> oldValue,
-                                             Maybe<dom::DOMStringView> value,
-                                             const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLSelectElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                             Maybe<DOMStringView> value,
+                                             const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLFormControlElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
@@ -816,7 +815,7 @@ namespace krys::boo::html
     return CreateRenderer<RenderListBox>(*this, krys::move(style));
   }
 
-  bool HTMLSelectElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
+  bool HTMLSelectElement::ChildShouldCreateRenderer(const Node &child) const noexcept
   {
     if (!HTMLFormControlElement::ChildShouldCreateRenderer(child))
     {
@@ -841,19 +840,20 @@ namespace krys::boo::html
     return selectedOptions;
   }
 
-  Ref<HTMLOptionsCollection> HTMLSelectElement::Options() noexcept
+  Ref<html::HTMLOptionsCollection> HTMLSelectElement::Options() noexcept
   {
     if (auto *options = _options.get())
     {
       // Only ever an HTMLOptionsCollection.
-      return ShareRef(static_cast<HTMLOptionsCollection &>(*options));
+      return ShareRef(static_cast<html::HTMLOptionsCollection &>(*options));
     }
-    auto options = CreateRef<HTMLOptionsCollection>(*this);
+    auto options = CreateRef<html::HTMLOptionsCollection>(*this);
     _options = CreateWeakPtr<dom::HTMLCollection>(options.get());
     return options;
   }
 
-  void HTMLSelectElement::UpdateListItemSelectedStates(AllowStyleInvalidation allowStyleInvalidation) noexcept
+  void HTMLSelectElement::UpdateListItemSelectedStates(
+    html::AllowStyleInvalidation allowStyleInvalidation) noexcept
   {
     if (_shouldRecalcListItems)
     {
@@ -915,7 +915,7 @@ namespace krys::boo::html
     CloneSelectedOptionIntoSelectButton();
   }
 
-  HTMLOptionElement *HTMLSelectElement::NamedItem(dom::DOMStringView name) const noexcept
+  HTMLOptionElement *HTMLSelectElement::NamedItem(DOMStringView name) const noexcept
   {
     if (name.empty())
     {
@@ -944,10 +944,10 @@ namespace krys::boo::html
     return &Downcast<HTMLOptionElement>(*ListItems()[static_cast<size_t>(listIndex)]);
   }
 
-  dom::ExceptionOr<void> HTMLSelectElement::SetItem(uint32 index, HTMLOptionElement *option) noexcept
+  ExceptionOr<void> HTMLSelectElement::SetItem(uint32 index, HTMLOptionElement *option) noexcept
   {
     // Setting a new or existing indexed property of the options collection.
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
 
     // 1. If value is null, then remove an option from collection given index and return.
     if (!option)
@@ -1006,10 +1006,10 @@ namespace krys::boo::html
     return {};
   }
 
-  dom::ExceptionOr<void> HTMLSelectElement::AppendNewOptionElements(uint32 count) noexcept
+  ExceptionOr<void> HTMLSelectElement::AppendNewOptionElements(uint32 count) noexcept
   {
     // 1. Let fragment be the result of creating a document fragment given select's node document.
-    auto fragment = CreateRef<dom::DocumentFragment>(NodeDocument());
+    auto fragment = CreateRef<DocumentFragment>(NodeDocument());
 
     // 2. Append count new option elements to fragment.
     for (uint32 i = 0; i < count; ++i)
@@ -1031,10 +1031,10 @@ namespace krys::boo::html
     return {};
   }
 
-  dom::ExceptionOr<void> HTMLSelectElement::Length(uint32 newLength) noexcept
+  ExceptionOr<void> HTMLSelectElement::Length(uint32 newLength) noexcept
   {
     // The options collection's length setter, which this acts like.
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
 
     // 1. Let current be the number of nodes represented by the collection.
     uint32 current = Length();
@@ -1382,7 +1382,7 @@ namespace krys::boo::html
     }
 
     // 3. Update a select's descendant selectedcontent elements given select.
-    FormControlAlgorithms::UpdateDescendantSelectedContents(*this);
+    html::FormControlAlgorithms::UpdateDescendantSelectedContents(*this);
   }
 
   HTMLOptionElement *HTMLSelectElement::FirstSelectedOption() const noexcept
@@ -1411,7 +1411,7 @@ namespace krys::boo::html
   }
 
   void HTMLSelectElement::RecalcListItems(bool updateSelectedStates,
-                                          AllowStyleInvalidation allowStyleInvalidation) const noexcept
+                                          html::AllowStyleInvalidation allowStyleInvalidation) const noexcept
   {
     _listItems.clear();
 
@@ -1534,7 +1534,7 @@ namespace krys::boo::html
     SelectOption(index, {SelectOptionFlag::DeselectOtherOptions, SelectOptionFlag::MakeOptionDirty});
 
     // 4. Update a select's descendant selectedcontent elements given select.
-    FormControlAlgorithms::UpdateDescendantSelectedContents(*this);
+    html::FormControlAlgorithms::UpdateDescendantSelectedContents(*this);
   }
 
   void HTMLSelectElement::OptionSelectionStateChanged(HTMLOptionElement &option,
@@ -1593,7 +1593,7 @@ namespace krys::boo::html
     // Picking an option sends select update notifications, which update the selectedcontent elements.
     if (flags.Contains(SelectOptionFlag::UserDriven))
     {
-      FormControlAlgorithms::UpdateDescendantSelectedContents(*this);
+      html::FormControlAlgorithms::UpdateDescendantSelectedContents(*this);
     }
 
     InvalidateSelectedItems();
@@ -1672,7 +1672,7 @@ namespace krys::boo::html
     return optionIndex;
   }
 
-  void HTMLSelectElement::DispatchFocusEvent(dom::EventTarget *relatedTarget,
+  void HTMLSelectElement::DispatchFocusEvent(EventTarget *relatedTarget,
                                              const dom::FocusOptions &options) noexcept
   {
     // Save the selection so it can be compared to the new selection when dispatching change events during
@@ -1684,7 +1684,7 @@ namespace krys::boo::html
     HTMLFormControlElement::DispatchFocusEvent(relatedTarget, options);
   }
 
-  void HTMLSelectElement::DispatchBlurEvent(dom::EventTarget *relatedTarget) noexcept
+  void HTMLSelectElement::DispatchBlurEvent(EventTarget *relatedTarget) noexcept
   {
     // We only need to fire change events here for menu lists, because we fire change events for list boxes
     // whenever the selection change is actually made. This matches other browsers' behavior.
@@ -1737,7 +1737,7 @@ namespace krys::boo::html
     }
   }
 
-  bool HTMLSelectElement::AppendFormData(DOMFormData &formData) noexcept
+  bool HTMLSelectElement::AppendFormData(html::DOMFormData &formData) noexcept
   {
     auto name = Name();
     if (name.empty())
@@ -1813,7 +1813,7 @@ namespace krys::boo::html
     }
 
     // 4. Update a select's descendant selectedcontent elements given selectElement.
-    FormControlAlgorithms::UpdateDescendantSelectedContents(*this);
+    html::FormControlAlgorithms::UpdateDescendantSelectedContents(*this);
     SetInteractedWithSinceLastFormSubmitEvent(false);
     InvalidateSelectedItems();
     SetOptionsChangedOnRenderer();
@@ -1821,7 +1821,7 @@ namespace krys::boo::html
     UpdateValidity();
   }
 
-  bool HTMLSelectElement::PlatformHandleKeydownEvent(dom::KeyboardEvent &event) noexcept
+  bool HTMLSelectElement::PlatformHandleKeydownEvent(KeyboardEvent &event) noexcept
   {
     if (!RenderTheme::Singleton().PopsMenuByArrowKeys())
     {
@@ -1854,11 +1854,11 @@ namespace krys::boo::html
     return false;
   }
 
-  void HTMLSelectElement::MenuListDefaultEventHandler(dom::Event &event) noexcept
+  void HTMLSelectElement::MenuListDefaultEventHandler(Event &event) noexcept
   {
     if (event.Type() == event_names::KeyDown)
     {
-      auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event);
+      auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event);
       if (!keyboardEvent)
       {
         return;
@@ -1940,7 +1940,7 @@ namespace krys::boo::html
     // the key press event.
     if (event.Type() == event_names::KeyPress)
     {
-      auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event);
+      auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event);
       if (!keyboardEvent)
       {
         return;
@@ -2015,7 +2015,7 @@ namespace krys::boo::html
       }
     }
 
-    if (auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
+    if (auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
         mouseEvent && event.Type() == event_names::MouseDown && mouseEvent->Button() == 0)
     {
       Focus();
@@ -2113,14 +2113,14 @@ namespace krys::boo::html
     UpdateListBoxSelection(!multiSelect);
 
     // Picking an option sends select update notifications, which update the selectedcontent elements.
-    FormControlAlgorithms::UpdateDescendantSelectedContents(*this);
+    html::FormControlAlgorithms::UpdateDescendantSelectedContents(*this);
   }
 
-  void HTMLSelectElement::ListBoxDefaultEventHandler(dom::Event &event) noexcept
+  void HTMLSelectElement::ListBoxDefaultEventHandler(Event &event) noexcept
   {
     KRYS_MAYBE_UNUSED auto &listItems = ListItems();
 
-    auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
+    auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
     if (event.Type() == event_names::MouseDown && mouseEvent && mouseEvent->Button() == 0)
     {
       Focus();
@@ -2212,7 +2212,7 @@ namespace krys::boo::html
     }
     else if (event.Type() == event_names::KeyDown)
     {
-      auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event);
+      auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event);
       if (!keyboardEvent)
       {
         return;
@@ -2222,8 +2222,8 @@ namespace krys::boo::html
       bool isHorizontalWritingMode = renderer ? renderer->GetWritingMode().IsHorizontal() : true;
       bool isBlockFlipped = renderer ? renderer->GetWritingMode().IsBlockFlipped() : false;
 
-      dom::DOMStringView nextKeyIdentifier = isHorizontalWritingMode ? u8"Down" : u8"Right";
-      dom::DOMStringView previousKeyIdentifier = isHorizontalWritingMode ? u8"Up" : u8"Left";
+      DOMStringView nextKeyIdentifier = isHorizontalWritingMode ? u8"Down" : u8"Right";
+      DOMStringView previousKeyIdentifier = isHorizontalWritingMode ? u8"Up" : u8"Left";
       if (isBlockFlipped)
       {
         std::swap(nextKeyIdentifier, previousKeyIdentifier);
@@ -2356,7 +2356,7 @@ namespace krys::boo::html
     }
     else if (event.Type() == event_names::KeyPress)
     {
-      auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event);
+      auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event);
       if (!keyboardEvent)
       {
         return;
@@ -2385,7 +2385,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLSelectElement::DefaultEventHandler(dom::Event &event) noexcept
+  void HTMLSelectElement::DefaultEventHandler(Event &event) noexcept
   {
     if (!Renderer())
     {
@@ -2417,7 +2417,7 @@ namespace krys::boo::html
 
     if (event.Type() == event_names::KeyPress)
     {
-      if (auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event))
+      if (auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event))
       {
         if (!keyboardEvent->CtrlKey() && !keyboardEvent->AltKey() && !keyboardEvent->MetaKey()
             && u_isprint(static_cast<UChar32>(keyboardEvent->CharCode())))
@@ -2457,7 +2457,7 @@ namespace krys::boo::html
     return static_cast<int32>(ListItems().size());
   }
 
-  dom::DOMString HTMLSelectElement::OptionAtIndex(int32 index) const noexcept
+  DOMString HTMLSelectElement::OptionAtIndex(int32 index) const noexcept
   {
     auto *option = DynamicDowncast<HTMLOptionElement>(ListItems()[static_cast<size_t>(index)].get());
     if (!option || option->IsDisabledFormControl())
@@ -2469,10 +2469,10 @@ namespace krys::boo::html
 
 #pragma endregion
 
-  void HTMLSelectElement::TypeAheadFind(dom::KeyboardEvent &event) noexcept
+  void HTMLSelectElement::TypeAheadFind(KeyboardEvent &event) noexcept
   {
     int32 index = _typeAhead.HandleEvent(
-      event, {TypeAhead::MatchMode::MatchPrefix, TypeAhead::MatchMode::CycleFirstChar});
+      event, {html::TypeAhead::MatchMode::MatchPrefix, html::TypeAhead::MatchMode::CycleFirstChar});
     if (index < 0)
     {
       return;
@@ -2537,7 +2537,7 @@ namespace krys::boo::html
     return options;
   }
 
-  dom::ExceptionOr<void> HTMLSelectElement::ShowPicker() noexcept
+  ExceptionOr<void> HTMLSelectElement::ShowPicker() noexcept
   {
     if (!NodeDocument().Frame())
     {
@@ -2546,15 +2546,14 @@ namespace krys::boo::html
 
     if (!IsMutable())
     {
-      return dom::Exception(dom::ExceptionCode::InvalidStateError,
-                            u8"Select showPicker() cannot be used on immutable controls.");
+      return Exception(ExceptionCode::InvalidStateError,
+                       u8"Select showPicker() cannot be used on immutable controls.");
     }
 
     auto *window = NodeDocument().Window();
     if (!window || !window->ConsumeTransientActivation())
     {
-      return dom::Exception(dom::ExceptionCode::NotAllowedError,
-                            u8"Select showPicker() requires a user gesture.");
+      return Exception(ExceptionCode::NotAllowedError, u8"Select showPicker() requires a user gesture.");
     }
 
     if (_contentsUseBaseAppearance)
@@ -2571,55 +2570,55 @@ namespace krys::boo::html
 #pragma region HTMLSelectElement
 
   // https://html.spec.whatwg.org/#dom-fe-autocomplete
-  dom::DOMString HTMLSelectElement::Autocomplete() const noexcept
+  DOMString HTMLSelectElement::Autocomplete() const noexcept
   {
     // Return the element's IDL-exposed autofill value.
-    return AutofillData::Create(*this).IDLExposedValue;
+    return html::AutofillData::Create(*this).IDLExposedValue;
   }
 
-  void HTMLSelectElement::Autocomplete(dom::DOMString value) noexcept
+  void HTMLSelectElement::Autocomplete(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"autocomplete", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"autocomplete", krys::move(value));
   }
 
   bool HTMLSelectElement::Disabled() const noexcept
   {
-    return Reflect<bool>(*this, u8"disabled");
+    return html::Reflect<bool>(*this, u8"disabled");
   }
 
   void HTMLSelectElement::Disabled(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"disabled", krys::move(value));
+    html::Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 
   void HTMLSelectElement::Multiple(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"multiple", krys::move(value));
+    html::Reflect<bool>(*this, u8"multiple", krys::move(value));
   }
 
-  dom::DOMString HTMLSelectElement::Name() const noexcept
+  DOMString HTMLSelectElement::Name() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLSelectElement::Name(dom::DOMString value) noexcept
+  void HTMLSelectElement::Name(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"name", krys::move(value));
   }
 
   bool HTMLSelectElement::Required() const noexcept
   {
-    return Reflect<bool>(*this, u8"required");
+    return html::Reflect<bool>(*this, u8"required");
   }
 
   void HTMLSelectElement::Required(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"required", krys::move(value));
+    html::Reflect<bool>(*this, u8"required", krys::move(value));
   }
 
   void HTMLSelectElement::Size(uint32 value) noexcept
   {
-    Reflect<uint32>(*this, u8"size", krys::move(value));
+    html::Reflect<uint32>(*this, u8"size", krys::move(value));
   }
 
 #pragma endregion

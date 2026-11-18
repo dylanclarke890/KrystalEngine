@@ -35,7 +35,7 @@
 namespace krys::boo
 {
   Ref<InsertNodeBeforeCommand>
-    InsertNodeBeforeCommand::Create(dom::Node &childToInsert, dom::Node &childToInsertBefore,
+    InsertNodeBeforeCommand::Create(Node &childToInsert, Node &childToInsertBefore,
                                     ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
                                     EditAction editingAction) noexcept
   {
@@ -44,7 +44,7 @@ namespace krys::boo
   }
 
   InsertNodeBeforeCommand::InsertNodeBeforeCommand(
-    dom::Node &childToInsert, dom::Node &childToInsertBefore,
+    Node &childToInsert, Node &childToInsertBefore,
     ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
     EditAction editingAction) noexcept
       : SimpleEditCommand(childToInsertBefore.NodeDocument(), editingAction),
@@ -58,7 +58,7 @@ namespace krys::boo
 
   void InsertNodeBeforeCommand::DoApply() noexcept
   {
-    RefPtr<dom::ContainerNode> parent = ShareRefPtr(_refChild->ParentNode());
+    RefPtr<ContainerNode> parent = ShareRefPtr(_refChild->ParentNode());
     if (!parent
         || (_shouldAssumeContentIsAlwaysEditable == DoNotAssumeContentIsAlwaysEditable
             && !IsEditableNode(*parent)))

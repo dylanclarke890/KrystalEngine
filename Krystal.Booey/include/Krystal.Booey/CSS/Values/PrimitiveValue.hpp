@@ -351,7 +351,7 @@ namespace krys::boo::css
     KRYS_NODISCARD UnitType PrimitiveType() const noexcept;
 
     /// @brief Exposed for the deprecated CSSOM. Throws if conversion to `targetUnit` is not allowed.
-    KRYS_NODISCARD dom::ExceptionOr<float> FloatValueDeprecated(UnitType targetUnit) const noexcept;
+    KRYS_NODISCARD ExceptionOr<float> FloatValueDeprecated(UnitType targetUnit) const noexcept;
 
 #pragma region Integer (requires IsInteger())
 

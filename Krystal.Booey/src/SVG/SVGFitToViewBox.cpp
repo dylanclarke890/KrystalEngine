@@ -27,7 +27,7 @@
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGRect.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   SVGFitToViewBox::SVGFitToViewBox(SVGElement *contextElement, SVGPropertyAccess access) noexcept
       : _viewBox(SVGAnimatedRect::Create(contextElement, access)),
@@ -43,7 +43,7 @@ namespace krys::boo::svg
     }
   }
 
-  bool SVGFitToViewBox::IsKnownAttribute(const dom::QualifiedName &attributeName) noexcept
+  bool SVGFitToViewBox::IsKnownAttribute(const QualifiedName &attributeName) noexcept
   {
     return PropertyRegistry::IsKnownAttribute(attributeName);
   }
@@ -60,7 +60,7 @@ namespace krys::boo::svg
     _isViewBoxValid = false;
   }
 
-  dom::DOMString SVGFitToViewBox::ViewBoxString() const noexcept
+  DOMString SVGFitToViewBox::ViewBoxString() const noexcept
   {
     return SVGPropertyTraits<FloatRect>::ToString(ViewBox());
   }
@@ -71,8 +71,7 @@ namespace krys::boo::svg
     ResetPreserveAspectRatio();
   }
 
-  bool SVGFitToViewBox::ParseAttribute(const dom::QualifiedName &name,
-                                       Maybe<dom::DOMStringView> value) noexcept
+  bool SVGFitToViewBox::ParseAttribute(const QualifiedName &name, Maybe<DOMStringView> value) noexcept
   {
     if (name == SVGNames::ViewBoxAttr())
     {
@@ -90,26 +89,26 @@ namespace krys::boo::svg
 
     if (name == SVGNames::PreserveAspectRatioAttr())
     {
-      SetPreserveAspectRatio(SVGPreserveAspectRatioValue {value.value_or(dom::DOMStringView {})});
+      SetPreserveAspectRatio(SVGPreserveAspectRatioValue {value.value_or(DOMStringView {})});
       return true;
     }
 
     return false;
   }
 
-  Maybe<FloatRect> SVGFitToViewBox::ParseViewBox(dom::DOMStringView value) noexcept
+  Maybe<FloatRect> SVGFitToViewBox::ParseViewBox(DOMStringView value) noexcept
   {
     return ParseViewBox(value, true);
   }
 
-  Maybe<FloatRect> SVGFitToViewBox::ParseViewBox(dom::DOMStringView &buffer, bool validate) noexcept
+  Maybe<FloatRect> SVGFitToViewBox::ParseViewBox(DOMStringView &buffer, bool validate) noexcept
   {
-    SkipOptionalSVGSpaces(buffer);
+    svg::SkipOptionalSVGSpaces(buffer);
 
-    auto x = ParseNumber(buffer);
-    auto y = ParseNumber(buffer);
-    auto width = ParseNumber(buffer);
-    auto height = ParseNumber(buffer, SuffixSkippingPolicy::DontSkip);
+    auto x = svg::ParseNumber(buffer);
+    auto y = svg::ParseNumber(buffer);
+    auto width = svg::ParseNumber(buffer);
+    auto height = svg::ParseNumber(buffer, svg::SuffixSkippingPolicy::DontSkip);
 
     if (validate)
     {
@@ -131,7 +130,7 @@ namespace krys::boo::svg
       }
 
       // Nothing should come after the last, fourth number.
-      SkipOptionalSVGSpaces(buffer);
+      svg::SkipOptionalSVGSpaces(buffer);
       if (!buffer.empty())
       {
         return {};

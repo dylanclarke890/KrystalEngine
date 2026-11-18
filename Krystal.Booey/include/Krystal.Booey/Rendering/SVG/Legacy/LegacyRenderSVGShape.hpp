@@ -33,14 +33,10 @@
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::svg
-{
-  class SVGGraphicsElement;
-}
-
 namespace krys::boo
 {
   class GraphicsContextStateSaver;
+  class SVGGraphicsElement;
 
   enum class LegacyRenderSVGShapeType : uint8
   {
@@ -93,7 +89,7 @@ namespace krys::boo
   public:
     ~LegacyRenderSVGShape() noexcept override;
 
-    KRYS_NODISCARD svg::SVGGraphicsElement &GraphicsElement() const noexcept;
+    KRYS_NODISCARD SVGGraphicsElement &GraphicsElement() const noexcept;
 
     void SetNeedsShapeUpdate() noexcept
     {
@@ -146,7 +142,7 @@ namespace krys::boo
     }
 
   protected:
-    LegacyRenderSVGShape(Type, svg::SVGGraphicsElement &, RenderStyle &&) noexcept;
+    LegacyRenderSVGShape(Type, SVGGraphicsElement &, RenderStyle &&) noexcept;
 
     Path &EnsurePath() noexcept;
 

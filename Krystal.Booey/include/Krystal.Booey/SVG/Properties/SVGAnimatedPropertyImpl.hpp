@@ -42,7 +42,7 @@
 #include "Krystal.Booey/SVG/SVGRect.hpp"
 #include "Krystal.Booey/SVG/SVGTransformList.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   using SVGAnimatedBoolean = SVGAnimatedPrimitiveProperty<bool>;
   using SVGAnimatedInteger = SVGAnimatedPrimitiveProperty<int32>;
@@ -58,7 +58,10 @@ namespace krys::boo::svg
   using SVGAnimatedNumberList = SVGAnimatedPropertyList<SVGNumberList>;
   using SVGAnimatedPointList = SVGAnimatedPropertyList<SVGPointList>;
   using SVGAnimatedTransformList = SVGAnimatedPropertyList<SVGTransformList>;
+}
 
+namespace krys::boo::svg
+{
   // Instantiated once in SVGAnimatedPropertyImpl.cpp: their virtual members are then compiled the same way by
   // every compiler (whether an implicit instantiation includes unused virtuals is unspecified), and once
   // rather than in every file that uses them.
@@ -77,7 +80,10 @@ namespace krys::boo::svg
   extern template class SVGAnimatedPropertyList<SVGPointList>;
   extern template class SVGAnimatedPropertyList<SVGTransformList>;
   extern template class SVGAnimatedPropertyList<SVGPathSegList>;
+}
 
+namespace krys::boo
+{
   class SVGAnimatedPathSegList : public SVGAnimatedPropertyList<SVGPathSegList>
   {
     using Base = SVGAnimatedPropertyList<SVGPathSegList>;

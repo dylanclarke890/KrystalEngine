@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<g>` element: a group of graphics.
   /// @see https://svgwg.org/svg2-draft/struct.html#InterfaceSVGGElement
@@ -11,7 +11,7 @@ namespace krys::boo::svg
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGGElement);
 
   public:
-    explicit SVGGElement(dom::Document &document) noexcept;
+    explicit SVGGElement(Document &document) noexcept;
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGGElement, SVGGraphicsElement>;
 
@@ -27,8 +27,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGGElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGGElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGGElement();
   }

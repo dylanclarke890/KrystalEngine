@@ -36,13 +36,13 @@ namespace krys::boo::dom
     return true;
   }
 
-  html::HTMLSlotElement *SlotAlgorithms::DefaultSlot(Node &node) noexcept
+  HTMLSlotElement *SlotAlgorithms::DefaultSlot(Node &node) noexcept
   {
     krys_debug_assert(Is<ShadowRoot>(TreeQueries::Root(node)));
 
     for (auto &descendant : DescendantRange(TreeQueries::Root(node)))
     {
-      if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(descendant))
+      if (auto *slot = DynamicDowncast<HTMLSlotElement>(descendant))
       {
         if (slot->Name().empty())
         {
@@ -54,13 +54,13 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-  const html::HTMLSlotElement *SlotAlgorithms::DefaultSlot(const Node &node) noexcept
+  const HTMLSlotElement *SlotAlgorithms::DefaultSlot(const Node &node) noexcept
   {
     krys_debug_assert(Is<ShadowRoot>(TreeQueries::Root(node)));
 
     for (auto &descendant : ConstDescendantRange(TreeQueries::Root(node)))
     {
-      if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(descendant))
+      if (auto *slot = DynamicDowncast<HTMLSlotElement>(descendant))
       {
         if (slot->Name().empty())
         {
@@ -97,7 +97,7 @@ namespace krys::boo::dom
     return node._assignedSlot != nullptr;
   }
 
-  html::HTMLSlotElement *SlotAlgorithms::GetAssignedSlot(const Node &node) noexcept
+  HTMLSlotElement *SlotAlgorithms::GetAssignedSlot(const Node &node) noexcept
   {
     if (Is<Element>(node))
     {
@@ -112,17 +112,17 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-  html::HTMLSlotElement *SlotAlgorithms::GetAssignedSlot(const Text &node) noexcept
+  HTMLSlotElement *SlotAlgorithms::GetAssignedSlot(const Text &node) noexcept
   {
     return node._assignedSlot.get();
   }
 
-  html::HTMLSlotElement *SlotAlgorithms::GetAssignedSlot(const Element &node) noexcept
+  HTMLSlotElement *SlotAlgorithms::GetAssignedSlot(const Element &node) noexcept
   {
     return node._assignedSlot.get();
   }
 
-  html::HTMLSlotElement *SlotAlgorithms::GetManualSlotAssignment(const Node &slottable) noexcept
+  HTMLSlotElement *SlotAlgorithms::GetManualSlotAssignment(const Node &slottable) noexcept
   {
     if (auto *element = DynamicDowncast<Element>(slottable))
     {
@@ -135,7 +135,7 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-  void SlotAlgorithms::SetManualSlotAssignment(Node &slottable, html::HTMLSlotElement *slot) noexcept
+  void SlotAlgorithms::SetManualSlotAssignment(Node &slottable, HTMLSlotElement *slot) noexcept
   {
     if (auto *element = DynamicDowncast<Element>(slottable))
     {
@@ -151,7 +151,7 @@ namespace krys::boo::dom
 
 #pragma region Finding slots and slotted elements
 
-  html::HTMLSlotElement *SlotAlgorithms::FindSlot(Node &slottable, bool open) noexcept
+  HTMLSlotElement *SlotAlgorithms::FindSlot(Node &slottable, bool open) noexcept
   {
     krys_debug_assert(IsSlottable(slottable));
 
@@ -180,22 +180,22 @@ namespace krys::boo::dom
 
     // A details element's first summary child takes its summary slot, and its other children its content
     // slot.
-    if (auto *details = DynamicDowncast<html::HTMLDetailsElement>(*parent);
+    if (auto *details = DynamicDowncast<HTMLDetailsElement>(*parent);
         details && shadow->Mode() == ShadowRootMode::UserAgent)
     {
       return details->SlotForHostChild(slottable);
     }
-    if (auto *select = DynamicDowncast<html::HTMLSelectElement>(*parent);
+    if (auto *select = DynamicDowncast<HTMLSelectElement>(*parent);
         select && shadow->Mode() == ShadowRootMode::UserAgent)
     {
       return select->SlotForHostChild(slottable);
     }
-    if (auto *option = DynamicDowncast<html::HTMLOptionElement>(*parent);
+    if (auto *option = DynamicDowncast<HTMLOptionElement>(*parent);
         option && shadow->Mode() == ShadowRootMode::UserAgent)
     {
       return option->SlotForHostChild();
     }
-    if (auto *optgroup = DynamicDowncast<html::HTMLOptGroupElement>(*parent);
+    if (auto *optgroup = DynamicDowncast<HTMLOptGroupElement>(*parent);
         optgroup && shadow->Mode() == ShadowRootMode::UserAgent)
     {
       return optgroup->SlotForHostChild(slottable);
@@ -207,7 +207,7 @@ namespace krys::boo::dom
     {
       for (auto &descendant : DescendantRange(*shadow))
       {
-        auto *slot = DynamicDowncast<html::HTMLSlotElement>(descendant);
+        auto *slot = DynamicDowncast<HTMLSlotElement>(descendant);
         if (slot == nullptr)
         {
           continue;
@@ -232,7 +232,7 @@ namespace krys::boo::dom
 
     for (auto &descendant : DescendantRange(*shadow))
     {
-      if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(descendant))
+      if (auto *slot = DynamicDowncast<HTMLSlotElement>(descendant))
       {
         if (slot->Name() == slottableName)
         {
@@ -244,7 +244,7 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-  List<Ref<Node>> SlotAlgorithms::FindSlottables(html::HTMLSlotElement &slot) noexcept
+  List<Ref<Node>> SlotAlgorithms::FindSlottables(HTMLSlotElement &slot) noexcept
   {
     // 1. Let result be « ».
     List<Ref<Node>> result;
@@ -300,7 +300,7 @@ namespace krys::boo::dom
     return result;
   }
 
-  List<Ref<Node>> SlotAlgorithms::FindFlattenedSlottables(html::HTMLSlotElement &slot) noexcept
+  List<Ref<Node>> SlotAlgorithms::FindFlattenedSlottables(HTMLSlotElement &slot) noexcept
   {
     // 1. Let result be « ».
     List<Ref<Node>> result;
@@ -331,10 +331,10 @@ namespace krys::boo::dom
     for (auto &node : slottables)
     {
       // 5a. If node is a slot whose root is a shadow root:
-      if (Is<html::HTMLSlotElement>(node) && TreeQueries::IsInShadowTree(*node))
+      if (Is<HTMLSlotElement>(node) && TreeQueries::IsInShadowTree(*node))
       {
         // 5a.i. Let temporaryResult be the result of finding flattened slottables given node.
-        auto temporaryResult = FindFlattenedSlottables(Downcast<html::HTMLSlotElement>(*node));
+        auto temporaryResult = FindFlattenedSlottables(Downcast<HTMLSlotElement>(*node));
 
         // 5a.ii. Append each slottable in temporaryResult, in order, to result.
         result.append_range(krys::move(temporaryResult));
@@ -354,7 +354,7 @@ namespace krys::boo::dom
 
 #pragma region Assigning slottables and slots
 
-  void SlotAlgorithms::AssignSlottables(html::HTMLSlotElement &slot) noexcept
+  void SlotAlgorithms::AssignSlottables(HTMLSlotElement &slot) noexcept
   {
     // 1. Let slottables be the result of finding slottables for slot.
     auto slottables = FindSlottables(slot);
@@ -432,7 +432,7 @@ namespace krys::boo::dom
   {
     for (auto &inclusiveDescendant : InclusiveDescendantRange(root))
     {
-      if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(inclusiveDescendant))
+      if (auto *slot = DynamicDowncast<HTMLSlotElement>(inclusiveDescendant))
       {
         AssignSlottables(*slot);
       }
@@ -442,7 +442,7 @@ namespace krys::boo::dom
   void SlotAlgorithms::AssignSlot(Node &slottable) noexcept
   {
     // 1. Let slot be the result of finding a slot with slottable.
-    html::HTMLSlotElement *slot = FindSlot(slottable);
+    HTMLSlotElement *slot = FindSlot(slottable);
 
     // 2. If slot is non-null, then run assign slottables for slot.
     if (slot != nullptr)
@@ -455,7 +455,7 @@ namespace krys::boo::dom
 
 #pragma region Signaling slot change
 
-  void SlotAlgorithms::SignalSlotChange(html::HTMLSlotElement &slot) noexcept
+  void SlotAlgorithms::SignalSlotChange(HTMLSlotElement &slot) noexcept
   {
     // 1. Append slot to slot's relevant agent's signal slots.
     MutationObserverAlgorithms::AppendSignalSlot(slot);

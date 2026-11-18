@@ -26,9 +26,9 @@
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include <algorithm>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFEMorphologyElement::SVGFEMorphologyElement(dom::Document &document) noexcept
+  SVGFEMorphologyElement::SVGFEMorphologyElement(Document &document) noexcept
       : SVGFilterPrimitiveStandardAttributes(document, CreateUnique<PropertyRegistry>(*this),
                                              SVGElementInterface::FEMorphology),
         _in1(SVGAnimatedString::Create(this)),
@@ -47,11 +47,10 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGFEMorphologyElement::AttributeChanged(const dom::QualifiedName &name,
-                                                Maybe<dom::DOMStringView> oldValue,
-                                                Maybe<dom::DOMStringView> value) noexcept
+  void SVGFEMorphologyElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                                Maybe<DOMStringView> value) noexcept
   {
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::OperatorAttr())
     {
@@ -63,11 +62,11 @@ namespace krys::boo::svg
     }
     else if (name == SVGNames::InAttr())
     {
-      _in1->SetBaseValInternal(dom::DOMString(string));
+      _in1->SetBaseValInternal(DOMString(string));
     }
     else if (name == SVGNames::RadiusAttr())
     {
-      if (auto result = ParseNumberOptionalNumber(string))
+      if (auto result = svg::ParseNumberOptionalNumber(string))
       {
         _radiusX->SetBaseValInternal(result->first);
         _radiusY->SetBaseValInternal(result->second);
@@ -78,7 +77,7 @@ namespace krys::boo::svg
   }
 
   bool SVGFEMorphologyElement::SetFilterEffectAttribute(FilterEffect &effect,
-                                                        const dom::QualifiedName &attributeName) noexcept
+                                                        const QualifiedName &attributeName) noexcept
   {
     auto &feMorphology = Downcast<FEMorphology>(effect);
     if (attributeName == SVGNames::OperatorAttr())
@@ -97,7 +96,7 @@ namespace krys::boo::svg
     return false;
   }
 
-  void SVGFEMorphologyElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGFEMorphologyElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (attributeName == SVGNames::InAttr())
     {

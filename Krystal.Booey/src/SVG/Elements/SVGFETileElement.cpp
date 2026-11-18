@@ -24,9 +24,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFETileElement::SVGFETileElement(dom::Document &document) noexcept
+  SVGFETileElement::SVGFETileElement(Document &document) noexcept
       : SVGFilterPrimitiveStandardAttributes(document, CreateUnique<PropertyRegistry>(*this),
                                              SVGElementInterface::FETile),
         _in1(SVGAnimatedString::Create(this))
@@ -39,18 +39,18 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGFETileElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                          Maybe<dom::DOMStringView> value) noexcept
+  void SVGFETileElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                          Maybe<DOMStringView> value) noexcept
   {
     if (name == SVGNames::InAttr())
     {
-      _in1->SetBaseValInternal(dom::DOMString(value.value_or(dom::DOMStringView {})));
+      _in1->SetBaseValInternal(DOMString(value.value_or(DOMStringView {})));
     }
 
     SVGFilterPrimitiveStandardAttributes::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGFETileElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGFETileElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {

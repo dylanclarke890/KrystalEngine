@@ -45,14 +45,14 @@ namespace krys::boo::html
 
     virtual void DidReceiveSpaceKeyFromControl() noexcept = 0;
 
-    KRYS_NODISCARD virtual dom::DOMString
+    KRYS_NODISCARD virtual DOMString
       FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept = 0;
 
     KRYS_NODISCARD virtual bool IsEditControlOwnerDisabled() const noexcept = 0;
 
     KRYS_NODISCARD virtual bool IsEditControlOwnerReadOnly() const noexcept = 0;
 
-    KRYS_NODISCARD virtual dom::DOMString LocaleIdentifier() const noexcept = 0;
+    KRYS_NODISCARD virtual DOMString LocaleIdentifier() const noexcept = 0;
   };
 
   /// @brief A date or time input's editable fields (the `::-webkit-datetime-edit` part): one per part of the
@@ -64,8 +64,8 @@ namespace krys::boo::html
   public:
     struct LayoutParameters
     {
-      dom::DOMString DateTimeFormat;
-      dom::DOMString FallbackDateTimeFormat;
+      DOMString DateTimeFormat;
+      DOMString FallbackDateTimeFormat;
       boo::Locale &FormatLocale;
       bool ShouldHaveMillisecondField {false};
 
@@ -92,17 +92,16 @@ namespace krys::boo::html
     DateComponents _placeholderDate;
 
   public:
-    DateTimeEditElement(dom::Document &document,
-                        DateTimeEditElementEditControlOwner &editControlOwner) noexcept;
+    DateTimeEditElement(Document &document, DateTimeEditElementEditControlOwner &editControlOwner) noexcept;
 
     ~DateTimeEditElement() noexcept override;
 
     KRYS_NODISCARD static Ref<DateTimeEditElement>
-      Create(dom::Document &document, DateTimeEditElementEditControlOwner &editControlOwner) noexcept;
+      Create(Document &document, DateTimeEditElementEditControlOwner &editControlOwner) noexcept;
 
     void AddField(const Ref<DateTimeFieldElement> &field) noexcept;
 
-    KRYS_NODISCARD dom::Element &FieldsWrapperElement() const noexcept;
+    KRYS_NODISCARD Element &FieldsWrapperElement() const noexcept;
 
     void FocusByOwner() noexcept;
 
@@ -112,9 +111,9 @@ namespace krys::boo::html
 
     void SetValueAsDate(const LayoutParameters &layoutParameters, const DateComponents &date) noexcept;
 
-    KRYS_NODISCARD dom::DOMString Value() const noexcept;
+    KRYS_NODISCARD DOMString Value() const noexcept;
 
-    KRYS_NODISCARD dom::DOMString PlaceholderValue() const noexcept;
+    KRYS_NODISCARD DOMString PlaceholderValue() const noexcept;
 
     KRYS_NODISCARD bool EditableFieldsHaveValues() const noexcept;
 
@@ -129,7 +128,7 @@ namespace krys::boo::html
       return _fields;
     }
 
-    void DefaultEventHandler(dom::Event &event) noexcept final;
+    void DefaultEventHandler(Event &event) noexcept final;
 
   private:
     KRYS_NODISCARD size_t FieldIndexOf(const DateTimeFieldElement &field) const noexcept;
@@ -144,7 +143,7 @@ namespace krys::boo::html
     bool FocusOnNextFocusableField(size_t startIndex) noexcept;
 
     // DateTimeFieldElementFieldOwner functions:
-    void DidBlurFromField(dom::Event &event) noexcept final;
+    void DidBlurFromField(Event &event) noexcept final;
 
     void FieldValueChanged() noexcept final;
 
@@ -158,7 +157,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool IsFieldOwnerHorizontal() const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString LocaleIdentifier() const noexcept final;
+    KRYS_NODISCARD DOMString LocaleIdentifier() const noexcept final;
 
     KRYS_NODISCARD const DateComponents &PlaceholderDate() const noexcept final;
   };

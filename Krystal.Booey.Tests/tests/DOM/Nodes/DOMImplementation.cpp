@@ -82,11 +82,11 @@ namespace krys::boo::dom::tests
       auto xhtml = implementation.CreateDocument(infra::namespaces::HTML, u8"html").ReleaseValue();
       CHECK(xhtml->ContentType() == u8"application/xhtml+xml");
       CHECK(Is<XHTMLDocument>(static_cast<Document &>(*xhtml)));
-      CHECK(Is<html::HTMLElement>(*xhtml->DocumentElement()));
+      CHECK(Is<HTMLElement>(*xhtml->DocumentElement()));
 
       auto svg = implementation.CreateDocument(infra::namespaces::SVG, u8"svg").ReleaseValue();
       CHECK(svg->ContentType() == u8"image/svg+xml");
-      CHECK(Is<svg::SVGDocument>(static_cast<Document &>(*svg)));
+      CHECK(Is<SVGDocument>(static_cast<Document &>(*svg)));
 
       auto xml = implementation.CreateDocument(u8"urn:x", u8"").ReleaseValue();
       CHECK(xml->ContentType() == u8"application/xml");

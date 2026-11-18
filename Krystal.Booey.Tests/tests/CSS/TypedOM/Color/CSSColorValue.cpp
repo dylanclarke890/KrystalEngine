@@ -21,7 +21,7 @@ namespace krys::boo::css::tests
     using Factory = CSSNumericFactory;
 
     template <typename T>
-    KRYS_NODISCARD Ref<T> Value(dom::ExceptionOr<Ref<T>> result)
+    KRYS_NODISCARD Ref<T> Value(ExceptionOr<Ref<T>> result)
     {
       REQUIRE(result.HasValue());
       return result.ReleaseValue();
@@ -72,9 +72,9 @@ namespace krys::boo::css::tests
             CSSColorValue::RectifyCSSColorPercent(CSSOMString(u8"NONE")).Value()))
           == "NONE");
     CHECK(CSSColorValue::RectifyCSSColorPercent(CSSOMString(u8"auto")).GetException().Code()
-          == dom::ExceptionCode::SyntaxError);
+          == ExceptionCode::SyntaxError);
     CHECK(CSSColorValue::RectifyCSSColorAngle(Numeric(Factory::Px(1))).GetException().Code()
-          == dom::ExceptionCode::SyntaxError);
+          == ExceptionCode::SyntaxError);
   }
 
   TEST_CASE_METHOD(ValueFixture, "CSSColorValue: colour functions",
@@ -86,7 +86,7 @@ namespace krys::boo::css::tests
     CHECK(Text(rgb->G()) == "255");
     CHECK(Text(rgb->B()) == "none");
     CHECK(Text(rgb->Alpha()) == "100%");
-    CHECK(rgb->SetR(Numeric(Factory::Px(1))).GetException().Code() == dom::ExceptionCode::SyntaxError);
+    CHECK(rgb->SetR(Numeric(Factory::Px(1))).GetException().Code() == ExceptionCode::SyntaxError);
     CHECK(Is<CSSColorValue>(static_cast<const CSSStyleValue &>(*rgb)));
 
     auto hsl = Value(CSSHSL::Create(30.0, 0.5, 0.25));
@@ -98,7 +98,7 @@ namespace krys::boo::css::tests
     auto hwb = Value(CSSHWB::Create(Factory::Deg(30), 0.2, 0.3));
     CHECK(Function(*hwb) == "hwb(30deg 20% 30% / 100%)");
     CHECK(Text(CSSColorValue::ToCSSColorPercent(hwb->W())) == "20%");
-    CHECK(CSSHWB::Create(Factory::Px(1), 0.2, 0.3).GetException().Code() == dom::ExceptionCode::SyntaxError);
+    CHECK(CSSHWB::Create(Factory::Px(1), 0.2, 0.3).GetException().Code() == ExceptionCode::SyntaxError);
 
     CHECK(Function(*Value(CSSLab::Create(0.5, 20.0, -20.0))) == "lab(50% 20 -20 / 100%)");
     CHECK(Function(*Value(CSSLCH::Create(0.5, 0.2, 90.0))) == "lch(50% 20% 90deg / 100%)");
@@ -133,7 +133,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "CSSColorValue: parsing reifies colours",
                    "[CSS][TypedOM][css-typed-om:dom-csscolorvalue-parse][css-typed-om:reify-a-color-value]")
   {
-    auto document = CreateRef<dom::Document>();
+    auto document = CreateRef<Document>();
     auto parse = [&](utf8_stringview text) -> Ref<CSSStyleValue>
     {
       auto parsed = CSSColorValue::Parse(*document, text);
@@ -203,7 +203,7 @@ namespace krys::boo::css::tests
         INFO(ToNarrow(text));
         auto parsed = CSSColorValue::Parse(*document, text);
         REQUIRE(parsed.HasException());
-        CHECK(parsed.GetException().Code() == dom::ExceptionCode::SyntaxError);
+        CHECK(parsed.GetException().Code() == ExceptionCode::SyntaxError);
       }
     }
   }

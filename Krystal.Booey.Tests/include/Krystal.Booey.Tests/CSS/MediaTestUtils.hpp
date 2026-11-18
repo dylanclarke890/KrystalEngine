@@ -102,7 +102,7 @@ namespace krys::boo::css::tests
     MediaChromeClient *Chrome {nullptr};
     Ref<Page> TestPage;
 
-    explicit MediaPage(dom::Document &document) noexcept : TestPage(CreatePage(Chrome))
+    explicit MediaPage(Document &document) noexcept : TestPage(CreatePage(Chrome))
     {
       auto &frame = TestPage->MainFrame();
       frame.CreateView({800, 600});

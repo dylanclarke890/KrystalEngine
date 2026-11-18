@@ -77,7 +77,7 @@ namespace krys::boo::style
 #endif
   }
 
-  const CustomProperty *CustomPropertyData::Get(const css::CSSOMStringAtom &name) const noexcept
+  const CustomProperty *CustomPropertyData::Get(const CSSOMStringAtom &name) const noexcept
   {
     for (const auto *propertyData = this; propertyData; propertyData = propertyData->_parentValues.get())
     {
@@ -89,7 +89,7 @@ namespace krys::boo::style
     return nullptr;
   }
 
-  void CustomPropertyData::Set(const css::CSSOMStringAtom &name, Ref<const CustomProperty> &&value) noexcept
+  void CustomPropertyData::Set(const CSSOMStringAtom &name, Ref<const CustomProperty> &&value) noexcept
   {
 #if KRYS_DEBUG
     krys_debug_assert(!_hasChildren);
@@ -159,7 +159,7 @@ namespace krys::boo::style
   {
     SmallList<const CustomPropertyData *, MaximumAncestorCount> descendants;
 
-    auto isOverriddenByDescendants = [&](const css::CSSOMStringAtom &key)
+    auto isOverriddenByDescendants = [&](const CSSOMStringAtom &key)
     {
       for (const auto *descendant : descendants)
       {
@@ -200,10 +200,10 @@ namespace krys::boo::style
     ForEachInternal(callback);
   }
 
-  css::CSSOMStringAtom CustomPropertyData::FindKeyAtIndex(uint32 index) const noexcept
+  CSSOMStringAtom CustomPropertyData::FindKeyAtIndex(uint32 index) const noexcept
   {
     uint32 currentIndex = 0;
-    css::CSSOMStringAtom key = null;
+    CSSOMStringAtom key = null;
     ForEachInternal(
       [&](const Entry &entry)
       {

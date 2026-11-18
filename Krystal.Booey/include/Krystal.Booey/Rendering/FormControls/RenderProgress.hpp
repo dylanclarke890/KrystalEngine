@@ -23,14 +23,11 @@
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLElement;
   class HTMLProgressElement;
-}
 
-namespace krys::boo
-{
   /// @brief The renderer of a `<progress>` with a native appearance (or its inner element without one): a
   /// block the theme draws as a bar, animated while it's indeterminate.
   class RenderProgress final : public RenderBlockFlow
@@ -44,7 +41,7 @@ namespace krys::boo
     Timer _animationTimer;
 
   public:
-    RenderProgress(html::HTMLElement &, RenderStyle &&) noexcept;
+    RenderProgress(HTMLElement &, RenderStyle &&) noexcept;
 
     ~RenderProgress() noexcept override;
 
@@ -64,7 +61,7 @@ namespace krys::boo
 
     void UpdateFromElement() noexcept override;
 
-    KRYS_NODISCARD html::HTMLProgressElement *ProgressElement() const noexcept;
+    KRYS_NODISCARD HTMLProgressElement *ProgressElement() const noexcept;
 
   private:
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override

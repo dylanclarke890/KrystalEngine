@@ -98,8 +98,8 @@ namespace krys::boo
   }
 
   static RenderPtr<RenderObject> CreateContentRenderer(const style::Content::Text &value,
-                                                       const Maybe<utf8_string> &altText,
-                                                       dom::Document &document, const RenderStyle &) noexcept
+                                                       const Maybe<utf8_string> &altText, Document &document,
+                                                       const RenderStyle &) noexcept
   {
     if (value.Value.empty() && (!altText || altText->empty()))
     {
@@ -112,8 +112,7 @@ namespace krys::boo
   }
 
   static RenderPtr<RenderObject> CreateContentRenderer(const style::Content::Image &value,
-                                                       const Maybe<utf8_string> &altText,
-                                                       dom::Document &document,
+                                                       const Maybe<utf8_string> &altText, Document &document,
                                                        const RenderStyle &pseudoStyle) noexcept
   {
     auto contentRenderer = CreateRenderer<RenderImage>(
@@ -125,14 +124,14 @@ namespace krys::boo
   }
 
   static RenderPtr<RenderObject> CreateContentRenderer(const style::Content::Counter &value,
-                                                       const Maybe<utf8_string> &, dom::Document &document,
+                                                       const Maybe<utf8_string> &, Document &document,
                                                        const RenderStyle &) noexcept
   {
     return CreateRenderer<RenderCounter>(document, value);
   }
 
   static RenderPtr<RenderObject> CreateContentRenderer(const style::Content::Quote &value,
-                                                       const Maybe<utf8_string> &, dom::Document &document,
+                                                       const Maybe<utf8_string> &, Document &document,
                                                        const RenderStyle &pseudoStyle) noexcept
   {
     auto contentRenderer = CreateRenderer<RenderQuote>(
@@ -142,8 +141,7 @@ namespace krys::boo
   }
 
   static KeyframeEffectStack *
-    KeyframeEffectStackForPseudoElement(const dom::Element &element,
-                                        PseudoElementType pseudoElementType) noexcept
+    KeyframeEffectStackForPseudoElement(const Element &element, PseudoElementType pseudoElementType) noexcept
   {
     if (!element.MayHaveKeyframeEffects())
     {
@@ -153,7 +151,7 @@ namespace krys::boo
     return element.GetKeyframeEffectStack(style::PseudoElementIdentifier {pseudoElementType});
   }
 
-  static bool NeedsPseudoElementForAnimation(const dom::Element &element,
+  static bool NeedsPseudoElementForAnimation(const Element &element,
                                              PseudoElementType pseudoElementType) noexcept
   {
     auto *stack = KeyframeEffectStackForPseudoElement(element, pseudoElementType);
@@ -204,8 +202,7 @@ namespace krys::boo
   }
 
   void RenderTreeUpdater::GeneratedContent::UpdateBeforeOrAfterPseudoElement(
-    dom::Element &current, const style::ElementUpdate &elementUpdate,
-    PseudoElementType pseudoElementType) noexcept
+    Element &current, const style::ElementUpdate &elementUpdate, PseudoElementType pseudoElementType) noexcept
   {
     krys_debug_assert(pseudoElementType == PseudoElementType::Before
                       || pseudoElementType == PseudoElementType::After);
@@ -230,7 +227,7 @@ namespace krys::boo
         .CancelStyleOriginatedAnimations();
     }
 
-    krys_debug_assert(!Is<dom::PseudoElement>(current));
+    krys_debug_assert(!Is<PseudoElement>(current));
     if (!NeedsPseudoElement(updateStyle) && !NeedsPseudoElementForAnimation(current, pseudoElementType))
     {
       if (pseudoElement)
@@ -381,7 +378,7 @@ namespace krys::boo
     return true;
   }
 
-  void RenderTreeUpdater::GeneratedContent::RemoveBeforePseudoElement(dom::Element &element,
+  void RenderTreeUpdater::GeneratedContent::RemoveBeforePseudoElement(Element &element,
                                                                       RenderTreeBuilder &builder) noexcept
   {
     auto *pseudoElement = element.BeforePseudoElement();
@@ -393,7 +390,7 @@ namespace krys::boo
     element.ClearBeforePseudoElement();
   }
 
-  void RenderTreeUpdater::GeneratedContent::RemoveAfterPseudoElement(dom::Element &element,
+  void RenderTreeUpdater::GeneratedContent::RemoveAfterPseudoElement(Element &element,
                                                                      RenderTreeBuilder &builder) noexcept
   {
     auto *pseudoElement = element.AfterPseudoElement();

@@ -53,14 +53,14 @@ namespace krys::boo
 
     /// @brief Whether @p document's window has transient activation: the request started from a user
     /// gesture.
-    KRYS_NODISCARD bool HasTransientActivation(dom::Document &document) noexcept
+    KRYS_NODISCARD bool HasTransientActivation(Document &document) noexcept
     {
       auto *window = document.Window();
       return window && window->HasTransientActivation();
     }
 
     /// @brief Settles @p promise with @p result, as a microtask.
-    void Settle(PointerLockCallback &&promise, dom::ExceptionOr<void> &&result) noexcept
+    void Settle(PointerLockCallback &&promise, ExceptionOr<void> &&result) noexcept
     {
       if (!promise)
       {
@@ -78,15 +78,14 @@ namespace krys::boo
 
   PointerLockController::~PointerLockController() noexcept = default;
 
-  void PointerLockController::RequestPointerLock(dom::Element *target,
-                                                 Maybe<dom::PointerLockOptions> &&options,
+  void PointerLockController::RequestPointerLock(Element *target, Maybe<dom::PointerLockOptions> &&options,
                                                  PointerLockCallback &&promise) noexcept
   {
     if (!target || !target->IsConnected() || _documentOfRemovedElementWhileWaitingForUnlock)
     {
       EnqueueEvent(event_names::PointerLockError, target);
-      Settle(krys::move(promise), dom::Exception {dom::ExceptionCode::WrongDocumentError,
-                                                  u8"Pointer lock target must be in an active document."});
+      Settle(krys::move(promise), Exception {ExceptionCode::WrongDocumentError,
+                                             u8"Pointer lock target must be in an active document."});
       return;
     }
 
@@ -97,7 +96,7 @@ namespace krys::boo
       // If the request was not started from an engagement gesture and the Document has not previously
       // released a successful Pointer Lock with exitPointerLock():
       Settle(krys::move(promise),
-             dom::Exception {dom::ExceptionCode::NotAllowedError, u8"Pointer lock requires a user gesture."});
+             Exception {ExceptionCode::NotAllowedError, u8"Pointer lock requires a user gesture."});
       return;
     }
 
@@ -106,7 +105,7 @@ namespace krys::boo
       // If options["unadjustedMovement"] is true and the platform does not support unadjustedMovement:
       EnqueueEvent(event_names::PointerLockError, target);
       Settle(krys::move(promise),
-             dom::Exception {dom::ExceptionCode::NotSupportedError, u8"Unadjusted movement is unavailable."});
+             Exception {ExceptionCode::NotSupportedError, u8"Unadjusted movement is unavailable."});
       return;
     }
 
@@ -118,8 +117,8 @@ namespace krys::boo
         // If the user agent's pointer-lock target is an element whose shadow-including root is not equal to
         // this's shadow-including root, then:
         Settle(krys::move(promise),
-               dom::Exception {dom::ExceptionCode::InvalidStateError,
-                               u8"Pointer lock cannot be moved to an element in a different document."});
+               Exception {ExceptionCode::InvalidStateError,
+                          u8"Pointer lock cannot be moved to an element in a different document."});
         return;
       }
       _element = ShareRefPtr(target);
@@ -176,8 +175,7 @@ namespace krys::boo
           case PointerLockRequestResult::Failure: controller.DidNotAcquirePointerLock(); break;
           case PointerLockRequestResult::Unsupported:
             controller.EnqueueEvent(event_names::PointerLockError, target.get());
-            controller.RejectPromises(dom::ExceptionCode::NotSupportedError,
-                                      u8"Pointer lock is unavailable.");
+            controller.RejectPromises(ExceptionCode::NotSupportedError, u8"Pointer lock is unavailable.");
             controller.ClearElement();
             break;
         }
@@ -229,13 +227,13 @@ namespace krys::boo
     // It is possible that the element is removed while pointer lock is still pending. This is essentially the
     // same situation as the !target->IsConnected() test in PointerLockController::RequestPointerLock, but it
     // has arisen in between then and now.
-    RejectPromises(dom::ExceptionCode::WrongDocumentError, u8"Pointer lock target element was removed.");
+    RejectPromises(ExceptionCode::WrongDocumentError, u8"Pointer lock target element was removed.");
     // Set element null immediately to block any future interaction with it including mouse events received
     // before the unlock completes.
     ClearElement();
   }
 
-  void PointerLockController::DocumentDetached(dom::Document &document) noexcept
+  void PointerLockController::DocumentDetached(Document &document) noexcept
   {
     if (_documentAllowedToRelockWithoutUserGesture.get() == &document)
     {
@@ -247,7 +245,7 @@ namespace krys::boo
       _documentOfRemovedElementWhileWaitingForUnlock = CreateWeakPtr(&_element->NodeDocument());
       RequestPointerUnlock();
       // It is possible that the document is detached while pointer lock is still pending.
-      RejectPromises(dom::ExceptionCode::WrongDocumentError, u8"Pointer lock target document was detached.");
+      RejectPromises(ExceptionCode::WrongDocumentError, u8"Pointer lock target document was detached.");
       ClearElement();
     }
   }
@@ -262,7 +260,7 @@ namespace krys::boo
     return _lockPending;
   }
 
-  dom::Element *PointerLockController::GetElement() const noexcept
+  Element *PointerLockController::GetElement() const noexcept
   {
     return _element.get();
   }
@@ -299,8 +297,7 @@ namespace krys::boo
     // 2. Reject promise with a "WrongDocumentError" DOMException.
     RefPtr element = _element;
     EnqueueEvent(event_names::PointerLockError, element.get());
-    RejectPromises(dom::ExceptionCode::WrongDocumentError,
-                   u8"Pointer lock requires the window to have focus.");
+    RejectPromises(ExceptionCode::WrongDocumentError, u8"Pointer lock requires the window to have focus.");
     ClearElement();
     _unlockPending = false;
     _documentOfRemovedElementWhileWaitingForUnlock = nullptr;
@@ -313,9 +310,8 @@ namespace krys::boo
       _documentAllowedToRelockWithoutUserGesture = nullptr;
     }
 
-    RefPtr<dom::Document> document = _element
-                                       ? ShareRefPtr(&_element->NodeDocument())
-                                       : ShareRefPtr(_documentOfRemovedElementWhileWaitingForUnlock.get());
+    RefPtr<Document> document = _element ? ShareRefPtr(&_element->NodeDocument())
+                                         : ShareRefPtr(_documentOfRemovedElementWhileWaitingForUnlock.get());
     EnqueueEvent(event_names::PointerLockChange, document.get());
     ClearElement();
     _unlockPending = false;
@@ -323,7 +319,7 @@ namespace krys::boo
   }
 
   void PointerLockController::DispatchLockedMouseEvent(const PlatformMouseEvent &event,
-                                                       const dom::DOMStringAtom &eventType) noexcept
+                                                       const DOMStringAtom &eventType) noexcept
   {
     if (!_element || !_element->NodeDocument().Frame())
     {
@@ -368,7 +364,7 @@ namespace krys::boo
     krys_debug_assert(_promises.empty());
   }
 
-  void PointerLockController::EnqueueEvent(dom::DOMStringAtom type, dom::Element *element) noexcept
+  void PointerLockController::EnqueueEvent(DOMStringAtom type, Element *element) noexcept
   {
     if (element)
     {
@@ -376,13 +372,13 @@ namespace krys::boo
     }
   }
 
-  void PointerLockController::EnqueueEvent(dom::DOMStringAtom type, dom::Document *document) noexcept
+  void PointerLockController::EnqueueEvent(DOMStringAtom type, Document *document) noexcept
   {
     // FIXME: Spec doesn't specify which task source use.
     if (document)
     {
       document->QueueTaskToDispatchEvent(html::TaskSource::UserInteraction,
-                                         dom::Event::Create(krys::move(type), true, false));
+                                         Event::Create(krys::move(type), true, false));
     }
   }
 
@@ -394,11 +390,11 @@ namespace krys::boo
     }
   }
 
-  void PointerLockController::RejectPromises(dom::ExceptionCode code, utf8_stringview reason) noexcept
+  void PointerLockController::RejectPromises(ExceptionCode code, utf8_stringview reason) noexcept
   {
     for (auto &promise : std::exchange(_promises, {}))
     {
-      Settle(krys::move(promise), dom::Exception {code, utf8_string(reason)});
+      Settle(krys::move(promise), Exception {code, utf8_string(reason)});
     }
   }
 

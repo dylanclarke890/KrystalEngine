@@ -15,19 +15,19 @@ namespace krys::boo::tests
     constexpr auto PlainTables = u8"table { border-spacing: 0 } td { padding: 0 } ";
 
     /// @brief The box of the element with id @p id, after updating layout.
-    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       (void)fixture.Document->UpdateLayout();
       return Downcast<RenderBox>(*fixture.ById(id).Renderer());
     }
 
-    KRYS_NODISCARD RenderTableCell &CellOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderTableCell &CellOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       return Downcast<RenderTableCell>(BoxOf(fixture, id));
     }
 
     /// @brief The border box of the element with id @p id, relative to its container.
-    KRYS_NODISCARD LayoutRect RectOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD LayoutRect RectOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       return BoxOf(fixture, id).FrameRect();
     }

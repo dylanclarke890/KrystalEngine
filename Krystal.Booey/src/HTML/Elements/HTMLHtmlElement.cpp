@@ -1,23 +1,23 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLHtmlElement::HTMLHtmlElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Html)
+  HTMLHtmlElement::HTMLHtmlElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Html)
   {
   }
 
 #pragma region HTMLHtmlElement Obsolete members
 
-  dom::DOMString HTMLHtmlElement::Version() const noexcept
+  DOMString HTMLHtmlElement::Version() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"version").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"version").value_or(u8"");
   }
 
-  void HTMLHtmlElement::Version(dom::DOMString value) noexcept
+  void HTMLHtmlElement::Version(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"version", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"version", krys::move(value));
   }
 
 #pragma endregion

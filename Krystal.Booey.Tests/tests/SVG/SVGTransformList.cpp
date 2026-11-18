@@ -89,7 +89,7 @@ namespace krys::boo::svg::tests
     CHECK_FALSE(fromMatrix.Value()->IsAttached());
 
     auto readOnly = SVGTransformList::Create(*list, SVGPropertyAccess::ReadOnly);
-    CHECK(readOnly->Consolidate().GetException().Code() == dom::ExceptionCode::NoModificationAllowedError);
+    CHECK(readOnly->Consolidate().GetException().Code() == ExceptionCode::NoModificationAllowedError);
   }
 
   TEST_CASE("SVGTransform: setters, matrices and owners", "[SVG][SVGTransform]")
@@ -130,7 +130,7 @@ namespace krys::boo::svg::tests
 
     // The matrices of a read-only list's transforms are read-only.
     auto readOnly = SVGTransformList::Create(*list, SVGPropertyAccess::ReadOnly);
-    auto code = dom::ExceptionCode::NoModificationAllowedError;
+    auto code = ExceptionCode::NoModificationAllowedError;
     CHECK(readOnly->Items()[0]->Matrix().SetA(1).GetException().Code() == code);
     CHECK(readOnly->Items()[0]->SetSkewX(1).GetException().Code() == code);
 
@@ -160,15 +160,15 @@ namespace krys::boo::svg::tests
     REQUIRE_FALSE(inverse.HasException());
     CHECK(inverse.Value()->Value() == AffineTransform(1, 0, 0, 1, -10, -20));
     CHECK(SVGMatrix::Create(AffineTransform(0, 0, 0, 0, 0, 0))->Inverse().GetException().Code()
-          == dom::ExceptionCode::InvalidStateError);
+          == ExceptionCode::InvalidStateError);
 
-    CHECK(matrix->RotateFromVector(0, 1).GetException().Code() == dom::ExceptionCode::TypeError);
-    CHECK(matrix->RotateFromVector(1, 0).GetException().Code() == dom::ExceptionCode::TypeError);
+    CHECK(matrix->RotateFromVector(0, 1).GetException().Code() == ExceptionCode::TypeError);
+    CHECK(matrix->RotateFromVector(1, 0).GetException().Code() == ExceptionCode::TypeError);
     REQUIRE_FALSE(matrix->RotateFromVector(1, 1).HasException());
 
     REQUIRE_FALSE(matrix->SetD(4).HasException());
     CHECK(matrix->D() == 4);
     auto readOnly = SVGMatrix::Create(nullptr, SVGPropertyAccess::ReadOnly);
-    CHECK(readOnly->SetA(2).GetException().Code() == dom::ExceptionCode::NoModificationAllowedError);
+    CHECK(readOnly->SetA(2).GetException().Code() == ExceptionCode::NoModificationAllowedError);
   }
 }

@@ -39,7 +39,7 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(shadow->AppendChild(*slot).HasException());
       CHECK(element->AssignedSlot() == nullptr);
       CHECK(text->AssignedSlot() == nullptr);
-      CHECK(Downcast<html::HTMLSlotElement>(*slot).AssignedNodes());
+      CHECK(Downcast<HTMLSlotElement>(*slot).AssignedNodes());
     }
   }
 }

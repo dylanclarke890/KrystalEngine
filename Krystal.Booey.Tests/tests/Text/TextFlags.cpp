@@ -59,17 +59,17 @@ namespace krys::boo::tests
     SECTION("Alternates use the font feature values")
     {
       auto featureValues = FontFeatureValues::Create();
-      featureValues->Styleset().insert_or_assign(css::CSSOMString {u8"fancy"}, List<uint32> {3, 12, 100});
-      featureValues->Swash().insert_or_assign(css::CSSOMString {u8"flowing"}, List<uint32> {2});
-      featureValues->Stylistic().insert_or_assign(css::CSSOMString {u8"alt"}, List<uint32> {4});
+      featureValues->Styleset().insert_or_assign(CSSOMString {u8"fancy"}, List<uint32> {3, 12, 100});
+      featureValues->Swash().insert_or_assign(CSSOMString {u8"flowing"}, List<uint32> {2});
+      featureValues->Stylistic().insert_or_assign(CSSOMString {u8"alt"}, List<uint32> {4});
 
       FontVariantSettings settings;
       auto &values = settings.Alternates.ValuesRef();
       values.HistoricalForms = true;
       values.Styleset.emplace_back(u8"fancy");
       values.Styleset.emplace_back(u8"missing");
-      values.Swash = css::CSSOMString {u8"flowing"};
-      values.Stylistic = css::CSSOMString {u8"alt"};
+      values.Swash = CSSOMString {u8"flowing"};
+      values.Stylistic = CSSOMString {u8"alt"};
 
       auto features = ComputeFeatureSettingsFromVariants(settings, featureValues);
       CHECK(FeatureValue(features, "hist") == 1);
@@ -90,7 +90,7 @@ namespace krys::boo::tests
       CHECK(normal.IsNormal());
 
       auto alternates = FontVariantAlternates::Normal();
-      alternates.ValuesRef().Ornaments = css::CSSOMString {u8"o"};
+      alternates.ValuesRef().Ornaments = CSSOMString {u8"o"};
       CHECK_FALSE(alternates.IsNormal());
       CHECK(alternates != normal);
       CHECK(DefaultHash<FontVariantAlternates>::Hash(alternates)

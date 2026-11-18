@@ -34,14 +34,10 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::html
-{
-  class HTMLInputElement;
-}
-
 namespace krys::boo
 {
   class AXObjectRareData;
+  class HTMLInputElement;
 
   /// @brief An accessibility object for a DOM node: its role, states and name come from the node, and its
   /// children from the node's children in the composed tree. Nodes with no renderer that accessibility
@@ -50,14 +46,14 @@ namespace krys::boo
   class AXNodeObject : public AXObject
   {
   private:
-    WeakPtr<dom::Node> _node;
+    WeakPtr<Node> _node;
     UniquePtr<AXObjectRareData> _rareData;
 
   protected:
     AXRole _ariaRole {AXRole::Unknown};
 
   public:
-    KRYS_NODISCARD static Ref<AXNodeObject> Create(AXId id, dom::Node &node, AXObjectCache &cache) noexcept;
+    KRYS_NODISCARD static Ref<AXNodeObject> Create(AXId id, Node &node, AXObjectCache &cache) noexcept;
 
     ~AXNodeObject() noexcept override;
 
@@ -73,7 +69,7 @@ namespace krys::boo
       return true;
     }
 
-    KRYS_NODISCARD dom::Node *GetNode() const noexcept override
+    KRYS_NODISCARD Node *GetNode() const noexcept override
     {
       return _node.get();
     }
@@ -137,7 +133,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool CanSetValueAttribute() const noexcept override;
 
-    KRYS_NODISCARD dom::Element *ActionElement() const noexcept override;
+    KRYS_NODISCARD Element *ActionElement() const noexcept override;
 
     void SetFocused(bool focused) noexcept override;
 
@@ -148,15 +144,15 @@ namespace krys::boo
     void SetIsExpanded(bool expanded) noexcept override;
 
     /// @brief The nearest link at or above the object's node.
-    KRYS_NODISCARD dom::Element *AnchorElement() const noexcept;
+    KRYS_NODISCARD Element *AnchorElement() const noexcept;
 
     KRYS_NODISCARD uint32 HeadingLevel() const noexcept override;
 
-    KRYS_NODISCARD dom::DOMString AccessibleName() const noexcept override;
+    KRYS_NODISCARD DOMString AccessibleName() const noexcept override;
 
-    KRYS_NODISCARD dom::DOMString AccessibleDescription() const noexcept override;
+    KRYS_NODISCARD DOMString AccessibleDescription() const noexcept override;
 
-    KRYS_NODISCARD dom::DOMString StringValue() const noexcept override;
+    KRYS_NODISCARD DOMString StringValue() const noexcept override;
 
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
 
@@ -172,7 +168,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsNonNativeTextControl() const noexcept override;
 
-    KRYS_NODISCARD dom::DOMString Text() const noexcept override;
+    KRYS_NODISCARD DOMString Text() const noexcept override;
 
     KRYS_NODISCARD VisiblePositionRange GetVisiblePositionRange() const noexcept override;
 
@@ -186,7 +182,7 @@ namespace krys::boo
 
     KRYS_NODISCARD CharacterRange SelectedTextRange() const noexcept override;
 
-    KRYS_NODISCARD dom::DOMString SelectedText() const noexcept override;
+    KRYS_NODISCARD DOMString SelectedText() const noexcept override;
 
     KRYS_NODISCARD AXObject *ObservableObject() const noexcept override;
 
@@ -203,7 +199,7 @@ namespace krys::boo
 
     KRYS_NODISCARD float MinValueForRange() const noexcept override;
 
-    KRYS_NODISCARD dom::DOMString ValueDescription() const noexcept override;
+    KRYS_NODISCARD DOMString ValueDescription() const noexcept override;
 
     KRYS_NODISCARD Maybe<AXOrientation> ExplicitOrientation() const noexcept override
     {
@@ -270,9 +266,9 @@ namespace krys::boo
 
     KRYS_NODISCARD Maybe<uint32> AxColumnIndex() const noexcept override;
 
-    KRYS_NODISCARD dom::DOMString AxRowIndexText() const noexcept override;
+    KRYS_NODISCARD DOMString AxRowIndexText() const noexcept override;
 
-    KRYS_NODISCARD dom::DOMString AxColumnIndexText() const noexcept override;
+    KRYS_NODISCARD DOMString AxColumnIndexText() const noexcept override;
 
     KRYS_NODISCARD Pair<uint32, uint32> RowIndexRange() const noexcept override;
 
@@ -300,7 +296,7 @@ namespace krys::boo
     void SetAXColIndexFromRow(int32 index) noexcept;
 
   protected:
-    AXNodeObject(AXId id, dom::Node *node, AXObjectCache &cache) noexcept;
+    AXNodeObject(AXId id, Node *node, AXObjectCache &cache) noexcept;
 
     /// @brief Adds the objects this one aria-owns as its last children (in aria-owns order).
     void UpdateOwnedChildrenIfNecessary() noexcept;
@@ -328,7 +324,7 @@ namespace krys::boo
       DetermineAccessibilityRoleFromNode(TreatStyleFormatGroupAsInline treatStyleFormatGroupAsInline =
                                            TreatStyleFormatGroupAsInline::No) const noexcept;
 
-    KRYS_NODISCARD AXRole RoleFromInputElement(const html::HTMLInputElement &input) const noexcept;
+    KRYS_NODISCARD AXRole RoleFromInputElement(const HTMLInputElement &input) const noexcept;
 
     /// @brief The role from the `role` attribute, if it names one that applies here.
     KRYS_NODISCARD virtual AXRole DetermineAriaRoleAttribute() const noexcept;

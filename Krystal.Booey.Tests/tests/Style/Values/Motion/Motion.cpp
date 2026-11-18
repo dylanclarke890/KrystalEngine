@@ -110,7 +110,7 @@ namespace krys::boo::style::tests
       u8R"html(<div id=group style="offset-path: url(#g)"></div><div id=missing style="offset-path: url(#none)"></div>)html"};
 
     // A reference to an SVG path or geometry element takes its path; other elements give none.
-    auto pathOf = [&](dom::DOMStringView id)
+    auto pathOf = [&](DOMStringView id)
     {
       return TryPath(fixture.Resolve(fixture.ById(id)).Style->GetOffsetPath(), MotionData());
     };

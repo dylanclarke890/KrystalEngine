@@ -24,7 +24,7 @@ namespace krys::boo::tests
       u8"body{margin:0}fieldset{margin:0;padding:0;border:10px solid #000;width:300px;box-sizing:content-box}"
       u8"legend{padding:0;width:50px;height:20px}#c{height:30px}";
 
-    KRYS_NODISCARD Maybe<Rect> RectOf(AnimationPageFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD Maybe<Rect> RectOf(AnimationPageFixture &fixture, DOMStringView id) noexcept
     {
       auto element = fixture.Document->GetElementById(id);
       if (!element)

@@ -59,28 +59,28 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD bool HasTagName(const dom::Node *node, html::TagName tagName) noexcept
+    KRYS_NODISCARD bool HasTagName(const boo::Node *node, html::TagName tagName) noexcept
     {
       return IsHTMLElementOfType(node, tagName);
     }
 
-    KRYS_NODISCARD bool HasClass(const dom::Node &node, utf8_stringview className) noexcept
+    KRYS_NODISCARD bool HasClass(const boo::Node &node, utf8_stringview className) noexcept
     {
-      auto *element = DynamicDowncast<dom::Element>(node);
-      return element && element->GetAttribute(u8"class") == dom::DOMString(className);
+      auto *element = DynamicDowncast<Element>(node);
+      return element && element->GetAttribute(u8"class") == DOMString(className);
     }
 
-    KRYS_NODISCARD bool IsInterchangeNewlineNode(const dom::Node &node) noexcept
+    KRYS_NODISCARD bool IsInterchangeNewlineNode(const boo::Node &node) noexcept
     {
       return HasTagName(&node, html::TagName::br) && HasClass(node, AppleInterchangeNewline);
     }
 
-    KRYS_NODISCARD bool IsInterchangeConvertedSpaceSpan(const dom::Node &node) noexcept
+    KRYS_NODISCARD bool IsInterchangeConvertedSpaceSpan(const boo::Node &node) noexcept
     {
-      return Is<html::HTMLElement>(node) && HasClass(node, AppleConvertedSpace);
+      return Is<HTMLElement>(node) && HasClass(node, AppleConvertedSpace);
     }
 
-    KRYS_NODISCARD bool IsScriptElement(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool IsScriptElement(const Element &element) noexcept
     {
       const auto &name = element.TagQualifiedName();
       return name.TagName() == html::TagName::script
@@ -131,25 +131,25 @@ namespace krys::boo
       return position;
     }
 
-    KRYS_NODISCARD bool IsHeaderElement(const dom::Node &a) noexcept
+    KRYS_NODISCARD bool IsHeaderElement(const boo::Node &a) noexcept
     {
       return HasTagName(&a, html::TagName::h1) || HasTagName(&a, html::TagName::h2)
              || HasTagName(&a, html::TagName::h3) || HasTagName(&a, html::TagName::h4)
              || HasTagName(&a, html::TagName::h5) || HasTagName(&a, html::TagName::h6);
     }
 
-    KRYS_NODISCARD bool HaveSameTagName(dom::Node &a, dom::Node *b) noexcept
+    KRYS_NODISCARD bool HaveSameTagName(boo::Node &a, boo::Node *b) noexcept
     {
-      auto *elementA = DynamicDowncast<dom::Element>(a);
+      auto *elementA = DynamicDowncast<Element>(a);
       if (!elementA)
       {
         return false;
       }
-      auto *elementB = DynamicDowncast<dom::Element>(b);
+      auto *elementB = DynamicDowncast<Element>(b);
       return elementB && elementA->TagName() == elementB->TagName();
     }
 
-    KRYS_NODISCARD bool IsProhibitedParagraphChild(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool IsProhibitedParagraphChild(const Element &element) noexcept
     {
       // https://dvcs.w3.org/hg/editing/raw-file/57abe6d3cb60/editing.html#prohibited-paragraph-child
       const auto &name = element.TagQualifiedName();
@@ -212,12 +212,12 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD bool HasRenderedText(const dom::Text &text) noexcept
+    KRYS_NODISCARD bool HasRenderedText(const Text &text) noexcept
     {
       return text.Renderer() && text.Renderer()->HasRenderedText();
     }
 
-    KRYS_NODISCARD RefPtr<dom::Node> EnclosingInline(dom::Node *node) noexcept
+    KRYS_NODISCARD RefPtr<boo::Node> EnclosingInline(boo::Node *node) noexcept
     {
       auto *currentNode = node;
       while (auto *parent = currentNode->ParentNode())
@@ -239,7 +239,7 @@ namespace krys::boo
       return ShareRefPtr(currentNode);
     }
 
-    KRYS_NODISCARD bool IsInlineNodeWithStyle(const dom::Node &node) noexcept
+    KRYS_NODISCARD bool IsInlineNodeWithStyle(const boo::Node &node) noexcept
     {
       // We don't want to skip over any block elements.
       if (IsBlock(node))
@@ -247,7 +247,7 @@ namespace krys::boo
         return false;
       }
 
-      auto *element = DynamicDowncast<html::HTMLElement>(node);
+      auto *element = DynamicDowncast<HTMLElement>(node);
       if (!element)
       {
         return false;
@@ -255,7 +255,7 @@ namespace krys::boo
 
       // We can skip over elements whose class attribute is
       // one of our internal classes.
-      auto classAttribute = element->GetAttribute(u8"class").value_or(dom::DOMString());
+      auto classAttribute = element->GetAttribute(u8"class").value_or(DOMString());
       utf8_stringview classAttributeValue = classAttribute;
       if (classAttributeValue == AppleTabSpanClass || classAttributeValue == AppleConvertedSpace)
       {
@@ -265,7 +265,7 @@ namespace krys::boo
       return EditingStyle::ElementIsStyledSpanOrHTMLEquivalent(*element);
     }
 
-    KRYS_NODISCARD RefPtr<dom::Node>
+    KRYS_NODISCARD RefPtr<boo::Node>
       NodeToSplitToAvoidPastingIntoInlineNodesWithStyle(const dom::Position &insertionPos) noexcept
     {
       auto containingBlock = EnclosingBlock(ShareRefPtr(insertionPos.GetContainerNode()));
@@ -296,7 +296,7 @@ namespace krys::boo
       return IsCharacterSmartReplaceExempt(character == 0xA0 ? U' ' : character, previousCharacter);
     }
 
-    KRYS_NODISCARD RefPtr<dom::Element> SingleChildList(dom::Element &element) noexcept
+    KRYS_NODISCARD RefPtr<Element> SingleChildList(Element &element) noexcept
     {
       auto *child = element.FirstChild();
       if (!child || child->NextSibling())
@@ -304,12 +304,12 @@ namespace krys::boo
         return nullptr;
       }
 
-      return IsListHTMLElement(child) ? ShareRefPtr(&Downcast<dom::Element>(*child)) : nullptr;
+      return IsListHTMLElement(child) ? ShareRefPtr(&Downcast<Element>(*child)) : nullptr;
     }
 
-    KRYS_NODISCARD Ref<dom::Element> DeepestSingleChildList(dom::Element &topLevelList) noexcept
+    KRYS_NODISCARD Ref<Element> DeepestSingleChildList(Element &topLevelList) noexcept
     {
-      Ref<dom::Element> list = ShareRef(topLevelList);
+      Ref<Element> list = ShareRef(topLevelList);
       while (auto childList = SingleChildList(*list))
       {
         list = childList;
@@ -317,11 +317,11 @@ namespace krys::boo
       return list;
     }
 
-    KRYS_NODISCARD dom::Element *EnclosingLinkEventParentOrSelf(dom::Node &node) noexcept
+    KRYS_NODISCARD Element *EnclosingLinkEventParentOrSelf(boo::Node &node) noexcept
     {
       for (auto *current = &node; current; current = current->ParentInComposedTree())
       {
-        auto *element = DynamicDowncast<dom::Element>(*current);
+        auto *element = DynamicDowncast<Element>(*current);
         if (element && css::IsLink(*element))
         {
           return element;
@@ -362,29 +362,28 @@ namespace krys::boo
     KRYS_NON_COPYABLE(ReplacementFragment);
 
   private:
-    RefPtr<dom::DocumentFragment> _fragment;
+    RefPtr<DocumentFragment> _fragment;
     bool _hasInterchangeNewlineAtStart {false};
     bool _hasInterchangeNewlineAtEnd {false};
 
     /// @brief The text of @p fragment: its text nodes, with a line break for each `<br>` and before each
     /// paragraph but the first.
-    KRYS_NODISCARD static utf8_string FragmentText(dom::DocumentFragment &fragment) noexcept;
+    KRYS_NODISCARD static utf8_string FragmentText(DocumentFragment &fragment) noexcept;
 
   public:
-    ReplacementFragment(RefPtr<dom::DocumentFragment> &&inputFragment,
-                        const VisibleSelection &selection) noexcept;
+    ReplacementFragment(RefPtr<DocumentFragment> &&inputFragment, const VisibleSelection &selection) noexcept;
 
-    KRYS_NODISCARD dom::DocumentFragment *Fragment() noexcept
+    KRYS_NODISCARD DocumentFragment *Fragment() noexcept
     {
       return _fragment.get();
     }
 
-    KRYS_NODISCARD dom::Node *FirstChild() const noexcept
+    KRYS_NODISCARD boo::Node *FirstChild() const noexcept
     {
       return _fragment ? _fragment->FirstChild() : nullptr;
     }
 
-    KRYS_NODISCARD dom::Node *LastChild() const noexcept
+    KRYS_NODISCARD boo::Node *LastChild() const noexcept
     {
       return _fragment ? _fragment->LastChild() : nullptr;
     }
@@ -405,23 +404,23 @@ namespace krys::boo
       return _hasInterchangeNewlineAtEnd;
     }
 
-    static void RemoveNode(dom::Node &node) noexcept;
+    static void RemoveNode(boo::Node &node) noexcept;
 
-    void RemoveNodePreservingChildren(dom::Node &node) noexcept;
+    void RemoveNodePreservingChildren(boo::Node &node) noexcept;
 
   private:
     void RemoveContentsWithSideEffects() noexcept;
 
-    void RemoveInterchangeNodes(dom::Node *container) noexcept;
+    void RemoveInterchangeNodes(boo::Node *container) noexcept;
 
-    static void InsertNodeBefore(dom::Node &node, dom::Node &refNode) noexcept;
+    static void InsertNodeBefore(boo::Node &node, boo::Node &refNode) noexcept;
   };
 
-  ReplacementFragment::ReplacementFragment(RefPtr<dom::DocumentFragment> &&inputFragment,
+  ReplacementFragment::ReplacementFragment(RefPtr<DocumentFragment> &&inputFragment,
                                            const VisibleSelection &selection) noexcept
       : _fragment(krys::move(inputFragment))
   {
-    RefPtr<dom::DocumentFragment> fragment = _fragment;
+    RefPtr<DocumentFragment> fragment = _fragment;
     if (!fragment)
     {
       return;
@@ -433,7 +432,7 @@ namespace krys::boo
 
     RemoveContentsWithSideEffects();
 
-    RefPtr<dom::Element> editableRoot = ShareRefPtr(selection.RootEditableElement());
+    RefPtr<Element> editableRoot = ShareRefPtr(selection.RootEditableElement());
     krys_debug_assert(editableRoot);
     if (!editableRoot)
     {
@@ -452,7 +451,7 @@ namespace krys::boo
     auto text = FragmentText(*fragment);
 
     // Give the root a chance to change the text.
-    auto event = dom::BeforeTextInsertedEvent::Create(text);
+    auto event = BeforeTextInsertedEvent::Create(text);
     (void)dom::EventDispatcher::DispatchToTarget(*event, editableRoot.get());
     if (text != event->Text() || !editableRoot->HasRichlyEditableStyle())
     {
@@ -472,17 +471,17 @@ namespace krys::boo
     }
   }
 
-  utf8_string ReplacementFragment::FragmentText(dom::DocumentFragment &fragment) noexcept
+  utf8_string ReplacementFragment::FragmentText(DocumentFragment &fragment) noexcept
   {
     utf8_string text;
     for (auto *node = fragment.FirstChild(); node; node = dom::TreeQueries::Next(*node, &fragment))
     {
-      if (auto *textNode = DynamicDowncast<dom::Text>(*node))
+      if (auto *textNode = DynamicDowncast<Text>(*node))
       {
         text.append(textNode->Data());
       }
       else if (HasTagName(node, html::TagName::br)
-               || (node->ParentNode() == &fragment && Is<dom::Element>(*node) && !text.empty()
+               || (node->ParentNode() == &fragment && Is<Element>(*node) && !text.empty()
                    && text.back() != u8'\n'))
       {
         text.push_back(u8'\n');
@@ -495,12 +494,12 @@ namespace krys::boo
 
   void ReplacementFragment::RemoveContentsWithSideEffects() noexcept
   {
-    List<Ref<dom::Element>> elementsToRemove;
+    List<Ref<Element>> elementsToRemove;
 
     auto *node = _fragment->FirstChild();
     while (node)
     {
-      auto *element = DynamicDowncast<dom::Element>(*node);
+      auto *element = DynamicDowncast<Element>(*node);
       if (element
           && (IsScriptElement(*element)
               || (HasTagName(element, html::TagName::style) && !HasClass(*element, WebKitMSOListQuirksStyle))
@@ -520,19 +519,19 @@ namespace krys::boo
     }
   }
 
-  void ReplacementFragment::RemoveNodePreservingChildren(dom::Node &node) noexcept
+  void ReplacementFragment::RemoveNodePreservingChildren(boo::Node &node) noexcept
   {
-    Ref<dom::Node> protectedNode = ShareRef(node);
+    Ref<boo::Node> protectedNode = ShareRef(node);
     while (auto *n = node.FirstChild())
     {
-      Ref<dom::Node> child = ShareRef(*n);
+      Ref<boo::Node> child = ShareRef(*n);
       RemoveNode(*child);
       InsertNodeBefore(*child, node);
     }
     RemoveNode(node);
   }
 
-  void ReplacementFragment::RemoveNode(dom::Node &node) noexcept
+  void ReplacementFragment::RemoveNode(boo::Node &node) noexcept
   {
     if (auto *parent = node.NonShadowBoundaryParentNode())
     {
@@ -540,7 +539,7 @@ namespace krys::boo
     }
   }
 
-  void ReplacementFragment::InsertNodeBefore(dom::Node &node, dom::Node &refNode) noexcept
+  void ReplacementFragment::InsertNodeBefore(boo::Node &node, boo::Node &refNode) noexcept
   {
     if (auto *parent = refNode.NonShadowBoundaryParentNode())
     {
@@ -548,14 +547,14 @@ namespace krys::boo
     }
   }
 
-  void ReplacementFragment::RemoveInterchangeNodes(dom::Node *container) noexcept
+  void ReplacementFragment::RemoveInterchangeNodes(boo::Node *container) noexcept
   {
     _hasInterchangeNewlineAtStart = false;
     _hasInterchangeNewlineAtEnd = false;
 
     // Interchange newlines at the "start" of the incoming fragment must be
     // either the first node in the fragment or the first leaf in the fragment.
-    RefPtr<dom::Node> node = ShareRefPtr(container->FirstChild());
+    RefPtr<boo::Node> node = ShareRefPtr(container->FirstChild());
     while (node)
     {
       if (IsInterchangeNewlineNode(*node))
@@ -587,7 +586,7 @@ namespace krys::boo
     node = ShareRefPtr(container->FirstChild());
     while (node)
     {
-      RefPtr<dom::Node> next = ShareRefPtr(TreeQueries::Next(*node));
+      RefPtr<boo::Node> next = ShareRefPtr(TreeQueries::Next(*node));
       if (IsInterchangeConvertedSpaceSpan(*node))
       {
         next = ShareRefPtr(TreeQueries::NextSkippingChildren(*node));
@@ -597,19 +596,19 @@ namespace krys::boo
     }
   }
 
-  dom::Node *ReplaceSelectionCommand::InsertedNodes::LastLeafInserted() const noexcept
+  boo::Node *ReplaceSelectionCommand::InsertedNodes::LastLeafInserted() const noexcept
   {
     krys_debug_assert(_lastNodeInserted);
     return TreeQueries::DeepLastChild(*_lastNodeInserted);
   }
 
-  dom::Node *ReplaceSelectionCommand::InsertedNodes::PastLastLeaf() const noexcept
+  boo::Node *ReplaceSelectionCommand::InsertedNodes::PastLastLeaf() const noexcept
   {
     krys_debug_assert(_lastNodeInserted);
     return TreeQueries::Next(*TreeQueries::DeepLastChild(*_lastNodeInserted));
   }
 
-  void ReplaceSelectionCommand::InsertedNodes::RespondToNodeInsertion(dom::Node *node) noexcept
+  void ReplaceSelectionCommand::InsertedNodes::RespondToNodeInsertion(boo::Node *node) noexcept
   {
     if (!node)
     {
@@ -624,7 +623,7 @@ namespace krys::boo
     _lastNodeInserted = ShareRefPtr(node);
   }
 
-  void ReplaceSelectionCommand::InsertedNodes::WillRemoveNodePreservingChildren(dom::Node *node) noexcept
+  void ReplaceSelectionCommand::InsertedNodes::WillRemoveNodePreservingChildren(boo::Node *node) noexcept
   {
     if (_firstNodeInserted == node)
     {
@@ -640,7 +639,7 @@ namespace krys::boo
         // backwards for the previous node as the last inserted node, clamping to the first inserted node if
         // needed to ensure that the document position of the last inserted node is not behind the first
         // inserted node.
-        RefPtr<dom::Node> previousNode = ShareRefPtr(TreeQueries::PreviousSkippingChildren(*node));
+        RefPtr<boo::Node> previousNode = ShareRefPtr(TreeQueries::PreviousSkippingChildren(*node));
         krys_debug_assert(previousNode);
         _lastNodeInserted = HasFlag(_firstNodeInserted->CompareDocumentPosition(*previousNode),
                                     dom::DocumentPosition::DOCUMENT_POSITION_FOLLOWING)
@@ -650,7 +649,7 @@ namespace krys::boo
     }
   }
 
-  void ReplaceSelectionCommand::InsertedNodes::WillRemovePossibleAncestorNode(dom::Node *node) noexcept
+  void ReplaceSelectionCommand::InsertedNodes::WillRemovePossibleAncestorNode(boo::Node *node) noexcept
   {
     bool containsFirstNode = node->Contains(_firstNodeInserted.get());
     bool containsLastNode = node->Contains(_lastNodeInserted.get());
@@ -684,7 +683,7 @@ namespace krys::boo
     }
   }
 
-  void ReplaceSelectionCommand::InsertedNodes::WillRemoveNode(dom::Node *node) noexcept
+  void ReplaceSelectionCommand::InsertedNodes::WillRemoveNode(boo::Node *node) noexcept
   {
     krys_debug_assert(!_firstNodeInserted || !_firstNodeInserted->IsDescendantOf(node));
     krys_debug_assert(!_lastNodeInserted || !_lastNodeInserted->IsDescendantOf(node));
@@ -708,7 +707,7 @@ namespace krys::boo
     }
   }
 
-  void ReplaceSelectionCommand::InsertedNodes::DidReplaceNode(dom::Node *node, dom::Node *newNode) noexcept
+  void ReplaceSelectionCommand::InsertedNodes::DidReplaceNode(boo::Node *node, boo::Node *newNode) noexcept
   {
     if (_firstNodeInserted == node)
     {
@@ -720,8 +719,7 @@ namespace krys::boo
     }
   }
 
-  ReplaceSelectionCommand::ReplaceSelectionCommand(dom::Document &document,
-                                                   RefPtr<dom::DocumentFragment> &&fragment,
+  ReplaceSelectionCommand::ReplaceSelectionCommand(Document &document, RefPtr<DocumentFragment> &&fragment,
                                                    EnumSet<CommandOption> options,
                                                    EditAction editAction) noexcept
       : CompositeEditCommand(document, editAction),
@@ -734,8 +732,8 @@ namespace krys::boo
   {
   }
 
-  Ref<ReplaceSelectionCommand> ReplaceSelectionCommand::Create(dom::Document &document,
-                                                               RefPtr<dom::DocumentFragment> &&fragment,
+  Ref<ReplaceSelectionCommand> ReplaceSelectionCommand::Create(Document &document,
+                                                               RefPtr<DocumentFragment> &&fragment,
                                                                EnumSet<CommandOption> options,
                                                                EditAction editingAction) noexcept
   {
@@ -786,8 +784,8 @@ namespace krys::boo
       return false;
     }
 
-    RefPtr<dom::Node> sourceNode = ShareRefPtr(source.DeepEquivalent().DeprecatedNode());
-    RefPtr<dom::Node> destinationNode = ShareRefPtr(destination.DeepEquivalent().DeprecatedNode());
+    RefPtr<boo::Node> sourceNode = ShareRefPtr(source.DeepEquivalent().DeprecatedNode());
+    RefPtr<boo::Node> destinationNode = ShareRefPtr(destination.DeepEquivalent().DeprecatedNode());
     auto sourceBlock = EnclosingBlock(sourceNode);
     auto destinationBlock = EnclosingBlock(destinationNode);
     return sourceBlock && !HasTagName(sourceBlock.get(), html::TagName::blockquote)
@@ -804,15 +802,15 @@ namespace krys::boo
   void ReplaceSelectionCommand::RemoveRedundantStylesAndKeepStyleSpanInline(
     InsertedNodes &insertedNodes) noexcept
   {
-    RefPtr<dom::Node> pastEndNode = ShareRefPtr(insertedNodes.PastLastLeaf());
-    RefPtr<dom::Node> next;
-    for (RefPtr<dom::Node> node = ShareRefPtr(insertedNodes.FirstNodeInserted()); node && node != pastEndNode;
+    RefPtr<boo::Node> pastEndNode = ShareRefPtr(insertedNodes.PastLastLeaf());
+    RefPtr<boo::Node> next;
+    for (RefPtr<boo::Node> node = ShareRefPtr(insertedNodes.FirstNodeInserted()); node && node != pastEndNode;
          node = next)
     {
       // FIXME: <rdar://problem/5371536> Style rules that match pasted content can change it's appearance
 
       next = ShareRefPtr(TreeQueries::Next(*node));
-      RefPtr<dom::StyledElement> element = DynamicDowncast<dom::StyledElement>(node);
+      RefPtr<StyledElement> element = DynamicDowncast<StyledElement>(node);
       if (!element)
       {
         continue;
@@ -822,15 +820,15 @@ namespace krys::boo
       auto newInlineStyle = EditingStyle::Create(inlineStyle.get());
       if (inlineStyle)
       {
-        if (RefPtr<html::HTMLElement> htmlElement = DynamicDowncast<html::HTMLElement>(element))
+        if (RefPtr<HTMLElement> htmlElement = DynamicDowncast<HTMLElement>(element))
         {
-          List<dom::DOMStringAtom> attributes;
+          List<DOMStringAtom> attributes;
 
           if (newInlineStyle->ConflictsWithImplicitStyleOfElement(*htmlElement))
           {
             // e.g. <b style="font-weight: normal;"> is converted to <span style="font-weight: normal;">
             node = ReplaceElementWithSpanPreservingChildrenAndAttributes(*htmlElement);
-            element = ShareRefPtr(&Downcast<dom::StyledElement>(*node));
+            element = ShareRefPtr(&Downcast<StyledElement>(*node));
             insertedNodes.DidReplaceNode(htmlElement.get(), node.get());
           }
           else if (newInlineStyle->ExtractConflictingImplicitStyleOfAttributes(
@@ -845,7 +843,7 @@ namespace krys::boo
           }
         }
 
-        RefPtr<dom::ContainerNode> context = ShareRefPtr(element->ParentNode());
+        RefPtr<ContainerNode> context = ShareRefPtr(element->ParentNode());
         newInlineStyle->RemoveStyleFromRulesAndContext(*element, context.get());
       }
 
@@ -891,14 +889,14 @@ namespace krys::boo
   void ReplaceSelectionCommand::MakeInsertedContentRoundTrippableWithHTMLTreeBuilder(
     InsertedNodes &insertedNodes) noexcept
   {
-    RefPtr<dom::Node> pastEndNode = ShareRefPtr(insertedNodes.PastLastLeaf());
-    RefPtr<dom::Node> next;
-    for (RefPtr<dom::Node> node = ShareRefPtr(insertedNodes.FirstNodeInserted()); node && node != pastEndNode;
+    RefPtr<boo::Node> pastEndNode = ShareRefPtr(insertedNodes.PastLastLeaf());
+    RefPtr<boo::Node> next;
+    for (RefPtr<boo::Node> node = ShareRefPtr(insertedNodes.FirstNodeInserted()); node && node != pastEndNode;
          node = next)
     {
       next = ShareRefPtr(TreeQueries::Next(*node));
 
-      RefPtr<html::HTMLElement> element = DynamicDowncast<html::HTMLElement>(node);
+      RefPtr<HTMLElement> element = DynamicDowncast<HTMLElement>(node);
       if (!element)
       {
         continue;
@@ -945,11 +943,11 @@ namespace krys::boo
     }
   }
 
-  void ReplaceSelectionCommand::MoveNodeOutOfAncestor(dom::Node &node, dom::Node &ancestor,
+  void ReplaceSelectionCommand::MoveNodeOutOfAncestor(boo::Node &node, boo::Node &ancestor,
                                                       InsertedNodes &insertedNodes) noexcept
   {
-    Ref<dom::Node> protectedNode = ShareRef(node);
-    Ref<dom::Node> protectedAncestor = ShareRef(ancestor);
+    Ref<boo::Node> protectedNode = ShareRef(node);
+    Ref<boo::Node> protectedAncestor = ShareRef(ancestor);
 
     if (!protectedAncestor->ParentNode()->HasEditableStyle())
     {
@@ -976,7 +974,7 @@ namespace krys::boo
     }
     else
     {
-      RefPtr<dom::Node> nodeToSplitTo = SplitTreeToNode(node, ancestor, true);
+      RefPtr<boo::Node> nodeToSplitTo = SplitTreeToNode(node, ancestor, true);
       RemoveNode(node);
       if (nodeToSplitTo)
       {
@@ -989,13 +987,13 @@ namespace krys::boo
     bool safeToRemoveAncestor = true;
     for (auto *child = ancestor.FirstChild(); child; child = child->NextSibling())
     {
-      if (auto *text = DynamicDowncast<dom::Text>(*child); text && HasRenderedText(*text))
+      if (auto *text = DynamicDowncast<Text>(*child); text && HasRenderedText(*text))
       {
         safeToRemoveAncestor = false;
         break;
       }
 
-      if (Is<dom::Element>(*child))
+      if (Is<Element>(*child))
       {
         safeToRemoveAncestor = false;
         break;
@@ -1013,8 +1011,8 @@ namespace krys::boo
   {
     (void)GetDocument().UpdateLayoutIgnorePendingStylesheets();
 
-    RefPtr<dom::Node> lastLeafInserted = ShareRefPtr(insertedNodes.LastLeafInserted());
-    if (auto *text = DynamicDowncast<dom::Text>(lastLeafInserted.get());
+    RefPtr<boo::Node> lastLeafInserted = ShareRefPtr(insertedNodes.LastLeafInserted());
+    if (auto *text = DynamicDowncast<Text>(lastLeafInserted.get());
         text && !HasRenderedText(*text)
         && !EnclosingElementWithTag(FirstPositionInOrBeforeNode(lastLeafInserted.get()),
                                     html::TagName::select)
@@ -1029,8 +1027,8 @@ namespace krys::boo
 
     // We don't have to make sure that firstNodeInserted isn't inside a select or script element
     // because it is a top level node in the fragment and the user can't insert into those elements.
-    RefPtr<dom::Node> firstNodeInserted = ShareRefPtr(insertedNodes.FirstNodeInserted());
-    if (auto *text = DynamicDowncast<dom::Text>(firstNodeInserted.get()); text && !HasRenderedText(*text))
+    RefPtr<boo::Node> firstNodeInserted = ShareRefPtr(insertedNodes.FirstNodeInserted());
+    if (auto *text = DynamicDowncast<Text>(firstNodeInserted.get()); text && !HasRenderedText(*text))
     {
       insertedNodes.WillRemoveNode(firstNodeInserted.get());
       RemoveNode(*firstNodeInserted);
@@ -1114,8 +1112,8 @@ namespace krys::boo
 
   bool ReplaceSelectionCommand::WillApplyCommand() noexcept
   {
-    Ref<dom::DocumentFragment> documentFragment = ShareRef(*_documentFragment);
-    _documentFragmentPlainText = documentFragment->TextContent().value_or(dom::DOMString());
+    Ref<DocumentFragment> documentFragment = ShareRef(*_documentFragment);
+    _documentFragmentPlainText = documentFragment->TextContent().value_or(DOMString());
     _documentFragmentHTMLMarkup = SerializeFragment(*documentFragment, SerializedNodes::SubtreeIncludingNode);
     (void)EnsureReplacementFragment();
     return CompositeEditCommand::WillApplyCommand();
@@ -1174,7 +1172,7 @@ namespace krys::boo
 
     dom::Position insertionPos = selection.Start();
     bool selectionIsPlainText = !selection.IsContentRichlyEditable();
-    RefPtr<dom::Element> currentRoot = ShareRefPtr(selection.RootEditableElement());
+    RefPtr<Element> currentRoot = ShareRefPtr(selection.RootEditableElement());
 
     if ((selectionStartWasStartOfParagraph && selectionEndWasEndOfParagraph) || startBlock == currentRoot
         || (startBlock && IsListItem(*startBlock)) || selectionIsPlainText)
@@ -1252,7 +1250,7 @@ namespace krys::boo
     // position after p that maps to the same visible position as p (since in the case where a br is at the
     // end of a block and collapsed away, there are positions after the br which map to the same visible
     // position as [br, 0]).
-    RefPtr<dom::Node> endBR = HasTagName(insertionPos.Downstream().DeprecatedNode(), html::TagName::br)
+    RefPtr<boo::Node> endBR = HasTagName(insertionPos.Downstream().DeprecatedNode(), html::TagName::br)
                                 ? ShareRefPtr(insertionPos.Downstream().DeprecatedNode())
                                 : nullptr;
     VisiblePosition originalVisPosBeforeEndBR;
@@ -1261,7 +1259,7 @@ namespace krys::boo
       originalVisPosBeforeEndBR = VisiblePosition(dom::PositionBeforeNode(endBR.get())).Previous();
     }
 
-    RefPtr<dom::Node> insertionBlock = EnclosingBlock(ShareRefPtr(insertionPos.DeprecatedNode()));
+    RefPtr<boo::Node> insertionBlock = EnclosingBlock(ShareRefPtr(insertionPos.DeprecatedNode()));
 
     // Adjust insertionPos to prevent nesting.
     if (_preventNesting && insertionBlock && insertionBlock != currentRoot && !IsTableCell(*insertionBlock))
@@ -1311,7 +1309,7 @@ namespace krys::boo
     {
       if (auto *containerNode = insertionPos.GetContainerNode())
       {
-        if (Is<dom::Text>(*containerNode) && insertionPos.OffsetInContainerNode()
+        if (Is<Text>(*containerNode) && insertionPos.OffsetInContainerNode()
             && !insertionPos.AtLastEditingPositionForNode())
         {
           SplitTextNode(*insertionPos.ContainerText(),
@@ -1320,11 +1318,11 @@ namespace krys::boo
         }
       }
 
-      if (RefPtr<dom::Node> nodeToSplitTo = NodeToSplitToAvoidPastingIntoInlineNodesWithStyle(insertionPos))
+      if (RefPtr<boo::Node> nodeToSplitTo = NodeToSplitToAvoidPastingIntoInlineNodesWithStyle(insertionPos))
       {
         if (nodeToSplitTo->ParentNode() && insertionPos.GetContainerNode() != nodeToSplitTo->ParentNode())
         {
-          RefPtr<dom::Node> splitStart = ShareRefPtr(insertionPos.ComputeNodeAfterPosition());
+          RefPtr<boo::Node> splitStart = ShareRefPtr(insertionPos.ComputeNodeAfterPosition());
           if (!splitStart)
           {
             splitStart = ShareRefPtr(insertionPos.GetContainerNode());
@@ -1350,8 +1348,8 @@ namespace krys::boo
     // 6) Select the replacement if requested, and match style if requested.
 
     InsertedNodes insertedNodes;
-    RefPtr<dom::Node> refNode = ShareRefPtr(fragment.FirstChild());
-    RefPtr<dom::Node> node = ShareRefPtr(refNode->NextSibling());
+    RefPtr<boo::Node> refNode = ShareRefPtr(fragment.FirstChild());
+    RefPtr<boo::Node> node = ShareRefPtr(refNode->NextSibling());
 
     if (refNode)
     {
@@ -1364,8 +1362,7 @@ namespace krys::boo
                                && blockStart->ParentNode()->HasEditableStyle();
     if (isInsertingIntoList)
     {
-      refNode =
-        InsertAsListItems(Downcast<dom::Element>(*refNode), blockStart.get(), insertionPos, insertedNodes);
+      refNode = InsertAsListItems(Downcast<Element>(*refNode), blockStart.get(), insertionPos, insertedNodes);
     }
     else if (IsEditablePosition(insertionPos))
     {
@@ -1383,7 +1380,7 @@ namespace krys::boo
 
     while (node)
     {
-      RefPtr<dom::Node> next = ShareRefPtr(node->NextSibling());
+      RefPtr<boo::Node> next = ShareRefPtr(node->NextSibling());
       fragment.RemoveNode(*node);
       InsertNodeAfter(*node, *refNode);
       insertedNodes.RespondToNodeInsertion(node.get());
@@ -1442,7 +1439,7 @@ namespace krys::boo
             || (ShouldRemoveEndBR(endBR.get(), originalVisPosBeforeEndBR)
                 && !(fragment.HasInterchangeNewlineAtEnd() && selectionIsPlainText))))
     {
-      RefPtr<dom::ContainerNode> parent = ShareRefPtr(endBR->ParentNode());
+      RefPtr<ContainerNode> parent = ShareRefPtr(endBR->ParentNode());
       insertedNodes.WillRemoveNode(endBR.get());
       RemoveNode(*endBR);
       (void)GetDocument().UpdateLayoutIgnorePendingStylesheets();
@@ -1496,7 +1493,7 @@ namespace krys::boo
       // We need to handle the case where we need to merge the end
       // but our destination node is inside an inline that is the last in the block.
       // We insert a placeholder before the newly inserted content to avoid being merged into the inline.
-      RefPtr<dom::Node> destinationNode = ShareRefPtr(destination.DeepEquivalent().DeprecatedNode());
+      RefPtr<boo::Node> destinationNode = ShareRefPtr(destination.DeepEquivalent().DeprecatedNode());
       if (_shouldMergeEnd && EnclosingInline(destinationNode.get()) != destinationNode
           && EnclosingInline(destinationNode.get())->NextSibling())
       {
@@ -1596,11 +1593,11 @@ namespace krys::boo
     CompleteHTMLReplacement(lastPositionToSelect);
   }
 
-  dom::DOMString ReplaceSelectionCommand::InputEventData() const noexcept
+  DOMString ReplaceSelectionCommand::InputEventData() const noexcept
   {
     if (IsEditingTextAreaOrTextInput())
     {
-      return _documentFragment->TextContent().value_or(dom::DOMString());
+      return _documentFragment->TextContent().value_or(DOMString());
     }
 
     return CompositeEditCommand::InputEventData();
@@ -1616,7 +1613,7 @@ namespace krys::boo
     return dom::DataTransfer::CreateForInputEvent(_documentFragmentPlainText, _documentFragmentHTMLMarkup);
   }
 
-  bool ReplaceSelectionCommand::ShouldRemoveEndBR(dom::Node *endBR,
+  bool ReplaceSelectionCommand::ShouldRemoveEndBR(boo::Node *endBR,
                                                   const VisiblePosition &originalVisPosBeforeEndBR) noexcept
   {
     if (!endBR || !endBR->IsConnected())
@@ -1652,7 +1649,7 @@ namespace krys::boo
     }
 
     auto *textControl = html::EnclosingTextFormControl(PositionAtStartOfInsertedContent().DeepEquivalent());
-    if (auto *input = DynamicDowncast<html::HTMLInputElement>(textControl); input && input->IsPasswordField())
+    if (auto *input = DynamicDowncast<HTMLInputElement>(textControl); input && input->IsPasswordField())
     {
       return false; // Disable smart replace for password fields.
     }
@@ -1740,8 +1737,8 @@ namespace krys::boo
     VisiblePosition endOfInsertedContent = PositionAtEndOfInsertedContent();
 
     dom::Position endUpstream = endOfInsertedContent.DeepEquivalent().Upstream();
-    RefPtr<dom::Node> endNode = ShareRefPtr(endUpstream.ComputeNodeBeforePosition());
-    auto *endTextNode = DynamicDowncast<dom::Text>(endNode.get());
+    RefPtr<boo::Node> endNode = ShareRefPtr(endUpstream.ComputeNodeBeforePosition());
+    auto *endTextNode = DynamicDowncast<Text>(endNode.get());
     auto endOffset = endTextNode ? static_cast<uint32>(endTextNode->Length()) : 0u;
     if (endUpstream.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor)
     {
@@ -1756,7 +1753,7 @@ namespace krys::boo
     if (needsTrailingSpace && endNode)
     {
       bool collapseWhiteSpace = !endNode->Renderer() || endNode->Renderer()->Style().CollapseWhiteSpace();
-      if (auto *text = DynamicDowncast<dom::Text>(*endNode))
+      if (auto *text = DynamicDowncast<Text>(*endNode))
       {
         InsertTextIntoNode(*text, endOffset,
                            collapseWhiteSpace ? NonBreakingSpaceString() : utf8_stringview(u8" "));
@@ -1778,7 +1775,7 @@ namespace krys::boo
     (void)GetDocument().UpdateLayout();
 
     dom::Position startDownstream = startOfInsertedContent.DeepEquivalent().Downstream();
-    RefPtr<dom::Node> startNode = ShareRefPtr(startDownstream.ComputeNodeAfterPosition());
+    RefPtr<boo::Node> startNode = ShareRefPtr(startDownstream.ComputeNodeAfterPosition());
     uint32 startOffset = 0;
     if (startDownstream.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor)
     {
@@ -1793,7 +1790,7 @@ namespace krys::boo
     if (needsLeadingSpace && startNode)
     {
       bool collapseWhiteSpace = !startNode->Renderer() || startNode->Renderer()->Style().CollapseWhiteSpace();
-      if (auto *text = DynamicDowncast<dom::Text>(*startNode))
+      if (auto *text = DynamicDowncast<Text>(*startNode))
       {
         InsertTextIntoNode(*text, startOffset,
                            collapseWhiteSpace ? NonBreakingSpaceString() : utf8_stringview(u8" "));
@@ -1892,19 +1889,19 @@ namespace krys::boo
       position.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor;
     bool positionOnlyToBeUpdatedIsOffsetInAnchor =
       positionOnlyToBeUpdated.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor;
-    RefPtr<dom::Text> text;
-    if (auto *container = DynamicDowncast<dom::Text>(position.GetContainerNode());
+    RefPtr<Text> text;
+    if (auto *container = DynamicDowncast<Text>(position.GetContainerNode());
         positionIsOffsetInAnchor && container)
     {
       text = ShareRefPtr(container);
     }
     else
     {
-      if (auto *before = DynamicDowncast<dom::Text>(position.ComputeNodeBeforePosition()))
+      if (auto *before = DynamicDowncast<Text>(position.ComputeNodeBeforePosition()))
       {
         text = ShareRefPtr(before);
       }
-      else if (auto *after = DynamicDowncast<dom::Text>(position.ComputeNodeAfterPosition()))
+      else if (auto *after = DynamicDowncast<Text>(position.ComputeNodeAfterPosition()))
       {
         text = ShareRefPtr(after);
       }
@@ -1914,7 +1911,7 @@ namespace krys::boo
       return;
     }
 
-    if (RefPtr<dom::Text> previous = ShareRefPtr(DynamicDowncast<dom::Text>(text->PreviousSibling())))
+    if (RefPtr<Text> previous = ShareRefPtr(DynamicDowncast<Text>(text->PreviousSibling())))
     {
       InsertTextIntoNode(*text, 0, previous->Data());
 
@@ -1948,7 +1945,7 @@ namespace krys::boo
 
       RemoveNode(*previous);
     }
-    if (RefPtr<dom::Text> next = ShareRefPtr(DynamicDowncast<dom::Text>(text->NextSibling())))
+    if (RefPtr<Text> next = ShareRefPtr(DynamicDowncast<Text>(text->NextSibling())))
     {
       auto originalLength = static_cast<uint32>(text->Length());
       InsertTextIntoNode(*text, originalLength, next->Data());
@@ -1974,24 +1971,24 @@ namespace krys::boo
 
   // If the user is inserting a list into an existing list, instead of nesting the list,
   // we put the list items into the existing list.
-  RefPtr<dom::Node> ReplaceSelectionCommand::InsertAsListItems(dom::Element &passedListElement,
-                                                               dom::Node *insertionBlock,
+  RefPtr<boo::Node> ReplaceSelectionCommand::InsertAsListItems(Element &passedListElement,
+                                                               boo::Node *insertionBlock,
                                                                const dom::Position &position,
                                                                InsertedNodes &insertedNodes) noexcept
   {
-    Ref<dom::Element> listElement = DeepestSingleChildList(passedListElement);
+    Ref<Element> listElement = DeepestSingleChildList(passedListElement);
 
     bool isStart = IsStartOfParagraph(position);
     bool isEnd = IsEndOfParagraph(position);
     bool isMiddle = !isStart && !isEnd;
-    RefPtr<dom::Node> lastNode = ShareRefPtr(insertionBlock);
+    RefPtr<boo::Node> lastNode = ShareRefPtr(insertionBlock);
 
     // If we're in the middle of a list item, we should split it into two separate
     // list items and insert these nodes between them.
     if (isMiddle)
     {
       int32 textNodeOffset = position.OffsetInContainerNode();
-      if (auto *text = DynamicDowncast<dom::Text>(*position.DeprecatedNode()); text && textNodeOffset > 0)
+      if (auto *text = DynamicDowncast<Text>(*position.DeprecatedNode()); text && textNodeOffset > 0)
       {
         SplitTextNode(*text, static_cast<uint32>(textNodeOffset));
       }
@@ -2000,7 +1997,7 @@ namespace krys::boo
 
     while (auto *firstChild = listElement->FirstChild())
     {
-      Ref<dom::Node> listItem = ShareRef(*firstChild);
+      Ref<boo::Node> listItem = ShareRef(*firstChild);
       (void)listElement->RemoveChild(*listItem);
       if (isStart || isMiddle)
       {
@@ -2025,7 +2022,7 @@ namespace krys::boo
     return lastNode;
   }
 
-  void ReplaceSelectionCommand::UpdateNodesInserted(dom::Node *node) noexcept
+  void ReplaceSelectionCommand::UpdateNodesInserted(boo::Node *node) noexcept
   {
     if (!node)
     {
@@ -2044,8 +2041,8 @@ namespace krys::boo
   {
     if (!_replacementFragment)
     {
-      _replacementFragment = CreateUnique<ReplacementFragment>(
-        RefPtr<dom::DocumentFragment>(_documentFragment), EndingSelection());
+      _replacementFragment =
+        CreateUnique<ReplacementFragment>(RefPtr<DocumentFragment>(_documentFragment), EndingSelection());
     }
     return _replacementFragment.get();
   }
@@ -2056,7 +2053,7 @@ namespace krys::boo
   // split text nodes.
   bool ReplaceSelectionCommand::PerformTrivialReplace(const ReplacementFragment &fragment) noexcept
   {
-    auto *textNode = DynamicDowncast<dom::Text>(fragment.FirstChild());
+    auto *textNode = DynamicDowncast<Text>(fragment.FirstChild());
     if (!textNode || fragment.FirstChild() != fragment.LastChild())
     {
       return false;
@@ -2079,7 +2076,7 @@ namespace krys::boo
       return false;
     }
 
-    RefPtr<dom::Node> nodeAfterInsertionPos = ShareRefPtr(EndingSelection().End().Downstream().AnchorNode());
+    RefPtr<boo::Node> nodeAfterInsertionPos = ShareRefPtr(EndingSelection().End().Downstream().AnchorNode());
     // Our fragment creation code handles tabs, spaces, and newlines, so we don't have to worry about those
     // here.
 

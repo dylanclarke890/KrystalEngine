@@ -30,7 +30,7 @@
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/String.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief The base types a numeric value's type has an exponent for.
   /// @see https://drafts.css-houdini.org/css-typed-om/#cssnumericvalue-base-type
@@ -44,7 +44,10 @@ namespace krys::boo::css
     Flex,
     Percent,
   };
+}
 
+namespace krys::boo::css
+{
   KRYS_NODISCARD constexpr Array<CSSNumericBaseType, 7> EachBaseType() noexcept
   {
     return {CSSNumericBaseType::Length,    CSSNumericBaseType::Angle,      CSSNumericBaseType::Time,

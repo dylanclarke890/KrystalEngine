@@ -119,14 +119,14 @@ namespace krys::boo
     IntSize _fixedLayoutSize;
     bool _useFixedLayout {false};
     bool _hasFlippedBlockRenderers {false};
-    css::CSSOMStringAtom _mediaType;
+    CSSOMStringAtom _mediaType;
     Maybe<OverrideViewportSize> _defaultViewportSizeOverride;
     Maybe<OverrideViewportSize> _smallViewportSizeOverride;
     Maybe<OverrideViewportSize> _largeViewportSizeOverride;
     LocalFrameViewLayoutContext _layoutContext;
     EnumSet<PaintBehavior> _paintBehavior;
     boo::Color _baseBackgroundColor {boo::Color::white};
-    RefPtr<dom::Node> _nodeToDraw;
+    RefPtr<Node> _nodeToDraw;
     bool _isPainting {false};
     bool _isTransparent {false};
     bool _contentIsOpaque {false};
@@ -151,8 +151,8 @@ namespace krys::boo
     bool _shouldScrollToFocusedElement {false};
     /// @brief The node the view keeps in view as layout changes (the fragment's target, or the document for
     /// the top), until the view scrolls otherwise.
-    WeakPtr<dom::ContainerNode> _maintainScrollPositionAnchor;
-    WeakPtr<dom::ContainerNode> _scheduledMaintainScrollPositionAnchor;
+    WeakPtr<ContainerNode> _maintainScrollPositionAnchor;
+    WeakPtr<ContainerNode> _scheduledMaintainScrollPositionAnchor;
     bool _scheduledToScrollToAnchor {false};
     /// @brief How the user last scrolled the view, if they did.
     Maybe<UserScrollType> _lastUserScrollType;
@@ -790,7 +790,7 @@ namespace krys::boo
 
     /// @brief Paints only @p node and its descendants from now on, or everything if it's null.
     // FIXME: change this to use the subtreePaint terminology.
-    void SetNodeToDraw(dom::Node *node) noexcept;
+    void SetNodeToDraw(Node *node) noexcept;
 
     enum SelectionInSnapshot
     {
@@ -851,13 +851,13 @@ namespace krys::boo
     }
 
     /// @brief The view's media type (`screen` by default).
-    KRYS_NODISCARD const css::CSSOMStringAtom &MediaType() const noexcept
+    KRYS_NODISCARD const CSSOMStringAtom &MediaType() const noexcept
     {
       return _mediaType;
     }
 
     /// @brief Sets the view's media type, and re-evaluates the document's style sheets if it changed.
-    void SetMediaType(const css::CSSOMStringAtom &mediaType) noexcept;
+    void SetMediaType(const CSSOMStringAtom &mediaType) noexcept;
 
     void SetOverrideSizeForCSSDefaultViewportUnits(OverrideViewportSize size) noexcept;
 
@@ -938,16 +938,16 @@ namespace krys::boo
 
     /// @brief Scrolls to the element the fragment @p fragmentIdentifier indicates.
     /// @return Whether there was something to scroll to.
-    bool ScrollToAnchorFragment(dom::DOMStringView fragmentIdentifier) noexcept;
+    bool ScrollToAnchorFragment(DOMStringView fragmentIdentifier) noexcept;
 
     /// @brief Clears the document's target, and an SVG document's view from its fragment.
     void ResetScrollAnchor() noexcept;
 
     /// @brief Keeps @p anchorNode in view as layout changes (null stops it), scrolling to it now.
-    void MaintainScrollPositionAtAnchor(dom::ContainerNode *anchorNode) noexcept;
+    void MaintainScrollPositionAtAnchor(ContainerNode *anchorNode) noexcept;
 
     /// @brief The node the view keeps in view, if any.
-    KRYS_NODISCARD dom::ContainerNode *MaintainedScrollPositionAnchor() const noexcept
+    KRYS_NODISCARD ContainerNode *MaintainedScrollPositionAnchor() const noexcept
     {
       return _maintainScrollPositionAnchor.get();
     }

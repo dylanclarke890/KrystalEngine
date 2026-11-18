@@ -31,12 +31,8 @@
 
 namespace krys::boo
 {
-  class RenderStyle;
-}
-
-namespace krys::boo::dom
-{
   class Document;
+  class RenderStyle;
 }
 
 namespace krys::boo::style
@@ -69,7 +65,7 @@ namespace krys::boo::css
     /// @note What the canvas 2D context's `filter` is set with.
     KRYS_NODISCARD Maybe<style::Filter> ParseFilterValueListOrNoneRaw(const CSSOMString &string,
                                                                       const ParserContext &context,
-                                                                      const dom::Document &document,
+                                                                      const Document &document,
                                                                       RenderStyle &style) noexcept;
   }
 }

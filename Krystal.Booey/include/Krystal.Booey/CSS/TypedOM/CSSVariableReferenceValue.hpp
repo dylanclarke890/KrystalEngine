@@ -28,7 +28,7 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSStyleValue.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSUnparsedValue;
 
@@ -46,7 +46,7 @@ namespace krys::boo::css
     /// @return A `TypeError` if @p variable isn't a custom property name.
     /// @see
     /// https://drafts.css-houdini.org/css-typed-om/#dom-cssvariablereferencevalue-cssvariablereferencevalue
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSVariableReferenceValue>>
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSVariableReferenceValue>>
       Create(CSSOMString variable, RefPtr<CSSUnparsedValue> fallback = {}) noexcept;
 
     ~CSSVariableReferenceValue() noexcept;
@@ -58,7 +58,7 @@ namespace krys::boo::css
     }
 
     /// @return A `TypeError`, leaving the variable unchanged, if @p variable isn't a custom property name.
-    dom::ExceptionOr<void> SetVariable(CSSOMString variable) noexcept;
+    ExceptionOr<void> SetVariable(CSSOMString variable) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssvariablereferencevalue-fallback
     KRYS_NODISCARD CSSUnparsedValue *Fallback() const noexcept

@@ -11,7 +11,7 @@ namespace krys::boo::html::tests
 
   namespace
   {
-    KRYS_NODISCARD Ref<RadioNodeList> Radios(FormFixture &fixture, dom::DOMStringView name) noexcept
+    KRYS_NODISCARD Ref<RadioNodeList> Radios(FormFixture &fixture, DOMStringView name) noexcept
     {
       auto item = fixture.Get<HTMLFormElement>(u8"f").Elements()->NamedItemOrItems(name);
       REQUIRE(item);
@@ -33,8 +33,8 @@ namespace krys::boo::html::tests
 
     auto one = collection->NamedItemOrItems(u8"one");
     REQUIRE(one);
-    REQUIRE(std::holds_alternative<RefPtr<dom::Element>>(*one));
-    CHECK(std::get<RefPtr<dom::Element>>(*one).get() == &fixture.ById(u8"a"));
+    REQUIRE(std::holds_alternative<RefPtr<Element>>(*one));
+    CHECK(std::get<RefPtr<Element>>(*one).get() == &fixture.ById(u8"a"));
 
     // An ID and a name both match, in tree order.
     auto list = Radios(fixture, u8"two");

@@ -28,9 +28,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFEDiffuseLightingElement::SVGFEDiffuseLightingElement(dom::Document &document) noexcept
+  SVGFEDiffuseLightingElement::SVGFEDiffuseLightingElement(Document &document) noexcept
       : SVGFilterPrimitiveStandardAttributes(document, CreateUnique<PropertyRegistry>(*this),
                                              SVGElementInterface::FEDiffuseLighting),
         _in1(SVGAnimatedString::Create(this)), _diffuseConstant(SVGAnimatedNumber::Create(this, 1)),
@@ -53,27 +53,26 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGFEDiffuseLightingElement::AttributeChanged(const dom::QualifiedName &name,
-                                                     Maybe<dom::DOMStringView> oldValue,
-                                                     Maybe<dom::DOMStringView> value) noexcept
+  void SVGFEDiffuseLightingElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                                     Maybe<DOMStringView> value) noexcept
   {
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::InAttr())
     {
-      _in1->SetBaseValInternal(dom::DOMString(string));
+      _in1->SetBaseValInternal(DOMString(string));
     }
     else if (name == SVGNames::SurfaceScaleAttr())
     {
-      _surfaceScale->SetBaseValInternal(ToFloatOrZero(string));
+      _surfaceScale->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::DiffuseConstantAttr())
     {
-      _diffuseConstant->SetBaseValInternal(ToFloatOrZero(string));
+      _diffuseConstant->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::KernelUnitLengthAttr())
     {
-      if (auto result = ParseNumberOptionalNumber(string))
+      if (auto result = svg::ParseNumberOptionalNumber(string))
       {
         _kernelUnitLengthX->SetBaseValInternal(result->first);
         _kernelUnitLengthY->SetBaseValInternal(result->second);
@@ -84,7 +83,7 @@ namespace krys::boo::svg
   }
 
   bool SVGFEDiffuseLightingElement::SetFilterEffectAttribute(FilterEffect &filterEffect,
-                                                             const dom::QualifiedName &attributeName) noexcept
+                                                             const QualifiedName &attributeName) noexcept
   {
     auto &effect = Downcast<FEDiffuseLighting>(filterEffect);
     auto lightElement = [this]
@@ -151,7 +150,7 @@ namespace krys::boo::svg
     return false;
   }
 
-  void SVGFEDiffuseLightingElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGFEDiffuseLightingElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (attributeName == SVGNames::InAttr())
     {
@@ -171,8 +170,8 @@ namespace krys::boo::svg
     SVGFilterPrimitiveStandardAttributes::SVGAttributeChanged(attributeName);
   }
 
-  void SVGFEDiffuseLightingElement::LightElementAttributeChanged(
-    const SVGFELightElement *lightElement, const dom::QualifiedName &attributeName) noexcept
+  void SVGFEDiffuseLightingElement::LightElementAttributeChanged(const SVGFELightElement *lightElement,
+                                                                 const QualifiedName &attributeName) noexcept
   {
     if (SVGFELightElement::FindLightElement(this) != lightElement)
     {

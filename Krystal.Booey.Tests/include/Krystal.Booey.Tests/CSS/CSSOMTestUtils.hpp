@@ -5,8 +5,8 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleDeclaration.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/Parser.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
@@ -66,7 +66,7 @@ namespace krys::boo::css::tests
 
   /// @brief The exception code `result` holds; it must hold one.
   template <typename T>
-  KRYS_NODISCARD dom::ExceptionCode ExceptionCodeOf(const dom::ExceptionOr<T> &result)
+  KRYS_NODISCARD ExceptionCode ExceptionCodeOf(const ExceptionOr<T> &result)
   {
     REQUIRE(result.HasException());
     return result.GetException().Code();

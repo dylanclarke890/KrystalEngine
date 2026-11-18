@@ -32,7 +32,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGProperty;
 
@@ -72,13 +72,14 @@ namespace krys::boo::svg
       animatedProperty.SetDirty();
     }
 
-    KRYS_NODISCARD virtual Maybe<dom::DOMString> Synchronize(const TOwner &) const noexcept
+    KRYS_NODISCARD virtual Maybe<DOMString> Synchronize(const TOwner &) const noexcept
     {
       return {};
     }
 
-    KRYS_NODISCARD virtual RefPtr<SVGAttributeAnimator>
-      CreateAnimator(TOwner &, const dom::QualifiedName &, AnimationMode, CalcMode, bool, bool) const noexcept
+    KRYS_NODISCARD virtual RefPtr<SVGAttributeAnimator> CreateAnimator(TOwner &, const QualifiedName &,
+                                                                       svg::AnimationMode, svg::CalcMode,
+                                                                       bool, bool) const noexcept
     {
       return nullptr;
     }

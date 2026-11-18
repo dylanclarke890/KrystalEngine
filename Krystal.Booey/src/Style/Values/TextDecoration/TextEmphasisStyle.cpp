@@ -65,11 +65,10 @@ namespace krys::boo::style
     constexpr utf8_stringview SesameDot = u8"﹅";
     constexpr utf8_stringview WhiteSesameDot = u8"﹆";
 
-    KRYS_NODISCARD const css::CSSOMStringAtom &
+    KRYS_NODISCARD const CSSOMStringAtom &
       MarkStringFromShape(const TextEmphasisStyle::Shape &markShape) noexcept
     {
-      auto pick = [&](const css::CSSOMStringAtom &filled,
-                      const css::CSSOMStringAtom &open) -> const css::CSSOMStringAtom &
+      auto pick = [&](const CSSOMStringAtom &filled, const CSSOMStringAtom &open) -> const CSSOMStringAtom &
       {
         return markShape.Fill == TextEmphasisFill::Filled ? filled : open;
       };
@@ -78,47 +77,47 @@ namespace krys::boo::style
       {
         case TextEmphasisMark::Dot:
         {
-          static const css::CSSOMStringAtom filledDotString {Bullet};
-          static const css::CSSOMStringAtom openDotString {WhiteBullet};
+          static const CSSOMStringAtom filledDotString {Bullet};
+          static const CSSOMStringAtom openDotString {WhiteBullet};
           return pick(filledDotString, openDotString);
         }
         case TextEmphasisMark::Circle:
         {
-          static const css::CSSOMStringAtom filledCircleString {BlackCircle};
-          static const css::CSSOMStringAtom openCircleString {WhiteCircle};
+          static const CSSOMStringAtom filledCircleString {BlackCircle};
+          static const CSSOMStringAtom openCircleString {WhiteCircle};
           return pick(filledCircleString, openCircleString);
         }
         case TextEmphasisMark::DoubleCircle:
         {
-          static const css::CSSOMStringAtom filledDoubleCircleString {Fisheye};
-          static const css::CSSOMStringAtom openDoubleCircleString {Bullseye};
+          static const CSSOMStringAtom filledDoubleCircleString {Fisheye};
+          static const CSSOMStringAtom openDoubleCircleString {Bullseye};
           return pick(filledDoubleCircleString, openDoubleCircleString);
         }
         case TextEmphasisMark::Triangle:
         {
-          static const css::CSSOMStringAtom filledTriangleString {BlackUpPointingTriangle};
-          static const css::CSSOMStringAtom openTriangleString {WhiteUpPointingTriangle};
+          static const CSSOMStringAtom filledTriangleString {BlackUpPointingTriangle};
+          static const CSSOMStringAtom openTriangleString {WhiteUpPointingTriangle};
           return pick(filledTriangleString, openTriangleString);
         }
         case TextEmphasisMark::Sesame:
         {
-          static const css::CSSOMStringAtom filledSesameString {SesameDot};
-          static const css::CSSOMStringAtom openSesameString {WhiteSesameDot};
+          static const CSSOMStringAtom filledSesameString {SesameDot};
+          static const CSSOMStringAtom openSesameString {WhiteSesameDot};
           return pick(filledSesameString, openSesameString);
         }
       }
 
       krys_debug_assert_msg(false, "Unreachable");
-      return css::CSSOMStringAtom::Empty();
+      return CSSOMStringAtom::Empty();
     }
   }
 
-  css::CSSOMStringAtom TextEmphasisStyle::MarkString() const noexcept
+  CSSOMStringAtom TextEmphasisStyle::MarkString() const noexcept
   {
     return krys::SwitchOn(
-      Value, [&](const css::keywords::None &) -> css::CSSOMStringAtom { return null; },
-      [&](const Shape &shape) -> css::CSSOMStringAtom { return MarkStringFromShape(shape); },
-      [&](const css::CSSOMStringAtom &customMark) -> css::CSSOMStringAtom { return customMark; });
+      Value, [&](const css::keywords::None &) -> CSSOMStringAtom { return null; },
+      [&](const Shape &shape) -> CSSOMStringAtom { return MarkStringFromShape(shape); },
+      [&](const CSSOMStringAtom &customMark) -> CSSOMStringAtom { return customMark; });
   }
 
   // MARK: - Conversion
@@ -178,7 +177,7 @@ namespace krys::boo::style
 
     if (primitiveValue->IsString())
     {
-      return css::CSSOMStringAtom {primitiveValue->StringValue()};
+      return CSSOMStringAtom {primitiveValue->StringValue()};
     }
 
     state.SetCurrentPropertyInvalidAtComputedValueTime();

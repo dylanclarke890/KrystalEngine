@@ -167,7 +167,7 @@ namespace krys::boo
         }
       }
 
-      auto *svgElement = DynamicDowncast<svg::SVGElement>(renderer.GetElement());
+      auto *svgElement = DynamicDowncast<SVGElement>(renderer.GetElement());
       if (!svgElement)
       {
         return;
@@ -179,7 +179,7 @@ namespace krys::boo
         {
           // We allow cycles in SVGDocumentExtensions reference sets in order to avoid expensive
           // reference graph adjustments on changes, so we need to break possible cycles here.
-          static HashSet<const svg::SVGElement *> invalidatingDependencies;
+          static HashSet<const SVGElement *> invalidatingDependencies;
           if (!invalidatingDependencies.insert(element.get()).second) KRYS_UNLIKELY
           {
             // Reference cycle: we are in process of invalidating this dependant.

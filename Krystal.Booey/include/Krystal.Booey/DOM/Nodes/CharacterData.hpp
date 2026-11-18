@@ -10,6 +10,11 @@
 
 namespace krys::boo::dom
 {
+  class TextAlgorithms;
+}
+
+namespace krys::boo
+{
   class Document;
 
   /// @brief A node with data: a Text, Comment or ProcessingInstruction node.
@@ -18,7 +23,7 @@ namespace krys::boo::dom
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CharacterData);
 
-    friend class TextAlgorithms;
+    friend class dom::TextAlgorithms;
 
   private:
     /// @see https://dom.spec.whatwg.org/#concept-cd-data
@@ -26,7 +31,7 @@ namespace krys::boo::dom
 
   protected:
     CharacterData(Document &document, DOMString data, dom::NodeType type,
-                  NodeFlags flags = NodeFlags::None) noexcept;
+                  dom::NodeFlags flags = dom::NodeFlags::None) noexcept;
 
   public:
 #pragma region CharacterData - https://dom.spec.whatwg.org/#characterdata
@@ -103,18 +108,18 @@ namespace krys::boo::dom
     /// nodes.
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-before
-    ExceptionOr<void> Before(const List<NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> Before(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Inserts `nodes` just after `this`, while replacing strings in `nodes` with equivalent Text
     /// nodes.
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-after
-    ExceptionOr<void> After(const List<NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> After(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Replaces `this` with `nodes`, while replacing strings in `nodes` with equivalent Text nodes.
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-replacewith
-    ExceptionOr<void> ReplaceWith(const List<NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> ReplaceWith(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Removes `this`.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-remove
@@ -181,8 +186,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::CharacterData)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CharacterData)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
     return node.IsCharacterDataNode();
   }

@@ -23,7 +23,7 @@ namespace krys::boo::dom::tests
     class TextNodeFilter : public NodeFilter
     {
     public:
-      KRYS_NODISCARD dom::ExceptionOr<FilterResult> AcceptNode(const Node &node) const noexcept override
+      KRYS_NODISCARD ExceptionOr<FilterResult> AcceptNode(const Node &node) const noexcept override
       {
         return node.NodeType() == NodeType::TEXT_NODE ? FilterResult::FILTER_ACCEPT
                                                       : FilterResult::FILTER_REJECT;
@@ -88,7 +88,7 @@ namespace krys::boo::dom::tests
   {
     CommonTestData data;
 
-    auto textNode = CreateRef<krys::boo::dom::Text>(*data.Document, u8"Hello, World!");
+    auto textNode = CreateRef<krys::boo::Text>(*data.Document, u8"Hello, World!");
 
     REQUIRE_FALSE(data.Node->AppendChild(*textNode).HasException());
 
@@ -113,7 +113,7 @@ namespace krys::boo::dom::tests
     CommonTestData data;
 
     auto elementNode = CreateRef<TestElement>(*data.Document);
-    auto textNode = CreateRef<krys::boo::dom::Text>(*data.Document, u8"Hello, World!");
+    auto textNode = CreateRef<krys::boo::Text>(*data.Document, u8"Hello, World!");
 
     REQUIRE_FALSE(data.Node->AppendChild(*elementNode).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*textNode).HasException());
@@ -138,7 +138,7 @@ namespace krys::boo::dom::tests
     /// @brief div#d > (b#b > "bb", i#i > (em#em > "e", "ii"), u#u), in a body.
     struct WalkTestData
     {
-      Ref<dom::Document> Document;
+      Ref<boo::Document> Document;
       Ref<Element> Div;
       Ref<Element> B;
       Ref<Element> I;
@@ -149,7 +149,7 @@ namespace krys::boo::dom::tests
       Node *IText;
 
       WalkTestData()
-          : Document(dom::Document::ParseHTMLUnsafe(
+          : Document(boo::Document::ParseHTMLUnsafe(
                        *CreateRef<HTMLDocument>(),
                        u8"<!DOCTYPE html><body><div id=d><b id=b>bb</b><i id=i><em id=em>e</em>"
                        u8"ii</i><u id=u></u></div>")
@@ -173,7 +173,7 @@ namespace krys::boo::dom::tests
       {
       }
 
-      KRYS_NODISCARD dom::ExceptionOr<FilterResult> AcceptNode(const Node &node) const noexcept override
+      KRYS_NODISCARD ExceptionOr<FilterResult> AcceptNode(const Node &node) const noexcept override
       {
         return Function(node);
       }

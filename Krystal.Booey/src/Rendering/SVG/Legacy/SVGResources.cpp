@@ -163,18 +163,18 @@ namespace krys::boo
       }
     }
 
-    KRYS_NODISCARD dom::DOMStringAtom TargetReferenceFromResource(svg::SVGElement &element) noexcept
+    KRYS_NODISCARD DOMStringAtom TargetReferenceFromResource(SVGElement &element) noexcept
     {
-      dom::DOMString target;
-      if (auto *svgPattern = DynamicDowncast<svg::SVGPatternElement>(element))
+      DOMString target;
+      if (auto *svgPattern = DynamicDowncast<SVGPatternElement>(element))
       {
         target = svgPattern->Href();
       }
-      else if (auto *svgGradient = DynamicDowncast<svg::SVGGradientElement>(element))
+      else if (auto *svgGradient = DynamicDowncast<SVGGradientElement>(element))
       {
         target = svgGradient->Href();
       }
-      else if (auto *svgFilter = DynamicDowncast<svg::SVGFilterElement>(element))
+      else if (auto *svgFilter = DynamicDowncast<SVGFilterElement>(element))
       {
         target = svgFilter->Href();
       }
@@ -183,25 +183,25 @@ namespace krys::boo
         krys_debug_assert(false);
       }
 
-      return svg::SVGURIReference::FragmentIdentifierFromIRIString(target, element.NodeDocument());
+      return SVGURIReference::FragmentIdentifierFromIRIString(target, element.NodeDocument());
     }
 
-    KRYS_NODISCARD bool IsChainableResource(const svg::SVGElement &element,
-                                            const svg::SVGElement &linkedResource) noexcept
+    KRYS_NODISCARD bool IsChainableResource(const SVGElement &element,
+                                            const SVGElement &linkedResource) noexcept
     {
-      if (Is<svg::SVGPatternElement>(element))
+      if (Is<SVGPatternElement>(element))
       {
-        return Is<svg::SVGPatternElement>(linkedResource);
+        return Is<SVGPatternElement>(linkedResource);
       }
 
-      if (Is<svg::SVGGradientElement>(element))
+      if (Is<SVGGradientElement>(element))
       {
-        return Is<svg::SVGGradientElement>(linkedResource);
+        return Is<SVGGradientElement>(linkedResource);
       }
 
-      if (Is<svg::SVGFilterElement>(element))
+      if (Is<SVGFilterElement>(element))
       {
-        return Is<svg::SVGFilterElement>(linkedResource);
+        return Is<SVGFilterElement>(linkedResource);
       }
 
       krys_debug_assert(false);
@@ -210,7 +210,7 @@ namespace krys::boo
 
     KRYS_NODISCARD LegacyRenderSVGResourceContainer *
       PaintingResourceFromSVGPaint(dom::DocumentOrShadowRoot &treeScope, const style::SVGPaint &paint,
-                                   dom::DOMStringAtom &id, bool &hasPendingResource) noexcept
+                                   DOMStringAtom &id, bool &hasPendingResource) noexcept
     {
       auto paintURL = paint.TryAnyURL();
       if (!paintURL)
@@ -218,8 +218,7 @@ namespace krys::boo
         return nullptr;
       }
 
-      id =
-        svg::SVGURIReference::FragmentIdentifierFromIRIString(*paintURL, treeScope.RootNode().NodeDocument());
+      id = SVGURIReference::FragmentIdentifierFromIRIString(*paintURL, treeScope.RootNode().NodeDocument());
       auto *container = GetRenderSVGResourceContainerById(treeScope, id);
       if (!container)
       {
@@ -248,7 +247,7 @@ namespace krys::boo
       return nullptr;
     }
 
-    Ref<svg::SVGElement> element = ShareRef(Downcast<svg::SVGElement>(*renderer.GetElement()));
+    Ref<SVGElement> element = ShareRef(Downcast<SVGElement>(*renderer.GetElement()));
 
     auto &treeScope = element->TreeScopeForSVGReferences();
     auto &document = treeScope.RootNode().NodeDocument();
@@ -309,7 +308,7 @@ namespace krys::boo
         // mask-image if it's a reference.
         if (auto maskImage = style.GetMaskLayers().UsedFirst().GetImage().TryStyleImage())
         {
-          auto resourceID = svg::SVGURIReference::FragmentIdentifierFromIRIString(maskImage->Url(), document);
+          auto resourceID = SVGURIReference::FragmentIdentifierFromIRIString(maskImage->Url(), document);
           if (auto *masker = GetRenderSVGResourceById<LegacyRenderSVGResourceMasker>(treeScope, resourceID))
           {
             ensureResources(foundResources).SetMasker(masker);
@@ -327,7 +326,7 @@ namespace krys::boo
       auto buildCachedMarkerResource = [&](const style::SVGMarkerResource &markerResource,
                                            bool (SVGResources::*setMarker)(LegacyRenderSVGResourceMarker *))
       {
-        auto markerId = svg::SVGURIReference::FragmentIdentifierFromIRIString(markerResource, document);
+        auto markerId = SVGURIReference::FragmentIdentifierFromIRIString(markerResource, document);
         if (auto *marker = GetRenderSVGResourceById<LegacyRenderSVGResourceMarker>(treeScope, markerId))
         {
           (ensureResources(foundResources).*setMarker)(marker);
@@ -347,7 +346,7 @@ namespace krys::boo
       if (style.HasFill())
       {
         bool hasPendingResource = false;
-        dom::DOMStringAtom id = null;
+        DOMStringAtom id = null;
         if (auto *fill = PaintingResourceFromSVGPaint(treeScope, style.Fill(), id, hasPendingResource))
         {
           ensureResources(foundResources).SetFill(fill);
@@ -361,7 +360,7 @@ namespace krys::boo
       if (style.HasStroke())
       {
         bool hasPendingResource = false;
-        dom::DOMStringAtom id = null;
+        DOMStringAtom id = null;
         if (auto *stroke = PaintingResourceFromSVGPaint(treeScope, style.Stroke(), id, hasPendingResource))
         {
           ensureResources(foundResources).SetStroke(stroke);
@@ -444,7 +443,7 @@ namespace krys::boo
   bool SVGResources::MarkerReverseStart() const noexcept
   {
     return _markerData && _markerData->MarkerStart
-           && _markerData->MarkerStart->MarkerElement().OrientType() == svg::SVGMarkerOrientAutoStartReverse;
+           && _markerData->MarkerStart->MarkerElement().OrientType() == SVGMarkerOrientAutoStartReverse;
   }
 
   bool SVGResources::IsEmpty() const noexcept

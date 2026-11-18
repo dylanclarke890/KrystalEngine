@@ -29,7 +29,7 @@
 
 namespace krys::boo
 {
-  LegacyRenderSVGResourceMasker::LegacyRenderSVGResourceMasker(svg::SVGMaskElement &element,
+  LegacyRenderSVGResourceMasker::LegacyRenderSVGResourceMasker(SVGMaskElement &element,
                                                                RenderStyle &&style) noexcept
       : LegacyRenderSVGResourceContainer(Type::LegacySVGResourceMasker, element, krys::move(style))
   {
@@ -37,17 +37,17 @@ namespace krys::boo
 
   LegacyRenderSVGResourceMasker::~LegacyRenderSVGResourceMasker() noexcept = default;
 
-  svg::SVGMaskElement &LegacyRenderSVGResourceMasker::MaskElement() const noexcept
+  SVGMaskElement &LegacyRenderSVGResourceMasker::MaskElement() const noexcept
   {
-    return Downcast<svg::SVGMaskElement>(LegacyRenderSVGResourceContainer::GetElement());
+    return Downcast<SVGMaskElement>(LegacyRenderSVGResourceContainer::GetElement());
   }
 
-  svg::SVGUnitTypes::SVGUnitType LegacyRenderSVGResourceMasker::MaskUnits() const noexcept
+  SVGUnitTypes::SVGUnitType LegacyRenderSVGResourceMasker::MaskUnits() const noexcept
   {
     return MaskElement().MaskUnits();
   }
 
-  svg::SVGUnitTypes::SVGUnitType LegacyRenderSVGResourceMasker::MaskContentUnits() const noexcept
+  SVGUnitTypes::SVGUnitType LegacyRenderSVGResourceMasker::MaskContentUnits() const noexcept
   {
     return MaskElement().MaskContentUnits();
   }
@@ -147,7 +147,7 @@ namespace krys::boo
     AffineTransform maskContentTransformation;
 
     auto &maskElement = MaskElement();
-    if (maskElement.MaskContentUnits() == svg::SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
+    if (maskElement.MaskContentUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
     {
       maskContentTransformation.Translate(objectBoundingBox.Location());
       maskContentTransformation.Scale(objectBoundingBox.Size());
@@ -157,7 +157,7 @@ namespace krys::boo
     // Draw the content into the ImageBuffer.
     for (auto *childNode = maskElement.FirstChild(); childNode; childNode = childNode->NextSibling())
     {
-      auto *child = DynamicDowncast<svg::SVGElement>(*childNode);
+      auto *child = DynamicDowncast<SVGElement>(*childNode);
       if (!child)
       {
         continue;
@@ -210,7 +210,7 @@ namespace krys::boo
     for (auto *childNode = MaskElement().FirstChild(); childNode; childNode = childNode->NextSibling())
     {
       auto *renderer = DynamicDowncast<RenderElement>(childNode->Renderer());
-      if (!renderer || !Is<svg::SVGElement>(*childNode))
+      if (!renderer || !Is<SVGElement>(*childNode))
       {
         continue;
       }
@@ -231,7 +231,7 @@ namespace krys::boo
     FloatRect objectBoundingBox = object.ObjectBoundingBox();
     auto &maskElement = MaskElement();
     FloatRect maskBoundaries =
-      svg::SVGLengthContext::ResolveRectangle(maskElement, maskElement.MaskUnits(), objectBoundingBox);
+      SVGLengthContext::ResolveRectangle(maskElement, maskElement.MaskUnits(), objectBoundingBox);
 
     // Resource was not layouted yet. Give back clipping rect of the mask.
     if (SelfNeedsLayout())
@@ -246,7 +246,7 @@ namespace krys::boo
     }
 
     FloatRect maskRect = maskContentBoundaries;
-    if (maskElement.MaskContentUnits() == svg::SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
+    if (maskElement.MaskContentUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
     {
       AffineTransform transform;
       transform.Translate(objectBoundingBox.Location());

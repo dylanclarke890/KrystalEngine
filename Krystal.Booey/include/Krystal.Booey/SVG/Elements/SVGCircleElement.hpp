@@ -23,7 +23,7 @@
 
 #include "Krystal.Booey/SVG/Elements/SVGGeometryElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<circle>` element: a circle about a centre.
   /// @see https://svgwg.org/svg2-draft/shapes.html#InterfaceSVGCircleElement
@@ -37,7 +37,7 @@ namespace krys::boo::svg
     Ref<SVGAnimatedLength> _r;
 
   public:
-    explicit SVGCircleElement(dom::Document &document) noexcept;
+    explicit SVGCircleElement(Document &document) noexcept;
 
     KRYS_NODISCARD const SVGLengthValue &Cx() const noexcept
     {
@@ -71,13 +71,13 @@ namespace krys::boo::svg
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGCircleElement, SVGGeometryElement>;
 
-    KRYS_NODISCARD SVGAnimatedProperty *PropertyForAttribute(const dom::QualifiedName &) const noexcept;
+    KRYS_NODISCARD SVGAnimatedProperty *PropertyForAttribute(const QualifiedName &) const noexcept;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD bool IsValid() const noexcept final
     {
@@ -93,8 +93,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGCircleElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGCircleElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGCircleElement();
   }

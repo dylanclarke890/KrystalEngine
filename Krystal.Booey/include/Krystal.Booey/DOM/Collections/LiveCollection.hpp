@@ -6,10 +6,13 @@
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Node;
+}
 
+namespace krys::boo::dom
+{
   /// @brief What can change a live collection's items, other than the descendants of its root changing.
   /// @note A filter that reads anything else must have its collection invalidated when that changes.
   enum class LiveCollectionInvalidation : uint8

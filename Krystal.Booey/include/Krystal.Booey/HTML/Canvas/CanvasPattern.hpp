@@ -55,8 +55,7 @@ namespace krys::boo::html
     /// @brief Reads @p type as a pattern's repetition (`repeat`, `repeat-x`, `repeat-y` or `no-repeat`; empty
     /// is `repeat`).
     /// @return False if @p type isn't one.
-    KRYS_NODISCARD static bool ParseRepetitionType(dom::DOMStringView type, bool &repeatX,
-                                                   bool &repeatY) noexcept;
+    KRYS_NODISCARD static bool ParseRepetitionType(DOMStringView type, bool &repeatX, bool &repeatY) noexcept;
 
     KRYS_NODISCARD Pattern &GetPattern() noexcept
     {
@@ -69,7 +68,7 @@ namespace krys::boo::html
     }
 
     /// @see https://html.spec.whatwg.org/#dom-canvaspattern-settransform
-    dom::ExceptionOr<void> SetTransform(css::DOMMatrix2DInit = {}) noexcept;
+    ExceptionOr<void> SetTransform(css::DOMMatrix2DInit = {}) noexcept;
 
   private:
     CanvasPattern(SourceImage &&, bool repeatX, bool repeatY) noexcept;

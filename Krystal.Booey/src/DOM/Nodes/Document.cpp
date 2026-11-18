@@ -34,13 +34,13 @@
 #include "Krystal.Booey/Animation/Timelines/StyleOriginatedTimelinesController.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp"
+#include "Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/StyleSheetList.hpp"
 #include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
-#include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/ColorAdjust.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheetList.hpp"
 #include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
 #include "Krystal.Booey/CSS/Values/ColorAdjust/ColorScheme.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
@@ -192,7 +192,7 @@
 #include <random>
 #include <tuple>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   namespace
   {
@@ -253,12 +253,12 @@ namespace krys::boo::dom
     }
   }
 
-  Document::Document(DocumentFlags flags) noexcept : Document()
+  Document::Document(dom::DocumentFlags flags) noexcept : Document()
   {
     SetDocumentFlag(flags);
 
     // An HTML document is a text/html one, however it's made.
-    if (HasDocumentFlag(DocumentFlags::IsHTMLDocument))
+    if (HasDocumentFlag(dom::DocumentFlags::IsHTMLDocument))
     {
       _contentType = u8"text/html";
     }
@@ -267,16 +267,17 @@ namespace krys::boo::dom
 #pragma region Document (DOM)
 
   Document::Document() noexcept
-      : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlags::IsContainerNode),
+      : ContainerNode(*this, dom::NodeType::DOCUMENT_NODE, dom::NodeFlags::IsContainerNode),
         DocumentOrShadowRoot(static_cast<ContainerNode &>(*this)), _url(url::AboutBlankURL()), _baseURL(_url),
-        _settings(ShareRef(Settings::Default())), _userActionElements(CreateUnique<UserActionElementSet>()),
+        _settings(ShareRef(Settings::Default())),
+        _userActionElements(CreateUnique<dom::UserActionElementSet>()),
         _styleRecalcTimer([this] { std::ignore = ShareRef(*this)->UpdateStyleIfNeeded(); }),
         _intersectionObserversInitialUpdateTimer(
           [this] { ScheduleRenderingUpdate({RenderingUpdateStep::IntersectionObservations}); })
   {
     // Set this's origin to the origin of current global object's associated Document. (Skipped: documents
     // have no origin.)
-    SetNodeFlag(NodeFlags::IsConnected);
+    SetNodeFlag(dom::NodeFlags::IsConnected);
     _styleScope = CreateUnique<style::Scope>(*this);
     _selection = CreateUnique<FrameSelection>(this);
     _editor = CreateUnique<boo::Editor>(*this);
@@ -385,11 +386,11 @@ namespace krys::boo::dom
     DecrementReferencingNodeCount();
   }
 
-  DOMImplementation &Document::Implementation() noexcept
+  dom::DOMImplementation &Document::Implementation() noexcept
   {
     if (_implementation == nullptr)
     {
-      _implementation = UniquePtr<DOMImplementation>(new DOMImplementation(*this));
+      _implementation = UniquePtr<dom::DOMImplementation>(new dom::DOMImplementation(*this));
     }
 
     return *_implementation;
@@ -407,7 +408,7 @@ namespace krys::boo::dom
 
   DOMString Document::CompatMode() const noexcept
   {
-    return _quirksMode == QuirksMode::Quirks ? u8"BackCompat" : u8"CSS1Compat";
+    return _quirksMode == dom::QuirksMode::Quirks ? u8"BackCompat" : u8"CSS1Compat";
   }
 
   const krys::text::ICodec &Document::Encoding() const noexcept
@@ -448,15 +449,15 @@ namespace krys::boo::dom
 
   RefPtr<DocumentType> Document::DocType() noexcept
   {
-    auto children = ChildNodeRange(*this);
-    auto it = FirstOfType<DocumentType>(children);
+    auto children = dom::ChildNodeRange(*this);
+    auto it = dom::FirstOfType<DocumentType>(children);
     return it == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<DocumentType>(&*it));
   }
 
   RefPtr<const DocumentType> Document::DocType() const noexcept
   {
-    auto children = ConstChildNodeRange(*this);
-    auto it = FirstOfType<DocumentType>(children);
+    auto children = dom::ConstChildNodeRange(*this);
+    auto it = dom::FirstOfType<DocumentType>(children);
     return it == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<DocumentType>(&*it));
   }
 
@@ -470,27 +471,29 @@ namespace krys::boo::dom
     return FirstElementChild();
   }
 
-  Ref<HTMLCollection> Document::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept
+  Ref<dom::HTMLCollection> Document::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept
   {
-    return NodeAlgorithms::GetElementsByTagName(*this, krys::move(qualifiedName));
+    return dom::NodeAlgorithms::GetElementsByTagName(*this, krys::move(qualifiedName));
   }
 
-  Ref<HTMLCollection> Document::GetElementsByTagNameNS(DOMStringAtom namespaceUri,
-                                                       DOMStringAtom localName) noexcept
+  Ref<dom::HTMLCollection> Document::GetElementsByTagNameNS(DOMStringAtom namespaceUri,
+                                                            DOMStringAtom localName) noexcept
   {
-    return NodeAlgorithms::GetElementsByTagNameNS(*this, krys::move(namespaceUri), krys::move(localName));
+    return dom::NodeAlgorithms::GetElementsByTagNameNS(*this, krys::move(namespaceUri),
+                                                       krys::move(localName));
   }
 
-  Ref<HTMLCollection> Document::GetElementsByClassName(DOMStringAtom classNames) noexcept
+  Ref<dom::HTMLCollection> Document::GetElementsByClassName(DOMStringAtom classNames) noexcept
   {
-    return NodeAlgorithms::GetElementsByClassName(*this, krys::move(classNames));
+    return dom::NodeAlgorithms::GetElementsByClassName(*this, krys::move(classNames));
   }
 
-  ExceptionOr<Ref<Element>> Document::CreateElement(DOMStringAtom localName,
-                                                    const ElementCreationOptionsOrString &options) noexcept
+  ExceptionOr<Ref<Element>>
+    Document::CreateElement(DOMStringAtom localName,
+                            const dom::ElementCreationOptionsOrString &options) noexcept
   {
     // 1. If localName is not a valid element local name, then throw an "InvalidCharacterError" DOMException.
-    if (!NameValidation::IsValidElementLocalName(localName.View()))
+    if (!dom::NameValidation::IsValidElementLocalName(localName.View()))
     {
       return Exception {ExceptionCode::InvalidCharacterError};
     }
@@ -502,7 +505,7 @@ namespace krys::boo::dom
     }
 
     // 3. Let registry and is be the result of flattening element creation options given options and this.
-    auto creationOptions = DocumentAlgorithms::FlattenElementCreationOptions(options, *this);
+    auto creationOptions = dom::DocumentAlgorithms::FlattenElementCreationOptions(options, *this);
     if (creationOptions.HasException())
     {
       return creationOptions.ReleaseException();
@@ -518,15 +521,16 @@ namespace krys::boo::dom
 
     // 5. Return the result of creating an element given this, localName, namespace, null, is, true, and
     // registry.
-    return ElementFactory::Create(*this, {namespaceURI, null, localName}, creationOptions.Value().Is, true,
-                                  creationOptions.Value().CustomElementRegistry);
+    return dom::ElementFactory::Create(*this, {namespaceURI, null, localName}, creationOptions.Value().Is,
+                                       true, creationOptions.Value().CustomElementRegistry);
   }
 
-  ExceptionOr<Ref<Element>> Document::CreateElementNS(DOMStringAtom namespaceUri, DOMStringAtom qualifiedName,
-                                                      const ElementCreationOptionsOrString &options) noexcept
+  ExceptionOr<Ref<Element>>
+    Document::CreateElementNS(DOMStringAtom namespaceUri, DOMStringAtom qualifiedName,
+                              const dom::ElementCreationOptionsOrString &options) noexcept
   {
-    return DocumentAlgorithms::InternalCreateElementNS(*this, krys::move(namespaceUri),
-                                                       krys::move(qualifiedName), options);
+    return dom::DocumentAlgorithms::InternalCreateElementNS(*this, krys::move(namespaceUri),
+                                                            krys::move(qualifiedName), options);
   }
 
   Ref<DocumentFragment> Document::CreateDocumentFragment() noexcept
@@ -568,7 +572,8 @@ namespace krys::boo::dom
     return ProcessingInstruction::Create(*this, krys::move(target), krys::move(data));
   }
 
-  ExceptionOr<Ref<Node>> Document::ImportNode(Node &node, const BoolOrImportNodeOptions &options) noexcept
+  ExceptionOr<Ref<Node>> Document::ImportNode(Node &node,
+                                              const dom::BoolOrImportNodeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. If node is a document or shadow root, then throw a "NotSupportedError" DOMException.
@@ -592,7 +597,7 @@ namespace krys::boo::dom
     else
     {
       // 5a. Set subtree to the negation of options["selfOnly"].
-      auto &dict = std::get<ImportNodeOptions>(options);
+      auto &dict = std::get<dom::ImportNodeOptions>(options);
       subtree = !dict.SelfOnly;
 
       // 5b. If options["customElementRegistry"] exists, then set registry to it.
@@ -616,7 +621,7 @@ namespace krys::boo::dom
     // 7. Return the result of cloning a node given node with document set to this, subtree set to subtree,
     // and
     //    fallbackRegistry set to registry.
-    return NodeAlgorithms::CloneNode(node, this, subtree, nullptr, registry.get());
+    return dom::NodeAlgorithms::CloneNode(node, this, subtree, nullptr, registry.get());
   }
 
   ExceptionOr<Ref<Node>> Document::AdoptNode(Node &node) noexcept
@@ -637,7 +642,7 @@ namespace krys::boo::dom
     // 3. Adopt node into this.
     // (Removing node from its parent may drop its last reference.)
     Ref protectedNode = ShareRef(node);
-    if (auto adoptResult = DocumentAlgorithms::AdoptNode(node, *this); adoptResult.HasException())
+    if (auto adoptResult = dom::DocumentAlgorithms::AdoptNode(node, *this); adoptResult.HasException())
     {
       return adoptResult.ReleaseException();
     }
@@ -652,7 +657,7 @@ namespace krys::boo::dom
   {
     // 1. If localName is not a valid attribute local name, then throw an "InvalidCharacterError"
     // DOMException.
-    if (!NameValidation::IsValidAttributeLocalName(localName.View()))
+    if (!dom::NameValidation::IsValidAttributeLocalName(localName.View()))
     {
       return Exception {ExceptionCode::InvalidCharacterError};
     }
@@ -673,8 +678,8 @@ namespace krys::boo::dom
   {
     // 1. Let (namespace, prefix, localName) be the result of validating and extracting namespace and
     //    qualifiedName given "attribute".
-    auto nameResult = NameValidation::ValidateAndExtract(krys::move(namespaceUri), krys::move(qualifiedName),
-                                                         ValidateAndExtractContext::Attribute);
+    auto nameResult = dom::NameValidation::ValidateAndExtract(
+      krys::move(namespaceUri), krys::move(qualifiedName), dom::ValidateAndExtractContext::Attribute);
     if (nameResult.HasException())
     {
       return nameResult.ReleaseException();
@@ -778,13 +783,14 @@ namespace krys::boo::dom
     return ShareRef(*event);
   }
 
-  Ref<Range> Document::CreateRange() noexcept
+  Ref<dom::Range> Document::CreateRange() noexcept
   {
-    return CreateRef<Range>(BoundaryPoint {ShareRef(*this), 0uz}, BoundaryPoint {ShareRef(*this), 0uz});
+    return CreateRef<dom::Range>(dom::BoundaryPoint {ShareRef(*this), 0uz},
+                                 dom::BoundaryPoint {ShareRef(*this), 0uz});
   }
 
-  Ref<NodeIterator> Document::CreateNodeIterator(Node &root, WhatToShow whatToShow,
-                                                 RefPtr<NodeFilter> &&filter) noexcept
+  Ref<dom::NodeIterator> Document::CreateNodeIterator(Node &root, dom::WhatToShow whatToShow,
+                                                      RefPtr<dom::NodeFilter> &&filter) noexcept
   {
     // 1. Let iterator be a new NodeIterator object.
     // 2. Set iterator's root to root.
@@ -792,18 +798,18 @@ namespace krys::boo::dom
     // 4. Set iterator's whatToShow to whatToShow.
     // 5. Set iterator's filter to filter.
     // 6. Return iterator.
-    return AdoptRef(*new NodeIterator(root, whatToShow, krys::move(filter)));
+    return AdoptRef(*new dom::NodeIterator(root, whatToShow, krys::move(filter)));
   }
 
-  Ref<TreeWalker> Document::CreateTreeWalker(Node &root, WhatToShow whatToShow,
-                                             RefPtr<NodeFilter> &&filter) noexcept
+  Ref<dom::TreeWalker> Document::CreateTreeWalker(Node &root, dom::WhatToShow whatToShow,
+                                                  RefPtr<dom::NodeFilter> &&filter) noexcept
   {
     // 1. Let walker be a new TreeWalker object.
     // 2. Set walker's root and walker's current to root.
     // 3. Set walker's whatToShow to whatToShow.
     // 4. Set walker's filter to filter.
     // 5. Return walker.
-    return AdoptRef(*new TreeWalker(root, whatToShow, krys::move(filter)));
+    return AdoptRef(*new dom::TreeWalker(root, whatToShow, krys::move(filter)));
   }
 
 #pragma endregion
@@ -898,13 +904,13 @@ namespace krys::boo::dom
     template <typename TElement>
     KRYS_NODISCARD auto *FirstSVGTitleChild(TElement &documentElement) noexcept
     {
-      using Title = match_constness_t<TElement, svg::SVGTitleElement>;
-      for (auto *child = TreeQueries::FirstElementChild(documentElement); child;
-           child = TreeQueries::NextElementSibling(*child))
+      using Title = match_constness_t<TElement, SVGTitleElement>;
+      for (auto *child = dom::TreeQueries::FirstElementChild(documentElement); child;
+           child = dom::TreeQueries::NextElementSibling(*child))
       {
-        if (auto *svgChild = DynamicDowncast<svg::SVGElement>(*child))
+        if (auto *svgChild = DynamicDowncast<SVGElement>(*child))
         {
-          if (auto *title = DynamicDowncast<svg::SVGTitleElement>(*svgChild))
+          if (auto *title = DynamicDowncast<SVGTitleElement>(*svgChild))
           {
             return static_cast<Title *>(title);
           }
@@ -915,8 +921,8 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD bool IsSVGSvgElement(const Element *element) noexcept
     {
-      auto *svgElement = element ? DynamicDowncast<svg::SVGElement>(*element) : nullptr;
-      return svgElement && Is<svg::SVGSvgElement>(*svgElement);
+      auto *svgElement = element ? DynamicDowncast<SVGElement>(*element) : nullptr;
+      return svgElement && Is<SVGSvgElement>(*svgElement);
     }
   }
 
@@ -934,7 +940,7 @@ namespace krys::boo::dom
       }
 
       return infra::StringAlgorithms::StripAndCollapseASCIIWhitespace(
-        TextAlgorithms::ChildTextContent(*title));
+        dom::TextAlgorithms::ChildTextContent(*title));
     }
 
     auto title = html::DOMTreeAccessors::GetTitleElement(*this);
@@ -943,7 +949,8 @@ namespace krys::boo::dom
       return {};
     }
 
-    return infra::StringAlgorithms::StripAndCollapseASCIIWhitespace(TextAlgorithms::ChildTextContent(*title));
+    return infra::StringAlgorithms::StripAndCollapseASCIIWhitespace(
+      dom::TextAlgorithms::ChildTextContent(*title));
   }
 
   ExceptionOr<void> Document::Title(DOMString value) noexcept
@@ -959,10 +966,10 @@ namespace krys::boo::dom
       {
         // Let element be the result of creating an element given the document element's node document,
         // "title", and the SVG namespace. Insert element as the first child of the document element.
-        title = ElementFactory::Create(*this, {infra::namespaces::SVG, null, u8"title"});
+        title = dom::ElementFactory::Create(*this, {infra::namespaces::SVG, null, u8"title"});
 
         if (auto insert =
-              MutationAlgorithms::PreInsert(*title, *documentElement, documentElement->FirstChild());
+              dom::MutationAlgorithms::PreInsert(*title, *documentElement, documentElement->FirstChild());
             insert.HasException())
         {
           return insert.ReleaseException();
@@ -970,7 +977,8 @@ namespace krys::boo::dom
       }
 
       // String replace all with the given value within element.
-      if (auto replace = NodeAlgorithms::StringReplaceAll(krys::move(value), *title); replace.HasException())
+      if (auto replace = dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *title);
+          replace.HasException())
       {
         return replace.ReleaseException();
       }
@@ -978,7 +986,7 @@ namespace krys::boo::dom
     // If the document element is in the HTML namespace:
     else if (documentElement && documentElement->NamespaceURI() == infra::namespaces::HTML)
     {
-      RefPtr<html::HTMLHeadElement> head = Head();
+      RefPtr<HTMLHeadElement> head = Head();
       RefPtr<Element> element = ShareRefPtr(html::DOMTreeAccessors::GetTitleElement(*this));
 
       // 1. If the title element is null and the head element is null, then return.
@@ -993,17 +1001,17 @@ namespace krys::boo::dom
       {
         // 3a. Let element be the result of creating an element given the document element's node document,
         //     "title", and the HTML namespace.
-        element = ElementFactory::Create(*this, {infra::namespaces::HTML, null, u8"title"});
+        element = dom::ElementFactory::Create(*this, {infra::namespaces::HTML, null, u8"title"});
 
         // 3b. Append element to the head element.
-        if (auto append = MutationAlgorithms::Append(*element, *head); append.HasException())
+        if (auto append = dom::MutationAlgorithms::Append(*element, *head); append.HasException())
         {
           return append.ReleaseException();
         }
       }
 
       // 4. String replace all with the given value within element.
-      if (auto replace = NodeAlgorithms::StringReplaceAll(krys::move(value), *element);
+      if (auto replace = dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *element);
           replace.HasException())
       {
         return replace.ReleaseException();
@@ -1039,7 +1047,7 @@ namespace krys::boo::dom
 
   namespace
   {
-    KRYS_NODISCARD html::HTMLBodyElement *FirstBodyElementChild(const Document &document) noexcept
+    KRYS_NODISCARD HTMLBodyElement *FirstBodyElementChild(const Document &document) noexcept
     {
       auto *html = html::DOMTreeAccessors::GetHtmlElement(document);
       if (html == nullptr)
@@ -1047,57 +1055,57 @@ namespace krys::boo::dom
         return nullptr;
       }
 
-      auto children = ChildNodeRange(*html);
-      auto body = FirstOfType<html::HTMLBodyElement>(children);
-      return body == std::ranges::end(children) ? nullptr : &Downcast<html::HTMLBodyElement>(*body);
+      auto children = dom::ChildNodeRange(*html);
+      auto body = dom::FirstOfType<HTMLBodyElement>(children);
+      return body == std::ranges::end(children) ? nullptr : &Downcast<HTMLBodyElement>(*body);
     }
 
-    template <DerivedFrom<html::HTMLElement> T>
+    template <DerivedFrom<HTMLElement> T>
     KRYS_NODISCARD bool IsHTMLElementOfType(const Element &element) noexcept
     {
-      auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
+      auto *htmlElement = DynamicDowncast<HTMLElement>(element);
       return htmlElement && Is<T>(*htmlElement);
     }
 
     /// @brief The document's collection that @p cache holds, or a new one that it holds from now on.
-    KRYS_NODISCARD Ref<HTMLCollection> CachedDocumentCollection(
-      WeakPtr<HTMLCollection> &cache, Document &document, LiveHTMLCollectionFilterFunc &&filter,
-      LiveCollectionInvalidation invalidation = LiveCollectionInvalidation::TreeOnly) noexcept
+    KRYS_NODISCARD Ref<dom::HTMLCollection> CachedDocumentCollection(
+      WeakPtr<dom::HTMLCollection> &cache, Document &document, dom::LiveHTMLCollectionFilterFunc &&filter,
+      dom::LiveCollectionInvalidation invalidation = dom::LiveCollectionInvalidation::TreeOnly) noexcept
     {
       if (auto collection = cache.lock())
       {
         return ShareRef(*collection.get());
       }
 
-      auto collection = CreateRef<LiveHTMLCollection>(document, krys::move(filter), invalidation);
+      auto collection = CreateRef<dom::LiveHTMLCollection>(document, krys::move(filter), invalidation);
       cache = CreateWeakPtr(collection.get());
       return collection;
     }
   }
 
-  RefPtr<html::HTMLBodyElement> Document::Body() noexcept
+  RefPtr<HTMLBodyElement> Document::Body() noexcept
   {
     return ShareRefPtr(FirstBodyElementChild(*this));
   }
 
-  RefPtr<const html::HTMLBodyElement> Document::Body() const noexcept
+  RefPtr<const HTMLBodyElement> Document::Body() const noexcept
   {
     return ShareRefPtr(FirstBodyElementChild(*this));
   }
 
-  ExceptionOr<void> Document::SetBodyOrFrameset(html::HTMLElement &body) noexcept
+  ExceptionOr<void> Document::SetBodyOrFrameset(HTMLElement &body) noexcept
   {
     html::CEReactionsScope ceReactions;
 
     // 1. If the new value is not a body or frameset element, then throw a "HierarchyRequestError"
     //    DOMException.
-    if (!Is<html::HTMLBodyElement>(body) && !Is<html::HTMLFrameSetElement>(body))
+    if (!Is<HTMLBodyElement>(body) && !Is<HTMLFrameSetElement>(body))
     {
       return ExceptionCode::HierarchyRequestError;
     }
 
     // 2. Otherwise, if the new value is the same as the body element, return.
-    RefPtr<html::HTMLElement> currentBody = ShareRefPtr(BodyOrFrameset());
+    RefPtr<HTMLElement> currentBody = ShareRefPtr(BodyOrFrameset());
     if (currentBody == &body)
     {
       return {};
@@ -1107,7 +1115,7 @@ namespace krys::boo::dom
     //    the body element's parent and return.
     if (currentBody != nullptr)
     {
-      if (auto replace = MutationAlgorithms::Replace(*currentBody, body, *currentBody->ParentNode());
+      if (auto replace = dom::MutationAlgorithms::Replace(*currentBody, body, *currentBody->ParentNode());
           replace.HasException())
       {
         return replace.ReleaseException();
@@ -1124,63 +1132,63 @@ namespace krys::boo::dom
 
     // 5. Otherwise, the body element is null, but there's a document element. Append the new value to the
     //    document element.
-    if (auto append = MutationAlgorithms::Append(body, *documentElement); append.HasException())
+    if (auto append = dom::MutationAlgorithms::Append(body, *documentElement); append.HasException())
     {
       return append.ReleaseException();
     }
     return {};
   }
 
-  RefPtr<html::HTMLHeadElement> Document::Head() noexcept
+  RefPtr<HTMLHeadElement> Document::Head() noexcept
   {
     return ShareRefPtr(html::DOMTreeAccessors::GetHeadElement(*this));
   }
 
-  RefPtr<const html::HTMLHeadElement> Document::Head() const noexcept
+  RefPtr<const HTMLHeadElement> Document::Head() const noexcept
   {
     return ShareRefPtr(html::DOMTreeAccessors::GetHeadElement(*this));
   }
 
-  Ref<HTMLCollection> Document::Images() noexcept
+  Ref<dom::HTMLCollection> Document::Images() noexcept
   {
     return CachedDocumentCollection(_images, *this, [](const Element &element)
-                                    { return IsHTMLElementOfType<html::HTMLImageElement>(element); });
+                                    { return IsHTMLElementOfType<HTMLImageElement>(element); });
   }
 
-  Ref<HTMLCollection> Document::Embeds() noexcept
+  Ref<dom::HTMLCollection> Document::Embeds() noexcept
   {
     return CachedDocumentCollection(_embeds, *this, [](const Element &element)
-                                    { return IsHTMLElementOfType<html::HTMLEmbedElement>(element); });
+                                    { return IsHTMLElementOfType<HTMLEmbedElement>(element); });
   }
 
-  Ref<HTMLCollection> Document::Plugins() noexcept
+  Ref<dom::HTMLCollection> Document::Plugins() noexcept
   {
     return Embeds();
   }
 
-  Ref<HTMLCollection> Document::Links() noexcept
+  Ref<dom::HTMLCollection> Document::Links() noexcept
   {
     return CachedDocumentCollection(
       _links, *this,
       [](const Element &element)
       {
-        return (IsHTMLElementOfType<html::HTMLAnchorElement>(element)
-                || IsHTMLElementOfType<html::HTMLAreaElement>(element))
+        return (IsHTMLElementOfType<HTMLAnchorElement>(element)
+                || IsHTMLElementOfType<HTMLAreaElement>(element))
                && element.HasAttribute(u8"href");
       },
-      LiveCollectionInvalidation::Href);
+      dom::LiveCollectionInvalidation::Href);
   }
 
-  Ref<HTMLCollection> Document::Forms() noexcept
+  Ref<dom::HTMLCollection> Document::Forms() noexcept
   {
     return CachedDocumentCollection(_forms, *this, [](const Element &element)
-                                    { return IsHTMLElementOfType<html::HTMLFormElement>(element); });
+                                    { return IsHTMLElementOfType<HTMLFormElement>(element); });
   }
 
-  Ref<HTMLCollection> Document::Scripts() noexcept
+  Ref<dom::HTMLCollection> Document::Scripts() noexcept
   {
     return CachedDocumentCollection(_scripts, *this, [](const Element &element)
-                                    { return IsHTMLElementOfType<html::HTMLScriptElement>(element); });
+                                    { return IsHTMLElementOfType<HTMLScriptElement>(element); });
   }
 
 #pragma region Obsolete members
@@ -1191,7 +1199,7 @@ namespace krys::boo::dom
     // and can't be set when there's no body element or it's a frameset.
     KRYS_NODISCARD DOMString BodyColorAttribute(const Document &document, DOMStringView name) noexcept
     {
-      auto *body = DynamicDowncast<html::HTMLBodyElement>(document.BodyOrFrameset());
+      auto *body = DynamicDowncast<HTMLBodyElement>(document.BodyOrFrameset());
       if (!body)
       {
         return {};
@@ -1201,7 +1209,7 @@ namespace krys::boo::dom
 
     void SetBodyColorAttribute(Document &document, DOMStringView name, DOMString value) noexcept
     {
-      if (auto *body = DynamicDowncast<html::HTMLBodyElement>(document.BodyOrFrameset()))
+      if (auto *body = DynamicDowncast<HTMLBodyElement>(document.BodyOrFrameset()))
       {
         (void)body->SetAttribute(DOMStringAtom(name), krys::move(value));
       }
@@ -1258,27 +1266,27 @@ namespace krys::boo::dom
     SetBodyColorAttribute(*this, u8"bgcolor", krys::move(value));
   }
 
-  Ref<HTMLCollection> Document::Anchors() noexcept
+  Ref<dom::HTMLCollection> Document::Anchors() noexcept
   {
     return CachedDocumentCollection(
       _anchors, *this, [](const Element &element)
-      { return IsHTMLElementOfType<html::HTMLAnchorElement>(element) && element.HasAttribute(u8"name"); },
-      LiveCollectionInvalidation::Name);
+      { return IsHTMLElementOfType<HTMLAnchorElement>(element) && element.HasAttribute(u8"name"); },
+      dom::LiveCollectionInvalidation::Name);
   }
 
-  Ref<HTMLCollection> Document::Applets() noexcept
+  Ref<dom::HTMLCollection> Document::Applets() noexcept
   {
     return CachedDocumentCollection(_applets, *this, [](const Element &) { return false; });
   }
 
 #pragma endregion
 
-  void Document::AddOwnerTreeLiveCollectionCache(LiveCollection &collection) noexcept
+  void Document::AddOwnerTreeLiveCollectionCache(dom::LiveCollection &collection) noexcept
   {
     _ownerTreeLiveCollectionCaches.push_back(&collection);
   }
 
-  void Document::RemoveOwnerTreeLiveCollectionCache(LiveCollection &collection) noexcept
+  void Document::RemoveOwnerTreeLiveCollectionCache(dom::LiveCollection &collection) noexcept
   {
     auto it = std::ranges::find(_ownerTreeLiveCollectionCaches, &collection);
     krys_debug_assert(it != _ownerTreeLiveCollectionCaches.end());
@@ -1314,7 +1322,8 @@ namespace krys::boo::dom
     for (size_t i = 0; i < _liveCollectionCacheCounts.size(); ++i)
     {
       if (_liveCollectionCacheCounts[i]
-          && LiveCollectionDependsOnAttribute(static_cast<LiveCollectionInvalidation>(i), localName))
+          && dom::LiveCollectionDependsOnAttribute(static_cast<dom::LiveCollectionInvalidation>(i),
+                                                   localName))
       {
         return true;
       }
@@ -1322,16 +1331,16 @@ namespace krys::boo::dom
     return false;
   }
 
-  Ref<NodeList> Document::GetElementsByName(DOMStringView elementName) noexcept
+  Ref<dom::NodeList> Document::GetElementsByName(DOMStringView elementName) noexcept
   {
-    return CreateRef<LiveNodeList>(
+    return CreateRef<dom::LiveNodeList>(
       *this,
       [name = DOMString(elementName)](const Node &node)
       {
-        auto *element = DynamicDowncast<html::HTMLElement>(node);
+        auto *element = DynamicDowncast<HTMLElement>(node);
         return element && element->GetAttribute(u8"name") == name;
       },
-      LiveCollectionInvalidation::Name);
+      dom::LiveCollectionInvalidation::Name);
   }
 
   DOMString Document::LastModified() const noexcept
@@ -1349,68 +1358,68 @@ namespace krys::boo::dom
 
 #pragma region ParentNode
 
-  Ref<HTMLCollection> Document::Children() noexcept
+  Ref<dom::HTMLCollection> Document::Children() noexcept
   {
     return EnsureNodeRareData().Children(*this);
   }
 
   RefPtr<const Element> Document::FirstElementChild() const noexcept
   {
-    return mixins::ParentNode::FirstElementChild(*this);
+    return dom::mixins::ParentNode::FirstElementChild(*this);
   }
 
   RefPtr<Element> Document::FirstElementChild() noexcept
   {
-    return mixins::ParentNode::FirstElementChild(*this);
+    return dom::mixins::ParentNode::FirstElementChild(*this);
   }
 
   RefPtr<const Element> Document::LastElementChild() const noexcept
   {
-    return mixins::ParentNode::LastElementChild(*this);
+    return dom::mixins::ParentNode::LastElementChild(*this);
   }
 
   RefPtr<Element> Document::LastElementChild() noexcept
   {
-    return mixins::ParentNode::LastElementChild(*this);
+    return dom::mixins::ParentNode::LastElementChild(*this);
   }
 
   size_t Document::ChildElementCount() const noexcept
   {
-    return mixins::ParentNode::ChildElementCount(*this);
+    return dom::mixins::ParentNode::ChildElementCount(*this);
   }
 
-  ExceptionOr<void> Document::Prepend(const List<NodeOrString> &nodes) noexcept
+  ExceptionOr<void> Document::Prepend(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return mixins::ParentNode::Prepend(*this, nodes);
+    return dom::mixins::ParentNode::Prepend(*this, nodes);
   }
 
-  ExceptionOr<void> Document::Append(const List<NodeOrString> &nodes) noexcept
+  ExceptionOr<void> Document::Append(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return mixins::ParentNode::Append(*this, nodes);
+    return dom::mixins::ParentNode::Append(*this, nodes);
   }
 
-  ExceptionOr<void> Document::ReplaceChildren(const List<NodeOrString> &nodes) noexcept
+  ExceptionOr<void> Document::ReplaceChildren(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return mixins::ParentNode::ReplaceChildren(*this, nodes);
+    return dom::mixins::ParentNode::ReplaceChildren(*this, nodes);
   }
 
   ExceptionOr<void> Document::MoveBefore(Node &node, Node *refChild) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return mixins::ParentNode::MoveBefore(*this, node, refChild);
+    return dom::mixins::ParentNode::MoveBefore(*this, node, refChild);
   }
 
   ExceptionOr<RefPtr<Element>> Document::QuerySelector(DOMStringView selectors) noexcept
   {
-    return mixins::ParentNode::QuerySelector(*this, selectors);
+    return dom::mixins::ParentNode::QuerySelector(*this, selectors);
   }
 
-  ExceptionOr<Ref<NodeList>> Document::QuerySelectorAll(DOMStringView selectors) noexcept
+  ExceptionOr<Ref<dom::NodeList>> Document::QuerySelectorAll(DOMStringView selectors) noexcept
   {
-    return mixins::ParentNode::QuerySelectorAll(*this, selectors);
+    return dom::mixins::ParentNode::QuerySelectorAll(*this, selectors);
   }
 
 #pragma endregion
@@ -1419,12 +1428,12 @@ namespace krys::boo::dom
 
   RefPtr<Element> Document::GetElementById(DOMStringView elementId) noexcept
   {
-    return mixins::NonElementParentNode::GetElementById(*this, elementId);
+    return dom::mixins::NonElementParentNode::GetElementById(*this, elementId);
   }
 
   RefPtr<const Element> Document::GetElementById(DOMStringView elementId) const noexcept
   {
-    return mixins::NonElementParentNode::GetElementById(*this, elementId);
+    return dom::mixins::NonElementParentNode::GetElementById(*this, elementId);
   }
 
 #pragma endregion
@@ -1478,10 +1487,10 @@ namespace krys::boo::dom
   {
     Maybe<DOMString> href;
     Maybe<DOMString> target;
-    for (auto &node : DescendantRange(*this))
+    for (auto &node : dom::DescendantRange(*this))
     {
-      auto *element = DynamicDowncast<html::HTMLElement>(&node);
-      if (element == nullptr || !Is<html::HTMLBaseElement>(*element))
+      auto *element = DynamicDowncast<HTMLElement>(&node);
+      if (element == nullptr || !Is<HTMLBaseElement>(*element))
       {
         continue;
       }
@@ -1899,13 +1908,13 @@ namespace krys::boo::dom
     // If the focused area of the document is removed, the viewport becomes the focused area. This doesn't run
     // the focusing or focus update steps, so no events are fired.
     // https://html.spec.whatwg.org/#html-element-removing-steps
-    if (_focusedElement && TreeQueries::IsShadowIncludingInclusiveAncestor(node, *_focusedElement))
+    if (_focusedElement && dom::TreeQueries::IsShadowIncludingInclusiveAncestor(node, *_focusedElement))
     {
       // Clearing the focus while the element is still in the tree also clears its ancestors' focus within.
       RefPtr<Element> focusedElement = std::exchange(_focusedElement, nullptr);
       focusedElement->SetFocus(false);
 
-      ScheduleContentRelevancyUpdate(ContentRelevancy::Focused);
+      ScheduleContentRelevancyUpdate(dom::ContentRelevancy::Focused);
 
       if (auto *editorClient = GetEditor().Client())
       {
@@ -1917,19 +1926,20 @@ namespace krys::boo::dom
     // continues from there: after its previous sibling, or at the start of its parent.
     // The specification doesn't say what happens; this follows other engines.
     if (_sequentialFocusNavigationStartingPoint
-        && TreeQueries::IsShadowIncludingInclusiveAncestor(node, *_sequentialFocusNavigationStartingPoint))
+        && dom::TreeQueries::IsShadowIncludingInclusiveAncestor(node,
+                                                                *_sequentialFocusNavigationStartingPoint))
     {
       if (auto *previousSibling = node.PreviousSibling())
       {
         _sequentialFocusNavigationStartingPoint = ShareRefPtr(previousSibling);
         _sequentialFocusNavigationStartingPointPosition =
-          SequentialFocusNavigationStartingPointPosition::After;
+          dom::SequentialFocusNavigationStartingPointPosition::After;
       }
       else if (auto *parent = node.ParentNode(); parent && parent != this)
       {
         _sequentialFocusNavigationStartingPoint = ShareRefPtr<Node>(parent);
         _sequentialFocusNavigationStartingPointPosition =
-          SequentialFocusNavigationStartingPointPosition::Inside;
+          dom::SequentialFocusNavigationStartingPointPosition::Inside;
       }
       else
       {
@@ -1942,7 +1952,7 @@ namespace krys::boo::dom
     // before the removal).
     auto moveOutOfRemovedSubtree = [&](RefPtr<Element> &element)
     {
-      if (!element || !TreeQueries::IsShadowIncludingInclusiveAncestor(node, *element))
+      if (!element || !dom::TreeQueries::IsShadowIncludingInclusiveAncestor(node, *element))
       {
         return;
       }
@@ -1986,14 +1996,14 @@ namespace krys::boo::dom
   }
 
   void Document::AddPendingScrollEventTarget(ContainerNode &originalTarget,
-                                             ScrollEventType eventType) noexcept
+                                             dom::ScrollEventType eventType) noexcept
   {
     Ref<ContainerNode> target = [&]() -> Ref<ContainerNode>
     {
-      if (auto *element = DynamicDowncast<html::HTMLElement>(originalTarget);
+      if (auto *element = DynamicDowncast<HTMLElement>(originalTarget);
           element && element->IsTextControlInnerTextElement())
       {
-        if (auto *shadowHost = TreeQueries::ShadowHost(*element))
+        if (auto *shadowHost = dom::TreeQueries::ShadowHost(*element))
         {
           return ShareRef<ContainerNode>(*shadowHost);
         }
@@ -2099,7 +2109,8 @@ namespace krys::boo::dom
     }
 
     // 7. Fire an event named visibilitychange at document, with its bubbles attribute initialized to true.
-    (void)EventDispatcher::DispatchToTarget(*Event::Create(event_names::VisibilityChange, true, false), this);
+    (void)dom::EventDispatcher::DispatchToTarget(*Event::Create(event_names::VisibilityChange, true, false),
+                                                 this);
   }
 
   void Document::VisibilityStateChanged() noexcept
@@ -2116,8 +2127,8 @@ namespace krys::boo::dom
       html::TaskSource::UserInteraction, *this,
       [protectedThis = ShareRef(*this)]
       {
-        (void)EventDispatcher::DispatchToTarget(*Event::Create(event_names::VisibilityChange, true, false),
-                                                protectedThis.get());
+        (void)dom::EventDispatcher::DispatchToTarget(
+          *Event::Create(event_names::VisibilityChange, true, false), protectedThis.get());
 
         bool pageIsVisible = protectedThis->GetPage() && protectedThis->GetPage()->IsVisible();
         if (!pageIsVisible)
@@ -2142,13 +2153,13 @@ namespace krys::boo::dom
     }
   }
 
-  void Document::RegisterForVisibilityStateChangedCallbacks(VisibilityChangeClient &client) noexcept
+  void Document::RegisterForVisibilityStateChangedCallbacks(dom::VisibilityChangeClient &client) noexcept
   {
     std::erase_if(_visibilityStateCallbackClients, [](const auto &weakClient) { return !weakClient; });
     _visibilityStateCallbackClients.push_back(CreateWeakPtr(&client));
   }
 
-  void Document::UnregisterForVisibilityStateChangedCallbacks(VisibilityChangeClient &client) noexcept
+  void Document::UnregisterForVisibilityStateChangedCallbacks(dom::VisibilityChangeClient &client) noexcept
   {
     std::erase_if(_visibilityStateCallbackClients,
                   [&](const auto &weakClient) { return !weakClient || weakClient.get() == &client; });
@@ -2214,7 +2225,7 @@ namespace krys::boo::dom
       }
 
       // Some canvases need to do work when rendering has finished but before their content is composited.
-      if (auto *htmlCanvas = DynamicDowncast<html::HTMLCanvasElement>(*canvas))
+      if (auto *htmlCanvas = DynamicDowncast<HTMLCanvasElement>(*canvas))
       {
         if (htmlCanvas->NeedsPreparationForDisplay())
         {
@@ -2323,11 +2334,11 @@ namespace krys::boo::dom
     }
   }
 
-  svg::SVGDocumentExtensions &Document::SVGExtensions() noexcept
+  SVGDocumentExtensions &Document::SVGExtensions() noexcept
   {
     if (!_svgExtensions)
     {
-      _svgExtensions = CreateUnique<svg::SVGDocumentExtensions>(*this);
+      _svgExtensions = CreateUnique<SVGDocumentExtensions>(*this);
     }
     return *_svgExtensions;
   }
@@ -2350,11 +2361,11 @@ namespace krys::boo::dom
     return *_lazyLoadImageObserver;
   }
 
-  ContentVisibilityDocumentState &Document::GetContentVisibilityDocumentState() noexcept
+  dom::ContentVisibilityDocumentState &Document::GetContentVisibilityDocumentState() noexcept
   {
     if (!_contentVisibilityDocumentState)
     {
-      _contentVisibilityDocumentState = CreateUnique<ContentVisibilityDocumentState>();
+      _contentVisibilityDocumentState = CreateUnique<dom::ContentVisibilityDocumentState>();
     }
     return *_contentVisibilityDocumentState;
   }
@@ -2364,16 +2375,16 @@ namespace krys::boo::dom
     return _contentVisibilityDocumentState && _contentVisibilityDocumentState->HasObservationTargets();
   }
 
-  DidUpdateAnyContentRelevancy Document::UpdateRelevancyOfContentVisibilityElements(
+  dom::DidUpdateAnyContentRelevancy Document::UpdateRelevancyOfContentVisibilityElements(
     UpdateLayoutIfContentVisibilityChanged updateLayout) noexcept
   {
     if (_contentRelevancyUpdate.IsEmpty() || !IsObservingContentVisibilityTargets())
     {
-      return DidUpdateAnyContentRelevancy::No;
+      return dom::DidUpdateAnyContentRelevancy::No;
     }
-    const DidUpdateAnyContentRelevancy result =
+    const dom::DidUpdateAnyContentRelevancy result =
       _contentVisibilityDocumentState->UpdateRelevancyOfContentVisibilityElements(_contentRelevancyUpdate);
-    if (result == DidUpdateAnyContentRelevancy::Yes
+    if (result == dom::DidUpdateAnyContentRelevancy::Yes
         && updateLayout == UpdateLayoutIfContentVisibilityChanged::Yes)
     {
       (void)UpdateLayoutIgnorePendingStylesheets();
@@ -2382,7 +2393,7 @@ namespace krys::boo::dom
     return result;
   }
 
-  void Document::ScheduleContentRelevancyUpdate(ContentRelevancy contentRelevancy) noexcept
+  void Document::ScheduleContentRelevancyUpdate(dom::ContentRelevancy contentRelevancy) noexcept
   {
     if (!IsObservingContentVisibilityTargets())
     {
@@ -2515,7 +2526,7 @@ namespace krys::boo::dom
       // reporting any values to resize observers.
       if (_contentVisibilityDocumentState
           && _contentVisibilityDocumentState->DetermineInitialVisibleContentVisibility()
-               == HadInitialVisibleContentVisibilityDetermination::Yes)
+               == dom::HadInitialVisibleContentVisibilityDetermination::Yes)
       {
         continue;
       }
@@ -2582,9 +2593,9 @@ namespace krys::boo::dom
     auto currentTargets = std::exchange(_pendingScrollEventTargets, {});
     for (auto &[target, type] : currentTargets)
     {
-      auto eventName = type == ScrollEventType::Scroll ? event_names::Scroll : event_names::ScrollEnd;
-      (void)EventDispatcher::FireEvent<Event>(DOMStringAtom(eventName), *target,
-                                              EventInit {.Bubbles = Is<Document>(*target)});
+      auto eventName = type == dom::ScrollEventType::Scroll ? event_names::Scroll : event_names::ScrollEnd;
+      (void)dom::EventDispatcher::FireEvent<Event>(DOMStringAtom(eventName), *target,
+                                                   EventInit {.Bubbles = Is<Document>(*target)});
     }
 
     if (_needsVisualViewportScrollEvent)
@@ -2592,7 +2603,7 @@ namespace krys::boo::dom
       _needsVisualViewportScrollEvent = false;
       if (RefPtr<LocalDOMWindow> window = _domWindow)
       {
-        (void)EventDispatcher::FireEvent(event_names::Scroll, window->GetVisualViewport());
+        (void)dom::EventDispatcher::FireEvent(event_names::Scroll, window->GetVisualViewport());
       }
     }
   }
@@ -2632,7 +2643,7 @@ namespace krys::boo::dom
       _needsDOMWindowResizeEvent = false;
       if (RefPtr<LocalDOMWindow> window = _domWindow)
       {
-        (void)EventDispatcher::FireEvent(event_names::Resize, *window);
+        (void)dom::EventDispatcher::FireEvent(event_names::Resize, *window);
       }
     }
     if (_needsVisualViewportResizeEvent)
@@ -2640,7 +2651,7 @@ namespace krys::boo::dom
       _needsVisualViewportResizeEvent = false;
       if (RefPtr<LocalDOMWindow> window = _domWindow)
       {
-        (void)EventDispatcher::FireEvent(event_names::Resize, window->GetVisualViewport());
+        (void)dom::EventDispatcher::FireEvent(event_names::Resize, window->GetVisualViewport());
       }
     }
   }
@@ -2712,12 +2723,11 @@ namespace krys::boo::dom
     }
   }
 
-  html::HTMLDialogElement *Document::ActiveModalDialog() const noexcept
+  HTMLDialogElement *Document::ActiveModalDialog() const noexcept
   {
     for (auto element = _topLayerElements.rbegin(); element != _topLayerElements.rend(); ++element)
     {
-      if (auto *dialog = DynamicDowncast<html::HTMLDialogElement>(element->get());
-          dialog && dialog->IsModal())
+      if (auto *dialog = DynamicDowncast<HTMLDialogElement>(element->get()); dialog && dialog->IsModal())
       {
         return dialog;
       }
@@ -2725,13 +2735,13 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-  void Document::AddOpenDialog(html::HTMLDialogElement &dialog) noexcept
+  void Document::AddOpenDialog(HTMLDialogElement &dialog) noexcept
   {
     krys_debug_assert(!_openDialogs.contains(ShareRef(dialog)));
     _openDialogs.add(ShareRef(dialog));
   }
 
-  void Document::RemoveOpenDialog(html::HTMLDialogElement &dialog) noexcept
+  void Document::RemoveOpenDialog(HTMLDialogElement &dialog) noexcept
   {
     _openDialogs.remove(ShareRef(dialog));
   }
@@ -2749,7 +2759,7 @@ namespace krys::boo::dom
     // 4. If the result of running topmost auto or hint popover given document is null, then return.
     if (TopmostAutoOrHintPopover())
     {
-      RefPtr<html::HTMLElement> ancestor = TopmostClickedPopover(target);
+      RefPtr<HTMLElement> ancestor = TopmostClickedPopover(target);
       // 5. If event's type is "pointerdown": set document's popover pointerdown target to the result of
       //    running topmost clicked popover given target.
       if (event.Type() == event_names::PointerDown)
@@ -2768,7 +2778,7 @@ namespace krys::boo::dom
         // 6e. Run hide popovers until given document, ancestor, false, and true.
         if (sameTarget)
         {
-          HideAllPopoversUntil(ancestor.get(), FocusPreviousElement::No, FireEvents::Yes);
+          HideAllPopoversUntil(ancestor.get(), dom::FocusPreviousElement::No, dom::FireEvents::Yes);
         }
       }
     }
@@ -2784,13 +2794,13 @@ namespace krys::boo::dom
     }
 
     // https://html.spec.whatwg.org/#nearest-clicked-dialog
-    auto nearestClickedDialog = [&]() -> html::HTMLDialogElement *
+    auto nearestClickedDialog = [&]() -> HTMLDialogElement *
     {
       // 1. Let target be event's target.
       // 2. If target is a dialog element, target has an open attribute, target's is modal is true, and
       // event's
       //    clientX and clientY are outside the bounds of target, then return null.
-      if (auto *dialog = DynamicDowncast<html::HTMLDialogElement>(target);
+      if (auto *dialog = DynamicDowncast<HTMLDialogElement>(target);
           dialog && dialog->Open() && dialog->IsModal())
       {
         auto bounds = dialog->BoundingClientRect();
@@ -2810,7 +2820,7 @@ namespace krys::boo::dom
       for (element = element ? element : target.ParentElementInComposedTree(); element;
            element = element->ParentElementInComposedTree())
       {
-        if (auto *dialog = DynamicDowncast<html::HTMLDialogElement>(*element); dialog && dialog->Open())
+        if (auto *dialog = DynamicDowncast<HTMLDialogElement>(*element); dialog && dialog->Open())
         {
           return dialog;
         }
@@ -2821,7 +2831,7 @@ namespace krys::boo::dom
     };
 
     // 4. Let ancestor be the result of running nearest clicked dialog given event.
-    RefPtr<html::HTMLDialogElement> ancestor = ShareRefPtr(nearestClickedDialog());
+    RefPtr<HTMLDialogElement> ancestor = ShareRefPtr(nearestClickedDialog());
 
     // 5. If event's type is "pointerdown", then set document's dialog pointerdown target to ancestor.
     if (event.Type() == event_names::PointerDown)
@@ -2846,7 +2856,7 @@ namespace krys::boo::dom
       }
 
       // 6d. Let topmostDialog be the last element of document's open dialogs list.
-      Ref<html::HTMLDialogElement> topmostDialog = _openDialogs.last();
+      Ref<HTMLDialogElement> topmostDialog = _openDialogs.last();
 
       // 6e. If ancestor is topmostDialog, then return.
       if (ancestor.get() == topmostDialog.get())
@@ -2855,7 +2865,7 @@ namespace krys::boo::dom
       }
 
       // 6f. If topmostDialog's computed closed-by state is not Any, then return.
-      if (topmostDialog->ComputedClosedByState() != html::HTMLDialogElement::ClosedByState::Any)
+      if (topmostDialog->ComputedClosedByState() != HTMLDialogElement::ClosedByState::Any)
       {
         return;
       }
@@ -2870,14 +2880,14 @@ namespace krys::boo::dom
     }
   }
 
-  List<Ref<html::HTMLElement>> Document::ShowingAutoPopoverList() const noexcept
+  List<Ref<HTMLElement>> Document::ShowingAutoPopoverList() const noexcept
   {
-    List<Ref<html::HTMLElement>> popovers;
+    List<Ref<HTMLElement>> popovers;
     for (auto &element : _topLayerElements)
     {
-      if (auto *popover = DynamicDowncast<html::HTMLElement>(element.get());
+      if (auto *popover = DynamicDowncast<HTMLElement>(element.get());
           popover && popover->IsPopoverShowing()
-          && popover->GetPopoverData()->OpenedInPopoverMode() == PopoverState::Auto)
+          && popover->GetPopoverData()->OpenedInPopoverMode() == dom::PopoverState::Auto)
       {
         popovers.push_back(ShareRef(*popover));
       }
@@ -2885,14 +2895,14 @@ namespace krys::boo::dom
     return popovers;
   }
 
-  List<Ref<html::HTMLElement>> Document::ShowingHintPopoverList() const noexcept
+  List<Ref<HTMLElement>> Document::ShowingHintPopoverList() const noexcept
   {
-    List<Ref<html::HTMLElement>> popovers;
+    List<Ref<HTMLElement>> popovers;
     for (auto &element : _topLayerElements)
     {
-      if (auto *popover = DynamicDowncast<html::HTMLElement>(element.get());
+      if (auto *popover = DynamicDowncast<HTMLElement>(element.get());
           popover && popover->IsPopoverShowing()
-          && popover->GetPopoverData()->OpenedInPopoverMode() == PopoverState::Hint)
+          && popover->GetPopoverData()->OpenedInPopoverMode() == dom::PopoverState::Hint)
       {
         popovers.push_back(ShareRef(*popover));
       }
@@ -2901,7 +2911,7 @@ namespace krys::boo::dom
   }
 
   // https://html.spec.whatwg.org/#topmost-auto-or-hint-popover
-  html::HTMLElement *Document::TopmostAutoOrHintPopover() const noexcept
+  HTMLElement *Document::TopmostAutoOrHintPopover() const noexcept
   {
     // 1. If document's showing hint popover list is not empty, then return document's showing hint popover
     //    list's last element.
@@ -2910,9 +2920,9 @@ namespace krys::boo::dom
     // 3. Return null.
     for (auto element = _topLayerElements.rbegin(); element != _topLayerElements.rend(); ++element)
     {
-      if (auto *popover = DynamicDowncast<html::HTMLElement>(element->get());
+      if (auto *popover = DynamicDowncast<HTMLElement>(element->get());
           popover && popover->IsPopoverShowing()
-          && popover->GetPopoverData()->OpenedInPopoverMode() == PopoverState::Hint)
+          && popover->GetPopoverData()->OpenedInPopoverMode() == dom::PopoverState::Hint)
       {
         return popover;
       }
@@ -2922,8 +2932,8 @@ namespace krys::boo::dom
   }
 
   // https://html.spec.whatwg.org/#hide-popovers-until
-  void Document::HideAllPopoversUntil(html::HTMLElement *endpoint, FocusPreviousElement focusPreviousElement,
-                                      FireEvents fireEvents) noexcept
+  void Document::HideAllPopoversUntil(HTMLElement *endpoint, dom::FocusPreviousElement focusPreviousElement,
+                                      dom::FireEvents fireEvents) noexcept
   {
     // 1. Let endpointIsHint be true if document's showing hint popover list contains endpoint; otherwise
     //    false.
@@ -2934,10 +2944,10 @@ namespace krys::boo::dom
            != hintPopovers.end();
 
     // 2. Run hide popover stack until given document, endpoint, Hint, focusPreviousElement, and fireEvents.
-    HidePopoverStackUntil(endpoint, PopoverState::Hint, focusPreviousElement, fireEvents);
+    HidePopoverStackUntil(endpoint, dom::PopoverState::Hint, focusPreviousElement, fireEvents);
 
     // 3. Let autoEndpoint be endpoint.
-    RefPtr<html::HTMLElement> autoEndpoint = ShareRefPtr(endpoint);
+    RefPtr<HTMLElement> autoEndpoint = ShareRefPtr(endpoint);
     // 4. If endpointIsHint is true, then set autoEndpoint to document's hint stack parent.
     if (endpointIsHint)
     {
@@ -2945,18 +2955,19 @@ namespace krys::boo::dom
     }
     // 5. Run hide popover stack until given document, autoEndpoint, Auto, focusPreviousElement, and
     //    fireEvents.
-    HidePopoverStackUntil(autoEndpoint.get(), PopoverState::Auto, focusPreviousElement, fireEvents);
+    HidePopoverStackUntil(autoEndpoint.get(), dom::PopoverState::Auto, focusPreviousElement, fireEvents);
   }
 
   // https://html.spec.whatwg.org/#hide-popover-stack-until
-  void Document::HidePopoverStackUntil(html::HTMLElement *endpoint, PopoverState stackType,
-                                       FocusPreviousElement focusPreviousElement,
-                                       FireEvents fireEvents) noexcept
+  void Document::HidePopoverStackUntil(HTMLElement *endpoint, dom::PopoverState stackType,
+                                       dom::FocusPreviousElement focusPreviousElement,
+                                       dom::FireEvents fireEvents) noexcept
   {
-    krys_debug_assert(stackType == PopoverState::Auto || stackType == PopoverState::Hint);
+    krys_debug_assert(stackType == dom::PopoverState::Auto || stackType == dom::PopoverState::Hint);
     // 1. Let popoverList be document's showing auto popover list if stackType is Auto; otherwise document's
     //    showing hint popover list.
-    auto popoverList = stackType == PopoverState::Auto ? ShowingAutoPopoverList() : ShowingHintPopoverList();
+    auto popoverList =
+      stackType == dom::PopoverState::Auto ? ShowingAutoPopoverList() : ShowingHintPopoverList();
 
     // 2. Let lastHideIndex be 0 if popoverList does not contain endpoint; otherwise the index of endpoint in
     //    popoverList plus 1.
@@ -2965,8 +2976,8 @@ namespace krys::boo::dom
     auto endpointIt = std::ranges::find(popoverList, endpoint, [](auto &popover) { return popover.get(); });
     auto lastHideIndex =
       endpointIt == popoverList.end() ? 0uz : static_cast<size_t>(endpointIt - popoverList.begin()) + 1;
-    List<Ref<html::HTMLElement>> toHide {popoverList.rbegin(), popoverList.rend() - lastHideIndex};
-    List<Ref<html::HTMLElement>> toRemain {popoverList.begin(), popoverList.begin() + lastHideIndex};
+    List<Ref<HTMLElement>> toHide {popoverList.rbegin(), popoverList.rend() - lastHideIndex};
+    List<Ref<HTMLElement>> toRemain {popoverList.begin(), popoverList.begin() + lastHideIndex};
 
     // 5. For each popover of toHide: run the hide popover algorithm given popover, focusPreviousElement,
     //    fireEvents, false, and null.
@@ -2980,7 +2991,7 @@ namespace krys::boo::dom
     //    showing hint popover list.
     // 7. Let toCheck be newPopoverList in reverse order.
     auto newPopoverList =
-      stackType == PopoverState::Auto ? ShowingAutoPopoverList() : ShowingHintPopoverList();
+      stackType == dom::PopoverState::Auto ? ShowingAutoPopoverList() : ShowingHintPopoverList();
     // 8. For each popover of toCheck:
     for (auto popover = newPopoverList.rbegin(); popover != newPopoverList.rend(); ++popover)
     {
@@ -2990,11 +3001,11 @@ namespace krys::boo::dom
         continue;
       }
       // 8b. Run the hide popover algorithm given popover, focusPreviousElement, false, false, and null.
-      (void)(*popover)->HidePopoverInternal(focusPreviousElement, FireEvents::No, false, nullptr);
+      (void)(*popover)->HidePopoverInternal(focusPreviousElement, dom::FireEvents::No, false, nullptr);
     }
   }
 
-  void Document::SetHintStackParent(html::HTMLElement *element) noexcept
+  void Document::SetHintStackParent(HTMLElement *element) noexcept
   {
     _hintStackParent = CreateWeakPtr(element);
   }
@@ -3002,11 +3013,11 @@ namespace krys::boo::dom
   namespace
   {
     /// @see https://html.spec.whatwg.org/#target-popover
-    KRYS_NODISCARD RefPtr<html::HTMLElement> TargetPopover(html::HTMLElement &element) noexcept
+    KRYS_NODISCARD RefPtr<HTMLElement> TargetPopover(HTMLElement &element) noexcept
     {
-      auto *control = DynamicDowncast<html::HTMLFormControlElement>(element);
+      auto *control = DynamicDowncast<HTMLFormControlElement>(element);
       // 1. If node is not a button element, then return node's popover target element.
-      auto *button = DynamicDowncast<html::HTMLButtonElement>(element);
+      auto *button = DynamicDowncast<HTMLButtonElement>(element);
       if (!button)
       {
         return control ? control->PopoverTargetElement() : nullptr;
@@ -3041,14 +3052,14 @@ namespace krys::boo::dom
       // 6. Let command be node's command attribute.
       // 7. If command is not in the Toggle Popover, Hide Popover, or Show Popover states, then return null.
       auto command = button->GetCommandType();
-      if (command != CommandType::TogglePopover && command != CommandType::HidePopover
-          && command != CommandType::ShowPopover)
+      if (command != dom::CommandType::TogglePopover && command != dom::CommandType::HidePopover
+          && command != dom::CommandType::ShowPopover)
       {
         return nullptr;
       }
       // 8. If target's popover attribute is in the No Popover state, then return null.
-      auto *popover = DynamicDowncast<html::HTMLElement>(*target);
-      if (!popover || popover->GetPopoverState() == PopoverState::None)
+      auto *popover = DynamicDowncast<HTMLElement>(*target);
+      if (!popover || popover->GetPopoverState() == dom::PopoverState::None)
       {
         return nullptr;
       }
@@ -3058,7 +3069,7 @@ namespace krys::boo::dom
   }
 
   // https://html.spec.whatwg.org/#topmost-clicked-popover
-  RefPtr<html::HTMLElement> Document::TopmostClickedPopover(Node &node) const noexcept
+  RefPtr<HTMLElement> Document::TopmostClickedPopover(Node &node) const noexcept
   {
     auto *startElement = DynamicDowncast<Element>(node);
     if (!startElement)
@@ -3071,12 +3082,12 @@ namespace krys::boo::dom
     // https://html.spec.whatwg.org/#nearest-inclusive-open-popover
     // https://html.spec.whatwg.org/#nearest-inclusive-target-popover
     // (Both walk the flat tree up from node, so they're found together.)
-    html::HTMLElement *clickedPopover = nullptr;
-    RefPtr<html::HTMLElement> targetPopover;
+    HTMLElement *clickedPopover = nullptr;
+    RefPtr<HTMLElement> targetPopover;
     for (auto *element = startElement; element && (!clickedPopover || !targetPopover);
          element = element->ParentElementInComposedTree())
     {
-      auto *htmlElement = DynamicDowncast<html::HTMLElement>(*element);
+      auto *htmlElement = DynamicDowncast<HTMLElement>(*element);
       if (!htmlElement)
       {
         continue;
@@ -3084,12 +3095,12 @@ namespace krys::boo::dom
       // If currentNode's opened in popover mode is "auto" or "hint", and currentNode's popover visibility
       // state is showing, then return currentNode.
       if (!clickedPopover && htmlElement->IsPopoverShowing()
-          && htmlElement->GetPopoverData()->OpenedInPopoverMode() != PopoverState::None)
+          && htmlElement->GetPopoverData()->OpenedInPopoverMode() != dom::PopoverState::None)
       {
         clickedPopover = htmlElement;
       }
       // A select's picker is as much its target as a button's popover is.
-      if (auto *select = DynamicDowncast<html::HTMLSelectElement>(*htmlElement);
+      if (auto *select = DynamicDowncast<HTMLSelectElement>(*htmlElement);
           select && select->IsPickerOpen() && !targetPopover)
       {
         targetPopover = ShareRefPtr(select->SelectPopover());
@@ -3101,8 +3112,8 @@ namespace krys::boo::dom
       {
         auto popover = TargetPopover(*htmlElement);
         if (popover && popover->IsPopoverShowing()
-            && (popover->GetPopoverState() == PopoverState::Auto
-                || popover->GetPopoverState() == PopoverState::Hint))
+            && (popover->GetPopoverState() == dom::PopoverState::Auto
+                || popover->GetPopoverState() == dom::PopoverState::Hint))
         {
           targetPopover = krys::move(popover);
         }
@@ -3112,7 +3123,7 @@ namespace krys::boo::dom
     // https://html.spec.whatwg.org/#get-the-popover-stack-position
     auto autoPopovers = ShowingAutoPopoverList();
     auto hintPopovers = ShowingHintPopoverList();
-    auto stackPosition = [&](html::HTMLElement *popover) -> size_t
+    auto stackPosition = [&](HTMLElement *popover) -> size_t
     {
       // 1. Let hintList be popover's node document's showing hint popover list.
       // 2. Let autoList be popover's node document's showing auto popover list.
@@ -3158,9 +3169,9 @@ namespace krys::boo::dom
     {
       return element.get();
     }
-    for (auto &node : DescendantRange(const_cast<Document &>(*this)))
+    for (auto &node : dom::DescendantRange(const_cast<Document &>(*this)))
     {
-      auto *anchor = DynamicDowncast<html::HTMLAnchorElement>(node);
+      auto *anchor = DynamicDowncast<HTMLAnchorElement>(node);
       if (!anchor)
       {
         continue;
@@ -3225,30 +3236,31 @@ namespace krys::boo::dom
     return _frame && _frame->Document() == this;
   }
 
-  DocumentTimerHandle Document::StartTimer(MonotonicTime::duration delay, Func<void()> action) noexcept
-  {
-    auto &timer = _timers.emplace_back(AdoptRef(*new DocumentTimer(*this, krys::move(action), delay, false)));
-    return DocumentTimerHandle(*timer);
-  }
-
-  DocumentTimerHandle Document::StartRepeatingTimer(MonotonicTime::duration interval,
-                                                    Func<void()> action) noexcept
+  dom::DocumentTimerHandle Document::StartTimer(MonotonicTime::duration delay, Func<void()> action) noexcept
   {
     auto &timer =
-      _timers.emplace_back(AdoptRef(*new DocumentTimer(*this, krys::move(action), interval, true)));
-    return DocumentTimerHandle(*timer);
+      _timers.emplace_back(AdoptRef(*new dom::DocumentTimer(*this, krys::move(action), delay, false)));
+    return dom::DocumentTimerHandle(*timer);
   }
 
-  void Document::RemoveTimer(DocumentTimer &timer) noexcept
+  dom::DocumentTimerHandle Document::StartRepeatingTimer(MonotonicTime::duration interval,
+                                                         Func<void()> action) noexcept
   {
-    std::erase_if(_timers, [&](const Ref<DocumentTimer> &each) { return each.get() == &timer; });
+    auto &timer =
+      _timers.emplace_back(AdoptRef(*new dom::DocumentTimer(*this, krys::move(action), interval, true)));
+    return dom::DocumentTimerHandle(*timer);
   }
 
-  int32 Document::RequestAnimationFrame(FrameRequestCallback &&callback) noexcept
+  void Document::RemoveTimer(dom::DocumentTimer &timer) noexcept
+  {
+    std::erase_if(_timers, [&](const Ref<dom::DocumentTimer> &each) { return each.get() == &timer; });
+  }
+
+  int32 Document::RequestAnimationFrame(dom::FrameRequestCallback &&callback) noexcept
   {
     if (!_scriptedAnimationController)
     {
-      _scriptedAnimationController = CreateUnique<ScriptedAnimationController>(*this);
+      _scriptedAnimationController = CreateUnique<dom::ScriptedAnimationController>(*this);
 
       // The page may have suspended its animation frame callbacks before the controller was made.
       if (!GetPage() || GetPage()->ScriptedAnimationsSuspended())
@@ -3291,7 +3303,7 @@ namespace krys::boo::dom
     }
   }
 
-  void Document::Suspend(ReasonForSuspension reason) noexcept
+  void Document::Suspend(dom::ReasonForSuspension reason) noexcept
   {
     if (_isSuspended)
     {
@@ -3333,7 +3345,7 @@ namespace krys::boo::dom
     _isSuspended = true;
   }
 
-  void Document::Resume(ReasonForSuspension reason) noexcept
+  void Document::Resume(dom::ReasonForSuspension reason) noexcept
   {
     if (!_isSuspended)
     {
@@ -3380,7 +3392,7 @@ namespace krys::boo::dom
                   [&](const auto &weakElement) { return !weakElement || weakElement.get() == &element; });
   }
 
-  void Document::SuspendScheduledTasks(ReasonForSuspension reason) noexcept
+  void Document::SuspendScheduledTasks(dom::ReasonForSuspension reason) noexcept
   {
     if (_scheduledTasksAreSuspended)
     {
@@ -3396,7 +3408,7 @@ namespace krys::boo::dom
     _scheduledTasksAreSuspended = true;
   }
 
-  void Document::ResumeScheduledTasks(ReasonForSuspension reason) noexcept
+  void Document::ResumeScheduledTasks(dom::ReasonForSuspension reason) noexcept
   {
     if (!_scheduledTasksAreSuspended || _reasonForSuspendingActiveDOMObjects != reason)
     {
@@ -3412,7 +3424,7 @@ namespace krys::boo::dom
     _scheduledTasksAreSuspended = false;
   }
 
-  void Document::SuspendActiveDOMObjects(ReasonForSuspension reason) noexcept
+  void Document::SuspendActiveDOMObjects(dom::ReasonForSuspension reason) noexcept
   {
     if (_activeDOMObjectsAreSuspended)
     {
@@ -3431,7 +3443,7 @@ namespace krys::boo::dom
     }
   }
 
-  void Document::ResumeActiveDOMObjects(ReasonForSuspension reason) noexcept
+  void Document::ResumeActiveDOMObjects(dom::ReasonForSuspension reason) noexcept
   {
     if (_reasonForSuspendingActiveDOMObjects != reason)
     {
@@ -3483,7 +3495,7 @@ namespace krys::boo::dom
   {
     if (RefPtr<LocalDOMWindow> window = _domWindow)
     {
-      (void)EventDispatcher::DispatchToTarget(event, window.get());
+      (void)dom::EventDispatcher::DispatchToTarget(event, window.get());
     }
   }
 
@@ -3498,7 +3510,7 @@ namespace krys::boo::dom
   {
     html::EventLoop::Current().QueueTask(
       source, *this, [protectedThis = ShareRef(*this), event = krys::move(event)]
-      { (void)EventDispatcher::DispatchToTarget(*event, protectedThis.get()); });
+      { (void)dom::EventDispatcher::DispatchToTarget(*event, protectedThis.get()); });
   }
 
   void Document::ExitPointerLock() noexcept
@@ -3530,30 +3542,30 @@ namespace krys::boo::dom
     return _domWindow.get();
   }
 
-  HighlightRegistry &Document::GetHighlightRegistry() noexcept
+  dom::HighlightRegistry &Document::GetHighlightRegistry() noexcept
   {
     if (!_highlightRegistry)
     {
-      _highlightRegistry = HighlightRegistry::Create();
+      _highlightRegistry = dom::HighlightRegistry::Create();
     }
     return *_highlightRegistry;
   }
 
-  HighlightRegistry &Document::FragmentHighlightRegistry() noexcept
+  dom::HighlightRegistry &Document::FragmentHighlightRegistry() noexcept
   {
     if (!_fragmentHighlightRegistry)
     {
-      _fragmentHighlightRegistry = HighlightRegistry::Create();
+      _fragmentHighlightRegistry = dom::HighlightRegistry::Create();
     }
     return *_fragmentHighlightRegistry;
   }
 
-  HighlightRegistry *Document::HighlightRegistryIfExists() const noexcept
+  dom::HighlightRegistry *Document::HighlightRegistryIfExists() const noexcept
   {
     return _highlightRegistry.get();
   }
 
-  HighlightRegistry *Document::FragmentHighlightRegistryIfExists() const noexcept
+  dom::HighlightRegistry *Document::FragmentHighlightRegistryIfExists() const noexcept
   {
     return _fragmentHighlightRegistry.get();
   }
@@ -3566,8 +3578,8 @@ namespace krys::boo::dom
 
   namespace
   {
-    void CollectHighlightRangesFromRegister(List<WeakPtr<HighlightRange>> &highlightRanges,
-                                            const HighlightRegistry &highlightRegistry) noexcept
+    void CollectHighlightRangesFromRegister(List<WeakPtr<dom::HighlightRange>> &highlightRanges,
+                                            const dom::HighlightRegistry &highlightRegistry) noexcept
     {
       for (auto &[name, highlight] : highlightRegistry.Map())
       {
@@ -3580,7 +3592,7 @@ namespace krys::boo::dom
             continue;
           }
 
-          auto simpleRange = MakeSimpleRange(highlightRange->Range());
+          auto simpleRange = dom::MakeSimpleRange(highlightRange->Range());
           if (&simpleRange.StartContainer().TreeScope() != &simpleRange.EndContainer().TreeScope())
           {
             continue;
@@ -3593,7 +3605,7 @@ namespace krys::boo::dom
 
   void Document::UpdateHighlightPositions() noexcept
   {
-    List<WeakPtr<HighlightRange>> highlightRanges;
+    List<WeakPtr<dom::HighlightRange>> highlightRanges;
     if (_highlightRegistry)
     {
       CollectHighlightRangesFromRegister(highlightRanges, *_highlightRegistry);
@@ -3605,13 +3617,13 @@ namespace krys::boo::dom
 
     for (auto &weakRangeData : highlightRanges)
     {
-      RefPtr<HighlightRange> highlightRange = ShareRefPtr(weakRangeData.get());
+      RefPtr<dom::HighlightRange> highlightRange = ShareRefPtr(weakRangeData.get());
       if (!highlightRange)
       {
         continue;
       }
 
-      VisibleSelection visibleSelection(MakeSimpleRange(highlightRange->Range()));
+      VisibleSelection visibleSelection(dom::MakeSimpleRange(highlightRange->Range()));
       auto startPosition = visibleSelection.VisibleStart().DeepEquivalent();
       auto endPosition = visibleSelection.VisibleEnd().DeepEquivalent();
       if (!weakRangeData.get())
@@ -3619,11 +3631,13 @@ namespace krys::boo::dom
         continue;
       }
 
-      if (auto simpleRange = MakeSimpleRange(highlightRange->StartPosition(), highlightRange->EndPosition()))
+      if (auto simpleRange =
+            dom::MakeSimpleRange(highlightRange->StartPosition(), highlightRange->EndPosition()))
       {
-        if (auto init = StaticRangeInit::Create(simpleRange->Start, simpleRange->End); !init.HasException())
+        if (auto init = dom::StaticRangeInit::Create(simpleRange->Start, simpleRange->End);
+            !init.HasException())
         {
-          Highlight::RepaintRange(*CreateRef<StaticRange>(init.ReleaseValue()));
+          dom::Highlight::RepaintRange(*CreateRef<dom::StaticRange>(init.ReleaseValue()));
         }
       }
 
@@ -3636,7 +3650,7 @@ namespace krys::boo::dom
         highlightRange->SetEndPosition(krys::move(endPosition));
       }
 
-      Highlight::RepaintRange(highlightRange->Range());
+      dom::Highlight::RepaintRange(highlightRange->Range());
     }
   }
 
@@ -3662,12 +3676,12 @@ namespace krys::boo::dom
     {
       // Update the current document readiness to "interactive", then fire DOMContentLoaded at the Document,
       // with its bubbles attribute initialized to true.
-      DocumentAlgorithms::UpdateCurrentDocumentReadiness(*this, html::DocumentReadyState::Interactive);
+      dom::DocumentAlgorithms::UpdateCurrentDocumentReadiness(*this, html::DocumentReadyState::Interactive);
       if (!_loadTiming.DOMContentLoadedEventStartTime)
       {
         _loadTiming.DOMContentLoadedEventStartTime = _domWindow ? _domWindow->NowTimestamp() : 0;
         auto event = Event::Create(event_names::DOMContentLoaded, true, false);
-        (void)EventDispatcher::DispatchToTarget(*event, this);
+        (void)dom::EventDispatcher::DispatchToTarget(*event, this);
         _loadTiming.DOMContentLoadedEventEndTime = _domWindow ? _domWindow->NowTimestamp() : 0;
       }
     }
@@ -3775,7 +3789,7 @@ namespace krys::boo::dom
     {
       _loadTiming.LoadEventStartTime = window->NowTimestamp();
     }
-    (void)EventDispatcher::FireEvent<Event>(event_names::Load, *window, {}, true);
+    (void)dom::EventDispatcher::FireEvent<Event>(event_names::Load, *window, {}, true);
     if (!_loadTiming.LoadEventEndTime)
     {
       _loadTiming.LoadEventEndTime = window->NowTimestamp();
@@ -3864,8 +3878,8 @@ namespace krys::boo::dom
     _pageShowing = false;
     if (RefPtr<LocalDOMWindow> window = _domWindow)
     {
-      auto event = html::PageTransitionEvent::Create(event_names::PageHide, persisted);
-      (void)EventDispatcher::DispatchToTarget(*event, window.get(), true);
+      auto event = PageTransitionEvent::Create(event_names::PageHide, persisted);
+      (void)dom::EventDispatcher::DispatchToTarget(*event, window.get(), true);
     }
   }
 
@@ -3880,17 +3894,17 @@ namespace krys::boo::dom
     _pageShowing = true;
     if (RefPtr<LocalDOMWindow> window = _domWindow)
     {
-      auto event = html::PageTransitionEvent::Create(event_names::PageShow, persisted);
-      (void)EventDispatcher::DispatchToTarget(*event, window.get(), true);
+      auto event = PageTransitionEvent::Create(event_names::PageShow, persisted);
+      (void)dom::EventDispatcher::DispatchToTarget(*event, window.get(), true);
     }
   }
 
   void Document::SetSequentialFocusNavigationStartingPoint(Node *node) noexcept
   {
-    _sequentialFocusNavigationStartingPointPosition = SequentialFocusNavigationStartingPointPosition::At;
+    _sequentialFocusNavigationStartingPointPosition = dom::SequentialFocusNavigationStartingPointPosition::At;
     // Setting the starting point to the document or its document element means navigation starts from the
     // start of the document.
-    if (!node || node == this || node == TreeQueries::DocumentElement(*this))
+    if (!node || node == this || node == dom::TreeQueries::DocumentElement(*this))
     {
       _sequentialFocusNavigationStartingPoint = nullptr;
       return;
@@ -4140,11 +4154,11 @@ namespace krys::boo::dom
   {
     if (auto *window = Window())
     {
-      EventTargetAlgorithms::RemoveAllEventListeners(*window);
+      dom::EventTargetAlgorithms::RemoveAllEventListeners(*window);
     }
-    for (Node *node = this; node; node = TreeQueries::NextShadowIncluding(*node))
+    for (Node *node = this; node; node = dom::TreeQueries::NextShadowIncluding(*node))
     {
-      EventTargetAlgorithms::RemoveAllEventListeners(*node);
+      dom::EventTargetAlgorithms::RemoveAllEventListeners(*node);
     }
   }
 
@@ -4192,7 +4206,7 @@ namespace krys::boo::dom
   List<RefPtr<WebAnimation>> Document::GetAnimations() noexcept
   {
     return MatchingAnimations([](Element &target) -> bool
-                              { return !TreeQueries::ContainingShadowRoot(target); });
+                              { return !dom::TreeQueries::ContainingShadowRoot(target); });
   }
 
   List<RefPtr<WebAnimation>>
@@ -4248,7 +4262,7 @@ namespace krys::boo::dom
     return *_styleOriginatedTimelinesController;
   }
 
-  void Document::KeyframesRuleDidChange(const css::CSSOMString &name) noexcept
+  void Document::KeyframesRuleDidChange(const CSSOMString &name) noexcept
   {
     for (auto *animation : WebAnimation::Instances())
     {
@@ -4342,7 +4356,7 @@ namespace krys::boo::dom
     {
       return false;
     }
-    if (!Is<html::HTMLHtmlElement>(*DocumentElement()))
+    if (!Is<HTMLHtmlElement>(*DocumentElement()))
     {
       return true;
     }
@@ -4369,10 +4383,10 @@ namespace krys::boo::dom
   }
 
   Document::UpdateLayoutResult
-    Document::UpdateLayoutIgnorePendingStylesheets(EnumSet<LayoutOptions> layoutOptions,
+    Document::UpdateLayoutIgnorePendingStylesheets(EnumSet<dom::LayoutOptions> layoutOptions,
                                                    const Element *context) noexcept
   {
-    layoutOptions.Add(LayoutOptions::IgnorePendingStylesheets);
+    layoutOptions.Add(dom::LayoutOptions::IgnorePendingStylesheets);
     return UpdateLayout(layoutOptions, context);
   }
 
@@ -4401,13 +4415,13 @@ namespace krys::boo::dom
     }
   }
 
-  Document::UpdateLayoutResult Document::UpdateLayout(EnumSet<LayoutOptions> layoutOptions,
+  Document::UpdateLayoutResult Document::UpdateLayout(EnumSet<dom::LayoutOptions> layoutOptions,
                                                       const Element *context) noexcept
   {
     bool oldIgnore = _ignorePendingStylesheets;
     auto restoreIgnorePendingStylesheets = MakeScopeExit([&] { _ignorePendingStylesheets = oldIgnore; });
 
-    if (layoutOptions.Contains(LayoutOptions::IgnorePendingStylesheets))
+    if (layoutOptions.Contains(dom::LayoutOptions::IgnorePendingStylesheets))
     {
       if (!HaveStylesheetsLoaded())
       {
@@ -4419,7 +4433,7 @@ namespace krys::boo::dom
         }
       }
       if (UpdateRelevancyOfContentVisibilityElements(UpdateLayoutIfContentVisibilityChanged::No)
-          == DidUpdateAnyContentRelevancy::Yes)
+          == dom::DidUpdateAnyContentRelevancy::Yes)
       {
         _ignorePendingStylesheets = oldIgnore;
         return UpdateLayout(layoutOptions, context);
@@ -4448,9 +4462,9 @@ namespace krys::boo::dom
       auto &layoutContext = frameView->LayoutContext();
       auto runForcedLayoutOnSkippedContentIfNeeded = [&]
       {
-        if (!layoutOptions.ContainsAny({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                        LayoutOptions::TreatContentVisibilityAutoAsVisible,
-                                        LayoutOptions::TreatRevealedWhenFoundAsVisible}))
+        if (!layoutOptions.ContainsAny({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                        dom::LayoutOptions::TreatContentVisibilityAutoAsVisible,
+                                        dom::LayoutOptions::TreatRevealedWhenFoundAsVisible}))
         {
           return false;
         }
@@ -4483,24 +4497,24 @@ namespace krys::boo::dom
         };
 
         auto isSkippedContentStale = markRendererDirtyIfNeeded(*rootForLayout);
-        if (layoutOptions.Contains(LayoutOptions::TreatContentVisibilityHiddenAsVisible))
+        if (layoutOptions.Contains(dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible))
         {
           for (auto &descendant : DescendantsOfType<RenderObject>(*rootForLayout))
           {
             isSkippedContentStale |= markRendererDirtyIfNeeded(descendant);
           }
         }
-        else if (layoutOptions.Contains(LayoutOptions::TreatContentVisibilityAutoAsVisible)
-                 || layoutOptions.Contains(LayoutOptions::TreatRevealedWhenFoundAsVisible))
+        else if (layoutOptions.Contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible)
+                 || layoutOptions.Contains(dom::LayoutOptions::TreatRevealedWhenFoundAsVisible))
         {
           for (auto &descendant : DescendantsOfType<RenderObject>(*rootForLayout))
           {
             // FIXME: While 'c-v: auto' is used 'hidden' inside 'c-v: hidden' we could entirly skip hidden
             // subtrees here.
             auto shouldLayoutSkippedContent =
-              (layoutOptions.Contains(LayoutOptions::TreatContentVisibilityAutoAsVisible)
+              (layoutOptions.Contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible)
                && descendant.Style().UsedContentVisibility() == ContentVisibility::Auto)
-              || (layoutOptions.Contains(LayoutOptions::TreatRevealedWhenFoundAsVisible)
+              || (layoutOptions.Contains(dom::LayoutOptions::TreatRevealedWhenFoundAsVisible)
                   && descendant.Style().AutoRevealsWhenFound());
 
             if (shouldLayoutSkippedContent)
@@ -4519,15 +4533,15 @@ namespace krys::boo::dom
         {
           auto types = EnumSet<ContentVisibilityOverrideScope::OverrideType> {};
 
-          if (layoutOptions.Contains(LayoutOptions::TreatContentVisibilityHiddenAsVisible))
+          if (layoutOptions.Contains(dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible))
           {
             types.Add(ContentVisibilityOverrideScope::OverrideType::Hidden);
           }
-          if (layoutOptions.Contains(LayoutOptions::TreatContentVisibilityAutoAsVisible))
+          if (layoutOptions.Contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible))
           {
             types.Add(ContentVisibilityOverrideScope::OverrideType::Auto);
           }
-          if (layoutOptions.Contains(LayoutOptions::TreatRevealedWhenFoundAsVisible))
+          if (layoutOptions.Contains(dom::LayoutOptions::TreatRevealedWhenFoundAsVisible))
           {
             types.Add(ContentVisibilityOverrideScope::OverrideType::RevealedWhenFound);
           }
@@ -4547,7 +4561,7 @@ namespace krys::boo::dom
 
       result = didRunLayout ? UpdateLayoutResult::ChangesDone : result;
 
-      if (layoutOptions.Contains(LayoutOptions::UpdateCompositingLayers)
+      if (layoutOptions.Contains(dom::LayoutOptions::UpdateCompositingLayers)
           && layoutContext.UpdateCompositingLayersAfterLayoutIfNeeded())
       {
         result = UpdateLayoutResult::ChangesDone;
@@ -4562,11 +4576,12 @@ namespace krys::boo::dom
     return static_cast<css::CSSFontSelector *>(_fontSelector.get());
   }
 
-  DocumentFontLoader &Document::GetFontLoader() const noexcept
+  dom::DocumentFontLoader &Document::GetFontLoader() const noexcept
   {
     if (!_fontLoader)
     {
-      _fontLoader = UniquePtr<DocumentFontLoader>(new DocumentFontLoader(const_cast<Document &>(*this)));
+      _fontLoader =
+        UniquePtr<dom::DocumentFontLoader>(new dom::DocumentFontLoader(const_cast<Document &>(*this)));
       // A loader made while the document is suspended waits for it to resume too.
       if (_isSuspended)
       {
@@ -4633,7 +4648,7 @@ namespace krys::boo::dom
       return found;
     }
     auto lowered = text::ToASCIILower(key);
-    for (auto &node : ComposedTreeDescendants(*this))
+    for (auto &node : dom::ComposedTreeDescendants(*this))
     {
       auto *element = DynamicDowncast<Element>(node);
       if (!element)
@@ -4754,7 +4769,7 @@ namespace krys::boo::dom
 
     // The events the command fires (mutation and input events) are dispatched once it's done, as script they
     // run could change the tree under it.
-    EventQueueScope eventQueueScope;
+    dom::EventQueueScope eventQueueScope;
     Ref protectedThis = ShareRef(*this);
     return DOMCommand(*this, commandId, showUI).Execute(value);
   }
@@ -5037,7 +5052,7 @@ namespace krys::boo::dom
     EnsurePendingRenderTreeUpdate().AddText(text, {offsetOfReplacedText, lengthOfReplacedText, null});
   }
 
-  void Document::UpdateSVGRenderer(svg::SVGElement &element) noexcept
+  void Document::UpdateSVGRenderer(SVGElement &element) noexcept
   {
     if (!HasLivingRenderTree())
     {
@@ -5327,7 +5342,7 @@ namespace krys::boo::dom
     // 2a. Let parsed be the result of parsing a list of component values given the value of element's
     //     content attribute.
     // 2b. If parsed is a valid CSS 'color-scheme' property value, then return parsed.
-    auto parseColorScheme = [&](const html::HTMLMetaElement &metaElement) -> Maybe<css::ColorScheme>
+    auto parseColorScheme = [&](const HTMLMetaElement &metaElement) -> Maybe<css::ColorScheme>
     {
       auto nameValue = metaElement.GetAttribute(u8"name");
       auto content = metaElement.GetAttribute(u8"content");
@@ -5341,10 +5356,10 @@ namespace krys::boo::dom
     // 3. Return null.
     // (The empty string, which leaves the page's color scheme unset.)
     DOMString colorSchemeString;
-    for (auto &node : DescendantRange(*this))
+    for (auto &node : dom::DescendantRange(*this))
     {
-      auto *htmlElement = DynamicDowncast<html::HTMLElement>(node);
-      auto *metaElement = htmlElement ? DynamicDowncast<html::HTMLMetaElement>(*htmlElement) : nullptr;
+      auto *htmlElement = DynamicDowncast<HTMLElement>(node);
+      auto *metaElement = htmlElement ? DynamicDowncast<HTMLMetaElement>(*htmlElement) : nullptr;
       if (!metaElement)
       {
         continue;
@@ -5388,7 +5403,8 @@ namespace krys::boo::dom
     _mediaQueryMatcher->EvaluateAll(css::MediaQueryMatcher::EventMode::DispatchNow);
   }
 
-  ExceptionOr<SelectorQuery &> Document::SelectorQueryForString(DOMStringView selectorString) const noexcept
+  ExceptionOr<dom::SelectorQuery &>
+    Document::SelectorQueryForString(DOMStringView selectorString) const noexcept
   {
     auto invalid = [&]
     {
@@ -5401,7 +5417,7 @@ namespace krys::boo::dom
     }
 
     // 1. Let selector be the result of parse a selector selectors.
-    auto *query = SelectorQueryCache::Singleton().Add(selectorString, *this);
+    auto *query = dom::SelectorQueryCache::Singleton().Add(selectorString, *this);
 
     // 2. If selector is failure, then throw a "SyntaxError" DOMException.
     if (!query)
@@ -5414,11 +5430,11 @@ namespace krys::boo::dom
 
 #pragma region DocumentOrShadowRoot Mixin (CSSOM)
 
-  css::StyleSheetList &Document::StyleSheets() noexcept
+  StyleSheetList &Document::StyleSheets() noexcept
   {
     if (!_styleSheetList)
     {
-      _styleSheetList = css::StyleSheetList::Create(*this);
+      _styleSheetList = StyleSheetList::Create(*this);
     }
     return *_styleSheetList;
   }
@@ -5429,7 +5445,7 @@ namespace krys::boo::dom
 
 #pragma region Mode
 
-  void Document::SetQuirksMode(QuirksMode mode) noexcept
+  void Document::SetQuirksMode(dom::QuirksMode mode) noexcept
   {
     if (_quirksMode == mode)
     {
@@ -5451,7 +5467,7 @@ namespace krys::boo::dom
   namespace
   {
     // See https://www.w3.org/TR/cssom-view-1/#potentially-scrollable.
-    KRYS_NODISCARD bool IsBodyPotentiallyScrollable(Document &document, html::HTMLBodyElement &body) noexcept
+    KRYS_NODISCARD bool IsBodyPotentiallyScrollable(Document &document, HTMLBodyElement &body) noexcept
     {
       // An element is potentially scrollable if all of the following conditions are true:
       // - The element has an associated CSS layout box.
@@ -5513,7 +5529,7 @@ namespace krys::boo::dom
     return DocumentElement();
   }
 
-  html::HTMLElement *Document::BodyOrFrameset() const noexcept
+  HTMLElement *Document::BodyOrFrameset() const noexcept
   {
     return html::DOMTreeAccessors::GetBodyElement(*this);
   }

@@ -32,7 +32,10 @@
 namespace krys::boo::svg
 {
   struct PatternAttributes;
+}
 
+namespace krys::boo
+{
   /// @brief The `<pattern>` element: a tile of graphics repeated to fill or stroke a shape.
   /// @see https://svgwg.org/svg2-draft/pservers.html#InterfaceSVGPatternElement
   class SVGPatternElement final : public SVGElement,
@@ -52,11 +55,11 @@ namespace krys::boo::svg
     Ref<SVGAnimatedTransformList> _patternTransform;
 
   public:
-    explicit SVGPatternElement(dom::Document &document) noexcept;
+    explicit SVGPatternElement(Document &document) noexcept;
 
-    void CollectPatternAttributes(PatternAttributes &) const noexcept;
+    void CollectPatternAttributes(svg::PatternAttributes &) const noexcept;
 
-    KRYS_NODISCARD AffineTransform LocalCoordinateSpaceTransform(CTMScope) const noexcept final;
+    KRYS_NODISCARD AffineTransform LocalCoordinateSpaceTransform(svg::CTMScope) const noexcept final;
 
     KRYS_NODISCARD const SVGLengthValue &X() const noexcept
     {
@@ -132,10 +135,10 @@ namespace krys::boo::svg
       SVGPropertyOwnerRegistry<SVGPatternElement, SVGElement, SVGFitToViewBox, SVGTests, SVGURIReference>;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
     void OnChildrenChanged() noexcept final;
 
@@ -158,8 +161,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGPatternElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGPatternElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGPatternElement();
   }

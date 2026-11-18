@@ -28,22 +28,19 @@
 #include "Krystal.Booey/CSS/TypedOM/StylePropertyMapReadOnly.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
-}
 
-namespace krys::boo::css
-{
   /// @brief An element's computed style (`computedStyleMap()`), as a read-only property map.
   /// @see https://drafts.css-houdini.org/css-typed-om/#computed-stylepropertymapreadonly-objects
   class ComputedStylePropertyMapReadOnly final : public StylePropertyMapReadOnly
   {
   private:
-    WeakPtr<dom::Element> _element;
+    WeakPtr<Element> _element;
 
   public:
-    KRYS_NODISCARD static Ref<ComputedStylePropertyMapReadOnly> Create(dom::Element &element) noexcept;
+    KRYS_NODISCARD static Ref<ComputedStylePropertyMapReadOnly> Create(Element &element) noexcept;
 
     ~ComputedStylePropertyMapReadOnly() noexcept override;
 
@@ -59,21 +56,22 @@ namespace krys::boo::css
     KRYS_NODISCARD List<Entry> Entries() const noexcept final;
 
   private:
-    explicit ComputedStylePropertyMapReadOnly(dom::Element &element) noexcept;
+    explicit ComputedStylePropertyMapReadOnly(Element &element) noexcept;
 
-    KRYS_NODISCARD dom::Document *Document() const noexcept final;
+    KRYS_NODISCARD boo::Document *Document() const noexcept final;
 
-    KRYS_NODISCARD RefPtr<Value> PropertyValue(PropertyId property) const noexcept final;
+    KRYS_NODISCARD RefPtr<css::Value> PropertyValue(css::PropertyId property) const noexcept final;
 
-    KRYS_NODISCARD CSSOMString ShorthandPropertySerialisation(PropertyId property) const noexcept final;
+    KRYS_NODISCARD CSSOMString ShorthandPropertySerialisation(css::PropertyId property) const noexcept final;
 
-    KRYS_NODISCARD RefPtr<Value> CustomPropertyValue(const CSSOMStringAtom &property) const noexcept final;
+    KRYS_NODISCARD RefPtr<css::Value>
+      CustomPropertyValue(const CSSOMStringAtom &property) const noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::ComputedStylePropertyMapReadOnly)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::StylePropertyMapReadOnly &map) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::ComputedStylePropertyMapReadOnly)
+  KRYS_NODISCARD static bool IsType(const krys::boo::StylePropertyMapReadOnly &map) noexcept
   {
-    return map.MapType() == krys::boo::css::StylePropertyMapReadOnly::Type::Computed;
+    return map.MapType() == krys::boo::StylePropertyMapReadOnly::Type::Computed;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

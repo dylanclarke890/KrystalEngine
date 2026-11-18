@@ -1,4 +1,4 @@
-﻿#include "Krystal.Booey/CSS/Media/MediaList.hpp"
+﻿#include "Krystal.Booey/CSS/CSSOM/MediaList.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/CSSOMTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSImportRule.hpp"
@@ -45,7 +45,7 @@ namespace krys::boo::css::tests
       REQUIRE_FALSE(media.DeleteMedium(u8"PRINT").HasException());
       REQUIRE(ToNarrow(media.MediaText()) == "screen and (min-width: 100px)");
 
-      REQUIRE(ExceptionCodeOf(media.DeleteMedium(u8"print")) == dom::ExceptionCode::NotFoundError);
+      REQUIRE(ExceptionCodeOf(media.DeleteMedium(u8"print")) == ExceptionCode::NotFoundError);
       REQUIRE(media.Length() == 1);
     }
 

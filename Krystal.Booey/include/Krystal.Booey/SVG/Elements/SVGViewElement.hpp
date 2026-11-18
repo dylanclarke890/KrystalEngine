@@ -4,7 +4,7 @@
 #include "Krystal.Booey/SVG/SVGFitToViewBox.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGSvgElement;
 
@@ -18,7 +18,7 @@ namespace krys::boo::svg
     WeakPtr<SVGSvgElement> _targetElement;
 
   public:
-    explicit SVGViewElement(dom::Document &document) noexcept;
+    explicit SVGViewElement(Document &document) noexcept;
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGViewElement, SVGElement, SVGFitToViewBox>;
 
@@ -29,10 +29,10 @@ namespace krys::boo::svg
     void ResetTargetElement() noexcept;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept override;
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final
     {
@@ -41,8 +41,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGViewElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGViewElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGViewElement();
   }

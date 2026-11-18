@@ -25,7 +25,7 @@ namespace krys::boo::tests
       #fixed { position: fixed; bottom: 0; right: 0; width: 10px; height: 10px }
     </style><body><div id=cb><div id=tl></div><div id=br></div><div id=stretch></div><div id=center></div><div style="height:20px"></div><div id=static></div><div id=shrink><div style="width:70px;height:5px"></div></div><div id=align></div></div><div id=fixed></div></body>)html";
 
-    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       return Downcast<RenderBox>(*fixture.ById(id).Renderer());
     }

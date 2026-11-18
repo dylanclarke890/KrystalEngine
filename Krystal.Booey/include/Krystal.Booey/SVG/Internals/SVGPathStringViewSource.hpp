@@ -23,16 +23,16 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathSource.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief Reads the segments of SVG path data, e.g. "M 0 0 L 10 10".
   class SVGPathStringViewSource final : public SVGPathSource
   {
   private:
-    dom::DOMStringView _buffer;
+    DOMStringView _buffer;
 
   public:
-    explicit SVGPathStringViewSource(dom::DOMStringView view) noexcept;
+    explicit SVGPathStringViewSource(DOMStringView view) noexcept;
 
   private:
     KRYS_NODISCARD bool HasMoreData() const noexcept final;

@@ -7,7 +7,7 @@ namespace krys::boo::html::tests
 {
   namespace
   {
-    KRYS_NODISCARD HTMLTableCellElement &Cell(dom::Element &element) noexcept
+    KRYS_NODISCARD HTMLTableCellElement &Cell(Element &element) noexcept
     {
       return Downcast<HTMLTableCellElement>(Downcast<HTMLElement>(element));
     }

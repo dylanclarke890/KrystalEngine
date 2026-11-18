@@ -25,16 +25,15 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
+  class HTMLElement;
+  class HTMLFormElement;
 }
 
 namespace krys::boo::html
 {
-  class HTMLElement;
-  class HTMLFormElement;
-
   /// @brief An element that can have a form owner.
   /// @see https://html.spec.whatwg.org/#form-associated-element
   class FormAssociatedElement
@@ -64,7 +63,7 @@ namespace krys::boo::html
     /// @brief The form owner, as the `form` IDL attribute exposes it: retargeted against the element, so a
     /// form in a shadow tree it reaches through a reference target shows as that tree's host.
     /// @see https://html.spec.whatwg.org/#dom-fae-form
-    KRYS_NODISCARD virtual RefPtr<dom::Element> FormForBindings() const noexcept;
+    KRYS_NODISCARD virtual RefPtr<Element> FormForBindings() const noexcept;
 
     void SetForm(HTMLFormElement *newForm) noexcept;
 
@@ -72,9 +71,9 @@ namespace krys::boo::html
     /// it's inserted.
     void SetFormSetByParser(HTMLFormElement *form) noexcept;
 
-    virtual void ElementInsertedIntoAncestor(dom::Element &element, bool connectedToDocument) noexcept;
+    virtual void ElementInsertedIntoAncestor(Element &element, bool connectedToDocument) noexcept;
 
-    virtual void ElementRemovedFromAncestor(dom::Element &element, bool disconnectedFromDocument) noexcept;
+    virtual void ElementRemovedFromAncestor(Element &element, bool disconnectedFromDocument) noexcept;
 
     KRYS_NODISCARD virtual FormAssociatedElement *AsFormAssociatedElement() noexcept = 0;
 

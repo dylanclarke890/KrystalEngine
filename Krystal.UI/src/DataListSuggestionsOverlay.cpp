@@ -155,10 +155,10 @@ namespace krys::ui
     (void)_view->Document().UpdateLayout();
 
     _items.assign(_suggestions.size(), nullptr);
-    for (boo::dom::Node *node = _view->Document().DocumentElement().get(); node;
+    for (boo::Node *node = _view->Document().DocumentElement().get(); node;
          node = boo::dom::TreeQueries::Next(*node))
     {
-      if (auto *element = DynamicDowncast<boo::dom::Element>(*node))
+      if (auto *element = DynamicDowncast<boo::Element>(*node))
       {
         if (auto index = element->GetAttribute(u8"data-index"))
         {
@@ -201,7 +201,7 @@ namespace krys::ui
 
   void DataListSuggestionsOverlay::Highlight(int32 index) noexcept
   {
-    auto element = [&](int32 i) -> boo::dom::Element *
+    auto element = [&](int32 i) -> boo::Element *
     {
       return i >= 0 && static_cast<size_t>(i) < _items.size() ? _items[static_cast<size_t>(i)].get()
                                                               : nullptr;

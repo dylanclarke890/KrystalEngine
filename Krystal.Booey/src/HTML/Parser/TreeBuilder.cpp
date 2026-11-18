@@ -59,7 +59,7 @@
 
 namespace krys::boo::html
 {
-  TreeBuilder::TreeBuilder(dom::Document &document, Tokenizer &tokenizer, Maybe<StackItem> &context) noexcept
+  TreeBuilder::TreeBuilder(Document &document, Tokenizer &tokenizer, Maybe<StackItem> &context) noexcept
       : _document(document), _tokenizer(tokenizer), _context(context)
   {
   }
@@ -182,7 +182,7 @@ namespace krys::boo::html
       while (true)
       {
         auto &currentNode = CurrentNode();
-        if (!Is<dom::Element>(currentNode))
+        if (!Is<Element>(currentNode))
         {
           _openElementStack.Pop();
           continue;
@@ -316,44 +316,44 @@ namespace krys::boo::html
         }
         else if (adjustedCurrentNode.NamespaceURI() == infra::namespaces::SVG)
         {
-          constexpr static Array<Array<dom::DOMStringView, 2uz>, 37uz> svgTagNameAdjustments = {
-            Array<dom::DOMStringView, 2uz> {u8"altglyph", u8"altGlyph"},
-            Array<dom::DOMStringView, 2uz> {u8"altglyphdef", u8"altGlyphDef"},
-            Array<dom::DOMStringView, 2uz> {u8"altglyphitem", u8"altGlyphItem"},
-            Array<dom::DOMStringView, 2uz> {u8"animatecolor", u8"animateColor"},
-            Array<dom::DOMStringView, 2uz> {u8"animatemotion", u8"animateMotion"},
-            Array<dom::DOMStringView, 2uz> {u8"animatetransform", u8"animateTransform"},
-            Array<dom::DOMStringView, 2uz> {u8"clippath", u8"clipPath"},
-            Array<dom::DOMStringView, 2uz> {u8"feblend", u8"feBlend"},
-            Array<dom::DOMStringView, 2uz> {u8"fecolormatrix", u8"feColorMatrix"},
-            Array<dom::DOMStringView, 2uz> {u8"fecomponenttransfer", u8"feComponentTransfer"},
-            Array<dom::DOMStringView, 2uz> {u8"fecomposite", u8"feComposite"},
-            Array<dom::DOMStringView, 2uz> {u8"feconvolvematrix", u8"feConvolveMatrix"},
-            Array<dom::DOMStringView, 2uz> {u8"fediffuselighting", u8"feDiffuseLighting"},
-            Array<dom::DOMStringView, 2uz> {u8"fedisplacementmap", u8"feDisplacementMap"},
-            Array<dom::DOMStringView, 2uz> {u8"fedistantlight", u8"feDistantLight"},
-            Array<dom::DOMStringView, 2uz> {u8"fedropshadow", u8"feDropShadow"},
-            Array<dom::DOMStringView, 2uz> {u8"feflood", u8"feFlood"},
-            Array<dom::DOMStringView, 2uz> {u8"fefunca", u8"feFuncA"},
-            Array<dom::DOMStringView, 2uz> {u8"fefuncb", u8"feFuncB"},
-            Array<dom::DOMStringView, 2uz> {u8"fefuncg", u8"feFuncG"},
-            Array<dom::DOMStringView, 2uz> {u8"fefuncr", u8"feFuncR"},
-            Array<dom::DOMStringView, 2uz> {u8"fegaussianblur", u8"feGaussianBlur"},
-            Array<dom::DOMStringView, 2uz> {u8"feimage", u8"feImage"},
-            Array<dom::DOMStringView, 2uz> {u8"femerge", u8"feMerge"},
-            Array<dom::DOMStringView, 2uz> {u8"femergenode", u8"feMergeNode"},
-            Array<dom::DOMStringView, 2uz> {u8"femorphology", u8"feMorphology"},
-            Array<dom::DOMStringView, 2uz> {u8"feoffset", u8"feOffset"},
-            Array<dom::DOMStringView, 2uz> {u8"fepointlight", u8"fePointLight"},
-            Array<dom::DOMStringView, 2uz> {u8"fespecularlighting", u8"feSpecularLighting"},
-            Array<dom::DOMStringView, 2uz> {u8"fespotlight", u8"feSpotLight"},
-            Array<dom::DOMStringView, 2uz> {u8"fetile", u8"feTile"},
-            Array<dom::DOMStringView, 2uz> {u8"feturbulence", u8"feTurbulence"},
-            Array<dom::DOMStringView, 2uz> {u8"foreignobject", u8"foreignObject"},
-            Array<dom::DOMStringView, 2uz> {u8"glyphref", u8"glyphRef"},
-            Array<dom::DOMStringView, 2uz> {u8"lineargradient", u8"linearGradient"},
-            Array<dom::DOMStringView, 2uz> {u8"radialgradient", u8"radialGradient"},
-            Array<dom::DOMStringView, 2uz> {u8"textpath", u8"textPath"},
+          constexpr static Array<Array<DOMStringView, 2uz>, 37uz> svgTagNameAdjustments = {
+            Array<DOMStringView, 2uz> {u8"altglyph", u8"altGlyph"},
+            Array<DOMStringView, 2uz> {u8"altglyphdef", u8"altGlyphDef"},
+            Array<DOMStringView, 2uz> {u8"altglyphitem", u8"altGlyphItem"},
+            Array<DOMStringView, 2uz> {u8"animatecolor", u8"animateColor"},
+            Array<DOMStringView, 2uz> {u8"animatemotion", u8"animateMotion"},
+            Array<DOMStringView, 2uz> {u8"animatetransform", u8"animateTransform"},
+            Array<DOMStringView, 2uz> {u8"clippath", u8"clipPath"},
+            Array<DOMStringView, 2uz> {u8"feblend", u8"feBlend"},
+            Array<DOMStringView, 2uz> {u8"fecolormatrix", u8"feColorMatrix"},
+            Array<DOMStringView, 2uz> {u8"fecomponenttransfer", u8"feComponentTransfer"},
+            Array<DOMStringView, 2uz> {u8"fecomposite", u8"feComposite"},
+            Array<DOMStringView, 2uz> {u8"feconvolvematrix", u8"feConvolveMatrix"},
+            Array<DOMStringView, 2uz> {u8"fediffuselighting", u8"feDiffuseLighting"},
+            Array<DOMStringView, 2uz> {u8"fedisplacementmap", u8"feDisplacementMap"},
+            Array<DOMStringView, 2uz> {u8"fedistantlight", u8"feDistantLight"},
+            Array<DOMStringView, 2uz> {u8"fedropshadow", u8"feDropShadow"},
+            Array<DOMStringView, 2uz> {u8"feflood", u8"feFlood"},
+            Array<DOMStringView, 2uz> {u8"fefunca", u8"feFuncA"},
+            Array<DOMStringView, 2uz> {u8"fefuncb", u8"feFuncB"},
+            Array<DOMStringView, 2uz> {u8"fefuncg", u8"feFuncG"},
+            Array<DOMStringView, 2uz> {u8"fefuncr", u8"feFuncR"},
+            Array<DOMStringView, 2uz> {u8"fegaussianblur", u8"feGaussianBlur"},
+            Array<DOMStringView, 2uz> {u8"feimage", u8"feImage"},
+            Array<DOMStringView, 2uz> {u8"femerge", u8"feMerge"},
+            Array<DOMStringView, 2uz> {u8"femergenode", u8"feMergeNode"},
+            Array<DOMStringView, 2uz> {u8"femorphology", u8"feMorphology"},
+            Array<DOMStringView, 2uz> {u8"feoffset", u8"feOffset"},
+            Array<DOMStringView, 2uz> {u8"fepointlight", u8"fePointLight"},
+            Array<DOMStringView, 2uz> {u8"fespecularlighting", u8"feSpecularLighting"},
+            Array<DOMStringView, 2uz> {u8"fespotlight", u8"feSpotLight"},
+            Array<DOMStringView, 2uz> {u8"fetile", u8"feTile"},
+            Array<DOMStringView, 2uz> {u8"feturbulence", u8"feTurbulence"},
+            Array<DOMStringView, 2uz> {u8"foreignobject", u8"foreignObject"},
+            Array<DOMStringView, 2uz> {u8"glyphref", u8"glyphRef"},
+            Array<DOMStringView, 2uz> {u8"lineargradient", u8"linearGradient"},
+            Array<DOMStringView, 2uz> {u8"radialgradient", u8"radialGradient"},
+            Array<DOMStringView, 2uz> {u8"textpath", u8"textPath"},
           };
 
           auto adjustedNameIt =
@@ -361,7 +361,7 @@ namespace krys::boo::html
                          [&](const auto &pair) { return pair[0] == token.Name().View(); });
           if (adjustedNameIt != svgTagNameAdjustments.end())
           {
-            token._name = dom::DOMStringAtom((*adjustedNameIt)[1]);
+            token._name = DOMStringAtom((*adjustedNameIt)[1]);
           }
 
           AdjustSVGAttributes(token);
@@ -395,7 +395,7 @@ namespace krys::boo::html
           return;
         }
 
-        if (token.Name() == u8"script" && Is<svg::SVGScriptElement>(CurrentNode()))
+        if (token.Name() == u8"script" && Is<SVGScriptElement>(CurrentNode()))
         {
           ScriptTag();
           return;
@@ -449,12 +449,12 @@ namespace krys::boo::html
     }
   }
 
-  dom::Element &TreeBuilder::CurrentNode() noexcept
+  Element &TreeBuilder::CurrentNode() noexcept
   {
     return _openElementStack.Bottom().Element();
   }
 
-  dom::Element &TreeBuilder::AdjustedCurrentNode() noexcept
+  Element &TreeBuilder::AdjustedCurrentNode() noexcept
   {
     if (_context.has_value() && _openElementStack.Size() == 1uz)
     {
@@ -655,14 +655,14 @@ namespace krys::boo::html
         }
 
         auto publicIdentifier =
-          dom::DOMString(docTypeData.PublicIdentifier.begin(), docTypeData.PublicIdentifier.end());
+          DOMString(docTypeData.PublicIdentifier.begin(), docTypeData.PublicIdentifier.end());
         if (docTypeData.HasPublicIdentifier && !publicIdentifier.empty())
         {
           ParseError(token);
         }
 
         auto systemIdentifier =
-          dom::DOMString(docTypeData.SystemIdentifier.begin(), docTypeData.SystemIdentifier.end());
+          DOMString(docTypeData.SystemIdentifier.begin(), docTypeData.SystemIdentifier.end());
         if (docTypeData.HasSystemIdentifier && !systemIdentifier.empty()
             && systemIdentifier != u8"about:legacy-compat")
         {
@@ -764,7 +764,7 @@ namespace krys::boo::html
     }
 
     auto html = dom::ElementFactory::Create(
-      _document, dom::QualifiedName(infra::namespaces::HTML, null, u8"html", TagName::html, Namespace::HTML));
+      _document, QualifiedName(infra::namespaces::HTML, null, u8"html", TagName::html, Namespace::HTML));
     _document.AppendChild(*html);
     _openElementStack.Push({TagName::html, Namespace::HTML, *html, {}});
 
@@ -831,9 +831,8 @@ namespace krys::boo::html
       }
     }
 
-    _head = Downcast<HTMLHeadElement>(
-      dom::ElementFactory::Create(_document, dom::QualifiedName(infra::namespaces::HTML, null, u8"head",
-                                                                TagName::head, Namespace::HTML)));
+    _head = Downcast<HTMLHeadElement>(dom::ElementFactory::Create(
+      _document, QualifiedName(infra::namespaces::HTML, null, u8"head", TagName::head, Namespace::HTML)));
     InsertElementAtAdjustedInsertionLocation(*_head);
     _openElementStack.Push({TagName::head, Namespace::HTML, *_head, {}});
 
@@ -1023,8 +1022,8 @@ namespace krys::boo::html
               // 4a. Let start be template's insertion start marker.
               // 4b. Let end be template's insertion end marker.
               // 4c. Assert: start is not null.
-              Ref<dom::Node> start = ShareRef(*templateElement.InsertionStartMarker());
-              RefPtr<dom::Node> end = ShareRefPtr(templateElement.InsertionEndMarker());
+              Ref<Node> start = ShareRef(*templateElement.InsertionStartMarker());
+              RefPtr<Node> end = ShareRefPtr(templateElement.InsertionEndMarker());
 
               // 4d. If start's parent is not null, then remove start.
               if (start->ParentNode())
@@ -1252,7 +1251,7 @@ namespace krys::boo::html
     }
 
     auto body = dom::ElementFactory::Create(
-      _document, dom::QualifiedName(infra::namespaces::HTML, null, u8"body", TagName::body, Namespace::HTML));
+      _document, QualifiedName(infra::namespaces::HTML, null, u8"body", TagName::body, Namespace::HTML));
     InsertElementAtAdjustedInsertionLocation(*body);
     _openElementStack.Push({TagName::body, Namespace::HTML, *body, {}});
 
@@ -2126,8 +2125,7 @@ namespace krys::boo::html
             {
               ParseError(token);
               auto pElement = dom::ElementFactory::Create(
-                _document,
-                dom::QualifiedName(infra::namespaces::HTML, null, u8"p", TagName::p, Namespace::HTML));
+                _document, QualifiedName(infra::namespaces::HTML, null, u8"p", TagName::p, Namespace::HTML));
               InsertElementAtAdjustedInsertionLocation(*pElement);
               _openElementStack.Push({TagName::p, Namespace::HTML, *pElement, {}});
             }
@@ -2404,8 +2402,8 @@ namespace krys::boo::html
             _openElementStack.PopUntilTableContext();
 
             auto colgroup = dom::ElementFactory::Create(
-              _document, dom::QualifiedName(infra::namespaces::HTML, null, u8"colgroup", TagName::colgroup,
-                                            Namespace::HTML));
+              _document,
+              QualifiedName(infra::namespaces::HTML, null, u8"colgroup", TagName::colgroup, Namespace::HTML));
             InsertElementAtAdjustedInsertionLocation(*colgroup);
             _openElementStack.Push({TagName::colgroup, Namespace::HTML, *colgroup, {}});
 
@@ -2430,9 +2428,9 @@ namespace krys::boo::html
           {
             _openElementStack.PopUntilTableContext();
 
-            auto tbody = dom::ElementFactory::Create(
-              _document,
-              dom::QualifiedName(infra::namespaces::HTML, null, u8"tbody", TagName::tbody, Namespace::HTML));
+            auto tbody =
+              dom::ElementFactory::Create(_document, QualifiedName(infra::namespaces::HTML, null, u8"tbody",
+                                                                   TagName::tbody, Namespace::HTML));
             InsertElementAtAdjustedInsertionLocation(*tbody);
             _openElementStack.Push({TagName::tbody, Namespace::HTML, *tbody, {}});
 
@@ -2842,9 +2840,8 @@ namespace krys::boo::html
 
             _openElementStack.PopUntilTableBodyContext();
 
-            auto tr =
-              dom::ElementFactory::Create(_document, dom::QualifiedName(infra::namespaces::HTML, null, u8"tr",
-                                                                        TagName::tr, Namespace::HTML));
+            auto tr = dom::ElementFactory::Create(
+              _document, QualifiedName(infra::namespaces::HTML, null, u8"tr", TagName::tr, Namespace::HTML));
             InsertElementAtAdjustedInsertionLocation(*tr);
             _openElementStack.Push({TagName::tr, Namespace::HTML, *tr, {}});
 
@@ -3696,7 +3693,7 @@ namespace krys::boo::html
 
 #pragma region Character Insertion
 
-  void TreeBuilder::InsertCharacters(dom::DOMString data) noexcept
+  void TreeBuilder::InsertCharacters(DOMString data) noexcept
   {
     // 1. Let data be the characters passed to the algorithm, or, if no characters were explicitly specified,
     //    the character of the character token being processed.
@@ -3704,7 +3701,7 @@ namespace krys::boo::html
     auto [parent, beforeSibling] = AdjustedInsertionLocation();
 
     // 3. If targetParent is a Document node, then return.
-    if (Is<dom::Document>(parent))
+    if (Is<Document>(parent))
     {
       return;
     }
@@ -3717,14 +3714,14 @@ namespace krys::boo::html
     // be
     //    the result of creating a text node given targetParent's node document and data, and insert text into
     //    targetParent before referenceChild.
-    if (Is<dom::Text>(previousSibling))
+    if (Is<Text>(previousSibling))
     {
-      auto &textNode = Downcast<dom::Text>(*previousSibling);
+      auto &textNode = Downcast<Text>(*previousSibling);
       textNode.AppendData(krys::move(data));
     }
     else
     {
-      auto textNode = CreateRef<dom::Text>(parent->NodeDocument(), krys::move(data));
+      auto textNode = CreateRef<Text>(parent->NodeDocument(), krys::move(data));
       // We purposely ignore the error here if it happens.
       (void)dom::MutationAlgorithms::Insert(*textNode, *parent, beforeSibling);
     }
@@ -3779,7 +3776,7 @@ namespace krys::boo::html
 
     if (position != begin)
     {
-      InsertCharacters(dom::DOMString(begin, position));
+      InsertCharacters(DOMString(begin, position));
       token._data.erase(0uz, std::distance(begin, position));
     }
 
@@ -3790,12 +3787,12 @@ namespace krys::boo::html
   {
     krys_debug_assert(token.Type() == TokenType::Character);
 
-    constexpr static dom::DOMStringView Replacement = u8"\uFFFD";
+    constexpr static DOMStringView Replacement = u8"\uFFFD";
 
-    auto ReplaceNulls = [&](dom::DOMString &str)
+    auto ReplaceNulls = [&](DOMString &str)
     {
       auto pos = str.find(u8'\0');
-      while (pos != dom::DOMString::npos)
+      while (pos != DOMString::npos)
       {
         ParseError(token);
         str.replace(pos, 1uz, Replacement);
@@ -3811,7 +3808,7 @@ namespace krys::boo::html
 
     if (position != begin)
     {
-      auto leadingData = dom::DOMString(begin, position);
+      auto leadingData = DOMString(begin, position);
       ReplaceNulls(leadingData);
       InsertCharacters(krys::move(leadingData));
       token._data.erase(0uz, std::distance(begin, position));
@@ -3860,7 +3857,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#appropriate-place-for-inserting-a-node
-  InsertionLocation TreeBuilder::AppropriatePlaceToInsertNode(dom::ContainerNode *targetOverride) noexcept
+  InsertionLocation TreeBuilder::AppropriatePlaceToInsertNode(ContainerNode *targetOverride) noexcept
   {
     // 1. Let targetParent be overrideTarget if it is not null; otherwise the current node.
     auto &target = targetOverride ? *targetOverride : CurrentNode();
@@ -3991,7 +3988,7 @@ namespace krys::boo::html
     return redirect->second;
   }
 
-  void TreeBuilder::RedirectInsertions(dom::Element &element, InsertionLocation location) noexcept
+  void TreeBuilder::RedirectInsertions(Element &element, InsertionLocation location) noexcept
   {
     if (_insertionTargetRedirectionMap.insert_or_assign(&element, location).second)
     {
@@ -4000,7 +3997,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#insert-an-element-at-the-adjusted-insertion-location
-  void TreeBuilder::InsertElementAtAdjustedInsertionLocation(dom::Element &element,
+  void TreeBuilder::InsertElementAtAdjustedInsertionLocation(Element &element,
                                                              Maybe<InsertionLocation> location,
                                                              bool alreadySanitized) noexcept
   {
@@ -4011,7 +4008,7 @@ namespace krys::boo::html
     //    inclusive ancestor of targetParent; or targetParent is a Document node that already has an element
     //    child, then return.
     if (element.ParentNode() || dom::TreeQueries::IsHostIncludingInclusiveAncestorOf(element, *parent)
-        || (Is<dom::Document>(*parent) && dom::TreeQueries::FirstElementChild(*parent)))
+        || (Is<Document>(*parent) && dom::TreeQueries::FirstElementChild(*parent)))
     {
       return;
     }
@@ -4028,7 +4025,7 @@ namespace krys::boo::html
       //     (Attributes are sanitized when the element is created from the token.)
 
       // 3c. Assert: if targetParent is a Document, then action is not "Replace with children".
-      krys_debug_assert(!Is<dom::Document>(*parent) || action != SanitizerAction::ReplaceWithChildren);
+      krys_debug_assert(!Is<Document>(*parent) || action != SanitizerAction::ReplaceWithChildren);
 
       // 3d. Switch on action:
       switch (action)
@@ -4123,7 +4120,7 @@ namespace krys::boo::html
     // 6. Let declarativeShadowHostElement be the current node.
     //    (This is not the adjusted current node, so that in the fragment case a top-level template element
     //    never attaches a shadow root to the parser's fragment context element.)
-    Ref<dom::Element> declarativeShadowHostElement = ShareRef(CurrentNode());
+    Ref<Element> declarativeShadowHostElement = ShareRef(CurrentNode());
 
     // 7. Let hostIsRoot be true if declarativeShadowHostElement is the topmost element in the stack of
     //    open elements; otherwise false.
@@ -4168,7 +4165,7 @@ namespace krys::boo::html
       if (templateElement.HasAttribute(u8"for"))
       {
         // 13b.i. Let scope be the target parent of the adjusted insertion location given insertionLocation.
-        Ref<dom::ContainerNode> scope = ShareRef(*AdjustedInsertionLocation(insertionLocation).Parent);
+        Ref<ContainerNode> scope = ShareRef(*AdjustedInsertionLocation(insertionLocation).Parent);
 
         // 13b.ii. If scope is the body element of its node document, then set scope to its parent.
         if (auto *body = scope->NodeDocument().BodyOrFrameset(); body == scope.get() && body->ParentNode())
@@ -4285,15 +4282,15 @@ namespace krys::boo::html
     }
   }
 
-  SanitizerAction TreeBuilder::SanitizerActionFor(dom::DOMStringView localName,
-                                                  dom::DOMStringAtom namespaceURI) const noexcept
+  SanitizerAction TreeBuilder::SanitizerActionFor(DOMStringView localName,
+                                                  DOMStringAtom namespaceURI) const noexcept
   {
     return _sanitizerConfig ? SanitizerAlgorithms::ActionForElementName(localName, krys::move(namespaceURI),
                                                                         *_sanitizerConfig)
                             : SanitizerAction::Keep;
   }
 
-  void TreeBuilder::MergeAttributes(dom::Element &element, const ParsedAttributeList &attributes) noexcept
+  void TreeBuilder::MergeAttributes(Element &element, const ParsedAttributeList &attributes) noexcept
   {
     // For each attribute on the token:
     for (auto &attr : attributes)
@@ -4311,16 +4308,15 @@ namespace krys::boo::html
 
       // If element does not have an attribute whose name is attribute's name, then add attribute's name and
       // its corresponding value to element.
-      if (dom::DOMStringAtom name {attr.NameView()}; !element.HasAttribute(name))
+      if (DOMStringAtom name {attr.NameView()}; !element.HasAttribute(name))
       {
-        element.SetAttribute(name, dom::DOMString(attr.ValueView()));
+        element.SetAttribute(name, DOMString(attr.ValueView()));
       }
     }
   }
 
-  Ref<dom::Element> TreeBuilder::InsertForeignElement(TokenAtom &token,
-                                                      const dom::DOMStringAtom &namespaceURI,
-                                                      bool onlyAddToElementStack) noexcept
+  Ref<Element> TreeBuilder::InsertForeignElement(TokenAtom &token, const DOMStringAtom &namespaceURI,
+                                                 bool onlyAddToElementStack) noexcept
   {
     // 1. Let element be the result of creating an element for the token given token, namespace, and the
     // target
@@ -4352,12 +4348,12 @@ namespace krys::boo::html
     return element;
   }
 
-  Ref<dom::Element> TreeBuilder::InsertHTMLElement(TokenAtom &token) noexcept
+  Ref<Element> TreeBuilder::InsertHTMLElement(TokenAtom &token) noexcept
   {
     return InsertForeignElement(token, infra::namespaces::HTML, false);
   }
 
-  void TreeBuilder::InsertComment(dom::DOMStringView data, Maybe<InsertionLocation> position) noexcept
+  void TreeBuilder::InsertComment(DOMStringView data, Maybe<InsertionLocation> position) noexcept
   {
     // 1. If the parser's parser sanitizer configuration is non-null and the parser's parser sanitizer
     //    configuration does not allow comments, then return.
@@ -4371,7 +4367,7 @@ namespace krys::boo::html
     auto [parent, beforeSibling] = AdjustedInsertionLocation(position);
 
     // 4. Let comment be the result of creating a comment node given targetParent's node document and data.
-    auto commentNode = CreateRef<dom::Comment>(parent->NodeDocument(), dom::DOMString(data));
+    auto commentNode = CreateRef<Comment>(parent->NodeDocument(), DOMString(data));
 
     // 5. Insert comment into targetParent before referenceChild.
     // We purposely ignore the error here if it happens.
@@ -4400,15 +4396,15 @@ namespace krys::boo::html
     // 5. Let pi be the result of creating a processing instruction node given targetParent's node document,
     //    piTarget, and data.
     // (The tokenizer only makes targets that are XML names, and data without "?>", so this can't throw.)
-    auto pi = dom::ProcessingInstruction::Create(parent->NodeDocument(), piTarget.ToString(),
-                                                 dom::DOMString(token.ProcessingInstructionData()))
+    auto pi = ProcessingInstruction::Create(parent->NodeDocument(), piTarget.ToString(),
+                                            DOMString(token.ProcessingInstructionData()))
                 .ReleaseValue();
 
     // 6. Insert pi into targetParent before referenceChild.
     (void)dom::MutationAlgorithms::Insert(*pi, *parent, beforeSibling);
   }
 
-  void TreeBuilder::AppendCommentToDocument(dom::DOMStringView data) noexcept
+  void TreeBuilder::AppendCommentToDocument(DOMStringView data) noexcept
   {
     InsertComment(data, InsertionLocation {&_document, nullptr});
   }
@@ -4447,10 +4443,9 @@ namespace krys::boo::html
     _insertionMode = InsertionMode::Text;
   }
 
-  Ref<dom::Element> TreeBuilder::CreateElement(const dom::DOMStringAtom &name,
-                                               const dom::DOMStringAtom &namespaceURI,
-                                               const ParsedAttributeList &attributes,
-                                               dom::ContainerNode &intendedParent) noexcept
+  Ref<Element> TreeBuilder::CreateElement(const DOMStringAtom &name, const DOMStringAtom &namespaceURI,
+                                          const ParsedAttributeList &attributes,
+                                          ContainerNode &intendedParent) noexcept
   {
     // https://html.spec.whatwg.org/#create-an-element-for-the-token
     // 1.-2. (There's no speculative parser.)
@@ -4466,12 +4461,12 @@ namespace krys::boo::html
     auto sanitizerAction = SanitizerActionFor(name.View(), namespaceURI);
 
     // 8. Let is be the value of the "is" attribute in token, if such an attribute exists; otherwise null.
-    auto is = [&]() -> dom::DOMStringAtom
+    auto is = [&]() -> DOMStringAtom
     {
       auto it = std::ranges::find_if(attributes,
                                      [](const ParsedAttribute &attr) { return attr.NameView() == u8"is"; });
 
-      return it != std::ranges::end(attributes) ? dom::DOMStringAtom(it->ValueView()) : null;
+      return it != std::ranges::end(attributes) ? DOMStringAtom(it->ValueView()) : null;
     }();
 
     // 9. If is is non-null, sanitizerConfig is non-null, and the result of checking if a sanitizer config
@@ -4545,13 +4540,13 @@ namespace krys::boo::html
         }
 
         // 17b. Append attribute to element.
-        dom::ElementAlgorithms::SetAttributeValue(*element, dom::DOMStringAtom(attr.NameView()),
-                                                  dom::DOMString(attr.ValueView()));
+        dom::ElementAlgorithms::SetAttributeValue(*element, DOMStringAtom(attr.NameView()),
+                                                  DOMString(attr.ValueView()));
       }
       else
       {
-        dom::DOMStringAtom namespaceUri = null;
-        dom::DOMStringAtom prefix = null;
+        DOMStringAtom namespaceUri = null;
+        DOMStringAtom prefix = null;
         size_t prefixLength = 0uz;
 
         if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXML))
@@ -4587,8 +4582,8 @@ namespace krys::boo::html
         {
           continue;
         }
-        dom::ElementAlgorithms::SetAttributeValue(*element, dom::DOMStringAtom(localName),
-                                                  dom::DOMString(attr.ValueView()), prefix, namespaceUri);
+        dom::ElementAlgorithms::SetAttributeValue(*element, DOMStringAtom(localName),
+                                                  DOMString(attr.ValueView()), prefix, namespaceUri);
       }
     }
 
@@ -4633,8 +4628,7 @@ namespace krys::boo::html
     return element;
   }
 
-  Ref<dom::Element> TreeBuilder::CreateElement(const StackItem &item,
-                                               dom::ContainerNode *intendedParent) noexcept
+  Ref<Element> TreeBuilder::CreateElement(const StackItem &item, ContainerNode *intendedParent) noexcept
   {
     auto &node = item.Element();
     auto &parent = intendedParent != nullptr ? *intendedParent : *node.ParentNode();
@@ -4742,7 +4736,7 @@ namespace krys::boo::html
 
   void TreeBuilder::AdjustForeignAttributes(TokenAtom &token) noexcept
   {
-    constexpr static Array<Pair<dom::DOMStringView, ParsedAttributeFlags>, 11uz> attributesToAdjust = {
+    constexpr static Array<Pair<DOMStringView, ParsedAttributeFlags>, 11uz> attributesToAdjust = {
       Pair {u8"xlink:actuate", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXLink},
       Pair {u8"xlink:arcrole", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXLink},
       Pair {u8"xlink:href", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXLink},
@@ -4771,65 +4765,65 @@ namespace krys::boo::html
 
   void TreeBuilder::AdjustSVGAttributes(TokenAtom &token) noexcept
   {
-    constexpr static Array<Array<dom::DOMStringView, 2uz>, 58uz> attributesToAdjust = {
-      Array<dom::DOMStringView, 2> {u8"attributename", u8"attributeName"},
-      Array<dom::DOMStringView, 2> {u8"attributetype", u8"attributeType"},
-      Array<dom::DOMStringView, 2> {u8"basefrequency", u8"baseFrequency"},
-      Array<dom::DOMStringView, 2> {u8"baseprofile", u8"baseProfile"},
-      Array<dom::DOMStringView, 2> {u8"calcmode", u8"calcMode"},
-      Array<dom::DOMStringView, 2> {u8"clippathunits", u8"clipPathUnits"},
-      Array<dom::DOMStringView, 2> {u8"diffuseconstant", u8"diffuseConstant"},
-      Array<dom::DOMStringView, 2> {u8"edgemode", u8"edgeMode"},
-      Array<dom::DOMStringView, 2> {u8"filterunits", u8"filterUnits"},
-      Array<dom::DOMStringView, 2> {u8"glyphref", u8"glyphRef"},
-      Array<dom::DOMStringView, 2> {u8"gradienttransform", u8"gradientTransform"},
-      Array<dom::DOMStringView, 2> {u8"gradientunits", u8"gradientUnits"},
-      Array<dom::DOMStringView, 2> {u8"kernelmatrix", u8"kernelMatrix"},
-      Array<dom::DOMStringView, 2> {u8"kernelunitlength", u8"kernelUnitLength"},
-      Array<dom::DOMStringView, 2> {u8"keypoints", u8"keyPoints"},
-      Array<dom::DOMStringView, 2> {u8"keysplines", u8"keySplines"},
-      Array<dom::DOMStringView, 2> {u8"keytimes", u8"keyTimes"},
-      Array<dom::DOMStringView, 2> {u8"lengthadjust", u8"lengthAdjust"},
-      Array<dom::DOMStringView, 2> {u8"limitingconeangle", u8"limitingConeAngle"},
-      Array<dom::DOMStringView, 2> {u8"markerheight", u8"markerHeight"},
-      Array<dom::DOMStringView, 2> {u8"markerunits", u8"markerUnits"},
-      Array<dom::DOMStringView, 2> {u8"markerwidth", u8"markerWidth"},
-      Array<dom::DOMStringView, 2> {u8"maskcontentunits", u8"maskContentUnits"},
-      Array<dom::DOMStringView, 2> {u8"maskunits", u8"maskUnits"},
-      Array<dom::DOMStringView, 2> {u8"numoctaves", u8"numOctaves"},
-      Array<dom::DOMStringView, 2> {u8"pathlength", u8"pathLength"},
-      Array<dom::DOMStringView, 2> {u8"patterncontentunits", u8"patternContentUnits"},
-      Array<dom::DOMStringView, 2> {u8"patterntransform", u8"patternTransform"},
-      Array<dom::DOMStringView, 2> {u8"patternunits", u8"patternUnits"},
-      Array<dom::DOMStringView, 2> {u8"pointsatx", u8"pointsAtX"},
-      Array<dom::DOMStringView, 2> {u8"pointsaty", u8"pointsAtY"},
-      Array<dom::DOMStringView, 2> {u8"pointsatz", u8"pointsAtZ"},
-      Array<dom::DOMStringView, 2> {u8"preservealpha", u8"preserveAlpha"},
-      Array<dom::DOMStringView, 2> {u8"preserveaspectratio", u8"preserveAspectRatio"},
-      Array<dom::DOMStringView, 2> {u8"primitiveunits", u8"primitiveUnits"},
-      Array<dom::DOMStringView, 2> {u8"refx", u8"refX"},
-      Array<dom::DOMStringView, 2> {u8"refy", u8"refY"},
-      Array<dom::DOMStringView, 2> {u8"repeatcount", u8"repeatCount"},
-      Array<dom::DOMStringView, 2> {u8"repeatdur", u8"repeatDur"},
-      Array<dom::DOMStringView, 2> {u8"requiredextensions", u8"requiredExtensions"},
-      Array<dom::DOMStringView, 2> {u8"requiredfeatures", u8"requiredFeatures"},
-      Array<dom::DOMStringView, 2> {u8"specularconstant", u8"specularConstant"},
-      Array<dom::DOMStringView, 2> {u8"specularexponent", u8"specularExponent"},
-      Array<dom::DOMStringView, 2> {u8"spreadmethod", u8"spreadMethod"},
-      Array<dom::DOMStringView, 2> {u8"startoffset", u8"startOffset"},
-      Array<dom::DOMStringView, 2> {u8"stddeviation", u8"stdDeviation"},
-      Array<dom::DOMStringView, 2> {u8"stitchtiles", u8"stitchTiles"},
-      Array<dom::DOMStringView, 2> {u8"surfacescale", u8"surfaceScale"},
-      Array<dom::DOMStringView, 2> {u8"systemlanguage", u8"systemLanguage"},
-      Array<dom::DOMStringView, 2> {u8"tablevalues", u8"tableValues"},
-      Array<dom::DOMStringView, 2> {u8"targetx", u8"targetX"},
-      Array<dom::DOMStringView, 2> {u8"targety", u8"targetY"},
-      Array<dom::DOMStringView, 2> {u8"textlength", u8"textLength"},
-      Array<dom::DOMStringView, 2> {u8"viewbox", u8"viewBox"},
-      Array<dom::DOMStringView, 2> {u8"viewtarget", u8"viewTarget"},
-      Array<dom::DOMStringView, 2> {u8"xchannelselector", u8"xChannelSelector"},
-      Array<dom::DOMStringView, 2> {u8"ychannelselector", u8"yChannelSelector"},
-      Array<dom::DOMStringView, 2> {u8"zoomandpan", u8"zoomAndPan"},
+    constexpr static Array<Array<DOMStringView, 2uz>, 58uz> attributesToAdjust = {
+      Array<DOMStringView, 2> {u8"attributename", u8"attributeName"},
+      Array<DOMStringView, 2> {u8"attributetype", u8"attributeType"},
+      Array<DOMStringView, 2> {u8"basefrequency", u8"baseFrequency"},
+      Array<DOMStringView, 2> {u8"baseprofile", u8"baseProfile"},
+      Array<DOMStringView, 2> {u8"calcmode", u8"calcMode"},
+      Array<DOMStringView, 2> {u8"clippathunits", u8"clipPathUnits"},
+      Array<DOMStringView, 2> {u8"diffuseconstant", u8"diffuseConstant"},
+      Array<DOMStringView, 2> {u8"edgemode", u8"edgeMode"},
+      Array<DOMStringView, 2> {u8"filterunits", u8"filterUnits"},
+      Array<DOMStringView, 2> {u8"glyphref", u8"glyphRef"},
+      Array<DOMStringView, 2> {u8"gradienttransform", u8"gradientTransform"},
+      Array<DOMStringView, 2> {u8"gradientunits", u8"gradientUnits"},
+      Array<DOMStringView, 2> {u8"kernelmatrix", u8"kernelMatrix"},
+      Array<DOMStringView, 2> {u8"kernelunitlength", u8"kernelUnitLength"},
+      Array<DOMStringView, 2> {u8"keypoints", u8"keyPoints"},
+      Array<DOMStringView, 2> {u8"keysplines", u8"keySplines"},
+      Array<DOMStringView, 2> {u8"keytimes", u8"keyTimes"},
+      Array<DOMStringView, 2> {u8"lengthadjust", u8"lengthAdjust"},
+      Array<DOMStringView, 2> {u8"limitingconeangle", u8"limitingConeAngle"},
+      Array<DOMStringView, 2> {u8"markerheight", u8"markerHeight"},
+      Array<DOMStringView, 2> {u8"markerunits", u8"markerUnits"},
+      Array<DOMStringView, 2> {u8"markerwidth", u8"markerWidth"},
+      Array<DOMStringView, 2> {u8"maskcontentunits", u8"maskContentUnits"},
+      Array<DOMStringView, 2> {u8"maskunits", u8"maskUnits"},
+      Array<DOMStringView, 2> {u8"numoctaves", u8"numOctaves"},
+      Array<DOMStringView, 2> {u8"pathlength", u8"pathLength"},
+      Array<DOMStringView, 2> {u8"patterncontentunits", u8"patternContentUnits"},
+      Array<DOMStringView, 2> {u8"patterntransform", u8"patternTransform"},
+      Array<DOMStringView, 2> {u8"patternunits", u8"patternUnits"},
+      Array<DOMStringView, 2> {u8"pointsatx", u8"pointsAtX"},
+      Array<DOMStringView, 2> {u8"pointsaty", u8"pointsAtY"},
+      Array<DOMStringView, 2> {u8"pointsatz", u8"pointsAtZ"},
+      Array<DOMStringView, 2> {u8"preservealpha", u8"preserveAlpha"},
+      Array<DOMStringView, 2> {u8"preserveaspectratio", u8"preserveAspectRatio"},
+      Array<DOMStringView, 2> {u8"primitiveunits", u8"primitiveUnits"},
+      Array<DOMStringView, 2> {u8"refx", u8"refX"},
+      Array<DOMStringView, 2> {u8"refy", u8"refY"},
+      Array<DOMStringView, 2> {u8"repeatcount", u8"repeatCount"},
+      Array<DOMStringView, 2> {u8"repeatdur", u8"repeatDur"},
+      Array<DOMStringView, 2> {u8"requiredextensions", u8"requiredExtensions"},
+      Array<DOMStringView, 2> {u8"requiredfeatures", u8"requiredFeatures"},
+      Array<DOMStringView, 2> {u8"specularconstant", u8"specularConstant"},
+      Array<DOMStringView, 2> {u8"specularexponent", u8"specularExponent"},
+      Array<DOMStringView, 2> {u8"spreadmethod", u8"spreadMethod"},
+      Array<DOMStringView, 2> {u8"startoffset", u8"startOffset"},
+      Array<DOMStringView, 2> {u8"stddeviation", u8"stdDeviation"},
+      Array<DOMStringView, 2> {u8"stitchtiles", u8"stitchTiles"},
+      Array<DOMStringView, 2> {u8"surfacescale", u8"surfaceScale"},
+      Array<DOMStringView, 2> {u8"systemlanguage", u8"systemLanguage"},
+      Array<DOMStringView, 2> {u8"tablevalues", u8"tableValues"},
+      Array<DOMStringView, 2> {u8"targetx", u8"targetX"},
+      Array<DOMStringView, 2> {u8"targety", u8"targetY"},
+      Array<DOMStringView, 2> {u8"textlength", u8"textLength"},
+      Array<DOMStringView, 2> {u8"viewbox", u8"viewBox"},
+      Array<DOMStringView, 2> {u8"viewtarget", u8"viewTarget"},
+      Array<DOMStringView, 2> {u8"xchannelselector", u8"xChannelSelector"},
+      Array<DOMStringView, 2> {u8"ychannelselector", u8"yChannelSelector"},
+      Array<DOMStringView, 2> {u8"zoomandpan", u8"zoomAndPan"},
     };
 
     for (auto &attr : token.Attributes())
@@ -4875,7 +4869,7 @@ namespace krys::boo::html
 
     if (data.HasSystemIdentifier)
     {
-      auto systemIdentifier = dom::DOMStringView(data.SystemIdentifier.begin(), data.SystemIdentifier.end());
+      auto systemIdentifier = DOMStringView(data.SystemIdentifier.begin(), data.SystemIdentifier.end());
       if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(
             systemIdentifier, u8"http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd"))
       {
@@ -4885,14 +4879,14 @@ namespace krys::boo::html
 
     if (data.HasPublicIdentifier)
     {
-      auto publicIdentifier = dom::DOMStringView(data.PublicIdentifier.begin(), data.PublicIdentifier.end());
+      auto publicIdentifier = DOMStringView(data.PublicIdentifier.begin(), data.PublicIdentifier.end());
 
-      auto Matches = [publicIdentifier](dom::DOMStringView identifier)
+      auto Matches = [publicIdentifier](DOMStringView identifier)
       {
         return infra::StringAlgorithms::ASCIICaseInsensitiveMatch(publicIdentifier, identifier);
       };
 
-      auto StartsWith = [publicIdentifier](dom::DOMStringView identifier)
+      auto StartsWith = [publicIdentifier](DOMStringView identifier)
       {
         if (publicIdentifier.size() < identifier.size())
         {
@@ -4976,9 +4970,9 @@ namespace krys::boo::html
 
     if (data.HasPublicIdentifier)
     {
-      auto publicIdentifier = dom::DOMStringView(data.PublicIdentifier.begin(), data.PublicIdentifier.end());
+      auto publicIdentifier = DOMStringView(data.PublicIdentifier.begin(), data.PublicIdentifier.end());
 
-      auto StartsWith = [publicIdentifier](dom::DOMStringView identifier)
+      auto StartsWith = [publicIdentifier](DOMStringView identifier)
       {
         if (publicIdentifier.size() < identifier.size())
         {
@@ -5111,15 +5105,15 @@ namespace krys::boo::html
       auto bookmark = _activeFormattingElements.BookmarkFor(formattingElementNode);
 
       // 4k. Let node and lastNode be furthestBlock.
-      dom::Element *node = &furthestBlockNode;
-      dom::Element *lastNode = node;
+      Element *node = &furthestBlockNode;
+      Element *lastNode = node;
 
       // 4l. Let pendingRedirects be an empty list.
       // (An element that is replaced with its children is not itself in the tree, so its insertion target
       // redirection map entry has to be updated when this algorithm changes where it would have been
       // inserted. The new location is only known once a later element is not itself replaced with its
       // children, so such elements are collected in pendingRedirects until then.)
-      List<Ref<dom::Element>> pendingRedirects;
+      List<Ref<Element>> pendingRedirects;
 
       // 4m. If the parser's parser sanitizer configuration is not null: let action be the result of getting
       //     the sanitizer action for an element name given lastNode's local name, lastNode's namespace, and
@@ -5142,12 +5136,12 @@ namespace krys::boo::html
       // 4o. Let bookmarkMoved be false.
       bool bookmarkMoved = false;
 
-      auto ElementAbove = [&](dom::Element &node) -> dom::Element *
+      auto ElementAbove = [&](Element &node) -> Element *
       {
         StackItem *entry = _openElementStack.EntryBefore(node);
         return entry != nullptr ? &entry->Element() : nullptr;
       };
-      dom::Element *immediatelyAbove = ElementAbove(*node);
+      Element *immediatelyAbove = ElementAbove(*node);
 
       // 4p. While true:
       while (true)
@@ -5284,7 +5278,7 @@ namespace krys::boo::html
       //     target before refNode.
       if (lastNode && !lastNode->ParentNode()
           && !dom::TreeQueries::IsHostIncludingInclusiveAncestorOf(*lastNode, *target)
-          && (!Is<dom::Document>(*target) || !dom::TreeQueries::FirstElementChild(*target))
+          && (!Is<Document>(*target) || !dom::TreeQueries::FirstElementChild(*target))
           && (!refNode || refNode->ParentNode() == target))
       {
         (void)dom::MutationAlgorithms::Insert(*lastNode, *target, refNode);
@@ -5369,7 +5363,7 @@ namespace krys::boo::html
     }
   }
 
-  StackItem *TreeBuilder::FurthestSpecialElementBlock(const dom::Element &formattingElement) noexcept
+  StackItem *TreeBuilder::FurthestSpecialElementBlock(const Element &formattingElement) noexcept
   {
     // Get the index of the formatting element in the open element stack.
     size_t formattingIndex = std::distance(
@@ -5394,7 +5388,7 @@ namespace krys::boo::html
 
 #pragma region IntegrationPoint Algorithms
 
-  bool TreeBuilder::IsMathMLTextIntegrationPoint(const dom::Element &element) noexcept
+  bool TreeBuilder::IsMathMLTextIntegrationPoint(const Element &element) noexcept
   {
     if (element.NamespaceURI() == infra::namespaces::MathML)
     {
@@ -5415,7 +5409,7 @@ namespace krys::boo::html
     return false;
   }
 
-  bool TreeBuilder::IsHTMLIntegrationPoint(const dom::Element &element) noexcept
+  bool TreeBuilder::IsHTMLIntegrationPoint(const Element &element) noexcept
   {
     if (element.NamespaceURI() == infra::namespaces::MathML)
     {

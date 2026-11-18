@@ -67,8 +67,7 @@ namespace krys::boo
     /// @brief The font in @p bytes (a TrueType, OpenType, WOFF or WOFF 2 file), or null if it isn't one.
     /// @param wrapping Set to whether the font may use @p bytes rather than a copy of them.
     KRYS_NODISCARD static RefPtr<FontCustomPlatformData>
-      CreateCustomFontData(SharedBuffer &bytes, const css::CSSOMString &itemInCollection,
-                           bool &wrapping) noexcept;
+      CreateCustomFontData(SharedBuffer &bytes, const CSSOMString &itemInCollection, bool &wrapping) noexcept;
 
     KRYS_NODISCARD static FontPlatformData
       PlatformDataFromCustomData(FontCustomPlatformData &fontCustomPlatformData,
@@ -87,7 +86,7 @@ namespace krys::boo
     bool EnsureCustomFontData(SharedBuffer *data) noexcept;
 
   private:
-    KRYS_NODISCARD css::CSSOMString CalculateItemInCollection() const noexcept;
+    KRYS_NODISCARD CSSOMString CalculateItemInCollection() const noexcept;
 
     void CheckNotify() noexcept override;
 

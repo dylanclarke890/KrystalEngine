@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Transform/CSSTransformComponent.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief A `translate()`, `translate3d()` or single-axis translation.
   /// @see https://drafts.css-houdini.org/css-typed-om/#csstranslate
@@ -42,12 +42,12 @@ namespace krys::boo::css
     /// @brief A 2D translation without @p z, or a 3D one with it.
     /// @return A `TypeError` if @p x or @p y isn't a length or percentage, or @p z isn't a length.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csstranslate-csstranslate
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSTranslate>>
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSTranslate>>
       Create(Ref<CSSNumericValue> x, Ref<CSSNumericValue> y, RefPtr<CSSNumericValue> z = {}) noexcept;
 
     /// @brief Reifies a translation function.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSTranslate>> Create(const FunctionValue &function,
-                                                                     dom::Document &document) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSTranslate>> Create(const css::FunctionValue &function,
+                                                                Document &document) noexcept;
 
     KRYS_NODISCARD const CSSNumericValue &X() const noexcept
     {
@@ -65,33 +65,33 @@ namespace krys::boo::css
     }
 
     /// @return A `TypeError` if @p x isn't a length or percentage.
-    dom::ExceptionOr<void> SetX(Ref<CSSNumericValue> x) noexcept;
+    ExceptionOr<void> SetX(Ref<CSSNumericValue> x) noexcept;
 
     /// @return A `TypeError` if @p y isn't a length or percentage.
-    dom::ExceptionOr<void> SetY(Ref<CSSNumericValue> y) noexcept;
+    ExceptionOr<void> SetY(Ref<CSSNumericValue> y) noexcept;
 
     /// @return A `TypeError` if @p z isn't a length.
-    dom::ExceptionOr<void> SetZ(Ref<CSSNumericValue> z) noexcept;
+    ExceptionOr<void> SetZ(Ref<CSSNumericValue> z) noexcept;
 
     void Serialise(StringBuilder &builder) const noexcept final;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<DOMMatrix>> ToMatrix() const noexcept final;
+    KRYS_NODISCARD ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
 
     KRYS_NODISCARD CSSTransformType TransformType() const noexcept final
     {
       return CSSTransformType::Translate;
     }
 
-    KRYS_NODISCARD RefPtr<Value> ToCSSValue() const noexcept final;
+    KRYS_NODISCARD RefPtr<css::Value> ToCSSValue() const noexcept final;
 
   private:
     CSSTranslate(bool is2D, Ref<CSSNumericValue> x, Ref<CSSNumericValue> y, Ref<CSSNumericValue> z) noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSTranslate)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSTransformComponent &component) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSTranslate)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSTransformComponent &component) noexcept
   {
-    return component.TransformType() == krys::boo::css::CSSTransformType::Translate;
+    return component.TransformType() == krys::boo::CSSTransformType::Translate;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

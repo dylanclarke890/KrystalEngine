@@ -34,7 +34,7 @@
 
 namespace krys::boo
 {
-  RenderMathMLRow::RenderMathMLRow(Type type, mathml::MathMLRowElement &element, RenderStyle &&style) noexcept
+  RenderMathMLRow::RenderMathMLRow(Type type, boo::MathMLRowElement &element, RenderStyle &&style) noexcept
       : RenderMathMLBlock(type, element, krys::move(style))
   {
     krys_debug_assert(IsRenderMathMLRow());
@@ -42,9 +42,9 @@ namespace krys::boo
 
   RenderMathMLRow::~RenderMathMLRow() noexcept = default;
 
-  mathml::MathMLRowElement &RenderMathMLRow::GetElement() const noexcept
+  boo::MathMLRowElement &RenderMathMLRow::GetElement() const noexcept
   {
-    return static_cast<mathml::MathMLRowElement &>(NodeForNonAnonymous());
+    return static_cast<boo::MathMLRowElement &>(NodeForNonAnonymous());
   }
 
   Maybe<LayoutUnit> RenderMathMLRow::FirstLineBaseline() const noexcept

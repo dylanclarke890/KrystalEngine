@@ -8,7 +8,7 @@ namespace krys::boo::style::tests
 {
   namespace
   {
-    KRYS_NODISCARD std::string HeightOf(ResolverFixture &fixture, dom::DOMStringView id)
+    KRYS_NODISCARD std::string HeightOf(ResolverFixture &fixture, DOMStringView id)
     {
       (void)fixture.Document->UpdateLayout();
       auto *style = fixture.ById(id).GetRenderStyle();
@@ -16,7 +16,7 @@ namespace krys::boo::style::tests
       return ResolverFixture::Serialised(*style, style->Height());
     }
 
-    KRYS_NODISCARD std::string WidthOf(ResolverFixture &fixture, dom::DOMStringView id)
+    KRYS_NODISCARD std::string WidthOf(ResolverFixture &fixture, DOMStringView id)
     {
       (void)fixture.Document->UpdateLayout();
       auto *style = fixture.ById(id).GetRenderStyle();

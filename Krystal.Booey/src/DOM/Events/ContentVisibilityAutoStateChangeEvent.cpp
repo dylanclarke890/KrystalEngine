@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Events/ContentVisibilityAutoStateChangeEvent.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   ContentVisibilityAutoStateChangeEvent::ContentVisibilityAutoStateChangeEvent(
     DOMStringAtom type, const ContentVisibilityAutoStateChangeEventInit &eventInitDict) noexcept

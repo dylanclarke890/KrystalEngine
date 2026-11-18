@@ -26,7 +26,7 @@
 #include "Krystal.Booey/DOM/Events/InputEvent.hpp"
 #include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   InputEvent::InputEvent(DOMStringAtom type, const InputEventInit &eventInitDict) noexcept
       : UIEvent(krys::move(type), eventInitDict), _inputType(eventInitDict.InputType),
@@ -39,9 +39,9 @@ namespace krys::boo::dom
 
   Ref<InputEvent> InputEvent::Create(const DOMStringAtom &type, LocalDOMWindow *view, DOMStringView inputType,
                                      bool cancelable, Maybe<DOMString> data,
-                                     RefPtr<DataTransfer> &&dataTransfer,
-                                     const List<RefPtr<StaticRange>> &targetRanges, int32 detail,
-                                     IsInputMethodComposing isInputMethodComposing) noexcept
+                                     RefPtr<dom::DataTransfer> &&dataTransfer,
+                                     const List<RefPtr<dom::StaticRange>> &targetRanges, int32 detail,
+                                     dom::IsInputMethodComposing isInputMethodComposing) noexcept
   {
     InputEventInit init;
     init.View = view;
@@ -51,7 +51,7 @@ namespace krys::boo::dom
     init.Detail = detail;
     init.Data = krys::move(data);
     init.DataTransfer = krys::move(dataTransfer);
-    init.IsComposing = isInputMethodComposing == IsInputMethodComposing::Yes;
+    init.IsComposing = isInputMethodComposing == dom::IsInputMethodComposing::Yes;
     init.InputType = DOMString(inputType);
     auto event = CreateRef<InputEvent>(type, init);
     event->_targetRanges = targetRanges;

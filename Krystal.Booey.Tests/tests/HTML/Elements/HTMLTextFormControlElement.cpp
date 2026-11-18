@@ -34,9 +34,9 @@ namespace krys::boo::tests
                               keyCode, false, false, false, {}, {}));
     }
 
-    KRYS_NODISCARD html::HTMLInputElement &InputById(EditorFixture &fixture, utf8_stringview id) noexcept
+    KRYS_NODISCARD HTMLInputElement &InputById(EditorFixture &fixture, utf8_stringview id) noexcept
     {
-      return Downcast<html::HTMLInputElement>(fixture.ById(id));
+      return Downcast<HTMLInputElement>(fixture.ById(id));
     }
   }
 
@@ -120,7 +120,7 @@ namespace krys::boo::tests
 
     SECTION("A text area's shadow tree holds its inner text, then its placeholder")
     {
-      auto &area = Downcast<html::HTMLTextAreaElement>(fixture.ById(u8"area"));
+      auto &area = Downcast<HTMLTextAreaElement>(fixture.ById(u8"area"));
       auto innerText = area.InnerTextElement();
       REQUIRE(innerText);
       CHECK(Narrow(area.InnerTextValue()) == "xy");
@@ -181,7 +181,7 @@ namespace krys::boo::tests
     {
       field.Focus();
       CHECK(editor.InsertText(u8"cd", nullptr));
-      Downcast<html::HTMLFormElement>(fixture.ById(u8"form")).Reset();
+      Downcast<HTMLFormElement>(fixture.ById(u8"form")).Reset();
       CHECK(Narrow(field.Value()) == "ab");
       CHECK(Narrow(field.InnerTextValue()) == "ab");
     }
@@ -255,7 +255,7 @@ namespace krys::boo::tests
 
     SECTION("A text area keeps line breaks")
     {
-      auto &area = Downcast<html::HTMLTextAreaElement>(fixture.ById(u8"area"));
+      auto &area = Downcast<HTMLTextAreaElement>(fixture.ById(u8"area"));
       area.Focus();
       CHECK(area.SelectionStart() == 0);
       area.SetSelectionRange(2, 2);
@@ -357,7 +357,7 @@ namespace krys::boo::tests
 
       auto error = field.SetRangeText(u8"?", 3, 1, u8"preserve");
       REQUIRE(error.HasException());
-      CHECK(error.GetException().Code() == dom::ExceptionCode::IndexSizeError);
+      CHECK(error.GetException().Code() == ExceptionCode::IndexSizeError);
     }
 
     SECTION("setRangeText() with preserve keeps a selection around the replaced text")

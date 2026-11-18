@@ -30,10 +30,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLMapElement::HTMLMapElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Map)
+  HTMLMapElement::HTMLMapElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Map)
   {
   }
 
@@ -86,27 +86,27 @@ namespace krys::boo::html
 
 #pragma region HTMLMapElement
 
-  dom::DOMString HTMLMapElement::Name() const noexcept
+  DOMString HTMLMapElement::Name() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLMapElement::Name(dom::DOMString value) noexcept
+  void HTMLMapElement::Name(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"name", krys::move(value));
   }
 
   Ref<dom::HTMLCollection> HTMLMapElement::Areas() noexcept
   {
-    return CreateRef<dom::LiveHTMLCollection>(*this, [](const dom::Element &element)
+    return CreateRef<dom::LiveHTMLCollection>(*this, [](const Element &element)
                                               { return Is<HTMLAreaElement>(element); });
   }
 
 #pragma endregion
 
-  void HTMLMapElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                          Maybe<dom::DOMStringView> oldValue, Maybe<dom::DOMStringView> value,
-                                          const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLMapElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                          Maybe<DOMStringView> value,
+                                          const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 
@@ -116,11 +116,11 @@ namespace krys::boo::html
       auto &scope = TreeScope();
       if (oldValue && !oldValue->empty())
       {
-        scope.RemoveImageMap(dom::DOMStringAtom(*oldValue), *this);
+        scope.RemoveImageMap(DOMStringAtom(*oldValue), *this);
       }
       if (value && !value->empty())
       {
-        scope.AddImageMap(dom::DOMStringAtom(*value), *this);
+        scope.AddImageMap(DOMStringAtom(*value), *this);
       }
     }
   }

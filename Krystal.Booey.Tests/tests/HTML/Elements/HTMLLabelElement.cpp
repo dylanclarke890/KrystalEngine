@@ -46,9 +46,9 @@ namespace krys::boo::html::tests
     FormFixture fixture(u8R"(<label id=l1 for=h1>One</label><x-host id=h1></x-host>
       <label id=l2>Two <x-host id=h2></x-host></label>)");
     // A shadow root on the element with ID @p id, its reference target @p target, holding @p markup.
-    auto attach = [&](dom::DOMStringView id, const char8_t *target, const char8_t *markup)
+    auto attach = [&](DOMStringView id, const char8_t *target, const char8_t *markup)
     {
-      auto shadow = fixture.ById(id).AttachShadow({.ReferenceTarget = dom::DOMString(target)}).ReleaseValue();
+      auto shadow = fixture.ById(id).AttachShadow({.ReferenceTarget = DOMString(target)}).ReleaseValue();
       REQUIRE_FALSE(shadow->SetHTMLUnsafe(markup).HasException());
       return shadow;
     };
@@ -69,7 +69,7 @@ namespace krys::boo::html::tests
     CHECK_FALSE(l2.FormForBindings());
 
     // A host whose reference target names nothing isn't a control, nor labelable itself.
-    shadow1->SetReferenceTarget(dom::DOMString(u8"missing"));
+    shadow1->SetReferenceTarget(DOMString(u8"missing"));
     CHECK_FALSE(l1.Control());
     shadow2->SetReferenceTarget(null);
     CHECK_FALSE(l2.Control());

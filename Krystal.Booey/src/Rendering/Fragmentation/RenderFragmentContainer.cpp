@@ -39,14 +39,14 @@
 
 namespace krys::boo
 {
-  RenderFragmentContainer::RenderFragmentContainer(Type type, dom::Element &element, RenderStyle &&style,
+  RenderFragmentContainer::RenderFragmentContainer(Type type, Element &element, RenderStyle &&style,
                                                    RenderFragmentedFlow *fragmentedFlow) noexcept
       : RenderBlockFlow(type, element, krys::move(style), {BlockFlowFlag::IsFragmentContainer}),
         _fragmentedFlow(CreateWeakPtr(fragmentedFlow))
   {
   }
 
-  RenderFragmentContainer::RenderFragmentContainer(Type type, dom::Document &document, RenderStyle &&style,
+  RenderFragmentContainer::RenderFragmentContainer(Type type, Document &document, RenderStyle &&style,
                                                    RenderFragmentedFlow *fragmentedFlow) noexcept
       : RenderBlockFlow(type, document, krys::move(style), {BlockFlowFlag::IsFragmentContainer}),
         _fragmentedFlow(CreateWeakPtr(fragmentedFlow))

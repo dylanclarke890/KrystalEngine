@@ -33,7 +33,7 @@ namespace krys::boo::svg::tests
     CHECK_FALSE(value.Parse(u8""));
 
     // Without validation, what follows is left in the buffer.
-    dom::DOMStringView buffer = u8"xMinYMid slice, 1 2";
+    DOMStringView buffer = u8"xMinYMid slice, 1 2";
     CHECK(value.Parse(buffer, false));
     CHECK(value.ValueAsString() == u8"xMinYMid slice");
     CHECK(buffer == u8", 1 2");
@@ -45,9 +45,9 @@ namespace krys::boo::svg::tests
     REQUIRE_FALSE(value.SetAlign(Value::SVG_PRESERVEASPECTRATIO_NONE).HasException());
     REQUIRE_FALSE(value.SetMeetOrSlice(Value::SVG_MEETORSLICE_SLICE).HasException());
     CHECK(value.ValueAsString() == u8"none slice");
-    CHECK(value.SetAlign(0) == dom::ExceptionCode::NotSupportedError);
-    CHECK(value.SetAlign(11) == dom::ExceptionCode::NotSupportedError);
-    CHECK(value.SetMeetOrSlice(3) == dom::ExceptionCode::NotSupportedError);
+    CHECK(value.SetAlign(0) == ExceptionCode::NotSupportedError);
+    CHECK(value.SetAlign(11) == ExceptionCode::NotSupportedError);
+    CHECK(value.SetMeetOrSlice(3) == ExceptionCode::NotSupportedError);
     CHECK(value.ValueAsString() == u8"none slice");
   }
 

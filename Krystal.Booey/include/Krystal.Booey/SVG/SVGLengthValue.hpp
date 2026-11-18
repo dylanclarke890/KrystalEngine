@@ -29,14 +29,10 @@
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   template <typename T>
   class ExceptionOr;
-}
-
-namespace krys::boo::svg
-{
   class SVGLengthContext;
 
   enum class SVGLengthType : uint8
@@ -68,13 +64,19 @@ namespace krys::boo::svg
     Allow,
     Forbid,
   };
+}
 
+namespace krys::boo::svg
+{
   enum class ShouldConvertNumberToPxLength : bool
   {
     No,
     Yes,
   };
+}
 
+namespace krys::boo
+{
   class SVGLengthValue
   {
   private:
@@ -82,8 +84,7 @@ namespace krys::boo::svg
     SVGLengthMode _lengthMode {SVGLengthMode::Other};
 
   public:
-    explicit SVGLengthValue(SVGLengthMode = SVGLengthMode::Other,
-                            dom::DOMStringView valueAsString = {}) noexcept;
+    explicit SVGLengthValue(SVGLengthMode = SVGLengthMode::Other, DOMStringView valueAsString = {}) noexcept;
 
     SVGLengthValue(float valueInSpecifiedUnits, SVGLengthType, SVGLengthMode = SVGLengthMode::Other) noexcept;
 
@@ -91,9 +92,9 @@ namespace krys::boo::svg
                    SVGLengthMode = SVGLengthMode::Other) noexcept;
 
     KRYS_NODISCARD static SVGLengthValue
-      Construct(SVGLengthMode, dom::DOMStringView, SVGParsingError &,
+      Construct(SVGLengthMode, DOMStringView, SVGParsingError &,
                 SVGLengthNegativeValuesMode = SVGLengthNegativeValuesMode::Allow,
-                Maybe<dom::DOMStringView> fallbackValue = {}) noexcept;
+                Maybe<DOMStringView> fallbackValue = {}) noexcept;
 
     KRYS_NODISCARD SVGLengthType LengthType() const noexcept;
 
@@ -112,28 +113,28 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD float ValueInSpecifiedUnits() const noexcept;
 
-    KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept;
+    KRYS_NODISCARD DOMString ValueAsString() const noexcept;
 
-    KRYS_NODISCARD dom::DOMStringAtom ValueAsAtomString() const noexcept;
+    KRYS_NODISCARD DOMStringAtom ValueAsAtomString() const noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<float> ValueForBindings(const SVGLengthContext &) const noexcept;
+    KRYS_NODISCARD ExceptionOr<float> ValueForBindings(const SVGLengthContext &) const noexcept;
 
     void SetValueInSpecifiedUnits(float) noexcept;
 
-    dom::ExceptionOr<void> SetValue(const SVGLengthContext &, float) noexcept;
+    ExceptionOr<void> SetValue(const SVGLengthContext &, float) noexcept;
 
-    dom::ExceptionOr<void> SetValue(const SVGLengthContext &, float, SVGLengthType, SVGLengthMode) noexcept;
+    ExceptionOr<void> SetValue(const SVGLengthContext &, float, SVGLengthType, SVGLengthMode) noexcept;
 
-    dom::ExceptionOr<void> SetValueAsString(dom::DOMStringView) noexcept;
+    ExceptionOr<void> SetValueAsString(DOMStringView) noexcept;
 
-    dom::ExceptionOr<void> SetValueAsString(dom::DOMStringView, SVGLengthMode) noexcept;
+    ExceptionOr<void> SetValueAsString(DOMStringView, SVGLengthMode) noexcept;
 
-    dom::ExceptionOr<void> ConvertToSpecifiedUnits(const SVGLengthContext &, SVGLengthType) noexcept;
+    ExceptionOr<void> ConvertToSpecifiedUnits(const SVGLengthContext &, SVGLengthType) noexcept;
 
     KRYS_NODISCARD friend bool operator==(const SVGLengthValue &, const SVGLengthValue &) noexcept = default;
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGLengthType, 13uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGLengthMode, 3uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGLengthNegativeValuesMode, 2uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SVGLengthType, 13uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SVGLengthMode, 3uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SVGLengthNegativeValuesMode, 2uz);

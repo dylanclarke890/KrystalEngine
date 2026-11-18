@@ -46,11 +46,11 @@ namespace krys::boo::html
     return false;
   }
 
-  void BaseButtonInputType::SetValue(dom::DOMStringView sanitizedValue, bool, TextFieldEventBehavior,
+  void BaseButtonInputType::SetValue(DOMStringView sanitizedValue, bool, TextFieldEventBehavior,
                                      TextControlSetValueSelection) noexcept
   {
     krys_debug_assert(Element());
-    (void)Element()->SetAttribute(u8"value", dom::DOMString(sanitizedValue));
+    (void)Element()->SetAttribute(u8"value", DOMString(sanitizedValue));
   }
 
   bool BaseButtonInputType::DirAutoUsesValue() const noexcept

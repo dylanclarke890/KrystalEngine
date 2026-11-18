@@ -32,14 +32,10 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
-{
-  class Document;
-}
-
 namespace krys::boo
 {
   class AnimationTimeline;
+  class Document;
   class ScrollTimeline;
   class WebAnimation;
 
@@ -56,7 +52,7 @@ namespace krys::boo
     List<WeakPtr<AnimationTimeline>> _timelines;
     List<WeakPtr<WebAnimation>> _pendingAnimations;
     List<Ref<ScrollTimeline>> _updatedScrollTimelines;
-    dom::Document &_document;
+    Document &_document;
     Maybe<Seconds> _cachedCurrentTime;
     /// @brief The last time cached, which the clearance timer doesn't clear: the pending animations' start
     /// time. The host runs the event loop once per frame, timers first, so the cache is usually cleared by
@@ -68,7 +64,7 @@ namespace krys::boo
     bool _isSuspended {false};
 
   public:
-    explicit AnimationTimelinesController(dom::Document &document) noexcept;
+    explicit AnimationTimelinesController(Document &document) noexcept;
 
     ~AnimationTimelinesController() noexcept;
 

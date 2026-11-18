@@ -33,7 +33,7 @@ namespace krys::boo::style
 {
   size_t StyleSheetContentsCache::KeyHash::operator()(const Key &key) const noexcept
   {
-    return Hash::Combine(std::hash<css::CSSOMString> {}(key.first), key.second.Hash());
+    return Hash::Combine(std::hash<CSSOMString> {}(key.first), key.second.Hash());
   }
 
   StyleSheetContentsCache::StyleSheetContentsCache() noexcept = default;

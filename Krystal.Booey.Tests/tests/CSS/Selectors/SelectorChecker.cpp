@@ -12,23 +12,23 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    KRYS_NODISCARD Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
+    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       parser->PumpTokenizer();
       return document;
     }
 
-    KRYS_NODISCARD dom::Element &ById(dom::Document &document, dom::DOMStringView id)
+    KRYS_NODISCARD Element &ById(Document &document, DOMStringView id)
     {
       auto element = document.GetElementById(id);
       REQUIRE(element);
       return *element;
     }
 
-    KRYS_NODISCARD bool Matches(const dom::Element &element, dom::DOMStringView selector)
+    KRYS_NODISCARD bool Matches(const Element &element, DOMStringView selector)
     {
       auto result = element.Matches(selector);
       REQUIRE_FALSE(result.HasException());

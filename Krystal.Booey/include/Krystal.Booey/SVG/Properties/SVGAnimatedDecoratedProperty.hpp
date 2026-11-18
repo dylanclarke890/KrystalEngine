@@ -30,7 +30,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGDecoratedProperty.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGProperty.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief An animated decorated property: an enumeration the DOM sees as an integer.
   template <template <typename, typename> class TDecoratedProperty, typename TDecoration>
@@ -64,11 +64,11 @@ namespace krys::boo::svg
     }
 
     // Used by the DOM.
-    dom::ExceptionOr<void> SetBaseVal(const TDecoration &baseVal) noexcept
+    ExceptionOr<void> SetBaseVal(const TDecoration &baseVal) noexcept
     {
       if (!_baseVal->SetValue(baseVal))
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       CommitPropertyChange(nullptr);
       return {};
@@ -106,13 +106,13 @@ namespace krys::boo::svg
     }
 
     // Used when committing a change from the SVGAnimatedProperty to the attribute.
-    KRYS_NODISCARD dom::DOMString BaseValAsString() const noexcept override
+    KRYS_NODISCARD DOMString BaseValAsString() const noexcept override
     {
       return _baseVal->ValueAsString();
     }
 
     // Used to apply the SVGAnimator change to the target element.
-    KRYS_NODISCARD dom::DOMString AnimValAsString() const noexcept override
+    KRYS_NODISCARD DOMString AnimValAsString() const noexcept override
     {
       krys_assert(IsAnimating() && !!_animVal);
       return _animVal->ValueAsString();
@@ -129,7 +129,7 @@ namespace krys::boo::svg
       return _state == SVGPropertyState::Dirty;
     }
 
-    Maybe<dom::DOMString> Synchronize() noexcept override
+    Maybe<DOMString> Synchronize() noexcept override
     {
       if (_state == SVGPropertyState::Clean)
       {

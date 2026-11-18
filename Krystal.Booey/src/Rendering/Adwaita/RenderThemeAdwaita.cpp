@@ -111,7 +111,7 @@ namespace krys::boo
     return false;
   }
 
-  bool RenderThemeAdwaita::ShouldHaveCapsLockIndicator(const html::HTMLInputElement &element) const noexcept
+  bool RenderThemeAdwaita::ShouldHaveCapsLockIndicator(const boo::HTMLInputElement &element) const noexcept
   {
     return element.IsPasswordField();
   }
@@ -246,7 +246,7 @@ namespace krys::boo
     return RenderTheme::IsControlStyled(style);
   }
 
-  void RenderThemeAdwaita::AdjustTextFieldStyle(RenderStyle &style, const dom::Element *) const noexcept
+  void RenderThemeAdwaita::AdjustTextFieldStyle(RenderStyle &style, const boo::Element *) const noexcept
   {
     if (!style.HasExplicitlySetBorderRadius())
     {
@@ -254,25 +254,25 @@ namespace krys::boo
     }
   }
 
-  void RenderThemeAdwaita::AdjustTextAreaStyle(RenderStyle &style, const dom::Element *element) const noexcept
+  void RenderThemeAdwaita::AdjustTextAreaStyle(RenderStyle &style, const boo::Element *element) const noexcept
   {
     AdjustTextFieldStyle(style, element);
   }
 
   void RenderThemeAdwaita::AdjustSearchFieldStyle(RenderStyle &style,
-                                                  const dom::Element *element) const noexcept
+                                                  const boo::Element *element) const noexcept
   {
     AdjustTextFieldStyle(style, element);
   }
 
-  void RenderThemeAdwaita::AdjustMenuListStyle(RenderStyle &style, const dom::Element *element) const noexcept
+  void RenderThemeAdwaita::AdjustMenuListStyle(RenderStyle &style, const boo::Element *element) const noexcept
   {
     RenderTheme::AdjustMenuListStyle(style, element);
     style.SetLineHeight(style::ComputedStyle::InitialLineHeight());
   }
 
   void RenderThemeAdwaita::AdjustMenuListButtonStyle(RenderStyle &style,
-                                                     const dom::Element *element) const noexcept
+                                                     const boo::Element *element) const noexcept
   {
     AdjustMenuListStyle(style, element);
   }
@@ -318,7 +318,7 @@ namespace krys::boo
             isHorizontal ? ProgressBarSize : bounds.Height()};
   }
 
-  void RenderThemeAdwaita::AdjustSliderThumbSize(RenderStyle &style, const dom::Element *) const noexcept
+  void RenderThemeAdwaita::AdjustSliderThumbSize(RenderStyle &style, const boo::Element *) const noexcept
   {
     auto appearance = style.UsedAppearance();
     if (appearance != StyleAppearance::SliderThumbHorizontal
@@ -347,7 +347,7 @@ namespace krys::boo
     return -16;
   }
 
-  void RenderThemeAdwaita::AdjustListButtonStyle(RenderStyle &style, const dom::Element *) const noexcept
+  void RenderThemeAdwaita::AdjustListButtonStyle(RenderStyle &style, const boo::Element *) const noexcept
   {
     // Add a margin to place the button at end of the input field.
     if (style.IsLeftToRightDirection())
@@ -433,7 +433,7 @@ namespace krys::boo
   style::LineWidthBox RenderThemeAdwaita::ControlBorder(StyleAppearance appearance, const FontCascade &font,
                                                         const style::LineWidthBox &zoomedBox,
                                                         float zoomFactor,
-                                                        const dom::Element *element) const noexcept
+                                                        const boo::Element *element) const noexcept
   {
     switch (appearance)
     {

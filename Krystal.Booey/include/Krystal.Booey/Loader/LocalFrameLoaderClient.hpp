@@ -71,7 +71,7 @@ namespace krys::boo
     /// to navigate to @p request; the host opens one if it wants.
     virtual void DispatchNewWindowRequested(const NavigationAction &action, const ResourceRequest &request,
                                             const FormSubmission *formSubmission,
-                                            dom::DOMStringView frameName) noexcept
+                                            DOMStringView frameName) noexcept
     {
       (void)action;
       (void)request;

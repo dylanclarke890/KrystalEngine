@@ -33,7 +33,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -61,10 +61,10 @@ namespace krys::boo::css
     List<SizesCalcValue> _valueList;
     float _result {0};
     bool _isValid {false};
-    const dom::Document &_document;
+    const Document &_document;
 
   public:
-    SizesCalcParser(TokenRange range, const dom::Document &document) noexcept;
+    SizesCalcParser(TokenRange range, const Document &document) noexcept;
 
     KRYS_NODISCARD float Result() const noexcept;
 

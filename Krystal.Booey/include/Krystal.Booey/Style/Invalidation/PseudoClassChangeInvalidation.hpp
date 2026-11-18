@@ -58,23 +58,22 @@ namespace krys::boo::style
     };
 
     const bool _isEnabled;
-    dom::Element &_element;
+    Element &_element;
 
     Invalidator::MatchElementRuleSets _beforeChangeRuleSets;
     Invalidator::MatchElementRuleSets _afterChangeRuleSets;
 
   public:
     /// @param value The state after the change.
-    PseudoClassChangeInvalidation(dom::Element &element, css::SelectorPseudoClass pseudoClass, bool value,
+    PseudoClassChangeInvalidation(Element &element, css::SelectorPseudoClass pseudoClass, bool value,
                                   InvalidationScope invalidationScope = InvalidationScope::All) noexcept;
 
     /// @brief For a change whose state after the change isn't known: invalidates both ways.
-    PseudoClassChangeInvalidation(dom::Element &element, css::SelectorPseudoClass pseudoClass,
+    PseudoClassChangeInvalidation(Element &element, css::SelectorPseudoClass pseudoClass,
                                   AnyValueTag) noexcept;
 
     PseudoClassChangeInvalidation(
-      dom::Element &element,
-      std::initializer_list<Pair<css::SelectorPseudoClass, bool>> pseudoClasses) noexcept;
+      Element &element, std::initializer_list<Pair<css::SelectorPseudoClass, bool>> pseudoClasses) noexcept;
 
     ~PseudoClassChangeInvalidation() noexcept;
 
@@ -92,11 +91,10 @@ namespace krys::boo::style
 
   /// @brief The keys of the invalidation rule sets for @p pseudoClass that may match @p element.
   KRYS_NODISCARD SmallList<PseudoClassInvalidationKey, 4>
-    MakePseudoClassInvalidationKeys(css::SelectorPseudoClass pseudoClass,
-                                    const dom::Element &element) noexcept;
+    MakePseudoClassInvalidationKeys(css::SelectorPseudoClass pseudoClass, const Element &element) noexcept;
 
   inline PseudoClassChangeInvalidation::PseudoClassChangeInvalidation(
-    dom::Element &element, css::SelectorPseudoClass pseudoClass, bool value,
+    Element &element, css::SelectorPseudoClass pseudoClass, bool value,
     InvalidationScope invalidationScope) noexcept
       : _isEnabled(element.NeedsStyleInvalidation()), _element(element)
   {
@@ -108,7 +106,7 @@ namespace krys::boo::style
     InvalidateBeforeChange();
   }
 
-  inline PseudoClassChangeInvalidation::PseudoClassChangeInvalidation(dom::Element &element,
+  inline PseudoClassChangeInvalidation::PseudoClassChangeInvalidation(Element &element,
                                                                       css::SelectorPseudoClass pseudoClass,
                                                                       AnyValueTag) noexcept
       : _isEnabled(element.NeedsStyleInvalidation()), _element(element)
@@ -122,7 +120,7 @@ namespace krys::boo::style
   }
 
   inline PseudoClassChangeInvalidation::PseudoClassChangeInvalidation(
-    dom::Element &element, std::initializer_list<Pair<css::SelectorPseudoClass, bool>> pseudoClasses) noexcept
+    Element &element, std::initializer_list<Pair<css::SelectorPseudoClass, bool>> pseudoClasses) noexcept
       : _isEnabled(element.NeedsStyleInvalidation()), _element(element)
   {
     if (!_isEnabled)

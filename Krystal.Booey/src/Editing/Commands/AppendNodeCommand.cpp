@@ -34,14 +34,13 @@
 
 namespace krys::boo
 {
-  Ref<AppendNodeCommand> AppendNodeCommand::Create(dom::ContainerNode &parent, dom::Node &node,
+  Ref<AppendNodeCommand> AppendNodeCommand::Create(ContainerNode &parent, Node &node,
                                                    EditAction editingAction) noexcept
   {
     return CreateRef<AppendNodeCommand>(parent, node, editingAction);
   }
 
-  AppendNodeCommand::AppendNodeCommand(dom::ContainerNode &parent, dom::Node &node,
-                                       EditAction editingAction) noexcept
+  AppendNodeCommand::AppendNodeCommand(ContainerNode &parent, Node &node, EditAction editingAction) noexcept
       : SimpleEditCommand(parent.NodeDocument(), editingAction), _parent(ShareRef(parent)),
         _node(ShareRef(node))
   {

@@ -34,15 +34,14 @@
 #include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
+  class HTMLInputElement;
   class TouchEvent;
 }
 
 namespace krys::boo::html
 {
-  class HTMLInputElement;
-
   /// @brief A range's thumb (the `::-webkit-slider-thumb` part), which the user drags along the track.
   class SliderThumbElement final : public HTMLDivElement
   {
@@ -52,9 +51,9 @@ namespace krys::boo::html
     bool _inDragMode {false};
 
   public:
-    explicit SliderThumbElement(dom::Document &) noexcept;
+    explicit SliderThumbElement(Document &) noexcept;
 
-    KRYS_NODISCARD static Ref<SliderThumbElement> Create(dom::Document &) noexcept;
+    KRYS_NODISCARD static Ref<SliderThumbElement> Create(Document &) noexcept;
 
     void SetPositionFromValue() noexcept;
 
@@ -75,7 +74,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool MatchesReadWritePseudoClass() const noexcept final;
 
-    void DefaultEventHandler(dom::Event &) noexcept final;
+    void DefaultEventHandler(Event &) noexcept final;
 
   private:
     void WillDetachRenderers() noexcept final;
@@ -107,25 +106,25 @@ namespace krys::boo::html
     bool _touchStarted {false};
 
   public:
-    explicit SliderContainerElement(dom::Document &) noexcept;
+    explicit SliderContainerElement(Document &) noexcept;
 
-    KRYS_NODISCARD static Ref<SliderContainerElement> Create(dom::Document &) noexcept;
+    KRYS_NODISCARD static Ref<SliderContainerElement> Create(Document &) noexcept;
 
     KRYS_NODISCARD bool IsSliderContainerElement() const noexcept final
     {
       return true;
     }
 
-    void DefaultEventHandler(dom::Event &) noexcept final;
+    void DefaultEventHandler(Event &) noexcept final;
 
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
 
-    void OnAdopt(dom::Document &oldDocument) noexcept final;
+    void OnAdopt(Document &oldDocument) noexcept final;
 
     /// @brief Moves the thumb to a single touch as it starts, and with the touch's moves along the slider,
     /// as Chrome does; a touch that first moves across the slider is left to pan.
-    void HandleTouchEvent(dom::TouchEvent &) noexcept;
+    void HandleTouchEvent(TouchEvent &) noexcept;
 
     /// @brief Whether the touch's moves so far are along the slider.
     KRYS_NODISCARD bool CanSlide() const noexcept;
@@ -133,25 +132,25 @@ namespace krys::boo::html
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::SliderThumbElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &element) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &element) noexcept
   {
     return element.IsSliderThumbElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    return node.IsHTMLElement() && IsType(Downcast<krys::boo::html::HTMLElement>(node));
+    return node.IsHTMLElement() && IsType(Downcast<krys::boo::HTMLElement>(node));
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::SliderContainerElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &element) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &element) noexcept
   {
     return element.IsSliderContainerElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    return node.IsHTMLElement() && IsType(Downcast<krys::boo::html::HTMLElement>(node));
+    return node.IsHTMLElement() && IsType(Downcast<krys::boo::HTMLElement>(node));
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

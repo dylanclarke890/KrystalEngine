@@ -115,7 +115,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD static Decimal ParseStep(AnyStepHandling anyStepHandling,
                                             const StepDescription &stepDescription,
-                                            Maybe<dom::DOMStringView> stepString) noexcept;
+                                            Maybe<DOMStringView> stepString) noexcept;
 
     KRYS_NODISCARD Decimal Step() const noexcept
     {

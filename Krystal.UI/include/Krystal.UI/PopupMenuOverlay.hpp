@@ -8,12 +8,8 @@
 
 namespace krys::boo
 {
+  class Element;
   class PopupMenuClient;
-
-  namespace dom
-  {
-    class Element;
-  }
 }
 
 namespace krys::ui
@@ -32,7 +28,7 @@ namespace krys::ui
     /// @brief Where the popup is, in the owner's viewport.
     boo::IntRect _rect;
     /// @brief The element of each item, by its index in the list; null for items that aren't shown.
-    List<RefPtr<boo::dom::Element>> _itemElements;
+    List<RefPtr<boo::Element>> _itemElements;
     int32 _highlightedIndex {-1};
     bool _visible {false};
     /// @brief Whether the control lays out right to left, so the overlay is mirrored.

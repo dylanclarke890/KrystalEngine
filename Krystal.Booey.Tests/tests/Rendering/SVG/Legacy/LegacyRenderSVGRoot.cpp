@@ -14,14 +14,14 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD svg::SVGSvgElement &SvgById(dom::Document &document, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD SVGSvgElement &SvgById(Document &document, DOMStringView id) noexcept
     {
       auto element = document.GetElementById(id);
       krys_assert(element);
-      return Downcast<svg::SVGSvgElement>(Downcast<svg::SVGElement>(*element));
+      return Downcast<SVGSvgElement>(Downcast<SVGElement>(*element));
     }
 
-    KRYS_NODISCARD LegacyRenderSVGRoot &RootById(dom::Document &document, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD LegacyRenderSVGRoot &RootById(Document &document, DOMStringView id) noexcept
     {
       auto *renderer = SvgById(document, id).Renderer();
       krys_assert(renderer);

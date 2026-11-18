@@ -14,12 +14,12 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief Counts `selectstart` events, cancelling them if asked.
-    struct SelectStartListener : public dom::EventListenerCallback
+    struct SelectStartListener : public EventListenerCallback
     {
       int32 Count {0};
       bool Cancel {false};
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         ++Count;
         if (Cancel)
@@ -54,9 +54,9 @@ namespace krys::boo::tests
         return Document->Selection();
       }
 
-      KRYS_NODISCARD dom::Text &TextIn(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD Text &TextIn(DOMStringView id) noexcept
       {
-        return Downcast<dom::Text>(*ById(id).FirstChild());
+        return Downcast<Text>(*ById(id).FirstChild());
       }
 
       KRYS_NODISCARD static PlatformMouseEvent Event(PlatformEvent::Type type, double x, double y,

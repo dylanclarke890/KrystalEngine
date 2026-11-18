@@ -77,7 +77,7 @@ namespace krys::boo::html
     // FIXME: When the current node is removed from the stack of open elements,
     // process internal resource links given the current node's node document.
 
-    Ref<dom::Element> back = ShareRef(Bottom().Element());
+    Ref<boo::Element> back = ShareRef(Bottom().Element());
     _items.pop_back();
 
     back->FinishParsingChildren();
@@ -90,7 +90,7 @@ namespace krys::boo::html
     }
   }
 
-  void OpenElementStack::PopUntil(const dom::Element &node) noexcept
+  void OpenElementStack::PopUntil(const Element &node) noexcept
   {
     while (&Bottom().Element() != &node)
     {
@@ -106,7 +106,7 @@ namespace krys::boo::html
     }
   }
 
-  void OpenElementStack::PopUntilPopped(const dom::Element &node) noexcept
+  void OpenElementStack::PopUntilPopped(const Element &node) noexcept
   {
     while (true)
     {
@@ -439,7 +439,7 @@ namespace krys::boo::html
     return false;
   }
 
-  bool OpenElementStack::HasElementInScope(const dom::Element &element) const noexcept
+  bool OpenElementStack::HasElementInScope(const Element &element) const noexcept
   {
     auto it = _items.rbegin();
     while (it != _items.rend())
@@ -537,7 +537,7 @@ namespace krys::boo::html
 
 #pragma endregion
 
-  bool OpenElementStack::Contains(const dom::Element &node) const noexcept
+  bool OpenElementStack::Contains(const Element &node) const noexcept
   {
     return std::ranges::any_of(_items, [&](const auto &item) { return &item.Element() == &node; });
   }

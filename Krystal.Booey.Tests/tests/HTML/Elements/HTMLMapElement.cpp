@@ -30,18 +30,18 @@ namespace krys::boo::html::tests
       u8"<area id=poly shape=poly coords=60,0,100,0,100,40 href=#poly></map>";
 
     /// @brief Counts the clicks at each element.
-    struct ClickRecorder : public dom::EventListenerCallback
+    struct ClickRecorder : public EventListenerCallback
     {
-      List<dom::Element *> &Targets;
+      List<Element *> &Targets;
 
-      explicit ClickRecorder(List<dom::Element *> &targets) noexcept : Targets(targets)
+      explicit ClickRecorder(List<Element *> &targets) noexcept : Targets(targets)
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
-        auto *node = DynamicDowncast<dom::Node>(event.Target().get());
-        Targets.push_back(node ? DynamicDowncast<dom::Element>(*node) : nullptr);
+        auto *node = DynamicDowncast<Node>(event.Target().get());
+        Targets.push_back(node ? DynamicDowncast<Element>(*node) : nullptr);
       }
     };
 
@@ -54,7 +54,7 @@ namespace krys::boo::html::tests
         (void)Document->UpdateLayout();
       }
 
-      KRYS_NODISCARD HTMLAreaElement &Area(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD HTMLAreaElement &Area(DOMStringView id) noexcept
       {
         return Downcast<HTMLAreaElement>(ById(id));
       }
@@ -192,12 +192,12 @@ namespace krys::boo::html::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLAreaElement: clicks and the cursor", "[HTML][ImageMaps]")
   {
     MapFixture fixture;
-    List<dom::Element *> clicked;
+    List<Element *> clicked;
     fixture.Document->AddEventListener(u8"click", CreateRef<ClickRecorder>(clicked), true);
 
     fixture.Click(10, 10);
     fixture.Click(30, 80);
-    CHECK(clicked == List<dom::Element *> {&fixture.ById(u8"rect"), &fixture.ById(u8"image")});
+    CHECK(clicked == List<Element *> {&fixture.ById(u8"rect"), &fixture.ById(u8"image")});
 
     (void)fixture.Frame->GetEventHandler().MouseMoved(
       MapFixture::Event(PlatformEvent::Type::MouseMoved, 75, 75));
@@ -230,15 +230,15 @@ namespace krys::boo::html::tests
 
     SECTION("sequential navigation goes through the areas")
     {
-      List<dom::Element *> order;
+      List<Element *> order;
       for (int32 i = 0; i < 5; ++i)
       {
         REQUIRE(FocusAlgorithms::SequentialNavigation(document, dom::FocusDirection::Forward));
         order.push_back(document.FocusedElement());
       }
       CHECK(order
-            == List<dom::Element *> {&rect, &fixture.ById(u8"circle"), &fixture.ById(u8"poly"),
-                                     &fixture.ById(u8"after"), &rect});
+            == List<Element *> {&rect, &fixture.ById(u8"circle"), &fixture.ById(u8"poly"),
+                                &fixture.ById(u8"after"), &rect});
     }
 
     SECTION("clicking an area focuses it")
@@ -284,7 +284,7 @@ namespace krys::boo::html::tests
   TEST_CASE("HTMLImageElement::AssociatedMapElement: follows the tree scope's maps",
             "[HTML][HTMLMapElement][html:rules-for-parsing-a-hash-name-reference]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto parser = CreateRef<html::DocumentParser>(*document);
     parser->InputStream().Append(u8"<!DOCTYPE html><body><img id=img usemap=#m><map id=first name=m></map>",
                                  IsEOF::Yes);
@@ -343,7 +343,7 @@ namespace krys::boo::html::tests
 
     SECTION("a map inside a subtree comes and goes with it")
     {
-      Ref<dom::Element> wrapper = document->CreateElement(u8"div").ReleaseValue();
+      Ref<Element> wrapper = document->CreateElement(u8"div").ReleaseValue();
       auto wrapped = create();
       wrapped->Name(u8"wrapped");
       REQUIRE_FALSE(wrapper->AppendChild(*wrapped).HasException());
@@ -368,7 +368,7 @@ namespace krys::boo::html::tests
       REQUIRE_FALSE(shadow->AppendChild(*inside).HasException());
       CHECK(image.AssociatedMapElement() == inside.get());
 
-      Ref<dom::Element> detached = document->CreateElement(u8"div").ReleaseValue();
+      Ref<Element> detached = document->CreateElement(u8"div").ReleaseValue();
       REQUIRE_FALSE(detached->AppendChild(image).HasException());
       REQUIRE_FALSE(detached->AppendChild(*inside).HasException());
       CHECK(image.AssociatedMapElement() == inside.get());

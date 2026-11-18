@@ -31,11 +31,11 @@
 namespace krys::boo
 {
   /// @see https://drafts.csswg.org/css-transitions-1/#dictdef-transitioneventinit
-  struct CSSTransitionEventInit : public dom::EventInit
+  struct CSSTransitionEventInit : public EventInit
   {
-    css::CSSOMString PropertyName;
+    CSSOMString PropertyName;
     double ElapsedTime {0};
-    css::CSSOMString PseudoElement;
+    CSSOMString PseudoElement;
   };
 
   /// @brief Fired at the owning element of a CSS transition as it runs, starts, ends or is canceled.
@@ -43,19 +43,19 @@ namespace krys::boo
   class CSSTransitionEvent final : public StyleOriginatedAnimationEvent
   {
   private:
-    css::CSSOMString _propertyName;
+    CSSOMString _propertyName;
 
   public:
     /// @brief The dictionary its constructor takes.
     using dictionary_type = CSSTransitionEventInit;
 
-    CSSTransitionEvent(dom::DOMStringAtom type, WebAnimation *animation, Maybe<Seconds> scheduledTime,
+    CSSTransitionEvent(DOMStringAtom type, WebAnimation *animation, Maybe<Seconds> scheduledTime,
                        double elapsedTime,
                        const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
-                       css::CSSOMString propertyName) noexcept;
+                       CSSOMString propertyName) noexcept;
 
     /// @see https://drafts.csswg.org/css-transitions-1/#dom-transitionevent-transitionevent
-    explicit CSSTransitionEvent(dom::DOMStringAtom type,
+    explicit CSSTransitionEvent(DOMStringAtom type,
                                 const CSSTransitionEventInit &eventInitDict = {}) noexcept;
 
     ~CSSTransitionEvent() noexcept override;
@@ -66,7 +66,7 @@ namespace krys::boo
     }
 
     /// @see https://drafts.csswg.org/css-transitions-1/#dom-transitionevent-propertyname
-    KRYS_NODISCARD const css::CSSOMString &PropertyName() const noexcept
+    KRYS_NODISCARD const CSSOMString &PropertyName() const noexcept
     {
       return _propertyName;
     }

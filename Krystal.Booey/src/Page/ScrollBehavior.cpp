@@ -31,7 +31,7 @@
 
 namespace krys::boo
 {
-  bool UseSmoothScrolling(ScrollBehavior behavior, const dom::Element *associatedElement) noexcept
+  bool UseSmoothScrolling(ScrollBehavior behavior, const boo::Element *associatedElement) noexcept
   {
     if (!associatedElement)
     {

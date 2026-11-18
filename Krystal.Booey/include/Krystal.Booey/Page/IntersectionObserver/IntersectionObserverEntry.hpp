@@ -46,7 +46,7 @@ namespace krys::boo
       dom::DOMRectInit BoundingClientRect;
       dom::DOMRectInit IntersectionRect;
       double IntersectionRatio {0};
-      RefPtr<dom::Element> Target;
+      RefPtr<Element> Target;
       bool IsIntersecting {false};
     };
 
@@ -56,7 +56,7 @@ namespace krys::boo
     RefPtr<dom::DOMRectReadOnly> _boundingClientRect;
     RefPtr<dom::DOMRectReadOnly> _intersectionRect;
     double _intersectionRatio {0};
-    RefPtr<dom::Element> _target;
+    RefPtr<Element> _target;
     bool _isIntersecting {false};
 
     explicit IntersectionObserverEntry(const Init &init) noexcept;
@@ -92,7 +92,7 @@ namespace krys::boo
     }
 
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserverentry-target
-    KRYS_NODISCARD dom::Element *Target() const noexcept
+    KRYS_NODISCARD Element *Target() const noexcept
     {
       return _target.get();
     }

@@ -33,10 +33,13 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLProgressElement;
+}
 
+namespace krys::boo::html
+{
   /// @brief An element of a `<progress>`'s shadow tree, rendered only when the progress element has no native
   /// appearance.
   class ProgressShadowElement : public HTMLDivElement
@@ -47,7 +50,7 @@ namespace krys::boo::html
     KRYS_NODISCARD HTMLProgressElement *ProgressElement() const noexcept;
 
   protected:
-    explicit ProgressShadowElement(dom::Document &) noexcept;
+    explicit ProgressShadowElement(Document &) noexcept;
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept override;
   };
@@ -58,9 +61,9 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ProgressInnerElement);
 
   public:
-    explicit ProgressInnerElement(dom::Document &) noexcept;
+    explicit ProgressInnerElement(Document &) noexcept;
 
-    KRYS_NODISCARD static Ref<ProgressInnerElement> Create(dom::Document &) noexcept;
+    KRYS_NODISCARD static Ref<ProgressInnerElement> Create(Document &) noexcept;
 
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept override;
@@ -74,9 +77,9 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ProgressBarElement);
 
   public:
-    explicit ProgressBarElement(dom::Document &) noexcept;
+    explicit ProgressBarElement(Document &) noexcept;
 
-    KRYS_NODISCARD static Ref<ProgressBarElement> Create(dom::Document &) noexcept;
+    KRYS_NODISCARD static Ref<ProgressBarElement> Create(Document &) noexcept;
   };
 
   /// @brief The `::-webkit-progress-value` part, as wide as the progress element's position.
@@ -85,9 +88,9 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ProgressValueElement);
 
   public:
-    explicit ProgressValueElement(dom::Document &) noexcept;
+    explicit ProgressValueElement(Document &) noexcept;
 
-    KRYS_NODISCARD static Ref<ProgressValueElement> Create(dom::Document &) noexcept;
+    KRYS_NODISCARD static Ref<ProgressValueElement> Create(Document &) noexcept;
 
     void SetInlineSizePercentage(double) noexcept;
   };

@@ -22,14 +22,14 @@ namespace krys::boo::tests
   struct AnimationPageFixture
   {
     Ref<Page> TestPage {Page::Create()};
-    RefPtr<dom::HTMLDocument> Document;
+    RefPtr<HTMLDocument> Document;
 
     explicit AnimationPageFixture(utf8_string markup) noexcept
     {
       auto &frame = TestPage->MainFrame();
       frame.CreateView({200, 100});
-      Document = CreateRef<dom::HTMLDocument>();
-      frame.SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+      Document = CreateRef<HTMLDocument>();
+      frame.SetDocument(ShareRefPtr<boo::Document>(Document.get()));
       auto parser = CreateRef<html::DocumentParser>(*Document);
       parser->InputStream().Append(krys::move(markup), IsEOF::Yes);
       parser->PumpTokenizer();
@@ -42,16 +42,16 @@ namespace krys::boo::tests
       TestPage->MainFrame().SetDocument(nullptr);
     }
 
-    KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) const noexcept
+    KRYS_NODISCARD Element &ById(DOMStringView id) const noexcept
     {
       auto element = Document->GetElementById(id);
       REQUIRE(element);
       return *element;
     }
 
-    void SetStyle(dom::DOMStringView id, utf8_stringview style) noexcept
+    void SetStyle(DOMStringView id, utf8_stringview style) noexcept
     {
-      REQUIRE_FALSE(ById(id).SetAttribute(u8"style", dom::DOMString {style}).HasException());
+      REQUIRE_FALSE(ById(id).SetAttribute(u8"style", DOMString {style}).HasException());
     }
 
     /// @brief Runs the event loop @p delta after its last run, then the rendering update if one is scheduled.
@@ -73,7 +73,7 @@ namespace krys::boo::tests
       Frame();
     }
 
-    KRYS_NODISCARD float Opacity(dom::DOMStringView id) noexcept
+    KRYS_NODISCARD float Opacity(DOMStringView id) noexcept
     {
       auto *renderer = ById(id).Renderer();
       REQUIRE(renderer);
@@ -83,11 +83,11 @@ namespace krys::boo::tests
 
   /// @brief Records the animation events fired at an element: their type, then the transition's property or
   /// the animation's name.
-  struct AnimationEventRecorder : dom::EventListenerCallback
+  struct AnimationEventRecorder : EventListenerCallback
   {
     List<std::string> Records;
 
-    void HandleEvent(dom::Event &event) noexcept override
+    void HandleEvent(Event &event) noexcept override
     {
       auto type = event.Type().View();
       std::string record(type.begin(), type.end());
@@ -107,12 +107,11 @@ namespace krys::boo::tests
       Records.push_back(krys::move(record));
     }
 
-    void Listen(dom::Element &element, std::initializer_list<const char8_t *> types) noexcept
+    void Listen(Element &element, std::initializer_list<const char8_t *> types) noexcept
     {
       for (auto type : types)
       {
-        element.AddEventListener(dom::DOMStringAtom(type), ShareRef<dom::EventListenerCallback>(*this),
-                                 false);
+        element.AddEventListener(DOMStringAtom(type), ShareRef<EventListenerCallback>(*this), false);
       }
     }
   };

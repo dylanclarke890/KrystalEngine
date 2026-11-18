@@ -14,12 +14,8 @@
 
 namespace krys::boo
 {
-  class Timer;
-}
-
-namespace krys::boo::dom
-{
   class Document;
+  class Timer;
 }
 
 namespace krys::boo::html
@@ -53,7 +49,7 @@ namespace krys::boo::html
       TaskSource Source;
       EventLoop::Steps Steps;
       /// @see https://html.spec.whatwg.org/#concept-task-document
-      WeakPtr<dom::Document> Document;
+      WeakPtr<boo::Document> Document;
       bool HasDocument {false};
       StoppedDocumentTask WhenStopped {StoppedDocumentTask::Drop};
     };
@@ -90,7 +86,7 @@ namespace krys::boo::html
     /// elements), which waits while the document is suspended; @p whenStopped is what becomes of it once the
     /// document is stopped or gone.
     /// @see https://html.spec.whatwg.org/#queue-a-global-task
-    void QueueTask(TaskSource source, dom::Document &document, Steps &&steps,
+    void QueueTask(TaskSource source, boo::Document &document, Steps &&steps,
                    StoppedDocumentTask whenStopped = StoppedDocumentTask::Drop) noexcept;
 
     /// @brief Queues a task on @p source after @p timeout of the host's time.

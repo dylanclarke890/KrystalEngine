@@ -29,7 +29,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include <utility>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief An additive animation function over a list type, interpolating item by item.
   template <typename TList>
@@ -42,8 +42,8 @@ namespace krys::boo::svg
 
   public:
     template <typename... TArgs>
-    SVGAnimationAdditiveListFunction(AnimationMode animationMode, CalcMode calcMode, bool isAccumulated,
-                                     bool isAdditive, const TArgs &...arguments) noexcept
+    SVGAnimationAdditiveListFunction(svg::AnimationMode animationMode, svg::CalcMode calcMode,
+                                     bool isAccumulated, bool isAdditive, const TArgs &...arguments) noexcept
         : SVGAnimationAdditiveFunction(animationMode, calcMode, isAccumulated, isAdditive),
           _from(TList::Create(arguments...)), _to(TList::Create(arguments...)),
           _toAtEndOfDuration(TList::Create(arguments...))
@@ -56,7 +56,7 @@ namespace krys::boo::svg
       return !_toAtEndOfDuration->IsEmpty() ? _toAtEndOfDuration : _to;
     }
 
-    bool AdjustAnimatedList(AnimationMode animationMode, float percentage, RefPtr<TList> &animated,
+    bool AdjustAnimatedList(svg::AnimationMode animationMode, float percentage, RefPtr<TList> &animated,
                             bool resizeAnimatedIfNeeded = true) noexcept
     {
       if (!_to->NumberOfItems())
@@ -70,7 +70,7 @@ namespace krys::boo::svg
         {
           *animated = *_to;
         }
-        else if (animationMode != AnimationMode::To)
+        else if (animationMode != svg::AnimationMode::To)
         {
           *animated = *_from;
         }

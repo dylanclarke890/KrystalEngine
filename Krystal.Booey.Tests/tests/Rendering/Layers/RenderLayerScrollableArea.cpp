@@ -20,13 +20,12 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, dom::DOMStringView id)
+    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, DOMStringView id)
     {
       return Downcast<RenderBox>(*fixture.ById(id).Renderer());
     }
 
-    KRYS_NODISCARD RenderLayerScrollableArea *ScrollableAreaOf(ResolverFixture &fixture,
-                                                               dom::DOMStringView id)
+    KRYS_NODISCARD RenderLayerScrollableArea *ScrollableAreaOf(ResolverFixture &fixture, DOMStringView id)
     {
       auto *layer = BoxOf(fixture, id).Layer();
       return layer ? layer->GetScrollableArea() : nullptr;

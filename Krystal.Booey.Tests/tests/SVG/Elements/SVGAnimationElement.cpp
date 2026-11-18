@@ -14,7 +14,7 @@ namespace krys::boo::svg::tests
 
   namespace
   {
-    KRYS_NODISCARD float X(const AnimationFixture &fixture, dom::DOMStringView id, float seconds) noexcept
+    KRYS_NODISCARD float X(const AnimationFixture &fixture, DOMStringView id, float seconds) noexcept
     {
       fixture.Seek(seconds);
       return fixture.ById<SVGRectElement>(id).X().ValueInSpecifiedUnits();

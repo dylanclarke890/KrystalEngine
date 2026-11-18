@@ -30,7 +30,7 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class Element;
@@ -51,22 +51,22 @@ namespace krys::boo::html
   class RadioNodeList final : public dom::LiveNodeList
   {
   private:
-    Ref<dom::ContainerNode> _ownerNode;
-    dom::DOMString _name;
+    Ref<ContainerNode> _ownerNode;
+    DOMString _name;
     RadioNodeListCandidates _candidates;
 
   public:
-    RadioNodeList(dom::ContainerNode &ownerNode, dom::DOMStringView name,
+    RadioNodeList(ContainerNode &ownerNode, DOMStringView name,
                   RadioNodeListCandidates candidates = RadioNodeListCandidates::ListedElements) noexcept;
 
     ~RadioNodeList() noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-radionodelist-value
-    KRYS_NODISCARD dom::DOMString Value() const noexcept;
+    KRYS_NODISCARD DOMString Value() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-radionodelist-value
-    void SetValue(dom::DOMStringView value) noexcept;
+    void SetValue(DOMStringView value) noexcept;
 
-    KRYS_NODISCARD bool ElementMatches(const dom::Element &element) const noexcept;
+    KRYS_NODISCARD bool ElementMatches(const Element &element) const noexcept;
   };
 }

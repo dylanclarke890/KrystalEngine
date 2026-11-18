@@ -41,7 +41,7 @@ namespace krys::boo::style
                                                           const css::Value &value) noexcept
   {
     auto processSingleItemFunction = [&](const css::FunctionValue &function,
-                                         Maybe<css::CSSOMString> &parameterToSet) -> bool
+                                         Maybe<CSSOMString> &parameterToSet) -> bool
     {
       if (function.size() != 1)
       {
@@ -59,7 +59,7 @@ namespace krys::boo::style
     };
 
     auto processListFunction = [&](const css::FunctionValue &function,
-                                   List<css::CSSOMString> &parameterToSet) -> bool
+                                   List<CSSOMString> &parameterToSet) -> bool
     {
       if (!function.size())
       {
@@ -183,7 +183,7 @@ namespace krys::boo::style
       if (value)
       {
         valueList.push_back(css::FunctionValue::Create(
-          name.Value, CreateCSSValue(pool, style, css::CustomIdentifier {css::CSSOMStringAtom {*value}})));
+          name.Value, CreateCSSValue(pool, style, css::CustomIdentifier {CSSOMStringAtom {*value}})));
       }
     };
     auto appendListFunction = [&](auto name, const auto &value)
@@ -194,7 +194,7 @@ namespace krys::boo::style
         for (auto &argument : value)
         {
           functionArguments.push_back(
-            CreateCSSValue(pool, style, css::CustomIdentifier {css::CSSOMStringAtom {argument}}));
+            CreateCSSValue(pool, style, css::CustomIdentifier {CSSOMStringAtom {argument}}));
         }
         valueList.push_back(css::FunctionValue::Create(name.Value, krys::move(functionArguments)));
       }
@@ -252,7 +252,7 @@ namespace krys::boo::style
 
         Serialise(builder, context, style, name);
         builder.Append(u8'(');
-        Serialise(builder, context, style, css::CustomIdentifier {css::CSSOMStringAtom {*value}});
+        Serialise(builder, context, style, css::CustomIdentifier {CSSOMStringAtom {*value}});
         builder.Append(u8')');
 
         needsSpace = true;
@@ -277,7 +277,7 @@ namespace krys::boo::style
             builder.Append(u8", ");
           }
           first = false;
-          Serialise(builder, context, style, css::CustomIdentifier {css::CSSOMStringAtom {argument}});
+          Serialise(builder, context, style, css::CustomIdentifier {CSSOMStringAtom {argument}});
         }
         builder.Append(u8')');
 

@@ -36,7 +36,7 @@ namespace krys::boo::css::tests
     }
 
     /// @brief Shows @p document in a new frame with a view of @p viewSize.
-    KRYS_NODISCARD Ref<LocalFrame> ShowInFrame(dom::Document &document, IntSize viewSize = {800, 600})
+    KRYS_NODISCARD Ref<LocalFrame> ShowInFrame(Document &document, IntSize viewSize = {800, 600})
     {
       auto frame = LocalFrame::Create();
       frame->CreateView(viewSize);
@@ -48,7 +48,7 @@ namespace krys::boo::css::tests
     /// on a 1920x1080 screen whose chrome client's answers the test sets (`Chrome`).
     struct EvaluationFixture : ValueFixture
     {
-      Ref<dom::Document> Document {CreateRef<dom::Document>()};
+      Ref<boo::Document> Document {CreateRef<boo::Document>()};
       MediaPage Media {*Document};
       Ref<LocalFrame> Frame {ShareRef(Media.Frame())};
       MediaChromeClient &Chrome {*Media.Chrome};
@@ -184,7 +184,7 @@ namespace krys::boo::css::tests
 
     SECTION("No root element: the condition is unknown")
     {
-      auto document = CreateRef<dom::Document>();
+      auto document = CreateRef<Document>();
       auto frame = ShowInFrame(*document);
       mq::MediaQueryEvaluator evaluator {Screen(), *document, &fixture.RootStyle};
       CHECK_FALSE(evaluator.Evaluate(Parse(u8"(width)")));
@@ -470,7 +470,7 @@ namespace krys::boo::css::tests
   {
     EvaluationFixture fixture;
 
-    mq::FeatureEvaluationContext context {CreateWeakRef<const dom::Document>(*fixture.Document),
+    mq::FeatureEvaluationContext context {CreateWeakRef<const boo::Document>(*fixture.Document),
                                           {fixture.RootStyle, &fixture.RootStyle, nullptr, nullptr},
                                           nullptr};
     for (auto *schema : mq::features::AllSchemas())

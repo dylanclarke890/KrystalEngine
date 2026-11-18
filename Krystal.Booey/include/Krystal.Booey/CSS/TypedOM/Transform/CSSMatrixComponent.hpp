@@ -31,7 +31,10 @@
 namespace krys::boo::css
 {
   class DOMMatrixReadOnly;
+}
 
+namespace krys::boo
+{
   /// @see https://drafts.css-houdini.org/css-typed-om/#dictdef-cssmatrixcomponentoptions
   struct CSSMatrixComponentOptions
   {
@@ -43,48 +46,48 @@ namespace krys::boo::css
   class CSSMatrixComponent final : public CSSTransformComponent
   {
   private:
-    Ref<DOMMatrix> _matrix;
+    Ref<css::DOMMatrix> _matrix;
 
   public:
     /// @brief A matrix component of a copy of @p matrix, 2D if @p options say so, or if they don't and the
     /// matrix is.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssmatrixcomponent-cssmatrixcomponent
-    KRYS_NODISCARD static Ref<CSSMatrixComponent> Create(const DOMMatrixReadOnly &matrix,
+    KRYS_NODISCARD static Ref<CSSMatrixComponent> Create(const css::DOMMatrixReadOnly &matrix,
                                                          CSSMatrixComponentOptions options = {}) noexcept;
 
     /// @brief Reifies a `matrix()` or `matrix3d()` function.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSMatrixComponent>> Create(const FunctionValue &function,
-                                                                           dom::Document &document) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSMatrixComponent>> Create(const css::FunctionValue &function,
+                                                                      Document &document) noexcept;
 
     ~CSSMatrixComponent() noexcept override;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssmatrixcomponent-matrix
-    KRYS_NODISCARD DOMMatrix &Matrix() const noexcept
+    KRYS_NODISCARD css::DOMMatrix &Matrix() const noexcept
     {
       return *_matrix;
     }
 
-    void SetMatrix(Ref<DOMMatrix> matrix) noexcept;
+    void SetMatrix(Ref<css::DOMMatrix> matrix) noexcept;
 
     void Serialise(StringBuilder &builder) const noexcept final;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<DOMMatrix>> ToMatrix() const noexcept final;
+    KRYS_NODISCARD ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
 
     KRYS_NODISCARD CSSTransformType TransformType() const noexcept final
     {
       return CSSTransformType::MatrixComponent;
     }
 
-    KRYS_NODISCARD RefPtr<Value> ToCSSValue() const noexcept final;
+    KRYS_NODISCARD RefPtr<css::Value> ToCSSValue() const noexcept final;
 
   private:
-    CSSMatrixComponent(const DOMMatrixReadOnly &matrix, bool is2D) noexcept;
+    CSSMatrixComponent(const css::DOMMatrixReadOnly &matrix, bool is2D) noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSMatrixComponent)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSTransformComponent &component) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSMatrixComponent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSTransformComponent &component) noexcept
   {
-    return component.TransformType() == krys::boo::css::CSSTransformType::MatrixComponent;
+    return component.TransformType() == krys::boo::CSSTransformType::MatrixComponent;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

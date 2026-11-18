@@ -228,7 +228,7 @@ namespace krys::boo::dom::tests
 
     SECTION("Focusing")
     {
-      auto &html = Downcast<html::HTMLElement>(target);
+      auto &html = Downcast<HTMLElement>(target);
       FocusOptions options;
       options.PreventScroll = true;
       html.Focus(options);
@@ -247,7 +247,7 @@ namespace krys::boo::dom::tests
 
       // Focusing an element that can't be focused leaves the focused element where it is.
       s.ScrollTo(0, 0);
-      Downcast<html::HTMLElement>(s).Focus();
+      Downcast<HTMLElement>(s).Focus();
       html::EventLoop::Current().RunUntilIdle();
       CHECK(fixture.Document->FocusedElement() == &target);
       CHECK(s.ScrollTop() == 0);
@@ -269,7 +269,7 @@ namespace krys::boo::dom::tests
       u8"<div id=s><span id=a></span><span id=b></span><span id=c></span><span id=d></span>"
       u8"<span id=e></span></div><div id=v><div id=vc></div></div>"};
     auto &s = fixture.ById(u8"s");
-    auto x = [&](dom::DOMStringView id)
+    auto x = [&](DOMStringView id)
     {
       return fixture.ById(id).GetBoundingClientRect()->X();
     };

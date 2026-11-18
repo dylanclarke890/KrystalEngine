@@ -49,11 +49,11 @@ namespace krys::boo
     };
 
     template <typename TCallback>
-    void ForEachFilterPrimitive(svg::SVGFilterElement &filterElement, const TCallback &callback) noexcept
+    void ForEachFilterPrimitive(boo::SVGFilterElement &filterElement, const TCallback &callback) noexcept
     {
       for (auto *child = filterElement.FirstChild(); child; child = child->NextSibling())
       {
-        if (auto *effectElement = DynamicDowncast<svg::SVGFilterPrimitiveStandardAttributes>(*child))
+        if (auto *effectElement = DynamicDowncast<SVGFilterPrimitiveStandardAttributes>(*child))
         {
           if (!callback(*effectElement))
           {
@@ -64,7 +64,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD Maybe<BuiltFilterEffectGraph>
-      BuildFilterEffectGraph(svg::SVGElement *contextElement, svg::SVGFilterElement &filterElement,
+      BuildFilterEffectGraph(boo::SVGElement *contextElement, boo::SVGFilterElement &filterElement,
                              const SVGFilterRenderer &filter,
                              const GraphicsContext &destinationContext) noexcept
     {
@@ -80,7 +80,7 @@ namespace krys::boo
 
       ForEachFilterPrimitive(
         filterElement,
-        [&](svg::SVGFilterPrimitiveStandardAttributes &effectElement)
+        [&](SVGFilterPrimitiveStandardAttributes &effectElement)
         {
           auto inputNames = effectElement.FilterEffectInputsNames();
           auto inputs = graph.GetNamedNodes(inputNames);
@@ -99,7 +99,7 @@ namespace krys::boo
 
           if (auto flags = effectElement.EffectGeometryFlags(); !flags.IsEmpty())
           {
-            auto effectBoundaries = svg::SVGLengthContext::ResolveRectangle(
+            auto effectBoundaries = SVGLengthContext::ResolveRectangle(
               contextElement, effectElement, filter.PrimitiveUnits(), filter.ReferenceBox());
             result.EffectGeometryMap.insert_or_assign(effect, FilterEffectGeometry(effectBoundaries, flags));
           }
@@ -109,7 +109,7 @@ namespace krys::boo
             effect->SetOperatingColorSpace(DestinationColorSpace::LinearSRGB());
           }
 
-          graph.AddNamedNode(dom::DOMStringAtom(effectElement.Result()), Ref<FilterEffect>(effect));
+          graph.AddNamedNode(DOMStringAtom(effectElement.Result()), Ref<FilterEffect>(effect));
           graph.SetNodeInputs(*effect, krys::move(*inputs));
           return true;
         });
@@ -123,7 +123,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD Maybe<SVGFilterPrimitiveGraph>
-      BuildFilterPrimitiveGraph(svg::SVGFilterElement &filterElement) noexcept
+      BuildFilterPrimitiveGraph(boo::SVGFilterElement &filterElement) noexcept
     {
       auto countChildNodes = filterElement.CountChildNodes();
       if (!countChildNodes || countChildNodes > MaxCountChildNodes)
@@ -135,13 +135,13 @@ namespace krys::boo
 
       ForEachFilterPrimitive(
         filterElement,
-        [&](svg::SVGFilterPrimitiveStandardAttributes &effectElement)
+        [&](SVGFilterPrimitiveStandardAttributes &effectElement)
         {
           // We should not be strict about not finding the input primitives here because SourceGraphic and
           // SourceAlpha do not have primitives.
           auto inputNames = effectElement.FilterEffectInputsNames();
           auto inputs = graph.GetNamedNodes(inputNames).value_or(SVGFilterPrimitiveGraph::NodeVector());
-          graph.AddNamedNode(dom::DOMStringAtom(effectElement.Result()), ShareRef(effectElement));
+          graph.AddNamedNode(DOMStringAtom(effectElement.Result()), ShareRef(effectElement));
           graph.SetNodeInputs(effectElement, krys::move(inputs));
           return true;
         });
@@ -150,8 +150,8 @@ namespace krys::boo
     }
   }
 
-  RefPtr<SVGFilterRenderer> SVGFilterRenderer::Create(svg::SVGElement *contextElement,
-                                                      svg::SVGFilterElement &filterElement,
+  RefPtr<SVGFilterRenderer> SVGFilterRenderer::Create(boo::SVGElement *contextElement,
+                                                      boo::SVGFilterElement &filterElement,
                                                       const FilterGeometry &geometry,
                                                       EnumSet<FilterRenderingMode> preferredRenderingModes,
                                                       const GraphicsContext &destinationContext) noexcept
@@ -174,7 +174,7 @@ namespace krys::boo
   }
 
   Ref<SVGFilterRenderer>
-    SVGFilterRenderer::Create(svg::SVGUnitTypes::SVGUnitType primitiveUnits, SVGFilterExpression &&expression,
+    SVGFilterRenderer::Create(SVGUnitTypes::SVGUnitType primitiveUnits, SVGFilterExpression &&expression,
                               FilterEffectVector &&effects, const FilterGeometry &geometry,
                               EnumSet<FilterRenderingMode> preferredRenderingModes) noexcept
   {
@@ -187,13 +187,13 @@ namespace krys::boo
   }
 
   SVGFilterRenderer::SVGFilterRenderer(const FilterGeometry &geometry,
-                                       svg::SVGUnitTypes::SVGUnitType primitiveUnits) noexcept
+                                       SVGUnitTypes::SVGUnitType primitiveUnits) noexcept
       : Filter(Type::SVGFilterRenderer, geometry), _primitiveUnits(primitiveUnits)
   {
   }
 
   SVGFilterRenderer::SVGFilterRenderer(const FilterGeometry &geometry,
-                                       svg::SVGUnitTypes::SVGUnitType primitiveUnits,
+                                       SVGUnitTypes::SVGUnitType primitiveUnits,
                                        SVGFilterExpression &&expression,
                                        FilterEffectVector &&effects) noexcept
       : Filter(Type::SVGFilterRenderer, geometry), _primitiveUnits(primitiveUnits),
@@ -201,8 +201,8 @@ namespace krys::boo
   {
   }
 
-  auto SVGFilterRenderer::BuildExpression(svg::SVGElement *contextElement,
-                                          svg::SVGFilterElement &filterElement,
+  auto SVGFilterRenderer::BuildExpression(boo::SVGElement *contextElement,
+                                          boo::SVGFilterElement &filterElement,
                                           const SVGFilterRenderer &filter,
                                           const GraphicsContext &destinationContext) noexcept
     -> Maybe<BuiltExpression>
@@ -247,7 +247,7 @@ namespace krys::boo
     return BuiltExpression {krys::move(expression), krys::move(effects)};
   }
 
-  bool SVGFilterRenderer::IsIdentity(svg::SVGFilterElement &filterElement) noexcept
+  bool SVGFilterRenderer::IsIdentity(boo::SVGFilterElement &filterElement) noexcept
   {
     auto graph = BuildFilterPrimitiveGraph(filterElement);
     if (!graph)
@@ -257,7 +257,7 @@ namespace krys::boo
 
     bool isIdentity = true;
     graph->Visit(
-      [&](svg::SVGFilterPrimitiveStandardAttributes &primitive, uint32)
+      [&](SVGFilterPrimitiveStandardAttributes &primitive, uint32)
       {
         if (!primitive.IsIdentity())
         {
@@ -268,7 +268,7 @@ namespace krys::boo
     return isIdentity;
   }
 
-  IntOutsets SVGFilterRenderer::CalculateOutsets(svg::SVGFilterElement &filterElement,
+  IntOutsets SVGFilterRenderer::CalculateOutsets(boo::SVGFilterElement &filterElement,
                                                  const FloatRect &targetBoundingBox) noexcept
   {
     auto graph = BuildFilterPrimitiveGraph(filterElement);
@@ -292,7 +292,7 @@ namespace krys::boo
     };
 
     bool result = graph->Visit(
-      [&](svg::SVGFilterPrimitiveStandardAttributes &primitive, uint32 level)
+      [&](SVGFilterPrimitiveStandardAttributes &primitive, uint32 level)
       {
         auto primitiveOutsets = primitive.Outsets(targetBoundingBox, filterElement.PrimitiveUnits());
         uint32 lastLevel = outsetsStack.empty() ? 0 : outsetsStack.back().second;
@@ -326,11 +326,10 @@ namespace krys::boo
 
   FloatSize SVGFilterRenderer::CalculateResolvedSize(const FloatSize &size,
                                                      const FloatRect &targetBoundingBox,
-                                                     svg::SVGUnitTypes::SVGUnitType primitiveUnits) noexcept
+                                                     SVGUnitTypes::SVGUnitType primitiveUnits) noexcept
   {
-    return primitiveUnits == svg::SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX
-             ? size * targetBoundingBox.Size()
-             : size;
+    return primitiveUnits == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX ? size * targetBoundingBox.Size()
+                                                                           : size;
   }
 
   FloatSize SVGFilterRenderer::ResolvedSize(const FloatSize &size) const noexcept
@@ -340,7 +339,7 @@ namespace krys::boo
 
   FloatPoint3D SVGFilterRenderer::ResolvedPoint3D(const FloatPoint3D &point) const noexcept
   {
-    if (_primitiveUnits != svg::SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
+    if (_primitiveUnits != SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
     {
       return point;
     }

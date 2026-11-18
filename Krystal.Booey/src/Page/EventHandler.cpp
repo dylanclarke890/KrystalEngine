@@ -117,17 +117,17 @@ namespace krys::boo
     // FIXME: A fullscreen video, once there is one.
     // https://html.spec.whatwg.org/#focus-processing-model
     // (The target node of a routed key event.)
-    KRYS_NODISCARD dom::Element *EventTargetElementForDocument(dom::Document *document) noexcept
+    KRYS_NODISCARD Element *EventTargetElementForDocument(Document *document) noexcept
     {
       if (!document)
       {
         return nullptr;
       }
       // 3. Let target node be target area's DOM anchor.
-      dom::Element *element = document->FocusedElement();
+      Element *element = document->FocusedElement();
       // 4. If target node is a Document that has a body element, then let target node be the body element of
       //    that Document.
-      if (!element && Is<dom::HTMLDocument>(*document))
+      if (!element && Is<HTMLDocument>(*document))
       {
         element = document->BodyOrFrameset();
       }
@@ -155,11 +155,11 @@ namespace krys::boo
 
     /// @brief The nearest inclusive ancestor of @p a and @p b in the composed tree, or null if they're in
     /// different trees.
-    KRYS_NODISCARD dom::Node *CommonInclusiveAncestorInComposedTree(dom::Node &a, dom::Node &b) noexcept
+    KRYS_NODISCARD Node *CommonInclusiveAncestorInComposedTree(Node &a, Node &b) noexcept
     {
-      for (dom::Node *ancestorOfA = &a; ancestorOfA; ancestorOfA = ancestorOfA->ParentInComposedTree())
+      for (Node *ancestorOfA = &a; ancestorOfA; ancestorOfA = ancestorOfA->ParentInComposedTree())
       {
-        for (dom::Node *ancestorOfB = &b; ancestorOfB; ancestorOfB = ancestorOfB->ParentInComposedTree())
+        for (Node *ancestorOfB = &b; ancestorOfB; ancestorOfB = ancestorOfB->ParentInComposedTree())
         {
           if (ancestorOfA == ancestorOfB)
           {
@@ -170,8 +170,7 @@ namespace krys::boo
       return nullptr;
     }
 
-    KRYS_NODISCARD RefPtr<dom::Node> TargetNodeForClickEvent(dom::Node *mousePressNode,
-                                                             dom::Node *mouseReleaseNode) noexcept
+    KRYS_NODISCARD RefPtr<Node> TargetNodeForClickEvent(Node *mousePressNode, Node *mouseReleaseNode) noexcept
     {
       if (!mousePressNode || !mouseReleaseNode)
       {
@@ -213,11 +212,11 @@ namespace krys::boo
       {
         return true;
       }
-      auto *shadowRoot = DynamicDowncast<dom::ShadowRoot>(*targetNode);
-      return shadowRoot && shadowRoot->Host() && Is<html::HTMLInputElement>(*shadowRoot->Host());
+      auto *shadowRoot = DynamicDowncast<ShadowRoot>(*targetNode);
+      return shadowRoot && shadowRoot->Host() && Is<HTMLInputElement>(*shadowRoot->Host());
     }
 
-    KRYS_NODISCARD dom::FocusDirection FocusDirectionForKey(const dom::DOMString &keyIdentifier) noexcept
+    KRYS_NODISCARD dom::FocusDirection FocusDirectionForKey(const DOMString &keyIdentifier) noexcept
     {
       if (keyIdentifier == u8"Down")
       {
@@ -251,11 +250,11 @@ namespace krys::boo
       return mouseEvent.GetScrollbar();
     }
 
-    KRYS_NODISCARD RefPtr<dom::Element> GetElementOrAncestorElementForNode(dom::Node *targetNode) noexcept
+    KRYS_NODISCARD RefPtr<Element> GetElementOrAncestorElementForNode(Node *targetNode) noexcept
     {
       while (targetNode)
       {
-        if (auto *asElement = DynamicDowncast<dom::Element>(targetNode))
+        if (auto *asElement = DynamicDowncast<Element>(targetNode))
         {
           return ShareRefPtr(asElement);
         }
@@ -276,39 +275,37 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD bool HasCapturingBoundaryListenerOn(const dom::EventTarget &target,
-                                                       Span<const dom::DOMStringAtom> types) noexcept
+    KRYS_NODISCARD bool HasCapturingBoundaryListenerOn(const EventTarget &target,
+                                                       Span<const DOMStringAtom> types) noexcept
     {
-      return std::ranges::any_of(types, [&](const dom::DOMStringAtom &type)
+      return std::ranges::any_of(types, [&](const DOMStringAtom &type)
                                  { return target.HasCapturingEventListener(type); });
     }
 
-    KRYS_NODISCARD bool
-      HasCapturingBoundaryListenerOnShadowRoot(const dom::Element &element,
-                                               Span<const dom::DOMStringAtom> types) noexcept
+    KRYS_NODISCARD bool HasCapturingBoundaryListenerOnShadowRoot(const Element &element,
+                                                                 Span<const DOMStringAtom> types) noexcept
     {
       auto &root = element.TreeScope().RootNode();
-      return Is<dom::ShadowRoot>(root) && HasCapturingBoundaryListenerOn(root, types);
+      return Is<ShadowRoot>(root) && HasCapturingBoundaryListenerOn(root, types);
     }
   }
 
-  bool EventHandler::HasBoundaryListener(const dom::Element &element,
-                                         Span<const dom::DOMStringAtom> types) noexcept
+  bool EventHandler::HasBoundaryListener(const Element &element, Span<const DOMStringAtom> types) noexcept
   {
     return std::ranges::any_of(types,
-                               [&](const dom::DOMStringAtom &type) { return element.HasEventListener(type); })
+                               [&](const DOMStringAtom &type) { return element.HasEventListener(type); })
            || HasCapturingBoundaryListenerOnShadowRoot(element, types);
   }
 
-  bool EventHandler::HasCapturingBoundaryListener(const dom::Element &element,
-                                                  Span<const dom::DOMStringAtom> types) noexcept
+  bool EventHandler::HasCapturingBoundaryListener(const Element &element,
+                                                  Span<const DOMStringAtom> types) noexcept
   {
     return HasCapturingBoundaryListenerOn(element, types)
            || HasCapturingBoundaryListenerOnShadowRoot(element, types);
   }
 
-  bool EventHandler::HasCapturingBoundaryListenerAbove(const dom::Element &element,
-                                                       Span<const dom::DOMStringAtom> types) noexcept
+  bool EventHandler::HasCapturingBoundaryListenerAbove(const Element &element,
+                                                       Span<const DOMStringAtom> types) noexcept
   {
     if (HasCapturingBoundaryListenerOnShadowRoot(element, types))
     {
@@ -337,12 +334,12 @@ namespace krys::boo
     _resizeLayer = nullptr;
   }
 
-  void EventHandler::SetCapturingMouseEventsElement(RefPtr<dom::Element> &&element) noexcept
+  void EventHandler::SetCapturingMouseEventsElement(RefPtr<Element> &&element) noexcept
   {
     _capturingMouseEventsElement = krys::move(element);
   }
 
-  void EventHandler::PointerCaptureElementDidChange(dom::Element *element) noexcept
+  void EventHandler::PointerCaptureElementDidChange(Element *element) noexcept
   {
     if (_capturingMouseEventsElement.get() == element)
     {
@@ -374,7 +371,7 @@ namespace krys::boo
     Ref frame = ShareRef(_frame);
 
     auto result = HitTestResult {point};
-    RefPtr<dom::Document> document = ShareRefPtr(frame->Document());
+    RefPtr<boo::Document> document = ShareRefPtr(frame->Document());
     if (!document)
     {
       return result;
@@ -387,7 +384,7 @@ namespace krys::boo
     document->HitTest(request, result);
     if (!request.ReadOnly())
     {
-      RefPtr<dom::Element> targetElement = ShareRefPtr(result.TargetElement());
+      RefPtr<Element> targetElement = ShareRefPtr(result.TargetElement());
       document->UpdateHoverActiveState(request, targetElement.get());
     }
 
@@ -434,9 +431,9 @@ namespace krys::boo
     CancelFakeMouseMoveEvent();
   }
 
-  void EventHandler::NodeWillBeRemoved(dom::Node &nodeToBeRemoved) noexcept
+  void EventHandler::NodeWillBeRemoved(Node &nodeToBeRemoved) noexcept
   {
-    auto contains = [&](dom::Node *node)
+    auto contains = [&](Node *node)
     {
       return node && dom::TreeQueries::IsShadowIncludingInclusiveAncestor(nodeToBeRemoved, *node);
     };
@@ -448,7 +445,7 @@ namespace krys::boo
 
     if (contains(_elementUnderMouse.get()))
     {
-      if (auto *elementBeingRemoved = DynamicDowncast<dom::Element>(nodeToBeRemoved))
+      if (auto *elementBeingRemoved = DynamicDowncast<Element>(nodeToBeRemoved))
       {
         _mouseMoveTargetOverride = ShareRefPtr(elementBeingRemoved->ParentElementInComposedTree());
       }
@@ -466,7 +463,7 @@ namespace krys::boo
 
     // Ancestors are held strongly, so the removed ones are dropped here.
     std::erase_if(_ancestorsOfLastElementUnderMouse,
-                  [&](const RefPtr<dom::Element> &element) { return contains(element.get()); });
+                  [&](const RefPtr<Element> &element) { return contains(element.get()); });
   }
 
   void EventHandler::SetLastKnownMousePosition(DoublePoint position, DoublePoint globalPosition) noexcept
@@ -564,7 +561,7 @@ namespace krys::boo
       layer->SetInResizeMode(true);
       _resizeLayer = CreateWeakPtr(layer);
       _offsetFromResizeCorner = LayoutSize(layer->OffsetFromResizeCorner(localPoint));
-      RefPtr<dom::Node> resizedNode = ShareRefPtr(mouseEvent.TargetNode());
+      RefPtr<Node> resizedNode = ShareRefPtr(mouseEvent.TargetNode());
       (void)DispatchMouseEvent(event_names::MouseDown, resizedNode.get(), _clickCount, platformMouseEvent,
                                FireMouseOverOut::Yes);
       return true;
@@ -572,7 +569,7 @@ namespace krys::boo
 
     _frame.Document()->Selection().SetCaretBlinkingSuspended(true);
 
-    RefPtr<dom::Node> targetNode = ShareRefPtr(mouseEvent.TargetNode());
+    RefPtr<Node> targetNode = ShareRefPtr(mouseEvent.TargetNode());
     bool swallowEvent = !DispatchMouseEvent(event_names::MouseDown, targetNode.get(), _clickCount,
                                             platformMouseEvent, FireMouseOverOut::Yes);
     if (!swallowEvent || mouseEvent.GetScrollbar())
@@ -711,7 +708,7 @@ namespace krys::boo
       UpdateCursor(*view, mouseEvent.GetHitTestResult(), platformMouseEvent.ShiftKey());
     }
 
-    RefPtr<dom::Node> targetNode = ShareRefPtr(mouseEvent.TargetNode());
+    RefPtr<Node> targetNode = ShareRefPtr(mouseEvent.TargetNode());
     bool swallowEvent = !DispatchMouseEvent(event_names::MouseMove, targetNode.get(), 0, platformMouseEvent,
                                             FireMouseOverOut::Yes);
 
@@ -768,7 +765,7 @@ namespace krys::boo
       return false;
     }
 
-    RefPtr<dom::Node> nodeToClick;
+    RefPtr<Node> nodeToClick;
     if (ignoreAncestorNodesForClickEvent == IgnoreAncestorNodesForClickEvent::Yes)
     {
       if (mouseEvent.TargetNode() == _clickNode.get())
@@ -778,7 +775,7 @@ namespace krys::boo
     }
     else
     {
-      RefPtr<dom::Node> clickNode = _clickNode;
+      RefPtr<Node> clickNode = _clickNode;
       nodeToClick = TargetNodeForClickEvent(clickNode.get(), mouseEvent.TargetNode());
     }
 
@@ -792,10 +789,10 @@ namespace krys::boo
     //
     // The click event should only be fired for the primary pointer button.
     bool isPrimaryPointerButton = platformMouseEvent.Button() == MouseButton::Left;
-    dom::DOMStringAtom eventName(isPrimaryPointerButton ? event_names::Click : event_names::AuxClick);
+    DOMStringAtom eventName(isPrimaryPointerButton ? event_names::Click : event_names::AuxClick);
 
     bool swallowed = false;
-    RefPtr<dom::Element> clickCaptureElement = std::exchange(_clickCaptureElement, nullptr);
+    RefPtr<Element> clickCaptureElement = std::exchange(_clickCaptureElement, nullptr);
     if (clickCaptureElement)
     {
       UpdateMouseEventTargetNode(eventName, nodeToClick.get(), platformMouseEvent, FireMouseOverOut::Yes);
@@ -812,16 +809,15 @@ namespace krys::boo
     return swallowed;
   }
 
-  bool EventHandler::DispatchAnyClickEvent(dom::DOMStringAtom eventType, dom::Node *clickNode,
-                                           int32 clickCount,
+  bool EventHandler::DispatchAnyClickEvent(DOMStringAtom eventType, Node *clickNode, int32 clickCount,
                                            const PlatformMouseEvent &platformMouseEvent) noexcept
   {
     if (clickNode)
     {
-      if (RefPtr<dom::Element> node = ShareRefPtr(DynamicDowncast<dom::Element>(clickNode)))
+      if (RefPtr<Element> node = ShareRefPtr(DynamicDowncast<Element>(clickNode)))
       {
         return node->DispatchMouseEvent(platformMouseEvent, krys::move(eventType), clickCount).Dispatched
-               == dom::Element::EventIsDispatched::Yes;
+               == Element::EventIsDispatched::Yes;
       }
     }
     return false;
@@ -856,7 +852,7 @@ namespace krys::boo
     {
       InvalidateClick();
       (void)lastScrollbarUnderMouse->MouseUp(platformMouseEvent);
-      RefPtr<dom::Element> lastElementUnderMouse = _lastElementUnderMouse;
+      RefPtr<Element> lastElementUnderMouse = _lastElementUnderMouse;
       return !DispatchMouseEvent(event_names::MouseUp, lastElementUnderMouse.get(), _clickCount,
                                  platformMouseEvent, FireMouseOverOut::No);
     }
@@ -868,7 +864,7 @@ namespace krys::boo
 
     // FIXME: Mouse capture.
 
-    RefPtr<dom::Node> targetNode = ShareRefPtr(mouseEvent.TargetNode());
+    RefPtr<Node> targetNode = ShareRefPtr(mouseEvent.TargetNode());
     bool swallowMouseUpEvent = !DispatchMouseEvent(event_names::MouseUp, targetNode.get(), _clickCount,
                                                    platformMouseEvent, FireMouseOverOut::Yes);
 
@@ -903,7 +899,7 @@ namespace krys::boo
       request, DocumentPointForWindowPoint(*frame, mouseEvent.Position()), mouseEvent);
   }
 
-  List<ScrollableArea *> EventHandler::ScrollableAreasEnclosing(dom::Node *node) const noexcept
+  List<ScrollableArea *> EventHandler::ScrollableAreasEnclosing(Node *node) const noexcept
   {
     List<ScrollableArea *> areas;
     auto *frameView = _frame.View();
@@ -916,7 +912,7 @@ namespace krys::boo
     RenderLayer *scrollableLayer = nullptr;
     for (auto *ancestor = node; ancestor; ancestor = ancestor->ParentOrShadowHostNode())
     {
-      if (Is<html::HTMLHtmlElement>(*ancestor) || Is<dom::Document>(*ancestor))
+      if (Is<HTMLHtmlElement>(*ancestor) || Is<Document>(*ancestor))
       {
         break;
       }
@@ -971,9 +967,9 @@ namespace krys::boo
     return areas;
   }
 
-  void EventHandler::NotifyScrollableAreasOfMouseEvents(const dom::DOMStringAtom &eventType,
-                                                        dom::Element *lastElementUnderMouse,
-                                                        dom::Element *elementUnderMouse) noexcept
+  void EventHandler::NotifyScrollableAreasOfMouseEvents(const DOMStringAtom &eventType,
+                                                        Element *lastElementUnderMouse,
+                                                        Element *elementUnderMouse) noexcept
   {
     auto lastAreas = ScrollableAreasEnclosing(lastElementUnderMouse);
     auto areas = ScrollableAreasEnclosing(elementUnderMouse);
@@ -1005,7 +1001,7 @@ namespace krys::boo
     }
   }
 
-  void EventHandler::UpdateMouseEventTargetNode(dom::DOMStringAtom eventType, dom::Node *targetNode,
+  void EventHandler::UpdateMouseEventTargetNode(DOMStringAtom eventType, Node *targetNode,
                                                 const PlatformMouseEvent &platformMouseEvent,
                                                 FireMouseOverOut fireMouseOverOut) noexcept
   {
@@ -1039,20 +1035,20 @@ namespace krys::boo
 
       if (_lastElementUnderMouse != _elementUnderMouse)
       {
-        List<Ref<dom::Element>> leftElementsChain;
-        for (dom::Element *element = _lastElementUnderMouse.get(); element;
+        List<Ref<Element>> leftElementsChain;
+        for (Element *element = _lastElementUnderMouse.get(); element;
              element = element->ParentElementInComposedTree())
         {
           leftElementsChain.push_back(ShareRef(*element));
         }
-        List<RefPtr<dom::Element>> elementsUnderMouse;
-        for (dom::Element *element = _elementUnderMouse.get(); element;
+        List<RefPtr<Element>> elementsUnderMouse;
+        for (Element *element = _elementUnderMouse.get(); element;
              element = element->ParentElementInComposedTree())
         {
           elementsUnderMouse.push_back(ShareRefPtr(element));
         }
 
-        List<RefPtr<dom::Element>> enteredElementsChain = elementsUnderMouse;
+        List<RefPtr<Element>> enteredElementsChain = elementsUnderMouse;
         if (!leftElementsChain.empty() && !enteredElementsChain.empty()
             && leftElementsChain.back().get() == enteredElementsChain.back().get())
         {
@@ -1074,14 +1070,12 @@ namespace krys::boo
 
         // Enter and leave events (and the pointer events dispatched with them) go only to the elements a
         // listener would see them on, as they don't bubble.
-        const std::array<dom::DOMStringAtom, 2> leaveTypes {event_names::MouseLeave,
-                                                            event_names::PointerLeave};
-        const std::array<dom::DOMStringAtom, 2> enterTypes {event_names::MouseEnter,
-                                                            event_names::PointerEnter};
+        const std::array<DOMStringAtom, 2> leaveTypes {event_names::MouseLeave, event_names::PointerLeave};
+        const std::array<DOMStringAtom, 2> enterTypes {event_names::MouseEnter, event_names::PointerEnter};
         RemoveBoundaryTargetsWithoutListeners(leftElementsChain, leaveTypes);
         RemoveBoundaryTargetsWithoutListeners(enteredElementsChain, enterTypes);
 
-        if (RefPtr<dom::Element> lastElementUnderMouse = _lastElementUnderMouse)
+        if (RefPtr<Element> lastElementUnderMouse = _lastElementUnderMouse)
         {
           (void)lastElementUnderMouse->DispatchMouseEvent(platformMouseEvent, event_names::MouseOut, 0,
                                                           _elementUnderMouse.get());
@@ -1093,7 +1087,7 @@ namespace krys::boo
                                           _elementUnderMouse.get());
         }
 
-        if (RefPtr<dom::Element> elementUnderMouse = _elementUnderMouse)
+        if (RefPtr<Element> elementUnderMouse = _elementUnderMouse)
         {
           (void)elementUnderMouse->DispatchMouseEvent(platformMouseEvent, event_names::MouseOver, 0,
                                                       _lastElementUnderMouse.get());
@@ -1136,19 +1130,19 @@ namespace krys::boo
     _elementUnderMouse = nullptr;
   }
 
-  bool EventHandler::IsElementAnAncestorOfLastElementUnderMouse(dom::Element *element) const noexcept
+  bool EventHandler::IsElementAnAncestorOfLastElementUnderMouse(Element *element) const noexcept
   {
     if (!element)
     {
       return false;
     }
 
-    return std::ranges::any_of(_ancestorsOfLastElementUnderMouse, [&](const RefPtr<dom::Element> &ancestor)
-                               { return ancestor.get() == element; });
+    return std::ranges::any_of(_ancestorsOfLastElementUnderMouse,
+                               [&](const RefPtr<Element> &ancestor) { return ancestor.get() == element; });
   }
 
-  bool EventHandler::DispatchMouseEvent(const dom::DOMStringAtom &eventType, dom::Node *targetNode,
-                                        int32 clickCount, const PlatformMouseEvent &platformMouseEvent,
+  bool EventHandler::DispatchMouseEvent(const DOMStringAtom &eventType, Node *targetNode, int32 clickCount,
+                                        const PlatformMouseEvent &platformMouseEvent,
                                         FireMouseOverOut fireMouseOverOut) noexcept
   {
     _mouseMoveTargetOverride = nullptr;
@@ -1158,7 +1152,7 @@ namespace krys::boo
 
     bool isMouseDownEvent = eventType == event_names::MouseDown;
 
-    RefPtr<dom::Element> elementUnderMouse = _elementUnderMouse;
+    RefPtr<Element> elementUnderMouse = _elementUnderMouse;
     if (eventType == event_names::MouseMove && _mouseMoveTargetOverride)
     {
       // If _mouseMoveTargetOverride is set, targetNode must have been disconnected during the execution of
@@ -1175,7 +1169,7 @@ namespace krys::boo
       auto result = elementUnderMouse->DispatchMouseEvent(platformMouseEvent, eventType, clickCount);
       _mouseMoveTargetOverride = nullptr;
       _capturesDragging = CapturesDragging::InabilityReason::Unknown;
-      if (result.DefaultPrevented == dom::Element::EventIsDefaultPrevented::Yes)
+      if (result.DefaultPrevented == Element::EventIsDefaultPrevented::Yes)
       {
         if (isMouseDownEvent)
         {
@@ -1186,7 +1180,7 @@ namespace krys::boo
           _capturesDragging = CapturesDragging::InabilityReason::MouseMoveIsCancelled;
         }
       }
-      if (result.Dispatched == dom::Element::EventIsDispatched::No)
+      if (result.Dispatched == Element::EventIsDispatched::No)
       {
         return false;
       }
@@ -1209,8 +1203,8 @@ namespace krys::boo
     // FIXME: A press inside a selected range in the focused element doesn't move the focus, once there's a
     // selection. (Form controls are mouse focusable here, as on GTK and WPE, so the latest focus trigger
     // needs no workaround for those that aren't.)
-    RefPtr<dom::Element> element;
-    if (RefPtr<dom::Element> pressedElement = _elementUnderMouse)
+    RefPtr<Element> element;
+    if (RefPtr<Element> pressedElement = _elementUnderMouse)
     {
       element = ShareRefPtr(html::FocusAlgorithms::ClickFocusableInclusiveAncestor(*pressedElement));
     }
@@ -1226,7 +1220,7 @@ namespace krys::boo
     {
       html::FocusAlgorithms::FocusingSteps(*element, nullptr, options);
     }
-    else if (RefPtr<dom::Document> document = ShareRefPtr(_frame.Document()))
+    else if (RefPtr<boo::Document> document = ShareRefPtr(_frame.Document()))
     {
       html::FocusAlgorithms::FocusingSteps(*document, nullptr, options);
     }
@@ -1286,7 +1280,7 @@ namespace krys::boo
 
     // Check for cases where we are too early for events -- possible unmatched key up from pressing return in
     // the location bar.
-    RefPtr<dom::Element> element = ShareRefPtr(EventTargetElementForDocument(_frame.Document()));
+    RefPtr<Element> element = ShareRefPtr(EventTargetElementForDocument(_frame.Document()));
     if (!element)
     {
       return false;
@@ -1322,9 +1316,9 @@ namespace krys::boo
     {
       keyDownEvent.DisambiguateKeyDownEvent(Type::RawKeyDown);
     }
-    Ref<dom::KeyboardEvent> keydown = dom::KeyboardEvent::Create(keyDownEvent, _frame.Window());
+    Ref<KeyboardEvent> keydown = KeyboardEvent::Create(keyDownEvent, _frame.Window());
 
-    auto setHasFocusVisibleIfNeeded = [&](dom::Element &element)
+    auto setHasFocusVisibleIfNeeded = [&](Element &element)
     {
       // If the user interacts with the page via the keyboard, the currently focused element should match
       // :focus-visible. Just typing a modifier key is not considered user interaction with the page, but
@@ -1359,7 +1353,7 @@ namespace krys::boo
     if (handledByInputMethod)
     {
       keyDownEvent.SetWindowsVirtualKeyCode(CompositionEventKeyCode);
-      keydown = dom::KeyboardEvent::Create(keyDownEvent, _frame.Window());
+      keydown = KeyboardEvent::Create(keyDownEvent, _frame.Window());
       keydown->SetTarget(element);
       keydown->SetIsDefaultEventHandlerIgnored();
     }
@@ -1400,7 +1394,7 @@ namespace krys::boo
     {
       return keydownResult;
     }
-    Ref<dom::KeyboardEvent> keypress = dom::KeyboardEvent::Create(keyPressEvent, _frame.Window());
+    Ref<KeyboardEvent> keypress = KeyboardEvent::Create(keyPressEvent, _frame.Window());
     if (keypress->IsComposing())
     {
       keypress->SetTarget(element);
@@ -1434,7 +1428,7 @@ namespace krys::boo
     return true;
   }
 
-  bool EventHandler::HandleTextInputEvent(utf8_stringview text, dom::Event *underlyingEvent,
+  bool EventHandler::HandleTextInputEvent(utf8_stringview text, Event *underlyingEvent,
                                           dom::TextEventInputType inputType) noexcept
   {
     // Platforms should differentiate real commands like selectAll from text input in disguise (like
@@ -1442,7 +1436,7 @@ namespace krys::boo
     krys_debug_assert(!underlyingEvent || !underlyingEvent->IsKeyboardEvent()
                       || underlyingEvent->Type() == event_names::KeyPress);
 
-    RefPtr<dom::EventTarget> target;
+    RefPtr<EventTarget> target;
     if (underlyingEvent)
     {
       target = underlyingEvent->Target();
@@ -1456,7 +1450,7 @@ namespace krys::boo
       return false;
     }
 
-    auto event = dom::TextEvent::Create(_frame.Window(), text, inputType);
+    auto event = TextEvent::Create(_frame.Window(), text, inputType);
     event->SetUnderlyingEvent(underlyingEvent);
 
     (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
@@ -1471,7 +1465,7 @@ namespace krys::boo
     return _frame.Document()->GetEditor().HandleTextEvent(*event);
   }
 
-  bool EventHandler::DefaultKeyboardEventHandler(dom::KeyboardEvent &event) noexcept
+  bool EventHandler::DefaultKeyboardEventHandler(KeyboardEvent &event) noexcept
   {
     if (event.Type() == event_names::KeyDown)
     {
@@ -1523,13 +1517,13 @@ namespace krys::boo
     return false;
   }
 
-  bool EventHandler::DefaultKeyboardScrollEventHandler(dom::KeyboardEvent &, ScrollLogicalDirection direction,
+  bool EventHandler::DefaultKeyboardScrollEventHandler(KeyboardEvent &, ScrollLogicalDirection direction,
                                                        ScrollGranularity granularity) noexcept
   {
     return LogicalScrollRecursively(direction, granularity, nullptr, KeyboardScrollIsAnimated());
   }
 
-  bool EventHandler::DefaultPageUpDownEventHandler(dom::KeyboardEvent &event) noexcept
+  bool EventHandler::DefaultPageUpDownEventHandler(KeyboardEvent &event) noexcept
   {
     krys_debug_assert(event.Type() == event_names::KeyDown);
 
@@ -1544,7 +1538,7 @@ namespace krys::boo
     return DefaultKeyboardScrollEventHandler(event, direction, ScrollGranularity::Page);
   }
 
-  bool EventHandler::DefaultHomeEndEventHandler(dom::KeyboardEvent &event) noexcept
+  bool EventHandler::DefaultHomeEndEventHandler(KeyboardEvent &event) noexcept
   {
     krys_debug_assert(event.Type() == event_names::KeyDown);
 
@@ -1559,7 +1553,7 @@ namespace krys::boo
     return DefaultKeyboardScrollEventHandler(event, direction, ScrollGranularity::Document);
   }
 
-  bool EventHandler::DefaultSpaceEventHandler(dom::KeyboardEvent &event) noexcept
+  bool EventHandler::DefaultSpaceEventHandler(KeyboardEvent &event) noexcept
   {
     krys_debug_assert(event.Type() == event_names::KeyPress);
 
@@ -1585,7 +1579,7 @@ namespace krys::boo
   }
 
   bool EventHandler::DefaultArrowEventHandler(dom::FocusDirection focusDirection,
-                                              dom::KeyboardEvent &event) noexcept
+                                              KeyboardEvent &event) noexcept
   {
     krys_debug_assert(event.Type() == event_names::KeyDown);
 
@@ -1627,9 +1621,9 @@ namespace krys::boo
   }
 
   bool EventHandler::ScrollOverflow(ScrollDirection direction, ScrollGranularity granularity,
-                                    dom::Node *startingNode) noexcept
+                                    Node *startingNode) noexcept
   {
-    RefPtr<dom::Node> node = ShareRefPtr(startingNode);
+    RefPtr<Node> node = ShareRefPtr(startingNode);
 
     if (!node)
     {
@@ -1661,9 +1655,9 @@ namespace krys::boo
   }
 
   bool EventHandler::LogicalScrollOverflow(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                                           dom::Node *startingNode, ScrollIsAnimated animated) noexcept
+                                           Node *startingNode, ScrollIsAnimated animated) noexcept
   {
-    RefPtr<dom::Node> node = ShareRefPtr(startingNode);
+    RefPtr<Node> node = ShareRefPtr(startingNode);
 
     if (!node)
     {
@@ -1690,7 +1684,7 @@ namespace krys::boo
   }
 
   bool EventHandler::ScrollRecursively(ScrollDirection direction, ScrollGranularity granularity,
-                                       dom::Node *startingNode) noexcept
+                                       Node *startingNode) noexcept
   {
     // The layout needs to be up to date to determine if we can scroll. We may be
     // here because of an onLoad event, in which case the final layout hasn't been performed yet.
@@ -1706,7 +1700,7 @@ namespace krys::boo
   }
 
   bool EventHandler::LogicalScrollRecursively(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                                              dom::Node *startingNode, ScrollIsAnimated animated) noexcept
+                                              Node *startingNode, ScrollIsAnimated animated) noexcept
   {
     Ref frame = ShareRef(_frame);
 
@@ -1722,7 +1716,7 @@ namespace krys::boo
     return view && view->LogicalScroll(direction, granularity, animated);
   }
 
-  bool EventHandler::DefaultTabEventHandler(dom::KeyboardEvent &event) noexcept
+  bool EventHandler::DefaultTabEventHandler(KeyboardEvent &event) noexcept
   {
     krys_debug_assert(event.Type() == event_names::KeyDown);
 
@@ -1863,7 +1857,7 @@ namespace krys::boo
   {
     _hoverTimer.Stop();
 
-    RefPtr<dom::Document> document = ShareRefPtr(_frame.Document());
+    RefPtr<boo::Document> document = ShareRefPtr(_frame.Document());
     auto *view = _frame.View();
     // Unlike upstream, which hit tests at the origin, there's nothing to hover without a known position.
     if (!document || !view || !_lastKnownMousePosition)
@@ -1919,7 +1913,7 @@ namespace krys::boo
     }
   }
 
-  bool EventHandler::UseHandCursor(dom::Node *node, bool isOverLink, bool shiftKey) noexcept
+  bool EventHandler::UseHandCursor(Node *node, bool isOverLink, bool shiftKey) noexcept
   {
     if (!node)
     {
@@ -1930,7 +1924,7 @@ namespace krys::boo
     bool editableLinkEnabled =
       !node->HasEditableStyle()
       || IsEditableLinkLive(node->NodeDocument().GetSettings().EditableLinkBehavior, shiftKey);
-    const auto *input = DynamicDowncast<html::HTMLInputElement>(*node);
+    const auto *input = DynamicDowncast<HTMLInputElement>(*node);
     bool isSubmitImage = input && input->IsImageButton();
     return (isOverLink || isSubmitImage) && editableLinkEnabled;
   }
@@ -1954,14 +1948,14 @@ namespace krys::boo
       return Cursor(Cursor::Type::Pointer);
     }
 
-    dom::Node *node = result.TargetNode();
+    Node *node = result.TargetNode();
     if (!node)
     {
       return null;
     }
 
     const RenderObject *renderer = node->Renderer();
-    if (auto *element = DynamicDowncast<dom::Element>(node); element && result.GetPseudoElementIdentifier())
+    if (auto *element = DynamicDowncast<Element>(node); element && result.GetPseudoElementIdentifier())
     {
       auto *pseudoElementRenderer =
         style::Styleable(*element, result.GetPseudoElementIdentifier()).Renderer();
@@ -2150,7 +2144,7 @@ namespace krys::boo
 
   bool EventHandler::IsInsideScrollbar(const IntPoint &windowPoint) const noexcept
   {
-    if (RefPtr<dom::Document> document = ShareRefPtr(_frame.Document()))
+    if (RefPtr<boo::Document> document = ShareRefPtr(_frame.Document()))
     {
       HitTestResult result {LayoutPoint(windowPoint)};
       (void)document->HitTest(
@@ -2178,7 +2172,7 @@ namespace krys::boo
                                               EnumSet<EventHandling> &handling) noexcept
   {
     Ref frame = ShareRef(_frame);
-    RefPtr<dom::Document> document = ShareRefPtr(frame->Document());
+    RefPtr<boo::Document> document = ShareRefPtr(frame->Document());
     if (!document)
     {
       return false;
@@ -2215,7 +2209,7 @@ namespace krys::boo
     HitTestResult result(LayoutPoint(view->WindowToContents(event.Position())));
     (void)document->HitTest(request, result);
 
-    RefPtr<dom::Element> element = ShareRefPtr(result.TargetElement());
+    RefPtr<Element> element = ShareRefPtr(result.TargetElement());
     WeakPtr<ScrollableArea> scrollableArea;
     DetermineWheelEventTarget(event, element, scrollableArea);
 
@@ -2279,7 +2273,7 @@ namespace krys::boo
   }
 
   void EventHandler::DetermineWheelEventTarget(const PlatformWheelEvent &wheelEvent,
-                                               RefPtr<dom::Element> &wheelEventTarget,
+                                               RefPtr<Element> &wheelEventTarget,
                                                WeakPtr<ScrollableArea> &scrollableArea) noexcept
   {
     auto *view = _frame.View();
@@ -2301,10 +2295,10 @@ namespace krys::boo
     scrollableArea = CreateWeakPtr<ScrollableArea>(view);
     // Find the first node with a valid scrollable area starting with the current node and traversing its
     // parents (or shadow hosts).
-    for (dom::ContainerNode *candidate = wheelEventTarget.get(); candidate;
+    for (ContainerNode *candidate = wheelEventTarget.get(); candidate;
          candidate = candidate->ParentInComposedTree())
     {
-      if (Is<html::HTMLHtmlElement>(*candidate) || Is<dom::Document>(*candidate))
+      if (Is<HTMLHtmlElement>(*candidate) || Is<Document>(*candidate))
       {
         break;
       }
@@ -2363,8 +2357,9 @@ namespace krys::boo
     }
   }
 
-  bool EventHandler::HandleWheelEventInAppropriateEnclosingBox(
-    dom::Node *startNode, const dom::WheelEvent &wheelEvent, const FloatSize &filteredPlatformDelta) noexcept
+  bool
+    EventHandler::HandleWheelEventInAppropriateEnclosingBox(Node *startNode, const WheelEvent &wheelEvent,
+                                                            const FloatSize &filteredPlatformDelta) noexcept
   {
     bool shouldHandleEvent = wheelEvent.DeltaX() || wheelEvent.DeltaY();
     if (!startNode->Renderer())
@@ -2389,7 +2384,7 @@ namespace krys::boo
       FloatSize(static_cast<float>(wheelEvent.DeltaX()), static_cast<float>(wheelEvent.DeltaY())));
   }
 
-  bool EventHandler::HandleWheelEventInAppropriateEnclosingBox(dom::Node *startNode,
+  bool EventHandler::HandleWheelEventInAppropriateEnclosingBox(Node *startNode,
                                                                const PlatformWheelEvent &event,
                                                                FloatSize biasedDelta) noexcept
   {
@@ -2464,7 +2459,7 @@ namespace krys::boo
     return scrollableArea.HandleWheelEventForScrolling(wheelEvent);
   }
 
-  bool EventHandler::DefaultWheelEventHandler(dom::Node *startNode, dom::WheelEvent &wheelEvent) noexcept
+  bool EventHandler::DefaultWheelEventHandler(Node *startNode, WheelEvent &wheelEvent) noexcept
   {
     if (!startNode)
     {
@@ -2521,7 +2516,7 @@ namespace krys::boo
   bool EventHandler::HandleTouchScroll(const PlatformWheelEvent &wheelEvent) noexcept
   {
     Ref frame = ShareRef(_frame);
-    RefPtr<dom::Document> document = ShareRefPtr(frame->Document());
+    RefPtr<boo::Document> document = ShareRefPtr(frame->Document());
     RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
     if (!document || !view || (!wheelEvent.DeltaX() && !wheelEvent.DeltaY()))
     {
@@ -2535,7 +2530,7 @@ namespace krys::boo
     HitTestResult result(LayoutPoint(view->WindowToContents(event.Position())));
     (void)document->HitTest(request, result);
 
-    if (RefPtr<dom::Element> element = ShareRefPtr(result.TargetElement()))
+    if (RefPtr<Element> element = ShareRefPtr(result.TargetElement()))
     {
       if (HandleWheelEventInAppropriateEnclosingBox(element.get(), event, event.Delta()))
       {
@@ -2564,29 +2559,29 @@ namespace krys::boo
       }
     }
 
-    KRYS_NODISCARD bool DispatchSelectStart(dom::Node *node) noexcept
+    KRYS_NODISCARD bool DispatchSelectStart(Node *node) noexcept
     {
       if (!node || !node->Renderer())
       {
         return true;
       }
 
-      auto type = dom::DOMStringAtom(event_names::SelectStart);
-      return dom::EventDispatcher::FireEvent<dom::Event>(
-        type, *node, dom::EventInit {.Bubbles = true, .Cancelable = true});
+      auto type = DOMStringAtom(event_names::SelectStart);
+      return dom::EventDispatcher::FireEvent<Event>(type, *node,
+                                                    EventInit {.Bubbles = true, .Cancelable = true});
     }
 
     // FIXME: Nodes that select on mouse down (shouldSelectOnMouseDown), once there are any. (There are no
     // image overlays; see DIFFERENCES.md.)
-    KRYS_NODISCARD RefPtr<dom::Node> NodeToSelectOnMouseDownForNode(dom::Node &targetNode) noexcept
+    KRYS_NODISCARD RefPtr<Node> NodeToSelectOnMouseDownForNode(Node &targetNode) noexcept
     {
       return dom::Position::RootUserSelectAllForNode(&targetNode);
     }
 
-    KRYS_NODISCARD VisibleSelection ExpandSelectionToRespectSelectOnMouseDown(
-      dom::Node &targetNode, const VisibleSelection &selection) noexcept
+    KRYS_NODISCARD VisibleSelection
+      ExpandSelectionToRespectSelectOnMouseDown(Node &targetNode, const VisibleSelection &selection) noexcept
     {
-      RefPtr<dom::Node> nodeToSelect = NodeToSelectOnMouseDownForNode(targetNode);
+      RefPtr<Node> nodeToSelect = NodeToSelectOnMouseDownForNode(targetNode);
       if (!nodeToSelect)
       {
         return selection;
@@ -2601,10 +2596,10 @@ namespace krys::boo
       return newSelection;
     }
 
-    KRYS_NODISCARD bool ShouldAvoidExtendingSelectionOnClick(const dom::Node &targetNode,
+    KRYS_NODISCARD bool ShouldAvoidExtendingSelectionOnClick(const Node &targetNode,
                                                              const VisibleSelection &selection) noexcept
     {
-      if (Is<dom::Text>(targetNode))
+      if (Is<Text>(targetNode))
       {
         return false;
       }
@@ -2658,7 +2653,7 @@ namespace krys::boo
     }
   }
 
-  bool EventHandler::ExpandAndUpdateSelectionForMouseDownIfNeeded(dom::Node &targetNode,
+  bool EventHandler::ExpandAndUpdateSelectionForMouseDownIfNeeded(Node &targetNode,
                                                                   const VisibleSelection &selection,
                                                                   TextGranularity granularity) noexcept
   {
@@ -2671,7 +2666,7 @@ namespace krys::boo
     return UpdateSelectionForMouseDownDispatchingSelectStart(&targetNode, expandedSelection, granularity);
   }
 
-  bool EventHandler::UpdateSelectionForMouseDownDispatchingSelectStart(dom::Node *targetNode,
+  bool EventHandler::UpdateSelectionForMouseDownDispatchingSelectStart(Node *targetNode,
                                                                        const VisibleSelection &selection,
                                                                        TextGranularity granularity) noexcept
   {
@@ -2711,7 +2706,7 @@ namespace krys::boo
   void EventHandler::SelectClosestWordFromHitTestResult(
     const HitTestResult &result, AppendTrailingWhitespace appendTrailingWhitespace) noexcept
   {
-    RefPtr<dom::Node> targetNode = ShareRefPtr(result.TargetNode());
+    RefPtr<Node> targetNode = ShareRefPtr(result.TargetNode());
     VisibleSelection newSelection;
 
     if (targetNode && targetNode->Renderer())
@@ -2737,7 +2732,7 @@ namespace krys::boo
   void EventHandler::SelectClosestContextualWordFromHitTestResult(
     const HitTestResult &result, AppendTrailingWhitespace appendTrailingWhitespace) noexcept
   {
-    RefPtr<dom::Node> targetNode = ShareRefPtr(result.TargetNode());
+    RefPtr<Node> targetNode = ShareRefPtr(result.TargetNode());
     VisibleSelection newSelection;
 
     if (targetNode && targetNode->Renderer())
@@ -2767,16 +2762,15 @@ namespace krys::boo
     // FIXME: In the editable case, word selection sometimes selects content that isn't underneath the mouse.
     // If the selection is non-editable, we do word selection to make it easier to use the contextual menu
     // items available for text selections. But only if we're above text.
-    if (!_frame.Document()->Selection().Selection().IsContentEditable()
-        && !Is<dom::Text>(result.TargetNode()))
+    if (!_frame.Document()->Selection().Selection().IsContentEditable() && !Is<Text>(result.TargetNode()))
     {
       return;
     }
 
-    RefPtr<dom::Element> urlElement = ShareRefPtr(result.URLElement());
+    RefPtr<Element> urlElement = ShareRefPtr(result.URLElement());
     if (!urlElement || !IsDraggableLink(*urlElement))
     {
-      if (RefPtr<dom::Node> targetNode = ShareRefPtr(result.TargetNode());
+      if (RefPtr<Node> targetNode = ShareRefPtr(result.TargetNode());
           targetNode && IsEditableNode(*targetNode))
       {
         SelectClosestWordFromHitTestResult(result, appendTrailingWhitespace);
@@ -2787,7 +2781,7 @@ namespace krys::boo
       return;
     }
 
-    if (RefPtr<dom::Node> targetNode = ShareRefPtr(result.TargetNode()); targetNode && targetNode->Renderer())
+    if (RefPtr<Node> targetNode = ShareRefPtr(result.TargetNode()); targetNode && targetNode->Renderer())
     {
       VisibleSelection newSelection;
       VisiblePosition pos(
@@ -2813,7 +2807,7 @@ namespace krys::boo
       return false;
     }
 
-    RefPtr<dom::Document> doc = ShareRefPtr(frame->Document());
+    RefPtr<boo::Document> doc = ShareRefPtr(frame->Document());
     RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
     if (!doc || !view)
     {
@@ -2852,7 +2846,7 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD dom::DOMStringAtom EventNameForTouchPointState(PlatformTouchPoint::State state) noexcept
+    KRYS_NODISCARD DOMStringAtom EventNameForTouchPointState(PlatformTouchPoint::State state) noexcept
     {
       switch (state)
       {
@@ -2883,7 +2877,7 @@ namespace krys::boo
           return result;
         }
       }
-      RefPtr<dom::Document> document = ShareRefPtr(frame->Document());
+      RefPtr<boo::Document> document = ShareRefPtr(frame->Document());
       HitTestRequest request(hitType);
       (void)document->HitTest(request, result);
       return result;
@@ -2913,19 +2907,19 @@ namespace krys::boo
     // in the event.
 
     // Holds the complete set of touches on the screen and will be used as the 'touches' list in the event.
-    RefPtr<dom::TouchList> touches = dom::TouchList::Create();
+    RefPtr<TouchList> touches = TouchList::Create();
 
     // A different view on the 'touches' list above, filtered and grouped by event target. Used for the
     // 'targetTouches' list in the event.
-    HashMap<dom::EventTarget *, RefPtr<dom::TouchList>> touchesByTarget;
+    HashMap<EventTarget *, RefPtr<TouchList>> touchesByTarget;
 
     // Array of touches per state, used to assemble the 'changedTouches' list in the event.
     struct Touches
     {
       // The touches corresponding to the particular change state this struct instance represents.
-      RefPtr<dom::TouchList> TouchList;
+      RefPtr<boo::TouchList> TouchList;
       // The targets involved in TouchList, in the order they were first seen.
-      List<RefPtr<dom::EventTarget>> Targets;
+      List<RefPtr<EventTarget>> Targets;
     };
 
     std::array<Touches, PlatformTouchPoint::TouchStateEnd> changedTouches;
@@ -2989,7 +2983,7 @@ namespace krys::boo
 
       // Increment the platform touch id by 1 to avoid storing a key of 0 in the hashmap.
       uint32 touchPointTargetKey = point.Id() + 1;
-      RefPtr<dom::EventTarget> touchTarget;
+      RefPtr<EventTarget> touchTarget;
       if (pointState == PlatformTouchPoint::TouchPressed)
       {
         HitTestResult result;
@@ -3016,7 +3010,7 @@ namespace krys::boo
           continue;
         }
 
-        RefPtr<dom::Element> element = ShareRefPtr(result.TargetElement());
+        RefPtr<Element> element = ShareRefPtr(result.TargetElement());
         if (!element)
         {
           continue;
@@ -3067,7 +3061,7 @@ namespace krys::boo
         }
       }
 
-      auto *touchTargetNode = DynamicDowncast<dom::Node>(touchTarget.get());
+      auto *touchTargetNode = DynamicDowncast<Node>(touchTarget.get());
       if (!touchTargetNode)
       {
         continue;
@@ -3092,7 +3086,7 @@ namespace krys::boo
         if (pointState == PlatformTouchPoint::TouchReleased
             || pointState == PlatformTouchPoint::TouchCancelled)
         {
-          _endedTouchPointerIds.push_back(dom::PointerEvent::PointerIdForTouch(point));
+          _endedTouchPointerIds.push_back(PointerEvent::PointerIdForTouch(point));
         }
       }
 
@@ -3105,24 +3099,24 @@ namespace krys::boo
                                     pagePoint.Y().ToDouble() / scaleFactor);
       DoubleSize adjustedRadius = point.Radius().ScaledBy(1 / scaleFactor);
 
-      auto touch = dom::Touch::Create(targetFrame.get(), touchTarget.get(), static_cast<int32>(point.Id()),
-                                      point.ScreenPos(), adjustedPagePoint, adjustedRadius,
-                                      point.RotationAngle(), point.Force(), point.Twist());
+      auto touch =
+        Touch::Create(targetFrame.get(), touchTarget.get(), static_cast<int32>(point.Id()), point.ScreenPos(),
+                      adjustedPagePoint, adjustedRadius, point.RotationAngle(), point.Force(), point.Twist());
 
       // Ensure this target's touch list exists, even if it ends up empty, so it can always be passed to
       // TouchEvent::Create below.
       auto targetTouchesIterator = touchesByTarget.find(touchTarget.get());
       if (targetTouchesIterator == touchesByTarget.end())
       {
-        targetTouchesIterator = touchesByTarget.emplace(touchTarget.get(), dom::TouchList::Create()).first;
+        targetTouchesIterator = touchesByTarget.emplace(touchTarget.get(), TouchList::Create()).first;
       }
 
       // touches and targetTouches should only contain information about touches still on the screen, so if
       // this point is released or cancelled it will only appear in the changedTouches list.
       if (pointState != PlatformTouchPoint::TouchReleased && pointState != PlatformTouchPoint::TouchCancelled)
       {
-        touches->Append(Ref<dom::Touch>(touch));
-        targetTouchesIterator->second->Append(Ref<dom::Touch>(touch));
+        touches->Append(Ref<Touch>(touch));
+        targetTouchesIterator->second->Append(Ref<Touch>(touch));
       }
 
       // Now build up the correct list for changedTouches.
@@ -3135,7 +3129,7 @@ namespace krys::boo
         auto &changed = changedTouches[pointState];
         if (!changed.TouchList)
         {
-          changed.TouchList = dom::TouchList::Create();
+          changed.TouchList = TouchList::Create();
         }
         changed.TouchList->Append(krys::move(touch));
         if (std::ranges::find(changed.Targets, touchTarget) == changed.Targets.end())
@@ -3153,7 +3147,7 @@ namespace krys::boo
     // Now iterate the changedTouches list and the targets within it, sending events to the targets as
     // required.
     bool swallowedEvent = false;
-    RefPtr<dom::TouchList> emptyList = dom::TouchList::Create();
+    RefPtr<TouchList> emptyList = TouchList::Create();
     for (uint32 state = 0; state != PlatformTouchPoint::TouchStateEnd; ++state)
     {
       auto &changed = changedTouches[state];
@@ -3164,22 +3158,22 @@ namespace krys::boo
 
       // When sending a touch cancel event, use empty touches and targetTouches lists.
       bool isTouchCancelEvent = state == PlatformTouchPoint::TouchCancelled;
-      RefPtr<dom::TouchList> &effectiveTouches = isTouchCancelEvent ? emptyList : touches;
+      RefPtr<TouchList> &effectiveTouches = isTouchCancelEvent ? emptyList : touches;
       auto stateName = EventNameForTouchPointState(static_cast<PlatformTouchPoint::State>(state));
 
       for (auto &target : changed.Targets)
       {
-        auto *targetNode = DynamicDowncast<dom::Node>(target.get());
+        auto *targetNode = DynamicDowncast<Node>(target.get());
         krys_debug_assert(targetNode);
 
-        RefPtr<dom::TouchList> targetTouches =
+        RefPtr<TouchList> targetTouches =
           isTouchCancelEvent ? emptyList : touchesByTarget.find(target.get())->second;
         krys_debug_assert(targetTouches);
 
         auto *targetFrame = targetNode->NodeDocument().Frame();
-        Ref<dom::TouchEvent> touchEvent = dom::TouchEvent::Create(
-          effectiveTouches.get(), targetTouches.get(), changed.TouchList.get(), stateName,
-          targetFrame ? targetFrame->View() : nullptr, {}, event.Modifiers());
+        Ref<TouchEvent> touchEvent =
+          TouchEvent::Create(effectiveTouches.get(), targetTouches.get(), changed.TouchList.get(), stateName,
+                             targetFrame ? targetFrame->View() : nullptr, {}, event.Modifiers());
         (void)dom::EventDispatcher::DispatchToTarget(*touchEvent, target.get());
         swallowedEvent = swallowedEvent || touchEvent->DefaultPrevented() || touchEvent->DefaultHandled();
       }
@@ -3222,7 +3216,7 @@ namespace krys::boo
       return false;
     }
 
-    RefPtr<dom::Node> targetNode = ShareRefPtr(event.TargetNode());
+    RefPtr<Node> targetNode = ShareRefPtr(event.TargetNode());
     if (!(targetNode && targetNode->Renderer() && MouseDownMayStartSelect()))
     {
       return false;
@@ -3246,7 +3240,7 @@ namespace krys::boo
   {
     Ref<LocalFrame> frame = ShareRef(_frame);
     (void)frame->Document()->UpdateLayoutIgnorePendingStylesheets();
-    RefPtr<dom::Node> targetNode = ShareRefPtr(event.TargetNode());
+    RefPtr<Node> targetNode = ShareRefPtr(event.TargetNode());
     if (!targetNode || !targetNode->Renderer() || !MouseDownMayStartSelect())
     {
       return false;
@@ -3318,9 +3312,9 @@ namespace krys::boo
       {
         if (newSelection.GetDirectionality() == Directionality::Strong)
         {
-          RefPtr<dom::Node> baseNode = ShareRefPtr(
-            newSelection.IsBaseFirst() ? newSelection.CanonicalAnchor().ComputeNodeAfterPosition()
-                                       : newSelection.CanonicalAnchor().ComputeNodeBeforePosition());
+          RefPtr<Node> baseNode = ShareRefPtr(newSelection.IsBaseFirst()
+                                                ? newSelection.CanonicalAnchor().ComputeNodeAfterPosition()
+                                                : newSelection.CanonicalAnchor().ComputeNodeBeforePosition());
           if (!baseNode)
           {
             baseNode = ShareRefPtr(newSelection.CanonicalAnchor().GetContainerNode());
@@ -3461,7 +3455,7 @@ namespace krys::boo
 
   VisiblePosition EventHandler::SelectionExtentRespectingEditingBoundary(const VisibleSelection &selection,
                                                                          const LayoutPoint &localPoint,
-                                                                         dom::Node *targetNode) noexcept
+                                                                         Node *targetNode) noexcept
   {
     FloatPoint selectionEndPoint = localPoint;
     auto *editableElement = selection.RootEditableElement();
@@ -3471,7 +3465,7 @@ namespace krys::boo
       return {};
     }
 
-    dom::Node *adjustedTarget = targetNode;
+    Node *adjustedTarget = targetNode;
     if (editableElement && !editableElement->Contains(targetNode))
     {
       if (!editableElement->Renderer())
@@ -3503,7 +3497,7 @@ namespace krys::boo
       return true;
     }
 
-    RefPtr<dom::Node> targetNode = ShareRefPtr(event.TargetNode());
+    RefPtr<Node> targetNode = ShareRefPtr(event.TargetNode());
     if (event.Event().Button() != MouseButton::Left || !targetNode)
     {
       return false;
@@ -3578,7 +3572,7 @@ namespace krys::boo
       return;
     }
 
-    RefPtr<dom::Node> target = ShareRefPtr(hitTestResult.TargetNode());
+    RefPtr<Node> target = ShareRefPtr(hitTestResult.TargetNode());
     if (!target)
     {
       return;
@@ -3601,7 +3595,7 @@ namespace krys::boo
 
     // Special case to limit selection to the containing block for SVG text.
     // FIXME: Isn't there a better non-SVG-specific way to do this?
-    if (RefPtr<dom::Node> selectionBaseNode = ShareRefPtr(newSelection.CanonicalAnchor().DeprecatedNode()))
+    if (RefPtr<Node> selectionBaseNode = ShareRefPtr(newSelection.CanonicalAnchor().DeprecatedNode()))
     {
       if (auto *selectionBaseRenderer = selectionBaseNode->Renderer())
       {
@@ -3630,7 +3624,7 @@ namespace krys::boo
       shouldSetDragStartSelection = true;
     }
 
-    RefPtr<dom::Node> rootUserSelectAllForMousePressNode =
+    RefPtr<Node> rootUserSelectAllForMousePressNode =
       dom::Position::RootUserSelectAllForNode(_mousePressNode.get());
     if (rootUserSelectAllForMousePressNode
         && rootUserSelectAllForMousePressNode == dom::Position::RootUserSelectAllForNode(target.get()))
@@ -3659,7 +3653,7 @@ namespace krys::boo
                                  .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
       }
 
-      RefPtr<dom::Node> rootUserSelectAllForTarget = dom::Position::RootUserSelectAllForNode(target.get());
+      RefPtr<Node> rootUserSelectAllForTarget = dom::Position::RootUserSelectAllForNode(target.get());
       if (rootUserSelectAllForTarget && _mousePressNode->Renderer() && targetVisiblePosition() < dragStart())
       {
         newSelection.SetFocus(dom::PositionBeforeNode(rootUserSelectAllForTarget.get())
@@ -3811,12 +3805,12 @@ namespace krys::boo
     return state;
   }
 
-  dom::Element *EventHandler::DraggedElement() noexcept
+  Element *EventHandler::DraggedElement() noexcept
   {
     return GetDragState().Source.get();
   }
 
-  void EventHandler::SetDragStateSource(dom::Element *element) const noexcept
+  void EventHandler::SetDragStateSource(Element *element) const noexcept
   {
     auto *document = _frame.Document();
     if (auto *cache = document ? document->ExistingAXObjectCache() : nullptr)
@@ -3896,7 +3890,7 @@ namespace krys::boo
              &_frame, targetElement, RoundedIntPoint(result.GetHitTestLocation().Point()), state);
   }
 
-  bool EventHandler::DispatchDragEvent(dom::DOMStringAtom eventType, dom::Element &dragTarget,
+  bool EventHandler::DispatchDragEvent(DOMStringAtom eventType, Element &dragTarget,
                                        const PlatformMouseEvent &event,
                                        dom::DataTransfer &dataTransfer) noexcept
   {
@@ -3909,7 +3903,7 @@ namespace krys::boo
       return false;
     }
 
-    auto dragEvent = dom::DragEvent::Create(
+    auto dragEvent = DragEvent::Create(
       eventType, true, true, true, event.Timestamp(), view.get(), 0,
       DoublePoint(FlooredIntPoint(event.GlobalPosition())), DoublePoint(FlooredIntPoint(event.Position())),
       event.MovementDelta().X(), event.MovementDelta().Y(), event.Modifiers(), MouseButton::Left, 0, nullptr,
@@ -3953,7 +3947,7 @@ namespace krys::boo
   }
 
   EventHandler::DragTargetResponse EventHandler::DispatchDragEnterOrDragOverEvent(
-    dom::DOMStringAtom eventType, dom::Element &target, const PlatformMouseEvent &event,
+    DOMStringAtom eventType, Element &target, const PlatformMouseEvent &event,
     UniquePtr<Pasteboard> &&pasteboard, EnumSet<DragOperation> sourceOperationMask,
     bool draggingFiles) noexcept
   {
@@ -3984,11 +3978,11 @@ namespace krys::boo
                                                     HitTestRequest::Type::DisallowUserAgentShadowContent}),
       event);
 
-    RefPtr<dom::Element> newTarget;
+    RefPtr<Element> newTarget;
     if (auto *targetNode = mouseEvent.TargetNode())
     {
       // Drag events should never go to non-element nodes (following IE, and proper mouseover/out dispatch)
-      if (auto *element = DynamicDowncast<dom::Element>(*targetNode))
+      if (auto *element = DynamicDowncast<Element>(*targetNode))
       {
         newTarget = ShareRefPtr(element);
       }
@@ -4014,7 +4008,7 @@ namespace krys::boo
                                                     makePasteboard(), sourceOperationMask, draggingFiles);
       }
 
-      if (RefPtr<dom::Element> dragTarget = _dragTarget)
+      if (RefPtr<Element> dragTarget = _dragTarget)
       {
         auto dataTransfer = dom::DataTransfer::CreateForUpdatingDropTarget(
           dragTarget->NodeDocument(), makePasteboard(), sourceOperationMask, draggingFiles);
@@ -4052,7 +4046,7 @@ namespace krys::boo
   {
     Ref<LocalFrame> frame = ShareRef(_frame);
 
-    if (RefPtr<dom::Element> dragTarget = _dragTarget)
+    if (RefPtr<Element> dragTarget = _dragTarget)
     {
       DispatchEventToDragSourceElement(event_names::Drag, event);
 
@@ -4071,7 +4065,7 @@ namespace krys::boo
     Ref<LocalFrame> frame = ShareRef(_frame);
 
     bool preventedDefault = false;
-    if (RefPtr<dom::Element> dragTarget = _dragTarget)
+    if (RefPtr<Element> dragTarget = _dragTarget)
     {
       Ref<dom::DataTransfer> dataTransfer = dom::DataTransfer::CreateForDrop(
         dragTarget->NodeDocument(), krys::move(pasteboard), sourceOperationMask, draggingFiles);
@@ -4169,7 +4163,7 @@ namespace krys::boo
     _mouseDownMayStartDrag = false;
   }
 
-  void EventHandler::UpdateDragStateAfterEditDragIfNeeded(dom::Element &rootEditableElement) noexcept
+  void EventHandler::UpdateDragStateAfterEditDragIfNeeded(Element &rootEditableElement) noexcept
   {
     // If inserting the dragged contents removed the drag source, we still want to fire dragend at the root
     // editable element.
@@ -4184,19 +4178,19 @@ namespace krys::boo
     return DraggedElement() && GetDragState().DataTransfer && GetDragState().ShouldDispatchEvents;
   }
 
-  void EventHandler::DispatchEventToDragSourceElement(dom::DOMStringAtom eventType,
+  void EventHandler::DispatchEventToDragSourceElement(DOMStringAtom eventType,
                                                       const PlatformMouseEvent &event) noexcept
   {
     if (ShouldDispatchEventsToDragSourceElement())
     {
-      Ref<dom::Element> draggedElement = ShareRef(*DraggedElement());
+      Ref<Element> draggedElement = ShareRef(*DraggedElement());
       (void)DispatchDragEvent(krys::move(eventType), *draggedElement, event, *GetDragState().DataTransfer);
     }
   }
 
   bool EventHandler::DispatchDragStartEventOnSourceElement(dom::DataTransfer &dataTransfer) noexcept
   {
-    Ref<dom::Element> draggedElement = ShareRef(*DraggedElement());
+    Ref<Element> draggedElement = ShareRef(*DraggedElement());
     if (auto *page = _frame.GetPage())
     {
       page->GetDragController().PrepareForDragStart(_frame, GetDragState().Type, *draggedElement,
@@ -4317,7 +4311,7 @@ namespace krys::boo
     // to drop an old drag.
     InvalidateDataTransfer();
 
-    RefPtr<dom::Document> document = ShareRefPtr(frame->Document());
+    RefPtr<boo::Document> document = ShareRefPtr(frame->Document());
     if (!document)
     {
       return false;
@@ -4338,7 +4332,7 @@ namespace krys::boo
       }
       dragState.DataTransfer->MoveDragState(krys::move(dragStartDataTransfer));
 
-      if (RefPtr<dom::Element> draggedElement = ShareRefPtr(DraggedElement());
+      if (RefPtr<Element> draggedElement = ShareRefPtr(DraggedElement());
           draggedElement && dragState.Type == EnumSet<DragSourceAction> {DragSourceAction::DHTML}
           && !dragState.DataTransfer->HasDragImage())
       {
@@ -4347,7 +4341,7 @@ namespace krys::boo
         {
           auto absolutePosition = renderer->LocalToAbsolute();
           auto delta = RoundedIntPoint(_mouseDownContentsPosition) - RoundedIntPoint(absolutePosition);
-          Ref<dom::Element> element = draggedElement;
+          Ref<Element> element = draggedElement;
           dragState.DataTransfer->SetDragImage(krys::move(element), delta.Width(), delta.Height());
         }
         else

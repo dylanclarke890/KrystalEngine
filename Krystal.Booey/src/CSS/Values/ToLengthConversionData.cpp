@@ -58,9 +58,10 @@ namespace krys::boo::css
   {
   }
 
-  ToLengthConversionData::ToLengthConversionData(
-    const RenderStyle &style, const RenderStyle *rootStyle, const RenderStyle *parentStyle,
-    const boo::RenderView *renderView, const dom::Element *elementForContainerUnitResolution) noexcept
+  ToLengthConversionData::ToLengthConversionData(const RenderStyle &style, const RenderStyle *rootStyle,
+                                                 const RenderStyle *parentStyle,
+                                                 const boo::RenderView *renderView,
+                                                 const Element *elementForContainerUnitResolution) noexcept
       : _style(&style), _rootStyle(rootStyle), _parentStyle(parentStyle), _renderView(renderView),
         _elementForContainerUnitResolution(ShareRefPtr(elementForContainerUnitResolution)), _zoom(1.f)
   {

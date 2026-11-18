@@ -35,19 +35,21 @@
 
 namespace krys::boo
 {
+  class Element;
+  class Node;
   class PlatformMouseEvent;
 }
 
 namespace krys::boo::dom
 {
-  class Element;
-  class Node;
-
   /// @brief Whether @p eventType is `click` or `auxclick`.
   KRYS_NODISCARD bool IsAnyClick(const DOMStringAtom &eventType) noexcept;
 
   KRYS_NODISCARD bool IsAnyClick(const Event &event) noexcept;
+}
 
+namespace krys::boo
+{
   /// @see https://w3c.github.io/uievents/#dictdef-mouseeventinit
   struct MouseEventInit : EventModifierInit
   {
@@ -208,8 +210,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::MouseEvent)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::MouseEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Event &event) noexcept
   {
     return event.IsMouseEvent();
   }

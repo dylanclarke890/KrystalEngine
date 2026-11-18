@@ -26,8 +26,8 @@ namespace krys::boo::html
     /// @brief The configuration a sanitizer configured with @p configuration has: a canonical copy, or a
     /// `TypeError` if it isn't valid.
     /// @see https://html.spec.whatwg.org/#configure-a-sanitizer
-    KRYS_NODISCARD static dom::ExceptionOr<SanitizerConfig> Configure(const SanitizerConfig &configuration,
-                                                                      bool permissiveDefaults) noexcept;
+    KRYS_NODISCARD static ExceptionOr<SanitizerConfig> Configure(const SanitizerConfig &configuration,
+                                                                 bool permissiveDefaults) noexcept;
 
     /// @see https://html.spec.whatwg.org/#canonicalize-the-configuration
     static void Canonicalize(SanitizerConfig &configuration, bool permissiveDefaults) noexcept;
@@ -62,30 +62,29 @@ namespace krys::boo::html
     /// @brief The configuration markup is sanitized with, given the options' sanitizer member (null if it's
     /// missing); null for no sanitizing, or a `TypeError` if the configuration isn't valid.
     /// @see https://html.spec.whatwg.org/#get-a-sanitizer-config-from-options
-    KRYS_NODISCARD static dom::ExceptionOr<Maybe<SanitizerConfig>>
+    KRYS_NODISCARD static ExceptionOr<Maybe<SanitizerConfig>>
       GetSanitizerConfigFromOptions(const SanitizerInput *sanitizer, bool safe) noexcept;
 
     /// @see https://html.spec.whatwg.org/#contains-a-javascript:-url
-    KRYS_NODISCARD static bool ContainsJavaScriptURL(dom::DOMStringView value) noexcept;
+    KRYS_NODISCARD static bool ContainsJavaScriptURL(DOMStringView value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#sanitizer-config-allows-comments
     KRYS_NODISCARD static bool AllowsComments(const SanitizerConfig &configuration) noexcept;
 
     /// @see https://html.spec.whatwg.org/#sanitizer-config-allows-processing-instruction-target
     KRYS_NODISCARD static bool
-      AllowsProcessingInstructionTarget(dom::DOMStringView piTarget,
+      AllowsProcessingInstructionTarget(DOMStringView piTarget,
                                         const SanitizerConfig &configuration) noexcept;
 
     /// @see https://html.spec.whatwg.org/#get-the-sanitizer-action-for-an-element-name
-    KRYS_NODISCARD static SanitizerAction ActionForElementName(dom::DOMStringView localName,
-                                                               dom::DOMStringAtom namespaceURI,
+    KRYS_NODISCARD static SanitizerAction ActionForElementName(DOMStringView localName,
+                                                               DOMStringAtom namespaceURI,
                                                                const SanitizerConfig &configuration) noexcept;
 
     /// @see https://html.spec.whatwg.org/#sanitizer-config-allows-an-attribute
-    KRYS_NODISCARD static bool AllowsAttribute(dom::DOMStringView localName,
-                                               const dom::DOMStringAtom &namespaceURI,
-                                               dom::DOMStringView value, dom::DOMStringView elementLocalName,
-                                               const dom::DOMStringAtom &elementNamespace,
+    KRYS_NODISCARD static bool AllowsAttribute(DOMStringView localName, const DOMStringAtom &namespaceURI,
+                                               DOMStringView value, DOMStringView elementLocalName,
+                                               const DOMStringAtom &elementNamespace,
                                                const SanitizerConfig &configuration) noexcept;
 
     /// @see https://html.spec.whatwg.org/#custom-data-attribute
@@ -93,8 +92,7 @@ namespace krys::boo::html
 
     /// @brief Whether @p a sorts before @p b: by namespace (null first), then by name.
     /// @see https://html.spec.whatwg.org/#compare-sanitizer-items
-    KRYS_NODISCARD static bool CompareItems(dom::DOMStringView nameA, const dom::DOMStringAtom &namespaceA,
-                                            dom::DOMStringView nameB,
-                                            const dom::DOMStringAtom &namespaceB) noexcept;
+    KRYS_NODISCARD static bool CompareItems(DOMStringView nameA, const DOMStringAtom &namespaceA,
+                                            DOMStringView nameB, const DOMStringAtom &namespaceB) noexcept;
   };
 }

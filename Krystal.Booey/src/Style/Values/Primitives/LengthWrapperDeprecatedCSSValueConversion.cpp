@@ -27,7 +27,7 @@
 namespace krys::boo::style
 {
   Maybe<css::ToLengthConversionData>
-    DeprecatedLengthConversionCreateCSSToLengthConversionData(const RefPtr<dom::Element> &) noexcept
+    DeprecatedLengthConversionCreateCSSToLengthConversionData(const RefPtr<Element> &) noexcept
   {
     // FIXME: Build the conversion data from the element's renderer style, the document element's renderer
     // style, the parent renderer's style and the render view (container query units are still to be

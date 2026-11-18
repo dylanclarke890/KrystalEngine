@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/DOM/Events/TouchList.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   Touch *TouchList::Item(uint32 index) const noexcept
   {

@@ -14,17 +14,16 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#sanitizerelementnamespace
   struct SanitizerElementNamespace
   {
-    dom::DOMString Name;
+    DOMString Name;
     /// @brief The namespace; null (`null`) for no namespace.
-    dom::DOMStringAtom Namespace;
+    DOMStringAtom Namespace;
 
-    SanitizerElementNamespace(dom::DOMString name,
-                              dom::DOMStringAtom namespaceURI = infra::namespaces::HTML) noexcept
+    SanitizerElementNamespace(DOMString name, DOMStringAtom namespaceURI = infra::namespaces::HTML) noexcept
         : Name(krys::move(name)), Namespace(krys::move(namespaceURI))
     {
     }
 
-    SanitizerElementNamespace(const char8_t *name) noexcept : SanitizerElementNamespace(dom::DOMString(name))
+    SanitizerElementNamespace(const char8_t *name) noexcept : SanitizerElementNamespace(DOMString(name))
     {
     }
 
@@ -39,17 +38,16 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#sanitizerattributenamespace
   struct SanitizerAttributeNamespace
   {
-    dom::DOMString Name;
+    DOMString Name;
     /// @brief The namespace; null (`null`) for no namespace.
-    dom::DOMStringAtom Namespace;
+    DOMStringAtom Namespace;
 
-    SanitizerAttributeNamespace(dom::DOMString name, dom::DOMStringAtom namespaceURI = null) noexcept
+    SanitizerAttributeNamespace(DOMString name, DOMStringAtom namespaceURI = null) noexcept
         : Name(krys::move(name)), Namespace(krys::move(namespaceURI))
     {
     }
 
-    SanitizerAttributeNamespace(const char8_t *name) noexcept
-        : SanitizerAttributeNamespace(dom::DOMString(name))
+    SanitizerAttributeNamespace(const char8_t *name) noexcept : SanitizerAttributeNamespace(DOMString(name))
     {
     }
 
@@ -82,9 +80,9 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#sanitizerprocessinginstruction
   struct SanitizerProcessingInstruction
   {
-    dom::DOMString Target;
+    DOMString Target;
 
-    SanitizerProcessingInstruction(dom::DOMString target) noexcept : Target(krys::move(target))
+    SanitizerProcessingInstruction(DOMString target) noexcept : Target(krys::move(target))
     {
     }
 

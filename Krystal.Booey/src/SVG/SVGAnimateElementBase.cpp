@@ -24,10 +24,9 @@
 #include "Krystal.Booey/SVG/SVGAnimateElementBase.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAttributeAnimator.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGAnimateElementBase::SVGAnimateElementBase(dom::Document &document,
-                                               SVGElementInterface interface) noexcept
+  SVGAnimateElementBase::SVGAnimateElementBase(Document &document, SVGElementInterface interface) noexcept
       : SVGAnimationElement(document, interface)
   {
     krys_debug_assert(interface == SVGElementInterface::Animate || interface == SVGElementInterface::Set
@@ -91,7 +90,7 @@ namespace krys::boo::svg
     ResetAnimation();
   }
 
-  void SVGAnimateElementBase::SetAttributeName(const dom::QualifiedName &attributeName) noexcept
+  void SVGAnimateElementBase::SetAttributeName(const QualifiedName &attributeName) noexcept
   {
     // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
     SVGSMILElement::SetAttributeName(attributeName);
@@ -105,8 +104,7 @@ namespace krys::boo::svg
     _hasInvalidCSSAttributeType = {};
   }
 
-  bool SVGAnimateElementBase::SetFromAndToValues(dom::DOMStringView fromString,
-                                                 dom::DOMStringView toString) noexcept
+  bool SVGAnimateElementBase::SetFromAndToValues(DOMStringView fromString, DOMStringView toString) noexcept
   {
     RefPtr target = ShareRefPtr(TargetElement());
     if (!target)
@@ -122,8 +120,7 @@ namespace krys::boo::svg
     return false;
   }
 
-  bool SVGAnimateElementBase::SetFromAndByValues(dom::DOMStringView fromString,
-                                                 dom::DOMStringView byString) noexcept
+  bool SVGAnimateElementBase::SetFromAndByValues(DOMStringView fromString, DOMStringView byString) noexcept
   {
     RefPtr target = ShareRefPtr(TargetElement());
     if (!target)
@@ -131,12 +128,12 @@ namespace krys::boo::svg
       return false;
     }
 
-    if (GetAnimationMode() == AnimationMode::By && (!IsAdditive() || IsDiscreteAnimator()))
+    if (GetAnimationMode() == svg::AnimationMode::By && (!IsAdditive() || IsDiscreteAnimator()))
     {
       return false;
     }
 
-    if (GetAnimationMode() == AnimationMode::FromBy && IsDiscreteAnimator())
+    if (GetAnimationMode() == svg::AnimationMode::FromBy && IsDiscreteAnimator())
     {
       return false;
     }
@@ -149,7 +146,7 @@ namespace krys::boo::svg
     return false;
   }
 
-  bool SVGAnimateElementBase::SetToAtEndOfDurationValue(dom::DOMStringView toAtEndOfDurationString) noexcept
+  bool SVGAnimateElementBase::SetToAtEndOfDurationValue(DOMStringView toAtEndOfDurationString) noexcept
   {
     RefPtr target = ShareRefPtr(TargetElement());
     if (!target || toAtEndOfDurationString.empty())
@@ -198,7 +195,7 @@ namespace krys::boo::svg
       progress = 1;
     }
 
-    if (GetCalcMode() == CalcMode::Discrete)
+    if (GetCalcMode() == svg::CalcMode::Discrete)
     {
       progress = progress < 0.5f ? 0.0f : 1.0f;
     }
@@ -237,8 +234,8 @@ namespace krys::boo::svg
     }
   }
 
-  Maybe<float> SVGAnimateElementBase::CalculateDistance(dom::DOMStringView fromString,
-                                                        dom::DOMStringView toString) noexcept
+  Maybe<float> SVGAnimateElementBase::CalculateDistance(DOMStringView fromString,
+                                                        DOMStringView toString) noexcept
   {
     // FIXME: A return value of float is not enough to support paced animations on lists.
     RefPtr target = ShareRefPtr(TargetElement());

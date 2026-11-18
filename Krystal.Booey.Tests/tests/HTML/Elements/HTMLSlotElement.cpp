@@ -11,9 +11,9 @@ namespace krys::boo::html::tests
     /// @brief A connected host with an open shadow root.
     struct SlotTestData
     {
-      Ref<dom::HTMLDocument> Document {CreateRef<dom::HTMLDocument>()};
-      Ref<dom::Element> Host {Document->CreateElement(u8"div").ReleaseValue()};
-      RefPtr<dom::ShadowRoot> Shadow;
+      Ref<HTMLDocument> Document {CreateRef<HTMLDocument>()};
+      Ref<Element> Host {Document->CreateElement(u8"div").ReleaseValue()};
+      RefPtr<boo::ShadowRoot> Shadow;
 
       SlotTestData() noexcept
       {
@@ -29,7 +29,7 @@ namespace krys::boo::html::tests
 
       /// @brief Whether @p slot's assigned nodes are exactly @p nodes.
       KRYS_NODISCARD static bool AssignedNodesAre(const HTMLSlotElement &slot,
-                                                  std::initializer_list<const dom::Node *> nodes) noexcept
+                                                  std::initializer_list<const Node *> nodes) noexcept
       {
         auto *assigned = slot.AssignedNodes();
         if (!assigned)
@@ -37,7 +37,7 @@ namespace krys::boo::html::tests
           return nodes.empty();
         }
         return std::ranges::equal(*assigned, nodes,
-                                  [](const auto &weak, const dom::Node *node) { return weak.get() == node; });
+                                  [](const auto &weak, const Node *node) { return weak.get() == node; });
       }
     };
   }
@@ -45,10 +45,10 @@ namespace krys::boo::html::tests
   TEST_CASE("Slots: a slot is HTML's slot element, with no assigned nodes to begin with",
             "[HTML][HTMLSlotElement][dom:shadow-tree-slots][dom:concept-slot][dom:slot-assigned-nodes]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto slot = CreateRef<HTMLSlotElement>(*document);
 
-    CHECK(Is<HTMLSlotElement>(static_cast<dom::Node &>(*slot)));
+    CHECK(Is<HTMLSlotElement>(static_cast<Node &>(*slot)));
     CHECK(slot->Name().empty());
     CHECK(slot->AssignedNodes() == nullptr);
   }
@@ -190,7 +190,7 @@ namespace krys::boo::html::tests
   TEST_CASE("HTMLSlotElement.assign(): sets the manually assigned nodes, which a manual shadow root assigns",
             "[HTML][HTMLSlotElement][html:dom-slot-assign]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto host = document->CreateElement(u8"div").ReleaseValue();
     REQUIRE_FALSE(document->AppendChild(*host).HasException());
     auto shadow =
@@ -216,13 +216,12 @@ namespace krys::boo::html::tests
     CHECK(SlotTestData::AssignedNodesAre(*first, {}));
 
     // In the order given, once each; nodes that aren't the host's children are kept but not assigned.
-    first->Assign(
-      {Ref<dom::Text>(b), Ref<dom::Element>(a), Ref<dom::Element>(a), Ref<dom::Element>(notAChild)});
+    first->Assign({Ref<Text>(b), Ref<Element>(a), Ref<Element>(a), Ref<Element>(notAChild)});
     CHECK(SlotTestData::AssignedNodesAre(*first, {b.get(), a.get()}));
 
     SECTION("Assigning to another slot moves the node")
     {
-      second->Assign({Ref<dom::Element>(a)});
+      second->Assign({Ref<Element>(a)});
       CHECK(SlotTestData::AssignedNodesAre(*first, {b.get()}));
       CHECK(SlotTestData::AssignedNodesAre(*second, {a.get()}));
     }

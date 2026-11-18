@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Color/CSSColorValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief A colour in the lab colour space.
   /// @see https://drafts.css-houdini.org/css-typed-om/#csslab
@@ -42,29 +42,29 @@ namespace krys::boo::css
   public:
     /// @return A `SyntaxError` if a component isn't of its type or `none`.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csslab-csslab
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSLab>> Create(CSSColorPercent lightness, CSSColorNumber a,
-                                                               CSSColorNumber b,
-                                                               CSSColorPercent alpha = 1.0) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSLab>> Create(CSSColorPercent lightness, CSSColorNumber a,
+                                                          CSSColorNumber b,
+                                                          CSSColorPercent alpha = 1.0) noexcept;
 
     KRYS_NODISCARD CSSColorPercent L() const noexcept;
 
     /// @return A `SyntaxError` if @p lightness isn't a percentage or `none`.
-    dom::ExceptionOr<void> SetL(CSSColorPercent lightness) noexcept;
+    ExceptionOr<void> SetL(CSSColorPercent lightness) noexcept;
 
     KRYS_NODISCARD CSSColorNumber A() const noexcept;
 
     /// @return A `SyntaxError` if @p a isn't a number or `none`.
-    dom::ExceptionOr<void> SetA(CSSColorNumber a) noexcept;
+    ExceptionOr<void> SetA(CSSColorNumber a) noexcept;
 
     KRYS_NODISCARD CSSColorNumber B() const noexcept;
 
     /// @return A `SyntaxError` if @p b isn't a number or `none`.
-    dom::ExceptionOr<void> SetB(CSSColorNumber b) noexcept;
+    ExceptionOr<void> SetB(CSSColorNumber b) noexcept;
 
     KRYS_NODISCARD CSSColorPercent Alpha() const noexcept;
 
     /// @return A `SyntaxError` if @p alpha isn't a percentage or `none`.
-    dom::ExceptionOr<void> SetAlpha(CSSColorPercent alpha) noexcept;
+    ExceptionOr<void> SetAlpha(CSSColorPercent alpha) noexcept;
 
     KRYS_NODISCARD CSSOMString ColorFunctionText() const noexcept final;
 
@@ -79,9 +79,9 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSLab)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleValue &styleValue) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSLab)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleValue &styleValue) noexcept
   {
-    return styleValue.StyleValueType() == krys::boo::css::CSSStyleValueType::CSSLab;
+    return styleValue.StyleValueType() == krys::boo::CSSStyleValueType::CSSLab;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

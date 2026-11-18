@@ -30,7 +30,7 @@
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLSpace.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   const MathMLElement::Length &MathMLSpaceElement::Width() noexcept
   {
@@ -47,9 +47,8 @@ namespace krys::boo::mathml
     return CachedMathMLLength(MathMLNames::DepthAttr(), _depth);
   }
 
-  void MathMLSpaceElement::AttributeChanged(const dom::QualifiedName &name,
-                                            Maybe<dom::DOMStringView> oldValue,
-                                            Maybe<dom::DOMStringView> value) noexcept
+  void MathMLSpaceElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                            Maybe<DOMStringView> value) noexcept
   {
     bool affectsLayout = false;
     if (name == MathMLNames::WidthAttr())

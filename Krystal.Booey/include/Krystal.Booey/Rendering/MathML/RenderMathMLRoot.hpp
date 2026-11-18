@@ -34,9 +34,10 @@
 
 namespace krys::boo
 {
+  class MathMLRootElement;
+
   namespace mathml
   {
-    class MathMLRootElement;
     enum class RootType : uint8;
   }
 
@@ -67,7 +68,7 @@ namespace krys::boo
     LayoutUnit _baseWidth;
 
   public:
-    RenderMathMLRoot(mathml::MathMLRootElement &element, RenderStyle &&style) noexcept;
+    RenderMathMLRoot(boo::MathMLRootElement &element, RenderStyle &&style) noexcept;
 
     ~RenderMathMLRoot() noexcept override;
 
@@ -88,7 +89,7 @@ namespace krys::boo
 
     KRYS_NODISCARD RenderBox &GetIndex() const noexcept;
 
-    KRYS_NODISCARD mathml::MathMLRootElement &GetElement() const noexcept;
+    KRYS_NODISCARD boo::MathMLRootElement &GetElement() const noexcept;
 
     KRYS_NODISCARD mathml::RootType GetRootType() const noexcept;
 

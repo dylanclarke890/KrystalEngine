@@ -39,7 +39,7 @@
 
 namespace krys::boo::html
 {
-  SpinButtonElement::SpinButtonElement(dom::Document &document, SpinButtonOwner &spinButtonOwner) noexcept
+  SpinButtonElement::SpinButtonElement(Document &document, SpinButtonOwner &spinButtonOwner) noexcept
       : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks),
         _spinButtonOwner(&spinButtonOwner), _repeatingTimer(*this, &SpinButtonElement::RepeatingTimerFired)
   {
@@ -50,7 +50,7 @@ namespace krys::boo::html
     StopObservingPopups();
   }
 
-  Ref<SpinButtonElement> SpinButtonElement::Create(dom::Document &document,
+  Ref<SpinButtonElement> SpinButtonElement::Create(Document &document,
                                                    SpinButtonOwner &spinButtonOwner) noexcept
   {
     auto element = CreateRef<SpinButtonElement>(document, spinButtonOwner);
@@ -64,9 +64,9 @@ namespace krys::boo::html
     return host && host->IsDisabledFormControl();
   }
 
-  void SpinButtonElement::DefaultEventHandler(dom::Event &event) noexcept
+  void SpinButtonElement::DefaultEventHandler(Event &event) noexcept
   {
-    auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
+    auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
     if (!mouseEvent)
     {
       if (!event.DefaultHandled())

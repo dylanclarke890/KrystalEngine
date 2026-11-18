@@ -32,10 +32,13 @@
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
+}
 
+namespace krys::boo::dom
+{
   /// @brief The user action state of a document's elements: which are active, hovered or focused. Only the
   /// elements with some state are kept; they're flagged (`Element::IsUserActionElement`).
   class UserActionElementSet

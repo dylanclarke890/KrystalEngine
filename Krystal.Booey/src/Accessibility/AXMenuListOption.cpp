@@ -28,20 +28,20 @@
 
 namespace krys::boo
 {
-  Ref<AXMenuListOption> AXMenuListOption::Create(AXId id, html::HTMLOptionElement &element,
+  Ref<AXMenuListOption> AXMenuListOption::Create(AXId id, HTMLOptionElement &element,
                                                  AXObjectCache &cache) noexcept
   {
     return AdoptRef(*new AXMenuListOption(id, element, cache));
   }
 
-  AXMenuListOption::AXMenuListOption(AXId id, html::HTMLOptionElement &element, AXObjectCache &cache) noexcept
+  AXMenuListOption::AXMenuListOption(AXId id, HTMLOptionElement &element, AXObjectCache &cache) noexcept
       : AXNodeObject(id, &element, cache)
   {
   }
 
-  html::HTMLOptionElement *AXMenuListOption::OptionElement() const noexcept
+  HTMLOptionElement *AXMenuListOption::OptionElement() const noexcept
   {
-    return DynamicDowncast<html::HTMLOptionElement>(GetNode());
+    return DynamicDowncast<HTMLOptionElement>(GetNode());
   }
 
   bool AXMenuListOption::IsEnabled() const noexcept
@@ -64,10 +64,10 @@ namespace krys::boo
     }
   }
 
-  dom::DOMString AXMenuListOption::StringValue() const noexcept
+  DOMString AXMenuListOption::StringValue() const noexcept
   {
     auto *option = OptionElement();
-    return option ? option->Label() : dom::DOMString {};
+    return option ? option->Label() : DOMString {};
   }
 
   LayoutRect AXMenuListOption::ElementRect() const noexcept

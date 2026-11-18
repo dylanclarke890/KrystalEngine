@@ -47,29 +47,29 @@ namespace krys::boo::html
 
     /// @brief Calls @p apply for the radio buttons named @p groupName without a form owner in @p rootNode's
     /// tree, until it returns false.
-    static void ForEachButtonInDetachedGroup(dom::ContainerNode &rootNode, dom::DOMStringView groupName,
+    static void ForEachButtonInDetachedGroup(ContainerNode &rootNode, DOMStringView groupName,
                                              const Func<bool(HTMLInputElement &)> &apply) noexcept;
 
-    KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
+    KRYS_NODISCARD DOMStringView FormControlType() const noexcept final
     {
       return input_type_names::Radio;
     }
 
-    KRYS_NODISCARD bool ValueMissing(dom::DOMStringView value) const noexcept final;
+    KRYS_NODISCARD bool ValueMissing(DOMStringView value) const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString ValueMissingText() const noexcept final;
+    KRYS_NODISCARD DOMString ValueMissingText() const noexcept final;
 
-    void HandleClickEvent(dom::MouseEvent &event) noexcept final;
+    void HandleClickEvent(MouseEvent &event) noexcept final;
 
-    ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept final;
+    ShouldCallBaseEventHandler HandleKeydownEvent(KeyboardEvent &event) noexcept final;
 
-    void HandleKeyupEvent(dom::KeyboardEvent &event) noexcept final;
+    void HandleKeyupEvent(KeyboardEvent &event) noexcept final;
 
     KRYS_NODISCARD bool ShouldSendChangeEventAfterCheckedChanged() noexcept final;
 
     void WillDispatchClick(InputElementClickState &state) noexcept final;
 
-    void DidDispatchClick(dom::Event &event, const InputElementClickState &state) noexcept final;
+    void DidDispatchClick(Event &event, const InputElementClickState &state) noexcept final;
 
     KRYS_NODISCARD bool MatchesIndeterminatePseudoClass() const noexcept final;
 

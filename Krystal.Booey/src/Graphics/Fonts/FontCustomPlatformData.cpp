@@ -59,8 +59,8 @@
 
 namespace krys::boo
 {
-  RefPtr<FontCustomPlatformData>
-    FontCustomPlatformData::Create(SharedBuffer &buffer, const css::CSSOMString &itemInCollection) noexcept
+  RefPtr<FontCustomPlatformData> FontCustomPlatformData::Create(SharedBuffer &buffer,
+                                                                const CSSOMString &itemInCollection) noexcept
   {
     // FIXME: The named face of a font collection, once collections are matched by name.
     (void)itemInCollection;
@@ -105,7 +105,7 @@ namespace krys::boo
     return platformData;
   }
 
-  bool FontCustomPlatformData::SupportsFormat(css::CSSOMStringView format) noexcept
+  bool FontCustomPlatformData::SupportsFormat(CSSOMStringView format) noexcept
   {
     for (auto supported : {u8"truetype", u8"opentype", u8"woff2", u8"woff2-variations", u8"woff-variations",
                            u8"truetype-variations", u8"opentype-variations", u8"woff"})

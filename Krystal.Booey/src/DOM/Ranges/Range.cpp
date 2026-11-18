@@ -1164,9 +1164,9 @@ namespace krys::boo::dom
     // 6. If element is null or all of the following are true: element's node document is an HTML document;
     //    element's local name is "html"; and element's namespace is the HTML namespace, then set element to
     //    the result of creating an element given node's node document, "body", and the HTML namespace.
-    if (!element || (Is<HTMLDocument>(element->NodeDocument()) && Is<html::HTMLHtmlElement>(*element)))
+    if (!element || (Is<HTMLDocument>(element->NodeDocument()) && Is<HTMLHtmlElement>(*element)))
     {
-      element = ElementFactory::CreateHTMLElement<html::HTMLBodyElement>(node->NodeDocument(), u8"body");
+      element = ElementFactory::CreateHTMLElement<HTMLBodyElement>(node->NodeDocument(), u8"body");
     }
 
     // 7. Return the result of invoking the fragment parsing algorithm steps given element, compliantString,

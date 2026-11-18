@@ -33,7 +33,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @brief A dialog box: shown with `Show()`, or `ShowModal()` in the top layer, where it blocks the rest of
   /// the document; closed with `Close()`, by a `method=dialog` form, or by the user through its close watcher
@@ -53,24 +53,24 @@ namespace krys::boo::html
     };
 
   private:
-    dom::DOMString _returnValue;
+    DOMString _returnValue;
     /// @see https://html.spec.whatwg.org/#is-modal
     bool _isModal {false};
     /// @see https://html.spec.whatwg.org/#enable-close-watcher-for-requestclose()
     bool _enableCloseWatcherForRequestClose {false};
     /// @see https://html.spec.whatwg.org/#request-close-return-value
-    Maybe<dom::DOMString> _requestCloseReturnValue;
+    Maybe<DOMString> _requestCloseReturnValue;
     /// @see https://html.spec.whatwg.org/#request-close-source-element
-    WeakPtr<dom::Element> _requestCloseSourceElement;
+    WeakPtr<Element> _requestCloseSourceElement;
     /// @see https://html.spec.whatwg.org/#previously-focused-element
-    WeakPtr<dom::Element> _previouslyFocusedElement;
+    WeakPtr<Element> _previouslyFocusedElement;
     /// @see https://html.spec.whatwg.org/#dialog-close-watcher
-    RefPtr<CloseWatcher> _closeWatcher;
+    RefPtr<html::CloseWatcher> _closeWatcher;
     /// @see https://html.spec.whatwg.org/#dialog-toggle-task-tracker
     RefPtr<dom::ToggleEventTask> _toggleEventTask;
 
   public:
-    HTMLDialogElement(dom::Document &document) noexcept;
+    HTMLDialogElement(Document &document) noexcept;
 
     ~HTMLDialogElement() noexcept override;
 
@@ -83,34 +83,34 @@ namespace krys::boo::html
     void Open(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-dialog-returnvalue
-    KRYS_NODISCARD const dom::DOMString &ReturnValue() const noexcept
+    KRYS_NODISCARD const DOMString &ReturnValue() const noexcept
     {
       return _returnValue;
     }
 
     /// @see https://html.spec.whatwg.org/#dom-dialog-returnvalue
-    void ReturnValue(dom::DOMString value) noexcept
+    void ReturnValue(DOMString value) noexcept
     {
       _returnValue = krys::move(value);
     }
 
     /// @see https://html.spec.whatwg.org/#dom-dialog-closedby
-    KRYS_NODISCARD dom::DOMString ClosedBy() const noexcept;
+    KRYS_NODISCARD DOMString ClosedBy() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-dialog-closedby
-    void ClosedBy(dom::DOMString value) noexcept;
+    void ClosedBy(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-dialog-show
-    dom::ExceptionOr<void> Show() noexcept;
+    ExceptionOr<void> Show() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-dialog-showmodal
-    dom::ExceptionOr<void> ShowModal() noexcept;
+    ExceptionOr<void> ShowModal() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-dialog-close
-    void Close(Maybe<dom::DOMString> returnValue = null) noexcept;
+    void Close(Maybe<DOMString> returnValue = null) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-dialog-requestclose
-    void RequestClose(Maybe<dom::DOMString> returnValue = null) noexcept;
+    void RequestClose(Maybe<DOMString> returnValue = null) noexcept;
 
 #pragma endregion
 
@@ -121,7 +121,7 @@ namespace krys::boo::html
     }
 
     /// @brief The dialog's close watcher, while it's open and connected.
-    KRYS_NODISCARD CloseWatcher *GetCloseWatcher() const noexcept
+    KRYS_NODISCARD html::CloseWatcher *GetCloseWatcher() const noexcept
     {
       return _closeWatcher.get();
     }
@@ -131,15 +131,15 @@ namespace krys::boo::html
 
     /// @brief Shows the dialog modally, invoked by @p source.
     /// @see https://html.spec.whatwg.org/#show-a-modal-dialog
-    dom::ExceptionOr<void> ShowModalDialog(dom::Element *source) noexcept;
+    ExceptionOr<void> ShowModalDialog(Element *source) noexcept;
 
     /// @brief Closes the dialog, setting its return value to @p result if there's one, invoked by @p source.
     /// @see https://html.spec.whatwg.org/#close-the-dialog
-    void CloseTheDialog(Maybe<dom::DOMString> result, dom::Element *source) noexcept;
+    void CloseTheDialog(Maybe<DOMString> result, Element *source) noexcept;
 
     /// @brief Asks the dialog to close (`cancel` can refuse), invoked by @p source.
     /// @see https://html.spec.whatwg.org/#dialog-request-close
-    void RequestCloseTheDialog(Maybe<dom::DOMString> returnValue, dom::Element *source) noexcept;
+    void RequestCloseTheDialog(Maybe<DOMString> returnValue, Element *source) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dialog-focusing-steps
     void RunFocusingSteps() noexcept;
@@ -154,23 +154,22 @@ namespace krys::boo::html
   protected:
     void OnInsert() noexcept override;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
   private:
     void SetIsModal(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#queue-a-dialog-toggle-event-task
     void QueueDialogToggleEventTask(dom::ToggleState oldState, dom::ToggleState newState,
-                                    dom::Element *source) noexcept;
+                                    Element *source) noexcept;
 
     /// @brief Fires `beforetoggle` from @p oldState to @p newState.
     /// @return Whether it wasn't canceled.
     bool FireBeforeToggleEvent(dom::ToggleState oldState, dom::ToggleState newState, bool cancelable,
-                               dom::Element *source) noexcept;
+                               Element *source) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dialog-setup-steps
     void SetupSteps() noexcept;
@@ -186,13 +185,13 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLDialogElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLDialogElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLDialogElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLDialogElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLDialogElement();
   }

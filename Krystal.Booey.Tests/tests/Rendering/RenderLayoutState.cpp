@@ -14,7 +14,7 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD RenderBox &LaidOutBoxOf(ResolverFixture &fixture, dom::DOMStringView id)
+    KRYS_NODISCARD RenderBox &LaidOutBoxOf(ResolverFixture &fixture, DOMStringView id)
     {
       (void)fixture.Document->UpdateLayout();
       auto *box = DynamicDowncast<RenderBox>(fixture.ById(id).Renderer());

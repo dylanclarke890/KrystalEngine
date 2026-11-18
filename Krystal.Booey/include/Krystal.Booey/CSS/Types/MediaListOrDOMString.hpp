@@ -4,9 +4,12 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class MediaList;
+}
 
-  using MediaListOrDOMString = Variant<RefPtr<MediaList>, dom::DOMString>;
+namespace krys::boo::css
+{
+  using MediaListOrDOMString = Variant<RefPtr<MediaList>, DOMString>;
 }

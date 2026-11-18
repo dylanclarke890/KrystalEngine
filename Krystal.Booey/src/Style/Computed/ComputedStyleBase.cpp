@@ -113,8 +113,7 @@ namespace krys::boo::style
 
   // MARK: - Custom properties
 
-  const CustomProperty *
-    ComputedStyleBase::CustomPropertyValue(const css::CSSOMStringAtom &name) const noexcept
+  const CustomProperty *ComputedStyleBase::CustomPropertyValue(const CSSOMStringAtom &name) const noexcept
   {
     for (auto *map : {&NonInheritedCustomProperties(), &InheritedCustomProperties()})
     {
@@ -148,7 +147,7 @@ namespace krys::boo::style
   }
 
   bool ComputedStyleBase::CustomPropertyValueEqual(const ComputedStyleBase &other,
-                                                   const css::CSSOMStringAtom &name) const noexcept
+                                                   const CSSOMStringAtom &name) const noexcept
   {
     if (&NonInheritedCustomProperties() == &other.NonInheritedCustomProperties()
         && &InheritedCustomProperties() == &other.InheritedCustomProperties())
@@ -195,7 +194,7 @@ namespace krys::boo::style
 
   // MARK: - Custom paint
 
-  void ComputedStyleBase::AddCustomPaintWatchProperty(const css::CSSOMStringAtom &name) noexcept
+  void ComputedStyleBase::AddCustomPaintWatchProperty(const CSSOMStringAtom &name) noexcept
   {
     auto &data = _nonInheritedData.Access().RareData.Access();
     data.CustomPaintWatchedProperties.insert(name);

@@ -36,13 +36,12 @@
 
 namespace krys::boo
 {
+  class Document;
   class Page;
 }
 
 namespace krys::boo::dom
 {
-  class Document;
-
   /// @brief Called with the frame's timestamp: milliseconds since the window's time origin.
   /// @see https://html.spec.whatwg.org/#framerequestcallback
   using FrameRequestCallback = Func<void(DOMHighResTimeStamp)>;

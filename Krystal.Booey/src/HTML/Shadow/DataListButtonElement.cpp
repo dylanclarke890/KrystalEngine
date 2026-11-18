@@ -35,12 +35,12 @@
 
 namespace krys::boo::html
 {
-  DataListButtonElement::DataListButtonElement(dom::Document &document, DataListButtonOwner &owner) noexcept
+  DataListButtonElement::DataListButtonElement(Document &document, DataListButtonOwner &owner) noexcept
       : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks), _owner(&owner)
   {
   }
 
-  Ref<DataListButtonElement> DataListButtonElement::Create(dom::Document &document,
+  Ref<DataListButtonElement> DataListButtonElement::Create(Document &document,
                                                            DataListButtonOwner &owner) noexcept
   {
     auto element = CreateRef<DataListButtonElement>(document, owner);
@@ -48,9 +48,9 @@ namespace krys::boo::html
     return element;
   }
 
-  void DataListButtonElement::DefaultEventHandler(dom::Event &event) noexcept
+  void DataListButtonElement::DefaultEventHandler(Event &event) noexcept
   {
-    if (!Is<dom::MouseEvent>(event))
+    if (!Is<MouseEvent>(event))
     {
       if (!event.DefaultHandled())
       {

@@ -122,7 +122,7 @@ namespace krys::ui
     return defaultValue;
   }
 
-  utf8_stringview EditorClient::InterpretKeyEvent(const boo::dom::KeyboardEvent &event) noexcept
+  utf8_stringview EditorClient::InterpretKeyEvent(const boo::KeyboardEvent &event) noexcept
   {
     krys_debug_assert(event.Type() == boo::event_names::KeyDown
                       || event.Type() == boo::event_names::KeyPress);
@@ -163,9 +163,9 @@ namespace krys::ui
     return {};
   }
 
-  bool EditorClient::HandleKeyboardEvent(boo::dom::KeyboardEvent &event) noexcept
+  bool EditorClient::HandleKeyboardEvent(boo::KeyboardEvent &event) noexcept
   {
-    auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
+    auto *node = DynamicDowncast<boo::Node>(event.Target().get());
     if (!node)
     {
       return false;
@@ -229,7 +229,7 @@ namespace krys::ui
     }
   }
 
-  void EditorClient::DiscardedComposition(const boo::dom::Document &) noexcept
+  void EditorClient::DiscardedComposition(const boo::Document &) noexcept
   {
     if (_discardedCompositionHandler)
     {
@@ -237,7 +237,7 @@ namespace krys::ui
     }
   }
 
-  void EditorClient::HandleInputMethodKeydown(boo::dom::KeyboardEvent &event) noexcept
+  void EditorClient::HandleInputMethodKeydown(boo::KeyboardEvent &event) noexcept
   {
     auto *platformEvent = event.UnderlyingPlatformEvent();
     if (platformEvent && platformEvent->HandledByInputMethod())
@@ -246,11 +246,11 @@ namespace krys::ui
     }
   }
 
-  void EditorClient::DidDispatchInputMethodKeydown(boo::dom::KeyboardEvent &event) noexcept
+  void EditorClient::DidDispatchInputMethodKeydown(boo::KeyboardEvent &event) noexcept
   {
     auto *platformEvent = event.UnderlyingPlatformEvent();
     krys_debug_assert(event.Target());
-    auto &editor = Downcast<boo::dom::Node>(*event.Target()).NodeDocument().GetEditor();
+    auto &editor = Downcast<boo::Node>(*event.Target()).NodeDocument().GetEditor();
 
     if (const auto &underlines = platformEvent->PreeditUnderlines())
     {
@@ -264,7 +264,7 @@ namespace krys::ui
     }
   }
 
-  void EditorClient::SetInputMethodState(boo::dom::Element *element) noexcept
+  void EditorClient::SetInputMethodState(boo::Element *element) noexcept
   {
     _acceptsTextInput = element && element->ShouldUseInputMethod();
   }

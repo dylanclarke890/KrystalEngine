@@ -43,13 +43,13 @@ namespace krys::boo::html
     {
     }
 
-    KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
+    KRYS_NODISCARD DOMStringView FormControlType() const noexcept final
     {
       return input_type_names::Reset;
     }
 
-    void HandleActivationBehavior(dom::Event &event) noexcept final;
+    void HandleActivationBehavior(Event &event) noexcept final;
 
-    KRYS_NODISCARD Maybe<dom::DOMString> DefaultValue() const noexcept final;
+    KRYS_NODISCARD Maybe<DOMString> DefaultValue() const noexcept final;
   };
 }

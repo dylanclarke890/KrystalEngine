@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/MathML/Elements/MathMLRowElement.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   /// @brief The `<mpadded>` element: a row with its size and position adjusted.
   /// @see https://w3c.github.io/mathml-core/#adjust-space-around-content-mpadded
@@ -43,7 +43,7 @@ namespace krys::boo::mathml
     Maybe<Length> _voffset;
 
   public:
-    explicit MathMLPaddedElement(dom::Document &document) noexcept
+    explicit MathMLPaddedElement(Document &document) noexcept
         : MathMLRowElement(document, MathMLElementInterface::Padded)
     {
     }
@@ -62,19 +62,19 @@ namespace krys::boo::mathml
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::mathml::MathMLPaddedElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::mathml::MathMLElement &element) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::MathMLPaddedElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::MathMLElement &element) noexcept
   {
-    return element.Interface() == krys::boo::mathml::MathMLElementInterface::Padded;
+    return element.Interface() == krys::boo::MathMLElementInterface::Padded;
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    auto *element = krys::DynamicDowncast<krys::boo::mathml::MathMLElement>(node);
+    auto *element = krys::DynamicDowncast<krys::boo::MathMLElement>(node);
     return element && IsType(*element);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

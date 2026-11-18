@@ -67,7 +67,7 @@ namespace krys::boo
 
     KRYS_NODISCARD Ref<css::Value> ComputedStyleValue(const RenderStyle &) const noexcept final;
 
-    KRYS_NODISCARD ImageWithScale SelectBestFitImage(const dom::Document &) noexcept final;
+    KRYS_NODISCARD ImageWithScale SelectBestFitImage(const Document &) noexcept final;
   };
 }
 

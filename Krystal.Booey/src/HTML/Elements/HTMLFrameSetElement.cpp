@@ -26,35 +26,36 @@
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLFrameSetElement::HTMLFrameSetElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::FrameSet)
+  HTMLFrameSetElement::HTMLFrameSetElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::FrameSet)
   {
   }
 
-  dom::DOMString HTMLFrameSetElement::Cols() const noexcept
+  DOMString HTMLFrameSetElement::Cols() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"cols").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"cols").value_or(u8"");
   }
 
-  void HTMLFrameSetElement::Cols(dom::DOMString value) noexcept
+  void HTMLFrameSetElement::Cols(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"cols", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"cols", krys::move(value));
   }
 
-  dom::DOMString HTMLFrameSetElement::Rows() const noexcept
+  DOMString HTMLFrameSetElement::Rows() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"rows").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"rows").value_or(u8"");
   }
 
-  void HTMLFrameSetElement::Rows(dom::DOMString value) noexcept
+  void HTMLFrameSetElement::Rows(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"rows", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"rows", krys::move(value));
   }
 
-  bool HTMLFrameSetElement::HasPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool
+    HTMLFrameSetElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                            const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && (localName == u8"bordercolor"))
     {
@@ -64,10 +65,10 @@ namespace krys::boo::html
   }
 
   void HTMLFrameSetElement::CollectPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI, dom::DOMStringView value,
+    const DOMStringAtom &localName, const DOMStringAtom &namespaceURI, DOMStringView value,
     css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);

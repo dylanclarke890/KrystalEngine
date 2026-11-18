@@ -37,7 +37,7 @@ namespace krys::boo::style
   /// mutations on several levels form a short linked list of property data.
   class CustomPropertyData : public RefCounted<CustomPropertyData>
   {
-    using CustomPropertyValueMap = HashMap<css::CSSOMStringAtom, RefPtr<const CustomProperty>>;
+    using CustomPropertyValueMap = HashMap<CSSOMStringAtom, RefPtr<const CustomProperty>>;
 
   private:
     RefPtr<const CustomPropertyData> _parentValues;
@@ -64,9 +64,9 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const CustomPropertyData &) const noexcept;
 
-    KRYS_NODISCARD const CustomProperty *Get(const css::CSSOMStringAtom &) const noexcept;
+    KRYS_NODISCARD const CustomProperty *Get(const CSSOMStringAtom &) const noexcept;
 
-    void Set(const css::CSSOMStringAtom &, Ref<const CustomProperty> &&) noexcept;
+    void Set(const CSSOMStringAtom &, Ref<const CustomProperty> &&) noexcept;
 
     KRYS_NODISCARD uint32 Size() const noexcept
     {
@@ -80,7 +80,7 @@ namespace krys::boo::style
 
     void ForEach(const Func<IterationStatus(const Entry &)> &) const noexcept;
 
-    KRYS_NODISCARD css::CSSOMStringAtom FindKeyAtIndex(uint32) const noexcept;
+    KRYS_NODISCARD CSSOMStringAtom FindKeyAtIndex(uint32) const noexcept;
 
   private:
     CustomPropertyData() noexcept = default;

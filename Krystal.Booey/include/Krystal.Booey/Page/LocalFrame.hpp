@@ -57,7 +57,7 @@ namespace krys::boo
 
   private:
     WeakPtr<Page> _page;
-    RefPtr<dom::Document> _document;
+    RefPtr<boo::Document> _document;
     RefPtr<LocalFrameView> _view;
     UniquePtr<EventHandler> _eventHandler;
     UniquePtr<FrameLoader> _loader;
@@ -101,7 +101,7 @@ namespace krys::boo
     }
 
     /// @brief The document the frame shows, if any.
-    KRYS_NODISCARD dom::Document *Document() const noexcept
+    KRYS_NODISCARD boo::Document *Document() const noexcept
     {
       return _document.get();
     }
@@ -135,13 +135,13 @@ namespace krys::boo
 
     /// @brief Shows @p newDocument in the frame, in place of its current document. @p newDocument must not be
     /// in a frame already.
-    void SetDocument(const RefPtr<dom::Document> &newDocument) noexcept;
+    void SetDocument(const RefPtr<boo::Document> &newDocument) noexcept;
 
     /// @brief The caret position nearest @p framePoint (in the frame's contents).
     KRYS_NODISCARD VisiblePosition VisiblePositionForPoint(const IntPoint &framePoint) const noexcept;
 
     /// @brief The document under @p point (in the window).
-    KRYS_NODISCARD dom::Document *DocumentAtPoint(const IntPoint &point) const noexcept;
+    KRYS_NODISCARD boo::Document *DocumentAtPoint(const IntPoint &point) const noexcept;
 
     /// @brief The zoom applied to the whole document (the root style's `zoom`).
     KRYS_NODISCARD float PageZoomFactor() const noexcept

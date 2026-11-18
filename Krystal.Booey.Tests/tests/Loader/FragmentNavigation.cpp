@@ -27,8 +27,8 @@ namespace krys::boo::tests
 
       void Navigate(utf8_stringview url) noexcept
       {
-        Frame->Loader().ChangeLocation(url::URL(Document->GetURL(), url), dom::DOMStringAtom::Empty(),
-                                       nullptr, ReferrerPolicy::EmptyString, null);
+        Frame->Loader().ChangeLocation(url::URL(Document->GetURL(), url), DOMStringAtom::Empty(), nullptr,
+                                       ReferrerPolicy::EmptyString, null);
         html::EventLoop::Current().RunUntilIdle();
       }
 
@@ -38,13 +38,13 @@ namespace krys::boo::tests
       }
 
       /// @brief How far below the top of the viewport @p id's element is.
-      KRYS_NODISCARD double TopOf(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD double TopOf(DOMStringView id) noexcept
       {
         (void)Document->UpdateLayoutIgnorePendingStylesheets();
         return ById(id).GetBoundingClientRect()->Y();
       }
 
-      KRYS_NODISCARD dom::Element *Target() const noexcept
+      KRYS_NODISCARD Element *Target() const noexcept
       {
         return Document->CSSTarget();
       }
@@ -70,7 +70,7 @@ namespace krys::boo::tests
     // There's no hashchange: Booey has no session history.
     uint32 hashChanges = 0;
     auto handle =
-      fixture.Document->Window()->AddEventListener(u8"hashchange", [&](dom::Event &) { ++hashChanges; });
+      fixture.Document->Window()->AddEventListener(u8"hashchange", [&](Event &) { ++hashChanges; });
 
     SECTION("a link to a fragment scrolls its target into view and makes it the target")
     {
@@ -167,9 +167,9 @@ namespace krys::boo::tests
     auto page = Page::Create();
     auto &frame = page->MainFrame();
     frame.CreateView({400, 300});
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     document->SetURL(url::URL(u8"https://example.com/page.html#section"));
-    frame.SetDocument(ShareRefPtr<dom::Document>(document.get()));
+    frame.SetDocument(ShareRefPtr<Document>(document.get()));
 
     auto parser = CreateRef<html::DocumentParser>(*document);
     parser->InputStream().Append(u8"<!DOCTYPE html>" + utf8_string(Page), IsEOF::Yes);

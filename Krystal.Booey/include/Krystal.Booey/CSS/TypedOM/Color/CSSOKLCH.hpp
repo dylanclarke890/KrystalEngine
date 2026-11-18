@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Color/CSSColorValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief A colour in the oklch colour space.
   /// @see https://drafts.css-houdini.org/css-typed-om/#cssoklch
@@ -42,29 +42,29 @@ namespace krys::boo::css
   public:
     /// @return A `SyntaxError` if a component isn't of its type or `none`.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssoklch-cssoklch
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSOKLCH>> Create(CSSColorPercent lightness,
-                                                                 CSSColorPercent chroma, CSSColorAngle hue,
-                                                                 CSSColorPercent alpha = 1.0) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSOKLCH>> Create(CSSColorPercent lightness, CSSColorPercent chroma,
+                                                            CSSColorAngle hue,
+                                                            CSSColorPercent alpha = 1.0) noexcept;
 
     KRYS_NODISCARD CSSColorPercent L() const noexcept;
 
     /// @return A `SyntaxError` if @p lightness isn't a percentage or `none`.
-    dom::ExceptionOr<void> SetL(CSSColorPercent lightness) noexcept;
+    ExceptionOr<void> SetL(CSSColorPercent lightness) noexcept;
 
     KRYS_NODISCARD CSSColorPercent C() const noexcept;
 
     /// @return A `SyntaxError` if @p chroma isn't a percentage or `none`.
-    dom::ExceptionOr<void> SetC(CSSColorPercent chroma) noexcept;
+    ExceptionOr<void> SetC(CSSColorPercent chroma) noexcept;
 
     KRYS_NODISCARD CSSColorAngle H() const noexcept;
 
     /// @return A `SyntaxError` if @p hue isn't an angle or `none`.
-    dom::ExceptionOr<void> SetH(CSSColorAngle hue) noexcept;
+    ExceptionOr<void> SetH(CSSColorAngle hue) noexcept;
 
     KRYS_NODISCARD CSSColorPercent Alpha() const noexcept;
 
     /// @return A `SyntaxError` if @p alpha isn't a percentage or `none`.
-    dom::ExceptionOr<void> SetAlpha(CSSColorPercent alpha) noexcept;
+    ExceptionOr<void> SetAlpha(CSSColorPercent alpha) noexcept;
 
     KRYS_NODISCARD CSSOMString ColorFunctionText() const noexcept final;
 
@@ -79,9 +79,9 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSOKLCH)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleValue &styleValue) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSOKLCH)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleValue &styleValue) noexcept
   {
-    return styleValue.StyleValueType() == krys::boo::css::CSSStyleValueType::CSSOKLCH;
+    return styleValue.StyleValueType() == krys::boo::CSSStyleValueType::CSSOKLCH;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

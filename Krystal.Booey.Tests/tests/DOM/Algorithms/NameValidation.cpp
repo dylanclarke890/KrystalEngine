@@ -23,7 +23,7 @@ namespace krys::boo::dom::tests
 
     SECTION("String with null character is invalid")
     {
-      dom::DOMString str = u8"foobar";
+      DOMString str = u8"foobar";
       str.insert(str.begin() + 3uz, '\0');
       REQUIRE_FALSE(NameValidation::IsValidNamespacePrefix(str));
     }
@@ -59,7 +59,7 @@ namespace krys::boo::dom::tests
 
     SECTION("String with null character is invalid")
     {
-      dom::DOMString str = u8"foobar";
+      DOMString str = u8"foobar";
       str.insert(str.begin() + 3uz, '\0');
       REQUIRE_FALSE(NameValidation::IsValidAttributeLocalName(str));
     }
@@ -102,7 +102,7 @@ namespace krys::boo::dom::tests
 
       SECTION("String with null character is invalid")
       {
-        dom::DOMString str = u8"foobar";
+        DOMString str = u8"foobar";
         str.insert(str.begin() + 3uz, '\0');
         REQUIRE_FALSE(NameValidation::IsValidElementLocalName(str));
       }
@@ -156,7 +156,7 @@ namespace krys::boo::dom::tests
     SECTION("Subsequent characters cannot be ASCII whitespace, null character, '/', or '>'")
     {
       REQUIRE_FALSE(NameValidation::IsValidElementLocalName(u8"foo bar"));
-      dom::DOMString str = u8"foobar";
+      DOMString str = u8"foobar";
       str.insert(str.begin() + 3uz, '\0');
       REQUIRE_FALSE(NameValidation::IsValidElementLocalName(str));
       REQUIRE_FALSE(NameValidation::IsValidElementLocalName(u8"foo/bar"));
@@ -174,7 +174,7 @@ namespace krys::boo::dom::tests
     {
       auto bytes = [](const char *text)
       {
-        return dom::DOMString(reinterpret_cast<const char8 *>(text));
+        return DOMString(reinterpret_cast<const char8 *>(text));
       };
       REQUIRE_FALSE(NameValidation::IsValidElementLocalName(bytes("_\xFF")));
       REQUIRE_FALSE(NameValidation::IsValidElementLocalName(bytes("\xC3")));
@@ -205,7 +205,7 @@ namespace krys::boo::dom::tests
 
     SECTION("String with null character is invalid")
     {
-      dom::DOMString str = u8"foobar";
+      DOMString str = u8"foobar";
       str.insert(str.begin() + 3uz, '\0');
       REQUIRE_FALSE(NameValidation::IsValidDocTypeName(str));
     }

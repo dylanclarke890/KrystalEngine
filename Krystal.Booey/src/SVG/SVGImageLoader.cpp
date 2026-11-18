@@ -24,7 +24,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   SVGImageLoader::SVGImageLoader(SVGImageElement &element) noexcept : ImageLoader(element)
   {

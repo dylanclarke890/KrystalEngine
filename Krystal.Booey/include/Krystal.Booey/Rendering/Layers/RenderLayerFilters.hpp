@@ -43,13 +43,9 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
-{
-  class Element;
-}
-
 namespace krys::boo
 {
+  class Element;
   class GraphicsContext;
   class RenderElement;
   class RenderLayer;
@@ -76,7 +72,7 @@ namespace krys::boo
     RefPtr<CSSFilterRenderer> _filter;
     UniquePtr<GraphicsContextSwitcher> _targetSwitcher;
 
-    List<Ref<dom::Element>> _internalSVGReferences;
+    List<Ref<Element>> _internalSVGReferences;
 
   public:
     KRYS_NODISCARD static Ref<RenderLayerFilters> Create(RenderLayer &layer, FloatSize scale) noexcept;

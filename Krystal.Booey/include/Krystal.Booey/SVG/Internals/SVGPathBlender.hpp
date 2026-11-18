@@ -22,6 +22,11 @@
 
 #include "Krystal.Booey/SVG/Internals/SVGPathConsumer.hpp"
 
+namespace krys::boo
+{
+  class SVGPathSource;
+}
+
 namespace krys::boo::svg
 {
   enum class FloatBlendMode : bool
@@ -29,9 +34,10 @@ namespace krys::boo::svg
     Horizontal,
     Vertical,
   };
+}
 
-  class SVGPathSource;
-
+namespace krys::boo
+{
   /// @brief Interpolates or adds two SVG paths segment by segment, or checks whether they can be.
   class SVGPathBlender
   {
@@ -73,7 +79,7 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD bool BlendArcToSegment(float progress) noexcept;
 
-    KRYS_NODISCARD float BlendAnimatedDimensonalFloat(float from, float to, FloatBlendMode,
+    KRYS_NODISCARD float BlendAnimatedDimensonalFloat(float from, float to, svg::FloatBlendMode,
                                                       float progress) noexcept;
 
     KRYS_NODISCARD FloatPoint BlendAnimatedFloatPoint(const FloatPoint &from, const FloatPoint &to,
@@ -89,8 +95,8 @@ namespace krys::boo::svg
     FloatPoint _fromSubpathPoint;
     FloatPoint _toSubpathPoint;
 
-    PathCoordinateMode _fromMode {PathCoordinateMode::AbsoluteCoordinates};
-    PathCoordinateMode _toMode {PathCoordinateMode::AbsoluteCoordinates};
+    svg::PathCoordinateMode _fromMode {svg::PathCoordinateMode::AbsoluteCoordinates};
+    svg::PathCoordinateMode _toMode {svg::PathCoordinateMode::AbsoluteCoordinates};
     unsigned _addTypesCount {0};
     bool _isInFirstHalfOfAnimation {false};
   };

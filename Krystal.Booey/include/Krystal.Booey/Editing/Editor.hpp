@@ -45,19 +45,23 @@ namespace krys::boo::url
   class URL;
 }
 
-namespace krys::boo::dom
+namespace krys::boo
 {
-  class DataTransfer;
   class Document;
   class DocumentFragment;
   class Element;
   class Event;
   class KeyboardEvent;
+  class Text;
+  class TextEvent;
+}
+
+namespace krys::boo::dom
+{
+  class DataTransfer;
   class Range;
   struct SimpleRange;
   class StaticRange;
-  class Text;
-  class TextEvent;
   enum class TextEventInputType : uint8;
 }
 
@@ -157,7 +161,7 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(Editor);
 
   private:
-    dom::Document &_document;
+    Document &_document;
     RefPtr<CompositeEditCommand> _lastEditCommand;
     // While typing, the page doesn't scroll as the text changes its size, until the typing command is
     // applied.
@@ -193,21 +197,20 @@ namespace krys::boo
     private:
       const EditorInternalCommand *_command {nullptr};
       EditorCommandSource _source {EditorCommandSource::MenuOrKeyBinding};
-      RefPtr<dom::Document> _document;
+      RefPtr<Document> _document;
 
     public:
       Command() noexcept = default;
 
-      Command(const EditorInternalCommand *command, EditorCommandSource source,
-              dom::Document &document) noexcept;
+      Command(const EditorInternalCommand *command, EditorCommandSource source, Document &document) noexcept;
 
-      bool Execute(utf8_stringview parameter = {}, dom::Event *triggeringEvent = nullptr) const noexcept;
+      bool Execute(utf8_stringview parameter = {}, Event *triggeringEvent = nullptr) const noexcept;
 
-      bool Execute(dom::Event *triggeringEvent) const noexcept;
+      bool Execute(Event *triggeringEvent) const noexcept;
 
       KRYS_NODISCARD bool IsSupported() const noexcept;
 
-      KRYS_NODISCARD bool IsEnabled(dom::Event *triggeringEvent = nullptr) const noexcept;
+      KRYS_NODISCARD bool IsEnabled(Event *triggeringEvent = nullptr) const noexcept;
 
       KRYS_NODISCARD bool IsTextInsertion() const noexcept;
 
@@ -215,21 +218,21 @@ namespace krys::boo
 
       /// @brief Whether the command's effect is on the current selection (bold text for `Bold`); false for
       /// an unsupported command or one without a state.
-      KRYS_NODISCARD TriState State(dom::Event *triggeringEvent = nullptr) const noexcept;
+      KRYS_NODISCARD TriState State(Event *triggeringEvent = nullptr) const noexcept;
 
       /// @brief The command's value for the current selection (the font for `FontName`); "true" or "false"
       /// for a command with a state but no value, and empty for an unsupported command or one with neither.
-      KRYS_NODISCARD utf8_string Value(dom::Event *triggeringEvent = nullptr) const noexcept;
+      KRYS_NODISCARD utf8_string Value(Event *triggeringEvent = nullptr) const noexcept;
 
     private:
       KRYS_NODISCARD LocalFrame *Frame() const noexcept;
     };
 
-    explicit Editor(dom::Document &document) noexcept;
+    explicit Editor(Document &document) noexcept;
 
     ~Editor() noexcept;
 
-    KRYS_NODISCARD dom::Document &GetDocument() const noexcept
+    KRYS_NODISCARD Document &GetDocument() const noexcept
     {
       return _document;
     }
@@ -239,13 +242,13 @@ namespace krys::boo
 
     /// @brief Lets the editor client run the command @p event is bound to.
     /// @return Whether it did, so the event's default action is done.
-    bool HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept;
+    bool HandleKeyboardEvent(KeyboardEvent &event) noexcept;
 
     /// @brief Lets the editor client mark a `keydown` an input method handled, before it's dispatched.
-    void HandleInputMethodKeydown(dom::KeyboardEvent &event) noexcept;
+    void HandleInputMethodKeydown(KeyboardEvent &event) noexcept;
 
     /// @brief Lets the editor client apply what an input method made of a key, after its `keydown`.
-    void DidDispatchInputMethodKeydown(dom::KeyboardEvent &event) noexcept;
+    void DidDispatchInputMethodKeydown(KeyboardEvent &event) noexcept;
 
     using PasteOption = EditorPasteOption;
 
@@ -280,7 +283,7 @@ namespace krys::boo
     /// replaces the selection.
     void PasteAsPlainText(utf8_stringview pastingText, bool smartReplace) noexcept;
 
-    void PasteAsFragment(Ref<dom::DocumentFragment> &&pastingFragment, bool smartReplace, bool matchStyle,
+    void PasteAsFragment(Ref<DocumentFragment> &&pastingFragment, bool smartReplace, bool matchStyle,
                          EditAction action = EditAction::Paste) noexcept;
 
     KRYS_NODISCARD bool IsPastingFromMenuOrKeyBinding() const noexcept
@@ -304,16 +307,16 @@ namespace krys::boo
     /// @brief Writes the image @p imageElement shows to @p pasteboard: its URL, titled @p title, and its
     /// markup.
     // FIXME: The image itself, with images on the pasteboard.
-    static void WriteImageToPasteboard(Pasteboard &pasteboard, dom::Element &imageElement,
-                                       const url::URL &url, utf8_stringview title) noexcept;
+    static void WriteImageToPasteboard(Pasteboard &pasteboard, Element &imageElement, const url::URL &url,
+                                       utf8_stringview title) noexcept;
 
     /// @brief The pasteboard's richest content as a fragment to paste at @p context.
     /// @param allowPlainText Whether plain text may be read when there's no richer content.
     /// @param chosePlainText Set to whether the fragment was made from plain text.
-    KRYS_NODISCARD RefPtr<dom::DocumentFragment> WebContentFromPasteboard(Pasteboard &pasteboard,
-                                                                          const dom::SimpleRange &context,
-                                                                          bool allowPlainText,
-                                                                          bool &chosePlainText) noexcept;
+    KRYS_NODISCARD RefPtr<DocumentFragment> WebContentFromPasteboard(Pasteboard &pasteboard,
+                                                                     const dom::SimpleRange &context,
+                                                                     bool allowPlainText,
+                                                                     bool &chosePlainText) noexcept;
 
     /// @brief The command named @p commandName (ignoring ASCII case), from a menu or key binding.
     KRYS_NODISCARD Command GetCommand(utf8_stringview commandName) noexcept;
@@ -325,17 +328,17 @@ namespace krys::boo
 
     KRYS_NODISCARD EditingBehavior Behavior() const noexcept;
 
-    void TextFieldDidBeginEditing(dom::Element &element) noexcept;
+    void TextFieldDidBeginEditing(Element &element) noexcept;
 
-    void TextFieldDidEndEditing(dom::Element &element) noexcept;
+    void TextFieldDidEndEditing(Element &element) noexcept;
 
-    void TextDidChangeInTextField(dom::Element &element) noexcept;
+    void TextDidChangeInTextField(Element &element) noexcept;
 
-    bool DoTextFieldCommandFromEvent(dom::Element &element, dom::KeyboardEvent *event) noexcept;
+    bool DoTextFieldCommandFromEvent(Element &element, KeyboardEvent *event) noexcept;
 
-    void TextWillBeDeletedInTextField(dom::Element &input) noexcept;
+    void TextWillBeDeletedInTextField(Element &input) noexcept;
 
-    void TextDidChangeInTextArea(dom::Element &element) noexcept;
+    void TextDidChangeInTextArea(Element &element) noexcept;
 
     /// @brief The element a new paragraph is made of: a `div`, or a `p`.
     KRYS_NODISCARD EditorParagraphSeparator DefaultParagraphSeparator() const noexcept
@@ -350,7 +353,7 @@ namespace krys::boo
 
     /// @brief The selection a command triggered by @p event works on: a text control's own selection when
     /// the event is at one the frame's selection isn't in.
-    KRYS_NODISCARD VisibleSelection SelectionForCommand(dom::Event *event) const noexcept;
+    KRYS_NODISCARD VisibleSelection SelectionForCommand(Event *event) const noexcept;
 
     KRYS_NODISCARD utf8_string SelectedText() const noexcept;
 
@@ -396,13 +399,12 @@ namespace krys::boo
     void SetBaseWritingDirection(WritingDirection direction) noexcept;
 
     /// @brief Inserts typed text, firing `textInput` at the event's target first.
-    bool InsertText(utf8_stringview text, dom::Event *triggeringEvent,
-                    dom::TextEventInputType inputType) noexcept;
+    bool InsertText(utf8_stringview text, Event *triggeringEvent, dom::TextEventInputType inputType) noexcept;
 
-    bool InsertText(utf8_stringview text, dom::Event *triggeringEvent) noexcept;
+    bool InsertText(utf8_stringview text, Event *triggeringEvent) noexcept;
 
     bool InsertTextWithoutSendingTextEvent(utf8_stringview text, bool selectInsertedText,
-                                           dom::TextEvent *triggeringEvent) noexcept;
+                                           TextEvent *triggeringEvent) noexcept;
 
     bool InsertLineBreak() noexcept;
 
@@ -410,7 +412,7 @@ namespace krys::boo
 
     /// @brief The default action of a `textInput` event: inserts its text, or pastes its fragment.
     /// @return Whether it was handled.
-    bool HandleTextEvent(dom::TextEvent &event) noexcept;
+    bool HandleTextEvent(TextEvent &event) noexcept;
 
     bool DeleteWithDirection(SelectionDirection direction, TextGranularity granularity,
                              bool shouldAddToKillRing, bool isTypingAction) noexcept;
@@ -420,8 +422,8 @@ namespace krys::boo
 
     void PerformDelete() noexcept;
 
-    void ReplaceSelectionWithFragment(dom::DocumentFragment &fragment, bool selectReplacement,
-                                      bool smartReplace, bool matchStyle,
+    void ReplaceSelectionWithFragment(DocumentFragment &fragment, bool selectReplacement, bool smartReplace,
+                                      bool matchStyle,
                                       EditAction editingAction = EditAction::Insert) noexcept;
 
     void ReplaceSelectionWithText(utf8_stringview text, bool selectReplacement, bool smartReplace,
@@ -520,7 +522,7 @@ namespace krys::boo
     bool GetCompositionSelection(uint32 &selectionStart, uint32 &selectionEnd) const noexcept;
 
     /// @brief The text node the composition is in, for painting it.
-    KRYS_NODISCARD dom::Text *CompositionNode() const noexcept;
+    KRYS_NODISCARD Text *CompositionNode() const noexcept;
 
     /// @brief The composition's start offset in its text node, or 0 if there's none.
     KRYS_NODISCARD uint32 CompositionStart() const noexcept;
@@ -554,9 +556,9 @@ namespace krys::boo
 
     void CloseTyping() noexcept;
 
-    KRYS_NODISCARD RefPtr<dom::Element> FindEventTargetFrom(const VisibleSelection &selection) const noexcept;
+    KRYS_NODISCARD RefPtr<Element> FindEventTargetFrom(const VisibleSelection &selection) const noexcept;
 
-    KRYS_NODISCARD bool ShouldInsertFragment(dom::DocumentFragment &fragment,
+    KRYS_NODISCARD bool ShouldInsertFragment(DocumentFragment &fragment,
                                              const Maybe<dom::SimpleRange> &replacingDOMRange) const noexcept;
 
     KRYS_NODISCARD bool ShouldInsertText(utf8_stringview text,
@@ -578,12 +580,12 @@ namespace krys::boo
 
     KRYS_NODISCARD utf8_string SelectedText(TextIteratorBehaviors behaviors) const noexcept;
 
-    bool DispatchClipboardEvent(RefPtr<dom::Element> target, ClipboardEventKind kind) noexcept;
+    bool DispatchClipboardEvent(RefPtr<Element> target, ClipboardEventKind kind) noexcept;
 
-    static bool DispatchClipboardEvent(const RefPtr<dom::Element> &target, ClipboardEventKind kind,
+    static bool DispatchClipboardEvent(const RefPtr<Element> &target, ClipboardEventKind kind,
                                        const Ref<dom::DataTransfer> &dataTransfer) noexcept;
 
-    KRYS_NODISCARD RefPtr<dom::Element> FindEventTargetFromSelection() const noexcept;
+    KRYS_NODISCARD RefPtr<Element> FindEventTargetFromSelection() const noexcept;
 
     void PerformCutOrCopy(EditorActionSpecifier action) noexcept;
 

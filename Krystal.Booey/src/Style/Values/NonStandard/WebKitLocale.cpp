@@ -43,7 +43,7 @@ namespace krys::boo::style
 
     switch (primitiveValue->ValueId())
     {
-      case css::ValueId::Invalid: return css::CSSOMStringAtom {primitiveValue->StringValue()};
+      case css::ValueId::Invalid: return CSSOMStringAtom {primitiveValue->StringValue()};
       case css::ValueId::Auto:    return css::keywords::Auto {};
       default:                    state.SetCurrentPropertyInvalidAtComputedValueTime(); return css::keywords::Auto {};
     }

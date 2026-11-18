@@ -309,7 +309,7 @@ namespace krys::boo::style
   static const ScopedName &ImplicitAnchorElementName() noexcept
   {
     // User specified anchor names start with "--".
-    static NeverDestroyed<ScopedName> name {ScopedName {css::CSSOMStringAtom(u8"implicit-anchor-element")}};
+    static NeverDestroyed<ScopedName> name {ScopedName {CSSOMStringAtom(u8"implicit-anchor-element")}};
     return name;
   }
 
@@ -747,7 +747,7 @@ namespace krys::boo::style
       return nullptr;
     }
 
-    Ref<const dom::Element> elementOrHost = ShareRef(*builderState.GetElement());
+    Ref<const boo::Element> elementOrHost = ShareRef(*builderState.GetElement());
 
     // PseudoElement nodes are created on-demand by render tree builder so dont' work as keys here.
     auto &anchorPositionedStates = *builderState.AnchorPositionedStates();
@@ -800,7 +800,7 @@ namespace krys::boo::style
 
     // Anchor value may now be resolved using layout information
 
-    RefPtr<dom::Element> anchorElement;
+    RefPtr<boo::Element> anchorElement;
     if (auto it = anchorPositionedState.AnchorElements.find(resolvedAnchorName);
         it != anchorPositionedState.AnchorElements.end())
     {
@@ -1113,11 +1113,11 @@ namespace krys::boo::style
   // anchor scope affecting this name, returns nullptr.
   // (*): an anchor element can also establish an anchor scope containing itself. In this case, the return
   // value is itself.
-  static const dom::Element *AnchorScopeForAnchorName(const RenderBoxModelObject &renderer,
+  static const boo::Element *AnchorScopeForAnchorName(const RenderBoxModelObject &renderer,
                                                       const ResolvedScopedName &anchorName) noexcept
   {
     // Traverse up the composed tree through itself and each ancestor.
-    const dom::Element *anchorElement = renderer.GetElement();
+    const boo::Element *anchorElement = renderer.GetElement();
     krys_debug_assert(anchorElement);
     for (const auto *currentAncestor = anchorElement; currentAncestor;
          currentAncestor = currentAncestor->ParentElementInComposedTree())
@@ -1214,7 +1214,7 @@ namespace krys::boo::style
 
   // See: https://drafts.csswg.org/css-anchor-position-1/#acceptable-anchor-element
   static bool IsAcceptableAnchorElement(const RenderBoxModelObject &anchorRenderer,
-                                        const dom::Element &anchorPositionedElement,
+                                        const boo::Element &anchorPositionedElement,
                                         const Maybe<ResolvedScopedName> &anchorName = null) noexcept
   {
     // "Possible anchor is either an element or a fully styleable tree-abiding pseudo-element."
@@ -1281,13 +1281,13 @@ namespace krys::boo::style
     return false;
   }
 
-  static RefPtr<dom::Element> FindImplicitAnchor(const dom::Element &anchorPositionedElement) noexcept
+  static RefPtr<boo::Element> FindImplicitAnchor(const boo::Element &anchorPositionedElement) noexcept
   {
-    auto find = [&]() -> RefPtr<dom::Element>
+    auto find = [&]() -> RefPtr<boo::Element>
     {
       // "The implicit anchor element of a pseudo-element is its originating element, unless otherwise
       // specified." https://drafts.csswg.org/css-anchor-position-1/#implicit
-      if (const auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(anchorPositionedElement))
+      if (const auto *pseudoElement = DynamicDowncast<PseudoElement>(anchorPositionedElement))
       {
         return ShareRefPtr(pseudoElement->HostElement());
       }
@@ -1296,7 +1296,7 @@ namespace krys::boo::style
       // 24. Set element's implicit anchor element to invoker.
       if (auto *popoverData = anchorPositionedElement.GetPopoverData())
       {
-        return ShareRefPtr<dom::Element>(popoverData->Invoker());
+        return ShareRefPtr<boo::Element>(popoverData->Invoker());
       }
 
       return nullptr;
@@ -1316,9 +1316,9 @@ namespace krys::boo::style
     return nullptr;
   }
 
-  static RefPtr<dom::Element>
+  static RefPtr<boo::Element>
     FindLastAcceptableAnchorWithName(const ResolvedScopedName &anchorName,
-                                     const dom::Element &anchorPositionedElement,
+                                     const boo::Element &anchorPositionedElement,
                                      const AnchorsForAnchorName &anchorsForAnchorName) noexcept
   {
     if (anchorName.Name() == ImplicitAnchorElementName().Name)
@@ -1343,7 +1343,7 @@ namespace krys::boo::style
     return nullptr;
   }
 
-  static AnchorsForAnchorName CollectAnchorsForAnchorName(const dom::Document &document) noexcept
+  static AnchorsForAnchorName CollectAnchorsForAnchorName(const Document &document) noexcept
   {
     const auto *renderView = document.GetRenderView();
     if (!renderView)
@@ -1389,7 +1389,7 @@ namespace krys::boo::style
   }
 
   AnchorElements AnchorPositionEvaluator::FindAnchorsForAnchorPositionedElement(
-    const dom::Element &anchorPositionedElement, const HashSet<ResolvedScopedName> &anchorNames,
+    const boo::Element &anchorPositionedElement, const HashSet<ResolvedScopedName> &anchorNames,
     const AnchorsForAnchorName &anchorsForAnchorName) noexcept
   {
     AnchorElements anchorElements;
@@ -1551,7 +1551,7 @@ namespace krys::boo::style
   }
 
   void AnchorPositionEvaluator::UpdateAnchorPositioningStatesAfterInterleavedLayout(
-    dom::Document &document, AnchorPositionedStates &anchorPositionedStates) noexcept
+    Document &document, AnchorPositionedStates &anchorPositionedStates) noexcept
   {
     if (anchorPositionedStates.empty())
     {
@@ -1569,7 +1569,7 @@ namespace krys::boo::style
       {
         case AnchorPositionResolutionStage::FindAnchors:
         {
-          RefPtr<const dom::Element> element = key.first;
+          RefPtr<const boo::Element> element = key.first;
           if (key.second)
           {
             element = element->PseudoElementIfExists(*key.second);
@@ -1597,7 +1597,7 @@ namespace krys::boo::style
             }
             document.StyleScope().AnchorPositionedToAnchorMap().insert_or_assign(
               element.get(), AnchorPositionedToAnchorEntry {
-                               .Element = CreateWeakPtr(const_cast<dom::Element *>(element.get())),
+                               .Element = CreateWeakPtr(const_cast<boo::Element *>(element.get())),
                                .PseudoElementIdentifier = key.second,
                                .Anchors = krys::move(anchors)});
           }
@@ -1625,7 +1625,7 @@ namespace krys::boo::style
   }
 
   void AnchorPositionEvaluator::UpdateAnchorPositionedStateForDefaultAnchorAndPositionVisibility(
-    dom::Element &element, const RenderStyle &style, AnchorPositionedStates &states) noexcept
+    boo::Element &element, const RenderStyle &style, AnchorPositionedStates &states) noexcept
   {
     auto shouldResolveDefaultAnchor = IsAnchorPositioned(style);
 
@@ -1640,7 +1640,7 @@ namespace krys::boo::style
       return;
     }
 
-    auto &state = states[{ShareRefPtr<const dom::Element>(&element), style.GetPseudoElementIdentifier()}];
+    auto &state = states[{ShareRefPtr<const boo::Element>(&element), style.GetPseudoElementIdentifier()}];
     if (!state)
     {
       state = CreateUnique<AnchorPositionedState>();
@@ -1966,24 +1966,24 @@ namespace krys::boo::style
 
   // FIXME: The code should operate fully on host/pseudoElementIdentifier pairs and not use PseudoElements to
   // support pseudo-elements other than ::before/::after.
-  RefPtr<const dom::Element>
+  RefPtr<const boo::Element>
     AnchorPositionEvaluator::AnchorPositionedElementOrPseudoElement(BuilderState &builderState) noexcept
   {
     const auto *element = builderState.GetElement();
     if (auto identifier = builderState.Style().GetPseudoElementIdentifier())
     {
-      RefPtr<const dom::Element> pseudoElement = element->PseudoElementIfExists(*identifier);
+      RefPtr<const boo::Element> pseudoElement = element->PseudoElementIfExists(*identifier);
       return pseudoElement;
     }
     return ShareRefPtr(element);
   }
 
   AnchorPositionedKey
-    AnchorPositionEvaluator::KeyForElementOrPseudoElement(const dom::Element &element) noexcept
+    AnchorPositionEvaluator::KeyForElementOrPseudoElement(const boo::Element &element) noexcept
   {
-    if (const auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(element))
+    if (const auto *pseudoElement = DynamicDowncast<PseudoElement>(element))
     {
-      return {ShareRefPtr<const dom::Element>(pseudoElement->HostElement()),
+      return {ShareRefPtr<const boo::Element>(pseudoElement->HostElement()),
               PseudoElementIdentifier {pseudoElement->GetPseudoElementType()}};
     }
     return {ShareRefPtr(&element), null};
@@ -2083,7 +2083,7 @@ namespace krys::boo::style
       if (auto usedPositionOptionIndex = positionTryBox->Style().UsedPositionOptionIndex())
       {
         lastSuccessfulPositionOptionMap.emplace(
-          AnchorPositionedKey {ShareRefPtr<const dom::Element>(&styleable->Element),
+          AnchorPositionedKey {ShareRefPtr<const boo::Element>(&styleable->Element),
                                styleable->PseudoElementIdentifier},
           *usedPositionOptionIndex);
       }

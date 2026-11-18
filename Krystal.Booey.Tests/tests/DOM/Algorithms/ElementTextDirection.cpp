@@ -60,7 +60,7 @@ namespace krys::boo::dom::tests
     CHECK(ParseTextDirectionState(null) == TextDirectionState::Undefined);
 
     auto document = Parse(u8"<!DOCTYPE html><p id=p dir=auto></p><bdi id=b></bdi><bdi id=c dir=ltr></bdi>");
-    CHECK(Is<html::HTMLBDIElement>(ById(*document, u8"b")));
+    CHECK(Is<HTMLBDIElement>(ById(*document, u8"b")));
     CHECK(ElementHasAutoTextDirectionState(ById(*document, u8"p")));
     CHECK(ElementHasAutoTextDirectionState(ById(*document, u8"b")));
     CHECK_FALSE(ElementHasAutoTextDirectionState(ById(*document, u8"c")));
@@ -250,8 +250,8 @@ namespace krys::boo::dom::tests
       Shalom,
       u8"<input id=named name=n dirname=n.dir></div>",
     }));
-    auto &i = Downcast<html::HTMLInputElement>(ById(*document, u8"i"));
-    auto &t = Downcast<html::HTMLTextAreaElement>(ById(*document, u8"t"));
+    auto &i = Downcast<HTMLInputElement>(ById(*document, u8"i"));
+    auto &t = Downcast<HTMLTextAreaElement>(ById(*document, u8"t"));
 
     CHECK(Dir(i) == "rtl");
     // An empty value decides nothing; a non-empty one without a strong character is ltr.
@@ -269,7 +269,7 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(t.SetValue(Salam).HasException());
       CHECK(Dir(t) == "rtl");
       // The value attribute, while the value isn't dirty.
-      auto &empty = Downcast<html::HTMLInputElement>(ById(*document, u8"empty"));
+      auto &empty = Downcast<HTMLInputElement>(ById(*document, u8"empty"));
       REQUIRE_FALSE(empty.SetAttribute(u8"value", Salam).HasException());
       CHECK(Dir(empty) == "rtl");
     }
@@ -286,7 +286,7 @@ namespace krys::boo::dom::tests
 
     SECTION("dirname's direction")
     {
-      auto &named = Downcast<html::HTMLInputElement>(ById(*document, u8"named"));
+      auto &named = Downcast<HTMLInputElement>(ById(*document, u8"named"));
       CHECK(named.DirectionForFormData() == u8"rtl");
       REQUIRE_FALSE(ById(*document, u8"d").SetAttribute(u8"dir", u8"ltr").HasException());
       CHECK(named.DirectionForFormData() == u8"ltr");

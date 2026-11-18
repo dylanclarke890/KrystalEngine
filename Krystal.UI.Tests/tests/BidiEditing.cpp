@@ -30,12 +30,12 @@ namespace krys::ui::tests
     constexpr double CaretTolerance = 1.0;
 
     /// @brief The node at @p path: an element's id, then the indices of children below it.
-    KRYS_NODISCARD boo::dom::Node *NodeAt(boo::dom::Document &document, const std::string &path)
+    KRYS_NODISCARD boo::Node *NodeAt(boo::Document &document, const std::string &path)
     {
       std::istringstream stream(path);
       std::string part;
       std::getline(stream, part, '/');
-      boo::dom::Node *node = document.GetElementById(boo::dom::DOMString(part.begin(), part.end())).get();
+      boo::Node *node = document.GetElementById(boo::DOMString(part.begin(), part.end())).get();
       while (node && std::getline(stream, part, '/'))
       {
         auto index = std::stoi(part);
@@ -49,13 +49,13 @@ namespace krys::ui::tests
     }
 
     /// @brief @p node's path, as `NodeAt` reads it.
-    KRYS_NODISCARD std::string PathOf(const boo::dom::Node &node)
+    KRYS_NODISCARD std::string PathOf(const boo::Node &node)
     {
       std::string path;
-      const boo::dom::Node *current = &node;
+      const boo::Node *current = &node;
       while (current)
       {
-        if (auto *element = DynamicDowncast<boo::dom::Element>(*current))
+        if (auto *element = DynamicDowncast<boo::Element>(*current))
         {
           if (auto id = element->GetAttribute(u8"id"))
           {
@@ -81,9 +81,9 @@ namespace krys::ui::tests
 
     /// @brief A text node's offset in UTF-16 code units (as Chrome's DOM counts) from its offset in bytes;
     /// other nodes' offsets count children either way.
-    KRYS_NODISCARD uint32 ToUTF16Offset(const boo::dom::Node &node, uint32 offset)
+    KRYS_NODISCARD uint32 ToUTF16Offset(const boo::Node &node, uint32 offset)
     {
-      auto *text = DynamicDowncast<boo::dom::Text>(node);
+      auto *text = DynamicDowncast<boo::Text>(node);
       if (!text)
       {
         return offset;
@@ -92,9 +92,9 @@ namespace krys::ui::tests
     }
 
     /// @brief The inverse of `ToUTF16Offset`.
-    KRYS_NODISCARD uint32 FromUTF16Offset(const boo::dom::Node &node, uint32 offset)
+    KRYS_NODISCARD uint32 FromUTF16Offset(const boo::Node &node, uint32 offset)
     {
-      auto *text = DynamicDowncast<boo::dom::Text>(node);
+      auto *text = DynamicDowncast<boo::Text>(node);
       if (!text)
       {
         return offset;
@@ -112,7 +112,7 @@ namespace krys::ui::tests
     /// @brief Whether @p chrome's endpoint (a path and offset) and Booey's are the same visible position. A
     /// range can be held by different but equivalent endpoints: extending forward, Chrome moves its anchor to
     /// the position's canonical form, as the start of the next text node, where Booey keeps the original.
-    KRYS_NODISCARD bool AreEquivalent(boo::dom::Document &document, const std::string &chrome,
+    KRYS_NODISCARD bool AreEquivalent(boo::Document &document, const std::string &chrome,
                                       const std::string &booey)
     {
       auto endpoint = [&](const std::string &text) -> boo::VisiblePosition
@@ -137,7 +137,7 @@ namespace krys::ui::tests
       std::string CaretX;
     };
 
-    KRYS_NODISCARD EditingState StateOf(boo::dom::Document &document)
+    KRYS_NODISCARD EditingState StateOf(boo::Document &document)
     {
       auto &selection = *document.GetSelection();
       EditingState state;
@@ -232,7 +232,7 @@ namespace krys::ui::tests
     }
 
     /// @brief The selection's client rects, as the scene's script writes them.
-    KRYS_NODISCARD std::string SelectionRects(boo::dom::Document &document)
+    KRYS_NODISCARD std::string SelectionRects(boo::Document &document)
     {
       auto &selection = *document.GetSelection();
       if (!selection.RangeCount() || selection.IsCollapsed())
@@ -252,14 +252,13 @@ namespace krys::ui::tests
     }
 
     /// @brief The text of the paragraph holding the selection's focus.
-    KRYS_NODISCARD std::string FocusParagraphText(boo::dom::Document &document)
+    KRYS_NODISCARD std::string FocusParagraphText(boo::Document &document)
     {
-      for (boo::dom::Node *node = document.GetSelection()->FocusNode().get(); node; node = node->ParentNode())
+      for (boo::Node *node = document.GetSelection()->FocusNode().get(); node; node = node->ParentNode())
       {
-        if (auto *element = DynamicDowncast<boo::dom::Element>(*node);
-            element && element->LocalName() == u8"p")
+        if (auto *element = DynamicDowncast<boo::Element>(*node); element && element->LocalName() == u8"p")
         {
-          auto text = element->TextContent().value_or(boo::dom::DOMString {});
+          auto text = element->TextContent().value_or(boo::DOMString {});
           return std::string(text.begin(), text.end());
         }
       }
@@ -373,10 +372,10 @@ namespace krys::ui::tests
         EditingState actual;
         std::string actualRects = "-";
         std::string actualText;
-        if (auto *field = DynamicDowncast<boo::html::HTMLTextFormControlElement>(document.FocusedElement()))
+        if (auto *field = DynamicDowncast<boo::HTMLTextFormControlElement>(document.FocusedElement()))
         {
           // A field's selection, by its offsets into its value.
-          auto id = field->GetAttribute(u8"id").value_or(boo::dom::DOMString {});
+          auto id = field->GetAttribute(u8"id").value_or(boo::DOMString {});
           auto value = field->Value();
           utf8_stringview text(value);
           auto offset = [&](uint32 bytes)
@@ -456,9 +455,9 @@ namespace krys::ui::tests
       {
         std::string alter, direction, granularity;
         operation >> alter >> direction >> granularity;
-        selection.Modify(boo::dom::DOMString(alter.begin(), alter.end()),
-                         boo::dom::DOMString(direction.begin(), direction.end()),
-                         boo::dom::DOMString(granularity.begin(), granularity.end()));
+        selection.Modify(boo::DOMString(alter.begin(), alter.end()),
+                         boo::DOMString(direction.begin(), direction.end()),
+                         boo::DOMString(granularity.begin(), granularity.end()));
       }
 
       EditingState chrome;
@@ -528,10 +527,10 @@ namespace krys::ui::tests
     };
     auto dirOf = [&](utf8_stringview id)
     {
-      auto dir = document.GetElementById(boo::dom::DOMString(id))->GetAttribute(u8"dir");
+      auto dir = document.GetElementById(boo::DOMString(id))->GetAttribute(u8"dir");
       return dir ? std::string(dir->begin(), dir->end()) : std::string("none");
     };
-    auto isRightToLeft = [](const boo::dom::Node &node)
+    auto isRightToLeft = [](const boo::Node &node)
     {
       return node.Renderer()->Style().GetWritingMode().BidiDirection() == boo::TextDirection::RTL;
     };
@@ -555,7 +554,7 @@ namespace krys::ui::tests
       // each time.
       auto textBlockIsRightToLeft = [&]
       {
-        boo::dom::Node *node = document.GetElementById(u8"p").get();
+        boo::Node *node = document.GetElementById(u8"p").get();
         while (node->FirstChild())
         {
           node = node->FirstChild();
@@ -587,10 +586,10 @@ namespace krys::ui::tests
 
       // "world" is in an element of its own now, embedded right to left.
       auto *last = paragraph.LastChild();
-      REQUIRE(Is<boo::dom::Element>(last));
+      REQUIRE(Is<boo::Element>(last));
       CHECK(isRightToLeft(*last));
       CHECK(last->Renderer()->Style().GetUnicodeBidi() == boo::UnicodeBidi::Embed);
-      CHECK(paragraph.TextContent() == boo::dom::DOMString(u8"hello world"));
+      CHECK(paragraph.TextContent() == boo::DOMString(u8"hello world"));
       CHECK_FALSE(isRightToLeft(paragraph));
     }
   }

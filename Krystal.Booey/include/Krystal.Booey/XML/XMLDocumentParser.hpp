@@ -40,7 +40,7 @@ struct _xmlParserInput;
 struct _xmlSAXHandler;
 using xmlChar = unsigned char;
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class DocumentFragment;
@@ -83,10 +83,10 @@ namespace krys::boo::xml
     RefPtr<XMLParserContext> _context;
     utf8_string _bufferedText;
 
-    RefPtr<dom::ContainerNode> _currentNode;
-    List<RefPtr<dom::ContainerNode>> _currentNodeStack;
+    RefPtr<ContainerNode> _currentNode;
+    List<RefPtr<ContainerNode>> _currentNodeStack;
 
-    RefPtr<dom::Text> _leafTextNode;
+    RefPtr<Text> _leafTextNode;
 
     bool _sawError {false};
     bool _isXHTMLDocument {false};
@@ -95,19 +95,18 @@ namespace krys::boo::xml
 
     bool _parsingFragment {false};
 
-    HashMap<dom::DOMStringAtom, dom::DOMStringAtom> _prefixToNamespaceMap;
-    dom::DOMStringAtom _defaultNamespaceURI {null};
+    HashMap<DOMStringAtom, DOMStringAtom> _prefixToNamespaceMap;
+    DOMStringAtom _defaultNamespaceURI {null};
 
   public:
-    KRYS_NODISCARD static Ref<XMLDocumentParser> Create(dom::Document &document) noexcept
+    KRYS_NODISCARD static Ref<XMLDocumentParser> Create(boo::Document &document) noexcept
     {
       return AdoptRef(*new XMLDocumentParser(document));
     }
 
     KRYS_NODISCARD static Ref<XMLDocumentParser>
-      Create(dom::DocumentFragment &fragment,
-             HashMap<dom::DOMStringAtom, dom::DOMStringAtom> &&prefixToNamespaceMap,
-             dom::DOMStringAtom defaultNamespaceURI) noexcept
+      Create(DocumentFragment &fragment, HashMap<DOMStringAtom, DOMStringAtom> &&prefixToNamespaceMap,
+             DOMStringAtom defaultNamespaceURI) noexcept
     {
       return AdoptRef(
         *new XMLDocumentParser(fragment, krys::move(prefixToNamespaceMap), krys::move(defaultNamespaceURI)));
@@ -130,8 +129,8 @@ namespace krys::boo::xml
       return _isXHTMLDocument;
     }
 
-    static bool ParseDocumentFragment(dom::DOMStringView, dom::DocumentFragment &,
-                                      dom::Element *contextElement = nullptr) noexcept;
+    static bool ParseDocumentFragment(DOMStringView, DocumentFragment &,
+                                      Element *contextElement = nullptr) noexcept;
 
     /// @brief Whether the document parsed was well formed.
     KRYS_NODISCARD bool WellFormed() const noexcept
@@ -139,9 +138,9 @@ namespace krys::boo::xml
       return !_sawError;
     }
 
-    KRYS_NODISCARD static bool SupportsXMLVersion(dom::DOMStringView) noexcept;
+    KRYS_NODISCARD static bool SupportsXMLVersion(DOMStringView) noexcept;
 
-    void Append(dom::DOMString source) noexcept final;
+    void Append(DOMString source) noexcept final;
 
     void Finish() noexcept final;
 
@@ -152,14 +151,13 @@ namespace krys::boo::xml
     KRYS_NODISCARD SourceLocation TextPosition() const noexcept;
 
   private:
-    explicit XMLDocumentParser(dom::Document &) noexcept;
+    explicit XMLDocumentParser(boo::Document &) noexcept;
 
-    XMLDocumentParser(dom::DocumentFragment &, HashMap<dom::DOMStringAtom, dom::DOMStringAtom> &&,
-                      dom::DOMStringAtom) noexcept;
+    XMLDocumentParser(DocumentFragment &, HashMap<DOMStringAtom, DOMStringAtom> &&, DOMStringAtom) noexcept;
 
     void End() noexcept;
 
-    bool AppendFragmentSource(dom::DOMStringView) noexcept;
+    bool AppendFragmentSource(DOMStringView) noexcept;
 
   public:
     // Callbacks from parser SAX, and other functions needed inside
@@ -190,7 +188,7 @@ namespace krys::boo::xml
   private:
     void InitializeParserContext(const utf8_string &chunk = {}) noexcept;
 
-    void PushCurrentNode(dom::ContainerNode *) noexcept;
+    void PushCurrentNode(ContainerNode *) noexcept;
 
     void PopCurrentNode() noexcept;
 
@@ -202,7 +200,7 @@ namespace krys::boo::xml
 
     bool UpdateLeafTextNode() noexcept;
 
-    void DoWrite(const dom::DOMString &) noexcept;
+    void DoWrite(const DOMString &) noexcept;
 
     void DoEnd() noexcept;
 

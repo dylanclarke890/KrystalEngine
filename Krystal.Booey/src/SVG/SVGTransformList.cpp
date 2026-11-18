@@ -28,9 +28,9 @@
 #include "Krystal.Booey/SVG/SVGTransformable.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  dom::ExceptionOr<RefPtr<SVGTransform>> SVGTransformList::Consolidate() noexcept
+  ExceptionOr<RefPtr<SVGTransform>> SVGTransformList::Consolidate() noexcept
   {
     auto result = CanAlterList();
     if (result.HasException())
@@ -68,10 +68,10 @@ namespace krys::boo::svg
     return result;
   }
 
-  bool SVGTransformList::ParseGeneric(dom::DOMStringView &buffer, ListReplacement listReplacement) noexcept
+  bool SVGTransformList::ParseGeneric(DOMStringView &buffer, ListReplacement listReplacement) noexcept
   {
     bool delimParsed = false;
-    SkipOptionalSVGSpaces(buffer);
+    svg::SkipOptionalSVGSpaces(buffer);
 
     size_t itemIndex = 0;
     auto currentListReplacement = listReplacement;
@@ -112,7 +112,7 @@ namespace krys::boo::svg
         Append(krys::move(parsedTransform));
       }
 
-      SkipOptionalSVGSpaces(buffer);
+      svg::SkipOptionalSVGSpaces(buffer);
 
       if (!buffer.empty() && buffer.front() == u8',')
       {
@@ -120,7 +120,7 @@ namespace krys::boo::svg
         delimParsed = true;
       }
 
-      SkipOptionalSVGSpaces(buffer);
+      svg::SkipOptionalSVGSpaces(buffer);
       ++itemIndex;
     }
 
@@ -133,7 +133,7 @@ namespace krys::boo::svg
     return !delimParsed;
   }
 
-  void SVGTransformList::Parse(dom::DOMStringView value) noexcept
+  void SVGTransformList::Parse(DOMStringView value) noexcept
   {
     auto buffer = value;
     bool parsingSucceeded = ParseGeneric(buffer, ListReplacement::Replace);
@@ -144,7 +144,7 @@ namespace krys::boo::svg
     }
   }
 
-  dom::DOMString SVGTransformList::ValueAsString() const noexcept
+  DOMString SVGTransformList::ValueAsString() const noexcept
   {
     StringBuilder builder;
     for (const auto &transform : _items)

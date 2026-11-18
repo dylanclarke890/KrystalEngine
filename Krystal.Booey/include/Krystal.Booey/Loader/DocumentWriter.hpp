@@ -37,10 +37,14 @@
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
+namespace krys::boo
+{
+  class ImageDocument;
+}
+
 namespace krys::boo::html
 {
   class DocumentParser;
-  class ImageDocument;
 }
 
 namespace krys::boo::xml
@@ -73,7 +77,7 @@ namespace krys::boo
     RefPtr<html::DocumentParser> _parser;
     RefPtr<xml::XMLDocumentParser> _xmlParser;
     /// @brief The image document being written, which takes the bytes as they are rather than a parser.
-    RefPtr<html::ImageDocument> _imageDocument;
+    RefPtr<ImageDocument> _imageDocument;
     List<uint8> _imageData;
     utf8_string _mimeType;
     State _state {State::NotStarted};

@@ -39,11 +39,7 @@ namespace krys::boo
   class RenderSVGGradientStop;
   class RenderSVGInlineText;
   class RenderSVGText;
-
-  namespace svg
-  {
-    class SVGGraphicsElement;
-  }
+  class SVGGraphicsElement;
 
   // functions used by the main RenderTreeAsText code
   void Write(TextStream &, const LegacyRenderSVGShape &, EnumSet<RenderAsTextFlag>) noexcept;
@@ -67,5 +63,5 @@ namespace krys::boo
 
   void WriteSVGInlineText(TextStream &, const RenderSVGInlineText &, EnumSet<RenderAsTextFlag>) noexcept;
 
-  void WriteSVGGraphicsElement(TextStream &, const svg::SVGGraphicsElement &) noexcept;
+  void WriteSVGGraphicsElement(TextStream &, const boo::SVGGraphicsElement &) noexcept;
 }

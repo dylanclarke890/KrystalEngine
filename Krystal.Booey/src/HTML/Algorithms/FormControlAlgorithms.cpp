@@ -74,7 +74,7 @@ namespace krys::boo::html
     HTMLOptionElement &option, HTMLSelectedContentElement &selectedcontent) noexcept
   {
     // 1. Let documentFragment be the result of creating a document fragment given option's node document.
-    auto documentFragment = CreateRef<dom::DocumentFragment>(option.NodeDocument());
+    auto documentFragment = CreateRef<DocumentFragment>(option.NodeDocument());
 
     // 2. For each child of option's children:
     for (auto &child : dom::ChildNodeRange(option))

@@ -71,7 +71,7 @@ namespace krys::boo::html
     }
   }
 
-  void LazyLoadImageObserver::Observe(dom::Element &element) noexcept
+  void LazyLoadImageObserver::Observe(Element &element) noexcept
   {
     // 1. Let doc be element's node document.
     Ref document = ShareRef(element.NodeDocument());
@@ -88,7 +88,7 @@ namespace krys::boo::html
     intersectionObserver->Observe(element);
   }
 
-  void LazyLoadImageObserver::Unobserve(dom::Element &element, dom::Document &document) noexcept
+  void LazyLoadImageObserver::Unobserve(Element &element, Document &document) noexcept
   {
     // 1. Let doc be element's node document.
     // 2. Assert: doc's lazy load intersection observer is not null.
@@ -101,7 +101,7 @@ namespace krys::boo::html
     }
   }
 
-  IntersectionObserver *LazyLoadImageObserver::GetIntersectionObserver(dom::Document &document) noexcept
+  IntersectionObserver *LazyLoadImageObserver::GetIntersectionObserver(Document &document) noexcept
   {
     if (!_observer)
     {
@@ -118,7 +118,7 @@ namespace krys::boo::html
     return _observer.get();
   }
 
-  bool LazyLoadImageObserver::IsObserved(dom::Element &element) const noexcept
+  bool LazyLoadImageObserver::IsObserved(Element &element) const noexcept
   {
     return _observer && _observer->IsObserving(element);
   }

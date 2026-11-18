@@ -11,7 +11,7 @@ namespace krys::boo::html::tests
 
   namespace
   {
-    KRYS_NODISCARD std::string Narrow(dom::DOMStringView string)
+    KRYS_NODISCARD std::string Narrow(DOMStringView string)
     {
       return std::string(reinterpret_cast<const char *>(string.data()), string.size());
     }
@@ -72,7 +72,7 @@ namespace krys::boo::html::tests
     script.Text(u8"replaced");
     REQUIRE(script.FirstChild());
     CHECK(script.FirstChild() == script.LastChild());
-    CHECK(Is<dom::Text>(*script.FirstChild()));
+    CHECK(Is<boo::Text>(*script.FirstChild()));
     CHECK(Narrow(script.Text()) == "replaced");
   }
 

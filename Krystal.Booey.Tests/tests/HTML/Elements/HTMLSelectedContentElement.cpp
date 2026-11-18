@@ -11,9 +11,9 @@ namespace krys::boo::html::tests
 
   namespace
   {
-    KRYS_NODISCARD std::string Text(const dom::Node &node) noexcept
+    KRYS_NODISCARD std::string Text(const Node &node) noexcept
     {
-      auto text = node.TextContent().value_or(dom::DOMString());
+      auto text = node.TextContent().value_or(DOMString());
       return std::string(reinterpret_cast<const char *>(text.data()), text.size());
     }
 

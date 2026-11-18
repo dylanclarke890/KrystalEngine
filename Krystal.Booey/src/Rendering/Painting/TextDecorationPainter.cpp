@@ -384,10 +384,10 @@ namespace krys::boo
     }
   }
 
-  KRYS_NODISCARD static bool IsAnchor(const dom::Node *node) noexcept
+  KRYS_NODISCARD static bool IsAnchor(const Node *node) noexcept
   {
-    auto *element = DynamicDowncast<html::HTMLElement>(node);
-    return element && Is<html::HTMLAnchorElement>(*element);
+    auto *element = DynamicDowncast<HTMLElement>(node);
+    return element && Is<HTMLAnchorElement>(*element);
   }
 
   static void CollectStylesForRenderer(TextDecorationPainter::Styles &result, const RenderObject &renderer,

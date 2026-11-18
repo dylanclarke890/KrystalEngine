@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/SVG/Elements/SVGPolylineElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGPolylineElement::SVGPolylineElement(dom::Document &document) noexcept
+  SVGPolylineElement::SVGPolylineElement(Document &document) noexcept
       : SVGPolyElement(document, SVGElementInterface::Polyline)
   {
   }

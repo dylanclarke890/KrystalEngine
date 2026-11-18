@@ -57,7 +57,7 @@ namespace krys::boo
              const RenderStyle &reversingAdjustedStartStyle, double reversingShorteningFactor) noexcept;
 
     /// @see https://drafts.csswg.org/css-transitions-2/#dom-csstransition-transitionproperty
-    KRYS_NODISCARD css::CSSOMStringAtom TransitionProperty() const noexcept;
+    KRYS_NODISCARD CSSOMStringAtom TransitionProperty() const noexcept;
 
     KRYS_NODISCARD AnimatableCSSProperty Property() const noexcept
     {
@@ -97,7 +97,7 @@ namespace krys::boo
     void SetTimingProperties(Seconds delay, Seconds duration) noexcept;
 
     KRYS_NODISCARD Ref<StyleOriginatedAnimationEvent>
-      CreateEvent(dom::DOMStringAtom eventType, Maybe<Seconds> scheduledTime, double elapsedTime,
+      CreateEvent(DOMStringAtom eventType, Maybe<Seconds> scheduledTime, double elapsedTime,
                   const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept final;
 
     void AnimationDidFinish() noexcept final;

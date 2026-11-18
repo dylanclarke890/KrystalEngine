@@ -45,8 +45,7 @@
 
 namespace krys::boo::css
 {
-  float SizesAttributeParser::ComputeLength(double value, LengthUnit unit,
-                                            const dom::Document &document) noexcept
+  float SizesAttributeParser::ComputeLength(double value, LengthUnit unit, const Document &document) noexcept
   {
     auto *renderer = document.GetRenderView();
     if (!renderer)
@@ -70,8 +69,7 @@ namespace krys::boo::css
     return ClampTo<float>(style::ComputeNonCalcLengthDouble(value, unit, conversionData));
   }
 
-  SizesAttributeParser::SizesAttributeParser(CSSOMStringView attribute,
-                                             const dom::Document &document) noexcept
+  SizesAttributeParser::SizesAttributeParser(CSSOMStringView attribute, const Document &document) noexcept
       : _document(CreateWeakPtr(&document))
   {
     InputStream inputStream {CSSOMString(attribute)};

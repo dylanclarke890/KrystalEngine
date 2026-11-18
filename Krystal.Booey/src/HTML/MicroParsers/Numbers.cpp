@@ -17,9 +17,8 @@ namespace krys::boo::html
     /// @brief Steps 15 to 18 of the rules for parsing floating-point number values (conversion): rounds the
     /// value given by @p negative, the digits before and after its full stop, and its exponent, to a double.
     KRYS_NODISCARD MicroParserResult<double>
-      ConvertFloatingPointValue(bool negative, dom::DOMStringView integerDigits,
-                                dom::DOMStringView fractionDigits, bool negativeExponent,
-                                dom::DOMStringView exponentDigits) noexcept
+      ConvertFloatingPointValue(bool negative, DOMStringView integerDigits, DOMStringView fractionDigits,
+                                bool negativeExponent, DOMStringView exponentDigits) noexcept
     {
       // The value is 0.<digits> times ten to the power of scale, with no leading zeros in digits.
       std::string digits;
@@ -76,7 +75,7 @@ namespace krys::boo::html
     }
   }
 
-  MicroParserResult<int64> Numbers::ParseInteger(dom::DOMStringView input) noexcept
+  MicroParserResult<int64> Numbers::ParseInteger(DOMStringView input) noexcept
   {
     // 1. Let input be the string being parsed.
     // 2. Let position be a pointer into input, initially pointing at the start of the string.
@@ -148,7 +147,7 @@ namespace krys::boo::html
     return {.Value = positive ? static_cast<int64>(value) : static_cast<int64>(0 - value)};
   }
 
-  MicroParserResult<uint64> Numbers::ParseNonNegativeInteger(dom::DOMStringView input) noexcept
+  MicroParserResult<uint64> Numbers::ParseNonNegativeInteger(DOMStringView input) noexcept
   {
     // 1. Let input be the string being parsed.
     // 2. Let value be the result of parsing input using the rules for parsing integers.
@@ -171,7 +170,7 @@ namespace krys::boo::html
     return {.Value = static_cast<uint64>(value.Value)};
   }
 
-  MicroParserResult<uint64> Numbers::ParseValidNonNegativeInteger(dom::DOMStringView input) noexcept
+  MicroParserResult<uint64> Numbers::ParseValidNonNegativeInteger(DOMStringView input) noexcept
   {
     // A string is a valid non-negative integer if it consists of one or more ASCII digits.
     if (input.empty())
@@ -188,7 +187,7 @@ namespace krys::boo::html
     return ParseNonNegativeInteger(input);
   }
 
-  bool Numbers::IsValidFloatingPointNumber(dom::DOMStringView input) noexcept
+  bool Numbers::IsValidFloatingPointNumber(DOMStringView input) noexcept
   {
     // A string is a valid floating-point number if it consists of:
     position_variable position = input.begin();
@@ -248,7 +247,7 @@ namespace krys::boo::html
     return position == input.end();
   }
 
-  MicroParserResult<double> Numbers::ParseFloatingPoint(dom::DOMStringView input) noexcept
+  MicroParserResult<double> Numbers::ParseFloatingPoint(DOMStringView input) noexcept
   {
     // 1. Let input be the string being parsed.
     // 2. Let position be a pointer into input, initially pointing at the start of the string.
@@ -260,10 +259,10 @@ namespace krys::boo::html
     // value, divisor and exponent are kept as the sign, the digits before and after the full stop, and the
     // exponent's sign and digits, so that conversion rounds the exact value.
     bool negative = false;
-    dom::DOMStringView integerDigits;
-    dom::DOMStringView fractionDigits;
+    DOMStringView integerDigits;
+    DOMStringView fractionDigits;
     bool negativeExponent = false;
-    dom::DOMStringView exponentDigits;
+    DOMStringView exponentDigits;
     auto conversion = [&]()
     {
       return ConvertFloatingPointValue(negative, integerDigits, fractionDigits, negativeExponent,
@@ -426,7 +425,7 @@ namespace krys::boo::html
     return conversion();
   }
 
-  MicroParserResult<double> Numbers::ParseValidFloatingPoint(dom::DOMStringView input) noexcept
+  MicroParserResult<double> Numbers::ParseValidFloatingPoint(DOMStringView input) noexcept
   {
     if (!IsValidFloatingPointNumber(input))
     {
@@ -435,7 +434,7 @@ namespace krys::boo::html
     return ParseFloatingPoint(input);
   }
 
-  List<double> Numbers::ParseListOfFloatingPointNumbers(dom::DOMStringView input) noexcept
+  List<double> Numbers::ParseListOfFloatingPointNumbers(DOMStringView input) noexcept
   {
     constexpr auto isSpaceOrDelimiter = [](char8 c)
     {

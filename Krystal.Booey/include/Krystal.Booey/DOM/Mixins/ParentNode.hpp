@@ -6,13 +6,17 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class Document;
   class Element;
-  class HTMLCollection;
   class Node;
+}
+
+namespace krys::boo::dom
+{
+  class HTMLCollection;
   class NodeList;
 }
 

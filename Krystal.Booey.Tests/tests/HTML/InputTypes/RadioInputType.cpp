@@ -22,8 +22,8 @@ namespace krys::boo::tests
     auto &settings = fixture.Document->GetSettings();
     settings.ScrollAnimatorEnabled = false;
     auto restoreSettings = MakeScopeExit([&] { settings.ScrollAnimatorEnabled = true; });
-    auto &first = Downcast<html::HTMLInputElement>(fixture.ById(u8"a"));
-    auto &second = Downcast<html::HTMLInputElement>(fixture.ById(u8"b"));
+    auto &first = Downcast<HTMLInputElement>(fixture.ById(u8"a"));
+    auto &second = Downcast<HTMLInputElement>(fixture.ById(u8"b"));
     first.Focus();
     REQUIRE(fixture.Frame->View()->GetScrollPosition().Y() == 0);
 

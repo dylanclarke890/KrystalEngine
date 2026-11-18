@@ -21,7 +21,7 @@
 #include "Krystal.Booey/DOM/Internals/QualifiedNameCache.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   QualifiedNameStorage::QualifiedNameStorage(DOMStringAtom namespaceURI, DOMStringAtom prefix,
                                              DOMStringAtom localName, html::TagName tagName,
@@ -39,19 +39,19 @@ namespace krys::boo::dom
 
   QualifiedNameStorage::~QualifiedNameStorage() noexcept
   {
-    QualifiedNameCache::ThreadLocalCache().Remove(*this);
+    dom::QualifiedNameCache::ThreadLocalCache().Remove(*this);
   }
 
   QualifiedName::QualifiedName(DOMStringAtom namespaceURI, DOMStringAtom prefix,
                                DOMStringAtom localName) noexcept
-      : _storage(QualifiedNameCache::ThreadLocalCache().GetOrAdd(krys::move(namespaceURI), krys::move(prefix),
-                                                                 krys::move(localName)))
+      : _storage(dom::QualifiedNameCache::ThreadLocalCache().GetOrAdd(
+          krys::move(namespaceURI), krys::move(prefix), krys::move(localName)))
   {
   }
 
   QualifiedName::QualifiedName(DOMStringAtom namespaceURI, DOMStringAtom prefix, DOMStringAtom localName,
                                html::TagName tagName, html::Namespace tagNamespace) noexcept
-      : _storage(QualifiedNameCache::ThreadLocalCache().GetOrAdd(
+      : _storage(dom::QualifiedNameCache::ThreadLocalCache().GetOrAdd(
           krys::move(namespaceURI), krys::move(prefix), krys::move(localName), tagName, tagNamespace))
   {
   }

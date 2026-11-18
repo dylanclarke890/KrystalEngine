@@ -29,7 +29,7 @@
 #include "Krystal.Booey/CSS/Values/VariableData.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   CSSFunctionRule::CSSFunctionRule(css::FunctionRule &rule, CSSStyleSheet *parent) noexcept
       : CSSGroupingRule(rule, parent)
@@ -72,14 +72,14 @@ namespace krys::boo::css
   {
     StringBuilder builder;
     builder.Append(u8"@function ");
-    SerialiseIdentifier(Name(), builder);
+    css::SerialiseIdentifier(Name(), builder);
     builder.Append(u8'(');
 
     CSSOMStringView separator = u8"";
     for (const auto &parameter : GetFunctionRule().Parameters())
     {
       builder.Append(separator);
-      SerialiseIdentifier(parameter.Name.ToString(), builder);
+      css::SerialiseIdentifier(parameter.Name.ToString(), builder);
       if (!parameter.Type.IsUniversal())
       {
         builder.Append(u8' ', parameter.Type.CSSTypeString());

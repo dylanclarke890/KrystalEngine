@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/SVG/Properties/SVGPropertyList.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief A list of value properties (`SVGLength`, `SVGNumber`, `SVGPoint`, `SVGTransform`).
   template <typename TProperty>

@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Color/CSSColorValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief An RGB channel: a number (a fraction), a numeric value, or `none`.
   /// @see https://drafts.css-houdini.org/css-typed-om/#typedefdef-csscolorrgbcomp
@@ -46,33 +46,33 @@ namespace krys::boo::css
   public:
     /// @return A `SyntaxError` if a component isn't of its type or `none`.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssrgb-cssrgb
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSRGB>> Create(CSSColorRGBComp red, CSSColorRGBComp green,
-                                                               CSSColorRGBComp blue,
-                                                               CSSColorPercent alpha = 1.0) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSRGB>> Create(CSSColorRGBComp red, CSSColorRGBComp green,
+                                                          CSSColorRGBComp blue,
+                                                          CSSColorPercent alpha = 1.0) noexcept;
 
     KRYS_NODISCARD CSSColorRGBComp R() const noexcept;
 
     /// @return A `SyntaxError` if @p red isn't a number or percentage or `none`.
-    dom::ExceptionOr<void> SetR(CSSColorRGBComp red) noexcept;
+    ExceptionOr<void> SetR(CSSColorRGBComp red) noexcept;
 
     KRYS_NODISCARD CSSColorRGBComp G() const noexcept;
 
     /// @return A `SyntaxError` if @p green isn't a number or percentage or `none`.
-    dom::ExceptionOr<void> SetG(CSSColorRGBComp green) noexcept;
+    ExceptionOr<void> SetG(CSSColorRGBComp green) noexcept;
 
     KRYS_NODISCARD CSSColorRGBComp B() const noexcept;
 
     /// @return A `SyntaxError` if @p blue isn't a number or percentage or `none`.
-    dom::ExceptionOr<void> SetB(CSSColorRGBComp blue) noexcept;
+    ExceptionOr<void> SetB(CSSColorRGBComp blue) noexcept;
 
     KRYS_NODISCARD CSSColorPercent Alpha() const noexcept;
 
     /// @return A `SyntaxError` if @p alpha isn't a percentage or `none`.
-    dom::ExceptionOr<void> SetAlpha(CSSColorPercent alpha) noexcept;
+    ExceptionOr<void> SetAlpha(CSSColorPercent alpha) noexcept;
 
     /// @return A `SyntaxError` if @p component is neither a number, a percentage nor `none`.
     /// @see https://drafts.css-houdini.org/css-typed-om/#rectify-a-csscolorrgbcomp
-    KRYS_NODISCARD static dom::ExceptionOr<RectifiedCSSColorComponent>
+    KRYS_NODISCARD static ExceptionOr<RectifiedCSSColorComponent>
       RectifyCSSColorRGBComp(CSSColorRGBComp component) noexcept;
 
     KRYS_NODISCARD CSSOMString ColorFunctionText() const noexcept final;
@@ -88,9 +88,9 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSRGB)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleValue &styleValue) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSRGB)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleValue &styleValue) noexcept
   {
-    return styleValue.StyleValueType() == krys::boo::css::CSSStyleValueType::CSSRGB;
+    return styleValue.StyleValueType() == krys::boo::CSSStyleValueType::CSSRGB;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

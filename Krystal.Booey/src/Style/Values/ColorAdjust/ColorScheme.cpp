@@ -38,11 +38,11 @@ namespace krys::boo::style
     EnumSet<boo::ColorScheme> result;
     for (const auto &scheme : Schemes)
     {
-      if (text::IsASCIICaselessEqual(scheme.Value.View(), css::CSSOMStringView {u8"light"}))
+      if (text::IsASCIICaselessEqual(scheme.Value.View(), CSSOMStringView {u8"light"}))
       {
         result.Add(boo::ColorScheme::Light);
       }
-      else if (text::IsASCIICaselessEqual(scheme.Value.View(), css::CSSOMStringView {u8"dark"}))
+      else if (text::IsASCIICaselessEqual(scheme.Value.View(), CSSOMStringView {u8"dark"}))
       {
         result.Add(boo::ColorScheme::Dark);
       }

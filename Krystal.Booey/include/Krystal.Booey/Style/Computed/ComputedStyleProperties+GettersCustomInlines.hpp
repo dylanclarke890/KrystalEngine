@@ -142,8 +142,7 @@ namespace krys::boo::style
 
   inline FontFamilies ComputedStyleProperties::FontFamily() const noexcept
   {
-    return {List<css::CSSOMStringAtom> {GetFontDescription().Families()},
-            GetFontDescription().IsSpecifiedFont()};
+    return {List<CSSOMStringAtom> {GetFontDescription().Families()}, GetFontDescription().IsSpecifiedFont()};
   }
 
   inline FontPalette ComputedStyleProperties::GetFontPalette() const noexcept

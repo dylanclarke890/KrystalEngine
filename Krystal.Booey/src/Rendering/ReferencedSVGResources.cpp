@@ -40,7 +40,7 @@
 
 namespace krys::boo
 {
-  class CSSSVGResourceElementClient final : public svg::SVGResourceElementClient
+  class CSSSVGResourceElementClient final : public SVGResourceElementClient
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CSSSVGResourceElementClient);
 
@@ -53,7 +53,7 @@ namespace krys::boo
     {
     }
 
-    void ResourceChanged(svg::SVGElement &) noexcept final;
+    void ResourceChanged(SVGElement &) noexcept final;
 
     KRYS_NODISCARD const RenderElement &Renderer() const noexcept final
     {
@@ -61,7 +61,7 @@ namespace krys::boo
     }
   };
 
-  void CSSSVGResourceElementClient::ResourceChanged(svg::SVGElement &) noexcept
+  void CSSSVGResourceElementClient::ResourceChanged(SVGElement &) noexcept
   {
     if (_clientRenderer.RenderTreeBeingDestroyed())
     {
@@ -78,7 +78,7 @@ namespace krys::boo
   ReferencedSVGResources::~ReferencedSVGResources() noexcept
   {
     auto &treeScope = _renderer.TreeScopeForSVGReferences();
-    List<dom::DOMStringAtom> targetIDs;
+    List<DOMStringAtom> targetIDs;
     for (const auto &[targetID, client] : _elementClients)
     {
       targetIDs.push_back(targetID);
@@ -89,8 +89,8 @@ namespace krys::boo
     }
   }
 
-  void ReferencedSVGResources::AddClientForTarget(svg::SVGElement &targetElement,
-                                                  const dom::DOMStringAtom &targetID) noexcept
+  void ReferencedSVGResources::AddClientForTarget(SVGElement &targetElement,
+                                                  const DOMStringAtom &targetID) noexcept
   {
     auto &client = _elementClients[targetID];
     if (!client)
@@ -101,7 +101,7 @@ namespace krys::boo
   }
 
   void ReferencedSVGResources::RemoveClientForTarget(dom::DocumentOrShadowRoot &treeScope,
-                                                     const dom::DOMStringAtom &targetID) noexcept
+                                                     const DOMStringAtom &targetID) noexcept
   {
     auto it = _elementClients.find(targetID);
     if (it == _elementClients.end())
@@ -113,14 +113,14 @@ namespace krys::boo
 
     auto targetElement =
       dom::mixins::NonElementParentNode::GetElementById(treeScope.RootNode(), targetID.View());
-    if (auto *svgElement = DynamicDowncast<svg::SVGElement>(targetElement.get()))
+    if (auto *svgElement = DynamicDowncast<SVGElement>(targetElement.get()))
     {
       svgElement->RemoveReferencingCSSClient(*client);
     }
   }
 
   ReferencedSVGResources::SVGElementIdentifierAndTagPairs
-    ReferencedSVGResources::ReferencedSVGResourceIDs(const RenderStyle &style, const dom::Document &) noexcept
+    ReferencedSVGResources::ReferencedSVGResourceIDs(const RenderStyle &style, const Document &) noexcept
   {
     SVGElementIdentifierAndTagPairs referencedResources;
     if (auto clipPath = style.GetClipPath().TryReference())
@@ -152,7 +152,7 @@ namespace krys::boo
   void ReferencedSVGResources::UpdateReferencedResources(
     dom::DocumentOrShadowRoot &treeScope, const SVGElementIdentifierAndTagPairs &referencedResources) noexcept
   {
-    HashSet<dom::DOMStringAtom> oldKeys;
+    HashSet<DOMStringAtom> oldKeys;
     for (const auto &[key, client] : _elementClients)
     {
       oldKeys.insert(key);
@@ -178,12 +178,12 @@ namespace krys::boo
 
   // SVG code uses getRenderSVGResourceById<>, but that works in terms of renderers. We need to find resources
   // before the render tree is fully constructed, so this works on Elements.
-  RefPtr<svg::SVGElement> ReferencedSVGResources::ElementForResourceID(dom::DocumentOrShadowRoot &treeScope,
-                                                                       const dom::DOMStringAtom &resourceID,
-                                                                       html::TagName tagName) noexcept
+  RefPtr<SVGElement> ReferencedSVGResources::ElementForResourceID(dom::DocumentOrShadowRoot &treeScope,
+                                                                  const DOMStringAtom &resourceID,
+                                                                  html::TagName tagName) noexcept
   {
     auto element = dom::mixins::NonElementParentNode::GetElementById(treeScope.RootNode(), resourceID.View());
-    auto *svgElement = DynamicDowncast<svg::SVGElement>(element.get());
+    auto *svgElement = DynamicDowncast<SVGElement>(element.get());
     if (!svgElement || svgElement->TagQualifiedName().TagName() != tagName)
     {
       return nullptr;
@@ -192,13 +192,12 @@ namespace krys::boo
     return ShareRefPtr(svgElement);
   }
 
-  RefPtr<svg::SVGElement>
-    ReferencedSVGResources::ElementForResourceIDs(dom::DocumentOrShadowRoot &treeScope,
-                                                  const dom::DOMStringAtom &resourceID,
-                                                  const SVGQualifiedNames &tagNames) noexcept
+  RefPtr<SVGElement> ReferencedSVGResources::ElementForResourceIDs(dom::DocumentOrShadowRoot &treeScope,
+                                                                   const DOMStringAtom &resourceID,
+                                                                   const SVGQualifiedNames &tagNames) noexcept
   {
     auto element = dom::mixins::NonElementParentNode::GetElementById(treeScope.RootNode(), resourceID.View());
-    auto *svgElement = DynamicDowncast<svg::SVGElement>(element.get());
+    auto *svgElement = DynamicDowncast<SVGElement>(element.get());
     if (!svgElement)
     {
       return nullptr;
@@ -215,7 +214,7 @@ namespace krys::boo
     return nullptr;
   }
 
-  RefPtr<svg::SVGFilterElement> ReferencedSVGResources::ReferencedFilterElement(
+  RefPtr<SVGFilterElement> ReferencedSVGResources::ReferencedFilterElement(
     dom::DocumentOrShadowRoot &treeScope, const style::ReferenceFilterOperation &referenceFilter) noexcept
   {
     if (referenceFilter.Fragment().View().empty())
@@ -224,7 +223,7 @@ namespace krys::boo
     }
 
     auto element = ElementForResourceID(treeScope, referenceFilter.Fragment(), html::TagName::filter);
-    return DynamicDowncast<svg::SVGFilterElement>(krys::move(element));
+    return DynamicDowncast<SVGFilterElement>(krys::move(element));
   }
 
   LegacyRenderSVGResourceClipper *
@@ -242,7 +241,7 @@ namespace krys::boo
 
   LegacyRenderSVGResourceContainer *
     ReferencedSVGResources::ReferencedRenderResource(dom::DocumentOrShadowRoot &treeScope,
-                                                     const dom::DOMStringAtom &fragment) noexcept
+                                                     const DOMStringAtom &fragment) noexcept
   {
     if (fragment.View().empty())
     {

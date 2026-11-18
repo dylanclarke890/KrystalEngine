@@ -32,7 +32,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -44,7 +44,7 @@ namespace krys::boo::css::calc
   struct Tree;
 }
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSMathSum;
   class CSSNumericValue;
@@ -60,7 +60,7 @@ namespace krys::boo::css
   {
   public:
     /// @see https://drafts.css-houdini.org/css-typed-om/#sum-value-value
-    using UnitMap = HashMap<UnitType, int32>;
+    using UnitMap = HashMap<css::UnitType, int32>;
 
     struct Addend
     {
@@ -75,33 +75,33 @@ namespace krys::boo::css
 
   public:
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-add
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>> Add(List<CSSNumberish> values) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<CSSNumericValue>> Add(List<CSSNumberish> values) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-sub
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>> Sub(List<CSSNumberish> values) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<CSSNumericValue>> Sub(List<CSSNumberish> values) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-mul
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>> Mul(List<CSSNumberish> values) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<CSSNumericValue>> Mul(List<CSSNumberish> values) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-div
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>> Div(List<CSSNumberish> values) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<CSSNumericValue>> Div(List<CSSNumberish> values) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-min
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>> Min(List<CSSNumberish> numberishes) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<CSSNumericValue>> Min(List<CSSNumberish> numberishes) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-max
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>> Max(List<CSSNumberish> numberishes) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<CSSNumericValue>> Max(List<CSSNumberish> numberishes) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-equals
     KRYS_NODISCARD bool Equals(List<CSSNumberish> values) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-to
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSUnitValue>> To(const CSSOMString &unit) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<CSSUnitValue>> To(const CSSOMString &unit) noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSUnitValue>> To(UnitType unit) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<CSSUnitValue>> To(css::UnitType unit) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-tosum
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSMathSum>> ToSum(const List<CSSOMString> &units) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<CSSMathSum>> ToSum(const List<CSSOMString> &units) noexcept;
 
     KRYS_NODISCARD const CSSNumericType &Type() const noexcept
     {
@@ -109,8 +109,8 @@ namespace krys::boo::css
     }
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-parse
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>> Parse(dom::Document &document,
-                                                                       CSSOMString &&cssText) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSNumericValue>> Parse(Document &document,
+                                                                  CSSOMString &&cssText) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#rectify-a-numberish-value
     KRYS_NODISCARD static Ref<CSSNumericValue> RectifyNumberish(CSSNumberish numberish) noexcept;
@@ -121,27 +121,27 @@ namespace krys::boo::css
     /// @see https://drafts.css-houdini.org/css-typed-om/#equal-numeric-value
     KRYS_NODISCARD virtual bool Equals(const CSSNumericValue &other) const noexcept = 0;
 
-    KRYS_NODISCARD virtual Maybe<calc::Child> ToCalcTreeNode() const noexcept = 0;
+    KRYS_NODISCARD virtual Maybe<css::calc::Child> ToCalcTreeNode() const noexcept = 0;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#reify-a-math-expression
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>>
-      ReifyMathExpression(const calc::Tree &tree) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSNumericValue>>
+      ReifyMathExpression(const css::calc::Tree &tree) noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>>
-      ReifyMathExpression(const calc::Child &root) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSNumericValue>>
+      ReifyMathExpression(const css::calc::Child &root) noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSNumericValue>>
-      ReifyMathExpression(const calc::ChildOrNone &root) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSNumericValue>>
+      ReifyMathExpression(const css::calc::ChildOrNone &root) noexcept;
 
   protected:
     explicit CSSNumericValue(CSSNumericType type = {}) noexcept : _type(krys::move(type))
     {
     }
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>>
+    KRYS_NODISCARD ExceptionOr<Ref<CSSNumericValue>>
       AddInternal(List<Ref<CSSNumericValue>> numericValues) noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>>
+    KRYS_NODISCARD ExceptionOr<Ref<CSSNumericValue>>
       MultiplyInternal(List<Ref<CSSNumericValue>> numericValues) noexcept;
 
     template <typename T>
@@ -150,8 +150,8 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSNumericValue)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleValue &styleValue) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSNumericValue)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleValue &styleValue) noexcept
   {
     return krys::boo::css::IsCSSNumericValue(styleValue.StyleValueType());
   }

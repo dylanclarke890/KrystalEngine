@@ -369,12 +369,12 @@ namespace krys::boo::css
 
 #pragma endregion
 
-  dom::ExceptionOr<float> PrimitiveValue::FloatValueDeprecated(UnitType targetUnit) const noexcept
+  ExceptionOr<float> PrimitiveValue::FloatValueDeprecated(UnitType targetUnit) const noexcept
   {
     auto result = DoubleValueInternalDeprecated(targetUnit);
     if (!result)
     {
-      return dom::Exception(dom::ExceptionCode::InvalidAccessError);
+      return Exception(ExceptionCode::InvalidAccessError);
     }
 
     return ClampTo<float>(*result);

@@ -33,7 +33,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief The base of the grouping rules with a condition (`@media`, `@supports`, `@container`).
   /// @see https://drafts.csswg.org/css-conditional/#the-cssconditionrule-interface
@@ -52,15 +52,15 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSConditionRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSGroupingRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSConditionRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSGroupingRule &rule) noexcept
   {
     return rule.IsCSSConditionRule();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.IsGroupingRule()
-           && static_cast<const krys::boo::css::CSSGroupingRule &>(rule).IsCSSConditionRule();
+           && static_cast<const krys::boo::CSSGroupingRule &>(rule).IsCSSConditionRule();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

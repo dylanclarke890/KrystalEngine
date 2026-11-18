@@ -16,12 +16,12 @@ namespace krys::boo::tests
                                     {RenderAsTextFlag::ShowAllLayers, RenderAsTextFlag::ShowIDAndClass});
     }
 
-    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       return Downcast<RenderBox>(*fixture.ById(id).Renderer());
     }
 
-    KRYS_NODISCARD RenderBlockFlow &BlockOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderBlockFlow &BlockOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       return Downcast<RenderBlockFlow>(*fixture.ById(id).Renderer());
     }

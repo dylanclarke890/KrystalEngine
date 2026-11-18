@@ -32,7 +32,7 @@
 
 namespace krys::boo::html
 {
-  dom::DOMString SerializeForNumberType(const Decimal &number) noexcept
+  DOMString SerializeForNumberType(const Decimal &number) noexcept
   {
     if (number.IsZero())
     {
@@ -42,7 +42,7 @@ namespace krys::boo::html
     return number.ToString();
   }
 
-  dom::DOMString SerializeForNumberType(double number) noexcept
+  DOMString SerializeForNumberType(double number) noexcept
   {
     // According to HTML5, "the best representation of the number n as a floating point number" is a string
     // produced by applying ToString() to n.
@@ -60,7 +60,7 @@ namespace krys::boo::html
       return number < 0 ? u8"-Infinity" : u8"Infinity";
     }
 
-    dom::DOMString result;
+    DOMString result;
     if (number < 0)
     {
       result += u8'-';
@@ -123,7 +123,7 @@ namespace krys::boo::html
     return result;
   }
 
-  Decimal ParseToDecimalForNumberType(dom::DOMStringView string, const Decimal &fallbackValue) noexcept
+  Decimal ParseToDecimalForNumberType(DOMStringView string, const Decimal &fallbackValue) noexcept
   {
     // https://html.spec.whatwg.org/#floating-point-numbers and ParseToDoubleForNumberType
     if (string.empty())
@@ -155,18 +155,18 @@ namespace krys::boo::html
     return value.IsZero() ? Decimal(0) : value;
   }
 
-  Decimal ParseToDecimalForNumberType(dom::DOMStringView string) noexcept
+  Decimal ParseToDecimalForNumberType(DOMStringView string) noexcept
   {
     return ParseToDecimalForNumberType(string, Decimal::NaN());
   }
 
-  double ParseHTMLFloatingPointNumberValue(dom::DOMStringView input, double fallbackValue) noexcept
+  double ParseHTMLFloatingPointNumberValue(DOMStringView input, double fallbackValue) noexcept
   {
     auto result = Numbers::ParseFloatingPoint(input);
     return result.Success() ? result.Value : fallbackValue;
   }
 
-  double ParseToDoubleForNumberType(dom::DOMStringView string, double fallbackValue) noexcept
+  double ParseToDoubleForNumberType(DOMStringView string, double fallbackValue) noexcept
   {
     // https://html.spec.whatwg.org/#floating-point-numbers
     if (string.empty())
@@ -211,7 +211,7 @@ namespace krys::boo::html
     return value ? value : 0;
   }
 
-  double ParseToDoubleForNumberType(dom::DOMStringView string) noexcept
+  double ParseToDoubleForNumberType(DOMStringView string) noexcept
   {
     return ParseToDoubleForNumberType(string, std::numeric_limits<double>::quiet_NaN());
   }

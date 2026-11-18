@@ -6,10 +6,13 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
+}
 
+namespace krys::boo::dom
+{
   /// @brief An element's `data-*` attributes, named as properties: `data-foo-bar` is `fooBar`.
   /// @see https://html.spec.whatwg.org/#domstringmap
   class DatasetDOMStringMap

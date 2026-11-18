@@ -5,13 +5,13 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
-  StaticNodeList::StaticNodeList(SmallNodeList &&nodes) noexcept : _nodes(krys::move(nodes))
+  dom::StaticNodeList::StaticNodeList(dom::SmallNodeList &&nodes) noexcept : _nodes(krys::move(nodes))
   {
   }
 
-  RefPtr<Node> StaticNodeList::Item(size_t index) noexcept
+  RefPtr<Node> dom::StaticNodeList::Item(size_t index) noexcept
   {
     if (IsSupportedPropertyIndex(index))
     {
@@ -21,22 +21,22 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-  RefPtr<const Node> StaticNodeList::Item(size_t index) const noexcept
+  RefPtr<const Node> dom::StaticNodeList::Item(size_t index) const noexcept
   {
-    return const_cast<StaticNodeList *>(this)->Item(index);
+    return const_cast<dom::StaticNodeList *>(this)->Item(index);
   }
 
-  RefPtr<Node> StaticNodeList::operator[](size_t index) noexcept
-  {
-    return Item(index);
-  }
-
-  RefPtr<const Node> StaticNodeList::operator[](size_t index) const noexcept
+  RefPtr<Node> dom::StaticNodeList::operator[](size_t index) noexcept
   {
     return Item(index);
   }
 
-  size_t StaticNodeList::Length() const noexcept
+  RefPtr<const Node> dom::StaticNodeList::operator[](size_t index) const noexcept
+  {
+    return Item(index);
+  }
+
+  size_t dom::StaticNodeList::Length() const noexcept
   {
     return _nodes.size();
   }

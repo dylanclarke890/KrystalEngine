@@ -27,9 +27,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFEDropShadowElement::SVGFEDropShadowElement(dom::Document &document) noexcept
+  SVGFEDropShadowElement::SVGFEDropShadowElement(Document &document) noexcept
       : SVGFilterPrimitiveStandardAttributes(document, CreateUnique<PropertyRegistry>(*this),
                                              SVGElementInterface::FEDropShadow),
         _in1(SVGAnimatedString::Create(this)), _dx(SVGAnimatedNumber::Create(this, 2)),
@@ -56,15 +56,14 @@ namespace krys::boo::svg
     UpdateSVGRendererForElementChange();
   }
 
-  void SVGFEDropShadowElement::AttributeChanged(const dom::QualifiedName &name,
-                                                Maybe<dom::DOMStringView> oldValue,
-                                                Maybe<dom::DOMStringView> value) noexcept
+  void SVGFEDropShadowElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                                Maybe<DOMStringView> value) noexcept
   {
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::StdDeviationAttr())
     {
-      if (auto result = ParseNumberOptionalNumber(string))
+      if (auto result = svg::ParseNumberOptionalNumber(string))
       {
         _stdDeviationX->SetBaseValInternal(result->first);
         _stdDeviationY->SetBaseValInternal(result->second);
@@ -72,21 +71,21 @@ namespace krys::boo::svg
     }
     else if (name == SVGNames::InAttr())
     {
-      _in1->SetBaseValInternal(dom::DOMString(string));
+      _in1->SetBaseValInternal(DOMString(string));
     }
     else if (name == SVGNames::DxAttr())
     {
-      _dx->SetBaseValInternal(ToFloatOrZero(string));
+      _dx->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::DyAttr())
     {
-      _dy->SetBaseValInternal(ToFloatOrZero(string));
+      _dy->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
 
     SVGFilterPrimitiveStandardAttributes::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGFEDropShadowElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGFEDropShadowElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (attributeName == SVGNames::InAttr())
     {
@@ -114,7 +113,7 @@ namespace krys::boo::svg
   }
 
   bool SVGFEDropShadowElement::SetFilterEffectAttribute(FilterEffect &filterEffect,
-                                                        const dom::QualifiedName &attributeName) noexcept
+                                                        const QualifiedName &attributeName) noexcept
   {
     auto &effect = Downcast<FEDropShadow>(filterEffect);
     if (attributeName == SVGNames::StdDeviationAttr())

@@ -61,7 +61,7 @@ namespace krys::boo
                                         const LayoutRect &potentialRect, LayoutPoint &exitPoint,
                                         LayoutPoint &entryPoint) noexcept;
 
-    bool IsScrollableNode(const dom::ContainerNode &) noexcept;
+    bool IsScrollableNode(const ContainerNode &) noexcept;
 
     RectsAlignment AlignmentForRects(dom::FocusDirection direction, const LayoutRect &curRect,
                                      const LayoutRect &targetRect, const LayoutSize &viewSize) noexcept
@@ -276,9 +276,9 @@ namespace krys::boo
       }
     }
 
-    bool IsScrollableNode(const dom::ContainerNode &container) noexcept
+    bool IsScrollableNode(const ContainerNode &container) noexcept
     {
-      krys_debug_assert(!Is<dom::Document>(container));
+      krys_debug_assert(!Is<boo::Document>(container));
       if (!container.HasChildNodes())
       {
         return false;
@@ -360,11 +360,11 @@ namespace krys::boo
     }
   }
 
-  FocusCandidate::FocusCandidate(dom::Element *element, dom::FocusDirection direction) noexcept
+  FocusCandidate::FocusCandidate(Element *element, dom::FocusDirection direction) noexcept
       : Distance(MaxDistance()), IsOffscreen(true)
 
   {
-    if (auto *area = DynamicDowncast<html::HTMLAreaElement>(element))
+    if (auto *area = DynamicDowncast<HTMLAreaElement>(element))
     {
       auto image = area->ImageElement();
       if (!image || !image->Renderer())
@@ -372,7 +372,7 @@ namespace krys::boo
         return;
       }
 
-      VisibleNode = CreateWeakPtr(static_cast<dom::Element *>(image.get()));
+      VisibleNode = CreateWeakPtr(static_cast<Element *>(image.get()));
       Rect = VirtualRectForAreaElementAndDirection(area, direction);
     }
     else
@@ -391,7 +391,7 @@ namespace krys::boo
     IsOffscreenAfterScrolling = HasOffscreenRect(*VisibleNode, direction);
   }
 
-  dom::Document *FocusCandidate::Document() const noexcept
+  boo::Document *FocusCandidate::Document() const noexcept
   {
     return VisibleNode ? &VisibleNode->NodeDocument() : nullptr;
   }
@@ -399,7 +399,7 @@ namespace krys::boo
   // Checks if |node| is offscreen the visible area (viewport) of its container
   // document. In case it is, one can scroll in direction or take any different
   // desired action later on.
-  bool HasOffscreenRect(const dom::Node &node, dom::FocusDirection direction) noexcept
+  bool HasOffscreenRect(const Node &node, dom::FocusDirection direction) noexcept
   {
     // Get the FrameView in which |node| is (which means the current viewport if |node|
     // is not in an inner document), so we can check if its content rect is visible
@@ -474,9 +474,9 @@ namespace krys::boo
     return false;
   }
 
-  bool ScrollInDirection(const dom::ContainerNode &container, dom::FocusDirection direction) noexcept
+  bool ScrollInDirection(const ContainerNode &container, dom::FocusDirection direction) noexcept
   {
-    if (auto *document = DynamicDowncast<dom::Document>(container))
+    if (auto *document = DynamicDowncast<boo::Document>(container))
     {
       return ScrollInDirection(document->Frame(), direction);
     }
@@ -523,28 +523,27 @@ namespace krys::boo
     return false;
   }
 
-  dom::ContainerNode *
-    ScrollableEnclosingBoxOrParentFrameForNodeInDirection(dom::FocusDirection direction,
-                                                          dom::ContainerNode &container) noexcept
+  ContainerNode *ScrollableEnclosingBoxOrParentFrameForNodeInDirection(dom::FocusDirection direction,
+                                                                       ContainerNode &container) noexcept
   {
     // A document has no parent frame to go on to: there's one frame.
-    dom::ContainerNode *parent = &container;
+    ContainerNode *parent = &container;
     do
     {
-      parent = Is<dom::Document>(*parent) ? nullptr : parent->ParentNode();
-    } while (parent && !CanScrollInDirection(*parent, direction) && !Is<dom::Document>(*parent));
+      parent = Is<boo::Document>(*parent) ? nullptr : parent->ParentNode();
+    } while (parent && !CanScrollInDirection(*parent, direction) && !Is<boo::Document>(*parent));
 
     return parent;
   }
 
-  bool CanScrollInDirection(const dom::ContainerNode &container, dom::FocusDirection direction) noexcept
+  bool CanScrollInDirection(const ContainerNode &container, dom::FocusDirection direction) noexcept
   {
-    if (Is<html::HTMLSelectElement>(container))
+    if (Is<HTMLSelectElement>(container))
     {
       return false;
     }
 
-    if (auto *document = DynamicDowncast<dom::Document>(container))
+    if (auto *document = DynamicDowncast<boo::Document>(container))
     {
       return CanScrollInDirection(document->Frame(), direction);
     }
@@ -610,13 +609,12 @@ namespace krys::boo
     }
   }
 
-  LayoutRect NodeRectInAbsoluteCoordinates(const dom::ContainerNode &containerNode,
-                                           bool ignoreBorder) noexcept
+  LayoutRect NodeRectInAbsoluteCoordinates(const ContainerNode &containerNode, bool ignoreBorder) noexcept
   {
     krys_debug_assert(containerNode.Renderer()
                       && !containerNode.NodeDocument().View()->LayoutContext().NeedsLayout());
 
-    if (auto *document = DynamicDowncast<dom::Document>(containerNode))
+    if (auto *document = DynamicDowncast<boo::Document>(containerNode))
     {
       return FrameRectInAbsoluteCoordinates(document->Frame());
     }
@@ -666,8 +664,8 @@ namespace krys::boo
       return false;
     }
 
-    if (Is<html::HTMLAreaElement>(firstCandidate.FocusableNode.get())
-        || Is<html::HTMLAreaElement>(secondCandidate.FocusableNode.get()))
+    if (Is<HTMLAreaElement>(firstCandidate.FocusableNode.get())
+        || Is<HTMLAreaElement>(secondCandidate.FocusableNode.get()))
     {
       return false;
     }
@@ -781,7 +779,7 @@ namespace krys::boo
   {
     krys_debug_assert(candidate.VisibleNode && candidate.IsOffscreen);
     LayoutRect candidateRect = candidate.Rect;
-    for (dom::ContainerNode *parentNode = candidate.VisibleNode->ParentNode(); parentNode;
+    for (ContainerNode *parentNode = candidate.VisibleNode->ParentNode(); parentNode;
          parentNode = parentNode->ParentNode())
     {
       if (!parentNode->Renderer())
@@ -833,7 +831,7 @@ namespace krys::boo
     return virtualStartingRect;
   }
 
-  LayoutRect VirtualRectForAreaElementAndDirection(html::HTMLAreaElement *area,
+  LayoutRect VirtualRectForAreaElementAndDirection(HTMLAreaElement *area,
                                                    dom::FocusDirection direction) noexcept
   {
     krys_debug_assert(area);

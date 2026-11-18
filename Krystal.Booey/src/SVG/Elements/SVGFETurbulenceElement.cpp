@@ -25,9 +25,9 @@
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Core/Text/StringToIntegerConversion.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFETurbulenceElement::SVGFETurbulenceElement(dom::Document &document) noexcept
+  SVGFETurbulenceElement::SVGFETurbulenceElement(Document &document) noexcept
       : SVGFilterPrimitiveStandardAttributes(document, CreateUnique<PropertyRegistry>(*this),
                                              SVGElementInterface::FETurbulence),
         _baseFrequencyX(SVGAnimatedNumber::Create(this)), _baseFrequencyY(SVGAnimatedNumber::Create(this)),
@@ -52,11 +52,10 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGFETurbulenceElement::AttributeChanged(const dom::QualifiedName &name,
-                                                Maybe<dom::DOMStringView> oldValue,
-                                                Maybe<dom::DOMStringView> value) noexcept
+  void SVGFETurbulenceElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                                Maybe<DOMStringView> value) noexcept
   {
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::TypeAttr())
     {
@@ -76,7 +75,7 @@ namespace krys::boo::svg
     }
     else if (name == SVGNames::BaseFrequencyAttr())
     {
-      if (auto result = ParseNumberOptionalNumber(string))
+      if (auto result = svg::ParseNumberOptionalNumber(string))
       {
         _baseFrequencyX->SetBaseValInternal(result->first);
         _baseFrequencyY->SetBaseValInternal(result->second);
@@ -84,7 +83,7 @@ namespace krys::boo::svg
     }
     else if (name == SVGNames::SeedAttr())
     {
-      _seed->SetBaseValInternal(ToFloatOrZero(string));
+      _seed->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::NumOctavesAttr())
     {
@@ -95,7 +94,7 @@ namespace krys::boo::svg
   }
 
   bool SVGFETurbulenceElement::SetFilterEffectAttribute(FilterEffect &filterEffect,
-                                                        const dom::QualifiedName &attributeName) noexcept
+                                                        const QualifiedName &attributeName) noexcept
   {
     auto &effect = Downcast<FETurbulence>(filterEffect);
     if (attributeName == SVGNames::TypeAttr())
@@ -125,7 +124,7 @@ namespace krys::boo::svg
     return false;
   }
 
-  void SVGFETurbulenceElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGFETurbulenceElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {

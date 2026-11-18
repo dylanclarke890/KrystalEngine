@@ -26,21 +26,21 @@ namespace krys::boo::html::tests
 
   namespace
   {
-    KRYS_NODISCARD std::string Narrow(dom::DOMStringView string)
+    KRYS_NODISCARD std::string Narrow(DOMStringView string)
     {
       return std::string(reinterpret_cast<const char *>(string.data()), string.size());
     }
 
-    KRYS_NODISCARD std::string NarrowOrNull(const Maybe<dom::DOMString> &string)
+    KRYS_NODISCARD std::string NarrowOrNull(const Maybe<DOMString> &string)
     {
-      return string ? Narrow(dom::DOMStringView(*string)) : std::string("null");
+      return string ? Narrow(DOMStringView(*string)) : std::string("null");
     }
 
     /// @brief Records a popover's toggle events, as `"<id>:<type>:<old>><new>"`.
     struct PopoverEventLog
     {
       List<std::string> Events;
-      List<dom::EventListenerHandle> Handles;
+      List<EventListenerHandle> Handles;
       bool PreventBeforeToggle {false};
 
       void Watch(HTMLElement &popover) noexcept
@@ -50,9 +50,9 @@ namespace krys::boo::html::tests
         {
           Handles.push_back(popover.AddEventListener(
             type,
-            [this, id](dom::Event &event)
+            [this, id](Event &event)
             {
-              auto &toggle = Downcast<dom::ToggleEvent>(event);
+              auto &toggle = Downcast<ToggleEvent>(event);
               Events.push_back(id + ":" + Narrow(event.Type().View()) + ":" + Narrow(toggle.OldState()) + ">"
                                + Narrow(toggle.NewState()));
               if (PreventBeforeToggle && event.Type() == u8"beforetoggle")
@@ -89,10 +89,10 @@ namespace krys::boo::html::tests
                            PlatformEvent::Type::MouseReleased, 1, {}, MonotonicTime::Now()));
     }
 
-    KRYS_NODISCARD dom::ExceptionCode ShowError(HTMLElement &element) noexcept
+    KRYS_NODISCARD ExceptionCode ShowError(HTMLElement &element) noexcept
     {
       auto result = element.ShowPopover();
-      return result.HasException() ? result.GetException().Code() : dom::ExceptionCode {};
+      return result.HasException() ? result.GetException().Code() : ExceptionCode {};
     }
   }
 
@@ -131,10 +131,10 @@ namespace krys::boo::html::tests
 
     SECTION("Only connected popovers show")
     {
-      CHECK(ShowError(plain) == dom::ExceptionCode::NotSupportedError);
+      CHECK(ShowError(plain) == ExceptionCode::NotSupportedError);
       auto detached = document.CreateElement(u8"div").ReleaseValue();
-      (void)detached->SetAttribute(u8"popover", dom::DOMString());
-      CHECK(ShowError(Downcast<HTMLElement>(*detached)) == dom::ExceptionCode::InvalidStateError);
+      (void)detached->SetAttribute(u8"popover", DOMString());
+      CHECK(ShowError(Downcast<HTMLElement>(*detached)) == ExceptionCode::InvalidStateError);
       CHECK(log.Take().empty());
     }
 
@@ -348,14 +348,14 @@ namespace krys::boo::html::tests
     SECTION("A modal dialog can't be a popover")
     {
       auto dialog = document.CreateElement(u8"dialog").ReleaseValue();
-      (void)dialog->SetAttribute(u8"popover", dom::DOMString());
+      (void)dialog->SetAttribute(u8"popover", DOMString());
       REQUIRE_FALSE(document.Body()->AppendChild(*dialog).HasException());
       auto &modal = Downcast<HTMLDialogElement>(*dialog);
       REQUIRE_FALSE(modal.ShowModal().HasException());
-      CHECK(ShowError(modal) == dom::ExceptionCode::InvalidStateError);
+      CHECK(ShowError(modal) == ExceptionCode::InvalidStateError);
       modal.Close();
       REQUIRE_FALSE(modal.ShowPopover().HasException());
-      CHECK(modal.ShowModal().GetException().Code() == dom::ExceptionCode::InvalidStateError);
+      CHECK(modal.ShowModal().GetException().Code() == ExceptionCode::InvalidStateError);
     }
   }
 
@@ -376,7 +376,7 @@ namespace krys::boo::html::tests
     auto &p = Downcast<HTMLElement>(fixture.ById(u8"p"));
     auto &q = Downcast<HTMLElement>(fixture.ById(u8"q"));
     REQUIRE_FALSE(p.ShowPopover().HasException());
-    auto clicked = [&](dom::DOMStringView id)
+    auto clicked = [&](DOMStringView id)
     {
       return document.TopmostClickedPopover(fixture.ById(id)).get();
     };
@@ -451,7 +451,7 @@ namespace krys::boo::html::tests
       // The trigger's focus navigation scope holds the popover, which follows it in sequential navigation.
       CHECK(FocusAlgorithms::IsFocusNavigationScopeOwner(trigger));
       auto order = FocusAlgorithms::SequentialFocusNavigationOrder(document);
-      auto position = [&](dom::DOMStringView id)
+      auto position = [&](DOMStringView id)
       {
         return std::ranges::find(order, &fixture.ById(id)) - order.begin();
       };
@@ -487,9 +487,9 @@ namespace krys::boo::html::tests
   {
     NavigationFixture fixture(u8"<button id=t popovertarget=h>T</button><x-host id=h></x-host>");
     // A shadow root on the element with ID @p id, its reference target @p target, holding @p markup.
-    auto attach = [&](dom::DOMStringView id, const char8_t *target, const char8_t *markup)
+    auto attach = [&](DOMStringView id, const char8_t *target, const char8_t *markup)
     {
-      auto shadow = fixture.ById(id).AttachShadow({.ReferenceTarget = dom::DOMString(target)}).ReleaseValue();
+      auto shadow = fixture.ById(id).AttachShadow({.ReferenceTarget = DOMString(target)}).ReleaseValue();
       REQUIRE_FALSE(shadow->SetHTMLUnsafe(markup).HasException());
       return shadow;
     };
@@ -509,12 +509,12 @@ namespace krys::boo::html::tests
   {
     NavigationFixture fixture(u8"<button id=t popovertarget=h>T</button><x-host id=h></x-host>");
     auto &host = fixture.ById(u8"h");
-    auto shadow = host.AttachShadow({.ReferenceTarget = dom::DOMString(u8"p")}).ReleaseValue();
+    auto shadow = host.AttachShadow({.ReferenceTarget = DOMString(u8"p")}).ReleaseValue();
     REQUIRE_FALSE(shadow->SetHTMLUnsafe(u8"<div id=p popover>P</div>").HasException());
     List<std::string> heard;
     auto onBefore =
-      host.AddEventListener(u8"beforetoggle", [&](dom::Event &) { heard.emplace_back("beforetoggle"); });
-    auto onToggle = host.AddEventListener(u8"toggle", [&](dom::Event &) { heard.emplace_back("toggle"); });
+      host.AddEventListener(u8"beforetoggle", [&](Event &) { heard.emplace_back("beforetoggle"); });
+    auto onToggle = host.AddEventListener(u8"toggle", [&](Event &) { heard.emplace_back("toggle"); });
 
     Downcast<HTMLButtonElement>(fixture.ById(u8"t")).Click();
     html::EventLoop::Current().RunUntilIdle();

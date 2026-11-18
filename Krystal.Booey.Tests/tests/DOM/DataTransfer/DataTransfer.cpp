@@ -165,7 +165,7 @@ namespace krys::boo::tests
 
       auto duplicate = items.Add(document, u8"again", u8"TEXT/plain");
       REQUIRE(duplicate.HasException());
-      CHECK(duplicate.GetException().Code() == dom::ExceptionCode::NotSupportedError);
+      CHECK(duplicate.GetException().Code() == ExceptionCode::NotSupportedError);
 
       dataTransfer->SetData(document, u8"application/x-custom", u8"custom");
       CHECK(items.Length() == 3);
@@ -203,7 +203,7 @@ namespace krys::boo::tests
     SECTION("A string item's string is given in a task")
     {
       utf8_string string;
-      plain->GetAsString(document, [&](const dom::DOMString &value) { string = value; });
+      plain->GetAsString(document, [&](const DOMString &value) { string = value; });
       CHECK(string.empty());
       html::EventLoop::Current().RunUntilIdle();
       CHECK(string == u8"plain");
@@ -301,16 +301,16 @@ namespace krys::boo::tests
   {
     EditorFixture fixture(u8"<div id=a style=\"width:30px;height:20px\">a</div><div id=b>b</div>");
     auto &document = *fixture.Document;
-    Ref<dom::Element> a = ShareRef(fixture.ById(u8"a"));
+    Ref<Element> a = ShareRef(fixture.ById(u8"a"));
 
     SECTION("Only a drag's data transfer that can be written takes one")
     {
       auto copyAndPaste = DataTransfer::Create();
-      copyAndPaste->SetDragImage(Ref<dom::Element>(a), 1, 2);
+      copyAndPaste->SetDragImage(Ref<Element>(a), 1, 2);
       CHECK(!copyAndPaste->HasDragImage());
 
       auto drop = DataTransfer::CreateForDrop(document, CreateUnique<StaticPasteboard>(), {}, false);
-      drop->SetDragImage(Ref<dom::Element>(a), 1, 2);
+      drop->SetDragImage(Ref<Element>(a), 1, 2);
       CHECK(!drop->HasDragImage());
     }
 
@@ -318,7 +318,7 @@ namespace krys::boo::tests
     {
       auto dataTransfer = DataTransfer::CreateForDragStartEvent(document);
       CHECK(!dataTransfer->HasDragImage());
-      dataTransfer->SetDragImage(Ref<dom::Element>(a), 3, 4);
+      dataTransfer->SetDragImage(Ref<Element>(a), 3, 4);
       CHECK(dataTransfer->HasDragImage());
       CHECK(dataTransfer->DragImageElement() == a.get());
 
@@ -333,7 +333,7 @@ namespace krys::boo::tests
     {
       auto image = CreateHTMLElement(document, u8"img");
       auto dataTransfer = DataTransfer::CreateForDragStartEvent(document);
-      dataTransfer->SetDragImage(Ref<dom::Element>(image), 0, 0);
+      dataTransfer->SetDragImage(Ref<Element>(image), 0, 0);
       // It has no image loaded, so it's the element.
       CHECK(dataTransfer->DragImageElement() == image.get());
     }
@@ -341,7 +341,7 @@ namespace krys::boo::tests
     SECTION("The drag takes dragstart's image")
     {
       auto dragStart = DataTransfer::CreateForDragStartEvent(document);
-      dragStart->SetDragImage(Ref<dom::Element>(a), 5, 6);
+      dragStart->SetDragImage(Ref<Element>(a), 5, 6);
       auto drag = DataTransfer::CreateForDrag(document);
       drag->MoveDragState(krys::move(dragStart));
       CHECK(drag->HasDragImage());

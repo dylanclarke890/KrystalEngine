@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/SVG/Elements/SVGAnimationElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGAttributeAnimator;
 
@@ -43,13 +43,13 @@ namespace krys::boo::svg
     KRYS_NODISCARD bool IsDiscreteAnimator() const noexcept;
 
   protected:
-    SVGAnimateElementBase(dom::Document &, SVGElementInterface) noexcept;
+    SVGAnimateElementBase(Document &, SVGElementInterface) noexcept;
 
     KRYS_NODISCARD bool HasValidAttributeType() const noexcept override;
 
-    KRYS_NODISCARD virtual dom::DOMString AnimateRangeString(dom::DOMStringView string) const noexcept
+    KRYS_NODISCARD virtual DOMString AnimateRangeString(DOMStringView string) const noexcept
     {
-      return dom::DOMString {string};
+      return DOMString {string};
     }
 
   private:
@@ -62,15 +62,15 @@ namespace krys::boo::svg
 
     void SetTargetElement(SVGElement *) noexcept override;
 
-    void SetAttributeName(const dom::QualifiedName &) noexcept override;
+    void SetAttributeName(const QualifiedName &) noexcept override;
 
     void ResetAnimation() noexcept override;
 
-    bool SetFromAndToValues(dom::DOMStringView fromString, dom::DOMStringView toString) noexcept override;
+    bool SetFromAndToValues(DOMStringView fromString, DOMStringView toString) noexcept override;
 
-    bool SetFromAndByValues(dom::DOMStringView fromString, dom::DOMStringView byString) noexcept override;
+    bool SetFromAndByValues(DOMStringView fromString, DOMStringView byString) noexcept override;
 
-    bool SetToAtEndOfDurationValue(dom::DOMStringView toAtEndOfDurationString) noexcept override;
+    bool SetToAtEndOfDurationValue(DOMStringView toAtEndOfDurationString) noexcept override;
 
     void StartAnimation() noexcept override;
 
@@ -80,24 +80,24 @@ namespace krys::boo::svg
 
     void StopAnimation(SVGElement *targetElement) noexcept override;
 
-    KRYS_NODISCARD Maybe<float> CalculateDistance(dom::DOMStringView fromString,
-                                                  dom::DOMStringView toString) noexcept override;
+    KRYS_NODISCARD Maybe<float> CalculateDistance(DOMStringView fromString,
+                                                  DOMStringView toString) noexcept override;
 
     KRYS_NODISCARD bool HasInvalidCSSAttributeType() const noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGAnimateElementBase)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &element) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGAnimateElementBase)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &element) noexcept
   {
-    using krys::boo::svg::SVGElementInterface;
+    using krys::boo::SVGElementInterface;
     auto interface = element.Interface();
     return interface == SVGElementInterface::Animate || interface == SVGElementInterface::AnimateTransform
            || interface == SVGElementInterface::Set;
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    auto *svgElement = krys::DynamicDowncast<krys::boo::svg::SVGElement>(node);
+    auto *svgElement = krys::DynamicDowncast<krys::boo::SVGElement>(node);
     return svgElement && IsType(*svgElement);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

@@ -4,10 +4,13 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Node;
+}
 
+namespace krys::boo::dom
+{
   /// @brief A NodeIterator or TreeWalker: a root, the node types it shows and a filter.
   /// @see https://dom.spec.whatwg.org/#traversal
   class TraversalBase

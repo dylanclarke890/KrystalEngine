@@ -24,7 +24,7 @@ namespace krys::boo::ax::tests
   TEST_CASE("AXObjectCache: a document outside a frame has no cache", "[Accessibility][AXObjectCache]")
   {
     css::tests::ValueFixture values;
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     AXObjectCache::EnableAccessibility();
     CHECK_FALSE(document->AxObjectCache());
     AXObjectCache::DisableAccessibility();
@@ -135,7 +135,7 @@ namespace krys::boo::ax::tests
 
     SECTION("the focused element's object")
     {
-      DynamicDowncast<html::HTMLElement>(page.ById(u8"button"))->Focus();
+      DynamicDowncast<HTMLElement>(page.ById(u8"button"))->Focus();
       CHECK(page.Cache().FocusedObject() == &page.Object(u8"button"));
     }
   }

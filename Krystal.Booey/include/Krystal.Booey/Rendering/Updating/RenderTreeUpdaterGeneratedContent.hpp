@@ -54,7 +54,7 @@ namespace krys::boo
 
     explicit GeneratedContent(RenderTreeUpdater &updater) noexcept;
 
-    void UpdateBeforeOrAfterPseudoElement(dom::Element &current, const style::ElementUpdate &elementUpdate,
+    void UpdateBeforeOrAfterPseudoElement(Element &current, const style::ElementUpdate &elementUpdate,
                                           PseudoElementType pseudoElementType) noexcept;
 
     void UpdateRemainingQuotes() noexcept;
@@ -64,9 +64,9 @@ namespace krys::boo
 
     void UpdateCounters() noexcept;
 
-    static void RemoveBeforePseudoElement(dom::Element &element, RenderTreeBuilder &builder) noexcept;
+    static void RemoveBeforePseudoElement(Element &element, RenderTreeBuilder &builder) noexcept;
 
-    static void RemoveAfterPseudoElement(dom::Element &element, RenderTreeBuilder &builder) noexcept;
+    static void RemoveAfterPseudoElement(Element &element, RenderTreeBuilder &builder) noexcept;
 
   private:
     void UpdateQuotesUpTo(RenderQuote *lastQuote) noexcept;

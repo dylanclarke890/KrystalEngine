@@ -54,8 +54,8 @@ namespace krys::boo::infra::tests
       return current != u8' ';
     };
 
-    dom::DOMString input = u8"foo bar baz";
-    dom::DOMStringView inputView(input);
+    DOMString input = u8"foo bar baz";
+    DOMStringView inputView(input);
 
     auto position = inputView.begin();
 
@@ -86,15 +86,15 @@ namespace krys::boo::infra::tests
             "[Infra][StringAlgorithms][infra:strictly-split]")
   {
     REQUIRE(StringAlgorithms::StrictlySplit(u8"foo bar baz", u8' ')
-            == List<dom::DOMString> {u8"foo", u8"bar", u8"baz"});
-    REQUIRE(StringAlgorithms::StrictlySplit(u8"foo:bar", u8':') == List<dom::DOMString> {u8"foo", u8"bar"});
-    REQUIRE(StringAlgorithms::StrictlySplit(u8"foo:", u8':') == List<dom::DOMString> {u8"foo", u8""});
+            == List<DOMString> {u8"foo", u8"bar", u8"baz"});
+    REQUIRE(StringAlgorithms::StrictlySplit(u8"foo:bar", u8':') == List<DOMString> {u8"foo", u8"bar"});
+    REQUIRE(StringAlgorithms::StrictlySplit(u8"foo:", u8':') == List<DOMString> {u8"foo", u8""});
   }
 
   TEST_CASE("Skip ASCII whitespace", "[Infra][StringAlgorithms][infra:skip-ascii-whitespace]")
   {
-    dom::DOMString input = u8"   foo bar baz";
-    dom::DOMStringView inputView(input);
+    DOMString input = u8"   foo bar baz";
+    DOMStringView inputView(input);
 
     auto position = inputView.begin();
     StringAlgorithms::SkipWhitespace(inputView, position);
@@ -105,75 +105,73 @@ namespace krys::boo::infra::tests
             "[Infra][StringAlgorithms][infra:split-on-ascii-whitespace]")
   {
     REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"   foo   bar baz  ")
-            == List<dom::DOMString> {u8"foo", u8"bar", u8"baz"});
+            == List<DOMString> {u8"foo", u8"bar", u8"baz"});
     REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"foo bar baz")
-            == List<dom::DOMString> {u8"foo", u8"bar", u8"baz"});
+            == List<DOMString> {u8"foo", u8"bar", u8"baz"});
     REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"   foo bar baz")
-            == List<dom::DOMString> {u8"foo", u8"bar", u8"baz"});
+            == List<DOMString> {u8"foo", u8"bar", u8"baz"});
     REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"foo bar baz   ")
-            == List<dom::DOMString> {u8"foo", u8"bar", u8"baz"});
+            == List<DOMString> {u8"foo", u8"bar", u8"baz"});
     REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"      ").empty());
     REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"").empty());
     REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t\n\r\f").empty());
     REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t foo \n bar \r baz \f")
-            == List<dom::DOMString> {u8"foo", u8"bar", u8"baz"});
+            == List<DOMString> {u8"foo", u8"bar", u8"baz"});
     REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t foo \n  \r  baz \f")
-            == List<dom::DOMString> {u8"foo", u8"baz"});
-    REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t foo \n  \r    \f") == List<dom::DOMString> {u8"foo"});
+            == List<DOMString> {u8"foo", u8"baz"});
+    REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t foo \n  \r    \f") == List<DOMString> {u8"foo"});
     REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t    \n  \r    \f").empty());
-    REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t foo") == List<dom::DOMString> {u8"foo"});
-    REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t foo ") == List<dom::DOMString> {u8"foo"});
-    REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t foo  ") == List<dom::DOMString> {u8"foo"});
-    REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t foo  bar") == List<dom::DOMString> {u8"foo", u8"bar"});
+    REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t foo") == List<DOMString> {u8"foo"});
+    REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t foo ") == List<DOMString> {u8"foo"});
+    REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t foo  ") == List<DOMString> {u8"foo"});
+    REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t foo  bar") == List<DOMString> {u8"foo", u8"bar"});
   }
 
   TEST_CASE("Split a string on commas: each token stripped of ASCII whitespace",
             "[Infra][StringAlgorithms][infra:split-on-commas]")
   {
     REQUIRE(StringAlgorithms::SplitOnComma(u8"   foo,   bar baz,qux  ")
-            == List<dom::DOMString> {u8"foo", u8"bar baz", u8"qux"});
-    REQUIRE(StringAlgorithms::SplitOnComma(u8"foo,bar,baz")
-            == List<dom::DOMString> {u8"foo", u8"bar", u8"baz"});
+            == List<DOMString> {u8"foo", u8"bar baz", u8"qux"});
+    REQUIRE(StringAlgorithms::SplitOnComma(u8"foo,bar,baz") == List<DOMString> {u8"foo", u8"bar", u8"baz"});
     REQUIRE(StringAlgorithms::SplitOnComma(u8"   foo,bar,baz")
-            == List<dom::DOMString> {u8"foo", u8"bar", u8"baz"});
+            == List<DOMString> {u8"foo", u8"bar", u8"baz"});
     REQUIRE(StringAlgorithms::SplitOnComma(u8"foo,bar,baz   ")
-            == List<dom::DOMString> {u8"foo", u8"bar", u8"baz"});
-    REQUIRE(StringAlgorithms::SplitOnComma(u8"      ") == List<dom::DOMString> {u8""});
+            == List<DOMString> {u8"foo", u8"bar", u8"baz"});
+    REQUIRE(StringAlgorithms::SplitOnComma(u8"      ") == List<DOMString> {u8""});
     REQUIRE(StringAlgorithms::SplitOnComma(u8"").empty());
-    REQUIRE(StringAlgorithms::SplitOnComma(u8"\t\n\r\f") == List<dom::DOMString> {u8""});
+    REQUIRE(StringAlgorithms::SplitOnComma(u8"\t\n\r\f") == List<DOMString> {u8""});
     REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo \n bar \r baz \f")
-            == List<dom::DOMString> {u8"foo \n bar \r baz"});
+            == List<DOMString> {u8"foo \n bar \r baz"});
     REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo ,\n  bar \r  baz \f")
-            == List<dom::DOMString> {u8"foo", u8"bar \r  baz"});
+            == List<DOMString> {u8"foo", u8"bar \r  baz"});
     REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo ,\n  bar \r    \f")
-            == List<dom::DOMString> {u8"foo", u8"bar"});
-    REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo ,\n    \r    \f")
-            == List<dom::DOMString> {u8"foo", u8""});
-    REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo,") == List<dom::DOMString> {u8"foo"});
-    REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo, ") == List<dom::DOMString> {u8"foo", u8""});
+            == List<DOMString> {u8"foo", u8"bar"});
+    REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo ,\n    \r    \f") == List<DOMString> {u8"foo", u8""});
+    REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo,") == List<DOMString> {u8"foo"});
+    REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo, ") == List<DOMString> {u8"foo", u8""});
   }
 
   TEST_CASE("Concatenate: the strings separated by the separator",
             "[Infra][StringAlgorithms][infra:string-concatenate]")
   {
     {
-      auto input = List<dom::DOMString> {u8"foo", u8"bar", u8"baz"};
+      auto input = List<DOMString> {u8"foo", u8"bar", u8"baz"};
       REQUIRE(StringAlgorithms::Concatenate(input, std::nullopt) == u8"foobarbaz");
     }
     {
-      auto input = List<dom::DOMString> {};
+      auto input = List<DOMString> {};
       REQUIRE(StringAlgorithms::Concatenate(input, std::nullopt).empty());
     }
     {
-      auto input = List<dom::DOMString> {u8""};
+      auto input = List<DOMString> {u8""};
       REQUIRE(StringAlgorithms::Concatenate(input, std::nullopt).empty());
     }
     {
-      auto input = List<dom::DOMString> {u8"foo", u8"", u8"bar"};
+      auto input = List<DOMString> {u8"foo", u8"", u8"bar"};
       REQUIRE(StringAlgorithms::Concatenate(input, std::nullopt) == u8"foobar");
     }
     {
-      auto input = List<dom::DOMString> {u8"foo", u8"bar", u8"baz"};
+      auto input = List<DOMString> {u8"foo", u8"bar", u8"baz"};
       REQUIRE(StringAlgorithms::Concatenate(input, u8", ") == u8"foo, bar, baz");
     }
   }
@@ -227,8 +225,8 @@ namespace krys::boo::infra::tests
   TEST_CASE("ASCII lowercase and uppercase: only ASCII alphas change",
             "[Infra][StringAlgorithms][infra:ascii-lowercase][infra:ascii-uppercase]")
   {
-    CHECK(krys::text::ToASCIILower(dom::DOMStringView(u8"AbC@[É")) == u8"abc@[É");
-    CHECK(krys::text::ToASCIIUpper(dom::DOMStringView(u8"aBc`{é")) == u8"ABC`{é");
+    CHECK(krys::text::ToASCIILower(DOMStringView(u8"AbC@[É")) == u8"abc@[É");
+    CHECK(krys::text::ToASCIIUpper(DOMStringView(u8"aBc`{é")) == u8"ABC`{é");
   }
 
   TEST_CASE("Code points: the ASCII classes",

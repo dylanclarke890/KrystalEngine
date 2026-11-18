@@ -30,7 +30,7 @@
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   /// @brief A presentation MathML element: one that lays out its children (as `<mtable>`, `<mtr>`,
   /// `<mtd>`, `<mprescripts>` and `<none>` do) and the base of the other presentation elements.
@@ -40,13 +40,13 @@ namespace krys::boo::mathml
 
   public:
     explicit MathMLPresentationElement(
-      dom::Document &document, MathMLElementInterface interface = MathMLElementInterface::Presentation,
+      Document &document, MathMLElementInterface interface = MathMLElementInterface::Presentation,
       dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
 
     /// @brief Parses a MathML length, as MathML Core does: a number and an optional unit, with a unitless
     /// value only allowed for "0".
     /// @return A length of type `ParsingFailed` if @p string isn't one.
-    KRYS_NODISCARD static Length ParseMathMLLength(dom::DOMStringView string) noexcept;
+    KRYS_NODISCARD static Length ParseMathMLLength(DOMStringView string) noexcept;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
 
@@ -56,10 +56,10 @@ namespace krys::boo::mathml
       return value == BooleanValue::Default ? Maybe<bool> {} : Maybe<bool> {value == BooleanValue::True};
     }
 
-    KRYS_NODISCARD BooleanValue CachedBooleanAttribute(const dom::QualifiedName &name,
+    KRYS_NODISCARD BooleanValue CachedBooleanAttribute(const QualifiedName &name,
                                                        Maybe<BooleanValue> &attribute) const noexcept;
 
-    KRYS_NODISCARD const Length &CachedMathMLLength(const dom::QualifiedName &name,
+    KRYS_NODISCARD const Length &CachedMathMLLength(const QualifiedName &name,
                                                     Maybe<Length> &length) const noexcept;
 
   private:
@@ -68,6 +68,6 @@ namespace krys::boo::mathml
       return true;
     }
 
-    KRYS_NODISCARD static Length ParseNumberAndUnit(dom::DOMStringView string) noexcept;
+    KRYS_NODISCARD static Length ParseNumberAndUnit(DOMStringView string) noexcept;
   };
 }

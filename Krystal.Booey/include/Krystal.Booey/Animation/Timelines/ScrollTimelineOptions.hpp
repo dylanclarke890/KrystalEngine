@@ -6,15 +6,12 @@
 
 namespace krys::boo
 {
-  namespace dom
-  {
-    class Element;
-  }
+  class Element;
 
   /// @see https://drafts.csswg.org/scroll-animations-1/#dictdef-scrolltimelineoptions
   struct ScrollTimelineOptions
   {
-    Maybe<RefPtr<dom::Element>> Source;
+    Maybe<RefPtr<boo::Element>> Source;
     ScrollAxis Axis {ScrollAxis::Block};
   };
 }

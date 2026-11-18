@@ -24,7 +24,7 @@
 #include "Krystal.Booey/DOM/Events/WheelEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   namespace
   {

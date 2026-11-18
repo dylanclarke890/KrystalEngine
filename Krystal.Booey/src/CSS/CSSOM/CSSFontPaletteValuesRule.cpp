@@ -31,7 +31,7 @@
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include <charconv>
 
-namespace krys::boo::css
+namespace krys::boo
 {
   namespace
   {
@@ -65,7 +65,7 @@ namespace krys::boo::css
       {
         result.Append(u8", ");
       }
-      result.Append(SerialiseFontFamily(family.ToString()));
+      result.Append(css::SerialiseFontFamily(family.ToString()));
     }
     return krys::move(result).ToString();
   }
@@ -172,7 +172,7 @@ namespace krys::boo::css
     return krys::move(builder).ToString();
   }
 
-  void CSSFontPaletteValuesRule::Reattach(Rule &rule) noexcept
+  void CSSFontPaletteValuesRule::Reattach(css::Rule &rule) noexcept
   {
     _fontPaletteValuesRule = ShareRef(Downcast<css::FontPaletteValuesRule>(rule));
   }

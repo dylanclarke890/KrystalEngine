@@ -26,7 +26,7 @@
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   struct QualifiedNameStorage : public RefCounted<QualifiedNameStorage>
   {
@@ -137,7 +137,10 @@ namespace krys::boo::dom
       return !(a == b);
     }
   };
+}
 
+namespace krys::boo::dom
+{
   KRYS_NODISCARD inline QualifiedName NullQualifiedName() noexcept
   {
     return QualifiedName(null, null, null, html::TagName::Unknown, html::Namespace::None);

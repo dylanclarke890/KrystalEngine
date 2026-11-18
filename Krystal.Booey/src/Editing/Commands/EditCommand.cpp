@@ -94,13 +94,13 @@ namespace krys::boo
     return false;
   }
 
-  EditCommand::EditCommand(dom::Document &document, EditAction editingAction) noexcept
+  EditCommand::EditCommand(Document &document, EditAction editingAction) noexcept
       : _document(ShareRef(document)), _startingSelection(document.Selection().Selection()),
         _endingSelection(_startingSelection), _editingAction(editingAction)
   {
   }
 
-  EditCommand::EditCommand(dom::Document &document, VisibleSelection startingSelection,
+  EditCommand::EditCommand(Document &document, VisibleSelection startingSelection,
                            VisibleSelection endingSelection) noexcept
       : _document(ShareRef(document)), _startingSelection(krys::move(startingSelection)),
         _endingSelection(krys::move(endingSelection))
@@ -191,7 +191,7 @@ namespace krys::boo
     }
   }
 
-  SimpleEditCommand::SimpleEditCommand(dom::Document &document, EditAction editingAction) noexcept
+  SimpleEditCommand::SimpleEditCommand(Document &document, EditAction editingAction) noexcept
       : EditCommand(document, editingAction)
   {
   }

@@ -140,7 +140,7 @@ namespace krys::boo
     mutable bool _isComputingTrackSizes {false};
 
   public:
-    RenderGrid(dom::Element &element, RenderStyle &&style) noexcept;
+    RenderGrid(Element &element, RenderStyle &&style) noexcept;
 
     ~RenderGrid() noexcept override;
 

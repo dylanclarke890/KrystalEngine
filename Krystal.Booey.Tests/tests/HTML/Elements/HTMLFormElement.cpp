@@ -26,13 +26,13 @@ namespace krys::boo::html::tests
   namespace
   {
     /// @brief Records the submitter of each submit event and the entries of each formdata event.
-    struct SubmissionEvents : dom::EventListenerCallback
+    struct SubmissionEvents : EventListenerCallback
     {
       List<std::string> Submitters;
       List<std::string> Entries;
       bool PreventSubmit {false};
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         if (auto *submitEvent = DynamicDowncast<SubmitEvent>(event))
         {
@@ -43,11 +43,11 @@ namespace krys::boo::html::tests
             event.PreventDefault();
           }
         }
-        else if (auto *formDataEvent = DynamicDowncast<dom::FormDataEvent>(event))
+        else if (auto *formDataEvent = DynamicDowncast<FormDataEvent>(event))
         {
           for (auto &item : formDataEvent->FormData().Items())
           {
-            Entries.push_back(Str(item.Name) + "=" + Str(std::get<dom::DOMString>(item.Data)));
+            Entries.push_back(Str(item.Name) + "=" + Str(std::get<DOMString>(item.Data)));
           }
           formDataEvent->FormData().Append(u8"added", u8"1");
         }
@@ -80,11 +80,11 @@ namespace krys::boo::html::tests
     // A named item found once is still found by that name when renamed.
     auto item = form.NamedItem(u8"a");
     REQUIRE(item);
-    CHECK(std::get<RefPtr<dom::Element>>(*item).get() == &a);
+    CHECK(std::get<RefPtr<Element>>(*item).get() == &a);
     REQUIRE_FALSE(a.SetAttribute(u8"name", u8"b").HasException());
     item = form.NamedItem(u8"a");
     REQUIRE(item);
-    CHECK(std::get<RefPtr<dom::Element>>(*item).get() == &a);
+    CHECK(std::get<RefPtr<Element>>(*item).get() == &a);
 
     auto invalid = EventLog::ListenTo(a, {u8"invalid"});
     CHECK_FALSE(form.CheckValidity());
@@ -203,7 +203,7 @@ namespace krys::boo::html::tests
     auto &form = fixture.Get<HTMLFormElement>(u8"f");
     int submits = 0;
     auto listener = form.AddEventListener(u8"submit",
-                                          [&](dom::Event &)
+                                          [&](Event &)
                                           {
                                             ++submits;
                                             (void)form.RequestSubmit();
@@ -228,14 +228,13 @@ namespace krys::boo::html::tests
     FormFixture fixture(
       u8R"(<form action="https://example.com/t"><input id=t1 name=t1><input id=t2 name=t2></form>
       <form action="https://example.com/o"><input id=o1 name=o1><input type=checkbox></form>)");
-    dom::KeyboardEventInit init;
+    KeyboardEventInit init;
     init.Bubbles = true;
     init.Cancelable = true;
     init.CharCode = '\r';
     auto enter = [&](utf8_stringview id)
     {
-      (void)fixture.Get<HTMLInputElement>(id).DispatchEvent(
-        *CreateRef<dom::KeyboardEvent>(u8"keypress", init));
+      (void)fixture.Get<HTMLInputElement>(id).DispatchEvent(*CreateRef<KeyboardEvent>(u8"keypress", init));
     };
     enter(u8"t1");
     CHECK(fixture.Submissions().empty());
@@ -384,11 +383,11 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
       <input type=submit id=go name=go value=Go></form>)");
     auto &t = fixture.Get<HTMLInputElement>(u8"t");
 
-    dom::KeyboardEventInit init;
+    KeyboardEventInit init;
     init.Bubbles = true;
     init.Cancelable = true;
     init.CharCode = '\r';
-    auto enter = CreateRef<dom::KeyboardEvent>(u8"keypress", init);
+    auto enter = CreateRef<KeyboardEvent>(u8"keypress", init);
     (void)t.DispatchEvent(*enter);
     REQUIRE(fixture.Submissions().size() == 1);
     // The default button submits, as if it were clicked.
@@ -440,14 +439,14 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
       <img id=b name=both><img id=j name=dup><img id=k name=dup></form><img id=o name=out>
       <table><form id=f2><tr><td><img id=m></td></tr></form></table>)");
     auto &form = fixture.Get<HTMLFormElement>(u8"f");
-    auto single = [&](dom::DOMStringView name) -> dom::Element *
+    auto single = [&](DOMStringView name) -> Element *
     {
       auto item = form.NamedItem(name);
-      if (!item || !std::holds_alternative<RefPtr<dom::Element>>(*item))
+      if (!item || !std::holds_alternative<RefPtr<Element>>(*item))
       {
         return nullptr;
       }
-      return std::get<RefPtr<dom::Element>>(*item).get();
+      return std::get<RefPtr<Element>>(*item).get();
     };
 
     SECTION("by ID and name, wherever they are in the form")
@@ -494,7 +493,7 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
 
     SECTION("a past name goes on working until the image leaves the form")
     {
-      Ref<dom::Element> image = ShareRef(fixture.ById(u8"i"));
+      Ref<Element> image = ShareRef(fixture.ById(u8"i"));
       CHECK(single(u8"n") == image.get());
       REQUIRE_FALSE(image->SetAttribute(u8"name", u8"renamed").HasException());
       CHECK(single(u8"n") == image.get());
@@ -507,12 +506,12 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
 
     SECTION("an image joins and leaves as it moves")
     {
-      Ref<dom::Element> outside = ShareRef(fixture.ById(u8"o"));
+      Ref<Element> outside = ShareRef(fixture.ById(u8"o"));
       REQUIRE_FALSE(form.AppendChild(*outside).HasException());
       CHECK(single(u8"out") == outside.get());
 
       auto *parent = form.ParentNode();
-      REQUIRE_FALSE(Downcast<dom::Element>(*parent).MoveBefore(*outside, nullptr).HasException());
+      REQUIRE_FALSE(Downcast<Element>(*parent).MoveBefore(*outside, nullptr).HasException());
       CHECK_FALSE(form.NamedItem(u8"out"));
       REQUIRE_FALSE(form.MoveBefore(*outside, nullptr).HasException());
       CHECK(single(u8"out") == outside.get());
@@ -523,20 +522,20 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
       auto &other = fixture.Get<HTMLFormElement>(u8"f2");
       auto item = other.NamedItem(u8"m");
       REQUIRE(item);
-      CHECK(std::get<RefPtr<dom::Element>>(*item).get() == &fixture.ById(u8"m"));
+      CHECK(std::get<RefPtr<Element>>(*item).get() == &fixture.ById(u8"m"));
     }
 
     SECTION("removing a form lets go of images that didn't go with it")
     {
       auto &other = fixture.Get<HTMLFormElement>(u8"f2");
-      Ref<dom::Element> kept = ShareRef<dom::Element>(other);
+      Ref<Element> kept = ShareRef<Element>(other);
       auto *image = &Downcast<HTMLImageElement>(Downcast<HTMLElement>(fixture.ById(u8"m")));
       CHECK(image->Form() == &other);
       REQUIRE_FALSE(other.ParentNode()->RemoveChild(other).HasException());
       CHECK(image->Form() == nullptr);
 
       // While one inside it stays with it.
-      Ref<dom::Element> formKept = ShareRef<dom::Element>(form);
+      Ref<Element> formKept = ShareRef<Element>(form);
       auto *inner = &Downcast<HTMLImageElement>(Downcast<HTMLElement>(fixture.ById(u8"i")));
       REQUIRE_FALSE(form.ParentNode()->RemoveChild(form).HasException());
       CHECK(inner->Form() == &form);
@@ -545,7 +544,7 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
     SECTION("a destroyed image, and a destroyed form")
     {
       {
-        Ref<dom::Element> image = ShareRef(fixture.ById(u8"i"));
+        Ref<Element> image = ShareRef(fixture.ById(u8"i"));
         REQUIRE_FALSE(image->ParentNode()->RemoveChild(*image).HasException());
       }
       CHECK_FALSE(form.NamedItem(u8"n"));
@@ -571,9 +570,9 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
     REQUIRE_FALSE(shadow->SetHTMLUnsafe(u8"<form id=f><input type=submit id=go></form>").HasException());
     auto &form = Downcast<HTMLFormElement>(*shadow->GetElementById(u8"f"));
     // Every submission is cancelled at the form, so none is left to run.
-    auto onForm = form.AddEventListener(u8"submit", [](dom::Event &event) { event.PreventDefault(); });
+    auto onForm = form.AddEventListener(u8"submit", [](Event &event) { event.PreventDefault(); });
     int32 heardAtHost = 0;
-    auto onHost = host.AddEventListener(u8"submit", [&](dom::Event &) { ++heardAtHost; });
+    auto onHost = host.AddEventListener(u8"submit", [&](Event &) { ++heardAtHost; });
 
     // Without a submitter it leaves the shadow tree; from a submitter beside the form there, it doesn't.
     REQUIRE_FALSE(form.RequestSubmit().HasException());

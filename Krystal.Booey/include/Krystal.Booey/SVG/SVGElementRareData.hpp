@@ -31,7 +31,7 @@
 #include "Krystal.Core/Types/WeakPtr.hpp"
 #include <algorithm>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGElement;
 
@@ -156,7 +156,7 @@ namespace krys::boo::svg
 
     /// @brief The element's computed style without CSS animations, transitions or SMIL animations: the base
     /// value of a SMIL animation.
-    KRYS_NODISCARD const RenderStyle *OverrideComputedStyle(dom::Element &,
+    KRYS_NODISCARD const RenderStyle *OverrideComputedStyle(Element &,
                                                             const RenderStyle *parentStyle) noexcept;
 
     KRYS_NODISCARD bool UseOverrideComputedStyle() const noexcept

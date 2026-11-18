@@ -47,7 +47,7 @@ namespace krys::boo::style
       return SingleAnimationName {css::keywords::None {}};
     }
 
-    return SingleAnimationName {ScopedName {css::CSSOMStringAtom {primitiveValue->StringValue()},
+    return SingleAnimationName {ScopedName {CSSOMStringAtom {primitiveValue->StringValue()},
                                             state.StyleScopeOrdinal(), primitiveValue->IsCustomIdent()}};
   }
 }

@@ -1021,7 +1021,7 @@ namespace krys::boo::style
     if (!propertiesA.empty() || !propertiesB.empty()) KRYS_UNLIKELY
     {
       // FIXME: We should not need to use Style::Extractor here.
-      Extractor extractor(static_cast<dom::Element *>(nullptr));
+      Extractor extractor(static_cast<Element *>(nullptr));
       auto &pool = css::ValuePool::MainThreadPool();
 
       for (auto *watchPropertiesMap : {&propertiesA, &propertiesB})

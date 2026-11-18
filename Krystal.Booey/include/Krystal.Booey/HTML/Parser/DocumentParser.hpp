@@ -14,7 +14,7 @@ namespace krys::boo::html
 {
   class DocumentParser : public RefCounted<DocumentParser>
   {
-    dom::HTMLDocument &_document;
+    HTMLDocument &_document;
     InputStream _input;
     Tokenizer _tokenizer;
     TreeBuilder _treeBuilder;
@@ -27,13 +27,13 @@ namespace krys::boo::html
     bool _paused {false};
 
   public:
-    DocumentParser(dom::HTMLDocument &document) noexcept;
+    DocumentParser(HTMLDocument &document) noexcept;
 
     /// @brief Parses @p input as the children of @p target, an element or a shadow root (whose host is then
     /// the context).
     /// @see https://html.spec.whatwg.org/#html-fragment-parsing-algorithm
-    KRYS_NODISCARD static Ref<dom::DocumentFragment>
-      ParseFragment(dom::ContainerNode &target, utf8_string input, bool allowDeclarativeShadowRoots = false,
+    KRYS_NODISCARD static Ref<DocumentFragment>
+      ParseFragment(ContainerNode &target, utf8_string input, bool allowDeclarativeShadowRoots = false,
                     ParserScriptingMode scriptingMode = ParserScriptingMode::Inert,
                     Maybe<SanitizerConfig> &&configuration = null) noexcept;
 

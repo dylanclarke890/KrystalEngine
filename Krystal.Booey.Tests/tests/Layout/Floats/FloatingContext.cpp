@@ -16,7 +16,7 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD const layout::Box &BoxOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD const layout::Box &BoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       auto box = fixture.ById(id).Renderer()->LayoutBox();
       REQUIRE(box);

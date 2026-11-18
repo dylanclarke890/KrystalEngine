@@ -31,7 +31,7 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSStyleValueFactory.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   CSSTransformComponent::~CSSTransformComponent() noexcept = default;
 
@@ -42,8 +42,8 @@ namespace krys::boo::css
     return krys::move(builder).ToString();
   }
 
-  dom::ExceptionOr<List<Ref<CSSNumericValue>>>
-    CSSTransformComponent::ReifyArguments(const FunctionValue &function, dom::Document &document) noexcept
+  ExceptionOr<List<Ref<CSSNumericValue>>>
+    CSSTransformComponent::ReifyArguments(const css::FunctionValue &function, Document &document) noexcept
   {
     List<Ref<CSSNumericValue>> arguments;
     for (const auto &argument : function)
@@ -57,7 +57,7 @@ namespace krys::boo::css
       auto *numericValue = DynamicDowncast<CSSNumericValue>(*styleValue);
       if (!numericValue)
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       arguments.push_back(ShareRef(*numericValue));
     }

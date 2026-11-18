@@ -33,7 +33,7 @@
 #include <cmath>
 #include <numbers>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   namespace
   {
@@ -391,7 +391,7 @@ namespace krys::boo::dom
         // MouseEvent is a misnomer in this context, and can represent events from a pressure sensitive input
         // device if the pointer type is "Pen" or "Touch". If it does represent a pressure sensitive input
         // device, we consult MouseEvent::force() for the event pressure, else we fall back to spec defaults.
-        _pressure(pointerType != MousePointerEventType()
+        _pressure(pointerType != dom::MousePointerEventType()
                     ? static_cast<float>(std::clamp(mouseEvent.Force(), 0., 1.))
                     : PressureForPressureInsensitiveInputDevices(Buttons())),
         _pointerType(pointerType), _isPrimary(true),
@@ -403,7 +403,7 @@ namespace krys::boo::dom
     _isTrusted = mouseEvent.IsTrusted();
 
     // A pen reports how it's held.
-    if (pointerType == PenPointerEventType())
+    if (pointerType == dom::PenPointerEventType())
     {
       auto &orientation = mouseEvent.GetPenOrientation();
       _tiltX = orientation.TiltX;
@@ -445,8 +445,9 @@ namespace krys::boo::dom
         _pressure(event.TouchPoints()[index].Force() > 0
                     ? event.TouchPoints()[index].Force()
                     : PressureForPressureInsensitiveInputDevices(ButtonsForType(type))),
-        _twist(static_cast<int32>(event.TouchPoints()[index].Twist())), _pointerType(TouchPointerEventType()),
-        _isPrimary(isPrimary), _fractionalCoordinatesAllowed(FractionalCoordinatesAllowedForType(type)),
+        _twist(static_cast<int32>(event.TouchPoints()[index].Twist())),
+        _pointerType(dom::TouchPointerEventType()), _isPrimary(isPrimary),
+        _fractionalCoordinatesAllowed(FractionalCoordinatesAllowedForType(type)),
         _coalescedEvents(coalescedEvents), _predictedEvents(predictedEvents)
   {
     _createTime = event.Timestamp();

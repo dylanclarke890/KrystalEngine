@@ -17,7 +17,7 @@ namespace krys::boo::mathml::tests
 
   TEST_CASE("MathMLPresentationElement: parsing lengths", "[MathML][MathMLPresentationElement]")
   {
-    auto parse = [](dom::DOMStringView string)
+    auto parse = [](DOMStringView string)
     {
       return MathMLPresentationElement::ParseMathMLLength(string);
     };

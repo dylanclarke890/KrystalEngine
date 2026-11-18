@@ -39,21 +39,21 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   template <>
-  struct EnumeratedAttributeTraits<"closedby", HTMLDialogElement>
+  struct html::EnumeratedAttributeTraits<"closedby", HTMLDialogElement>
   {
-    using State = ClosedByAttributeState;
-    static inline const KeywordStateMapping<State> StateMappings[] = {
+    using State = html::ClosedByAttributeState;
+    static inline const html::KeywordStateMapping<State> StateMappings[] = {
       {u8"any", State::Any}, {u8"closerequest", State::CloseRequest}, {u8"none", State::None}};
 
     constexpr static State MissingValueDefault = State::Auto;
     constexpr static State InvalidValueDefault = State::Auto;
   };
 
-  HTMLDialogElement::HTMLDialogElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Dialog)
+  HTMLDialogElement::HTMLDialogElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Dialog)
   {
   }
 
@@ -63,30 +63,30 @@ namespace krys::boo::html
 
   bool HTMLDialogElement::Open() const noexcept
   {
-    return Reflect<bool>(*this, u8"open");
+    return html::Reflect<bool>(*this, u8"open");
   }
 
   void HTMLDialogElement::Open(bool value) noexcept
   {
-    CEReactionsScope ceReactions;
-    Reflect<bool>(*this, u8"open", krys::move(value));
+    html::CEReactionsScope ceReactions;
+    html::Reflect<bool>(*this, u8"open", krys::move(value));
   }
 
-  dom::DOMString HTMLDialogElement::ClosedBy() const noexcept
+  DOMString HTMLDialogElement::ClosedBy() const noexcept
   {
-    return ReflectEnumerated<"closedby", HTMLDialogElement>(*this);
+    return html::ReflectEnumerated<"closedby", HTMLDialogElement>(*this);
   }
 
-  void HTMLDialogElement::ClosedBy(dom::DOMString value) noexcept
+  void HTMLDialogElement::ClosedBy(DOMString value) noexcept
   {
-    CEReactionsScope ceReactions;
-    Reflect<dom::DOMString>(*this, u8"closedby", krys::move(value));
+    html::CEReactionsScope ceReactions;
+    html::Reflect<DOMString>(*this, u8"closedby", krys::move(value));
   }
 
   // https://html.spec.whatwg.org/#dom-dialog-show
-  dom::ExceptionOr<void> HTMLDialogElement::Show() noexcept
+  ExceptionOr<void> HTMLDialogElement::Show() noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
 
     // 1. If this has an open attribute and is modal of this is false, then return.
     // 2. If this has an open attribute, then throw an "InvalidStateError" DOMException.
@@ -96,8 +96,7 @@ namespace krys::boo::html
       {
         return {};
       }
-      return dom::Exception {dom::ExceptionCode::InvalidStateError,
-                             u8"Cannot call show() on an open modal dialog."};
+      return Exception {ExceptionCode::InvalidStateError, u8"Cannot call show() on an open modal dialog."};
     }
 
     // 3. If the result of firing an event named beforetoggle, using ToggleEvent, with the cancelable
@@ -119,7 +118,7 @@ namespace krys::boo::html
     QueueDialogToggleEventTask(dom::ToggleState::Closed, dom::ToggleState::Open, nullptr);
 
     // 6. Add an open attribute to this, whose value is the empty string.
-    (void)SetAttribute(u8"open", dom::DOMString());
+    (void)SetAttribute(u8"open", DOMString());
 
     // 7. Set this's previously focused element to the focused element.
     _previouslyFocusedElement = CreateWeakPtr(NodeDocument().FocusedElement());
@@ -135,23 +134,23 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-dialog-showmodal
-  dom::ExceptionOr<void> HTMLDialogElement::ShowModal() noexcept
+  ExceptionOr<void> HTMLDialogElement::ShowModal() noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     return ShowModalDialog(nullptr);
   }
 
   // https://html.spec.whatwg.org/#dom-dialog-close
-  void HTMLDialogElement::Close(Maybe<dom::DOMString> returnValue) noexcept
+  void HTMLDialogElement::Close(Maybe<DOMString> returnValue) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     CloseTheDialog(krys::move(returnValue), nullptr);
   }
 
   // https://html.spec.whatwg.org/#dom-dialog-requestclose
-  void HTMLDialogElement::RequestClose(Maybe<dom::DOMString> returnValue) noexcept
+  void HTMLDialogElement::RequestClose(Maybe<DOMString> returnValue) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     RequestCloseTheDialog(krys::move(returnValue), nullptr);
   }
 
@@ -164,19 +163,20 @@ namespace krys::boo::html
     // 1a. If dialog's is modal is true, then return Close Request.
     // 1b. Return None.
     // 2. Return the state of dialog's closedby attribute.
-    auto value = Reflect<dom::DOMString>(*this, u8"closedby");
-    switch (EnumeratedAttribute<"closedby", HTMLDialogElement>::ResolveState(value))
+    auto value = html::Reflect<DOMString>(*this, u8"closedby");
+    switch (html::EnumeratedAttribute<"closedby", HTMLDialogElement>::ResolveState(value))
     {
-      case ClosedByAttributeState::Any:          return ClosedByState::Any;
-      case ClosedByAttributeState::CloseRequest: return ClosedByState::CloseRequest;
-      case ClosedByAttributeState::None:         return ClosedByState::None;
-      case ClosedByAttributeState::Auto:         return IsModal() ? ClosedByState::CloseRequest : ClosedByState::None;
+      case html::ClosedByAttributeState::Any:          return ClosedByState::Any;
+      case html::ClosedByAttributeState::CloseRequest: return ClosedByState::CloseRequest;
+      case html::ClosedByAttributeState::None:         return ClosedByState::None;
+      case html::ClosedByAttributeState::Auto:
+        return IsModal() ? ClosedByState::CloseRequest : ClosedByState::None;
     }
     krys_unreachable();
   }
 
   // https://html.spec.whatwg.org/#show-a-modal-dialog
-  dom::ExceptionOr<void> HTMLDialogElement::ShowModalDialog(dom::Element *source) noexcept
+  ExceptionOr<void> HTMLDialogElement::ShowModalDialog(Element *source) noexcept
   {
     // 1. If subject has an open attribute and is modal of subject is true, then return.
     // 2. If subject has an open attribute, then throw an "InvalidStateError" DOMException.
@@ -186,8 +186,8 @@ namespace krys::boo::html
       {
         return {};
       }
-      return dom::Exception {dom::ExceptionCode::InvalidStateError,
-                             u8"Cannot call showModal() on an open non-modal dialog."};
+      return Exception {ExceptionCode::InvalidStateError,
+                        u8"Cannot call showModal() on an open non-modal dialog."};
     }
 
     // 3. If subject's node document is not fully active, then throw an "InvalidStateError" DOMException.
@@ -195,17 +195,17 @@ namespace krys::boo::html
     // 5. If subject is in the popover showing state, then throw an "InvalidStateError" DOMException.
     if (!IsConnected())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError, u8"Element is not connected."};
+      return Exception {ExceptionCode::InvalidStateError, u8"Element is not connected."};
     }
     if (IsPopoverShowing())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError, u8"Element is already an open popover."};
+      return Exception {ExceptionCode::InvalidStateError, u8"Element is already an open popover."};
     }
-    Ref<dom::Document> document = ShareRef(NodeDocument());
+    Ref<Document> document = ShareRef(NodeDocument());
     if (!document->IsFullyActive())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError,
-                             u8"Invalid for dialogs within documents that are not fully active."};
+      return Exception {ExceptionCode::InvalidStateError,
+                        u8"Invalid for dialogs within documents that are not fully active."};
     }
 
     // 6. If the result of firing an event named beforetoggle, using ToggleEvent, with the cancelable
@@ -230,7 +230,7 @@ namespace krys::boo::html
     QueueDialogToggleEventTask(dom::ToggleState::Closed, dom::ToggleState::Open, source);
 
     // 11. Add an open attribute to subject, whose value is the empty string.
-    (void)SetAttribute(u8"open", dom::DOMString());
+    (void)SetAttribute(u8"open", DOMString());
 
     // 12. Assert: subject's close watcher is not null.
     // (Null in a document without a window.)
@@ -260,7 +260,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#close-the-dialog
-  void HTMLDialogElement::CloseTheDialog(Maybe<dom::DOMString> result, dom::Element *source) noexcept
+  void HTMLDialogElement::CloseTheDialog(Maybe<DOMString> result, Element *source) noexcept
   {
     // 1. If subject does not have an open attribute, then return.
     if (!Open())
@@ -315,7 +315,7 @@ namespace krys::boo::html
     // 12. If subject's previously focused element is not null:
     // 12a. Let element be subject's previously focused element.
     // 12b. Set subject's previously focused element to null.
-    if (RefPtr<dom::Element> element = std::exchange(_previouslyFocusedElement, nullptr).lock())
+    if (RefPtr<Element> element = std::exchange(_previouslyFocusedElement, nullptr).lock())
     {
       // 12c. If subject's node document's focused area of the document's DOM anchor is a shadow-including
       //      inclusive descendant of subject, or wasModal is true, then run the focusing steps for element;
@@ -324,25 +324,24 @@ namespace krys::boo::html
       if (wasModal
           || (focusedArea && dom::TreeQueries::IsShadowIncludingInclusiveDescendant(*focusedArea, *this)))
       {
-        FocusAlgorithms::FocusingSteps(*element, nullptr, {.PreventScroll = true});
+        html::FocusAlgorithms::FocusingSteps(*element, nullptr, {.PreventScroll = true});
       }
     }
 
     // 13. Queue an element task on the user interaction task source given the subject element to fire an
     // event
     //     named close at subject.
-    EventLoop::Current().QueueTask(TaskSource::UserInteraction, NodeDocument(),
-                                   [protectedThis]
-                                   {
-                                     auto event = dom::Event::Create(event_names::Close, false, false);
-                                     (void)dom::EventDispatcher::DispatchToTarget(*event,
-                                                                                  protectedThis.get());
-                                   });
+    html::EventLoop::Current().QueueTask(html::TaskSource::UserInteraction, NodeDocument(),
+                                         [protectedThis]
+                                         {
+                                           auto event = Event::Create(event_names::Close, false, false);
+                                           (void)dom::EventDispatcher::DispatchToTarget(*event,
+                                                                                        protectedThis.get());
+                                         });
   }
 
   // https://html.spec.whatwg.org/#dialog-request-close
-  void HTMLDialogElement::RequestCloseTheDialog(Maybe<dom::DOMString> returnValue,
-                                                dom::Element *source) noexcept
+  void HTMLDialogElement::RequestCloseTheDialog(Maybe<DOMString> returnValue, Element *source) noexcept
   {
     // 1. If subject does not have an open attribute, then return.
     // 2. If subject is not connected or subject's node document is not fully active, then return.
@@ -354,7 +353,7 @@ namespace krys::boo::html
     }
 
     Ref<HTMLDialogElement> protectedThis = ShareRef(*this);
-    Ref<CloseWatcher> closeWatcher = ShareRef(*_closeWatcher);
+    Ref<html::CloseWatcher> closeWatcher = ShareRef(*_closeWatcher);
 
     // 4. Set subject's enable close watcher for request close to true.
     _enableCloseWatcherForRequestClose = true;
@@ -440,21 +439,21 @@ namespace krys::boo::html
     // 3. If subject has the autofocus attribute, then set control to subject.
     // 4. If control is null, then set control to the focus delegate of subject.
     // 5. If control is null, then set control to subject.
-    RefPtr<dom::Node> control;
+    RefPtr<Node> control;
     if (HasAttribute(u8"autofocus"))
     {
-      control = ShareRefPtr<dom::Node>(this);
+      control = ShareRefPtr<Node>(this);
     }
     if (!control)
     {
-      control = ShareRefPtr(FocusAlgorithms::FocusDelegate(*this));
+      control = ShareRefPtr(html::FocusAlgorithms::FocusDelegate(*this));
     }
     if (!control)
     {
-      control = ShareRefPtr<dom::Node>(this);
+      control = ShareRefPtr<Node>(this);
     }
 
-    Ref<dom::Document> controlDocument = ShareRef(control->NodeDocument());
+    Ref<Document> controlDocument = ShareRef(control->NodeDocument());
     if (!controlDocument->GetPage())
     {
       return;
@@ -462,14 +461,14 @@ namespace krys::boo::html
 
     // 6. Run the focusing steps for control.
     // (A modal dialog that can't focus it moves the focus to the viewport.)
-    auto *controlElement = DynamicDowncast<dom::Element>(*control);
-    if (controlElement && FocusAlgorithms::IsFocusableArea(*controlElement))
+    auto *controlElement = DynamicDowncast<Element>(*control);
+    if (controlElement && html::FocusAlgorithms::IsFocusableArea(*controlElement))
     {
-      FocusAlgorithms::FocusingSteps(*controlElement);
+      html::FocusAlgorithms::FocusingSteps(*controlElement);
     }
     else if (IsModal())
     {
-      FocusAlgorithms::FocusingSteps(NodeDocument());
+      html::FocusAlgorithms::FocusingSteps(NodeDocument());
     }
 
     // 7. Let topDocument be control's node navigable's top-level traversable's active document.
@@ -495,7 +494,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLDialogElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLDialogElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
 
@@ -517,10 +516,9 @@ namespace krys::boo::html
     SetIsModal(false);
   }
 
-  void HTMLDialogElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                             Maybe<dom::DOMStringView> oldValue,
-                                             Maybe<dom::DOMStringView> value,
-                                             const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLDialogElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                             Maybe<DOMStringView> value,
+                                             const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 
@@ -563,7 +561,7 @@ namespace krys::boo::html
 
     // Which dialog blocks the document changes: the document element is the inert subtree root.
     InvalidateStyleInternal();
-    if (RefPtr<dom::Element> documentElement = NodeDocument().DocumentElement())
+    if (RefPtr<Element> documentElement = NodeDocument().DocumentElement())
     {
       documentElement->InvalidateStyleInternal();
     }
@@ -571,7 +569,7 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#queue-a-dialog-toggle-event-task
   void HTMLDialogElement::QueueDialogToggleEventTask(dom::ToggleState oldState, dom::ToggleState newState,
-                                                     dom::Element *source) noexcept
+                                                     Element *source) noexcept
   {
     // (The task tracker is a ToggleEventTask, which coalesces the queued events.)
     if (!_toggleEventTask)
@@ -582,21 +580,21 @@ namespace krys::boo::html
   }
 
   bool HTMLDialogElement::FireBeforeToggleEvent(dom::ToggleState oldState, dom::ToggleState newState,
-                                                bool cancelable, dom::Element *source) noexcept
+                                                bool cancelable, Element *source) noexcept
   {
     auto stringForState = [](dom::ToggleState state)
     {
-      return dom::DOMString(state == dom::ToggleState::Closed ? u8"closed" : u8"open");
+      return DOMString(state == dom::ToggleState::Closed ? u8"closed" : u8"open");
     };
 
-    dom::ToggleEventInit init;
+    ToggleEventInit init;
     init.OldState = stringForState(oldState);
     init.NewState = stringForState(newState);
     // Composed, with relatedTarget the subject if retargeting the source against it gives it, else the
     // source.
     init.Composed = true;
     init.Source = ShareRefPtr(source);
-    auto event = dom::ToggleEvent::Create(event_names::BeforeToggle, init, cancelable);
+    auto event = ToggleEvent::Create(event_names::BeforeToggle, init, cancelable);
     (void)dom::EventDispatcher::DispatchFromSource(*event, *this, source);
     return !event->DefaultPrevented();
   }
@@ -632,7 +630,7 @@ namespace krys::boo::html
     // 2. If subject's close watcher is not null:
     // 2a. Destroy subject's close watcher.
     // 2b. Set subject's close watcher to null.
-    if (RefPtr<CloseWatcher> closeWatcher = std::exchange(_closeWatcher, nullptr))
+    if (RefPtr<html::CloseWatcher> closeWatcher = std::exchange(_closeWatcher, nullptr))
     {
       closeWatcher->Destroy();
     }
@@ -655,7 +653,7 @@ namespace krys::boo::html
 
     // The watcher holds the dialog weakly: the dialog holds the watcher.
     auto weakThis = CreateWeakPtr(this);
-    _closeWatcher = CloseWatcher::Establish(
+    _closeWatcher = html::CloseWatcher::Establish(
       NodeDocument(),
       [weakThis](bool canPreventClose)
       {
@@ -664,7 +662,7 @@ namespace krys::boo::html
         {
           return true;
         }
-        auto event = dom::Event::Create(event_names::Cancel, false, canPreventClose);
+        auto event = Event::Create(event_names::Cancel, false, canPreventClose);
         (void)dom::EventDispatcher::DispatchToTarget(*event, dialog.get());
         return !event->DefaultPrevented();
       },

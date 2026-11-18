@@ -24,9 +24,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGLineElement::SVGLineElement(dom::Document &document) noexcept
+  SVGLineElement::SVGLineElement(Document &document) noexcept
       : SVGGeometryElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Line),
         _x1(SVGAnimatedLength::Create(this, SVGLengthMode::Width)),
         _y1(SVGAnimatedLength::Create(this, SVGLengthMode::Height)),
@@ -44,11 +44,11 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGLineElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                        Maybe<dom::DOMStringView> value) noexcept
+  void SVGLineElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                        Maybe<DOMStringView> value) noexcept
   {
     auto parseError = SVGParsingError::None;
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::X1Attr())
     {
@@ -71,7 +71,7 @@ namespace krys::boo::svg
     SVGGeometryElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGLineElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGLineElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {

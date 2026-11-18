@@ -44,12 +44,12 @@
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   namespace
   {
     template <typename T>
-    KRYS_NODISCARD T *DynamicDowncastSVG(dom::Node *node) noexcept
+    KRYS_NODISCARD T *DynamicDowncastSVG(Node *node) noexcept
     {
       auto *svgElement = DynamicDowncast<SVGElement>(node);
       if constexpr (SameType<T, SVGElement>)
@@ -63,19 +63,19 @@ namespace krys::boo::svg
     }
 
     // Makes the SVG element @p localName, whose tag is @p tagName, in @p document.
-    KRYS_NODISCARD Ref<SVGElement> CreateSVGElement(dom::Document &document, utf8_stringview localName,
+    KRYS_NODISCARD Ref<SVGElement> CreateSVGElement(Document &document, utf8_stringview localName,
                                                     html::TagName tagName) noexcept
     {
-      auto element = dom::ElementFactory::Create(document, dom::QualifiedName(infra::namespaces::SVG, null,
-                                                                              dom::DOMStringAtom(localName),
-                                                                              tagName, html::Namespace::SVG));
+      auto element = dom::ElementFactory::Create(
+        document,
+        QualifiedName(infra::namespaces::SVG, null, DOMStringAtom(localName), tagName, html::Namespace::SVG));
       return Downcast<SVGElement>(krys::move(element));
     }
 
     // Calls @p function with each descendant of @p root that is a @p T, in tree order; the function returns
     // the node to carry on after (the descendant itself, or the node that replaced it).
     template <typename T, typename TFunction>
-    void ForEachDescendantOfType(dom::ContainerNode &root, TFunction function) noexcept
+    void ForEachDescendantOfType(ContainerNode &root, TFunction function) noexcept
     {
       auto *node = root.FirstChild();
       while (node)
@@ -89,7 +89,7 @@ namespace krys::boo::svg
     }
   }
 
-  SVGUseElement::SVGUseElement(dom::Document &document) noexcept
+  SVGUseElement::SVGUseElement(Document &document) noexcept
       : SVGGraphicsElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Use),
         SVGURIReference(this), _x(SVGAnimatedLength::Create(this, SVGLengthMode::Width)),
         _y(SVGAnimatedLength::Create(this, SVGLengthMode::Height)),
@@ -117,16 +117,16 @@ namespace krys::boo::svg
     }
   }
 
-  dom::Document *SVGUseElement::ExternalDocument() const noexcept
+  Document *SVGUseElement::ExternalDocument() const noexcept
   {
     return _externalDocument ? _externalDocument->Document() : nullptr;
   }
 
-  void SVGUseElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                       Maybe<dom::DOMStringView> value) noexcept
+  void SVGUseElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                       Maybe<DOMStringView> value) noexcept
   {
     auto parseError = SVGParsingError::None;
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::XAttr())
     {
@@ -171,7 +171,7 @@ namespace krys::boo::svg
     UpdateExternalDocument();
   }
 
-  void SVGUseElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void SVGUseElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     // Check m_shadowTreeNeedsUpdate before calling SVGElement::removedFromAncestor which calls
     // SVGElement::invalidateInstances and SVGUseElement::updateExternalDocument which calls
@@ -223,9 +223,9 @@ namespace krys::boo::svg
     // https://svgwg.org/svg2-draft/struct.html#UseElement
 
     RefPtr<SVGElement> correspondingElement = ShareRefPtr(shadowElement.CorrespondingElement());
-    auto transfer = [&](const SVGLengthValue &length, const dom::QualifiedName &name)
+    auto transfer = [&](const SVGLengthValue &length, const QualifiedName &name)
     {
-      Maybe<dom::DOMString> value;
+      Maybe<DOMString> value;
       if (length.ValueInSpecifiedUnits())
       {
         value = length.ValueAsString();
@@ -248,7 +248,7 @@ namespace krys::boo::svg
     transfer(Height(), SVGNames::HeightAttr());
   }
 
-  void SVGUseElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGUseElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     InstanceInvalidationGuard guard(*this);
 
@@ -320,7 +320,7 @@ namespace krys::boo::svg
       return true;
     }
 
-    KRYS_NODISCARD bool IsDisallowedElement(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool IsDisallowedElement(const Element &element) noexcept
     {
       auto *svgElement = DynamicDowncast<SVGElement>(element);
       return !svgElement || IsDisallowedElement(*svgElement);
@@ -329,7 +329,7 @@ namespace krys::boo::svg
 
   void SVGUseElement::ClearShadowTree() noexcept
   {
-    if (RefPtr<dom::ShadowRoot> root = ShareRefPtr(UserAgentShadowRoot()))
+    if (RefPtr<boo::ShadowRoot> root = ShareRefPtr(UserAgentShadowRoot()))
     {
       (void)dom::MutationAlgorithms::ReplaceAll(nullptr, *root);
     }
@@ -354,7 +354,7 @@ namespace krys::boo::svg
     }
     NodeDocument().RemoveElementWithPendingUserAgentShadowTreeUpdate(*this);
 
-    dom::DOMStringAtom targetID = null;
+    DOMStringAtom targetID = null;
     RefPtr<SVGElement> target = FindTarget(&targetID);
     if (!target)
     {
@@ -364,7 +364,7 @@ namespace krys::boo::svg
 
     krys_assert(!dom::TreeQueries::IsDescendant(*this, *target));
     {
-      Ref<dom::ShadowRoot> shadowRoot = ShareRef(EnsureUserAgentShadowRoot());
+      Ref<boo::ShadowRoot> shadowRoot = ShareRef(EnsureUserAgentShadowRoot());
       CloneTarget(*shadowRoot, *target);
       ExpandUseElementsInShadowTree();
       ExpandSymbolElementsInShadowTree();
@@ -467,7 +467,7 @@ namespace krys::boo::svg
 
   namespace
   {
-    void DisassociateAndRemoveClones(const List<Ref<dom::Element>> &clones) noexcept
+    void DisassociateAndRemoveClones(const List<Ref<Element>> &clones) noexcept
     {
       for (auto &clone : clones)
       {
@@ -488,14 +488,14 @@ namespace krys::boo::svg
 
     // The elements of @p subtree that @p predicate matches, not looking inside them.
     template <typename TPredicate>
-    KRYS_NODISCARD List<Ref<dom::Element>> MatchingElementsInSubtree(SVGElement &subtree,
-                                                                     TPredicate predicate) noexcept
+    KRYS_NODISCARD List<Ref<Element>> MatchingElementsInSubtree(SVGElement &subtree,
+                                                                TPredicate predicate) noexcept
     {
-      List<Ref<dom::Element>> elements;
+      List<Ref<Element>> elements;
       auto *node = subtree.FirstChild();
       while (node)
       {
-        auto *element = DynamicDowncast<dom::Element>(node);
+        auto *element = DynamicDowncast<Element>(node);
         if (element && predicate(*element))
         {
           elements.push_back(ShareRef(*element));
@@ -517,7 +517,7 @@ namespace krys::boo::svg
       // Assert that it's not in a document to make sure callers are still using it this way.
       krys_debug_assert(!subtree.IsConnected());
 
-      DisassociateAndRemoveClones(MatchingElementsInSubtree(subtree, [](const dom::Element &element)
+      DisassociateAndRemoveClones(MatchingElementsInSubtree(subtree, [](const Element &element)
                                                             { return IsDisallowedElement(element); }));
     }
 
@@ -528,8 +528,8 @@ namespace krys::boo::svg
       // into <svg> elements, which is correct for symbol elements directly referenced by use elements,
       // but incorrect for ones that just happen to be in a subtree.
       DisassociateAndRemoveClones(MatchingElementsInSubtree(
-        subtree, [](const dom::Element &element)
-        { return DynamicDowncastSVG<SVGSymbolElement>(const_cast<dom::Element *>(&element)) != nullptr; }));
+        subtree, [](const Element &element)
+        { return DynamicDowncastSVG<SVGSymbolElement>(const_cast<Element *>(&element)) != nullptr; }));
     }
 
     // Calls @p function with each SVG element of @p clone and the element of @p original in the same place,
@@ -537,8 +537,8 @@ namespace krys::boo::svg
     template <typename TFunction>
     void ForEachDescendantPair(SVGElement &clone, SVGElement &original, TFunction function) noexcept
     {
-      dom::Node *cloneNode = clone.FirstChild();
-      dom::Node *originalNode = original.FirstChild();
+      Node *cloneNode = clone.FirstChild();
+      Node *originalNode = original.FirstChild();
       while (cloneNode && originalNode)
       {
         auto *cloneElement = DynamicDowncast<SVGElement>(cloneNode);
@@ -588,7 +588,7 @@ namespace krys::boo::svg
     }
   }
 
-  RefPtr<SVGElement> SVGUseElement::FindTarget(dom::DOMStringAtom *targetID) const noexcept
+  RefPtr<SVGElement> SVGUseElement::FindTarget(DOMStringAtom *targetID) const noexcept
   {
     auto *correspondingElement = CorrespondingElement();
     const SVGUseElement &original =
@@ -643,7 +643,7 @@ namespace krys::boo::svg
     return target;
   }
 
-  void SVGUseElement::CloneTarget(dom::ContainerNode &container, SVGElement &target) const noexcept
+  void SVGUseElement::CloneTarget(ContainerNode &container, SVGElement &target) const noexcept
   {
     auto clone = dom::NodeAlgorithms::CloneNode(target, &NodeDocument(), true);
     krys_assert(!clone.HasException());
@@ -666,9 +666,8 @@ namespace krys::boo::svg
       originalClone.SynchronizeAllAttributes();
       for (const auto &attribute : originalClone.AttributeList())
       {
-        (void)replacementClone.SetAttributeNS(attribute->NamespaceURI(),
-                                              dom::DOMStringAtom(attribute->Name()),
-                                              dom::DOMString(attribute->Value()));
+        (void)replacementClone.SetAttributeNS(attribute->NamespaceURI(), DOMStringAtom(attribute->Name()),
+                                              DOMString(attribute->Value()));
       }
       for (auto *child = originalClone.FirstChild(); child; child = child->NextSibling())
       {
@@ -685,7 +684,7 @@ namespace krys::boo::svg
   {
     ForEachDescendantOfType<SVGUseElement>(
       *UserAgentShadowRoot(),
-      [&](SVGUseElement &element) -> dom::Node &
+      [&](SVGUseElement &element) -> Node &
       {
         Ref<SVGUseElement> originalClone = ShareRef(element);
 
@@ -704,8 +703,8 @@ namespace krys::boo::svg
         replacementClone->RemoveAttribute(SVGNames::WidthAttr().LocalName());
         replacementClone->RemoveAttribute(SVGNames::HeightAttr().LocalName());
         replacementClone->RemoveAttribute(SVGNames::HrefAttr().LocalName());
-        replacementClone->RemoveAttributeNS(XLinkNames::HrefAttr().NamespaceURI(),
-                                            XLinkNames::HrefAttr().LocalName());
+        replacementClone->RemoveAttributeNS(svg::XLinkNames::HrefAttr().NamespaceURI(),
+                                            svg::XLinkNames::HrefAttr().LocalName());
 
         if (target)
         {
@@ -723,7 +722,7 @@ namespace krys::boo::svg
   {
     ForEachDescendantOfType<SVGSymbolElement>(
       *UserAgentShadowRoot(),
-      [&](SVGSymbolElement &element) -> dom::Node &
+      [&](SVGSymbolElement &element) -> Node &
       {
         Ref<SVGSymbolElement> originalClone = ShareRef(element);
 
@@ -751,13 +750,13 @@ namespace krys::boo::svg
     // instead.
     ForEachDescendantOfType<SVGElement>(
       *UserAgentShadowRoot(),
-      [](SVGElement &descendant) -> dom::Node &
+      [](SVGElement &descendant) -> Node &
       {
         for (auto &listener : descendant.CorrespondingElement()->EventListeners())
         {
           descendant.AddEventListener(
             listener->Type(), ShareRef(*listener->Callback()),
-            dom::AddEventListenerOptions {
+            AddEventListenerOptions {
               {listener->Capture()}, listener->Once(), listener->Passive(), ShareRefPtr(listener->Signal())});
         }
         return descendant;
@@ -807,7 +806,7 @@ namespace krys::boo::svg
     if (resource.ErrorOccurred())
     {
       SetErrorOccurred(true);
-      auto event = dom::Event::Create(event_names::Error, false, false);
+      auto event = Event::Create(event_names::Error, false, false);
       (void)DispatchEvent(*event);
     }
     else if (!resource.GetResourceError().IsCancellation())
@@ -819,7 +818,7 @@ namespace krys::boo::svg
   void SVGUseElement::UpdateExternalDocument() noexcept
   {
     url::URL externalDocumentURL;
-    Ref<dom::Document> document = ShareRef(NodeDocument());
+    Ref<Document> document = ShareRef(NodeDocument());
     // FIXME: This early exit should be removed once the assert(!url.ProtocolIsData()) is removed from
     // IsExternalURIReference().
     if (document->CompleteURL(Href()).ProtocolIsData())

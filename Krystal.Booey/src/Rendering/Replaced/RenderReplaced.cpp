@@ -68,7 +68,7 @@ namespace krys::boo
     }
   }
 
-  RenderReplaced::RenderReplaced(Type type, dom::Element &element, RenderStyle &&style,
+  RenderReplaced::RenderReplaced(Type type, Element &element, RenderStyle &&style,
                                  EnumSet<ReplacedFlag> flags) noexcept
       : RenderBox(type, element, krys::move(style), {}, flags), _intrinsicSize(DefaultWidth, DefaultHeight)
   {
@@ -77,7 +77,7 @@ namespace krys::boo
     krys_debug_assert(IsRenderReplaced());
   }
 
-  RenderReplaced::RenderReplaced(Type type, dom::Element &element, RenderStyle &&style,
+  RenderReplaced::RenderReplaced(Type type, Element &element, RenderStyle &&style,
                                  const LayoutSize &intrinsicSize, EnumSet<ReplacedFlag> flags) noexcept
       : RenderBox(type, element, krys::move(style), {}, flags), _intrinsicSize(intrinsicSize)
   {
@@ -86,7 +86,7 @@ namespace krys::boo
     krys_debug_assert(IsRenderReplaced());
   }
 
-  RenderReplaced::RenderReplaced(Type type, dom::Document &document, RenderStyle &&style,
+  RenderReplaced::RenderReplaced(Type type, Document &document, RenderStyle &&style,
                                  const LayoutSize &intrinsicSize, EnumSet<ReplacedFlag> flags) noexcept
       : RenderBox(type, document, krys::move(style), {}, flags), _intrinsicSize(intrinsicSize)
   {

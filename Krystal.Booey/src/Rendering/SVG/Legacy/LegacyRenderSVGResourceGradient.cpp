@@ -28,7 +28,7 @@
 
 namespace krys::boo
 {
-  LegacyRenderSVGResourceGradient::LegacyRenderSVGResourceGradient(Type type, svg::SVGGradientElement &node,
+  LegacyRenderSVGResourceGradient::LegacyRenderSVGResourceGradient(Type type, SVGGradientElement &node,
                                                                    RenderStyle &&style) noexcept
       : LegacyRenderSVGResourceContainer(type, node, krys::move(style))
   {
@@ -61,7 +61,7 @@ namespace krys::boo
                                                    EnumSet<RenderSVGResourceMode> resourceMode) noexcept
   {
     Maybe<FloatRect> objectBoundingBox;
-    if (GradientUnits() == svg::SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
+    if (GradientUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
     {
       objectBoundingBox = renderer.ObjectBoundingBox();
     }
@@ -193,7 +193,7 @@ namespace krys::boo
       }
 
       void PostApplyResource(RenderElement &, GraphicsContext *&context, const GradientData &,
-                             svg::SVGUnitTypes::SVGUnitType, const AffineTransform &,
+                             SVGUnitTypes::SVGUnitType, const AffineTransform &,
                              EnumSet<RenderSVGResourceMode> resourceMode, const Path *path,
                              const RenderElement *shape) noexcept final
       {
@@ -254,20 +254,20 @@ namespace krys::boo
   }
 
   GradientSpreadMethod
-    LegacyRenderSVGResourceGradient::PlatformSpreadMethodFromSVGType(svg::SVGSpreadMethodType method) noexcept
+    LegacyRenderSVGResourceGradient::PlatformSpreadMethodFromSVGType(SVGSpreadMethodType method) noexcept
   {
     switch (method)
     {
-      case svg::SVGSpreadMethodUnknown:
-      case svg::SVGSpreadMethodPad:
+      case SVGSpreadMethodUnknown:
+      case SVGSpreadMethodPad:
       {
         return GradientSpreadMethod::Pad;
       }
-      case svg::SVGSpreadMethodReflect:
+      case SVGSpreadMethodReflect:
       {
         return GradientSpreadMethod::Reflect;
       }
-      case svg::SVGSpreadMethodRepeat:
+      case SVGSpreadMethodRepeat:
       {
         return GradientSpreadMethod::Repeat;
       }

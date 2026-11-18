@@ -35,7 +35,7 @@ namespace krys::boo::style
   namespace
   {
     KRYS_NODISCARD bool MayBeAffectedByAttributeChange(const RuleFeatureSet &features, bool isHTML,
-                                                       const dom::QualifiedName &attributeName) noexcept
+                                                       const QualifiedName &attributeName) noexcept
     {
       auto &nameSet =
         isHTML ? features.AttributeLowercaseLocalNamesInRules : features.AttributeLocalNamesInRules;
@@ -43,21 +43,21 @@ namespace krys::boo::style
     }
   }
 
-  void AttributeChangeInvalidation::InvalidateStyle(const dom::QualifiedName &attributeName,
-                                                    Maybe<dom::DOMStringView> oldValue,
-                                                    Maybe<dom::DOMStringView> newValue) noexcept
+  void AttributeChangeInvalidation::InvalidateStyle(const QualifiedName &attributeName,
+                                                    Maybe<DOMStringView> oldValue,
+                                                    Maybe<DOMStringView> newValue) noexcept
   {
     if (newValue == oldValue)
     {
       return;
     }
 
-    bool isHTML = Is<html::HTMLElement>(*_element) && Is<dom::HTMLDocument>(_element->NodeDocument());
+    bool isHTML = Is<HTMLElement>(*_element) && Is<HTMLDocument>(_element->NodeDocument());
 
     bool shouldInvalidateCurrent = false;
     bool mayAffectStyleInShadowTree = false;
 
-    css::CSSOMStringAtom attributeNameForLookups(text::ToASCIILower(attributeName.LocalName().View()));
+    CSSOMStringAtom attributeNameForLookups(text::ToASCIILower(attributeName.LocalName().View()));
 
     TraverseRuleFeatures(*_element,
                          [&](const RuleFeatureSet &features, bool mayAffectShadowTree)
@@ -93,8 +93,8 @@ namespace krys::boo::style
         return;
       }
 
-      Maybe<css::CSSOMStringAtom> oldValueAtom;
-      Maybe<css::CSSOMStringAtom> newValueAtom;
+      Maybe<CSSOMStringAtom> oldValueAtom;
+      Maybe<CSSOMStringAtom> newValueAtom;
       if (oldValue)
       {
         oldValueAtom.emplace(*oldValue);

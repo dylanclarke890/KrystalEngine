@@ -34,13 +34,12 @@
 
 namespace krys::boo
 {
-  Ref<SplitElementCommand> SplitElementCommand::Create(dom::Element &element,
-                                                       dom::Node &splitPointChild) noexcept
+  Ref<SplitElementCommand> SplitElementCommand::Create(Element &element, Node &splitPointChild) noexcept
   {
     return CreateRef<SplitElementCommand>(element, splitPointChild);
   }
 
-  SplitElementCommand::SplitElementCommand(dom::Element &element, dom::Node &splitPointChild) noexcept
+  SplitElementCommand::SplitElementCommand(Element &element, Node &splitPointChild) noexcept
       : SimpleEditCommand(element.NodeDocument()), _element2(ShareRef(element)),
         _atChild(ShareRef(splitPointChild))
   {
@@ -54,13 +53,13 @@ namespace krys::boo
       return;
     }
 
-    List<Ref<dom::Node>> children;
+    List<Ref<Node>> children;
     for (auto *node = _element2->FirstChild(); node != _atChild.get(); node = node->NextSibling())
     {
       children.push_back(ShareRef(*node));
     }
 
-    RefPtr<dom::ContainerNode> parent = ShareRefPtr(_element2->ParentNode());
+    RefPtr<ContainerNode> parent = ShareRefPtr(_element2->ParentNode());
     if (!parent || !parent->HasEditableStyle())
     {
       return;
@@ -89,19 +88,19 @@ namespace krys::boo
 
   void SplitElementCommand::DoUnapply() noexcept
   {
-    RefPtr<dom::Element> element1 = _element1;
+    RefPtr<Element> element1 = _element1;
     if (!element1 || !element1->HasEditableStyle() || !_element2->HasEditableStyle())
     {
       return;
     }
 
-    List<Ref<dom::Node>> children;
+    List<Ref<Node>> children;
     for (auto *node = element1->FirstChild(); node; node = node->NextSibling())
     {
       children.push_back(ShareRef(*node));
     }
 
-    RefPtr<dom::Node> refChild = ShareRefPtr(_element2->FirstChild());
+    RefPtr<Node> refChild = ShareRefPtr(_element2->FirstChild());
 
     for (auto &child : children)
     {

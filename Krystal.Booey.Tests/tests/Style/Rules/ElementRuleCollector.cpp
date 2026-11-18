@@ -29,9 +29,9 @@ namespace krys::boo::style::tests
 
   namespace
   {
-    KRYS_NODISCARD Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
+    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       parser->PumpTokenizer();
@@ -44,29 +44,29 @@ namespace krys::boo::style::tests
       html::EventLoop::Current().RunUntilIdle();
     }
 
-    KRYS_NODISCARD dom::Element &ById(dom::Document &document, dom::DOMStringView id)
+    KRYS_NODISCARD boo::Element &ById(Document &document, DOMStringView id)
     {
       auto element = document.GetElementById(id);
       REQUIRE(element);
       return *element;
     }
 
-    KRYS_NODISCARD Ref<dom::Element> Create(dom::Document &document, dom::DOMStringAtom localName)
+    KRYS_NODISCARD Ref<boo::Element> Create(Document &document, DOMStringAtom localName)
     {
       auto element = document.CreateElement(krys::move(localName));
       REQUIRE_FALSE(element.HasException());
       return element.ReleaseValue();
     }
 
-    KRYS_NODISCARD Ref<html::HTMLStyleElement> CreateStyle(dom::Document &document, dom::DOMString &&text)
+    KRYS_NODISCARD Ref<HTMLStyleElement> CreateStyle(Document &document, DOMString &&text)
     {
-      auto style = CreateRef<html::HTMLStyleElement>(document);
+      auto style = CreateRef<HTMLStyleElement>(document);
       REQUIRE_FALSE(style->TextContent(krys::move(text)).HasException());
       return style;
     }
 
-    KRYS_NODISCARD Ref<dom::ShadowRoot> AttachShadow(dom::Element &host, dom::DOMString &&styleText,
-                                                     dom::ShadowRootMode mode = dom::ShadowRootMode::Open)
+    KRYS_NODISCARD Ref<ShadowRoot> AttachShadow(boo::Element &host, DOMString &&styleText,
+                                                dom::ShadowRootMode mode = dom::ShadowRootMode::Open)
     {
       auto shadow = host.AttachShadow({.Mode = mode}).ReleaseValue();
       REQUIRE_FALSE(
@@ -75,12 +75,12 @@ namespace krys::boo::style::tests
       return shadow;
     }
 
-    KRYS_NODISCARD ScopeRuleSets &RuleSetsFor(dom::Element &element)
+    KRYS_NODISCARD ScopeRuleSets &RuleSetsFor(boo::Element &element)
     {
       return Scope::ForNode(element).GetResolver().RuleSets();
     }
 
-    KRYS_NODISCARD Ref<MatchResult> MatchAll(dom::Element &element,
+    KRYS_NODISCARD Ref<MatchResult> MatchAll(boo::Element &element,
                                              const Maybe<PseudoElementRequest> &request = {})
     {
       ElementRuleCollector collector(element, RuleSetsFor(element), nullptr);
@@ -230,15 +230,14 @@ namespace krys::boo::style::tests
     auto *inlineStyle = Find(result->AuthorDeclarations, u8"inline");
     REQUIRE(inlineStyle->FromStyleAttribute == FromStyleAttribute::Yes);
     REQUIRE(inlineStyle->CascadeLayerPriority == RuleSet::CascadeLayerPriorityForUnlayered);
-    REQUIRE(inlineStyle->Properties.get() == Downcast<dom::StyledElement>(p).InlineStyle());
+    REQUIRE(inlineStyle->Properties.get() == Downcast<StyledElement>(p).InlineStyle());
     // Inline style parsed from the attribute is immutable, so it can be cached.
     REQUIRE(inlineStyle->IsCacheable == IsCacheable::Yes);
     REQUIRE_FALSE(result->IsCompletelyNonCacheable);
 
     SECTION("Mutable inline style can't be cached")
     {
-      REQUIRE(
-        Downcast<dom::StyledElement>(p).SetInlineStyleProperty(css::PropertyId::Color, css::ValueId::Red));
+      REQUIRE(Downcast<StyledElement>(p).SetInlineStyleProperty(css::PropertyId::Color, css::ValueId::Red));
       auto mutableResult = MatchAll(p);
       REQUIRE(Find(mutableResult->AuthorDeclarations, u8"inline")->IsCacheable == IsCacheable::No);
       REQUIRE(mutableResult->IsCompletelyNonCacheable);
@@ -385,8 +384,8 @@ namespace krys::boo::style::tests
       REQUIRE_FALSE(mid->SetAttribute(u8"exportparts", u8" a , b:c, b : d, bad:, :bad, e f,").HasException());
       const auto &mappings = midShadow->GetPartMappings();
       REQUIRE(mappings.size() == 2uz);
-      CHECK(mappings.at(u8"a") == SmallList<dom::DOMStringAtom, 1> {dom::DOMStringAtom(u8"a")});
-      CHECK(mappings.at(u8"b") == SmallList<dom::DOMStringAtom, 1> {dom::DOMStringAtom(u8"c"), u8"d"});
+      CHECK(mappings.at(u8"a") == SmallList<DOMStringAtom, 1> {DOMStringAtom(u8"a")});
+      CHECK(mappings.at(u8"b") == SmallList<DOMStringAtom, 1> {DOMStringAtom(u8"c"), u8"d"});
     }
   }
 

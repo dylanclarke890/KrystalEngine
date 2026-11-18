@@ -31,9 +31,10 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLTablePartElement::HTMLTablePartElement(dom::Document &document, HTMLElementInterface interface) noexcept
+  HTMLTablePartElement::HTMLTablePartElement(Document &document,
+                                             html::HTMLElementInterface interface) noexcept
       : HTMLElement(document, interface)
   {
   }
@@ -51,8 +52,9 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  bool HTMLTablePartElement::HasPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool
+    HTMLTablePartElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                             const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == u8"bgcolor" || localName == u8"background" || localName == u8"valign"
@@ -64,10 +66,10 @@ namespace krys::boo::html
   }
 
   void HTMLTablePartElement::CollectPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI, dom::DOMStringView value,
+    const DOMStringAtom &localName, const DOMStringAtom &namespaceURI, DOMStringView value,
     css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
@@ -150,9 +152,9 @@ namespace krys::boo::html
 
 namespace krys::boo::html::detail
 {
-  Ref<HTMLElement> CreateTableElement(dom::Document &document, dom::DOMStringView localName) noexcept
+  Ref<HTMLElement> CreateTableElement(Document &document, DOMStringView localName) noexcept
   {
-    auto element = document.CreateElementNS(infra::namespaces::HTML, dom::DOMStringAtom(localName));
+    auto element = document.CreateElementNS(infra::namespaces::HTML, DOMStringAtom(localName));
     krys_debug_assert(!element.HasException());
     return ShareRef(Downcast<HTMLElement>(*element.ReleaseValue()));
   }

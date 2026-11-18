@@ -30,7 +30,7 @@
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLPadded.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   const MathMLElement::Length &MathMLPaddedElement::Width() noexcept
   {
@@ -57,9 +57,8 @@ namespace krys::boo::mathml
     return CachedMathMLLength(MathMLNames::VoffsetAttr(), _voffset);
   }
 
-  void MathMLPaddedElement::AttributeChanged(const dom::QualifiedName &name,
-                                             Maybe<dom::DOMStringView> oldValue,
-                                             Maybe<dom::DOMStringView> value) noexcept
+  void MathMLPaddedElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                             Maybe<DOMStringView> value) noexcept
   {
     bool affectsLayout = false;
     if (name == MathMLNames::WidthAttr())

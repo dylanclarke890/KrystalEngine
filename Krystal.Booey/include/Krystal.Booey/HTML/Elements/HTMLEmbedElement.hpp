@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLPlugInElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlembedelement
   class HTMLEmbedElement : public HTMLPlugInElement
@@ -11,7 +11,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLEmbedElement);
 
   public:
-    HTMLEmbedElement(dom::Document &document) noexcept;
+    HTMLEmbedElement(Document &document) noexcept;
 
     KRYS_NODISCARD bool IsInteractiveContent() const noexcept final
     {
@@ -32,22 +32,22 @@ namespace krys::boo::html
     void Src(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-type
-    KRYS_NODISCARD dom::DOMString Type() const noexcept;
+    KRYS_NODISCARD DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-type
-    void Type(dom::DOMString value) noexcept;
+    void Type(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-width
-    KRYS_NODISCARD dom::DOMString Width() const noexcept;
+    KRYS_NODISCARD DOMString Width() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-width
-    void Width(dom::DOMString value) noexcept;
+    void Width(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-height
-    KRYS_NODISCARD dom::DOMString Height() const noexcept;
+    KRYS_NODISCARD DOMString Height() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-height
-    void Height(dom::DOMString value) noexcept;
+    void Height(DOMString value) noexcept;
 
     // (No `getSVGDocument()`: an embed loads no nested document, as subframes aren't planned; see
     // OVERVIEW.md.)
@@ -57,29 +57,28 @@ namespace krys::boo::html
 #pragma region HTMLEmbedElement Obsolete members - https://html.spec.whatwg.org/#HTMLEmbedElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-embed-align
-    KRYS_NODISCARD dom::DOMString Align() const noexcept;
+    KRYS_NODISCARD DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-align
-    void Align(dom::DOMString value) noexcept;
+    void Align(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-name
-    KRYS_NODISCARD dom::DOMString Name() const noexcept;
+    KRYS_NODISCARD DOMString Name() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-name
-    void Name(dom::DOMString value) noexcept;
+    void Name(DOMString value) noexcept;
 
 #pragma endregion
 
   protected:
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLEmbedElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLEmbedElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLEmbedElement();
   }

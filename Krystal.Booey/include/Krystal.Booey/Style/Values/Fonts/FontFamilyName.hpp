@@ -36,7 +36,7 @@ namespace krys::boo::style
   // https://drafts.csswg.org/css-fonts-4/#family-name-syntax
   struct FontFamilyName
   {
-    css::CSSOMStringAtom Value;
+    CSSOMStringAtom Value;
 
     KRYS_NODISCARD bool operator==(const FontFamilyName &) const noexcept = default;
   };

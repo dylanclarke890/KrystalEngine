@@ -40,7 +40,7 @@ namespace krys::boo
   class ResizeObserverEntry : public RefCounted<ResizeObserverEntry>
   {
   private:
-    const Ref<dom::Element> _target;
+    const Ref<Element> _target;
     const Ref<dom::DOMRectReadOnly> _contentRect;
     // The specification allows several boxes for fragmented elements (multicol), but these lists only ever
     // hold one.
@@ -48,7 +48,7 @@ namespace krys::boo
     List<Ref<ResizeObserverSize>> _contentBoxSizes;
     List<Ref<ResizeObserverSize>> _devicePixelContentBoxSizes;
 
-    ResizeObserverEntry(Ref<dom::Element> &&target, const FloatRect &contentRect, FloatSize borderBoxSize,
+    ResizeObserverEntry(Ref<Element> &&target, const FloatRect &contentRect, FloatSize borderBoxSize,
                         FloatSize contentBoxSize, FloatSize devicePixelContentBoxSize) noexcept
         : _target(krys::move(target)),
           _contentRect(dom::DOMRectReadOnly::Create(contentRect.X(), contentRect.Y(), contentRect.Width(),
@@ -61,8 +61,7 @@ namespace krys::boo
     }
 
   public:
-    KRYS_NODISCARD static Ref<ResizeObserverEntry> Create(Ref<dom::Element> &&target,
-                                                          const FloatRect &contentRect,
+    KRYS_NODISCARD static Ref<ResizeObserverEntry> Create(Ref<Element> &&target, const FloatRect &contentRect,
                                                           FloatSize borderBoxSize, FloatSize contentBoxSize,
                                                           FloatSize devicePixelContentBoxSize) noexcept
     {
@@ -71,7 +70,7 @@ namespace krys::boo
     }
 
     /// @see https://drafts.csswg.org/resize-observer/#dom-resizeobserverentry-target
-    KRYS_NODISCARD dom::Element &Target() const noexcept
+    KRYS_NODISCARD Element &Target() const noexcept
     {
       return *_target;
     }

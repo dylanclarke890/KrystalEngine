@@ -28,7 +28,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   /// @brief A user interface event that knows which modifier keys were held: the base of mouse and keyboard
   /// events.
@@ -172,7 +172,10 @@ namespace krys::boo::dom
       return result;
     }
   };
+}
 
+namespace krys::boo::dom
+{
   /// @brief The first keyboard or mouse event in the chain of events from @p event through their underlying
   /// events (a simulated click's key press), if any.
   KRYS_NODISCARD inline UIEventWithKeyState *FindEventWithKeyState(Event *event) noexcept

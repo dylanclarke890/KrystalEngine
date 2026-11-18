@@ -39,7 +39,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class StyleSheetList;
 }
@@ -75,6 +75,10 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::SlotAssignmentMode, 2u);
 
 namespace krys::boo::dom
 {
+  class DocumentAlgorithms;
+  class ElementAlgorithms;
+  class NodeAlgorithms;
+
   enum class DelegatesFocus : bool
   {
     No,
@@ -105,17 +109,20 @@ namespace krys::boo::dom
     Maybe<DOMString> ReferenceTarget;
     html::CustomElementRegistry *CustomElementRegistry {nullptr};
   };
+}
 
+namespace krys::boo
+{
   /// @brief The root of a shadow tree, attached to its host element.
   /// @see https://dom.spec.whatwg.org/#interface-shadowroot
   /// @see https://dom.spec.whatwg.org/#concept-shadow-root
-  class ShadowRoot : public DocumentFragment, public DocumentOrShadowRoot
+  class ShadowRoot : public DocumentFragment, public dom::DocumentOrShadowRoot
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ShadowRoot);
 
-    friend class DocumentAlgorithms;
-    friend class ElementAlgorithms;
-    friend class NodeAlgorithms;
+    friend class dom::DocumentAlgorithms;
+    friend class dom::ElementAlgorithms;
+    friend class dom::NodeAlgorithms;
     friend class html::TreeBuilder;
 
   public:
@@ -125,7 +132,7 @@ namespace krys::boo::dom
   private:
     /// @brief Open, closed, or the user agent's own (treated as closed).
     /// @see https://dom.spec.whatwg.org/#shadowroot-mode
-    ShadowRootMode _mode : BitCount<ShadowRootMode>() {ShadowRootMode::Open};
+    dom::ShadowRootMode _mode : BitCount<dom::ShadowRootMode>() {dom::ShadowRootMode::Open};
     /// @see https://dom.spec.whatwg.org/#shadowroot-delegates-focus
     bool _delegatesFocus : 1 {false};
     /// @see https://dom.spec.whatwg.org/#shadowroot-available-to-element-internals
@@ -133,7 +140,8 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#shadowroot-declarative
     bool _declarative : 1 {false};
     /// @see https://dom.spec.whatwg.org/#shadowroot-slot-assignment
-    SlotAssignmentMode _slotAssignment : BitCount<SlotAssignmentMode>() {SlotAssignmentMode::Manual};
+    dom::SlotAssignmentMode _slotAssignment
+      : BitCount<dom::SlotAssignmentMode>() {dom::SlotAssignmentMode::Manual};
     /// @see https://dom.spec.whatwg.org/#shadowroot-clonable
     bool _clonable : 1 {false};
     /// @see https://dom.spec.whatwg.org/#shadowroot-serializable
@@ -141,7 +149,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#shadowroot-keep-custom-element-registry-null
     bool _keepCustomElementRegistryNull : 1 {false};
     bool _containsFocusedElement : 1 {false};
-    RefPtr<css::StyleSheetList> _styleSheetList;
+    RefPtr<StyleSheetList> _styleSheetList;
     /// @brief The ID of the element in the shadow tree that references to the host go to, or null.
     /// @see https://dom.spec.whatwg.org/#shadowroot-reference-target
     Maybe<DOMString> _referenceTarget;
@@ -150,14 +158,14 @@ namespace krys::boo::dom
 
   public:
     ShadowRoot(Document &document, RefPtr<html::CustomElementRegistry> &&registry = nullptr,
-               NodeFlags flags = NodeFlags::None) noexcept;
+               dom::NodeFlags flags = dom::NodeFlags::None) noexcept;
 
     ~ShadowRoot() noexcept override;
 
 #pragma region ShadowRoot - https://dom.spec.whatwg.org/#shadowroot
 
     /// @see https://dom.spec.whatwg.org/#dom-shadowroot-mode
-    KRYS_NODISCARD ShadowRootMode Mode() const noexcept
+    KRYS_NODISCARD dom::ShadowRootMode Mode() const noexcept
     {
       return _mode;
     }
@@ -172,7 +180,7 @@ namespace krys::boo::dom
     /// fields) are focused instead of the control, and sequential navigation moves between them.
     void SetUserAgentDelegatesFocus(bool delegatesFocus) noexcept
     {
-      krys_debug_assert(_mode == ShadowRootMode::UserAgent);
+      krys_debug_assert(_mode == dom::ShadowRootMode::UserAgent);
       _delegatesFocus = delegatesFocus;
     }
 
@@ -185,7 +193,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-shadowroot-slotassignment
-    KRYS_NODISCARD SlotAssignmentMode SlotAssignment() const noexcept
+    KRYS_NODISCARD dom::SlotAssignmentMode SlotAssignment() const noexcept
     {
       return _slotAssignment;
     }
@@ -263,7 +271,7 @@ namespace krys::boo::dom
 
     /// @brief The shadow root's children serialised as HTML, with the shadow roots @p options asks for.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-gethtml
-    KRYS_NODISCARD DOMString GetHTML(GetHTMLOptions options = {}) const noexcept;
+    KRYS_NODISCARD DOMString GetHTML(dom::GetHTMLOptions options = {}) const noexcept;
 
     /// @brief The children serialized; in an XML document, an `InvalidStateError` if they can't be serialized
     /// as well-formed XML.
@@ -279,7 +287,7 @@ namespace krys::boo::dom
 
     /// @brief The style sheets of the shadow root, in order.
     /// @see https://drafts.csswg.org/cssom/#dom-documentorshadowroot-stylesheets
-    KRYS_NODISCARD css::StyleSheetList &StyleSheets() noexcept;
+    KRYS_NODISCARD StyleSheetList &StyleSheets() noexcept;
 
 #pragma endregion
 
@@ -314,8 +322,9 @@ namespace krys::boo::dom
 
   private:
     /// @brief Replaces the shadow root's children with @p markup parsed in its host's context.
-    ExceptionOr<void> ReplaceChildrenWithMarkup(DOMStringView markup,
-                                                EnumSet<ParserContentPolicy> parserContentPolicy) noexcept;
+    ExceptionOr<void>
+      ReplaceChildrenWithMarkup(DOMStringView markup,
+                                EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept;
 
   protected:
     /// @see https://dom.spec.whatwg.org/#get-the-parent
@@ -331,14 +340,17 @@ namespace krys::boo::dom
 
 #pragma endregion
   };
+}
 
+namespace krys::boo::dom
+{
   /// @brief The shadow roots of the slots that @p node is assigned to: its assigned slot's, then that slot's
   /// assigned slot's, and so on.
   KRYS_NODISCARD List<Ref<ShadowRoot>> AssignedShadowRootsIfSlotted(const Node &node) noexcept;
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::ShadowRoot)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::ShadowRoot)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
     return node.IsShadowRootNode();
   }

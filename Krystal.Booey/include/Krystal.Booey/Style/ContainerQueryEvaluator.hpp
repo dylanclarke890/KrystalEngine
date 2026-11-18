@@ -32,7 +32,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
 }
@@ -43,7 +43,7 @@ namespace krys::boo::style
   /// among the ancestors of the element being resolved, and the style update so far.
   struct ContainerQueryEvaluationState
   {
-    List<Ref<const dom::Element>> SizeQueryContainers;
+    List<Ref<const Element>> SizeQueryContainers;
     CheckedPtr<style::Update> StyleUpdate;
   };
 
@@ -60,22 +60,21 @@ namespace krys::boo::style
     };
 
   private:
-    Ref<const dom::Element> _element;
+    Ref<const Element> _element;
     const SelectionMode _selectionMode;
     const ScopeOrdinal _scopeOrdinal;
     ContainerQueryEvaluationState *_evaluationState {nullptr};
 
   public:
-    ContainerQueryEvaluator(const dom::Element &element, SelectionMode selectionMode,
-                            ScopeOrdinal scopeOrdinal,
+    ContainerQueryEvaluator(const Element &element, SelectionMode selectionMode, ScopeOrdinal scopeOrdinal,
                             ContainerQueryEvaluationState *evaluationState) noexcept;
 
     KRYS_NODISCARD bool Evaluate(const css::cq::ContainerQuery &containerQuery) const noexcept;
 
     /// @brief The query container for @p element: the nearest ancestor (in the composed tree) that is a
     /// container for all of @p requiredAxes and, if @p name isn't empty, has that container name.
-    KRYS_NODISCARD static RefPtr<const dom::Element>
-      SelectContainer(css::cq::Axis requiredAxes, const css::CSSOMString &name, const dom::Element &element,
+    KRYS_NODISCARD static RefPtr<const Element>
+      SelectContainer(css::cq::Axis requiredAxes, const CSSOMString &name, const Element &element,
                       SelectionMode selectionMode = SelectionMode::Element,
                       ScopeOrdinal scopeOrdinal = ScopeOrdinal::Element,
                       const ContainerQueryEvaluationState *evaluationState = nullptr) noexcept;

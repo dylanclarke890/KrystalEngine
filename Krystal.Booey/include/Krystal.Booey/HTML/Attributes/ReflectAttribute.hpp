@@ -20,10 +20,10 @@
 namespace krys::boo::html
 {
   template <typename T>
-  concept ReflectTarget = DerivedFrom<T, dom::Element> || SameType<T, ElementInternals>;
+  concept ReflectTarget = DerivedFrom<T, Element> || SameType<T, ElementInternals>;
 
   template <typename T>
-  concept ReflectTypeDOMString = OneOf<T, dom::DOMString, Maybe<dom::DOMString>>;
+  concept ReflectTypeDOMString = OneOf<T, DOMString, Maybe<DOMString>>;
 
   template <typename T>
   concept ReflectURLType = OneOf<T, dom::USVString>;
@@ -113,33 +113,33 @@ namespace krys::boo::html
     };
 
     template <typename T>
-    using reflect_get_return_t = conditional_t<SameType<T, dom::DOMString>, Maybe<dom::DOMString>, T>;
+    using reflect_get_return_t = conditional_t<SameType<T, DOMString>, Maybe<DOMString>, T>;
 
     template <typename T, OnlyNonNegativeNumbers OnlyNonNegative, OnlyPositiveNumbers OnlyPositive>
     using reflect_set_return_t =
       conditional_t<(SameType<T, int32> && OnlyNonNegative == OnlyNonNegativeNumbers::Yes)
                       || (SameType<T, uint32> && OnlyPositive == OnlyPositiveNumbers::Yes),
-                    dom::ExceptionOr<void>, void>;
+                    ExceptionOr<void>, void>;
 
     /// @brief @p value as the shortest valid integer.
-    KRYS_NODISCARD inline dom::DOMString IntegerToString(int64 value) noexcept
+    KRYS_NODISCARD inline DOMString IntegerToString(int64 value) noexcept
     {
       char buffer[24];
       auto end = std::to_chars(buffer, buffer + sizeof(buffer), value).ptr;
-      return dom::DOMString(dom::DOMStringView(reinterpret_cast<const char8 *>(buffer), end - buffer));
+      return DOMString(DOMStringView(reinterpret_cast<const char8 *>(buffer), end - buffer));
     }
 
 #pragma region Element ReflectTarget
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#get-the-element
-    KRYS_NODISCARD inline dom::Element *GetElement(dom::Element &element) noexcept
+    KRYS_NODISCARD inline Element *GetElement(Element &element) noexcept
     {
       return &element;
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#get-the-content-attribute
-    KRYS_NODISCARD inline Maybe<dom::DOMString> GetContentAttribute(const dom::Element &element,
-                                                                    dom::DOMStringAtom name) noexcept
+    KRYS_NODISCARD inline Maybe<DOMString> GetContentAttribute(const Element &element,
+                                                               DOMStringAtom name) noexcept
     {
       auto attribute = dom::ElementAlgorithms::GetAttributeByNamespace(null, krys::move(name), element);
       if (attribute == nullptr)
@@ -151,14 +151,13 @@ namespace krys::boo::html
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#set-the-content-attribute
-    inline void SetContentAttribute(dom::Element &element, dom::DOMStringAtom name,
-                                    dom::DOMString value) noexcept
+    inline void SetContentAttribute(Element &element, DOMStringAtom name, DOMString value) noexcept
     {
       dom::ElementAlgorithms::SetAttributeValue(element, krys::move(name), krys::move(value));
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#delete-the-content-attribute
-    inline void DeleteContentAttribute(dom::Element &element, dom::DOMStringAtom name) noexcept
+    inline void DeleteContentAttribute(Element &element, DOMStringAtom name) noexcept
     {
       dom::ElementAlgorithms::RemoveAttributeByNamespace(null, krys::move(name), element);
     }
@@ -174,23 +173,22 @@ namespace krys::boo::html
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#get-the-content-attribute
-    KRYS_NODISCARD inline Maybe<dom::DOMString> GetContentAttribute(const ElementInternals &internals,
-                                                                    dom::DOMStringAtom name) noexcept
+    KRYS_NODISCARD inline Maybe<DOMString> GetContentAttribute(const ElementInternals &internals,
+                                                               DOMStringAtom name) noexcept
     {
       // The target element's internal content attribute map's value for the name, if it has one.
       return internals.InternalContentAttribute(krys::move(name));
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#set-the-content-attribute
-    inline void SetContentAttribute(ElementInternals &internals, dom::DOMStringAtom name,
-                                    dom::DOMString value) noexcept
+    inline void SetContentAttribute(ElementInternals &internals, DOMStringAtom name, DOMString value) noexcept
     {
       // The target element's internal content attribute map's value for the name.
       internals.SetInternalContentAttribute(krys::move(name), krys::move(value));
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#delete-the-content-attribute
-    inline void DeleteContentAttribute(ElementInternals &internals, dom::DOMStringAtom name) noexcept
+    inline void DeleteContentAttribute(ElementInternals &internals, DOMStringAtom name) noexcept
     {
       // Removed from the target element's internal content attribute map.
       internals.RemoveInternalContentAttribute(krys::move(name));
@@ -206,8 +204,7 @@ namespace krys::boo::html
     /// are `ReflectEnumerated`.
     /// @see https://html.spec.whatwg.org/#limited-to-only-known-values
     template <ReflectTarget Target>
-    KRYS_NODISCARD Maybe<dom::DOMString> ReflectDOMString(const Target &target,
-                                                          dom::DOMStringAtom name) noexcept
+    KRYS_NODISCARD Maybe<DOMString> ReflectDOMString(const Target &target, DOMStringAtom name) noexcept
     {
       // 1. Let element be the result of running this's get the element.
       // 2. Let contentAttributeValue be the result of running this's get the content attribute.
@@ -218,8 +215,7 @@ namespace krys::boo::html
 
     /// @brief Helper for setting reflected content attributes with 'DOMString?' type.
     template <ReflectTarget Target>
-    void ReflectDOMString(Target &target, const dom::DOMStringAtom &name,
-                          Maybe<dom::DOMString> value) noexcept
+    void ReflectDOMString(Target &target, const DOMStringAtom &name, Maybe<DOMString> value) noexcept
     {
       // 1. If the given value is null, then run this's delete the content attribute.
       if (!value.has_value())
@@ -235,7 +231,7 @@ namespace krys::boo::html
 
     /// @brief Helper for setting reflected content attributes with 'DOMString' type.
     template <ReflectTarget Target>
-    void ReflectDOMString(Target &target, dom::DOMStringAtom name, dom::DOMString value) noexcept
+    void ReflectDOMString(Target &target, DOMStringAtom name, DOMString value) noexcept
     {
       // The setter steps are to run this's set the content attribute with the given value.
       SetContentAttribute(target, krys::move(name), krys::move(value));
@@ -250,7 +246,7 @@ namespace krys::boo::html
     /// base URL, unless it doesn't parse.
     /// @see https://html.spec.whatwg.org/#treated-as-a-url
     template <TreatedAsURL AsUrl, ReflectTarget Target>
-    KRYS_NODISCARD dom::USVString ReflectUSVString(const Target &target, dom::DOMStringAtom name) noexcept
+    KRYS_NODISCARD dom::USVString ReflectUSVString(const Target &target, DOMStringAtom name) noexcept
     {
       // 1. Let element be the result of running this's get the element.
       // 2. Let contentAttributeValue be the result of running this's get the content attribute.
@@ -281,7 +277,7 @@ namespace krys::boo::html
 
     /// @brief Helper for setting reflected content attributes with 'dom::USVString' type.
     template <TreatedAsURL AsUrl, ReflectTarget Target>
-    void ReflectUSVString(Target &target, dom::DOMStringAtom name, dom::USVString value) noexcept
+    void ReflectUSVString(Target &target, DOMStringAtom name, dom::USVString value) noexcept
     {
       // The setter steps are to run this's set the content attribute with the given value.
       SetContentAttribute(target, krys::move(name), krys::move(value));
@@ -295,7 +291,7 @@ namespace krys::boo::html
     /// when it's present, whatever its value.
     /// @see https://html.spec.whatwg.org/#boolean-attribute
     template <ReflectTarget Target>
-    KRYS_NODISCARD bool ReflectBool(const Target &target, dom::DOMStringAtom name) noexcept
+    KRYS_NODISCARD bool ReflectBool(const Target &target, DOMStringAtom name) noexcept
     {
       // 1. Let contentAttributeValue be the result of running this's get the content attribute.
       // 2. If contentAttributeValue is null, then return false.
@@ -305,7 +301,7 @@ namespace krys::boo::html
 
     /// @brief Helper for setting reflected content attributes with 'bool' type.
     template <ReflectTarget Target>
-    void ReflectBool(Target &target, const dom::DOMStringAtom &name, bool value) noexcept
+    void ReflectBool(Target &target, const DOMStringAtom &name, bool value) noexcept
     {
       // 1. If the given value is false, then run this's delete the content attribute.
       if (!value)
@@ -315,7 +311,7 @@ namespace krys::boo::html
       // 2. If the given value is true, then run this's set the content attribute with the empty string.
       else
       {
-        SetContentAttribute(target, name, dom::DOMString {});
+        SetContentAttribute(target, name, DOMString {});
       }
     }
 
@@ -327,7 +323,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#default-value
     template <OnlyNonNegativeNumbers OnlyNonNegative, MaybeReflectDefault<int32> DefaultValue,
               ReflectTarget Target>
-    KRYS_NODISCARD int32 ReflectLong(const Target &target, dom::DOMStringAtom name) noexcept
+    KRYS_NODISCARD int32 ReflectLong(const Target &target, DOMStringAtom name) noexcept
     {
       // 1. Let contentAttributeValue be the result of running this's get the content attribute.
       auto contentAttributeValue = GetContentAttribute(target, krys::move(name));
@@ -377,7 +373,7 @@ namespace krys::boo::html
     /// @brief Helper for setting reflected content attributes with 'long' type.
     template <OnlyNonNegativeNumbers OnlyNonNegative, ReflectTarget Target>
     KRYS_NODISCARD reflect_set_return_t<int32, OnlyNonNegative, OnlyPositiveNumbers::No>
-      ReflectLong(Target &target, dom::DOMStringAtom name, int32 value) noexcept
+      ReflectLong(Target &target, DOMStringAtom name, int32 value) noexcept
     {
       // 1. If the reflected IDL attribute is limited to only non-negative numbers and the given value is
       //    negative, then throw an "IndexSizeError" DOMException.
@@ -385,7 +381,7 @@ namespace krys::boo::html
       {
         if (value < 0)
         {
-          return dom::ExceptionCode::IndexSizeError;
+          return ExceptionCode::IndexSizeError;
         }
       }
 
@@ -410,7 +406,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#clamped-to-the-range
     template <OnlyPositiveNumbers OnlyPositive, OnlyPositiveNumbersWithFallback OnlyPositiveWithFallback,
               MaybeReflectDefault<uint32> DefaultValue, MaybeReflectRange<uint32> Range, ReflectTarget Target>
-    KRYS_NODISCARD uint32 ReflectUnsignedLong(const Target &target, dom::DOMStringAtom name) noexcept
+    KRYS_NODISCARD uint32 ReflectUnsignedLong(const Target &target, DOMStringAtom name) noexcept
     {
       static_assert(!(OnlyPositive == OnlyPositiveNumbers::Yes
                       && OnlyPositiveWithFallback == OnlyPositiveNumbersWithFallback::Yes),
@@ -485,8 +481,8 @@ namespace krys::boo::html
     /// @brief Helper for setting reflected content attributes with 'unsigned long' type.
     template <OnlyPositiveNumbers OnlyPositive, OnlyPositiveNumbersWithFallback OnlyPositiveWithFallback,
               MaybeReflectDefault<uint32> DefaultValue, ReflectTarget Target>
-    KRYS_NODISCARD conditional_t<OnlyPositive == OnlyPositiveNumbers::Yes, dom::ExceptionOr<void>, void>
-      ReflectUnsignedLong(Target &target, dom::DOMStringAtom name, uint32 value) noexcept
+    KRYS_NODISCARD conditional_t<OnlyPositive == OnlyPositiveNumbers::Yes, ExceptionOr<void>, void>
+      ReflectUnsignedLong(Target &target, DOMStringAtom name, uint32 value) noexcept
     {
       static_assert(!(OnlyPositive == OnlyPositiveNumbers::Yes
                       && OnlyPositiveWithFallback == OnlyPositiveNumbersWithFallback::Yes),
@@ -498,7 +494,7 @@ namespace krys::boo::html
       {
         if (value == 0)
         {
-          return dom::ExceptionCode::IndexSizeError;
+          return ExceptionCode::IndexSizeError;
         }
       }
 
@@ -546,7 +542,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#clamped-to-the-range
     template <OnlyPositiveNumbers OnlyPositive, MaybeReflectDefault<double> DefaultValue,
               ReflectTarget Target>
-    KRYS_NODISCARD double ReflectDouble(const Target &target, dom::DOMStringAtom name) noexcept
+    KRYS_NODISCARD double ReflectDouble(const Target &target, DOMStringAtom name) noexcept
     {
       // 1. Let contentAttributeValue be the result of running this's get the content attribute.
       auto contentAttributeValue = GetContentAttribute(target, krys::move(name));
@@ -581,7 +577,7 @@ namespace krys::boo::html
 
     /// @brief Helper for setting reflected content attributes with 'double' type.
     template <OnlyPositiveNumbers OnlyPositive, ReflectTarget Target>
-    void ReflectDouble(Target &target, dom::DOMStringAtom name, double value) noexcept
+    void ReflectDouble(Target &target, DOMStringAtom name, double value) noexcept
     {
       // 1. If the reflected IDL attribute is limited to only positive numbers and the given value is not
       //    greater than 0, then return.
@@ -603,7 +599,7 @@ namespace krys::boo::html
 
   // Reflecting content attributes to IDL attributes and back, one function per IDL extended attribute.
   // Enumerated attributes and attributes that are limited to a set of known values
-  // (dom::DOMString/Maybe<dom::DOMString>) are not handled by these and need to be handled separately by the
+  // (DOMString/Maybe<DOMString>) are not handled by these and need to be handled separately by the
   // caller. This includes 'missing', 'default' and 'invalid' value handling.
   // https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflect
 
@@ -613,9 +609,9 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#xattr-reflect
   template <ReflectType TValue, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> Reflect(const Target &target,
-                                                              dom::DOMStringAtom name) noexcept
+                                                              DOMStringAtom name) noexcept
   {
-    if constexpr (OneOf<TValue, dom::DOMString, Maybe<dom::DOMString>>)
+    if constexpr (OneOf<TValue, DOMString, Maybe<DOMString>>)
     {
       return detail::ReflectDOMString(target, krys::move(name));
     }
@@ -655,11 +651,11 @@ namespace krys::boo::html
   template <ReflectType TValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
-    Reflect(Target &target, dom::DOMStringAtom name, TValue value) noexcept
+    Reflect(Target &target, DOMStringAtom name, TValue value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [Reflect] setter");
 
-    if constexpr (OneOf<TValue, dom::DOMString, Maybe<dom::DOMString>>)
+    if constexpr (OneOf<TValue, DOMString, Maybe<DOMString>>)
     {
       detail::ReflectDOMString(target, krys::move(name), krys::move(value));
     }
@@ -696,7 +692,7 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
   template <ReflectDefaultGetterType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> Reflect(const Target &target,
-                                                              dom::DOMStringAtom name) noexcept
+                                                              DOMStringAtom name) noexcept
   {
     if constexpr (SameType<TValue, int32>)
     {
@@ -727,7 +723,7 @@ namespace krys::boo::html
   template <ReflectDefaultSetterType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
-    Reflect(Target &target, dom::DOMStringAtom name, TValue value) noexcept
+    Reflect(Target &target, DOMStringAtom name, TValue value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [Reflect][ReflectDefault] setter");
 
@@ -749,7 +745,7 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#xattr-reflectrange
   template <ReflectRangeType TValue, ReflectRange<TValue> Range, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> Reflect(const Target &target,
-                                                              dom::DOMStringAtom name) noexcept
+                                                              DOMStringAtom name) noexcept
   {
     if constexpr (SameType<TValue, uint32>)
     {
@@ -771,7 +767,7 @@ namespace krys::boo::html
   template <ReflectRangeType TValue, ReflectDefault<TValue> DefaultValue, ReflectRange<TValue> Range,
             ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> Reflect(const Target &target,
-                                                              dom::DOMStringAtom name) noexcept
+                                                              DOMStringAtom name) noexcept
   {
     if constexpr (SameType<TValue, uint32>)
     {
@@ -795,11 +791,11 @@ namespace krys::boo::html
   /// known values, whose keywords and defaults are `EnumeratedAttributeTraits<AttributeName, TElement>`.
   /// @see https://html.spec.whatwg.org/#limited-to-only-known-values
   template <NTTPString AttributeName, DerivedFrom<HTMLElement> TElement = HTMLElement,
-            ReflectTypeDOMString TValue = dom::DOMString, ReflectTarget Target>
+            ReflectTypeDOMString TValue = DOMString, ReflectTarget Target>
   KRYS_NODISCARD TValue ReflectEnumerated(const Target &target) noexcept
   {
-    static const dom::DOMStringAtom name(
-      dom::DOMStringView(reinterpret_cast<const char8 *>(AttributeName.Data), AttributeName.Size - 1));
+    static const DOMStringAtom name(
+      DOMStringView(reinterpret_cast<const char8 *>(AttributeName.Data), AttributeName.Size - 1));
 
     // Steps 1 to 4 of the `DOMString` getter:
     // 1. Let element be the result of running this's get the element.
@@ -835,7 +831,7 @@ namespace krys::boo::html
   template <ReflectType TValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
-    ReflectSetter(Target &target, dom::DOMStringAtom name, TValue value) noexcept
+    ReflectSetter(Target &target, DOMStringAtom name, TValue value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [ReflectSetter] setter");
 
@@ -850,7 +846,7 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#xattr-reflecturl
   template <ReflectURLType TValue, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> ReflectURL(const Target &target,
-                                                                 dom::DOMStringAtom name) noexcept
+                                                                 DOMStringAtom name) noexcept
   {
     return detail::ReflectUSVString<detail::TreatedAsURL::Yes>(target, krys::move(name));
   }
@@ -860,7 +856,7 @@ namespace krys::boo::html
   template <ReflectURLType TValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
-    ReflectURL(Target &target, dom::DOMStringAtom name, TValue value) noexcept
+    ReflectURL(Target &target, DOMStringAtom name, TValue value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [ReflectURL] setter");
 
@@ -875,7 +871,7 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#xattr-reflectnonnegative
   template <ReflectNonNegativeType TValue, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> ReflectNonNegative(const Target &target,
-                                                                         dom::DOMStringAtom name) noexcept
+                                                                         DOMStringAtom name) noexcept
   {
     if constexpr (SameType<TValue, int32>)
     {
@@ -893,7 +889,7 @@ namespace krys::boo::html
   template <ReflectNonNegativeType TValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::Yes, detail::OnlyPositiveNumbers::No>
-    ReflectNonNegative(Target &target, dom::DOMStringAtom name, TValue value) noexcept
+    ReflectNonNegative(Target &target, DOMStringAtom name, TValue value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [ReflectNonNegative] setter");
 
@@ -912,7 +908,7 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
   template <ReflectNonNegativeType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> ReflectNonNegative(const Target &target,
-                                                                         dom::DOMStringAtom name) noexcept
+                                                                         DOMStringAtom name) noexcept
   {
     if constexpr (SameType<TValue, int32>)
     {
@@ -933,7 +929,7 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#xattr-reflectpositive
   template <ReflectPositiveType TValue, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> ReflectPositive(const Target &target,
-                                                                      dom::DOMStringAtom name) noexcept
+                                                                      DOMStringAtom name) noexcept
   {
     if constexpr (SameType<TValue, uint32>)
     {
@@ -958,7 +954,7 @@ namespace krys::boo::html
   template <ReflectPositiveType TValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::Yes>
-    ReflectPositive(Target &target, dom::DOMStringAtom name, TValue value) noexcept
+    ReflectPositive(Target &target, DOMStringAtom name, TValue value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [ReflectPositive] setter");
 
@@ -984,7 +980,7 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
   template <ReflectPositiveType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> ReflectPositive(const Target &target,
-                                                                      dom::DOMStringAtom name) noexcept
+                                                                      DOMStringAtom name) noexcept
   {
     if constexpr (SameType<TValue, uint32>)
     {
@@ -1011,7 +1007,7 @@ namespace krys::boo::html
   template <ReflectPositiveType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::Yes>
-    ReflectPositive(Target &target, dom::DOMStringAtom name, TValue value) noexcept
+    ReflectPositive(Target &target, DOMStringAtom name, TValue value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [ReflectPositive][ReflectDefault] setter");
 
@@ -1035,8 +1031,8 @@ namespace krys::boo::html
   /// @brief Represents the `[ReflectPositiveWithFallback]` IDL attribute (getter).
   /// @see https://html.spec.whatwg.org/#xattr-reflectpositivewithfallback
   template <ReflectPositiveWithFallbackType TValue, ReflectTarget Target>
-  KRYS_NODISCARD detail::reflect_get_return_t<TValue>
-    ReflectPositiveWithFallback(const Target &target, dom::DOMStringAtom name) noexcept
+  KRYS_NODISCARD detail::reflect_get_return_t<TValue> ReflectPositiveWithFallback(const Target &target,
+                                                                                  DOMStringAtom name) noexcept
   {
     if constexpr (SameType<TValue, uint32>)
     {
@@ -1061,7 +1057,7 @@ namespace krys::boo::html
   template <ReflectPositiveWithFallbackType TValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
-    ReflectPositiveWithFallback(Target &target, dom::DOMStringAtom name, TValue value) noexcept
+    ReflectPositiveWithFallback(Target &target, DOMStringAtom name, TValue value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [ReflectPositiveWithFallback] setter");
 
@@ -1086,8 +1082,8 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#xattr-reflectpositivewithfallback
   /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
   template <ReflectPositiveWithFallbackType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
-  KRYS_NODISCARD detail::reflect_get_return_t<TValue>
-    ReflectPositiveWithFallback(const Target &target, dom::DOMStringAtom name) noexcept
+  KRYS_NODISCARD detail::reflect_get_return_t<TValue> ReflectPositiveWithFallback(const Target &target,
+                                                                                  DOMStringAtom name) noexcept
   {
     if constexpr (SameType<TValue, uint32>)
     {
@@ -1114,7 +1110,7 @@ namespace krys::boo::html
   template <ReflectPositiveWithFallbackType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No,
                                               detail::OnlyPositiveNumbers(SameType<TValue, double>)>
-    ReflectPositiveWithFallback(Target &target, dom::DOMStringAtom name, TValue value) noexcept
+    ReflectPositiveWithFallback(Target &target, DOMStringAtom name, TValue value) noexcept
   {
     static_assert(!IsConst<Target>,
                   "Target cannot be const for [ReflectPositiveWithFallback][ReflectDefault] setter");

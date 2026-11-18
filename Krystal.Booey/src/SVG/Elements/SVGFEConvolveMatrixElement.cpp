@@ -26,9 +26,9 @@
 #include "Krystal.Core/Text/StringToIntegerConversion.hpp"
 #include <cmath>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFEConvolveMatrixElement::SVGFEConvolveMatrixElement(dom::Document &document) noexcept
+  SVGFEConvolveMatrixElement::SVGFEConvolveMatrixElement(Document &document) noexcept
       : SVGFilterPrimitiveStandardAttributes(document, CreateUnique<PropertyRegistry>(*this),
                                              SVGElementInterface::FEConvolveMatrix),
         _in1(SVGAnimatedString::Create(this)), _orderX(SVGAnimatedInteger::Create(this, InitialOrderValue)),
@@ -64,19 +64,18 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGFEConvolveMatrixElement::AttributeChanged(const dom::QualifiedName &name,
-                                                    Maybe<dom::DOMStringView> oldValue,
-                                                    Maybe<dom::DOMStringView> value) noexcept
+  void SVGFEConvolveMatrixElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                                    Maybe<DOMStringView> value) noexcept
   {
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::InAttr())
     {
-      _in1->SetBaseValInternal(dom::DOMString(string));
+      _in1->SetBaseValInternal(DOMString(string));
     }
     else if (name == SVGNames::OrderAttr())
     {
-      if (auto result = ParseNumberOptionalNumber(string))
+      if (auto result = svg::ParseNumberOptionalNumber(string))
       {
         _orderX->SetBaseValInternal(static_cast<int32>(result->first));
         _orderY->SetBaseValInternal(static_cast<int32>(result->second));
@@ -101,7 +100,7 @@ namespace krys::boo::svg
     }
     else if (name == SVGNames::DivisorAttr())
     {
-      if (auto result = ParseNumberFromString(string))
+      if (auto result = svg::ParseNumberFromString(string))
       {
         _divisor->SetBaseValInternal(*result);
       }
@@ -112,7 +111,7 @@ namespace krys::boo::svg
     }
     else if (name == SVGNames::BiasAttr())
     {
-      _bias->SetBaseValInternal(ToFloatOrZero(string));
+      _bias->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
     else if (name == SVGNames::TargetXAttr())
     {
@@ -124,7 +123,7 @@ namespace krys::boo::svg
     }
     else if (name == SVGNames::KernelUnitLengthAttr())
     {
-      if (auto result = ParseNumberOptionalNumber(string))
+      if (auto result = svg::ParseNumberOptionalNumber(string))
       {
         _kernelUnitLengthX->SetBaseValInternal(result->first);
         _kernelUnitLengthY->SetBaseValInternal(result->second);
@@ -151,7 +150,7 @@ namespace krys::boo::svg
   }
 
   bool SVGFEConvolveMatrixElement::SetFilterEffectAttribute(FilterEffect &filterEffect,
-                                                            const dom::QualifiedName &attributeName) noexcept
+                                                            const QualifiedName &attributeName) noexcept
   {
     auto &effect = Downcast<FEConvolveMatrix>(filterEffect);
     if (attributeName == SVGNames::EdgeModeAttr())
@@ -215,7 +214,7 @@ namespace krys::boo::svg
     return targetYValue >= 0 && targetYValue < orderYValue;
   }
 
-  void SVGFEConvolveMatrixElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGFEConvolveMatrixElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if ((attributeName == SVGNames::TargetXAttr() || attributeName == SVGNames::OrderAttr())
         && !IsValidTargetXOffset())

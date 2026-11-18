@@ -48,6 +48,7 @@
 
 namespace krys::boo
 {
+  class Document;
   class HitTestLocation;
   class HitTestRequest;
   class HitTestResult;
@@ -58,11 +59,6 @@ namespace krys::boo
   class RenderObject;
   class RenderText;
   class RenderView;
-}
-
-namespace krys::boo::dom
-{
-  class Document;
 }
 
 namespace krys::boo::layout
@@ -93,7 +89,7 @@ namespace krys::boo::layout_integration
 
   private:
     CheckedPtr<layout::ElementBox> _rootLayoutBox;
-    CheckedPtr<dom::Document> _document;
+    CheckedPtr<Document> _document;
     WeakPtr<layout::LayoutState> _layoutState;
     layout::BlockFormattingState &_blockFormattingState;
     layout::InlineContentCache &_inlineContentCache;

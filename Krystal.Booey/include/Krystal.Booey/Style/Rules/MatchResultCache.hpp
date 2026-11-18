@@ -38,7 +38,7 @@ namespace krys::boo::css
   class StyleProperties;
 }
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
 }
@@ -64,7 +64,7 @@ namespace krys::boo::style
     struct Entry;
 
   private:
-    HashMap<const dom::Element *, UniquePtr<Entry>> _entries;
+    HashMap<const Element *, UniquePtr<Entry>> _entries;
     uint32 _setsSinceLastPrune {0};
 
   public:
@@ -72,16 +72,16 @@ namespace krys::boo::style
 
     ~MatchResultCache() noexcept;
 
-    KRYS_NODISCARD Maybe<CachedMatchResult> ResultWithCurrentInlineStyle(const dom::Element &) noexcept;
+    KRYS_NODISCARD Maybe<CachedMatchResult> ResultWithCurrentInlineStyle(const Element &) noexcept;
 
     static void Update(CachedMatchResult &, const RenderStyle &) noexcept;
 
-    void UpdateForFastPathInherit(const dom::Element &, const RenderStyle &parentStyle) noexcept;
+    void UpdateForFastPathInherit(const Element &, const RenderStyle &parentStyle) noexcept;
 
-    void Set(const dom::Element &, const UnadjustedStyle &) noexcept;
+    void Set(const Element &, const UnadjustedStyle &) noexcept;
 
   private:
-    KRYS_NODISCARD Entry *Find(const dom::Element &) noexcept;
+    KRYS_NODISCARD Entry *Find(const Element &) noexcept;
 
     void PruneDeadEntries() noexcept;
 

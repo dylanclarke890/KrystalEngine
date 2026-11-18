@@ -128,13 +128,13 @@ namespace krys::boo::html
     return true;
   }
 
-  bool FileInputType::ValueMissing(dom::DOMStringView value) const noexcept
+  bool FileInputType::ValueMissing(DOMStringView value) const noexcept
   {
     krys_debug_assert(Element());
     return Element()->IsRequired() && value.empty();
   }
 
-  dom::DOMString FileInputType::ValueMissingText() const noexcept
+  DOMString FileInputType::ValueMissingText() const noexcept
   {
     krys_debug_assert(Element());
     return Element()->Multiple() ? ValidationMessageValueMissingForMultipleFileText()
@@ -152,7 +152,7 @@ namespace krys::boo::html
     return false;
   }
 
-  dom::DOMString FileInputType::FirstElementPathForInputValue() const noexcept
+  DOMString FileInputType::FirstElementPathForInputValue() const noexcept
   {
     if (_fileList->IsEmpty())
     {
@@ -163,10 +163,10 @@ namespace krys::boo::html
     // browsers revealed the real file path, but that's a privacy problem. Code on the web decided to try to
     // parse the value by looking for backslashes (because that's what Windows file paths use). To be
     // compatible with that code, we make up a fake path for the file.
-    return dom::DOMString(u8"C:\\fakepath\\") + dom::DOMString(_fileList->GetFile(0).Name());
+    return DOMString(u8"C:\\fakepath\\") + DOMString(_fileList->GetFile(0).Name());
   }
 
-  void FileInputType::SetValue(dom::DOMStringView, bool valueChanged, TextFieldEventBehavior,
+  void FileInputType::SetValue(DOMStringView, bool valueChanged, TextFieldEventBehavior,
                                TextControlSetValueSelection) noexcept
   {
     if (!valueChanged)
@@ -190,7 +190,7 @@ namespace krys::boo::html
     Ref<HTMLInputElement> element = ShareRef(*Element());
     auto button =
       dom::ElementFactory::CreateHTMLElement<HTMLInputElement>(element->NodeDocument(), u8"input");
-    (void)button->SetAttribute(u8"type", dom::DOMString(input_type_names::Button));
+    (void)button->SetAttribute(u8"type", DOMString(input_type_names::Button));
     button->SetUserAgentPart(css::user_agent_parts::FileSelectorButton());
     (void)button->SetValue(element->Multiple() ? FileButtonChooseMultipleFilesLabel()
                                                : FileButtonChooseFileLabel());
@@ -200,7 +200,7 @@ namespace krys::boo::html
 
   namespace
   {
-    KRYS_NODISCARD RefPtr<HTMLInputElement> FileSelectorButton(const dom::Element &element) noexcept
+    KRYS_NODISCARD RefPtr<HTMLInputElement> FileSelectorButton(const boo::Element &element) noexcept
     {
       auto *root = element.UserAgentShadowRoot();
       return root ? ShareRefPtr(DynamicDowncast<HTMLInputElement>(root->FirstChild())) : nullptr;
@@ -217,7 +217,7 @@ namespace krys::boo::html
     }
   }
 
-  void FileInputType::AttributeChanged(const dom::DOMStringAtom &name) noexcept
+  void FileInputType::AttributeChanged(const DOMStringAtom &name) noexcept
   {
     if (name == u8"multiple")
     {
@@ -233,7 +233,7 @@ namespace krys::boo::html
     BaseClickableWithKeyInputType::AttributeChanged(name);
   }
 
-  dom::DOMString FileInputType::DisplayString() const noexcept
+  DOMString FileInputType::DisplayString() const noexcept
   {
     return _displayString;
   }
@@ -276,7 +276,7 @@ namespace krys::boo::html
   {
     krys_debug_assert(Element());
     auto &element = *Element();
-    auto accept = element.GetAttribute(u8"accept").value_or(dom::DOMString());
+    auto accept = element.GetAttribute(u8"accept").value_or(DOMString());
     FileChooserSettings settings {
       .AllowsMultipleFiles = element.Multiple(),
       .AcceptMIMETypes = ParseAcceptAttribute(accept, IsAcceptedMIMEType),
@@ -315,7 +315,7 @@ namespace krys::boo::html
     chromeClient->RunOpenPanel(*frame, *chooser);
   }
 
-  void FileInputType::HandleActivationBehavior(dom::Event &event) noexcept
+  void FileInputType::HandleActivationBehavior(Event &event) noexcept
   {
     krys_debug_assert(Element());
     // Only for a user's click or key.
@@ -389,7 +389,7 @@ namespace krys::boo::html
     if (pathsChanged)
     {
       // This may destroy this input type; the element is kept alive.
-      auto event = dom::Event::Create(event_names::Input, true, false, true);
+      auto event = Event::Create(event_names::Input, true, false, true);
       (void)dom::EventDispatcher::DispatchToTarget(*event, element.get());
       element->DispatchChangeEvent();
     }

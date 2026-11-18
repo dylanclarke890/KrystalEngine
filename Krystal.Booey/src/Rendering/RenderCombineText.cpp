@@ -33,7 +33,7 @@ namespace krys::boo
     constexpr float TextCombineMargin = 1.15f;
   }
 
-  RenderCombineText::RenderCombineText(dom::Text &textNode, utf8_string text) noexcept
+  RenderCombineText::RenderCombineText(boo::Text &textNode, utf8_string text) noexcept
       : RenderText(Type::CombineText, textNode, krys::move(text))
   {
     krys_debug_assert(IsRenderCombineText());

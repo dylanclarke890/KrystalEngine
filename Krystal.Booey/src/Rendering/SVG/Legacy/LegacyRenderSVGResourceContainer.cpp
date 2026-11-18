@@ -30,11 +30,11 @@
 
 namespace krys::boo
 {
-  LegacyRenderSVGResourceContainer::LegacyRenderSVGResourceContainer(Type type, svg::SVGElement &element,
+  LegacyRenderSVGResourceContainer::LegacyRenderSVGResourceContainer(Type type, SVGElement &element,
                                                                      RenderStyle &&style) noexcept
       : LegacyRenderSVGHiddenContainer(type, element, krys::move(style),
                                        SVGModelObjectFlag::IsResourceContainer),
-        _id(dom::DOMStringAtom(element.Id()))
+        _id(DOMStringAtom(element.Id()))
   {
   }
 
@@ -84,7 +84,7 @@ namespace krys::boo
     // Remove old id, that is guaranteed to be present in cache.
     auto &treeScope = GetElement().TreeScopeForSVGReferences();
     treeScope.RemoveSVGResource(_id);
-    _id = dom::DOMStringAtom(GetElement().Id());
+    _id = DOMStringAtom(GetElement().Id());
 
     RegisterResource();
   }
@@ -262,7 +262,7 @@ namespace krys::boo
     // Update cached resources of pending clients.
     for (auto &weakClient : elements)
     {
-      RefPtr<svg::SVGElement> client = ShareRefPtr(weakClient.get());
+      RefPtr<SVGElement> client = ShareRefPtr(weakClient.get());
       if (!client)
       {
         continue;
@@ -302,9 +302,9 @@ namespace krys::boo
       return resourceTransform;
     }
 
-    RefPtr<svg::SVGGraphicsElement> element =
-      ShareRefPtr(&Downcast<svg::SVGGraphicsElement>(Downcast<svg::SVGElement>(*object->GetNode())));
-    AffineTransform transform = element->GetScreenCTM(svg::SVGLocatable::DisallowStyleUpdate);
+    RefPtr<SVGGraphicsElement> element =
+      ShareRefPtr(&Downcast<SVGGraphicsElement>(Downcast<SVGElement>(*object->GetNode())));
+    AffineTransform transform = element->GetScreenCTM(SVGLocatable::DisallowStyleUpdate);
     transform *= resourceTransform;
     return transform;
   }

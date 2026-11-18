@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/SVG/Properties/SVGPointerMemberAccessor.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief Reaches an animated property an owner holds as a member.
   template <typename TOwner, typename TAnimatedProperty>

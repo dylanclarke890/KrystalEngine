@@ -62,7 +62,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const SVGPathTransformedByteStream &) const noexcept = default;
 
-    svg::SVGPathByteStream RawStream;
+    SVGPathByteStream RawStream;
     float Zoom;
     FloatPoint Offset;
   };
@@ -80,7 +80,7 @@ namespace krys::boo::style
     }
   };
 
-  KRYS_NODISCARD static const boo::Path &CachedTransformedByteStreamPath(const svg::SVGPathByteStream &stream,
+  KRYS_NODISCARD static const boo::Path &CachedTransformedByteStreamPath(const SVGPathByteStream &stream,
                                                                          float zoom,
                                                                          const FloatPoint &offset) noexcept
   {
@@ -92,8 +92,8 @@ namespace krys::boo::style
 
   // MARK: - Conversion
 
-  KRYS_NODISCARD static svg::SVGPathByteStream CopySVGPathByteStream(const svg::SVGPathByteStream &source,
-                                                                     PathConversion conversion) noexcept
+  KRYS_NODISCARD static SVGPathByteStream CopySVGPathByteStream(const SVGPathByteStream &source,
+                                                                PathConversion conversion) noexcept
   {
     if (conversion == PathConversion::ForceAbsolute)
     {
@@ -175,7 +175,7 @@ namespace krys::boo::style
 
   Path Blending<Path>::Blend(const Path &a, const Path &b, const BlendingContext &context) noexcept
   {
-    svg::SVGPathByteStream resultingPathBytes;
+    SVGPathByteStream resultingPathBytes;
     (void)svg::BuildAnimatedSVGPathByteStream(a.Data.ByteStream, b.Data.ByteStream, resultingPathBytes,
                                               static_cast<float>(context.Progress));
 

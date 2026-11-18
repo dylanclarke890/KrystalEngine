@@ -76,7 +76,7 @@ namespace krys::boo::css
   }
 
   RefPtr<FontLoadRequest>
-    FontFaceSrcResourceValue::GetFontLoadRequest(dom::Document &context,
+    FontFaceSrcResourceValue::GetFontLoadRequest(boo::Document &context,
                                                  bool isInitiatingElementInUserAgentShadowTree) noexcept
   {
     if (_cachedFont)

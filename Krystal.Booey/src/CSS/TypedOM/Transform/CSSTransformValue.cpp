@@ -43,13 +43,13 @@
 
 #include <algorithm>
 
-namespace krys::boo::css
+namespace krys::boo
 {
   namespace
   {
     template <typename T>
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSTransformComponent>>
-      UpcastComponent(dom::ExceptionOr<Ref<T>> component) noexcept
+    KRYS_NODISCARD ExceptionOr<Ref<CSSTransformComponent>>
+      UpcastComponent(ExceptionOr<Ref<T>> component) noexcept
     {
       if (component.HasException())
       {
@@ -60,75 +60,75 @@ namespace krys::boo::css
 
     /// @brief Reifies a transform function as the transform component of its kind.
     /// @see https://drafts.css-houdini.org/css-typed-om/#reify-a-transform-list
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSTransformComponent>>
-      CreateTransformComponent(const FunctionValue &function, dom::Document &document) noexcept
+    KRYS_NODISCARD ExceptionOr<Ref<CSSTransformComponent>>
+      CreateTransformComponent(const css::FunctionValue &function, Document &document) noexcept
     {
       switch (function.Name())
       {
-        case ValueId::TranslateX:
-        case ValueId::TranslateY:
-        case ValueId::TranslateZ:
-        case ValueId::Translate:
-        case ValueId::Translate3d:
+        case css::ValueId::TranslateX:
+        case css::ValueId::TranslateY:
+        case css::ValueId::TranslateZ:
+        case css::ValueId::Translate:
+        case css::ValueId::Translate3d:
         {
           return UpcastComponent(CSSTranslate::Create(function, document));
         }
-        case ValueId::ScaleX:
-        case ValueId::ScaleY:
-        case ValueId::ScaleZ:
-        case ValueId::Scale:
-        case ValueId::Scale3d:
+        case css::ValueId::ScaleX:
+        case css::ValueId::ScaleY:
+        case css::ValueId::ScaleZ:
+        case css::ValueId::Scale:
+        case css::ValueId::Scale3d:
         {
           return UpcastComponent(CSSScale::Create(function, document));
         }
-        case ValueId::RotateX:
-        case ValueId::RotateY:
-        case ValueId::RotateZ:
-        case ValueId::Rotate:
-        case ValueId::Rotate3d:
+        case css::ValueId::RotateX:
+        case css::ValueId::RotateY:
+        case css::ValueId::RotateZ:
+        case css::ValueId::Rotate:
+        case css::ValueId::Rotate3d:
         {
           return UpcastComponent(CSSRotate::Create(function, document));
         }
-        case ValueId::SkewX:
+        case css::ValueId::SkewX:
         {
           return UpcastComponent(CSSSkewX::Create(function, document));
         }
-        case ValueId::SkewY:
+        case css::ValueId::SkewY:
         {
           return UpcastComponent(CSSSkewY::Create(function, document));
         }
-        case ValueId::Skew:
+        case css::ValueId::Skew:
         {
           return UpcastComponent(CSSSkew::Create(function, document));
         }
-        case ValueId::Perspective:
+        case css::ValueId::Perspective:
         {
           return UpcastComponent(CSSPerspective::Create(function, document));
         }
-        case ValueId::Matrix:
-        case ValueId::Matrix3d:
+        case css::ValueId::Matrix:
+        case css::ValueId::Matrix3d:
         {
           return UpcastComponent(CSSMatrixComponent::Create(function, document));
         }
         default:
         {
-          return dom::Exception {dom::ExceptionCode::TypeError};
+          return Exception {ExceptionCode::TypeError};
         }
       }
     }
   }
 
-  dom::ExceptionOr<Ref<CSSTransformValue>> CSSTransformValue::Create(const TransformListValue &list,
-                                                                     dom::Document &document) noexcept
+  ExceptionOr<Ref<CSSTransformValue>> CSSTransformValue::Create(const css::TransformListValue &list,
+                                                                Document &document) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#reify-a-transform-list
     List<Ref<CSSTransformComponent>> components;
     for (const auto &value : list)
     {
-      const auto *function = DynamicDowncast<FunctionValue>(value);
+      const auto *function = DynamicDowncast<css::FunctionValue>(value);
       if (!function)
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       auto component = CreateTransformComponent(*function, document);
       if (component.HasException())
@@ -140,14 +140,14 @@ namespace krys::boo::css
     return AdoptRef(*new CSSTransformValue(krys::move(components)));
   }
 
-  dom::ExceptionOr<Ref<CSSTransformValue>>
+  ExceptionOr<Ref<CSSTransformValue>>
     CSSTransformValue::Create(List<Ref<CSSTransformComponent>> transforms) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformvalue-csstransformvalue
     // 1. If transforms is empty, throw a TypeError.
     if (transforms.empty())
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     // 2. Let this be a new CSSTransformValue whose values to iterate over is transforms.
     // 3. Return this.
@@ -170,12 +170,12 @@ namespace krys::boo::css
     return _components[index];
   }
 
-  dom::ExceptionOr<Ref<CSSTransformComponent>>
+  ExceptionOr<Ref<CSSTransformComponent>>
     CSSTransformValue::SetItem(size_t index, Ref<CSSTransformComponent> component) noexcept
   {
     if (index > _components.size())
     {
-      return dom::Exception {dom::ExceptionCode::RangeError};
+      return Exception {ExceptionCode::RangeError};
     }
     if (index == _components.size())
     {
@@ -194,14 +194,14 @@ namespace krys::boo::css
     return std::ranges::all_of(_components, [](const auto &component) { return component->Is2D(); });
   }
 
-  dom::ExceptionOr<Ref<DOMMatrix>> CSSTransformValue::ToMatrix() const noexcept
+  ExceptionOr<Ref<css::DOMMatrix>> CSSTransformValue::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformvalue-tomatrix
     // 1. Let matrix be a new DOMMatrix, initialized to the identity matrix, with its is2D internal slot set
     // to
     //    true.
     TransformationMatrix matrix;
-    auto is2D = DOMMatrixReadOnly::Is2D::Yes;
+    auto is2D = css::DOMMatrixReadOnly::Is2D::Yes;
     // 2. For each transform in this's values to iterate over:
     for (const auto &component : _components)
     {
@@ -215,12 +215,12 @@ namespace krys::boo::css
       // 2.2. Set matrix to the result of multiplying matrix and the matrix represented by transformMatrix.
       if (!transformMatrix->GetIs2D())
       {
-        is2D = DOMMatrixReadOnly::Is2D::No;
+        is2D = css::DOMMatrixReadOnly::Is2D::No;
       }
       matrix.Multiply(transformMatrix->GetTransformationMatrix());
     }
     // 3. Return matrix.
-    return DOMMatrix::Create(matrix, is2D);
+    return css::DOMMatrix::Create(matrix, is2D);
   }
 
   void CSSTransformValue::Serialise(StringBuilder &builder, EnumSet<SerialisationArguments>) const noexcept
@@ -238,16 +238,16 @@ namespace krys::boo::css
     }
   }
 
-  RefPtr<Value> CSSTransformValue::ToCSSValue() const noexcept
+  RefPtr<css::Value> CSSTransformValue::ToCSSValue() const noexcept
   {
-    ValueListBuilder builder;
+    css::ValueListBuilder builder;
     for (const auto &component : _components)
     {
       if (auto value = component->ToCSSValue())
       {
-        builder.push_back(Ref<Value>(krys::move(value)));
+        builder.push_back(Ref<css::Value>(krys::move(value)));
       }
     }
-    return TransformListValue::Create(krys::move(builder));
+    return css::TransformListValue::Create(krys::move(builder));
   }
 }

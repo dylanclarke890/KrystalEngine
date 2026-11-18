@@ -75,7 +75,7 @@ namespace krys::boo::style::tests
 
     KRYS_NODISCARD std::string CustomWinner(const PropertyCascade &cascade, utf8_stringview name)
     {
-      auto atom = css::CSSOMStringAtom(css::CSSOMString(name));
+      auto atom = CSSOMStringAtom(CSSOMString(name));
       if (!cascade.HasCustomProperty(atom))
       {
         return {};
@@ -83,9 +83,9 @@ namespace krys::boo::style::tests
       return CssText(*cascade.GetCustomProperty(atom).CssValue);
     }
 
-    KRYS_NODISCARD Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
+    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       parser->PumpTokenizer();
@@ -454,7 +454,7 @@ namespace krys::boo::style::tests
       CHECK(afterTransition.OverriddenAnimatedProperties().empty());
 
       // That's decided property by property.
-      HashSet<AnimatableCSSProperty> transitioning {css::CSSOMStringAtom(u8"--a")};
+      HashSet<AnimatableCSSProperty> transitioning {CSSOMStringAtom(u8"--a")};
       PropertyCascade mixed(*result, {{PropertyType::AfterAnimation}}, &animated, nullptr, &transitioning);
       CHECK(Winner(mixed, PropertyId::Opacity) == "0.5");
       CHECK_FALSE(mixed.HasCustomProperty(u8"--a"));
@@ -485,7 +485,7 @@ namespace krys::boo::style::tests
       result->AuthorDeclarations.push_back(
         Block(u8"padding-top: var(--b); --c: var(--d); --e: 1; z-index: 1"));
 
-      HashSet<AnimatableCSSProperty> animated {css::CSSOMStringAtom(u8"--x")};
+      HashSet<AnimatableCSSProperty> animated {CSSOMStringAtom(u8"--x")};
       PropertyCascade cascade(*result, {{PropertyType::AfterAnimation}}, &animated);
       CHECK(Winner(cascade, PropertyId::PaddingTop) == "var(--b)");
       CHECK(CustomWinner(cascade, u8"--c") == "var(--d)");

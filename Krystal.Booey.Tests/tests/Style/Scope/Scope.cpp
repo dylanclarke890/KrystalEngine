@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
@@ -18,9 +18,9 @@ namespace krys::boo::style::tests
 {
   namespace
   {
-    Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
+    Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       parser->PumpTokenizer();
@@ -32,21 +32,21 @@ namespace krys::boo::style::tests
       html::EventLoop::Current().RunUntilIdle();
     }
 
-    Ref<html::HTMLLinkElement> AppendLink(dom::Node &parent, dom::DOMString &&rel) noexcept
+    Ref<HTMLLinkElement> AppendLink(Node &parent, DOMString &&rel) noexcept
     {
-      auto link = CreateRef<html::HTMLLinkElement>(parent.NodeDocument());
+      auto link = CreateRef<HTMLLinkElement>(parent.NodeDocument());
       REQUIRE_FALSE(link->SetAttribute(u8"rel", krys::move(rel)).HasException());
       REQUIRE_FALSE(parent.AppendChild(*link).HasException());
       return link;
     }
 
     /// @brief An element that calls back while its style is resolved and its renderers are attached.
-    class StyleCallbackElement final : public html::HTMLDivElement
+    class StyleCallbackElement final : public HTMLDivElement
     {
       KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(StyleCallbackElement);
 
     public:
-      explicit StyleCallbackElement(dom::Document &document) noexcept
+      explicit StyleCallbackElement(boo::Document &document) noexcept
           : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
       {
       }
@@ -71,9 +71,9 @@ namespace krys::boo::style::tests
       Func<void()> DuringRenderTreeUpdate;
     };
 
-    bool Contains(const List<WeakPtr<dom::ShadowRoot>> &roots, const dom::ShadowRoot &shadowRoot) noexcept
+    bool Contains(const List<WeakPtr<boo::ShadowRoot>> &roots, const boo::ShadowRoot &shadowRoot) noexcept
     {
-      return std::ranges::any_of(roots, [&](const WeakPtr<dom::ShadowRoot> &root)
+      return std::ranges::any_of(roots, [&](const WeakPtr<boo::ShadowRoot> &root)
                                  { return root.get() == &shadowRoot; });
     }
   }
@@ -81,7 +81,7 @@ namespace krys::boo::style::tests
   TEST_CASE("Scope: shadow trees follow their host's connection", "[Style][Scope][DOM]")
   {
     auto document = Parse(u8"<div></div>");
-    RefPtr<dom::Element> host = document->Body()->FirstElementChild();
+    RefPtr<Element> host = document->Body()->FirstElementChild();
     auto shadow = host->AttachShadow({}).ReleaseValue();
     auto inner = document->CreateElement(u8"span").ReleaseValue();
     REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
@@ -142,7 +142,7 @@ namespace krys::boo::style::tests
   TEST_CASE("Scope: the scope of a node", "[Style][Scope]")
   {
     auto document = Parse(u8"<div></div>");
-    RefPtr<dom::Element> host = document->Body()->FirstElementChild();
+    RefPtr<Element> host = document->Body()->FirstElementChild();
     auto shadow = host->AttachShadow({}).ReleaseValue();
     auto inner = document->CreateElement(u8"span").ReleaseValue();
     REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
@@ -160,7 +160,7 @@ namespace krys::boo::style::tests
 
     SECTION("Adopting a shadow host gives its shadow root a scope for the new document")
     {
-      auto otherDocument = CreateRef<dom::HTMLDocument>();
+      auto otherDocument = CreateRef<HTMLDocument>();
       REQUIRE_FALSE(otherDocument->AdoptNode(*host).HasException());
       REQUIRE(&shadow->StyleScope().Document() == otherDocument.get());
     }
@@ -178,7 +178,7 @@ namespace krys::boo::style::tests
       REQUIRE(sheets.size() == 3uz);
       REQUIRE(scope.ActiveStyleSheets().size() == 2uz);
 
-      auto &third = Downcast<css::CSSStyleSheet>(*sheets[2]);
+      auto &third = Downcast<CSSStyleSheet>(*sheets[2]);
       third.SetDisabled(true);
       REQUIRE(scope.HasPendingUpdate());
       RunTasks();
@@ -196,7 +196,7 @@ namespace krys::boo::style::tests
 
       auto active = [&](uint32 index)
       {
-        return scope.ActiveStyleSheetsContains(Downcast<css::CSSStyleSheet>(*sheets[index]));
+        return scope.ActiveStyleSheetsContains(Downcast<CSSStyleSheet>(*sheets[index]));
       };
       REQUIRE(active(0));
       REQUIRE(active(1));
@@ -337,7 +337,7 @@ namespace krys::boo::style::tests
 
     SECTION("still list the sheets")
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       REQUIRE_FALSE(document->HasLivingRenderTree());
       auto style = document->CreateElement(u8"style").ReleaseValue();
       REQUIRE_FALSE(style->TextContent(u8"a{}").HasException());
@@ -396,7 +396,7 @@ namespace krys::boo::style::tests
     auto width = [&]() -> int32
     {
       (void)fixture.Document->UpdateLayout();
-      return Downcast<html::HTMLElement>(element).OffsetWidth();
+      return Downcast<HTMLElement>(element).OffsetWidth();
     };
     REQUIRE(width() == 400);
 
@@ -412,10 +412,10 @@ namespace krys::boo::style::tests
       u8"<!DOCTYPE html><style>body{margin:0}.v{display:block;width:50vw}.n{display:none}"
       u8".f{display:block;width:10px}</style><div id=a class=v></div><div id=b class=f></div>"
       u8"<div id=host></div>");
-    auto width = [&](dom::Element &element) -> int32
+    auto width = [&](Element &element) -> int32
     {
       (void)fixture.Document->UpdateLayout();
-      return Downcast<html::HTMLElement>(element).OffsetWidth();
+      return Downcast<HTMLElement>(element).OffsetWidth();
     };
     auto resize = [&](int32 viewportWidth)
     {
@@ -466,7 +466,7 @@ namespace krys::boo::style::tests
 
     SECTION("one that leaves the tree and returns")
     {
-      Ref<dom::Element> kept = ShareRef(a);
+      Ref<Element> kept = ShareRef(a);
       auto parent = ShareRefPtr(a.ParentNode());
       REQUIRE_FALSE(parent->RemoveChild(a).HasException());
       resize(1'000);
@@ -479,7 +479,7 @@ namespace krys::boo::style::tests
     SECTION("one that is destroyed")
     {
       {
-        Ref<dom::Element> removed = ShareRef(a);
+        Ref<Element> removed = ShareRef(a);
         REQUIRE_FALSE(a.ParentNode()->RemoveChild(a).HasException());
       }
       resize(1'000);
@@ -516,7 +516,7 @@ namespace krys::boo::style::tests
       CHECK(width(*inner) == 250);
 
       // In the shadow tree, a has no rule; with the same class as inner, it's using its units there.
-      Ref<dom::Element> kept = ShareRef(a);
+      Ref<Element> kept = ShareRef(a);
       REQUIRE_FALSE(a.SetAttribute(u8"class", u8"s v").HasException());
       REQUIRE_FALSE(shadow->AppendChild(a).HasException());
       CHECK(width(a) == 250);

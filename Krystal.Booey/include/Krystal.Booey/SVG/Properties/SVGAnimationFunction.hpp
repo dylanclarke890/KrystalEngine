@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/SVG/Properties/SVGAttributeAnimator.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGElement;
 
@@ -35,7 +35,7 @@ namespace krys::boo::svg
   class SVGAnimationFunction
   {
   protected:
-    AnimationMode _animationMode;
+    svg::AnimationMode _animationMode;
 
   public:
     virtual ~SVGAnimationFunction() noexcept = default;
@@ -45,22 +45,20 @@ namespace krys::boo::svg
       return false;
     }
 
-    virtual void SetFromAndToValues(SVGElement &targetElement, dom::DOMStringView,
-                                    dom::DOMStringView) noexcept = 0;
+    virtual void SetFromAndToValues(SVGElement &targetElement, DOMStringView, DOMStringView) noexcept = 0;
 
-    virtual void SetFromAndByValues(SVGElement &targetElement, dom::DOMStringView,
-                                    dom::DOMStringView) noexcept = 0;
+    virtual void SetFromAndByValues(SVGElement &targetElement, DOMStringView, DOMStringView) noexcept = 0;
 
-    virtual void SetToAtEndOfDurationValue(SVGElement &targetElement, dom::DOMStringView) noexcept = 0;
+    virtual void SetToAtEndOfDurationValue(SVGElement &targetElement, DOMStringView) noexcept = 0;
 
-    KRYS_NODISCARD virtual Maybe<float> CalculateDistance(SVGElement &, dom::DOMStringView,
-                                                          dom::DOMStringView) const noexcept
+    KRYS_NODISCARD virtual Maybe<float> CalculateDistance(SVGElement &, DOMStringView,
+                                                          DOMStringView) const noexcept
     {
       return {};
     }
 
   protected:
-    explicit SVGAnimationFunction(AnimationMode animationMode) noexcept : _animationMode(animationMode)
+    explicit SVGAnimationFunction(svg::AnimationMode animationMode) noexcept : _animationMode(animationMode)
     {
     }
 

@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlbrelement
   class HTMLBRElement : public HTMLElement
@@ -38,15 +38,15 @@ namespace krys::boo::html
       return false;
     }
 
-    HTMLBRElement(dom::Document &document) noexcept;
+    HTMLBRElement(Document &document) noexcept;
 
 #pragma region HTMLBRElement Obsolete members - https://html.spec.whatwg.org/#HTMLBRElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-br-compact
-    KRYS_NODISCARD dom::DOMString Clear() const noexcept;
+    KRYS_NODISCARD DOMString Clear() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-br-compact
-    void Clear(dom::DOMString value) noexcept;
+    void Clear(DOMString value) noexcept;
 
 #pragma endregion
 
@@ -54,18 +54,17 @@ namespace krys::boo::html
 
   protected:
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLBRElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLBRElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLBRElement();
   }

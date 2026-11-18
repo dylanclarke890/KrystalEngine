@@ -29,7 +29,7 @@
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief Reaches two animated properties an owner reflects one attribute through.
   template <typename TOwner, typename TAccessor1, typename TAccessor2>

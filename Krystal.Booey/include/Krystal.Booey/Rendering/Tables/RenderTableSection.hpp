@@ -143,9 +143,9 @@ namespace krys::boo
     bool _needsCellRecalc {false};
 
   public:
-    RenderTableSection(dom::Element &element, RenderStyle &&style) noexcept;
+    RenderTableSection(Element &element, RenderStyle &&style) noexcept;
 
-    RenderTableSection(dom::Document &document, RenderStyle &&style) noexcept;
+    RenderTableSection(Document &document, RenderStyle &&style) noexcept;
 
     ~RenderTableSection() noexcept override;
 

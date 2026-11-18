@@ -39,7 +39,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderMathMLMath);
 
   public:
-    RenderMathMLMath(mathml::MathMLRowElement &element, RenderStyle &&style) noexcept;
+    RenderMathMLMath(boo::MathMLRowElement &element, RenderStyle &&style) noexcept;
 
     ~RenderMathMLMath() noexcept override;
 

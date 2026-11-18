@@ -30,7 +30,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include <utility>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGElement;
 
@@ -48,7 +48,7 @@ namespace krys::boo::svg
     using AnimatorAnimatedProperty = TAnimatedProperty;
 
     template <typename... TArgs>
-    SVGAnimatedPropertyAnimator(const dom::QualifiedName &attributeName, Ref<TAnimatedProperty> &animated,
+    SVGAnimatedPropertyAnimator(const QualifiedName &attributeName, Ref<TAnimatedProperty> &animated,
                                 TArgs &&...arguments) noexcept
         : SVGAttributeAnimator(attributeName), _animated(animated),
           _function(std::forward<TArgs>(arguments)...)
@@ -65,20 +65,18 @@ namespace krys::boo::svg
       return _function.IsDiscrete();
     }
 
-    void SetFromAndToValues(SVGElement &targetElement, dom::DOMStringView from,
-                            dom::DOMStringView to) noexcept override
+    void SetFromAndToValues(SVGElement &targetElement, DOMStringView from, DOMStringView to) noexcept override
     {
       _function.SetFromAndToValues(targetElement, from, to);
     }
 
-    void SetFromAndByValues(SVGElement &targetElement, dom::DOMStringView from,
-                            dom::DOMStringView by) noexcept override
+    void SetFromAndByValues(SVGElement &targetElement, DOMStringView from, DOMStringView by) noexcept override
     {
       _function.SetFromAndByValues(targetElement, from, by);
     }
 
     void SetToAtEndOfDurationValue(SVGElement &targetElement,
-                                   dom::DOMStringView toAtEndOfDuration) noexcept override
+                                   DOMStringView toAtEndOfDuration) noexcept override
     {
       _function.SetToAtEndOfDurationValue(targetElement, toAtEndOfDuration);
     }
@@ -121,8 +119,8 @@ namespace krys::boo::svg
       }
     }
 
-    KRYS_NODISCARD Maybe<float> CalculateDistance(SVGElement &targetElement, dom::DOMStringView from,
-                                                  dom::DOMStringView to) const noexcept override
+    KRYS_NODISCARD Maybe<float> CalculateDistance(SVGElement &targetElement, DOMStringView from,
+                                                  DOMStringView to) const noexcept override
     {
       return _function.CalculateDistance(targetElement, from, to);
     }

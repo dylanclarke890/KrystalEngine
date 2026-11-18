@@ -4,9 +4,9 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGTransformableContainer.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGGElement::SVGGElement(dom::Document &document) noexcept
+  SVGGElement::SVGGElement(Document &document) noexcept
       : SVGGraphicsElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::G)
   {
   }

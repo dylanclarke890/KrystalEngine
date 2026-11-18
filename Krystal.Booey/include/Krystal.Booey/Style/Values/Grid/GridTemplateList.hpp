@@ -33,7 +33,7 @@
 
 namespace krys::boo::style
 {
-  using RepeatEntry = Variant<GridTrackSize, List<css::CSSOMString>>;
+  using RepeatEntry = Variant<GridTrackSize, List<CSSOMString>>;
   using RepeatTrackList = List<RepeatEntry>;
 
   struct GridTrackEntryRepeat
@@ -57,7 +57,7 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const GridTrackEntrySubgrid &) const noexcept = default;
   };
 
-  using GridTrackEntry = Variant<GridTrackSize, List<css::CSSOMString>, GridTrackEntryRepeat,
+  using GridTrackEntry = Variant<GridTrackSize, List<CSSOMString>, GridTrackEntryRepeat,
                                  GridTrackEntryAutoRepeat, GridTrackEntrySubgrid>;
   using GridTrackList = List<GridTrackEntry>;
 

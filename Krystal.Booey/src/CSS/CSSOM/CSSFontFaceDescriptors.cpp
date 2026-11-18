@@ -22,13 +22,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/CSS/Descriptors/CSSFontFaceDescriptors.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSFontFaceDescriptors.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSFontFaceRule.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSFontFaceDescriptors::CSSFontFaceDescriptors(MutableStyleProperties &propertySet,
+  CSSFontFaceDescriptors::CSSFontFaceDescriptors(css::MutableStyleProperties &propertySet,
                                                  CSSFontFaceRule &parentRule) noexcept
       : PropertySetCSSDescriptors(propertySet, parentRule)
   {
@@ -36,15 +36,15 @@ namespace krys::boo::css
 
   CSSFontFaceDescriptors::~CSSFontFaceDescriptors() noexcept = default;
 
-  Ref<CSSFontFaceDescriptors> CSSFontFaceDescriptors::Create(MutableStyleProperties &propertySet,
+  Ref<CSSFontFaceDescriptors> CSSFontFaceDescriptors::Create(css::MutableStyleProperties &propertySet,
                                                              CSSFontFaceRule &parentRule) noexcept
   {
     return AdoptRef(*new CSSFontFaceDescriptors(propertySet, parentRule));
   }
 
-  RuleType CSSFontFaceDescriptors::GetRuleType() const noexcept
+  css::RuleType CSSFontFaceDescriptors::GetRuleType() const noexcept
   {
-    return RuleType::FontFace;
+    return css::RuleType::FontFace;
   }
 
 #pragma region Descriptors
@@ -52,100 +52,100 @@ namespace krys::boo::css
   // @font-face 'src'
   CSSOMString CSSFontFaceDescriptors::Src() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::Src);
+    return GetPropertyValueInternal(css::PropertyId::Src);
   }
 
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetSrc(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFontFaceDescriptors::SetSrc(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Src, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::Src, value, css::IsImportant::No);
   }
 
   // @font-face 'fontFamily'
   CSSOMString CSSFontFaceDescriptors::FontFamily() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::FontFamily);
+    return GetPropertyValueInternal(css::PropertyId::FontFamily);
   }
 
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetFontFamily(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFontFaceDescriptors::SetFontFamily(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::FontFamily, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::FontFamily, value, css::IsImportant::No);
   }
 
   // @font-face 'font-style'
   CSSOMString CSSFontFaceDescriptors::FontStyle() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::FontStyle);
+    return GetPropertyValueInternal(css::PropertyId::FontStyle);
   }
 
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetFontStyle(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFontFaceDescriptors::SetFontStyle(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::FontStyle, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::FontStyle, value, css::IsImportant::No);
   }
 
   // @font-face 'font-weight'
   CSSOMString CSSFontFaceDescriptors::FontWeight() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::FontWeight);
+    return GetPropertyValueInternal(css::PropertyId::FontWeight);
   }
 
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetFontWeight(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFontFaceDescriptors::SetFontWeight(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::FontWeight, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::FontWeight, value, css::IsImportant::No);
   }
 
   // @font-face 'font-width'
   CSSOMString CSSFontFaceDescriptors::FontWidth() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::FontWidth);
+    return GetPropertyValueInternal(css::PropertyId::FontWidth);
   }
 
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetFontWidth(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFontFaceDescriptors::SetFontWidth(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::FontWidth, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::FontWidth, value, css::IsImportant::No);
   }
 
   // @font-face 'size-adjust'
   CSSOMString CSSFontFaceDescriptors::SizeAdjust() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::SizeAdjust);
+    return GetPropertyValueInternal(css::PropertyId::SizeAdjust);
   }
 
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetSizeAdjust(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFontFaceDescriptors::SetSizeAdjust(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::SizeAdjust, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::SizeAdjust, value, css::IsImportant::No);
   }
 
   // @font-face 'unicode-range'
   CSSOMString CSSFontFaceDescriptors::UnicodeRange() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::UnicodeRange);
+    return GetPropertyValueInternal(css::PropertyId::UnicodeRange);
   }
 
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetUnicodeRange(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFontFaceDescriptors::SetUnicodeRange(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::UnicodeRange, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::UnicodeRange, value, css::IsImportant::No);
   }
 
   // @font-face 'font-feature-settings'
   CSSOMString CSSFontFaceDescriptors::FontFeatureSettings() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::FontFeatureSettings);
+    return GetPropertyValueInternal(css::PropertyId::FontFeatureSettings);
   }
 
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetFontFeatureSettings(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFontFaceDescriptors::SetFontFeatureSettings(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::FontFeatureSettings, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::FontFeatureSettings, value, css::IsImportant::No);
   }
 
   // @font-face 'font-display'
   CSSOMString CSSFontFaceDescriptors::FontDisplay() const noexcept
   {
-    return GetPropertyValueInternal(PropertyId::FontDisplay);
+    return GetPropertyValueInternal(css::PropertyId::FontDisplay);
   }
 
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetFontDisplay(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFontFaceDescriptors::SetFontDisplay(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::FontDisplay, value, IsImportant::No);
+    return SetPropertyInternal(css::PropertyId::FontDisplay, value, css::IsImportant::No);
   }
 
 #pragma endregion

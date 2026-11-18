@@ -5,9 +5,9 @@
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp"
-#include "Krystal.Booey/CSS/Media/MediaList.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheetList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/CSSOM/MediaList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/StyleSheetList.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/TypeCast.hpp"
@@ -29,7 +29,7 @@ namespace krys::boo::svg::tests
     auto add = [&](utf8_stringview text)
     {
       auto style = CreateRef<SVGStyleElement>(*fixture.Document);
-      REQUIRE_FALSE(style->TextContent(dom::DOMString(text)).HasException());
+      REQUIRE_FALSE(style->TextContent(DOMString(text)).HasException());
       auto events = boo::tests::LoadEvents::ListenTo(*style);
       REQUIRE_FALSE(svg.AppendChild(*style).HasException());
       return events;

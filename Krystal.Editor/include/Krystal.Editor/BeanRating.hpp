@@ -29,12 +29,12 @@ namespace krys
 
   private:
     RefPtr<boo::html::ElementInternals> _internals;
-    List<Ref<boo::dom::Element>> _beans;
+    List<Ref<boo::Element>> _beans;
     int32 _rating {0};
     bool _disabled {false};
 
   public:
-    explicit BeanRating(boo::html::HTMLElement &element) noexcept : CustomElement(element)
+    explicit BeanRating(boo::HTMLElement &element) noexcept : CustomElement(element)
     {
       auto internals = element.AttachInternals();
       krys_assert(!internals.HasException());
@@ -46,7 +46,7 @@ namespace krys
       auto &document = element.NodeDocument();
 
       auto style = document.CreateElement(u8"style").ReleaseValue();
-      (void)style->TextContent(boo::dom::DOMString(Styles));
+      (void)style->TextContent(boo::DOMString(Styles));
       (void)shadowRoot.Value()->AppendChild(*style);
 
       for (int32 bean = 0; bean < MaxRating; ++bean)
@@ -56,15 +56,15 @@ namespace krys
         (void)shadowRoot.Value()->AppendChild(*span);
         // The beans go with the element, and their listeners with them: the target keeps them.
         span
-          ->AddEventListener<boo::dom::MouseEvent>(u8"click",
-                                                   [this, bean](boo::dom::MouseEvent &) { Choose(bean + 1); })
+          ->AddEventListener<boo::MouseEvent>(u8"click",
+                                              [this, bean](boo::MouseEvent &) { Choose(bean + 1); })
           .Release();
         _beans.push_back(krys::move(span));
       }
 
       element
-        .AddEventListener<boo::dom::KeyboardEvent>(u8"keydown", [this](boo::dom::KeyboardEvent &event)
-                                                   { HandleKey(event); })
+        .AddEventListener<boo::KeyboardEvent>(u8"keydown",
+                                              [this](boo::KeyboardEvent &event) { HandleKey(event); })
         .Release();
 
       Update();
@@ -85,9 +85,9 @@ namespace krys
       }
     }
 
-    void AttributeChangedCallback(const boo::dom::DOMStringAtom &localName, const boo::dom::DOMStringAtom &,
-                                  const boo::dom::DOMStringAtom &newValue,
-                                  const boo::dom::DOMStringAtom &) noexcept override
+    void AttributeChangedCallback(const boo::DOMStringAtom &localName, const boo::DOMStringAtom &,
+                                  const boo::DOMStringAtom &newValue,
+                                  const boo::DOMStringAtom &) noexcept override
     {
       if (localName == u8"value")
       {
@@ -98,7 +98,7 @@ namespace krys
 
     void FormResetCallback() noexcept override
     {
-      _rating = Parse(boo::dom::DOMStringAtom(Element().GetAttribute(u8"value").value_or(u8"")));
+      _rating = Parse(boo::DOMStringAtom(Element().GetAttribute(u8"value").value_or(u8"")));
       Update();
     }
 
@@ -118,7 +118,7 @@ namespace krys
       .bean.filled { background-color: #6f4326; }
     )";
 
-    KRYS_NODISCARD static int32 Parse(const boo::dom::DOMStringAtom &value) noexcept
+    KRYS_NODISCARD static int32 Parse(const boo::DOMStringAtom &value) noexcept
     {
       auto text = value.View();
       int32 rating = 0;
@@ -137,7 +137,7 @@ namespace krys
       Update();
     }
 
-    void HandleKey(boo::dom::KeyboardEvent &event) noexcept
+    void HandleKey(boo::KeyboardEvent &event) noexcept
     {
       auto key = event.Key();
       if (key == u8"ArrowRight" || key == u8"ArrowUp")
@@ -164,14 +164,13 @@ namespace krys
     {
       for (int32 bean = 0; bean < MaxRating; ++bean)
       {
-        (void)_beans[static_cast<size_t>(bean)]->ClassList().Toggle(boo::dom::DOMString(u8"filled"),
+        (void)_beans[static_cast<size_t>(bean)]->ClassList().Toggle(boo::DOMString(u8"filled"),
                                                                     bean < _rating);
       }
 
       if (_rating > 0)
       {
-        (void)_internals->SetFormValue(
-          boo::dom::DOMString(utf8_string(1, static_cast<char8_t>(u8'0' + _rating))));
+        (void)_internals->SetFormValue(boo::DOMString(utf8_string(1, static_cast<char8_t>(u8'0' + _rating))));
         (void)_internals->States().Add(u8"rated");
       }
       else

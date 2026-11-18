@@ -30,7 +30,7 @@ namespace krys::boo::style
   // https://www.w3.org/TR/css-content-3/#propdef-quotes
   struct Quotes
   {
-    using Data = css::SpaceSeparatedRefCountedFixedVector<css::CSSOMString>;
+    using Data = css::SpaceSeparatedRefCountedFixedVector<CSSOMString>;
 
     Quotes(css::keywords::Auto keyword) noexcept : _value {keyword}
     {
@@ -59,9 +59,9 @@ namespace krys::boo::style
       return krys::HoldsAlternative<Data>(_value);
     }
 
-    KRYS_NODISCARD const css::CSSOMString &OpenQuote(unsigned index) const noexcept;
+    KRYS_NODISCARD const CSSOMString &OpenQuote(unsigned index) const noexcept;
 
-    KRYS_NODISCARD const css::CSSOMString &CloseQuote(unsigned index) const noexcept;
+    KRYS_NODISCARD const CSSOMString &CloseQuote(unsigned index) const noexcept;
 
     template <typename... F>
     decltype(auto) SwitchOn(F &&...f) const noexcept

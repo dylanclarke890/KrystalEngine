@@ -40,23 +40,23 @@ namespace krys::boo::html
     FormListedElement &_element;
 
   public:
-    FormAttributeTargetObserver(dom::DOMStringAtom id, FormListedElement &element) noexcept;
+    FormAttributeTargetObserver(DOMStringAtom id, FormListedElement &element) noexcept;
 
   private:
-    void IdTargetChanged(dom::Element &) noexcept override;
+    void IdTargetChanged(boo::Element &) noexcept override;
   };
 
   namespace
   {
     /// @brief The element with the ID @p id in @p element's tree.
-    KRYS_NODISCARD dom::Element *ElementForId(const HTMLElement &element, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD boo::Element *ElementForId(const HTMLElement &element, DOMStringView id) noexcept
     {
       auto &root = dom::TreeQueries::Root(const_cast<HTMLElement &>(element));
-      if (auto *document = DynamicDowncast<dom::Document>(root))
+      if (auto *document = DynamicDowncast<Document>(root))
       {
         return document->GetElementById(id).get();
       }
-      if (auto *fragment = DynamicDowncast<dom::DocumentFragment>(root))
+      if (auto *fragment = DynamicDowncast<DocumentFragment>(root))
       {
         return fragment->GetElementById(id).get();
       }
@@ -73,7 +73,7 @@ namespace krys::boo::html
           // Let candidate be element's resolved form target element: the first element in its tree with the
           // attribute's ID, or the element its shadow root's reference target names. If candidate is a form
           // element, then set newForm to candidate.
-          RefPtr<dom::Element> candidate = ShareRefPtr(ElementForId(element, *formId));
+          RefPtr<boo::Element> candidate = ShareRefPtr(ElementForId(element, *formId));
           if (candidate)
           {
             candidate = candidate->ResolveReferenceTarget();
@@ -100,7 +100,7 @@ namespace krys::boo::html
     }
   }
 
-  void FormListedElement::ElementInsertedIntoAncestor(dom::Element &element,
+  void FormListedElement::ElementInsertedIntoAncestor(boo::Element &element,
                                                       bool connectedToDocument) noexcept
   {
     FormAssociatedElement::ElementInsertedIntoAncestor(element, connectedToDocument);
@@ -115,7 +115,7 @@ namespace krys::boo::html
     }
   }
 
-  void FormListedElement::ElementRemovedFromAncestor(dom::Element &element,
+  void FormListedElement::ElementRemovedFromAncestor(boo::Element &element,
                                                      bool disconnectedFromDocument) noexcept
   {
     krys_debug_assert(&AsHTMLElement() == &element);
@@ -128,13 +128,13 @@ namespace krys::boo::html
     }
   }
 
-  void FormListedElement::FormOwnerRemovedFromTree(const dom::Node &formRoot) noexcept
+  void FormListedElement::FormOwnerRemovedFromTree(const Node &formRoot) noexcept
   {
     krys_debug_assert(Form());
 
     auto formHasSameRootNode = [&]() -> Maybe<bool>
     {
-      const dom::Node *rootNode = &AsHTMLElement();
+      const Node *rootNode = &AsHTMLElement();
       if (auto *currentForm = Form())
       {
         for (auto *ancestor = rootNode->ParentNode(); ancestor; ancestor = ancestor->ParentNode())
@@ -207,8 +207,7 @@ namespace krys::boo::html
     SetForm(FindAssociatedForm(AsHTMLElement(), Form()));
   }
 
-  void FormListedElement::ParseAttribute(const dom::DOMStringAtom &localName,
-                                         Maybe<dom::DOMStringView> value) noexcept
+  void FormListedElement::ParseAttribute(const DOMStringAtom &localName, Maybe<DOMStringView> value) noexcept
   {
     if (localName == u8"form")
     {
@@ -216,7 +215,7 @@ namespace krys::boo::html
     }
   }
 
-  void FormListedElement::ParseFormAttribute(Maybe<dom::DOMStringView> value) noexcept
+  void FormListedElement::ParseFormAttribute(Maybe<DOMStringView> value) noexcept
   {
     auto &element = AsHTMLElement();
     if (!value)
@@ -295,27 +294,27 @@ namespace krys::boo::html
     return false;
   }
 
-  dom::DOMString FormListedElement::CustomValidationMessage() const noexcept
+  DOMString FormListedElement::CustomValidationMessage() const noexcept
   {
     return _customValidationMessage;
   }
 
-  dom::DOMString FormListedElement::ValidationMessage() const noexcept
+  DOMString FormListedElement::ValidationMessage() const noexcept
   {
-    return WillValidate() ? _customValidationMessage : dom::DOMString();
+    return WillValidate() ? _customValidationMessage : DOMString();
   }
 
   // https://html.spec.whatwg.org/#dom-cva-setcustomvalidity
-  void FormListedElement::SetCustomValidity(dom::DOMStringView error) noexcept
+  void FormListedElement::SetCustomValidity(DOMStringView error) noexcept
   {
     // 1. Set error to the result of normalizing newlines given error.
     // 2. Set the custom validity error message to error.
     SetCustomValidationMessage(infra::StringAlgorithms::NormalizeNewlines(error));
   }
 
-  void FormListedElement::SetCustomValidationMessage(dom::DOMStringView message) noexcept
+  void FormListedElement::SetCustomValidationMessage(DOMStringView message) noexcept
   {
-    _customValidationMessage = dom::DOMString(message);
+    _customValidationMessage = DOMString(message);
   }
 
   void FormListedElement::ResetFormAttributeTargetObserver() noexcept
@@ -323,7 +322,7 @@ namespace krys::boo::html
     auto &element = AsHTMLElement();
     krys_assert(element.IsConnected());
     _formAttributeTargetObserver = CreateUnique<FormAttributeTargetObserver>(
-      dom::DOMStringAtom(element.GetAttribute(u8"form").value_or(dom::DOMString())), *this);
+      DOMStringAtom(element.GetAttribute(u8"form").value_or(DOMString())), *this);
   }
 
   void FormListedElement::FormAttributeTargetChanged() noexcept
@@ -331,19 +330,19 @@ namespace krys::boo::html
     ResetFormOwner();
   }
 
-  dom::DOMString FormListedElement::Name() const noexcept
+  DOMString FormListedElement::Name() const noexcept
   {
-    return AsHTMLElement().GetAttribute(u8"name").value_or(dom::DOMString());
+    return AsHTMLElement().GetAttribute(u8"name").value_or(DOMString());
   }
 
-  FormAttributeTargetObserver::FormAttributeTargetObserver(dom::DOMStringAtom id,
+  FormAttributeTargetObserver::FormAttributeTargetObserver(DOMStringAtom id,
                                                            FormListedElement &element) noexcept
       : IdTargetObserver(element.AsHTMLElement().TreeScope().IdTargetObserverRegistry(), krys::move(id)),
         _element(element)
   {
   }
 
-  void FormAttributeTargetObserver::IdTargetChanged(dom::Element &) noexcept
+  void FormAttributeTargetObserver::IdTargetChanged(boo::Element &) noexcept
   {
     _element.FormAttributeTargetChanged();
   }

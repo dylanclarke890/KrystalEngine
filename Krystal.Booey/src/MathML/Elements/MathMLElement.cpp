@@ -39,7 +39,7 @@
 #include <algorithm>
 #include <charconv>
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   namespace
   {
@@ -49,7 +49,7 @@ namespace krys::boo::mathml
     // The largest rowspan a table cell takes, as HTML's.
     constexpr uint32 MaxMathMLRowspan = 65'534;
 
-    KRYS_NODISCARD uint32 LimitToOnlyHTMLNonNegative(dom::DOMStringView value, uint32 defaultValue) noexcept
+    KRYS_NODISCARD uint32 LimitToOnlyHTMLNonNegative(DOMStringView value, uint32 defaultValue) noexcept
     {
       auto result = html::Numbers::ParseNonNegativeInteger(value);
       if (!result.Success() || result.Value > MaxHTMLNonNegativeInteger)
@@ -60,7 +60,7 @@ namespace krys::boo::mathml
     }
   }
 
-  MathMLElement::MathMLElement(dom::Document &document, MathMLElementInterface interface,
+  MathMLElement::MathMLElement(Document &document, MathMLElementInterface interface,
                                dom::NodeFlags nodeFlags) noexcept
       : StyledElement(document, dom::NullQualifiedName(), nodeFlags | dom::NodeFlags::IsMathMLElement),
         _interface(interface)
@@ -73,7 +73,7 @@ namespace krys::boo::mathml
     {
       return 1u;
     }
-    auto colSpanValue = AttributeValue(MathMLNames::ColumnspanAttr()).value_or(dom::DOMString {});
+    auto colSpanValue = AttributeValue(MathMLNames::ColumnspanAttr()).value_or(DOMString {});
     return std::max(1u, LimitToOnlyHTMLNonNegative(colSpanValue, 1u));
   }
 
@@ -83,24 +83,24 @@ namespace krys::boo::mathml
     {
       return 1u;
     }
-    auto rowSpanValue = AttributeValue(MathMLNames::RowspanAttr()).value_or(dom::DOMString {});
+    auto rowSpanValue = AttributeValue(MathMLNames::RowspanAttr()).value_or(DOMString {});
     return std::max(1u, std::min(LimitToOnlyHTMLNonNegative(rowSpanValue, 1u), MaxMathMLRowspan));
   }
 
-  Maybe<dom::DOMString> MathMLElement::AttributeValue(const dom::QualifiedName &name) const noexcept
+  Maybe<DOMString> MathMLElement::AttributeValue(const QualifiedName &name) const noexcept
   {
     return GetAttributeNS(name.NamespaceURI(), name.LocalName());
   }
 
-  void MathMLElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                         Maybe<dom::DOMStringView> oldValue, Maybe<dom::DOMStringView> value,
-                                         const dom::DOMStringAtom &namespaceURI) noexcept
+  void MathMLElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                         Maybe<DOMStringView> value,
+                                         const DOMStringAtom &namespaceURI) noexcept
   {
-    AttributeChanged(dom::QualifiedName {namespaceURI, null, localName}, oldValue, value);
+    AttributeChanged(QualifiedName {namespaceURI, null, localName}, oldValue, value);
   }
 
-  void MathMLElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                       Maybe<dom::DOMStringView> value) noexcept
+  void MathMLElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                       Maybe<DOMStringView> value) noexcept
   {
     if (name == MathMLNames::ColumnspanAttr() || name == MathMLNames::RowspanAttr())
     {
@@ -117,15 +117,14 @@ namespace krys::boo::mathml
 
   namespace
   {
-    KRYS_NODISCARD bool EndsWithIgnoringASCIICase(dom::DOMStringView value,
-                                                  dom::DOMStringView suffix) noexcept
+    KRYS_NODISCARD bool EndsWithIgnoringASCIICase(DOMStringView value, DOMStringView suffix) noexcept
     {
       return value.size() >= suffix.size()
              && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value.substr(value.size() - suffix.size()),
                                                                    suffix);
     }
 
-    KRYS_NODISCARD bool IsDisallowedMathSizeAttribute(dom::DOMStringView value) noexcept
+    KRYS_NODISCARD bool IsDisallowedMathSizeAttribute(DOMStringView value) noexcept
     {
       // FIXME: The CSS parser sometimes accept non-zero <number> font-size values on MathML elements, so
       // explicitly disallow them.
@@ -159,9 +158,8 @@ namespace krys::boo::mathml
     };
   }
 
-  bool
-    MathMLElement::HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                      const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool MathMLElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                         const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == MathMLNames::DirAttr().LocalName()
@@ -176,9 +174,9 @@ namespace krys::boo::mathml
     return StyledElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void MathMLElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                             const dom::DOMStringAtom &namespaceURI,
-                                                             dom::DOMStringView value,
+  void MathMLElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                             const DOMStringAtom &namespaceURI,
+                                                             DOMStringView value,
                                                              css::MutableStyleProperties &style) noexcept
   {
     if (namespaceURI != null)
@@ -187,7 +185,7 @@ namespace krys::boo::mathml
       return;
     }
 
-    auto string = css::CSSOMString(value);
+    auto string = CSSOMString(value);
     if (localName == MathMLNames::MathbackgroundAttr().LocalName())
     {
       AddPropertyToPresentationalHintStyle(style, css::PropertyId::BackgroundColor, string);
@@ -289,7 +287,7 @@ namespace krys::boo::mathml
     html::FocusAlgorithms::AutofocusInsertionSteps(*this);
   }
 
-  bool MathMLElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
+  bool MathMLElement::ChildShouldCreateRenderer(const Node &child) const noexcept
   {
     // In general, only MathML children are allowed. Text nodes are only visible in token MathML elements.
     return Is<MathMLElement>(child);

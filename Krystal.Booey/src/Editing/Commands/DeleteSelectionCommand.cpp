@@ -46,19 +46,19 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD bool IsTableRow(const dom::Node &node) noexcept
+    KRYS_NODISCARD bool IsTableRow(const boo::Node &node) noexcept
     {
       return IsHTMLElementOfType(&node, html::TagName::tr);
     }
 
-    KRYS_NODISCARD bool IsTableCellEmpty(dom::Node &cell) noexcept
+    KRYS_NODISCARD bool IsTableCellEmpty(boo::Node &cell) noexcept
     {
       krys_debug_assert(IsTableCell(cell));
       return VisiblePosition(dom::FirstPositionInNode(&cell))
              == VisiblePosition(dom::LastPositionInNode(&cell));
     }
 
-    KRYS_NODISCARD bool IsTableRowEmpty(const dom::Node &row) noexcept
+    KRYS_NODISCARD bool IsTableRowEmpty(const boo::Node &row) noexcept
     {
       if (!IsTableRow(row))
       {
@@ -76,9 +76,9 @@ namespace krys::boo
       return true;
     }
 
-    KRYS_NODISCARD bool IsSpecialHTMLElement(const dom::Node &node) noexcept
+    KRYS_NODISCARD bool IsSpecialHTMLElement(const boo::Node &node) noexcept
     {
-      auto *htmlElement = DynamicDowncast<html::HTMLElement>(node);
+      auto *htmlElement = DynamicDowncast<HTMLElement>(node);
       if (!htmlElement)
       {
         return false;
@@ -115,7 +115,7 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD RefPtr<html::HTMLElement> FirstInSpecialElement(const dom::Position &position) noexcept
+    KRYS_NODISCARD RefPtr<HTMLElement> FirstInSpecialElement(const dom::Position &position) noexcept
     {
       auto *rootEditableElement = position.RootEditableElement();
       for (auto *node = position.DeprecatedNode(); node && node->RootEditableElement() == rootEditableElement;
@@ -130,13 +130,13 @@ namespace krys::boo
         if ((IsRenderedTable(node) && visiblePosition == firstInElement.Next())
             || visiblePosition == firstInElement)
         {
-          return ShareRefPtr(&Downcast<html::HTMLElement>(*node));
+          return ShareRefPtr(&Downcast<HTMLElement>(*node));
         }
       }
       return nullptr;
     }
 
-    KRYS_NODISCARD RefPtr<html::HTMLElement> LastInSpecialElement(const dom::Position &position) noexcept
+    KRYS_NODISCARD RefPtr<HTMLElement> LastInSpecialElement(const dom::Position &position) noexcept
     {
       auto *rootEditableElement = position.RootEditableElement();
       for (auto *node = position.DeprecatedNode(); node && node->RootEditableElement() == rootEditableElement;
@@ -151,13 +151,13 @@ namespace krys::boo
         if ((IsRenderedTable(node) && visiblePosition == lastInElement.Previous())
             || visiblePosition == lastInElement)
         {
-          return ShareRefPtr(&Downcast<html::HTMLElement>(*node));
+          return ShareRefPtr(&Downcast<HTMLElement>(*node));
         }
       }
       return nullptr;
     }
 
-    KRYS_NODISCARD std::pair<dom::Position, RefPtr<html::HTMLElement>>
+    KRYS_NODISCARD std::pair<dom::Position, RefPtr<HTMLElement>>
       PositionBeforeContainingSpecialElement(const dom::Position &position) noexcept
     {
       auto element = FirstInSpecialElement(position);
@@ -175,7 +175,7 @@ namespace krys::boo
       return {result, krys::move(element)};
     }
 
-    KRYS_NODISCARD std::pair<dom::Position, RefPtr<html::HTMLElement>>
+    KRYS_NODISCARD std::pair<dom::Position, RefPtr<HTMLElement>>
       PositionAfterContainingSpecialElement(const dom::Position &position) noexcept
     {
       auto element = LastInSpecialElement(position);
@@ -193,7 +193,7 @@ namespace krys::boo
       return {result, krys::move(element)};
     }
 
-    KRYS_NODISCARD dom::Position FirstEditablePositionInNode(dom::Node *node) noexcept
+    KRYS_NODISCARD dom::Position FirstEditablePositionInNode(boo::Node *node) noexcept
     {
       krys_debug_assert(node);
       auto *next = node;
@@ -204,12 +204,12 @@ namespace krys::boo
       return next ? FirstPositionInOrBeforeNode(next) : dom::Position();
     }
 
-    KRYS_NODISCARD bool ShouldRemoveContentOnly(const dom::Node &node) noexcept
+    KRYS_NODISCARD bool ShouldRemoveContentOnly(const boo::Node &node) noexcept
     {
       return IsTableStructureNode(node) || node.IsRootEditableElement();
     }
 
-    void UpdatePositionForTextRemoval(dom::Node *node, int32 offset, int32 count,
+    void UpdatePositionForTextRemoval(boo::Node *node, int32 offset, int32 count,
                                       dom::Position &position) noexcept
     {
       if (position.GetAnchorType() != dom::Position::AnchorType::PositionIsOffsetInAnchor
@@ -228,12 +228,12 @@ namespace krys::boo
       }
     }
 
-    KRYS_NODISCARD dom::Element *NextElement(dom::Node &current, const dom::Node *stayWithin) noexcept
+    KRYS_NODISCARD Element *NextElement(boo::Node &current, const boo::Node *stayWithin) noexcept
     {
       for (auto *node = TreeQueries::Next(current, stayWithin); node;
            node = TreeQueries::Next(*node, stayWithin))
       {
-        if (auto *element = DynamicDowncast<dom::Element>(*node))
+        if (auto *element = DynamicDowncast<Element>(*node))
         {
           return element;
         }
@@ -242,7 +242,7 @@ namespace krys::boo
     }
   }
 
-  DeleteSelectionCommand::DeleteSelectionCommand(dom::Document &document, bool smartDelete,
+  DeleteSelectionCommand::DeleteSelectionCommand(Document &document, bool smartDelete,
                                                  bool mergeBlocksAfterDelete, bool replace,
                                                  bool expandForSpecialElements, bool sanitizeMarkup,
                                                  EditAction editingAction) noexcept
@@ -266,7 +266,7 @@ namespace krys::boo
 
   DeleteSelectionCommand::~DeleteSelectionCommand() noexcept = default;
 
-  Ref<DeleteSelectionCommand> DeleteSelectionCommand::Create(dom::Document &document, bool smartDelete,
+  Ref<DeleteSelectionCommand> DeleteSelectionCommand::Create(Document &document, bool smartDelete,
                                                              bool mergeBlocksAfterDelete, bool replace,
                                                              bool expandForSpecialElements,
                                                              bool sanitizeMarkup,
@@ -463,8 +463,8 @@ namespace krys::boo
     _upstreamEnd = end.Upstream();
     _downstreamEnd = end.Downstream();
 
-    _startRoot = ShareRefPtr<dom::Node>(EditableRootForPosition(start));
-    _endRoot = ShareRefPtr<dom::Node>(EditableRootForPosition(end));
+    _startRoot = ShareRefPtr<boo::Node>(EditableRootForPosition(start));
+    _endRoot = ShareRefPtr<boo::Node>(EditableRootForPosition(end));
 
     _startTableRow = EnclosingNodeOfType(start, &IsTableRow);
     _endTableRow = EnclosingNodeOfType(end, &IsTableRow);
@@ -576,14 +576,14 @@ namespace krys::boo
     // However, if typing style was previously set from another text node at the previous
     // position (now deleted), we need to clear that style as well.
     if (_upstreamStart.DeprecatedNode() == _downstreamEnd.DeprecatedNode()
-        && Is<dom::Text>(*_upstreamStart.DeprecatedNode()))
+        && Is<Text>(*_upstreamStart.DeprecatedNode()))
     {
       GetDocument().Selection().ClearTypingStyle();
       return;
     }
 
     auto *startNode = _selectionToDelete.Start().DeprecatedNode();
-    if (!Is<dom::Text>(*startNode) && !IsHTMLElementOfType(startNode, html::TagName::img)
+    if (!Is<Text>(*startNode) && !IsHTMLElementOfType(startNode, html::TagName::img)
         && !IsHTMLElementOfType(startNode, html::TagName::br))
     {
       return;
@@ -597,10 +597,10 @@ namespace krys::boo
 
   bool DeleteSelectionCommand::HandleSpecialCaseBRDelete() noexcept
   {
-    RefPtr<dom::Node> nodeAfterUpstreamStart = ShareRefPtr(_upstreamStart.ComputeNodeAfterPosition());
-    RefPtr<dom::Node> nodeAfterDownstreamStart = ShareRefPtr(_downstreamStart.ComputeNodeAfterPosition());
+    RefPtr<boo::Node> nodeAfterUpstreamStart = ShareRefPtr(_upstreamStart.ComputeNodeAfterPosition());
+    RefPtr<boo::Node> nodeAfterDownstreamStart = ShareRefPtr(_downstreamStart.ComputeNodeAfterPosition());
     // Upstream end will appear before BR due to canonicalization
-    RefPtr<dom::Node> nodeAfterUpstreamEnd = ShareRefPtr(_upstreamEnd.ComputeNodeAfterPosition());
+    RefPtr<boo::Node> nodeAfterUpstreamEnd = ShareRefPtr(_upstreamEnd.ComputeNodeAfterPosition());
 
     if (!nodeAfterUpstreamStart || !nodeAfterDownstreamStart)
     {
@@ -639,7 +639,7 @@ namespace krys::boo
     return false;
   }
 
-  void DeleteSelectionCommand::InsertBlockPlaceholderForTableCellIfNeeded(dom::Element &element) noexcept
+  void DeleteSelectionCommand::InsertBlockPlaceholderForTableCellIfNeeded(Element &element) noexcept
   {
     // Make sure empty cell has some height.
     auto *renderer = DynamicDowncast<RenderTableCell>(element.Renderer());
@@ -651,7 +651,7 @@ namespace krys::boo
   }
 
   void DeleteSelectionCommand::RemoveNodeUpdatingStates(
-    dom::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable) noexcept
+    boo::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable) noexcept
   {
     if (&node == _startBlock)
     {
@@ -679,14 +679,14 @@ namespace krys::boo
   }
 
   void DeleteSelectionCommand::RemoveNode(
-    dom::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable) noexcept
+    boo::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable) noexcept
   {
     if (!node.ParentNode())
     {
       return;
     }
 
-    Ref<dom::Node> protectedNode = ShareRef(node);
+    Ref<boo::Node> protectedNode = ShareRef(node);
     if (_startRoot != _endRoot
         && !(node.IsDescendantOf(_startRoot.get()) && node.IsDescendantOf(_endRoot.get())))
     {
@@ -700,10 +700,10 @@ namespace krys::boo
           return;
         }
         // Search this non-editable region for editable regions to empty.
-        RefPtr<dom::Node> child = ShareRefPtr(node.FirstChild());
+        RefPtr<boo::Node> child = ShareRefPtr(node.FirstChild());
         while (child)
         {
-          RefPtr<dom::Node> nextChild = ShareRefPtr(child->NextSibling());
+          RefPtr<boo::Node> nextChild = ShareRefPtr(child->NextSibling());
           RemoveNode(*child, shouldAssumeContentIsAlwaysEditable);
           // Bail if nextChild is no longer node's child.
           if (nextChild && nextChild->ParentNode() != &node)
@@ -722,7 +722,7 @@ namespace krys::boo
     {
       // Do not remove an element of table structure; remove its contents.
       // Likewise for the root editable element.
-      RefPtr<dom::Node> child = ShareRefPtr(TreeQueries::Next(node, &*protectedNode));
+      RefPtr<boo::Node> child = ShareRefPtr(TreeQueries::Next(node, &*protectedNode));
       while (child)
       {
         if (ShouldRemoveContentOnly(*child))
@@ -730,19 +730,19 @@ namespace krys::boo
           child = ShareRefPtr(TreeQueries::Next(*child, &*protectedNode));
           continue;
         }
-        RefPtr<dom::Node> nextChild = ShareRefPtr(TreeQueries::NextSkippingChildren(*child, &*protectedNode));
+        RefPtr<boo::Node> nextChild = ShareRefPtr(TreeQueries::NextSkippingChildren(*child, &*protectedNode));
         RemoveNodeUpdatingStates(*child, shouldAssumeContentIsAlwaysEditable);
         child = krys::move(nextChild);
       }
 
-      krys_debug_assert(Is<dom::Element>(node));
-      auto &element = Downcast<dom::Element>(node);
+      krys_debug_assert(Is<Element>(node));
+      auto &element = Downcast<Element>(node);
       (void)GetDocument().UpdateLayoutIgnorePendingStylesheets();
       // Check if we need to insert a placeholder for descendant table cells.
-      RefPtr<dom::Element> descendant = ShareRefPtr(NextElement(element, &element));
+      RefPtr<Element> descendant = ShareRefPtr(NextElement(element, &element));
       while (descendant)
       {
-        RefPtr<dom::Element> nextDescendant = ShareRefPtr(NextElement(*descendant, &element));
+        RefPtr<Element> nextDescendant = ShareRefPtr(NextElement(*descendant, &element));
         InsertBlockPlaceholderForTableCellIfNeeded(*descendant);
         descendant = krys::move(nextDescendant);
       }
@@ -752,7 +752,7 @@ namespace krys::boo
     RemoveNodeUpdatingStates(node, shouldAssumeContentIsAlwaysEditable);
   }
 
-  void DeleteSelectionCommand::DeleteTextFromNode(dom::Text &node, uint32 offset, uint32 count) noexcept
+  void DeleteSelectionCommand::DeleteTextFromNode(Text &node, uint32 offset, uint32 count) noexcept
   {
     // FIXME: Update the endpoints of the range being deleted.
     auto signedOffset = static_cast<int32>(offset);
@@ -773,7 +773,7 @@ namespace krys::boo
       return;
     }
     auto nodes = dom::IntersectingNodes(*range).begin();
-    List<Ref<dom::Element>> stylingElements;
+    List<Ref<Element>> stylingElements;
     while (nodes)
     {
       auto &node = *nodes;
@@ -782,7 +782,7 @@ namespace krys::boo
       if (shouldMove)
       {
         nodes.AdvanceSkippingChildren();
-        stylingElements.push_back(ShareRef(Downcast<dom::Element>(node)));
+        stylingElements.push_back(ShareRef(Downcast<Element>(node)));
       }
       else
       {
@@ -791,7 +791,7 @@ namespace krys::boo
     }
     for (auto &stylingElement : stylingElements)
     {
-      RefPtr<dom::Element> rootEditableElement = ShareRefPtr(stylingElement->RootEditableElement());
+      RefPtr<Element> rootEditableElement = ShareRefPtr(stylingElement->RootEditableElement());
       if (!rootEditableElement)
       {
         continue;
@@ -809,7 +809,7 @@ namespace krys::boo
     }
 
     int32 startOffset = _upstreamStart.DeprecatedEditingOffset();
-    RefPtr<dom::Node> startNode = ShareRefPtr(_upstreamStart.DeprecatedNode());
+    RefPtr<boo::Node> startNode = ShareRefPtr(_upstreamStart.DeprecatedNode());
 
     MakeStylingElementsDirectChildrenOfEditableRootToPreventStyleLoss();
 
@@ -828,7 +828,7 @@ namespace krys::boo
     int32 startNodeCaretMaxOffset = CaretMaxOffset(*startNode);
     if (startOffset >= startNodeCaretMaxOffset)
     {
-      if (auto *text = DynamicDowncast<dom::Text>(*startNode))
+      if (auto *text = DynamicDowncast<Text>(*startNode))
       {
         if (text->Length() > static_cast<size_t>(startNodeCaretMaxOffset))
         {
@@ -855,7 +855,7 @@ namespace krys::boo
     {
       if (_downstreamEnd.DeprecatedEditingOffset() - startOffset > 0)
       {
-        if (auto *text = DynamicDowncast<dom::Text>(*startNode))
+        if (auto *text = DynamicDowncast<Text>(*startNode))
         {
           // in a text node that needs to be trimmed
           DeleteTextFromNode(*text, static_cast<uint32>(startOffset),
@@ -880,11 +880,11 @@ namespace krys::boo
       bool startNodeWasDescendantOfEndNode =
         _upstreamStart.DeprecatedNode()->IsDescendantOf(_downstreamEnd.DeprecatedNode());
       // The selection to delete spans more than one node.
-      RefPtr<dom::Node> node = startNode;
+      RefPtr<boo::Node> node = startNode;
 
       if (startOffset > 0)
       {
-        if (auto *text = DynamicDowncast<dom::Text>(*startNode))
+        if (auto *text = DynamicDowncast<Text>(*startNode))
         {
           // in a text node that needs to be trimmed
           DeleteTextFromNode(*text, static_cast<uint32>(startOffset),
@@ -903,7 +903,7 @@ namespace krys::boo
       }
       else if (startNode == _upstreamEnd.DeprecatedNode())
       {
-        if (auto *text = DynamicDowncast<dom::Text>(*startNode))
+        if (auto *text = DynamicDowncast<Text>(*startNode))
         {
           DeleteTextFromNode(*text, 0, static_cast<uint32>(_upstreamEnd.DeprecatedEditingOffset()));
         }
@@ -925,7 +925,7 @@ namespace krys::boo
           auto *parentNode = node->ParentNode();
           if (!parentNode || CanHaveChildrenForEditing(*parentNode))
           {
-            RefPtr<dom::Node> nextNode = ShareRefPtr(TreeQueries::NextSkippingChildren(*node));
+            RefPtr<boo::Node> nextNode = ShareRefPtr(TreeQueries::NextSkippingChildren(*node));
             // if we just removed a node from the end container, update end position so the
             // check above will work
             UpdatePositionForNodeRemoval(_downstreamEnd, *node);
@@ -961,7 +961,7 @@ namespace krys::boo
         }
         else
         {
-          if (auto *text = DynamicDowncast<dom::Text>(*_downstreamEnd.DeprecatedNode()))
+          if (auto *text = DynamicDowncast<Text>(*_downstreamEnd.DeprecatedNode()))
           {
             // in a text node that needs to be trimmed
             if (_downstreamEnd.DeprecatedEditingOffset() > 0)
@@ -990,10 +990,10 @@ namespace krys::boo
                 offset = n->ComputeNodeIndex() + 1;
               }
             }
-            RefPtr<dom::Node> downstreamEndNode = ShareRefPtr(_downstreamEnd.DeprecatedNode());
+            RefPtr<boo::Node> downstreamEndNode = ShareRefPtr(_downstreamEnd.DeprecatedNode());
             RemoveChildrenInRange(*downstreamEndNode, offset,
                                   static_cast<uint32>(_downstreamEnd.DeprecatedEditingOffset()));
-            _downstreamEnd = dom::MakeDeprecatedLegacyPosition(RefPtr<dom::Node>(downstreamEndNode), offset);
+            _downstreamEnd = dom::MakeDeprecatedLegacyPosition(RefPtr<boo::Node>(downstreamEndNode), offset);
           }
         }
       }
@@ -1006,7 +1006,7 @@ namespace krys::boo
 
     // The no-break space is longer than the space it replaces, so offsets after it in the same text node
     // move.
-    auto replaceWithNonBreakingSpace = [&](dom::Text &textNode, uint32 offset)
+    auto replaceWithNonBreakingSpace = [&](Text &textNode, uint32 offset)
     {
       ReplaceTextInNodePreservingMarkers(textNode, offset, 1, NonBreakingSpaceString());
       const auto delta = static_cast<int32>(NonBreakingSpaceString().size()) - 1;
@@ -1016,7 +1016,7 @@ namespace krys::boo
             && position->DeprecatedEditingOffset() > static_cast<int32>(offset))
         {
           *position = dom::MakeDeprecatedLegacyPosition(
-            ShareRefPtr<dom::Node>(&textNode),
+            ShareRefPtr<boo::Node>(&textNode),
             static_cast<uint32>(position->DeprecatedEditingOffset() + delta));
         }
       }
@@ -1026,7 +1026,7 @@ namespace krys::boo
     // VisiblePosition::characterBefore
     if (_leadingWhitespace.IsNotNull() && !_leadingWhitespace.IsRenderedCharacter())
     {
-      if (auto *textNode = DynamicDowncast<dom::Text>(*_leadingWhitespace.DeprecatedNode()))
+      if (auto *textNode = DynamicDowncast<Text>(*_leadingWhitespace.DeprecatedNode()))
       {
         krys_debug_assert(!textNode->Renderer() || textNode->Renderer()->Style().CollapseWhiteSpace());
         replaceWithNonBreakingSpace(*textNode,
@@ -1035,7 +1035,7 @@ namespace krys::boo
     }
     if (_trailingWhitespace.IsNotNull() && !_trailingWhitespace.IsRenderedCharacter())
     {
-      if (auto *textNode = DynamicDowncast<dom::Text>(*_trailingWhitespace.DeprecatedNode()))
+      if (auto *textNode = DynamicDowncast<Text>(*_trailingWhitespace.DeprecatedNode()))
       {
         krys_debug_assert(!textNode->Renderer() || textNode->Renderer()->Style().CollapseWhiteSpace());
         replaceWithNonBreakingSpace(*textNode,
@@ -1084,7 +1084,7 @@ namespace krys::boo
 
     // m_downstreamEnd's block has been emptied out by deletion.  There is no content inside of it to
     // move, so just remove it.
-    RefPtr<dom::Element> endBlock = EnclosingBlock(ShareRefPtr(_downstreamEnd.DeprecatedNode()));
+    RefPtr<Element> endBlock = EnclosingBlock(ShareRefPtr(_downstreamEnd.DeprecatedNode()));
     if (!endBlock)
     {
       return;
@@ -1130,7 +1130,7 @@ namespace krys::boo
       if (IsHTMLElementOfType(mergeDestination.DeepEquivalent().Downstream().DeprecatedNode(),
                               html::TagName::br))
       {
-        RefPtr<dom::Node> nodeToRemove =
+        RefPtr<boo::Node> nodeToRemove =
           ShareRefPtr(mergeDestination.DeepEquivalent().Downstream().DeprecatedNode());
         RemoveNodeAndPruneAncestors(*nodeToRemove);
         _endingPosition = startOfParagraphToMove.DeepEquivalent();
@@ -1178,10 +1178,10 @@ namespace krys::boo
     // CompositeEditCommand::removeNode and adjusts selection.
     if (_endTableRow && _endTableRow->IsConnected() && _endTableRow != _startTableRow)
     {
-      RefPtr<dom::Node> row = ShareRefPtr(_endTableRow->PreviousSibling());
+      RefPtr<boo::Node> row = ShareRefPtr(_endTableRow->PreviousSibling());
       while (row && row != _startTableRow)
       {
-        RefPtr<dom::Node> previousRow = ShareRefPtr(row->PreviousSibling());
+        RefPtr<boo::Node> previousRow = ShareRefPtr(row->PreviousSibling());
         if (IsTableRowEmpty(*row))
         {
           RemoveNodeUpdatingStates(*row, DoNotAssumeContentIsAlwaysEditable);
@@ -1193,10 +1193,10 @@ namespace krys::boo
     // Remove empty rows after the start row.
     if (_startTableRow && _startTableRow->IsConnected() && _startTableRow != _endTableRow)
     {
-      RefPtr<dom::Node> row = ShareRefPtr(_startTableRow->NextSibling());
+      RefPtr<boo::Node> row = ShareRefPtr(_startTableRow->NextSibling());
       while (row && row != _endTableRow)
       {
-        RefPtr<dom::Node> nextRow = ShareRefPtr(row->NextSibling());
+        RefPtr<boo::Node> nextRow = ShareRefPtr(row->NextSibling());
         if (IsTableRowEmpty(*row))
         {
           RemoveNodeUpdatingStates(*row, DoNotAssumeContentIsAlwaysEditable);
@@ -1205,7 +1205,7 @@ namespace krys::boo
       }
     }
 
-    RefPtr<dom::Node> endTableRow = _startTableRow;
+    RefPtr<boo::Node> endTableRow = _startTableRow;
     if (endTableRow && endTableRow->IsConnected() && endTableRow != _startTableRow)
     {
       if (IsTableRowEmpty(*endTableRow))
@@ -1262,12 +1262,12 @@ namespace krys::boo
   // This method removes div elements with no attributes that have only one child or no children at all.
   void DeleteSelectionCommand::RemoveRedundantBlocks() noexcept
   {
-    RefPtr<dom::Node> node = ShareRefPtr(_endingPosition.GetContainerNode());
+    RefPtr<boo::Node> node = ShareRefPtr(_endingPosition.GetContainerNode());
     if (!node)
     {
       return;
     }
-    RefPtr<dom::Element> rootNode = ShareRefPtr(node->RootEditableElement());
+    RefPtr<Element> rootNode = ShareRefPtr(node->RootEditableElement());
 
     while (node && node != rootNode)
     {
@@ -1283,7 +1283,7 @@ namespace krys::boo
       }
       else
       {
-        node = ShareRefPtr<dom::Node>(node->ParentNode());
+        node = ShareRefPtr<boo::Node>(node->ParentNode());
       }
     }
   }

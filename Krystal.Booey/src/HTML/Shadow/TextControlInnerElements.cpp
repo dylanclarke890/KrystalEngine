@@ -45,12 +45,12 @@ namespace krys::boo::html
 {
 #pragma region TextControlInnerContainer
 
-  TextControlInnerContainer::TextControlInnerContainer(dom::Document &document) noexcept
+  TextControlInnerContainer::TextControlInnerContainer(Document &document) noexcept
       : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
   {
   }
 
-  Ref<TextControlInnerContainer> TextControlInnerContainer::Create(dom::Document &document) noexcept
+  Ref<TextControlInnerContainer> TextControlInnerContainer::Create(Document &document) noexcept
   {
     return CreateRef<TextControlInnerContainer>(document);
   }
@@ -78,12 +78,12 @@ namespace krys::boo::html
 
 #pragma region TextControlInnerElement
 
-  TextControlInnerElement::TextControlInnerElement(dom::Document &document) noexcept
+  TextControlInnerElement::TextControlInnerElement(Document &document) noexcept
       : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
   {
   }
 
-  Ref<TextControlInnerElement> TextControlInnerElement::Create(dom::Document &document) noexcept
+  Ref<TextControlInnerElement> TextControlInnerElement::Create(Document &document) noexcept
   {
     return CreateRef<TextControlInnerElement>(document);
   }
@@ -114,12 +114,12 @@ namespace krys::boo::html
 
 #pragma region TextControlInnerTextElement
 
-  TextControlInnerTextElement::TextControlInnerTextElement(dom::Document &document) noexcept
+  TextControlInnerTextElement::TextControlInnerTextElement(Document &document) noexcept
       : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
   {
   }
 
-  Ref<TextControlInnerTextElement> TextControlInnerTextElement::Create(dom::Document &document,
+  Ref<TextControlInnerTextElement> TextControlInnerTextElement::Create(Document &document,
                                                                        bool isEditable) noexcept
   {
     auto result = CreateRef<TextControlInnerTextElement>(document);
@@ -129,10 +129,10 @@ namespace krys::boo::html
 
   void TextControlInnerTextElement::UpdateInnerTextElementEditabilityImpl(bool isEditable) noexcept
   {
-    (void)SetAttribute(u8"contenteditable", dom::DOMString(isEditable ? u8"plaintext-only" : u8"false"));
+    (void)SetAttribute(u8"contenteditable", DOMString(isEditable ? u8"plaintext-only" : u8"false"));
   }
 
-  void TextControlInnerTextElement::DefaultEventHandler(dom::Event &event) noexcept
+  void TextControlInnerTextElement::DefaultEventHandler(Event &event) noexcept
   {
     // FIXME: In the future, we should add a way to have default event listeners.
     // Then we would add one to the text field's inner div, and we wouldn't need this subclass.
@@ -144,7 +144,7 @@ namespace krys::boo::html
       // cause events to be sent to the TextControlInnerTextElement. To
       // prevent an infinite loop, we must check for this case before sending
       // the event up the chain.
-      if (RefPtr<dom::Element> host = ShareRefPtr(dom::TreeQueries::ShadowHost(*this)))
+      if (RefPtr<Element> host = ShareRefPtr(dom::TreeQueries::ShadowHost(*this)))
       {
         host->DefaultEventHandler(event);
       }
@@ -181,12 +181,12 @@ namespace krys::boo::html
 
 #pragma region TextControlPlaceholderElement
 
-  TextControlPlaceholderElement::TextControlPlaceholderElement(dom::Document &document) noexcept
+  TextControlPlaceholderElement::TextControlPlaceholderElement(Document &document) noexcept
       : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
   {
   }
 
-  Ref<TextControlPlaceholderElement> TextControlPlaceholderElement::Create(dom::Document &document) noexcept
+  Ref<TextControlPlaceholderElement> TextControlPlaceholderElement::Create(Document &document) noexcept
   {
     auto element = CreateRef<TextControlPlaceholderElement>(document);
     element->SetUserAgentPart(css::user_agent_parts::Placeholder());
@@ -235,13 +235,12 @@ namespace krys::boo::html
     }
   }
 
-  SearchFieldResultsButtonElement::SearchFieldResultsButtonElement(dom::Document &document) noexcept
+  SearchFieldResultsButtonElement::SearchFieldResultsButtonElement(Document &document) noexcept
       : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
   {
   }
 
-  Ref<SearchFieldResultsButtonElement>
-    SearchFieldResultsButtonElement::Create(dom::Document &document) noexcept
+  Ref<SearchFieldResultsButtonElement> SearchFieldResultsButtonElement::Create(Document &document) noexcept
   {
     return CreateRef<SearchFieldResultsButtonElement>(document);
   }
@@ -276,13 +275,13 @@ namespace krys::boo::html
     return null;
   }
 
-  void SearchFieldResultsButtonElement::DefaultEventHandler(dom::Event &event) noexcept
+  void SearchFieldResultsButtonElement::DefaultEventHandler(Event &event) noexcept
   {
     // A press focuses the field and selects its text.
     if (RefPtr<HTMLInputElement> input =
           ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this))))
     {
-      auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
+      auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
       if (event.Type() == event_names::MouseDown && mouseEvent && mouseEvent->Button() == 0)
       {
         input->Focus();
@@ -301,12 +300,12 @@ namespace krys::boo::html
 
 #pragma region SearchFieldCancelButtonElement
 
-  SearchFieldCancelButtonElement::SearchFieldCancelButtonElement(dom::Document &document) noexcept
+  SearchFieldCancelButtonElement::SearchFieldCancelButtonElement(Document &document) noexcept
       : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
   {
   }
 
-  Ref<SearchFieldCancelButtonElement> SearchFieldCancelButtonElement::Create(dom::Document &document) noexcept
+  Ref<SearchFieldCancelButtonElement> SearchFieldCancelButtonElement::Create(Document &document) noexcept
   {
     auto element = CreateRef<SearchFieldCancelButtonElement>(document);
     element->SetUserAgentPart(css::user_agent_parts::WebkitSearchCancelButton());
@@ -334,7 +333,7 @@ namespace krys::boo::html
     return elementStyle;
   }
 
-  void SearchFieldCancelButtonElement::DefaultEventHandler(dom::Event &event) noexcept
+  void SearchFieldCancelButtonElement::DefaultEventHandler(Event &event) noexcept
   {
     RefPtr<HTMLInputElement> input =
       ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this)));
@@ -347,7 +346,7 @@ namespace krys::boo::html
       return;
     }
 
-    if (auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
+    if (auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
         event.Type() == event_names::MouseDown && mouseEvent && mouseEvent->Button() == 0)
     {
       input->Focus();

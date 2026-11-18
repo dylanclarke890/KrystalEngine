@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlheadingelement
   class HTMLHeadingElement : public HTMLElement
@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLHeadingElement);
 
   public:
-    HTMLHeadingElement(dom::Document &document) noexcept;
+    HTMLHeadingElement(Document &document) noexcept;
 
     /// @brief The heading's level: its number (1 for `h1`), increased by its computed heading offset, up
     /// to 9.
@@ -21,28 +21,28 @@ namespace krys::boo::html
     /// @brief The sum of the `headingoffset` values of @p element and its ancestors (crossing shadow
     /// boundaries), up to and including the nearest with `headingreset`.
     /// @see https://html.spec.whatwg.org/#get-an-element's-computed-heading-offset
-    KRYS_NODISCARD static uint64 ComputedHeadingOffset(const dom::Element &element) noexcept;
+    KRYS_NODISCARD static uint64 ComputedHeadingOffset(const Element &element) noexcept;
 
 #pragma region HTMLHeadingElement Obsolete members - https://html.spec.whatwg.org/#HTMLHeadingElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-hx-align
-    KRYS_NODISCARD dom::DOMString Align() const noexcept;
+    KRYS_NODISCARD DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hx-align
-    void Align(dom::DOMString value) noexcept;
+    void Align(DOMString value) noexcept;
 
 #pragma endregion
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLHeadingElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLHeadingElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLHeadingElement();
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    auto *element = krys::DynamicDowncast<krys::boo::html::HTMLElement>(target);
+    auto *element = krys::DynamicDowncast<krys::boo::HTMLElement>(target);
     return element && element->IsHTMLHeadingElement();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

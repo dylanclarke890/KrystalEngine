@@ -28,10 +28,7 @@
 namespace krys::boo
 {
   class RenderBoxModelObject;
-}
 
-namespace krys::boo::svg
-{
   /// @brief The base of `<text>` and `<tspan>`: their characters' absolute and relative positions and
   /// rotations.
   /// @see https://svgwg.org/svg2-draft/text.html#InterfaceSVGTextPositioningElement
@@ -103,28 +100,26 @@ namespace krys::boo::svg
     }
 
   protected:
-    SVGTextPositioningElement(dom::Document &, UniquePtr<SVGPropertyRegistry> &&,
-                              SVGElementInterface) noexcept;
+    SVGTextPositioningElement(Document &, UniquePtr<SVGPropertyRegistry> &&, SVGElementInterface) noexcept;
 
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept override;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept override;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept override;
 
   private:
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept final;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept final;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGTextPositioningElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGTextPositioningElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGTextPositioningElement();
   }

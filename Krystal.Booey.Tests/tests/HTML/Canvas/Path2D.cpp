@@ -64,7 +64,7 @@ namespace krys::boo::tests
       CHECK(bounds.Width() == Approx(20).margin(0.01));
 
       // A negative radius throws; an empty arc draws only the line to its start.
-      CHECK(path->Arc(0, 0, -1, 0, 1).GetException().Code() == dom::ExceptionCode::IndexSizeError);
+      CHECK(path->Arc(0, 0, -1, 0, 1).GetException().Code() == ExceptionCode::IndexSizeError);
       auto empty = Path2D::Create();
       REQUIRE_FALSE(empty->Arc(20, 20, 5, 1, 1).HasException());
       CHECK(empty->GetPath().CurrentPoint().X() == Approx(20 + 5 * std::cos(1.f)));
@@ -83,7 +83,7 @@ namespace krys::boo::tests
       // A zero radius is a line.
       REQUIRE_FALSE(path->ArcTo(40, 40, 0, 40, 0).HasException());
       CHECK(path->GetPath().CurrentPoint() == FloatPoint(40, 40));
-      CHECK(path->ArcTo(0, 0, 1, 1, -1).GetException().Code() == dom::ExceptionCode::IndexSizeError);
+      CHECK(path->ArcTo(0, 0, 1, 1, -1).GetException().Code() == ExceptionCode::IndexSizeError);
     }
 
     SECTION("ellipse")
@@ -93,7 +93,7 @@ namespace krys::boo::tests
       auto bounds = path->GetPath().FastBoundingRect();
       CHECK(bounds.Width() == Approx(40).margin(0.01));
       CHECK(bounds.Height() == Approx(20).margin(0.01));
-      CHECK(path->Ellipse(0, 0, -1, 1, 0, 0, 1).GetException().Code() == dom::ExceptionCode::IndexSizeError);
+      CHECK(path->Ellipse(0, 0, -1, 1, 0, 0, 1).GetException().Code() == ExceptionCode::IndexSizeError);
 
       // A flat ellipse is lines through its quarter points.
       auto flat = Path2D::Create();
@@ -115,15 +115,15 @@ namespace krys::boo::tests
     // One to four radii; more or fewer throw, as do negative ones.
     List<CanvasPath::RadiusVariant> five(5, CanvasPath::RadiusVariant(1.0));
     CHECK(path->RoundRect(0, 0, 10, 10, Span<const CanvasPath::RadiusVariant>(five)).GetException().Code()
-          == dom::ExceptionCode::RangeError);
+          == ExceptionCode::RangeError);
     CHECK(path->RoundRect(0, 0, 10, 10, Span<const CanvasPath::RadiusVariant>()).GetException().Code()
-          == dom::ExceptionCode::RangeError);
+          == ExceptionCode::RangeError);
     CHECK(path->RoundRect(0, 0, 10, 10, CanvasPath::RadiusVariant(-1.0)).GetException().Code()
-          == dom::ExceptionCode::RangeError);
+          == ExceptionCode::RangeError);
     CHECK(path->RoundRect(0, 0, 10, 10, CanvasPath::RadiusVariant(dom::DOMPointInit {.X = 1, .Y = -1}))
             .GetException()
             .Code()
-          == dom::ExceptionCode::RangeError);
+          == ExceptionCode::RangeError);
 
     // A non-finite radius adds nothing.
     auto unchanged = Path2D::Create();
@@ -158,8 +158,7 @@ namespace krys::boo::tests
     REQUIRE_FALSE(scaled->AddPath(*triangle, {.M11 = 2, .M22 = 3}).HasException());
     CHECK(scaled->GetPath().FastBoundingRect() == FloatRect(0, 0, 20, 30));
 
-    CHECK(combined->AddPath(*triangle, {.A = 1, .M11 = 2}).GetException().Code()
-          == dom::ExceptionCode::TypeError);
+    CHECK(combined->AddPath(*triangle, {.A = 1, .M11 = 2}).GetException().Code() == ExceptionCode::TypeError);
   }
 
   TEST_CASE("Path2D: SVG path data and added paths end with a new subpath at their last point",

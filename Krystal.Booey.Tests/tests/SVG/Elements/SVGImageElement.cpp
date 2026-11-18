@@ -18,7 +18,7 @@ namespace krys::boo::svg::tests
 
   namespace
   {
-    KRYS_NODISCARD SVGImageElement &ImageById(PageInFrameFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD SVGImageElement &ImageById(PageInFrameFixture &fixture, DOMStringView id) noexcept
     {
       return Downcast<SVGImageElement>(Downcast<SVGElement>(fixture.ById(id)));
     }
@@ -102,8 +102,8 @@ layer at (0,0) size 200x100
     // crossOrigin reflects the CORS setting.
     CHECK_FALSE(image.CrossOrigin());
     image.CrossOrigin(u8"bogus");
-    CHECK(image.CrossOrigin() == dom::DOMString(u8"anonymous"));
+    CHECK(image.CrossOrigin() == DOMString(u8"anonymous"));
     (void)image.SetAttribute(u8"crossorigin", u8"USE-CREDENTIALS");
-    CHECK(image.CrossOrigin() == dom::DOMString(u8"use-credentials"));
+    CHECK(image.CrossOrigin() == DOMString(u8"use-credentials"));
   }
 }

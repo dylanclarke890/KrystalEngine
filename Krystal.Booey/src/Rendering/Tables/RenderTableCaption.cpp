@@ -22,7 +22,7 @@
 
 namespace krys::boo
 {
-  RenderTableCaption::RenderTableCaption(dom::Element &element, RenderStyle &&style) noexcept
+  RenderTableCaption::RenderTableCaption(Element &element, RenderStyle &&style) noexcept
       : RenderBlockFlow(Type::TableCaption, element, krys::move(style))
   {
     krys_debug_assert(IsRenderTableCaption());

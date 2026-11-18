@@ -36,10 +36,7 @@
 namespace krys::boo
 {
   class LocalDOMWindow;
-}
 
-namespace krys::boo::dom
-{
   /// @see https://w3c.github.io/uievents/#dictdef-keyboardeventinit
   struct KeyboardEventInit : EventModifierInit
   {
@@ -171,8 +168,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::KeyboardEvent)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::KeyboardEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Event &event) noexcept
   {
     return event.IsKeyboardEvent();
   }

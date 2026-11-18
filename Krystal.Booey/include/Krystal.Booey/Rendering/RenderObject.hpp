@@ -49,12 +49,16 @@
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
-  class DocumentOrShadowRoot;
   class Element;
   class Node;
+}
+
+namespace krys::boo::dom
+{
+  class DocumentOrShadowRoot;
   class Position;
   class PositionWithAffinity;
   struct SimpleRange;
@@ -473,7 +477,7 @@ namespace krys::boo
     virtual VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
                                                        const IntRect *) noexcept;
 
-    KRYS_NODISCARD virtual VisibleInViewportState ImageVisibleInViewport(const dom::Document &) const noexcept
+    KRYS_NODISCARD virtual VisibleInViewportState ImageVisibleInViewport(const Document &) const noexcept
     {
       return VisibleInViewportState::No;
     }
@@ -730,8 +734,7 @@ namespace krys::boo
       VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
                                                  const IntRect *) noexcept final;
 
-      KRYS_NODISCARD VisibleInViewportState
-        ImageVisibleInViewport(const dom::Document &) const noexcept final;
+      KRYS_NODISCARD VisibleInViewportState ImageVisibleInViewport(const Document &) const noexcept final;
 
       void DidRemoveCachedImageClient(CachedImage &) noexcept final;
 
@@ -752,7 +755,7 @@ namespace krys::boo
       IsStickilyPositioned = 3,
     };
 
-    dom::Node &_node;
+    Node &_node;
     RenderElement *_parent {nullptr};
     RenderObject *_previous {nullptr};
     RenderObject *_next {nullptr};
@@ -770,7 +773,7 @@ namespace krys::boo
   public:
     /// @brief Anonymous objects should pass the document as their node, and they will then automatically be
     /// marked as anonymous in the constructor.
-    RenderObject(Type type, dom::Node &node, EnumSet<TypeFlag> typeFlags,
+    RenderObject(Type type, Node &node, EnumSet<TypeFlag> typeFlags,
                  TypeSpecificFlags typeSpecificFlags) noexcept;
 
     virtual ~RenderObject() noexcept;
@@ -1632,7 +1635,7 @@ namespace krys::boo
 
     /// @brief The node hit testing reports for the renderer: its node, or for anonymous renderers in
     /// generated content, the pseudo-element's.
-    KRYS_NODISCARD virtual dom::Node *NodeForHitTest() const noexcept;
+    KRYS_NODISCARD virtual Node *NodeForHitTest() const noexcept;
 
     KRYS_NODISCARD bool HasTransformOrPerspective() const noexcept;
 
@@ -1784,7 +1787,7 @@ namespace krys::boo
                                                                       const RenderObject &renderer) noexcept;
 
     /// @brief The node rendered, or null for an anonymous object.
-    KRYS_NODISCARD dom::Node *GetNode() const noexcept
+    KRYS_NODISCARD Node *GetNode() const noexcept
     {
       if (IsAnonymous())
       {
@@ -1793,18 +1796,18 @@ namespace krys::boo
       return &_node;
     }
 
-    KRYS_NODISCARD dom::Node &NodeForNonAnonymous() const noexcept
+    KRYS_NODISCARD Node &NodeForNonAnonymous() const noexcept
     {
       krys_debug_assert(!IsAnonymous());
       return _node;
     }
 
     /// @brief The node rendered, or null for an anonymous object or a pseudo-element.
-    KRYS_NODISCARD dom::Node *NonPseudoNode() const noexcept;
+    KRYS_NODISCARD Node *NonPseudoNode() const noexcept;
 
-    KRYS_NODISCARD dom::Element *NonPseudoElement() const noexcept;
+    KRYS_NODISCARD Element *NonPseudoElement() const noexcept;
 
-    KRYS_NODISCARD dom::Document &GetDocument() const noexcept;
+    KRYS_NODISCARD Document &GetDocument() const noexcept;
 
     KRYS_NODISCARD dom::DocumentOrShadowRoot &TreeScopeForSVGReferences() const noexcept;
 

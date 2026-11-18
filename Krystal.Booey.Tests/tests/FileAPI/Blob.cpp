@@ -191,7 +191,7 @@ namespace krys::boo::tests
       CHECK(file->Size() == 0);
       auto bytes = file->Bytes();
       REQUIRE(bytes.HasException());
-      CHECK(bytes.GetException().Code() == dom::ExceptionCode::NotFoundError);
+      CHECK(bytes.GetException().Code() == ExceptionCode::NotFoundError);
     }
 
     SECTION("A directory")

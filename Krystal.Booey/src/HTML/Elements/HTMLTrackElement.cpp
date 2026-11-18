@@ -2,78 +2,79 @@
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#attr-track-kind
   template <>
-  struct EnumeratedAttributeTraits<"kind", HTMLTrackElement>
+  struct html::EnumeratedAttributeTraits<"kind", HTMLTrackElement>
   {
-    using State = KindAttributeState;
-    static inline const KeywordStateMapping<State> StateMappings[] = {{u8"subtitles", State::Subtitles},
-                                                                      {u8"captions", State::Captions},
-                                                                      {u8"descriptions", State::Descriptions},
-                                                                      {u8"chapters", State::Chapters},
-                                                                      {u8"metadata", State::Metadata}};
+    using State = html::KindAttributeState;
+    static inline const html::KeywordStateMapping<State> StateMappings[] = {
+      {u8"subtitles", State::Subtitles},
+      {u8"captions", State::Captions},
+      {u8"descriptions", State::Descriptions},
+      {u8"chapters", State::Chapters},
+      {u8"metadata", State::Metadata}};
 
     constexpr static State MissingValueDefault = State::Subtitles;
     constexpr static State InvalidValueDefault = State::Metadata;
   };
 
-  HTMLTrackElement::HTMLTrackElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Track)
+  HTMLTrackElement::HTMLTrackElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Track)
   {
   }
 
 #pragma region HTMLTrackElement
 
-  dom::DOMString HTMLTrackElement::Kind() const noexcept
+  DOMString HTMLTrackElement::Kind() const noexcept
   {
-    return ReflectEnumerated<"kind", HTMLTrackElement>(*this);
+    return html::ReflectEnumerated<"kind", HTMLTrackElement>(*this);
   }
 
-  void HTMLTrackElement::Kind(dom::DOMString value) noexcept
+  void HTMLTrackElement::Kind(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"kind", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"kind", krys::move(value));
   }
 
   dom::USVString HTMLTrackElement::Src() const noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"src");
+    return html::ReflectURL<dom::USVString>(*this, u8"src");
   }
 
   void HTMLTrackElement::Src(dom::USVString value) noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
+    return html::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
-  dom::DOMString HTMLTrackElement::SrcLang() const noexcept
+  DOMString HTMLTrackElement::SrcLang() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"srclang").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"srclang").value_or(u8"");
   }
 
-  void HTMLTrackElement::SrcLang(dom::DOMString value) noexcept
+  void HTMLTrackElement::SrcLang(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"srclang", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"srclang", krys::move(value));
   }
 
-  dom::DOMString HTMLTrackElement::Label() const noexcept
+  DOMString HTMLTrackElement::Label() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"label").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"label").value_or(u8"");
   }
 
-  void HTMLTrackElement::Label(dom::DOMString value) noexcept
+  void HTMLTrackElement::Label(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"label", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"label", krys::move(value));
   }
 
   bool HTMLTrackElement::Default() const noexcept
   {
-    return Reflect<bool>(*this, u8"default");
+    return html::Reflect<bool>(*this, u8"default");
   }
 
   void HTMLTrackElement::Default(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"default", krys::move(value));
+    html::Reflect<bool>(*this, u8"default", krys::move(value));
   }
 
 #pragma endregion

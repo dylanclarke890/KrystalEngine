@@ -60,14 +60,13 @@ namespace krys::boo::html
 
   public:
     /// @see https://html.spec.whatwg.org/#rules-for-parsing-dimension-values
-    KRYS_NODISCARD static Maybe<HTMLDimension> ParseHTMLDimension(dom::DOMStringView dimensionString) noexcept
+    KRYS_NODISCARD static Maybe<HTMLDimension> ParseHTMLDimension(DOMStringView dimensionString) noexcept
     {
       return ParseHTMLDimensionInternal(dimensionString, IsMultiLength::No);
     }
 
     /// @brief As `ParseHTMLDimension`, but rejects relative lengths (`2*`).
-    KRYS_NODISCARD static Maybe<HTMLDimension>
-      ParseHTMLMultiLength(dom::DOMStringView multiLengthString) noexcept
+    KRYS_NODISCARD static Maybe<HTMLDimension> ParseHTMLMultiLength(DOMStringView multiLengthString) noexcept
     {
       return ParseHTMLDimensionInternal(multiLengthString, IsMultiLength::Yes);
     }
@@ -82,7 +81,7 @@ namespace krys::boo::html
     /// @brief Steps 1 to 7 of the rules for parsing dimension values, less the current dimension value: the
     /// value, and the position the current dimension value is given.
     KRYS_NODISCARD static Maybe<HTMLDimensionParsingResult>
-      ParseHTMLDimensionNumber(dom::DOMStringView data) noexcept
+      ParseHTMLDimensionNumber(DOMStringView data) noexcept
     {
       // 1. Let input be the string being parsed.
       // 2. Let position be a position variable for input, initially pointing at the start of input.
@@ -147,7 +146,7 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#current-dimension-value
     KRYS_NODISCARD static Maybe<HTMLDimension>
-      ParseHTMLDimensionInternal(dom::DOMStringView dimensionString, IsMultiLength isMultiLength) noexcept
+      ParseHTMLDimensionInternal(DOMStringView dimensionString, IsMultiLength isMultiLength) noexcept
     {
       auto result = ParseHTMLDimensionNumber(dimensionString);
       if (!result)

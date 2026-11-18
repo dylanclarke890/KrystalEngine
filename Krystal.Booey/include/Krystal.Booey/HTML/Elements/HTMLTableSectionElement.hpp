@@ -29,7 +29,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTablePartElement.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLTableRowElement;
 
@@ -42,7 +42,7 @@ namespace krys::boo::html
     WeakPtr<dom::HTMLCollection> _rows;
 
   public:
-    HTMLTableSectionElement(dom::Document &document) noexcept;
+    HTMLTableSectionElement(Document &document) noexcept;
 
 #pragma region HTMLTableSectionElement - https://html.spec.whatwg.org/#htmltablesectionelement
 
@@ -53,40 +53,40 @@ namespace krys::boo::html
     /// @brief A new row at @p index in the section's rows (-1 for the end): an `IndexSizeError` if @p index
     /// is less than -1 or more than the number of rows.
     /// @see https://html.spec.whatwg.org/#dom-tbody-insertrow
-    dom::ExceptionOr<Ref<HTMLTableRowElement>> InsertRow(int32 index = -1) noexcept;
+    ExceptionOr<Ref<HTMLTableRowElement>> InsertRow(int32 index = -1) noexcept;
 
     /// @brief Removes the row at @p index in the section's rows (-1 for the last, if any): an
     /// `IndexSizeError` if there's no such row.
     /// @see https://html.spec.whatwg.org/#dom-tbody-deleterow
-    dom::ExceptionOr<void> DeleteRow(int32 index) noexcept;
+    ExceptionOr<void> DeleteRow(int32 index) noexcept;
 
 #pragma endregion
 
 #pragma region HTMLTableSectionElement Obsolete members - https://html.spec.whatwg.org/#HTMLTableSectionElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-tbody-align
-    KRYS_NODISCARD dom::DOMString Align() const noexcept;
+    KRYS_NODISCARD DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tbody-align
-    void Align(dom::DOMString value) noexcept;
+    void Align(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tbody-char
-    KRYS_NODISCARD dom::DOMString Char() const noexcept;
+    KRYS_NODISCARD DOMString Char() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tbody-char
-    void Char(dom::DOMString value) noexcept;
+    void Char(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tbody-charoff
-    KRYS_NODISCARD dom::DOMString CharOff() const noexcept;
+    KRYS_NODISCARD DOMString CharOff() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tbody-charoff
-    void CharOff(dom::DOMString value) noexcept;
+    void CharOff(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tbody-valign
-    KRYS_NODISCARD dom::DOMString VAlign() const noexcept;
+    KRYS_NODISCARD DOMString VAlign() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tbody-valign
-    void VAlign(dom::DOMString value) noexcept;
+    void VAlign(DOMString value) noexcept;
 
 #pragma endregion
 
@@ -96,14 +96,14 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLTableSectionElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLTableSectionElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return Is<krys::boo::html::HTMLElement>(target)
-           && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLTableSectionElement();
+    return Is<krys::boo::HTMLElement>(target)
+           && Downcast<krys::boo::HTMLElement>(target).IsHTMLTableSectionElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLTableSectionElement();
   }

@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Numeric/CSSNumericArray.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   Ref<CSSNumericArray> CSSNumericArray::Create(List<CSSNumberish> numberishes) noexcept
   {

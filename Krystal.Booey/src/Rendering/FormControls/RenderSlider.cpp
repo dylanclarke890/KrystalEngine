@@ -26,7 +26,7 @@
 
 namespace krys::boo
 {
-  RenderSlider::RenderSlider(html::HTMLInputElement &element, RenderStyle &&style) noexcept
+  RenderSlider::RenderSlider(HTMLInputElement &element, RenderStyle &&style) noexcept
       : RenderFlexibleBox(Type::Slider, element, krys::move(style))
   {
     // We assume RenderSlider works only with <input type=range>.
@@ -62,9 +62,9 @@ namespace krys::boo
     return RenderFlexibleBox::ComputeLogicalHeight(logicalHeight, logicalTop);
   }
 
-  html::HTMLInputElement &RenderSlider::InputElement() const noexcept
+  HTMLInputElement &RenderSlider::InputElement() const noexcept
   {
-    return Downcast<html::HTMLInputElement>(NodeForNonAnonymous());
+    return Downcast<HTMLInputElement>(NodeForNonAnonymous());
   }
 
   void RenderSlider::ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,

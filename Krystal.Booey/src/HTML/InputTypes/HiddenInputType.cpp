@@ -47,11 +47,11 @@ namespace krys::boo::html
     return false;
   }
 
-  void HiddenInputType::SetValue(dom::DOMStringView sanitizedValue, bool, TextFieldEventBehavior,
+  void HiddenInputType::SetValue(DOMStringView sanitizedValue, bool, TextFieldEventBehavior,
                                  TextControlSetValueSelection) noexcept
   {
     krys_debug_assert(Element());
-    (void)Element()->SetAttribute(u8"value", dom::DOMString(sanitizedValue));
+    (void)Element()->SetAttribute(u8"value", DOMString(sanitizedValue));
   }
 
   bool HiddenInputType::AppendFormData(DOMFormData &formData) const noexcept
@@ -60,7 +60,7 @@ namespace krys::boo::html
     auto &element = *Element();
     auto name = element.Name();
 
-    if (text::IsASCIICaselessEqual(dom::DOMStringView(name), u8"_charset_"))
+    if (text::IsASCIICaselessEqual(DOMStringView(name), u8"_charset_"))
     {
       // Entry lists are UTF-8 only (see DIFFERENCES.md).
       formData.Append(name, u8"UTF-8");

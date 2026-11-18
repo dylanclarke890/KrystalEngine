@@ -23,7 +23,7 @@ namespace krys::boo::tests
     /// @brief An element's boxes as the table in the test has them: `id: bounding | client client ...`.
     KRYS_NODISCARD std::string Boxes(AnimationPageFixture &fixture, const char8_t *id)
     {
-      auto element = fixture.Document->GetElementById(dom::DOMStringView {id});
+      auto element = fixture.Document->GetElementById(DOMStringView {id});
       if (!element)
       {
         return {};
@@ -295,7 +295,7 @@ namespace krys::boo::tests
       AnimationPageFixture fixture {page(
         AbsoluteAtEnd, u8"<div style='width:300px'>aa<span id=s><i id=t>bb</i><i id=a></i></span>dd</div>")};
       (void)fixture.Document->UpdateLayout();
-      REQUIRE_FALSE(fixture.ById(u8"t").TextContent(dom::DOMString {u8"bbbb"}).HasException());
+      REQUIRE_FALSE(fixture.ById(u8"t").TextContent(DOMString {u8"bbbb"}).HasException());
       CHECK(rects(fixture) == "s: 40,0,80,20 | 40,0,80,20; a: 115,15,5,5 | 115,15,5,5");
     }
 
@@ -305,7 +305,7 @@ namespace krys::boo::tests
         page(u8"span{position:relative}#a{position:absolute;left:0;top:0;width:5px;height:5px}",
              u8"<div style='width:300px'><i id=t>aa</i><span id=s>bb<i id=a></i></span>dd</div>")};
       (void)fixture.Document->UpdateLayout();
-      REQUIRE_FALSE(fixture.ById(u8"t").TextContent(dom::DOMString {u8"aaaa"}).HasException());
+      REQUIRE_FALSE(fixture.ById(u8"t").TextContent(DOMString {u8"aaaa"}).HasException());
       CHECK(rects(fixture) == "s: 80,0,40,20 | 80,0,40,20; a: 80,0,5,5 | 80,0,5,5");
     }
 
@@ -315,7 +315,7 @@ namespace krys::boo::tests
         page(AbsoluteAtEnd, u8"<div style='width:300px'>aa<span id=s>bb<div id=b></div><i id=t>cc</i><i "
                             u8"id=a></i></span>dd</div>")};
       (void)fixture.Document->UpdateLayout();
-      REQUIRE_FALSE(fixture.ById(u8"t").TextContent(dom::DOMString {u8"cccc"}).HasException());
+      REQUIRE_FALSE(fixture.ById(u8"t").TextContent(DOMString {u8"cccc"}).HasException());
       CHECK(rects(fixture) == "s: 0,0,300,70 | 40,0,40,20 0,20,300,30 0,50,80,20; a: 75,65,5,5 | 75,65,5,5");
     }
 

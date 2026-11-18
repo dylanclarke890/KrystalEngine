@@ -11,7 +11,7 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief The text renderer of the element with @p id, after layout.
-    KRYS_NODISCARD RenderText &TextOf(ResolverFixture &fixture, dom::DOMStringView id)
+    KRYS_NODISCARD RenderText &TextOf(ResolverFixture &fixture, DOMStringView id)
     {
       (void)fixture.Document->UpdateLayout();
       auto *text = DynamicDowncast<RenderText>(fixture.ById(id).FirstChild()->Renderer());
@@ -20,7 +20,7 @@ namespace krys::boo::tests
     }
 
     /// @brief The logical width of the element with @p id's box, in a vertical writing mode.
-    KRYS_NODISCARD int LogicalWidthOf(ResolverFixture &fixture, dom::DOMStringView id)
+    KRYS_NODISCARD int LogicalWidthOf(ResolverFixture &fixture, DOMStringView id)
     {
       auto *inlineBox = DynamicDowncast<RenderInline>(fixture.ById(id).Renderer());
       REQUIRE(inlineBox);

@@ -32,15 +32,11 @@
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
   class Element;
   class KeyboardEvent;
-}
-
-namespace krys::boo
-{
   class LocalFrame;
   class UndoStep;
 
@@ -69,7 +65,7 @@ namespace krys::boo
 
     /// @brief Runs the editor command a `keydown` or `keypress` is bound to, if any.
     /// @return Whether the event was handled, so its default action is done.
-    virtual bool HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept = 0;
+    virtual bool HandleKeyboardEvent(KeyboardEvent &event) noexcept = 0;
 
     virtual void RespondToChangedContents() noexcept = 0;
 
@@ -78,24 +74,24 @@ namespace krys::boo
 
     /// @brief Called when the page dropped the input method's composition (confirming or cancelling it), so
     /// the host can tell the input method.
-    virtual void DiscardedComposition(const dom::Document &document) noexcept = 0;
+    virtual void DiscardedComposition(const Document &document) noexcept = 0;
 
     /// @brief Called after the composition was set, confirmed or cancelled.
     virtual void DidUpdateComposition() noexcept = 0;
 
     /// @brief Called before a `keydown` is dispatched: marks it handled (its default handled) if an input
     /// method handled the key, so it goes out with key code 229 and no `keypress`.
-    virtual void HandleInputMethodKeydown(dom::KeyboardEvent &event) noexcept = 0;
+    virtual void HandleInputMethodKeydown(KeyboardEvent &event) noexcept = 0;
 
     /// @brief Called after a `keydown` an input method handled was dispatched, to apply what it made of the
     /// key: the composition, or the text it confirmed.
-    virtual void DidDispatchInputMethodKeydown(dom::KeyboardEvent &) noexcept
+    virtual void DidDispatchInputMethodKeydown(KeyboardEvent &) noexcept
     {
     }
 
     /// @brief Called as the focused element changes (@p element; null when nothing is), so the host can turn
     /// its input method on for elements that use one (`Element::ShouldUseInputMethod()`) and off otherwise.
-    virtual void SetInputMethodState(dom::Element *element) noexcept = 0;
+    virtual void SetInputMethodState(Element *element) noexcept = 0;
 
     /// @brief Whether deleting and pasting whole words adds and removes the spaces around them.
     KRYS_NODISCARD virtual bool SmartInsertDeleteEnabled() noexcept = 0;
@@ -117,22 +113,22 @@ namespace krys::boo
     virtual void Redo() noexcept = 0;
 
     /// @brief Called when a text field is focused, so the host can offer to fill it (autofill).
-    virtual void TextFieldDidBeginEditing(dom::Element &element) noexcept = 0;
+    virtual void TextFieldDidBeginEditing(Element &element) noexcept = 0;
 
     /// @brief Called when a text field loses the focus.
-    virtual void TextFieldDidEndEditing(dom::Element &element) noexcept = 0;
+    virtual void TextFieldDidEndEditing(Element &element) noexcept = 0;
 
     /// @brief Called after the user changed the text of the focused text field.
-    virtual void TextDidChangeInTextField(dom::Element &element) noexcept = 0;
+    virtual void TextDidChangeInTextField(Element &element) noexcept = 0;
 
     /// @brief Lets the host handle a key in a focused text field (to move through its suggestions).
     /// @return Whether the host handled it.
-    virtual bool DoTextFieldCommandFromEvent(dom::Element &element, dom::KeyboardEvent *event) noexcept = 0;
+    virtual bool DoTextFieldCommandFromEvent(Element &element, KeyboardEvent *event) noexcept = 0;
 
-    virtual void TextWillBeDeletedInTextField(dom::Element &element) noexcept = 0;
+    virtual void TextWillBeDeletedInTextField(Element &element) noexcept = 0;
 
     /// @brief Called after the user changed the text of the focused text area.
-    virtual void TextDidChangeInTextArea(dom::Element &element) noexcept = 0;
+    virtual void TextDidChangeInTextArea(Element &element) noexcept = 0;
   };
 
   /// @brief The editor client of a page that has no host.
@@ -156,7 +152,7 @@ namespace krys::boo
       return defaultValue;
     }
 
-    bool HandleKeyboardEvent(dom::KeyboardEvent &) noexcept final
+    bool HandleKeyboardEvent(KeyboardEvent &) noexcept final
     {
       return false;
     }
@@ -169,7 +165,7 @@ namespace krys::boo
     {
     }
 
-    void DiscardedComposition(const dom::Document &) noexcept final
+    void DiscardedComposition(const Document &) noexcept final
     {
     }
 
@@ -177,11 +173,11 @@ namespace krys::boo
     {
     }
 
-    void HandleInputMethodKeydown(dom::KeyboardEvent &) noexcept final
+    void HandleInputMethodKeydown(KeyboardEvent &) noexcept final
     {
     }
 
-    void SetInputMethodState(dom::Element *) noexcept final
+    void SetInputMethodState(Element *) noexcept final
     {
     }
 
@@ -220,28 +216,28 @@ namespace krys::boo
     {
     }
 
-    void TextFieldDidBeginEditing(dom::Element &) noexcept final
+    void TextFieldDidBeginEditing(Element &) noexcept final
     {
     }
 
-    void TextFieldDidEndEditing(dom::Element &) noexcept final
+    void TextFieldDidEndEditing(Element &) noexcept final
     {
     }
 
-    void TextDidChangeInTextField(dom::Element &) noexcept final
+    void TextDidChangeInTextField(Element &) noexcept final
     {
     }
 
-    bool DoTextFieldCommandFromEvent(dom::Element &, dom::KeyboardEvent *) noexcept final
+    bool DoTextFieldCommandFromEvent(Element &, KeyboardEvent *) noexcept final
     {
       return false;
     }
 
-    void TextWillBeDeletedInTextField(dom::Element &) noexcept final
+    void TextWillBeDeletedInTextField(Element &) noexcept final
     {
     }
 
-    void TextDidChangeInTextArea(dom::Element &) noexcept final
+    void TextDidChangeInTextArea(Element &) noexcept final
     {
     }
   };

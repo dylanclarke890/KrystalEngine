@@ -20,7 +20,7 @@ namespace krys::boo::html
   public:
     /// @brief The document element, if it's an html element.
     /// @see https://html.spec.whatwg.org/#the-html-element-2
-    KRYS_NODISCARD static HTMLHtmlElement *GetHtmlElement(const dom::Document &document) noexcept
+    KRYS_NODISCARD static HTMLHtmlElement *GetHtmlElement(const Document &document) noexcept
     {
       auto documentElement = document.DocumentElement();
       if (!Is<HTMLHtmlElement>(documentElement))
@@ -33,7 +33,7 @@ namespace krys::boo::html
 
     /// @brief The first head element that is a child of the html element.
     /// @see https://html.spec.whatwg.org/#the-head-element-2
-    KRYS_NODISCARD static HTMLHeadElement *GetHeadElement(const dom::Document &document) noexcept
+    KRYS_NODISCARD static HTMLHeadElement *GetHeadElement(const Document &document) noexcept
     {
       auto *html = GetHtmlElement(document);
       if (html == nullptr)
@@ -48,16 +48,16 @@ namespace krys::boo::html
 
     /// @brief The first title element in the document, in tree order.
     /// @see https://html.spec.whatwg.org/#the-title-element-2
-    KRYS_NODISCARD static HTMLTitleElement *GetTitleElement(const dom::Document &document) noexcept
+    KRYS_NODISCARD static HTMLTitleElement *GetTitleElement(const Document &document) noexcept
     {
-      auto descendants = dom::DescendantRange(const_cast<dom::Document &>(document));
+      auto descendants = dom::DescendantRange(const_cast<Document &>(document));
       auto title = dom::FirstOfType<HTMLTitleElement>(descendants);
       return title == std::ranges::end(descendants) ? nullptr : &Downcast<HTMLTitleElement>(*title);
     }
 
     /// @brief The first of the html element's children that is a body or frameset element.
     /// @see https://html.spec.whatwg.org/#the-body-element-2
-    KRYS_NODISCARD static HTMLElement *GetBodyElement(const dom::Document &document) noexcept
+    KRYS_NODISCARD static HTMLElement *GetBodyElement(const Document &document) noexcept
     {
       auto *html = GetHtmlElement(document);
       if (html == nullptr)

@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmldivelement
   class HTMLDivElement : public HTMLElement
@@ -10,30 +10,29 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLDivElement);
 
   public:
-    HTMLDivElement(dom::Document &document) noexcept;
+    HTMLDivElement(Document &document) noexcept;
 
 #pragma region HTMLDivElement Obsolete members - https://html.spec.whatwg.org/#HTMLDivElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-div-align
-    KRYS_NODISCARD dom::DOMString Align() const noexcept;
+    KRYS_NODISCARD DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-div-align
-    void Align(dom::DOMString value) noexcept;
+    void Align(DOMString value) noexcept;
 
 #pragma endregion
 
   protected:
-    HTMLDivElement(dom::Document &document, dom::NodeFlags nodeFlags) noexcept;
+    HTMLDivElement(Document &document, dom::NodeFlags nodeFlags) noexcept;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLDivElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLDivElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLDivElement();
   }

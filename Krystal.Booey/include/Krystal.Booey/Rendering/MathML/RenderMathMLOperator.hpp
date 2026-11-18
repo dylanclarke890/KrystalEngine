@@ -34,10 +34,7 @@
 
 namespace krys::boo
 {
-  namespace mathml
-  {
-    class MathMLOperatorElement;
-  }
+  class MathMLOperatorElement;
 
   /// @brief The renderer of `<mo>`: a token spaced and stretched as its operator properties say, drawn from
   /// the font's larger glyphs when it stretches or is a large operator.
@@ -55,11 +52,11 @@ namespace krys::boo
     MathOperator _mathOperator;
 
   public:
-    RenderMathMLOperator(mathml::MathMLOperatorElement &element, RenderStyle &&style) noexcept;
+    RenderMathMLOperator(boo::MathMLOperatorElement &element, RenderStyle &&style) noexcept;
 
     ~RenderMathMLOperator() noexcept override;
 
-    KRYS_NODISCARD mathml::MathMLOperatorElement &GetElement() const noexcept;
+    KRYS_NODISCARD boo::MathMLOperatorElement &GetElement() const noexcept;
 
     void StretchTo(LayoutUnit heightAboveBaseline, LayoutUnit depthBelowBaseline) noexcept;
 
@@ -82,13 +79,13 @@ namespace krys::boo
       return _isStretchWidthLocked;
     }
 
-    KRYS_NODISCARD bool HasOperatorFlag(mathml::MathMLOperatorDictionary::Flag flag) const noexcept;
+    KRYS_NODISCARD bool HasOperatorFlag(MathMLOperatorDictionary::Flag flag) const noexcept;
 
     KRYS_NODISCARD bool IsLargeOperatorInDisplayStyle() const noexcept;
 
     KRYS_NODISCARD bool ShouldMoveLimits() const noexcept
     {
-      return HasOperatorFlag(mathml::MathMLOperatorDictionary::MovableLimits);
+      return HasOperatorFlag(MathMLOperatorDictionary::MovableLimits);
     }
 
     KRYS_NODISCARD bool IsVertical() const noexcept;
@@ -106,7 +103,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsStretchy() const noexcept
     {
-      return TextContent() && HasOperatorFlag(mathml::MathMLOperatorDictionary::Stretchy);
+      return TextContent() && HasOperatorFlag(MathMLOperatorDictionary::Stretchy);
     }
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept final

@@ -19,8 +19,7 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief The first text box of the block with id @p id.
-    KRYS_NODISCARD const layout::InlineTextBox &TextBoxOf(ResolverFixture &fixture,
-                                                          dom::DOMStringView id) noexcept
+    KRYS_NODISCARD const layout::InlineTextBox &TextBoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       auto &root = RootBoxOf(fixture, id);
       const layout::InlineTextBox *textBox = nullptr;
@@ -37,7 +36,7 @@ namespace krys::boo::tests
     {
       layout::InlineContentCache Cache;
 
-      Items(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+      Items(ResolverFixture &fixture, DOMStringView id) noexcept
       {
         layout::InlineItemsBuilder(Cache, RootBoxOf(fixture, id)).Build({});
       }
@@ -247,8 +246,7 @@ namespace krys::boo::tests
 
     SECTION("White space")
     {
-      auto check =
-        [&](dom::DOMStringView id, bool preserveSpaces, bool preserveNewline, bool wraps, bool hangs)
+      auto check = [&](DOMStringView id, bool preserveSpaces, bool preserveNewline, bool wraps, bool hangs)
       {
         auto &box = TextBoxOf(fixture, id);
         CHECK(TextUtil::ShouldPreserveSpacesAndTabs(box) == preserveSpaces);

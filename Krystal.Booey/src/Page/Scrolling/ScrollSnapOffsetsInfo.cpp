@@ -516,7 +516,7 @@ namespace krys::boo
           LayoutPoint(areaOriginRelativeToSnapPort.Width(), areaOriginRelativeToSnapPort.Height())))),
         scrollSnapArea.Size());
       info.SnapAreas.push_back(areaAsOffsets);
-      info.SnapAreaTargets.push_back(CreateWeakPtr<dom::Element>(child->GetElement()));
+      info.SnapAreaTargets.push_back(CreateWeakPtr<boo::Element>(child->GetElement()));
       auto areaIndex = static_cast<uint32>(info.SnapAreas.size() - 1);
 
       if (snapsHorizontally)

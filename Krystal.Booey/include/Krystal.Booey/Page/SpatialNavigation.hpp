@@ -26,22 +26,14 @@
 #include "Krystal.Core/Types/WeakPtr.hpp"
 #include <limits>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class Document;
   class Element;
-  class Node;
-}
-
-namespace krys::boo::html
-{
   class HTMLAreaElement;
-}
-
-namespace krys::boo
-{
   class LocalFrame;
+  class Node;
 
   KRYS_NODISCARD constexpr inline int64 MaxDistance() noexcept
   {
@@ -110,9 +102,9 @@ namespace krys::boo
     // We handle differently visibleNode and FocusableNode to properly handle the areas of imagemaps,
     // where visibleNode would represent the image element and focusableNode would represent the area element.
     // In all other cases, visibleNode and focusableNode are one and the same.
-    WeakPtr<dom::Element> VisibleNode;
-    WeakPtr<dom::Element> FocusableNode;
-    WeakPtr<dom::ContainerNode> EnclosingScrollableBox;
+    WeakPtr<Element> VisibleNode;
+    WeakPtr<Element> FocusableNode;
+    WeakPtr<ContainerNode> EnclosingScrollableBox;
     int64 Distance {MaxDistance()};
     RectsAlignment Alignment {RectsAlignment::None};
     LayoutRect Rect;
@@ -121,7 +113,7 @@ namespace krys::boo
 
     FocusCandidate() noexcept = default;
 
-    FocusCandidate(dom::Element *element, dom::FocusDirection direction) noexcept;
+    FocusCandidate(Element *element, dom::FocusDirection direction) noexcept;
 
     KRYS_NODISCARD bool IsNull() const noexcept
     {
@@ -133,19 +125,19 @@ namespace krys::boo
       return VisibleNode && EnclosingScrollableBox;
     }
 
-    KRYS_NODISCARD dom::Document *Document() const noexcept;
+    KRYS_NODISCARD boo::Document *Document() const noexcept;
   };
 
   /// @brief Whether @p node is outside the viewport of its document (after scrolling a line in @p direction,
   /// if there is one).
-  KRYS_NODISCARD bool HasOffscreenRect(const dom::Node &node,
+  KRYS_NODISCARD bool HasOffscreenRect(const Node &node,
                                        dom::FocusDirection direction = dom::FocusDirection::None) noexcept;
 
   bool ScrollInDirection(LocalFrame *frame, dom::FocusDirection direction) noexcept;
 
-  bool ScrollInDirection(const dom::ContainerNode &container, dom::FocusDirection direction) noexcept;
+  bool ScrollInDirection(const ContainerNode &container, dom::FocusDirection direction) noexcept;
 
-  KRYS_NODISCARD bool CanScrollInDirection(const dom::ContainerNode &container,
+  KRYS_NODISCARD bool CanScrollInDirection(const ContainerNode &container,
                                            dom::FocusDirection direction) noexcept;
 
   KRYS_NODISCARD bool CanScrollInDirection(const LocalFrame *frame, dom::FocusDirection direction) noexcept;
@@ -162,11 +154,11 @@ namespace krys::boo
   void DistanceDataForNode(dom::FocusDirection direction, const FocusCandidate &current,
                            FocusCandidate &candidate) noexcept;
 
-  KRYS_NODISCARD dom::ContainerNode *
+  KRYS_NODISCARD ContainerNode *
     ScrollableEnclosingBoxOrParentFrameForNodeInDirection(dom::FocusDirection direction,
-                                                          dom::ContainerNode &container) noexcept;
+                                                          ContainerNode &container) noexcept;
 
-  KRYS_NODISCARD LayoutRect NodeRectInAbsoluteCoordinates(const dom::ContainerNode &containerNode,
+  KRYS_NODISCARD LayoutRect NodeRectInAbsoluteCoordinates(const ContainerNode &containerNode,
                                                           bool ignoreBorder = false) noexcept;
 
   KRYS_NODISCARD LayoutRect FrameRectInAbsoluteCoordinates(LocalFrame *frame) noexcept;
@@ -175,6 +167,6 @@ namespace krys::boo
                                                     const LayoutRect &startingRect,
                                                     LayoutUnit width = LayoutUnit()) noexcept;
 
-  KRYS_NODISCARD LayoutRect VirtualRectForAreaElementAndDirection(html::HTMLAreaElement *area,
+  KRYS_NODISCARD LayoutRect VirtualRectForAreaElementAndDirection(HTMLAreaElement *area,
                                                                   dom::FocusDirection direction) noexcept;
 }

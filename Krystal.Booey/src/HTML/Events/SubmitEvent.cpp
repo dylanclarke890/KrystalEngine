@@ -2,9 +2,9 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  SubmitEvent::SubmitEvent(dom::DOMStringAtom type, const SubmitEventInit &eventInitDict) noexcept
+  SubmitEvent::SubmitEvent(DOMStringAtom type, const SubmitEventInit &eventInitDict) noexcept
       : Event(krys::move(type), eventInitDict), _submitter(eventInitDict.Submitter)
   {
   }

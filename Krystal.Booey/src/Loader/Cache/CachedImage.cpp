@@ -284,9 +284,9 @@ namespace krys::boo
 
     if (RefPtr<Image> image = _image)
     {
-      if (auto *svgImage = DynamicDowncast<svg::SVGImage>(*image))
+      if (auto *svgImage = DynamicDowncast<SVGImage>(*image))
       {
-        _svgImageCache = CreateUnique<svg::SVGImageCache>(svgImage);
+        _svgImageCache = CreateUnique<SVGImageCache>(svgImage);
       }
 
       // Send queued container size requests.

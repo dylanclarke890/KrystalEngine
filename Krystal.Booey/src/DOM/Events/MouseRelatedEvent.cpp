@@ -32,7 +32,7 @@
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include <cmath>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   namespace
   {

@@ -26,9 +26,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGTextPositioningElement::SVGTextPositioningElement(dom::Document &document,
+  SVGTextPositioningElement::SVGTextPositioningElement(Document &document,
                                                        UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
                                                        SVGElementInterface interface) noexcept
       : SVGTextContentElement(document, krys::move(propertyRegistry), interface,
@@ -51,11 +51,10 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGTextPositioningElement::AttributeChanged(const dom::QualifiedName &name,
-                                                   Maybe<dom::DOMStringView> oldValue,
-                                                   Maybe<dom::DOMStringView> value) noexcept
+  void SVGTextPositioningElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                                   Maybe<DOMStringView> value) noexcept
   {
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
     if (name == SVGNames::XAttr())
     {
       _x->BaseVal()->Parse(string);
@@ -82,15 +81,15 @@ namespace krys::boo::svg
 
   namespace
   {
-    KRYS_NODISCARD bool IsXOrYAttribute(const dom::DOMStringAtom &localName,
-                                        const dom::DOMStringAtom &namespaceURI) noexcept
+    KRYS_NODISCARD bool IsXOrYAttribute(const DOMStringAtom &localName,
+                                        const DOMStringAtom &namespaceURI) noexcept
     {
       return namespaceURI == null && (localName == u8"x" || localName == u8"y");
     }
   }
 
   void SVGTextPositioningElement::CollectPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI, dom::DOMStringView value,
+    const DOMStringAtom &localName, const DOMStringAtom &namespaceURI, DOMStringView value,
     css::MutableStyleProperties &style) noexcept
   {
     if (IsXOrYAttribute(localName, namespaceURI))
@@ -101,7 +100,7 @@ namespace krys::boo::svg
   }
 
   bool SVGTextPositioningElement::HasPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
+    const DOMStringAtom &localName, const DOMStringAtom &namespaceURI) const noexcept
   {
     if (IsXOrYAttribute(localName, namespaceURI))
     {
@@ -110,7 +109,7 @@ namespace krys::boo::svg
     return SVGTextContentElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void SVGTextPositioningElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGTextPositioningElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {

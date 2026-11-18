@@ -6,7 +6,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   Ref<AbortSignal> AbortSignal::Abort(Maybe<::krys::Any> reason) noexcept
   {
@@ -37,7 +37,7 @@ namespace krys::boo::dom
     // holds the signal strongly whether or not it has listeners, and runs to completion on its own.
     document
       .StartTimer(std::chrono::milliseconds(milliseconds), [signal]
-                  { AbortAlgorithms::SignalAbort(*signal, Exception {ExceptionCode::TimeoutError}); })
+                  { dom::AbortAlgorithms::SignalAbort(*signal, Exception {ExceptionCode::TimeoutError}); })
       .Release();
 
     // 4. Return signal.
@@ -46,7 +46,7 @@ namespace krys::boo::dom
 
   Ref<AbortSignal> AbortSignal::Any(const List<Ref<AbortSignal>> &signals) noexcept
   {
-    return AbortAlgorithms::CreateDependentAbortSignal(signals);
+    return dom::AbortAlgorithms::CreateDependentAbortSignal(signals);
   }
 
   krys::Any AbortSignal::ReasonOrAbortError(Maybe<krys::Any> reason) noexcept

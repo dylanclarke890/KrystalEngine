@@ -31,16 +31,15 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   const MathMLElement::Length &MathMLFractionElement::LineThickness() noexcept
   {
     return CachedMathMLLength(MathMLNames::LinethicknessAttr(), _lineThickness);
   }
 
-  void MathMLFractionElement::AttributeChanged(const dom::QualifiedName &name,
-                                               Maybe<dom::DOMStringView> oldValue,
-                                               Maybe<dom::DOMStringView> value) noexcept
+  void MathMLFractionElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                               Maybe<DOMStringView> value) noexcept
   {
     if (name == MathMLNames::LinethicknessAttr())
     {

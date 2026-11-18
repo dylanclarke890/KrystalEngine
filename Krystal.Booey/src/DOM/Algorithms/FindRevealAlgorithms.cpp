@@ -45,12 +45,12 @@ namespace krys::boo::dom
       HiddenUntilFound,
     };
 
-    KRYS_NODISCARD RefPtr<html::HTMLDetailsElement> ClosedDetailsElementAncestor(const Node &node) noexcept
+    KRYS_NODISCARD RefPtr<HTMLDetailsElement> ClosedDetailsElementAncestor(const Node &node) noexcept
     {
       auto *slot = SlotAlgorithms::GetAssignedSlot(node);
       if (slot && slot->UserAgentPart() == css::user_agent_parts::DetailsContent())
       {
-        if (auto *details = DynamicDowncast<html::HTMLDetailsElement>(TreeQueries::ShadowHost(*slot)))
+        if (auto *details = DynamicDowncast<HTMLDetailsElement>(TreeQueries::ShadowHost(*slot)))
         {
           if (!details->HasAttribute(u8"open"))
           {
@@ -74,7 +74,7 @@ namespace krys::boo::dom
     }
 
     // 1. Let ancestorsToReveal be « ».
-    List<std::pair<Ref<html::HTMLElement>, RevealType>> ancestors;
+    List<std::pair<Ref<HTMLElement>, RevealType>> ancestors;
 
     // 2. Let ancestor be target.
     // 3. While ancestor has a parent node within the flat tree:
@@ -84,8 +84,7 @@ namespace krys::boo::dom
     {
       // 3.1. If ancestor has a hidden attribute in the Hidden Until Found state, then append
       //      (ancestor, "until-found") to ancestorsToReveal.
-      if (auto *element = DynamicDowncast<html::HTMLElement>(*ancestor);
-          element && element->IsHiddenUntilFound())
+      if (auto *element = DynamicDowncast<HTMLElement>(*ancestor); element && element->IsHiddenUntilFound())
       {
         ancestors.emplace_back(ShareRef(*element), RevealType::HiddenUntilFound);
       }
@@ -93,7 +92,7 @@ namespace krys::boo::dom
       //      attribute, then append (ancestor's parent node, "details") to ancestorsToReveal.
       if (auto details = ClosedDetailsElementAncestor(*ancestor))
       {
-        ancestors.emplace_back(ShareRef<html::HTMLElement>(*details), RevealType::ClosedDetails);
+        ancestors.emplace_back(ShareRef<HTMLElement>(*details), RevealType::ClosedDetails);
       }
       // 3.3. Set ancestor to the parent node of ancestor within the flat tree.
     }
@@ -118,7 +117,7 @@ namespace krys::boo::dom
             return revealed;
           }
           // 4.3.3. Set ancestorToReveal's open attribute to the empty string.
-          Downcast<html::HTMLDetailsElement>(*element).Open(true);
+          Downcast<HTMLDetailsElement>(*element).Open(true);
           revealed = true;
           break;
         // 4.2. If revealType is "until-found":

@@ -34,7 +34,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   /// @brief The element generated for an element's `::before` or `::after` pseudo-element. It isn't in the
   /// tree: its host element owns it.
@@ -78,13 +78,16 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &style) noexcept override;
   };
+}
 
+namespace krys::boo::dom
+{
   /// @brief The tag name of pseudo-elements.
   KRYS_NODISCARD const QualifiedName &PseudoElementTagName() noexcept;
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::PseudoElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::PseudoElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
     return node.IsPseudoElement();
   }

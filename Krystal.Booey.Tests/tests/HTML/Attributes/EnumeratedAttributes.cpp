@@ -52,27 +52,26 @@ namespace krys::boo::html::tests
             "[HTML][Attributes][html:canonical-keyword]")
   {
     using Popover = EnumeratedAttribute<"popover", HTMLElement>;
-    CHECK(Popover::ResolveCanonicalKeyword<Maybe<dom::DOMString>>(u8"AUTO") == u8"auto");
-    CHECK(Popover::ResolveCanonicalKeyword<Maybe<dom::DOMString>>(u8"") == u8"auto");
-    CHECK(Popover::ResolveCanonicalKeyword<Maybe<dom::DOMString>>(u8"bogus") == u8"manual");
-    CHECK(Popover::ResolveCanonicalKeyword<Maybe<dom::DOMString>>(null) == null);
+    CHECK(Popover::ResolveCanonicalKeyword<Maybe<DOMString>>(u8"AUTO") == u8"auto");
+    CHECK(Popover::ResolveCanonicalKeyword<Maybe<DOMString>>(u8"") == u8"auto");
+    CHECK(Popover::ResolveCanonicalKeyword<Maybe<DOMString>>(u8"bogus") == u8"manual");
+    CHECK(Popover::ResolveCanonicalKeyword<Maybe<DOMString>>(null) == null);
 
     // Explicitly given canonical keywords: "on" maps to the sentences state, whose keyword is "sentences".
     using Autocapitalize = EnumeratedAttribute<"autocapitalize", HTMLElement>;
-    CHECK(Autocapitalize::ResolveCanonicalKeyword<dom::DOMString>(u8"on") == u8"sentences");
-    CHECK(Autocapitalize::ResolveCanonicalKeyword<dom::DOMString>(u8"off") == u8"none");
-    CHECK(Autocapitalize::ResolveCanonicalKeyword<dom::DOMString>(null).empty());
+    CHECK(Autocapitalize::ResolveCanonicalKeyword<DOMString>(u8"on") == u8"sentences");
+    CHECK(Autocapitalize::ResolveCanonicalKeyword<DOMString>(u8"off") == u8"none");
+    CHECK(Autocapitalize::ResolveCanonicalKeyword<DOMString>(null).empty());
 
     using CrossOrigin = EnumeratedAttribute<"crossorigin", HTMLElement>;
-    CHECK(CrossOrigin::ResolveCanonicalKeyword<Maybe<dom::DOMString>>(u8"") == u8"anonymous");
+    CHECK(CrossOrigin::ResolveCanonicalKeyword<Maybe<DOMString>>(u8"") == u8"anonymous");
   }
 
   namespace
   {
     template <typename TElement>
-    KRYS_NODISCARD Ref<TElement> Create(dom::Document &document, dom::DOMStringAtom name,
-                                        const dom::DOMStringAtom &attribute = {},
-                                        Maybe<dom::DOMString> value = null)
+    KRYS_NODISCARD Ref<TElement> Create(Document &document, DOMStringAtom name,
+                                        const DOMStringAtom &attribute = {}, Maybe<DOMString> value = null)
     {
       auto element = document.CreateElement(krys::move(name)).ReleaseValue();
       if (value)
@@ -83,12 +82,11 @@ namespace krys::boo::html::tests
     }
 
     template <typename TElement>
-    void CheckCrossOriginAndFetchPriority(dom::Document &document, const dom::DOMStringAtom &name)
+    void CheckCrossOriginAndFetchPriority(Document &document, const DOMStringAtom &name)
     {
       INFO(reinterpret_cast<const char *>(name.View().data()));
       CHECK(Create<TElement>(document, name)->CrossOrigin() == null);
-      CHECK(Create<TElement>(document, name, u8"crossorigin", dom::DOMString())->CrossOrigin()
-            == u8"anonymous");
+      CHECK(Create<TElement>(document, name, u8"crossorigin", DOMString())->CrossOrigin() == u8"anonymous");
       CHECK(Create<TElement>(document, name, u8"crossorigin", u8"bogus")->CrossOrigin() == u8"anonymous");
       CHECK(Create<TElement>(document, name, u8"crossorigin", u8"USE-Credentials")->CrossOrigin()
             == u8"use-credentials");
@@ -105,16 +103,16 @@ namespace krys::boo::html::tests
     }
 
     template <typename TElement>
-    void CheckReferrerPolicy(dom::Document &document, const dom::DOMStringAtom &name)
+    void CheckReferrerPolicy(Document &document, const DOMStringAtom &name)
     {
       INFO(reinterpret_cast<const char *>(name.View().data()));
       CHECK(Create<TElement>(document, name)->ReferrerPolicy() == u8"");
       CHECK(Create<TElement>(document, name, u8"referrerpolicy", u8"No-Referrer")->ReferrerPolicy()
             == u8"no-referrer");
-      CHECK(Create<TElement>(document, name, u8"referrerpolicy",
-                             dom::DOMString(u8"strict-origin-when-cross-origin"))
-              ->ReferrerPolicy()
-            == u8"strict-origin-when-cross-origin");
+      CHECK(
+        Create<TElement>(document, name, u8"referrerpolicy", DOMString(u8"strict-origin-when-cross-origin"))
+          ->ReferrerPolicy()
+        == u8"strict-origin-when-cross-origin");
       CHECK(Create<TElement>(document, name, u8"referrerpolicy", u8"bogus")->ReferrerPolicy() == u8"");
     }
   }
@@ -124,7 +122,7 @@ namespace krys::boo::html::tests
     "[HTML][Attributes][html:cors-settings-attribute][html:attr-crossorigin-none]"
     "[html:fetch-priority-attribute][html:dom-img-crossorigin][html:dom-img-fetchpriority]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     CheckCrossOriginAndFetchPriority<HTMLImageElement>(*document, u8"img");
     CheckCrossOriginAndFetchPriority<HTMLLinkElement>(*document, u8"link");
     CheckCrossOriginAndFetchPriority<HTMLScriptElement>(*document, u8"script");
@@ -139,7 +137,7 @@ namespace krys::boo::html::tests
             "[html:dom-img-referrerpolicy][html:dom-iframe-referrerpolicy]"
             "[html:dom-area-referrerpolicy]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     CheckReferrerPolicy<HTMLAnchorElement>(*document, u8"a");
     CheckReferrerPolicy<HTMLAreaElement>(*document, u8"area");
     CheckReferrerPolicy<HTMLIFrameElement>(*document, u8"iframe");

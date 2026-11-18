@@ -32,14 +32,21 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
+namespace krys::boo
+{
+  class SVGAnimatedProperty;
+  class SVGAttributeAnimator;
+  class SVGProperty;
+}
+
 namespace krys::boo::svg
 {
   enum class AnimationMode : uint8;
   enum class CalcMode : uint8;
-  class SVGAnimatedProperty;
-  class SVGAttributeAnimator;
-  class SVGProperty;
+}
 
+namespace krys::boo
+{
   /// @brief An element's registry of the properties that reflect its attributes.
   class SVGPropertyRegistry
   {
@@ -50,30 +57,27 @@ namespace krys::boo::svg
 
     virtual void DetachAllProperties() const noexcept = 0;
 
-    KRYS_NODISCARD virtual dom::QualifiedName PropertyAttributeName(const SVGProperty &) const noexcept = 0;
+    KRYS_NODISCARD virtual QualifiedName PropertyAttributeName(const SVGProperty &) const noexcept = 0;
 
-    KRYS_NODISCARD virtual dom::QualifiedName
+    KRYS_NODISCARD virtual QualifiedName
       AnimatedPropertyAttributeName(const SVGAnimatedProperty &) const noexcept = 0;
 
-    virtual void SetAnimatedPropertyDirty(const dom::QualifiedName &,
-                                          SVGAnimatedProperty &) const noexcept = 0;
+    virtual void SetAnimatedPropertyDirty(const QualifiedName &, SVGAnimatedProperty &) const noexcept = 0;
 
-    KRYS_NODISCARD virtual Maybe<dom::DOMString> Synchronize(const dom::QualifiedName &) const noexcept = 0;
+    KRYS_NODISCARD virtual Maybe<DOMString> Synchronize(const QualifiedName &) const noexcept = 0;
 
-    KRYS_NODISCARD virtual List<Pair<dom::QualifiedName, dom::DOMString>>
-      SynchronizeAllAttributes() const noexcept = 0;
+    KRYS_NODISCARD virtual List<Pair<QualifiedName, DOMString>> SynchronizeAllAttributes() const noexcept = 0;
 
-    KRYS_NODISCARD virtual bool IsAnimatedPropertyAttribute(const dom::QualifiedName &) const noexcept = 0;
+    KRYS_NODISCARD virtual bool IsAnimatedPropertyAttribute(const QualifiedName &) const noexcept = 0;
 
-    KRYS_NODISCARD virtual bool
-      IsAnimatedStylePropertyAttribute(const dom::QualifiedName &) const noexcept = 0;
+    KRYS_NODISCARD virtual bool IsAnimatedStylePropertyAttribute(const QualifiedName &) const noexcept = 0;
 
-    KRYS_NODISCARD virtual RefPtr<SVGAttributeAnimator> CreateAnimator(const dom::QualifiedName &,
-                                                                       AnimationMode, CalcMode,
+    KRYS_NODISCARD virtual RefPtr<SVGAttributeAnimator> CreateAnimator(const QualifiedName &,
+                                                                       svg::AnimationMode, svg::CalcMode,
                                                                        bool isAccumulated,
                                                                        bool isAdditive) const noexcept = 0;
 
-    virtual void AppendAnimatedInstance(const dom::QualifiedName &attributeName,
+    virtual void AppendAnimatedInstance(const QualifiedName &attributeName,
                                         SVGAttributeAnimator &) const noexcept = 0;
   };
 }

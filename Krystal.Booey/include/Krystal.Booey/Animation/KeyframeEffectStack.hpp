@@ -34,7 +34,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -60,7 +60,7 @@ namespace krys::boo
 
   private:
     List<WeakPtr<KeyframeEffect>> _effects;
-    HashSet<css::CSSOMString> _invalidCSSAnimationNames;
+    HashSet<CSSOMString> _invalidCSSAnimationNames;
     AnimatableCSSPropertySet _acceleratedPropertiesOverriddenByCascade;
     Maybe<style::Animations> _cssAnimationList;
     bool _isSorted {true};
@@ -113,9 +113,9 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasInvalidCSSAnimationNames() const noexcept;
 
-    KRYS_NODISCARD bool ContainsInvalidCSSAnimationName(const css::CSSOMString &name) const noexcept;
+    KRYS_NODISCARD bool ContainsInvalidCSSAnimationName(const CSSOMString &name) const noexcept;
 
-    void AddInvalidCSSAnimationName(const css::CSSOMString &name) noexcept;
+    void AddInvalidCSSAnimationName(const CSSOMString &name) noexcept;
 
     void EffectAbilityToBeAcceleratedDidChange(const KeyframeEffect &effect) noexcept;
 
@@ -127,7 +127,7 @@ namespace krys::boo
                                             const RenderStyle *currentStyle) noexcept;
 
     void CascadeDidOverrideProperties(const AnimatableCSSPropertySet &overriddenProperties,
-                                      const dom::Document &document) noexcept;
+                                      const Document &document) noexcept;
 
     KRYS_NODISCARD const AnimatableCSSPropertySet &AcceleratedPropertiesOverriddenByCascade() const noexcept
     {

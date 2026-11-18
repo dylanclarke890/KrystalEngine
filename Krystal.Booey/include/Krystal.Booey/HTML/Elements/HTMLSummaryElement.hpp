@@ -23,7 +23,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLDetailsElement;
 
@@ -34,7 +34,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLSummaryElement);
 
   public:
-    explicit HTMLSummaryElement(dom::Document &document) noexcept;
+    explicit HTMLSummaryElement(Document &document) noexcept;
 
     /// @brief Whether the element is its details' summary: the first `summary` child of its `details`
     /// parent, or the default summary of a `details` element without one.
@@ -42,18 +42,18 @@ namespace krys::boo::html
     KRYS_NODISCARD bool IsActiveSummary() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-summary-element:activation-behaviour
-    void ActivationBehavior(dom::Event &event) noexcept final;
+    void ActivationBehavior(Event &event) noexcept final;
 
-    void DefaultEventHandler(dom::Event &event) noexcept final;
+    void DefaultEventHandler(Event &event) noexcept final;
 
   protected:
 #pragma region Extensibility Hooks
 
     void OnInsert() noexcept final;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept final;
 
-    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
+    void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept final;
 
 #pragma endregion
 
@@ -62,13 +62,13 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLSummaryElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLSummaryElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLSummaryElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLSummaryElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLSummaryElement();
   }

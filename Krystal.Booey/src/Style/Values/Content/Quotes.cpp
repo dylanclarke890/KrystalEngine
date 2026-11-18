@@ -30,18 +30,18 @@ namespace krys::boo::style
 {
   namespace
   {
-    KRYS_NODISCARD const css::CSSOMString &EmptyString() noexcept
+    KRYS_NODISCARD const CSSOMString &EmptyString() noexcept
     {
-      static const css::CSSOMString empty;
+      static const CSSOMString empty;
       return empty;
     }
   }
 
-  const css::CSSOMString &Quotes::OpenQuote(unsigned index) const noexcept
+  const CSSOMString &Quotes::OpenQuote(unsigned index) const noexcept
   {
     return krys::SwitchOn(
       _value,
-      [&](const Data &data) -> const css::CSSOMString &
+      [&](const Data &data) -> const CSSOMString &
       {
         auto i = index * 2;
 
@@ -51,14 +51,14 @@ namespace krys::boo::style
         }
         return data[data.size() - 2];
       },
-      [&](const auto &) -> const css::CSSOMString & { return EmptyString(); });
+      [&](const auto &) -> const CSSOMString & { return EmptyString(); });
   }
 
-  const css::CSSOMString &Quotes::CloseQuote(unsigned index) const noexcept
+  const CSSOMString &Quotes::CloseQuote(unsigned index) const noexcept
   {
     return krys::SwitchOn(
       _value,
-      [&](const Data &data) -> const css::CSSOMString &
+      [&](const Data &data) -> const CSSOMString &
       {
         auto i = (index * 2) + 1;
 
@@ -68,7 +68,7 @@ namespace krys::boo::style
         }
         return data[data.size() - 1];
       },
-      [&](const auto &) -> const css::CSSOMString & { return EmptyString(); });
+      [&](const auto &) -> const CSSOMString & { return EmptyString(); });
   }
 
   // MARK: - Conversion

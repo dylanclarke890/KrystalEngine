@@ -34,14 +34,13 @@
 
 namespace krys::boo
 {
-  Ref<DeleteFromTextNodeCommand> DeleteFromTextNodeCommand::Create(dom::Text &node, uint32 offset,
-                                                                   uint32 count,
+  Ref<DeleteFromTextNodeCommand> DeleteFromTextNodeCommand::Create(Text &node, uint32 offset, uint32 count,
                                                                    EditAction editingAction) noexcept
   {
     return CreateRef<DeleteFromTextNodeCommand>(node, offset, count, editingAction);
   }
 
-  DeleteFromTextNodeCommand::DeleteFromTextNodeCommand(dom::Text &node, uint32 offset, uint32 count,
+  DeleteFromTextNodeCommand::DeleteFromTextNodeCommand(Text &node, uint32 offset, uint32 count,
                                                        EditAction editingAction) noexcept
       : SimpleEditCommand(node.NodeDocument(), editingAction), _node(ShareRef(node)), _offset(offset),
         _count(count)

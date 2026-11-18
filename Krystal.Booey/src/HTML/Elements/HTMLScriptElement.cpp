@@ -28,43 +28,43 @@
 
 #include "Krystal.Core/Text/ASCII.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLScriptElement::HTMLScriptElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Script)
+  HTMLScriptElement::HTMLScriptElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Script)
   {
   }
 
 #pragma region HTMLScriptElement
 
-  dom::DOMString HTMLScriptElement::Type() const noexcept
+  DOMString HTMLScriptElement::Type() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"type").value_or(u8"");
   }
 
-  void HTMLScriptElement::Type(dom::DOMString value) noexcept
+  void HTMLScriptElement::Type(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"type", krys::move(value));
   }
 
   dom::USVString HTMLScriptElement::Src() const noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"src");
+    return html::ReflectURL<dom::USVString>(*this, u8"src");
   }
 
   void HTMLScriptElement::Src(dom::USVString value) noexcept
   {
-    return ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
+    return html::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
   bool HTMLScriptElement::NoModule() const noexcept
   {
-    return Reflect<bool>(*this, u8"nomodule");
+    return html::Reflect<bool>(*this, u8"nomodule");
   }
 
   void HTMLScriptElement::NoModule(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"nomodule", krys::move(value));
+    html::Reflect<bool>(*this, u8"nomodule", krys::move(value));
   }
 
   // https://html.spec.whatwg.org/#dom-script-async
@@ -73,7 +73,7 @@ namespace krys::boo::html
     // 1. If this's force async is true, then return true.
     // 2. If this's async content attribute is present, then return true.
     // 3. Return false.
-    return _forceAsync || Reflect<bool>(*this, u8"async");
+    return _forceAsync || html::Reflect<bool>(*this, u8"async");
   }
 
   // https://html.spec.whatwg.org/#dom-script-async
@@ -84,35 +84,34 @@ namespace krys::boo::html
 
     // 2. If the given value is true, then set this's async content attribute to the empty string.
     // 3. Otherwise, remove this's async content attribute.
-    Reflect<bool>(*this, u8"async", krys::move(value));
+    html::Reflect<bool>(*this, u8"async", krys::move(value));
   }
 
   bool HTMLScriptElement::Defer() const noexcept
   {
-    return Reflect<bool>(*this, u8"defer");
+    return html::Reflect<bool>(*this, u8"defer");
   }
 
   void HTMLScriptElement::Defer(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"defer", krys::move(value));
+    html::Reflect<bool>(*this, u8"defer", krys::move(value));
   }
 
   dom::DOMTokenList &HTMLScriptElement::Blocking() noexcept
   {
     if (!_blocking)
     {
-      _blocking = dom::ElementAlgorithms::CreateDOMTokenList(
-        *this, u8"blocking", [](dom::Document &, dom::DOMStringView token)
-        { return text::IsASCIICaselessEqual(token, u8"render"); });
+      _blocking =
+        dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"blocking", [](Document &, DOMStringView token)
+                                                   { return text::IsASCIICaselessEqual(token, u8"render"); });
     }
 
     return *_blocking;
   }
 
-  void HTMLScriptElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                             Maybe<dom::DOMStringView> oldValue,
-                                             Maybe<dom::DOMStringView> value,
-                                             const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLScriptElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                             Maybe<DOMStringView> value,
+                                             const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
@@ -132,7 +131,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#the-script-element:concept-node-clone-ext
-  void HTMLScriptElement::OnClone(dom::Node &copy, bool subtree) noexcept
+  void HTMLScriptElement::OnClone(Node &copy, bool subtree) noexcept
   {
     HTMLElement::OnClone(copy, subtree);
 
@@ -141,55 +140,55 @@ namespace krys::boo::html
     Downcast<HTMLScriptElement>(copy)._alreadyStarted = _alreadyStarted;
   }
 
-  Maybe<dom::DOMString> HTMLScriptElement::CrossOrigin() const noexcept
+  Maybe<DOMString> HTMLScriptElement::CrossOrigin() const noexcept
   {
-    return ReflectEnumerated<"crossorigin", HTMLElement, Maybe<dom::DOMString>>(*this);
+    return html::ReflectEnumerated<"crossorigin", HTMLElement, Maybe<DOMString>>(*this);
   }
 
-  void HTMLScriptElement::CrossOrigin(Maybe<dom::DOMString> value) noexcept
+  void HTMLScriptElement::CrossOrigin(Maybe<DOMString> value) noexcept
   {
-    Reflect<Maybe<dom::DOMString>>(*this, u8"crossorigin", krys::move(value));
+    html::Reflect<Maybe<DOMString>>(*this, u8"crossorigin", krys::move(value));
   }
 
-  dom::DOMString HTMLScriptElement::ReferrerPolicy() const noexcept
+  DOMString HTMLScriptElement::ReferrerPolicy() const noexcept
   {
-    return ReflectEnumerated<"referrerpolicy">(*this);
+    return html::ReflectEnumerated<"referrerpolicy">(*this);
   }
 
-  void HTMLScriptElement::ReferrerPolicy(dom::DOMString value) noexcept
+  void HTMLScriptElement::ReferrerPolicy(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"referrerpolicy", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"referrerpolicy", krys::move(value));
   }
 
-  dom::DOMString HTMLScriptElement::Integrity() const noexcept
+  DOMString HTMLScriptElement::Integrity() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"integrity").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"integrity").value_or(u8"");
   }
 
-  void HTMLScriptElement::Integrity(dom::DOMString value) noexcept
+  void HTMLScriptElement::Integrity(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"integrity", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"integrity", krys::move(value));
   }
 
-  dom::DOMString HTMLScriptElement::FetchPriority() const noexcept
+  DOMString HTMLScriptElement::FetchPriority() const noexcept
   {
-    return ReflectEnumerated<"fetchpriority">(*this);
+    return html::ReflectEnumerated<"fetchpriority">(*this);
   }
 
-  void HTMLScriptElement::FetchPriority(dom::DOMString value) noexcept
+  void HTMLScriptElement::FetchPriority(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"fetchpriority", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"fetchpriority", krys::move(value));
   }
 
   // https://html.spec.whatwg.org/#dom-script-text
-  dom::DOMString HTMLScriptElement::Text() const noexcept
+  DOMString HTMLScriptElement::Text() const noexcept
   {
     // The text getter steps are to return this's child text content.
     return dom::TextAlgorithms::ChildTextContent(*this);
   }
 
   // https://html.spec.whatwg.org/#dom-script-text
-  void HTMLScriptElement::Text(dom::DOMString value) noexcept
+  void HTMLScriptElement::Text(DOMString value) noexcept
   {
     // 1. (Skipped: there are no Trusted Types.)
     // 2. (Skipped: there are no Trusted Types.)
@@ -198,7 +197,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-script-supports
-  bool HTMLScriptElement::Supports(dom::DOMStringView type) noexcept
+  bool HTMLScriptElement::Supports(DOMStringView type) noexcept
   {
     // 1. If type is "classic", then return true.
     // 2. If type is "module", then return true.
@@ -212,34 +211,34 @@ namespace krys::boo::html
 
 #pragma region HTMLScriptElement Obsolete members
 
-  dom::DOMString HTMLScriptElement::Charset() const noexcept
+  DOMString HTMLScriptElement::Charset() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"charset").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"charset").value_or(u8"");
   }
 
-  void HTMLScriptElement::Charset(dom::DOMString value) noexcept
+  void HTMLScriptElement::Charset(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"charset", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"charset", krys::move(value));
   }
 
-  dom::DOMString HTMLScriptElement::Event() const noexcept
+  DOMString HTMLScriptElement::Event() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"event").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"event").value_or(u8"");
   }
 
-  void HTMLScriptElement::Event(dom::DOMString value) noexcept
+  void HTMLScriptElement::Event(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"event", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"event", krys::move(value));
   }
 
-  dom::DOMString HTMLScriptElement::HtmlFor() const noexcept
+  DOMString HTMLScriptElement::HtmlFor() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"for").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"for").value_or(u8"");
   }
 
-  void HTMLScriptElement::HtmlFor(dom::DOMString value) noexcept
+  void HTMLScriptElement::HtmlFor(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"for", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"for", krys::move(value));
   }
 
 #pragma endregion

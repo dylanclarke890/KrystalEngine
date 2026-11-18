@@ -25,10 +25,10 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Color/CSSRGB.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  dom::ExceptionOr<Ref<CSSRGB>> CSSRGB::Create(CSSColorRGBComp red, CSSColorRGBComp green,
-                                               CSSColorRGBComp blue, CSSColorPercent alpha) noexcept
+  ExceptionOr<Ref<CSSRGB>> CSSRGB::Create(CSSColorRGBComp red, CSSColorRGBComp green, CSSColorRGBComp blue,
+                                          CSSColorPercent alpha) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssrgb-cssrgb
     auto rectifiedRed = RectifyCSSColorRGBComp(krys::move(red));
@@ -66,7 +66,7 @@ namespace krys::boo::css
     return ToCSSColorComponent(_red);
   }
 
-  dom::ExceptionOr<void> CSSRGB::SetR(CSSColorRGBComp red) noexcept
+  ExceptionOr<void> CSSRGB::SetR(CSSColorRGBComp red) noexcept
   {
     auto rectified = RectifyCSSColorRGBComp(krys::move(red));
     if (rectified.HasException())
@@ -82,7 +82,7 @@ namespace krys::boo::css
     return ToCSSColorComponent(_green);
   }
 
-  dom::ExceptionOr<void> CSSRGB::SetG(CSSColorRGBComp green) noexcept
+  ExceptionOr<void> CSSRGB::SetG(CSSColorRGBComp green) noexcept
   {
     auto rectified = RectifyCSSColorRGBComp(krys::move(green));
     if (rectified.HasException())
@@ -98,7 +98,7 @@ namespace krys::boo::css
     return ToCSSColorComponent(_blue);
   }
 
-  dom::ExceptionOr<void> CSSRGB::SetB(CSSColorRGBComp blue) noexcept
+  ExceptionOr<void> CSSRGB::SetB(CSSColorRGBComp blue) noexcept
   {
     auto rectified = RectifyCSSColorRGBComp(krys::move(blue));
     if (rectified.HasException())
@@ -114,7 +114,7 @@ namespace krys::boo::css
     return ToCSSColorComponent(_alpha);
   }
 
-  dom::ExceptionOr<void> CSSRGB::SetAlpha(CSSColorPercent alpha) noexcept
+  ExceptionOr<void> CSSRGB::SetAlpha(CSSColorPercent alpha) noexcept
   {
     auto rectified = RectifyCSSColorPercent(krys::move(alpha));
     if (rectified.HasException())
@@ -125,8 +125,7 @@ namespace krys::boo::css
     return {};
   }
 
-  dom::ExceptionOr<RectifiedCSSColorComponent>
-    CSSRGB::RectifyCSSColorRGBComp(CSSColorRGBComp component) noexcept
+  ExceptionOr<RectifiedCSSColorComponent> CSSRGB::RectifyCSSColorRGBComp(CSSColorRGBComp component) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#rectify-a-csscolorrgbcomp
     // 1. If val is a double, replace it with a new unit value of (val * 100, "percent").

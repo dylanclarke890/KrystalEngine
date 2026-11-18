@@ -64,7 +64,7 @@ namespace krys::ui
     /// open.
     bool OpensNewWindow {false};
     /// @brief The element that started it: the link or the form.
-    RefPtr<boo::dom::Element> SourceElement;
+    RefPtr<boo::Element> SourceElement;
     /// @brief The mouse button that followed the link, if a click did.
     Maybe<boo::MouseButton> Button;
     /// @brief The modifier keys held as the link was followed or the form submitted.
@@ -319,7 +319,7 @@ namespace krys::ui
     /// @brief A custom element definition the view gives each document it loads.
     struct CustomElementDefinition
     {
-      boo::dom::DOMStringAtom Name;
+      boo::DOMStringAtom Name;
       boo::html::CustomElementFactory Factory;
       boo::html::CustomElementOptions Options;
     };
@@ -418,7 +418,7 @@ namespace krys::ui
     /// elements of that name are upgraded).
     /// @return An error if @p name isn't a valid custom element name or the view already defines it.
     KRYS_NODISCARD Expected<void>
-      DefineCustomElement(const boo::dom::DOMStringAtom &name, boo::html::CustomElementFactory &&factory,
+      DefineCustomElement(const boo::DOMStringAtom &name, boo::html::CustomElementFactory &&factory,
                           boo::html::CustomElementOptions &&options = {}) noexcept;
 
     /// @brief Registers the font files (`.ttf`, `.otf`, `.ttc`, `.otc`) in @p directory for every page, so
@@ -480,7 +480,7 @@ namespace krys::ui
     void Replay(const boo::display_list::DisplayList &displayList, gfx::Renderer2D &renderer) noexcept;
 
     /// @brief The topmost element at @p point (in viewport coordinates), or null if there's none.
-    KRYS_NODISCARD boo::dom::Element *HitTest(const boo::IntPoint &point) noexcept;
+    KRYS_NODISCARD boo::Element *HitTest(const boo::IntPoint &point) noexcept;
 
     /// @brief Moves the mouse to @p point (in viewport coordinates): mouse events fire at the elements it
     /// leaves and enters, the elements under it become `:hover`, and the cursor follows.
@@ -724,7 +724,7 @@ namespace krys::ui
     }
 
     /// @brief The view's document: the main frame's.
-    KRYS_NODISCARD boo::dom::HTMLDocument &Document() const noexcept;
+    KRYS_NODISCARD boo::HTMLDocument &Document() const noexcept;
 
     KRYS_NODISCARD boo::LocalFrame &Frame() const noexcept
     {
@@ -826,7 +826,7 @@ namespace krys::ui
     }
 
     /// @brief The topmost element at @p point, in the viewport's CSS pixels.
-    KRYS_NODISCARD boo::dom::Element *HitTestInPage(const boo::IntPoint &point) const noexcept;
+    KRYS_NODISCARD boo::Element *HitTestInPage(const boo::IntPoint &point) const noexcept;
 
     /// @brief `MouseWheel` at @p point, in the viewport's CSS pixels.
     bool MouseWheelInPage(const boo::IntPoint &point, float notchesX, float notchesY,

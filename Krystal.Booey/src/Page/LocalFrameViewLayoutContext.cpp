@@ -79,7 +79,7 @@ namespace krys::boo
     return _frameView.Frame();
   }
 
-  dom::Document *LocalFrameViewLayoutContext::Document() const noexcept
+  boo::Document *LocalFrameViewLayoutContext::Document() const noexcept
   {
     return Frame().Document();
   }

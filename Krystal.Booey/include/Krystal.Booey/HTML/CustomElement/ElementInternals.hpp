@@ -38,11 +38,17 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
-  class NodeList;
+  class HTMLElement;
+  class HTMLFormElement;
   class ShadowRoot;
+}
+
+namespace krys::boo::dom
+{
+  class NodeList;
 }
 
 namespace krys::boo::html
@@ -50,8 +56,6 @@ namespace krys::boo::html
   class CustomStateSet;
   class ElementInternals;
   class FormAssociatedCustomElement;
-  class HTMLElement;
-  class HTMLFormElement;
 
   namespace detail
   {
@@ -71,9 +75,9 @@ namespace krys::boo::html
     WeakPtr<HTMLElement> _target;
     // The specification gives the element its internal content attribute map, but only its internals, of
     // which it has one, read and write it.
-    HashMap<dom::DOMStringAtom, dom::DOMString> _internalContentAttributeMap;
-    HashMap<dom::DOMStringAtom, WeakPtr<dom::Element>> _explicitlySetAttrElements;
-    HashMap<dom::DOMStringAtom, List<WeakPtr<dom::Element>>> _explicitlySetAttrElementLists;
+    HashMap<DOMStringAtom, DOMString> _internalContentAttributeMap;
+    HashMap<DOMStringAtom, WeakPtr<boo::Element>> _explicitlySetAttrElements;
+    HashMap<DOMStringAtom, List<WeakPtr<boo::Element>>> _explicitlySetAttrElementLists;
 
   public:
     explicit ElementInternals(HTMLElement &element) noexcept;
@@ -94,41 +98,41 @@ namespace krys::boo::html
     /// @brief The element's shadow root, open or closed, if it was attached while the element was a custom
     /// element.
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-shadowroot
-    KRYS_NODISCARD RefPtr<dom::ShadowRoot> ShadowRoot() const noexcept;
+    KRYS_NODISCARD RefPtr<boo::ShadowRoot> ShadowRoot() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-form
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<dom::Element>> Form() const noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<boo::Element>> Form() const noexcept;
 
     /// @brief Sets the value the element submits with its form, and the state it restores (by default its
     /// value).
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-setformvalue
-    dom::ExceptionOr<void> SetFormValue(CustomElementFormValue &&value,
-                                        Maybe<CustomElementFormValue> &&state = null) noexcept;
+    ExceptionOr<void> SetFormValue(CustomElementFormValue &&value,
+                                   Maybe<CustomElementFormValue> &&state = null) noexcept;
 
     /// @brief Sets the element's validity: invalid with @p message if any of @p flags is set.
     /// @param validationAnchor Where the validation message points (a shadow-including descendant of the
     /// element); the element if null.
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-setvalidity
-    dom::ExceptionOr<void> SetValidity(ValidityStateFlags flags = {}, dom::DOMString message = {},
-                                       HTMLElement *validationAnchor = nullptr) noexcept;
+    ExceptionOr<void> SetValidity(ValidityStateFlags flags = {}, DOMString message = {},
+                                  HTMLElement *validationAnchor = nullptr) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-willvalidate
-    KRYS_NODISCARD dom::ExceptionOr<bool> WillValidate() const noexcept;
+    KRYS_NODISCARD ExceptionOr<bool> WillValidate() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-validity
-    KRYS_NODISCARD dom::ExceptionOr<ValidityState> Validity() noexcept;
+    KRYS_NODISCARD ExceptionOr<ValidityState> Validity() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-validationmessage
-    KRYS_NODISCARD dom::ExceptionOr<dom::DOMString> ValidationMessage() const noexcept;
+    KRYS_NODISCARD ExceptionOr<DOMString> ValidationMessage() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-reportvalidity
-    dom::ExceptionOr<bool> ReportValidity() noexcept;
+    ExceptionOr<bool> ReportValidity() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-checkvalidity
-    dom::ExceptionOr<bool> CheckValidity() noexcept;
+    ExceptionOr<bool> CheckValidity() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-labels
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<dom::NodeList>> Labels() noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<dom::NodeList>> Labels() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-states
     KRYS_NODISCARD CustomStateSet &States() noexcept;
@@ -136,31 +140,29 @@ namespace krys::boo::html
     /// @brief The value the target element's ARIA defaults give @p name (an ARIA attribute's content
     /// attribute name), if the internals set one.
     /// @see https://html.spec.whatwg.org/#internal-content-attribute-map
-    KRYS_NODISCARD Maybe<dom::DOMString>
-      InternalContentAttribute(const dom::DOMStringAtom &name) const noexcept;
+    KRYS_NODISCARD Maybe<DOMString> InternalContentAttribute(const DOMStringAtom &name) const noexcept;
 
     /// @see https://html.spec.whatwg.org/#internal-content-attribute-map
-    void SetInternalContentAttribute(const dom::DOMStringAtom &name, dom::DOMString value) noexcept;
+    void SetInternalContentAttribute(const DOMStringAtom &name, DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#internal-content-attribute-map
-    void RemoveInternalContentAttribute(const dom::DOMStringAtom &name) noexcept;
+    void RemoveInternalContentAttribute(const DOMStringAtom &name) noexcept;
 
     /// @brief The element an `Element?` ARIA attribute of the internals refers to.
     /// @see https://html.spec.whatwg.org/#attr-associated-element
-    KRYS_NODISCARD RefPtr<dom::Element>
-      ElementForAttributeInternal(const dom::DOMStringAtom &name) const noexcept;
+    KRYS_NODISCARD RefPtr<boo::Element> ElementForAttributeInternal(const DOMStringAtom &name) const noexcept;
 
     /// @see https://html.spec.whatwg.org/#attr-associated-element
-    void SetElementAttribute(const dom::DOMStringAtom &name, dom::Element *element) noexcept;
+    void SetElementAttribute(const DOMStringAtom &name, boo::Element *element) noexcept;
 
     /// @brief The elements a `FrozenArray<Element>?` ARIA attribute of the internals refers to.
     /// @see https://html.spec.whatwg.org/#attr-associated-elements
-    KRYS_NODISCARD Maybe<List<Ref<dom::Element>>>
-      ElementsForAttributeInternal(const dom::DOMStringAtom &name) const noexcept;
+    KRYS_NODISCARD Maybe<List<Ref<boo::Element>>>
+      ElementsForAttributeInternal(const DOMStringAtom &name) const noexcept;
 
     /// @see https://html.spec.whatwg.org/#attr-associated-elements
-    void SetElementsArrayAttribute(const dom::DOMStringAtom &name,
-                                   const Maybe<List<Ref<dom::Element>>> &elements) noexcept;
+    void SetElementsArrayAttribute(const DOMStringAtom &name,
+                                   const Maybe<List<Ref<boo::Element>>> &elements) noexcept;
 
   private:
     KRYS_NODISCARD HTMLElement *TargetElement() noexcept
@@ -172,7 +174,7 @@ namespace krys::boo::html
 
     /// @brief Tells accessibility the default for @p name changed from @p oldValue, unless the element's own
     /// attribute overrides it.
-    void InternalContentAttributeChanged(const dom::DOMStringAtom &name,
-                                         const Maybe<dom::DOMString> &oldValue) noexcept;
+    void InternalContentAttributeChanged(const DOMStringAtom &name,
+                                         const Maybe<DOMString> &oldValue) noexcept;
   };
 }

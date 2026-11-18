@@ -9,7 +9,7 @@ namespace krys::boo::html::tests
 
   namespace
   {
-    KRYS_NODISCARD std::string Str(dom::DOMStringView text) noexcept
+    KRYS_NODISCARD std::string Str(DOMStringView text) noexcept
     {
       return std::string(reinterpret_cast<const char *>(text.data()), text.size());
     }

@@ -8,17 +8,20 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
+namespace krys::boo
+{
+  class Document;
+  class Element;
+  class HTMLElement;
+}
+
 namespace krys::boo::html
 {
   class CustomElementRegistry;
-  class HTMLElement;
 }
 
 namespace krys::boo::dom
 {
-  class Document;
-  class Element;
-
   using CustomElementRegistryOrDefault = Maybe<RefPtr<html::CustomElementRegistry>>;
   constexpr auto DefaultCustomElementRegistry = null;
 
@@ -41,7 +44,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD static Ref<T> CreateHTMLElement(Document &document, DOMStringAtom localName) noexcept
     {
       auto element = Create(document, QualifiedName {infra::namespaces::HTML, null, krys::move(localName)});
-      return ShareRef(Downcast<T>(Downcast<html::HTMLElement>(*element)));
+      return ShareRef(Downcast<T>(Downcast<HTMLElement>(*element)));
     }
   };
 }

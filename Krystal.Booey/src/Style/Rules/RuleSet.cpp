@@ -52,7 +52,7 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD size_t RulesCountForName(const RuleSet::AtomRuleMap &map,
-                                            const css::CSSOMStringAtom &name) noexcept
+                                            const CSSOMStringAtom &name) noexcept
     {
       if (auto it = map.find(name); it != map.end())
       {
@@ -135,7 +135,7 @@ namespace krys::boo::style
       {
         return false;
       }
-      if (svg::SVGElement::AnimatableAttributeForName(attributeSelector.Attribute().LocalName().View())
+      if (SVGElement::AnimatableAttributeForName(attributeSelector.Attribute().LocalName().View())
           != dom::NullQualifiedName())
       {
         return false;
@@ -153,8 +153,7 @@ namespace krys::boo::style
     return AdoptRef(*new RuleSet);
   }
 
-  void RuleSet::AddToRuleSet(const css::CSSOMStringAtom &key, AtomRuleMap &map,
-                             const RuleData &ruleData) noexcept
+  void RuleSet::AddToRuleSet(const CSSOMStringAtom &key, AtomRuleMap &map, const RuleData &ruleData) noexcept
   {
     if (key == null)
     {
@@ -477,7 +476,7 @@ namespace krys::boo::style
     {
       auto ruleSet = RuleSet::Create();
       {
-        const css::mq::MediaQueryEvaluator screenEvaluator {css::CSSOMStringAtom(u8"screen"),
+        const css::mq::MediaQueryEvaluator screenEvaluator {CSSOMStringAtom(u8"screen"),
                                                             css::mq::EvaluationResult::True};
         RuleSetBuilder builder(*ruleSet, screenEvaluator);
         for (auto *rules : collectedChanges.AffectedRules)
@@ -632,7 +631,7 @@ namespace krys::boo::style
   }
 
   RefPtr<const css::PositionTryRule>
-    RuleSet::PositionTryRuleForName(const css::CSSOMStringAtom &name) const noexcept
+    RuleSet::PositionTryRuleForName(const CSSOMStringAtom &name) const noexcept
   {
     auto it = _positionTryRules.find(name);
     return it == _positionTryRules.end() ? nullptr : it->second;

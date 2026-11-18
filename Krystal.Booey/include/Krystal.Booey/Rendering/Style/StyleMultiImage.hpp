@@ -29,19 +29,16 @@
 #include "Krystal.Booey/Rendering/Style/StyleInvalidImage.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::dom
-{
-  class Document;
-}
-
 namespace krys::boo
 {
+  class Document;
+
   /// @brief One of the candidate images of an image set or cursor, with its resolution.
   struct ImageWithScale
   {
     RefPtr<StyleImage> Image {StyleInvalidImage::Create()};
     float ScaleFactor {1};
-    Maybe<css::CSSOMString> MimeType;
+    Maybe<CSSOMString> MimeType;
 
     KRYS_NODISCARD bool operator==(const ImageWithScale &other) const noexcept
     {
@@ -64,7 +61,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool Equals(const StyleMultiImage &other) const noexcept;
 
-    KRYS_NODISCARD virtual ImageWithScale SelectBestFitImage(const dom::Document &) noexcept = 0;
+    KRYS_NODISCARD virtual ImageWithScale SelectBestFitImage(const Document &) noexcept = 0;
 
     KRYS_NODISCARD CachedImage *GetCachedImage() const noexcept final;
 

@@ -41,7 +41,7 @@ namespace krys::boo::style
   /// @brief A name defined or referenced in a tree scope, e.g. a `@keyframes` or container name.
   struct ScopedName
   {
-    css::CSSOMStringAtom Name;
+    CSSOMStringAtom Name;
     style::ScopeOrdinal ScopeOrdinal {style::ScopeOrdinal::Element};
     bool IsIdentifier {true};
 

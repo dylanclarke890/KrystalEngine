@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Color/CSSColorValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief A colour in the hwb colour space.
   /// @see https://drafts.css-houdini.org/css-typed-om/#csshwb
@@ -43,10 +43,10 @@ namespace krys::boo::css
     /// @return A `SyntaxError` if @p hue isn't an angle, or @p whiteness, @p blackness or @p alpha isn't a
     /// percentage (a number being a fraction).
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csshwb-csshwb
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSHWB>> Create(Ref<CSSNumericValue> hue,
-                                                               const CSSNumberish &whiteness,
-                                                               const CSSNumberish &blackness,
-                                                               const CSSNumberish &alpha = 1.0) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSHWB>> Create(Ref<CSSNumericValue> hue,
+                                                          const CSSNumberish &whiteness,
+                                                          const CSSNumberish &blackness,
+                                                          const CSSNumberish &alpha = 1.0) noexcept;
 
     KRYS_NODISCARD const CSSNumericValue &H() const noexcept
     {
@@ -54,22 +54,22 @@ namespace krys::boo::css
     }
 
     /// @return A `SyntaxError` if @p hue isn't an angle.
-    dom::ExceptionOr<void> SetH(Ref<CSSNumericValue> hue) noexcept;
+    ExceptionOr<void> SetH(Ref<CSSNumericValue> hue) noexcept;
 
     KRYS_NODISCARD CSSNumberish W() const noexcept;
 
     /// @return A `SyntaxError` if @p whiteness isn't a percentage.
-    dom::ExceptionOr<void> SetW(const CSSNumberish &whiteness) noexcept;
+    ExceptionOr<void> SetW(const CSSNumberish &whiteness) noexcept;
 
     KRYS_NODISCARD CSSNumberish B() const noexcept;
 
     /// @return A `SyntaxError` if @p blackness isn't a percentage.
-    dom::ExceptionOr<void> SetB(const CSSNumberish &blackness) noexcept;
+    ExceptionOr<void> SetB(const CSSNumberish &blackness) noexcept;
 
     KRYS_NODISCARD CSSNumberish Alpha() const noexcept;
 
     /// @return A `SyntaxError` if @p alpha isn't a percentage.
-    dom::ExceptionOr<void> SetAlpha(const CSSNumberish &alpha) noexcept;
+    ExceptionOr<void> SetAlpha(const CSSNumberish &alpha) noexcept;
 
     KRYS_NODISCARD CSSOMString ColorFunctionText() const noexcept final;
 
@@ -84,9 +84,9 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSHWB)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleValue &styleValue) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSHWB)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleValue &styleValue) noexcept
   {
-    return styleValue.StyleValueType() == krys::boo::css::CSSStyleValueType::CSSHWB;
+    return styleValue.StyleValueType() == krys::boo::CSSStyleValueType::CSSHWB;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

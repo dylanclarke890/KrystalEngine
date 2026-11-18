@@ -64,7 +64,7 @@
 
 namespace krys::boo
 {
-  RenderSVGText::RenderSVGText(svg::SVGTextElement &element, RenderStyle &&style) noexcept
+  RenderSVGText::RenderSVGText(SVGTextElement &element, RenderStyle &&style) noexcept
       : RenderSVGBlock(Type::SVGText, element, krys::move(style))
   {
     krys_debug_assert(IsRenderSVGText());
@@ -75,9 +75,9 @@ namespace krys::boo
     krys_debug_assert(_layoutAttributes.empty());
   }
 
-  svg::SVGTextElement &RenderSVGText::TextElement() const noexcept
+  SVGTextElement &RenderSVGText::TextElement() const noexcept
   {
-    return Downcast<svg::SVGTextElement>(RenderSVGBlock::GraphicsElement());
+    return Downcast<SVGTextElement>(RenderSVGBlock::GraphicsElement());
   }
 
   bool RenderSVGText::IsChildAllowed(const RenderObject &child, const RenderStyle &) const noexcept
@@ -558,8 +558,8 @@ namespace krys::boo
         continue;
       }
 
-      auto *svgElement = DynamicDowncast<svg::SVGElement>(*node);
-      bool isTextPath = svgElement && Is<svg::SVGTextPathElement>(*svgElement);
+      auto *svgElement = DynamicDowncast<SVGElement>(*node);
+      bool isTextPath = svgElement && Is<SVGTextPathElement>(*svgElement);
       if (isTextPath)
       {
         // Build text chunks for all <textPath> children, using the line layout algorithm.
@@ -1047,7 +1047,7 @@ namespace krys::boo
     }
 
     Ref textElement = ShareRef(TextElement());
-    svg::SVGLengthContext lengthContext(textElement.get());
+    SVGLengthContext lengthContext(textElement.get());
     strokeBoundaries.Inflate(lengthContext.ValueForLength(Style().GetStrokeWidth(), style::ZoomNeeded {}));
     return strokeBoundaries;
   }

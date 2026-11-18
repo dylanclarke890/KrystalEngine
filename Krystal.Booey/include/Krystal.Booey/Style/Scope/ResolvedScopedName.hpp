@@ -30,7 +30,7 @@
 #include "Krystal.Core/Hash.hpp"
 #include <functional>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
 }
@@ -43,21 +43,21 @@ namespace krys::boo::style
   class ResolvedScopedName
   {
   private:
-    css::CSSOMStringAtom _name;
+    CSSOMStringAtom _name;
     ScopeIdentifier _scopeIdentifier;
 
   public:
-    ResolvedScopedName(css::CSSOMStringAtom name, ScopeIdentifier scopeIdentifier) noexcept
+    ResolvedScopedName(CSSOMStringAtom name, ScopeIdentifier scopeIdentifier) noexcept
         : _name(krys::move(name)), _scopeIdentifier(scopeIdentifier)
     {
     }
 
     /// @brief Creates a ResolvedScopedName from a ScopedName by resolving the scope ordinal into the concrete
     /// style scope.
-    KRYS_NODISCARD static ResolvedScopedName CreateFromScopedName(const dom::Element &element,
+    KRYS_NODISCARD static ResolvedScopedName CreateFromScopedName(const Element &element,
                                                                   const ScopedName &scopedName) noexcept;
 
-    KRYS_NODISCARD const css::CSSOMStringAtom &Name() const noexcept
+    KRYS_NODISCARD const CSSOMStringAtom &Name() const noexcept
     {
       return _name;
     }
@@ -79,7 +79,7 @@ namespace std
     size_t operator()(const krys::boo::style::ResolvedScopedName &name) const noexcept
     {
       return krys::UnsignedIntegerPairHash(
-        hash<krys::boo::css::CSSOMStringAtom> {}(name.Name()),
+        hash<krys::boo::CSSOMStringAtom> {}(name.Name()),
         hash<krys::boo::style::ScopeIdentifier> {}(name.GetScopeIdentifier()));
     }
   };

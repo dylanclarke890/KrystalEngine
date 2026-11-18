@@ -38,10 +38,6 @@ namespace krys::boo
 {
   class PlatformTouchEvent;
   class PlatformTouchPoint;
-}
-
-namespace krys::boo::dom
-{
   class PointerEvent;
 
   /// @see https://w3c.github.io/pointerevents/#pointereventinit-dictionary
@@ -104,7 +100,7 @@ namespace krys::boo::dom
     int32 _twist {0};
     double _altitudeAngle {std::numbers::pi / 2};
     double _azimuthAngle {0};
-    DOMString _pointerType {MousePointerEventType()};
+    DOMString _pointerType {dom::MousePointerEventType()};
     bool _isPrimary {false};
     bool _fractionalCoordinatesAllowed {true};
     List<Ref<PointerEvent>> _coalescedEvents;
@@ -394,8 +390,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::PointerEvent)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::PointerEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Event &event) noexcept
   {
     return event.IsPointerEvent();
   }

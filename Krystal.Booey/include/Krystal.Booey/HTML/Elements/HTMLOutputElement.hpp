@@ -33,7 +33,7 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmloutputelement
   class HTMLOutputElement : public HTMLFormControlElement
@@ -42,7 +42,7 @@ namespace krys::boo::html
 
   private:
     UniquePtr<dom::DOMTokenList> _htmlFor;
-    Maybe<dom::DOMString> _defaultValueOverride;
+    Maybe<DOMString> _defaultValueOverride;
 
   public:
     KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept final
@@ -50,7 +50,7 @@ namespace krys::boo::html
       return false;
     }
 
-    HTMLOutputElement(dom::Document &document) noexcept;
+    HTMLOutputElement(Document &document) noexcept;
 
     ~HTMLOutputElement() noexcept override;
 
@@ -60,32 +60,32 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMTokenList &HtmlFor() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-output-name
-    KRYS_NODISCARD dom::DOMString Name() const noexcept override;
+    KRYS_NODISCARD DOMString Name() const noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-output-name
-    void Name(dom::DOMString value) noexcept;
+    void Name(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-output-type
-    KRYS_NODISCARD dom::DOMString Type() const noexcept
+    KRYS_NODISCARD DOMString Type() const noexcept
     {
       return FormControlType();
     }
 
     /// @see https://html.spec.whatwg.org/#dom-output-defaultvalue
-    KRYS_NODISCARD dom::DOMString DefaultValue() const noexcept;
+    KRYS_NODISCARD DOMString DefaultValue() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-output-defaultvalue
-    void DefaultValue(dom::DOMString value) noexcept;
+    void DefaultValue(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-output-value
-    KRYS_NODISCARD dom::DOMString Value() const noexcept;
+    KRYS_NODISCARD DOMString Value() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-output-value
-    void Value(dom::DOMString value) noexcept;
+    void Value(DOMString value) noexcept;
 
 #pragma endregion
 
-    KRYS_NODISCARD dom::DOMString FormControlType() const noexcept final
+    KRYS_NODISCARD DOMString FormControlType() const noexcept final
     {
       return u8"output";
     }
@@ -103,9 +103,8 @@ namespace krys::boo::html
     void Reset() noexcept final;
 
   protected:
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
     KRYS_NODISCARD bool ComputeWillValidate() const noexcept final
     {
@@ -114,13 +113,13 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLOutputElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLOutputElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLOutputElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLOutputElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLOutputElement();
   }

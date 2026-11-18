@@ -67,7 +67,7 @@ namespace krys::boo
       return true;
     }
 
-    KRYS_NODISCARD bool ShouldHaveCapsLockIndicator(const html::HTMLInputElement &) const noexcept final;
+    KRYS_NODISCARD bool ShouldHaveCapsLockIndicator(const boo::HTMLInputElement &) const noexcept final;
 
     KRYS_NODISCARD Color PlatformActiveSelectionBackgroundColor(style::ColorOptions) const noexcept final;
 
@@ -95,20 +95,20 @@ namespace krys::boo
 
     KRYS_NODISCARD Color SystemColor(css::ValueId, style::ColorOptions) const noexcept final;
 
-    void AdjustTextFieldStyle(RenderStyle &, const dom::Element *) const noexcept final;
+    void AdjustTextFieldStyle(RenderStyle &, const boo::Element *) const noexcept final;
 
-    void AdjustTextAreaStyle(RenderStyle &, const dom::Element *) const noexcept final;
+    void AdjustTextAreaStyle(RenderStyle &, const boo::Element *) const noexcept final;
 
-    void AdjustSearchFieldStyle(RenderStyle &, const dom::Element *) const noexcept final;
+    void AdjustSearchFieldStyle(RenderStyle &, const boo::Element *) const noexcept final;
 
     KRYS_NODISCARD bool PopsMenuBySpaceOrReturn() const noexcept final
     {
       return true;
     }
 
-    void AdjustMenuListStyle(RenderStyle &, const dom::Element *) const noexcept override;
+    void AdjustMenuListStyle(RenderStyle &, const boo::Element *) const noexcept override;
 
-    void AdjustMenuListButtonStyle(RenderStyle &, const dom::Element *) const noexcept override;
+    void AdjustMenuListButtonStyle(RenderStyle &, const boo::Element *) const noexcept override;
 
     KRYS_NODISCARD style::PaddingBox PopupInternalPaddingBox(const RenderStyle &) const noexcept final;
 
@@ -118,7 +118,7 @@ namespace krys::boo
     KRYS_NODISCARD IntRect ProgressBarRectForBounds(const RenderProgress &,
                                                     const IntRect &) const noexcept final;
 
-    void AdjustSliderThumbSize(RenderStyle &, const dom::Element *) const noexcept final;
+    void AdjustSliderThumbSize(RenderStyle &, const boo::Element *) const noexcept final;
 
     KRYS_NODISCARD IntSize SliderTickSize() const noexcept final;
 
@@ -126,7 +126,7 @@ namespace krys::boo
 
     KRYS_NODISCARD int32 SliderTickOffsetFromTrackCenter() const noexcept final;
 
-    void AdjustListButtonStyle(RenderStyle &, const dom::Element *) const noexcept final;
+    void AdjustListButtonStyle(RenderStyle &, const boo::Element *) const noexcept final;
 
     KRYS_NODISCARD style::PreferredSizePair ControlSize(StyleAppearance, const FontCascade &,
                                                         const style::PreferredSizePair &,
@@ -138,6 +138,6 @@ namespace krys::boo
 
     KRYS_NODISCARD style::LineWidthBox ControlBorder(StyleAppearance, const FontCascade &,
                                                      const style::LineWidthBox &, float,
-                                                     const dom::Element *) const noexcept final;
+                                                     const boo::Element *) const noexcept final;
   };
 }

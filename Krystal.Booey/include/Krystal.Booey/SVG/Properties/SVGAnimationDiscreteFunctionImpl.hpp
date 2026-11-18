@@ -30,7 +30,7 @@
 #include "Krystal.Booey/SVG/SVGMarkerTypes.hpp"
 #include "Krystal.Booey/SVG/SVGPreserveAspectRatioValue.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGAnimatedAngleOrientAnimator;
 
@@ -40,8 +40,7 @@ namespace krys::boo::svg
     using Base = SVGAnimationDiscreteFunction<bool>;
     using Base::Base;
 
-    void SetFromAndToValues(SVGElement &targetElement, dom::DOMStringView from,
-                            dom::DOMStringView to) noexcept override
+    void SetFromAndToValues(SVGElement &targetElement, DOMStringView from, DOMStringView to) noexcept override
     {
       _from = SVGPropertyTraits<bool>::FromString(targetElement, from);
       _to = SVGPropertyTraits<bool>::FromString(targetElement, to);
@@ -58,8 +57,7 @@ namespace krys::boo::svg
   public:
     using Base::Base;
 
-    void SetFromAndToValues(SVGElement &targetElement, dom::DOMStringView from,
-                            dom::DOMStringView to) noexcept override
+    void SetFromAndToValues(SVGElement &targetElement, DOMStringView from, DOMStringView to) noexcept override
     {
       _from = SVGPropertyTraits<TEnum>::FromString(targetElement, from);
       _to = SVGPropertyTraits<TEnum>::FromString(targetElement, to);
@@ -74,7 +72,7 @@ namespace krys::boo::svg
     using Base = SVGAnimationDiscreteFunction<SVGMarkerOrientType>;
     using Base::Base;
 
-    void SetFromAndToValues(SVGElement &, dom::DOMStringView, dom::DOMStringView) noexcept override
+    void SetFromAndToValues(SVGElement &, DOMStringView, DOMStringView) noexcept override
     {
       // Values will be set by SVGAnimatedAngleOrientAnimator.
       krys_debug_assert_msg(false, "The orient type's values are set by its orient animator");
@@ -88,23 +86,23 @@ namespace krys::boo::svg
     using Base = SVGAnimationDiscreteFunction<SVGPreserveAspectRatioValue>;
     using Base::Base;
 
-    void SetFromAndToValues(SVGElement &, dom::DOMStringView from, dom::DOMStringView to) noexcept override
+    void SetFromAndToValues(SVGElement &, DOMStringView from, DOMStringView to) noexcept override
     {
       _from = SVGPreserveAspectRatioValue(from);
       _to = SVGPreserveAspectRatioValue(to);
     }
   };
 
-  class SVGAnimationStringFunction : public SVGAnimationDiscreteFunction<dom::DOMString>
+  class SVGAnimationStringFunction : public SVGAnimationDiscreteFunction<DOMString>
   {
   public:
-    using Base = SVGAnimationDiscreteFunction<dom::DOMString>;
+    using Base = SVGAnimationDiscreteFunction<DOMString>;
     using Base::Base;
 
-    void SetFromAndToValues(SVGElement &, dom::DOMStringView from, dom::DOMStringView to) noexcept override
+    void SetFromAndToValues(SVGElement &, DOMStringView from, DOMStringView to) noexcept override
     {
-      _from = dom::DOMString(from);
-      _to = dom::DOMString(to);
+      _from = DOMString(from);
+      _to = DOMString(to);
     }
   };
 }

@@ -49,7 +49,7 @@ namespace krys::boo
     double _force {0};
     PenOrientation _penOrientation;
     PointerID _pointerId {MousePointerID};
-    dom::DOMString _pointerType {dom::MousePointerEventType()};
+    DOMString _pointerType {dom::MousePointerEventType()};
     int32 _clickCount {0};
     uint16 _buttons {0};
     List<PlatformMouseEvent> _coalescedEvents;
@@ -70,7 +70,7 @@ namespace krys::boo
                        const DoublePoint &movementDelta = {}, double force = 0,
                        SyntheticClickType syntheticClickType = SyntheticClickType::NoTap,
                        PointerID pointerId = MousePointerID,
-                       dom::DOMString pointerType = dom::MousePointerEventType()) noexcept
+                       DOMString pointerType = dom::MousePointerEventType()) noexcept
         : PlatformEvent(type, modifiers, timestamp), _button(button), _syntheticClickType(syntheticClickType),
           _position(position), _globalPosition(globalPosition), _movementDelta(movementDelta), _force(force),
           _pointerId(pointerId), _pointerType(krys::move(pointerType)), _clickCount(clickCount),
@@ -147,7 +147,7 @@ namespace krys::boo
       return _pointerId;
     }
 
-    KRYS_NODISCARD const dom::DOMString &PointerType() const noexcept
+    KRYS_NODISCARD const DOMString &PointerType() const noexcept
     {
       return _pointerType;
     }

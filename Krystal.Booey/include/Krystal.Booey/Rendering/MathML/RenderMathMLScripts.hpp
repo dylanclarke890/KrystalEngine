@@ -44,7 +44,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderMathMLScripts);
 
   public:
-    RenderMathMLScripts(Type type, mathml::MathMLScriptsElement &element, RenderStyle &&style) noexcept;
+    RenderMathMLScripts(Type type, MathMLScriptsElement &element, RenderStyle &&style) noexcept;
 
     ~RenderMathMLScripts() noexcept override;
 
@@ -56,7 +56,7 @@ namespace krys::boo
     }
 
   protected:
-    KRYS_NODISCARD mathml::MathMLScriptsElement::ScriptType GetScriptType() const noexcept;
+    KRYS_NODISCARD MathMLScriptsElement::ScriptType GetScriptType() const noexcept;
 
     void ComputePreferredLogicalWidths() noexcept override;
 
@@ -92,7 +92,7 @@ namespace krys::boo
       LayoutUnit Descent;
     };
 
-    KRYS_NODISCARD mathml::MathMLScriptsElement &GetElement() const noexcept;
+    KRYS_NODISCARD MathMLScriptsElement &GetElement() const noexcept;
 
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept final;
 

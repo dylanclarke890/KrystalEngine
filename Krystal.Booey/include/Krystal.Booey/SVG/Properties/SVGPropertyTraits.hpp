@@ -33,7 +33,7 @@
 #include <cmath>
 #include <utility>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGElement;
 
@@ -50,18 +50,18 @@ namespace krys::boo::svg
       return false;
     }
 
-    KRYS_NODISCARD static bool FromString(SVGElement &, dom::DOMStringView string) noexcept
+    KRYS_NODISCARD static bool FromString(SVGElement &, DOMStringView string) noexcept
     {
       return string == u8"true";
     }
 
-    KRYS_NODISCARD static Maybe<bool> Parse(const dom::QualifiedName &, dom::DOMStringView) noexcept
+    KRYS_NODISCARD static Maybe<bool> Parse(const QualifiedName &, DOMStringView) noexcept
     {
       krys_assert_msg(false, "Not reached");
       return InitialValue();
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(bool type) noexcept
+    KRYS_NODISCARD static DOMString ToString(bool type) noexcept
     {
       return type ? u8"true" : u8"false";
     }
@@ -75,9 +75,9 @@ namespace krys::boo::svg
       return Color();
     }
 
-    KRYS_NODISCARD static Color FromString(SVGElement &, dom::DOMStringView) noexcept;
+    KRYS_NODISCARD static Color FromString(SVGElement &, DOMStringView) noexcept;
 
-    KRYS_NODISCARD static dom::DOMString ToString(const Color &) noexcept;
+    KRYS_NODISCARD static DOMString ToString(const Color &) noexcept;
   };
 
   template <>
@@ -88,13 +88,13 @@ namespace krys::boo::svg
       return 0;
     }
 
-    KRYS_NODISCARD static Maybe<uint32> Parse(const dom::QualifiedName &, dom::DOMStringView) noexcept
+    KRYS_NODISCARD static Maybe<uint32> Parse(const QualifiedName &, DOMStringView) noexcept
     {
       krys_assert_msg(false, "Not reached");
       return InitialValue();
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(uint32 type) noexcept
+    KRYS_NODISCARD static DOMString ToString(uint32 type) noexcept
     {
       StringBuilder builder;
       builder.Append(type);
@@ -110,15 +110,15 @@ namespace krys::boo::svg
       return 0;
     }
 
-    KRYS_NODISCARD static int32 FromString(SVGElement &, dom::DOMStringView) noexcept;
+    KRYS_NODISCARD static int32 FromString(SVGElement &, DOMStringView) noexcept;
 
-    KRYS_NODISCARD static Maybe<int32> Parse(const dom::QualifiedName &, dom::DOMStringView) noexcept
+    KRYS_NODISCARD static Maybe<int32> Parse(const QualifiedName &, DOMStringView) noexcept
     {
       krys_assert_msg(false, "Not reached");
       return InitialValue();
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(int32 type) noexcept
+    KRYS_NODISCARD static DOMString ToString(int32 type) noexcept
     {
       StringBuilder builder;
       builder.Append(type);
@@ -134,9 +134,9 @@ namespace krys::boo::svg
       return {};
     }
 
-    KRYS_NODISCARD static std::pair<int32, int32> FromString(SVGElement &, dom::DOMStringView string) noexcept
+    KRYS_NODISCARD static std::pair<int32, int32> FromString(SVGElement &, DOMStringView string) noexcept
     {
-      auto result = ParseNumberOptionalNumber(string);
+      auto result = svg::ParseNumberOptionalNumber(string);
       if (!result)
       {
         return {};
@@ -145,14 +145,13 @@ namespace krys::boo::svg
                             static_cast<int32>(std::round(result->second)));
     }
 
-    KRYS_NODISCARD static Maybe<std::pair<int32, int32>> Parse(const dom::QualifiedName &,
-                                                               dom::DOMStringView) noexcept
+    KRYS_NODISCARD static Maybe<std::pair<int32, int32>> Parse(const QualifiedName &, DOMStringView) noexcept
     {
       krys_assert_msg(false, "Not reached");
       return InitialValue();
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(std::pair<int32, int32>) noexcept
+    KRYS_NODISCARD static DOMString ToString(std::pair<int32, int32>) noexcept
     {
       krys_assert_msg(false, "Not reached");
       return {};
@@ -167,17 +166,17 @@ namespace krys::boo::svg
       return 0;
     }
 
-    KRYS_NODISCARD static float FromString(SVGElement &, dom::DOMStringView string) noexcept
+    KRYS_NODISCARD static float FromString(SVGElement &, DOMStringView string) noexcept
     {
-      return ParseNumberFromString(string).value_or(0);
+      return svg::ParseNumberFromString(string).value_or(0);
     }
 
-    KRYS_NODISCARD static Maybe<float> Parse(const dom::QualifiedName &, dom::DOMStringView string) noexcept
+    KRYS_NODISCARD static Maybe<float> Parse(const QualifiedName &, DOMStringView string) noexcept
     {
-      return ParseNumberFromString(string);
+      return svg::ParseNumberFromString(string);
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(float type) noexcept
+    KRYS_NODISCARD static DOMString ToString(float type) noexcept
     {
       StringBuilder builder;
       builder.Append(type);
@@ -193,19 +192,18 @@ namespace krys::boo::svg
       return {};
     }
 
-    KRYS_NODISCARD static std::pair<float, float> FromString(SVGElement &, dom::DOMStringView string) noexcept
+    KRYS_NODISCARD static std::pair<float, float> FromString(SVGElement &, DOMStringView string) noexcept
     {
-      return ParseNumberOptionalNumber(string).value_or(std::pair<float, float> {});
+      return svg::ParseNumberOptionalNumber(string).value_or(std::pair<float, float> {});
     }
 
-    KRYS_NODISCARD static Maybe<std::pair<float, float>> Parse(const dom::QualifiedName &,
-                                                               dom::DOMStringView) noexcept
+    KRYS_NODISCARD static Maybe<std::pair<float, float>> Parse(const QualifiedName &, DOMStringView) noexcept
     {
       krys_assert_msg(false, "Not reached");
       return InitialValue();
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(std::pair<float, float>) noexcept
+    KRYS_NODISCARD static DOMString ToString(std::pair<float, float>) noexcept
     {
       krys_assert_msg(false, "Not reached");
       return {};
@@ -220,18 +218,17 @@ namespace krys::boo::svg
       return FloatPoint();
     }
 
-    KRYS_NODISCARD static FloatPoint FromString(SVGElement &, dom::DOMStringView string) noexcept
+    KRYS_NODISCARD static FloatPoint FromString(SVGElement &, DOMStringView string) noexcept
     {
-      return ParsePoint(string).value_or(FloatPoint());
+      return svg::ParsePoint(string).value_or(FloatPoint());
     }
 
-    KRYS_NODISCARD static Maybe<FloatPoint> Parse(const dom::QualifiedName &,
-                                                  dom::DOMStringView string) noexcept
+    KRYS_NODISCARD static Maybe<FloatPoint> Parse(const QualifiedName &, DOMStringView string) noexcept
     {
-      return ParsePoint(string);
+      return svg::ParsePoint(string);
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(const FloatPoint &type) noexcept
+    KRYS_NODISCARD static DOMString ToString(const FloatPoint &type) noexcept
     {
       StringBuilder builder;
       builder.Append(type.X(), u8' ', type.Y());
@@ -247,18 +244,17 @@ namespace krys::boo::svg
       return FloatRect();
     }
 
-    KRYS_NODISCARD static FloatRect FromString(SVGElement &, dom::DOMStringView string) noexcept
+    KRYS_NODISCARD static FloatRect FromString(SVGElement &, DOMStringView string) noexcept
     {
-      return ParseRect(string).value_or(FloatRect());
+      return svg::ParseRect(string).value_or(FloatRect());
     }
 
-    KRYS_NODISCARD static Maybe<FloatRect> Parse(const dom::QualifiedName &,
-                                                 dom::DOMStringView string) noexcept
+    KRYS_NODISCARD static Maybe<FloatRect> Parse(const QualifiedName &, DOMStringView string) noexcept
     {
-      return ParseRect(string);
+      return svg::ParseRect(string);
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(const FloatRect &type) noexcept
+    KRYS_NODISCARD static DOMString ToString(const FloatRect &type) noexcept
     {
       StringBuilder builder;
       builder.Append(type.X(), u8' ', type.Y(), u8' ', type.Width(), u8' ', type.Height());
@@ -267,27 +263,26 @@ namespace krys::boo::svg
   };
 
   template <>
-  struct SVGPropertyTraits<dom::DOMString>
+  struct SVGPropertyTraits<DOMString>
   {
-    KRYS_NODISCARD static dom::DOMString InitialValue() noexcept
+    KRYS_NODISCARD static DOMString InitialValue() noexcept
     {
-      return dom::DOMString();
+      return DOMString();
     }
 
-    KRYS_NODISCARD static dom::DOMString FromString(SVGElement &, dom::DOMStringView string) noexcept
+    KRYS_NODISCARD static DOMString FromString(SVGElement &, DOMStringView string) noexcept
     {
-      return dom::DOMString(string);
+      return DOMString(string);
     }
 
-    KRYS_NODISCARD static Maybe<dom::DOMString> Parse(const dom::QualifiedName &,
-                                                      dom::DOMStringView string) noexcept
+    KRYS_NODISCARD static Maybe<DOMString> Parse(const QualifiedName &, DOMStringView string) noexcept
     {
-      return dom::DOMString(string);
+      return DOMString(string);
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(dom::DOMStringView string) noexcept
+    KRYS_NODISCARD static DOMString ToString(DOMStringView string) noexcept
     {
-      return dom::DOMString(string);
+      return DOMString(string);
     }
   };
 }

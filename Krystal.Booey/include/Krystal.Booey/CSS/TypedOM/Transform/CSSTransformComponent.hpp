@@ -29,7 +29,7 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSStyleValue.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -38,7 +38,10 @@ namespace krys::boo::css
 {
   class DOMMatrix;
   class FunctionValue;
+}
 
+namespace krys::boo
+{
   /// @brief The kinds of transform components.
   enum class CSSTransformType : uint8
   {
@@ -82,12 +85,12 @@ namespace krys::boo::css
 
     /// @return A `TypeError` if a length or angle in the component isn't one with an absolute unit.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
-    KRYS_NODISCARD virtual dom::ExceptionOr<Ref<DOMMatrix>> ToMatrix() const noexcept = 0;
+    KRYS_NODISCARD virtual ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept = 0;
 
     KRYS_NODISCARD virtual CSSTransformType TransformType() const noexcept = 0;
 
     /// @brief The transform function as a CSS value, or null if a numeric value in it has no CSS value.
-    KRYS_NODISCARD virtual RefPtr<Value> ToCSSValue() const noexcept = 0;
+    KRYS_NODISCARD virtual RefPtr<css::Value> ToCSSValue() const noexcept = 0;
 
   protected:
     explicit CSSTransformComponent(bool is2D) noexcept : _is2D(is2D)
@@ -95,7 +98,7 @@ namespace krys::boo::css
     }
 
     /// @brief Reifies the arguments of @p function, each of which must be a numeric value.
-    KRYS_NODISCARD static dom::ExceptionOr<List<Ref<CSSNumericValue>>>
-      ReifyArguments(const FunctionValue &function, dom::Document &document) noexcept;
+    KRYS_NODISCARD static ExceptionOr<List<Ref<CSSNumericValue>>>
+      ReifyArguments(const css::FunctionValue &function, Document &document) noexcept;
   };
 }

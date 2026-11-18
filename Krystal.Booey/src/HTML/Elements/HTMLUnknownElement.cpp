@@ -5,10 +5,10 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLUnknownElement::HTMLUnknownElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Unknown, HTMLElementFlags::None,
+  HTMLUnknownElement::HTMLUnknownElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Unknown, html::HTMLElementFlags::None,
                     dom::NodeFlags::IsUnknownElement)
   {
   }

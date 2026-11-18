@@ -24,7 +24,7 @@
 #include "Krystal.Booey/Graphics/Filters/FETurbulence.hpp"
 #include "Krystal.Booey/SVG/SVGFilterPrimitiveStandardAttributes.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   enum SVGStitchOptions : uint8
   {
@@ -41,7 +41,7 @@ namespace krys::boo::svg
       return SVG_STITCHTYPE_NOSTITCH;
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(SVGStitchOptions type) noexcept
+    KRYS_NODISCARD static DOMString ToString(SVGStitchOptions type) noexcept
     {
       switch (type)
       {
@@ -54,7 +54,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    KRYS_NODISCARD static SVGStitchOptions FromString(SVGElement &, dom::DOMStringView value) noexcept
+    KRYS_NODISCARD static SVGStitchOptions FromString(SVGElement &, DOMStringView value) noexcept
     {
       if (value == u8"stitch")
       {
@@ -76,7 +76,7 @@ namespace krys::boo::svg
       return static_cast<uint32>(TurbulenceType::Turbulence);
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(TurbulenceType type) noexcept
+    KRYS_NODISCARD static DOMString ToString(TurbulenceType type) noexcept
     {
       switch (type)
       {
@@ -89,7 +89,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    KRYS_NODISCARD static TurbulenceType FromString(SVGElement &, dom::DOMStringView value) noexcept
+    KRYS_NODISCARD static TurbulenceType FromString(SVGElement &, DOMStringView value) noexcept
     {
       if (value == u8"fractalNoise")
       {
@@ -120,7 +120,7 @@ namespace krys::boo::svg
     Ref<SVGAnimatedEnumeration> _type;
 
   public:
-    explicit SVGFETurbulenceElement(dom::Document &document) noexcept;
+    explicit SVGFETurbulenceElement(Document &document) noexcept;
 
     KRYS_NODISCARD float BaseFrequencyX() const noexcept
     {
@@ -186,13 +186,12 @@ namespace krys::boo::svg
       SVGPropertyOwnerRegistry<SVGFETurbulenceElement, SVGFilterPrimitiveStandardAttributes>;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
-    bool SetFilterEffectAttribute(FilterEffect &effect,
-                                  const dom::QualifiedName &attributeName) noexcept final;
+    bool SetFilterEffectAttribute(FilterEffect &effect, const QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD RefPtr<FilterEffect>
       CreateFilterEffect(const FilterEffectVector &inputs,
@@ -200,8 +199,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGFETurbulenceElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGFETurbulenceElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGFETurbulenceElement();
   }

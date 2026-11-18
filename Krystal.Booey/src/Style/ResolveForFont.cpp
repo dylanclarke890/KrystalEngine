@@ -237,7 +237,7 @@ namespace krys::boo::style
   static ResolvedFontSize
     FontSizeFromUnresolvedFontSize(const css::parse_property::UnresolvedFontSize &unresolvedSize,
                                    float parentSize, const FontCascadeDescription &fontDescription,
-                                   dom::Document &document) noexcept
+                                   Document &document) noexcept
   {
     return krys::SwitchOn(
       unresolvedSize,
@@ -336,7 +336,7 @@ namespace krys::boo::style
             css::generic_font_family_names::FamilyName(css::parse_property::GenericFontFamilyIndex(ident)),
             true};
         },
-        [&](const css::CSSOMStringAtom &familyString) -> std::pair<StringAtom, bool>
+        [&](const CSSOMStringAtom &familyString) -> std::pair<StringAtom, bool>
         { return {familyString, false}; });
 
       if (family.View().empty())
@@ -359,7 +359,7 @@ namespace krys::boo::style
 
   Maybe<FontCascade> ResolveForUnresolvedFont(const css::parse_property::UnresolvedFont &unresolvedFont,
                                               FontCascadeDescription &&fontDescription,
-                                              dom::Document &document) noexcept
+                                              Document &document) noexcept
   {
     // Map the font property longhands into the style.
     float parentSize = fontDescription.SpecifiedSize();

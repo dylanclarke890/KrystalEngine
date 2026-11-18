@@ -33,7 +33,7 @@ namespace krys::ui
 
     KRYS_NODISCARD bool CanPaste(boo::LocalFrame *frame, bool defaultValue) const noexcept override;
 
-    bool HandleKeyboardEvent(boo::dom::KeyboardEvent &event) noexcept override;
+    bool HandleKeyboardEvent(boo::KeyboardEvent &event) noexcept override;
 
     void RespondToChangedContents() noexcept override
     {
@@ -41,17 +41,17 @@ namespace krys::ui
 
     void RespondToChangedSelection(boo::LocalFrame *frame) noexcept override;
 
-    void DiscardedComposition(const boo::dom::Document &document) noexcept override;
+    void DiscardedComposition(const boo::Document &document) noexcept override;
 
     void DidUpdateComposition() noexcept override
     {
     }
 
-    void HandleInputMethodKeydown(boo::dom::KeyboardEvent &event) noexcept override;
+    void HandleInputMethodKeydown(boo::KeyboardEvent &event) noexcept override;
 
-    void DidDispatchInputMethodKeydown(boo::dom::KeyboardEvent &event) noexcept override;
+    void DidDispatchInputMethodKeydown(boo::KeyboardEvent &event) noexcept override;
 
-    void SetInputMethodState(boo::dom::Element *element) noexcept override;
+    void SetInputMethodState(boo::Element *element) noexcept override;
 
     /// @brief Whether the focused element takes text from the input method.
     KRYS_NODISCARD bool AcceptsTextInput() const noexcept
@@ -87,32 +87,32 @@ namespace krys::ui
 
     // There's no autofill (not planned, see Krystal.Booey's OVERVIEW.md).
 
-    void TextFieldDidBeginEditing(boo::dom::Element &) noexcept override
+    void TextFieldDidBeginEditing(boo::Element &) noexcept override
     {
     }
 
-    void TextFieldDidEndEditing(boo::dom::Element &) noexcept override
+    void TextFieldDidEndEditing(boo::Element &) noexcept override
     {
     }
 
-    void TextDidChangeInTextField(boo::dom::Element &) noexcept override
+    void TextDidChangeInTextField(boo::Element &) noexcept override
     {
     }
 
-    bool DoTextFieldCommandFromEvent(boo::dom::Element &, boo::dom::KeyboardEvent *) noexcept override
+    bool DoTextFieldCommandFromEvent(boo::Element &, boo::KeyboardEvent *) noexcept override
     {
       return false;
     }
 
-    void TextWillBeDeletedInTextField(boo::dom::Element &) noexcept override
+    void TextWillBeDeletedInTextField(boo::Element &) noexcept override
     {
     }
 
-    void TextDidChangeInTextArea(boo::dom::Element &) noexcept override
+    void TextDidChangeInTextArea(boo::Element &) noexcept override
     {
     }
 
     /// @brief The name of the editor command @p event is bound to, or empty if none is.
-    KRYS_NODISCARD static utf8_stringview InterpretKeyEvent(const boo::dom::KeyboardEvent &event) noexcept;
+    KRYS_NODISCARD static utf8_stringview InterpretKeyEvent(const boo::KeyboardEvent &event) noexcept;
   };
 }

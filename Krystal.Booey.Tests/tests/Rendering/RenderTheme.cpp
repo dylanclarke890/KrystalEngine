@@ -101,7 +101,7 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD const RenderStyle &StyleOf(EditorFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD const RenderStyle &StyleOf(EditorFixture &fixture, DOMStringView id) noexcept
     {
       return fixture.ById(id).Renderer()->Style();
     }
@@ -167,7 +167,7 @@ namespace krys::boo::tests
                           u8"<input type=checkbox id=off disabled><input id=field readonly>"
                           u8"<input type=checkbox id=dark style=color-scheme:dark>");
     auto &theme = RenderTheme::Singleton();
-    auto states = [&](dom::DOMStringView id)
+    auto states = [&](DOMStringView id)
     {
       return theme.ExtractControlStyleStatesForRenderer(*fixture.ById(id).Renderer());
     };
@@ -177,7 +177,7 @@ namespace krys::boo::tests
     CHECK(states(u8"check").Contains(ControlStyle::State::WindowActive));
     CHECK_FALSE(states(u8"check").Contains(ControlStyle::State::Hovered));
 
-    Downcast<html::HTMLInputElement>(fixture.ById(u8"mixed")).SetIndeterminate(true);
+    Downcast<boo::HTMLInputElement>(fixture.ById(u8"mixed")).SetIndeterminate(true);
     CHECK(states(u8"mixed").Contains(ControlStyle::State::Indeterminate));
 
     CHECK_FALSE(states(u8"off").Contains(ControlStyle::State::Enabled));

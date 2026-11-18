@@ -28,9 +28,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGMaskElement::SVGMaskElement(dom::Document &document) noexcept
+  SVGMaskElement::SVGMaskElement(Document &document) noexcept
       : SVGElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Mask),
         SVGTests(this), _x(SVGAnimatedLength::Create(this, SVGLengthMode::Width, u8"-10%")),
         _y(SVGAnimatedLength::Create(this, SVGLengthMode::Height, u8"-10%")),
@@ -57,11 +57,11 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGMaskElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                        Maybe<dom::DOMStringView> value) noexcept
+  void SVGMaskElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                        Maybe<DOMStringView> value) noexcept
   {
     auto parseError = SVGParsingError::None;
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::MaskUnitsAttr())
     {
@@ -105,7 +105,7 @@ namespace krys::boo::svg
     SVGElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGMaskElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGMaskElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsAnimatedLengthAttribute(attributeName))
     {

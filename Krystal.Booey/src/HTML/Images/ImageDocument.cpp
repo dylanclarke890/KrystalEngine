@@ -44,7 +44,7 @@
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include <algorithm>
 
-namespace krys::boo::html
+namespace krys::boo
 {
   ImageDocument::ImageDocument() noexcept : HTMLDocument(dom::DocumentFlags::IsImageDocument)
   {
@@ -124,7 +124,7 @@ namespace krys::boo::html
         }
         StringBuilder title;
         title.Append(name, u8" (", size.Width(), u8"×", size.Height(), u8")");
-        (void)Title(dom::DOMString(krys::move(title).ToString()));
+        (void)Title(DOMString(krys::move(title).ToString()));
       }
 
       ImageUpdated();
@@ -160,7 +160,7 @@ namespace krys::boo::html
                                                   : u8"user-select: none; display: block");
     auto &imageLoader = imageElement->GetImageLoader();
     imageLoader.SetLoadManually(true);
-    (void)imageElement->SetAttribute(u8"src", dom::DOMString(GetURL().String()));
+    (void)imageElement->SetAttribute(u8"src", DOMString(GetURL().String()));
     (void)body->AppendChild(*imageElement);
     imageLoader.SetLoadManually(false);
     if (auto *cachedImage = imageElement->GetCachedImage())
@@ -170,9 +170,9 @@ namespace krys::boo::html
 
     if (_shouldShrinkImage)
     {
-      _clickListener = imageElement->AddEventListener<dom::MouseEvent>(
+      _clickListener = imageElement->AddEventListener<MouseEvent>(
         event_names::Click,
-        [document = CreateWeakPtr(this)](dom::MouseEvent &event)
+        [document = CreateWeakPtr(this)](MouseEvent &event)
         {
           if (document && dom::IsAnyClick(event))
           {

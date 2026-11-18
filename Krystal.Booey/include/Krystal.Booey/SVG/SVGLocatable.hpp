@@ -25,16 +25,22 @@
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGElement;
+}
 
+namespace krys::boo::svg
+{
   enum class CTMScope : bool
   {
     NearestViewportScope, // Used for getCTM()
     ScreenScope,          // Used for getScreenCTM()
   };
+}
 
+namespace krys::boo
+{
   /// @brief The elements with a place in a coordinate system: their viewport elements, bounding box and
   /// transforms to their viewport and to the screen.
   class SVGLocatable
@@ -64,14 +70,14 @@ namespace krys::boo::svg
     KRYS_NODISCARD static SVGElement *FarthestViewportElement(const SVGElement *element) noexcept;
 
   protected:
-    KRYS_NODISCARD virtual AffineTransform LocalCoordinateSpaceTransform(CTMScope) const noexcept
+    KRYS_NODISCARD virtual AffineTransform LocalCoordinateSpaceTransform(svg::CTMScope) const noexcept
     {
       return AffineTransform();
     }
 
     KRYS_NODISCARD static FloatRect GetBBox(SVGElement *element, StyleUpdateStrategy) noexcept;
 
-    KRYS_NODISCARD static AffineTransform ComputeCTM(SVGElement *element, CTMScope,
+    KRYS_NODISCARD static AffineTransform ComputeCTM(SVGElement *element, svg::CTMScope,
                                                      StyleUpdateStrategy) noexcept;
   };
 }

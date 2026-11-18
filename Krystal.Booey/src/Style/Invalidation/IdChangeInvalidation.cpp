@@ -29,7 +29,7 @@
 
 namespace krys::boo::style
 {
-  void IdChangeInvalidation::InvalidateStyle(const dom::DOMStringAtom &changedId) noexcept
+  void IdChangeInvalidation::InvalidateStyle(const DOMStringAtom &changedId) noexcept
   {
     if (changedId.View().empty())
     {

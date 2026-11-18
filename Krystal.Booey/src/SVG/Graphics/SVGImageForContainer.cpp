@@ -22,7 +22,7 @@
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   SVGImageForContainer::SVGImageForContainer(SVGImage *image, const FloatSize &containerSize,
                                              float containerZoom, url::URL initialFragmentURL) noexcept

@@ -32,7 +32,7 @@
 
 namespace krys::boo
 {
-  SVGTextLayoutAttributesBuilder::TextPosition::TextPosition(svg::SVGTextPositioningElement *newElement,
+  SVGTextLayoutAttributesBuilder::TextPosition::TextPosition(SVGTextPositioningElement *newElement,
                                                              uint32 newStart, uint32 newLength) noexcept
       : Element(ShareCheckedPtr(newElement)), Start(newStart), Length(newLength)
   {
@@ -148,7 +148,7 @@ namespace krys::boo
         continue;
       }
 
-      RefPtr element = svg::SVGTextPositioningElement::ElementFromRenderer(*inlineChild);
+      RefPtr element = SVGTextPositioningElement::ElementFromRenderer(*inlineChild);
 
       size_t atPosition = _textPositions.size();
       if (element)
@@ -172,7 +172,7 @@ namespace krys::boo
 
   void SVGTextLayoutAttributesBuilder::BuildCharacterDataMap(RenderSVGText &textRoot) noexcept
   {
-    RefPtr outermostTextElement = svg::SVGTextPositioningElement::ElementFromRenderer(textRoot);
+    RefPtr outermostTextElement = SVGTextPositioningElement::ElementFromRenderer(textRoot);
     krys_debug_assert(outermostTextElement);
 
     // Grab outermost <text> element value lists and insert them in the character data map.
@@ -220,7 +220,7 @@ namespace krys::boo
       return;
     }
 
-    svg::SVGLengthContext lengthContext(element.get());
+    SVGLengthContext lengthContext(element.get());
     for (uint32 i = 0; i < position.Length; ++i)
     {
       bool hasX = i < xListSize;

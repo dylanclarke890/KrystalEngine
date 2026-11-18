@@ -30,72 +30,72 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  KRYS_NODISCARD static bool IsNameColorScheme(dom::DOMStringView nameValue) noexcept
+  KRYS_NODISCARD static bool IsNameColorScheme(DOMStringView nameValue) noexcept
   {
     return text::IsASCIICaselessEqual(nameValue, u8"color-scheme");
   }
 
 #pragma region HTMLMetaElement
 
-  HTMLMetaElement::HTMLMetaElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Meta)
+  HTMLMetaElement::HTMLMetaElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Meta)
   {
   }
 
-  dom::DOMString HTMLMetaElement::Name() const noexcept
+  DOMString HTMLMetaElement::Name() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLMetaElement::Name(dom::DOMString value) noexcept
+  void HTMLMetaElement::Name(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"name", krys::move(value));
   }
 
-  dom::DOMString HTMLMetaElement::HttpEquiv() const noexcept
+  DOMString HTMLMetaElement::HttpEquiv() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"http-equiv").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"http-equiv").value_or(u8"");
   }
 
-  void HTMLMetaElement::HttpEquiv(dom::DOMString value) noexcept
+  void HTMLMetaElement::HttpEquiv(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"http-equiv", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"http-equiv", krys::move(value));
   }
 
-  dom::DOMString HTMLMetaElement::Content() const noexcept
+  DOMString HTMLMetaElement::Content() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"content").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"content").value_or(u8"");
   }
 
-  void HTMLMetaElement::Content(dom::DOMString value) noexcept
+  void HTMLMetaElement::Content(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"content", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"content", krys::move(value));
   }
 
-  dom::DOMString HTMLMetaElement::Media() const noexcept
+  DOMString HTMLMetaElement::Media() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"media").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"media").value_or(u8"");
   }
 
-  void HTMLMetaElement::Media(dom::DOMString value) noexcept
+  void HTMLMetaElement::Media(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"media", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"media", krys::move(value));
   }
 
 #pragma endregion
 
 #pragma region HTMLMetaElement Obsolete members
 
-  dom::DOMString HTMLMetaElement::Scheme() const noexcept
+  DOMString HTMLMetaElement::Scheme() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"scheme").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"scheme").value_or(u8"");
   }
 
-  void HTMLMetaElement::Scheme(dom::DOMString value) noexcept
+  void HTMLMetaElement::Scheme(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"scheme", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"scheme", krys::move(value));
   }
 
 #pragma endregion
@@ -106,10 +106,9 @@ namespace krys::boo::html
     Process();
   }
 
-  void HTMLMetaElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                           Maybe<dom::DOMStringView> oldValue,
-                                           Maybe<dom::DOMStringView> value,
-                                           const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLMetaElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                           Maybe<DOMStringView> value,
+                                           const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
@@ -126,7 +125,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLMetaElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLMetaElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
     auto name = GetAttribute(u8"name");
@@ -136,7 +135,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLMetaElement::Process(Maybe<dom::DOMStringView> oldName) noexcept
+  void HTMLMetaElement::Process(Maybe<DOMStringView> oldName) noexcept
   {
     // Changing a meta tag while it's not in the document tree shouldn't have any effect on the document.
     if (IsInDocumentTree())

@@ -111,21 +111,21 @@ namespace krys::boo
 
   public:
     /// @see https://drafts.csswg.org/scroll-animations-1/#dom-viewtimeline-viewtimeline
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<ViewTimeline>>
-      Create(dom::Document &document, const ViewTimelineOptions &options = {}) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<ViewTimeline>>
+      Create(boo::Document &document, const ViewTimelineOptions &options = {}) noexcept;
 
-    KRYS_NODISCARD static Ref<ViewTimeline> Create(const css::CSSOMStringAtom &name, ScrollAxis axis,
+    KRYS_NODISCARD static Ref<ViewTimeline> Create(const CSSOMStringAtom &name, ScrollAxis axis,
                                                    const style::ViewTimelineInsetItem &insets) noexcept;
 
     /// @see https://drafts.csswg.org/scroll-animations-1/#dom-viewtimeline-subject
-    KRYS_NODISCARD const dom::Element *Subject() const noexcept;
+    KRYS_NODISCARD const boo::Element *Subject() const noexcept;
 
     KRYS_NODISCARD const style::WeakStyleable &SubjectStyleable() const noexcept
     {
       return _subject;
     }
 
-    void SetSubject(dom::Element *subject) noexcept;
+    void SetSubject(boo::Element *subject) noexcept;
 
     void SetSubject(const style::Styleable &styleable) noexcept;
 
@@ -140,10 +140,10 @@ namespace krys::boo
     }
 
     /// @see https://drafts.csswg.org/scroll-animations-1/#dom-viewtimeline-startoffset
-    KRYS_NODISCARD Ref<css::CSSNumericValue> StartOffset() const noexcept;
+    KRYS_NODISCARD Ref<CSSNumericValue> StartOffset() const noexcept;
 
     /// @see https://drafts.csswg.org/scroll-animations-1/#dom-viewtimeline-endoffset
-    KRYS_NODISCARD Ref<css::CSSNumericValue> EndOffset() const noexcept;
+    KRYS_NODISCARD Ref<CSSNumericValue> EndOffset() const noexcept;
 
     KRYS_NODISCARD ShouldUpdateAnimationsAndSendEvents
       DocumentWillUpdateAnimationsAndSendEvents() noexcept override;
@@ -154,9 +154,9 @@ namespace krys::boo
 
     KRYS_NODISCARD const RenderElement *StickyContainer() const noexcept;
 
-    KRYS_NODISCARD RefPtr<dom::Element> BindingsSource() const noexcept override;
+    KRYS_NODISCARD RefPtr<boo::Element> BindingsSource() const noexcept override;
 
-    KRYS_NODISCARD RefPtr<dom::Element> Source() const noexcept override;
+    KRYS_NODISCARD RefPtr<boo::Element> Source() const noexcept override;
 
     KRYS_NODISCARD style::SingleAnimationRange DefaultRange() const noexcept final;
 
@@ -174,8 +174,7 @@ namespace krys::boo
   private:
     explicit ViewTimeline(ScrollAxis axis) noexcept;
 
-    ViewTimeline(const css::CSSOMStringAtom &name, ScrollAxis axis,
-                 style::ViewTimelineInsetItem insets) noexcept;
+    ViewTimeline(const CSSOMStringAtom &name, ScrollAxis axis, style::ViewTimelineInsetItem insets) noexcept;
 
     KRYS_NODISCARD ScrollTimeline::Data ComputeTimelineData(
       UseCachedCurrentTime useCachedCurrentTime = UseCachedCurrentTime::Yes) const noexcept final;
@@ -196,8 +195,8 @@ namespace krys::boo
 
     void CacheCurrentTime() noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<SpecifiedViewTimelineInsets>
-      ValidateSpecifiedInsets(const ViewTimelineInsetValue &inset, const dom::Document &document) noexcept;
+    KRYS_NODISCARD static ExceptionOr<SpecifiedViewTimelineInsets>
+      ValidateSpecifiedInsets(const ViewTimelineInsetValue &inset, const boo::Document &document) noexcept;
   };
 }
 

@@ -8,6 +8,12 @@
 
 namespace krys::boo::dom
 {
+  class ElementAlgorithms;
+  class NodeAlgorithms;
+}
+
+namespace krys::boo
+{
   class Document;
   class Element;
 
@@ -20,8 +26,8 @@ namespace krys::boo::dom
 
     friend class Document;
     friend class Element;
-    friend class ElementAlgorithms;
-    friend class NodeAlgorithms;
+    friend class dom::ElementAlgorithms;
+    friend class dom::NodeAlgorithms;
 
   private:
     /// @brief The attribute's namespace, namespace prefix and local name.
@@ -142,8 +148,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::Attr)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::Attr)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
     return node.IsAttributeNode();
   }

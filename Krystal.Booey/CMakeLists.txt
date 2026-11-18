@@ -389,12 +389,12 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/CSSOM/CSSSupportsRule.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSStyleDeclaration.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp
-  include/Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp
-  include/Krystal.Booey/CSS/StyleSheets/CSSStyleSheetObservableArray.hpp
-  include/Krystal.Booey/CSS/Descriptors/CSSFontFaceDescriptors.hpp
-  include/Krystal.Booey/CSS/Descriptors/CSSFunctionDescriptors.hpp
-  include/Krystal.Booey/CSS/Descriptors/CSSPositionTryDescriptors.hpp
-  include/Krystal.Booey/CSS/Descriptors/PropertySetCSSDescriptors.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSStyleSheetObservableArray.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSFontFaceDescriptors.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSFunctionDescriptors.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSPositionTryDescriptors.hpp
+  include/Krystal.Booey/CSS/CSSOM/PropertySetCSSDescriptors.hpp
   include/Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp
   include/Krystal.Booey/CSS/DOMMatrix/DOMMatrix2DInit.hpp
   include/Krystal.Booey/CSS/DOMMatrix/DOMMatrixInit.hpp
@@ -405,9 +405,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Font/SegmentedFontFace.hpp
   include/Krystal.Booey/CSS/Font/FontSelectionValueInlines.hpp
   include/Krystal.Booey/CSS/CSSOM/Markup.hpp
-  include/Krystal.Booey/CSS/Media/MediaList.hpp
-  include/Krystal.Booey/CSS/Media/MediaQueryList.hpp
-  include/Krystal.Booey/CSS/Media/MediaQueryListEvent.hpp
+  include/Krystal.Booey/CSS/CSSOM/MediaList.hpp
+  include/Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp
+  include/Krystal.Booey/CSS/CSSOM/MediaQueryListEvent.hpp
   include/Krystal.Booey/CSS/Parser/AtRuleId.hpp
   include/Krystal.Booey/CSS/Parser/CustomPropertySyntax.hpp
   include/Krystal.Booey/CSS/Parser/InputStream.hpp
@@ -544,9 +544,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp
   include/Krystal.Booey/CSS/Selectors/SelectorPseudoTypeMap.hpp
   include/Krystal.Booey/CSS/CSSOM/StyleAttributeMutationScope.hpp
-  include/Krystal.Booey/CSS/StyleSheets/StyleSheet.hpp
+  include/Krystal.Booey/CSS/CSSOM/StyleSheet.hpp
   include/Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp
-  include/Krystal.Booey/CSS/StyleSheets/StyleSheetList.hpp
+  include/Krystal.Booey/CSS/CSSOM/StyleSheetList.hpp
   include/Krystal.Booey/CSS/Values/ToLengthConversionData.hpp
   include/Krystal.Booey/CSS/TypedOM/Color/CSSColor.hpp
   include/Krystal.Booey/CSS/TypedOM/Color/CSSColorValue.hpp
@@ -801,12 +801,12 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/CSSOM/CSSSupportsRule.cpp
   src/CSS/CSSOM/CSSStyleDeclaration.cpp
   src/CSS/CSSOM/CSSStyleProperties.cpp
-  src/CSS/StyleSheets/CSSStyleSheet.cpp
-  src/CSS/StyleSheets/CSSStyleSheetObservableArray.cpp
-  src/CSS/Descriptors/CSSFontFaceDescriptors.cpp
-  src/CSS/Descriptors/CSSFunctionDescriptors.cpp
-  src/CSS/Descriptors/CSSPositionTryDescriptors.cpp
-  src/CSS/Descriptors/PropertySetCSSDescriptors.cpp
+  src/CSS/CSSOM/CSSStyleSheet.cpp
+  src/CSS/CSSOM/CSSStyleSheetObservableArray.cpp
+  src/CSS/CSSOM/CSSFontFaceDescriptors.cpp
+  src/CSS/CSSOM/CSSFunctionDescriptors.cpp
+  src/CSS/CSSOM/CSSPositionTryDescriptors.cpp
+  src/CSS/CSSOM/PropertySetCSSDescriptors.cpp
   src/CSS/DOMMatrix/DOMMatrix.cpp
   src/CSS/DOMMatrix/DOMMatrixReadOnly.cpp
   src/CSS/Font/FontFace.cpp
@@ -814,9 +814,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Font/FontFaceSource.cpp
   src/CSS/Font/SegmentedFontFace.cpp
   src/CSS/CSSOM/Markup.cpp
-  src/CSS/Media/MediaList.cpp
-  src/CSS/Media/MediaQueryList.cpp
-  src/CSS/Media/MediaQueryListEvent.cpp
+  src/CSS/CSSOM/MediaList.cpp
+  src/CSS/CSSOM/MediaQueryList.cpp
+  src/CSS/CSSOM/MediaQueryListEvent.cpp
   src/CSS/Parser/AtRuleId.cpp
   src/CSS/Parser/CustomPropertySyntax.cpp
   src/CSS/Parser/KeywordLookup.cpp
@@ -907,7 +907,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Selectors/SelectorParserContext.cpp
   src/CSS/CSSOM/StyleAttributeMutationScope.cpp
   src/CSS/StyleSheets/StyleSheetContents.cpp
-  src/CSS/StyleSheets/StyleSheetList.cpp
+  src/CSS/CSSOM/StyleSheetList.cpp
   src/CSS/Values/NumberFormatting.cpp
   src/CSS/Values/ToLengthConversionData.cpp
   src/CSS/TypedOM/Color/CSSColor.cpp

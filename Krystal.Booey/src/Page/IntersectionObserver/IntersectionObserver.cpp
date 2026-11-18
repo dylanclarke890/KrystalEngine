@@ -65,8 +65,8 @@ namespace krys::boo
       return RemoveFirstMatching(list, [&](auto &weak) { return weak.get() == value; });
     }
 
-    dom::ExceptionOr<IntersectionObserverMarginBox> ParseMargin(const dom::DOMString &margin,
-                                                                const utf8_string &marginName) noexcept
+    ExceptionOr<IntersectionObserverMarginBox> ParseMargin(const DOMString &margin,
+                                                           const utf8_string &marginName) noexcept
     {
       using namespace css::parse_property;
 
@@ -75,7 +75,7 @@ namespace krys::boo
         .Context = parserContext,
       };
 
-      css::InputStream input {dom::DOMString(margin)};
+      css::InputStream input {DOMString(margin)};
       css::Tokenizer tokenizer {input};
       std::ignore = tokenizer.PumpTokenizer();
       auto tokenRange = tokenizer.Tokens();
@@ -86,16 +86,16 @@ namespace krys::boo
         return IntersectionObserverMarginBox {IntersectionObserverMarginEdge::Fixed {0}};
       }
 
-      auto consumeEdge = [&] -> dom::ExceptionOr<IntersectionObserverMarginEdge>
+      auto consumeEdge = [&] -> ExceptionOr<IntersectionObserverMarginEdge>
       {
         auto parsedValue =
           css::PrimitiveValueResolver<css::LengthPercentage<>>::ConsumeAndResolve(tokenRange, parserState);
 
         if (!parsedValue || parsedValue->IsCalculated())
         {
-          return dom::Exception(dom::ExceptionCode::SyntaxError,
-                                u8"Failed to construct 'IntersectionObserver': " + marginName
-                                  + u8" must be specified in pixels or percent.");
+          return Exception(ExceptionCode::SyntaxError, u8"Failed to construct 'IntersectionObserver': "
+                                                         + marginName
+                                                         + u8" must be specified in pixels or percent.");
         }
 
         if (parsedValue->IsPercentage())
@@ -114,9 +114,9 @@ namespace krys::boo
             parsedValue->ResolveAsLengthNoConversionDataRequired<float>()}};
         }
 
-        return dom::Exception(dom::ExceptionCode::SyntaxError,
-                              u8"Failed to construct 'IntersectionObserver': " + marginName
-                                + u8" must be specified in pixels or percent.");
+        return Exception(ExceptionCode::SyntaxError, u8"Failed to construct 'IntersectionObserver': "
+                                                       + marginName
+                                                       + u8" must be specified in pixels or percent.");
       };
 
       auto edge1 = consumeEdge();
@@ -161,16 +161,16 @@ namespace krys::boo
 
       if (!tokenRange.IsAtEnd())
       {
-        return dom::Exception(dom::ExceptionCode::SyntaxError,
-                              u8"Failed to construct 'IntersectionObserver': Extra text found at the end of "
-                                + marginName + u8".");
+        return Exception(ExceptionCode::SyntaxError,
+                         u8"Failed to construct 'IntersectionObserver': Extra text found at the end of "
+                           + marginName + u8".");
       }
 
       return IntersectionObserverMarginBox {edge1.ReleaseValue(), edge2.ReleaseValue(), edge3.ReleaseValue(),
                                             edge4.ReleaseValue()};
     }
 
-    dom::DOMString MarginBoxToString(const IntersectionObserverMarginBox &marginBox) noexcept
+    DOMString MarginBoxToString(const IntersectionObserverMarginBox &marginBox) noexcept
     {
       StringBuilder stringBuilder;
       for (auto side : AllBoxSides)
@@ -239,15 +239,15 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<Ref<IntersectionObserver>>
-    IntersectionObserver::Create(dom::Document &document, IntersectionObserverCallback &&callback, Init init,
+  ExceptionOr<Ref<IntersectionObserver>>
+    IntersectionObserver::Create(Document &document, IntersectionObserverCallback &&callback, Init init,
                                  IncludeObscuredInsets includeObscuredInsets) noexcept
   {
-    RefPtr<dom::ContainerNode> root;
+    RefPtr<ContainerNode> root;
     if (init.Root)
     {
-      root = SwitchOn(*init.Root, [](auto &elementOrDocument) -> RefPtr<dom::ContainerNode>
-                      { return elementOrDocument; });
+      root = SwitchOn(*init.Root,
+                      [](auto &elementOrDocument) -> RefPtr<ContainerNode> { return elementOrDocument; });
     }
 
     auto rootMarginOrException = ParseMargin(init.RootMargin, u8"rootMargin");
@@ -276,8 +276,8 @@ namespace krys::boo
     {
       if (!(threshold >= 0 && threshold <= 1))
       {
-        return dom::Exception(
-          dom::ExceptionCode::RangeError,
+        return Exception(
+          ExceptionCode::RangeError,
           u8"Failed to construct 'IntersectionObserver': all thresholds must lie in the range [0.0, 1.0].");
       }
     }
@@ -287,8 +287,8 @@ namespace krys::boo
       scrollMarginOrException.ReleaseValue(), krys::move(thresholds), includeObscuredInsets));
   }
 
-  IntersectionObserver::IntersectionObserver(dom::Document &document, IntersectionObserverCallback &&callback,
-                                             dom::ContainerNode *root,
+  IntersectionObserver::IntersectionObserver(Document &document, IntersectionObserverCallback &&callback,
+                                             ContainerNode *root,
                                              IntersectionObserverMarginBox &&parsedRootMargin,
                                              IntersectionObserverMarginBox &&parsedScrollMargin,
                                              List<double> &&thresholds,
@@ -298,14 +298,14 @@ namespace krys::boo
         _thresholds(krys::move(thresholds)), _callback(krys::move(callback)),
         _includeObscuredInsets(includeObscuredInsets)
   {
-    if (auto *rootDocument = DynamicDowncast<dom::Document>(root))
+    if (auto *rootDocument = DynamicDowncast<Document>(root))
     {
       auto &observerData = rootDocument->EnsureIntersectionObserverData();
       observerData.Observers.push_back(CreateWeakPtr(this));
     }
     else if (root)
     {
-      auto &observerData = Downcast<dom::Element>(*root).EnsureIntersectionObserverData();
+      auto &observerData = Downcast<Element>(*root).EnsureIntersectionObserverData();
       observerData.Observers.push_back(CreateWeakPtr(this));
     }
     else if (auto *frame = document.Frame())
@@ -322,38 +322,38 @@ namespace krys::boo
   IntersectionObserver::~IntersectionObserver() noexcept
   {
     auto *root = _root.get();
-    if (auto *document = DynamicDowncast<dom::Document>(root))
+    if (auto *document = DynamicDowncast<Document>(root))
     {
       RemoveFirstWeak(document->IntersectionObserverDataIfExists()->Observers, this);
     }
     else if (root)
     {
-      RemoveFirstWeak(Downcast<dom::Element>(*root).IntersectionObserverDataIfExists()->Observers, this);
+      RemoveFirstWeak(Downcast<Element>(*root).IntersectionObserverDataIfExists()->Observers, this);
     }
     Disconnect();
   }
 
-  dom::Document *IntersectionObserver::TrackingDocument() const noexcept
+  Document *IntersectionObserver::TrackingDocument() const noexcept
   {
     return _root ? &_root->NodeDocument() : _implicitRootDocument.get();
   }
 
-  dom::DOMString IntersectionObserver::RootMargin() const noexcept
+  DOMString IntersectionObserver::RootMargin() const noexcept
   {
     return MarginBoxToString(_rootMargin);
   }
 
-  dom::DOMString IntersectionObserver::ScrollMargin() const noexcept
+  DOMString IntersectionObserver::ScrollMargin() const noexcept
   {
     return MarginBoxToString(_scrollMargin);
   }
 
-  bool IntersectionObserver::IsObserving(const dom::Element &element) const noexcept
+  bool IntersectionObserver::IsObserving(const Element &element) const noexcept
   {
     return std::ranges::any_of(_observationTargets, [&](auto &target) { return target.get() == &element; });
   }
 
-  void IntersectionObserver::Observe(dom::Element &target) noexcept
+  void IntersectionObserver::Observe(Element &target) noexcept
   {
     if (!TrackingDocument() || !_callback || IsObserving(target))
     {
@@ -368,7 +368,7 @@ namespace krys::boo
     // make sure to keep the target alive until this first observation.
     _targetsWaitingForFirstObservation.push_back(ShareRef(target));
 
-    RefPtr<dom::Document> document = ShareRefPtr(TrackingDocument());
+    RefPtr<Document> document = ShareRefPtr(TrackingDocument());
     if (!hadObservationTargets)
     {
       document->AddIntersectionObserver(*this);
@@ -376,7 +376,7 @@ namespace krys::boo
     document->ScheduleInitialIntersectionObservationUpdate();
   }
 
-  void IntersectionObserver::Unobserve(dom::Element &target) noexcept
+  void IntersectionObserver::Unobserve(Element &target) noexcept
   {
     if (!RemoveTargetRegistration(target))
     {
@@ -418,7 +418,7 @@ namespace krys::boo
     return std::exchange(_queuedEntries, {});
   }
 
-  void IntersectionObserver::TargetDestroyed(dom::Element &target) noexcept
+  void IntersectionObserver::TargetDestroyed(Element &target) noexcept
   {
     RemoveFirstWeak(_observationTargets, &target);
     RemoveFirstMatching(_targetsWaitingForFirstObservation,
@@ -432,7 +432,7 @@ namespace krys::boo
     }
   }
 
-  bool IntersectionObserver::RemoveTargetRegistration(dom::Element &target) noexcept
+  bool IntersectionObserver::RemoveTargetRegistration(Element &target) noexcept
   {
     auto *observerData = target.IntersectionObserverDataIfExists();
     if (!observerData)
@@ -464,7 +464,7 @@ namespace krys::boo
   }
 
   auto IntersectionObserver::ComputeIntersectionState(const IntersectionObserverRegistration &registration,
-                                                      LocalFrameView &hostFrameView, dom::Element &target,
+                                                      LocalFrameView &hostFrameView, Element &target,
                                                       ApplyRootMargin applyRootMargin) const noexcept
     -> IntersectionObservationState
   {

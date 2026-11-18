@@ -28,7 +28,7 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSNumericValue.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief The operands of a math value.
   /// @see https://drafts.css-houdini.org/css-typed-om/#cssnumericarray

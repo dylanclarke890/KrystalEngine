@@ -46,15 +46,14 @@ namespace krys::boo::style
     Type _type {Type::None};
     // The identifier is the string when the type is String and is the @counter-style name when the type is
     // CounterStyle.
-    css::CSSOMStringAtom _identifier {null};
+    CSSOMStringAtom _identifier {null};
 
   public:
     ListStyleType(css::keywords::None) noexcept
     {
     }
 
-    ListStyleType(css::CSSOMStringAtom &&string) noexcept
-        : _type {Type::String}, _identifier {krys::move(string)}
+    ListStyleType(CSSOMStringAtom &&string) noexcept : _type {Type::String}, _identifier {krys::move(string)}
     {
     }
 
@@ -66,22 +65,22 @@ namespace krys::boo::style
     // <counter-style> specific constructors.
 
     ListStyleType(css::keywords::Circle keyword) noexcept
-        : ListStyleType {CounterStyle {{css::CSSOMStringAtom {css::ToString(css::keywords::Circle::Value)}}}}
+        : ListStyleType {CounterStyle {{CSSOMStringAtom {css::ToString(css::keywords::Circle::Value)}}}}
     {
     }
 
     ListStyleType(css::keywords::Decimal keyword) noexcept
-        : ListStyleType {CounterStyle {{css::CSSOMStringAtom {css::ToString(css::keywords::Decimal::Value)}}}}
+        : ListStyleType {CounterStyle {{CSSOMStringAtom {css::ToString(css::keywords::Decimal::Value)}}}}
     {
     }
 
     ListStyleType(css::keywords::Disc keyword) noexcept
-        : ListStyleType {CounterStyle {{css::CSSOMStringAtom {css::ToString(css::keywords::Disc::Value)}}}}
+        : ListStyleType {CounterStyle {{CSSOMStringAtom {css::ToString(css::keywords::Disc::Value)}}}}
     {
     }
 
     ListStyleType(css::keywords::Square keyword) noexcept
-        : ListStyleType {CounterStyle {{css::CSSOMStringAtom {css::ToString(css::keywords::Square::Value)}}}}
+        : ListStyleType {CounterStyle {{CSSOMStringAtom {css::ToString(css::keywords::Square::Value)}}}}
     {
     }
 
@@ -115,9 +114,9 @@ namespace krys::boo::style
       return IsCounterStyle() ? Maybe<CounterStyle> {CounterStyle {{_identifier}}} : null;
     }
 
-    KRYS_NODISCARD Maybe<css::CSSOMStringAtom> TryString() const noexcept
+    KRYS_NODISCARD Maybe<CSSOMStringAtom> TryString() const noexcept
     {
-      return IsString() ? Maybe<css::CSSOMStringAtom> {_identifier} : null;
+      return IsString() ? Maybe<CSSOMStringAtom> {_identifier} : null;
     }
 
     template <typename... F>

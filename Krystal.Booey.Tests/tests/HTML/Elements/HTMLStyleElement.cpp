@@ -3,9 +3,9 @@
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp"
-#include "Krystal.Booey/CSS/Media/MediaList.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheetList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/CSSOM/MediaList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/StyleSheetList.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -22,38 +22,38 @@ namespace krys::boo::html::tests
   {
     using css::tests::ToNarrow;
 
-    Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
+    Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       parser->PumpTokenizer();
       return document;
     }
 
-    Ref<HTMLStyleElement> CreateStyle(dom::Document &document, dom::DOMString &&text) noexcept
+    Ref<HTMLStyleElement> CreateStyle(Document &document, DOMString &&text) noexcept
     {
       auto style = CreateRef<HTMLStyleElement>(document);
       REQUIRE_FALSE(style->TextContent(krys::move(text)).HasException());
       return style;
     }
 
-    Ref<HTMLStyleElement> AsStyle(dom::Node &node) noexcept
+    Ref<HTMLStyleElement> AsStyle(Node &node) noexcept
     {
       return ShareRef(Downcast<HTMLStyleElement>(Downcast<HTMLElement>(node)));
     }
 
-    css::CSSStyleSheet *SheetAt(dom::Document &document, uint32 index) noexcept
+    CSSStyleSheet *SheetAt(Document &document, uint32 index) noexcept
     {
-      return DynamicDowncast<css::CSSStyleSheet>(document.StyleSheets().Item(index));
+      return DynamicDowncast<CSSStyleSheet>(document.StyleSheets().Item(index));
     }
 
-    uint32 RuleCount(css::CSSStyleSheet &sheet) noexcept
+    uint32 RuleCount(CSSStyleSheet &sheet) noexcept
     {
       return sheet.CssRules()->Length();
     }
 
-    struct EventCounter : public dom::EventListenerCallback
+    struct EventCounter : public EventListenerCallback
     {
       uint32 &Count;
 
@@ -61,7 +61,7 @@ namespace krys::boo::html::tests
       {
       }
 
-      void HandleEvent(dom::Event &) noexcept override
+      void HandleEvent(Event &) noexcept override
       {
         Count++;
       }
@@ -112,7 +112,7 @@ namespace krys::boo::html::tests
       REQUIRE(first != nullptr);
       REQUIRE(RuleCount(*first) == 1u);
 
-      auto &text = Downcast<dom::Text>(*style->FirstChild());
+      auto &text = Downcast<Text>(*style->FirstChild());
       REQUIRE_FALSE(text.Data(u8"a {} b {}").HasException());
       REQUIRE(style->Sheet() != first.get());
       REQUIRE(RuleCount(*style->Sheet()) == 2u);

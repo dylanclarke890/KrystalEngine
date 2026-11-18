@@ -42,13 +42,9 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
-{
-  class Document;
-}
-
 namespace krys::boo
 {
+  class Document;
   class LocalFrame;
   class LocalFrameView;
   class RenderBlock;
@@ -311,7 +307,7 @@ namespace krys::boo
 
     KRYS_NODISCARD LocalFrame &Frame() const noexcept;
 
-    KRYS_NODISCARD dom::Document *Document() const noexcept;
+    KRYS_NODISCARD boo::Document *Document() const noexcept;
 
     KRYS_NODISCARD RenderView *GetRenderView() const noexcept;
 

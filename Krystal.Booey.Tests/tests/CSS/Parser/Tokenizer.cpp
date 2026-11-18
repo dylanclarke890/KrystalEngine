@@ -13,12 +13,12 @@ namespace krys::boo::css::tests
   {
 #pragma region Serialise
 
-    void SerialiseNumericValue(const Token &token, dom::DOMString &output) noexcept
+    void SerialiseNumericValue(const Token &token, DOMString &output) noexcept
     {
       output += krys::boo::tests::ToUTF8(token.NumericValue());
     }
 
-    void SerialiseCSSToken(const Token &token, dom::DOMString &output) noexcept
+    void SerialiseCSSToken(const Token &token, DOMString &output) noexcept
     {
       switch (token.Type())
       {
@@ -169,9 +169,9 @@ namespace krys::boo::css::tests
       }
     }
 
-    KRYS_NODISCARD dom::DOMString SerialiseCSSTokens(TokenRange tokens) noexcept
+    KRYS_NODISCARD DOMString SerialiseCSSTokens(TokenRange tokens) noexcept
     {
-      dom::DOMString output;
+      DOMString output;
 
       for (auto &token : tokens)
       {

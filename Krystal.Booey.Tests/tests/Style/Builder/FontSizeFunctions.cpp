@@ -63,7 +63,7 @@ namespace krys::boo::style::tests
 
     SECTION("From the document")
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       CHECK(FontSizeForKeyword(Keyword(css::ValueId::Small), false, *document) == 13);
     }
   }
@@ -110,7 +110,7 @@ namespace krys::boo::style::tests
 
     SECTION("From a style and document")
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto style = RenderStyle::Create();
       std::ignore = style.SetUsedZoom(2);
 
@@ -129,7 +129,7 @@ namespace krys::boo::style::tests
 
   TEST_CASE("FontSizeFunctions: legacy sizes", "[Style][FontSizeFunctions]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     CHECK(LegacyFontSizeForPixelSize(10, false, *document) == 1);
     CHECK(LegacyFontSizeForPixelSize(13, false, *document) == 2);
     CHECK(LegacyFontSizeForPixelSize(16, false, *document) == 3);

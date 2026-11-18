@@ -40,12 +40,12 @@ namespace krys::boo
 {
   struct InlineBoxAndOffset;
   class RenderElement;
+  class Text;
 }
 
 namespace krys::boo::dom
 {
   struct SimpleRange;
-  class Text;
 
   enum class PositionMoveType : uint8
   {

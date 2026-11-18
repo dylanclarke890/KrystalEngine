@@ -3,10 +3,13 @@
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Types/SmallNodeList.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
+}
 
+namespace krys::boo::dom
+{
   /// @brief A static element collection: the elements it was made with.
   /// @see https://dom.spec.whatwg.org/#concept-collection-static
   class StaticHTMLCollection : public HTMLCollection

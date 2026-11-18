@@ -52,13 +52,13 @@ namespace krys::boo
     WeakPtr<RenderCounter> _nextForSameCounter;
 
   public:
-    RenderCounter(dom::Document &document, style::Content::Counter counter) noexcept;
+    RenderCounter(Document &document, style::Content::Counter counter) noexcept;
 
     ~RenderCounter() noexcept override;
 
     static void DestroyCounterNodes(RenderElement &owner) noexcept;
 
-    static void DestroyCounterNode(RenderElement &owner, const css::CSSOMStringAtom &identifier) noexcept;
+    static void DestroyCounterNode(RenderElement &owner, const CSSOMStringAtom &identifier) noexcept;
 
     static void RendererStyleChanged(RenderElement &renderer, const RenderStyle *oldStyle,
                                      const RenderStyle &newStyle) noexcept;

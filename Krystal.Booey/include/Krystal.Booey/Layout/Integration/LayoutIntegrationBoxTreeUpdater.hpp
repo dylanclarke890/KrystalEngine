@@ -29,13 +29,9 @@
 #include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::dom
-{
-  class Document;
-}
-
 namespace krys::boo
 {
+  class Document;
   class RenderBlock;
   class RenderElement;
   class RenderObject;
@@ -58,12 +54,12 @@ namespace krys::boo::layout_integration
   {
   private:
     RenderBlock &_rootRenderer;
-    CheckedPtr<const dom::Document> _document;
+    CheckedPtr<const Document> _document;
 
   public:
     explicit BoxTreeUpdater(RenderBlock &rootRenderer) noexcept;
 
-    BoxTreeUpdater(RenderBlock &rootRenderer, const dom::Document &document) noexcept;
+    BoxTreeUpdater(RenderBlock &rootRenderer, const Document &document) noexcept;
 
     ~BoxTreeUpdater() noexcept;
 

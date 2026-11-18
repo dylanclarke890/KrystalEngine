@@ -23,7 +23,7 @@
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   /// @see https://webidl.spec.whatwg.org/#idl-DOMException-error-names.
   enum class ExceptionCode : uint8
@@ -75,9 +75,9 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::ExceptionCode, 38u)
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::ExceptionCode, 38u)
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Exception
   {

@@ -60,7 +60,7 @@ namespace krys::boo::tests
       // Insertion order doesn't matter.
       auto tag = [](int i)
       {
-        css::CSSOMString name = u8"tag";
+        CSSOMString name = u8"tag";
         name += static_cast<char8>(u8'a' + i % 26);
         name += static_cast<char8>(u8'0' + i / 26);
         return name;

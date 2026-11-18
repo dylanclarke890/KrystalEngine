@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/SVG/Properties/SVGList.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief A list of plain values, such as the strings of an `SVGStringList`.
   template <typename TProperty>

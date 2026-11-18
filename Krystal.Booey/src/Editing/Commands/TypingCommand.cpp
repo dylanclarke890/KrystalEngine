@@ -159,7 +159,7 @@ namespace krys::boo
     }
   }
 
-  TypingCommand::TypingCommand(dom::Document &document, Type commandType, utf8_stringview textToInsert,
+  TypingCommand::TypingCommand(Document &document, Type commandType, utf8_stringview textToInsert,
                                EnumSet<Option> options, TextGranularity granularity,
                                TextCompositionType compositionType) noexcept
       : TextInsertionBaseCommand(document,
@@ -177,14 +177,14 @@ namespace krys::boo
     UpdatePreservesTypingStyle(_commandType);
   }
 
-  Ref<TypingCommand> TypingCommand::Create(dom::Document &document, Type command, utf8_stringview text,
+  Ref<TypingCommand> TypingCommand::Create(Document &document, Type command, utf8_stringview text,
                                            EnumSet<Option> options, TextGranularity granularity,
                                            TextCompositionType compositionType) noexcept
   {
     return CreateRef<TypingCommand>(document, command, text, options, granularity, compositionType);
   }
 
-  Ref<TypingCommand> TypingCommand::Create(dom::Document &document, Type command, utf8_stringview text,
+  Ref<TypingCommand> TypingCommand::Create(Document &document, Type command, utf8_stringview text,
                                            EnumSet<Option> options,
                                            TextCompositionType compositionType) noexcept
   {
@@ -192,7 +192,7 @@ namespace krys::boo
                                     compositionType);
   }
 
-  void TypingCommand::DeleteSelection(dom::Document &document, EnumSet<Option> options,
+  void TypingCommand::DeleteSelection(Document &document, EnumSet<Option> options,
                                       TextCompositionType compositionType) noexcept
   {
     if (!document.Selection().IsRange())
@@ -213,7 +213,7 @@ namespace krys::boo
     Create(document, Type::DeleteSelection, {}, options, compositionType)->Apply();
   }
 
-  void TypingCommand::DeleteKeyPressed(dom::Document &document, EnumSet<Option> options,
+  void TypingCommand::DeleteKeyPressed(Document &document, EnumSet<Option> options,
                                        TextGranularity granularity) noexcept
   {
     if (granularity == TextGranularity::CharacterGranularity)
@@ -233,7 +233,7 @@ namespace krys::boo
     Create(document, Type::DeleteKey, {}, options, granularity)->Apply();
   }
 
-  void TypingCommand::ForwardDeleteKeyPressed(dom::Document &document, EnumSet<Option> options,
+  void TypingCommand::ForwardDeleteKeyPressed(Document &document, EnumSet<Option> options,
                                               TextGranularity granularity) noexcept
   {
     // FIXME: Forward delete in TextEdit appears to open and close a new typing command.
@@ -255,7 +255,7 @@ namespace krys::boo
   }
 
   void TypingCommand::UpdateSelectionIfDifferentFromCurrentSelection(TypingCommand *typingCommand,
-                                                                     dom::Document &document) noexcept
+                                                                     Document &document) noexcept
   {
     VisibleSelection currentSelection = document.Selection().Selection();
     if (currentSelection == typingCommand->EndingSelection())
@@ -268,7 +268,7 @@ namespace krys::boo
   }
 
   // (There are no spelling and grammar markers to update; see DIFFERENCES.md.)
-  void TypingCommand::InsertText(dom::Document &document, utf8_stringview text, dom::Event *triggeringEvent,
+  void TypingCommand::InsertText(Document &document, utf8_stringview text, Event *triggeringEvent,
                                  EnumSet<Option> options, TextCompositionType composition) noexcept
   {
     const auto &selection = document.Selection().Selection();
@@ -277,7 +277,7 @@ namespace krys::boo
 
   // FIXME: We shouldn't need to take selectionForInsertion. It should be identical to FrameSelection's
   // current selection.
-  void TypingCommand::InsertText(dom::Document &document, utf8_stringview text, dom::Event *triggeringEvent,
+  void TypingCommand::InsertText(Document &document, utf8_stringview text, Event *triggeringEvent,
                                  const VisibleSelection &selectionForInsertion, EnumSet<Option> options,
                                  TextCompositionType compositionType) noexcept
   {
@@ -317,7 +317,7 @@ namespace krys::boo
     ApplyTextInsertionCommand(frame.get(), *command, selectionForInsertion, currentSelection);
   }
 
-  void TypingCommand::InsertLineBreak(dom::Document &document, EnumSet<Option> options) noexcept
+  void TypingCommand::InsertLineBreak(Document &document, EnumSet<Option> options) noexcept
   {
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
     {
@@ -333,7 +333,7 @@ namespace krys::boo
     Create(document, Type::InsertLineBreak, {}, options)->Apply();
   }
 
-  void TypingCommand::InsertParagraphSeparator(dom::Document &document, EnumSet<Option> options) noexcept
+  void TypingCommand::InsertParagraphSeparator(Document &document, EnumSet<Option> options) noexcept
   {
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
     {
@@ -349,7 +349,7 @@ namespace krys::boo
     Create(document, Type::InsertParagraphSeparator, {}, options)->Apply();
   }
 
-  RefPtr<TypingCommand> TypingCommand::LastTypingCommandIfStillOpenForTyping(dom::Document &document) noexcept
+  RefPtr<TypingCommand> TypingCommand::LastTypingCommandIfStillOpenForTyping(Document &document) noexcept
   {
     auto *lastEditCommand = DynamicDowncast<TypingCommand>(document.GetEditor().LastEditCommand());
     if (!lastEditCommand || !lastEditCommand->IsOpenForMoreTyping())
@@ -364,7 +364,7 @@ namespace krys::boo
     return !_isHandlingInitialTypingCommand || EditActionIsDeleteByTyping(EditingAction());
   }
 
-  void TypingCommand::CloseTyping(dom::Document &document) noexcept
+  void TypingCommand::CloseTyping(Document &document) noexcept
   {
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
     {
@@ -412,9 +412,9 @@ namespace krys::boo
     krys_debug_assert(false);
   }
 
-  dom::DOMString TypingCommand::InputEventTypeName() const noexcept
+  DOMString TypingCommand::InputEventTypeName() const noexcept
   {
-    return dom::DOMString(InputTypeNameForEditingAction(_currentTypingEditAction));
+    return DOMString(InputTypeNameForEditingAction(_currentTypingEditAction));
   }
 
   bool TypingCommand::IsInputMethodComposing() const noexcept
@@ -428,7 +428,7 @@ namespace krys::boo
            && _currentTypingEditAction != EditAction::TypingDeletePendingComposition;
   }
 
-  dom::DOMString TypingCommand::InputEventData() const noexcept
+  DOMString TypingCommand::InputEventData() const noexcept
   {
     switch (_currentTypingEditAction)
     {
@@ -436,7 +436,7 @@ namespace krys::boo
       case EditAction::TypingInsertPendingComposition:
       case EditAction::TypingInsertFinalComposition:   return _currentTextToInsert;
       case EditAction::InsertReplacement:
-        return IsEditingTextAreaOrTextInput() ? _currentTextToInsert : dom::DOMString();
+        return IsEditingTextAreaOrTextInput() ? _currentTextToInsert : DOMString();
       default: return CompositeEditCommand::InputEventData();
     }
   }
@@ -604,7 +604,7 @@ namespace krys::boo
 
   bool TypingCommand::MakeEditableRootEmpty() noexcept
   {
-    RefPtr<dom::Element> root = ShareRefPtr(EndingSelection().RootEditableElement());
+    RefPtr<Element> root = ShareRefPtr(EndingSelection().RootEditableElement());
     if (!root || !root->FirstChild())
     {
       return false;

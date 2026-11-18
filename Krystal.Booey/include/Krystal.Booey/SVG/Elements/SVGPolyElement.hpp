@@ -24,7 +24,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGGeometryElement.hpp"
 #include "Krystal.Booey/SVG/SVGPointList.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The base of `<polygon>` and `<polyline>`: a shape through a list of points.
   class SVGPolyElement : public SVGGeometryElement
@@ -55,13 +55,13 @@ namespace krys::boo::svg
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGPolyElement, SVGGeometryElement>;
 
   protected:
-    SVGPolyElement(dom::Document &document, SVGElementInterface interface) noexcept;
+    SVGPolyElement(Document &document, SVGElementInterface interface) noexcept;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept override;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept override;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept override;
 
     KRYS_NODISCARD bool IsValid() const noexcept override
     {
@@ -75,8 +75,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGPolyElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGPolyElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGPolygonElement() || target.IsSVGPolylineElement();
   }

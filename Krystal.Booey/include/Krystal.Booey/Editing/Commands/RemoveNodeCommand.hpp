@@ -27,30 +27,26 @@
 
 #include "Krystal.Booey/Editing/Commands/EditCommand.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class Node;
-}
 
-namespace krys::boo
-{
   /// @brief Removes a node, remembering where it was.
   class RemoveNodeCommand final : public SimpleEditCommand
   {
   private:
-    const Ref<dom::Node> _node;
-    RefPtr<dom::ContainerNode> _parent;
-    RefPtr<dom::Node> _refChild;
+    const Ref<Node> _node;
+    RefPtr<ContainerNode> _parent;
+    RefPtr<Node> _refChild;
     ShouldAssumeContentIsAlwaysEditable _shouldAssumeContentIsAlwaysEditable;
 
   public:
     KRYS_NODISCARD static Ref<RemoveNodeCommand>
-      Create(dom::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
+      Create(Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
              EditAction editingAction = EditAction::Unspecified) noexcept;
 
-    RemoveNodeCommand(dom::Node &node,
-                      ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
+    RemoveNodeCommand(Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
                       EditAction editingAction) noexcept;
 
   private:

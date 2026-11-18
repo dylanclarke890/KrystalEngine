@@ -70,7 +70,7 @@ layer at (447,18) size 51x10
   {
     RegisterAhem();
     boo::tests::EditorFixture fixture(u8"<style>input{font:10px Ahem}</style><input id=field value=abcdef>");
-    auto &field = Downcast<html::HTMLInputElement>(fixture.ById(u8"field"));
+    auto &field = Downcast<HTMLInputElement>(fixture.ById(u8"field"));
     auto &handler = fixture.Frame->GetEventHandler();
 
     // The text starts 3 pixels in (the border and padding); a click on the border goes to the inner text.
@@ -106,7 +106,7 @@ layer at (447,18) size 51x10
     CHECK(layer->InResizeMode());
 
     // Each move changes the style attribute once, however many of its properties change.
-    List<dom::DOMStringAtom> oldValues;
+    List<DOMStringAtom> oldValues;
     auto observer = CreateRef<dom::MutationObserver>(
       [&](const List<Ref<dom::MutationRecord>> &records, dom::MutationObserver &)
       {

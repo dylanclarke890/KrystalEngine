@@ -52,20 +52,19 @@ namespace krys::boo::style
     };
 
   private:
-    RefPtr<dom::Element> _parentElement;
-    const dom::ContainerNode::ChildChange &_childChange;
+    RefPtr<Element> _parentElement;
+    const ContainerNode::ChildChange &_childChange;
 
     const bool _isEnabled;
     const bool _needsHasInvalidation;
     const bool _wasEmpty;
 
   public:
-    ChildChangeInvalidation(dom::ContainerNode &container,
-                            const dom::ContainerNode::ChildChange &childChange) noexcept;
+    ChildChangeInvalidation(ContainerNode &container, const ContainerNode::ChildChange &childChange) noexcept;
 
     ~ChildChangeInvalidation() noexcept;
 
-    static void InvalidateAfterFinishedParsingChildren(dom::Element &parent) noexcept;
+    static void InvalidateAfterFinishedParsingChildren(Element &parent) noexcept;
 
   private:
     void InvalidateForHasBeforeMutation() noexcept;
@@ -76,7 +75,7 @@ namespace krys::boo::style
 
     void CheckForSiblingStyleChanges() noexcept;
 
-    void InvalidateForChangedElement(dom::Element &changedElement, MatchingHasSelectors &matchingHasSelectors,
+    void InvalidateForChangedElement(Element &changedElement, MatchingHasSelectors &matchingHasSelectors,
                                      ChangedElementRelation changedElementRelation) noexcept;
 
     void InvalidateForChangeOutsideHasScope() noexcept;
@@ -90,15 +89,15 @@ namespace krys::boo::style
     template <typename TFunction>
     void TraverseRemainingExistingSiblings(TFunction function) noexcept;
 
-    KRYS_NODISCARD dom::Element &ParentElement() noexcept
+    KRYS_NODISCARD Element &ParentElement() noexcept
     {
       return *_parentElement;
     }
   };
 
   inline ChildChangeInvalidation::ChildChangeInvalidation(
-    dom::ContainerNode &container, const dom::ContainerNode::ChildChange &childChange) noexcept
-      : _parentElement(ShareRefPtr(DynamicDowncast<dom::Element>(container))), _childChange(childChange),
+    ContainerNode &container, const ContainerNode::ChildChange &childChange) noexcept
+      : _parentElement(ShareRefPtr(DynamicDowncast<Element>(container))), _childChange(childChange),
         _isEnabled(_parentElement && _parentElement->NeedsStyleInvalidation()),
         _needsHasInvalidation(_isEnabled && Scope::ForNode(*_parentElement).UsesHasPseudoClass()),
         _wasEmpty(!container.FirstChild())

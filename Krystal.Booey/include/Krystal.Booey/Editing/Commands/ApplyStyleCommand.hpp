@@ -29,13 +29,10 @@
 #include "Krystal.Booey/Editing/EditingStyle.hpp"
 #include "Krystal.Booey/Editing/WritingDirection.hpp"
 
-namespace krys::boo::html
-{
-  class HTMLElement;
-}
-
 namespace krys::boo
 {
+  class HTMLElement;
+
   enum ShouldIncludeTypingStyle : bool
   {
     IncludeTypingStyle,
@@ -61,7 +58,7 @@ namespace krys::boo
       Yes,
     };
 
-    using IsInlineElementToRemoveFunction = bool (*)(const dom::Element *);
+    using IsInlineElementToRemoveFunction = bool (*)(const Element *);
 
   private:
     RefPtr<EditingStyle> _style;
@@ -69,38 +66,37 @@ namespace krys::boo
     dom::Position _start;
     dom::Position _end;
     bool _useEndingSelection;
-    RefPtr<dom::Element> _styledInlineElement;
+    RefPtr<Element> _styledInlineElement;
     bool _removeOnly;
     IsInlineElementToRemoveFunction _isInlineElementToRemoveFunction {nullptr};
 
   public:
-    ApplyStyleCommand(dom::Document &document, const EditingStyle *style, EditAction action,
+    ApplyStyleCommand(Document &document, const EditingStyle *style, EditAction action,
                       ApplyStylePropertyLevel level) noexcept;
 
-    ApplyStyleCommand(dom::Document &document, const EditingStyle *style, dom::Position start,
-                      dom::Position end, EditAction action, ApplyStylePropertyLevel level) noexcept;
+    ApplyStyleCommand(Document &document, const EditingStyle *style, dom::Position start, dom::Position end,
+                      EditAction action, ApplyStylePropertyLevel level) noexcept;
 
-    ApplyStyleCommand(dom::Element &element, bool removeOnly, EditAction action) noexcept;
+    ApplyStyleCommand(Element &element, bool removeOnly, EditAction action) noexcept;
 
-    ApplyStyleCommand(dom::Document &document, const EditingStyle *style,
+    ApplyStyleCommand(Document &document, const EditingStyle *style,
                       IsInlineElementToRemoveFunction isInlineElementToRemove, EditAction action) noexcept;
 
     KRYS_NODISCARD static Ref<ApplyStyleCommand>
-      Create(dom::Document &document, const EditingStyle *style,
-             EditAction action = EditAction::ChangeAttributes,
+      Create(Document &document, const EditingStyle *style, EditAction action = EditAction::ChangeAttributes,
              ApplyStylePropertyLevel level = ApplyStylePropertyLevel::Default) noexcept;
 
     KRYS_NODISCARD static Ref<ApplyStyleCommand>
-      Create(dom::Document &document, const EditingStyle *style, const dom::Position &start,
+      Create(Document &document, const EditingStyle *style, const dom::Position &start,
              const dom::Position &end, EditAction action = EditAction::ChangeAttributes,
              ApplyStylePropertyLevel level = ApplyStylePropertyLevel::Default) noexcept;
 
     KRYS_NODISCARD static Ref<ApplyStyleCommand>
-      Create(dom::Element &element, bool removeOnly = false,
+      Create(Element &element, bool removeOnly = false,
              EditAction action = EditAction::ChangeAttributes) noexcept;
 
     KRYS_NODISCARD static Ref<ApplyStyleCommand>
-      Create(dom::Document &document, const EditingStyle *style,
+      Create(Document &document, const EditingStyle *style,
              IsInlineElementToRemoveFunction isInlineElementToRemoveFunction,
              EditAction action = EditAction::ChangeAttributes) noexcept;
 
@@ -113,44 +109,43 @@ namespace krys::boo
     }
 
     // style-removal helpers
-    KRYS_NODISCARD bool IsStyledInlineElementToRemove(dom::Element *element) const noexcept;
+    KRYS_NODISCARD bool IsStyledInlineElementToRemove(Element *element) const noexcept;
 
-    KRYS_NODISCARD bool ShouldApplyInlineStyleToRun(EditingStyle &style, dom::Node *runStart,
-                                                    dom::Node *pastEndNode) noexcept;
+    KRYS_NODISCARD bool ShouldApplyInlineStyleToRun(EditingStyle &style, boo::Node *runStart,
+                                                    boo::Node *pastEndNode) noexcept;
 
-    void RemoveConflictingInlineStyleFromRun(EditingStyle &style, RefPtr<dom::Node> &runStart,
-                                             RefPtr<dom::Node> &runEnd, dom::Node *pastEndNode) noexcept;
+    void RemoveConflictingInlineStyleFromRun(EditingStyle &style, RefPtr<boo::Node> &runStart,
+                                             RefPtr<boo::Node> &runEnd, boo::Node *pastEndNode) noexcept;
 
-    bool RemoveInlineStyleFromElement(EditingStyle &style, html::HTMLElement &element,
+    bool RemoveInlineStyleFromElement(EditingStyle &style, HTMLElement &element,
                                       InlineStyleRemovalMode mode = InlineStyleRemovalMode::IfNeeded,
                                       EditingStyle *extractedStyle = nullptr) noexcept;
 
-    KRYS_NODISCARD bool ShouldRemoveInlineStyleFromElement(EditingStyle &style,
-                                                           html::HTMLElement &element) noexcept
+    KRYS_NODISCARD bool ShouldRemoveInlineStyleFromElement(EditingStyle &style, HTMLElement &element) noexcept
     {
       return RemoveInlineStyleFromElement(style, element, InlineStyleRemovalMode::None);
     }
 
-    void ReplaceWithSpanOrRemoveIfWithoutAttributes(html::HTMLElement &element) noexcept;
+    void ReplaceWithSpanOrRemoveIfWithoutAttributes(HTMLElement &element) noexcept;
 
-    bool RemoveImplicitlyStyledElement(EditingStyle &style, html::HTMLElement &element,
-                                       InlineStyleRemovalMode mode, EditingStyle *extractedStyle) noexcept;
+    bool RemoveImplicitlyStyledElement(EditingStyle &style, HTMLElement &element, InlineStyleRemovalMode mode,
+                                       EditingStyle *extractedStyle) noexcept;
 
-    bool RemoveCSSStyle(EditingStyle &style, html::HTMLElement &element,
+    bool RemoveCSSStyle(EditingStyle &style, HTMLElement &element,
                         InlineStyleRemovalMode mode = InlineStyleRemovalMode::IfNeeded,
                         EditingStyle *extractedStyle = nullptr) noexcept;
 
-    KRYS_NODISCARD RefPtr<html::HTMLElement>
-      HighestAncestorWithConflictingInlineStyle(EditingStyle &style, dom::Node *node) noexcept;
+    KRYS_NODISCARD RefPtr<HTMLElement> HighestAncestorWithConflictingInlineStyle(EditingStyle &style,
+                                                                                 boo::Node *node) noexcept;
 
-    void ApplyInlineStyleToPushDown(dom::Node &node, EditingStyle *style) noexcept;
+    void ApplyInlineStyleToPushDown(boo::Node &node, EditingStyle *style) noexcept;
 
-    void PushDownInlineStyleAroundNode(EditingStyle &style, dom::Node *targetNode) noexcept;
+    void PushDownInlineStyleAroundNode(EditingStyle &style, boo::Node *targetNode) noexcept;
 
     void RemoveInlineStyle(EditingStyle &style, const dom::Position &start,
                            const dom::Position &end) noexcept;
 
-    KRYS_NODISCARD static bool NodeFullySelected(dom::Element &element, const dom::Position &start,
+    KRYS_NODISCARD static bool NodeFullySelected(Element &element, const dom::Position &start,
                                                  const dom::Position &end) noexcept;
 
     // style-application helpers
@@ -161,18 +156,18 @@ namespace krys::boo
     void FixRangeAndApplyInlineStyle(EditingStyle &style, const dom::Position &start,
                                      const dom::Position &end) noexcept;
 
-    void ApplyInlineStyleToNodeRange(EditingStyle &style, dom::Node &startNode,
-                                     dom::Node *pastEndNode) noexcept;
+    void ApplyInlineStyleToNodeRange(EditingStyle &style, boo::Node &startNode,
+                                     boo::Node *pastEndNode) noexcept;
 
-    void AddBlockStyle(const StyleChange &styleChange, html::HTMLElement &block) noexcept;
+    void AddBlockStyle(const StyleChange &styleChange, HTMLElement &block) noexcept;
 
-    void AddInlineStyleIfNeeded(EditingStyle *style, dom::Node &start, dom::Node &end,
+    void AddInlineStyleIfNeeded(EditingStyle *style, boo::Node &start, boo::Node &end,
                                 AddStyledElement addStyledElement = AddStyledElement::Yes) noexcept;
 
-    dom::Position PositionToComputeInlineStyleChange(dom::Node &startNode,
-                                                     RefPtr<dom::Node> &dummyElement) noexcept;
+    dom::Position PositionToComputeInlineStyleChange(boo::Node &startNode,
+                                                     RefPtr<boo::Node> &dummyElement) noexcept;
 
-    void ApplyInlineStyleChange(dom::Node &passedStart, dom::Node &passedEnd, StyleChange &styleChange,
+    void ApplyInlineStyleChange(boo::Node &passedStart, boo::Node &passedEnd, StyleChange &styleChange,
                                 AddStyledElement addStyledElement) noexcept;
 
     void SplitTextAtStart(const dom::Position &start, const dom::Position &end) noexcept;
@@ -183,7 +178,7 @@ namespace krys::boo
 
     void SplitTextElementAtEnd(const dom::Position &start, const dom::Position &end) noexcept;
 
-    KRYS_NODISCARD bool ShouldSplitTextElement(dom::Element *element, EditingStyle &style) noexcept;
+    KRYS_NODISCARD bool ShouldSplitTextElement(Element *element, EditingStyle &style) noexcept;
 
     KRYS_NODISCARD static bool IsValidCaretPositionInTextNode(const dom::Position &position) noexcept;
 
@@ -191,14 +186,14 @@ namespace krys::boo
 
     bool MergeEndWithNextIfIdentical(const dom::Position &start, const dom::Position &end) noexcept;
 
-    void CleanupUnstyledStyleSpans(dom::ContainerNode *dummySpanAncestor) noexcept;
+    void CleanupUnstyledStyleSpans(ContainerNode *dummySpanAncestor) noexcept;
 
-    bool SurroundNodeRangeWithElement(dom::Node &start, dom::Node &end, Ref<dom::Element> &&element) noexcept;
+    bool SurroundNodeRangeWithElement(boo::Node &start, boo::Node &end, Ref<Element> &&element) noexcept;
 
-    RefPtr<html::HTMLElement> SplitAncestorsWithUnicodeBidi(dom::Node *node, bool before,
-                                                            WritingDirection allowedDirection) noexcept;
+    RefPtr<HTMLElement> SplitAncestorsWithUnicodeBidi(boo::Node *node, bool before,
+                                                      WritingDirection allowedDirection) noexcept;
 
-    void RemoveEmbeddingUpToEnclosingBlock(dom::Node *node, dom::Node *unsplitAncestor) noexcept;
+    void RemoveEmbeddingUpToEnclosingBlock(boo::Node *node, boo::Node *unsplitAncestor) noexcept;
 
     void UpdateStartEnd(const dom::Position &newStart, const dom::Position &newEnd) noexcept;
 
@@ -214,10 +209,10 @@ namespace krys::boo
   };
 
   KRYS_NODISCARD bool IsEmptyFontTag(
-    const dom::Element *element,
+    const Element *element,
     ShouldStyleAttributeBeEmpty shouldStyleAttributeBeEmpty = StyleAttributeShouldBeEmpty) noexcept;
 
-  KRYS_NODISCARD bool IsStyleSpanOrSpanWithOnlyStyleAttribute(const dom::Element &element) noexcept;
+  KRYS_NODISCARD bool IsStyleSpanOrSpanWithOnlyStyleAttribute(const Element &element) noexcept;
 
-  KRYS_NODISCARD Ref<dom::Element> CreateStyleSpanElement(dom::Document &document) noexcept;
+  KRYS_NODISCARD Ref<Element> CreateStyleSpanElement(Document &document) noexcept;
 }

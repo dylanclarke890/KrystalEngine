@@ -54,7 +54,7 @@
 #include "Krystal.Core/Types/HashMap.hpp"
 #include <algorithm>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   namespace
   {
@@ -73,14 +73,14 @@ namespace krys::boo::svg
     }
 
     template <typename T>
-    KRYS_NODISCARD T *DynamicDowncastSVG(dom::Node *node) noexcept
+    KRYS_NODISCARD T *DynamicDowncastSVG(Node *node) noexcept
     {
       auto *svgElement = DynamicDowncast<SVGElement>(node);
       return svgElement ? DynamicDowncast<T>(*svgElement) : nullptr;
     }
   }
 
-  SVGElement::SVGElement(dom::Document &document, UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
+  SVGElement::SVGElement(Document &document, UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
                          SVGElementInterface interface, SVGElementFlags flags,
                          dom::NodeFlags nodeFlags) noexcept
       : StyledElement(document, dom::NullQualifiedName(),
@@ -98,13 +98,13 @@ namespace krys::boo::svg
     }
   }
 
-  SVGElement::SVGElement(dom::Document &document, SVGElementInterface interface, SVGElementFlags flags,
+  SVGElement::SVGElement(Document &document, SVGElementInterface interface, SVGElementFlags flags,
                          dom::NodeFlags nodeFlags) noexcept
       : SVGElement(document, CreateUnique<PropertyRegistry>(*this), interface, flags, nodeFlags)
   {
   }
 
-  SVGElement::SVGElement(dom::Document &document) noexcept : SVGElement(document, SVGElementInterface::None)
+  SVGElement::SVGElement(Document &document) noexcept : SVGElement(document, SVGElementInterface::None)
   {
   }
 
@@ -228,8 +228,8 @@ namespace krys::boo::svg
     return boo::ColorInterpolation::Auto;
   }
 
-  void SVGElement::ReportAttributeParsingError(SVGParsingError error, const dom::QualifiedName &name,
-                                               dom::DOMStringView value) noexcept
+  void SVGElement::ReportAttributeParsingError(SVGParsingError error, const QualifiedName &name,
+                                               DOMStringView value) noexcept
   {
     // There's no console to report the error to (see DIFFERENCES.md).
     (void)error;
@@ -237,7 +237,7 @@ namespace krys::boo::svg
     (void)value;
   }
 
-  void SVGElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void SVGElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     StyledElement::OnRemove(isSubtreeRoot, oldAncestor);
 
@@ -272,7 +272,7 @@ namespace krys::boo::svg
     InvalidateInstances();
 
     // NOTE: every node removed with the subtree is told its subtree root's old parent.
-    auto *oldShadowRoot = DynamicDowncast<dom::ShadowRoot>(oldAncestor);
+    auto *oldShadowRoot = DynamicDowncast<boo::ShadowRoot>(oldAncestor);
     if (oldShadowRoot && oldShadowRoot->Mode() == dom::ShadowRootMode::UserAgent)
     {
       SetCorrespondingElement(nullptr);
@@ -323,7 +323,7 @@ namespace krys::boo::svg
     return nullptr;
   }
 
-  AffineTransform SVGElement::LocalCoordinateSpaceTransform(CTMScope) const noexcept
+  AffineTransform SVGElement::LocalCoordinateSpaceTransform(svg::CTMScope) const noexcept
   {
     // To be overridden by SVGGraphicsElement (or as special case SVGTextElement and SVGPatternElement)
     return AffineTransform();
@@ -460,7 +460,7 @@ namespace krys::boo::svg
       return;
     }
 
-    auto event = dom::Event::Create(event_names::Load, false, false);
+    auto event = Event::Create(event_names::Load, false, false);
     (void)DispatchEvent(*event);
   }
 
@@ -478,15 +478,14 @@ namespace krys::boo::svg
     InvalidateInstances();
   }
 
-  void SVGElement::OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                                      Maybe<dom::DOMStringView> value,
-                                      const dom::DOMStringAtom &namespaceURI) noexcept
+  void SVGElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                      Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept
   {
-    AttributeChanged(dom::QualifiedName {namespaceURI, null, localName}, oldValue, value);
+    AttributeChanged(QualifiedName {namespaceURI, null, localName}, oldValue, value);
   }
 
-  void SVGElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                    Maybe<dom::DOMStringView> value) noexcept
+  void SVGElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                    Maybe<DOMStringView> value) noexcept
   {
     StyledElement::OnAttributeChanged(name.LocalName(), oldValue, value, name.NamespaceURI());
 
@@ -496,7 +495,7 @@ namespace krys::boo::svg
     }
     else if (name == SVGNames::ClassAttr())
     {
-      _className->SetBaseValInternal(dom::DOMString {value.value_or(dom::DOMStringView {})});
+      _className->SetBaseValInternal(DOMString {value.value_or(DOMStringView {})});
     }
 
     // Changes to the style attribute are processed lazily (see Element::getAttribute() and related methods),
@@ -512,21 +511,22 @@ namespace krys::boo::svg
     }
   }
 
-  bool SVGElement::IsAnimatedAttribute(const dom::QualifiedName &attributeName) const noexcept
+  bool SVGElement::IsAnimatedAttribute(const QualifiedName &attributeName) const noexcept
   {
     return SVGPropertyAnimatorFactory::IsKnownAttribute(attributeName)
            || IsAnimatedPropertyAttribute(attributeName);
   }
 
-  bool SVGElement::IsAnimatedStyleAttribute(const dom::QualifiedName &attributeName) const noexcept
+  bool SVGElement::IsAnimatedStyleAttribute(const QualifiedName &attributeName) const noexcept
   {
     return SVGPropertyAnimatorFactory::IsKnownAttribute(attributeName)
            || _propertyRegistry->IsAnimatedStylePropertyAttribute(attributeName);
   }
 
-  RefPtr<SVGAttributeAnimator> SVGElement::CreateAnimator(const dom::QualifiedName &attributeName,
-                                                          AnimationMode animationMode, CalcMode calcMode,
-                                                          bool isAccumulated, bool isAdditive) noexcept
+  RefPtr<SVGAttributeAnimator> SVGElement::CreateAnimator(const QualifiedName &attributeName,
+                                                          svg::AnimationMode animationMode,
+                                                          svg::CalcMode calcMode, bool isAccumulated,
+                                                          bool isAdditive) noexcept
   {
     // Property animator, e.g. "fill" or "fill-opacity".
     if (auto animator = PropertyAnimatorFactory().CreateAnimator(attributeName, animationMode, calcMode,
@@ -549,7 +549,7 @@ namespace krys::boo::svg
     return animator;
   }
 
-  void SVGElement::AnimatorWillBeDeleted(const dom::QualifiedName &attributeName) noexcept
+  void SVGElement::AnimatorWillBeDeleted(const QualifiedName &attributeName) noexcept
   {
     PropertyAnimatorFactory().AnimatorWillBeDeleted(attributeName);
   }
@@ -576,7 +576,7 @@ namespace krys::boo::svg
     }
   }
 
-  const RenderStyle *SVGElementRareData::OverrideComputedStyle(dom::Element &element,
+  const RenderStyle *SVGElementRareData::OverrideComputedStyle(Element &element,
                                                                const RenderStyle *parentStyle) noexcept
   {
     if (!_useOverrideComputedStyle)
@@ -617,9 +617,9 @@ namespace krys::boo::svg
     return _svgRareData->OverrideComputedStyle(*this, parentStyle);
   }
 
-  dom::QualifiedName SVGElement::AnimatableAttributeForName(dom::DOMStringView localName) noexcept
+  QualifiedName SVGElement::AnimatableAttributeForName(DOMStringView localName) noexcept
   {
-    static const NeverDestroyed<HashMap<dom::DOMStringView, dom::QualifiedName>> animatableAttributes = []
+    static const NeverDestroyed<HashMap<DOMStringView, QualifiedName>> animatableAttributes = []
     {
       const Array names {
         &SVGNames::ClassAttr(),
@@ -715,7 +715,7 @@ namespace krys::boo::svg
         &SVGNames::ZAttr(),
         &SVGNames::HrefAttr(),
       };
-      HashMap<dom::DOMStringView, dom::QualifiedName> map;
+      HashMap<DOMStringView, QualifiedName> map;
       for (const auto *name : names)
       {
         KRYS_MAYBE_UNUSED auto [iterator, isNewEntry] = map.try_emplace(name->LocalName().View(), *name);
@@ -728,7 +728,7 @@ namespace krys::boo::svg
   }
 
 #if KRYS_DEBUG
-  bool SVGElement::IsAnimatableAttribute(const dom::QualifiedName &name) const noexcept
+  bool SVGElement::IsAnimatableAttribute(const QualifiedName &name) const noexcept
   {
     if (AnimatableAttributeForName(name.LocalName().View()) == name)
     {
@@ -737,13 +737,13 @@ namespace krys::boo::svg
     return false;
   }
 
-  bool SVGElement::FilterOutAnimatableAttribute(const dom::QualifiedName &) const noexcept
+  bool SVGElement::FilterOutAnimatableAttribute(const QualifiedName &) const noexcept
   {
     return false;
   }
 #endif
 
-  void SVGElement::SynchronizeSVGAttribute(const dom::QualifiedName &name) noexcept
+  void SVGElement::SynchronizeSVGAttribute(const QualifiedName &name) noexcept
   {
     // If the value of the property has changed, serialize the new value to the attribute.
     if (auto value = _propertyRegistry->Synchronize(name))
@@ -793,7 +793,7 @@ namespace krys::boo::svg
     SVGAttributeChanged(attributeName);
   }
 
-  bool SVGElement::IsAnimatedPropertyAttribute(const dom::QualifiedName &attributeName) const noexcept
+  bool SVGElement::IsAnimatedPropertyAttribute(const QualifiedName &attributeName) const noexcept
   {
     return _propertyRegistry->IsAnimatedPropertyAttribute(attributeName);
   }
@@ -814,12 +814,12 @@ namespace krys::boo::svg
     InvalidateStyle();
   }
 
-  dom::DOMStringAtom SVGElement::ClassName() const noexcept
+  DOMStringAtom SVGElement::ClassName() const noexcept
   {
-    return dom::DOMStringAtom {_className->CurrentValue()};
+    return DOMStringAtom {_className->CurrentValue()};
   }
 
-  bool SVGElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
+  bool SVGElement::ChildShouldCreateRenderer(const Node &child) const noexcept
   {
     auto *svgChild = DynamicDowncast<SVGElement>(child);
     if (!svgChild)
@@ -852,7 +852,7 @@ namespace krys::boo::svg
     auto *parent = dom::TreeQueries::ParentOrShadowHostElement(*this);
     if (!parent || Is<SVGElement>(*parent))
     {
-      return dom::StyledElement::RendererIsNeeded(style);
+      return StyledElement::RendererIsNeeded(style);
     }
 
     return false;
@@ -891,7 +891,7 @@ namespace krys::boo::svg
     return true;
   }
 
-  void SVGElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     auto propId = CssPropertyIdForSVGAttributeName(attributeName.LocalName(), attributeName.NamespaceURI());
     if (propId != css::PropertyId::Invalid)
@@ -970,7 +970,7 @@ namespace krys::boo::svg
     }
 
     auto &treeScope = TreeScopeForSVGReferences();
-    auto resourceId = dom::DOMStringAtom(Id());
+    auto resourceId = DOMStringAtom(Id());
     if (!treeScope.IsIdOfPendingSVGResource(resourceId))
     {
       return;
@@ -1015,7 +1015,7 @@ namespace krys::boo::svg
     return ResolveStyle(resolutionContext);
   }
 
-  void SVGElement::DidAddEventListener(const dom::EventListener &listener) noexcept
+  void SVGElement::DidAddEventListener(const EventListener &listener) noexcept
   {
     StyledElement::DidAddEventListener(listener);
 
@@ -1032,12 +1032,12 @@ namespace krys::boo::svg
       krys_debug_assert(instance->IsInUserAgentShadowTree());
       instance->AddEventListener(
         listener.Type(), ShareRef(*listener.Callback()),
-        dom::AddEventListenerOptions {
+        AddEventListenerOptions {
           {listener.Capture()}, listener.Once(), listener.Passive(), ShareRefPtr(listener.Signal())});
     }
   }
 
-  void SVGElement::DidRemoveEventListener(const dom::EventListener &listener) noexcept
+  void SVGElement::DidRemoveEventListener(const EventListener &listener) noexcept
   {
     StyledElement::DidRemoveEventListener(listener);
 
@@ -1163,16 +1163,15 @@ namespace krys::boo::svg
 
 #pragma region Presentational hints
 
-  css::PropertyId
-    SVGElement::CssPropertyIdForSVGAttributeName(const dom::DOMStringAtom &localName,
-                                                 const dom::DOMStringAtom &namespaceURI) noexcept
+  css::PropertyId SVGElement::CssPropertyIdForSVGAttributeName(const DOMStringAtom &localName,
+                                                               const DOMStringAtom &namespaceURI) noexcept
   {
     if (namespaceURI != null)
     {
       return css::PropertyId::Invalid;
     }
 
-    static const HashMap<dom::DOMStringView, css::PropertyId> map {
+    static const HashMap<DOMStringView, css::PropertyId> map {
       {u8"alignment-baseline", css::PropertyId::AlignmentBaseline},
       {u8"baseline-shift", css::PropertyId::BaselineShift},
       {u8"clip", css::PropertyId::Clip},
@@ -1249,8 +1248,8 @@ namespace krys::boo::svg
     return it == map.end() ? css::PropertyId::Invalid : it->second;
   }
 
-  bool SVGElement::HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                      const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool SVGElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                      const DOMStringAtom &namespaceURI) const noexcept
   {
     if (CssPropertyIdForSVGAttributeName(localName, namespaceURI) != css::PropertyId::Invalid)
     {
@@ -1259,15 +1258,15 @@ namespace krys::boo::svg
     return StyledElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void SVGElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                          const dom::DOMStringAtom &namespaceURI,
-                                                          dom::DOMStringView value,
+  void SVGElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                          const DOMStringAtom &namespaceURI,
+                                                          DOMStringView value,
                                                           css::MutableStyleProperties &style) noexcept
   {
     auto property = CssPropertyIdForSVGAttributeName(localName, namespaceURI);
     if (property != css::PropertyId::Invalid)
     {
-      AddPropertyToPresentationalHintStyle(style, property, css::CSSOMString(value));
+      AddPropertyToPresentationalHintStyle(style, property, CSSOMString(value));
     }
   }
 

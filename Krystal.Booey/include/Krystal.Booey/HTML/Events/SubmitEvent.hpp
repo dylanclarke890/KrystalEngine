@@ -4,19 +4,19 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLElement;
 
   /// @see https://html.spec.whatwg.org/#submiteventinit
-  struct SubmitEventInit : dom::EventInit
+  struct SubmitEventInit : EventInit
   {
     RefPtr<HTMLElement> Submitter;
   };
 
   /// @brief The `submit` event, with the button that submitted the form.
   /// @see https://html.spec.whatwg.org/#submitevent
-  class SubmitEvent final : public dom::Event
+  class SubmitEvent final : public Event
   {
   private:
     RefPtr<HTMLElement> _submitter;
@@ -26,7 +26,7 @@ namespace krys::boo::html
     using dictionary_type = SubmitEventInit;
 
     /// @see https://html.spec.whatwg.org/#dom-submitevent-submitevent
-    SubmitEvent(dom::DOMStringAtom type, const SubmitEventInit &eventInitDict = {}) noexcept;
+    SubmitEvent(DOMStringAtom type, const SubmitEventInit &eventInitDict = {}) noexcept;
 
     /// @brief A trusted `submit` event, which bubbles and can be cancelled.
     KRYS_NODISCARD static Ref<SubmitEvent> Create(RefPtr<HTMLElement> &&submitter) noexcept;
@@ -44,8 +44,8 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::SubmitEvent)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SubmitEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Event &event) noexcept
   {
     return event.IsSubmitEvent();
   }

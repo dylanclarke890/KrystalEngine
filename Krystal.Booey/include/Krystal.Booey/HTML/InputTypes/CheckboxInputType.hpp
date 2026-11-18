@@ -45,20 +45,20 @@ namespace krys::boo::html
     {
     }
 
-    KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
+    KRYS_NODISCARD DOMStringView FormControlType() const noexcept final
     {
       return input_type_names::Checkbox;
     }
 
-    KRYS_NODISCARD bool ValueMissing(dom::DOMStringView value) const noexcept final;
+    KRYS_NODISCARD bool ValueMissing(DOMStringView value) const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString ValueMissingText() const noexcept final;
+    KRYS_NODISCARD DOMString ValueMissingText() const noexcept final;
 
-    void HandleKeyupEvent(dom::KeyboardEvent &event) noexcept final;
+    void HandleKeyupEvent(KeyboardEvent &event) noexcept final;
 
     void WillDispatchClick(InputElementClickState &state) noexcept final;
 
-    void DidDispatchClick(dom::Event &event, const InputElementClickState &state) noexcept final;
+    void DidDispatchClick(Event &event, const InputElementClickState &state) noexcept final;
 
     KRYS_NODISCARD bool MatchesIndeterminatePseudoClass() const noexcept final;
   };

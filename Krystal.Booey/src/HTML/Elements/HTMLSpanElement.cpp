@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLSpanElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLSpanElement::HTMLSpanElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Span)
+  HTMLSpanElement::HTMLSpanElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Span)
   {
   }
 }

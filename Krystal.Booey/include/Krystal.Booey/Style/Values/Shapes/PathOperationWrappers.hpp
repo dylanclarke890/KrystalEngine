@@ -105,7 +105,7 @@ namespace krys::boo::style
       return _operation->Url();
     }
 
-    KRYS_NODISCARD KRYS_ALWAYS_INLINE const css::CSSOMStringAtom &Fragment() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE const CSSOMStringAtom &Fragment() const noexcept
     {
       return _operation->Fragment();
     }

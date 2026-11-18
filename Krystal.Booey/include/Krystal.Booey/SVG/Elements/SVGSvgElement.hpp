@@ -34,11 +34,6 @@ namespace krys::boo::css
 namespace krys::boo
 {
   class LocalFrame;
-}
-
-namespace krys::boo::svg
-{
-  class SMILTimeContainer;
   class SVGAngle;
   class SVGLength;
   class SVGMatrix;
@@ -47,7 +42,15 @@ namespace krys::boo::svg
   class SVGTransform;
   class SVGViewElement;
   class SVGViewSpec;
+}
 
+namespace krys::boo::svg
+{
+  class SMILTimeContainer;
+}
+
+namespace krys::boo
+{
   /// @brief The `<svg>` element: a viewport, the root of an SVG document fragment when it's outermost.
   /// @see https://svgwg.org/svg2-draft/struct.html#InterfaceSVGSVGElement
   class SVGSvgElement final : public SVGGraphicsElement, public SVGFitToViewBox
@@ -64,12 +67,12 @@ namespace krys::boo::svg
 
     bool _useCurrentView {false};
     RefPtr<SVGViewSpec> _viewSpec;
-    dom::DOMString _currentViewFragmentIdentifier;
+    DOMString _currentViewFragmentIdentifier;
     WeakPtr<SVGViewElement> _currentViewElement;
-    Ref<SMILTimeContainer> _timeContainer;
+    Ref<svg::SMILTimeContainer> _timeContainer;
 
   public:
-    explicit SVGSvgElement(dom::Document &document) noexcept;
+    explicit SVGSvgElement(Document &document) noexcept;
 
     ~SVGSvgElement() noexcept override;
 
@@ -125,7 +128,7 @@ namespace krys::boo::svg
 
     /// @brief The first element in the subtree of the `<svg>` element whose id is @p id.
     /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__getElementById
-    KRYS_NODISCARD RefPtr<dom::Element> GetElementById(dom::DOMStringView id) noexcept;
+    KRYS_NODISCARD RefPtr<Element> GetElementById(DOMStringView id) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__suspendRedraw
     KRYS_NODISCARD static uint32 SuspendRedraw(uint32) noexcept
@@ -164,7 +167,7 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD bool HasActiveAnimation() const noexcept;
 
-    KRYS_NODISCARD SMILTimeContainer &TimeContainer() noexcept
+    KRYS_NODISCARD svg::SMILTimeContainer &TimeContainer() noexcept
     {
       return *_timeContainer;
     }
@@ -180,7 +183,7 @@ namespace krys::boo::svg
     /// @brief The view a fragment identifier gives the `<svg>`, created when first asked for.
     SVGViewSpec &CurrentView() noexcept;
 
-    bool ScrollToFragment(dom::DOMStringView fragmentIdentifier) noexcept;
+    bool ScrollToFragment(DOMStringView fragmentIdentifier) noexcept;
 
     void ResetScrollAnchor() noexcept;
 
@@ -255,20 +258,20 @@ namespace krys::boo::svg
   private:
     void OnInsert() noexcept override;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
-    void OnAdopt(dom::Document &oldDocument) noexcept override;
+    void OnAdopt(Document &oldDocument) noexcept override;
 
     void PrepareForDocumentSuspension() noexcept override;
 
     void ResumeFromDocumentSuspension() noexcept override;
 
-    KRYS_NODISCARD AffineTransform LocalCoordinateSpaceTransform(CTMScope) const noexcept override;
+    KRYS_NODISCARD AffineTransform LocalCoordinateSpaceTransform(svg::CTMScope) const noexcept override;
 
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept override;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept override;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept override;
 
     KRYS_NODISCARD bool SelfHasRelativeLengths() const noexcept override;
 
@@ -280,17 +283,16 @@ namespace krys::boo::svg
       CollectIntersectionOrEnclosureList(SVGRect &, SVGElement *,
                                          bool (*checkFunction)(SVGElement &, SVGRect &)) noexcept;
 
-    KRYS_NODISCARD RefPtr<SVGViewElement>
-      FindViewAnchor(dom::DOMStringView fragmentIdentifier) const noexcept;
+    KRYS_NODISCARD RefPtr<SVGViewElement> FindViewAnchor(DOMStringView fragmentIdentifier) const noexcept;
 
     KRYS_NODISCARD static SVGSvgElement *FindRootAnchor(const SVGViewElement *) noexcept;
 
-    KRYS_NODISCARD SVGSvgElement *FindRootAnchor(dom::DOMStringView) const noexcept;
+    KRYS_NODISCARD SVGSvgElement *FindRootAnchor(DOMStringView) const noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGSvgElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGSvgElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGSvgElement();
   }

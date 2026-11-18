@@ -31,7 +31,7 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include <utility>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief An SVG path in a compact binary form: each segment is its command byte followed by its numbers
   /// and flags. The bytes are only meant to be read back by `SVGPathByteStreamSource`.
@@ -107,7 +107,7 @@ namespace krys::boo::svg
     SVGPathByteStream() noexcept = default;
 
     /// @brief Parses `string` as SVG path data; on a parse error the stream holds the segments before it.
-    explicit SVGPathByteStream(dom::DOMStringView string) noexcept;
+    explicit SVGPathByteStream(DOMStringView string) noexcept;
 
     explicit SVGPathByteStream(Bytes &&data) noexcept : _data(Data::Create(krys::move(data)))
     {

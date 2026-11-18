@@ -71,7 +71,7 @@ namespace krys::boo
                                EnumSet<RenderSVGResourceMode>) noexcept = 0;
 
     virtual void PostApplyResource(RenderElement &, GraphicsContext *&, const GradientData &,
-                                   svg::SVGUnitTypes::SVGUnitType gradientUnits,
+                                   SVGUnitTypes::SVGUnitType gradientUnits,
                                    const AffineTransform &gradientTransform, EnumSet<RenderSVGResourceMode>,
                                    const Path *, const RenderElement *) noexcept = 0;
   };
@@ -90,9 +90,9 @@ namespace krys::boo
   public:
     ~LegacyRenderSVGResourceGradient() noexcept override;
 
-    KRYS_NODISCARD svg::SVGGradientElement &GradientElement() const noexcept
+    KRYS_NODISCARD SVGGradientElement &GradientElement() const noexcept
     {
-      return static_cast<svg::SVGGradientElement &>(LegacyRenderSVGResourceContainer::GetElement());
+      return static_cast<SVGGradientElement &>(LegacyRenderSVGResourceContainer::GetElement());
     }
 
     void RemoveAllClientsFromCache() noexcept final;
@@ -116,10 +116,9 @@ namespace krys::boo
     void GetElement() const = delete;
 
   protected:
-    LegacyRenderSVGResourceGradient(Type, svg::SVGGradientElement &, RenderStyle &&) noexcept;
+    LegacyRenderSVGResourceGradient(Type, SVGGradientElement &, RenderStyle &&) noexcept;
 
-    KRYS_NODISCARD static GradientSpreadMethod
-      PlatformSpreadMethodFromSVGType(svg::SVGSpreadMethodType) noexcept;
+    KRYS_NODISCARD static GradientSpreadMethod PlatformSpreadMethodFromSVGType(SVGSpreadMethodType) noexcept;
 
   private:
     KRYS_NODISCARD GradientData::Inputs ComputeInputs(RenderElement &,
@@ -128,7 +127,7 @@ namespace krys::boo
     KRYS_NODISCARD GradientData *GradientDataForRenderer(RenderElement &,
                                                          EnumSet<RenderSVGResourceMode>) noexcept;
 
-    KRYS_NODISCARD virtual svg::SVGUnitTypes::SVGUnitType GradientUnits() const noexcept = 0;
+    KRYS_NODISCARD virtual SVGUnitTypes::SVGUnitType GradientUnits() const noexcept = 0;
 
     KRYS_NODISCARD virtual AffineTransform GradientTransform() const noexcept = 0;
 

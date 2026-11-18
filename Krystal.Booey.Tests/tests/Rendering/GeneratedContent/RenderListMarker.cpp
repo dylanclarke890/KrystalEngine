@@ -11,7 +11,7 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD RenderListMarker &MarkerOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD RenderListMarker &MarkerOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       auto *marker = Downcast<RenderListItem>(*fixture.ById(id).Renderer()).MarkerRenderer();
       REQUIRE(marker);

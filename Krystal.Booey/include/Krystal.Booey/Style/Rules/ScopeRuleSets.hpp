@@ -37,7 +37,7 @@
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSStyleSheet;
 }
@@ -78,7 +78,7 @@ namespace krys::boo::style
     KRYS_NON_COPY_MOVABLE(ScopeRuleSets);
 
     template <typename T>
-    using AtomMap = HashMap<css::CSSOMStringAtom, UniquePtr<T>>;
+    using AtomMap = HashMap<CSSOMStringAtom, UniquePtr<T>>;
     template <typename T>
     using PseudoClassMap = HashMap<PseudoClassInvalidationKey, UniquePtr<T>, PseudoClassInvalidationKeyHash>;
 
@@ -96,7 +96,7 @@ namespace krys::boo::style
     mutable PseudoClassMap<List<InvalidationRuleSet>> _pseudoClassInvalidationRuleSets;
     mutable PseudoClassMap<List<InvalidationRuleSet>> _hasPseudoClassInvalidationRuleSets;
 
-    mutable Maybe<HashSet<css::CSSOMStringAtom>> _customPropertyNamesInStyleContainerQueries;
+    mutable Maybe<HashSet<CSSOMStringAtom>> _customPropertyNamesInStyleContainerQueries;
 
     mutable Maybe<SelectorsForStyleAttribute> _cachedSelectorsForStyleAttribute;
 
@@ -137,13 +137,13 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD const List<InvalidationRuleSet> *
-      IdInvalidationRuleSets(const css::CSSOMStringAtom &id) const noexcept;
+      IdInvalidationRuleSets(const CSSOMStringAtom &id) const noexcept;
 
     KRYS_NODISCARD const List<InvalidationRuleSet> *
-      ClassInvalidationRuleSets(const css::CSSOMStringAtom &className) const noexcept;
+      ClassInvalidationRuleSets(const CSSOMStringAtom &className) const noexcept;
 
     KRYS_NODISCARD const List<InvalidationRuleSet> *
-      AttributeInvalidationRuleSets(const css::CSSOMStringAtom &attributeName) const noexcept;
+      AttributeInvalidationRuleSets(const CSSOMStringAtom &attributeName) const noexcept;
 
     KRYS_NODISCARD const List<InvalidationRuleSet> *
       PseudoClassInvalidationRuleSets(const PseudoClassInvalidationKey &pseudoClassKey) const noexcept;
@@ -151,7 +151,7 @@ namespace krys::boo::style
     KRYS_NODISCARD const List<InvalidationRuleSet> *
       HasPseudoClassInvalidationRuleSets(const PseudoClassInvalidationKey &key) const noexcept;
 
-    KRYS_NODISCARD const HashSet<css::CSSOMStringAtom> &
+    KRYS_NODISCARD const HashSet<CSSOMStringAtom> &
       CustomPropertyNamesInStyleContainerQueries() const noexcept;
 
     KRYS_NODISCARD SelectorsForStyleAttribute GetSelectorsForStyleAttribute() const noexcept;
@@ -165,7 +165,7 @@ namespace krys::boo::style
 
     void ResetAuthorStyle() noexcept;
 
-    void AppendAuthorStyleSheets(Span<const RefPtr<css::CSSStyleSheet>> styleSheets,
+    void AppendAuthorStyleSheets(Span<const RefPtr<CSSStyleSheet>> styleSheets,
                                  const css::mq::MediaQueryEvaluator &mediaQueryEvaluator) noexcept;
 
     void ResetUserAgentMediaQueryStyle() noexcept;

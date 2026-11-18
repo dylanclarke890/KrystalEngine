@@ -52,7 +52,7 @@ namespace krys::boo::css
     /// @brief Only copies the simple selector.
     MutableSelector(const Selector &selector, SimpleSelectorTag) noexcept;
 
-    explicit MutableSelector(const dom::QualifiedName &tagQualifiedName) noexcept;
+    explicit MutableSelector(const QualifiedName &tagQualifiedName) noexcept;
 
     ~MutableSelector() noexcept;
 
@@ -87,7 +87,7 @@ namespace krys::boo::css
       return _selector->Value();
     }
 
-    void SetAttribute(const dom::QualifiedName &name, AttributeCaseFlag caseFlag) noexcept
+    void SetAttribute(const QualifiedName &name, AttributeCaseFlag caseFlag) noexcept
     {
       _selector->SetAttribute(name, caseFlag);
     }
@@ -202,7 +202,7 @@ namespace krys::boo::css
 
     void PrependComplexSelectorComponentAsRelative(UniquePtr<MutableSelector> selector) noexcept;
 
-    void AppendTagInComplexSelector(const dom::QualifiedName &tagQualifiedName,
+    void AppendTagInComplexSelector(const QualifiedName &tagQualifiedName,
                                     bool tagIsForNamespaceRule = false) noexcept;
 
     KRYS_NODISCARD UniquePtr<MutableSelector> ReleaseFromComplexSelector() noexcept;

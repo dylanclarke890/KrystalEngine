@@ -29,7 +29,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedProperty.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGSharedPrimitiveProperty.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief An animated boolean, integer, number or string.
   template <typename TProperty>
@@ -54,7 +54,7 @@ namespace krys::boo::svg
     }
 
     // Used by the DOM.
-    dom::ExceptionOr<void> SetBaseVal(const TProperty &baseVal) noexcept
+    ExceptionOr<void> SetBaseVal(const TProperty &baseVal) noexcept
     {
       _baseVal->SetValue(baseVal);
       CommitPropertyChange(nullptr);
@@ -92,13 +92,13 @@ namespace krys::boo::svg
     }
 
     // Used when committing a change from the SVGAnimatedProperty to the attribute.
-    KRYS_NODISCARD dom::DOMString BaseValAsString() const noexcept override
+    KRYS_NODISCARD DOMString BaseValAsString() const noexcept override
     {
       return _baseVal->ValueAsString();
     }
 
     // Used to apply the SVGAttributeAnimator change to the target element.
-    KRYS_NODISCARD dom::DOMString AnimValAsString() const noexcept override
+    KRYS_NODISCARD DOMString AnimValAsString() const noexcept override
     {
       krys_assert(IsAnimating() && _animVal);
       return _animVal->ValueAsString();
@@ -115,7 +115,7 @@ namespace krys::boo::svg
       return _baseVal->IsDirty();
     }
 
-    Maybe<dom::DOMString> Synchronize() noexcept override
+    Maybe<DOMString> Synchronize() noexcept override
     {
       return _baseVal->Synchronize();
     }

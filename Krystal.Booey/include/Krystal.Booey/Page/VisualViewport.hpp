@@ -39,7 +39,7 @@ namespace krys::boo
   /// @brief The part of the page the user sees: the layout viewport, as pages aren't pinch-zoomed. It fires
   /// `resize` as its size changes, and `scroll` as it moves within the layout viewport (never, at scale 1).
   /// @see https://drafts.csswg.org/cssom-view/#the-visualviewport-interface
-  class VisualViewport final : public dom::EventTarget
+  class VisualViewport final : public EventTarget
   {
     KRYS_NON_COPY_MOVABLE(VisualViewport);
 

@@ -27,7 +27,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSRule;
   class CSSStyleSheet;

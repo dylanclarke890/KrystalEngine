@@ -32,9 +32,14 @@
 #include "Krystal.Booey/Loader/Cache/CachedStyleSheetClient.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSStyleSheet;
+  class HTMLLinkElement;
+}
+
+namespace krys::boo::css
+{
   struct ParserContext;
   class StyleSheetContents;
 }
@@ -46,9 +51,11 @@ namespace krys::boo::style
 
 namespace krys::boo::html
 {
-  class HTMLLinkElement;
   using LinkEventSender = dom::EventSender<HTMLLinkElement>;
+}
 
+namespace krys::boo
+{
   /// @see https://html.spec.whatwg.org/#htmllinkelement
   class HTMLLinkElement : public HTMLElement, public CachedStyleSheetClient
   {
@@ -73,12 +80,12 @@ namespace krys::boo::html
     UniquePtr<dom::DOMTokenList> _sizes;
     UniquePtr<dom::DOMTokenList> _blocking;
 
-    RefPtr<css::CSSStyleSheet> _sheet;
+    RefPtr<CSSStyleSheet> _sheet;
     CachedResourceHandle<CachedCSSStyleSheet> _cachedSheet;
     WeakPtr<style::Scope> _styleScope;
     url::URL _url;
-    Maybe<dom::DOMString> _type;
-    dom::DOMString _media;
+    Maybe<DOMString> _type;
+    DOMString _media;
     bool _relIsStyleSheet {false};
     bool _relIsAlternate {false};
     bool _relIsIcon {false};
@@ -90,7 +97,7 @@ namespace krys::boo::html
     bool _isRenderBlocking {false};
 
   public:
-    HTMLLinkElement(dom::Document &document) noexcept;
+    HTMLLinkElement(Document &document) noexcept;
 
     ~HTMLLinkElement() noexcept override;
 
@@ -103,51 +110,51 @@ namespace krys::boo::html
     void Href(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-crossorigin
-    KRYS_NODISCARD Maybe<dom::DOMString> CrossOrigin() const noexcept;
+    KRYS_NODISCARD Maybe<DOMString> CrossOrigin() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-crossorigin
-    void CrossOrigin(Maybe<dom::DOMString> value) noexcept;
+    void CrossOrigin(Maybe<DOMString> value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-rel
-    KRYS_NODISCARD dom::DOMString Rel() const noexcept;
+    KRYS_NODISCARD DOMString Rel() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-rel
-    void Rel(dom::DOMString value) noexcept;
+    void Rel(DOMString value) noexcept;
 
     /// @brief The `as` attribute's potential destination keyword, in its canonical case, or the empty string.
     /// @see https://html.spec.whatwg.org/#dom-link-as
     /// @see https://html.spec.whatwg.org/#attr-link-as
-    KRYS_NODISCARD dom::DOMString As() const noexcept;
+    KRYS_NODISCARD DOMString As() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-as
-    void As(dom::DOMString value) noexcept;
+    void As(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-rellist
     KRYS_NODISCARD dom::DOMTokenList &RelList() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-media
-    KRYS_NODISCARD dom::DOMString Media() const noexcept;
+    KRYS_NODISCARD DOMString Media() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-media
-    void Media(dom::DOMString value) noexcept;
+    void Media(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-integrity
-    KRYS_NODISCARD dom::DOMString Integrity() const noexcept;
+    KRYS_NODISCARD DOMString Integrity() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-integrity
-    void Integrity(dom::DOMString value) noexcept;
+    void Integrity(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-hreflang
-    KRYS_NODISCARD dom::DOMString HrefLang() const noexcept;
+    KRYS_NODISCARD DOMString HrefLang() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-hreflang
-    void HrefLang(dom::DOMString value) noexcept;
+    void HrefLang(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-type
-    KRYS_NODISCARD dom::DOMString Type() const noexcept;
+    KRYS_NODISCARD DOMString Type() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-type
-    void Type(dom::DOMString value) noexcept;
+    void Type(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-sizes
     KRYS_NODISCARD dom::DOMTokenList &Sizes() noexcept;
@@ -159,16 +166,16 @@ namespace krys::boo::html
     void ImageSrcset(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-imagesizes
-    KRYS_NODISCARD dom::DOMString ImageSizes() const noexcept;
+    KRYS_NODISCARD DOMString ImageSizes() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-imagesizes
-    void ImageSizes(dom::DOMString value) noexcept;
+    void ImageSizes(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-referrerpolicy
-    KRYS_NODISCARD dom::DOMString ReferrerPolicy() const noexcept;
+    KRYS_NODISCARD DOMString ReferrerPolicy() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-referrerpolicy
-    void ReferrerPolicy(dom::DOMString value) noexcept;
+    void ReferrerPolicy(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-blocking
     KRYS_NODISCARD dom::DOMTokenList &Blocking() noexcept;
@@ -180,32 +187,32 @@ namespace krys::boo::html
     void Disabled(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-fetchpriority
-    KRYS_NODISCARD dom::DOMString FetchPriority() const noexcept;
+    KRYS_NODISCARD DOMString FetchPriority() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-fetchpriority
-    void FetchPriority(dom::DOMString value) noexcept;
+    void FetchPriority(DOMString value) noexcept;
 
 #pragma endregion
 
 #pragma region HTMLLinkElement Obsolete members - https://html.spec.whatwg.org/#HTMLLinkElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-link-charset
-    KRYS_NODISCARD dom::DOMString Charset() const noexcept;
+    KRYS_NODISCARD DOMString Charset() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-charset
-    void Charset(dom::DOMString value) noexcept;
+    void Charset(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-rev
-    KRYS_NODISCARD dom::DOMString Rev() const noexcept;
+    KRYS_NODISCARD DOMString Rev() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-rev
-    void Rev(dom::DOMString value) noexcept;
+    void Rev(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-target
-    KRYS_NODISCARD dom::DOMString Target() const noexcept;
+    KRYS_NODISCARD DOMString Target() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-target
-    void Target(dom::DOMString value) noexcept;
+    void Target(DOMString value) noexcept;
 
 #pragma endregion
 
@@ -213,7 +220,7 @@ namespace krys::boo::html
 
     /// @brief The associated CSS style sheet, if any.
     /// @see https://drafts.csswg.org/cssom/#dom-linkstyle-sheet
-    KRYS_NODISCARD css::CSSStyleSheet *Sheet() const noexcept;
+    KRYS_NODISCARD CSSStyleSheet *Sheet() const noexcept;
 
 #pragma endregion
 
@@ -246,18 +253,17 @@ namespace krys::boo::html
       return _relIsIcon;
     }
 
-    void DispatchPendingEvent(LinkEventSender *eventSender, const StringAtom &eventType) noexcept;
+    void DispatchPendingEvent(html::LinkEventSender *eventSender, const StringAtom &eventType) noexcept;
 
     /// @brief Dispatches the `load` and `error` events waiting to be dispatched soon, of every link.
     static void DispatchPendingLoadEvents() noexcept;
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
     void OnInsert() noexcept override;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
     void FinishParsingChildren() noexcept override;
 
@@ -277,7 +283,7 @@ namespace krys::boo::html
 
     void SetDisabledState(bool disabled) noexcept;
 
-    void ParseRel(dom::DOMStringView value) noexcept;
+    void ParseRel(DOMStringView value) noexcept;
 
     /// @brief Tells the document its icons may have changed.
     void IconMayHaveChanged() noexcept;
@@ -303,14 +309,14 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLLinkElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLLinkElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLLinkElement();
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    auto *element = krys::DynamicDowncast<krys::boo::html::HTMLElement>(target);
+    auto *element = krys::DynamicDowncast<krys::boo::HTMLElement>(target);
     return element && element->IsHTMLLinkElement();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

@@ -44,7 +44,7 @@ namespace krys::boo::html
 
   CanvasPattern::~CanvasPattern() noexcept = default;
 
-  bool CanvasPattern::ParseRepetitionType(dom::DOMStringView type, bool &repeatX, bool &repeatY) noexcept
+  bool CanvasPattern::ParseRepetitionType(DOMStringView type, bool &repeatX, bool &repeatY) noexcept
   {
     if (type.empty() || type == u8"repeat")
     {
@@ -74,7 +74,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-canvaspattern-settransform
-  dom::ExceptionOr<void> CanvasPattern::SetTransform(css::DOMMatrix2DInit matrixInit) noexcept
+  ExceptionOr<void> CanvasPattern::SetTransform(css::DOMMatrix2DInit matrixInit) noexcept
   {
     // 1. Let matrix be the result of creating a DOMMatrix from the 2D dictionary transform.
     auto checkValid = css::DOMMatrixReadOnly::ValidateAndFixup(matrixInit);

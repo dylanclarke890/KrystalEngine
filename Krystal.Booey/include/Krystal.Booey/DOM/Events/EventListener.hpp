@@ -11,6 +11,11 @@
 
 namespace krys::boo::dom
 {
+  class EventTargetAlgorithms;
+}
+
+namespace krys::boo
+{
   class AbortSignal;
   class Event;
 
@@ -55,7 +60,7 @@ namespace krys::boo::dom
   /// @see https://dom.spec.whatwg.org/#concept-event-listener
   class EventListener : public RefCounted<EventListener>, public CanMakeWeakPtr<EventListener>
   {
-    friend class EventTargetAlgorithms;
+    friend class dom::EventTargetAlgorithms;
 
   private:
     const DOMStringAtom _type;

@@ -3,23 +3,23 @@
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLParagraphElement::HTMLParagraphElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Paragraph)
+  HTMLParagraphElement::HTMLParagraphElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Paragraph)
   {
   }
 
 #pragma region HTMLHeadingElement Obsolete members
 
-  dom::DOMString HTMLParagraphElement::Align() const noexcept
+  DOMString HTMLParagraphElement::Align() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLParagraphElement::Align(dom::DOMString value) noexcept
+  void HTMLParagraphElement::Align(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"align", krys::move(value));
   }
 
 #pragma endregion
@@ -27,10 +27,10 @@ namespace krys::boo::html
 #pragma region Presentational hints
 
   void HTMLParagraphElement::CollectPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI, dom::DOMStringView value,
+    const DOMStringAtom &localName, const DOMStringAtom &namespaceURI, DOMStringView value,
     css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);

@@ -28,16 +28,12 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
-{
-  template <typename>
-  class ExceptionOr;
-}
-
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSRule;
   class CSSStyleSheet;
+  template <typename>
+  class ExceptionOr;
 
   /// @brief The media query list of a style sheet, an `@import` rule or an `@media` rule, as exposed to
   /// scripts.
@@ -47,7 +43,7 @@ namespace krys::boo::css
   private:
     WeakPtr<CSSStyleSheet> _parentStyleSheet;
     WeakPtr<CSSRule> _parentRule;
-    Maybe<mq::MediaQueryList> _detachedMediaQueries;
+    Maybe<css::mq::MediaQueryList> _detachedMediaQueries;
 
     explicit MediaList(CSSStyleSheet *parentSheet) noexcept;
 
@@ -69,7 +65,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD CSSOMString Item(uint32 index) const noexcept;
 
-    dom::ExceptionOr<void> DeleteMedium(const CSSOMString &oldMedium) noexcept;
+    ExceptionOr<void> DeleteMedium(const CSSOMString &oldMedium) noexcept;
 
     void AppendMedium(const CSSOMString &newMedium) noexcept;
 
@@ -84,9 +80,9 @@ namespace krys::boo::css
     /// @brief Keeps a copy of the media queries, so the list still works once its owner has gone.
     void DetachFromParent() noexcept;
 
-    KRYS_NODISCARD const mq::MediaQueryList &MediaQueries() const noexcept;
+    KRYS_NODISCARD const css::mq::MediaQueryList &MediaQueries() const noexcept;
 
   private:
-    void SetMediaQueries(mq::MediaQueryList &&queries) noexcept;
+    void SetMediaQueries(css::mq::MediaQueryList &&queries) noexcept;
   };
 }

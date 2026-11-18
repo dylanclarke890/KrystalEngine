@@ -56,39 +56,39 @@ namespace krys::boo::html
       return true;
     }
 
-    KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
+    KRYS_NODISCARD DOMStringView FormControlType() const noexcept final
     {
       return input_type_names::Range;
     }
 
     KRYS_NODISCARD double ValueAsDouble() const noexcept final;
 
-    dom::ExceptionOr<void> SetValueAsDecimal(const Decimal &value,
-                                             TextFieldEventBehavior eventBehavior) const noexcept final;
+    ExceptionOr<void> SetValueAsDecimal(const Decimal &value,
+                                        TextFieldEventBehavior eventBehavior) const noexcept final;
 
-    KRYS_NODISCARD bool TypeMismatchFor(dom::DOMStringView value) const noexcept final;
+    KRYS_NODISCARD bool TypeMismatchFor(DOMStringView value) const noexcept final;
 
     KRYS_NODISCARD bool SupportsRequired() const noexcept final;
 
     KRYS_NODISCARD StepRange CreateStepRange(AnyStepHandling anyStepHandling) const noexcept final;
 
-    ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept final;
+    ShouldCallBaseEventHandler HandleKeydownEvent(KeyboardEvent &event) noexcept final;
 
-    KRYS_NODISCARD Decimal ParseToNumber(dom::DOMStringView string,
+    KRYS_NODISCARD Decimal ParseToNumber(DOMStringView string,
                                          const Decimal &defaultValue) const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString Serialize(const Decimal &value) const noexcept final;
+    KRYS_NODISCARD DOMString Serialize(const Decimal &value) const noexcept final;
 
-    void AttributeChanged(const dom::DOMStringAtom &localName) noexcept final;
+    void AttributeChanged(const DOMStringAtom &localName) noexcept final;
 
-    void SetValue(dom::DOMStringView value, bool valueChanged, TextFieldEventBehavior eventBehavior,
+    void SetValue(DOMStringView value, bool valueChanged, TextFieldEventBehavior eventBehavior,
                   TextControlSetValueSelection selection) noexcept final;
 
-    KRYS_NODISCARD Maybe<dom::DOMString> FallbackValue() const noexcept final;
+    KRYS_NODISCARD Maybe<DOMString> FallbackValue() const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString SanitizeValue(dom::DOMStringView proposedValue) const noexcept final;
+    KRYS_NODISCARD DOMString SanitizeValue(DOMStringView proposedValue) const noexcept final;
 
-    void HandleMouseDownEvent(dom::MouseEvent &event) noexcept final;
+    void HandleMouseDownEvent(MouseEvent &event) noexcept final;
 
     void DisabledStateChanged() noexcept final;
 

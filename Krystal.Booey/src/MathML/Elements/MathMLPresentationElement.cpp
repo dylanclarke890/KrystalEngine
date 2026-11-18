@@ -32,10 +32,9 @@
 #include <charconv>
 #include <cmath>
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
-  MathMLPresentationElement::MathMLPresentationElement(dom::Document &document,
-                                                       MathMLElementInterface interface,
+  MathMLPresentationElement::MathMLPresentationElement(Document &document, MathMLElementInterface interface,
                                                        dom::NodeFlags nodeFlags) noexcept
       : MathMLElement(document, interface, nodeFlags)
   {
@@ -52,7 +51,7 @@ namespace krys::boo::mathml
   }
 
   MathMLElement::BooleanValue
-    MathMLPresentationElement::CachedBooleanAttribute(const dom::QualifiedName &name,
+    MathMLPresentationElement::CachedBooleanAttribute(const QualifiedName &name,
                                                       Maybe<BooleanValue> &attribute) const noexcept
   {
     if (attribute)
@@ -62,7 +61,7 @@ namespace krys::boo::mathml
 
     // In MathML Core, attribute values are ASCII case-insensitive.
     // https://w3c.github.io/mathml-core/#dfn-boolean
-    auto value = AttributeValue(name).value_or(dom::DOMString {});
+    auto value = AttributeValue(name).value_or(DOMString {});
     if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"true"))
     {
       attribute = BooleanValue::True;
@@ -79,7 +78,7 @@ namespace krys::boo::mathml
     return *attribute;
   }
 
-  MathMLElement::Length MathMLPresentationElement::ParseNumberAndUnit(dom::DOMStringView string) noexcept
+  MathMLElement::Length MathMLPresentationElement::ParseNumberAndUnit(DOMStringView string) noexcept
   {
     LengthType lengthType = LengthType::UnitLess;
     size_t stringLength = string.size();
@@ -154,7 +153,7 @@ namespace krys::boo::mathml
     return Length {.Type = lengthType, .Value = lengthValue};
   }
 
-  MathMLElement::Length MathMLPresentationElement::ParseMathMLLength(dom::DOMStringView string) noexcept
+  MathMLElement::Length MathMLPresentationElement::ParseMathMLLength(DOMStringView string) noexcept
   {
     // The regular expression from the MathML Relax NG schema is as follows:
     //
@@ -191,12 +190,12 @@ namespace krys::boo::mathml
   }
 
   const MathMLElement::Length &
-    MathMLPresentationElement::CachedMathMLLength(const dom::QualifiedName &name,
+    MathMLPresentationElement::CachedMathMLLength(const QualifiedName &name,
                                                   Maybe<Length> &length) const noexcept
   {
     if (!length)
     {
-      length = ParseMathMLLength(AttributeValue(name).value_or(dom::DOMString {}));
+      length = ParseMathMLLength(AttributeValue(name).value_or(DOMString {}));
     }
     return *length;
   }

@@ -28,7 +28,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
 }
@@ -42,21 +42,21 @@ namespace krys::boo::html::mixins
   {
   public:
     /// @see https://html.spec.whatwg.org/#dom-tabindex
-    KRYS_NODISCARD static int32 TabIndex(const dom::Element &element) noexcept;
+    KRYS_NODISCARD static int32 TabIndex(const Element &element) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tabindex
-    static void TabIndex(dom::Element &element, int32 value) noexcept;
+    static void TabIndex(Element &element, int32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-fe-autofocus
-    KRYS_NODISCARD static bool Autofocus(const dom::Element &element) noexcept;
+    KRYS_NODISCARD static bool Autofocus(const Element &element) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-fe-autofocus
-    static void Autofocus(dom::Element &element, bool value) noexcept;
+    static void Autofocus(Element &element, bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-focus
-    static void Focus(dom::Element &element, const dom::FocusOptions &options = {}) noexcept;
+    static void Focus(Element &element, const dom::FocusOptions &options = {}) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-blur
-    static void Blur(dom::Element &element) noexcept;
+    static void Blur(Element &element) noexcept;
   };
 }

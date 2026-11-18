@@ -33,10 +33,7 @@
 
 namespace krys::boo
 {
-  namespace dom
-  {
-    class Element;
-  }
+  class Element;
 
   namespace style
   {
@@ -46,11 +43,11 @@ namespace krys::boo
   /// @brief An edge of an animation's attachment range, as script gives it (`rangeStart`, `rangeEnd`).
   /// @see https://drafts.csswg.org/web-animations-2/#dom-animation-rangestart
   using TimelineRangeValue =
-    Variant<TimelineRangeOffset, RefPtr<css::CSSNumericValue>, RefPtr<css::CSSKeywordValue>, dom::DOMString>;
+    Variant<TimelineRangeOffset, RefPtr<CSSNumericValue>, RefPtr<CSSKeywordValue>, DOMString>;
 
   /// @brief Parses @p value as an edge of an attachment range for @p element's document, or null if it isn't
   /// one.
   KRYS_NODISCARD RefPtr<css::Value> ConvertToCSSValue(TimelineRangeValue value,
-                                                      const RefPtr<dom::Element> &element,
+                                                      const RefPtr<boo::Element> &element,
                                                       style::SingleAnimationRangeType type) noexcept;
 }

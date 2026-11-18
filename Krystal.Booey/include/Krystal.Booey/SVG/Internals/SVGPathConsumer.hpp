@@ -42,7 +42,10 @@ namespace krys::boo::svg
     // Segments are passed on as written.
     UnalteredParsing,
   };
+}
 
+namespace krys::boo
+{
   /// @brief Receives the segments of a parsed SVG path.
   class SVGPathConsumer
   {
@@ -56,30 +59,32 @@ namespace krys::boo::svg
     KRYS_NODISCARD virtual bool ContinueConsuming() noexcept = 0;
 
     // Used in UnalteredParsing/NormalizedParsing modes.
-    virtual void MoveTo(const FloatPoint &targetPoint, bool closed, PathCoordinateMode mode) noexcept = 0;
+    virtual void MoveTo(const FloatPoint &targetPoint, bool closed,
+                        svg::PathCoordinateMode mode) noexcept = 0;
 
-    virtual void LineTo(const FloatPoint &targetPoint, PathCoordinateMode mode) noexcept = 0;
+    virtual void LineTo(const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept = 0;
 
     virtual void CurveToCubic(const FloatPoint &controlPoint1, const FloatPoint &controlPoint2,
-                              const FloatPoint &targetPoint, PathCoordinateMode mode) noexcept = 0;
+                              const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept = 0;
 
     virtual void ClosePath() noexcept = 0;
 
     // Only used in UnalteredParsing mode.
-    virtual void LineToHorizontal(float x, PathCoordinateMode mode) noexcept = 0;
+    virtual void LineToHorizontal(float x, svg::PathCoordinateMode mode) noexcept = 0;
 
-    virtual void LineToVertical(float y, PathCoordinateMode mode) noexcept = 0;
+    virtual void LineToVertical(float y, svg::PathCoordinateMode mode) noexcept = 0;
 
     virtual void CurveToCubicSmooth(const FloatPoint &controlPoint2, const FloatPoint &targetPoint,
-                                    PathCoordinateMode mode) noexcept = 0;
+                                    svg::PathCoordinateMode mode) noexcept = 0;
 
     virtual void CurveToQuadratic(const FloatPoint &controlPoint, const FloatPoint &targetPoint,
-                                  PathCoordinateMode mode) noexcept = 0;
+                                  svg::PathCoordinateMode mode) noexcept = 0;
 
-    virtual void CurveToQuadraticSmooth(const FloatPoint &targetPoint, PathCoordinateMode mode) noexcept = 0;
+    virtual void CurveToQuadraticSmooth(const FloatPoint &targetPoint,
+                                        svg::PathCoordinateMode mode) noexcept = 0;
 
     virtual void ArcTo(float r1, float r2, float angle, bool largeArcFlag, bool sweepFlag,
-                       const FloatPoint &targetPoint, PathCoordinateMode mode) noexcept = 0;
+                       const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept = 0;
 
   protected:
     virtual ~SVGPathConsumer() noexcept = default;

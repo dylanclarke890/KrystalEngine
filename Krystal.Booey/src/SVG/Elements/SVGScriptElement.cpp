@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/SVG/Elements/SVGScriptElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGScriptElement::SVGScriptElement(dom::Document &document) noexcept
+  SVGScriptElement::SVGScriptElement(Document &document) noexcept
       : SVGElement(document, SVGElementInterface::Script)
   {
   }

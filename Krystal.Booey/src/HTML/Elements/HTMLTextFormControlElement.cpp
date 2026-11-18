@@ -58,18 +58,18 @@
 #include <algorithm>
 #include <limits>
 
-namespace krys::boo::html
+namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD dom::Position PositionForIndex(TextControlInnerTextElement *innerText,
+    KRYS_NODISCARD dom::Position PositionForIndex(html::TextControlInnerTextElement *innerText,
                                                   uint32 index) noexcept
     {
       uint32 remainingCharactersToMoveForward = index;
-      dom::Node *lastBrOrText = innerText;
-      for (dom::Node *node = innerText; node; node = dom::TreeQueries::Next(*node, innerText))
+      Node *lastBrOrText = innerText;
+      for (Node *node = innerText; node; node = dom::TreeQueries::Next(*node, innerText))
       {
-        if (IsHTMLElementOfType(node, TagName::br))
+        if (IsHTMLElementOfType(node, html::TagName::br))
         {
           if (!remainingCharactersToMoveForward)
           {
@@ -78,7 +78,7 @@ namespace krys::boo::html
           remainingCharactersToMoveForward--;
           lastBrOrText = node;
         }
-        else if (auto *text = DynamicDowncast<dom::Text>(*node))
+        else if (auto *text = DynamicDowncast<Text>(*node))
         {
           if (remainingCharactersToMoveForward < text->Length())
           {
@@ -92,7 +92,7 @@ namespace krys::boo::html
     }
 
     /// @brief @p offset moved back to the start of the UTF-8 character it's in.
-    KRYS_NODISCARD uint32 SnapToCharacterStart(dom::DOMStringView text, uint32 offset) noexcept
+    KRYS_NODISCARD uint32 SnapToCharacterStart(DOMStringView text, uint32 offset) noexcept
     {
       while (offset > 0 && offset < text.size() && (static_cast<uint8>(text[offset]) & 0xC0) == 0x80)
       {
@@ -101,19 +101,19 @@ namespace krys::boo::html
       return offset;
     }
 
-    KRYS_NODISCARD dom::DOMStringView DirectionString(TextFieldSelectionDirection direction) noexcept
+    KRYS_NODISCARD DOMStringView DirectionString(html::TextFieldSelectionDirection direction) noexcept
     {
       switch (direction)
       {
-        case TextFieldSelectionDirection::SelectionHasNoDirection:       return u8"none";
-        case TextFieldSelectionDirection::SelectionHasForwardDirection:  return u8"forward";
-        case TextFieldSelectionDirection::SelectionHasBackwardDirection: return u8"backward";
+        case html::TextFieldSelectionDirection::SelectionHasNoDirection:       return u8"none";
+        case html::TextFieldSelectionDirection::SelectionHasForwardDirection:  return u8"forward";
+        case html::TextFieldSelectionDirection::SelectionHasBackwardDirection: return u8"backward";
       }
 
       krys_unreachable();
     }
 
-    void StripTrailingNewline(dom::DOMString &result) noexcept
+    void StripTrailingNewline(DOMString &result) noexcept
     {
       // Remove one trailing newline; there's always one that's collapsed out by rendering.
       if (!result.empty() && result.back() == u8'\n')
@@ -122,16 +122,16 @@ namespace krys::boo::html
       }
     }
 
-    KRYS_NODISCARD dom::DOMString InnerTextValueFrom(TextControlInnerTextElement &innerText) noexcept
+    KRYS_NODISCARD DOMString InnerTextValueFrom(html::TextControlInnerTextElement &innerText) noexcept
     {
-      dom::DOMString result;
-      for (dom::Node *node = innerText.FirstChild(); node; node = dom::TreeQueries::Next(*node, &innerText))
+      DOMString result;
+      for (Node *node = innerText.FirstChild(); node; node = dom::TreeQueries::Next(*node, &innerText))
       {
-        if (IsHTMLElementOfType(node, TagName::br))
+        if (IsHTMLElementOfType(node, html::TagName::br))
         {
           result.push_back(u8'\n');
         }
-        else if (auto *textNode = DynamicDowncast<dom::Text>(*node))
+        else if (auto *textNode = DynamicDowncast<Text>(*node))
         {
           result.append(textNode->Data());
         }
@@ -140,10 +140,10 @@ namespace krys::boo::html
       return result;
     }
 
-    void SetContainerAndOffsetForRange(dom::Node &node, uint32 offset, RefPtr<dom::Node> &containerNode,
+    void SetContainerAndOffsetForRange(Node &node, uint32 offset, RefPtr<Node> &containerNode,
                                        uint32 &offsetInContainer) noexcept
     {
-      if (Is<dom::Text>(node))
+      if (Is<Text>(node))
       {
         containerNode = ShareRefPtr(&node);
         offsetInContainer = offset;
@@ -156,27 +156,27 @@ namespace krys::boo::html
     }
   }
 
-  HTMLTextFormControlElement::HTMLTextFormControlElement(dom::Document &document,
-                                                         HTMLElementInterface interface) noexcept
+  HTMLTextFormControlElement::HTMLTextFormControlElement(Document &document,
+                                                         html::HTMLElementInterface interface) noexcept
       : HTMLFormControlElement(document, interface)
   {
     if (document.Frame() && document.GetEditor().Behavior().ShouldConsiderSelectionAsDirectional())
     {
-      _cachedSelectionDirection = TextFieldSelectionDirection::SelectionHasForwardDirection;
+      _cachedSelectionDirection = html::TextFieldSelectionDirection::SelectionHasForwardDirection;
     }
   }
 
   HTMLTextFormControlElement::~HTMLTextFormControlElement() noexcept = default;
 
-  bool HTMLTextFormControlElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
+  bool HTMLTextFormControlElement::ChildShouldCreateRenderer(const Node &child) const noexcept
   {
     // FIXME: We shouldn't force the pseudo elements down into the shadow, but
     // this perserves the current behavior of WebKit.
-    if (Is<dom::PseudoElement>(child))
+    if (Is<PseudoElement>(child))
     {
       return HTMLFormControlElement::ChildShouldCreateRenderer(child);
     }
-    return Is<dom::ShadowRoot>(child.ParentNode())
+    return Is<boo::ShadowRoot>(child.ParentNode())
            && HTMLFormControlElement::ChildShouldCreateRenderer(child);
   }
 
@@ -189,18 +189,18 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLTextFormControlElement::DispatchFocusEvent(dom::EventTarget *relatedTarget,
+  void HTMLTextFormControlElement::DispatchFocusEvent(EventTarget *relatedTarget,
                                                       const dom::FocusOptions &options) noexcept
   {
     if (SupportsPlaceholder())
     {
       UpdatePlaceholderVisibility();
     }
-    HandleFocusEvent(DynamicDowncast<dom::Node>(relatedTarget));
+    HandleFocusEvent(DynamicDowncast<Node>(relatedTarget));
     HTMLFormControlElement::DispatchFocusEvent(relatedTarget, options);
   }
 
-  void HTMLTextFormControlElement::DispatchBlurEvent(dom::EventTarget *relatedTarget) noexcept
+  void HTMLTextFormControlElement::DispatchBlurEvent(EventTarget *relatedTarget) noexcept
   {
     if (SupportsPlaceholder())
     {
@@ -223,7 +223,7 @@ namespace krys::boo::html
     SubtreeHasChanged();
   }
 
-  void HTMLTextFormControlElement::ForwardEvent(dom::Event &event) noexcept
+  void HTMLTextFormControlElement::ForwardEvent(Event &event) noexcept
   {
     if (event.Type() == event_names::Blur || event.Type() == event_names::Focus)
     {
@@ -238,7 +238,7 @@ namespace krys::boo::html
 
   bool HTMLTextFormControlElement::IsPlaceholderEmpty() const noexcept
   {
-    auto attributeValue = GetAttribute(u8"placeholder").value_or(dom::DOMString());
+    auto attributeValue = GetAttribute(u8"placeholder").value_or(DOMString());
     return std::ranges::all_of(attributeValue, [](char8 c) { return c == u8'\n' || c == u8'\r'; });
   }
 
@@ -295,7 +295,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-textarea/input-selectiondirection
-  void HTMLTextFormControlElement::SetSelectionDirection(dom::DOMStringView direction) noexcept
+  void HTMLTextFormControlElement::SetSelectionDirection(DOMStringView direction) noexcept
   {
     // 2. Set the selection range with the value of this element's selectionStart attribute, the value of this
     //    element's selectionEnd attribute, and the given value.
@@ -310,13 +310,13 @@ namespace krys::boo::html
 
     // 2. Set the selection range with 0 and infinity.
     if (SetSelectionRange(0, std::numeric_limits<uint32>::max(),
-                          TextFieldSelectionDirection::SelectionHasNoDirection, revealMode))
+                          html::TextFieldSelectionDirection::SelectionHasNoDirection, revealMode))
     {
       ScheduleSelectEvent();
     }
   }
 
-  dom::DOMString HTMLTextFormControlElement::SelectedText() const noexcept
+  DOMString HTMLTextFormControlElement::SelectedText() const noexcept
   {
     if (!IsTextField())
     {
@@ -340,7 +340,7 @@ namespace krys::boo::html
     SetInteractedWithSinceLastFormSubmitEvent(true);
   }
 
-  dom::ExceptionOr<void> HTMLTextFormControlElement::SetRangeText(dom::DOMStringView replacement) noexcept
+  ExceptionOr<void> HTMLTextFormControlElement::SetRangeText(DOMStringView replacement) noexcept
   {
     // 3. If the method has only one argument, then let start and end have the values of the selectionStart
     //    attribute and the selectionEnd attribute respectively.
@@ -348,14 +348,13 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-textarea/input-setrangetext
-  dom::ExceptionOr<void> HTMLTextFormControlElement::SetRangeText(dom::DOMStringView replacement,
-                                                                  uint32 start, uint32 end,
-                                                                  dom::DOMStringView selectionMode) noexcept
+  ExceptionOr<void> HTMLTextFormControlElement::SetRangeText(DOMStringView replacement, uint32 start,
+                                                             uint32 end, DOMStringView selectionMode) noexcept
   {
     // 4. If start is greater than end, then throw an "IndexSizeError" DOMException.
     if (start > end)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     auto text = InnerTextValue();
@@ -390,7 +389,8 @@ namespace krys::boo::html
     }
 
     // 2. Set this element's dirty value flag to true.
-    (void)SetValue(text, TextFieldEventBehavior::DispatchNoEvent, TextControlSetValueSelection::DoNotSet);
+    (void)SetValue(text, html::TextFieldEventBehavior::DispatchNoEvent,
+                   html::TextControlSetValueSelection::DoNotSet);
 
     // 11. Let new length be the length of the value of the first argument.
     // 12. Let new end be the sum of start and new length.
@@ -435,7 +435,7 @@ namespace krys::boo::html
 
     // 14. Set the selection range with selection start and selection end.
     if (SetSelectionRange(newSelectionStart, newSelectionEnd,
-                          TextFieldSelectionDirection::SelectionHasNoDirection))
+                          html::TextFieldSelectionDirection::SelectionHasNoDirection))
     {
       ScheduleSelectEvent();
     }
@@ -444,21 +444,20 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#set-the-selection-range
-  void HTMLTextFormControlElement::SetSelectionRange(uint32 start, uint32 end,
-                                                     dom::DOMStringView directionString,
-                                                     ForBindings forBindings) noexcept
+  void HTMLTextFormControlElement::SetSelectionRange(uint32 start, uint32 end, DOMStringView directionString,
+                                                     html::ForBindings forBindings) noexcept
   {
     // 4. If direction is not identical to either "backward" or "forward", or if the direction argument was
     // not
     //    given, set direction to "none".
-    auto direction = TextFieldSelectionDirection::SelectionHasNoDirection;
+    auto direction = html::TextFieldSelectionDirection::SelectionHasNoDirection;
     if (directionString == u8"forward")
     {
-      direction = TextFieldSelectionDirection::SelectionHasForwardDirection;
+      direction = html::TextFieldSelectionDirection::SelectionHasForwardDirection;
     }
     else if (directionString == u8"backward")
     {
-      direction = TextFieldSelectionDirection::SelectionHasBackwardDirection;
+      direction = html::TextFieldSelectionDirection::SelectionHasBackwardDirection;
     }
 
     // 3. Set the selection of the text control to the sequence of code units within the relevant value
@@ -476,9 +475,9 @@ namespace krys::boo::html
   }
 
   bool HTMLTextFormControlElement::SetSelectionRange(uint32 start, uint32 end,
-                                                     TextFieldSelectionDirection direction,
+                                                     html::TextFieldSelectionDirection direction,
                                                      SelectionRevealMode revealMode,
-                                                     ForBindings forBindings) noexcept
+                                                     html::ForBindings forBindings) noexcept
   {
     if (!IsTextField())
     {
@@ -493,14 +492,14 @@ namespace krys::boo::html
     end = SnapToCharacterStart(innerTextValue, std::min(end, innerTextValueLength));
     start = SnapToCharacterStart(innerTextValue, std::min(start, end));
 
-    Ref<dom::Document> document = ShareRef(NodeDocument());
+    Ref<Document> document = ShareRef(NodeDocument());
     bool hasFocus = document->FocusedElement() == this;
 
     auto *frame = document->Frame();
-    if (direction == TextFieldSelectionDirection::SelectionHasNoDirection && frame
+    if (direction == html::TextFieldSelectionDirection::SelectionHasNoDirection && frame
         && document->GetEditor().Behavior().ShouldConsiderSelectionAsDirectional())
     {
-      direction = TextFieldSelectionDirection::SelectionHasForwardDirection;
+      direction = html::TextFieldSelectionDirection::SelectionHasForwardDirection;
     }
 
     if (!hasFocus && innerText)
@@ -511,7 +510,7 @@ namespace krys::boo::html
       }
 
       // Cache selection if neither selection or focus is on the input.
-      if (frame && EnclosingTextFormControl(document->Selection().Selection().Start()) != this)
+      if (frame && html::EnclosingTextFormControl(document->Selection().Selection().Start()) != this)
       {
         return CacheSelection(start, end, direction);
       }
@@ -544,7 +543,7 @@ namespace krys::boo::html
     }
     else
     {
-      if (direction == TextFieldSelectionDirection::SelectionHasBackwardDirection)
+      if (direction == html::TextFieldSelectionDirection::SelectionHasBackwardDirection)
       {
         endPosition = startPosition;
         startPosition = PositionForIndex(innerText.get(), end);
@@ -558,7 +557,7 @@ namespace krys::boo::html
     if (document->Frame())
     {
       auto options = FrameSelection::DefaultSetSelectionOptions();
-      if (forBindings == ForBindings::Yes)
+      if (forBindings == html::ForBindings::Yes)
       {
         options.Add(FrameSelection::SetSelectionOption::ForBindings);
       }
@@ -580,7 +579,7 @@ namespace krys::boo::html
           break;
       }
       document->Selection().MoveWithoutValidationTo(
-        startPosition, endPosition, direction != TextFieldSelectionDirection::SelectionHasNoDirection,
+        startPosition, endPosition, direction != html::TextFieldSelectionDirection::SelectionHasNoDirection,
         options);
     }
 
@@ -589,7 +588,7 @@ namespace krys::boo::html
   }
 
   bool HTMLTextFormControlElement::CacheSelection(uint32 start, uint32 end,
-                                                  TextFieldSelectionDirection direction) noexcept
+                                                  html::TextFieldSelectionDirection direction) noexcept
   {
     bool didChange =
       _cachedSelectionStart != start || _cachedSelectionEnd != end || _cachedSelectionDirection != direction;
@@ -665,11 +664,11 @@ namespace krys::boo::html
     return IndexForPosition(NodeDocument().Selection().Selection().End());
   }
 
-  dom::DOMStringView HTMLTextFormControlElement::SelectionDirection() const noexcept
+  DOMStringView HTMLTextFormControlElement::SelectionDirection() const noexcept
   {
     if (!IsTextField())
     {
-      return DirectionString(TextFieldSelectionDirection::SelectionHasNoDirection);
+      return DirectionString(html::TextFieldSelectionDirection::SelectionHasNoDirection);
     }
     if (NodeDocument().FocusedElement() != this && HasCachedSelection())
     {
@@ -679,19 +678,19 @@ namespace krys::boo::html
     return DirectionString(ComputeSelectionDirection());
   }
 
-  TextFieldSelectionDirection HTMLTextFormControlElement::ComputeSelectionDirection() const noexcept
+  html::TextFieldSelectionDirection HTMLTextFormControlElement::ComputeSelectionDirection() const noexcept
   {
     krys_debug_assert(IsTextField());
     if (!NodeDocument().Frame())
     {
-      return TextFieldSelectionDirection::SelectionHasNoDirection;
+      return html::TextFieldSelectionDirection::SelectionHasNoDirection;
     }
 
     const auto &selection = NodeDocument().Selection().Selection();
     return selection.GetDirectionality() == Directionality::Strong
-             ? (selection.IsBaseFirst() ? TextFieldSelectionDirection::SelectionHasForwardDirection
-                                        : TextFieldSelectionDirection::SelectionHasBackwardDirection)
-             : TextFieldSelectionDirection::SelectionHasNoDirection;
+             ? (selection.IsBaseFirst() ? html::TextFieldSelectionDirection::SelectionHasForwardDirection
+                                        : html::TextFieldSelectionDirection::SelectionHasBackwardDirection)
+             : html::TextFieldSelectionDirection::SelectionHasNoDirection;
   }
 
   Maybe<dom::SimpleRange> HTMLTextFormControlElement::Selection() const noexcept
@@ -713,22 +712,20 @@ namespace krys::boo::html
 
     if (!innerText->FirstChild())
     {
-      return dom::SimpleRange {{Ref<dom::Node>(ShareRef(*innerText)), 0},
-                               {Ref<dom::Node>(ShareRef(*innerText)), 0}};
+      return dom::SimpleRange {{Ref<Node>(ShareRef(*innerText)), 0}, {Ref<Node>(ShareRef(*innerText)), 0}};
     }
 
     uint32 offset = 0;
-    RefPtr<dom::Node> startNode;
-    RefPtr<dom::Node> endNode;
-    for (dom::Node *node = innerText->FirstChild(); node;
-         node = dom::TreeQueries::Next(*node, innerText.get()))
+    RefPtr<Node> startNode;
+    RefPtr<Node> endNode;
+    for (Node *node = innerText->FirstChild(); node; node = dom::TreeQueries::Next(*node, innerText.get()))
     {
       krys_debug_assert(!node->FirstChild());
-      krys_debug_assert(Is<dom::Text>(*node) || IsHTMLElementOfType(node, TagName::br));
+      krys_debug_assert(Is<Text>(*node) || IsHTMLElementOfType(node, html::TagName::br));
 
       uint32 length = [&]
       {
-        auto *textNode = DynamicDowncast<dom::Text>(*node);
+        auto *textNode = DynamicDowncast<Text>(*node);
         return textNode ? static_cast<uint32>(textNode->Length()) : 1u;
       }();
 
@@ -751,8 +748,7 @@ namespace krys::boo::html
       return null;
     }
 
-    return dom::SimpleRange {{Ref<dom::Node>(ShareRef(*startNode)), start},
-                             {Ref<dom::Node>(ShareRef(*endNode)), end}};
+    return dom::SimpleRange {{Ref<Node>(ShareRef(*startNode)), start}, {Ref<Node>(ShareRef(*endNode)), end}};
   }
 
   void HTMLTextFormControlElement::RestoreCachedSelection(SelectionRevealMode revealMode) noexcept
@@ -778,7 +774,7 @@ namespace krys::boo::html
 
     if (shouldFireSelectEvent && _cachedSelectionStart != _cachedSelectionEnd)
     {
-      auto event = dom::Event::Create(event_names::Select, true, false);
+      auto event = Event::Create(event_names::Select, true, false);
       (void)dom::EventDispatcher::DispatchToTarget(*event, this);
     }
 
@@ -793,31 +789,32 @@ namespace krys::boo::html
     }
 
     _hasScheduledSelectionChangeEvent = true;
-    EventLoop::Current().QueueTask(TaskSource::UserInteraction, NodeDocument(),
-                                   [textControl = Ref<HTMLTextFormControlElement>(ShareRef(*this))]
-                                   {
-                                     textControl->_hasScheduledSelectionChangeEvent = false;
-                                     auto event =
-                                       dom::Event::Create(event_names::SelectionChange, true, false);
-                                     (void)dom::EventDispatcher::DispatchToTarget(*event, textControl.get());
-                                   });
+    html::EventLoop::Current().QueueTask(
+      html::TaskSource::UserInteraction, NodeDocument(),
+      [textControl = Ref<HTMLTextFormControlElement>(ShareRef(*this))]
+      {
+        textControl->_hasScheduledSelectionChangeEvent = false;
+        auto event = Event::Create(event_names::SelectionChange, true, false);
+        (void)dom::EventDispatcher::DispatchToTarget(*event, textControl.get());
+      });
   }
 
   void HTMLTextFormControlElement::ScheduleSelectEvent() noexcept
   {
-    EventLoop::Current().QueueTask(TaskSource::UserInteraction, NodeDocument(),
-                                   [textControl = Ref<HTMLTextFormControlElement>(ShareRef(*this))]
-                                   {
-                                     auto event = dom::Event::Create(event_names::Select, true, false);
-                                     (void)dom::EventDispatcher::DispatchToTarget(*event, textControl.get());
-                                   });
+    html::EventLoop::Current().QueueTask(html::TaskSource::UserInteraction, NodeDocument(),
+                                         [textControl = Ref<HTMLTextFormControlElement>(ShareRef(*this))]
+                                         {
+                                           auto event = Event::Create(event_names::Select, true, false);
+                                           (void)dom::EventDispatcher::DispatchToTarget(*event,
+                                                                                        textControl.get());
+                                         });
     ScheduleSelectionChangeEvent();
   }
 
-  void HTMLTextFormControlElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                                      Maybe<dom::DOMStringView> oldValue,
-                                                      Maybe<dom::DOMStringView> value,
-                                                      const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLTextFormControlElement::OnAttributeChanged(const DOMStringAtom &localName,
+                                                      Maybe<DOMStringView> oldValue,
+                                                      Maybe<DOMStringView> value,
+                                                      const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLFormControlElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI == null && localName == u8"placeholder")
@@ -870,7 +867,7 @@ namespace krys::boo::html
     return _wasEverChangedByUserEdit;
   }
 
-  void HTMLTextFormControlElement::SetInnerTextValue(dom::DOMString value) noexcept
+  void HTMLTextFormControlElement::SetInnerTextValue(DOMString value) noexcept
   {
     auto innerText = InnerTextElementCreatingShadowSubtreeIfNeeded();
     if (!innerText)
@@ -900,10 +897,10 @@ namespace krys::boo::html
     SetFormControlValueMatchesRenderer(true);
   }
 
-  dom::DOMString HTMLTextFormControlElement::InnerTextValue() const noexcept
+  DOMString HTMLTextFormControlElement::InnerTextValue() const noexcept
   {
     auto innerText = InnerTextElement();
-    return innerText ? InnerTextValueFrom(*innerText) : dom::DOMString {};
+    return innerText ? InnerTextValueFrom(*innerText) : DOMString {};
   }
 
   uint32 HTMLTextFormControlElement::IndexForPosition(const dom::Position &passedPosition) const noexcept
@@ -920,7 +917,7 @@ namespace krys::boo::html
     }
 
     uint32 index = 0;
-    dom::Node *startNode = passedPosition.ComputeNodeBeforePosition();
+    Node *startNode = passedPosition.ComputeNodeBeforePosition();
     if (!startNode)
     {
       startNode = passedPosition.GetContainerNode();
@@ -928,9 +925,9 @@ namespace krys::boo::html
     krys_debug_assert(startNode);
     krys_debug_assert(innerText->Contains(startNode));
 
-    for (dom::Node *node = startNode; node; node = dom::TreeQueries::Previous(*node, innerText.get()))
+    for (Node *node = startNode; node; node = dom::TreeQueries::Previous(*node, innerText.get()))
     {
-      if (auto *text = DynamicDowncast<dom::Text>(*node))
+      if (auto *text = DynamicDowncast<Text>(*node))
       {
         auto length = static_cast<uint32>(text->Length());
         if (node == passedPosition.GetContainerNode())
@@ -942,7 +939,7 @@ namespace krys::boo::html
           index += length;
         }
       }
-      else if (IsHTMLElementOfType(node, TagName::br))
+      else if (IsHTMLElementOfType(node, html::TagName::br))
       {
         ++index;
       }
@@ -954,7 +951,7 @@ namespace krys::boo::html
     return index;
   }
 
-  dom::DOMString HTMLTextFormControlElement::ValueWithHardLineBreaks() const noexcept
+  DOMString HTMLTextFormControlElement::ValueWithHardLineBreaks() const noexcept
   {
     // FIXME: It's not acceptable to ignore the HardWrap setting when there is no renderer.
     // While we have no evidence this has ever been a practical problem, it would be best to fix it some day.
@@ -964,7 +961,7 @@ namespace krys::boo::html
     }
 
     auto innerText = InnerTextElement();
-    if (!innerText || innerText->TextContent().value_or(dom::DOMString {}).empty())
+    if (!innerText || innerText->TextContent().value_or(DOMString {}).empty())
     {
       return Value();
     }
@@ -975,7 +972,7 @@ namespace krys::boo::html
       return Value();
     }
 
-    dom::Node *breakNode = nullptr;
+    Node *breakNode = nullptr;
     uint32 breakOffset = 0;
     auto currentLineBox = inline_iterator::FirstLineBoxFor(*renderer);
     if (!currentLineBox)
@@ -1004,17 +1001,16 @@ namespace krys::boo::html
 
     skipToNextSoftLineBreakPosition();
 
-    dom::DOMString result;
-    for (dom::Node *node = innerText->FirstChild(); node;
-         node = dom::TreeQueries::Next(*node, innerText.get()))
+    DOMString result;
+    for (Node *node = innerText->FirstChild(); node; node = dom::TreeQueries::Next(*node, innerText.get()))
     {
-      if (IsHTMLElementOfType(node, TagName::br))
+      if (IsHTMLElementOfType(node, html::TagName::br))
       {
         result.push_back(u8'\n');
       }
-      else if (auto *textNode = DynamicDowncast<dom::Text>(*node))
+      else if (auto *textNode = DynamicDowncast<Text>(*node))
       {
-        dom::DOMStringView data = textNode->Data();
+        DOMStringView data = textNode->Data();
         auto length = static_cast<uint32>(data.size());
         uint32 position = 0;
         while (breakNode == node && breakOffset <= length)
@@ -1038,7 +1034,7 @@ namespace krys::boo::html
     return result;
   }
 
-  HTMLTextFormControlElement *EnclosingTextFormControl(const dom::Position &position) noexcept
+  HTMLTextFormControlElement *html::EnclosingTextFormControl(const dom::Position &position) noexcept
   {
     auto *container = position.GetContainerNode();
     if (!container)
@@ -1068,13 +1064,13 @@ namespace krys::boo::html
     }
   }
 
-  int32 HTMLTextFormControlElement::ParseLengthAttribute(Maybe<dom::DOMStringView> value) noexcept
+  int32 HTMLTextFormControlElement::ParseLengthAttribute(Maybe<DOMStringView> value) noexcept
   {
     if (!value)
     {
       return -1;
     }
-    auto result = Numbers::ParseNonNegativeInteger(*value);
+    auto result = html::Numbers::ParseNonNegativeInteger(*value);
     if (!result.Success() || result.Value > static_cast<uint64>(std::numeric_limits<int32>::max()))
     {
       return -1;
@@ -1082,7 +1078,7 @@ namespace krys::boo::html
     return static_cast<int32>(result.Value);
   }
 
-  size_t HTMLTextFormControlElement::LengthForAPIValue(dom::DOMStringView text) noexcept
+  size_t HTMLTextFormControlElement::LengthForAPIValue(DOMStringView text) noexcept
   {
     size_t length = 0;
     for (char8 character : text)
@@ -1098,11 +1094,11 @@ namespace krys::boo::html
     return length;
   }
 
-  dom::DOMString HTMLTextFormControlElement::DirectionForFormData() const noexcept
+  DOMString HTMLTextFormControlElement::DirectionForFormData() const noexcept
   {
     auto direction = [this]
     {
-      for (auto *element = static_cast<const dom::Element *>(this); element;
+      for (auto *element = static_cast<const boo::Element *>(this); element;
            element = element->ParentElement())
       {
         if (!Is<HTMLElement>(*element))

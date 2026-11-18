@@ -41,7 +41,7 @@ namespace krys::boo
     FloatSize _radii;
 
   public:
-    LegacyRenderSVGEllipse(svg::SVGGraphicsElement &, RenderStyle &&) noexcept;
+    LegacyRenderSVGEllipse(SVGGraphicsElement &, RenderStyle &&) noexcept;
 
     ~LegacyRenderSVGEllipse() noexcept override;
 

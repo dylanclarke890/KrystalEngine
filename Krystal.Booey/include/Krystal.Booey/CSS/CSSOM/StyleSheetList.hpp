@@ -27,15 +27,11 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
   class Node;
   class ShadowRoot;
-}
-
-namespace krys::boo::css
-{
   class StyleSheet;
 
   /// @brief The style sheets of a document or shadow root, in order. Live until its document or shadow root
@@ -46,20 +42,20 @@ namespace krys::boo::css
     KRYS_NON_COPY_MOVABLE(StyleSheetList);
 
   private:
-    WeakPtr<dom::Document> _document;
-    WeakPtr<dom::ShadowRoot> _shadowRoot;
+    WeakPtr<Document> _document;
+    WeakPtr<ShadowRoot> _shadowRoot;
     List<RefPtr<StyleSheet>> _detachedStyleSheets;
 
-    explicit StyleSheetList(dom::Document &document) noexcept;
+    explicit StyleSheetList(Document &document) noexcept;
 
-    explicit StyleSheetList(dom::ShadowRoot &shadowRoot) noexcept;
+    explicit StyleSheetList(ShadowRoot &shadowRoot) noexcept;
 
   public:
     ~StyleSheetList() noexcept;
 
-    KRYS_NODISCARD static Ref<StyleSheetList> Create(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<StyleSheetList> Create(Document &document) noexcept;
 
-    KRYS_NODISCARD static Ref<StyleSheetList> Create(dom::ShadowRoot &shadowRoot) noexcept;
+    KRYS_NODISCARD static Ref<StyleSheetList> Create(ShadowRoot &shadowRoot) noexcept;
 
 #pragma region StyleSheetList - https://drafts.csswg.org/cssom/#the-stylesheetlist-interface
 
@@ -77,7 +73,7 @@ namespace krys::boo::css
     }
 
     /// @brief The document or shadow root whose sheets these are, or null once detached.
-    KRYS_NODISCARD dom::Node *OwnerNode() const noexcept;
+    KRYS_NODISCARD Node *OwnerNode() const noexcept;
 
     /// @brief Keeps the current sheets and stops following the document or shadow root.
     void Detach() noexcept;

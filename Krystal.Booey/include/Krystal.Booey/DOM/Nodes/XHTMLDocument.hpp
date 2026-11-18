@@ -4,21 +4,21 @@
 #include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class XHTMLDocument : public XMLDocument
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(XHTMLDocument);
 
   public:
-    XHTMLDocument() noexcept : XMLDocument(DocumentFlags::IsXHTMLDocument)
+    XHTMLDocument() noexcept : XMLDocument(dom::DocumentFlags::IsXHTMLDocument)
     {
     }
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::XHTMLDocument)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Document &document) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::XHTMLDocument)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Document &document) noexcept
   {
     return document.IsXHTMLDocument();
   }

@@ -22,13 +22,10 @@
 
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 
-namespace krys::boo::html
-{
-  class HTMLInputElement;
-}
-
 namespace krys::boo
 {
+  class HTMLInputElement;
+
   /// @brief The renderer of `<input type=range>`: a flex box holding its track and thumb.
   class RenderSlider final : public RenderFlexibleBox
   {
@@ -37,11 +34,11 @@ namespace krys::boo
   public:
     constexpr static int32 DefaultTrackLength = 129;
 
-    RenderSlider(html::HTMLInputElement &, RenderStyle &&) noexcept;
+    RenderSlider(HTMLInputElement &, RenderStyle &&) noexcept;
 
     ~RenderSlider() noexcept override;
 
-    KRYS_NODISCARD html::HTMLInputElement &InputElement() const noexcept;
+    KRYS_NODISCARD HTMLInputElement &InputElement() const noexcept;
 
     KRYS_NODISCARD bool CanHaveGeneratedChildren() const noexcept override
     {

@@ -21,7 +21,7 @@ namespace krys::boo::style::tests
 
   namespace
   {
-    using Names = List<css::CSSOMString>;
+    using Names = List<CSSOMString>;
   }
 
   TEST_CASE_METHOD(BuilderFixture, "Style GridAutoFlow", "[Style][Values][Grid]")

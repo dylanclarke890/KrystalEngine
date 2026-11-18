@@ -59,7 +59,7 @@ namespace krys::boo::css
   struct SelectorChecker::LocalContext
   {
     const Selector *CurrentSelector;
-    const dom::Element *Element;
+    const boo::Element *Element;
     const Selector *FirstSelectorOfTheFragment;
     Maybe<style::PseudoElementIdentifier> RequestedPseudoElement;
     bool IsMatchElement {true};
@@ -71,7 +71,7 @@ namespace krys::boo::css
     bool MatchedHostPseudoClass {false};
     bool IsNegation {false};
 
-    LocalContext(const Selector &selector, const dom::Element &element,
+    LocalContext(const Selector &selector, const boo::Element &element,
                  Maybe<style::PseudoElementIdentifier> requestedPseudoElement) noexcept
         : CurrentSelector(&selector), Element(&element), FirstSelectorOfTheFragment(&selector),
           RequestedPseudoElement(krys::move(requestedPseudoElement))
@@ -81,22 +81,22 @@ namespace krys::boo::css
 
   namespace
   {
-    KRYS_NODISCARD bool IsHTMLElementInHTMLDocument(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool IsHTMLElementInHTMLDocument(const Element &element) noexcept
     {
-      return Is<html::HTMLElement>(element) && Is<dom::HTMLDocument>(element.NodeDocument());
+      return Is<HTMLElement>(element) && Is<HTMLDocument>(element.NodeDocument());
     }
 
-    KRYS_NODISCARD bool IsFirstChildElement(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool IsFirstChildElement(const Element &element) noexcept
     {
       return !dom::TreeQueries::PreviousElementSibling(element);
     }
 
-    KRYS_NODISCARD bool IsLastChildElement(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool IsLastChildElement(const Element &element) noexcept
     {
       return !dom::TreeQueries::NextElementSibling(element);
     }
 
-    KRYS_NODISCARD bool IsFirstOfType(const dom::Element &element, const dom::QualifiedName &type) noexcept
+    KRYS_NODISCARD bool IsFirstOfType(const Element &element, const QualifiedName &type) noexcept
     {
       for (auto *sibling = dom::TreeQueries::PreviousElementSibling(element); sibling;
            sibling = dom::TreeQueries::PreviousElementSibling(*sibling))
@@ -109,7 +109,7 @@ namespace krys::boo::css
       return true;
     }
 
-    KRYS_NODISCARD bool IsLastOfType(const dom::Element &element, const dom::QualifiedName &type) noexcept
+    KRYS_NODISCARD bool IsLastOfType(const Element &element, const QualifiedName &type) noexcept
     {
       for (auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
            sibling = dom::TreeQueries::NextElementSibling(*sibling))
@@ -122,7 +122,7 @@ namespace krys::boo::css
       return true;
     }
 
-    KRYS_NODISCARD int32 CountElementsBefore(const dom::Element &element) noexcept
+    KRYS_NODISCARD int32 CountElementsBefore(const Element &element) noexcept
     {
       int32 count = 0;
       for (auto *sibling = dom::TreeQueries::PreviousElementSibling(element); sibling;
@@ -139,8 +139,7 @@ namespace krys::boo::css
       return count;
     }
 
-    KRYS_NODISCARD int32 CountElementsOfTypeBefore(const dom::Element &element,
-                                                   const dom::QualifiedName &type) noexcept
+    KRYS_NODISCARD int32 CountElementsOfTypeBefore(const Element &element, const QualifiedName &type) noexcept
     {
       int32 count = 0;
       for (auto *sibling = dom::TreeQueries::PreviousElementSibling(element); sibling;
@@ -154,7 +153,7 @@ namespace krys::boo::css
       return count;
     }
 
-    KRYS_NODISCARD int32 CountElementsAfter(const dom::Element &element) noexcept
+    KRYS_NODISCARD int32 CountElementsAfter(const Element &element) noexcept
     {
       int32 count = 0;
       for (auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
@@ -165,8 +164,7 @@ namespace krys::boo::css
       return count;
     }
 
-    KRYS_NODISCARD int32 CountElementsOfTypeAfter(const dom::Element &element,
-                                                  const dom::QualifiedName &type) noexcept
+    KRYS_NODISCARD int32 CountElementsOfTypeAfter(const Element &element, const QualifiedName &type) noexcept
     {
       int32 count = 0;
       for (auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
@@ -194,7 +192,7 @@ namespace krys::boo::css
       }
 
       // Move to the shadow host if the parent is the shadow root and mark that we must match :host
-      if (auto *shadowRoot = DynamicDowncast<dom::ShadowRoot>(context.Element->ParentNode()))
+      if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(context.Element->ParentNode()))
       {
         updatedContext.Element = shadowRoot->Host();
         updatedContext.MustMatchHostPseudoClass = true;
@@ -213,10 +211,10 @@ namespace krys::boo::css
     /// (LocalContextForParent).
     KRYS_NODISCARD bool
       MatchesVirtualScopingRootAsParent(const SelectorChecker::CheckingContext &checkingContext,
-                                        const dom::Element &element, const Selector &selector) noexcept
+                                        const Element &element, const Selector &selector) noexcept
     {
       const auto *scope = checkingContext.Scope.get();
-      if (!scope || Is<dom::Element>(*scope) || element.ParentNode() != scope)
+      if (!scope || Is<Element>(*scope) || element.ParentNode() != scope)
       {
         return false;
       }
@@ -237,8 +235,7 @@ namespace krys::boo::css
       return false;
     }
 
-    KRYS_NODISCARD bool StartsWith(dom::DOMStringView value, dom::DOMStringView prefix,
-                                   bool caseSensitive) noexcept
+    KRYS_NODISCARD bool StartsWith(DOMStringView value, DOMStringView prefix, bool caseSensitive) noexcept
     {
       if (value.size() < prefix.size())
       {
@@ -248,8 +245,7 @@ namespace krys::boo::css
                            : text::IsASCIICaselessEqual(value.substr(0, prefix.size()), prefix);
     }
 
-    KRYS_NODISCARD bool EndsWith(dom::DOMStringView value, dom::DOMStringView suffix,
-                                 bool caseSensitive) noexcept
+    KRYS_NODISCARD bool EndsWith(DOMStringView value, DOMStringView suffix, bool caseSensitive) noexcept
     {
       if (value.size() < suffix.size())
       {
@@ -259,7 +255,7 @@ namespace krys::boo::css
                            : text::IsASCIICaselessEqual(value.substr(value.size() - suffix.size()), suffix);
     }
 
-    KRYS_NODISCARD size_t Find(dom::DOMStringView value, dom::DOMStringView search, size_t start,
+    KRYS_NODISCARD size_t Find(DOMStringView value, DOMStringView search, size_t start,
                                bool caseSensitive) noexcept
     {
       if (caseSensitive)
@@ -268,7 +264,7 @@ namespace krys::boo::css
       }
       if (search.size() > value.size())
       {
-        return dom::DOMStringView::npos;
+        return DOMStringView::npos;
       }
       for (size_t i = start; i + search.size() <= value.size(); ++i)
       {
@@ -277,11 +273,11 @@ namespace krys::boo::css
           return i;
         }
       }
-      return dom::DOMStringView::npos;
+      return DOMStringView::npos;
     }
 
-    KRYS_NODISCARD bool AttributeValueMatches(dom::DOMStringView value, SelectorMatch match,
-                                              dom::DOMStringView selectorValue, bool caseSensitive) noexcept
+    KRYS_NODISCARD bool AttributeValueMatches(DOMStringView value, SelectorMatch match,
+                                              DOMStringView selectorValue, bool caseSensitive) noexcept
     {
       switch (match)
       {
@@ -305,7 +301,7 @@ namespace krys::boo::css
           while (true)
           {
             size_t foundPos = Find(value, selectorValue, startSearchAt, caseSensitive);
-            if (foundPos == dom::DOMStringView::npos)
+            if (foundPos == DOMStringView::npos)
             {
               return false;
             }
@@ -326,7 +322,7 @@ namespace krys::boo::css
         case SelectorMatch::AttributeSubstring:
         {
           bool valueContainsSelectorValue =
-            Find(value, selectorValue, 0, caseSensitive) != dom::DOMStringView::npos;
+            Find(value, selectorValue, 0, caseSensitive) != DOMStringView::npos;
 
           if (!valueContainsSelectorValue || selectorValue.empty())
           {
@@ -376,7 +372,7 @@ namespace krys::boo::css
       return true;
     }
 
-    KRYS_NODISCARD bool NameMatchesFilter(const dom::QualifiedName &name, const CSSOMStringAtom &filterPrefix,
+    KRYS_NODISCARD bool NameMatchesFilter(const QualifiedName &name, const CSSOMStringAtom &filterPrefix,
                                           const CSSOMStringAtom &filterLocalName,
                                           const CSSOMStringAtom &filterNamespaceURI) noexcept
     {
@@ -387,9 +383,8 @@ namespace krys::boo::css
       return filterPrefix == dom::StarAtom() || filterNamespaceURI == name.NamespaceURI();
     }
 
-    KRYS_NODISCARD bool AnyAttributeMatches(const dom::Element &element, const Selector &selector,
-                                            const dom::QualifiedName &selectorAttr,
-                                            bool caseSensitive) noexcept
+    KRYS_NODISCARD bool AnyAttributeMatches(const Element &element, const Selector &selector,
+                                            const QualifiedName &selectorAttr, bool caseSensitive) noexcept
     {
       bool isHTML = IsHTMLElementInHTMLDocument(element);
       auto &localName = isHTML ? selectorAttr.LocalNameLower() : selectorAttr.LocalName();
@@ -483,7 +478,7 @@ namespace krys::boo::css
       return false;
     }
 
-    KRYS_NODISCARD bool TagMatches(const dom::Element &element, const Selector &simpleSelector) noexcept
+    KRYS_NODISCARD bool TagMatches(const Element &element, const Selector &simpleSelector) noexcept
     {
       auto &tagQName = simpleSelector.TagQualifiedName();
 
@@ -504,7 +499,7 @@ namespace krys::boo::css
     }
 
     /// @brief The tokens of the element's `part` attribute.
-    KRYS_NODISCARD List<CSSOMStringAtom> PartNames(const dom::Element &element) noexcept
+    KRYS_NODISCARD List<CSSOMStringAtom> PartNames(const Element &element) noexcept
     {
       List<CSSOMStringAtom> names;
       auto part = element.GetAttribute(u8"part");
@@ -512,7 +507,7 @@ namespace krys::boo::css
       {
         return names;
       }
-      dom::DOMStringView remaining = *part;
+      DOMStringView remaining = *part;
       while (!remaining.empty())
       {
         auto start = std::ranges::find_if_not(remaining, [](char8 c) { return text::IsASCIIWhitespace(c); });
@@ -520,20 +515,20 @@ namespace krys::boo::css
           std::ranges::find_if(start, remaining.end(), [](char8 c) { return text::IsASCIIWhitespace(c); });
         if (start != end)
         {
-          CSSOMStringAtom name(dom::DOMStringView(start, end));
+          CSSOMStringAtom name(DOMStringView(start, end));
           if (std::ranges::find(names, name) == names.end())
           {
             names.push_back(name);
           }
         }
-        remaining = dom::DOMStringView(end, remaining.end());
+        remaining = DOMStringView(end, remaining.end());
       }
       return names;
     }
   }
 
   static inline void AddStyleRelation(SelectorChecker::CheckingContext &checkingContext,
-                                      const dom::Element &element, style::Relation::Type type,
+                                      const Element &element, style::Relation::Type type,
                                       uint32 value = 1) noexcept
   {
     krys_debug_assert(value == 1 || type == style::Relation::NthChildIndex
@@ -556,12 +551,12 @@ namespace krys::boo::css
     checkingContext.StyleRelations.emplace_back(element, type, value);
   }
 
-  SelectorChecker::SelectorChecker(const dom::Document &document) noexcept
-      : _strictParsing(!document.InQuirksMode()), _documentIsHTML(Is<dom::HTMLDocument>(document))
+  SelectorChecker::SelectorChecker(const Document &document) noexcept
+      : _strictParsing(!document.InQuirksMode()), _documentIsHTML(Is<HTMLDocument>(document))
   {
   }
 
-  bool SelectorChecker::Match(const Selector &selector, const dom::Element &element,
+  bool SelectorChecker::Match(const Selector &selector, const Element &element,
                               CheckingContext &checkingContext) const noexcept
   {
     auto &requestedPseudoElement = checkingContext.RequestedPseudoElement();
@@ -598,7 +593,7 @@ namespace krys::boo::css
     return true;
   }
 
-  bool SelectorChecker::MatchHostPseudoClass(const Selector &selector, const dom::Element &element,
+  bool SelectorChecker::MatchHostPseudoClass(const Selector &selector, const Element &element,
                                              CheckingContext &checkingContext) const noexcept
   {
     if (!dom::TreeQueries::GetShadowRoot(element))
@@ -906,8 +901,7 @@ namespace krys::boo::css
     return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
   }
 
-  bool SelectorChecker::AttributeSelectorMatches(const dom::Element &element,
-                                                 const dom::QualifiedName &attributeName,
+  bool SelectorChecker::AttributeSelectorMatches(const Element &element, const QualifiedName &attributeName,
                                                  const CSSOMStringAtom &attributeValue,
                                                  const Selector &selector) noexcept
   {
@@ -922,7 +916,7 @@ namespace krys::boo::css
     }
     bool caseSensitive = !selector.IsAttributeValueMatchingCaseInsensitive()
                          && !(isHTML && !selector.IsAttributeValueMatchingCaseSensitive()
-                              && !dom::HTMLDocument::IsCaseSensitiveAttribute(selector.Attribute()));
+                              && !HTMLDocument::IsCaseSensitiveAttribute(selector.Attribute()));
     return AttributeValueMatches(attributeValue.View(), selector.Match(), selector.Value().View(),
                                  caseSensitive);
   }
@@ -930,7 +924,7 @@ namespace krys::boo::css
   bool SelectorChecker::CheckOne(CheckingContext &checkingContext, LocalContext &context,
                                  MatchType &matchType) const noexcept
   {
-    const dom::Element &element = *context.Element;
+    const boo::Element &element = *context.Element;
     const Selector &selector = *context.CurrentSelector;
 
     if (context.MustMatchHostPseudoClass)
@@ -976,10 +970,10 @@ namespace krys::boo::css
       }
 
       auto &attr = selector.Attribute();
-      bool caseSensitive = !selector.IsAttributeValueMatchingCaseInsensitive()
-                           && !(_documentIsHTML && Is<html::HTMLElement>(element)
-                                && !selector.IsAttributeValueMatchingCaseSensitive()
-                                && !dom::HTMLDocument::IsCaseSensitiveAttribute(attr));
+      bool caseSensitive =
+        !selector.IsAttributeValueMatchingCaseInsensitive()
+        && !(_documentIsHTML && Is<HTMLElement>(element) && !selector.IsAttributeValueMatchingCaseSensitive()
+             && !HTMLDocument::IsCaseSensitiveAttribute(attr));
 
       return AnyAttributeMatches(element, selector, attr, caseSensitive);
     }
@@ -1038,12 +1032,12 @@ namespace krys::boo::css
           bool result = true;
           for (auto *node = element.FirstChild(); node; node = node->NextSibling())
           {
-            if (Is<dom::Element>(*node))
+            if (Is<Element>(*node))
             {
               result = false;
               break;
             }
-            if (auto *textNode = DynamicDowncast<dom::Text>(*node))
+            if (auto *textNode = DynamicDowncast<Text>(*node))
             {
               if (!textNode->Data().empty())
               {
@@ -1060,7 +1054,7 @@ namespace krys::boo::css
         {
           // first-child matches the first child that is an element
           bool isFirstChild = IsFirstChildElement(element);
-          if (auto *parentElement = DynamicDowncast<dom::Element>(element.ParentNode()))
+          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
           {
             AddStyleRelation(checkingContext, *parentElement,
                              style::Relation::ChildrenAffectedByFirstChildRules);
@@ -1075,7 +1069,7 @@ namespace krys::boo::css
         case SelectorPseudoClass::FirstOfType:
         {
           // first-of-type matches the first element of its type
-          if (auto *parentElement = DynamicDowncast<dom::Element>(element.ParentNode()))
+          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
           {
             auto relation = context.IsSubjectOrAdjacentElement
                               ? style::Relation::ChildrenAffectedByForwardPositionalRules
@@ -1088,7 +1082,7 @@ namespace krys::boo::css
         {
           // last-child matches the last child that is an element
           bool isLastChild = IsLastChildElement(element);
-          if (auto *parentElement = DynamicDowncast<dom::Element>(element.ParentNode()))
+          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
           {
             if (!parentElement->IsFinishedParsingChildren())
             {
@@ -1107,7 +1101,7 @@ namespace krys::boo::css
         case SelectorPseudoClass::LastOfType:
         {
           // last-of-type matches the last element of its type
-          if (auto *parentElement = DynamicDowncast<dom::Element>(element.ParentNode()))
+          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
           {
             auto relation = context.IsSubjectOrAdjacentElement
                               ? style::Relation::ChildrenAffectedByBackwardPositionalRules
@@ -1124,7 +1118,7 @@ namespace krys::boo::css
         {
           bool firstChild = IsFirstChildElement(element);
           bool onlyChild = firstChild && IsLastChildElement(element);
-          if (auto *parentElement = DynamicDowncast<dom::Element>(element.ParentNode()))
+          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
           {
             AddStyleRelation(checkingContext, *parentElement,
                              style::Relation::ChildrenAffectedByFirstChildRules);
@@ -1148,7 +1142,7 @@ namespace krys::boo::css
         case SelectorPseudoClass::OnlyOfType:
         {
           // FIXME: This selector is very slow.
-          if (auto *parentElement = DynamicDowncast<dom::Element>(element.ParentNode()))
+          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
           {
             auto forwardRelation = context.IsSubjectOrAdjacentElement
                                      ? style::Relation::ChildrenAffectedByForwardPositionalRules
@@ -1223,7 +1217,7 @@ namespace krys::boo::css
         case SelectorPseudoClass::PlaceholderShown: return IsPlaceholderShown(element);
         case SelectorPseudoClass::NthChild:
         {
-          if (auto *parentElement = DynamicDowncast<dom::Element>(element.ParentNode()))
+          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
           {
             auto relation = context.IsSubjectOrAdjacentElement
                               ? style::Relation::ChildrenAffectedByForwardPositionalRules
@@ -1266,7 +1260,7 @@ namespace krys::boo::css
         }
         case SelectorPseudoClass::NthOfType:
         {
-          if (auto *parentElement = DynamicDowncast<dom::Element>(element.ParentNode()))
+          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
           {
             auto relation = context.IsSubjectOrAdjacentElement
                               ? style::Relation::ChildrenAffectedByForwardPositionalRules
@@ -1283,7 +1277,7 @@ namespace krys::boo::css
         }
         case SelectorPseudoClass::NthLastChild:
         {
-          if (auto *parentElement = DynamicDowncast<dom::Element>(element.ParentNode()))
+          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
           {
             if (const SelectorList *selectorList = selector.SubSelectors())
             {
@@ -1329,7 +1323,7 @@ namespace krys::boo::css
         }
         case SelectorPseudoClass::NthLastOfType:
         {
-          if (auto *parentElement = DynamicDowncast<dom::Element>(element.ParentNode()))
+          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
           {
             auto relation = context.IsSubjectOrAdjacentElement
                               ? style::Relation::ChildrenAffectedByBackwardPositionalRules
@@ -1433,9 +1427,9 @@ namespace krys::boo::css
 
           // A virtual scoping root (a document fragment or shadow root) matches no element; the child and
           // descendant combinators match `:scope` against it (MatchesVirtualScopingRootAsParent).
-          const dom::Node *contextualReferenceNode =
-            !checkingContext.Scope ? dom::TreeQueries::DocumentElement(element.NodeDocument())
-                                   : static_cast<const dom::Node *>(checkingContext.Scope.get());
+          const Node *contextualReferenceNode = !checkingContext.Scope
+                                                  ? dom::TreeQueries::DocumentElement(element.NodeDocument())
+                                                  : static_cast<const Node *>(checkingContext.Scope.get());
           auto match = &element == contextualReferenceNode;
           if (!match)
           {
@@ -1470,7 +1464,7 @@ namespace krys::boo::css
         case SelectorPseudoClass::Modal:
         {
           // FIXME: Fullscreen elements, once there are any.
-          auto *dialog = DynamicDowncast<html::HTMLDialogElement>(element);
+          auto *dialog = DynamicDowncast<HTMLDialogElement>(element);
           return dialog && dialog->IsModal();
         }
 
@@ -1479,7 +1473,7 @@ namespace krys::boo::css
         // https://drafts.csswg.org/selectors-5/#headings
         case SelectorPseudoClass::Heading:
         {
-          auto *heading = DynamicDowncast<html::HTMLHeadingElement>(element);
+          auto *heading = DynamicDowncast<HTMLHeadingElement>(element);
           if (!heading)
           {
             return false;
@@ -1495,16 +1489,16 @@ namespace krys::boo::css
         // https://html.spec.whatwg.org/#selector-open
         case SelectorPseudoClass::Open:
         {
-          if (Is<html::HTMLDetailsElement>(element) || Is<html::HTMLDialogElement>(element))
+          if (Is<HTMLDetailsElement>(element) || Is<HTMLDialogElement>(element))
           {
             return element.HasAttribute(u8"open");
           }
-          if (auto *select = DynamicDowncast<html::HTMLSelectElement>(element))
+          if (auto *select = DynamicDowncast<HTMLSelectElement>(element))
           {
             auto *menuList = DynamicDowncast<RenderMenuList>(select->Renderer());
             return (menuList && menuList->PopupIsVisible()) || select->IsPickerOpen();
           }
-          if (auto *input = DynamicDowncast<html::HTMLInputElement>(element))
+          if (auto *input = DynamicDowncast<HTMLInputElement>(element))
           {
             return input->IsPresentingAttachedView();
           }
@@ -1513,11 +1507,11 @@ namespace krys::boo::css
 
         case SelectorPseudoClass::InternalSelectBaseContents:
         {
-          auto *select = DynamicDowncast<html::HTMLSelectElement>(element);
+          auto *select = DynamicDowncast<HTMLSelectElement>(element);
           return select && select->ContentsUseBaseAppearance();
         }
 
-        case SelectorPseudoClass::InternalHtmlDocument: return Is<dom::HTMLDocument>(element.NodeDocument());
+        case SelectorPseudoClass::InternalHtmlDocument: return Is<HTMLDocument>(element.NodeDocument());
       }
       return false;
     }
@@ -1553,7 +1547,7 @@ namespace krys::boo::css
             return false;
           }
           // ::slotted matches after flattening so it can't match an active <slot>.
-          if (Is<html::HTMLSlotElement>(*context.Element)
+          if (Is<HTMLSlotElement>(*context.Element)
               && dom::TreeQueries::ContainingShadowRoot(*context.Element))
           {
             return false;
@@ -1648,7 +1642,7 @@ namespace krys::boo::css
   }
 
   bool SelectorChecker::MatchSelectorList(CheckingContext &checkingContext, const LocalContext &context,
-                                          const dom::Element &element,
+                                          const Element &element,
                                           const SelectorList &selectorList) const noexcept
   {
     bool hasMatchedAnything = false;
@@ -1673,7 +1667,7 @@ namespace krys::boo::css
     return hasMatchedAnything;
   }
 
-  bool SelectorChecker::MatchHasPseudoClass(CheckingContext &checkingContext, const dom::Element &element,
+  bool SelectorChecker::MatchHasPseudoClass(CheckingContext &checkingContext, const Element &element,
                                             const Selector &hasSelector) const noexcept
   {
     // :has() should never be nested with another :has()
@@ -1710,7 +1704,7 @@ namespace krys::boo::css
                     ? &checkingContext.SelectorMatchingState->HasPseudoClassMatchCache
                     : nullptr;
 
-    auto cachedMatch = [&](const dom::Element &cachedElement)
+    auto cachedMatch = [&](const Element &cachedElement)
     {
       auto it = cache->find(style::MakeHasPseudoClassCacheKey(cachedElement, hasSelector));
       return it == cache->end() ? style::HasPseudoClassMatch::None : it->second;
@@ -1781,7 +1775,7 @@ namespace krys::boo::css
 
     bool matchedInsideScope = false;
 
-    auto checkRelative = [&](const dom::Element &elementToCheck)
+    auto checkRelative = [&](const Element &elementToCheck)
     {
       LocalContext hasContext(hasSelector, elementToCheck, null);
       hasContext.InFunctionalPseudoClass = true;
@@ -1799,11 +1793,11 @@ namespace krys::boo::css
       return result;
     };
 
-    auto checkDescendants = [&](const dom::Element &descendantRoot)
+    auto checkDescendants = [&](const Element &descendantRoot)
     {
       for (auto *node = dom::TreeQueries::Next(descendantRoot, &descendantRoot); node;)
       {
-        auto *descendant = DynamicDowncast<dom::Element>(*node);
+        auto *descendant = DynamicDowncast<Element>(*node);
         if (!descendant)
         {
           node = dom::TreeQueries::Next(*node, &descendantRoot);

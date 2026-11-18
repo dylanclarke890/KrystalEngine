@@ -78,34 +78,34 @@ namespace krys::boo::dom
         //     elements aren't supported, so is doesn't count.)
         if (NameValidation::IsValidCustomElementName(name.LocalName().View()))
         {
-          auto element = CreateRef<html::HTMLMaybeFormAssociatedCustomElement>(document, name.LocalName());
+          auto element = CreateRef<HTMLMaybeFormAssociatedCustomElement>(document, name.LocalName());
           element->SetIsCustomElementUpgradeCandidate();
           result = element;
         }
         else
         {
-          result = CreateRefPtr<html::HTMLUnknownElement>(document);
+          result = CreateRefPtr<HTMLUnknownElement>(document);
         }
       }
     }
     else if (name.NamespaceURI() == infra::namespaces::SVG)
     {
       // SVG's tag names are case-sensitive.
-      result = svg::SVGElementFactory::TryCreate(document, name.TagName());
+      result = SVGElementFactory::TryCreate(document, name.TagName());
 
       if (result == nullptr)
       {
-        result = CreateRefPtr<svg::SVGUnknownElement>(document);
+        result = CreateRefPtr<SVGUnknownElement>(document);
       }
     }
     else if (name.NamespaceURI() == infra::namespaces::MathML)
     {
       // MathML's tag names are case-sensitive.
-      result = mathml::MathMLElementFactory::TryCreate(document, name.TagName());
+      result = MathMLElementFactory::TryCreate(document, name.TagName());
 
       if (result == nullptr)
       {
-        result = CreateRefPtr<mathml::MathMLUnknownElement>(document);
+        result = CreateRefPtr<MathMLUnknownElement>(document);
       }
     }
 

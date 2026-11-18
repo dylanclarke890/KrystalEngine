@@ -37,8 +37,8 @@ namespace krys::boo::style
     builder.Append(u8"currentcolor");
   }
 
-  css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &,
-                                                   const CurrentColor &) noexcept
+  CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &,
+                                              const CurrentColor &) noexcept
   {
     return u8"currentcolor";
   }

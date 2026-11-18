@@ -241,13 +241,13 @@ namespace krys::boo::style::interpolation
     }
 
     KRYS_NODISCARD Pair<const CustomProperty *, const CustomProperty *>
-      CustomPropertyValuesForInterpolation(const css::CSSOMStringAtom &customProperty,
+      CustomPropertyValuesForInterpolation(const CSSOMStringAtom &customProperty,
                                            const RenderStyle &fromStyle, const RenderStyle &toStyle) noexcept
     {
       return {fromStyle.CustomPropertyValue(customProperty), toStyle.CustomPropertyValue(customProperty)};
     }
 
-    void InterpolateCustomProperty(const css::CSSOMStringAtom &customProperty, RenderStyle &destination,
+    void InterpolateCustomProperty(const CSSOMStringAtom &customProperty, RenderStyle &destination,
                                    const RenderStyle &from, const RenderStyle &to, double progress,
                                    CompositeOperation compositeOperation,
                                    IterationCompositeOperation iterationCompositeOperation,
@@ -297,7 +297,7 @@ namespace krys::boo::style::interpolation
                                             [](const ImageWrapper &) { return false; }, [](const Color &)
                                             { return true; }, [](const URL &) { return false; },
                                             [](const css::CustomIdentifier &) { return false; },
-                                            [](const css::CSSOMString &) { return false; },
+                                            [](const CSSOMString &) { return false; },
                                             [](const TransformFunction &) { return true; }),
                         syntaxValue);
     }
@@ -311,7 +311,7 @@ namespace krys::boo::style::interpolation
       krys::CreateVisitor(
         [](css::PropertyId propertyId)
         { return !css::Property::AnimationUsesNonAdditiveOrCumulativeInterpolation(propertyId); },
-        [](const css::CSSOMStringAtom &) { return true; }),
+        [](const CSSOMStringAtom &) { return true; }),
       property);
   }
 
@@ -320,7 +320,7 @@ namespace krys::boo::style::interpolation
     return std::visit(
       krys::CreateVisitor([&](css::PropertyId propertyId)
                           { return css::Property::AnimationIsAccelerated(propertyId, settings); },
-                          [](const css::CSSOMStringAtom &) { return false; }),
+                          [](const CSSOMStringAtom &) { return false; }),
       property);
   }
 
@@ -332,7 +332,7 @@ namespace krys::boo::style::interpolation
                           return propertyId == css::PropertyId::Custom
                                  || WrapperMap::Singleton().GetWrapper(propertyId) != nullptr;
                         },
-                        [](const css::CSSOMStringAtom &)
+                        [](const CSSOMStringAtom &)
                         {
                           // FIXME: This should only be true for properties that are registered custom
                           // properties.
@@ -342,7 +342,7 @@ namespace krys::boo::style::interpolation
   }
 
   bool Equals(const AnimatableCSSProperty &property, const RenderStyle &a, const RenderStyle &b,
-              const dom::Document &) noexcept
+              const boo::Document &) noexcept
   {
     return std::visit(krys::CreateVisitor(
                         [&](css::PropertyId propertyId)
@@ -353,7 +353,7 @@ namespace krys::boo::style::interpolation
                           }
                           return true;
                         },
-                        [&](const css::CSSOMStringAtom &customProperty)
+                        [&](const CSSOMStringAtom &customProperty)
                         {
                           auto [aCustomPropertyValue, bCustomPropertyValue] =
                             CustomPropertyValuesForInterpolation(customProperty, a, b);
@@ -367,7 +367,7 @@ namespace krys::boo::style::interpolation
   }
 
   bool CanInterpolate(const AnimatableCSSProperty &property, const RenderStyle &a, const RenderStyle &b,
-                      const dom::Document &) noexcept
+                      const boo::Document &) noexcept
   {
     return std::visit(
       krys::CreateVisitor(
@@ -379,7 +379,7 @@ namespace krys::boo::style::interpolation
           }
           return true;
         },
-        [&](const css::CSSOMStringAtom &customProperty)
+        [&](const CSSOMStringAtom &customProperty)
         {
           auto [aCustomPropertyValue, bCustomPropertyValue] =
             CustomPropertyValuesForInterpolation(customProperty, a, b);
@@ -437,7 +437,7 @@ namespace krys::boo::style::interpolation
           InterpolateStandardProperty(propertyId, destination, from, to, progress, compositeOperation,
                                       iterationCompositeOperation, currentIteration, client);
         },
-        [&](const css::CSSOMStringAtom &customProperty)
+        [&](const CSSOMStringAtom &customProperty)
         {
           InterpolateCustomProperty(customProperty, destination, from, to, progress, compositeOperation,
                                     iterationCompositeOperation, currentIteration, client);
@@ -467,7 +467,7 @@ namespace krys::boo::style::interpolation
           }
           return false;
         },
-        [&](const css::CSSOMStringAtom &customProperty)
+        [&](const CSSOMStringAtom &customProperty)
         {
           auto [from, to] = CustomPropertyValuesForInterpolation(customProperty, a, b);
           if (!from || !to)

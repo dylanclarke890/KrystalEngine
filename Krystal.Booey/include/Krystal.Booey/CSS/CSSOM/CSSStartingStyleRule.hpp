@@ -32,30 +32,33 @@
 namespace krys::boo::css
 {
   class StartingStyleRule;
+}
 
+namespace krys::boo
+{
   /// @brief An `@starting-style` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-transitions-2/#the-cssstartingstylerule-interface
   class CSSStartingStyleRule final : public CSSGroupingRule
   {
   private:
-    CSSStartingStyleRule(StartingStyleRule &rule, CSSStyleSheet *parent) noexcept;
+    CSSStartingStyleRule(css::StartingStyleRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
-    KRYS_NODISCARD static Ref<CSSStartingStyleRule> Create(StartingStyleRule &rule,
+    KRYS_NODISCARD static Ref<CSSStartingStyleRule> Create(css::StartingStyleRule &rule,
                                                            CSSStyleSheet *parent) noexcept;
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
   private:
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::StartingStyle;
+      return css::RuleType::StartingStyle;
     }
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSStartingStyleRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSStartingStyleRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::StartingStyle;
   }

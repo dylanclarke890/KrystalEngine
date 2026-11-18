@@ -34,19 +34,19 @@ namespace krys::boo
   class SimplifyMarkupCommand final : public CompositeEditCommand
   {
   private:
-    RefPtr<dom::Node> _firstNode;
-    RefPtr<dom::Node> _nodeAfterLast;
+    RefPtr<boo::Node> _firstNode;
+    RefPtr<boo::Node> _nodeAfterLast;
 
   public:
-    SimplifyMarkupCommand(dom::Document &document, dom::Node *firstNode, dom::Node *nodeAfterLast) noexcept;
+    SimplifyMarkupCommand(Document &document, boo::Node *firstNode, boo::Node *nodeAfterLast) noexcept;
 
-    KRYS_NODISCARD static Ref<SimplifyMarkupCommand> Create(dom::Document &document, dom::Node *firstNode,
-                                                            dom::Node *nodeAfterLast) noexcept;
+    KRYS_NODISCARD static Ref<SimplifyMarkupCommand> Create(Document &document, boo::Node *firstNode,
+                                                            boo::Node *nodeAfterLast) noexcept;
 
   private:
     void DoApply() noexcept override;
 
-    int32 PruneSubsequentAncestorsToRemove(List<Ref<dom::Node>> &nodesToRemove,
+    int32 PruneSubsequentAncestorsToRemove(List<Ref<boo::Node>> &nodesToRemove,
                                            size_t startNodeIndex) noexcept;
   };
 }

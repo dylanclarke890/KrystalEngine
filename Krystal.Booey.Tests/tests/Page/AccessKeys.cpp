@@ -13,7 +13,7 @@ namespace krys::boo::tests
     using Strings = List<std::string>;
     using Modifier = PlatformEvent::Modifier;
 
-    struct Recorder : dom::EventListenerCallback
+    struct Recorder : EventListenerCallback
     {
       Strings &Records;
 
@@ -21,10 +21,10 @@ namespace krys::boo::tests
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
-        auto *element = DynamicDowncast<dom::Element>(DynamicDowncast<dom::Node>(event.Target().get()));
-        auto id = element ? element->GetAttribute(u8"id").value_or(dom::DOMString {}) : dom::DOMString {};
+        auto *element = DynamicDowncast<Element>(DynamicDowncast<Node>(event.Target().get()));
+        auto id = element ? element->GetAttribute(u8"id").value_or(DOMString {}) : DOMString {};
         auto type = event.Type().View();
         Records.push_back(std::string(type.begin(), type.end()) + ":" + std::string(id.begin(), id.end()));
       }
@@ -33,18 +33,18 @@ namespace krys::boo::tests
     struct AccessKeyFixture : EditorFixture
     {
       Strings Records;
-      Ref<dom::EventListenerCallback> Listener {CreateRef<Recorder>(Records)};
+      Ref<EventListenerCallback> Listener {CreateRef<Recorder>(Records)};
 
       explicit AccessKeyFixture(utf8_stringview markup) noexcept : EditorFixture(markup)
       {
         Listen(*Document);
       }
 
-      void Listen(dom::EventTarget &target) noexcept
+      void Listen(EventTarget &target) noexcept
       {
         for (auto type : {u8"keydown", u8"keypress", u8"focus", u8"click"})
         {
-          target.AddEventListener(dom::DOMStringAtom(type), Ref {Listener}, true);
+          target.AddEventListener(DOMStringAtom(type), Ref {Listener}, true);
         }
       }
 
@@ -89,9 +89,9 @@ namespace krys::boo::tests
 
     SECTION("cancelling the keydown doesn't stop it")
     {
-      struct Canceller : dom::EventListenerCallback
+      struct Canceller : EventListenerCallback
       {
-        void HandleEvent(dom::Event &event) noexcept override
+        void HandleEvent(Event &event) noexcept override
         {
           event.PreventDefault();
         }
@@ -137,9 +137,9 @@ namespace krys::boo::tests
 
     SECTION("accessKeyLabel names the key and its modifier")
     {
-      CHECK(Downcast<html::HTMLElement>(fixture.ById(u8"plain")).AccessKeyLabel() == u8"Alt+b");
-      CHECK(Downcast<html::HTMLElement>(fixture.ById(u8"tokens")).AccessKeyLabel() == u8"Alt+x");
-      CHECK(Downcast<html::HTMLElement>(fixture.ById(u8"long")).AccessKeyLabel().empty());
+      CHECK(Downcast<HTMLElement>(fixture.ById(u8"plain")).AccessKeyLabel() == u8"Alt+b");
+      CHECK(Downcast<HTMLElement>(fixture.ById(u8"tokens")).AccessKeyLabel() == u8"Alt+x");
+      CHECK(Downcast<HTMLElement>(fixture.ById(u8"long")).AccessKeyLabel().empty());
       CHECK(fixture.Document->Body()->AccessKeyLabel().empty());
     }
   }
@@ -177,13 +177,13 @@ namespace krys::boo::tests
     CHECK(fixture.Press(u8"k") == Strings {"focus:math"});
 
     // A legend runs its delegatee's: not a label's, and the first of the rest.
-    CHECK(Downcast<html::HTMLLegendElement>(fixture.ById(u8"legend")).AccessKeyDelegatee().get()
+    CHECK(Downcast<HTMLLegendElement>(fixture.ById(u8"legend")).AccessKeyDelegatee().get()
           == &fixture.ById(u8"delegate"));
     CHECK(fixture.Press(u8"l") == Strings {"focus:delegate", "click:delegate"});
     // Without one, it's clicked like any other element.
-    CHECK_FALSE(Downcast<html::HTMLLegendElement>(fixture.ById(u8"alone")).AccessKeyDelegatee());
+    CHECK_FALSE(Downcast<HTMLLegendElement>(fixture.ById(u8"alone")).AccessKeyDelegatee());
     CHECK(fixture.Press(u8"n") == Strings {"click:alone"});
-    CHECK_FALSE(Downcast<html::HTMLLegendElement>(fixture.ById(u8"orphan")).AccessKeyDelegatee());
+    CHECK_FALSE(Downcast<HTMLLegendElement>(fixture.ById(u8"orphan")).AccessKeyDelegatee());
     CHECK(fixture.Press(u8"o") == Strings {"click:orphan"});
   }
 }

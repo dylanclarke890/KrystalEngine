@@ -175,7 +175,7 @@ namespace krys::boo
     KRYS_NODISCARD static LayoutSize CalculateFillTileSize(const RenderBoxModelObject &, const TLayer &,
                                                            const LayoutSize &positioningAreaSize) noexcept;
 
-    KRYS_NODISCARD const dom::Document &Document() const noexcept;
+    KRYS_NODISCARD const boo::Document &Document() const noexcept;
 
     KRYS_NODISCARD const RenderView &View() const noexcept;
   };

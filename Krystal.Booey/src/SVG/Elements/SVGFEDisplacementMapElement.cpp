@@ -25,9 +25,9 @@
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include <cmath>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFEDisplacementMapElement::SVGFEDisplacementMapElement(dom::Document &document) noexcept
+  SVGFEDisplacementMapElement::SVGFEDisplacementMapElement(Document &document) noexcept
       : SVGFilterPrimitiveStandardAttributes(document, CreateUnique<PropertyRegistry>(*this),
                                              SVGElementInterface::FEDisplacementMap),
         _in1(SVGAnimatedString::Create(this)), _in2(SVGAnimatedString::Create(this)),
@@ -51,11 +51,10 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGFEDisplacementMapElement::AttributeChanged(const dom::QualifiedName &name,
-                                                     Maybe<dom::DOMStringView> oldValue,
-                                                     Maybe<dom::DOMStringView> value) noexcept
+  void SVGFEDisplacementMapElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                                     Maybe<DOMStringView> value) noexcept
   {
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::XChannelSelectorAttr())
     {
@@ -75,22 +74,22 @@ namespace krys::boo::svg
     }
     else if (name == SVGNames::InAttr())
     {
-      _in1->SetBaseValInternal(dom::DOMString(string));
+      _in1->SetBaseValInternal(DOMString(string));
     }
     else if (name == SVGNames::In2Attr())
     {
-      _in2->SetBaseValInternal(dom::DOMString(string));
+      _in2->SetBaseValInternal(DOMString(string));
     }
     else if (name == SVGNames::ScaleAttr())
     {
-      _scale->SetBaseValInternal(ToFloatOrZero(string));
+      _scale->SetBaseValInternal(svg::ToFloatOrZero(string));
     }
 
     SVGFilterPrimitiveStandardAttributes::AttributeChanged(name, oldValue, value);
   }
 
   bool SVGFEDisplacementMapElement::SetFilterEffectAttribute(FilterEffect &filterEffect,
-                                                             const dom::QualifiedName &attributeName) noexcept
+                                                             const QualifiedName &attributeName) noexcept
   {
     auto &effect = Downcast<FEDisplacementMap>(filterEffect);
     if (attributeName == SVGNames::XChannelSelectorAttr())
@@ -110,7 +109,7 @@ namespace krys::boo::svg
     return false;
   }
 
-  void SVGFEDisplacementMapElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGFEDisplacementMapElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (attributeName == SVGNames::InAttr() || attributeName == SVGNames::In2Attr())
     {

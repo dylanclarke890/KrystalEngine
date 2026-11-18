@@ -141,14 +141,14 @@ namespace krys::boo::style
 
 #pragma pack(pop)
 
-  using PseudoClassInvalidationKey = std::tuple<uint32, uint8, css::CSSOMStringAtom>;
+  using PseudoClassInvalidationKey = std::tuple<uint32, uint8, CSSOMStringAtom>;
 
   struct PseudoClassInvalidationKeyHash
   {
     KRYS_NODISCARD size_t operator()(const PseudoClassInvalidationKey &key) const noexcept
     {
       return Hash::Combine(std::get<0>(key), std::get<1>(key))
-             ^ std::hash<css::CSSOMStringAtom> {}(std::get<2>(key));
+             ^ std::hash<CSSOMStringAtom> {}(std::get<2>(key));
     }
   };
 
@@ -184,23 +184,23 @@ namespace krys::boo::style
     };
 
     template <typename T>
-    using AtomMap = HashMap<css::CSSOMStringAtom, UniquePtr<T>>;
+    using AtomMap = HashMap<CSSOMStringAtom, UniquePtr<T>>;
     template <typename T>
     using PseudoClassMap = HashMap<PseudoClassInvalidationKey, UniquePtr<T>, PseudoClassInvalidationKeyHash>;
 
-    HashSet<css::CSSOMStringAtom> IdsInRules;
-    HashSet<css::CSSOMStringAtom> IdsMatchingAncestorsInRules;
-    HashSet<css::CSSOMStringAtom> AttributeLowercaseLocalNamesInRules;
-    HashSet<css::CSSOMStringAtom> AttributeLocalNamesInRules;
-    HashSet<css::CSSOMStringAtom> ContentAttributeNamesInRules;
+    HashSet<CSSOMStringAtom> IdsInRules;
+    HashSet<CSSOMStringAtom> IdsMatchingAncestorsInRules;
+    HashSet<CSSOMStringAtom> AttributeLowercaseLocalNamesInRules;
+    HashSet<CSSOMStringAtom> AttributeLocalNamesInRules;
+    HashSet<CSSOMStringAtom> ContentAttributeNamesInRules;
     AtomMap<RuleFeatureVector> IdRules;
     AtomMap<RuleFeatureVector> ClassRules;
     AtomMap<List<RuleFeatureWithInvalidationSelector>> AttributeRules;
     PseudoClassMap<RuleFeatureVector> PseudoClassRules;
     PseudoClassMap<List<RuleFeatureWithInvalidationSelector>> HasPseudoClassRules;
     List<RuleAndSelector> ScopeBreakingHasPseudoClassRules;
-    HashSet<css::CSSOMStringAtom> ClassesAffectingHost;
-    HashSet<css::CSSOMStringAtom> AttributesAffectingHost;
+    HashSet<CSSOMStringAtom> ClassesAffectingHost;
+    HashSet<CSSOMStringAtom> AttributesAffectingHost;
     HashSet<css::SelectorPseudoClass> PseudoClassesAffectingHost;
     HashSet<css::SelectorPseudoClass> PseudoClasses;
     Array<bool, MatchElementCount> UsedMatchElements {};
@@ -232,7 +232,7 @@ namespace krys::boo::style
     void CollectFeatures(CollectionContext &collectionContext, const RuleData &ruleData,
                          const List<Ref<const css::ScopeRule>> &scopeRules = {}) noexcept;
 
-    void RegisterContentAttribute(const css::CSSOMStringAtom &attributeName) noexcept;
+    void RegisterContentAttribute(const CSSOMStringAtom &attributeName) noexcept;
 
     KRYS_NODISCARD bool UsesHasPseudoClass() const noexcept;
 
@@ -272,12 +272,12 @@ namespace krys::boo::style
 
   KRYS_NODISCARD PseudoClassInvalidationKey
     MakePseudoClassInvalidationKey(css::SelectorPseudoClass pseudoClass, InvalidationKeyType keyType,
-                                   const css::CSSOMStringAtom &keyString) noexcept;
+                                   const CSSOMStringAtom &keyString) noexcept;
 
   KRYS_NODISCARD PseudoClassInvalidationKey MakePseudoClassInvalidationKey(
     css::SelectorPseudoClass pseudoClass, InvalidationKeyType keyType) noexcept;
 
-  KRYS_NODISCARD bool UnlikelyToHaveSelectorForAttribute(const css::CSSOMStringAtom &name) noexcept;
+  KRYS_NODISCARD bool UnlikelyToHaveSelectorForAttribute(const CSSOMStringAtom &name) noexcept;
 
   KRYS_NODISCARD inline bool IsUniversalInvalidation(const PseudoClassInvalidationKey &key) noexcept
   {

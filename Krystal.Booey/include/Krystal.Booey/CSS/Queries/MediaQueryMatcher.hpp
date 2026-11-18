@@ -32,18 +32,13 @@
 
 namespace krys::boo
 {
-  class RenderStyle;
-}
-
-namespace krys::boo::dom
-{
   class Document;
+  class MediaQueryList;
+  class RenderStyle;
 }
 
 namespace krys::boo::css
 {
-  class MediaQueryList;
-
   /// @brief Evaluates a document's `MediaQueryList`s whenever it's needed and dispatches `change` events on
   /// the ones whose query has changed. `MediaQueryList`s are evaluated in the order in which they were added.
   class MediaQueryMatcher final : public RefCounted<MediaQueryMatcher>
@@ -58,7 +53,7 @@ namespace krys::boo::css
     };
 
   private:
-    WeakPtr<dom::Document> _document;
+    WeakPtr<Document> _document;
     List<WeakPtr<MediaQueryList>> _mediaQueryLists;
 
     // This value is incremented at style selector changes.
@@ -66,12 +61,12 @@ namespace krys::boo::css
     // that a media query result change is notified exactly once.
     uint32 _evaluationRound {1};
 
-    explicit MediaQueryMatcher(dom::Document &document) noexcept;
+    explicit MediaQueryMatcher(Document &document) noexcept;
 
   public:
     ~MediaQueryMatcher() noexcept;
 
-    KRYS_NODISCARD static Ref<MediaQueryMatcher> Create(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<MediaQueryMatcher> Create(Document &document) noexcept;
 
     void DocumentDestroyed() noexcept;
 

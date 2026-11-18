@@ -29,14 +29,10 @@
 #include "Krystal.Booey/Rendering/Replaced/RenderReplaced.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLAreaElement;
   class HTMLMapElement;
-}
-
-namespace krys::boo
-{
   enum class ImageDrawResult : uint8;
   class StyleImage;
 
@@ -65,10 +61,10 @@ namespace krys::boo
     float _imageDevicePixelRatio {1};
 
   public:
-    RenderImage(Type type, dom::Element &element, RenderStyle &&style, StyleImage *styleImage = nullptr,
+    RenderImage(Type type, Element &element, RenderStyle &&style, StyleImage *styleImage = nullptr,
                 float imageDevicePixelRatio = 1.0f) noexcept;
 
-    RenderImage(Type type, dom::Document &document, RenderStyle &&style,
+    RenderImage(Type type, Document &document, RenderStyle &&style,
                 StyleImage *styleImage = nullptr) noexcept;
 
     ~RenderImage() noexcept override;
@@ -129,10 +125,10 @@ namespace krys::boo
     KRYS_NODISCARD virtual bool ShouldDisplayBrokenImageIcon() const noexcept;
 
     /// @brief Repaints the focus ring of @p element, an area of the image's map, as it gains or loses focus.
-    void AreaElementFocusChanged(html::HTMLAreaElement &element) noexcept;
+    void AreaElementFocusChanged(HTMLAreaElement &element) noexcept;
 
     /// @brief The image map the image uses, if any.
-    KRYS_NODISCARD html::HTMLMapElement *ImageMap() const noexcept;
+    KRYS_NODISCARD HTMLMapElement *ImageMap() const noexcept;
 
     KRYS_NODISCARD bool ShouldRespectZeroIntrinsicWidth() const noexcept override;
 

@@ -141,9 +141,9 @@ namespace krys::boo
 
         auto isDecoratingInlineBox = [&]
         {
-          auto *element = DynamicDowncast<html::HTMLElement>(ancestor->GetElement());
+          auto *element = DynamicDowncast<HTMLElement>(ancestor->GetElement());
           if (element
-              && (Is<html::HTMLAnchorElement>(*element)
+              && (Is<HTMLAnchorElement>(*element)
                   || element->TagQualifiedName().TagName() == html::TagName::font))
           {
             // <font> and <a> are always considered decorating boxes.

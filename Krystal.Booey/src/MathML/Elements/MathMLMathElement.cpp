@@ -28,7 +28,7 @@
 #include "Krystal.Booey/MathML/Elements/MathMLMathElement.hpp"
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLMath.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   RenderPtr<RenderElement> MathMLMathElement::CreateElementRenderer(RenderStyle &&style) noexcept
   {

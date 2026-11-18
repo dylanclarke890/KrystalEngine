@@ -29,7 +29,7 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   /// @brief The operator dictionary: the default form, spacing and properties of each operator.
   /// @see https://w3c.github.io/mathml-core/#operator-dictionary
@@ -60,7 +60,7 @@ namespace krys::boo::mathml
 
     struct Property
     {
-      mathml::MathMLOperatorDictionary::Form Form {mathml::MathMLOperatorDictionary::Form::Infix};
+      MathMLOperatorDictionary::Form Form {MathMLOperatorDictionary::Form::Infix};
       // Default leading and trailing spaces are "thickmathspace".
       uint16 LeadingSpaceInMathUnit {5};
       uint16 TrailingSpaceInMathUnit {5};

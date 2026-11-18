@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmltemplateelement
   class HTMLTemplateElement : public HTMLElement
@@ -11,48 +11,48 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTemplateElement);
 
   private:
-    Ref<dom::DocumentFragment> _content;
+    Ref<DocumentFragment> _content;
 
     // The content patching state, while the parser has the template open (processing instruction markers).
-    RefPtr<dom::ContainerNode> _insertionTarget;
-    RefPtr<dom::Node> _insertionStartMarker;
-    RefPtr<dom::Node> _insertionEndMarker;
+    RefPtr<ContainerNode> _insertionTarget;
+    RefPtr<Node> _insertionStartMarker;
+    RefPtr<Node> _insertionEndMarker;
 
   public:
-    HTMLTemplateElement(dom::Document &document) noexcept;
+    HTMLTemplateElement(Document &document) noexcept;
 
 #pragma region HTMLTemplateElement - https://html.spec.whatwg.org/#htmltemplateelement
 
     /// @see https://html.spec.whatwg.org/#dom-template-content
-    RefPtr<dom::DocumentFragment> Content() const noexcept;
+    RefPtr<DocumentFragment> Content() const noexcept;
 
     /// @brief The template contents: a document fragment, or the shadow root of the host a declarative shadow
     /// root was attached to (the template element is then never inserted).
     /// @see https://html.spec.whatwg.org/#template-contents
-    KRYS_NODISCARD dom::DocumentFragment &TemplateContents() const noexcept
+    KRYS_NODISCARD DocumentFragment &TemplateContents() const noexcept
     {
       return *_content;
     }
 
     /// @brief Sets the template contents to the declarative shadow root @p shadow.
-    void SetTemplateContents(dom::ShadowRoot &shadow) noexcept;
+    void SetTemplateContents(boo::ShadowRoot &shadow) noexcept;
 
     /// @brief Where the parser puts this template's children instead of its template contents, when it
     /// patches content in: the parent of the markers its for attribute names.
     /// @see https://html.spec.whatwg.org/#insertion-target
-    KRYS_NODISCARD dom::ContainerNode *InsertionTarget() const noexcept
+    KRYS_NODISCARD ContainerNode *InsertionTarget() const noexcept
     {
       return _insertionTarget.get();
     }
 
     /// @see https://html.spec.whatwg.org/#insertion-start-marker
-    KRYS_NODISCARD dom::Node *InsertionStartMarker() const noexcept
+    KRYS_NODISCARD Node *InsertionStartMarker() const noexcept
     {
       return _insertionStartMarker.get();
     }
 
     /// @see https://html.spec.whatwg.org/#insertion-end-marker
-    KRYS_NODISCARD dom::Node *InsertionEndMarker() const noexcept
+    KRYS_NODISCARD Node *InsertionEndMarker() const noexcept
     {
       return _insertionEndMarker.get();
     }
@@ -63,19 +63,19 @@ namespace krys::boo::html
     /// @brief Finds the markers named by the for attribute in @p scope, and makes their parent the insertion
     /// target, removing what's between them; false if there aren't any.
     /// @see https://html.spec.whatwg.org/#prepare-content-patching
-    KRYS_NODISCARD bool PrepareContentPatching(dom::ContainerNode &scope) noexcept;
+    KRYS_NODISCARD bool PrepareContentPatching(ContainerNode &scope) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-htmlfor
-    KRYS_NODISCARD dom::DOMString HtmlFor() const noexcept;
+    KRYS_NODISCARD DOMString HtmlFor() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-htmlfor
-    void HtmlFor(dom::DOMString value) noexcept;
+    void HtmlFor(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootmode
-    KRYS_NODISCARD dom::DOMString ShadowRootMode() const noexcept;
+    KRYS_NODISCARD DOMString ShadowRootMode() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootmode
-    void ShadowRootMode(dom::DOMString value) noexcept;
+    void ShadowRootMode(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootdelegatesfocus
     KRYS_NODISCARD bool ShadowRootDelegatesFocus() const noexcept;
@@ -84,10 +84,10 @@ namespace krys::boo::html
     void ShadowRootDelegatesFocus(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootslotassignment
-    KRYS_NODISCARD dom::DOMString ShadowRootSlotAssignment() const noexcept;
+    KRYS_NODISCARD DOMString ShadowRootSlotAssignment() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootslotassignment
-    void ShadowRootSlotAssignment(dom::DOMString value) noexcept;
+    void ShadowRootSlotAssignment(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootclonable
     KRYS_NODISCARD bool ShadowRootClonable() const noexcept;
@@ -104,38 +104,38 @@ namespace krys::boo::html
     /// @brief The `shadowrootreferencetarget` attribute: the reference target of the declarative shadow root
     /// the template makes, or null without one.
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootreferencetarget
-    KRYS_NODISCARD Maybe<dom::DOMString> ShadowRootReferenceTarget() const noexcept;
+    KRYS_NODISCARD Maybe<DOMString> ShadowRootReferenceTarget() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootreferencetarget
-    void ShadowRootReferenceTarget(Maybe<dom::DOMString> value) noexcept;
+    void ShadowRootReferenceTarget(Maybe<DOMString> value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootcustomelementregistry
-    KRYS_NODISCARD dom::DOMString ShadowRootCustomElementRegistry() const noexcept;
+    KRYS_NODISCARD DOMString ShadowRootCustomElementRegistry() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootcustomelementregistry
-    void ShadowRootCustomElementRegistry(dom::DOMString value) noexcept;
+    void ShadowRootCustomElementRegistry(DOMString value) noexcept;
 
 #pragma endregion
 
   protected:
-    void OnAdopt(dom::Document &oldDocument) noexcept override;
+    void OnAdopt(Document &oldDocument) noexcept override;
 
     /// @see https://html.spec.whatwg.org/#template-clone
-    void OnClone(dom::Node &copy, bool subtree) noexcept override;
+    void OnClone(Node &copy, bool subtree) noexcept override;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLTemplateElement)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLTemplateElement)
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLTemplateElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return Is<krys::boo::html::HTMLElement>(target)
-           && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLTemplateElement();
+    return Is<krys::boo::HTMLElement>(target)
+           && Downcast<krys::boo::HTMLElement>(target).IsHTMLTemplateElement();
   }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

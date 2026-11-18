@@ -2,23 +2,23 @@
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLTableCaptionElement::HTMLTableCaptionElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::TableCaption)
+  HTMLTableCaptionElement::HTMLTableCaptionElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::TableCaption)
   {
   }
 
 #pragma region HTMLTableCaptionElement Obsolete members
 
-  dom::DOMString HTMLTableCaptionElement::Align() const noexcept
+  DOMString HTMLTableCaptionElement::Align() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"align").value_or(u8"");
   }
 
-  void HTMLTableCaptionElement::Align(dom::DOMString value) noexcept
+  void HTMLTableCaptionElement::Align(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"align", krys::move(value));
   }
 
 #pragma endregion
@@ -26,10 +26,10 @@ namespace krys::boo::html
 #pragma region Presentational hints
 
   void HTMLTableCaptionElement::CollectPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI, dom::DOMStringView value,
+    const DOMStringAtom &localName, const DOMStringAtom &namespaceURI, DOMStringView value,
     css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);

@@ -32,9 +32,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGTextPathElement::SVGTextPathElement(dom::Document &document) noexcept
+  SVGTextPathElement::SVGTextPathElement(Document &document) noexcept
       : SVGTextContentElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::TextPath),
         SVGURIReference(this), _startOffset(SVGAnimatedLength::Create(this, SVGLengthMode::Other)),
         _method(SVGAnimatedEnumeration::Create(this, SVGTextPathMethodAlign)),
@@ -62,12 +62,11 @@ namespace krys::boo::svg
     RemoveElementReference();
   }
 
-  void SVGTextPathElement::AttributeChanged(const dom::QualifiedName &name,
-                                            Maybe<dom::DOMStringView> oldValue,
-                                            Maybe<dom::DOMStringView> value) noexcept
+  void SVGTextPathElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                            Maybe<DOMStringView> value) noexcept
   {
     auto parseError = SVGParsingError::None;
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::StartOffsetAttr())
     {
@@ -98,7 +97,7 @@ namespace krys::boo::svg
     SVGTextContentElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGTextPathElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGTextPathElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {
@@ -127,9 +126,9 @@ namespace krys::boo::svg
     return CreateRenderer<RenderSVGTextPath>(*this, krys::move(style));
   }
 
-  bool SVGTextPathElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
+  bool SVGTextPathElement::ChildShouldCreateRenderer(const Node &child) const noexcept
   {
-    if (Is<dom::Text>(child))
+    if (Is<Text>(child))
     {
       return true;
     }
@@ -144,7 +143,7 @@ namespace krys::boo::svg
       if (Is<SVGAElement>(*parent) || Is<SVGTextElement>(*parent))
       {
         // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
-        return dom::StyledElement::RendererIsNeeded(style);
+        return StyledElement::RendererIsNeeded(style);
       }
     }
     return false;
@@ -194,7 +193,7 @@ namespace krys::boo::svg
     BuildPendingResource();
   }
 
-  void SVGTextPathElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void SVGTextPathElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     bool disconnectedFromDocument = oldAncestor.IsConnected() && !IsConnected();
     SVGTextContentElement::OnRemove(isSubtreeRoot, oldAncestor);

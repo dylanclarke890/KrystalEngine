@@ -255,17 +255,17 @@ namespace krys::boo::html
   struct InsertionLocation
   {
     /// @brief The parent into which the new node should be inserted.
-    dom::ContainerNode *Parent;
+    ContainerNode *Parent;
 
     /// @brief The child before which the new node should be inserted, or null if the new node should be
     /// appended to `Parent`.
-    dom::Node *BeforeSibling {nullptr};
+    Node *BeforeSibling {nullptr};
   };
 
   class TreeBuilder
   {
   private:
-    dom::Document &_document;
+    Document &_document;
 
     Tokenizer &_tokenizer;
 
@@ -302,14 +302,14 @@ namespace krys::boo::html
     Maybe<StackItem> &_context;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#pending-table-character-tokens
-    List<dom::DOMString> _pendingTableCharacterTokens;
+    List<DOMString> _pendingTableCharacterTokens;
     /// @brief Redirects insertions into the fragment case's root `html` element to the fragment, and
     /// insertions into elements replaced with their children by the sanitizer to where those elements would
     /// have been.
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#insertion-target-redirection-map
-    HashMap<const dom::Node *, InsertionLocation> _insertionTargetRedirectionMap;
+    HashMap<const Node *, InsertionLocation> _insertionTargetRedirectionMap;
     /// @brief Keeps the redirection map's keys alive.
-    List<Ref<dom::Element>> _redirectedElements;
+    List<Ref<Element>> _redirectedElements;
     /// @brief When there is one, the parser sanitizes the markup as it's parsed: elements, attributes and
     /// comments that it doesn't allow aren't inserted.
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#parser-sanitizer-configuration
@@ -318,7 +318,7 @@ namespace krys::boo::html
     bool _ignoreNextNewline : 1 {false};
 
   public:
-    TreeBuilder(dom::Document &document, Tokenizer &tokenizer, Maybe<StackItem> &context) noexcept;
+    TreeBuilder(Document &document, Tokenizer &tokenizer, Maybe<StackItem> &context) noexcept;
 
     void ProcessToken(TokenAtom token) noexcept;
 
@@ -333,7 +333,7 @@ namespace krys::boo::html
     }
 
     /// @brief Sets the parser's insertion target redirection map[@p element] to @p location.
-    void RedirectInsertions(dom::Element &element, InsertionLocation location) noexcept;
+    void RedirectInsertions(Element &element, InsertionLocation location) noexcept;
 
     /// @brief Sets the parser sanitizer configuration; null for none.
     void SanitizerConfiguration(Maybe<SanitizerConfig> &&configuration) noexcept
@@ -375,10 +375,10 @@ namespace krys::boo::html
     void ProcessAccordingToRulesForForeignContent(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#current-node
-    KRYS_NODISCARD dom::Element &CurrentNode() noexcept;
+    KRYS_NODISCARD Element &CurrentNode() noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#adjusted-current-node
-    KRYS_NODISCARD dom::Element &AdjustedCurrentNode() noexcept;
+    KRYS_NODISCARD Element &AdjustedCurrentNode() noexcept;
 
     static void ParseError(const TokenAtom &token) noexcept;
 
@@ -459,7 +459,7 @@ namespace krys::boo::html
 #pragma region Character Insertion
 
     /// @see https://html.spec.whatwg.org/#insert-a-character
-    void InsertCharacters(dom::DOMString data) noexcept;
+    void InsertCharacters(DOMString data) noexcept;
 
     /// @brief Removes null characters in a character token and returns whether any characters remain.
     bool RemoveNulls(TokenAtom &token) noexcept;
@@ -485,30 +485,29 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#appropriate-place-for-inserting-a-node
     KRYS_NODISCARD InsertionLocation
-      AppropriatePlaceToInsertNode(dom::ContainerNode *targetOverride = nullptr) noexcept;
+      AppropriatePlaceToInsertNode(ContainerNode *targetOverride = nullptr) noexcept;
 
     /// @see https://html.spec.whatwg.org/#adjusted-insertion-location
     KRYS_NODISCARD InsertionLocation
       AdjustedInsertionLocation(Maybe<InsertionLocation> insertionLocation = null) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-an-element-at-the-adjusted-insertion-location
-    void InsertElementAtAdjustedInsertionLocation(dom::Element &element,
-                                                  Maybe<InsertionLocation> location = null,
+    void InsertElementAtAdjustedInsertionLocation(Element &element, Maybe<InsertionLocation> location = null,
                                                   bool alreadySanitized = false) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-foreign-element
-    Ref<dom::Element> InsertForeignElement(TokenAtom &token, const dom::DOMStringAtom &namespaceURI,
-                                           bool onlyAddToElementStack) noexcept;
+    Ref<Element> InsertForeignElement(TokenAtom &token, const DOMStringAtom &namespaceURI,
+                                      bool onlyAddToElementStack) noexcept;
 
     /// @brief The sanitizer action for an element named @p localName in @p namespaceURI: "Keep" when the
     /// parser isn't sanitizing.
     /// @see https://html.spec.whatwg.org/#get-the-sanitizer-action-for-an-element-name
-    KRYS_NODISCARD SanitizerAction SanitizerActionFor(dom::DOMStringView localName,
-                                                      dom::DOMStringAtom namespaceURI) const noexcept;
+    KRYS_NODISCARD SanitizerAction SanitizerActionFor(DOMStringView localName,
+                                                      DOMStringAtom namespaceURI) const noexcept;
 
     /// @brief Adds the attributes of an `html` or `body` start tag that @p element doesn't have and the
     /// parser's sanitizer configuration allows.
-    void MergeAttributes(dom::Element &element, const ParsedAttributeList &attributes) noexcept;
+    void MergeAttributes(Element &element, const ParsedAttributeList &attributes) noexcept;
 
     /// @brief The "in head" insertion mode's steps for a template start tag, which may attach a declarative
     /// shadow root.
@@ -516,17 +515,17 @@ namespace krys::boo::html
     void InsertTemplateElement(TokenAtom &token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-an-html-element
-    Ref<dom::Element> InsertHTMLElement(TokenAtom &token) noexcept;
+    Ref<Element> InsertHTMLElement(TokenAtom &token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-comment
-    void InsertComment(dom::DOMStringView data, Maybe<InsertionLocation> position = null) noexcept;
+    void InsertComment(DOMStringView data, Maybe<InsertionLocation> position = null) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-processing-instruction
     void InsertProcessingInstruction(const TokenAtom &token,
                                      Maybe<InsertionLocation> position = null) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-character
-    void AppendCommentToDocument(dom::DOMStringView data) noexcept;
+    void AppendCommentToDocument(DOMStringView data) noexcept;
 
     /// @see https://html.spec.whatwg.org/#generic-raw-text-element-parsing-algorithm
     void ParseGenericRawTextElement(TokenAtom token) noexcept;
@@ -535,13 +534,12 @@ namespace krys::boo::html
     void ParseGenericRCDATATextElement(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#create-an-element-for-the-token
-    KRYS_NODISCARD Ref<dom::Element> CreateElement(const dom::DOMStringAtom &name,
-                                                   const dom::DOMStringAtom &namespaceURI,
-                                                   const ParsedAttributeList &attributes,
-                                                   dom::ContainerNode &intendedParent) noexcept;
+    KRYS_NODISCARD Ref<Element> CreateElement(const DOMStringAtom &name, const DOMStringAtom &namespaceURI,
+                                              const ParsedAttributeList &attributes,
+                                              ContainerNode &intendedParent) noexcept;
 
-    KRYS_NODISCARD Ref<dom::Element> CreateElement(const StackItem &item,
-                                                   dom::ContainerNode *intendedParent = nullptr) noexcept;
+    KRYS_NODISCARD Ref<Element> CreateElement(const StackItem &item,
+                                              ContainerNode *intendedParent = nullptr) noexcept;
 
     void ReconstructActiveFormattingElements() noexcept;
 
@@ -576,15 +574,15 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm
     void RunAdoptionAgency(TokenAtom &token) noexcept;
 
-    StackItem *FurthestSpecialElementBlock(const dom::Element &formattingElement) noexcept;
+    StackItem *FurthestSpecialElementBlock(const Element &formattingElement) noexcept;
 
 #pragma endregion
 
 #pragma region IntegrationPoint Algorithms
 
-    KRYS_NODISCARD static bool IsMathMLTextIntegrationPoint(const dom::Element &element) noexcept;
+    KRYS_NODISCARD static bool IsMathMLTextIntegrationPoint(const Element &element) noexcept;
 
-    KRYS_NODISCARD static bool IsHTMLIntegrationPoint(const dom::Element &element) noexcept;
+    KRYS_NODISCARD static bool IsHTMLIntegrationPoint(const Element &element) noexcept;
 
 #pragma endregion
   };

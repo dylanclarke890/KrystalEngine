@@ -65,7 +65,7 @@ namespace krys::boo
     if (data)
     {
       // We don't need to create a new frame because the new document belongs to the parent UseElement.
-      auto document = CreateRef<svg::SVGDocument>();
+      auto document = CreateRef<SVGDocument>();
       document->SetSettings(Ref<Settings>(_settings));
       document->SetURL(url::URL(Response().URL()));
 

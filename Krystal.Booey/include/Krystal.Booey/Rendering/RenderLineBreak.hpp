@@ -29,10 +29,7 @@
 
 namespace krys::boo
 {
-  namespace html
-  {
-    class HTMLElement;
-  }
+  class HTMLElement;
 
   /// @brief The line break of a `<br>`, or the line break opportunity of a `<wbr>`.
   class RenderLineBreak final : public RenderBoxModelObject
@@ -45,7 +42,7 @@ namespace krys::boo
     {
     }
 
-    RenderLineBreak(html::HTMLElement &element, RenderStyle &&style) noexcept;
+    RenderLineBreak(boo::HTMLElement &element, RenderStyle &&style) noexcept;
 
     ~RenderLineBreak() noexcept override;
 

@@ -17,7 +17,7 @@ namespace krys::boo::tests
   {
     using namespace std::chrono_literals;
 
-    KRYS_NODISCARD InputKeyframe Opacity(KeyframeOffset offset, dom::DOMString value) noexcept
+    KRYS_NODISCARD InputKeyframe Opacity(KeyframeOffset offset, DOMString value) noexcept
     {
       InputKeyframe keyframe;
       keyframe.Offset = krys::move(offset);
@@ -31,7 +31,7 @@ namespace krys::boo::tests
     }
 
     KRYS_NODISCARD Ref<WebAnimation>
-      Animate(dom::Element &element, KeyframesInput &&keyframes,
+      Animate(Element &element, KeyframesInput &&keyframes,
               Maybe<Variant<double, KeyframeAnimationOptions>> &&options = 1'000.0)
     {
       auto result = element.Animate(krys::move(keyframes), krys::move(options));
@@ -55,10 +55,10 @@ namespace krys::boo::tests
 
       KRYS_NODISCARD WebAnimation::ErrorCallback Failed(const std::string &what) noexcept
       {
-        return [this, what](const dom::Exception &exception)
+        return [this, what](const Exception &exception)
         {
-          Records.push_back(
-            what + " " + (exception.Code() == dom::ExceptionCode::AbortError ? "AbortError" : "rejected"));
+          Records.push_back(what + " "
+                            + (exception.Code() == ExceptionCode::AbortError ? "AbortError" : "rejected"));
         };
       }
 
@@ -108,7 +108,7 @@ namespace krys::boo::tests
     {
       auto result = box.Animate(List<InputKeyframe> {Opacity(2.0, u8"0")});
       REQUIRE(result.HasException());
-      CHECK(result.GetException().Code() == dom::ExceptionCode::TypeError);
+      CHECK(result.GetException().Code() == ExceptionCode::TypeError);
     }
 
     animation->Cancel(WebAnimation::Silently::Yes);
@@ -244,7 +244,7 @@ namespace krys::boo::tests
       KeyframeAnimationOptions pseudoOptions;
       pseudoOptions.PseudoElement = u8"::before";
       auto onPseudo = Animate(box, Fade(), pseudoOptions);
-      CHECK(onPseudo->CommitStyles().GetException().Code() == dom::ExceptionCode::NoModificationAllowedError);
+      CHECK(onPseudo->CommitStyles().GetException().Code() == ExceptionCode::NoModificationAllowedError);
       onPseudo->Cancel(WebAnimation::Silently::Yes);
     }
   }

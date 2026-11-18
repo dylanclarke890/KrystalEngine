@@ -32,10 +32,6 @@
 namespace krys::boo
 {
   class RenderElement;
-}
-
-namespace krys::boo::svg
-{
   class SVGElement;
 
   /// @brief A renderer outside SVG that refers to an SVG element as a resource (a clip path from CSS), told

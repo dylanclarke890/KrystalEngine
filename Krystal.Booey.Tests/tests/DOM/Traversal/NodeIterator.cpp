@@ -29,7 +29,7 @@ namespace krys::boo::dom::tests
     class TextNodeFilter : public NodeFilter
     {
     public:
-      KRYS_NODISCARD dom::ExceptionOr<FilterResult> AcceptNode(const Node &node) const noexcept override
+      KRYS_NODISCARD ExceptionOr<FilterResult> AcceptNode(const Node &node) const noexcept override
       {
         return node.NodeType() == NodeType::TEXT_NODE ? FilterResult::FILTER_ACCEPT
                                                       : FilterResult::FILTER_REJECT;
@@ -273,7 +273,7 @@ namespace krys::boo::dom::tests
     /// @brief body > div#d > (b#b > "bb", i#i > (em#em, "ii"), u#u).
     struct AdjustTestData
     {
-      Ref<dom::Document> Document;
+      Ref<boo::Document> Document;
       Ref<Element> Body;
       Ref<Element> Div;
       Ref<Element> B;
@@ -283,7 +283,7 @@ namespace krys::boo::dom::tests
       Ref<Element> U;
 
       AdjustTestData()
-          : Document(dom::Document::ParseHTMLUnsafe(
+          : Document(boo::Document::ParseHTMLUnsafe(
                        *CreateRef<HTMLDocument>(),
                        u8"<!DOCTYPE html><body><div id=d><b id=b>bb</b><i id=i><em id=em></em>"
                        u8"ii</i><u id=u></u></div>")
@@ -303,7 +303,7 @@ namespace krys::boo::dom::tests
       Func<void(const Node &)> Callback;
       FilterResult Result {FilterResult::FILTER_SKIP};
 
-      KRYS_NODISCARD dom::ExceptionOr<FilterResult> AcceptNode(const Node &node) const noexcept override
+      KRYS_NODISCARD ExceptionOr<FilterResult> AcceptNode(const Node &node) const noexcept override
       {
         Callback(node);
         return Result;

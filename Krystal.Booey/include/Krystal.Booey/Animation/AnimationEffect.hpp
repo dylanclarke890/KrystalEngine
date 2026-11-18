@@ -37,11 +37,7 @@
 
 namespace krys::boo
 {
-  namespace dom
-  {
-    class Document;
-  }
-
+  class Document;
   class WebAnimation;
 
   namespace style
@@ -89,14 +85,14 @@ namespace krys::boo
     /// @brief Updates the timing properties present in @p timing, as `updateTiming()` does: those of a CSS
     /// animation then no longer follow its style.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-animationeffect-updatetiming
-    dom::ExceptionOr<void> BindingsUpdateTiming(dom::Document &document,
-                                                const Maybe<OptionalEffectTiming> &timing) noexcept;
+    ExceptionOr<void> BindingsUpdateTiming(boo::Document &document,
+                                           const Maybe<OptionalEffectTiming> &timing) noexcept;
 
     /// @brief Updates the timing properties present in @p timing.
     /// @return A `TypeError` if a value is invalid, leaving every property unchanged.
     /// @see https://drafts.csswg.org/web-animations-1/#updating-animationeffect-timing
-    dom::ExceptionOr<void> UpdateTiming(dom::Document &document,
-                                        const Maybe<OptionalEffectTiming> &timing) noexcept;
+    ExceptionOr<void> UpdateTiming(boo::Document &document,
+                                   const Maybe<OptionalEffectTiming> &timing) noexcept;
 
     virtual void AnimationDidTick() noexcept
     {
@@ -174,7 +170,7 @@ namespace krys::boo
     }
 
     /// @return A `TypeError`, leaving the iteration start unchanged, if it's negative.
-    dom::ExceptionOr<void> SetIterationStart(double iterationStart) noexcept;
+    ExceptionOr<void> SetIterationStart(double iterationStart) noexcept;
 
     KRYS_NODISCARD double Iterations() const noexcept
     {
@@ -182,7 +178,7 @@ namespace krys::boo
     }
 
     /// @return A `TypeError`, leaving the iteration count unchanged, if it's negative or NaN.
-    dom::ExceptionOr<void> SetIterations(double iterations) noexcept;
+    ExceptionOr<void> SetIterations(double iterations) noexcept;
 
     KRYS_NODISCARD WebAnimationTime IterationDuration() noexcept;
 

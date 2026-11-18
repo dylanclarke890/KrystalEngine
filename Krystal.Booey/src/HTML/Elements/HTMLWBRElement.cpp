@@ -26,10 +26,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLWBRElement.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLWBRElement::HTMLWBRElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::WBR)
+  HTMLWBRElement::HTMLWBRElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::WBR)
   {
   }
 

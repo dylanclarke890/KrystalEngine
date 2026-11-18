@@ -29,7 +29,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief An SVG property holding a value of `TProperty`.
   template <typename TProperty>

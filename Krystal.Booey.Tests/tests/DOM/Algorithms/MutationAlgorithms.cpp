@@ -120,7 +120,7 @@ namespace krys::boo::dom::tests
 
     SECTION("Inserting a Text node into a Document returns a HierarchyRequestError")
     {
-      auto textNode = CreateRef<krys::boo::dom::Text>(*document, u8"Hello, world!");
+      auto textNode = CreateRef<krys::boo::Text>(*document, u8"Hello, world!");
 
       auto result = MutationAlgorithms::EnsurePreInsertValidity(*textNode, *document, nullptr);
       REQUIRE(result.HasException());
@@ -156,7 +156,7 @@ namespace krys::boo::dom::tests
 
         SECTION("Node has a Text child returns a HierarchyRequestError")
         {
-          auto textNode = CreateRef<krys::boo::dom::Text>(*document, u8"Hello, world!");
+          auto textNode = CreateRef<krys::boo::Text>(*document, u8"Hello, world!");
 
           REQUIRE_FALSE(docFragment->AppendChild(*textNode).HasException());
 
@@ -192,7 +192,7 @@ namespace krys::boo::dom::tests
           SECTION(
             "Ref child non null and document type is following ref child returns a HierarchyRequestError")
           {
-            auto comment = CreateRef<krys::boo::dom::Comment>(*document, u8"This is a comment node.");
+            auto comment = CreateRef<krys::boo::Comment>(*document, u8"This is a comment node.");
 
             REQUIRE_FALSE(docFragment->AppendChild(*otherElement).HasException());
             REQUIRE_FALSE(document->AppendChild(*comment).HasException());
@@ -495,7 +495,7 @@ namespace krys::boo::dom::tests
 
     SECTION("HierarchyRequestError if node is a Text node and newParent is a Document")
     {
-      auto textNode = CreateRef<krys::boo::dom::Text>(*document, u8"Hello, world!");
+      auto textNode = CreateRef<krys::boo::Text>(*document, u8"Hello, world!");
       REQUIRE_FALSE(element->AppendChild(*textNode).HasException());
 
       REQUIRE(MutationAlgorithms::Move(*textNode, *document, nullptr)
@@ -680,7 +680,7 @@ namespace krys::boo::dom::tests
 
     SECTION("HierarchyRequestError if newChild is a Text node and parent is a Document")
     {
-      auto textNode = CreateRef<krys::boo::dom::Text>(*document, u8"Hello, world!");
+      auto textNode = CreateRef<krys::boo::Text>(*document, u8"Hello, world!");
       REQUIRE(MutationAlgorithms::Replace(*element, *textNode, *document)
               == ExceptionCode::HierarchyRequestError);
     }
@@ -756,7 +756,7 @@ namespace krys::boo::dom::tests
       SECTION("newChild is a DocumentFragment node and has an Text node child and parent already")
       {
         auto docFragment = CreateRef<DocumentFragment>(*document);
-        auto text = CreateRef<krys::boo::dom::Text>(*document, u8"");
+        auto text = CreateRef<krys::boo::Text>(*document, u8"");
 
         REQUIRE_FALSE(docFragment->AppendChild(*text).HasException());
 

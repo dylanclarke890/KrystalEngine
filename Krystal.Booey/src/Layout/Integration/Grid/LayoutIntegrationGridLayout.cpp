@@ -58,7 +58,7 @@ namespace krys::boo::layout_integration
             return trackSize.IsBreadth() && trackSize.MinTrackBreadth().IsLength()
                    && trackSize.MinTrackBreadth().Length().IsFixed();
           },
-          [](const List<css::CSSOMString> &names) { return names.empty(); },
+          [](const List<CSSOMString> &names) { return names.empty(); },
           [](const style::GridTrackEntryRepeat &) { return false; },
           [](const style::GridTrackEntryAutoRepeat &) { return false; },
           [](const style::GridTrackEntrySubgrid &) { return false; });

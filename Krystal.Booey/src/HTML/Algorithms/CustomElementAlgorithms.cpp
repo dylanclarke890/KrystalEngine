@@ -26,16 +26,14 @@ namespace krys::boo::html
   }
 
   CustomElementRegistry *
-    CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(dom::Document &document) noexcept
+    CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(Document &document) noexcept
   {
     return EffectiveGlobalCustomElementRegistry(document._customElementRegistry.get());
   }
 
   // https://html.spec.whatwg.org/#look-up-a-custom-element-definition
-  CustomElementInterface *
-    CustomElementAlgorithms::LookupCustomElementDefinition(CustomElementRegistry *registry,
-                                                           const dom::DOMStringAtom &namespaceURI,
-                                                           dom::DOMStringAtom localName) noexcept
+  CustomElementInterface *CustomElementAlgorithms::LookupCustomElementDefinition(
+    CustomElementRegistry *registry, const DOMStringAtom &namespaceURI, DOMStringAtom localName) noexcept
   {
     // 1. If registry is null, then return null.
     if (registry == nullptr)
@@ -58,23 +56,23 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#look-up-a-custom-element-registry
-  CustomElementRegistry *CustomElementAlgorithms::LookUpCustomElementRegistry(dom::Node &node) noexcept
+  CustomElementRegistry *CustomElementAlgorithms::LookUpCustomElementRegistry(Node &node) noexcept
   {
     // 1. If node is an Element object, then return node's custom element registry.
     // 2. If node is a ShadowRoot object, then return node's custom element registry.
     // 3. If node is a Document object, then return node's custom element registry.
     // 4. Return null.
-    if (auto *element = DynamicDowncast<dom::Element>(node))
+    if (auto *element = DynamicDowncast<Element>(node))
     {
       return element->CustomElementRegistry().get();
     }
 
-    if (auto *document = DynamicDowncast<dom::Document>(node))
+    if (auto *document = DynamicDowncast<Document>(node))
     {
       return document->CustomElementRegistry().get();
     }
 
-    if (auto *shadowRoot = DynamicDowncast<dom::ShadowRoot>(node))
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(node))
     {
       return shadowRoot->CustomElementRegistry().get();
     }

@@ -67,7 +67,7 @@ namespace krys::boo::css
     }
   }
 
-  void SelectorFilter::CollectElementIdentifierHashes(const dom::Element &element,
+  void SelectorFilter::CollectElementIdentifierHashes(const boo::Element &element,
                                                       SmallList<uint32, 4> &identifierHashes) noexcept
   {
     identifierHashes.push_back(IdentifierHash(element.TagQualifiedName().LocalNameLower()) * TagNameSalt);
@@ -85,8 +85,8 @@ namespace krys::boo::css
 
     for (auto &attribute : element.AttributeList())
     {
-      auto &attributeName = Is<html::HTMLElement>(element) ? attribute->GetQualifiedName().LocalName()
-                                                           : attribute->GetQualifiedName().LocalNameLower();
+      auto &attributeName = Is<HTMLElement>(element) ? attribute->GetQualifiedName().LocalName()
+                                                     : attribute->GetQualifiedName().LocalNameLower();
       if (IsExcludedAttribute(attributeName))
       {
         continue;
@@ -95,18 +95,18 @@ namespace krys::boo::css
     }
   }
 
-  bool SelectorFilter::ParentStackIsConsistent(const dom::ContainerNode *parentNode) const noexcept
+  bool SelectorFilter::ParentStackIsConsistent(const ContainerNode *parentNode) const noexcept
   {
-    if (!parentNode || Is<dom::Document>(*parentNode) || Is<dom::ShadowRoot>(*parentNode))
+    if (!parentNode || Is<Document>(*parentNode) || Is<ShadowRoot>(*parentNode))
     {
       return _parentStack.empty();
     }
     return !_parentStack.empty() && _parentStack.back().Element == parentNode;
   }
 
-  void SelectorFilter::InitializeParentStack(const dom::Element &parent) noexcept
+  void SelectorFilter::InitializeParentStack(const boo::Element &parent) noexcept
   {
-    SmallList<const dom::Element *, 20> ancestors;
+    SmallList<const boo::Element *, 20> ancestors;
     for (const auto *ancestor = &parent; ancestor; ancestor = ancestor->ParentElement())
     {
       ancestors.push_back(ancestor);
@@ -118,7 +118,7 @@ namespace krys::boo::css
     }
   }
 
-  void SelectorFilter::PushParent(const dom::Element *parent) noexcept
+  void SelectorFilter::PushParent(const boo::Element *parent) noexcept
   {
     krys_debug_assert(_parentStack.empty() || _parentStack.back().Element == parent->ParentElement());
     krys_debug_assert(!_parentStack.empty() || !parent->ParentElement());
@@ -134,7 +134,7 @@ namespace krys::boo::css
     }
   }
 
-  void SelectorFilter::PushParentInitializingIfNeeded(const dom::Element &parent) noexcept
+  void SelectorFilter::PushParentInitializingIfNeeded(const boo::Element &parent) noexcept
   {
     if (_parentStack.empty()) KRYS_UNLIKELY
     {
@@ -160,7 +160,7 @@ namespace krys::boo::css
     }
   }
 
-  void SelectorFilter::PopParentsUntil(const dom::Element *parent) noexcept
+  void SelectorFilter::PopParentsUntil(const boo::Element *parent) noexcept
   {
     while (!_parentStack.empty())
     {

@@ -20,7 +20,7 @@ namespace krys::boo::css::tests
                                                   / "Ahem.ttf");
     }
 
-    KRYS_NODISCARD const RenderStyle &Rendered(ResolverFixture &fixture, dom::DOMStringView id)
+    KRYS_NODISCARD const RenderStyle &Rendered(ResolverFixture &fixture, DOMStringView id)
     {
       auto *style = fixture.ById(id).GetRenderStyle();
       REQUIRE(style);

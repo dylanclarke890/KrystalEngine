@@ -22,13 +22,10 @@
 
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 
-namespace krys::boo::html
-{
-  class HTMLInputElement;
-}
-
 namespace krys::boo
 {
+  class HTMLInputElement;
+
   /// @brief The renderer of `<input type=file>`. Each RenderFileUploadControl contains a RenderButton (for
   /// opening the file chooser), and sufficient space to draw the files' names; there's no file icon, as in
   /// Chrome. The RenderButton has a shadow node associated with it to receive click/hover events.
@@ -40,17 +37,17 @@ namespace krys::boo
     bool _canReceiveDroppedFiles;
 
   public:
-    RenderFileUploadControl(html::HTMLInputElement &, RenderStyle &&) noexcept;
+    RenderFileUploadControl(HTMLInputElement &, RenderStyle &&) noexcept;
 
     ~RenderFileUploadControl() noexcept override;
 
-    KRYS_NODISCARD dom::DOMString ButtonValue() const noexcept;
+    KRYS_NODISCARD DOMString ButtonValue() const noexcept;
 
     /// @brief The text drawn after the button: the files' names (or how many there are), or that none is
     /// chosen, truncated to fit.
     KRYS_NODISCARD utf8_string FileTextValue() const noexcept;
 
-    KRYS_NODISCARD html::HTMLInputElement &InputElement() const noexcept;
+    KRYS_NODISCARD HTMLInputElement &InputElement() const noexcept;
 
   private:
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
@@ -75,7 +72,7 @@ namespace krys::boo
       PositionForPoint(const LayoutPoint &, HitTestSource,
                        const RenderFragmentContainer * = nullptr) noexcept override;
 
-    KRYS_NODISCARD html::HTMLInputElement *UploadButton() const noexcept;
+    KRYS_NODISCARD HTMLInputElement *UploadButton() const noexcept;
   };
 }
 

@@ -154,7 +154,7 @@ namespace krys::boo
     }
   }
 
-  RenderTableCell::RenderTableCell(dom::Element &element, RenderStyle &&style) noexcept
+  RenderTableCell::RenderTableCell(Element &element, RenderStyle &&style) noexcept
       : RenderBlockFlow(Type::TableCell, element, krys::move(style))
   {
     // We only update the flags when notified of DOM changes in ColSpanOrRowSpanChanged()
@@ -163,7 +163,7 @@ namespace krys::boo
     krys_debug_assert(IsRenderTableCell());
   }
 
-  RenderTableCell::RenderTableCell(dom::Document &document, RenderStyle &&style) noexcept
+  RenderTableCell::RenderTableCell(Document &document, RenderStyle &&style) noexcept
       : RenderBlockFlow(Type::TableCell, document, krys::move(style))
   {
     krys_debug_assert(IsRenderTableCell());
@@ -336,10 +336,10 @@ namespace krys::boo
     section->SetNeedsCellRecalc();
   }
 
-  const html::HTMLTableCellElement *RenderTableCell::TableCellElement() const noexcept
+  const HTMLTableCellElement *RenderTableCell::TableCellElement() const noexcept
   {
-    auto *htmlElement = DynamicDowncast<html::HTMLElement>(GetElement());
-    return htmlElement ? DynamicDowncast<html::HTMLTableCellElement>(*htmlElement) : nullptr;
+    auto *htmlElement = DynamicDowncast<HTMLElement>(GetElement());
+    return htmlElement ? DynamicDowncast<HTMLTableCellElement>(*htmlElement) : nullptr;
   }
 
   uint32 RenderTableCell::ParseColSpanFromDOM() const noexcept
@@ -349,7 +349,7 @@ namespace krys::boo
     {
       return std::min<uint32>(cell->ColSpan(), MaxColumnIndex);
     }
-    auto *mathMLElement = DynamicDowncast<mathml::MathMLElement>(*GetElement());
+    auto *mathMLElement = DynamicDowncast<MathMLElement>(*GetElement());
     if (mathMLElement && mathMLElement->HasTagName(html::TagName::mtd))
     {
       return std::min<uint32>(mathMLElement->ColSpan(), MaxColumnIndex);
@@ -369,7 +369,7 @@ namespace krys::boo
       auto rowSpan = cell->RowSpan();
       return std::min<uint32>(rowSpan ? rowSpan : MaxRowspan, RenderTableRow::MaxRowIndex);
     }
-    auto *mathMLElement = DynamicDowncast<mathml::MathMLElement>(*GetElement());
+    auto *mathMLElement = DynamicDowncast<MathMLElement>(*GetElement());
     if (mathMLElement && mathMLElement->HasTagName(html::TagName::mtd))
     {
       return std::min<uint32>(mathMLElement->RowSpan(), RenderTableRow::MaxRowIndex);

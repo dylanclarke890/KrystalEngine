@@ -38,7 +38,7 @@ namespace krys::boo
   /// @brief The counter directives of an element, by counter name.
   struct CounterDirectiveMap
   {
-    HashMap<css::CSSOMStringAtom, CounterDirectives> Map;
+    HashMap<CSSOMStringAtom, CounterDirectives> Map;
 
     KRYS_NODISCARD bool operator==(const CounterDirectiveMap &) const noexcept = default;
   };

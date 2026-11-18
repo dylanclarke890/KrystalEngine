@@ -45,9 +45,9 @@ namespace krys::boo::html
     bool _isSelfClosing : 1 {false};
     bool _selfClosingTagAcknowledged : 1 {false};
     bool _dataReleased : 1 {false};
-    dom::DOMStringAtom _name {null};
+    DOMStringAtom _name {null};
     UniquePtr<DoctypeData> _doctypeData;
-    dom::DOMString _data;
+    DOMString _data;
     ParsedAttributeList _attributes;
 
   public:
@@ -68,7 +68,7 @@ namespace krys::boo::html
         }
         case TokenType::DOCTYPE:
         {
-          _name = dom::DOMStringAtom(dom::DOMStringView {data.begin(), data.end()});
+          _name = DOMStringAtom(DOMStringView {data.begin(), data.end()});
           _doctypeData = token.ReleaseDOCTYPEData();
 
           break;
@@ -76,22 +76,22 @@ namespace krys::boo::html
         case TokenType::Comment:
         case TokenType::Character:
         {
-          _data = dom::DOMString {data.begin(), data.end()};
+          _data = DOMString {data.begin(), data.end()};
 
           break;
         }
         case TokenType::ProcessingInstruction:
         {
-          _name = dom::DOMStringAtom(dom::DOMStringView {data.begin(), data.end()});
+          _name = DOMStringAtom(DOMStringView {data.begin(), data.end()});
           const auto &piData = token.ProcessingInstructionData();
-          _data = dom::DOMString {piData.begin(), piData.end()};
+          _data = DOMString {piData.begin(), piData.end()};
 
           break;
         }
         case TokenType::StartTag:
         case TokenType::EndTag:
         {
-          _name = dom::DOMStringAtom(dom::DOMStringView {data.begin(), data.end()});
+          _name = DOMStringAtom(DOMStringView {data.begin(), data.end()});
           _attributes = krys::move(token.Attributes());
 
           if (_type == TokenType::StartTag)
@@ -123,7 +123,7 @@ namespace krys::boo::html
       _selfClosingTagAcknowledged = true;
     }
 
-    KRYS_NODISCARD const dom::DOMStringAtom &Name() const noexcept KRYS_LIFETIME_BOUND
+    KRYS_NODISCARD const DOMStringAtom &Name() const noexcept KRYS_LIFETIME_BOUND
     {
       krys_debug_assert(_type == TokenType::StartTag || _type == TokenType::EndTag
                         || _type == TokenType::DOCTYPE);
@@ -137,7 +137,7 @@ namespace krys::boo::html
       return _attributes;
     }
 
-    KRYS_NODISCARD dom::DOMStringView Comment() const noexcept
+    KRYS_NODISCARD DOMStringView Comment() const noexcept
     {
       krys_debug_assert(_type == TokenType::Comment);
       krys_debug_assert(!_dataReleased);
@@ -145,7 +145,7 @@ namespace krys::boo::html
       return _data;
     }
 
-    KRYS_NODISCARD dom::DOMString ReleaseComment() noexcept
+    KRYS_NODISCARD DOMString ReleaseComment() noexcept
     {
       krys_debug_assert(_type == TokenType::Comment);
       krys_debug_assert(!_dataReleased);
@@ -154,19 +154,19 @@ namespace krys::boo::html
       return krys::move(_data);
     }
 
-    KRYS_NODISCARD const dom::DOMStringAtom &ProcessingInstructionTarget() const noexcept KRYS_LIFETIME_BOUND
+    KRYS_NODISCARD const DOMStringAtom &ProcessingInstructionTarget() const noexcept KRYS_LIFETIME_BOUND
     {
       krys_debug_assert(_type == TokenType::ProcessingInstruction);
       return _name;
     }
 
-    KRYS_NODISCARD dom::DOMStringView ProcessingInstructionData() const noexcept
+    KRYS_NODISCARD DOMStringView ProcessingInstructionData() const noexcept
     {
       krys_debug_assert(_type == TokenType::ProcessingInstruction);
       return _data;
     }
 
-    KRYS_NODISCARD dom::DOMStringView Characters() const noexcept
+    KRYS_NODISCARD DOMStringView Characters() const noexcept
     {
       krys_debug_assert(_type == TokenType::Character);
       krys_debug_assert(!_dataReleased);
@@ -174,7 +174,7 @@ namespace krys::boo::html
       return _data;
     }
 
-    KRYS_NODISCARD dom::DOMString ReleaseCharacters() noexcept
+    KRYS_NODISCARD DOMString ReleaseCharacters() noexcept
     {
       krys_debug_assert(_type == TokenType::Character);
       krys_debug_assert(!_dataReleased);

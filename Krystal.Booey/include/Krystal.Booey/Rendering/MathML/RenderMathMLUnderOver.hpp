@@ -33,10 +33,7 @@
 
 namespace krys::boo
 {
-  namespace mathml
-  {
-    class MathMLUnderOverElement;
-  }
+  class MathMLUnderOverElement;
 
   /// @brief The renderer of `<munder>`, `<mover>` and `<munderover>`: a base with scripts centred below and
   /// above it, which move to its side as sub- and superscripts when its operator's limits move.
@@ -47,7 +44,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderMathMLUnderOver);
 
   public:
-    RenderMathMLUnderOver(mathml::MathMLUnderOverElement &element, RenderStyle &&style) noexcept;
+    RenderMathMLUnderOver(boo::MathMLUnderOverElement &element, RenderStyle &&style) noexcept;
 
     ~RenderMathMLUnderOver() noexcept override;
 
@@ -74,7 +71,7 @@ namespace krys::boo
       return !ShouldMoveLimits();
     }
 
-    KRYS_NODISCARD mathml::MathMLUnderOverElement &GetElement() const noexcept;
+    KRYS_NODISCARD boo::MathMLUnderOverElement &GetElement() const noexcept;
 
     void ComputePreferredLogicalWidths() noexcept final;
 

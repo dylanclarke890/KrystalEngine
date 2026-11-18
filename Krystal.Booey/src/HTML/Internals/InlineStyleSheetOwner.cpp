@@ -19,9 +19,9 @@
  */
 
 #include "Krystal.Booey/HTML/Internals/InlineStyleSheetOwner.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
@@ -38,19 +38,19 @@ namespace krys::boo::html
 {
   namespace
   {
-    KRYS_NODISCARD css::ParserContext ParserContextForElement(const dom::Element &element) noexcept
+    KRYS_NODISCARD css::ParserContext ParserContextForElement(const Element &element) noexcept
     {
       auto &document = element.NodeDocument();
       return css::ParserContext(document, document.BaseURL(), u8"UTF-8");
     }
 
-    KRYS_NODISCARD dom::DOMString Title(const dom::Element &element) noexcept
+    KRYS_NODISCARD DOMString Title(const Element &element) noexcept
     {
       return element.GetAttribute(u8"title").value_or(u8"");
     }
 
     // https://html.spec.whatwg.org/multipage/semantics.html#update-a-style-block
-    KRYS_NODISCARD bool IsValidCSSContentType(const dom::DOMStringAtom &type) noexcept
+    KRYS_NODISCARD bool IsValidCSSContentType(const DOMStringAtom &type) noexcept
     {
       if (type.View().empty())
       {
@@ -70,7 +70,7 @@ namespace krys::boo::html
     }
   }
 
-  css::CSSStyleSheet *InlineStyleSheetOwner::Sheet() const noexcept
+  CSSStyleSheet *InlineStyleSheetOwner::Sheet() const noexcept
   {
     return _sheet.get();
   }
@@ -80,7 +80,7 @@ namespace krys::boo::html
     return _styleScope.get();
   }
 
-  void InlineStyleSheetOwner::InsertedIntoDocument(dom::Element &element) noexcept
+  void InlineStyleSheetOwner::InsertedIntoDocument(Element &element) noexcept
   {
     auto &scope = style::Scope::ForNode(element);
     _styleScope = CreateWeakPtr(&scope);
@@ -93,7 +93,7 @@ namespace krys::boo::html
     CreateSheetFromTextContents(element);
   }
 
-  void InlineStyleSheetOwner::RemovedFromDocument(dom::Element &element) noexcept
+  void InlineStyleSheetOwner::RemovedFromDocument(Element &element) noexcept
   {
     if (auto *scope = _styleScope.get())
     {
@@ -109,7 +109,7 @@ namespace krys::boo::html
     }
   }
 
-  void InlineStyleSheetOwner::ClearDocumentData(dom::Element &element) noexcept
+  void InlineStyleSheetOwner::ClearDocumentData(Element &element) noexcept
   {
     if (_sheet)
     {
@@ -122,7 +122,7 @@ namespace krys::boo::html
     }
   }
 
-  void InlineStyleSheetOwner::ChildrenChanged(dom::Element &element) noexcept
+  void InlineStyleSheetOwner::ChildrenChanged(Element &element) noexcept
   {
     if (!element.IsFinishedParsingChildren())
     {
@@ -135,7 +135,7 @@ namespace krys::boo::html
     CreateSheetFromTextContents(element);
   }
 
-  void InlineStyleSheetOwner::FinishParsingChildren(dom::Element &element) noexcept
+  void InlineStyleSheetOwner::FinishParsingChildren(Element &element) noexcept
   {
     if (element.IsConnected())
     {
@@ -143,7 +143,7 @@ namespace krys::boo::html
     }
   }
 
-  void InlineStyleSheetOwner::CreateSheetFromTextContents(dom::Element &element) noexcept
+  void InlineStyleSheetOwner::CreateSheetFromTextContents(Element &element) noexcept
   {
     CreateSheet(element, dom::TextAlgorithms::ChildTextContent(element));
   }
@@ -155,7 +155,7 @@ namespace krys::boo::html
     sheet->ClearOwnerNode();
   }
 
-  void InlineStyleSheetOwner::CreateSheet(dom::Element &element, const dom::DOMString &text) noexcept
+  void InlineStyleSheetOwner::CreateSheet(Element &element, const DOMString &text) noexcept
   {
     // The update a style block algorithm (from step 2; the callers check step 3, that it's connected):
     // https://html.spec.whatwg.org/#update-a-style-block
@@ -215,7 +215,7 @@ namespace krys::boo::html
     if (auto cachedSheet = style::StyleSheetContentsCache::Singleton().Get(cacheKey))
     {
       krys_debug_assert(cachedSheet->IsCacheableWithNoBaseURLDependency());
-      auto sheet = css::CSSStyleSheet::CreateInline(cachedSheet, element);
+      auto sheet = CSSStyleSheet::CreateInline(cachedSheet, element);
       _sheet = sheet;
       sheet->SetMediaQueries(krys::move(mediaQueries));
       if (!dom::TreeQueries::IsInShadowTree(element))
@@ -232,7 +232,7 @@ namespace krys::boo::html
 
     auto contents = css::StyleSheetContents::Create(cacheKey.second);
 
-    auto sheet = css::CSSStyleSheet::CreateInline(Ref<css::StyleSheetContents>(contents), element);
+    auto sheet = CSSStyleSheet::CreateInline(Ref<css::StyleSheetContents>(contents), element);
     _sheet = sheet;
     sheet->SetMediaQueries(krys::move(mediaQueries));
     if (!dom::TreeQueries::IsInShadowTree(element))
@@ -261,7 +261,7 @@ namespace krys::boo::html
     return _sheet && _sheet->IsLoading();
   }
 
-  bool InlineStyleSheetOwner::SheetLoaded(dom::Element &element) noexcept
+  bool InlineStyleSheetOwner::SheetLoaded(Element &element) noexcept
   {
     if (IsLoading())
     {
@@ -276,7 +276,7 @@ namespace krys::boo::html
     return true;
   }
 
-  void InlineStyleSheetOwner::StartLoadingDynamicSheet(dom::Element &element) noexcept
+  void InlineStyleSheetOwner::StartLoadingDynamicSheet(Element &element) noexcept
   {
     if (auto *scope = _styleScope.get(); scope && !scope->HasPendingSheet(element))
     {

@@ -20,22 +20,22 @@ namespace krys::boo::tests
   {
     using Strings = List<std::string>;
 
-    KRYS_NODISCARD std::string Name(const dom::EventTarget *target)
+    KRYS_NODISCARD std::string Name(const EventTarget *target)
     {
-      auto *node = DynamicDowncast<dom::Node>(target);
-      auto *element = node ? DynamicDowncast<dom::Element>(*node) : nullptr;
+      auto *node = DynamicDowncast<Node>(target);
+      auto *element = node ? DynamicDowncast<Element>(*node) : nullptr;
       if (!element)
       {
         return node ? "document" : "null";
       }
-      auto id = element->GetAttribute(u8"id").value_or(dom::DOMString());
-      auto name = id.empty() ? element->LocalName().View() : dom::DOMStringView(id);
+      auto id = element->GetAttribute(u8"id").value_or(DOMString());
+      auto name = id.empty() ? element->LocalName().View() : DOMStringView(id);
       return std::string(name.begin(), name.end());
     }
 
     /// @brief Records the events it handles as `type:target`, with the pointer id after a pointer event's
     /// type (`pointerdown3`) and the lengths of a touch event's lists after its type (`touchstart[1,1,1]`).
-    struct Recorder : public dom::EventListenerCallback
+    struct Recorder : public EventListenerCallback
     {
       List<std::string> &Records;
 
@@ -43,14 +43,14 @@ namespace krys::boo::tests
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         auto type = std::string(event.Type().View().begin(), event.Type().View().end());
-        if (auto *pointerEvent = DynamicDowncast<dom::PointerEvent>(event))
+        if (auto *pointerEvent = DynamicDowncast<PointerEvent>(event))
         {
           type += std::to_string(pointerEvent->PointerId());
         }
-        if (auto *touchEvent = DynamicDowncast<dom::TouchEvent>(event))
+        if (auto *touchEvent = DynamicDowncast<TouchEvent>(event))
         {
           type += "[" + std::to_string(touchEvent->Touches()->Length()) + ","
                   + std::to_string(touchEvent->TargetTouches()->Length()) + ","
@@ -62,7 +62,7 @@ namespace krys::boo::tests
 
     /// @brief Calls @p action when it handles an event.
     template <typename TAction>
-    struct ActionListener : public dom::EventListenerCallback
+    struct ActionListener : public EventListenerCallback
     {
       TAction Action;
 
@@ -70,7 +70,7 @@ namespace krys::boo::tests
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         Action(event);
       }
@@ -89,7 +89,7 @@ namespace krys::boo::tests
       {
         (void)Document->UpdateLayout();
         // Capturing at the document sees the events that don't bubble too.
-        Ref<dom::EventListenerCallback> recorder = CreateRef<Recorder>(Records);
+        Ref<EventListenerCallback> recorder = CreateRef<Recorder>(Records);
         for (auto type :
              {u8"pointerover", u8"pointerout", u8"pointerenter", u8"pointerleave", u8"pointerdown",
               u8"pointermove", u8"pointerup", u8"pointercancel", u8"gotpointercapture",
@@ -98,7 +98,7 @@ namespace krys::boo::tests
         {
           if (recordPointerMoves || type != utf8_stringview(u8"pointermove"))
           {
-            Document->AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, true);
+            Document->AddEventListener(DOMStringAtom(type), Ref {recorder}, true);
           }
         }
       }
@@ -140,10 +140,10 @@ namespace krys::boo::tests
       }
 
       template <typename TAction>
-      void On(dom::EventTarget &target, utf8_stringview type, TAction action) noexcept
+      void On(EventTarget &target, utf8_stringview type, TAction action) noexcept
       {
-        Ref<dom::EventListenerCallback> listener = CreateRef<ActionListener<TAction>>(krys::move(action));
-        target.AddEventListener(dom::DOMStringAtom(type), krys::move(listener), false);
+        Ref<EventListenerCallback> listener = CreateRef<ActionListener<TAction>>(krys::move(action));
+        target.AddEventListener(DOMStringAtom(type), krys::move(listener), false);
       }
     };
 
@@ -156,7 +156,7 @@ namespace krys::boo::tests
     TouchFixture fixture;
     auto &a = fixture.ById(u8"a");
 
-    auto touch = dom::Touch::Create(fixture.Frame.get(), &a, 4, {300, 400}, {10, 20}, {3, 2}, 15, 0.5f, 30);
+    auto touch = Touch::Create(fixture.Frame.get(), &a, 4, {300, 400}, {10, 20}, {3, 2}, 15, 0.5f, 30);
     CHECK(touch->Target() == &a);
     CHECK(touch->Identifier() == 4);
     CHECK(touch->ScreenX() == 300);
@@ -172,22 +172,21 @@ namespace krys::boo::tests
     CHECK(clone->Target() == nullptr);
     CHECK(clone->ClientY() == 20);
 
-    auto list = dom::TouchList::Create({touch});
+    auto list = TouchList::Create({touch});
     CHECK(list->Length() == 1);
     CHECK(list->Item(0) == touch.get());
     CHECK(list->Item(1) == nullptr);
 
-    dom::TouchEventInit init;
+    TouchEventInit init;
     init.ChangedTouches.push_back(touch);
     init.CtrlKey = true;
-    auto event = CreateRef<dom::TouchEvent>(u8"touchstart", init);
+    auto event = CreateRef<TouchEvent>(u8"touchstart", init);
     CHECK_FALSE(event->IsTrusted());
     CHECK(event->Touches()->Length() == 0);
     CHECK(event->ChangedTouches()->Length() == 1);
     CHECK(event->CtrlKey());
 
-    auto cancel =
-      dom::TouchEvent::Create(list.get(), list.get(), list.get(), u8"touchcancel", nullptr, {}, {});
+    auto cancel = TouchEvent::Create(list.get(), list.get(), list.get(), u8"touchcancel", nullptr, {}, {});
     CHECK(cancel->IsTrusted());
     CHECK(cancel->Bubbles());
     CHECK_FALSE(cancel->Cancelable());
@@ -208,7 +207,7 @@ namespace krys::boo::tests
       // The touch is captured implicitly, before its next pointer event, and keeps its target as it moves
       // onto b.
       fixture.On(a, u8"pointerrawupdate",
-                 [&](dom::Event &event)
+                 [&](Event &event)
                  {
                    CHECK_FALSE(event.Cancelable());
                    fixture.Records.emplace_back("raw:a");
@@ -226,12 +225,11 @@ namespace krys::boo::tests
 
     SECTION("the pointer and touch events' properties")
     {
-      RefPtr<dom::PointerEvent> down;
-      RefPtr<dom::TouchEvent> start;
+      RefPtr<PointerEvent> down;
+      RefPtr<TouchEvent> start;
       fixture.On(a, u8"pointerdown",
-                 [&](dom::Event &event) { down = ShareRefPtr(&Downcast<dom::PointerEvent>(event)); });
-      fixture.On(a, u8"touchstart",
-                 [&](dom::Event &event) { start = ShareRefPtr(&Downcast<dom::TouchEvent>(event)); });
+                 [&](Event &event) { down = ShareRefPtr(&Downcast<PointerEvent>(event)); });
+      fixture.On(a, u8"touchstart", [&](Event &event) { start = ShareRefPtr(&Downcast<TouchEvent>(event)); });
       (void)fixture.Touch(Type::TouchStart, {TouchFixture::Point(2, State::TouchPressed, 10.5, 20.5)});
       REQUIRE(down);
       CHECK(down->IsTrusted());
@@ -267,13 +265,13 @@ namespace krys::boo::tests
       bool aPrimary = false;
       bool bPrimary = true;
       fixture.On(a, u8"pointermove",
-                 [&](dom::Event &event) { aPrimary = Downcast<dom::PointerEvent>(event).GetIsPrimary(); });
+                 [&](Event &event) { aPrimary = Downcast<PointerEvent>(event).GetIsPrimary(); });
       fixture.On(b, u8"pointermove",
-                 [&](dom::Event &event) { bPrimary = Downcast<dom::PointerEvent>(event).GetIsPrimary(); });
+                 [&](Event &event) { bPrimary = Downcast<PointerEvent>(event).GetIsPrimary(); });
       uint32 aRawUpdates = 0;
       uint32 bRawUpdates = 0;
-      fixture.On(a, u8"pointerrawupdate", [&](dom::Event &) { ++aRawUpdates; });
-      fixture.On(b, u8"pointerrawupdate", [&](dom::Event &) { ++bRawUpdates; });
+      fixture.On(a, u8"pointerrawupdate", [&](Event &) { ++aRawUpdates; });
+      fixture.On(b, u8"pointerrawupdate", [&](Event &) { ++bRawUpdates; });
       // A stationary touch has a pointermove, but isn't among the changed touches, and has no
       // pointerrawupdate.
       (void)fixture.Touch(Type::TouchMove, {TouchFixture::Point(0, State::TouchStationary, 10, 10),
@@ -311,13 +309,10 @@ namespace krys::boo::tests
 
     SECTION("cancelling touchstart swallows the event; capture released in pointerdown never starts")
     {
-      fixture.On(a, u8"touchstart", [&](dom::Event &event) { event.PreventDefault(); });
-      fixture.On(a, u8"pointerdown",
-                 [&](dom::Event &event)
-                 {
-                   (void)a.ReleasePointerCapture(
-                     static_cast<int32>(Downcast<dom::PointerEvent>(event).PointerId()));
-                 });
+      fixture.On(a, u8"touchstart", [&](Event &event) { event.PreventDefault(); });
+      fixture.On(
+        a, u8"pointerdown", [&](Event &event)
+        { (void)a.ReleasePointerCapture(static_cast<int32>(Downcast<PointerEvent>(event).PointerId())); });
       CHECK(fixture.Touch(Type::TouchStart, {TouchFixture::Point(0, State::TouchPressed, 10, 10)}));
       CHECK(fixture.Take()
             == Strings {"pointerover3:a", "pointerenter3:a", "pointerdown3:a", "touchstart[1,1,1]:a"});
@@ -370,14 +365,14 @@ namespace krys::boo::tests
       return handler.HandleTouchEvent(event);
     };
     int calls = 0;
-    auto listen = [&](dom::EventTarget &target, utf8_stringview type)
+    auto listen = [&](EventTarget &target, utf8_stringview type)
     {
-      auto action = [&calls](dom::Event &)
+      auto action = [&calls](Event &)
       {
         ++calls;
       };
-      Ref<dom::EventListenerCallback> listener = CreateRef<ActionListener<decltype(action)>>(action);
-      target.AddEventListener(dom::DOMStringAtom(type), krys::move(listener), false);
+      Ref<EventListenerCallback> listener = CreateRef<ActionListener<decltype(action)>>(action);
+      target.AddEventListener(DOMStringAtom(type), krys::move(listener), false);
     };
 
     SECTION("nothing is dispatched, and the press still activates what it hits")
@@ -441,12 +436,10 @@ namespace krys::boo::tests
       return event;
     };
 
-    RefPtr<dom::PointerEvent> move;
-    RefPtr<dom::PointerEvent> down;
-    fixture.On(a, u8"pointermove",
-               [&](dom::Event &event) { move = ShareRefPtr(&Downcast<dom::PointerEvent>(event)); });
-    fixture.On(a, u8"pointerdown",
-               [&](dom::Event &event) { down = ShareRefPtr(&Downcast<dom::PointerEvent>(event)); });
+    RefPtr<PointerEvent> move;
+    RefPtr<PointerEvent> down;
+    fixture.On(a, u8"pointermove", [&](Event &event) { move = ShareRefPtr(&Downcast<PointerEvent>(event)); });
+    fixture.On(a, u8"pointerdown", [&](Event &event) { down = ShareRefPtr(&Downcast<PointerEvent>(event)); });
 
     // Hovering is a move without buttons.
     (void)fixture.Handler().MouseMoved(penEvent(PlatformEvent::Type::MouseMoved, MouseButton::None, 0, 0));

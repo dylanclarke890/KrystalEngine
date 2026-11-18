@@ -28,7 +28,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGList.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief A list of SVG properties, which it owns: a change to an item is committed through the list.
   template <typename TProperty>

@@ -24,9 +24,9 @@
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGTransformable.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGAnimateTransformElement::SVGAnimateTransformElement(dom::Document &document) noexcept
+  SVGAnimateTransformElement::SVGAnimateTransformElement(Document &document) noexcept
       : SVGAnimateElementBase(document, SVGElementInterface::AnimateTransform)
   {
   }
@@ -46,13 +46,12 @@ namespace krys::boo::svg
     return SVGAnimateElementBase::HasValidAttributeType();
   }
 
-  void SVGAnimateTransformElement::AttributeChanged(const dom::QualifiedName &name,
-                                                    Maybe<dom::DOMStringView> oldValue,
-                                                    Maybe<dom::DOMStringView> value) noexcept
+  void SVGAnimateTransformElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                                    Maybe<DOMStringView> value) noexcept
   {
     if (name == SVGNames::TypeAttr())
     {
-      _type = SVGTransformable::ParseTransformTypeFromString(value.value_or(dom::DOMStringView {}))
+      _type = SVGTransformable::ParseTransformTypeFromString(value.value_or(DOMStringView {}))
                 .value_or(SVGTransformValue::SVG_TRANSFORM_UNKNOWN);
       if (_type == SVGTransformValue::SVG_TRANSFORM_MATRIX)
       {
@@ -63,9 +62,9 @@ namespace krys::boo::svg
     SVGAnimateElementBase::AttributeChanged(name, oldValue, value);
   }
 
-  dom::DOMString SVGAnimateTransformElement::AnimateRangeString(dom::DOMStringView string) const noexcept
+  DOMString SVGAnimateTransformElement::AnimateRangeString(DOMStringView string) const noexcept
   {
-    dom::DOMString result {SVGTransformValue::PrefixForTransformType(_type)};
+    DOMString result {SVGTransformValue::PrefixForTransformType(_type)};
     result += string;
     result += u8')';
     return result;

@@ -207,9 +207,9 @@ namespace krys::boo::dom
       {
         copy = CreateRef<XHTMLDocument>();
       }
-      else if (Is<svg::SVGDocument>(doc))
+      else if (Is<SVGDocument>(doc))
       {
-        copy = CreateRef<svg::SVGDocument>();
+        copy = CreateRef<SVGDocument>();
       }
       else if (Is<XMLDocument>(doc))
       {

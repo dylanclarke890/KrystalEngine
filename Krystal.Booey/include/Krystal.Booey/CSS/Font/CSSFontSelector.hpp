@@ -39,7 +39,7 @@
 #include "Krystal.Core/Types/StringAtom.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -108,7 +108,7 @@ namespace krys::boo::css
       KRYS_NODISCARD size_t operator()(const PaletteKey &key) const noexcept;
     };
 
-    WeakPtr<dom::Document> _document;
+    WeakPtr<Document> _document;
     Ref<CSSFontFaceSet> _cssFontFaceSet;
     FontFaceClientImpl _fontFaceClient;
     List<FontSelectorClient *> _clients;
@@ -126,12 +126,12 @@ namespace krys::boo::css
     bool _buildIsUnderway {false};
     bool _isStopped {false};
 
-    explicit CSSFontSelector(dom::Document &document) noexcept;
+    explicit CSSFontSelector(Document &document) noexcept;
 
   public:
     ~CSSFontSelector() noexcept override;
 
-    KRYS_NODISCARD static Ref<CSSFontSelector> Create(dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<CSSFontSelector> Create(Document &document) noexcept;
 
     KRYS_NODISCARD uint32 Version() const noexcept final
     {
@@ -194,7 +194,7 @@ namespace krys::boo::css
     void UpdateStyleIfNeeded() noexcept;
 
     /// @brief The document the selector's fonts are for, if it's still alive.
-    KRYS_NODISCARD dom::Document *GetDocument() const noexcept
+    KRYS_NODISCARD Document *GetDocument() const noexcept
     {
       return _document.get();
     }

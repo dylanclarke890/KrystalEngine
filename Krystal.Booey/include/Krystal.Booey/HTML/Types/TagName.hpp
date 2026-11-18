@@ -261,7 +261,7 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TagName, 242u);
 
 namespace krys::boo::html
 {
-  KRYS_NODISCARD constexpr TagName ParseTagName(dom::DOMStringView name) noexcept
+  KRYS_NODISCARD constexpr TagName ParseTagName(DOMStringView name) noexcept
   {
     krys_debug_assert(!name.empty());
 

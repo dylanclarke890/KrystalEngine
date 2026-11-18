@@ -18,7 +18,7 @@
 #include <cmath>
 #include <format>
 
-namespace krys::boo::html
+namespace krys::boo
 {
   namespace
   {
@@ -83,32 +83,32 @@ namespace krys::boo::html
       float Distance {0};
     };
 
-    KRYS_NODISCARD dom::DOMString MarqueeTransform(bool horizontal, float offset) noexcept
+    KRYS_NODISCARD DOMString MarqueeTransform(bool horizontal, float offset) noexcept
     {
       auto text = std::format("translate{}({}px)", horizontal ? 'X' : 'Y', offset);
-      return dom::DOMString(text.begin(), text.end());
+      return DOMString(text.begin(), text.end());
     }
   }
 
-  HTMLMarqueeElement::HTMLMarqueeElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Marquee)
+  HTMLMarqueeElement::HTMLMarqueeElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Marquee)
   {
   }
 
   HTMLMarqueeElement::~HTMLMarqueeElement() noexcept = default;
 
-  Ref<HTMLMarqueeElement> HTMLMarqueeElement::Create(dom::Document &document) noexcept
+  Ref<HTMLMarqueeElement> HTMLMarqueeElement::Create(Document &document) noexcept
   {
     auto marquee = CreateRef<HTMLMarqueeElement>(document);
     marquee->EnsureUserAgentShadowRoot();
     return marquee;
   }
 
-  void HTMLMarqueeElement::DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept
+  void HTMLMarqueeElement::DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept
   {
     auto &document = NodeDocument();
     auto style = document.CreateElementNS(infra::namespaces::HTML, u8"style").ReleaseValue();
-    (void)style->TextContent(dom::DOMString(css::MarqueeElementShadowUserAgentStyleSheet));
+    (void)style->TextContent(DOMString(css::MarqueeElementShadowUserAgentStyleSheet));
     (void)root.AppendChild(*style);
 
     auto mover = dom::ElementFactory::CreateHTMLElement<HTMLDivElement>(document, u8"div");
@@ -132,7 +132,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLMarqueeElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLMarqueeElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
     if (oldAncestor.IsConnected())
@@ -143,22 +143,22 @@ namespace krys::boo::html
 
   uint32 HTMLMarqueeElement::HSpace() const noexcept
   {
-    return Reflect<uint32>(*this, u8"hspace");
+    return html::Reflect<uint32>(*this, u8"hspace");
   }
 
   void HTMLMarqueeElement::HSpace(uint32 value) noexcept
   {
-    Reflect<uint32>(*this, u8"hspace", krys::move(value));
+    html::Reflect<uint32>(*this, u8"hspace", krys::move(value));
   }
 
   uint32 HTMLMarqueeElement::VSpace() const noexcept
   {
-    return Reflect<uint32>(*this, u8"vspace");
+    return html::Reflect<uint32>(*this, u8"vspace");
   }
 
   void HTMLMarqueeElement::VSpace(uint32 value) noexcept
   {
-    Reflect<uint32>(*this, u8"vspace", krys::move(value));
+    html::Reflect<uint32>(*this, u8"vspace", krys::move(value));
   }
 
   // https://html.spec.whatwg.org/#marquee-loop-count
@@ -169,7 +169,7 @@ namespace krys::boo::html
     // parsed value, and otherwise is -1.
     if (auto value = GetAttribute(u8"loop"))
     {
-      if (auto parsed = Numbers::ParseInteger(*value); parsed.Success() && parsed.Value >= 1)
+      if (auto parsed = html::Numbers::ParseInteger(*value); parsed.Success() && parsed.Value >= 1)
       {
         return static_cast<int32>(std::min<int64>(parsed.Value, std::numeric_limits<int32>::max()));
       }
@@ -186,41 +186,43 @@ namespace krys::boo::html
     if (value != Loop() && (value > 0 || value == -1))
     {
       auto text = std::to_string(value);
-      (void)SetAttribute(u8"loop", dom::DOMString(text.begin(), text.end()));
+      (void)SetAttribute(u8"loop", DOMString(text.begin(), text.end()));
     }
   }
 
   // https://html.spec.whatwg.org/#marquee-scroll-distance
   uint32 HTMLMarqueeElement::ScrollAmount() const noexcept
   {
-    return Reflect<uint32, ReflectDefault<uint32> {DefaultMarqueeScrollAmount}>(*this, u8"scrollamount");
+    return html::Reflect<uint32, html::ReflectDefault<uint32> {DefaultMarqueeScrollAmount}>(*this,
+                                                                                            u8"scrollamount");
   }
 
   void HTMLMarqueeElement::ScrollAmount(uint32 value) noexcept
   {
-    Reflect<uint32, ReflectDefault<uint32> {DefaultMarqueeScrollAmount}>(*this, u8"scrollamount",
-                                                                         krys::move(value));
+    html::Reflect<uint32, html::ReflectDefault<uint32> {DefaultMarqueeScrollAmount}>(*this, u8"scrollamount",
+                                                                                     krys::move(value));
   }
 
   uint32 HTMLMarqueeElement::ScrollDelay() const noexcept
   {
-    return Reflect<uint32, ReflectDefault<uint32> {DefaultMarqueeScrollDelay}>(*this, u8"scrolldelay");
+    return html::Reflect<uint32, html::ReflectDefault<uint32> {DefaultMarqueeScrollDelay}>(*this,
+                                                                                           u8"scrolldelay");
   }
 
   void HTMLMarqueeElement::ScrollDelay(uint32 value) noexcept
   {
-    Reflect<uint32, ReflectDefault<uint32> {DefaultMarqueeScrollDelay}>(*this, u8"scrolldelay",
-                                                                        krys::move(value));
+    html::Reflect<uint32, html::ReflectDefault<uint32> {DefaultMarqueeScrollDelay}>(*this, u8"scrolldelay",
+                                                                                    krys::move(value));
   }
 
   bool HTMLMarqueeElement::TrueSpeed() const noexcept
   {
-    return Reflect<bool>(*this, u8"truespeed");
+    return html::Reflect<bool>(*this, u8"truespeed");
   }
 
   void HTMLMarqueeElement::TrueSpeed(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"truespeed", krys::move(value));
+    html::Reflect<bool>(*this, u8"truespeed", krys::move(value));
   }
 
   // https://html.spec.whatwg.org/#marquee-scroll-interval
@@ -390,58 +392,59 @@ namespace krys::boo::html
       });
   }
 
-  dom::DOMString HTMLMarqueeElement::Behavior() const noexcept
+  DOMString HTMLMarqueeElement::Behavior() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"behavior").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"behavior").value_or(u8"");
   }
 
-  void HTMLMarqueeElement::Behavior(dom::DOMString value) noexcept
+  void HTMLMarqueeElement::Behavior(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"behavior", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"behavior", krys::move(value));
   }
 
-  dom::DOMString HTMLMarqueeElement::BgColor() const noexcept
+  DOMString HTMLMarqueeElement::BgColor() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"bgcolor").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"bgcolor").value_or(u8"");
   }
 
-  void HTMLMarqueeElement::BgColor(dom::DOMString value) noexcept
+  void HTMLMarqueeElement::BgColor(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"bgcolor", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"bgcolor", krys::move(value));
   }
 
-  dom::DOMString HTMLMarqueeElement::Direction() const noexcept
+  DOMString HTMLMarqueeElement::Direction() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"direction").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"direction").value_or(u8"");
   }
 
-  void HTMLMarqueeElement::Direction(dom::DOMString value) noexcept
+  void HTMLMarqueeElement::Direction(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"direction", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"direction", krys::move(value));
   }
 
-  dom::DOMString HTMLMarqueeElement::Height() const noexcept
+  DOMString HTMLMarqueeElement::Height() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"height").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"height").value_or(u8"");
   }
 
-  void HTMLMarqueeElement::Height(dom::DOMString value) noexcept
+  void HTMLMarqueeElement::Height(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"height", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"height", krys::move(value));
   }
 
-  dom::DOMString HTMLMarqueeElement::Width() const noexcept
+  DOMString HTMLMarqueeElement::Width() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"width").value_or(u8"");
   }
 
-  void HTMLMarqueeElement::Width(dom::DOMString value) noexcept
+  void HTMLMarqueeElement::Width(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"width", krys::move(value));
   }
 
-  bool HTMLMarqueeElement::HasPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool
+    HTMLMarqueeElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                           const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == u8"width" || localName == u8"height" || localName == u8"bgcolor"
@@ -452,12 +455,12 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLMarqueeElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                                  const dom::DOMStringAtom &namespaceURI,
-                                                                  dom::DOMStringView value,
+  void HTMLMarqueeElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                                  const DOMStringAtom &namespaceURI,
+                                                                  DOMStringView value,
                                                                   css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);

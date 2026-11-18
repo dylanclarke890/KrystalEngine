@@ -14,9 +14,9 @@
 namespace krys::boo::svg::tests
 {
   /// @brief The name of a test attribute in the null namespace.
-  KRYS_NODISCARD inline dom::QualifiedName TestAttributeName(dom::DOMStringAtom localName) noexcept
+  KRYS_NODISCARD inline QualifiedName TestAttributeName(DOMStringAtom localName) noexcept
   {
-    return dom::QualifiedName {null, null, krys::move(localName)};
+    return QualifiedName {null, null, krys::move(localName)};
   }
 
   /// @brief An SVG element with a property of every kind the registry reaches, standing in for the elements
@@ -50,11 +50,11 @@ namespace krys::boo::svg::tests
     Ref<SVGAnimatedTransformList> Transform;
     Ref<SVGTransformList> ViewTransform;
 
-    List<dom::QualifiedName> ChangedAttributes;
+    List<QualifiedName> ChangedAttributes;
     bool SelfRelative {false};
     uint32 ClearedTargets {0};
 
-    explicit TestSVGElement(dom::Document &document, bool selfRelative = false) noexcept
+    explicit TestSVGElement(Document &document, bool selfRelative = false) noexcept
         : SVGElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::None),
           SVGTests(this), SVGURIReference(this), X(SVGAnimatedLength::Create(this, SVGLengthMode::Width)),
           Dx(SVGAnimatedLength::Create(this, SVGLengthMode::Width)),
@@ -108,7 +108,7 @@ namespace krys::boo::svg::tests
       return SVGTests::IsValid();
     }
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept override
     {
       ChangedAttributes.push_back(attributeName);
       SVGTests::SVGAttributeChanged(attributeName);
@@ -120,10 +120,10 @@ namespace krys::boo::svg::tests
     using SVGURIReference::Href;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept override
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept override
     {
-      auto string = value.value_or(dom::DOMStringView {});
+      auto string = value.value_or(DOMStringView {});
       if (name == SVGNames::XAttr())
       {
         X->SetBaseValInternal(SVGLengthValue(SVGLengthMode::Width, string));
@@ -134,7 +134,7 @@ namespace krys::boo::svg::tests
       }
       else if (name == TestAttributeName(u8"result"))
       {
-        String->SetBaseValInternal(dom::DOMString {string});
+        String->SetBaseValInternal(DOMString {string});
       }
       else if (name == TestAttributeName(u8"transform"))
       {
@@ -158,7 +158,7 @@ namespace krys::boo::svg::tests
   };
 
   /// @brief A test element, created in @p document.
-  KRYS_NODISCARD inline Ref<TestSVGElement> CreateTestSVGElement(dom::Document &document,
+  KRYS_NODISCARD inline Ref<TestSVGElement> CreateTestSVGElement(Document &document,
                                                                  bool selfRelative = false) noexcept
   {
     return AdoptRef(*new TestSVGElement(document, selfRelative));

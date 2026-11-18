@@ -20,12 +20,12 @@ namespace krys::boo::tests
       }
 
       /// @brief The element at the point, or null.
-      KRYS_NODISCARD dom::Element *Hit(double x, double y) noexcept
+      KRYS_NODISCARD boo::Element *Hit(double x, double y) noexcept
       {
         return Document->ElementFromPoint(x, y).get();
       }
 
-      KRYS_NODISCARD dom::Element *Body() noexcept
+      KRYS_NODISCARD boo::Element *Body() noexcept
       {
         return Document->Body().get();
       }
@@ -127,7 +127,7 @@ namespace krys::boo::tests
     CHECK(fixture.Hit(2, 50) == &fixture.ById(u8"p"));
     HitTestResult result(LayoutPoint(2, 50));
     fixture.Document->HitTest(HitTestRequest(), result);
-    CHECK(Is<dom::Text>(result.InnerNode()));
+    CHECK(Is<Text>(result.InnerNode()));
     CHECK(fixture.Hit(22, 50) == &fixture.ById(u8"e"));
   }
 
@@ -183,7 +183,7 @@ namespace krys::boo::tests
     HitFixture fixture {u8"<style>#a{height:20px}#a:hover{height:40px}</style><div id=a></div>"};
     auto &document = *fixture.Document;
     auto &a = fixture.ById(u8"a");
-    auto HeightOf = [](dom::Element &element)
+    auto HeightOf = [](boo::Element &element)
     {
       return style::tests::ResolverFixture::Serialised(*element.GetRenderStyle(),
                                                        element.GetRenderStyle()->Height());

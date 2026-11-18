@@ -43,7 +43,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
   class Event;
@@ -178,12 +178,12 @@ namespace krys::boo
     /// @param triggeringEvent The event that started the navigation (a click), if any.
     /// @param downloadAttribute The link's `download` attribute; null if it has none.
     /// @param sourceElement The link, if any.
-    void ChangeLocation(const url::URL &url, dom::DOMStringAtom passedTarget, dom::Event *triggeringEvent,
-                        ReferrerPolicy referrerPolicy, dom::DOMStringAtom downloadAttribute,
-                        dom::Element *sourceElement = nullptr) noexcept;
+    void ChangeLocation(const url::URL &url, DOMStringAtom passedTarget, Event *triggeringEvent,
+                        ReferrerPolicy referrerPolicy, DOMStringAtom downloadAttribute,
+                        Element *sourceElement = nullptr) noexcept;
 
     /// @brief Navigates as @p frameRequest asks, to a `GET` request.
-    void ChangeLocation(FrameLoadRequest frameRequest, dom::Event *triggeringEvent = nullptr) noexcept;
+    void ChangeLocation(FrameLoadRequest frameRequest, Event *triggeringEvent = nullptr) noexcept;
 
     /// @brief Hands a form submission (a `GET` or a `POST`) to the host.
     void SubmitForm(Ref<FormSubmission> &&submission) noexcept;
@@ -191,7 +191,7 @@ namespace krys::boo
     /// @brief The frame a navigation targeting @p name navigates: this frame for an empty name, `_self`,
     /// `_parent` and `_top` (a frame is the only one in its tree); null for `_blank` and other names, which
     /// would open a new browsing context.
-    KRYS_NODISCARD LocalFrame *FindFrameForNavigation(dom::DOMStringView name) const noexcept;
+    KRYS_NODISCARD LocalFrame *FindFrameForNavigation(DOMStringView name) const noexcept;
 
     /// @brief Run when the parser stops parsing the frame's document: scrolls to its URL's fragment.
     void FinishedParsing() noexcept;
@@ -236,7 +236,7 @@ namespace krys::boo
     /// @brief Hands the navigation @p action started to the host, for the browsing context @p frameName
     /// names (a new one for `_blank` or a name no frame has).
     void RequestNavigation(const NavigationAction &action, const ResourceRequest &request,
-                           const FormSubmission *formSubmission, dom::DOMStringView frameName) noexcept;
+                           const FormSubmission *formSubmission, DOMStringView frameName) noexcept;
 
     /// @brief The committed document gets a view of its own, as a new page's would: scrolled to its top, not
     /// yet laid out.

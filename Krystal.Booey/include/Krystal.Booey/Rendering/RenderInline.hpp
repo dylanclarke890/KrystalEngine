@@ -56,9 +56,9 @@ namespace krys::boo
       PositionForPoint(const LayoutPoint &point, HitTestSource source,
                        const RenderFragmentContainer *fragment = nullptr) noexcept final;
 
-    RenderInline(Type type, dom::Element &element, RenderStyle &&style) noexcept;
+    RenderInline(Type type, Element &element, RenderStyle &&style) noexcept;
 
-    RenderInline(Type type, dom::Document &document, RenderStyle &&style) noexcept;
+    RenderInline(Type type, Document &document, RenderStyle &&style) noexcept;
 
     ~RenderInline() noexcept override;
 

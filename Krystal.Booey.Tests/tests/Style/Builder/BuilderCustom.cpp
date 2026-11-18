@@ -56,7 +56,7 @@ namespace krys::boo::style::tests
       {
         static const CounterDirectives none {};
         const auto &map = Style.GetCounterDirectives().Map;
-        auto it = map.find(css::CSSOMStringAtom {name});
+        auto it = map.find(CSSOMStringAtom {name});
         return it == map.end() ? none : it->second;
       }
     };
@@ -197,7 +197,7 @@ namespace krys::boo::style::tests
     SECTION("Inherited")
     {
       auto &parentMap = ParentStyle.AccessCounterDirectives().Map;
-      parentMap[css::CSSOMStringAtom {u8"c"}] = CounterDirectives {.ResetValue = 1, .SetValue = 4};
+      parentMap[CSSOMStringAtom {u8"c"}] = CounterDirectives {.ResetValue = 1, .SetValue = 4};
       ApplyInherit(PropertyId::CounterSet);
       CHECK(Counter(u8"c").SetValue == 4);
       CHECK_FALSE(Counter(u8"c").ResetValue);

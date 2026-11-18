@@ -72,12 +72,12 @@ namespace krys::boo::dom
     _dataset = krys::move(dataset);
   }
 
-  void ElementRareData::SetAttributeStyleMap(Ref<css::StylePropertyMap> map) noexcept
+  void ElementRareData::SetAttributeStyleMap(Ref<StylePropertyMap> map) noexcept
   {
     _attributeStyleMap = krys::move(map);
   }
 
-  void ElementRareData::SetComputedStyleMap(Ref<css::StylePropertyMapReadOnly> map) noexcept
+  void ElementRareData::SetComputedStyleMap(Ref<StylePropertyMapReadOnly> map) noexcept
   {
     _computedStyleMap = krys::move(map);
   }

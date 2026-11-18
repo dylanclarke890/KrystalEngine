@@ -71,7 +71,7 @@ namespace krys::boo
     bool _needsHeightsRecalculation {false};
 
   public:
-    RenderMultiColumnFlow(dom::Document &document, RenderStyle &&style) noexcept;
+    RenderMultiColumnFlow(Document &document, RenderStyle &&style) noexcept;
 
     ~RenderMultiColumnFlow() noexcept override;
 

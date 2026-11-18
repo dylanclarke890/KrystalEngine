@@ -28,7 +28,7 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   namespace
   {

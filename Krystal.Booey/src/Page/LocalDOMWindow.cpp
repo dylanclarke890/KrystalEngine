@@ -26,7 +26,7 @@
 
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSComputedStyleDeclaration.hpp"
-#include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
@@ -57,7 +57,7 @@ namespace krys::boo
     }
   }
 
-  LocalDOMWindow::LocalDOMWindow(dom::Document &document) noexcept
+  LocalDOMWindow::LocalDOMWindow(boo::Document &document) noexcept
       : EventTarget(dom::EventTargetFlags::IsWindow), _document(CreateWeakPtr(&document)),
         _timeOrigin(html::EventLoop::Current().Now()),
         _lastActivationTimestamp(std::numeric_limits<dom::DOMHighResTimeStamp>::infinity()),
@@ -81,17 +81,17 @@ namespace krys::boo
     }
   }
 
-  Ref<LocalDOMWindow> LocalDOMWindow::Create(dom::Document &document) noexcept
+  Ref<LocalDOMWindow> LocalDOMWindow::Create(boo::Document &document) noexcept
   {
     return AdoptRef(*new LocalDOMWindow(document));
   }
 
-  dom::Document *LocalDOMWindow::Document() const noexcept
+  boo::Document *LocalDOMWindow::Document() const noexcept
   {
     return _document.get();
   }
 
-  void LocalDOMWindow::DidAddEventListener(const dom::EventListener &listener) noexcept
+  void LocalDOMWindow::DidAddEventListener(const EventListener &listener) noexcept
   {
     EventTarget::DidAddEventListener(listener);
     if (auto *document = Document())
@@ -148,9 +148,9 @@ namespace krys::boo
     page->GetChromeClient().Focus();
   }
 
-  bool LocalDOMWindow::IsNamedObject(const dom::Element &element, dom::DOMStringView name) noexcept
+  bool LocalDOMWindow::IsNamedObject(const Element &element, DOMStringView name) noexcept
   {
-    if (!Is<html::HTMLElement>(element) || name.empty())
+    if (!Is<HTMLElement>(element) || name.empty())
     {
       return false;
     }
@@ -170,8 +170,8 @@ namespace krys::boo
     return id && *id == name;
   }
 
-  Maybe<Variant<RefPtr<dom::Element>, RefPtr<dom::HTMLCollection>>>
-    LocalDOMWindow::NamedItem(dom::DOMStringView name) const noexcept
+  Maybe<Variant<RefPtr<Element>, RefPtr<dom::HTMLCollection>>>
+    LocalDOMWindow::NamedItem(DOMStringView name) const noexcept
   {
     // The named objects are in a document tree with window's associated Document as their root. There are no
     // child navigables.
@@ -181,11 +181,11 @@ namespace krys::boo
       return {};
     }
 
-    RefPtr<dom::Element> first;
+    RefPtr<Element> first;
     bool several = false;
     for (auto &node : dom::DescendantRange(*document))
     {
-      auto *element = DynamicDowncast<dom::Element>(node);
+      auto *element = DynamicDowncast<Element>(node);
       if (!element || !IsNamedObject(*element, name))
       {
         continue;
@@ -206,32 +206,32 @@ namespace krys::boo
     // If objects has only one element, return that element.
     if (!several)
     {
-      return Variant<RefPtr<dom::Element>, RefPtr<dom::HTMLCollection>>(krys::move(first));
+      return Variant<RefPtr<Element>, RefPtr<dom::HTMLCollection>>(krys::move(first));
     }
 
     // Otherwise return an HTMLCollection rooted at window's associated Document, whose filter matches only
     // named objects of window with the name name.
     RefPtr<dom::HTMLCollection> collection = CreateRef<dom::LiveHTMLCollection>(
-      *document, [name = dom::DOMString(name)](const dom::Element &element)
+      *document, [name = DOMString(name)](const Element &element)
       { return IsNamedObject(element, name) && element.IsInDocumentTree(); },
       dom::LiveCollectionInvalidation::IdOrName);
-    return Variant<RefPtr<dom::Element>, RefPtr<dom::HTMLCollection>>(krys::move(collection));
+    return Variant<RefPtr<Element>, RefPtr<dom::HTMLCollection>>(krys::move(collection));
   }
 
-  List<dom::DOMString> LocalDOMWindow::SupportedPropertyNames() const noexcept
+  List<DOMString> LocalDOMWindow::SupportedPropertyNames() const noexcept
   {
     // The window's document-tree child navigable target name property set (empty: there are no child
     // navigables), then the values of the name content attributes of embed, form, img and object elements,
     // and of the id content attributes of HTML elements, that are non-empty and in the document tree, in tree
     // order, ignoring later duplicates.
-    List<dom::DOMString> names;
+    List<DOMString> names;
     auto *document = Document();
     if (!document)
     {
       return names;
     }
 
-    auto add = [&](const Maybe<dom::DOMString> &value)
+    auto add = [&](const Maybe<DOMString> &value)
     {
       if (value && !value->empty() && std::ranges::find(names, *value) == names.end())
       {
@@ -241,8 +241,8 @@ namespace krys::boo
 
     for (auto &node : dom::DescendantRange(*document))
     {
-      auto *element = DynamicDowncast<dom::Element>(node);
-      if (!element || !Is<html::HTMLElement>(*element))
+      auto *element = DynamicDowncast<Element>(node);
+      if (!element || !Is<HTMLElement>(*element))
       {
         continue;
       }
@@ -270,11 +270,10 @@ namespace krys::boo
     return _closeWatcherManager.get();
   }
 
-  RefPtr<css::MediaQueryList> LocalDOMWindow::MatchMedia(dom::DOMStringView query) noexcept
+  RefPtr<MediaQueryList> LocalDOMWindow::MatchMedia(DOMStringView query) noexcept
   {
     auto *document = Document();
-    return document ? RefPtr<css::MediaQueryList>(document->GetMediaQueryMatcher().MatchMedia(query))
-                    : nullptr;
+    return document ? RefPtr<MediaQueryList>(document->GetMediaQueryMatcher().MatchMedia(query)) : nullptr;
   }
 
   VisualViewport &LocalDOMWindow::GetVisualViewport() const noexcept
@@ -444,12 +443,12 @@ namespace krys::boo
     return (page ? page->DeviceScaleFactor() : 1.f) * frame->FrameScaleFactor() * frame->PageZoomFactor();
   }
 
-  Ref<css::CSSStyleDeclaration>
-    LocalDOMWindow::GetComputedStyle(dom::Element &element, const css::CSSOMString &pseudoElement) noexcept
+  Ref<CSSStyleDeclaration> LocalDOMWindow::GetComputedStyle(Element &element,
+                                                            const CSSOMString &pseudoElement) noexcept
   {
     if (!pseudoElement.starts_with(u8':'))
     {
-      return css::CSSComputedStyleDeclaration::Create(element, null);
+      return CSSComputedStyleDeclaration::Create(element, null);
     }
 
     // FIXME: This does not work for pseudo-elements that take arguments (webkit.org/b/264103).
@@ -457,9 +456,9 @@ namespace krys::boo
       pseudoElement, css::SelectorParserContext {element.NodeDocument()});
     if (!pseudoElementIsParsable)
     {
-      return css::CSSComputedStyleDeclaration::CreateEmpty(element);
+      return CSSComputedStyleDeclaration::CreateEmpty(element);
     }
-    return css::CSSComputedStyleDeclaration::Create(element, pseudoElementIdentifier);
+    return CSSComputedStyleDeclaration::Create(element, pseudoElementIdentifier);
   }
 
   namespace

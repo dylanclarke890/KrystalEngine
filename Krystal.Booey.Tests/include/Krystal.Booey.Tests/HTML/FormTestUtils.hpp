@@ -44,7 +44,7 @@ namespace krys::boo::tests
     {
       for (auto &item : entries->Items())
       {
-        auto *value = std::get_if<dom::DOMString>(&item.Data);
+        auto *value = std::get_if<DOMString>(&item.Data);
         auto *file = std::get_if<RefPtr<File>>(&item.Data);
         received.Entries += (received.Entries.empty() ? "" : "&") + narrow(item.Name) + "="
                             + (value   ? narrow(*value)
@@ -54,7 +54,7 @@ namespace krys::boo::tests
     }
     if (auto *submitter = submission.Submitter())
     {
-      received.Submitter = narrow(submitter->GetAttribute(u8"id").value_or(dom::DOMString()));
+      received.Submitter = narrow(submitter->GetAttribute(u8"id").value_or(DOMString()));
     }
     return received;
   }
@@ -81,13 +81,13 @@ namespace krys::boo::tests
       TestPage = Page::Create(nullptr, nullptr, krys::move(loaderClient));
       Frame = ShareRefPtr(&TestPage->MainFrame());
       Frame->CreateView({200, 100});
-      Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+      Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
     }
 
     template <typename T>
-    KRYS_NODISCARD T &Get(dom::DOMStringView id) noexcept
+    KRYS_NODISCARD T &Get(DOMStringView id) noexcept
     {
-      return Downcast<T>(Downcast<html::HTMLElement>(ById(id)));
+      return Downcast<T>(Downcast<HTMLElement>(ById(id)));
     }
 
     /// @brief The submissions the host was asked about, after running the tasks that start them (they're
@@ -100,12 +100,12 @@ namespace krys::boo::tests
   };
 
   /// @brief Records the types of the events it hears, and cancels them if asked.
-  struct EventLog : dom::EventListenerCallback
+  struct EventLog : EventListenerCallback
   {
     List<std::string> Types;
     bool PreventDefault {false};
 
-    void HandleEvent(dom::Event &event) noexcept override
+    void HandleEvent(Event &event) noexcept override
     {
       Types.push_back(Str(event.Type().View()));
       if (PreventDefault)
@@ -114,13 +114,13 @@ namespace krys::boo::tests
       }
     }
 
-    KRYS_NODISCARD static Ref<EventLog> ListenTo(dom::EventTarget &target,
+    KRYS_NODISCARD static Ref<EventLog> ListenTo(EventTarget &target,
                                                  std::initializer_list<utf8_stringview> types) noexcept
     {
       auto log = CreateRef<EventLog>();
       for (auto type : types)
       {
-        target.AddEventListener(dom::DOMStringAtom(type), log, false);
+        target.AddEventListener(DOMStringAtom(type), log, false);
       }
       return log;
     }

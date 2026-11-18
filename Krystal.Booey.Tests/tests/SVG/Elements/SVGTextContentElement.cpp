@@ -17,7 +17,7 @@ namespace krys::boo::svg::tests
 
   namespace
   {
-    KRYS_NODISCARD SVGTextContentElement &TextById(dom::Document &document, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD SVGTextContentElement &TextById(Document &document, DOMStringView id) noexcept
     {
       auto element = document.GetElementById(id);
       krys_assert(element);
@@ -72,12 +72,12 @@ namespace krys::boo::svg::tests
     CHECK(text.GetCharNumAtPosition({0, 0}) == -1);
 
     // Character numbers past the text throw.
-    CHECK(text.GetStartPositionOfChar(7).GetException().Code() == dom::ExceptionCode::IndexSizeError);
-    CHECK(text.GetEndPositionOfChar(7).GetException().Code() == dom::ExceptionCode::IndexSizeError);
-    CHECK(text.GetExtentOfChar(7).GetException().Code() == dom::ExceptionCode::IndexSizeError);
-    CHECK(text.GetRotationOfChar(7).GetException().Code() == dom::ExceptionCode::IndexSizeError);
-    CHECK(text.GetSubStringLength(7, 1).GetException().Code() == dom::ExceptionCode::IndexSizeError);
-    CHECK(text.SelectSubString(7, 1).GetException().Code() == dom::ExceptionCode::IndexSizeError);
+    CHECK(text.GetStartPositionOfChar(7).GetException().Code() == ExceptionCode::IndexSizeError);
+    CHECK(text.GetEndPositionOfChar(7).GetException().Code() == ExceptionCode::IndexSizeError);
+    CHECK(text.GetExtentOfChar(7).GetException().Code() == ExceptionCode::IndexSizeError);
+    CHECK(text.GetRotationOfChar(7).GetException().Code() == ExceptionCode::IndexSizeError);
+    CHECK(text.GetSubStringLength(7, 1).GetException().Code() == ExceptionCode::IndexSizeError);
+    CHECK(text.SelectSubString(7, 1).GetException().Code() == ExceptionCode::IndexSizeError);
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "SVGTextContentElement: selectSubString",

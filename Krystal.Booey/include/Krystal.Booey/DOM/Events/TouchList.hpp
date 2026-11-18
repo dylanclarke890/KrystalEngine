@@ -31,7 +31,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   /// @brief A list of touches, as a touch event's `touches`, `targetTouches` and `changedTouches`.
   /// @see https://w3c.github.io/touch-events/#touchlist-interface

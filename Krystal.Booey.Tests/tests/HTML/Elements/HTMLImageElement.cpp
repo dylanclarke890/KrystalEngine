@@ -30,9 +30,9 @@ namespace krys::boo::tests
     {
       using PageInFrameFixture::PageInFrameFixture;
 
-      KRYS_NODISCARD html::HTMLImageElement &Image(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD HTMLImageElement &Image(DOMStringView id) noexcept
       {
-        return Downcast<html::HTMLImageElement>(ById(id));
+        return Downcast<HTMLImageElement>(ById(id));
       }
     };
 
@@ -55,11 +55,11 @@ namespace krys::boo::tests
 
       KRYS_NODISCARD ImageLoader::DecodePromise Promise() noexcept
       {
-        return [this](const dom::ExceptionOr<void> &result)
+        return [this](const ExceptionOr<void> &result)
         {
           if (result.HasException())
           {
-            CHECK(result.GetException().Code() == dom::ExceptionCode::EncodingError);
+            CHECK(result.GetException().Code() == ExceptionCode::EncodingError);
             Rejections.push_back(result.GetException().Message());
           }
           else
@@ -357,9 +357,9 @@ namespace krys::boo::tests
   TEST_CASE("HTMLImageElement.decoding: reflects its known values, auto by default",
             "[HTML][HTMLImageElement][html:dom-img-decoding][html:attr-img-decoding]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto element = document->CreateElement(u8"img").ReleaseValue();
-    auto &image = Downcast<html::HTMLImageElement>(Downcast<html::HTMLElement>(*element));
+    auto &image = Downcast<HTMLImageElement>(Downcast<HTMLElement>(*element));
     CHECK(css::tests::ToNarrow(image.Decoding()) == "auto");
     image.Decoding(u8"ASYNC");
     CHECK(css::tests::ToNarrow(image.Decoding()) == "async");

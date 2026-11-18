@@ -3,11 +3,14 @@
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Event;
   class EventTarget;
+}
 
+namespace krys::boo::dom
+{
   /// @brief Holds back the events dispatched while an `EventQueueScope` is alive, and dispatches them in
   /// order when the outermost scope ends: an editing command's `input` events fire once its changes are made,
   /// not from the middle of them.

@@ -35,8 +35,8 @@
 
 namespace krys::boo
 {
-  using OptionalDoubleOrString = Maybe<Variant<double, dom::DOMString>>;
-  using DoubleOrCSSNumericValueOrString = Variant<double, RefPtr<css::CSSNumericValue>, dom::DOMString>;
+  using OptionalDoubleOrString = Maybe<Variant<double, DOMString>>;
+  using DoubleOrCSSNumericValueOrString = Variant<double, RefPtr<CSSNumericValue>, DOMString>;
 
   /// @brief An animation effect's specified timing, as the Web Animations interfaces give and take it.
   /// @see https://drafts.csswg.org/web-animations-1/#dictdef-effecttiming
@@ -44,14 +44,14 @@ namespace krys::boo
   {
     /// @brief In milliseconds, a numeric value (a percentage, for a progress-based timeline), or the string
     /// `auto`.
-    DoubleOrCSSNumericValueOrString Duration {dom::DOMString(u8"auto")};
+    DoubleOrCSSNumericValueOrString Duration {DOMString(u8"auto")};
     /// @brief In milliseconds.
     double Delay {0};
     /// @brief In milliseconds.
     double EndDelay {0};
     double IterationStart {0};
     double Iterations {1};
-    dom::DOMString Easing {u8"linear"};
+    DOMString Easing {u8"linear"};
     FillMode Fill {FillMode::Auto};
     PlaybackDirection Direction {PlaybackDirection::Normal};
 
@@ -60,8 +60,8 @@ namespace krys::boo
     {
       return krys::SwitchOn(
         Duration, [](double doubleDuration) -> OptionalDoubleOrString { return doubleDuration; },
-        [](const dom::DOMString &stringDuration) -> OptionalDoubleOrString { return stringDuration; },
-        [](const RefPtr<css::CSSNumericValue> &) -> OptionalDoubleOrString { return null; });
+        [](const DOMString &stringDuration) -> OptionalDoubleOrString { return stringDuration; },
+        [](const RefPtr<CSSNumericValue> &) -> OptionalDoubleOrString { return null; });
     }
   };
 }

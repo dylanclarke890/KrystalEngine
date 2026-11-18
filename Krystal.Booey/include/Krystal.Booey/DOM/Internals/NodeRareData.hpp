@@ -30,12 +30,16 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
+  class Node;
+}
+
+namespace krys::boo::dom
+{
   class HTMLCollection;
   class LiveCollection;
-  class Node;
   class NodeList;
 
   /// @brief The data a node needs only some of the time, made when it's first needed; an element's is an

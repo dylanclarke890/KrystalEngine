@@ -40,10 +40,10 @@
 #include "Krystal.Booey/Rendering/Replaced/RenderHTMLCanvas.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLCanvasElement::HTMLCanvasElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Canvas),
+  HTMLCanvasElement::HTMLCanvasElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Canvas),
         CanvasBase(IntSize(static_cast<int32>(DefaultWidth), static_cast<int32>(DefaultHeight)))
   {
   }
@@ -59,26 +59,26 @@ namespace krys::boo::html
   // https://html.spec.whatwg.org/#dom-canvas-width
   uint32 HTMLCanvasElement::Width() const noexcept
   {
-    return Reflect<uint32, ReflectDefault<uint32> {DefaultWidth}>(*this, u8"width");
+    return html::Reflect<uint32, html::ReflectDefault<uint32> {DefaultWidth}>(*this, u8"width");
   }
 
   void HTMLCanvasElement::Width(uint32 value) noexcept
   {
-    Reflect<uint32, ReflectDefault<uint32> {DefaultWidth}>(*this, u8"width", value);
+    html::Reflect<uint32, html::ReflectDefault<uint32> {DefaultWidth}>(*this, u8"width", value);
   }
 
   uint32 HTMLCanvasElement::Height() const noexcept
   {
-    return Reflect<uint32, ReflectDefault<uint32> {DefaultHeight}>(*this, u8"height");
+    return html::Reflect<uint32, html::ReflectDefault<uint32> {DefaultHeight}>(*this, u8"height");
   }
 
   void HTMLCanvasElement::Height(uint32 value) noexcept
   {
-    Reflect<uint32, ReflectDefault<uint32> {DefaultHeight}>(*this, u8"height", value);
+    html::Reflect<uint32, html::ReflectDefault<uint32> {DefaultHeight}>(*this, u8"height", value);
   }
 
   // https://html.spec.whatwg.org/#dom-canvas-getcontext
-  RefPtr<CanvasRenderingContext> HTMLCanvasElement::GetContext(dom::DOMStringView contextId) noexcept
+  RefPtr<html::CanvasRenderingContext> HTMLCanvasElement::GetContext(DOMStringView contextId) noexcept
   {
     // 1. If options is not an object, then set options to null. (Skipped: GetContext2d takes the options.)
     // 2. Set options to the result of converting options to a JavaScript value. (Skipped: as above.)
@@ -90,24 +90,24 @@ namespace krys::boo::html
     {
       return GetContext2d();
     }
-    if (contextId == EngineTextureRenderingContext::ContextType)
+    if (contextId == html::EngineTextureRenderingContext::ContextType)
     {
       if (_context)
       {
-        return ShareRefPtr(DynamicDowncast<EngineTextureRenderingContext>(_context.get()));
+        return ShareRefPtr(DynamicDowncast<html::EngineTextureRenderingContext>(_context.get()));
       }
       return ShareRefPtr(CreateContextEngineTexture());
     }
     return nullptr;
   }
 
-  bool HTMLCanvasElement::Is2dType(dom::DOMStringView type) noexcept
+  bool HTMLCanvasElement::Is2dType(DOMStringView type) noexcept
   {
     return type == u8"2d";
   }
 
-  RefPtr<CanvasRenderingContext2D>
-    HTMLCanvasElement::GetContext2d(CanvasRenderingContext2DSettings &&settings) noexcept
+  RefPtr<html::CanvasRenderingContext2D>
+    HTMLCanvasElement::GetContext2d(html::CanvasRenderingContext2DSettings &&settings) noexcept
   {
     // none: Let context be the result of running the 2D context creation algorithm given this and options.
     // Set this's context mode to 2d. Return context.
@@ -117,12 +117,12 @@ namespace krys::boo::html
     }
     // 2d: Return the same object as was returned the last time the method was invoked with this same first
     // argument. Any other mode: Return null.
-    return ShareRefPtr(DynamicDowncast<CanvasRenderingContext2D>(_context.get()));
+    return ShareRefPtr(DynamicDowncast<html::CanvasRenderingContext2D>(_context.get()));
   }
 
   // https://html.spec.whatwg.org/#2d-context-creation-algorithm
-  CanvasRenderingContext2D *
-    HTMLCanvasElement::CreateContext2d(CanvasRenderingContext2DSettings &&settings) noexcept
+  html::CanvasRenderingContext2D *
+    HTMLCanvasElement::CreateContext2d(html::CanvasRenderingContext2DSettings &&settings) noexcept
   {
     krys_debug_assert(!_context);
 
@@ -137,7 +137,7 @@ namespace krys::boo::html
     // 7. Return context.
 
     auto context =
-      CanvasRenderingContext2D::Create(*this, krys::move(settings), NodeDocument().InQuirksMode());
+      html::CanvasRenderingContext2D::Create(*this, krys::move(settings), NodeDocument().InQuirksMode());
     auto *context2d = context.get();
     _context = krys::move(context);
 
@@ -146,10 +146,10 @@ namespace krys::boo::html
     return context2d;
   }
 
-  EngineTextureRenderingContext *HTMLCanvasElement::CreateContextEngineTexture() noexcept
+  html::EngineTextureRenderingContext *HTMLCanvasElement::CreateContextEngineTexture() noexcept
   {
     krys_debug_assert(!_context);
-    auto context = CreateUnique<EngineTextureRenderingContext>(*this);
+    auto context = CreateUnique<html::EngineTextureRenderingContext>(*this);
     auto *engineTextureContext = context.get();
     _context = krys::move(context);
 
@@ -215,7 +215,7 @@ namespace krys::boo::html
       }
     }
 
-    CanvasBase::DidDraw(rect);
+    html::CanvasBase::DidDraw(rect);
   }
 
   // https://html.spec.whatwg.org/#concept-canvas-set-bitmap-dimensions
@@ -224,7 +224,7 @@ namespace krys::boo::html
     const bool hadImageBuffer = HasCreatedImageBuffer();
 
     // 1. Reset the rendering context to its default state.
-    if (auto *context = DynamicDowncast<CanvasRenderingContext2D>(_context.get()))
+    if (auto *context = DynamicDowncast<html::CanvasRenderingContext2D>(_context.get()))
     {
       context->Reset();
     }
@@ -260,7 +260,7 @@ namespace krys::boo::html
     std::ignore = SetImageBuffer(nullptr);
     ClearCopiedImage();
 
-    if (auto *context = DynamicDowncast<GPUBasedCanvasRenderingContext>(_context.get()))
+    if (auto *context = DynamicDowncast<html::GPUBasedCanvasRenderingContext>(_context.get()))
     {
       context->Reshape();
     }
@@ -345,7 +345,7 @@ namespace krys::boo::html
 
     _didClearImageBuffer = true;
 
-    if (auto *canvas = DynamicDowncast<CanvasRenderingContext2D>(_context.get()))
+    if (auto *canvas = DynamicDowncast<html::CanvasRenderingContext2D>(_context.get()))
     {
       // No need to undo transforms/clip/etc. because we are called right after the context is reset.
       canvas->ClearRect(0, 0, Width(), Height());
@@ -357,7 +357,7 @@ namespace krys::boo::html
     return NodeDocument().CssParserContext();
   }
 
-  dom::Document *HTMLCanvasElement::CanvasDocument() const noexcept
+  Document *HTMLCanvasElement::CanvasDocument() const noexcept
   {
     return &NodeDocument();
   }
@@ -400,7 +400,7 @@ namespace krys::boo::html
       _context->PrepareForDisplay();
     }
 
-    if (_context->IsSurfaceBufferTransparentBlack(CanvasRenderingContext::SurfaceBuffer::DisplayBuffer))
+    if (_context->IsSurfaceBufferTransparentBlack(html::CanvasRenderingContext::SurfaceBuffer::DisplayBuffer))
     {
       const bool skipTransparentBlackDraw =
         context.GetCompositeMode() == CompositeMode {CompositeOperator::SourceOver, BlendMode::Normal};
@@ -414,7 +414,7 @@ namespace krys::boo::html
     if (_context->Is2d())
     {
       if (auto buffer =
-            _context->SurfaceBufferToImageBuffer(CanvasRenderingContext::SurfaceBuffer::DisplayBuffer))
+            _context->SurfaceBufferToImageBuffer(html::CanvasRenderingContext::SurfaceBuffer::DisplayBuffer))
       {
         context.DrawImageBuffer(*buffer, FloatRect(SnappedIntRect(rect)),
                                 ImagePaintingOptions(context.CompositeOperation()));
@@ -423,7 +423,7 @@ namespace krys::boo::html
     }
 
     if (auto image =
-          _context->SurfaceBufferToNativeImage(CanvasRenderingContext::SurfaceBuffer::DisplayBuffer))
+          _context->SurfaceBufferToNativeImage(html::CanvasRenderingContext::SurfaceBuffer::DisplayBuffer))
     {
       context.DrawNativeImage(*image, FloatRect(SnappedIntRect(rect)),
                               FloatRect({}, FloatSize(image->Size())),
@@ -435,10 +435,9 @@ namespace krys::boo::html
 
 #pragma region Element
 
-  void HTMLCanvasElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                             Maybe<dom::DOMStringView> oldValue,
-                                             Maybe<dom::DOMStringView> value,
-                                             const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLCanvasElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                             Maybe<DOMStringView> value,
+                                             const DOMStringAtom &namespaceURI) noexcept
   {
     if (namespaceURI == null && (localName == u8"width" || localName == u8"height"))
     {
@@ -447,7 +446,7 @@ namespace krys::boo::html
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
   }
 
-  void HTMLCanvasElement::OnAdopt(dom::Document &oldDocument) noexcept
+  void HTMLCanvasElement::OnAdopt(Document &oldDocument) noexcept
   {
     HTMLElement::OnAdopt(oldDocument);
 
@@ -468,8 +467,8 @@ namespace krys::boo::html
 
 #pragma region Presentational hints
 
-  bool HTMLCanvasElement::HasPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool HTMLCanvasElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                             const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && (localName == u8"width" || localName == u8"height"))
     {
@@ -478,12 +477,12 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLCanvasElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                                 const dom::DOMStringAtom &namespaceURI,
-                                                                 dom::DOMStringView value,
+  void HTMLCanvasElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                                 const DOMStringAtom &namespaceURI,
+                                                                 DOMStringView value,
                                                                  css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
@@ -506,7 +505,7 @@ namespace krys::boo::html
 
 #pragma endregion
 
-  KRYS_NODISCARD static dom::DOMString ToEncodingMimeType(dom::DOMStringView mimeType) noexcept
+  KRYS_NODISCARD static DOMString ToEncodingMimeType(DOMStringView mimeType) noexcept
   {
     if (!MIMETypeRegistry::IsSupportedImageMIMETypeForEncoding(mimeType))
     {
@@ -526,7 +525,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-canvas-todataurl
-  dom::DOMString HTMLCanvasElement::ToDataURL(dom::DOMStringView mimeType, Maybe<double> quality) noexcept
+  DOMString HTMLCanvasElement::ToDataURL(DOMStringView mimeType, Maybe<double> quality) noexcept
   {
     // 1. (Skipped: a canvas is always origin-clean, as there are no origins; see DIFFERENCES.md.)
 

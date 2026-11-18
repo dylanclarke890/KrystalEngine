@@ -35,10 +35,7 @@ namespace krys::boo
 {
   class FilterEffect;
   class GraphicsContext;
-}
 
-namespace krys::boo::svg
-{
   /// @brief A filter primitive element: its subregion and result name, and the filter effect it creates.
   /// @see https://drafts.fxtf.org/filter-effects/#InterfaceSVGFilterPrimitiveStandardAttributes
   class SVGFilterPrimitiveStandardAttributes : public SVGElement
@@ -78,7 +75,7 @@ namespace krys::boo::svg
       return _height->CurrentValue();
     }
 
-    KRYS_NODISCARD dom::DOMString Result() const noexcept
+    KRYS_NODISCARD DOMString Result() const noexcept
     {
       return _result->CurrentValue();
     }
@@ -110,7 +107,7 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD EnumSet<FilterEffectGeometry::Flags> EffectGeometryFlags() const noexcept;
 
-    KRYS_NODISCARD virtual List<dom::DOMStringAtom> FilterEffectInputsNames() const noexcept
+    KRYS_NODISCARD virtual List<DOMStringAtom> FilterEffectInputsNames() const noexcept
     {
       return {};
     }
@@ -128,7 +125,7 @@ namespace krys::boo::svg
     KRYS_NODISCARD RefPtr<FilterEffect> GetFilterEffect(const FilterEffectVector &inputs,
                                                         const GraphicsContext &destinationContext) noexcept;
 
-    void PrimitiveAttributeChanged(const dom::QualifiedName &attribute) noexcept;
+    void PrimitiveAttributeChanged(const QualifiedName &attribute) noexcept;
 
     void MarkFilterEffectForRepaint() noexcept;
 
@@ -137,30 +134,29 @@ namespace krys::boo::svg
     static void InvalidateFilterPrimitiveParent(SVGElement *element) noexcept;
 
   protected:
-    SVGFilterPrimitiveStandardAttributes(dom::Document &document,
+    SVGFilterPrimitiveStandardAttributes(Document &document,
                                          UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
                                          SVGElementInterface interface) noexcept;
 
     // Out of line: destroying _effect needs FilterEffect, which this header only forward-declares.
     ~SVGFilterPrimitiveStandardAttributes() noexcept override;
 
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept override;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept override;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept override;
 
     void OnChildrenChanged() noexcept override;
 
-    void PrimitiveAttributeOnChildChanged(const dom::Element &child,
-                                          const dom::QualifiedName &attribute) noexcept;
+    void PrimitiveAttributeOnChildChanged(const Element &child, const QualifiedName &attribute) noexcept;
 
-    virtual bool SetFilterEffectAttribute(FilterEffect &, const dom::QualifiedName &) noexcept
+    virtual bool SetFilterEffectAttribute(FilterEffect &, const QualifiedName &) noexcept
     {
       return false;
     }
 
-    virtual bool SetFilterEffectAttributeFromChild(FilterEffect &, const dom::Element &,
-                                                   const dom::QualifiedName &) noexcept
+    virtual bool SetFilterEffectAttributeFromChild(FilterEffect &, const Element &,
+                                                   const QualifiedName &) noexcept
     {
       return false;
     }
@@ -179,21 +175,21 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept override;
 
-    KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &) const noexcept override
+    KRYS_NODISCARD bool ChildShouldCreateRenderer(const Node &) const noexcept override
     {
       return false;
     }
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGFilterPrimitiveStandardAttributes)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &element) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGFilterPrimitiveStandardAttributes)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &element) noexcept
   {
     return element.IsFilterEffect();
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    auto *svgElement = krys::DynamicDowncast<krys::boo::svg::SVGElement>(node);
+    auto *svgElement = krys::DynamicDowncast<krys::boo::SVGElement>(node);
     return svgElement && IsType(*svgElement);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

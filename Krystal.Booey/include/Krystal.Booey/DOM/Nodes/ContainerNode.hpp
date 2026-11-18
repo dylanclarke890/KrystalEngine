@@ -27,6 +27,12 @@
 
 namespace krys::boo::dom
 {
+  class ExtensibilityHooks;
+  class MutationAlgorithms;
+}
+
+namespace krys::boo
+{
   class Element;
 
   /// @brief A ContainerNode is a Node that can have child nodes. It provides the common implementation for
@@ -37,8 +43,8 @@ namespace krys::boo::dom
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ContainerNode);
 
-    friend class ExtensibilityHooks;
-    friend class MutationAlgorithms;
+    friend class dom::ExtensibilityHooks;
+    friend class dom::MutationAlgorithms;
 
   public:
     /// @brief A change to a container's children, as style invalidation sees it.
@@ -102,7 +108,7 @@ namespace krys::boo::dom
     CheckedPtr<Node> _lastChild;
 
   protected:
-    ContainerNode(Document &document, dom::NodeType type, NodeFlags flags) noexcept;
+    ContainerNode(Document &document, dom::NodeType type, dom::NodeFlags flags) noexcept;
 
   public:
     ~ContainerNode() noexcept override;
@@ -156,8 +162,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::ContainerNode)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::ContainerNode)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
     return node.IsContainerNode();
   }

@@ -83,7 +83,7 @@ namespace krys::boo::tests
     };
 
     /// @brief Records the events it handles as `type:target`, with `^` for those that bubble.
-    struct EventRecorder : public dom::EventListenerCallback
+    struct EventRecorder : public EventListenerCallback
     {
       List<std::string> &Records;
 
@@ -91,15 +91,15 @@ namespace krys::boo::tests
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         auto type = event.Type().View();
         std::string target = "document";
-        if (auto *node = DynamicDowncast<dom::Node>(event.Target().get()))
+        if (auto *node = DynamicDowncast<Node>(event.Target().get()))
         {
-          if (auto *element = DynamicDowncast<dom::Element>(*node))
+          if (auto *element = DynamicDowncast<Element>(*node))
           {
-            auto id = element->GetAttribute(u8"id").value_or(dom::DOMString());
+            auto id = element->GetAttribute(u8"id").value_or(DOMString());
             target = std::string(id.begin(), id.end());
           }
         }
@@ -158,15 +158,15 @@ namespace krys::boo::tests
     }
 
     /// @brief Cancels the events it handles, keeping the last one's vertical delta.
-    struct WheelCanceller : public dom::EventListenerCallback
+    struct WheelCanceller : public EventListenerCallback
     {
       double DeltaY {0};
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         if (event.IsWheelEvent())
         {
-          DeltaY = static_cast<dom::WheelEvent &>(event).DeltaY();
+          DeltaY = static_cast<WheelEvent &>(event).DeltaY();
         }
         event.PreventDefault();
       }
@@ -510,10 +510,10 @@ namespace krys::boo::tests
       utf8_string(TallPage)
       + u8"<div id=box style=overflow:auto;height:50px><div style=height:200px></div></div>"};
     List<std::string> records;
-    Ref<dom::EventListenerCallback> recorder = CreateRef<EventRecorder>(records);
+    Ref<EventListenerCallback> recorder = CreateRef<EventRecorder>(records);
     for (auto type : {u8"scroll", u8"scrollend"})
     {
-      fixture.Document->AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, true);
+      fixture.Document->AddEventListener(DOMStringAtom(type), Ref {recorder}, true);
     }
 
     // The view's scroll fires at the document, bubbling, at the next scroll steps, once however often it
@@ -611,7 +611,7 @@ namespace krys::boo::tests
     SECTION("pressing a scrollbar leaves the focus alone")
     {
       auto &field = fixture.ById(u8"field");
-      Downcast<html::HTMLElement>(field).Focus();
+      Downcast<HTMLElement>(field).Focus();
       REQUIRE(fixture.Document->FocusedElement() == &field);
       Press(handler, {190, 75});
       Release(handler, {190, 75});
@@ -843,7 +843,7 @@ namespace krys::boo::tests
     SECTION("pressing a scrollbar doesn't move the focus to the viewport")
     {
       auto &field = fixture.ById(u8"field");
-      Downcast<html::HTMLElement>(field).Focus();
+      Downcast<HTMLElement>(field).Focus();
       Press(handler, {90, 60});
       Release(handler, {90, 60});
       CHECK(fixture.Document->FocusedElement() == &field);
@@ -919,7 +919,7 @@ namespace krys::boo::tests
     {
       // The document's wheel listeners are passive unless they say otherwise.
       auto canceller = CreateRef<WheelCanceller>();
-      dom::AddEventListenerOptions options;
+      AddEventListenerOptions options;
       options.Passive = false;
       fixture.Document->AddEventListener(u8"wheel", canceller, options);
       CHECK(Wheel(handler, {20, 20}, {0, 100}));
@@ -957,7 +957,7 @@ namespace krys::boo::tests
 
     // No wheel event fires.
     auto canceller = CreateRef<WheelCanceller>();
-    dom::AddEventListenerOptions options;
+    AddEventListenerOptions options;
     options.Passive = false;
     fixture.Document->AddEventListener(u8"wheel", canceller, options);
 
@@ -1053,7 +1053,7 @@ namespace krys::boo::tests
     SECTION("the focused box scrolls first, then the view")
     {
       auto &box = fixture.ById(u8"box");
-      Downcast<html::HTMLElement>(box).Focus();
+      Downcast<HTMLElement>(box).Focus();
       CHECK(down());
       CHECK(box.ScrollTop() == 40);
       CHECK(Key(handler, u8"End", u8"End", vk::End));
@@ -1065,8 +1065,8 @@ namespace krys::boo::tests
 
     SECTION("a cancelled keydown scrolls nothing")
     {
-      fixture.Document->AddEventListener(
-        u8"keydown", Ref<dom::EventListenerCallback> {CreateRef<WheelCanceller>()}, false);
+      fixture.Document->AddEventListener(u8"keydown",
+                                         Ref<EventListenerCallback> {CreateRef<WheelCanceller>()}, false);
       CHECK(down());
       CHECK(view.GetScrollPosition() == ScrollPosition());
     }

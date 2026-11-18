@@ -189,7 +189,7 @@ namespace krys::boo::tests
             "[Page][Scrolling][ScrollAnchoringController][css-scroll-anchoring:priority-candidates]")
   {
     AnimationPageFixture fixture {AnchoringPage({}, u8"<textarea id=t></textarea>")};
-    Downcast<html::HTMLElement>(fixture.ById(u8"t")).Focus(dom::FocusOptions {.PreventScroll = true});
+    Downcast<HTMLElement>(fixture.ById(u8"t")).Focus(dom::FocusOptions {.PreventScroll = true});
     ScrollViewTo(fixture, 300);
     CHECK(View(fixture).GetScrollAnchoringController()->AnchorElement() == &fixture.ById(u8"t"));
 
@@ -203,7 +203,7 @@ namespace krys::boo::tests
             "[Page][Scrolling][ScrollAnchoringController][css-scroll-anchoring:priority-candidates]")
   {
     AnimationPageFixture fixture {AnchoringPage({}, u8"<div id=t tabindex=0></div>")};
-    Downcast<html::HTMLElement>(fixture.ById(u8"t")).Focus(dom::FocusOptions {.PreventScroll = true});
+    Downcast<HTMLElement>(fixture.ById(u8"t")).Focus(dom::FocusOptions {.PreventScroll = true});
     ScrollViewTo(fixture, 300);
     CHECK(View(fixture).GetScrollAnchoringController()->AnchorElement() == &fixture.ById(u8"d6"));
   }

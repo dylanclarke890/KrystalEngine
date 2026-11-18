@@ -50,9 +50,19 @@ namespace krys::boo::dom
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::EventPhaseType, 4u)
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
+}
+
+namespace krys::boo::dom
+{
+  class EventDispatcher;
+  class EventFactory;
+}
+
+namespace krys::boo
+{
   class EventTarget;
 
   /// @see https://dom.spec.whatwg.org/#dictdef-eventinit
@@ -67,10 +77,10 @@ namespace krys::boo::dom
   /// @see https://dom.spec.whatwg.org/#event
   class Event : public RefCounted<Event>
   {
-    friend class Document;
-    friend class EventDispatcher;
-    friend class EventFactory;
-    friend class ShadowRoot;
+    friend class boo::Document;
+    friend class dom::EventDispatcher;
+    friend class dom::EventFactory;
+    friend class boo::ShadowRoot;
     friend class EventTarget;
 
   protected:
@@ -83,8 +93,8 @@ namespace krys::boo::dom
     RefPtr<EventTarget> _currentTarget {nullptr};
     MonotonicTime::duration _createTime {};
     /// @see https://dom.spec.whatwg.org/#event-path
-    List<EventPathItem> _path;
-    EventPhaseType _eventPhase : BitCount<EventPhaseType>() {EventPhaseType::NONE};
+    List<dom::EventPathItem> _path;
+    dom::EventPhaseType _eventPhase : BitCount<dom::EventPhaseType>() {dom::EventPhaseType::NONE};
     bool _isTrusted : 1 {false};
     bool _bubbles : 1 {false};
     bool _cancellable : 1 {false};
@@ -154,7 +164,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD List<Ref<EventTarget>> ComposedPath() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-event-eventphase
-    KRYS_NODISCARD EventPhaseType EventPhase() const noexcept
+    KRYS_NODISCARD dom::EventPhaseType EventPhase() const noexcept
     {
       return _eventPhase;
     }
@@ -251,7 +261,7 @@ namespace krys::boo::dom
     /// @brief The event's creation time in milliseconds since the time origin of @p document's window; 0 if
     /// it has none.
     /// @see https://dom.spec.whatwg.org/#dom-event-timestamp
-    KRYS_NODISCARD DOMHighResTimeStamp TimeStampForBindings(const Document &document) const noexcept;
+    KRYS_NODISCARD dom::DOMHighResTimeStamp TimeStampForBindings(const Document &document) const noexcept;
 
     /// @note Legacy.
     /// @see https://dom.spec.whatwg.org/#dom-event-initevent

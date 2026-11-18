@@ -32,11 +32,18 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/String.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSNumericValue;
-  enum class UnitType : uint8;
+}
 
+namespace krys::boo::css
+{
+  enum class UnitType : uint8;
+}
+
+namespace krys::boo
+{
   /// @brief A numeric value's type: an exponent for each base type it has, and the base type a percentage
   /// resolves against.
   /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-type
@@ -54,7 +61,7 @@ namespace krys::boo::css
     Maybe<CSSNumericBaseType> PercentHint;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#cssnumericvalue-create-a-type
-    KRYS_NODISCARD static Maybe<CSSNumericType> Create(UnitType unit, int32 exponent = 1) noexcept;
+    KRYS_NODISCARD static Maybe<CSSNumericType> Create(css::UnitType unit, int32 exponent = 1) noexcept;
 
     KRYS_NODISCARD friend bool operator==(const CSSNumericType &, const CSSNumericType &) noexcept = default;
 

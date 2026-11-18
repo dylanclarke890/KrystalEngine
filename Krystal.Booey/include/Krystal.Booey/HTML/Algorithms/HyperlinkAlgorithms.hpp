@@ -5,10 +5,11 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
   class Event;
+  class HTMLElement;
 }
 
 namespace krys::boo::url
@@ -18,8 +19,6 @@ namespace krys::boo::url
 
 namespace krys::boo::html
 {
-  class HTMLElement;
-
   /// @brief What `<a>` and `<area>` share as hyperlinks: their URL, their target and following them.
   /// @see https://html.spec.whatwg.org/#links-created-by-a-and-area-elements
   class HyperlinkAlgorithms
@@ -35,13 +34,13 @@ namespace krys::boo::html
     /// @brief The browsing context @p element's link navigates: its `target`, or the document's base target,
     /// with `_blank` for a target with dangling markup.
     /// @see https://html.spec.whatwg.org/#get-an-element's-target
-    KRYS_NODISCARD static dom::DOMStringAtom EffectiveTarget(const HTMLElement &element) noexcept;
+    KRYS_NODISCARD static DOMStringAtom EffectiveTarget(const HTMLElement &element) noexcept;
 
     /// @brief Whether @p event is the keydown of the Enter key.
-    KRYS_NODISCARD static bool IsEnterKeyKeydownEvent(const dom::Event &event) noexcept;
+    KRYS_NODISCARD static bool IsEnterKeyKeydownEvent(const Event &event) noexcept;
 
     /// @brief Whether @p element's `rel` attribute has the keyword @p relation (ASCII case-insensitively).
-    KRYS_NODISCARD static bool HasRel(const HTMLElement &element, dom::DOMStringView relation) noexcept;
+    KRYS_NODISCARD static bool HasRel(const HTMLElement &element, DOMStringView relation) noexcept;
 
     /// @brief The referrer policy @p subject's link is followed with: `no-referrer` for `rel=noreferrer`.
     /// @see https://html.spec.whatwg.org/#hyperlink-referrer-policy
@@ -50,12 +49,12 @@ namespace krys::boo::html
     /// @brief The activation behaviour of `<a>` and `<area>`: follows the link, with the coordinates clicked
     /// on a server-side image map.
     /// @see https://html.spec.whatwg.org/#the-a-element:activation-behaviour
-    static void ActivationBehavior(HTMLElement &element, dom::Event &event) noexcept;
+    static void ActivationBehavior(HTMLElement &element, Event &event) noexcept;
 
     /// @brief Follows @p subject's link, as @p event (a click, or the Enter key's simulated click) asks: its
     /// frame's loader navigates to its URL, followed by @p hyperlinkSuffix, in its target.
     /// @see https://html.spec.whatwg.org/#following-hyperlinks-2
-    static void FollowTheHyperlink(HTMLElement &subject, dom::Event &event,
+    static void FollowTheHyperlink(HTMLElement &subject, Event &event,
                                    const Maybe<utf8_string> &hyperlinkSuffix = null) noexcept;
   };
 }

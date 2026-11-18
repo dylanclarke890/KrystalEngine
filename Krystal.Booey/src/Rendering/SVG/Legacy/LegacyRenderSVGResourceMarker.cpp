@@ -32,7 +32,7 @@
 
 namespace krys::boo
 {
-  LegacyRenderSVGResourceMarker::LegacyRenderSVGResourceMarker(svg::SVGMarkerElement &element,
+  LegacyRenderSVGResourceMarker::LegacyRenderSVGResourceMarker(SVGMarkerElement &element,
                                                                RenderStyle &&style) noexcept
       : LegacyRenderSVGResourceContainer(Type::LegacySVGResourceMarker, element, krys::move(style))
   {
@@ -40,12 +40,12 @@ namespace krys::boo
 
   LegacyRenderSVGResourceMarker::~LegacyRenderSVGResourceMarker() noexcept = default;
 
-  svg::SVGMarkerElement &LegacyRenderSVGResourceMarker::MarkerElement() const noexcept
+  SVGMarkerElement &LegacyRenderSVGResourceMarker::MarkerElement() const noexcept
   {
-    return Downcast<svg::SVGMarkerElement>(LegacyRenderSVGResourceContainer::GetElement());
+    return Downcast<SVGMarkerElement>(LegacyRenderSVGResourceContainer::GetElement());
   }
 
-  svg::SVGMarkerUnitsType LegacyRenderSVGResourceMarker::MarkerUnits() const noexcept
+  SVGMarkerUnitsType LegacyRenderSVGResourceMarker::MarkerUnits() const noexcept
   {
     return MarkerElement().MarkerUnits();
   }
@@ -96,14 +96,14 @@ namespace krys::boo
   FloatPoint LegacyRenderSVGResourceMarker::ReferencePoint() const noexcept
   {
     auto &markerElement = MarkerElement();
-    svg::SVGLengthContext lengthContext(&markerElement);
+    SVGLengthContext lengthContext(&markerElement);
     return FloatPoint(markerElement.RefX().Value(lengthContext), markerElement.RefY().Value(lengthContext));
   }
 
   Maybe<float> LegacyRenderSVGResourceMarker::Angle() const noexcept
   {
     auto &markerElement = MarkerElement();
-    if (markerElement.OrientType() == svg::SVGMarkerOrientAngle)
+    if (markerElement.OrientType() == SVGMarkerOrientAngle)
     {
       return markerElement.OrientAngle().Value();
     }
@@ -114,7 +114,7 @@ namespace krys::boo
                                                                       float autoAngle,
                                                                       float strokeWidth) const noexcept
   {
-    bool useStrokeWidth = MarkerElement().MarkerUnits() == svg::SVGMarkerUnitsType::StrokeWidth;
+    bool useStrokeWidth = MarkerElement().MarkerUnits() == SVGMarkerUnitsType::StrokeWidth;
 
     AffineTransform transform;
     transform.Translate(origin);
@@ -127,8 +127,7 @@ namespace krys::boo
   {
     auto &markerElement = MarkerElement();
     // An empty viewBox disables rendering.
-    if (markerElement.HasAttribute(svg::SVGNames::ViewBoxAttr().LocalName())
-        && markerElement.HasEmptyViewBox())
+    if (markerElement.HasAttribute(SVGNames::ViewBoxAttr().LocalName()) && markerElement.HasEmptyViewBox())
     {
       return;
     }
@@ -170,7 +169,7 @@ namespace krys::boo
     }
 
     auto &markerElement = MarkerElement();
-    svg::SVGLengthContext lengthContext(&markerElement);
+    SVGLengthContext lengthContext(&markerElement);
     float w = markerElement.MarkerWidth().Value(lengthContext);
     float h = markerElement.MarkerHeight().Value(lengthContext);
     _viewport = FloatRect(0, 0, w, h);

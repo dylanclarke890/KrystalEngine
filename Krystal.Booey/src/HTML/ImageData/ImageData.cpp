@@ -127,16 +127,15 @@ namespace krys::boo::html
     return AdoptRef(*new ImageData(size, krys::move(array), colorSpace));
   }
 
-  dom::ExceptionOr<Ref<ImageData>> ImageData::Create(uint32 sw, uint32 sh,
-                                                     PredefinedColorSpace defaultColorSpace,
-                                                     Maybe<ImageDataSettings> settings,
-                                                     Span<const uint8> optionalBytes) noexcept
+  ExceptionOr<Ref<ImageData>> ImageData::Create(uint32 sw, uint32 sh, PredefinedColorSpace defaultColorSpace,
+                                                Maybe<ImageDataSettings> settings,
+                                                Span<const uint8> optionalBytes) noexcept
   {
     // https://html.spec.whatwg.org/#dom-imagedata
     // 1. If one or both of sw and sh are zero, then throw an "IndexSizeError" DOMException.
     if (!sw || !sh)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     // 2. Initialize this given sw, sh, and settings.
@@ -149,20 +148,20 @@ namespace krys::boo::html
     constexpr auto maximum = static_cast<uint32>(std::numeric_limits<int32>::max());
     if (sw > maximum || sh > maximum)
     {
-      return dom::Exception {dom::ExceptionCode::RangeError, u8"Cannot allocate a buffer of this size"};
+      return Exception {ExceptionCode::RangeError, u8"Cannot allocate a buffer of this size"};
     }
     IntSize size(static_cast<int32>(sw), static_cast<int32>(sh));
     auto pixelFormat = ComputePixelFormat(settings);
     auto dataSize = ComputeDataSize(size, pixelFormat);
     if (!dataSize)
     {
-      return dom::Exception {dom::ExceptionCode::RangeError, u8"Cannot allocate a buffer of this size"};
+      return Exception {ExceptionCode::RangeError, u8"Cannot allocate a buffer of this size"};
     }
 
     auto array = ImageDataArray::TryCreate(*dataSize, pixelFormat, optionalBytes);
     if (!array)
     {
-      return dom::Exception {dom::ExceptionCode::RangeError, u8"Out of memory"};
+      return Exception {ExceptionCode::RangeError, u8"Out of memory"};
     }
 
     // 3.-8. Initialize the width attribute of imageData to pixelsPerRow. [...] Otherwise, initialize the
@@ -171,14 +170,14 @@ namespace krys::boo::html
     return AdoptRef(*new ImageData(size, krys::move(*array), colorSpace));
   }
 
-  dom::ExceptionOr<Ref<ImageData>> ImageData::Create(uint32 sw, uint32 sh,
-                                                     Maybe<ImageDataSettings> settings) noexcept
+  ExceptionOr<Ref<ImageData>> ImageData::Create(uint32 sw, uint32 sh,
+                                                Maybe<ImageDataSettings> settings) noexcept
   {
     return Create(sw, sh, PredefinedColorSpace::SRGB, settings);
   }
 
-  dom::ExceptionOr<Ref<ImageData>> ImageData::Create(ImageDataArray &&array, uint32 sw, Maybe<uint32> sh,
-                                                     Maybe<ImageDataSettings> settings) noexcept
+  ExceptionOr<Ref<ImageData>> ImageData::Create(ImageDataArray &&array, uint32 sw, Maybe<uint32> sh,
+                                                Maybe<ImageDataSettings> settings) noexcept
   {
     // https://html.spec.whatwg.org/#dom-imagedata-with-data
     // 1. Let bytesPerPixel be 4 if settings["pixelFormat"] is "rgba-unorm8"; otherwise 8.
@@ -189,8 +188,7 @@ namespace krys::boo::html
     auto length = array.Length();
     if (!length || length % 4)
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError,
-                             u8"Length is not a non-zero multiple of 4"};
+      return Exception {ExceptionCode::InvalidStateError, u8"Length is not a non-zero multiple of 4"};
     }
 
     // 4. Let length be length divided by bytesPerPixel.
@@ -198,7 +196,7 @@ namespace krys::boo::html
     auto pixels = length / 4;
     if (!sw || pixels % sw)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError, u8"Length is not a multiple of sw"};
+      return Exception {ExceptionCode::IndexSizeError, u8"Length is not a multiple of sw"};
     }
 
     // 6. Let height be length divided by sw.
@@ -206,13 +204,13 @@ namespace krys::boo::html
     if (height > static_cast<size_t>(std::numeric_limits<int32>::max())
         || sw > static_cast<uint32>(std::numeric_limits<int32>::max()))
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError, u8"Computed height is too big"};
+      return Exception {ExceptionCode::IndexSizeError, u8"Computed height is too big"};
     }
 
     // 7. If sh was given and its value is not equal to height, then throw an "IndexSizeError" DOMException.
     if (sh && *sh != height)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError, u8"sh value is not equal to height"};
+      return Exception {ExceptionCode::IndexSizeError, u8"sh value is not equal to height"};
     }
 
     // 8. Initialize this given sw, sh, settings, and source set to data.
@@ -225,7 +223,7 @@ namespace krys::boo::html
     auto dataSize = ComputeDataSize(size, ComputePixelFormat(settings));
     if (!dataSize || *dataSize != length)
     {
-      return dom::Exception {dom::ExceptionCode::RangeError};
+      return Exception {ExceptionCode::RangeError};
     }
 
     auto colorSpace = ComputeColorSpace(settings);

@@ -30,7 +30,7 @@
 #include "Krystal.Booey/SVG/SVGTests.hpp"
 #include "Krystal.Booey/SVG/SVGTransformList.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief Reaches one of an element's conditional processing attributes, which it keeps in its rare data.
   template <typename TOwner>
@@ -63,7 +63,7 @@ namespace krys::boo::svg
       Property(owner)->Detach();
     }
 
-    KRYS_NODISCARD Maybe<dom::DOMString> Synchronize(const TOwner &owner) const noexcept override
+    KRYS_NODISCARD Maybe<DOMString> Synchronize(const TOwner &owner) const noexcept override
     {
       return Property(owner)->Synchronize();
     }

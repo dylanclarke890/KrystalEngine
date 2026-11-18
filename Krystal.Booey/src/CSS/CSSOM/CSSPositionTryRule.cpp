@@ -24,14 +24,14 @@
  */
 
 #include "Krystal.Booey/CSS/CSSOM/CSSPositionTryRule.hpp"
-#include "Krystal.Booey/CSS/Descriptors/CSSPositionTryDescriptors.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSPositionTryDescriptors.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   CSSPositionTryRule::CSSPositionTryRule(css::PositionTryRule &rule, CSSStyleSheet *parent) noexcept
       : CSSRule(parent), _positionTryRule(ShareRef(rule))
@@ -57,7 +57,7 @@ namespace krys::boo::css
     builder.Append(u8"@position-try ", Name().View(), u8" {");
 
     auto properties = _positionTryRule->ProtectedProperties();
-    if (auto declarations = properties->AsText(DefaultSerialisationContext()); !declarations.empty())
+    if (auto declarations = properties->AsText(css::DefaultSerialisationContext()); !declarations.empty())
     {
       builder.Append(u8" ", declarations, u8' ');
     }
@@ -70,7 +70,7 @@ namespace krys::boo::css
     return krys::move(builder).ToString();
   }
 
-  void CSSPositionTryRule::Reattach(Rule &rule) noexcept
+  void CSSPositionTryRule::Reattach(css::Rule &rule) noexcept
   {
     _positionTryRule = ShareRef(Downcast<css::PositionTryRule>(rule));
     if (auto propertiesCSSOMWrapper = _propertiesCSSOMWrapper)

@@ -27,7 +27,7 @@
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   CSSScopeRule::CSSScopeRule(css::ScopeRule &rule, CSSStyleSheet *parent) noexcept
       : CSSGroupingRule(rule, parent)

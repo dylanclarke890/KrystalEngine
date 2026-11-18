@@ -62,21 +62,21 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD bool ShouldAlwaysUseDirectionalSelection(const dom::Document *document) noexcept
+    KRYS_NODISCARD bool ShouldAlwaysUseDirectionalSelection(const Document *document) noexcept
     {
       return !document
              || EditingBehavior(document->GetSettings().EditingBehaviorType)
                   .ShouldConsiderSelectionAsDirectional();
     }
 
-    KRYS_NODISCARD EditingBehavior Behavior(const dom::Document *document) noexcept
+    KRYS_NODISCARD EditingBehavior Behavior(const Document *document) noexcept
     {
       return EditingBehavior(document ? document->GetSettings().EditingBehaviorType
                                       : EditingBehaviorType::Windows);
     }
 
     KRYS_NODISCARD bool SelectionIsOrphanedOrBelongsToWrongDocument(const VisibleSelection &selection,
-                                                                    const dom::Document *document) noexcept
+                                                                    const Document *document) noexcept
     {
       if (selection.IsOrphan())
       {
@@ -86,14 +86,14 @@ namespace krys::boo
       return document && documentOfSelection && document != documentOfSelection.get();
     }
 
-    KRYS_NODISCARD bool ContainsEndpoints(const dom::Document *document,
+    KRYS_NODISCARD bool ContainsEndpoints(const Document *document,
                                           const Maybe<dom::SimpleRange> &range) noexcept
     {
       return document && range && document->Contains(range->Start.Container.get())
              && document->Contains(range->End.Container.get());
     }
 
-    KRYS_NODISCARD bool ContainsEndpoints(const dom::Document *document, const dom::Range &liveRange) noexcept
+    KRYS_NODISCARD bool ContainsEndpoints(const Document *document, const dom::Range &liveRange) noexcept
     {
       // Only need to check the start container because live ranges enforce the invariant that start and end
       // have a common ancestor.
@@ -117,8 +117,7 @@ namespace krys::boo
       return result;
     }
 
-    void RepaintCaretForLocalRect(dom::Node *node, const LayoutRect &rect,
-                                  CaretAnimator *caretAnimator) noexcept
+    void RepaintCaretForLocalRect(Node *node, const LayoutRect &rect, CaretAnimator *caretAnimator) noexcept
     {
       if (auto *caretPainter = RendererForCaretPainting(node))
       {
@@ -203,7 +202,7 @@ namespace krys::boo
       }
     }
 
-    KRYS_NODISCARD bool RemovingNodeRemovesPosition(dom::Node &node, const dom::Position &position) noexcept
+    KRYS_NODISCARD bool RemovingNodeRemovesPosition(Node &node, const dom::Position &position) noexcept
     {
       if (!position.AnchorNode())
       {
@@ -215,7 +214,7 @@ namespace krys::boo
         return true;
       }
 
-      return Is<dom::Element>(node)
+      return Is<Element>(node)
              && dom::TreeQueries::IsShadowIncludingInclusiveAncestor(node, *position.AnchorNode());
     }
 
@@ -223,7 +222,7 @@ namespace krys::boo
     {
       // We use AnchorNode instead of GetContainerNode() because NodeWillBeRemoved must update position when
       // anchored node is removed.
-      for (dom::Node *currentNode = position.AnchorNode(); currentNode;
+      for (Node *currentNode = position.AnchorNode(); currentNode;
            currentNode = currentNode->ParentOrShadowHostNode())
       {
         if (currentNode->ContainsSelectionEndPoint() == value)
@@ -234,7 +233,7 @@ namespace krys::boo
       }
     }
 
-    void UpdatePositionAfterAdoptingTextReplacement(dom::Position &position, dom::CharacterData &node,
+    void UpdatePositionAfterAdoptingTextReplacement(dom::Position &position, CharacterData &node,
                                                     uint32 offset, uint32 oldLength,
                                                     uint32 newLength) noexcept
     {
@@ -264,7 +263,7 @@ namespace krys::boo
     }
   }
 
-  FrameSelection::FrameSelection(dom::Document *document) noexcept
+  FrameSelection::FrameSelection(Document *document) noexcept
       : _document(document), _caretAnimator(CreateUnique<SimpleCaretAnimator>(*this)),
         _focused(document && document->IsFocusedAndActive())
   {
@@ -293,7 +292,7 @@ namespace krys::boo
 
   FrameSelection::~FrameSelection() noexcept = default;
 
-  dom::Element *FrameSelection::RootEditableElementOrDocumentElement() const noexcept
+  Element *FrameSelection::RootEditableElementOrDocumentElement() const noexcept
   {
     auto *selectionRoot = _selection.RootEditableElement();
     return selectionRoot ? selectionRoot : _document->DocumentElement().get();
@@ -444,7 +443,7 @@ namespace krys::boo
     // Selection offsets should increase when LF is inserted before the caret in InsertLineBreakCommand. See
     // <https://webkit.org/b/56061>.
     // https://www.w3.org/TR/selection-api/#selectionchange-event
-    RefPtr<html::HTMLTextFormControlElement> textControl =
+    RefPtr<HTMLTextFormControlElement> textControl =
       ShareRefPtr(html::EnclosingTextFormControl(newSelection.Start()));
     bool shouldScheduleSelectionChangeEvent = willMutateSelection;
     if (textControl)
@@ -494,7 +493,7 @@ namespace krys::boo
         html::TaskSource::UserInteraction, *document,
         [weakDocument = CreateWeakPtr(document)]
         {
-          if (RefPtr<dom::Document> document = ShareRefPtr(weakDocument.get()))
+          if (RefPtr<Document> document = ShareRefPtr(weakDocument.get()))
           {
             document->Selection()._hasScheduledSelectionChangeEventOnDocument = false;
             (void)dom::EventDispatcher::FireEvent(event_names::SelectionChange, *document);
@@ -508,7 +507,7 @@ namespace krys::boo
   void FrameSelection::SetSelection(const VisibleSelection &selection, EnumSet<SetSelectionOption> options,
                                     CursorAlignOnScroll align, TextGranularity granularity) noexcept
   {
-    RefPtr<dom::Document> document = ShareRefPtr(_document);
+    RefPtr<Document> document = ShareRefPtr(_document);
     if (!SetSelectionWithoutUpdatingAppearance(selection, options, align, granularity))
     {
       return;
@@ -714,7 +713,7 @@ namespace krys::boo
     SetNodeContainsSelectionEndPoint(selection.End(), value);
   }
 
-  void FrameSelection::NodeWillBeRemoved(dom::Node &node) noexcept
+  void FrameSelection::NodeWillBeRemoved(Node &node) noexcept
   {
     // There can't be a selection inside a fragment, so if a fragment's node is being removed,
     // the selection in the document that created the fragment needs no adjustment.
@@ -748,7 +747,7 @@ namespace krys::boo
     }
   }
 
-  void FrameSelection::RespondToNodeModification(dom::Node &node, bool anchorRemoved, bool focusRemoved,
+  void FrameSelection::RespondToNodeModification(Node &node, bool anchorRemoved, bool focusRemoved,
                                                  bool baseRemoved, bool extentRemoved, bool startRemoved,
                                                  bool endRemoved) noexcept
   {
@@ -862,7 +861,7 @@ namespace krys::boo
     }
   }
 
-  void FrameSelection::TextWasReplaced(dom::CharacterData &node, uint32 offset, uint32 oldLength,
+  void FrameSelection::TextWasReplaced(CharacterData &node, uint32 offset, uint32 oldLength,
                                        uint32 newLength) noexcept
   {
     if (IsNone() || !node.IsConnected())
@@ -1039,7 +1038,7 @@ namespace krys::boo
   void FrameSelection::AdjustSelectionExtentIfNeeded(VisiblePosition &extent, bool isForward,
                                                      UserTriggered) noexcept
   {
-    if (RefPtr<dom::Node> rootUserSelectAll =
+    if (RefPtr<Node> rootUserSelectAll =
           dom::Position::RootUserSelectAllForNode(extent.DeepEquivalent().AnchorNode()))
     {
       extent = isForward
@@ -1879,15 +1878,15 @@ namespace krys::boo
 
   bool FrameSelection::DispatchSelectStart() noexcept
   {
-    RefPtr<dom::Node> selectStartTarget = ShareRefPtr(_selection.CanonicalFocus().GetContainerNode());
+    RefPtr<Node> selectStartTarget = ShareRefPtr(_selection.CanonicalFocus().GetContainerNode());
     if (!selectStartTarget)
     {
       return true;
     }
 
-    auto type = dom::DOMStringAtom(event_names::SelectStart);
-    return dom::EventDispatcher::FireEvent<dom::Event>(type, *selectStartTarget,
-                                                       dom::EventInit {.Bubbles = true, .Cancelable = true});
+    auto type = DOMStringAtom(event_names::SelectStart);
+    return dom::EventDispatcher::FireEvent<Event>(type, *selectStartTarget,
+                                                  EventInit {.Bubbles = true, .Cancelable = true});
   }
 
   void FrameSelection::SetStart(const VisiblePosition &position, UserTriggered trigger) noexcept
@@ -1978,7 +1977,7 @@ namespace krys::boo
   void FrameSelection::SelectAll() noexcept
   {
     auto *focusedElement = _document->FocusedElement();
-    if (auto *selectElement = DynamicDowncast<html::HTMLSelectElement>(focusedElement))
+    if (auto *selectElement = DynamicDowncast<HTMLSelectElement>(focusedElement))
     {
       if (selectElement->CanSelectAll())
       {
@@ -1987,14 +1986,14 @@ namespace krys::boo
       }
     }
 
-    RefPtr<dom::Node> root;
-    RefPtr<dom::Node> selectStartTarget;
+    RefPtr<Node> root;
+    RefPtr<Node> selectStartTarget;
     if (_selection.IsContentEditable())
     {
       root = HighestEditableRoot(_selection.Start());
       if (auto *shadowRoot = _selection.NonBoundaryShadowTreeRootNode())
       {
-        selectStartTarget = ShareRefPtr<dom::Node>(dom::TreeQueries::ShadowHost(*shadowRoot));
+        selectStartTarget = ShareRefPtr<Node>(dom::TreeQueries::ShadowHost(*shadowRoot));
       }
       else
       {
@@ -2007,7 +2006,7 @@ namespace krys::boo
       {
         if (focusedElement->IsTextField())
         {
-          Downcast<html::HTMLTextFormControlElement>(*focusedElement).Select();
+          Downcast<HTMLTextFormControlElement>(*focusedElement).Select();
           return;
         }
         root = ShareRefPtr(focusedElement->NonBoundaryShadowTreeRootNode());
@@ -2019,7 +2018,7 @@ namespace krys::boo
 
       if (root)
       {
-        selectStartTarget = ShareRefPtr<dom::Node>(dom::TreeQueries::ShadowHost(*root));
+        selectStartTarget = ShareRefPtr<Node>(dom::TreeQueries::ShadowHost(*root));
       }
       else
       {
@@ -2034,9 +2033,9 @@ namespace krys::boo
 
     if (selectStartTarget)
     {
-      auto type = dom::DOMStringAtom(event_names::SelectStart);
-      bool notCanceled = dom::EventDispatcher::FireEvent<dom::Event>(
-        type, *selectStartTarget, dom::EventInit {.Bubbles = true, .Cancelable = true});
+      auto type = DOMStringAtom(event_names::SelectStart);
+      bool notCanceled = dom::EventDispatcher::FireEvent<Event>(
+        type, *selectStartTarget, EventInit {.Bubbles = true, .Cancelable = true});
       if (!notCanceled)
       {
         return;
@@ -2093,7 +2092,7 @@ namespace krys::boo
 
   void FrameSelection::FocusedOrActiveStateChanged() noexcept
   {
-    RefPtr<dom::Document> document = ShareRefPtr(_document);
+    RefPtr<Document> document = ShareRefPtr(_document);
     document->UpdateStyleIfNeeded();
 
     // Because RenderObject::SelectionBackgroundColor() and
@@ -2318,7 +2317,7 @@ namespace krys::boo
     }
     _position = position;
     SetCaretRectNeedsUpdate();
-    dom::Document *document = nullptr;
+    Document *document = nullptr;
     if (auto *node = _position.DeepEquivalent().DeprecatedNode())
     {
       InvalidateCaretRect(node);
@@ -2334,7 +2333,7 @@ namespace krys::boo
     }
   }
 
-  void DragCaretController::NodeWillBeRemoved(dom::Node &node) noexcept
+  void DragCaretController::NodeWillBeRemoved(Node &node) noexcept
   {
     if (!HasCaret() || !node.IsConnected())
     {
@@ -2389,7 +2388,7 @@ namespace krys::boo
 
 #pragma endregion
 
-  bool CaretBase::UpdateCaretRect(dom::Document &document, const VisiblePosition &caretPosition) noexcept
+  bool CaretBase::UpdateCaretRect(Document &document, const VisiblePosition &caretPosition) noexcept
   {
     (void)document.UpdateLayoutIgnorePendingStylesheets();
     _caretRectNeedsUpdate = false;
@@ -2425,7 +2424,7 @@ namespace krys::boo
       return false;
     }
 
-    RefPtr<dom::Document> document = ShareRefPtr(_document);
+    RefPtr<Document> document = ShareRefPtr(_document);
     if (!document)
     {
       return false;
@@ -2438,7 +2437,7 @@ namespace krys::boo
 
     LayoutRect oldRect = LocalCaretRectWithoutUpdate();
 
-    RefPtr<dom::Node> caretNode = _previousCaretNode;
+    RefPtr<Node> caretNode = _previousCaretNode;
     if (ShouldUpdateCaretRect())
     {
       if (!IsNonOrphanedCaret(_selection))
@@ -2511,7 +2510,7 @@ namespace krys::boo
                                    _caretAnimator.get());
   }
 
-  void CaretBase::InvalidateCaretRect(dom::Node *node, bool caretRectChanged,
+  void CaretBase::InvalidateCaretRect(Node *node, bool caretRectChanged,
                                       CaretAnimator *caretAnimator) noexcept
   {
     // EDIT FIXME: This is an unfortunate hack.
@@ -2549,7 +2548,7 @@ namespace krys::boo
     }
   }
 
-  Color CaretBase::ComputeCaretColor(const RenderStyle &elementStyle, const dom::Node *node) noexcept
+  Color CaretBase::ComputeCaretColor(const RenderStyle &elementStyle, const Node *node) noexcept
   {
     auto *parentElement = node ? node->ParentElement() : nullptr;
     const RenderStyle *parentStyle =
@@ -2569,7 +2568,7 @@ namespace krys::boo
     return elementStyle.ColorResolvingCurrentColor(css::PropertyId::CaretColor);
   }
 
-  void CaretBase::PaintCaret(const dom::Node &node, GraphicsContext &context, const LayoutPoint &paintOffset,
+  void CaretBase::PaintCaret(const Node &node, GraphicsContext &context, const LayoutPoint &paintOffset,
                              CaretAnimator *caretAnimator) const noexcept
   {
     auto caretPresentationProperties =
@@ -2592,7 +2591,7 @@ namespace krys::boo
     }
 
     Color caretColor = Color::black;
-    auto *element = DynamicDowncast<dom::Element>(node);
+    auto *element = DynamicDowncast<Element>(node);
     if (!element)
     {
       element = node.ParentElement();
@@ -2628,12 +2627,12 @@ namespace krys::boo
     InvalidateCaretRect();
   }
 
-  dom::Document *FrameSelection::GetDocument() noexcept
+  Document *FrameSelection::GetDocument() noexcept
   {
     return _document;
   }
 
-  dom::Node *FrameSelection::CaretNode() noexcept
+  Node *FrameSelection::CaretNode() noexcept
   {
     return Selection().VisibleStart().DeepEquivalent().DeprecatedNode();
   }
@@ -2681,8 +2680,8 @@ namespace krys::boo
       return;
     }
 
-    RefPtr<dom::Document> document = ShareRefPtr(_document);
-    if (RefPtr<dom::Element> target = ShareRefPtr(_selection.RootEditableElement()))
+    RefPtr<Document> document = ShareRefPtr(_document);
+    if (RefPtr<Element> target = ShareRefPtr(_selection.RootEditableElement()))
     {
       // Walk up the DOM tree to search for an element to focus.
       if (auto *focusable = html::FocusAlgorithms::ClickFocusableInclusiveAncestor(*target))

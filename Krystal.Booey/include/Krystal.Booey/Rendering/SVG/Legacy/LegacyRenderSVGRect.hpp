@@ -29,24 +29,21 @@
 
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGShape.hpp"
 
-namespace krys::boo::svg
-{
-  class SVGRectElement;
-}
-
 namespace krys::boo
 {
+  class SVGRectElement;
+
   /// @brief The renderer of `<rect>`: plain rectangles are filled, stroked and hit tested without a path.
   class LegacyRenderSVGRect final : public LegacyRenderSVGShape
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(LegacyRenderSVGRect);
 
   public:
-    LegacyRenderSVGRect(svg::SVGRectElement &, RenderStyle &&) noexcept;
+    LegacyRenderSVGRect(SVGRectElement &, RenderStyle &&) noexcept;
 
     ~LegacyRenderSVGRect() noexcept override;
 
-    KRYS_NODISCARD svg::SVGRectElement &RectElement() const noexcept;
+    KRYS_NODISCARD SVGRectElement &RectElement() const noexcept;
 
   private:
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override

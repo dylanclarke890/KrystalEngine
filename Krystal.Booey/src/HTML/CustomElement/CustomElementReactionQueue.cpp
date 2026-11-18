@@ -91,7 +91,7 @@ namespace krys::boo::html
 
   CustomElementReactionQueueItem::~CustomElementReactionQueueItem() noexcept = default;
 
-  void CustomElementReactionQueueItem::Invoke(dom::Element &element,
+  void CustomElementReactionQueueItem::Invoke(Element &element,
                                               CustomElementInterface &elementInterface) noexcept
   {
     switch (_type)
@@ -149,7 +149,7 @@ namespace krys::boo::html
     krys_debug_assert(IsEmpty());
   }
 
-  void CustomElementQueue::Add(dom::Element &element) noexcept
+  void CustomElementQueue::Add(Element &element) noexcept
   {
     krys_debug_assert(!_invoking);
     // FIXME: Avoid inserting the same element multiple times.
@@ -177,7 +177,7 @@ namespace krys::boo::html
     InvokeAll();
   }
 
-  List<Ref<dom::Element>> CustomElementQueue::TakeElements() noexcept
+  List<Ref<Element>> CustomElementQueue::TakeElements() noexcept
   {
     krys_assert(!_invoking);
     return std::exchange(_elements, {});
@@ -200,7 +200,7 @@ namespace krys::boo::html
     return _items.size() == 1 && _items[0].GetType() == Item::Type::ElementUpgrade;
   }
 
-  void CustomElementReactionQueue::EnqueueElementUpgrade(dom::Element &element,
+  void CustomElementReactionQueue::EnqueueElementUpgrade(Element &element,
                                                          bool alreadyScheduledToUpgrade) noexcept
   {
     krys_debug_assert(CustomElementReactionDisallowedScope::IsReactionAllowed());
@@ -218,7 +218,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#concept-try-upgrade
-  void CustomElementReactionQueue::TryToUpgradeElement(dom::Element &element) noexcept
+  void CustomElementReactionQueue::TryToUpgradeElement(Element &element) noexcept
   {
     krys_debug_assert(CustomElementReactionDisallowedScope::IsReactionAllowed());
     krys_debug_assert(element.IsCustomElementUpgradeCandidate());
@@ -242,7 +242,7 @@ namespace krys::boo::html
     element.EnqueueToUpgrade(*elementInterface);
   }
 
-  void CustomElementReactionQueue::EnqueueConnectedCallbackIfNeeded(dom::Element &element) noexcept
+  void CustomElementReactionQueue::EnqueueConnectedCallbackIfNeeded(Element &element) noexcept
   {
     krys_debug_assert(CustomElementReactionDisallowedScope::IsReactionAllowed());
     krys_debug_assert(element.IsDefinedCustomElement());
@@ -252,7 +252,7 @@ namespace krys::boo::html
     EnqueueElementOnAppropriateElementQueue(element);
   }
 
-  void CustomElementReactionQueue::EnqueueDisconnectedCallbackIfNeeded(dom::Element &element) noexcept
+  void CustomElementReactionQueue::EnqueueDisconnectedCallbackIfNeeded(Element &element) noexcept
   {
     krys_debug_assert(element.IsDefinedCustomElement());
     krys_debug_assert(CustomElementReactionDisallowedScope::IsReactionAllowed());
@@ -262,7 +262,7 @@ namespace krys::boo::html
     EnqueueElementOnAppropriateElementQueue(element);
   }
 
-  void CustomElementReactionQueue::EnqueueConnectedMoveCallbackIfNeeded(dom::Element &element) noexcept
+  void CustomElementReactionQueue::EnqueueConnectedMoveCallbackIfNeeded(Element &element) noexcept
   {
     krys_debug_assert(CustomElementReactionDisallowedScope::IsReactionAllowed());
     krys_debug_assert(element.IsDefinedCustomElement());
@@ -272,9 +272,8 @@ namespace krys::boo::html
     EnqueueElementOnAppropriateElementQueue(element);
   }
 
-  void CustomElementReactionQueue::EnqueueAdoptedCallbackIfNeeded(dom::Element &element,
-                                                                  dom::Document &oldDocument,
-                                                                  dom::Document &newDocument) noexcept
+  void CustomElementReactionQueue::EnqueueAdoptedCallbackIfNeeded(Element &element, Document &oldDocument,
+                                                                  Document &newDocument) noexcept
   {
     krys_debug_assert(CustomElementReactionDisallowedScope::IsReactionAllowed());
     krys_debug_assert(element.IsDefinedCustomElement());
@@ -285,9 +284,10 @@ namespace krys::boo::html
     EnqueueElementOnAppropriateElementQueue(element);
   }
 
-  void CustomElementReactionQueue::EnqueueAttributeChangedCallbackIfNeeded(
-    dom::Element &element, const dom::QualifiedName &attributeName, dom::DOMStringAtom oldValue,
-    dom::DOMStringAtom newValue) noexcept
+  void CustomElementReactionQueue::EnqueueAttributeChangedCallbackIfNeeded(Element &element,
+                                                                           const QualifiedName &attributeName,
+                                                                           DOMStringAtom oldValue,
+                                                                           DOMStringAtom newValue) noexcept
   {
     krys_debug_assert(CustomElementReactionDisallowedScope::IsReactionAllowed());
     krys_debug_assert(element.IsDefinedCustomElement());
@@ -303,7 +303,7 @@ namespace krys::boo::html
     EnqueueElementOnAppropriateElementQueue(element);
   }
 
-  void CustomElementReactionQueue::EnqueueFormAssociatedCallbackIfNeeded(dom::Element &element,
+  void CustomElementReactionQueue::EnqueueFormAssociatedCallbackIfNeeded(Element &element,
                                                                          HTMLFormElement *form) noexcept
   {
     krys_debug_assert(CustomElementReactionDisallowedScope::IsReactionAllowed());
@@ -314,7 +314,7 @@ namespace krys::boo::html
     EnqueueElementOnAppropriateElementQueue(element);
   }
 
-  void CustomElementReactionQueue::EnqueueFormResetCallbackIfNeeded(dom::Element &element) noexcept
+  void CustomElementReactionQueue::EnqueueFormResetCallbackIfNeeded(Element &element) noexcept
   {
     krys_debug_assert(CustomElementReactionDisallowedScope::IsReactionAllowed());
     krys_debug_assert(element.ReactionQueue() != nullptr);
@@ -324,7 +324,7 @@ namespace krys::boo::html
     EnqueueElementOnAppropriateElementQueue(element);
   }
 
-  void CustomElementReactionQueue::EnqueueFormDisabledCallbackIfNeeded(dom::Element &element,
+  void CustomElementReactionQueue::EnqueueFormDisabledCallbackIfNeeded(Element &element,
                                                                        bool isDisabled) noexcept
   {
     krys_debug_assert(CustomElementReactionDisallowedScope::IsReactionAllowed());
@@ -335,7 +335,7 @@ namespace krys::boo::html
     EnqueueElementOnAppropriateElementQueue(element);
   }
 
-  void CustomElementReactionQueue::EnqueuePostUpgradeReactions(dom::Element &element) noexcept
+  void CustomElementReactionQueue::EnqueuePostUpgradeReactions(Element &element) noexcept
   {
     krys_debug_assert(CustomElementReactionDisallowedScope::IsReactionAllowed());
     krys_debug_assert(element.IsCustomElementUpgradeCandidate());
@@ -354,7 +354,7 @@ namespace krys::boo::html
       {
         queue._items.emplace_back(Item::Type::AttributeChanged,
                                   Item::AttributeChangedPayload {attribute->GetQualifiedName(), null,
-                                                                 dom::DOMStringAtom(attribute->Value())});
+                                                                 DOMStringAtom(attribute->Value())});
       }
     }
 
@@ -389,7 +389,7 @@ namespace krys::boo::html
     _attachedInternals = krys::move(internals);
   }
 
-  void CustomElementReactionQueue::InvokeAll(dom::Element &element) noexcept
+  void CustomElementReactionQueue::InvokeAll(Element &element) noexcept
   {
     while (!_items.empty())
     {
@@ -402,7 +402,7 @@ namespace krys::boo::html
   }
 
   void CustomElementReactionQueue::EnqueueElementsOnAppropriateElementQueue(
-    const List<Ref<dom::Element>> &elements) noexcept
+    const List<Ref<Element>> &elements) noexcept
   {
     for (auto &element : elements)
     {
@@ -411,7 +411,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#enqueue-an-element-on-the-appropriate-element-queue
-  void CustomElementReactionQueue::EnqueueElementOnAppropriateElementQueue(dom::Element &element) noexcept
+  void CustomElementReactionQueue::EnqueueElementOnAppropriateElementQueue(Element &element) noexcept
   {
     krys_debug_assert(element.ReactionQueue() != nullptr);
 

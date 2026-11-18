@@ -39,7 +39,7 @@
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   namespace
   {
@@ -60,8 +60,8 @@ namespace krys::boo::html
     }};
   }
 
-  HTMLButtonElement::HTMLButtonElement(dom::Document &document) noexcept
-      : HTMLFormControlElement(document, HTMLElementInterface::Button)
+  HTMLButtonElement::HTMLButtonElement(Document &document) noexcept
+      : HTMLFormControlElement(document, html::HTMLElementInterface::Button)
   {
     SetEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
   }
@@ -76,7 +76,7 @@ namespace krys::boo::html
     return CreateRenderer<RenderButton>(*this, krys::move(style));
   }
 
-  dom::DOMString HTMLButtonElement::FormControlType() const noexcept
+  DOMString HTMLButtonElement::FormControlType() const noexcept
   {
     switch (_type)
     {
@@ -87,10 +87,9 @@ namespace krys::boo::html
     krys_unreachable();
   }
 
-  void HTMLButtonElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
-                                             Maybe<dom::DOMStringView> oldValue,
-                                             Maybe<dom::DOMStringView> value,
-                                             const dom::DOMStringAtom &namespaceURI) noexcept
+  void HTMLButtonElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                             Maybe<DOMStringView> value,
+                                             const DOMStringAtom &namespaceURI) noexcept
   {
     HTMLFormControlElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
@@ -99,16 +98,16 @@ namespace krys::boo::html
     }
     if (localName == u8"type")
     {
-      ComputeType(value.value_or(dom::DOMStringView()));
+      ComputeType(value.value_or(DOMStringView()));
     }
     else if (localName == u8"command" || localName == u8"commandfor")
     {
-      ComputeType(GetAttribute(u8"type").value_or(dom::DOMString()));
+      ComputeType(GetAttribute(u8"type").value_or(DOMString()));
     }
   }
 
   // https://html.spec.whatwg.org/#the-button-element:activation-behaviour
-  void HTMLButtonElement::ActivationBehavior(dom::Event &event) noexcept
+  void HTMLButtonElement::ActivationBehavior(Event &event) noexcept
   {
     // 1. If element is disabled, then return.
     if (IsDisabledFormControl())
@@ -151,8 +150,8 @@ namespace krys::boo::html
 
       // 3c. If element's type attribute is in the Auto state, then return.
       if (_type == ButtonType::Button
-          && !text::IsASCIICaselessEqual(
-            dom::DOMStringView(GetAttribute(u8"type").value_or(dom::DOMString())), u8"button"))
+          && !text::IsASCIICaselessEqual(DOMStringView(GetAttribute(u8"type").value_or(DOMString())),
+                                         u8"button"))
       {
         return;
       }
@@ -170,9 +169,9 @@ namespace krys::boo::html
     HandlePopoverTargetAction(event.Target().get());
   }
 
-  void HTMLButtonElement::DefaultEventHandler(dom::Event &event) noexcept
+  void HTMLButtonElement::DefaultEventHandler(Event &event) noexcept
   {
-    if (auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event))
+    if (auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event))
     {
       if (keyboardEvent->Type() == event_names::KeyDown && keyboardEvent->KeyIdentifier() == u8"U+0020")
       {
@@ -232,7 +231,7 @@ namespace krys::boo::html
     _isActivatedSubmit = flag;
   }
 
-  bool HTMLButtonElement::AppendFormData(DOMFormData &formData) noexcept
+  bool HTMLButtonElement::AppendFormData(html::DOMFormData &formData) noexcept
   {
     if (_type != ButtonType::Submit || Name().empty() || !_isActivatedSubmit)
     {
@@ -263,13 +262,13 @@ namespace krys::boo::html
     UpdateTypeForParent();
   }
 
-  void HTMLButtonElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLButtonElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLFormControlElement::OnRemove(isSubtreeRoot, oldAncestor);
     UpdateTypeForParent();
   }
 
-  void HTMLButtonElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLButtonElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLFormControlElement::OnMove(isSubtreeRoot, oldAncestor);
     UpdateTypeForParent();
@@ -277,11 +276,11 @@ namespace krys::boo::html
 
   void HTMLButtonElement::UpdateTypeForParent() noexcept
   {
-    ComputeType(GetAttribute(u8"type").value_or(dom::DOMString()));
+    ComputeType(GetAttribute(u8"type").value_or(DOMString()));
   }
 
   // https://html.spec.whatwg.org/#concept-submit-button
-  void HTMLButtonElement::ComputeType(dom::DOMStringView typeAttributeValue) noexcept
+  void HTMLButtonElement::ComputeType(DOMStringView typeAttributeValue) noexcept
   {
     auto oldType = _type;
     // NOLINTBEGIN(bugprone-branch-clone): the keywords' states, then the missing and invalid value defaults.
@@ -318,7 +317,7 @@ namespace krys::boo::html
     }
   }
 
-  RefPtr<dom::Element> HTMLButtonElement::CommandForElement() const noexcept
+  RefPtr<boo::Element> HTMLButtonElement::CommandForElement() const noexcept
   {
     return ResolvedElementForAttribute(u8"commandfor");
   }
@@ -334,7 +333,7 @@ namespace krys::boo::html
 
     for (const auto &[keyword, type] : CommandKeywords)
     {
-      if (text::IsASCIICaselessEqual(dom::DOMStringView(*action), dom::DOMStringView(keyword)))
+      if (text::IsASCIICaselessEqual(DOMStringView(*action), DOMStringView(keyword)))
       {
         return type;
       }
@@ -351,7 +350,7 @@ namespace krys::boo::html
 
   void HTMLButtonElement::HandleCommand() noexcept
   {
-    RefPtr<dom::Element> invokee = CommandForElement();
+    RefPtr<boo::Element> invokee = CommandForElement();
     if (!invokee)
     {
       return;
@@ -389,14 +388,14 @@ namespace krys::boo::html
     //     command attribute initialized to command, its source attribute initialized to element, its
     //     cancelable attribute initialized to true, its composed flag set, and relatedTarget set to
     //     relatedTarget.
-    dom::CommandEventInit init;
+    CommandEventInit init;
     init.Bubbles = false;
     init.Cancelable = true;
     init.Composed = true;
-    init.Source = ShareRefPtr<dom::Element>(this);
-    init.Command = commandRaw.value_or(dom::DOMString());
+    init.Source = ShareRefPtr<boo::Element>(this);
+    init.Command = commandRaw.value_or(DOMString());
 
-    auto event = dom::CommandEvent::Create(event_names::Command, init, true);
+    auto event = CommandEvent::Create(event_names::Command, init, true);
     (void)dom::EventDispatcher::DispatchFromSource(*event, *invokee, this);
 
     // 5e. If continue is false, then return.
@@ -420,7 +419,7 @@ namespace krys::boo::html
 #pragma region HTMLButtonElement
 
   // https://html.spec.whatwg.org/#dom-button-command
-  dom::DOMString HTMLButtonElement::Command() const noexcept
+  DOMString HTMLButtonElement::Command() const noexcept
   {
     // 1. Let command be this's command attribute.
     auto command = GetCommandType();
@@ -428,7 +427,7 @@ namespace krys::boo::html
     // 2. If command is in the Custom state, then return command's value.
     if (command == dom::CommandType::Custom)
     {
-      return GetAttribute(u8"command").value_or(dom::DOMString());
+      return GetAttribute(u8"command").value_or(DOMString());
     }
 
     // 3. If command is in the Unknown state, then return the empty string.
@@ -437,38 +436,38 @@ namespace krys::boo::html
     {
       if (type == command)
       {
-        return dom::DOMString(keyword);
+        return DOMString(keyword);
       }
     }
     return {};
   }
 
-  void HTMLButtonElement::Command(dom::DOMString value) noexcept
+  void HTMLButtonElement::Command(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"command", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"command", krys::move(value));
   }
 
-  RefPtr<dom::Element> HTMLButtonElement::CommandForElementForBindings() const noexcept
+  RefPtr<boo::Element> HTMLButtonElement::CommandForElementForBindings() const noexcept
   {
     // The getter steps are to return the result of running this's get the unresolved commandfor target
     // element (a host, not what its reference target names).
     return ElementForAttributeInternal(u8"commandfor");
   }
 
-  void HTMLButtonElement::CommandForElementForBindings(dom::Element *element) noexcept
+  void HTMLButtonElement::CommandForElementForBindings(boo::Element *element) noexcept
   {
-    CEReactionsScope ceReactions;
+    html::CEReactionsScope ceReactions;
     SetElementAttribute(u8"commandfor", element);
   }
 
   bool HTMLButtonElement::Disabled() const noexcept
   {
-    return Reflect<bool>(*this, u8"disabled");
+    return html::Reflect<bool>(*this, u8"disabled");
   }
 
   void HTMLButtonElement::Disabled(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"disabled", krys::move(value));
+    html::Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 
   dom::USVString HTMLButtonElement::FormAction() const noexcept
@@ -493,56 +492,56 @@ namespace krys::boo::html
 
   void HTMLButtonElement::FormAction(dom::USVString value) noexcept
   {
-    return ReflectSetter<dom::USVString>(*this, u8"formaction", krys::move(value));
+    return html::ReflectSetter<dom::USVString>(*this, u8"formaction", krys::move(value));
   }
 
-  dom::DOMString HTMLButtonElement::EncType() const noexcept
+  DOMString HTMLButtonElement::EncType() const noexcept
   {
-    return ReflectEnumerated<"formenctype">(*this);
+    return html::ReflectEnumerated<"formenctype">(*this);
   }
 
-  void HTMLButtonElement::EncType(dom::DOMString value) noexcept
+  void HTMLButtonElement::EncType(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"formenctype", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"formenctype", krys::move(value));
   }
 
-  dom::DOMString HTMLButtonElement::FormMethod() const noexcept
+  DOMString HTMLButtonElement::FormMethod() const noexcept
   {
-    return ReflectEnumerated<"formmethod">(*this);
+    return html::ReflectEnumerated<"formmethod">(*this);
   }
 
-  void HTMLButtonElement::FormMethod(dom::DOMString value) noexcept
+  void HTMLButtonElement::FormMethod(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"formmethod", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"formmethod", krys::move(value));
   }
 
   void HTMLButtonElement::FormNoValidate(bool value) noexcept
   {
-    Reflect<bool>(*this, u8"formnovalidate", krys::move(value));
+    html::Reflect<bool>(*this, u8"formnovalidate", krys::move(value));
   }
 
-  dom::DOMString HTMLButtonElement::FormTarget() const noexcept
+  DOMString HTMLButtonElement::FormTarget() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"formtarget").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"formtarget").value_or(u8"");
   }
 
-  void HTMLButtonElement::FormTarget(dom::DOMString value) noexcept
+  void HTMLButtonElement::FormTarget(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"formtarget", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"formtarget", krys::move(value));
   }
 
-  dom::DOMString HTMLButtonElement::Name() const noexcept
+  DOMString HTMLButtonElement::Name() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"name").value_or(u8"");
   }
 
-  void HTMLButtonElement::Name(dom::DOMString value) noexcept
+  void HTMLButtonElement::Name(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"name", krys::move(value));
   }
 
   // https://html.spec.whatwg.org/#dom-button-type
-  dom::DOMString HTMLButtonElement::Type() const noexcept
+  DOMString HTMLButtonElement::Type() const noexcept
   {
     // 1. If this is a submit button, then return "submit".
     // 2. Let state be this's type attribute.
@@ -552,19 +551,19 @@ namespace krys::boo::html
     return FormControlType();
   }
 
-  void HTMLButtonElement::Type(dom::DOMString value) noexcept
+  void HTMLButtonElement::Type(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"type", krys::move(value));
   }
 
-  dom::DOMString HTMLButtonElement::Value() const noexcept
+  DOMString HTMLButtonElement::Value() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"value").value_or(u8"");
+    return html::Reflect<DOMString>(*this, u8"value").value_or(u8"");
   }
 
-  void HTMLButtonElement::Value(dom::DOMString value) noexcept
+  void HTMLButtonElement::Value(DOMString value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"value", krys::move(value));
+    html::Reflect<DOMString>(*this, u8"value", krys::move(value));
   }
 
 #pragma endregion

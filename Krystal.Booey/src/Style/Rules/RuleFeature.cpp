@@ -265,9 +265,9 @@ namespace krys::boo::style
     KRYS_NODISCARD PseudoClassInvalidationKey MakePseudoClassInvalidationKey(
       css::SelectorPseudoClass pseudoClass, const css::Selector &selector) noexcept
     {
-      css::CSSOMStringAtom attributeName = null;
-      css::CSSOMStringAtom className = null;
-      css::CSSOMStringAtom tagName = null;
+      CSSOMStringAtom attributeName = null;
+      CSSOMStringAtom className = null;
+      CSSOMStringAtom tagName = null;
       for (auto *simpleSelector = selector.LastInCompoundSelector(); simpleSelector;
            simpleSelector = simpleSelector->PrecedingComplexSelectorComponent())
       {
@@ -520,7 +520,7 @@ namespace krys::boo::style
 
   PseudoClassInvalidationKey MakePseudoClassInvalidationKey(css::SelectorPseudoClass pseudoClass,
                                                             InvalidationKeyType keyType,
-                                                            const css::CSSOMStringAtom &keyString) noexcept
+                                                            const CSSOMStringAtom &keyString) noexcept
   {
     krys_debug_assert(keyType != InvalidationKeyType::Universal || keyString == dom::StarAtom());
     return {ToUnderlying(pseudoClass), static_cast<uint8>(keyType), keyString};
@@ -532,7 +532,7 @@ namespace krys::boo::style
     return MakePseudoClassInvalidationKey(pseudoClass, keyType, dom::StarAtom());
   }
 
-  bool UnlikelyToHaveSelectorForAttribute(const css::CSSOMStringAtom &name) noexcept
+  bool UnlikelyToHaveSelectorForAttribute(const CSSOMStringAtom &name) noexcept
   {
     return name.View() == u8"class" || name.View() == u8"id" || name.View() == u8"style";
   }
@@ -578,7 +578,7 @@ namespace krys::boo::style
       HasStartingStyleRules = true;
     }
 
-    auto addToMap = [&](auto &map, auto &entries, HashSet<css::CSSOMStringAtom> *hostAffectingNames)
+    auto addToMap = [&](auto &map, auto &entries, HashSet<CSSOMStringAtom> *hostAffectingNames)
     {
       for (auto &entry : entries)
       {
@@ -736,7 +736,7 @@ namespace krys::boo::style
     HasStartingStyleRules = HasStartingStyleRules || other.HasStartingStyleRules;
   }
 
-  void RuleFeatureSet::RegisterContentAttribute(const css::CSSOMStringAtom &attributeName) noexcept
+  void RuleFeatureSet::RegisterContentAttribute(const CSSOMStringAtom &attributeName) noexcept
   {
     ContentAttributeNamesInRules.insert(attributeName.ToASCIILower());
     AttributeLowercaseLocalNamesInRules.insert(attributeName);

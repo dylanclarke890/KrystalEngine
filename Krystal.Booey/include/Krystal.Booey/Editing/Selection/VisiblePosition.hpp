@@ -121,7 +121,7 @@ namespace krys::boo
     }
 
     // FIXME: This does not handle [table, 0] correctly.
-    KRYS_NODISCARD dom::Element *RootEditableElement() const noexcept
+    KRYS_NODISCARD Element *RootEditableElement() const noexcept
     {
       return _deepPosition.IsNotNull() ? _deepPosition.DeprecatedNode()->RootEditableElement() : nullptr;
     }
@@ -170,26 +170,25 @@ namespace krys::boo
 
   KRYS_NODISCARD Maybe<dom::BoundaryPoint> MakeBoundaryPoint(const VisiblePosition &position) noexcept;
 
-  KRYS_NODISCARD dom::Element *EnclosingBlockFlowElement(const VisiblePosition &visiblePosition) noexcept;
+  KRYS_NODISCARD Element *EnclosingBlockFlowElement(const VisiblePosition &visiblePosition) noexcept;
 
   KRYS_NODISCARD bool IsFirstVisiblePositionInNode(const VisiblePosition &visiblePosition,
-                                                   const dom::Node *node) noexcept;
+                                                   const Node *node) noexcept;
 
   KRYS_NODISCARD bool IsLastVisiblePositionInNode(const VisiblePosition &visiblePosition,
-                                                  const dom::Node *node) noexcept;
+                                                  const Node *node) noexcept;
 
   KRYS_NODISCARD bool AreVisiblePositionsInSameTreeScope(const VisiblePosition &a,
                                                          const VisiblePosition &b) noexcept;
 
-  KRYS_NODISCARD dom::Node *CommonInclusiveAncestor(const VisiblePosition &a,
-                                                    const VisiblePosition &b) noexcept;
+  KRYS_NODISCARD Node *CommonInclusiveAncestor(const VisiblePosition &a, const VisiblePosition &b) noexcept;
 
   /// @brief A position as its index in a scope (from `IndexForVisiblePosition`), which survives the DOM
   /// changing.
   struct VisiblePositionIndex
   {
     int32 Value {-1};
-    RefPtr<dom::ContainerNode> Scope;
+    RefPtr<ContainerNode> Scope;
   };
 
   struct VisiblePositionIndexRange
@@ -219,7 +218,7 @@ namespace krys::boo
 
   KRYS_NODISCARD VisiblePositionRange MakeVisiblePositionRange(const Maybe<dom::SimpleRange> &range) noexcept;
 
-  KRYS_NODISCARD dom::Node *CommonInclusiveAncestor(const VisiblePositionRange &range) noexcept;
+  KRYS_NODISCARD Node *CommonInclusiveAncestor(const VisiblePositionRange &range) noexcept;
 
   KRYS_NODISCARD bool Intersects(const VisiblePositionRange &a, const VisiblePositionRange &b) noexcept;
 

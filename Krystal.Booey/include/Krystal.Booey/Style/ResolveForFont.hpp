@@ -35,6 +35,7 @@
 
 namespace krys::boo
 {
+  class Document;
   class FontCascade;
   class FontCascadeDescription;
 }
@@ -48,11 +49,6 @@ namespace krys::boo::css
   {
     struct UnresolvedFont;
   }
-}
-
-namespace krys::boo::dom
-{
-  class Document;
 }
 
 namespace krys::boo::style
@@ -77,5 +73,5 @@ namespace krys::boo::style
   /// @note What the canvas 2D context's `font` is resolved with.
   KRYS_NODISCARD Maybe<FontCascade>
     ResolveForUnresolvedFont(const css::parse_property::UnresolvedFont &unresolvedFont,
-                             FontCascadeDescription &&fontDescription, dom::Document &document) noexcept;
+                             FontCascadeDescription &&fontDescription, Document &document) noexcept;
 }

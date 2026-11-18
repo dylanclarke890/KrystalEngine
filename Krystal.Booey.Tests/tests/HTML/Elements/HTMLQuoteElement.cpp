@@ -7,11 +7,11 @@ namespace krys::boo::html::tests
   TEST_CASE("HTMLQuoteElement.cite: the cite attribute parsed against the document's base URL",
             "[HTML][HTMLQuoteElement][html:attr-blockquote-cite][html:attr-q-cite]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
     for (auto localName : {u8"blockquote", u8"q"})
     {
-      auto element = document->CreateElement(dom::DOMStringAtom(localName)).ReleaseValue();
+      auto element = document->CreateElement(DOMStringAtom(localName)).ReleaseValue();
       auto &quote = Downcast<HTMLQuoteElement>(Downcast<HTMLElement>(*element));
       CHECK(quote.Cite().empty());
 

@@ -24,7 +24,7 @@
 
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   /// @brief A document whose type is "html", with the content type text/html.
   /// @see https://dom.spec.whatwg.org/#html-document
@@ -33,11 +33,12 @@ namespace krys::boo::dom
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLDocument);
 
   public:
-    HTMLDocument() noexcept : Document(DocumentFlags::IsHTMLDocument)
+    HTMLDocument() noexcept : Document(dom::DocumentFlags::IsHTMLDocument)
     {
     }
 
-    explicit HTMLDocument(DocumentFlags flags) noexcept : Document(flags | DocumentFlags::IsHTMLDocument)
+    explicit HTMLDocument(dom::DocumentFlags flags) noexcept
+        : Document(flags | dom::DocumentFlags::IsHTMLDocument)
     {
     }
 
@@ -48,8 +49,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::HTMLDocument)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Document &document) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLDocument)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Document &document) noexcept
   {
     return document.IsHTMLDocument();
   }

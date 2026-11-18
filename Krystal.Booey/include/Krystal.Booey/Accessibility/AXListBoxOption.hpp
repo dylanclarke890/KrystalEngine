@@ -30,20 +30,17 @@
 
 #include "Krystal.Booey/Accessibility/AXNodeObject.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLElement;
   class HTMLSelectElement;
-}
 
-namespace krys::boo
-{
   /// @brief An `option` or `optgroup` of a list box `select`: a child of the list box, wherever it is in the
   /// select, with no children of its own.
   class AXListBoxOption final : public AXNodeObject
   {
   public:
-    KRYS_NODISCARD static Ref<AXListBoxOption> Create(AXId id, html::HTMLElement &element,
+    KRYS_NODISCARD static Ref<AXListBoxOption> Create(AXId id, HTMLElement &element,
                                                       AXObjectCache &cache) noexcept;
 
     ~AXListBoxOption() noexcept override;
@@ -73,12 +70,12 @@ namespace krys::boo
 
     void SetSelected(bool selected) noexcept override;
 
-    KRYS_NODISCARD dom::DOMString StringValue() const noexcept override;
+    KRYS_NODISCARD DOMString StringValue() const noexcept override;
 
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
 
   private:
-    AXListBoxOption(AXId id, html::HTMLElement &element, AXObjectCache &cache) noexcept;
+    AXListBoxOption(AXId id, HTMLElement &element, AXObjectCache &cache) noexcept;
 
     KRYS_NODISCARD AXRole DetermineAccessibilityRole() noexcept override
     {
@@ -87,7 +84,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ComputeIsIgnored() const noexcept override;
 
-    KRYS_NODISCARD html::HTMLSelectElement *ListBoxOptionParentNode() const noexcept;
+    KRYS_NODISCARD HTMLSelectElement *ListBoxOptionParentNode() const noexcept;
 
     KRYS_NODISCARD int32 ListBoxOptionIndex() const noexcept;
   };

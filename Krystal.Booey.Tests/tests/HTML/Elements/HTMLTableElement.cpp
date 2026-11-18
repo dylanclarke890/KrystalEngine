@@ -73,10 +73,10 @@ namespace krys::boo::html::tests
       auto body = CreateTableElement<HTMLTableSectionElement>(*data.Document, u8"tbody");
       auto result = table.THead(RefPtr<HTMLTableSectionElement>(body));
       REQUIRE(result.HasException());
-      CHECK(result.GetException().Code() == dom::ExceptionCode::HierarchyRequestError);
+      CHECK(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
       result = table.TFoot(RefPtr<HTMLTableSectionElement>(body));
       REQUIRE(result.HasException());
-      CHECK(result.GetException().Code() == dom::ExceptionCode::HierarchyRequestError);
+      CHECK(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
 
       auto foot = CreateTableElement<HTMLTableSectionElement>(*data.Document, u8"tfoot");
       REQUIRE_FALSE(table.TFoot(RefPtr<HTMLTableSectionElement>(foot)).HasException());
@@ -166,10 +166,10 @@ namespace krys::boo::html::tests
 
       auto result = table.InsertRow(6);
       REQUIRE(result.HasException());
-      CHECK(result.GetException().Code() == dom::ExceptionCode::IndexSizeError);
+      CHECK(result.GetException().Code() == ExceptionCode::IndexSizeError);
       result = table.InsertRow(-2);
       REQUIRE(result.HasException());
-      CHECK(result.GetException().Code() == dom::ExceptionCode::IndexSizeError);
+      CHECK(result.GetException().Code() == ExceptionCode::IndexSizeError);
     }
 
     SECTION("deleteRow removes the row at the index, -1 for the last")
@@ -182,10 +182,10 @@ namespace krys::boo::html::tests
 
       auto result = table.DeleteRow(1);
       REQUIRE(result.HasException());
-      CHECK(result.GetException().Code() == dom::ExceptionCode::IndexSizeError);
+      CHECK(result.GetException().Code() == ExceptionCode::IndexSizeError);
       result = table.DeleteRow(-2);
       REQUIRE(result.HasException());
-      CHECK(result.GetException().Code() == dom::ExceptionCode::IndexSizeError);
+      CHECK(result.GetException().Code() == ExceptionCode::IndexSizeError);
 
       REQUIRE_FALSE(table.DeleteRow(0).HasException());
       CHECK_FALSE(table.DeleteRow(-1).HasException());

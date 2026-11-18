@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Numeric/CSSMathValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @see https://drafts.css-houdini.org/css-typed-om/#cssmathclamp
   class CSSMathClamp final : public CSSMathValue
@@ -39,8 +39,8 @@ namespace krys::boo::css
 
   public:
     /// @return A `TypeError` if the values' types can't be combined.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSMathClamp>>
-      Create(CSSNumberish &&lower, CSSNumberish &&value, CSSNumberish &&upper) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSMathClamp>> Create(CSSNumberish &&lower, CSSNumberish &&value,
+                                                                CSSNumberish &&upper) noexcept;
 
     KRYS_NODISCARD const CSSNumericValue &Lower() const noexcept
     {
@@ -57,7 +57,7 @@ namespace krys::boo::css
       return *_upper;
     }
 
-    KRYS_NODISCARD Maybe<calc::Child> ToCalcTreeNode() const noexcept final;
+    KRYS_NODISCARD Maybe<css::calc::Child> ToCalcTreeNode() const noexcept final;
 
   private:
     KRYS_NODISCARD CSSMathOperator GetOperator() const noexcept final
@@ -81,9 +81,9 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSMathClamp)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleValue &styleValue) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSMathClamp)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleValue &styleValue) noexcept
   {
-    return styleValue.StyleValueType() == krys::boo::css::CSSStyleValueType::CSSMathClamp;
+    return styleValue.StyleValueType() == krys::boo::CSSStyleValueType::CSSMathClamp;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

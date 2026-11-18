@@ -8,7 +8,7 @@
 namespace krys::boo::layout::tests
 {
   using style::tests::ResolverFixture;
-  using GaugeRegion = html::HTMLMeterElement::GaugeRegion;
+  using GaugeRegion = HTMLMeterElement::GaugeRegion;
 
   TEST_CASE_METHOD(
     css::tests::ValueFixture, "HTMLMeterElement: values and gauge regions",
@@ -37,13 +37,13 @@ layer at (0,0) size 800x10
             RenderBlock {DIV} at (0,0) size 5x10 id="value" class="even-less-good"
 )");
 
-    auto &meter = Downcast<html::HTMLMeterElement>(fixture.ById(u8"meter"));
+    auto &meter = Downcast<HTMLMeterElement>(fixture.ById(u8"meter"));
     CHECK(meter.Min() == 0);
     CHECK(meter.Max() == 1);
     CHECK(meter.Optimum() == 0.5);
     CHECK(meter.GetGaugeRegion() == GaugeRegion::Optimum);
 
-    auto &low = Downcast<html::HTMLMeterElement>(fixture.ById(u8"low"));
+    auto &low = Downcast<HTMLMeterElement>(fixture.ById(u8"low"));
     CHECK(low.GetGaugeRegion() == GaugeRegion::EvenLessGood);
     low.SetAttribute(u8"value", u8"50");
     CHECK(low.GetGaugeRegion() == GaugeRegion::Suboptimal);

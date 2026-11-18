@@ -4,21 +4,21 @@
 #include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  class SVGDocument : public dom::XMLDocument
+  class SVGDocument : public XMLDocument
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGDocument);
 
   public:
-    SVGDocument() noexcept : dom::XMLDocument(dom::DocumentFlags::IsSVGDocument)
+    SVGDocument() noexcept : XMLDocument(dom::DocumentFlags::IsSVGDocument)
     {
     }
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGDocument)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Document &document) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGDocument)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Document &document) noexcept
   {
     return document.IsSVGDocument();
   }

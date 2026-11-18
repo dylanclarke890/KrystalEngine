@@ -31,11 +31,6 @@
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::svg
-{
-  class SVGImageCache;
-}
-
 namespace krys::boo
 {
   class CachedImageClient;
@@ -43,6 +38,7 @@ namespace krys::boo
   class IntRect;
   class RenderElement;
   class RenderObject;
+  class SVGImageCache;
 
   /// @brief A cached image: the encoded data a load brought, and the image made from it.
   // FIXME: The broken image (G7c), the image data update back-off for streamed data, and asynchronous
@@ -121,7 +117,7 @@ namespace krys::boo
     /// @brief The settings of the document that loaded the image.
     RefPtr<Settings> _settings;
     RefPtr<Image> _image;
-    UniquePtr<svg::SVGImageCache> _svgImageCache;
+    UniquePtr<SVGImageCache> _svgImageCache;
     HashMap<const CachedImageClient *, ContainerContext> _pendingContainerContextRequests;
     /// @brief The clients that drew nothing while the image's frame decodes on the work queue, which a static
     /// image's frame, once it's decoded, is shown in.

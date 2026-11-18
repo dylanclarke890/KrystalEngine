@@ -30,21 +30,21 @@ namespace krys::editor
     /// @brief A chapter and how much of it is in view, in CSS pixels.
     struct ChapterInView
     {
-      WeakPtr<boo::dom::Element> Chapter;
+      WeakPtr<boo::Element> Chapter;
       double VisibleHeight {0};
     };
 
   private:
-    WeakPtr<boo::dom::Document> _document;
+    WeakPtr<boo::Document> _document;
     RefPtr<boo::ResizeObserver> _resizeObserver;
     RefPtr<boo::IntersectionObserver> _chapterObserver;
-    boo::dom::EventListenerHandle _lazyLoads;
+    boo::EventListenerHandle _lazyLoads;
     List<ChapterInView> _chapters;
-    boo::dom::DOMString _currentChapter;
+    boo::DOMString _currentChapter;
     size_t _imagesLoaded {0};
 
   public:
-    explicit PageObservers(boo::dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
+    explicit PageObservers(boo::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
       if (auto card = document.GetElementById(u8"resize-card"))
       {
@@ -59,7 +59,7 @@ namespace krys::editor
         // `load` doesn't bubble, so this listens as it's captured.
         _lazyLoads = list->AddEventListener(
           u8"load",
-          [this](boo::dom::Event &)
+          [this](boo::Event &)
           {
             ++_imagesLoaded;
             ShowImagesLoaded();
@@ -88,9 +88,9 @@ namespace krys::editor
         return;
       }
       _chapterObserver = observer.ReleaseValue();
-      for (RefPtr<boo::dom::Node> node : *chapters.Value())
+      for (RefPtr<boo::Node> node : *chapters.Value())
       {
-        if (auto *chapter = DynamicDowncast<boo::dom::Element>(node.get()))
+        if (auto *chapter = DynamicDowncast<boo::Element>(node.get()))
         {
           _chapters.push_back({CreateWeakPtr(chapter), 0});
           _chapterObserver->Observe(*chapter);
@@ -99,7 +99,7 @@ namespace krys::editor
     }
 
     /// @brief The heading of the chapter most in view; empty if none is.
-    KRYS_NODISCARD const boo::dom::DOMString &CurrentChapter() const noexcept
+    KRYS_NODISCARD const boo::DOMString &CurrentChapter() const noexcept
     {
       return _currentChapter;
     }
@@ -121,8 +121,7 @@ namespace krys::editor
       auto &size = *entry.ContentBoxSize().front();
       auto text =
         std::format("{} × {} pixels", std::lround(size.InlineSize()), std::lround(size.BlockSize()));
-      (void)label->TextContent(
-        boo::dom::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
+      (void)label->TextContent(boo::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
     }
 
     void ShowImagesLoaded() noexcept
@@ -136,8 +135,7 @@ namespace krys::editor
       auto images = list->QuerySelectorAll(u8"img");
       auto total = images.HasException() ? 0uz : images.Value()->Length();
       auto text = std::format("{} of {} images loaded", _imagesLoaded, total);
-      (void)label->TextContent(
-        boo::dom::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
+      (void)label->TextContent(boo::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
     }
 
     void UpdateChapters(const List<Ref<boo::IntersectionObserverEntry>> &entries) noexcept
@@ -168,7 +166,7 @@ namespace krys::editor
         if (auto heading = mostInView->Chapter->QuerySelector(u8"h2");
             !heading.HasException() && heading.Value())
         {
-          _currentChapter = heading.Value()->TextContent().value_or(boo::dom::DOMString {});
+          _currentChapter = heading.Value()->TextContent().value_or(boo::DOMString {});
         }
       }
     }

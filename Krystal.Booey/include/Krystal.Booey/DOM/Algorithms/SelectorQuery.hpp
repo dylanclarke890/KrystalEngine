@@ -41,11 +41,15 @@ namespace krys::boo::css
   class Selector;
 }
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class ContainerNode;
   class Document;
   class Element;
+}
+
+namespace krys::boo::dom
+{
   class NodeList;
 
   /// @brief Runs the selectors of a list against elements, choosing a fast path for the common

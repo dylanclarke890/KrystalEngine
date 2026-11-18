@@ -44,7 +44,7 @@ namespace krys::boo::html
     {
     }
 
-    KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
+    KRYS_NODISCARD DOMStringView FormControlType() const noexcept final
     {
       return input_type_names::Month;
     }
@@ -60,21 +60,19 @@ namespace krys::boo::html
 
     KRYS_NODISCARD Decimal DefaultValueForStepUp() const noexcept final;
 
-    KRYS_NODISCARD Decimal ParseToNumber(dom::DOMStringView string,
+    KRYS_NODISCARD Decimal ParseToNumber(DOMStringView string,
                                          const Decimal &defaultValue) const noexcept final;
 
   protected:
-    KRYS_NODISCARD dom::DOMString SerializeWithMilliseconds(double value) const noexcept final;
+    KRYS_NODISCARD DOMString SerializeWithMilliseconds(double value) const noexcept final;
 
   private:
-    KRYS_NODISCARD Maybe<DateComponents>
-      ParseToDateComponents(dom::DOMStringView source) const noexcept final;
+    KRYS_NODISCARD Maybe<DateComponents> ParseToDateComponents(DOMStringView source) const noexcept final;
 
     KRYS_NODISCARD Maybe<DateComponents> SetMillisecondToDateComponents(double value) const noexcept final;
 
     // DateTimeEditElementEditControlOwner functions:
-    KRYS_NODISCARD dom::DOMString
-      FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept final;
+    KRYS_NODISCARD DOMString FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept final;
 
     // BaseDateAndTimeInputType functions:
     void SetupLayoutParameters(DateTimeEditElement::LayoutParameters &layoutParameters,

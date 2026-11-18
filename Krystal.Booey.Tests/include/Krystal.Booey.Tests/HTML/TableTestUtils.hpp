@@ -7,7 +7,7 @@
 
 namespace krys::boo::html::tests
 {
-  KRYS_NODISCARD inline std::string TableText(dom::DOMStringView text) noexcept
+  KRYS_NODISCARD inline std::string TableText(DOMStringView text) noexcept
   {
     return std::string(reinterpret_cast<const char *>(text.data()), text.size());
   }
@@ -26,8 +26,8 @@ namespace krys::boo::html::tests
   /// @brief A document with a body holding a table, whose markup the test sets.
   struct TableDocument
   {
-    Ref<dom::HTMLDocument> Document {CreateRef<dom::HTMLDocument>()};
-    RefPtr<dom::Element> Body;
+    Ref<HTMLDocument> Document {CreateRef<HTMLDocument>()};
+    RefPtr<Element> Body;
 
     TableDocument() noexcept
     {
@@ -37,9 +37,9 @@ namespace krys::boo::html::tests
       (void)html->AppendChild(*Body);
     }
 
-    HTMLTableElement &Table(dom::DOMStringView markup) const noexcept
+    HTMLTableElement &Table(DOMStringView markup) const noexcept
     {
-      dom::DOMString tableMarkup(u8"<table id=t>");
+      DOMString tableMarkup(u8"<table id=t>");
       tableMarkup += markup;
       tableMarkup += u8"</table>";
       (void)Body->InnerHTML(tableMarkup);

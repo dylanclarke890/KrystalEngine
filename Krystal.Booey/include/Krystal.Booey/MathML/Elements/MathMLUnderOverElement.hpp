@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/MathML/Elements/MathMLScriptsElement.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   /// @brief The `<munder>`, `<mover>` and `<munderover>` elements: a base with scripts below and above it.
   /// @see https://w3c.github.io/mathml-core/#underscripts-and-overscripts-munder-mover-munderover
@@ -40,7 +40,7 @@ namespace krys::boo::mathml
     Maybe<BooleanValue> _accentUnder;
 
   public:
-    MathMLUnderOverElement(dom::Document &document, ScriptType scriptType) noexcept
+    MathMLUnderOverElement(Document &document, ScriptType scriptType) noexcept
         : MathMLScriptsElement(document, scriptType, MathMLElementInterface::UnderOver)
     {
     }
@@ -52,19 +52,19 @@ namespace krys::boo::mathml
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
 
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::mathml::MathMLUnderOverElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::mathml::MathMLElement &element) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::MathMLUnderOverElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::MathMLElement &element) noexcept
   {
-    return element.Interface() == krys::boo::mathml::MathMLElementInterface::UnderOver;
+    return element.Interface() == krys::boo::MathMLElementInterface::UnderOver;
   }
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
-    auto *element = krys::DynamicDowncast<krys::boo::mathml::MathMLElement>(node);
+    auto *element = krys::DynamicDowncast<krys::boo::MathMLElement>(node);
     return element && IsType(*element);
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

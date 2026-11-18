@@ -26,26 +26,26 @@
 /// @see https://html.spec.whatwg.org/#attr-input-type
 namespace krys::boo::html::input_type_names
 {
-  constexpr dom::DOMStringView Button = u8"button";
-  constexpr dom::DOMStringView Checkbox = u8"checkbox";
-  constexpr dom::DOMStringView Color = u8"color";
-  constexpr dom::DOMStringView Date = u8"date";
-  constexpr dom::DOMStringView DateTimeLocal = u8"datetime-local";
-  constexpr dom::DOMStringView Email = u8"email";
-  constexpr dom::DOMStringView File = u8"file";
-  constexpr dom::DOMStringView Hidden = u8"hidden";
-  constexpr dom::DOMStringView Image = u8"image";
-  constexpr dom::DOMStringView Month = u8"month";
-  constexpr dom::DOMStringView Number = u8"number";
-  constexpr dom::DOMStringView Password = u8"password";
-  constexpr dom::DOMStringView Radio = u8"radio";
-  constexpr dom::DOMStringView Range = u8"range";
-  constexpr dom::DOMStringView Reset = u8"reset";
-  constexpr dom::DOMStringView Search = u8"search";
-  constexpr dom::DOMStringView Submit = u8"submit";
-  constexpr dom::DOMStringView Telephone = u8"tel";
-  constexpr dom::DOMStringView Text = u8"text";
-  constexpr dom::DOMStringView Time = u8"time";
-  constexpr dom::DOMStringView URL = u8"url";
-  constexpr dom::DOMStringView Week = u8"week";
+  constexpr DOMStringView Button = u8"button";
+  constexpr DOMStringView Checkbox = u8"checkbox";
+  constexpr DOMStringView Color = u8"color";
+  constexpr DOMStringView Date = u8"date";
+  constexpr DOMStringView DateTimeLocal = u8"datetime-local";
+  constexpr DOMStringView Email = u8"email";
+  constexpr DOMStringView File = u8"file";
+  constexpr DOMStringView Hidden = u8"hidden";
+  constexpr DOMStringView Image = u8"image";
+  constexpr DOMStringView Month = u8"month";
+  constexpr DOMStringView Number = u8"number";
+  constexpr DOMStringView Password = u8"password";
+  constexpr DOMStringView Radio = u8"radio";
+  constexpr DOMStringView Range = u8"range";
+  constexpr DOMStringView Reset = u8"reset";
+  constexpr DOMStringView Search = u8"search";
+  constexpr DOMStringView Submit = u8"submit";
+  constexpr DOMStringView Telephone = u8"tel";
+  constexpr DOMStringView Text = u8"text";
+  constexpr DOMStringView Time = u8"time";
+  constexpr DOMStringView URL = u8"url";
+  constexpr DOMStringView Week = u8"week";
 }

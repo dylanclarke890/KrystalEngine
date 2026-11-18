@@ -67,7 +67,7 @@ namespace krys::boo::html
     }
   }
 
-  Color ParseColor(dom::DOMStringView colorString, CanvasBase &canvasBase) noexcept
+  Color ParseColor(DOMStringView colorString, CanvasBase &canvasBase) noexcept
   {
     using namespace css::parse_property;
 
@@ -91,7 +91,7 @@ namespace krys::boo::html
     return ParseColorRawGeneral(colorString, cssParserContext, options, state);
   }
 
-  Color ParseColor(dom::DOMStringView colorString) noexcept
+  Color ParseColor(DOMStringView colorString) noexcept
   {
     using namespace css::parse_property;
 

@@ -23,7 +23,7 @@ namespace krys::boo::html::tests
     CHECK(section.InsertRow(3).HasValue());
     auto result = section.InsertRow(5);
     REQUIRE(result.HasException());
-    CHECK(result.GetException().Code() == dom::ExceptionCode::IndexSizeError);
+    CHECK(result.GetException().Code() == ExceptionCode::IndexSizeError);
 
     REQUIRE_FALSE(section.DeleteRow(0).HasException());
     CHECK(rows->Length() == 3);
@@ -31,6 +31,6 @@ namespace krys::boo::html::tests
     CHECK(rows->Length() == 2);
     auto deleteResult = section.DeleteRow(2);
     REQUIRE(deleteResult.HasException());
-    CHECK(deleteResult.GetException().Code() == dom::ExceptionCode::IndexSizeError);
+    CHECK(deleteResult.GetException().Code() == ExceptionCode::IndexSizeError);
   }
 }

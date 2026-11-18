@@ -33,7 +33,7 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   namespace
   {
@@ -45,13 +45,13 @@ namespace krys::boo::css
     }
   }
 
-  dom::ExceptionOr<Ref<CSSSkew>> CSSSkew::Create(Ref<CSSNumericValue> ax, Ref<CSSNumericValue> ay) noexcept
+  ExceptionOr<Ref<CSSSkew>> CSSSkew::Create(Ref<CSSNumericValue> ax, Ref<CSSNumericValue> ay) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssskew-cssskew
     // 1. If ax or ay do not match <angle>, throw a TypeError.
     if (!ax->Type().Matches<CSSNumericBaseType::Angle>() || !ay->Type().Matches<CSSNumericBaseType::Angle>())
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     // 2. Return a new CSSSkew object with its ax and ay internal slots set to ax and ay, and its is2D
     // internal
@@ -59,8 +59,7 @@ namespace krys::boo::css
     return AdoptRef(*new CSSSkew(krys::move(ax), krys::move(ay)));
   }
 
-  dom::ExceptionOr<Ref<CSSSkew>> CSSSkew::Create(const FunctionValue &function,
-                                                 dom::Document &document) noexcept
+  ExceptionOr<Ref<CSSSkew>> CSSSkew::Create(const css::FunctionValue &function, Document &document) noexcept
   {
     auto reified = ReifyArguments(function, document);
     if (reified.HasException())
@@ -68,9 +67,9 @@ namespace krys::boo::css
       return reified.ReleaseException();
     }
     auto arguments = reified.ReleaseValue();
-    if (function.Name() != ValueId::Skew || arguments.empty() || arguments.size() > 2)
+    if (function.Name() != css::ValueId::Skew || arguments.empty() || arguments.size() > 2)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     if (arguments.size() == 2)
     {
@@ -84,21 +83,21 @@ namespace krys::boo::css
   {
   }
 
-  dom::ExceptionOr<void> CSSSkew::SetAx(Ref<CSSNumericValue> ax) noexcept
+  ExceptionOr<void> CSSSkew::SetAx(Ref<CSSNumericValue> ax) noexcept
   {
     if (!ax->Type().Matches<CSSNumericBaseType::Angle>())
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     _ax = krys::move(ax);
     return {};
   }
 
-  dom::ExceptionOr<void> CSSSkew::SetAy(Ref<CSSNumericValue> ay) noexcept
+  ExceptionOr<void> CSSSkew::SetAy(Ref<CSSNumericValue> ay) noexcept
   {
     if (!ay->Type().Matches<CSSNumericBaseType::Angle>())
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     _ay = krys::move(ay);
     return {};
@@ -117,28 +116,28 @@ namespace krys::boo::css
     builder.Append(u8')');
   }
 
-  dom::ExceptionOr<Ref<DOMMatrix>> CSSSkew::ToMatrix() const noexcept
+  ExceptionOr<Ref<css::DOMMatrix>> CSSSkew::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
     const auto *axUnitValue = DynamicDowncast<CSSUnitValue>(*_ax);
     const auto *ayUnitValue = DynamicDowncast<CSSUnitValue>(*_ay);
     if (!axUnitValue || !ayUnitValue)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
-    auto ax = axUnitValue->ConvertTo(UnitType::deg);
-    auto ay = ayUnitValue->ConvertTo(UnitType::deg);
+    auto ax = axUnitValue->ConvertTo(css::UnitType::deg);
+    auto ay = ayUnitValue->ConvertTo(css::UnitType::deg);
     if (!ax || !ay)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     TransformationMatrix matrix;
     matrix.Skew(ax->Value(), ay->Value());
-    return DOMMatrix::Create(matrix, DOMMatrixReadOnly::Is2D::Yes);
+    return css::DOMMatrix::Create(matrix, css::DOMMatrixReadOnly::Is2D::Yes);
   }
 
-  RefPtr<Value> CSSSkew::ToCSSValue() const noexcept
+  RefPtr<css::Value> CSSSkew::ToCSSValue() const noexcept
   {
     auto ax = _ax->ToCSSValue();
     auto ay = _ay->ToCSSValue();
@@ -148,8 +147,9 @@ namespace krys::boo::css
     }
     if (IsZeroSkewAngle(*_ay))
     {
-      return FunctionValue::Create(ValueId::Skew, Ref<Value>(krys::move(ax)));
+      return css::FunctionValue::Create(css::ValueId::Skew, Ref<css::Value>(krys::move(ax)));
     }
-    return FunctionValue::Create(ValueId::Skew, Ref<Value>(krys::move(ax)), Ref<Value>(krys::move(ay)));
+    return css::FunctionValue::Create(css::ValueId::Skew, Ref<css::Value>(krys::move(ax)),
+                                      Ref<css::Value>(krys::move(ay)));
   }
 }

@@ -14,20 +14,20 @@ namespace krys::boo::style
   {
     using PseudoClass = css::SelectorPseudoClass;
 
-    KRYS_NODISCARD bool IsHTMLElement(const dom::Element &element, html::TagName tagName) noexcept
+    KRYS_NODISCARD bool IsHTMLElement(const Element &element, html::TagName tagName) noexcept
     {
-      return Is<html::HTMLElement>(element) && element.TagQualifiedName().TagName() == tagName;
+      return Is<HTMLElement>(element) && element.TagQualifiedName().TagName() == tagName;
     }
 
-    KRYS_NODISCARD bool IsOneOf(const dom::Element &element,
+    KRYS_NODISCARD bool IsOneOf(const Element &element,
                                 std::initializer_list<html::TagName> tagNames) noexcept
     {
-      return Is<html::HTMLElement>(element)
+      return Is<HTMLElement>(element)
              && std::ranges::find(tagNames, element.TagQualifiedName().TagName()) != tagNames.end();
     }
 
     /// @brief Whether @p element is in the state @p pseudoClass matches.
-    KRYS_NODISCARD bool MatchesState(const dom::Element &element, PseudoClass pseudoClass) noexcept
+    KRYS_NODISCARD bool MatchesState(const Element &element, PseudoClass pseudoClass) noexcept
     {
       switch (pseudoClass)
       {
@@ -44,7 +44,7 @@ namespace krys::boo::style
 
     /// @brief Starts the invalidations for states of @p element that may flip: each as if it flips, which
     /// costs a little extra invalidation when it doesn't.
-    void InvalidateStates(PseudoClassChangeInvalidations &invalidations, dom::Element &element,
+    void InvalidateStates(PseudoClassChangeInvalidations &invalidations, Element &element,
                           std::initializer_list<PseudoClass> pseudoClasses) noexcept
     {
       if (!element.NeedsStyleInvalidation())
@@ -60,7 +60,7 @@ namespace krys::boo::style
 
     /// @brief Starts the invalidation for a functional pseudo-class (`:lang()`, `:dir()`) whose matches may
     /// change either way.
-    void InvalidateAnyValue(PseudoClassChangeInvalidations &invalidations, dom::Element &element,
+    void InvalidateAnyValue(PseudoClassChangeInvalidations &invalidations, Element &element,
                             PseudoClass pseudoClass) noexcept
     {
       if (!element.NeedsStyleInvalidation())
@@ -75,10 +75,10 @@ namespace krys::boo::style
     /// shadow trees if @p crossShadowBoundaries: the subtrees of descendants for which @p stop is true are
     /// skipped.
     template <typename TStop, typename TFunction>
-    void ForEachInheritingDescendant(dom::Element &element, bool crossShadowBoundaries, TStop stop,
+    void ForEachInheritingDescendant(Element &element, bool crossShadowBoundaries, TStop stop,
                                      TFunction function) noexcept
     {
-      auto visitChildren = [&](this auto &self, dom::ContainerNode &container) -> void
+      auto visitChildren = [&](this auto &self, ContainerNode &container) -> void
       {
         for (auto *child = dom::TreeQueries::FirstElementChild(container); child;
              child = dom::TreeQueries::NextElementSibling(*child))
@@ -103,40 +103,37 @@ namespace krys::boo::style
       visitChildren(element);
     }
 
-    KRYS_NODISCARD bool HasLanguageAttribute(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool HasLanguageAttribute(const Element &element) noexcept
     {
       return element.HasAttributeNS(infra::namespaces::XML, u8"lang")
              || element.HasAttributeNS(null, u8"lang");
     }
 
-    KRYS_NODISCARD bool HasDirectionality(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool HasDirectionality(const Element &element) noexcept
     {
-      if (!Is<html::HTMLElement>(element))
+      if (!Is<HTMLElement>(element))
       {
         return false;
       }
-      auto dir =
-        text::ToASCIILower(dom::DOMStringView(element.GetAttribute(u8"dir").value_or(dom::DOMString())));
+      auto dir = text::ToASCIILower(DOMStringView(element.GetAttribute(u8"dir").value_or(DOMString())));
       return dir == u8"ltr" || dir == u8"rtl" || dir == u8"auto";
     }
 
-    KRYS_NODISCARD bool HasContentEditableAttribute(const dom::Element &element) noexcept
+    KRYS_NODISCARD bool HasContentEditableAttribute(const Element &element) noexcept
     {
-      return Is<html::HTMLElement>(element) && element.HasAttribute(u8"contenteditable");
+      return Is<HTMLElement>(element) && element.HasAttribute(u8"contenteditable");
     }
 
-    void InvalidateDisabledStates(PseudoClassChangeInvalidations &invalidations,
-                                  dom::Element &element) noexcept
+    void InvalidateDisabledStates(PseudoClassChangeInvalidations &invalidations, Element &element) noexcept
     {
       InvalidateStates(invalidations, element, {PseudoClass::Disabled, PseudoClass::Enabled});
     }
   }
 
   void InvalidatePseudoClassesForAttributeChange(PseudoClassChangeInvalidations &invalidations,
-                                                 dom::Element &element,
-                                                 const dom::QualifiedName &attributeName,
-                                                 Maybe<dom::DOMStringView> oldValue,
-                                                 Maybe<dom::DOMStringView> newValue) noexcept
+                                                 Element &element, const QualifiedName &attributeName,
+                                                 Maybe<DOMStringView> oldValue,
+                                                 Maybe<DOMStringView> newValue) noexcept
   {
     if (!element.NeedsStyleInvalidation())
     {
@@ -152,7 +149,7 @@ namespace krys::boo::style
       if (localName == u8"lang")
       {
         InvalidateAnyValue(invalidations, element, PseudoClass::Lang);
-        ForEachInheritingDescendant(element, true, HasLanguageAttribute, [&](dom::Element &descendant)
+        ForEachInheritingDescendant(element, true, HasLanguageAttribute, [&](Element &descendant)
                                     { InvalidateAnyValue(invalidations, descendant, PseudoClass::Lang); });
       }
       return;
@@ -176,7 +173,7 @@ namespace krys::boo::style
     if (localName == u8"lang")
     {
       InvalidateAnyValue(invalidations, element, PseudoClass::Lang);
-      ForEachInheritingDescendant(element, true, HasLanguageAttribute, [&](dom::Element &descendant)
+      ForEachInheritingDescendant(element, true, HasLanguageAttribute, [&](Element &descendant)
                                   { InvalidateAnyValue(invalidations, descendant, PseudoClass::Lang); });
       return;
     }
@@ -193,7 +190,7 @@ namespace krys::boo::style
       return;
     }
 
-    if (!Is<html::HTMLElement>(element))
+    if (!Is<HTMLElement>(element))
     {
       return;
     }
@@ -201,7 +198,7 @@ namespace krys::boo::style
     if (localName == u8"dir")
     {
       InvalidateAnyValue(invalidations, element, PseudoClass::Dir);
-      ForEachInheritingDescendant(element, true, HasDirectionality, [&](dom::Element &descendant)
+      ForEachInheritingDescendant(element, true, HasDirectionality, [&](Element &descendant)
                                   { InvalidateAnyValue(invalidations, descendant, PseudoClass::Dir); });
       return;
     }
@@ -210,7 +207,7 @@ namespace krys::boo::style
     {
       InvalidateStates(invalidations, element, {PseudoClass::ReadOnly, PseudoClass::ReadWrite});
       ForEachInheritingDescendant(
-        element, false, HasContentEditableAttribute, [&](dom::Element &descendant)
+        element, false, HasContentEditableAttribute, [&](Element &descendant)
         { InvalidateStates(invalidations, descendant, {PseudoClass::ReadOnly, PseudoClass::ReadWrite}); });
       return;
     }

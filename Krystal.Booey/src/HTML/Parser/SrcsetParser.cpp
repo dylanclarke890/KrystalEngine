@@ -51,8 +51,8 @@ namespace krys::boo::html
       return text::IsASCIIWhitespace(c) || c == u8',';
     }
 
-    void TokenizeDescriptors(dom::DOMStringView attribute, size_t &position,
-                             List<dom::DOMStringView> &descriptors) noexcept
+    void TokenizeDescriptors(DOMStringView attribute, size_t &position,
+                             List<DOMStringView> &descriptors) noexcept
     {
       auto state = DescriptorTokenizerState::Initial;
       Maybe<size_t> currentDescriptorStart = position;
@@ -138,7 +138,7 @@ namespace krys::boo::html
     }
 
     // Steps 9 to 14 of parsing a srcset attribute, the descriptor parser: whether error is still no.
-    KRYS_NODISCARD bool ParseDescriptors(const List<dom::DOMStringView> &descriptors,
+    KRYS_NODISCARD bool ParseDescriptors(const List<DOMStringView> &descriptors,
                                          DescriptorParsingResult &result) noexcept
     {
       // 9. Descriptor parser: Let error be no.
@@ -281,7 +281,7 @@ namespace krys::boo::html
     }
   }
 
-  List<ImageCandidate> ParseImageCandidatesFromSrcsetAttribute(dom::DOMStringView attribute) noexcept
+  List<ImageCandidate> ParseImageCandidatesFromSrcsetAttribute(DOMStringView attribute) noexcept
   {
     // 1. Let input be the value passed to this algorithm.
     // 2. Let position be a pointer into input, initially pointing at the start of the string.
@@ -339,7 +339,7 @@ namespace krys::boo::html
         // 8b. Let current descriptor be the empty string.
         // 8c. Let state be in descriptor.
         // 8d. Let c be the character at position. Do the following depending on the value of state.
-        List<dom::DOMStringView> descriptorTokens;
+        List<DOMStringView> descriptorTokens;
         TokenizeDescriptors(attribute, position, descriptorTokens);
 
         // 9.-14. (The descriptor parser.)
@@ -352,16 +352,15 @@ namespace krys::boo::html
         }
       }
 
-      imageCandidates.emplace_back(dom::DOMString(imageURL), result, ImageCandidate::OriginAttribute::Srcset);
+      imageCandidates.emplace_back(DOMString(imageURL), result, ImageCandidate::OriginAttribute::Srcset);
 
       // 16. Return to the step labeled splitting loop.
     }
   }
 
   ImageCandidate BestFitSourceForImageAttributes(
-    float deviceScaleFactor, Maybe<dom::DOMStringView> srcAttribute,
-    Maybe<dom::DOMStringView> srcsetAttribute, float sourceSize,
-    const Func<bool(const ImageCandidate &)> &shouldIgnoreCandidateCallback) noexcept
+    float deviceScaleFactor, Maybe<DOMStringView> srcAttribute, Maybe<DOMStringView> srcsetAttribute,
+    float sourceSize, const Func<bool(const ImageCandidate &)> &shouldIgnoreCandidateCallback) noexcept
   {
     // Create a source set: https://html.spec.whatwg.org/#create-a-source-set
     if (!srcsetAttribute)
@@ -370,7 +369,7 @@ namespace krys::boo::html
       {
         return {};
       }
-      return ImageCandidate(dom::DOMString(*srcAttribute), DescriptorParsingResult(),
+      return ImageCandidate(DOMString(*srcAttribute), DescriptorParsingResult(),
                             ImageCandidate::OriginAttribute::Src);
     }
 
@@ -387,7 +386,7 @@ namespace krys::boo::html
     // (It's appended anyway, and then loses to an earlier 1x entry, or is ignored if there are widths.)
     if (srcAttribute && !srcAttribute->empty())
     {
-      imageCandidates.emplace_back(dom::DOMString(*srcAttribute), DescriptorParsingResult(),
+      imageCandidates.emplace_back(DOMString(*srcAttribute), DescriptorParsingResult(),
                                    ImageCandidate::OriginAttribute::Src);
     }
 

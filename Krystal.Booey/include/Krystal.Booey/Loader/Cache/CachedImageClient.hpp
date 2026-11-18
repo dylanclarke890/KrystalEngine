@@ -28,12 +28,8 @@
 namespace krys::boo
 {
   class CachedImage;
+  class Document;
   class IntRect;
-
-  namespace dom
-  {
-    class Document;
-  }
 
   enum class VisibleInViewportState : uint8
   {
@@ -74,7 +70,7 @@ namespace krys::boo
     virtual VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
                                                        const IntRect *) noexcept;
 
-    KRYS_NODISCARD virtual VisibleInViewportState ImageVisibleInViewport(const dom::Document &) const noexcept
+    KRYS_NODISCARD virtual VisibleInViewportState ImageVisibleInViewport(const boo::Document &) const noexcept
     {
       return VisibleInViewportState::No;
     }

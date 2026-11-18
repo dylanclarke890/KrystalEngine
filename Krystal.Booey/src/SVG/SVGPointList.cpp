@@ -27,32 +27,32 @@
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  bool SVGPointList::Parse(dom::DOMStringView value) noexcept
+  bool SVGPointList::Parse(DOMStringView value) noexcept
   {
     ClearItems();
 
     auto buffer = value;
-    SkipOptionalSVGSpaces(buffer);
+    svg::SkipOptionalSVGSpaces(buffer);
 
     bool delimParsed = false;
     while (!buffer.empty())
     {
       delimParsed = false;
-      auto xPos = ParseNumber(buffer);
+      auto xPos = svg::ParseNumber(buffer);
       if (!xPos)
       {
         return false;
       }
 
-      auto yPos = ParseNumber(buffer, SuffixSkippingPolicy::DontSkip);
+      auto yPos = svg::ParseNumber(buffer, svg::SuffixSkippingPolicy::DontSkip);
       if (!yPos)
       {
         return false;
       }
 
-      SkipOptionalSVGSpaces(buffer);
+      svg::SkipOptionalSVGSpaces(buffer);
 
       if (!buffer.empty() && buffer.front() == u8',')
       {
@@ -60,7 +60,7 @@ namespace krys::boo::svg
         delimParsed = true;
       }
 
-      SkipOptionalSVGSpaces(buffer);
+      svg::SkipOptionalSVGSpaces(buffer);
 
       Append(SVGPoint::Create({*xPos, *yPos}));
     }
@@ -69,7 +69,7 @@ namespace krys::boo::svg
     return !delimParsed;
   }
 
-  dom::DOMString SVGPointList::ValueAsString() const noexcept
+  DOMString SVGPointList::ValueAsString() const noexcept
   {
     StringBuilder builder;
     for (const auto &point : _items)

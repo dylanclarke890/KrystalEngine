@@ -54,7 +54,7 @@ namespace krys::ui
     view.ResizeToLayoutSize(size);
   }
 
-  boo::dom::Element *Overlay::HitTest(View &view, const boo::IntPoint &point) noexcept
+  boo::Element *Overlay::HitTest(View &view, const boo::IntPoint &point) noexcept
   {
     return view.HitTestInPage(point);
   }
@@ -64,10 +64,10 @@ namespace krys::ui
     return view.MouseWheelInPage(point, notchesX, notchesY, {}, pal::GetWheelScrollSettings());
   }
 
-  boo::dom::Element *Overlay::ElementWithAttributeAt(View &view, const boo::IntPoint &point,
-                                                     utf8_stringview name) noexcept
+  boo::Element *Overlay::ElementWithAttributeAt(View &view, const boo::IntPoint &point,
+                                                utf8_stringview name) noexcept
   {
-    auto attribute = boo::dom::DOMStringAtom(name);
+    auto attribute = boo::DOMStringAtom(name);
     for (auto *element = view.HitTestInPage(point); element; element = element->ParentElement())
     {
       if (element->HasAttribute(attribute))
@@ -78,9 +78,9 @@ namespace krys::ui
     return nullptr;
   }
 
-  void Overlay::SetClass(boo::dom::Element &element, utf8_stringview className, bool on) noexcept
+  void Overlay::SetClass(boo::Element &element, utf8_stringview className, bool on) noexcept
   {
-    auto classes = element.GetAttribute(u8"class").value_or(boo::dom::DOMString());
+    auto classes = element.GetAttribute(u8"class").value_or(boo::DOMString());
     utf8_string padded = u8" " + classes + u8" ";
     utf8_string token = u8" " + utf8_string(className) + u8" ";
     auto position = padded.find(token);

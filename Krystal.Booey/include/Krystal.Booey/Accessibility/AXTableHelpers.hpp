@@ -31,19 +31,11 @@
 namespace krys::boo
 {
   class AXObjectCache;
+  class Element;
+  class HTMLTableElement;
+  class HTMLTableSectionElement;
+  class Node;
   class RenderObject;
-
-  namespace dom
-  {
-    class Element;
-    class Node;
-  }
-
-  namespace html
-  {
-    class HTMLTableElement;
-    class HTMLTableSectionElement;
-  }
 }
 
 /// @brief What the table, row and cell objects share: which elements are tables, rows and cells, and the
@@ -54,46 +46,46 @@ namespace krys::boo::ax
   constexpr AXRole LayoutTableCellRole = AXRole::TextGroup;
 
   /// @brief Whether @p element's `role` (or its custom element's default role) lists @p role.
-  KRYS_NODISCARD bool HasRole(const dom::Element &element, dom::DOMStringView role) noexcept;
+  KRYS_NODISCARD bool HasRole(const boo::Element &element, DOMStringView role) noexcept;
 
   /// @brief Whether @p element has no `role` (and its custom element no default role).
-  KRYS_NODISCARD bool HasNoRole(const dom::Element &element) noexcept;
+  KRYS_NODISCARD bool HasNoRole(const boo::Element &element) noexcept;
 
   /// @brief Whether @p element's role is `grid`, `table` or `treegrid`.
-  KRYS_NODISCARD bool HasTableRole(const dom::Element &element) noexcept;
+  KRYS_NODISCARD bool HasTableRole(const boo::Element &element) noexcept;
 
   /// @brief Whether @p element's role is `gridcell`, `cell`, `columnheader` or `rowheader`.
-  KRYS_NODISCARD bool HasCellARIARole(const dom::Element &element) noexcept;
+  KRYS_NODISCARD bool HasCellARIARole(const boo::Element &element) noexcept;
 
-  KRYS_NODISCARD bool HasRowRole(const dom::Element &element) noexcept;
+  KRYS_NODISCARD bool HasRowRole(const boo::Element &element) noexcept;
 
   /// @brief Whether @p element is a `thead`, `tbody` or `tfoot`, or has the `rowgroup` role.
-  KRYS_NODISCARD bool IsRowGroup(const dom::Element &element) noexcept;
+  KRYS_NODISCARD bool IsRowGroup(const boo::Element &element) noexcept;
 
   KRYS_NODISCARD bool IsTableRole(AXRole role) noexcept;
 
   /// @brief Whether @p element is a row: `role=row`, or a `tr` (or `display: table-row` element) with no
   /// role.
-  KRYS_NODISCARD bool IsTableRowElement(const dom::Element &element) noexcept;
+  KRYS_NODISCARD bool IsTableRowElement(const boo::Element &element) noexcept;
 
   /// @brief Whether @p element is a cell: a cell role, or a `td` or `th` (or `display: table-cell` element)
   /// with no role.
-  KRYS_NODISCARD bool IsTableCellElement(const dom::Element &element) noexcept;
+  KRYS_NODISCARD bool IsTableCellElement(const boo::Element &element) noexcept;
 
   /// @brief The `table` element @p node is, or that @p renderer (a table renderer) is for.
-  KRYS_NODISCARD html::HTMLTableElement *TableElementIncludingAncestors(dom::Node *node,
-                                                                        RenderObject *renderer) noexcept;
+  KRYS_NODISCARD boo::HTMLTableElement *TableElementIncludingAncestors(boo::Node *node,
+                                                                       RenderObject *renderer) noexcept;
 
   /// @brief Whether the table has something only data tables have: a caption, summary, header or footer,
   /// rules, or columns.
-  KRYS_NODISCARD bool TableElementIndicatesAccessibleTable(const html::HTMLTableElement &table) noexcept;
+  KRYS_NODISCARD bool TableElementIndicatesAccessibleTable(const boo::HTMLTableElement &table) noexcept;
 
   /// @brief Whether the author gave the section a role other than a group (which says they want a data
   /// table).
-  KRYS_NODISCARD bool TableSectionIndicatesAccessibleTable(html::HTMLTableSectionElement &section,
+  KRYS_NODISCARD bool TableSectionIndicatesAccessibleTable(boo::HTMLTableSectionElement &section,
                                                            AXObjectCache &cache) noexcept;
 
   /// @brief WebKit's heuristic for a table with nothing that marks it out: looks at its rows' and cells'
   /// attributes, borders, colours and number.
-  KRYS_NODISCARD bool IsDataTableWithTraversal(html::HTMLTableElement &table, AXObjectCache &cache) noexcept;
+  KRYS_NODISCARD bool IsDataTableWithTraversal(boo::HTMLTableElement &table, AXObjectCache &cache) noexcept;
 }

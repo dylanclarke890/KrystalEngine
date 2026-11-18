@@ -30,11 +30,14 @@
 
 #include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLTableElement;
   class HTMLTableRowElement;
+}
 
+namespace krys::boo::html
+{
   /// @brief A table's rows: those of its `thead`s, then those that are its children or in its `tbody`s, then
   /// those of its `tfoot`s, each in tree order.
   /// @see https://html.spec.whatwg.org/#dom-table-rows
@@ -54,8 +57,8 @@ namespace krys::boo::html
     KRYS_NODISCARD static HTMLTableRowElement *LastRow(HTMLTableElement &table) noexcept;
 
   protected:
-    KRYS_NODISCARD dom::Element *CollectionBegin() const noexcept override;
+    KRYS_NODISCARD Element *CollectionBegin() const noexcept override;
 
-    KRYS_NODISCARD dom::Element *CollectionNext(dom::Element &element) const noexcept override;
+    KRYS_NODISCARD Element *CollectionNext(Element &element) const noexcept override;
   };
 }

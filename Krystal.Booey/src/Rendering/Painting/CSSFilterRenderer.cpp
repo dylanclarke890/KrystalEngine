@@ -203,7 +203,7 @@ namespace krys::boo
       return FEColorMatrix::Create(ColorMatrixType::FECOLORMATRIX_TYPE_MATRIX, krys::move(inputParameters));
     }
 
-    KRYS_NODISCARD RefPtr<svg::SVGFilterElement>
+    KRYS_NODISCARD RefPtr<SVGFilterElement>
       ReferenceFilterElement(const style::ReferenceFilterOperation &filterOperation,
                              RenderElement &renderer) noexcept
     {
@@ -258,10 +258,10 @@ namespace krys::boo
         return nullptr;
       }
 
-      auto *contextElement = DynamicDowncast<svg::SVGElement>(renderer.GetElement());
+      auto *contextElement = DynamicDowncast<SVGElement>(renderer.GetElement());
 
       auto geometry = filter.Geometry();
-      geometry.FilterRegion = svg::SVGLengthContext::ResolveRectangle(
+      geometry.FilterRegion = SVGLengthContext::ResolveRectangle(
         contextElement, *filterElement, filterElement->FilterUnits(), filter.ReferenceBox());
       if (geometry.FilterRegion.IsEmpty())
       {

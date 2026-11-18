@@ -83,7 +83,7 @@ namespace krys::boo
     // Ensure our parent is an SVG object.
     krys_debug_assert(renderer.Parent());
     auto &parent = *renderer.Parent();
-    if (!Is<svg::SVGElement>(parent.GetElement()))
+    if (!Is<SVGElement>(parent.GetElement()))
     {
       return FloatRect();
     }
@@ -407,7 +407,7 @@ namespace krys::boo
       {
         // When selfNeedsLayout is false and the layout size changed, we have to check whether this child uses
         // relative lengths
-        if (auto *element = DynamicDowncast<svg::SVGElement>(child.GetNode());
+        if (auto *element = DynamicDowncast<SVGElement>(child.GetNode());
             element && element->HasRelativeLengths())
         {
           // When the layout size changed and when using relative values tell the LegacyRenderSVGShape to
@@ -555,8 +555,7 @@ namespace krys::boo
         {
           if (renderer.GetElement())
           {
-            auto viewportSize =
-              svg::SVGLengthContext(Downcast<svg::SVGElement>(renderer.GetElement())).ViewportSize();
+            auto viewportSize = SVGLengthContext(Downcast<SVGElement>(renderer.GetElement())).ViewportSize();
             if (viewportSize)
             {
               referenceBox.SetSize(*viewportSize);
@@ -652,7 +651,7 @@ namespace krys::boo
 
   void SVGRenderSupport::StyleChanged(RenderElement &renderer, const RenderStyle *oldStyle) noexcept
   {
-    if (renderer.GetElement() && Is<svg::SVGElement>(*renderer.GetElement())
+    if (renderer.GetElement() && Is<SVGElement>(*renderer.GetElement())
         && (!oldStyle || renderer.Style().HasBlendMode() != oldStyle->HasBlendMode()))
     {
       SVGRenderSupport::UpdateMaskedAncestorShouldIsolateBlending(renderer);
@@ -668,13 +667,13 @@ namespace krys::boo
   {
     auto *element = renderer.GetElement();
     krys_debug_assert(element);
-    krys_debug_assert(Is<svg::SVGElement>(*element));
+    krys_debug_assert(Is<SVGElement>(*element));
     for (auto *ancestorElement = element->ParentElement(); ancestorElement;
          ancestorElement = ancestorElement->ParentElement())
     {
-      auto *ancestorSVGElement = DynamicDowncast<svg::SVGElement>(*ancestorElement);
+      auto *ancestorSVGElement = DynamicDowncast<SVGElement>(*ancestorElement);
       auto *ancestor =
-        ancestorSVGElement ? DynamicDowncast<svg::SVGGraphicsElement>(*ancestorSVGElement) : nullptr;
+        ancestorSVGElement ? DynamicDowncast<SVGGraphicsElement>(*ancestorSVGElement) : nullptr;
       if (!ancestor)
       {
         continue;
@@ -695,14 +694,14 @@ namespace krys::boo
   void SVGRenderSupport::ApplyStrokeStyleToContext(GraphicsContext &context, const RenderStyle &style,
                                                    const RenderElement &renderer) noexcept
   {
-    auto *element = DynamicDowncast<svg::SVGElement>(renderer.GetElement());
+    auto *element = DynamicDowncast<SVGElement>(renderer.GetElement());
     if (!element)
     {
       krys_debug_assert(false);
       return;
     }
 
-    svg::SVGLengthContext lengthContext(element);
+    SVGLengthContext lengthContext(element);
     context.SetStrokeThickness(lengthContext.ValueForLength(style.GetStrokeWidth(), style::ZoomNeeded {}));
     context.SetLineCap(style.CapStyle());
     context.SetLineJoin(style.JoinStyle());
@@ -720,7 +719,7 @@ namespace krys::boo
     {
       float scaleFactor = 1;
 
-      if (auto *geometryElement = DynamicDowncast<svg::SVGGeometryElement>(*element))
+      if (auto *geometryElement = DynamicDowncast<SVGGeometryElement>(*element))
       {
         krys_debug_assert(renderer.IsLegacyRenderSVGShape());
         // FIXME: A value of zero is valid. Need to differentiate this case from being unspecified.

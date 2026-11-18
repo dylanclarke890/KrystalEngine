@@ -7,7 +7,7 @@ namespace krys::boo::html::tests
 {
   namespace
   {
-    KRYS_NODISCARD HTMLIFrameElement &AsIFrame(dom::Element &element) noexcept
+    KRYS_NODISCARD HTMLIFrameElement &AsIFrame(Element &element) noexcept
     {
       return Downcast<HTMLIFrameElement>(Downcast<HTMLElement>(element));
     }
@@ -16,7 +16,7 @@ namespace krys::boo::html::tests
   TEST_CASE("HTMLIFrameElement: srcdoc is the attribute's value, and loading reflects its known values",
             "[HTML][HTMLIFrameElement][html:dom-iframe-srcdoc][html:dom-iframe-loading]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto element = document->CreateElement(u8"iframe").ReleaseValue();
     auto &iframe = AsIFrame(*element);
 

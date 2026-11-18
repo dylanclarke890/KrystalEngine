@@ -27,10 +27,13 @@
 
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   class HTMLCanvasElement;
+}
 
+namespace krys::boo::html
+{
   /// @brief A context that draws on the GPU, into a surface its canvas's layer shows.
   class GPUBasedCanvasRenderingContext : public CanvasRenderingContext
   {

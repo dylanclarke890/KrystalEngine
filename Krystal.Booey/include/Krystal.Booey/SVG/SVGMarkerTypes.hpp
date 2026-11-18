@@ -31,7 +31,7 @@
 #include "Krystal.Core/Enum.hpp"
 #include <utility>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   enum class SVGMarkerUnitsType : uint8
   {
@@ -56,7 +56,7 @@ namespace krys::boo::svg
       return krys::ToUnderlying(SVGMarkerUnitsType::StrokeWidth);
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(SVGMarkerUnitsType type) noexcept
+    KRYS_NODISCARD static DOMString ToString(SVGMarkerUnitsType type) noexcept
     {
       switch (type)
       {
@@ -78,7 +78,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    KRYS_NODISCARD static SVGMarkerUnitsType FromString(SVGElement &, dom::DOMStringView value) noexcept
+    KRYS_NODISCARD static SVGMarkerUnitsType FromString(SVGElement &, DOMStringView value) noexcept
     {
       if (value == u8"userSpaceOnUse")
       {
@@ -95,7 +95,7 @@ namespace krys::boo::svg
   template <>
   struct SVGPropertyTraits<SVGMarkerOrientType>
   {
-    KRYS_NODISCARD static dom::DOMStringView AutoStartReverseString() noexcept
+    KRYS_NODISCARD static DOMStringView AutoStartReverseString() noexcept
     {
       return u8"auto-start-reverse";
     }
@@ -105,7 +105,7 @@ namespace krys::boo::svg
       return SVGMarkerOrientAutoStartReverse;
     }
 
-    KRYS_NODISCARD static SVGMarkerOrientType FromString(SVGElement &, dom::DOMStringView string) noexcept
+    KRYS_NODISCARD static SVGMarkerOrientType FromString(SVGElement &, DOMStringView string) noexcept
     {
       if (string == u8"auto")
       {
@@ -118,7 +118,7 @@ namespace krys::boo::svg
       return SVGMarkerOrientUnknown;
     }
 
-    KRYS_NODISCARD static dom::DOMString ToString(SVGMarkerOrientType type) noexcept
+    KRYS_NODISCARD static DOMString ToString(SVGMarkerOrientType type) noexcept
     {
       if (type == SVGMarkerOrientAuto)
       {
@@ -126,7 +126,7 @@ namespace krys::boo::svg
       }
       if (type == SVGMarkerOrientAutoStartReverse)
       {
-        return dom::DOMString(AutoStartReverseString());
+        return DOMString(AutoStartReverseString());
       }
       return {};
     }
@@ -136,7 +136,7 @@ namespace krys::boo::svg
   struct SVGPropertyTraits<std::pair<SVGAngleValue, SVGMarkerOrientType>>
   {
     KRYS_NODISCARD static std::pair<SVGAngleValue, SVGMarkerOrientType>
-      FromString(SVGElement &targetElement, dom::DOMStringView string) noexcept
+      FromString(SVGElement &targetElement, DOMStringView string) noexcept
     {
       SVGAngleValue angle;
       SVGMarkerOrientType orientType =
@@ -154,4 +154,4 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGMarkerUnitsType, 3uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SVGMarkerUnitsType, 3uz);

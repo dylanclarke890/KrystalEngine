@@ -31,16 +31,17 @@
 
 namespace krys::boo
 {
+  class HTMLSlotElement;
   class RenderStyle;
   class RenderText;
 }
 
-namespace krys::boo::html
+namespace krys::boo::dom
 {
-  class HTMLSlotElement;
+  class SlotAlgorithms;
 }
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 
@@ -50,15 +51,15 @@ namespace krys::boo::dom
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Text);
 
-    friend class SlotAlgorithms;
+    friend class dom::SlotAlgorithms;
 
   private:
     /// @see https://dom.spec.whatwg.org/#slotable-name
     DOMString _slottableName;
     /// @see https://dom.spec.whatwg.org/#slotable-assigned-slot
-    WeakPtr<html::HTMLSlotElement> _assignedSlot;
+    WeakPtr<HTMLSlotElement> _assignedSlot;
     /// @see https://dom.spec.whatwg.org/#slottable-manual-slot-assignment
-    WeakPtr<html::HTMLSlotElement> _manuallyAssignedSlot;
+    WeakPtr<HTMLSlotElement> _manuallyAssignedSlot;
 
   protected:
     struct CDATAConstructorTag
@@ -101,7 +102,7 @@ namespace krys::boo::dom
 #pragma region Slottable Mixin - https://dom.spec.whatwg.org/#slotable
 
     /// @see https://dom.spec.whatwg.org/#dom-slotable-assignedslot
-    KRYS_NODISCARD RefPtr<html::HTMLSlotElement> AssignedSlot() noexcept;
+    KRYS_NODISCARD RefPtr<HTMLSlotElement> AssignedSlot() noexcept;
 
 #pragma endregion
 
@@ -116,8 +117,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::Text)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::Text)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
     return node.IsTextNode();
   }

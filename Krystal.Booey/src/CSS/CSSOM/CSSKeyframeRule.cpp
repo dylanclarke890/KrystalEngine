@@ -26,14 +26,14 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSKeyframeRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSKeyframesRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Core/Assert.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSKeyframeRule::CSSKeyframeRule(KeyframeRule &keyframe, CSSKeyframesRule *parent) noexcept
+  CSSKeyframeRule::CSSKeyframeRule(css::KeyframeRule &keyframe, CSSKeyframesRule *parent) noexcept
       : CSSRule(nullptr), _keyframe(ShareRef(keyframe))
   {
     SetParentRule(parent);
@@ -57,12 +57,12 @@ namespace krys::boo::css
     return _keyframe->KeyText();
   }
 
-  dom::ExceptionOr<void> CSSKeyframeRule::SetKeyText(const CSSOMString &text) noexcept
+  ExceptionOr<void> CSSKeyframeRule::SetKeyText(const CSSOMString &text) noexcept
   {
     CSSStyleSheet::RuleMutationScope mutationScope(this);
     if (!_keyframe->SetKeyText(text))
     {
-      return dom::ExceptionCode::SyntaxError;
+      return ExceptionCode::SyntaxError;
     }
     return {};
   }
@@ -76,7 +76,7 @@ namespace krys::boo::css
     return *_propertiesCSSOMWrapper;
   }
 
-  void CSSKeyframeRule::Reattach(Rule &) noexcept
+  void CSSKeyframeRule::Reattach(css::Rule &) noexcept
   {
     // No need to reattach, the underlying data is shareable on mutation.
     krys_debug_assert(false);

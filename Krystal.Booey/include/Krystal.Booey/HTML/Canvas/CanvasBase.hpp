@@ -35,6 +35,7 @@
 
 namespace krys::boo
 {
+  class Document;
   class GraphicsContextStateSaver;
   class Image;
   class ImageBuffer;
@@ -43,11 +44,6 @@ namespace krys::boo
 namespace krys::boo::css
 {
   struct ParserContext;
-}
-
-namespace krys::boo::dom
-{
-  class Document;
 }
 
 namespace krys::boo::html
@@ -111,7 +107,7 @@ namespace krys::boo::html
     KRYS_NODISCARD virtual const css::ParserContext &CssParserContext() const noexcept = 0;
 
     /// @brief The document the canvas belongs to (its script execution context), if any.
-    KRYS_NODISCARD virtual dom::Document *CanvasDocument() const noexcept = 0;
+    KRYS_NODISCARD virtual Document *CanvasDocument() const noexcept = 0;
 
     /// @brief Returns the buffer's graphics context to the state it was made with.
     void ResetGraphicsContextState() const noexcept;

@@ -4,13 +4,9 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
-}
-
-namespace krys::boo::svg
-{
   class SVGElement;
 
   /// @brief Creates the element for a tag in the SVG namespace.
@@ -18,7 +14,7 @@ namespace krys::boo::svg
   {
   public:
     /// @brief The element for @p elementName, or null if SVG has no such element.
-    KRYS_NODISCARD static RefPtr<SVGElement> TryCreate(dom::Document &document,
+    KRYS_NODISCARD static RefPtr<SVGElement> TryCreate(Document &document,
                                                        html::TagName elementName) noexcept;
   };
 }

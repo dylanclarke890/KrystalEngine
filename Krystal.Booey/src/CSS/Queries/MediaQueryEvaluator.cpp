@@ -30,7 +30,7 @@
 
 namespace krys::boo::css::mq
 {
-  MediaQueryEvaluator::MediaQueryEvaluator(CSSOMStringAtom mediaType, const dom::Document &document,
+  MediaQueryEvaluator::MediaQueryEvaluator(CSSOMStringAtom mediaType, const Document &document,
                                            const RenderStyle *rootElementStyle) noexcept
       : GenericMediaQueryEvaluator(), _mediaType(krys::move(mediaType)), _document(CreateWeakPtr(&document)),
         _rootElementStyle(rootElementStyle)

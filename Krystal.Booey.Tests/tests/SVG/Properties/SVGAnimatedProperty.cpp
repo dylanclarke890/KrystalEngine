@@ -29,14 +29,14 @@ namespace krys::boo::svg::tests
     // The DOM's change is committed to the element, which marks the property dirty.
     REQUIRE_FALSE(number->SetBaseVal(3).HasException());
     CHECK(number->IsDirty());
-    CHECK(number->Synchronize() == dom::DOMString(u8"3"));
+    CHECK(number->Synchronize() == DOMString(u8"3"));
     CHECK_FALSE(number->IsDirty());
     CHECK(number->BaseValAsString() == u8"3");
 
     auto &boolean = element->Boolean;
     CHECK_FALSE(boolean->BaseVal());
     REQUIRE_FALSE(boolean->SetBaseVal(true).HasException());
-    CHECK(boolean->Synchronize() == dom::DOMString(u8"true"));
+    CHECK(boolean->Synchronize() == DOMString(u8"true"));
 
     auto &integer = element->Integer;
     CHECK(integer->BaseValAsString() == u8"7");
@@ -44,7 +44,7 @@ namespace krys::boo::svg::tests
     auto &string = element->String;
     CHECK(string->BaseVal().empty());
     REQUIRE_FALSE(string->SetBaseVal(u8"#target").HasException());
-    CHECK(string->Synchronize() == dom::DOMString(u8"#target"));
+    CHECK(string->Synchronize() == DOMString(u8"#target"));
 
     // Detached from its element, a change goes nowhere.
     number->Detach();
@@ -68,13 +68,13 @@ namespace krys::boo::svg::tests
     REQUIRE(animVal);
     CHECK(animVal->IsReadOnly());
     CHECK(animVal->SetValueAsString(u8"1px").GetException().Code()
-          == dom::ExceptionCode::NoModificationAllowedError);
+          == ExceptionCode::NoModificationAllowedError);
 
     REQUIRE_FALSE(length->BaseVal()->SetValueAsString(u8"10px").HasException());
     CHECK(animVal->ValueAsString() == u8"10px");
     CHECK(length->CurrentValue().ValueAsString() == u8"10px");
     CHECK(length->IsDirty());
-    CHECK(length->Synchronize() == dom::DOMString(u8"10px"));
+    CHECK(length->Synchronize() == DOMString(u8"10px"));
 
     length->SetBaseValInternal(SVGLengthValue(SVGLengthMode::Width, u8"5%"));
     CHECK(animVal->ValueAsString() == u8"5%");
@@ -87,7 +87,7 @@ namespace krys::boo::svg::tests
 
     auto &angle = element->OrientAngle;
     REQUIRE_FALSE(angle->BaseVal()->SetValueAsString(u8"90deg").HasException());
-    CHECK(angle->Synchronize() == dom::DOMString(u8"90deg"));
+    CHECK(angle->Synchronize() == DOMString(u8"90deg"));
 
     auto &preserveAspectRatio = element->PreserveAspectRatio;
     REQUIRE_FALSE(preserveAspectRatio->BaseVal()
@@ -109,14 +109,14 @@ namespace krys::boo::svg::tests
     REQUIRE(animVal);
     CHECK(animVal->ValueAsString() == u8"1px 2px");
     CHECK(animVal->LengthMode() == SVGLengthMode::Height);
-    CHECK(animVal->Clear().GetException().Code() == dom::ExceptionCode::NoModificationAllowedError);
+    CHECK(animVal->Clear().GetException().Code() == ExceptionCode::NoModificationAllowedError);
 
     // A change to an item of the base value reaches the animated value and the element.
     REQUIRE_FALSE(lengths->BaseVal()->Items()[1]->SetValueAsString(u8"3em").HasException());
     CHECK(animVal->ValueAsString() == u8"1px 3em");
     CHECK(animVal->Items()[1]->IsReadOnly());
     CHECK(lengths->IsDirty());
-    CHECK(lengths->Synchronize() == dom::DOMString(u8"1px 3em"));
+    CHECK(lengths->Synchronize() == DOMString(u8"1px 3em"));
     CHECK(&lengths->CurrentValue() == lengths->BaseVal().get());
 
     auto &numbers = element->Numbers;
@@ -147,13 +147,13 @@ namespace krys::boo::svg::tests
     CHECK(units->BaseValAsString() == u8"userSpaceOnUse");
 
     // The DOM can't set 0 or a value beyond the enumeration.
-    CHECK(units->SetBaseVal(0).GetException().Code() == dom::ExceptionCode::TypeError);
-    CHECK(units->SetBaseVal(3).GetException().Code() == dom::ExceptionCode::TypeError);
+    CHECK(units->SetBaseVal(0).GetException().Code() == ExceptionCode::TypeError);
+    CHECK(units->SetBaseVal(3).GetException().Code() == ExceptionCode::TypeError);
     CHECK_FALSE(units->IsDirty());
 
     REQUIRE_FALSE(units->SetBaseVal(SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX).HasException());
     CHECK(units->IsDirty());
-    CHECK(units->Synchronize() == dom::DOMString(u8"objectBoundingBox"));
+    CHECK(units->Synchronize() == DOMString(u8"objectBoundingBox"));
     CHECK_FALSE(units->Synchronize());
 
     // Orientations are enumerations too, set to auto-start-reverse by parsing.

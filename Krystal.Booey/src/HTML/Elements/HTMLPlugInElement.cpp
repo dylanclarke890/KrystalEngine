@@ -24,15 +24,15 @@
 #include "Krystal.Booey/HTML/Elements/HTMLPlugInElement.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLPlugInElement::HTMLPlugInElement(dom::Document &document, HTMLElementInterface interface) noexcept
+  HTMLPlugInElement::HTMLPlugInElement(Document &document, html::HTMLElementInterface interface) noexcept
       : HTMLElement(document, interface)
   {
   }
 
-  bool HTMLPlugInElement::HasPresentationalHintsForAttribute(
-    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
+  bool HTMLPlugInElement::HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                             const DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == u8"width" || localName == u8"height" || localName == u8"vspace"
@@ -43,12 +43,12 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLPlugInElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                                 const dom::DOMStringAtom &namespaceURI,
-                                                                 dom::DOMStringView value,
+  void HTMLPlugInElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                                 const DOMStringAtom &namespaceURI,
+                                                                 DOMStringView value,
                                                                  css::MutableStyleProperties &style) noexcept
   {
-    using namespace presentational_hints;
+    using namespace html::presentational_hints;
     if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);

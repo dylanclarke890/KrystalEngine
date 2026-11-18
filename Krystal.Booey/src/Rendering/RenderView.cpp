@@ -47,7 +47,7 @@
 
 namespace krys::boo
 {
-  RenderView::RenderView(dom::Document &document, RenderStyle &&style) noexcept
+  RenderView::RenderView(Document &document, RenderStyle &&style) noexcept
       : RenderBlockFlow(Type::View, document, krys::move(style)), _frameView(*document.View()),
         _initialContainingBlock(CreateUnique<layout::InitialContainingBlock>(RenderStyle::Clone(Style()))),
         _layoutState(CreateUnique<layout::LayoutState>(
@@ -169,7 +169,7 @@ namespace krys::boo
     }
 
     // We propagate the background only for HTML content.
-    if (!Is<html::HTMLHtmlElement>(documentRenderer.GetElement()))
+    if (!Is<HTMLHtmlElement>(documentRenderer.GetElement()))
     {
       return &documentRenderer;
     }
@@ -550,7 +550,7 @@ namespace krys::boo
     quads.emplace_back(FloatRect(FloatPoint(), FloatSize(Layer()->Size())));
   }
 
-  dom::Node *RenderView::NodeForHitTest() const noexcept
+  Node *RenderView::NodeForHitTest() const noexcept
   {
     return GetDocument().DocumentElement().get();
   }

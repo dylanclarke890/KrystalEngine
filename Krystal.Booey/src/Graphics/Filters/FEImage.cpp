@@ -28,13 +28,13 @@
 namespace krys::boo
 {
   Ref<FEImage> FEImage::Create(SourceImage &&sourceImage, const FloatRect &sourceImageRect,
-                               const svg::SVGPreserveAspectRatioValue &preserveAspectRatio) noexcept
+                               const SVGPreserveAspectRatioValue &preserveAspectRatio) noexcept
   {
     return AdoptRef(*new FEImage(krys::move(sourceImage), sourceImageRect, preserveAspectRatio));
   }
 
   FEImage::FEImage(SourceImage &&sourceImage, const FloatRect &sourceImageRect,
-                   const svg::SVGPreserveAspectRatioValue &preserveAspectRatio) noexcept
+                   const SVGPreserveAspectRatioValue &preserveAspectRatio) noexcept
       : FilterEffect(Type::FEImage), _sourceImage(krys::move(sourceImage)), _sourceImageRect(sourceImageRect),
         _preserveAspectRatio(preserveAspectRatio)
   {

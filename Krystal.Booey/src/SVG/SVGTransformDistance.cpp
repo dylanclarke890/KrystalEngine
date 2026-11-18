@@ -22,7 +22,7 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include <cmath>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   SVGTransformDistance::SVGTransformDistance(SVGTransformValue::SVGTransformType type, float angle, float cx,
                                              float cy, const AffineTransform &transform) noexcept

@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 
@@ -10,7 +10,7 @@ namespace krys::boo::html::tests
 {
   TEST_CASE("HTMLLinkElement::RelList", "[HTML][HTMLLinkElement]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto link = document->CreateElement(u8"link").ReleaseValue();
     REQUIRE_FALSE(link->SetAttribute(u8"rel", u8"stylesheet icon").HasException());
 
@@ -25,7 +25,7 @@ namespace krys::boo::html::tests
   TEST_CASE("HTMLLinkElement.as: limited to the potential destinations",
             "[HTML][HTMLLinkElement][html:dom-link-as]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto element = document->CreateElement(u8"link").ReleaseValue();
     auto &link = Downcast<HTMLLinkElement>(Downcast<HTMLElement>(*element));
     CHECK(link.As().empty());
@@ -38,7 +38,7 @@ namespace krys::boo::html::tests
       link.As(value);
       CHECK(link.As() == expected);
     }
-    CHECK(link.GetAttribute(u8"as") == dom::DOMString(u8"stylesheet"));
+    CHECK(link.GetAttribute(u8"as") == DOMString(u8"stylesheet"));
   }
 
   namespace
@@ -48,13 +48,13 @@ namespace krys::boo::html::tests
     using boo::tests::PageInFrameFixture;
     using boo::tests::RunNetworkingTasks;
 
-    KRYS_NODISCARD bool HasRenderer(PageInFrameFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD bool HasRenderer(PageInFrameFixture &fixture, DOMStringView id) noexcept
     {
       (void)fixture.Document->UpdateLayout();
       return fixture.ById(id).Renderer() != nullptr;
     }
 
-    KRYS_NODISCARD HTMLLinkElement &Link(PageInFrameFixture &fixture, dom::DOMStringView id) noexcept
+    KRYS_NODISCARD HTMLLinkElement &Link(PageInFrameFixture &fixture, DOMStringView id) noexcept
     {
       return Downcast<HTMLLinkElement>(fixture.ById(id));
     }

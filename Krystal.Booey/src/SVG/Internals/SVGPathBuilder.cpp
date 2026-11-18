@@ -24,15 +24,16 @@
 #include "Krystal.Booey/SVG/Internals/SVGPathBuilder.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   SVGPathBuilder::SVGPathBuilder(Path &path) noexcept : _path(path)
   {
   }
 
-  void SVGPathBuilder::MoveTo(const FloatPoint &targetPoint, bool closed, PathCoordinateMode mode) noexcept
+  void SVGPathBuilder::MoveTo(const FloatPoint &targetPoint, bool closed,
+                              svg::PathCoordinateMode mode) noexcept
   {
-    _current = mode == PathCoordinateMode::AbsoluteCoordinates ? targetPoint : _current + targetPoint;
+    _current = mode == svg::PathCoordinateMode::AbsoluteCoordinates ? targetPoint : _current + targetPoint;
     if (closed && !_path.IsEmpty())
     {
       _path.CloseSubpath();
@@ -40,16 +41,16 @@ namespace krys::boo::svg
     _path.MoveTo(_current);
   }
 
-  void SVGPathBuilder::LineTo(const FloatPoint &targetPoint, PathCoordinateMode mode) noexcept
+  void SVGPathBuilder::LineTo(const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept
   {
-    _current = mode == PathCoordinateMode::AbsoluteCoordinates ? targetPoint : _current + targetPoint;
+    _current = mode == svg::PathCoordinateMode::AbsoluteCoordinates ? targetPoint : _current + targetPoint;
     _path.AddLineTo(_current);
   }
 
   void SVGPathBuilder::CurveToCubic(const FloatPoint &point1, const FloatPoint &point2,
-                                    const FloatPoint &targetPoint, PathCoordinateMode mode) noexcept
+                                    const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept
   {
-    if (mode == PathCoordinateMode::RelativeCoordinates)
+    if (mode == svg::PathCoordinateMode::RelativeCoordinates)
     {
       _path.AddBezierCurveTo(_current + point1, _current + point2, _current + targetPoint);
       _current += targetPoint;

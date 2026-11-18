@@ -18,8 +18,8 @@ namespace krys::boo::tests
     CHECK(identity->GetIs2D());
 
     // Six values are a 2D matrix, sixteen a 3D one; other lengths throw.
-    auto affine = DOMMatrix::Create(Variant<dom::DOMString, List<double>>(List<double> {1, 2, 3, 4, 5, 6}))
-                    .ReleaseValue();
+    auto affine =
+      DOMMatrix::Create(Variant<DOMString, List<double>>(List<double> {1, 2, 3, 4, 5, 6})).ReleaseValue();
     CHECK(affine->GetIs2D());
     CHECK(affine->A() == 1);
     CHECK(affine->D() == 4);
@@ -29,40 +29,36 @@ namespace krys::boo::tests
     List<double> sixteen(16, 0.0);
     sixteen[0] = sixteen[5] = sixteen[10] = sixteen[15] = 1;
     sixteen[14] = 7;
-    auto full = DOMMatrix::Create(Variant<dom::DOMString, List<double>>(sixteen)).ReleaseValue();
+    auto full = DOMMatrix::Create(Variant<DOMString, List<double>>(sixteen)).ReleaseValue();
     CHECK_FALSE(full->GetIs2D());
     CHECK(full->M43() == 7);
 
-    CHECK(
-      DOMMatrix::Create(Variant<dom::DOMString, List<double>>(List<double> {1, 2, 3})).GetException().Code()
-      == dom::ExceptionCode::TypeError);
+    CHECK(DOMMatrix::Create(Variant<DOMString, List<double>>(List<double> {1, 2, 3})).GetException().Code()
+          == ExceptionCode::TypeError);
 
     SECTION("strings are parsed as `transform`")
     {
-      auto translated = DOMMatrix::Create(Variant<dom::DOMString, List<double>>(
-                                            dom::DOMString(u8"translate(10px, 20px) scale(2)")))
-                          .ReleaseValue();
+      auto translated =
+        DOMMatrix::Create(Variant<DOMString, List<double>>(DOMString(u8"translate(10px, 20px) scale(2)")))
+          .ReleaseValue();
       CHECK(translated->GetIs2D());
       CHECK(translated->A() == 2);
       CHECK(translated->E() == 10);
       CHECK(translated->F() == 20);
 
       // A 3D function makes a 3D matrix, even when it's affine.
-      auto rotated =
-        DOMMatrix::Create(Variant<dom::DOMString, List<double>>(u8"rotateX(0deg)")).ReleaseValue();
+      auto rotated = DOMMatrix::Create(Variant<DOMString, List<double>>(u8"rotateX(0deg)")).ReleaseValue();
       CHECK_FALSE(rotated->GetIs2D());
 
       // `none` and the empty string are the identity.
-      CHECK(DOMMatrix::Create(Variant<dom::DOMString, List<double>>(u8"none")).ReleaseValue()->IsIdentity());
-      CHECK(DOMMatrix::Create(Variant<dom::DOMString, List<double>>(dom::DOMString()))
-              .ReleaseValue()
-              ->IsIdentity());
+      CHECK(DOMMatrix::Create(Variant<DOMString, List<double>>(u8"none")).ReleaseValue()->IsIdentity());
+      CHECK(DOMMatrix::Create(Variant<DOMString, List<double>>(DOMString())).ReleaseValue()->IsIdentity());
 
       // Lengths that need a style or a box, and things that aren't transforms, are syntax errors.
       for (auto string : {u8"translate(1em)", u8"translate(50%)", u8"red", u8"scale(2) junk"})
       {
-        CHECK(DOMMatrix::Create(Variant<dom::DOMString, List<double>>(string)).GetException().Code()
-              == dom::ExceptionCode::SyntaxError);
+        CHECK(DOMMatrix::Create(Variant<DOMString, List<double>>(string)).GetException().Code()
+              == ExceptionCode::SyntaxError);
       }
     }
 
@@ -92,8 +88,7 @@ namespace krys::boo::tests
     css::DOMMatrix2DInit mismatched;
     mismatched.A = 1;
     mismatched.M11 = 2;
-    CHECK(DOMMatrixReadOnly::ValidateAndFixup(mismatched).GetException().Code()
-          == dom::ExceptionCode::TypeError);
+    CHECK(DOMMatrixReadOnly::ValidateAndFixup(mismatched).GetException().Code() == ExceptionCode::TypeError);
     css::DOMMatrix2DInit nan;
     nan.B = std::nan("");
     nan.M12 = std::nan("");
@@ -103,7 +98,7 @@ namespace krys::boo::tests
     css::DOMMatrixInit flat;
     flat.Is2D = true;
     flat.M33 = 2;
-    CHECK(DOMMatrixReadOnly::ValidateAndFixup(flat).GetException().Code() == dom::ExceptionCode::TypeError);
+    CHECK(DOMMatrixReadOnly::ValidateAndFixup(flat).GetException().Code() == ExceptionCode::TypeError);
 
     // Without `is2D`, 3D entries make it 3D.
     css::DOMMatrixInit deep;
@@ -163,12 +158,11 @@ namespace krys::boo::tests
 
       // A singular matrix inverts to NaNs, and is no longer 2D.
       auto singular =
-        DOMMatrix::Create(Variant<dom::DOMString, List<double>>(List<double> {0, 0, 0, 0, 0, 0}))
-          .ReleaseValue();
+        DOMMatrix::Create(Variant<DOMString, List<double>>(List<double> {0, 0, 0, 0, 0, 0})).ReleaseValue();
       singular->InvertSelf();
       CHECK(std::isnan(singular->A()));
       CHECK_FALSE(singular->GetIs2D());
-      CHECK(singular->ToString().GetException().Code() == dom::ExceptionCode::InvalidStateError);
+      CHECK(singular->ToString().GetException().Code() == ExceptionCode::InvalidStateError);
     }
 
     SECTION("setting 3D entries makes it 3D")

@@ -25,11 +25,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Descriptors/PropertySetCSSDescriptors.hpp"
+#include "Krystal.Booey/CSS/CSSOM/PropertySetCSSDescriptors.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSFunctionDeclarations;
 
@@ -38,12 +38,13 @@ namespace krys::boo::css
   class CSSFunctionDescriptors final : public PropertySetCSSDescriptors
   {
   private:
-    CSSFunctionDescriptors(MutableStyleProperties &propertySet, CSSFunctionDeclarations &parentRule) noexcept;
+    CSSFunctionDescriptors(css::MutableStyleProperties &propertySet,
+                           CSSFunctionDeclarations &parentRule) noexcept;
 
   public:
     ~CSSFunctionDescriptors() noexcept override;
 
-    KRYS_NODISCARD static Ref<CSSFunctionDescriptors> Create(MutableStyleProperties &propertySet,
+    KRYS_NODISCARD static Ref<CSSFunctionDescriptors> Create(css::MutableStyleProperties &propertySet,
                                                              CSSFunctionDeclarations &parentRule) noexcept;
 
     KRYS_NODISCARD StyleDeclarationType GetStyleDeclarationType() const noexcept final
@@ -53,16 +54,16 @@ namespace krys::boo::css
 
     KRYS_NODISCARD CSSOMString Result() const noexcept;
 
-    dom::ExceptionOr<void> SetResult(const CSSOMString &value) noexcept;
+    ExceptionOr<void> SetResult(const CSSOMString &value) noexcept;
 
   private:
-    KRYS_NODISCARD RuleType GetRuleType() const noexcept final;
+    KRYS_NODISCARD css::RuleType GetRuleType() const noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSFunctionDescriptors)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleDeclaration &declaration) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSFunctionDescriptors)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleDeclaration &declaration) noexcept
   {
-    return declaration.GetStyleDeclarationType() == krys::boo::css::StyleDeclarationType::Function;
+    return declaration.GetStyleDeclarationType() == krys::boo::StyleDeclarationType::Function;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

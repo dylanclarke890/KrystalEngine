@@ -26,7 +26,7 @@
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief Writes the segments it consumes to an `SVGPathByteStream`.
   class SVGPathByteStreamBuilder final : public SVGPathConsumer
@@ -48,30 +48,30 @@ namespace krys::boo::svg
     }
 
     // Used in UnalteredParsing/NormalizedParsing modes.
-    void MoveTo(const FloatPoint &targetPoint, bool closed, PathCoordinateMode mode) noexcept final;
+    void MoveTo(const FloatPoint &targetPoint, bool closed, svg::PathCoordinateMode mode) noexcept final;
 
-    void LineTo(const FloatPoint &targetPoint, PathCoordinateMode mode) noexcept final;
+    void LineTo(const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept final;
 
     void CurveToCubic(const FloatPoint &point1, const FloatPoint &point2, const FloatPoint &targetPoint,
-                      PathCoordinateMode mode) noexcept final;
+                      svg::PathCoordinateMode mode) noexcept final;
 
     void ClosePath() noexcept final;
 
     // Only used in UnalteredParsing mode.
-    void LineToHorizontal(float x, PathCoordinateMode mode) noexcept final;
+    void LineToHorizontal(float x, svg::PathCoordinateMode mode) noexcept final;
 
-    void LineToVertical(float y, PathCoordinateMode mode) noexcept final;
+    void LineToVertical(float y, svg::PathCoordinateMode mode) noexcept final;
 
     void CurveToCubicSmooth(const FloatPoint &point2, const FloatPoint &targetPoint,
-                            PathCoordinateMode mode) noexcept final;
+                            svg::PathCoordinateMode mode) noexcept final;
 
     void CurveToQuadratic(const FloatPoint &point1, const FloatPoint &targetPoint,
-                          PathCoordinateMode mode) noexcept final;
+                          svg::PathCoordinateMode mode) noexcept final;
 
-    void CurveToQuadraticSmooth(const FloatPoint &targetPoint, PathCoordinateMode mode) noexcept final;
+    void CurveToQuadraticSmooth(const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept final;
 
     void ArcTo(float r1, float r2, float angle, bool largeArcFlag, bool sweepFlag,
-               const FloatPoint &targetPoint, PathCoordinateMode mode) noexcept final;
+               const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept final;
 
     template <typename TData>
     void WriteType(const TData &data) noexcept

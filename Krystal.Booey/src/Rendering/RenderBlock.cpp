@@ -57,15 +57,15 @@
 
 namespace krys::boo
 {
-  RenderBlock::RenderBlock(Type type, dom::Element &element, RenderStyle &&style,
-                           EnumSet<TypeFlag> baseTypeFlags, TypeSpecificFlags typeSpecificFlags) noexcept
+  RenderBlock::RenderBlock(Type type, Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags,
+                           TypeSpecificFlags typeSpecificFlags) noexcept
       : RenderBox(type, element, krys::move(style), baseTypeFlags | TypeFlag::IsRenderBlock,
                   typeSpecificFlags)
   {
     krys_debug_assert(IsRenderBlock());
   }
 
-  RenderBlock::RenderBlock(Type type, dom::Document &document, RenderStyle &&style,
+  RenderBlock::RenderBlock(Type type, Document &document, RenderStyle &&style,
                            EnumSet<TypeFlag> baseTypeFlags, TypeSpecificFlags typeSpecificFlags) noexcept
       : RenderBox(type, document, krys::move(style), baseTypeFlags | TypeFlag::IsRenderBlock,
                   typeSpecificFlags)
@@ -2811,7 +2811,7 @@ namespace krys::boo
 
 #pragma endregion
 
-  dom::Node *RenderBlock::NodeForHitTest() const noexcept
+  Node *RenderBlock::NodeForHitTest() const noexcept
   {
     if (auto type = Style().GetPseudoElementType())
     {

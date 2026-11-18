@@ -32,14 +32,10 @@
 
 namespace krys::boo
 {
+  class Document;
   class Font;
   class FontCreationContext;
   class FontDescription;
-
-  namespace dom
-  {
-    class Document;
-  }
 }
 
 namespace krys::boo::css
@@ -100,7 +96,7 @@ namespace krys::boo::css
 
     void OpportunisticallyStartFontDataURLLoading() noexcept;
 
-    void Load(dom::Document *document = nullptr) noexcept;
+    void Load(boo::Document *document = nullptr) noexcept;
 
     KRYS_NODISCARD RefPtr<Font> GetFont(const FontDescription &fontDescription, bool syntheticBold,
                                         bool syntheticItalic,

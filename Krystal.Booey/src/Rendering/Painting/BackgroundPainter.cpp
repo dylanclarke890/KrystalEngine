@@ -1390,7 +1390,7 @@ namespace krys::boo
     return true;
   }
 
-  const dom::Document &BackgroundPainter::Document() const noexcept
+  const boo::Document &BackgroundPainter::Document() const noexcept
   {
     return _renderer.GetDocument();
   }

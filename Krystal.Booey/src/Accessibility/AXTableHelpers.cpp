@@ -51,13 +51,13 @@ namespace krys::boo::ax
     using html::TagName;
     using infra::StringAlgorithms;
 
-    KRYS_NODISCARD TagName TagNameOf(const dom::Element &element) noexcept
+    KRYS_NODISCARD TagName TagNameOf(const boo::Element &element) noexcept
     {
-      auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
+      auto *htmlElement = DynamicDowncast<HTMLElement>(element);
       return htmlElement ? htmlElement->TagQualifiedName().TagName() : TagName::Unknown;
     }
 
-    KRYS_NODISCARD bool HasAnyRole(const dom::Element &element, Span<const dom::DOMStringView> roles) noexcept
+    KRYS_NODISCARD bool HasAnyRole(const boo::Element &element, Span<const DOMStringView> roles) noexcept
     {
       auto value = AXObject::AttributeWithDefaultARIA(element, u8"role");
       for (const auto &name : StringAlgorithms::SplitOnWhitespace(value))
@@ -74,9 +74,9 @@ namespace krys::boo::ax
     }
 
     /// @brief @p element's @p name attribute as an integer, 0 if it isn't one.
-    KRYS_NODISCARD int64 IntegralAttribute(const dom::Element &element, dom::DOMStringView name) noexcept
+    KRYS_NODISCARD int64 IntegralAttribute(const boo::Element &element, DOMStringView name) noexcept
     {
-      auto value = element.GetAttribute(dom::DOMStringAtom(name));
+      auto value = element.GetAttribute(DOMStringAtom(name));
       if (!value)
       {
         return 0;
@@ -85,13 +85,13 @@ namespace krys::boo::ax
       return result.Success() ? result.Value : 0;
     }
 
-    KRYS_NODISCARD bool HasNonEmptyAttribute(const dom::Element &element, dom::DOMStringView name) noexcept
+    KRYS_NODISCARD bool HasNonEmptyAttribute(const boo::Element &element, DOMStringView name) noexcept
     {
-      auto value = element.GetAttribute(dom::DOMStringAtom(name));
+      auto value = element.GetAttribute(DOMStringAtom(name));
       return value && !value->empty();
     }
 
-    KRYS_NODISCARD const RenderStyle *StyleFrom(const dom::Element &element) noexcept
+    KRYS_NODISCARD const RenderStyle *StyleFrom(const boo::Element &element) noexcept
     {
       if (auto *renderer = element.Renderer())
       {
@@ -106,35 +106,35 @@ namespace krys::boo::ax
     }
   }
 
-  bool HasRole(const dom::Element &element, dom::DOMStringView role) noexcept
+  bool HasRole(const boo::Element &element, DOMStringView role) noexcept
   {
-    const dom::DOMStringView roles[] = {role};
+    const DOMStringView roles[] = {role};
     return HasAnyRole(element, roles);
   }
 
-  bool HasNoRole(const dom::Element &element) noexcept
+  bool HasNoRole(const boo::Element &element) noexcept
   {
     return AXObject::AttributeWithDefaultARIA(element, u8"role").empty();
   }
 
-  bool HasTableRole(const dom::Element &element) noexcept
+  bool HasTableRole(const boo::Element &element) noexcept
   {
-    const dom::DOMStringView roles[] = {u8"grid", u8"table", u8"treegrid"};
+    const DOMStringView roles[] = {u8"grid", u8"table", u8"treegrid"};
     return HasAnyRole(element, roles);
   }
 
-  bool HasCellARIARole(const dom::Element &element) noexcept
+  bool HasCellARIARole(const boo::Element &element) noexcept
   {
-    const dom::DOMStringView roles[] = {u8"gridcell", u8"cell", u8"columnheader", u8"rowheader"};
+    const DOMStringView roles[] = {u8"gridcell", u8"cell", u8"columnheader", u8"rowheader"};
     return HasAnyRole(element, roles);
   }
 
-  bool HasRowRole(const dom::Element &element) noexcept
+  bool HasRowRole(const boo::Element &element) noexcept
   {
     return HasRole(element, u8"row");
   }
 
-  bool IsRowGroup(const dom::Element &element) noexcept
+  bool IsRowGroup(const boo::Element &element) noexcept
   {
     auto tagName = TagNameOf(element);
     return tagName == TagName::thead || tagName == TagName::tbody || tagName == TagName::tfoot
@@ -152,7 +152,7 @@ namespace krys::boo::ax
     }
   }
 
-  bool IsTableRowElement(const dom::Element &element) noexcept
+  bool IsTableRowElement(const boo::Element &element) noexcept
   {
     if (HasRowRole(element))
     {
@@ -163,25 +163,25 @@ namespace krys::boo::ax
       // This has a non-row role, so it shouldn't be considered a row.
       return false;
     }
-    return Is<RenderTableRow>(element.Renderer()) || Is<html::HTMLTableRowElement>(element);
+    return Is<RenderTableRow>(element.Renderer()) || Is<HTMLTableRowElement>(element);
   }
 
-  bool IsTableCellElement(const dom::Element &element) noexcept
+  bool IsTableCellElement(const boo::Element &element) noexcept
   {
     if (HasCellARIARole(element))
     {
       return true;
     }
-    if (Is<html::HTMLTableCellElement>(element) && HasNoRole(element))
+    if (Is<HTMLTableCellElement>(element) && HasNoRole(element))
     {
       return true;
     }
     return Is<RenderTableCell>(element.Renderer());
   }
 
-  html::HTMLTableElement *TableElementIncludingAncestors(dom::Node *node, RenderObject *renderer) noexcept
+  boo::HTMLTableElement *TableElementIncludingAncestors(boo::Node *node, RenderObject *renderer) noexcept
   {
-    if (auto *table = DynamicDowncast<html::HTMLTableElement>(node))
+    if (auto *table = DynamicDowncast<boo::HTMLTableElement>(node))
     {
       return table;
     }
@@ -190,7 +190,7 @@ namespace krys::boo::ax
     {
       return nullptr;
     }
-    if (auto *table = DynamicDowncast<html::HTMLTableElement>(renderTable->GetElement()))
+    if (auto *table = DynamicDowncast<boo::HTMLTableElement>(renderTable->GetElement()))
     {
       return table;
     }
@@ -201,20 +201,20 @@ namespace krys::boo::ax
     {
       return nullptr;
     }
-    if (auto *table = DynamicDowncast<html::HTMLTableElement>(*firstChildNode))
+    if (auto *table = DynamicDowncast<boo::HTMLTableElement>(*firstChildNode))
     {
       return table;
     }
     // The table element is between the child and the element the anonymous table is in (a table element with
     // another display type, say); one further out is another table's.
-    dom::Node *container = nullptr;
+    boo::Node *container = nullptr;
     for (auto *parent = renderTable->Parent(); parent && !container; parent = parent->Parent())
     {
       container = parent->GetNode();
     }
     for (auto *ancestor = firstChildNode->ParentElement(); ancestor; ancestor = ancestor->ParentElement())
     {
-      if (auto *table = DynamicDowncast<html::HTMLTableElement>(*ancestor))
+      if (auto *table = DynamicDowncast<boo::HTMLTableElement>(*ancestor))
       {
         return table;
       }
@@ -226,7 +226,7 @@ namespace krys::boo::ax
     return nullptr;
   }
 
-  bool TableElementIndicatesAccessibleTable(const html::HTMLTableElement &table) noexcept
+  bool TableElementIndicatesAccessibleTable(const boo::HTMLTableElement &table) noexcept
   {
     // If there is a caption element, summary, THEAD, or TFOOT section, it's most certainly a data table.
     auto head = table.THead();
@@ -255,7 +255,7 @@ namespace krys::boo::ax
     return false;
   }
 
-  bool TableSectionIndicatesAccessibleTable(html::HTMLTableSectionElement &section,
+  bool TableSectionIndicatesAccessibleTable(boo::HTMLTableSectionElement &section,
                                             AXObjectCache &cache) noexcept
   {
     // Use the presence of any non-group role as a sign that the author wants this to be an accessibility
@@ -271,10 +271,10 @@ namespace krys::boo::ax
     return false;
   }
 
-  bool IsDataTableWithTraversal(html::HTMLTableElement &table, AXObjectCache &cache) noexcept
+  bool IsDataTableWithTraversal(boo::HTMLTableElement &table, AXObjectCache &cache) noexcept
   {
     bool didTopSectionCheck = false;
-    auto topSectionIndicatesLayoutTable = [&](html::HTMLTableSectionElement *section)
+    auto topSectionIndicatesLayoutTable = [&](boo::HTMLTableSectionElement *section)
     {
       if (didTopSectionCheck || !section)
       {
@@ -304,7 +304,7 @@ namespace krys::boo::ax
     uint32 cellsWithLeftBorder = 0;
     uint32 cellsWithRightBorder = 0;
 
-    HashMap<const dom::Node *, uint32> cellCountForEachRow;
+    HashMap<const boo::Node *, uint32> cellCountForEachRow;
     std::array<Color, 5> alternatingRowColors;
     uint32 alternatingRowColorCount = 0;
     uint32 rowCount = 0;
@@ -317,12 +317,12 @@ namespace krys::boo::ax
     };
 
     bool firstColumnHasAllHeaderCells = true;
-    html::HTMLTableRowElement *firstRow = nullptr;
-    html::HTMLTableSectionElement *firstBody = nullptr;
-    html::HTMLTableSectionElement *firstFoot = nullptr;
+    HTMLTableRowElement *firstRow = nullptr;
+    boo::HTMLTableSectionElement *firstBody = nullptr;
+    boo::HTMLTableSectionElement *firstFoot = nullptr;
 
     // Do a breadth-first search to determine if this is a data table.
-    List<dom::Element *> elementsToVisit {&table};
+    List<boo::Element *> elementsToVisit {&table};
     for (size_t next = 0; next < elementsToVisit.size(); ++next)
     {
       auto *currentParent = elementsToVisit[next];
@@ -330,7 +330,7 @@ namespace krys::boo::ax
       for (auto *currentElement = currentParent->FirstElementChild().get(); currentElement;
            currentElement = currentElement->NextElementSibling().get())
       {
-        if (auto *section = DynamicDowncast<html::HTMLTableSectionElement>(*currentElement))
+        if (auto *section = DynamicDowncast<boo::HTMLTableSectionElement>(*currentElement))
         {
           auto tagName = TagNameOf(*section);
           if (tagName == TagName::thead)
@@ -350,7 +350,7 @@ namespace krys::boo::ax
             firstFoot = firstFoot ? firstFoot : section;
           }
         }
-        else if (auto *row = DynamicDowncast<html::HTMLTableRowElement>(*currentElement))
+        else if (auto *row = DynamicDowncast<HTMLTableRowElement>(*currentElement))
         {
           firstRow = firstRow ? firstRow : row;
 
@@ -377,7 +377,7 @@ namespace krys::boo::ax
             }
           }
         }
-        else if (auto *cell = DynamicDowncast<html::HTMLTableCellElement>(*currentElement))
+        else if (auto *cell = DynamicDowncast<HTMLTableCellElement>(*currentElement))
         {
           ++cellCount;
 
@@ -476,7 +476,7 @@ namespace krys::boo::ax
             return true;
           }
         }
-        else if (Is<html::HTMLTableElement>(*currentElement))
+        else if (Is<boo::HTMLTableElement>(*currentElement))
         {
           // Don't descend into nested tables.
           continue;

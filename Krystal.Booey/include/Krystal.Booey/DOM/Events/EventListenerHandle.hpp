@@ -5,7 +5,7 @@
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Event;
   class EventListener;

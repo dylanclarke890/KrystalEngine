@@ -32,19 +32,18 @@
 
 namespace krys::boo
 {
-  Ref<ResizeObserver> ResizeObserver::Create(dom::Document &document,
-                                             ResizeObserverCallback &&callback) noexcept
+  Ref<ResizeObserver> ResizeObserver::Create(Document &document, ResizeObserverCallback &&callback) noexcept
   {
     return AdoptRef(*new ResizeObserver(document, krys::move(callback), false));
   }
 
-  Ref<ResizeObserver> ResizeObserver::CreateNativeObserver(dom::Document &document,
+  Ref<ResizeObserver> ResizeObserver::CreateNativeObserver(Document &document,
                                                            ResizeObserverCallback &&callback) noexcept
   {
     return AdoptRef(*new ResizeObserver(document, krys::move(callback), true));
   }
 
-  ResizeObserver::ResizeObserver(dom::Document &document, ResizeObserverCallback &&callback,
+  ResizeObserver::ResizeObserver(Document &document, ResizeObserverCallback &&callback,
                                  bool isNative) noexcept
       : _document(CreateWeakPtr(&document)), _callback(krys::move(callback)), _isNative(isNative)
   {
@@ -59,7 +58,7 @@ namespace krys::boo
     }
   }
 
-  void ResizeObserver::ObserveInternal(dom::Element &target, ResizeObserverBoxOptions boxOptions) noexcept
+  void ResizeObserver::ObserveInternal(Element &target, ResizeObserverBoxOptions boxOptions) noexcept
   {
     auto position = std::ranges::find_if(_observations,
                                          [&](auto &observation) { return observation->Target() == &target; });
@@ -89,12 +88,12 @@ namespace krys::boo
     }
   }
 
-  void ResizeObserver::Observe(dom::Element &target, const ResizeObserverOptions &options) noexcept
+  void ResizeObserver::Observe(Element &target, const ResizeObserverOptions &options) noexcept
   {
     ObserveInternal(target, options.Box);
   }
 
-  void ResizeObserver::Unobserve(dom::Element &target) noexcept
+  void ResizeObserver::Unobserve(Element &target) noexcept
   {
     if (!RemoveTarget(target))
     {
@@ -108,7 +107,7 @@ namespace krys::boo
     RemoveAllTargets();
   }
 
-  void ResizeObserver::TargetDestroyed(dom::Element &target) noexcept
+  void ResizeObserver::TargetDestroyed(Element &target) noexcept
   {
     RemoveObservation(target);
   }
@@ -165,7 +164,7 @@ namespace krys::boo
     _callback(entries, *this);
   }
 
-  bool ResizeObserver::RemoveTarget(dom::Element &target) noexcept
+  bool ResizeObserver::RemoveTarget(Element &target) noexcept
   {
     auto *observerData = target.ResizeObserverDataIfExists();
     if (!observerData)
@@ -190,7 +189,7 @@ namespace krys::boo
     _observations.clear();
   }
 
-  bool ResizeObserver::RemoveObservation(const dom::Element &target) noexcept
+  bool ResizeObserver::RemoveObservation(const Element &target) noexcept
   {
     RemoveFirstMatching(_targetsWaitingForFirstObservation,
                         [&target](auto &pendingTarget) { return pendingTarget.get() == &target; });
@@ -198,7 +197,7 @@ namespace krys::boo
                                [&target](auto &observation) { return observation->Target() == &target; });
   }
 
-  void ResizeObserver::ResetObservationSize(dom::Element &target) noexcept
+  void ResizeObserver::ResetObservationSize(Element &target) noexcept
   {
     auto position = std::ranges::find_if(_observations,
                                          [&](auto &observation) { return observation->Target() == &target; });

@@ -26,7 +26,10 @@
 namespace krys::boo::svg
 {
   struct LinearGradientAttributes;
+}
 
+namespace krys::boo
+{
   /// @brief The `<linearGradient>` element: a gradient along a line.
   /// @see https://svgwg.org/svg2-draft/pservers.html#InterfaceSVGLinearGradientElement
   class SVGLinearGradientElement final : public SVGGradientElement
@@ -40,9 +43,9 @@ namespace krys::boo::svg
     Ref<SVGAnimatedLength> _y2;
 
   public:
-    explicit SVGLinearGradientElement(dom::Document &document) noexcept;
+    explicit SVGLinearGradientElement(Document &document) noexcept;
 
-    bool CollectGradientAttributes(LinearGradientAttributes &) noexcept;
+    bool CollectGradientAttributes(svg::LinearGradientAttributes &) noexcept;
 
     KRYS_NODISCARD const SVGLengthValue &X1() const noexcept
     {
@@ -87,10 +90,10 @@ namespace krys::boo::svg
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGLinearGradientElement, SVGGradientElement>;
 
   private:
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
 
@@ -98,8 +101,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGLinearGradientElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGLinearGradientElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGLinearGradientElement();
   }

@@ -6,10 +6,13 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class AbortController;
+}
 
+namespace krys::boo::dom
+{
   /// @brief Implementations of the AbortController and AbortSignal algorithms.
   /// @see https://dom.spec.whatwg.org/#abortcontroller
   /// @see https://dom.spec.whatwg.org/#abortsignal

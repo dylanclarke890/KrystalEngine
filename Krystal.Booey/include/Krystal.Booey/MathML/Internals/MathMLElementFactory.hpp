@@ -4,13 +4,9 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
-}
-
-namespace krys::boo::mathml
-{
   class MathMLElement;
 
   /// @brief Creates the element for a tag in the MathML namespace.
@@ -18,7 +14,7 @@ namespace krys::boo::mathml
   {
   public:
     /// @brief The element for @p elementName, or null if MathML Core has no such element.
-    KRYS_NODISCARD static RefPtr<MathMLElement> TryCreate(dom::Document &document,
+    KRYS_NODISCARD static RefPtr<MathMLElement> TryCreate(Document &document,
                                                           html::TagName elementName) noexcept;
   };
 }

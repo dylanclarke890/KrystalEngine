@@ -34,7 +34,7 @@ namespace krys::boo::css::tests
             InsetFunction {Inset {.Insets = {LP {1_css_px}}, .Radii = BorderRadius::DefaultValue()}}}))
           == "inset(1px)");
     CHECK(CssText(*BasicShapeValue::Create(
-            BasicShape {PathFunction {Path {.Data = {svg::SVGPathByteStream(u8"M 0 0")}}}}))
+            BasicShape {PathFunction {Path {.Data = {SVGPathByteStream(u8"M 0 0")}}}}))
           == "path(\"M 0 0\")");
   }
 

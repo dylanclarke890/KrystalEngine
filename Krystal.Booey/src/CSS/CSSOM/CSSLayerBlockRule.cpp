@@ -32,15 +32,15 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSLayerBlockRule::CSSLayerBlockRule(LayerRule &rule, CSSStyleSheet *parent) noexcept
+  CSSLayerBlockRule::CSSLayerBlockRule(css::LayerRule &rule, CSSStyleSheet *parent) noexcept
       : CSSGroupingRule(rule, parent)
   {
     krys_debug_assert(!rule.IsStatement());
   }
 
-  Ref<CSSLayerBlockRule> CSSLayerBlockRule::Create(LayerRule &rule, CSSStyleSheet *parent) noexcept
+  Ref<CSSLayerBlockRule> CSSLayerBlockRule::Create(css::LayerRule &rule, CSSStyleSheet *parent) noexcept
   {
     return AdoptRef(*new CSSLayerBlockRule(rule, parent));
   }
@@ -59,22 +59,22 @@ namespace krys::boo::css
 
   CSSOMString CSSLayerBlockRule::Name() const noexcept
   {
-    const auto &layer = Downcast<LayerRule>(GetGroupRule());
+    const auto &layer = Downcast<css::LayerRule>(GetGroupRule());
 
     if (layer.Name().empty())
     {
       return {};
     }
 
-    return StringFromCascadeLayerName(layer.Name());
+    return css::StringFromCascadeLayerName(layer.Name());
   }
 
-  CSSOMString StringFromCascadeLayerName(const CascadeLayerName &name) noexcept
+  CSSOMString css::StringFromCascadeLayerName(const css::CascadeLayerName &name) noexcept
   {
     StringBuilder result;
     for (const auto &segment : name)
     {
-      SerialiseIdentifier(segment.ToString(), result);
+      css::SerialiseIdentifier(segment.ToString(), result);
       if (&segment != &name.back())
       {
         result.Append(u8'.');

@@ -131,12 +131,12 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Counter/CounterStyle.cpp
 		tests/CSS/CSSOM/CSSComputedStyleDeclaration.cpp
 		tests/CSS/CSSOM/CSSStyleProperties.cpp
-		tests/CSS/StyleSheets/CSSStyleSheet.cpp
+		tests/CSS/CSSOM/CSSStyleSheet.cpp
 		tests/CSS/DOMMatrix/DOMMatrix.cpp
-		tests/CSS/StyleSheets/CSSStyleSheetObservableArray.cpp
-		tests/CSS/Descriptors/PropertySetCSSDescriptors.cpp
-		tests/CSS/Media/MediaList.cpp
-		tests/CSS/Media/MediaQueryList.cpp
+		tests/CSS/CSSOM/CSSStyleSheetObservableArray.cpp
+		tests/CSS/CSSOM/PropertySetCSSDescriptors.cpp
+		tests/CSS/CSSOM/MediaList.cpp
+		tests/CSS/CSSOM/MediaQueryList.cpp
 		tests/CSS/Calc/CalcType.cpp
 		tests/CSS/Calc/Executor.cpp
 		tests/CSS/Calc/SymbolTable.cpp

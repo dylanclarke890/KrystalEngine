@@ -1,8 +1,8 @@
-﻿#include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
+﻿#include "Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/MediaTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
-#include "Krystal.Booey/CSS/Media/MediaQueryListEvent.hpp"
+#include "Krystal.Booey/CSS/CSSOM/MediaQueryListEvent.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -15,9 +15,9 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    KRYS_NODISCARD Ref<dom::HTMLDocument> Parse(utf8_string &&input) noexcept
+    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
     {
-      auto document = CreateRef<dom::HTMLDocument>();
+      auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       parser->PumpTokenizer();
@@ -30,11 +30,11 @@ namespace krys::boo::css::tests
       CSSOMString Media;
       bool Matches {false};
       bool IsTrusted {false};
-      const dom::EventTarget *Target {nullptr};
+      const EventTarget *Target {nullptr};
     };
 
     /// @brief Records the `change` events it handles, in order, across every listener sharing @p records.
-    struct ChangeRecorder : public dom::EventListenerCallback
+    struct ChangeRecorder : public EventListenerCallback
     {
       List<ChangeRecord> &Records;
 
@@ -42,7 +42,7 @@ namespace krys::boo::css::tests
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         // Only `change` listeners are added, and `change` is only fired with a `MediaQueryListEvent`.
         auto &change = static_cast<MediaQueryListEvent &>(event);
@@ -51,7 +51,7 @@ namespace krys::boo::css::tests
     };
 
     /// @brief Shows @p document in a new frame with an 800x600 view.
-    KRYS_NODISCARD Ref<LocalFrame> ShowInFrame(dom::Document &document) noexcept
+    KRYS_NODISCARD Ref<LocalFrame> ShowInFrame(Document &document) noexcept
     {
       auto frame = LocalFrame::Create();
       frame->CreateView({800, 600});
@@ -62,7 +62,7 @@ namespace krys::boo::css::tests
     /// @brief A parsed document, evaluated against an 800x600 screen view in a page on a 1920x1080 screen.
     struct MatchMediaFixture : ValueFixture
     {
-      Ref<dom::HTMLDocument> Document {Parse(u8"<!DOCTYPE html><p>")};
+      Ref<HTMLDocument> Document {Parse(u8"<!DOCTYPE html><p>")};
       MediaPage Media {*Document};
       Ref<LocalFrame> Frame {ShareRef(Media.Frame())};
 
@@ -110,7 +110,7 @@ namespace krys::boo::css::tests
       Frame->SetDocument(nullptr);
       REQUIRE_FALSE(Document->Window()->MatchMedia(u8"all")->Matches());
 
-      auto empty = CreateRef<dom::HTMLDocument>();
+      auto empty = CreateRef<HTMLDocument>();
       auto emptyFrame = ShowInFrame(*empty);
       REQUIRE_FALSE(empty->Window()->MatchMedia(u8"all")->Matches());
     }
@@ -150,7 +150,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(MatchMediaFixture, "MediaQueryList: change events", "[CSS][MediaQueryList]")
   {
     List<ChangeRecord> records;
-    Ref<dom::EventListenerCallback> recorder = CreateRef<ChangeRecorder>(records);
+    Ref<EventListenerCallback> recorder = CreateRef<ChangeRecorder>(records);
 
     auto wide = Document->Window()->MatchMedia(u8"(min-width: 500px)");
     auto narrow = Document->Window()->MatchMedia(u8"(max-width: 499px)");

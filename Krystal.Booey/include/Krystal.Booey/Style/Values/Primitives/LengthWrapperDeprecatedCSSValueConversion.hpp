@@ -32,12 +32,12 @@ namespace krys::boo::style
   // MARK: - Deprecated Conversions
 
   KRYS_NODISCARD Maybe<css::ToLengthConversionData>
-    DeprecatedLengthConversionCreateCSSToLengthConversionData(const RefPtr<dom::Element> &) noexcept;
+    DeprecatedLengthConversionCreateCSSToLengthConversionData(const RefPtr<Element> &) noexcept;
 
   template <LengthWrapperBaseDerived T>
   struct DeprecatedCSSValueConversion<T>
   {
-    KRYS_NODISCARD Maybe<T> operator()(const RefPtr<dom::Element> &element,
+    KRYS_NODISCARD Maybe<T> operator()(const RefPtr<Element> &element,
                                        const css::PrimitiveValue &primitiveValue) noexcept
     {
       auto convertLengthPercentage = [&]() -> Maybe<T>
@@ -125,7 +125,7 @@ namespace krys::boo::style
       }
     }
 
-    KRYS_NODISCARD Maybe<T> operator()(const RefPtr<dom::Element> &element, const css::Value &value) noexcept
+    KRYS_NODISCARD Maybe<T> operator()(const RefPtr<Element> &element, const css::Value &value) noexcept
     {
       auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value);
       if (!primitiveValue)

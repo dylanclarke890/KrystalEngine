@@ -30,15 +30,15 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSVariableReferenceValue.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSUnparsedValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  dom::ExceptionOr<Ref<CSSVariableReferenceValue>>
+  ExceptionOr<Ref<CSSVariableReferenceValue>>
     CSSVariableReferenceValue::Create(CSSOMString variable, RefPtr<CSSUnparsedValue> fallback) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssvariablereferencevalue-cssvariablereferencevalue
     if (!variable.starts_with(u8"--"))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     return AdoptRef(*new CSSVariableReferenceValue(krys::move(variable), krys::move(fallback)));
@@ -52,12 +52,12 @@ namespace krys::boo::css
 
   CSSVariableReferenceValue::~CSSVariableReferenceValue() noexcept = default;
 
-  dom::ExceptionOr<void> CSSVariableReferenceValue::SetVariable(CSSOMString variable) noexcept
+  ExceptionOr<void> CSSVariableReferenceValue::SetVariable(CSSOMString variable) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssvariablereferencevalue-variable
     if (!variable.starts_with(u8"--"))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     _variable = krys::move(variable);

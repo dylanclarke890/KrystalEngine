@@ -32,14 +32,14 @@
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSSupportsRule::CSSSupportsRule(SupportsRule &rule, CSSStyleSheet *parent) noexcept
+  CSSSupportsRule::CSSSupportsRule(css::SupportsRule &rule, CSSStyleSheet *parent) noexcept
       : CSSConditionRule(rule, parent)
   {
   }
 
-  Ref<CSSSupportsRule> CSSSupportsRule::Create(SupportsRule &rule, CSSStyleSheet *parent) noexcept
+  Ref<CSSSupportsRule> CSSSupportsRule::Create(css::SupportsRule &rule, CSSStyleSheet *parent) noexcept
   {
     return AdoptRef(*new CSSSupportsRule(rule, parent));
   }
@@ -52,7 +52,7 @@ namespace krys::boo::css
     return krys::move(builder).ToString();
   }
 
-  CSSOMString CSSSupportsRule::CssText(const SerialisationContext &context) const noexcept
+  CSSOMString CSSSupportsRule::CssText(const css::SerialisationContext &context) const noexcept
   {
     StringBuilder builder;
     builder.Append(u8"@supports ", ConditionText());
@@ -62,6 +62,6 @@ namespace krys::boo::css
 
   CSSOMString CSSSupportsRule::ConditionText() const noexcept
   {
-    return Downcast<SupportsRule>(GetGroupRule()).ConditionText();
+    return Downcast<css::SupportsRule>(GetGroupRule()).ConditionText();
   }
 }

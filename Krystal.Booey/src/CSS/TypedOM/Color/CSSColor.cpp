@@ -25,10 +25,10 @@
 
 #include "Krystal.Booey/CSS/TypedOM/Color/CSSColor.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  dom::ExceptionOr<Ref<CSSColor>> CSSColor::Create(CSSKeywordish colorSpace, List<CSSColorPercent> channels,
-                                                   CSSNumberish alpha) noexcept
+  ExceptionOr<Ref<CSSColor>> CSSColor::Create(CSSKeywordish colorSpace, List<CSSColorPercent> channels,
+                                              CSSNumberish alpha) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csscolor-csscolor
     List<RectifiedCSSColorComponent> rectifiedChannels;

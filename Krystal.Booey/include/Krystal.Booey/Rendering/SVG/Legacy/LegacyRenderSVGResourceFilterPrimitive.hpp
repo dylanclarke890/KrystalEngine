@@ -28,14 +28,10 @@
 
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGHiddenContainer.hpp"
 
-namespace krys::boo::svg
-{
-  class SVGFilterPrimitiveStandardAttributes;
-}
-
 namespace krys::boo
 {
   class FilterEffect;
+  class SVGFilterPrimitiveStandardAttributes;
 
   /// @brief The renderer of a filter primitive: it holds the primitive's style, and tells its filter when the
   /// primitive changes.
@@ -44,10 +40,9 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(LegacyRenderSVGResourceFilterPrimitive);
 
   public:
-    LegacyRenderSVGResourceFilterPrimitive(svg::SVGFilterPrimitiveStandardAttributes &,
-                                           RenderStyle &&) noexcept;
+    LegacyRenderSVGResourceFilterPrimitive(SVGFilterPrimitiveStandardAttributes &, RenderStyle &&) noexcept;
 
-    KRYS_NODISCARD svg::SVGFilterPrimitiveStandardAttributes &FilterPrimitiveElement() const noexcept;
+    KRYS_NODISCARD SVGFilterPrimitiveStandardAttributes &FilterPrimitiveElement() const noexcept;
 
     void StyleDidChange(style::Difference, const RenderStyle *oldStyle) noexcept override;
 

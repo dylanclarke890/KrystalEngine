@@ -32,13 +32,10 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
-{
-  class Document;
-}
-
 namespace krys::boo
 {
+  class Document;
+
   /// @brief How a temporary selection is made.
   enum class TemporarySelectionOption : uint8
   {
@@ -73,13 +70,13 @@ namespace krys::boo
       Yes,
     };
 
-    RefPtr<dom::Document> _document;
+    RefPtr<Document> _document;
     EnumSet<TemporarySelectionOption> _options;
     Maybe<VisibleSelection> _selectionToRestore;
     bool _wasIgnoringSelectionChanges {false};
 
   public:
-    explicit TemporarySelectionChange(dom::Document &document,
+    explicit TemporarySelectionChange(Document &document,
                                       Maybe<VisibleSelection> temporarySelection = std::nullopt,
                                       EnumSet<TemporarySelectionOption> options = {}) noexcept;
 

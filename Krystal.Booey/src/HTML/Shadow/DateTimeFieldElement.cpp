@@ -38,13 +38,13 @@
 
 namespace krys::boo::html
 {
-  DateTimeFieldElement::DateTimeFieldElement(dom::Document &document,
+  DateTimeFieldElement::DateTimeFieldElement(Document &document,
                                              DateTimeFieldElementFieldOwner &fieldOwner) noexcept
       : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks), _fieldOwner(&fieldOwner)
   {
   }
 
-  void DateTimeFieldElement::Initialize(DateTimeFieldElement &field, dom::DOMStringAtom part,
+  void DateTimeFieldElement::Initialize(DateTimeFieldElement &field, DOMStringAtom part,
                                         utf8_stringview label) noexcept
   {
     field.SetUserAgentPart(krys::move(part));
@@ -53,7 +53,7 @@ namespace krys::boo::html
     (void)field.SetAttribute(u8"role", u8"spinbutton");
     if (!label.empty())
     {
-      (void)field.SetAttribute(u8"aria-label", dom::DOMString(label));
+      (void)field.SetAttribute(u8"aria-label", DOMString(label));
     }
     field.UpdateAriaValueAttributes();
   }
@@ -89,14 +89,14 @@ namespace krys::boo::html
     return elementStyle;
   }
 
-  void DateTimeFieldElement::DefaultEventHandler(dom::Event &event) noexcept
+  void DateTimeFieldElement::DefaultEventHandler(Event &event) noexcept
   {
     if (event.Type() == event_names::Blur)
     {
       HandleBlurEvent(event);
     }
 
-    if (auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event))
+    if (auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event))
     {
       if (!IsFieldOwnerDisabled() && !IsFieldOwnerReadOnly())
       {
@@ -117,7 +117,7 @@ namespace krys::boo::html
     HTMLDivElement::DefaultEventHandler(event);
   }
 
-  void DateTimeFieldElement::DefaultKeyboardEventHandler(dom::KeyboardEvent &keyboardEvent) noexcept
+  void DateTimeFieldElement::DefaultKeyboardEventHandler(KeyboardEvent &keyboardEvent) noexcept
   {
     if (IsFieldOwnerDisabled())
     {
@@ -133,10 +133,10 @@ namespace krys::boo::html
     auto &code = keyboardEvent.Code();
 
     bool isHorizontal = IsFieldOwnerHorizontal();
-    dom::DOMStringView nextKeyIdentifier = isHorizontal ? u8"Right" : u8"Down";
-    dom::DOMStringView previousKeyIdentifier = isHorizontal ? u8"Left" : u8"Up";
-    dom::DOMStringView stepUpKeyIdentifier = isHorizontal ? u8"Up" : u8"Right";
-    dom::DOMStringView stepDownKeyIdentifier = isHorizontal ? u8"Down" : u8"Left";
+    DOMStringView nextKeyIdentifier = isHorizontal ? u8"Right" : u8"Down";
+    DOMStringView previousKeyIdentifier = isHorizontal ? u8"Left" : u8"Up";
+    DOMStringView stepUpKeyIdentifier = isHorizontal ? u8"Up" : u8"Right";
+    DOMStringView stepDownKeyIdentifier = isHorizontal ? u8"Down" : u8"Left";
 
     if (key == previousKeyIdentifier && _fieldOwner && _fieldOwner->FocusOnPreviousField(*this))
     {
@@ -199,7 +199,7 @@ namespace krys::boo::html
     return true;
   }
 
-  void DateTimeFieldElement::HandleBlurEvent(dom::Event &event) noexcept
+  void DateTimeFieldElement::HandleBlurEvent(Event &event) noexcept
   {
     if (_fieldOwner)
     {
@@ -212,12 +212,12 @@ namespace krys::boo::html
     return NodeDocument().GetCachedLocale(LocaleIdentifier());
   }
 
-  dom::DOMString DateTimeFieldElement::LocaleIdentifier() const noexcept
+  DOMString DateTimeFieldElement::LocaleIdentifier() const noexcept
   {
-    return _fieldOwner ? _fieldOwner->LocaleIdentifier() : dom::DOMString();
+    return _fieldOwner ? _fieldOwner->LocaleIdentifier() : DOMString();
   }
 
-  dom::DOMString DateTimeFieldElement::VisibleValue() const noexcept
+  DOMString DateTimeFieldElement::VisibleValue() const noexcept
   {
     if (HasValue())
     {
@@ -230,10 +230,10 @@ namespace krys::boo::html
   {
     if (!FirstChild())
     {
-      (void)AppendChild(*CreateRef<dom::Text>(NodeDocument(), dom::DOMString()));
+      (void)AppendChild(*CreateRef<Text>(NodeDocument(), DOMString()));
     }
 
-    auto &textNode = Downcast<dom::Text>(*FirstChild());
+    auto &textNode = Downcast<Text>(*FirstChild());
     auto newVisibleValue = VisibleValue();
     if (textNode.WholeText() != newVisibleValue)
     {

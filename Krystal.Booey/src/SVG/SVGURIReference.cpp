@@ -33,7 +33,7 @@
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   SVGURIReference::SVGURIReference(SVGElement *contextElement) noexcept
       : _href(SVGAnimatedString::Create(contextElement))
@@ -43,11 +43,11 @@ namespace krys::boo::svg
     {
       didRegistration = true;
       PropertyRegistry::RegisterProperty<&SVGURIReference::_href>(SVGNames::HrefAttr());
-      PropertyRegistry::RegisterProperty<&SVGURIReference::_href>(XLinkNames::HrefAttr());
+      PropertyRegistry::RegisterProperty<&SVGURIReference::_href>(svg::XLinkNames::HrefAttr());
     }
   }
 
-  bool SVGURIReference::IsKnownAttribute(const dom::QualifiedName &attributeName) noexcept
+  bool SVGURIReference::IsKnownAttribute(const QualifiedName &attributeName) noexcept
   {
     return PropertyRegistry::IsKnownAttribute(attributeName);
   }
@@ -57,42 +57,41 @@ namespace krys::boo::svg
     return *_href->ContextElement();
   }
 
-  void SVGURIReference::ParseAttribute(const dom::QualifiedName &name,
-                                       Maybe<dom::DOMStringView> value) noexcept
+  void SVGURIReference::ParseAttribute(const QualifiedName &name, Maybe<DOMStringView> value) noexcept
   {
     if (name.Matches(SVGNames::HrefAttr()))
     {
       if (value)
       {
-        _href->SetBaseValInternal(dom::DOMString {*value});
+        _href->SetBaseValInternal(DOMString {*value});
       }
       else
       {
-        const auto &xlinkHref = XLinkNames::HrefAttr();
+        const auto &xlinkHref = svg::XLinkNames::HrefAttr();
         _href->SetBaseValInternal(ContextElement()
                                     .GetAttributeNS(xlinkHref.NamespaceURI(), xlinkHref.LocalName())
-                                    .value_or(dom::DOMString {}));
+                                    .value_or(DOMString {}));
       }
     }
-    else if (name.Matches(XLinkNames::HrefAttr())
+    else if (name.Matches(svg::XLinkNames::HrefAttr())
              && !ContextElement().HasAttributeNS(null, SVGNames::HrefAttr().LocalName()))
     {
-      _href->SetBaseValInternal(dom::DOMString {value.value_or(dom::DOMStringView {})});
+      _href->SetBaseValInternal(DOMString {value.value_or(DOMStringView {})});
     }
   }
 
-  dom::DOMStringAtom SVGURIReference::FragmentIdentifierFromIRIString(dom::DOMStringView url,
-                                                                      const dom::Document &document) noexcept
+  DOMStringAtom SVGURIReference::FragmentIdentifierFromIRIString(DOMStringView url,
+                                                                 const Document &document) noexcept
   {
     size_t start = url.find(u8'#');
-    if (start == dom::DOMStringView::npos)
+    if (start == DOMStringView::npos)
     {
-      return dom::DOMStringAtom::Empty();
+      return DOMStringAtom::Empty();
     }
 
     if (!start)
     {
-      return dom::DOMStringAtom(url.substr(1));
+      return DOMStringAtom(url.substr(1));
     }
 
     auto base = document.CompleteURL(url.substr(0, start), document.BaseURL());
@@ -100,31 +99,31 @@ namespace krys::boo::svg
     auto urlWithFragment = document.CompleteURL(fragmentIdentifier, base);
     if (url::EqualIgnoringFragmentIdentifier(urlWithFragment, document.GetURL()))
     {
-      return dom::DOMStringAtom(fragmentIdentifier.substr(1));
+      return DOMStringAtom(fragmentIdentifier.substr(1));
     }
 
     // The url doesn't have any fragment identifier.
-    return dom::DOMStringAtom::Empty();
+    return DOMStringAtom::Empty();
   }
 
-  dom::DOMStringAtom SVGURIReference::FragmentIdentifierFromIRIString(const style::URL &url,
-                                                                      const dom::Document &document) noexcept
+  DOMStringAtom SVGURIReference::FragmentIdentifierFromIRIString(const style::URL &url,
+                                                                 const Document &document) noexcept
   {
     return FragmentIdentifierFromIRIString(url.Resolved.String(), document);
   }
 
-  dom::DOMStringAtom
+  DOMStringAtom
     SVGURIReference::FragmentIdentifierFromIRIString(const style::SVGMarkerResource &markerResource,
-                                                     const dom::Document &document) noexcept
+                                                     const Document &document) noexcept
   {
     if (auto url = markerResource.TryURL())
     {
       return FragmentIdentifierFromIRIString(*url, document);
     }
-    return dom::DOMStringAtom::Empty();
+    return DOMStringAtom::Empty();
   }
 
-  bool SVGURIReference::IsExternalURIReference(dom::DOMStringView uri, const dom::Document &document) noexcept
+  bool SVGURIReference::IsExternalURIReference(DOMStringView uri, const Document &document) noexcept
   {
     // Fragment-only URIs are always internal
     if (uri.starts_with(u8'#'))
@@ -138,20 +137,20 @@ namespace krys::boo::svg
     return !url::EqualIgnoringFragmentIdentifier(url, document.GetURL());
   }
 
-  auto SVGURIReference::TargetElementFromIRIString(dom::DOMStringView iri,
+  auto SVGURIReference::TargetElementFromIRIString(DOMStringView iri,
                                                    const dom::DocumentOrShadowRoot &treeScope,
-                                                   const RefPtr<dom::Document> &externalDocument) noexcept
+                                                   const RefPtr<Document> &externalDocument) noexcept
     -> TargetElementResult
   {
     // If there's no fragment identifier contained within the IRI string, we can't lookup an element.
     size_t startOfFragmentIdentifier = iri.find(u8'#');
-    if (startOfFragmentIdentifier == dom::DOMStringView::npos)
+    if (startOfFragmentIdentifier == DOMStringView::npos)
     {
       return {};
     }
 
     // Exclude the '#' character when determining the fragmentIdentifier.
-    auto id = dom::DOMStringAtom(iri.substr(startOfFragmentIdentifier + 1));
+    auto id = DOMStringAtom(iri.substr(startOfFragmentIdentifier + 1));
     if (id.View().empty())
     {
       return {};
@@ -195,7 +194,7 @@ namespace krys::boo::svg
 
   auto SVGURIReference::TargetElementFromIRIString(const style::URL &iri,
                                                    const dom::DocumentOrShadowRoot &treeScope,
-                                                   const RefPtr<dom::Document> &externalDocument) noexcept
+                                                   const RefPtr<Document> &externalDocument) noexcept
     -> TargetElementResult
   {
     return TargetElementFromIRIString(iri.Resolved.String(), treeScope, externalDocument);

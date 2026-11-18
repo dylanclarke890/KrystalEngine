@@ -38,7 +38,7 @@ namespace krys::ui
     _owner = nullptr;
   }
 
-  void ValidationMessageOverlay::Show(boo::dom::Element &anchor, utf8_stringview message) noexcept
+  void ValidationMessageOverlay::Show(boo::Element &anchor, utf8_stringview message) noexcept
   {
     if (!_owner)
     {

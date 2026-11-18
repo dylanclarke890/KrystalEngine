@@ -63,7 +63,7 @@ namespace krys::boo
 
       using Value =
         Variant<LengthPercentage<>, Length<>, Number<>, Percentage<>, Angle<>, Time<>, Resolution<>,
-                ImageWrapper, Color, URL, css::CustomIdentifier, css::CSSOMString, TransformFunction>;
+                ImageWrapper, Color, URL, css::CustomIdentifier, CSSOMString, TransformFunction>;
 
       struct ValueList
       {
@@ -76,24 +76,24 @@ namespace krys::boo
       using Kind = Variant<GuaranteedInvalid, Ref<css::VariableData>, Value, ValueList>;
 
     private:
-      const css::CSSOMStringAtom _name;
+      const CSSOMStringAtom _name;
       const Kind _value;
       mutable RefPtr<css::VariableData> _cachedTokens;
 
     public:
       KRYS_NODISCARD static Ref<const CustomProperty>
-        CreateForGuaranteedInvalid(const css::CSSOMStringAtom &name) noexcept;
+        CreateForGuaranteedInvalid(const CSSOMStringAtom &name) noexcept;
 
       KRYS_NODISCARD static Ref<const CustomProperty>
-        CreateForVariableData(const css::CSSOMStringAtom &name, Ref<css::VariableData> &&) noexcept;
+        CreateForVariableData(const CSSOMStringAtom &name, Ref<css::VariableData> &&) noexcept;
 
-      KRYS_NODISCARD static Ref<const CustomProperty> CreateForValue(const css::CSSOMStringAtom &name,
+      KRYS_NODISCARD static Ref<const CustomProperty> CreateForValue(const CSSOMStringAtom &name,
                                                                      Value &&) noexcept;
 
-      KRYS_NODISCARD static Ref<const CustomProperty> CreateForValueList(const css::CSSOMStringAtom &name,
+      KRYS_NODISCARD static Ref<const CustomProperty> CreateForValueList(const CSSOMStringAtom &name,
                                                                          ValueList &&) noexcept;
 
-      KRYS_NODISCARD const css::CSSOMStringAtom &GetName() const noexcept
+      KRYS_NODISCARD const CSSOMStringAtom &GetName() const noexcept
       {
         return _name;
       }
@@ -119,47 +119,46 @@ namespace krys::boo
 
       KRYS_NODISCARD Ref<css::Value> PropertyValue(css::ValuePool &, const RenderStyle &) const noexcept;
 
-      KRYS_NODISCARD css::CSSOMString PropertyValueSerialisation(const css::SerialisationContext &,
-                                                                 const RenderStyle &) const noexcept;
+      KRYS_NODISCARD CSSOMString PropertyValueSerialisation(const css::SerialisationContext &,
+                                                            const RenderStyle &) const noexcept;
 
       void PropertyValueSerialisation(StringBuilder &, const css::SerialisationContext &,
                                       const RenderStyle &) const noexcept;
 
     private:
-      CustomProperty(css::CSSOMStringAtom name, Kind &&value) noexcept
+      CustomProperty(CSSOMStringAtom name, Kind &&value) noexcept
           : _name(krys::move(name)), _value(krys::move(value))
       {
       }
 
-      KRYS_NODISCARD css::CSSOMString
-        PropertyValueSerialisationForTokenization(const css::SerialisationContext &,
-                                                  const RenderStyle &) const noexcept;
+      KRYS_NODISCARD CSSOMString PropertyValueSerialisationForTokenization(
+        const css::SerialisationContext &, const RenderStyle &) const noexcept;
 
       void PropertyValueSerialisationForTokenization(StringBuilder &, const css::SerialisationContext &,
                                                      const RenderStyle &) const noexcept;
     };
 
     inline Ref<const CustomProperty>
-      CustomProperty::CreateForGuaranteedInvalid(const css::CSSOMStringAtom &name) noexcept
+      CustomProperty::CreateForGuaranteedInvalid(const CSSOMStringAtom &name) noexcept
     {
       return AdoptRef(*new CustomProperty(name, Kind {GuaranteedInvalid {}}));
     }
 
     inline Ref<const CustomProperty>
-      CustomProperty::CreateForVariableData(const css::CSSOMStringAtom &name,
+      CustomProperty::CreateForVariableData(const CSSOMStringAtom &name,
                                             Ref<css::VariableData> &&value) noexcept
     {
       return AdoptRef(
         *new CustomProperty(name, Kind {std::in_place_type<Ref<css::VariableData>>, krys::move(value)}));
     }
 
-    inline Ref<const CustomProperty> CustomProperty::CreateForValue(const css::CSSOMStringAtom &name,
+    inline Ref<const CustomProperty> CustomProperty::CreateForValue(const CSSOMStringAtom &name,
                                                                     Value &&value) noexcept
     {
       return AdoptRef(*new CustomProperty(name, Kind {std::in_place_type<Value>, krys::move(value)}));
     }
 
-    inline Ref<const CustomProperty> CustomProperty::CreateForValueList(const css::CSSOMStringAtom &name,
+    inline Ref<const CustomProperty> CustomProperty::CreateForValueList(const CSSOMStringAtom &name,
                                                                         ValueList &&valueList) noexcept
     {
       return AdoptRef(*new CustomProperty(name, Kind {std::in_place_type<ValueList>, krys::move(valueList)}));

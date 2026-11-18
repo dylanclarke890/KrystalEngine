@@ -31,7 +31,7 @@
 
 namespace krys::boo
 {
-  RenderMathMLPadded::RenderMathMLPadded(mathml::MathMLPaddedElement &element, RenderStyle &&style) noexcept
+  RenderMathMLPadded::RenderMathMLPadded(boo::MathMLPaddedElement &element, RenderStyle &&style) noexcept
       : RenderMathMLRow(Type::MathMLPadded, element, krys::move(style))
   {
     krys_debug_assert(IsRenderMathMLPadded());
@@ -39,9 +39,9 @@ namespace krys::boo
 
   RenderMathMLPadded::~RenderMathMLPadded() noexcept = default;
 
-  mathml::MathMLPaddedElement &RenderMathMLPadded::GetElement() const noexcept
+  boo::MathMLPaddedElement &RenderMathMLPadded::GetElement() const noexcept
   {
-    return static_cast<mathml::MathMLPaddedElement &>(NodeForNonAnonymous());
+    return static_cast<boo::MathMLPaddedElement &>(NodeForNonAnonymous());
   }
 
   LayoutUnit RenderMathMLPadded::Voffset() const noexcept

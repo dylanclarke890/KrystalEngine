@@ -35,7 +35,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
 }
@@ -47,13 +47,13 @@ namespace krys::boo::html
   /// close action. A watcher made with `Create` fires `cancel` and `close` at itself; dialogs and popovers
   /// establish their own with their own actions.
   /// @see https://html.spec.whatwg.org/#close-watchers
-  class CloseWatcher final : public dom::EventTarget
+  class CloseWatcher final : public EventTarget
   {
   public:
     /// @see https://html.spec.whatwg.org/#closewatcheroptions
     struct Options
     {
-      RefPtr<dom::AbortSignal> Signal;
+      RefPtr<AbortSignal> Signal;
     };
 
     /// @brief Given whether it can refuse, returns whether to close.
@@ -66,29 +66,28 @@ namespace krys::boo::html
     using GetEnabledState = Func<bool()>;
 
   private:
-    WeakPtr<dom::Document> _document;
+    WeakPtr<Document> _document;
     CancelAction _cancelAction;
     CloseAction _closeAction;
     GetEnabledState _getEnabledState;
     bool _active {true};
     bool _isRunningCancelAction {false};
-    RefPtr<dom::AbortSignal> _signal;
-    Maybe<dom::AbortAlgorithmCallback> _signalAlgorithm;
+    RefPtr<AbortSignal> _signal;
+    Maybe<AbortAlgorithmCallback> _signalAlgorithm;
 
   public:
-    CloseWatcher(dom::Document &document, CancelAction &&cancelAction, CloseAction &&closeAction,
+    CloseWatcher(Document &document, CancelAction &&cancelAction, CloseAction &&closeAction,
                  GetEnabledState &&getEnabledState) noexcept;
 
     /// @brief A close watcher of @p document's window that fires `cancel` and `close` at itself, destroyed
     /// once @p options' signal aborts.
     /// @return An `InvalidStateError` if @p document isn't fully active.
     /// @see https://html.spec.whatwg.org/#dom-closewatcher
-    static dom::ExceptionOr<Ref<CloseWatcher>> Create(dom::Document &document,
-                                                      const Options &options = {}) noexcept;
+    static ExceptionOr<Ref<CloseWatcher>> Create(Document &document, const Options &options = {}) noexcept;
 
     /// @brief A close watcher of @p document's window, which must be fully active, with the given actions.
     /// @see https://html.spec.whatwg.org/#establish-a-close-watcher
-    static Ref<CloseWatcher> Establish(dom::Document &document, CancelAction &&cancelAction,
+    static Ref<CloseWatcher> Establish(Document &document, CancelAction &&cancelAction,
                                        CloseAction &&closeAction, GetEnabledState &&getEnabledState) noexcept;
 
     /// @brief Whether the watcher is still in its window's close watcher manager.

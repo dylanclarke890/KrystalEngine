@@ -35,7 +35,7 @@
 namespace krys::boo
 {
   Ref<RemoveNodeCommand>
-    RemoveNodeCommand::Create(dom::Node &node,
+    RemoveNodeCommand::Create(Node &node,
                               ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
                               EditAction editingAction) noexcept
   {
@@ -43,7 +43,7 @@ namespace krys::boo
   }
 
   RemoveNodeCommand::RemoveNodeCommand(
-    dom::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
+    Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
     EditAction editingAction) noexcept
       : SimpleEditCommand(node.NodeDocument(), editingAction), _node(ShareRef(node)),
         _shouldAssumeContentIsAlwaysEditable(shouldAssumeContentIsAlwaysEditable)
@@ -53,7 +53,7 @@ namespace krys::boo
 
   void RemoveNodeCommand::DoApply() noexcept
   {
-    RefPtr<dom::ContainerNode> parent = ShareRefPtr(_node->ParentNode());
+    RefPtr<ContainerNode> parent = ShareRefPtr(_node->ParentNode());
     if (!parent
         || (_shouldAssumeContentIsAlwaysEditable == DoNotAssumeContentIsAlwaysEditable
             && !IsEditableNode(*parent) && parent->Renderer()))
@@ -70,8 +70,8 @@ namespace krys::boo
 
   void RemoveNodeCommand::DoUnapply() noexcept
   {
-    RefPtr<dom::ContainerNode> parent = krys::move(_parent);
-    RefPtr<dom::Node> refChild = krys::move(_refChild);
+    RefPtr<ContainerNode> parent = krys::move(_parent);
+    RefPtr<Node> refChild = krys::move(_refChild);
     if (!parent || !parent->HasEditableStyle())
     {
       return;

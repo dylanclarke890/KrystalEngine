@@ -33,7 +33,7 @@
 
 namespace krys::boo::style
 {
-  using ChildChange = dom::ContainerNode::ChildChange;
+  using ChildChange = ContainerNode::ChildChange;
 
   namespace
   {
@@ -47,20 +47,20 @@ namespace krys::boo::style
 
     /// @brief Calls @p function for each element descendant of @p root, in tree order.
     template <typename TFunction>
-    void ForEachDescendantElement(dom::Element &root, TFunction function) noexcept
+    void ForEachDescendantElement(Element &root, TFunction function) noexcept
     {
       for (auto *node = dom::TreeQueries::Next(root, &root); node;
            node = dom::TreeQueries::Next(*node, &root))
       {
-        if (auto *element = DynamicDowncast<dom::Element>(*node))
+        if (auto *element = DynamicDowncast<Element>(*node))
         {
-          Ref<dom::Element> protectedElement = ShareRef(*element);
+          Ref<Element> protectedElement = ShareRef(*element);
           function(*element);
         }
       }
     }
 
-    void CheckForEmptyStyleChange(dom::Element &element) noexcept
+    void CheckForEmptyStyleChange(Element &element) noexcept
     {
       if (!element.StyleAffectedByEmpty())
       {
@@ -74,7 +74,7 @@ namespace krys::boo::style
       }
     }
 
-    void InvalidateForForwardPositionalRules(dom::Element &parent, dom::Element *elementAfterChange) noexcept
+    void InvalidateForForwardPositionalRules(Element &parent, Element *elementAfterChange) noexcept
     {
       bool childrenAffected = parent.ChildrenAffectedByForwardPositionalRules();
       bool descendantsAffected = parent.DescendantsAffectedByForwardPositionalRules();
@@ -102,8 +102,7 @@ namespace krys::boo::style
       }
     }
 
-    void InvalidateForBackwardPositionalRules(dom::Element &parent,
-                                              dom::Element *elementBeforeChange) noexcept
+    void InvalidateForBackwardPositionalRules(Element &parent, Element *elementBeforeChange) noexcept
     {
       bool childrenAffected = parent.ChildrenAffectedByBackwardPositionalRules();
       bool descendantsAffected = parent.DescendantsAffectedByBackwardPositionalRules();
@@ -131,7 +130,7 @@ namespace krys::boo::style
       }
     }
 
-    void InvalidateForFirstChildState(dom::Element &child, bool state) noexcept
+    void InvalidateForFirstChildState(Element &child, bool state) noexcept
     {
       auto *style = child.GetRenderStyle();
       if (!style || style->FirstChildState() == state)
@@ -140,7 +139,7 @@ namespace krys::boo::style
       }
     }
 
-    void InvalidateForLastChildState(dom::Element &child, bool state) noexcept
+    void InvalidateForLastChildState(Element &child, bool state) noexcept
     {
       auto *style = child.GetRenderStyle();
       if (!style || style->LastChildState() == state)
@@ -151,7 +150,7 @@ namespace krys::boo::style
   }
 
   void ChildChangeInvalidation::InvalidateForChangedElement(
-    dom::Element &changedElement, MatchingHasSelectors &matchingHasSelectors,
+    Element &changedElement, MatchingHasSelectors &matchingHasSelectors,
     ChangedElementRelation changedElementRelation) noexcept
   {
     auto &ruleSets = ParentElement().StyleResolver().RuleSets();
@@ -266,7 +265,7 @@ namespace krys::boo::style
     MatchingHasSelectors matchingHasSelectors;
 
     TraverseRemovedElements(
-      [&](dom::Element &changedElement)
+      [&](Element &changedElement)
       {
         InvalidateForChangedElement(changedElement, matchingHasSelectors,
                                     ChangedElementRelation::SelfOrDescendant);
@@ -325,7 +324,7 @@ namespace krys::boo::style
     if (ParentElement().AffectedByHasWithPositionalPseudoClass())
     {
       TraverseRemainingExistingSiblings(
-        [&](dom::Element &changedElement)
+        [&](Element &changedElement)
         {
           InvalidateForChangedElement(changedElement, matchingHasSelectors, ChangedElementRelation::Sibling);
         });
@@ -355,7 +354,7 @@ namespace krys::boo::style
     MatchingHasSelectors matchingHasSelectors;
 
     TraverseAddedElements(
-      [&](dom::Element &changedElement)
+      [&](Element &changedElement)
       {
         InvalidateForChangedElement(changedElement, matchingHasSelectors,
                                     ChangedElementRelation::SelfOrDescendant);
@@ -368,7 +367,7 @@ namespace krys::boo::style
                                   ChangedElementRelation::SelfOrDescendant);
     }
 
-    auto firstChildStateWillStartMatching = [&](dom::Element *elementAfterChange)
+    auto firstChildStateWillStartMatching = [&](Element *elementAfterChange)
     {
       if (!elementAfterChange)
       {
@@ -388,7 +387,7 @@ namespace krys::boo::style
       return false;
     };
 
-    auto lastChildStateWillStartMatching = [&](dom::Element *elementBeforeChange)
+    auto lastChildStateWillStartMatching = [&](Element *elementBeforeChange)
     {
       if (!elementBeforeChange)
       {
@@ -411,7 +410,7 @@ namespace krys::boo::style
     if (ParentElement().AffectedByHasWithPositionalPseudoClass())
     {
       TraverseRemainingExistingSiblings(
-        [&](dom::Element &changedElement)
+        [&](Element &changedElement)
         {
           InvalidateForChangedElement(changedElement, matchingHasSelectors, ChangedElementRelation::Sibling);
         });
@@ -443,12 +442,12 @@ namespace krys::boo::style
     auto &features = ParentElement().StyleResolver().RuleSets().Features();
     bool needsDescendantTraversal = NeedsDescendantTraversal(features);
 
-    RefPtr<dom::Element> firstToRemove =
+    RefPtr<Element> firstToRemove =
       ShareRefPtr(_childChange.PreviousSiblingElement
                     ? dom::TreeQueries::NextElementSibling(*_childChange.PreviousSiblingElement)
                     : dom::TreeQueries::FirstElementChild(ParentElement()));
 
-    for (RefPtr<dom::Element> toRemove = firstToRemove; toRemove.get() != _childChange.NextSiblingElement;
+    for (RefPtr<Element> toRemove = firstToRemove; toRemove.get() != _childChange.NextSiblingElement;
          toRemove = ShareRefPtr(dom::TreeQueries::NextElementSibling(*toRemove)))
     {
       function(*toRemove);
@@ -470,7 +469,7 @@ namespace krys::boo::style
       return;
     }
 
-    RefPtr<dom::Element> newElement = [&]
+    RefPtr<Element> newElement = [&]
     {
       auto *previous = _childChange.PreviousSiblingElement;
       auto *candidate = previous ? dom::TreeQueries::NextElementSibling(*previous)
@@ -506,13 +505,13 @@ namespace krys::boo::style
       return;
     }
 
-    for (RefPtr<dom::Element> child = ShareRefPtr(_childChange.PreviousSiblingElement); child;
+    for (RefPtr<Element> child = ShareRefPtr(_childChange.PreviousSiblingElement); child;
          child = ShareRefPtr(dom::TreeQueries::PreviousElementSibling(*child)))
     {
       function(*child);
     }
 
-    for (RefPtr<dom::Element> child = ShareRefPtr(_childChange.NextSiblingElement); child;
+    for (RefPtr<Element> child = ShareRefPtr(_childChange.NextSiblingElement); child;
          child = ShareRefPtr(dom::TreeQueries::NextElementSibling(*child)))
     {
       function(*child);
@@ -531,7 +530,7 @@ namespace krys::boo::style
     CheckForSiblingStyleChanges();
   }
 
-  void ChildChangeInvalidation::InvalidateAfterFinishedParsingChildren(dom::Element &parent) noexcept
+  void ChildChangeInvalidation::InvalidateAfterFinishedParsingChildren(Element &parent) noexcept
   {
     if (!parent.NeedsStyleInvalidation())
     {

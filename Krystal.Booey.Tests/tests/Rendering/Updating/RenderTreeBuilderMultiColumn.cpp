@@ -60,17 +60,17 @@ namespace krys::boo::tests
         Document->UpdateStyleIfNeeded();
       }
 
-      KRYS_NODISCARD RenderBlockFlow &Block(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD RenderBlockFlow &Block(DOMStringView id) noexcept
       {
         return Downcast<RenderBlockFlow>(*ById(id).Renderer());
       }
 
-      KRYS_NODISCARD std::string Tree(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD std::string Tree(DOMStringView id) noexcept
       {
         return MultiColumnTree(*ById(id).Renderer());
       }
 
-      void SetStyle(dom::DOMStringView id, const char8_t *style) noexcept
+      void SetStyle(DOMStringView id, const char8_t *style) noexcept
       {
         krys_assert(!ById(id).SetAttribute(u8"style", style).HasException());
         Document->UpdateStyleIfNeeded();

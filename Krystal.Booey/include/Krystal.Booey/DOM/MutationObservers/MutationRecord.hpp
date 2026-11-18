@@ -20,9 +20,13 @@ namespace krys::boo::dom
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::MutationRecordType, 3uz);
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Node;
+}
+
+namespace krys::boo::dom
+{
   class NodeList;
 
   /// @brief A change to a node, as delivered to a mutation observer.

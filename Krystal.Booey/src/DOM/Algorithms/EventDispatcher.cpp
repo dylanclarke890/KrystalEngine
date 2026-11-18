@@ -152,7 +152,7 @@ namespace krys::boo::dom
         if (slottable != nullptr)
         {
           // 6i.i.A. Assert: parent is a slot.
-          krys_debug_assert(Is<html::HTMLSlotElement>(nodeParent));
+          krys_debug_assert(Is<HTMLSlotElement>(nodeParent));
 
           // 6i.i.B. Set slottable to null.
           slottable = nullptr;

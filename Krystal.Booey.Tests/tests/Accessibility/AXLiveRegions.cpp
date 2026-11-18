@@ -66,7 +66,7 @@ namespace krys::boo::ax::tests
 
     SECTION("Text changed")
     {
-      auto *text = DynamicDowncast<dom::Text>(page.ById(u8"paragraph").FirstChild());
+      auto *text = DynamicDowncast<Text>(page.ById(u8"paragraph").FirstChild());
       REQUIRE(text);
       REQUIRE_FALSE(text->AppendData(u8" news").HasException());
       (void)page.Document->UpdateLayout();
@@ -105,7 +105,7 @@ namespace krys::boo::ax::tests
     CHECK(editor.IsNonNativeTextControl());
     (void)page.TakeNotifications();
 
-    auto *text = DynamicDowncast<dom::Text>(page.ById(u8"span").FirstChild());
+    auto *text = DynamicDowncast<Text>(page.ById(u8"span").FirstChild());
     REQUIRE(text);
     REQUIRE_FALSE(text->AppendData(u8" there").HasException());
     (void)page.Document->UpdateLayout();

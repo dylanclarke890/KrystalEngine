@@ -27,7 +27,7 @@
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlframesetelement
   class HTMLFrameSetElement : public HTMLElement
@@ -35,7 +35,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLFrameSetElement);
 
   public:
-    HTMLFrameSetElement(dom::Document &document) noexcept;
+    HTMLFrameSetElement(Document &document) noexcept;
 
 #pragma region WindowEventHandlers - https://html.spec.whatwg.org/#windoweventhandlers
 
@@ -45,31 +45,30 @@ namespace krys::boo::html
 #pragma endregion
 
     /// @see https://html.spec.whatwg.org/#dom-frameset-cols
-    KRYS_NODISCARD dom::DOMString Cols() const noexcept;
+    KRYS_NODISCARD DOMString Cols() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-frameset-cols
-    void Cols(dom::DOMString value) noexcept;
+    void Cols(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-frameset-rows
-    KRYS_NODISCARD dom::DOMString Rows() const noexcept;
+    KRYS_NODISCARD DOMString Rows() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-frameset-rows
-    void Rows(dom::DOMString value) noexcept;
+    void Rows(DOMString value) noexcept;
 
   protected:
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLFrameSetElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLFrameSetElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLFrameSetElement();
   }

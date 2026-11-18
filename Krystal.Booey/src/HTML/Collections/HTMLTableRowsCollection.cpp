@@ -38,7 +38,7 @@ namespace krys::boo::html
 {
   namespace
   {
-    KRYS_NODISCARD bool TableRowsIsTableSection(const dom::Node &node, TagName sectionTag) noexcept
+    KRYS_NODISCARD bool TableRowsIsTableSection(const Node &node, TagName sectionTag) noexcept
     {
       auto *element = DynamicDowncast<HTMLElement>(node);
       return element && element->HasTagName(sectionTag);
@@ -50,11 +50,11 @@ namespace krys::boo::html
       return TableRowsIsTableSection(*row.ParentNode(), sectionTag);
     }
 
-    KRYS_NODISCARD dom::Element *TableRowsFirstElementChild(dom::ContainerNode &node) noexcept
+    KRYS_NODISCARD Element *TableRowsFirstElementChild(ContainerNode &node) noexcept
     {
       for (auto *child = node.FirstChild(); child; child = child->NextSibling())
       {
-        if (auto *element = DynamicDowncast<dom::Element>(*child))
+        if (auto *element = DynamicDowncast<Element>(*child))
         {
           return element;
         }
@@ -62,11 +62,11 @@ namespace krys::boo::html
       return nullptr;
     }
 
-    KRYS_NODISCARD dom::Element *TableRowsLastElementChild(dom::ContainerNode &node) noexcept
+    KRYS_NODISCARD Element *TableRowsLastElementChild(ContainerNode &node) noexcept
     {
       for (auto *child = node.LastChild(); child; child = child->PreviousSibling())
       {
-        if (auto *element = DynamicDowncast<dom::Element>(*child))
+        if (auto *element = DynamicDowncast<Element>(*child))
         {
           return element;
         }
@@ -74,11 +74,11 @@ namespace krys::boo::html
       return nullptr;
     }
 
-    KRYS_NODISCARD dom::Element *TableRowsNextElementSibling(dom::Node &node) noexcept
+    KRYS_NODISCARD Element *TableRowsNextElementSibling(Node &node) noexcept
     {
       for (auto *sibling = node.NextSibling(); sibling; sibling = sibling->NextSibling())
       {
-        if (auto *element = DynamicDowncast<dom::Element>(*sibling))
+        if (auto *element = DynamicDowncast<Element>(*sibling))
         {
           return element;
         }
@@ -86,11 +86,11 @@ namespace krys::boo::html
       return nullptr;
     }
 
-    KRYS_NODISCARD dom::Element *TableRowsPreviousElementSibling(dom::Node &node) noexcept
+    KRYS_NODISCARD Element *TableRowsPreviousElementSibling(Node &node) noexcept
     {
       for (auto *sibling = node.PreviousSibling(); sibling; sibling = sibling->PreviousSibling())
       {
-        if (auto *element = DynamicDowncast<dom::Element>(*sibling))
+        if (auto *element = DynamicDowncast<Element>(*sibling))
         {
           return element;
         }
@@ -98,7 +98,7 @@ namespace krys::boo::html
       return nullptr;
     }
 
-    KRYS_NODISCARD HTMLTableRowElement *TableRowsFirstRowChild(dom::ContainerNode &node) noexcept
+    KRYS_NODISCARD HTMLTableRowElement *TableRowsFirstRowChild(ContainerNode &node) noexcept
     {
       for (auto *child = node.FirstChild(); child; child = child->NextSibling())
       {
@@ -110,7 +110,7 @@ namespace krys::boo::html
       return nullptr;
     }
 
-    KRYS_NODISCARD HTMLTableRowElement *TableRowsLastRowChild(dom::ContainerNode &node) noexcept
+    KRYS_NODISCARD HTMLTableRowElement *TableRowsLastRowChild(ContainerNode &node) noexcept
     {
       for (auto *child = node.LastChild(); child; child = child->PreviousSibling())
       {
@@ -136,7 +136,7 @@ namespace krys::boo::html
   }
 
   HTMLTableRowsCollection::HTMLTableRowsCollection(HTMLTableElement &table) noexcept
-      : LiveHTMLCollection(table, [](const dom::Element &) { return true; }), _table(ShareRef(table))
+      : LiveHTMLCollection(table, [](const Element &) { return true; }), _table(ShareRef(table))
   {
   }
 
@@ -152,7 +152,7 @@ namespace krys::boo::html
       }
     }
 
-    dom::Element *child = nullptr;
+    Element *child = nullptr;
 
     // If still looking at head sections, find the first row in the next head section.
     if (!previous)
@@ -271,12 +271,12 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  dom::Element *HTMLTableRowsCollection::CollectionBegin() const noexcept
+  Element *HTMLTableRowsCollection::CollectionBegin() const noexcept
   {
     return RowAfter(*_table, nullptr);
   }
 
-  dom::Element *HTMLTableRowsCollection::CollectionNext(dom::Element &element) const noexcept
+  Element *HTMLTableRowsCollection::CollectionNext(Element &element) const noexcept
   {
     return RowAfter(*_table, &static_cast<HTMLTableRowElement &>(element));
   }

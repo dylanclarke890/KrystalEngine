@@ -48,7 +48,7 @@
 
 namespace krys::boo
 {
-  LegacyRenderSVGShape::LegacyRenderSVGShape(Type type, svg::SVGGraphicsElement &element,
+  LegacyRenderSVGShape::LegacyRenderSVGShape(Type type, SVGGraphicsElement &element,
                                              RenderStyle &&style) noexcept
       : LegacyRenderSVGModelObject(type, element, krys::move(style),
                                    {SVGModelObjectFlag::IsShape, SVGModelObjectFlag::UsesBoundaryCaching})
@@ -57,9 +57,9 @@ namespace krys::boo
 
   LegacyRenderSVGShape::~LegacyRenderSVGShape() noexcept = default;
 
-  svg::SVGGraphicsElement &LegacyRenderSVGShape::GraphicsElement() const noexcept
+  SVGGraphicsElement &LegacyRenderSVGShape::GraphicsElement() const noexcept
   {
-    return Downcast<svg::SVGGraphicsElement>(LegacyRenderSVGModelObject::GetElement());
+    return Downcast<SVGGraphicsElement>(LegacyRenderSVGModelObject::GetElement());
   }
 
   bool LegacyRenderSVGShape::HasNonScalingStroke() const noexcept
@@ -226,7 +226,7 @@ namespace krys::boo
 
   AffineTransform LegacyRenderSVGShape::NonScalingStrokeTransform() const noexcept
   {
-    return GraphicsElement().GetScreenCTM(svg::SVGLocatable::DisallowStyleUpdate);
+    return GraphicsElement().GetScreenCTM(SVGLocatable::DisallowStyleUpdate);
   }
 
   void LegacyRenderSVGShape::FillShape(const RenderStyle &style, GraphicsContext &originalContext) noexcept
@@ -574,7 +574,7 @@ namespace krys::boo
 
   float LegacyRenderSVGShape::StrokeWidth() const noexcept
   {
-    svg::SVGLengthContext lengthContext(&GraphicsElement());
+    SVGLengthContext lengthContext(&GraphicsElement());
     auto strokeWidth = lengthContext.ValueForLength(Style().GetStrokeWidth(), style::ZoomNeeded {});
     return std::isnan(strokeWidth) ? 0 : strokeWidth;
   }

@@ -1439,7 +1439,7 @@ namespace krys::boo::style
         return;
       }
 
-      List<css::CSSOMString> lineNames;
+      List<CSSOMString> lineNames;
       collector.CollectLineNamesForIndex(lineNames, static_cast<uint32>(i));
       if (!lineNames.empty() || renderEmpty)
       {
@@ -1522,9 +1522,9 @@ namespace krys::boo::style
 
     auto repeatVisitor = [&](css::ValueListBuilder &list, const RepeatEntry &entry)
     {
-      if (std::holds_alternative<List<css::CSSOMString>>(entry))
+      if (std::holds_alternative<List<CSSOMString>>(entry))
       {
-        const auto &names = std::get<List<css::CSSOMString>>(entry);
+        const auto &names = std::get<List<CSSOMString>>(entry);
         if (names.empty() && !isSubgrid)
         {
           return;
@@ -1542,7 +1542,7 @@ namespace krys::boo::style
       krys::SwitchOn(
         entry,
         [&](const GridTrackSize &size) { list.push_back(CreateCSSValue(state.Pool, state.Style, size)); },
-        [&](const List<css::CSSOMString> &names)
+        [&](const List<CSSOMString> &names)
         {
           // Subgrids don't have track sizes specified, so empty line names sets
           // need to be serialised, as they are meaningful placeholders.
@@ -1593,7 +1593,7 @@ namespace krys::boo::style
   /// @brief Appends each item to `builder`, separated by `separator`.
   template <typename TRange, typename TFunc>
   void AppendInterleaved(StringBuilder &builder, const TRange &range, TFunc func,
-                         css::CSSOMStringView separator) noexcept
+                         CSSOMStringView separator) noexcept
   {
     bool first = true;
     for (const auto &item : range)
@@ -1720,7 +1720,7 @@ namespace krys::boo::style
       return;
     }
 
-    css::CSSOMStringView stringView = builder;
+    CSSOMStringView stringView = builder;
     auto stringViewFirst = stringView.substr(offsetBeforeFirst, offsetAfterFirst - offsetBeforeFirst);
     auto stringViewSecond = stringView.substr(offsetBeforeSecond, offsetAfterSecond - offsetBeforeSecond);
 
@@ -1818,7 +1818,7 @@ namespace krys::boo::style
       return;
     }
 
-    css::CSSOMStringView stringView = builder;
+    CSSOMStringView stringView = builder;
     auto stringViewTop = stringView.substr(offsetBeforeTop, offsetAfterTop - offsetBeforeTop);
     auto stringViewRight = stringView.substr(offsetBeforeRight, offsetAfterRight - offsetBeforeRight);
     auto stringViewBottom = stringView.substr(offsetBeforeBottom, offsetAfterBottom - offsetBeforeBottom);
@@ -2366,7 +2366,7 @@ namespace krys::boo::style
     auto showsDelay = animation.GetDelay() != Animation::InitialDelay();
     auto showsDuration = showsDelay || animation.GetDuration() != Animation::InitialDuration();
 
-    auto name = [&]() -> css::CSSOMStringView
+    auto name = [&]() -> CSSOMStringView
     {
       if (auto keyframesName = animation.GetName().TryKeyframesName())
       {

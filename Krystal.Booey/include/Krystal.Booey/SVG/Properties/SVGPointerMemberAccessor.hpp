@@ -29,7 +29,7 @@
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief Reaches a property an owner holds as a member.
   template <typename TOwner, typename TProperty>
@@ -60,7 +60,7 @@ namespace krys::boo::svg
       Property(owner)->Detach();
     }
 
-    KRYS_NODISCARD Maybe<dom::DOMString> Synchronize(const TOwner &owner) const noexcept override
+    KRYS_NODISCARD Maybe<DOMString> Synchronize(const TOwner &owner) const noexcept override
     {
       return Property(owner)->Synchronize();
     }

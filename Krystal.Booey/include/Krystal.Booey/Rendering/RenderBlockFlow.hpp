@@ -180,10 +180,10 @@ namespace krys::boo
     Maybe<Pair<float, float>> _previousInlineLayoutContentTopAndBottomIncludingInkOverflow;
 
   public:
-    RenderBlockFlow(Type type, dom::Element &element, RenderStyle &&style,
+    RenderBlockFlow(Type type, Element &element, RenderStyle &&style,
                     EnumSet<BlockFlowFlag> flags = {}) noexcept;
 
-    RenderBlockFlow(Type type, dom::Document &document, RenderStyle &&style,
+    RenderBlockFlow(Type type, Document &document, RenderStyle &&style,
                     EnumSet<BlockFlowFlag> flags = {}) noexcept;
 
     ~RenderBlockFlow() noexcept override;

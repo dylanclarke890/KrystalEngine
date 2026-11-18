@@ -32,15 +32,14 @@
 
 namespace krys::boo
 {
-  MoveSelectionCommand::MoveSelectionCommand(Ref<dom::DocumentFragment> &&fragment,
-                                             const dom::Position &position, bool smartInsert,
-                                             bool smartDelete) noexcept
+  MoveSelectionCommand::MoveSelectionCommand(Ref<DocumentFragment> &&fragment, const dom::Position &position,
+                                             bool smartInsert, bool smartDelete) noexcept
       : CompositeEditCommand(position.AnchorNode()->NodeDocument()), _fragment(krys::move(fragment)),
         _position(position), _smartInsert(smartInsert), _smartDelete(smartDelete)
   {
   }
 
-  Ref<MoveSelectionCommand> MoveSelectionCommand::Create(Ref<dom::DocumentFragment> &&fragment,
+  Ref<MoveSelectionCommand> MoveSelectionCommand::Create(Ref<DocumentFragment> &&fragment,
                                                          const dom::Position &position, bool smartInsert,
                                                          bool smartDelete) noexcept
   {

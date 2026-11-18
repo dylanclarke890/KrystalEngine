@@ -44,7 +44,7 @@ namespace krys::boo::svg::tests
     REQUIRE_FALSE(element->SetAttribute(u8"systemLanguage", language).HasException());
     CHECK(element->IsValid());
     REQUIRE_FALSE(
-      element->SetAttribute(u8"systemLanguage", dom::DOMString {language} + u8" x-none").HasException());
+      element->SetAttribute(u8"systemLanguage", DOMString {language} + u8" x-none").HasException());
     CHECK_FALSE(element->IsValid());
   }
 }

@@ -13,7 +13,7 @@ namespace krys::boo::html::tests
 {
   namespace
   {
-    KRYS_NODISCARD Maybe<SRGBA<uint8>> Legacy(dom::DOMStringView value) noexcept
+    KRYS_NODISCARD Maybe<SRGBA<uint8>> Legacy(DOMStringView value) noexcept
     {
       return HTMLElement::ParseLegacyColorValue(value);
     }
@@ -50,7 +50,7 @@ namespace krys::boo::html::tests
             "[HTML][PresentationalHints][html:rules-for-parsing-a-legacy-colour-value]")
   {
     // The specification truncates to 128 code points before removing the "#", which would leave out the "f".
-    dom::DOMString value = u8"#";
+    DOMString value = u8"#";
     value.append(127, u8'0');
     value += u8'f';
     CHECK(Legacy(value) == SRGBA<uint8> {0, 0, 0xF0});
@@ -59,15 +59,14 @@ namespace krys::boo::html::tests
   TEST_CASE("HTMLElement::IsInteractiveContent: the interactive content elements",
             "[HTML][HTMLElement][html:interactive-content-2]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto isInteractive =
-      [&](dom::DOMStringAtom localName, utf8_stringview attribute = {}, utf8_stringview value = {})
+      [&](DOMStringAtom localName, utf8_stringview attribute = {}, utf8_stringview value = {})
     {
       auto element = document->CreateElement(krys::move(localName)).ReleaseValue();
       if (!attribute.empty())
       {
-        REQUIRE_FALSE(
-          element->SetAttribute(dom::DOMStringAtom(attribute), dom::DOMString(value)).HasException());
+        REQUIRE_FALSE(element->SetAttribute(DOMStringAtom(attribute), DOMString(value)).HasException());
       }
       return Downcast<HTMLElement>(*element).IsInteractiveContent();
     };
@@ -90,13 +89,13 @@ namespace krys::boo::html::tests
     "HTMLElement.translate: the translation mode, inherited from the nearest yes or no",
     "[HTML][HTMLElement][html:dom-translate][html:translation-mode][html:attr-translate-inherit-state]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto create = [&](utf8_stringview translate = {})
     {
       auto element = document->CreateElement(u8"span").ReleaseValue();
       if (translate.data())
       {
-        REQUIRE_FALSE(element->SetAttribute(u8"translate", dom::DOMString(translate)).HasException());
+        REQUIRE_FALSE(element->SetAttribute(u8"translate", DOMString(translate)).HasException());
       }
       return Downcast<HTMLElement>(krys::move(element));
     };
@@ -128,10 +127,10 @@ namespace krys::boo::html::tests
 
     // Setting it writes yes or no.
     inherit->Translate(true);
-    CHECK(inherit->GetAttribute(u8"translate") == dom::DOMString(u8"yes"));
+    CHECK(inherit->GetAttribute(u8"translate") == DOMString(u8"yes"));
     CHECK(invalid->Translate());
     inherit->Translate(false);
-    CHECK(inherit->GetAttribute(u8"translate") == dom::DOMString(u8"no"));
+    CHECK(inherit->GetAttribute(u8"translate") == DOMString(u8"no"));
   }
 
   TEST_CASE(
@@ -156,7 +155,7 @@ namespace krys::boo::html::tests
     "HTMLElement.innerText: setting it replaces the children with text and a br per line break",
     "[HTML][HTMLElement][html:dom-innertext][html:set-the-inner-text-steps][html:rendered-text-fragment]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto div = document->CreateElement(u8"div").ReleaseValue();
     auto &element = Downcast<HTMLElement>(*div);
     REQUIRE_FALSE(div->AppendChild(*document->CreateElement(u8"b").ReleaseValue()).HasException());
@@ -165,16 +164,15 @@ namespace krys::boo::html::tests
     List<std::string> children;
     for (auto *child = div->FirstChild(); child; child = child->NextSibling())
     {
-      auto *text = DynamicDowncast<dom::Text>(*child);
+      auto *text = DynamicDowncast<Text>(*child);
       children.push_back(
         text ? std::string(reinterpret_cast<const char *>(text->Data().data()), text->Data().size())
              : std::string("<")
-                 + reinterpret_cast<const char *>(Downcast<dom::Element>(*child).LocalName().View().data())
-                 + ">");
+                 + reinterpret_cast<const char *>(Downcast<Element>(*child).LocalName().View().data()) + ">");
     }
     CHECK(children == List<std::string> {"a", "<br>", "b", "<br>", "<br>", "c", "<br>"});
 
-    element.InnerText(dom::DOMString());
+    element.InnerText(DOMString());
     CHECK_FALSE(div->HasChildNodes());
   }
 
@@ -182,16 +180,15 @@ namespace krys::boo::html::tests
             "[HTML][HTMLElement][html:dom-outertext][html:merge-with-the-next-text-node][html:rendered-text-"
             "fragment]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
-    auto check = [](const auto &result, dom::ExceptionCode code)
+    auto document = CreateRef<HTMLDocument>();
+    auto check = [](const auto &result, ExceptionCode code)
     {
       return result.HasException() && result.GetException().Code() == code;
     };
 
     // Without a parent, it throws.
     auto orphan = document->CreateElement(u8"span").ReleaseValue();
-    CHECK(
-      check(Downcast<HTMLElement>(*orphan).OuterText(u8"x"), dom::ExceptionCode::NoModificationAllowedError));
+    CHECK(check(Downcast<HTMLElement>(*orphan).OuterText(u8"x"), ExceptionCode::NoModificationAllowedError));
 
     auto p = document->CreateElement(u8"p").ReleaseValue();
     auto span = document->CreateElement(u8"span").ReleaseValue();
@@ -201,27 +198,27 @@ namespace krys::boo::html::tests
 
     REQUIRE_FALSE(Downcast<HTMLElement>(*span).OuterText(u8"1\n2").HasException());
     REQUIRE(p->ChildNodes()->Length() == 3);
-    CHECK(Downcast<dom::Text>(*p->FirstChild()).Data() == u8"x1");
-    CHECK(Downcast<dom::Element>(*p->FirstChild()->NextSibling()).LocalName() == u8"br");
-    CHECK(Downcast<dom::Text>(*p->LastChild()).Data() == u8"2z");
+    CHECK(Downcast<Text>(*p->FirstChild()).Data() == u8"x1");
+    CHECK(Downcast<Element>(*p->FirstChild()->NextSibling()).LocalName() == u8"br");
+    CHECK(Downcast<Text>(*p->LastChild()).Data() == u8"2z");
 
     // An empty value leaves an empty text node, merged away.
     auto b = document->CreateElement(u8"b").ReleaseValue();
     REQUIRE_FALSE(p->InsertBefore(*b, p->LastChild()).HasException());
-    REQUIRE_FALSE(Downcast<HTMLElement>(*b).OuterText(dom::DOMString()).HasException());
+    REQUIRE_FALSE(Downcast<HTMLElement>(*b).OuterText(DOMString()).HasException());
     REQUIRE(p->ChildNodes()->Length() == 3);
-    CHECK(Downcast<dom::Text>(*p->LastChild()).Data() == u8"2z");
+    CHECK(Downcast<Text>(*p->LastChild()).Data() == u8"2z");
   }
 
   TEST_CASE("HTMLElement.dir: limited to ltr, rtl and auto", "[HTML][HTMLElement][html:dom-dir]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto div = document->CreateElement(u8"div").ReleaseValue();
     auto &element = Downcast<HTMLElement>(*div);
     CHECK(element.Dir().empty());
     element.Dir(u8"RTL");
     CHECK(element.Dir() == u8"rtl");
-    CHECK(element.GetAttribute(u8"dir") == dom::DOMString(u8"RTL"));
+    CHECK(element.GetAttribute(u8"dir") == DOMString(u8"RTL"));
     element.Dir(u8"up");
     CHECK(element.Dir().empty());
   }
@@ -229,14 +226,14 @@ namespace krys::boo::html::tests
   TEST_CASE("HTMLElement.click(): an untrusted click, unless disabled or already being clicked",
             "[HTML][HTMLElement][html:dom-click][html:click-in-progress-flag]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto button = document->CreateElement(u8"button").ReleaseValue();
     auto &element = Downcast<HTMLElement>(*button);
 
     int clicks = 0;
     bool trusted = true;
     auto listener = button->AddEventListener(u8"click",
-                                             [&](dom::Event &event)
+                                             [&](Event &event)
                                              {
                                                ++clicks;
                                                trusted = event.IsTrusted();
@@ -257,8 +254,8 @@ namespace krys::boo::html::tests
                    "[html:dom-contenteditable][html:dom-iscontenteditable]")
   {
     style::tests::ResolverFixture fixture {u8"<!DOCTYPE html><div id=d><span id=s></span></div>"};
-    dom::Element *div = &fixture.ById(u8"d");
-    dom::Element *span = &fixture.ById(u8"s");
+    Element *div = &fixture.ById(u8"d");
+    Element *span = &fixture.ById(u8"s");
     auto &element = Downcast<HTMLElement>(*div);
 
     CHECK(element.ContentEditable() == u8"inherit");
@@ -277,15 +274,15 @@ namespace krys::boo::html::tests
 
     // The setter takes the keywords in any case, and throws for anything else.
     REQUIRE_FALSE(element.ContentEditable(u8"TRUE").HasException());
-    CHECK(div->GetAttribute(u8"contenteditable") == dom::DOMString(u8"true"));
+    CHECK(div->GetAttribute(u8"contenteditable") == DOMString(u8"true"));
     CHECK(span->IsContentEditable());
     REQUIRE_FALSE(Downcast<HTMLElement>(*span).ContentEditable(u8"false").HasException());
     CHECK_FALSE(span->IsContentEditable());
     REQUIRE_FALSE(element.ContentEditable(u8"Plaintext-Only").HasException());
-    CHECK(div->GetAttribute(u8"contenteditable") == dom::DOMString(u8"plaintext-only"));
+    CHECK(div->GetAttribute(u8"contenteditable") == DOMString(u8"plaintext-only"));
     auto result = element.ContentEditable(u8"yes");
     REQUIRE(result.HasException());
-    CHECK(result.GetException().Code() == dom::ExceptionCode::SyntaxError);
+    CHECK(result.GetException().Code() == ExceptionCode::SyntaxError);
     REQUIRE_FALSE(element.ContentEditable(u8"inherit").HasException());
     CHECK_FALSE(div->HasAttribute(u8"contenteditable"));
   }
@@ -298,7 +295,7 @@ namespace krys::boo::html::tests
     "[html:dom-autocapitalize][html:own-autocapitalization-hint][html:autocapitalization-hint]"
     "[html:dom-autocorrect][html:attr-autocorrect][html:used-autocorrection-state]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto form = document->CreateElement(u8"form").ReleaseValue();
     auto input = document->CreateElement(u8"input").ReleaseValue();
     auto div = document->CreateElement(u8"div").ReleaseValue();
@@ -320,7 +317,7 @@ namespace krys::boo::html::tests
       REQUIRE_FALSE(div->SetAttribute(u8"spellcheck", u8"").HasException());
       CHECK(divElement.SpellCheck());
       divElement.SpellCheck(false);
-      CHECK(div->GetAttribute(u8"spellcheck") == dom::DOMString(u8"false"));
+      CHECK(div->GetAttribute(u8"spellcheck") == DOMString(u8"false"));
     }
 
     SECTION("writingSuggestions is false only below a false state")
@@ -357,7 +354,7 @@ namespace krys::boo::html::tests
       CHECK_FALSE(inputElement.Autocorrect());
       CHECK(divElement.Autocorrect());
       inputElement.Autocorrect(true);
-      CHECK(input->GetAttribute(u8"autocorrect") == dom::DOMString(u8"on"));
+      CHECK(input->GetAttribute(u8"autocorrect") == DOMString(u8"on"));
       CHECK(inputElement.Autocorrect());
       REQUIRE_FALSE(input->SetAttribute(u8"type", u8"email").HasException());
       CHECK_FALSE(inputElement.Autocorrect());
@@ -368,13 +365,13 @@ namespace krys::boo::html::tests
             "[HTML][HTMLElement][html:dom-inputmode][html:attr-inputmode][html:dom-enterkeyhint]"
             "[html:attr-enterkeyhint]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto div = document->CreateElement(u8"div").ReleaseValue();
     auto &element = Downcast<HTMLElement>(*div);
 
     CHECK(element.InputMode().empty());
     element.InputMode(u8"NUMERIC");
-    CHECK(div->GetAttribute(u8"inputmode") == dom::DOMString(u8"NUMERIC"));
+    CHECK(div->GetAttribute(u8"inputmode") == DOMString(u8"NUMERIC"));
     CHECK(element.InputMode() == u8"numeric");
     element.InputMode(u8"digits");
     CHECK(element.InputMode().empty());
@@ -389,23 +386,23 @@ namespace krys::boo::html::tests
   TEST_CASE("HTMLElement.hidden: true, false or until-found",
             "[HTML][HTMLElement][html:dom-hidden][html:attr-hidden]")
   {
-    auto document = CreateRef<dom::HTMLDocument>();
+    auto document = CreateRef<HTMLDocument>();
     auto div = document->CreateElement(u8"div").ReleaseValue();
     auto &element = Downcast<HTMLElement>(*div);
-    using Result = BoolOr<dom::DOMString>;
+    using Result = BoolOr<DOMString>;
 
     CHECK(element.Hidden() == Result(false));
     REQUIRE_FALSE(element.SetAttribute(u8"hidden", u8"whatever").HasException());
     CHECK(element.Hidden() == Result(true));
     REQUIRE_FALSE(element.SetAttribute(u8"hidden", u8"UNTIL-found").HasException());
-    CHECK(element.Hidden() == Result(dom::DOMString(u8"until-found")));
+    CHECK(element.Hidden() == Result(DOMString(u8"until-found")));
 
     // Strings other than until-found and the empty string hide it.
-    element.Hidden(dom::DOMString(u8"Until-Found"));
-    CHECK(element.GetAttribute(u8"hidden") == dom::DOMString(u8"until-found"));
-    element.Hidden(dom::DOMString(u8"false"));
-    CHECK(element.GetAttribute(u8"hidden") == dom::DOMString(u8""));
-    element.Hidden(dom::DOMString());
+    element.Hidden(DOMString(u8"Until-Found"));
+    CHECK(element.GetAttribute(u8"hidden") == DOMString(u8"until-found"));
+    element.Hidden(DOMString(u8"false"));
+    CHECK(element.GetAttribute(u8"hidden") == DOMString(u8""));
+    element.Hidden(DOMString());
     CHECK_FALSE(element.HasAttribute(u8"hidden"));
 
     element.Hidden(true);
@@ -415,7 +412,7 @@ namespace krys::boo::html::tests
 
     // 0 and NaN remove it; any other number hides it.
     element.Hidden(2.0);
-    CHECK(element.GetAttribute(u8"hidden") == dom::DOMString(u8""));
+    CHECK(element.GetAttribute(u8"hidden") == DOMString(u8""));
     element.Hidden(std::numeric_limits<double>::quiet_NaN());
     CHECK_FALSE(element.HasAttribute(u8"hidden"));
     element.Hidden(-1.0);

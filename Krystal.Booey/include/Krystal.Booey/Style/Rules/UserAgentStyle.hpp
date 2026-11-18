@@ -29,7 +29,7 @@ namespace krys::boo::css
   class StyleSheetContents;
 }
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Element;
 }
@@ -61,7 +61,7 @@ namespace krys::boo::style
 
     static void InitDefaultStyleSheet() noexcept;
 
-    static void EnsureDefaultStyleSheetsForElement(const dom::Element &element) noexcept;
+    static void EnsureDefaultStyleSheetsForElement(const Element &element) noexcept;
 
   private:
     static void AddToDefaultStyle(css::StyleSheetContents &sheet) noexcept;

@@ -37,19 +37,22 @@
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   class SVGElement;
   class SVGSMILElement;
   class SVGSvgElement;
+}
 
+namespace krys::boo::svg
+{
   /// @brief The timeline of an `<svg>` element's animations: it schedules them by target and attribute,
   /// and samples them in the rendering update of each frame while any is changing, sleeping on a timer until
   /// a frame before the next change otherwise.
   class SMILTimeContainer final : public RefCounted<SMILTimeContainer>,
                                   public CanMakeWeakPtr<SMILTimeContainer>
   {
-    using ElementAttributePair = Pair<SVGElement *, dom::QualifiedName>;
+    using ElementAttributePair = Pair<SVGElement *, QualifiedName>;
     using AnimationsVector = List<WeakPtr<SVGSMILElement>>;
     using GroupedAnimationsMap = List<Pair<ElementAttributePair, AnimationsVector>>;
 
@@ -72,9 +75,9 @@ namespace krys::boo::svg
       return AdoptRef(*new SMILTimeContainer(owner));
     }
 
-    void Schedule(SVGSMILElement *, SVGElement *, const dom::QualifiedName &) noexcept;
+    void Schedule(SVGSMILElement *, SVGElement *, const QualifiedName &) noexcept;
 
-    void Unschedule(SVGSMILElement *, SVGElement *, const dom::QualifiedName &) noexcept;
+    void Unschedule(SVGSMILElement *, SVGElement *, const QualifiedName &) noexcept;
 
     void NotifyIntervalsChanged() noexcept;
 

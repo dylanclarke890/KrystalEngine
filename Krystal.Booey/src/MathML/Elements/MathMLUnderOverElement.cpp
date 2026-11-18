@@ -31,7 +31,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   MathMLElement::BooleanValue MathMLUnderOverElement::Accent() noexcept
   {
@@ -43,9 +43,8 @@ namespace krys::boo::mathml
     return CachedBooleanAttribute(MathMLNames::AccentunderAttr(), _accentUnder);
   }
 
-  void MathMLUnderOverElement::AttributeChanged(const dom::QualifiedName &name,
-                                                Maybe<dom::DOMStringView> oldValue,
-                                                Maybe<dom::DOMStringView> value) noexcept
+  void MathMLUnderOverElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                                Maybe<DOMStringView> value) noexcept
   {
     bool affectsLayout = false;
     if (name == MathMLNames::AccentAttr())

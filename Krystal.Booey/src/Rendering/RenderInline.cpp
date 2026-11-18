@@ -46,14 +46,14 @@
 
 namespace krys::boo
 {
-  RenderInline::RenderInline(Type type, dom::Element &element, RenderStyle &&style) noexcept
+  RenderInline::RenderInline(Type type, Element &element, RenderStyle &&style) noexcept
       : RenderBoxModelObject(type, element, krys::move(style), TypeFlag::IsRenderInline, {})
   {
     SetChildrenInline(true);
     krys_debug_assert(IsRenderInline());
   }
 
-  RenderInline::RenderInline(Type type, dom::Document &document, RenderStyle &&style) noexcept
+  RenderInline::RenderInline(Type type, Document &document, RenderStyle &&style) noexcept
       : RenderBoxModelObject(type, document, krys::move(style), TypeFlag::IsRenderInline, {})
   {
     SetChildrenInline(true);

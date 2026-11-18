@@ -37,7 +37,7 @@ namespace krys::boo::html
 {
   InputType::ShouldCallBaseEventHandler
     BaseClickableWithKeyInputType::HandleKeydownEvent(HTMLInputElement &element,
-                                                      dom::KeyboardEvent &event) noexcept
+                                                      KeyboardEvent &event) noexcept
   {
     if (event.KeyIdentifier() == u8"U+0020")
     {
@@ -49,7 +49,7 @@ namespace krys::boo::html
   }
 
   void BaseClickableWithKeyInputType::HandleKeypressEvent(HTMLInputElement &element,
-                                                          dom::KeyboardEvent &event) noexcept
+                                                          KeyboardEvent &event) noexcept
   {
     int32 charCode = event.CharCode();
     if (charCode == '\r')
@@ -65,8 +65,7 @@ namespace krys::boo::html
     }
   }
 
-  void BaseClickableWithKeyInputType::HandleKeyupEvent(InputType &inputType,
-                                                       dom::KeyboardEvent &event) noexcept
+  void BaseClickableWithKeyInputType::HandleKeyupEvent(InputType &inputType, KeyboardEvent &event) noexcept
   {
     if (event.KeyIdentifier() != u8"U+0020")
     {
@@ -77,19 +76,19 @@ namespace krys::boo::html
   }
 
   InputType::ShouldCallBaseEventHandler
-    BaseClickableWithKeyInputType::HandleKeydownEvent(dom::KeyboardEvent &event) noexcept
+    BaseClickableWithKeyInputType::HandleKeydownEvent(KeyboardEvent &event) noexcept
   {
     krys_debug_assert(Element());
     return HandleKeydownEvent(*Element(), event);
   }
 
-  void BaseClickableWithKeyInputType::HandleKeypressEvent(dom::KeyboardEvent &event) noexcept
+  void BaseClickableWithKeyInputType::HandleKeypressEvent(KeyboardEvent &event) noexcept
   {
     krys_debug_assert(Element());
     HandleKeypressEvent(*Element(), event);
   }
 
-  void BaseClickableWithKeyInputType::HandleKeyupEvent(dom::KeyboardEvent &event) noexcept
+  void BaseClickableWithKeyInputType::HandleKeyupEvent(KeyboardEvent &event) noexcept
   {
     HandleKeyupEvent(*this, event);
   }

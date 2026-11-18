@@ -45,13 +45,13 @@ namespace krys::boo::html::tests
     CHECK(cells->Length() == 4);
     auto result = row.InsertCell(6);
     REQUIRE(result.HasException());
-    CHECK(result.GetException().Code() == dom::ExceptionCode::IndexSizeError);
+    CHECK(result.GetException().Code() == ExceptionCode::IndexSizeError);
 
     REQUIRE_FALSE(row.DeleteCell(-1).HasException());
     REQUIRE_FALSE(row.DeleteCell(0).HasException());
     CHECK(TableIds(*cells) == List<std::string> {"a", "b"});
     auto deleteResult = row.DeleteCell(2);
     REQUIRE(deleteResult.HasException());
-    CHECK(deleteResult.GetException().Code() == dom::ExceptionCode::IndexSizeError);
+    CHECK(deleteResult.GetException().Code() == ExceptionCode::IndexSizeError);
   }
 }

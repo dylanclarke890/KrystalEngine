@@ -38,7 +38,7 @@ namespace krys::boo::style
     PseudoElementType Type;
 
     /// @brief The highlight name, for `::highlight`.
-    css::CSSOMStringAtom NameArgument {null};
+    CSSOMStringAtom NameArgument {null};
 
     KRYS_NODISCARD friend bool operator==(const PseudoElementIdentifier &,
                                           const PseudoElementIdentifier &) noexcept = default;

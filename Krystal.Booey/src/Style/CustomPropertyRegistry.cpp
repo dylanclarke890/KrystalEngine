@@ -44,8 +44,7 @@ namespace krys::boo::style
 
   CustomPropertyRegistry::~CustomPropertyRegistry() noexcept = default;
 
-  const css::RegisteredCustomProperty *
-    CustomPropertyRegistry::Get(const css::CSSOMStringAtom &name) const noexcept
+  const css::RegisteredCustomProperty *CustomPropertyRegistry::Get(const CSSOMStringAtom &name) const noexcept
   {
     krys_debug_assert(css::IsCustomPropertyName(name.View()));
 
@@ -63,7 +62,7 @@ namespace krys::boo::style
     return nullptr;
   }
 
-  bool CustomPropertyRegistry::IsInherited(const css::CSSOMStringAtom &name) const noexcept
+  bool CustomPropertyRegistry::IsInherited(const CSSOMStringAtom &name) const noexcept
   {
     const auto *registered = Get(name);
     return registered ? registered->Inherits : true;
@@ -190,7 +189,7 @@ namespace krys::boo::style
     return *_initialValuePrototypeStyle;
   }
 
-  void CustomPropertyRegistry::Invalidate(const css::CSSOMStringAtom &customProperty) noexcept
+  void CustomPropertyRegistry::Invalidate(const CSSOMStringAtom &customProperty) noexcept
   {
     _hasInvalidPrototypeStyle = true;
     // Changing property registration may affect computed property values in the cache.
@@ -204,7 +203,7 @@ namespace krys::boo::style
   }
 
   void CustomPropertyRegistry::NotifyAnimationsOfCustomPropertyRegistration(
-    const css::CSSOMStringAtom &customProperty) noexcept
+    const CSSOMStringAtom &customProperty) noexcept
   {
     auto &document = _scope.Document();
     for (auto *animation : WebAnimation::Instances())
@@ -219,8 +218,8 @@ namespace krys::boo::style
     }
   }
 
-  auto CustomPropertyRegistry::ParseInitialValue(const dom::Document &document,
-                                                 const css::CSSOMStringAtom &propertyName,
+  auto CustomPropertyRegistry::ParseInitialValue(const Document &document,
+                                                 const CSSOMStringAtom &propertyName,
                                                  const css::CustomPropertySyntax &syntax,
                                                  css::TokenRange tokenRange) noexcept
     -> Expected<Pair<RefPtr<const CustomProperty>, ViewportUnitDependency>, ParseInitialValueError>
@@ -250,7 +249,7 @@ namespace krys::boo::style
                  dependencies.ViewportDimensions ? ViewportUnitDependency::Yes : ViewportUnitDependency::No};
   }
 
-  bool CustomPropertyRegistry::InvalidatePropertiesWithViewportUnits(dom::Document &document) noexcept
+  bool CustomPropertyRegistry::InvalidatePropertiesWithViewportUnits(Document &document) noexcept
   {
     bool invalidatedAny = false;
 

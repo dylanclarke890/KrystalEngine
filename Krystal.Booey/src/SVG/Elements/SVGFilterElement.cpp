@@ -29,9 +29,9 @@
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGParsingError.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFilterElement::SVGFilterElement(dom::Document &document) noexcept
+  SVGFilterElement::SVGFilterElement(Document &document) noexcept
       : SVGElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Filter),
         SVGURIReference(this),
         _filterUnits(SVGAnimatedEnumeration::Create(this, SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)),
@@ -59,11 +59,11 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGFilterElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                          Maybe<dom::DOMStringView> value) noexcept
+  void SVGFilterElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                          Maybe<DOMStringView> value) noexcept
   {
     auto parseError = SVGParsingError::None;
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::FilterUnitsAttr())
     {
@@ -107,7 +107,7 @@ namespace krys::boo::svg
     SVGElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGFilterElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGFilterElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsAnimatedLengthAttribute(attributeName))
     {
@@ -142,7 +142,7 @@ namespace krys::boo::svg
     return CreateRenderer<LegacyRenderSVGResourceFilter>(*this, krys::move(style));
   }
 
-  bool SVGFilterElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
+  bool SVGFilterElement::ChildShouldCreateRenderer(const Node &child) const noexcept
   {
     auto *childElement = DynamicDowncast<SVGElement>(child);
     if (!childElement)

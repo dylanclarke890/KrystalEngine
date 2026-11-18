@@ -69,10 +69,9 @@ namespace krys::boo::svg::tests
     CHECK_FALSE(removed.Value()->IsAttached());
     CHECK(list->ValueAsString() == u8"9px 2px");
 
-    CHECK(list->GetItem(2).GetException().Code() == dom::ExceptionCode::IndexSizeError);
-    CHECK(list->RemoveItem(2).GetException().Code() == dom::ExceptionCode::IndexSizeError);
-    CHECK(list->ReplaceItem(SVGLength::Create(), 2).GetException().Code()
-          == dom::ExceptionCode::IndexSizeError);
+    CHECK(list->GetItem(2).GetException().Code() == ExceptionCode::IndexSizeError);
+    CHECK(list->RemoveItem(2).GetException().Code() == ExceptionCode::IndexSizeError);
+    CHECK(list->ReplaceItem(SVGLength::Create(), 2).GetException().Code() == ExceptionCode::IndexSizeError);
     CHECK(list->IsSupportedPropertyIndex(1));
     CHECK_FALSE(list->IsSupportedPropertyIndex(2));
 
@@ -88,7 +87,7 @@ namespace krys::boo::svg::tests
     auto readOnly = SVGLengthList::Create(*list, SVGPropertyAccess::ReadOnly);
     CHECK(readOnly->ValueAsString() == u8"1px 2px");
     CHECK(readOnly->Items()[0]->IsReadOnly());
-    auto code = dom::ExceptionCode::NoModificationAllowedError;
+    auto code = ExceptionCode::NoModificationAllowedError;
     CHECK(readOnly->Clear().GetException().Code() == code);
     CHECK(readOnly->AppendItem(SVGLength::Create()).GetException().Code() == code);
     CHECK(readOnly->Items()[0]->SetValueAsString(u8"3px").GetException().Code() == code);

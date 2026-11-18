@@ -26,11 +26,11 @@ namespace krys::boo::style::tests
   /// the property's id, origin or style scope are tested with `Build`.
   struct BuilderFixture : css::tests::ValueFixture
   {
-    Ref<dom::HTMLDocument> Document {CreateRef<dom::HTMLDocument>()};
+    Ref<HTMLDocument> Document {CreateRef<HTMLDocument>()};
     // Both start with the document's default font (16px), as resolved styles do.
     RenderStyle ParentStyle {RenderStyle::Clone(*Resolver::DefaultStyleForElement(*Document, nullptr))};
     RenderStyle Style {RenderStyle::Clone(*Resolver::DefaultStyleForElement(*Document, nullptr))};
-    RefPtr<const dom::Element> Element;
+    RefPtr<const boo::Element> Element;
     Maybe<BuilderPositionTryFallback> PositionTryFallback;
     UniquePtr<BuilderState> State;
 
@@ -40,7 +40,7 @@ namespace krys::boo::style::tests
     }
 
     /// @brief Recreates the builder state, for `element` if given.
-    void Reset(const dom::Element *element = nullptr) noexcept
+    void Reset(const boo::Element *element = nullptr) noexcept
     {
       Element = ShareRefPtr(element);
       ResetState();

@@ -13,28 +13,28 @@
 #include "Krystal.Core/Utils/Move.hpp"
 #include <ranges>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   void EventTarget::AddEventListener(const DOMStringAtom &type, Ref<EventListenerCallback> callback,
                                      const AddEventListenerOptionsOrBool &optionsOrBool) noexcept
   {
     // 1. Let capture, passive, once, and signal be the result of flattening more options.
-    AddEventListenerOptions options = EventTargetAlgorithms::FlattenMoreOptions(optionsOrBool);
+    AddEventListenerOptions options = dom::EventTargetAlgorithms::FlattenMoreOptions(optionsOrBool);
 
     // 2. Add an event listener with this and an event listener whose type is type, callback is callback,
     // capture is capture, passive is passive, once is once, and signal is signal.
     auto listener = CreateRef<EventListener>(type, krys::move(callback), krys::move(options));
-    (void)EventTargetAlgorithms::AddEventListener(*this, *listener.get());
+    (void)dom::EventTargetAlgorithms::AddEventListener(*this, *listener.get());
   }
 
   EventListenerHandle
     EventTarget::AddEventListener(const DOMStringAtom &type, Func<void(Event &)> &&callback,
                                   const AddEventListenerOptionsOrBool &optionsOrBool) noexcept
   {
-    AddEventListenerOptions options = EventTargetAlgorithms::FlattenMoreOptions(optionsOrBool);
+    AddEventListenerOptions options = dom::EventTargetAlgorithms::FlattenMoreOptions(optionsOrBool);
     auto listener = CreateRef<EventListener>(
       type, CreateRef<FunctionEventListenerCallback>(krys::move(callback)), krys::move(options));
-    if (!EventTargetAlgorithms::AddEventListener(*this, *listener.get()))
+    if (!dom::EventTargetAlgorithms::AddEventListener(*this, *listener.get()))
     {
       return {};
     }
@@ -58,7 +58,7 @@ namespace krys::boo::dom
                                         const EventListenerOptionsOrBool &optionsOrBool) noexcept
   {
     // 1. Let capture be the result of flattening options.
-    EventListenerOptions options = EventTargetAlgorithms::FlattenOptions(optionsOrBool);
+    EventListenerOptions options = dom::EventTargetAlgorithms::FlattenOptions(optionsOrBool);
 
     // 2. If this's event listener list contains an event listener whose type is type, callback is callback,
     // and capture is capture, then remove an event listener with this and that event listener.
@@ -71,7 +71,7 @@ namespace krys::boo::dom
     const auto &existing = std::ranges::find_if(_eventListenerList, krys::move(AlreadyExists));
     if (existing != _eventListenerList.end())
     {
-      EventTargetAlgorithms::RemoveEventListener(*this, **existing);
+      dom::EventTargetAlgorithms::RemoveEventListener(*this, **existing);
     }
   }
 
@@ -109,7 +109,7 @@ namespace krys::boo::dom
         _eventHandlers->erase(it);
         if (listener)
         {
-          EventTargetAlgorithms::RemoveEventListener(*this, *listener);
+          dom::EventTargetAlgorithms::RemoveEventListener(*this, *listener);
         }
       }
       return;
@@ -156,7 +156,7 @@ namespace krys::boo::dom
       });
     auto listener = CreateRef<EventListener>(name, krys::move(callback), AddEventListenerOptions {});
     _eventHandlers->push_back({name, krys::move(value), listener});
-    (void)EventTargetAlgorithms::AddEventListener(*this, *listener);
+    (void)dom::EventTargetAlgorithms::AddEventListener(*this, *listener);
   }
 
   ExceptionOr<bool> EventTarget::DispatchEvent(Event &event) noexcept
@@ -172,6 +172,6 @@ namespace krys::boo::dom
     event._isTrusted = false;
 
     // 3. Return the result of dispatching event to this.
-    return EventDispatcher::DispatchToTarget(event, this);
+    return dom::EventDispatcher::DispatchToTarget(event, this);
   }
 }

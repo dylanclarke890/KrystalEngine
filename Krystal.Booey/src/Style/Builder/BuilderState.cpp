@@ -91,13 +91,13 @@ namespace krys::boo::style
   // properties that are NOT allowed to scale within a zoomed SVG document (letter/word-spacing/font-size).
   bool BuilderState::UseSVGZoomRules() const noexcept
   {
-    return Is<svg::SVGElement>(GetElement());
+    return Is<SVGElement>(GetElement());
   }
 
   bool BuilderState::UseSVGZoomRulesForLength() const noexcept
   {
-    auto *svgElement = DynamicDowncast<svg::SVGElement>(GetElement());
-    return svgElement && !(Is<svg::SVGSvgElement>(*svgElement) && svgElement->ParentNode());
+    auto *svgElement = DynamicDowncast<SVGElement>(GetElement());
+    return svgElement && !(Is<SVGSvgElement>(*svgElement) && svgElement->ParentNode());
   }
 
   RefPtr<StyleImage> BuilderState::CreateStyleImage(const css::Value &value) const noexcept
@@ -133,7 +133,7 @@ namespace krys::boo::style
     return nullptr;
   }
 
-  void BuilderState::RegisterContentAttribute(const css::CSSOMStringAtom &attributeLocalName) noexcept
+  void BuilderState::RegisterContentAttribute(const CSSOMStringAtom &attributeLocalName) noexcept
   {
     if (Style().GetPseudoElementType() == PseudoElementType::Before
         || Style().GetPseudoElementType() == PseudoElementType::After)
@@ -144,7 +144,7 @@ namespace krys::boo::style
 
   void BuilderState::AdjustStyleForInterCharacterRuby() noexcept
   {
-    if (!_style.IsInterCharacterRubyPosition() || !GetElement() || !Is<html::HTMLElement>(*GetElement())
+    if (!_style.IsInterCharacterRubyPosition() || !GetElement() || !Is<HTMLElement>(*GetElement())
         || GetElement()->TagQualifiedName().TagName() != html::TagName::rt)
     {
       return;

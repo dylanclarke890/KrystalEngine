@@ -65,7 +65,7 @@ namespace krys::boo::css
     }
   }
 
-  void CSSFontFace::AppendSources(CSSFontFace &fontFace, ValueList &srcList, dom::Document *context,
+  void CSSFontFace::AppendSources(CSSFontFace &fontFace, ValueList &srcList, boo::Document *context,
                                   bool isInitiatingElementInUserAgentShadowTree) noexcept
   {
     // FIXME: A setting for the trusted types of downloadable fonts, once there's a safe font parser.

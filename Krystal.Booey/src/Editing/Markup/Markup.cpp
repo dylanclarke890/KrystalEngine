@@ -77,16 +77,16 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD bool HasTagName(const dom::Node &node, html::TagName tagName) noexcept
+    KRYS_NODISCARD bool HasTagName(const Node &node, html::TagName tagName) noexcept
     {
       return IsHTMLElementOfType(&node, tagName);
     }
 
     // Composed tree traversal, ignoring user agent shadow trees.
 
-    KRYS_NODISCARD dom::Node *FirstChildInComposedTree(dom::Node &node) noexcept
+    KRYS_NODISCARD Node *FirstChildInComposedTree(Node &node) noexcept
     {
-      if (auto *element = DynamicDowncast<dom::Element>(node))
+      if (auto *element = DynamicDowncast<Element>(node))
       {
         if (auto *shadowRoot = TreeQueries::GetShadowRoot(*element);
             shadowRoot && shadowRoot->Mode() != dom::ShadowRootMode::UserAgent)
@@ -94,7 +94,7 @@ namespace krys::boo
           return shadowRoot->FirstChild();
         }
       }
-      if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(node))
+      if (auto *slot = DynamicDowncast<HTMLSlotElement>(node))
       {
         if (auto *assignedNodes = slot->AssignedNodes(); assignedNodes && !assignedNodes->empty())
         {
@@ -104,7 +104,7 @@ namespace krys::boo
       return node.FirstChild();
     }
 
-    KRYS_NODISCARD dom::Node *NextSiblingInComposedTree(dom::Node &node) noexcept
+    KRYS_NODISCARD Node *NextSiblingInComposedTree(Node &node) noexcept
     {
       auto *slot = dom::SlotAlgorithms::IsSlottable(node) ? dom::SlotAlgorithms::FindSlot(node) : nullptr;
       if (slot && !slot->IsInUserAgentShadowTree())
@@ -123,7 +123,7 @@ namespace krys::boo
       return node.NextSibling();
     }
 
-    KRYS_NODISCARD dom::Node *NextSkippingChildrenInComposedTree(dom::Node &node) noexcept
+    KRYS_NODISCARD Node *NextSkippingChildrenInComposedTree(Node &node) noexcept
     {
       if (auto *sibling = NextSiblingInComposedTree(node))
       {
@@ -188,7 +188,7 @@ namespace krys::boo
       dom::Position _end;
       List<utf8_string> _reversedPrecedingMarkup;
       const AnnotateForInterchange _annotate;
-      RefPtr<dom::Node> _highestNodeToBeSerialized;
+      RefPtr<Node> _highestNodeToBeSerialized;
       RefPtr<EditingStyle> _wrappingStyle;
       bool _useComposedTree;
       bool _ignoresUserSelectNone;
@@ -202,13 +202,13 @@ namespace krys::boo
       bool _hasAppendedAnyText {false};
 
     public:
-      StyledMarkupAccumulator(const dom::Position &start, dom::Position end, List<Ref<dom::Node>> *nodes,
+      StyledMarkupAccumulator(const dom::Position &start, dom::Position end, List<Ref<Node>> *nodes,
                               ResolveURLs resolveURLs, SerializeComposedTree serializeComposedTree,
                               IgnoreUserSelectNone ignoreUserSelectNone, AnnotateForInterchange annotate,
                               StandardFontFamilySerializationMode standardFontFamilySerializationMode,
                               MSOListMode msoListMode, bool needsPositionStyleConversion,
                               PreserveDirectionForInlineText preserveDirectionForInlineText,
-                              dom::Node *highestNodeToBeSerialized = nullptr) noexcept
+                              Node *highestNodeToBeSerialized = nullptr) noexcept
           : MarkupAccumulator(nodes, resolveURLs, GetSerializationSyntax(*start.GetDocument())),
             _start(start), _end(krys::move(end)), _annotate(annotate),
             _highestNodeToBeSerialized(ShareRefPtr(highestNodeToBeSerialized)),
@@ -222,9 +222,9 @@ namespace krys::boo
       {
       }
 
-      RefPtr<dom::Node> SerializeNodes(const dom::Position &start, const dom::Position &end) noexcept;
+      RefPtr<Node> SerializeNodes(const dom::Position &start, const dom::Position &end) noexcept;
 
-      void WrapWithNode(dom::Node &node, bool convertBlocksToInlines = false,
+      void WrapWithNode(Node &node, bool convertBlocksToInlines = false,
                         RangeFullySelectsNode rangeFullySelectsNode = DoesFullySelectNode) noexcept;
 
       void WrapWithStyleNode(css::StyleProperties *style, bool isBlock = false) noexcept;
@@ -243,7 +243,7 @@ namespace krys::boo
 
       using MarkupAccumulator::Append;
 
-      KRYS_NODISCARD dom::ContainerNode *ParentNode(dom::Node &node) const noexcept
+      KRYS_NODISCARD ContainerNode *ParentNode(Node &node) const noexcept
       {
         if (_useComposedTree) KRYS_UNLIKELY
         {
@@ -254,7 +254,7 @@ namespace krys::boo
 
       // FIXME: The `meta charset` for clients that read the markup back from the pasteboard as UTF-8, with
       // the pasteboard's HTML.
-      void PrependHeadIfNecessary(const dom::Element *baseElement) noexcept
+      void PrependHeadIfNecessary(const Element *baseElement) noexcept
       {
         bool shouldAppendMetaCharset = false;
         if (!shouldAppendMetaCharset && !baseElement)
@@ -319,31 +319,30 @@ namespace krys::boo
         return isBlock ? u8"</div>" : u8"</span>";
       }
 
-      KRYS_NODISCARD utf8_string RenderedTextRespectingRange(const dom::Text &text) noexcept;
+      KRYS_NODISCARD utf8_string RenderedTextRespectingRange(const Text &text) noexcept;
 
-      KRYS_NODISCARD utf8_string TextContentRespectingRange(const dom::Text &text) noexcept;
+      KRYS_NODISCARD utf8_string TextContentRespectingRange(const Text &text) noexcept;
 
-      KRYS_NODISCARD bool ShouldPreserveMSOListStyleForElement(const dom::Element &element) const noexcept;
+      KRYS_NODISCARD bool ShouldPreserveMSOListStyleForElement(const Element &element) const noexcept;
 
-      KRYS_NODISCARD static SpanReplacementType
-        SpanReplacementForElement(const dom::Element &element) noexcept;
+      KRYS_NODISCARD static SpanReplacementType SpanReplacementForElement(const Element &element) noexcept;
 
-      void AppendStartTag(utf8_string &out, const dom::Element &element, bool addDisplayInline,
+      void AppendStartTag(utf8_string &out, const Element &element, bool addDisplayInline,
                           RangeFullySelectsNode rangeFullySelectsNode) noexcept;
 
-      void AppendEndTag(utf8_string &out, const dom::Element &element) noexcept override;
+      void AppendEndTag(utf8_string &out, const Element &element) noexcept override;
 
-      void AppendCustomAttributes(utf8_string &out, const dom::Element &element,
+      void AppendCustomAttributes(utf8_string &out, const Element &element,
                                   Namespaces *namespaces) noexcept override;
 
-      void AppendText(utf8_string &out, const dom::Text &text) noexcept override;
+      void AppendText(utf8_string &out, const Text &text) noexcept override;
 
-      void AppendStartTag(utf8_string &out, const dom::Element &element, Namespaces *) noexcept override
+      void AppendStartTag(utf8_string &out, const Element &element, Namespaces *) noexcept override
       {
         AppendStartTag(out, element, false, DoesFullySelectNode);
       }
 
-      KRYS_NODISCARD dom::Node *FirstChild(dom::Node &node) const noexcept
+      KRYS_NODISCARD Node *FirstChild(Node &node) const noexcept
       {
         if (_useComposedTree) KRYS_UNLIKELY
         {
@@ -352,7 +351,7 @@ namespace krys::boo
         return node.FirstChild();
       }
 
-      KRYS_NODISCARD dom::Node *NextSibling(dom::Node &node) const noexcept
+      KRYS_NODISCARD Node *NextSibling(Node &node) const noexcept
       {
         if (_useComposedTree) KRYS_UNLIKELY
         {
@@ -361,7 +360,7 @@ namespace krys::boo
         return node.NextSibling();
       }
 
-      KRYS_NODISCARD dom::Node *NextSkippingChildren(dom::Node &node) const noexcept
+      KRYS_NODISCARD Node *NextSkippingChildren(Node &node) const noexcept
       {
         if (_useComposedTree) KRYS_UNLIKELY
         {
@@ -370,7 +369,7 @@ namespace krys::boo
         return TreeQueries::NextSkippingChildren(node);
       }
 
-      KRYS_NODISCARD bool HasChildNodes(dom::Node &node) const noexcept
+      KRYS_NODISCARD bool HasChildNodes(Node &node) const noexcept
       {
         if (_useComposedTree) KRYS_UNLIKELY
         {
@@ -379,7 +378,7 @@ namespace krys::boo
         return node.HasChildNodes();
       }
 
-      KRYS_NODISCARD bool IsDescendantOf(dom::Node &node, dom::Node &possibleAncestor) const noexcept
+      KRYS_NODISCARD bool IsDescendantOf(Node &node, Node &possibleAncestor) const noexcept
       {
         if (_useComposedTree) KRYS_UNLIKELY
         {
@@ -388,28 +387,28 @@ namespace krys::boo
         return node.IsDescendantOf(&possibleAncestor);
       }
 
-      RefPtr<dom::Node> TraverseNodesForSerialization(dom::Node &startNode, dom::Node *pastEnd,
-                                                      NodeTraversalMode traversalMode) noexcept;
+      RefPtr<Node> TraverseNodesForSerialization(Node &startNode, Node *pastEnd,
+                                                 NodeTraversalMode traversalMode) noexcept;
 
-      bool AppendNodeToPreserveMSOList(dom::Node &node) noexcept;
+      bool AppendNodeToPreserveMSOList(Node &node) noexcept;
 
       KRYS_NODISCARD bool ShouldAnnotate() const noexcept
       {
         return _annotate == AnnotateForInterchange::Yes;
       }
 
-      KRYS_NODISCARD bool ShouldApplyWrappingStyle(const dom::Node &node) const noexcept
+      KRYS_NODISCARD bool ShouldApplyWrappingStyle(const Node &node) const noexcept
       {
         return _highestNodeToBeSerialized && _highestNodeToBeSerialized->ParentNode() == node.ParentNode()
                && _wrappingStyle && _wrappingStyle->Style();
       }
     };
 
-    void StyledMarkupAccumulator::WrapWithNode(dom::Node &node, bool convertBlocksToInlines,
+    void StyledMarkupAccumulator::WrapWithNode(Node &node, bool convertBlocksToInlines,
                                                RangeFullySelectsNode rangeFullySelectsNode) noexcept
     {
       utf8_string markup;
-      if (auto *element = DynamicDowncast<dom::Element>(node))
+      if (auto *element = DynamicDowncast<Element>(node))
       {
         AppendStartTag(markup, *element, convertBlocksToInlines && IsBlock(node), rangeFullySelectsNode);
       }
@@ -486,7 +485,7 @@ namespace krys::boo
       return result;
     }
 
-    void StyledMarkupAccumulator::AppendText(utf8_string &out, const dom::Text &text) noexcept
+    void StyledMarkupAccumulator::AppendText(utf8_string &out, const Text &text) noexcept
     {
       const bool parentIsTextarea = IsHTMLElementOfType(text.ParentElement(), html::TagName::textarea);
       const bool wrappingSpan = ShouldApplyWrappingStyle(text) && !parentIsTextarea;
@@ -519,7 +518,7 @@ namespace krys::boo
                                  }
 
                                  auto enclosingBlockDirection = DirectionOfEnclosingBlock(
-                                   dom::Position(ShareRefPtr(const_cast<dom::Text *>(&text)), 0));
+                                   dom::Position(ShareRefPtr(const_cast<Text *>(&text)), 0));
                                  if (enclosingBlockDirection == directionFromText)
                                  {
                                    return null;
@@ -537,7 +536,7 @@ namespace krys::boo
       else
       {
         const bool useRenderedText = !EnclosingElementWithTag(
-          dom::FirstPositionInNode(const_cast<dom::Text *>(&text)), html::TagName::select);
+          dom::FirstPositionInNode(const_cast<Text *>(&text)), html::TagName::select);
         utf8_string content =
           useRenderedText ? RenderedTextRespectingRange(text) : TextContentRespectingRange(text);
         utf8_string buffer;
@@ -553,10 +552,10 @@ namespace krys::boo
       _hasAppendedAnyText = true;
     }
 
-    utf8_string StyledMarkupAccumulator::RenderedTextRespectingRange(const dom::Text &text) noexcept
+    utf8_string StyledMarkupAccumulator::RenderedTextRespectingRange(const Text &text) noexcept
     {
       TextIteratorBehaviors behaviors;
-      auto *mutableText = const_cast<dom::Text *>(&text);
+      auto *mutableText = const_cast<Text *>(&text);
       dom::Position start =
         &text == _start.GetContainerNode() ? _start : dom::FirstPositionInNode(mutableText);
       dom::Position end;
@@ -581,7 +580,7 @@ namespace krys::boo
       return range ? PlainText(*range, behaviors) : utf8_string();
     }
 
-    utf8_string StyledMarkupAccumulator::TextContentRespectingRange(const dom::Text &text) noexcept
+    utf8_string StyledMarkupAccumulator::TextContentRespectingRange(const Text &text) noexcept
     {
       if (_start.IsNull() && _end.IsNull())
       {
@@ -603,13 +602,12 @@ namespace krys::boo
     }
 
     // (No attachment identifiers: `<attachment>` is WebKit's, not a standard element.)
-    void StyledMarkupAccumulator::AppendCustomAttributes(utf8_string &, const dom::Element &,
+    void StyledMarkupAccumulator::AppendCustomAttributes(utf8_string &, const Element &,
                                                          Namespaces *) noexcept
     {
     }
 
-    bool StyledMarkupAccumulator::ShouldPreserveMSOListStyleForElement(
-      const dom::Element &element) const noexcept
+    bool StyledMarkupAccumulator::ShouldPreserveMSOListStyleForElement(const Element &element) const noexcept
     {
       if (_inMSOList)
       {
@@ -617,7 +615,7 @@ namespace krys::boo
       }
       if (_shouldPreserveMSOList)
       {
-        auto style = element.GetAttribute(u8"style").value_or(dom::DOMString());
+        auto style = element.GetAttribute(u8"style").value_or(DOMString());
         utf8_stringview view(style);
         return view.starts_with(u8"mso-list:") || view.contains(u8";mso-list:")
                || view.contains(u8"\nmso-list:");
@@ -627,9 +625,9 @@ namespace krys::boo
 
     // FIXME: Data detector elements, with data detection.
     StyledMarkupAccumulator::SpanReplacementType
-      StyledMarkupAccumulator::SpanReplacementForElement(const dom::Element &element) noexcept
+      StyledMarkupAccumulator::SpanReplacementForElement(const Element &element) noexcept
     {
-      if (Is<html::HTMLSlotElement>(element))
+      if (Is<HTMLSlotElement>(element))
       {
         return SpanReplacementType::Slot;
       }
@@ -637,7 +635,7 @@ namespace krys::boo
       return SpanReplacementType::None;
     }
 
-    void StyledMarkupAccumulator::AppendStartTag(utf8_string &out, const dom::Element &element,
+    void StyledMarkupAccumulator::AppendStartTag(utf8_string &out, const Element &element,
                                                  bool addDisplayInline,
                                                  RangeFullySelectsNode rangeFullySelectsNode) noexcept
     {
@@ -654,7 +652,7 @@ namespace krys::boo
       AppendCustomAttributes(out, element, nullptr);
 
       const bool shouldAnnotateOrForceInline =
-        Is<html::HTMLElement>(element) && (ShouldAnnotate() || addDisplayInline);
+        Is<HTMLElement>(element) && (ShouldAnnotate() || addDisplayInline);
       bool shouldOverrideStyleAttr = (shouldAnnotateOrForceInline || ShouldApplyWrappingStyle(element)
                                       || replacementType != SpanReplacementType::None)
                                      && !ShouldPreserveMSOListStyleForElement(element);
@@ -672,7 +670,7 @@ namespace krys::boo
       if (shouldOverrideStyleAttr)
       {
         RefPtr<EditingStyle> newInlineStyle;
-        auto &mutableElement = const_cast<dom::Element &>(element);
+        auto &mutableElement = const_cast<Element &>(element);
 
         if (ShouldApplyWrappingStyle(element))
         {
@@ -690,7 +688,7 @@ namespace krys::boo
           newInlineStyle->AddDisplayContents();
         }
 
-        if (auto *styledElement = DynamicDowncast<dom::StyledElement>(element);
+        if (auto *styledElement = DynamicDowncast<StyledElement>(element);
             styledElement && styledElement->InlineStyle())
         {
           newInlineStyle->OverrideWithStyle(*styledElement->InlineStyle());
@@ -700,7 +698,7 @@ namespace krys::boo
         {
           if (ShouldAnnotate())
           {
-            newInlineStyle->MergeStyleFromRulesForSerialization(Downcast<html::HTMLElement>(mutableElement),
+            newInlineStyle->MergeStyleFromRulesForSerialization(Downcast<HTMLElement>(mutableElement),
                                                                 _standardFontFamilySerializationMode);
           }
 
@@ -734,7 +732,7 @@ namespace krys::boo
       AppendCloseTag(out, element);
     }
 
-    void StyledMarkupAccumulator::AppendEndTag(utf8_string &out, const dom::Element &element) noexcept
+    void StyledMarkupAccumulator::AppendEndTag(utf8_string &out, const Element &element) noexcept
     {
       if (SpanReplacementForElement(element) != SpanReplacementType::None) KRYS_UNLIKELY
       {
@@ -746,16 +744,16 @@ namespace krys::boo
       }
     }
 
-    RefPtr<dom::Node> StyledMarkupAccumulator::SerializeNodes(const dom::Position &start,
-                                                              const dom::Position &end) noexcept
+    RefPtr<Node> StyledMarkupAccumulator::SerializeNodes(const dom::Position &start,
+                                                         const dom::Position &end) noexcept
     {
       krys_debug_assert(start <= end);
-      RefPtr<dom::Node> startNode = start.FirstNode();
+      RefPtr<Node> startNode = start.FirstNode();
       if (!startNode)
       {
         return nullptr;
       }
-      RefPtr<dom::Node> pastEnd = ShareRefPtr(end.ComputeNodeAfterPosition());
+      RefPtr<Node> pastEnd = ShareRefPtr(end.ComputeNodeAfterPosition());
       if (!pastEnd && end.GetContainerNode())
       {
         pastEnd = ShareRefPtr(NextSkippingChildren(*end.GetContainerNode()));
@@ -776,8 +774,8 @@ namespace krys::boo
       return TraverseNodesForSerialization(*startNode, pastEnd.get(), NodeTraversalMode::EmitString);
     }
 
-    RefPtr<dom::Node>
-      StyledMarkupAccumulator::TraverseNodesForSerialization(dom::Node &startNode, dom::Node *pastEnd,
+    RefPtr<Node>
+      StyledMarkupAccumulator::TraverseNodesForSerialization(Node &startNode, Node *pastEnd,
                                                              NodeTraversalMode traversalMode) noexcept
     {
       const bool shouldEmit = traversalMode == NodeTraversalMode::EmitString;
@@ -787,7 +785,7 @@ namespace krys::boo
       _inMSOList = false;
 
       uint32 depth = 0;
-      auto enterNode = [&](dom::Node &node)
+      auto enterNode = [&](Node &node)
       {
         if (_shouldPreserveMSOList) KRYS_UNLIKELY
         {
@@ -800,7 +798,7 @@ namespace krys::boo
           }
         }
 
-        auto *element = DynamicDowncast<dom::Element>(node);
+        auto *element = DynamicDowncast<Element>(node);
         bool isDisplayContents = element && element->HasDisplayContents();
         if (!node.Renderer() && !isDisplayContents
             && !EnclosingElementWithTag(FirstPositionInOrBeforeNode(&node), html::TagName::select))
@@ -827,8 +825,8 @@ namespace krys::boo
         return true;
       };
 
-      RefPtr<dom::Node> lastClosed;
-      auto exitNode = [&](dom::Node &node)
+      RefPtr<Node> lastClosed;
+      auto exitNode = [&](Node &node)
       {
         bool closing = depth;
         if (depth)
@@ -849,11 +847,11 @@ namespace krys::boo
         lastClosed = ShareRefPtr(&node);
       };
 
-      RefPtr<dom::Node> lastNode;
-      RefPtr<dom::Node> next;
-      for (RefPtr<dom::Node> n = ShareRefPtr(&startNode); n != pastEnd; lastNode = n, n = next)
+      RefPtr<Node> lastNode;
+      RefPtr<Node> next;
+      for (RefPtr<Node> n = ShareRefPtr(&startNode); n != pastEnd; lastNode = n, n = next)
       {
-        List<RefPtr<dom::Node>> exitedAncestors;
+        List<RefPtr<Node>> exitedAncestors;
         next = nullptr;
 
         auto advanceToAncestorSibling = [&]()
@@ -865,7 +863,7 @@ namespace krys::boo
           }
           for (auto *ancestor = ParentNode(*n); ancestor; ancestor = ParentNode(*ancestor))
           {
-            exitedAncestors.push_back(ShareRefPtr<dom::Node>(ancestor));
+            exitedAncestors.push_back(ShareRefPtr<Node>(ancestor));
             if (auto *sibling = NextSibling(*ancestor))
             {
               next = ShareRefPtr(sibling);
@@ -935,9 +933,9 @@ namespace krys::boo
       return lastClosed;
     }
 
-    bool StyledMarkupAccumulator::AppendNodeToPreserveMSOList(dom::Node &node) noexcept
+    bool StyledMarkupAccumulator::AppendNodeToPreserveMSOList(Node &node) noexcept
     {
-      if (auto *commentNode = DynamicDowncast<dom::Comment>(node))
+      if (auto *commentNode = DynamicDowncast<Comment>(node))
       {
         if (!_inMSOList && commentNode->Data() == u8"[if !supportLists]")
         {
@@ -956,7 +954,7 @@ namespace krys::boo
       }
       if (HasTagName(node, html::TagName::style))
       {
-        auto *textChild = DynamicDowncast<dom::Text>(node.FirstChild());
+        auto *textChild = DynamicDowncast<Text>(node.FirstChild());
         if (!textChild)
         {
           return false;
@@ -990,8 +988,7 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD dom::Node *
-      AncestorToRetainStructureAndAppearanceForBlock(dom::Node *commonAncestorBlock) noexcept
+    KRYS_NODISCARD Node *AncestorToRetainStructureAndAppearanceForBlock(Node *commonAncestorBlock) noexcept
     {
       if (!commonAncestorBlock)
       {
@@ -1001,7 +998,7 @@ namespace krys::boo
       if (HasTagName(*commonAncestorBlock, html::TagName::tbody)
           || HasTagName(*commonAncestorBlock, html::TagName::tr))
       {
-        dom::ContainerNode *table = commonAncestorBlock->ParentNode();
+        ContainerNode *table = commonAncestorBlock->ParentNode();
         while (table && !HasTagName(*table, html::TagName::table))
         {
           table = table->ParentNode();
@@ -1018,7 +1015,7 @@ namespace krys::boo
       return nullptr;
     }
 
-    KRYS_NODISCARD dom::Node *AncestorToRetainStructureAndAppearance(dom::Node *commonAncestor) noexcept
+    KRYS_NODISCARD Node *AncestorToRetainStructureAndAppearance(Node *commonAncestor) noexcept
     {
       return AncestorToRetainStructureAndAppearanceForBlock(
         EnclosingBlock(ShareRefPtr(commonAncestor)).get());
@@ -1035,9 +1032,9 @@ namespace krys::boo
              && !(HasTagName(*upstreamNode, html::TagName::br) && upstreamNode == downstreamNode);
     }
 
-    KRYS_NODISCARD RefPtr<EditingStyle> StyleFromMatchedRulesAndInlineDecl(dom::Node &node) noexcept
+    KRYS_NODISCARD RefPtr<EditingStyle> StyleFromMatchedRulesAndInlineDecl(Node &node) noexcept
     {
-      auto *element = DynamicDowncast<html::HTMLElement>(node);
+      auto *element = DynamicDowncast<HTMLElement>(node);
       if (!element)
       {
         return nullptr;
@@ -1048,7 +1045,7 @@ namespace krys::boo
       return style;
     }
 
-    KRYS_NODISCARD bool IsElementPresentational(const dom::Node &node) noexcept
+    KRYS_NODISCARD bool IsElementPresentational(const Node &node) noexcept
     {
       return HasTagName(node, html::TagName::u) || HasTagName(node, html::TagName::s)
              || HasTagName(node, html::TagName::strike) || HasTagName(node, html::TagName::i)
@@ -1056,12 +1053,11 @@ namespace krys::boo
              || HasTagName(node, html::TagName::strong);
     }
 
-    KRYS_NODISCARD RefPtr<dom::Node> HighestAncestorToWrapMarkup(const dom::Position &start,
-                                                                 const dom::Position &end,
-                                                                 dom::Node &commonAncestor,
-                                                                 AnnotateForInterchange annotate) noexcept
+    KRYS_NODISCARD RefPtr<Node> HighestAncestorToWrapMarkup(const dom::Position &start,
+                                                            const dom::Position &end, Node &commonAncestor,
+                                                            AnnotateForInterchange annotate) noexcept
     {
-      RefPtr<dom::Node> specialCommonAncestor;
+      RefPtr<Node> specialCommonAncestor;
       if (annotate == AnnotateForInterchange::Yes)
       {
         // Include ancestors that aren't completely inside the range but are required to retain
@@ -1074,16 +1070,16 @@ namespace krys::boo
               && VisibleSelection::SelectionFromContentsOfNode(parentListNode.get())
                    == VisibleSelection(start, end))
           {
-            specialCommonAncestor = ShareRefPtr<dom::Node>(parentListNode->ParentNode());
+            specialCommonAncestor = ShareRefPtr<Node>(parentListNode->ParentNode());
             while (specialCommonAncestor && !IsListHTMLElement(specialCommonAncestor.get()))
             {
-              specialCommonAncestor = ShareRefPtr<dom::Node>(specialCommonAncestor->ParentNode());
+              specialCommonAncestor = ShareRefPtr<Node>(specialCommonAncestor->ParentNode());
             }
           }
         }
       }
 
-      RefPtr<dom::Node> checkAncestor =
+      RefPtr<Node> checkAncestor =
         specialCommonAncestor ? specialCommonAncestor : ShareRefPtr(&commonAncestor);
       if (checkAncestor->Renderer() && checkAncestor->Renderer()->ContainingBlock())
       {
@@ -1103,7 +1099,7 @@ namespace krys::boo
       // any tab span that needs to be included.
       if (!specialCommonAncestor && ParentTabSpanNode(&commonAncestor))
       {
-        specialCommonAncestor = ShareRefPtr<dom::Node>(commonAncestor.ParentNode());
+        specialCommonAncestor = ShareRefPtr<Node>(commonAncestor.ParentNode());
       }
       if (!specialCommonAncestor && TabSpanNode(&commonAncestor))
       {
@@ -1114,14 +1110,14 @@ namespace krys::boo
             dom::FirstPositionInNode(specialCommonAncestor ? specialCommonAncestor.get() : &commonAncestor),
             html::TagName::a))
       {
-        specialCommonAncestor = ShareRefPtr<dom::Node>(enclosingAnchor);
+        specialCommonAncestor = ShareRefPtr<Node>(enclosingAnchor);
       }
 
       if (auto *enclosingPicture = EnclosingElementWithTag(
             dom::FirstPositionInNode(specialCommonAncestor ? specialCommonAncestor.get() : &commonAncestor),
             html::TagName::picture))
       {
-        specialCommonAncestor = ShareRefPtr<dom::Node>(enclosingPicture);
+        specialCommonAncestor = ShareRefPtr<Node>(enclosingPicture);
       }
 
       return specialCommonAncestor;
@@ -1137,10 +1133,9 @@ namespace krys::boo
 
     // FIXME: The document's first `base` element (firstBaseElement), with base URLs.
     KRYS_NODISCARD utf8_string SerializePreservingVisualAppearanceInternal(
-      const dom::Position &start, const dom::Position &end, List<Ref<dom::Node>> *nodes,
-      ResolveURLs resolveURLs, SerializeComposedTree serializeComposedTree,
-      IgnoreUserSelectNone ignoreUserSelectNone, AnnotateForInterchange annotate,
-      ConvertBlocksToInlines convertBlocksToInlines,
+      const dom::Position &start, const dom::Position &end, List<Ref<Node>> *nodes, ResolveURLs resolveURLs,
+      SerializeComposedTree serializeComposedTree, IgnoreUserSelectNone ignoreUserSelectNone,
+      AnnotateForInterchange annotate, ConvertBlocksToInlines convertBlocksToInlines,
       StandardFontFamilySerializationMode standardFontFamilySerializationMode, MSOListMode msoListMode,
       PreserveBaseElement preserveBaseElement,
       PreserveDirectionForInlineText preserveDirectionForInlineText) noexcept
@@ -1152,21 +1147,21 @@ namespace krys::boo
         return {};
       }
 
-      RefPtr<dom::Node> commonAncestor = ShareRefPtr(dom::CommonInclusiveAncestor(start, end));
+      RefPtr<Node> commonAncestor = ShareRefPtr(dom::CommonInclusiveAncestor(start, end));
       if (!commonAncestor)
       {
         return {};
       }
 
-      Ref<dom::Document> document = ShareRef(*start.GetDocument());
+      Ref<Document> document = ShareRef(*start.GetDocument());
       (void)document->UpdateLayoutIgnorePendingStylesheets();
 
       VisiblePosition visibleStart {start};
       VisiblePosition visibleEnd {end};
 
-      RefPtr<dom::Element> body = ShareRefPtr(
+      RefPtr<Element> body = ShareRefPtr(
         EnclosingElementWithTag(dom::FirstPositionInNode(commonAncestor.get()), html::TagName::body));
-      RefPtr<dom::Element> fullySelectedRoot;
+      RefPtr<Element> fullySelectedRoot;
       // FIXME: Do this for all fully selected blocks, not just the body.
       if (body && VisiblePosition(dom::FirstPositionInNode(body.get())) == visibleStart
           && VisiblePosition(dom::LastPositionInNode(body.get())) == visibleEnd)
@@ -1211,8 +1206,8 @@ namespace krys::boo
       if (specialCommonAncestor && lastClosed)
       {
         // Also include all of the ancestors of lastClosed up to this special ancestor.
-        for (RefPtr<dom::Node> ancestor = ShareRefPtr<dom::Node>(accumulator.ParentNode(*lastClosed));
-             ancestor; ancestor = ShareRefPtr<dom::Node>(accumulator.ParentNode(*ancestor)))
+        for (RefPtr<Node> ancestor = ShareRefPtr<Node>(accumulator.ParentNode(*lastClosed)); ancestor;
+             ancestor = ShareRefPtr<Node>(accumulator.ParentNode(*ancestor)))
         {
           if (fullySelectedRoot && ancestor == fullySelectedRoot
               && convertBlocksToInlines == ConvertBlocksToInlines::No)
@@ -1221,14 +1216,13 @@ namespace krys::boo
 
             // Bring the background attribute over, but not as an attribute because a background attribute on
             // a div appears to have no effect.
-            dom::DOMStringAtom backgroundAttr(u8"background");
+            DOMStringAtom backgroundAttr(u8"background");
             if ((!fullySelectedRootStyle || !fullySelectedRootStyle->Style()
                  || !fullySelectedRootStyle->Style()->GetPropertyCSSValue(PropertyId::BackgroundImage))
                 && fullySelectedRoot->HasAttribute(backgroundAttr))
             {
               utf8_string backgroundImage(u8"url('");
-              backgroundImage.append(
-                fullySelectedRoot->GetAttribute(backgroundAttr).value_or(dom::DOMString()));
+              backgroundImage.append(fullySelectedRoot->GetAttribute(backgroundAttr).value_or(DOMString()));
               backgroundImage.append(u8"')");
               (void)fullySelectedRootStyle->Style()->SetProperty(PropertyId::BackgroundImage,
                                                                  backgroundImage);
@@ -1303,7 +1297,7 @@ namespace krys::boo
       return accumulator.TakeResults();
     }
 
-    void FillContainerFromString(dom::ContainerNode &paragraph, utf8_stringview string) noexcept
+    void FillContainerFromString(ContainerNode &paragraph, utf8_stringview string) noexcept
     {
       auto &document = paragraph.NodeDocument();
 
@@ -1362,36 +1356,35 @@ namespace krys::boo
       return container && container->Renderer() && container->Renderer()->Style().PreserveNewline();
     }
 
-    List<Ref<dom::Element>> CollectElementsToRemoveFromFragment(dom::ContainerNode &container) noexcept
+    List<Ref<Element>> CollectElementsToRemoveFromFragment(ContainerNode &container) noexcept
     {
-      List<Ref<dom::Element>> toRemove;
+      List<Ref<Element>> toRemove;
       for (auto *child = container.FirstChild(); child; child = child->NextSibling())
       {
-        auto *element = DynamicDowncast<html::HTMLElement>(*child);
+        auto *element = DynamicDowncast<HTMLElement>(*child);
         if (!element)
         {
           continue;
         }
         if (HasTagName(*element, html::TagName::html))
         {
-          toRemove.push_back(ShareRef<dom::Element>(*element));
+          toRemove.push_back(ShareRef<Element>(*element));
           auto nested = CollectElementsToRemoveFromFragment(*element);
           (void)nested;
           continue;
         }
         if (HasTagName(*element, html::TagName::head) || HasTagName(*element, html::TagName::body))
         {
-          toRemove.push_back(ShareRef<dom::Element>(*element));
+          toRemove.push_back(ShareRef<Element>(*element));
         }
       }
       return toRemove;
     }
 
-    void RemoveElementFromFragmentPreservingChildren(dom::DocumentFragment &fragment,
-                                                     dom::Element &element) noexcept
+    void RemoveElementFromFragmentPreservingChildren(DocumentFragment &fragment, Element &element) noexcept
     {
-      RefPtr<dom::Node> nextChild;
-      for (RefPtr<dom::Node> child = ShareRefPtr(element.FirstChild()); child; child = nextChild)
+      RefPtr<Node> nextChild;
+      for (RefPtr<Node> child = ShareRefPtr(element.FirstChild()); child; child = nextChild)
       {
         nextChild = ShareRefPtr(child->NextSibling());
         (void)element.RemoveChild(*child);
@@ -1400,8 +1393,8 @@ namespace krys::boo
       (void)fragment.RemoveChild(element);
     }
 
-    KRYS_NODISCARD Ref<dom::DocumentFragment>
-      ParseHTMLIntoFragment(utf8_stringview markup, dom::Element &contextElement,
+    KRYS_NODISCARD Ref<DocumentFragment>
+      ParseHTMLIntoFragment(utf8_stringview markup, Element &contextElement,
                             bool allowDeclarativeShadowRoots = false) noexcept
     {
       return html::DocumentParser::ParseFragment(contextElement, utf8_string(markup),
@@ -1409,12 +1402,12 @@ namespace krys::boo
     }
 
     // FIXME: The template document for contexts that are templates.
-    KRYS_NODISCARD dom::ExceptionOr<Ref<dom::DocumentFragment>>
-      CreateFragmentForMarkup(dom::Element &contextElement, utf8_stringview markup,
+    KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>>
+      CreateFragmentForMarkup(Element &contextElement, utf8_stringview markup,
                               EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept
     {
       auto &document = contextElement.NodeDocument();
-      if (Is<dom::HTMLDocument>(document)
+      if (Is<HTMLDocument>(document)
           || parserContentPolicy.Contains(dom::ParserContentPolicy::AlwaysParseAsHTML))
       {
         return ParseHTMLIntoFragment(
@@ -1422,10 +1415,10 @@ namespace krys::boo
           parserContentPolicy.Contains(dom::ParserContentPolicy::AllowDeclarativeShadowRoots));
       }
 
-      Ref<dom::DocumentFragment> fragment = document.CreateDocumentFragment();
+      Ref<DocumentFragment> fragment = document.CreateDocumentFragment();
       if (!xml::XMLDocumentParser::ParseDocumentFragment(markup, *fragment, &contextElement))
       {
-        return dom::Exception {dom::ExceptionCode::SyntaxError};
+        return Exception {ExceptionCode::SyntaxError};
       }
       return fragment;
     }
@@ -1437,7 +1430,7 @@ namespace krys::boo
     krys_debug_assert(treeType == dom::TreeType::Tree || treeType == dom::TreeType::ComposedTree);
   }
 
-  dom::ContainerNode *UserSelectNoneStateCache::ParentNode(dom::Node &node) const noexcept
+  ContainerNode *UserSelectNoneStateCache::ParentNode(Node &node) const noexcept
   {
     if (_useComposedTree)
     {
@@ -1446,7 +1439,7 @@ namespace krys::boo
     return node.ParentOrShadowHostNode();
   }
 
-  dom::Node *UserSelectNoneStateCache::FirstChild(dom::Node &node) const noexcept
+  Node *UserSelectNoneStateCache::FirstChild(Node &node) const noexcept
   {
     if (_useComposedTree)
     {
@@ -1455,7 +1448,7 @@ namespace krys::boo
     return node.FirstChild();
   }
 
-  dom::Node *UserSelectNoneStateCache::NextSibling(dom::Node &node) const noexcept
+  Node *UserSelectNoneStateCache::NextSibling(Node &node) const noexcept
   {
     if (_useComposedTree)
     {
@@ -1464,7 +1457,7 @@ namespace krys::boo
     return node.NextSibling();
   }
 
-  UserSelectNoneStateCache::State UserSelectNoneStateCache::ComputeState(dom::Node &targetNode) noexcept
+  UserSelectNoneStateCache::State UserSelectNoneStateCache::ComputeState(Node &targetNode) noexcept
   {
     if (auto it = _cache.find(&targetNode); it != _cache.end())
     {
@@ -1475,7 +1468,7 @@ namespace krys::boo
       return State::NotUserSelectNone;
     }
     auto state = State::OnlyUserSelectNone;
-    dom::Node *currentNode = &targetNode;
+    Node *currentNode = &targetNode;
     bool foundMixed = false;
     while (currentNode)
     {
@@ -1500,7 +1493,7 @@ namespace krys::boo
       }
       else
       {
-        dom::Node *ancestor;
+        Node *ancestor;
         for (ancestor = ParentNode(*currentNode); ancestor; ancestor = ParentNode(*ancestor))
         {
           _cache[ancestor] = state;
@@ -1524,7 +1517,7 @@ namespace krys::boo
     return state;
   }
 
-  utf8_string SerializePreservingVisualAppearance(const dom::SimpleRange &range, List<Ref<dom::Node>> *nodes,
+  utf8_string SerializePreservingVisualAppearance(const dom::SimpleRange &range, List<Ref<Node>> *nodes,
                                                   AnnotateForInterchange annotate,
                                                   ConvertBlocksToInlines convertBlocksToInlines,
                                                   ResolveURLs resolveURLs) noexcept
@@ -1539,7 +1532,7 @@ namespace krys::boo
   utf8_string SerializePreservingVisualAppearance(
     const VisibleSelection &selection, ResolveURLs resolveURLs, SerializeComposedTree serializeComposedTree,
     IgnoreUserSelectNone ignoreUserSelectNone, PreserveBaseElement preserveBaseElement,
-    PreserveDirectionForInlineText preserveDirectionForInlineText, List<Ref<dom::Node>> *nodes) noexcept
+    PreserveDirectionForInlineText preserveDirectionForInlineText, List<Ref<Node>> *nodes) noexcept
   {
     return SerializePreservingVisualAppearanceInternal(
       selection.Start(), selection.End(), nodes, resolveURLs, serializeComposedTree, ignoreUserSelectNone,
@@ -1548,7 +1541,7 @@ namespace krys::boo
   }
 
   // FIXME: The destination page's dark appearance (setUseColorAppearance), with dark appearance.
-  Ref<Page> CreatePageForSanitizingWebContent(dom::Document *) noexcept
+  Ref<Page> CreatePageForSanitizingWebContent(Document *) noexcept
   {
     Ref<Page> page = Page::Create();
 
@@ -1570,12 +1563,12 @@ namespace krys::boo
     return page;
   }
 
-  Maybe<utf8_string> SanitizeMarkup(utf8_stringview rawHTML, dom::Document *destinationDocument,
+  Maybe<utf8_string> SanitizeMarkup(utf8_stringview rawHTML, Document *destinationDocument,
                                     MSOListQuirks msoListQuirks,
-                                    const Func<void(dom::DocumentFragment &)> &fragmentSanitizer) noexcept
+                                    const Func<void(DocumentFragment &)> &fragmentSanitizer) noexcept
   {
     Ref<Page> page = CreatePageForSanitizingWebContent(destinationDocument);
-    RefPtr<dom::Document> stagingDocument = ShareRefPtr(page->MainFrame().Document());
+    RefPtr<boo::Document> stagingDocument = ShareRefPtr(page->MainFrame().Document());
     if (!stagingDocument)
     {
       return null;
@@ -1613,8 +1606,8 @@ namespace krys::boo
     }
   }
 
-  utf8_string SanitizedMarkupForFragmentInDocument(const Ref<dom::DocumentFragment> &fragment,
-                                                   dom::Document &document, MSOListQuirks msoListQuirks,
+  utf8_string SanitizedMarkupForFragmentInDocument(const Ref<DocumentFragment> &fragment, Document &document,
+                                                   MSOListQuirks msoListQuirks,
                                                    utf8_stringview originalMarkup) noexcept
   {
     MSOListMode msoListMode =
@@ -1622,7 +1615,7 @@ namespace krys::boo
         ? MSOListMode::Preserve
         : MSOListMode::DoNotPreserve;
 
-    RefPtr<dom::Element> bodyElement = document.Body();
+    RefPtr<Element> bodyElement = document.Body();
     krys_debug_assert(bodyElement);
     (void)bodyElement->AppendChild(*fragment);
 
@@ -1647,8 +1640,8 @@ namespace krys::boo
 
   // FIXME: Completing relative URLs against baseURL (completeURLs), with URL attributes. (No attachment
   // elements' files to restore: `<attachment>` is WebKit's, not a standard element.)
-  Ref<dom::DocumentFragment> CreateFragmentFromMarkup(dom::Document &document, utf8_stringview markup,
-                                                      utf8_stringview baseURL) noexcept
+  Ref<DocumentFragment> CreateFragmentFromMarkup(Document &document, utf8_stringview markup,
+                                                 utf8_stringview baseURL) noexcept
   {
     (void)baseURL;
     // We use a fake body element here to trick the HTML parser into using the InBody insertion mode.
@@ -1656,10 +1649,10 @@ namespace krys::boo
     return ParseHTMLIntoFragment(markup, *fakeBody);
   }
 
-  utf8_string SerializeFragment(const dom::Node &node, SerializedNodes root, List<Ref<dom::Node>> *nodes,
+  utf8_string SerializeFragment(const Node &node, SerializedNodes root, List<Ref<Node>> *nodes,
                                 ResolveURLs resolveURLs, Maybe<SerializationSyntax> serializationSyntax,
                                 SerializeShadowRoots serializeShadowRoots,
-                                List<Ref<dom::ShadowRoot>> &&explicitShadowRoots) noexcept
+                                List<Ref<ShadowRoot>> &&explicitShadowRoots) noexcept
   {
     if (!serializationSyntax)
     {
@@ -1668,11 +1661,11 @@ namespace krys::boo
 
     MarkupAccumulator accumulator(nodes, resolveURLs, *serializationSyntax, serializeShadowRoots,
                                   krys::move(explicitShadowRoots));
-    return accumulator.SerializeNodes(const_cast<dom::Node &>(node), root);
+    return accumulator.SerializeNodes(const_cast<Node &>(node), root);
   }
 
-  dom::ExceptionOr<utf8_string> SerializeFragmentRequiringWellFormed(const dom::Node &node,
-                                                                     SerializedNodes root) noexcept
+  ExceptionOr<utf8_string> SerializeFragmentRequiringWellFormed(const Node &node,
+                                                                SerializedNodes root) noexcept
   {
     // 1. Let context document be node's node document.
     // 2. If context document is an HTML document, then return the result of HTML fragment serialization
@@ -1681,18 +1674,18 @@ namespace krys::boo
     MarkupAccumulator accumulator(nullptr, ResolveURLs::NoExcludingURLsForPrivacy,
                                   MarkupAccumulator::GetSerializationSyntax(node.NodeDocument()),
                                   SerializeShadowRoots::Explicit, {}, RequireWellFormed::Yes);
-    auto markup = accumulator.SerializeNodes(const_cast<dom::Node &>(node), root);
+    auto markup = accumulator.SerializeNodes(const_cast<Node &>(node), root);
     if (!accumulator.IsWellFormed())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
     return markup;
   }
 
-  bool IsPlainTextMarkup(dom::Node *node) noexcept
+  bool IsPlainTextMarkup(Node *node) noexcept
   {
     krys_debug_assert(node);
-    if (!HasTagName(*node, html::TagName::div) || Downcast<dom::Element>(*node).HasAttributes())
+    if (!HasTagName(*node, html::TagName::div) || Downcast<Element>(*node).HasAttributes())
     {
       return false;
     }
@@ -1706,7 +1699,7 @@ namespace krys::boo
     auto *secondChild = firstChild->NextSibling();
     if (!secondChild)
     {
-      return Is<dom::Text>(*firstChild) || firstChild->FirstChild();
+      return Is<Text>(*firstChild) || firstChild->FirstChild();
     }
 
     if (secondChild->NextSibling())
@@ -1714,11 +1707,10 @@ namespace krys::boo
       return false;
     }
 
-    return ParentTabSpanNode(firstChild->FirstChild()) && Is<dom::Text>(*secondChild);
+    return ParentTabSpanNode(firstChild->FirstChild()) && Is<Text>(*secondChild);
   }
 
-  Ref<dom::DocumentFragment> CreateFragmentFromText(const dom::SimpleRange &context,
-                                                    utf8_stringview text) noexcept
+  Ref<DocumentFragment> CreateFragmentFromText(const dom::SimpleRange &context, utf8_stringview text) noexcept
   {
     auto &document = context.Start.Container->NodeDocument();
     auto fragment = document.CreateDocumentFragment();
@@ -1733,7 +1725,7 @@ namespace krys::boo
     auto createHTMLBRElement = [&document]()
     {
       auto element = CreateHTMLElement(document, u8"br");
-      (void)element->SetAttribute(u8"class", dom::DOMString(AppleInterchangeNewline));
+      (void)element->SetAttribute(u8"class", DOMString(AppleInterchangeNewline));
       return element;
     };
 
@@ -1783,7 +1775,7 @@ namespace krys::boo
     {
       auto s = list[i];
 
-      RefPtr<dom::Element> element;
+      RefPtr<Element> element;
       if (s.empty() && i + 1 == numLines)
       {
         // For last line, use the "magic BR" rather than a P.
@@ -1811,7 +1803,7 @@ namespace krys::boo
     return fragment;
   }
 
-  utf8_string DocumentTypeString(const dom::Document &document) noexcept
+  utf8_string DocumentTypeString(const Document &document) noexcept
   {
     auto documentType = document.DocType();
     if (!documentType)
@@ -1831,22 +1823,22 @@ namespace krys::boo
     return markup;
   }
 
-  dom::ExceptionOr<Ref<dom::DocumentFragment>>
-    CreateFragmentForInnerOuterHTML(dom::Element &contextElement, utf8_stringview markup,
+  ExceptionOr<Ref<DocumentFragment>>
+    CreateFragmentForInnerOuterHTML(Element &contextElement, utf8_stringview markup,
                                     EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept
   {
     return CreateFragmentForMarkup(contextElement, markup, parserContentPolicy);
   }
 
-  dom::ExceptionOr<Ref<dom::DocumentFragment>> CreateContextualFragment(dom::Element &element,
-                                                                        utf8_stringview markup) noexcept
+  ExceptionOr<Ref<DocumentFragment>> CreateContextualFragment(Element &element,
+                                                              utf8_stringview markup) noexcept
   {
     auto result = CreateFragmentForMarkup(element, markup, {});
     if (result.HasException())
     {
       return result.ReleaseException();
     }
-    Ref<dom::DocumentFragment> fragment = result.ReleaseValue();
+    Ref<DocumentFragment> fragment = result.ReleaseValue();
 
     // We need to pop <html> and <body> elements and remove <head> to
     // accommodate folks passing complete HTML documents to make the
@@ -1862,10 +1854,10 @@ namespace krys::boo
 
   // FIXME: Setting a lone text child's data instead of replacing it when script can't observe the difference
   // (canUseSetDataOptimization), with mutation observers' child list scope.
-  dom::ExceptionOr<void> ReplaceChildrenWithFragment(dom::ContainerNode &container,
-                                                     const Ref<dom::DocumentFragment> &fragment) noexcept
+  ExceptionOr<void> ReplaceChildrenWithFragment(ContainerNode &container,
+                                                const Ref<DocumentFragment> &fragment) noexcept
   {
-    Ref<dom::ContainerNode> containerNode = ShareRef(container);
+    Ref<ContainerNode> containerNode = ShareRef(container);
 
     // Replacing them all at once queues a single mutation record.
     return dom::MutationAlgorithms::ReplaceAll(fragment.get(), *containerNode);

@@ -23,22 +23,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheetObservableArray.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheetObservableArray.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  CSSStyleSheetObservableArray::CSSStyleSheetObservableArray(dom::ContainerNode &treeScope) noexcept
+  CSSStyleSheetObservableArray::CSSStyleSheetObservableArray(ContainerNode &treeScope) noexcept
       : _treeScope(CreateWeakPtr(&treeScope))
   {
-    krys_debug_assert(Is<dom::Document>(treeScope) || Is<dom::ShadowRoot>(treeScope));
+    krys_debug_assert(Is<Document>(treeScope) || Is<ShadowRoot>(treeScope));
   }
 
-  dom::ExceptionOr<void> CSSStyleSheetObservableArray::SetValueAt(uint32 index, CSSStyleSheet &sheet) noexcept
+  ExceptionOr<void> CSSStyleSheetObservableArray::SetValueAt(uint32 index, CSSStyleSheet &sheet) noexcept
   {
     krys_assert(index <= _sheets.size());
 
@@ -88,7 +88,7 @@ namespace krys::boo::css
     return _sheets[index].get();
   }
 
-  dom::ExceptionOr<void> CSSStyleSheetObservableArray::SetSheets(List<Ref<CSSStyleSheet>> &&sheets) noexcept
+  ExceptionOr<void> CSSStyleSheetObservableArray::SetSheets(List<Ref<CSSStyleSheet>> &&sheets) noexcept
   {
     for (auto &sheet : sheets)
     {
@@ -112,18 +112,16 @@ namespace krys::boo::css
     return {};
   }
 
-  Maybe<dom::Exception>
+  Maybe<Exception>
     CSSStyleSheetObservableArray::ShouldThrowWhenAddingSheet(const CSSStyleSheet &sheet) const noexcept
   {
     if (!sheet.WasConstructedByJS())
     {
-      return dom::Exception(dom::ExceptionCode::NotAllowedError,
-                            u8"Sheet needs to be constructed by JavaScript");
+      return Exception(ExceptionCode::NotAllowedError, u8"Sheet needs to be constructed by JavaScript");
     }
     if (!_treeScope || sheet.ConstructorDocument() != &_treeScope->NodeDocument())
     {
-      return dom::Exception(dom::ExceptionCode::NotAllowedError,
-                            u8"Sheet constructor document doesn't match");
+      return Exception(ExceptionCode::NotAllowedError, u8"Sheet constructor document doesn't match");
     }
     return null;
   }

@@ -172,7 +172,7 @@ layer at (0,0) size 200x100
     {
       PageInFrameFixture fixture(markup({}, u8"<div id=abs style=\"" + utf8_string(box) + u8"\"></div>"));
       CHECK(fixture.Document->ElementFromPoint(57, 29).get() == &fixture.ById(u8"abs"));
-      Ref<dom::Element> element = ShareRef(fixture.ById(u8"abs"));
+      Ref<Element> element = ShareRef(fixture.ById(u8"abs"));
       REQUIRE_FALSE(
         element
           ->SetAttribute(u8"style", u8"position: absolute; left: 20px; top: 7px; width: 10px; height: 10px")

@@ -29,9 +29,9 @@ namespace krys::boo::tests
         (void)Document->UpdateLayout();
       }
 
-      KRYS_NODISCARD dom::Text &TextIn(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD Text &TextIn(DOMStringView id) noexcept
       {
-        return Downcast<dom::Text>(*ById(id).FirstChild());
+        return Downcast<Text>(*ById(id).FirstChild());
       }
 
       KRYS_NODISCARD RenderSelection &Selection() noexcept
@@ -39,7 +39,7 @@ namespace krys::boo::tests
         return Document->GetRenderView()->Selection();
       }
 
-      void Select(dom::Node &start, uint32 startOffset, dom::Node &end, uint32 endOffset) noexcept
+      void Select(Node &start, uint32 startOffset, Node &end, uint32 endOffset) noexcept
       {
         Document->Selection().MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&start), startOffset),
                                      dom::MakeContainerOffsetPosition(ShareRefPtr(&end), endOffset),
@@ -136,7 +136,7 @@ namespace krys::boo::tests
     auto *image = Downcast<RenderReplaced>(fixture.ById(u8"i").Renderer());
     REQUIRE(image);
 
-    auto &after = Downcast<dom::Text>(*fixture.ById(u8"a").LastChild());
+    auto &after = Downcast<Text>(*fixture.ById(u8"a").LastChild());
     fixture.Select(text, 2, after, 3);
     CHECK(image->SelectionState() == HighlightState::Inside);
     CHECK(image->IsSelected());

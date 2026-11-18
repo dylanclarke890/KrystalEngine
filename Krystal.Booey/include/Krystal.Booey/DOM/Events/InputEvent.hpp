@@ -42,7 +42,10 @@ namespace krys::boo::dom
     No,
     Yes,
   };
+}
 
+namespace krys::boo
+{
   /// @see https://w3c.github.io/uievents/#dictdef-inputeventinit
   struct InputEventInit : UIEventInit
   {
@@ -59,8 +62,8 @@ namespace krys::boo::dom
   private:
     DOMString _inputType;
     Maybe<DOMString> _data;
-    RefPtr<DataTransfer> _dataTransfer;
-    List<RefPtr<StaticRange>> _targetRanges;
+    RefPtr<dom::DataTransfer> _dataTransfer;
+    List<RefPtr<dom::StaticRange>> _targetRanges;
     bool _isInputMethodComposing {false};
 
   public:
@@ -73,11 +76,11 @@ namespace krys::boo::dom
     ~InputEvent() noexcept override;
 
     /// @brief A trusted input event, which bubbles and crosses shadow boundaries.
-    KRYS_NODISCARD static Ref<InputEvent> Create(const DOMStringAtom &type, LocalDOMWindow *view,
-                                                 DOMStringView inputType, bool cancelable,
-                                                 Maybe<DOMString> data, RefPtr<DataTransfer> &&dataTransfer,
-                                                 const List<RefPtr<StaticRange>> &targetRanges, int32 detail,
-                                                 IsInputMethodComposing isInputMethodComposing) noexcept;
+    KRYS_NODISCARD static Ref<InputEvent>
+      Create(const DOMStringAtom &type, LocalDOMWindow *view, DOMStringView inputType, bool cancelable,
+             Maybe<DOMString> data, RefPtr<dom::DataTransfer> &&dataTransfer,
+             const List<RefPtr<dom::StaticRange>> &targetRanges, int32 detail,
+             dom::IsInputMethodComposing isInputMethodComposing) noexcept;
 
     KRYS_NODISCARD bool IsInputEvent() const noexcept final
     {
@@ -97,7 +100,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://w3c.github.io/input-events/#dom-inputevent-datatransfer
-    KRYS_NODISCARD const RefPtr<DataTransfer> &GetDataTransfer() const noexcept
+    KRYS_NODISCARD const RefPtr<dom::DataTransfer> &GetDataTransfer() const noexcept
     {
       return _dataTransfer;
     }
@@ -109,15 +112,15 @@ namespace krys::boo::dom
     }
 
     /// @see https://w3c.github.io/input-events/#dom-inputevent-gettargetranges
-    KRYS_NODISCARD const List<RefPtr<StaticRange>> &GetTargetRanges() const noexcept
+    KRYS_NODISCARD const List<RefPtr<dom::StaticRange>> &GetTargetRanges() const noexcept
     {
       return _targetRanges;
     }
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::InputEvent)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::InputEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Event &event) noexcept
   {
     return event.IsInputEvent();
   }

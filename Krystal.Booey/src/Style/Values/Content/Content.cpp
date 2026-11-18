@@ -64,7 +64,7 @@ namespace krys::boo::style
     }
 
     // FIXME: Replace with support for CSS Values 5 attr() substitution function.
-    auto processAttrContent = [&](const css::AttrValue &attrValue) -> css::CSSOMString
+    auto processAttrContent = [&](const css::AttrValue &attrValue) -> CSSOMString
     {
       if (!state.Style().GetPseudoElementType())
       {
@@ -75,7 +75,7 @@ namespace krys::boo::style
         const_cast<RenderStyle &>(state.ParentStyle()).SetHasAttrContent();
       }
 
-      css::CSSOMStringAtom attributeLocalName {attrValue.AttributeName()};
+      CSSOMStringAtom attributeLocalName {attrValue.AttributeName()};
       const auto *element = state.GetElement();
       auto attributeValue = element ? element->GetAttributeNS(null, attributeLocalName) : std::nullopt;
 
@@ -85,7 +85,7 @@ namespace krys::boo::style
       if (!attributeValue)
       {
         const auto *fallback = DynamicDowncast<css::PrimitiveValue>(attrValue.Fallback());
-        return fallback && fallback->IsString() ? fallback->StringValue() : css::CSSOMString {};
+        return fallback && fallback->IsString() ? fallback->StringValue() : CSSOMString {};
       }
       return *attributeValue;
     };
@@ -103,7 +103,7 @@ namespace krys::boo::style
               return Content::Image {ImageWrapper {Ref<StyleImage> {krys::move(image)}}};
             }
             state.SetCurrentPropertyInvalidAtComputedValueTime();
-            return Content::Text {css::CSSOMString {}};
+            return Content::Text {CSSOMString {}};
           }
           if (const auto *primitive = DynamicDowncast<css::PrimitiveValue>(item))
           {
@@ -124,7 +124,7 @@ namespace krys::boo::style
               return Content::Text {processAttrContent(*attr)};
             }
             state.SetCurrentPropertyInvalidAtComputedValueTime();
-            return Content::Text {css::CSSOMString {}};
+            return Content::Text {CSSOMString {}};
           }
           if (const auto *counter = DynamicDowncast<css::CounterValue>(item))
           {
@@ -132,11 +132,11 @@ namespace krys::boo::style
                                      ConvertCSSValueToStyle<CounterStyle>(state, *counter->CounterStyle())};
           }
           state.SetCurrentPropertyInvalidAtComputedValueTime();
-          return Content::Text {css::CSSOMString {}};
+          return Content::Text {CSSOMString {}};
         });
     };
 
-    auto computeAltText = [&]() -> Maybe<css::CSSOMString>
+    auto computeAltText = [&]() -> Maybe<CSSOMString>
     {
       if (!contentListAltTextPair)
       {
@@ -150,7 +150,7 @@ namespace krys::boo::style
         return {};
       }
 
-      css::CSSOMString altText;
+      CSSOMString altText;
       for (const auto &item : *altTextList)
       {
         if (item.IsString())

@@ -26,18 +26,14 @@
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
+  class CSSRule;
+  class CSSStyleSheet;
   class Element;
 
   template <typename>
   class ExceptionOr;
-}
-
-namespace krys::boo::css
-{
-  class CSSRule;
-  class CSSStyleSheet;
 
   enum class StyleDeclarationType : uint8
   {
@@ -63,7 +59,7 @@ namespace krys::boo::css
     KRYS_NODISCARD virtual StyleDeclarationType GetStyleDeclarationType() const noexcept = 0;
 
     /// @brief The element whose `style` attribute this is, if any.
-    KRYS_NODISCARD virtual dom::Element *ParentElement() const noexcept
+    KRYS_NODISCARD virtual Element *ParentElement() const noexcept
     {
       return nullptr;
     }
@@ -72,7 +68,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD virtual CSSOMString CssText() const noexcept = 0;
 
-    virtual dom::ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept = 0;
+    virtual ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept = 0;
 
     KRYS_NODISCARD virtual uint32 Length() const noexcept = 0;
 
@@ -91,10 +87,10 @@ namespace krys::boo::css
 
     KRYS_NODISCARD virtual bool IsPropertyImplicit(const CSSOMString &propertyName) noexcept = 0;
 
-    virtual dom::ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
-                                               const CSSOMString &priority) noexcept = 0;
+    virtual ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
+                                          const CSSOMString &priority) noexcept = 0;
 
-    virtual dom::ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &propertyName) noexcept = 0;
+    virtual ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &propertyName) noexcept = 0;
 
     KRYS_NODISCARD virtual CSSStyleSheet *ParentStyleSheet() const noexcept
     {

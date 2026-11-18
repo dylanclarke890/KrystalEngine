@@ -64,7 +64,7 @@ namespace krys::boo::css
     };
 
     /// @see https://drafts.fxtf.org/geometry/#dom-dommatrixreadonly-dommatrixreadonly
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<DOMMatrixReadOnly>>
+    KRYS_NODISCARD static ExceptionOr<Ref<DOMMatrixReadOnly>>
       Create(Maybe<Variant<CSSOMString, List<double>>> init = null) noexcept;
 
     KRYS_NODISCARD static Ref<DOMMatrixReadOnly> Create(const TransformationMatrix &matrix,
@@ -73,18 +73,16 @@ namespace krys::boo::css
       return AdoptRef(*new DOMMatrixReadOnly(matrix, is2D));
     }
 
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<DOMMatrixReadOnly>> FromMatrix(DOMMatrixInit &&) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<DOMMatrixReadOnly>> FromMatrix(DOMMatrixInit &&) noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<DOMMatrixReadOnly>>
-      FromFloat32Array(Span<const float>) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<DOMMatrixReadOnly>> FromFloat32Array(Span<const float>) noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<DOMMatrixReadOnly>>
-      FromFloat64Array(Span<const double>) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<DOMMatrixReadOnly>> FromFloat64Array(Span<const double>) noexcept;
 
     /// @see https://drafts.fxtf.org/geometry/#matrix-validate-and-fixup
-    KRYS_NODISCARD static dom::ExceptionOr<void> ValidateAndFixup(DOMMatrix2DInit &) noexcept;
+    KRYS_NODISCARD static ExceptionOr<void> ValidateAndFixup(DOMMatrix2DInit &) noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<void> ValidateAndFixup(DOMMatrixInit &) noexcept;
+    KRYS_NODISCARD static ExceptionOr<void> ValidateAndFixup(DOMMatrixInit &) noexcept;
 
     KRYS_NODISCARD double A() const noexcept
     {
@@ -204,11 +202,11 @@ namespace krys::boo::css
     KRYS_NODISCARD bool IsIdentity() const noexcept;
 
     /// @see https://drafts.fxtf.org/geometry/#dom-dommatrix-setmatrixvalue
-    dom::ExceptionOr<void> SetMatrixValue(const CSSOMString &) noexcept;
+    ExceptionOr<void> SetMatrixValue(const CSSOMString &) noexcept;
 
     KRYS_NODISCARD Ref<DOMMatrix> Translate(double tx = 0, double ty = 0, double tz = 0) const noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<DOMMatrix>> Multiply(DOMMatrixInit &&other) const noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<DOMMatrix>> Multiply(DOMMatrixInit &&other) const noexcept;
 
     KRYS_NODISCARD Ref<DOMMatrix> FlipX() const noexcept;
 
@@ -249,7 +247,7 @@ namespace krys::boo::css
     KRYS_NODISCARD Array<double, 16> ToFloat64Array() const noexcept;
 
     /// @see https://drafts.fxtf.org/geometry/#dom-dommatrixreadonly-stringifier
-    KRYS_NODISCARD dom::ExceptionOr<CSSOMString> ToString() const noexcept;
+    KRYS_NODISCARD ExceptionOr<CSSOMString> ToString() const noexcept;
 
     KRYS_NODISCARD const TransformationMatrix &GetTransformationMatrix() const noexcept
     {
@@ -269,19 +267,19 @@ namespace krys::boo::css
       bool Is2D {true};
     };
 
-    KRYS_NODISCARD static dom::ExceptionOr<AbstractMatrix>
+    KRYS_NODISCARD static ExceptionOr<AbstractMatrix>
       ParseStringIntoAbstractMatrix(const CSSOMString &) noexcept;
 
     /// @brief A matrix made from a list of 6 or 16 values, or nothing for other lengths.
     template <typename T, typename TValue>
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<T>> FromArrayHelper(Span<const TValue>) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<T>> FromArrayHelper(Span<const TValue>) noexcept;
 
     template <typename T>
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<T>> FromMatrixHelper(DOMMatrixInit) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<T>> FromMatrixHelper(DOMMatrixInit) noexcept;
   };
 
   template <typename T, typename TValue>
-  inline dom::ExceptionOr<Ref<T>> DOMMatrixReadOnly::FromArrayHelper(Span<const TValue> init) noexcept
+  inline ExceptionOr<Ref<T>> DOMMatrixReadOnly::FromArrayHelper(Span<const TValue> init) noexcept
   {
     if (init.size() == 6)
     {
@@ -295,12 +293,12 @@ namespace krys::boo::css
                                              init[13], init[14], init[15]},
                        Is2D::No);
     }
-    return dom::Exception {dom::ExceptionCode::TypeError};
+    return Exception {ExceptionCode::TypeError};
   }
 
   // https://drafts.fxtf.org/geometry/#create-a-dommatrix-from-the-dictionary
   template <typename T>
-  inline dom::ExceptionOr<Ref<T>> DOMMatrixReadOnly::FromMatrixHelper(DOMMatrixInit init) noexcept
+  inline ExceptionOr<Ref<T>> DOMMatrixReadOnly::FromMatrixHelper(DOMMatrixInit init) noexcept
   {
     auto result = ValidateAndFixup(init);
     if (result.HasException())

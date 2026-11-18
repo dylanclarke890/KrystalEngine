@@ -43,7 +43,7 @@ namespace krys::boo::css::mq
   class MediaQueryEvaluator;
 }
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Document;
   class Element;
@@ -103,15 +103,15 @@ namespace krys::boo::style
       return _dirtiesAllStyle;
     }
 
-    void InvalidateStyle(dom::Document &document) noexcept;
+    void InvalidateStyle(Document &document) noexcept;
 
     void InvalidateStyle(Scope &scope) noexcept;
 
-    void InvalidateStyle(dom::ShadowRoot &shadowRoot) noexcept;
+    void InvalidateStyle(ShadowRoot &shadowRoot) noexcept;
 
-    void InvalidateStyle(dom::Element &element) noexcept;
+    void InvalidateStyle(Element &element) noexcept;
 
-    static void InvalidateShadowParts(dom::ShadowRoot &shadowRoot) noexcept;
+    static void InvalidateShadowParts(ShadowRoot &shadowRoot) noexcept;
 
     static void AddToMatchElementRuleSets(MatchElementRuleSets &matchElementRuleSets,
                                           const InvalidationRuleSet &invalidationRuleSet) noexcept;
@@ -120,30 +120,29 @@ namespace krys::boo::style
       AddToMatchElementRuleSetsRespectingNegation(MatchElementRuleSets &matchElementRuleSets,
                                                   const InvalidationRuleSet &invalidationRuleSet) noexcept;
 
-    static void InvalidateWithMatchElementRuleSets(dom::Element &element,
+    static void InvalidateWithMatchElementRuleSets(Element &element,
                                                    const MatchElementRuleSets &matchElementRuleSets) noexcept;
 
     static void InvalidateAllStyle(Scope &scope) noexcept;
 
-    static void InvalidateHostAndSlottedStyleIfNeeded(dom::ShadowRoot &shadowRoot) noexcept;
+    static void InvalidateHostAndSlottedStyleIfNeeded(ShadowRoot &shadowRoot) noexcept;
 
-    static void InvalidateWithScopeBreakingHasPseudoClassRuleSet(dom::Element &element,
+    static void InvalidateWithScopeBreakingHasPseudoClassRuleSet(Element &element,
                                                                  const RuleSet *ruleSet) noexcept;
 
   private:
-    CheckDescendants InvalidateIfNeeded(dom::Element &element,
+    CheckDescendants InvalidateIfNeeded(Element &element,
                                         SelectorMatchingState *selectorMatchingState) noexcept;
 
-    void InvalidateStyleForTree(dom::Element &root, SelectorMatchingState *selectorMatchingState) noexcept;
+    void InvalidateStyleForTree(Element &root, SelectorMatchingState *selectorMatchingState) noexcept;
 
-    void InvalidateStyleForDescendants(dom::Element &root,
-                                       SelectorMatchingState *selectorMatchingState) noexcept;
+    void InvalidateStyleForDescendants(Element &root, SelectorMatchingState *selectorMatchingState) noexcept;
 
-    void InvalidateInShadowTreeIfNeeded(dom::Element &element) noexcept;
+    void InvalidateInShadowTreeIfNeeded(Element &element) noexcept;
 
-    void InvalidateUserAgentParts(dom::ShadowRoot &shadowRoot) noexcept;
+    void InvalidateUserAgentParts(ShadowRoot &shadowRoot) noexcept;
 
-    void InvalidateStyleWithMatchElement(dom::Element &element, MatchElement matchElement) noexcept;
+    void InvalidateStyleWithMatchElement(Element &element, MatchElement matchElement) noexcept;
 
     KRYS_NODISCARD RuleInformation CollectRuleInformation() const noexcept;
   };

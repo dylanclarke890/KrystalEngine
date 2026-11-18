@@ -22,8 +22,8 @@ namespace krys::editor
     KRYS_NON_COPY_MOVABLE(PageTextInput);
 
   private:
-    WeakPtr<boo::dom::Document> _document;
-    List<boo::dom::EventListenerHandle> _listeners;
+    WeakPtr<boo::Document> _document;
+    List<boo::EventListenerHandle> _listeners;
     /// @brief The lines the log shows, the oldest first.
     List<std::string> _lines;
 
@@ -31,9 +31,9 @@ namespace krys::editor
     /// @brief How many events the log shows.
     constexpr static size_t MaxLines {12};
 
-    explicit PageTextInput(boo::dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
+    explicit PageTextInput(boo::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
-      RefPtr<boo::dom::EventTarget> fields = document.GetElementById(u8"ime-fields");
+      RefPtr<boo::EventTarget> fields = document.GetElementById(u8"ime-fields");
       if (!fields)
       {
         return;
@@ -42,13 +42,13 @@ namespace krys::editor
       for (auto type :
            {u8"compositionstart", u8"compositionupdate", u8"compositionend", u8"beforeinput", u8"input"})
       {
-        _listeners.push_back(fields->AddEventListener(boo::dom::DOMStringAtom(type),
-                                                      [this](boo::dom::Event &event) { Log(event); }));
+        _listeners.push_back(
+          fields->AddEventListener(boo::DOMStringAtom(type), [this](boo::Event &event) { Log(event); }));
       }
-      if (RefPtr<boo::dom::EventTarget> clear = document.GetElementById(u8"ime-clear"))
+      if (RefPtr<boo::EventTarget> clear = document.GetElementById(u8"ime-clear"))
       {
         _listeners.push_back(clear->AddEventListener(u8"click",
-                                                     [this](boo::dom::Event &)
+                                                     [this](boo::Event &)
                                                      {
                                                        _lines.clear();
                                                        Show();
@@ -58,19 +58,19 @@ namespace krys::editor
     }
 
   private:
-    KRYS_NODISCARD static std::string Narrow(boo::dom::DOMStringView text) noexcept
+    KRYS_NODISCARD static std::string Narrow(boo::DOMStringView text) noexcept
     {
       return std::string(text.begin(), text.end());
     }
 
     /// @brief Adds @p event to the log: the field it went to, its type, its data and whether it's part of a
     /// composition.
-    void Log(boo::dom::Event &event) noexcept
+    void Log(boo::Event &event) noexcept
     {
       std::string field = "?";
-      if (auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get()))
+      if (auto *node = DynamicDowncast<boo::Node>(event.Target().get()))
       {
-        if (auto *element = DynamicDowncast<boo::dom::Element>(*node))
+        if (auto *element = DynamicDowncast<boo::Element>(*node))
         {
           field = Narrow(element->LocalName().View());
         }
@@ -79,11 +79,11 @@ namespace krys::editor
       auto line = std::format("{}: {}", field, Narrow(event.Type().View()));
       if (event.IsCompositionEvent())
       {
-        line += std::format(" “{}”", Narrow(Downcast<boo::dom::CompositionEvent>(event).Data()));
+        line += std::format(" “{}”", Narrow(Downcast<boo::CompositionEvent>(event).Data()));
       }
       else if (event.IsInputEvent())
       {
-        auto &input = Downcast<boo::dom::InputEvent>(event);
+        auto &input = Downcast<boo::InputEvent>(event);
         line += " " + Narrow(input.InputType());
         if (input.Data())
         {
@@ -123,8 +123,7 @@ namespace krys::editor
       {
         text.pop_back();
       }
-      (void)log->TextContent(
-        boo::dom::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
+      (void)log->TextContent(boo::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
     }
   };
 }

@@ -51,15 +51,15 @@
 #include "Krystal.Booey/SVG/SVGViewSpec.hpp"
 #include <cmath>
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGSvgElement::SVGSvgElement(dom::Document &document) noexcept
+  SVGSvgElement::SVGSvgElement(Document &document) noexcept
       : SVGGraphicsElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Svg),
         SVGFitToViewBox(this), _x(SVGAnimatedLength::Create(this, SVGLengthMode::Width)),
         _y(SVGAnimatedLength::Create(this, SVGLengthMode::Height)),
         _width(SVGAnimatedLength::Create(this, SVGLengthMode::Width, u8"100%")),
         _height(SVGAnimatedLength::Create(this, SVGLengthMode::Height, u8"100%")),
-        _timeContainer(SMILTimeContainer::Create(*this))
+        _timeContainer(svg::SMILTimeContainer::Create(*this))
   {
     document.RegisterForDocumentSuspensionCallbacks(*this);
 
@@ -88,7 +88,7 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGSvgElement::OnAdopt(dom::Document &oldDocument) noexcept
+  void SVGSvgElement::OnAdopt(Document &oldDocument) noexcept
   {
     oldDocument.UnregisterForDocumentSuspensionCallbacks(*this);
     NodeDocument().RegisterForDocumentSuspensionCallbacks(*this);
@@ -118,7 +118,7 @@ namespace krys::boo::svg
     SVGGraphicsElement::OnInsert();
   }
 
-  void SVGSvgElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void SVGSvgElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     if (oldAncestor.IsConnected() && !IsConnected())
     {
@@ -238,11 +238,11 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGSvgElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                       Maybe<dom::DOMStringView> value) noexcept
+  void SVGSvgElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                       Maybe<DOMStringView> value) noexcept
   {
     auto parseError = SVGParsingError::None;
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::XAttr())
     {
@@ -268,7 +268,7 @@ namespace krys::boo::svg
     SVGGraphicsElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGSvgElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGSvgElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {
@@ -312,7 +312,7 @@ namespace krys::boo::svg
       return true;
     }
     // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
-    return dom::StyledElement::RendererIsNeeded(style);
+    return StyledElement::RendererIsNeeded(style);
   }
 
   RenderPtr<RenderElement> SVGSvgElement::CreateElementRenderer(RenderStyle &&style) noexcept
@@ -371,8 +371,7 @@ namespace krys::boo::svg
                                                       bool (*checkFunction)(SVGElement &, SVGRect &)) noexcept
   {
     dom::SmallNodeList elements;
-    dom::ContainerNode &root =
-      referenceElement ? static_cast<dom::ContainerNode &>(*referenceElement) : *this;
+    ContainerNode &root = referenceElement ? static_cast<ContainerNode &>(*referenceElement) : *this;
     for (auto *node = root.FirstChild(); node; node = dom::TreeQueries::Next(*node, &root))
     {
       auto *element = DynamicDowncast<SVGElement>(*node);
@@ -457,7 +456,7 @@ namespace krys::boo::svg
     return SVGTransform::Create(transform);
   }
 
-  AffineTransform SVGSvgElement::LocalCoordinateSpaceTransform(CTMScope mode) const noexcept
+  AffineTransform SVGSvgElement::LocalCoordinateSpaceTransform(svg::CTMScope mode) const noexcept
   {
     AffineTransform viewBoxTransform;
     if (!HasEmptyViewBox())
@@ -472,7 +471,7 @@ namespace krys::boo::svg
       SVGLengthContext lengthContext(this);
       transform.Translate(X().Value(lengthContext), Y().Value(lengthContext));
     }
-    else if (mode == CTMScope::ScreenScope)
+    else if (mode == svg::CTMScope::ScreenScope)
     {
       if (auto *renderer = Renderer())
       {
@@ -530,7 +529,7 @@ namespace krys::boo::svg
     }
 
     // 'x' / 'y' / 'viewBox' lead to a non-identity supplementalLayerTransform in RenderSVGViewportContainer
-    dom::DOMStringAtom noNamespace = null;
+    DOMStringAtom noNamespace = null;
     return (HasAttributeNS(noNamespace, SVGNames::XAttr().LocalName())
             || HasAttributeNS(noNamespace, SVGNames::YAttr().LocalName()))
            || (HasAttributeNS(noNamespace, SVGNames::ViewBoxAttr().LocalName()) && !HasEmptyViewBox());
@@ -667,7 +666,7 @@ namespace krys::boo::svg
 
   // getElementById on SVGSVGElement is restricted to only the child subtree defined by the <svg> element.
   // See http://www.w3.org/TR/SVG11/struct.html#InterfaceSVGSVGElement
-  RefPtr<dom::Element> SVGSvgElement::GetElementById(dom::DOMStringView id) noexcept
+  RefPtr<Element> SVGSvgElement::GetElementById(DOMStringView id) noexcept
   {
     return dom::mixins::NonElementParentNode::GetElementById(*this, id);
   }
@@ -677,7 +676,7 @@ namespace krys::boo::svg
     return SVGTests::IsValid();
   }
 
-  bool SVGSvgElement::ScrollToFragment(dom::DOMStringView fragmentIdentifier) noexcept
+  bool SVGSvgElement::ScrollToFragment(DOMStringView fragmentIdentifier) noexcept
   {
     auto *renderer = Renderer();
 
@@ -747,7 +746,7 @@ namespace krys::boo::svg
         {
           invalidateView(*rootRenderer);
         }
-        _currentViewFragmentIdentifier = dom::DOMString(fragmentIdentifier);
+        _currentViewFragmentIdentifier = DOMString(fragmentIdentifier);
         return true;
       }
     }
@@ -796,7 +795,7 @@ namespace krys::boo::svg
     auto &view = CurrentView();
     _useCurrentView = true;
 
-    dom::DOMStringAtom noNamespace = null;
+    DOMStringAtom noNamespace = null;
     if (viewElement.HasAttributeNS(noNamespace, SVGNames::ViewBoxAttr().LocalName()))
     {
       view.SetViewBox(viewElement.ViewBox());
@@ -816,7 +815,7 @@ namespace krys::boo::svg
     }
   }
 
-  RefPtr<SVGViewElement> SVGSvgElement::FindViewAnchor(dom::DOMStringView fragmentIdentifier) const noexcept
+  RefPtr<SVGViewElement> SVGSvgElement::FindViewAnchor(DOMStringView fragmentIdentifier) const noexcept
   {
     auto *anchor = NodeDocument().FindAnchor(fragmentIdentifier);
     auto *svgAnchor = anchor ? DynamicDowncast<SVGElement>(*anchor) : nullptr;
@@ -835,7 +834,7 @@ namespace krys::boo::svg
     return svgElement ? DynamicDowncast<SVGSvgElement>(*svgElement) : nullptr;
   }
 
-  SVGSvgElement *SVGSvgElement::FindRootAnchor(dom::DOMStringView fragmentIdentifier) const noexcept
+  SVGSvgElement *SVGSvgElement::FindRootAnchor(DOMStringView fragmentIdentifier) const noexcept
   {
     if (auto viewElement = FindViewAnchor(fragmentIdentifier))
     {

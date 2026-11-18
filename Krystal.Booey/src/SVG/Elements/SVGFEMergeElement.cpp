@@ -24,9 +24,9 @@
 #include "Krystal.Booey/SVG/Elements/SVGFEMergeNodeElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGFEMergeElement::SVGFEMergeElement(dom::Document &document) noexcept
+  SVGFEMergeElement::SVGFEMergeElement(Document &document) noexcept
       : SVGFilterPrimitiveStandardAttributes(document, CreateUnique<PropertyRegistry>(*this),
                                              SVGElementInterface::FEMerge)
   {
@@ -39,9 +39,9 @@ namespace krys::boo::svg
     MarkFilterEffectForRebuild();
   }
 
-  List<dom::DOMStringAtom> SVGFEMergeElement::FilterEffectInputsNames() const noexcept
+  List<DOMStringAtom> SVGFEMergeElement::FilterEffectInputsNames() const noexcept
   {
-    List<dom::DOMStringAtom> inputsNames;
+    List<DOMStringAtom> inputsNames;
     for (auto *child = FirstChild(); child; child = child->NextSibling())
     {
       if (auto *mergeNode = DynamicDowncast<SVGFEMergeNodeElement>(*child))

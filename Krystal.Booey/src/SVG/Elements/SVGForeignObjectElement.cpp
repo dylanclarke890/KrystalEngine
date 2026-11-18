@@ -26,9 +26,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGForeignObjectElement::SVGForeignObjectElement(dom::Document &document) noexcept
+  SVGForeignObjectElement::SVGForeignObjectElement(Document &document) noexcept
       : SVGGraphicsElement(document, CreateUnique<PropertyRegistry>(*this),
                            SVGElementInterface::ForeignObject),
         _x(SVGAnimatedLength::Create(this, SVGLengthMode::Width)),
@@ -47,12 +47,11 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGForeignObjectElement::AttributeChanged(const dom::QualifiedName &name,
-                                                 Maybe<dom::DOMStringView> oldValue,
-                                                 Maybe<dom::DOMStringView> value) noexcept
+  void SVGForeignObjectElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                                 Maybe<DOMStringView> value) noexcept
   {
     auto parseError = SVGParsingError::None;
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::XAttr())
     {
@@ -75,7 +74,7 @@ namespace krys::boo::svg
     SVGGraphicsElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGForeignObjectElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGForeignObjectElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {
@@ -104,7 +103,7 @@ namespace krys::boo::svg
     return CreateRenderer<LegacyRenderSVGForeignObject>(*this, krys::move(style));
   }
 
-  bool SVGForeignObjectElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
+  bool SVGForeignObjectElement::ChildShouldCreateRenderer(const Node &child) const noexcept
   {
     // Disallow arbitary SVG content. Only allow proper <svg xmlns="svgNS"> subdocuments.
     if (auto *svgChild = DynamicDowncast<SVGElement>(child))

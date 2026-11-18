@@ -23,7 +23,7 @@
 
 #include "Krystal.Booey/SVG/Elements/SVGGeometryElement.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief The `<line>` element: a line between two points.
   /// @see https://svgwg.org/svg2-draft/shapes.html#InterfaceSVGLineElement
@@ -38,7 +38,7 @@ namespace krys::boo::svg
     Ref<SVGAnimatedLength> _y2;
 
   public:
-    explicit SVGLineElement(dom::Document &document) noexcept;
+    explicit SVGLineElement(Document &document) noexcept;
 
     KRYS_NODISCARD const SVGLengthValue &X1() const noexcept
     {
@@ -83,10 +83,10 @@ namespace krys::boo::svg
   private:
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGLineElement, SVGGeometryElement>;
 
-    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                          Maybe<dom::DOMStringView> value) noexcept final;
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
 
-    void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD bool IsValid() const noexcept final
     {
@@ -102,8 +102,8 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGLineElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::SVGElement &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGLineElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
   {
     return target.IsSVGLineElement();
   }

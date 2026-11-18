@@ -28,13 +28,9 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
-namespace krys::boo::dom
-{
-  class Node;
-}
-
 namespace krys::boo
 {
+  class Node;
   class RenderElement;
   class RenderObject;
 
@@ -68,7 +64,7 @@ namespace krys::boo
       return _nextSibling;
     }
 
-    void ComputeNextSibling(const dom::Node &node) noexcept;
+    void ComputeNextSibling(const Node &node) noexcept;
 
     void MoveToLastChild() noexcept
     {
@@ -83,6 +79,6 @@ namespace krys::boo
 
     void InvalidateNextSibling(const RenderObject &siblingRenderer) noexcept;
 
-    KRYS_NODISCARD RenderObject *NextSiblingRenderer(const dom::Node &node) const noexcept;
+    KRYS_NODISCARD RenderObject *NextSiblingRenderer(const Node &node) const noexcept;
   };
 }

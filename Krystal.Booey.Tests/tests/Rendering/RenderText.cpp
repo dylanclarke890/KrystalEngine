@@ -15,18 +15,18 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief The text node child of the element with @p id at @p index (among all its children).
-    KRYS_NODISCARD dom::Text &TextChild(ResolverFixture &fixture, dom::DOMStringView id, size_t index = 0)
+    KRYS_NODISCARD boo::Text &TextChild(ResolverFixture &fixture, DOMStringView id, size_t index = 0)
     {
       auto *child = fixture.ById(id).FirstChild();
       for (; index; --index)
       {
         child = child->NextSibling();
       }
-      return Downcast<dom::Text>(*child);
+      return Downcast<boo::Text>(*child);
     }
 
     /// @brief The rendered text of the text node child of the element with @p id at @p index.
-    KRYS_NODISCARD utf8_string RenderedText(ResolverFixture &fixture, dom::DOMStringView id, size_t index = 0)
+    KRYS_NODISCARD utf8_string RenderedText(ResolverFixture &fixture, DOMStringView id, size_t index = 0)
     {
       auto *renderer = TextChild(fixture, id, index).Renderer();
       return renderer ? renderer->Text() : u8"(none)";
@@ -61,7 +61,7 @@ namespace krys::boo::tests
 
     SECTION("Text in a display: contents element is wrapped in an anonymous inline with its style")
     {
-      auto &text = Downcast<dom::Text>(*fixture.ById(u8"wrap").FirstElementChild()->FirstChild());
+      auto &text = Downcast<boo::Text>(*fixture.ById(u8"wrap").FirstElementChild()->FirstChild());
       auto *renderer = text.Renderer();
       REQUIRE(renderer);
       auto *wrapper = renderer->InlineWrapperForDisplayContents();
@@ -225,6 +225,6 @@ namespace krys::boo::tests
     CHECK(wbr->IsWBR());
     CHECK(static_cast<RenderObject *>(wbr)->IsWBR());
     CHECK(wbr->IsLineBreakOpportunity());
-    CHECK(Is<html::HTMLWBRElement>(Downcast<html::HTMLElement>(fixture.ById(u8"wbr"))));
+    CHECK(Is<HTMLWBRElement>(Downcast<HTMLElement>(fixture.ById(u8"wbr"))));
   }
 }

@@ -31,28 +31,27 @@
 namespace krys::boo
 {
   class CachedImage;
-}
-
-namespace krys::boo::dom
-{
   class Document;
 }
 
 namespace krys::boo::css
 {
   class ImageValue;
+}
 
+namespace krys::boo
+{
   /// @brief An image value (`url()`), as the Typed OM represents it.
   /// @see https://drafts.css-houdini.org/css-typed-om/#cssimagevalue
   class CSSImageValue final : public CSSStyleValue
   {
   private:
-    const Ref<ImageValue> _cssValue;
-    WeakPtr<dom::Document> _document;
+    const Ref<css::ImageValue> _cssValue;
+    WeakPtr<boo::Document> _document;
 
   public:
-    KRYS_NODISCARD static Ref<CSSImageValue> Create(Ref<ImageValue> cssValue,
-                                                    dom::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<CSSImageValue> Create(Ref<css::ImageValue> cssValue,
+                                                    boo::Document &document) noexcept;
 
     ~CSSImageValue() noexcept override;
 
@@ -61,23 +60,23 @@ namespace krys::boo::css
     /// @brief The image, once it has started loading.
     KRYS_NODISCARD CachedImage *Image() const noexcept;
 
-    KRYS_NODISCARD dom::Document *Document() const noexcept;
+    KRYS_NODISCARD boo::Document *Document() const noexcept;
 
     KRYS_NODISCARD CSSStyleValueType StyleValueType() const noexcept final
     {
       return CSSStyleValueType::CSSImageValue;
     }
 
-    KRYS_NODISCARD RefPtr<Value> ToCSSValue() const noexcept final;
+    KRYS_NODISCARD RefPtr<css::Value> ToCSSValue() const noexcept final;
 
   private:
-    CSSImageValue(Ref<ImageValue> cssValue, dom::Document &document) noexcept;
+    CSSImageValue(Ref<css::ImageValue> cssValue, boo::Document &document) noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSImageValue)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSStyleValue &styleValue) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSImageValue)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSStyleValue &styleValue) noexcept
   {
-    return styleValue.StyleValueType() == krys::boo::css::CSSStyleValueType::CSSImageValue;
+    return styleValue.StyleValueType() == krys::boo::CSSStyleValueType::CSSImageValue;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

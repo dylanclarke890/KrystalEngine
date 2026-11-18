@@ -26,7 +26,7 @@
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   enum class SVGPropertyAccess : uint8
   {
@@ -126,7 +126,7 @@ namespace krys::boo::svg
       _state = SVGPropertyState::Dirty;
     }
 
-    Maybe<dom::DOMString> Synchronize() noexcept
+    Maybe<DOMString> Synchronize() noexcept
     {
       if (_state == SVGPropertyState::Clean)
       {
@@ -137,7 +137,7 @@ namespace krys::boo::svg
     }
 
     // This is used when calling setAttribute().
-    KRYS_NODISCARD virtual dom::DOMString ValueAsString() const noexcept
+    KRYS_NODISCARD virtual DOMString ValueAsString() const noexcept
     {
       return {};
     }

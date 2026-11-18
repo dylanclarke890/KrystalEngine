@@ -69,16 +69,16 @@
 #include "Krystal.Booey/Style/CustomPropertyRegistry.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   CSSOMString DOMCSSNamespace::Escape(const CSSOMString &ident) noexcept
   {
     StringBuilder builder;
-    SerialiseIdentifier(ident, builder);
+    css::SerialiseIdentifier(ident, builder);
     return builder.ToString();
   }
 
-  bool DOMCSSNamespace::Supports(const dom::Document &document, CSSOMStringView property,
+  bool DOMCSSNamespace::Supports(const Document &document, CSSOMStringView property,
                                  CSSOMStringView value) noexcept
   {
     // 1. If property is an ASCII case-insensitive match for any defined CSS property that the UA supports, or
@@ -86,44 +86,44 @@ namespace krys::boo::css
     //    grammar, return true.
     // 2. Otherwise, return false.
     // (In standards mode, as the specification has no quirks for it.)
-    ParserContext context(document);
-    context.Mode = ParserMode::HTMLStandard;
+    css::ParserContext context(document);
+    context.Mode = css::ParserMode::HTMLStandard;
 
-    auto propertyId = PropertyIdFromName(property);
-    if (propertyId == PropertyId::Invalid && IsCustomPropertyName(property))
+    auto propertyId = css::PropertyIdFromName(property);
+    if (propertyId == css::PropertyId::Invalid && css::IsCustomPropertyName(property))
     {
-      auto declaration = MutableStyleProperties::Create();
-      return Parser::ParseCustomPropertyValue(*declaration, CSSOMStringAtom(property), value, IsImportant::No,
-                                              context)
-             != Parser::ParseResult::Error;
+      auto declaration = css::MutableStyleProperties::Create();
+      return css::Parser::ParseCustomPropertyValue(*declaration, CSSOMStringAtom(property), value,
+                                                   css::IsImportant::No, context)
+             != css::Parser::ParseResult::Error;
     }
 
-    if (propertyId == PropertyId::Invalid || !IsExposed(propertyId, context.PropertySettings)
-        || Property::IsDescriptorOnly(propertyId) || value.empty())
+    if (propertyId == css::PropertyId::Invalid || !IsExposed(propertyId, context.PropertySettings)
+        || css::Property::IsDescriptorOnly(propertyId) || value.empty())
     {
       return false;
     }
 
-    auto declaration = MutableStyleProperties::Create();
-    return Parser::ParseValue(*declaration, propertyId, value, IsImportant::No, context)
-           != Parser::ParseResult::Error;
+    auto declaration = css::MutableStyleProperties::Create();
+    return css::Parser::ParseValue(*declaration, propertyId, value, css::IsImportant::No, context)
+           != css::Parser::ParseResult::Error;
   }
 
-  bool DOMCSSNamespace::Supports(const dom::Document &document, CSSOMStringView conditionText) noexcept
+  bool DOMCSSNamespace::Supports(const Document &document, CSSOMStringView conditionText) noexcept
   {
     // 1. If conditionText, parsed and evaluated as a <supports-condition>, would return true, return true.
     // 2. Otherwise, If conditionText, wrapped in parentheses and then parsed and evaluated as a
     //    <supports-condition>, would return true, return true.
     // 3. Otherwise, return false.
-    ParserContext context(document);
-    context.Mode = ParserMode::HTMLStandard;
-    return SupportsParser::SupportsCondition(
-             conditionText, context, SupportsParser::ParsingMode::AllowBareDeclarationAndGeneralEnclosed)
-           == SupportsParser::Supported;
+    css::ParserContext context(document);
+    context.Mode = css::ParserMode::HTMLStandard;
+    return css::SupportsParser::SupportsCondition(
+             conditionText, context, css::SupportsParser::ParsingMode::AllowBareDeclarationAndGeneralEnclosed)
+           == css::SupportsParser::Supported;
   }
 
-  dom::ExceptionOr<void> DOMCSSNamespace::RegisterProperty(dom::Document &document,
-                                                           const PropertyDefinition &definition) noexcept
+  ExceptionOr<void> DOMCSSNamespace::RegisterProperty(Document &document,
+                                                      const PropertyDefinition &definition) noexcept
   {
     // 1. Let property set be the value of this's relevant global object's associated Document's
     //    [[registeredPropertySet]] slot.
@@ -131,10 +131,10 @@ namespace krys::boo::css
     auto &registry = document.StyleScope().GetCustomPropertyRegistry();
 
     // 2. If name is not a custom property name string, throw a SyntaxError and exit this algorithm.
-    if (!IsCustomPropertyName(definition.Name))
+    if (!css::IsCustomPropertyName(definition.Name))
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError,
-                             u8"The name of this property is not a custom property name."};
+      return Exception {ExceptionCode::SyntaxError,
+                        u8"The name of this property is not a custom property name."};
     }
     // If property set already contains an entry with name as its property name (compared codepoint-wise),
     // throw an InvalidModificationError and exit this algorithm.
@@ -142,15 +142,15 @@ namespace krys::boo::css
 
     // 3. Attempt to consume a syntax definition from syntax. If it returns failure, throw a SyntaxError.
     //    Otherwise, let syntax definition be the returned syntax definition.
-    auto syntax = CustomPropertySyntax::Parse(definition.Syntax);
+    auto syntax = css::CustomPropertySyntax::Parse(definition.Syntax);
     if (!syntax)
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError, u8"Invalid property syntax definition."};
+      return Exception {ExceptionCode::SyntaxError, u8"Invalid property syntax definition."};
     }
 
     auto name = CSSOMStringAtom(definition.Name);
     RefPtr<const style::CustomProperty> initialValue;
-    RefPtr<const VariableData> initialValueTokensForViewportUnits;
+    RefPtr<const css::VariableData> initialValueTokensForViewportUnits;
 
     // 4. If initialValue is not present, let parsed initial value be the guaranteed-invalid value.
     // (Only for the universal syntax, as in Chrome and WebKit, and as `@property` requires; see
@@ -159,8 +159,8 @@ namespace krys::boo::css
     {
       if (!syntax->IsUniversal())
       {
-        return dom::Exception {dom::ExceptionCode::SyntaxError,
-                               u8"An initial value is mandatory except for the '*' syntax."};
+        return Exception {ExceptionCode::SyntaxError,
+                          u8"An initial value is mandatory except for the '*' syntax."};
       }
       initialValue = style::CustomProperty::CreateForGuaranteedInvalid(name);
     }
@@ -173,8 +173,8 @@ namespace krys::boo::css
       //   initial value be the parsed result.
       // - If parsed initial value is not computationally independent, throw a SyntaxError and exit this
       //   algorithm.
-      auto inputStream = InputStream(CSSOMString(*definition.InitialValue));
-      auto tokenizer = Tokenizer(inputStream);
+      auto inputStream = css::InputStream(CSSOMString(*definition.InitialValue));
+      auto tokenizer = css::Tokenizer(inputStream);
       std::ignore = tokenizer.PumpTokenizer();
 
       auto parsedInitialValue =
@@ -184,17 +184,17 @@ namespace krys::boo::css
         if (parsedInitialValue.error()
             == style::CustomPropertyRegistry::ParseInitialValueError::NotComputationallyIndependent)
         {
-          return dom::Exception {dom::ExceptionCode::SyntaxError,
-                                 u8"The given initial value must be computationally independent."};
+          return Exception {ExceptionCode::SyntaxError,
+                            u8"The given initial value must be computationally independent."};
         }
-        return dom::Exception {dom::ExceptionCode::SyntaxError,
-                               u8"The given initial value does not parse for the given syntax."};
+        return Exception {ExceptionCode::SyntaxError,
+                          u8"The given initial value does not parse for the given syntax."};
       }
 
       initialValue = parsedInitialValue->first;
       if (parsedInitialValue->second == style::CustomPropertyRegistry::ViewportUnitDependency::Yes)
       {
-        initialValueTokensForViewportUnits = VariableData::Create(tokenizer.Tokens());
+        initialValueTokensForViewportUnits = css::VariableData::Create(tokenizer.Tokens());
         document.SetHasStyleWithViewportUnits();
       }
     }
@@ -203,7 +203,7 @@ namespace krys::boo::css
     // 6. Let registered property be a struct with a property name of name, a syntax of syntax definition, an
     //    initial value of parsed initial value, and an inherit flag of inherit flag. Append registered
     //    property to property set.
-    auto property = RegisteredCustomProperty {
+    auto property = css::RegisteredCustomProperty {
       .Name = name,
       .Syntax = krys::move(*syntax),
       .Inherits = definition.Inherits,
@@ -212,8 +212,8 @@ namespace krys::boo::css
     };
     if (!registry.RegisterFromAPI(krys::move(property)))
     {
-      return dom::Exception {dom::ExceptionCode::InvalidModificationError,
-                             u8"This property has already been registered."};
+      return Exception {ExceptionCode::InvalidModificationError,
+                        u8"This property has already been registered."};
     }
     return {};
   }

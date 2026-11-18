@@ -37,19 +37,19 @@ namespace krys::boo
   namespace
   {
     /// @brief The width the first of @p sizes gives: "60x70" is 60.
-    KRYS_NODISCARD Maybe<uint32> FirstIconSize(dom::DOMStringView sizes) noexcept
+    KRYS_NODISCARD Maybe<uint32> FirstIconSize(DOMStringView sizes) noexcept
     {
       auto start = std::ranges::find_if_not(sizes, [](char8 c) { return text::IsASCIIWhitespace(c); });
       if (start == sizes.end())
       {
         return null;
       }
-      auto first = dom::DOMStringView(start, sizes.end());
+      auto first = DOMStringView(start, sizes.end());
       return text::ParseIntegerAllowingTrailingJunk<uint32>(first);
     }
   }
 
-  List<LinkIcon> CollectLinkIcons(const dom::Document &document) noexcept
+  List<LinkIcon> CollectLinkIcons(const boo::Document &document) noexcept
   {
     auto head = document.Head();
     if (!head)
@@ -60,7 +60,7 @@ namespace krys::boo
     List<LinkIcon> icons;
     for (const auto *child = head->FirstChild(); child; child = child->NextSibling())
     {
-      const auto *link = DynamicDowncast<html::HTMLLinkElement>(*child);
+      const auto *link = DynamicDowncast<HTMLLinkElement>(*child);
       if (!link || !link->IsIcon())
       {
         continue;
@@ -77,7 +77,7 @@ namespace krys::boo
         continue;
       }
 
-      icons.push_back({krys::move(url), dom::DOMString(link->GetAttribute(u8"type").value_or(u8"")),
+      icons.push_back({krys::move(url), DOMString(link->GetAttribute(u8"type").value_or(u8"")),
                        FirstIconSize(link->GetAttribute(u8"sizes").value_or(u8""))});
     }
 

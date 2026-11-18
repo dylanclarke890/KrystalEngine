@@ -70,7 +70,7 @@ namespace krys::boo
     auto mimeType = observer.MimeType();
     if (mimeType == u8"image/svg+xml")
     {
-      return svg::SVGImage::Create(&observer);
+      return SVGImage::Create(&observer);
     }
 
     // There are no PDF images (see DIFFERENCES.md).

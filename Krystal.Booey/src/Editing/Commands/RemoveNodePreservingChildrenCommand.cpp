@@ -31,7 +31,7 @@
 namespace krys::boo
 {
   RemoveNodePreservingChildrenCommand::RemoveNodePreservingChildrenCommand(
-    dom::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
+    boo::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
     EditAction editingAction) noexcept
       : CompositeEditCommand(node.NodeDocument(), editingAction), _node(ShareRef(node)),
         _shouldAssumeContentIsAlwaysEditable(shouldAssumeContentIsAlwaysEditable)
@@ -39,7 +39,7 @@ namespace krys::boo
   }
 
   Ref<RemoveNodePreservingChildrenCommand> RemoveNodePreservingChildrenCommand::Create(
-    dom::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
+    boo::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
     EditAction editingAction) noexcept
   {
     return CreateRef<RemoveNodePreservingChildrenCommand>(node, shouldAssumeContentIsAlwaysEditable,
@@ -48,8 +48,8 @@ namespace krys::boo
 
   void RemoveNodePreservingChildrenCommand::DoApply() noexcept
   {
-    List<Ref<dom::Node>> children;
-    RefPtr<dom::ContainerNode> parent = ShareRefPtr(_node->ParentNode());
+    List<Ref<boo::Node>> children;
+    RefPtr<ContainerNode> parent = ShareRefPtr(_node->ParentNode());
     if (!parent
         || (_shouldAssumeContentIsAlwaysEditable == DoNotAssumeContentIsAlwaysEditable
             && !IsEditableNode(*parent)))

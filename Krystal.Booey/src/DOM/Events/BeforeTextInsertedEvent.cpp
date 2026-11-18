@@ -26,7 +26,7 @@
 #include "Krystal.Booey/DOM/Events/BeforeTextInsertedEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   BeforeTextInsertedEvent::BeforeTextInsertedEvent(DOMStringView text) noexcept
       : Event(event_names::WebkitBeforeTextInserted, {.Bubbles = false, .Cancelable = true}), _text(text)

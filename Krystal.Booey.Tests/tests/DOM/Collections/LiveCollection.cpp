@@ -414,12 +414,12 @@ namespace krys::boo::dom::tests
   TEST_CASE_METHOD(LiveCollectionFixture, "LiveCollection: selectedOptions follows the options' selectedness",
                    "[DOM][LiveCollection][html:dom-select-selectedoptions]")
   {
-    auto select = Downcast<html::HTMLSelectElement>(Add(*Root, u8"select").get());
+    auto select = Downcast<HTMLSelectElement>(Add(*Root, u8"select").get());
     REQUIRE_FALSE(select->SetAttribute(u8"multiple", u8"").HasException());
     auto firstRef = Add(*select, u8"option");
-    auto &first = Downcast<html::HTMLOptionElement>(*firstRef);
+    auto &first = Downcast<HTMLOptionElement>(*firstRef);
     auto secondRef = Add(*select, u8"option");
-    auto &second = Downcast<html::HTMLOptionElement>(*secondRef);
+    auto &second = Downcast<HTMLOptionElement>(*secondRef);
     auto selected = select->SelectedOptions();
     auto options = select->Options();
     CHECK(selected->Length() == 0uz);
@@ -464,7 +464,7 @@ namespace krys::boo::dom::tests
 
     SECTION("a single select selects by itself as its options change")
     {
-      auto single = Downcast<html::HTMLSelectElement>(Add(*Root, u8"select").get());
+      auto single = Downcast<HTMLSelectElement>(Add(*Root, u8"select").get());
       auto singleSelected = single->SelectedOptions();
       CHECK(singleSelected->Length() == 0uz);
       auto option = Add(*single, u8"option");
@@ -485,7 +485,7 @@ namespace krys::boo::dom::tests
     auto elsewhere = Add(*Root, u8"section");
     auto label = Add(*elsewhere, u8"label");
     REQUIRE_FALSE(label->SetAttribute(u8"for", u8"x").HasException());
-    auto labels = Downcast<html::HTMLElement>(*input).Labels();
+    auto labels = Downcast<HTMLElement>(*input).Labels();
     REQUIRE(labels);
     CHECK(labels->Length() == 1uz);
     CHECK(labels->Item(0).get() == label.get());
@@ -538,7 +538,7 @@ namespace krys::boo::dom::tests
     {
       auto wrapping = Add(*elsewhere, u8"label");
       auto other = Add(*wrapping, u8"input");
-      auto otherLabels = Downcast<html::HTMLElement>(*other).Labels();
+      auto otherLabels = Downcast<HTMLElement>(*other).Labels();
       CHECK(otherLabels->Length() == 1uz);
 
       auto earlier = Create(u8"button");
@@ -560,7 +560,7 @@ namespace krys::boo::dom::tests
       auto tree = Create(u8"div");
       auto wrapping = Add(*tree, u8"label");
       auto inner = Add(*wrapping, u8"input");
-      auto innerLabels = Downcast<html::HTMLElement>(*inner).Labels();
+      auto innerLabels = Downcast<HTMLElement>(*inner).Labels();
       CHECK(innerLabels->Length() == 1uz);
       auto outer = Add(*tree, u8"label");
       CHECK(innerLabels->Length() == 1uz);
@@ -592,7 +592,7 @@ namespace krys::boo::dom::tests
     Connect();
     auto formElement = Add(*Root, u8"form");
     REQUIRE_FALSE(formElement->SetAttribute(u8"id", u8"f").HasException());
-    auto &form = Downcast<html::HTMLFormElement>(*formElement);
+    auto &form = Downcast<HTMLFormElement>(*formElement);
     auto first = Add(form, u8"input");
     auto second = Add(form, u8"input");
     auto outside = Add(*Root, u8"input");
@@ -676,7 +676,7 @@ namespace krys::boo::dom::tests
     Connect();
     auto formElement = Add(*Root, u8"form");
     REQUIRE_FALSE(formElement->SetAttribute(u8"id", u8"f").HasException());
-    auto &form = Downcast<html::HTMLFormElement>(*formElement);
+    auto &form = Downcast<HTMLFormElement>(*formElement);
     auto first = Add(form, u8"input");
     auto second = Add(form, u8"input");
     auto outside = Add(*Root, u8"input");
@@ -750,7 +750,7 @@ namespace krys::boo::dom::tests
       CHECK(list->Value().empty());
 
       list->SetValue(u8"b");
-      CHECK(Downcast<html::HTMLInputElement>(*second).Checked());
+      CHECK(Downcast<HTMLInputElement>(*second).Checked());
       CHECK(list->Value() == u8"b");
     }
 
@@ -770,7 +770,7 @@ namespace krys::boo::dom::tests
                    "[DOM][LiveCollection][html:dom-table-rows]")
   {
     auto tableElement = Add(*Root, u8"table");
-    auto &table = Downcast<html::HTMLTableElement>(Downcast<html::HTMLElement>(*tableElement));
+    auto &table = Downcast<HTMLTableElement>(Downcast<HTMLElement>(*tableElement));
     auto foot = Add(table, u8"tfoot");
     auto footRow = Add(*foot, u8"tr");
     auto body = Add(table, u8"tbody");

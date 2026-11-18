@@ -257,12 +257,11 @@ namespace krys::boo::html
     KRYS_NODISCARD SanitizerElementNamespaceWithAttributes
       DefaultSanitizerElement(const SanitizerDefaultElement &element, utf8_stringview namespaceURI) noexcept
     {
-      SanitizerElementNamespaceWithAttributes result {dom::DOMString(element.Name),
-                                                      dom::DOMStringAtom(namespaceURI)};
+      SanitizerElementNamespaceWithAttributes result {DOMString(element.Name), DOMStringAtom(namespaceURI)};
       result.Attributes.emplace();
       for (auto attribute : std::views::split(element.Attributes, u8' '))
       {
-        result.Attributes->emplace_back(dom::DOMString(attribute.begin(), attribute.end()));
+        result.Attributes->emplace_back(DOMString(attribute.begin(), attribute.end()));
       }
       return result;
     }
@@ -271,9 +270,9 @@ namespace krys::boo::html
                                         const SanitizerAttributeNamespace &attribute,
                                         utf8_stringview elementName, utf8_stringview elementNamespace,
                                         utf8_stringview attributeName,
-                                        const dom::DOMStringAtom &attributeNamespace) noexcept
+                                        const DOMStringAtom &attributeNamespace) noexcept
     {
-      return element.Name == elementName && element.Namespace == dom::DOMStringAtom(elementNamespace)
+      return element.Name == elementName && element.Namespace == DOMStringAtom(elementNamespace)
              && attribute.Name == attributeName && attribute.Namespace == attributeNamespace;
     }
   }
@@ -292,7 +291,7 @@ namespace krys::boo::html
         config.Attributes.emplace();
         for (auto name : DefaultGlobalAttributes)
         {
-          config.Attributes->emplace_back(dom::DOMString(name));
+          config.Attributes->emplace_back(DOMString(name));
         }
 
         // comments: false; dataAttributes: false; javascriptURLs: false.
@@ -361,8 +360,8 @@ namespace krys::boo::html
   bool SanitizerConstants::IsNavigatingURLAttribute(const SanitizerElementNamespace &element,
                                                     const SanitizerAttributeNamespace &attribute) noexcept
   {
-    dom::DOMStringAtom none = null;
-    auto xlink = dom::DOMStringAtom(infra::namespaces::XLink);
+    DOMStringAtom none = null;
+    auto xlink = DOMStringAtom(infra::namespaces::XLink);
     using infra::namespaces::HTML;
     using infra::namespaces::SVG;
 
@@ -381,7 +380,7 @@ namespace krys::boo::html
   bool SanitizerConstants::IsAnimatingURLAttribute(const SanitizerElementNamespace &element,
                                                    const SanitizerAttributeNamespace &attribute) noexcept
   {
-    dom::DOMStringAtom none = null;
+    DOMStringAtom none = null;
     using infra::namespaces::SVG;
     return IsSanitizerPair(element, attribute, u8"animate", SVG, u8"attributeName", none)
            || IsSanitizerPair(element, attribute, u8"animateTransform", SVG, u8"attributeName", none)

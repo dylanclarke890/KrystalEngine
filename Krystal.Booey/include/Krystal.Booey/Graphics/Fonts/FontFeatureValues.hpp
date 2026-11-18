@@ -37,7 +37,7 @@
 namespace krys::boo
 {
   /// @brief A feature value name and its values, e.g. `nice-style: 12` in `@styleset`.
-  using FontFeatureValuesTag = Pair<css::CSSOMString, List<uint32>>;
+  using FontFeatureValuesTag = Pair<CSSOMString, List<uint32>>;
 
   /// @brief The feature value blocks of `@font-feature-values`.
   /// @see https://drafts.csswg.org/css-fonts-4/#font-feature-values
@@ -55,7 +55,7 @@ namespace krys::boo
   class FontFeatureValues : public RefCounted<FontFeatureValues>
   {
   public:
-    using Tags = HashMap<css::CSSOMString, List<uint32>>;
+    using Tags = HashMap<CSSOMString, List<uint32>>;
 
   private:
     Tags _styleset;

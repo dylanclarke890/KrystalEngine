@@ -4,7 +4,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   /// @see https://dom.spec.whatwg.org/#dictdef-customeventinit
   template <typename T>
@@ -80,12 +80,12 @@ namespace krys::boo::dom
 namespace krys
 {
   template <typename T, typename Source>
-  class TypeCastTraits<const boo::dom::CustomEvent<T>, Source>
+  class TypeCastTraits<const boo::CustomEvent<T>, Source>
   {
   public:
     KRYS_NODISCARD constexpr static bool IsOfType(Source &source) noexcept
     {
-      return source.CustomEventDetailType() == boo::dom::CustomEvent<T>::DetailType();
+      return source.CustomEventDetailType() == boo::CustomEvent<T>::DetailType();
     }
   };
 }

@@ -31,6 +31,8 @@
 namespace krys::boo
 {
   class FileList;
+  class HTMLDataListElement;
+  class HTMLOptionElement;
 }
 
 namespace krys::boo::html
@@ -48,11 +50,12 @@ namespace krys::boo::html
     RefPtr<HTMLInputElement> CheckedRadioButton;
   };
 
-  class HTMLDataListElement;
   class HTMLImageLoader;
-  class HTMLOptionElement;
   class ListAttributeTargetObserver;
+}
 
+namespace krys::boo
+{
   /// @see https://html.spec.whatwg.org/#htmlinputelement
   class HTMLInputElement : public HTMLTextFormControlElement
   {
@@ -72,10 +75,10 @@ namespace krys::boo::html
       Off,
     };
 
-    dom::DOMString _name;
-    Maybe<dom::DOMString> _valueIfDirty;
-    UniquePtr<HTMLImageLoader> _imageLoader;
-    UniquePtr<ListAttributeTargetObserver> _listAttributeTargetObserver;
+    DOMString _name;
+    Maybe<DOMString> _valueIfDirty;
+    UniquePtr<html::HTMLImageLoader> _imageLoader;
+    UniquePtr<html::ListAttributeTargetObserver> _listAttributeTargetObserver;
     uint32 _size {DefaultSize};
     bool _isChecked : 1 {false};
     bool _dirtyCheckednessFlag : 1 {false};
@@ -87,24 +90,24 @@ namespace krys::boo::html
     bool _hasPendingUserAgentShadowTreeUpdate : 1 {false};
     bool _canReceiveDroppedFiles : 1 {false};
     AutoCompleteSetting _autocomplete {Uninitialized};
-    RefPtr<InputType> _inputType;
-    InputElementClickState _clickHandlingState;
+    RefPtr<html::InputType> _inputType;
+    html::InputElementClickState _clickHandlingState;
 
   public:
     /// @brief Only text fields can start a selection.
     KRYS_NODISCARD bool CanStartSelection() const noexcept final;
 
-    HTMLInputElement(dom::Document &document) noexcept;
+    HTMLInputElement(Document &document) noexcept;
 
     ~HTMLInputElement() noexcept override;
 
 #pragma region HTMLInputElement - https://html.spec.whatwg.org/#htmlinputelement
 
     /// @see https://html.spec.whatwg.org/#dom-input-accept
-    KRYS_NODISCARD dom::DOMString Accept() const noexcept;
+    KRYS_NODISCARD DOMString Accept() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-accept
-    void Accept(dom::DOMString value) noexcept;
+    void Accept(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-alpha
     KRYS_NODISCARD bool Alpha() const noexcept;
@@ -113,16 +116,16 @@ namespace krys::boo::html
     void Alpha(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-alt
-    KRYS_NODISCARD dom::DOMString Alt() const noexcept;
+    KRYS_NODISCARD DOMString Alt() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-alt
-    void Alt(dom::DOMString value) noexcept;
+    void Alt(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-autocomplete
-    KRYS_NODISCARD dom::DOMString Autocomplete() const noexcept;
+    KRYS_NODISCARD DOMString Autocomplete() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-autocomplete
-    void Autocomplete(dom::DOMString value) noexcept;
+    void Autocomplete(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-defaultchecked
     KRYS_NODISCARD bool DefaultChecked() const noexcept;
@@ -145,19 +148,19 @@ namespace krys::boo::html
 
     /// @brief Sets the checkedness, and makes it dirty.
     void SetChecked(bool isChecked,
-                    WasSetByJavaScript wasCheckedByJavaScript = WasSetByJavaScript::Yes) noexcept;
+                    html::WasSetByJavaScript wasCheckedByJavaScript = html::WasSetByJavaScript::Yes) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-colorspace
-    KRYS_NODISCARD dom::DOMString ColourSpace() const noexcept;
+    KRYS_NODISCARD DOMString ColourSpace() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-colorspace
-    void ColourSpace(dom::DOMString value) noexcept;
+    void ColourSpace(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-dirname
-    KRYS_NODISCARD dom::DOMString DirName() const noexcept;
+    KRYS_NODISCARD DOMString DirName() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-dirname
-    void DirName(dom::DOMString value) noexcept;
+    void DirName(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;
@@ -173,7 +176,7 @@ namespace krys::boo::html
     /// `change` if their paths changed, or else `cancel`.
     /// @see https://html.spec.whatwg.org/#dom-input-files
     void SetFiles(RefPtr<FileList> &&files,
-                  WasSetByJavaScript wasSetByJavaScript = WasSetByJavaScript::No) noexcept;
+                  html::WasSetByJavaScript wasSetByJavaScript = html::WasSetByJavaScript::No) noexcept;
 
     /// @brief Takes a file input's files from @p dragData, dropped on it.
     /// @return Whether it took any.
@@ -188,7 +191,7 @@ namespace krys::boo::html
     void SetCanReceiveDroppedFiles(bool canReceiveDroppedFiles) noexcept;
 
     /// @brief A file input's text for its files, given with them by the host's chooser.
-    KRYS_NODISCARD dom::DOMString DisplayString() const noexcept;
+    KRYS_NODISCARD DOMString DisplayString() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formaction
     KRYS_NODISCARD dom::USVString FormAction() const noexcept;
@@ -197,16 +200,16 @@ namespace krys::boo::html
     void FormAction(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formenctype
-    KRYS_NODISCARD dom::DOMString FormEnctype() const noexcept;
+    KRYS_NODISCARD DOMString FormEnctype() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formenctype
-    void FormEnctype(dom::DOMString value) noexcept;
+    void FormEnctype(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formmethod
-    KRYS_NODISCARD dom::DOMString FormMethod() const noexcept;
+    KRYS_NODISCARD DOMString FormMethod() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formmethod
-    void FormMethod(dom::DOMString value) noexcept;
+    void FormMethod(DOMString value) noexcept;
 
     using HTMLTextFormControlElement::FormNoValidate;
 
@@ -214,10 +217,10 @@ namespace krys::boo::html
     void FormNoValidate(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formtarget
-    KRYS_NODISCARD dom::DOMString FormTarget() const noexcept;
+    KRYS_NODISCARD DOMString FormTarget() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formtarget
-    void FormTarget(dom::DOMString value) noexcept;
+    void FormTarget(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-height
     KRYS_NODISCARD uint32 Height() const noexcept;
@@ -247,7 +250,7 @@ namespace krys::boo::html
     /// @brief The suggestions source element retargeted against the input: a datalist in a shadow tree shows
     /// as its host.
     /// @see https://html.spec.whatwg.org/#dom-input-list
-    KRYS_NODISCARD RefPtr<dom::Element> ListForBindings() const noexcept;
+    KRYS_NODISCARD RefPtr<boo::Element> ListForBindings() const noexcept;
 
     /// @brief The input's datalist (its `list`) or its suggestions may have changed.
     void DataListMayHaveChanged() noexcept;
@@ -259,10 +262,10 @@ namespace krys::boo::html
     KRYS_NODISCARD Maybe<Decimal> FindClosestTickMarkValue(const Decimal &value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-max
-    KRYS_NODISCARD dom::DOMString Max() const noexcept;
+    KRYS_NODISCARD DOMString Max() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-max
-    void Max(dom::DOMString value) noexcept;
+    void Max(DOMString value) noexcept;
 
     using HTMLTextFormControlElement::MaxLength;
 
@@ -270,10 +273,10 @@ namespace krys::boo::html
     void MaxLength(int32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-min
-    KRYS_NODISCARD dom::DOMString Min() const noexcept;
+    KRYS_NODISCARD DOMString Min() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-min
-    void Min(dom::DOMString value) noexcept;
+    void Min(DOMString value) noexcept;
 
     using HTMLTextFormControlElement::MinLength;
 
@@ -287,22 +290,22 @@ namespace krys::boo::html
     void Multiple(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-name
-    KRYS_NODISCARD dom::DOMString Name() const noexcept override;
+    KRYS_NODISCARD DOMString Name() const noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-input-name
-    void Name(dom::DOMString value) noexcept;
+    void Name(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-pattern
-    KRYS_NODISCARD dom::DOMString Pattern() const noexcept;
+    KRYS_NODISCARD DOMString Pattern() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-pattern
-    void Pattern(dom::DOMString value) noexcept;
+    void Pattern(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-placeholder
-    KRYS_NODISCARD dom::DOMString Placeholder() const noexcept;
+    KRYS_NODISCARD DOMString Placeholder() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-placeholder
-    void Placeholder(dom::DOMString value) noexcept;
+    void Placeholder(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-readonly
     KRYS_NODISCARD bool ReadOnly() const noexcept;
@@ -320,7 +323,7 @@ namespace krys::boo::html
     KRYS_NODISCARD uint32 Size() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-size
-    dom::ExceptionOr<void> Size(uint32 value) noexcept;
+    ExceptionOr<void> Size(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-src
     KRYS_NODISCARD dom::USVString Src() const noexcept;
@@ -329,47 +332,47 @@ namespace krys::boo::html
     void Src(dom::USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-step
-    KRYS_NODISCARD dom::DOMString Step() const noexcept;
+    KRYS_NODISCARD DOMString Step() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-step
-    void Step(dom::DOMString value) noexcept;
+    void Step(DOMString value) noexcept;
 
     /// @brief The type's name: "text" for a missing or unknown type.
     /// @see https://html.spec.whatwg.org/#dom-input-type
-    KRYS_NODISCARD dom::DOMString Type() const noexcept
+    KRYS_NODISCARD DOMString Type() const noexcept
     {
       return FormControlType();
     }
 
     /// @see https://html.spec.whatwg.org/#dom-input-type
-    void Type(dom::DOMString value) noexcept;
+    void Type(DOMString value) noexcept;
 
     KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-input-defaultvalue
-    KRYS_NODISCARD dom::DOMString DefaultValue() const noexcept;
+    KRYS_NODISCARD DOMString DefaultValue() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-defaultvalue
-    void DefaultValue(dom::DOMString value) noexcept;
+    void DefaultValue(DOMString value) noexcept;
 
     /// @brief The value, by the type's value mode.
     /// @see https://html.spec.whatwg.org/#dom-input-value
-    KRYS_NODISCARD dom::DOMString Value() const noexcept final;
+    KRYS_NODISCARD DOMString Value() const noexcept final;
 
     /// @see https://html.spec.whatwg.org/#dom-input-value
-    dom::ExceptionOr<void> Value(const dom::DOMString &value) noexcept
+    ExceptionOr<void> Value(const DOMString &value) noexcept
     {
       return SetValue(value);
     }
 
-    dom::ExceptionOr<void>
-      SetValue(dom::DOMStringView value,
-               TextFieldEventBehavior eventBehavior = TextFieldEventBehavior::DispatchNoEvent,
-               TextControlSetValueSelection selection =
-                 TextControlSetValueSelection::SetSelectionToEnd) noexcept final;
+    ExceptionOr<void>
+      SetValue(DOMStringView value,
+               html::TextFieldEventBehavior eventBehavior = html::TextFieldEventBehavior::DispatchNoEvent,
+               html::TextControlSetValueSelection selection =
+                 html::TextControlSetValueSelection::SetSelectionToEnd) noexcept final;
 
     /// @brief Sets the value as the user would, firing `input` and `change`.
-    void SetValueForUser(dom::DOMStringView value) noexcept;
+    void SetValueForUser(DOMStringView value) noexcept;
 
     /// @brief The value as milliseconds since the epoch (NaN if it isn't a date), as `valueAsDate` exposes
     /// it.
@@ -377,14 +380,15 @@ namespace krys::boo::html
     KRYS_NODISCARD double ValueAsDate() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-valueasdate
-    dom::ExceptionOr<void> SetValueAsDate(double value) noexcept;
+    ExceptionOr<void> SetValueAsDate(double value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-valueasnumber
     KRYS_NODISCARD double ValueAsNumber() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-valueasnumber
-    dom::ExceptionOr<void> SetValueAsNumber(
-      double value, TextFieldEventBehavior eventBehavior = TextFieldEventBehavior::DispatchNoEvent) noexcept;
+    ExceptionOr<void> SetValueAsNumber(
+      double value,
+      html::TextFieldEventBehavior eventBehavior = html::TextFieldEventBehavior::DispatchNoEvent) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-width
     KRYS_NODISCARD uint32 Width() const noexcept;
@@ -393,48 +397,48 @@ namespace krys::boo::html
     void Width(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-stepup
-    dom::ExceptionOr<void> StepUp(int n = 1) noexcept;
+    ExceptionOr<void> StepUp(int n = 1) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-stepdown
-    dom::ExceptionOr<void> StepDown(int n = 1) noexcept;
+    ExceptionOr<void> StepDown(int n = 1) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-cva-validationmessage
-    KRYS_NODISCARD dom::DOMString ValidationMessage() const noexcept final;
+    KRYS_NODISCARD DOMString ValidationMessage() const noexcept final;
 
     /// @brief The selection's start, or null if the type has no selection.
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectionstart
     KRYS_NODISCARD Maybe<uint32> SelectionStartForBindings() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectionstart
-    dom::ExceptionOr<void> SetSelectionStartForBindings(Maybe<uint32> start) noexcept;
+    ExceptionOr<void> SetSelectionStartForBindings(Maybe<uint32> start) noexcept;
 
     /// @brief The selection's end, or null if the type has no selection.
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectionend
     KRYS_NODISCARD Maybe<uint32> SelectionEndForBindings() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectionend
-    dom::ExceptionOr<void> SetSelectionEndForBindings(Maybe<uint32> end) noexcept;
+    ExceptionOr<void> SetSelectionEndForBindings(Maybe<uint32> end) noexcept;
 
     /// @brief The selection's direction, or null if the type has no selection.
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectiondirection
-    KRYS_NODISCARD Maybe<dom::DOMString> SelectionDirectionForBindings() const noexcept;
+    KRYS_NODISCARD Maybe<DOMString> SelectionDirectionForBindings() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectiondirection
-    dom::ExceptionOr<void> SetSelectionDirectionForBindings(dom::DOMStringView direction) noexcept;
+    ExceptionOr<void> SetSelectionDirectionForBindings(DOMStringView direction) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-setselectionrange
-    dom::ExceptionOr<void> SetSelectionRangeForBindings(uint32 start, uint32 end,
-                                                        dom::DOMStringView direction = {}) noexcept;
+    ExceptionOr<void> SetSelectionRangeForBindings(uint32 start, uint32 end,
+                                                   DOMStringView direction = {}) noexcept;
 
     using HTMLTextFormControlElement::SetRangeText;
 
     /// @brief Throws `InvalidStateError` if the type has no selection.
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-setrangetext
-    dom::ExceptionOr<void> SetRangeText(dom::DOMStringView replacement, uint32 start, uint32 end,
-                                        dom::DOMStringView selectionMode) noexcept final;
+    ExceptionOr<void> SetRangeText(DOMStringView replacement, uint32 start, uint32 end,
+                                   DOMStringView selectionMode) noexcept final;
 
     /// @see https://html.spec.whatwg.org/#dom-input-showpicker
-    dom::ExceptionOr<void> ShowPicker() noexcept;
+    ExceptionOr<void> ShowPicker() noexcept;
 
     /// @brief Whether the type's picker is showing.
     KRYS_NODISCARD bool IsPresentingAttachedView() const noexcept;
@@ -471,9 +475,9 @@ namespace krys::boo::html
     /// @brief Sets @p step to the allowed value step, if there is one.
     KRYS_NODISCARD bool GetAllowedValueStep(Decimal *step) const noexcept;
 
-    KRYS_NODISCARD StepRange CreateStepRange(AnyStepHandling anyStepHandling) const noexcept;
+    KRYS_NODISCARD html::StepRange CreateStepRange(html::AnyStepHandling anyStepHandling) const noexcept;
 
-    KRYS_NODISCARD InputType &GetInputType() const noexcept
+    KRYS_NODISCARD html::InputType &GetInputType() const noexcept
     {
       return *_inputType;
     }
@@ -518,16 +522,16 @@ namespace krys::boo::html
     KRYS_NODISCARD bool IsImageButton() const noexcept;
 
     /// @brief The loader of an image button's image, if the element has been one.
-    KRYS_NODISCARD HTMLImageLoader *ImageLoaderIfExists() const noexcept
+    KRYS_NODISCARD html::HTMLImageLoader *ImageLoaderIfExists() const noexcept
     {
       return _imageLoader.get();
     }
 
-    KRYS_NODISCARD HTMLImageLoader &EnsureImageLoader() noexcept;
+    KRYS_NODISCARD html::HTMLImageLoader &EnsureImageLoader() noexcept;
 
     /// @brief An image button's label when it shows no image: the `alt` attribute, or else the `title` or
     /// `value` attribute, or else a default.
-    KRYS_NODISCARD dom::DOMString AltText() const noexcept;
+    KRYS_NODISCARD DOMString AltText() const noexcept;
 
     KRYS_NODISCARD bool IsNumberField() const noexcept;
 
@@ -557,20 +561,20 @@ namespace krys::boo::html
 
     /// @brief Whether @p value would be a valid value; not for types without a string value (checkboxes and
     /// radio buttons).
-    KRYS_NODISCARD bool IsValidValue(dom::DOMStringView value) const noexcept;
+    KRYS_NODISCARD bool IsValidValue(DOMStringView value) const noexcept;
 
     KRYS_NODISCARD bool HasDirtyValue() const noexcept
     {
       return _valueIfDirty.has_value();
     }
 
-    KRYS_NODISCARD Maybe<dom::DOMString> SanitizeValue(Maybe<dom::DOMStringView> value) const noexcept;
+    KRYS_NODISCARD Maybe<DOMString> SanitizeValue(Maybe<DOMStringView> value) const noexcept;
 
     /// @brief The value as the input shows it.
-    KRYS_NODISCARD dom::DOMString VisibleValue() const noexcept;
+    KRYS_NODISCARD DOMString VisibleValue() const noexcept;
 
     /// @brief The value, or the type's default if there's none (a submit button's label, say).
-    KRYS_NODISCARD dom::DOMString ValueWithDefault() const noexcept;
+    KRYS_NODISCARD DOMString ValueWithDefault() const noexcept;
 
     KRYS_NODISCARD bool IsActivatedSubmit() const noexcept final;
 
@@ -588,15 +592,15 @@ namespace krys::boo::html
     KRYS_NODISCARD html::RadioButtonGroups *RadioButtonGroups() const noexcept;
 
     // Functions for InputType classes.
-    void SetValueInternal(dom::DOMStringView sanitizedValue, TextFieldEventBehavior eventBehavior) noexcept;
+    void SetValueInternal(DOMStringView sanitizedValue, html::TextFieldEventBehavior eventBehavior) noexcept;
 
     /// @brief Takes the text the user edited as the value (dirty, and modified by the user).
-    void SetValueFromRenderer(dom::DOMStringView value) noexcept;
+    void SetValueFromRenderer(DOMStringView value) noexcept;
 
     /// @brief Caches a collapsed selection at @p caretOffset, as setting the value does while unfocused.
     void CacheSelectionInResponseToSetValue(uint32 caretOffset) noexcept
     {
-      CacheSelection(caretOffset, caretOffset, TextFieldSelectionDirection::SelectionHasNoDirection);
+      CacheSelection(caretOffset, caretOffset, html::TextFieldSelectionDirection::SelectionHasNoDirection);
     }
 
     /// @brief Tells the editor a text field stopped being edited.
@@ -624,9 +628,9 @@ namespace krys::boo::html
 
     KRYS_NODISCARD HTMLElement *PlaceholderElement() const noexcept final;
 
-    KRYS_NODISCARD RefPtr<TextControlInnerTextElement> InnerTextElement() const noexcept final;
+    KRYS_NODISCARD RefPtr<html::TextControlInnerTextElement> InnerTextElement() const noexcept final;
 
-    RefPtr<TextControlInnerTextElement> InnerTextElementCreatingShadowSubtreeIfNeeded() noexcept final;
+    RefPtr<html::TextControlInnerTextElement> InnerTextElementCreatingShadowSubtreeIfNeeded() noexcept final;
 
     KRYS_NODISCARD RenderStyle CreateInnerTextStyle(const RenderStyle &style) noexcept final;
 
@@ -658,16 +662,16 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool MatchesReadWritePseudoClass() const noexcept final;
 
-    KRYS_NODISCARD Maybe<dom::DOMString> ResultForDialogSubmit() const noexcept final;
+    KRYS_NODISCARD Maybe<DOMString> ResultForDialogSubmit() const noexcept final;
 
-    KRYS_NODISCARD dom::DOMString FormControlType() const noexcept final;
+    KRYS_NODISCARD DOMString FormControlType() const noexcept final;
 
     KRYS_NODISCARD bool CanTriggerImplicitSubmission() const noexcept final
     {
       return IsTextField();
     }
 
-    bool AppendFormData(DOMFormData &formData) noexcept final;
+    bool AppendFormData(html::DOMFormData &formData) noexcept final;
 
     KRYS_NODISCARD bool IsSuccessfulSubmitButton() const noexcept final;
 
@@ -700,53 +704,51 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &style) noexcept final;
 
-    void LegacyPreActivationBehavior(dom::Event &event) noexcept final;
+    void LegacyPreActivationBehavior(Event &event) noexcept final;
 
-    void ActivationBehavior(dom::Event &event) noexcept final;
+    void ActivationBehavior(Event &event) noexcept final;
 
-    void LegacyCanceledActivationBehavior(dom::Event &event) noexcept final;
+    void LegacyCanceledActivationBehavior(Event &event) noexcept final;
 
-    void DefaultEventHandler(dom::Event &event) noexcept final;
+    void DefaultEventHandler(Event &event) noexcept final;
 
 #pragma region HTMLInputElement Obsolete members - https://html.spec.whatwg.org/#HTMLInputElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-input-align
-    KRYS_NODISCARD dom::DOMString Align() const noexcept;
+    KRYS_NODISCARD DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-align
-    void Align(dom::DOMString value) noexcept;
+    void Align(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-usemap
-    KRYS_NODISCARD dom::DOMString UseMap() const noexcept;
+    KRYS_NODISCARD DOMString UseMap() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-usemap
-    void UseMap(dom::DOMString value) noexcept;
+    void UseMap(DOMString value) noexcept;
 
 #pragma endregion
 
   protected:
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
     void OnInsert() noexcept final;
 
     void OnPostConnection() noexcept final;
 
-    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept final;
 
-    void OnAdopt(dom::Document &oldDocument) noexcept final;
+    void OnAdopt(Document &oldDocument) noexcept final;
 
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept final;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept final;
 
-    void OnClone(dom::Node &copy, bool subtree) noexcept final;
+    void OnClone(Node &copy, bool subtree) noexcept final;
 
     KRYS_NODISCARD bool IsEmptyValue() const noexcept final;
 
@@ -754,7 +756,7 @@ namespace krys::boo::html
 
     void SubtreeHasChanged() noexcept final;
 
-    void HandleFocusEvent(dom::Node *oldFocusedNode) noexcept final;
+    void HandleFocusEvent(Node *oldFocusedNode) noexcept final;
 
     void HandleBlurEvent() noexcept final;
 
@@ -772,7 +774,7 @@ namespace krys::boo::html
 
   private:
     /// @brief The value, or null if the type has none (no dirty value, value attribute or fallback).
-    KRYS_NODISCARD Maybe<dom::DOMString> ValueOrNull() const noexcept;
+    KRYS_NODISCARD Maybe<DOMString> ValueOrNull() const noexcept;
 
     KRYS_NODISCARD bool SupportsMinLength() const noexcept
     {
@@ -784,11 +786,11 @@ namespace krys::boo::html
       return IsTextType();
     }
 
-    KRYS_NODISCARD bool TooShort(dom::DOMStringView value, NeedsToCheckDirtyFlag check) const noexcept;
+    KRYS_NODISCARD bool TooShort(DOMStringView value, NeedsToCheckDirtyFlag check) const noexcept;
 
-    KRYS_NODISCARD bool TooLong(dom::DOMStringView value, NeedsToCheckDirtyFlag check) const noexcept;
+    KRYS_NODISCARD bool TooLong(DOMStringView value, NeedsToCheckDirtyFlag check) const noexcept;
 
-    void UpdateType(dom::DOMStringView typeAttributeValue) noexcept;
+    void UpdateType(DOMStringView typeAttributeValue) noexcept;
 
     void RunPostTypeUpdateTasks() noexcept;
 
@@ -797,9 +799,9 @@ namespace krys::boo::html
 
     void InvalidateStyleOnFocusChangeIfNeeded() noexcept;
 
-    void MaxLengthAttributeChanged(Maybe<dom::DOMStringView> newValue) noexcept;
+    void MaxLengthAttributeChanged(Maybe<DOMStringView> newValue) noexcept;
 
-    void MinLengthAttributeChanged(Maybe<dom::DOMStringView> newValue) noexcept;
+    void MinLengthAttributeChanged(Maybe<DOMStringView> newValue) noexcept;
 
     void UpdateValueIfNeeded() noexcept;
 
@@ -812,13 +814,13 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLInputElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLInputElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLInputElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLInputElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLInputElement();
   }

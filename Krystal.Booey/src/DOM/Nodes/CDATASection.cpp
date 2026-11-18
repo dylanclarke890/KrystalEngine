@@ -5,7 +5,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   CDATASection::CDATASection(Document &document, DOMString data) noexcept
       : Text(document, krys::move(data), Text::CDATAConstructorTag {})

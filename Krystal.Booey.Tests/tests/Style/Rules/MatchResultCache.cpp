@@ -28,9 +28,9 @@ namespace krys::boo::style::tests
         return {.ParentStyle = BodyStyle.get()};
       }
 
-      KRYS_NODISCARD dom::StyledElement &Styled(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD StyledElement &Styled(DOMStringView id) noexcept
       {
-        return Downcast<dom::StyledElement>(ById(id));
+        return Downcast<StyledElement>(ById(id));
       }
     };
   }
@@ -44,7 +44,7 @@ namespace krys::boo::style::tests
     // Parsed inline styles are immutable: only inline styles changed through the CSSOM are cached.
     cache.Set(x, resolver.UnadjustedStyleForElement(x, Context()));
     CHECK_FALSE(cache.ResultWithCurrentInlineStyle(x));
-    REQUIRE(x.SetInlineStyleProperty(css::PropertyId::Width, css::CSSOMString(u8"6px")));
+    REQUIRE(x.SetInlineStyleProperty(css::PropertyId::Width, CSSOMString(u8"6px")));
 
     auto unadjusted = resolver.UnadjustedStyleForElement(x, Context());
     REQUIRE(unadjusted.MatchResult);
@@ -62,7 +62,7 @@ namespace krys::boo::style::tests
 
     SECTION("Changed low-priority properties are applied alone")
     {
-      REQUIRE(x.SetInlineStyleProperty(css::PropertyId::Width, css::CSSOMString(u8"7px")));
+      REQUIRE(x.SetInlineStyleProperty(css::PropertyId::Width, CSSOMString(u8"7px")));
       auto cached = cache.ResultWithCurrentInlineStyle(x);
       REQUIRE(cached);
       REQUIRE(cached->ChangedProperties.Ids.size() == 1u);
@@ -88,12 +88,12 @@ namespace krys::boo::style::tests
 
     SECTION("Changed high-priority properties apply every property")
     {
-      REQUIRE(x.SetInlineStyleProperty(css::PropertyId::Width, css::CSSOMString(u8"1em")));
-      REQUIRE(x.SetInlineStyleProperty(css::PropertyId::Opacity, css::CSSOMString(u8"0.25")));
+      REQUIRE(x.SetInlineStyleProperty(css::PropertyId::Width, CSSOMString(u8"1em")));
+      REQUIRE(x.SetInlineStyleProperty(css::PropertyId::Opacity, CSSOMString(u8"0.25")));
       // Rebuild the entry with a font size in it.
-      REQUIRE(x.SetInlineStyleProperty(css::PropertyId::FontSize, css::CSSOMString(u8"10px")));
+      REQUIRE(x.SetInlineStyleProperty(css::PropertyId::FontSize, CSSOMString(u8"10px")));
       cache.Set(x, resolver.UnadjustedStyleForElement(x, Context()));
-      REQUIRE(x.SetInlineStyleProperty(css::PropertyId::FontSize, css::CSSOMString(u8"30px")));
+      REQUIRE(x.SetInlineStyleProperty(css::PropertyId::FontSize, CSSOMString(u8"30px")));
 
       auto cached = cache.ResultWithCurrentInlineStyle(x);
       REQUIRE(cached);
@@ -108,7 +108,7 @@ namespace krys::boo::style::tests
 
     SECTION("Adding a property drops the entry")
     {
-      REQUIRE(x.SetInlineStyleProperty(css::PropertyId::Height, css::CSSOMString(u8"9px")));
+      REQUIRE(x.SetInlineStyleProperty(css::PropertyId::Height, CSSOMString(u8"9px")));
       CHECK_FALSE(cache.ResultWithCurrentInlineStyle(x));
       CHECK_FALSE(cache.ResultWithCurrentInlineStyle(x));
     }

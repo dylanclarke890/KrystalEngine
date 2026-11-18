@@ -30,25 +30,32 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSFunctionDescriptors;
-  class FunctionDeclarationsRule;
+}
 
+namespace krys::boo::css
+{
+  class FunctionDeclarationsRule;
+}
+
+namespace krys::boo
+{
   /// @brief The declarations of an `@function` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-mixins/#cssfunctiondeclarations
   class CSSFunctionDeclarations final : public CSSRule
   {
   private:
-    Ref<FunctionDeclarationsRule> _styleRule;
+    Ref<css::FunctionDeclarationsRule> _styleRule;
     RefPtr<CSSFunctionDescriptors> _descriptorsCSSOMWrapper;
 
-    CSSFunctionDeclarations(FunctionDeclarationsRule &rule, CSSStyleSheet *parent) noexcept;
+    CSSFunctionDeclarations(css::FunctionDeclarationsRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
     ~CSSFunctionDeclarations() noexcept override;
 
-    KRYS_NODISCARD static Ref<CSSFunctionDeclarations> Create(FunctionDeclarationsRule &rule,
+    KRYS_NODISCARD static Ref<CSSFunctionDeclarations> Create(css::FunctionDeclarationsRule &rule,
                                                               CSSStyleSheet *sheet) noexcept;
 
     KRYS_NODISCARD CSSFunctionDescriptors &Style() noexcept;
@@ -56,17 +63,17 @@ namespace krys::boo::css
   private:
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
-    void Reattach(Rule &rule) noexcept final;
+    void Reattach(css::Rule &rule) noexcept final;
 
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::FunctionDeclarations;
+      return css::RuleType::FunctionDeclarations;
     }
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSFunctionDeclarations)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSFunctionDeclarations)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::FunctionDeclarations;
   }

@@ -33,24 +33,20 @@
 namespace krys::boo
 {
   class CachedImage;
-  class SharedBuffer;
-}
-
-namespace krys::boo::html
-{
   class HTMLImageElement;
+  class SharedBuffer;
 
   /// @brief The document a load of an image shows: an `img` in an otherwise empty document, given the loaded
   /// bytes rather than fetching them. The image is shrunk to fit the view, and a click on it toggles between
   /// that and its natural size.
   /// @see https://html.spec.whatwg.org/#read-media
-  class ImageDocument final : public dom::HTMLDocument
+  class ImageDocument final : public HTMLDocument
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ImageDocument);
 
   private:
     WeakPtr<HTMLImageElement> _imageElement;
-    dom::EventListenerHandle _clickListener;
+    EventListenerHandle _clickListener;
     bool _imageSizeIsKnown {false};
     bool _didShrinkImage {false};
     bool _shouldShrinkImage {true};
@@ -96,8 +92,8 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::ImageDocument)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Document &document) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::ImageDocument)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Document &document) noexcept
   {
     return document.IsImageDocument();
   }

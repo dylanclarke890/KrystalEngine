@@ -19,14 +19,13 @@ namespace krys::boo::tests
   {
     using namespace std::chrono_literals;
 
-    KRYS_NODISCARD std::string Narrow(const dom::DOMString &string)
+    KRYS_NODISCARD std::string Narrow(const DOMString &string)
     {
       return std::string(string.begin(), string.end());
     }
 
-    KRYS_NODISCARD InputKeyframe Keyframe(KeyframeOffset offset,
-                                          List<Pair<dom::DOMString, dom::DOMString>> properties,
-                                          dom::DOMString easing = u8"linear") noexcept
+    KRYS_NODISCARD InputKeyframe Keyframe(KeyframeOffset offset, List<Pair<DOMString, DOMString>> properties,
+                                          DOMString easing = u8"linear") noexcept
     {
       InputKeyframe keyframe;
       keyframe.Offset = krys::move(offset);
@@ -42,7 +41,7 @@ namespace krys::boo::tests
       {
       }
 
-      KRYS_NODISCARD dom::ExceptionOr<Ref<KeyframeEffect>>
+      KRYS_NODISCARD ExceptionOr<Ref<KeyframeEffect>>
         Effect(KeyframesInput &&keyframes,
                Maybe<Variant<double, KeyframeEffectOptions>> &&options = 1'000.0) noexcept
       {
@@ -50,13 +49,13 @@ namespace krys::boo::tests
       }
     };
 
-    KRYS_NODISCARD Ref<KeyframeEffect> Valid(dom::ExceptionOr<Ref<KeyframeEffect>> result)
+    KRYS_NODISCARD Ref<KeyframeEffect> Valid(ExceptionOr<Ref<KeyframeEffect>> result)
     {
       REQUIRE(result.HasValue());
       return result.ReleaseValue();
     }
 
-    KRYS_NODISCARD dom::ExceptionCode Error(dom::ExceptionOr<Ref<KeyframeEffect>> result)
+    KRYS_NODISCARD ExceptionCode Error(ExceptionOr<Ref<KeyframeEffect>> result)
     {
       REQUIRE(result.HasException());
       return result.ReleaseException().Code();
@@ -124,12 +123,11 @@ namespace krys::boo::tests
     SECTION("invalid keyframes throw a TypeError")
     {
       CHECK(Error(fixture.Effect(List<InputKeyframe> {Keyframe(0.5, {}), Keyframe(0.25, {})}))
-            == dom::ExceptionCode::TypeError);
-      CHECK(Error(fixture.Effect(List<InputKeyframe> {Keyframe(1.5, {})})) == dom::ExceptionCode::TypeError);
+            == ExceptionCode::TypeError);
+      CHECK(Error(fixture.Effect(List<InputKeyframe> {Keyframe(1.5, {})})) == ExceptionCode::TypeError);
       CHECK(Error(fixture.Effect(List<InputKeyframe> {Keyframe(nullptr, {}, u8"bounce")}))
-            == dom::ExceptionCode::TypeError);
-      CHECK(Error(fixture.Effect(List<InputKeyframe> {Keyframe(u8"lemon", {})}))
-            == dom::ExceptionCode::TypeError);
+            == ExceptionCode::TypeError);
+      CHECK(Error(fixture.Effect(List<InputKeyframe> {Keyframe(u8"lemon", {})})) == ExceptionCode::TypeError);
     }
 
     SECTION("string offsets")
@@ -155,7 +153,7 @@ namespace krys::boo::tests
 
     InputPropertyIndexedKeyframes keyframes;
     keyframes.Properties = {{u8"opacity", {u8"0", u8"0.5", u8"1"}}, {u8"marginLeft", {u8"0px", u8"30px"}}};
-    keyframes.Easing = List<dom::DOMString> {u8"ease-in", u8"ease-out"};
+    keyframes.Easing = List<DOMString> {u8"ease-in", u8"ease-out"};
     auto effect = Valid(fixture.Effect(krys::move(keyframes)));
 
     // The opacities at 0, 0.5 and 1 and the margins at 0 and 1 merge into three keyframes, and the easings
@@ -184,8 +182,8 @@ namespace krys::boo::tests
     // An unused easing must still parse.
     InputPropertyIndexedKeyframes unusedEasing;
     unusedEasing.Properties = {{u8"opacity", {u8"1"}}};
-    unusedEasing.Easing = List<dom::DOMString> {u8"linear", u8"bounce"};
-    CHECK(Error(fixture.Effect(krys::move(unusedEasing))) == dom::ExceptionCode::TypeError);
+    unusedEasing.Easing = List<DOMString> {u8"linear", u8"bounce"};
+    CHECK(Error(fixture.Effect(krys::move(unusedEasing))) == ExceptionCode::TypeError);
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "KeyframeEffect: options, copies and setKeyframes()",
@@ -209,12 +207,12 @@ namespace krys::boo::tests
 
     SECTION("pseudo-elements")
     {
-      CHECK(effect->SetPseudoElement(u8"::lemon").GetException().Code() == dom::ExceptionCode::SyntaxError);
+      CHECK(effect->SetPseudoElement(u8"::lemon").GetException().Code() == ExceptionCode::SyntaxError);
       CHECK_FALSE(effect->SetPseudoElement(u8"").HasException());
       CHECK_FALSE(effect->TargetsPseudoElement());
 
       options.PseudoElement = u8"lemon";
-      CHECK(Error(fixture.Effect(nullptr, options)) == dom::ExceptionCode::SyntaxError);
+      CHECK(Error(fixture.Effect(nullptr, options)) == ExceptionCode::SyntaxError);
     }
 
     SECTION("a copy")

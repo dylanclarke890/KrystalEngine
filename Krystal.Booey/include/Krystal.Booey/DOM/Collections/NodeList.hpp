@@ -6,10 +6,13 @@
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Node;
+}
 
+namespace krys::boo::dom
+{
   /// @see https://dom.spec.whatwg.org/#interface-nodelist
   class NodeList : public RefCounted<NodeList>, public CanMakeWeakPtr<NodeList>
   {

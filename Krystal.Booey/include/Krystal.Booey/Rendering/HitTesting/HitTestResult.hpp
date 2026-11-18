@@ -36,14 +36,10 @@
 
 namespace krys::boo
 {
+  class Element;
   class Image;
   class LocalFrame;
-
-  namespace dom
-  {
-    class Element;
-    class Node;
-  }
+  class Node;
 
   enum class HitTestProgress
   {
@@ -59,18 +55,18 @@ namespace krys::boo
   {
   public:
     /// @brief The nodes a list-based test hit, in the order they were hit, each once.
-    using NodeSet = List<Ref<dom::Node>>;
+    using NodeSet = List<Ref<boo::Node>>;
 
   private:
     HitTestLocation _hitTestLocation;
 
-    RefPtr<dom::Node> _innerNode;
-    RefPtr<dom::Node> _innerNonSharedNode;
+    RefPtr<boo::Node> _innerNode;
+    RefPtr<boo::Node> _innerNonSharedNode;
     DoublePoint _doublePointInInnerNodeFrame; // The hit-tested point in innerNode frame coordinates.
     // A point in the local coordinate space of _innerNonSharedNode's renderer. Allows us to efficiently
     // determine where inside the renderer we hit on subsequent operations.
     LayoutPoint _localPoint;
-    RefPtr<dom::Element> _innerURLElement;
+    RefPtr<boo::Element> _innerURLElement;
     RefPtr<Scrollbar> _scrollbar;
     // Returns true if we are over a widget (and not in the border/padding area of a RenderWidget for
     // example).
@@ -105,25 +101,25 @@ namespace krys::boo
 
     HitTestResult &operator=(const HitTestResult &other) noexcept;
 
-    void SetInnerNode(dom::Node *node) noexcept;
+    void SetInnerNode(boo::Node *node) noexcept;
 
-    KRYS_NODISCARD dom::Node *InnerNode() const noexcept
+    KRYS_NODISCARD boo::Node *InnerNode() const noexcept
     {
       return _innerNode.get();
     }
 
-    void SetInnerNonSharedNode(dom::Node *node) noexcept;
+    void SetInnerNonSharedNode(boo::Node *node) noexcept;
 
-    KRYS_NODISCARD dom::Node *InnerNonSharedNode() const noexcept
+    KRYS_NODISCARD boo::Node *InnerNonSharedNode() const noexcept
     {
       return _innerNonSharedNode.get();
     }
 
-    KRYS_NODISCARD dom::Element *InnerNonSharedElement() const noexcept;
+    KRYS_NODISCARD boo::Element *InnerNonSharedElement() const noexcept;
 
-    void SetURLElement(dom::Element *element) noexcept;
+    void SetURLElement(boo::Element *element) noexcept;
 
-    KRYS_NODISCARD dom::Element *URLElement() const noexcept
+    KRYS_NODISCARD boo::Element *URLElement() const noexcept
     {
       return _innerURLElement.get();
     }
@@ -220,11 +216,11 @@ namespace krys::boo
     /// @brief Adds @p node to the nodes a list-based test hit.
     /// @return Whether the test can stop: never for a test of every element under the point, else once @p
     /// rect covers the whole area tested.
-    HitTestProgress AddNodeToListBasedTestResult(dom::Node *node, const HitTestRequest &request,
+    HitTestProgress AddNodeToListBasedTestResult(boo::Node *node, const HitTestRequest &request,
                                                  const HitTestLocation &locationInContainer,
                                                  const LayoutRect &rect = LayoutRect()) noexcept;
 
-    HitTestProgress AddNodeToListBasedTestResult(dom::Node *node, const HitTestRequest &request,
+    HitTestProgress AddNodeToListBasedTestResult(boo::Node *node, const HitTestRequest &request,
                                                  const HitTestLocation &locationInContainer,
                                                  const FloatRect &rect) noexcept;
 
@@ -233,19 +229,19 @@ namespace krys::boo
 
     KRYS_NODISCARD const NodeSet &ListBasedTestResult() const noexcept;
 
-    KRYS_NODISCARD dom::Node *TargetNode() const noexcept
+    KRYS_NODISCARD boo::Node *TargetNode() const noexcept
     {
       return InnerNode();
     }
 
     /// @brief The inner node, or the nearest element above it.
-    KRYS_NODISCARD dom::Element *TargetElement() const noexcept;
+    KRYS_NODISCARD boo::Element *TargetElement() const noexcept;
 
   private:
     KRYS_NODISCARD NodeSet &MutableListBasedTestResult() noexcept;
 
     template <typename TRect>
-    HitTestProgress AddNodeToListBasedTestResultCommon(dom::Node *node, const HitTestRequest &request,
+    HitTestProgress AddNodeToListBasedTestResultCommon(boo::Node *node, const HitTestRequest &request,
                                                        const HitTestLocation &locationInContainer,
                                                        const TRect &rect) noexcept;
   };

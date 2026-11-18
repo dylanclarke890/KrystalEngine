@@ -1102,8 +1102,8 @@ namespace krys::boo::style
 
     if (!initialDesc.FirstFamily().View().empty())
     {
-      builderState.SetFontDescriptionFamilies(FontFamilies {
-        List<css::CSSOMStringAtom> {initialDesc.Families()}, fontDescription.IsSpecifiedFont()});
+      builderState.SetFontDescriptionFamilies(
+        FontFamilies {List<CSSOMStringAtom> {initialDesc.Families()}, fontDescription.IsSpecifiedFont()});
     }
   }
 
@@ -1330,7 +1330,7 @@ namespace krys::boo::style
       {
         return;
       }
-      css::CSSOMStringAtom identifier {pair->first->StringValue()};
+      CSSOMStringAtom identifier {pair->first->StringValue()};
       int32 counterValue = pair->second->ResolveAsNumber<int32>(conversionData);
       auto &directives = map.try_emplace(identifier).first->second;
       if constexpr (counterBehavior == Reset)
@@ -1500,7 +1500,7 @@ namespace krys::boo::style
     for (auto *ancestor = builderState.GetElement() ? builderState.GetElement()->ParentElement() : nullptr;
          ancestor; ancestor = ancestor->ParentElement())
     {
-      if (Is<html::HTMLElement>(*ancestor) && ancestor->TagQualifiedName().TagName() == html::TagName::rt)
+      if (Is<HTMLElement>(*ancestor) && ancestor->TagQualifiedName().TagName() == html::TagName::rt)
       {
         return 1.0f;
       }

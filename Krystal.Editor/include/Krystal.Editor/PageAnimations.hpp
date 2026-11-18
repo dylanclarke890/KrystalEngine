@@ -28,13 +28,13 @@ namespace krys::editor
     constexpr static double Duration = 2'000;
 
   private:
-    WeakPtr<boo::dom::Document> _document;
+    WeakPtr<boo::Document> _document;
     RefPtr<boo::WebAnimation> _animation;
-    Array<boo::dom::EventListenerHandle, 4> _listeners;
+    Array<boo::EventListenerHandle, 4> _listeners;
     int32 _frameRequest {0};
 
   public:
-    explicit PageAnimations(boo::dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
+    explicit PageAnimations(boo::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
       auto ball = document.GetElementById(u8"anim-ball");
       if (!ball)
@@ -55,8 +55,8 @@ namespace krys::editor
         return;
       }
 
-      auto listen = [&](utf8_stringview id, boo::dom::DOMStringAtom type,
-                        Func<void(boo::dom::Event &)> &&callback) -> boo::dom::EventListenerHandle
+      auto listen = [&](utf8_stringview id, boo::DOMStringAtom type,
+                        Func<void(boo::Event &)> &&callback) -> boo::EventListenerHandle
       {
         if (auto element = document.GetElementById(id))
         {
@@ -64,18 +64,16 @@ namespace krys::editor
         }
         return {};
       };
-      _listeners[0] =
-        listen(u8"anim-play", u8"click", [this](boo::dom::Event &) { (void)_animation->Play(); });
-      _listeners[1] =
-        listen(u8"anim-pause", u8"click", [this](boo::dom::Event &) { (void)_animation->Pause(); });
+      _listeners[0] = listen(u8"anim-play", u8"click", [this](boo::Event &) { (void)_animation->Play(); });
+      _listeners[1] = listen(u8"anim-pause", u8"click", [this](boo::Event &) { (void)_animation->Pause(); });
       _listeners[2] =
-        listen(u8"anim-reverse", u8"click", [this](boo::dom::Event &) { (void)_animation->Reverse(); });
+        listen(u8"anim-reverse", u8"click", [this](boo::Event &) { (void)_animation->Reverse(); });
       _listeners[3] = listen(u8"anim-seek", u8"input",
-                             [this](boo::dom::Event &)
+                             [this](boo::Event &)
                              {
                                if (auto seek = _document ? _document->GetElementById(u8"anim-seek") : nullptr)
                                {
-                                 if (auto *input = DynamicDowncast<boo::html::HTMLInputElement>(seek.get()))
+                                 if (auto *input = DynamicDowncast<boo::HTMLInputElement>(seek.get()))
                                  {
                                    Seek(input->ValueAsNumber() / 100);
                                  }
@@ -116,7 +114,7 @@ namespace krys::editor
 
   private:
     /// @brief Animates @p ball from its track's start to its end, paused at the start.
-    KRYS_NODISCARD bool CreateAnimation(boo::dom::Element &ball) noexcept
+    KRYS_NODISCARD bool CreateAnimation(boo::Element &ball) noexcept
     {
       // The ball's margin is a share of the track's width, less its own.
       boo::InputKeyframe start;
@@ -180,12 +178,11 @@ namespace krys::editor
                               PlayStateName(_animation->GetPlayState()));
       if (auto label = _document->GetElementById(u8"anim-time"))
       {
-        (void)label->TextContent(
-          boo::dom::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
+        (void)label->TextContent(boo::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
       }
       if (auto seek = _document->GetElementById(u8"anim-seek"))
       {
-        if (auto *input = DynamicDowncast<boo::html::HTMLInputElement>(seek.get()))
+        if (auto *input = DynamicDowncast<boo::HTMLInputElement>(seek.get()))
         {
           (void)input->SetValueAsNumber(seconds * 1'000 / Duration * 100);
         }

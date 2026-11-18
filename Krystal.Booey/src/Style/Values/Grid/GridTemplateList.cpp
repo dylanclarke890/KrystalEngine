@@ -68,7 +68,7 @@ namespace krys::boo::style
           ++currentNamedGridLine;
           Sizes.push_back(size);
         },
-        [&](const List<css::CSSOMString> &names)
+        [&](const List<CSSOMString> &names)
         {
           createGridLineNamesList(names, currentNamedGridLine, NamedLines, OrderedNamedLines);
           // Subgrids only have line names defined, not track sizes, so we want our count
@@ -84,7 +84,7 @@ namespace krys::boo::style
           {
             for (const auto &repeatEntry : repeat.Tracks)
             {
-              if (const auto *names = std::get_if<List<css::CSSOMString>>(&repeatEntry))
+              if (const auto *names = std::get_if<List<CSSOMString>>(&repeatEntry))
               {
                 createGridLineNamesList(*names, currentNamedGridLine, NamedLines, OrderedNamedLines);
                 // Subgrids only have line names defined, not track sizes, so we want our count
@@ -109,7 +109,7 @@ namespace krys::boo::style
           AutoRepeatType = repeat.Type;
           for (const auto &autoRepeatEntry : repeat.Tracks)
           {
-            if (const auto *names = std::get_if<List<css::CSSOMString>>(&autoRepeatEntry))
+            if (const auto *names = std::get_if<List<CSSOMString>>(&autoRepeatEntry))
             {
               createGridLineNamesList(*names, autoRepeatIndex, AutoRepeatNamedLines,
                                       AutoRepeatOrderedNamedLines);
@@ -176,9 +176,9 @@ namespace krys::boo::style
       {
         return;
       }
-      if (list.empty() || !std::holds_alternative<List<css::CSSOMString>>(list.back()))
+      if (list.empty() || !std::holds_alternative<List<CSSOMString>>(list.back()))
       {
-        list.emplace_back(List<css::CSSOMString> {});
+        list.emplace_back(List<CSSOMString> {});
       }
     };
 
@@ -195,7 +195,7 @@ namespace krys::boo::style
         if (const auto *namesValue = DynamicDowncast<css::GridLineNamesValue>(currentValue))
         {
           auto names = namesValue->Names();
-          repeatList.emplace_back(List<css::CSSOMString>(names.begin(), names.end()));
+          repeatList.emplace_back(List<CSSOMString>(names.begin(), names.end()));
         }
         else
         {
@@ -215,7 +215,7 @@ namespace krys::boo::style
       if (const auto *namesValue = DynamicDowncast<css::GridLineNamesValue>(currentValue))
       {
         auto names = namesValue->Names();
-        trackList.emplace_back(List<css::CSSOMString>(names.begin(), names.end()));
+        trackList.emplace_back(List<CSSOMString>(names.begin(), names.end()));
         return;
       }
 
@@ -281,7 +281,7 @@ namespace krys::boo::style
       krys::SwitchOn(
         from[i], [&](const GridTrackSize &size)
         { result.emplace_back(style::Blend(size, std::get<GridTrackSize>(to[i]), context)); },
-        [&](const List<css::CSSOMString> &names)
+        [&](const List<CSSOMString> &names)
         {
           if (context.Progress < 0.5)
           {
@@ -289,7 +289,7 @@ namespace krys::boo::style
           }
           else
           {
-            result.emplace_back(std::get<List<css::CSSOMString>>(to[i]));
+            result.emplace_back(std::get<List<CSSOMString>>(to[i]));
           }
         });
     }
@@ -309,8 +309,7 @@ namespace krys::boo::style
       const auto &toEntry = to.Tracks[i];
       bool canBlend = krys::SwitchOn(
         from.Tracks[i], [&](const GridTrackSize &) { return std::holds_alternative<GridTrackSize>(toEntry); },
-        [&](const List<css::CSSOMString> &)
-        { return std::holds_alternative<List<css::CSSOMString>>(toEntry); },
+        [&](const List<CSSOMString> &) { return std::holds_alternative<List<CSSOMString>>(toEntry); },
         [&](const GridTrackEntryRepeat &repeat)
         {
           const auto *toRepeat = std::get_if<GridTrackEntryRepeat>(&toEntry);
@@ -344,7 +343,7 @@ namespace krys::boo::style
       krys::SwitchOn(
         from.Tracks[i], [&](const GridTrackSize &size)
         { result.emplace_back(style::Blend(size, std::get<GridTrackSize>(toEntry), context)); },
-        [&](const List<css::CSSOMString> &names)
+        [&](const List<CSSOMString> &names)
         {
           if (context.Progress < 0.5)
           {
@@ -352,7 +351,7 @@ namespace krys::boo::style
           }
           else
           {
-            result.emplace_back(std::get<List<css::CSSOMString>>(toEntry));
+            result.emplace_back(std::get<List<CSSOMString>>(toEntry));
           }
         },
         [&](const GridTrackEntryRepeat &repeatFrom)

@@ -33,39 +33,43 @@
 namespace krys::boo::css
 {
   class NamespaceRule;
+}
 
+namespace krys::boo
+{
   /// @brief An `@namespace` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/cssom/#the-cssnamespacerule-interface
   class CSSNamespaceRule final : public CSSRule
   {
   private:
-    Ref<NamespaceRule> _namespaceRule;
+    Ref<css::NamespaceRule> _namespaceRule;
 
-    CSSNamespaceRule(NamespaceRule &rule, CSSStyleSheet *parent) noexcept;
+    CSSNamespaceRule(css::NamespaceRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
     ~CSSNamespaceRule() noexcept override;
 
-    KRYS_NODISCARD static Ref<CSSNamespaceRule> Create(NamespaceRule &rule, CSSStyleSheet *sheet) noexcept;
+    KRYS_NODISCARD static Ref<CSSNamespaceRule> Create(css::NamespaceRule &rule,
+                                                       CSSStyleSheet *sheet) noexcept;
 
     KRYS_NODISCARD const CSSOMStringAtom &NamespaceURI() const noexcept KRYS_LIFETIME_BOUND;
 
     KRYS_NODISCARD const CSSOMStringAtom &Prefix() const noexcept KRYS_LIFETIME_BOUND;
 
   private:
-    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
-      return RuleType::Namespace;
+      return css::RuleType::Namespace;
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
-    void Reattach(Rule &rule) noexcept final;
+    void Reattach(css::Rule &rule) noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSNamespaceRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CSSNamespaceRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::CSSRule &rule) noexcept
   {
     return rule.StyleRuleType() == krys::boo::css::RuleType::Namespace;
   }

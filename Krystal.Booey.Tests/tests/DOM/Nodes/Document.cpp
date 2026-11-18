@@ -484,7 +484,7 @@ namespace krys::boo::dom::tests
       CHECK(element->LocalName() == u8"div");
       CHECK(element->NamespaceURI() == infra::namespaces::HTML);
       CHECK(element->Prefix() == null);
-      CHECK(Is<html::HTMLElement>(*element));
+      CHECK(Is<HTMLElement>(*element));
     }
 
     SECTION("4. an XML document's are in no namespace, as given")
@@ -676,7 +676,7 @@ namespace krys::boo::dom::tests
     SECTION("a template's contents are adopted too")
     {
       auto templateElement = source->CreateElement(u8"template").ReleaseValue();
-      auto content = Downcast<html::HTMLTemplateElement>(*templateElement).Content();
+      auto content = Downcast<HTMLTemplateElement>(*templateElement).Content();
       REQUIRE_FALSE(content->AppendChild(*source->CreateTextNode(u8"text")).HasException());
       auto result = document->AdoptNode(*content).ReleaseValue();
       CHECK(result == content);
@@ -853,31 +853,31 @@ namespace krys::boo::dom::tests
 
     // Only a body or frameset element.
     auto div = document->CreateElement(u8"div").ReleaseValue();
-    CHECK(check(document->SetBodyOrFrameset(Downcast<html::HTMLElement>(*div)),
-                ExceptionCode::HierarchyRequestError));
+    CHECK(
+      check(document->SetBodyOrFrameset(Downcast<HTMLElement>(*div)), ExceptionCode::HierarchyRequestError));
 
     // The same body does nothing.
-    RefPtr<html::HTMLElement> body = ShareRefPtr(document->BodyOrFrameset());
+    RefPtr<HTMLElement> body = ShareRefPtr(document->BodyOrFrameset());
     REQUIRE_FALSE(document->SetBodyOrFrameset(*body).HasException());
     CHECK(document->BodyOrFrameset() == body.get());
 
     // A new body, not yet in the document, replaces the body element.
     auto newBody = document->CreateElement(u8"body").ReleaseValue();
-    REQUIRE_FALSE(document->SetBodyOrFrameset(Downcast<html::HTMLElement>(*newBody)).HasException());
+    REQUIRE_FALSE(document->SetBodyOrFrameset(Downcast<HTMLElement>(*newBody)).HasException());
     CHECK(document->BodyOrFrameset() == newBody.get());
     CHECK(body->ParentNode() == nullptr);
 
     // Without a body element, a frameset is appended to the document element.
     REQUIRE_FALSE(newBody->Remove().HasException());
     auto frameset = document->CreateElement(u8"frameset").ReleaseValue();
-    REQUIRE_FALSE(document->SetBodyOrFrameset(Downcast<html::HTMLElement>(*frameset)).HasException());
+    REQUIRE_FALSE(document->SetBodyOrFrameset(Downcast<HTMLElement>(*frameset)).HasException());
     CHECK(document->BodyOrFrameset() == frameset.get());
     CHECK(document->DocumentElement()->LastChild() == frameset.get());
 
     // Without a document element either, it throws.
     auto empty = CreateRef<HTMLDocument>();
     auto emptyBody = empty->CreateElement(u8"body").ReleaseValue();
-    CHECK(check(empty->SetBodyOrFrameset(Downcast<html::HTMLElement>(*emptyBody)),
+    CHECK(check(empty->SetBodyOrFrameset(Downcast<HTMLElement>(*emptyBody)),
                 ExceptionCode::HierarchyRequestError));
   }
 

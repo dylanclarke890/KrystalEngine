@@ -41,12 +41,16 @@
 #include "Krystal.Core/Utils/AllowCompactPointers.hpp"
 #include <new>
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class CSSGroupingRule;
   class CSSRule;
   class CSSStyleRule;
   class CSSStyleSheet;
+}
+
+namespace krys::boo::css
+{
   class MutableStyleProperties;
   class StyleProperties;
   class StyleSheetContents;
@@ -517,8 +521,8 @@ namespace krys::boo::css
   /// @brief The base of the rules that contain other rules.
   class GroupRule : public Rule
   {
-    friend class CSSGroupingRule;
-    friend class CSSStyleSheet;
+    friend class boo::CSSGroupingRule;
+    friend class boo::CSSStyleSheet;
 
   private:
     mutable List<Ref<Rule>> _childRules;

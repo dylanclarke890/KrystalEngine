@@ -4,10 +4,10 @@
 #include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
-  HTMLDataListElement::HTMLDataListElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::DataList)
+  HTMLDataListElement::HTMLDataListElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::DataList)
   {
   }
 
@@ -20,7 +20,7 @@ namespace krys::boo::html
     // The options IDL attribute must return an HTMLCollection rooted at the datalist node, whose filter
     // matches option elements.
     Ref<dom::HTMLCollection> options = CreateRef<dom::LiveHTMLCollection>(
-      *this, [](const dom::Element &element) { return Is<HTMLOptionElement>(element); });
+      *this, [](const Element &element) { return Is<HTMLOptionElement>(element); });
     _options = CreateWeakPtr<dom::HTMLCollection>(options.get());
     return options;
   }
@@ -43,7 +43,7 @@ namespace krys::boo::html
   {
     if (auto id = GetAttribute(u8"id"); id && !id->empty() && IsConnected())
     {
-      TreeScope().NotifyIdTargetObservers(*this, dom::DOMStringAtom(*id));
+      TreeScope().NotifyIdTargetObservers(*this, DOMStringAtom(*id));
     }
   }
 

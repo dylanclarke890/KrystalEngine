@@ -88,7 +88,7 @@ namespace krys::boo
     }
 
     /// @see https://drafts.csswg.org/css-animations-2/#dom-cssanimation-animationname
-    KRYS_NODISCARD const css::CSSOMStringAtom &AnimationName() const noexcept
+    KRYS_NODISCARD const CSSOMStringAtom &AnimationName() const noexcept
     {
       return _animationName.Name;
     }
@@ -127,7 +127,7 @@ namespace krys::boo
     KRYS_NODISCARD boo::TimingFunction *BackingAnimationTimingFunction() const noexcept final;
 
     KRYS_NODISCARD Ref<StyleOriginatedAnimationEvent>
-      CreateEvent(dom::DOMStringAtom eventType, Maybe<Seconds> scheduledTime, double elapsedTime,
+      CreateEvent(DOMStringAtom eventType, Maybe<Seconds> scheduledTime, double elapsedTime,
                   const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept final;
 
     KRYS_NODISCARD AnimationTimeline *BindingsTimeline() const noexcept final;
@@ -138,15 +138,15 @@ namespace krys::boo
 
     void SetBindingsRangeEnd(TimelineRangeValue &&range) noexcept final;
 
-    dom::ExceptionOr<void> BindingsPlay() noexcept final;
+    ExceptionOr<void> BindingsPlay() noexcept final;
 
-    dom::ExceptionOr<void> BindingsPause() noexcept final;
+    ExceptionOr<void> BindingsPause() noexcept final;
 
     void SetBindingsEffect(RefPtr<AnimationEffect> &&newEffect) noexcept final;
 
-    dom::ExceptionOr<void> SetBindingsStartTime(const Maybe<WebAnimationTime> &startTime) noexcept final;
+    ExceptionOr<void> SetBindingsStartTime(const Maybe<WebAnimationTime> &startTime) noexcept final;
 
-    dom::ExceptionOr<void> BindingsReverse() noexcept final;
+    ExceptionOr<void> BindingsReverse() noexcept final;
   };
 }
 

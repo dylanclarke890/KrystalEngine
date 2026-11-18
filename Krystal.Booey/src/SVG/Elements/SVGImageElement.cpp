@@ -30,9 +30,9 @@
 #include "Krystal.Booey/SVG/SVGImageLoader.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
-  SVGImageElement::SVGImageElement(dom::Document &document) noexcept
+  SVGImageElement::SVGImageElement(Document &document) noexcept
       : SVGGraphicsElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Image),
         SVGURIReference(this), _x(SVGAnimatedLength::Create(this, SVGLengthMode::Width)),
         _y(SVGAnimatedLength::Create(this, SVGLengthMode::Height)),
@@ -61,11 +61,11 @@ namespace krys::boo::svg
     return _imageLoader->Image();
   }
 
-  void SVGImageElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                         Maybe<dom::DOMStringView> value) noexcept
+  void SVGImageElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                         Maybe<DOMStringView> value) noexcept
   {
     auto parseError = SVGParsingError::None;
-    auto string = value.value_or(dom::DOMStringView {});
+    auto string = value.value_or(DOMStringView {});
 
     if (name == SVGNames::PreserveAspectRatioAttr())
     {
@@ -96,7 +96,7 @@ namespace krys::boo::svg
     SVGGraphicsElement::AttributeChanged(name, oldValue, value);
   }
 
-  void SVGImageElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
+  void SVGImageElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
   {
     if (PropertyRegistry::IsKnownAttribute(attributeName))
     {
@@ -169,16 +169,17 @@ namespace krys::boo::svg
     _imageLoader->UpdateFromElement();
   }
 
-  Maybe<dom::DOMString> SVGImageElement::ImageSourceURL() const noexcept
+  Maybe<DOMString> SVGImageElement::ImageSourceURL() const noexcept
   {
     if (auto href = GetAttribute(SVGNames::HrefAttr().LocalName()))
     {
       return href;
     }
-    return GetAttributeNS(XLinkNames::HrefAttr().NamespaceURI(), XLinkNames::HrefAttr().LocalName());
+    return GetAttributeNS(svg::XLinkNames::HrefAttr().NamespaceURI(),
+                          svg::XLinkNames::HrefAttr().LocalName());
   }
 
-  Maybe<dom::DOMString> SVGImageElement::CrossOrigin() const noexcept
+  Maybe<DOMString> SVGImageElement::CrossOrigin() const noexcept
   {
     // https://html.spec.whatwg.org/#cors-settings-attribute
     auto value = GetAttribute(u8"crossorigin");
@@ -188,12 +189,12 @@ namespace krys::boo::svg
     }
     if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*value, u8"use-credentials"))
     {
-      return dom::DOMString(u8"use-credentials");
+      return DOMString(u8"use-credentials");
     }
-    return dom::DOMString(u8"anonymous");
+    return DOMString(u8"anonymous");
   }
 
-  void SVGImageElement::CrossOrigin(Maybe<dom::DOMString> value) noexcept
+  void SVGImageElement::CrossOrigin(Maybe<DOMString> value) noexcept
   {
     if (value)
     {
@@ -205,7 +206,7 @@ namespace krys::boo::svg
     }
   }
 
-  void SVGImageElement::OnAdopt(dom::Document &oldDocument) noexcept
+  void SVGImageElement::OnAdopt(Document &oldDocument) noexcept
   {
     _imageLoader->ElementDidMoveToNewDocument(oldDocument);
     SVGGraphicsElement::OnAdopt(oldDocument);

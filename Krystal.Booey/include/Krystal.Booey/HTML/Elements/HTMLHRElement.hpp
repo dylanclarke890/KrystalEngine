@@ -24,7 +24,7 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlhrelement
   class HTMLHRElement : public HTMLElement
@@ -37,21 +37,21 @@ namespace krys::boo::html
       return HasChildNodes() && HTMLElement::CanContainRangeEndPoint();
     }
 
-    HTMLHRElement(dom::Document &document) noexcept;
+    HTMLHRElement(Document &document) noexcept;
 
 #pragma region HTMLHRElement Obsolete members - https://html.spec.whatwg.org/#HTMLHRElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-hr-align
-    KRYS_NODISCARD dom::DOMString Align() const noexcept;
+    KRYS_NODISCARD DOMString Align() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hr-align
-    void Align(dom::DOMString value) noexcept;
+    void Align(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hr-color
-    KRYS_NODISCARD dom::DOMString Color() const noexcept;
+    KRYS_NODISCARD DOMString Color() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hr-color
-    void Color(dom::DOMString value) noexcept;
+    void Color(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hr-noshade
     KRYS_NODISCARD bool NoShade() const noexcept;
@@ -60,39 +60,38 @@ namespace krys::boo::html
     void NoShade(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hr-size
-    KRYS_NODISCARD dom::DOMString Size() const noexcept;
+    KRYS_NODISCARD DOMString Size() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hr-size
-    void Size(dom::DOMString value) noexcept;
+    void Size(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hr-width
-    KRYS_NODISCARD dom::DOMString Width() const noexcept;
+    KRYS_NODISCARD DOMString Width() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hr-width
-    void Width(dom::DOMString value) noexcept;
+    void Width(DOMString value) noexcept;
 
 #pragma endregion
 
   protected:
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLHRElement)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLHRElement)
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
   {
-    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLHRElement();
+    return target.IsHTMLElement() && Downcast<krys::boo::HTMLElement>(target).IsHTMLHRElement();
   }
 
-  KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
   {
     return target.IsHTMLHRElement();
   }

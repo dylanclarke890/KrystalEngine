@@ -30,7 +30,7 @@ namespace krys::boo::svg::tests
 
     auto readOnly = SVGNumber::Create(&owner, SVGPropertyAccess::ReadOnly);
     CHECK(readOnly->SetValueForBindings(1).GetException().Code()
-          == dom::ExceptionCode::NoModificationAllowedError);
+          == ExceptionCode::NoModificationAllowedError);
     CHECK(SVGNumber::Create(2)->Clone()->ValueForBindings() == 2);
   }
 }

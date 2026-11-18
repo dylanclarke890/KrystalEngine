@@ -25,27 +25,27 @@
 #include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGAElement.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD bool IsInSummaryInteractiveContent(dom::EventTarget *target) noexcept
+    KRYS_NODISCARD bool IsInSummaryInteractiveContent(EventTarget *target) noexcept
     {
       // The target may have been retargeted out of the summary (the default summary's details), in which case
       // no summary is met on the way up.
       auto isInInteractiveContent = false;
-      auto *node = DynamicDowncast<dom::Node>(target);
-      for (auto *element = node ? DynamicDowncast<dom::Element>(*node) : nullptr; element;
+      auto *node = DynamicDowncast<Node>(target);
+      for (auto *element = node ? DynamicDowncast<Element>(*node) : nullptr; element;
            element = dom::TreeQueries::ParentOrShadowHostElement(*element))
       {
         if (Is<HTMLSummaryElement>(*element))
         {
           return isInInteractiveContent;
         }
-        auto *svgElement = DynamicDowncast<svg::SVGElement>(*element);
+        auto *svgElement = DynamicDowncast<SVGElement>(*element);
         if (auto *htmlElement = DynamicDowncast<HTMLElement>(*element);
             (htmlElement && htmlElement->IsInteractiveContent())
-            || (svgElement && Is<svg::SVGAElement>(*svgElement)))
+            || (svgElement && Is<SVGAElement>(*svgElement)))
         {
           isInInteractiveContent = true;
         }
@@ -54,8 +54,8 @@ namespace krys::boo::html
     }
   }
 
-  HTMLSummaryElement::HTMLSummaryElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Summary)
+  HTMLSummaryElement::HTMLSummaryElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::Summary)
   {
     SetEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
   }
@@ -85,7 +85,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#the-summary-element:activation-behaviour
-  void HTMLSummaryElement::ActivationBehavior(dom::Event &event) noexcept
+  void HTMLSummaryElement::ActivationBehavior(Event &event) noexcept
   {
     // 1. If this summary element is not the summary for its parent details, then return.
     // (Nor when the event targets interactive content within it, as in browsers.)
@@ -105,11 +105,11 @@ namespace krys::boo::html
     event.SetDefaultHandled();
   }
 
-  void HTMLSummaryElement::DefaultEventHandler(dom::Event &event) noexcept
+  void HTMLSummaryElement::DefaultEventHandler(Event &event) noexcept
   {
     if (IsActiveSummary())
     {
-      if (auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event))
+      if (auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event))
       {
         if (keyboardEvent->Type() == event_names::KeyDown && keyboardEvent->KeyIdentifier() == u8"U+0020")
         {
@@ -158,7 +158,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLSummaryElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLSummaryElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
     if (auto *details = DynamicDowncast<HTMLDetailsElement>(oldAncestor); details && isSubtreeRoot)
@@ -167,7 +167,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLSummaryElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  void HTMLSummaryElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
     if (!isSubtreeRoot)

@@ -33,7 +33,7 @@
 #include "Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp"
 #include "Krystal.Core/Enum.hpp"
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   /// @brief The class a MathML element is made as, which its tag name selects.
   enum class MathMLElementInterface : uint8
@@ -55,13 +55,13 @@ namespace krys::boo::mathml
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::mathml::MathMLElementInterface, 14uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::MathMLElementInterface, 14uz);
 
-namespace krys::boo::mathml
+namespace krys::boo
 {
   /// @see https://w3c.github.io/mathml-core/#dom-and-javascript
   /// @note Subclasses react to their attributes in `AttributeChanged`, then call their base's.
-  class MathMLElement : public dom::StyledElement
+  class MathMLElement : public StyledElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(MathMLElement);
 
@@ -69,7 +69,7 @@ namespace krys::boo::mathml
     MathMLElementInterface _interface {MathMLElementInterface::None};
 
   public:
-    explicit MathMLElement(dom::Document &document,
+    explicit MathMLElement(Document &document,
                            MathMLElementInterface interface = MathMLElementInterface::None,
                            dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
 
@@ -186,34 +186,32 @@ namespace krys::boo::mathml
     /// attributes. Overrides drop what they cached from the attribute, then call their base's.
     /// @param oldValue The previous value, or null if the attribute was added.
     /// @param value The new value, or null if the attribute was removed.
-    virtual void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
-                                  Maybe<dom::DOMStringView> value) noexcept;
+    virtual void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                  Maybe<DOMStringView> value) noexcept;
 
     void OnInsert() noexcept override;
 
-    KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &child) const noexcept override;
+    KRYS_NODISCARD bool ChildShouldCreateRenderer(const Node &child) const noexcept override;
 
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
-                                                const dom::DOMStringAtom &namespaceURI,
-                                                dom::DOMStringView value,
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
     /// @brief The value of the attribute @p name, or null if the element doesn't have it.
-    KRYS_NODISCARD Maybe<dom::DOMString> AttributeValue(const dom::QualifiedName &name) const noexcept;
+    KRYS_NODISCARD Maybe<DOMString> AttributeValue(const QualifiedName &name) const noexcept;
 
   private:
-    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value,
-                            const dom::DOMStringAtom &namespaceURI) noexcept final;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept final;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::mathml::MathMLElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::MathMLElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &node) noexcept
   {
     return node.IsMathMLElement();
   }

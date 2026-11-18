@@ -32,7 +32,7 @@
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::svg
+namespace krys::boo
 {
   /// @brief An SVG image as one client draws it: at that client's container size and zoom, scrolled to the
   /// fragment of the client's URL.
@@ -107,7 +107,7 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGImageForContainer)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGImageForContainer)
   KRYS_NODISCARD static bool IsType(const krys::boo::Image &image) noexcept
   {
     return image.IsSVGImageForContainer();
