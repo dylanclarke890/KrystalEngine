@@ -12,12 +12,12 @@
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
 #include "Krystal.PAL/DragAndDrop.hpp"
-#include "Krystal.PAL/KeyModifiers.hpp"
-#include "Krystal.PAL/Keys.hpp"
-#include "Krystal.PAL/MouseButtons.hpp"
+#include "Krystal.PAL/Input/KeyModifiers.hpp"
+#include "Krystal.PAL/Input/Keys.hpp"
+#include "Krystal.PAL/Input/MouseButtons.hpp"
+#include "Krystal.PAL/Input/TextInput.hpp"
+#include "Krystal.PAL/Input/TouchpadPan.hpp"
 #include "Krystal.PAL/Platform.hpp"
-#include "Krystal.PAL/TextInput.hpp"
-#include "Krystal.PAL/TouchpadPan.hpp"
 
 /// @brief Conversions between the platform layer's input and cursors and Booey's.
 namespace krys::ui::input

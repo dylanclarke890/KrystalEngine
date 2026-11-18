@@ -31,25 +31,25 @@ target_sources(Krystal.PAL
       include/Krystal.PAL/CursorShapes.hpp
       include/Krystal.PAL/Display.hpp
       include/Krystal.PAL/DragAndDrop.hpp
-      include/Krystal.PAL/KeyModifiers.hpp
       include/Krystal.PAL/Events.hpp
-      include/Krystal.PAL/Gamepad.hpp
-      include/Krystal.PAL/Input.hpp
       include/Krystal.PAL/IWindow.hpp
-      include/Krystal.PAL/Keyboard.hpp
-      include/Krystal.PAL/Keys.hpp
-      include/Krystal.PAL/Mouse.hpp
-      include/Krystal.PAL/MouseButtons.hpp
       include/Krystal.PAL/Platform.hpp
-      include/Krystal.PAL/Pointer.hpp
-      include/Krystal.PAL/TextInput.hpp
-      include/Krystal.PAL/TouchpadPan.hpp
+      include/Krystal.PAL/Input/Gamepad.hpp
+      include/Krystal.PAL/Input/Input.hpp
+      include/Krystal.PAL/Input/Keyboard.hpp
+      include/Krystal.PAL/Input/KeyModifiers.hpp
+      include/Krystal.PAL/Input/Keys.hpp
+      include/Krystal.PAL/Input/Mouse.hpp
+      include/Krystal.PAL/Input/MouseButtons.hpp
+      include/Krystal.PAL/Input/Pointer.hpp
+      include/Krystal.PAL/Input/TextInput.hpp
+      include/Krystal.PAL/Input/TouchpadPan.hpp
 
 	PRIVATE 
     src/Events.cpp
-    src/Input.cpp
-    src/Keyboard.cpp
-    src/Mouse.cpp
+    src/Input/Input.cpp
+    src/Input/Keyboard.cpp
+    src/Input/Mouse.cpp
 )
 
 if(WIN32)

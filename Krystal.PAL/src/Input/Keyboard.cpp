@@ -1,4 +1,4 @@
-﻿#include "Krystal.PAL/Keyboard.hpp"
+﻿#include "Krystal.PAL/Input/Keyboard.hpp"
 
 namespace krys::pal
 {

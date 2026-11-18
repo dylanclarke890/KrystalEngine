@@ -8,7 +8,7 @@
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Utils/NativeHandle.hpp"
-#include "Krystal.PAL/Pointer.hpp"
+#include "Krystal.PAL/Input/Pointer.hpp"
 
 namespace krys::pal
 {

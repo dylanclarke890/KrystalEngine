@@ -13,7 +13,7 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Gfx/Device.hpp"
 #include "Krystal.PAL/Events.hpp"
-#include "Krystal.PAL/Input.hpp"
+#include "Krystal.PAL/Input/Input.hpp"
 #include "Krystal.PAL/IWindow.hpp"
 #include "Krystal.PAL/Platform.hpp"
 #include <algorithm>

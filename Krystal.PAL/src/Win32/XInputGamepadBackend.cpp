@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Core/Macros.hpp"
-#include "Krystal.PAL/Gamepad.hpp"
+#include "Krystal.PAL/Input/Gamepad.hpp"
 #include <algorithm>
 #include <cmath>
 

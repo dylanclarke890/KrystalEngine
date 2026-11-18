@@ -2,8 +2,8 @@
 #include "Krystal.Core/Events/Event.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
-#include "Krystal.PAL/Keys.hpp"
-#include "Krystal.PAL/MouseButtons.hpp"
+#include "Krystal.PAL/Input/Keys.hpp"
+#include "Krystal.PAL/Input/MouseButtons.hpp"
 
 namespace krys::pal
 {

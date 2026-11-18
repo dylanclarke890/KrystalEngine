@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.PAL/KeyModifiers.hpp"
+#include "Krystal.PAL/Input/KeyModifiers.hpp"
 
 namespace krys::pal
 {

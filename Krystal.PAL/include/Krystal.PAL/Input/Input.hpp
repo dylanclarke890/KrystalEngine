@@ -4,10 +4,10 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.PAL/Events.hpp"
-#include "Krystal.PAL/Gamepad.hpp"
+#include "Krystal.PAL/Input/Gamepad.hpp"
+#include "Krystal.PAL/Input/Keyboard.hpp"
+#include "Krystal.PAL/Input/Mouse.hpp"
 #include "Krystal.PAL/IWindow.hpp"
-#include "Krystal.PAL/Keyboard.hpp"
-#include "Krystal.PAL/Mouse.hpp"
 
 namespace krys
 {

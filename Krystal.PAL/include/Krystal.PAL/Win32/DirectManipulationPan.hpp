@@ -3,7 +3,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.PAL/TouchpadPan.hpp"
+#include "Krystal.PAL/Input/TouchpadPan.hpp"
 
 #ifndef WIN32_LEAN_AND_MEAN
   #define WIN32_LEAN_AND_MEAN

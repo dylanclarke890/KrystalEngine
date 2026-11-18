@@ -4,8 +4,8 @@
 #include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/String.hpp"
-#include "Krystal.PAL/KeyModifiers.hpp"
-#include "Krystal.PAL/Keys.hpp"
+#include "Krystal.PAL/Input/KeyModifiers.hpp"
+#include "Krystal.PAL/Input/Keys.hpp"
 
 namespace krys::boo
 {
