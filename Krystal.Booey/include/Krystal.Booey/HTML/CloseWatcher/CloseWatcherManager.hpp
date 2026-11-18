@@ -33,7 +33,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class KeyboardEvent;
 }
@@ -75,7 +75,7 @@ namespace krys::boo::html
     /// @brief Escape's close request: processes the close watchers, unless @p event was handled or is
     /// untrusted.
     /// @return Whether an enabled watcher was asked.
-    bool EscapeKeyHandler(dom::KeyboardEvent &event) noexcept;
+    bool EscapeKeyHandler(KeyboardEvent &event) noexcept;
 
     /// @brief A close request (Escape, or another user action the host treats as one): asks the last group's
     /// watchers to close, newest first, until one cancels.

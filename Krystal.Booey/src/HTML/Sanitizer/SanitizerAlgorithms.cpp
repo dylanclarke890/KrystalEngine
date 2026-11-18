@@ -112,8 +112,8 @@ namespace krys::boo::html
     }
   }
 
-  dom::ExceptionOr<SanitizerConfig> SanitizerAlgorithms::Configure(const SanitizerConfig &configuration,
-                                                                   bool permissiveDefaults) noexcept
+  ExceptionOr<SanitizerConfig> SanitizerAlgorithms::Configure(const SanitizerConfig &configuration,
+                                                              bool permissiveDefaults) noexcept
   {
     // 1. Let freshConfiguration be a clone of configuration.
     auto freshConfiguration = configuration;
@@ -124,7 +124,7 @@ namespace krys::boo::html
     // 3. If freshConfiguration is not valid, then throw a TypeError.
     if (!IsValid(freshConfiguration))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError, u8"The sanitizer configuration isn't valid."};
+      return Exception {ExceptionCode::TypeError, u8"The sanitizer configuration isn't valid."};
     }
 
     // 4. Set sanitizer's configuration to freshConfiguration.
@@ -626,7 +626,7 @@ namespace krys::boo::html
     return result;
   }
 
-  dom::ExceptionOr<Maybe<SanitizerConfig>>
+  ExceptionOr<Maybe<SanitizerConfig>>
     SanitizerAlgorithms::GetSanitizerConfigFromOptions(const SanitizerInput *sanitizer, bool safe) noexcept
   {
     // 1. Let sanitizerInput be null.

@@ -357,7 +357,7 @@ namespace krys::boo::tests
 
       auto error = field.SetRangeText(u8"?", 3, 1, u8"preserve");
       REQUIRE(error.HasException());
-      CHECK(error.GetException().Code() == dom::ExceptionCode::IndexSizeError);
+      CHECK(error.GetException().Code() == ExceptionCode::IndexSizeError);
     }
 
     SECTION("setRangeText() with preserve keeps a selection around the replaced text")

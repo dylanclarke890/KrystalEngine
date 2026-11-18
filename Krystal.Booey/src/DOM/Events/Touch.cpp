@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   namespace
   {

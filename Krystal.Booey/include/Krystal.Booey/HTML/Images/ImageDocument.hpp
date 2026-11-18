@@ -46,7 +46,7 @@ namespace krys::boo
 
   private:
     WeakPtr<HTMLImageElement> _imageElement;
-    dom::EventListenerHandle _clickListener;
+    EventListenerHandle _clickListener;
     bool _imageSizeIsKnown {false};
     bool _didShrinkImage {false};
     bool _shouldShrinkImage {true};

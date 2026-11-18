@@ -8,10 +8,7 @@
 namespace krys::boo
 {
   class LocalDOMWindow;
-}
 
-namespace krys::boo::dom
-{
   /// @see https://w3c.github.io/uievents/#dictdef-uieventinit
   struct UIEventInit : EventInit
   {
@@ -73,8 +70,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::UIEvent)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::UIEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Event &event) noexcept
   {
     return event.IsUIEvent();
   }

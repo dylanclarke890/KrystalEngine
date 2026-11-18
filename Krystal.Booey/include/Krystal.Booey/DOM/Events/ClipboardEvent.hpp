@@ -5,12 +5,12 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   /// @see https://w3c.github.io/clipboard-apis/#dictdef-clipboardeventinit
   struct ClipboardEventInit : EventInit
   {
-    RefPtr<DataTransfer> ClipboardData;
+    RefPtr<dom::DataTransfer> ClipboardData;
   };
 
   /// @brief A clipboard event: `copy`, `cut` and `paste`, and the legacy `beforecopy`, `beforecut` and
@@ -19,7 +19,7 @@ namespace krys::boo::dom
   class ClipboardEvent final : public Event
   {
   private:
-    RefPtr<DataTransfer> _clipboardData;
+    RefPtr<dom::DataTransfer> _clipboardData;
 
   public:
     /// @brief The dictionary its constructor takes.
@@ -33,10 +33,10 @@ namespace krys::boo::dom
     /// @brief A trusted clipboard event carrying @p dataTransfer, which bubbles, can be cancelled and crosses
     /// shadow boundaries.
     KRYS_NODISCARD static Ref<ClipboardEvent> Create(const DOMStringAtom &type,
-                                                     Ref<DataTransfer> &&dataTransfer) noexcept;
+                                                     Ref<dom::DataTransfer> &&dataTransfer) noexcept;
 
     /// @see https://w3c.github.io/clipboard-apis/#dom-clipboardevent-clipboarddata
-    KRYS_NODISCARD DataTransfer *ClipboardData() const noexcept
+    KRYS_NODISCARD dom::DataTransfer *ClipboardData() const noexcept
     {
       return _clipboardData.get();
     }
@@ -48,8 +48,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::ClipboardEvent)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::ClipboardEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Event &event) noexcept
   {
     return event.IsClipboardEvent();
   }

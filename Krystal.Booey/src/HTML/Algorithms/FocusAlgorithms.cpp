@@ -690,7 +690,7 @@ namespace krys::boo::html
       // chain
       //      is also an Element, then let related blur target be the last entry in new chain. Otherwise, let
       //      related blur target be null.
-      dom::EventTarget *relatedBlurTarget = nullptr;
+      EventTarget *relatedBlurTarget = nullptr;
       if (i == oldChain.size() - 1 && blurEventTarget && !newChain.empty() && Is<Element>(*newChain.back()))
       {
         relatedBlurTarget = newChain.back().get();
@@ -743,7 +743,7 @@ namespace krys::boo::html
       // chain
       //      is also an Element, then let related focus target be the last entry in old chain. Otherwise, let
       //      related focus target be null.
-      dom::EventTarget *relatedFocusTarget = nullptr;
+      EventTarget *relatedFocusTarget = nullptr;
       if (i == newChain.size() - 1 && focusEventTarget && !oldChain.empty() && Is<Element>(*oldChain.back()))
       {
         relatedFocusTarget = oldChain.back().get();
@@ -765,7 +765,7 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#fire-a-focus-event
   void FocusAlgorithms::FireFocusEvent(const DOMStringAtom &e, Element &target,
-                                       dom::EventTarget *relatedTarget) noexcept
+                                       EventTarget *relatedTarget) noexcept
   {
     // 1. Let view be target if target is a Window object; otherwise target's node document's relevant global
     //    object.
@@ -773,11 +773,11 @@ namespace krys::boo::html
 
     // 2. Fire an event named e at target, using FocusEvent, with the relatedTarget attribute initialized to
     //    relatedTarget, the view attribute initialized to view, and the composed flag set.
-    dom::FocusEventInit attributes;
+    FocusEventInit attributes;
     attributes.View = view;
     attributes.RelatedTarget = ShareRefPtr(relatedTarget);
     attributes.Composed = true;
-    (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(e, target, attributes);
+    (void)dom::EventDispatcher::FireEvent<FocusEvent>(e, target, attributes);
 
     // The bubbling `focusin` and `focusout` events follow `focus` and `blur`.
     // https://w3c.github.io/uievents/#events-focusevent-event-order
@@ -785,7 +785,7 @@ namespace krys::boo::html
     if (bubblingType)
     {
       attributes.Bubbles = true;
-      (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(DOMStringAtom(bubblingType), target, attributes);
+      (void)dom::EventDispatcher::FireEvent<FocusEvent>(DOMStringAtom(bubblingType), target, attributes);
     }
   }
 
@@ -1511,11 +1511,11 @@ namespace krys::boo::html
     }
     if (RefPtr<LocalDOMWindow> window = ShareRefPtr(document.Window()))
     {
-      dom::FocusEventInit attributes;
+      FocusEventInit attributes;
       attributes.View = window.get();
       attributes.Composed = true;
-      (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(DOMStringAtom(focused ? u8"focus" : u8"blur"),
-                                                             *window, attributes);
+      (void)dom::EventDispatcher::FireEvent<FocusEvent>(DOMStringAtom(focused ? u8"focus" : u8"blur"),
+                                                        *window, attributes);
     }
     // NOTE: the window's listeners may have moved the focus.
     if (RefPtr<Element> focusedElement = ShareRefPtr(document.FocusedElement()); focused && focusedElement)

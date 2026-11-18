@@ -1760,8 +1760,7 @@ namespace krys::ui
       boo::PlatformTouchPoint point(id, boo::PlatformTouchPoint::TouchCancelled, position, position, {}, 0,
                                     0);
       _page->GetPointerCaptureController().CancelPointer(
-        boo::dom::PointerEvent::PointerIdForTouch(point),
-        view->WindowToContents(boo::FlooredIntPoint(position)));
+        boo::PointerEvent::PointerIdForTouch(point), view->WindowToContents(boo::FlooredIntPoint(position)));
       PerformMicrotaskCheckpoint();
     }
   }
@@ -1879,7 +1878,7 @@ namespace krys::ui
     int32 clickCount = CountClick(point, boo::MouseButton::Left, DoubleTapDistance);
     boo::PlatformTouchPoint touchPoint(id, boo::PlatformTouchPoint::TouchReleased, ToScreen(position),
                                        position, {}, 0, 0);
-    auto pointerId = boo::dom::PointerEvent::PointerIdForTouch(touchPoint);
+    auto pointerId = boo::PointerEvent::PointerIdForTouch(touchPoint);
     auto event = [&](boo::PlatformEvent::Type type, boo::MouseButton button, uint16 buttons, int32 count)
     {
       return boo::PlatformMouseEvent(boo::DoublePoint(point), boo::DoublePoint(ToScreen(point)), button, type,
@@ -1915,7 +1914,7 @@ namespace krys::ui
     boo::PlatformMouseEvent event(
       boo::DoublePoint(point), boo::DoublePoint(ToScreen(point)), boo::MouseButton::Right,
       boo::PlatformEvent::Type::MousePressed, 1, {}, boo::html::EventLoop::Current().Now(), 0, {}, 0,
-      boo::SyntheticClickType::NoTap, boo::dom::PointerEvent::PointerIdForTouch(touchPoint),
+      boo::SyntheticClickType::NoTap, boo::PointerEvent::PointerIdForTouch(touchPoint),
       boo::dom::TouchPointerEventType());
     (void)_frame->GetEventHandler().SendContextMenuEvent(event);
     PerformMicrotaskCheckpoint();

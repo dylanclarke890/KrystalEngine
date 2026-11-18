@@ -39,7 +39,7 @@ namespace krys::boo
   }
 
   StyleOriginatedAnimationEvent::StyleOriginatedAnimationEvent(DOMStringAtom type,
-                                                               const dom::EventInit &eventInitDict,
+                                                               const EventInit &eventInitDict,
                                                                double elapsedTime,
                                                                CSSOMString pseudoElement) noexcept
       : AnimationEventBase(krys::move(type), eventInitDict), _elapsedTime(elapsedTime),

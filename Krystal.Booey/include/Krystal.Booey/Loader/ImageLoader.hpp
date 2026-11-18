@@ -68,7 +68,7 @@ namespace krys::boo
   public:
     /// @brief Settles a `decode()` promise: with nothing once the image is decoded, or with an
     /// `EncodingError`.
-    using DecodePromise = Func<void(dom::ExceptionOr<void> &&)>;
+    using DecodePromise = Func<void(ExceptionOr<void> &&)>;
 
   private:
     boo::Element &_element;

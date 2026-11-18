@@ -79,12 +79,12 @@ namespace krys::boo::tests
     struct StateChanges
     {
       List<bool> Skipped;
-      dom::EventListenerHandle Handle;
+      EventListenerHandle Handle;
 
       explicit StateChanges(Element &element) noexcept
           : Handle(element.AddEventListener(
-              u8"contentvisibilityautostatechange", [this](dom::Event &event)
-              { Skipped.push_back(Downcast<dom::ContentVisibilityAutoStateChangeEvent>(event).Skipped()); }))
+              u8"contentvisibilityautostatechange", [this](Event &event)
+              { Skipped.push_back(Downcast<ContentVisibilityAutoStateChangeEvent>(event).Skipped()); }))
       {
       }
     };

@@ -48,10 +48,10 @@ namespace krys::boo
 
     /// @brief Follows the link, if it is one.
     /// @see https://html.spec.whatwg.org/#the-a-element:activation-behaviour
-    void ActivationBehavior(dom::Event &event) noexcept override;
+    void ActivationBehavior(Event &event) noexcept override;
 
     /// @brief Follows a focused link on Enter (as a simulated click), and on a click of the middle button.
-    void DefaultEventHandler(dom::Event &event) noexcept override;
+    void DefaultEventHandler(Event &event) noexcept override;
 
     /// @brief Whether the link is followed by a click with or without @p shiftKey: always outside editable
     /// content, and inside it as `Settings::EditableLinkBehavior` says.
@@ -108,7 +108,7 @@ namespace krys::boo
     KRYS_NODISCARD DOMString Text() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-text
-    dom::ExceptionOr<void> Text(DOMString value) noexcept;
+    ExceptionOr<void> Text(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-referrerpolicy
     KRYS_NODISCARD DOMString ReferrerPolicy() const noexcept;

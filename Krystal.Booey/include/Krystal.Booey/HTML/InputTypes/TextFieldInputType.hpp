@@ -81,12 +81,12 @@ namespace krys::boo::html
   protected:
     TextFieldInputType(Type type, HTMLInputElement &element) noexcept;
 
-    ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept override;
+    ShouldCallBaseEventHandler HandleKeydownEvent(KeyboardEvent &event) noexcept override;
 
     /// @brief Steps the value with the up and down arrow keys, as the spin button would.
-    void HandleKeydownEventForSpinButton(dom::KeyboardEvent &event) noexcept;
+    void HandleKeydownEventForSpinButton(KeyboardEvent &event) noexcept;
 
-    void HandleClickEvent(dom::MouseEvent &event) noexcept final;
+    void HandleClickEvent(MouseEvent &event) noexcept final;
 
     KRYS_NODISCARD HTMLElement *ContainerElement() const noexcept final;
 
@@ -130,11 +130,11 @@ namespace krys::boo::html
   private:
     KRYS_NODISCARD bool IsEmptyValue() const noexcept final;
 
-    void HandleBeforeTextInsertedEvent(dom::BeforeTextInsertedEvent &event) noexcept override;
+    void HandleBeforeTextInsertedEvent(BeforeTextInsertedEvent &event) noexcept override;
 
-    void ForwardEvent(dom::Event &event) noexcept final;
+    void ForwardEvent(Event &event) noexcept final;
 
-    KRYS_NODISCARD bool ShouldSubmitImplicitly(dom::Event &event) noexcept final;
+    KRYS_NODISCARD bool ShouldSubmitImplicitly(Event &event) noexcept final;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateInputRenderer(RenderStyle &&style) noexcept override;
 

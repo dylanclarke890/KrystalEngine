@@ -68,7 +68,7 @@ namespace krys::boo::svg::tests
     REQUIRE(animVal);
     CHECK(animVal->IsReadOnly());
     CHECK(animVal->SetValueAsString(u8"1px").GetException().Code()
-          == dom::ExceptionCode::NoModificationAllowedError);
+          == ExceptionCode::NoModificationAllowedError);
 
     REQUIRE_FALSE(length->BaseVal()->SetValueAsString(u8"10px").HasException());
     CHECK(animVal->ValueAsString() == u8"10px");
@@ -109,7 +109,7 @@ namespace krys::boo::svg::tests
     REQUIRE(animVal);
     CHECK(animVal->ValueAsString() == u8"1px 2px");
     CHECK(animVal->LengthMode() == SVGLengthMode::Height);
-    CHECK(animVal->Clear().GetException().Code() == dom::ExceptionCode::NoModificationAllowedError);
+    CHECK(animVal->Clear().GetException().Code() == ExceptionCode::NoModificationAllowedError);
 
     // A change to an item of the base value reaches the animated value and the element.
     REQUIRE_FALSE(lengths->BaseVal()->Items()[1]->SetValueAsString(u8"3em").HasException());
@@ -147,8 +147,8 @@ namespace krys::boo::svg::tests
     CHECK(units->BaseValAsString() == u8"userSpaceOnUse");
 
     // The DOM can't set 0 or a value beyond the enumeration.
-    CHECK(units->SetBaseVal(0).GetException().Code() == dom::ExceptionCode::TypeError);
-    CHECK(units->SetBaseVal(3).GetException().Code() == dom::ExceptionCode::TypeError);
+    CHECK(units->SetBaseVal(0).GetException().Code() == ExceptionCode::TypeError);
+    CHECK(units->SetBaseVal(3).GetException().Code() == ExceptionCode::TypeError);
     CHECK_FALSE(units->IsDirty());
 
     REQUIRE_FALSE(units->SetBaseVal(SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX).HasException());

@@ -52,7 +52,7 @@ namespace krys::boo
 
     /// @brief Removes the table's caption, and inserts @p caption as its first child if it isn't null.
     /// @see https://html.spec.whatwg.org/#dom-table-caption
-    dom::ExceptionOr<void> Caption(const RefPtr<HTMLTableCaptionElement> &caption) noexcept;
+    ExceptionOr<void> Caption(const RefPtr<HTMLTableCaptionElement> &caption) noexcept;
 
     /// @brief The table's caption, made its first child if it had none.
     /// @see https://html.spec.whatwg.org/#dom-table-createcaption
@@ -67,7 +67,7 @@ namespace krys::boo
     /// @brief Removes the table's `thead`, and inserts @p head after the caption and column groups if it
     /// isn't null: a `HierarchyRequestError` if it isn't a `thead`.
     /// @see https://html.spec.whatwg.org/#dom-table-thead
-    dom::ExceptionOr<void> THead(const RefPtr<HTMLTableSectionElement> &head) noexcept;
+    ExceptionOr<void> THead(const RefPtr<HTMLTableSectionElement> &head) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-createthead
     Ref<HTMLTableSectionElement> CreateTHead() noexcept;
@@ -81,7 +81,7 @@ namespace krys::boo
     /// @brief Removes the table's `tfoot`, and appends @p foot if it isn't null: a `HierarchyRequestError` if
     /// it isn't a `tfoot`.
     /// @see https://html.spec.whatwg.org/#dom-table-tfoot
-    dom::ExceptionOr<void> TFoot(const RefPtr<HTMLTableSectionElement> &foot) noexcept;
+    ExceptionOr<void> TFoot(const RefPtr<HTMLTableSectionElement> &foot) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-createtfoot
     Ref<HTMLTableSectionElement> CreateTFoot() noexcept;
@@ -103,12 +103,12 @@ namespace krys::boo
     /// @brief A new row at @p index in the table's rows (-1 for the end), in a new `tbody` if the table has
     /// no rows or bodies: an `IndexSizeError` if @p index is less than -1 or more than the number of rows.
     /// @see https://html.spec.whatwg.org/#dom-table-insertrow
-    dom::ExceptionOr<Ref<HTMLTableRowElement>> InsertRow(int32 index = -1) noexcept;
+    ExceptionOr<Ref<HTMLTableRowElement>> InsertRow(int32 index = -1) noexcept;
 
     /// @brief Removes the row at @p index in the table's rows (-1 for the last, if any): an `IndexSizeError`
     /// if there's no such row.
     /// @see https://html.spec.whatwg.org/#dom-table-deleterow
-    dom::ExceptionOr<void> DeleteRow(int32 index) noexcept;
+    ExceptionOr<void> DeleteRow(int32 index) noexcept;
 
 #pragma endregion
 

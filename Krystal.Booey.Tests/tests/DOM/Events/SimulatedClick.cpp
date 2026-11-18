@@ -32,13 +32,13 @@ namespace krys::boo::tests
     };
 
     /// @brief Keeps the last mouse event's coordinates.
-    struct CoordinateRecorder : public dom::EventListenerCallback
+    struct CoordinateRecorder : public EventListenerCallback
     {
       double ScreenX {-1}, ScreenY {-1}, ClientX {-1}, ClientY {-1};
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
-        auto &mouse = static_cast<dom::MouseEvent &>(event);
+        auto &mouse = static_cast<MouseEvent &>(event);
         ScreenX = mouse.ScreenX();
         ScreenY = mouse.ScreenY();
         ClientX = mouse.ClientX();
@@ -70,7 +70,7 @@ namespace krys::boo::tests
     CHECK(recorder->ScreenY == 225);
 
     // The user agent's mouse events made without an underlying event are too.
-    auto event = dom::MouseEvent::CreateSimulated(event_names::Click, nullptr, button, true);
+    auto event = MouseEvent::CreateSimulated(event_names::Click, nullptr, button, true);
     CHECK(event->ScreenX() == 130);
     CHECK(event->ClientX() == 30);
   }

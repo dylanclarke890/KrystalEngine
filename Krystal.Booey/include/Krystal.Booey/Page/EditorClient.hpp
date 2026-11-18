@@ -36,15 +36,7 @@ namespace krys::boo
 {
   class Document;
   class Element;
-}
-
-namespace krys::boo::dom
-{
   class KeyboardEvent;
-}
-
-namespace krys::boo
-{
   class LocalFrame;
   class UndoStep;
 
@@ -73,7 +65,7 @@ namespace krys::boo
 
     /// @brief Runs the editor command a `keydown` or `keypress` is bound to, if any.
     /// @return Whether the event was handled, so its default action is done.
-    virtual bool HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept = 0;
+    virtual bool HandleKeyboardEvent(KeyboardEvent &event) noexcept = 0;
 
     virtual void RespondToChangedContents() noexcept = 0;
 
@@ -89,11 +81,11 @@ namespace krys::boo
 
     /// @brief Called before a `keydown` is dispatched: marks it handled (its default handled) if an input
     /// method handled the key, so it goes out with key code 229 and no `keypress`.
-    virtual void HandleInputMethodKeydown(dom::KeyboardEvent &event) noexcept = 0;
+    virtual void HandleInputMethodKeydown(KeyboardEvent &event) noexcept = 0;
 
     /// @brief Called after a `keydown` an input method handled was dispatched, to apply what it made of the
     /// key: the composition, or the text it confirmed.
-    virtual void DidDispatchInputMethodKeydown(dom::KeyboardEvent &) noexcept
+    virtual void DidDispatchInputMethodKeydown(KeyboardEvent &) noexcept
     {
     }
 
@@ -131,7 +123,7 @@ namespace krys::boo
 
     /// @brief Lets the host handle a key in a focused text field (to move through its suggestions).
     /// @return Whether the host handled it.
-    virtual bool DoTextFieldCommandFromEvent(Element &element, dom::KeyboardEvent *event) noexcept = 0;
+    virtual bool DoTextFieldCommandFromEvent(Element &element, KeyboardEvent *event) noexcept = 0;
 
     virtual void TextWillBeDeletedInTextField(Element &element) noexcept = 0;
 
@@ -160,7 +152,7 @@ namespace krys::boo
       return defaultValue;
     }
 
-    bool HandleKeyboardEvent(dom::KeyboardEvent &) noexcept final
+    bool HandleKeyboardEvent(KeyboardEvent &) noexcept final
     {
       return false;
     }
@@ -181,7 +173,7 @@ namespace krys::boo
     {
     }
 
-    void HandleInputMethodKeydown(dom::KeyboardEvent &) noexcept final
+    void HandleInputMethodKeydown(KeyboardEvent &) noexcept final
     {
     }
 
@@ -236,7 +228,7 @@ namespace krys::boo
     {
     }
 
-    bool DoTextFieldCommandFromEvent(Element &, dom::KeyboardEvent *) noexcept final
+    bool DoTextFieldCommandFromEvent(Element &, KeyboardEvent *) noexcept final
     {
       return false;
     }

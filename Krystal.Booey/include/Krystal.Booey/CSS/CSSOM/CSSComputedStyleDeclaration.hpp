@@ -100,19 +100,19 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsPropertyImplicit(const CSSOMString &propertyName) noexcept final;
 
-    dom::ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
-                                       const CSSOMString &priority) noexcept final;
+    ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
+                                  const CSSOMString &priority) noexcept final;
 
-    dom::ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &propertyName) noexcept final;
+    ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &propertyName) noexcept final;
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
-    dom::ExceptionOr<void> SetCssText(const CSSOMString &) noexcept final;
+    ExceptionOr<void> SetCssText(const CSSOMString &) noexcept final;
 
     KRYS_NODISCARD CSSOMString GetPropertyValueInternal(css::PropertyId) noexcept final;
 
-    dom::ExceptionOr<void> SetPropertyInternal(css::PropertyId, const CSSOMString &value,
-                                               css::IsImportant) noexcept final;
+    ExceptionOr<void> SetPropertyInternal(css::PropertyId, const CSSOMString &value,
+                                          css::IsImportant) noexcept final;
 
     KRYS_NODISCARD Ref<css::MutableStyleProperties> CopyProperties() const noexcept final;
 

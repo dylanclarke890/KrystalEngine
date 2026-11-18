@@ -144,12 +144,12 @@ namespace krys::boo::html
 
     KRYS_NODISCARD double ValueAsDate() const noexcept override;
 
-    dom::ExceptionOr<void> SetValueAsDate(double value) const noexcept override;
+    ExceptionOr<void> SetValueAsDate(double value) const noexcept override;
 
     KRYS_NODISCARD double ValueAsDouble() const noexcept final;
 
-    dom::ExceptionOr<void> SetValueAsDecimal(const Decimal &value,
-                                             TextFieldEventBehavior eventBehavior) const noexcept final;
+    ExceptionOr<void> SetValueAsDecimal(const Decimal &value,
+                                        TextFieldEventBehavior eventBehavior) const noexcept final;
 
     KRYS_NODISCARD Decimal DefaultValueForStepUp() const noexcept override;
 
@@ -157,7 +157,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool SupportsReadOnly() const noexcept final;
 
-    void HandleActivationBehavior(dom::Event &event) noexcept override;
+    void HandleActivationBehavior(Event &event) noexcept override;
 
     void CreateShadowSubtree() noexcept final;
 
@@ -173,11 +173,11 @@ namespace krys::boo::html
 
     void Detach() noexcept final;
 
-    ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept final;
+    ShouldCallBaseEventHandler HandleKeydownEvent(KeyboardEvent &event) noexcept final;
 
-    void HandleKeypressEvent(dom::KeyboardEvent &event) noexcept final;
+    void HandleKeypressEvent(KeyboardEvent &event) noexcept final;
 
-    void HandleKeyupEvent(dom::KeyboardEvent &event) noexcept final;
+    void HandleKeyupEvent(KeyboardEvent &event) noexcept final;
 
     // DateTimeEditElementEditControlOwner functions:
     void DidBlurFromControl() noexcept final;

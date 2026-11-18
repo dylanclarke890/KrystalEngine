@@ -58,7 +58,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::Margin);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMargin(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMargin(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::Margin, value, css::IsImportant::No);
   }
@@ -69,7 +69,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::MarginTop);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginTop(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMarginTop(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::MarginTop, value, css::IsImportant::No);
   }
@@ -80,7 +80,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::MarginRight);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginRight(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMarginRight(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::MarginRight, value, css::IsImportant::No);
   }
@@ -91,7 +91,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::MarginBottom);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginBottom(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMarginBottom(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::MarginBottom, value, css::IsImportant::No);
   }
@@ -102,7 +102,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::MarginLeft);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginLeft(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMarginLeft(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::MarginLeft, value, css::IsImportant::No);
   }
@@ -113,7 +113,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::MarginBlock);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginBlock(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMarginBlock(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::MarginBlock, value, css::IsImportant::No);
   }
@@ -124,7 +124,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::MarginBlockStart);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginBlockStart(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMarginBlockStart(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::MarginBlockStart, value, css::IsImportant::No);
   }
@@ -135,7 +135,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::MarginBlockEnd);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginBlockEnd(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMarginBlockEnd(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::MarginBlockEnd, value, css::IsImportant::No);
   }
@@ -146,7 +146,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::MarginInline);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginInline(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMarginInline(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::MarginInline, value, css::IsImportant::No);
   }
@@ -157,7 +157,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::MarginInlineStart);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginInlineStart(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMarginInlineStart(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::MarginInlineStart, value, css::IsImportant::No);
   }
@@ -168,7 +168,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::MarginInlineEnd);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginInlineEnd(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMarginInlineEnd(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::MarginInlineEnd, value, css::IsImportant::No);
   }
@@ -179,7 +179,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::Inset);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInset(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetInset(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::Inset, value, css::IsImportant::No);
   }
@@ -190,7 +190,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::InsetBlock);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInsetBlock(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetInsetBlock(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::InsetBlock, value, css::IsImportant::No);
   }
@@ -201,7 +201,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::InsetBlockStart);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInsetBlockStart(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetInsetBlockStart(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::InsetBlockStart, value, css::IsImportant::No);
   }
@@ -212,7 +212,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::InsetBlockEnd);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInsetBlockEnd(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetInsetBlockEnd(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::InsetBlockEnd, value, css::IsImportant::No);
   }
@@ -223,7 +223,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::InsetInline);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInsetInline(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetInsetInline(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::InsetInline, value, css::IsImportant::No);
   }
@@ -234,7 +234,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::InsetInlineStart);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInsetInlineStart(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetInsetInlineStart(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::InsetInlineStart, value, css::IsImportant::No);
   }
@@ -245,7 +245,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::InsetInlineEnd);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInsetInlineEnd(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetInsetInlineEnd(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::InsetInlineEnd, value, css::IsImportant::No);
   }
@@ -256,7 +256,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::Top);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetTop(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetTop(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::Top, value, css::IsImportant::No);
   }
@@ -267,7 +267,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::Left);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetLeft(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetLeft(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::Left, value, css::IsImportant::No);
   }
@@ -278,7 +278,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::Right);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetRight(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetRight(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::Right, value, css::IsImportant::No);
   }
@@ -289,7 +289,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::Bottom);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetBottom(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetBottom(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::Bottom, value, css::IsImportant::No);
   }
@@ -300,7 +300,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::Width);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetWidth(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetWidth(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::Width, value, css::IsImportant::No);
   }
@@ -311,7 +311,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::MinWidth);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMinWidth(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMinWidth(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::MinWidth, value, css::IsImportant::No);
   }
@@ -322,7 +322,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::MaxWidth);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMaxWidth(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMaxWidth(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::MaxWidth, value, css::IsImportant::No);
   }
@@ -333,7 +333,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::Height);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetHeight(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetHeight(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::Height, value, css::IsImportant::No);
   }
@@ -344,7 +344,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::MinHeight);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMinHeight(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMinHeight(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::MinHeight, value, css::IsImportant::No);
   }
@@ -355,7 +355,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::MaxHeight);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMaxHeight(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMaxHeight(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::MaxHeight, value, css::IsImportant::No);
   }
@@ -366,7 +366,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::BlockSize);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetBlockSize(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetBlockSize(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::BlockSize, value, css::IsImportant::No);
   }
@@ -377,7 +377,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::MinBlockSize);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMinBlockSize(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMinBlockSize(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::MinBlockSize, value, css::IsImportant::No);
   }
@@ -388,7 +388,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::MaxBlockSize);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMaxBlockSize(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMaxBlockSize(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::MaxBlockSize, value, css::IsImportant::No);
   }
@@ -399,7 +399,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::InlineSize);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInlineSize(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetInlineSize(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::InlineSize, value, css::IsImportant::No);
   }
@@ -410,7 +410,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::MinInlineSize);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMinInlineSize(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMinInlineSize(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::MinInlineSize, value, css::IsImportant::No);
   }
@@ -421,7 +421,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::MaxInlineSize);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMaxInlineSize(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetMaxInlineSize(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::MaxInlineSize, value, css::IsImportant::No);
   }
@@ -432,7 +432,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::PlaceSelf);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetPlaceSelf(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetPlaceSelf(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::PlaceSelf, value, css::IsImportant::No);
   }
@@ -443,7 +443,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::AlignSelf);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetAlignSelf(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetAlignSelf(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::AlignSelf, value, css::IsImportant::No);
   }
@@ -454,7 +454,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::JustifySelf);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetJustifySelf(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetJustifySelf(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::JustifySelf, value, css::IsImportant::No);
   }
@@ -465,7 +465,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::PositionAnchor);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetPositionAnchor(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetPositionAnchor(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::PositionAnchor, value, css::IsImportant::No);
   }
@@ -476,16 +476,16 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::PositionArea);
   }
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetPositionArea(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetPositionArea(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::PositionArea, value, css::IsImportant::No);
   }
 
 #pragma endregion
 
-  dom::ExceptionOr<void> CSSPositionTryDescriptors::SetPropertyInternal(css::PropertyId property,
-                                                                        const CSSOMString &value,
-                                                                        css::IsImportant important) noexcept
+  ExceptionOr<void> CSSPositionTryDescriptors::SetPropertyInternal(css::PropertyId property,
+                                                                   const CSSOMString &value,
+                                                                   css::IsImportant important) noexcept
   {
     auto result = PropertySetCSSDescriptors::SetPropertyInternal(property, value, important);
 

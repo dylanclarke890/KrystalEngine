@@ -34,13 +34,13 @@
 namespace krys::boo
 {
   NavigationAction::UIEventWithKeyStateData::UIEventWithKeyStateData(
-    const dom::UIEventWithKeyState &uiEvent) noexcept
+    const UIEventWithKeyState &uiEvent) noexcept
       : IsTrusted(uiEvent.IsTrusted()), ShiftKey(uiEvent.ShiftKey()), CtrlKey(uiEvent.CtrlKey()),
         AltKey(uiEvent.AltKey()), MetaKey(uiEvent.MetaKey())
   {
   }
 
-  NavigationAction::MouseEventData::MouseEventData(const dom::MouseEvent &mouseEvent) noexcept
+  NavigationAction::MouseEventData::MouseEventData(const MouseEvent &mouseEvent) noexcept
       : UIEventWithKeyStateData(mouseEvent), AbsoluteLocation(mouseEvent.AbsoluteLocation()),
         Button(mouseEvent.ButtonType()), ButtonDown(mouseEvent.ButtonDown())
   {
@@ -49,7 +49,7 @@ namespace krys::boo
   namespace
   {
     KRYS_NODISCARD Maybe<NavigationAction::UIEventWithKeyStateData>
-      KeyStateDataForFirstEventWithKeyState(dom::Event *event) noexcept
+      KeyStateDataForFirstEventWithKeyState(Event *event) noexcept
     {
       if (auto *uiEvent = dom::FindEventWithKeyState(event))
       {
@@ -59,11 +59,11 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD Maybe<NavigationAction::MouseEventData>
-      MouseEventDataForFirstMouseEvent(dom::Event *event) noexcept
+      MouseEventDataForFirstMouseEvent(Event *event) noexcept
     {
       for (auto *current = event; current; current = current->UnderlyingEvent())
       {
-        if (auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(*current))
+        if (auto *mouseEvent = DynamicDowncast<MouseEvent>(*current))
         {
           return NavigationAction::MouseEventData(*mouseEvent);
         }
@@ -83,9 +83,8 @@ namespace krys::boo
 
   NavigationAction::NavigationAction() noexcept = default;
 
-  NavigationAction::NavigationAction(ResourceRequest originalRequest, bool isFormSubmission,
-                                     dom::Event *event, DOMStringAtom downloadAttribute,
-                                     Element *sourceElement) noexcept
+  NavigationAction::NavigationAction(ResourceRequest originalRequest, bool isFormSubmission, Event *event,
+                                     DOMStringAtom downloadAttribute, Element *sourceElement) noexcept
       : _originalRequest(krys::move(originalRequest)),
         _keyStateEventData(KeyStateDataForFirstEventWithKeyState(event)),
         _mouseEventData(MouseEventDataForFirstMouseEvent(event)),

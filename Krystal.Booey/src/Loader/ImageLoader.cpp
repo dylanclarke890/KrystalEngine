@@ -90,7 +90,7 @@ namespace krys::boo
           {
             if (rejection)
             {
-              promise(dom::Exception(dom::ExceptionCode::EncodingError, *rejection));
+              promise(Exception(ExceptionCode::EncodingError, *rejection));
             }
             else
             {

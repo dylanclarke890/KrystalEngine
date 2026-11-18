@@ -54,7 +54,7 @@ namespace krys::boo
 
   /// @brief The promise `requestPointerLock()` returns, as a callback: called once, as a microtask, with
   /// nothing when the lock is applied, or with the exception the request failed with.
-  using PointerLockCallback = Func<void(dom::ExceptionOr<void> &&)>;
+  using PointerLockCallback = Func<void(ExceptionOr<void> &&)>;
 
   /// @brief A page's pointer lock: the element the mouse's events go to while it's locked
   /// (`requestPointerLock()`), with the cursor hidden and the mouse's movement as its moves' `movementX` and
@@ -140,7 +140,7 @@ namespace krys::boo
 
     void ResolvePromises() noexcept;
 
-    void RejectPromises(dom::ExceptionCode code, utf8_stringview reason) noexcept;
+    void RejectPromises(ExceptionCode code, utf8_stringview reason) noexcept;
 
     void ElementWasRemovedInternal() noexcept;
 

@@ -144,7 +144,7 @@ namespace krys::boo::html
     return true;
   }
 
-  void ImageInputType::HandleActivationBehavior(dom::Event &event) noexcept
+  void ImageInputType::HandleActivationBehavior(Event &event) noexcept
   {
     krys_debug_assert(Element());
     Ref<HTMLInputElement> element = ShareRef(*Element());
@@ -156,7 +156,7 @@ namespace krys::boo::html
     Ref<HTMLFormElement> protectedForm = ShareRef(*element->Form());
 
     _clickLocation = IntPoint();
-    if (auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event))
+    if (auto *mouseEvent = DynamicDowncast<MouseEvent>(event))
     {
       if (!mouseEvent->IsSimulated())
       {

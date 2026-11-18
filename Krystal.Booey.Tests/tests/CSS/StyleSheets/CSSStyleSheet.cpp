@@ -115,21 +115,21 @@ namespace krys::boo::css::tests
 
     SECTION("an index past the end")
     {
-      REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"b { }", 2)) == dom::ExceptionCode::IndexSizeError);
+      REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"b { }", 2)) == ExceptionCode::IndexSizeError);
     }
 
     SECTION("a rule that doesn't parse")
     {
-      REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"x", 0)) == dom::ExceptionCode::SyntaxError);
-      REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"", 0)) == dom::ExceptionCode::SyntaxError);
-      REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"a { } b { }", 0)) == dom::ExceptionCode::SyntaxError);
+      REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"x", 0)) == ExceptionCode::SyntaxError);
+      REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"", 0)) == ExceptionCode::SyntaxError);
+      REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"a { } b { }", 0)) == ExceptionCode::SyntaxError);
     }
 
     SECTION("a rule in the wrong place")
     {
       // @import must come before style rules.
       REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"@import \"a.css\";", 1))
-              == dom::ExceptionCode::HierarchyRequestError);
+              == ExceptionCode::HierarchyRequestError);
       REQUIRE(sheet->InsertRule(u8"@import \"a.css\";", 0).HasValue());
       REQUIRE(Is<CSSImportRule>(*sheet->Item(0)));
       REQUIRE(sheet->Item(1) == first);
@@ -138,7 +138,7 @@ namespace krys::boo::css::tests
     SECTION("an @namespace rule after other rules")
     {
       REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"@namespace a url(a);", 0))
-              == dom::ExceptionCode::InvalidStateError);
+              == ExceptionCode::InvalidStateError);
     }
   }
 
@@ -147,7 +147,7 @@ namespace krys::boo::css::tests
     auto sheet = SheetFromText(u8"a { } b { }");
     RefPtr<CSSRule> first = ShareRefPtr(sheet->Item(0));
 
-    REQUIRE(ExceptionCodeOf(sheet->DeleteRule(2)) == dom::ExceptionCode::IndexSizeError);
+    REQUIRE(ExceptionCodeOf(sheet->DeleteRule(2)) == ExceptionCode::IndexSizeError);
 
     REQUIRE_FALSE(sheet->DeleteRule(0).HasException());
     REQUIRE(sheet->Length() == 1);
@@ -172,7 +172,7 @@ namespace krys::boo::css::tests
     REQUIRE(sheet->AddRule(u8"c", u8"", 0).HasValue());
     REQUIRE(SheetText(*sheet) == "c { } a { } b { color: red; }");
 
-    REQUIRE(ExceptionCodeOf(sheet->AddRule(u8"d", u8"", 4)) == dom::ExceptionCode::IndexSizeError);
+    REQUIRE(ExceptionCodeOf(sheet->AddRule(u8"d", u8"", 4)) == ExceptionCode::IndexSizeError);
   }
 
   TEST_CASE("CSSStyleSheet: rules of a sheet that isn't origin-clean", "[CSS][CSSOM][CSSStyleSheet]")
@@ -183,9 +183,9 @@ namespace krys::boo::css::tests
 
     REQUIRE_FALSE(sheet->CanAccessRules());
     REQUIRE_FALSE(sheet->CssRules());
-    REQUIRE(ExceptionCodeOf(sheet->CssRulesForBindings()) == dom::ExceptionCode::SecurityError);
-    REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"b { }", 0)) == dom::ExceptionCode::SecurityError);
-    REQUIRE(ExceptionCodeOf(sheet->DeleteRule(0)) == dom::ExceptionCode::SecurityError);
+    REQUIRE(ExceptionCodeOf(sheet->CssRulesForBindings()) == ExceptionCode::SecurityError);
+    REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"b { }", 0)) == ExceptionCode::SecurityError);
+    REQUIRE(ExceptionCodeOf(sheet->DeleteRule(0)) == ExceptionCode::SecurityError);
     // The serialisation skips the access check.
     REQUIRE(SheetText(*sheet) == "a { }");
   }
@@ -280,14 +280,13 @@ namespace krys::boo::css::tests
     SECTION("an invalid base URL")
     {
       auto sheet = CSSStyleSheet::Create(*document, {.BaseURL = u8"relative"});
-      REQUIRE(ExceptionCodeOf(sheet) == dom::ExceptionCode::NotAllowedError);
+      REQUIRE(ExceptionCodeOf(sheet) == ExceptionCode::NotAllowedError);
     }
 
     SECTION("@import rules can't be inserted")
     {
       auto sheet = ConstructedSheet(*document);
-      REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"@import \"a.css\";", 0))
-              == dom::ExceptionCode::SyntaxError);
+      REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"@import \"a.css\";", 0)) == ExceptionCode::SyntaxError);
     }
 
     SECTION("replaceSync ignores @import rules")
@@ -312,7 +311,7 @@ namespace krys::boo::css::tests
     SECTION("replaceSync on a sheet that wasn't constructed")
     {
       auto sheet = SheetFromText(u8"a { }");
-      REQUIRE(ExceptionCodeOf(sheet->ReplaceSync(u8"b { }")) == dom::ExceptionCode::NotAllowedError);
+      REQUIRE(ExceptionCodeOf(sheet->ReplaceSync(u8"b { }")) == ExceptionCode::NotAllowedError);
       REQUIRE(SheetText(*sheet) == "a { }");
     }
   }
@@ -424,6 +423,6 @@ namespace krys::boo::css::tests
 
     // Once there are other rules, @namespace rules can't be inserted.
     REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"@namespace x url(x);", 2))
-            == dom::ExceptionCode::InvalidStateError);
+            == ExceptionCode::InvalidStateError);
   }
 }

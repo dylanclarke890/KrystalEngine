@@ -36,12 +36,12 @@ namespace krys::boo
     /// @brief A new `td` at @p index in the row's cells (-1 for the end): an `IndexSizeError` if @p index is
     /// less than -1 or more than the number of cells.
     /// @see https://html.spec.whatwg.org/#dom-tr-insertcell
-    dom::ExceptionOr<Ref<HTMLTableCellElement>> InsertCell(int32 index = -1) noexcept;
+    ExceptionOr<Ref<HTMLTableCellElement>> InsertCell(int32 index = -1) noexcept;
 
     /// @brief Removes the cell at @p index in the row's cells (-1 for the last, if any): an `IndexSizeError`
     /// if there's no such cell.
     /// @see https://html.spec.whatwg.org/#dom-tr-deletecell
-    dom::ExceptionOr<void> DeleteCell(int32 index) noexcept;
+    ExceptionOr<void> DeleteCell(int32 index) noexcept;
 
 #pragma endregion
 

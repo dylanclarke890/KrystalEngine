@@ -5,7 +5,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/multipage/dnd.html#drageventinit
   struct DragEventInit : MouseEventInit
@@ -19,7 +19,7 @@ namespace krys::boo::dom
   class DragEvent final : public MouseEvent
   {
   private:
-    RefPtr<DataTransfer> _dataTransfer;
+    RefPtr<dom::DataTransfer> _dataTransfer;
 
   public:
     /// @brief The dictionary its constructor takes.
@@ -37,10 +37,10 @@ namespace krys::boo::dom
              const DoublePoint &screenLocation, const DoublePoint &windowLocation, double movementX,
              double movementY, EnumSet<Modifier> modifiers, MouseButton button, uint16 buttons,
              EventTarget *relatedTarget, double force, SyntheticClickType syntheticClickType,
-             DataTransfer *dataTransfer = nullptr) noexcept;
+             dom::DataTransfer *dataTransfer = nullptr) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-dragevent-datatransfer
-    KRYS_NODISCARD DataTransfer *GetDataTransfer() const noexcept
+    KRYS_NODISCARD dom::DataTransfer *GetDataTransfer() const noexcept
     {
       return _dataTransfer.get();
     }
@@ -55,12 +55,12 @@ namespace krys::boo::dom
               const DoublePoint &screenLocation, const DoublePoint &windowLocation, double movementX,
               double movementY, EnumSet<Modifier> modifiers, MouseButton button, uint16 buttons,
               EventTarget *relatedTarget, double force, SyntheticClickType syntheticClickType,
-              DataTransfer *dataTransfer) noexcept;
+              dom::DataTransfer *dataTransfer) noexcept;
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::DragEvent)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::DragEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Event &event) noexcept
   {
     return event.IsDragEvent();
   }

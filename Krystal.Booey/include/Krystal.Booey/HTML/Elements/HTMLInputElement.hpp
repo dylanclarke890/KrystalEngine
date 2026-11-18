@@ -323,7 +323,7 @@ namespace krys::boo
     KRYS_NODISCARD uint32 Size() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-size
-    dom::ExceptionOr<void> Size(uint32 value) noexcept;
+    ExceptionOr<void> Size(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-src
     KRYS_NODISCARD dom::USVString Src() const noexcept;
@@ -360,12 +360,12 @@ namespace krys::boo
     KRYS_NODISCARD DOMString Value() const noexcept final;
 
     /// @see https://html.spec.whatwg.org/#dom-input-value
-    dom::ExceptionOr<void> Value(const DOMString &value) noexcept
+    ExceptionOr<void> Value(const DOMString &value) noexcept
     {
       return SetValue(value);
     }
 
-    dom::ExceptionOr<void>
+    ExceptionOr<void>
       SetValue(DOMStringView value,
                html::TextFieldEventBehavior eventBehavior = html::TextFieldEventBehavior::DispatchNoEvent,
                html::TextControlSetValueSelection selection =
@@ -380,13 +380,13 @@ namespace krys::boo
     KRYS_NODISCARD double ValueAsDate() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-valueasdate
-    dom::ExceptionOr<void> SetValueAsDate(double value) noexcept;
+    ExceptionOr<void> SetValueAsDate(double value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-valueasnumber
     KRYS_NODISCARD double ValueAsNumber() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-valueasnumber
-    dom::ExceptionOr<void> SetValueAsNumber(
+    ExceptionOr<void> SetValueAsNumber(
       double value,
       html::TextFieldEventBehavior eventBehavior = html::TextFieldEventBehavior::DispatchNoEvent) noexcept;
 
@@ -397,10 +397,10 @@ namespace krys::boo
     void Width(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-stepup
-    dom::ExceptionOr<void> StepUp(int n = 1) noexcept;
+    ExceptionOr<void> StepUp(int n = 1) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-stepdown
-    dom::ExceptionOr<void> StepDown(int n = 1) noexcept;
+    ExceptionOr<void> StepDown(int n = 1) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-cva-validationmessage
     KRYS_NODISCARD DOMString ValidationMessage() const noexcept final;
@@ -410,35 +410,35 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<uint32> SelectionStartForBindings() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectionstart
-    dom::ExceptionOr<void> SetSelectionStartForBindings(Maybe<uint32> start) noexcept;
+    ExceptionOr<void> SetSelectionStartForBindings(Maybe<uint32> start) noexcept;
 
     /// @brief The selection's end, or null if the type has no selection.
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectionend
     KRYS_NODISCARD Maybe<uint32> SelectionEndForBindings() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectionend
-    dom::ExceptionOr<void> SetSelectionEndForBindings(Maybe<uint32> end) noexcept;
+    ExceptionOr<void> SetSelectionEndForBindings(Maybe<uint32> end) noexcept;
 
     /// @brief The selection's direction, or null if the type has no selection.
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectiondirection
     KRYS_NODISCARD Maybe<DOMString> SelectionDirectionForBindings() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectiondirection
-    dom::ExceptionOr<void> SetSelectionDirectionForBindings(DOMStringView direction) noexcept;
+    ExceptionOr<void> SetSelectionDirectionForBindings(DOMStringView direction) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-setselectionrange
-    dom::ExceptionOr<void> SetSelectionRangeForBindings(uint32 start, uint32 end,
-                                                        DOMStringView direction = {}) noexcept;
+    ExceptionOr<void> SetSelectionRangeForBindings(uint32 start, uint32 end,
+                                                   DOMStringView direction = {}) noexcept;
 
     using HTMLTextFormControlElement::SetRangeText;
 
     /// @brief Throws `InvalidStateError` if the type has no selection.
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-setrangetext
-    dom::ExceptionOr<void> SetRangeText(DOMStringView replacement, uint32 start, uint32 end,
-                                        DOMStringView selectionMode) noexcept final;
+    ExceptionOr<void> SetRangeText(DOMStringView replacement, uint32 start, uint32 end,
+                                   DOMStringView selectionMode) noexcept final;
 
     /// @see https://html.spec.whatwg.org/#dom-input-showpicker
-    dom::ExceptionOr<void> ShowPicker() noexcept;
+    ExceptionOr<void> ShowPicker() noexcept;
 
     /// @brief Whether the type's picker is showing.
     KRYS_NODISCARD bool IsPresentingAttachedView() const noexcept;
@@ -704,13 +704,13 @@ namespace krys::boo
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &style) noexcept final;
 
-    void LegacyPreActivationBehavior(dom::Event &event) noexcept final;
+    void LegacyPreActivationBehavior(Event &event) noexcept final;
 
-    void ActivationBehavior(dom::Event &event) noexcept final;
+    void ActivationBehavior(Event &event) noexcept final;
 
-    void LegacyCanceledActivationBehavior(dom::Event &event) noexcept final;
+    void LegacyCanceledActivationBehavior(Event &event) noexcept final;
 
-    void DefaultEventHandler(dom::Event &event) noexcept final;
+    void DefaultEventHandler(Event &event) noexcept final;
 
 #pragma region HTMLInputElement Obsolete members - https://html.spec.whatwg.org/#HTMLInputElement-partial
 

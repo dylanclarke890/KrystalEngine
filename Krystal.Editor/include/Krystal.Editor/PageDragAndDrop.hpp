@@ -28,7 +28,7 @@ namespace krys::editor
 
   private:
     WeakPtr<boo::Document> _document;
-    List<boo::dom::EventListenerHandle> _listeners;
+    List<boo::EventListenerHandle> _listeners;
     /// @brief The card being dragged, while one is.
     RefPtr<boo::Element> _dragged;
     /// @brief The lines the log shows, the oldest first.
@@ -40,38 +40,36 @@ namespace krys::editor
 
     explicit PageDragAndDrop(boo::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
-      RefPtr<boo::dom::EventTarget> sample = document.GetElementById(u8"drag-and-drop");
+      RefPtr<boo::EventTarget> sample = document.GetElementById(u8"drag-and-drop");
       if (!sample)
       {
         return;
       }
 
       _listeners.push_back(
-        sample->AddEventListener(u8"dragstart", [this](boo::dom::Event &event) { StartCardDrag(event); }));
+        sample->AddEventListener(u8"dragstart", [this](boo::Event &event) { StartCardDrag(event); }));
       for (auto type : {u8"dragenter", u8"dragover"})
       {
-        _listeners.push_back(sample->AddEventListener(boo::DOMStringAtom(type),
-                                                      [this](boo::dom::Event &event) { DragOver(event); }));
+        _listeners.push_back(
+          sample->AddEventListener(boo::DOMStringAtom(type), [this](boo::Event &event) { DragOver(event); }));
       }
       _listeners.push_back(
-        sample->AddEventListener(u8"dragleave", [this](boo::dom::Event &event) { DragLeave(event); }));
+        sample->AddEventListener(u8"dragleave", [this](boo::Event &event) { DragLeave(event); }));
+      _listeners.push_back(sample->AddEventListener(u8"drop", [this](boo::Event &event) { Drop(event); }));
+      _listeners.push_back(sample->AddEventListener(u8"dragend", [this](boo::Event &) { EndCardDrag(); }));
       _listeners.push_back(
-        sample->AddEventListener(u8"drop", [this](boo::dom::Event &event) { Drop(event); }));
-      _listeners.push_back(
-        sample->AddEventListener(u8"dragend", [this](boo::dom::Event &) { EndCardDrag(); }));
-      _listeners.push_back(
-        sample->AddEventListener(u8"change", [this](boo::dom::Event &event) { FilesChosen(event); }));
+        sample->AddEventListener(u8"change", [this](boo::Event &event) { FilesChosen(event); }));
       // Every drag event but those of each move (`drag` and `dragover`) goes in the log, as the handlers
       // above left it.
       for (auto type : {u8"dragstart", u8"dragenter", u8"dragleave", u8"drop", u8"dragend"})
       {
         _listeners.push_back(
-          sample->AddEventListener(boo::DOMStringAtom(type), [this](boo::dom::Event &event) { Log(event); }));
+          sample->AddEventListener(boo::DOMStringAtom(type), [this](boo::Event &event) { Log(event); }));
       }
-      if (RefPtr<boo::dom::EventTarget> clear = document.GetElementById(u8"drag-clear"))
+      if (RefPtr<boo::EventTarget> clear = document.GetElementById(u8"drag-clear"))
       {
         _listeners.push_back(clear->AddEventListener(u8"click",
-                                                     [this](boo::dom::Event &)
+                                                     [this](boo::Event &)
                                                      {
                                                        _lines.clear();
                                                        ShowLog();
@@ -93,7 +91,7 @@ namespace krys::editor
     }
 
     /// @brief The element @p event went to, if it went to one.
-    KRYS_NODISCARD static boo::Element *TargetElement(boo::dom::Event &event) noexcept
+    KRYS_NODISCARD static boo::Element *TargetElement(boo::Event &event) noexcept
     {
       auto *node = DynamicDowncast<boo::Node>(event.Target().get());
       return node ? DynamicDowncast<boo::Element>(*node) : nullptr;
@@ -126,10 +124,10 @@ namespace krys::editor
     }
 
     /// @brief A card's drag carries its text, and only moves it.
-    void StartCardDrag(boo::dom::Event &event) noexcept
+    void StartCardDrag(boo::Event &event) noexcept
     {
       auto card = Closest(TargetElement(event), u8".drag-card");
-      auto &dataTransfer = *Downcast<boo::dom::DragEvent>(event).GetDataTransfer();
+      auto &dataTransfer = *Downcast<boo::DragEvent>(event).GetDataTransfer();
       if (!card || !_document)
       {
         return;
@@ -166,10 +164,10 @@ namespace krys::editor
 
     /// @brief The lists take the cards, and the drop zone takes anything, as a copy where the source allows
     /// one.
-    void DragOver(boo::dom::Event &event) noexcept
+    void DragOver(boo::Event &event) noexcept
     {
       auto *target = TargetElement(event);
-      auto &dataTransfer = *Downcast<boo::dom::DragEvent>(event).GetDataTransfer();
+      auto &dataTransfer = *Downcast<boo::DragEvent>(event).GetDataTransfer();
       if (auto zone = Closest(target, u8"#drop-zone"))
       {
         auto allowed = dataTransfer.EffectAllowed();
@@ -190,7 +188,7 @@ namespace krys::editor
 
     /// @brief A drag leaving the drop zone unmarks it (its contents don't take the pointer, so a leave there
     /// is the zone's own).
-    static void DragLeave(boo::dom::Event &event) noexcept
+    static void DragLeave(boo::Event &event) noexcept
     {
       auto *target = TargetElement(event);
       if (target && target->GetAttribute(u8"id") == boo::DOMString(u8"drop-zone"))
@@ -199,18 +197,18 @@ namespace krys::editor
       }
     }
 
-    void Drop(boo::dom::Event &event) noexcept
+    void Drop(boo::Event &event) noexcept
     {
       auto *target = TargetElement(event);
       if (Closest(target, u8"#drop-zone"))
       {
         event.PreventDefault();
-        ShowDrop(Downcast<boo::dom::DragEvent>(event));
+        ShowDrop(Downcast<boo::DragEvent>(event));
       }
       else if (auto list = Closest(target, u8".drag-list"); list && _dragged)
       {
         event.PreventDefault();
-        DropCard(*list, Closest(target, u8".drag-card"), Downcast<boo::dom::DragEvent>(event).ClientY());
+        DropCard(*list, Closest(target, u8".drag-card"), Downcast<boo::DragEvent>(event).ClientY());
       }
       MarkOver(nullptr);
     }
@@ -240,7 +238,7 @@ namespace krys::editor
     }
 
     /// @brief Lists what was dropped on the drop zone: its text, its URLs and its files.
-    void ShowDrop(boo::dom::DragEvent &event) noexcept
+    void ShowDrop(boo::DragEvent &event) noexcept
     {
       if (!_document)
       {
@@ -275,7 +273,7 @@ namespace krys::editor
     }
 
     /// @brief Logs the files the file input took.
-    void FilesChosen(boo::dom::Event &event) noexcept
+    void FilesChosen(boo::Event &event) noexcept
     {
       auto *input = DynamicDowncast<boo::HTMLInputElement>(TargetElement(event));
       auto *files = input ? input->Files() : nullptr;
@@ -294,7 +292,7 @@ namespace krys::editor
 
     /// @brief Adds @p event to the log: what it went to, its type, its data's types, and the operations it
     /// allows and chose.
-    void Log(boo::dom::Event &event) noexcept
+    void Log(boo::Event &event) noexcept
     {
       std::string target = "?";
       if (auto *element = TargetElement(event))
@@ -304,8 +302,7 @@ namespace krys::editor
       }
 
       auto line = std::format("{}: {}", target, Narrow(event.Type().View()));
-      if (auto dataTransfer = Downcast<boo::dom::DragEvent>(event).GetDataTransfer();
-          dataTransfer && _document)
+      if (auto dataTransfer = Downcast<boo::DragEvent>(event).GetDataTransfer(); dataTransfer && _document)
       {
         std::string types;
         for (auto &type : dataTransfer->Types(*_document))

@@ -63,7 +63,7 @@ namespace krys::boo::html
     KRYS_NODISCARD Maybe<DateComponents> SetMillisecondToDateComponents(double value) const noexcept final;
 
     // Time inputs have no picker.
-    void HandleActivationBehavior(dom::Event &event) noexcept final;
+    void HandleActivationBehavior(Event &event) noexcept final;
 
     void ShowPicker() noexcept final;
 

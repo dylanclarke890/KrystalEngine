@@ -55,7 +55,7 @@ namespace krys::boo
     return static_cast<uint16>(StyleRuleType());
   }
 
-  dom::ExceptionOr<void> CSSRule::SetCssText(const CSSOMString &) noexcept
+  ExceptionOr<void> CSSRule::SetCssText(const CSSOMString &) noexcept
   {
     return {};
   }

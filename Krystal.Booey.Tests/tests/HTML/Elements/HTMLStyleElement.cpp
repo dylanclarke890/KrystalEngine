@@ -53,7 +53,7 @@ namespace krys::boo::html::tests
       return sheet.CssRules()->Length();
     }
 
-    struct EventCounter : public dom::EventListenerCallback
+    struct EventCounter : public EventListenerCallback
     {
       uint32 &Count;
 
@@ -61,7 +61,7 @@ namespace krys::boo::html::tests
       {
       }
 
-      void HandleEvent(dom::Event &) noexcept override
+      void HandleEvent(Event &) noexcept override
       {
         Count++;
       }

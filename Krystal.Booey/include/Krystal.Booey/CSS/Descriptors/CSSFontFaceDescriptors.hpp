@@ -52,39 +52,39 @@ namespace krys::boo
 
     KRYS_NODISCARD CSSOMString Src() const noexcept;
 
-    dom::ExceptionOr<void> SetSrc(const CSSOMString &value) noexcept;
+    ExceptionOr<void> SetSrc(const CSSOMString &value) noexcept;
 
     KRYS_NODISCARD CSSOMString FontFamily() const noexcept;
 
-    dom::ExceptionOr<void> SetFontFamily(const CSSOMString &value) noexcept;
+    ExceptionOr<void> SetFontFamily(const CSSOMString &value) noexcept;
 
     KRYS_NODISCARD CSSOMString FontStyle() const noexcept;
 
-    dom::ExceptionOr<void> SetFontStyle(const CSSOMString &value) noexcept;
+    ExceptionOr<void> SetFontStyle(const CSSOMString &value) noexcept;
 
     KRYS_NODISCARD CSSOMString FontWeight() const noexcept;
 
-    dom::ExceptionOr<void> SetFontWeight(const CSSOMString &value) noexcept;
+    ExceptionOr<void> SetFontWeight(const CSSOMString &value) noexcept;
 
     KRYS_NODISCARD CSSOMString FontWidth() const noexcept;
 
-    dom::ExceptionOr<void> SetFontWidth(const CSSOMString &value) noexcept;
+    ExceptionOr<void> SetFontWidth(const CSSOMString &value) noexcept;
 
     KRYS_NODISCARD CSSOMString SizeAdjust() const noexcept;
 
-    dom::ExceptionOr<void> SetSizeAdjust(const CSSOMString &value) noexcept;
+    ExceptionOr<void> SetSizeAdjust(const CSSOMString &value) noexcept;
 
     KRYS_NODISCARD CSSOMString UnicodeRange() const noexcept;
 
-    dom::ExceptionOr<void> SetUnicodeRange(const CSSOMString &value) noexcept;
+    ExceptionOr<void> SetUnicodeRange(const CSSOMString &value) noexcept;
 
     KRYS_NODISCARD CSSOMString FontFeatureSettings() const noexcept;
 
-    dom::ExceptionOr<void> SetFontFeatureSettings(const CSSOMString &value) noexcept;
+    ExceptionOr<void> SetFontFeatureSettings(const CSSOMString &value) noexcept;
 
     KRYS_NODISCARD CSSOMString FontDisplay() const noexcept;
 
-    dom::ExceptionOr<void> SetFontDisplay(const CSSOMString &value) noexcept;
+    ExceptionOr<void> SetFontDisplay(const CSSOMString &value) noexcept;
 
   private:
     KRYS_NODISCARD css::RuleType GetRuleType() const noexcept final;

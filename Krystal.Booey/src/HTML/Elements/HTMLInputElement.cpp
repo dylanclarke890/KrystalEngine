@@ -458,11 +458,11 @@ namespace krys::boo
     return _size;
   }
 
-  dom::ExceptionOr<void> HTMLInputElement::Size(uint32 value) noexcept
+  ExceptionOr<void> HTMLInputElement::Size(uint32 value) noexcept
   {
     if (!value)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
     auto limitedSize = value > 2'147'483'647 ? static_cast<uint32>(DefaultSize) : value;
     auto string = std::to_string(limitedSize);
@@ -538,13 +538,13 @@ namespace krys::boo
     return ValueOrNull().value_or(DOMString());
   }
 
-  dom::ExceptionOr<void> HTMLInputElement::SetValue(DOMStringView value,
-                                                    html::TextFieldEventBehavior eventBehavior,
-                                                    html::TextControlSetValueSelection selection) noexcept
+  ExceptionOr<void> HTMLInputElement::SetValue(DOMStringView value,
+                                               html::TextFieldEventBehavior eventBehavior,
+                                               html::TextControlSetValueSelection selection) noexcept
   {
     if (IsFileUpload() && !value.empty())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     Ref<HTMLInputElement> protectedThis = ShareRef(*this);
@@ -585,7 +585,7 @@ namespace krys::boo
     return _inputType->ValueAsDate();
   }
 
-  dom::ExceptionOr<void> HTMLInputElement::SetValueAsDate(double value) noexcept
+  ExceptionOr<void> HTMLInputElement::SetValueAsDate(double value) noexcept
   {
     return _inputType->SetValueAsDate(value);
   }
@@ -595,12 +595,12 @@ namespace krys::boo
     return _inputType->ValueAsDouble();
   }
 
-  dom::ExceptionOr<void>
-    HTMLInputElement::SetValueAsNumber(double newValue, html::TextFieldEventBehavior eventBehavior) noexcept
+  ExceptionOr<void> HTMLInputElement::SetValueAsNumber(double newValue,
+                                                       html::TextFieldEventBehavior eventBehavior) noexcept
   {
     if (!std::isfinite(newValue))
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
     return _inputType->SetValueAsDouble(newValue, eventBehavior);
   }
@@ -615,12 +615,12 @@ namespace krys::boo
     html::Reflect<uint32>(*this, u8"width", krys::move(value));
   }
 
-  dom::ExceptionOr<void> HTMLInputElement::StepUp(int n) noexcept
+  ExceptionOr<void> HTMLInputElement::StepUp(int n) noexcept
   {
     return _inputType->StepUp(n);
   }
 
-  dom::ExceptionOr<void> HTMLInputElement::StepDown(int n) noexcept
+  ExceptionOr<void> HTMLInputElement::StepDown(int n) noexcept
   {
     return _inputType->StepUp(-n);
   }
@@ -1156,7 +1156,7 @@ namespace krys::boo
     _inputType->Detach();
   }
 
-  dom::ExceptionOr<void> HTMLInputElement::ShowPicker() noexcept
+  ExceptionOr<void> HTMLInputElement::ShowPicker() noexcept
   {
     if (!NodeDocument().Frame())
     {
@@ -1165,15 +1165,14 @@ namespace krys::boo
 
     if (!IsMutable())
     {
-      return dom::Exception(dom::ExceptionCode::InvalidStateError,
-                            u8"Input showPicker() cannot be used on immutable controls.");
+      return Exception(ExceptionCode::InvalidStateError,
+                       u8"Input showPicker() cannot be used on immutable controls.");
     }
 
     auto *window = NodeDocument().Window();
     if (!window || !window->ConsumeTransientActivation())
     {
-      return dom::Exception(dom::ExceptionCode::NotAllowedError,
-                            u8"Input showPicker() requires a user gesture.");
+      return Exception(ExceptionCode::NotAllowedError, u8"Input showPicker() requires a user gesture.");
     }
 
     _inputType->ShowPicker();
@@ -1202,7 +1201,7 @@ namespace krys::boo
     // Input event is fired by the Node::defaultEventHandler for editable controls.
     if (!IsTextField())
     {
-      dom::ScopedEventQueue::DispatchOrQueue(dom::Event::Create(event_names::Input, true, false, true),
+      dom::ScopedEventQueue::DispatchOrQueue(Event::Create(event_names::Input, true, false, true),
                                              ShareRef(*this));
     }
 
@@ -1330,12 +1329,12 @@ namespace krys::boo
     return textBlockStyle;
   }
 
-  dom::ExceptionOr<void> HTMLInputElement::SetRangeText(DOMStringView replacement, uint32 start, uint32 end,
-                                                        DOMStringView selectionMode) noexcept
+  ExceptionOr<void> HTMLInputElement::SetRangeText(DOMStringView replacement, uint32 start, uint32 end,
+                                                   DOMStringView selectionMode) noexcept
   {
     if (!_inputType->SupportsSelectionAPI())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     return HTMLTextFormControlElement::SetRangeText(replacement, start, end, selectionMode);
@@ -1351,11 +1350,11 @@ namespace krys::boo
     return SelectionStart();
   }
 
-  dom::ExceptionOr<void> HTMLInputElement::SetSelectionStartForBindings(Maybe<uint32> start) noexcept
+  ExceptionOr<void> HTMLInputElement::SetSelectionStartForBindings(Maybe<uint32> start) noexcept
   {
     if (!CanHaveSelection() || !_inputType->SupportsSelectionAPI())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     SetSelectionStart(start.value_or(0));
@@ -1372,11 +1371,11 @@ namespace krys::boo
     return SelectionEnd();
   }
 
-  dom::ExceptionOr<void> HTMLInputElement::SetSelectionEndForBindings(Maybe<uint32> end) noexcept
+  ExceptionOr<void> HTMLInputElement::SetSelectionEndForBindings(Maybe<uint32> end) noexcept
   {
     if (!CanHaveSelection() || !_inputType->SupportsSelectionAPI())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     SetSelectionEnd(end.value_or(0));
@@ -1393,23 +1392,23 @@ namespace krys::boo
     return DOMString(SelectionDirection());
   }
 
-  dom::ExceptionOr<void> HTMLInputElement::SetSelectionDirectionForBindings(DOMStringView direction) noexcept
+  ExceptionOr<void> HTMLInputElement::SetSelectionDirectionForBindings(DOMStringView direction) noexcept
   {
     if (!CanHaveSelection() || !_inputType->SupportsSelectionAPI())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     SetSelectionDirection(direction);
     return {};
   }
 
-  dom::ExceptionOr<void> HTMLInputElement::SetSelectionRangeForBindings(uint32 start, uint32 end,
-                                                                        DOMStringView direction) noexcept
+  ExceptionOr<void> HTMLInputElement::SetSelectionRangeForBindings(uint32 start, uint32 end,
+                                                                   DOMStringView direction) noexcept
   {
     if (!CanHaveSelection() || !_inputType->SupportsSelectionAPI())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     SetSelectionRange(start, end, direction, html::ForBindings::Yes);
@@ -2147,7 +2146,7 @@ namespace krys::boo
 #pragma region Events
 
   // https://html.spec.whatwg.org/#the-input-element:legacy-pre-activation-behavior
-  void HTMLInputElement::LegacyPreActivationBehavior(dom::Event &event) noexcept
+  void HTMLInputElement::LegacyPreActivationBehavior(Event &event) noexcept
   {
     // 1. If this element's type attribute is in the Checkbox state, then set this element's checkedness to
     // its
@@ -2160,7 +2159,7 @@ namespace krys::boo
     // (The checkbox and radio input types' WillDispatchClick, which remember the state to restore.)
     _clickHandlingState = {};
     _clickHandlingState.Trusted = event.IsTrusted();
-    auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
+    auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
     if (event.Type() == event_names::Click && mouseEvent && mouseEvent->Button() == 0)
     {
       _inputType->WillDispatchClick(_clickHandlingState);
@@ -2169,7 +2168,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#the-input-element:activation-behaviour
-  void HTMLInputElement::ActivationBehavior(dom::Event &event) noexcept
+  void HTMLInputElement::ActivationBehavior(Event &event) noexcept
   {
     // A file input's button (its ::file-selector-button) activates the input, so clicking it opens the
     // chooser, as in Chrome.
@@ -2211,7 +2210,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#the-input-element:legacy-canceled-activation-behavior
-  void HTMLInputElement::LegacyCanceledActivationBehavior(dom::Event &event) noexcept
+  void HTMLInputElement::LegacyCanceledActivationBehavior(Event &event) noexcept
   {
     // 1. If the element's type attribute is in the Checkbox state, then set the element's checkedness and the
     //    element's indeterminateness back to the values they had before the legacy-pre-activation behavior
@@ -2231,11 +2230,11 @@ namespace krys::boo
     _clickHandlingState.CheckedRadioButton = nullptr;
   }
 
-  void HTMLInputElement::DefaultEventHandler(dom::Event &event) noexcept
+  void HTMLInputElement::DefaultEventHandler(Event &event) noexcept
   {
     Ref<html::InputType> protectedInputType = ShareRef(*_inputType);
 
-    if (auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event); mouseEvent && mouseEvent->Button() == 0)
+    if (auto *mouseEvent = DynamicDowncast<MouseEvent>(event); mouseEvent && mouseEvent->Button() == 0)
     {
       if (mouseEvent->Type() == event_names::Click || mouseEvent->Type() == event_names::AuxClick)
       {
@@ -2253,7 +2252,7 @@ namespace krys::boo
       }
     }
 
-    if (auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event);
+    if (auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event);
         keyboardEvent && keyboardEvent->Type() == event_names::KeyDown)
     {
       auto shouldCallBaseEventHandler = _inputType->HandleKeydownEvent(*keyboardEvent);
@@ -2280,7 +2279,7 @@ namespace krys::boo
 
     // Use key press event here since sending simulated mouse events on key down blocks the proper sending of
     // the key press event.
-    if (auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event))
+    if (auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event))
     {
       if (keyboardEvent->Type() == event_names::KeyPress)
       {
@@ -2319,7 +2318,7 @@ namespace krys::boo
       return;
     }
 
-    if (auto *beforeTextInsertedEvent = DynamicDowncast<dom::BeforeTextInsertedEvent>(event))
+    if (auto *beforeTextInsertedEvent = DynamicDowncast<BeforeTextInsertedEvent>(event))
     {
       _inputType->HandleBeforeTextInsertedEvent(*beforeTextInsertedEvent);
     }

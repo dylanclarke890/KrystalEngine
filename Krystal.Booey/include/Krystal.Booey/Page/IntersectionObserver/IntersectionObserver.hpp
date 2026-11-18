@@ -139,7 +139,7 @@ namespace krys::boo
 
   public:
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-intersectionobserver
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<IntersectionObserver>>
+    KRYS_NODISCARD static ExceptionOr<Ref<IntersectionObserver>>
       Create(Document &document, IntersectionObserverCallback &&callback, Init init = {},
              IncludeObscuredInsets includeObscuredInsets = IncludeObscuredInsets::No) noexcept;
 

@@ -71,7 +71,7 @@ void main()
   private:
     gfx::Device &_device;
     WeakPtr<boo::Document> _document;
-    List<boo::dom::EventListenerHandle> _listeners;
+    List<boo::EventListenerHandle> _listeners;
     List<boo::html::EngineTextureRenderingContext *> _contexts;
     gfx::TextureHandle _texture {};
     gfx::TextureHandle _depth {};
@@ -115,14 +115,14 @@ void main()
       }
 
       // The pointer that presses the cube captures itself to it, and turns the cube until it lets go.
-      auto listen = [&](utf8_stringview type, Func<void(boo::dom::PointerEvent &)> &&callback)
+      auto listen = [&](utf8_stringview type, Func<void(boo::PointerEvent &)> &&callback)
       {
-        _listeners.push_back(cube->AddEventListener(
-          boo::DOMStringAtom(type), [callback = krys::move(callback)](boo::dom::Event &event)
-          { callback(static_cast<boo::dom::PointerEvent &>(event)); }));
+        _listeners.push_back(cube->AddEventListener(boo::DOMStringAtom(type),
+                                                    [callback = krys::move(callback)](boo::Event &event)
+                                                    { callback(static_cast<boo::PointerEvent &>(event)); }));
       };
       listen(u8"pointerdown",
-             [this](boo::dom::PointerEvent &pointer)
+             [this](boo::PointerEvent &pointer)
              {
                if (auto element = ById(u8"cube"))
                {
@@ -131,10 +131,10 @@ void main()
                  (void)element->SetPointerCapture(static_cast<int32>(pointer.PointerId()));
                }
              });
-      listen(u8"gotpointercapture", [this](boo::dom::PointerEvent &pointer)
-             { _dragPointer = static_cast<int32>(pointer.PointerId()); });
-      listen(u8"lostpointercapture", [this](boo::dom::PointerEvent &) { _dragPointer = -1; });
-      listen(u8"pointermove", [this](boo::dom::PointerEvent &pointer) { Drag(pointer); });
+      listen(u8"gotpointercapture",
+             [this](boo::PointerEvent &pointer) { _dragPointer = static_cast<int32>(pointer.PointerId()); });
+      listen(u8"lostpointercapture", [this](boo::PointerEvent &) { _dragPointer = -1; });
+      listen(u8"pointermove", [this](boo::PointerEvent &pointer) { Drag(pointer); });
     }
 
     ~PageCube() noexcept
@@ -329,7 +329,7 @@ void main()
       return _document ? _document->GetElementById(id) : nullptr;
     }
 
-    void Drag(const boo::dom::PointerEvent &pointer) noexcept
+    void Drag(const boo::PointerEvent &pointer) noexcept
     {
       if (static_cast<int32>(pointer.PointerId()) != _dragPointer)
       {

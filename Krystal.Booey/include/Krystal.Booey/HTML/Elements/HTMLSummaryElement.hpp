@@ -42,9 +42,9 @@ namespace krys::boo
     KRYS_NODISCARD bool IsActiveSummary() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-summary-element:activation-behaviour
-    void ActivationBehavior(dom::Event &event) noexcept final;
+    void ActivationBehavior(Event &event) noexcept final;
 
-    void DefaultEventHandler(dom::Event &event) noexcept final;
+    void DefaultEventHandler(Event &event) noexcept final;
 
   protected:
 #pragma region Extensibility Hooks

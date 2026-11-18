@@ -8,12 +8,8 @@
 namespace krys::boo
 {
   class Element;
-  class HTMLElement;
-}
-
-namespace krys::boo::dom
-{
   class Event;
+  class HTMLElement;
 }
 
 namespace krys::boo::url
@@ -41,7 +37,7 @@ namespace krys::boo::html
     KRYS_NODISCARD static DOMStringAtom EffectiveTarget(const HTMLElement &element) noexcept;
 
     /// @brief Whether @p event is the keydown of the Enter key.
-    KRYS_NODISCARD static bool IsEnterKeyKeydownEvent(const dom::Event &event) noexcept;
+    KRYS_NODISCARD static bool IsEnterKeyKeydownEvent(const Event &event) noexcept;
 
     /// @brief Whether @p element's `rel` attribute has the keyword @p relation (ASCII case-insensitively).
     KRYS_NODISCARD static bool HasRel(const HTMLElement &element, DOMStringView relation) noexcept;
@@ -53,12 +49,12 @@ namespace krys::boo::html
     /// @brief The activation behaviour of `<a>` and `<area>`: follows the link, with the coordinates clicked
     /// on a server-side image map.
     /// @see https://html.spec.whatwg.org/#the-a-element:activation-behaviour
-    static void ActivationBehavior(HTMLElement &element, dom::Event &event) noexcept;
+    static void ActivationBehavior(HTMLElement &element, Event &event) noexcept;
 
     /// @brief Follows @p subject's link, as @p event (a click, or the Enter key's simulated click) asks: its
     /// frame's loader navigates to its URL, followed by @p hyperlinkSuffix, in its target.
     /// @see https://html.spec.whatwg.org/#following-hyperlinks-2
-    static void FollowTheHyperlink(HTMLElement &subject, dom::Event &event,
+    static void FollowTheHyperlink(HTMLElement &subject, Event &event,
                                    const Maybe<utf8_string> &hyperlinkSuffix = null) noexcept;
   };
 }

@@ -83,7 +83,7 @@ namespace krys::boo
 
     /// @brief Replaces the segment at @p index, or appends one at the end.
     /// @return A `RangeError` if @p index is past the end.
-    dom::ExceptionOr<CSSUnparsedSegment> SetItem(size_t index, CSSUnparsedSegment segment) noexcept;
+    ExceptionOr<CSSUnparsedSegment> SetItem(size_t index, CSSUnparsedSegment segment) noexcept;
 
     KRYS_NODISCARD const List<CSSUnparsedSegment> &Segments() const noexcept
     {

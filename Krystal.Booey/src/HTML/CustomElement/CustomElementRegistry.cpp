@@ -91,9 +91,8 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-customelementregistry-define
-  dom::ExceptionOr<void> CustomElementRegistry::Define(const DOMStringAtom &name,
-                                                       CustomElementFactory &&factory,
-                                                       CustomElementOptions &&options) noexcept
+  ExceptionOr<void> CustomElementRegistry::Define(const DOMStringAtom &name, CustomElementFactory &&factory,
+                                                  CustomElementOptions &&options) noexcept
   {
     CEReactionsScope ceReactions;
 
@@ -102,14 +101,14 @@ namespace krys::boo::html
     // 2. If name is not a valid custom element name, then throw a "SyntaxError" DOMException.
     if (!dom::NameValidation::IsValidCustomElementName(name.View()))
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError};
+      return Exception {ExceptionCode::SyntaxError};
     }
 
     // 3. If this's custom element definition set contains an item with name name, then throw a
     //    "NotSupportedError" DOMException.
     if (FindInterface(name) != nullptr)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     // 4. If this's custom element definition set contains an item with constructor constructor, then throw a
@@ -121,7 +120,7 @@ namespace krys::boo::html
     // 8. If this's element definition is running is true, then throw a "NotSupportedError" DOMException.
     if (_elementDefinitionIsRunning)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     // 9. Set this's element definition is running to true.
@@ -226,14 +225,14 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#dom-customelementregistry-whendefined
   // (The promise is a callback, called in a microtask once the name is defined.)
-  dom::ExceptionOr<void> CustomElementRegistry::WhenDefined(const DOMStringAtom &name,
-                                                            WhenDefinedCallback &&callback) noexcept
+  ExceptionOr<void> CustomElementRegistry::WhenDefined(const DOMStringAtom &name,
+                                                       WhenDefinedCallback &&callback) noexcept
   {
     // 1. If name is not a valid custom element name, then return a promise rejected with a "SyntaxError"
     //    DOMException.
     if (!dom::NameValidation::IsValidCustomElementName(name.View()))
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError};
+      return Exception {ExceptionCode::SyntaxError};
     }
 
     // 2. If this's custom element definition set contains an item with name name, then return a promise
@@ -283,7 +282,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-customelementregistry-initialize
-  dom::ExceptionOr<void> CustomElementRegistry::Initialize(Node &root) noexcept
+  ExceptionOr<void> CustomElementRegistry::Initialize(Node &root) noexcept
   {
     CEReactionsScope ceReactions;
 
@@ -291,7 +290,7 @@ namespace krys::boo::html
     //    element registry is not this, then throw a "NotSupportedError" DOMException.
     if (!IsScoped() && (Is<boo::Document>(root) || this != root.NodeDocument().CustomElementRegistry().get()))
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     // 2. If root is a Document node whose custom element registry is null, then set root's custom element

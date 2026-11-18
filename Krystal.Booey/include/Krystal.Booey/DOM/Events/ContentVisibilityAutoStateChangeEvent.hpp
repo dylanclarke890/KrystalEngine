@@ -4,7 +4,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   /// @see https://drafts.csswg.org/css-contain/#dictdef-contentvisibilityautostatechangeeventinit
   struct ContentVisibilityAutoStateChangeEventInit : EventInit
@@ -48,8 +48,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::ContentVisibilityAutoStateChangeEvent)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::ContentVisibilityAutoStateChangeEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Event &event) noexcept
   {
     return event.IsContentVisibilityAutoStateChangeEvent();
   }

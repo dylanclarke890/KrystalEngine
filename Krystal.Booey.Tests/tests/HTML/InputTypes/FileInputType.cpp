@@ -46,13 +46,13 @@ namespace krys::boo::html::tests
     }
 
     /// @brief The entries of each formdata event, as "name=file:name:type" or "name=value".
-    struct FormDataEntries : dom::EventListenerCallback
+    struct FormDataEntries : EventListenerCallback
     {
       List<std::string> Entries;
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
-        for (auto &item : Downcast<dom::FormDataEvent>(event).FormData().Items())
+        for (auto &item : Downcast<FormDataEvent>(event).FormData().Items())
         {
           if (auto *file = std::get_if<RefPtr<File>>(&item.Data))
           {

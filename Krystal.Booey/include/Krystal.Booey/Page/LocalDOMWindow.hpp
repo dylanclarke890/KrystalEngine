@@ -76,7 +76,7 @@ namespace krys::boo
   /// (`load`, `resize` and the others) fire at, and which the document's events bubble to.
   /// @note The document makes its window as it becomes a frame's document, and keeps it.
   /// @see https://html.spec.whatwg.org/#the-window-object
-  class LocalDOMWindow final : public dom::EventTarget
+  class LocalDOMWindow final : public EventTarget
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_NON_COPY_MOVABLE(LocalDOMWindow);
@@ -318,7 +318,7 @@ namespace krys::boo
     KRYS_NODISCARD DOMSelection *GetSelection() const noexcept;
 
   protected:
-    void DidAddEventListener(const dom::EventListener &listener) noexcept final;
+    void DidAddEventListener(const EventListener &listener) noexcept final;
 
   private:
     /// @brief Whether @p element is a named object of the window with the name @p name.
@@ -327,7 +327,7 @@ namespace krys::boo
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::LocalDOMWindow)
-  static bool IsType(const krys::boo::dom::EventTarget &target) noexcept
+  static bool IsType(const krys::boo::EventTarget &target) noexcept
   {
     return target.IsWindow();
   }

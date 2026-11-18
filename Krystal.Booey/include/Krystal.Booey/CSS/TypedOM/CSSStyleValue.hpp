@@ -219,12 +219,12 @@ namespace krys::boo
     /// @brief Parses @p cssText as a value of @p property, reified.
     /// @return A `TypeError` if @p property isn't a property or @p cssText doesn't parse as its value.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssstylevalue-parse
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSStyleValue>>
-      Parse(Document &document, CSSOMStringView property, CSSOMStringView cssText) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSStyleValue>> Parse(Document &document, CSSOMStringView property,
+                                                                CSSOMStringView cssText) noexcept;
 
     /// @brief Parses @p cssText as a value of @p property, each of its iterations reified.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssstylevalue-parseall
-    KRYS_NODISCARD static dom::ExceptionOr<List<Ref<CSSStyleValue>>>
+    KRYS_NODISCARD static ExceptionOr<List<Ref<CSSStyleValue>>>
       ParseAll(Document &document, CSSOMStringView property, CSSOMStringView cssText) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#stylevalue-serialization

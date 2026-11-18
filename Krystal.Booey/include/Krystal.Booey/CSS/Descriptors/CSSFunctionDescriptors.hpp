@@ -54,7 +54,7 @@ namespace krys::boo
 
     KRYS_NODISCARD CSSOMString Result() const noexcept;
 
-    dom::ExceptionOr<void> SetResult(const CSSOMString &value) noexcept;
+    ExceptionOr<void> SetResult(const CSSOMString &value) noexcept;
 
   private:
     KRYS_NODISCARD css::RuleType GetRuleType() const noexcept final;

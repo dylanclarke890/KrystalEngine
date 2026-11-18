@@ -42,12 +42,12 @@ namespace krys::boo
     /// @brief A 2D translation without @p z, or a 3D one with it.
     /// @return A `TypeError` if @p x or @p y isn't a length or percentage, or @p z isn't a length.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csstranslate-csstranslate
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSTranslate>>
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSTranslate>>
       Create(Ref<CSSNumericValue> x, Ref<CSSNumericValue> y, RefPtr<CSSNumericValue> z = {}) noexcept;
 
     /// @brief Reifies a translation function.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSTranslate>> Create(const css::FunctionValue &function,
-                                                                     Document &document) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSTranslate>> Create(const css::FunctionValue &function,
+                                                                Document &document) noexcept;
 
     KRYS_NODISCARD const CSSNumericValue &X() const noexcept
     {
@@ -65,17 +65,17 @@ namespace krys::boo
     }
 
     /// @return A `TypeError` if @p x isn't a length or percentage.
-    dom::ExceptionOr<void> SetX(Ref<CSSNumericValue> x) noexcept;
+    ExceptionOr<void> SetX(Ref<CSSNumericValue> x) noexcept;
 
     /// @return A `TypeError` if @p y isn't a length or percentage.
-    dom::ExceptionOr<void> SetY(Ref<CSSNumericValue> y) noexcept;
+    ExceptionOr<void> SetY(Ref<CSSNumericValue> y) noexcept;
 
     /// @return A `TypeError` if @p z isn't a length.
-    dom::ExceptionOr<void> SetZ(Ref<CSSNumericValue> z) noexcept;
+    ExceptionOr<void> SetZ(Ref<CSSNumericValue> z) noexcept;
 
     void Serialise(StringBuilder &builder) const noexcept final;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
+    KRYS_NODISCARD ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
 
     KRYS_NODISCARD CSSTransformType TransformType() const noexcept final
     {

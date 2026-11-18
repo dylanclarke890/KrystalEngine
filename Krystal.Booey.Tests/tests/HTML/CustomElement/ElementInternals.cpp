@@ -110,7 +110,7 @@ namespace krys::boo::html::tests
       (void)InternalsOf(u8"plain");
       auto again = Downcast<HTMLElement>(ById(u8"plain")).AttachInternals();
       REQUIRE(again.HasException());
-      CHECK(again.GetException().Code() == dom::ExceptionCode::NotSupportedError);
+      CHECK(again.GetException().Code() == ExceptionCode::NotSupportedError);
     }
 
     SECTION("an element with an is value has none")
@@ -120,7 +120,7 @@ namespace krys::boo::html::tests
       REQUIRE(element.Value()->IsDefinedCustomElement());
       auto internals = Downcast<HTMLElement>(*element.Value()).AttachInternals();
       REQUIRE(internals.HasException());
-      CHECK(internals.GetException().Code() == dom::ExceptionCode::NotSupportedError);
+      CHECK(internals.GetException().Code() == ExceptionCode::NotSupportedError);
     }
 
     SECTION("a definition can disable them")
@@ -244,7 +244,7 @@ namespace krys::boo::html::tests
 
       auto noMessage = internals.SetValidity({.ValueMissing = true}, u8"");
       REQUIRE(noMessage.HasException());
-      CHECK(noMessage.GetException().Code() == dom::ExceptionCode::TypeError);
+      CHECK(noMessage.GetException().Code() == ExceptionCode::TypeError);
 
       REQUIRE_FALSE(internals.SetValidity({.ValueMissing = true}, u8"Pick a rating").HasException());
       CHECK(internals.Validity().Value().ValueMissing());
@@ -257,7 +257,7 @@ namespace krys::boo::html::tests
       auto outside =
         internals.SetValidity({.CustomError = true}, u8"Elsewhere", &Downcast<HTMLElement>(ById(u8"b")));
       REQUIRE(outside.HasException());
-      CHECK(outside.GetException().Code() == dom::ExceptionCode::NotFoundError);
+      CHECK(outside.GetException().Code() == ExceptionCode::NotFoundError);
 
       REQUIRE_FALSE(internals.SetValidity().HasException());
       CHECK(internals.CheckValidity().Value());

@@ -87,9 +87,9 @@ namespace krys::boo
 
     void BindingsWhenFinished(ReadyCallback onFinished, ErrorCallback onError = nullptr) noexcept final;
 
-    dom::ExceptionOr<void> BindingsPlay() noexcept override;
+    ExceptionOr<void> BindingsPlay() noexcept override;
 
-    dom::ExceptionOr<void> BindingsPause() noexcept override;
+    ExceptionOr<void> BindingsPause() noexcept override;
 
     /// @brief Brings the animation up to date with the owning element's style.
     void FlushPendingStyleChanges() const noexcept;

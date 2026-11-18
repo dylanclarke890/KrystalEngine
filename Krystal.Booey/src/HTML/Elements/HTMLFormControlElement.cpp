@@ -90,7 +90,7 @@ namespace krys::boo
     ClearForm();
   }
 
-  void HTMLFormControlElement::DispatchBlurEvent(dom::EventTarget *relatedTarget) noexcept
+  void HTMLFormControlElement::DispatchBlurEvent(EventTarget *relatedTarget) noexcept
   {
     HTMLElement::DispatchBlurEvent(relatedTarget);
     HideVisibleValidationMessage();
@@ -204,13 +204,12 @@ namespace krys::boo
 
   void HTMLFormControlElement::DispatchChangeEvent() noexcept
   {
-    dom::ScopedEventQueue::DispatchOrQueue(dom::Event::Create(event_names::Change, true, false),
-                                           ShareRef(*this));
+    dom::ScopedEventQueue::DispatchOrQueue(Event::Create(event_names::Change, true, false), ShareRef(*this));
   }
 
   void HTMLFormControlElement::DispatchCancelEvent() noexcept
   {
-    auto event = dom::Event::Create(event_names::Cancel, true, false);
+    auto event = Event::Create(event_names::Cancel, true, false);
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
   }
 
@@ -224,7 +223,7 @@ namespace krys::boo
   void HTMLFormControlElement::DispatchFormControlInputEvent() noexcept
   {
     SetChangedSinceLastFormControlChangeEvent(true);
-    dom::ScopedEventQueue::DispatchOrQueue(dom::Event::Create(event_names::Input, true, false, true),
+    dom::ScopedEventQueue::DispatchOrQueue(Event::Create(event_names::Input, true, false, true),
                                            ShareRef(*this));
   }
 
@@ -302,7 +301,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#popover-target-attribute-activation-behavior
-  void HTMLFormControlElement::HandlePopoverTargetAction(dom::EventTarget *eventTarget) noexcept
+  void HTMLFormControlElement::HandlePopoverTargetAction(EventTarget *eventTarget) noexcept
   {
     // 1. Let popover be node's popover target element.
     // 2. If popover is null, then return.

@@ -37,7 +37,7 @@
 
 namespace krys::boo::html
 {
-  void ResetInputType::HandleActivationBehavior(dom::Event &event) noexcept
+  void ResetInputType::HandleActivationBehavior(Event &event) noexcept
   {
     krys_debug_assert(Element());
     if (Element()->IsDisabledFormControl())

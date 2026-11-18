@@ -40,7 +40,7 @@ namespace krys::boo::html::tests
     struct PopoverEventLog
     {
       List<std::string> Events;
-      List<dom::EventListenerHandle> Handles;
+      List<EventListenerHandle> Handles;
       bool PreventBeforeToggle {false};
 
       void Watch(HTMLElement &popover) noexcept
@@ -50,9 +50,9 @@ namespace krys::boo::html::tests
         {
           Handles.push_back(popover.AddEventListener(
             type,
-            [this, id](dom::Event &event)
+            [this, id](Event &event)
             {
-              auto &toggle = Downcast<dom::ToggleEvent>(event);
+              auto &toggle = Downcast<ToggleEvent>(event);
               Events.push_back(id + ":" + Narrow(event.Type().View()) + ":" + Narrow(toggle.OldState()) + ">"
                                + Narrow(toggle.NewState()));
               if (PreventBeforeToggle && event.Type() == u8"beforetoggle")
@@ -89,10 +89,10 @@ namespace krys::boo::html::tests
                            PlatformEvent::Type::MouseReleased, 1, {}, MonotonicTime::Now()));
     }
 
-    KRYS_NODISCARD dom::ExceptionCode ShowError(HTMLElement &element) noexcept
+    KRYS_NODISCARD ExceptionCode ShowError(HTMLElement &element) noexcept
     {
       auto result = element.ShowPopover();
-      return result.HasException() ? result.GetException().Code() : dom::ExceptionCode {};
+      return result.HasException() ? result.GetException().Code() : ExceptionCode {};
     }
   }
 
@@ -131,10 +131,10 @@ namespace krys::boo::html::tests
 
     SECTION("Only connected popovers show")
     {
-      CHECK(ShowError(plain) == dom::ExceptionCode::NotSupportedError);
+      CHECK(ShowError(plain) == ExceptionCode::NotSupportedError);
       auto detached = document.CreateElement(u8"div").ReleaseValue();
       (void)detached->SetAttribute(u8"popover", DOMString());
-      CHECK(ShowError(Downcast<HTMLElement>(*detached)) == dom::ExceptionCode::InvalidStateError);
+      CHECK(ShowError(Downcast<HTMLElement>(*detached)) == ExceptionCode::InvalidStateError);
       CHECK(log.Take().empty());
     }
 
@@ -352,10 +352,10 @@ namespace krys::boo::html::tests
       REQUIRE_FALSE(document.Body()->AppendChild(*dialog).HasException());
       auto &modal = Downcast<HTMLDialogElement>(*dialog);
       REQUIRE_FALSE(modal.ShowModal().HasException());
-      CHECK(ShowError(modal) == dom::ExceptionCode::InvalidStateError);
+      CHECK(ShowError(modal) == ExceptionCode::InvalidStateError);
       modal.Close();
       REQUIRE_FALSE(modal.ShowPopover().HasException());
-      CHECK(modal.ShowModal().GetException().Code() == dom::ExceptionCode::InvalidStateError);
+      CHECK(modal.ShowModal().GetException().Code() == ExceptionCode::InvalidStateError);
     }
   }
 
@@ -513,8 +513,8 @@ namespace krys::boo::html::tests
     REQUIRE_FALSE(shadow->SetHTMLUnsafe(u8"<div id=p popover>P</div>").HasException());
     List<std::string> heard;
     auto onBefore =
-      host.AddEventListener(u8"beforetoggle", [&](dom::Event &) { heard.emplace_back("beforetoggle"); });
-    auto onToggle = host.AddEventListener(u8"toggle", [&](dom::Event &) { heard.emplace_back("toggle"); });
+      host.AddEventListener(u8"beforetoggle", [&](Event &) { heard.emplace_back("beforetoggle"); });
+    auto onToggle = host.AddEventListener(u8"toggle", [&](Event &) { heard.emplace_back("toggle"); });
 
     Downcast<HTMLButtonElement>(fixture.ById(u8"t")).Click();
     html::EventLoop::Current().RunUntilIdle();

@@ -68,8 +68,8 @@ namespace krys::boo
     return nullptr;
   }
 
-  dom::ExceptionOr<void> PointerCaptureController::SetPointerCapture(Element *capturingTarget,
-                                                                     PointerID pointerId) noexcept
+  ExceptionOr<void> PointerCaptureController::SetPointerCapture(Element *capturingTarget,
+                                                                PointerID pointerId) noexcept
   {
     // https://w3c.github.io/pointerevents/#setting-pointer-capture
 
@@ -78,14 +78,14 @@ namespace krys::boo
     auto capturingData = CapturingDataFor(pointerId);
     if (!capturingData)
     {
-      return dom::Exception {dom::ExceptionCode::NotFoundError};
+      return Exception {ExceptionCode::NotFoundError};
     }
 
     // 2. If the Element on which this method is invoked is not connected, throw an exception with the name
     // InvalidStateError.
     if (!capturingTarget->IsConnected())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     // 3. If this method is invoked while the document has a locked element, throw an exception with the name
@@ -94,7 +94,7 @@ namespace krys::boo
     {
       if (page->GetPointerLockController().IsLocked())
       {
-        return dom::Exception {dom::ExceptionCode::InvalidStateError};
+        return Exception {ExceptionCode::InvalidStateError};
       }
     }
 
@@ -114,8 +114,8 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> PointerCaptureController::ReleasePointerCapture(Element *capturingTarget,
-                                                                         PointerID pointerId) noexcept
+  ExceptionOr<void> PointerCaptureController::ReleasePointerCapture(Element *capturingTarget,
+                                                                    PointerID pointerId) noexcept
   {
     // https://w3c.github.io/pointerevents/#releasing-pointer-capture
 
@@ -129,7 +129,7 @@ namespace krys::boo
     auto capturingData = CapturingDataFor(pointerId);
     if (!capturingData)
     {
-      return dom::Exception {dom::ExceptionCode::NotFoundError};
+      return Exception {ExceptionCode::NotFoundError};
     }
 
     // 2. If hasPointerCapture is false for the Element with the specified pointerId, then terminate these
@@ -210,10 +210,10 @@ namespace krys::boo
         auto pointerType = capturingData->PointerType;
         (void)ReleasePointerCapture(&element, id);
         // FIXME: Spec doesn't specify which task source to use.
-        element.NodeDocument().QueueTaskToDispatchEvent(
-          html::TaskSource::UserInteraction,
-          dom::PointerEvent::Create(event_names::LostPointerCapture, element.NodeDocument().Window(), id,
-                                    pointerType));
+        element.NodeDocument().QueueTaskToDispatchEvent(html::TaskSource::UserInteraction,
+                                                        PointerEvent::Create(event_names::LostPointerCapture,
+                                                                             element.NodeDocument().Window(),
+                                                                             id, pointerType));
         return;
       }
     }
@@ -261,8 +261,9 @@ namespace krys::boo
     }
   }
 
-  RefPtr<dom::PointerEvent> PointerCaptureController::PointerEventForMouseEvent(
-    const dom::MouseEvent &mouseEvent, PointerID pointerId, const DOMString &pointerType) noexcept
+  RefPtr<PointerEvent>
+    PointerCaptureController::PointerEventForMouseEvent(const MouseEvent &mouseEvent, PointerID pointerId,
+                                                        const DOMString &pointerType) noexcept
   {
     if (HasActiveTouch())
     {
@@ -289,20 +290,18 @@ namespace krys::boo
       // a pointermove event and let the button state show the newly depressed button.
       if (type == event_names::MouseDown && pointerIsPressed)
       {
-        return dom::PointerEvent::Create(event_names::PointerMove, button, mouseEvent, pointerId,
-                                         pointerType);
+        return PointerEvent::Create(event_names::PointerMove, button, mouseEvent, pointerId, pointerType);
       }
 
       // We're active and the mouseup still has some pressed button, this means we should dispatch
       // a pointermove event.
       if (type == event_names::MouseUp && pointerIsPressed && mouseEvent.Buttons() > 0)
       {
-        return dom::PointerEvent::Create(event_names::PointerMove, button, mouseEvent, pointerId,
-                                         pointerType);
+        return PointerEvent::Create(event_names::PointerMove, button, mouseEvent, pointerId, pointerType);
       }
     }
 
-    auto pointerEvent = dom::PointerEvent::Create(button, mouseEvent, pointerId, pointerType);
+    auto pointerEvent = PointerEvent::Create(button, mouseEvent, pointerId, pointerType);
     if (capturingData)
     {
       capturingData->PreviousMouseButton = newButton;
@@ -330,7 +329,7 @@ namespace krys::boo
     return false;
   }
 
-  MouseButton PointerCaptureController::ButtonForMouseEvent(const dom::MouseEvent &mouseEvent,
+  MouseButton PointerCaptureController::ButtonForMouseEvent(const MouseEvent &mouseEvent,
                                                             PointerID pointerId) const noexcept
   {
     auto capturingData = CapturingDataFor(pointerId);
@@ -339,8 +338,8 @@ namespace krys::boo
     MouseButton previousMouseButton =
       capturingData ? capturingData->PreviousMouseButton : MouseButton::PointerHasNotChanged;
 
-    auto pointerEventType = dom::PointerEvent::TypeFromMouseEventType(mouseEvent.Type());
-    if (!dom::PointerEvent::TypeRequiresResolvedButton(pointerEventType))
+    auto pointerEventType = PointerEvent::TypeFromMouseEventType(mouseEvent.Type());
+    if (!PointerEvent::TypeRequiresResolvedButton(pointerEventType))
     {
       if (newButton == previousMouseButton || !pointerIsPressed)
       {
@@ -350,7 +349,7 @@ namespace krys::boo
     return newButton;
   }
 
-  void PointerCaptureController::DispatchPointerRawUpdateForMouseEvent(const dom::MouseEvent &mouseEvent,
+  void PointerCaptureController::DispatchPointerRawUpdateForMouseEvent(const MouseEvent &mouseEvent,
                                                                        PointerID pointerId,
                                                                        const DOMString &pointerType,
                                                                        Element &target) noexcept
@@ -360,13 +359,13 @@ namespace krys::boo
       return;
     }
 
-    DispatchEvent(*dom::PointerEvent::Create(event_names::PointerRawUpdate,
-                                             ButtonForMouseEvent(mouseEvent, pointerId), mouseEvent,
-                                             pointerId, pointerType),
+    DispatchEvent(*PointerEvent::Create(event_names::PointerRawUpdate,
+                                        ButtonForMouseEvent(mouseEvent, pointerId), mouseEvent, pointerId,
+                                        pointerType),
                   &target);
   }
 
-  bool PointerCaptureController::SkipPointerMoveForMouseEvent(const dom::MouseEvent &mouseEvent,
+  bool PointerCaptureController::SkipPointerMoveForMouseEvent(const MouseEvent &mouseEvent,
                                                               PointerID pointerId,
                                                               const DOMString &pointerType,
                                                               Element &target) noexcept
@@ -400,14 +399,13 @@ namespace krys::boo
     }
   }
 
-  void PointerCaptureController::DispatchOverOrOutEvent(DOMStringAtom type, dom::EventTarget *target,
+  void PointerCaptureController::DispatchOverOrOutEvent(DOMStringAtom type, EventTarget *target,
                                                         const PlatformTouchEvent &event, uint32 index,
                                                         bool isPrimary, LocalFrameView *view,
                                                         const DoublePoint &touchDelta) noexcept
   {
-    DispatchEvent(
-      *dom::PointerEvent::Create(krys::move(type), event, {}, {}, index, isPrimary, view, touchDelta),
-      target);
+    DispatchEvent(*PointerEvent::Create(krys::move(type), event, {}, {}, index, isPrimary, view, touchDelta),
+                  target);
   }
 
   void PointerCaptureController::DispatchEnterOrLeaveEvent(DOMStringAtom type, Element &targetElement,
@@ -427,7 +425,7 @@ namespace krys::boo
     {
       for (auto it = targetChain.rbegin(); it != targetChain.rend(); ++it)
       {
-        DispatchEvent(*dom::PointerEvent::Create(type, event, {}, {}, index, isPrimary, view, touchDelta),
+        DispatchEvent(*PointerEvent::Create(type, event, {}, {}, index, isPrimary, view, touchDelta),
                       it->get());
       }
     }
@@ -435,13 +433,13 @@ namespace krys::boo
     {
       for (auto &element : targetChain)
       {
-        DispatchEvent(*dom::PointerEvent::Create(type, event, {}, {}, index, isPrimary, view, touchDelta),
+        DispatchEvent(*PointerEvent::Create(type, event, {}, {}, index, isPrimary, view, touchDelta),
                       element.get());
       }
     }
   }
 
-  void PointerCaptureController::DispatchEventForTouchAtIndex(dom::EventTarget &target,
+  void PointerCaptureController::DispatchEventForTouchAtIndex(EventTarget &target,
                                                               const PlatformTouchEvent &platformTouchEvent,
                                                               uint32 index, bool isPrimary,
                                                               LocalFrameView *view,
@@ -458,14 +456,13 @@ namespace krys::boo
     krys_assert(targetElement);
 
     auto mapToPointerEvents = [&](const List<PlatformTouchEvent> &events,
-                                  const DOMStringAtom *type = nullptr) -> List<Ref<dom::PointerEvent>>
+                                  const DOMStringAtom *type = nullptr) -> List<Ref<PointerEvent>>
     {
       auto create = [&](const PlatformTouchEvent &event)
       {
-        return type
-                 ? dom::PointerEvent::Create(*type, event, {}, {}, false, false, index, isPrimary, view,
-                                             touchDelta)
-                 : dom::PointerEvent::Create(event, {}, {}, false, false, index, isPrimary, view, touchDelta);
+        return type ? PointerEvent::Create(*type, event, {}, {}, false, false, index, isPrimary, view,
+                                           touchDelta)
+                    : PointerEvent::Create(event, {}, {}, false, false, index, isPrimary, view, touchDelta);
       };
 
       if (index)
@@ -473,7 +470,7 @@ namespace krys::boo
         return {create(platformTouchEvent)};
       }
 
-      List<Ref<dom::PointerEvent>> result;
+      List<Ref<PointerEvent>> result;
       for (auto &event : events)
       {
         result.push_back(create(event));
@@ -485,13 +482,13 @@ namespace krys::boo
     {
       auto coalescedEvents = mapToPointerEvents(platformTouchEvent.CoalescedEvents());
       auto predictedEvents = mapToPointerEvents(platformTouchEvent.PredictedEvents());
-      return dom::PointerEvent::Create(platformTouchEvent, coalescedEvents, predictedEvents, index, isPrimary,
-                                       view, touchDelta);
+      return PointerEvent::Create(platformTouchEvent, coalescedEvents, predictedEvents, index, isPrimary,
+                                  view, touchDelta);
     };
 
     const auto &touchPoint = platformTouchEvent.TouchPoints()[index];
-    auto type = dom::PointerEvent::TypeForTouchPoint(touchPoint);
-    auto pointerId = dom::PointerEvent::PointerIdForTouch(touchPoint);
+    auto type = PointerEvent::TypeForTouchPoint(touchPoint);
+    auto pointerId = PointerEvent::PointerIdForTouch(touchPoint);
 
     // A pointer cancelled because its touch now pans or zooms the page fires nothing more.
     // https://w3c.github.io/pointerevents/#the-pointercancel-event
@@ -555,8 +552,8 @@ namespace krys::boo
 
       for (auto &chain : leftElementsChain)
       {
-        DispatchEvent(*dom::PointerEvent::Create(event_names::PointerLeave, platformTouchEvent, {}, {}, index,
-                                                 isPrimary, view, touchDelta),
+        DispatchEvent(*PointerEvent::Create(event_names::PointerLeave, platformTouchEvent, {}, {}, index,
+                                            isPrimary, view, touchDelta),
                       chain.get());
       }
 
@@ -568,8 +565,8 @@ namespace krys::boo
 
       for (auto it = enteredElementsChain.rbegin(); it != enteredElementsChain.rend(); ++it)
       {
-        DispatchEvent(*dom::PointerEvent::Create(event_names::PointerEnter, platformTouchEvent, {}, {}, index,
-                                                 isPrimary, view, touchDelta),
+        DispatchEvent(*PointerEvent::Create(event_names::PointerEnter, platformTouchEvent, {}, {}, index,
+                                            isPrimary, view, touchDelta),
                       it->get());
       }
     }
@@ -604,9 +601,9 @@ namespace krys::boo
     {
       const DOMStringAtom rawUpdateType(event_names::PointerRawUpdate);
       DispatchEvent(
-        *dom::PointerEvent::Create(rawUpdateType, platformTouchEvent,
-                                   mapToPointerEvents(platformTouchEvent.CoalescedEvents(), &rawUpdateType),
-                                   {}, index, isPrimary, view, touchDelta),
+        *PointerEvent::Create(rawUpdateType, platformTouchEvent,
+                              mapToPointerEvents(platformTouchEvent.CoalescedEvents(), &rawUpdateType), {},
+                              index, isPrimary, view, touchDelta),
         &target);
     }
 
@@ -637,7 +634,7 @@ namespace krys::boo
     capturingData->PreviousTarget = nullptr;
   }
 
-  void PointerCaptureController::DispatchEvent(dom::PointerEvent &event, dom::EventTarget *target) noexcept
+  void PointerCaptureController::DispatchEvent(PointerEvent &event, EventTarget *target) noexcept
   {
     if (!target || event.Target())
     {
@@ -658,8 +655,8 @@ namespace krys::boo
     PointerEventWasDispatched(event);
   }
 
-  void PointerCaptureController::PointerEventWillBeDispatched(const dom::PointerEvent &event,
-                                                              dom::EventTarget *target) noexcept
+  void PointerCaptureController::PointerEventWillBeDispatched(const PointerEvent &event,
+                                                              EventTarget *target) noexcept
   {
     auto *node = DynamicDowncast<Node>(target);
     auto *element = node ? DynamicDowncast<Element>(node) : nullptr;
@@ -723,13 +720,13 @@ namespace krys::boo
     return it->second;
   }
 
-  auto PointerCaptureController::EnsureCapturingDataForPointerEvent(const dom::PointerEvent &event) noexcept
+  auto PointerCaptureController::EnsureCapturingDataForPointerEvent(const PointerEvent &event) noexcept
     -> Ref<CapturingData>
   {
     return EnsureCapturingData(event.PointerId(), event.PointerType());
   }
 
-  void PointerCaptureController::PointerEventWasDispatched(const dom::PointerEvent &event) noexcept
+  void PointerCaptureController::PointerEventWasDispatched(const PointerEvent &event) noexcept
   {
     auto capturingData = CapturingDataFor(event.PointerId());
     if (!capturingData)
@@ -768,7 +765,7 @@ namespace krys::boo
   }
 
   void PointerCaptureController::CancelPointer(PointerID pointerId, const IntPoint &documentPoint,
-                                               dom::PointerEvent *existingCancelEvent) noexcept
+                                               PointerEvent *existingCancelEvent) noexcept
   {
     // https://w3c.github.io/pointerevents/#the-pointercancel-event
 
@@ -835,8 +832,7 @@ namespace krys::boo
 
     // After firing the pointercancel event, a user agent MUST also fire a pointer event named pointerout
     // followed by firing a pointer event named pointerleave.
-    auto isPrimary =
-      capturingData->IsPrimary ? dom::PointerEvent::IsPrimary::Yes : dom::PointerEvent::IsPrimary::No;
+    auto isPrimary = capturingData->IsPrimary ? PointerEvent::IsPrimary::Yes : PointerEvent::IsPrimary::No;
 
     if (existingCancelEvent)
     {
@@ -844,19 +840,18 @@ namespace krys::boo
     }
     else
     {
-      auto cancelEvent =
-        dom::PointerEvent::Create(event_names::PointerCancel, target->NodeDocument().Window(), pointerId,
-                                  capturingData->PointerType, isPrimary);
+      auto cancelEvent = PointerEvent::Create(event_names::PointerCancel, target->NodeDocument().Window(),
+                                              pointerId, capturingData->PointerType, isPrimary);
       (void)dom::EventDispatcher::DispatchToTarget(*cancelEvent, target.get());
     }
 
     (void)dom::EventDispatcher::DispatchToTarget(
-      *dom::PointerEvent::Create(event_names::PointerOut, target->NodeDocument().Window(), pointerId,
-                                 capturingData->PointerType, isPrimary),
+      *PointerEvent::Create(event_names::PointerOut, target->NodeDocument().Window(), pointerId,
+                            capturingData->PointerType, isPrimary),
       target.get());
     (void)dom::EventDispatcher::DispatchToTarget(
-      *dom::PointerEvent::Create(event_names::PointerLeave, target->NodeDocument().Window(), pointerId,
-                                 capturingData->PointerType, isPrimary),
+      *PointerEvent::Create(event_names::PointerLeave, target->NodeDocument().Window(), pointerId,
+                            capturingData->PointerType, isPrimary),
       target.get());
     ProcessPendingPointerCapture(pointerId);
   }
@@ -890,9 +885,9 @@ namespace krys::boo
       if (targetOverride->IsConnected())
       {
         (void)dom::EventDispatcher::DispatchToTarget(
-          *dom::PointerEvent::CreateForPointerCapture(event_names::LostPointerCapture,
-                                                      targetOverride->NodeDocument().Window(), pointerId,
-                                                      capturingData->IsPrimary, capturingData->PointerType),
+          *PointerEvent::CreateForPointerCapture(event_names::LostPointerCapture,
+                                                 targetOverride->NodeDocument().Window(), pointerId,
+                                                 capturingData->IsPrimary, capturingData->PointerType),
           targetOverride.get());
       }
       if (capturingData->PointerType == dom::MousePointerEventType())
@@ -917,9 +912,9 @@ namespace krys::boo
         }
       }
       (void)dom::EventDispatcher::DispatchToTarget(
-        *dom::PointerEvent::CreateForPointerCapture(event_names::GotPointerCapture,
-                                                    pendingTargetOverride->NodeDocument().Window(), pointerId,
-                                                    capturingData->IsPrimary, capturingData->PointerType),
+        *PointerEvent::CreateForPointerCapture(event_names::GotPointerCapture,
+                                               pendingTargetOverride->NodeDocument().Window(), pointerId,
+                                               capturingData->IsPrimary, capturingData->PointerType),
         pendingTargetOverride.get());
     }
 

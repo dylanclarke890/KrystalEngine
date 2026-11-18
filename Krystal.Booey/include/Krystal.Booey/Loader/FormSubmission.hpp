@@ -39,13 +39,9 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/String.hpp"
 
-namespace krys::boo::dom
-{
-  class Event;
-}
-
 namespace krys::boo
 {
+  class Event;
   class HTMLFormControlElement;
   class HTMLFormElement;
 }
@@ -144,7 +140,7 @@ namespace krys::boo
     DOMString _target;
     DOMString _encodingType;
     RefPtr<html::DOMFormData> _entryList;
-    RefPtr<dom::Event> _event;
+    RefPtr<boo::Event> _event;
     Maybe<DOMString> _returnValue; // for form[method=dialog]
     RefPtr<HTMLFormElement> _form;
     RefPtr<HTMLFormControlElement> _submitter;
@@ -153,17 +149,17 @@ namespace krys::boo
   public:
     /// @brief A dialog's submission, with the submitter's result.
     FormSubmission(Maybe<DOMString> returnValue, url::URL action, DOMStringView target,
-                   DOMStringView encodingType, dom::Event *event) noexcept;
+                   DOMStringView encodingType, boo::Event *event) noexcept;
 
     /// @brief A `GET` or `POST` submission of @p entryList.
     FormSubmission(Method method, url::URL action, DOMStringView target, DOMStringView encodingType,
-                   Ref<html::DOMFormData> &&entryList, dom::Event *event) noexcept;
+                   Ref<html::DOMFormData> &&entryList, boo::Event *event) noexcept;
 
     ~FormSubmission() noexcept;
 
     KRYS_NODISCARD static Ref<FormSubmission> Create(HTMLFormElement &form,
                                                      HTMLFormControlElement *overrideSubmitter,
-                                                     const Attributes &attributes, dom::Event *event,
+                                                     const Attributes &attributes, boo::Event *event,
                                                      FormSubmissionTrigger trigger) noexcept;
 
     KRYS_NODISCARD Method GetMethod() const noexcept
@@ -191,7 +187,7 @@ namespace krys::boo
     /// @brief The entries submitted, in tree order; null for a dialog.
     KRYS_NODISCARD html::DOMFormData *EntryList() const noexcept;
 
-    KRYS_NODISCARD dom::Event *Event() const noexcept
+    KRYS_NODISCARD boo::Event *Event() const noexcept
     {
       return _event.get();
     }

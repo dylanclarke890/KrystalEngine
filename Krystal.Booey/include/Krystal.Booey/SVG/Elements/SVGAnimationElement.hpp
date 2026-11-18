@@ -82,13 +82,13 @@ namespace krys::boo
 #pragma region DOM API
 
     /// @see https://svgwg.org/specs/animations/#__svg__SVGAnimationElement__getStartTime
-    KRYS_NODISCARD dom::ExceptionOr<float> GetStartTime() const noexcept;
+    KRYS_NODISCARD ExceptionOr<float> GetStartTime() const noexcept;
 
     /// @see https://svgwg.org/specs/animations/#__svg__SVGAnimationElement__getCurrentTime
     KRYS_NODISCARD float GetCurrentTime() const noexcept;
 
     /// @see https://svgwg.org/specs/animations/#__svg__SVGAnimationElement__getSimpleDuration
-    KRYS_NODISCARD dom::ExceptionOr<float> GetSimpleDuration() const noexcept;
+    KRYS_NODISCARD ExceptionOr<float> GetSimpleDuration() const noexcept;
 
     /// @see https://svgwg.org/specs/animations/#__svg__SVGAnimationElement__beginElement
     void BeginElement() noexcept

@@ -101,10 +101,10 @@ namespace krys::boo
     void ClosedBy(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-dialog-show
-    dom::ExceptionOr<void> Show() noexcept;
+    ExceptionOr<void> Show() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-dialog-showmodal
-    dom::ExceptionOr<void> ShowModal() noexcept;
+    ExceptionOr<void> ShowModal() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-dialog-close
     void Close(Maybe<DOMString> returnValue = null) noexcept;
@@ -131,7 +131,7 @@ namespace krys::boo
 
     /// @brief Shows the dialog modally, invoked by @p source.
     /// @see https://html.spec.whatwg.org/#show-a-modal-dialog
-    dom::ExceptionOr<void> ShowModalDialog(Element *source) noexcept;
+    ExceptionOr<void> ShowModalDialog(Element *source) noexcept;
 
     /// @brief Closes the dialog, setting its return value to @p result if there's one, invoked by @p source.
     /// @see https://html.spec.whatwg.org/#close-the-dialog

@@ -48,7 +48,7 @@ namespace krys::boo::html
       return input_type_names::Reset;
     }
 
-    void HandleActivationBehavior(dom::Event &event) noexcept final;
+    void HandleActivationBehavior(Event &event) noexcept final;
 
     KRYS_NODISCARD Maybe<DOMString> DefaultValue() const noexcept final;
   };

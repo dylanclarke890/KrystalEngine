@@ -22,13 +22,13 @@ namespace krys::boo::html::tests
     struct EventLog
     {
       List<std::string> Events;
-      List<dom::EventListenerHandle> Handles;
+      List<EventListenerHandle> Handles;
       bool PreventCancel {false};
 
       void Watch(CloseWatcher &watcher, const std::string &name) noexcept
       {
         Handles.push_back(watcher.AddEventListener(u8"cancel",
-                                                   [this, name](dom::Event &event)
+                                                   [this, name](Event &event)
                                                    {
                                                      Events.push_back(name + ":cancel"
                                                                       + (event.Cancelable() ? "!" : ""));
@@ -37,8 +37,8 @@ namespace krys::boo::html::tests
                                                        event.PreventDefault();
                                                      }
                                                    }));
-        Handles.push_back(watcher.AddEventListener(u8"close", [this, name](dom::Event &)
-                                                   { Events.push_back(name + ":close"); }));
+        Handles.push_back(
+          watcher.AddEventListener(u8"close", [this, name](Event &) { Events.push_back(name + ":close"); }));
       }
     };
 
@@ -93,7 +93,7 @@ namespace krys::boo::html::tests
     SECTION("The event handler attributes")
     {
       bool closed = false;
-      watcher->SetOnClose([&](dom::Event &) { closed = true; });
+      watcher->SetOnClose([&](Event &) { closed = true; });
       REQUIRE(watcher->OnClose());
       watcher->RequestClose();
       CHECK(closed);
@@ -101,7 +101,7 @@ namespace krys::boo::html::tests
 
     SECTION("A signal destroys it as it aborts")
     {
-      dom::AbortController controller;
+      AbortController controller;
       auto signalled =
         CloseWatcher::Create(document, {.Signal = ShareRefPtr(controller.Signal())}).ReleaseValue();
       CHECK(signalled->IsActive());
@@ -119,7 +119,7 @@ namespace krys::boo::html::tests
       auto detached = CreateRef<HTMLDocument>();
       auto result = CloseWatcher::Create(*detached);
       REQUIRE(result.HasException());
-      CHECK(result.GetException().Code() == dom::ExceptionCode::InvalidStateError);
+      CHECK(result.GetException().Code() == ExceptionCode::InvalidStateError);
     }
 
     SECTION("Stopping the document destroys its watchers")
@@ -188,7 +188,7 @@ namespace krys::boo::html::tests
     SECTION("Requesting a close from cancel does nothing")
     {
       auto a = CloseWatcher::Create(document).ReleaseValue();
-      auto handle = a->AddEventListener(u8"cancel", [&](dom::Event &) { a->RequestClose(); });
+      auto handle = a->AddEventListener(u8"cancel", [&](Event &) { a->RequestClose(); });
       log.Watch(*a, "a");
       a->RequestClose();
       CHECK(log.Events == List<std::string> {"a:cancel!", "a:close"});

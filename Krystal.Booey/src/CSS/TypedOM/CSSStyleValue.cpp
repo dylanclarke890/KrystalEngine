@@ -34,8 +34,8 @@
 
 namespace krys::boo
 {
-  dom::ExceptionOr<Ref<CSSStyleValue>> CSSStyleValue::Parse(Document &document, CSSOMStringView property,
-                                                            CSSOMStringView cssText) noexcept
+  ExceptionOr<Ref<CSSStyleValue>> CSSStyleValue::Parse(Document &document, CSSOMStringView property,
+                                                       CSSOMStringView cssText) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssstylevalue-parse
     auto result = CSSStyleValueFactory::ParseStyleValue(document, property, cssText, false);
@@ -47,13 +47,13 @@ namespace krys::boo
     // A shorthand that serialises to nothing gives no values.
     if (values.empty())
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError};
+      return Exception {ExceptionCode::SyntaxError};
     }
     return krys::move(values.front());
   }
 
-  dom::ExceptionOr<List<Ref<CSSStyleValue>>>
-    CSSStyleValue::ParseAll(Document &document, CSSOMStringView property, CSSOMStringView cssText) noexcept
+  ExceptionOr<List<Ref<CSSStyleValue>>> CSSStyleValue::ParseAll(Document &document, CSSOMStringView property,
+                                                                CSSOMStringView cssText) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssstylevalue-parseall
     return CSSStyleValueFactory::ParseStyleValue(document, property, cssText, true);

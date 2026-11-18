@@ -13,7 +13,7 @@ namespace krys::boo::html
   namespace
   {
     // https://html.spec.whatwg.org/#html-fragment-parsing-algorithm-steps
-    KRYS_NODISCARD dom::ExceptionOr<Ref<DocumentFragment>>
+    KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>>
       RunFragmentParsingAlgorithmSteps(ContainerNode &target, DOMStringView markup,
                                        const SanitizerInput *sanitizer, FragmentParserMode mode) noexcept
     {
@@ -58,7 +58,7 @@ namespace krys::boo::html
     return element;
   }
 
-  dom::ExceptionOr<ContainerNode *> HTMLInsertionAlgorithms::ParentForHTMLInsertion(Node &node) noexcept
+  ExceptionOr<ContainerNode *> HTMLInsertionAlgorithms::ParentForHTMLInsertion(Node &node) noexcept
   {
     // 1. Let parent be node's parent.
     auto *parent = node.ParentNode();
@@ -72,7 +72,7 @@ namespace krys::boo::html
     // 3. If parent is a template element, then throw a "HierarchyRequestError" DOMException.
     if (Is<HTMLTemplateElement>(*parent))
     {
-      return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
+      return Exception {ExceptionCode::HierarchyRequestError};
     }
 
     // 4. If parent is an Element, or a DocumentFragment with a non-null host, then return parent.
@@ -86,12 +86,12 @@ namespace krys::boo::html
     }
 
     // 5. Throw a "HierarchyRequestError" DOMException.
-    return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
+    return Exception {ExceptionCode::HierarchyRequestError};
   }
 
-  dom::ExceptionOr<void> HTMLInsertionAlgorithms::FilterAndSetHTML(ContainerNode &target, DOMStringView html,
-                                                                   const SanitizerInput *sanitizer,
-                                                                   FragmentParserMode mode) noexcept
+  ExceptionOr<void> HTMLInsertionAlgorithms::FilterAndSetHTML(ContainerNode &target, DOMStringView html,
+                                                              const SanitizerInput *sanitizer,
+                                                              FragmentParserMode mode) noexcept
   {
     // 1. Let fragment be the result of parsing HTML for insertion given target, html, options, and mode.
     auto fragment = ParseHTMLForInsertion(target, html, sanitizer, mode);
@@ -108,15 +108,15 @@ namespace krys::boo::html
     return {};
   }
 
-  dom::ExceptionOr<void> HTMLInsertionAlgorithms::FilterAndPreInsertHTML(ContainerNode &parent, Node *child,
-                                                                         DOMStringView html,
-                                                                         const SanitizerInput *sanitizer,
-                                                                         FragmentParserMode mode) noexcept
+  ExceptionOr<void> HTMLInsertionAlgorithms::FilterAndPreInsertHTML(ContainerNode &parent, Node *child,
+                                                                    DOMStringView html,
+                                                                    const SanitizerInput *sanitizer,
+                                                                    FragmentParserMode mode) noexcept
   {
     // 1. If parent is an html element, then throw a "HierarchyRequestError" DOMException.
     if (Is<HTMLHtmlElement>(parent))
     {
-      return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
+      return Exception {ExceptionCode::HierarchyRequestError};
     }
 
     // 2. Let fragment be the result of parsing HTML for insertion given parent, html, options, and mode.
@@ -137,15 +137,15 @@ namespace krys::boo::html
     return {};
   }
 
-  dom::ExceptionOr<void> HTMLInsertionAlgorithms::FilterAndReplaceWithHTML(ContainerNode &parent, Node &node,
-                                                                           DOMStringView html,
-                                                                           const SanitizerInput *sanitizer,
-                                                                           FragmentParserMode mode) noexcept
+  ExceptionOr<void> HTMLInsertionAlgorithms::FilterAndReplaceWithHTML(ContainerNode &parent, Node &node,
+                                                                      DOMStringView html,
+                                                                      const SanitizerInput *sanitizer,
+                                                                      FragmentParserMode mode) noexcept
   {
     // 1. If parent is an html element, then throw a "HierarchyRequestError" DOMException.
     if (Is<HTMLHtmlElement>(parent))
     {
-      return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
+      return Exception {ExceptionCode::HierarchyRequestError};
     }
 
     // 2. Let fragment be the result of parsing HTML for insertion given parent, html, options, and mode.
@@ -166,7 +166,7 @@ namespace krys::boo::html
     return {};
   }
 
-  dom::ExceptionOr<RefPtr<DocumentFragment>>
+  ExceptionOr<RefPtr<DocumentFragment>>
     HTMLInsertionAlgorithms::ParseHTMLForInsertion(ContainerNode &target, DOMStringView html,
                                                    const SanitizerInput *sanitizer,
                                                    FragmentParserMode mode) noexcept
@@ -204,9 +204,9 @@ namespace krys::boo::html
     return RefPtr<DocumentFragment> {fragment.ReleaseValue()};
   }
 
-  dom::ExceptionOr<void> HTMLInsertionAlgorithms::BeforeHTML(Node &node, DOMStringView html,
-                                                             const SanitizerInput *sanitizer,
-                                                             FragmentParserMode mode) noexcept
+  ExceptionOr<void> HTMLInsertionAlgorithms::BeforeHTML(Node &node, DOMStringView html,
+                                                        const SanitizerInput *sanitizer,
+                                                        FragmentParserMode mode) noexcept
   {
     // 1. Let parent be the parent for HTML insertion given this.
     auto parent = ParentForHTMLInsertion(node);
@@ -225,9 +225,9 @@ namespace krys::boo::html
     return FilterAndPreInsertHTML(*parent.Value(), &node, html, sanitizer, mode);
   }
 
-  dom::ExceptionOr<void> HTMLInsertionAlgorithms::AfterHTML(Node &node, DOMStringView html,
-                                                            const SanitizerInput *sanitizer,
-                                                            FragmentParserMode mode) noexcept
+  ExceptionOr<void> HTMLInsertionAlgorithms::AfterHTML(Node &node, DOMStringView html,
+                                                       const SanitizerInput *sanitizer,
+                                                       FragmentParserMode mode) noexcept
   {
     // 1. Let parent be the parent for HTML insertion given this.
     auto parent = ParentForHTMLInsertion(node);
@@ -246,9 +246,9 @@ namespace krys::boo::html
     return FilterAndPreInsertHTML(*parent.Value(), node.NextSibling(), html, sanitizer, mode);
   }
 
-  dom::ExceptionOr<void> HTMLInsertionAlgorithms::ReplaceWithHTML(Node &node, DOMStringView html,
-                                                                  const SanitizerInput *sanitizer,
-                                                                  FragmentParserMode mode) noexcept
+  ExceptionOr<void> HTMLInsertionAlgorithms::ReplaceWithHTML(Node &node, DOMStringView html,
+                                                             const SanitizerInput *sanitizer,
+                                                             FragmentParserMode mode) noexcept
   {
     // 1. Let parent be the parent for HTML insertion given this.
     auto parent = ParentForHTMLInsertion(node);

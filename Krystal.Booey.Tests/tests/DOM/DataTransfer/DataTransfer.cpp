@@ -165,7 +165,7 @@ namespace krys::boo::tests
 
       auto duplicate = items.Add(document, u8"again", u8"TEXT/plain");
       REQUIRE(duplicate.HasException());
-      CHECK(duplicate.GetException().Code() == dom::ExceptionCode::NotSupportedError);
+      CHECK(duplicate.GetException().Code() == ExceptionCode::NotSupportedError);
 
       dataTransfer->SetData(document, u8"application/x-custom", u8"custom");
       CHECK(items.Length() == 3);

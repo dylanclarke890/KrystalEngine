@@ -90,9 +90,9 @@ namespace krys::boo::html
 
     KRYS_NODISCARD DOMString PlaceholderValue() const noexcept final;
 
-    void HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept final;
+    void HandleKeyboardEvent(KeyboardEvent &event) noexcept final;
 
-    void HandleBlurEvent(dom::Event &event) noexcept final;
+    void HandleBlurEvent(Event &event) noexcept final;
 
     KRYS_NODISCARD DOMString FormatValue(int value) const noexcept;
 

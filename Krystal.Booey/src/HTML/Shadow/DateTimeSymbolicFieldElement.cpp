@@ -109,7 +109,7 @@ namespace krys::boo::html
     return _symbols[static_cast<size_t>(_placeholderIndex)];
   }
 
-  void DateTimeSymbolicFieldElement::HandleKeyboardEvent(dom::KeyboardEvent &keyboardEvent) noexcept
+  void DateTimeSymbolicFieldElement::HandleKeyboardEvent(KeyboardEvent &keyboardEvent) noexcept
   {
     if (keyboardEvent.Type() != event_names::KeyPress)
     {

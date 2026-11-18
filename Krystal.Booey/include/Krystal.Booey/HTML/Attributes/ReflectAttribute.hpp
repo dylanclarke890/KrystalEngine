@@ -119,7 +119,7 @@ namespace krys::boo::html
     using reflect_set_return_t =
       conditional_t<(SameType<T, int32> && OnlyNonNegative == OnlyNonNegativeNumbers::Yes)
                       || (SameType<T, uint32> && OnlyPositive == OnlyPositiveNumbers::Yes),
-                    dom::ExceptionOr<void>, void>;
+                    ExceptionOr<void>, void>;
 
     /// @brief @p value as the shortest valid integer.
     KRYS_NODISCARD inline DOMString IntegerToString(int64 value) noexcept
@@ -381,7 +381,7 @@ namespace krys::boo::html
       {
         if (value < 0)
         {
-          return dom::ExceptionCode::IndexSizeError;
+          return ExceptionCode::IndexSizeError;
         }
       }
 
@@ -481,7 +481,7 @@ namespace krys::boo::html
     /// @brief Helper for setting reflected content attributes with 'unsigned long' type.
     template <OnlyPositiveNumbers OnlyPositive, OnlyPositiveNumbersWithFallback OnlyPositiveWithFallback,
               MaybeReflectDefault<uint32> DefaultValue, ReflectTarget Target>
-    KRYS_NODISCARD conditional_t<OnlyPositive == OnlyPositiveNumbers::Yes, dom::ExceptionOr<void>, void>
+    KRYS_NODISCARD conditional_t<OnlyPositive == OnlyPositiveNumbers::Yes, ExceptionOr<void>, void>
       ReflectUnsignedLong(Target &target, DOMStringAtom name, uint32 value) noexcept
     {
       static_assert(!(OnlyPositive == OnlyPositiveNumbers::Yes
@@ -494,7 +494,7 @@ namespace krys::boo::html
       {
         if (value == 0)
         {
-          return dom::ExceptionCode::IndexSizeError;
+          return ExceptionCode::IndexSizeError;
         }
       }
 

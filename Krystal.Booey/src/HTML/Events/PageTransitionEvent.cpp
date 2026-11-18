@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/Events/PageTransitionEvent.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   PageTransitionEvent::PageTransitionEvent(DOMStringAtom type,
                                            const PageTransitionEventInit &eventInitDict) noexcept

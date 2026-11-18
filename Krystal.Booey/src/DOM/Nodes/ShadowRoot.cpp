@@ -138,7 +138,7 @@ namespace krys::boo
 
 #pragma region ShadowRoot (DOM Parsing)
 
-  dom::ExceptionOr<void> ShadowRoot::SetHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
+  ExceptionOr<void> ShadowRoot::SetHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // Filter and set HTML given this, html, options, and Safe.
@@ -146,8 +146,7 @@ namespace krys::boo
                                                            html::FragmentParserMode::Safe);
   }
 
-  dom::ExceptionOr<void> ShadowRoot::AppendHTML(DOMStringView html,
-                                                const html::SetHTMLOptions &options) noexcept
+  ExceptionOr<void> ShadowRoot::AppendHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // Filter and pre-insert HTML given this, null, html, options, and Safe.
@@ -155,8 +154,7 @@ namespace krys::boo
                                                                  html::FragmentParserMode::Safe);
   }
 
-  dom::ExceptionOr<void> ShadowRoot::PrependHTML(DOMStringView html,
-                                                 const html::SetHTMLOptions &options) noexcept
+  ExceptionOr<void> ShadowRoot::PrependHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // Filter and pre-insert HTML given this, this's first child, html, options, and Safe.
@@ -164,8 +162,8 @@ namespace krys::boo
       *this, FirstChild(), html, &options.Sanitizer, html::FragmentParserMode::Safe);
   }
 
-  dom::ExceptionOr<void> ShadowRoot::SetHTMLUnsafe(DOMStringView html,
-                                                   const html::SetHTMLUnsafeOptions &options) noexcept
+  ExceptionOr<void> ShadowRoot::SetHTMLUnsafe(DOMStringView html,
+                                              const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
@@ -176,8 +174,8 @@ namespace krys::boo
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
-  dom::ExceptionOr<void> ShadowRoot::AppendHTMLUnsafe(DOMStringView html,
-                                                      const html::SetHTMLUnsafeOptions &options) noexcept
+  ExceptionOr<void> ShadowRoot::AppendHTMLUnsafe(DOMStringView html,
+                                                 const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
@@ -189,8 +187,8 @@ namespace krys::boo
       html::FragmentParserMode::Unsafe);
   }
 
-  dom::ExceptionOr<void> ShadowRoot::PrependHTMLUnsafe(DOMStringView html,
-                                                       const html::SetHTMLUnsafeOptions &options) noexcept
+  ExceptionOr<void> ShadowRoot::PrependHTMLUnsafe(DOMStringView html,
+                                                  const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
@@ -211,14 +209,14 @@ namespace krys::boo
                              krys::move(options.ShadowRoots));
   }
 
-  dom::ExceptionOr<DOMString> ShadowRoot::InnerHTML() const noexcept
+  ExceptionOr<DOMString> ShadowRoot::InnerHTML() const noexcept
   {
     // The innerHTML getter steps are to return the result of running fragment serializing algorithm steps
     // with this and true.
     return SerializeFragmentRequiringWellFormed(*this, SerializedNodes::SubtreesOfChildren);
   }
 
-  dom::ExceptionOr<void> ShadowRoot::InnerHTML(DOMStringView markup) noexcept
+  ExceptionOr<void> ShadowRoot::InnerHTML(DOMStringView markup) noexcept
   {
     html::CEReactionsScope ceReactions;
     return ReplaceChildrenWithMarkup(markup, {});
@@ -226,7 +224,7 @@ namespace krys::boo
 
 #pragma endregion
 
-  dom::ExceptionOr<void>
+  ExceptionOr<void>
     ShadowRoot::ReplaceChildrenWithMarkup(DOMStringView markup,
                                           EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept
   {
@@ -279,7 +277,7 @@ namespace krys::boo
 
 #pragma endregion
 
-  dom::EventTarget *ShadowRoot::GetParent(dom::Event &event) const noexcept
+  EventTarget *ShadowRoot::GetParent(Event &event) const noexcept
   {
     if (!event.Composed())
     {

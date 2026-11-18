@@ -195,7 +195,7 @@ namespace krys::boo
     return GetPropertyValueInternal(property);
   }
 
-  dom::ExceptionOr<void>
+  ExceptionOr<void>
     CSSStyleProperties::SetPropertyValueForCamelCasedIDLAttribute(const CSSOMStringAtom &attribute,
                                                                   const CSSOMString &value) noexcept
   {
@@ -211,7 +211,7 @@ namespace krys::boo
     return GetPropertyValueInternal(property);
   }
 
-  dom::ExceptionOr<void>
+  ExceptionOr<void>
     CSSStyleProperties::SetPropertyValueForDashedIDLAttribute(const CSSOMStringAtom &attribute,
                                                               const CSSOMString &value) noexcept
   {
@@ -224,7 +224,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::Float);
   }
 
-  dom::ExceptionOr<void> CSSStyleProperties::SetCssFloat(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSStyleProperties::SetCssFloat(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::Float, value, css::IsImportant::No);
   }
@@ -284,7 +284,7 @@ namespace krys::boo
     return _propertySet->AsText(css::DefaultSerialisationContext());
   }
 
-  dom::ExceptionOr<void> PropertySetCSSStyleProperties::SetCssText(const CSSOMString &text) noexcept
+  ExceptionOr<void> PropertySetCSSStyleProperties::SetCssText(const CSSOMString &text) noexcept
   {
     html::CEReactionsScope ceReactions;
     StyleAttributeMutationScope mutationScope {ParentElement()};
@@ -345,9 +345,9 @@ namespace krys::boo
     return _propertySet->IsPropertyImplicit(css::PropertyIdFromName(propertyName));
   }
 
-  dom::ExceptionOr<void> PropertySetCSSStyleProperties::SetProperty(const CSSOMString &propertyName,
-                                                                    const CSSOMString &value,
-                                                                    const CSSOMString &priority) noexcept
+  ExceptionOr<void> PropertySetCSSStyleProperties::SetProperty(const CSSOMString &propertyName,
+                                                               const CSSOMString &value,
+                                                               const CSSOMString &priority) noexcept
   {
     html::CEReactionsScope ceReactions;
     StyleAttributeMutationScope mutationScope {ParentElement()};
@@ -396,7 +396,7 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<CSSOMString>
+  ExceptionOr<CSSOMString>
     PropertySetCSSStyleProperties::RemoveProperty(const CSSOMString &propertyName) noexcept
   {
     html::CEReactionsScope ceReactions;
@@ -440,9 +440,9 @@ namespace krys::boo
     return _propertySet->GetPropertyValue(property);
   }
 
-  dom::ExceptionOr<void>
-    PropertySetCSSStyleProperties::SetPropertyInternal(css::PropertyId property, const CSSOMString &value,
-                                                       css::IsImportant important) noexcept
+  ExceptionOr<void> PropertySetCSSStyleProperties::SetPropertyInternal(css::PropertyId property,
+                                                                       const CSSOMString &value,
+                                                                       css::IsImportant important) noexcept
   {
     StyleAttributeMutationScope mutationScope {ParentElement()};
     if (!WillMutate())

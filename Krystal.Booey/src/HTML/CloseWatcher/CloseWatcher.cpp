@@ -43,14 +43,13 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-closewatcher
-  dom::ExceptionOr<Ref<CloseWatcher>> CloseWatcher::Create(Document &document,
-                                                           const Options &options) noexcept
+  ExceptionOr<Ref<CloseWatcher>> CloseWatcher::Create(Document &document, const Options &options) noexcept
   {
     // 1. If this's relevant global object's associated Document is not fully active, then throw an
     //    "InvalidStateError" DOMException.
     if (!document.IsFullyActive())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError, u8"Document is not fully active."};
+      return Exception {ExceptionCode::InvalidStateError, u8"Document is not fully active."};
     }
 
     // 2. Let closeWatcher be the result of establishing a close watcher given this's relevant global object,
@@ -65,18 +64,18 @@ namespace krys::boo::html
     auto *self = watcher.get();
     watcher->_cancelAction = [self](bool canPreventClose)
     {
-      auto cancelEvent = dom::Event::Create(event_names::Cancel, false, canPreventClose);
+      auto cancelEvent = Event::Create(event_names::Cancel, false, canPreventClose);
       (void)dom::EventDispatcher::DispatchToTarget(*cancelEvent, self);
       return !cancelEvent->DefaultPrevented();
     };
     watcher->_closeAction = [self]
     {
-      auto closeEvent = dom::Event::Create(event_names::Close, false, false);
+      auto closeEvent = Event::Create(event_names::Close, false, false);
       (void)dom::EventDispatcher::DispatchToTarget(*closeEvent, self);
     };
 
     // 3. If options["signal"] exists:
-    if (RefPtr<dom::AbortSignal> signal = options.Signal)
+    if (RefPtr<AbortSignal> signal = options.Signal)
     {
       // 3.1. If options["signal"] is aborted, then destroy closeWatcher.
       if (signal->Aborted())
@@ -88,7 +87,7 @@ namespace krys::boo::html
       else
       {
         watcher->_signal = signal;
-        dom::AbortAlgorithmCallback algorithm = [weakWatcher = CreateWeakPtr(watcher.get())](const Any &)
+        AbortAlgorithmCallback algorithm = [weakWatcher = CreateWeakPtr(watcher.get())](const Any &)
         {
           if (auto strongWatcher = weakWatcher.lock())
           {

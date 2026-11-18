@@ -146,8 +146,8 @@ namespace krys::boo
     return length;
   }
 
-  dom::ExceptionOr<void> SVGLengthValue::SetValueAsString(DOMStringView valueAsString,
-                                                          SVGLengthMode lengthMode) noexcept
+  ExceptionOr<void> SVGLengthValue::SetValueAsString(DOMStringView valueAsString,
+                                                     SVGLengthMode lengthMode) noexcept
   {
     _lengthMode = lengthMode;
     return SetValueAsString(valueAsString);
@@ -286,27 +286,27 @@ namespace krys::boo
     return DOMStringAtom(ValueAsString());
   }
 
-  dom::ExceptionOr<float> SVGLengthValue::ValueForBindings(const SVGLengthContext &context) const noexcept
+  ExceptionOr<float> SVGLengthValue::ValueForBindings(const SVGLengthContext &context) const noexcept
   {
     return krys::SwitchOn(
       _value,
-      [&](const css::Number<> &number) -> dom::ExceptionOr<float>
+      [&](const css::Number<> &number) -> ExceptionOr<float>
       {
         if (auto raw = number.GetRaw())
         {
           return static_cast<float>(raw->Value);
         }
 
-        return dom::Exception {dom::ExceptionCode::NotFoundError};
+        return Exception {ExceptionCode::NotFoundError};
       },
-      [&](const css::LengthPercentage<> &length) -> dom::ExceptionOr<float>
+      [&](const css::LengthPercentage<> &length) -> ExceptionOr<float>
       {
         if (auto raw = length.GetRaw())
         {
           return context.ResolveValueToUserUnits(static_cast<float>(raw->Value), raw->Unit, _lengthMode);
         }
 
-        return dom::Exception {dom::ExceptionCode::NotFoundError};
+        return Exception {ExceptionCode::NotFoundError};
       });
   }
 
@@ -325,16 +325,16 @@ namespace krys::boo
       });
   }
 
-  dom::ExceptionOr<void> SVGLengthValue::SetValue(const SVGLengthContext &context, float value) noexcept
+  ExceptionOr<void> SVGLengthValue::SetValue(const SVGLengthContext &context, float value) noexcept
   {
     return krys::SwitchOn(
       _value,
-      [&](const css::Number<> &) -> dom::ExceptionOr<void>
+      [&](const css::Number<> &) -> ExceptionOr<void>
       {
         _value = css::Number<>(value);
         return {};
       },
-      [&](const css::LengthPercentage<> &current) -> dom::ExceptionOr<void>
+      [&](const css::LengthPercentage<> &current) -> ExceptionOr<void>
       {
         if (auto raw = current.GetRaw())
         {
@@ -353,8 +353,8 @@ namespace krys::boo
       });
   }
 
-  dom::ExceptionOr<void> SVGLengthValue::SetValue(const SVGLengthContext &context, float value,
-                                                  SVGLengthType lengthType, SVGLengthMode lengthMode) noexcept
+  ExceptionOr<void> SVGLengthValue::SetValue(const SVGLengthContext &context, float value,
+                                             SVGLengthType lengthType, SVGLengthMode lengthMode) noexcept
   {
     // FIXME: Seems like a bug that we change the value of m_unit even if setValue throws an exception.
     _lengthMode = lengthMode;
@@ -363,18 +363,18 @@ namespace krys::boo
     return SetValue(context, value);
   }
 
-  dom::ExceptionOr<void> SVGLengthValue::SetValueAsString(DOMStringView string) noexcept
+  ExceptionOr<void> SVGLengthValue::SetValueAsString(DOMStringView string) noexcept
   {
     if (string.empty())
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError};
+      return Exception {ExceptionCode::SyntaxError};
     }
 
     // Trim leading and trailing whitespace to match SVG parsing expectations.
     auto trimmedString = infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(string);
     if (trimmedString.empty())
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError};
+      return Exception {ExceptionCode::SyntaxError};
     }
 
     // CSS::Range only clamps to boundaries, but we historically handled
@@ -402,7 +402,7 @@ namespace krys::boo
     {
       if (!tokenRange.IsAtEnd())
       {
-        return dom::Exception {dom::ExceptionCode::SyntaxError};
+        return Exception {ExceptionCode::SyntaxError};
       }
 
       _value = isFloatOverflow(*number) ? css::Number<>(0) : krys::move(*number);
@@ -415,13 +415,13 @@ namespace krys::boo
     {
       if (!tokenRange.IsAtEnd())
       {
-        return dom::Exception {dom::ExceptionCode::SyntaxError};
+        return Exception {ExceptionCode::SyntaxError};
       }
 
       // FIXME: Add support for calculated lengths.
       if (length->IsCalc())
       {
-        return dom::Exception {dom::ExceptionCode::SyntaxError};
+        return Exception {ExceptionCode::SyntaxError};
       }
 
       _value = krys::move(*length);
@@ -429,11 +429,11 @@ namespace krys::boo
       return {};
     }
 
-    return dom::Exception {dom::ExceptionCode::SyntaxError};
+    return Exception {ExceptionCode::SyntaxError};
   }
 
-  dom::ExceptionOr<void> SVGLengthValue::ConvertToSpecifiedUnits(const SVGLengthContext &context,
-                                                                 SVGLengthType targetType) noexcept
+  ExceptionOr<void> SVGLengthValue::ConvertToSpecifiedUnits(const SVGLengthContext &context,
+                                                            SVGLengthType targetType) noexcept
   {
     auto valueInUserUnits = ValueForBindings(context);
     if (valueInUserUnits.HasException())

@@ -3,10 +3,13 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class EventTarget;
+}
 
+namespace krys::boo::dom
+{
   /// @brief An item of an event's path.
   /// @see https://dom.spec.whatwg.org/#event-path-item
   class EventPathItem

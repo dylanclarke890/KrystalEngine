@@ -146,7 +146,7 @@ namespace krys::ui::tests
 
     /// @brief Records the keyboard events it handles as `type:key/code/keyCode/charCode/location`, with
     /// `+shift` and `+ctrl` for the modifiers.
-    struct KeyRecorder : public boo::dom::EventListenerCallback
+    struct KeyRecorder : public boo::EventListenerCallback
     {
       List<std::string> &Records;
 
@@ -154,9 +154,9 @@ namespace krys::ui::tests
       {
       }
 
-      void HandleEvent(boo::dom::Event &event) noexcept override
+      void HandleEvent(boo::Event &event) noexcept override
       {
-        auto &key = static_cast<boo::dom::KeyboardEvent &>(event);
+        auto &key = static_cast<boo::KeyboardEvent &>(event);
         auto type = key.Type().View();
         auto record =
           std::string(type.begin(), type.end()) + ":" + std::string(key.Key().begin(), key.Key().end()) + "/"
@@ -175,7 +175,7 @@ namespace krys::ui::tests
     };
 
     /// @brief Records the presses, releases and clicks it handles as `type:id/detail`.
-    struct ClickRecorder : public boo::dom::EventListenerCallback
+    struct ClickRecorder : public boo::EventListenerCallback
     {
       List<std::string> &Records;
 
@@ -183,9 +183,9 @@ namespace krys::ui::tests
       {
       }
 
-      void HandleEvent(boo::dom::Event &event) noexcept override
+      void HandleEvent(boo::Event &event) noexcept override
       {
-        auto &mouse = static_cast<boo::dom::MouseEvent &>(event);
+        auto &mouse = static_cast<boo::MouseEvent &>(event);
         auto type = mouse.Type().View();
         auto *node = DynamicDowncast<boo::Node>(event.Target().get());
         auto *element = node ? DynamicDowncast<boo::Element>(*node) : nullptr;
@@ -272,14 +272,14 @@ namespace krys::ui::tests
       view.SetScreenOrigin({100, 200});
       double screenX = 0;
       double screenY = 0;
-      auto handle = view.Document().AddEventListener(u8"mousedown",
-                                                     Func<void(boo::dom::Event &)>(
-                                                       [&](boo::dom::Event &event)
-                                                       {
-                                                         auto &mouse = Downcast<boo::dom::MouseEvent>(event);
-                                                         screenX = mouse.ScreenX();
-                                                         screenY = mouse.ScreenY();
-                                                       }));
+      auto handle = view.Document().AddEventListener(u8"mousedown", Func<void(boo::Event &)>(
+                                                                      [&](boo::Event &event)
+                                                                      {
+                                                                        auto &mouse =
+                                                                          Downcast<boo::MouseEvent>(event);
+                                                                        screenX = mouse.ScreenX();
+                                                                        screenY = mouse.ScreenY();
+                                                                      }));
       view.MousePressed({20, 40}, pal::MouseButton::Left);
       view.MouseReleased({20, 40}, pal::MouseButton::Left);
       CHECK(screenX == 60);
@@ -310,14 +310,14 @@ namespace krys::ui::tests
 
     // Each event as `type:clientX,clientY`, a pointer event's with its type and width.
     List<std::string> records;
-    auto record = [&](boo::dom::Event &event)
+    auto record = [&](boo::Event &event)
     {
       auto type = event.Type().View();
-      auto &mouse = Downcast<boo::dom::MouseEvent>(event);
+      auto &mouse = Downcast<boo::MouseEvent>(event);
       std::string text = std::string(type.begin(), type.end()) + ":"
                          + std::to_string(static_cast<int>(mouse.ClientX())) + ","
                          + std::to_string(static_cast<int>(mouse.ClientY()));
-      if (auto *pointer = DynamicDowncast<boo::dom::PointerEvent>(event))
+      if (auto *pointer = DynamicDowncast<boo::PointerEvent>(event))
       {
         auto pointerType = utf8_stringview(pointer->PointerType());
         text += "/" + std::string(pointerType.begin(), pointerType.end()) + "/"
@@ -325,11 +325,11 @@ namespace krys::ui::tests
       }
       records.push_back(text);
     };
-    List<boo::dom::EventListenerHandle> handles;
+    List<boo::EventListenerHandle> handles;
     for (auto type : {u8"wheel", u8"pointerdown", u8"dragenter"})
     {
       handles.push_back(
-        view.Document().AddEventListener(boo::DOMStringAtom(type), Func<void(boo::dom::Event &)>(record)));
+        view.Document().AddEventListener(boo::DOMStringAtom(type), Func<void(boo::Event &)>(record)));
     }
 
     SECTION("The wheel and a touchpad's pan, whose pixels are the view's")
@@ -770,7 +770,7 @@ namespace krys::ui::tests
     WaitForLoad(view);
     view.UpdateRendering();
     List<std::string> records;
-    Ref<boo::dom::EventListenerCallback> recorder = CreateRef<ClickRecorder>(records);
+    Ref<boo::EventListenerCallback> recorder = CreateRef<ClickRecorder>(records);
     for (auto type : {u8"mousedown", u8"mouseup", u8"click", u8"auxclick", u8"dblclick"})
     {
       view.Document().AddEventListener(boo::DOMStringAtom(type), Ref {recorder}, false);
@@ -816,11 +816,11 @@ namespace krys::ui::tests
 
     // Each event as `type:screenX,screenY`.
     List<std::string> records;
-    auto record = [&](boo::dom::Event &event)
+    auto record = [&](boo::Event &event)
     {
       auto type = event.Type().View();
       std::string text = std::string(type.begin(), type.end()) + ":";
-      if (auto *touch = DynamicDowncast<boo::dom::TouchEvent>(event))
+      if (auto *touch = DynamicDowncast<boo::TouchEvent>(event))
       {
         auto *first = touch->ChangedTouches()->Item(0);
         text += std::to_string(static_cast<int>(first->ScreenX())) + ","
@@ -828,17 +828,17 @@ namespace krys::ui::tests
       }
       else
       {
-        auto &mouse = Downcast<boo::dom::MouseEvent>(event);
+        auto &mouse = Downcast<boo::MouseEvent>(event);
         text += std::to_string(static_cast<int>(mouse.ScreenX())) + ","
                 + std::to_string(static_cast<int>(mouse.ScreenY()));
       }
       records.push_back(text);
     };
-    List<boo::dom::EventListenerHandle> handles;
+    List<boo::EventListenerHandle> handles;
     for (auto type : {u8"mousedown", u8"wheel", u8"touchstart"})
     {
       handles.push_back(
-        view.Document().AddEventListener(boo::DOMStringAtom(type), Func<void(boo::dom::Event &)>(record)));
+        view.Document().AddEventListener(boo::DOMStringAtom(type), Func<void(boo::Event &)>(record)));
     }
 
     view.MousePressed({10, 20}, pal::MouseButton::Left);
@@ -871,7 +871,7 @@ namespace krys::ui::tests
     // Each event as `type:id`, a mouse move's with its movement, and the handler's calls as `lock` and
     // `unlock`.
     List<std::string> records;
-    auto record = [&](boo::dom::Event &event)
+    auto record = [&](boo::Event &event)
     {
       auto type = event.Type().View();
       auto *node = DynamicDowncast<boo::Node>(event.Target().get());
@@ -881,24 +881,23 @@ namespace krys::ui::tests
       std::string text = std::string(type.begin(), type.end()) + ":" + std::string(id.begin(), id.end());
       if (event.Type() == boo::event_names::MouseMove)
       {
-        auto &mouse = static_cast<boo::dom::MouseEvent &>(event);
+        auto &mouse = static_cast<boo::MouseEvent &>(event);
         text += "/" + std::to_string(static_cast<int>(mouse.MovementX())) + ","
                 + std::to_string(static_cast<int>(mouse.MovementY()));
       }
       records.push_back(text);
     };
-    List<boo::dom::EventListenerHandle> handles;
+    List<boo::EventListenerHandle> handles;
     for (auto type : {u8"pointerlockchange", u8"pointerlockerror", u8"mousemove"})
     {
       handles.push_back(
-        view.Document().AddEventListener(boo::DOMStringAtom(type), Func<void(boo::dom::Event &)>(record)));
+        view.Document().AddEventListener(boo::DOMStringAtom(type), Func<void(boo::Event &)>(record)));
     }
 
     // A press on `a` asks to lock the pointer to it (a press is a user gesture).
     boo::dom::PointerLockOptions options;
     handles.push_back(a.AddEventListener(
-      u8"mousedown",
-      Func<void(boo::dom::Event &)>([&](boo::dom::Event &) { a.RequestPointerLock(options); })));
+      u8"mousedown", Func<void(boo::Event &)>([&](boo::Event &) { a.RequestPointerLock(options); })));
     auto click = [&]
     {
       view.MousePressed({10, 10}, pal::MouseButton::Left);
@@ -1006,37 +1005,37 @@ namespace krys::ui::tests
     // Each event as `type:id/buttons`, a pointer event's with its type, id and pressure, and a touch event's
     // with its touches.
     List<std::string> records;
-    auto record = [&](boo::dom::Event &event)
+    auto record = [&](boo::Event &event)
     {
       auto type = event.Type().View();
       auto *node = DynamicDowncast<boo::Node>(event.Target().get());
       auto *element = node ? DynamicDowncast<boo::Element>(*node) : nullptr;
       auto id = element ? element->GetAttribute(u8"id").value_or(boo::DOMString()) : boo::DOMString();
       std::string text = std::string(type.begin(), type.end()) + ":" + std::string(id.begin(), id.end());
-      if (auto *pointer = DynamicDowncast<boo::dom::PointerEvent>(event))
+      if (auto *pointer = DynamicDowncast<boo::PointerEvent>(event))
       {
         auto pointerType = pointer->PointerType();
         text += "/" + std::string(pointerType.begin(), pointerType.end())
                 + std::to_string(pointer->PointerId()) + "/" + std::to_string(pointer->Buttons()) + "/"
                 + std::to_string(static_cast<int>(pointer->Pressure() * 100));
       }
-      else if (auto *touch = DynamicDowncast<boo::dom::TouchEvent>(event))
+      else if (auto *touch = DynamicDowncast<boo::TouchEvent>(event))
       {
         text += "/" + std::to_string(touch->Touches()->Length()) + ","
                 + std::to_string(touch->ChangedTouches()->Length());
       }
-      else if (auto *mouse = DynamicDowncast<boo::dom::MouseEvent>(event))
+      else if (auto *mouse = DynamicDowncast<boo::MouseEvent>(event))
       {
         text += "/" + std::to_string(mouse->Buttons());
       }
       records.push_back(text);
     };
-    List<boo::dom::EventListenerHandle> handles;
+    List<boo::EventListenerHandle> handles;
     for (auto type : {u8"pointerdown", u8"pointermove", u8"pointerup", u8"pointercancel", u8"mousedown",
                       u8"mouseup", u8"click", u8"touchstart", u8"touchmove", u8"touchend", u8"touchcancel"})
     {
       handles.push_back(
-        view.Document().AddEventListener(boo::DOMStringAtom(type), Func<void(boo::dom::Event &)>(record)));
+        view.Document().AddEventListener(boo::DOMStringAtom(type), Func<void(boo::Event &)>(record)));
     }
 
     auto input = [](pal::PointerType type, pal::PointerAction action, uint32 id = 7)
@@ -1051,11 +1050,11 @@ namespace krys::ui::tests
 
     SECTION("a pen hovers, presses and releases as the mouse does, with its pressure and tilt")
     {
-      RefPtr<boo::dom::PointerEvent> down;
+      RefPtr<boo::PointerEvent> down;
       handles.push_back(view.Document().AddEventListener(
         u8"pointerdown",
-        Func<void(boo::dom::Event &)>([&](boo::dom::Event &event)
-                                      { down = ShareRefPtr(&Downcast<boo::dom::PointerEvent>(event)); })));
+        Func<void(boo::Event &)>([&](boo::Event &event)
+                                 { down = ShareRefPtr(&Downcast<boo::PointerEvent>(event)); })));
 
       auto hover = input(pal::PointerType::Pen, pal::PointerAction::Moved);
       hover.InContact = false;
@@ -1214,14 +1213,14 @@ namespace krys::ui::tests
 
     // Each event as `type:id`, a pointer event's with its type and id.
     List<std::string> records;
-    auto record = [&](boo::dom::Event &event)
+    auto record = [&](boo::Event &event)
     {
       auto type = event.Type().View();
       auto *node = DynamicDowncast<boo::Node>(event.Target().get());
       auto *element = node ? DynamicDowncast<boo::Element>(*node) : nullptr;
       auto id = element ? element->GetAttribute(u8"id").value_or(boo::DOMString()) : boo::DOMString();
       std::string text = std::string(type.begin(), type.end()) + ":" + std::string(id.begin(), id.end());
-      if (auto *pointer = DynamicDowncast<boo::dom::PointerEvent>(event))
+      if (auto *pointer = DynamicDowncast<boo::PointerEvent>(event))
       {
         auto pointerType = pointer->PointerType();
         text +=
@@ -1229,22 +1228,21 @@ namespace krys::ui::tests
       }
       records.push_back(text);
     };
-    List<boo::dom::EventListenerHandle> handles;
+    List<boo::EventListenerHandle> handles;
     for (auto type : {u8"pointerdown", u8"pointerup", u8"pointercancel", u8"mousedown", u8"mouseup",
                       u8"click", u8"dblclick", u8"contextmenu"})
     {
       handles.push_back(
-        view.Document().AddEventListener(boo::DOMStringAtom(type), Func<void(boo::dom::Event &)>(record)));
+        view.Document().AddEventListener(boo::DOMStringAtom(type), Func<void(boo::Event &)>(record)));
     }
     // On the document, touchmove's listeners are passive unless they say otherwise; on `tall` they aren't.
     auto cancel = [&](utf8_stringview type, bool onTall = false)
     {
-      boo::dom::EventTarget &target =
-        onTall ? static_cast<boo::dom::EventTarget &>(*view.Document().GetElementById(u8"tall"))
-               : view.Document();
-      handles.push_back(target.AddEventListener(
-        boo::DOMStringAtom(type),
-        Func<void(boo::dom::Event &)>([](boo::dom::Event &event) { event.PreventDefault(); })));
+      boo::EventTarget &target =
+        onTall ? static_cast<boo::EventTarget &>(*view.Document().GetElementById(u8"tall")) : view.Document();
+      handles.push_back(
+        target.AddEventListener(boo::DOMStringAtom(type),
+                                Func<void(boo::Event &)>([](boo::Event &event) { event.PreventDefault(); })));
     };
 
     auto touch = [&](pal::PointerAction action, boo::DoublePoint point, uint32 id = 1)
@@ -1435,8 +1433,8 @@ namespace krys::ui::tests
     auto rect = input.GetBoundingClientRect();
     auto y = rect->Y() + rect->Height() / 2;
     uint32 changes = 0;
-    auto handle = input.AddEventListener(
-      u8"change", Func<void(boo::dom::Event &)>([&](boo::dom::Event &) { ++changes; }));
+    auto handle =
+      input.AddEventListener(u8"change", Func<void(boo::Event &)>([&](boo::Event &) { ++changes; }));
 
     auto touch = [&](pal::PointerAction action, boo::DoublePoint point)
     {
@@ -1482,8 +1480,8 @@ namespace krys::ui::tests
     view.UpdateRendering();
     auto &input = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"f"));
     uint32 changes = 0;
-    auto handle = input.AddEventListener(
-      u8"change", Func<void(boo::dom::Event &)>([&](boo::dom::Event &) { ++changes; }));
+    auto handle =
+      input.AddEventListener(u8"change", Func<void(boo::Event &)>([&](boo::Event &) { ++changes; }));
     auto click = [&]
     {
       view.MousePressed({5, 5}, pal::MouseButton::Left);
@@ -1727,7 +1725,7 @@ namespace krys::ui::tests
     WaitForLoad(view);
     view.UpdateRendering();
     List<std::string> records;
-    Ref<boo::dom::EventListenerCallback> recorder = CreateRef<KeyRecorder>(records);
+    Ref<boo::EventListenerCallback> recorder = CreateRef<KeyRecorder>(records);
     for (auto type : {u8"keydown", u8"keypress", u8"keyup"})
     {
       view.Document().AddEventListener(boo::DOMStringAtom(type), Ref {recorder}, false);
@@ -1754,9 +1752,9 @@ namespace krys::ui::tests
     records.clear();
 
     // The page can cancel a key.
-    struct Canceller : boo::dom::EventListenerCallback
+    struct Canceller : boo::EventListenerCallback
     {
-      void HandleEvent(boo::dom::Event &event) noexcept override
+      void HandleEvent(boo::Event &event) noexcept override
       {
         event.PreventDefault();
       }
@@ -1843,11 +1841,11 @@ namespace krys::ui::tests
     WaitForLoad(view);
     view.UpdateRendering();
 
-    struct ScrollCounter : boo::dom::EventListenerCallback
+    struct ScrollCounter : boo::EventListenerCallback
     {
       int32 Count {0};
 
-      void HandleEvent(boo::dom::Event &) noexcept override
+      void HandleEvent(boo::Event &) noexcept override
       {
         ++Count;
       }
@@ -1957,7 +1955,7 @@ namespace krys::ui::tests
     CHECK(fired == 1);
 
     // Input is followed by a microtask checkpoint.
-    struct MicrotaskQueuer : boo::dom::EventListenerCallback
+    struct MicrotaskQueuer : boo::EventListenerCallback
     {
       int32 &Ran;
 
@@ -1965,7 +1963,7 @@ namespace krys::ui::tests
       {
       }
 
-      void HandleEvent(boo::dom::Event &) noexcept override
+      void HandleEvent(boo::Event &) noexcept override
       {
         boo::html::EventLoop::Current().QueueMicrotask([this] { ++Ran; });
       }
@@ -1973,7 +1971,7 @@ namespace krys::ui::tests
 
     int32 ran = 0;
     view.Document().AddEventListener(
-      u8"mousedown", Ref<boo::dom::EventListenerCallback> {CreateRef<MicrotaskQueuer>(ran)}, false);
+      u8"mousedown", Ref<boo::EventListenerCallback> {CreateRef<MicrotaskQueuer>(ran)}, false);
     view.MousePressed({5, 5}, pal::MouseButton::Left);
     CHECK(ran == 1);
     view.MouseReleased({5, 5}, pal::MouseButton::Left);
@@ -2181,7 +2179,7 @@ namespace krys::ui::tests
     boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
     auto changes = 0;
 
-    struct Counter : public boo::dom::EventListenerCallback
+    struct Counter : public boo::EventListenerCallback
     {
       int32 &Count;
 
@@ -2189,7 +2187,7 @@ namespace krys::ui::tests
       {
       }
 
-      void HandleEvent(boo::dom::Event &) noexcept override
+      void HandleEvent(boo::Event &) noexcept override
       {
         ++Count;
       }
@@ -2288,11 +2286,11 @@ namespace krys::ui::tests
       return utf8_string(text.begin(), text.end());
     }
 
-    struct EventCounter : public boo::dom::EventListenerCallback
+    struct EventCounter : public boo::EventListenerCallback
     {
       int32 Count {0};
 
-      void HandleEvent(boo::dom::Event &) noexcept override
+      void HandleEvent(boo::Event &) noexcept override
       {
         ++Count;
       }
@@ -2847,7 +2845,7 @@ namespace krys::ui::tests
 
     uint32 changes = 0;
     auto handle = view.Document().AddEventListener(boo::DOMStringAtom(boo::event_names::VisibilityChange),
-                                                   [&](boo::dom::Event &) { ++changes; });
+                                                   [&](boo::Event &) { ++changes; });
     view.SetVisible(false);
     CHECK_FALSE(view.IsVisible());
     CHECK(view.Document().Hidden());

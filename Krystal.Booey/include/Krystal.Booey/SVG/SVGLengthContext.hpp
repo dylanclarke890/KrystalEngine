@@ -34,7 +34,7 @@ namespace krys::boo::css
   class ToLengthConversionData;
 }
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   template <typename T>
   class ExceptionOr;
@@ -120,27 +120,27 @@ namespace krys::boo
     KRYS_NODISCARD float ValueForLength(const style::StrokeWidth &, style::ZoomNeeded,
                                         SVGLengthMode = SVGLengthMode::Other) noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<float> ResolveValueToUserUnits(float, const css::LengthPercentageUnit &,
-                                                                   SVGLengthMode) const noexcept;
+    KRYS_NODISCARD ExceptionOr<float> ResolveValueToUserUnits(float, const css::LengthPercentageUnit &,
+                                                              SVGLengthMode) const noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<css::LengthPercentage<>>
+    KRYS_NODISCARD ExceptionOr<css::LengthPercentage<>>
       ResolveValueFromUserUnits(float, const css::LengthPercentageUnit &, SVGLengthMode) const noexcept;
 
     KRYS_NODISCARD Maybe<FloatSize> ViewportSize() const noexcept;
 
   private:
-    KRYS_NODISCARD dom::ExceptionOr<float>
-      ConvertValueFromUserUnitsToPercentage(float value, SVGLengthMode) const noexcept;
+    KRYS_NODISCARD ExceptionOr<float> ConvertValueFromUserUnitsToPercentage(float value,
+                                                                            SVGLengthMode) const noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<float>
-      ConvertValueFromPercentageToUserUnits(float value, SVGLengthMode) const noexcept;
+    KRYS_NODISCARD ExceptionOr<float> ConvertValueFromPercentageToUserUnits(float value,
+                                                                            SVGLengthMode) const noexcept;
 
     KRYS_NODISCARD static float ConvertValueFromPercentageToUserUnits(float value, SVGLengthMode,
                                                                       FloatSize) noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<float> ConvertValueFromUserUnitsToEXS(float) const noexcept;
+    KRYS_NODISCARD ExceptionOr<float> ConvertValueFromUserUnitsToEXS(float) const noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<float> ConvertValueFromEXSToUserUnits(float) const noexcept;
+    KRYS_NODISCARD ExceptionOr<float> ConvertValueFromEXSToUserUnits(float) const noexcept;
 
     KRYS_NODISCARD Maybe<FloatSize> ComputeViewportSize() const noexcept;
 

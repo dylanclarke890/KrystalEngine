@@ -339,7 +339,7 @@ namespace krys::boo
     Submit(nullptr, false, FormSubmissionTrigger::SubmittedByJavaScript);
   }
 
-  dom::ExceptionOr<void> HTMLFormElement::RequestSubmit(HTMLElement *submitter) noexcept
+  ExceptionOr<void> HTMLFormElement::RequestSubmit(HTMLElement *submitter) noexcept
   {
     // Update layout before processing form actions in case the style changes the form or button
     // relationships.
@@ -353,15 +353,14 @@ namespace krys::boo
       control = ShareRefPtr(DynamicDowncast<HTMLFormControlElement>(*submitter));
       if (!control || !control->IsSubmitButton())
       {
-        return dom::Exception {dom::ExceptionCode::TypeError,
-                               u8"The specified element is not a submit button."};
+        return Exception {ExceptionCode::TypeError, u8"The specified element is not a submit button."};
       }
 
       // 1b. If submitter's form owner is not this form element, then throw a "NotFoundError" DOMException.
       if (control->Form() != this)
       {
-        return dom::Exception {dom::ExceptionCode::NotFoundError,
-                               u8"The specified element is not owned by this form element."};
+        return Exception {ExceptionCode::NotFoundError,
+                          u8"The specified element is not owned by this form element."};
       }
     }
 
@@ -388,7 +387,7 @@ namespace krys::boo
     // https://html.spec.whatwg.org/#concept-form-reset
     // 1. Let reset be the result of firing an event named reset at form, with the bubbles and cancelable
     //    attributes initialized to true.
-    auto event = dom::Event::Create(event_names::Reset, true, true);
+    auto event = Event::Create(event_names::Reset, true, true);
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
 
     // 2. If reset is true, then invoke the reset algorithm of each resettable element whose form owner is
@@ -501,7 +500,7 @@ namespace krys::boo
     return false;
   }
 
-  void HTMLFormElement::SubmitImplicitly(dom::Event &event, bool fromImplicitSubmissionTrigger) noexcept
+  void HTMLFormElement::SubmitImplicitly(Event &event, bool fromImplicitSubmissionTrigger) noexcept
   {
     uint32 submissionTriggerCount = 0;
     for (auto &element : CopyListedElementsVector())
@@ -535,7 +534,7 @@ namespace krys::boo
     }
   }
 
-  void HTMLFormElement::SubmitIfPossible(dom::Event *event, HTMLFormControlElement *submitter,
+  void HTMLFormElement::SubmitIfPossible(Event *event, HTMLFormControlElement *submitter,
                                          FormSubmissionTrigger trigger) noexcept
   {
     // https://html.spec.whatwg.org/#form-submission-algorithm
@@ -583,7 +582,7 @@ namespace krys::boo
 
     // Let relatedTarget be form if the result of retargeting submitterButton against form is form; otherwise
     // submitterButton. Fire submit, composed, with relatedTarget set to relatedTarget.
-    auto submitEvent = html::SubmitEvent::Create(ShareRefPtr(static_cast<HTMLElement *>(submitter)));
+    auto submitEvent = SubmitEvent::Create(ShareRefPtr(static_cast<HTMLElement *>(submitter)));
     (void)dom::EventDispatcher::DispatchFromSource(*submitEvent, *this, submitter);
 
     // Event handling could have resulted in _shouldSubmit becoming true as a side effect, too.
@@ -622,7 +621,7 @@ namespace krys::boo
     return values;
   }
 
-  void HTMLFormElement::Submit(dom::Event *event, bool processingUserGesture, FormSubmissionTrigger trigger,
+  void HTMLFormElement::Submit(Event *event, bool processingUserGesture, FormSubmissionTrigger trigger,
                                HTMLFormControlElement *submitter) noexcept
   {
     // SubmitIfPossible also checks this, but some paths bypass it.
@@ -984,7 +983,7 @@ namespace krys::boo
     _invalidFormControls.erase(position);
   }
 
-  DOMString HTMLFormElement::EffectiveTarget(const dom::Event *event,
+  DOMString HTMLFormElement::EffectiveTarget(const Event *event,
                                              HTMLFormControlElement *overrideSubmitter) const noexcept
   {
     // The submitter's formtarget is the target given to get an element's target:
@@ -1017,7 +1016,7 @@ namespace krys::boo
     return _wasUserSubmitted;
   }
 
-  HTMLFormControlElement *HTMLFormElement::FindSubmitter(const dom::Event *event) noexcept
+  HTMLFormControlElement *HTMLFormElement::FindSubmitter(const Event *event) noexcept
   {
     if (!event)
     {
@@ -1335,8 +1334,8 @@ namespace krys::boo
     // 6. Let form data be a new FormData object associated with entry list.
     // 7. Fire an event named formdata at form using FormDataEvent, with the formData attribute initialized to
     //    form data and the bubbles attribute initialized to true.
-    auto event = dom::FormDataEvent::Create(event_names::FormData, true, false, false,
-                                            Ref<html::DOMFormData>(domFormData));
+    auto event =
+      FormDataEvent::Create(event_names::FormData, true, false, false, Ref<html::DOMFormData>(domFormData));
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
 
     if (submitter)

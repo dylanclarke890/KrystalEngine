@@ -85,7 +85,7 @@ namespace krys::boo::html
     return sanitizer.ReleaseValue();
   }
 
-  dom::ExceptionOr<Ref<Sanitizer>> Sanitizer::Create(const SanitizerConfig &configuration) noexcept
+  ExceptionOr<Ref<Sanitizer>> Sanitizer::Create(const SanitizerConfig &configuration) noexcept
   {
     // 2. Configure this given configuration and true.
     auto configured = SanitizerAlgorithms::Configure(configuration, true);

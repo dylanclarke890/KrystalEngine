@@ -30,7 +30,7 @@
 
 namespace krys::boo
 {
-  dom::ExceptionOr<RefPtr<SVGTransform>> SVGTransformList::Consolidate() noexcept
+  ExceptionOr<RefPtr<SVGTransform>> SVGTransformList::Consolidate() noexcept
   {
     auto result = CanAlterList();
     if (result.HasException())

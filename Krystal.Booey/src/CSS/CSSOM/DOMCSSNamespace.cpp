@@ -122,8 +122,8 @@ namespace krys::boo
            == css::SupportsParser::Supported;
   }
 
-  dom::ExceptionOr<void> DOMCSSNamespace::RegisterProperty(Document &document,
-                                                           const PropertyDefinition &definition) noexcept
+  ExceptionOr<void> DOMCSSNamespace::RegisterProperty(Document &document,
+                                                      const PropertyDefinition &definition) noexcept
   {
     // 1. Let property set be the value of this's relevant global object's associated Document's
     //    [[registeredPropertySet]] slot.
@@ -133,8 +133,8 @@ namespace krys::boo
     // 2. If name is not a custom property name string, throw a SyntaxError and exit this algorithm.
     if (!css::IsCustomPropertyName(definition.Name))
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError,
-                             u8"The name of this property is not a custom property name."};
+      return Exception {ExceptionCode::SyntaxError,
+                        u8"The name of this property is not a custom property name."};
     }
     // If property set already contains an entry with name as its property name (compared codepoint-wise),
     // throw an InvalidModificationError and exit this algorithm.
@@ -145,7 +145,7 @@ namespace krys::boo
     auto syntax = css::CustomPropertySyntax::Parse(definition.Syntax);
     if (!syntax)
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError, u8"Invalid property syntax definition."};
+      return Exception {ExceptionCode::SyntaxError, u8"Invalid property syntax definition."};
     }
 
     auto name = CSSOMStringAtom(definition.Name);
@@ -159,8 +159,8 @@ namespace krys::boo
     {
       if (!syntax->IsUniversal())
       {
-        return dom::Exception {dom::ExceptionCode::SyntaxError,
-                               u8"An initial value is mandatory except for the '*' syntax."};
+        return Exception {ExceptionCode::SyntaxError,
+                          u8"An initial value is mandatory except for the '*' syntax."};
       }
       initialValue = style::CustomProperty::CreateForGuaranteedInvalid(name);
     }
@@ -184,11 +184,11 @@ namespace krys::boo
         if (parsedInitialValue.error()
             == style::CustomPropertyRegistry::ParseInitialValueError::NotComputationallyIndependent)
         {
-          return dom::Exception {dom::ExceptionCode::SyntaxError,
-                                 u8"The given initial value must be computationally independent."};
+          return Exception {ExceptionCode::SyntaxError,
+                            u8"The given initial value must be computationally independent."};
         }
-        return dom::Exception {dom::ExceptionCode::SyntaxError,
-                               u8"The given initial value does not parse for the given syntax."};
+        return Exception {ExceptionCode::SyntaxError,
+                          u8"The given initial value does not parse for the given syntax."};
       }
 
       initialValue = parsedInitialValue->first;
@@ -212,8 +212,8 @@ namespace krys::boo
     };
     if (!registry.RegisterFromAPI(krys::move(property)))
     {
-      return dom::Exception {dom::ExceptionCode::InvalidModificationError,
-                             u8"This property has already been registered."};
+      return Exception {ExceptionCode::InvalidModificationError,
+                        u8"This property has already been registered."};
     }
     return {};
   }

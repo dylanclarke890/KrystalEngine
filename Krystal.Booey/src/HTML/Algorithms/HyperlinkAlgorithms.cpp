@@ -19,9 +19,9 @@ namespace krys::boo::html
   {
     /// @brief Where @p event clicked in @p image, in CSS pixels from its top left corner.
     KRYS_NODISCARD Maybe<FloatPoint> ServerMapClickPosition(const HTMLImageElement &image,
-                                                            const dom::Event &event) noexcept
+                                                            const Event &event) noexcept
     {
-      auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
+      auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
       auto *renderer = DynamicDowncast<RenderImage>(image.Renderer());
       if (!mouseEvent || !renderer)
       {
@@ -78,13 +78,13 @@ namespace krys::boo::html
     return MakeTargetBlankIfHasDanglingMarkup(effectiveTarget);
   }
 
-  bool HyperlinkAlgorithms::IsEnterKeyKeydownEvent(const dom::Event &event) noexcept
+  bool HyperlinkAlgorithms::IsEnterKeyKeydownEvent(const Event &event) noexcept
   {
     if (event.Type() != event_names::KeyDown)
     {
       return false;
     }
-    auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event);
+    auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event);
     return keyboardEvent && keyboardEvent->KeyIdentifier() == u8"Enter";
   }
 
@@ -111,7 +111,7 @@ namespace krys::boo::html
     return false;
   }
 
-  void HyperlinkAlgorithms::ActivationBehavior(HTMLElement &element, dom::Event &event) noexcept
+  void HyperlinkAlgorithms::ActivationBehavior(HTMLElement &element, Event &event) noexcept
   {
     // 1. If element has no href attribute, then return.
     if (!element.HasAttribute(u8"href"))
@@ -170,7 +170,7 @@ namespace krys::boo::html
     FollowTheHyperlink(element, event, hyperlinkSuffix);
   }
 
-  void HyperlinkAlgorithms::FollowTheHyperlink(HTMLElement &subject, dom::Event &event,
+  void HyperlinkAlgorithms::FollowTheHyperlink(HTMLElement &subject, Event &event,
                                                const Maybe<utf8_string> &hyperlinkSuffix) noexcept
   {
     event.SetDefaultHandled();

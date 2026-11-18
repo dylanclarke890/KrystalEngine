@@ -42,7 +42,7 @@ namespace krys::boo
     return krys::move(builder).ToString();
   }
 
-  dom::ExceptionOr<List<Ref<CSSNumericValue>>>
+  ExceptionOr<List<Ref<CSSNumericValue>>>
     CSSTransformComponent::ReifyArguments(const css::FunctionValue &function, Document &document) noexcept
   {
     List<Ref<CSSNumericValue>> arguments;
@@ -57,7 +57,7 @@ namespace krys::boo
       auto *numericValue = DynamicDowncast<CSSNumericValue>(*styleValue);
       if (!numericValue)
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       arguments.push_back(ShareRef(*numericValue));
     }

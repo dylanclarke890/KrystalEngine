@@ -205,18 +205,18 @@ layer at (0,0) size 800x104
     // The original's listeners hear events at its instances, whether added before or after they were made.
     int32 before = 0;
     int32 after = 0;
-    auto beforeHandle = rect.AddEventListener(u8"ping", [&](dom::Event &) { ++before; });
+    auto beforeHandle = rect.AddEventListener(u8"ping", [&](Event &) { ++before; });
     (void)rect.SetAttribute(u8"x", u8"1");
     clone = TargetClone(fixture, use);
     REQUIRE(clone);
-    auto afterHandle = rect.AddEventListener(u8"ping", [&](dom::Event &) { ++after; });
-    (void)clone->DispatchEvent(*CreateRef<dom::Event>(u8"ping"));
+    auto afterHandle = rect.AddEventListener(u8"ping", [&](Event &) { ++after; });
+    (void)clone->DispatchEvent(*CreateRef<Event>(u8"ping"));
     CHECK(before == 1);
     CHECK(after == 1);
 
     // Removing a listener removes it from the instances.
     afterHandle = {};
-    (void)clone->DispatchEvent(*CreateRef<dom::Event>(u8"ping"));
+    (void)clone->DispatchEvent(*CreateRef<Event>(u8"ping"));
     CHECK(before == 2);
     CHECK(after == 1);
   }

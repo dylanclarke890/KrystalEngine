@@ -55,7 +55,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::Src);
   }
 
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetSrc(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFontFaceDescriptors::SetSrc(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::Src, value, css::IsImportant::No);
   }
@@ -66,7 +66,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::FontFamily);
   }
 
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetFontFamily(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFontFaceDescriptors::SetFontFamily(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::FontFamily, value, css::IsImportant::No);
   }
@@ -77,7 +77,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::FontStyle);
   }
 
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetFontStyle(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFontFaceDescriptors::SetFontStyle(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::FontStyle, value, css::IsImportant::No);
   }
@@ -88,7 +88,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::FontWeight);
   }
 
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetFontWeight(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFontFaceDescriptors::SetFontWeight(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::FontWeight, value, css::IsImportant::No);
   }
@@ -99,7 +99,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::FontWidth);
   }
 
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetFontWidth(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFontFaceDescriptors::SetFontWidth(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::FontWidth, value, css::IsImportant::No);
   }
@@ -110,7 +110,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::SizeAdjust);
   }
 
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetSizeAdjust(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFontFaceDescriptors::SetSizeAdjust(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::SizeAdjust, value, css::IsImportant::No);
   }
@@ -121,7 +121,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::UnicodeRange);
   }
 
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetUnicodeRange(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFontFaceDescriptors::SetUnicodeRange(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::UnicodeRange, value, css::IsImportant::No);
   }
@@ -132,7 +132,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::FontFeatureSettings);
   }
 
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetFontFeatureSettings(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFontFaceDescriptors::SetFontFeatureSettings(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::FontFeatureSettings, value, css::IsImportant::No);
   }
@@ -143,7 +143,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::FontDisplay);
   }
 
-  dom::ExceptionOr<void> CSSFontFaceDescriptors::SetFontDisplay(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFontFaceDescriptors::SetFontDisplay(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::FontDisplay, value, css::IsImportant::No);
   }

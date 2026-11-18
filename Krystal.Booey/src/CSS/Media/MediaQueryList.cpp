@@ -64,25 +64,25 @@ namespace krys::boo
     return krys::move(builder).ToString();
   }
 
-  void MediaQueryList::AddListener(RefPtr<dom::EventListenerCallback> &&listener) noexcept
+  void MediaQueryList::AddListener(RefPtr<EventListenerCallback> &&listener) noexcept
   {
     if (!listener)
     {
       return;
     }
 
-    Ref<dom::EventListenerCallback> callback = krys::move(listener);
+    Ref<EventListenerCallback> callback = krys::move(listener);
     AddEventListener(event_names::Change, krys::move(callback), false);
   }
 
-  void MediaQueryList::RemoveListener(RefPtr<dom::EventListenerCallback> &&listener) noexcept
+  void MediaQueryList::RemoveListener(RefPtr<EventListenerCallback> &&listener) noexcept
   {
     if (!listener)
     {
       return;
     }
 
-    Ref<dom::EventListenerCallback> callback = krys::move(listener);
+    Ref<EventListenerCallback> callback = krys::move(listener);
     RemoveEventListener(event_names::Change, krys::move(callback), false);
   }
 

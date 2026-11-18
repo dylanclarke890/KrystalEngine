@@ -23,7 +23,7 @@ namespace krys::editor
 
   private:
     WeakPtr<boo::Document> _document;
-    List<boo::dom::EventListenerHandle> _listeners;
+    List<boo::EventListenerHandle> _listeners;
     /// @brief The lines the log shows, the oldest first.
     List<std::string> _lines;
 
@@ -33,7 +33,7 @@ namespace krys::editor
 
     explicit PageTextInput(boo::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
-      RefPtr<boo::dom::EventTarget> fields = document.GetElementById(u8"ime-fields");
+      RefPtr<boo::EventTarget> fields = document.GetElementById(u8"ime-fields");
       if (!fields)
       {
         return;
@@ -43,12 +43,12 @@ namespace krys::editor
            {u8"compositionstart", u8"compositionupdate", u8"compositionend", u8"beforeinput", u8"input"})
       {
         _listeners.push_back(
-          fields->AddEventListener(boo::DOMStringAtom(type), [this](boo::dom::Event &event) { Log(event); }));
+          fields->AddEventListener(boo::DOMStringAtom(type), [this](boo::Event &event) { Log(event); }));
       }
-      if (RefPtr<boo::dom::EventTarget> clear = document.GetElementById(u8"ime-clear"))
+      if (RefPtr<boo::EventTarget> clear = document.GetElementById(u8"ime-clear"))
       {
         _listeners.push_back(clear->AddEventListener(u8"click",
-                                                     [this](boo::dom::Event &)
+                                                     [this](boo::Event &)
                                                      {
                                                        _lines.clear();
                                                        Show();
@@ -65,7 +65,7 @@ namespace krys::editor
 
     /// @brief Adds @p event to the log: the field it went to, its type, its data and whether it's part of a
     /// composition.
-    void Log(boo::dom::Event &event) noexcept
+    void Log(boo::Event &event) noexcept
     {
       std::string field = "?";
       if (auto *node = DynamicDowncast<boo::Node>(event.Target().get()))
@@ -79,11 +79,11 @@ namespace krys::editor
       auto line = std::format("{}: {}", field, Narrow(event.Type().View()));
       if (event.IsCompositionEvent())
       {
-        line += std::format(" “{}”", Narrow(Downcast<boo::dom::CompositionEvent>(event).Data()));
+        line += std::format(" “{}”", Narrow(Downcast<boo::CompositionEvent>(event).Data()));
       }
       else if (event.IsInputEvent())
       {
-        auto &input = Downcast<boo::dom::InputEvent>(event);
+        auto &input = Downcast<boo::InputEvent>(event);
         line += " " + Narrow(input.InputType());
         if (input.Data())
         {

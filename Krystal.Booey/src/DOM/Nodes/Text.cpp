@@ -47,7 +47,7 @@ namespace krys::boo
     // 3. Return text.
   }
 
-  dom::ExceptionOr<Ref<Text>> Text::SplitText(size_t offset) noexcept
+  ExceptionOr<Ref<Text>> Text::SplitText(size_t offset) noexcept
   {
     return dom::TextAlgorithms::Split(*this, offset);
   }

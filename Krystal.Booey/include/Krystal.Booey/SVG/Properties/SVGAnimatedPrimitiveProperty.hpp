@@ -54,7 +54,7 @@ namespace krys::boo
     }
 
     // Used by the DOM.
-    dom::ExceptionOr<void> SetBaseVal(const TProperty &baseVal) noexcept
+    ExceptionOr<void> SetBaseVal(const TProperty &baseVal) noexcept
     {
       _baseVal->SetValue(baseVal);
       CommitPropertyChange(nullptr);

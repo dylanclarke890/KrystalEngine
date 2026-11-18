@@ -225,7 +225,7 @@ namespace krys::boo::html
     InputType::AttributeChanged(name);
   }
 
-  void ColorInputType::HandleActivationBehavior(dom::Event &event) noexcept
+  void ColorInputType::HandleActivationBehavior(Event &event) noexcept
   {
     krys_debug_assert(Element());
     if (Element()->IsDisabledFormControl() || !Element()->Renderer())

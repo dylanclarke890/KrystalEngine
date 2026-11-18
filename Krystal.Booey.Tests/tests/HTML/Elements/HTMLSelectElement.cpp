@@ -72,11 +72,11 @@ namespace krys::boo::tests
     }
 
     /// @brief Counts the events of a type fired at a target.
-    struct EventCounter final : dom::EventListenerCallback
+    struct EventCounter final : EventListenerCallback
     {
       int32 Count {0};
 
-      void HandleEvent(dom::Event &) noexcept override
+      void HandleEvent(Event &) noexcept override
       {
         ++Count;
       }
@@ -253,7 +253,7 @@ namespace krys::boo::tests
     {
       auto result = select.Add(RefPtr<HTMLOptionElement>(newOption(u8"n")), before(u8"o"));
       REQUIRE(result.HasException());
-      CHECK(result.GetException().Code() == dom::ExceptionCode::NotFoundError);
+      CHECK(result.GetException().Code() == ExceptionCode::NotFoundError);
       REQUIRE_FALSE(select.Add(ShareRefPtr(&OptionById(fixture, u8"c")), before(u8"c")).HasException());
       CHECK(ListItemIds(select) == u8"a g b c");
     }
@@ -472,7 +472,7 @@ namespace krys::boo::tests
     EditorFixture fixture(u8"<select id=s><option>A</option><option>B</option></select>");
     auto &select = SelectById(fixture, u8"s");
     List<std::string> events;
-    auto log = [&](dom::Event &event)
+    auto log = [&](Event &event)
     {
       events.push_back(Narrow(event.Type().View()) + (event.Bubbles() ? " bubbles" : "")
                        + (event.Composed() ? " composed" : ""));
@@ -496,8 +496,8 @@ namespace krys::boo::tests
     auto &select = SelectById(fixture, u8"s");
     auto input = CreateRef<EventCounter>();
     auto change = CreateRef<EventCounter>();
-    select.AddEventListener(event_names::Input, ShareRef<dom::EventListenerCallback>(*input), false);
-    select.AddEventListener(event_names::Change, ShareRef<dom::EventListenerCallback>(*change), false);
+    select.AddEventListener(event_names::Input, ShareRef<EventListenerCallback>(*input), false);
+    select.AddEventListener(event_names::Change, ShareRef<EventListenerCallback>(*change), false);
     select.Focus();
     REQUIRE(fixture.Document->FocusedElement() == &select);
 
@@ -535,7 +535,7 @@ namespace krys::boo::tests
     // Without a user gesture it's not allowed.
     auto result = select.ShowPicker();
     REQUIRE(result.HasException());
-    CHECK(result.GetException().Code() == dom::ExceptionCode::NotAllowedError);
+    CHECK(result.GetException().Code() == ExceptionCode::NotAllowedError);
 
     // A gesture allows one call, which uses it up.
     window.NotifyActivated();
@@ -547,7 +547,7 @@ namespace krys::boo::tests
     window.NotifyActivated();
     auto disabled = select.ShowPicker();
     REQUIRE(disabled.HasException());
-    CHECK(disabled.GetException().Code() == dom::ExceptionCode::InvalidStateError);
+    CHECK(disabled.GetException().Code() == ExceptionCode::InvalidStateError);
   }
 
   namespace
@@ -702,7 +702,7 @@ namespace krys::boo::tests
       SECTION("clicking an option picks it, firing events and closing")
       {
         auto counter = CreateRef<EventCounter>();
-        select.AddEventListener(event_names::Change, ShareRef<dom::EventListenerCallback>(*counter), false);
+        select.AddEventListener(event_names::Change, ShareRef<EventListenerCallback>(*counter), false);
         ClickElement(fixture, d);
         html::EventLoop::Current().RunUntilIdle();
         CHECK(select.SelectedIndex() == 3);

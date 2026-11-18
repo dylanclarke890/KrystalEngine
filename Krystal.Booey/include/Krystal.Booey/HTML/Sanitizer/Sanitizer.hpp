@@ -28,8 +28,7 @@ namespace krys::boo::html
 
     /// @brief A sanitizer with @p configuration; a `TypeError` if it isn't valid.
     /// @see https://html.spec.whatwg.org/#dom-sanitizer-constructor
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<Sanitizer>>
-      Create(const SanitizerConfig &configuration) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<Sanitizer>> Create(const SanitizerConfig &configuration) noexcept;
 
     /// @brief A copy of the configuration, with its lists sorted.
     /// @see https://html.spec.whatwg.org/#dom-sanitizer-get

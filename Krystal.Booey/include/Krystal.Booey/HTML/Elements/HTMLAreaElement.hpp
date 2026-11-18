@@ -91,10 +91,10 @@ namespace krys::boo
 
     /// @brief Follows the link, if it is one.
     /// @see https://html.spec.whatwg.org/#the-area-element:activation-behaviour
-    void ActivationBehavior(dom::Event &event) noexcept override;
+    void ActivationBehavior(Event &event) noexcept override;
 
     /// @brief Follows a focused link on Enter (as a simulated click), and on a click of the middle button.
-    void DefaultEventHandler(dom::Event &event) noexcept override;
+    void DefaultEventHandler(Event &event) noexcept override;
 
 #pragma region HTMLAreaElement - https://html.spec.whatwg.org/#htmlareaelement
 

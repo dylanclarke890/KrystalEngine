@@ -54,19 +54,19 @@ namespace krys::boo
     return rows;
   }
 
-  dom::ExceptionOr<Ref<HTMLTableRowElement>> HTMLTableSectionElement::InsertRow(int32 index) noexcept
+  ExceptionOr<Ref<HTMLTableRowElement>> HTMLTableSectionElement::InsertRow(int32 index) noexcept
   {
     // 1. If index is less than −1 or greater than the number of elements in the rows collection, throw
     //    an "IndexSizeError" DOMException.
     if (index < -1)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
     auto children = Rows();
     auto numRows = static_cast<int32>(children->Length());
     if (index > numRows)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     // 2. Let table row be the result of creating an element given this element's node document, "tr", and
@@ -86,7 +86,7 @@ namespace krys::boo
     return row;
   }
 
-  dom::ExceptionOr<void> HTMLTableSectionElement::DeleteRow(int32 index) noexcept
+  ExceptionOr<void> HTMLTableSectionElement::DeleteRow(int32 index) noexcept
   {
     html::CEReactionsScope ceReactions;
 
@@ -107,7 +107,7 @@ namespace krys::boo
     }
     if (index < 0 || index >= numRows)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
     if (auto result = RemoveChild(*children->Item(index)); result.HasException())
     {

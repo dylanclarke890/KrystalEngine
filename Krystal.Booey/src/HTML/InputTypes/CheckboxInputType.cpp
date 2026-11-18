@@ -48,7 +48,7 @@ namespace krys::boo::html
     return ValidationMessageValueMissingForCheckboxText();
   }
 
-  void CheckboxInputType::HandleKeyupEvent(dom::KeyboardEvent &event) noexcept
+  void CheckboxInputType::HandleKeyupEvent(KeyboardEvent &event) noexcept
   {
     if (event.KeyIdentifier() != u8"U+0020")
     {
@@ -76,7 +76,7 @@ namespace krys::boo::html
     element.SetChecked(!state.Checked, state.Trusted ? WasSetByJavaScript::No : WasSetByJavaScript::Yes);
   }
 
-  void CheckboxInputType::DidDispatchClick(dom::Event &event, const InputElementClickState &state) noexcept
+  void CheckboxInputType::DidDispatchClick(Event &event, const InputElementClickState &state) noexcept
   {
     if (event.DefaultPrevented() || event.DefaultHandled())
     {

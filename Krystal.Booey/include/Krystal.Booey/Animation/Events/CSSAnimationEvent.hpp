@@ -30,7 +30,7 @@
 namespace krys::boo
 {
   /// @see https://drafts.csswg.org/css-animations-1/#dictdef-animationeventinit
-  struct CSSAnimationEventInit : public dom::EventInit
+  struct CSSAnimationEventInit : public EventInit
   {
     CSSOMString AnimationName;
     double ElapsedTime {0};

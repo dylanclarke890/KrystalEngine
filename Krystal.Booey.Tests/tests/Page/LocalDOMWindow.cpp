@@ -108,8 +108,8 @@ namespace krys::boo::tests
     CHECK(window->Document() == document.get());
     CHECK(window->Frame() == frame.get());
     CHECK(window->IsCurrentlyDisplayedInFrame());
-    CHECK(Is<LocalDOMWindow>(static_cast<dom::EventTarget &>(*window)));
-    CHECK_FALSE(Is<LocalDOMWindow>(static_cast<dom::EventTarget &>(*document)));
+    CHECK(Is<LocalDOMWindow>(static_cast<EventTarget &>(*window)));
+    CHECK_FALSE(Is<LocalDOMWindow>(static_cast<EventTarget &>(*document)));
 
     // The window's custom element registry is the document's.
     CHECK(&window->CustomElements() == document->CustomElementRegistry().get());
@@ -130,7 +130,7 @@ namespace krys::boo::tests
     List<std::string> order;
     auto windowCapture = window.AddEventListener(
       u8"click",
-      [&](dom::Event &event)
+      [&](Event &event)
       {
         CHECK(event.CurrentTarget().get() == &window);
         CHECK(event.Target().get() == &button);
@@ -138,11 +138,10 @@ namespace krys::boo::tests
       },
       true);
     auto documentCapture = fixture.Document->AddEventListener(
-      u8"click", [&](dom::Event &) { order.emplace_back("document capture"); }, true);
+      u8"click", [&](Event &) { order.emplace_back("document capture"); }, true);
     auto documentBubble =
-      fixture.Document->AddEventListener(u8"click", [&](dom::Event &) { order.emplace_back("document"); });
-    auto windowBubble =
-      window.AddEventListener(u8"click", [&](dom::Event &) { order.emplace_back("window"); });
+      fixture.Document->AddEventListener(u8"click", [&](Event &) { order.emplace_back("document"); });
+    auto windowBubble = window.AddEventListener(u8"click", [&](Event &) { order.emplace_back("window"); });
 
     button.DispatchSimulatedClick(nullptr);
     CHECK(order == List<std::string> {"window capture", "document capture", "document", "window"});
@@ -152,10 +151,10 @@ namespace krys::boo::tests
       bool documentHeard = false;
       bool windowHeard = false;
       auto documentLoad =
-        fixture.Document->AddEventListener(u8"load", [&](dom::Event &) { documentHeard = true; });
-      auto windowLoad = window.AddEventListener(u8"load", [&](dom::Event &) { windowHeard = true; });
+        fixture.Document->AddEventListener(u8"load", [&](Event &) { documentHeard = true; });
+      auto windowLoad = window.AddEventListener(u8"load", [&](Event &) { windowHeard = true; });
 
-      auto load = dom::Event::Create(event_names::Load, true, false);
+      auto load = Event::Create(event_names::Load, true, false);
       (void)dom::EventDispatcher::DispatchToTarget(*load, &button);
       CHECK(documentHeard);
       CHECK_FALSE(windowHeard);
@@ -166,13 +165,13 @@ namespace krys::boo::tests
     {
       bool windowHeard = false;
       auto windowLoad = window.AddEventListener(u8"load",
-                                                [&](dom::Event &event)
+                                                [&](Event &event)
                                                 {
                                                   windowHeard = true;
                                                   CHECK(event.CurrentTarget().get() == &window);
                                                   CHECK(event.Target().get() == fixture.Document.get());
                                                 });
-      (void)dom::EventDispatcher::FireEvent<dom::Event>(event_names::Load, window, {}, true);
+      (void)dom::EventDispatcher::FireEvent<Event>(event_names::Load, window, {}, true);
       CHECK(windowHeard);
     }
 
@@ -181,7 +180,7 @@ namespace krys::boo::tests
       // Its window's document isn't fully active, so inner invoke skips the listeners.
       fixture.TestPage->MainFrame().SetDocument(nullptr);
       order.clear();
-      auto event = dom::Event::Create(event_names::Click, true, false);
+      auto event = Event::Create(event_names::Click, true, false);
       (void)dom::EventDispatcher::DispatchToTarget(*event, &button);
       CHECK(order.empty());
     }
@@ -194,7 +193,7 @@ namespace krys::boo::tests
 
     uint32 resizes = 0;
     auto listener = window.AddEventListener(u8"resize",
-                                            [&](dom::Event &event)
+                                            [&](Event &event)
                                             {
                                               CHECK(event.IsTrusted());
                                               CHECK_FALSE(event.Bubbles());
@@ -376,8 +375,8 @@ namespace krys::boo::tests
 
     uint32 resizes = 0;
     uint32 scrolls = 0;
-    auto resizeListener = visualViewport.AddEventListener(u8"resize", [&](dom::Event &) { ++resizes; });
-    auto scrollListener = visualViewport.AddEventListener(u8"scroll", [&](dom::Event &) { ++scrolls; });
+    auto resizeListener = visualViewport.AddEventListener(u8"resize", [&](Event &) { ++resizes; });
+    auto scrollListener = visualViewport.AddEventListener(u8"scroll", [&](Event &) { ++scrolls; });
 
     fixture.TestPage->MainFrame().View()->Resize({300, 150});
     fixture.TestPage->UpdateRendering();
@@ -539,16 +538,16 @@ namespace krys::boo::tests
 
     SECTION("a handler keeps its listener's place as its value changes")
     {
-      auto before = button.AddEventListener(u8"click", [&](dom::Event &) { order.emplace_back("before"); });
-      button.SetOnClick([&](dom::Event &) { order.emplace_back("handler"); });
-      auto after = button.AddEventListener(u8"click", [&](dom::Event &) { order.emplace_back("after"); });
+      auto before = button.AddEventListener(u8"click", [&](Event &) { order.emplace_back("before"); });
+      button.SetOnClick([&](Event &) { order.emplace_back("handler"); });
+      auto after = button.AddEventListener(u8"click", [&](Event &) { order.emplace_back("after"); });
       REQUIRE(button.OnClick() != nullptr);
 
       button.DispatchSimulatedClick(nullptr);
       CHECK(order == List<std::string> {"before", "handler", "after"});
 
       order.clear();
-      button.SetOnClick([&](dom::Event &) { order.emplace_back("replaced"); });
+      button.SetOnClick([&](Event &) { order.emplace_back("replaced"); });
       button.DispatchSimulatedClick(nullptr);
       CHECK(order == List<std::string> {"before", "replaced", "after"});
 
@@ -560,23 +559,23 @@ namespace krys::boo::tests
       CHECK(order == List<std::string> {"before", "after"});
 
       order.clear();
-      button.SetOnClick([&](dom::Event &) { order.emplace_back("again"); });
+      button.SetOnClick([&](Event &) { order.emplace_back("again"); });
       button.DispatchSimulatedClick(nullptr);
       CHECK(order == List<std::string> {"before", "after", "again"});
     }
 
     SECTION("a handler cancels by preventing the default")
     {
-      button.SetOnClick([](dom::Event &event) { event.PreventDefault(); });
-      auto click = dom::Event::Create(event_names::Click, true, true);
+      button.SetOnClick([](Event &event) { event.PreventDefault(); });
+      auto click = Event::Create(event_names::Click, true, true);
       CHECK_FALSE(dom::EventDispatcher::DispatchToTarget(*click, &button));
     }
 
     SECTION("documents and windows have handlers too")
     {
-      fixture.Document->SetOnClick([&](dom::Event &) { order.emplace_back("document"); });
-      window.SetOnClick([&](dom::Event &) { order.emplace_back("window"); });
-      fixture.Document->SetOnCopy([&](dom::Event &) {});
+      fixture.Document->SetOnClick([&](Event &) { order.emplace_back("document"); });
+      window.SetOnClick([&](Event &) { order.emplace_back("window"); });
+      fixture.Document->SetOnCopy([&](Event &) {});
       CHECK(fixture.Document->OnCopy() != nullptr);
       button.DispatchSimulatedClick(nullptr);
       CHECK(order == List<std::string> {"document", "window"});
@@ -585,7 +584,7 @@ namespace krys::boo::tests
     SECTION("pointer and touch events have handlers")
     {
       uint32 calls = 0;
-      auto count = [&](dom::Event &)
+      auto count = [&](Event &)
       {
         ++calls;
       };
@@ -619,7 +618,7 @@ namespace krys::boo::tests
     SECTION("the document's own handlers")
     {
       uint32 calls = 0;
-      auto count = [&](dom::Event &)
+      auto count = [&](Event &)
       {
         ++calls;
       };
@@ -638,7 +637,7 @@ namespace krys::boo::tests
     {
       auto svg = fixture.Document->CreateElementNS(infra::namespaces::SVG, u8"svg").ReleaseValue();
       auto &svgElement = Downcast<SVGElement>(*svg);
-      svgElement.SetOnResize([](dom::Event &) {});
+      svgElement.SetOnResize([](Event &) {});
       CHECK(svgElement.OnResize() != nullptr);
       CHECK(window.OnResize() == nullptr);
     }
@@ -646,13 +645,13 @@ namespace krys::boo::tests
     SECTION("the body's window handlers are the window's")
     {
       auto &body = *fixture.Document->Body();
-      body.SetOnResize([&](dom::Event &) { order.emplace_back("resize"); });
-      body.SetOnPageShow([&](dom::Event &) {});
+      body.SetOnResize([&](Event &) { order.emplace_back("resize"); });
+      body.SetOnPageShow([&](Event &) {});
       CHECK(window.OnResize() == body.OnResize());
       CHECK(window.OnResize() != nullptr);
       CHECK(window.OnPageShow() != nullptr);
       // Other handlers are the body's own.
-      body.SetOnClick([&](dom::Event &) {});
+      body.SetOnClick([&](Event &) {});
       CHECK(window.OnClick() == nullptr);
 
       fixture.TestPage->MainFrame().View()->Resize({300, 150});
@@ -662,7 +661,7 @@ namespace krys::boo::tests
       // Without a browsing context, they're nowhere.
       fixture.TestPage->MainFrame().SetDocument(nullptr);
       CHECK(body.OnResize() == nullptr);
-      body.SetOnLoad([](dom::Event &) {});
+      body.SetOnLoad([](Event &) {});
       CHECK(window.OnLoad() == nullptr);
     }
   }

@@ -31,7 +31,7 @@
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include <cmath>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   namespace
   {
@@ -51,14 +51,14 @@ namespace krys::boo::dom
     }
   }
 
-  bool IsAnyClick(const DOMStringAtom &eventType) noexcept
+  bool dom::IsAnyClick(const DOMStringAtom &eventType) noexcept
   {
     return eventType == event_names::Click || eventType == event_names::AuxClick;
   }
 
-  bool IsAnyClick(const Event &event) noexcept
+  bool dom::IsAnyClick(const Event &event) noexcept
   {
-    return IsAnyClick(event.Type());
+    return dom::IsAnyClick(event.Type());
   }
 
   MouseEvent::MouseEvent(DOMStringAtom type, const MouseEventInit &initializer) noexcept
@@ -207,7 +207,7 @@ namespace krys::boo::dom
 
   bool MouseEvent::CanTriggerActivationBehavior(const Event &event) noexcept
   {
-    if (!IsAnyClick(event))
+    if (!dom::IsAnyClick(event))
     {
       return false;
     }

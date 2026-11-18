@@ -78,9 +78,9 @@ namespace krys::boo
 
     KRYS_NODISCARD CSSRuleList &CssRules() const noexcept;
 
-    dom::ExceptionOr<uint32> InsertRule(const CSSOMString &rule, uint32 index) noexcept;
+    ExceptionOr<uint32> InsertRule(const CSSOMString &rule, uint32 index) noexcept;
 
-    dom::ExceptionOr<void> DeleteRule(uint32 index) noexcept;
+    ExceptionOr<void> DeleteRule(uint32 index) noexcept;
 
     KRYS_NODISCARD uint32 Length() const noexcept;
 

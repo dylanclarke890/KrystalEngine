@@ -25,14 +25,11 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyTraits.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   template <typename T>
   class ExceptionOr;
-}
 
-namespace krys::boo
-{
   class SVGAngleValue
   {
   public:
@@ -70,12 +67,12 @@ namespace krys::boo
       return _valueInSpecifiedUnits;
     }
 
-    dom::ExceptionOr<void> SetValueAsString(DOMStringView) noexcept;
+    ExceptionOr<void> SetValueAsString(DOMStringView) noexcept;
 
     KRYS_NODISCARD DOMString ValueAsString() const noexcept;
 
-    dom::ExceptionOr<void> NewValueSpecifiedUnits(uint16 unitType, float valueInSpecifiedUnits) noexcept;
+    ExceptionOr<void> NewValueSpecifiedUnits(uint16 unitType, float valueInSpecifiedUnits) noexcept;
 
-    dom::ExceptionOr<void> ConvertToSpecifiedUnits(uint16 unitType) noexcept;
+    ExceptionOr<void> ConvertToSpecifiedUnits(uint16 unitType) noexcept;
   };
 }

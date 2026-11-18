@@ -49,7 +49,7 @@ namespace krys::boo
     }
 
     template <typename T>
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<SVGPoint>> Create(dom::ExceptionOr<T> value) noexcept
+    KRYS_NODISCARD static ExceptionOr<Ref<SVGPoint>> Create(ExceptionOr<T> value) noexcept
     {
       if (value.HasException())
       {
@@ -68,11 +68,11 @@ namespace krys::boo
       return _value.X();
     }
 
-    dom::ExceptionOr<void> SetX(float x) noexcept
+    ExceptionOr<void> SetX(float x) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetX(x);
@@ -85,11 +85,11 @@ namespace krys::boo
       return _value.Y();
     }
 
-    dom::ExceptionOr<void> SetY(float y) noexcept
+    ExceptionOr<void> SetY(float y) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetY(y);

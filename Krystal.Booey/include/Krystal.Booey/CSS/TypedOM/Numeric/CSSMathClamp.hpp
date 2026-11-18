@@ -39,8 +39,8 @@ namespace krys::boo
 
   public:
     /// @return A `TypeError` if the values' types can't be combined.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSMathClamp>>
-      Create(CSSNumberish &&lower, CSSNumberish &&value, CSSNumberish &&upper) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSMathClamp>> Create(CSSNumberish &&lower, CSSNumberish &&value,
+                                                                CSSNumberish &&upper) noexcept;
 
     KRYS_NODISCARD const CSSNumericValue &Lower() const noexcept
     {

@@ -57,8 +57,8 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<Ref<ViewTimeline>> ViewTimeline::Create(boo::Document &document,
-                                                           const ViewTimelineOptions &options) noexcept
+  ExceptionOr<Ref<ViewTimeline>> ViewTimeline::Create(boo::Document &document,
+                                                      const ViewTimelineOptions &options) noexcept
   {
     auto viewTimeline = AdoptRef(*new ViewTimeline(options.Axis));
 
@@ -71,7 +71,7 @@ namespace krys::boo
     auto specifiedInsets = specifiedInsetsOrException.ReleaseValue();
     if (!IsValidInset(specifiedInsets.Start) || !IsValidInset(specifiedInsets.End))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     viewTimeline->_specifiedInsets = krys::move(specifiedInsets);
@@ -104,7 +104,7 @@ namespace krys::boo
 
   auto ViewTimeline::ValidateSpecifiedInsets(const ViewTimelineInsetValue &inset,
                                              const boo::Document &document) noexcept
-    -> dom::ExceptionOr<SpecifiedViewTimelineInsets>
+    -> ExceptionOr<SpecifiedViewTimelineInsets>
   {
     // https://drafts.csswg.org/scroll-animations-1/#dom-viewtimeline-viewtimeline
 
@@ -116,13 +116,13 @@ namespace krys::boo
     {
       if (insetString->empty())
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       auto consumedInset =
         css::parse_property::ParseSingleViewTimelineInsetItem(*insetString, document.CssParserContext());
       if (!consumedInset)
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
 
       if (RefPtr insetPair = DynamicDowncast<css::ValuePair>(consumedInset))
@@ -136,7 +136,7 @@ namespace krys::boo
     }
 
     auto cssPrimitiveValueForCSSNumericValue =
-      [&](const RefPtr<CSSNumericValue> &numericValue) -> dom::ExceptionOr<RefPtr<css::PrimitiveValue>>
+      [&](const RefPtr<CSSNumericValue> &numericValue) -> ExceptionOr<RefPtr<css::PrimitiveValue>>
     {
       if (const auto *insetValue = DynamicDowncast<CSSUnitValue>(numericValue.get()))
       {
@@ -147,17 +147,17 @@ namespace krys::boo
     };
 
     auto cssPrimitiveValueForCSSKeywordValue =
-      [&](const Ref<CSSKeywordValue> &keywordValue) -> dom::ExceptionOr<RefPtr<css::PrimitiveValue>>
+      [&](const Ref<CSSKeywordValue> &keywordValue) -> ExceptionOr<RefPtr<css::PrimitiveValue>>
     {
       if (keywordValue->Value() != u8"auto")
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       return RefPtr<css::PrimitiveValue> {};
     };
 
     auto cssPrimitiveValueForIndividualInset =
-      [&](const ViewTimelineIndividualInset &individualInset) -> dom::ExceptionOr<RefPtr<css::PrimitiveValue>>
+      [&](const ViewTimelineIndividualInset &individualInset) -> ExceptionOr<RefPtr<css::PrimitiveValue>>
     {
       if (const auto *numericInset = std::get_if<RefPtr<CSSNumericValue>>(&individualInset))
       {
@@ -180,7 +180,7 @@ namespace krys::boo
 
     if (!numberOfInsets || numberOfInsets > 2)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     auto startInsetOrException = cssPrimitiveValueForIndividualInset(insetList.at(0));

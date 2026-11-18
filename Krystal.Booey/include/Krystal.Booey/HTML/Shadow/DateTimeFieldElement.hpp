@@ -31,13 +31,9 @@
 namespace krys::boo
 {
   class DateComponents;
+  class KeyboardEvent;
   class Locale;
   class RenderStyle;
-}
-
-namespace krys::boo::dom
-{
-  class KeyboardEvent;
 }
 
 namespace krys::boo::html
@@ -57,7 +53,7 @@ namespace krys::boo::html
   public:
     virtual ~DateTimeFieldElementFieldOwner() noexcept = default;
 
-    virtual void DidBlurFromField(dom::Event &event) noexcept = 0;
+    virtual void DidBlurFromField(Event &event) noexcept = 0;
 
     virtual void FieldValueChanged() noexcept = 0;
 
@@ -95,7 +91,7 @@ namespace krys::boo::html
     DateTimeFieldElementFieldOwner *_fieldOwner;
 
   public:
-    void DefaultEventHandler(dom::Event &event) noexcept override;
+    void DefaultEventHandler(Event &event) noexcept override;
 
     KRYS_NODISCARD DOMString VisibleValue() const noexcept;
 
@@ -148,9 +144,9 @@ namespace krys::boo::html
 
     KRYS_NODISCARD virtual int PlaceholderValueAsInteger() const noexcept = 0;
 
-    virtual void HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept = 0;
+    virtual void HandleKeyboardEvent(KeyboardEvent &event) noexcept = 0;
 
-    virtual void HandleBlurEvent(dom::Event &event) noexcept;
+    virtual void HandleBlurEvent(Event &event) noexcept;
 
     KRYS_NODISCARD DateTimeFieldElementFieldOwner *FieldOwner() const noexcept
     {
@@ -162,7 +158,7 @@ namespace krys::boo::html
       ResolveCustomStyle(const style::ResolutionContext &resolutionContext,
                          const RenderStyle *shadowHostStyle) noexcept final;
 
-    void DefaultKeyboardEventHandler(dom::KeyboardEvent &event) noexcept;
+    void DefaultKeyboardEventHandler(KeyboardEvent &event) noexcept;
 
     KRYS_NODISCARD bool IsFieldOwnerDisabled() const noexcept;
 

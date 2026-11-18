@@ -158,9 +158,8 @@ namespace krys::boo
     return computedTiming;
   }
 
-  dom::ExceptionOr<void>
-    AnimationEffect::BindingsUpdateTiming(boo::Document &document,
-                                          const Maybe<OptionalEffectTiming> &timing) noexcept
+  ExceptionOr<void> AnimationEffect::BindingsUpdateTiming(boo::Document &document,
+                                                          const Maybe<OptionalEffectTiming> &timing) noexcept
   {
     auto retVal = UpdateTiming(document, timing);
     if (!retVal.HasException() && timing)
@@ -173,8 +172,8 @@ namespace krys::boo
     return retVal;
   }
 
-  dom::ExceptionOr<void> AnimationEffect::UpdateTiming(boo::Document &document,
-                                                       const Maybe<OptionalEffectTiming> &timing) noexcept
+  ExceptionOr<void> AnimationEffect::UpdateTiming(boo::Document &document,
+                                                  const Maybe<OptionalEffectTiming> &timing) noexcept
   {
     // 6.5.4. Updating the timing of an AnimationEffect
     // https://drafts.csswg.org/web-animations/#updating-animationeffect-timing
@@ -192,7 +191,7 @@ namespace krys::boo
     {
       if (*timing->IterationStart < 0)
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
     }
 
@@ -202,7 +201,7 @@ namespace krys::boo
     {
       if (*timing->Iterations < 0 || std::isnan(*timing->Iterations))
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
     }
 
@@ -215,12 +214,12 @@ namespace krys::boo
       {
         if (*durationAsDouble < 0 || std::isnan(*durationAsDouble))
         {
-          return dom::Exception {dom::ExceptionCode::TypeError};
+          return Exception {ExceptionCode::TypeError};
         }
       }
       else if (std::get<DOMString>(*timing->Duration) != u8"auto")
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
     }
 
@@ -235,8 +234,8 @@ namespace krys::boo
           {
             if (timeline->IsProgressBased())
             {
-              return dom::Exception {
-                dom::ExceptionCode::TypeError,
+              return Exception {
+                ExceptionCode::TypeError,
                 u8"The number of iterations cannot be set to Infinity for progress-based animations"};
             }
           }
@@ -255,7 +254,7 @@ namespace krys::boo
         css::parse_property::ParseEasingFunctionDeprecated(*timing->Easing, parsingContext);
       if (!timingFunctionResult)
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       SetTimingFunction(timingFunctionResult);
     }
@@ -321,14 +320,14 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> AnimationEffect::SetIterationStart(double iterationStart) noexcept
+  ExceptionOr<void> AnimationEffect::SetIterationStart(double iterationStart) noexcept
   {
     // https://drafts.csswg.org/web-animations-1/#dom-animationeffecttiming-iterationstart
     // If an attempt is made to set this attribute to a value less than zero, a TypeError must
     // be thrown and the value of the iterationStart attribute left unchanged.
     if (iterationStart < 0)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     if (_timing.IterationStart == iterationStart)
@@ -341,14 +340,14 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> AnimationEffect::SetIterations(double iterations) noexcept
+  ExceptionOr<void> AnimationEffect::SetIterations(double iterations) noexcept
   {
     // https://drafts.csswg.org/web-animations-1/#dom-animationeffecttiming-iterations
     // If an attempt is made to set this attribute to a value less than zero or a NaN value, a
     // TypeError must be thrown and the value of the iterations attribute left unchanged.
     if (iterations < 0 || std::isnan(iterations))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     if (_timing.Iterations == iterations)

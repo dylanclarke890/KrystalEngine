@@ -286,9 +286,9 @@ namespace krys::boo
     return (usedZoom != 1.0f) ? value / usedZoom : value;
   }
 
-  dom::ExceptionOr<float>
-    SVGLengthContext::ResolveValueToUserUnits(float value, const css::LengthPercentageUnit &targetUnit,
-                                              SVGLengthMode lengthMode) const noexcept
+  ExceptionOr<float> SVGLengthContext::ResolveValueToUserUnits(float value,
+                                                               const css::LengthPercentageUnit &targetUnit,
+                                                               SVGLengthMode lengthMode) const noexcept
   {
     switch (targetUnit)
     {
@@ -311,7 +311,7 @@ namespace krys::boo
 
         if (!lengthUnit)
         {
-          return dom::Exception {dom::ExceptionCode::NotSupportedError};
+          return Exception {ExceptionCode::NotSupportedError};
         }
 
         return ComputeNonCalcLength(value, *lengthUnit);
@@ -319,7 +319,7 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<css::LengthPercentage<>>
+  ExceptionOr<css::LengthPercentage<>>
     SVGLengthContext::ResolveValueFromUserUnits(float value, const css::LengthPercentageUnit &targetUnit,
                                                 SVGLengthMode lengthMode) const noexcept
   {
@@ -352,13 +352,13 @@ namespace krys::boo
 
         if (!lengthUnit)
         {
-          return dom::Exception {dom::ExceptionCode::NotSupportedError};
+          return Exception {ExceptionCode::NotSupportedError};
         }
 
         auto pxPerUnit = ComputeNonCalcLength(1.0, *lengthUnit);
         if (!pxPerUnit)
         {
-          return dom::Exception {dom::ExceptionCode::NotSupportedError};
+          return Exception {ExceptionCode::NotSupportedError};
         }
 
         return css::LengthPercentage<>(targetUnit, value / pxPerUnit);
@@ -366,14 +366,14 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<float>
+  ExceptionOr<float>
     SVGLengthContext::ConvertValueFromUserUnitsToPercentage(float value,
                                                             SVGLengthMode lengthMode) const noexcept
   {
     auto viewportSize = this->ViewportSize();
     if (!viewportSize)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     if (auto divisor = DimensionForLengthMode(lengthMode, *viewportSize))
@@ -384,14 +384,14 @@ namespace krys::boo
     return value;
   }
 
-  dom::ExceptionOr<float>
+  ExceptionOr<float>
     SVGLengthContext::ConvertValueFromPercentageToUserUnits(float value,
                                                             SVGLengthMode lengthMode) const noexcept
   {
     auto viewportSize = this->ViewportSize();
     if (!viewportSize)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     return ConvertValueFromPercentageToUserUnits(value, lengthMode, *viewportSize);
@@ -474,12 +474,12 @@ namespace krys::boo
     return ShareRefPtr(static_cast<const SVGElement *>(_context.get()));
   }
 
-  dom::ExceptionOr<float> SVGLengthContext::ConvertValueFromUserUnitsToEXS(float value) const noexcept
+  ExceptionOr<float> SVGLengthContext::ConvertValueFromUserUnitsToEXS(float value) const noexcept
   {
     auto *style = RenderStyleForLengthResolving(ProtectedContext().get());
     if (!style)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     // Use of ceil allows a pixel match to the W3Cs expected output of coords-units-03-b.svg
@@ -487,18 +487,18 @@ namespace krys::boo
     float xHeight = std::ceil(style->MetricsOfPrimaryFont().XHeight().value_or(0));
     if (!xHeight)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     return value / xHeight;
   }
 
-  dom::ExceptionOr<float> SVGLengthContext::ConvertValueFromEXSToUserUnits(float value) const noexcept
+  ExceptionOr<float> SVGLengthContext::ConvertValueFromEXSToUserUnits(float value) const noexcept
   {
     auto *style = RenderStyleForLengthResolving(ProtectedContext().get());
     if (!style)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     // Use of ceil allows a pixel match to the W3Cs expected output of coords-units-03-b.svg

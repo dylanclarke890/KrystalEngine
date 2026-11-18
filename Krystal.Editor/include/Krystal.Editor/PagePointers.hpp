@@ -30,7 +30,7 @@ namespace krys::editor
 
   private:
     WeakPtr<boo::Document> _document;
-    List<boo::dom::EventListenerHandle> _listeners;
+    List<boo::EventListenerHandle> _listeners;
     /// @brief Each pointer over the pad, by its id (in order), as the readout shows it.
     List<std::pair<int32, std::string>> _pointers;
     uint32 _touches {0};
@@ -50,8 +50,8 @@ namespace krys::editor
         return;
       }
 
-      auto listen = [&](const RefPtr<boo::dom::EventTarget> &target, utf8_stringview type,
-                        Func<void(boo::dom::Event &)> &&callback)
+      auto listen =
+        [&](const RefPtr<boo::EventTarget> &target, utf8_stringview type, Func<void(boo::Event &)> &&callback)
       {
         if (target)
         {
@@ -60,18 +60,18 @@ namespace krys::editor
       };
 
       // The pad: every pointer over it, and the touches it holds.
-      RefPtr<boo::dom::EventTarget> pad = document.GetElementById(u8"pointer-pad");
+      RefPtr<boo::EventTarget> pad = document.GetElementById(u8"pointer-pad");
       for (auto type : {u8"pointerover", u8"pointermove", u8"pointerdown", u8"pointerup"})
       {
         listen(pad, type,
-               [this](boo::dom::Event &event) { ShowPointer(static_cast<boo::dom::PointerEvent &>(event)); });
+               [this](boo::Event &event) { ShowPointer(static_cast<boo::PointerEvent &>(event)); });
       }
       for (auto type : {u8"pointerleave", u8"pointercancel"})
       {
         listen(pad, type,
-               [this](boo::dom::Event &event)
+               [this](boo::Event &event)
                {
-                 auto id = static_cast<int32>(static_cast<boo::dom::PointerEvent &>(event).PointerId());
+                 auto id = static_cast<int32>(static_cast<boo::PointerEvent &>(event).PointerId());
                  std::erase_if(_pointers, [&](const auto &pointer) { return pointer.first == id; });
                  ShowPad();
                });
@@ -79,20 +79,20 @@ namespace krys::editor
       for (auto type : {u8"touchstart", u8"touchmove", u8"touchend", u8"touchcancel"})
       {
         listen(pad, type,
-               [this](boo::dom::Event &event)
+               [this](boo::Event &event)
                {
-                 auto *touches = static_cast<boo::dom::TouchEvent &>(event).TargetTouches();
+                 auto *touches = static_cast<boo::TouchEvent &>(event).TargetTouches();
                  _touches = touches ? touches->Length() : 0;
                  ShowPad();
                });
       }
 
       // The chip: the pointer that presses it captures itself to it, and drags it until it lets go.
-      RefPtr<boo::dom::EventTarget> chip = document.GetElementById(u8"drag-chip");
+      RefPtr<boo::EventTarget> chip = document.GetElementById(u8"drag-chip");
       listen(chip, u8"pointerdown",
-             [this](boo::dom::Event &event)
+             [this](boo::Event &event)
              {
-               auto &pointer = static_cast<boo::dom::PointerEvent &>(event);
+               auto &pointer = static_cast<boo::PointerEvent &>(event);
                if (auto element = ById(u8"drag-chip"))
                {
                  _grabX = pointer.OffsetX();
@@ -101,24 +101,24 @@ namespace krys::editor
                }
              });
       listen(chip, u8"gotpointercapture",
-             [this](boo::dom::Event &event)
+             [this](boo::Event &event)
              {
-               _dragPointer = static_cast<int32>(static_cast<boo::dom::PointerEvent &>(event).PointerId());
+               _dragPointer = static_cast<int32>(static_cast<boo::PointerEvent &>(event).PointerId());
                SetText(u8"drag-chip", std::format("Dragging (pointer {})", _dragPointer));
              });
       listen(chip, u8"lostpointercapture",
-             [this](boo::dom::Event &)
+             [this](boo::Event &)
              {
                _dragPointer = -1;
                SetText(u8"drag-chip", "Drag me");
              });
       listen(chip, u8"pointermove",
-             [this](boo::dom::Event &event) { DragChip(static_cast<boo::dom::PointerEvent &>(event)); });
+             [this](boo::Event &event) { DragChip(static_cast<boo::PointerEvent &>(event)); });
 
       // The lock box: a click locks the pointer to it, and the mouse's movement comes to it.
-      RefPtr<boo::dom::EventTarget> box = document.GetElementById(u8"lock-box");
+      RefPtr<boo::EventTarget> box = document.GetElementById(u8"lock-box");
       listen(box, u8"click",
-             [this](boo::dom::Event &)
+             [this](boo::Event &)
              {
                if (auto element = ById(u8"lock-box"))
                {
@@ -126,9 +126,9 @@ namespace krys::editor
                }
              });
       listen(box, u8"mousemove",
-             [this](boo::dom::Event &event)
+             [this](boo::Event &event)
              {
-               auto &mouse = static_cast<boo::dom::MouseEvent &>(event);
+               auto &mouse = static_cast<boo::MouseEvent &>(event);
                if (!IsLocked())
                {
                  return;
@@ -139,17 +139,16 @@ namespace krys::editor
                        std::format("Locked: moved {:.0f}, {:.0f}; {:.0f}, {:.0f} in all. Escape unlocks it.",
                                    mouse.MovementX(), mouse.MovementY(), _lockedX, _lockedY));
              });
-      RefPtr<boo::dom::EventTarget> target = ShareRefPtr(&document);
-      listen(target, u8"pointerlockchange", [this](boo::dom::Event &) { ShowLock(); });
+      RefPtr<boo::EventTarget> target = ShareRefPtr(&document);
+      listen(target, u8"pointerlockchange", [this](boo::Event &) { ShowLock(); });
       listen(target, u8"pointerlockerror",
-             [this](boo::dom::Event &) { SetText(u8"lock-readout", "The pointer can't be locked here."); });
+             [this](boo::Event &) { SetText(u8"lock-readout", "The pointer can't be locked here."); });
 
       // The pan area: what taps, double taps and long presses do there.
-      RefPtr<boo::dom::EventTarget> area = document.GetElementById(u8"pan-area");
+      RefPtr<boo::EventTarget> area = document.GetElementById(u8"pan-area");
       for (auto type : {u8"click", u8"dblclick", u8"contextmenu"})
       {
-        listen(area, type,
-               [this](boo::dom::Event &event) { ShowGesture(static_cast<boo::dom::MouseEvent &>(event)); });
+        listen(area, type, [this](boo::Event &event) { ShowGesture(static_cast<boo::MouseEvent &>(event)); });
       }
 
       ShowPad();
@@ -182,7 +181,7 @@ namespace krys::editor
       return box && _document->PointerLockElement() == box;
     }
 
-    void ShowPointer(const boo::dom::PointerEvent &pointer) noexcept
+    void ShowPointer(const boo::PointerEvent &pointer) noexcept
     {
       auto id = static_cast<int32>(pointer.PointerId());
       auto line = std::format("{} {} at {:.0f}, {:.0f}: pressure {:.2f}, tilt {} {}, buttons {}",
@@ -215,7 +214,7 @@ namespace krys::editor
       SetText(u8"pointer-readout", text);
     }
 
-    void DragChip(const boo::dom::PointerEvent &pointer) noexcept
+    void DragChip(const boo::PointerEvent &pointer) noexcept
     {
       auto chip = ById(u8"drag-chip");
       auto area = ById(u8"drag-area");
@@ -248,9 +247,9 @@ namespace krys::editor
       }
     }
 
-    void ShowGesture(const boo::dom::MouseEvent &event) noexcept
+    void ShowGesture(const boo::MouseEvent &event) noexcept
     {
-      auto *pointer = DynamicDowncast<boo::dom::PointerEvent>(event);
+      auto *pointer = DynamicDowncast<boo::PointerEvent>(event);
       auto from = pointer ? " from " + Narrow(pointer->PointerType()) : std::string();
       SetText(u8"gesture-log", std::format("{}{} at {:.0f}, {:.0f}", Narrow(event.Type().View()), from,
                                            event.OffsetX(), event.OffsetY()));

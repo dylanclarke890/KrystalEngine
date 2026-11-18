@@ -71,9 +71,8 @@ namespace krys::boo::html
     return ParseToDoubleForNumberType(Element()->Value());
   }
 
-  dom::ExceptionOr<void>
-    RangeInputType::SetValueAsDecimal(const Decimal &newValue,
-                                      TextFieldEventBehavior eventBehavior) const noexcept
+  ExceptionOr<void> RangeInputType::SetValueAsDecimal(const Decimal &newValue,
+                                                      TextFieldEventBehavior eventBehavior) const noexcept
   {
     krys_debug_assert(Element());
     (void)Element()->SetValue(Serialize(newValue), eventBehavior);
@@ -108,7 +107,7 @@ namespace krys::boo::html
     return StepRange(stepBase, RangeLimitations::Valid, minimum, maximum, step, RangeStepDescription);
   }
 
-  InputType::ShouldCallBaseEventHandler RangeInputType::HandleKeydownEvent(dom::KeyboardEvent &event) noexcept
+  InputType::ShouldCallBaseEventHandler RangeInputType::HandleKeydownEvent(KeyboardEvent &event) noexcept
   {
     krys_debug_assert(Element());
     Ref<HTMLInputElement> element = ShareRef(*Element());
@@ -244,7 +243,7 @@ namespace krys::boo::html
   }
 
   // FIXME: Should this work for untrusted input?
-  void RangeInputType::HandleMouseDownEvent(dom::MouseEvent &event) noexcept
+  void RangeInputType::HandleMouseDownEvent(MouseEvent &event) noexcept
   {
     krys_debug_assert(Element());
 

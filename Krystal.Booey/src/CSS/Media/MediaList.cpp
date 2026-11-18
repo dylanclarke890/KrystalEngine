@@ -133,7 +133,7 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> MediaList::DeleteMedium(const CSSOMString &oldMedium) noexcept
+  ExceptionOr<void> MediaList::DeleteMedium(const CSSOMString &oldMedium) noexcept
   {
     auto valueToRemove = text::ToASCIILower(CSSOMStringView(oldMedium));
     auto queries = MediaQueries();
@@ -146,7 +146,7 @@ namespace krys::boo
         return {};
       }
     }
-    return dom::ExceptionCode::NotFoundError;
+    return ExceptionCode::NotFoundError;
   }
 
   void MediaList::AppendMedium(const CSSOMString &newMedium) noexcept

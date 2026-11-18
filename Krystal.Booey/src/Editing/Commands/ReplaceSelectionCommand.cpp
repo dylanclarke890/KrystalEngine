@@ -451,7 +451,7 @@ namespace krys::boo
     auto text = FragmentText(*fragment);
 
     // Give the root a chance to change the text.
-    auto event = dom::BeforeTextInsertedEvent::Create(text);
+    auto event = BeforeTextInsertedEvent::Create(text);
     (void)dom::EventDispatcher::DispatchToTarget(*event, editableRoot.get());
     if (text != event->Text() || !editableRoot->HasRichlyEditableStyle())
     {

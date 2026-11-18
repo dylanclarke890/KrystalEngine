@@ -52,7 +52,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool SupportsRequired() const noexcept final;
 
-    void HandleActivationBehavior(dom::Event &event) noexcept final;
+    void HandleActivationBehavior(Event &event) noexcept final;
 
     KRYS_NODISCARD bool CanBeSuccessfulSubmitButton() noexcept final;
 

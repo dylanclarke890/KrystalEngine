@@ -364,9 +364,9 @@ namespace krys::boo::html
     }
   }
 
-  void SliderThumbElement::DefaultEventHandler(dom::Event &event) noexcept
+  void SliderThumbElement::DefaultEventHandler(Event &event) noexcept
   {
-    auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
+    auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
     if (!mouseEvent)
     {
       HTMLDivElement::DefaultEventHandler(event);
@@ -468,9 +468,9 @@ namespace krys::boo::html
     NodeDocument().AddListenerTypeIfNeeded(event_names::TouchStart);
   }
 
-  void SliderContainerElement::DefaultEventHandler(dom::Event &event) noexcept
+  void SliderContainerElement::DefaultEventHandler(Event &event) noexcept
   {
-    if (auto *touchEvent = DynamicDowncast<dom::TouchEvent>(event))
+    if (auto *touchEvent = DynamicDowncast<TouchEvent>(event))
     {
       HandleTouchEvent(*touchEvent);
       if (touchEvent->DefaultHandled())
@@ -481,7 +481,7 @@ namespace krys::boo::html
     HTMLDivElement::DefaultEventHandler(event);
   }
 
-  void SliderContainerElement::HandleTouchEvent(dom::TouchEvent &event) noexcept
+  void SliderContainerElement::HandleTouchEvent(TouchEvent &event) noexcept
   {
     RefPtr input = ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this)));
     if (!input || input->IsDisabledFormControl())

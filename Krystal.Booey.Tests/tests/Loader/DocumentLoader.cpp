@@ -281,7 +281,7 @@ namespace krys::boo::tests
     struct EndRecorder
     {
       List<std::string> Events;
-      List<dom::EventListenerHandle> Handles;
+      List<EventListenerHandle> Handles;
 
       void Attach(LoadFixture &fixture) noexcept
       {
@@ -291,7 +291,7 @@ namespace krys::boo::tests
           auto &document = fixture.Document();
           auto *window = document.Window();
           Handles.push_back(document.AddEventListener(u8"readystatechange",
-                                                      [this, &document](dom::Event &)
+                                                      [this, &document](Event &)
                                                       {
                                                         switch (document.ReadyState())
                                                         {
@@ -307,29 +307,28 @@ namespace krys::boo::tests
                                                         }
                                                       }));
           Handles.push_back(document.AddEventListener(u8"DOMContentLoaded",
-                                                      [this](dom::Event &event)
+                                                      [this](Event &event)
                                                       {
                                                         CHECK(event.Bubbles());
                                                         Events.emplace_back("DOMContentLoaded");
                                                       }));
           Handles.push_back(window->AddEventListener(u8"load",
-                                                     [this, &document, window](dom::Event &event)
+                                                     [this, &document, window](Event &event)
                                                      {
                                                        CHECK(event.Target().get() == &document);
                                                        CHECK(event.CurrentTarget().get() == window);
                                                        Events.emplace_back("load");
                                                      }));
-          Handles.push_back(
-            window->AddEventListener<html::PageTransitionEvent>(u8"pageshow",
-                                                                [this](html::PageTransitionEvent &event)
-                                                                {
-                                                                  CHECK_FALSE(event.Persisted());
-                                                                  CHECK(event.Bubbles());
-                                                                  CHECK(event.Cancelable());
-                                                                  Events.emplace_back("pageshow");
-                                                                }));
+          Handles.push_back(window->AddEventListener<PageTransitionEvent>(u8"pageshow",
+                                                                          [this](PageTransitionEvent &event)
+                                                                          {
+                                                                            CHECK_FALSE(event.Persisted());
+                                                                            CHECK(event.Bubbles());
+                                                                            CHECK(event.Cancelable());
+                                                                            Events.emplace_back("pageshow");
+                                                                          }));
           // load doesn't reach the window from the document's own listeners, and DOMContentLoaded does.
-          Handles.push_back(window->AddEventListener(u8"DOMContentLoaded", [this](dom::Event &)
+          Handles.push_back(window->AddEventListener(u8"DOMContentLoaded", [this](Event &)
                                                      { Events.emplace_back("window heard"); }));
         };
       }
@@ -413,17 +412,17 @@ namespace krys::boo::tests
                                               DOMStringAtom::Empty(), nullptr, ReferrerPolicy::EmptyString,
                                               null);
     };
-    auto pageHide = window->AddEventListener<html::PageTransitionEvent>(u8"pagehide",
-                                                                        [&](html::PageTransitionEvent &event)
-                                                                        {
-                                                                          CHECK_FALSE(event.Persisted());
-                                                                          CHECK(event.Bubbles());
-                                                                          CHECK(event.Cancelable());
-                                                                          events.emplace_back("pagehide");
-                                                                          tryToNavigate();
-                                                                        });
+    auto pageHide = window->AddEventListener<PageTransitionEvent>(u8"pagehide",
+                                                                  [&](PageTransitionEvent &event)
+                                                                  {
+                                                                    CHECK_FALSE(event.Persisted());
+                                                                    CHECK(event.Bubbles());
+                                                                    CHECK(event.Cancelable());
+                                                                    events.emplace_back("pagehide");
+                                                                    tryToNavigate();
+                                                                  });
     auto unload = window->AddEventListener(u8"unload",
-                                           [&](dom::Event &event)
+                                           [&](Event &event)
                                            {
                                              CHECK(event.Target().get() == first.get());
                                              events.emplace_back("unload");
@@ -432,16 +431,16 @@ namespace krys::boo::tests
 
     RefPtr<Element> paragraph = first->QuerySelector(u8"p").ReleaseValue();
     REQUIRE(paragraph);
-    auto onDocument = first->AddEventListener(u8"click", [](dom::Event &) {});
+    auto onDocument = first->AddEventListener(u8"click", [](Event &) {});
     CHECK(first->VisibilityState() == html::DocumentVisibilityState::Visible);
     auto visibilityChange = first->AddEventListener(u8"visibilitychange",
-                                                    [&](dom::Event &event)
+                                                    [&](Event &event)
                                                     {
                                                       CHECK(event.Bubbles());
                                                       CHECK(first->Hidden());
                                                       events.emplace_back("visibilitychange");
                                                     });
-    auto onParagraph = paragraph->AddEventListener(u8"click", [](dom::Event &) {});
+    auto onParagraph = paragraph->AddEventListener(u8"click", [](Event &) {});
 
     // A document is unloaded as the next one commits.
     fixture.LoadMarkup(u8"<!DOCTYPE html><p>Second</p>", u8"https://example.com/second.html");

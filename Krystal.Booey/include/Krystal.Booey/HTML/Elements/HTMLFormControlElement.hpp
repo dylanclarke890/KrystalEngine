@@ -159,7 +159,7 @@ namespace krys::boo
     /// @brief Shows or hides the control's popover target element as its activation, unless the activation
     /// came from inside the popover (@p eventTarget is the event's target).
     /// @see https://html.spec.whatwg.org/#popover-target-attribute-activation-behavior
-    void HandlePopoverTargetAction(dom::EventTarget *eventTarget) noexcept;
+    void HandlePopoverTargetAction(EventTarget *eventTarget) noexcept;
 
     KRYS_NODISCARD html::FormAssociatedElement *AsFormAssociatedElement() noexcept final
     {
@@ -214,7 +214,7 @@ namespace krys::boo
     virtual void RequiredStateChanged() noexcept;
 
     /// @brief Losing the focus hides the control's validation message.
-    void DispatchBlurEvent(dom::EventTarget *relatedTarget) noexcept override;
+    void DispatchBlurEvent(EventTarget *relatedTarget) noexcept override;
 
   private:
     KRYS_NODISCARD HTMLElement *ValidationAnchorElement() noexcept final

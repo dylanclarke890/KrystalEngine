@@ -19,6 +19,11 @@ namespace krys::boo
 
 namespace krys::boo::dom
 {
+  class AbortAlgorithms;
+}
+
+namespace krys::boo
+{
   /// @see https://dom.spec.whatwg.org/#abortsignal-abort-algorithms
   class AbortAlgorithmCallback
   {
@@ -69,7 +74,7 @@ namespace krys::boo::dom
   /// @see https://dom.spec.whatwg.org/#abortsignal
   class AbortSignal : public EventTarget
   {
-    friend class AbortAlgorithms;
+    friend class dom::AbortAlgorithms;
 
   private:
     /// @brief A signal that depends on this one: held strongly while it has to stay alive for this signal to

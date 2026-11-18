@@ -37,13 +37,9 @@ namespace krys::boo
 {
   class Document;
   class Element;
+  class EventTarget;
   class RenderStyle;
   class SVGElement;
-}
-
-namespace krys::boo::dom
-{
-  class EventTarget;
 }
 
 namespace krys::boo::style
@@ -95,7 +91,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD static EnumSet<EventListenerRegionType>
       ComputeEventListenerRegionTypes(const Document &document, const RenderStyle &style,
-                                      const dom::EventTarget &eventTarget,
+                                      const EventTarget &eventTarget,
                                       EnumSet<EventListenerRegionType> parentTypes) noexcept;
   };
 }

@@ -39,11 +39,11 @@ namespace krys::boo::html
   {
   public:
     static ShouldCallBaseEventHandler HandleKeydownEvent(HTMLInputElement &element,
-                                                         dom::KeyboardEvent &event) noexcept;
+                                                         KeyboardEvent &event) noexcept;
 
-    static void HandleKeypressEvent(HTMLInputElement &element, dom::KeyboardEvent &event) noexcept;
+    static void HandleKeypressEvent(HTMLInputElement &element, KeyboardEvent &event) noexcept;
 
-    static void HandleKeyupEvent(InputType &inputType, dom::KeyboardEvent &event) noexcept;
+    static void HandleKeyupEvent(InputType &inputType, KeyboardEvent &event) noexcept;
 
   protected:
     BaseClickableWithKeyInputType(Type type, HTMLInputElement &element) noexcept : InputType(type, element)
@@ -51,10 +51,10 @@ namespace krys::boo::html
     }
 
   private:
-    ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept override;
+    ShouldCallBaseEventHandler HandleKeydownEvent(KeyboardEvent &event) noexcept override;
 
-    void HandleKeypressEvent(dom::KeyboardEvent &event) noexcept override;
+    void HandleKeypressEvent(KeyboardEvent &event) noexcept override;
 
-    void HandleKeyupEvent(dom::KeyboardEvent &event) noexcept override;
+    void HandleKeyupEvent(KeyboardEvent &event) noexcept override;
   };
 }

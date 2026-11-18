@@ -30,14 +30,14 @@ namespace krys::boo
 {
   AnimationEventBase::AnimationEventBase(DOMStringAtom type, WebAnimation *animation,
                                          Maybe<Seconds> scheduledTime) noexcept
-      : Event(krys::move(type), dom::EventInit {.Bubbles = true, .Cancelable = false}),
+      : Event(krys::move(type), EventInit {.Bubbles = true, .Cancelable = false}),
         _animation(ShareRefPtr(animation)), _scheduledTime(scheduledTime)
   {
     _isTrusted = true;
     _initialized = true;
   }
 
-  AnimationEventBase::AnimationEventBase(DOMStringAtom type, const dom::EventInit &eventInitDict) noexcept
+  AnimationEventBase::AnimationEventBase(DOMStringAtom type, const EventInit &eventInitDict) noexcept
       : Event(krys::move(type), eventInitDict)
   {
   }

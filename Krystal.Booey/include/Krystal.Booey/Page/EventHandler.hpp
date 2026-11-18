@@ -59,16 +59,16 @@
 namespace krys::boo
 {
   class Element;
+  class Event;
+  class KeyboardEvent;
   class Node;
+  class WheelEvent;
 }
 
 namespace krys::boo::dom
 {
   class DataTransfer;
-  class Event;
-  class KeyboardEvent;
   enum class TextEventInputType : uint8;
-  class WheelEvent;
 }
 
 namespace krys::boo
@@ -269,7 +269,7 @@ namespace krys::boo
     EnumSet<PlatformEventModifier> _lastKnownModifiers;
 
     // The element each touch began on, by its id plus one (so no key is 0).
-    HashMap<uint32, RefPtr<dom::EventTarget>> _originatingTouchPointTargets;
+    HashMap<uint32, RefPtr<EventTarget>> _originatingTouchPointTargets;
     RefPtr<Document> _originatingTouchPointDocument;
     uint32 _originatingTouchPointTargetKey {0};
     bool _touchPressed {false};
@@ -517,7 +517,7 @@ namespace krys::boo
     /// can scroll by the event's deltas, passing over boxes at their end unless `overscroll-behavior` stops
     /// it.
     /// @return Whether it scrolled (or `overscroll-behavior` stopped the scroll there).
-    bool DefaultWheelEventHandler(Node *startNode, dom::WheelEvent &wheelEvent) noexcept;
+    bool DefaultWheelEventHandler(Node *startNode, WheelEvent &wheelEvent) noexcept;
 
     /// @brief Scrolls for a touch's pan, or the fling after it, by @p event's delta from where the touch
     /// began (its position): the nearest box under it that can scroll that way, passing over boxes at their
@@ -547,12 +547,12 @@ namespace krys::boo
     /// focus; the arrows scroll by a line, Page Up and Page Down by a page, and Home and End to the start or
     /// end, and a `keypress` of Space (Shift+Space) a page down (up).
     /// @return Whether the event was handled.
-    bool DefaultKeyboardEventHandler(dom::KeyboardEvent &event) noexcept;
+    bool DefaultKeyboardEventHandler(KeyboardEvent &event) noexcept;
 
     /// @brief Fires `textInput` for text the user typed (or pasted, or dropped) at @p underlyingEvent's
     /// target, or else the focused element, and has the editor insert it unless a listener cancels it.
     /// @return Whether the editor handled it.
-    bool HandleTextInputEvent(utf8_stringview text, dom::Event *underlyingEvent,
+    bool HandleTextInputEvent(utf8_stringview text, Event *underlyingEvent,
                               dom::TextEventInputType inputType) noexcept;
 
     /// @brief Scrolls the box of @p startingNode (the focused element, or else the last pressed node, if
@@ -589,23 +589,23 @@ namespace krys::boo
 
     bool InternalKeyEvent(const PlatformKeyboardEvent &initialKeyEvent) noexcept;
 
-    bool DefaultTabEventHandler(dom::KeyboardEvent &event) noexcept;
+    bool DefaultTabEventHandler(KeyboardEvent &event) noexcept;
 
-    bool DefaultKeyboardScrollEventHandler(dom::KeyboardEvent &event, ScrollLogicalDirection direction,
+    bool DefaultKeyboardScrollEventHandler(KeyboardEvent &event, ScrollLogicalDirection direction,
                                            ScrollGranularity granularity) noexcept;
 
-    bool DefaultPageUpDownEventHandler(dom::KeyboardEvent &event) noexcept;
+    bool DefaultPageUpDownEventHandler(KeyboardEvent &event) noexcept;
 
-    bool DefaultHomeEndEventHandler(dom::KeyboardEvent &event) noexcept;
+    bool DefaultHomeEndEventHandler(KeyboardEvent &event) noexcept;
 
-    bool DefaultSpaceEventHandler(dom::KeyboardEvent &event) noexcept;
+    bool DefaultSpaceEventHandler(KeyboardEvent &event) noexcept;
 
     /// @brief Runs the access key action of the element @p event's key is the access key of, if it's pressed
     /// with Alt (and perhaps Shift).
     /// @return Whether there was such an element.
     bool HandleAccessKey(const PlatformKeyboardEvent &event) noexcept;
 
-    bool DefaultArrowEventHandler(dom::FocusDirection focusDirection, dom::KeyboardEvent &event) noexcept;
+    bool DefaultArrowEventHandler(dom::FocusDirection focusDirection, KeyboardEvent &event) noexcept;
 
     KRYS_NODISCARD MouseEventWithHitTestResults
       PrepareMouseEvent(const HitTestRequest &request, const PlatformMouseEvent &mouseEvent) noexcept;
@@ -707,7 +707,7 @@ namespace krys::boo
     bool HandleWheelEventInAppropriateEnclosingBox(Node *startNode, const PlatformWheelEvent &event,
                                                    FloatSize biasedDelta) noexcept;
 
-    bool HandleWheelEventInAppropriateEnclosingBox(Node *startNode, const dom::WheelEvent &wheelEvent,
+    bool HandleWheelEventInAppropriateEnclosingBox(Node *startNode, const WheelEvent &wheelEvent,
                                                    const FloatSize &filteredPlatformDelta) noexcept;
 
     KRYS_NODISCARD static bool ScrollableAreaCanHandleEvent(const PlatformWheelEvent &wheelEvent,

@@ -23,7 +23,7 @@ namespace krys::boo::tests
 {
   namespace
   {
-    KRYS_NODISCARD std::string Name(const dom::EventTarget *target)
+    KRYS_NODISCARD std::string Name(const EventTarget *target)
     {
       auto *node = DynamicDowncast<Node>(target);
       auto *element = node ? DynamicDowncast<Element>(*node) : nullptr;
@@ -38,7 +38,7 @@ namespace krys::boo::tests
 
     /// @brief Records the mouse and focus events it handles as `type:target`, with the related target of
     /// `mouseover`, `mouseout` and the focus events and the detail of presses, releases and clicks.
-    struct MouseRecorder : public dom::EventListenerCallback
+    struct MouseRecorder : public EventListenerCallback
     {
       List<std::string> &Records;
 
@@ -46,20 +46,20 @@ namespace krys::boo::tests
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         auto type = std::string(event.Type().View().begin(), event.Type().View().end());
         auto record = type + ":" + Name(event.Target().get());
         if (!event.IsMouseEvent() || type == "mouseover" || type == "mouseout")
         {
-          auto related = event.IsMouseEvent() ? static_cast<dom::MouseEvent &>(event).RelatedTarget()
-                                              : static_cast<dom::FocusEvent &>(event).RelatedTarget();
+          auto related = event.IsMouseEvent() ? static_cast<MouseEvent &>(event).RelatedTarget()
+                                              : static_cast<FocusEvent &>(event).RelatedTarget();
           record += "(" + Name(related.get()) + ")";
         }
         if (event.IsMouseEvent() && type != "mousemove" && type != "mouseover" && type != "mouseout"
             && type != "mouseenter" && type != "mouseleave")
         {
-          record += "/" + std::to_string(static_cast<dom::MouseEvent &>(event).Detail());
+          record += "/" + std::to_string(static_cast<MouseEvent &>(event).Detail());
         }
         Records.push_back(record);
       }
@@ -82,7 +82,7 @@ namespace krys::boo::tests
           return;
         }
         // Capturing at the document sees the events that don't bubble too.
-        Ref<dom::EventListenerCallback> recorder = CreateRef<MouseRecorder>(Records);
+        Ref<EventListenerCallback> recorder = CreateRef<MouseRecorder>(Records);
         for (auto type : {u8"mousemove", u8"mouseover", u8"mouseout", u8"mouseenter", u8"mouseleave",
                           u8"mousedown", u8"mouseup", u8"click", u8"auxclick", u8"dblclick"})
         {
@@ -135,7 +135,7 @@ namespace krys::boo::tests
 
     /// @brief Calls @p action when it handles an event.
     template <typename TAction>
-    struct ActionListener : public dom::EventListenerCallback
+    struct ActionListener : public EventListenerCallback
     {
       TAction Action;
 
@@ -143,23 +143,23 @@ namespace krys::boo::tests
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         Action(event);
       }
     };
 
     template <typename TAction>
-    void Listen(dom::EventTarget &target, utf8_stringview type, TAction action)
+    void Listen(EventTarget &target, utf8_stringview type, TAction action)
     {
-      Ref<dom::EventListenerCallback> listener = CreateRef<ActionListener<TAction>>(krys::move(action));
+      Ref<EventListenerCallback> listener = CreateRef<ActionListener<TAction>>(krys::move(action));
       target.AddEventListener(DOMStringAtom(type), krys::move(listener), false);
     }
 
     using Strings = List<std::string>;
 
     /// @brief Records the keyboard events it handles as `type:target/key/keyCode/charCode`.
-    struct KeyRecorder : public dom::EventListenerCallback
+    struct KeyRecorder : public EventListenerCallback
     {
       List<std::string> &Records;
 
@@ -167,9 +167,9 @@ namespace krys::boo::tests
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
-        auto &key = static_cast<dom::KeyboardEvent &>(event);
+        auto &key = static_cast<KeyboardEvent &>(event);
         auto type = std::string(key.Type().View().begin(), key.Type().View().end());
         Records.push_back(type + ":" + Name(event.Target().get()) + "/"
                           + std::string(key.Key().begin(), key.Key().end()) + "/"
@@ -232,7 +232,7 @@ namespace krys::boo::tests
     MouseFixture fixture {u8"<div id=outer style=padding:10px><div id=middle><div id=inner style=height:20px>"
                           u8"</div></div></div>",
                           false};
-    Ref<dom::EventListenerCallback> recorder = CreateRef<MouseRecorder>(fixture.Records);
+    Ref<EventListenerCallback> recorder = CreateRef<MouseRecorder>(fixture.Records);
     // Enter and leave don't bubble: inner's own listeners see only its events, and outer's capturing one sees
     // those of the elements inside it too. Nothing listens on the others, so nothing is sent to them.
     fixture.ById(u8"inner").AddEventListener(u8"mouseenter", Ref {recorder}, false);
@@ -299,7 +299,7 @@ namespace krys::boo::tests
 
     SECTION("cancelling swallows the event")
     {
-      Listen(fixture.ById(u8"a"), u8"mousedown", [](dom::Event &event) { event.PreventDefault(); });
+      Listen(fixture.ById(u8"a"), u8"mousedown", [](Event &event) { event.PreventDefault(); });
       CHECK(fixture.Press(5, 5));
       CHECK_FALSE(fixture.Release(5, 5));
       CHECK(fixture.Take() == Strings {"mousedown:a/1", "mouseup:a/1", "click:a/1"});
@@ -320,7 +320,7 @@ namespace krys::boo::tests
       u8"<style>#outer:focus{margin-right:100px}</style>"
       u8"<div id=outer tabindex=0 style=padding:10px><div id=inner style=height:20px></div></div>"
       u8"<div id=other tabindex=-1 style=height:20px></div><div id=plain style=height:20px></div>"};
-    Ref<dom::EventListenerCallback> recorder = CreateRef<MouseRecorder>(fixture.Records);
+    Ref<EventListenerCallback> recorder = CreateRef<MouseRecorder>(fixture.Records);
     for (auto type : {u8"focus", u8"blur", u8"focusin", u8"focusout"})
     {
       fixture.Document->AddEventListener(DOMStringAtom(type), Ref {recorder}, true);
@@ -370,14 +370,14 @@ namespace krys::boo::tests
 
     SECTION("a cancelled press keeps the focus")
     {
-      Listen(other, u8"mousedown", [](dom::Event &event) { event.PreventDefault(); });
+      Listen(other, u8"mousedown", [](Event &event) { event.PreventDefault(); });
       CHECK(pressAt(5, 45) == Strings {"mousedown:other/1", "mouseup:other/1", "click:other/1"});
       CHECK(fixture.Document->FocusedElement() == &outer);
     }
 
     SECTION("the window losing and regaining focus")
     {
-      struct WindowRecorder : dom::EventListenerCallback
+      struct WindowRecorder : EventListenerCallback
       {
         List<std::string> &Records;
         LocalDOMWindow *Window;
@@ -387,14 +387,14 @@ namespace krys::boo::tests
         {
         }
 
-        void HandleEvent(dom::Event &event) noexcept override
+        void HandleEvent(Event &event) noexcept override
         {
           // Not what bubbles from the focused element.
           if (event.Target().get() != Window)
           {
             return;
           }
-          auto *focusEvent = DynamicDowncast<dom::FocusEvent>(event);
+          auto *focusEvent = DynamicDowncast<FocusEvent>(event);
           bool isRight = focusEvent && focusEvent->View() == Window && !event.Bubbles() && event.Composed();
           auto type = std::string(event.Type().View().begin(), event.Type().View().end());
           Records.push_back("window:" + type + (isRight ? "" : "(wrong)"));
@@ -402,7 +402,7 @@ namespace krys::boo::tests
       };
 
       auto *window = fixture.Document->Window();
-      Ref<dom::EventListenerCallback> windowRecorder = CreateRef<WindowRecorder>(fixture.Records, window);
+      Ref<EventListenerCallback> windowRecorder = CreateRef<WindowRecorder>(fixture.Records, window);
       for (auto type : {u8"focus", u8"blur", u8"focusin", u8"focusout"})
       {
         window->AddEventListener(DOMStringAtom(type), Ref {windowRecorder}, false);
@@ -442,7 +442,7 @@ namespace krys::boo::tests
                    "[Page][EventHandler][html:focus-processing-model][html:fire-a-focus-event]")
   {
     MouseFixture fixture {u8"<div id=box tabindex=0 style=height:20px></div><div id=other tabindex=0></div>"};
-    Ref<dom::EventListenerCallback> recorder = CreateRef<KeyRecorder>(fixture.Records);
+    Ref<EventListenerCallback> recorder = CreateRef<KeyRecorder>(fixture.Records);
     for (auto type : {u8"keydown", u8"keypress", u8"keyup"})
     {
       fixture.Document->AddEventListener(DOMStringAtom(type), Ref {recorder}, true);
@@ -480,7 +480,7 @@ namespace krys::boo::tests
 
     SECTION("a cancelled keydown has no keypress")
     {
-      Listen(*fixture.Document, u8"keydown", [](dom::Event &event) { event.PreventDefault(); });
+      Listen(*fixture.Document, u8"keydown", [](Event &event) { event.PreventDefault(); });
       CHECK(handler.KeyEvent(KeyEvent(Type::KeyDown, u8"a", u8"a", 'A')));
       CHECK(fixture.Take() == Strings {"keydown:body/a/65/0"});
     }
@@ -524,7 +524,7 @@ namespace krys::boo::tests
       // Not with Ctrl or Meta, nor when the keydown is cancelled.
       CHECK_FALSE(tab({PlatformEvent::Modifier::ControlKey}));
       CHECK(fixture.Document->FocusedElement() == &box);
-      Listen(*fixture.Document, u8"keydown", [](dom::Event &event) { event.PreventDefault(); });
+      Listen(*fixture.Document, u8"keydown", [](Event &event) { event.PreventDefault(); });
       CHECK(tab());
       CHECK(fixture.Document->FocusedElement() == &box);
     }
@@ -595,8 +595,7 @@ namespace krys::boo::tests
     SECTION("a keydown that moves the focus sends the keypress to the new focused element")
     {
       auto &other = fixture.ById(u8"other");
-      Listen(*fixture.Document, u8"keydown",
-             [&](dom::Event &) { html::FocusAlgorithms::FocusingSteps(other); });
+      Listen(*fixture.Document, u8"keydown", [&](Event &) { html::FocusAlgorithms::FocusingSteps(other); });
       (void)handler.KeyEvent(KeyEvent(Type::KeyDown, u8"x", u8"x", 'X'));
       CHECK(fixture.Take() == Strings {"keydown:body/x/88/0", "keypress:other/x/120/120"});
       CHECK(other.HasFocusVisible());
@@ -611,7 +610,7 @@ namespace krys::boo::tests
     Ref<Element> inner = ShareRef(fixture.ById(u8"inner"));
 
     // The mousemove after a mouseover that removes its target goes to the target's parent.
-    Listen(*inner, u8"mouseover", [&](dom::Event &) { (void)outer.RemoveChild(*inner); });
+    Listen(*inner, u8"mouseover", [&](Event &) { (void)outer.RemoveChild(*inner); });
     fixture.Move(15, 15);
     auto records = fixture.Take();
     REQUIRE_FALSE(records.empty());
@@ -688,7 +687,7 @@ namespace krys::boo::tests
     MouseFixture fixture {u8"<div id=a style=height:20px>hello world</div>"};
     List<std::string> records;
     Listen(*fixture.Document, u8"contextmenu",
-           [&](dom::Event &event) { records.push_back("contextmenu:" + Name(event.Target().get())); });
+           [&](Event &event) { records.push_back("contextmenu:" + Name(event.Target().get())); });
     auto event = MouseFixture::Event(PlatformEvent::Type::MousePressed, 5, 5, MouseButton::Right, 1);
 
     SECTION("after a press of the right button, which no longer holds the mouse")
@@ -704,7 +703,7 @@ namespace krys::boo::tests
 
     SECTION("cancelling it")
     {
-      Listen(fixture.ById(u8"a"), u8"contextmenu", [](dom::Event &event) { event.PreventDefault(); });
+      Listen(fixture.ById(u8"a"), u8"contextmenu", [](Event &event) { event.PreventDefault(); });
       CHECK(fixture.Handler().SendContextMenuEvent(event));
       CHECK(records == Strings {"contextmenu:a"});
     }

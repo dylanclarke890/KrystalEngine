@@ -34,21 +34,20 @@
 
 namespace krys::boo
 {
-  dom::ExceptionOr<Ref<CSSSkewY>> CSSSkewY::Create(Ref<CSSNumericValue> ay) noexcept
+  ExceptionOr<Ref<CSSSkewY>> CSSSkewY::Create(Ref<CSSNumericValue> ay) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssskewy-cssskewy
     // 1. If ay does not match <angle>, throw a TypeError.
     if (!ay->Type().Matches<CSSNumericBaseType::Angle>())
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     // 2. Return a new CSSSkewY object with its ay internal slot set to ay, and its is2D internal slot
     //    set to true.
     return AdoptRef(*new CSSSkewY(krys::move(ay)));
   }
 
-  dom::ExceptionOr<Ref<CSSSkewY>> CSSSkewY::Create(const css::FunctionValue &function,
-                                                   Document &document) noexcept
+  ExceptionOr<Ref<CSSSkewY>> CSSSkewY::Create(const css::FunctionValue &function, Document &document) noexcept
   {
     auto reified = ReifyArguments(function, document);
     if (reified.HasException())
@@ -58,7 +57,7 @@ namespace krys::boo
     auto arguments = reified.ReleaseValue();
     if (function.Name() != css::ValueId::SkewY || arguments.size() != 1)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     return Create(krys::move(arguments[0]));
   }
@@ -67,11 +66,11 @@ namespace krys::boo
   {
   }
 
-  dom::ExceptionOr<void> CSSSkewY::SetAy(Ref<CSSNumericValue> ay) noexcept
+  ExceptionOr<void> CSSSkewY::SetAy(Ref<CSSNumericValue> ay) noexcept
   {
     if (!ay->Type().Matches<CSSNumericBaseType::Angle>())
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     _ay = krys::move(ay);
     return {};
@@ -85,18 +84,18 @@ namespace krys::boo
     builder.Append(u8')');
   }
 
-  dom::ExceptionOr<Ref<css::DOMMatrix>> CSSSkewY::ToMatrix() const noexcept
+  ExceptionOr<Ref<css::DOMMatrix>> CSSSkewY::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
     const auto *unitValue = DynamicDowncast<CSSUnitValue>(*_ay);
     if (!unitValue)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     auto angle = unitValue->ConvertTo(css::UnitType::deg);
     if (!angle)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     TransformationMatrix matrix;

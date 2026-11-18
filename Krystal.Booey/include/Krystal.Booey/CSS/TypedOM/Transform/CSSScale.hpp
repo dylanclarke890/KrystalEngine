@@ -43,12 +43,12 @@ namespace krys::boo
     /// @brief A 2D scale without @p z, or a 3D one with it.
     /// @return A `TypeError` if @p x, @p y or @p z isn't a number.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssscale-cssscale
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSScale>> Create(CSSNumberish x, CSSNumberish y,
-                                                                 Maybe<CSSNumberish> z = {}) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSScale>> Create(CSSNumberish x, CSSNumberish y,
+                                                            Maybe<CSSNumberish> z = {}) noexcept;
 
     /// @brief Reifies a scale function.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSScale>> Create(const css::FunctionValue &function,
-                                                                 Document &document) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSScale>> Create(const css::FunctionValue &function,
+                                                            Document &document) noexcept;
 
     KRYS_NODISCARD const CSSNumericValue &X() const noexcept
     {
@@ -66,17 +66,17 @@ namespace krys::boo
     }
 
     /// @return A `TypeError` if @p x isn't a number.
-    dom::ExceptionOr<void> SetX(CSSNumberish x) noexcept;
+    ExceptionOr<void> SetX(CSSNumberish x) noexcept;
 
     /// @return A `TypeError` if @p y isn't a number.
-    dom::ExceptionOr<void> SetY(CSSNumberish y) noexcept;
+    ExceptionOr<void> SetY(CSSNumberish y) noexcept;
 
     /// @return A `TypeError` if @p z isn't a number.
-    dom::ExceptionOr<void> SetZ(CSSNumberish z) noexcept;
+    ExceptionOr<void> SetZ(CSSNumberish z) noexcept;
 
     void Serialise(StringBuilder &builder) const noexcept final;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
+    KRYS_NODISCARD ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
 
     KRYS_NODISCARD CSSTransformType TransformType() const noexcept final
     {

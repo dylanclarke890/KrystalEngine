@@ -100,12 +100,12 @@ namespace krys::boo::tests
   };
 
   /// @brief Records the types of the events it hears, and cancels them if asked.
-  struct EventLog : dom::EventListenerCallback
+  struct EventLog : EventListenerCallback
   {
     List<std::string> Types;
     bool PreventDefault {false};
 
-    void HandleEvent(dom::Event &event) noexcept override
+    void HandleEvent(Event &event) noexcept override
     {
       Types.push_back(Str(event.Type().View()));
       if (PreventDefault)
@@ -114,7 +114,7 @@ namespace krys::boo::tests
       }
     }
 
-    KRYS_NODISCARD static Ref<EventLog> ListenTo(dom::EventTarget &target,
+    KRYS_NODISCARD static Ref<EventLog> ListenTo(EventTarget &target,
                                                  std::initializer_list<utf8_stringview> types) noexcept
     {
       auto log = CreateRef<EventLog>();

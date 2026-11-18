@@ -52,11 +52,11 @@ namespace krys::boo::html
 
     KRYS_NODISCARD double ValueAsDouble() const noexcept final;
 
-    dom::ExceptionOr<void> SetValueAsDouble(double value,
-                                            TextFieldEventBehavior eventBehavior) const noexcept final;
+    ExceptionOr<void> SetValueAsDouble(double value,
+                                       TextFieldEventBehavior eventBehavior) const noexcept final;
 
-    dom::ExceptionOr<void> SetValueAsDecimal(const Decimal &value,
-                                             TextFieldEventBehavior eventBehavior) const noexcept final;
+    ExceptionOr<void> SetValueAsDecimal(const Decimal &value,
+                                        TextFieldEventBehavior eventBehavior) const noexcept final;
 
     KRYS_NODISCARD bool TypeMismatchFor(DOMStringView value) const noexcept final;
 
@@ -86,9 +86,9 @@ namespace krys::boo::html
 
     KRYS_NODISCARD float DecorationWidth(float inputWidth) const noexcept final;
 
-    ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept final;
+    ShouldCallBaseEventHandler HandleKeydownEvent(KeyboardEvent &event) noexcept final;
 
-    void HandleBeforeTextInsertedEvent(dom::BeforeTextInsertedEvent &event) noexcept final;
+    void HandleBeforeTextInsertedEvent(BeforeTextInsertedEvent &event) noexcept final;
 
     /// @brief @p proposedValue as the element's locale writes numbers (its digits and decimal separator), or
     /// as it is in scientific notation.

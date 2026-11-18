@@ -23,27 +23,26 @@ namespace krys::editor
 
   private:
     WeakPtr<boo::Document> _document;
-    List<boo::dom::EventListenerHandle> _listeners;
+    List<boo::EventListenerHandle> _listeners;
 
   public:
     explicit PageSpatialNavigation(boo::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
-      RefPtr<boo::dom::EventTarget> grid = document.GetElementById(u8"nav-grid");
+      RefPtr<boo::EventTarget> grid = document.GetElementById(u8"nav-grid");
       if (!grid)
       {
         return;
       }
 
-      auto listen = [&](utf8_stringview type, Func<void(boo::dom::Event &)> &&callback)
+      auto listen = [&](utf8_stringview type, Func<void(boo::Event &)> &&callback)
       {
         _listeners.push_back(grid->AddEventListener(boo::DOMStringAtom(type), krys::move(callback)));
       };
 
       // The arrow keys move the focus as the D-pad does, and the log shows what was pressed.
-      listen(u8"keydown",
-             [this](boo::dom::Event &event) { MoveFocus(static_cast<boo::dom::KeyboardEvent &>(event)); });
+      listen(u8"keydown", [this](boo::Event &event) { MoveFocus(static_cast<boo::KeyboardEvent &>(event)); });
       listen(u8"click",
-             [this](boo::dom::Event &event)
+             [this](boo::Event &event)
              {
                auto *target = TargetElement(event);
                if (target && target->LocalName() == u8"button")
@@ -53,7 +52,7 @@ namespace krys::editor
                }
              });
       listen(u8"change",
-             [this](boo::dom::Event &event)
+             [this](boo::Event &event)
              {
                auto *target = TargetElement(event);
                if (!target)
@@ -76,7 +75,7 @@ namespace krys::editor
       }
     }
 
-    KRYS_NODISCARD static boo::Element *TargetElement(boo::dom::Event &event) noexcept
+    KRYS_NODISCARD static boo::Element *TargetElement(boo::Event &event) noexcept
     {
       auto *node = DynamicDowncast<boo::Node>(event.Target().get());
       return node ? DynamicDowncast<boo::Element>(*node) : nullptr;
@@ -87,7 +86,7 @@ namespace krys::editor
       return std::string(text.begin(), text.end());
     }
 
-    void MoveFocus(boo::dom::KeyboardEvent &event) noexcept
+    void MoveFocus(boo::KeyboardEvent &event) noexcept
     {
       using FocusDirection = boo::dom::FocusDirection;
       if (!_document || event.CtrlKey() || event.AltKey() || event.MetaKey() || event.ShiftKey())

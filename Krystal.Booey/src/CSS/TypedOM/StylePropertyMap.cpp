@@ -77,14 +77,14 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<void> StylePropertyMap::Set(CSSOMStringView property,
-                                               List<CSSStyleValueOrString> values) noexcept
+  ExceptionOr<void> StylePropertyMap::Set(CSSOMStringView property,
+                                          List<CSSStyleValueOrString> values) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymap-set
     auto *document = Document();
     if (!document)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     // A custom property's value is one unparsed value.
@@ -99,13 +99,13 @@ namespace krys::boo
       const auto &list = styleValues.Value();
       if (list.size() != 1 || !Is<CSSUnparsedValue>(*list[0]))
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       auto value = list[0]->ToCSSValue();
       auto *reference = value ? DynamicDowncast<css::VariableReferenceValue>(*value) : nullptr;
       if (!reference)
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       std::ignore = SetCustomProperty(CSSOMStringAtom(property), ShareRef(*reference));
       return {};
@@ -114,12 +114,12 @@ namespace krys::boo
     auto propertyId = ExposedPropertyId(*document, property);
     if (propertyId == css::PropertyId::Invalid)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     if (!css::Property::IsListValuedProperty(propertyId) && values.size() > 1)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     // A shorthand is set from its one value's serialisation.
@@ -127,14 +127,14 @@ namespace krys::boo
     {
       if (values.size() != 1)
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       auto value = krys::SwitchOn(
         values[0], [](const RefPtr<CSSStyleValue> &styleValue) { return styleValue->ToString(); },
         [](const CSSOMString &string) { return string; });
       if (value.empty() || !SetShorthandProperty(propertyId, value))
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       return {};
     }
@@ -152,7 +152,7 @@ namespace krys::boo
       {
         if (Is<CSSUnparsedValue>(*styleValue))
         {
-          return dom::Exception {dom::ExceptionCode::TypeError};
+          return Exception {ExceptionCode::TypeError};
         }
       }
     }
@@ -160,7 +160,7 @@ namespace krys::boo
     auto value = ValueFromStyleValues(propertyId, list);
     if (!value)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     // The parser may convert numbers to lengths, which the Typed OM doesn't allow.
@@ -168,28 +168,28 @@ namespace krys::boo
         primitiveValue && (primitiveValue->IsNumber() || primitiveValue->IsInteger())
         && !css::Property::AllowsNumberOrIntegerInput(propertyId))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     // A pair or quad of equal values serialises as fewer, so its serialisation wouldn't represent it.
     if (const auto *pair = DynamicDowncast<css::ValuePair>(*value); pair && pair->CanBeCoalesced())
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
     if (const auto *quad = DynamicDowncast<css::QuadValue>(*value); quad && quad->CanBeCoalesced())
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     if (!SetProperty(propertyId, Ref<css::Value>(krys::move(value))))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     return {};
   }
 
-  dom::ExceptionOr<void> StylePropertyMap::Append(CSSOMStringView property,
-                                                  List<CSSStyleValueOrString> values) noexcept
+  ExceptionOr<void> StylePropertyMap::Append(CSSOMStringView property,
+                                             List<CSSStyleValueOrString> values) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymap-append
     if (values.empty())
@@ -200,17 +200,17 @@ namespace krys::boo
     auto *document = Document();
     if (!document)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     if (css::IsCustomPropertyName(property))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     auto propertyId = ExposedPropertyId(*document, property);
     if (propertyId == css::PropertyId::Invalid || !css::Property::IsListValuedProperty(propertyId))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     auto currentValue = PropertyValue(propertyId);
@@ -234,7 +234,7 @@ namespace krys::boo
     {
       if (Is<CSSUnparsedValue>(*styleValue))
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       auto cssValue = styleValue->ToCSSValueWithProperty(propertyId);
       if (!cssValue)
@@ -243,7 +243,7 @@ namespace krys::boo
       }
       if (Is<css::VariableReferenceValue>(*cssValue))
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       list.push_back(Ref<css::Value>(krys::move(cssValue)));
     }
@@ -251,12 +251,12 @@ namespace krys::boo
     if (!SetProperty(propertyId, css::ValueList::Create(
                                    css::Property::ListValuedPropertySeparator(propertyId), krys::move(list))))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     return {};
   }
 
-  dom::ExceptionOr<void> StylePropertyMap::Delete(CSSOMStringView property) noexcept
+  ExceptionOr<void> StylePropertyMap::Delete(CSSOMStringView property) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymap-delete
     if (css::IsCustomPropertyName(property))
@@ -270,7 +270,7 @@ namespace krys::boo
                                : css::PropertyIdFromName(text::ToASCIILower(property));
     if (propertyId == css::PropertyId::Invalid)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     RemoveProperty(propertyId);
     return {};

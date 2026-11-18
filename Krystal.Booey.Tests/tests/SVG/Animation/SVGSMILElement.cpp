@@ -72,7 +72,7 @@ namespace krys::boo::svg::tests
     auto recording = [&](const char *name)
     {
       return html::EventHandlerCallback(
-        [&records, name](dom::Event &event)
+        [&records, name](Event &event)
         {
           auto type = event.Type().View();
           records.push_back(std::string(name) + ":" + std::string(type.begin(), type.end()));

@@ -100,14 +100,14 @@ namespace krys::boo
     return svg::GetTotalLengthOfSVGPathByteStream(PathByteStream());
   }
 
-  dom::ExceptionOr<Ref<SVGPoint>> SVGPathElement::GetPointAtLength(float distance) const noexcept
+  ExceptionOr<Ref<SVGPoint>> SVGPathElement::GetPointAtLength(float distance) const noexcept
   {
     (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets(PathQueryLayoutOptions, this);
 
     // Spec: If it is not able to compute the total length of path, then throw.
     if (PathByteStream().IsEmpty())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError, u8"The element's path is empty."};
+      return Exception {ExceptionCode::InvalidStateError, u8"The element's path is empty."};
     }
 
     // Spec: Clamp distance to [0, length].

@@ -64,7 +64,7 @@ namespace krys::boo
     explicit HTMLOptionElement(Document &document) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option
-    static dom::ExceptionOr<Ref<HTMLOptionElement>>
+    static ExceptionOr<Ref<HTMLOptionElement>>
       CreateForLegacyFactoryFunction(Document &document, DOMString text, Maybe<DOMString> value,
                                      bool defaultSelected, bool selected) noexcept;
 
@@ -83,7 +83,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &style) noexcept final;
 
-    void DefaultEventHandler(dom::Event &event) noexcept final;
+    void DefaultEventHandler(Event &event) noexcept final;
 
 #pragma region HTMLOptionElement - https://html.spec.whatwg.org/#htmloptionelement
 

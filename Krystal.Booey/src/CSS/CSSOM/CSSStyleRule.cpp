@@ -280,13 +280,13 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<uint32> CSSStyleRule::InsertRule(const CSSOMString &ruleString, uint32 index) noexcept
+  ExceptionOr<uint32> CSSStyleRule::InsertRule(const CSSOMString &ruleString, uint32 index) noexcept
   {
     krys_debug_assert(_childRuleCSSOMWrappers.size() == NestedRules().size());
 
     if (index > NestedRules().size())
     {
-      return dom::ExceptionCode::IndexSizeError;
+      return ExceptionCode::IndexSizeError;
     }
 
     auto *styleSheet = ParentStyleSheet();
@@ -298,14 +298,14 @@ namespace krys::boo
       newRule = css::Parser::ParseNestedDeclarations(GetParserContext(), ruleString);
       if (!newRule)
       {
-        return dom::ExceptionCode::SyntaxError;
+        return ExceptionCode::SyntaxError;
       }
     }
 
     // We only accepts style rule, nested group rule (@media,...) or nested declarations inside style rules.
     if (!newRule->IsStyleRule() && !newRule->IsGroupRule() && !newRule->IsNestedDeclarationsRule())
     {
-      return dom::ExceptionCode::HierarchyRequestError;
+      return ExceptionCode::HierarchyRequestError;
     }
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
@@ -336,7 +336,7 @@ namespace krys::boo
     return index;
   }
 
-  dom::ExceptionOr<void> CSSStyleRule::DeleteRule(uint32 index) noexcept
+  ExceptionOr<void> CSSStyleRule::DeleteRule(uint32 index) noexcept
   {
     krys_debug_assert(_childRuleCSSOMWrappers.size() == NestedRules().size());
 
@@ -344,7 +344,7 @@ namespace krys::boo
     {
       // IndexSizeError: Raised if the specified index does not correspond to a
       // rule in the media rule list.
-      return dom::ExceptionCode::IndexSizeError;
+      return ExceptionCode::IndexSizeError;
     }
 
     auto &rules = Downcast<css::StyleRuleWithNesting>(*_styleRule).NestedRules();

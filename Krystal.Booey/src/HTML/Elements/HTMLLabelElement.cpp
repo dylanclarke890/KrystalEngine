@@ -193,7 +193,7 @@ namespace krys::boo
     }
   }
 
-  bool HTMLLabelElement::IsEventTargetedAtInteractiveDescendants(dom::Event &event) const noexcept
+  bool HTMLLabelElement::IsEventTargetedAtInteractiveDescendants(Event &event) const noexcept
   {
     auto target = event.Target();
     auto *node = DynamicDowncast<Node>(target.get());
@@ -218,7 +218,7 @@ namespace krys::boo
     return false;
   }
 
-  void HTMLLabelElement::DefaultEventHandler(dom::Event &event) noexcept
+  void HTMLLabelElement::DefaultEventHandler(Event &event) noexcept
   {
     if (dom::IsAnyClick(event) && !_processingClick)
     {

@@ -30,7 +30,7 @@ namespace krys::editor
   private:
     WeakPtr<boo::Document> _document;
     RefPtr<boo::WebAnimation> _animation;
-    Array<boo::dom::EventListenerHandle, 4> _listeners;
+    Array<boo::EventListenerHandle, 4> _listeners;
     int32 _frameRequest {0};
 
   public:
@@ -56,7 +56,7 @@ namespace krys::editor
       }
 
       auto listen = [&](utf8_stringview id, boo::DOMStringAtom type,
-                        Func<void(boo::dom::Event &)> &&callback) -> boo::dom::EventListenerHandle
+                        Func<void(boo::Event &)> &&callback) -> boo::EventListenerHandle
       {
         if (auto element = document.GetElementById(id))
         {
@@ -64,14 +64,12 @@ namespace krys::editor
         }
         return {};
       };
-      _listeners[0] =
-        listen(u8"anim-play", u8"click", [this](boo::dom::Event &) { (void)_animation->Play(); });
-      _listeners[1] =
-        listen(u8"anim-pause", u8"click", [this](boo::dom::Event &) { (void)_animation->Pause(); });
+      _listeners[0] = listen(u8"anim-play", u8"click", [this](boo::Event &) { (void)_animation->Play(); });
+      _listeners[1] = listen(u8"anim-pause", u8"click", [this](boo::Event &) { (void)_animation->Pause(); });
       _listeners[2] =
-        listen(u8"anim-reverse", u8"click", [this](boo::dom::Event &) { (void)_animation->Reverse(); });
+        listen(u8"anim-reverse", u8"click", [this](boo::Event &) { (void)_animation->Reverse(); });
       _listeners[3] = listen(u8"anim-seek", u8"input",
-                             [this](boo::dom::Event &)
+                             [this](boo::Event &)
                              {
                                if (auto seek = _document ? _document->GetElementById(u8"anim-seek") : nullptr)
                                {

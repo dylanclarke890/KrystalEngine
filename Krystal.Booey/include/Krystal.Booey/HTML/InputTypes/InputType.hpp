@@ -45,21 +45,17 @@
 
 namespace krys::boo
 {
+  class BeforeTextInsertedEvent;
   class ChromeClient;
   class DragData;
+  class Event;
   class HTMLElement;
   class HTMLInputElement;
+  class KeyboardEvent;
+  class MouseEvent;
   class Node;
   class RenderElement;
   class RenderStyle;
-}
-
-namespace krys::boo::dom
-{
-  class BeforeTextInsertedEvent;
-  class Event;
-  class KeyboardEvent;
-  class MouseEvent;
 }
 
 namespace krys::boo::html
@@ -299,15 +295,15 @@ namespace krys::boo::html
     /// @brief Milliseconds since the epoch, or NaN.
     KRYS_NODISCARD virtual double ValueAsDate() const noexcept;
 
-    virtual dom::ExceptionOr<void> SetValueAsDate(double value) const noexcept;
+    virtual ExceptionOr<void> SetValueAsDate(double value) const noexcept;
 
     KRYS_NODISCARD virtual double ValueAsDouble() const noexcept;
 
-    virtual dom::ExceptionOr<void> SetValueAsDouble(double value,
-                                                    TextFieldEventBehavior eventBehavior) const noexcept;
+    virtual ExceptionOr<void> SetValueAsDouble(double value,
+                                               TextFieldEventBehavior eventBehavior) const noexcept;
 
-    virtual dom::ExceptionOr<void> SetValueAsDecimal(const Decimal &value,
-                                                     TextFieldEventBehavior eventBehavior) const noexcept;
+    virtual ExceptionOr<void> SetValueAsDecimal(const Decimal &value,
+                                                TextFieldEventBehavior eventBehavior) const noexcept;
 
     // Validation functions.
     KRYS_NODISCARD virtual DOMString ValidationMessage() const noexcept;
@@ -354,7 +350,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD virtual StepRange CreateStepRange(AnyStepHandling anyStepHandling) const noexcept;
 
-    virtual dom::ExceptionOr<void> StepUp(int n) noexcept;
+    virtual ExceptionOr<void> StepUp(int n) noexcept;
 
     /// @brief Steps the value @p n times as the user does (the arrow keys, the spin button): an empty or
     /// invalid value starts from the default, and a value off the step snaps to it first.
@@ -385,11 +381,11 @@ namespace krys::boo::html
     KRYS_NODISCARD virtual DOMString SanitizeValue(DOMStringView proposedValue) const noexcept;
 
     // Event handlers.
-    virtual void HandleMouseDownEvent(dom::MouseEvent &) noexcept
+    virtual void HandleMouseDownEvent(MouseEvent &) noexcept
     {
     }
 
-    virtual void HandleClickEvent(dom::MouseEvent &) noexcept
+    virtual void HandleClickEvent(MouseEvent &) noexcept
     {
     }
 
@@ -397,27 +393,27 @@ namespace krys::boo::html
     {
     }
 
-    virtual void DidDispatchClick(dom::Event &, const InputElementClickState &) noexcept
+    virtual void DidDispatchClick(Event &, const InputElementClickState &) noexcept
     {
     }
 
     /// @brief What a click (or a press of Enter or Space standing in for one) does: submit the form, reset
     /// it, or open a picker.
-    virtual void HandleActivationBehavior(dom::Event &) noexcept
+    virtual void HandleActivationBehavior(Event &) noexcept
     {
     }
 
-    virtual ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept;
+    virtual ShouldCallBaseEventHandler HandleKeydownEvent(KeyboardEvent &event) noexcept;
 
-    virtual void HandleKeypressEvent(dom::KeyboardEvent &event) noexcept;
+    virtual void HandleKeypressEvent(KeyboardEvent &event) noexcept;
 
-    virtual void HandleKeyupEvent(dom::KeyboardEvent &event) noexcept;
+    virtual void HandleKeyupEvent(KeyboardEvent &event) noexcept;
 
-    virtual void HandleBeforeTextInsertedEvent(dom::BeforeTextInsertedEvent &) noexcept
+    virtual void HandleBeforeTextInsertedEvent(BeforeTextInsertedEvent &) noexcept
     {
     }
 
-    virtual void ForwardEvent(dom::Event &) noexcept
+    virtual void ForwardEvent(Event &) noexcept
     {
     }
 
@@ -538,7 +534,7 @@ namespace krys::boo::html
     KRYS_NODISCARD virtual float DecorationWidth(float inputWidth) const noexcept;
 
     // Helpers for event handlers.
-    KRYS_NODISCARD virtual bool ShouldSubmitImplicitly(dom::Event &event) noexcept;
+    KRYS_NODISCARD virtual bool ShouldSubmitImplicitly(Event &event) noexcept;
 
     KRYS_NODISCARD virtual bool CanBeSuccessfulSubmitButton() noexcept;
 
@@ -624,7 +620,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool IsInvalid(DOMStringView value) const noexcept;
 
-    void DispatchSimulatedClickIfActive(dom::KeyboardEvent &event) const noexcept;
+    void DispatchSimulatedClickIfActive(KeyboardEvent &event) const noexcept;
 
     KRYS_NODISCARD virtual DateComponentsType DateType() const noexcept;
 
@@ -655,7 +651,7 @@ namespace krys::boo::html
 
   private:
     /// @brief Adds the step times @p count to the current value, for StepUp() and StepDown().
-    dom::ExceptionOr<void> ApplyStep(int count, AnyStepHandling anyStepHandling,
-                                     TextFieldEventBehavior eventBehavior) noexcept;
+    ExceptionOr<void> ApplyStep(int count, AnyStepHandling anyStepHandling,
+                                TextFieldEventBehavior eventBehavior) noexcept;
   };
 }

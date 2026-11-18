@@ -30,7 +30,7 @@
 namespace krys::boo
 {
   /// @see https://drafts.csswg.org/web-animations-1/#dictdef-animationplaybackeventinit
-  struct AnimationPlaybackEventInit : public dom::EventInit
+  struct AnimationPlaybackEventInit : public EventInit
   {
     Maybe<WebAnimationTime> CurrentTime;
     Maybe<WebAnimationTime> TimelineTime;

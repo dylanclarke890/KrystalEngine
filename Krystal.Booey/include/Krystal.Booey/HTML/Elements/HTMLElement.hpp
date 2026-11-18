@@ -255,7 +255,7 @@ namespace krys::boo
     KRYS_NODISCARD DOMString ContentEditable() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-contenteditable
-    dom::ExceptionOr<void> ContentEditable(DOMStringView value) noexcept;
+    ExceptionOr<void> ContentEditable(DOMStringView value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-draggable
     KRYS_NODISCARD bool Draggable() const noexcept;
@@ -318,27 +318,27 @@ namespace krys::boo
     /// @brief Replaces the element itself with @p value's text, with a `<br>` for each line break, merged
     /// with the text around it; `NoModificationAllowedError` if the element has no parent.
     /// @see https://html.spec.whatwg.org/#dom-outertext
-    dom::ExceptionOr<void> OuterText(const DOMString &value) noexcept;
+    ExceptionOr<void> OuterText(const DOMString &value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-attachinternals
-    KRYS_NODISCARD dom::ExceptionOr<Ref<html::ElementInternals>> AttachInternals() noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<html::ElementInternals>> AttachInternals() noexcept;
 
     /// @brief Shows the popover, invoked by @p options' source.
     /// @return A `NotSupportedError` if the element isn't a popover; an `InvalidStateError` if it isn't
     /// connected, its document isn't fully active, it's a modal dialog, another popover is being shown or
     /// hidden, or its `popover` attribute changes as other popovers hide.
     /// @see https://html.spec.whatwg.org/#dom-showpopover
-    dom::ExceptionOr<void> ShowPopover(const html::ShowPopoverOptions &options = {}) noexcept;
+    ExceptionOr<void> ShowPopover(const html::ShowPopoverOptions &options = {}) noexcept;
 
     /// @return A `NotSupportedError` if the element isn't a popover; an `InvalidStateError` if it's a modal
     /// dialog.
     /// @see https://html.spec.whatwg.org/#dom-hidepopover
-    dom::ExceptionOr<void> HidePopover() noexcept;
+    ExceptionOr<void> HidePopover() noexcept;
 
     /// @brief Hides the popover if it's showing, else shows it, unless @p options forces one or the other.
     /// @return Whether the popover is showing, or the exceptions of `ShowPopover` and `HidePopover`.
     /// @see https://html.spec.whatwg.org/#dom-togglepopover
-    dom::ExceptionOr<bool>
+    ExceptionOr<bool>
       TogglePopover(const html::TogglePopoverOptionsOrBool &options = html::TogglePopoverOptions {}) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-popover
@@ -502,15 +502,15 @@ namespace krys::boo
     /// @brief Shows the popover, invoked by @p source; the exceptions of `ShowPopover` are returned only if
     /// @p throwExceptions.
     /// @see https://html.spec.whatwg.org/#show-popover
-    dom::ExceptionOr<void> ShowPopoverInternal(HTMLElement *source, bool throwExceptions = true) noexcept;
+    ExceptionOr<void> ShowPopoverInternal(HTMLElement *source, bool throwExceptions = true) noexcept;
 
     /// @brief Hides the popover, and the popovers above it in its stack; the exceptions of `HidePopover` are
     /// returned only if @p throwExceptions.
     /// @param source The element that hid it, which `beforetoggle` and `toggle` carry.
     /// @see https://html.spec.whatwg.org/#hide-popover-algorithm
-    dom::ExceptionOr<void> HidePopoverInternal(dom::FocusPreviousElement focusPreviousElement,
-                                               dom::FireEvents fireEvents, bool throwExceptions,
-                                               HTMLElement *source) noexcept;
+    ExceptionOr<void> HidePopoverInternal(dom::FocusPreviousElement focusPreviousElement,
+                                          dom::FireEvents fireEvents, bool throwExceptions,
+                                          HTMLElement *source) noexcept;
 
     /// @brief The popover commands, for a popover.
     KRYS_NODISCARD bool IsValidCommandType(dom::CommandType command) const noexcept override;
@@ -1097,8 +1097,8 @@ namespace krys::boo
     /// @brief Whether the popover can be shown (@p expectedToBeShowing false) or hidden: false if it already
     /// is.
     /// @see https://html.spec.whatwg.org/#check-popover-validity
-    KRYS_NODISCARD dom::ExceptionOr<bool> CheckPopoverValidity(bool expectedToBeShowing,
-                                                               Document *expectedDocument) const noexcept;
+    KRYS_NODISCARD ExceptionOr<bool> CheckPopoverValidity(bool expectedToBeShowing,
+                                                          Document *expectedDocument) const noexcept;
 
     /// @see https://html.spec.whatwg.org/#popover-focusing-steps
     void RunPopoverFocusingSteps() noexcept;

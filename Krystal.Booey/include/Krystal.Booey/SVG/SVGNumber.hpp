@@ -51,7 +51,7 @@ namespace krys::boo
     }
 
     template <typename T>
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<SVGNumber>> Create(dom::ExceptionOr<T> value) noexcept
+    KRYS_NODISCARD static ExceptionOr<Ref<SVGNumber>> Create(ExceptionOr<T> value) noexcept
     {
       if (value.HasException())
       {
@@ -70,11 +70,11 @@ namespace krys::boo
       return _value;
     }
 
-    dom::ExceptionOr<void> SetValueForBindings(float value) noexcept
+    ExceptionOr<void> SetValueForBindings(float value) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value = value;

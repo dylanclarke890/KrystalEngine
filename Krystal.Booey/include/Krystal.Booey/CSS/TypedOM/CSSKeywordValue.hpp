@@ -46,7 +46,7 @@ namespace krys::boo
 
   public:
     /// @return A `TypeError` if @p value is empty.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSKeywordValue>> Create(const CSSOMString &value) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSKeywordValue>> Create(const CSSOMString &value) noexcept;
 
     KRYS_NODISCARD const CSSOMString &Value() const noexcept
     {
@@ -54,7 +54,7 @@ namespace krys::boo
     }
 
     /// @return A `TypeError`, leaving the value unchanged, if @p value is empty.
-    dom::ExceptionOr<void> SetValue(const CSSOMString &value) noexcept;
+    ExceptionOr<void> SetValue(const CSSOMString &value) noexcept;
 
     KRYS_NODISCARD CSSStyleValueType StyleValueType() const noexcept final
     {

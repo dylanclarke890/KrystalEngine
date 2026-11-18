@@ -58,7 +58,7 @@ namespace krys::boo
       return AdoptRef(*new SVGTransformList(other, access));
     }
 
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<SVGTransform>>
+    KRYS_NODISCARD static ExceptionOr<Ref<SVGTransform>>
       CreateSVGTransformFromMatrix(css::DOMMatrix2DInit &&matrixInit) noexcept
     {
       Ref svgTransform = SVGTransform::Create();
@@ -66,7 +66,7 @@ namespace krys::boo
       return svgTransform;
     }
 
-    dom::ExceptionOr<RefPtr<SVGTransform>> Consolidate() noexcept;
+    ExceptionOr<RefPtr<SVGTransform>> Consolidate() noexcept;
 
     KRYS_NODISCARD AffineTransform Concatenate() const noexcept;
 

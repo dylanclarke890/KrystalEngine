@@ -61,13 +61,13 @@ namespace krys::boo
 
     KRYS_NODISCARD CSSOMString CssFloat() noexcept;
 
-    dom::ExceptionOr<void> SetCssFloat(const CSSOMString &value) noexcept;
+    ExceptionOr<void> SetCssFloat(const CSSOMString &value) noexcept;
 
     // PropertyId versions of the CSSOM functions to support bindings and editing.
     KRYS_NODISCARD virtual CSSOMString GetPropertyValueInternal(css::PropertyId property) noexcept = 0;
 
-    virtual dom::ExceptionOr<void> SetPropertyInternal(css::PropertyId property, const CSSOMString &value,
-                                                       css::IsImportant important) noexcept = 0;
+    virtual ExceptionOr<void> SetPropertyInternal(css::PropertyId property, const CSSOMString &value,
+                                                  css::IsImportant important) noexcept = 0;
 
     KRYS_NODISCARD virtual Ref<css::MutableStyleProperties> CopyProperties() const noexcept = 0;
 
@@ -76,16 +76,16 @@ namespace krys::boo
     KRYS_NODISCARD CSSOMString
       GetPropertyValueForCamelCasedIDLAttribute(const CSSOMStringAtom &attribute) noexcept;
 
-    dom::ExceptionOr<void> SetPropertyValueForCamelCasedIDLAttribute(const CSSOMStringAtom &attribute,
-                                                                     const CSSOMString &value) noexcept;
+    ExceptionOr<void> SetPropertyValueForCamelCasedIDLAttribute(const CSSOMStringAtom &attribute,
+                                                                const CSSOMString &value) noexcept;
 
     // Shared implementation for all properties that match
     // https://drafts.csswg.org/cssom/#dom-cssstyledeclaration-dashed_attribute.
     KRYS_NODISCARD CSSOMString
       GetPropertyValueForDashedIDLAttribute(const CSSOMStringAtom &attribute) noexcept;
 
-    dom::ExceptionOr<void> SetPropertyValueForDashedIDLAttribute(const CSSOMStringAtom &attribute,
-                                                                 const CSSOMString &value) noexcept;
+    ExceptionOr<void> SetPropertyValueForDashedIDLAttribute(const CSSOMStringAtom &attribute,
+                                                            const CSSOMString &value) noexcept;
 
     /// @brief The property named by a script property name: camel-cased (`backgroundColor`) or
     /// WebKit-cased (`webkitTransform`).
@@ -141,19 +141,19 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsPropertyImplicit(const CSSOMString &propertyName) noexcept final;
 
-    dom::ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
-                                       const CSSOMString &priority) noexcept final;
+    ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
+                                  const CSSOMString &priority) noexcept final;
 
-    dom::ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &propertyName) noexcept final;
+    ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &propertyName) noexcept final;
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
-    dom::ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept final;
+    ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept final;
 
     KRYS_NODISCARD CSSOMString GetPropertyValueInternal(css::PropertyId property) noexcept final;
 
-    dom::ExceptionOr<void> SetPropertyInternal(css::PropertyId property, const CSSOMString &value,
-                                               css::IsImportant important) noexcept final;
+    ExceptionOr<void> SetPropertyInternal(css::PropertyId property, const CSSOMString &value,
+                                          css::IsImportant important) noexcept final;
 
     KRYS_NODISCARD Ref<css::MutableStyleProperties> CopyProperties() const noexcept final;
 

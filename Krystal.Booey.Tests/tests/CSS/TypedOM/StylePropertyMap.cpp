@@ -60,7 +60,7 @@ namespace krys::boo::css::tests
       CHECK(Get(map, u8"WIDTH") == "10px");
       CHECK(Get(map, u8"height") == "undefined");
       CHECK(Get(map, u8"--x") == "foo");
-      CHECK(map.Get(u8"bogus").GetException().Code() == dom::ExceptionCode::TypeError);
+      CHECK(map.Get(u8"bogus").GetException().Code() == ExceptionCode::TypeError);
       CHECK(map.Has(u8"width").Value());
       CHECK_FALSE(map.Has(u8"height").Value());
 
@@ -83,11 +83,11 @@ namespace krys::boo::css::tests
       auto red = CSSRGB::Create(1.0, 0.0, 0.0).ReleaseValue();
       REQUIRE_FALSE(map.Set(u8"color", Values(red)).HasException());
       CHECK(Get(map, u8"color") == "rgb(255, 0, 0)");
-      CHECK(map.Set(u8"height", Values(red)).GetException().Code() == dom::ExceptionCode::TypeError);
+      CHECK(map.Set(u8"height", Values(red)).GetException().Code() == ExceptionCode::TypeError);
 
       // A number isn't a length, and a single-valued property takes one value.
       CHECK(map.Set(u8"height", Values(CSSNumericFactory::Number(3))).GetException().Code()
-            == dom::ExceptionCode::TypeError);
+            == ExceptionCode::TypeError);
       CHECK(map.Set(u8"height", Strings({u8"1px", u8"2px"})).HasException());
       CHECK(map.Set(u8"height", Strings({u8"red"})).HasException());
       CHECK(map.Set(u8"bogus", Strings({u8"1px"})).HasException());

@@ -84,7 +84,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-dialog-show
-  dom::ExceptionOr<void> HTMLDialogElement::Show() noexcept
+  ExceptionOr<void> HTMLDialogElement::Show() noexcept
   {
     html::CEReactionsScope ceReactions;
 
@@ -96,8 +96,7 @@ namespace krys::boo
       {
         return {};
       }
-      return dom::Exception {dom::ExceptionCode::InvalidStateError,
-                             u8"Cannot call show() on an open modal dialog."};
+      return Exception {ExceptionCode::InvalidStateError, u8"Cannot call show() on an open modal dialog."};
     }
 
     // 3. If the result of firing an event named beforetoggle, using ToggleEvent, with the cancelable
@@ -135,7 +134,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-dialog-showmodal
-  dom::ExceptionOr<void> HTMLDialogElement::ShowModal() noexcept
+  ExceptionOr<void> HTMLDialogElement::ShowModal() noexcept
   {
     html::CEReactionsScope ceReactions;
     return ShowModalDialog(nullptr);
@@ -177,7 +176,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#show-a-modal-dialog
-  dom::ExceptionOr<void> HTMLDialogElement::ShowModalDialog(Element *source) noexcept
+  ExceptionOr<void> HTMLDialogElement::ShowModalDialog(Element *source) noexcept
   {
     // 1. If subject has an open attribute and is modal of subject is true, then return.
     // 2. If subject has an open attribute, then throw an "InvalidStateError" DOMException.
@@ -187,8 +186,8 @@ namespace krys::boo
       {
         return {};
       }
-      return dom::Exception {dom::ExceptionCode::InvalidStateError,
-                             u8"Cannot call showModal() on an open non-modal dialog."};
+      return Exception {ExceptionCode::InvalidStateError,
+                        u8"Cannot call showModal() on an open non-modal dialog."};
     }
 
     // 3. If subject's node document is not fully active, then throw an "InvalidStateError" DOMException.
@@ -196,17 +195,17 @@ namespace krys::boo
     // 5. If subject is in the popover showing state, then throw an "InvalidStateError" DOMException.
     if (!IsConnected())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError, u8"Element is not connected."};
+      return Exception {ExceptionCode::InvalidStateError, u8"Element is not connected."};
     }
     if (IsPopoverShowing())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError, u8"Element is already an open popover."};
+      return Exception {ExceptionCode::InvalidStateError, u8"Element is already an open popover."};
     }
     Ref<Document> document = ShareRef(NodeDocument());
     if (!document->IsFullyActive())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError,
-                             u8"Invalid for dialogs within documents that are not fully active."};
+      return Exception {ExceptionCode::InvalidStateError,
+                        u8"Invalid for dialogs within documents that are not fully active."};
     }
 
     // 6. If the result of firing an event named beforetoggle, using ToggleEvent, with the cancelable
@@ -335,7 +334,7 @@ namespace krys::boo
     html::EventLoop::Current().QueueTask(html::TaskSource::UserInteraction, NodeDocument(),
                                          [protectedThis]
                                          {
-                                           auto event = dom::Event::Create(event_names::Close, false, false);
+                                           auto event = Event::Create(event_names::Close, false, false);
                                            (void)dom::EventDispatcher::DispatchToTarget(*event,
                                                                                         protectedThis.get());
                                          });
@@ -588,14 +587,14 @@ namespace krys::boo
       return DOMString(state == dom::ToggleState::Closed ? u8"closed" : u8"open");
     };
 
-    dom::ToggleEventInit init;
+    ToggleEventInit init;
     init.OldState = stringForState(oldState);
     init.NewState = stringForState(newState);
     // Composed, with relatedTarget the subject if retargeting the source against it gives it, else the
     // source.
     init.Composed = true;
     init.Source = ShareRefPtr(source);
-    auto event = dom::ToggleEvent::Create(event_names::BeforeToggle, init, cancelable);
+    auto event = ToggleEvent::Create(event_names::BeforeToggle, init, cancelable);
     (void)dom::EventDispatcher::DispatchFromSource(*event, *this, source);
     return !event->DefaultPrevented();
   }
@@ -663,7 +662,7 @@ namespace krys::boo
         {
           return true;
         }
-        auto event = dom::Event::Create(event_names::Cancel, false, canPreventClose);
+        auto event = Event::Create(event_names::Cancel, false, canPreventClose);
         (void)dom::EventDispatcher::DispatchToTarget(*event, dialog.get());
         return !event->DefaultPrevented();
       },

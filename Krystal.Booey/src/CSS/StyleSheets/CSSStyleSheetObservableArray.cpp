@@ -38,7 +38,7 @@ namespace krys::boo
     krys_debug_assert(Is<Document>(treeScope) || Is<ShadowRoot>(treeScope));
   }
 
-  dom::ExceptionOr<void> CSSStyleSheetObservableArray::SetValueAt(uint32 index, CSSStyleSheet &sheet) noexcept
+  ExceptionOr<void> CSSStyleSheetObservableArray::SetValueAt(uint32 index, CSSStyleSheet &sheet) noexcept
   {
     krys_assert(index <= _sheets.size());
 
@@ -88,7 +88,7 @@ namespace krys::boo
     return _sheets[index].get();
   }
 
-  dom::ExceptionOr<void> CSSStyleSheetObservableArray::SetSheets(List<Ref<CSSStyleSheet>> &&sheets) noexcept
+  ExceptionOr<void> CSSStyleSheetObservableArray::SetSheets(List<Ref<CSSStyleSheet>> &&sheets) noexcept
   {
     for (auto &sheet : sheets)
     {
@@ -112,18 +112,16 @@ namespace krys::boo
     return {};
   }
 
-  Maybe<dom::Exception>
+  Maybe<Exception>
     CSSStyleSheetObservableArray::ShouldThrowWhenAddingSheet(const CSSStyleSheet &sheet) const noexcept
   {
     if (!sheet.WasConstructedByJS())
     {
-      return dom::Exception(dom::ExceptionCode::NotAllowedError,
-                            u8"Sheet needs to be constructed by JavaScript");
+      return Exception(ExceptionCode::NotAllowedError, u8"Sheet needs to be constructed by JavaScript");
     }
     if (!_treeScope || sheet.ConstructorDocument() != &_treeScope->NodeDocument())
     {
-      return dom::Exception(dom::ExceptionCode::NotAllowedError,
-                            u8"Sheet constructor document doesn't match");
+      return Exception(ExceptionCode::NotAllowedError, u8"Sheet constructor document doesn't match");
     }
     return null;
   }

@@ -163,9 +163,9 @@ namespace krys::boo
     bool AppendFormData(html::DOMFormData &formData) noexcept final;
 
     /// @see https://html.spec.whatwg.org/#the-button-element:activation-behaviour
-    void ActivationBehavior(dom::Event &event) noexcept final;
+    void ActivationBehavior(Event &event) noexcept final;
 
-    void DefaultEventHandler(dom::Event &event) noexcept final;
+    void DefaultEventHandler(Event &event) noexcept final;
 
   protected:
     KRYS_NODISCARD bool ComputeWillValidate() const noexcept final;

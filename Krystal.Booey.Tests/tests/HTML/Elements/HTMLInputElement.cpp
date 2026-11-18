@@ -138,7 +138,7 @@ namespace krys::boo::html::tests
     // No allowed value step.
     auto stepped = fixture.Get<HTMLInputElement>(u8"n").StepUp(1);
     REQUIRE(stepped.HasException());
-    CHECK(stepped.GetException().Code() == dom::ExceptionCode::InvalidStateError);
+    CHECK(stepped.GetException().Code() == ExceptionCode::InvalidStateError);
 
     // A minimum greater than the maximum: nothing.
     auto &n2 = fixture.Get<HTMLInputElement>(u8"n2");
@@ -184,7 +184,7 @@ namespace krys::boo::html::tests
 
     auto picker = fixture.Get<HTMLInputElement>(u8"e").ShowPicker();
     REQUIRE(picker.HasException());
-    CHECK(picker.GetException().Code() == dom::ExceptionCode::NotAllowedError);
+    CHECK(picker.GetException().Code() == ExceptionCode::NotAllowedError);
   }
 
   TEST_CASE("HTMLInputElement: type", "[HTML][Forms][Input][html:dom-input-type][html:attr-input-type]")

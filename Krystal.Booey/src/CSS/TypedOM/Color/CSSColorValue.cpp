@@ -52,35 +52,35 @@ namespace krys::boo
     /// @brief Rectifies a colour component: a number is @p numberToValue's value, a numeric value must match
     /// @p matches, and a keyword must be `none`.
     template <typename TNumberToValue, typename TMatches>
-    KRYS_NODISCARD dom::ExceptionOr<RectifiedCSSColorComponent> RectifyCSSColorComponent(
+    KRYS_NODISCARD ExceptionOr<RectifiedCSSColorComponent> RectifyCSSColorComponent(
       Variant<double, RefPtr<CSSNumericValue>, CSSOMString, RefPtr<CSSKeywordValue>> component,
       const TNumberToValue &numberToValue, const TMatches &matches) noexcept
     {
-      auto keyword = [](Ref<CSSKeywordValue> value) -> dom::ExceptionOr<RectifiedCSSColorComponent>
+      auto keyword = [](Ref<CSSKeywordValue> value) -> ExceptionOr<RectifiedCSSColorComponent>
       {
         if (!infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value->Value(), u8"none"))
         {
-          return dom::Exception {dom::ExceptionCode::SyntaxError};
+          return Exception {ExceptionCode::SyntaxError};
         }
         return RectifiedCSSColorComponent {RefPtr<CSSKeywordValue>(krys::move(value))};
       };
       return krys::SwitchOn(
-        krys::move(component), [&](double value) -> dom::ExceptionOr<RectifiedCSSColorComponent>
+        krys::move(component), [&](double value) -> ExceptionOr<RectifiedCSSColorComponent>
         { return RectifiedCSSColorComponent {RefPtr<CSSNumericValue>(numberToValue(value))}; },
-        [&](RefPtr<CSSNumericValue> &&value) -> dom::ExceptionOr<RectifiedCSSColorComponent>
+        [&](RefPtr<CSSNumericValue> &&value) -> ExceptionOr<RectifiedCSSColorComponent>
         {
           if (!value || !matches(value->Type()))
           {
-            return dom::Exception {dom::ExceptionCode::SyntaxError};
+            return Exception {ExceptionCode::SyntaxError};
           }
           return RectifiedCSSColorComponent {krys::move(value)};
         },
         [&](CSSOMString &&value) { return keyword(CSSKeywordValue::RectifyKeywordish(krys::move(value))); },
-        [&](RefPtr<CSSKeywordValue> &&value) -> dom::ExceptionOr<RectifiedCSSColorComponent>
+        [&](RefPtr<CSSKeywordValue> &&value) -> ExceptionOr<RectifiedCSSColorComponent>
         {
           if (!value)
           {
-            return dom::Exception {dom::ExceptionCode::SyntaxError};
+            return Exception {ExceptionCode::SyntaxError};
           }
           return keyword(Ref<CSSKeywordValue>(krys::move(value)));
         });
@@ -232,7 +232,7 @@ namespace krys::boo
 
     /// @brief The colour value a successful construction made, or null.
     template <typename T>
-    KRYS_NODISCARD RefPtr<CSSStyleValue> Made(dom::ExceptionOr<Ref<T>> made) noexcept
+    KRYS_NODISCARD RefPtr<CSSStyleValue> Made(ExceptionOr<Ref<T>> made) noexcept
     {
       if (made.HasException())
       {
@@ -394,8 +394,7 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<Ref<CSSStyleValue>> CSSColorValue::Parse(Document &document,
-                                                            CSSOMStringView cssText) noexcept
+  ExceptionOr<Ref<CSSStyleValue>> CSSColorValue::Parse(Document &document, CSSOMStringView cssText) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csscolorvalue-parse
     // 1. Let result be the result of parsing cssText as a <color>. If result is a syntax error, throw a
@@ -412,7 +411,7 @@ namespace krys::boo
     tokens.DiscardWhitespace();
     if (!result || !tokens.IsAtEnd())
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError, u8"Failed to parse CSS text as a colour"};
+      return Exception {ExceptionCode::SyntaxError, u8"Failed to parse CSS text as a colour"};
     }
 
     // 2. Reify a color value from result, and return the result.
@@ -483,7 +482,7 @@ namespace krys::boo
     return krys::move(builder).ToString();
   }
 
-  dom::ExceptionOr<RectifiedCSSColorComponent>
+  ExceptionOr<RectifiedCSSColorComponent>
     CSSColorValue::RectifyCSSColorPercent(CSSColorPercent percent) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#rectify-a-csscolorpercent
@@ -493,8 +492,7 @@ namespace krys::boo
       [](const CSSNumericType &type) { return type.Matches<CSSNumericBaseType::Percent>(); });
   }
 
-  dom::ExceptionOr<RectifiedCSSColorComponent>
-    CSSColorValue::RectifyCSSColorAngle(CSSColorAngle angle) noexcept
+  ExceptionOr<RectifiedCSSColorComponent> CSSColorValue::RectifyCSSColorAngle(CSSColorAngle angle) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#rectify-a-csscolorangle
     return RectifyCSSColorComponent(
@@ -502,8 +500,7 @@ namespace krys::boo
       [](const CSSNumericType &type) { return type.Matches<CSSNumericBaseType::Angle>(); });
   }
 
-  dom::ExceptionOr<RectifiedCSSColorComponent>
-    CSSColorValue::RectifyCSSColorNumber(CSSColorNumber number) noexcept
+  ExceptionOr<RectifiedCSSColorComponent> CSSColorValue::RectifyCSSColorNumber(CSSColorNumber number) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#rectify-a-csscolornumber
     return RectifyCSSColorComponent(

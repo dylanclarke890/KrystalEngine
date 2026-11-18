@@ -34,7 +34,7 @@ namespace krys::boo::tests
     CHECK(full->M43() == 7);
 
     CHECK(DOMMatrix::Create(Variant<DOMString, List<double>>(List<double> {1, 2, 3})).GetException().Code()
-          == dom::ExceptionCode::TypeError);
+          == ExceptionCode::TypeError);
 
     SECTION("strings are parsed as `transform`")
     {
@@ -58,7 +58,7 @@ namespace krys::boo::tests
       for (auto string : {u8"translate(1em)", u8"translate(50%)", u8"red", u8"scale(2) junk"})
       {
         CHECK(DOMMatrix::Create(Variant<DOMString, List<double>>(string)).GetException().Code()
-              == dom::ExceptionCode::SyntaxError);
+              == ExceptionCode::SyntaxError);
       }
     }
 
@@ -88,8 +88,7 @@ namespace krys::boo::tests
     css::DOMMatrix2DInit mismatched;
     mismatched.A = 1;
     mismatched.M11 = 2;
-    CHECK(DOMMatrixReadOnly::ValidateAndFixup(mismatched).GetException().Code()
-          == dom::ExceptionCode::TypeError);
+    CHECK(DOMMatrixReadOnly::ValidateAndFixup(mismatched).GetException().Code() == ExceptionCode::TypeError);
     css::DOMMatrix2DInit nan;
     nan.B = std::nan("");
     nan.M12 = std::nan("");
@@ -99,7 +98,7 @@ namespace krys::boo::tests
     css::DOMMatrixInit flat;
     flat.Is2D = true;
     flat.M33 = 2;
-    CHECK(DOMMatrixReadOnly::ValidateAndFixup(flat).GetException().Code() == dom::ExceptionCode::TypeError);
+    CHECK(DOMMatrixReadOnly::ValidateAndFixup(flat).GetException().Code() == ExceptionCode::TypeError);
 
     // Without `is2D`, 3D entries make it 3D.
     css::DOMMatrixInit deep;
@@ -163,7 +162,7 @@ namespace krys::boo::tests
       singular->InvertSelf();
       CHECK(std::isnan(singular->A()));
       CHECK_FALSE(singular->GetIs2D());
-      CHECK(singular->ToString().GetException().Code() == dom::ExceptionCode::InvalidStateError);
+      CHECK(singular->ToString().GetException().Code() == ExceptionCode::InvalidStateError);
     }
 
     SECTION("setting 3D entries makes it 3D")

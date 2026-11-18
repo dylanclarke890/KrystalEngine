@@ -158,7 +158,7 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<void> SVGAngleValue::SetValueAsString(DOMStringView value) noexcept
+  ExceptionOr<void> SVGAngleValue::SetValueAsString(DOMStringView value) noexcept
   {
     if (value.empty())
     {
@@ -170,13 +170,13 @@ namespace krys::boo
     auto valueInSpecifiedUnits = svg::ParseNumber(buffer, svg::SuffixSkippingPolicy::DontSkip);
     if (!valueInSpecifiedUnits)
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError};
+      return Exception {ExceptionCode::SyntaxError};
     }
 
     auto unitType = ParseAngleType(buffer);
     if (unitType == SVGAngleValue::SVG_ANGLETYPE_UNKNOWN)
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError};
+      return Exception {ExceptionCode::SyntaxError};
     }
 
     _unitType = unitType;
@@ -184,12 +184,12 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> SVGAngleValue::NewValueSpecifiedUnits(uint16 unitType,
-                                                               float valueInSpecifiedUnits) noexcept
+  ExceptionOr<void> SVGAngleValue::NewValueSpecifiedUnits(uint16 unitType,
+                                                          float valueInSpecifiedUnits) noexcept
   {
     if (unitType == SVG_ANGLETYPE_UNKNOWN || unitType > SVG_ANGLETYPE_GRAD)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     _unitType = static_cast<Type>(unitType);
@@ -197,12 +197,12 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> SVGAngleValue::ConvertToSpecifiedUnits(uint16 unitType) noexcept
+  ExceptionOr<void> SVGAngleValue::ConvertToSpecifiedUnits(uint16 unitType) noexcept
   {
     if (unitType == SVG_ANGLETYPE_UNKNOWN || _unitType == SVG_ANGLETYPE_UNKNOWN
         || unitType > SVG_ANGLETYPE_GRAD)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     if (unitType == _unitType)

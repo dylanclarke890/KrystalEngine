@@ -42,10 +42,10 @@ namespace krys::boo::css::tests
                                  { return scope.get() == &treeScope; });
     }
 
-    void RequireNotAllowed(const dom::ExceptionOr<void> &result) noexcept
+    void RequireNotAllowed(const ExceptionOr<void> &result) noexcept
     {
       REQUIRE(result.HasException());
-      REQUIRE(result.GetException().Code() == dom::ExceptionCode::NotAllowedError);
+      REQUIRE(result.GetException().Code() == ExceptionCode::NotAllowedError);
     }
   }
 

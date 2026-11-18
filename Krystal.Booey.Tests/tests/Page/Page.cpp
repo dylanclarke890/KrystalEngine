@@ -103,15 +103,15 @@ namespace krys::boo::tests
     };
 
     /// @brief Calls a function for each event it handles.
-    struct Listener : dom::EventListenerCallback
+    struct Listener : EventListenerCallback
     {
-      Func<void(dom::Event &)> Function;
+      Func<void(Event &)> Function;
 
-      explicit Listener(Func<void(dom::Event &)> &&function) noexcept : Function(krys::move(function))
+      explicit Listener(Func<void(Event &)> &&function) noexcept : Function(krys::move(function))
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         Function(event);
       }
@@ -155,9 +155,8 @@ namespace krys::boo::tests
     SECTION("a scroll schedules one, which fires the scroll events")
     {
       List<std::string> records;
-      Ref<dom::EventListenerCallback> recorder = CreateRef<Listener>(
-        [&](dom::Event &event)
-        { records.emplace_back(event.Type().View().begin(), event.Type().View().end()); });
+      Ref<EventListenerCallback> recorder = CreateRef<Listener>(
+        [&](Event &event) { records.emplace_back(event.Type().View().begin(), event.Type().View().end()); });
       fixture.Document->AddEventListener(u8"scroll", Ref {recorder}, false);
 
       fixture.View().SetScrollPosition({0, 100});
@@ -171,8 +170,8 @@ namespace krys::boo::tests
     {
       // A `scroll` listener scrolls again: the scroll steps already ran, so the next update fires it.
       int32 scrolls = 0;
-      Ref<dom::EventListenerCallback> scroller = CreateRef<Listener>(
-        [&](dom::Event &)
+      Ref<EventListenerCallback> scroller = CreateRef<Listener>(
+        [&](Event &)
         {
           if (++scrolls == 1)
           {
@@ -473,7 +472,7 @@ namespace krys::boo::tests
     // The fake move has the modifier keys of the latest event, a key press here.
     Maybe<bool> shiftKey;
     auto listener = fixture.ById(u8"top").AddEventListener(
-      u8"mousemove", [&](dom::Event &event) { shiftKey = Downcast<dom::MouseEvent>(event).ShiftKey(); });
+      u8"mousemove", [&](Event &event) { shiftKey = Downcast<MouseEvent>(event).ShiftKey(); });
     (void)fixture.Handler().KeyEvent(
       PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, u8"", u8"", u8"Shift", u8"ShiftLeft", u8"", 16,
                             false, false, false, {PlatformEvent::Modifier::ShiftKey}, MonotonicTime::Now()));
@@ -595,7 +594,7 @@ namespace krys::boo::tests
 
     List<bool> events;
     auto handle = document.AddEventListener(event_names::VisibilityChange,
-                                            [&](dom::Event &event) { events.push_back(event.Bubbles()); });
+                                            [&](Event &event) { events.push_back(event.Bubbles()); });
 
     SECTION("Hiding and showing the page fire visibilitychange in a task")
     {

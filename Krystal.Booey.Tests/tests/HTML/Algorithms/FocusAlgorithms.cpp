@@ -21,7 +21,7 @@ namespace krys::boo::html::tests
       return Downcast<HTMLElement>(element);
     }
 
-    KRYS_NODISCARD std::string Id(const dom::EventTarget *target)
+    KRYS_NODISCARD std::string Id(const EventTarget *target)
     {
       auto *element = DynamicDowncast<Element>(DynamicDowncast<Node>(target));
       if (!element)
@@ -33,7 +33,7 @@ namespace krys::boo::html::tests
     }
 
     /// @brief Records the focus events it handles as `type:target(relatedTarget)`.
-    struct FocusRecorder : public dom::EventListenerCallback
+    struct FocusRecorder : public EventListenerCallback
     {
       List<std::string> &Records;
 
@@ -41,18 +41,18 @@ namespace krys::boo::html::tests
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
-        auto &focus = static_cast<dom::FocusEvent &>(event);
+        auto &focus = static_cast<FocusEvent &>(event);
         auto type = focus.Type().View();
         Records.push_back(std::string(type.begin(), type.end()) + ":" + Id(event.Target().get()) + "("
                           + Id(focus.RelatedTarget().get()) + ")");
       }
     };
 
-    void Listen(dom::EventTarget &target, List<std::string> &records)
+    void Listen(EventTarget &target, List<std::string> &records)
     {
-      Ref<dom::EventListenerCallback> recorder = CreateRef<FocusRecorder>(records);
+      Ref<EventListenerCallback> recorder = CreateRef<FocusRecorder>(records);
       for (auto type : {u8"focus", u8"blur", u8"focusin", u8"focusout"})
       {
         target.AddEventListener(DOMStringAtom(type), Ref {recorder}, false);

@@ -63,8 +63,8 @@ namespace krys::boo::html
 
     KRYS_NODISCARD double ValueAsDouble() const noexcept final;
 
-    dom::ExceptionOr<void> SetValueAsDecimal(const Decimal &value,
-                                             TextFieldEventBehavior eventBehavior) const noexcept final;
+    ExceptionOr<void> SetValueAsDecimal(const Decimal &value,
+                                        TextFieldEventBehavior eventBehavior) const noexcept final;
 
     KRYS_NODISCARD bool TypeMismatchFor(DOMStringView value) const noexcept final;
 
@@ -72,7 +72,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD StepRange CreateStepRange(AnyStepHandling anyStepHandling) const noexcept final;
 
-    ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept final;
+    ShouldCallBaseEventHandler HandleKeydownEvent(KeyboardEvent &event) noexcept final;
 
     KRYS_NODISCARD Decimal ParseToNumber(DOMStringView string,
                                          const Decimal &defaultValue) const noexcept final;
@@ -88,7 +88,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD DOMString SanitizeValue(DOMStringView proposedValue) const noexcept final;
 
-    void HandleMouseDownEvent(dom::MouseEvent &event) noexcept final;
+    void HandleMouseDownEvent(MouseEvent &event) noexcept final;
 
     void DisabledStateChanged() noexcept final;
 

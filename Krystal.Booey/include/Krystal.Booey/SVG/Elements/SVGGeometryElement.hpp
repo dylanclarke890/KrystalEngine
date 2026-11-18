@@ -43,7 +43,7 @@ namespace krys::boo
     KRYS_NODISCARD virtual float GetTotalLength() const noexcept;
 
     /// @see https://svgwg.org/svg2-draft/types.html#__svg__SVGGeometryElement__getPointAtLength
-    KRYS_NODISCARD virtual dom::ExceptionOr<Ref<SVGPoint>> GetPointAtLength(float distance) const noexcept;
+    KRYS_NODISCARD virtual ExceptionOr<Ref<SVGPoint>> GetPointAtLength(float distance) const noexcept;
 
     /// @see https://svgwg.org/svg2-draft/types.html#__svg__SVGGeometryElement__isPointInFill
     KRYS_NODISCARD bool IsPointInFill(dom::DOMPointInit) noexcept;

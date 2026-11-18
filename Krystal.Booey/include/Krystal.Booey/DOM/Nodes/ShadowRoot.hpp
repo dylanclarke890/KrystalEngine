@@ -239,35 +239,35 @@ namespace krys::boo
     /// @brief Replaces the shadow root's children with @p html, parsed as HTML in its host's context,
     /// sanitized by @p options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-sethtml
-    dom::ExceptionOr<void> SetHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> SetHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Appends @p html, parsed as HTML in the host's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-appendhtml
-    dom::ExceptionOr<void> AppendHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> AppendHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Prepends @p html, parsed as HTML in the host's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-prependhtml
-    dom::ExceptionOr<void> PrependHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> PrependHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Replaces the shadow root's children with @p html, parsed as HTML in its host's context;
     /// sanitized only if @p options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-sethtmlunsafe
-    dom::ExceptionOr<void> SetHTMLUnsafe(DOMStringView html,
-                                         const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    ExceptionOr<void> SetHTMLUnsafe(DOMStringView html,
+                                    const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Appends @p html, parsed as HTML in the host's context; sanitized only if @p options gives a
     /// sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-appendhtmlunsafe
-    dom::ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html,
-                                            const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html,
+                                       const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Prepends @p html, parsed as HTML in the host's context; sanitized only if @p options gives a
     /// sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-prependhtmlunsafe
-    dom::ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html,
-                                             const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html,
+                                        const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief The shadow root's children serialised as HTML, with the shadow roots @p options asks for.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-gethtml
@@ -276,10 +276,10 @@ namespace krys::boo
     /// @brief The children serialized; in an XML document, an `InvalidStateError` if they can't be serialized
     /// as well-formed XML.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-innerhtml
-    KRYS_NODISCARD dom::ExceptionOr<DOMString> InnerHTML() const noexcept;
+    KRYS_NODISCARD ExceptionOr<DOMString> InnerHTML() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-innerhtml
-    dom::ExceptionOr<void> InnerHTML(DOMStringView markup) noexcept;
+    ExceptionOr<void> InnerHTML(DOMStringView markup) noexcept;
 
 #pragma endregion
 
@@ -322,13 +322,13 @@ namespace krys::boo
 
   private:
     /// @brief Replaces the shadow root's children with @p markup parsed in its host's context.
-    dom::ExceptionOr<void>
+    ExceptionOr<void>
       ReplaceChildrenWithMarkup(DOMStringView markup,
                                 EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept;
 
   protected:
     /// @see https://dom.spec.whatwg.org/#get-the-parent
-    KRYS_NODISCARD dom::EventTarget *GetParent(dom::Event &event) const noexcept override;
+    KRYS_NODISCARD EventTarget *GetParent(Event &event) const noexcept override;
 
 #pragma region Extension Hooks
 

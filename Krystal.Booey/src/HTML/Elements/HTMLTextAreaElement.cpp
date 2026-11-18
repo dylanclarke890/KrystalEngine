@@ -123,7 +123,7 @@ namespace krys::boo
     }
   }
 
-  void HTMLTextAreaElement::DefaultEventHandler(dom::Event &event) noexcept
+  void HTMLTextAreaElement::DefaultEventHandler(Event &event) noexcept
   {
     if (Renderer())
     {
@@ -131,7 +131,7 @@ namespace krys::boo
       {
         ForwardEvent(event);
       }
-      else if (auto *insertedEvent = DynamicDowncast<dom::BeforeTextInsertedEvent>(event))
+      else if (auto *insertedEvent = DynamicDowncast<BeforeTextInsertedEvent>(event))
       {
         HandleBeforeTextInsertedEvent(*insertedEvent);
       }
@@ -164,7 +164,7 @@ namespace krys::boo
     }
   }
 
-  void HTMLTextAreaElement::HandleBeforeTextInsertedEvent(dom::BeforeTextInsertedEvent &event) const noexcept
+  void HTMLTextAreaElement::HandleBeforeTextInsertedEvent(BeforeTextInsertedEvent &event) const noexcept
   {
     krys_debug_assert(Renderer());
     int32 signedMaxLength = MaxLength();
@@ -382,9 +382,9 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-textarea-value
-  dom::ExceptionOr<void> HTMLTextAreaElement::SetValue(DOMStringView value,
-                                                       html::TextFieldEventBehavior eventBehavior,
-                                                       html::TextControlSetValueSelection selection) noexcept
+  ExceptionOr<void> HTMLTextAreaElement::SetValue(DOMStringView value,
+                                                  html::TextFieldEventBehavior eventBehavior,
+                                                  html::TextControlSetValueSelection selection) noexcept
   {
     // 1. Let oldAPIValue be this element's API value.
     // 2. Set this element's raw value to the new value.

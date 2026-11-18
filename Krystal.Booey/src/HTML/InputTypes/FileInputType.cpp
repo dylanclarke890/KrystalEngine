@@ -315,7 +315,7 @@ namespace krys::boo::html
     chromeClient->RunOpenPanel(*frame, *chooser);
   }
 
-  void FileInputType::HandleActivationBehavior(dom::Event &event) noexcept
+  void FileInputType::HandleActivationBehavior(Event &event) noexcept
   {
     krys_debug_assert(Element());
     // Only for a user's click or key.
@@ -389,7 +389,7 @@ namespace krys::boo::html
     if (pathsChanged)
     {
       // This may destroy this input type; the element is kept alive.
-      auto event = dom::Event::Create(event_names::Input, true, false, true);
+      auto event = Event::Create(event_names::Input, true, false, true);
       (void)dom::EventDispatcher::DispatchToTarget(*event, element.get());
       element->DispatchChangeEvent();
     }

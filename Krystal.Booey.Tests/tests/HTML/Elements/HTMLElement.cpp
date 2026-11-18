@@ -181,15 +181,14 @@ namespace krys::boo::html::tests
             "fragment]")
   {
     auto document = CreateRef<HTMLDocument>();
-    auto check = [](const auto &result, dom::ExceptionCode code)
+    auto check = [](const auto &result, ExceptionCode code)
     {
       return result.HasException() && result.GetException().Code() == code;
     };
 
     // Without a parent, it throws.
     auto orphan = document->CreateElement(u8"span").ReleaseValue();
-    CHECK(
-      check(Downcast<HTMLElement>(*orphan).OuterText(u8"x"), dom::ExceptionCode::NoModificationAllowedError));
+    CHECK(check(Downcast<HTMLElement>(*orphan).OuterText(u8"x"), ExceptionCode::NoModificationAllowedError));
 
     auto p = document->CreateElement(u8"p").ReleaseValue();
     auto span = document->CreateElement(u8"span").ReleaseValue();
@@ -234,7 +233,7 @@ namespace krys::boo::html::tests
     int clicks = 0;
     bool trusted = true;
     auto listener = button->AddEventListener(u8"click",
-                                             [&](dom::Event &event)
+                                             [&](Event &event)
                                              {
                                                ++clicks;
                                                trusted = event.IsTrusted();
@@ -283,7 +282,7 @@ namespace krys::boo::html::tests
     CHECK(div->GetAttribute(u8"contenteditable") == DOMString(u8"plaintext-only"));
     auto result = element.ContentEditable(u8"yes");
     REQUIRE(result.HasException());
-    CHECK(result.GetException().Code() == dom::ExceptionCode::SyntaxError);
+    CHECK(result.GetException().Code() == ExceptionCode::SyntaxError);
     REQUIRE_FALSE(element.ContentEditable(u8"inherit").HasException());
     CHECK_FALSE(div->HasAttribute(u8"contenteditable"));
   }

@@ -45,9 +45,9 @@ namespace krys::boo::svg::tests
     REQUIRE_FALSE(value.SetAlign(Value::SVG_PRESERVEASPECTRATIO_NONE).HasException());
     REQUIRE_FALSE(value.SetMeetOrSlice(Value::SVG_MEETORSLICE_SLICE).HasException());
     CHECK(value.ValueAsString() == u8"none slice");
-    CHECK(value.SetAlign(0) == dom::ExceptionCode::NotSupportedError);
-    CHECK(value.SetAlign(11) == dom::ExceptionCode::NotSupportedError);
-    CHECK(value.SetMeetOrSlice(3) == dom::ExceptionCode::NotSupportedError);
+    CHECK(value.SetAlign(0) == ExceptionCode::NotSupportedError);
+    CHECK(value.SetAlign(11) == ExceptionCode::NotSupportedError);
+    CHECK(value.SetMeetOrSlice(3) == ExceptionCode::NotSupportedError);
     CHECK(value.ValueAsString() == u8"none slice");
   }
 

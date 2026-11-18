@@ -71,7 +71,7 @@ namespace krys::boo::style
       {
         return element;
       }
-      return ComposedTreeAncestors(*node).First();
+      return dom::ComposedTreeAncestors(*node).First();
     }
 
     KRYS_NODISCARD bool HasValidStyleForProperty(Element &element, css::PropertyId) noexcept
@@ -103,7 +103,7 @@ namespace krys::boo::style
       }
 
       const auto *currentElement = &element;
-      for (auto &ancestor : ComposedTreeAncestors(element))
+      for (auto &ancestor : dom::ComposedTreeAncestors(element))
       {
         if (ancestor.StyleValidity() != Validity::Valid)
         {

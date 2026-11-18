@@ -42,7 +42,7 @@ namespace krys::boo
 
     KRYS_NODISCARD float GetTotalLength() const noexcept final;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<SVGPoint>> GetPointAtLength(float distance) const noexcept final;
+    KRYS_NODISCARD ExceptionOr<Ref<SVGPoint>> GetPointAtLength(float distance) const noexcept final;
 
     KRYS_NODISCARD FloatRect GetBBox(StyleUpdateStrategy = AllowStyleUpdate) noexcept final;
 

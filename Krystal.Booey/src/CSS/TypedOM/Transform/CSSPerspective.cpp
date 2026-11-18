@@ -39,46 +39,46 @@ namespace krys::boo
   namespace
   {
     /// @brief @p length if it's a length or `none`, with a string as a keyword value.
-    KRYS_NODISCARD dom::ExceptionOr<CSSPerspectiveValue>
+    KRYS_NODISCARD ExceptionOr<CSSPerspectiveValue>
       CheckPerspectiveLength(CSSPerspectiveValue length) noexcept
     {
       // https://drafts.css-houdini.org/css-typed-om/#dom-cssperspective-cssperspective
-      auto checkKeyword = [](Ref<CSSKeywordValue> keyword) -> dom::ExceptionOr<CSSPerspectiveValue>
+      auto checkKeyword = [](Ref<CSSKeywordValue> keyword) -> ExceptionOr<CSSPerspectiveValue>
       {
         // Otherwise (that is, if length is not a CSSNumericValue), rectify a keywordish value from length,
         // then if the result's value is an ASCII case-insensitive match for the keyword none, set length to
         // the result. Otherwise, throw a TypeError.
         if (!infra::StringAlgorithms::ASCIICaseInsensitiveMatch(keyword->Value(), u8"none"))
         {
-          return dom::Exception {dom::ExceptionCode::TypeError};
+          return Exception {ExceptionCode::TypeError};
         }
         return CSSPerspectiveValue {RefPtr<CSSKeywordValue>(krys::move(keyword))};
       };
       return krys::SwitchOn(
         krys::move(length),
-        [](RefPtr<CSSNumericValue> &&value) -> dom::ExceptionOr<CSSPerspectiveValue>
+        [](RefPtr<CSSNumericValue> &&value) -> ExceptionOr<CSSPerspectiveValue>
         {
           // If length is a CSSNumericValue: if length does not match <length>, throw a TypeError.
           if (!value || !value->Type().Matches<CSSNumericBaseType::Length>())
           {
-            return dom::Exception {dom::ExceptionCode::TypeError};
+            return Exception {ExceptionCode::TypeError};
           }
           return CSSPerspectiveValue {krys::move(value)};
         },
         [&](CSSOMString &&value)
         { return checkKeyword(CSSKeywordValue::RectifyKeywordish(krys::move(value))); },
-        [&](RefPtr<CSSKeywordValue> &&value) -> dom::ExceptionOr<CSSPerspectiveValue>
+        [&](RefPtr<CSSKeywordValue> &&value) -> ExceptionOr<CSSPerspectiveValue>
         {
           if (!value)
           {
-            return dom::Exception {dom::ExceptionCode::TypeError};
+            return Exception {ExceptionCode::TypeError};
           }
           return checkKeyword(Ref<CSSKeywordValue>(krys::move(value)));
         });
     }
   }
 
-  dom::ExceptionOr<Ref<CSSPerspective>> CSSPerspective::Create(CSSPerspectiveValue length) noexcept
+  ExceptionOr<Ref<CSSPerspective>> CSSPerspective::Create(CSSPerspectiveValue length) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssperspective-cssperspective
     auto checkedLength = CheckPerspectiveLength(krys::move(length));
@@ -91,12 +91,12 @@ namespace krys::boo
     return AdoptRef(*new CSSPerspective(checkedLength.ReleaseValue()));
   }
 
-  dom::ExceptionOr<Ref<CSSPerspective>> CSSPerspective::Create(const css::FunctionValue &function,
-                                                               Document &document) noexcept
+  ExceptionOr<Ref<CSSPerspective>> CSSPerspective::Create(const css::FunctionValue &function,
+                                                          Document &document) noexcept
   {
     if (function.Name() != css::ValueId::Perspective || function.Length() != 1)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     auto reified = CSSStyleValueFactory::ReifyValue(document, function[0], {});
     if (reified.HasException())
@@ -112,7 +112,7 @@ namespace krys::boo
     {
       return Create(ShareRefPtr(numeric));
     }
-    return dom::Exception {dom::ExceptionCode::TypeError};
+    return Exception {ExceptionCode::TypeError};
   }
 
   CSSPerspective::CSSPerspective(CSSPerspectiveValue length) noexcept
@@ -122,7 +122,7 @@ namespace krys::boo
 
   CSSPerspective::~CSSPerspective() noexcept = default;
 
-  dom::ExceptionOr<void> CSSPerspective::SetLength(CSSPerspectiveValue length) noexcept
+  ExceptionOr<void> CSSPerspective::SetLength(CSSPerspectiveValue length) noexcept
   {
     auto checkedLength = CheckPerspectiveLength(krys::move(length));
     if (checkedLength.HasException())
@@ -157,7 +157,7 @@ namespace krys::boo
     builder.Append(u8')');
   }
 
-  dom::ExceptionOr<Ref<css::DOMMatrix>> CSSPerspective::ToMatrix() const noexcept
+  ExceptionOr<Ref<css::DOMMatrix>> CSSPerspective::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
     // `perspective(none)` is the identity.
@@ -169,12 +169,12 @@ namespace krys::boo
     const auto *unitValue = DynamicDowncast<CSSUnitValue>(numeric->get());
     if (!unitValue)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     auto length = unitValue->ConvertTo(css::UnitType::px);
     if (!length)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     TransformationMatrix matrix;

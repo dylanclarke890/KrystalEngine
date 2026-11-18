@@ -40,12 +40,12 @@ namespace krys::boo
   public:
     /// @return A `TypeError` if @p ax or @p ay isn't an angle.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssskew-cssskew
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSSkew>> Create(Ref<CSSNumericValue> ax,
-                                                                Ref<CSSNumericValue> ay) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSSkew>> Create(Ref<CSSNumericValue> ax,
+                                                           Ref<CSSNumericValue> ay) noexcept;
 
     /// @brief Reifies a `skew()` function.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSSkew>> Create(const css::FunctionValue &function,
-                                                                Document &document) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSSkew>> Create(const css::FunctionValue &function,
+                                                           Document &document) noexcept;
 
     KRYS_NODISCARD const CSSNumericValue &Ax() const noexcept
     {
@@ -58,10 +58,10 @@ namespace krys::boo
     }
 
     /// @return A `TypeError` if @p ax isn't an angle.
-    dom::ExceptionOr<void> SetAx(Ref<CSSNumericValue> ax) noexcept;
+    ExceptionOr<void> SetAx(Ref<CSSNumericValue> ax) noexcept;
 
     /// @return A `TypeError` if @p ay isn't an angle.
-    dom::ExceptionOr<void> SetAy(Ref<CSSNumericValue> ay) noexcept;
+    ExceptionOr<void> SetAy(Ref<CSSNumericValue> ay) noexcept;
 
     /// @brief Does nothing: a skew is always 2D.
     void SetIs2D(bool) noexcept final
@@ -70,7 +70,7 @@ namespace krys::boo
 
     void Serialise(StringBuilder &builder) const noexcept final;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
+    KRYS_NODISCARD ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
 
     KRYS_NODISCARD CSSTransformType TransformType() const noexcept final
     {

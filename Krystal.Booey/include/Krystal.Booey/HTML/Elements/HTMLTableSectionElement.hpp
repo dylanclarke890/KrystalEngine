@@ -53,12 +53,12 @@ namespace krys::boo
     /// @brief A new row at @p index in the section's rows (-1 for the end): an `IndexSizeError` if @p index
     /// is less than -1 or more than the number of rows.
     /// @see https://html.spec.whatwg.org/#dom-tbody-insertrow
-    dom::ExceptionOr<Ref<HTMLTableRowElement>> InsertRow(int32 index = -1) noexcept;
+    ExceptionOr<Ref<HTMLTableRowElement>> InsertRow(int32 index = -1) noexcept;
 
     /// @brief Removes the row at @p index in the section's rows (-1 for the last, if any): an
     /// `IndexSizeError` if there's no such row.
     /// @see https://html.spec.whatwg.org/#dom-tbody-deleterow
-    dom::ExceptionOr<void> DeleteRow(int32 index) noexcept;
+    ExceptionOr<void> DeleteRow(int32 index) noexcept;
 
 #pragma endregion
 

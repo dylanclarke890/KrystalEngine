@@ -32,10 +32,6 @@
 namespace krys::boo
 {
   class LocalFrameView;
-}
-
-namespace krys::boo::dom
-{
   struct MouseEventInit;
 
   /// @brief An event at a point on the screen: its coordinates in the screen, the viewport, the page, the

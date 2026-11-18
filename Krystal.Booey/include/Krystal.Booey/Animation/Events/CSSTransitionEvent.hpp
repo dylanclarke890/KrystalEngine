@@ -31,7 +31,7 @@
 namespace krys::boo
 {
   /// @see https://drafts.csswg.org/css-transitions-1/#dictdef-transitioneventinit
-  struct CSSTransitionEventInit : public dom::EventInit
+  struct CSSTransitionEventInit : public EventInit
   {
     CSSOMString PropertyName;
     double ElapsedTime {0};

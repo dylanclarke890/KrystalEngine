@@ -70,18 +70,18 @@ namespace krys::boo::html
   CanvasGradient::~CanvasGradient() noexcept = default;
 
   // https://html.spec.whatwg.org/#dom-canvasgradient-addcolorstop
-  dom::ExceptionOr<void> CanvasGradient::AddColorStop(double value, DOMStringView colorString) noexcept
+  ExceptionOr<void> CanvasGradient::AddColorStop(double value, DOMStringView colorString) noexcept
   {
     // (The offset is a double, so a non-finite one is a TypeError.)
     if (!std::isfinite(value))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     // 1. If the offset is less than 0 or greater than 1, then throw an "IndexSizeError" DOMException.
     if (value < 0 || value > 1)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     // 2. Let parsed color be the result of parsing color.
@@ -89,7 +89,7 @@ namespace krys::boo::html
     auto color = ParseColor(colorString);
     if (!color.IsValid())
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError};
+      return Exception {ExceptionCode::SyntaxError};
     }
 
     // 4. Place a new stop on the gradient, at offset offset relative to the whole gradient, and whose color

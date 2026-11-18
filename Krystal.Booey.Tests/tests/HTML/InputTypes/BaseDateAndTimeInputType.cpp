@@ -31,7 +31,7 @@ namespace krys::boo::tests
     }
 
     /// @brief Calls `showPicker()` on @p input during a user gesture, which it needs.
-    KRYS_NODISCARD dom::ExceptionOr<void> ShowPicker(HTMLInputElement &input) noexcept
+    KRYS_NODISCARD ExceptionOr<void> ShowPicker(HTMLInputElement &input) noexcept
     {
       input.NodeDocument().Window()->NotifyActivated();
       return input.ShowPicker();
@@ -480,7 +480,7 @@ namespace krys::boo::tests
     {
       auto result = input.ShowPicker();
       REQUIRE(result.HasException());
-      CHECK(result.GetException().Code() == dom::ExceptionCode::NotAllowedError);
+      CHECK(result.GetException().Code() == ExceptionCode::NotAllowedError);
       CHECK_FALSE(client->Chooser);
 
       CHECK_FALSE(ShowPicker(input).HasException());

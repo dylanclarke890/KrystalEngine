@@ -61,19 +61,19 @@ namespace krys::boo
                                                                  krys::move(localName));
   }
 
-  dom::ExceptionOr<RefPtr<Attr>> dom::NamedNodeMap::SetNamedItem(Attr &attr) noexcept
+  ExceptionOr<RefPtr<Attr>> dom::NamedNodeMap::SetNamedItem(Attr &attr) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::ElementAlgorithms::SetAttribute(attr, *_associatedElement);
   }
 
-  dom::ExceptionOr<RefPtr<Attr>> dom::NamedNodeMap::SetNamedItemNS(Attr &attr) noexcept
+  ExceptionOr<RefPtr<Attr>> dom::NamedNodeMap::SetNamedItemNS(Attr &attr) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::ElementAlgorithms::SetAttribute(attr, *_associatedElement);
   }
 
-  dom::ExceptionOr<Ref<Attr>> dom::NamedNodeMap::RemoveNamedItem(DOMStringAtom qualifiedName) noexcept
+  ExceptionOr<Ref<Attr>> dom::NamedNodeMap::RemoveNamedItem(DOMStringAtom qualifiedName) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let attr be the result of removing an attribute given qualifiedName and element.
@@ -81,15 +81,15 @@ namespace krys::boo
     // 2. If attr is null, then throw a "NotFoundError" DOMException.
     if (attr == nullptr)
     {
-      return dom::Exception {dom::ExceptionCode::NotFoundError};
+      return Exception {ExceptionCode::NotFoundError};
     }
 
     // 3. Return attr.
     return ShareRef(*attr);
   }
 
-  dom::ExceptionOr<Ref<Attr>> dom::NamedNodeMap::RemoveNamedItemNS(DOMStringAtom attrNamespace,
-                                                                   DOMStringAtom localName) noexcept
+  ExceptionOr<Ref<Attr>> dom::NamedNodeMap::RemoveNamedItemNS(DOMStringAtom attrNamespace,
+                                                              DOMStringAtom localName) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let attr be the result of removing an attribute given namespace, localName, and element.
@@ -98,7 +98,7 @@ namespace krys::boo
     // 2. If attr is null, then throw a "NotFoundError" DOMException.
     if (attr == nullptr)
     {
-      return dom::Exception {dom::ExceptionCode::NotFoundError};
+      return Exception {ExceptionCode::NotFoundError};
     }
 
     // 3. Return attr.

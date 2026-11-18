@@ -83,7 +83,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD DOMString PlaceholderValue() const noexcept final;
 
-    void HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept final;
+    void HandleKeyboardEvent(KeyboardEvent &event) noexcept final;
 
     // TypeAheadDataSource functions:
     KRYS_NODISCARD int32 IndexOfSelectedOption() const noexcept final;

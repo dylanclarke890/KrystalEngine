@@ -89,14 +89,14 @@ namespace krys::boo
     return GetAttribute(u8"label").value_or(DOMString()).empty() ? _contentsSlot.get() : nullptr;
   }
 
-  void HTMLOptionElement::DefaultEventHandler(dom::Event &event) noexcept
+  void HTMLOptionElement::DefaultEventHandler(Event &event) noexcept
   {
     auto *select = OwnerSelectElement();
     if (select && select->ContentsUseBaseAppearance() && event.Type() == event_names::MouseUp)
     {
       // https://html.spec.whatwg.org/#concept-select-pick
       // 3. If event is a MouseEvent and event's button attribute is not 0, then return.
-      if (auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event); mouseEvent && mouseEvent->Button() == 0)
+      if (auto *mouseEvent = DynamicDowncast<MouseEvent>(event); mouseEvent && mouseEvent->Button() == 0)
       {
         select->PickOption(*this);
         event.SetDefaultHandled();
@@ -111,7 +111,7 @@ namespace krys::boo
   {
   }
 
-  dom::ExceptionOr<Ref<HTMLOptionElement>> HTMLOptionElement::CreateForLegacyFactoryFunction(
+  ExceptionOr<Ref<HTMLOptionElement>> HTMLOptionElement::CreateForLegacyFactoryFunction(
     Document &document, DOMString text, Maybe<DOMString> value, bool defaultSelected, bool selected) noexcept
   {
     auto element = dom::ElementFactory::CreateHTMLElement<HTMLOptionElement>(document, u8"option");

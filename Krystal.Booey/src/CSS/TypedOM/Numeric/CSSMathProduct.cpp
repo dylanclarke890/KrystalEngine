@@ -29,7 +29,7 @@
 
 namespace krys::boo
 {
-  dom::ExceptionOr<Ref<CSSMathProduct>> CSSMathProduct::Create(List<CSSNumberish> numberishes) noexcept
+  ExceptionOr<Ref<CSSMathProduct>> CSSMathProduct::Create(List<CSSNumberish> numberishes) noexcept
   {
     List<Ref<CSSNumericValue>> values;
     values.reserve(numberishes.size());
@@ -40,17 +40,17 @@ namespace krys::boo
     return Create(krys::move(values));
   }
 
-  dom::ExceptionOr<Ref<CSSMathProduct>> CSSMathProduct::Create(List<Ref<CSSNumericValue>> &&values) noexcept
+  ExceptionOr<Ref<CSSMathProduct>> CSSMathProduct::Create(List<Ref<CSSNumericValue>> &&values) noexcept
   {
     if (values.empty())
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError};
+      return Exception {ExceptionCode::SyntaxError};
     }
 
     auto type = CSSNumericType::MultiplyTypes(values);
     if (!type)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     return AdoptRef(*new CSSMathProduct(krys::move(values), krys::move(*type)));

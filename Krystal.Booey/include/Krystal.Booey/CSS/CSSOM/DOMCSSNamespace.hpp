@@ -95,7 +95,7 @@ namespace krys::boo
     /// @return A `SyntaxError` if the name, syntax or initial value is invalid, and an
     /// `InvalidModificationError` if the property is already registered.
     /// @see https://drafts.css-houdini.org/css-properties-values-api/#dom-css-registerproperty
-    static dom::ExceptionOr<void> RegisterProperty(Document &document,
-                                                   const PropertyDefinition &definition) noexcept;
+    static ExceptionOr<void> RegisterProperty(Document &document,
+                                              const PropertyDefinition &definition) noexcept;
   };
 }

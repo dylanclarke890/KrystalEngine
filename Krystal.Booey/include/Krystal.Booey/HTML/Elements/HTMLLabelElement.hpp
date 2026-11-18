@@ -78,7 +78,7 @@ namespace krys::boo
     void SetHovered(bool over, style::InvalidationScope invalidationScope = style::InvalidationScope::All,
                     HitTestRequest request = {}) noexcept final;
 
-    void DefaultEventHandler(dom::Event &event) noexcept final;
+    void DefaultEventHandler(Event &event) noexcept final;
 
     KRYS_NODISCARD bool IsInteractiveContent() const noexcept final
     {
@@ -86,7 +86,7 @@ namespace krys::boo
     }
 
   private:
-    KRYS_NODISCARD bool IsEventTargetedAtInteractiveDescendants(dom::Event &event) const noexcept;
+    KRYS_NODISCARD bool IsEventTargetedAtInteractiveDescendants(Event &event) const noexcept;
   };
 }
 

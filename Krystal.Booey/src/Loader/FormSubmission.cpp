@@ -98,7 +98,7 @@ namespace krys::boo
   }
 
   FormSubmission::FormSubmission(Maybe<DOMString> returnValue, url::URL action, DOMStringView target,
-                                 DOMStringView encodingType, dom::Event *event) noexcept
+                                 DOMStringView encodingType, boo::Event *event) noexcept
       : _method(Method::Dialog), _action(krys::move(action)), _target(target), _encodingType(encodingType),
         _event(ShareRefPtr(event)), _returnValue(krys::move(returnValue))
   {
@@ -106,7 +106,7 @@ namespace krys::boo
 
   FormSubmission::FormSubmission(Method method, url::URL action, DOMStringView target,
                                  DOMStringView encodingType, Ref<html::DOMFormData> &&entryList,
-                                 dom::Event *event) noexcept
+                                 boo::Event *event) noexcept
       : _method(method), _action(krys::move(action)), _target(target), _encodingType(encodingType),
         _entryList(krys::move(entryList)), _event(ShareRefPtr(event))
   {
@@ -115,7 +115,7 @@ namespace krys::boo
   FormSubmission::~FormSubmission() noexcept = default;
 
   Ref<FormSubmission> FormSubmission::Create(HTMLFormElement &form, HTMLFormControlElement *overrideSubmitter,
-                                             const Attributes &attributes, dom::Event *event,
+                                             const Attributes &attributes, boo::Event *event,
                                              FormSubmissionTrigger trigger) noexcept
   {
     auto copiedAttributes = attributes;

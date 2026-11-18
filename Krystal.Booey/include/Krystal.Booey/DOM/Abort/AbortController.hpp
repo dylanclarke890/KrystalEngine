@@ -7,12 +7,17 @@
 
 namespace krys::boo::dom
 {
+  class AbortAlgorithms;
+}
+
+namespace krys::boo
+{
   class AbortSignal;
 
   /// @see https://dom.spec.whatwg.org/#abortcontroller
   class AbortController
   {
-    friend class AbortAlgorithms;
+    friend class dom::AbortAlgorithms;
 
   private:
     /// @see https://dom.spec.whatwg.org/#abortcontroller-signal

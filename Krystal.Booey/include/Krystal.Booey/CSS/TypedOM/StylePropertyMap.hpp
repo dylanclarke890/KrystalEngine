@@ -43,18 +43,18 @@ namespace krys::boo
     /// @brief Sets @p property to @p values, a string being parsed as its value.
     /// @return A `TypeError` if @p property isn't a property, or @p values aren't a valid value of it.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymap-set
-    dom::ExceptionOr<void> Set(CSSOMStringView property, List<CSSStyleValueOrString> values) noexcept;
+    ExceptionOr<void> Set(CSSOMStringView property, List<CSSStyleValueOrString> values) noexcept;
 
     /// @brief Appends @p values to the list-valued @p property.
     /// @return A `TypeError` if @p property isn't a list-valued property, or @p values aren't valid items of
     /// it.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymap-append
-    dom::ExceptionOr<void> Append(CSSOMStringView property, List<CSSStyleValueOrString> values) noexcept;
+    ExceptionOr<void> Append(CSSOMStringView property, List<CSSStyleValueOrString> values) noexcept;
 
     /// @brief Removes @p property.
     /// @return A `TypeError` if @p property isn't a property.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymap-delete
-    dom::ExceptionOr<void> Delete(CSSOMStringView property) noexcept;
+    ExceptionOr<void> Delete(CSSOMStringView property) noexcept;
 
     /// @brief Removes every property.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymap-clear

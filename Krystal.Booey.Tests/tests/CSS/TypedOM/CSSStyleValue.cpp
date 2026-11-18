@@ -26,8 +26,8 @@ namespace krys::boo::css::tests
       return result.ReleaseValue();
     }
 
-    KRYS_NODISCARD dom::ExceptionCode ParseError(Document &document, CSSOMStringView property,
-                                                 CSSOMStringView cssText)
+    KRYS_NODISCARD ExceptionCode ParseError(Document &document, CSSOMStringView property,
+                                            CSSOMStringView cssText)
     {
       auto result = CSSStyleValue::Parse(document, property, cssText);
       REQUIRE(result.HasException());
@@ -102,9 +102,9 @@ namespace krys::boo::css::tests
 
     SECTION("errors")
     {
-      CHECK(ParseError(*document, u8"not-a-property", u8"1") == dom::ExceptionCode::TypeError);
-      CHECK(ParseError(*document, u8"width", u8"red") == dom::ExceptionCode::TypeError);
-      CHECK(ParseError(*document, u8"width", u8"") == dom::ExceptionCode::TypeError);
+      CHECK(ParseError(*document, u8"not-a-property", u8"1") == ExceptionCode::TypeError);
+      CHECK(ParseError(*document, u8"width", u8"red") == ExceptionCode::TypeError);
+      CHECK(ParseError(*document, u8"width", u8"") == ExceptionCode::TypeError);
     }
   }
 

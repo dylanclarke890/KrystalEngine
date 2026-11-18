@@ -19,7 +19,7 @@ namespace krys::boo
     return dom::TextAlgorithms::ChildTextContent(*this);
   }
 
-  dom::ExceptionOr<void> HTMLTitleElement::Text(DOMString value) noexcept
+  ExceptionOr<void> HTMLTitleElement::Text(DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *this);

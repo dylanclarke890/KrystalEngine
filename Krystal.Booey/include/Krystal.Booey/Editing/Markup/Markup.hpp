@@ -112,19 +112,19 @@ namespace krys::boo
   /// `insertAdjacentHTML()` and `setHTMLUnsafe()`: as HTML in an HTML document or when the policy says to,
   /// and as XML otherwise, which throws a `SyntaxError` if it isn't well formed.
   /// @see https://html.spec.whatwg.org/#fragment-parsing-algorithm-steps
-  KRYS_NODISCARD dom::ExceptionOr<Ref<DocumentFragment>>
+  KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>>
     CreateFragmentForInnerOuterHTML(Element &contextElement, utf8_stringview markup,
                                     EnumSet<dom::ParserContentPolicy> parserContentPolicy = {}) noexcept;
 
   /// @see https://w3c.github.io/DOM-Parsing/#dom-range-createcontextualfragment
-  KRYS_NODISCARD dom::ExceptionOr<Ref<DocumentFragment>>
-    CreateContextualFragment(Element &element, utf8_stringview markup) noexcept;
+  KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>> CreateContextualFragment(Element &element,
+                                                                             utf8_stringview markup) noexcept;
 
   KRYS_NODISCARD bool IsPlainTextMarkup(Node *node) noexcept;
 
   // These methods are used by HTMLElement & ShadowRoot to replace the children with respected fragment/text.
-  dom::ExceptionOr<void> ReplaceChildrenWithFragment(ContainerNode &container,
-                                                     const Ref<DocumentFragment> &fragment) noexcept;
+  ExceptionOr<void> ReplaceChildrenWithFragment(ContainerNode &container,
+                                                const Ref<DocumentFragment> &fragment) noexcept;
 
   enum class ConvertBlocksToInlines : bool
   {
@@ -209,8 +209,8 @@ namespace krys::boo
   /// document, and otherwise as XML that must be well-formed.
   /// @return An `InvalidStateError` if the XML serialization meets one of its error cases.
   /// @see https://html.spec.whatwg.org/#fragment-serializing-algorithm-steps
-  KRYS_NODISCARD dom::ExceptionOr<utf8_string>
-    SerializeFragmentRequiringWellFormed(const Node &node, SerializedNodes root) noexcept;
+  KRYS_NODISCARD ExceptionOr<utf8_string> SerializeFragmentRequiringWellFormed(const Node &node,
+                                                                               SerializedNodes root) noexcept;
 
   KRYS_NODISCARD utf8_string URLToMarkup(utf8_stringview url, utf8_stringview title) noexcept;
 

@@ -126,7 +126,7 @@ namespace krys::boo
     return CreateRenderer<LegacyRenderSVGTransformableContainer>(*this, krys::move(style));
   }
 
-  void SVGAElement::ActivationBehavior(dom::Event &event) noexcept
+  void SVGAElement::ActivationBehavior(Event &event) noexcept
   {
     if (!css::IsLink(*this))
     {
@@ -135,7 +135,7 @@ namespace krys::boo
     FollowTheHyperlink(event);
   }
 
-  void SVGAElement::DefaultEventHandler(dom::Event &event) noexcept
+  void SVGAElement::DefaultEventHandler(Event &event) noexcept
   {
     if (css::IsLink(*this))
     {
@@ -148,7 +148,7 @@ namespace krys::boo
 
       // A click is followed as the activation behaviour; other buttons' clicks (the middle button opening the
       // link elsewhere) are followed here, and the host decides from the button.
-      if (event.Type() == event_names::AuxClick && dom::MouseEvent::CanTriggerActivationBehavior(event))
+      if (event.Type() == event_names::AuxClick && MouseEvent::CanTriggerActivationBehavior(event))
       {
         FollowTheHyperlink(event);
         return;
@@ -158,7 +158,7 @@ namespace krys::boo
     SVGGraphicsElement::DefaultEventHandler(event);
   }
 
-  void SVGAElement::FollowTheHyperlink(dom::Event &event) noexcept
+  void SVGAElement::FollowTheHyperlink(Event &event) noexcept
   {
     auto url = infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(Href());
 

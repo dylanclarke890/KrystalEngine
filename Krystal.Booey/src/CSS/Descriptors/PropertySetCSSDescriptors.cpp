@@ -85,7 +85,7 @@ namespace krys::boo
     return _propertySet->AsText(css::DefaultSerialisationContext());
   }
 
-  dom::ExceptionOr<void> PropertySetCSSDescriptors::SetCssText(const CSSOMString &text) noexcept
+  ExceptionOr<void> PropertySetCSSDescriptors::SetCssText(const CSSOMString &text) noexcept
   {
     if (!WillMutate())
     {
@@ -138,9 +138,9 @@ namespace krys::boo
     return _propertySet->IsPropertyImplicit(css::PropertyIdFromName(propertyName));
   }
 
-  dom::ExceptionOr<void> PropertySetCSSDescriptors::SetProperty(const CSSOMString &propertyName,
-                                                                const CSSOMString &value,
-                                                                const CSSOMString &priority) noexcept
+  ExceptionOr<void> PropertySetCSSDescriptors::SetProperty(const CSSOMString &propertyName,
+                                                           const CSSOMString &value,
+                                                           const CSSOMString &priority) noexcept
   {
     auto property = css::PropertyIdFromName(propertyName);
     if (!IsExposed(property))
@@ -168,8 +168,7 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<CSSOMString>
-    PropertySetCSSDescriptors::RemoveProperty(const CSSOMString &propertyName) noexcept
+  ExceptionOr<CSSOMString> PropertySetCSSDescriptors::RemoveProperty(const CSSOMString &propertyName) noexcept
   {
     auto property = css::PropertyIdFromName(propertyName);
     if (!IsExposed(property))
@@ -198,9 +197,9 @@ namespace krys::boo
     return _propertySet->GetPropertyValue(property);
   }
 
-  dom::ExceptionOr<void> PropertySetCSSDescriptors::SetPropertyInternal(css::PropertyId property,
-                                                                        const CSSOMString &value,
-                                                                        css::IsImportant important) noexcept
+  ExceptionOr<void> PropertySetCSSDescriptors::SetPropertyInternal(css::PropertyId property,
+                                                                   const CSSOMString &value,
+                                                                   css::IsImportant important) noexcept
   {
     if (!WillMutate())
     {

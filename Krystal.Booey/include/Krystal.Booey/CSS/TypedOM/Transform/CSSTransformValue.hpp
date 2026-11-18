@@ -53,12 +53,12 @@ namespace krys::boo
   public:
     /// @brief Reifies a transform list.
     /// @see https://drafts.css-houdini.org/css-typed-om/#reify-a-transform-list
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSTransformValue>> Create(const css::TransformListValue &list,
-                                                                          Document &document) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSTransformValue>> Create(const css::TransformListValue &list,
+                                                                     Document &document) noexcept;
 
     /// @return A `TypeError` if @p transforms is empty.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csstransformvalue-csstransformvalue
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSTransformValue>>
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSTransformValue>>
       Create(List<Ref<CSSTransformComponent>> transforms) noexcept;
 
     ~CSSTransformValue() noexcept override;
@@ -79,8 +79,8 @@ namespace krys::boo
 
     /// @brief Replaces the component at @p index, or appends one at the end.
     /// @return A `RangeError` if @p index is past the end.
-    dom::ExceptionOr<Ref<CSSTransformComponent>> SetItem(size_t index,
-                                                         Ref<CSSTransformComponent> component) noexcept;
+    ExceptionOr<Ref<CSSTransformComponent>> SetItem(size_t index,
+                                                    Ref<CSSTransformComponent> component) noexcept;
 
     KRYS_NODISCARD const List<Ref<CSSTransformComponent>> &Components() const noexcept
     {
@@ -93,7 +93,7 @@ namespace krys::boo
     /// @brief The components' matrices, multiplied in order.
     /// @return A `TypeError` if a component has no matrix.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csstransformvalue-tomatrix
-    KRYS_NODISCARD dom::ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept;
 
     KRYS_NODISCARD CSSStyleValueType StyleValueType() const noexcept final
     {

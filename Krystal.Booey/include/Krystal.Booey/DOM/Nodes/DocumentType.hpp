@@ -75,22 +75,22 @@ namespace krys::boo
     /// nodes.
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-before
-    dom::ExceptionOr<void> Before(const List<dom::NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> Before(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Inserts `nodes` just after `this`, while replacing strings in `nodes` with equivalent Text
     /// nodes.
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-after
-    dom::ExceptionOr<void> After(const List<dom::NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> After(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Replaces `this` with `nodes`, while replacing strings in `nodes` with equivalent Text nodes.
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-replacewith
-    dom::ExceptionOr<void> ReplaceWith(const List<dom::NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> ReplaceWith(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Removes `this`.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-remove
-    dom::ExceptionOr<void> Remove() noexcept;
+    ExceptionOr<void> Remove() noexcept;
 
 #pragma endregion
   };

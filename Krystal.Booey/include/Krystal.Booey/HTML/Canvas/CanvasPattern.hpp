@@ -68,7 +68,7 @@ namespace krys::boo::html
     }
 
     /// @see https://html.spec.whatwg.org/#dom-canvaspattern-settransform
-    dom::ExceptionOr<void> SetTransform(css::DOMMatrix2DInit = {}) noexcept;
+    ExceptionOr<void> SetTransform(css::DOMMatrix2DInit = {}) noexcept;
 
   private:
     CanvasPattern(SourceImage &&, bool repeatX, bool repeatY) noexcept;

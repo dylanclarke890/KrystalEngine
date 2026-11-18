@@ -67,9 +67,9 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-elementinternals-setvalidity
-  dom::ExceptionOr<void> FormAssociatedCustomElement::SetValidity(ValidityStateFlags flags,
-                                                                  const DOMString &message,
-                                                                  HTMLElement *validationAnchor) noexcept
+  ExceptionOr<void> FormAssociatedCustomElement::SetValidity(ValidityStateFlags flags,
+                                                             const DOMString &message,
+                                                             HTMLElement *validationAnchor) noexcept
   {
     krys_debug_assert(_element.IsPrecustomizedOrDefinedCustomElement());
 
@@ -77,7 +77,7 @@ namespace krys::boo::html
     // 4. If flags contains one or more true values and message is the empty string, then throw a TypeError.
     if (!flags.IsValid() && message.empty())
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     // 5. Set message to the result of normalizing newlines given message.
@@ -98,7 +98,7 @@ namespace krys::boo::html
     if (validationAnchor
         && !dom::TreeQueries::IsShadowIncludingInclusiveAncestor(_element, *validationAnchor))
     {
-      return dom::Exception {dom::ExceptionCode::NotFoundError};
+      return Exception {ExceptionCode::NotFoundError};
     }
 
     // 11. Set element's validation anchor to anchor.

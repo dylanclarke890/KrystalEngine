@@ -70,7 +70,7 @@ namespace krys::boo::tests
     // There's no hashchange: Booey has no session history.
     uint32 hashChanges = 0;
     auto handle =
-      fixture.Document->Window()->AddEventListener(u8"hashchange", [&](dom::Event &) { ++hashChanges; });
+      fixture.Document->Window()->AddEventListener(u8"hashchange", [&](Event &) { ++hashChanges; });
 
     SECTION("a link to a fragment scrolls its target into view and makes it the target")
     {

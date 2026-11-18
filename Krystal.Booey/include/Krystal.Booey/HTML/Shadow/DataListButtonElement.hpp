@@ -59,7 +59,7 @@ namespace krys::boo::html
       _owner = nullptr;
     }
 
-    void DefaultEventHandler(dom::Event &event) noexcept override;
+    void DefaultEventHandler(Event &event) noexcept override;
 
     /// @brief Disabled with its field.
     KRYS_NODISCARD bool IsDisabledFormControl() const noexcept override;

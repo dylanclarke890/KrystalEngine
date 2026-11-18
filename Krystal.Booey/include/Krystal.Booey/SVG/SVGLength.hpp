@@ -71,7 +71,7 @@ namespace krys::boo
     }
 
     template <typename T>
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<SVGLength>> Create(dom::ExceptionOr<T> value) noexcept
+    KRYS_NODISCARD static ExceptionOr<Ref<SVGLength>> Create(ExceptionOr<T> value) noexcept
     {
       if (value.HasException())
       {
@@ -95,20 +95,20 @@ namespace krys::boo
       return static_cast<uint16>(_value.LengthType());
     }
 
-    KRYS_NODISCARD dom::ExceptionOr<float> ValueForBindings() noexcept;
+    KRYS_NODISCARD ExceptionOr<float> ValueForBindings() noexcept;
 
-    dom::ExceptionOr<void> SetValueForBindings(float) noexcept;
+    ExceptionOr<void> SetValueForBindings(float) noexcept;
 
     KRYS_NODISCARD float ValueInSpecifiedUnits() noexcept
     {
       return _value.ValueInSpecifiedUnits();
     }
 
-    dom::ExceptionOr<void> SetValueInSpecifiedUnits(float valueInSpecifiedUnits) noexcept
+    ExceptionOr<void> SetValueInSpecifiedUnits(float valueInSpecifiedUnits) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetValueInSpecifiedUnits(valueInSpecifiedUnits);
@@ -116,11 +116,11 @@ namespace krys::boo
       return {};
     }
 
-    dom::ExceptionOr<void> SetValueAsString(DOMStringView value) noexcept
+    ExceptionOr<void> SetValueAsString(DOMStringView value) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       auto result = _value.SetValueAsString(value);
@@ -133,16 +133,16 @@ namespace krys::boo
       return result;
     }
 
-    dom::ExceptionOr<void> NewValueSpecifiedUnits(uint16 unitType, float valueInSpecifiedUnits) noexcept
+    ExceptionOr<void> NewValueSpecifiedUnits(uint16 unitType, float valueInSpecifiedUnits) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       if (unitType == SVG_LENGTHTYPE_UNKNOWN || unitType > SVG_LENGTHTYPE_PC)
       {
-        return dom::Exception {dom::ExceptionCode::NotSupportedError};
+        return Exception {ExceptionCode::NotSupportedError};
       }
 
       _value = {valueInSpecifiedUnits, static_cast<SVGLengthType>(unitType), _value.LengthMode()};
@@ -150,7 +150,7 @@ namespace krys::boo
       return {};
     }
 
-    dom::ExceptionOr<void> ConvertToSpecifiedUnits(uint16 unitType) noexcept;
+    ExceptionOr<void> ConvertToSpecifiedUnits(uint16 unitType) noexcept;
 
     KRYS_NODISCARD DOMString ValueAsString() const noexcept override
     {

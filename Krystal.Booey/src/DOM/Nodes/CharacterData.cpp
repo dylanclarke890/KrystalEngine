@@ -19,32 +19,32 @@ namespace krys::boo
 
 #pragma region CharacterData
 
-  dom::ExceptionOr<void> CharacterData::Data(DOMString data) noexcept
+  ExceptionOr<void> CharacterData::Data(DOMString data) noexcept
   {
     return dom::TextAlgorithms::Replace(*this, 0uz, Length(), krys::move(data));
   }
 
-  dom::ExceptionOr<DOMString> CharacterData::SubstringData(size_t offset, size_t count) const noexcept
+  ExceptionOr<DOMString> CharacterData::SubstringData(size_t offset, size_t count) const noexcept
   {
     return dom::TextAlgorithms::Substring(*this, offset, count);
   }
 
-  dom::ExceptionOr<void> CharacterData::AppendData(DOMString data) noexcept
+  ExceptionOr<void> CharacterData::AppendData(DOMString data) noexcept
   {
     return dom::TextAlgorithms::Replace(*this, _data.size(), 0uz, krys::move(data));
   }
 
-  dom::ExceptionOr<void> CharacterData::InsertData(size_t offset, DOMString data) noexcept
+  ExceptionOr<void> CharacterData::InsertData(size_t offset, DOMString data) noexcept
   {
     return dom::TextAlgorithms::Replace(*this, offset, 0uz, krys::move(data));
   }
 
-  dom::ExceptionOr<void> CharacterData::DeleteData(size_t offset, size_t count) noexcept
+  ExceptionOr<void> CharacterData::DeleteData(size_t offset, size_t count) noexcept
   {
     return dom::TextAlgorithms::Replace(*this, offset, count, u8"");
   }
 
-  dom::ExceptionOr<void> CharacterData::ReplaceData(size_t offset, size_t count, DOMString data) noexcept
+  ExceptionOr<void> CharacterData::ReplaceData(size_t offset, size_t count, DOMString data) noexcept
   {
     return dom::TextAlgorithms::Replace(*this, offset, count, krys::move(data));
   }
@@ -53,73 +53,71 @@ namespace krys::boo
 
 #pragma region ChildNode
 
-  dom::ExceptionOr<void> CharacterData::Before(const List<dom::NodeOrString> &nodes) noexcept
+  ExceptionOr<void> CharacterData::Before(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ChildNode::Before(*this, nodes);
   }
 
-  dom::ExceptionOr<void> CharacterData::After(const List<dom::NodeOrString> &nodes) noexcept
+  ExceptionOr<void> CharacterData::After(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ChildNode::After(*this, nodes);
   }
 
-  dom::ExceptionOr<void> CharacterData::ReplaceWith(const List<dom::NodeOrString> &nodes) noexcept
+  ExceptionOr<void> CharacterData::ReplaceWith(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ChildNode::ReplaceWith(*this, nodes);
   }
 
-  dom::ExceptionOr<void> CharacterData::Remove() noexcept
+  ExceptionOr<void> CharacterData::Remove() noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ChildNode::Remove(*this);
   }
 
-  dom::ExceptionOr<void> CharacterData::BeforeHTML(DOMStringView html,
-                                                   const html::SetHTMLOptions &options) noexcept
+  ExceptionOr<void> CharacterData::BeforeHTML(DOMStringView html,
+                                              const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::BeforeHTML(*this, html, &options.Sanitizer,
                                                      html::FragmentParserMode::Safe);
   }
 
-  dom::ExceptionOr<void> CharacterData::AfterHTML(DOMStringView html,
-                                                  const html::SetHTMLOptions &options) noexcept
+  ExceptionOr<void> CharacterData::AfterHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::AfterHTML(*this, html, &options.Sanitizer,
                                                     html::FragmentParserMode::Safe);
   }
 
-  dom::ExceptionOr<void> CharacterData::ReplaceWithHTML(DOMStringView html,
-                                                        const html::SetHTMLOptions &options) noexcept
+  ExceptionOr<void> CharacterData::ReplaceWithHTML(DOMStringView html,
+                                                   const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::ReplaceWithHTML(*this, html, &options.Sanitizer,
                                                           html::FragmentParserMode::Safe);
   }
 
-  dom::ExceptionOr<void> CharacterData::BeforeHTMLUnsafe(DOMStringView html,
-                                                         const html::SetHTMLUnsafeOptions &options) noexcept
+  ExceptionOr<void> CharacterData::BeforeHTMLUnsafe(DOMStringView html,
+                                                    const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::BeforeHTML(
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
-  dom::ExceptionOr<void> CharacterData::AfterHTMLUnsafe(DOMStringView html,
-                                                        const html::SetHTMLUnsafeOptions &options) noexcept
+  ExceptionOr<void> CharacterData::AfterHTMLUnsafe(DOMStringView html,
+                                                   const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::AfterHTML(
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
-  dom::ExceptionOr<void>
-    CharacterData::ReplaceWithHTMLUnsafe(DOMStringView html,
-                                         const html::SetHTMLUnsafeOptions &options) noexcept
+  ExceptionOr<void> CharacterData::ReplaceWithHTMLUnsafe(DOMStringView html,
+                                                         const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::ReplaceWithHTML(

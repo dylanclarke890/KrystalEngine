@@ -33,12 +33,8 @@
 
 namespace krys::boo
 {
-  class LocalFrame;
-}
-
-namespace krys::boo::dom
-{
   class EventTarget;
+  class LocalFrame;
 
   /// @brief A touch on the screen, as a touch event reports it: where it is, the element it began on and the
   /// size and pressure of its contact.

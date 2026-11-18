@@ -50,18 +50,18 @@ namespace krys::boo
   class Document;
   class DocumentFragment;
   class Element;
+  class Event;
+  class KeyboardEvent;
   class Text;
+  class TextEvent;
 }
 
 namespace krys::boo::dom
 {
   class DataTransfer;
-  class Event;
-  class KeyboardEvent;
   class Range;
   struct SimpleRange;
   class StaticRange;
-  class TextEvent;
   enum class TextEventInputType : uint8;
 }
 
@@ -204,13 +204,13 @@ namespace krys::boo
 
       Command(const EditorInternalCommand *command, EditorCommandSource source, Document &document) noexcept;
 
-      bool Execute(utf8_stringview parameter = {}, dom::Event *triggeringEvent = nullptr) const noexcept;
+      bool Execute(utf8_stringview parameter = {}, Event *triggeringEvent = nullptr) const noexcept;
 
-      bool Execute(dom::Event *triggeringEvent) const noexcept;
+      bool Execute(Event *triggeringEvent) const noexcept;
 
       KRYS_NODISCARD bool IsSupported() const noexcept;
 
-      KRYS_NODISCARD bool IsEnabled(dom::Event *triggeringEvent = nullptr) const noexcept;
+      KRYS_NODISCARD bool IsEnabled(Event *triggeringEvent = nullptr) const noexcept;
 
       KRYS_NODISCARD bool IsTextInsertion() const noexcept;
 
@@ -218,11 +218,11 @@ namespace krys::boo
 
       /// @brief Whether the command's effect is on the current selection (bold text for `Bold`); false for
       /// an unsupported command or one without a state.
-      KRYS_NODISCARD TriState State(dom::Event *triggeringEvent = nullptr) const noexcept;
+      KRYS_NODISCARD TriState State(Event *triggeringEvent = nullptr) const noexcept;
 
       /// @brief The command's value for the current selection (the font for `FontName`); "true" or "false"
       /// for a command with a state but no value, and empty for an unsupported command or one with neither.
-      KRYS_NODISCARD utf8_string Value(dom::Event *triggeringEvent = nullptr) const noexcept;
+      KRYS_NODISCARD utf8_string Value(Event *triggeringEvent = nullptr) const noexcept;
 
     private:
       KRYS_NODISCARD LocalFrame *Frame() const noexcept;
@@ -242,13 +242,13 @@ namespace krys::boo
 
     /// @brief Lets the editor client run the command @p event is bound to.
     /// @return Whether it did, so the event's default action is done.
-    bool HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept;
+    bool HandleKeyboardEvent(KeyboardEvent &event) noexcept;
 
     /// @brief Lets the editor client mark a `keydown` an input method handled, before it's dispatched.
-    void HandleInputMethodKeydown(dom::KeyboardEvent &event) noexcept;
+    void HandleInputMethodKeydown(KeyboardEvent &event) noexcept;
 
     /// @brief Lets the editor client apply what an input method made of a key, after its `keydown`.
-    void DidDispatchInputMethodKeydown(dom::KeyboardEvent &event) noexcept;
+    void DidDispatchInputMethodKeydown(KeyboardEvent &event) noexcept;
 
     using PasteOption = EditorPasteOption;
 
@@ -334,7 +334,7 @@ namespace krys::boo
 
     void TextDidChangeInTextField(Element &element) noexcept;
 
-    bool DoTextFieldCommandFromEvent(Element &element, dom::KeyboardEvent *event) noexcept;
+    bool DoTextFieldCommandFromEvent(Element &element, KeyboardEvent *event) noexcept;
 
     void TextWillBeDeletedInTextField(Element &input) noexcept;
 
@@ -353,7 +353,7 @@ namespace krys::boo
 
     /// @brief The selection a command triggered by @p event works on: a text control's own selection when
     /// the event is at one the frame's selection isn't in.
-    KRYS_NODISCARD VisibleSelection SelectionForCommand(dom::Event *event) const noexcept;
+    KRYS_NODISCARD VisibleSelection SelectionForCommand(Event *event) const noexcept;
 
     KRYS_NODISCARD utf8_string SelectedText() const noexcept;
 
@@ -399,13 +399,12 @@ namespace krys::boo
     void SetBaseWritingDirection(WritingDirection direction) noexcept;
 
     /// @brief Inserts typed text, firing `textInput` at the event's target first.
-    bool InsertText(utf8_stringview text, dom::Event *triggeringEvent,
-                    dom::TextEventInputType inputType) noexcept;
+    bool InsertText(utf8_stringview text, Event *triggeringEvent, dom::TextEventInputType inputType) noexcept;
 
-    bool InsertText(utf8_stringview text, dom::Event *triggeringEvent) noexcept;
+    bool InsertText(utf8_stringview text, Event *triggeringEvent) noexcept;
 
     bool InsertTextWithoutSendingTextEvent(utf8_stringview text, bool selectInsertedText,
-                                           dom::TextEvent *triggeringEvent) noexcept;
+                                           TextEvent *triggeringEvent) noexcept;
 
     bool InsertLineBreak() noexcept;
 
@@ -413,7 +412,7 @@ namespace krys::boo
 
     /// @brief The default action of a `textInput` event: inserts its text, or pastes its fragment.
     /// @return Whether it was handled.
-    bool HandleTextEvent(dom::TextEvent &event) noexcept;
+    bool HandleTextEvent(TextEvent &event) noexcept;
 
     bool DeleteWithDirection(SelectionDirection direction, TextGranularity granularity,
                              bool shouldAddToKillRing, bool isTypingAction) noexcept;

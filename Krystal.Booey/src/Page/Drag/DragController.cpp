@@ -644,7 +644,7 @@ namespace krys::boo
     auto target = innerFrame->Document()->GetEditor().FindEventTargetFrom(
       VisibleSelection(dragCaretController.CaretPosition()));
     // FIXME: What guarantees target is not null?
-    auto event = dom::TextEvent::CreateForDrop(target->NodeDocument().Window(), text);
+    auto event = TextEvent::CreateForDrop(target->NodeDocument().Window(), text);
     (void)target->DispatchEvent(*event);
     return !event->DefaultPrevented();
   }

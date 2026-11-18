@@ -118,7 +118,7 @@ namespace krys::boo::html::tests
     auto invalid = [](const SanitizerConfig &config)
     {
       auto result = Sanitizer::Create(config);
-      return result.HasException() && result.GetException().Code() == dom::ExceptionCode::TypeError;
+      return result.HasException() && result.GetException().Code() == ExceptionCode::TypeError;
     };
 
     CHECK(invalid({.Elements = List<SanitizerElementNamespaceWithAttributes> {u8"p"},

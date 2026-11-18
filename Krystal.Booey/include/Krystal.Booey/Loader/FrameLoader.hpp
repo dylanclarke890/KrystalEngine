@@ -46,10 +46,6 @@
 namespace krys::boo
 {
   class Element;
-}
-
-namespace krys::boo::dom
-{
   class Event;
 }
 
@@ -182,12 +178,12 @@ namespace krys::boo
     /// @param triggeringEvent The event that started the navigation (a click), if any.
     /// @param downloadAttribute The link's `download` attribute; null if it has none.
     /// @param sourceElement The link, if any.
-    void ChangeLocation(const url::URL &url, DOMStringAtom passedTarget, dom::Event *triggeringEvent,
+    void ChangeLocation(const url::URL &url, DOMStringAtom passedTarget, Event *triggeringEvent,
                         ReferrerPolicy referrerPolicy, DOMStringAtom downloadAttribute,
                         Element *sourceElement = nullptr) noexcept;
 
     /// @brief Navigates as @p frameRequest asks, to a `GET` request.
-    void ChangeLocation(FrameLoadRequest frameRequest, dom::Event *triggeringEvent = nullptr) noexcept;
+    void ChangeLocation(FrameLoadRequest frameRequest, Event *triggeringEvent = nullptr) noexcept;
 
     /// @brief Hands a form submission (a `GET` or a `POST`) to the host.
     void SubmitForm(Ref<FormSubmission> &&submission) noexcept;

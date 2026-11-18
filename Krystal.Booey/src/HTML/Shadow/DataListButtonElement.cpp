@@ -48,9 +48,9 @@ namespace krys::boo::html
     return element;
   }
 
-  void DataListButtonElement::DefaultEventHandler(dom::Event &event) noexcept
+  void DataListButtonElement::DefaultEventHandler(Event &event) noexcept
   {
-    if (!Is<dom::MouseEvent>(event))
+    if (!Is<MouseEvent>(event))
     {
       if (!event.DefaultHandled())
       {

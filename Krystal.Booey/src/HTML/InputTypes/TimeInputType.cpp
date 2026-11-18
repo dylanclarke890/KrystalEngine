@@ -84,7 +84,7 @@ namespace krys::boo::html
     return Decimal::FromDouble(milliseconds);
   }
 
-  void TimeInputType::HandleActivationBehavior(dom::Event &) noexcept
+  void TimeInputType::HandleActivationBehavior(Event &) noexcept
   {
   }
 

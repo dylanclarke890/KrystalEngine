@@ -40,9 +40,9 @@ namespace krys::boo::html
   public:
     bool AppendFormData(DOMFormData &formData) const noexcept override;
 
-    ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept override;
+    ShouldCallBaseEventHandler HandleKeydownEvent(KeyboardEvent &event) noexcept override;
 
-    void HandleKeypressEvent(dom::KeyboardEvent &event) noexcept override;
+    void HandleKeypressEvent(KeyboardEvent &event) noexcept override;
 
     KRYS_NODISCARD bool CanSetStringValue() const noexcept override;
 

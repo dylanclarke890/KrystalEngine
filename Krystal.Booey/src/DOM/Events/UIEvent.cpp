@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/Events/UIEvent.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   UIEvent::UIEvent(DOMStringAtom type, const UIEventInit &eventInitDict) noexcept
       : Event(krys::move(type), eventInitDict), _view(ShareRefPtr(eventInitDict.View)),

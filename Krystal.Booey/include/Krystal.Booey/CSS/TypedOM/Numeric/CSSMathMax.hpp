@@ -37,10 +37,9 @@ namespace krys::boo
 
   public:
     /// @return A `SyntaxError` if there are no values, or a `TypeError` if their types can't be combined.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSMathMax>> Create(List<CSSNumberish> numberishes) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSMathMax>> Create(List<CSSNumberish> numberishes) noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSMathMax>>
-      Create(List<Ref<CSSNumericValue>> &&values) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSMathMax>> Create(List<Ref<CSSNumericValue>> &&values) noexcept;
 
     KRYS_NODISCARD const CSSNumericArray &Values() const noexcept
     {

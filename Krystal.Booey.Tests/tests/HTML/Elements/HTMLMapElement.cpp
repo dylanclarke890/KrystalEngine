@@ -30,7 +30,7 @@ namespace krys::boo::html::tests
       u8"<area id=poly shape=poly coords=60,0,100,0,100,40 href=#poly></map>";
 
     /// @brief Counts the clicks at each element.
-    struct ClickRecorder : public dom::EventListenerCallback
+    struct ClickRecorder : public EventListenerCallback
     {
       List<Element *> &Targets;
 
@@ -38,7 +38,7 @@ namespace krys::boo::html::tests
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         auto *node = DynamicDowncast<Node>(event.Target().get());
         Targets.push_back(node ? DynamicDowncast<Element>(*node) : nullptr);

@@ -48,8 +48,8 @@ namespace krys::boo
   namespace
   {
     template <typename T>
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSTransformComponent>>
-      UpcastComponent(dom::ExceptionOr<Ref<T>> component) noexcept
+    KRYS_NODISCARD ExceptionOr<Ref<CSSTransformComponent>>
+      UpcastComponent(ExceptionOr<Ref<T>> component) noexcept
     {
       if (component.HasException())
       {
@@ -60,7 +60,7 @@ namespace krys::boo
 
     /// @brief Reifies a transform function as the transform component of its kind.
     /// @see https://drafts.css-houdini.org/css-typed-om/#reify-a-transform-list
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSTransformComponent>>
+    KRYS_NODISCARD ExceptionOr<Ref<CSSTransformComponent>>
       CreateTransformComponent(const css::FunctionValue &function, Document &document) noexcept
     {
       switch (function.Name())
@@ -112,14 +112,14 @@ namespace krys::boo
         }
         default:
         {
-          return dom::Exception {dom::ExceptionCode::TypeError};
+          return Exception {ExceptionCode::TypeError};
         }
       }
     }
   }
 
-  dom::ExceptionOr<Ref<CSSTransformValue>> CSSTransformValue::Create(const css::TransformListValue &list,
-                                                                     Document &document) noexcept
+  ExceptionOr<Ref<CSSTransformValue>> CSSTransformValue::Create(const css::TransformListValue &list,
+                                                                Document &document) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#reify-a-transform-list
     List<Ref<CSSTransformComponent>> components;
@@ -128,7 +128,7 @@ namespace krys::boo
       const auto *function = DynamicDowncast<css::FunctionValue>(value);
       if (!function)
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       auto component = CreateTransformComponent(*function, document);
       if (component.HasException())
@@ -140,14 +140,14 @@ namespace krys::boo
     return AdoptRef(*new CSSTransformValue(krys::move(components)));
   }
 
-  dom::ExceptionOr<Ref<CSSTransformValue>>
+  ExceptionOr<Ref<CSSTransformValue>>
     CSSTransformValue::Create(List<Ref<CSSTransformComponent>> transforms) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformvalue-csstransformvalue
     // 1. If transforms is empty, throw a TypeError.
     if (transforms.empty())
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     // 2. Let this be a new CSSTransformValue whose values to iterate over is transforms.
     // 3. Return this.
@@ -170,12 +170,12 @@ namespace krys::boo
     return _components[index];
   }
 
-  dom::ExceptionOr<Ref<CSSTransformComponent>>
+  ExceptionOr<Ref<CSSTransformComponent>>
     CSSTransformValue::SetItem(size_t index, Ref<CSSTransformComponent> component) noexcept
   {
     if (index > _components.size())
     {
-      return dom::Exception {dom::ExceptionCode::RangeError};
+      return Exception {ExceptionCode::RangeError};
     }
     if (index == _components.size())
     {
@@ -194,7 +194,7 @@ namespace krys::boo
     return std::ranges::all_of(_components, [](const auto &component) { return component->Is2D(); });
   }
 
-  dom::ExceptionOr<Ref<css::DOMMatrix>> CSSTransformValue::ToMatrix() const noexcept
+  ExceptionOr<Ref<css::DOMMatrix>> CSSTransformValue::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformvalue-tomatrix
     // 1. Let matrix be a new DOMMatrix, initialized to the identity matrix, with its is2D internal slot set

@@ -91,7 +91,7 @@ namespace krys::boo
     return _document.get();
   }
 
-  void LocalDOMWindow::DidAddEventListener(const dom::EventListener &listener) noexcept
+  void LocalDOMWindow::DidAddEventListener(const EventListener &listener) noexcept
   {
     EventTarget::DidAddEventListener(listener);
     if (auto *document = Document())

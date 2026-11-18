@@ -23,7 +23,7 @@ namespace krys::boo::dom::tests
     class TextNodeFilter : public NodeFilter
     {
     public:
-      KRYS_NODISCARD dom::ExceptionOr<FilterResult> AcceptNode(const Node &node) const noexcept override
+      KRYS_NODISCARD ExceptionOr<FilterResult> AcceptNode(const Node &node) const noexcept override
       {
         return node.NodeType() == NodeType::TEXT_NODE ? FilterResult::FILTER_ACCEPT
                                                       : FilterResult::FILTER_REJECT;
@@ -173,7 +173,7 @@ namespace krys::boo::dom::tests
       {
       }
 
-      KRYS_NODISCARD dom::ExceptionOr<FilterResult> AcceptNode(const Node &node) const noexcept override
+      KRYS_NODISCARD ExceptionOr<FilterResult> AcceptNode(const Node &node) const noexcept override
       {
         return Function(node);
       }

@@ -32,15 +32,15 @@
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
-{
-  class HTMLCollection;
-  class KeyboardEvent;
-}
-
 namespace krys::boo
 {
   class HTMLOptGroupElement;
+  class KeyboardEvent;
+}
+
+namespace krys::boo::dom
+{
+  class HTMLCollection;
 }
 
 namespace krys::boo::html
@@ -186,7 +186,7 @@ namespace krys::boo
     KRYS_NODISCARD uint32 Length() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-length
-    dom::ExceptionOr<void> Length(uint32 newLength) noexcept;
+    ExceptionOr<void> Length(uint32 newLength) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-item
     KRYS_NODISCARD HTMLOptionElement *Item(uint32 index) const noexcept;
@@ -195,8 +195,8 @@ namespace krys::boo
     KRYS_NODISCARD HTMLOptionElement *NamedItem(DOMStringView name) const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-add
-    dom::ExceptionOr<void> Add(const OptionOrOptGroupElement &element,
-                               const Maybe<HTMLElementOrInt> &before = {}) noexcept;
+    ExceptionOr<void> Add(const OptionOrOptGroupElement &element,
+                          const Maybe<HTMLElementOrInt> &before = {}) noexcept;
 
     using Element::Remove;
 
@@ -206,7 +206,7 @@ namespace krys::boo
 
     /// @see https://html.spec.whatwg.org/#dom-select-setter
     /// @see https://html.spec.whatwg.org/#append-new-option-elements
-    dom::ExceptionOr<void> SetItem(uint32 index, HTMLOptionElement *option) noexcept;
+    ExceptionOr<void> SetItem(uint32 index, HTMLOptionElement *option) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-selectedoptions
     KRYS_NODISCARD Ref<dom::HTMLCollection> SelectedOptions() noexcept;
@@ -225,7 +225,7 @@ namespace krys::boo
     void Value(DOMStringView value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-showpicker
-    dom::ExceptionOr<void> ShowPicker() noexcept;
+    ExceptionOr<void> ShowPicker() noexcept;
 
 #pragma endregion
 
@@ -368,11 +368,11 @@ namespace krys::boo
 
     void DidRecalcStyle(EnumSet<style::Change> styleChange) noexcept final;
 
-    void DefaultEventHandler(dom::Event &event) noexcept final;
+    void DefaultEventHandler(Event &event) noexcept final;
 
-    void DispatchFocusEvent(dom::EventTarget *relatedTarget, const dom::FocusOptions &options) noexcept final;
+    void DispatchFocusEvent(EventTarget *relatedTarget, const dom::FocusOptions &options) noexcept final;
 
-    void DispatchBlurEvent(dom::EventTarget *relatedTarget) noexcept final;
+    void DispatchBlurEvent(EventTarget *relatedTarget) noexcept final;
 
     void OnChildrenChanged() noexcept final;
 
@@ -384,7 +384,7 @@ namespace krys::boo
     void DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept final;
 
   private:
-    void BaseAppearanceDefaultEventHandler(dom::Event &event) noexcept;
+    void BaseAppearanceDefaultEventHandler(Event &event) noexcept;
 
     /// @see https://html.spec.whatwg.org/#select-open-picker
     void OpenPicker(bool byKeyboard) noexcept;
@@ -398,7 +398,7 @@ namespace krys::boo
     void FocusOptionForKey(DOMStringView keyIdentifier) noexcept;
 
     /// @see https://html.spec.whatwg.org/#append-new-option-elements
-    dom::ExceptionOr<void> AppendNewOptionElements(uint32 count) noexcept;
+    ExceptionOr<void> AppendNewOptionElements(uint32 count) noexcept;
 
     /// @see https://html.spec.whatwg.org/#placeholder-label-option
     KRYS_NODISCARD bool HasPlaceholderLabelOption() const noexcept;
@@ -412,7 +412,7 @@ namespace krys::boo
       bool updateSelectedStates = true,
       html::AllowStyleInvalidation allowStyleInvalidation = html::AllowStyleInvalidation::Yes) const noexcept;
 
-    void TypeAheadFind(dom::KeyboardEvent &event) noexcept;
+    void TypeAheadFind(KeyboardEvent &event) noexcept;
 
     void SaveLastSelection() noexcept;
 
@@ -426,11 +426,11 @@ namespace krys::boo
 
     void UpdateSelectedState(int32 listIndex, bool multi, bool shift) noexcept;
 
-    void MenuListDefaultEventHandler(dom::Event &event) noexcept;
+    void MenuListDefaultEventHandler(Event &event) noexcept;
 
-    bool PlatformHandleKeydownEvent(dom::KeyboardEvent &event) noexcept;
+    bool PlatformHandleKeydownEvent(KeyboardEvent &event) noexcept;
 
-    void ListBoxDefaultEventHandler(dom::Event &event) noexcept;
+    void ListBoxDefaultEventHandler(Event &event) noexcept;
 
     void SetOptionsChangedOnRenderer() noexcept;
 

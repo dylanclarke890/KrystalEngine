@@ -128,7 +128,7 @@ namespace krys::boo::tests
           ViewTimeline::Create(*fixture.Document, {.Subject = ShareRefPtr(&fixture.ById(u8"subject")),
                                                    .Inset = krys::move(inset)});
         REQUIRE(result.HasException());
-        CHECK(result.GetException().Code() == dom::ExceptionCode::TypeError);
+        CHECK(result.GetException().Code() == ExceptionCode::TypeError);
       };
       expectTypeError(DOMString());
       expectTypeError(u8"lemon");

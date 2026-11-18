@@ -13,7 +13,7 @@ namespace krys::boo::tests
     using Strings = List<std::string>;
     using Modifier = PlatformEvent::Modifier;
 
-    struct Recorder : dom::EventListenerCallback
+    struct Recorder : EventListenerCallback
     {
       Strings &Records;
 
@@ -21,7 +21,7 @@ namespace krys::boo::tests
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         auto *element = DynamicDowncast<Element>(DynamicDowncast<Node>(event.Target().get()));
         auto id = element ? element->GetAttribute(u8"id").value_or(DOMString {}) : DOMString {};
@@ -33,14 +33,14 @@ namespace krys::boo::tests
     struct AccessKeyFixture : EditorFixture
     {
       Strings Records;
-      Ref<dom::EventListenerCallback> Listener {CreateRef<Recorder>(Records)};
+      Ref<EventListenerCallback> Listener {CreateRef<Recorder>(Records)};
 
       explicit AccessKeyFixture(utf8_stringview markup) noexcept : EditorFixture(markup)
       {
         Listen(*Document);
       }
 
-      void Listen(dom::EventTarget &target) noexcept
+      void Listen(EventTarget &target) noexcept
       {
         for (auto type : {u8"keydown", u8"keypress", u8"focus", u8"click"})
         {
@@ -89,9 +89,9 @@ namespace krys::boo::tests
 
     SECTION("cancelling the keydown doesn't stop it")
     {
-      struct Canceller : dom::EventListenerCallback
+      struct Canceller : EventListenerCallback
       {
-        void HandleEvent(dom::Event &event) noexcept override
+        void HandleEvent(Event &event) noexcept override
         {
           event.PreventDefault();
         }

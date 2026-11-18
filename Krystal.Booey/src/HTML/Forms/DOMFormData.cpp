@@ -35,8 +35,7 @@
 
 namespace krys::boo::html
 {
-  dom::ExceptionOr<Ref<DOMFormData>> DOMFormData::Create(HTMLFormElement *form,
-                                                         HTMLElement *submitter) noexcept
+  ExceptionOr<Ref<DOMFormData>> DOMFormData::Create(HTMLFormElement *form, HTMLElement *submitter) noexcept
   {
     auto formData = Create();
     if (!form)
@@ -50,21 +49,19 @@ namespace krys::boo::html
       control = ShareRefPtr(DynamicDowncast<HTMLFormControlElement>(*submitter));
       if (!control || !control->IsSubmitButton())
       {
-        return dom::Exception {dom::ExceptionCode::TypeError,
-                               u8"The specified element is not a submit button."};
+        return Exception {ExceptionCode::TypeError, u8"The specified element is not a submit button."};
       }
       if (control->Form() != form)
       {
-        return dom::Exception {dom::ExceptionCode::NotFoundError,
-                               u8"The specified element is not owned by this form element."};
+        return Exception {ExceptionCode::NotFoundError,
+                          u8"The specified element is not owned by this form element."};
       }
     }
 
     auto result = form->ConstructEntryList(krys::move(control), krys::move(formData), nullptr);
     if (!result)
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError,
-                             u8"Already constructing Form entry list."};
+      return Exception {ExceptionCode::InvalidStateError, u8"Already constructing Form entry list."};
     }
 
     Ref<DOMFormData> entryList = krys::move(result);

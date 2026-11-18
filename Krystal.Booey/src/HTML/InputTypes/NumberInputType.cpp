@@ -283,8 +283,7 @@ namespace krys::boo::html
     return width;
   }
 
-  InputType::ShouldCallBaseEventHandler
-    NumberInputType::HandleKeydownEvent(dom::KeyboardEvent &event) noexcept
+  InputType::ShouldCallBaseEventHandler NumberInputType::HandleKeydownEvent(KeyboardEvent &event) noexcept
   {
     HandleKeydownEventForSpinButton(event);
     if (!event.DefaultHandled())
@@ -294,7 +293,7 @@ namespace krys::boo::html
     return ShouldCallBaseEventHandler::Yes;
   }
 
-  void NumberInputType::HandleBeforeTextInsertedEvent(dom::BeforeTextInsertedEvent &event) noexcept
+  void NumberInputType::HandleBeforeTextInsertedEvent(BeforeTextInsertedEvent &event) noexcept
   {
     // Normalize full-width digits and minus sign to ASCII
     auto normalizedText = NormalizeFullWidthNumberChars(event.Text());
@@ -514,17 +513,16 @@ namespace krys::boo::html
     return ParseToDoubleForNumberType(Element()->Value());
   }
 
-  dom::ExceptionOr<void>
-    NumberInputType::SetValueAsDouble(double newValue, TextFieldEventBehavior eventBehavior) const noexcept
+  ExceptionOr<void> NumberInputType::SetValueAsDouble(double newValue,
+                                                      TextFieldEventBehavior eventBehavior) const noexcept
   {
     krys_debug_assert(Element());
     (void)Element()->SetValue(SerializeForNumberType(newValue), eventBehavior);
     return {};
   }
 
-  dom::ExceptionOr<void>
-    NumberInputType::SetValueAsDecimal(const Decimal &newValue,
-                                       TextFieldEventBehavior eventBehavior) const noexcept
+  ExceptionOr<void> NumberInputType::SetValueAsDecimal(const Decimal &newValue,
+                                                       TextFieldEventBehavior eventBehavior) const noexcept
   {
     krys_debug_assert(Element());
     (void)Element()->SetValue(SerializeForNumberType(newValue), eventBehavior);

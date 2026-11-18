@@ -35,7 +35,7 @@ namespace krys::boo
   class WebAnimation;
 
   /// @brief An event about an animation: a playback event, or a CSS animation or transition event.
-  class AnimationEventBase : public dom::Event
+  class AnimationEventBase : public Event
   {
   private:
     RefPtr<WebAnimation> _animation;
@@ -45,7 +45,7 @@ namespace krys::boo
     /// @brief A trusted event, fired by the user agent, that bubbles and isn't cancelable.
     AnimationEventBase(DOMStringAtom type, WebAnimation *animation, Maybe<Seconds> scheduledTime) noexcept;
 
-    AnimationEventBase(DOMStringAtom type, const dom::EventInit &eventInitDict) noexcept;
+    AnimationEventBase(DOMStringAtom type, const EventInit &eventInitDict) noexcept;
 
   public:
     ~AnimationEventBase() noexcept override;
@@ -82,7 +82,7 @@ namespace krys::boo
 
     /// @brief Sets the target to dispatch the event at, once it's dispatched from the pending animation event
     /// queue.
-    void SetTarget(RefPtr<dom::EventTarget> &&target) noexcept
+    void SetTarget(RefPtr<EventTarget> &&target) noexcept
     {
       _target = krys::move(target);
     }
@@ -90,7 +90,7 @@ namespace krys::boo
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::AnimationEventBase)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::Event &event) noexcept
   {
     return event.IsAnimationEvent();
   }

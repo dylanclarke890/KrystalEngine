@@ -28,19 +28,12 @@
 
 namespace krys::boo
 {
-  class Element;
-}
-
-namespace krys::boo::dom
-{
-  template <typename>
-  class ExceptionOr;
-}
-
-namespace krys::boo
-{
   class CSSRule;
   class CSSStyleSheet;
+  class Element;
+
+  template <typename>
+  class ExceptionOr;
 
   enum class StyleDeclarationType : uint8
   {
@@ -75,7 +68,7 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual CSSOMString CssText() const noexcept = 0;
 
-    virtual dom::ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept = 0;
+    virtual ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept = 0;
 
     KRYS_NODISCARD virtual uint32 Length() const noexcept = 0;
 
@@ -94,10 +87,10 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual bool IsPropertyImplicit(const CSSOMString &propertyName) noexcept = 0;
 
-    virtual dom::ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
-                                               const CSSOMString &priority) noexcept = 0;
+    virtual ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
+                                          const CSSOMString &priority) noexcept = 0;
 
-    virtual dom::ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &propertyName) noexcept = 0;
+    virtual ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &propertyName) noexcept = 0;
 
     KRYS_NODISCARD virtual CSSStyleSheet *ParentStyleSheet() const noexcept
     {

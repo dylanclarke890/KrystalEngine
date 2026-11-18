@@ -35,8 +35,7 @@
 
 namespace krys::boo
 {
-  dom::ExceptionOr<Ref<CSSScale>> CSSScale::Create(CSSNumberish x, CSSNumberish y,
-                                                   Maybe<CSSNumberish> z) noexcept
+  ExceptionOr<Ref<CSSScale>> CSSScale::Create(CSSNumberish x, CSSNumberish y, Maybe<CSSNumberish> z) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssscale-cssscale
     // 1. Let x, y, and z (if passed) be replaced by the result of rectifying a numberish value.
@@ -49,7 +48,7 @@ namespace krys::boo
     if (!rectifiedX->Type().MatchesNumber() || !rectifiedY->Type().MatchesNumber()
         || !rectifiedZ->Type().MatchesNumber())
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     // 3. Let this be a new CSSScale object, with its x and y internal slots set to x and y.
     // 4. If z was passed, set this's z internal slot to z, and set this's is2D internal slot to false.
@@ -60,8 +59,7 @@ namespace krys::boo
       *new CSSScale(is2D, krys::move(rectifiedX), krys::move(rectifiedY), krys::move(rectifiedZ)));
   }
 
-  dom::ExceptionOr<Ref<CSSScale>> CSSScale::Create(const css::FunctionValue &function,
-                                                   Document &document) noexcept
+  ExceptionOr<Ref<CSSScale>> CSSScale::Create(const css::FunctionValue &function, Document &document) noexcept
   {
     auto reified = ReifyArguments(function, document);
     if (reified.HasException())
@@ -121,7 +119,7 @@ namespace krys::boo
         break;
       }
     }
-    return dom::Exception {dom::ExceptionCode::TypeError};
+    return Exception {ExceptionCode::TypeError};
   }
 
   CSSScale::CSSScale(bool is2D, Ref<CSSNumericValue> x, Ref<CSSNumericValue> y,
@@ -130,34 +128,34 @@ namespace krys::boo
   {
   }
 
-  dom::ExceptionOr<void> CSSScale::SetX(CSSNumberish x) noexcept
+  ExceptionOr<void> CSSScale::SetX(CSSNumberish x) noexcept
   {
     auto rectified = CSSNumericValue::RectifyNumberish(krys::move(x));
     if (!rectified->Type().MatchesNumber())
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     _x = krys::move(rectified);
     return {};
   }
 
-  dom::ExceptionOr<void> CSSScale::SetY(CSSNumberish y) noexcept
+  ExceptionOr<void> CSSScale::SetY(CSSNumberish y) noexcept
   {
     auto rectified = CSSNumericValue::RectifyNumberish(krys::move(y));
     if (!rectified->Type().MatchesNumber())
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     _y = krys::move(rectified);
     return {};
   }
 
-  dom::ExceptionOr<void> CSSScale::SetZ(CSSNumberish z) noexcept
+  ExceptionOr<void> CSSScale::SetZ(CSSNumberish z) noexcept
   {
     auto rectified = CSSNumericValue::RectifyNumberish(krys::move(z));
     if (!rectified->Type().MatchesNumber())
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     _z = krys::move(rectified);
     return {};
@@ -178,7 +176,7 @@ namespace krys::boo
     builder.Append(u8')');
   }
 
-  dom::ExceptionOr<Ref<css::DOMMatrix>> CSSScale::ToMatrix() const noexcept
+  ExceptionOr<Ref<css::DOMMatrix>> CSSScale::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
     const auto *xUnitValue = DynamicDowncast<CSSUnitValue>(*_x);
@@ -186,7 +184,7 @@ namespace krys::boo
     const auto *zUnitValue = DynamicDowncast<CSSUnitValue>(*_z);
     if (!xUnitValue || !yUnitValue || !zUnitValue)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     TransformationMatrix matrix;

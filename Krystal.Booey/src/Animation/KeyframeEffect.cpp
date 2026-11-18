@@ -523,7 +523,7 @@ namespace krys::boo
       }
     }
 
-    KRYS_NODISCARD dom::ExceptionOr<void>
+    KRYS_NODISCARD ExceptionOr<void>
       ProcessIterableKeyframes(boo::Document &document, List<KeyframeEffect::InputKeyframe> keyframesInput,
                                List<KeyframeEffect::ParsedKeyframe> &parsedKeyframes) noexcept
     {
@@ -543,7 +543,7 @@ namespace krys::boo
         {
           if (!IsTimelineRangeOffsetValid(*timelineRangeOffset))
           {
-            return dom::Exception {dom::ExceptionCode::TypeError};
+            return Exception {ExceptionCode::TypeError};
           }
           keyframeOutput.Offset = *timelineRangeOffset;
         }
@@ -552,7 +552,7 @@ namespace krys::boo
           auto parsedValue = DoubleOrTimelineRangeOffsetFromString(*stringOffset, document);
           if (!parsedValue)
           {
-            return dom::Exception {dom::ExceptionCode::TypeError};
+            return Exception {ExceptionCode::TypeError};
           }
           if (const auto *doubleOffset = std::get_if<double>(&*parsedValue))
           {
@@ -587,7 +587,7 @@ namespace krys::boo
       return {};
     }
 
-    KRYS_NODISCARD dom::ExceptionOr<void> ProcessPropertyIndexedKeyframes(
+    KRYS_NODISCARD ExceptionOr<void> ProcessPropertyIndexedKeyframes(
       boo::Document &document, KeyframeEffect::InputPropertyIndexedKeyframes keyframesInput,
       List<KeyframeEffect::ParsedKeyframe> &parsedKeyframes, List<DOMString> &unusedEasings) noexcept
     {
@@ -608,7 +608,7 @@ namespace krys::boo
           auto parsedValue = DoubleOrTimelineRangeOffsetFromString(*stringOffset, document);
           if (!parsedValue)
           {
-            return dom::Exception {dom::ExceptionCode::TypeError};
+            return Exception {ExceptionCode::TypeError};
           }
           if (const auto *doubleOffset = std::get_if<double>(&*parsedValue))
           {
@@ -720,7 +720,7 @@ namespace krys::boo
           auto validatedOffset = ValidateKeyframeOffset(keyframeOffset, document);
           if (!validatedOffset)
           {
-            return dom::Exception {dom::ExceptionCode::TypeError};
+            return Exception {ExceptionCode::TypeError};
           }
           offsets.push_back(*validatedOffset);
         }
@@ -733,7 +733,7 @@ namespace krys::boo
       {
         if (!IsTimelineRangeOffsetValid(*timelineRangeOffset))
         {
-          return dom::Exception {dom::ExceptionCode::TypeError};
+          return Exception {ExceptionCode::TypeError};
         }
         offsets.emplace_back(*timelineRangeOffset);
       }
@@ -742,7 +742,7 @@ namespace krys::boo
         auto parsedValue = DoubleOrTimelineRangeOffsetFromString(*stringOffset, document);
         if (!parsedValue)
         {
-          return dom::Exception {dom::ExceptionCode::TypeError};
+          return Exception {ExceptionCode::TypeError};
         }
         if (const auto *doubleOffset = std::get_if<double>(&*parsedValue))
         {
@@ -929,7 +929,7 @@ namespace krys::boo
     return css::NameForIDL(property);
   }
 
-  dom::ExceptionOr<Ref<KeyframeEffect>>
+  ExceptionOr<Ref<KeyframeEffect>>
     KeyframeEffect::Create(boo::Document &document, Element *target, KeyframesInput &&keyframes,
                            Maybe<Variant<double, KeyframeEffectOptions>> options) noexcept
   {
@@ -957,7 +957,7 @@ namespace krys::boo
         auto convertedDuration = keyframeEffectOptions.DurationAsDoubleOrString();
         if (!convertedDuration)
         {
-          return dom::Exception {dom::ExceptionCode::TypeError};
+          return Exception {ExceptionCode::TypeError};
         }
 
         timing = {
@@ -1355,8 +1355,8 @@ namespace krys::boo
     return computedKeyframes;
   }
 
-  dom::ExceptionOr<void> KeyframeEffect::SetBindingsKeyframes(boo::Document &document,
-                                                              KeyframesInput keyframesInput) noexcept
+  ExceptionOr<void> KeyframeEffect::SetBindingsKeyframes(boo::Document &document,
+                                                         KeyframesInput keyframesInput) noexcept
   {
     auto retVal = SetKeyframes(document, krys::move(keyframesInput));
     if (!retVal.HasException())
@@ -1369,8 +1369,8 @@ namespace krys::boo
     return retVal;
   }
 
-  dom::ExceptionOr<void> KeyframeEffect::SetKeyframes(boo::Document &document,
-                                                      KeyframesInput keyframesInput) noexcept
+  ExceptionOr<void> KeyframeEffect::SetKeyframes(boo::Document &document,
+                                                 KeyframesInput keyframesInput) noexcept
   {
     auto processKeyframesResult = ProcessKeyframes(document, krys::move(keyframesInput));
     if (!processKeyframesResult.HasException() && Animation())
@@ -1387,8 +1387,8 @@ namespace krys::boo
     return processKeyframesResult;
   }
 
-  dom::ExceptionOr<void> KeyframeEffect::ProcessKeyframes(boo::Document &document,
-                                                          KeyframesInput keyframesInput) noexcept
+  ExceptionOr<void> KeyframeEffect::ProcessKeyframes(boo::Document &document,
+                                                     KeyframesInput keyframesInput) noexcept
   {
     Ref protectedDocument = ShareRef(document);
 
@@ -1436,7 +1436,7 @@ namespace krys::boo
       auto offset = *doubleOffset;
       if (offset < lastNonNullOffset || offset < 0 || offset > 1)
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       lastNonNullOffset = offset;
     }
@@ -1460,7 +1460,7 @@ namespace krys::boo
         css::parse_property::ParseEasingFunctionDeprecated(keyframe.Easing, parserContext);
       if (!timingFunctionResult)
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       keyframe.TimingFunction = krys::move(timingFunctionResult);
     }
@@ -1474,7 +1474,7 @@ namespace krys::boo
       // non-deprecated parsing function.
       if (!css::parse_property::ParseEasingFunctionDeprecated(easing, parserContext))
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
     }
 
@@ -1922,13 +1922,13 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> KeyframeEffect::SetPseudoElement(const CSSOMString &pseudoElement) noexcept
+  ExceptionOr<void> KeyframeEffect::SetPseudoElement(const CSSOMString &pseudoElement) noexcept
   {
     // https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-pseudoelement
     auto [parsed, pseudoElementIdentifier] = PseudoElementIdentifierFromString(pseudoElement, Document());
     if (!parsed)
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError, u8"Parsing pseudo-element selector failed"};
+      return Exception {ExceptionCode::SyntaxError, u8"Parsing pseudo-element selector failed"};
     }
 
     if (_pseudoElementIdentifier == pseudoElementIdentifier)

@@ -281,13 +281,13 @@ namespace krys::boo
     SetInactive();
   }
 
-  dom::ExceptionOr<float> SVGAnimationElement::GetStartTime() const noexcept
+  ExceptionOr<float> SVGAnimationElement::GetStartTime() const noexcept
   {
     auto intervalBegin = IntervalBegin();
     if (!intervalBegin.IsFinite())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError,
-                             u8"The animation element does not have a current interval."};
+      return Exception {ExceptionCode::InvalidStateError,
+                        u8"The animation element does not have a current interval."};
     }
     return static_cast<float>(intervalBegin.Value());
   }
@@ -297,13 +297,13 @@ namespace krys::boo
     return static_cast<float>(Elapsed().Value());
   }
 
-  dom::ExceptionOr<float> SVGAnimationElement::GetSimpleDuration() const noexcept
+  ExceptionOr<float> SVGAnimationElement::GetSimpleDuration() const noexcept
   {
     auto simpleDuration = SimpleDuration();
     if (!simpleDuration.IsFinite())
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError,
-                             u8"The simple duration is not determined on the given element."};
+      return Exception {ExceptionCode::NotSupportedError,
+                        u8"The simple duration is not determined on the given element."};
     }
     return static_cast<float>(simpleDuration.Value());
   }

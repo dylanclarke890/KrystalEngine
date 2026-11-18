@@ -92,7 +92,7 @@ namespace krys::boo
     }
   }
 
-  class svg::ConditionEventListener final : public dom::EventListenerCallback
+  class svg::ConditionEventListener final : public EventListenerCallback
   {
   private:
     WeakPtr<SVGSMILElement> _animation;
@@ -116,7 +116,7 @@ namespace krys::boo
     {
     }
 
-    void HandleEvent(dom::Event &) noexcept final
+    void HandleEvent(Event &) noexcept final
     {
       if (RefPtr animation = ShareRefPtr(_animation.get()))
       {
@@ -716,8 +716,7 @@ namespace krys::boo
         krys_debug_assert(!condition.EventListener);
         condition.EventListener = svg::ConditionEventListener::Create(this, &condition);
         eventBase->AddEventListener(
-          condition.Name, ShareRef(static_cast<dom::EventListenerCallback &>(*condition.EventListener)),
-          false);
+          condition.Name, ShareRef(static_cast<EventListenerCallback &>(*condition.EventListener)), false);
       }
       else if (condition.ConditionType == Condition::Syncbase)
       {
@@ -763,8 +762,7 @@ namespace krys::boo
         if (RefPtr eventBase = EventBaseFor(condition))
         {
           eventBase->RemoveEventListener(
-            condition.Name, ShareRef(static_cast<dom::EventListenerCallback &>(*condition.EventListener)),
-            false);
+            condition.Name, ShareRef(static_cast<EventListenerCallback &>(*condition.EventListener)), false);
         }
         condition.EventListener->DisconnectAnimation();
         condition.EventListener = nullptr;
@@ -1626,7 +1624,7 @@ namespace krys::boo
                                             const StringAtom &eventType) noexcept
   {
     krys_debug_assert(eventSender == &SmilEventSender());
-    auto event = dom::Event::Create(eventType, false, false);
+    auto event = Event::Create(eventType, false, false);
     (void)DispatchEvent(*event);
   }
 }

@@ -32,15 +32,15 @@ namespace krys::boo::html::tests
     struct ToggleLog
     {
       List<std::string> Events;
-      List<dom::EventListenerHandle> Handles;
+      List<EventListenerHandle> Handles;
 
       void Watch(Element &element) noexcept
       {
         auto id = Narrow(element.GetAttribute(u8"id").value_or(DOMString()));
         Handles.push_back(element.AddEventListener(u8"toggle",
-                                                   [this, id](dom::Event &event)
+                                                   [this, id](Event &event)
                                                    {
-                                                     auto &toggle = Downcast<dom::ToggleEvent>(event);
+                                                     auto &toggle = Downcast<ToggleEvent>(event);
                                                      Events.push_back(id + ":" + Narrow(toggle.OldState())
                                                                       + ">" + Narrow(toggle.NewState()));
                                                    }));
@@ -288,7 +288,7 @@ namespace krys::boo::html::tests
     List<std::string> events;
     auto handle = document.AddEventListener(
       u8"beforematch",
-      [&](dom::Event &event)
+      [&](Event &event)
       {
         CHECK(event.Bubbles());
         CHECK_FALSE(event.Cancelable());

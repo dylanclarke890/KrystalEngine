@@ -58,7 +58,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-path2d-addpath
-  dom::ExceptionOr<void> Path2D::AddPath(const Path2D &path, css::DOMMatrix2DInit transform) noexcept
+  ExceptionOr<void> Path2D::AddPath(const Path2D &path, css::DOMMatrix2DInit transform) noexcept
   {
     // 2. Let matrix be the result of creating a DOMMatrix from the 2D dictionary transform.
     auto checkValid = css::DOMMatrixReadOnly::ValidateAndFixup(transform);

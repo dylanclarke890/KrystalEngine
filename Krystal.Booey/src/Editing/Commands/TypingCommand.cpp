@@ -268,7 +268,7 @@ namespace krys::boo
   }
 
   // (There are no spelling and grammar markers to update; see DIFFERENCES.md.)
-  void TypingCommand::InsertText(Document &document, utf8_stringview text, dom::Event *triggeringEvent,
+  void TypingCommand::InsertText(Document &document, utf8_stringview text, Event *triggeringEvent,
                                  EnumSet<Option> options, TextCompositionType composition) noexcept
   {
     const auto &selection = document.Selection().Selection();
@@ -277,7 +277,7 @@ namespace krys::boo
 
   // FIXME: We shouldn't need to take selectionForInsertion. It should be identical to FrameSelection's
   // current selection.
-  void TypingCommand::InsertText(Document &document, utf8_stringview text, dom::Event *triggeringEvent,
+  void TypingCommand::InsertText(Document &document, utf8_stringview text, Event *triggeringEvent,
                                  const VisibleSelection &selectionForInsertion, EnumSet<Option> options,
                                  TextCompositionType compositionType) noexcept
   {

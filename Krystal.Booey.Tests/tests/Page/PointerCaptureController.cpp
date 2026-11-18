@@ -19,7 +19,7 @@ namespace krys::boo::tests
   {
     using Strings = List<std::string>;
 
-    KRYS_NODISCARD std::string Name(const dom::EventTarget *target)
+    KRYS_NODISCARD std::string Name(const EventTarget *target)
     {
       auto *node = DynamicDowncast<Node>(target);
       auto *element = node ? DynamicDowncast<Element>(*node) : nullptr;
@@ -33,7 +33,7 @@ namespace krys::boo::tests
     }
 
     /// @brief Records the events it handles as `type:target`, with `!` after the type of a pointer event.
-    struct Recorder : public dom::EventListenerCallback
+    struct Recorder : public EventListenerCallback
     {
       List<std::string> &Records;
 
@@ -41,7 +41,7 @@ namespace krys::boo::tests
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         auto type = std::string(event.Type().View().begin(), event.Type().View().end());
         Records.push_back(type + (event.IsPointerEvent() ? "!" : "") + ":" + Name(event.Target().get()));
@@ -50,7 +50,7 @@ namespace krys::boo::tests
 
     /// @brief Calls @p action when it handles an event.
     template <typename TAction>
-    struct ActionListener : public dom::EventListenerCallback
+    struct ActionListener : public EventListenerCallback
     {
       TAction Action;
 
@@ -58,7 +58,7 @@ namespace krys::boo::tests
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         Action(event);
       }
@@ -77,7 +77,7 @@ namespace krys::boo::tests
       {
         (void)Document->UpdateLayout();
         // Capturing at the document sees the events that don't bubble too.
-        Ref<dom::EventListenerCallback> recorder = CreateRef<Recorder>(Records);
+        Ref<EventListenerCallback> recorder = CreateRef<Recorder>(Records);
         for (auto type :
              {u8"pointerover", u8"pointerout", u8"pointerenter", u8"pointerleave", u8"pointerdown",
               u8"pointermove", u8"pointerup", u8"pointercancel", u8"gotpointercapture",
@@ -148,7 +148,7 @@ namespace krys::boo::tests
       template <typename TAction>
       void On(Element &element, utf8_stringview type, TAction action) noexcept
       {
-        Ref<dom::EventListenerCallback> listener = CreateRef<ActionListener<TAction>>(krys::move(action));
+        Ref<EventListenerCallback> listener = CreateRef<ActionListener<TAction>>(krys::move(action));
         element.AddEventListener(DOMStringAtom(type), krys::move(listener), false);
       }
     };
@@ -178,12 +178,11 @@ namespace krys::boo::tests
 
     SECTION("the pointer events' properties")
     {
-      RefPtr<dom::PointerEvent> down;
-      RefPtr<dom::PointerEvent> click;
+      RefPtr<PointerEvent> down;
+      RefPtr<PointerEvent> click;
       fixture.On(a, u8"pointerdown",
-                 [&](dom::Event &event) { down = ShareRefPtr(&Downcast<dom::PointerEvent>(event)); });
-      fixture.On(a, u8"click",
-                 [&](dom::Event &event) { click = ShareRefPtr(&Downcast<dom::PointerEvent>(event)); });
+                 [&](Event &event) { down = ShareRefPtr(&Downcast<PointerEvent>(event)); });
+      fixture.On(a, u8"click", [&](Event &event) { click = ShareRefPtr(&Downcast<PointerEvent>(event)); });
       fixture.Press(10.5, 20.5);
       fixture.Release(10.5, 20.5);
       REQUIRE(down);
@@ -200,12 +199,12 @@ namespace krys::boo::tests
 
     SECTION("pointerrawupdate comes before each pointermove, and can't be cancelled")
     {
-      List<Ref<dom::PointerEvent>> rawUpdates;
+      List<Ref<PointerEvent>> rawUpdates;
       fixture.On(a, u8"pointerrawupdate",
-                 [&](dom::Event &event)
+                 [&](Event &event)
                  {
                    fixture.Records.emplace_back("raw:a");
-                   rawUpdates.push_back(ShareRef(Downcast<dom::PointerEvent>(event)));
+                   rawUpdates.push_back(ShareRef(Downcast<PointerEvent>(event)));
                    event.PreventDefault();
                  });
 
@@ -237,7 +236,7 @@ namespace krys::boo::tests
     {
       fixture.Move(10, 10);
       (void)fixture.Take();
-      fixture.On(a, u8"pointerdown", [](dom::Event &event) { event.PreventDefault(); });
+      fixture.On(a, u8"pointerdown", [](Event &event) { event.PreventDefault(); });
       fixture.Press(10, 10);
       CHECK(fixture.Take() == Strings {"pointerdown!:a"});
       fixture.Move(20, 20, 1);
@@ -270,9 +269,8 @@ namespace krys::boo::tests
 
     SECTION("a simulated click is a pointer event from no pointing device")
     {
-      RefPtr<dom::PointerEvent> click;
-      fixture.On(a, u8"click",
-                 [&](dom::Event &event) { click = ShareRefPtr(&Downcast<dom::PointerEvent>(event)); });
+      RefPtr<PointerEvent> click;
+      fixture.On(a, u8"click", [&](Event &event) { click = ShareRefPtr(&Downcast<PointerEvent>(event)); });
       Downcast<HTMLElement>(a).Click();
       REQUIRE(click);
       CHECK(click->PointerId() == static_cast<PointerID>(-1));
@@ -300,7 +298,7 @@ namespace krys::boo::tests
     {
       fixture.Move(10, 10);
       (void)fixture.Take();
-      fixture.On(a, u8"pointerdown", [](dom::Event &event) { event.PreventDefault(); });
+      fixture.On(a, u8"pointerdown", [](Event &event) { event.PreventDefault(); });
       fixture.Press(10, 10);
       CHECK(fixture.Take() == Strings {"pointerdown!:a"});
       fixture.Move(20, 20, 1);
@@ -327,24 +325,24 @@ namespace krys::boo::tests
       uint32 moves = 0;
       SECTION("on a node")
       {
-        fixture.On(a, u8"pointermove", [&](dom::Event &) { ++moves; });
+        fixture.On(a, u8"pointermove", [&](Event &) { ++moves; });
       }
       SECTION("as a handler")
       {
-        Downcast<HTMLElement>(a).SetOnPointerMove([&](dom::Event &) { ++moves; });
+        Downcast<HTMLElement>(a).SetOnPointerMove([&](Event &) { ++moves; });
       }
       SECTION("on the window")
       {
-        fixture.Document->Window()->SetOnPointerMove([&](dom::Event &) { ++moves; });
+        fixture.Document->Window()->SetOnPointerMove([&](Event &) { ++moves; });
       }
       SECTION("on a node adopted into the document")
       {
         auto other = fixture.Document->Implementation().CreateHTMLDocument(u8"other").ReleaseValue();
         auto div = other->CreateElement(u8"div").ReleaseValue();
-        fixture.On(*div, u8"pointermove", [](dom::Event &) {});
+        fixture.On(*div, u8"pointermove", [](Event &) {});
         REQUIRE_FALSE(a.AppendChild(*div).HasException());
         CHECK(fixture.Document->HasPointerMoveListener());
-        fixture.On(a, u8"pointermove", [&](dom::Event &) { ++moves; });
+        fixture.On(a, u8"pointermove", [&](Event &) { ++moves; });
       }
       CHECK(fixture.Document->HasPointerMoveListener());
       fixture.Move(20, 10);
@@ -357,11 +355,11 @@ namespace krys::boo::tests
       uint32 moves = 0;
       uint32 rawUpdates = 0;
       fixture.On(a, u8"pointerrawupdate",
-                 [&](dom::Event &)
+                 [&](Event &)
                  {
                    if (!rawUpdates++)
                    {
-                     fixture.On(a, u8"pointermove", [&](dom::Event &) { ++moves; });
+                     fixture.On(a, u8"pointermove", [&](Event &) { ++moves; });
                    }
                  });
       CHECK(fixture.Document->HasPointerRawUpdateListener());
@@ -380,9 +378,9 @@ namespace krys::boo::tests
     auto captureOnPress = [&]
     {
       fixture.On(a, u8"pointerdown",
-                 [&](dom::Event &event)
+                 [&](Event &event)
                  {
-                   auto pointerId = static_cast<int32>(Downcast<dom::PointerEvent>(event).PointerId());
+                   auto pointerId = static_cast<int32>(Downcast<PointerEvent>(event).PointerId());
                    CHECK_FALSE(a.SetPointerCapture(pointerId).HasException());
                    CHECK(a.HasPointerCapture(pointerId));
                  });
@@ -452,15 +450,15 @@ namespace krys::boo::tests
     {
       auto unknown = a.SetPointerCapture(99);
       REQUIRE(unknown.HasException());
-      CHECK(unknown.GetException().Code() == dom::ExceptionCode::NotFoundError);
+      CHECK(unknown.GetException().Code() == ExceptionCode::NotFoundError);
       auto unknownRelease = a.ReleasePointerCapture(99);
       REQUIRE(unknownRelease.HasException());
-      CHECK(unknownRelease.GetException().Code() == dom::ExceptionCode::NotFoundError);
+      CHECK(unknownRelease.GetException().Code() == ExceptionCode::NotFoundError);
 
       auto disconnected = fixture.Document->CreateElement(u8"div").ReleaseValue();
       auto result = disconnected->SetPointerCapture(MousePointerID);
       REQUIRE(result.HasException());
-      CHECK(result.GetException().Code() == dom::ExceptionCode::InvalidStateError);
+      CHECK(result.GetException().Code() == ExceptionCode::InvalidStateError);
 
       // The mouse isn't pressed, so nothing captures it.
       CHECK_FALSE(a.SetPointerCapture(MousePointerID).HasException());

@@ -95,8 +95,8 @@ namespace krys::boo::html
     /// @brief Defines @p name as a custom element whose behaviour @p factory creates, and upgrades the
     /// elements already waiting for it.
     /// @see https://html.spec.whatwg.org/#dom-customelementregistry-define
-    dom::ExceptionOr<void> Define(const DOMStringAtom &name, CustomElementFactory &&factory,
-                                  CustomElementOptions &&options = {}) noexcept;
+    ExceptionOr<void> Define(const DOMStringAtom &name, CustomElementFactory &&factory,
+                             CustomElementOptions &&options = {}) noexcept;
 
     /// @brief The definition of @p name; null if there's none.
     /// @see https://html.spec.whatwg.org/#dom-customelementregistry-get
@@ -108,7 +108,7 @@ namespace krys::boo::html
 
     /// @brief Calls @p callback (in a microtask) once @p name is defined, or now if it already is.
     /// @see https://html.spec.whatwg.org/#dom-customelementregistry-whendefined
-    dom::ExceptionOr<void> WhenDefined(const DOMStringAtom &name, WhenDefinedCallback &&callback) noexcept;
+    ExceptionOr<void> WhenDefined(const DOMStringAtom &name, WhenDefinedCallback &&callback) noexcept;
 
     /// @brief Tries to upgrade @p root and its shadow-including descendants.
     /// @see https://html.spec.whatwg.org/#dom-customelementregistry-upgrade
@@ -116,7 +116,7 @@ namespace krys::boo::html
 
     /// @brief Gives @p root and its descendants that have a null registry this one, and upgrades them.
     /// @see https://html.spec.whatwg.org/#dom-customelementregistry-initialize
-    dom::ExceptionOr<void> Initialize(Node &root) noexcept;
+    ExceptionOr<void> Initialize(Node &root) noexcept;
 
     /// @brief Remembers that @p document has trees using this (scoped) registry, so that they upgrade when
     /// a definition is added.

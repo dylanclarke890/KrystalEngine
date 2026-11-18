@@ -116,7 +116,7 @@ namespace krys::boo::html
     return ValueAsDouble();
   }
 
-  dom::ExceptionOr<void> BaseDateAndTimeInputType::SetValueAsDate(double value) const noexcept
+  ExceptionOr<void> BaseDateAndTimeInputType::SetValueAsDate(double value) const noexcept
   {
     krys_debug_assert(Element());
     (void)Element()->SetValue(SerializeWithMilliseconds(value));
@@ -130,7 +130,7 @@ namespace krys::boo::html
     return value.IsFinite() ? value.ToDouble() : DateComponents::InvalidMilliseconds();
   }
 
-  dom::ExceptionOr<void>
+  ExceptionOr<void>
     BaseDateAndTimeInputType::SetValueAsDecimal(const Decimal &newValue,
                                                 TextFieldEventBehavior eventBehavior) const noexcept
   {
@@ -295,7 +295,7 @@ namespace krys::boo::html
     }
   }
 
-  void BaseDateAndTimeInputType::HandleActivationBehavior(dom::Event &event) noexcept
+  void BaseDateAndTimeInputType::HandleActivationBehavior(Event &event) noexcept
   {
     krys_debug_assert(Element());
     // Only for a user's click or key.
@@ -304,7 +304,7 @@ namespace krys::boo::html
       return;
     }
 
-    _pickerWasActivatedByKeyboard = Is<dom::KeyboardEvent>(event);
+    _pickerWasActivatedByKeyboard = Is<KeyboardEvent>(event);
 
     if (_dateTimeChooser)
     {
@@ -472,13 +472,13 @@ namespace krys::boo::html
   }
 
   InputType::ShouldCallBaseEventHandler
-    BaseDateAndTimeInputType::HandleKeydownEvent(dom::KeyboardEvent &event) noexcept
+    BaseDateAndTimeInputType::HandleKeydownEvent(KeyboardEvent &event) noexcept
   {
     krys_debug_assert(Element());
     return BaseClickableWithKeyInputType::HandleKeydownEvent(*Element(), event);
   }
 
-  void BaseDateAndTimeInputType::HandleKeypressEvent(dom::KeyboardEvent &event) noexcept
+  void BaseDateAndTimeInputType::HandleKeypressEvent(KeyboardEvent &event) noexcept
   {
     // The return key should not activate the element, as it conflicts with the key binding to submit a form.
     if (event.CharCode() == '\r')
@@ -490,7 +490,7 @@ namespace krys::boo::html
     BaseClickableWithKeyInputType::HandleKeypressEvent(*Element(), event);
   }
 
-  void BaseDateAndTimeInputType::HandleKeyupEvent(dom::KeyboardEvent &event) noexcept
+  void BaseDateAndTimeInputType::HandleKeyupEvent(KeyboardEvent &event) noexcept
   {
     BaseClickableWithKeyInputType::HandleKeyupEvent(*this, event);
   }

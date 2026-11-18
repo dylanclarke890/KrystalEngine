@@ -29,8 +29,8 @@
 
 namespace krys::boo
 {
-  dom::ExceptionOr<Ref<CSSMathClamp>> CSSMathClamp::Create(CSSNumberish &&lower, CSSNumberish &&value,
-                                                           CSSNumberish &&upper) noexcept
+  ExceptionOr<Ref<CSSMathClamp>> CSSMathClamp::Create(CSSNumberish &&lower, CSSNumberish &&value,
+                                                      CSSNumberish &&upper) noexcept
   {
     auto rectifiedLower = RectifyNumberish(krys::move(lower));
     auto rectifiedValue = RectifyNumberish(krys::move(value));
@@ -39,12 +39,12 @@ namespace krys::boo
     auto addedType = CSSNumericType::AddTypes(rectifiedLower->Type(), rectifiedValue->Type());
     if (!addedType)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     addedType = CSSNumericType::AddTypes(*addedType, rectifiedUpper->Type());
     if (!addedType)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     return AdoptRef(*new CSSMathClamp(krys::move(*addedType), krys::move(rectifiedLower),

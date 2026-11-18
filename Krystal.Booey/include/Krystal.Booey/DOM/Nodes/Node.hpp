@@ -206,7 +206,7 @@ namespace krys::boo
   /// @see https://dom.spec.whatwg.org/#interface-node
   /// @see https://dom.spec.whatwg.org/#concept-node
   /// @see https://dom.spec.whatwg.org/#concept-node-tree
-  class Node : public dom::EventTarget, public CanMakeCheckedPtr<Node>
+  class Node : public EventTarget, public CanMakeCheckedPtr<Node>
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Node);
@@ -324,7 +324,7 @@ namespace krys::boo
 
     /// @see https://dom.spec.whatwg.org/#dom-node-nodevalue
     // NOLINTNEXTLINE(performance-unnecessary-value-param): a sink in the overrides.
-    virtual dom::ExceptionOr<void> NodeValue(DOMString value) noexcept
+    virtual ExceptionOr<void> NodeValue(DOMString value) noexcept
     {
       (void)value; // still want it in the signature
       return {};
@@ -343,17 +343,17 @@ namespace krys::boo
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
     /// @see https://dom.spec.whatwg.org/#set-text-content
     // NOLINTNEXTLINE(performance-unnecessary-value-param): a sink in the overrides.
-    virtual dom::ExceptionOr<void> TextContent(DOMString value) noexcept
+    virtual ExceptionOr<void> TextContent(DOMString value) noexcept
     {
       (void)value; // still want it in the signature
       return {};
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-node-normalize
-    dom::ExceptionOr<void> Normalize() noexcept;
+    ExceptionOr<void> Normalize() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-clonenode
-    KRYS_NODISCARD dom::ExceptionOr<Ref<Node>> CloneNode(bool subtree = false) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<Node>> CloneNode(bool subtree = false) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-isequalnode
     KRYS_NODISCARD bool IsEqualNode(const Node *otherNode) const noexcept;
@@ -402,16 +402,16 @@ namespace krys::boo
     KRYS_NODISCARD bool IsDefaultNamespace(DOMStringAtom namespaceURI) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-insertbefore
-    dom::ExceptionOr<Node &> InsertBefore(Node &newChild, Node *refChild) noexcept;
+    ExceptionOr<Node &> InsertBefore(Node &newChild, Node *refChild) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-replacechild
-    dom::ExceptionOr<Node &> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
+    ExceptionOr<Node &> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-removechild
-    dom::ExceptionOr<Node &> RemoveChild(Node &child) noexcept;
+    ExceptionOr<Node &> RemoveChild(Node &child) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-appendchild
-    dom::ExceptionOr<Node &> AppendChild(Node &newChild) noexcept;
+    ExceptionOr<Node &> AppendChild(Node &newChild) noexcept;
 
 #pragma endregion
 
@@ -695,7 +695,7 @@ namespace krys::boo
     /// @brief Handles @p event after its dispatch when no listener canceled it: called for the event's
     /// target, then for the nodes on its path until one handles it (`Event::SetDefaultHandled`), if it
     /// bubbles.
-    virtual void DefaultEventHandler(dom::Event &event) noexcept;
+    virtual void DefaultEventHandler(Event &event) noexcept;
 
     /// @brief Whether a position can be inside the node; the content of nodes it can't be inside (images,
     /// `<br>`, form controls) is ignored by editing.
@@ -731,9 +731,9 @@ namespace krys::boo
 
   protected:
     /// @see https://dom.spec.whatwg.org/#get-the-parent
-    KRYS_NODISCARD dom::EventTarget *GetParent(dom::Event &event) const noexcept override;
+    KRYS_NODISCARD EventTarget *GetParent(Event &event) const noexcept override;
 
-    void DidAddEventListener(const dom::EventListener &listener) noexcept override;
+    void DidAddEventListener(const EventListener &listener) noexcept override;
 
   public:
 #pragma region Tree Scope
@@ -1059,7 +1059,7 @@ namespace krys::boo::dom
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::Node)
-  static bool IsType(const krys::boo::dom::EventTarget &target) noexcept
+  static bool IsType(const krys::boo::EventTarget &target) noexcept
   {
     return target.IsNode();
   }

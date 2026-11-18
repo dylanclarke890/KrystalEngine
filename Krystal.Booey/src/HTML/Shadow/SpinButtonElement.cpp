@@ -64,9 +64,9 @@ namespace krys::boo::html
     return host && host->IsDisabledFormControl();
   }
 
-  void SpinButtonElement::DefaultEventHandler(dom::Event &event) noexcept
+  void SpinButtonElement::DefaultEventHandler(Event &event) noexcept
   {
-    auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
+    auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
     if (!mouseEvent)
     {
       if (!event.DefaultHandled())

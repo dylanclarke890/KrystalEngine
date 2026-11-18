@@ -32,15 +32,11 @@
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::dom
-{
-  template <typename>
-  class ExceptionOr;
-}
-
 namespace krys::boo
 {
   class CSSStyleSheet;
+  template <typename>
+  class ExceptionOr;
 }
 
 namespace krys::boo::css
@@ -138,7 +134,7 @@ namespace krys::boo
     {
     }
 
-    static dom::ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept;
+    static ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept;
 
   protected:
     KRYS_NODISCARD bool HasCachedSelectorText() const noexcept

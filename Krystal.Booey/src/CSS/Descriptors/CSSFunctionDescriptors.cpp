@@ -56,7 +56,7 @@ namespace krys::boo
     return GetPropertyValueInternal(css::PropertyId::Result);
   }
 
-  dom::ExceptionOr<void> CSSFunctionDescriptors::SetResult(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSFunctionDescriptors::SetResult(const CSSOMString &value) noexcept
   {
     return SetPropertyInternal(css::PropertyId::Result, value, css::IsImportant::No);
   }

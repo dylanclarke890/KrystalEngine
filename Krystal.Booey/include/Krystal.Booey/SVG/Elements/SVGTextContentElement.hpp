@@ -120,25 +120,25 @@ namespace krys::boo
     KRYS_NODISCARD float GetComputedTextLength() noexcept;
 
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__getSubStringLength
-    KRYS_NODISCARD dom::ExceptionOr<float> GetSubStringLength(uint32 charnum, uint32 nchars) noexcept;
+    KRYS_NODISCARD ExceptionOr<float> GetSubStringLength(uint32 charnum, uint32 nchars) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__getStartPositionOfChar
-    KRYS_NODISCARD dom::ExceptionOr<Ref<SVGPoint>> GetStartPositionOfChar(uint32 charnum) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<SVGPoint>> GetStartPositionOfChar(uint32 charnum) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__getEndPositionOfChar
-    KRYS_NODISCARD dom::ExceptionOr<Ref<SVGPoint>> GetEndPositionOfChar(uint32 charnum) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<SVGPoint>> GetEndPositionOfChar(uint32 charnum) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__getExtentOfChar
-    KRYS_NODISCARD dom::ExceptionOr<Ref<SVGRect>> GetExtentOfChar(uint32 charnum) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<SVGRect>> GetExtentOfChar(uint32 charnum) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__getRotationOfChar
-    KRYS_NODISCARD dom::ExceptionOr<float> GetRotationOfChar(uint32 charnum) noexcept;
+    KRYS_NODISCARD ExceptionOr<float> GetRotationOfChar(uint32 charnum) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__getCharNumAtPosition
     KRYS_NODISCARD int32 GetCharNumAtPosition(dom::DOMPointInit) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__selectSubString
-    dom::ExceptionOr<void> SelectSubString(uint32 charnum, uint32 nchars) noexcept;
+    ExceptionOr<void> SelectSubString(uint32 charnum, uint32 nchars) noexcept;
 
     KRYS_NODISCARD static const SVGTextContentElement *ElementFromRenderer(const RenderObject *) noexcept;
 

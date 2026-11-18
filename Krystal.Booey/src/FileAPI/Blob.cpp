@@ -198,27 +198,27 @@ namespace krys::boo
 
     /// @brief Appends @p length bytes of the file at @p path, from @p offset (to its end for
     /// `BlobDataItem::ToEndOfFile`), to @p bytes.
-    KRYS_NODISCARD Maybe<dom::Exception> ReadFileRange(utf8_stringview path, int64 offset, int64 length,
-                                                       List<uint8> &bytes) noexcept
+    KRYS_NODISCARD Maybe<Exception> ReadFileRange(utf8_stringview path, int64 offset, int64 length,
+                                                  List<uint8> &bytes) noexcept
     {
       std::filesystem::path filePath(path);
       std::error_code error;
       if (!std::filesystem::is_regular_file(filePath, error))
       {
-        return dom::Exception {dom::ExceptionCode::NotFoundError};
+        return Exception {ExceptionCode::NotFoundError};
       }
 
       std::ifstream file(filePath, std::ios::binary);
       if (!file)
       {
-        return dom::Exception {dom::ExceptionCode::NotReadableError};
+        return Exception {ExceptionCode::NotReadableError};
       }
       if (length == BlobDataItem::ToEndOfFile)
       {
         auto size = static_cast<int64>(std::filesystem::file_size(filePath, error));
         if (error)
         {
-          return dom::Exception {dom::ExceptionCode::NotReadableError};
+          return Exception {ExceptionCode::NotReadableError};
         }
         length = size > offset ? size - offset : 0;
       }
@@ -229,7 +229,7 @@ namespace krys::boo
       file.read(reinterpret_cast<char *>(bytes.data() + start), static_cast<std::streamsize>(length));
       if (file.gcount() != static_cast<std::streamsize>(length))
       {
-        return dom::Exception {dom::ExceptionCode::NotReadableError};
+        return Exception {ExceptionCode::NotReadableError};
       }
       return std::nullopt;
     }
@@ -328,7 +328,7 @@ namespace krys::boo
                               static_cast<size_t>(sliceMemoryCost)));
   }
 
-  dom::ExceptionOr<List<uint8>> Blob::Bytes() const noexcept
+  ExceptionOr<List<uint8>> Blob::Bytes() const noexcept
   {
     List<uint8> bytes;
     for (auto &item : _data->Items())
@@ -347,7 +347,7 @@ namespace krys::boo
     return bytes;
   }
 
-  dom::ExceptionOr<utf8_string> Blob::Text() const noexcept
+  ExceptionOr<utf8_string> Blob::Text() const noexcept
   {
     auto result = Bytes();
     if (result.HasException())

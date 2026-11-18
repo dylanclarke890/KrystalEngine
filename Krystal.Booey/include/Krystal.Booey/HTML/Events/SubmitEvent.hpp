@@ -7,19 +7,16 @@
 namespace krys::boo
 {
   class HTMLElement;
-}
 
-namespace krys::boo::html
-{
   /// @see https://html.spec.whatwg.org/#submiteventinit
-  struct SubmitEventInit : dom::EventInit
+  struct SubmitEventInit : EventInit
   {
     RefPtr<HTMLElement> Submitter;
   };
 
   /// @brief The `submit` event, with the button that submitted the form.
   /// @see https://html.spec.whatwg.org/#submitevent
-  class SubmitEvent final : public dom::Event
+  class SubmitEvent final : public Event
   {
   private:
     RefPtr<HTMLElement> _submitter;
@@ -47,8 +44,8 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::SubmitEvent)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SubmitEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Event &event) noexcept
   {
     return event.IsSubmitEvent();
   }

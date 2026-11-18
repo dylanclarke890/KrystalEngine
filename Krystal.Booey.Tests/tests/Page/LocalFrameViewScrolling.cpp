@@ -83,7 +83,7 @@ namespace krys::boo::tests
     };
 
     /// @brief Records the events it handles as `type:target`, with `^` for those that bubble.
-    struct EventRecorder : public dom::EventListenerCallback
+    struct EventRecorder : public EventListenerCallback
     {
       List<std::string> &Records;
 
@@ -91,7 +91,7 @@ namespace krys::boo::tests
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         auto type = event.Type().View();
         std::string target = "document";
@@ -158,15 +158,15 @@ namespace krys::boo::tests
     }
 
     /// @brief Cancels the events it handles, keeping the last one's vertical delta.
-    struct WheelCanceller : public dom::EventListenerCallback
+    struct WheelCanceller : public EventListenerCallback
     {
       double DeltaY {0};
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         if (event.IsWheelEvent())
         {
-          DeltaY = static_cast<dom::WheelEvent &>(event).DeltaY();
+          DeltaY = static_cast<WheelEvent &>(event).DeltaY();
         }
         event.PreventDefault();
       }
@@ -510,7 +510,7 @@ namespace krys::boo::tests
       utf8_string(TallPage)
       + u8"<div id=box style=overflow:auto;height:50px><div style=height:200px></div></div>"};
     List<std::string> records;
-    Ref<dom::EventListenerCallback> recorder = CreateRef<EventRecorder>(records);
+    Ref<EventListenerCallback> recorder = CreateRef<EventRecorder>(records);
     for (auto type : {u8"scroll", u8"scrollend"})
     {
       fixture.Document->AddEventListener(DOMStringAtom(type), Ref {recorder}, true);
@@ -919,7 +919,7 @@ namespace krys::boo::tests
     {
       // The document's wheel listeners are passive unless they say otherwise.
       auto canceller = CreateRef<WheelCanceller>();
-      dom::AddEventListenerOptions options;
+      AddEventListenerOptions options;
       options.Passive = false;
       fixture.Document->AddEventListener(u8"wheel", canceller, options);
       CHECK(Wheel(handler, {20, 20}, {0, 100}));
@@ -957,7 +957,7 @@ namespace krys::boo::tests
 
     // No wheel event fires.
     auto canceller = CreateRef<WheelCanceller>();
-    dom::AddEventListenerOptions options;
+    AddEventListenerOptions options;
     options.Passive = false;
     fixture.Document->AddEventListener(u8"wheel", canceller, options);
 
@@ -1065,8 +1065,8 @@ namespace krys::boo::tests
 
     SECTION("a cancelled keydown scrolls nothing")
     {
-      fixture.Document->AddEventListener(
-        u8"keydown", Ref<dom::EventListenerCallback> {CreateRef<WheelCanceller>()}, false);
+      fixture.Document->AddEventListener(u8"keydown",
+                                         Ref<EventListenerCallback> {CreateRef<WheelCanceller>()}, false);
       CHECK(down());
       CHECK(view.GetScrollPosition() == ScrollPosition());
     }

@@ -492,9 +492,9 @@ namespace krys::boo
 
     void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
-    void DidAddEventListener(const dom::EventListener &listener) noexcept override;
+    void DidAddEventListener(const EventListener &listener) noexcept override;
 
-    void DidRemoveEventListener(const dom::EventListener &listener) noexcept override;
+    void DidRemoveEventListener(const EventListener &listener) noexcept override;
 
     KRYS_NODISCARD virtual bool NeedsPendingResourceHandling() const noexcept
     {

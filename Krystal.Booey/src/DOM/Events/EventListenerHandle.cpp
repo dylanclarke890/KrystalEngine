@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   EventListenerHandle::EventListenerHandle(EventTarget &target, EventListener &listener) noexcept
       : _target(CreateWeakPtr(&target)), _listener(CreateWeakPtr(&listener))
@@ -41,7 +41,7 @@ namespace krys::boo::dom
     _listener = nullptr;
     if (target && listener && !listener->Removed())
     {
-      EventTargetAlgorithms::RemoveEventListener(*target, *listener);
+      dom::EventTargetAlgorithms::RemoveEventListener(*target, *listener);
     }
   }
 

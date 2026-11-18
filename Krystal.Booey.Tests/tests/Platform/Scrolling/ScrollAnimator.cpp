@@ -28,11 +28,11 @@ namespace krys::boo::tests
       u8"<!DOCTYPE html><style>body{margin:0}#s{width:100px;height:100px;overflow:auto}#c{height:1000px}"
       u8".smooth{scroll-behavior:smooth}</style><div id=s tabindex=0><div id=c></div></div>";
 
-    struct EventCounter final : dom::EventListenerCallback
+    struct EventCounter final : EventListenerCallback
     {
       int32 Count {0};
 
-      void HandleEvent(dom::Event &) noexcept override
+      void HandleEvent(Event &) noexcept override
       {
         ++Count;
       }
@@ -74,9 +74,8 @@ namespace krys::boo::tests
     auto &scroller = fixture.ById(u8"s");
     auto scroll = CreateRef<EventCounter>();
     auto scrollEnd = CreateRef<EventCounter>();
-    scroller.AddEventListener(event_names::Scroll, ShareRef<dom::EventListenerCallback>(*scroll), false);
-    scroller.AddEventListener(event_names::ScrollEnd, ShareRef<dom::EventListenerCallback>(*scrollEnd),
-                              false);
+    scroller.AddEventListener(event_names::Scroll, ShareRef<EventListenerCallback>(*scroll), false);
+    scroller.AddEventListener(event_names::ScrollEnd, ShareRef<EventListenerCallback>(*scrollEnd), false);
 
     SECTION("moves over frames, and ends with one scrollend")
     {
@@ -278,8 +277,8 @@ namespace krys::boo::tests
     auto &view = *fixture.Document->View();
     auto &window = *fixture.Document->Window();
     auto scrollEnd = CreateRef<EventCounter>();
-    fixture.Document->AddEventListener(event_names::ScrollEnd,
-                                       ShareRef<dom::EventListenerCallback>(*scrollEnd), false);
+    fixture.Document->AddEventListener(event_names::ScrollEnd, ShareRef<EventListenerCallback>(*scrollEnd),
+                                       false);
 
     SECTION("scrollTo with smooth")
     {
@@ -419,7 +418,7 @@ namespace krys::boo::tests
     int32 itemHeight =
       (listBox.ItemBoundingBoxRect({}, 1).Y() - listBox.ItemBoundingBoxRect({}, 0).Y()).ToInt();
     auto scrollEnd = CreateRef<EventCounter>();
-    select.AddEventListener(event_names::ScrollEnd, ShareRef<dom::EventListenerCallback>(*scrollEnd), false);
+    select.AddEventListener(event_names::ScrollEnd, ShareRef<EventListenerCallback>(*scrollEnd), false);
 
     SECTION("scrollTop, with scroll-behavior: smooth, moves over frames and ends with one scrollend")
     {

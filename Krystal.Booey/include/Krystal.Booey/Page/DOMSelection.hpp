@@ -75,10 +75,10 @@ namespace krys::boo
 
     KRYS_NODISCARD DOMString Direction() const noexcept;
 
-    dom::ExceptionOr<void> SetBaseAndExtent(Node &anchorNode, uint32 anchorOffset, Node &focusNode,
-                                            uint32 focusOffset) noexcept;
+    ExceptionOr<void> SetBaseAndExtent(Node &anchorNode, uint32 anchorOffset, Node &focusNode,
+                                       uint32 focusOffset) noexcept;
 
-    dom::ExceptionOr<void> SetPosition(Node *node, uint32 offset = 0) noexcept;
+    ExceptionOr<void> SetPosition(Node *node, uint32 offset = 0) noexcept;
 
     /// @note Non-standard.
     void Modify(DOMStringView alter, DOMStringView direction, DOMStringView granularity) noexcept;
@@ -97,21 +97,21 @@ namespace krys::boo
 
     KRYS_NODISCARD uint32 RangeCount() const noexcept;
 
-    dom::ExceptionOr<void> Collapse(Node *node, uint32 offset = 0) noexcept;
+    ExceptionOr<void> Collapse(Node *node, uint32 offset = 0) noexcept;
 
-    dom::ExceptionOr<void> CollapseToEnd() noexcept;
+    ExceptionOr<void> CollapseToEnd() noexcept;
 
-    dom::ExceptionOr<void> CollapseToStart() noexcept;
+    ExceptionOr<void> CollapseToStart() noexcept;
 
-    dom::ExceptionOr<void> Extend(Node &node, uint32 offset = 0) noexcept;
+    ExceptionOr<void> Extend(Node &node, uint32 offset = 0) noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<dom::Range>> GetRangeAt(uint32 index) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<dom::Range>> GetRangeAt(uint32 index) noexcept;
 
     void RemoveAllRanges() noexcept;
 
     void AddRange(dom::Range &liveRange) noexcept;
 
-    dom::ExceptionOr<void> RemoveRange(dom::Range &liveRange) noexcept;
+    ExceptionOr<void> RemoveRange(dom::Range &liveRange) noexcept;
 
     KRYS_NODISCARD List<Ref<dom::StaticRange>>
       GetComposedRanges(const List<Ref<ShadowRoot>> &shadowRoots = {}) noexcept;
@@ -120,7 +120,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ContainsNode(Node &node, bool allowPartialContainment = false) const noexcept;
 
-    dom::ExceptionOr<void> SelectAllChildren(Node &node) noexcept;
+    ExceptionOr<void> SelectAllChildren(Node &node) noexcept;
 
     KRYS_NODISCARD DOMString ToString() const noexcept;
 

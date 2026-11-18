@@ -37,20 +37,20 @@ namespace krys::boo::html
   {
   }
 
-  dom::ExceptionOr<void> HTMLOptionsCollection::Length(uint32 length) noexcept
+  ExceptionOr<void> HTMLOptionsCollection::Length(uint32 length) noexcept
   {
     CEReactionsScope ceReactions;
     return _selectElement->Length(length);
   }
 
-  dom::ExceptionOr<void> HTMLOptionsCollection::SetItem(uint32 index, HTMLOptionElement *option) noexcept
+  ExceptionOr<void> HTMLOptionsCollection::SetItem(uint32 index, HTMLOptionElement *option) noexcept
   {
     CEReactionsScope ceReactions;
     return _selectElement->SetItem(index, option);
   }
 
-  dom::ExceptionOr<void> HTMLOptionsCollection::Add(const OptionOrOptGroupElement &element,
-                                                    const Maybe<HTMLElementOrInt> &before) noexcept
+  ExceptionOr<void> HTMLOptionsCollection::Add(const OptionOrOptGroupElement &element,
+                                               const Maybe<HTMLElementOrInt> &before) noexcept
   {
     CEReactionsScope ceReactions;
     return _selectElement->Add(element, before);

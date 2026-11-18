@@ -38,12 +38,8 @@ namespace krys::boo
   class ContainerNode;
   class Document;
   class Element;
-  class Node;
-}
-
-namespace krys::boo::dom
-{
   class EventTarget;
+  class Node;
 }
 
 namespace krys::boo::html
@@ -112,8 +108,7 @@ namespace krys::boo::html
 
     /// @brief Fires a focus event named @p e at @p target, and the `focusin`/`focusout` that goes with it.
     /// @see https://html.spec.whatwg.org/#fire-a-focus-event
-    static void FireFocusEvent(const DOMStringAtom &e, Element &target,
-                               dom::EventTarget *relatedTarget) noexcept;
+    static void FireFocusEvent(const DOMStringAtom &e, Element &target, EventTarget *relatedTarget) noexcept;
 
     /// @see https://html.spec.whatwg.org/#has-focus-steps
     KRYS_NODISCARD static bool HasFocusSteps(const Document &target) noexcept;

@@ -189,7 +189,7 @@ namespace krys::boo
     }
   }
 
-  void HTMLTextFormControlElement::DispatchFocusEvent(dom::EventTarget *relatedTarget,
+  void HTMLTextFormControlElement::DispatchFocusEvent(EventTarget *relatedTarget,
                                                       const dom::FocusOptions &options) noexcept
   {
     if (SupportsPlaceholder())
@@ -200,7 +200,7 @@ namespace krys::boo
     HTMLFormControlElement::DispatchFocusEvent(relatedTarget, options);
   }
 
-  void HTMLTextFormControlElement::DispatchBlurEvent(dom::EventTarget *relatedTarget) noexcept
+  void HTMLTextFormControlElement::DispatchBlurEvent(EventTarget *relatedTarget) noexcept
   {
     if (SupportsPlaceholder())
     {
@@ -223,7 +223,7 @@ namespace krys::boo
     SubtreeHasChanged();
   }
 
-  void HTMLTextFormControlElement::ForwardEvent(dom::Event &event) noexcept
+  void HTMLTextFormControlElement::ForwardEvent(Event &event) noexcept
   {
     if (event.Type() == event_names::Blur || event.Type() == event_names::Focus)
     {
@@ -340,7 +340,7 @@ namespace krys::boo
     SetInteractedWithSinceLastFormSubmitEvent(true);
   }
 
-  dom::ExceptionOr<void> HTMLTextFormControlElement::SetRangeText(DOMStringView replacement) noexcept
+  ExceptionOr<void> HTMLTextFormControlElement::SetRangeText(DOMStringView replacement) noexcept
   {
     // 3. If the method has only one argument, then let start and end have the values of the selectionStart
     //    attribute and the selectionEnd attribute respectively.
@@ -348,14 +348,13 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-textarea/input-setrangetext
-  dom::ExceptionOr<void> HTMLTextFormControlElement::SetRangeText(DOMStringView replacement, uint32 start,
-                                                                  uint32 end,
-                                                                  DOMStringView selectionMode) noexcept
+  ExceptionOr<void> HTMLTextFormControlElement::SetRangeText(DOMStringView replacement, uint32 start,
+                                                             uint32 end, DOMStringView selectionMode) noexcept
   {
     // 4. If start is greater than end, then throw an "IndexSizeError" DOMException.
     if (start > end)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     auto text = InnerTextValue();
@@ -775,7 +774,7 @@ namespace krys::boo
 
     if (shouldFireSelectEvent && _cachedSelectionStart != _cachedSelectionEnd)
     {
-      auto event = dom::Event::Create(event_names::Select, true, false);
+      auto event = Event::Create(event_names::Select, true, false);
       (void)dom::EventDispatcher::DispatchToTarget(*event, this);
     }
 
@@ -795,7 +794,7 @@ namespace krys::boo
       [textControl = Ref<HTMLTextFormControlElement>(ShareRef(*this))]
       {
         textControl->_hasScheduledSelectionChangeEvent = false;
-        auto event = dom::Event::Create(event_names::SelectionChange, true, false);
+        auto event = Event::Create(event_names::SelectionChange, true, false);
         (void)dom::EventDispatcher::DispatchToTarget(*event, textControl.get());
       });
   }
@@ -805,7 +804,7 @@ namespace krys::boo
     html::EventLoop::Current().QueueTask(html::TaskSource::UserInteraction, NodeDocument(),
                                          [textControl = Ref<HTMLTextFormControlElement>(ShareRef(*this))]
                                          {
-                                           auto event = dom::Event::Create(event_names::Select, true, false);
+                                           auto event = Event::Create(event_names::Select, true, false);
                                            (void)dom::EventDispatcher::DispatchToTarget(*event,
                                                                                         textControl.get());
                                          });

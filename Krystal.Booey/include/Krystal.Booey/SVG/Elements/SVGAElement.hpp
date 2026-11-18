@@ -93,15 +93,15 @@ namespace krys::boo
       return SVGTests::IsValid();
     }
 
-    void ActivationBehavior(dom::Event &event) noexcept final;
+    void ActivationBehavior(Event &event) noexcept final;
 
-    void DefaultEventHandler(dom::Event &event) noexcept final;
+    void DefaultEventHandler(Event &event) noexcept final;
 
     KRYS_NODISCARD bool HasRel(SVGALinkRelation) const noexcept;
 
     KRYS_NODISCARD bool CanStartSelection() const noexcept final;
 
-    void FollowTheHyperlink(dom::Event &event) noexcept;
+    void FollowTheHyperlink(Event &event) noexcept;
   };
 }
 

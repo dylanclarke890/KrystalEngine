@@ -40,7 +40,7 @@ namespace krys::boo::html::tests
     struct CommandLog
     {
       List<std::string> Events;
-      List<dom::EventListenerHandle> Handles;
+      List<EventListenerHandle> Handles;
       bool PreventCommand {false};
 
       void Watch(boo::Element &element) noexcept
@@ -48,9 +48,9 @@ namespace krys::boo::html::tests
         auto id = IdOf(&element);
         Handles.push_back(element.AddEventListener(
           u8"command",
-          [this, id](dom::Event &event)
+          [this, id](Event &event)
           {
-            auto &command = Downcast<dom::CommandEvent>(event);
+            auto &command = Downcast<CommandEvent>(event);
             CHECK_FALSE(event.Bubbles());
             CHECK(event.Cancelable());
             CHECK(event.IsTrusted());
@@ -61,8 +61,8 @@ namespace krys::boo::html::tests
             }
           }));
         Handles.push_back(element.AddEventListener(
-          u8"beforetoggle", [this, id](dom::Event &event)
-          { Events.push_back(id + ":beforetoggle:" + IdOf(Downcast<dom::ToggleEvent>(event).Source())); }));
+          u8"beforetoggle", [this, id](Event &event)
+          { Events.push_back(id + ":beforetoggle:" + IdOf(Downcast<ToggleEvent>(event).Source())); }));
       }
 
       /// @brief The events so far, after running the queued tasks.
@@ -162,7 +162,7 @@ namespace krys::boo::html::tests
     REQUIRE(Downcast<HTMLButtonElement>(*button).CommandForElement().get() == target.get());
 
     int commands = 0;
-    auto listener = target->AddEventListener(u8"command", [&](dom::Event &) { ++commands; });
+    auto listener = target->AddEventListener(u8"command", [&](Event &) { ++commands; });
     Downcast<HTMLElement>(*button).Click();
     CHECK(commands == 0);
   }
@@ -323,7 +323,7 @@ namespace krys::boo::html::tests
     log.Watch(dialog);
     List<std::string> cancels;
     auto cancelListener =
-      dialog.AddEventListener(u8"cancel", [&](dom::Event &) { cancels.emplace_back("cancel"); });
+      dialog.AddEventListener(u8"cancel", [&](Event &) { cancels.emplace_back("cancel"); });
 
     SECTION("show-modal shows it modally, and close closes it with the button's value")
     {
@@ -415,7 +415,7 @@ namespace krys::boo::html::tests
     int32 heardAtHost = 0;
     bool composed = false;
     auto onHost = host.AddEventListener(u8"command",
-                                        [&](dom::Event &event)
+                                        [&](Event &event)
                                         {
                                           ++heardAtHost;
                                           composed = event.Composed();

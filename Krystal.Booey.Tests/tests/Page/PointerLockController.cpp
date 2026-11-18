@@ -59,7 +59,7 @@ namespace krys::boo::tests
       }
     };
 
-    KRYS_NODISCARD std::string Name(const dom::EventTarget *target)
+    KRYS_NODISCARD std::string Name(const EventTarget *target)
     {
       auto *node = DynamicDowncast<Node>(target);
       auto *element = node ? DynamicDowncast<Element>(*node) : nullptr;
@@ -73,7 +73,7 @@ namespace krys::boo::tests
 
     /// @brief Records the events it handles as `type:target`, with a mouse move's movement after its type
     /// (`mousemove(5,-3)`).
-    struct Recorder : public dom::EventListenerCallback
+    struct Recorder : public EventListenerCallback
     {
       List<std::string> &Records;
 
@@ -81,12 +81,12 @@ namespace krys::boo::tests
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         auto type = std::string(event.Type().View().begin(), event.Type().View().end());
         if (event.Type() == event_names::MouseMove)
         {
-          auto &mouse = static_cast<dom::MouseEvent &>(event);
+          auto &mouse = static_cast<MouseEvent &>(event);
           type += "(" + std::to_string(static_cast<int>(mouse.MovementX())) + ","
                   + std::to_string(static_cast<int>(mouse.MovementY())) + ")";
         }
@@ -116,7 +116,7 @@ namespace krys::boo::tests
         (void)Document->UpdateLayout();
 
         // Capturing at the document sees the events that don't bubble too.
-        Ref<dom::EventListenerCallback> recorder = CreateRef<Recorder>(Records);
+        Ref<EventListenerCallback> recorder = CreateRef<Recorder>(Records);
         for (auto type : {u8"pointerlockchange", u8"pointerlockerror", u8"pointerdown", u8"pointermove",
                           u8"pointerup", u8"mousedown", u8"mousemove", u8"mouseup", u8"click", u8"wheel",
                           u8"gotpointercapture", u8"lostpointercapture"})
@@ -154,15 +154,15 @@ namespace krys::boo::tests
         std::string settled = "pending";
         element.RequestPointerLock(
           options,
-          [&](const dom::ExceptionOr<void> &result)
+          [&](const ExceptionOr<void> &result)
           {
-            settled =
-              !result.HasException()                                                   ? "ok"
-              : result.GetException().Code() == dom::ExceptionCode::NotAllowedError    ? "NotAllowedError"
-              : result.GetException().Code() == dom::ExceptionCode::WrongDocumentError ? "WrongDocumentError"
-              : result.GetException().Code() == dom::ExceptionCode::NotSupportedError  ? "NotSupportedError"
-              : result.GetException().Code() == dom::ExceptionCode::InvalidStateError  ? "InvalidStateError"
-                                                                                       : "other";
+            settled = !result.HasException()                                           ? "ok"
+                      : result.GetException().Code() == ExceptionCode::NotAllowedError ? "NotAllowedError"
+                      : result.GetException().Code() == ExceptionCode::WrongDocumentError
+                        ? "WrongDocumentError"
+                      : result.GetException().Code() == ExceptionCode::NotSupportedError ? "NotSupportedError"
+                      : result.GetException().Code() == ExceptionCode::InvalidStateError ? "InvalidStateError"
+                                                                                         : "other";
           });
         html::EventLoop::Current().RunUntilIdle();
         return settled;
@@ -237,7 +237,7 @@ namespace krys::boo::tests
                       "mouseup:a", "click:a", "wheel:a"});
 
     // Pointers can't be captured while it's locked.
-    CHECK(b.SetPointerCapture(1).GetException().Code() == dom::ExceptionCode::InvalidStateError);
+    CHECK(b.SetPointerCapture(1).GetException().Code() == ExceptionCode::InvalidStateError);
 
     // Moving the lock to another element of the document needs no host.
     CHECK(fixture.Lock(b) == "ok");

@@ -120,12 +120,12 @@ namespace krys::boo::html
     return ValidationMessageValueMissingForRadioText();
   }
 
-  void RadioInputType::HandleClickEvent(dom::MouseEvent &event) noexcept
+  void RadioInputType::HandleClickEvent(MouseEvent &event) noexcept
   {
     event.SetDefaultHandled();
   }
 
-  InputType::ShouldCallBaseEventHandler RadioInputType::HandleKeydownEvent(dom::KeyboardEvent &event) noexcept
+  InputType::ShouldCallBaseEventHandler RadioInputType::HandleKeydownEvent(KeyboardEvent &event) noexcept
   {
     if (BaseCheckableInputType::HandleKeydownEvent(event) == ShouldCallBaseEventHandler::No)
     {
@@ -196,7 +196,7 @@ namespace krys::boo::html
     return ShouldCallBaseEventHandler::Yes;
   }
 
-  void RadioInputType::HandleKeyupEvent(dom::KeyboardEvent &event) noexcept
+  void RadioInputType::HandleKeyupEvent(KeyboardEvent &event) noexcept
   {
     if (event.KeyIdentifier() != u8"U+0020")
     {
@@ -243,7 +243,7 @@ namespace krys::boo::html
     element->SetChecked(true);
   }
 
-  void RadioInputType::DidDispatchClick(dom::Event &event, const InputElementClickState &state) noexcept
+  void RadioInputType::DidDispatchClick(Event &event, const InputElementClickState &state) noexcept
   {
     auto *element = Element();
     if (event.DefaultPrevented() || event.DefaultHandled())

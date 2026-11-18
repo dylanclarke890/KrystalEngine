@@ -66,7 +66,7 @@ namespace krys::boo::css::tests
 
   /// @brief The exception code `result` holds; it must hold one.
   template <typename T>
-  KRYS_NODISCARD dom::ExceptionCode ExceptionCodeOf(const dom::ExceptionOr<T> &result)
+  KRYS_NODISCARD ExceptionCode ExceptionCodeOf(const ExceptionOr<T> &result)
   {
     REQUIRE(result.HasException());
     return result.GetException().Code();

@@ -756,7 +756,7 @@ namespace krys::boo
         {
           descendant.AddEventListener(
             listener->Type(), ShareRef(*listener->Callback()),
-            dom::AddEventListenerOptions {
+            AddEventListenerOptions {
               {listener->Capture()}, listener->Once(), listener->Passive(), ShareRefPtr(listener->Signal())});
         }
         return descendant;
@@ -806,7 +806,7 @@ namespace krys::boo
     if (resource.ErrorOccurred())
     {
       SetErrorOccurred(true);
-      auto event = dom::Event::Create(event_names::Error, false, false);
+      auto event = Event::Create(event_names::Error, false, false);
       (void)DispatchEvent(*event);
     }
     else if (!resource.GetResourceError().IsCancellation())

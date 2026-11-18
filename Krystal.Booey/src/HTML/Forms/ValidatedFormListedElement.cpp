@@ -187,8 +187,7 @@ namespace krys::boo::html
     // 1a. Fire an event named invalid at element, with the cancelable attribute initialized to true (though
     //     canceling has no effect).
     auto type = DOMStringAtom(event_names::Invalid);
-    bool notCanceled =
-      dom::EventDispatcher::FireEvent<dom::Event>(type, element, dom::EventInit {.Cancelable = true});
+    bool notCanceled = dom::EventDispatcher::FireEvent<Event>(type, element, EventInit {.Cancelable = true});
 
     // (For the report validity steps and statically validating a form, an element whose event isn't canceled
     // is unhandled.)

@@ -99,7 +99,7 @@ namespace krys::boo::html
 
     void AttributeChanged(const DOMStringAtom &name) noexcept final;
 
-    void HandleActivationBehavior(dom::Event &event) noexcept final;
+    void HandleActivationBehavior(Event &event) noexcept final;
 
     void ShowPicker() noexcept final;
 

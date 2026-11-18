@@ -107,7 +107,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#the-button-element:activation-behaviour
-  void HTMLButtonElement::ActivationBehavior(dom::Event &event) noexcept
+  void HTMLButtonElement::ActivationBehavior(Event &event) noexcept
   {
     // 1. If element is disabled, then return.
     if (IsDisabledFormControl())
@@ -169,9 +169,9 @@ namespace krys::boo
     HandlePopoverTargetAction(event.Target().get());
   }
 
-  void HTMLButtonElement::DefaultEventHandler(dom::Event &event) noexcept
+  void HTMLButtonElement::DefaultEventHandler(Event &event) noexcept
   {
-    if (auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event))
+    if (auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event))
     {
       if (keyboardEvent->Type() == event_names::KeyDown && keyboardEvent->KeyIdentifier() == u8"U+0020")
       {
@@ -388,14 +388,14 @@ namespace krys::boo
     //     command attribute initialized to command, its source attribute initialized to element, its
     //     cancelable attribute initialized to true, its composed flag set, and relatedTarget set to
     //     relatedTarget.
-    dom::CommandEventInit init;
+    CommandEventInit init;
     init.Bubbles = false;
     init.Cancelable = true;
     init.Composed = true;
     init.Source = ShareRefPtr<boo::Element>(this);
     init.Command = commandRaw.value_or(DOMString());
 
-    auto event = dom::CommandEvent::Create(event_names::Command, init, true);
+    auto event = CommandEvent::Create(event_names::Command, init, true);
     (void)dom::EventDispatcher::DispatchFromSource(*event, *invokee, this);
 
     // 5e. If continue is false, then return.

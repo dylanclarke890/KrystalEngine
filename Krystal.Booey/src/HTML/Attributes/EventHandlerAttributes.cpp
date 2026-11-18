@@ -27,8 +27,7 @@ namespace krys::boo::html
     }
   }
 
-  dom::EventTarget *EventHandlerAlgorithms::DetermineTarget(dom::EventTarget &eventTarget,
-                                                            DOMStringAtom name) noexcept
+  EventTarget *EventHandlerAlgorithms::DetermineTarget(EventTarget &eventTarget, DOMStringAtom name) noexcept
   {
     // If eventTarget is not a body element or a frameset element, or name isn't the name of an attribute
     // of the WindowEventHandlers interface mixin or the window-reflecting body element event handler set,
@@ -51,15 +50,15 @@ namespace krys::boo::html
     return document.Window();
   }
 
-  const EventHandlerCallback *EventHandlerAlgorithms::Get(const dom::EventTarget &eventTarget,
+  const EventHandlerCallback *EventHandlerAlgorithms::Get(const EventTarget &eventTarget,
                                                           const DOMStringAtom &name) noexcept
   {
     // Let eventTarget be the result of determining the target of an event handler; if it's null, return null.
-    auto *target = DetermineTarget(const_cast<dom::EventTarget &>(eventTarget), name);
+    auto *target = DetermineTarget(const_cast<EventTarget &>(eventTarget), name);
     return target ? target->EventHandlerValue(name) : nullptr;
   }
 
-  void EventHandlerAlgorithms::Set(dom::EventTarget &eventTarget, const DOMStringAtom &name,
+  void EventHandlerAlgorithms::Set(EventTarget &eventTarget, const DOMStringAtom &name,
                                    EventHandlerCallback &&value) noexcept
   {
     // Let eventTarget be the result of determining the target of an event handler; if it's null, return.

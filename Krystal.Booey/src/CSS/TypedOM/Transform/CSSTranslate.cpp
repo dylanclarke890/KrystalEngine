@@ -48,8 +48,8 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<Ref<CSSTranslate>> CSSTranslate::Create(Ref<CSSNumericValue> x, Ref<CSSNumericValue> y,
-                                                           RefPtr<CSSNumericValue> z) noexcept
+  ExceptionOr<Ref<CSSTranslate>> CSSTranslate::Create(Ref<CSSNumericValue> x, Ref<CSSNumericValue> y,
+                                                      RefPtr<CSSNumericValue> z) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstranslate-csstranslate
     bool is2D = !z;
@@ -59,14 +59,14 @@ namespace krys::boo
     }
     if (!IsValidTranslateXY(*x) || !IsValidTranslateXY(*y) || !IsValidTranslateZ(*z))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     Ref<CSSNumericValue> nonNullZ = krys::move(z);
     return AdoptRef(*new CSSTranslate(is2D, krys::move(x), krys::move(y), krys::move(nonNullZ)));
   }
 
-  dom::ExceptionOr<Ref<CSSTranslate>> CSSTranslate::Create(const css::FunctionValue &function,
-                                                           Document &document) noexcept
+  ExceptionOr<Ref<CSSTranslate>> CSSTranslate::Create(const css::FunctionValue &function,
+                                                      Document &document) noexcept
   {
     auto reified = ReifyArguments(function, document);
     if (reified.HasException())
@@ -126,7 +126,7 @@ namespace krys::boo
         break;
       }
     }
-    return dom::Exception {dom::ExceptionCode::TypeError};
+    return Exception {ExceptionCode::TypeError};
   }
 
   CSSTranslate::CSSTranslate(bool is2D, Ref<CSSNumericValue> x, Ref<CSSNumericValue> y,
@@ -135,31 +135,31 @@ namespace krys::boo
   {
   }
 
-  dom::ExceptionOr<void> CSSTranslate::SetX(Ref<CSSNumericValue> x) noexcept
+  ExceptionOr<void> CSSTranslate::SetX(Ref<CSSNumericValue> x) noexcept
   {
     if (!IsValidTranslateXY(*x))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     _x = krys::move(x);
     return {};
   }
 
-  dom::ExceptionOr<void> CSSTranslate::SetY(Ref<CSSNumericValue> y) noexcept
+  ExceptionOr<void> CSSTranslate::SetY(Ref<CSSNumericValue> y) noexcept
   {
     if (!IsValidTranslateXY(*y))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     _y = krys::move(y);
     return {};
   }
 
-  dom::ExceptionOr<void> CSSTranslate::SetZ(Ref<CSSNumericValue> z) noexcept
+  ExceptionOr<void> CSSTranslate::SetZ(Ref<CSSNumericValue> z) noexcept
   {
     if (!IsValidTranslateZ(*z))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     _z = krys::move(z);
     return {};
@@ -180,7 +180,7 @@ namespace krys::boo
     builder.Append(u8')');
   }
 
-  dom::ExceptionOr<Ref<css::DOMMatrix>> CSSTranslate::ToMatrix() const noexcept
+  ExceptionOr<Ref<css::DOMMatrix>> CSSTranslate::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
     // The matrix's entries are relative to px, so a length that isn't compatible with px (a relative length
@@ -190,14 +190,14 @@ namespace krys::boo
     const auto *zUnitValue = DynamicDowncast<CSSUnitValue>(*_z);
     if (!xUnitValue || !yUnitValue || !zUnitValue)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     auto x = xUnitValue->ConvertTo(css::UnitType::px);
     auto y = yUnitValue->ConvertTo(css::UnitType::px);
     auto z = zUnitValue->ConvertTo(css::UnitType::px);
     if (!x || !y || !z)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     TransformationMatrix matrix;

@@ -269,7 +269,7 @@ namespace krys::boo
     StyleOriginatedAnimation::SetBindingsRangeEnd(krys::move(range));
   }
 
-  dom::ExceptionOr<void> CSSAnimation::BindingsPlay() noexcept
+  ExceptionOr<void> CSSAnimation::BindingsPlay() noexcept
   {
     // https://drafts.csswg.org/css-animations-2/#animations
 
@@ -284,7 +284,7 @@ namespace krys::boo
     return retVal;
   }
 
-  dom::ExceptionOr<void> CSSAnimation::BindingsPause() noexcept
+  ExceptionOr<void> CSSAnimation::BindingsPause() noexcept
   {
     // https://drafts.csswg.org/css-animations-2/#animations
 
@@ -324,7 +324,7 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<void> CSSAnimation::SetBindingsStartTime(const Maybe<WebAnimationTime> &startTime) noexcept
+  ExceptionOr<void> CSSAnimation::SetBindingsStartTime(const Maybe<WebAnimationTime> &startTime) noexcept
   {
     // https://drafts.csswg.org/css-animations-2/#animations
 
@@ -349,7 +349,7 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> CSSAnimation::BindingsReverse() noexcept
+  ExceptionOr<void> CSSAnimation::BindingsReverse() noexcept
   {
     // https://drafts.csswg.org/css-animations-2/#animations
 

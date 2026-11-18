@@ -72,7 +72,7 @@ namespace krys::boo
       if (RefPtr<Element> rootEditableElement = ShareRefPtr(startNode->RootEditableElement()))
       {
         // Send BeforeTextInsertedEvent. The event handler will update text if necessary.
-        auto event = dom::BeforeTextInsertedEvent::Create(text);
+        auto event = BeforeTextInsertedEvent::Create(text);
         (void)dom::EventDispatcher::DispatchToTarget(*event, rootEditableElement.get());
         newText = event->Text();
       }
@@ -88,7 +88,7 @@ namespace krys::boo
       return false;
     }
 
-    auto event = dom::BeforeTextInsertedEvent::Create(u8"\n");
+    auto event = BeforeTextInsertedEvent::Create(u8"\n");
     (void)dom::EventDispatcher::DispatchToTarget(*event, node.get());
     return !event->Text().empty();
   }

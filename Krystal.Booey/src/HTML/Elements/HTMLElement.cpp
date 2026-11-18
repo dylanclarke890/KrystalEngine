@@ -741,7 +741,7 @@ namespace krys::boo
     return InnerText();
   }
 
-  dom::ExceptionOr<void> HTMLElement::OuterText(const DOMString &value) noexcept
+  ExceptionOr<void> HTMLElement::OuterText(const DOMString &value) noexcept
   {
     html::CEReactionsScope ceReactions;
 
@@ -749,7 +749,7 @@ namespace krys::boo
     RefPtr<ContainerNode> parent = ShareRefPtr(ParentNode());
     if (!parent)
     {
-      return dom::ExceptionCode::NoModificationAllowedError;
+      return ExceptionCode::NoModificationAllowedError;
     }
 
     // 2. Let next be this's next sibling.
@@ -794,12 +794,12 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-attachinternals
-  dom::ExceptionOr<Ref<html::ElementInternals>> HTMLElement::AttachInternals() noexcept
+  ExceptionOr<Ref<html::ElementInternals>> HTMLElement::AttachInternals() noexcept
   {
     // 1. If this's is value is not null, then throw a "NotSupportedError" DOMException.
     if (IsValue() != null)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     // 2. Let definition be the result of looking up a custom element definition given this's custom element
@@ -809,26 +809,26 @@ namespace krys::boo
     auto *queue = ReactionQueue();
     if (!queue)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     // 4. If definition's disable internals is true, then throw a "NotSupportedError" DOMException.
     if (queue->IsElementInternalsDisabled())
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     // 5. If this's attached internals is non-null, then throw a "NotSupportedError" DOMException.
     if (queue->AttachedInternals())
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     // 6. If this's custom element state is not "precustomized" or "custom", then throw a "NotSupportedError"
     //    DOMException.
     if (!IsPrecustomizedOrDefinedCustomElement())
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     // 7. Set this's attached internals to a new ElementInternals instance whose target element is this.
@@ -839,7 +839,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-showpopover
-  dom::ExceptionOr<void> HTMLElement::ShowPopover(const html::ShowPopoverOptions &options) noexcept
+  ExceptionOr<void> HTMLElement::ShowPopover(const html::ShowPopoverOptions &options) noexcept
   {
     // 1. Let source be options["source"] if it exists; otherwise, null.
     // 2. Run show popover given this, true, and source.
@@ -849,13 +849,13 @@ namespace krys::boo
   // https://html.spec.whatwg.org/#dom-hidepopover
   // The hidePopover() method steps are: Run the hide popover algorithm given this, true, true, true, and
   // null.
-  dom::ExceptionOr<void> HTMLElement::HidePopover() noexcept
+  ExceptionOr<void> HTMLElement::HidePopover() noexcept
   {
     return HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, true, nullptr);
   }
 
   // https://html.spec.whatwg.org/#dom-togglepopover
-  dom::ExceptionOr<bool> HTMLElement::TogglePopover(const html::TogglePopoverOptionsOrBool &options) noexcept
+  ExceptionOr<bool> HTMLElement::TogglePopover(const html::TogglePopoverOptionsOrBool &options) noexcept
   {
     // 1. Let force be null.
     Maybe<bool> force;
@@ -960,8 +960,8 @@ namespace krys::boo
   namespace
   {
     /// @brief What a popover algorithm returns once @p validity says the popover can't be shown or hidden.
-    KRYS_NODISCARD dom::ExceptionOr<void> InvalidPopoverResult(dom::ExceptionOr<bool> validity,
-                                                               bool throwExceptions) noexcept
+    KRYS_NODISCARD ExceptionOr<void> InvalidPopoverResult(ExceptionOr<bool> validity,
+                                                          bool throwExceptions) noexcept
     {
       if (throwExceptions && validity.HasException())
       {
@@ -970,7 +970,7 @@ namespace krys::boo
       return {};
     }
 
-    KRYS_NODISCARD bool IsValid(const dom::ExceptionOr<bool> &validity) noexcept
+    KRYS_NODISCARD bool IsValid(const ExceptionOr<bool> &validity) noexcept
     {
       return validity.HasValue() && validity.Value();
     }
@@ -982,7 +982,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#show-popover
-  dom::ExceptionOr<void> HTMLElement::ShowPopoverInternal(HTMLElement *source, bool throwExceptions) noexcept
+  ExceptionOr<void> HTMLElement::ShowPopoverInternal(HTMLElement *source, bool throwExceptions) noexcept
   {
     // 1. Let document be element's node document.
     Ref<Document> document = ShareRef(NodeDocument());
@@ -994,8 +994,8 @@ namespace krys::boo
     {
       if (throwExceptions)
       {
-        return dom::Exception {dom::ExceptionCode::InvalidStateError,
-                               u8"Cannot show a popover while showing or hiding a popover."};
+        return Exception {ExceptionCode::InvalidStateError,
+                          u8"Cannot show a popover while showing or hiding a popover."};
       }
       return {};
     }
@@ -1088,9 +1088,8 @@ namespace krys::boo
         cleanupShowingSteps();
         if (throwExceptions)
         {
-          return dom::Exception {
-            dom::ExceptionCode::InvalidStateError,
-            u8"The value of the popover attribute was changed while hiding the popover."};
+          return Exception {ExceptionCode::InvalidStateError,
+                            u8"The value of the popover attribute was changed while hiding the popover."};
         }
         return {};
       }
@@ -1191,9 +1190,9 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#hide-popover-algorithm
-  dom::ExceptionOr<void> HTMLElement::HidePopoverInternal(dom::FocusPreviousElement focusPreviousElement,
-                                                          dom::FireEvents fireEvents, bool throwExceptions,
-                                                          HTMLElement *source) noexcept
+  ExceptionOr<void> HTMLElement::HidePopoverInternal(dom::FocusPreviousElement focusPreviousElement,
+                                                     dom::FireEvents fireEvents, bool throwExceptions,
+                                                     HTMLElement *source) noexcept
   {
     // 1. Let validityResult be the result of running check popover validity given element, true, and null.
     // 2. If validityResult is not true: if throwExceptions is true and validityResult is a DOMException, then
@@ -1373,15 +1372,14 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#check-popover-validity
-  dom::ExceptionOr<bool> HTMLElement::CheckPopoverValidity(bool expectedToBeShowing,
-                                                           Document *expectedDocument) const noexcept
+  ExceptionOr<bool> HTMLElement::CheckPopoverValidity(bool expectedToBeShowing,
+                                                      Document *expectedDocument) const noexcept
   {
     // 1. If element's popover attribute is in the No Popover state, then throw a "NotSupportedError"
     //    DOMException.
     if (GetPopoverState() == dom::PopoverState::None)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError,
-                             u8"Element does not have the popover attribute."};
+      return Exception {ExceptionCode::NotSupportedError, u8"Element does not have the popover attribute."};
     }
 
     // 2. If any of the following are true: expectedToBeShowing is true and element's popover visibility state
@@ -1401,22 +1399,21 @@ namespace krys::boo
     // isn't fully active: hiding it has to succeed.
     if (!expectedToBeShowing && !IsConnected())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError, u8"Element is not connected."};
+      return Exception {ExceptionCode::InvalidStateError, u8"Element is not connected."};
     }
     if (!expectedToBeShowing && !NodeDocument().IsFullyActive())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError,
-                             u8"Invalid for popovers within documents that are not fully active."};
+      return Exception {ExceptionCode::InvalidStateError,
+                        u8"Invalid for popovers within documents that are not fully active."};
     }
     if (expectedDocument && &NodeDocument() != expectedDocument)
     {
-      return dom::Exception {
-        dom::ExceptionCode::InvalidStateError,
-        u8"Invalid when the document changes while showing or hiding a popover element."};
+      return Exception {ExceptionCode::InvalidStateError,
+                        u8"Invalid when the document changes while showing or hiding a popover element."};
     }
     if (auto *dialog = DynamicDowncast<HTMLDialogElement>(*this); dialog && dialog->IsModal())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError, u8"Element is a modal <dialog> element."};
+      return Exception {ExceptionCode::InvalidStateError, u8"Element is a modal <dialog> element."};
     }
     // FIXME: The fullscreen flag, once there's fullscreen.
     // 4. Return true.
@@ -1520,14 +1517,14 @@ namespace krys::boo
       return DOMString(state == dom::ToggleState::Closed ? u8"closed" : u8"open");
     };
 
-    dom::ToggleEventInit init;
+    ToggleEventInit init;
     init.OldState = stringForState(oldState);
     init.NewState = stringForState(newState);
     // Composed, with relatedTarget the subject if retargeting the source against it gives it, else the
     // source.
     init.Composed = true;
     init.Source = ShareRefPtr<Element>(source);
-    auto event = dom::ToggleEvent::Create(event_names::BeforeToggle, init, cancelable);
+    auto event = ToggleEvent::Create(event_names::BeforeToggle, init, cancelable);
     (void)dom::EventDispatcher::DispatchFromSource(*event, *this, source);
     return !event->DefaultPrevented();
   }
@@ -1628,7 +1625,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-contenteditable
-  dom::ExceptionOr<void> HTMLElement::ContentEditable(DOMStringView value) noexcept
+  ExceptionOr<void> HTMLElement::ContentEditable(DOMStringView value) noexcept
   {
     html::CEReactionsScope ceReactions;
     // On setting, if the new value is an ASCII case-insensitive match for the string "inherit", then the
@@ -1651,7 +1648,7 @@ namespace krys::boo
         return {};
       }
     }
-    return dom::Exception {dom::ExceptionCode::SyntaxError};
+    return Exception {ExceptionCode::SyntaxError};
   }
 
   Node::Editability HTMLElement::EditabilityFromContentEditableAttr(const Node &node) noexcept

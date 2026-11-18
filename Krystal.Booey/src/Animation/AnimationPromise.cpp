@@ -34,7 +34,7 @@ namespace krys::boo::detail
     Settle();
   }
 
-  void AnimationPromise::Reject(dom::Exception exception) noexcept
+  void AnimationPromise::Reject(Exception exception) noexcept
   {
     if (_status != Status::Pending)
     {

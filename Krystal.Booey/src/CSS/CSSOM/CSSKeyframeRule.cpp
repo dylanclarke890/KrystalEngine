@@ -57,12 +57,12 @@ namespace krys::boo
     return _keyframe->KeyText();
   }
 
-  dom::ExceptionOr<void> CSSKeyframeRule::SetKeyText(const CSSOMString &text) noexcept
+  ExceptionOr<void> CSSKeyframeRule::SetKeyText(const CSSOMString &text) noexcept
   {
     CSSStyleSheet::RuleMutationScope mutationScope(this);
     if (!_keyframe->SetKeyText(text))
     {
-      return dom::ExceptionCode::SyntaxError;
+      return ExceptionCode::SyntaxError;
     }
     return {};
   }

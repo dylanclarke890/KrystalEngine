@@ -47,13 +47,13 @@ namespace krys::boo::html
   /// close action. A watcher made with `Create` fires `cancel` and `close` at itself; dialogs and popovers
   /// establish their own with their own actions.
   /// @see https://html.spec.whatwg.org/#close-watchers
-  class CloseWatcher final : public dom::EventTarget
+  class CloseWatcher final : public EventTarget
   {
   public:
     /// @see https://html.spec.whatwg.org/#closewatcheroptions
     struct Options
     {
-      RefPtr<dom::AbortSignal> Signal;
+      RefPtr<AbortSignal> Signal;
     };
 
     /// @brief Given whether it can refuse, returns whether to close.
@@ -72,8 +72,8 @@ namespace krys::boo::html
     GetEnabledState _getEnabledState;
     bool _active {true};
     bool _isRunningCancelAction {false};
-    RefPtr<dom::AbortSignal> _signal;
-    Maybe<dom::AbortAlgorithmCallback> _signalAlgorithm;
+    RefPtr<AbortSignal> _signal;
+    Maybe<AbortAlgorithmCallback> _signalAlgorithm;
 
   public:
     CloseWatcher(Document &document, CancelAction &&cancelAction, CloseAction &&closeAction,
@@ -83,8 +83,7 @@ namespace krys::boo::html
     /// once @p options' signal aborts.
     /// @return An `InvalidStateError` if @p document isn't fully active.
     /// @see https://html.spec.whatwg.org/#dom-closewatcher
-    static dom::ExceptionOr<Ref<CloseWatcher>> Create(Document &document,
-                                                      const Options &options = {}) noexcept;
+    static ExceptionOr<Ref<CloseWatcher>> Create(Document &document, const Options &options = {}) noexcept;
 
     /// @brief A close watcher of @p document's window, which must be fully active, with the given actions.
     /// @see https://html.spec.whatwg.org/#establish-a-close-watcher

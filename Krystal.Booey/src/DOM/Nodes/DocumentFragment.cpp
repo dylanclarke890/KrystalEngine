@@ -42,7 +42,7 @@ namespace krys::boo
     return dom::TextAlgorithms::DescendantTextContent(*this);
   }
 
-  dom::ExceptionOr<void> DocumentFragment::TextContent(DOMString value) noexcept
+  ExceptionOr<void> DocumentFragment::TextContent(DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *this);
@@ -82,36 +82,36 @@ namespace krys::boo
     return dom::mixins::ParentNode::ChildElementCount(*this);
   }
 
-  dom::ExceptionOr<void> DocumentFragment::Prepend(const List<dom::NodeOrString> &nodes) noexcept
+  ExceptionOr<void> DocumentFragment::Prepend(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ParentNode::Prepend(*this, nodes);
   }
 
-  dom::ExceptionOr<void> DocumentFragment::Append(const List<dom::NodeOrString> &nodes) noexcept
+  ExceptionOr<void> DocumentFragment::Append(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ParentNode::Append(*this, nodes);
   }
 
-  dom::ExceptionOr<void> DocumentFragment::ReplaceChildren(const List<dom::NodeOrString> &nodes) noexcept
+  ExceptionOr<void> DocumentFragment::ReplaceChildren(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ParentNode::ReplaceChildren(*this, nodes);
   }
 
-  dom::ExceptionOr<void> DocumentFragment::MoveBefore(Node &node, Node *refChild) noexcept
+  ExceptionOr<void> DocumentFragment::MoveBefore(Node &node, Node *refChild) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ParentNode::MoveBefore(*this, node, refChild);
   }
 
-  dom::ExceptionOr<RefPtr<Element>> DocumentFragment::QuerySelector(DOMStringView selectors) noexcept
+  ExceptionOr<RefPtr<Element>> DocumentFragment::QuerySelector(DOMStringView selectors) noexcept
   {
     return dom::mixins::ParentNode::QuerySelector(*this, selectors);
   }
 
-  dom::ExceptionOr<Ref<dom::NodeList>> DocumentFragment::QuerySelectorAll(DOMStringView selectors) noexcept
+  ExceptionOr<Ref<dom::NodeList>> DocumentFragment::QuerySelectorAll(DOMStringView selectors) noexcept
   {
     return dom::mixins::ParentNode::QuerySelectorAll(*this, selectors);
   }

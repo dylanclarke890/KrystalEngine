@@ -15,11 +15,11 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief Counts the events it hears.
-    struct EventCounter : public dom::EventListenerCallback
+    struct EventCounter : public EventListenerCallback
     {
       int32 Count {0};
 
-      void HandleEvent(dom::Event &) noexcept override
+      void HandleEvent(Event &) noexcept override
       {
         ++Count;
       }
@@ -125,7 +125,7 @@ namespace krys::boo::tests
       REQUIRE(!selection.CollapseToStart().HasException());
       CHECK(selection.AnchorOffset() == 4);
       selection.Empty();
-      CHECK(selection.CollapseToStart() == dom::ExceptionCode::InvalidStateError);
+      CHECK(selection.CollapseToStart() == ExceptionCode::InvalidStateError);
     }
 
     SECTION("selectAllChildren and modify")
@@ -151,12 +151,12 @@ namespace krys::boo::tests
 
     SECTION("Errors")
     {
-      CHECK(selection.Collapse(&text, 100) == dom::ExceptionCode::IndexSizeError);
-      CHECK(selection.Extend(text, 1) == dom::ExceptionCode::InvalidStateError);
-      CHECK(selection.GetRangeAt(0) == dom::ExceptionCode::IndexSizeError);
+      CHECK(selection.Collapse(&text, 100) == ExceptionCode::IndexSizeError);
+      CHECK(selection.Extend(text, 1) == ExceptionCode::InvalidStateError);
+      CHECK(selection.GetRangeAt(0) == ExceptionCode::IndexSizeError);
       auto other = CreateRef<dom::Range>(dom::BoundaryPoint {ShareRef<Node>(text), 0},
                                          dom::BoundaryPoint {ShareRef<Node>(text), 1});
-      CHECK(selection.RemoveRange(*other) == dom::ExceptionCode::NotFoundError);
+      CHECK(selection.RemoveRange(*other) == ExceptionCode::NotFoundError);
     }
   }
 

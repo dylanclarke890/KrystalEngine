@@ -118,13 +118,13 @@ namespace krys::boo::css::tests
       REQUIRE_FALSE(rule.DeleteRule(1).HasException());
       CHECK(deleted->ParentRule() == nullptr);
       CHECK(rule.Length() == 2);
-      CHECK(ExceptionCodeOf(rule.DeleteRule(2)) == dom::ExceptionCode::IndexSizeError);
+      CHECK(ExceptionCodeOf(rule.DeleteRule(2)) == ExceptionCode::IndexSizeError);
     }
 
     SECTION("insertRule errors")
     {
-      CHECK(ExceptionCodeOf(rule.InsertRule(u8"& b { }", 1)) == dom::ExceptionCode::IndexSizeError);
-      CHECK(ExceptionCodeOf(rule.InsertRule(u8"x", 0)) == dom::ExceptionCode::SyntaxError);
+      CHECK(ExceptionCodeOf(rule.InsertRule(u8"& b { }", 1)) == ExceptionCode::IndexSizeError);
+      CHECK(ExceptionCodeOf(rule.InsertRule(u8"x", 0)) == ExceptionCode::SyntaxError);
       CHECK(rule.InsertRule(u8"@font-face { }", 0).HasException());
       CHECK(rule.Length() == 0);
       CHECK_FALSE(rule.GetStyleRule().IsStyleRuleWithNesting());

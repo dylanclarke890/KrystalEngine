@@ -42,21 +42,21 @@ namespace krys::boo::css::tests
 
     SECTION("insertRule errors")
     {
-      CHECK(ExceptionCodeOf(media.InsertRule(u8"b { }", 2)) == dom::ExceptionCode::IndexSizeError);
-      CHECK(ExceptionCodeOf(media.InsertRule(u8"x", 0)) == dom::ExceptionCode::SyntaxError);
+      CHECK(ExceptionCodeOf(media.InsertRule(u8"b { }", 2)) == ExceptionCode::IndexSizeError);
+      CHECK(ExceptionCodeOf(media.InsertRule(u8"x", 0)) == ExceptionCode::SyntaxError);
       // Declarations are only allowed inside a style or scope rule.
-      CHECK(ExceptionCodeOf(media.InsertRule(u8"color: red;", 0)) == dom::ExceptionCode::SyntaxError);
+      CHECK(ExceptionCodeOf(media.InsertRule(u8"color: red;", 0)) == ExceptionCode::SyntaxError);
       CHECK(ExceptionCodeOf(media.InsertRule(u8"@import \"a.css\";", 0))
-            == dom::ExceptionCode::HierarchyRequestError);
+            == ExceptionCode::HierarchyRequestError);
       CHECK(ExceptionCodeOf(media.InsertRule(u8"@namespace a url(a);", 0))
-            == dom::ExceptionCode::HierarchyRequestError);
+            == ExceptionCode::HierarchyRequestError);
       CHECK(media.Length() == 1);
     }
 
     SECTION("deleteRule")
     {
       RefPtr<CSSRule> held = ShareRefPtr(first);
-      CHECK(ExceptionCodeOf(media.DeleteRule(1)) == dom::ExceptionCode::IndexSizeError);
+      CHECK(ExceptionCodeOf(media.DeleteRule(1)) == ExceptionCode::IndexSizeError);
       REQUIRE_FALSE(media.DeleteRule(0).HasException());
       CHECK(rules.Length() == 0);
       CHECK(held->ParentRule() == nullptr);

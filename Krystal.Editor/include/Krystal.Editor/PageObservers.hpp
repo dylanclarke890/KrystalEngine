@@ -38,7 +38,7 @@ namespace krys::editor
     WeakPtr<boo::Document> _document;
     RefPtr<boo::ResizeObserver> _resizeObserver;
     RefPtr<boo::IntersectionObserver> _chapterObserver;
-    boo::dom::EventListenerHandle _lazyLoads;
+    boo::EventListenerHandle _lazyLoads;
     List<ChapterInView> _chapters;
     boo::DOMString _currentChapter;
     size_t _imagesLoaded {0};
@@ -59,7 +59,7 @@ namespace krys::editor
         // `load` doesn't bubble, so this listens as it's captured.
         _lazyLoads = list->AddEventListener(
           u8"load",
-          [this](boo::dom::Event &)
+          [this](boo::Event &)
           {
             ++_imagesLoaded;
             ShowImagesLoaded();

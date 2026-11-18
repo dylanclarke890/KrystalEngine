@@ -48,7 +48,7 @@ namespace krys::boo
     }
 
     template <typename T>
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<SVGRect>> Create(dom::ExceptionOr<T> value) noexcept
+    KRYS_NODISCARD static ExceptionOr<Ref<SVGRect>> Create(ExceptionOr<T> value) noexcept
     {
       if (value.HasException())
       {
@@ -62,11 +62,11 @@ namespace krys::boo
       return _value.X();
     }
 
-    dom::ExceptionOr<void> SetX(float xValue) noexcept
+    ExceptionOr<void> SetX(float xValue) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetX(xValue);
@@ -79,11 +79,11 @@ namespace krys::boo
       return _value.Y();
     }
 
-    dom::ExceptionOr<void> SetY(float yValue) noexcept
+    ExceptionOr<void> SetY(float yValue) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetY(yValue);
@@ -96,11 +96,11 @@ namespace krys::boo
       return _value.Width();
     }
 
-    dom::ExceptionOr<void> SetWidth(float widthValue) noexcept
+    ExceptionOr<void> SetWidth(float widthValue) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetWidth(widthValue);
@@ -113,11 +113,11 @@ namespace krys::boo
       return _value.Height();
     }
 
-    dom::ExceptionOr<void> SetHeight(float heightValue) noexcept
+    ExceptionOr<void> SetHeight(float heightValue) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetHeight(heightValue);

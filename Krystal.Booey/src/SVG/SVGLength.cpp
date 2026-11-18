@@ -30,7 +30,7 @@
 
 namespace krys::boo
 {
-  dom::ExceptionOr<float> SVGLength::ValueForBindings() noexcept
+  ExceptionOr<float> SVGLength::ValueForBindings() noexcept
   {
     RefPtr element = ShareRefPtr(ContextElement());
 
@@ -62,11 +62,11 @@ namespace krys::boo
     return _value.ValueForBindings(SVGLengthContext {element.get()});
   }
 
-  dom::ExceptionOr<void> SVGLength::SetValueForBindings(float value) noexcept
+  ExceptionOr<void> SVGLength::SetValueForBindings(float value) noexcept
   {
     if (IsReadOnly())
     {
-      return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+      return Exception {ExceptionCode::NoModificationAllowedError};
     }
 
     auto result = _value.SetValue(SVGLengthContext {RefPtr {ShareRefPtr(ContextElement())}.get()}, value);
@@ -79,16 +79,16 @@ namespace krys::boo
     return result;
   }
 
-  dom::ExceptionOr<void> SVGLength::ConvertToSpecifiedUnits(uint16 unitType) noexcept
+  ExceptionOr<void> SVGLength::ConvertToSpecifiedUnits(uint16 unitType) noexcept
   {
     if (IsReadOnly())
     {
-      return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+      return Exception {ExceptionCode::NoModificationAllowedError};
     }
 
     if (unitType == SVG_LENGTHTYPE_UNKNOWN || unitType > SVG_LENGTHTYPE_PC)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     auto result = _value.ConvertToSpecifiedUnits(

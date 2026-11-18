@@ -65,8 +65,8 @@ namespace krys::boo
       return RemoveFirstMatching(list, [&](auto &weak) { return weak.get() == value; });
     }
 
-    dom::ExceptionOr<IntersectionObserverMarginBox> ParseMargin(const DOMString &margin,
-                                                                const utf8_string &marginName) noexcept
+    ExceptionOr<IntersectionObserverMarginBox> ParseMargin(const DOMString &margin,
+                                                           const utf8_string &marginName) noexcept
     {
       using namespace css::parse_property;
 
@@ -86,16 +86,16 @@ namespace krys::boo
         return IntersectionObserverMarginBox {IntersectionObserverMarginEdge::Fixed {0}};
       }
 
-      auto consumeEdge = [&] -> dom::ExceptionOr<IntersectionObserverMarginEdge>
+      auto consumeEdge = [&] -> ExceptionOr<IntersectionObserverMarginEdge>
       {
         auto parsedValue =
           css::PrimitiveValueResolver<css::LengthPercentage<>>::ConsumeAndResolve(tokenRange, parserState);
 
         if (!parsedValue || parsedValue->IsCalculated())
         {
-          return dom::Exception(dom::ExceptionCode::SyntaxError,
-                                u8"Failed to construct 'IntersectionObserver': " + marginName
-                                  + u8" must be specified in pixels or percent.");
+          return Exception(ExceptionCode::SyntaxError, u8"Failed to construct 'IntersectionObserver': "
+                                                         + marginName
+                                                         + u8" must be specified in pixels or percent.");
         }
 
         if (parsedValue->IsPercentage())
@@ -114,9 +114,9 @@ namespace krys::boo
             parsedValue->ResolveAsLengthNoConversionDataRequired<float>()}};
         }
 
-        return dom::Exception(dom::ExceptionCode::SyntaxError,
-                              u8"Failed to construct 'IntersectionObserver': " + marginName
-                                + u8" must be specified in pixels or percent.");
+        return Exception(ExceptionCode::SyntaxError, u8"Failed to construct 'IntersectionObserver': "
+                                                       + marginName
+                                                       + u8" must be specified in pixels or percent.");
       };
 
       auto edge1 = consumeEdge();
@@ -161,9 +161,9 @@ namespace krys::boo
 
       if (!tokenRange.IsAtEnd())
       {
-        return dom::Exception(dom::ExceptionCode::SyntaxError,
-                              u8"Failed to construct 'IntersectionObserver': Extra text found at the end of "
-                                + marginName + u8".");
+        return Exception(ExceptionCode::SyntaxError,
+                         u8"Failed to construct 'IntersectionObserver': Extra text found at the end of "
+                           + marginName + u8".");
       }
 
       return IntersectionObserverMarginBox {edge1.ReleaseValue(), edge2.ReleaseValue(), edge3.ReleaseValue(),
@@ -239,7 +239,7 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<Ref<IntersectionObserver>>
+  ExceptionOr<Ref<IntersectionObserver>>
     IntersectionObserver::Create(Document &document, IntersectionObserverCallback &&callback, Init init,
                                  IncludeObscuredInsets includeObscuredInsets) noexcept
   {
@@ -276,8 +276,8 @@ namespace krys::boo
     {
       if (!(threshold >= 0 && threshold <= 1))
       {
-        return dom::Exception(
-          dom::ExceptionCode::RangeError,
+        return Exception(
+          ExceptionCode::RangeError,
           u8"Failed to construct 'IntersectionObserver': all thresholds must lie in the range [0.0, 1.0].");
       }
     }

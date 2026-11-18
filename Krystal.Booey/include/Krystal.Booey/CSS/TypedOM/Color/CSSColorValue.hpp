@@ -60,25 +60,25 @@ namespace krys::boo
     /// relative colours, and components of other types).
     /// @return A `SyntaxError` if @p cssText isn't a `<color>`.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csscolorvalue-parse
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSStyleValue>> Parse(Document &document,
-                                                                     CSSOMStringView cssText) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSStyleValue>> Parse(Document &document,
+                                                                CSSOMStringView cssText) noexcept;
 
     /// @brief The colour as the CSS function its components make (`rgb(50% 255 none / 100%)`).
     KRYS_NODISCARD virtual CSSOMString ColorFunctionText() const noexcept = 0;
 
     /// @return A `SyntaxError` if @p percent is neither a percentage nor `none`.
     /// @see https://drafts.css-houdini.org/css-typed-om/#rectify-a-csscolorpercent
-    KRYS_NODISCARD static dom::ExceptionOr<RectifiedCSSColorComponent>
+    KRYS_NODISCARD static ExceptionOr<RectifiedCSSColorComponent>
       RectifyCSSColorPercent(CSSColorPercent percent) noexcept;
 
     /// @return A `SyntaxError` if @p angle is neither an angle nor `none`.
     /// @see https://drafts.css-houdini.org/css-typed-om/#rectify-a-csscolorangle
-    KRYS_NODISCARD static dom::ExceptionOr<RectifiedCSSColorComponent>
+    KRYS_NODISCARD static ExceptionOr<RectifiedCSSColorComponent>
       RectifyCSSColorAngle(CSSColorAngle angle) noexcept;
 
     /// @return A `SyntaxError` if @p number is neither a number nor `none`.
     /// @see https://drafts.css-houdini.org/css-typed-om/#rectify-a-csscolornumber
-    KRYS_NODISCARD static dom::ExceptionOr<RectifiedCSSColorComponent>
+    KRYS_NODISCARD static ExceptionOr<RectifiedCSSColorComponent>
       RectifyCSSColorNumber(CSSColorNumber number) noexcept;
 
     /// @brief @p component as the variant the component's getters return.

@@ -60,15 +60,15 @@ namespace krys::boo::tests
       }
     };
 
-    struct FunctionListener final : dom::EventListenerCallback
+    struct FunctionListener final : EventListenerCallback
     {
-      Func<void(dom::Event &)> Function;
+      Func<void(Event &)> Function;
 
-      explicit FunctionListener(Func<void(dom::Event &)> &&function) noexcept : Function(krys::move(function))
+      explicit FunctionListener(Func<void(Event &)> &&function) noexcept : Function(krys::move(function))
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         Function(event);
       }
@@ -131,11 +131,11 @@ namespace krys::boo::tests
       }
 
       /// @brief Calls @p function for each event of @p type.
-      void ListenWith(utf8_stringview type, Func<void(dom::Event &)> &&function) noexcept
+      void ListenWith(utf8_stringview type, Func<void(boo::Event &)> &&function) noexcept
       {
         Document->AddEventListener(
-          DOMStringAtom(type),
-          Ref<dom::EventListenerCallback>(CreateRef<FunctionListener>(krys::move(function))), true);
+          DOMStringAtom(type), Ref<EventListenerCallback>(CreateRef<FunctionListener>(krys::move(function))),
+          true);
       }
 
       /// @brief Logs each drag event as its type and its target's id.
@@ -146,7 +146,7 @@ namespace krys::boo::tests
               event_names::DragLeave, event_names::Drop, event_names::DragEnd})
         {
           ListenWith(type,
-                     [this](dom::Event &event)
+                     [this](boo::Event &event)
                      {
                        auto *element = DynamicDowncast<Element>(DynamicDowncast<Node>(event.Target().get()));
                        utf8_string id =
@@ -233,9 +233,9 @@ namespace krys::boo::tests
       }
     };
 
-    KRYS_NODISCARD dom::DataTransfer &DataTransferOf(dom::Event &event) noexcept
+    KRYS_NODISCARD dom::DataTransfer &DataTransferOf(Event &event) noexcept
     {
-      auto *dataTransfer = Downcast<dom::DragEvent>(event).GetDataTransfer();
+      auto *dataTransfer = Downcast<DragEvent>(event).GetDataTransfer();
       krys_assert(dataTransfer);
       return *dataTransfer;
     }
@@ -254,13 +254,13 @@ namespace krys::boo::tests
     std::string readInDrop;
     std::string dropEffectAtEnd;
     fixture.ListenWith(event_names::DragStart,
-                       [&](dom::Event &event)
+                       [&](Event &event)
                        {
                          auto &dataTransfer = DataTransferOf(event);
                          CHECK(dataTransfer.CanWriteData());
                          dataTransfer.SetData(document, u8"text/plain", u8"payload");
                        });
-    auto accept = [&](dom::Event &event)
+    auto accept = [&](Event &event)
     {
       auto *target = DynamicDowncast<Element>(DynamicDowncast<Node>(event.Target().get()));
       if (!target || target->GetAttribute(u8"id") != DOMString(u8"dst"))
@@ -281,13 +281,13 @@ namespace krys::boo::tests
     fixture.ListenWith(event_names::DragEnter, accept);
     fixture.ListenWith(event_names::DragOver, accept);
     fixture.ListenWith(event_names::Drop,
-                       [&](dom::Event &event)
+                       [&](Event &event)
                        {
                          readInDrop = Narrow(DataTransferOf(event).GetData(document, u8"text/plain"));
                          event.PreventDefault();
                        });
-    fixture.ListenWith(event_names::DragEnd, [&](dom::Event &event)
-                       { dropEffectAtEnd = Narrow(DataTransferOf(event).DropEffect()); });
+    fixture.ListenWith(event_names::DragEnd,
+                       [&](Event &event) { dropEffectAtEnd = Narrow(DataTransferOf(event).DropEffect()); });
 
     // A press on the element and a move within the hysteresis don't start a drag.
     fixture.Press(10, 10);
@@ -321,7 +321,7 @@ namespace krys::boo::tests
     // Drag events have the keys the host reports held.
     Maybe<bool> shiftKey;
     auto keys = fixture.ById(u8"dst").AddEventListener(
-      u8"dragover", [&](dom::Event &event) { shiftKey = Downcast<dom::MouseEvent>(event).ShiftKey(); });
+      u8"dragover", [&](Event &event) { shiftKey = Downcast<MouseEvent>(event).ShiftKey(); });
     (void)fixture.DragTo(10, 64, {}, {PlatformEvent::Modifier::ShiftKey});
     CHECK(shiftKey == true);
     (void)fixture.DragTo(10, 64);
@@ -366,7 +366,7 @@ namespace krys::boo::tests
 
     SECTION("A cancelled dragstart")
     {
-      fixture.ListenWith(event_names::DragStart, [](dom::Event &event) { event.PreventDefault(); });
+      fixture.ListenWith(event_names::DragStart, [](Event &event) { event.PreventDefault(); });
       fixture.Press(10, 10);
       fixture.Move(10, 30);
       CHECK(fixture.Client->Starts == 0);
@@ -400,8 +400,8 @@ namespace krys::boo::tests
     DragFixture fixture(u8"<div id=src draggable=true>source</div><div id=dst>target</div>");
     fixture.LogDragEvents();
     std::string dropEffectAtEnd;
-    fixture.ListenWith(event_names::DragEnd, [&](dom::Event &event)
-                       { dropEffectAtEnd = Narrow(DataTransferOf(event).DropEffect()); });
+    fixture.ListenWith(event_names::DragEnd,
+                       [&](Event &event) { dropEffectAtEnd = Narrow(DataTransferOf(event).DropEffect()); });
     fixture.Press(10, 10);
     fixture.Move(10, 20);
     REQUIRE(fixture.Client->Starts == 1);
@@ -430,7 +430,7 @@ namespace krys::boo::tests
     {
       fixture.Client->SourceMask = {DragOperation::Copy};
       fixture.ListenWith(event_names::DragOver,
-                         [](dom::Event &event)
+                         [](Event &event)
                          {
                            DataTransferOf(event).SetDropEffect(u8"move");
                            event.PreventDefault();
@@ -445,7 +445,7 @@ namespace krys::boo::tests
   {
     DragFixture fixture(u8"<div id=src draggable=true>source</div><div id=dst>target</div>");
     fixture.ListenWith(event_names::DragStart,
-                       [](dom::Event &event)
+                       [](Event &event)
                        {
                          auto &dataTransfer = DataTransferOf(event);
                          dataTransfer.SetEffectAllowed(u8"bogus");
@@ -458,8 +458,8 @@ namespace krys::boo::tests
     CHECK(fixture.Client->SourceMask == EnumSet<DragOperation> {DragOperation::Copy, DragOperation::Link});
 
     // A target that accepts without choosing gets the source's first allowed operation.
-    fixture.ListenWith(event_names::DragOver, [](dom::Event &event) { event.PreventDefault(); });
-    fixture.ListenWith(event_names::DragEnter, [](dom::Event &event) { event.PreventDefault(); });
+    fixture.ListenWith(event_names::DragOver, [](Event &event) { event.PreventDefault(); });
+    fixture.ListenWith(event_names::DragEnter, [](Event &event) { event.PreventDefault(); });
     CHECK(fixture.DragTo(10, 60) == DragOperation::Copy);
     fixture.End(10, 60, {});
   }
@@ -537,7 +537,7 @@ namespace krys::boo::tests
     {
       fixture.Client->Data.SetText(u8"dropped");
       fixture.Client->SourceMask = AnyDragOperation();
-      fixture.ListenWith(event_names::TextInput, [](dom::Event &event) { event.PreventDefault(); });
+      fixture.ListenWith(event_names::TextInput, [](Event &event) { event.PreventDefault(); });
       (void)fixture.DragTo(200, 50);
       CHECK(fixture.Drop(200, 50));
       CHECK(fixture.InnerHTML(b) == "xyz");
@@ -555,7 +555,7 @@ namespace krys::boo::tests
     SECTION("Text into a text field")
     {
       int32 inputs = 0;
-      fixture.ListenWith(event_names::Input, [&](dom::Event &) { ++inputs; });
+      fixture.ListenWith(event_names::Input, [&](Event &) { ++inputs; });
       fixture.Client->Data.SetText(u8"dropped");
       CHECK(fixture.DragTo(10, 8) == DragOperation::Copy);
       CHECK(fixture.Controller().GetDragHandlingMethod() == DragHandlingMethod::EditPlainText);
@@ -567,7 +567,7 @@ namespace krys::boo::tests
     SECTION("Files into a file input")
     {
       int32 changes = 0;
-      fixture.ListenWith(event_names::Change, [&](dom::Event &) { ++changes; });
+      fixture.ListenWith(event_names::Change, [&](Event &) { ++changes; });
       fixture.Client->Data.SetURIList(u8"file:///C:/drops/a.txt\r\nfile:///C:/drops/b.txt");
       auto rect = file.BoundingClientRect();
       auto x = static_cast<int32>(rect.X() + 5);
@@ -643,7 +643,7 @@ namespace krys::boo::tests
     {
       DragFixture fixture(u8"<div id=src draggable=true>source</div>"
                           u8"<div id=image style=\"width:30px;height:20px\">image</div>");
-      fixture.ListenWith(event_names::DragStart, [&](dom::Event &event)
+      fixture.ListenWith(event_names::DragStart, [&](Event &event)
                          { DataTransferOf(event).SetDragImage(ShareRef(fixture.ById(u8"image")), 5, 6); });
       fixture.Press(10, 15);
       fixture.Move(10, 30);

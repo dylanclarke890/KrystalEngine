@@ -69,9 +69,9 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> CSSComputedStyleDeclaration::SetCssText(const CSSOMString &) noexcept
+  ExceptionOr<void> CSSComputedStyleDeclaration::SetCssText(const CSSOMString &) noexcept
   {
-    return dom::ExceptionCode::NoModificationAllowedError;
+    return ExceptionCode::NoModificationAllowedError;
   }
 
   Ref<css::MutableStyleProperties> CSSComputedStyleDeclaration::CopyProperties() const noexcept
@@ -201,15 +201,15 @@ namespace krys::boo
     return false;
   }
 
-  dom::ExceptionOr<void> CSSComputedStyleDeclaration::SetProperty(const CSSOMString &, const CSSOMString &,
-                                                                  const CSSOMString &) noexcept
+  ExceptionOr<void> CSSComputedStyleDeclaration::SetProperty(const CSSOMString &, const CSSOMString &,
+                                                             const CSSOMString &) noexcept
   {
-    return dom::ExceptionCode::NoModificationAllowedError;
+    return ExceptionCode::NoModificationAllowedError;
   }
 
-  dom::ExceptionOr<CSSOMString> CSSComputedStyleDeclaration::RemoveProperty(const CSSOMString &) noexcept
+  ExceptionOr<CSSOMString> CSSComputedStyleDeclaration::RemoveProperty(const CSSOMString &) noexcept
   {
-    return dom::ExceptionCode::NoModificationAllowedError;
+    return ExceptionCode::NoModificationAllowedError;
   }
 
   CSSOMString CSSComputedStyleDeclaration::GetPropertyValueInternal(css::PropertyId propertyID) noexcept
@@ -217,10 +217,9 @@ namespace krys::boo
     return GetPropertyValue(propertyID);
   }
 
-  dom::ExceptionOr<void> CSSComputedStyleDeclaration::SetPropertyInternal(css::PropertyId,
-                                                                          const CSSOMString &,
-                                                                          css::IsImportant) noexcept
+  ExceptionOr<void> CSSComputedStyleDeclaration::SetPropertyInternal(css::PropertyId, const CSSOMString &,
+                                                                     css::IsImportant) noexcept
   {
-    return dom::ExceptionCode::NoModificationAllowedError;
+    return ExceptionCode::NoModificationAllowedError;
   }
 }

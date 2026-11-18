@@ -111,11 +111,11 @@ namespace krys::boo
     /// @return The bytes, or `NotFoundError` if a file it's from has gone, or `NotReadableError` if one
     /// can't be read.
     /// @see https://w3c.github.io/FileAPI/#dom-blob-bytes
-    KRYS_NODISCARD dom::ExceptionOr<List<uint8>> Bytes() const noexcept;
+    KRYS_NODISCARD ExceptionOr<List<uint8>> Bytes() const noexcept;
 
     /// @brief Reads the blob's bytes, decoded as UTF-8.
     /// @see https://w3c.github.io/FileAPI/#dom-blob-text
-    KRYS_NODISCARD dom::ExceptionOr<utf8_string> Text() const noexcept;
+    KRYS_NODISCARD ExceptionOr<utf8_string> Text() const noexcept;
 
     KRYS_NODISCARD size_t MemoryCost() const noexcept
     {

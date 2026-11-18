@@ -90,7 +90,7 @@ namespace krys::boo
     return 0;
   }
 
-  dom::ExceptionOr<Ref<SVGPoint>> SVGGeometryElement::GetPointAtLength(float distance) const noexcept
+  ExceptionOr<Ref<SVGPoint>> SVGGeometryElement::GetPointAtLength(float distance) const noexcept
   {
     (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets(GeometryQueryLayoutOptions, this);
 
@@ -98,7 +98,7 @@ namespace krys::boo
     // Spec: If current element is a non-rendered element, throw an InvalidStateError.
     if (!renderer)
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     // Spec: Clamp distance to [0, length].
@@ -111,7 +111,7 @@ namespace krys::boo
     }
 
     krys_debug_assert(false);
-    return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    return Exception {ExceptionCode::InvalidStateError};
   }
 
   bool SVGGeometryElement::IsPointInFill(dom::DOMPointInit pointInit) noexcept

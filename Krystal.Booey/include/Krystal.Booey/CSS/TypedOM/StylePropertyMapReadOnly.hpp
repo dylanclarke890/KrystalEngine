@@ -63,16 +63,16 @@ namespace krys::boo
     /// @brief The first value of @p property, or null if it has none.
     /// @return A `TypeError` if @p property isn't a property.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymapreadonly-get
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<CSSStyleValue>> Get(CSSOMStringView property) const noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<CSSStyleValue>> Get(CSSOMStringView property) const noexcept;
 
     /// @brief The values of @p property.
     /// @return A `TypeError` if @p property isn't a property.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymapreadonly-getall
-    KRYS_NODISCARD dom::ExceptionOr<List<Ref<CSSStyleValue>>> GetAll(CSSOMStringView property) const noexcept;
+    KRYS_NODISCARD ExceptionOr<List<Ref<CSSStyleValue>>> GetAll(CSSOMStringView property) const noexcept;
 
     /// @return A `TypeError` if @p property isn't a property.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymapreadonly-has
-    KRYS_NODISCARD dom::ExceptionOr<bool> Has(CSSOMStringView property) const noexcept;
+    KRYS_NODISCARD ExceptionOr<bool> Has(CSSOMStringView property) const noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymapreadonly-size
     KRYS_NODISCARD virtual size_t Size() const noexcept = 0;

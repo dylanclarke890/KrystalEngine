@@ -82,7 +82,7 @@ namespace krys::boo
     Text(Document &document, DOMString data = u8"") noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-text-splittext
-    KRYS_NODISCARD dom::ExceptionOr<Ref<Text>> SplitText(size_t offset) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<Text>> SplitText(size_t offset) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-text-wholetext
     KRYS_NODISCARD DOMString WholeText() const noexcept;

@@ -14,30 +14,30 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief Records the composition, text, input and key events as "type data", in order.
-    struct EventLog : public dom::EventListenerCallback
+    struct EventLog : public EventListenerCallback
     {
       List<std::string> Events;
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         auto type = Narrow(event.Type().View());
         if (event.IsCompositionEvent())
         {
-          Events.push_back(type + " " + Narrow(Downcast<dom::CompositionEvent>(event).Data()));
+          Events.push_back(type + " " + Narrow(Downcast<CompositionEvent>(event).Data()));
         }
         else if (event.IsInputEvent())
         {
-          auto &input = Downcast<dom::InputEvent>(event);
+          auto &input = Downcast<InputEvent>(event);
           Events.push_back(type + " " + Narrow(input.InputType())
                            + (input.IsComposing() ? " composing" : ""));
         }
         else if (event.IsTextEvent())
         {
-          Events.push_back(type + " " + Narrow(Downcast<dom::TextEvent>(event).Data()));
+          Events.push_back(type + " " + Narrow(Downcast<TextEvent>(event).Data()));
         }
         else if (event.IsKeyboardEvent())
         {
-          auto &key = Downcast<dom::KeyboardEvent>(event);
+          auto &key = Downcast<KeyboardEvent>(event);
           Events.push_back(type + " " + std::to_string(key.KeyCode())
                            + (key.IsComposing() ? " composing" : ""));
         }

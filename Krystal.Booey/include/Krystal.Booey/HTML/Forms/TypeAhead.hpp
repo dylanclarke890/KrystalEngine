@@ -31,7 +31,7 @@
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/String.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class KeyboardEvent;
 }
@@ -72,7 +72,7 @@ namespace krys::boo::html
     explicit TypeAhead(TypeAheadDataSource *dataSource) noexcept;
 
     /// @return The index of the matching option, or -1 if none matches.
-    KRYS_NODISCARD int32 HandleEvent(dom::KeyboardEvent &event, EnumSet<MatchMode> matchMode) noexcept;
+    KRYS_NODISCARD int32 HandleEvent(KeyboardEvent &event, EnumSet<MatchMode> matchMode) noexcept;
 
     /// @brief Forgets what was typed, so the next key starts a new search.
     void ResetSession() noexcept

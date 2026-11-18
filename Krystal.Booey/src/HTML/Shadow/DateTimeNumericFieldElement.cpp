@@ -175,7 +175,7 @@ namespace krys::boo::html
     return _placeholder;
   }
 
-  void DateTimeNumericFieldElement::HandleKeyboardEvent(dom::KeyboardEvent &keyboardEvent) noexcept
+  void DateTimeNumericFieldElement::HandleKeyboardEvent(KeyboardEvent &keyboardEvent) noexcept
   {
     if (keyboardEvent.Type() != event_names::KeyPress)
     {
@@ -222,7 +222,7 @@ namespace krys::boo::html
     keyboardEvent.SetDefaultHandled();
   }
 
-  void DateTimeNumericFieldElement::HandleBlurEvent(dom::Event &event) noexcept
+  void DateTimeNumericFieldElement::HandleBlurEvent(Event &event) noexcept
   {
     _typeAheadBuffer.clear();
     DateTimeFieldElement::HandleBlurEvent(event);

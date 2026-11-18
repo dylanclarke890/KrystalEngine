@@ -66,7 +66,7 @@ namespace krys::boo
     KRYS_NODISCARD CSSOMString KeyText() const noexcept;
 
     /// @see https://drafts.csswg.org/css-animations-1/#dom-csskeyframerule-keytext
-    dom::ExceptionOr<void> SetKeyText(const CSSOMString &text) noexcept;
+    ExceptionOr<void> SetKeyText(const CSSOMString &text) noexcept;
 
     KRYS_NODISCARD CSSStyleProperties &Style() noexcept;
 

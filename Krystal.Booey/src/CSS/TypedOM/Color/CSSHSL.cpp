@@ -27,8 +27,8 @@
 
 namespace krys::boo
 {
-  dom::ExceptionOr<Ref<CSSHSL>> CSSHSL::Create(CSSColorAngle hue, CSSColorPercent saturation,
-                                               CSSColorPercent lightness, CSSColorPercent alpha) noexcept
+  ExceptionOr<Ref<CSSHSL>> CSSHSL::Create(CSSColorAngle hue, CSSColorPercent saturation,
+                                          CSSColorPercent lightness, CSSColorPercent alpha) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csshsl-csshsl
     auto rectifiedHue = RectifyCSSColorAngle(krys::move(hue));
@@ -67,7 +67,7 @@ namespace krys::boo
     return ToCSSColorComponent(_hue);
   }
 
-  dom::ExceptionOr<void> CSSHSL::SetH(CSSColorAngle hue) noexcept
+  ExceptionOr<void> CSSHSL::SetH(CSSColorAngle hue) noexcept
   {
     auto rectified = RectifyCSSColorAngle(krys::move(hue));
     if (rectified.HasException())
@@ -83,7 +83,7 @@ namespace krys::boo
     return ToCSSColorComponent(_saturation);
   }
 
-  dom::ExceptionOr<void> CSSHSL::SetS(CSSColorPercent saturation) noexcept
+  ExceptionOr<void> CSSHSL::SetS(CSSColorPercent saturation) noexcept
   {
     auto rectified = RectifyCSSColorPercent(krys::move(saturation));
     if (rectified.HasException())
@@ -99,7 +99,7 @@ namespace krys::boo
     return ToCSSColorComponent(_lightness);
   }
 
-  dom::ExceptionOr<void> CSSHSL::SetL(CSSColorPercent lightness) noexcept
+  ExceptionOr<void> CSSHSL::SetL(CSSColorPercent lightness) noexcept
   {
     auto rectified = RectifyCSSColorPercent(krys::move(lightness));
     if (rectified.HasException())
@@ -115,7 +115,7 @@ namespace krys::boo
     return ToCSSColorComponent(_alpha);
   }
 
-  dom::ExceptionOr<void> CSSHSL::SetAlpha(CSSColorPercent alpha) noexcept
+  ExceptionOr<void> CSSHSL::SetAlpha(CSSColorPercent alpha) noexcept
   {
     auto rectified = RectifyCSSColorPercent(krys::move(alpha));
     if (rectified.HasException())

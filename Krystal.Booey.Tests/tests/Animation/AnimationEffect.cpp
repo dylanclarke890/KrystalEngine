@@ -91,7 +91,7 @@ namespace krys::boo::tests
       {
         auto result = effect.UpdateTiming(*fixture.Document, timing);
         REQUIRE(result.HasException());
-        CHECK(result.GetException().Code() == dom::ExceptionCode::TypeError);
+        CHECK(result.GetException().Code() == ExceptionCode::TypeError);
       };
       expectTypeError({.IterationStart = -1});
       expectTypeError({.Iterations = -1});

@@ -51,15 +51,15 @@ namespace krys::boo
     using infra::StringAlgorithms;
 
     /// @see https://dom.spec.whatwg.org/#concept-range-bp-set (its first two steps)
-    KRYS_NODISCARD dom::ExceptionOr<void> CheckNodeOffsetPair(const Node &node, uint32 offset) noexcept
+    KRYS_NODISCARD ExceptionOr<void> CheckNodeOffsetPair(const Node &node, uint32 offset) noexcept
     {
       if (Is<DocumentType>(node))
       {
-        return dom::Exception(dom::ExceptionCode::InvalidNodeTypeError);
+        return Exception(ExceptionCode::InvalidNodeTypeError);
       }
       if (offset > dom::TreeQueries::Length(node))
       {
-        return dom::Exception(dom::ExceptionCode::IndexSizeError);
+        return Exception(ExceptionCode::IndexSizeError);
       }
       return {};
     }
@@ -215,7 +215,7 @@ namespace krys::boo
     return 0;
   }
 
-  dom::ExceptionOr<void> DOMSelection::Collapse(Node *node, uint32 offset) noexcept
+  ExceptionOr<void> DOMSelection::Collapse(Node *node, uint32 offset) noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -242,7 +242,7 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> DOMSelection::CollapseToEnd() noexcept
+  ExceptionOr<void> DOMSelection::CollapseToEnd() noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -252,14 +252,14 @@ namespace krys::boo
     auto &selection = frame->Document()->Selection();
     if (selection.IsNone())
     {
-      return dom::Exception(dom::ExceptionCode::InvalidStateError);
+      return Exception(ExceptionCode::InvalidStateError);
     }
     selection.DisassociateLiveRange();
     selection.MoveTo(selection.Selection().UncanonicalizedEnd(), Affinity::Downstream);
     return {};
   }
 
-  dom::ExceptionOr<void> DOMSelection::CollapseToStart() noexcept
+  ExceptionOr<void> DOMSelection::CollapseToStart() noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -269,7 +269,7 @@ namespace krys::boo
     auto &selection = frame->Document()->Selection();
     if (selection.IsNone())
     {
-      return dom::Exception(dom::ExceptionCode::InvalidStateError);
+      return Exception(ExceptionCode::InvalidStateError);
     }
     selection.DisassociateLiveRange();
     selection.MoveTo(selection.Selection().UncanonicalizedStart(), Affinity::Downstream);
@@ -281,8 +281,8 @@ namespace krys::boo
     RemoveAllRanges();
   }
 
-  dom::ExceptionOr<void> DOMSelection::SetBaseAndExtent(Node &anchorNode, uint32 anchorOffset,
-                                                        Node &focusNode, uint32 focusOffset) noexcept
+  ExceptionOr<void> DOMSelection::SetBaseAndExtent(Node &anchorNode, uint32 anchorOffset, Node &focusNode,
+                                                   uint32 focusOffset) noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -311,7 +311,7 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> DOMSelection::SetPosition(Node *node, uint32 offset) noexcept
+  ExceptionOr<void> DOMSelection::SetPosition(Node *node, uint32 offset) noexcept
   {
     return Collapse(node, offset);
   }
@@ -403,7 +403,7 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<void> DOMSelection::Extend(Node &node, uint32 offset) noexcept
+  ExceptionOr<void> DOMSelection::Extend(Node &node, uint32 offset) noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -413,8 +413,8 @@ namespace krys::boo
 
     if (RangeCount() < 1 && !frame->Document()->Selection().IsCaretOrRange())
     {
-      return dom::Exception(dom::ExceptionCode::InvalidStateError,
-                            u8"extend() requires a Range to be added to the Selection");
+      return Exception(ExceptionCode::InvalidStateError,
+                       u8"extend() requires a Range to be added to the Selection");
     }
 
     if (!(node.IsConnected() && frame->Document() == &node.NodeDocument())
@@ -434,11 +434,11 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<Ref<dom::Range>> DOMSelection::GetRangeAt(uint32 index) noexcept
+  ExceptionOr<Ref<dom::Range>> DOMSelection::GetRangeAt(uint32 index) noexcept
   {
     if (index >= RangeCount())
     {
-      return dom::Exception(dom::ExceptionCode::IndexSizeError);
+      return Exception(ExceptionCode::IndexSizeError);
     }
     auto &frame = *Frame();
     if (RefPtr<dom::Range> liveRange = frame.Document()->Selection().AssociatedLiveRange())
@@ -470,7 +470,7 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<void> DOMSelection::RemoveRange(dom::Range &liveRange) noexcept
+  ExceptionOr<void> DOMSelection::RemoveRange(dom::Range &liveRange) noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -479,7 +479,7 @@ namespace krys::boo
     }
     if (&liveRange != frame->Document()->Selection().AssociatedLiveRange().get())
     {
-      return dom::Exception(dom::ExceptionCode::NotFoundError);
+      return Exception(ExceptionCode::NotFoundError);
     }
     RemoveAllRanges();
     return {};
@@ -551,7 +551,7 @@ namespace krys::boo
     return range && (allowPartial ? Intersects(*range, node) : Contains(*range, node));
   }
 
-  dom::ExceptionOr<void> DOMSelection::SelectAllChildren(Node &node) noexcept
+  ExceptionOr<void> DOMSelection::SelectAllChildren(Node &node) noexcept
   {
     // This doesn't (and shouldn't) select the characters in a node if passed a text node.
     // Selection API specification seems to have this wrong: https://github.com/w3c/selection-api/issues/125

@@ -29,13 +29,10 @@
 #include "Krystal.Booey/Editing/Selection/TextGranularity.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 
-namespace krys::boo::dom
-{
-  class Event;
-}
-
 namespace krys::boo
 {
+  class Event;
+
   enum class TypingCommandOption : uint8
   {
     SelectInsertedText,
@@ -117,11 +114,11 @@ namespace krys::boo
       ForwardDeleteKeyPressed(Document &document, EnumSet<Option> options = {},
                               TextGranularity granularity = TextGranularity::CharacterGranularity) noexcept;
 
-    static void InsertText(Document &document, utf8_stringview text, dom::Event *triggeringEvent,
+    static void InsertText(Document &document, utf8_stringview text, Event *triggeringEvent,
                            EnumSet<Option> options,
                            TextCompositionType compositionType = TextCompositionType::None) noexcept;
 
-    static void InsertText(Document &document, utf8_stringview text, dom::Event *triggeringEvent,
+    static void InsertText(Document &document, utf8_stringview text, Event *triggeringEvent,
                            const VisibleSelection &selectionForInsertion, EnumSet<Option> options,
                            TextCompositionType compositionType = TextCompositionType::None) noexcept;
 

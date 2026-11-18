@@ -119,7 +119,7 @@ namespace krys::boo
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-node-nodevalue
-    dom::ExceptionOr<void> NodeValue(DOMString value) noexcept final
+    ExceptionOr<void> NodeValue(DOMString value) noexcept final
     {
       html::CEReactionsScope ceReactions;
       SetExistingAttributeValue(*this, krys::move(value));
@@ -133,7 +133,7 @@ namespace krys::boo
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
-    dom::ExceptionOr<void> TextContent(DOMString value) noexcept final
+    ExceptionOr<void> TextContent(DOMString value) noexcept final
     {
       html::CEReactionsScope ceReactions;
       SetExistingAttributeValue(*this, krys::move(value));

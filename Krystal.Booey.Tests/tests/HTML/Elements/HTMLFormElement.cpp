@@ -26,13 +26,13 @@ namespace krys::boo::html::tests
   namespace
   {
     /// @brief Records the submitter of each submit event and the entries of each formdata event.
-    struct SubmissionEvents : dom::EventListenerCallback
+    struct SubmissionEvents : EventListenerCallback
     {
       List<std::string> Submitters;
       List<std::string> Entries;
       bool PreventSubmit {false};
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         if (auto *submitEvent = DynamicDowncast<SubmitEvent>(event))
         {
@@ -43,7 +43,7 @@ namespace krys::boo::html::tests
             event.PreventDefault();
           }
         }
-        else if (auto *formDataEvent = DynamicDowncast<dom::FormDataEvent>(event))
+        else if (auto *formDataEvent = DynamicDowncast<FormDataEvent>(event))
         {
           for (auto &item : formDataEvent->FormData().Items())
           {
@@ -203,7 +203,7 @@ namespace krys::boo::html::tests
     auto &form = fixture.Get<HTMLFormElement>(u8"f");
     int submits = 0;
     auto listener = form.AddEventListener(u8"submit",
-                                          [&](dom::Event &)
+                                          [&](Event &)
                                           {
                                             ++submits;
                                             (void)form.RequestSubmit();
@@ -228,14 +228,13 @@ namespace krys::boo::html::tests
     FormFixture fixture(
       u8R"(<form action="https://example.com/t"><input id=t1 name=t1><input id=t2 name=t2></form>
       <form action="https://example.com/o"><input id=o1 name=o1><input type=checkbox></form>)");
-    dom::KeyboardEventInit init;
+    KeyboardEventInit init;
     init.Bubbles = true;
     init.Cancelable = true;
     init.CharCode = '\r';
     auto enter = [&](utf8_stringview id)
     {
-      (void)fixture.Get<HTMLInputElement>(id).DispatchEvent(
-        *CreateRef<dom::KeyboardEvent>(u8"keypress", init));
+      (void)fixture.Get<HTMLInputElement>(id).DispatchEvent(*CreateRef<KeyboardEvent>(u8"keypress", init));
     };
     enter(u8"t1");
     CHECK(fixture.Submissions().empty());
@@ -384,11 +383,11 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
       <input type=submit id=go name=go value=Go></form>)");
     auto &t = fixture.Get<HTMLInputElement>(u8"t");
 
-    dom::KeyboardEventInit init;
+    KeyboardEventInit init;
     init.Bubbles = true;
     init.Cancelable = true;
     init.CharCode = '\r';
-    auto enter = CreateRef<dom::KeyboardEvent>(u8"keypress", init);
+    auto enter = CreateRef<KeyboardEvent>(u8"keypress", init);
     (void)t.DispatchEvent(*enter);
     REQUIRE(fixture.Submissions().size() == 1);
     // The default button submits, as if it were clicked.
@@ -571,9 +570,9 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
     REQUIRE_FALSE(shadow->SetHTMLUnsafe(u8"<form id=f><input type=submit id=go></form>").HasException());
     auto &form = Downcast<HTMLFormElement>(*shadow->GetElementById(u8"f"));
     // Every submission is cancelled at the form, so none is left to run.
-    auto onForm = form.AddEventListener(u8"submit", [](dom::Event &event) { event.PreventDefault(); });
+    auto onForm = form.AddEventListener(u8"submit", [](Event &event) { event.PreventDefault(); });
     int32 heardAtHost = 0;
-    auto onHost = host.AddEventListener(u8"submit", [&](dom::Event &) { ++heardAtHost; });
+    auto onHost = host.AddEventListener(u8"submit", [&](Event &) { ++heardAtHost; });
 
     // Without a submitter it leaves the shadow tree; from a submitter beside the form there, it doesn't.
     REQUIRE_FALSE(form.RequestSubmit().HasException());

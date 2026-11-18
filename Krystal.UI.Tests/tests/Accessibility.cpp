@@ -631,7 +631,7 @@ namespace krys::ui::tests
     view.UpdateRendering();
     int32 clicks = 0;
 
-    struct ClickCounter final : boo::dom::EventListenerCallback
+    struct ClickCounter final : boo::EventListenerCallback
     {
       int32 &Clicks;
 
@@ -639,7 +639,7 @@ namespace krys::ui::tests
       {
       }
 
-      void HandleEvent(boo::dom::Event &) noexcept override
+      void HandleEvent(boo::Event &) noexcept override
       {
         ++Clicks;
       }
@@ -647,8 +647,7 @@ namespace krys::ui::tests
 
     view.Document()
       .GetElementById(u8"button")
-      ->AddEventListener(u8"click", Ref<boo::dom::EventListenerCallback>(CreateRef<ClickCounter>(clicks)),
-                         false);
+      ->AddEventListener(u8"click", Ref<boo::EventListenerCallback>(CreateRef<ClickCounter>(clicks)), false);
     view.AttachAccessibility(**window);
 
     auto handle = (*window)->GetWindowHandle().As<HWND>();

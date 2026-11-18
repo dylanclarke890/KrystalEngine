@@ -65,14 +65,14 @@ namespace krys::boo::html
     return ShareRefPtr(shadowRoot);
   }
 
-  dom::ExceptionOr<RefPtr<boo::Element>> ElementInternals::Form() const noexcept
+  ExceptionOr<RefPtr<boo::Element>> ElementInternals::Form() const noexcept
   {
     // 1. Let element be this's target element.
     // 2. If element is not a form-associated custom element, then throw a "NotSupportedError" DOMException.
     auto *element = ElementAsFormAssociatedCustom();
     if (!element)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
     // 3. If element's form owner is null, then return null.
     // 4. Return the result of retargeting element's form owner against element.
@@ -83,79 +83,79 @@ namespace krys::boo::html
   // 1. Let element be this's target element.
   // 2. If element is not a form-associated custom element, then throw a "NotSupportedError" DOMException.
   // (And so for the other form members.)
-  dom::ExceptionOr<void> ElementInternals::SetFormValue(CustomElementFormValue &&value,
-                                                        Maybe<CustomElementFormValue> &&state) noexcept
+  ExceptionOr<void> ElementInternals::SetFormValue(CustomElementFormValue &&value,
+                                                   Maybe<CustomElementFormValue> &&state) noexcept
   {
     if (auto *element = ElementAsFormAssociatedCustom())
     {
       element->SetFormValue(krys::move(value), krys::move(state));
       return {};
     }
-    return dom::Exception {dom::ExceptionCode::NotSupportedError};
+    return Exception {ExceptionCode::NotSupportedError};
   }
 
-  dom::ExceptionOr<void> ElementInternals::SetValidity(ValidityStateFlags flags, DOMString message,
-                                                       HTMLElement *validationAnchor) noexcept
+  ExceptionOr<void> ElementInternals::SetValidity(ValidityStateFlags flags, DOMString message,
+                                                  HTMLElement *validationAnchor) noexcept
   {
     if (auto *element = ElementAsFormAssociatedCustom())
     {
       return element->SetValidity(flags, krys::move(message), validationAnchor);
     }
-    return dom::Exception {dom::ExceptionCode::NotSupportedError};
+    return Exception {ExceptionCode::NotSupportedError};
   }
 
-  dom::ExceptionOr<bool> ElementInternals::WillValidate() const noexcept
+  ExceptionOr<bool> ElementInternals::WillValidate() const noexcept
   {
     if (auto *element = ElementAsFormAssociatedCustom())
     {
       return element->WillValidate();
     }
-    return dom::Exception {dom::ExceptionCode::NotSupportedError};
+    return Exception {ExceptionCode::NotSupportedError};
   }
 
-  dom::ExceptionOr<ValidityState> ElementInternals::Validity() noexcept
+  ExceptionOr<ValidityState> ElementInternals::Validity() noexcept
   {
     if (auto *element = ElementAsFormAssociatedCustom())
     {
       return element->Validity();
     }
-    return dom::Exception {dom::ExceptionCode::NotSupportedError};
+    return Exception {ExceptionCode::NotSupportedError};
   }
 
-  dom::ExceptionOr<DOMString> ElementInternals::ValidationMessage() const noexcept
+  ExceptionOr<DOMString> ElementInternals::ValidationMessage() const noexcept
   {
     if (auto *element = ElementAsFormAssociatedCustom())
     {
       return element->ValidationMessage();
     }
-    return dom::Exception {dom::ExceptionCode::NotSupportedError};
+    return Exception {ExceptionCode::NotSupportedError};
   }
 
-  dom::ExceptionOr<bool> ElementInternals::ReportValidity() noexcept
+  ExceptionOr<bool> ElementInternals::ReportValidity() noexcept
   {
     if (auto *element = ElementAsFormAssociatedCustom())
     {
       return element->ReportValidity();
     }
-    return dom::Exception {dom::ExceptionCode::NotSupportedError};
+    return Exception {ExceptionCode::NotSupportedError};
   }
 
-  dom::ExceptionOr<bool> ElementInternals::CheckValidity() noexcept
+  ExceptionOr<bool> ElementInternals::CheckValidity() noexcept
   {
     if (auto *element = ElementAsFormAssociatedCustom())
     {
       return element->CheckValidity();
     }
-    return dom::Exception {dom::ExceptionCode::NotSupportedError};
+    return Exception {ExceptionCode::NotSupportedError};
   }
 
-  dom::ExceptionOr<RefPtr<dom::NodeList>> ElementInternals::Labels() noexcept
+  ExceptionOr<RefPtr<dom::NodeList>> ElementInternals::Labels() noexcept
   {
     if (auto *element = ElementAsFormAssociatedCustom())
     {
       return element->AsHTMLElement().Labels();
     }
-    return dom::Exception {dom::ExceptionCode::NotSupportedError};
+    return Exception {ExceptionCode::NotSupportedError};
   }
 
   // https://html.spec.whatwg.org/#dom-elementinternals-states

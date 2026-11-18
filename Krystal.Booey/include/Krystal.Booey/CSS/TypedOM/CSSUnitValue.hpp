@@ -40,8 +40,8 @@ namespace krys::boo
   public:
     /// @return A `TypeError` if @p unit isn't a unit.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssunitvalue-cssunitvalue
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSUnitValue>> Create(double value,
-                                                                     const CSSOMString &unit) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSUnitValue>> Create(double value,
+                                                                const CSSOMString &unit) noexcept;
 
     KRYS_NODISCARD static Ref<CSSUnitValue> Create(double value, css::UnitType unit) noexcept
     {

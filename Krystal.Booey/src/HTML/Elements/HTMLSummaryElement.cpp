@@ -29,7 +29,7 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD bool IsInSummaryInteractiveContent(dom::EventTarget *target) noexcept
+    KRYS_NODISCARD bool IsInSummaryInteractiveContent(EventTarget *target) noexcept
     {
       // The target may have been retargeted out of the summary (the default summary's details), in which case
       // no summary is met on the way up.
@@ -85,7 +85,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#the-summary-element:activation-behaviour
-  void HTMLSummaryElement::ActivationBehavior(dom::Event &event) noexcept
+  void HTMLSummaryElement::ActivationBehavior(Event &event) noexcept
   {
     // 1. If this summary element is not the summary for its parent details, then return.
     // (Nor when the event targets interactive content within it, as in browsers.)
@@ -105,11 +105,11 @@ namespace krys::boo
     event.SetDefaultHandled();
   }
 
-  void HTMLSummaryElement::DefaultEventHandler(dom::Event &event) noexcept
+  void HTMLSummaryElement::DefaultEventHandler(Event &event) noexcept
   {
     if (IsActiveSummary())
     {
-      if (auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event))
+      if (auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event))
       {
         if (keyboardEvent->Type() == event_names::KeyDown && keyboardEvent->KeyIdentifier() == u8"U+0020")
         {

@@ -56,15 +56,15 @@ namespace krys
         (void)shadowRoot.Value()->AppendChild(*span);
         // The beans go with the element, and their listeners with them: the target keeps them.
         span
-          ->AddEventListener<boo::dom::MouseEvent>(u8"click",
-                                                   [this, bean](boo::dom::MouseEvent &) { Choose(bean + 1); })
+          ->AddEventListener<boo::MouseEvent>(u8"click",
+                                              [this, bean](boo::MouseEvent &) { Choose(bean + 1); })
           .Release();
         _beans.push_back(krys::move(span));
       }
 
       element
-        .AddEventListener<boo::dom::KeyboardEvent>(u8"keydown", [this](boo::dom::KeyboardEvent &event)
-                                                   { HandleKey(event); })
+        .AddEventListener<boo::KeyboardEvent>(u8"keydown",
+                                              [this](boo::KeyboardEvent &event) { HandleKey(event); })
         .Release();
 
       Update();
@@ -137,7 +137,7 @@ namespace krys
       Update();
     }
 
-    void HandleKey(boo::dom::KeyboardEvent &event) noexcept
+    void HandleKey(boo::KeyboardEvent &event) noexcept
     {
       auto key = event.Key();
       if (key == u8"ArrowRight" || key == u8"ArrowUp")

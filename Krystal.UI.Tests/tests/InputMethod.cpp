@@ -24,26 +24,26 @@ namespace krys::ui::tests
     }
 
     /// @brief Records the key, composition and input events as "type data", in order.
-    struct EventLog : boo::dom::EventListenerCallback
+    struct EventLog : boo::EventListenerCallback
     {
       List<std::string> Events;
 
-      void HandleEvent(boo::dom::Event &event) noexcept override
+      void HandleEvent(boo::Event &event) noexcept override
       {
         auto type = Narrow(event.Type().View());
         if (event.IsCompositionEvent())
         {
-          Events.push_back(type + " " + Narrow(Downcast<boo::dom::CompositionEvent>(event).Data()));
+          Events.push_back(type + " " + Narrow(Downcast<boo::CompositionEvent>(event).Data()));
         }
         else if (event.IsInputEvent())
         {
-          auto &input = Downcast<boo::dom::InputEvent>(event);
+          auto &input = Downcast<boo::InputEvent>(event);
           Events.push_back(type + " " + Narrow(input.InputType())
                            + (input.IsComposing() ? " composing" : ""));
         }
         else if (event.IsKeyboardEvent())
         {
-          auto &key = Downcast<boo::dom::KeyboardEvent>(event);
+          auto &key = Downcast<boo::KeyboardEvent>(event);
           Events.push_back(type + " " + std::to_string(key.KeyCode()));
         }
       }

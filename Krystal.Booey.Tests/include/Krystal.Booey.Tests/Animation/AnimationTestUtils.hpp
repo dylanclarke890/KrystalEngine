@@ -83,11 +83,11 @@ namespace krys::boo::tests
 
   /// @brief Records the animation events fired at an element: their type, then the transition's property or
   /// the animation's name.
-  struct AnimationEventRecorder : dom::EventListenerCallback
+  struct AnimationEventRecorder : EventListenerCallback
   {
     List<std::string> Records;
 
-    void HandleEvent(dom::Event &event) noexcept override
+    void HandleEvent(Event &event) noexcept override
     {
       auto type = event.Type().View();
       std::string record(type.begin(), type.end());
@@ -111,7 +111,7 @@ namespace krys::boo::tests
     {
       for (auto type : types)
       {
-        element.AddEventListener(DOMStringAtom(type), ShareRef<dom::EventListenerCallback>(*this), false);
+        element.AddEventListener(DOMStringAtom(type), ShareRef<EventListenerCallback>(*this), false);
       }
     }
   };

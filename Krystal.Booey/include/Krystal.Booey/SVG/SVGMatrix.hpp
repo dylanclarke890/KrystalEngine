@@ -51,7 +51,7 @@ namespace krys::boo
     }
 
     template <typename T>
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<SVGMatrix>> Create(dom::ExceptionOr<T> value) noexcept
+    KRYS_NODISCARD static ExceptionOr<Ref<SVGMatrix>> Create(ExceptionOr<T> value) noexcept
     {
       if (value.HasException())
       {
@@ -65,11 +65,11 @@ namespace krys::boo
       return _value.A();
     }
 
-    dom::ExceptionOr<void> SetA(double value) noexcept
+    ExceptionOr<void> SetA(double value) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetA(value);
@@ -82,11 +82,11 @@ namespace krys::boo
       return _value.B();
     }
 
-    dom::ExceptionOr<void> SetB(double value) noexcept
+    ExceptionOr<void> SetB(double value) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetB(value);
@@ -99,11 +99,11 @@ namespace krys::boo
       return _value.C();
     }
 
-    dom::ExceptionOr<void> SetC(double value) noexcept
+    ExceptionOr<void> SetC(double value) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetC(value);
@@ -116,11 +116,11 @@ namespace krys::boo
       return _value.D();
     }
 
-    dom::ExceptionOr<void> SetD(double value) noexcept
+    ExceptionOr<void> SetD(double value) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetD(value);
@@ -133,11 +133,11 @@ namespace krys::boo
       return _value.E();
     }
 
-    dom::ExceptionOr<void> SetE(double value) noexcept
+    ExceptionOr<void> SetE(double value) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetE(value);
@@ -150,11 +150,11 @@ namespace krys::boo
       return _value.F();
     }
 
-    dom::ExceptionOr<void> SetF(double value) noexcept
+    ExceptionOr<void> SetF(double value) noexcept
     {
       if (IsReadOnly())
       {
-        return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+        return Exception {ExceptionCode::NoModificationAllowedError};
       }
 
       _value.SetF(value);
@@ -169,12 +169,12 @@ namespace krys::boo
       return SVGMatrix::Create(copy);
     }
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<SVGMatrix>> Inverse() const noexcept
+    KRYS_NODISCARD ExceptionOr<Ref<SVGMatrix>> Inverse() const noexcept
     {
       auto inverse = _value.Inverse();
       if (!inverse)
       {
-        return dom::Exception {dom::ExceptionCode::InvalidStateError, u8"Matrix is not invertible"};
+        return Exception {ExceptionCode::InvalidStateError, u8"Matrix is not invertible"};
       }
 
       return SVGMatrix::Create(*inverse);
@@ -208,11 +208,11 @@ namespace krys::boo
       return SVGMatrix::Create(copy);
     }
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<SVGMatrix>> RotateFromVector(float x, float y) const noexcept
+    KRYS_NODISCARD ExceptionOr<Ref<SVGMatrix>> RotateFromVector(float x, float y) const noexcept
     {
       if (!x || !y)
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
 
       auto copy = _value;

@@ -42,7 +42,7 @@ namespace krys::boo
   public:
     /// @return A `SyntaxError` if a channel is neither a percentage nor `none`.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csscolor-csscolor
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSColor>>
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSColor>>
       Create(CSSKeywordish colorSpace, List<CSSColorPercent> channels, CSSNumberish alpha = 1.0) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csscolor-colorspace

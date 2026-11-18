@@ -51,7 +51,10 @@ namespace krys::boo::dom
     RemoveBackground,
     Other,
   };
+}
 
+namespace krys::boo
+{
   /// @brief The text an edit inserts (`textInput`): typed, pasted or dropped, which listeners can cancel
   /// before the editor inserts it.
   /// @note Legacy.
@@ -60,7 +63,7 @@ namespace krys::boo::dom
   class TextEvent final : public UIEvent
   {
   private:
-    TextEventInputType _inputType {TextEventInputType::Keyboard};
+    dom::TextEventInputType _inputType {dom::TextEventInputType::Keyboard};
     DOMString _data;
     RefPtr<DocumentFragment> _pastingFragment;
     bool _shouldSmartReplace {false};
@@ -69,24 +72,24 @@ namespace krys::boo::dom
   public:
     TextEvent() noexcept;
 
-    TextEvent(DOMStringView data, TextEventInputType inputType) noexcept;
+    TextEvent(DOMStringView data, dom::TextEventInputType inputType) noexcept;
 
-    TextEvent(DOMStringView data, RefPtr<DocumentFragment> &&pastingFragment, TextEventInputType inputType,
-              bool shouldSmartReplace, bool shouldMatchStyle) noexcept;
+    TextEvent(DOMStringView data, RefPtr<DocumentFragment> &&pastingFragment,
+              dom::TextEventInputType inputType, bool shouldSmartReplace, bool shouldMatchStyle) noexcept;
 
     ~TextEvent() noexcept override;
 
     /// @brief A trusted `textInput` event, which bubbles, can be cancelled and crosses shadow boundaries.
     KRYS_NODISCARD static Ref<TextEvent>
       Create(LocalDOMWindow *view, DOMStringView data,
-             TextEventInputType inputType = TextEventInputType::Keyboard) noexcept;
+             dom::TextEventInputType inputType = dom::TextEventInputType::Keyboard) noexcept;
 
     KRYS_NODISCARD static Ref<TextEvent> CreateForPlainTextPaste(LocalDOMWindow *view, DOMStringView data,
                                                                  bool shouldSmartReplace) noexcept;
 
     KRYS_NODISCARD static Ref<TextEvent> CreateForFragmentPaste(LocalDOMWindow *view,
                                                                 RefPtr<DocumentFragment> &&data,
-                                                                TextEventInputType inputType,
+                                                                dom::TextEventInputType inputType,
                                                                 bool shouldSmartReplace,
                                                                 bool shouldMatchStyle) noexcept;
 
@@ -109,47 +112,47 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD bool IsLineBreak() const noexcept
     {
-      return _inputType == TextEventInputType::LineBreak;
+      return _inputType == dom::TextEventInputType::LineBreak;
     }
 
     KRYS_NODISCARD bool IsComposition() const noexcept
     {
-      return _inputType == TextEventInputType::Composition;
+      return _inputType == dom::TextEventInputType::Composition;
     }
 
     KRYS_NODISCARD bool IsBackTab() const noexcept
     {
-      return _inputType == TextEventInputType::BackTab;
+      return _inputType == dom::TextEventInputType::BackTab;
     }
 
     KRYS_NODISCARD bool IsPaste() const noexcept
     {
-      return _inputType == TextEventInputType::Paste;
+      return _inputType == dom::TextEventInputType::Paste;
     }
 
     KRYS_NODISCARD bool IsDrop() const noexcept
     {
-      return _inputType == TextEventInputType::Drop;
+      return _inputType == dom::TextEventInputType::Drop;
     }
 
     KRYS_NODISCARD bool IsDictation() const noexcept
     {
-      return _inputType == TextEventInputType::Dictation;
+      return _inputType == dom::TextEventInputType::Dictation;
     }
 
     KRYS_NODISCARD bool IsAutocompletion() const noexcept
     {
-      return _inputType == TextEventInputType::Autocompletion;
+      return _inputType == dom::TextEventInputType::Autocompletion;
     }
 
     KRYS_NODISCARD bool IsKeyboard() const noexcept
     {
-      return _inputType == TextEventInputType::Keyboard;
+      return _inputType == dom::TextEventInputType::Keyboard;
     }
 
     KRYS_NODISCARD bool IsRemoveBackground() const noexcept
     {
-      return _inputType == TextEventInputType::RemoveBackground;
+      return _inputType == dom::TextEventInputType::RemoveBackground;
     }
 
     KRYS_NODISCARD bool ShouldSmartReplace() const noexcept
@@ -166,8 +169,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::TextEvent)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::TextEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Event &event) noexcept
   {
     return event.IsTextEvent();
   }

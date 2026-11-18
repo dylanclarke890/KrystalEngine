@@ -128,7 +128,7 @@ namespace krys::boo::html
       return _fields;
     }
 
-    void DefaultEventHandler(dom::Event &event) noexcept final;
+    void DefaultEventHandler(Event &event) noexcept final;
 
   private:
     KRYS_NODISCARD size_t FieldIndexOf(const DateTimeFieldElement &field) const noexcept;
@@ -143,7 +143,7 @@ namespace krys::boo::html
     bool FocusOnNextFocusableField(size_t startIndex) noexcept;
 
     // DateTimeFieldElementFieldOwner functions:
-    void DidBlurFromField(dom::Event &event) noexcept final;
+    void DidBlurFromField(Event &event) noexcept final;
 
     void FieldValueChanged() noexcept final;
 

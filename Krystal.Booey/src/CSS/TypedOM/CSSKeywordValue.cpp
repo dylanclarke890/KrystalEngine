@@ -47,21 +47,21 @@ namespace krys::boo
       });
   }
 
-  dom::ExceptionOr<Ref<CSSKeywordValue>> CSSKeywordValue::Create(const CSSOMString &value) noexcept
+  ExceptionOr<Ref<CSSKeywordValue>> CSSKeywordValue::Create(const CSSOMString &value) noexcept
   {
     if (value.empty())
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     return AdoptRef(*new CSSKeywordValue(value));
   }
 
-  dom::ExceptionOr<void> CSSKeywordValue::SetValue(const CSSOMString &value) noexcept
+  ExceptionOr<void> CSSKeywordValue::SetValue(const CSSOMString &value) noexcept
   {
     if (value.empty())
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     _value = value;

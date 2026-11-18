@@ -178,12 +178,11 @@ namespace krys::boo
     return _segments[index];
   }
 
-  dom::ExceptionOr<CSSUnparsedSegment> CSSUnparsedValue::SetItem(size_t index,
-                                                                 CSSUnparsedSegment segment) noexcept
+  ExceptionOr<CSSUnparsedSegment> CSSUnparsedValue::SetItem(size_t index, CSSUnparsedSegment segment) noexcept
   {
     if (index > _segments.size())
     {
-      return dom::Exception {dom::ExceptionCode::RangeError};
+      return Exception {ExceptionCode::RangeError};
     }
     if (index == _segments.size())
     {

@@ -54,11 +54,11 @@ namespace krys::ui::tests
       }
     };
 
-    struct Counter : boo::dom::EventListenerCallback
+    struct Counter : boo::EventListenerCallback
     {
       int32 Count {0};
 
-      void HandleEvent(boo::dom::Event &) noexcept override
+      void HandleEvent(boo::Event &) noexcept override
       {
         ++Count;
       }

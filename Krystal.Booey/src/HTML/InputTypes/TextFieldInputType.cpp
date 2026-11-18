@@ -224,7 +224,7 @@ namespace krys::boo::html
     // a user typing gesture), with the user typing gesture indicator.
   }
 
-  void TextFieldInputType::HandleClickEvent(dom::MouseEvent &) noexcept
+  void TextFieldInputType::HandleClickEvent(MouseEvent &) noexcept
   {
     auto &element = *Element();
     if (element.Focused() && element.List())
@@ -241,8 +241,7 @@ namespace krys::boo::html
     }
   }
 
-  InputType::ShouldCallBaseEventHandler
-    TextFieldInputType::HandleKeydownEvent(dom::KeyboardEvent &event) noexcept
+  InputType::ShouldCallBaseEventHandler TextFieldInputType::HandleKeydownEvent(KeyboardEvent &event) noexcept
   {
     krys_debug_assert(Element());
     Ref<HTMLInputElement> element = ShareRef(*Element());
@@ -266,7 +265,7 @@ namespace krys::boo::html
     return ShouldCallBaseEventHandler::Yes;
   }
 
-  void TextFieldInputType::HandleKeydownEventForSpinButton(dom::KeyboardEvent &event) noexcept
+  void TextFieldInputType::HandleKeydownEventForSpinButton(KeyboardEvent &event) noexcept
   {
     krys_debug_assert(Element());
     if (!Element()->IsMutable())
@@ -294,7 +293,7 @@ namespace krys::boo::html
     event.SetDefaultHandled();
   }
 
-  void TextFieldInputType::ForwardEvent(dom::Event &event) noexcept
+  void TextFieldInputType::ForwardEvent(Event &event) noexcept
   {
     krys_debug_assert(Element());
 
@@ -355,9 +354,9 @@ namespace krys::boo::html
     Element()->EndEditing();
   }
 
-  bool TextFieldInputType::ShouldSubmitImplicitly(dom::Event &event) noexcept
+  bool TextFieldInputType::ShouldSubmitImplicitly(Event &event) noexcept
   {
-    auto *textEvent = DynamicDowncast<dom::TextEvent>(event);
+    auto *textEvent = DynamicDowncast<TextEvent>(event);
     return (event.Type() == event_names::TextInput && textEvent && textEvent->Data() == u8"\n")
            || InputType::ShouldSubmitImplicitly(event);
   }
@@ -555,7 +554,7 @@ namespace krys::boo::html
     return LimitLength(proposedValueWithoutLineBreaks, HTMLInputElement::MaxEffectiveLength);
   }
 
-  void TextFieldInputType::HandleBeforeTextInsertedEvent(dom::BeforeTextInsertedEvent &event) noexcept
+  void TextFieldInputType::HandleBeforeTextInsertedEvent(BeforeTextInsertedEvent &event) noexcept
   {
     krys_debug_assert(Element());
     auto &element = *Element();

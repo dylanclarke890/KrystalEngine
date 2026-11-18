@@ -252,9 +252,9 @@ namespace krys::boo::html
     return std::numeric_limits<double>::quiet_NaN();
   }
 
-  dom::ExceptionOr<void> InputType::SetValueAsDate(double) const noexcept
+  ExceptionOr<void> InputType::SetValueAsDate(double) const noexcept
   {
-    return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    return Exception {ExceptionCode::InvalidStateError};
   }
 
   double InputType::ValueAsDouble() const noexcept
@@ -262,15 +262,15 @@ namespace krys::boo::html
     return std::numeric_limits<double>::quiet_NaN();
   }
 
-  dom::ExceptionOr<void> InputType::SetValueAsDouble(double doubleValue,
-                                                     TextFieldEventBehavior eventBehavior) const noexcept
+  ExceptionOr<void> InputType::SetValueAsDouble(double doubleValue,
+                                                TextFieldEventBehavior eventBehavior) const noexcept
   {
     return SetValueAsDecimal(Decimal::FromDouble(doubleValue), eventBehavior);
   }
 
-  dom::ExceptionOr<void> InputType::SetValueAsDecimal(const Decimal &, TextFieldEventBehavior) const noexcept
+  ExceptionOr<void> InputType::SetValueAsDecimal(const Decimal &, TextFieldEventBehavior) const noexcept
   {
-    return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    return Exception {ExceptionCode::InvalidStateError};
   }
 
   bool InputType::SupportsRequired() const noexcept
@@ -503,22 +503,22 @@ namespace krys::boo::html
     return {};
   }
 
-  InputType::ShouldCallBaseEventHandler InputType::HandleKeydownEvent(dom::KeyboardEvent &) noexcept
+  InputType::ShouldCallBaseEventHandler InputType::HandleKeydownEvent(KeyboardEvent &) noexcept
   {
     return ShouldCallBaseEventHandler::Yes;
   }
 
-  void InputType::HandleKeypressEvent(dom::KeyboardEvent &) noexcept
+  void InputType::HandleKeypressEvent(KeyboardEvent &) noexcept
   {
   }
 
-  void InputType::HandleKeyupEvent(dom::KeyboardEvent &) noexcept
+  void InputType::HandleKeyupEvent(KeyboardEvent &) noexcept
   {
   }
 
-  bool InputType::ShouldSubmitImplicitly(dom::Event &event) noexcept
+  bool InputType::ShouldSubmitImplicitly(Event &event) noexcept
   {
-    auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event);
+    auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event);
     return keyboardEvent && event.Type() == event_names::KeyPress && keyboardEvent->CharCode() == '\r';
   }
 
@@ -544,7 +544,7 @@ namespace krys::boo::html
     return DateComponentsType::Invalid;
   }
 
-  void InputType::DispatchSimulatedClickIfActive(dom::KeyboardEvent &event) const noexcept
+  void InputType::DispatchSimulatedClickIfActive(KeyboardEvent &event) const noexcept
   {
     krys_debug_assert(Element());
     auto &element = *Element();
@@ -959,8 +959,8 @@ namespace krys::boo::html
     return 0;
   }
 
-  dom::ExceptionOr<void> InputType::ApplyStep(int count, AnyStepHandling anyStepHandling,
-                                              TextFieldEventBehavior eventBehavior) noexcept
+  ExceptionOr<void> InputType::ApplyStep(int count, AnyStepHandling anyStepHandling,
+                                         TextFieldEventBehavior eventBehavior) noexcept
   {
     // https://html.spec.whatwg.org/#dom-input-stepup
 
@@ -970,7 +970,7 @@ namespace krys::boo::html
     // steps.
     if (!stepRange.HasStep())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     // 3. If the element has a minimum and a maximum and the minimum is greater than the maximum, then abort
@@ -1072,11 +1072,11 @@ namespace krys::boo::html
     return StepRange();
   }
 
-  dom::ExceptionOr<void> InputType::StepUp(int n) noexcept
+  ExceptionOr<void> InputType::StepUp(int n) noexcept
   {
     if (!IsSteppable())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     return ApplyStep(n, AnyStepHandling::Reject, TextFieldEventBehavior::DispatchNoEvent);

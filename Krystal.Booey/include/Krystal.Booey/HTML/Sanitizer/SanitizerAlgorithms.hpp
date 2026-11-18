@@ -26,8 +26,8 @@ namespace krys::boo::html
     /// @brief The configuration a sanitizer configured with @p configuration has: a canonical copy, or a
     /// `TypeError` if it isn't valid.
     /// @see https://html.spec.whatwg.org/#configure-a-sanitizer
-    KRYS_NODISCARD static dom::ExceptionOr<SanitizerConfig> Configure(const SanitizerConfig &configuration,
-                                                                      bool permissiveDefaults) noexcept;
+    KRYS_NODISCARD static ExceptionOr<SanitizerConfig> Configure(const SanitizerConfig &configuration,
+                                                                 bool permissiveDefaults) noexcept;
 
     /// @see https://html.spec.whatwg.org/#canonicalize-the-configuration
     static void Canonicalize(SanitizerConfig &configuration, bool permissiveDefaults) noexcept;
@@ -62,7 +62,7 @@ namespace krys::boo::html
     /// @brief The configuration markup is sanitized with, given the options' sanitizer member (null if it's
     /// missing); null for no sanitizing, or a `TypeError` if the configuration isn't valid.
     /// @see https://html.spec.whatwg.org/#get-a-sanitizer-config-from-options
-    KRYS_NODISCARD static dom::ExceptionOr<Maybe<SanitizerConfig>>
+    KRYS_NODISCARD static ExceptionOr<Maybe<SanitizerConfig>>
       GetSanitizerConfigFromOptions(const SanitizerInput *sanitizer, bool safe) noexcept;
 
     /// @see https://html.spec.whatwg.org/#contains-a-javascript:-url

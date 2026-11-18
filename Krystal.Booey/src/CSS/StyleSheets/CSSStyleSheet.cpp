@@ -116,7 +116,7 @@ namespace krys::boo
     return AdoptRef(*new CSSStyleSheet(krys::move(contents), owner, true));
   }
 
-  dom::ExceptionOr<Ref<CSSStyleSheet>> CSSStyleSheet::Create(Document &document, Init init) noexcept
+  ExceptionOr<Ref<CSSStyleSheet>> CSSStyleSheet::Create(Document &document, Init init) noexcept
   {
     url::URL baseURL;
     if (!init.BaseURL)
@@ -128,7 +128,7 @@ namespace krys::boo
       baseURL = document.CompleteURL(*init.BaseURL);
       if (!baseURL.IsValid())
       {
-        return dom::Exception(dom::ExceptionCode::NotAllowedError, u8"Base URL is invalid");
+        return Exception(ExceptionCode::NotAllowedError, u8"Base URL is invalid");
       }
     }
 
@@ -409,33 +409,33 @@ namespace krys::boo
     return true;
   }
 
-  dom::ExceptionOr<uint32> CSSStyleSheet::InsertRule(const CSSOMString &ruleString, uint32 index) noexcept
+  ExceptionOr<uint32> CSSStyleSheet::InsertRule(const CSSOMString &ruleString, uint32 index) noexcept
   {
     krys_debug_assert(_childRuleCSSOMWrappers.empty()
                       || _childRuleCSSOMWrappers.size() == _contents->RuleCount());
 
     if (!CanAccessRules())
     {
-      return dom::Exception(dom::ExceptionCode::SecurityError,
-                            u8"Not allowed to insert rule into cross-origin stylesheet");
+      return Exception(ExceptionCode::SecurityError,
+                       u8"Not allowed to insert rule into cross-origin stylesheet");
     }
 
     if (index > Length())
     {
-      return dom::ExceptionCode::IndexSizeError;
+      return ExceptionCode::IndexSizeError;
     }
 
     auto rule = css::Parser::ParseRule(ruleString, _contents->GetParserContext(), _contents.get(),
                                        css::Parser::AllowedRules::ImportRules);
     if (!rule)
     {
-      return dom::ExceptionCode::SyntaxError;
+      return ExceptionCode::SyntaxError;
     }
 
     if (_wasConstructedByJS && rule->IsImportRule())
     {
-      return dom::Exception(dom::ExceptionCode::SyntaxError,
-                            u8"Cannot inserted an @import rule in a constructed CSSStyleSheet object");
+      return Exception(ExceptionCode::SyntaxError,
+                       u8"Cannot inserted an @import rule in a constructed CSSStyleSheet object");
     }
 
     RuleMutationScope mutationScope(this, RuleMutationType::RuleInsertion,
@@ -447,9 +447,9 @@ namespace krys::boo
     {
       if (isNamespace)
       {
-        return dom::ExceptionCode::InvalidStateError;
+        return ExceptionCode::InvalidStateError;
       }
-      return dom::ExceptionCode::HierarchyRequestError;
+      return ExceptionCode::HierarchyRequestError;
     }
 
     if (!_childRuleCSSOMWrappers.empty())
@@ -460,20 +460,20 @@ namespace krys::boo
     return index;
   }
 
-  dom::ExceptionOr<void> CSSStyleSheet::DeleteRule(uint32 index) noexcept
+  ExceptionOr<void> CSSStyleSheet::DeleteRule(uint32 index) noexcept
   {
     krys_debug_assert(_childRuleCSSOMWrappers.empty()
                       || _childRuleCSSOMWrappers.size() == _contents->RuleCount());
 
     if (!CanAccessRules())
     {
-      return dom::Exception(dom::ExceptionCode::SecurityError,
-                            u8"Not allowed to delete rule from cross-origin stylesheet");
+      return Exception(ExceptionCode::SecurityError,
+                       u8"Not allowed to delete rule from cross-origin stylesheet");
     }
 
     if (index >= Length())
     {
-      return dom::ExceptionCode::IndexSizeError;
+      return ExceptionCode::IndexSizeError;
     }
 
     RuleMutationScope mutationScope(this);
@@ -481,7 +481,7 @@ namespace krys::boo
     bool success = _contents->WrapperDeleteRule(index);
     if (!success)
     {
-      return dom::ExceptionCode::InvalidStateError;
+      return ExceptionCode::InvalidStateError;
     }
 
     if (!_childRuleCSSOMWrappers.empty())
@@ -496,8 +496,8 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<int32> CSSStyleSheet::AddRule(const CSSOMString &selector, const CSSOMString &style,
-                                                 Maybe<uint32> index) noexcept
+  ExceptionOr<int32> CSSStyleSheet::AddRule(const CSSOMString &selector, const CSSOMString &style,
+                                            Maybe<uint32> index) noexcept
   {
     CSSOMString text;
     text.append(selector).append(u8" { ").append(style);
@@ -517,23 +517,22 @@ namespace krys::boo
     return -1;
   }
 
-  dom::ExceptionOr<void> CSSStyleSheet::RemoveRule(uint32 index) noexcept
+  ExceptionOr<void> CSSStyleSheet::RemoveRule(uint32 index) noexcept
   {
     return DeleteRule(index);
   }
 
-  dom::ExceptionOr<Ref<CSSRuleList>> CSSStyleSheet::CssRulesForBindings() noexcept
+  ExceptionOr<Ref<CSSRuleList>> CSSStyleSheet::CssRulesForBindings() noexcept
   {
     auto cssRules = CssRules();
     if (!cssRules)
     {
-      return dom::Exception(dom::ExceptionCode::SecurityError,
-                            u8"Not allowed to access cross-origin stylesheet");
+      return Exception(ExceptionCode::SecurityError, u8"Not allowed to access cross-origin stylesheet");
     }
     return Ref<CSSRuleList>(krys::move(cssRules));
   }
 
-  dom::ExceptionOr<Ref<CSSRuleList>> CSSStyleSheet::Rules() noexcept
+  ExceptionOr<Ref<CSSRuleList>> CSSStyleSheet::Rules() noexcept
   {
     return CssRulesForBindings();
   }
@@ -650,12 +649,12 @@ namespace krys::boo
   }
 
   // https://w3c.github.io/csswg-drafts/cssom-1/#dom-cssstylesheet-replacesync
-  dom::ExceptionOr<void> CSSStyleSheet::ReplaceSync(const CSSOMString &text) noexcept
+  ExceptionOr<void> CSSStyleSheet::ReplaceSync(const CSSOMString &text) noexcept
   {
     if (!_wasConstructedByJS)
     {
-      return dom::Exception(dom::ExceptionCode::NotAllowedError,
-                            u8"This CSSStyleSheet object was not constructed by JavaScript");
+      return Exception(ExceptionCode::NotAllowedError,
+                       u8"This CSSStyleSheet object was not constructed by JavaScript");
     }
 
     // Try to use the cache in the case where contents is replaced before the stylesheet is attached to the

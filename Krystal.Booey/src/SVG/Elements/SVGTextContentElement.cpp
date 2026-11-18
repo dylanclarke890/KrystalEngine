@@ -75,53 +75,53 @@ namespace krys::boo
     return SVGTextQuery(Renderer()).TextLength();
   }
 
-  dom::ExceptionOr<float> SVGTextContentElement::GetSubStringLength(uint32 charnum, uint32 nchars) noexcept
+  ExceptionOr<float> SVGTextContentElement::GetSubStringLength(uint32 charnum, uint32 nchars) noexcept
   {
     uint32 numberOfChars = GetNumberOfChars();
     if (charnum >= numberOfChars)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     nchars = std::min(nchars, numberOfChars - charnum);
     return SVGTextQuery(Renderer()).SubStringLength(charnum, nchars);
   }
 
-  dom::ExceptionOr<Ref<SVGPoint>> SVGTextContentElement::GetStartPositionOfChar(uint32 charnum) noexcept
+  ExceptionOr<Ref<SVGPoint>> SVGTextContentElement::GetStartPositionOfChar(uint32 charnum) noexcept
   {
     if (charnum >= GetNumberOfChars())
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     return SVGPoint::Create(SVGTextQuery(Renderer()).StartPositionOfCharacter(charnum));
   }
 
-  dom::ExceptionOr<Ref<SVGPoint>> SVGTextContentElement::GetEndPositionOfChar(uint32 charnum) noexcept
+  ExceptionOr<Ref<SVGPoint>> SVGTextContentElement::GetEndPositionOfChar(uint32 charnum) noexcept
   {
     if (charnum >= GetNumberOfChars())
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     return SVGPoint::Create(SVGTextQuery(Renderer()).EndPositionOfCharacter(charnum));
   }
 
-  dom::ExceptionOr<Ref<SVGRect>> SVGTextContentElement::GetExtentOfChar(uint32 charnum) noexcept
+  ExceptionOr<Ref<SVGRect>> SVGTextContentElement::GetExtentOfChar(uint32 charnum) noexcept
   {
     if (charnum >= GetNumberOfChars())
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     return SVGRect::Create(SVGTextQuery(Renderer()).ExtentOfCharacter(charnum));
   }
 
-  dom::ExceptionOr<float> SVGTextContentElement::GetRotationOfChar(uint32 charnum) noexcept
+  ExceptionOr<float> SVGTextContentElement::GetRotationOfChar(uint32 charnum) noexcept
   {
     if (charnum >= GetNumberOfChars())
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     return SVGTextQuery(Renderer()).RotationOfCharacter(charnum);
@@ -137,12 +137,12 @@ namespace krys::boo
     return SVGTextQuery(Renderer()).CharacterNumberAtPosition(transformPoint);
   }
 
-  dom::ExceptionOr<void> SVGTextContentElement::SelectSubString(uint32 charnum, uint32 nchars) noexcept
+  ExceptionOr<void> SVGTextContentElement::SelectSubString(uint32 charnum, uint32 nchars) noexcept
   {
     uint32 numberOfChars = GetNumberOfChars();
     if (charnum >= numberOfChars)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     nchars = std::min(nchars, numberOfChars - charnum);

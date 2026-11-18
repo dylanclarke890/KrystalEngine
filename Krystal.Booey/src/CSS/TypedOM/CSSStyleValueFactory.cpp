@@ -121,20 +121,20 @@ namespace krys::boo
       return CSSStyleValue::Create(ShareRefPtr(const_cast<css::Value *>(&value)));
     }
 
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<css::Value>>
-      ExtractValue(Document &document, css::PropertyId property, CSSOMStringView cssText) noexcept
+    KRYS_NODISCARD ExceptionOr<RefPtr<css::Value>> ExtractValue(Document &document, css::PropertyId property,
+                                                                CSSOMStringView cssText) noexcept
     {
       auto declaration = css::MutableStyleProperties::Create();
       if (css::Parser::ParseValue(*declaration, property, cssText, css::IsImportant::Yes,
                                   css::ParserContext(document))
           == css::Parser::ParseResult::Error)
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       return declaration->GetPropertyCSSValue(property);
     }
 
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<CSSStyleValue>>
+    KRYS_NODISCARD ExceptionOr<RefPtr<CSSStyleValue>>
       ExtractShorthandValues(Document &document, css::PropertyId property, CSSOMStringView cssText) noexcept
     {
       auto declaration = css::MutableStyleProperties::Create();
@@ -142,7 +142,7 @@ namespace krys::boo
                                   css::ParserContext(document))
           == css::Parser::ParseResult::Error)
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       return CSSStyleValueFactory::ConstructStyleValueForShorthandSerialisation(
         document, declaration->GetPropertyValue(property));
@@ -176,14 +176,15 @@ namespace krys::boo
       css::VariableReferenceValue::Create(tokenizer.Tokens(), css::ParserContext(document)));
   }
 
-  dom::ExceptionOr<List<Ref<CSSStyleValue>>>
-    CSSStyleValueFactory::ParseStyleValue(Document &document, CSSOMStringView property,
-                                          CSSOMStringView cssText, bool parseMultiple) noexcept
+  ExceptionOr<List<Ref<CSSStyleValue>>> CSSStyleValueFactory::ParseStyleValue(Document &document,
+                                                                              CSSOMStringView property,
+                                                                              CSSOMStringView cssText,
+                                                                              bool parseMultiple) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#parse-a-cssstylevalue
     if (cssText.empty())
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     // A custom property's value is its tokens, with the variable references among them.
@@ -197,7 +198,7 @@ namespace krys::boo
     auto propertyId = css::PropertyIdFromName(text::ToASCIILower(property));
     if (propertyId == css::PropertyId::Invalid)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     // A shorthand's value is its serialisation.
@@ -267,9 +268,9 @@ namespace krys::boo
     return results;
   }
 
-  dom::ExceptionOr<Ref<CSSStyleValue>>
-    CSSStyleValueFactory::ReifyValue(Document &document, const css::Value &value,
-                                     Maybe<css::PropertyId> property) noexcept
+  ExceptionOr<Ref<CSSStyleValue>> CSSStyleValueFactory::ReifyValue(Document &document,
+                                                                   const css::Value &value,
+                                                                   Maybe<css::PropertyId> property) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#reify-as-a-cssstylevalue
     if (const auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value))
@@ -322,7 +323,7 @@ namespace krys::boo
           return ReifyValue(document, *css::VariableReferenceValue::Create(Ref<css::VariableData>(data)),
                             property);
         },
-        [&](css::GlobalKeyword keyword) -> dom::ExceptionOr<Ref<CSSStyleValue>>
+        [&](css::GlobalKeyword keyword) -> ExceptionOr<Ref<CSSStyleValue>>
         { return ReifyKeyword(css::ToValueId(keyword)); });
     }
     else if (const auto *transformList = DynamicDowncast<css::TransformListValue>(value))
@@ -358,7 +359,7 @@ namespace krys::boo
       // A list of one item is that item, and a list-valued property's list is its first item.
       if (!valueList->Length())
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       if ((valueList->Length() == 1 && MayConvertValueListToSingleValue(property))
           || (property && css::Property::IsListValuedProperty(*property)))
@@ -370,7 +371,7 @@ namespace krys::boo
     return CSSStyleValue::Create(ShareRefPtr(const_cast<css::Value *>(&value)));
   }
 
-  dom::ExceptionOr<List<Ref<CSSStyleValue>>>
+  ExceptionOr<List<Ref<CSSStyleValue>>>
     CSSStyleValueFactory::ListFromStyleValuesOrStrings(Document &document, CSSOMStringView property,
                                                        List<CSSStyleValueOrString> values) noexcept
   {

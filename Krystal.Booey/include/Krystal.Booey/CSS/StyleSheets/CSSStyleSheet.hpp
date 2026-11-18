@@ -44,13 +44,9 @@ namespace krys::boo
   class ContainerNode;
   class Document;
   class Element;
-  class Node;
-}
-
-namespace krys::boo::dom
-{
   template <typename>
   class ExceptionOr;
+  class Node;
 }
 
 namespace krys::boo::style
@@ -163,7 +159,7 @@ namespace krys::boo
 
     /// @brief The `CSSStyleSheet` constructor: an empty sheet, constructed by script, for @p document.
     /// @see https://drafts.csswg.org/cssom/#dom-cssstylesheet-cssstylesheet
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSStyleSheet>> Create(Document &document, Init init) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSStyleSheet>> Create(Document &document, Init init) noexcept;
 
     KRYS_NODISCARD CSSStyleSheet *ParentStyleSheet() const noexcept final;
 
@@ -188,20 +184,20 @@ namespace krys::boo
     /// @return Null if the rules can't be accessed (a cross-origin sheet).
     KRYS_NODISCARD RefPtr<CSSRuleList> CssRules() noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSRuleList>> CssRulesForBindings() noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<CSSRuleList>> CssRulesForBindings() noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSRuleList>> Rules() noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<CSSRuleList>> Rules() noexcept;
 
-    dom::ExceptionOr<uint32> InsertRule(const CSSOMString &rule, uint32 index) noexcept;
+    ExceptionOr<uint32> InsertRule(const CSSOMString &rule, uint32 index) noexcept;
 
-    dom::ExceptionOr<void> DeleteRule(uint32 index) noexcept;
+    ExceptionOr<void> DeleteRule(uint32 index) noexcept;
 
-    dom::ExceptionOr<int32> AddRule(const CSSOMString &selector, const CSSOMString &style,
-                                    Maybe<uint32> index) noexcept;
+    ExceptionOr<int32> AddRule(const CSSOMString &selector, const CSSOMString &style,
+                               Maybe<uint32> index) noexcept;
 
-    dom::ExceptionOr<void> RemoveRule(uint32 index) noexcept;
+    ExceptionOr<void> RemoveRule(uint32 index) noexcept;
 
-    dom::ExceptionOr<void> ReplaceSync(const CSSOMString &text) noexcept;
+    ExceptionOr<void> ReplaceSync(const CSSOMString &text) noexcept;
 
     KRYS_NODISCARD bool WasMutated() const noexcept
     {

@@ -77,12 +77,12 @@ namespace krys::boo::tests
   };
 
   /// @brief Counts an element's `load` and `error` events.
-  struct LoadEvents : dom::EventListenerCallback
+  struct LoadEvents : EventListenerCallback
   {
     int32 Loads {0};
     int32 Errors {0};
 
-    void HandleEvent(dom::Event &event) noexcept override
+    void HandleEvent(Event &event) noexcept override
     {
       if (event.Type() == u8"load")
       {

@@ -52,7 +52,7 @@ namespace krys::boo
   {
     /// @brief Reifies @p value, a value of @p property (or of no particular property).
     /// @see https://drafts.css-houdini.org/css-typed-om/#reify-as-a-cssstylevalue
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSStyleValue>>
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSStyleValue>>
       ReifyValue(Document &document, const css::Value &value, Maybe<css::PropertyId> property) noexcept;
 
     /// @brief Parses @p cssText as a value of @p property, then reifies its first iteration, or each of them
@@ -60,9 +60,10 @@ namespace krys::boo
     /// @p parseMultiple.
     /// @return A `TypeError` if @p property isn't a property or @p cssText doesn't parse as its value.
     /// @see https://drafts.css-houdini.org/css-typed-om/#parse-a-cssstylevalue
-    KRYS_NODISCARD static dom::ExceptionOr<List<Ref<CSSStyleValue>>>
-      ParseStyleValue(Document &document, CSSOMStringView property, CSSOMStringView cssText,
-                      bool parseMultiple) noexcept;
+    KRYS_NODISCARD static ExceptionOr<List<Ref<CSSStyleValue>>> ParseStyleValue(Document &document,
+                                                                                CSSOMStringView property,
+                                                                                CSSOMStringView cssText,
+                                                                                bool parseMultiple) noexcept;
 
     /// @brief A shorthand's value, from its serialisation: an unparsed value if it references variables,
     /// otherwise a generic style value. Null if @p serialisation is.
@@ -72,7 +73,7 @@ namespace krys::boo
 
     /// @brief @p values as style values for @p property, the strings among them parsed as each of their
     /// iterations.
-    KRYS_NODISCARD static dom::ExceptionOr<List<Ref<CSSStyleValue>>>
+    KRYS_NODISCARD static ExceptionOr<List<Ref<CSSStyleValue>>>
       ListFromStyleValuesOrStrings(Document &document, CSSOMStringView property,
                                    List<CSSStyleValueOrString> values) noexcept;
   };

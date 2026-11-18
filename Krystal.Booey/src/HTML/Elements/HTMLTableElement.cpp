@@ -85,7 +85,7 @@ namespace krys::boo
     return nullptr;
   }
 
-  dom::ExceptionOr<void> HTMLTableElement::Caption(const RefPtr<HTMLTableCaptionElement> &caption) noexcept
+  ExceptionOr<void> HTMLTableElement::Caption(const RefPtr<HTMLTableCaptionElement> &caption) noexcept
   {
     html::CEReactionsScope ceReactions;
 
@@ -136,7 +136,7 @@ namespace krys::boo
     return FirstTableSection(*this, html::TagName::thead);
   }
 
-  dom::ExceptionOr<void> HTMLTableElement::THead(const RefPtr<HTMLTableSectionElement> &head) noexcept
+  ExceptionOr<void> HTMLTableElement::THead(const RefPtr<HTMLTableSectionElement> &head) noexcept
   {
     html::CEReactionsScope ceReactions;
 
@@ -144,7 +144,7 @@ namespace krys::boo
     //    DOMException.
     if (head && !head->HasTagName(html::TagName::thead)) KRYS_UNLIKELY
     {
-      return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
+      return Exception {ExceptionCode::HierarchyRequestError};
     }
 
     // 2. Remove the first thead element child of this, if any.
@@ -208,7 +208,7 @@ namespace krys::boo
     return FirstTableSection(*this, html::TagName::tfoot);
   }
 
-  dom::ExceptionOr<void> HTMLTableElement::TFoot(const RefPtr<HTMLTableSectionElement> &foot) noexcept
+  ExceptionOr<void> HTMLTableElement::TFoot(const RefPtr<HTMLTableSectionElement> &foot) noexcept
   {
     html::CEReactionsScope ceReactions;
 
@@ -216,7 +216,7 @@ namespace krys::boo
     //    DOMException.
     if (foot && !foot->HasTagName(html::TagName::tfoot)) KRYS_UNLIKELY
     {
-      return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
+      return Exception {ExceptionCode::HierarchyRequestError};
     }
 
     // 2. Remove the first tfoot element child of this, if any.
@@ -315,7 +315,7 @@ namespace krys::boo
     return rows;
   }
 
-  dom::ExceptionOr<Ref<HTMLTableRowElement>> HTMLTableElement::InsertRow(int32 index) noexcept
+  ExceptionOr<Ref<HTMLTableRowElement>> HTMLTableElement::InsertRow(int32 index) noexcept
   {
     // 1. If index is less than −1 or greater than the number of elements in the rows collection, then throw
     // an
@@ -323,7 +323,7 @@ namespace krys::boo
     // (Greater is found while walking the rows.)
     if (index < -1)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     Ref<HTMLTableElement> protectedThis = ShareRef(*this);
@@ -343,7 +343,7 @@ namespace krys::boo
         {
           if (i != index)
           {
-            return dom::Exception {dom::ExceptionCode::IndexSizeError};
+            return Exception {ExceptionCode::IndexSizeError};
           }
           break;
         }
@@ -398,7 +398,7 @@ namespace krys::boo
     return newRow;
   }
 
-  dom::ExceptionOr<void> HTMLTableElement::DeleteRow(int32 index) noexcept
+  ExceptionOr<void> HTMLTableElement::DeleteRow(int32 index) noexcept
   {
     html::CEReactionsScope ceReactions;
 
@@ -430,7 +430,7 @@ namespace krys::boo
       }
       if (!row)
       {
-        return dom::Exception {dom::ExceptionCode::IndexSizeError};
+        return Exception {ExceptionCode::IndexSizeError};
       }
     }
 

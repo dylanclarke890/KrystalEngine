@@ -333,7 +333,7 @@ namespace krys::boo::tests
     REQUIRE_FALSE(context.SetTransform({.M11 = 2, .M41 = 7}).HasException());
     CHECK(context.GetTransform()->A() == 2);
     CHECK(context.GetTransform()->E() == 7);
-    CHECK(context.SetTransform({.E = 1, .M41 = 2}).GetException().Code() == dom::ExceptionCode::TypeError);
+    CHECK(context.SetTransform({.E = 1, .M41 = 2}).GetException().Code() == ExceptionCode::TypeError);
 
     context.ResetTransform();
     CHECK(context.GetTransform()->IsIdentity());
@@ -394,19 +394,18 @@ namespace krys::boo::tests
     auto &context = fixture.Context();
 
     CHECK(context.CreateLinearGradient(0, 0, std::nanf(""), 0).GetException().Code()
-          == dom::ExceptionCode::TypeError);
+          == ExceptionCode::TypeError);
     CHECK(context.CreateRadialGradient(0, 0, -1, 0, 0, 1).GetException().Code()
-          == dom::ExceptionCode::IndexSizeError);
+          == ExceptionCode::IndexSizeError);
     CHECK(context.CreateConicGradient(std::numeric_limits<float>::infinity(), 0, 0).GetException().Code()
-          == dom::ExceptionCode::TypeError);
+          == ExceptionCode::TypeError);
     CHECK(context.CreateRadialGradient(0, 0, 1, 0, std::nanf(""), 1).GetException().Code()
-          == dom::ExceptionCode::TypeError);
+          == ExceptionCode::TypeError);
 
     auto gradient = context.CreateLinearGradient(0, 0, 100, 0).ReleaseValue();
-    CHECK(gradient->AddColorStop(1.5, u8"red").GetException().Code() == dom::ExceptionCode::IndexSizeError);
-    CHECK(gradient->AddColorStop(std::nan(""), u8"red").GetException().Code()
-          == dom::ExceptionCode::TypeError);
-    CHECK(gradient->AddColorStop(0.5, u8"nonsense").GetException().Code() == dom::ExceptionCode::SyntaxError);
+    CHECK(gradient->AddColorStop(1.5, u8"red").GetException().Code() == ExceptionCode::IndexSizeError);
+    CHECK(gradient->AddColorStop(std::nan(""), u8"red").GetException().Code() == ExceptionCode::TypeError);
+    CHECK(gradient->AddColorStop(0.5, u8"nonsense").GetException().Code() == ExceptionCode::SyntaxError);
     CHECK_FALSE(gradient->AddColorStop(0, u8"red").HasException());
     CHECK_FALSE(gradient->AddColorStop(1, u8"blue").HasException());
 
@@ -632,7 +631,7 @@ namespace krys::boo::tests
       REQUIRE_FALSE(made.HasException());
       CHECK(made.Value()->Size() == IntSize(3, 2));
       CHECK(made.Value()->ColorSpace() == html::PredefinedColorSpace::SRGB);
-      CHECK(context.CreateImageData(0, 2, {}).GetException().Code() == dom::ExceptionCode::IndexSizeError);
+      CHECK(context.CreateImageData(0, 2, {}).GetException().Code() == ExceptionCode::IndexSizeError);
 
       auto like = context.CreateImageData(*made.Value());
       CHECK(like.Value()->Size() == IntSize(3, 2));
@@ -657,7 +656,7 @@ namespace krys::boo::tests
       // Negative sizes read the other way; zero ones are errors.
       auto flipped = context.GetImageData(4, 4, -3, -1, {});
       CHECK(flipped.Value()->Size() == IntSize(3, 1));
-      CHECK(context.GetImageData(0, 0, 0, 1, {}).GetException().Code() == dom::ExceptionCode::IndexSizeError);
+      CHECK(context.GetImageData(0, 0, 0, 1, {}).GetException().Code() == ExceptionCode::IndexSizeError);
     }
 
     SECTION("put: drawn as an image, replacing what's there, whatever the state")
@@ -740,7 +739,7 @@ namespace krys::boo::tests
     {
       auto &broken = Downcast<HTMLImageElement>(fixture.ById(u8"broken"));
       CHECK(context.DrawImage(ShareRefPtr(&broken), 0, 0).GetException().Code()
-            == dom::ExceptionCode::InvalidStateError);
+            == ExceptionCode::InvalidStateError);
       REQUIRE_FALSE(context.DrawImage(ShareRefPtr(&broken), std::nanf(""), 0, 1, 1).HasException());
     }
 
@@ -767,7 +766,7 @@ namespace krys::boo::tests
       // A canvas with no pixels can't be drawn.
       auto &empty = fixture.Canvas(u8"empty");
       CHECK(context.DrawImage(ShareRefPtr(&empty), 0, 0).GetException().Code()
-            == dom::ExceptionCode::InvalidStateError);
+            == ExceptionCode::InvalidStateError);
 
       // Non-finite arguments return first.
       REQUIRE_FALSE(context.DrawImage(ShareRefPtr(&empty), 0, std::nanf("")).HasException());
@@ -784,7 +783,7 @@ namespace krys::boo::tests
       CHECK_FALSE(pattern.Value()->GetPattern().RepeatY());
 
       CHECK(context.CreatePattern(ShareRefPtr(&image), u8"diagonal").GetException().Code()
-            == dom::ExceptionCode::SyntaxError);
+            == ExceptionCode::SyntaxError);
       // An image not yet loaded makes no pattern, without an error.
       auto &pending = Downcast<HTMLImageElement>(fixture.ById(u8"pending"));
       auto none = context.CreatePattern(ShareRefPtr(&pending), u8"repeat");
@@ -794,10 +793,10 @@ namespace krys::boo::tests
       // A canvas is copied; without a host its pixels can't be, nor can an empty canvas's.
       auto &empty = fixture.Canvas(u8"empty");
       CHECK(context.CreatePattern(ShareRefPtr(&empty), u8"repeat").GetException().Code()
-            == dom::ExceptionCode::InvalidStateError);
+            == ExceptionCode::InvalidStateError);
       std::ignore = fixture.Context(u8"other");
       CHECK(context.CreatePattern(ShareRefPtr(&fixture.Canvas(u8"other")), u8"repeat").GetException().Code()
-            == dom::ExceptionCode::InvalidStateError);
+            == ExceptionCode::InvalidStateError);
     }
   }
 

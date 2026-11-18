@@ -211,12 +211,12 @@ namespace krys::boo::tests
     using Alteration = FrameSelection::Alteration;
 
     /// @brief Counts `selectstart` events, cancelling them if asked.
-    struct ModifySelectStartListener : public dom::EventListenerCallback
+    struct ModifySelectStartListener : public EventListenerCallback
     {
       int32 Count {0};
       bool Cancel {false};
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         ++Count;
         if (Cancel)

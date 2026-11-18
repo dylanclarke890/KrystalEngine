@@ -111,8 +111,10 @@ namespace krys::boo
   class LocalFrameView;
   class Locale;
   class MediaQueryList;
+  class MouseEvent;
   class MouseEventWithHitTestResults;
   class PlatformMouseEvent;
+  class PointerEvent;
   class ProcessingInstruction;
   class RenderElement;
   class RenderStyle;
@@ -220,11 +222,9 @@ namespace krys::boo::dom
   class HTMLCollection;
   class HighlightRegistry;
   class LiveRangeUpdater;
-  class MouseEvent;
   class MutationAlgorithms;
   class NodeAlgorithms;
   class NodeIterator;
-  class PointerEvent;
   class SelectorQuery;
   class TreeWalker;
   class UserActionElementSet;
@@ -589,12 +589,12 @@ namespace krys::boo
     KRYS_NODISCARD Ref<dom::HTMLCollection> GetElementsByClassName(DOMStringAtom classNames) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createelement
-    KRYS_NODISCARD dom::ExceptionOr<Ref<Element>>
+    KRYS_NODISCARD ExceptionOr<Ref<Element>>
       CreateElement(DOMStringAtom localName,
                     const dom::ElementCreationOptionsOrString &options = {}) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createelementns
-    KRYS_NODISCARD dom::ExceptionOr<Ref<Element>>
+    KRYS_NODISCARD ExceptionOr<Ref<Element>>
       CreateElementNS(DOMStringAtom namespaceUri, DOMStringAtom qualifiedName,
                       const dom::ElementCreationOptionsOrString &options = {}) noexcept;
 
@@ -605,31 +605,31 @@ namespace krys::boo
     KRYS_NODISCARD Ref<Text> CreateTextNode(DOMString data) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createcdatasection
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CDATASection>> CreateCDATASection(DOMString data) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<CDATASection>> CreateCDATASection(DOMString data) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createcomment
     KRYS_NODISCARD Ref<Comment> CreateComment(DOMString data) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createprocessinginstruction
-    KRYS_NODISCARD dom::ExceptionOr<Ref<ProcessingInstruction>>
+    KRYS_NODISCARD ExceptionOr<Ref<ProcessingInstruction>>
       CreateProcessingInstruction(DOMString target, DOMString data) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-importnode
-    KRYS_NODISCARD dom::ExceptionOr<Ref<Node>>
+    KRYS_NODISCARD ExceptionOr<Ref<Node>>
       ImportNode(Node &node, const dom::BoolOrImportNodeOptions &options = false) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-adoptnode
-    KRYS_NODISCARD dom::ExceptionOr<Ref<Node>> AdoptNode(Node &node) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<Node>> AdoptNode(Node &node) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createattribute
-    KRYS_NODISCARD dom::ExceptionOr<Ref<Attr>> CreateAttribute(DOMStringAtom localName) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<Attr>> CreateAttribute(DOMStringAtom localName) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createattributens
-    KRYS_NODISCARD dom::ExceptionOr<Ref<Attr>> CreateAttributeNS(DOMStringAtom namespaceUri,
-                                                                 DOMStringAtom qualifiedName) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<Attr>> CreateAttributeNS(DOMStringAtom namespaceUri,
+                                                            DOMStringAtom qualifiedName) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createevent
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<dom::Event>> CreateEvent(DOMStringView interface) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<Event>> CreateEvent(DOMStringView interface) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createrange
     KRYS_NODISCARD Ref<dom::Range> CreateRange() noexcept;
@@ -651,7 +651,7 @@ namespace krys::boo
     /// @brief A new HTML document parsed from @p markup, with declarative shadow roots and the settings of
     /// @p context, the document of the caller; sanitized only if @p options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-parsehtmlunsafe
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<Document>>
+    KRYS_NODISCARD static ExceptionOr<Ref<Document>>
       ParseHTMLUnsafe(Document &context, DOMStringView markup,
                       html::ParseHTMLUnsafeOptions options = {}) noexcept;
 
@@ -659,7 +659,7 @@ namespace krys::boo
     /// @p context, sanitized by @p options (the default configuration if it gives none) with unsafe content
     /// removed.
     /// @see https://html.spec.whatwg.org/#dom-parsehtml
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<Document>>
+    KRYS_NODISCARD static ExceptionOr<Ref<Document>>
       ParseHTML(Document &context, DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Sets whether parsing into the document attaches declarative shadow roots.
@@ -705,7 +705,7 @@ namespace krys::boo
     KRYS_NODISCARD DOMString Title() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#document.title
-    dom::ExceptionOr<void> Title(DOMString value) noexcept;
+    ExceptionOr<void> Title(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-dir
     KRYS_NODISCARD DOMString Dir() const noexcept;
@@ -724,7 +724,7 @@ namespace krys::boo
     /// @brief Sets the body element to @p body; `HierarchyRequestError` if it isn't a body or frameset
     /// element, or if there's no body element and no document element to append it to.
     /// @see https://html.spec.whatwg.org/#dom-document-body
-    dom::ExceptionOr<void> SetBodyOrFrameset(HTMLElement &body) noexcept;
+    ExceptionOr<void> SetBodyOrFrameset(HTMLElement &body) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-head
     KRYS_NODISCARD RefPtr<HTMLHeadElement> Head() noexcept;
@@ -835,30 +835,30 @@ namespace krys::boo
     /// @note Only HTML documents have commands: in others it throws an `InvalidStateError`. @p showUI is
     /// ignored, as no command shows a user interface.
     /// @see https://w3c.github.io/editing/docs/execCommand/#execcommand()
-    KRYS_NODISCARD dom::ExceptionOr<bool> ExecCommand(DOMStringView commandId, bool showUI = false,
-                                                      DOMStringView value = {}) noexcept;
+    KRYS_NODISCARD ExceptionOr<bool> ExecCommand(DOMStringView commandId, bool showUI = false,
+                                                 DOMStringView value = {}) noexcept;
 
     /// @brief Whether the editing command @p commandId can run on the current selection.
     /// @see https://w3c.github.io/editing/docs/execCommand/#querycommandenabled()
-    KRYS_NODISCARD dom::ExceptionOr<bool> QueryCommandEnabled(DOMStringView commandId) noexcept;
+    KRYS_NODISCARD ExceptionOr<bool> QueryCommandEnabled(DOMStringView commandId) noexcept;
 
     /// @brief Whether the editing command @p commandId's state is indeterminate (some of the selection has
     /// it, some doesn't).
     /// @see https://w3c.github.io/editing/docs/execCommand/#querycommandindeterm()
-    KRYS_NODISCARD dom::ExceptionOr<bool> QueryCommandIndeterm(DOMStringView commandId) noexcept;
+    KRYS_NODISCARD ExceptionOr<bool> QueryCommandIndeterm(DOMStringView commandId) noexcept;
 
     /// @brief Whether the editing command @p commandId's state is true for the current selection.
     /// @see https://w3c.github.io/editing/docs/execCommand/#querycommandstate()
-    KRYS_NODISCARD dom::ExceptionOr<bool> QueryCommandState(DOMStringView commandId) noexcept;
+    KRYS_NODISCARD ExceptionOr<bool> QueryCommandState(DOMStringView commandId) noexcept;
 
     /// @brief Whether @p commandId names an editing command script can run.
     /// @see https://w3c.github.io/editing/docs/execCommand/#querycommandsupported()
-    KRYS_NODISCARD dom::ExceptionOr<bool> QueryCommandSupported(DOMStringView commandId) noexcept;
+    KRYS_NODISCARD ExceptionOr<bool> QueryCommandSupported(DOMStringView commandId) noexcept;
 
     /// @brief The editing command @p commandId's value for the current selection: "true" or "false" for a
     /// command with a state and no value, and empty for one with neither.
     /// @see https://w3c.github.io/editing/docs/execCommand/#querycommandvalue()
-    KRYS_NODISCARD dom::ExceptionOr<DOMString> QueryCommandValue(DOMStringView commandId) noexcept;
+    KRYS_NODISCARD ExceptionOr<DOMString> QueryCommandValue(DOMStringView commandId) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-hidden
     KRYS_NODISCARD bool Hidden() const noexcept
@@ -1295,7 +1295,7 @@ namespace krys::boo
     /// wasn't in or on an invoker of, and the topmost open dialog if its `closedby` is `any`. Run as @p event
     /// (a trusted `pointerdown` or `pointerup`) is about to be dispatched at @p target.
     /// @see https://html.spec.whatwg.org/#light-dismiss-activities
-    void HandleLightDismiss(const dom::PointerEvent &event, Node &target) noexcept;
+    void HandleLightDismiss(const PointerEvent &event, Node &target) noexcept;
 
     /// @brief The showing popovers opened as auto popovers, in top layer order.
     /// @see https://html.spec.whatwg.org/#showing-auto-popover-list
@@ -1528,7 +1528,7 @@ namespace krys::boo
     KRYS_NODISCARD LocalDOMWindow *DefaultView() const noexcept;
 
     /// @brief Fires @p event at the document's window, if it has one.
-    void DispatchWindowEvent(dom::Event &event) noexcept;
+    void DispatchWindowEvent(Event &event) noexcept;
 
     /// @see https://html.spec.whatwg.org/#load-timing-info
     KRYS_NODISCARD const dom::DocumentLoadTimingInfo &LoadTiming() const noexcept
@@ -1716,10 +1716,10 @@ namespace krys::boo
     }
 
     /// @brief Queues a task on @p source that fires @p event at the document's window, if it has one then.
-    void QueueTaskToDispatchEventOnWindow(html::TaskSource source, Ref<dom::Event> &&event) noexcept;
+    void QueueTaskToDispatchEventOnWindow(html::TaskSource source, Ref<Event> &&event) noexcept;
 
     /// @brief Queues a task on @p source that fires @p event at the document.
-    void QueueTaskToDispatchEvent(html::TaskSource source, Ref<dom::Event> &&event) noexcept;
+    void QueueTaskToDispatchEvent(html::TaskSource source, Ref<Event> &&event) noexcept;
 
     /// @brief The loader of the document's subresources (images), made on first use.
     KRYS_NODISCARD CachedResourceLoader &GetCachedResourceLoader() const noexcept;
@@ -2070,7 +2070,7 @@ namespace krys::boo
     /// `closest()`.
     /// @return A `SyntaxError` if @p selectorString isn't a valid selector list.
     /// @see https://dom.spec.whatwg.org/#scope-match-a-selectors-string (steps 1 and 2)
-    KRYS_NODISCARD dom::ExceptionOr<dom::SelectorQuery &>
+    KRYS_NODISCARD ExceptionOr<dom::SelectorQuery &>
       SelectorQueryForString(DOMStringView selectorString) const noexcept;
 
 #pragma endregion
@@ -2148,34 +2148,34 @@ namespace krys::boo
     /// equivalent Text nodes.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-prepend
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
-    dom::ExceptionOr<void> Prepend(const List<dom::NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> Prepend(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Inserts `nodes` after the last child of `this`, while replacing strings in `nodes` with
     /// equivalent Text nodes.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-append
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
-    dom::ExceptionOr<void> Append(const List<dom::NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> Append(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Replace all children of `this` with `nodes`, while replacing strings in `nodes` with equivalent
     /// Text nodes.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-replacechildren
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
-    dom::ExceptionOr<void> ReplaceChildren(const List<dom::NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> ReplaceChildren(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Moves, without first removing, `movedNode` into `this` after `child` if `child` is non-null;
     /// otherwise after the last child of node. This method preserves state associated with `movedNode`.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-movebefore
     /// @throws HierarchyRequestError if the constraints of the node tree are violated, or the state
     /// associated with the moved node cannot be preserved.
-    dom::ExceptionOr<void> MoveBefore(Node &node, Node *child) noexcept;
+    ExceptionOr<void> MoveBefore(Node &node, Node *child) noexcept;
 
     /// @brief Returns the first element that is a descendant of `this` that matches `selectors`.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-queryselector
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<Element>> QuerySelector(DOMStringView selectors) noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<Element>> QuerySelector(DOMStringView selectors) noexcept;
 
     /// @brief Returns all element descendants of `this` that match `selectors`.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-queryselectorall
-    KRYS_NODISCARD dom::ExceptionOr<Ref<dom::NodeList>> QuerySelectorAll(DOMStringView selectors) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<dom::NodeList>> QuerySelectorAll(DOMStringView selectors) noexcept;
 
 #pragma endregion
 
@@ -2224,7 +2224,7 @@ namespace krys::boo
       _xmlEncoding = krys::move(encoding);
     }
 
-    dom::ExceptionOr<void> SetXMLVersion(DOMString version) noexcept;
+    ExceptionOr<void> SetXMLVersion(DOMString version) noexcept;
 
     void SetXMLStandalone(bool standalone) noexcept
     {
@@ -2267,7 +2267,7 @@ namespace krys::boo
     void UpdateBaseURL() noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-document-object:get-the-parent
-    KRYS_NODISCARD dom::EventTarget *GetParent(dom::Event &event) const noexcept override;
+    KRYS_NODISCARD EventTarget *GetParent(Event &event) const noexcept override;
 
     KRYS_NODISCARD static bool IsScriptingDisabled() noexcept
     {

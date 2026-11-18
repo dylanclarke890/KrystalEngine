@@ -48,8 +48,8 @@ namespace krys::boo
     return AdoptRef(*new CSSMatrixComponent(matrix, options.Is2D.value_or(matrix.GetIs2D())));
   }
 
-  dom::ExceptionOr<Ref<CSSMatrixComponent>> CSSMatrixComponent::Create(const css::FunctionValue &function,
-                                                                       Document &document) noexcept
+  ExceptionOr<Ref<CSSMatrixComponent>> CSSMatrixComponent::Create(const css::FunctionValue &function,
+                                                                  Document &document) noexcept
   {
     auto reified = ReifyArguments(function, document);
     if (reified.HasException())
@@ -62,7 +62,7 @@ namespace krys::boo
       const auto *unitValue = DynamicDowncast<CSSUnitValue>(*argument);
       if (!unitValue)
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       entries.push_back(unitValue->Value());
     }
@@ -82,7 +82,7 @@ namespace krys::boo
                                                    css::DOMMatrixReadOnly::Is2D::No);
       return Create(*matrix);
     }
-    return dom::Exception {dom::ExceptionCode::TypeError};
+    return Exception {ExceptionCode::TypeError};
   }
 
   CSSMatrixComponent::CSSMatrixComponent(const css::DOMMatrixReadOnly &matrix, bool is2D) noexcept
@@ -114,7 +114,7 @@ namespace krys::boo
                    m.M42(), u8", ", m.M43(), u8", ", m.M44(), u8')');
   }
 
-  dom::ExceptionOr<Ref<css::DOMMatrix>> CSSMatrixComponent::ToMatrix() const noexcept
+  ExceptionOr<Ref<css::DOMMatrix>> CSSMatrixComponent::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
     if (!Is2D())

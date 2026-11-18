@@ -8,10 +8,7 @@
 namespace krys::boo
 {
   class Element;
-}
 
-namespace krys::boo::dom
-{
   /// @see https://html.spec.whatwg.org/#commandeventinit
   struct CommandEventInit : EventInit
   {
@@ -56,8 +53,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::CommandEvent)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::CommandEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Event &event) noexcept
   {
     return event.IsCommandEvent();
   }

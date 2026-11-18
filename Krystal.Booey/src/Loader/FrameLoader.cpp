@@ -293,7 +293,7 @@ namespace krys::boo
       //     relevant global object, with legacy target override flag set.
       if (RefPtr<LocalDOMWindow> window = ShareRefPtr(document->Window()))
       {
-        auto unloadEvent = dom::Event::Create(event_names::Unload, false, false);
+        auto unloadEvent = Event::Create(event_names::Unload, false, false);
         (void)dom::EventDispatcher::DispatchToTarget(*unloadEvent, window.get(), true);
       }
       _wasUnloadEventEmitted = true;
@@ -410,9 +410,9 @@ namespace krys::boo
     }
   }
 
-  void FrameLoader::ChangeLocation(const url::URL &url, DOMStringAtom passedTarget,
-                                   dom::Event *triggeringEvent, ReferrerPolicy referrerPolicy,
-                                   DOMStringAtom downloadAttribute, Element *sourceElement) noexcept
+  void FrameLoader::ChangeLocation(const url::URL &url, DOMStringAtom passedTarget, Event *triggeringEvent,
+                                   ReferrerPolicy referrerPolicy, DOMStringAtom downloadAttribute,
+                                   Element *sourceElement) noexcept
   {
     auto *document = _frame.Document();
     if (!document)
@@ -427,7 +427,7 @@ namespace krys::boo
     ChangeLocation(krys::move(frameLoadRequest), triggeringEvent);
   }
 
-  void FrameLoader::ChangeLocation(FrameLoadRequest frameRequest, dom::Event *triggeringEvent) noexcept
+  void FrameLoader::ChangeLocation(FrameLoadRequest frameRequest, Event *triggeringEvent) noexcept
   {
     krys_assert(frameRequest.GetResourceRequest().HTTPMethod() == u8"GET");
 

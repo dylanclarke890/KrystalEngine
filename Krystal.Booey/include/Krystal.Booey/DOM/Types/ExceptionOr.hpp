@@ -30,7 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   template <typename T>
   class ExceptionOr

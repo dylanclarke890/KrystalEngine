@@ -110,7 +110,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool MatchesReadWritePseudoClass() const noexcept override;
 
-    void DefaultEventHandler(dom::Event &) noexcept override;
+    void DefaultEventHandler(Event &) noexcept override;
 
     void SetHovered(bool, style::InvalidationScope = style::InvalidationScope::All,
                     HitTestRequest = {}) noexcept override;

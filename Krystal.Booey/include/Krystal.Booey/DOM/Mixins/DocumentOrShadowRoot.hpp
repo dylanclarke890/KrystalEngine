@@ -60,6 +60,12 @@ namespace krys::boo::style
   class Scope;
 }
 
+namespace krys::boo
+{
+  template <typename>
+  class ExceptionOr;
+}
+
 namespace krys::boo::dom
 {
   class DocumentAlgorithms;
@@ -67,9 +73,6 @@ namespace krys::boo::dom
   class NodeAlgorithms;
   struct SVGResourcesMap;
   class TreeScopeOrderedMap;
-
-  template <typename>
-  class ExceptionOr;
 
   /// @brief The state and members shared by documents and shadow roots, the roots of node trees.
   /// @see https://dom.spec.whatwg.org/#mixin-documentorshadowroot

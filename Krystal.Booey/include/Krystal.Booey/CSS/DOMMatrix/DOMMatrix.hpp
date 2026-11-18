@@ -37,7 +37,7 @@ namespace krys::boo::css
 
   public:
     /// @see https://drafts.fxtf.org/geometry/#dom-dommatrixreadonly-dommatrixreadonly
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<DOMMatrix>>
+    KRYS_NODISCARD static ExceptionOr<Ref<DOMMatrix>>
       Create(Maybe<Variant<CSSOMString, List<double>>> init = null) noexcept;
 
     KRYS_NODISCARD static Ref<DOMMatrix> Create(const TransformationMatrix &matrix, Is2D is2D) noexcept
@@ -45,15 +45,15 @@ namespace krys::boo::css
       return AdoptRef(*new DOMMatrix(matrix, is2D));
     }
 
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<DOMMatrix>> FromMatrix(DOMMatrixInit &&) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<DOMMatrix>> FromMatrix(DOMMatrixInit &&) noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<DOMMatrix>> FromFloat32Array(Span<const float>) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<DOMMatrix>> FromFloat32Array(Span<const float>) noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<DOMMatrix>> FromFloat64Array(Span<const double>) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<DOMMatrix>> FromFloat64Array(Span<const double>) noexcept;
 
-    dom::ExceptionOr<Ref<DOMMatrix>> MultiplySelf(DOMMatrixInit &&other) noexcept;
+    ExceptionOr<Ref<DOMMatrix>> MultiplySelf(DOMMatrixInit &&other) noexcept;
 
-    dom::ExceptionOr<Ref<DOMMatrix>> PreMultiplySelf(DOMMatrixInit &&other) noexcept;
+    ExceptionOr<Ref<DOMMatrix>> PreMultiplySelf(DOMMatrixInit &&other) noexcept;
 
     Ref<DOMMatrix> TranslateSelf(double tx = 0, double ty = 0, double tz = 0) noexcept;
 

@@ -26,7 +26,7 @@ namespace krys::boo::tests
     }
 
     /// @brief Calls `showPicker()` on @p input during a user gesture, which it needs.
-    KRYS_NODISCARD dom::ExceptionOr<void> ShowPicker(HTMLInputElement &input) noexcept
+    KRYS_NODISCARD ExceptionOr<void> ShowPicker(HTMLInputElement &input) noexcept
     {
       input.NodeDocument().Window()->NotifyActivated();
       return input.ShowPicker();
@@ -210,7 +210,7 @@ namespace krys::boo::tests
 
       List<DOMString> swatchAtInput;
       auto handle = input.AddEventListener(
-        u8"input", [&](dom::Event &) { swatchAtInput.push_back(*Swatch(input).GetAttribute(u8"style")); });
+        u8"input", [&](Event &) { swatchAtInput.push_back(*Swatch(input).GetAttribute(u8"style")); });
       client->Chooser->Client->DidChooseColor(SRGBA<uint8> {255, 0, 0});
       REQUIRE(swatchAtInput.size() == 1);
       CHECK(swatchAtInput[0] == u8"background-color: rgb(255, 0, 0);");

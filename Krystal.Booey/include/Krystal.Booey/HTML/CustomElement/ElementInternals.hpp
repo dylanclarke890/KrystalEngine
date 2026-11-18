@@ -101,38 +101,38 @@ namespace krys::boo::html
     KRYS_NODISCARD RefPtr<boo::ShadowRoot> ShadowRoot() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-form
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<boo::Element>> Form() const noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<boo::Element>> Form() const noexcept;
 
     /// @brief Sets the value the element submits with its form, and the state it restores (by default its
     /// value).
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-setformvalue
-    dom::ExceptionOr<void> SetFormValue(CustomElementFormValue &&value,
-                                        Maybe<CustomElementFormValue> &&state = null) noexcept;
+    ExceptionOr<void> SetFormValue(CustomElementFormValue &&value,
+                                   Maybe<CustomElementFormValue> &&state = null) noexcept;
 
     /// @brief Sets the element's validity: invalid with @p message if any of @p flags is set.
     /// @param validationAnchor Where the validation message points (a shadow-including descendant of the
     /// element); the element if null.
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-setvalidity
-    dom::ExceptionOr<void> SetValidity(ValidityStateFlags flags = {}, DOMString message = {},
-                                       HTMLElement *validationAnchor = nullptr) noexcept;
+    ExceptionOr<void> SetValidity(ValidityStateFlags flags = {}, DOMString message = {},
+                                  HTMLElement *validationAnchor = nullptr) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-willvalidate
-    KRYS_NODISCARD dom::ExceptionOr<bool> WillValidate() const noexcept;
+    KRYS_NODISCARD ExceptionOr<bool> WillValidate() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-validity
-    KRYS_NODISCARD dom::ExceptionOr<ValidityState> Validity() noexcept;
+    KRYS_NODISCARD ExceptionOr<ValidityState> Validity() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-validationmessage
-    KRYS_NODISCARD dom::ExceptionOr<DOMString> ValidationMessage() const noexcept;
+    KRYS_NODISCARD ExceptionOr<DOMString> ValidationMessage() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-reportvalidity
-    dom::ExceptionOr<bool> ReportValidity() noexcept;
+    ExceptionOr<bool> ReportValidity() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-checkvalidity
-    dom::ExceptionOr<bool> CheckValidity() noexcept;
+    ExceptionOr<bool> CheckValidity() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-labels
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<dom::NodeList>> Labels() noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<dom::NodeList>> Labels() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-states
     KRYS_NODISCARD CustomStateSet &States() noexcept;

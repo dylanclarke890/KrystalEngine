@@ -28,16 +28,12 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
-{
-  template <typename>
-  class ExceptionOr;
-}
-
 namespace krys::boo
 {
   class CSSRule;
   class CSSStyleSheet;
+  template <typename>
+  class ExceptionOr;
 
   /// @brief The media query list of a style sheet, an `@import` rule or an `@media` rule, as exposed to
   /// scripts.
@@ -69,7 +65,7 @@ namespace krys::boo
 
     KRYS_NODISCARD CSSOMString Item(uint32 index) const noexcept;
 
-    dom::ExceptionOr<void> DeleteMedium(const CSSOMString &oldMedium) noexcept;
+    ExceptionOr<void> DeleteMedium(const CSSOMString &oldMedium) noexcept;
 
     void AppendMedium(const CSSOMString &newMedium) noexcept;
 

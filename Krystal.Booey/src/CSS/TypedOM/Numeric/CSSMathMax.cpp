@@ -28,7 +28,7 @@
 
 namespace krys::boo
 {
-  dom::ExceptionOr<Ref<CSSMathMax>> CSSMathMax::Create(List<CSSNumberish> numberishes) noexcept
+  ExceptionOr<Ref<CSSMathMax>> CSSMathMax::Create(List<CSSNumberish> numberishes) noexcept
   {
     List<Ref<CSSNumericValue>> values;
     values.reserve(numberishes.size());
@@ -39,17 +39,17 @@ namespace krys::boo
     return Create(krys::move(values));
   }
 
-  dom::ExceptionOr<Ref<CSSMathMax>> CSSMathMax::Create(List<Ref<CSSNumericValue>> &&values) noexcept
+  ExceptionOr<Ref<CSSMathMax>> CSSMathMax::Create(List<Ref<CSSNumericValue>> &&values) noexcept
   {
     if (values.empty())
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError};
+      return Exception {ExceptionCode::SyntaxError};
     }
 
     auto type = CSSNumericType::AddTypes(values);
     if (!type)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     return AdoptRef(*new CSSMathMax(krys::move(values), krys::move(*type)));

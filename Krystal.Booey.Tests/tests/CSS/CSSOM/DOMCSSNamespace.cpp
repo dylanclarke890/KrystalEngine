@@ -107,7 +107,7 @@ namespace krys::boo::css::tests
 
       // The first registration wins.
       CHECK(exceptionCode({.Name = u8"--size", .Syntax = u8"<color>", .InitialValue = CSSOMString(u8"red")})
-            == dom::ExceptionCode::InvalidModificationError);
+            == ExceptionCode::InvalidModificationError);
       CHECK(registry.Get(u8"--size")->Inherits);
     }
 
@@ -121,7 +121,7 @@ namespace krys::boo::css::tests
 
     SECTION("invalid definitions throw a SyntaxError")
     {
-      constexpr auto syntaxError = dom::ExceptionCode::SyntaxError;
+      constexpr auto syntaxError = ExceptionCode::SyntaxError;
       CHECK(exceptionCode({.Name = u8"size", .InitialValue = CSSOMString(u8"1px")}) == syntaxError);
       CHECK(exceptionCode({.Name = u8"--x", .Syntax = u8"<nonsense>", .InitialValue = CSSOMString(u8"1px")})
             == syntaxError);

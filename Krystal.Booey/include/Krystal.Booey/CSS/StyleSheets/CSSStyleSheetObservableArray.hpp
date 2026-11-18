@@ -37,16 +37,10 @@
 namespace krys::boo
 {
   class ContainerNode;
-}
 
-namespace krys::boo::dom
-{
   template <typename>
   class ExceptionOr;
-}
 
-namespace krys::boo
-{
   /// @brief The style sheets adopted by a document or shadow root (`adoptedStyleSheets`), with the checks and
   /// notifications of the IDL observable array.
   /// @see https://drafts.csswg.org/cssom/#dom-documentorshadowroot-adoptedstylesheets
@@ -63,7 +57,7 @@ namespace krys::boo
     explicit CSSStyleSheetObservableArray(ContainerNode &treeScope) noexcept;
 
     /// @brief Replaces every sheet, if each of @p sheets can be adopted.
-    dom::ExceptionOr<void> SetSheets(List<Ref<CSSStyleSheet>> &&sheets) noexcept;
+    ExceptionOr<void> SetSheets(List<Ref<CSSStyleSheet>> &&sheets) noexcept;
 
     KRYS_NODISCARD const List<Ref<CSSStyleSheet>> &Sheets() const noexcept
     {
@@ -72,7 +66,7 @@ namespace krys::boo
 
     /// @brief Sets the sheet at @p index, or appends it if @p index is the length.
     /// @attention @p index must be at most the length.
-    dom::ExceptionOr<void> SetValueAt(uint32 index, CSSStyleSheet &sheet) noexcept;
+    ExceptionOr<void> SetValueAt(uint32 index, CSSStyleSheet &sheet) noexcept;
 
     /// @attention The array must not be empty.
     void RemoveLast() noexcept;
@@ -90,8 +84,7 @@ namespace krys::boo
     void ShrinkTo(uint32 length) noexcept;
 
   private:
-    KRYS_NODISCARD Maybe<dom::Exception>
-      ShouldThrowWhenAddingSheet(const CSSStyleSheet &sheet) const noexcept;
+    KRYS_NODISCARD Maybe<Exception> ShouldThrowWhenAddingSheet(const CSSStyleSheet &sheet) const noexcept;
 
     void DidAddSheet(CSSStyleSheet &sheet) noexcept;
 

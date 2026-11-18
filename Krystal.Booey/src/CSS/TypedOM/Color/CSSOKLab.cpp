@@ -27,8 +27,8 @@
 
 namespace krys::boo
 {
-  dom::ExceptionOr<Ref<CSSOKLab>> CSSOKLab::Create(CSSColorPercent lightness, CSSColorNumber a,
-                                                   CSSColorNumber b, CSSColorPercent alpha) noexcept
+  ExceptionOr<Ref<CSSOKLab>> CSSOKLab::Create(CSSColorPercent lightness, CSSColorNumber a, CSSColorNumber b,
+                                              CSSColorPercent alpha) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssoklab-cssoklab
     auto rectifiedLightness = RectifyCSSColorPercent(krys::move(lightness));
@@ -66,7 +66,7 @@ namespace krys::boo
     return ToCSSColorComponent(_lightness);
   }
 
-  dom::ExceptionOr<void> CSSOKLab::SetL(CSSColorPercent lightness) noexcept
+  ExceptionOr<void> CSSOKLab::SetL(CSSColorPercent lightness) noexcept
   {
     auto rectified = RectifyCSSColorPercent(krys::move(lightness));
     if (rectified.HasException())
@@ -82,7 +82,7 @@ namespace krys::boo
     return ToCSSColorComponent(_a);
   }
 
-  dom::ExceptionOr<void> CSSOKLab::SetA(CSSColorNumber a) noexcept
+  ExceptionOr<void> CSSOKLab::SetA(CSSColorNumber a) noexcept
   {
     auto rectified = RectifyCSSColorNumber(krys::move(a));
     if (rectified.HasException())
@@ -98,7 +98,7 @@ namespace krys::boo
     return ToCSSColorComponent(_b);
   }
 
-  dom::ExceptionOr<void> CSSOKLab::SetB(CSSColorNumber b) noexcept
+  ExceptionOr<void> CSSOKLab::SetB(CSSColorNumber b) noexcept
   {
     auto rectified = RectifyCSSColorNumber(krys::move(b));
     if (rectified.HasException())
@@ -114,7 +114,7 @@ namespace krys::boo
     return ToCSSColorComponent(_alpha);
   }
 
-  dom::ExceptionOr<void> CSSOKLab::SetAlpha(CSSColorPercent alpha) noexcept
+  ExceptionOr<void> CSSOKLab::SetAlpha(CSSColorPercent alpha) noexcept
   {
     auto rectified = RectifyCSSColorPercent(krys::move(alpha));
     if (rectified.HasException())

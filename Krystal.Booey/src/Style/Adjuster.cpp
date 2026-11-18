@@ -351,7 +351,7 @@ namespace krys::boo::style
   }
 
   EnumSet<EventListenerRegionType>
-    Adjuster::ComputeEventListenerRegionTypes(const Document &, const RenderStyle &, const dom::EventTarget &,
+    Adjuster::ComputeEventListenerRegionTypes(const Document &, const RenderStyle &, const EventTarget &,
                                               EnumSet<EventListenerRegionType> parentTypes) noexcept
   {
     // Event listener regions (wheel, touch and interaction regions) are platform features that aren't

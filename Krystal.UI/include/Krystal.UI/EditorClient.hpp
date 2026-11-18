@@ -33,7 +33,7 @@ namespace krys::ui
 
     KRYS_NODISCARD bool CanPaste(boo::LocalFrame *frame, bool defaultValue) const noexcept override;
 
-    bool HandleKeyboardEvent(boo::dom::KeyboardEvent &event) noexcept override;
+    bool HandleKeyboardEvent(boo::KeyboardEvent &event) noexcept override;
 
     void RespondToChangedContents() noexcept override
     {
@@ -47,9 +47,9 @@ namespace krys::ui
     {
     }
 
-    void HandleInputMethodKeydown(boo::dom::KeyboardEvent &event) noexcept override;
+    void HandleInputMethodKeydown(boo::KeyboardEvent &event) noexcept override;
 
-    void DidDispatchInputMethodKeydown(boo::dom::KeyboardEvent &event) noexcept override;
+    void DidDispatchInputMethodKeydown(boo::KeyboardEvent &event) noexcept override;
 
     void SetInputMethodState(boo::Element *element) noexcept override;
 
@@ -99,7 +99,7 @@ namespace krys::ui
     {
     }
 
-    bool DoTextFieldCommandFromEvent(boo::Element &, boo::dom::KeyboardEvent *) noexcept override
+    bool DoTextFieldCommandFromEvent(boo::Element &, boo::KeyboardEvent *) noexcept override
     {
       return false;
     }
@@ -113,6 +113,6 @@ namespace krys::ui
     }
 
     /// @brief The name of the editor command @p event is bound to, or empty if none is.
-    KRYS_NODISCARD static utf8_stringview InterpretKeyEvent(const boo::dom::KeyboardEvent &event) noexcept;
+    KRYS_NODISCARD static utf8_stringview InterpretKeyEvent(const boo::KeyboardEvent &event) noexcept;
   };
 }

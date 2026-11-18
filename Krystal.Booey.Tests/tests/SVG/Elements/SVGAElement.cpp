@@ -17,13 +17,13 @@ namespace krys::boo::svg::tests
   {
     void Click(boo::Element &target, int16 button = 0) noexcept
     {
-      dom::MouseEventInit init;
+      MouseEventInit init;
       init.Bubbles = true;
       init.Cancelable = true;
       init.Composed = true;
       init.Button = button;
       auto type = button == 0 ? DOMStringAtom(u8"click") : DOMStringAtom(u8"auxclick");
-      (void)target.DispatchEvent(*CreateRef<dom::MouseEvent>(type, init));
+      (void)target.DispatchEvent(*CreateRef<MouseEvent>(type, init));
     }
 
     KRYS_NODISCARD SVGAElement &AById(NavigationFixture &fixture, DOMStringView id) noexcept

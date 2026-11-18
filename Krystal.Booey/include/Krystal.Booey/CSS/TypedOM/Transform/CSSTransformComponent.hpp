@@ -85,7 +85,7 @@ namespace krys::boo
 
     /// @return A `TypeError` if a length or angle in the component isn't one with an absolute unit.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
-    KRYS_NODISCARD virtual dom::ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept = 0;
+    KRYS_NODISCARD virtual ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept = 0;
 
     KRYS_NODISCARD virtual CSSTransformType TransformType() const noexcept = 0;
 
@@ -98,7 +98,7 @@ namespace krys::boo
     }
 
     /// @brief Reifies the arguments of @p function, each of which must be a numeric value.
-    KRYS_NODISCARD static dom::ExceptionOr<List<Ref<CSSNumericValue>>>
+    KRYS_NODISCARD static ExceptionOr<List<Ref<CSSNumericValue>>>
       ReifyArguments(const css::FunctionValue &function, Document &document) noexcept;
   };
 }

@@ -488,14 +488,14 @@ namespace krys::boo
     return dom::NodeAlgorithms::GetElementsByClassName(*this, krys::move(classNames));
   }
 
-  dom::ExceptionOr<Ref<Element>>
+  ExceptionOr<Ref<Element>>
     Document::CreateElement(DOMStringAtom localName,
                             const dom::ElementCreationOptionsOrString &options) noexcept
   {
     // 1. If localName is not a valid element local name, then throw an "InvalidCharacterError" DOMException.
     if (!dom::NameValidation::IsValidElementLocalName(localName.View()))
     {
-      return dom::Exception {dom::ExceptionCode::InvalidCharacterError};
+      return Exception {ExceptionCode::InvalidCharacterError};
     }
 
     // 2. If this is an HTML document, then set localName to localName in ASCII lowercase.
@@ -525,7 +525,7 @@ namespace krys::boo
                                        true, creationOptions.Value().CustomElementRegistry);
   }
 
-  dom::ExceptionOr<Ref<Element>>
+  ExceptionOr<Ref<Element>>
     Document::CreateElementNS(DOMStringAtom namespaceUri, DOMStringAtom qualifiedName,
                               const dom::ElementCreationOptionsOrString &options) noexcept
   {
@@ -543,18 +543,18 @@ namespace krys::boo
     return CreateRef<Text>(*this, krys::move(data));
   }
 
-  dom::ExceptionOr<Ref<CDATASection>> Document::CreateCDATASection(DOMString data) noexcept
+  ExceptionOr<Ref<CDATASection>> Document::CreateCDATASection(DOMString data) noexcept
   {
     // 1. If this is an HTML document, then throw a "NotSupportedError" DOMException.
     if (Is<HTMLDocument>(*this))
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     // 2. If data contains the string "]]>", then throw an "InvalidCharacterError" DOMException.
     if (data.contains(u8"]]>"))
     {
-      return dom::Exception {dom::ExceptionCode::InvalidCharacterError};
+      return Exception {ExceptionCode::InvalidCharacterError};
     }
 
     // 3. Return the result of creating a CDATA section node given this and data.
@@ -566,20 +566,20 @@ namespace krys::boo
     return CreateRef<Comment>(*this, krys::move(data));
   }
 
-  dom::ExceptionOr<Ref<ProcessingInstruction>> Document::CreateProcessingInstruction(DOMString target,
-                                                                                     DOMString data) noexcept
+  ExceptionOr<Ref<ProcessingInstruction>> Document::CreateProcessingInstruction(DOMString target,
+                                                                                DOMString data) noexcept
   {
     return ProcessingInstruction::Create(*this, krys::move(target), krys::move(data));
   }
 
-  dom::ExceptionOr<Ref<Node>> Document::ImportNode(Node &node,
-                                                   const dom::BoolOrImportNodeOptions &options) noexcept
+  ExceptionOr<Ref<Node>> Document::ImportNode(Node &node,
+                                              const dom::BoolOrImportNodeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. If node is a document or shadow root, then throw a "NotSupportedError" DOMException.
     if (Is<Document>(node) || Is<ShadowRoot>(node))
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     // 2. Let subtree be false.
@@ -607,7 +607,7 @@ namespace krys::boo
       //     "NotSupportedError" DOMException.
       if (registry != nullptr && !registry->IsScoped() && registry != CustomElementRegistry())
       {
-        return dom::Exception {dom::ExceptionCode::NotSupportedError};
+        return Exception {ExceptionCode::NotSupportedError};
       }
     }
 
@@ -624,19 +624,19 @@ namespace krys::boo
     return dom::NodeAlgorithms::CloneNode(node, this, subtree, nullptr, registry.get());
   }
 
-  dom::ExceptionOr<Ref<Node>> Document::AdoptNode(Node &node) noexcept
+  ExceptionOr<Ref<Node>> Document::AdoptNode(Node &node) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. If node is a document, then throw a "NotSupportedError" DOMException.
     if (Is<Document>(node))
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     // 2. If node is a shadow root, then throw a "HierarchyRequestError" DOMException.
     if (Is<ShadowRoot>(node))
     {
-      return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
+      return Exception {ExceptionCode::HierarchyRequestError};
     }
 
     // 3. Adopt node into this.
@@ -653,13 +653,13 @@ namespace krys::boo
 
   // NOTE: VS says this method can be made const but it's lying, Attr constructor needs a non-const Document
   // reference and we can't make it const without breaking that.
-  dom::ExceptionOr<Ref<Attr>> Document::CreateAttribute(DOMStringAtom localName) noexcept
+  ExceptionOr<Ref<Attr>> Document::CreateAttribute(DOMStringAtom localName) noexcept
   {
     // 1. If localName is not a valid attribute local name, then throw an "InvalidCharacterError"
     // DOMException.
     if (!dom::NameValidation::IsValidAttributeLocalName(localName.View()))
     {
-      return dom::Exception {dom::ExceptionCode::InvalidCharacterError};
+      return Exception {ExceptionCode::InvalidCharacterError};
     }
 
     // 2. If this is an HTML document, then set localName to localName in ASCII lowercase.
@@ -673,8 +673,8 @@ namespace krys::boo
     return AdoptRef<Attr>(*new Attr(*this, qualifiedName));
   }
 
-  dom::ExceptionOr<Ref<Attr>> Document::CreateAttributeNS(DOMStringAtom namespaceUri,
-                                                          DOMStringAtom qualifiedName) noexcept
+  ExceptionOr<Ref<Attr>> Document::CreateAttributeNS(DOMStringAtom namespaceUri,
+                                                     DOMStringAtom qualifiedName) noexcept
   {
     // 1. Let (namespace, prefix, localName) be the result of validating and extracting namespace and
     //    qualifiedName given "attribute".
@@ -692,7 +692,7 @@ namespace krys::boo
   namespace
   {
     /// @brief A new event of the interface that createEvent's table gives @p interface; null if none does.
-    KRYS_NODISCARD RefPtr<dom::Event> CreateEventOfInterface(DOMStringView interface) noexcept
+    KRYS_NODISCARD RefPtr<Event> CreateEventOfInterface(DOMStringView interface) noexcept
     {
       auto matches = [interface](DOMStringView name)
       {
@@ -702,51 +702,51 @@ namespace krys::boo
 
       if (matches(u8"compositionevent"))
       {
-        return CreateRef<dom::CompositionEvent>(empty);
+        return CreateRef<CompositionEvent>(empty);
       }
       if (matches(u8"customevent"))
       {
         // (Without script, there's no detail type to give it.)
-        return CreateRef<dom::CustomEvent<EmptyTag>>(empty);
+        return CreateRef<CustomEvent<EmptyTag>>(empty);
       }
       if (matches(u8"dragevent"))
       {
-        return CreateRef<dom::DragEvent>(empty);
+        return CreateRef<DragEvent>(empty);
       }
       if (matches(u8"event") || matches(u8"events") || matches(u8"htmlevents") || matches(u8"svgevents"))
       {
-        return CreateRef<dom::Event>(empty);
+        return CreateRef<Event>(empty);
       }
       if (matches(u8"focusevent"))
       {
-        return CreateRef<dom::FocusEvent>(empty);
+        return CreateRef<FocusEvent>(empty);
       }
       if (matches(u8"keyboardevent"))
       {
-        return CreateRef<dom::KeyboardEvent>(empty);
+        return CreateRef<KeyboardEvent>(empty);
       }
       if (matches(u8"mouseevent") || matches(u8"mouseevents"))
       {
-        return CreateRef<dom::MouseEvent>(empty);
+        return CreateRef<MouseEvent>(empty);
       }
       if (matches(u8"textevent"))
       {
-        return CreateRef<dom::TextEvent>();
+        return CreateRef<TextEvent>();
       }
       if (matches(u8"uievent") || matches(u8"uievents"))
       {
-        return CreateRef<dom::UIEvent>(empty);
+        return CreateRef<UIEvent>(empty);
       }
       if (matches(u8"touchevent"))
       {
-        return CreateRef<dom::TouchEvent>(empty);
+        return CreateRef<TouchEvent>(empty);
       }
       // `devicemotionevent` and `deviceorientationevent` name interfaces that aren't exposed.
       return nullptr;
     }
   }
 
-  dom::ExceptionOr<Ref<dom::Event>> Document::CreateEvent(DOMStringView interface) noexcept
+  ExceptionOr<Ref<Event>> Document::CreateEvent(DOMStringView interface) noexcept
   {
     // 1. Let constructor be null.
     // 2. If interface is an ASCII case-insensitive match for any of the strings in the first column in the
@@ -755,12 +755,12 @@ namespace krys::boo
     // 4. If the interface indicated by constructor is not exposed on the relevant global object of this, then
     //    throw a "NotSupportedError" DOMException. (The table leaves out the interfaces that aren't.)
     // 5. Let event be the result of creating an event given constructor.
-    RefPtr<dom::Event> event = CreateEventOfInterface(interface);
+    RefPtr<Event> event = CreateEventOfInterface(interface);
 
     // 3. If constructor is null, then throw a "NotSupportedError" DOMException.
     if (!event)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     // 6. Initialize event's type attribute to the empty string.
@@ -851,8 +851,8 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-parsehtmlunsafe
-  dom::ExceptionOr<Ref<Document>> Document::ParseHTMLUnsafe(Document &context, DOMStringView markup,
-                                                            html::ParseHTMLUnsafeOptions options) noexcept
+  ExceptionOr<Ref<Document>> Document::ParseHTMLUnsafe(Document &context, DOMStringView markup,
+                                                       html::ParseHTMLUnsafeOptions options) noexcept
   {
     // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
     //    algorithm with the current global object, html, options, and "Document parseHTMLUnsafe".
@@ -876,8 +876,8 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-parsehtml
-  dom::ExceptionOr<Ref<Document>> Document::ParseHTML(Document &context, DOMStringView html,
-                                                      const html::SetHTMLOptions &options) noexcept
+  ExceptionOr<Ref<Document>> Document::ParseHTML(Document &context, DOMStringView html,
+                                                 const html::SetHTMLOptions &options) noexcept
   {
     // 1. Let document be a new Document, whose content type is "text/html" and origin is this's relevant
     //    global object's associated Document's origin.
@@ -953,7 +953,7 @@ namespace krys::boo
       dom::TextAlgorithms::ChildTextContent(*title));
   }
 
-  dom::ExceptionOr<void> Document::Title(DOMString value) noexcept
+  ExceptionOr<void> Document::Title(DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
     auto documentElement = DocumentElement();
@@ -1093,7 +1093,7 @@ namespace krys::boo
     return ShareRefPtr(FirstBodyElementChild(*this));
   }
 
-  dom::ExceptionOr<void> Document::SetBodyOrFrameset(HTMLElement &body) noexcept
+  ExceptionOr<void> Document::SetBodyOrFrameset(HTMLElement &body) noexcept
   {
     html::CEReactionsScope ceReactions;
 
@@ -1101,7 +1101,7 @@ namespace krys::boo
     //    DOMException.
     if (!Is<HTMLBodyElement>(body) && !Is<HTMLFrameSetElement>(body))
     {
-      return dom::ExceptionCode::HierarchyRequestError;
+      return ExceptionCode::HierarchyRequestError;
     }
 
     // 2. Otherwise, if the new value is the same as the body element, return.
@@ -1127,7 +1127,7 @@ namespace krys::boo
     auto documentElement = DocumentElement();
     if (documentElement == nullptr)
     {
-      return dom::ExceptionCode::HierarchyRequestError;
+      return ExceptionCode::HierarchyRequestError;
     }
 
     // 5. Otherwise, the body element is null, but there's a document element. Append the new value to the
@@ -1388,36 +1388,36 @@ namespace krys::boo
     return dom::mixins::ParentNode::ChildElementCount(*this);
   }
 
-  dom::ExceptionOr<void> Document::Prepend(const List<dom::NodeOrString> &nodes) noexcept
+  ExceptionOr<void> Document::Prepend(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ParentNode::Prepend(*this, nodes);
   }
 
-  dom::ExceptionOr<void> Document::Append(const List<dom::NodeOrString> &nodes) noexcept
+  ExceptionOr<void> Document::Append(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ParentNode::Append(*this, nodes);
   }
 
-  dom::ExceptionOr<void> Document::ReplaceChildren(const List<dom::NodeOrString> &nodes) noexcept
+  ExceptionOr<void> Document::ReplaceChildren(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ParentNode::ReplaceChildren(*this, nodes);
   }
 
-  dom::ExceptionOr<void> Document::MoveBefore(Node &node, Node *refChild) noexcept
+  ExceptionOr<void> Document::MoveBefore(Node &node, Node *refChild) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ParentNode::MoveBefore(*this, node, refChild);
   }
 
-  dom::ExceptionOr<RefPtr<Element>> Document::QuerySelector(DOMStringView selectors) noexcept
+  ExceptionOr<RefPtr<Element>> Document::QuerySelector(DOMStringView selectors) noexcept
   {
     return dom::mixins::ParentNode::QuerySelector(*this, selectors);
   }
 
-  dom::ExceptionOr<Ref<dom::NodeList>> Document::QuerySelectorAll(DOMStringView selectors) noexcept
+  ExceptionOr<Ref<dom::NodeList>> Document::QuerySelectorAll(DOMStringView selectors) noexcept
   {
     return dom::mixins::ParentNode::QuerySelectorAll(*this, selectors);
   }
@@ -2109,8 +2109,8 @@ namespace krys::boo
     }
 
     // 7. Fire an event named visibilitychange at document, with its bubbles attribute initialized to true.
-    (void)dom::EventDispatcher::DispatchToTarget(
-      *dom::Event::Create(event_names::VisibilityChange, true, false), this);
+    (void)dom::EventDispatcher::DispatchToTarget(*Event::Create(event_names::VisibilityChange, true, false),
+                                                 this);
   }
 
   void Document::VisibilityStateChanged() noexcept
@@ -2128,7 +2128,7 @@ namespace krys::boo
       [protectedThis = ShareRef(*this)]
       {
         (void)dom::EventDispatcher::DispatchToTarget(
-          *dom::Event::Create(event_names::VisibilityChange, true, false), protectedThis.get());
+          *Event::Create(event_names::VisibilityChange, true, false), protectedThis.get());
 
         bool pageIsVisible = protectedThis->GetPage() && protectedThis->GetPage()->IsVisible();
         if (!pageIsVisible)
@@ -2594,8 +2594,8 @@ namespace krys::boo
     for (auto &[target, type] : currentTargets)
     {
       auto eventName = type == dom::ScrollEventType::Scroll ? event_names::Scroll : event_names::ScrollEnd;
-      (void)dom::EventDispatcher::FireEvent<dom::Event>(DOMStringAtom(eventName), *target,
-                                                        dom::EventInit {.Bubbles = Is<Document>(*target)});
+      (void)dom::EventDispatcher::FireEvent<Event>(DOMStringAtom(eventName), *target,
+                                                   EventInit {.Bubbles = Is<Document>(*target)});
     }
 
     if (_needsVisualViewportScrollEvent)
@@ -2747,7 +2747,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#run-light-dismiss-activities
-  void Document::HandleLightDismiss(const dom::PointerEvent &event, Node &target) noexcept
+  void Document::HandleLightDismiss(const PointerEvent &event, Node &target) noexcept
   {
     krys_debug_assert(event.IsTrusted());
 
@@ -3491,7 +3491,7 @@ namespace krys::boo
     return Frame() ? _domWindow.get() : nullptr;
   }
 
-  void Document::DispatchWindowEvent(dom::Event &event) noexcept
+  void Document::DispatchWindowEvent(Event &event) noexcept
   {
     if (RefPtr<LocalDOMWindow> window = _domWindow)
     {
@@ -3499,14 +3499,14 @@ namespace krys::boo
     }
   }
 
-  void Document::QueueTaskToDispatchEventOnWindow(html::TaskSource source, Ref<dom::Event> &&event) noexcept
+  void Document::QueueTaskToDispatchEventOnWindow(html::TaskSource source, Ref<Event> &&event) noexcept
   {
     html::EventLoop::Current().QueueTask(source, *this,
                                          [protectedThis = ShareRef(*this), event = krys::move(event)]
                                          { protectedThis->DispatchWindowEvent(*event); });
   }
 
-  void Document::QueueTaskToDispatchEvent(html::TaskSource source, Ref<dom::Event> &&event) noexcept
+  void Document::QueueTaskToDispatchEvent(html::TaskSource source, Ref<Event> &&event) noexcept
   {
     html::EventLoop::Current().QueueTask(
       source, *this, [protectedThis = ShareRef(*this), event = krys::move(event)]
@@ -3530,7 +3530,7 @@ namespace krys::boo
     page->GetPointerLockController().RequestPointerUnlock();
   }
 
-  dom::EventTarget *Document::GetParent(dom::Event &event) const noexcept
+  EventTarget *Document::GetParent(Event &event) const noexcept
   {
     // A Document's get the parent algorithm, given an event, returns null if event's type attribute value is
     // "load" or the Document does not have a browsing context; otherwise the Document's relevant global
@@ -3654,11 +3654,11 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<void> Document::SetXMLVersion(DOMString version) noexcept
+  ExceptionOr<void> Document::SetXMLVersion(DOMString version) noexcept
   {
     if (!xml::XMLDocumentParser::SupportsXMLVersion(version))
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     _xmlVersion = krys::move(version);
@@ -3680,7 +3680,7 @@ namespace krys::boo
       if (!_loadTiming.DOMContentLoadedEventStartTime)
       {
         _loadTiming.DOMContentLoadedEventStartTime = _domWindow ? _domWindow->NowTimestamp() : 0;
-        auto event = dom::Event::Create(event_names::DOMContentLoaded, true, false);
+        auto event = Event::Create(event_names::DOMContentLoaded, true, false);
         (void)dom::EventDispatcher::DispatchToTarget(*event, this);
         _loadTiming.DOMContentLoadedEventEndTime = _domWindow ? _domWindow->NowTimestamp() : 0;
       }
@@ -3789,7 +3789,7 @@ namespace krys::boo
     {
       _loadTiming.LoadEventStartTime = window->NowTimestamp();
     }
-    (void)dom::EventDispatcher::FireEvent<dom::Event>(event_names::Load, *window, {}, true);
+    (void)dom::EventDispatcher::FireEvent<Event>(event_names::Load, *window, {}, true);
     if (!_loadTiming.LoadEventEndTime)
     {
       _loadTiming.LoadEventEndTime = window->NowTimestamp();
@@ -3878,7 +3878,7 @@ namespace krys::boo
     _pageShowing = false;
     if (RefPtr<LocalDOMWindow> window = _domWindow)
     {
-      auto event = html::PageTransitionEvent::Create(event_names::PageHide, persisted);
+      auto event = PageTransitionEvent::Create(event_names::PageHide, persisted);
       (void)dom::EventDispatcher::DispatchToTarget(*event, window.get(), true);
     }
   }
@@ -3894,7 +3894,7 @@ namespace krys::boo
     _pageShowing = true;
     if (RefPtr<LocalDOMWindow> window = _domWindow)
     {
-      auto event = html::PageTransitionEvent::Create(event_names::PageShow, persisted);
+      auto event = PageTransitionEvent::Create(event_names::PageShow, persisted);
       (void)dom::EventDispatcher::DispatchToTarget(*event, window.get(), true);
     }
   }
@@ -4733,15 +4733,14 @@ namespace krys::boo
         commandName, userInterface ? EditorCommandSource::DOMWithUserInterface : EditorCommandSource::DOM);
     }
 
-    KRYS_NODISCARD dom::Exception NotHTMLDocument(utf8_stringview method) noexcept
+    KRYS_NODISCARD Exception NotHTMLDocument(utf8_stringview method) noexcept
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError,
-                             utf8_string(method) + u8" is only supported on HTML documents."};
+      return Exception {ExceptionCode::InvalidStateError,
+                        utf8_string(method) + u8" is only supported on HTML documents."};
     }
   }
 
-  dom::ExceptionOr<bool> Document::ExecCommand(DOMStringView commandId, bool showUI,
-                                               DOMStringView value) noexcept
+  ExceptionOr<bool> Document::ExecCommand(DOMStringView commandId, bool showUI, DOMStringView value) noexcept
   {
     html::CEReactionsScope ceReactions;
 
@@ -4775,7 +4774,7 @@ namespace krys::boo
     return DOMCommand(*this, commandId, showUI).Execute(value);
   }
 
-  dom::ExceptionOr<bool> Document::QueryCommandEnabled(DOMStringView commandId) noexcept
+  ExceptionOr<bool> Document::QueryCommandEnabled(DOMStringView commandId) noexcept
   {
     if (!IsHTMLDocument() && !IsXHTMLDocument()) KRYS_UNLIKELY
     {
@@ -4784,7 +4783,7 @@ namespace krys::boo
     return DOMCommand(*this, commandId).IsEnabled();
   }
 
-  dom::ExceptionOr<bool> Document::QueryCommandIndeterm(DOMStringView commandId) noexcept
+  ExceptionOr<bool> Document::QueryCommandIndeterm(DOMStringView commandId) noexcept
   {
     if (!IsHTMLDocument() && !IsXHTMLDocument()) KRYS_UNLIKELY
     {
@@ -4793,7 +4792,7 @@ namespace krys::boo
     return DOMCommand(*this, commandId).State() == TriState::Indeterminate;
   }
 
-  dom::ExceptionOr<bool> Document::QueryCommandState(DOMStringView commandId) noexcept
+  ExceptionOr<bool> Document::QueryCommandState(DOMStringView commandId) noexcept
   {
     if (!IsHTMLDocument() && !IsXHTMLDocument()) KRYS_UNLIKELY
     {
@@ -4802,7 +4801,7 @@ namespace krys::boo
     return DOMCommand(*this, commandId).State() == TriState::True;
   }
 
-  dom::ExceptionOr<bool> Document::QueryCommandSupported(DOMStringView commandId) noexcept
+  ExceptionOr<bool> Document::QueryCommandSupported(DOMStringView commandId) noexcept
   {
     if (!IsHTMLDocument() && !IsXHTMLDocument()) KRYS_UNLIKELY
     {
@@ -4811,7 +4810,7 @@ namespace krys::boo
     return DOMCommand(*this, commandId).IsSupported();
   }
 
-  dom::ExceptionOr<DOMString> Document::QueryCommandValue(DOMStringView commandId) noexcept
+  ExceptionOr<DOMString> Document::QueryCommandValue(DOMStringView commandId) noexcept
   {
     if (!IsHTMLDocument() && !IsXHTMLDocument()) KRYS_UNLIKELY
     {
@@ -5404,13 +5403,13 @@ namespace krys::boo
     _mediaQueryMatcher->EvaluateAll(css::MediaQueryMatcher::EventMode::DispatchNow);
   }
 
-  dom::ExceptionOr<dom::SelectorQuery &>
+  ExceptionOr<dom::SelectorQuery &>
     Document::SelectorQueryForString(DOMStringView selectorString) const noexcept
   {
     auto invalid = [&]
     {
-      return dom::Exception(dom::ExceptionCode::SyntaxError,
-                            u8"'" + DOMString(selectorString) + u8"' is not a valid selector.");
+      return Exception(ExceptionCode::SyntaxError,
+                       u8"'" + DOMString(selectorString) + u8"' is not a valid selector.");
     };
     if (selectorString.empty())
     {

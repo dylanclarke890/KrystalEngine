@@ -56,8 +56,8 @@ namespace krys::boo
                                                          CSSMatrixComponentOptions options = {}) noexcept;
 
     /// @brief Reifies a `matrix()` or `matrix3d()` function.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSMatrixComponent>> Create(const css::FunctionValue &function,
-                                                                           Document &document) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSMatrixComponent>> Create(const css::FunctionValue &function,
+                                                                      Document &document) noexcept;
 
     ~CSSMatrixComponent() noexcept override;
 
@@ -71,7 +71,7 @@ namespace krys::boo
 
     void Serialise(StringBuilder &builder) const noexcept final;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
+    KRYS_NODISCARD ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
 
     KRYS_NODISCARD CSSTransformType TransformType() const noexcept final
     {

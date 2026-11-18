@@ -104,14 +104,14 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsPropertyImplicit(const CSSOMString &propertyName) noexcept final;
 
-    dom::ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
-                                       const CSSOMString &priority) noexcept final;
+    ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
+                                  const CSSOMString &priority) noexcept final;
 
-    dom::ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &propertyName) noexcept final;
+    ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &propertyName) noexcept final;
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
-    dom::ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept final;
+    ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept final;
 
     KRYS_NODISCARD bool IsExposed(css::PropertyId property) const noexcept;
 
@@ -122,8 +122,8 @@ namespace krys::boo
     // PropertyId versions of the CSSOM functions to support bindings.
     KRYS_NODISCARD CSSOMString GetPropertyValueInternal(css::PropertyId property) const noexcept;
 
-    virtual dom::ExceptionOr<void> SetPropertyInternal(css::PropertyId property, const CSSOMString &value,
-                                                       css::IsImportant important) noexcept;
+    virtual ExceptionOr<void> SetPropertyInternal(css::PropertyId property, const CSSOMString &value,
+                                                  css::IsImportant important) noexcept;
 
     KRYS_NODISCARD css::ParserContext CssParserContext() const noexcept;
 

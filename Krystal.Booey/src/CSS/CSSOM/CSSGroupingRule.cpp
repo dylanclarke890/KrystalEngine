@@ -58,14 +58,14 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<uint32> CSSGroupingRule::InsertRule(const CSSOMString &ruleString, uint32 index) noexcept
+  ExceptionOr<uint32> CSSGroupingRule::InsertRule(const CSSOMString &ruleString, uint32 index) noexcept
   {
     krys_debug_assert(_childRuleCSSOMWrappers.size() == _groupRule->ChildRules().size());
 
     if (index > _groupRule->ChildRules().size())
     {
       // IndexSizeError: Raised if the specified index is not a valid insertion point.
-      return dom::ExceptionCode::IndexSizeError;
+      return ExceptionCode::IndexSizeError;
     }
 
     auto *styleSheet = ParentStyleSheet();
@@ -96,13 +96,13 @@ namespace krys::boo
       // rule.
       if (!nestedContextWithCurrentRule)
       {
-        return dom::ExceptionCode::SyntaxError;
+        return ExceptionCode::SyntaxError;
       }
 
       newRule = css::Parser::ParseNestedDeclarations(GetParserContext(), ruleString);
       if (!newRule)
       {
-        return dom::ExceptionCode::SyntaxError;
+        return ExceptionCode::SyntaxError;
       }
     }
 
@@ -115,13 +115,13 @@ namespace krys::boo
       // HierarchyRequestError: Raised if the rule cannot be inserted at the specified
       // index, e.g., if an @import rule is inserted after a standard rule set or other
       // at-rule.
-      return dom::ExceptionCode::HierarchyRequestError;
+      return ExceptionCode::HierarchyRequestError;
     }
 
     if (HasStyleRuleAncestor() && !newRule->IsStyleRule() && !newRule->IsGroupRule()
         && !newRule->IsNestedDeclarationsRule())
     {
-      return dom::ExceptionCode::HierarchyRequestError;
+      return ExceptionCode::HierarchyRequestError;
     }
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
@@ -132,7 +132,7 @@ namespace krys::boo
     return index;
   }
 
-  dom::ExceptionOr<void> CSSGroupingRule::DeleteRule(uint32 index) noexcept
+  ExceptionOr<void> CSSGroupingRule::DeleteRule(uint32 index) noexcept
   {
     krys_debug_assert(_childRuleCSSOMWrappers.size() == _groupRule->ChildRules().size());
 
@@ -140,7 +140,7 @@ namespace krys::boo
     {
       // IndexSizeError: Raised if the specified index does not correspond to a
       // rule in the media rule list.
-      return dom::ExceptionCode::IndexSizeError;
+      return ExceptionCode::IndexSizeError;
     }
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);

@@ -47,14 +47,14 @@ namespace krys::boo::dom::tests
     { node.LastElementChild() } -> SameType<RefPtr<Element>>;
     { node.ChildElementCount() } -> SameType<size_t>;
 
-    { node.Prepend(nodes) } -> SameType<dom::ExceptionOr<void>>;
-    { node.Append(nodes) } -> SameType<dom::ExceptionOr<void>>;
-    { node.ReplaceChildren(nodes) } -> SameType<dom::ExceptionOr<void>>;
+    { node.Prepend(nodes) } -> SameType<ExceptionOr<void>>;
+    { node.Append(nodes) } -> SameType<ExceptionOr<void>>;
+    { node.ReplaceChildren(nodes) } -> SameType<ExceptionOr<void>>;
 
-    { node.MoveBefore(node, optionalNode) } -> SameType<dom::ExceptionOr<void>>;
+    { node.MoveBefore(node, optionalNode) } -> SameType<ExceptionOr<void>>;
 
-    { node.QuerySelector(selectors) } -> SameType<dom::ExceptionOr<RefPtr<Element>>>;
-    { node.QuerySelectorAll(selectors) } -> SameType<dom::ExceptionOr<Ref<NodeList>>>;
+    { node.QuerySelector(selectors) } -> SameType<ExceptionOr<RefPtr<Element>>>;
+    { node.QuerySelectorAll(selectors) } -> SameType<ExceptionOr<Ref<NodeList>>>;
   };
 
   TEST_CASE("Mixin::ParentNode", "[HTML][Mixins][dom:interface-parentnode]")
@@ -82,10 +82,10 @@ namespace krys::boo::dom::tests
 
   template <typename T>
   concept ChildNodeMixin = requires(T &node, const List<NodeOrString> &nodes) {
-    { node.Before(nodes) } -> SameType<dom::ExceptionOr<void>>;
-    { node.After(nodes) } -> SameType<dom::ExceptionOr<void>>;
-    { node.ReplaceWith(nodes) } -> SameType<dom::ExceptionOr<void>>;
-    { node.Remove() } -> SameType<dom::ExceptionOr<void>>;
+    { node.Before(nodes) } -> SameType<ExceptionOr<void>>;
+    { node.After(nodes) } -> SameType<ExceptionOr<void>>;
+    { node.ReplaceWith(nodes) } -> SameType<ExceptionOr<void>>;
+    { node.Remove() } -> SameType<ExceptionOr<void>>;
   };
 
   TEST_CASE("Mixin::ChildNode", "[HTML][Mixins][dom:interface-childnode]")

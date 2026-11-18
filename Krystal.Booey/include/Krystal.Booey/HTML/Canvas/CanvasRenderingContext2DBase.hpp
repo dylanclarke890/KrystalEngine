@@ -450,7 +450,7 @@ namespace krys::boo::html
 
     void SetTransform(double m11, double m12, double m21, double m22, double dx, double dy) noexcept;
 
-    dom::ExceptionOr<void> SetTransform(css::DOMMatrix2DInit = {}) noexcept;
+    ExceptionOr<void> SetTransform(css::DOMMatrix2DInit = {}) noexcept;
 
     void ResetTransform() noexcept;
 
@@ -511,46 +511,46 @@ namespace krys::boo::html
 
     void SetFillStyle(Ref<CanvasPattern> &&) noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CanvasGradient>>
-      CreateLinearGradient(float x0, float y0, float x1, float y1) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CanvasGradient>> CreateLinearGradient(float x0, float y0, float x1,
+                                                                                float y1) noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CanvasGradient>>
+    KRYS_NODISCARD static ExceptionOr<Ref<CanvasGradient>>
       CreateRadialGradient(float x0, float y0, float r0, float x1, float y1, float r1) noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CanvasGradient>>
-      CreateConicGradient(float angleInRadians, float x, float y) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CanvasGradient>> CreateConicGradient(float angleInRadians, float x,
+                                                                               float y) noexcept;
 
     /// @brief A pattern of @p image repeated as @p repetition says; null if the image isn't ready yet.
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(CanvasImageSource image,
-                                                                         DOMStringView repetition) noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(CanvasImageSource image,
+                                                                    DOMStringView repetition) noexcept;
 
 #pragma endregion
 
 #pragma region CanvasDrawImage
 
-    dom::ExceptionOr<void> DrawImage(CanvasImageSource, float dx, float dy) noexcept;
+    ExceptionOr<void> DrawImage(CanvasImageSource, float dx, float dy) noexcept;
 
-    dom::ExceptionOr<void> DrawImage(CanvasImageSource, float dx, float dy, float dw, float dh) noexcept;
+    ExceptionOr<void> DrawImage(CanvasImageSource, float dx, float dy, float dw, float dh) noexcept;
 
-    dom::ExceptionOr<void> DrawImage(CanvasImageSource, float sx, float sy, float sw, float sh, float dx,
-                                     float dy, float dw, float dh) noexcept;
+    ExceptionOr<void> DrawImage(CanvasImageSource, float sx, float sy, float sw, float sh, float dx, float dy,
+                                float dw, float dh) noexcept;
 
 #pragma endregion
 
 #pragma region CanvasImageData
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<ImageData>> CreateImageData(ImageData &) const noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<ImageData>> CreateImageData(ImageData &) const noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<ImageData>> CreateImageData(int32 width, int32 height,
-                                                                    Maybe<ImageDataSettings>) const noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<ImageData>> CreateImageData(int32 width, int32 height,
+                                                               Maybe<ImageDataSettings>) const noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<ImageData>> GetImageData(int32 sx, int32 sy, int32 sw, int32 sh,
-                                                                 Maybe<ImageDataSettings>) const noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<ImageData>> GetImageData(int32 sx, int32 sy, int32 sw, int32 sh,
+                                                            Maybe<ImageDataSettings>) const noexcept;
 
-    dom::ExceptionOr<void> PutImageData(ImageData &, int32 dx, int32 dy) noexcept;
+    ExceptionOr<void> PutImageData(ImageData &, int32 dx, int32 dy) noexcept;
 
-    dom::ExceptionOr<void> PutImageData(ImageData &, int32 dx, int32 dy, int32 dirtyX, int32 dirtyY,
-                                        int32 dirtyWidth, int32 dirtyHeight) noexcept;
+    ExceptionOr<void> PutImageData(ImageData &, int32 dx, int32 dy, int32 dirtyX, int32 dirtyY,
+                                   int32 dirtyWidth, int32 dirtyHeight) noexcept;
 
 #pragma endregion
 
@@ -836,37 +836,36 @@ namespace krys::boo::html
     void FullCanvasCompositedDrawImage(T &image, const FloatRect &dest, const FloatRect &src,
                                        CompositeOperator) noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<RefPtr<CanvasPattern>>
+    KRYS_NODISCARD static ExceptionOr<RefPtr<CanvasPattern>>
       CreatePattern(CachedImage &, RenderElement *, bool repeatX, bool repeatY) noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(HTMLImageElement &, bool repeatX,
-                                                                         bool repeatY) noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(HTMLImageElement &, bool repeatX,
+                                                                    bool repeatY) noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(SVGImageElement &, bool repeatX,
-                                                                         bool repeatY) noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(SVGImageElement &, bool repeatX,
+                                                                    bool repeatY) noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(CanvasBase &, bool repeatX,
-                                                                                bool repeatY) noexcept;
+    KRYS_NODISCARD static ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(CanvasBase &, bool repeatX,
+                                                                           bool repeatY) noexcept;
 
-    dom::ExceptionOr<void> DrawImage(HTMLImageElement &, const FloatRect &srcRect,
-                                     const FloatRect &dstRect) noexcept;
+    ExceptionOr<void> DrawImage(HTMLImageElement &, const FloatRect &srcRect,
+                                const FloatRect &dstRect) noexcept;
 
-    dom::ExceptionOr<void> DrawImage(HTMLImageElement &, const FloatRect &srcRect, const FloatRect &dstRect,
-                                     const CompositeOperator &, const BlendMode &) noexcept;
+    ExceptionOr<void> DrawImage(HTMLImageElement &, const FloatRect &srcRect, const FloatRect &dstRect,
+                                const CompositeOperator &, const BlendMode &) noexcept;
 
-    dom::ExceptionOr<void> DrawImage(SVGImageElement &, const FloatRect &srcRect,
-                                     const FloatRect &dstRect) noexcept;
+    ExceptionOr<void> DrawImage(SVGImageElement &, const FloatRect &srcRect,
+                                const FloatRect &dstRect) noexcept;
 
-    dom::ExceptionOr<void> DrawImage(SVGImageElement &, const FloatRect &srcRect, const FloatRect &dstRect,
-                                     const CompositeOperator &, const BlendMode &) noexcept;
+    ExceptionOr<void> DrawImage(SVGImageElement &, const FloatRect &srcRect, const FloatRect &dstRect,
+                                const CompositeOperator &, const BlendMode &) noexcept;
 
-    dom::ExceptionOr<void> DrawImage(CanvasBase &, const FloatRect &srcRect,
-                                     const FloatRect &dstRect) noexcept;
+    ExceptionOr<void> DrawImage(CanvasBase &, const FloatRect &srcRect, const FloatRect &dstRect) noexcept;
 
-    dom::ExceptionOr<void> DrawImage(Document &, CachedImage &, const RenderObject *,
-                                     const FloatRect &imageRect, const FloatRect &srcRect,
-                                     const FloatRect &dstRect, const CompositeOperator &, const BlendMode &,
-                                     ImageOrientation = ImageOrientation::Orientation::FromImage) noexcept;
+    ExceptionOr<void> DrawImage(Document &, CachedImage &, const RenderObject *, const FloatRect &imageRect,
+                                const FloatRect &srcRect, const FloatRect &dstRect, const CompositeOperator &,
+                                const BlendMode &,
+                                ImageOrientation = ImageOrientation::Orientation::FromImage) noexcept;
 
     /// @brief Keeps @p imageData's pixels, premultiplied, when they're put over the whole canvas, so that
     /// reading them back soon after needn't read the buffer; null if they aren't.

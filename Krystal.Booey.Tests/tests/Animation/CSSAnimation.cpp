@@ -158,7 +158,7 @@ namespace krys::boo::tests
     SECTION("On the window")
     {
       fixture.Document->Window()->AddEventListener(u8"animationiteration",
-                                                   ShareRef<dom::EventListenerCallback>(*recorder), false);
+                                                   ShareRef<EventListenerCallback>(*recorder), false);
     }
     CHECK(fixture.Document->HasAnimationIterationListener());
     CHECK(animation.TimeToNextTick().count() == Catch::Approx(0.75));

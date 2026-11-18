@@ -743,7 +743,7 @@ namespace krys::boo
     return style.Display() != DisplayType::None && style.Display() != DisplayType::Contents;
   }
 
-  void Element::DispatchFocusEvent(dom::EventTarget *relatedTarget, const dom::FocusOptions &) noexcept
+  void Element::DispatchFocusEvent(EventTarget *relatedTarget, const dom::FocusOptions &) noexcept
   {
     // While the document's window doesn't have system focus, the focus moves without events, as in Chrome:
     // the element gets them when the window gets system focus (FocusAlgorithms::SystemFocusChanged).
@@ -753,7 +753,7 @@ namespace krys::boo
     }
   }
 
-  void Element::DispatchBlurEvent(dom::EventTarget *relatedTarget) noexcept
+  void Element::DispatchBlurEvent(EventTarget *relatedTarget) noexcept
   {
     // (See DispatchFocusEvent: the element had its blur when the window lost system focus.)
     if (NodeDocument().IsFocusedAndActive())
@@ -1058,7 +1058,7 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD bool IsCompatibilityMouseEvent(const dom::MouseEvent &mouseEvent) noexcept
+    KRYS_NODISCARD bool IsCompatibilityMouseEvent(const MouseEvent &mouseEvent) noexcept
     {
       // https://www.w3.org/TR/pointerevents/#compatibility-mapping-with-mouse-events
       auto type = mouseEvent.Type();
@@ -1073,7 +1073,7 @@ namespace krys::boo
     };
 
     KRYS_NODISCARD ShouldIgnoreMouseEvent
-      DispatchPointerEventIfNeeded(Element &element, const dom::MouseEvent &mouseEvent,
+      DispatchPointerEventIfNeeded(Element &element, const MouseEvent &mouseEvent,
                                    const PlatformMouseEvent &platformEvent, bool &didNotSwallowEvent) noexcept
     {
       if (auto *page = element.NodeDocument().GetPage())
@@ -1151,23 +1151,22 @@ namespace krys::boo
     // FIXME: Force events (MouseForceChanged, MouseForceDown and MouseForceUp), once the host reports force
     // clicks.
 
-    List<Ref<dom::MouseEvent>> childMouseEvents;
+    List<Ref<MouseEvent>> childMouseEvents;
     for (const auto &childPlatformEvent : platformEvent.CoalescedEvents())
     {
-      childMouseEvents.push_back(dom::MouseEvent::Create(eventType, NodeDocument().View(), childPlatformEvent,
-                                                         {}, {}, detail, relatedTarget));
+      childMouseEvents.push_back(MouseEvent::Create(eventType, NodeDocument().View(), childPlatformEvent, {},
+                                                    {}, detail, relatedTarget));
     }
 
-    List<Ref<dom::MouseEvent>> predictedEvents;
+    List<Ref<MouseEvent>> predictedEvents;
     for (const auto &childPlatformEvent : platformEvent.PredictedEvents())
     {
-      predictedEvents.push_back(dom::MouseEvent::Create(eventType, NodeDocument().View(), childPlatformEvent,
-                                                        {}, {}, detail, relatedTarget));
+      predictedEvents.push_back(MouseEvent::Create(eventType, NodeDocument().View(), childPlatformEvent, {},
+                                                   {}, detail, relatedTarget));
     }
 
-    Ref<dom::MouseEvent> mouseEvent =
-      dom::MouseEvent::Create(eventType, NodeDocument().View(), platformEvent, childMouseEvents,
-                              predictedEvents, detail, relatedTarget);
+    Ref<MouseEvent> mouseEvent = MouseEvent::Create(eventType, NodeDocument().View(), platformEvent,
+                                                    childMouseEvents, predictedEvents, detail, relatedTarget);
 
     if (mouseEvent->Type().View().empty())
     {
@@ -1205,12 +1204,12 @@ namespace krys::boo
       // Special case: If it's a double click event, we also send the dblclick event. This is not part
       // of the DOM specs, but is used for compatibility with the ondblclick="" attribute. This is treated
       // as a separate event in other DOM-compliant browsers like Firefox, and so we do the same.
-      Ref<dom::MouseEvent> doubleClickEvent = dom::MouseEvent::Create(
-        event_names::DblClick, mouseEvent->Bubbles(), mouseEvent->Cancelable(), true,
-        html::EventLoop::Current().Now(), mouseEvent->FrameView(), mouseEvent->Detail(),
-        mouseEvent->ScreenX(), mouseEvent->ScreenY(), mouseEvent->ClientX(), mouseEvent->ClientY(),
-        mouseEvent->ModifierKeys(), mouseEvent->ButtonType(), mouseEvent->Buttons(),
-        mouseEvent->GetSyntheticClickType(), relatedTarget);
+      Ref<MouseEvent> doubleClickEvent =
+        MouseEvent::Create(event_names::DblClick, mouseEvent->Bubbles(), mouseEvent->Cancelable(), true,
+                           html::EventLoop::Current().Now(), mouseEvent->FrameView(), mouseEvent->Detail(),
+                           mouseEvent->ScreenX(), mouseEvent->ScreenY(), mouseEvent->ClientX(),
+                           mouseEvent->ClientY(), mouseEvent->ModifierKeys(), mouseEvent->ButtonType(),
+                           mouseEvent->Buttons(), mouseEvent->GetSyntheticClickType(), relatedTarget);
 
       if (mouseEvent->DefaultHandled())
       {
@@ -1229,9 +1228,9 @@ namespace krys::boo
   bool Element::DispatchWheelEvent(const PlatformWheelEvent &platformEvent,
                                    EnumSet<EventHandling> &processing, bool isCancelable) noexcept
   {
-    Ref<dom::WheelEvent> event = dom::WheelEvent::Create(platformEvent, NodeDocument().View(),
-                                                         isCancelable ? dom::WheelEvent::IsCancelable::Yes
-                                                                      : dom::WheelEvent::IsCancelable::No);
+    Ref<WheelEvent> event =
+      WheelEvent::Create(platformEvent, NodeDocument().View(),
+                         isCancelable ? WheelEvent::IsCancelable::Yes : WheelEvent::IsCancelable::No);
 
     // Events with no deltas are important because they convey platform information about scroll gestures
     // and momentum beginning or ending. However, those events should not be sent to the DOM since some
@@ -1275,7 +1274,7 @@ namespace krys::boo
     return true;
   }
 
-  bool Element::DispatchSimulatedClick(dom::Event *underlyingEvent,
+  bool Element::DispatchSimulatedClick(Event *underlyingEvent,
                                        dom::SimulatedClickMouseEventOptions eventOptions,
                                        dom::SimulatedClickVisualOptions visualOptions) noexcept
   {
@@ -1285,7 +1284,7 @@ namespace krys::boo
 
   bool Element::DispatchKeyEvent(const PlatformKeyboardEvent &platformEvent) noexcept
   {
-    Ref<dom::KeyboardEvent> event = dom::KeyboardEvent::Create(platformEvent, NodeDocument().Window());
+    Ref<KeyboardEvent> event = KeyboardEvent::Create(platformEvent, NodeDocument().Window());
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
     if (event->DefaultPrevented() || event->DefaultHandled())
     {
@@ -1598,7 +1597,7 @@ namespace krys::boo
 
 #pragma region Animations
 
-  dom::ExceptionOr<Ref<WebAnimation>>
+  ExceptionOr<Ref<WebAnimation>>
     Element::Animate(KeyframesInput &&keyframes,
                      Maybe<Variant<double, KeyframeAnimationOptions>> options) noexcept
   {
@@ -2135,14 +2134,14 @@ namespace krys::boo
     return attr->Value();
   }
 
-  dom::ExceptionOr<void> Element::SetAttribute(DOMStringAtom qualifiedName, DOMString value) noexcept
+  ExceptionOr<void> Element::SetAttribute(DOMStringAtom qualifiedName, DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. If qualifiedName is not a valid attribute local name, then throw an "InvalidCharacterError"
     //    DOMException.
     if (!dom::NameValidation::IsValidAttributeLocalName(qualifiedName.View()))
     {
-      return dom::Exception {dom::ExceptionCode::InvalidCharacterError};
+      return Exception {ExceptionCode::InvalidCharacterError};
     }
 
     // 2. If this is in the HTML namespace and its node document is an HTML document, then set qualifiedName
@@ -2177,8 +2176,8 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> Element::SetAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom qualifiedName,
-                                                 DOMString value) noexcept
+  ExceptionOr<void> Element::SetAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom qualifiedName,
+                                            DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let (namespace, prefix, localName) be the result of validating and extracting namespace and
@@ -2214,15 +2213,14 @@ namespace krys::boo
                                                        *this);
   }
 
-  dom::ExceptionOr<bool> Element::ToggleAttribute(DOMStringAtom qualifiedName,
-                                                  const Maybe<bool> &force) noexcept
+  ExceptionOr<bool> Element::ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. If qualifiedName is not a valid attribute local name, then throw an "InvalidCharacterError"
     //    DOMException.
     if (!dom::NameValidation::IsValidAttributeLocalName(qualifiedName.View()))
     {
-      return dom::Exception {dom::ExceptionCode::InvalidCharacterError};
+      return Exception {ExceptionCode::InvalidCharacterError};
     }
 
     // 2. If this is in the HTML namespace and its node document is an HTML document, then set qualifiedName
@@ -2307,25 +2305,25 @@ namespace krys::boo
                                                            *this);
   }
 
-  dom::ExceptionOr<RefPtr<Attr>> Element::SetAttributeNode(Attr &attr) noexcept
+  ExceptionOr<RefPtr<Attr>> Element::SetAttributeNode(Attr &attr) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::ElementAlgorithms::SetAttribute(attr, *this);
   }
 
-  dom::ExceptionOr<RefPtr<Attr>> Element::SetAttributeNodeNS(Attr &attr) noexcept
+  ExceptionOr<RefPtr<Attr>> Element::SetAttributeNodeNS(Attr &attr) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::ElementAlgorithms::SetAttribute(attr, *this);
   }
 
-  dom::ExceptionOr<Ref<Attr>> Element::RemoveAttributeNode(Attr &attr) noexcept
+  ExceptionOr<Ref<Attr>> Element::RemoveAttributeNode(Attr &attr) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. If this's attribute list does not contain attr, then throw a "NotFoundError" DOMException.
     if (!std::ranges::any_of(_attributes, [&](const Ref<Attr> &a) { return a.get() == &attr; }))
     {
-      return dom::Exception {dom::ExceptionCode::NotFoundError};
+      return Exception {ExceptionCode::NotFoundError};
     }
 
     // 2. Remove attr.
@@ -2340,7 +2338,7 @@ namespace krys::boo
     return NodeDocument().GetCachedLocale(css::EffectiveLang(*this));
   }
 
-  dom::ExceptionOr<Ref<ShadowRoot>> Element::AttachShadow(const dom::ShadowRootInit &init) noexcept
+  ExceptionOr<Ref<ShadowRoot>> Element::AttachShadow(const dom::ShadowRootInit &init) noexcept
   {
     // 1. Let registry be this's node document's custom element registry.
     // 2. If init["customElementRegistry"] exists, then set registry to it.
@@ -2351,7 +2349,7 @@ namespace krys::boo
     //    custom element registry, then throw a "NotSupportedError" DOMException.
     if (registry != nullptr && !registry->IsScoped() && registry != NodeDocument().CustomElementRegistry())
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     // 4. Run attach a shadow root with this, init["mode"], init["delegatesFocus"], init["serializable"],
@@ -2417,7 +2415,7 @@ namespace krys::boo
     (void)SetAttribute(u8"useragentpart", part.ToString());
   }
 
-  dom::ExceptionOr<RefPtr<Element>> Element::Closest(DOMStringView selectors) noexcept
+  ExceptionOr<RefPtr<Element>> Element::Closest(DOMStringView selectors) noexcept
   {
     auto query = NodeDocument().SelectorQueryForString(selectors);
     if (query.HasException())
@@ -2427,7 +2425,7 @@ namespace krys::boo
     return ShareRefPtr(query.Value().Closest(*this));
   }
 
-  dom::ExceptionOr<bool> Element::Matches(DOMStringView selectors) const noexcept
+  ExceptionOr<bool> Element::Matches(DOMStringView selectors) const noexcept
   {
     auto query = NodeDocument().SelectorQueryForString(selectors);
     if (query.HasException())
@@ -2454,8 +2452,8 @@ namespace krys::boo
     return dom::NodeAlgorithms::GetElementsByClassName(*this, krys::move(classNames));
   }
 
-  dom::ExceptionOr<Element *> Element::InsertAdjacentElement(dom::InsertAdjacentWhere where,
-                                                             Element &element) noexcept
+  ExceptionOr<Element *> Element::InsertAdjacentElement(dom::InsertAdjacentWhere where,
+                                                        Element &element) noexcept
   {
     html::CEReactionsScope ceReactions;
     auto result = dom::ElementAlgorithms::InsertAdjacent(*this, where, element);
@@ -2468,7 +2466,7 @@ namespace krys::boo
     return result.Value() ? &element : nullptr;
   }
 
-  dom::ExceptionOr<void> Element::InsertAdjacentText(dom::InsertAdjacentWhere where, DOMString data) noexcept
+  ExceptionOr<void> Element::InsertAdjacentText(dom::InsertAdjacentWhere where, DOMString data) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let text be the result of creating a text node given this's node document and data.
@@ -2491,7 +2489,7 @@ namespace krys::boo
     // The element whose children insertAdjacentHTML() parses the markup as: the element, or its parent for
     // beforebegin and afterend, with a body element in place of a context that isn't an element or is an
     // html element in an HTML document.
-    KRYS_NODISCARD dom::ExceptionOr<Ref<Element>>
+    KRYS_NODISCARD ExceptionOr<Ref<Element>>
       ContextElementForInsertAdjacentHTML(Element &element, dom::InsertAdjacentWhere where) noexcept
     {
       Ref<ContainerNode> contextNode = ShareRef<ContainerNode>(element);
@@ -2500,7 +2498,7 @@ namespace krys::boo
         auto *parent = element.ParentNode();
         if (!parent || Is<Document>(*parent))
         {
-          return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+          return Exception {ExceptionCode::NoModificationAllowedError};
         }
         contextNode = ShareRef(*parent);
       }
@@ -2515,7 +2513,7 @@ namespace krys::boo
     }
 
     // Appends the data of the text node after node, if there is one, to node's, and removes it.
-    KRYS_NODISCARD dom::ExceptionOr<void> MergeWithNextTextNode(Text &node) noexcept
+    KRYS_NODISCARD ExceptionOr<void> MergeWithNextTextNode(Text &node) noexcept
     {
       auto *next = DynamicDowncast<Text>(node.NextSibling());
       if (!next)
@@ -2531,7 +2529,7 @@ namespace krys::boo
     }
   }
 
-  dom::ExceptionOr<void>
+  ExceptionOr<void>
     Element::ReplaceChildrenWithMarkup(DOMStringView markup,
                                        EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept
   {
@@ -2556,7 +2554,7 @@ namespace krys::boo
     return ReplaceChildrenWithFragment(*container, fragment.ReleaseValue());
   }
 
-  dom::ExceptionOr<void> Element::SetHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
+  ExceptionOr<void> Element::SetHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let target be the target for HTML insertion given this.
@@ -2566,7 +2564,7 @@ namespace krys::boo
       html::FragmentParserMode::Safe);
   }
 
-  dom::ExceptionOr<void> Element::AppendHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
+  ExceptionOr<void> Element::AppendHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let target be the target for HTML insertion given this.
@@ -2576,8 +2574,7 @@ namespace krys::boo
       html::FragmentParserMode::Safe);
   }
 
-  dom::ExceptionOr<void> Element::PrependHTML(DOMStringView html,
-                                              const html::SetHTMLOptions &options) noexcept
+  ExceptionOr<void> Element::PrependHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let target be the target for HTML insertion given this.
@@ -2587,8 +2584,8 @@ namespace krys::boo
       target, target.FirstChild(), html, &options.Sanitizer, html::FragmentParserMode::Safe);
   }
 
-  dom::ExceptionOr<void> Element::SetHTMLUnsafe(DOMStringView html,
-                                                const html::SetHTMLUnsafeOptions &options) noexcept
+  ExceptionOr<void> Element::SetHTMLUnsafe(DOMStringView html,
+                                           const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
@@ -2601,8 +2598,8 @@ namespace krys::boo
       options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
-  dom::ExceptionOr<void> Element::AppendHTMLUnsafe(DOMStringView html,
-                                                   const html::SetHTMLUnsafeOptions &options) noexcept
+  ExceptionOr<void> Element::AppendHTMLUnsafe(DOMStringView html,
+                                              const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
@@ -2615,8 +2612,8 @@ namespace krys::boo
       options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
-  dom::ExceptionOr<void> Element::PrependHTMLUnsafe(DOMStringView html,
-                                                    const html::SetHTMLUnsafeOptions &options) noexcept
+  ExceptionOr<void> Element::PrependHTMLUnsafe(DOMStringView html,
+                                               const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
@@ -2630,46 +2627,45 @@ namespace krys::boo
       html::FragmentParserMode::Unsafe);
   }
 
-  dom::ExceptionOr<void> Element::BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
+  ExceptionOr<void> Element::BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::BeforeHTML(*this, html, &options.Sanitizer,
                                                      html::FragmentParserMode::Safe);
   }
 
-  dom::ExceptionOr<void> Element::AfterHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
+  ExceptionOr<void> Element::AfterHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::AfterHTML(*this, html, &options.Sanitizer,
                                                     html::FragmentParserMode::Safe);
   }
 
-  dom::ExceptionOr<void> Element::ReplaceWithHTML(DOMStringView html,
-                                                  const html::SetHTMLOptions &options) noexcept
+  ExceptionOr<void> Element::ReplaceWithHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::ReplaceWithHTML(*this, html, &options.Sanitizer,
                                                           html::FragmentParserMode::Safe);
   }
 
-  dom::ExceptionOr<void> Element::BeforeHTMLUnsafe(DOMStringView html,
-                                                   const html::SetHTMLUnsafeOptions &options) noexcept
+  ExceptionOr<void> Element::BeforeHTMLUnsafe(DOMStringView html,
+                                              const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::BeforeHTML(
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
-  dom::ExceptionOr<void> Element::AfterHTMLUnsafe(DOMStringView html,
-                                                  const html::SetHTMLUnsafeOptions &options) noexcept
+  ExceptionOr<void> Element::AfterHTMLUnsafe(DOMStringView html,
+                                             const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::AfterHTML(
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
-  dom::ExceptionOr<void> Element::ReplaceWithHTMLUnsafe(DOMStringView html,
-                                                        const html::SetHTMLUnsafeOptions &options) noexcept
+  ExceptionOr<void> Element::ReplaceWithHTMLUnsafe(DOMStringView html,
+                                                   const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::ReplaceWithHTML(
@@ -2685,27 +2681,27 @@ namespace krys::boo
                              krys::move(options.ShadowRoots));
   }
 
-  dom::ExceptionOr<DOMString> Element::InnerHTML() const noexcept
+  ExceptionOr<DOMString> Element::InnerHTML() const noexcept
   {
     // The innerHTML getter steps are to return the result of running fragment serializing algorithm steps
     // with this and true.
     return SerializeFragmentRequiringWellFormed(*this, SerializedNodes::SubtreesOfChildren);
   }
 
-  dom::ExceptionOr<void> Element::InnerHTML(DOMStringView markup) noexcept
+  ExceptionOr<void> Element::InnerHTML(DOMStringView markup) noexcept
   {
     html::CEReactionsScope ceReactions;
     return ReplaceChildrenWithMarkup(markup, {});
   }
 
-  dom::ExceptionOr<DOMString> Element::OuterHTML() const noexcept
+  ExceptionOr<DOMString> Element::OuterHTML() const noexcept
   {
     // 1. Let element be a fictional node whose only child is this.
     // 2. Return the result of running fragment serializing algorithm steps with element and true.
     return SerializeFragmentRequiringWellFormed(*this, SerializedNodes::SubtreeIncludingNode);
   }
 
-  dom::ExceptionOr<void> Element::OuterHTML(DOMStringView markup) noexcept
+  ExceptionOr<void> Element::OuterHTML(DOMStringView markup) noexcept
   {
     html::CEReactionsScope ceReactions;
 
@@ -2719,7 +2715,7 @@ namespace krys::boo
       {
         return {};
       }
-      return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+      return Exception {ExceptionCode::NoModificationAllowedError};
     }
 
     RefPtr<Node> previous = ShareRefPtr(PreviousSibling());
@@ -2755,8 +2751,7 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> Element::InsertAdjacentHTML(dom::InsertAdjacentWhere where,
-                                                     DOMStringView markup) noexcept
+  ExceptionOr<void> Element::InsertAdjacentHTML(dom::InsertAdjacentWhere where, DOMStringView markup) noexcept
   {
     html::CEReactionsScope ceReactions;
 
@@ -2788,7 +2783,7 @@ namespace krys::boo
 
 #pragma region Element (Pointer Events)
 
-  dom::ExceptionOr<void> Element::SetPointerCapture(int32 pointerId) noexcept
+  ExceptionOr<void> Element::SetPointerCapture(int32 pointerId) noexcept
   {
     if (auto *page = NodeDocument().GetPage())
     {
@@ -2797,7 +2792,7 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<void> Element::ReleasePointerCapture(int32 pointerId) noexcept
+  ExceptionOr<void> Element::ReleasePointerCapture(int32 pointerId) noexcept
   {
     if (auto *page = NodeDocument().GetPage())
     {
@@ -2821,7 +2816,7 @@ namespace krys::boo
 #pragma region Element (Pointer Lock)
 
   void Element::RequestPointerLock(dom::PointerLockOptions options,
-                                   Func<void(dom::ExceptionOr<void> &&)> &&promise) noexcept
+                                   Func<void(ExceptionOr<void> &&)> &&promise) noexcept
   {
     if (auto *page = NodeDocument().GetPage())
     {
@@ -2844,7 +2839,7 @@ namespace krys::boo
     return dom::TextAlgorithms::DescendantTextContent(*this);
   }
 
-  dom::ExceptionOr<void> Element::TextContent(DOMString value) noexcept
+  ExceptionOr<void> Element::TextContent(DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *this);
@@ -2854,25 +2849,25 @@ namespace krys::boo
 
 #pragma region ChildNode
 
-  dom::ExceptionOr<void> Element::Before(const List<dom::NodeOrString> &nodes) noexcept
+  ExceptionOr<void> Element::Before(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ChildNode::Before(*this, nodes);
   }
 
-  dom::ExceptionOr<void> Element::After(const List<dom::NodeOrString> &nodes) noexcept
+  ExceptionOr<void> Element::After(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ChildNode::After(*this, nodes);
   }
 
-  dom::ExceptionOr<void> Element::ReplaceWith(const List<dom::NodeOrString> &nodes) noexcept
+  ExceptionOr<void> Element::ReplaceWith(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ChildNode::ReplaceWith(*this, nodes);
   }
 
-  dom::ExceptionOr<void> Element::Remove() noexcept
+  ExceptionOr<void> Element::Remove() noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ChildNode::Remove(*this);
@@ -2936,36 +2931,36 @@ namespace krys::boo
     return dom::mixins::ParentNode::ChildElementCount(*this);
   }
 
-  dom::ExceptionOr<void> Element::Prepend(const List<dom::NodeOrString> &nodes) noexcept
+  ExceptionOr<void> Element::Prepend(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ParentNode::Prepend(*this, nodes);
   }
 
-  dom::ExceptionOr<void> Element::Append(const List<dom::NodeOrString> &nodes) noexcept
+  ExceptionOr<void> Element::Append(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ParentNode::Append(*this, nodes);
   }
 
-  dom::ExceptionOr<void> Element::ReplaceChildren(const List<dom::NodeOrString> &nodes) noexcept
+  ExceptionOr<void> Element::ReplaceChildren(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ParentNode::ReplaceChildren(*this, nodes);
   }
 
-  dom::ExceptionOr<void> Element::MoveBefore(Node &node, Node *refChild) noexcept
+  ExceptionOr<void> Element::MoveBefore(Node &node, Node *refChild) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ParentNode::MoveBefore(*this, node, refChild);
   }
 
-  dom::ExceptionOr<RefPtr<Element>> Element::QuerySelector(DOMStringView selectors) noexcept
+  ExceptionOr<RefPtr<Element>> Element::QuerySelector(DOMStringView selectors) noexcept
   {
     return dom::mixins::ParentNode::QuerySelector(*this, selectors);
   }
 
-  dom::ExceptionOr<Ref<dom::NodeList>> Element::QuerySelectorAll(DOMStringView selectors) noexcept
+  ExceptionOr<Ref<dom::NodeList>> Element::QuerySelectorAll(DOMStringView selectors) noexcept
   {
     return dom::mixins::ParentNode::QuerySelectorAll(*this, selectors);
   }

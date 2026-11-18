@@ -104,19 +104,19 @@ namespace krys::boo
     return cells;
   }
 
-  dom::ExceptionOr<Ref<HTMLTableCellElement>> HTMLTableRowElement::InsertCell(int32 index) noexcept
+  ExceptionOr<Ref<HTMLTableCellElement>> HTMLTableRowElement::InsertCell(int32 index) noexcept
   {
     // 1. If index is less than −1 or greater than the number of elements in the cells collection, throw
     //    an "IndexSizeError" DOMException.
     if (index < -1)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
     auto children = Cells();
     auto numCells = static_cast<int32>(children->Length());
     if (index > numCells)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     // 2. Let table cell be the result of creating an element given this element's node document, "td", and
@@ -136,7 +136,7 @@ namespace krys::boo
     return cell;
   }
 
-  dom::ExceptionOr<void> HTMLTableRowElement::DeleteCell(int32 index) noexcept
+  ExceptionOr<void> HTMLTableRowElement::DeleteCell(int32 index) noexcept
   {
     html::CEReactionsScope ceReactions;
 
@@ -157,7 +157,7 @@ namespace krys::boo
     }
     if (index < 0 || index >= numCells)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
     if (auto result = RemoveChild(*children->Item(index)); result.HasException())
     {

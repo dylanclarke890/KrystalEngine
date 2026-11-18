@@ -74,18 +74,18 @@ namespace krys::boo::html
 
     /// @brief `new ImageData(sw, sh, settings)` in @p defaultColorSpace, a copy of @p bytes or transparent
     /// black when it's empty.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<ImageData>> Create(uint32 sw, uint32 sh,
-                                                                  PredefinedColorSpace defaultColorSpace,
-                                                                  Maybe<ImageDataSettings> = {},
-                                                                  Span<const uint8> bytes = {}) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<ImageData>> Create(uint32 sw, uint32 sh,
+                                                             PredefinedColorSpace defaultColorSpace,
+                                                             Maybe<ImageDataSettings> = {},
+                                                             Span<const uint8> bytes = {}) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-imagedata
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<ImageData>> Create(uint32 sw, uint32 sh,
-                                                                  Maybe<ImageDataSettings>) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<ImageData>> Create(uint32 sw, uint32 sh,
+                                                             Maybe<ImageDataSettings>) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-imagedata-with-data
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<ImageData>>
-      Create(ImageDataArray &&, uint32 sw, Maybe<uint32> sh, Maybe<ImageDataSettings>) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<ImageData>> Create(ImageDataArray &&, uint32 sw, Maybe<uint32> sh,
+                                                             Maybe<ImageDataSettings>) noexcept;
 
     ~ImageData() noexcept;
 

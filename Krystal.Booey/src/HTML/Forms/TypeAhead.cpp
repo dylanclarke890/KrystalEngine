@@ -86,7 +86,7 @@ namespace krys::boo::html
   {
   }
 
-  int32 TypeAhead::HandleEvent(dom::KeyboardEvent &event, EnumSet<MatchMode> matchMode) noexcept
+  int32 TypeAhead::HandleEvent(KeyboardEvent &event, EnumSet<MatchMode> matchMode) noexcept
   {
     if (event.TimeStamp() < _lastTypeTime)
     {

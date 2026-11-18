@@ -28,16 +28,10 @@ namespace krys::boo
 {
   class AffineTransform;
   class FloatRect;
-}
 
-namespace krys::boo::dom
-{
   template <typename T>
   class ExceptionOr;
-}
 
-namespace krys::boo
-{
   class SVGPreserveAspectRatioValue
   {
   public:
@@ -76,14 +70,14 @@ namespace krys::boo
 
     KRYS_NODISCARD bool operator==(const SVGPreserveAspectRatioValue &) const noexcept = default;
 
-    dom::ExceptionOr<void> SetAlign(uint16) noexcept;
+    ExceptionOr<void> SetAlign(uint16) noexcept;
 
     KRYS_NODISCARD uint16 Align() const noexcept
     {
       return _align;
     }
 
-    dom::ExceptionOr<void> SetMeetOrSlice(uint16) noexcept;
+    ExceptionOr<void> SetMeetOrSlice(uint16) noexcept;
 
     KRYS_NODISCARD uint16 MeetOrSlice() const noexcept
     {

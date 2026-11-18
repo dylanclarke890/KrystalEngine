@@ -1402,7 +1402,7 @@ namespace krys::boo
     }
 
     // FIXME: The template document for contexts that are templates.
-    KRYS_NODISCARD dom::ExceptionOr<Ref<DocumentFragment>>
+    KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>>
       CreateFragmentForMarkup(Element &contextElement, utf8_stringview markup,
                               EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept
     {
@@ -1418,7 +1418,7 @@ namespace krys::boo
       Ref<DocumentFragment> fragment = document.CreateDocumentFragment();
       if (!xml::XMLDocumentParser::ParseDocumentFragment(markup, *fragment, &contextElement))
       {
-        return dom::Exception {dom::ExceptionCode::SyntaxError};
+        return Exception {ExceptionCode::SyntaxError};
       }
       return fragment;
     }
@@ -1664,8 +1664,8 @@ namespace krys::boo
     return accumulator.SerializeNodes(const_cast<Node &>(node), root);
   }
 
-  dom::ExceptionOr<utf8_string> SerializeFragmentRequiringWellFormed(const Node &node,
-                                                                     SerializedNodes root) noexcept
+  ExceptionOr<utf8_string> SerializeFragmentRequiringWellFormed(const Node &node,
+                                                                SerializedNodes root) noexcept
   {
     // 1. Let context document be node's node document.
     // 2. If context document is an HTML document, then return the result of HTML fragment serialization
@@ -1677,7 +1677,7 @@ namespace krys::boo
     auto markup = accumulator.SerializeNodes(const_cast<Node &>(node), root);
     if (!accumulator.IsWellFormed())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
     return markup;
   }
@@ -1823,15 +1823,15 @@ namespace krys::boo
     return markup;
   }
 
-  dom::ExceptionOr<Ref<DocumentFragment>>
+  ExceptionOr<Ref<DocumentFragment>>
     CreateFragmentForInnerOuterHTML(Element &contextElement, utf8_stringview markup,
                                     EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept
   {
     return CreateFragmentForMarkup(contextElement, markup, parserContentPolicy);
   }
 
-  dom::ExceptionOr<Ref<DocumentFragment>> CreateContextualFragment(Element &element,
-                                                                   utf8_stringview markup) noexcept
+  ExceptionOr<Ref<DocumentFragment>> CreateContextualFragment(Element &element,
+                                                              utf8_stringview markup) noexcept
   {
     auto result = CreateFragmentForMarkup(element, markup, {});
     if (result.HasException())
@@ -1854,8 +1854,8 @@ namespace krys::boo
 
   // FIXME: Setting a lone text child's data instead of replacing it when script can't observe the difference
   // (canUseSetDataOptimization), with mutation observers' child list scope.
-  dom::ExceptionOr<void> ReplaceChildrenWithFragment(ContainerNode &container,
-                                                     const Ref<DocumentFragment> &fragment) noexcept
+  ExceptionOr<void> ReplaceChildrenWithFragment(ContainerNode &container,
+                                                const Ref<DocumentFragment> &fragment) noexcept
   {
     Ref<ContainerNode> containerNode = ShareRef(container);
 

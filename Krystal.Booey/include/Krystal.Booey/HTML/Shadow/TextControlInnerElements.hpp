@@ -82,7 +82,7 @@ namespace krys::boo::html
     KRYS_NODISCARD static Ref<TextControlInnerTextElement> Create(Document &document,
                                                                   bool isEditable) noexcept;
 
-    void DefaultEventHandler(dom::Event &event) noexcept override;
+    void DefaultEventHandler(Event &event) noexcept override;
 
     KRYS_NODISCARD RenderTextControlInnerBlock *Renderer() const noexcept;
 
@@ -135,7 +135,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD static Ref<SearchFieldResultsButtonElement> Create(Document &document) noexcept;
 
-    void DefaultEventHandler(dom::Event &event) noexcept override;
+    void DefaultEventHandler(Event &event) noexcept override;
 
     KRYS_NODISCARD bool CanAdjustStyleForAppearance() const noexcept
     {
@@ -164,7 +164,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD static Ref<SearchFieldCancelButtonElement> Create(Document &document) noexcept;
 
-    void DefaultEventHandler(dom::Event &event) noexcept override;
+    void DefaultEventHandler(Event &event) noexcept override;
 
   private:
     KRYS_NODISCARD Maybe<style::UnadjustedStyle>

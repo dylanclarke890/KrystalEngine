@@ -89,14 +89,14 @@ namespace krys::boo::html
     return elementStyle;
   }
 
-  void DateTimeFieldElement::DefaultEventHandler(dom::Event &event) noexcept
+  void DateTimeFieldElement::DefaultEventHandler(Event &event) noexcept
   {
     if (event.Type() == event_names::Blur)
     {
       HandleBlurEvent(event);
     }
 
-    if (auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event))
+    if (auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event))
     {
       if (!IsFieldOwnerDisabled() && !IsFieldOwnerReadOnly())
       {
@@ -117,7 +117,7 @@ namespace krys::boo::html
     HTMLDivElement::DefaultEventHandler(event);
   }
 
-  void DateTimeFieldElement::DefaultKeyboardEventHandler(dom::KeyboardEvent &keyboardEvent) noexcept
+  void DateTimeFieldElement::DefaultKeyboardEventHandler(KeyboardEvent &keyboardEvent) noexcept
   {
     if (IsFieldOwnerDisabled())
     {
@@ -199,7 +199,7 @@ namespace krys::boo::html
     return true;
   }
 
-  void DateTimeFieldElement::HandleBlurEvent(dom::Event &event) noexcept
+  void DateTimeFieldElement::HandleBlurEvent(Event &event) noexcept
   {
     if (_fieldOwner)
     {

@@ -74,7 +74,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-canvaspattern-settransform
-  dom::ExceptionOr<void> CanvasPattern::SetTransform(css::DOMMatrix2DInit matrixInit) noexcept
+  ExceptionOr<void> CanvasPattern::SetTransform(css::DOMMatrix2DInit matrixInit) noexcept
   {
     // 1. Let matrix be the result of creating a DOMMatrix from the 2D dictionary transform.
     auto checkValid = css::DOMMatrixReadOnly::ValidateAndFixup(matrixInit);

@@ -207,7 +207,7 @@ namespace krys::boo
     /// @return A `TypeError` if the keyframes or the timing are invalid, or a `SyntaxError` if the
     /// pseudo-element selector is.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-keyframeeffect
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<KeyframeEffect>>
+    KRYS_NODISCARD static ExceptionOr<Ref<KeyframeEffect>>
       Create(boo::Document &document, Element *target, KeyframesInput &&keyframes,
              Maybe<Variant<double, KeyframeEffectOptions>> options = null) noexcept;
 
@@ -237,7 +237,7 @@ namespace krys::boo
 
     /// @return A `SyntaxError` if @p pseudoElement isn't a pseudo-element selector.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-pseudoelement
-    dom::ExceptionOr<void> SetPseudoElement(const CSSOMString &pseudoElement) noexcept;
+    ExceptionOr<void> SetPseudoElement(const CSSOMString &pseudoElement) noexcept;
 
     KRYS_NODISCARD Maybe<style::Styleable> TargetStyleable() const noexcept;
 
@@ -247,10 +247,9 @@ namespace krys::boo
     /// @brief Replaces the keyframes, as `setKeyframes()` does: a CSS animation's then no longer follow its
     /// `@keyframes` rule.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-setkeyframes
-    dom::ExceptionOr<void> SetBindingsKeyframes(boo::Document &document,
-                                                KeyframesInput keyframesInput) noexcept;
+    ExceptionOr<void> SetBindingsKeyframes(boo::Document &document, KeyframesInput keyframesInput) noexcept;
 
-    dom::ExceptionOr<void> SetKeyframes(boo::Document &document, KeyframesInput keyframesInput) noexcept;
+    ExceptionOr<void> SetKeyframes(boo::Document &document, KeyframesInput keyframesInput) noexcept;
 
     KRYS_NODISCARD boo::IterationCompositeOperation IterationComposite() const noexcept
     {
@@ -412,7 +411,7 @@ namespace krys::boo
     void CopyPropertiesFromSource(const Ref<KeyframeEffect> &source) noexcept;
 
     /// @see https://drafts.csswg.org/web-animations-1/#processing-a-keyframes-argument
-    dom::ExceptionOr<void> ProcessKeyframes(boo::Document &document, KeyframesInput keyframesInput) noexcept;
+    ExceptionOr<void> ProcessKeyframes(boo::Document &document, KeyframesInput keyframesInput) noexcept;
 
     void UpdateBlendingKeyframes(RenderStyle &elementStyle,
                                  const style::ResolutionContext &resolutionContext) noexcept;

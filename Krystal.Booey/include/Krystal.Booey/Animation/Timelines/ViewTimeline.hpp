@@ -111,7 +111,7 @@ namespace krys::boo
 
   public:
     /// @see https://drafts.csswg.org/scroll-animations-1/#dom-viewtimeline-viewtimeline
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<ViewTimeline>>
+    KRYS_NODISCARD static ExceptionOr<Ref<ViewTimeline>>
       Create(boo::Document &document, const ViewTimelineOptions &options = {}) noexcept;
 
     KRYS_NODISCARD static Ref<ViewTimeline> Create(const CSSOMStringAtom &name, ScrollAxis axis,
@@ -195,7 +195,7 @@ namespace krys::boo
 
     void CacheCurrentTime() noexcept;
 
-    KRYS_NODISCARD static dom::ExceptionOr<SpecifiedViewTimelineInsets>
+    KRYS_NODISCARD static ExceptionOr<SpecifiedViewTimelineInsets>
       ValidateSpecifiedInsets(const ViewTimelineInsetValue &inset, const boo::Document &document) noexcept;
   };
 }

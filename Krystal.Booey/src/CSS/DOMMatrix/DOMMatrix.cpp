@@ -29,7 +29,7 @@
 
 namespace krys::boo::css
 {
-  dom::ExceptionOr<Ref<DOMMatrix>> DOMMatrix::Create(Maybe<Variant<CSSOMString, List<double>>> init) noexcept
+  ExceptionOr<Ref<DOMMatrix>> DOMMatrix::Create(Maybe<Variant<CSSOMString, List<double>>> init) noexcept
   {
     if (!init)
     {
@@ -38,7 +38,7 @@ namespace krys::boo::css
 
     return SwitchOn(
       *init,
-      [](const CSSOMString &init) -> dom::ExceptionOr<Ref<DOMMatrix>>
+      [](const CSSOMString &init) -> ExceptionOr<Ref<DOMMatrix>>
       {
         auto parseResult = ParseStringIntoAbstractMatrix(init);
         if (parseResult.HasException())
@@ -48,7 +48,7 @@ namespace krys::boo::css
         return AdoptRef(
           *new DOMMatrix(parseResult.Value().Matrix, parseResult.Value().Is2D ? Is2D::Yes : Is2D::No));
       },
-      [](const List<double> &init) -> dom::ExceptionOr<Ref<DOMMatrix>>
+      [](const List<double> &init) -> ExceptionOr<Ref<DOMMatrix>>
       { return FromArrayHelper<DOMMatrix, double>(Span<const double>(init)); });
   }
 
@@ -57,23 +57,23 @@ namespace krys::boo::css
   {
   }
 
-  dom::ExceptionOr<Ref<DOMMatrix>> DOMMatrix::FromMatrix(DOMMatrixInit &&init) noexcept
+  ExceptionOr<Ref<DOMMatrix>> DOMMatrix::FromMatrix(DOMMatrixInit &&init) noexcept
   {
     return FromMatrixHelper<DOMMatrix>(krys::move(init));
   }
 
-  dom::ExceptionOr<Ref<DOMMatrix>> DOMMatrix::FromFloat32Array(Span<const float> array32) noexcept
+  ExceptionOr<Ref<DOMMatrix>> DOMMatrix::FromFloat32Array(Span<const float> array32) noexcept
   {
     return FromArrayHelper<DOMMatrix>(array32);
   }
 
-  dom::ExceptionOr<Ref<DOMMatrix>> DOMMatrix::FromFloat64Array(Span<const double> array64) noexcept
+  ExceptionOr<Ref<DOMMatrix>> DOMMatrix::FromFloat64Array(Span<const double> array64) noexcept
   {
     return FromArrayHelper<DOMMatrix>(array64);
   }
 
   // https://drafts.fxtf.org/geometry/#dom-dommatrix-multiplyself
-  dom::ExceptionOr<Ref<DOMMatrix>> DOMMatrix::MultiplySelf(DOMMatrixInit &&other) noexcept
+  ExceptionOr<Ref<DOMMatrix>> DOMMatrix::MultiplySelf(DOMMatrixInit &&other) noexcept
   {
     auto fromMatrixResult = DOMMatrix::FromMatrix(krys::move(other));
     if (fromMatrixResult.HasException())
@@ -90,7 +90,7 @@ namespace krys::boo::css
   }
 
   // https://drafts.fxtf.org/geometry/#dom-dommatrix-premultiplyself
-  dom::ExceptionOr<Ref<DOMMatrix>> DOMMatrix::PreMultiplySelf(DOMMatrixInit &&other) noexcept
+  ExceptionOr<Ref<DOMMatrix>> DOMMatrix::PreMultiplySelf(DOMMatrixInit &&other) noexcept
   {
     auto fromMatrixResult = DOMMatrix::FromMatrix(krys::move(other));
     if (fromMatrixResult.HasException())

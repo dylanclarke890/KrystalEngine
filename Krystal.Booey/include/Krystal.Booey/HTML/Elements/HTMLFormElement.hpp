@@ -30,13 +30,9 @@
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::dom
-{
-  class Event;
-}
-
 namespace krys::boo
 {
+  class Event;
   class HTMLFormControlElement;
   class HTMLImageElement;
 }
@@ -170,7 +166,7 @@ namespace krys::boo
     void Submit() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-requestsubmit
-    dom::ExceptionOr<void> RequestSubmit(HTMLElement *submitter = nullptr) noexcept;
+    ExceptionOr<void> RequestSubmit(HTMLElement *submitter = nullptr) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-reset
     void Reset() noexcept;
@@ -207,14 +203,14 @@ namespace krys::boo
 
     /// @see https://html.spec.whatwg.org/#form-submission-algorithm
     void SubmitIfPossible(
-      dom::Event *event, HTMLFormControlElement *submitter = nullptr,
+      Event *event, HTMLFormControlElement *submitter = nullptr,
       FormSubmissionTrigger trigger = FormSubmissionTrigger::NotSubmittedByJavaScript) noexcept;
 
     /// @brief Submits the form as script's `submit()` does.
     void SubmitFromJavaScript() noexcept;
 
     /// @see https://html.spec.whatwg.org/#implicit-submission
-    void SubmitImplicitly(dom::Event &event, bool fromImplicitSubmissionTrigger) noexcept;
+    void SubmitImplicitly(Event &event, bool fromImplicitSubmissionTrigger) noexcept;
 
     KRYS_NODISCARD bool IsMethodPost() const noexcept
     {
@@ -224,13 +220,13 @@ namespace krys::boo
     /// @brief The browsing context name the form submits to: the submitter's `formtarget`, the form's
     /// `target`, or the document's base target, with `_blank` for a target with dangling markup.
     /// @see https://html.spec.whatwg.org/#get-an-element's-target
-    KRYS_NODISCARD DOMString EffectiveTarget(const dom::Event *event,
+    KRYS_NODISCARD DOMString EffectiveTarget(const Event *event,
                                              HTMLFormControlElement *submitter) const noexcept;
 
     KRYS_NODISCARD bool WasUserSubmitted() const noexcept;
 
     /// @brief The form control the event that submits the form was targeted at, if any.
-    KRYS_NODISCARD static HTMLFormControlElement *FindSubmitter(const dom::Event *event) noexcept;
+    KRYS_NODISCARD static HTMLFormControlElement *FindSubmitter(const Event *event) noexcept;
 
     /// @see https://html.spec.whatwg.org/#default-button
     KRYS_NODISCARD HTMLFormControlElement *DefaultButton() const noexcept;
@@ -291,7 +287,7 @@ namespace krys::boo
                             Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
   private:
-    void Submit(dom::Event *event, bool processingUserGesture, FormSubmissionTrigger trigger,
+    void Submit(Event *event, bool processingUserGesture, FormSubmissionTrigger trigger,
                 HTMLFormControlElement *submitter = nullptr) noexcept;
 
     void SubmitDialog(const Ref<FormSubmission> &formSubmission) noexcept;

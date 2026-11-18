@@ -275,7 +275,7 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD bool HasCapturingBoundaryListenerOn(const dom::EventTarget &target,
+    KRYS_NODISCARD bool HasCapturingBoundaryListenerOn(const EventTarget &target,
                                                        Span<const DOMStringAtom> types) noexcept
     {
       return std::ranges::any_of(types, [&](const DOMStringAtom &type)
@@ -1316,7 +1316,7 @@ namespace krys::boo
     {
       keyDownEvent.DisambiguateKeyDownEvent(Type::RawKeyDown);
     }
-    Ref<dom::KeyboardEvent> keydown = dom::KeyboardEvent::Create(keyDownEvent, _frame.Window());
+    Ref<KeyboardEvent> keydown = KeyboardEvent::Create(keyDownEvent, _frame.Window());
 
     auto setHasFocusVisibleIfNeeded = [&](Element &element)
     {
@@ -1353,7 +1353,7 @@ namespace krys::boo
     if (handledByInputMethod)
     {
       keyDownEvent.SetWindowsVirtualKeyCode(CompositionEventKeyCode);
-      keydown = dom::KeyboardEvent::Create(keyDownEvent, _frame.Window());
+      keydown = KeyboardEvent::Create(keyDownEvent, _frame.Window());
       keydown->SetTarget(element);
       keydown->SetIsDefaultEventHandlerIgnored();
     }
@@ -1394,7 +1394,7 @@ namespace krys::boo
     {
       return keydownResult;
     }
-    Ref<dom::KeyboardEvent> keypress = dom::KeyboardEvent::Create(keyPressEvent, _frame.Window());
+    Ref<KeyboardEvent> keypress = KeyboardEvent::Create(keyPressEvent, _frame.Window());
     if (keypress->IsComposing())
     {
       keypress->SetTarget(element);
@@ -1428,7 +1428,7 @@ namespace krys::boo
     return true;
   }
 
-  bool EventHandler::HandleTextInputEvent(utf8_stringview text, dom::Event *underlyingEvent,
+  bool EventHandler::HandleTextInputEvent(utf8_stringview text, Event *underlyingEvent,
                                           dom::TextEventInputType inputType) noexcept
   {
     // Platforms should differentiate real commands like selectAll from text input in disguise (like
@@ -1436,7 +1436,7 @@ namespace krys::boo
     krys_debug_assert(!underlyingEvent || !underlyingEvent->IsKeyboardEvent()
                       || underlyingEvent->Type() == event_names::KeyPress);
 
-    RefPtr<dom::EventTarget> target;
+    RefPtr<EventTarget> target;
     if (underlyingEvent)
     {
       target = underlyingEvent->Target();
@@ -1450,7 +1450,7 @@ namespace krys::boo
       return false;
     }
 
-    auto event = dom::TextEvent::Create(_frame.Window(), text, inputType);
+    auto event = TextEvent::Create(_frame.Window(), text, inputType);
     event->SetUnderlyingEvent(underlyingEvent);
 
     (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
@@ -1465,7 +1465,7 @@ namespace krys::boo
     return _frame.Document()->GetEditor().HandleTextEvent(*event);
   }
 
-  bool EventHandler::DefaultKeyboardEventHandler(dom::KeyboardEvent &event) noexcept
+  bool EventHandler::DefaultKeyboardEventHandler(KeyboardEvent &event) noexcept
   {
     if (event.Type() == event_names::KeyDown)
     {
@@ -1517,13 +1517,13 @@ namespace krys::boo
     return false;
   }
 
-  bool EventHandler::DefaultKeyboardScrollEventHandler(dom::KeyboardEvent &, ScrollLogicalDirection direction,
+  bool EventHandler::DefaultKeyboardScrollEventHandler(KeyboardEvent &, ScrollLogicalDirection direction,
                                                        ScrollGranularity granularity) noexcept
   {
     return LogicalScrollRecursively(direction, granularity, nullptr, KeyboardScrollIsAnimated());
   }
 
-  bool EventHandler::DefaultPageUpDownEventHandler(dom::KeyboardEvent &event) noexcept
+  bool EventHandler::DefaultPageUpDownEventHandler(KeyboardEvent &event) noexcept
   {
     krys_debug_assert(event.Type() == event_names::KeyDown);
 
@@ -1538,7 +1538,7 @@ namespace krys::boo
     return DefaultKeyboardScrollEventHandler(event, direction, ScrollGranularity::Page);
   }
 
-  bool EventHandler::DefaultHomeEndEventHandler(dom::KeyboardEvent &event) noexcept
+  bool EventHandler::DefaultHomeEndEventHandler(KeyboardEvent &event) noexcept
   {
     krys_debug_assert(event.Type() == event_names::KeyDown);
 
@@ -1553,7 +1553,7 @@ namespace krys::boo
     return DefaultKeyboardScrollEventHandler(event, direction, ScrollGranularity::Document);
   }
 
-  bool EventHandler::DefaultSpaceEventHandler(dom::KeyboardEvent &event) noexcept
+  bool EventHandler::DefaultSpaceEventHandler(KeyboardEvent &event) noexcept
   {
     krys_debug_assert(event.Type() == event_names::KeyPress);
 
@@ -1579,7 +1579,7 @@ namespace krys::boo
   }
 
   bool EventHandler::DefaultArrowEventHandler(dom::FocusDirection focusDirection,
-                                              dom::KeyboardEvent &event) noexcept
+                                              KeyboardEvent &event) noexcept
   {
     krys_debug_assert(event.Type() == event_names::KeyDown);
 
@@ -1716,7 +1716,7 @@ namespace krys::boo
     return view && view->LogicalScroll(direction, granularity, animated);
   }
 
-  bool EventHandler::DefaultTabEventHandler(dom::KeyboardEvent &event) noexcept
+  bool EventHandler::DefaultTabEventHandler(KeyboardEvent &event) noexcept
   {
     krys_debug_assert(event.Type() == event_names::KeyDown);
 
@@ -2357,8 +2357,9 @@ namespace krys::boo
     }
   }
 
-  bool EventHandler::HandleWheelEventInAppropriateEnclosingBox(
-    Node *startNode, const dom::WheelEvent &wheelEvent, const FloatSize &filteredPlatformDelta) noexcept
+  bool
+    EventHandler::HandleWheelEventInAppropriateEnclosingBox(Node *startNode, const WheelEvent &wheelEvent,
+                                                            const FloatSize &filteredPlatformDelta) noexcept
   {
     bool shouldHandleEvent = wheelEvent.DeltaX() || wheelEvent.DeltaY();
     if (!startNode->Renderer())
@@ -2458,7 +2459,7 @@ namespace krys::boo
     return scrollableArea.HandleWheelEventForScrolling(wheelEvent);
   }
 
-  bool EventHandler::DefaultWheelEventHandler(Node *startNode, dom::WheelEvent &wheelEvent) noexcept
+  bool EventHandler::DefaultWheelEventHandler(Node *startNode, WheelEvent &wheelEvent) noexcept
   {
     if (!startNode)
     {
@@ -2566,8 +2567,8 @@ namespace krys::boo
       }
 
       auto type = DOMStringAtom(event_names::SelectStart);
-      return dom::EventDispatcher::FireEvent<dom::Event>(
-        type, *node, dom::EventInit {.Bubbles = true, .Cancelable = true});
+      return dom::EventDispatcher::FireEvent<Event>(type, *node,
+                                                    EventInit {.Bubbles = true, .Cancelable = true});
     }
 
     // FIXME: Nodes that select on mouse down (shouldSelectOnMouseDown), once there are any. (There are no
@@ -2906,19 +2907,19 @@ namespace krys::boo
     // in the event.
 
     // Holds the complete set of touches on the screen and will be used as the 'touches' list in the event.
-    RefPtr<dom::TouchList> touches = dom::TouchList::Create();
+    RefPtr<TouchList> touches = TouchList::Create();
 
     // A different view on the 'touches' list above, filtered and grouped by event target. Used for the
     // 'targetTouches' list in the event.
-    HashMap<dom::EventTarget *, RefPtr<dom::TouchList>> touchesByTarget;
+    HashMap<EventTarget *, RefPtr<TouchList>> touchesByTarget;
 
     // Array of touches per state, used to assemble the 'changedTouches' list in the event.
     struct Touches
     {
       // The touches corresponding to the particular change state this struct instance represents.
-      RefPtr<dom::TouchList> TouchList;
+      RefPtr<boo::TouchList> TouchList;
       // The targets involved in TouchList, in the order they were first seen.
-      List<RefPtr<dom::EventTarget>> Targets;
+      List<RefPtr<EventTarget>> Targets;
     };
 
     std::array<Touches, PlatformTouchPoint::TouchStateEnd> changedTouches;
@@ -2982,7 +2983,7 @@ namespace krys::boo
 
       // Increment the platform touch id by 1 to avoid storing a key of 0 in the hashmap.
       uint32 touchPointTargetKey = point.Id() + 1;
-      RefPtr<dom::EventTarget> touchTarget;
+      RefPtr<EventTarget> touchTarget;
       if (pointState == PlatformTouchPoint::TouchPressed)
       {
         HitTestResult result;
@@ -3085,7 +3086,7 @@ namespace krys::boo
         if (pointState == PlatformTouchPoint::TouchReleased
             || pointState == PlatformTouchPoint::TouchCancelled)
         {
-          _endedTouchPointerIds.push_back(dom::PointerEvent::PointerIdForTouch(point));
+          _endedTouchPointerIds.push_back(PointerEvent::PointerIdForTouch(point));
         }
       }
 
@@ -3098,24 +3099,24 @@ namespace krys::boo
                                     pagePoint.Y().ToDouble() / scaleFactor);
       DoubleSize adjustedRadius = point.Radius().ScaledBy(1 / scaleFactor);
 
-      auto touch = dom::Touch::Create(targetFrame.get(), touchTarget.get(), static_cast<int32>(point.Id()),
-                                      point.ScreenPos(), adjustedPagePoint, adjustedRadius,
-                                      point.RotationAngle(), point.Force(), point.Twist());
+      auto touch =
+        Touch::Create(targetFrame.get(), touchTarget.get(), static_cast<int32>(point.Id()), point.ScreenPos(),
+                      adjustedPagePoint, adjustedRadius, point.RotationAngle(), point.Force(), point.Twist());
 
       // Ensure this target's touch list exists, even if it ends up empty, so it can always be passed to
       // TouchEvent::Create below.
       auto targetTouchesIterator = touchesByTarget.find(touchTarget.get());
       if (targetTouchesIterator == touchesByTarget.end())
       {
-        targetTouchesIterator = touchesByTarget.emplace(touchTarget.get(), dom::TouchList::Create()).first;
+        targetTouchesIterator = touchesByTarget.emplace(touchTarget.get(), TouchList::Create()).first;
       }
 
       // touches and targetTouches should only contain information about touches still on the screen, so if
       // this point is released or cancelled it will only appear in the changedTouches list.
       if (pointState != PlatformTouchPoint::TouchReleased && pointState != PlatformTouchPoint::TouchCancelled)
       {
-        touches->Append(Ref<dom::Touch>(touch));
-        targetTouchesIterator->second->Append(Ref<dom::Touch>(touch));
+        touches->Append(Ref<Touch>(touch));
+        targetTouchesIterator->second->Append(Ref<Touch>(touch));
       }
 
       // Now build up the correct list for changedTouches.
@@ -3128,7 +3129,7 @@ namespace krys::boo
         auto &changed = changedTouches[pointState];
         if (!changed.TouchList)
         {
-          changed.TouchList = dom::TouchList::Create();
+          changed.TouchList = TouchList::Create();
         }
         changed.TouchList->Append(krys::move(touch));
         if (std::ranges::find(changed.Targets, touchTarget) == changed.Targets.end())
@@ -3146,7 +3147,7 @@ namespace krys::boo
     // Now iterate the changedTouches list and the targets within it, sending events to the targets as
     // required.
     bool swallowedEvent = false;
-    RefPtr<dom::TouchList> emptyList = dom::TouchList::Create();
+    RefPtr<TouchList> emptyList = TouchList::Create();
     for (uint32 state = 0; state != PlatformTouchPoint::TouchStateEnd; ++state)
     {
       auto &changed = changedTouches[state];
@@ -3157,7 +3158,7 @@ namespace krys::boo
 
       // When sending a touch cancel event, use empty touches and targetTouches lists.
       bool isTouchCancelEvent = state == PlatformTouchPoint::TouchCancelled;
-      RefPtr<dom::TouchList> &effectiveTouches = isTouchCancelEvent ? emptyList : touches;
+      RefPtr<TouchList> &effectiveTouches = isTouchCancelEvent ? emptyList : touches;
       auto stateName = EventNameForTouchPointState(static_cast<PlatformTouchPoint::State>(state));
 
       for (auto &target : changed.Targets)
@@ -3165,14 +3166,14 @@ namespace krys::boo
         auto *targetNode = DynamicDowncast<Node>(target.get());
         krys_debug_assert(targetNode);
 
-        RefPtr<dom::TouchList> targetTouches =
+        RefPtr<TouchList> targetTouches =
           isTouchCancelEvent ? emptyList : touchesByTarget.find(target.get())->second;
         krys_debug_assert(targetTouches);
 
         auto *targetFrame = targetNode->NodeDocument().Frame();
-        Ref<dom::TouchEvent> touchEvent = dom::TouchEvent::Create(
-          effectiveTouches.get(), targetTouches.get(), changed.TouchList.get(), stateName,
-          targetFrame ? targetFrame->View() : nullptr, {}, event.Modifiers());
+        Ref<TouchEvent> touchEvent =
+          TouchEvent::Create(effectiveTouches.get(), targetTouches.get(), changed.TouchList.get(), stateName,
+                             targetFrame ? targetFrame->View() : nullptr, {}, event.Modifiers());
         (void)dom::EventDispatcher::DispatchToTarget(*touchEvent, target.get());
         swallowedEvent = swallowedEvent || touchEvent->DefaultPrevented() || touchEvent->DefaultHandled();
       }
@@ -3902,7 +3903,7 @@ namespace krys::boo
       return false;
     }
 
-    auto dragEvent = dom::DragEvent::Create(
+    auto dragEvent = DragEvent::Create(
       eventType, true, true, true, event.Timestamp(), view.get(), 0,
       DoublePoint(FlooredIntPoint(event.GlobalPosition())), DoublePoint(FlooredIntPoint(event.Position())),
       event.MovementDelta().X(), event.MovementDelta().Y(), event.Modifiers(), MouseButton::Left, 0, nullptr,

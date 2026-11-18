@@ -46,8 +46,8 @@ namespace krys::boo
     UpdateAttributesFromData();
   }
 
-  dom::ExceptionOr<Ref<ProcessingInstruction>>
-    ProcessingInstruction::Create(Document &document, DOMString target, DOMString data) noexcept
+  ExceptionOr<Ref<ProcessingInstruction>> ProcessingInstruction::Create(Document &document, DOMString target,
+                                                                        DOMString data) noexcept
   {
     // Create a processing instruction node:
     // 1. Let pi be the result of creating a node that implements ProcessingInstruction, given document.
@@ -55,13 +55,13 @@ namespace krys::boo
     //    1. If target does not match the Name production, then throw an "InvalidCharacterError" DOMException.
     if (!dom::NameValidation::IsValidXMLName(target))
     {
-      return dom::ExceptionCode::InvalidCharacterError;
+      return ExceptionCode::InvalidCharacterError;
     }
 
     // 2. If data contains the string "?>", then throw an "InvalidCharacterError" DOMException.
     if (data.contains(u8"?>"))
     {
-      return dom::ExceptionCode::InvalidCharacterError;
+      return ExceptionCode::InvalidCharacterError;
     }
 
     // 3.-5. In the constructor.
@@ -93,12 +93,12 @@ namespace krys::boo
     return it->Value;
   }
 
-  dom::ExceptionOr<void> ProcessingInstruction::SetAttribute(DOMStringView name, DOMString value) noexcept
+  ExceptionOr<void> ProcessingInstruction::SetAttribute(DOMStringView name, DOMString value) noexcept
   {
     // 1. If name is not a valid attribute local name, then throw an "InvalidCharacterError" DOMException.
     if (!dom::NameValidation::IsValidAttributeLocalName(name))
     {
-      return dom::ExceptionCode::InvalidCharacterError;
+      return ExceptionCode::InvalidCharacterError;
     }
 
     // 2. Set this's attribute map[name] to value.
@@ -126,13 +126,12 @@ namespace krys::boo
     UpdateDataFromAttributes();
   }
 
-  dom::ExceptionOr<bool> ProcessingInstruction::ToggleAttribute(DOMStringView name,
-                                                                Maybe<bool> force) noexcept
+  ExceptionOr<bool> ProcessingInstruction::ToggleAttribute(DOMStringView name, Maybe<bool> force) noexcept
   {
     // 1. If name is not a valid attribute local name, then throw an "InvalidCharacterError" DOMException.
     if (!dom::NameValidation::IsValidAttributeLocalName(name))
     {
-      return dom::ExceptionCode::InvalidCharacterError;
+      return ExceptionCode::InvalidCharacterError;
     }
 
     // 2. Let attributes be this's attribute map.

@@ -58,7 +58,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD double ValueAsDate() const noexcept final;
 
-    dom::ExceptionOr<void> SetValueAsDate(double value) const noexcept final;
+    ExceptionOr<void> SetValueAsDate(double value) const noexcept final;
 
     KRYS_NODISCARD DOMString SanitizeValue(DOMStringView proposedValue) const noexcept final;
 

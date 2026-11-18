@@ -14,12 +14,12 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief Counts `selectstart` events, cancelling them if asked.
-    struct SelectStartListener : public dom::EventListenerCallback
+    struct SelectStartListener : public EventListenerCallback
     {
       int32 Count {0};
       bool Cancel {false};
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         ++Count;
         if (Cancel)

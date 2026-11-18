@@ -55,7 +55,7 @@ namespace krys::boo::tests
       return defaultValue;
     }
 
-    bool HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept final
+    bool HandleKeyboardEvent(KeyboardEvent &event) noexcept final
     {
       ++KeyEvents;
       if (event.Type() != event_names::KeyDown || event.KeyCode() != vk::Right || !event.ShiftKey())
@@ -101,7 +101,7 @@ namespace krys::boo::tests
       ++CompositionUpdates;
     }
 
-    void HandleInputMethodKeydown(dom::KeyboardEvent &event) noexcept final
+    void HandleInputMethodKeydown(KeyboardEvent &event) noexcept final
     {
       auto *platformEvent = event.UnderlyingPlatformEvent();
       if (platformEvent && platformEvent->HandledByInputMethod())
@@ -110,7 +110,7 @@ namespace krys::boo::tests
       }
     }
 
-    void DidDispatchInputMethodKeydown(dom::KeyboardEvent &event) noexcept final
+    void DidDispatchInputMethodKeydown(KeyboardEvent &event) noexcept final
     {
       auto *platformEvent = event.UnderlyingPlatformEvent();
       auto &editor = Downcast<Node>(*event.Target()).NodeDocument().GetEditor();
@@ -212,7 +212,7 @@ namespace krys::boo::tests
       TextControlNotifications.emplace_back("field changed");
     }
 
-    bool DoTextFieldCommandFromEvent(boo::Element &, boo::dom::KeyboardEvent *) noexcept final
+    bool DoTextFieldCommandFromEvent(boo::Element &, boo::KeyboardEvent *) noexcept final
     {
       return false;
     }
@@ -368,13 +368,13 @@ namespace krys::boo::tests
   };
 
   /// @brief Counts the events of a type, cancelling them if asked.
-  struct CountingListener : public dom::EventListenerCallback
+  struct CountingListener : public EventListenerCallback
   {
     int32 Count {0};
     bool Cancel {false};
     bool LastWasTrustedClipboardEvent {false};
 
-    void HandleEvent(dom::Event &event) noexcept override
+    void HandleEvent(Event &event) noexcept override
     {
       ++Count;
       LastWasTrustedClipboardEvent = event.IsClipboardEvent() && event.IsTrusted() && event.Bubbles()

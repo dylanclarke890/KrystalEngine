@@ -25,13 +25,10 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 
-namespace krys::boo::dom
-{
-  class BeforeTextInsertedEvent;
-}
-
 namespace krys::boo
 {
+  class BeforeTextInsertedEvent;
+
   /// @see https://html.spec.whatwg.org/#htmltextareaelement
   class HTMLTextAreaElement : public HTMLTextFormControlElement
   {
@@ -149,7 +146,7 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-textarea-value
     KRYS_NODISCARD DOMString Value() const noexcept final;
 
-    dom::ExceptionOr<void>
+    ExceptionOr<void>
       SetValue(DOMStringView value,
                html::TextFieldEventBehavior eventBehavior = html::TextFieldEventBehavior::DispatchNoEvent,
                html::TextControlSetValueSelection selection =
@@ -202,7 +199,7 @@ namespace krys::boo
     void UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
                                SelectionRevealMode revealMode = SelectionRevealMode::Reveal) noexcept final;
 
-    void DefaultEventHandler(dom::Event &event) noexcept final;
+    void DefaultEventHandler(Event &event) noexcept final;
 
     KRYS_NODISCARD bool IsEnumeratable() const noexcept final
     {
@@ -288,7 +285,7 @@ namespace krys::boo
     /// @brief Takes the text the user edited as the value, if the inner text changed since the value was set.
     void UpdateValue() const noexcept;
 
-    void HandleBeforeTextInsertedEvent(dom::BeforeTextInsertedEvent &event) const noexcept;
+    void HandleBeforeTextInsertedEvent(BeforeTextInsertedEvent &event) const noexcept;
 
     KRYS_NODISCARD static DOMString SanitizeUserInputValue(DOMStringView proposedValue,
                                                            size_t maxLength) noexcept;

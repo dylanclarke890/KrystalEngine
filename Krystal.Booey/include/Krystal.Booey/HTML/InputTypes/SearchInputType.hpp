@@ -55,7 +55,7 @@ namespace krys::boo::html
       return input_type_names::Search;
     }
 
-    ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept final;
+    ShouldCallBaseEventHandler HandleKeydownEvent(KeyboardEvent &event) noexcept final;
 
   private:
     KRYS_NODISCARD bool NeedsContainer() const noexcept final;

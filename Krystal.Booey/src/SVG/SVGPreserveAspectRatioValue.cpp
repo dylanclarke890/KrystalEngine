@@ -42,22 +42,22 @@ namespace krys::boo
   {
   }
 
-  dom::ExceptionOr<void> SVGPreserveAspectRatioValue::SetAlign(uint16 align) noexcept
+  ExceptionOr<void> SVGPreserveAspectRatioValue::SetAlign(uint16 align) noexcept
   {
     if (align == SVG_PRESERVEASPECTRATIO_UNKNOWN || align > SVG_PRESERVEASPECTRATIO_XMAXYMAX)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     _align = static_cast<SVGPreserveAspectRatioType>(align);
     return {};
   }
 
-  dom::ExceptionOr<void> SVGPreserveAspectRatioValue::SetMeetOrSlice(uint16 meetOrSlice) noexcept
+  ExceptionOr<void> SVGPreserveAspectRatioValue::SetMeetOrSlice(uint16 meetOrSlice) noexcept
   {
     if (meetOrSlice == SVG_MEETORSLICE_UNKNOWN || meetOrSlice > SVG_MEETORSLICE_SLICE)
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     _meetOrSlice = static_cast<SVGMeetOrSliceType>(meetOrSlice);

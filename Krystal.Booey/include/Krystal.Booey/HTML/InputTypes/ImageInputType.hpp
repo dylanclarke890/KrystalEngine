@@ -69,7 +69,7 @@ namespace krys::boo::html
       return false;
     }
 
-    void HandleActivationBehavior(dom::Event &event) noexcept final;
+    void HandleActivationBehavior(Event &event) noexcept final;
 
     KRYS_NODISCARD bool ShouldRespectHeightAndWidthAttributes() noexcept final;
 

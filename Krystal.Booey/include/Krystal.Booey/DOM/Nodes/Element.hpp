@@ -321,11 +321,11 @@ namespace krys::boo
                                                    DOMStringAtom localName) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-setattribute
-    dom::ExceptionOr<void> SetAttribute(DOMStringAtom qualifiedName, DOMString value) noexcept;
+    ExceptionOr<void> SetAttribute(DOMStringAtom qualifiedName, DOMString value) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-setattributens
-    dom::ExceptionOr<void> SetAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom qualifiedName,
-                                          DOMString value) noexcept;
+    ExceptionOr<void> SetAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom qualifiedName,
+                                     DOMString value) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-removeattribute
     void RemoveAttribute(DOMStringAtom qualifiedName) noexcept;
@@ -334,7 +334,7 @@ namespace krys::boo
     void RemoveAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-toggleattribute
-    dom::ExceptionOr<bool> ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept;
+    ExceptionOr<bool> ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-hasattribute
     /// @see https://dom.spec.whatwg.org/#concept-element-attribute-has
@@ -351,16 +351,16 @@ namespace krys::boo
                                             DOMStringAtom localName) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-setattributenode
-    dom::ExceptionOr<RefPtr<Attr>> SetAttributeNode(Attr &attr) noexcept;
+    ExceptionOr<RefPtr<Attr>> SetAttributeNode(Attr &attr) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-setattributenodens
-    dom::ExceptionOr<RefPtr<Attr>> SetAttributeNodeNS(Attr &attr) noexcept;
+    ExceptionOr<RefPtr<Attr>> SetAttributeNodeNS(Attr &attr) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-removeattributenode
-    dom::ExceptionOr<Ref<Attr>> RemoveAttributeNode(Attr &attr) noexcept;
+    ExceptionOr<Ref<Attr>> RemoveAttributeNode(Attr &attr) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-attachshadow
-    dom::ExceptionOr<Ref<ShadowRoot>> AttachShadow(const dom::ShadowRootInit &init) noexcept;
+    ExceptionOr<Ref<ShadowRoot>> AttachShadow(const dom::ShadowRootInit &init) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-shadowroot
     KRYS_NODISCARD RefPtr<ShadowRoot> ShadowRoot() const noexcept;
@@ -394,13 +394,13 @@ namespace krys::boo
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-closest
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<Element>> Closest(DOMStringView selectors) noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<Element>> Closest(DOMStringView selectors) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-matches
-    KRYS_NODISCARD dom::ExceptionOr<bool> Matches(DOMStringView selectors) const noexcept;
+    KRYS_NODISCARD ExceptionOr<bool> Matches(DOMStringView selectors) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-webkitmatchesselector
-    KRYS_NODISCARD dom::ExceptionOr<bool> WebkitMatchesSelector(DOMStringView selectors) const noexcept
+    KRYS_NODISCARD ExceptionOr<bool> WebkitMatchesSelector(DOMStringView selectors) const noexcept
     {
       return Matches(selectors);
     }
@@ -416,11 +416,10 @@ namespace krys::boo
     KRYS_NODISCARD Ref<dom::HTMLCollection> GetElementsByClassName(DOMStringAtom classNames) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-insertadjacentelement
-    dom::ExceptionOr<Element *> InsertAdjacentElement(dom::InsertAdjacentWhere where,
-                                                      Element &element) noexcept;
+    ExceptionOr<Element *> InsertAdjacentElement(dom::InsertAdjacentWhere where, Element &element) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-insertadjacenttext
-    dom::ExceptionOr<void> InsertAdjacentText(dom::InsertAdjacentWhere where, DOMString data) noexcept;
+    ExceptionOr<void> InsertAdjacentText(dom::InsertAdjacentWhere where, DOMString data) noexcept;
 
 #pragma endregion
 
@@ -430,69 +429,68 @@ namespace krys::boo
     /// context, sanitized by @p options (the default configuration if it gives none) with unsafe content
     /// removed.
     /// @see https://html.spec.whatwg.org/#dom-element-sethtml
-    dom::ExceptionOr<void> SetHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> SetHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Appends @p html, parsed as HTML in the element's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-element-appendhtml
-    dom::ExceptionOr<void> AppendHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> AppendHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Prepends @p html, parsed as HTML in the element's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-element-prependhtml
-    dom::ExceptionOr<void> PrependHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> PrependHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Replaces the element's children (a template's contents) with @p html, parsed as HTML in its
     /// context; sanitized only if @p options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-element-sethtmlunsafe
-    dom::ExceptionOr<void> SetHTMLUnsafe(DOMStringView html,
-                                         const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    ExceptionOr<void> SetHTMLUnsafe(DOMStringView html,
+                                    const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Appends @p html, parsed as HTML in the element's context; sanitized only if @p options gives a
     /// sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-element-appendhtmlunsafe
-    dom::ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html,
-                                            const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html,
+                                       const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Prepends @p html, parsed as HTML in the element's context; sanitized only if @p options gives a
     /// sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-element-prependhtmlunsafe
-    dom::ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html,
-                                             const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html,
+                                        const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Inserts before the element @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtml
-    dom::ExceptionOr<void> BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Inserts after the element @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtml
-    dom::ExceptionOr<void> AfterHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> AfterHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Replaces the element with @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtml
-    dom::ExceptionOr<void> ReplaceWithHTML(DOMStringView html,
-                                           const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> ReplaceWithHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Inserts before the element @p html, parsed as HTML in its parent's context; sanitized only if
     /// @p options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtmlunsafe
-    dom::ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html,
-                                            const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html,
+                                       const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Inserts after the element @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtmlunsafe
-    dom::ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html,
-                                           const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html,
+                                      const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Replaces the element with @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtmlunsafe
-    dom::ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html,
-                                                 const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html,
+                                            const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief The element's children serialised as HTML, with the shadow roots @p options asks for.
     /// @see https://html.spec.whatwg.org/#dom-element-gethtml
@@ -501,31 +499,31 @@ namespace krys::boo
     /// @brief The children serialized; in an XML document, an `InvalidStateError` if they can't be serialized
     /// as well-formed XML.
     /// @see https://html.spec.whatwg.org/#dom-element-innerhtml
-    KRYS_NODISCARD dom::ExceptionOr<DOMString> InnerHTML() const noexcept;
+    KRYS_NODISCARD ExceptionOr<DOMString> InnerHTML() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-element-innerhtml
-    dom::ExceptionOr<void> InnerHTML(DOMStringView markup) noexcept;
+    ExceptionOr<void> InnerHTML(DOMStringView markup) noexcept;
 
     /// @brief The element serialized; in an XML document, an `InvalidStateError` if it can't be serialized as
     /// well-formed XML.
     /// @see https://html.spec.whatwg.org/#dom-element-outerhtml
-    KRYS_NODISCARD dom::ExceptionOr<DOMString> OuterHTML() const noexcept;
+    KRYS_NODISCARD ExceptionOr<DOMString> OuterHTML() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-element-outerhtml
-    dom::ExceptionOr<void> OuterHTML(DOMStringView markup) noexcept;
+    ExceptionOr<void> OuterHTML(DOMStringView markup) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-element-insertadjacenthtml
-    dom::ExceptionOr<void> InsertAdjacentHTML(dom::InsertAdjacentWhere where, DOMStringView markup) noexcept;
+    ExceptionOr<void> InsertAdjacentHTML(dom::InsertAdjacentWhere where, DOMStringView markup) noexcept;
 
 #pragma endregion
 
 #pragma region Element (Pointer Events) - https://w3c.github.io/pointerevents/#extensions-to-the-element-interface
 
     /// @see https://w3c.github.io/pointerevents/#dom-element-setpointercapture
-    dom::ExceptionOr<void> SetPointerCapture(int32 pointerId) noexcept;
+    ExceptionOr<void> SetPointerCapture(int32 pointerId) noexcept;
 
     /// @see https://w3c.github.io/pointerevents/#dom-element-releasepointercapture
-    dom::ExceptionOr<void> ReleasePointerCapture(int32 pointerId) noexcept;
+    ExceptionOr<void> ReleasePointerCapture(int32 pointerId) noexcept;
 
     /// @see https://w3c.github.io/pointerevents/#dom-element-haspointercapture
     KRYS_NODISCARD bool HasPointerCapture(int32 pointerId) noexcept;
@@ -540,7 +538,7 @@ namespace krys::boo
     /// @param promise Called once, as a microtask, when the lock is applied or the request fails.
     /// @see https://w3c.github.io/pointerlock/#dom-element-requestpointerlock
     void RequestPointerLock(dom::PointerLockOptions options = {},
-                            Func<void(dom::ExceptionOr<void> &&)> &&promise = {}) noexcept;
+                            Func<void(ExceptionOr<void> &&)> &&promise = {}) noexcept;
 
 #pragma endregion
 
@@ -631,7 +629,7 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<DOMString> TextContent() const noexcept final;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
-    dom::ExceptionOr<void> TextContent(DOMString value) noexcept final;
+    ExceptionOr<void> TextContent(DOMString value) noexcept final;
 
 #pragma endregion
 
@@ -665,34 +663,34 @@ namespace krys::boo
     /// equivalent Text nodes.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-prepend
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
-    dom::ExceptionOr<void> Prepend(const List<dom::NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> Prepend(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Inserts `nodes` after the last child of `this`, while replacing strings in `nodes` with
     /// equivalent Text nodes.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-append
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
-    dom::ExceptionOr<void> Append(const List<dom::NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> Append(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Replace all children of `this` with `nodes`, while replacing strings in `nodes` with equivalent
     /// Text nodes.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-replacechildren
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
-    dom::ExceptionOr<void> ReplaceChildren(const List<dom::NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> ReplaceChildren(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Moves, without first removing, `movedNode` into `this` after `child` if `child` is non-null;
     /// otherwise after the last child of node. This method preserves state associated with `movedNode`.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-movebefore
     /// @throws HierarchyRequestError if the constraints of the node tree are violated, or the state
     /// associated with the moved node cannot be preserved.
-    dom::ExceptionOr<void> MoveBefore(Node &node, Node *child) noexcept;
+    ExceptionOr<void> MoveBefore(Node &node, Node *child) noexcept;
 
     /// @brief Returns the first element that is a descendant of `this` that matches `selectors`.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-queryselector
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<Element>> QuerySelector(DOMStringView selectors) noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<Element>> QuerySelector(DOMStringView selectors) noexcept;
 
     /// @brief Returns all element descendants of `this` that match `selectors`.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-queryselectorall
-    KRYS_NODISCARD dom::ExceptionOr<Ref<dom::NodeList>> QuerySelectorAll(DOMStringView selectors) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<dom::NodeList>> QuerySelectorAll(DOMStringView selectors) noexcept;
 
 #pragma endregion
 
@@ -722,22 +720,22 @@ namespace krys::boo
     /// nodes.
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-before
-    dom::ExceptionOr<void> Before(const List<dom::NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> Before(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Inserts `nodes` just after `this`, while replacing strings in `nodes` with equivalent Text
     /// nodes.
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-after
-    dom::ExceptionOr<void> After(const List<dom::NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> After(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Replaces `this` with `nodes`, while replacing strings in `nodes` with equivalent Text nodes.
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-replacewith
-    dom::ExceptionOr<void> ReplaceWith(const List<dom::NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> ReplaceWith(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Removes `this`.
     /// @see https://dom.spec.whatwg.org/#dom-childnode-remove
-    dom::ExceptionOr<void> Remove() noexcept;
+    ExceptionOr<void> Remove() noexcept;
 
 #pragma endregion
 
@@ -1137,12 +1135,11 @@ namespace krys::boo
 
     /// @brief Fires `focus` (then `focusin`) at the element as the focus update steps focus it; text controls
     /// update their placeholder and begin editing first.
-    virtual void DispatchFocusEvent(dom::EventTarget *relatedTarget,
-                                    const dom::FocusOptions &options) noexcept;
+    virtual void DispatchFocusEvent(EventTarget *relatedTarget, const dom::FocusOptions &options) noexcept;
 
     /// @brief Fires `blur` (then `focusout`) at the element as the focus update steps unfocus it; text
     /// controls update their placeholder and end editing first.
-    virtual void DispatchBlurEvent(dom::EventTarget *relatedTarget) noexcept;
+    virtual void DispatchBlurEvent(EventTarget *relatedTarget) noexcept;
 
     /// @brief Called after the element lost the focus and `blur` was fired at it.
     virtual void DidBlur() noexcept
@@ -1359,7 +1356,7 @@ namespace krys::boo
     /// @return A `TypeError` if the keyframes or the timing are invalid, or a `SyntaxError` if the
     /// pseudo-element selector is.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-animatable-animate
-    KRYS_NODISCARD dom::ExceptionOr<Ref<WebAnimation>>
+    KRYS_NODISCARD ExceptionOr<Ref<WebAnimation>>
       Animate(boo::KeyframesInput &&keyframes,
               Maybe<Variant<double, KeyframeAnimationOptions>> options = null) noexcept;
 
@@ -1509,7 +1506,7 @@ namespace krys::boo
     /// @brief Dispatches a click at the element from the user agent, standing in for @p underlyingEvent.
     /// @return False if the element is a disabled form control, or is already being clicked.
     bool DispatchSimulatedClick(
-      dom::Event *underlyingEvent,
+      Event *underlyingEvent,
       dom::SimulatedClickMouseEventOptions eventOptions = dom::SimulatedClickMouseEventOptions::SendNoEvents,
       dom::SimulatedClickVisualOptions visualOptions =
         dom::SimulatedClickVisualOptions::ShowPressedLook) noexcept;
@@ -1839,7 +1836,7 @@ namespace krys::boo
     void SynchronizeAnimatedSVGAttributes() const noexcept;
 
     /// @brief Replaces the element's children (a template's content's) with @p markup parsed in its context.
-    dom::ExceptionOr<void>
+    ExceptionOr<void>
       ReplaceChildrenWithMarkup(DOMStringView markup,
                                 EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept;
   };

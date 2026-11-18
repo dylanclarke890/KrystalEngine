@@ -46,33 +46,33 @@ namespace krys::boo
   public:
     /// @return A `SyntaxError` if a component isn't of its type or `none`.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssrgb-cssrgb
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSRGB>> Create(CSSColorRGBComp red, CSSColorRGBComp green,
-                                                               CSSColorRGBComp blue,
-                                                               CSSColorPercent alpha = 1.0) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSRGB>> Create(CSSColorRGBComp red, CSSColorRGBComp green,
+                                                          CSSColorRGBComp blue,
+                                                          CSSColorPercent alpha = 1.0) noexcept;
 
     KRYS_NODISCARD CSSColorRGBComp R() const noexcept;
 
     /// @return A `SyntaxError` if @p red isn't a number or percentage or `none`.
-    dom::ExceptionOr<void> SetR(CSSColorRGBComp red) noexcept;
+    ExceptionOr<void> SetR(CSSColorRGBComp red) noexcept;
 
     KRYS_NODISCARD CSSColorRGBComp G() const noexcept;
 
     /// @return A `SyntaxError` if @p green isn't a number or percentage or `none`.
-    dom::ExceptionOr<void> SetG(CSSColorRGBComp green) noexcept;
+    ExceptionOr<void> SetG(CSSColorRGBComp green) noexcept;
 
     KRYS_NODISCARD CSSColorRGBComp B() const noexcept;
 
     /// @return A `SyntaxError` if @p blue isn't a number or percentage or `none`.
-    dom::ExceptionOr<void> SetB(CSSColorRGBComp blue) noexcept;
+    ExceptionOr<void> SetB(CSSColorRGBComp blue) noexcept;
 
     KRYS_NODISCARD CSSColorPercent Alpha() const noexcept;
 
     /// @return A `SyntaxError` if @p alpha isn't a percentage or `none`.
-    dom::ExceptionOr<void> SetAlpha(CSSColorPercent alpha) noexcept;
+    ExceptionOr<void> SetAlpha(CSSColorPercent alpha) noexcept;
 
     /// @return A `SyntaxError` if @p component is neither a number, a percentage nor `none`.
     /// @see https://drafts.css-houdini.org/css-typed-om/#rectify-a-csscolorrgbcomp
-    KRYS_NODISCARD static dom::ExceptionOr<RectifiedCSSColorComponent>
+    KRYS_NODISCARD static ExceptionOr<RectifiedCSSColorComponent>
       RectifyCSSColorRGBComp(CSSColorRGBComp component) noexcept;
 
     KRYS_NODISCARD CSSOMString ColorFunctionText() const noexcept final;

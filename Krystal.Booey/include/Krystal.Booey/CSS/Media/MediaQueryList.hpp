@@ -41,7 +41,7 @@ namespace krys::boo
   /// @brief The object `matchMedia()` returns: the current result of a media query list, and `change` events
   /// whenever it changes.
   /// @see https://drafts.csswg.org/cssom-view/#the-mediaquerylist-interface
-  class MediaQueryList final : public dom::EventTarget
+  class MediaQueryList final : public EventTarget
   {
   private:
     RefPtr<css::MediaQueryMatcher> _matcher;
@@ -70,11 +70,11 @@ namespace krys::boo
 
     /// @note Legacy.
     /// @see https://drafts.csswg.org/cssom-view/#dom-mediaquerylist-addlistener
-    void AddListener(RefPtr<dom::EventListenerCallback> &&listener) noexcept;
+    void AddListener(RefPtr<EventListenerCallback> &&listener) noexcept;
 
     /// @note Legacy.
     /// @see https://drafts.csswg.org/cssom-view/#dom-mediaquerylist-removelistener
-    void RemoveListener(RefPtr<dom::EventListenerCallback> &&listener) noexcept;
+    void RemoveListener(RefPtr<EventListenerCallback> &&listener) noexcept;
 
     void Evaluate(css::mq::MediaQueryEvaluator &evaluator,
                   css::MediaQueryMatcher::EventMode eventMode) noexcept;

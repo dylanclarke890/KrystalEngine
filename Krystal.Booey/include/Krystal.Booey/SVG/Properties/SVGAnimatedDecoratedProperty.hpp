@@ -64,11 +64,11 @@ namespace krys::boo
     }
 
     // Used by the DOM.
-    dom::ExceptionOr<void> SetBaseVal(const TDecoration &baseVal) noexcept
+    ExceptionOr<void> SetBaseVal(const TDecoration &baseVal) noexcept
     {
       if (!_baseVal->SetValue(baseVal))
       {
-        return dom::Exception {dom::ExceptionCode::TypeError};
+        return Exception {ExceptionCode::TypeError};
       }
       CommitPropertyChange(nullptr);
       return {};

@@ -132,7 +132,7 @@ namespace krys::boo::html
     (void)SetAttribute(u8"contenteditable", DOMString(isEditable ? u8"plaintext-only" : u8"false"));
   }
 
-  void TextControlInnerTextElement::DefaultEventHandler(dom::Event &event) noexcept
+  void TextControlInnerTextElement::DefaultEventHandler(Event &event) noexcept
   {
     // FIXME: In the future, we should add a way to have default event listeners.
     // Then we would add one to the text field's inner div, and we wouldn't need this subclass.
@@ -275,13 +275,13 @@ namespace krys::boo::html
     return null;
   }
 
-  void SearchFieldResultsButtonElement::DefaultEventHandler(dom::Event &event) noexcept
+  void SearchFieldResultsButtonElement::DefaultEventHandler(Event &event) noexcept
   {
     // A press focuses the field and selects its text.
     if (RefPtr<HTMLInputElement> input =
           ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this))))
     {
-      auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
+      auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
       if (event.Type() == event_names::MouseDown && mouseEvent && mouseEvent->Button() == 0)
       {
         input->Focus();
@@ -333,7 +333,7 @@ namespace krys::boo::html
     return elementStyle;
   }
 
-  void SearchFieldCancelButtonElement::DefaultEventHandler(dom::Event &event) noexcept
+  void SearchFieldCancelButtonElement::DefaultEventHandler(Event &event) noexcept
   {
     RefPtr<HTMLInputElement> input =
       ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this)));
@@ -346,7 +346,7 @@ namespace krys::boo::html
       return;
     }
 
-    if (auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
+    if (auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
         event.Type() == event_names::MouseDown && mouseEvent && mouseEvent->Button() == 0)
     {
       input->Focus();

@@ -63,10 +63,10 @@ namespace krys
     UniquePtr<ui::FileLoaderStrategy> _fileLoader;
     UniquePtr<ui::View> _pageView;
     /// @brief The page's listeners, which go when the page is loaded again.
-    boo::dom::EventListenerHandle _cardPicker;
-    boo::dom::EventListenerHandle _keyLogger;
-    boo::dom::EventListenerHandle _commandHandler;
-    boo::dom::EventListenerHandle _dialogLogger;
+    boo::EventListenerHandle _cardPicker;
+    boo::EventListenerHandle _keyLogger;
+    boo::EventListenerHandle _commandHandler;
+    boo::EventListenerHandle _dialogLogger;
     /// @brief The page's observers, made once it has loaded: the header shows the chapter most in view.
     UniquePtr<editor::PageObservers> _observers;
     /// @brief The page's animation from C++, made once it has loaded.
@@ -605,7 +605,7 @@ namespace krys
       // Toggles `picked` on the card a click lands in.
       _cardPicker =
         document.AddEventListener(u8"click",
-                                  [](boo::dom::Event &event)
+                                  [](boo::Event &event)
                                   {
                                     auto *node = DynamicDowncast<boo::Node>(event.Target().get());
                                     auto *target = node ? DynamicDowncast<boo::Element>(*node) : nullptr;
@@ -620,9 +620,9 @@ namespace krys
                                     }
                                   });
       // Shows the `key` of each key pressed on the page in its `#last-key` element.
-      _keyLogger = document.AddEventListener<boo::dom::KeyboardEvent>(
+      _keyLogger = document.AddEventListener<boo::KeyboardEvent>(
         u8"keydown",
-        [this](boo::dom::KeyboardEvent &event)
+        [this](boo::KeyboardEvent &event)
         {
           if (auto label = _pageView->Document().GetElementById(u8"last-key"))
           {
@@ -632,9 +632,9 @@ namespace krys
         });
       // Carries out the page's custom `--show` command, which shows a dialog without making it modal (there's
       // no built-in command for that). `command` doesn't bubble, so this listens as it's captured.
-      _commandHandler = document.AddEventListener<boo::dom::CommandEvent>(
+      _commandHandler = document.AddEventListener<boo::CommandEvent>(
         u8"command",
-        [](boo::dom::CommandEvent &event)
+        [](boo::CommandEvent &event)
         {
           auto *node = DynamicDowncast<boo::Node>(event.Target().get());
           auto *dialog = node ? DynamicDowncast<boo::HTMLDialogElement>(*node) : nullptr;
@@ -649,7 +649,7 @@ namespace krys
       // listens as it's captured).
       _dialogLogger = document.AddEventListener(
         u8"close",
-        [this](boo::dom::Event &event)
+        [this](boo::Event &event)
         {
           auto *node = DynamicDowncast<boo::Node>(event.Target().get());
           auto *dialog = node ? DynamicDowncast<boo::HTMLDialogElement>(*node) : nullptr;

@@ -57,16 +57,16 @@ namespace krys::boo::html
     }
 
     /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-length
-    dom::ExceptionOr<void> Length(uint32 length) noexcept;
+    ExceptionOr<void> Length(uint32 length) noexcept;
 
     using LiveHTMLCollection::Length;
 
     /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-setter
-    dom::ExceptionOr<void> SetItem(uint32 index, HTMLOptionElement *option) noexcept;
+    ExceptionOr<void> SetItem(uint32 index, HTMLOptionElement *option) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-add
-    dom::ExceptionOr<void> Add(const OptionOrOptGroupElement &element,
-                               const Maybe<HTMLElementOrInt> &before = {}) noexcept;
+    ExceptionOr<void> Add(const OptionOrOptGroupElement &element,
+                          const Maybe<HTMLElementOrInt> &before = {}) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-remove
     void Remove(int32 index) noexcept;

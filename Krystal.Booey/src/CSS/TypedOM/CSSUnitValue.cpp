@@ -82,17 +82,17 @@ namespace krys::boo
     builder.Append(UnitSerialisation());
   }
 
-  dom::ExceptionOr<Ref<CSSUnitValue>> CSSUnitValue::Create(double value, const CSSOMString &unit) noexcept
+  ExceptionOr<Ref<CSSUnitValue>> CSSUnitValue::Create(double value, const CSSOMString &unit) noexcept
   {
     auto parsedUnit = ParseUnit(unit);
     if (parsedUnit == css::UnitType::Unknown)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     auto type = CSSNumericType::Create(parsedUnit);
     if (!type)
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
     auto unitValue = AdoptRef(*new CSSUnitValue(value, parsedUnit));
     unitValue->_type = krys::move(*type);

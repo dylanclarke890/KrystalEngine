@@ -63,7 +63,7 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<DOMString> TextContent() const noexcept final;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
-    dom::ExceptionOr<void> TextContent(DOMString value) noexcept final;
+    ExceptionOr<void> TextContent(DOMString value) noexcept final;
 
 #pragma endregion
 
@@ -97,34 +97,34 @@ namespace krys::boo
     /// equivalent Text nodes.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-prepend
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
-    dom::ExceptionOr<void> Prepend(const List<dom::NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> Prepend(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Inserts `nodes` after the last child of `this`, while replacing strings in `nodes` with
     /// equivalent Text nodes.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-append
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
-    dom::ExceptionOr<void> Append(const List<dom::NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> Append(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Replace all children of `this` with `nodes`, while replacing strings in `nodes` with equivalent
     /// Text nodes.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-replacechildren
     /// @throws HierarchyRequestError if the constraints of the node tree are violated.
-    dom::ExceptionOr<void> ReplaceChildren(const List<dom::NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> ReplaceChildren(const List<dom::NodeOrString> &nodes) noexcept;
 
     /// @brief Moves, without first removing, `movedNode` into `this` after `child` if `child` is non-null;
     /// otherwise after the last child of node. This method preserves state associated with `movedNode`.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-movebefore
     /// @throws HierarchyRequestError if the constraints of the node tree are violated, or the state
     /// associated with the moved node cannot be preserved.
-    dom::ExceptionOr<void> MoveBefore(Node &node, Node *child) noexcept;
+    ExceptionOr<void> MoveBefore(Node &node, Node *child) noexcept;
 
     /// @brief Returns the first element that is a descendant of `this` that matches `selectors`.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-queryselector
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<Element>> QuerySelector(DOMStringView selectors) noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<Element>> QuerySelector(DOMStringView selectors) noexcept;
 
     /// @brief Returns all element descendants of `this` that match `selectors`.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-queryselectorall
-    KRYS_NODISCARD dom::ExceptionOr<Ref<dom::NodeList>> QuerySelectorAll(DOMStringView selectors) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<dom::NodeList>> QuerySelectorAll(DOMStringView selectors) noexcept;
 
 #pragma endregion
 

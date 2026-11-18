@@ -47,14 +47,14 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD bool IsShiftKeyDown(const dom::Event &event) noexcept
+    KRYS_NODISCARD bool IsShiftKeyDown(const Event &event) noexcept
     {
-      const auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
+      const auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
       return mouseEvent && mouseEvent->ShiftKey();
     }
   }
 
-  void HTMLAnchorElement::ActivationBehavior(dom::Event &event) noexcept
+  void HTMLAnchorElement::ActivationBehavior(Event &event) noexcept
   {
     if (!TreatLinkAsLive(IsShiftKeyDown(event)))
     {
@@ -74,7 +74,7 @@ namespace krys::boo
     return css::IsLink(*this) && TreatLinkAsLive(_wasShiftKeyDownOnMouseDown);
   }
 
-  void HTMLAnchorElement::DefaultEventHandler(dom::Event &event) noexcept
+  void HTMLAnchorElement::DefaultEventHandler(Event &event) noexcept
   {
     if (css::IsLink(*this))
     {
@@ -98,7 +98,7 @@ namespace krys::boo
 
       // A click is followed as the activation behaviour; other buttons' clicks (the middle button opening the
       // link elsewhere) are followed here, and the host decides from the button.
-      if (event.Type() == event_names::AuxClick && dom::MouseEvent::CanTriggerActivationBehavior(event)
+      if (event.Type() == event_names::AuxClick && MouseEvent::CanTriggerActivationBehavior(event)
           && TreatLinkAsLive(IsShiftKeyDown(event)))
       {
         html::HyperlinkAlgorithms::FollowTheHyperlink(*this, event);
@@ -218,7 +218,7 @@ namespace krys::boo
     return dom::TextAlgorithms::DescendantTextContent(*this);
   }
 
-  dom::ExceptionOr<void> HTMLAnchorElement::Text(DOMString value) noexcept
+  ExceptionOr<void> HTMLAnchorElement::Text(DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *this);

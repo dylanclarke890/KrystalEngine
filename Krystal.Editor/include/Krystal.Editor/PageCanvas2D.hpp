@@ -47,7 +47,7 @@ namespace krys::editor
 
   private:
     WeakPtr<boo::Document> _document;
-    List<boo::dom::EventListenerHandle> _listeners;
+    List<boo::EventListenerHandle> _listeners;
     RefPtr<boo::html::CanvasRenderingContext2D> _chart;
     RefPtr<boo::html::CanvasRenderingContext2D> _pad;
     RefPtr<boo::html::CanvasRenderingContext2D> _palette;
@@ -307,16 +307,16 @@ namespace krys::editor
     {
       auto pad = ById(u8"pad");
       auto listen =
-        [&](boo::Element &element, utf8_stringview type, Func<void(boo::dom::PointerEvent &)> &&callback)
+        [&](boo::Element &element, utf8_stringview type, Func<void(boo::PointerEvent &)> &&callback)
       {
         _listeners.push_back(element.AddEventListener(
-          boo::DOMStringAtom(type), [callback = krys::move(callback)](boo::dom::Event &event)
-          { callback(static_cast<boo::dom::PointerEvent &>(event)); }));
+          boo::DOMStringAtom(type), [callback = krys::move(callback)](boo::Event &event)
+          { callback(static_cast<boo::PointerEvent &>(event)); }));
       };
 
       // The pointer that presses the pad captures itself to it, and draws until it lets go.
       listen(*pad, u8"pointerdown",
-             [this](boo::dom::PointerEvent &pointer)
+             [this](boo::PointerEvent &pointer)
              {
                if (auto element = ById(u8"pad"))
                {
@@ -328,11 +328,11 @@ namespace krys::editor
                  (void)element->SetPointerCapture(static_cast<int32>(pointer.PointerId()));
                }
              });
-      listen(*pad, u8"gotpointercapture", [this](boo::dom::PointerEvent &pointer)
-             { _drawPointer = static_cast<int32>(pointer.PointerId()); });
-      listen(*pad, u8"lostpointercapture", [this](boo::dom::PointerEvent &) { _drawPointer = -1; });
+      listen(*pad, u8"gotpointercapture",
+             [this](boo::PointerEvent &pointer) { _drawPointer = static_cast<int32>(pointer.PointerId()); });
+      listen(*pad, u8"lostpointercapture", [this](boo::PointerEvent &) { _drawPointer = -1; });
       listen(*pad, u8"pointermove",
-             [this](boo::dom::PointerEvent &pointer)
+             [this](boo::PointerEvent &pointer)
              {
                auto element = ById(u8"pad");
                if (!element || static_cast<int32>(pointer.PointerId()) != _drawPointer)
@@ -348,7 +348,7 @@ namespace krys::editor
       if (auto palette = ById(u8"pad-palette"))
       {
         listen(*palette, u8"pointerdown",
-               [this](boo::dom::PointerEvent &pointer)
+               [this](boo::PointerEvent &pointer)
                {
                  if (auto element = ById(u8"pad-palette"))
                  {
@@ -362,7 +362,7 @@ namespace krys::editor
       {
         _listeners.push_back(
           clear->AddEventListener(u8"click",
-                                  [this](boo::dom::Event &)
+                                  [this](boo::Event &)
                                   {
                                     if (_pad && _document)
                                     {
@@ -375,7 +375,7 @@ namespace krys::editor
 
     /// @brief Where @p pointer is in @p element's canvas's pixels.
     KRYS_NODISCARD static std::pair<double, double> PadPoint(boo::Element &element,
-                                                             const boo::dom::PointerEvent &pointer) noexcept
+                                                             const boo::PointerEvent &pointer) noexcept
     {
       auto rect = element.GetBoundingClientRect();
       auto &canvas = Downcast<boo::HTMLCanvasElement>(element);

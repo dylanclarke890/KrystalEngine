@@ -31,7 +31,7 @@
 #include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   Event::Event(DOMStringAtom type, const EventInit &eventInitDict) noexcept
       : _type(krys::move(type)), _createTime(html::EventLoop::Current().Now()),
@@ -56,7 +56,7 @@ namespace krys::boo::dom
     // 3. Return event.
   }
 
-  DOMHighResTimeStamp Event::TimeStampForBindings(const Document &document) const noexcept
+  dom::DOMHighResTimeStamp Event::TimeStampForBindings(const Document &document) const noexcept
   {
     auto *window = document.Window();
     if (!window)

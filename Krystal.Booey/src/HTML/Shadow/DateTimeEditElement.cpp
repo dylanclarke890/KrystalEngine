@@ -225,9 +225,9 @@ namespace krys::boo::html
     return it == _fields.end() ? NotFound : static_cast<size_t>(it - _fields.begin());
   }
 
-  void DateTimeEditElement::DefaultEventHandler(dom::Event &event) noexcept
+  void DateTimeEditElement::DefaultEventHandler(Event &event) noexcept
   {
-    if (auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event))
+    if (auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event))
     {
       if (keyboardEvent->KeyIdentifier() == u8"U+0020" && _editControlOwner)
       {
@@ -303,19 +303,19 @@ namespace krys::boo::html
     }
   }
 
-  void DateTimeEditElement::DidBlurFromField(dom::Event &event) noexcept
+  void DateTimeEditElement::DidBlurFromField(Event &event) noexcept
   {
     if (!_editControlOwner)
     {
       return;
     }
 
-    auto *focusEvent = DynamicDowncast<dom::FocusEvent>(event);
+    auto *focusEvent = DynamicDowncast<FocusEvent>(event);
     if (auto newFocusedElement = focusEvent ? focusEvent->RelatedTarget() : nullptr)
     {
-      bool didFocusSiblingField = std::ranges::any_of(
-        _fields,
-        [&](auto &field) { return static_cast<dom::EventTarget *>(field.get()) == newFocusedElement.get(); });
+      bool didFocusSiblingField =
+        std::ranges::any_of(_fields, [&](auto &field)
+                            { return static_cast<EventTarget *>(field.get()) == newFocusedElement.get(); });
 
       if (didFocusSiblingField)
       {

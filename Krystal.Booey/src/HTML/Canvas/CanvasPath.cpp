@@ -180,7 +180,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-arcto
-  dom::ExceptionOr<void> CanvasPath::ArcTo(float x1, float y1, float x2, float y2, float r) noexcept
+  ExceptionOr<void> CanvasPath::ArcTo(float x1, float y1, float x2, float y2, float r) noexcept
   {
     // 1. If any of the arguments are infinite or NaN, then return.
     if (!std::isfinite(x1) || !std::isfinite(y1) || !std::isfinite(x2) || !std::isfinite(y2)
@@ -193,7 +193,7 @@ namespace krys::boo::html
     // (Before step 2, so a negative radius leaves the path as it was.)
     if (r < 0)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     if (!HasInvertibleTransform()) KRYS_UNLIKELY
@@ -261,8 +261,8 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#dom-context-2d-arc
   // (The ellipse method steps with radius as both radii and no rotation.)
-  dom::ExceptionOr<void> CanvasPath::Arc(float x, float y, float radius, float startAngle, float endAngle,
-                                         bool anticlockwise) noexcept
+  ExceptionOr<void> CanvasPath::Arc(float x, float y, float radius, float startAngle, float endAngle,
+                                    bool anticlockwise) noexcept
   {
     if (!std::isfinite(x) || !std::isfinite(y) || !std::isfinite(radius) || !std::isfinite(startAngle)
         || !std::isfinite(endAngle))
@@ -272,7 +272,7 @@ namespace krys::boo::html
 
     if (radius < 0)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     if (!HasInvertibleTransform()) KRYS_UNLIKELY
@@ -295,8 +295,8 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#ellipse-method-steps
-  dom::ExceptionOr<void> CanvasPath::Ellipse(float x, float y, float radiusX, float radiusY, float rotation,
-                                             float startAngle, float endAngle, bool anticlockwise) noexcept
+  ExceptionOr<void> CanvasPath::Ellipse(float x, float y, float radiusX, float radiusY, float rotation,
+                                        float startAngle, float endAngle, bool anticlockwise) noexcept
   {
     if (!std::isfinite(x) || !std::isfinite(y) || !std::isfinite(radiusX) || !std::isfinite(radiusY)
         || !std::isfinite(rotation) || !std::isfinite(startAngle) || !std::isfinite(endAngle))
@@ -306,7 +306,7 @@ namespace krys::boo::html
 
     if (radiusX < 0 || radiusY < 0)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     if (!HasInvertibleTransform()) KRYS_UNLIKELY
@@ -386,14 +386,14 @@ namespace krys::boo::html
     _path.AddRect(FloatRect(x, y, width, height));
   }
 
-  dom::ExceptionOr<void> CanvasPath::RoundRect(float x, float y, float width, float height,
-                                               const RadiusVariant &radii) noexcept
+  ExceptionOr<void> CanvasPath::RoundRect(float x, float y, float width, float height,
+                                          const RadiusVariant &radii) noexcept
   {
     return RoundRect(x, y, width, height, Span<const RadiusVariant>(&radii, 1));
   }
 
-  dom::ExceptionOr<void> CanvasPath::RoundRect(float x, float y, float width, float height,
-                                               Span<const RadiusVariant> radii) noexcept
+  ExceptionOr<void> CanvasPath::RoundRect(float x, float y, float width, float height,
+                                          Span<const RadiusVariant> radii) noexcept
   {
     // https://html.spec.whatwg.org/#dom-context-2d-roundrect
     // 1. If any of x, y, w, or h are infinite or NaN, then return.
@@ -411,7 +411,7 @@ namespace krys::boo::html
       StringBuilder message;
       message.Append(u8"radii must contain at least 1 element, up to 4. It contained ", radii.size(),
                      u8" elements.");
-      return dom::Exception {dom::ExceptionCode::RangeError, krys::move(message).ToString()};
+      return Exception {ExceptionCode::RangeError, krys::move(message).ToString()};
     }
 
     // 4. Let normalizedRadii be an empty list.
@@ -424,7 +424,7 @@ namespace krys::boo::html
       auto exception = SwitchOn(
         radius,
         // 5a. If radius is a DOMPointInit:
-        [&normalizedRadii, &shouldReturnSilently](const dom::DOMPointInit &point) -> dom::ExceptionOr<void>
+        [&normalizedRadii, &shouldReturnSilently](const dom::DOMPointInit &point) -> ExceptionOr<void>
         {
           // 5a.i. If radius["x"] or radius["y"] is infinite or NaN, then return.
           if (!std::isfinite(point.X) || !std::isfinite(point.Y))
@@ -436,8 +436,7 @@ namespace krys::boo::html
           // 5a.ii. If radius["x"] or radius["y"] is negative, then throw a RangeError.
           if (point.X < 0 || point.Y < 0)
           {
-            return dom::Exception {dom::ExceptionCode::RangeError,
-                                   u8"radius point coordinates must be positive"};
+            return Exception {ExceptionCode::RangeError, u8"radius point coordinates must be positive"};
           }
 
           // 5a.iii. Otherwise, append radius to normalizedRadii.
@@ -445,7 +444,7 @@ namespace krys::boo::html
           return {};
         },
         // 5b. If radius is a unrestricted double:
-        [&normalizedRadii, &shouldReturnSilently](double radiusValue) -> dom::ExceptionOr<void>
+        [&normalizedRadii, &shouldReturnSilently](double radiusValue) -> ExceptionOr<void>
         {
           // 5b.i. If radius is infinite or NaN, then return.
           if (!std::isfinite(radiusValue))
@@ -457,7 +456,7 @@ namespace krys::boo::html
           // 5b.ii. If radius is negative, then throw a RangeError.
           if (radiusValue < 0)
           {
-            return dom::Exception {dom::ExceptionCode::RangeError, u8"radius value must be positive"};
+            return Exception {ExceptionCode::RangeError, u8"radius value must be positive"};
           }
 
           // 5b.iii. Otherwise, append «[ "x" → radius, "y" → radius ]» to normalizedRadii.

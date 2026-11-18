@@ -138,15 +138,15 @@ namespace krys::boo
 
     void SetBindingsRangeEnd(TimelineRangeValue &&range) noexcept final;
 
-    dom::ExceptionOr<void> BindingsPlay() noexcept final;
+    ExceptionOr<void> BindingsPlay() noexcept final;
 
-    dom::ExceptionOr<void> BindingsPause() noexcept final;
+    ExceptionOr<void> BindingsPause() noexcept final;
 
     void SetBindingsEffect(RefPtr<AnimationEffect> &&newEffect) noexcept final;
 
-    dom::ExceptionOr<void> SetBindingsStartTime(const Maybe<WebAnimationTime> &startTime) noexcept final;
+    ExceptionOr<void> SetBindingsStartTime(const Maybe<WebAnimationTime> &startTime) noexcept final;
 
-    dom::ExceptionOr<void> BindingsReverse() noexcept final;
+    ExceptionOr<void> BindingsReverse() noexcept final;
   };
 }
 

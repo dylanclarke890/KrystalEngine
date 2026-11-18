@@ -30,11 +30,11 @@ namespace krys::boo::css::tests
       CSSOMString Media;
       bool Matches {false};
       bool IsTrusted {false};
-      const dom::EventTarget *Target {nullptr};
+      const EventTarget *Target {nullptr};
     };
 
     /// @brief Records the `change` events it handles, in order, across every listener sharing @p records.
-    struct ChangeRecorder : public dom::EventListenerCallback
+    struct ChangeRecorder : public EventListenerCallback
     {
       List<ChangeRecord> &Records;
 
@@ -42,7 +42,7 @@ namespace krys::boo::css::tests
       {
       }
 
-      void HandleEvent(dom::Event &event) noexcept override
+      void HandleEvent(Event &event) noexcept override
       {
         // Only `change` listeners are added, and `change` is only fired with a `MediaQueryListEvent`.
         auto &change = static_cast<MediaQueryListEvent &>(event);
@@ -150,7 +150,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(MatchMediaFixture, "MediaQueryList: change events", "[CSS][MediaQueryList]")
   {
     List<ChangeRecord> records;
-    Ref<dom::EventListenerCallback> recorder = CreateRef<ChangeRecorder>(records);
+    Ref<EventListenerCallback> recorder = CreateRef<ChangeRecorder>(records);
 
     auto wide = Document->Window()->MatchMedia(u8"(min-width: 500px)");
     auto narrow = Document->Window()->MatchMedia(u8"(max-width: 499px)");

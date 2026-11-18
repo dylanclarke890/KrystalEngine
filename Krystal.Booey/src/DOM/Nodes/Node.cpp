@@ -66,7 +66,7 @@
 namespace krys::boo
 {
   Node::Node(Document &document, dom::NodeType type, dom::NodeFlags flags) noexcept
-      : dom::EventTarget(dom::EventTargetFlags::IsNode), _nodeType(type), _nodeDocument(&document),
+      : EventTarget(dom::EventTargetFlags::IsNode), _nodeType(type), _nodeDocument(&document),
         _parentNode(nullptr), _previousSibling(nullptr), _nextSibling(nullptr)
   {
     _flags = flags;
@@ -163,9 +163,9 @@ namespace krys::boo
     }
   }
 
-  void Node::DidAddEventListener(const dom::EventListener &listener) noexcept
+  void Node::DidAddEventListener(const EventListener &listener) noexcept
   {
-    dom::EventTarget::DidAddEventListener(listener);
+    EventTarget::DidAddEventListener(listener);
     NodeDocument().AddListenerTypeIfNeeded(listener.Type());
   }
 
@@ -317,7 +317,7 @@ namespace krys::boo
     return nullptr;
   }
 
-  dom::ExceptionOr<void> Node::Normalize() noexcept
+  ExceptionOr<void> Node::Normalize() noexcept
   {
     html::CEReactionsScope ceReactions;
     // Run these steps for each descendant exclusive Text node node of this:
@@ -399,13 +399,13 @@ namespace krys::boo
     return {};
   }
 
-  dom::ExceptionOr<Ref<Node>> Node::CloneNode(bool subtree) noexcept
+  ExceptionOr<Ref<Node>> Node::CloneNode(bool subtree) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. If this is a shadow root, then throw a "NotSupportedError" DOMException.
     if (Is<ShadowRoot>(this))
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return Exception {ExceptionCode::NotSupportedError};
     }
 
     // 2. Return the result of cloning a node given this with subtree set to subtree.
@@ -628,7 +628,7 @@ namespace krys::boo
     return namespaceURI == defaultNamespace;
   }
 
-  dom::ExceptionOr<Node &> Node::InsertBefore(Node &newChild, Node *refChild) noexcept
+  ExceptionOr<Node &> Node::InsertBefore(Node &newChild, Node *refChild) noexcept
   {
     html::CEReactionsScope ceReactions;
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
@@ -636,10 +636,10 @@ namespace krys::boo
       return dom::MutationAlgorithms::PreInsert(newChild, *containerNode, refChild);
     }
 
-    return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
+    return Exception {ExceptionCode::HierarchyRequestError};
   }
 
-  dom::ExceptionOr<Node &> Node::ReplaceChild(Node &newChild, Node &oldChild) noexcept
+  ExceptionOr<Node &> Node::ReplaceChild(Node &newChild, Node &oldChild) noexcept
   {
     html::CEReactionsScope ceReactions;
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
@@ -647,10 +647,10 @@ namespace krys::boo
       return dom::MutationAlgorithms::Replace(oldChild, newChild, *containerNode);
     }
 
-    return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
+    return Exception {ExceptionCode::HierarchyRequestError};
   }
 
-  dom::ExceptionOr<Node &> Node::RemoveChild(Node &oldChild) noexcept
+  ExceptionOr<Node &> Node::RemoveChild(Node &oldChild) noexcept
   {
     html::CEReactionsScope ceReactions;
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
@@ -658,10 +658,10 @@ namespace krys::boo
       return dom::MutationAlgorithms::PreRemove(oldChild, *containerNode);
     }
 
-    return dom::Exception {dom::ExceptionCode::NotFoundError};
+    return Exception {ExceptionCode::NotFoundError};
   }
 
-  dom::ExceptionOr<Node &> Node::AppendChild(Node &newChild) noexcept
+  ExceptionOr<Node &> Node::AppendChild(Node &newChild) noexcept
   {
     html::CEReactionsScope ceReactions;
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
@@ -669,7 +669,7 @@ namespace krys::boo
       return dom::MutationAlgorithms::Append(newChild, *containerNode);
     }
 
-    return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
+    return Exception {ExceptionCode::HierarchyRequestError};
   }
 
 #pragma endregion
@@ -963,14 +963,14 @@ namespace krys::boo
     return result;
   }
 
-  void Node::DefaultEventHandler(dom::Event &event) noexcept
+  void Node::DefaultEventHandler(Event &event) noexcept
   {
     // A middle button press pans the nearest box that can scroll, unless it's on a link.
     if (event.Type() != event_names::MouseDown)
     {
       return;
     }
-    auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
+    auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
     if (!mouseEvent || mouseEvent->Button() != static_cast<int16>(MouseButton::Middle))
     {
       return;
@@ -1121,7 +1121,7 @@ namespace krys::boo
 
 #pragma endregion
 
-  dom::EventTarget *Node::GetParent(dom::Event &event) const noexcept
+  EventTarget *Node::GetParent(Event &event) const noexcept
   {
     (void)event;
 
@@ -1168,7 +1168,7 @@ namespace krys::boo
     {
       size_t depth = 0;
       const Node *ancestor = &node;
-      while ((ancestor = Parent<treeType>(*ancestor)))
+      while ((ancestor = dom::Parent<treeType>(*ancestor)))
       {
         ++depth;
       }
@@ -1202,15 +1202,15 @@ namespace krys::boo
       for (size_t i = 0; i < difference; ++i)
       {
         distinctAncestorA = x;
-        x = Parent<treeType>(*x);
+        x = dom::Parent<treeType>(*x);
       }
       const Node *distinctAncestorB = nullptr;
       while (x != y)
       {
         distinctAncestorA = x;
         distinctAncestorB = y;
-        x = Parent<treeType>(*x);
-        y = Parent<treeType>(*y);
+        x = dom::Parent<treeType>(*x);
+        y = dom::Parent<treeType>(*y);
       }
       if (depthA < depthB)
       {

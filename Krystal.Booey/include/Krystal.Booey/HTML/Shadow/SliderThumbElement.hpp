@@ -34,14 +34,10 @@
 #include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
 
-namespace krys::boo::dom
-{
-  class TouchEvent;
-}
-
 namespace krys::boo
 {
   class HTMLInputElement;
+  class TouchEvent;
 }
 
 namespace krys::boo::html
@@ -78,7 +74,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool MatchesReadWritePseudoClass() const noexcept final;
 
-    void DefaultEventHandler(dom::Event &) noexcept final;
+    void DefaultEventHandler(Event &) noexcept final;
 
   private:
     void WillDetachRenderers() noexcept final;
@@ -119,7 +115,7 @@ namespace krys::boo::html
       return true;
     }
 
-    void DefaultEventHandler(dom::Event &) noexcept final;
+    void DefaultEventHandler(Event &) noexcept final;
 
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
@@ -128,7 +124,7 @@ namespace krys::boo::html
 
     /// @brief Moves the thumb to a single touch as it starts, and with the touch's moves along the slider,
     /// as Chrome does; a touch that first moves across the slider is left to pan.
-    void HandleTouchEvent(dom::TouchEvent &) noexcept;
+    void HandleTouchEvent(TouchEvent &) noexcept;
 
     /// @brief Whether the touch's moves so far are along the slider.
     KRYS_NODISCARD bool CanSlide() const noexcept;

@@ -5,7 +5,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class Event;
 }
@@ -16,7 +16,7 @@ namespace krys::boo::html
   /// @note Script's event handlers return a value that can cancel the event; a C++ handler calls
   /// `PreventDefault()` instead.
   /// @see https://html.spec.whatwg.org/#eventhandler
-  using EventHandlerCallback = Func<void(dom::Event &)>;
+  using EventHandlerCallback = Func<void(Event &)>;
 
   /// @brief The event handler IDL attributes' getting and setting steps.
   /// @see https://html.spec.whatwg.org/#event-handler-attributes
@@ -27,18 +27,17 @@ namespace krys::boo::html
     /// frameset elements' window-reflecting and `WindowEventHandlers` handlers, their document's window
     /// (null if the document isn't fully active).
     /// @see https://html.spec.whatwg.org/#determining-the-target-of-an-event-handler
-    KRYS_NODISCARD static dom::EventTarget *DetermineTarget(dom::EventTarget &eventTarget,
-                                                            DOMStringAtom name) noexcept;
+    KRYS_NODISCARD static EventTarget *DetermineTarget(EventTarget &eventTarget, DOMStringAtom name) noexcept;
 
     /// @brief The value of @p eventTarget's event handler @p name; null if it has none.
     /// @see https://html.spec.whatwg.org/#getting-the-current-value-of-the-event-handler
-    KRYS_NODISCARD static const EventHandlerCallback *Get(const dom::EventTarget &eventTarget,
+    KRYS_NODISCARD static const EventHandlerCallback *Get(const EventTarget &eventTarget,
                                                           const DOMStringAtom &name) noexcept;
 
     /// @brief Sets @p eventTarget's event handler @p name to @p value, or deactivates it if @p value is
     /// empty.
     /// @see https://html.spec.whatwg.org/#event-handler-idl-attributes
-    static void Set(dom::EventTarget &eventTarget, const DOMStringAtom &name,
+    static void Set(EventTarget &eventTarget, const DOMStringAtom &name,
                     EventHandlerCallback &&value) noexcept;
   };
 }

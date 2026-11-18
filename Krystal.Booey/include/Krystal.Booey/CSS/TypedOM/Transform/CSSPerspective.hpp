@@ -45,11 +45,11 @@ namespace krys::boo
   public:
     /// @return A `TypeError` if @p length isn't a length or `none`.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssperspective-cssperspective
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSPerspective>> Create(CSSPerspectiveValue length) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSPerspective>> Create(CSSPerspectiveValue length) noexcept;
 
     /// @brief Reifies a `perspective()` function.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSPerspective>> Create(const css::FunctionValue &function,
-                                                                       Document &document) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<CSSPerspective>> Create(const css::FunctionValue &function,
+                                                                  Document &document) noexcept;
 
     ~CSSPerspective() noexcept override;
 
@@ -60,7 +60,7 @@ namespace krys::boo
     }
 
     /// @return A `TypeError` if @p length isn't a length or `none`.
-    dom::ExceptionOr<void> SetLength(CSSPerspectiveValue length) noexcept;
+    ExceptionOr<void> SetLength(CSSPerspectiveValue length) noexcept;
 
     /// @brief Does nothing: a perspective is always 3D.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssperspective-is2d
@@ -70,7 +70,7 @@ namespace krys::boo
 
     void Serialise(StringBuilder &builder) const noexcept final;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
+    KRYS_NODISCARD ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
 
     KRYS_NODISCARD CSSTransformType TransformType() const noexcept final
     {

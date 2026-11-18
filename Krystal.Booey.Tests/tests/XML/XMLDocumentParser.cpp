@@ -239,7 +239,7 @@ namespace krys::boo::tests
     {
       auto result = CreateContextualFragment(*root, u8"<open>");
       REQUIRE(result.HasException());
-      CHECK(result.ReleaseException().Code() == dom::ExceptionCode::SyntaxError);
+      CHECK(result.ReleaseException().Code() == ExceptionCode::SyntaxError);
     }
   }
 

@@ -84,8 +84,7 @@ namespace krys::boo
     return values;
   }
 
-  dom::ExceptionOr<RefPtr<CSSStyleValue>>
-    StylePropertyMapReadOnly::Get(CSSOMStringView property) const noexcept
+  ExceptionOr<RefPtr<CSSStyleValue>> StylePropertyMapReadOnly::Get(CSSOMStringView property) const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymapreadonly-get
     auto *document = Document();
@@ -103,7 +102,7 @@ namespace krys::boo
     if (propertyId == css::PropertyId::Invalid
         || !IsExposed(propertyId, css::ParserContext(*document).PropertySettings))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     // A shorthand's value is its serialisation.
@@ -116,7 +115,7 @@ namespace krys::boo
     return ReifyValue(*document, PropertyValue(propertyId), propertyId);
   }
 
-  dom::ExceptionOr<List<Ref<CSSStyleValue>>>
+  ExceptionOr<List<Ref<CSSStyleValue>>>
     StylePropertyMapReadOnly::GetAll(CSSOMStringView property) const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymapreadonly-getall
@@ -136,7 +135,7 @@ namespace krys::boo
     if (propertyId == css::PropertyId::Invalid
         || !IsExposed(propertyId, css::ParserContext(*document).PropertySettings))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     if (IsShorthand(propertyId))
@@ -153,7 +152,7 @@ namespace krys::boo
     return ReifyValueToList(*document, PropertyValue(propertyId), propertyId);
   }
 
-  dom::ExceptionOr<bool> StylePropertyMapReadOnly::Has(CSSOMStringView property) const noexcept
+  ExceptionOr<bool> StylePropertyMapReadOnly::Has(CSSOMStringView property) const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymapreadonly-has
     auto result = Get(property);

@@ -4,17 +4,17 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::html
+namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#pagetransitioneventinit
-  struct PageTransitionEventInit : dom::EventInit
+  struct PageTransitionEventInit : EventInit
   {
     bool Persisted {false};
   };
 
   /// @brief `pageshow` and `pagehide`: a document is shown or hidden as its frame navigates.
   /// @see https://html.spec.whatwg.org/#pagetransitionevent
-  class PageTransitionEvent final : public dom::Event
+  class PageTransitionEvent final : public Event
   {
   private:
     bool _persisted {false};
@@ -43,8 +43,8 @@ namespace krys::boo::html
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::PageTransitionEvent)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::PageTransitionEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::Event &event) noexcept
   {
     return event.IsPageTransitionEvent();
   }

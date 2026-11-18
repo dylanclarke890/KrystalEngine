@@ -29,14 +29,10 @@
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   template <typename T>
   class ExceptionOr;
-}
-
-namespace krys::boo
-{
   class SVGLengthContext;
 
   enum class SVGLengthType : uint8
@@ -121,19 +117,19 @@ namespace krys::boo
 
     KRYS_NODISCARD DOMStringAtom ValueAsAtomString() const noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<float> ValueForBindings(const SVGLengthContext &) const noexcept;
+    KRYS_NODISCARD ExceptionOr<float> ValueForBindings(const SVGLengthContext &) const noexcept;
 
     void SetValueInSpecifiedUnits(float) noexcept;
 
-    dom::ExceptionOr<void> SetValue(const SVGLengthContext &, float) noexcept;
+    ExceptionOr<void> SetValue(const SVGLengthContext &, float) noexcept;
 
-    dom::ExceptionOr<void> SetValue(const SVGLengthContext &, float, SVGLengthType, SVGLengthMode) noexcept;
+    ExceptionOr<void> SetValue(const SVGLengthContext &, float, SVGLengthType, SVGLengthMode) noexcept;
 
-    dom::ExceptionOr<void> SetValueAsString(DOMStringView) noexcept;
+    ExceptionOr<void> SetValueAsString(DOMStringView) noexcept;
 
-    dom::ExceptionOr<void> SetValueAsString(DOMStringView, SVGLengthMode) noexcept;
+    ExceptionOr<void> SetValueAsString(DOMStringView, SVGLengthMode) noexcept;
 
-    dom::ExceptionOr<void> ConvertToSpecifiedUnits(const SVGLengthContext &, SVGLengthType) noexcept;
+    ExceptionOr<void> ConvertToSpecifiedUnits(const SVGLengthContext &, SVGLengthType) noexcept;
 
     KRYS_NODISCARD friend bool operator==(const SVGLengthValue &, const SVGLengthValue &) noexcept = default;
   };

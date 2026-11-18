@@ -30,12 +30,11 @@
 namespace krys::boo
 {
   class Element;
+  class Event;
 }
 
 namespace krys::boo::dom
 {
-  class Event;
-
   enum class SimulatedClickMouseEventOptions : uint8
   {
     SendNoEvents,

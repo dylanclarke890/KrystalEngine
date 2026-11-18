@@ -907,7 +907,7 @@ namespace krys::boo::html
     Transform(m11, m12, m21, m22, dx, dy);
   }
 
-  dom::ExceptionOr<void> CanvasRenderingContext2DBase::SetTransform(css::DOMMatrix2DInit matrixInit) noexcept
+  ExceptionOr<void> CanvasRenderingContext2DBase::SetTransform(css::DOMMatrix2DInit matrixInit) noexcept
   {
     // https://html.spec.whatwg.org/#dom-context-2d-settransform-matrix
     // 1. Let matrix be the result of creating a DOMMatrix from the 2D dictionary transform.
@@ -1668,48 +1668,48 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-createlineargradient
-  dom::ExceptionOr<Ref<CanvasGradient>>
+  ExceptionOr<Ref<CanvasGradient>>
     CanvasRenderingContext2DBase::CreateLinearGradient(float x0, float y0, float x1, float y1) noexcept
   {
     // (The arguments are doubles, so a non-finite one is a TypeError.)
     if (!std::isfinite(x0) || !std::isfinite(y0) || !std::isfinite(x1) || !std::isfinite(y1))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     return CanvasGradient::Create(FloatPoint(x0, y0), FloatPoint(x1, y1));
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-createradialgradient
-  dom::ExceptionOr<Ref<CanvasGradient>> CanvasRenderingContext2DBase::CreateRadialGradient(float x0, float y0,
-                                                                                           float r0, float x1,
-                                                                                           float y1,
-                                                                                           float r1) noexcept
+  ExceptionOr<Ref<CanvasGradient>> CanvasRenderingContext2DBase::CreateRadialGradient(float x0, float y0,
+                                                                                      float r0, float x1,
+                                                                                      float y1,
+                                                                                      float r1) noexcept
   {
     // (The arguments are doubles, so a non-finite one is a TypeError.)
     if (!std::isfinite(x0) || !std::isfinite(y0) || !std::isfinite(r0) || !std::isfinite(x1)
         || !std::isfinite(y1) || !std::isfinite(r1))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     // 1. If r0 or r1 are negative, then throw an "IndexSizeError" DOMException.
     if (r0 < 0 || r1 < 0)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     return CanvasGradient::Create(FloatPoint(x0, y0), r0, FloatPoint(x1, y1), r1);
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-createconicgradient
-  dom::ExceptionOr<Ref<CanvasGradient>>
+  ExceptionOr<Ref<CanvasGradient>>
     CanvasRenderingContext2DBase::CreateConicGradient(float angleInRadians, float x, float y) noexcept
   {
     // (The arguments are doubles, so a non-finite one is a TypeError.)
     if (!std::isfinite(angleInRadians) || !std::isfinite(x) || !std::isfinite(y))
     {
-      return dom::Exception {dom::ExceptionCode::TypeError};
+      return Exception {ExceptionCode::TypeError};
     }
 
     // Angle starts from x-axis for consistency within canvas methods. See
@@ -1719,7 +1719,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-createpattern
-  dom::ExceptionOr<RefPtr<CanvasPattern>>
+  ExceptionOr<RefPtr<CanvasPattern>>
     CanvasRenderingContext2DBase::CreatePattern(CanvasImageSource image, DOMStringView repetition) noexcept
   {
     // 4. If repetition is the empty string, then set it to "repeat".
@@ -1730,34 +1730,35 @@ namespace krys::boo::html
     bool repeatX, repeatY;
     if (!CanvasPattern::ParseRepetitionType(repetition, repeatX, repeatY))
     {
-      return dom::Exception {dom::ExceptionCode::SyntaxError};
+      return Exception {ExceptionCode::SyntaxError};
     }
 
-    return SwitchOn(image, [&](auto &element) -> dom::ExceptionOr<RefPtr<CanvasPattern>>
+    return SwitchOn(image, [&](auto &element) -> ExceptionOr<RefPtr<CanvasPattern>>
                     { return this->CreatePattern(*element, repeatX, repeatY); });
   }
 
-  dom::ExceptionOr<RefPtr<CanvasPattern>>
-    CanvasRenderingContext2DBase::CreatePattern(CachedImage &cachedImage, RenderElement *renderer,
-                                                bool repeatX, bool repeatY) noexcept
+  ExceptionOr<RefPtr<CanvasPattern>> CanvasRenderingContext2DBase::CreatePattern(CachedImage &cachedImage,
+                                                                                 RenderElement *renderer,
+                                                                                 bool repeatX,
+                                                                                 bool repeatY) noexcept
   {
     RefPtr<Image> image = ShareRefPtr(cachedImage.ImageForRenderer(renderer));
     if (!image)
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     auto nativeImage = image->GetNativeImage();
     if (!nativeImage)
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     return RefPtr<CanvasPattern> {
       CanvasPattern::Create(SourceImage(Ref<NativeImage>(krys::move(nativeImage))), repeatX, repeatY)};
   }
 
-  dom::ExceptionOr<RefPtr<CanvasPattern>>
+  ExceptionOr<RefPtr<CanvasPattern>>
     CanvasRenderingContext2DBase::CreatePattern(HTMLImageElement &imageElement, bool repeatX,
                                                 bool repeatY) noexcept
   {
@@ -1771,12 +1772,12 @@ namespace krys::boo::html
 
     if (cachedImage->ErrorOccurred())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     if (cachedImage->GetStatus() == CachedResource::LoadError)
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     // Image may have a zero-width or a zero-height.
@@ -1792,7 +1793,7 @@ namespace krys::boo::html
     return CreatePattern(*cachedImage, imageElement.Renderer(), repeatX, repeatY);
   }
 
-  dom::ExceptionOr<RefPtr<CanvasPattern>>
+  ExceptionOr<RefPtr<CanvasPattern>>
     CanvasRenderingContext2DBase::CreatePattern(SVGImageElement &imageElement, bool repeatX,
                                                 bool repeatY) noexcept
   {
@@ -1806,7 +1807,7 @@ namespace krys::boo::html
 
     if (cachedImage->ErrorOccurred())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     // The image loading has started but it is not complete.
@@ -1828,24 +1829,24 @@ namespace krys::boo::html
     return CreatePattern(*cachedImage, imageElement.Renderer(), repeatX, repeatY);
   }
 
-  dom::ExceptionOr<RefPtr<CanvasPattern>>
+  ExceptionOr<RefPtr<CanvasPattern>>
     CanvasRenderingContext2DBase::CreatePattern(CanvasBase &canvas, bool repeatX, bool repeatY) noexcept
   {
     if (!canvas.Width() || !canvas.Height())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
     auto *copiedImage = canvas.CopiedImage();
 
     if (!copiedImage)
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     auto nativeImage = copiedImage->GetNativeImage();
     if (!nativeImage)
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     return RefPtr<CanvasPattern> {
@@ -1902,13 +1903,13 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-drawimage
-  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasImageSource image, float dx,
-                                                                 float dy) noexcept
+  ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasImageSource image, float dx,
+                                                            float dy) noexcept
   {
     // (The source and destination rectangles default to the image's size; see below.)
     return SwitchOn(
       image,
-      [&](RefPtr<HTMLImageElement> &imageElement) -> dom::ExceptionOr<void>
+      [&](RefPtr<HTMLImageElement> &imageElement) -> ExceptionOr<void>
       {
         LayoutSize destRectSize = Size(*imageElement, ImageSizeType::AfterDevicePixelRatio);
         LayoutSize sourceRectSize = Size(*imageElement, ImageSizeType::BeforeDevicePixelRatio);
@@ -1916,7 +1917,7 @@ namespace krys::boo::html
                                FloatRect {0, 0, sourceRectSize.Width(), sourceRectSize.Height()},
                                FloatRect {dx, dy, destRectSize.Width(), destRectSize.Height()});
       },
-      [&](RefPtr<SVGImageElement> &imageElement) -> dom::ExceptionOr<void>
+      [&](RefPtr<SVGImageElement> &imageElement) -> ExceptionOr<void>
       {
         LayoutSize destRectSize = Size(*imageElement, ImageSizeType::AfterDevicePixelRatio);
         LayoutSize sourceRectSize = Size(*imageElement, ImageSizeType::BeforeDevicePixelRatio);
@@ -1924,7 +1925,7 @@ namespace krys::boo::html
                                FloatRect {0, 0, sourceRectSize.Width(), sourceRectSize.Height()},
                                FloatRect {dx, dy, destRectSize.Width(), destRectSize.Height()});
       },
-      [&](auto &element) -> dom::ExceptionOr<void>
+      [&](auto &element) -> ExceptionOr<void>
       {
         FloatSize elementSize = FloatSize(Size(*element));
         return this->DrawImage(*element, FloatRect {0, 0, elementSize.Width(), elementSize.Height()},
@@ -1932,11 +1933,11 @@ namespace krys::boo::html
       });
   }
 
-  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasImageSource image, float dx, float dy,
-                                                                 float dw, float dh) noexcept
+  ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasImageSource image, float dx, float dy,
+                                                            float dw, float dh) noexcept
   {
     return SwitchOn(image,
-                    [&](auto &element) -> dom::ExceptionOr<void>
+                    [&](auto &element) -> ExceptionOr<void>
                     {
                       FloatSize elementSize = FloatSize(Size(*element));
                       return this->DrawImage(*element,
@@ -1945,27 +1946,27 @@ namespace krys::boo::html
                     });
   }
 
-  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasImageSource image, float sx, float sy,
-                                                                 float sw, float sh, float dx, float dy,
-                                                                 float dw, float dh) noexcept
+  ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasImageSource image, float sx, float sy,
+                                                            float sw, float sh, float dx, float dy, float dw,
+                                                            float dh) noexcept
   {
     return SwitchOn(
-      image, [&](auto &element) -> dom::ExceptionOr<void>
+      image, [&](auto &element) -> ExceptionOr<void>
       { return this->DrawImage(*element, FloatRect {sx, sy, sw, sh}, FloatRect {dx, dy, dw, dh}); });
   }
 
-  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(HTMLImageElement &imageElement,
-                                                                 const FloatRect &srcRect,
-                                                                 const FloatRect &dstRect) noexcept
+  ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(HTMLImageElement &imageElement,
+                                                            const FloatRect &srcRect,
+                                                            const FloatRect &dstRect) noexcept
   {
     return DrawImage(imageElement, srcRect, dstRect, GetState().GlobalComposite, GetState().GlobalBlend);
   }
 
-  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(HTMLImageElement &imageElement,
-                                                                 const FloatRect &srcRect,
-                                                                 const FloatRect &dstRect,
-                                                                 const CompositeOperator &op,
-                                                                 const BlendMode &blendMode) noexcept
+  ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(HTMLImageElement &imageElement,
+                                                            const FloatRect &srcRect,
+                                                            const FloatRect &dstRect,
+                                                            const CompositeOperator &op,
+                                                            const BlendMode &blendMode) noexcept
   {
     // 1. If any of the arguments are infinite or NaN, then return.
     if (!AreDrawImageRectsFinite(srcRect, dstRect))
@@ -1983,8 +1984,8 @@ namespace krys::boo::html
     auto *cachedImage = imageElement.GetCachedImage();
     if (cachedImage && cachedImage->ErrorOccurred())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError,
-                             u8"The HTMLImageElement provided is in the 'broken' state."};
+      return Exception {ExceptionCode::InvalidStateError,
+                        u8"The HTMLImageElement provided is in the 'broken' state."};
     }
     if (!imageElement.Complete() || !cachedImage)
     {
@@ -2005,18 +2006,18 @@ namespace krys::boo::html
                      dstRect, op, blendMode, orientation);
   }
 
-  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(SVGImageElement &imageElement,
-                                                                 const FloatRect &srcRect,
-                                                                 const FloatRect &dstRect) noexcept
+  ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(SVGImageElement &imageElement,
+                                                            const FloatRect &srcRect,
+                                                            const FloatRect &dstRect) noexcept
   {
     return DrawImage(imageElement, srcRect, dstRect, GetState().GlobalComposite, GetState().GlobalBlend);
   }
 
-  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(SVGImageElement &imageElement,
-                                                                 const FloatRect &srcRect,
-                                                                 const FloatRect &dstRect,
-                                                                 const CompositeOperator &op,
-                                                                 const BlendMode &blendMode) noexcept
+  ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(SVGImageElement &imageElement,
+                                                            const FloatRect &srcRect,
+                                                            const FloatRect &dstRect,
+                                                            const CompositeOperator &op,
+                                                            const BlendMode &blendMode) noexcept
   {
     // 1. If any of the arguments are infinite or NaN, then return.
     if (!AreDrawImageRectsFinite(srcRect, dstRect))
@@ -2034,8 +2035,8 @@ namespace krys::boo::html
 
     if (cachedImage->ErrorOccurred())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError,
-                             u8"The SVGImageElement provided is in the 'broken' state."};
+      return Exception {ExceptionCode::InvalidStateError,
+                        u8"The SVGImageElement provided is in the 'broken' state."};
     }
 
     auto imageRect =
@@ -2045,7 +2046,7 @@ namespace krys::boo::html
                      dstRect, op, blendMode);
   }
 
-  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(
+  ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(
     Document &, CachedImage &cachedImage, const RenderObject *renderer, const FloatRect &imageRect,
     const FloatRect &srcRect, const FloatRect &dstRect, const CompositeOperator &op,
     const BlendMode &blendMode, ImageOrientation orientation) noexcept
@@ -2158,9 +2159,9 @@ namespace krys::boo::html
     return {};
   }
 
-  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasBase &sourceCanvas,
-                                                                 const FloatRect &srcRect,
-                                                                 const FloatRect &dstRect) noexcept
+  ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasBase &sourceCanvas,
+                                                            const FloatRect &srcRect,
+                                                            const FloatRect &dstRect) noexcept
   {
     // 1. If any of the arguments are infinite or NaN, then return.
     if (!AreDrawImageRectsFinite(srcRect, dstRect))
@@ -2174,7 +2175,7 @@ namespace krys::boo::html
     FloatRect srcCanvasRect = FloatRect(FloatPoint(), FloatSize(sourceCanvas.Size()));
     if (!srcCanvasRect.Width() || !srcCanvasRect.Height())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     // 5. If one of the sw or sh arguments is zero, then return. Nothing is painted.
@@ -2379,7 +2380,7 @@ namespace krys::boo::html
   constexpr static uint32 PutImageDataCacheAreaLimit = 60 * 60;
 
   // https://html.spec.whatwg.org/#dom-context-2d-createimagedata-imagedata
-  dom::ExceptionOr<Ref<ImageData>>
+  ExceptionOr<Ref<ImageData>>
     CanvasRenderingContext2DBase::CreateImageData(ImageData &existingImageData) const noexcept
   {
     // 1. Let newImageData be a new ImageData object.
@@ -2402,14 +2403,14 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-createimagedata
-  dom::ExceptionOr<Ref<ImageData>>
+  ExceptionOr<Ref<ImageData>>
     CanvasRenderingContext2DBase::CreateImageData(int32 sw, int32 sh,
                                                   Maybe<ImageDataSettings> settings) const noexcept
   {
     // 1. If one or both of sw and sh are zero, then throw an "IndexSizeError" DOMException.
     if (!sw || !sh)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     // 2. Let newImageData be a new ImageData object.
@@ -2542,7 +2543,7 @@ namespace krys::boo::html
     return ImageData::Create(size, ImageDataArray(krys::move(data)), _settings.ColorSpace);
   }
 
-  dom::ExceptionOr<Ref<ImageData>>
+  ExceptionOr<Ref<ImageData>>
     CanvasRenderingContext2DBase::GetImageData(int32 sx, int32 sy, int32 sw, int32 sh,
                                                Maybe<ImageDataSettings> settings) const noexcept
   {
@@ -2550,7 +2551,7 @@ namespace krys::boo::html
     // 1. If either the sw or sh arguments are zero, then throw an "IndexSizeError" DOMException.
     if (!sw || !sh)
     {
-      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      return Exception {ExceptionCode::IndexSizeError};
     }
 
     // 2. (Skipped: a canvas is always origin-clean, as there are no origins; see DIFFERENCES.md.)
@@ -2603,7 +2604,7 @@ namespace krys::boo::html
     RefPtr<PixelBuffer> pixelBuffer = buffer->GetPixelBuffer(format, imageDataRect);
     if (!pixelBuffer)
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     krys_debug_assert(pixelBuffer->Format().ColorSpace == ToDestinationColorSpace(computedColorSpace));
@@ -2614,12 +2615,11 @@ namespace krys::boo::html
       return Ref<ImageData>(krys::move(imageData));
     }
 
-    return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    return Exception {ExceptionCode::InvalidStateError};
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-putimagedata-short
-  dom::ExceptionOr<void> CanvasRenderingContext2DBase::PutImageData(ImageData &data, int32 dx,
-                                                                    int32 dy) noexcept
+  ExceptionOr<void> CanvasRenderingContext2DBase::PutImageData(ImageData &data, int32 dx, int32 dy) noexcept
   {
     return PutImageData(data, dx, dy, 0, 0, data.Width(), data.Height());
   }
@@ -2641,17 +2641,16 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-putimagedata
-  dom::ExceptionOr<void> CanvasRenderingContext2DBase::PutImageData(ImageData &data, int32 dx, int32 dy,
-                                                                    int32 dirtyX, int32 dirtyY,
-                                                                    int32 dirtyWidth,
-                                                                    int32 dirtyHeight) noexcept
+  ExceptionOr<void> CanvasRenderingContext2DBase::PutImageData(ImageData &data, int32 dx, int32 dy,
+                                                               int32 dirtyX, int32 dirtyY, int32 dirtyWidth,
+                                                               int32 dirtyHeight) noexcept
   {
     // https://html.spec.whatwg.org/#dom-context2d-putimagedata-common
     // 1. Let buffer be imageData's data attribute value's [[ViewedArrayBuffer]] internal slot.
     // 2. If IsDetachedBuffer(buffer) is true, then throw an "InvalidStateError" DOMException.
     if (data.Data().IsDetached())
     {
-      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      return Exception {ExceptionCode::InvalidStateError};
     }
 
     RefPtr<ImageBuffer> buffer = ShareRefPtr(GetCanvasBase().Buffer());

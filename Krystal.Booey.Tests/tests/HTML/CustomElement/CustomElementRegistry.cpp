@@ -41,7 +41,7 @@ namespace krys::boo::html::tests
       Define(u8"x-a");
       auto again = Registry().Define(u8"x-a", [](HTMLElement &) { return UniquePtr<CustomElement> {}; });
       REQUIRE(again.HasException());
-      CHECK(again.GetException().Code() == dom::ExceptionCode::NotSupportedError);
+      CHECK(again.GetException().Code() == ExceptionCode::NotSupportedError);
     }
 
     SECTION("get and getName")
@@ -262,12 +262,12 @@ namespace krys::boo::html::tests
     {
       Calls.clear();
 
-      struct Reenter : dom::EventListenerCallback
+      struct Reenter : EventListenerCallback
       {
         Element *Target {nullptr};
         Log *Calls {nullptr};
 
-        void HandleEvent(dom::Event &) noexcept override
+        void HandleEvent(Event &) noexcept override
         {
           (void)Target->SetAttribute(u8"value", u8"from-listener");
           Calls->emplace_back(u8"returned");
@@ -278,7 +278,7 @@ namespace krys::boo::html::tests
       listener->Target = &element;
       listener->Calls = &Calls;
       element.AddEventListener(u8"custom", listener, false);
-      auto event = CreateRef<dom::Event>(u8"custom");
+      auto event = CreateRef<Event>(u8"custom");
       (void)element.DispatchEvent(*event);
       CHECK(TakeCalls() == Log {u8"attribute value null from-listener", u8"returned"});
     }
@@ -313,7 +313,7 @@ namespace krys::boo::html::tests
     auto element = Create(u8"x-closed");
     auto shadow = element->AttachShadow({});
     REQUIRE(shadow.HasException());
-    CHECK(shadow.GetException().Code() == dom::ExceptionCode::NotSupportedError);
+    CHECK(shadow.GetException().Code() == ExceptionCode::NotSupportedError);
 
     SECTION("an element with a shadow root fails to upgrade")
     {
@@ -354,7 +354,7 @@ namespace krys::boo::html::tests
     {
       auto initializeDocument = Registry().Initialize(*Document);
       REQUIRE(initializeDocument.HasException());
-      CHECK(initializeDocument.GetException().Code() == dom::ExceptionCode::NotSupportedError);
+      CHECK(initializeDocument.GetException().Code() == ExceptionCode::NotSupportedError);
 
       REQUIRE_FALSE(scoped->Initialize(*global).HasException());
       CHECK(global->CustomElementRegistry().get() == &Registry());

@@ -460,7 +460,7 @@ namespace krys::boo
       return;
     }
 
-    auto event = dom::Event::Create(event_names::Load, false, false);
+    auto event = Event::Create(event_names::Load, false, false);
     (void)DispatchEvent(*event);
   }
 
@@ -1015,7 +1015,7 @@ namespace krys::boo
     return ResolveStyle(resolutionContext);
   }
 
-  void SVGElement::DidAddEventListener(const dom::EventListener &listener) noexcept
+  void SVGElement::DidAddEventListener(const EventListener &listener) noexcept
   {
     StyledElement::DidAddEventListener(listener);
 
@@ -1032,12 +1032,12 @@ namespace krys::boo
       krys_debug_assert(instance->IsInUserAgentShadowTree());
       instance->AddEventListener(
         listener.Type(), ShareRef(*listener.Callback()),
-        dom::AddEventListenerOptions {
+        AddEventListenerOptions {
           {listener.Capture()}, listener.Once(), listener.Passive(), ShareRefPtr(listener.Signal())});
     }
   }
 
-  void SVGElement::DidRemoveEventListener(const dom::EventListener &listener) noexcept
+  void SVGElement::DidRemoveEventListener(const EventListener &listener) noexcept
   {
     StyledElement::DidRemoveEventListener(listener);
 

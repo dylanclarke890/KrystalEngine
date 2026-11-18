@@ -59,17 +59,17 @@ namespace krys::boo::html
 
     KRYS_NODISCARD DOMString ValueMissingText() const noexcept final;
 
-    void HandleClickEvent(dom::MouseEvent &event) noexcept final;
+    void HandleClickEvent(MouseEvent &event) noexcept final;
 
-    ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept final;
+    ShouldCallBaseEventHandler HandleKeydownEvent(KeyboardEvent &event) noexcept final;
 
-    void HandleKeyupEvent(dom::KeyboardEvent &event) noexcept final;
+    void HandleKeyupEvent(KeyboardEvent &event) noexcept final;
 
     KRYS_NODISCARD bool ShouldSendChangeEventAfterCheckedChanged() noexcept final;
 
     void WillDispatchClick(InputElementClickState &state) noexcept final;
 
-    void DidDispatchClick(dom::Event &event, const InputElementClickState &state) noexcept final;
+    void DidDispatchClick(Event &event, const InputElementClickState &state) noexcept final;
 
     KRYS_NODISCARD bool MatchesIndeterminatePseudoClass() const noexcept final;
 

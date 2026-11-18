@@ -48,12 +48,12 @@ namespace krys::boo
     SetEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
   }
 
-  void HTMLAreaElement::ActivationBehavior(dom::Event &event) noexcept
+  void HTMLAreaElement::ActivationBehavior(Event &event) noexcept
   {
     html::HyperlinkAlgorithms::ActivationBehavior(*this, event);
   }
 
-  void HTMLAreaElement::DefaultEventHandler(dom::Event &event) noexcept
+  void HTMLAreaElement::DefaultEventHandler(Event &event) noexcept
   {
     if (css::IsLink(*this))
     {
@@ -64,7 +64,7 @@ namespace krys::boo
         return;
       }
 
-      if (event.Type() == event_names::AuxClick && dom::MouseEvent::CanTriggerActivationBehavior(event))
+      if (event.Type() == event_names::AuxClick && MouseEvent::CanTriggerActivationBehavior(event))
       {
         html::HyperlinkAlgorithms::FollowTheHyperlink(*this, event);
         return;

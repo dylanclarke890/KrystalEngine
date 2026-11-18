@@ -70,8 +70,8 @@ namespace krys::boo::html
 
     /// @brief The entries of @p form, as submitted by @p submitter.
     /// @see https://xhr.spec.whatwg.org/#dom-formdata
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<DOMFormData>> Create(HTMLFormElement *form,
-                                                                    HTMLElement *submitter) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<DOMFormData>> Create(HTMLFormElement *form,
+                                                               HTMLElement *submitter) noexcept;
 
     KRYS_NODISCARD static Ref<DOMFormData> Create() noexcept;
 

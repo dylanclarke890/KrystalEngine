@@ -4,11 +4,14 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class EventListener;
   class EventTarget;
+}
 
+namespace krys::boo::dom
+{
   /// @brief Implementations of the EventTarget interface algorithms.
   /// @see https://dom.spec.whatwg.org/#eventtarget
   class EventTargetAlgorithms

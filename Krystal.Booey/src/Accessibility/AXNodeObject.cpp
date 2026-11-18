@@ -2330,7 +2330,7 @@ namespace krys::boo
       // A spin button steps with the up and down arrows (https://w3c.github.io/aria/#spinbutton).
       bool vertical = object.Orientation() == AXOrientation::Vertical || object.Role() == AXRole::SpinButton;
       bool increment = action == StepAction::Increment;
-      dom::KeyboardEventInit init;
+      KeyboardEventInit init;
       init.Key =
         vertical ? (increment ? u8"ArrowUp" : u8"ArrowDown") : (increment ? u8"ArrowRight" : u8"ArrowLeft");
       init.Code = init.Key;
@@ -2343,8 +2343,8 @@ namespace krys::boo
       init.Composed = true;
 
       Ref protectedNode = ShareRef(*node);
-      bool handled = !dom::EventDispatcher::FireEvent<dom::KeyboardEvent>(u8"keydown", *node, init);
-      handled |= !dom::EventDispatcher::FireEvent<dom::KeyboardEvent>(u8"keyup", *node, init);
+      bool handled = !dom::EventDispatcher::FireEvent<KeyboardEvent>(u8"keydown", *node, init);
+      handled |= !dom::EventDispatcher::FireEvent<KeyboardEvent>(u8"keyup", *node, init);
       return handled;
     }
 

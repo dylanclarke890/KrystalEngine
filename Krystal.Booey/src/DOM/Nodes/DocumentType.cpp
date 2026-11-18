@@ -24,25 +24,25 @@ namespace krys::boo
 
 #pragma region ChildNode
 
-  dom::ExceptionOr<void> DocumentType::Before(const List<dom::NodeOrString> &nodes) noexcept
+  ExceptionOr<void> DocumentType::Before(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ChildNode::Before(*this, nodes);
   }
 
-  dom::ExceptionOr<void> DocumentType::After(const List<dom::NodeOrString> &nodes) noexcept
+  ExceptionOr<void> DocumentType::After(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ChildNode::After(*this, nodes);
   }
 
-  dom::ExceptionOr<void> DocumentType::ReplaceWith(const List<dom::NodeOrString> &nodes) noexcept
+  ExceptionOr<void> DocumentType::ReplaceWith(const List<dom::NodeOrString> &nodes) noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ChildNode::ReplaceWith(*this, nodes);
   }
 
-  dom::ExceptionOr<void> DocumentType::Remove() noexcept
+  ExceptionOr<void> DocumentType::Remove() noexcept
   {
     html::CEReactionsScope ceReactions;
     return dom::mixins::ChildNode::Remove(*this);
