@@ -39,7 +39,6 @@ target_sources(Krystal.Editor
 			include
 		FILES
 			include/Krystal.Editor/Application.hpp
-			include/Krystal.Editor/BooeyScene.hpp
 			include/Krystal.Editor/Editor.hpp
 		
 	PRIVATE

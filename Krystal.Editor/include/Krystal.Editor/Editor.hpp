@@ -9,8 +9,6 @@
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
-#include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
@@ -20,12 +18,10 @@
 #include "Krystal.Core/Log/ILogger.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Utils/ScopedProfiler.hpp"
 #include "Krystal.Editor/Application.hpp"
 #include "Krystal.Editor/BeanRating.hpp"
-#include "Krystal.Editor/BooeyScene.hpp"
 #include "Krystal.Editor/PageAnimations.hpp"
 #include "Krystal.Editor/PageCanvas2D.hpp"
 #include "Krystal.Editor/PageCube.hpp"
@@ -42,7 +38,6 @@
 #include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.UI/View.hpp"
 #include <algorithm>
-#include <cmath>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -52,28 +47,16 @@
 
 namespace krys
 {
-  /// @brief What the editor shows below its header; F2 moves to the next.
-  enum class EditorView : uint8
-  {
-    // An HTML page from `Krystal.Editor/pages`, painted by Booey.
-    Page,
-    // A dashboard drawn with Render2D directly.
-    Render2D,
-    // A scene drawn through Booey's graphics context.
-    BooeyScene,
-  };
-
+  /// @brief The editor: an HTML page from `Krystal.Editor/pages`, painted by Booey below a header.
   class Editor : public Application
   {
   private:
-    /// @brief The height of the header the views are drawn under.
+    /// @brief The height of the header the page is drawn under.
     constexpr static float HeaderHeight = 56.f;
 
     uint32 _width {0u};
     uint32 _height {0u};
-    float _time {0.f};
     UniquePtr<gfx::Renderer2D> _renderer;
-    gfx::TextureHandle _image {};
     UniquePtr<gfx::FontFace2D> _font;
     UniquePtr<gfx::FontFace2D> _boldFont;
     /// @brief Booey's loader, which reads files on the application's workers.
@@ -108,8 +91,6 @@ namespace krys
     bool _focused {true};
     /// @brief Where the window's input method was last told the page's text input is, in the window.
     Maybe<boo::IntRect> _textInputRect;
-    editor::BooeyFonts _booeyFonts {};
-    EditorView _view {EditorView::Page};
     /// @brief The mouse in page view coordinates: below the header.
     boo::IntPoint _pointer;
 
@@ -133,7 +114,6 @@ namespace krys
         return;
       }
       _renderer = krys::move(*renderer);
-      CreateImage();
       LoadFonts();
       CreatePage();
     }
@@ -151,43 +131,9 @@ namespace krys
       _cube = nullptr;
       _canvas2D = nullptr;
       _pageView = nullptr;
-      _booeyFonts = {};
       _renderer = nullptr;
       _boldFont = nullptr;
       _font = nullptr;
-      if (_image.IsValid())
-      {
-        _context->Device->Destroy(_image);
-      }
-    }
-
-    /// @brief A 16-by-16 colour gradient with a checkerboard over it, since the editor has no image assets.
-    void CreateImage() noexcept
-    {
-      constexpr uint32 size = 16u;
-      Array<Array<uint8, 4>, size * size> texels {};
-      for (uint32 y = 0u; y < size; ++y)
-      {
-        for (uint32 x = 0u; x < size; ++x)
-        {
-          const bool light = (x / 4u + y / 4u) % 2u == 0u;
-          const auto shade = static_cast<uint8>(light ? 255u : 170u);
-          texels[y * size + x] = {static_cast<uint8>(x * shade / (size - 1u)),
-                                  static_cast<uint8>(y * shade / (size - 1u)), shade, 255u};
-        }
-      }
-
-      auto image =
-        _context->Device->CreateTexture({.Width = size, .Height = size, .DebugName = u8"EditorImage"});
-      if (!image)
-      {
-        _context->Logger->Error("{}", image.error());
-        return;
-      }
-      _image = *image;
-      _context->Device->WriteTexture(
-        _image, gfx::TextureRegion::Whole2D(size, size),
-        Span<const byte>(reinterpret_cast<const byte *>(texels.data()), sizeof(texels)));
     }
 
     /// @brief Liberation Sans, regular and synthetically bold, for the labels.
@@ -232,24 +178,6 @@ namespace krys
             _context->Logger->Info("Key Pressed '{}'", event.Key());
           }
 
-          if (event.Key() == pal::Key::F2 && event.State() == pal::KeyState::Pressed)
-          {
-            _view = static_cast<EditorView>((static_cast<uint8>(_view) + 1u) % 3u);
-            if (_pageView)
-            {
-              _pageView->SetVisible(_view == EditorView::Page);
-              // Screen readers see the page only while it's shown.
-              if (_view == EditorView::Page)
-              {
-                AttachPageAccessibility();
-              }
-              else
-              {
-                _pageView->DetachAccessibility();
-              }
-            }
-          }
-
           if (event.Key() == pal::Key::F5 && event.State() == pal::KeyState::Pressed)
           {
             // Reloading loads the page's style sheets and images again, so edits to them show.
@@ -268,8 +196,7 @@ namespace krys
           }
 
           // The other keys go to the page view's focused element.
-          if (_pageView && _view == EditorView::Page && event.Key() != pal::Key::F2
-              && event.Key() != pal::Key::F5)
+          if (_pageView && event.Key() != pal::Key::F5)
           {
             if (event.State() == pal::KeyState::Released)
             {
@@ -290,7 +217,7 @@ namespace krys
       _context->Events->On<TextInputEvent>(
         [&](const auto &event)
         {
-          if (_pageView && _view == EditorView::Page)
+          if (_pageView)
           {
             (void)_pageView->InsertText(event.Text());
           }
@@ -300,7 +227,7 @@ namespace krys
       _context->Events->On<CompositionInputEvent>(
         [&](const auto &event)
         {
-          if (!_pageView || _view != EditorView::Page)
+          if (!_pageView)
           {
             return true;
           }
@@ -338,7 +265,7 @@ namespace krys
           return true;
         });
 
-      // The page is hidden while the window is minimised or another of the editor's views is shown.
+      // The page is hidden while the window is minimised.
       _context->Events->On<WindowMinimiseEvent>(
         [&](const auto &)
         {
@@ -354,7 +281,7 @@ namespace krys
         {
           if (_pageView)
           {
-            _pageView->SetVisible(_view == EditorView::Page);
+            _pageView->SetVisible(true);
           }
           return true;
         });
@@ -378,7 +305,7 @@ namespace krys
         {
           _pointer = boo::IntPoint(static_cast<int32>(event.ClientX()),
                                    static_cast<int32>(event.ClientY() - HeaderHeight));
-          if (_pageView && _view == EditorView::Page)
+          if (_pageView)
           {
             if (_pointer.Y() < 0)
             {
@@ -409,7 +336,7 @@ namespace krys
       _context->Events->On<MouseButtonEvent>(
         [&](const auto &event)
         {
-          if (!_pageView || _view != EditorView::Page)
+          if (!_pageView)
           {
             return true;
           }
@@ -430,7 +357,7 @@ namespace krys
       _context->Events->On<PointerInputEvent>(
         [&](const auto &event)
         {
-          if (!_pageView || _view != EditorView::Page)
+          if (!_pageView)
           {
             return true;
           }
@@ -452,7 +379,7 @@ namespace krys
       _context->Events->On<MouseScrollEvent>(
         [&](const auto &event)
         {
-          if (!_pageView || _view != EditorView::Page)
+          if (!_pageView)
           {
             return true;
           }
@@ -470,7 +397,7 @@ namespace krys
       _context->Events->On<TouchpadPanEvent>(
         [&](const auto &event)
         {
-          if (!_pageView || _view != EditorView::Page)
+          if (!_pageView)
           {
             return true;
           }
@@ -485,8 +412,8 @@ namespace krys
           return true;
         });
 
-      // Drags from other applications go to the page view, which answers what a drop would do; off it (over
-      // the header, or with another view shown), they're off the page.
+      // Drags from other applications go to the page view, which answers what a drop would do; over the
+      // header, they're off the page.
       _context->Events->On<DragInputEvent>(
         [&](const auto &event)
         {
@@ -497,10 +424,6 @@ namespace krys
           auto &input = event.Input();
           boo::IntPoint point(static_cast<int32>(input.ClientX),
                               static_cast<int32>(input.ClientY - HeaderHeight));
-          if (_view != EditorView::Page)
-          {
-            point = boo::IntPoint(-1, -1);
-          }
           _context->Window->SetDropOperation(_pageView->SystemDragInput(point, input));
           return true;
         });
@@ -515,8 +438,6 @@ namespace krys
 
     void OnUpdate(seconds dt) noexcept override
     {
-      _time += static_cast<float>(dt.count());
-
       // Booey's event loop runs on the page's time: timers, then tasks and microtasks.
       _pageTime += std::chrono::duration_cast<MonotonicTime::duration>(dt);
       if (_pageView)
@@ -556,7 +477,7 @@ namespace krys
       }
 
       // The page's live 3D view is drawn into its texture before the page is painted.
-      if (_cube && _view == EditorView::Page)
+      if (_cube)
       {
         _cube->Render(commands);
       }
@@ -567,19 +488,7 @@ namespace krys
                                   .Format = gfx::TextureFormat::RGBA8Unorm,
                                   .ClearColour = Array<float, 4> {0.933f, 0.945f, 0.965f, 1.f}});
 
-      switch (_view)
-      {
-        case EditorView::Page: DrawPage(); break;
-        case EditorView::Render2D:
-          DrawCard(U"Mask clipping", 24.f, 80.f, 392.f, 616.f);
-          DrawCard(U"Shadows", 444.f, 80.f, 392.f, 616.f);
-          DrawCard(U"Compositing", 864.f, 80.f, 392.f, 616.f);
-          DrawClipping(24.f, 80.f);
-          DrawShadows(444.f, 80.f);
-          DrawCompositing(864.f, 80.f);
-          break;
-        case EditorView::BooeyScene: DrawBooey(); break;
-      }
+      DrawPage();
       // The header goes over the page, which scrolls under it.
       DrawHeader();
 
@@ -591,7 +500,7 @@ namespace krys
     /// with its windows by the composition or the caret.
     void UpdateTextInput() noexcept
     {
-      bool enabled = _pageView && _view == EditorView::Page && _focused && _pageView->AcceptsTextInput();
+      bool enabled = _pageView && _focused && _pageView->AcceptsTextInput();
       _context->Window->SetTextInputEnabled(enabled);
       if (!enabled)
       {
@@ -837,8 +746,7 @@ namespace krys
     /// everywhere else; a drag in the page shows its cursor wherever the mouse is.
     void UpdateCursor() noexcept
     {
-      bool overPage =
-        _pageView && _view == EditorView::Page && (_pointer.Y() >= 0 || _pageView->IsDragging());
+      bool overPage = _pageView && (_pointer.Y() >= 0 || _pageView->IsDragging());
       if (overPage)
       {
         if (auto image = _pageView->CurrentCursorImage())
@@ -851,8 +759,7 @@ namespace krys
       _context->Window->SetCursor(overPage ? _pageView->CurrentCursor() : pal::CursorShape::Arrow);
     }
 
-    /// @brief The page shown in the page view, which Booey's drawing is also replayed through, and Liberation
-    /// Sans as Booey's fonts.
+    /// @brief The page view and the page it shows.
     void CreatePage() noexcept
     {
       // Booey's work that can leave the main thread runs on the application's workers, its file reads as
@@ -869,10 +776,7 @@ namespace krys
         static_cast<float>(pal::GetDPIForWindow(_context->Window->GetWindowHandle())) / 96.f);
       _pageView->SetFocused(_focused);
       _pageView->SetPointingDevices(pal::GetPointingDevices());
-      if (_view == EditorView::Page)
-      {
-        AttachPageAccessibility();
-      }
+      AttachPageAccessibility();
       // The window hides and confines the cursor while the page has locked the pointer.
       _pageView->SetPointerLockHandler(
         [&](bool locked)
@@ -891,16 +795,6 @@ namespace krys
         u8"bean-rating", [](boo::html::HTMLElement &element) { return CreateUnique<BeanRating>(element); },
         BeanRating::Options());
       LoadPage();
-      auto &database = boo::FontDatabase::Singleton();
-      auto faces = database.FacesInFamily(u8"Liberation Sans");
-      if (faces.empty())
-      {
-        _context->Logger->Error("Booey couldn't load Liberation Sans.");
-        return;
-      }
-      _booeyFonts.Regular =
-        boo::Font::Create(boo::FontPlatformData {ShareRef(*faces.front()), 14, false, false});
-      _booeyFonts.Bold = boo::Font::Create(boo::FontPlatformData {ShareRef(*faces.front()), 14, true, false});
     }
 
     /// @brief Exposes the page to screen readers through the window, below the header.
@@ -970,20 +864,6 @@ namespace krys
       _renderer->Restore();
     }
 
-    /// @brief The Booey scene view: a scene drawn through Booey's graphics context, recorded into a display
-    /// list and replayed into Render2D.
-    void DrawBooey() noexcept
-    {
-      if (!_pageView)
-      {
-        return;
-      }
-      boo::display_list::RecorderImpl recorder(
-        boo::FloatSize(static_cast<float>(_width), static_cast<float>(_height)));
-      editor::BooeyScene(recorder, _booeyFonts, _time).Draw();
-      _pageView->Replay(*recorder.TakeDisplayList(), *_renderer);
-    }
-
     KRYS_NODISCARD static gfx::RoundedRect2D Rounded(float x, float y, float width, float height,
                                                      float radius) noexcept
     {
@@ -1000,48 +880,6 @@ namespace krys
     {
       return {static_cast<uint8>((rgb >> 16u) & 255u), static_cast<uint8>((rgb >> 8u) & 255u),
               static_cast<uint8>(rgb & 255u), alpha};
-    }
-
-    /// @brief An outer `box-shadow` as a browser paints it: the box's shape, moved out of view, casts the
-    /// shadow, clipped out of the box a pixel inside its edge (the box is opaque), so it shows only around
-    /// it.
-    void BoxShadow(const gfx::RoundedRect2D &box, Vec2f offset, float blur, SRGBA<uint8> colour) noexcept
-    {
-      constexpr float away = 10'000.f;
-      auto clipOut = box;
-      clipOut.Rect = {box.Rect.X + 1.f, box.Rect.Y + 1.f, box.Rect.Width - 2.f, box.Rect.Height - 2.f};
-      auto moved = box;
-      moved.Rect.X += away;
-      _renderer->Save();
-      _renderer->ClipOutRoundedRect(clipOut);
-      _renderer->SetDropShadow({.Offset = {offset.x - away, offset.y}, .BlurRadius = blur, .Colour = colour});
-      _renderer->FillRoundedRect(moved, SRGBA<uint8> {0, 0, 0});
-      _renderer->Restore();
-    }
-
-    /// @brief An inset `box-shadow` as a browser paints it: a rect with the box as its hole, moved out of
-    /// view, casts the shadow inside a clip to the box.
-    void InsetShadow(const gfx::RoundedRect2D &box, Vec2f offset, float blur, SRGBA<uint8> colour) noexcept
-    {
-      constexpr float away = 10'000.f;
-      const float reach = blur + std::abs(offset.x) + std::abs(offset.y) + 2.f;
-      const auto &rect = box.Rect;
-      _renderer->Save();
-      _renderer->ClipRoundedRect(box);
-      _renderer->SetDropShadow({.Offset = {offset.x - away, offset.y}, .BlurRadius = blur, .Colour = colour});
-      _renderer->Translate(away, 0.f);
-      _renderer->FillRectWithRoundedHole(
-        {rect.X - reach, rect.Y - reach, rect.Width + 2.f * reach, rect.Height + 2.f * reach}, box,
-        SRGBA<uint8> {0, 0, 0});
-      _renderer->Restore();
-    }
-
-    /// @brief A white tile with a two-layer shadow, as design systems draw cards.
-    void DrawTile(const gfx::RoundedRect2D &tile, SRGBA<uint8> colour = {255, 255, 255}) noexcept
-    {
-      BoxShadow(tile, {0.f, 1.f}, 3.f, Rgb(0x000000, 30));
-      BoxShadow(tile, {0.f, 4.f}, 12.f, Rgb(0x000000, 22));
-      _renderer->FillRoundedRect(tile, colour);
     }
 
     /// @brief A line of text on a baseline, left to right, placed by advances (Booey shapes text; this is
@@ -1082,402 +920,18 @@ namespace krys
       _renderer->SetDropShadow({.Offset = {0.f, 1.f}, .BlurRadius = 4.f, .Colour = Rgb(0x1A1040, 120)});
       DrawText(U"Krystal", 56.f, 36.f, 22.f, Rgb(0xFFFFFF), true);
       _renderer->Restore();
-      const char32_t *links[] {U"Page", U"Render2D", U"Booey scene"};
-      for (int i = 0; i < 3; ++i)
-      {
-        const bool active = i == static_cast<int>(_view);
-        DrawText(links[i], 170.f + static_cast<float>(i) * 96.f, 34.f, 15.f,
-                 Rgb(0xFFFFFF, active ? 255 : 150), active);
-      }
-      DrawText(U"F2 switches views, F5 reloads the page", width - 290.f, 34.f, 13.f, Rgb(0xFFFFFF, 170));
+      DrawText(U"F5 reloads the page", width - 150.f, 34.f, 13.f, Rgb(0xFFFFFF, 170));
 
       // The page's chapter most in view, from its intersection observer.
-      if (_observers && _view == EditorView::Page && !_observers->CurrentChapter().empty())
+      if (_observers && !_observers->CurrentChapter().empty())
       {
         std::u32string chapter = U"Reading: ";
         for (text::CodePointIterator it(utf8_stringview(_observers->CurrentChapter())); !it.AtEnd(); ++it)
         {
           chapter.push_back(*it);
         }
-        DrawText(chapter.c_str(), 480.f, 34.f, 15.f, Rgb(0xFFFFFF), true);
+        DrawText(chapter.c_str(), 170.f, 34.f, 15.f, Rgb(0xFFFFFF), true);
       }
-    }
-
-    void DrawCard(const char32_t *title, float x, float y, float width, float height) noexcept
-    {
-      const auto card = Rounded(x, y, width, height, 16.f);
-      BoxShadow(card, {0.f, 2.f}, 6.f, Rgb(0x1A2240, 26));
-      BoxShadow(card, {0.f, 12.f}, 32.f, Rgb(0x1A2240, 30));
-      _renderer->FillRoundedRect(card, Rgb(0xFFFFFF));
-      DrawText(title, x + 24.f, y + 34.f, 16.f, Rgb(0x5A6378), true);
-    }
-
-    /// @brief Mask clipping: a turning star window, a panel with orbiting holes, two path clips at once, a
-    /// turning rounded clip, a ring chart and an avatar.
-    void DrawClipping(float x, float y) noexcept
-    {
-      using namespace gfx;
-
-      // The image scrolling behind a turning star.
-      const Vec2f star {x + 110.f, y + 160.f};
-      _renderer->Save();
-      _renderer->Translate(star.x, star.y);
-      _renderer->Rotate(_time * 0.4f);
-      _renderer->ClipPath(Star(82.f), FillRule::NonZero);
-      _renderer->SetTransform({});
-      const float drift = std::fmod(_time * 20.f, 40.f);
-      for (int row = 0; row < 6; ++row)
-      {
-        for (int column = 0; column < 6; ++column)
-        {
-          if (_image.IsValid())
-          {
-            _renderer->DrawImage(_image,
-                                 {star.x - 100.f + static_cast<float>(column) * 40.f - drift,
-                                  star.y - 100.f + static_cast<float>(row) * 40.f - drift, 40.f, 40.f},
-                                 {.Filter = SamplerFilter::Nearest});
-          }
-        }
-      }
-      _renderer->Restore();
-
-      // A gradient panel with three holes orbiting in it.
-      const auto panel = Rounded(x + 222.f, y + 80.f, 148.f, 150.f, 18.f);
-      Path2D holes;
-      for (int i = 0; i < 3; ++i)
-      {
-        const float angle = _time * 0.9f + static_cast<float>(i) * 2.0944f;
-        holes.AddEllipse({x + 296.f + 38.f * std::cos(angle), y + 155.f + 38.f * std::sin(angle)},
-                         {16.f, 16.f});
-      }
-      const Gradient2D panelFill {
-        .Shape = LinearGradient2D {{panel.Rect.X, panel.Rect.Y},
-                                   {panel.Rect.X + panel.Rect.Width, panel.Rect.Y + panel.Rect.Height}},
-        .Stops = {{.Offset = 0.f, .Colour = Hex(0x06D6A0)}, {.Offset = 1.f, .Colour = Hex(0x118AB2)}}};
-      _renderer->Save();
-      _renderer->ClipOutPath(holes, FillRule::NonZero);
-      _renderer->FillRoundedRect(panel, panelFill);
-      _renderer->Restore();
-
-      // Two path clips at once: a circle and a turning star, their masks multiplied.
-      const Vec2f both {x + 110.f, y + 350.f};
-      Path2D circle;
-      circle.AddEllipse(both, {80.f, 80.f});
-      const Gradient2D wheel {.Shape = ConicGradient2D {both, 0.f},
-                              .Stops = {{.Offset = 0.f, .Colour = Hex(0xEF476F)},
-                                        {.Offset = 0.33f, .Colour = Hex(0xFFD166)},
-                                        {.Offset = 0.66f, .Colour = Hex(0x06D6A0)},
-                                        {.Offset = 1.f, .Colour = Hex(0xEF476F)}}};
-      _renderer->Save();
-      _renderer->ClipPath(circle, FillRule::NonZero);
-      _renderer->Translate(both.x, both.y);
-      _renderer->Rotate(-_time * 0.3f);
-      _renderer->ClipPath(Star(110.f), FillRule::NonZero);
-      _renderer->SetTransform({});
-      _renderer->FillRect({both.x - 90.f, both.y - 90.f, 180.f, 180.f}, wheel);
-      _renderer->Restore();
-
-      // Stripes behind a rounded clip that rocks.
-      const Vec2f rocking {x + 296.f, y + 350.f};
-      _renderer->Save();
-      _renderer->Translate(rocking.x, rocking.y);
-      _renderer->Rotate(std::sin(_time * 0.8f) * 0.5f);
-      _renderer->ClipRoundedRect(Rounded(-66.f, -52.f, 132.f, 104.f, 24.f));
-      _renderer->SetTransform({});
-      _renderer->FillRect({rocking.x - 100.f, rocking.y - 100.f, 200.f, 200.f}, Rgb(0xFFD166));
-      const float shift = std::fmod(_time * 16.f, 28.f);
-      for (int i = -8; i <= 8; ++i)
-      {
-        const float offset = static_cast<float>(i) * 28.f + shift;
-        _renderer->StrokeLine({rocking.x + offset - 100.f, rocking.y - 100.f},
-                              {rocking.x + offset + 100.f, rocking.y + 100.f}, {.Width = 10.f},
-                              Rgb(0xEF476F));
-      }
-      _renderer->Restore();
-
-      // A ring chart: a conic gradient with hard stops, clipped to a ring (even-odd).
-      const Vec2f ring {x + 110.f, y + 530.f};
-      Path2D band;
-      band.AddEllipse(ring, {62.f, 62.f});
-      band.AddEllipse(ring, {38.f, 38.f});
-      const float share = 0.35f + 0.15f * std::sin(_time * 0.7f);
-      const Gradient2D chart {.Shape = ConicGradient2D {ring, 0.f},
-                              .Stops = {{.Offset = 0.f, .Colour = Hex(0x4F6DF5)},
-                                        {.Offset = share, .Colour = Hex(0x4F6DF5)},
-                                        {.Offset = share, .Colour = Hex(0xFFD166)},
-                                        {.Offset = share + 0.25f, .Colour = Hex(0xFFD166)},
-                                        {.Offset = share + 0.25f, .Colour = Hex(0xE3E7EF)},
-                                        {.Offset = 1.f, .Colour = Hex(0xE3E7EF)}}};
-      _renderer->Save();
-      _renderer->ClipPath(band, FillRule::EvenOdd);
-      _renderer->FillRect({ring.x - 64.f, ring.y - 64.f, 128.f, 128.f}, chart);
-      _renderer->Restore();
-
-      // A progress bar: a gradient inside a rounded clip, with stripes sliding along it.
-      const auto track = Rounded(x + 222.f, y + 480.f, 148.f, 20.f, 10.f);
-      _renderer->FillRoundedRect(track, Rgb(0xE3E7EF));
-      const float progress = 0.5f + 0.45f * std::sin(_time * 0.6f);
-      const Gradient2D fill {
-        .Shape = LinearGradient2D {{track.Rect.X, 0.f}, {track.Rect.X + track.Rect.Width, 0.f}},
-        .Stops = {{.Offset = 0.f, .Colour = Hex(0x4F6DF5)}, {.Offset = 1.f, .Colour = Hex(0xB04FF5)}}};
-      _renderer->Save();
-      _renderer->ClipRoundedRect(track);
-      _renderer->FillRoundedRect(Rounded(track.Rect.X, track.Rect.Y, track.Rect.Width * progress, 20.f, 10.f),
-                                 fill);
-      _renderer->StrokeLine({track.Rect.X - 20.f, track.Rect.Y + 10.f},
-                            {track.Rect.X + track.Rect.Width * progress, track.Rect.Y + 10.f},
-                            {.Width = 20.f, .Dashes = {6.f, 10.f}, .DashOffset = -_time * 30.f},
-                            Rgb(0xFFFFFF, 60));
-      _renderer->Restore();
-
-      // An avatar: the image clipped to a circle, with a ring and a shadow.
-      const Vec2f avatar {x + 296.f, y + 565.f};
-      Path2D face;
-      face.AddEllipse(avatar, {32.f, 32.f});
-      _renderer->Save();
-      _renderer->SetDropShadow({.Offset = {0.f, 3.f}, .BlurRadius = 10.f, .Colour = Rgb(0x000000, 70)});
-      _renderer->FillPath(face, FillRule::NonZero, Rgb(0xFFFFFF));
-      _renderer->Restore();
-      if (_image.IsValid())
-      {
-        _renderer->Save();
-        _renderer->ClipPath(face, FillRule::NonZero);
-        _renderer->DrawImage(_image, {avatar.x - 32.f, avatar.y - 32.f, 64.f, 64.f});
-        _renderer->Restore();
-      }
-      _renderer->StrokePath(face, {.Width = 3.f}, Rgb(0xFFFFFF));
-    }
-
-    /// @brief Shadows: elevations, sharp, inset, glowing and translucent shadows, shadows of paths and
-    /// strokes, shadows under transforms, and a card lifting.
-    void DrawShadows(float x, float y) noexcept
-    {
-      using namespace gfx;
-
-      // Elevations, as a design system steps them.
-      const float blurs[] {2.f, 6.f, 14.f, 28.f};
-      const float drops[] {1.f, 3.f, 6.f, 12.f};
-      for (int i = 0; i < 4; ++i)
-      {
-        const auto tile = Rounded(x + 24.f + static_cast<float>(i) * 90.f, y + 64.f, 74.f, 64.f, 10.f);
-        BoxShadow(tile, {0.f, drops[i]}, blurs[i], Rgb(0x000000, 70));
-        _renderer->FillRoundedRect(tile, Rgb(0xFFFFFF));
-      }
-
-      // Sharp, inset, glowing on a dark tile, and translucent (its shadow fades with it).
-      const float row = y + 160.f;
-      const auto sharp = Rounded(x + 24.f, row, 74.f, 64.f, 0.f);
-      BoxShadow(sharp, {6.f, 6.f}, 0.f, Rgb(0x4F6DF5));
-      _renderer->FillRoundedRect(sharp, Rgb(0xFFFFFF));
-      DrawText(U"Sharp", sharp.Rect.X + 12.f, row + 24.f, 13.f, Rgb(0x5A6378));
-
-      const auto well = Rounded(x + 114.f, row, 74.f, 64.f, 14.f);
-      _renderer->FillRoundedRect(well, Rgb(0xEEF1F6));
-      InsetShadow(well, {0.f, 3.f}, 10.f, Rgb(0x000000, 110));
-
-      const auto dark = Rounded(x + 204.f, row, 74.f, 64.f, 14.f);
-      _renderer->Save();
-      _renderer->SetDropShadow(
-        {.Offset = {}, .BlurRadius = 18.f + 6.f * std::sin(_time * 2.f), .Colour = Rgb(0x00E5FF, 200)});
-      _renderer->FillRoundedRect(dark, Rgb(0x23283A));
-      _renderer->Restore();
-
-      const auto glass = Rounded(x + 294.f, row, 74.f, 64.f, 14.f);
-      _renderer->Save();
-      _renderer->SetDropShadow({.Offset = {0.f, 6.f}, .BlurRadius = 12.f, .Colour = Rgb(0x000000, 160)});
-      _renderer->FillRoundedRect(glass, Rgb(0x4F6DF5, 110));
-      _renderer->Restore();
-
-      // Shadows of paths and strokes: a star, a zigzag, dots and a ring.
-      const float shapes = y + 300.f;
-      _renderer->Save();
-      _renderer->SetDropShadow({.Offset = {3.f, 5.f}, .BlurRadius = 8.f, .Colour = Rgb(0x000000, 90)});
-      _renderer->Save();
-      _renderer->Translate(x + 62.f, shapes);
-      _renderer->FillPath(Star(36.f), FillRule::NonZero, Rgb(0xFFD166));
-      _renderer->Restore();
-      Path2D zigzag;
-      zigzag.MoveTo({x + 110.f, shapes + 20.f});
-      zigzag.LineTo({x + 135.f, shapes - 20.f});
-      zigzag.LineTo({x + 160.f, shapes + 20.f});
-      zigzag.LineTo({x + 185.f, shapes - 20.f});
-      _renderer->StrokePath(zigzag, {.Width = 8.f, .Cap = LineCap::Round, .Join = LineJoin::Round},
-                            Rgb(0xEF476F));
-      _renderer->StrokeLine({x + 210.f, shapes}, {x + 280.f, shapes},
-                            {.Width = 10.f, .Cap = LineCap::Round, .Dashes = {0.f, 20.f}}, Rgb(0x06D6A0));
-      Path2D ring;
-      ring.AddEllipse({x + 330.f, shapes}, {26.f, 26.f});
-      _renderer->StrokePath(ring, {.Width = 6.f}, Rgb(0x4F6DF5));
-      _renderer->Restore();
-
-      // Under transforms: the shadow turning with its card (current coordinates) and staying put
-      // (ignoring transforms, as canvas does), and a card squashed by a scale.
-      const float turned = y + 420.f;
-      for (int i = 0; i < 2; ++i)
-      {
-        _renderer->Save();
-        _renderer->Translate(x + 70.f + static_cast<float>(i) * 120.f, turned);
-        _renderer->Rotate(std::sin(_time * 0.9f) * 0.6f);
-        _renderer->SetShadowsIgnoreTransforms(i == 1);
-        _renderer->SetDropShadow({.Offset = {0.f, 8.f}, .BlurRadius = 12.f, .Colour = Rgb(0x000000, 90)});
-        _renderer->FillRoundedRect(Rounded(-38.f, -28.f, 76.f, 56.f, 10.f), Rgb(0xFFFFFF));
-        _renderer->Restore();
-      }
-      _renderer->Save();
-      _renderer->Translate(x + 320.f, turned);
-      _renderer->Scale(1.4f, 0.7f);
-      _renderer->SetDropShadow({.Offset = {0.f, 8.f}, .BlurRadius = 12.f, .Colour = Rgb(0x000000, 90)});
-      _renderer->FillRoundedRect(Rounded(-26.f, -36.f, 52.f, 72.f, 10.f), Rgb(0xFFFFFF));
-      _renderer->Restore();
-
-      // A card lifting on its shadow, and a star whose shadow swings round it.
-      const float lift = 0.5f + 0.5f * std::sin(_time * 1.7f);
-      const auto lifted = Rounded(x + 24.f, y + 520.f - 4.f * lift, 160.f, 64.f, 12.f);
-      BoxShadow(lifted, {0.f, 2.f + 8.f * lift}, 6.f + 18.f * lift, Rgb(0x000000, 80));
-      _renderer->FillRoundedRect(lifted, Rgb(0xFFFFFF));
-      DrawText(U"Lifting card", lifted.Rect.X + 16.f, lifted.Rect.Y + 26.f, 14.f, Rgb(0x222733), true);
-      DrawText(U"Its shadow grows as it rises", lifted.Rect.X + 16.f, lifted.Rect.Y + 46.f, 11.f,
-               Rgb(0x8A93A6));
-
-      _renderer->Save();
-      _renderer->SetDropShadow({.Offset = {8.f * std::cos(_time), 8.f * std::sin(_time)},
-                                .BlurRadius = 10.f,
-                                .Colour = Rgb(0x1A1040, 110)});
-      _renderer->Translate(x + 300.f, y + 552.f);
-      _renderer->FillPath(Star(36.f), FillRule::NonZero, Rgb(0xB04FF5));
-      _renderer->Restore();
-    }
-
-    /// @brief Compositing (there are no filters yet): blend modes over the image, opacity per draw against
-    /// a group's, a layer composited with multiply, additive light, and gradients.
-    void DrawCompositing(float x, float y) noexcept
-    {
-      using namespace gfx;
-
-      // Six blend modes over the image.
-      const auto backdrop = Rounded(x + 24.f, y + 60.f, 344.f, 110.f, 12.f);
-      _renderer->Save();
-      _renderer->ClipRoundedRect(backdrop);
-      if (_image.IsValid())
-      {
-        _renderer->DrawImage(_image, backdrop.Rect);
-      }
-      const BlendMode modes[] {BlendMode::Multiply,   BlendMode::Screen, BlendMode::Overlay,
-                               BlendMode::Difference, BlendMode::Hue,    BlendMode::Luminosity};
-      for (int i = 0; i < 6; ++i)
-      {
-        const float bob = 12.f * std::sin(_time * 2.f + static_cast<float>(i));
-        _renderer->Save();
-        _renderer->SetBlendMode(modes[i]);
-        _renderer->FillRoundedRect(
-          Rounded(x + 36.f + static_cast<float>(i) * 56.f, y + 92.f + bob, 46.f, 46.f, 23.f), Rgb(0xFF8C00));
-        _renderer->Restore();
-      }
-      _renderer->Restore();
-
-      // Opacity per draw (the overlap mixes) and for a group (it fades as one).
-      const float circles = y + 200.f;
-      _renderer->FillRoundedRect(Rounded(x + 24.f, circles, 56.f, 56.f, 28.f), Rgb(0xEF476F, 128));
-      _renderer->FillRoundedRect(Rounded(x + 54.f, circles + 18.f, 56.f, 56.f, 28.f), Rgb(0x4F6DF5, 128));
-      _renderer->BeginLayer(0.5f + 0.4f * std::sin(_time * 1.5f));
-      _renderer->FillRoundedRect(Rounded(x + 130.f, circles, 56.f, 56.f, 28.f), Rgb(0xEF476F));
-      _renderer->FillRoundedRect(Rounded(x + 160.f, circles + 18.f, 56.f, 56.f, 28.f), Rgb(0x4F6DF5));
-      _renderer->EndLayer();
-
-      // A layer composited with multiply over stripes.
-      const auto stripes = Rounded(x + 244.f, circles, 124.f, 74.f, 10.f);
-      _renderer->Save();
-      _renderer->ClipRoundedRect(stripes);
-      for (int i = 0; i < 6; ++i)
-      {
-        _renderer->FillRect({stripes.Rect.X + static_cast<float>(i) * 21.f, stripes.Rect.Y, 21.f, 74.f},
-                            i % 2 == 0 ? Rgb(0xFFD166) : Rgb(0x06D6A0));
-      }
-      _renderer->BeginLayer(1.f, BlendMode::Multiply);
-      _renderer->FillRoundedRect(Rounded(stripes.Rect.X + 18.f, circles + 12.f, 50.f, 50.f, 8.f),
-                                 Rgb(0x8ECAE6));
-      _renderer->FillRoundedRect(Rounded(stripes.Rect.X + 52.f, circles + 12.f, 50.f, 50.f, 8.f),
-                                 Rgb(0xF4A6C6));
-      _renderer->EndLayer();
-      _renderer->Restore();
-
-      // Additive light (plus-lighter) on a dark tile.
-      const auto night = Rounded(x + 24.f, y + 300.f, 344.f, 120.f, 14.f);
-      _renderer->FillRoundedRect(night, Rgb(0x14182A));
-      _renderer->Save();
-      _renderer->ClipRoundedRect(night);
-      _renderer->SetBlendMode(BlendMode::PlusLighter);
-      const uint32 lights[] {0xD02020, 0x20C040, 0x2040E0};
-      for (int i = 0; i < 3; ++i)
-      {
-        const float angle = _time * 0.8f + static_cast<float>(i) * 2.0944f;
-        const Vec2f centre {x + 196.f + 34.f * std::cos(angle), y + 360.f + 22.f * std::sin(angle)};
-        const Gradient2D glow {.Shape = RadialGradient2D {centre, centre, 0.f, 56.f},
-                               .Stops = {{.Offset = 0.f, .Colour = Hex(lights[i])},
-                                         {.Offset = 1.f, .Colour = {0.f, 0.f, 0.f, 0.f}}}};
-        _renderer->FillRect({centre.x - 56.f, centre.y - 56.f, 112.f, 112.f}, glow);
-      }
-      _renderer->Restore();
-
-      // Gradients: a turning linear one, a radial one with a circling focus, a turning conic one, a bar in
-      // OKLCH the long way round and a subtle grey bar that shows the dithering.
-      const float tiles = y + 450.f;
-      const Vec2f linearCentre {x + 57.f, tiles + 33.f};
-      const Vec2f along {33.f * std::cos(_time), 33.f * std::sin(_time)};
-      const Gradient2D linear {
-        .Shape = LinearGradient2D {{linearCentre.x - along.x, linearCentre.y - along.y},
-                                   {linearCentre.x + along.x, linearCentre.y + along.y}},
-        .Stops = {{.Offset = 0.f, .Colour = Hex(0xFF8C00)}, {.Offset = 1.f, .Colour = Hex(0x7333E6)}}};
-      _renderer->FillRoundedRect(Rounded(x + 24.f, tiles, 66.f, 66.f, 12.f), linear);
-
-      const Vec2f radialCentre {x + 143.f, tiles + 33.f};
-      const Vec2f focus {radialCentre.x + 14.f * std::cos(_time * 1.3f),
-                         radialCentre.y + 14.f * std::sin(_time * 1.3f)};
-      const Gradient2D radial {
-        .Shape = RadialGradient2D {focus, radialCentre, 0.f, 33.f},
-        .Stops = {{.Offset = 0.f, .Colour = Hex(0xFFFFFF)}, {.Offset = 1.f, .Colour = Hex(0x1A4DCC)}}};
-      _renderer->FillRoundedRect(Rounded(x + 110.f, tiles, 66.f, 66.f, 33.f), radial);
-
-      const Gradient2D conic {.Shape = ConicGradient2D {{x + 229.f, tiles + 33.f}, _time * 0.7f},
-                              .Stops = {{.Offset = 0.f, .Colour = Hex(0xEF476F)},
-                                        {.Offset = 0.5f, .Colour = Hex(0xFFD166)},
-                                        {.Offset = 0.5f, .Colour = Hex(0x118AB2)},
-                                        {.Offset = 1.f, .Colour = Hex(0xEF476F)}}};
-      _renderer->FillRoundedRect(Rounded(x + 196.f, tiles, 66.f, 66.f, 33.f), conic);
-
-      const Gradient2D hues {
-        .Shape = LinearGradient2D {{x + 24.f, 0.f}, {x + 368.f, 0.f}},
-        .Stops = {{.Offset = 0.f, .Colour = Hex(0xFF0000)}, {.Offset = 1.f, .Colour = Hex(0x0000FF)}},
-        .Interpolation = {.ColourSpace = ColourInterpolationMethod::OKLCH {HueInterpolationMethod::Longer},
-                          .AlphaPremultiplication = AlphaPremultiplication::Premultiplied}};
-      _renderer->FillRoundedRect(Rounded(x + 24.f, tiles + 86.f, 344.f, 20.f, 6.f), hues);
-
-      const Gradient2D greys {
-        .Shape = LinearGradient2D {{x + 24.f, 0.f}, {x + 368.f, 0.f}},
-        .Stops = {{.Offset = 0.f, .Colour = Hex(0xD8DCE4)}, {.Offset = 1.f, .Colour = Hex(0xEEF1F6)}}};
-      _renderer->FillRoundedRect(Rounded(x + 24.f, tiles + 116.f, 344.f, 20.f, 6.f), greys);
-    }
-
-    /// @brief A five-pointed star drawn in one stroke, so its contour crosses itself.
-    KRYS_NODISCARD static gfx::Path2D Star(float radius) noexcept
-    {
-      gfx::Path2D path;
-      for (int i = 0; i < 5; ++i)
-      {
-        // Every second point of a pentagon: the classic pentagram.
-        const float angle = -1.5707963f + static_cast<float>(i * 2) * 1.2566371f;
-        const Vec2f point {radius * std::cos(angle), radius * std::sin(angle)};
-        if (i == 0)
-        {
-          path.MoveTo(point);
-        }
-        else
-        {
-          path.LineTo(point);
-        }
-      }
-      path.Close();
-      return path;
     }
   };
 }
