@@ -2,8 +2,8 @@
 # Only the engine's own modules (and their tests and generated code), not vcpkg or third-party/.
 HeaderFilterRegex: '.*[/\\]Krystal\.[A-Za-z.]+[/\\].*'
 
-# Vendored code inside the modules (magic_enum, Khronos's OpenGL headers).
-ExcludeHeaderFilterRegex: '.*[/\\](MagicEnum\.hpp|OpenGL[/\\]Official[/\\].*)'
+# Vendored code inside the modules (Khronos's OpenGL headers).
+ExcludeHeaderFilterRegex: '.*[/\\](OpenGL[/\\]Official[/\\].*)'
 
 # Auto-fixes are formatted with .clang-format.
 FormatStyle: file

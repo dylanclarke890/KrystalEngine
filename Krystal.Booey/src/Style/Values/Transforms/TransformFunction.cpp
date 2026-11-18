@@ -75,7 +75,7 @@ namespace krys::boo::style
     if (primitiveValue.IsPercentage())
     {
       return TranslateTransformFunction::LengthPercentage::Percentage {
-        static_cast<float>(primitiveValue.ResolveAsPercentage<double>(conversionData))};
+        primitiveValue.ResolveAsPercentage<float>(conversionData)};
     }
     if (primitiveValue.IsCalculated())
     {
@@ -553,7 +553,7 @@ namespace krys::boo::style
     // FIXME: Support for <number> parameters for `perspective` is a quirk that should go away when 3d
     // transforms are finalized.
     return PerspectiveTransformFunction::Create(Length<css::NonNegative> {
-      static_cast<float>(ConvertCSSValueToStyle<Number<css::NonNegative>>(state, parameter).Value)});
+      ConvertCSSValueToStyle<Number<css::NonNegative, float>>(state, parameter).Value});
   }
 
   // MARK: - Conversion

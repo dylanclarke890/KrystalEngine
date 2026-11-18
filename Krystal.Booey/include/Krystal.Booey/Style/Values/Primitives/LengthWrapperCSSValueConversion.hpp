@@ -95,7 +95,7 @@ namespace krys::boo::style
         {
           return T {typename T::Percentage {
             css::ClampToRange<T::Percentage::Range, float>(
-              primitiveValue.ResolveAsPercentage(conversionData)),
+              primitiveValue.ResolveAsPercentage<float>(conversionData)),
           }};
         }
 

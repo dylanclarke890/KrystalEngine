@@ -37,7 +37,7 @@ namespace krys::boo::style
   // https://drafts.csswg.org/css-fonts-4/#propdef-font-size-adjust
   struct FontSizeAdjust
   {
-    using Number = style::Number<css::NonNegative>;
+    using Number = style::Number<css::NonNegative, float>;
     using Metric = boo::FontSizeAdjust::Metric;
     using ValueType = boo::FontSizeAdjust::ValueType;
 
@@ -51,7 +51,7 @@ namespace krys::boo::style
     }
 
     FontSizeAdjust(Metric metric, Number metricValue) noexcept
-        : _platform {metric, ValueType::Number, static_cast<float>(metricValue.Value)}
+        : _platform {metric, ValueType::Number, metricValue.Value}
     {
     }
 
