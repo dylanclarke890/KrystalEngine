@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
@@ -9,7 +10,6 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Gfx/Render2D/Path2D.hpp"
-#include "Krystal.Gfx/Render2D/Rect2D.hpp"
 #include "Krystal.Gfx/Render2D/Transform2D.hpp"
 #include "Krystal.Text/FreeTypeFace.hpp"
 
@@ -61,7 +61,7 @@ namespace krys::gfx
   {
     /// @brief The pixels it covers, relative to the pixel the pen is in: the pen is at that pixel's top-left
     /// corner plus the subpixel offset; y points down, so the baseline is y = 0.
-    PixelRect2D Bounds {};
+    RectI Bounds {};
     /// @brief Rows from the top: one byte of coverage per pixel, or four (premultiplied RGBA) for colour
     /// glyphs.
     List<uint8> Pixels;

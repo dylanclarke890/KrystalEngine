@@ -61,13 +61,13 @@ namespace krys::gfx::tests
       double x = 0.0;
       double y = 0.0;
       double total = 0.0;
-      for (uint32 row = firstRow; row < bitmap.Bounds.Height && row < lastRow; ++row)
+      for (uint32 row = firstRow; row < static_cast<uint32>(bitmap.Bounds.Height()) && row < lastRow; ++row)
       {
-        for (uint32 column = 0u; column < bitmap.Bounds.Width; ++column)
+        for (uint32 column = 0u; column < static_cast<uint32>(bitmap.Bounds.Width()); ++column)
         {
-          const double value = bitmap.Pixels[row * bitmap.Bounds.Width + column] / 255.0;
-          x += value * (bitmap.Bounds.X + static_cast<int32>(column) + 0.5);
-          y += value * (bitmap.Bounds.Y + static_cast<int32>(row) + 0.5);
+          const double value = bitmap.Pixels[row * bitmap.Bounds.Width() + column] / 255.0;
+          x += value * (bitmap.Bounds.X() + static_cast<int32>(column) + 0.5);
+          y += value * (bitmap.Bounds.Y() + static_cast<int32>(row) + 0.5);
           total += value;
         }
       }
@@ -100,10 +100,10 @@ namespace krys::gfx::tests
       const auto bitmap = face->Rasterise(glyph, 16.f, 0.f);
       REQUIRE(bitmap.has_value());
       CHECK_FALSE(bitmap->Colour);
-      CHECK(bitmap->Bounds.X == reference->glyph->bitmap_left);
-      CHECK(bitmap->Bounds.Y == -reference->glyph->bitmap_top);
-      REQUIRE(bitmap->Bounds.Width == expected.width);
-      REQUIRE(bitmap->Bounds.Height == expected.rows);
+      CHECK(bitmap->Bounds.X() == reference->glyph->bitmap_left);
+      CHECK(bitmap->Bounds.Y() == -reference->glyph->bitmap_top);
+      REQUIRE(static_cast<uint32>(bitmap->Bounds.Width()) == expected.width);
+      REQUIRE(static_cast<uint32>(bitmap->Bounds.Height()) == expected.rows);
       bool same = true;
       for (uint32 row = 0u; row < expected.rows; ++row)
       {
@@ -129,8 +129,8 @@ namespace krys::gfx::tests
     // H sits on the baseline, above it.
     const auto upright = face->Rasterise(h, 32.f, 0.f);
     REQUIRE(upright.has_value());
-    CHECK(upright->Bounds.Y < 0);
-    CHECK(upright->Bounds.Y + static_cast<int32>(upright->Bounds.Height) == 0);
+    CHECK(upright->Bounds.Y() < 0);
+    CHECK(upright->Bounds.MaxY() == 0);
 
     // Half a pixel along moves it half a pixel, coverage and all.
     const auto moved = face->Rasterise(h, 32.f, 0.5f);
@@ -167,9 +167,9 @@ namespace krys::gfx::tests
     auto row = [](const GlyphBitmap &bitmap, uint32 index)
     {
       double total = 0.0;
-      for (uint32 column = 0u; column < bitmap.Bounds.Width; ++column)
+      for (uint32 column = 0u; column < static_cast<uint32>(bitmap.Bounds.Width()); ++column)
       {
-        total += bitmap.Pixels[index * bitmap.Bounds.Width + column] / 255.0;
+        total += bitmap.Pixels[index * bitmap.Bounds.Width() + column] / 255.0;
       }
       return total;
     };
@@ -195,7 +195,7 @@ namespace krys::gfx::tests
     // Slanted right: the top of the l is further right than its bottom.
     const auto slanted = oblique->Rasterise(l, 48.f, 0.f);
     REQUIRE(slanted.has_value());
-    const uint32 rows = slanted->Bounds.Height;
+    const uint32 rows = slanted->Bounds.Height();
     const float top = Centroid(*slanted, 0u, rows / 4u).x;
     const float bottom = Centroid(*slanted, rows * 3u / 4u, rows).x;
     CHECK(top - bottom > static_cast<float>(rows) * 0.5f * 0.25f * 0.9f);
@@ -209,13 +209,13 @@ namespace krys::gfx::tests
     // A quarter turn clockwise lays the l along x, its top to the right... of the pen: y down, x right.
     const auto turned = face->Rasterise(l, 32.f, 0.f, Transform2D::Rotation(std::numbers::pi_v<float> / 2.f));
     REQUIRE((upright && turned));
-    CHECK(turned->Bounds.Width == upright->Bounds.Height);
-    CHECK(turned->Bounds.Height == upright->Bounds.Width);
+    CHECK(turned->Bounds.Width() == upright->Bounds.Height());
+    CHECK(turned->Bounds.Height() == upright->Bounds.Width());
     CHECK(std::abs(Total(*turned) - Total(*upright)) < Total(*upright) * 0.02);
     // Doubling the scale doubles the height.
     const auto scaled = face->Rasterise(l, 32.f, 0.f, Transform2D::Scale(1.f, 2.f));
     REQUIRE(scaled.has_value());
-    CHECK(std::abs(static_cast<int>(scaled->Bounds.Height) - 2 * static_cast<int>(upright->Bounds.Height))
+    CHECK(std::abs(static_cast<int>(scaled->Bounds.Height()) - 2 * static_cast<int>(upright->Bounds.Height()))
           <= 1);
   }
 
@@ -236,16 +236,16 @@ namespace krys::gfx::tests
     const auto bitmap = face->Rasterise(face->GlyphIndex(U'g'), 40.f, 0.f);
     REQUIRE(bitmap.has_value());
     PathRasteriser rasteriser;
-    const auto mask = rasteriser.Rasterise(path, Transform2D::Identity(), FillRule::NonZero,
-                                           {.X = -100, .Y = -100, .Width = 200u, .Height = 200u});
+    const auto mask =
+      rasteriser.Rasterise(path, Transform2D::Identity(), FillRule::NonZero, {-100, -100, 200u, 200u});
     double area = 0.0;
     for (const auto value : mask.Coverage)
     {
       area += value / 255.0;
     }
     CHECK(std::abs(area - Total(*bitmap)) < Total(*bitmap) * 0.02);
-    CHECK(mask.Bounds.Y == bitmap->Bounds.Y);
-    CHECK(mask.Bounds.X == bitmap->Bounds.X);
+    CHECK(mask.Bounds.Y() == bitmap->Bounds.Y());
+    CHECK(mask.Bounds.X() == bitmap->Bounds.X());
   }
 
   TEST_CASE("FontFace2D: rasterises colour glyphs as RGBA", "[Gfx][Render2D]")
@@ -262,6 +262,7 @@ namespace krys::gfx::tests
     const auto bitmap = (*face)->Rasterise((*face)->GlyphIndex(U'\U0001F600'), 32.f, 0.f);
     REQUIRE(bitmap.has_value());
     CHECK(bitmap->Colour);
-    CHECK(bitmap->Pixels.size() == static_cast<size_t>(bitmap->Bounds.Width) * bitmap->Bounds.Height * 4u);
+    CHECK(bitmap->Pixels.size()
+          == static_cast<size_t>(bitmap->Bounds.Width()) * bitmap->Bounds.Height() * 4u);
   }
 }

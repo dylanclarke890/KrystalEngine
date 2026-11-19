@@ -18,8 +18,8 @@ namespace krys::gfx::tests
       PathStroker stroker;
       PathRasteriser rasteriser;
       const auto outline = stroker.Stroke(path, style, transform);
-      const auto mask = rasteriser.Rasterise(outline, transform, FillRule::NonZero,
-                                             {.X = -1'000, .Y = -1'000, .Width = 2'000u, .Height = 2'000u});
+      const auto mask =
+        rasteriser.Rasterise(outline, transform, FillRule::NonZero, {-1'000, -1'000, 2'000u, 2'000u});
       float sum = 0.f;
       for (const auto value : mask.Coverage)
       {

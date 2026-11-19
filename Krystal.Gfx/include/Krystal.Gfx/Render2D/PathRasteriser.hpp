@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Gfx/Render2D/Path2D.hpp"
-#include "Krystal.Gfx/Render2D/Rect2D.hpp"
 #include "Krystal.Gfx/Render2D/Transform2D.hpp"
 
 namespace krys::gfx
@@ -14,13 +14,14 @@ namespace krys::gfx
   struct CoverageMask
   {
     /// @brief The pixels the mask covers; empty when the shape covers none.
-    PixelRect2D Bounds {};
+    RectI Bounds {};
     /// @brief One byte per pixel, from 0 (outside) to 255 (inside), rows from the top.
     List<uint8> Coverage;
 
     KRYS_NODISCARD uint8 At(int32 x, int32 y) const noexcept
     {
-      return Coverage[static_cast<size_t>(y - Bounds.Y) * Bounds.Width + static_cast<size_t>(x - Bounds.X)];
+      return Coverage[static_cast<size_t>(y - Bounds.Y()) * Bounds.Width()
+                      + static_cast<size_t>(x - Bounds.X())];
     }
   };
 
@@ -78,7 +79,7 @@ namespace krys::gfx
     /// @brief Rasterises `path`, mapped into pixels by `transform`, within `clip`. Paths with non-finite
     /// points cover nothing.
     KRYS_NODISCARD CoverageMask Rasterise(const Path2D &path, const Transform2D &transform, FillRule rule,
-                                          const PixelRect2D &clip) noexcept;
+                                          const RectI &clip) noexcept;
 
   private:
     /// @brief Flattens the transformed path into `_edges`; false if a point isn't finite.

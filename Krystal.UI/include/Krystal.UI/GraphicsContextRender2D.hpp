@@ -34,7 +34,7 @@ namespace krys::ui
     struct ImageClip
     {
       gfx::TextureHandle Texture;
-      gfx::Rect2D Destination;
+      RectF Destination;
       gfx::Transform2D Transform;
       uint32 StackSize {0};
     };

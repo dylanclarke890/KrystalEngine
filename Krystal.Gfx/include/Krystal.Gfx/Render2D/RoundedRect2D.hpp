@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Gfx/Render2D/Rect2D.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::gfx
 {
@@ -25,7 +25,7 @@ namespace krys::gfx
   /// @brief A rectangle with circular corners.
   struct RoundedRect2D
   {
-    Rect2D Rect {};
+    RectF Rect {};
     CornerRadii2D Radii {};
 
     constexpr bool operator==(const RoundedRect2D &) const noexcept = default;

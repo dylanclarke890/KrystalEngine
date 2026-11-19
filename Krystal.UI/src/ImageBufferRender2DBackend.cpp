@@ -517,7 +517,7 @@ namespace krys::ui
                               .Height = height,
                               .Format = gfx::TextureFormat::RGBA8Unorm,
                               .ClearColour = Array<float, 4> {0.f, 0.f, 0.f, 0.f}});
-    const gfx::Rect2D whole {0.f, 0.f, static_cast<float>(width), static_cast<float>(height)};
+    const RectF whole {0.f, 0.f, static_cast<float>(width), static_cast<float>(height)};
     _copier->DrawImage(source, whole, whole);
     _copier->End();
     _device->Submit(commands);

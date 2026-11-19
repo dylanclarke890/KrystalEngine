@@ -30,10 +30,11 @@ namespace krys::gfx::tests
     {
       renderer.Save();
       auto clipOut = box;
-      clipOut.Rect = {box.Rect.X + 1.f, box.Rect.Y + 1.f, box.Rect.Width - 2.f, box.Rect.Height - 2.f};
+      clipOut.Rect = {box.Rect.X() + 1.f, box.Rect.Y() + 1.f, box.Rect.Width() - 2.f,
+                      box.Rect.Height() - 2.f};
       renderer.ClipOutRoundedRect(clipOut);
       renderer.SetDropShadow({.Offset = {offset.x - Away, offset.y}, .BlurRadius = blur, .Colour = colour});
-      box.Rect.X += Away;
+      box.Rect.Move(Away, 0.f);
       renderer.FillRoundedRect(box, Black);
       renderer.Restore();
     }
@@ -50,7 +51,8 @@ namespace krys::gfx::tests
       const float reach = blur + std::abs(offset.x) + std::abs(offset.y) + 2.f;
       const auto &rect = box.Rect;
       renderer.FillRectWithRoundedHole(
-        {rect.X - reach, rect.Y - reach, rect.Width + 2.f * reach, rect.Height + 2.f * reach}, box, Black);
+        {rect.X() - reach, rect.Y() - reach, rect.Width() + 2.f * reach, rect.Height() + 2.f * reach}, box,
+        Black);
       renderer.Restore();
     }
 

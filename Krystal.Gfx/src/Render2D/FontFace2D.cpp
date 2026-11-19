@@ -186,10 +186,8 @@ namespace krys::gfx
     }
 
     const FT_Bitmap &bitmap = slot->bitmap;
-    GlyphBitmap result {.Bounds = {.X = slot->bitmap_left,
-                                   .Y = -slot->bitmap_top,
-                                   .Width = bitmap.width,
-                                   .Height = bitmap.rows},
+    GlyphBitmap result {.Bounds = {slot->bitmap_left, -slot->bitmap_top, static_cast<int32>(bitmap.width),
+                                   static_cast<int32>(bitmap.rows)},
                         .Pixels = {},
                         .Colour = bitmap.pixel_mode == FT_PIXEL_MODE_BGRA};
     if (result.Bounds.IsEmpty())

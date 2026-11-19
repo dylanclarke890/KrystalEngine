@@ -206,7 +206,7 @@ namespace krys::ui
     float y = targetPoint.Y() + Padding;
     for (char digit : digits)
     {
-      const Array<gfx::Rect2D, 7> segments {{
+      const Array<RectF, 7> segments {{
         {x, y, DigitWidth, Stroke},
         {x + DigitWidth - Stroke, y, Stroke, Half + Stroke},
         {x + DigitWidth - Stroke, y + Half, Stroke, Half + Stroke},
@@ -266,7 +266,7 @@ namespace krys::ui
     _renderer->Save();
     SetTransform(modelViewMatrix);
     _renderer->DrawImage(
-      texture.Handle(), ToRect2D(targetRect),
+      texture.Handle(), targetRect,
       {.Filter = ScalingFilter(texture.Size(), targetRect, modelViewMatrix), .Opacity = opacity});
     _renderer->Restore();
   }
@@ -282,7 +282,7 @@ namespace krys::ui
 
     _renderer->Save();
     SetTransform(modelViewMatrix);
-    _renderer->DrawImage(texture, ToRect2D(targetRect),
+    _renderer->DrawImage(texture, targetRect,
                          {.Filter = ScalingFilter(textureSize, targetRect, modelViewMatrix),
                           .Alpha = alpha,
                           .Opacity = opacity});
@@ -299,7 +299,7 @@ namespace krys::ui
 
     _renderer->Save();
     SetTransform(matrix);
-    _renderer->FillRect(ToRect2D(rect), gfx::Paint2D(ToColour(color)));
+    _renderer->FillRect(rect, gfx::Paint2D(ToColour(color)));
     _renderer->Restore();
   }
 
@@ -317,12 +317,12 @@ namespace krys::ui
       if (modelViewMatrix.IsAffine() && quad.IsRectilinear() && !rect.IsEmpty())
       {
         SetTransform(boo::TransformationMatrix());
-        _renderer->ClipRect(ToRect2D(RectF(rect)));
+        _renderer->ClipRect(RectF(rect));
         SetTransform(modelViewMatrix);
       }
       else
       {
-        _renderer->ClipRect(ToRect2D(targetRect.Rect()));
+        _renderer->ClipRect(targetRect.Rect());
       }
     }
     else if (auto circular = ToCircularRoundedRect(targetRect))

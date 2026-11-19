@@ -54,16 +54,16 @@ namespace krys::gfx
     _hasCurrentPoint = false;
   }
 
-  void Path2D::AddRect(const Rect2D &rect) noexcept
+  void Path2D::AddRect(const RectF &rect) noexcept
   {
-    MoveTo({rect.X, rect.Y});
-    LineTo({rect.X + rect.Width, rect.Y});
-    LineTo({rect.X + rect.Width, rect.Y + rect.Height});
-    LineTo({rect.X, rect.Y + rect.Height});
+    MoveTo({rect.X(), rect.Y()});
+    LineTo({rect.X() + rect.Width(), rect.Y()});
+    LineTo({rect.X() + rect.Width(), rect.Y() + rect.Height()});
+    LineTo({rect.X(), rect.Y() + rect.Height()});
     Close();
   }
 
-  void Path2D::AddRoundedRect(const Rect2D &rect, const Array<Vec2f, 4> &radii) noexcept
+  void Path2D::AddRoundedRect(const RectF &rect, const Array<Vec2f, 4> &radii) noexcept
   {
     Array<Vec2f, 4> r {};
     for (size_t i = 0u; i < 4u; ++i)
@@ -79,19 +79,19 @@ namespace krys::gfx
         scale = std::min(scale, length / (a + b));
       }
     };
-    fit(rect.Width, r[0].x, r[1].x);
-    fit(rect.Width, r[3].x, r[2].x);
-    fit(rect.Height, r[0].y, r[3].y);
-    fit(rect.Height, r[1].y, r[2].y);
+    fit(rect.Width(), r[0].x, r[1].x);
+    fit(rect.Width(), r[3].x, r[2].x);
+    fit(rect.Height(), r[0].y, r[3].y);
+    fit(rect.Height(), r[1].y, r[2].y);
     for (auto &radius : r)
     {
       radius = {radius.x * scale, radius.y * scale};
     }
 
-    const float left = rect.X;
-    const float top = rect.Y;
-    const float right = rect.X + rect.Width;
-    const float bottom = rect.Y + rect.Height;
+    const float left = rect.X();
+    const float top = rect.Y();
+    const float right = rect.X() + rect.Width();
+    const float bottom = rect.Y() + rect.Height();
     const float k = QuarterArcControl;
 
     MoveTo({left + r[0].x, top});

@@ -72,8 +72,8 @@ namespace krys::gfx::tests
     const auto blurred = atlas.GetGlyph(*face, a, 16.f, 0u, {}, 2.f);
     REQUIRE(blurred.has_value());
     CHECK_FALSE(blurred->Colour);
-    CHECK(blurred->Bounds.Width == first->Bounds.Width + 2u * detail::BlurExtent(2.f));
-    CHECK(blurred->Bounds.X == first->Bounds.X - static_cast<int32>(detail::BlurExtent(2.f)));
+    CHECK(blurred->Bounds.Width() == first->Bounds.Width() + 2 * static_cast<int32>(detail::BlurExtent(2.f)));
+    CHECK(blurred->Bounds.X() == first->Bounds.X() - static_cast<int32>(detail::BlurExtent(2.f)));
     CHECK(atlas.Stats().Rasterised == 6u);
 
     // A space has no pixels, so no texture.
@@ -97,12 +97,12 @@ namespace krys::gfx::tests
     REQUIRE(bitmap.has_value());
     CHECK(location->Bounds == bitmap->Bounds);
 
-    List<byte> texels(static_cast<size_t>(location->Texels.Width) * location->Texels.Height);
+    List<byte> texels(static_cast<size_t>(location->Texels.Width()) * location->Texels.Height());
     device->ReadTexture(location->Texture,
-                        {.X = static_cast<uint32>(location->Texels.X),
-                         .Y = static_cast<uint32>(location->Texels.Y),
-                         .Width = location->Texels.Width,
-                         .Height = location->Texels.Height},
+                        {.X = static_cast<uint32>(location->Texels.X()),
+                         .Y = static_cast<uint32>(location->Texels.Y()),
+                         .Width = static_cast<uint32>(location->Texels.Width()),
+                         .Height = static_cast<uint32>(location->Texels.Height())},
                         texels);
     CHECK(std::memcmp(texels.data(), bitmap->Pixels.data(), texels.size()) == 0);
     device->EndFrame();

@@ -104,7 +104,7 @@ namespace krys::gfx
       auto &pages = bitmap->Colour ? _colour : _coverage;
       const bool colour = bitmap->Colour;
       const auto slot =
-        pages.Allocate(bitmap->Bounds.Width, bitmap->Bounds.Height,
+        pages.Allocate(bitmap->Bounds.Width(), bitmap->Bounds.Height(),
                        [&](uint32 page)
                        {
                          std::erase_if(_entries, [&](const auto &item)

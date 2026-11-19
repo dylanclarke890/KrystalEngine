@@ -12,7 +12,7 @@ namespace krys::gfx
   {
     /// @brief Bounds of every point of the path once transformed. Curves stay within their control points,
     /// so this contains the path; it's cheap enough to check a mask's size before rasterising it.
-    KRYS_NODISCARD Maybe<Rect2D> ControlBounds(const Path2D &path, const Transform2D &transform) noexcept
+    KRYS_NODISCARD Maybe<RectF> ControlBounds(const Path2D &path, const Transform2D &transform) noexcept
     {
       const auto points = path.Points();
       if (points.empty())
@@ -36,13 +36,12 @@ namespace krys::gfx
       {
         return {};
       }
-      return Rect2D {left, top, right - left, bottom - top};
+      return RectF {left, top, right - left, bottom - top};
     }
 
-    KRYS_NODISCARD PixelRect2D Offset(PixelRect2D rect, int32 x, int32 y) noexcept
+    KRYS_NODISCARD RectI Offset(RectI rect, int32 x, int32 y) noexcept
     {
-      rect.X += x;
-      rect.Y += y;
+      rect.Move(x, y);
       return rect;
     }
   }
@@ -99,7 +98,7 @@ namespace krys::gfx
   }
 
   MaskLocation MaskAtlas::GetMask(const Path2D &path, const Transform2D &transform, FillRule rule,
-                                  const PixelRect2D &clip, float blur) noexcept
+                                  const RectI &clip, float blur) noexcept
   {
     Collect();
     blur = blur > 0.f && std::isfinite(blur) ? blur : 0.f;
@@ -150,12 +149,11 @@ namespace krys::gfx
     const auto extent = detail::BlurExtent(blur);
     const auto largest = static_cast<float>(std::min(_device->Limits().MaxTextureSize, 4'096u));
     const float spread = 2.f + 2.f * static_cast<float>(extent);
-    if (bounds->Width + spread > largest || bounds->Height + spread > largest)
+    if (bounds->Width() + spread > largest || bounds->Height() + spread > largest)
     {
       auto localClip =
         Offset(clip, -offsetX - static_cast<int32>(extent), -offsetY - static_cast<int32>(extent));
-      localClip.Width += 2u * extent;
-      localClip.Height += 2u * extent;
+      localClip.Expand(2 * static_cast<int32>(extent), 2 * static_cast<int32>(extent));
       auto mask = _rasteriser.Rasterise(path, shape, rule, localClip);
       ++_stats.Rasterised;
       if (extent > 0u)
@@ -166,8 +164,7 @@ namespace krys::gfx
       return UploadTransient(mask);
     }
 
-    constexpr PixelRect2D everywhere {
-      .X = -(1 << 24), .Y = -(1 << 24), .Width = 1u << 25, .Height = 1u << 25};
+    constexpr RectI everywhere {-(1 << 24), -(1 << 24), 1u << 25, 1u << 25};
     auto mask = _rasteriser.Rasterise(path, shape, rule, everywhere);
     ++_stats.Rasterised;
     if (extent > 0u)
@@ -178,8 +175,8 @@ namespace krys::gfx
     Entry entry {.Bounds = mask.Bounds, .LastUsedFrame = frame};
     if (!mask.Bounds.IsEmpty())
     {
-      const uint32 width = mask.Bounds.Width;
-      const uint32 height = mask.Bounds.Height;
+      const uint32 width = mask.Bounds.Width();
+      const uint32 height = mask.Bounds.Height();
       Maybe<AtlasSlot> packed {};
       if (width <= _desc.MaxPackedSize && height <= _desc.MaxPackedSize)
       {
@@ -201,7 +198,7 @@ namespace krys::gfx
         {
           return {};
         }
-        entry.Texels = {.X = 0, .Y = 0, .Width = width, .Height = height};
+        entry.Texels = {0, 0, static_cast<int32>(width), static_cast<int32>(height)};
         Upload(entry.OwnTexture, entry.Texels, mask);
       }
     }
@@ -221,12 +218,12 @@ namespace krys::gfx
       return {};
     }
     const auto texture =
-      CreateMaskTexture(mask.Bounds.Width, mask.Bounds.Height, u8"Render2D.Mask.Transient");
+      CreateMaskTexture(mask.Bounds.Width(), mask.Bounds.Height(), u8"Render2D.Mask.Transient");
     if (!texture.IsValid())
     {
       return {};
     }
-    const PixelRect2D texels {.X = 0, .Y = 0, .Width = mask.Bounds.Width, .Height = mask.Bounds.Height};
+    const RectI texels {0, 0, mask.Bounds.Width(), mask.Bounds.Height()};
     Upload(texture, texels, mask);
     _retired.push_back({.Texture = texture, .Frame = _device->FrameNumber()});
     return {.Texture = texture, .Texels = texels, .Bounds = mask.Bounds};
@@ -290,14 +287,14 @@ namespace krys::gfx
     return texture ? *texture : TextureHandle {};
   }
 
-  void MaskAtlas::Upload(TextureHandle texture, const PixelRect2D &texels, const CoverageMask &mask) noexcept
+  void MaskAtlas::Upload(TextureHandle texture, const RectI &texels, const CoverageMask &mask) noexcept
   {
     _device->WriteTexture(
       texture,
-      {.X = static_cast<uint32>(texels.X),
-       .Y = static_cast<uint32>(texels.Y),
-       .Width = texels.Width,
-       .Height = texels.Height},
+      {.X = static_cast<uint32>(texels.X()),
+       .Y = static_cast<uint32>(texels.Y()),
+       .Width = static_cast<uint32>(texels.Width()),
+       .Height = static_cast<uint32>(texels.Height())},
       Span<const byte>(reinterpret_cast<const byte *>(mask.Coverage.data()), mask.Coverage.size()));
   }
 }

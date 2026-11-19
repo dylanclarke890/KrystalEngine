@@ -113,9 +113,8 @@ namespace krys::ui
     return texture;
   }
 
-  gfx::TextureHandle ImageBufferTextures::Copy(gfx::TextureHandle texture, const gfx::Rect2D &source,
-                                               uint32 width, uint32 height,
-                                               gfx::CommandBuffer &commands) noexcept
+  gfx::TextureHandle ImageBufferTextures::Copy(gfx::TextureHandle texture, const RectF &source, uint32 width,
+                                               uint32 height, gfx::CommandBuffer &commands) noexcept
   {
     const auto copy = Acquire(width, height);
     auto *renderer = RendererForDepth();

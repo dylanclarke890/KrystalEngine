@@ -30,7 +30,7 @@ namespace krys::ui::tests
     const boo::FloatRoundedRect circular({0, 0, 20, 10}, {2, 2}, {3, 3}, {4, 4}, {5, 5});
     auto rect = ToCircularRoundedRect(circular);
     REQUIRE(rect.has_value());
-    CHECK(rect->Rect == gfx::Rect2D {0, 0, 20, 10});
+    CHECK(rect->Rect == RectF {0, 0, 20, 10});
     // Booey's radii are top-left, top-right, bottom-left, bottom-right.
     CHECK(rect->Radii == gfx::CornerRadii2D {.TopLeft = 2, .TopRight = 3, .BottomRight = 5, .BottomLeft = 4});
 

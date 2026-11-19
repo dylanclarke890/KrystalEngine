@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Array.hpp"
@@ -12,7 +13,6 @@
 #include "Krystal.Gfx/Render2D/AtlasPages.hpp"
 #include "Krystal.Gfx/Render2D/Path2D.hpp"
 #include "Krystal.Gfx/Render2D/PathRasteriser.hpp"
-#include "Krystal.Gfx/Render2D/Rect2D.hpp"
 #include "Krystal.Gfx/Render2D/Transform2D.hpp"
 
 namespace krys::gfx
@@ -33,9 +33,9 @@ namespace krys::gfx
     /// @brief The R8 texture holding the coverage.
     TextureHandle Texture {};
     /// @brief The mask's texels in the texture.
-    PixelRect2D Texels {};
+    RectI Texels {};
     /// @brief The target pixels the mask covers; empty when the path covers none.
-    PixelRect2D Bounds {};
+    RectI Bounds {};
   };
 
   struct MaskAtlasStats
@@ -89,9 +89,9 @@ namespace krys::gfx
       uint32 Page {NoPage};
       /// @brief The mask's own texture, when it isn't on a page; invalid for masks that cover nothing.
       TextureHandle OwnTexture {};
-      PixelRect2D Texels {};
+      RectI Texels {};
       /// @brief The pixels the mask covers, before the whole-pixel part of the translation.
-      PixelRect2D Bounds {};
+      RectI Bounds {};
       uint64 LastUsedFrame {0u};
     };
 
@@ -121,7 +121,7 @@ namespace krys::gfx
     /// standard deviation `blur` pixels (for shadows), rasterising it if it isn't cached. `clip` only limits
     /// masks too large to cache.
     KRYS_NODISCARD MaskLocation GetMask(const Path2D &path, const Transform2D &transform, FillRule rule,
-                                        const PixelRect2D &clip, float blur = 0.f) noexcept;
+                                        const RectI &clip, float blur = 0.f) noexcept;
 
     /// @brief Uploads a mask made elsewhere into a texture of its own, kept for this frame only.
     KRYS_NODISCARD MaskLocation UploadTransient(const CoverageMask &mask) noexcept;
@@ -151,6 +151,6 @@ namespace krys::gfx
     KRYS_NODISCARD TextureHandle CreateMaskTexture(uint32 width, uint32 height,
                                                    utf8_stringview name) noexcept;
 
-    void Upload(TextureHandle texture, const PixelRect2D &texels, const CoverageMask &mask) noexcept;
+    void Upload(TextureHandle texture, const RectI &texels, const CoverageMask &mask) noexcept;
   };
 }

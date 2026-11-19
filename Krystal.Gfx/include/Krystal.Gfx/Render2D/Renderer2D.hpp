@@ -4,6 +4,7 @@
 #include "Krystal.Core/Colour/AlphaPremultiplication.hpp"
 #include "Krystal.Core/Colour/BlendMode.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Array.hpp"
@@ -24,7 +25,6 @@
 #include "Krystal.Gfx/Render2D/Paint2D.hpp"
 #include "Krystal.Gfx/Render2D/Path2D.hpp"
 #include "Krystal.Gfx/Render2D/PathStroker.hpp"
-#include "Krystal.Gfx/Render2D/Rect2D.hpp"
 #include "Krystal.Gfx/Render2D/RoundedRect2D.hpp"
 #include "Krystal.Gfx/Render2D/StrokeStyle.hpp"
 #include "Krystal.Gfx/Render2D/Transform2D.hpp"
@@ -297,7 +297,7 @@ namespace krys::gfx
     {
       Transform2D Transform {};
       /// @brief The clip's bounds, in target pixels; draws outside them are discarded by the scissor.
-      PixelRect2D Clip {};
+      RectI Clip {};
       /// @brief The shape clips in effect, an index into the frame's chains, or `NoChain`.
       uint32 Chain {NoChain};
       BlendMode Blend {BlendMode::Normal};
@@ -475,7 +475,7 @@ namespace krys::gfx
     {
       uint32 FirstInstance {0u};
       uint32 InstanceCount {0u};
-      PixelRect2D Scissor {};
+      RectI Scissor {};
       uint32 Chain {NoChain};
       TextureHandle Texture {};
       SamplerHandle Sampler {};
@@ -487,7 +487,7 @@ namespace krys::gfx
       CompositeOperator2D Operator {CompositeOperator2D::SourceOver};
       /// @brief For a blend mode that reads what's beneath: the target pixels its instances reach, copied
       /// before it's drawn.
-      PixelRect2D Backdrop {};
+      RectI Backdrop {};
       /// @brief The gradient its gradient instances read, an index into the frame's gradients, or
       /// `NoGradient`.
       uint32 Gradient {NoGradient};
@@ -506,9 +506,9 @@ namespace krys::gfx
       BlendMode Blend {BlendMode::Normal};
       CompositeOperator2D Operator {CompositeOperator2D::SourceOver};
       /// @brief The clip when it began: nothing in it shows outside.
-      PixelRect2D Clip {};
+      RectI Clip {};
       /// @brief The target pixels its draws reach; at `End`, within the clip, its texture's extent.
-      PixelRect2D Bounds {};
+      RectI Bounds {};
       /// @brief How many states were saved when it began, after its own save.
       size_t SaveDepth {0u};
       /// @brief Its composite instance in the parent, and that instance's batch.
@@ -708,14 +708,14 @@ namespace krys::gfx
 
     /// @brief Intersects the clip with a rect in the current coordinates. A rect whose edges land on whole
     /// target pixels, under a transform that keeps rects axis-aligned, is the scissor alone.
-    void ClipRect(const Rect2D &rect) noexcept;
+    void ClipRect(const RectF &rect) noexcept;
 
     /// @brief Intersects the clip with a rounded rect in the current coordinates, its radii constrained as
     /// `FillRoundedRect`'s are.
     void ClipRoundedRect(const RoundedRect2D &rect) noexcept;
 
     /// @brief Clips out a rect in the current coordinates: later draws skip it.
-    void ClipOutRect(const Rect2D &rect) noexcept;
+    void ClipOutRect(const RectF &rect) noexcept;
 
     /// @brief Clips out a rounded rect in the current coordinates.
     void ClipOutRoundedRect(const RoundedRect2D &rect) noexcept;
@@ -731,7 +731,7 @@ namespace krys::gfx
     /// @brief A clip as it was at some point in a frame: its bounds and its shape clips.
     struct ClipState
     {
-      PixelRect2D Bounds {};
+      RectI Bounds {};
       uint32 Chain {NoChain};
     };
 
@@ -742,7 +742,7 @@ namespace krys::gfx
     /// narrowing it; `Restore` brings back the clip saved before.
     void SetClip(const ClipState &clip) noexcept;
 
-    void FillRect(const Rect2D &rect, const Paint2D &paint) noexcept;
+    void FillRect(const RectF &rect, const Paint2D &paint) noexcept;
 
     /// @brief Fills a rounded rect. Negative radii are treated as zero, and radii that don't fit are scaled
     /// down together until they do, as CSS does for `border-radius`.
@@ -752,11 +752,10 @@ namespace krys::gfx
     /// constrained as `FillRoundedRect`'s are.
     /// @note Holes have circular corners. For elliptical ones, fill a path with the rect and the hole under
     /// `FillRule::EvenOdd`.
-    void FillRectWithRoundedHole(const Rect2D &rect, const RoundedRect2D &hole,
-                                 const Paint2D &paint) noexcept;
+    void FillRectWithRoundedHole(const RectF &rect, const RoundedRect2D &hole, const Paint2D &paint) noexcept;
 
     /// @brief Draws the `source` texels of a texture into `destination`, scaling to fit.
-    void DrawImage(TextureHandle texture, const Rect2D &source, const Rect2D &destination,
+    void DrawImage(TextureHandle texture, const RectF &source, const RectF &destination,
                    const ImageOptions &options = {}) noexcept;
 
     /// @brief Fills a path under the fill rule. The path is rasterised on the CPU into a coverage mask, which
@@ -783,7 +782,7 @@ namespace krys::gfx
                     Span<const Vec2f> positions, Vec2f origin, const Paint2D &paint) noexcept;
 
     /// @brief Draws the whole of a texture into `destination`.
-    void DrawImage(TextureHandle texture, const Rect2D &destination,
+    void DrawImage(TextureHandle texture, const RectF &destination,
                    const ImageOptions &options = {}) noexcept;
 
     /// @brief Sets the shadow later fills and strokes cast; images cast none. A shadow with no offset and no
@@ -855,8 +854,8 @@ namespace krys::gfx
     /// @brief Records one pass of a blur by `sigma` texels along `direction` (1, 0 or 0, 1), over `region` of
     /// `source` into the same texels of `destination`; nothing outside `region` is read.
     void RecordBlur(CommandBuffer &commands, const FrameResources &resources, TextureHandle source,
-                    TextureHandle destination, const PixelRect2D &region, Array<float, 2> direction,
-                    float sigma, EdgeMode2D edgeMode) noexcept;
+                    TextureHandle destination, const RectI &region, Array<float, 2> direction, float sigma,
+                    EdgeMode2D edgeMode) noexcept;
 
     /// @brief Adds a rounded rect in `transform`'s coordinates, its radii constrained.
     void AddRoundedRect(const RoundedRect2D &rect, const ResolvedPaint &paint,
@@ -916,18 +915,12 @@ namespace krys::gfx
 
     /// @brief The target pixels an instance's quad reaches under `transform` (grown by a pixel for its
     /// antialiased edge), within the clip.
-    KRYS_NODISCARD PixelRect2D Reach(const RectInstance &instance,
-                                     const Transform2D &transform) const noexcept;
+    KRYS_NODISCARD RectI Reach(const RectInstance &instance, const Transform2D &transform) const noexcept;
 
     /// @brief Whether a blend mode reads what's beneath the draw, so it's copied first.
     KRYS_NODISCARD static bool CopiesBackdrop(BlendMode mode) noexcept;
 
     /// @brief The target pixels whose centres are inside the rect from (left, top) to (right, bottom).
-    KRYS_NODISCARD static PixelRect2D ToPixelRect(float left, float top, float right, float bottom) noexcept;
-
-    KRYS_NODISCARD static PixelRect2D Intersect(const PixelRect2D &a, const PixelRect2D &b) noexcept;
-
-    /// @brief The smallest rect holding both; an empty one adds nothing.
-    KRYS_NODISCARD static PixelRect2D Union(const PixelRect2D &a, const PixelRect2D &b) noexcept;
+    KRYS_NODISCARD static RectI ToPixelRect(float left, float top, float right, float bottom) noexcept;
   };
 }

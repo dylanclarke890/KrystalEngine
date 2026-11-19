@@ -36,7 +36,7 @@ namespace krys::gfx::tests
       UniquePtr<Device> _device;
       UniquePtr<FilterRenderer2D> _renderer;
       List<TextureHandle> _images;
-      PixelRect2D _region {};
+      RectI _region {};
 
     public:
       FilterRenderer2DFixture() : _device(CreateTestDevice())
@@ -59,16 +59,16 @@ namespace krys::gfx::tests
       }
 
       /// @brief A source holding `texels`, rows from the top, over `region`.
-      KRYS_NODISCARD FilterSource2D Source(const PixelRect2D &region, Span<const FilterPixel> texels,
+      KRYS_NODISCARD FilterSource2D Source(const RectI &region, Span<const FilterPixel> texels,
                                            bool premultiplied = true)
       {
         auto image = _device->CreateTexture({.Format = TextureFormat::RGBA8Unorm,
-                                             .Width = region.Width,
-                                             .Height = region.Height,
+                                             .Width = static_cast<uint32>(region.Width()),
+                                             .Height = static_cast<uint32>(region.Height()),
                                              .DebugName = u8"Image"});
         REQUIRE(image.has_value());
         _device->WriteTexture(
-          *image, TextureRegion::Whole2D(region.Width, region.Height),
+          *image, TextureRegion::Whole2D(region.Width(), region.Height()),
           Span<const byte>(reinterpret_cast<const byte *>(texels.data()), texels.size_bytes()));
         _images.push_back(*image);
         return {.Texture = *image, .Region = region, .Premultiplied = premultiplied};
@@ -84,16 +84,16 @@ namespace krys::gfx::tests
         _device->EndFrame();
         REQUIRE(result.has_value());
         _region = result->Region;
-        List<FilterPixel> pixels(static_cast<size_t>(_region.Width) * _region.Height);
+        List<FilterPixel> pixels(static_cast<size_t>(_region.Width()) * _region.Height());
         _device->ReadTexture(
-          result->Texture, TextureRegion::Whole2D(_region.Width, _region.Height),
+          result->Texture, TextureRegion::Whole2D(_region.Width(), _region.Height()),
           Span<byte>(reinterpret_cast<byte *>(pixels.data()), pixels.size() * sizeof(FilterPixel)));
         return pixels;
       }
 
       KRYS_NODISCARD FilterPixel At(const List<FilterPixel> &pixels, uint32 x, uint32 y) const
       {
-        return pixels[y * _region.Width + x];
+        return pixels[y * _region.Width() + x];
       }
     };
 
@@ -105,7 +105,7 @@ namespace krys::gfx::tests
       return texels;
     }
 
-    constexpr PixelRect2D Square {.X = 0, .Y = 0, .Width = 4u, .Height = 4u};
+    constexpr RectI Square {0, 0, 4u, 4u};
   }
 
   TEST_CASE_METHOD(FilterRenderer2DFixture, "FilterRenderer2D: an empty graph has no result",
@@ -121,12 +121,11 @@ namespace krys::gfx::tests
   TEST_CASE_METHOD(FilterRenderer2DFixture, "FilterRenderer2D: flood fills its region", "[Render2D][Filter]")
   {
     FilterGraph2D graph;
-    graph.Nodes.push_back({.Type = FilterNode2D::Kind::Flood,
-                           .Region = {.X = 5, .Y = 7, .Width = 3u, .Height = 2u},
-                           .Colour = {0.f, 0.5f, 0.f, 0.5f}});
+    graph.Nodes.push_back(
+      {.Type = FilterNode2D::Kind::Flood, .Region = {5, 7, 3u, 2u}, .Colour = {0.f, 0.5f, 0.f, 0.5f}});
     const auto pixels = Run(graph);
-    CHECK(_region.X == 5);
-    CHECK(_region.Y == 7);
+    CHECK(_region.X() == 5);
+    CHECK(_region.Y() == 7);
     for (const auto &pixel : pixels)
     {
       CHECK(FilterNear(pixel, {0, 128, 0, 128}));
@@ -138,13 +137,13 @@ namespace krys::gfx::tests
   {
     FilterGraph2D graph;
     const auto texels = OnePixel(0u, 0u, FilterRed);
-    graph.Sources.push_back(Source({.X = 10, .Y = 20, .Width = 4u, .Height = 4u}, texels));
+    graph.Sources.push_back(Source({10, 20, 4u, 4u}, texels));
 
     SECTION("by whole pixels")
     {
       graph.Nodes.push_back({.Type = FilterNode2D::Kind::Offset,
                              .Inputs = {FilterInput2D::Source(0u)},
-                             .Region = {.X = 10, .Y = 20, .Width = 4u, .Height = 4u},
+                             .Region = {10, 20, 4u, 4u},
                              .Offset = {2.f, 1.f}});
       const auto pixels = Run(graph);
       CHECK(FilterNear(At(pixels, 2u, 1u), FilterRed));
@@ -154,7 +153,7 @@ namespace krys::gfx::tests
     {
       graph.Nodes.push_back({.Type = FilterNode2D::Kind::Offset,
                              .Inputs = {FilterInput2D::Source(0u)},
-                             .Region = {.X = 10, .Y = 20, .Width = 4u, .Height = 4u},
+                             .Region = {10, 20, 4u, 4u},
                              .Offset = {0.5f, 0.f}});
       const auto pixels = Run(graph);
       CHECK(FilterNear(At(pixels, 0u, 0u), {128, 0, 0, 128}));
@@ -164,7 +163,7 @@ namespace krys::gfx::tests
     {
       graph.Nodes.push_back({.Type = FilterNode2D::Kind::Offset,
                              .Inputs = {FilterInput2D::Source(0u)},
-                             .Region = {.X = 6, .Y = 20, .Width = 4u, .Height = 4u}});
+                             .Region = {6, 20, 4u, 4u}});
       const auto pixels = Run(graph);
       for (const auto &pixel : pixels)
       {
@@ -276,10 +275,10 @@ namespace krys::gfx::tests
     FilterGraph2D graph;
     List<FilterPixel> texels(81u, FilterClear);
     texels[4u * 9u + 4u] = FilterWhite;
-    graph.Sources.push_back(Source({.X = 0, .Y = 0, .Width = 9u, .Height = 9u}, texels));
+    graph.Sources.push_back(Source({0, 0, 9u, 9u}, texels));
     graph.Nodes.push_back({.Type = FilterNode2D::Kind::Blur,
                            .Inputs = {FilterInput2D::Source(0u)},
-                           .Region = {.X = 0, .Y = 0, .Width = 9u, .Height = 9u},
+                           .Region = {0, 0, 9u, 9u},
                            .StandardDeviation = {1.f, 1.f}});
     const auto pixels = Run(graph);
     const auto centre = At(pixels, 4u, 4u);
@@ -302,7 +301,7 @@ namespace krys::gfx::tests
     FilterGraph2D graph;
     List<FilterPixel> texels(25u, FilterClear);
     texels[2u * 5u + 2u] = FilterRed;
-    const PixelRect2D region {.X = 0, .Y = 0, .Width = 5u, .Height = 5u};
+    const RectI region {0, 0, 5u, 5u};
     graph.Sources.push_back(Source(region, texels));
     graph.Nodes.push_back({.Type = FilterNode2D::Kind::Morphology,
                            .Inputs = {FilterInput2D::Source(0u)},
@@ -424,7 +423,7 @@ namespace krys::gfx::tests
                    "[Render2D][Filter]")
   {
     FilterGraph2D graph;
-    const PixelRect2D region {.X = 0, .Y = 0, .Width = 16u, .Height = 16u};
+    const RectI region {0, 0, 16u, 16u};
     graph.Nodes.push_back({.Type = FilterNode2D::Kind::Turbulence,
                            .Region = region,
                            .FractalNoise = true,
@@ -455,8 +454,8 @@ namespace krys::gfx::tests
       {.Type = FilterNode2D::Kind::Offset, .Inputs = {FilterInput2D::Source(0u)}, .Region = Square});
     graph.Nodes.push_back({.Type = FilterNode2D::Kind::Tile,
                            .Inputs = {FilterInput2D::Node(0u)},
-                           .Region = {.X = 0, .Y = 0, .Width = 8u, .Height = 8u},
-                           .TileRect = {.X = 1, .Y = 1, .Width = 2u, .Height = 2u}});
+                           .Region = {0, 0, 8u, 8u},
+                           .TileRect = {1, 1, 2u, 2u}});
     const auto pixels = Run(graph);
     CHECK(FilterNear(pixels[1u * 8u + 1u], FilterRed));
     CHECK(FilterNear(pixels[3u * 8u + 3u], FilterRed));

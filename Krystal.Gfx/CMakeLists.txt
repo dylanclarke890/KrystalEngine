@@ -77,7 +77,6 @@ target_sources(Krystal.Gfx
       include/Krystal.Gfx/Render2D/Path2D.hpp
       include/Krystal.Gfx/Render2D/PathRasteriser.hpp
       include/Krystal.Gfx/Render2D/PathStroker.hpp
-      include/Krystal.Gfx/Render2D/Rect2D.hpp
       include/Krystal.Gfx/Render2D/Renderer2D.hpp
       include/Krystal.Gfx/Render2D/RoundedRect2D.hpp
       include/Krystal.Gfx/Render2D/StrokeStyle.hpp

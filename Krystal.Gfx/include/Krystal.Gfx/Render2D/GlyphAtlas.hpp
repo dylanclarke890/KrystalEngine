@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Array.hpp"
@@ -10,7 +11,6 @@
 #include "Krystal.Gfx/Handles.hpp"
 #include "Krystal.Gfx/Render2D/AtlasPages.hpp"
 #include "Krystal.Gfx/Render2D/FontFace2D.hpp"
-#include "Krystal.Gfx/Render2D/Rect2D.hpp"
 #include "Krystal.Gfx/Render2D/Transform2D.hpp"
 #include <utility>
 
@@ -31,9 +31,9 @@ namespace krys::gfx
   {
     /// @brief The R8 or RGBA texture holding it; invalid for a glyph with no pixels, such as a space.
     TextureHandle Texture {};
-    PixelRect2D Texels {};
+    RectI Texels {};
     /// @brief The pixels it covers relative to the pixel the pen is in, y down (see `GlyphBitmap`).
-    PixelRect2D Bounds {};
+    RectI Bounds {};
     bool Colour {false};
   };
 
@@ -82,8 +82,8 @@ namespace krys::gfx
       bool Colour {false};
       /// @brief Its page, or `NoPage` for a glyph with no pixels.
       uint32 Page {NoPage};
-      PixelRect2D Texels {};
-      PixelRect2D Bounds {};
+      RectI Texels {};
+      RectI Bounds {};
     };
 
   public:

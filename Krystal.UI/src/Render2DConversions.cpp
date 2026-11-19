@@ -42,7 +42,7 @@ namespace krys::ui
     {
       return (corner.Width() + corner.Height()) / 2.f;
     };
-    return gfx::RoundedRect2D {.Rect = ToRect2D(rect.Rect()),
+    return gfx::RoundedRect2D {.Rect = rect.Rect(),
                                .Radii = {.TopLeft = radius(radii.TopLeft()),
                                          .TopRight = radius(radii.TopRight()),
                                          .BottomRight = radius(radii.BottomRight()),
@@ -56,8 +56,8 @@ namespace krys::ui
     {
       return Vec2f {size.Width(), size.Height()};
     };
-    path.AddRoundedRect(ToRect2D(rect.Rect()), {toVec(radii.TopLeft()), toVec(radii.TopRight()),
-                                                toVec(radii.BottomRight()), toVec(radii.BottomLeft())});
+    path.AddRoundedRect(rect.Rect(), {toVec(radii.TopLeft()), toVec(radii.TopRight()),
+                                      toVec(radii.BottomRight()), toVec(radii.BottomLeft())});
   }
 
   namespace
@@ -136,7 +136,7 @@ namespace krys::ui
 
       void AddData(const boo::PathRect &data) noexcept
       {
-        _path.AddRect(ToRect2D(data.Rect));
+        _path.AddRect(data.Rect);
       }
 
       void AddData(const boo::PathRoundedRect &data) noexcept
@@ -148,7 +148,7 @@ namespace krys::ui
       {
         // Continuous rounded rects are unavailable. Paint a normal rounded rect instead.
         const Vec2f radius {data.CornerWidth, data.CornerHeight};
-        _path.AddRoundedRect(ToRect2D(data.Rect), {radius, radius, radius, radius});
+        _path.AddRoundedRect(data.Rect, {radius, radius, radius, radius});
       }
 
       void AddData(const boo::PathDataLine &data) noexcept

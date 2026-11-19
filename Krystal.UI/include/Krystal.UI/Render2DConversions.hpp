@@ -8,7 +8,6 @@
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Gfx/Render2D/Gradient2D.hpp"
 #include "Krystal.Gfx/Render2D/Path2D.hpp"
-#include "Krystal.Gfx/Render2D/Rect2D.hpp"
 #include "Krystal.Gfx/Render2D/RoundedRect2D.hpp"
 #include "Krystal.Gfx/Render2D/StrokeStyle.hpp"
 #include "Krystal.Gfx/Render2D/Transform2D.hpp"
@@ -21,11 +20,6 @@ namespace krys::boo
 
 namespace krys::ui
 {
-  KRYS_NODISCARD constexpr gfx::Rect2D ToRect2D(const RectF &rect) noexcept
-  {
-    return {rect.X(), rect.Y(), rect.Width(), rect.Height()};
-  }
-
   KRYS_NODISCARD constexpr Vec2f ToVec2f(const PointF &point) noexcept
   {
     return {point.X(), point.Y()};
