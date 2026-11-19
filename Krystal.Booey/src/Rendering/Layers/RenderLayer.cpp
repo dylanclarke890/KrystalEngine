@@ -51,6 +51,7 @@
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
+#include "Krystal.Booey/Graphics/Transforms/LayoutTransforms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
@@ -4518,7 +4519,7 @@ namespace krys::boo
       {
         if (flags.Contains(IncludeSelfTransform) && PaintsWithTransform({}))
         {
-          localClipRect = Transform()->MapRect(localClipRect);
+          localClipRect = MapRect(*Transform(), localClipRect);
         }
 
         localClipRect.Move(OffsetFromAncestor(ancestorLayer));
@@ -4593,8 +4594,8 @@ namespace krys::boo
     if (flags.Contains(IncludeSelfTransform) && PaintsWithTransform({}))
     {
       TransformationMatrix *affineTrans = Transform();
-      boundingBoxRect = affineTrans->MapRect(boundingBoxRect);
-      unionBounds = affineTrans->MapRect(unionBounds);
+      boundingBoxRect = MapRect(*affineTrans, boundingBoxRect);
+      unionBounds = MapRect(*affineTrans, unionBounds);
     }
     unionBounds.Move(offsetFromRoot);
     return unionBounds;
@@ -5167,7 +5168,7 @@ namespace krys::boo
         ExpandClipRectForDescendantsAndReflection(clipRect, layer, &layer, transparencyBehavior,
                                                   paintBehavior, paintDirtyRect);
         Expand(clipRect, ToLayoutBoxExtent(layer.FilterOutsets()));
-        LayoutRect result = transform.MapRect(clipRect);
+        LayoutRect result = MapRect(transform, clipRect);
         if (!paginationLayer)
         {
           if (paintDirtyRect)
@@ -6220,7 +6221,7 @@ namespace krys::boo
     if (!transformedPaintingInfo.PaintDirtyRect.IsInfinite())
     {
       transformedPaintingInfo.PaintDirtyRect = LayoutRect(EncloseRectToDevicePixels(
-        transform.Inverse().value_or(TransformationMatrix()).MapRect(paintingInfo.PaintDirtyRect),
+        MapRect(transform.Inverse().value_or(TransformationMatrix()), paintingInfo.PaintDirtyRect),
         deviceScaleFactor));
     }
 

@@ -22,10 +22,10 @@
  */
 
 #include "Krystal.Booey/SVG/Internals/SVGPathParser.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStreamBuilder.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathSource.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathStringBuilder.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 #include <numbers>

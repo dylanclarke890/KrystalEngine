@@ -31,7 +31,6 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderAncestorIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -51,6 +50,7 @@
 #include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Booey/SVG/SVGElementRareData.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include <algorithm>
 

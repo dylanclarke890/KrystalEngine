@@ -6,7 +6,7 @@
 namespace krys::ui
 {
   void EngineTextureLayer::PaintToTextureMapper(TextureMapper &textureMapper, const RectF &targetRect,
-                                                const boo::TransformationMatrix &modelViewMatrix,
+                                                const TransformationMatrix &modelViewMatrix,
                                                 float opacity) noexcept
   {
     textureMapper.DrawTexture(_texture.Handle(), _texture.Size(), targetRect, modelViewMatrix, opacity,

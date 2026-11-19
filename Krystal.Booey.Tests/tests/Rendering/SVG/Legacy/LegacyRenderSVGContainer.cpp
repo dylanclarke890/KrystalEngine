@@ -72,7 +72,7 @@ namespace krys::boo::tests
       ElementById(*fixture.Document, u8"g").SetAttribute(u8"transform", u8"rotate(90)").HasException());
     REQUIRE_FALSE(ElementById(*fixture.Document, u8"v").SetAttribute(u8"x", u8"15").HasException());
     (void)fixture.Document->UpdateLayout();
-    CHECK(g.LocalToParentTransform() == AffineTransform::MakeRotation(90));
+    CHECK(g.LocalToParentTransform() == AffineTransform::CreateRotation(90));
     CHECK(AsObject(v).LocalToParentTransform() == AffineTransform(4, 0, 0, 4, 20, 6));
   }
 

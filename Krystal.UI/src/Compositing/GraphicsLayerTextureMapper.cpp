@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerFilterAnimationValue.hpp"
+#include "Krystal.Booey/Graphics/Transforms/LayoutTransforms.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.UI/Compositing/PlatformLayerDisplayDelegate.hpp"
@@ -198,7 +199,7 @@ namespace krys::ui
     NotifyChange(SizeChange);
   }
 
-  void GraphicsLayerTextureMapper::SetTransform(const boo::TransformationMatrix &value) noexcept
+  void GraphicsLayerTextureMapper::SetTransform(const TransformationMatrix &value) noexcept
   {
     if (value == Transform())
     {
@@ -209,7 +210,7 @@ namespace krys::ui
     NotifyChange(TransformChange);
   }
 
-  void GraphicsLayerTextureMapper::SetChildrenTransform(const boo::TransformationMatrix &value) noexcept
+  void GraphicsLayerTextureMapper::SetChildrenTransform(const TransformationMatrix &value) noexcept
   {
     if (value == ChildrenTransform())
     {
@@ -757,7 +758,7 @@ namespace krys::ui
     _layerTransform.SetChildrenTransform(ChildrenTransform());
     auto *parent = DynamicDowncast<GraphicsLayerTextureMapper>(Parent());
     _layerTransform.CombineTransforms(parent ? parent->_layerTransform.CombinedForChildren()
-                                             : boo::TransformationMatrix());
+                                             : TransformationMatrix());
 
     // Non-invertible layers are not visible.
     auto inverse = _layerTransform.Combined().Inverse();
@@ -770,7 +771,7 @@ namespace krys::ui
     // A projection of the rect (surface coordinates) onto the layer's plane (layer coordinates). The
     // resulting quad might be skewed and the result is the bounding box of this quad, so it might spread
     // further than the real visible area.
-    RectF visibleRect(inverse->ClampedBoundsOfProjectedQuad(QuadF(rect)));
+    RectF visibleRect(boo::ClampedBoundsOfProjectedQuad(*inverse, QuadF(rect)));
     if (visibleRect.Width() >= boo::LayoutUnit::NearlyMax().ToFloat()
         || visibleRect.Width() <= boo::LayoutUnit::NearlyMin().ToFloat())
     {

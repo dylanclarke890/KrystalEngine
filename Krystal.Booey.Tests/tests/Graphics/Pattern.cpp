@@ -17,14 +17,14 @@ namespace krys::boo::tests
 
     // A pattern's tile image is the buffer it was made with, its size in the buffer's pixels.
     auto pattern = Pattern::Create(SourceImage {Ref<ImageBuffer>(tile)},
-                                   {true, false, AffineTransform::MakeTranslation({1, 2})});
+                                   {true, false, AffineTransform::CreateTranslation({1, 2})});
     CHECK(pattern->TileImageBuffer() == tile.get());
     CHECK(pattern->TileNativeImage() == nullptr);
     CHECK(pattern->TileImage().Size() == SizeI(20, 40));
     CHECK(pattern->RepeatX());
     CHECK_FALSE(pattern->RepeatY());
-    pattern->SetPatternSpaceTransform(AffineTransform::MakeScale({3, 3}));
-    CHECK(pattern->PatternSpaceTransform() == AffineTransform::MakeScale({3, 3}));
+    pattern->SetPatternSpaceTransform(AffineTransform::CreateScale({3, 3}));
+    CHECK(pattern->PatternSpaceTransform() == AffineTransform::CreateScale({3, 3}));
 
     // A brush paints with a pattern in place of a gradient; brushes with patterns are equal only with the
     // same pattern.

@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Gradient.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 
 namespace krys::boo
 {

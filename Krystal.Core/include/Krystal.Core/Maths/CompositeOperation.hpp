@@ -27,7 +27,7 @@
 
 #include "Krystal.Core/Enum.hpp"
 
-namespace krys::boo
+namespace krys
 {
   enum class CompositeOperation : uint8
   {
@@ -37,4 +37,4 @@ namespace krys::boo
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::CompositeOperation, 3uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::CompositeOperation, 3uz);

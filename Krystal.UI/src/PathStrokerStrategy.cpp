@@ -96,7 +96,7 @@ namespace krys::ui
                                   .MiterLimit = style.MiterLimit,
                                   .Dashes = List<float>(style.Dashes.begin(), style.Dashes.end()),
                                   .DashOffset = style.DashOffset};
-    return _stroker.Stroke(ToPath2D(path), strokeStyle, gfx::Transform2D::Identity());
+    return _stroker.Stroke(ToPath2D(path), strokeStyle, AffineTransform());
   }
 
   bool PathStrokerStrategy::StrokeContains(const boo::Path &path, const PointF &point,

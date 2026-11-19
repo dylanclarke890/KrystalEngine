@@ -48,7 +48,7 @@ namespace krys::ui
     explicit ImageBufferRender2DLayer(ImageBufferRender2DBackend &backend) noexcept;
 
     void PaintToTextureMapper(TextureMapper &textureMapper, const RectF &targetRect,
-                              const boo::TransformationMatrix &modelViewMatrix = {},
+                              const TransformationMatrix &modelViewMatrix = {},
                               float opacity = 1.0) noexcept override;
   };
 
@@ -146,7 +146,7 @@ namespace krys::ui
     /// @brief A clip, under the transform it was made under.
     struct ClipEntry
     {
-      boo::AffineTransform Ctm;
+      AffineTransform Ctm;
       boo::display_list::Item Clip;
     };
 
@@ -154,7 +154,7 @@ namespace krys::ui
     struct StateLevel
     {
       boo::GraphicsContextState State;
-      boo::AffineTransform Ctm;
+      AffineTransform Ctm;
       /// @brief Whether the level reset the clip of the levels beneath it.
       bool ResetsClip {false};
       bool IsTransparencyLayer {false};

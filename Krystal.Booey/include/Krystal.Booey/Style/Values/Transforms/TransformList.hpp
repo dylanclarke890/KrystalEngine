@@ -29,10 +29,13 @@
 #include "Krystal.Booey/Style/Values/Types.hpp"
 #include "Krystal.Core/Geometry/GeometryForward.hpp"
 
-namespace krys::boo
+namespace krys
 {
   class TransformationMatrix;
+}
 
+namespace krys::boo
+{
   namespace style
   {
     struct Transform;

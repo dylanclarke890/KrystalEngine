@@ -1,11 +1,11 @@
-﻿#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+﻿#include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 
-namespace krys::boo::tests
+namespace krys::tests
 {
   using Catch::Matchers::WithinAbs;
   using Catch::Matchers::WithinULP;
@@ -881,7 +881,7 @@ namespace krys::boo::tests
 
   TEST_CASE("AffineTransform: Translation", "[Graphics][AffineTransform]")
   {
-    auto test = AffineTransform::MakeTranslation({-5.0f, -7.0f});
+    auto test = AffineTransform::CreateTranslation({-5.0f, -7.0f});
     CHECK_THAT(test.A(), WithinULP(1.0, 4));
     CHECK_THAT(test.B(), WithinULP(0.0, 4));
     CHECK_THAT(test.C(), WithinULP(0.0, 4));
@@ -909,12 +909,12 @@ namespace krys::boo::tests
     CHECK_THAT(matrix.M34(), WithinULP(0.0, 4));
   }
 
-  TEST_CASE("AffineTransform: MakeMapBetweenRects", "[Graphics][AffineTransform]")
+  TEST_CASE("AffineTransform: CreateMapBetweenRects", "[Graphics][AffineTransform]")
   {
     RectF fromRect(10.0f, 10.0f, 100.0f, 100.0f);
     RectF toRect(70.0f, 70.0f, 200.0f, 50.0f);
 
-    auto mapBetween = MakeMapBetweenRects(fromRect, toRect);
+    auto mapBetween = CreateMapBetweenRects(fromRect, toRect);
 
     CHECK_THAT(mapBetween.A(), WithinULP(2.0, 4));
     CHECK_THAT(mapBetween.B(), WithinULP(0.0, 4));

@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Maths/CompositeOperation.hpp"
 
 namespace krys::boo
 {

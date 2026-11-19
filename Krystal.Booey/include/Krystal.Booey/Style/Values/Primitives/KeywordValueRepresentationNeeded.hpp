@@ -25,7 +25,6 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Values/Concepts.hpp"
-#include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSizeAdjust.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/Paths/WindRule.hpp"
@@ -36,6 +35,7 @@
 #include "Krystal.Booey/Text/TextSpacing.hpp"
 #include "Krystal.Booey/Text/UnicodeBidi.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
+#include "Krystal.Core/Maths/CompositeOperation.hpp"
 
 // FIXME: Add specializations of ValueRepresentation for all enums listed in this file.
 

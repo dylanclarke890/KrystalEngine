@@ -18,12 +18,6 @@ namespace krys::ui
 {
   namespace
   {
-    KRYS_NODISCARD gfx::Transform2D ToTransform2D(const boo::TransformationMatrix &matrix) noexcept
-    {
-      // FIXME: Perspective, once there are 3D rendering contexts: a layer's 3D transform is flattened.
-      return ui::ToTransform2D(matrix.ToAffineTransform());
-    }
-
     /// @brief A matrix's rows as a layer filter's colour matrix.
     template <size_t ColumnCount, size_t RowCount>
     KRYS_NODISCARD Array<float, 20> RowsOf(const ColourMatrix<ColumnCount, RowCount> &matrix) noexcept
@@ -146,13 +140,13 @@ namespace krys::ui
     return _imageBuffers->Render(backend, *commands);
   }
 
-  void TextureMapper::SetTransform(const boo::TransformationMatrix &matrix) noexcept
+  void TextureMapper::SetTransform(const TransformationMatrix &matrix) noexcept
   {
-    _renderer->SetTransform(_baseTransform * ToTransform2D(matrix));
+    _renderer->SetTransform(_baseTransform * matrix.ToAffineTransform());
   }
 
   void TextureMapper::DrawBorder(const boo::Color &color, float width, const RectF &targetRect,
-                                 const boo::TransformationMatrix &modelViewMatrix) noexcept
+                                 const TransformationMatrix &modelViewMatrix) noexcept
   {
     if (ClipBounds().IsEmpty())
     {
@@ -175,7 +169,7 @@ namespace krys::ui
   }
 
   void TextureMapper::DrawNumber(int32 number, const boo::Color &color, const PointF &targetPoint,
-                                 const boo::TransformationMatrix &modelViewMatrix) noexcept
+                                 const TransformationMatrix &modelViewMatrix) noexcept
   {
     if (ClipBounds().IsEmpty())
     {
@@ -239,9 +233,8 @@ namespace krys::ui
     }
   }
 
-  gfx::SamplerFilter
-    TextureMapper::ScalingFilter(const SizeI &textureSize, const RectF &targetRect,
-                                 const boo::TransformationMatrix &modelViewMatrix) const noexcept
+  gfx::SamplerFilter TextureMapper::ScalingFilter(const SizeI &textureSize, const RectF &targetRect,
+                                                  const TransformationMatrix &modelViewMatrix) const noexcept
   {
     if (_minificationFilter == _magnificationFilter)
     {
@@ -254,7 +247,7 @@ namespace krys::ui
   }
 
   void TextureMapper::DrawTexture(const BitmapTexture &texture, const RectF &targetRect,
-                                  const boo::TransformationMatrix &modelViewMatrix, float opacity,
+                                  const TransformationMatrix &modelViewMatrix, float opacity,
                                   AllEdgesExposed) noexcept
   {
     if (!texture.Handle().IsValid() || ClipBounds().IsEmpty())
@@ -272,7 +265,7 @@ namespace krys::ui
   }
 
   void TextureMapper::DrawTexture(gfx::TextureHandle texture, const SizeI &textureSize,
-                                  const RectF &targetRect, const boo::TransformationMatrix &modelViewMatrix,
+                                  const RectF &targetRect, const TransformationMatrix &modelViewMatrix,
                                   float opacity, AlphaPremultiplication alpha) noexcept
   {
     if (!texture.IsValid() || ClipBounds().IsEmpty())
@@ -289,7 +282,7 @@ namespace krys::ui
     _renderer->Restore();
   }
 
-  void TextureMapper::DrawSolidColor(const RectF &rect, const boo::TransformationMatrix &matrix,
+  void TextureMapper::DrawSolidColor(const RectF &rect, const TransformationMatrix &matrix,
                                      const boo::Color &color, bool) noexcept
   {
     if (ClipBounds().IsEmpty())
@@ -303,7 +296,7 @@ namespace krys::ui
     _renderer->Restore();
   }
 
-  void TextureMapper::BeginClip(const boo::TransformationMatrix &modelViewMatrix,
+  void TextureMapper::BeginClip(const TransformationMatrix &modelViewMatrix,
                                 const boo::FloatRoundedRect &targetRect) noexcept
   {
     _renderer->Save();
@@ -316,7 +309,7 @@ namespace krys::ui
       auto rect = quad.EnclosingBoundingBox();
       if (modelViewMatrix.IsAffine() && quad.IsRectilinear() && !rect.IsEmpty())
       {
-        SetTransform(boo::TransformationMatrix());
+        SetTransform(TransformationMatrix());
         _renderer->ClipRect(RectF(rect));
         SetTransform(modelViewMatrix);
       }
@@ -367,7 +360,7 @@ namespace krys::ui
     _renderer->BeginLayer(opacity, blendMode);
     uint32 layers = 1u;
     // The filters' lengths are the layer's, which the transform scales (by the device and page scales).
-    float scale = std::sqrt(std::abs(_renderer->GetTransform().Determinant()));
+    float scale = std::sqrt(std::abs(static_cast<float>(_renderer->GetTransform().Determinant())));
     for (auto it = filters.rbegin(); it != filters.rend(); ++it)
     {
       if (auto filter = LayerFilterFor(**it, blurEdgeMode, scale))

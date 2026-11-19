@@ -10,10 +10,10 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Gfx/Device.hpp"
 #include "Krystal.Gfx/Handles.hpp"
+#include "Krystal.Gfx/Render2D/AffineTransformFloats.hpp"
 #include "Krystal.Gfx/Render2D/AtlasPages.hpp"
 #include "Krystal.Gfx/Render2D/Path2D.hpp"
 #include "Krystal.Gfx/Render2D/PathRasteriser.hpp"
-#include "Krystal.Gfx/Render2D/Transform2D.hpp"
 
 namespace krys::gfx
 {
@@ -120,7 +120,7 @@ namespace krys::gfx
     /// @brief The mask of `path`, mapped into target pixels by `transform` and blurred by a Gaussian with
     /// standard deviation `blur` pixels (for shadows), rasterising it if it isn't cached. `clip` only limits
     /// masks too large to cache.
-    KRYS_NODISCARD MaskLocation GetMask(const Path2D &path, const Transform2D &transform, FillRule rule,
+    KRYS_NODISCARD MaskLocation GetMask(const Path2D &path, const AffineTransform &transform, FillRule rule,
                                         const RectI &clip, float blur = 0.f) noexcept;
 
     /// @brief Uploads a mask made elsewhere into a texture of its own, kept for this frame only.

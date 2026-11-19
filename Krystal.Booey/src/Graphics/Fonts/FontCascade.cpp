@@ -945,7 +945,7 @@ namespace krys::boo
       GlyphToPathTranslator(const TextRun &textRun, const GlyphBuffer &glyphBuffer,
                             const PointF &textOrigin) noexcept
           : _textRun(textRun), _glyphBuffer(glyphBuffer), _fontData(&glyphBuffer.FontAt(_index)),
-            _translation(AffineTransform::MakeTranslation(ToSizeF(textOrigin)))
+            _translation(AffineTransform::CreateTranslation(ToSizeF(textOrigin)))
       {
       }
 

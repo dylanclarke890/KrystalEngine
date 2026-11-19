@@ -12,7 +12,7 @@ namespace krys::boo::tests
     {
       double KeyOffset;
       bool Animates {true};
-      Maybe<boo::CompositeOperation> Operation;
+      Maybe<krys::CompositeOperation> Operation;
 
       explicit TestKeyframe(double offset, bool animates = true) noexcept
           : KeyOffset(offset), Animates(animates)
@@ -24,7 +24,7 @@ namespace krys::boo::tests
         return KeyOffset;
       }
 
-      KRYS_NODISCARD Maybe<boo::CompositeOperation> CompositeOperation() const noexcept override
+      KRYS_NODISCARD Maybe<krys::CompositeOperation> CompositeOperation() const noexcept override
       {
         return Operation;
       }
@@ -39,9 +39,9 @@ namespace krys::boo::tests
     {
       List<UniquePtr<TestKeyframe>> Keyframes;
       RefPtr<TimingFunction> Timing;
-      boo::CompositeOperation Operation {boo::CompositeOperation::Replace};
+      krys::CompositeOperation Operation {krys::CompositeOperation::Replace};
 
-      KRYS_NODISCARD boo::CompositeOperation CompositeOperation() const noexcept override
+      KRYS_NODISCARD krys::CompositeOperation CompositeOperation() const noexcept override
       {
         return Operation;
       }

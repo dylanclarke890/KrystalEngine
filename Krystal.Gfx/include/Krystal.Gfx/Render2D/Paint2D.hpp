@@ -5,8 +5,8 @@
 #include "Krystal.Core/Colour/ColourTypes.hpp"
 #include "Krystal.Core/Maths/Vector.hpp"
 #include "Krystal.Gfx/Handles.hpp"
+#include "Krystal.Gfx/Render2D/AffineTransformFloats.hpp"
 #include "Krystal.Gfx/Render2D/Gradient2D.hpp"
-#include "Krystal.Gfx/Render2D/Transform2D.hpp"
 #include "Krystal.Gfx/Sampler.hpp"
 
 namespace krys::gfx
@@ -17,7 +17,7 @@ namespace krys::gfx
     TextureHandle Texture {};
     /// @brief Maps pattern space into the draw's coordinates. In pattern space, a tile is `TileSize` and
     /// tiles repeat every `TileSize` + `Spacing` from the origin, in both directions.
-    Transform2D PatternSpace {};
+    AffineTransform PatternSpace {};
     Vec2f TileSize;
     /// @brief The transparent gap after each tile.
     Vec2f Spacing;
@@ -39,7 +39,7 @@ namespace krys::gfx
   {
     SRGBA<uint8> _colour {};
     const Gradient2D *_gradient {nullptr};
-    Transform2D _gradientSpace {};
+    AffineTransform _gradientSpace {};
     const ImagePattern2D *_pattern {nullptr};
 
   public:
@@ -49,7 +49,7 @@ namespace krys::gfx
     }
 
     /// @brief A gradient, its coordinates mapped into the draw's by `gradientSpace`.
-    constexpr Paint2D(const Gradient2D &gradient, const Transform2D &gradientSpace = {}) noexcept
+    constexpr Paint2D(const Gradient2D &gradient, const AffineTransform &gradientSpace = {}) noexcept
         : _gradient(&gradient), _gradientSpace(gradientSpace)
     {
     }
@@ -77,7 +77,7 @@ namespace krys::gfx
     }
 
     /// @brief Maps the gradient's coordinates into the coordinates of the draw it paints.
-    KRYS_NODISCARD constexpr const Transform2D &GetGradientSpace() const noexcept
+    KRYS_NODISCARD constexpr const AffineTransform &GetGradientSpace() const noexcept
     {
       return _gradientSpace;
     }

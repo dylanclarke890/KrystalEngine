@@ -371,7 +371,7 @@ namespace krys::gfx::tests
     }
 
     // Each frame starts untransformed.
-    Draw([](Renderer2D &renderer) { CHECK(renderer.GetTransform() == Transform2D::Identity()); },
+    Draw([](Renderer2D &renderer) { CHECK(renderer.GetTransform() == AffineTransform()); },
          Maybe<Array<float, 4>> {});
   }
 
@@ -2204,15 +2204,20 @@ namespace krys::gfx::tests
       {
         renderer.Translate(2.f, 0.f);
         renderer.Scale(2.f, 1.f);
-        renderer.FillRect({-1.f, 0.f, 8.f, 2.f}, Paint2D {gradient, Transform2D::Translation(1.f, 0.f)});
+        renderer.FillRect({-1.f, 0.f, 8.f, 2.f},
+                          Paint2D {gradient, AffineTransform::CreateTranslation(SizeF(1.f, 0.f))});
       });
     CHECK(GreyMismatches(Read(), _width, GradientSpreadMethod::Pad,
                          [](double x, double) -> Maybe<double> { return ((x - 2.0) / 2.0 - 1.0) / 4.0; })
           == 0u);
 
     // A gradient space that flattens the plane shows nothing.
-    Draw([&](Renderer2D &renderer)
-         { renderer.FillRect({0.f, 0.f, 16.f, 2.f}, Paint2D {gradient, Transform2D::Scale(0.f, 1.f)}); });
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        renderer.FillRect({0.f, 0.f, 16.f, 2.f},
+                          Paint2D {gradient, AffineTransform::CreateScale(SizeF(0.f, 1.f))});
+      });
     CHECK(Read()[0] == Clear);
   }
 
@@ -2709,8 +2714,8 @@ namespace krys::gfx::tests
     SECTION("Pattern space moves and scales the tiles")
     {
       const ImagePattern2D pattern {.Texture = image,
-                                    .PatternSpace =
-                                      Transform2D::Translation(1.f, 0.f) * Transform2D::Scale(2.f, 2.f),
+                                    .PatternSpace = AffineTransform::CreateTranslation(SizeF(1.f, 0.f))
+                                                    * AffineTransform::CreateScale(SizeF(2.f, 2.f)),
                                     .TileSize = {2.f, 2.f},
                                     .Filter = SamplerFilter::Nearest};
       Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 8.f, 8.f}, pattern); });
@@ -2747,8 +2752,8 @@ namespace krys::gfx::tests
       constexpr Array<Pixel, 4> blue {Blue, Blue, Blue, Blue};
       auto uniform = Image(2u, 2u, blue);
       const ImagePattern2D pattern {.Texture = uniform,
-                                    .PatternSpace =
-                                      Transform2D::Translation(0.3f, 0.7f) * Transform2D::Scale(0.76f, 0.61f),
+                                    .PatternSpace = AffineTransform::CreateTranslation(SizeF(0.3f, 0.7f))
+                                                    * AffineTransform::CreateScale(SizeF(0.76f, 0.61f)),
                                     .TileSize = {2.f, 2.f}};
       Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 8.f, 8.f}, pattern); });
       for (const auto &pixel : Read())
@@ -2766,7 +2771,7 @@ namespace krys::gfx::tests
       auto first = [&](bool repeat)
       {
         const ImagePattern2D pattern {.Texture = row,
-                                      .PatternSpace = Transform2D::Scale(4.f, 8.f),
+                                      .PatternSpace = AffineTransform::CreateScale(SizeF(4.f, 8.f)),
                                       .TileSize = {2.f, 1.f},
                                       .RepeatX = repeat,
                                       .RepeatY = repeat};

@@ -98,6 +98,7 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Commands/Command.cpp
 	
   # Geometry
+	PRIVATE tests/Geometry/AffineTransform.cpp
 	PRIVATE tests/Geometry/GeometryUtilities.cpp
 	PRIVATE tests/Geometry/Point.cpp
 	PRIVATE tests/Geometry/Point3.cpp
@@ -108,6 +109,7 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Geometry/Region.cpp
 	PRIVATE tests/Geometry/Segment.cpp
 	PRIVATE tests/Geometry/Size.cpp
+	PRIVATE tests/Geometry/TransformationMatrix.cpp
 
   # IO
   PRIVATE tests/IO/Backends/NativeFileBackend.cpp

@@ -45,7 +45,7 @@ namespace krys::boo::style::interpolation
     AnimatableCSSProperty Property;
 
     Context(AnimatableCSSProperty property, double progress, bool isDiscrete,
-            boo::CompositeOperation compositeOperation,
+            krys::CompositeOperation compositeOperation,
             boo::IterationCompositeOperation iterationCompositeOperation, double currentIteration,
             boo::Color fromColor, boo::Color toColor, const interpolation::Client &client) noexcept
         : BlendingContext(progress, isDiscrete, compositeOperation, iterationCompositeOperation,

@@ -357,9 +357,6 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Geometry/LayoutPoint.cpp
 		tests/Graphics/Geometry/LayoutRect.cpp
 		tests/Graphics/Geometry/LayoutSize.cpp
-		tests/Graphics/Transforms/AffineTransform.cpp
-		tests/Graphics/Transforms/Quaternion.cpp
-		tests/Graphics/Transforms/TransformationMatrix.cpp
 		tests/Graphics/Transforms/TransformExtras.cpp
 		tests/Text/TextFlags.cpp
 		tests/Text/TextSpacing.cpp

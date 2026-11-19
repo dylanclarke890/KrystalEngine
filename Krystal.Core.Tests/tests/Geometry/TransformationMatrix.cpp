@@ -1,11 +1,10 @@
-﻿#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
+﻿#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
-#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
 
-namespace krys::boo::tests
+namespace krys::tests
 {
   using Catch::Matchers::WithinAbs;
   using Catch::Matchers::WithinULP;
@@ -1123,7 +1122,7 @@ namespace krys::boo::tests
     REQUIRE(test3 != test4);
   }
 
-  TEST_CASE("TransformationMatrix: MakeMapBetweenRects", "[Graphics][TransformationMatrix]")
+  TEST_CASE("TransformationMatrix: CreateMapBetweenRects", "[Graphics][TransformationMatrix]")
   {
     RectF fromRect(10.0f, 10.0f, 100.0f, 100.0f);
     RectF toRect(70.0f, 70.0f, 200.0f, 50.0f);
@@ -1153,5 +1152,60 @@ namespace krys::boo::tests
     CHECK_THAT(mapBetween.M42(), WithinULP(60.0, 4));
     CHECK_THAT(mapBetween.M43(), WithinULP(0.0, 4));
     CHECK_THAT(mapBetween.M44(), WithinULP(1.0, 4));
+  }
+
+  TEST_CASE("TransformationMatrix: interpolating a decomposed rotation", "[Geometry][TransformationMatrix]")
+  {
+    const double halfSqrt2 = std::sqrt(0.5);
+    const Quaternion<double> identity;
+    // A 90 degree rotation about z.
+    const Quaternion<double> rotateZ(halfSqrt2, 0, 0, halfSqrt2);
+
+    SECTION("a spherical interpolation")
+    {
+      auto start = InterpolateRotation(identity, rotateZ, 0, CompositeOperation::Replace);
+      CHECK_THAT(start.z, WithinAbs(0, 1e-12));
+      CHECK_THAT(start.w, WithinAbs(1, 1e-12));
+
+      // Halfway is a 45 degree rotation about z.
+      auto half = InterpolateRotation(identity, rotateZ, 0.5, CompositeOperation::Replace);
+      CHECK_THAT(half.x, WithinAbs(0, 1e-12));
+      CHECK_THAT(half.z, WithinAbs(std::sin(std::numbers::pi / 8), 1e-12));
+      CHECK_THAT(half.w, WithinAbs(std::cos(std::numbers::pi / 8), 1e-12));
+
+      auto end = InterpolateRotation(identity, rotateZ, 1, CompositeOperation::Replace);
+      CHECK_THAT(end.z, WithinAbs(halfSqrt2, 1e-12));
+      CHECK_THAT(end.w, WithinAbs(halfSqrt2, 1e-12));
+
+      // The same rotation returns itself.
+      CHECK(InterpolateRotation(rotateZ, rotateZ, 0.3, CompositeOperation::Replace) == rotateZ);
+
+      // A negated quaternion is the same rotation: the start is negated onto the shorter arc, so halfway is
+      // the negated 45 degree rotation.
+      auto flipped = InterpolateRotation(identity, Quaternion<double>(-halfSqrt2, 0, 0, -halfSqrt2), 0.5,
+                                         CompositeOperation::Replace);
+      CHECK_THAT(flipped.z, WithinAbs(-std::sin(std::numbers::pi / 8), 1e-12));
+      CHECK_THAT(flipped.w, WithinAbs(-std::cos(std::numbers::pi / 8), 1e-12));
+    }
+
+    SECTION("accumulating multiplies")
+    {
+      CHECK((identity * rotateZ) == rotateZ);
+
+      // Two 90 degree rotations are a 180 degree rotation.
+      auto twice = (rotateZ * rotateZ);
+      CHECK_THAT(twice.z, WithinAbs(1, 1e-12));
+      CHECK_THAT(twice.w, WithinAbs(0, 1e-12));
+    }
+
+    SECTION("the composite operation")
+    {
+      CHECK(InterpolateRotation(rotateZ, rotateZ, 0.5, CompositeOperation::Accumulate)
+            == (rotateZ * rotateZ));
+      CHECK(InterpolateRotation(identity, rotateZ, 0.5, CompositeOperation::Replace)
+            == InterpolateRotation(identity, rotateZ, 0.5, CompositeOperation::Replace));
+      CHECK(InterpolateRotation(identity, rotateZ, 0.5, CompositeOperation::Add)
+            == InterpolateRotation(identity, rotateZ, 0.5, CompositeOperation::Replace));
+    }
   }
 }

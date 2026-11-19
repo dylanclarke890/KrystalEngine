@@ -26,8 +26,8 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGValueProperty.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 
 namespace krys::boo
 {

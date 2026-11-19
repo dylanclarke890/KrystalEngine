@@ -19,11 +19,6 @@ namespace krys::ui
 {
   namespace
   {
-    KRYS_NODISCARD boo::AffineTransform ToAffineTransform(const gfx::Transform2D &transform) noexcept
-    {
-      return {transform.A, transform.B, transform.C, transform.D, transform.E, transform.F};
-    }
-
     /// @brief The operator Render2D draws @p op with, blending with @p blendMode as Skia does: a blend mode
     /// other than normal blends over. Plus darker and difference aren't Porter-Duff operators: they draw
     /// over.
@@ -326,12 +321,12 @@ namespace krys::ui
   }
 
   void GraphicsContextRender2D::FillRect(const RectF &boundaries, boo::Gradient &gradient,
-                                         const boo::AffineTransform &gradientSpaceTransform,
+                                         const AffineTransform &gradientSpaceTransform,
                                          RequiresClipToRect) noexcept
   {
     PrepareDraw();
     const auto gradient2D = ToGradient2D(gradient, Alpha());
-    _renderer.FillRect(boundaries, gfx::Paint2D(gradient2D, ToTransform2D(gradientSpaceTransform)));
+    _renderer.FillRect(boundaries, gfx::Paint2D(gradient2D, gradientSpaceTransform));
   }
 
   void GraphicsContextRender2D::FillRoundedRectImpl(const boo::FloatRoundedRect &rect,
@@ -388,12 +383,12 @@ namespace krys::ui
     {
       shadow.Offset.SetWidth(shadow.Offset.Width() - away);
     }
-    else if (auto inverse = ToAffineTransform(transform).Inverse())
+    else if (auto inverse = transform.Inverse())
     {
       shadow.Offset = shadow.Offset - inverse->MapSize(SizeF {away, 0});
     }
     _renderer.Save();
-    _renderer.SetTransform(gfx::Transform2D::Translation(away, 0.f) * transform);
+    _renderer.SetTransform(AffineTransform::CreateTranslation(SizeF(away, 0.f)) * transform);
     _renderer.SetDropShadow({.Offset = {shadow.Offset.Width(), shadow.Offset.Height()},
                              .BlurRadius = shadow.Radius,
                              .Colour = ToColour(shadow.Color)});
@@ -781,19 +776,19 @@ namespace krys::ui
     _renderer.Translate(x, y);
   }
 
-  void GraphicsContextRender2D::ConcatCTM(const boo::AffineTransform &transform) noexcept
+  void GraphicsContextRender2D::ConcatCTM(const AffineTransform &transform) noexcept
   {
-    _renderer.ConcatTransform(ToTransform2D(transform));
+    _renderer.ConcatTransform(transform);
   }
 
-  void GraphicsContextRender2D::SetCTM(const boo::AffineTransform &transform) noexcept
+  void GraphicsContextRender2D::SetCTM(const AffineTransform &transform) noexcept
   {
-    _renderer.SetTransform(ToTransform2D(transform));
+    _renderer.SetTransform(transform);
   }
 
-  boo::AffineTransform GraphicsContextRender2D::GetCTM(IncludeDeviceScale) const noexcept
+  AffineTransform GraphicsContextRender2D::GetCTM(IncludeDeviceScale) const noexcept
   {
-    return ToAffineTransform(_renderer.GetTransform());
+    return _renderer.GetTransform();
   }
 
   GraphicsContextRender2D::Brush GraphicsContextRender2D::FillBrushPaint() const noexcept
@@ -805,8 +800,7 @@ namespace krys::ui
     }
     if (auto *gradient = brush.GetGradient())
     {
-      return {.Gradient = ToGradient2D(*gradient, Alpha()),
-              .GradientSpace = ToTransform2D(brush.GradientSpaceTransform())};
+      return {.Gradient = ToGradient2D(*gradient, Alpha()), .GradientSpace = brush.GradientSpaceTransform()};
     }
     return {.Colour = ToColour(brush.GetColor(), Alpha())};
   }
@@ -820,8 +814,7 @@ namespace krys::ui
     }
     if (auto *gradient = brush.GetGradient())
     {
-      return {.Gradient = ToGradient2D(*gradient, Alpha()),
-              .GradientSpace = ToTransform2D(brush.GradientSpaceTransform())};
+      return {.Gradient = ToGradient2D(*gradient, Alpha()), .GradientSpace = brush.GradientSpaceTransform()};
     }
     return {.Colour = ToColour(brush.GetColor(), Alpha())};
   }
@@ -851,7 +844,7 @@ namespace krys::ui
     const auto size = pattern.TileImage().Size();
     return {.Pattern = gfx::ImagePattern2D {
               .Texture = texture,
-              .PatternSpace = ToTransform2D(pattern.PatternSpaceTransform()),
+              .PatternSpace = pattern.PatternSpaceTransform(),
               .TileSize = {static_cast<float>(size.Width()), static_cast<float>(size.Height())},
               .Filter = ImageFilter(),
               .Opacity = Alpha(),
@@ -934,9 +927,9 @@ namespace krys::ui
   }
 
   void GraphicsContextRender2D::DrawPattern(boo::NativeImage &image, const RectF &destRect,
-                                            const RectF &tileRect,
-                                            const boo::AffineTransform &patternTransform, const PointF &phase,
-                                            const SizeF &spacing, boo::ImagePaintingOptions options) noexcept
+                                            const RectF &tileRect, const AffineTransform &patternTransform,
+                                            const PointF &phase, const SizeF &spacing,
+                                            boo::ImagePaintingOptions options) noexcept
   {
     auto *commands = _renderer.GetCommandBuffer();
     if (!_imageBuffers || !commands || !patternTransform.IsInvertible() || tileRect.IsEmpty())
@@ -1011,9 +1004,9 @@ namespace krys::ui
   }
 
   void GraphicsContextRender2D::DrawPattern(boo::ImageBuffer &image, const RectF &destRect,
-                                            const RectF &tileRect,
-                                            const boo::AffineTransform &patternTransform, const PointF &phase,
-                                            const SizeF &spacing, boo::ImagePaintingOptions options) noexcept
+                                            const RectF &tileRect, const AffineTransform &patternTransform,
+                                            const PointF &phase, const SizeF &spacing,
+                                            boo::ImagePaintingOptions options) noexcept
   {
     auto *commands = _renderer.GetCommandBuffer();
     if (!_imageBuffers || !commands || !patternTransform.IsInvertible() || tileRect.IsEmpty())
@@ -1045,7 +1038,7 @@ namespace krys::ui
 
   void GraphicsContextRender2D::DrawTexturePattern(gfx::TextureHandle texture, const SizeF &size,
                                                    const RectF &destRect, const RectF &tileRect,
-                                                   const boo::AffineTransform &patternTransform,
+                                                   const AffineTransform &patternTransform,
                                                    const PointF &phase, const SizeF &spacing,
                                                    boo::ImagePaintingOptions options,
                                                    gfx::CommandBuffer &commands) noexcept
@@ -1057,7 +1050,7 @@ namespace krys::ui
     phaseOffset.Scale(static_cast<float>(patternTransform.A()), static_cast<float>(patternTransform.D()));
     phaseOffset.MoveBy(phase);
     const auto shaderMatrix =
-      gfx::Transform2D::Translation(phaseOffset.X(), phaseOffset.Y()) * ToTransform2D(patternTransform);
+      AffineTransform::CreateTranslation(SizeF(phaseOffset.X(), phaseOffset.Y())) * patternTransform;
 
     auto tileTexture = texture;
     bool repeatX = true;
@@ -1068,10 +1061,10 @@ namespace krys::ui
       // scaled to fit the destination exactly doesn't filter in the texels at its other end.
       if (const auto inverse = shaderMatrix.Inverse())
       {
-        const auto corners = {inverse->Apply({destRect.X(), destRect.Y()}),
-                              inverse->Apply({destRect.MaxX(), destRect.Y()}),
-                              inverse->Apply({destRect.X(), destRect.MaxY()}),
-                              inverse->Apply({destRect.MaxX(), destRect.MaxY()})};
+        const auto corners = {gfx::MapPoint(*inverse, {destRect.X(), destRect.Y()}),
+                              gfx::MapPoint(*inverse, {destRect.MaxX(), destRect.Y()}),
+                              gfx::MapPoint(*inverse, {destRect.X(), destRect.MaxY()}),
+                              gfx::MapPoint(*inverse, {destRect.MaxX(), destRect.MaxY()})};
         float left = std::numeric_limits<float>::max();
         float top = left;
         float right = std::numeric_limits<float>::lowest();

@@ -1459,7 +1459,6 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Adwaita/TextFieldAdwaita.hpp
   include/Krystal.Booey/Graphics/Adwaita/ToggleButtonAdwaita.hpp
   include/Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp
-  include/Krystal.Booey/Graphics/Animation/CompositeOperation.hpp
   include/Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp
   include/Krystal.Booey/Graphics/Animation/SpringSolver.hpp
   include/Krystal.Booey/Graphics/Animation/TimingFunction.hpp
@@ -1658,16 +1657,14 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/TextRuns/TextRunIterator.hpp
   include/Krystal.Booey/Graphics/TextRuns/WidthCache.hpp
   include/Krystal.Booey/Graphics/TextRuns/WidthIterator.hpp
-  include/Krystal.Booey/Graphics/Transforms/AffineTransform.hpp
   include/Krystal.Booey/Graphics/Transforms/IdentityTransformOperation.hpp
+  include/Krystal.Booey/Graphics/Transforms/LayoutTransforms.hpp
   include/Krystal.Booey/Graphics/Transforms/Matrix3DTransformOperation.hpp
   include/Krystal.Booey/Graphics/Transforms/MatrixTransformOperation.hpp
   include/Krystal.Booey/Graphics/Transforms/PerspectiveTransformOperation.hpp
-  include/Krystal.Booey/Graphics/Transforms/Quaternion.hpp
   include/Krystal.Booey/Graphics/Transforms/RotateTransformOperation.hpp
   include/Krystal.Booey/Graphics/Transforms/ScaleTransformOperation.hpp
   include/Krystal.Booey/Graphics/Transforms/SkewTransformOperation.hpp
-  include/Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp
   include/Krystal.Booey/Graphics/Transforms/TransformOperation.hpp
   include/Krystal.Booey/Graphics/Transforms/TransformOperations.hpp
   include/Krystal.Booey/Graphics/Transforms/TransformOperationsSharedPrimitivesPrefix.hpp
@@ -1819,16 +1816,14 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
   src/Graphics/TextRuns/ComplexTextControllerHarfBuzz.cpp
   src/Graphics/TextRuns/StringTruncator.cpp
   src/Graphics/TextRuns/WidthIterator.cpp
-  src/Graphics/Transforms/AffineTransform.cpp
   src/Graphics/Transforms/IdentityTransformOperation.cpp
+  src/Graphics/Transforms/LayoutTransforms.cpp
   src/Graphics/Transforms/Matrix3DTransformOperation.cpp
   src/Graphics/Transforms/MatrixTransformOperation.cpp
   src/Graphics/Transforms/PerspectiveTransformOperation.cpp
-  src/Graphics/Transforms/Quaternion.cpp
   src/Graphics/Transforms/RotateTransformOperation.cpp
   src/Graphics/Transforms/ScaleTransformOperation.cpp
   src/Graphics/Transforms/SkewTransformOperation.cpp
-  src/Graphics/Transforms/TransformationMatrix.cpp
   src/Graphics/Transforms/TransformOperation.cpp
   src/Graphics/Transforms/TransformOperations.cpp
   src/Graphics/Transforms/TransformState.cpp

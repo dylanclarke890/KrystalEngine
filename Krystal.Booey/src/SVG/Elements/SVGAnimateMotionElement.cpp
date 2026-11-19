@@ -22,7 +22,6 @@
 
 #include "Krystal.Booey/SVG/Elements/SVGAnimateMotionElement.hpp"
 #include "Krystal.Booey/Graphics/Paths/PathTraversalState.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGPathData.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
@@ -31,6 +30,7 @@
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 
 namespace krys::boo
 {

@@ -9,9 +9,9 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Gfx/Device.hpp"
 #include "Krystal.Gfx/Handles.hpp"
+#include "Krystal.Gfx/Render2D/AffineTransformFloats.hpp"
 #include "Krystal.Gfx/Render2D/AtlasPages.hpp"
 #include "Krystal.Gfx/Render2D/FontFace2D.hpp"
-#include "Krystal.Gfx/Render2D/Transform2D.hpp"
 #include <utility>
 
 namespace krys::gfx
@@ -106,7 +106,7 @@ namespace krys::gfx
     /// With a `blur` (a standard deviation in pixels), it's the glyph's coverage blurred, for shadows: a
     /// colour glyph's alpha, so always coverage, its bounds grown by the blur's reach.
     KRYS_NODISCARD Maybe<GlyphLocation> GetGlyph(const FontFace2D &face, uint32 glyph, float size,
-                                                 uint32 subpixel, const Transform2D &linear = {},
+                                                 uint32 subpixel, const AffineTransform &linear = {},
                                                  float blur = 0.f) noexcept;
 
     /// @brief Splits a pen's x into the whole pixel it's in and its quarter within it, rounding to the

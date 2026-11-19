@@ -38,7 +38,8 @@ namespace krys::gfx::tests
     }
 
     KRYS_NODISCARD CoverageMask Rasterise(const Path2D &path, FillRule rule = FillRule::NonZero,
-                                          const Transform2D &transform = {}, const RectI &clip = Everywhere)
+                                          const AffineTransform &transform = {},
+                                          const RectI &clip = Everywhere)
     {
       PathRasteriser rasteriser;
       return rasteriser.Rasterise(path, transform, rule, clip);
@@ -159,7 +160,8 @@ namespace krys::gfx::tests
   TEST_CASE("PathRasteriser: maps the path into pixels and clips it", "[Gfx][Render2D]")
   {
     auto transformed = Rasterise(Rect(0.f, 0.f, 1.f, 1.f), FillRule::NonZero,
-                                 Transform2D::Translation(1.f, 1.f) * Transform2D::Scale(3.f, 2.f));
+                                 AffineTransform::CreateTranslation(SizeF(1.f, 1.f))
+                                   * AffineTransform::CreateScale(SizeF(3.f, 2.f)));
     CHECK(transformed.Bounds == RectI {1, 1, 3u, 2u});
     CHECK(Area(transformed) == 6.f);
 

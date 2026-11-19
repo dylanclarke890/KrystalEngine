@@ -25,18 +25,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Geometry/Region.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
 #include <cmath>
 #include <numbers>
 
-namespace krys::boo
+namespace krys
 {
   namespace
   {
@@ -46,21 +46,21 @@ namespace krys::boo
     }
   }
 
-  AffineTransform AffineTransform::MakeRotation(double angleInDegrees, PointF center) noexcept
+  AffineTransform AffineTransform::CreateRotation(double angleInDegrees, PointF center) noexcept
   {
     if (center.IsZero())
     {
-      return MakeRotation(angleInDegrees);
+      return CreateRotation(angleInDegrees);
     }
 
     auto centerSize = ToSizeF(center);
-    auto matrix = MakeTranslation(centerSize);
+    auto matrix = CreateTranslation(centerSize);
     matrix.Rotate(angleInDegrees);
     matrix.Translate(-centerSize);
     return matrix;
   }
 
-  AffineTransform AffineTransform::MakeRotation(double angleInDegrees) noexcept
+  AffineTransform AffineTransform::CreateRotation(double angleInDegrees) noexcept
   {
     auto angleInRadians = deg2rad(angleInDegrees);
     double cosAngle = std::cos(angleInRadians);
@@ -259,7 +259,7 @@ namespace krys::boo
     return Shear(0, std::tan(deg2rad(angle)));
   }
 
-  AffineTransform MakeMapBetweenRects(const RectF &source, const RectF &dest) noexcept
+  AffineTransform CreateMapBetweenRects(const RectF &source, const RectF &dest) noexcept
   {
     AffineTransform transform;
     transform.Translate(dest.X() - source.X(), dest.Y() - source.Y());

@@ -48,6 +48,11 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
+namespace krys
+{
+  class TransformationMatrix;
+}
+
 namespace krys::boo
 {
   class Color;
@@ -66,7 +71,6 @@ namespace krys::boo
   class StyleNonInheritedData;
   class StyleRareInheritedData;
   class SVGRenderStyle;
-  class TransformationMatrix;
   class ViewTimeline;
 
   struct BorderData;

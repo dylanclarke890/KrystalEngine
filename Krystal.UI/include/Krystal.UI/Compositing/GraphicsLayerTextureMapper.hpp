@@ -109,9 +109,9 @@ namespace krys::ui
 
     void SetSize(const SizeF &value) noexcept override;
 
-    void SetTransform(const boo::TransformationMatrix &value) noexcept override;
+    void SetTransform(const TransformationMatrix &value) noexcept override;
 
-    void SetChildrenTransform(const boo::TransformationMatrix &value) noexcept override;
+    void SetChildrenTransform(const TransformationMatrix &value) noexcept override;
 
     void SetPreserves3D(bool value) noexcept override;
 

@@ -20,9 +20,9 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/GradientColorStops.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGGradientElement.hpp"
 #include "Krystal.Booey/SVG/SVGUnitTypes.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 
 namespace krys::boo::svg
 {

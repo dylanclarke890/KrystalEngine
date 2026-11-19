@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 
 namespace krys::ui
 {
@@ -31,11 +31,11 @@ namespace krys::ui
     virtual ~TextureMapperPlatformLayer() noexcept = default;
 
     virtual void PaintToTextureMapper(TextureMapper &textureMapper, const RectF &targetRect,
-                                      const boo::TransformationMatrix &modelViewMatrix = {},
+                                      const TransformationMatrix &modelViewMatrix = {},
                                       float opacity = 1.0) noexcept = 0;
 
     virtual void DrawBorder(TextureMapper &textureMapper, const boo::Color &color, float borderWidth,
-                            const RectF &targetRect, const boo::TransformationMatrix &transform) noexcept;
+                            const RectF &targetRect, const TransformationMatrix &transform) noexcept;
 
     void SetClient(Client *client) noexcept
     {

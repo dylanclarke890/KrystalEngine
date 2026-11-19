@@ -24,10 +24,13 @@
 #include "Krystal.Booey/SVG/Elements/SVGAnimationElement.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 
-namespace krys::boo
+namespace krys
 {
   class AffineTransform;
+}
 
+namespace krys::boo
+{
   /// @brief The `<animateMotion>` element: moves its target along a motion path.
   /// @see https://svgwg.org/specs/animations/#AnimateMotionElement
   class SVGAnimateMotionElement final : public SVGAnimationElement

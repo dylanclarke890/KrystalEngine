@@ -12,21 +12,21 @@ namespace krys::gfx
   {
     /// @brief Bounds of every point of the path once transformed. Curves stay within their control points,
     /// so this contains the path; it's cheap enough to check a mask's size before rasterising it.
-    KRYS_NODISCARD Maybe<RectF> ControlBounds(const Path2D &path, const Transform2D &transform) noexcept
+    KRYS_NODISCARD Maybe<RectF> ControlBounds(const Path2D &path, const AffineTransform &transform) noexcept
     {
       const auto points = path.Points();
       if (points.empty())
       {
         return {};
       }
-      const auto first = transform.Apply(points[0]);
+      const auto first = MapPoint(transform, points[0]);
       float left = first.x;
       float top = first.y;
       float right = first.x;
       float bottom = first.y;
       for (const auto &point : points)
       {
-        const auto mapped = transform.Apply(point);
+        const auto mapped = MapPoint(transform, point);
         left = std::min(left, mapped.x);
         top = std::min(top, mapped.y);
         right = std::max(right, mapped.x);
@@ -97,7 +97,7 @@ namespace krys::gfx
     }
   }
 
-  MaskLocation MaskAtlas::GetMask(const Path2D &path, const Transform2D &transform, FillRule rule,
+  MaskLocation MaskAtlas::GetMask(const Path2D &path, const AffineTransform &transform, FillRule rule,
                                   const RectI &clip, float blur) noexcept
   {
     Collect();
@@ -105,24 +105,20 @@ namespace krys::gfx
     const uint64 frame = _device->FrameNumber();
 
     // The whole-pixel part of the translation moves the mask; the rest shapes it.
-    const float wholeX = std::floor(transform.E);
-    const float wholeY = std::floor(transform.F);
+    const double wholeX = std::floor(transform.E());
+    const double wholeY = std::floor(transform.F());
     if (!std::isfinite(wholeX) || !std::isfinite(wholeY))
     {
       return {};
     }
     const auto offsetX = static_cast<int32>(wholeX);
     const auto offsetY = static_cast<int32>(wholeY);
-    const Transform2D shape {.A = transform.A,
-                             .B = transform.B,
-                             .C = transform.C,
-                             .D = transform.D,
-                             .E = transform.E - wholeX,
-                             .F = transform.F - wholeY};
+    const AffineTransform shape(transform.A(), transform.B(), transform.C(), transform.D(),
+                                transform.E() - wholeX, transform.F() - wholeY);
 
     Key key {.Path = path,
-             .Linear = {shape.A, shape.B, shape.C, shape.D},
-             .Fraction = {shape.E, shape.F},
+             .Linear = LinearPartF(shape),
+             .Fraction = TranslationF(shape),
              .Rule = rule,
              .Blur = blur};
     if (auto found = _entries.find(key); found != _entries.end())

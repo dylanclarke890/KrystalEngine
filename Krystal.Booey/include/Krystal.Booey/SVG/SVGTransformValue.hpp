@@ -61,13 +61,13 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static SVGTransformValue TranslateTransformValue(SizeF delta) noexcept
     {
-      return SVGTransformValue(SVG_TRANSFORM_TRANSLATE, AffineTransform::MakeTranslation(delta));
+      return SVGTransformValue(SVG_TRANSFORM_TRANSLATE, AffineTransform::CreateTranslation(delta));
     }
 
     KRYS_NODISCARD static SVGTransformValue RotateTransformValue(float angleInDegrees, PointF center) noexcept
     {
       auto result =
-        SVGTransformValue(SVG_TRANSFORM_ROTATE, AffineTransform::MakeRotation(angleInDegrees, center));
+        SVGTransformValue(SVG_TRANSFORM_ROTATE, AffineTransform::CreateRotation(angleInDegrees, center));
       result._angle = angleInDegrees;
       result._rotationCenter = center;
       return result;
@@ -75,7 +75,7 @@ namespace krys::boo
 
     KRYS_NODISCARD static SVGTransformValue ScaleTransformValue(SizeF scale) noexcept
     {
-      return SVGTransformValue(SVG_TRANSFORM_SCALE, AffineTransform::MakeScale(scale));
+      return SVGTransformValue(SVG_TRANSFORM_SCALE, AffineTransform::CreateScale(scale));
     }
 
     SVGTransformValue(SVGTransformType type = SVG_TRANSFORM_MATRIX,
@@ -170,7 +170,7 @@ namespace krys::boo
       _angle = 0;
       _rotationCenter = {};
 
-      _matrix->Value() = AffineTransform::MakeTranslation({tx, ty});
+      _matrix->Value() = AffineTransform::CreateTranslation({tx, ty});
     }
 
     KRYS_NODISCARD SizeF Scale() const noexcept
@@ -184,7 +184,7 @@ namespace krys::boo
       _angle = 0;
       _rotationCenter = {};
 
-      _matrix->Value() = AffineTransform::MakeScale({sx, sy});
+      _matrix->Value() = AffineTransform::CreateScale({sx, sy});
     }
 
     void SetRotate(float angleInDegrees, float cx, float cy) noexcept
@@ -193,7 +193,7 @@ namespace krys::boo
       _angle = angleInDegrees;
       _rotationCenter = {cx, cy};
 
-      _matrix->Value() = AffineTransform::MakeRotation(angleInDegrees, {cx, cy});
+      _matrix->Value() = AffineTransform::CreateRotation(angleInDegrees, {cx, cy});
     }
 
     void SetSkewX(float angle) noexcept

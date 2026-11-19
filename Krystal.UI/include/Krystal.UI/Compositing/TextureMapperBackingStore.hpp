@@ -11,11 +11,11 @@ namespace krys::ui
     ~TextureMapperBackingStore() noexcept override = default;
 
     void PaintToTextureMapper(TextureMapper &textureMapper, const RectF &targetRect,
-                              const boo::TransformationMatrix &modelViewMatrix,
+                              const TransformationMatrix &modelViewMatrix,
                               float opacity) noexcept override = 0;
 
     virtual void DrawRepaintCounter(TextureMapper &, int32, const boo::Color &, const RectF &,
-                                    const boo::TransformationMatrix &) noexcept
+                                    const TransformationMatrix &) noexcept
     {
     }
 
@@ -36,6 +36,6 @@ namespace krys::ui
     }
 
     void PaintToTextureMapper(TextureMapper &textureMapper, const RectF &targetRect,
-                              const boo::TransformationMatrix &transform, float opacity) noexcept override;
+                              const TransformationMatrix &transform, float opacity) noexcept override;
   };
 }

@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Animation/Timing/EffectTiming.hpp"
-#include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp"
+#include "Krystal.Core/Maths/CompositeOperation.hpp"
 
 namespace krys::boo
 {

@@ -5,8 +5,8 @@
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Gfx/Render2D/AffineTransformFloats.hpp"
 #include "Krystal.Gfx/Render2D/Path2D.hpp"
-#include "Krystal.Gfx/Render2D/Transform2D.hpp"
 
 namespace krys::gfx
 {
@@ -78,12 +78,12 @@ namespace krys::gfx
 
     /// @brief Rasterises `path`, mapped into pixels by `transform`, within `clip`. Paths with non-finite
     /// points cover nothing.
-    KRYS_NODISCARD CoverageMask Rasterise(const Path2D &path, const Transform2D &transform, FillRule rule,
+    KRYS_NODISCARD CoverageMask Rasterise(const Path2D &path, const AffineTransform &transform, FillRule rule,
                                           const RectI &clip) noexcept;
 
   private:
     /// @brief Flattens the transformed path into `_edges`; false if a point isn't finite.
-    KRYS_NODISCARD bool BuildEdges(const Path2D &path, const Transform2D &transform) noexcept;
+    KRYS_NODISCARD bool BuildEdges(const Path2D &path, const AffineTransform &transform) noexcept;
 
     void AddLine(Vec2f from, Vec2f to) noexcept;
 

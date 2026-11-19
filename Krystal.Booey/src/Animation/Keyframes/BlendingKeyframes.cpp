@@ -479,7 +479,7 @@ namespace krys::boo
         for (const auto &property : implicitProperties)
         {
           style::interpolation::Interpolate(property, *keyframeStyle, underlyingStyle, underlyingStyle, 1,
-                                            boo::CompositeOperation::Replace, effect);
+                                            krys::CompositeOperation::Replace, effect);
           existingImplicitBlendingKeyframe->AddProperty(property);
         }
         existingImplicitBlendingKeyframe->SetStyle(krys::move(keyframeStyle));
@@ -498,7 +498,7 @@ namespace krys::boo
       // default composite property as "replace" for CSS Animations.
       if (effect.Animation() && Is<CSSAnimation>(*effect.Animation()))
       {
-        blendingKeyframe.SetCompositeOperation(boo::CompositeOperation::Replace);
+        blendingKeyframe.SetCompositeOperation(krys::CompositeOperation::Replace);
       }
       Insert(krys::move(blendingKeyframe));
     };

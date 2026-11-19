@@ -25,7 +25,6 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
-#include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationDelay.hpp"
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationDuration.hpp"
@@ -36,6 +35,7 @@
 #include "Krystal.Booey/Style/Values/Easing/EasingFunction.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/CoordinatedValueListValue.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Maths/CompositeOperation.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"

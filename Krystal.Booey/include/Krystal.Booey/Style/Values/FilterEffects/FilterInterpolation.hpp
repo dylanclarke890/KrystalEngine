@@ -28,8 +28,8 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
-#include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperation.hpp"
+#include "Krystal.Core/Maths/CompositeOperation.hpp"
 
 namespace krys::boo::style
 {

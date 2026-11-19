@@ -32,9 +32,13 @@
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
+namespace krys
 {
   class AffineTransform;
+}
+
+namespace krys::boo
+{
   class GraphicsContext;
   class LegacyRenderSVGRoot;
   struct PaintInfo;

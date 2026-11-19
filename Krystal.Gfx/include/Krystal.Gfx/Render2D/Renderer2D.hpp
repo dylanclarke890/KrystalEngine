@@ -17,6 +17,7 @@
 #include "Krystal.Gfx/Device.hpp"
 #include "Krystal.Gfx/Formats.hpp"
 #include "Krystal.Gfx/Handles.hpp"
+#include "Krystal.Gfx/Render2D/AffineTransformFloats.hpp"
 #include "Krystal.Gfx/Render2D/FilterGraph2D.hpp"
 #include "Krystal.Gfx/Render2D/FontFace2D.hpp"
 #include "Krystal.Gfx/Render2D/GlyphAtlas.hpp"
@@ -27,7 +28,6 @@
 #include "Krystal.Gfx/Render2D/PathStroker.hpp"
 #include "Krystal.Gfx/Render2D/RoundedRect2D.hpp"
 #include "Krystal.Gfx/Render2D/StrokeStyle.hpp"
-#include "Krystal.Gfx/Render2D/Transform2D.hpp"
 #include "Krystal.Gfx/Sampler.hpp"
 
 namespace krys::gfx
@@ -295,7 +295,7 @@ namespace krys::gfx
 
     struct DrawState
     {
-      Transform2D Transform {};
+      AffineTransform Transform {};
       /// @brief The clip's bounds, in target pixels; draws outside them are discarded by the scissor.
       RectI Clip {};
       /// @brief The shape clips in effect, an index into the frame's chains, or `NoChain`.
@@ -312,7 +312,7 @@ namespace krys::gfx
     {
       RoundedRect2D Shape {};
       /// @brief Maps target pixels into the shape's coordinates.
-      Transform2D Inverse {};
+      AffineTransform Inverse {};
       bool Out {false};
     };
 
@@ -320,7 +320,7 @@ namespace krys::gfx
     struct PathClip
     {
       Path2D Path {};
-      Transform2D Transform {};
+      AffineTransform Transform {};
       FillRule Rule {FillRule::NonZero};
       bool Out {false};
     };
@@ -387,7 +387,7 @@ namespace krys::gfx
       /// @brief Maps target pixels into the shape's own space: along the line for a linear gradient (offset
       /// 0 to 1 along x), centred on the first circle for a radial one, centred and turned to start along x
       /// for a conic one.
-      Transform2D Inverse {};
+      AffineTransform Inverse {};
       /// @brief A radial gradient's second centre, relative to its first, then its start and end radii.
       Array<float, 4> Radial {};
       uint32 FirstStop {0u};
@@ -430,7 +430,7 @@ namespace krys::gfx
       TextureHandle Texture {};
       SamplerHandle Sampler {};
       /// @brief Maps target pixels into pattern space.
-      Transform2D Inverse {};
+      AffineTransform Inverse {};
       /// @brief The tile's size, then the spacing after it, in pattern space.
       Array<float, 4> TileAndSpacing {};
       /// @brief `PatternFlags`.
@@ -453,7 +453,7 @@ namespace krys::gfx
     /// @brief Where a shape's shadow goes: the shape's transform moved by the offset, and the blur.
     struct ShadowPlacement
     {
-      Transform2D Transform {};
+      AffineTransform Transform {};
       /// @brief The standard deviation in the shape's local units, and in target pixels.
       float Sigma {0.f};
       float PixelSigma {0.f};
@@ -692,7 +692,7 @@ namespace krys::gfx
     void Restore() noexcept;
 
     /// @brief Applies `transform` before the current transform: later draws are in its coordinates.
-    void ConcatTransform(const Transform2D &transform) noexcept;
+    void ConcatTransform(const AffineTransform &transform) noexcept;
 
     void Translate(float x, float y) noexcept;
 
@@ -702,9 +702,9 @@ namespace krys::gfx
     void Rotate(float radians) noexcept;
 
     /// @brief Replaces the current transform, relative to the target's pixels.
-    void SetTransform(const Transform2D &transform) noexcept;
+    void SetTransform(const AffineTransform &transform) noexcept;
 
-    KRYS_NODISCARD const Transform2D &GetTransform() const noexcept;
+    KRYS_NODISCARD const AffineTransform &GetTransform() const noexcept;
 
     /// @brief Intersects the clip with a rect in the current coordinates. A rect whose edges land on whole
     /// target pixels, under a transform that keeps rects axis-aligned, is the scissor alone.
@@ -859,11 +859,11 @@ namespace krys::gfx
 
     /// @brief Adds a rounded rect in `transform`'s coordinates, its radii constrained.
     void AddRoundedRect(const RoundedRect2D &rect, const ResolvedPaint &paint,
-                        const Transform2D &transform) noexcept;
+                        const AffineTransform &transform) noexcept;
 
     /// @brief Fills in the instance's transform and adds it to the batch it can join, or a new one; skips it
     /// when nothing would show.
-    void AddInstance(RectInstance instance, const Transform2D &transform, TextureHandle texture,
+    void AddInstance(RectInstance instance, const AffineTransform &transform, TextureHandle texture,
                      SamplerHandle sampler, uint32 gradient = NoGradient,
                      uint32 pattern = NoPattern) noexcept;
 
@@ -876,7 +876,7 @@ namespace krys::gfx
 
     /// @brief Where the shadow of a shape drawn under `transform` with `paint` goes; nothing when there's no
     /// shadow to show.
-    KRYS_NODISCARD Maybe<ShadowPlacement> PlaceShadow(const Transform2D &transform,
+    KRYS_NODISCARD Maybe<ShadowPlacement> PlaceShadow(const AffineTransform &transform,
                                                       const ResolvedPaint &paint) const noexcept;
 
     /// @brief Adds a mask's instance, drawn on whole target pixels, unless it's empty or outside the clip.
@@ -891,7 +891,7 @@ namespace krys::gfx
     /// @brief Fills a path through its mask under `geometry` (which may differ from the current transform,
     /// as a glyph's outline is placed at its pen), with its shadow, the paint resolved in the current
     /// coordinates.
-    void FillPathMask(const Path2D &path, const Transform2D &geometry, FillRule rule,
+    void FillPathMask(const Path2D &path, const AffineTransform &geometry, FillRule rule,
                       const ResolvedPaint &paint) noexcept;
 
     /// @brief Whether a paint certainly shows nothing, before the work of resolving it.
@@ -915,7 +915,7 @@ namespace krys::gfx
 
     /// @brief The target pixels an instance's quad reaches under `transform` (grown by a pixel for its
     /// antialiased edge), within the clip.
-    KRYS_NODISCARD RectI Reach(const RectInstance &instance, const Transform2D &transform) const noexcept;
+    KRYS_NODISCARD RectI Reach(const RectInstance &instance, const AffineTransform &transform) const noexcept;
 
     /// @brief Whether a blend mode reads what's beneath the draw, so it's copied first.
     KRYS_NODISCARD static bool CopiesBackdrop(BlendMode mode) noexcept;

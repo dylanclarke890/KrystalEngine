@@ -207,13 +207,14 @@ namespace krys::gfx::tests
     const uint32 l = face->GlyphIndex(U'l');
     const auto upright = face->Rasterise(l, 32.f, 0.f);
     // A quarter turn clockwise lays the l along x, its top to the right... of the pen: y down, x right.
-    const auto turned = face->Rasterise(l, 32.f, 0.f, Transform2D::Rotation(std::numbers::pi_v<float> / 2.f));
+    const auto turned =
+      face->Rasterise(l, 32.f, 0.f, AffineTransform().RotateRadians(std::numbers::pi_v<float> / 2.f));
     REQUIRE((upright && turned));
     CHECK(turned->Bounds.Width() == upright->Bounds.Height());
     CHECK(turned->Bounds.Height() == upright->Bounds.Width());
     CHECK(std::abs(Total(*turned) - Total(*upright)) < Total(*upright) * 0.02);
     // Doubling the scale doubles the height.
-    const auto scaled = face->Rasterise(l, 32.f, 0.f, Transform2D::Scale(1.f, 2.f));
+    const auto scaled = face->Rasterise(l, 32.f, 0.f, AffineTransform::CreateScale(SizeF(1.f, 2.f)));
     REQUIRE(scaled.has_value());
     CHECK(std::abs(static_cast<int>(scaled->Bounds.Height()) - 2 * static_cast<int>(upright->Bounds.Height()))
           <= 1);
@@ -237,7 +238,7 @@ namespace krys::gfx::tests
     REQUIRE(bitmap.has_value());
     PathRasteriser rasteriser;
     const auto mask =
-      rasteriser.Rasterise(path, Transform2D::Identity(), FillRule::NonZero, {-100, -100, 200u, 200u});
+      rasteriser.Rasterise(path, AffineTransform(), FillRule::NonZero, {-100, -100, 200u, 200u});
     double area = 0.0;
     for (const auto value : mask.Coverage)
     {

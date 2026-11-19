@@ -124,9 +124,9 @@ namespace krys::boo
     }
 
     // Convert that to Axis/Angle form
-    double x = decomp.Quaternion.X;
-    double y = decomp.Quaternion.Y;
-    double z = decomp.Quaternion.Z;
+    double x = decomp.Quaternion.x;
+    double y = decomp.Quaternion.y;
+    double z = decomp.Quaternion.z;
     double length = std::hypot(x, y, z);
     double angle = 0;
 
@@ -135,7 +135,7 @@ namespace krys::boo
       x /= length;
       y /= length;
       z /= length;
-      angle = rad2deg(std::acos(decomp.Quaternion.W) * 2);
+      angle = rad2deg(std::acos(decomp.Quaternion.w) * 2);
     }
     else
     {

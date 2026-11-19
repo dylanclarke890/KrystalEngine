@@ -24,7 +24,6 @@
  */
 
 #include "Krystal.Booey/Style/TransformResolver.hpp"
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Rendering/MotionPath.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Rendering/TransformOperationData.hpp"
@@ -33,6 +32,7 @@
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Point3.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 
 namespace krys::boo::style
 {

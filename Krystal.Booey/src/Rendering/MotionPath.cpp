@@ -27,7 +27,6 @@
 #include "Krystal.Booey/Graphics/Geometry/RayIntersection.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Graphics/Paths/PathTraversalState.hpp"
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Rendering/Painting/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/PathOperation.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
@@ -37,6 +36,7 @@
 #include "Krystal.Booey/Style/Values/Motion/OffsetPosition.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Position.hpp"
 #include "Krystal.Core/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 #include <cmath>

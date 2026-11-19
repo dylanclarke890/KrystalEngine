@@ -121,6 +121,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Events/EventManager.hpp
 
       # Geometry
+      include/Krystal.Core/Geometry/AffineTransform.hpp
       include/Krystal.Core/Geometry/GeometryForward.hpp
       include/Krystal.Core/Geometry/GeometryUtilities.hpp
       include/Krystal.Core/Geometry/Point.hpp
@@ -133,6 +134,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Geometry/Region.hpp
       include/Krystal.Core/Geometry/Segment.hpp
       include/Krystal.Core/Geometry/Size.hpp
+      include/Krystal.Core/Geometry/TransformationMatrix.hpp
 
       # IO
       include/Krystal.Core/IO/Backends/NativeFileBackend.hpp
@@ -155,6 +157,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Maths/Clamp.hpp
       include/Krystal.Core/Maths/Clipspace.hpp
       include/Krystal.Core/Maths/Compare.hpp
+      include/Krystal.Core/Maths/CompositeOperation.hpp
       include/Krystal.Core/Maths/Conventions.hpp
       include/Krystal.Core/Maths/Convert.hpp
       include/Krystal.Core/Maths/Easing.hpp
@@ -305,6 +308,7 @@ target_sources(Krystal.Core
     src/Events/EventManager.cpp
     
     # Geometry
+    src/Geometry/AffineTransform.cpp
     src/Geometry/GeometryUtilities.cpp
     src/Geometry/Point.cpp
     src/Geometry/Point3.cpp
@@ -315,6 +319,7 @@ target_sources(Krystal.Core
     src/Geometry/Region.cpp
     src/Geometry/Segment.cpp
     src/Geometry/Size.cpp
+    src/Geometry/TransformationMatrix.cpp
     
     # IO
     src/IO/Backends/NativeFileBackend.cpp

@@ -23,9 +23,9 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Paths/RotationDirection.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/Painting/TextPaintStyle.hpp"
 #include "Krystal.Booey/Style/Values/TextDecoration/TextShadow.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Strings/StringAtom.hpp"
 

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2023 Apple Inc. All rights reserved.
+ * Copyright (C) 2005-2016 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,26 +25,22 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
+
+namespace krys
+{
+  class TransformationMatrix;
+}
 
 namespace krys::boo
 {
-  /// @brief A rotation quaternion, used to interpolate decomposed 3D transforms.
-  struct Quaternion
-  {
-    double X;
-    double Y;
-    double Z;
-    double W;
+  /// @brief @p rect mapped by @p transform, enclosed in layout units.
+  KRYS_NODISCARD LayoutRect MapRect(const TransformationMatrix &transform, const LayoutRect &rect) noexcept;
 
-    KRYS_NODISCARD constexpr bool operator==(const Quaternion &other) const noexcept = default;
-
-    KRYS_NODISCARD Quaternion Slerp(const Quaternion &other, double progress) const noexcept;
-
-    KRYS_NODISCARD Quaternion Accumulate(const Quaternion &other) const noexcept;
-
-    KRYS_NODISCARD Quaternion Interpolate(const Quaternion &other, double progress,
-                                          CompositeOperation compositeOperation) const noexcept;
-  };
+  /// @brief The bounding box of @p quad projected by @p transform, with infinite or negative-w values clamped
+  /// to half `LayoutUnit`'s range.
+  KRYS_NODISCARD LayoutRect ClampedBoundsOfProjectedQuad(const TransformationMatrix &transform,
+                                                         const QuadF &quad) noexcept;
 }

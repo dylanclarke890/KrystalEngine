@@ -35,7 +35,7 @@
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Booey/Graphics/Transforms/LayoutTransforms.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFieldSetElement.hpp"
@@ -70,6 +70,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
@@ -2021,10 +2022,10 @@ namespace krys::boo
 
   void RenderObject::RepaintRects::Transform(const TransformationMatrix &matrix) noexcept
   {
-    ClippedOverflowRect = matrix.MapRect(ClippedOverflowRect);
+    ClippedOverflowRect = MapRect(matrix, ClippedOverflowRect);
     if (OutlineBoundsRect)
     {
-      *OutlineBoundsRect = matrix.MapRect(*OutlineBoundsRect);
+      *OutlineBoundsRect = MapRect(matrix, *OutlineBoundsRect);
     }
   }
 
@@ -2033,7 +2034,7 @@ namespace krys::boo
   {
     bool identicalRects = OutlineBoundsRect && *OutlineBoundsRect == ClippedOverflowRect;
     ClippedOverflowRect =
-      LayoutRect(EncloseRectToDevicePixels(matrix.MapRect(ClippedOverflowRect), deviceScaleFactor));
+      LayoutRect(EncloseRectToDevicePixels(MapRect(matrix, ClippedOverflowRect), deviceScaleFactor));
     if (identicalRects)
     {
       *OutlineBoundsRect = ClippedOverflowRect;
@@ -2041,7 +2042,7 @@ namespace krys::boo
     else if (OutlineBoundsRect)
     {
       *OutlineBoundsRect =
-        LayoutRect(EncloseRectToDevicePixels(matrix.MapRect(*OutlineBoundsRect), deviceScaleFactor));
+        LayoutRect(EncloseRectToDevicePixels(MapRect(matrix, *OutlineBoundsRect), deviceScaleFactor));
     }
   }
 

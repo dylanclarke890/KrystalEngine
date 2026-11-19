@@ -31,9 +31,9 @@
 #include "Krystal.Booey/Graphics/NullGraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Paths/PathStream.hpp"
 #include "Krystal.Booey/Graphics/Paths/PathTraversalState.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Platform/PathStrokeStrategy.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
@@ -475,7 +475,7 @@ namespace krys::boo
 
   void Path::Translate(const SizeF &delta) noexcept
   {
-    Transform(AffineTransform::MakeTranslation(delta));
+    Transform(AffineTransform::CreateTranslation(delta));
   }
 
   void Path::Transform(const AffineTransform &transform) noexcept

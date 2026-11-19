@@ -51,6 +51,12 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
+namespace krys
+{
+  class AffineTransform;
+  class TransformationMatrix;
+}
+
 namespace krys::boo
 {
   class Document;
@@ -73,7 +79,6 @@ namespace krys::boo::layout
 
 namespace krys::boo
 {
-  class AffineTransform;
   enum class Affinity : bool;
   class ControlPart;
   class HitTestLocation;
@@ -95,7 +100,6 @@ namespace krys::boo
   class RenderTreeBuilder;
   class RenderView;
   class ScrollAnchoringController;
-  class TransformationMatrix;
   class TransformState;
   class VisiblePosition;
 

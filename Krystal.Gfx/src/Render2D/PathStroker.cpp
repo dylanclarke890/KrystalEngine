@@ -56,11 +56,11 @@ namespace krys::gfx
     }
 
     /// @brief The most the transform stretches any length: its largest singular value.
-    KRYS_NODISCARD float MaxStretch(const Transform2D &transform) noexcept
+    KRYS_NODISCARD float MaxStretch(const AffineTransform &transform) noexcept
     {
-      const float sum = transform.A * transform.A + transform.B * transform.B + transform.C * transform.C
-                        + transform.D * transform.D;
-      const float determinant = transform.Determinant();
+      const auto sum = static_cast<float>(transform.A() * transform.A() + transform.B() * transform.B()
+                                          + transform.C() * transform.C() + transform.D() * transform.D());
+      const auto determinant = static_cast<float>(transform.Determinant());
       const float root = std::sqrt(std::max(sum * sum - 4.f * determinant * determinant, 0.f));
       return std::sqrt((sum + root) * 0.5f);
     }
@@ -92,7 +92,7 @@ namespace krys::gfx
   }
 
   Path2D PathStroker::Stroke(const Path2D &path, const StrokeStyle &style,
-                             const Transform2D &transform) noexcept
+                             const AffineTransform &transform) noexcept
   {
     Path2D outline;
     const float stretch = MaxStretch(transform);
@@ -102,7 +102,8 @@ namespace krys::gfx
     }
 
     // A hairline is one target pixel wide, whatever the transform's scale.
-    _halfWidth = style.Width > 0.f ? style.Width * 0.5f : 0.5f / std::sqrt(std::abs(transform.Determinant()));
+    _halfWidth = style.Width > 0.f ? style.Width * 0.5f
+                                   : 0.5f / std::sqrt(std::abs(static_cast<float>(transform.Determinant())));
     if (!(_halfWidth > 0.f) || !std::isfinite(_halfWidth))
     {
       return outline;

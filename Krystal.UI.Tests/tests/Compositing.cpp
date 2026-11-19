@@ -36,7 +36,7 @@ namespace krys::ui::tests
       HashMap<utf8_string, Contents> ContentsByName;
       /// @brief The static `translate` of every layer, which animations of the other transform properties
       /// keep.
-      boo::TransformationMatrix Translate;
+      TransformationMatrix Translate;
       /// @brief Fills alternate bands of this height in two colours, for tall layers.
       float StripeHeight {0};
       uint32 PaintCount {0};
@@ -70,10 +70,10 @@ namespace krys::ui::tests
         }
       }
 
-      KRYS_NODISCARD boo::TransformationMatrix
+      KRYS_NODISCARD TransformationMatrix
         TransformMatrixForProperty(boo::AnimatedProperty property) const noexcept override
       {
-        return property == boo::AnimatedProperty::Translate ? Translate : boo::TransformationMatrix {};
+        return property == boo::AnimatedProperty::Translate ? Translate : TransformationMatrix {};
       }
     };
 
@@ -207,7 +207,7 @@ namespace krys::ui::tests
 
     auto turned = fixture.CreateLayer(u8"turned", {250, 30}, {80, 60});
     turned->SetDrawsContent(true);
-    boo::TransformationMatrix rotation;
+    TransformationMatrix rotation;
     rotation.Rotate(15);
     turned->SetTransform(rotation);
     client.ContentsByName[u8"turned"] = {Rgb(0x06D6A0), {10, 10, 20, 20}, Rgb(0x073B4C)};

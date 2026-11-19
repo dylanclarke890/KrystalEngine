@@ -29,8 +29,8 @@
 #pragma once
 
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
-#include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp"
+#include "Krystal.Core/Maths/CompositeOperation.hpp"
 
 namespace krys::boo
 {

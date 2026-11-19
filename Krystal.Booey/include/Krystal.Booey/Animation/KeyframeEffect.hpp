@@ -33,11 +33,11 @@
 #include "Krystal.Booey/Animation/Keyframes/KeyframeInterpolation.hpp"
 #include "Krystal.Booey/Animation/Timelines/TimelineRangeOffset.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
-#include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp"
 #include "Krystal.Booey/Style/Interpolation/InterpolationClient.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
+#include "Krystal.Core/Maths/CompositeOperation.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
@@ -177,7 +177,7 @@ namespace krys::boo
     Maybe<style::PseudoElementIdentifier> _pseudoElementIdentifier;
     WebAnimationType _animationType {WebAnimationType::WebAnimation};
     boo::IterationCompositeOperation _iterationCompositeOperation {boo::IterationCompositeOperation::Replace};
-    boo::CompositeOperation _compositeOperation {boo::CompositeOperation::Replace};
+    krys::CompositeOperation _compositeOperation {krys::CompositeOperation::Replace};
     AnimationEffectPhase _phaseAtLastApplication {AnimationEffectPhase::Idle};
     AcceleratedAction _lastRecordedAcceleratedAction {AcceleratedAction::Stop};
     AcceleratedPropertiesState _acceleratedPropertiesState {AcceleratedPropertiesState::None};
@@ -258,20 +258,20 @@ namespace krys::boo
 
     void SetIterationComposite(boo::IterationCompositeOperation iterationCompositeOperation) noexcept;
 
-    KRYS_NODISCARD boo::CompositeOperation Composite() const noexcept
+    KRYS_NODISCARD krys::CompositeOperation Composite() const noexcept
     {
       return _compositeOperation;
     }
 
-    void SetComposite(boo::CompositeOperation compositeOperation) noexcept;
+    void SetComposite(krys::CompositeOperation compositeOperation) noexcept;
 
     /// @brief The composite operation, as `composite` gives it: the style of a style-originated animation is
     /// brought up to date first.
-    KRYS_NODISCARD boo::CompositeOperation BindingsComposite() const noexcept;
+    KRYS_NODISCARD krys::CompositeOperation BindingsComposite() const noexcept;
 
     /// @brief Sets the composite operation, as `composite` does: a CSS animation's then no longer follows its
     /// style.
-    void SetBindingsComposite(boo::CompositeOperation compositeOperation) noexcept;
+    void SetBindingsComposite(krys::CompositeOperation compositeOperation) noexcept;
 
     /// @brief Applies the effect at the animation's current time to @p targetStyle.
     EnumSet<AnimationImpact> Apply(RenderStyle &targetStyle,
@@ -516,7 +516,7 @@ namespace krys::boo
     KRYS_NODISCARD bool PreventsAnimationReadiness() const noexcept final;
 
     // KeyframeInterpolation
-    KRYS_NODISCARD boo::CompositeOperation CompositeOperation() const noexcept final
+    KRYS_NODISCARD krys::CompositeOperation CompositeOperation() const noexcept final
     {
       return _compositeOperation;
     }

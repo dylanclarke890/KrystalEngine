@@ -22,10 +22,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGBlock.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextChunk.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextLayoutAttributesBuilder.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 

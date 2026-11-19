@@ -25,10 +25,13 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/GeometryForward.hpp"
 
-namespace krys::boo
+namespace krys
 {
   class AffineTransform;
+}
 
+namespace krys::boo
+{
   template <typename T>
   class ExceptionOr;
 

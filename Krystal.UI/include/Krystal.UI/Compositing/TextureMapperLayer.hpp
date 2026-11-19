@@ -4,12 +4,12 @@
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerEnums.hpp"
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Point3.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
@@ -40,8 +40,8 @@ namespace krys::ui
       Point3F AnchorPoint {0.5, 0.5, 0};
       PointF BoundsOrigin;
       SizeF Size;
-      boo::TransformationMatrix Transform;
-      boo::TransformationMatrix ChildrenTransform;
+      TransformationMatrix Transform;
+      TransformationMatrix ChildrenTransform;
       float Opacity {1};
       RectF ContentsRect;
       SizeF ContentsTileSize;
@@ -73,9 +73,9 @@ namespace krys::ui
 
     struct LayerTransforms
     {
-      boo::TransformationMatrix LocalTransform;
-      boo::TransformationMatrix Combined;
-      boo::TransformationMatrix CombinedForChildren;
+      TransformationMatrix LocalTransform;
+      TransformationMatrix Combined;
+      TransformationMatrix CombinedForChildren;
     };
 
     List<TextureMapperLayer *> _children;
@@ -121,9 +121,9 @@ namespace krys::ui
 
     void SetPreserves3D(bool preserves3D) noexcept;
 
-    void SetTransform(const boo::TransformationMatrix &transform) noexcept;
+    void SetTransform(const TransformationMatrix &transform) noexcept;
 
-    void SetChildrenTransform(const boo::TransformationMatrix &childrenTransform) noexcept;
+    void SetChildrenTransform(const TransformationMatrix &childrenTransform) noexcept;
 
     void SetContentsRect(const RectF &contentsRect) noexcept;
 
@@ -151,12 +151,12 @@ namespace krys::ui
       return _state.Opacity;
     }
 
-    KRYS_NODISCARD boo::TransformationMatrix Transform() const noexcept
+    KRYS_NODISCARD TransformationMatrix Transform() const noexcept
     {
       return _state.Transform;
     }
 
-    KRYS_NODISCARD const boo::TransformationMatrix &ToSurfaceTransform() const noexcept
+    KRYS_NODISCARD const TransformationMatrix &ToSurfaceTransform() const noexcept
     {
       return _layerTransforms.Combined;
     }

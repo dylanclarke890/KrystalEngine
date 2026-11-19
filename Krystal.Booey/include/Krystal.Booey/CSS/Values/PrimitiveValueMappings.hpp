@@ -34,7 +34,6 @@
 #include "Krystal.Booey/CSS/Values/FontFaceSrcValue.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSizeAdjust.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/Paths/WindRule.hpp"
@@ -68,6 +67,7 @@
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Maths/CompositeOperation.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
 // FIXME: The mapping of `style::PositionTryOrder` is added with its type.
@@ -1685,6 +1685,9 @@ namespace krys::boo
   KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH
+
+  // Krystal.Core's, named in Booey for the mapping's `boo::` qualification.
+  using krys::CompositeOperation;
 
 #define KRYS_MAPPING_TYPE CompositeOperation
 #define KRYS_MAPPING_FOR_EACH(CASE) CASE(Replace) CASE(Add) CASE(Accumulate)

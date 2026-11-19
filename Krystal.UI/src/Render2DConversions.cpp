@@ -242,8 +242,8 @@ namespace krys::ui
         // Made about the origin, then rotated and moved into place.
         gfx::Path2D arc;
         arc.AddArc({}, {radiusX, radiusY}, startAngle, endAngle, anticlockwise);
-        const auto transform =
-          gfx::Transform2D::Translation(centre.X(), centre.Y()) * gfx::Transform2D::Rotation(rotation);
+        const auto transform = AffineTransform::CreateTranslation(SizeF(centre.X(), centre.Y()))
+                               * AffineTransform().RotateRadians(rotation);
         auto points = arc.Points();
         size_t index = 0;
         for (const auto verb : arc.Verbs())
@@ -253,25 +253,27 @@ namespace krys::ui
             case gfx::PathVerb::MoveTo:
               if (_hasCurrentPoint)
               {
-                _path.LineTo(transform.Apply(points[index]));
+                _path.LineTo(gfx::MapPoint(transform, points[index]));
               }
               else
               {
-                _path.MoveTo(transform.Apply(points[index]));
+                _path.MoveTo(gfx::MapPoint(transform, points[index]));
               }
               index += 1;
               break;
             case gfx::PathVerb::LineTo:
-              _path.LineTo(transform.Apply(points[index]));
+              _path.LineTo(gfx::MapPoint(transform, points[index]));
               index += 1;
               break;
             case gfx::PathVerb::QuadTo:
-              _path.QuadTo(transform.Apply(points[index]), transform.Apply(points[index + 1]));
+              _path.QuadTo(gfx::MapPoint(transform, points[index]),
+                           gfx::MapPoint(transform, points[index + 1]));
               index += 2;
               break;
             case gfx::PathVerb::CubicTo:
-              _path.CubicTo(transform.Apply(points[index]), transform.Apply(points[index + 1]),
-                            transform.Apply(points[index + 2]));
+              _path.CubicTo(gfx::MapPoint(transform, points[index]),
+                            gfx::MapPoint(transform, points[index + 1]),
+                            gfx::MapPoint(transform, points[index + 2]));
               index += 3;
               break;
             case gfx::PathVerb::Close: _path.Close(); break;

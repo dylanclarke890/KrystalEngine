@@ -21,7 +21,7 @@ namespace krys::ui
   }
 
   void ImageBufferRender2DLayer::PaintToTextureMapper(TextureMapper &textureMapper, const RectF &targetRect,
-                                                      const boo::TransformationMatrix &modelViewMatrix,
+                                                      const TransformationMatrix &modelViewMatrix,
                                                       float opacity) noexcept
   {
     auto *backend = _backend.get();

@@ -43,6 +43,7 @@
 
 namespace krys
 {
+  class TransformationMatrix;
   class TextStream;
 }
 
@@ -52,7 +53,6 @@ namespace krys::boo
   class PaintedContentsInfo;
   class RenderLayerCompositor;
   class Scrollbar;
-  class TransformationMatrix;
 
   enum CompositingLayerType : uint8
   {

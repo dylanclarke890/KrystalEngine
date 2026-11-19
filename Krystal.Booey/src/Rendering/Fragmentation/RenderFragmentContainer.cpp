@@ -31,6 +31,7 @@
 
 #include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentContainer.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
+#include "Krystal.Booey/Graphics/Transforms/LayoutTransforms.hpp"
 #include "Krystal.Booey/Rendering/Fragmentation/RenderBoxFragmentInfo.hpp"
 #include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
@@ -611,7 +612,7 @@ namespace krys::boo
     {
       if (hasTransform)
       {
-        rect = box.Layer()->CurrentTransform().MapRect(rect);
+        rect = MapRect(box.Layer()->CurrentTransform(), rect);
       }
 
       if (box.IsInFlowPositioned())

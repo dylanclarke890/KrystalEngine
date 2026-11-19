@@ -61,6 +61,7 @@ target_sources(Krystal.Gfx.Tests
     tests/OpenGL/Device.cpp
 
     # Render2D
+    tests/Render2D/AffineTransformFloats.cpp
     tests/Render2D/CoverageBlur.cpp
     tests/Render2D/FilterRenderer2D.cpp
     tests/Render2D/FontFace2D.cpp
@@ -72,5 +73,4 @@ target_sources(Krystal.Gfx.Tests
     tests/Render2D/PathStroker.cpp
     tests/Render2D/Renderer2D.cpp
     tests/Render2D/Text.cpp
-    tests/Render2D/Transform2D.cpp
 )

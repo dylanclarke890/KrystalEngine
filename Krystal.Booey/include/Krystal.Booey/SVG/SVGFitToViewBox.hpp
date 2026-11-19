@@ -27,9 +27,13 @@
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 
-namespace krys::boo
+namespace krys
 {
   class AffineTransform;
+}
+
+namespace krys::boo
+{
   template <typename TOwner, typename... TBaseTypes>
   class SVGPropertyOwnerRegistry;
 

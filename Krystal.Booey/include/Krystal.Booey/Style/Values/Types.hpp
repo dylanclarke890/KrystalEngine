@@ -27,6 +27,7 @@
 #include "Krystal.Booey/CSS/Calc/SymbolTable.hpp"
 #include "Krystal.Booey/CSS/Values/NoConversionDataRequiredTag.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -34,10 +35,14 @@
 #include <tuple>
 #include <utility>
 
+namespace krys
+{
+  enum class CompositeOperation : uint8;
+}
+
 namespace krys::boo
 {
   struct BlendingContext;
-  enum class CompositeOperation : uint8;
   class Element;
   class RenderStyle;
 }

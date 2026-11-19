@@ -18,7 +18,7 @@ namespace krys::ui
     }
 
     ui::TextureMapper &TextureMapper;
-    boo::TransformationMatrix Transform;
+    TransformationMatrix Transform;
     float Opacity {1};
     TextureMapperLayer *BackdropLayer {nullptr};
     /// @brief Whether painting a backdrop reached the layer it belongs to: what's painted after it is above
@@ -48,7 +48,7 @@ namespace krys::ui
 
     // Compute transforms recursively on the way down to leafs.
     {
-      boo::TransformationMatrix parentTransform;
+      TransformationMatrix parentTransform;
       if (_parent)
       {
         parentTransform = _parent->_layerTransforms.CombinedForChildren;
@@ -129,7 +129,7 @@ namespace krys::ui
       return;
     }
 
-    boo::TransformationMatrix transform;
+    TransformationMatrix transform;
     transform.Multiply(options.Transform);
     transform.Multiply(_layerTransforms.Combined);
 
@@ -142,7 +142,7 @@ namespace krys::ui
     }
 
     options.TextureMapper.SetWrapMode(TextureMapper::WrapMode::Stretch);
-    options.TextureMapper.SetPatternTransform(boo::TransformationMatrix());
+    options.TextureMapper.SetPatternTransform(TransformationMatrix());
 
     if (backingStore)
     {
@@ -177,7 +177,7 @@ namespace krys::ui
       options.TextureMapper.SetWrapMode(TextureMapper::WrapMode::Repeat);
 
       auto patternTransform =
-        boo::TransformationMatrix::RectToRect({{}, _state.ContentsTileSize}, {{}, _state.ContentsRect.Size()})
+        TransformationMatrix::RectToRect({{}, _state.ContentsTileSize}, {{}, _state.ContentsRect.Size()})
           .Translate(_state.ContentsTilePhase.Width() / _state.ContentsRect.Width(),
                      _state.ContentsTilePhase.Height() / _state.ContentsRect.Height());
       options.TextureMapper.SetPatternTransform(patternTransform);
@@ -211,7 +211,7 @@ namespace krys::ui
 
   void TextureMapperLayer::PaintBackdrop(TextureMapperPaintOptions &options) noexcept
   {
-    boo::TransformationMatrix clipTransform;
+    TransformationMatrix clipTransform;
     clipTransform.Multiply(options.Transform);
     clipTransform.Multiply(_layerTransforms.Combined);
     options.TextureMapper.BeginClip(clipTransform, _state.BackdropFiltersRect);
@@ -242,7 +242,7 @@ namespace krys::ui
     bool shouldClip = (_state.MasksToBounds || _state.ContentsRectClipsDescendants) && !_state.Preserves3D;
     if (shouldClip)
     {
-      boo::TransformationMatrix clipTransform;
+      TransformationMatrix clipTransform;
       clipTransform.Multiply(options.Transform);
       clipTransform.Multiply(_layerTransforms.Combined);
       if (_state.ContentsRectClipsDescendants)
@@ -334,7 +334,7 @@ namespace krys::ui
     {
       // As the intermediate surface of a masked layer leaves out its filters' outsets, its group is clipped
       // to the layer: the mask covers no more.
-      boo::TransformationMatrix clipTransform;
+      TransformationMatrix clipTransform;
       clipTransform.Multiply(options.Transform);
       clipTransform.Multiply(_layerTransforms.Combined);
       options.TextureMapper.BeginClip(clipTransform, boo::FloatRoundedRect(LayerRect()));
@@ -519,12 +519,12 @@ namespace krys::ui
     _state.Preserves3D = preserves3D;
   }
 
-  void TextureMapperLayer::SetTransform(const boo::TransformationMatrix &transform) noexcept
+  void TextureMapperLayer::SetTransform(const TransformationMatrix &transform) noexcept
   {
     _state.Transform = transform;
   }
 
-  void TextureMapperLayer::SetChildrenTransform(const boo::TransformationMatrix &childrenTransform) noexcept
+  void TextureMapperLayer::SetChildrenTransform(const TransformationMatrix &childrenTransform) noexcept
   {
     _state.ChildrenTransform = childrenTransform;
   }

@@ -69,7 +69,7 @@ namespace krys::boo
     childPaintInfo.ApplyTransform(LocalTransform());
     // NOTE: painted from the block's location, where the repaint rect (which opacity, blending and isolation
     // clip to) starts; the block, which paints itself at its location, is painted offset back by it.
-    childPaintInfo.ApplyTransform(AffineTransform::MakeTranslation(SizeF(LocationOffset())));
+    childPaintInfo.ApplyTransform(AffineTransform::CreateTranslation(SizeF(LocationOffset())));
 
     if (SVGRenderSupport::IsOverflowHidden(*this))
     {

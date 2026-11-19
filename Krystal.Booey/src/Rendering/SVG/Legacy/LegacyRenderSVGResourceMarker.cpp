@@ -87,7 +87,7 @@ namespace krys::boo
   const AffineTransform &LegacyRenderSVGResourceMarker::LocalToParentTransform() const noexcept
   {
     _localToParentTransform =
-      AffineTransform::MakeTranslation(ToSizeF(_viewport.Location())) * ViewportTransform();
+      AffineTransform::CreateTranslation(ToSizeF(_viewport.Location())) * ViewportTransform();
     return _localToParentTransform;
     // If this class were ever given a localTransform(), then the above would read:
     // return viewportTranslation * localTransform() * viewportTransform();

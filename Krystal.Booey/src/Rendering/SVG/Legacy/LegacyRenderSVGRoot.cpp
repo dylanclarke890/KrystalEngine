@@ -335,7 +335,7 @@ namespace krys::boo
     // Transform from our paint container's coordinate system to our local coords.
     PointI adjustedPaintOffset = RoundedPointI(paintOffset);
     auto transform =
-      AffineTransform::MakeTranslation(ToSizeF(adjustedPaintOffset)) * LocalToBorderBoxTransform();
+      AffineTransform::CreateTranslation(ToSizeF(adjustedPaintOffset)) * LocalToBorderBoxTransform();
     childPaintInfo.ApplyTransform(transform);
 
     // SVGRenderingContext must be destroyed before we restore the childPaintInfo.context(), because a filter

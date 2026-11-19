@@ -35,7 +35,7 @@ namespace krys::ui
     {
       gfx::TextureHandle Texture;
       RectF Destination;
-      gfx::Transform2D Transform;
+      AffineTransform Transform;
       uint32 StackSize {0};
     };
 
@@ -95,7 +95,7 @@ namespace krys::ui
 
     void FillRect(const RectF &, const boo::Color &) noexcept override;
 
-    void FillRect(const RectF &, boo::Gradient &, const boo::AffineTransform &,
+    void FillRect(const RectF &, boo::Gradient &, const AffineTransform &,
                   RequiresClipToRect = RequiresClipToRect::Yes) noexcept override;
 
     void FillRoundedRectImpl(const boo::FloatRoundedRect &, const boo::Color &) noexcept override;
@@ -151,14 +151,14 @@ namespace krys::ui
                          boo::ImagePaintingOptions = {}) noexcept override;
 
     void DrawPattern(boo::NativeImage &, const RectF &destRect, const RectF &tileRect,
-                     const boo::AffineTransform &patternTransform, const PointF &phase, const SizeF &spacing,
+                     const AffineTransform &patternTransform, const PointF &phase, const SizeF &spacing,
                      boo::ImagePaintingOptions = {}) noexcept override;
 
     void DrawImageBuffer(boo::ImageBuffer &, const RectF &destination, const RectF &source,
                          boo::ImagePaintingOptions = {}) noexcept override;
 
     void DrawPattern(boo::ImageBuffer &, const RectF &destRect, const RectF &tileRect,
-                     const boo::AffineTransform &patternTransform, const PointF &phase, const SizeF &spacing,
+                     const AffineTransform &patternTransform, const PointF &phase, const SizeF &spacing,
                      boo::ImagePaintingOptions = {}) noexcept override;
 
     /// @brief Applies @p filter on the GPU: its effects become a Render2D filter graph, evaluated into the
@@ -177,12 +177,12 @@ namespace krys::ui
 
     void Translate(float x, float y) noexcept override;
 
-    void ConcatCTM(const boo::AffineTransform &) noexcept override;
+    void ConcatCTM(const AffineTransform &) noexcept override;
 
-    void SetCTM(const boo::AffineTransform &) noexcept override;
+    void SetCTM(const AffineTransform &) noexcept override;
 
-    KRYS_NODISCARD boo::AffineTransform
-      GetCTM(IncludeDeviceScale = PossiblyIncludeDeviceScale) const noexcept override;
+    KRYS_NODISCARD
+    AffineTransform GetCTM(IncludeDeviceScale = PossiblyIncludeDeviceScale) const noexcept override;
 
   private:
     /// @brief A fill or stroke's paint, keeping the gradient it refers to alive.
@@ -190,7 +190,7 @@ namespace krys::ui
     {
       SRGBA<uint8> Colour {};
       Maybe<gfx::Gradient2D> Gradient;
-      gfx::Transform2D GradientSpace {};
+      AffineTransform GradientSpace {};
       Maybe<gfx::ImagePattern2D> Pattern;
 
       KRYS_NODISCARD gfx::Paint2D Paint() const noexcept
@@ -223,7 +223,7 @@ namespace krys::ui
 
     /// @brief Fills @p destRect with @p tileRect of @p texture (of @p size), repeated, as an image pattern.
     void DrawTexturePattern(gfx::TextureHandle texture, const SizeF &size, const RectF &destRect,
-                            const RectF &tileRect, const boo::AffineTransform &patternTransform,
+                            const RectF &tileRect, const AffineTransform &patternTransform,
                             const PointF &phase, const SizeF &spacing, boo::ImagePaintingOptions options,
                             gfx::CommandBuffer &commands) noexcept;
 

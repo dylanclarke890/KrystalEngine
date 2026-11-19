@@ -1132,32 +1132,32 @@ void main()
     }
   }
 
-  void Renderer2D::ConcatTransform(const Transform2D &transform) noexcept
+  void Renderer2D::ConcatTransform(const AffineTransform &transform) noexcept
   {
     _state.Transform = _state.Transform * transform;
   }
 
   void Renderer2D::Translate(float x, float y) noexcept
   {
-    ConcatTransform(Transform2D::Translation(x, y));
+    ConcatTransform(AffineTransform::CreateTranslation(SizeF(x, y)));
   }
 
   void Renderer2D::Scale(float x, float y) noexcept
   {
-    ConcatTransform(Transform2D::Scale(x, y));
+    ConcatTransform(AffineTransform::CreateScale(SizeF(x, y)));
   }
 
   void Renderer2D::Rotate(float radians) noexcept
   {
-    ConcatTransform(Transform2D::Rotation(radians));
+    ConcatTransform(AffineTransform().RotateRadians(radians));
   }
 
-  void Renderer2D::SetTransform(const Transform2D &transform) noexcept
+  void Renderer2D::SetTransform(const AffineTransform &transform) noexcept
   {
     _state.Transform = transform;
   }
 
-  const Transform2D &Renderer2D::GetTransform() const noexcept
+  const AffineTransform &Renderer2D::GetTransform() const noexcept
   {
     return _state.Transform;
   }
@@ -1168,8 +1168,8 @@ void main()
     const auto &transform = _state.Transform;
     if (transform.PreservesAxisAlignment())
     {
-      const auto a = transform.Apply({rect.X(), rect.Y()});
-      const auto b = transform.Apply({rect.X() + rect.Width(), rect.Y() + rect.Height()});
+      const auto a = MapPoint(transform, {rect.X(), rect.Y()});
+      const auto b = MapPoint(transform, {rect.X() + rect.Width(), rect.Y() + rect.Height()});
       const float left = std::min(a.x, b.x);
       const float top = std::min(a.y, b.y);
       const float right = std::max(a.x, b.x);
@@ -1317,10 +1317,10 @@ void main()
       // The scissor covers every pixel the shape's antialiased edge reaches.
       const auto &transform = _state.Transform;
       const auto &rect = shape.Rect;
-      const Array<Vec2f, 4> corners {transform.Apply({rect.X(), rect.Y()}),
-                                     transform.Apply({rect.X() + rect.Width(), rect.Y()}),
-                                     transform.Apply({rect.X(), rect.Y() + rect.Height()}),
-                                     transform.Apply({rect.X() + rect.Width(), rect.Y() + rect.Height()})};
+      const Array<Vec2f, 4> corners {
+        MapPoint(transform, {rect.X(), rect.Y()}), MapPoint(transform, {rect.X() + rect.Width(), rect.Y()}),
+        MapPoint(transform, {rect.X(), rect.Y() + rect.Height()}),
+        MapPoint(transform, {rect.X() + rect.Width(), rect.Y() + rect.Height()})};
       float left = corners[0].x;
       float top = corners[0].y;
       float right = corners[0].x;
@@ -1371,7 +1371,7 @@ void main()
   }
 
   void Renderer2D::AddRoundedRect(const RoundedRect2D &roundedRect, const ResolvedPaint &paint,
-                                  const Transform2D &transform) noexcept
+                                  const AffineTransform &transform) noexcept
   {
     const auto &rect = roundedRect.Rect;
     if (rect.Width() <= 0.f || rect.Height() <= 0.f)
@@ -1423,7 +1423,8 @@ void main()
 
     // A hairline is one target pixel wide, whatever the transform's scale.
     const float halfWidth =
-      style.Width > 0.f ? style.Width * 0.5f : 0.5f / std::sqrt(std::abs(_state.Transform.Determinant()));
+      style.Width > 0.f ? style.Width * 0.5f
+                        : 0.5f / std::sqrt(std::abs(static_cast<float>(_state.Transform.Determinant())));
     if (!(halfWidth > 0.f) || !std::isfinite(halfWidth))
     {
       return;
@@ -1435,8 +1436,7 @@ void main()
     const float length = std::sqrt(dx * dx + dy * dy);
     const Vec2f along = length > 0.f ? Vec2f {dx / length, dy / length} : Vec2f {1.f, 0.f};
     const auto transform =
-      _state.Transform
-      * Transform2D {.A = along.x, .B = along.y, .C = -along.y, .D = along.x, .E = from.x, .F = from.y};
+      _state.Transform * AffineTransform(along.x, along.y, -along.y, along.x, from.x, from.y);
 
     // Square and round caps reach half the width past each end; round ones are the rect's rounded ends.
     const float extension = style.Cap == LineCap::Butt ? 0.f : halfWidth;
@@ -1583,7 +1583,7 @@ void main()
     FillPathMask(path, _state.Transform, rule, *resolved);
   }
 
-  void Renderer2D::FillPathMask(const Path2D &path, const Transform2D &geometry, FillRule rule,
+  void Renderer2D::FillPathMask(const Path2D &path, const AffineTransform &geometry, FillRule rule,
                                 const ResolvedPaint &paint) noexcept
   {
     // The shadow's mask is the path's, moved and blurred in target pixels. It can show where the path
@@ -1626,7 +1626,7 @@ void main()
        .HoleRadii = {},
        .Colour = colour,
        .Flags = Textured | Mask},
-      Transform2D::Identity(), mask.Texture, _nearestSampler, gradient, pattern);
+      AffineTransform(), mask.Texture, _nearestSampler, gradient, pattern);
   }
 
   void Renderer2D::DrawGlyphs(const FontFace2D &face, float size, Span<const uint32> glyphs,
@@ -1641,7 +1641,7 @@ void main()
     }
     const auto resolved = ResolvePaint(paint);
     const auto &transform = _state.Transform;
-    const float scale = std::sqrt(std::abs(transform.Determinant()));
+    const float scale = std::sqrt(std::abs(static_cast<float>(transform.Determinant())));
     if (!resolved || !(scale > 0.f) || !std::isfinite(scale))
     {
       return;
@@ -1659,7 +1659,8 @@ void main()
       if (!path.IsEmpty())
       {
         const auto at = pen(i);
-        FillPathMask(path, transform * Transform2D::Translation(at.x, at.y), FillRule::NonZero, *resolved);
+        FillPathMask(path, transform * AffineTransform::CreateTranslation(SizeF(at.x, at.y)),
+                     FillRule::NonZero, *resolved);
       }
     };
 
@@ -1676,11 +1677,11 @@ void main()
     // Under a uniform scale, glyphs are rasterised at the scaled size, so hinting still applies; under any
     // other transform, they're rasterised under it.
     const bool uniform =
-      transform.B == 0.f && transform.C == 0.f && transform.A == transform.D && transform.A > 0.f;
-    const float rasterSize = uniform ? size * transform.A : size;
-    const Transform2D linear =
-      uniform ? Transform2D {}
-              : Transform2D {.A = transform.A, .B = transform.B, .C = transform.C, .D = transform.D};
+      transform.B() == 0.f && transform.C() == 0.f && transform.A() == transform.D() && transform.A() > 0.f;
+    const float rasterSize = uniform ? size * static_cast<float>(transform.A()) : size;
+    const AffineTransform linear =
+      uniform ? AffineTransform()
+              : AffineTransform(transform.A(), transform.B(), transform.C(), transform.D(), 0, 0);
 
     // A glyph from the atlas, its pen in target pixels snapped to a quarter across and a whole pixel down;
     // false when the atlas has no room for it.
@@ -1703,11 +1704,12 @@ void main()
     // pixels, at its pen moved by the offset, in the shadow's colour.
     if (const auto shadow = PlaceShadow(transform, *resolved))
     {
-      const Vec2f offset {shadow->Transform.E - transform.E, shadow->Transform.F - transform.F};
+      const Vec2f offset {static_cast<float>(shadow->Transform.E() - transform.E()),
+                          static_cast<float>(shadow->Transform.F() - transform.F())};
       const ResolvedPaint shadowPaint {.Colour = shadow->Colour, .Gradient = NoGradient};
       for (size_t i = 0u; i < count; ++i)
       {
-        const auto at = transform.Apply(pen(i));
+        const auto at = MapPoint(transform, pen(i));
         if (!drawGlyph(glyphs[i], {at.x + offset.x, at.y + offset.y}, shadowPaint, shadow->PixelSigma, true))
         {
           // No room: the outline's shadow alone.
@@ -1715,8 +1717,9 @@ void main()
           const auto from = pen(i);
           if (!path.IsEmpty())
           {
-            AddMask(_masks.GetMask(path, shadow->Transform * Transform2D::Translation(from.x, from.y),
-                                   FillRule::NonZero, _state.Clip, shadow->PixelSigma),
+            AddMask(_masks.GetMask(
+                      path, shadow->Transform * AffineTransform::CreateTranslation(SizeF(from.x, from.y)),
+                      FillRule::NonZero, _state.Clip, shadow->PixelSigma),
                     shadow->Colour, NoGradient);
           }
         }
@@ -1725,15 +1728,15 @@ void main()
 
     for (size_t i = 0u; i < count; ++i)
     {
-      if (!drawGlyph(glyphs[i], transform.Apply(pen(i)), *resolved, 0.f, false))
+      if (!drawGlyph(glyphs[i], MapPoint(transform, pen(i)), *resolved, 0.f, false))
       {
         // No room in the atlas (or too large for a page): the glyph's outline instead.
         const auto path = face.GlyphPath(glyphs[i], size);
         const auto at = pen(i);
         if (!path.IsEmpty())
         {
-          AddMask(_masks.GetMask(path, transform * Transform2D::Translation(at.x, at.y), FillRule::NonZero,
-                                 _state.Clip),
+          AddMask(_masks.GetMask(path, transform * AffineTransform::CreateTranslation(SizeF(at.x, at.y)),
+                                 FillRule::NonZero, _state.Clip),
                   resolved->Colour, resolved->Gradient, resolved->Pattern);
         }
       }
@@ -1770,7 +1773,7 @@ void main()
        .HoleRadii = {},
        .Colour = image ? Array<uint8, 4> {255u, 255u, 255u, alpha} : paint.Colour,
        .Flags = image ? Textured : Textured | mask},
-      Transform2D::Identity(), glyph.Texture, _nearestSampler, image ? NoGradient : paint.Gradient,
+      AffineTransform(), glyph.Texture, _nearestSampler, image ? NoGradient : paint.Gradient,
       image ? NoPattern : paint.Pattern);
   }
 
@@ -1786,7 +1789,7 @@ void main()
     }
   }
 
-  void Renderer2D::AddInstance(RectInstance instance, const Transform2D &transform, TextureHandle texture,
+  void Renderer2D::AddInstance(RectInstance instance, const AffineTransform &transform, TextureHandle texture,
                                SamplerHandle sampler, uint32 gradient, uint32 pattern) noexcept
   {
     // Nothing shows through an empty clip or a transform that flattens everything.
@@ -1794,8 +1797,8 @@ void main()
     {
       return;
     }
-    instance.Linear = {transform.A, transform.B, transform.C, transform.D};
-    instance.Translation = {transform.E, transform.F};
+    instance.Linear = LinearPartF(transform);
+    instance.Translation = TranslationF(transform);
     instance.Flags |= static_cast<uint32>(_state.Blend) << BlendModeShift;
     if (gradient != NoGradient)
     {
@@ -1868,7 +1871,7 @@ void main()
     _rects.push_back(instance);
   }
 
-  Maybe<Renderer2D::ShadowPlacement> Renderer2D::PlaceShadow(const Transform2D &transform,
+  Maybe<Renderer2D::ShadowPlacement> Renderer2D::PlaceShadow(const AffineTransform &transform,
                                                              const ResolvedPaint &paint) const noexcept
   {
     if (!_state.DropShadow)
@@ -1891,8 +1894,8 @@ void main()
     // measured in the shape's own units for the shader, and in target pixels for masks (where a transform
     // that stretches unevenly is taken by its average scale).
     const auto &current = _state.Transform;
-    const float currentScale = std::sqrt(std::abs(current.Determinant()));
-    const float localScale = std::sqrt(std::abs(transform.Determinant()));
+    const float currentScale = std::sqrt(std::abs(static_cast<float>(current.Determinant())));
+    const float localScale = std::sqrt(std::abs(static_cast<float>(transform.Determinant())));
     if (!(currentScale > 0.f) || !(localScale > 0.f))
     {
       return {};
@@ -1900,10 +1903,12 @@ void main()
     float pixelSigma = radius * 0.5f;
     if (!_state.ShadowsIgnoreTransforms)
     {
-      offset = {current.A * offset.x + current.C * offset.y, current.B * offset.x + current.D * offset.y};
+      // The linear part only: the offset is a distance, not a position.
+      offset = MapPoint(AffineTransform(current.A(), current.B(), current.C(), current.D(), 0, 0), offset);
       pixelSigma *= currentScale;
     }
-    return ShadowPlacement {.Transform = Transform2D::Translation(offset.x, offset.y) * transform,
+    return ShadowPlacement {.Transform =
+                              AffineTransform::CreateTranslation(SizeF(offset.x, offset.y)) * transform,
                             .Sigma = pixelSigma / localScale,
                             .PixelSigma = pixelSigma,
                             .Colour = {colour.Red, colour.Green, colour.Blue, alpha}};
@@ -2013,7 +2018,7 @@ void main()
     // Each shape's own space, mapped into the gradient's: there, the shader's sums are short.
     constexpr float degenerateThreshold = 1.f / 32768.f;
     GradientData data {.Shape = LinearShape, .Spread = gradient->Spread};
-    Transform2D shape {};
+    AffineTransform shape {};
     bool degenerate = false;
     SwitchOn(
       gradient->Shape,
@@ -2023,14 +2028,14 @@ void main()
         const float dx = linear.Point1.x - linear.Point0.x;
         const float dy = linear.Point1.y - linear.Point0.y;
         degenerate = !(std::sqrt(dx * dx + dy * dy) > degenerateThreshold);
-        shape = {.A = dx, .B = dy, .C = -dy, .D = dx, .E = linear.Point0.x, .F = linear.Point0.y};
+        shape = AffineTransform(dx, dy, -dy, dx, linear.Point0.x, linear.Point0.y);
       },
       [&](const RadialGradient2D &radial)
       {
         // Elliptical gradients squash circles vertically about the first centre, which is the origin.
         const float aspectRatio = radial.AspectRatio;
-        shape = Transform2D::Translation(radial.Point0.x, radial.Point0.y)
-                * Transform2D::Scale(1.f, aspectRatio != 1.f ? 1.f / aspectRatio : 1.f);
+        shape = AffineTransform::CreateTranslation(SizeF(radial.Point0.x, radial.Point0.y))
+                * AffineTransform::CreateScale(SizeF(1.f, aspectRatio != 1.f ? 1.f / aspectRatio : 1.f));
         auto radius = [](float value)
         {
           return std::isfinite(value) ? std::max(value, 0.f) : 0.f;
@@ -2066,8 +2071,8 @@ void main()
       {
         // Upright at the start angle, then clockwise: from x in the shape's space.
         data.Shape = ConicShape;
-        shape = Transform2D::Translation(conic.Point0.x, conic.Point0.y)
-                * Transform2D::Rotation(conic.AngleRadians - 1.57079632679f);
+        shape = AffineTransform::CreateTranslation(SizeF(conic.Point0.x, conic.Point0.y))
+                * AffineTransform().RotateRadians(conic.AngleRadians - 1.57079632679f);
       });
 
     if (degenerate)
@@ -2103,7 +2108,7 @@ void main()
                           .Gradient = static_cast<uint32>(_gradients.size() - 1u)};
   }
 
-  RectI Renderer2D::Reach(const RectInstance &instance, const Transform2D &transform) const noexcept
+  RectI Renderer2D::Reach(const RectInstance &instance, const AffineTransform &transform) const noexcept
   {
     // A shadow reaches as far as its quad: three standard deviations past its shape.
     auto rect = instance.Rect;
@@ -2112,9 +2117,10 @@ void main()
       const float reach = 3.f * instance.UV[0];
       rect = {rect[0] - reach, rect[1] - reach, rect[2] + 2.f * reach, rect[3] + 2.f * reach};
     }
-    const Array<Vec2f, 4> corners {
-      transform.Apply({rect[0], rect[1]}), transform.Apply({rect[0] + rect[2], rect[1]}),
-      transform.Apply({rect[0], rect[1] + rect[3]}), transform.Apply({rect[0] + rect[2], rect[1] + rect[3]})};
+    const Array<Vec2f, 4> corners {MapPoint(transform, {rect[0], rect[1]}),
+                                   MapPoint(transform, {rect[0] + rect[2], rect[1]}),
+                                   MapPoint(transform, {rect[0], rect[1] + rect[3]}),
+                                   MapPoint(transform, {rect[0] + rect[2], rect[1] + rect[3]})};
     float left = corners[0].x;
     float top = corners[0].y;
     float right = corners[0].x;
@@ -2737,8 +2743,10 @@ void main()
             const auto &inverse = clip.Inverse;
             data.Clips[i] = {.Rect = {rect.X(), rect.Y(), rect.Width(), rect.Height()},
                              .Radii = {radii.TopLeft, radii.TopRight, radii.BottomRight, radii.BottomLeft},
-                             .InverseLinear = {inverse.A, inverse.B, inverse.C, inverse.D},
-                             .InverseTranslation = {inverse.E, inverse.F, clip.Out ? 1.f : 0.f, 0.f}};
+                             .InverseLinear = LinearPartF(inverse),
+                             .InverseTranslation = {static_cast<float>(inverse.E()),
+                                                    static_cast<float>(inverse.F()), clip.Out ? 1.f : 0.f,
+                                                    0.f}};
           }
         }
         std::memcpy(clips.Data.data(), &data, sizeof(data));
@@ -2762,8 +2770,9 @@ void main()
         data.Shape = gradient.Shape;
         data.Spread = static_cast<uint32>(gradient.Spread);
         data.StopCount = gradient.StopCount;
-        data.InverseLinear = {inverse.A, inverse.B, inverse.C, inverse.D};
-        data.InverseTranslation = {inverse.E, inverse.F, 0.f, 0.f};
+        data.InverseLinear = LinearPartF(inverse);
+        data.InverseTranslation = {static_cast<float>(inverse.E()), static_cast<float>(inverse.F()), 0.f,
+                                   0.f};
         data.Radial = gradient.Radial;
         for (uint32 i = 0u; i < gradient.StopCount; ++i)
         {
@@ -2786,10 +2795,11 @@ void main()
         }
         const auto &pattern = _patterns[batch.Pattern];
         const auto &inverse = pattern.Inverse;
-        const PatternUniforms data {.InverseLinear = {inverse.A, inverse.B, inverse.C, inverse.D},
-                                    .InverseTranslation = {inverse.E, inverse.F, 0.f, 0.f},
-                                    .TileAndSpacing = pattern.TileAndSpacing,
-                                    .Flags = {pattern.Flags, 0u, 0u, 0u}};
+        const PatternUniforms data {
+          .InverseLinear = LinearPartF(inverse),
+          .InverseTranslation = {static_cast<float>(inverse.E()), static_cast<float>(inverse.F()), 0.f, 0.f},
+          .TileAndSpacing = pattern.TileAndSpacing,
+          .Flags = {pattern.Flags, 0u, 0u, 0u}};
         std::memcpy(block.Data.data(), &data, sizeof(data));
         commands.BindUniformBuffer(3u, block.Buffer, block.Offset, sizeof(PatternUniforms));
         commands.BindTexture(3u, pattern.Texture, pattern.Sampler);

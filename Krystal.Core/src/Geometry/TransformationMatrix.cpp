@@ -25,17 +25,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
-#include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 
-namespace krys::boo
+namespace krys
 {
   //
   // Adapted from Matrix Inversion by Richard Carling, Graphics Gems
@@ -63,7 +61,7 @@ namespace krys::boo
   namespace
   {
     using Matrix4 = TransformationMatrix::Matrix4;
-    using Vector4 = Array<double, 4>;
+    using Components4 = Array<double, 4>;
     using Vector3 = Array<double, 3>;
 
     // inverse(original_matrix, inverse_matrix)
@@ -193,7 +191,7 @@ namespace krys::boo
     }
 
     // Returns false if the matrix is not invertible
-    KRYS_NODISCARD bool Inverse(const Matrix4 &matrix, Matrix4 &result) noexcept
+    KRYS_NODISCARD bool InvertMatrix4(const Matrix4 &matrix, Matrix4 &result) noexcept
     {
       // Calculate the 4x4 determinant
       // If the determinant is zero,
@@ -239,7 +237,7 @@ namespace krys::boo
     }
 
     // Multiply a homogeneous point by a matrix and return the transformed point
-    void V4MulPointByMatrix(const Vector4 &p, const Matrix4 &m, Vector4 &result) noexcept
+    void V4MulPointByMatrix(const Components4 &p, const Matrix4 &m, Components4 &result) noexcept
     {
       result[0] = (p[0] * m[0][0]) + (p[1] * m[1][0]) + (p[2] * m[2][0]) + (p[3] * m[3][0]);
       result[1] = (p[0] * m[0][1]) + (p[1] * m[1][1]) + (p[2] * m[2][1]) + (p[3] * m[3][1]);
@@ -394,7 +392,7 @@ namespace krys::boo
       if (localMatrix[0][3] != 0 || localMatrix[1][3] != 0 || localMatrix[2][3] != 0)
       {
         // rightHandSide is the right hand side of the equation.
-        Vector4 rightHandSide;
+        Components4 rightHandSide;
         rightHandSide[0] = localMatrix[0][3];
         rightHandSide[1] = localMatrix[1][3];
         rightHandSide[2] = localMatrix[2][3];
@@ -404,13 +402,13 @@ namespace krys::boo
         // rightHandSide by the inverse. (This is the easiest way, not
         // necessarily the best.)
         Matrix4 inversePerspectiveMatrix, transposedInversePerspectiveMatrix;
-        if (!Inverse(perspectiveMatrix, inversePerspectiveMatrix))
+        if (!InvertMatrix4(perspectiveMatrix, inversePerspectiveMatrix))
         {
           return false;
         }
         TransposeMatrix4(inversePerspectiveMatrix, transposedInversePerspectiveMatrix);
 
-        Vector4 perspectivePoint;
+        Components4 perspectivePoint;
         V4MulPointByMatrix(rightHandSide, transposedInversePerspectiveMatrix, perspectivePoint);
 
         result.PerspectiveX = perspectivePoint[0];
@@ -574,21 +572,12 @@ namespace krys::boo
         w = (column[0][1] - column[1][0]) * s;
       }
 
-      result.Quaternion.X = x;
-      result.Quaternion.Y = y;
-      result.Quaternion.Z = z;
-      result.Quaternion.W = w;
+      result.Quaternion = krys::Quaternion<double>(w, x, y, z);
 
       return true;
     }
 
     // End of Supporting Math Functions
-
-    KRYS_NODISCARD float ClampEdgeValue(float f) noexcept
-    {
-      krys_debug_assert(!std::isnan(f));
-      return std::min<float>(std::max<float>(f, -LayoutUnit::Max() / 2), LayoutUnit::Max() / 2);
-    }
 
     KRYS_NODISCARD double RoundEpsilonToZero(double val) noexcept
     {
@@ -621,17 +610,17 @@ namespace krys::boo
     SetMatrix(t.A(), t.B(), t.C(), t.D(), t.E(), t.F());
   }
 
-  TransformationMatrix TransformationMatrix::FromQuaternion(const boo::Quaternion &q) noexcept
+  TransformationMatrix TransformationMatrix::FromQuaternion(const krys::Quaternion<double> &q) noexcept
   {
-    double xx = q.X * q.X;
-    double yy = q.Y * q.Y;
-    double zz = q.Z * q.Z;
-    double xz = q.X * q.Z;
-    double xy = q.X * q.Y;
-    double yz = q.Y * q.Z;
-    double xw = q.W * q.X;
-    double yw = q.W * q.Y;
-    double zw = q.W * q.Z;
+    double xx = q.x * q.x;
+    double yy = q.y * q.y;
+    double zz = q.z * q.z;
+    double xz = q.x * q.z;
+    double xy = q.x * q.y;
+    double yz = q.y * q.z;
+    double xw = q.w * q.x;
+    double yw = q.w * q.y;
+    double zw = q.w * q.z;
 
     return TransformationMatrix(1 - 2 * (yy + zz), 2 * (xy + zw), 2 * (xz - yw), 0, 2 * (xy - zw),
                                 1 - 2 * (xx + zz), 2 * (yz + xw), 0, 2 * (xz + yw), 2 * (yz - xw),
@@ -727,7 +716,8 @@ namespace krys::boo
       // Using int max causes overflow when other code uses the projected point. To
       // represent infinity yet reduce the risk of overflow, we use a large but
       // not-too-large number here when clamping.
-      const int largeNumber = 100'000'000 / FixedPointDenominator;
+      // (WebKit divides by its layout units' fixed-point denominator, 64.)
+      const int largeNumber = 100'000'000 / 64;
       outX = std::copysign(largeNumber, outX);
       outY = std::copysign(largeNumber, outY);
       if (clamped)
@@ -774,37 +764,6 @@ namespace krys::boo
     return projectedQuad;
   }
 
-  LayoutRect TransformationMatrix::ClampedBoundsOfProjectedQuad(const QuadF &q) const noexcept
-  {
-    RectF mappedQuadBounds = ProjectQuad(q).BoundingBox();
-
-    float left = ClampEdgeValue(std::floor(mappedQuadBounds.X()));
-    float top = ClampEdgeValue(std::floor(mappedQuadBounds.Y()));
-
-    float right;
-    if (std::isinf(mappedQuadBounds.X()) && std::isinf(mappedQuadBounds.Width()))
-    {
-      right = LayoutUnit::Max() / 2;
-    }
-    else
-    {
-      right = ClampEdgeValue(std::ceil(mappedQuadBounds.MaxX()));
-    }
-
-    float bottom;
-    if (std::isinf(mappedQuadBounds.Y()) && std::isinf(mappedQuadBounds.Height()))
-    {
-      bottom = LayoutUnit::Max() / 2;
-    }
-    else
-    {
-      bottom = ClampEdgeValue(std::ceil(mappedQuadBounds.MaxY()));
-    }
-
-    return LayoutRect(LayoutUnit::Clamp(left), LayoutUnit::Clamp(top), LayoutUnit::Clamp(right - left),
-                      LayoutUnit::Clamp(bottom - top));
-  }
-
   void TransformationMatrix::Map4ComponentPoint(double &x, double &y, double &z, double &w) const noexcept
   {
     if (IsIdentityOrTranslation())
@@ -815,8 +774,8 @@ namespace krys::boo
       return;
     }
 
-    Vector4 input = {x, y, z, w};
-    Vector4 result;
+    Components4 input = {x, y, z, w};
+    Components4 result;
     V4MulPointByMatrix(input, _matrix, result);
 
     x = result[0];
@@ -849,11 +808,6 @@ namespace krys::boo
   RectI TransformationMatrix::MapRect(const RectI &rect) const noexcept
   {
     return EnclosingRectI(MapRect(RectF(rect)));
-  }
-
-  LayoutRect TransformationMatrix::MapRect(const LayoutRect &r) const noexcept
-  {
-    return EnclosingLayoutRect(MapRect(RectF(r)));
   }
 
   RectF TransformationMatrix::MapRect(const RectF &r) const noexcept
@@ -1392,7 +1346,7 @@ namespace krys::boo
     // FIXME: Use LU decomposition to apply the inverse instead of calculating the inverse explicitly.
     // Calculating the inverse of a 4x4 matrix using cofactors is numerically unstable and unnecessary to
     // apply the inverse transformation to a point.
-    if (!boo::Inverse(_matrix, invMat._matrix))
+    if (!InvertMatrix4(_matrix, invMat._matrix))
     {
       return {};
     }
@@ -1532,7 +1486,7 @@ namespace krys::boo
     BlendFloat(fromDecomp.PerspectiveZ, toDecomp.PerspectiveZ, progress, operationForNonOneBasedValues);
     BlendFloat(fromDecomp.PerspectiveW, toDecomp.PerspectiveW, progress, compositeOperation);
     fromDecomp.Quaternion =
-      fromDecomp.Quaternion.Interpolate(toDecomp.Quaternion, progress, compositeOperation);
+      InterpolateRotation(fromDecomp.Quaternion, toDecomp.Quaternion, progress, compositeOperation);
 
     Recompose4(fromDecomp);
   }
@@ -1578,14 +1532,14 @@ namespace krys::boo
       return true;
     }
 
-    return boo::Decompose2(_matrix, decomp);
+    return krys::Decompose2(_matrix, decomp);
   }
 
   bool TransformationMatrix::Decompose4(Decomposed4Type &decomp) const noexcept
   {
     if (IsIdentity())
     {
-      decomp = {};
+      decomp = Decomposed4Type();
       decomp.PerspectiveW = 1;
       decomp.ScaleX = 1;
       decomp.ScaleY = 1;
@@ -1593,7 +1547,7 @@ namespace krys::boo
       return true;
     }
 
-    return boo::Decompose4(_matrix, decomp);
+    return krys::Decompose4(_matrix, decomp);
   }
 
   void TransformationMatrix::Recompose2(const Decomposed2Type &decomp) noexcept
@@ -1746,5 +1700,57 @@ namespace krys::boo
     double newX, newY;
     transform.Map(static_cast<double>(point.X()), static_cast<double>(point.Y()), newX, newY);
     return PointF::NarrowPrecision(newX, newY);
+  }
+
+  namespace
+  {
+    // Perform a spherical linear interpolation between the two
+    // passed quaternions with 0 <= t <= 1.
+    KRYS_NODISCARD Quaternion<double> SlerpRotation(const Quaternion<double> &from,
+                                                    const Quaternion<double> &other, double progress) noexcept
+    {
+      constexpr double epsilon = 1e-5;
+      Quaternion<double> copy = from;
+
+      double cosHalfAngle = copy.x * other.x + copy.y * other.y + copy.z * other.z + copy.w * other.w;
+
+      if (cosHalfAngle < 0.0)
+      {
+        copy.x = -copy.x;
+        copy.y = -copy.y;
+        copy.z = -copy.z;
+        copy.w = -copy.w;
+        cosHalfAngle = -cosHalfAngle;
+      }
+
+      if (cosHalfAngle > 1)
+      {
+        cosHalfAngle = 1;
+      }
+
+      double sinHalfAngle = std::sqrt(1.0 - cosHalfAngle * cosHalfAngle);
+      if (sinHalfAngle < epsilon)
+      {
+        // Quaternions share common axis and angle.
+        return from;
+      }
+
+      double halfAngle = std::acos(cosHalfAngle);
+      double scale = std::sin((1 - progress) * halfAngle) / sinHalfAngle;
+      double invscale = std::sin(progress * halfAngle) / sinHalfAngle;
+
+      return Quaternion<double>(copy.w * scale + other.w * invscale, copy.x * scale + other.x * invscale,
+                                copy.y * scale + other.y * invscale, copy.z * scale + other.z * invscale);
+    }
+  }
+
+  Quaternion<double> InterpolateRotation(const Quaternion<double> &from, const Quaternion<double> &to,
+                                         double progress, CompositeOperation compositeOperation) noexcept
+  {
+    if (compositeOperation == CompositeOperation::Accumulate)
+    {
+      return from * to;
+    }
+    return SlerpRotation(from, to, progress);
   }
 }

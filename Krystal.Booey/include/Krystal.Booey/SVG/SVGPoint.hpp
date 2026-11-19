@@ -99,7 +99,7 @@ namespace krys::boo
 
     KRYS_NODISCARD Ref<SVGPoint> MatrixTransform(SVGMatrix &matrix) const noexcept
     {
-      auto newPoint = boo::MatrixTransform(_value, matrix.Value());
+      auto newPoint = krys::MatrixTransform(_value, matrix.Value());
       return AdoptRef(*new SVGPoint(newPoint));
     }
 

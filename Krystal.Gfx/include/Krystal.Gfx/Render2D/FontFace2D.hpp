@@ -9,8 +9,8 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Gfx/Render2D/AffineTransformFloats.hpp"
 #include "Krystal.Gfx/Render2D/Path2D.hpp"
-#include "Krystal.Gfx/Render2D/Transform2D.hpp"
 #include "Krystal.Text/FreeTypeFace.hpp"
 
 // FreeType's own declaration of a size handle.
@@ -119,7 +119,7 @@ namespace krys::gfx
     /// transform or synthetic oblique, as fitting to the grid only means anything on it. Nothing if FreeType
     /// can't load it.
     KRYS_NODISCARD Maybe<GlyphBitmap> Rasterise(uint32 glyph, float size, float subpixel,
-                                                const Transform2D &linear = {}) const noexcept;
+                                                const AffineTransform &linear = {}) const noexcept;
 
     /// @brief The outline of `glyph` at `size` pixels per em, the pen at the origin, y pointing down, with
     /// the synthetic styles; unhinted. Empty for a glyph without one.

@@ -29,10 +29,14 @@
 #include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 
+namespace krys
+{
+  class TransformationMatrix;
+}
+
 namespace krys::boo
 {
   class RenderStyle;
-  class TransformationMatrix;
   struct TransformOperationData;
 }
 

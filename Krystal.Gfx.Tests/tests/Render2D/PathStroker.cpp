@@ -13,7 +13,7 @@ namespace krys::gfx::tests
 
     /// @brief The area the stroke covers, in square target pixels.
     KRYS_NODISCARD float StrokedArea(const Path2D &path, const StrokeStyle &style,
-                                     const Transform2D &transform = {})
+                                     const AffineTransform &transform = {})
     {
       PathStroker stroker;
       PathRasteriser rasteriser;
@@ -138,14 +138,15 @@ namespace krys::gfx::tests
 
   TEST_CASE("PathStroker: strokes in the path's coordinates", "[Gfx][Render2D]")
   {
-    const auto scale = Transform2D::Scale(10.f, 10.f);
+    const auto scale = AffineTransform::CreateScale(SizeF(10.f, 10.f));
     CHECK(StrokedArea(Line({0.f, 0.5f}, {1.f, 0.5f}), {.Width = 0.2f}, scale) == 20.f);
 
     // A hairline is one target pixel wide, whatever the scale.
     // Centred on a pixel boundary, it half covers two rows.
     CHECK_THAT(StrokedArea(Line({0.f, 5.f}, {10.f, 5.f}), {.Width = 0.f}),
                Catch::Matchers::WithinAbs(10.f, 0.1f));
-    CHECK_THAT(StrokedArea(Line({0.f, 1.f}, {2.5f, 1.f}), {.Width = 0.f}, Transform2D::Scale(4.f, 4.f)),
+    CHECK_THAT(StrokedArea(Line({0.f, 1.f}, {2.5f, 1.f}), {.Width = 0.f},
+                           AffineTransform::CreateScale(SizeF(4.f, 4.f))),
                Catch::Matchers::WithinAbs(10.f, 0.1f));
   }
 

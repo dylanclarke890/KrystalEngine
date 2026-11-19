@@ -5,7 +5,7 @@ namespace krys::ui
 {
   void TextureMapperPlatformLayer::DrawBorder(TextureMapper &textureMapper, const boo::Color &color,
                                               float borderWidth, const RectF &targetRect,
-                                              const boo::TransformationMatrix &transform) noexcept
+                                              const TransformationMatrix &transform) noexcept
   {
     textureMapper.DrawBorder(color, borderWidth, targetRect, transform);
   }
@@ -18,7 +18,7 @@ namespace krys::ui
 
   void TextureMapperSolidColorLayer::PaintToTextureMapper(TextureMapper &textureMapper,
                                                           const RectF &targetRect,
-                                                          const boo::TransformationMatrix &transform,
+                                                          const TransformationMatrix &transform,
                                                           float opacity) noexcept
   {
     textureMapper.DrawSolidColor(targetRect, transform, _color.ColorWithAlphaMultipliedBy(opacity), true);

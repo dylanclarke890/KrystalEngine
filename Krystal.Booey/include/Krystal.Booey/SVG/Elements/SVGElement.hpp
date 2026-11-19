@@ -34,9 +34,13 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo
+namespace krys
 {
   class AffineTransform;
+}
+
+namespace krys::boo
+{
   enum class ColorInterpolation : uint8;
 
   enum class SVGElementFlags : uint8

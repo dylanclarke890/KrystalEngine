@@ -27,10 +27,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Maths/CompositeOperation.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -41,7 +41,7 @@ namespace krys
   class TextStream;
 }
 
-namespace krys::boo
+namespace krys
 {
   class TransformationMatrix;
 
@@ -197,6 +197,12 @@ namespace krys::boo
 
     KRYS_NODISCARD double YScale() const noexcept;
 
+    /// @brief The determinant of the linear part (`A() * D() - B() * C()`).
+    KRYS_NODISCARD constexpr double Determinant() const noexcept
+    {
+      return _transform[0] * _transform[3] - _transform[1] * _transform[2];
+    }
+
     // If you call this, you're probably doing it wrong.
     KRYS_NODISCARD bool IsInvertible() const noexcept;
 
@@ -263,19 +269,19 @@ namespace krys::boo
       return Span<const double, 6>(_transform);
     }
 
-    KRYS_NODISCARD static AffineTransform MakeTranslation(SizeF delta) noexcept
+    KRYS_NODISCARD static AffineTransform CreateTranslation(SizeF delta) noexcept
     {
       return AffineTransform(1, 0, 0, 1, delta.Width(), delta.Height());
     }
 
-    KRYS_NODISCARD static AffineTransform MakeScale(SizeF scale) noexcept
+    KRYS_NODISCARD static AffineTransform CreateScale(SizeF scale) noexcept
     {
       return AffineTransform(scale.Width(), 0, 0, scale.Height(), 0, 0);
     }
 
-    KRYS_NODISCARD static AffineTransform MakeRotation(double angleInDegrees, PointF center) noexcept;
+    KRYS_NODISCARD static AffineTransform CreateRotation(double angleInDegrees, PointF center) noexcept;
 
-    KRYS_NODISCARD static AffineTransform MakeRotation(double angleInDegrees) noexcept;
+    KRYS_NODISCARD static AffineTransform CreateRotation(double angleInDegrees) noexcept;
 
     // decompose the matrix into its component parts
     struct DecomposedType
@@ -298,10 +304,10 @@ namespace krys::boo
 
   constexpr inline AffineTransform AffineTransform::Identity {};
 
-  KRYS_NODISCARD AffineTransform MakeMapBetweenRects(const RectF &source, const RectF &dest) noexcept;
+  KRYS_NODISCARD AffineTransform CreateMapBetweenRects(const RectF &source, const RectF &dest) noexcept;
 }
 
-namespace krys::boo
+namespace krys
 {
   TextStream &operator<<(TextStream &ts, const AffineTransform &transform) noexcept;
 

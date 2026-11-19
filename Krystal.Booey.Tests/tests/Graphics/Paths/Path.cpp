@@ -5,7 +5,7 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Paths/PathTraversalState.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include <cmath>
 #include <numbers>
 
@@ -138,7 +138,7 @@ namespace krys::boo::tests
 
       Path combined;
       combined.AddRect({0, 0, 1, 1});
-      combined.AddPath(copy, AffineTransform::MakeTranslation({100, 0}));
+      combined.AddPath(copy, AffineTransform::CreateTranslation({100, 0}));
       CHECK(combined.BoundingRect() == RectF {0, 0, 120, 10});
 
       combined.Clear();
@@ -252,7 +252,7 @@ namespace krys::boo::tests
     Path ellipse;
     ellipse.MoveTo({0, 0});
     ellipse.AddEllipseInRect({0, 0, 10, 10});
-    ellipse.Transform(AffineTransform::MakeTranslation({5, 5}));
+    ellipse.Transform(AffineTransform::CreateTranslation({5, 5}));
     CHECK(ellipse.BoundingRect() == RectF(5, 5, 10, 10));
   }
 
@@ -330,7 +330,7 @@ namespace krys::boo::tests
     {
       Path circle;
       circle.AddArc({0, 0}, 10, 0, 2 * pi, RotationDirection::Clockwise);
-      circle.Transform(AffineTransform::MakeTranslation({100, 0}));
+      circle.Transform(AffineTransform::CreateTranslation({100, 0}));
       CHECK(circle.Contains({100, 0}));
       CHECK_FALSE(circle.Contains({0, 0}));
     }
@@ -340,7 +340,7 @@ namespace krys::boo::tests
       Path rect;
       rect.AddRect({0, 0, 10, 10});
       Path path;
-      path.AddPath(rect, AffineTransform::MakeTranslation({5, 0}));
+      path.AddPath(rect, AffineTransform::CreateTranslation({5, 0}));
       CHECK(path.FastBoundingRect() == RectF(5, 0, 10, 10));
     }
   }

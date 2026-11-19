@@ -73,7 +73,7 @@ namespace krys::boo
     AnimatableCSSPropertySet _properties; // The properties specified in this keyframe.
     UniquePtr<RenderStyle> _style;
     RefPtr<TimingFunction> _timingFunction;
-    Maybe<boo::CompositeOperation> _compositeOperation;
+    Maybe<krys::CompositeOperation> _compositeOperation;
     bool _containsDirectionAwareProperty {false};
 
   public:
@@ -91,7 +91,7 @@ namespace krys::boo
       return _computedOffset;
     }
 
-    KRYS_NODISCARD Maybe<boo::CompositeOperation> CompositeOperation() const noexcept final
+    KRYS_NODISCARD Maybe<krys::CompositeOperation> CompositeOperation() const noexcept final
     {
       return _compositeOperation;
     }
@@ -147,7 +147,7 @@ namespace krys::boo
       _timingFunction = timingFunction;
     }
 
-    void SetCompositeOperation(Maybe<boo::CompositeOperation> operation) noexcept
+    void SetCompositeOperation(Maybe<krys::CompositeOperation> operation) noexcept
     {
       _compositeOperation = operation;
     }

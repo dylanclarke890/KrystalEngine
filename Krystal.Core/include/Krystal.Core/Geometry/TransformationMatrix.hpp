@@ -25,16 +25,15 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
-#include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
-#include "Krystal.Booey/Graphics/Transforms/Quaternion.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Point3.hpp"
+#include "Krystal.Core/Maths/CompositeOperation.hpp"
+#include "Krystal.Core/Maths/Quaternion.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
+namespace krys
 {
   class AffineTransform;
 
@@ -67,7 +66,7 @@ namespace krys::boo
     {
       double ScaleX, ScaleY, ScaleZ;
       double SkewXY, SkewXZ, SkewYZ;
-      boo::Quaternion Quaternion;
+      krys::Quaternion<double> Quaternion;
       double TranslateX, TranslateY, TranslateZ;
       double PerspectiveX, PerspectiveY, PerspectiveZ, PerspectiveW;
 
@@ -133,7 +132,7 @@ namespace krys::boo
 
     TransformationMatrix(const AffineTransform &t) noexcept;
 
-    KRYS_NODISCARD static TransformationMatrix FromQuaternion(const boo::Quaternion &q) noexcept;
+    KRYS_NODISCARD static TransformationMatrix FromQuaternion(const krys::Quaternion<double> &q) noexcept;
 
     // Field of view in radians
     KRYS_NODISCARD static TransformationMatrix FromProjection(double fovUp, double fovDown, double fovLeft,
@@ -198,7 +197,11 @@ namespace krys::boo
     // box computations but may not be what is wanted in other contexts.
     KRYS_NODISCARD RectI MapRect(const RectI &r) const noexcept;
 
-    KRYS_NODISCARD LayoutRect MapRect(const LayoutRect &r) const noexcept;
+    // Not for fixed-point rects, which would otherwise convert to `RectF` without enclosing the result: their
+    // own module maps them.
+    template <GeometryCoordinate T>
+    requires GeometryTraits<T>::IsFixedPoint
+    Rect<T> MapRect(const Rect<T> &r) const noexcept = delete;
 
     // If the matrix has 3D components, the z component of the result is
     // dropped, effectively projecting the quad into the z=0 plane.
@@ -211,10 +214,6 @@ namespace krys::boo
 
     // Projects the four corners of the quad.
     KRYS_NODISCARD QuadF ProjectQuad(const QuadF &q, bool *clamped = nullptr) const noexcept;
-
-    // Projects the four corners of the quad and takes a bounding box,
-    // while sanitizing values created when the w component is negative.
-    KRYS_NODISCARD LayoutRect ClampedBoundsOfProjectedQuad(const QuadF &q) const noexcept;
 
     KRYS_NODISCARD constexpr double M11() const noexcept
     {
@@ -634,4 +633,11 @@ namespace krys::boo
 
   /// @brief @p point mapped by @p transform, in double precision.
   KRYS_NODISCARD PointF MatrixTransform(const PointF &point, const TransformationMatrix &transform) noexcept;
+
+  /// @brief Interpolates the rotation of a decomposed 3D transform: a spherical interpolation @p progress of
+  /// the way from @p from to @p to (taking the shorter arc, and @p from if they're the same rotation), or
+  /// their product when @p compositeOperation is `Accumulate`.
+  KRYS_NODISCARD Quaternion<double> InterpolateRotation(const Quaternion<double> &from,
+                                                        const Quaternion<double> &to, double progress,
+                                                        CompositeOperation compositeOperation) noexcept;
 }

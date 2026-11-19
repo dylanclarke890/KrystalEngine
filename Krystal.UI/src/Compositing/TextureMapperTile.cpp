@@ -72,7 +72,7 @@ namespace krys::ui
     textureMapper.UpdateContents(*_texture, sourceLayer, targetRect, sourceOffset, scale);
   }
 
-  void TextureMapperTile::Paint(TextureMapper &textureMapper, const boo::TransformationMatrix &transform,
+  void TextureMapperTile::Paint(TextureMapper &textureMapper, const TransformationMatrix &transform,
                                 float opacity, bool allEdgesExposed) noexcept
   {
     if (auto texture = Texture())

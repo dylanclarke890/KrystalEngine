@@ -13,7 +13,7 @@ namespace krys::gfx
     }
   }
 
-  CoverageMask PathRasteriser::Rasterise(const Path2D &path, const Transform2D &transform, FillRule rule,
+  CoverageMask PathRasteriser::Rasterise(const Path2D &path, const AffineTransform &transform, FillRule rule,
                                          const RectI &clip) noexcept
   {
     _edges.clear();
@@ -113,7 +113,7 @@ namespace krys::gfx
     return mask;
   }
 
-  bool PathRasteriser::BuildEdges(const Path2D &path, const Transform2D &transform) noexcept
+  bool PathRasteriser::BuildEdges(const Path2D &path, const AffineTransform &transform) noexcept
   {
     const auto points = path.Points();
     size_t next = 0u;
@@ -137,7 +137,7 @@ namespace krys::gfx
         case PathVerb::MoveTo:
         {
           closeContour();
-          const auto point = transform.Apply(points[next++]);
+          const auto point = MapPoint(transform, points[next++]);
           if (!IsFinite(point))
           {
             return false;
@@ -149,7 +149,7 @@ namespace krys::gfx
         }
         case PathVerb::LineTo:
         {
-          const auto point = transform.Apply(points[next++]);
+          const auto point = MapPoint(transform, points[next++]);
           if (!IsFinite(point))
           {
             return false;
@@ -160,8 +160,8 @@ namespace krys::gfx
         }
         case PathVerb::QuadTo:
         {
-          const auto control = transform.Apply(points[next++]);
-          const auto end = transform.Apply(points[next++]);
+          const auto control = MapPoint(transform, points[next++]);
+          const auto end = MapPoint(transform, points[next++]);
           if (!IsFinite(control) || !IsFinite(end))
           {
             return false;
@@ -172,9 +172,9 @@ namespace krys::gfx
         }
         case PathVerb::CubicTo:
         {
-          const auto control1 = transform.Apply(points[next++]);
-          const auto control2 = transform.Apply(points[next++]);
-          const auto end = transform.Apply(points[next++]);
+          const auto control1 = MapPoint(transform, points[next++]);
+          const auto control2 = MapPoint(transform, points[next++]);
+          const auto end = MapPoint(transform, points[next++]);
           if (!IsFinite(control1) || !IsFinite(control2) || !IsFinite(end))
           {
             return false;

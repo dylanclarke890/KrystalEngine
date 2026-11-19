@@ -28,19 +28,19 @@ namespace krys::ui
     _image = nullptr;
   }
 
-  boo::TransformationMatrix
+  TransformationMatrix
     TextureMapperTiledBackingStore::AdjustedTransformForRect(const RectF &targetRect) noexcept
   {
-    return boo::TransformationMatrix::RectToRect(Rect(), targetRect);
+    return TransformationMatrix::RectToRect(Rect(), targetRect);
   }
 
   void TextureMapperTiledBackingStore::PaintToTextureMapper(TextureMapper &textureMapper,
                                                             const RectF &targetRect,
-                                                            const boo::TransformationMatrix &transform,
+                                                            const TransformationMatrix &transform,
                                                             float opacity) noexcept
   {
     UpdateContentsFromImageIfNeeded(textureMapper);
-    boo::TransformationMatrix adjustedTransform = transform * AdjustedTransformForRect(targetRect);
+    TransformationMatrix adjustedTransform = transform * AdjustedTransformForRect(targetRect);
     for (auto &tile : _tiles)
     {
       tile.Paint(textureMapper, adjustedTransform, opacity, AllTileEdgesExposed(Rect(), tile.Rect()));
@@ -49,9 +49,9 @@ namespace krys::ui
 
   void TextureMapperTiledBackingStore::DrawBorder(TextureMapper &textureMapper, const boo::Color &borderColor,
                                                   float borderWidth, const RectF &targetRect,
-                                                  const boo::TransformationMatrix &transform) noexcept
+                                                  const TransformationMatrix &transform) noexcept
   {
-    boo::TransformationMatrix adjustedTransform = transform * AdjustedTransformForRect(targetRect);
+    TransformationMatrix adjustedTransform = transform * AdjustedTransformForRect(targetRect);
     for (auto &tile : _tiles)
     {
       textureMapper.DrawBorder(borderColor, borderWidth, tile.Rect(), adjustedTransform);
@@ -61,9 +61,9 @@ namespace krys::ui
   void TextureMapperTiledBackingStore::DrawRepaintCounter(TextureMapper &textureMapper, int32 repaintCount,
                                                           const boo::Color &borderColor,
                                                           const RectF &targetRect,
-                                                          const boo::TransformationMatrix &transform) noexcept
+                                                          const TransformationMatrix &transform) noexcept
   {
-    boo::TransformationMatrix adjustedTransform = transform * AdjustedTransformForRect(targetRect);
+    TransformationMatrix adjustedTransform = transform * AdjustedTransformForRect(targetRect);
     for (auto &tile : _tiles)
     {
       textureMapper.DrawNumber(repaintCount, borderColor, tile.Rect().Location(), adjustedTransform);

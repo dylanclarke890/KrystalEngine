@@ -44,14 +44,13 @@ namespace krys::ui
     ~TextureMapperTiledBackingStore() noexcept override = default;
 
     void PaintToTextureMapper(TextureMapper &textureMapper, const RectF &targetRect,
-                              const boo::TransformationMatrix &transform, float opacity) noexcept override;
+                              const TransformationMatrix &transform, float opacity) noexcept override;
 
     void DrawBorder(TextureMapper &textureMapper, const boo::Color &borderColor, float borderWidth,
-                    const RectF &targetRect, const boo::TransformationMatrix &transform) noexcept override;
+                    const RectF &targetRect, const TransformationMatrix &transform) noexcept override;
 
     void DrawRepaintCounter(TextureMapper &textureMapper, int32 repaintCount, const boo::Color &borderColor,
-                            const RectF &targetRect,
-                            const boo::TransformationMatrix &transform) noexcept override;
+                            const RectF &targetRect, const TransformationMatrix &transform) noexcept override;
 
     void UpdateContentsScale(float scale) noexcept;
 
@@ -82,7 +81,7 @@ namespace krys::ui
 
     void UpdateContentsFromImageIfNeeded(TextureMapper &textureMapper) noexcept;
 
-    KRYS_NODISCARD boo::TransformationMatrix AdjustedTransformForRect(const RectF &targetRect) noexcept;
+    KRYS_NODISCARD TransformationMatrix AdjustedTransformForRect(const RectF &targetRect) noexcept;
 
     KRYS_NODISCARD static SizeI ComputeTileSize(const SizeI &viewportSize, int32 maxTextureSize,
                                                 const RectI &contentsRect) noexcept;

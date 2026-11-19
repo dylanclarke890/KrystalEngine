@@ -28,6 +28,11 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 
+namespace krys
+{
+  class TransformationMatrix;
+}
+
 namespace krys::boo
 {
   class BoxPathOperation;
@@ -35,7 +40,6 @@ namespace krys::boo
   class RayPathOperation;
   class RenderElement;
   class ShapePathOperation;
-  class TransformationMatrix;
   struct TransformOperationData;
 
   namespace style

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 #include "Krystal.UI/Compositing/BitmapTexture.hpp"
 
 namespace krys::boo
@@ -63,7 +63,7 @@ namespace krys::ui
     void UpdateContents(TextureMapper &textureMapper, const boo::GraphicsLayer &sourceLayer,
                         const RectI &dirtyRect, float scale = 1) noexcept;
 
-    virtual void Paint(TextureMapper &textureMapper, const boo::TransformationMatrix &transform,
-                       float opacity, bool allEdgesExposed) noexcept;
+    virtual void Paint(TextureMapper &textureMapper, const TransformationMatrix &transform, float opacity,
+                       bool allEdgesExposed) noexcept;
   };
 }
