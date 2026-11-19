@@ -43,7 +43,7 @@ namespace krys::text
     for (text::CodePointIterator it {content}; !it.AtEnd(); ++it)
     {
       isLatin1 = isLatin1 && *it <= 0xFF;
-      switch (u_charDirection(static_cast<UChar32>(*it)))
+      switch (u_charDirection(*it))
       {
         case U_LEFT_TO_RIGHT:        return TextDirection::LTR;
         case U_RIGHT_TO_LEFT:
@@ -62,7 +62,7 @@ namespace krys::text
   {
     for (text::CodePointIterator it {content}; !it.AtEnd(); ++it)
     {
-      switch (u_charDirection(static_cast<UChar32>(*it)))
+      switch (u_charDirection(*it))
       {
         case U_LEFT_TO_RIGHT:        return TextDirection::LTR;
         case U_RIGHT_TO_LEFT:

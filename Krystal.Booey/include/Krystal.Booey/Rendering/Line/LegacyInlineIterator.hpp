@@ -242,7 +242,7 @@ namespace krys::boo
 
       if (auto *textRenderer = DynamicDowncast<RenderText>(*_renderer)) KRYS_LIKELY
       {
-        return u_charDirection(static_cast<UChar32>(CharacterAt(_pos)));
+        return u_charDirection(CharacterAt(_pos));
       }
 
       if (auto *listMarkerRenderer = DynamicDowncast<RenderListMarker>(*_renderer))

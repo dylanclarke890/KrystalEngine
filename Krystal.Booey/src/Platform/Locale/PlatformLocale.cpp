@@ -32,9 +32,9 @@
 #include "Krystal.Booey/Platform/DateComponents.hpp"
 #include "Krystal.Booey/Platform/Locale/DateTimeFormat.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <format>
 #include <unicode/uchar.h>
-#include <unicode/utf8.h>
 
 namespace krys::boo
 {
@@ -205,7 +205,7 @@ namespace krys::boo
       return text.substr(position, part.size()) == part;
     }
 
-    KRYS_NODISCARD bool IsSpaceOrNewline(UChar32 c) noexcept
+    KRYS_NODISCARD bool IsSpaceOrNewline(char32 c) noexcept
     {
       if (c <= 0x7F)
       {
@@ -217,33 +217,28 @@ namespace krys::boo
     /// @brief @p text without the white space at its ends.
     KRYS_NODISCARD utf8_stringview Trim(utf8_stringview text) noexcept
     {
-      auto *bytes = reinterpret_cast<const uint8_t *>(text.data());
-      auto length = static_cast<int32>(text.size());
-      int32 start = 0;
-      while (start < length)
+      size_t start = 0;
+      while (start < text.size())
       {
-        int32 next = start;
-        UChar32 c;
-        U8_NEXT(bytes, next, length, c);
-        if (c < 0 || !IsSpaceOrNewline(c))
+        auto decoded = text::DecodeUTF8(Span<const char8>(text.data() + start, text.size() - start));
+        if (!decoded.IsValid || !IsSpaceOrNewline(decoded.CodePoint))
         {
           break;
         }
-        start = next;
+        start += decoded.Length;
       }
-      int32 end = length;
+      size_t end = text.size();
       while (end > start)
       {
-        int32 previous = end;
-        UChar32 c;
-        U8_PREV(bytes, start, previous, c);
-        if (c < 0 || !IsSpaceOrNewline(c))
+        auto previous = text::PreviousCodePointStart(text, end);
+        auto decoded = text::DecodeUTF8(Span<const char8>(text.data() + previous, end - previous));
+        if (previous < start || !decoded.IsValid || !IsSpaceOrNewline(decoded.CodePoint))
         {
           break;
         }
         end = previous;
       }
-      return text.substr(static_cast<size_t>(start), static_cast<size_t>(end - start));
+      return text.substr(start, end - start);
     }
   }
 

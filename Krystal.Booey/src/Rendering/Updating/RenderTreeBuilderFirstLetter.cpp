@@ -125,8 +125,7 @@ namespace krys::boo
     // letter should be included"
     KRYS_NODISCARD bool IsPunctuationForFirstLetter(char32 c) noexcept
     {
-      return U_GET_GC_MASK(static_cast<UChar32>(c))
-             & (U_GC_PS_MASK | U_GC_PE_MASK | U_GC_PI_MASK | U_GC_PF_MASK | U_GC_PO_MASK);
+      return U_GET_GC_MASK(c) & (U_GC_PS_MASK | U_GC_PE_MASK | U_GC_PI_MASK | U_GC_PF_MASK | U_GC_PO_MASK);
     }
 
     KRYS_NODISCARD bool ShouldSkipForFirstLetter(char32 c) noexcept

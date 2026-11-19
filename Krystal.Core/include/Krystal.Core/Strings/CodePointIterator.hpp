@@ -9,12 +9,12 @@
 
 namespace krys::text
 {
-  /// @brief The result of decoding one UTF-8 sequence.
+  /// @brief The result of decoding one UTF-8 or UTF-16 sequence.
   struct DecodedCodePoint
   {
     /// @brief The code point, or `UnicodeReplacementChar` if the sequence was invalid.
     char32 CodePoint;
-    /// @brief The number of bytes consumed: the sequence's length, or 1 for an invalid byte.
+    /// @brief The number of code units consumed: the sequence's length, or 1 for an invalid unit.
     uint8 Length;
     bool IsValid;
   };
@@ -81,6 +81,25 @@ namespace krys::text
     }
 
     return {codePoint, length, true};
+  }
+
+  /// @brief Decodes the UTF-16 sequence at the start of @p data: a surrogate pair, or one code unit. An
+  /// unpaired surrogate reads as itself and isn't valid.
+  /// @param data Must not be empty.
+  KRYS_NODISCARD constexpr DecodedCodePoint DecodeUTF16(Span<const char16> data) noexcept
+  {
+    krys_debug_assert(!data.empty());
+
+    char16 lead = data[0];
+    if (!IsSurrogate(lead))
+    {
+      return {lead, 1, true};
+    }
+    if (IsLeadSurrogate(lead) && data.size() > 1 && IsTrailSurrogate(data[1]))
+    {
+      return {UTF16CombineSurrogates(lead, data[1]), 2, true};
+    }
+    return {lead, 1, false};
   }
 
   /// @brief Decodes the code point starting at byte @p offset of @p text.

@@ -133,7 +133,7 @@ namespace krys::boo
         return CharacterClass::NonIdeographNumeral;
       }
 
-      auto generalCategoryMask = static_cast<uint32>(U_GET_GC_MASK(static_cast<UChar32>(character)));
+      auto generalCategoryMask = static_cast<uint32>(U_GET_GC_MASK(character));
       if (IsIdeograph(character))
       {
         return CharacterClass::Ideograph;

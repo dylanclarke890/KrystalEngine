@@ -42,10 +42,10 @@
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Text/TextBoundaries.hpp"
 #include "Krystal.Text/TextBreakIterator.hpp"
 #include <unicode/ubrk.h>
-#include <unicode/utf8.h>
 
 namespace krys::boo
 {
@@ -876,7 +876,7 @@ namespace krys::boo
     needMoreContext = false;
     int32 start, end;
     int32 position = static_cast<int32>(offset);
-    U8_BACK_1(reinterpret_cast<const uint8_t *>(text.data()), 0, position);
+    position = static_cast<int32>(text::PreviousCodePointStart(text, static_cast<size_t>(position)));
     text::FindWordBoundary(text, position, &start, &end);
     return static_cast<uint32>(start);
   }

@@ -41,8 +41,8 @@
 #include "Krystal.Booey/Layout/Integration/Inline/LineSelection.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/Selection/CaretRectComputation.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <algorithm>
-#include <unicode/utf8.h>
 
 namespace krys::boo
 {
@@ -828,9 +828,9 @@ namespace krys::boo
       return 0;
     }
 
-    UChar32 ch;
-    U8_NEXT(reinterpret_cast<const uint8_t *>(data.data()), offset, length, ch);
-    return ch < 0 ? 0 : static_cast<char32>(ch);
+    auto decoded =
+      text::DecodeUTF8(Span<const char8>(data.data() + offset, static_cast<size_t>(length - offset)));
+    return decoded.IsValid ? decoded.CodePoint : 0;
   }
 
   InlineBoxAndOffset VisiblePosition::GetInlineBoxAndOffset() const noexcept

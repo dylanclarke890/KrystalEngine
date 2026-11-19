@@ -71,7 +71,7 @@ namespace krys::boo
       // FIXME: Depending on the string value, we may need the real bidi algorithm. (rdar://106139180)
       // Also we may need to start checking for the entire content for directionality (and whether we need to
       // check for additional directionality characters like U_RIGHT_TO_LEFT_EMBEDDING).
-      auto bidiCategory = u_charDirection(static_cast<UChar32>(*text::CodePointIterator(content)));
+      auto bidiCategory = u_charDirection(*text::CodePointIterator(content));
       if (bidiCategory != U_RIGHT_TO_LEFT && bidiCategory != U_RIGHT_TO_LEFT_ARABIC)
       {
         return text::TextDirection::LTR;

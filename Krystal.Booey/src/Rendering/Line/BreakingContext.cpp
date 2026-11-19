@@ -553,7 +553,7 @@ namespace krys::boo
           canBreakMidWord = breakAll;
         }
 
-        if (midWordBreak && !(U_GET_GC_MASK(static_cast<UChar32>(c)) & U_GC_M_MASK))
+        if (midWordBreak && !(U_GET_GC_MASK(c) & U_GC_M_MASK))
         {
           // Remember this as a breakable position in case
           // adding the end width forces a break.

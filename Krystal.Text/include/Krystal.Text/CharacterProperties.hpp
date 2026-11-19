@@ -34,7 +34,7 @@ namespace krys::text
 {
   KRYS_NODISCARD inline bool IsEmojiGroupCandidate(char32 character) noexcept
   {
-    switch (ublock_getCode(static_cast<UChar32>(character)))
+    switch (ublock_getCode(character))
     {
       case UBLOCK_MISCELLANEOUS_SYMBOLS:
       case UBLOCK_DINGBATS:
@@ -81,7 +81,7 @@ namespace krys::text
     {
       return false;
     }
-    return u_hasBinaryProperty(static_cast<UChar32>(character), UCHAR_EMOJI_PRESENTATION);
+    return u_hasBinaryProperty(character, UCHAR_EMOJI_PRESENTATION);
   }
 
   KRYS_NODISCARD inline bool IsEmojiModifierBase(char32 character) noexcept
@@ -92,29 +92,29 @@ namespace krys::text
     {
       return false;
     }
-    return u_hasBinaryProperty(static_cast<UChar32>(character), UCHAR_EMOJI_MODIFIER_BASE);
+    return u_hasBinaryProperty(character, UCHAR_EMOJI_MODIFIER_BASE);
   }
 
   KRYS_NODISCARD inline bool IsDefaultIgnorableCodePoint(char32 character) noexcept
   {
-    return u_hasBinaryProperty(static_cast<UChar32>(character), UCHAR_DEFAULT_IGNORABLE_CODE_POINT);
+    return u_hasBinaryProperty(character, UCHAR_DEFAULT_IGNORABLE_CODE_POINT);
   }
 
   KRYS_NODISCARD inline bool IsControlCharacter(char32 character) noexcept
   {
-    return u_charType(static_cast<UChar32>(character)) == U_CONTROL_CHAR;
+    return u_charType(character) == U_CONTROL_CHAR;
   }
 
   KRYS_NODISCARD inline bool IsPrivateUseAreaCharacter(char32 character) noexcept
   {
-    auto block = ublock_getCode(static_cast<UChar32>(character));
+    auto block = ublock_getCode(character);
     return block == UBLOCK_PRIVATE_USE_AREA || block == UBLOCK_SUPPLEMENTARY_PRIVATE_USE_AREA_A
            || block == UBLOCK_SUPPLEMENTARY_PRIVATE_USE_AREA_B;
   }
 
   KRYS_NODISCARD inline bool IsPunctuation(char32 character) noexcept
   {
-    return U_GET_GC_MASK(static_cast<UChar32>(character)) & U_GC_P_MASK;
+    return U_GET_GC_MASK(character) & U_GC_P_MASK;
   }
 
   KRYS_NODISCARD constexpr bool IsOpeningPunctuation(uint32 generalCategoryMask) noexcept
@@ -130,7 +130,7 @@ namespace krys::text
   KRYS_NODISCARD inline bool IsOfScriptType(char32 codePoint, UScriptCode scriptType) noexcept
   {
     UErrorCode error = U_ZERO_ERROR;
-    UScriptCode script = uscript_getScript(static_cast<UChar32>(codePoint), &error);
+    UScriptCode script = uscript_getScript(codePoint, &error);
     if (error != U_ZERO_ERROR)
     {
       return false;
@@ -140,8 +140,7 @@ namespace krys::text
 
   KRYS_NODISCARD inline UEastAsianWidth EastAsianWidth(char32 character) noexcept
   {
-    return static_cast<UEastAsianWidth>(
-      u_getIntPropertyValue(static_cast<UChar32>(character), UCHAR_EAST_ASIAN_WIDTH));
+    return static_cast<UEastAsianWidth>(u_getIntPropertyValue(character, UCHAR_EAST_ASIAN_WIDTH));
   }
 
   KRYS_NODISCARD inline bool IsEastAsianFullWidth(char32 character) noexcept
@@ -170,6 +169,6 @@ namespace krys::text
 
   KRYS_NODISCARD inline bool IsCurrencySymbol(char32 character) noexcept
   {
-    return u_charType(static_cast<UChar32>(character)) == U_CURRENCY_SYMBOL;
+    return u_charType(character) == U_CURRENCY_SYMBOL;
   }
 }

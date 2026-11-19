@@ -25,33 +25,18 @@
  */
 
 #include "Krystal.Text/TextBoundaries.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Text/TextBreakIterator.hpp"
 #include <unicode/ubrk.h>
-#include <unicode/utf8.h>
 
 namespace krys::text
 {
   namespace
   {
-    KRYS_NODISCARD const uint8_t *Bytes(utf8_stringview text) noexcept
-    {
-      return reinterpret_cast<const uint8_t *>(text.data());
-    }
-
-    /// @brief The code point that starts at @p offset.
-    KRYS_NODISCARD UChar32 CodePointAt(utf8_stringview text, int32 offset) noexcept
-    {
-      UChar32 c;
-      U8_NEXT(Bytes(text), offset, static_cast<int32>(text.size()), c);
-      return c;
-    }
-
     /// @brief The code point that ends at @p offset.
-    KRYS_NODISCARD UChar32 CodePointBefore(utf8_stringview text, int32 offset) noexcept
+    KRYS_NODISCARD char32 CodePointBefore(utf8_stringview text, size_t offset) noexcept
     {
-      UChar32 c;
-      U8_PREV(Bytes(text), 0, offset, c);
-      return c;
+      return CodePointAt(text, PreviousCodePointStart(text, offset));
     }
   }
 
@@ -61,9 +46,9 @@ namespace krys::text
     for (int32 i = 0; i < length;)
     {
       int32 first = i;
-      UChar32 ch;
-      U8_NEXT(Bytes(text), i, length, ch);
-      if (!RequiresContextForWordBoundary(static_cast<char32>(ch)))
+      auto decoded = DecodeUTF8(Span<const char8>(text.data() + i, static_cast<size_t>(length - i)));
+      i += decoded.Length;
+      if (!RequiresContextForWordBoundary(decoded.CodePoint))
       {
         return static_cast<uint32>(first);
       }
@@ -77,9 +62,8 @@ namespace krys::text
     for (int32 i = length; i > 0;)
     {
       int32 last = i;
-      UChar32 ch;
-      U8_PREV(Bytes(text), 0, i, ch);
-      if (!RequiresContextForWordBoundary(static_cast<char32>(ch)))
+      i = static_cast<int32>(PreviousCodePointStart(text, static_cast<size_t>(i)));
+      if (!RequiresContextForWordBoundary(CodePointAt(text, static_cast<size_t>(i))))
       {
         return static_cast<uint32>(last);
       }
@@ -97,7 +81,8 @@ namespace krys::text
       while (position != UBRK_DONE)
       {
         // We stop searching when the character preceeding the break is alphanumeric.
-        if (static_cast<uint32>(position) < text.size() && u_isalnum(CodePointBefore(text, position)))
+        if (static_cast<uint32>(position) < text.size()
+            && u_isalnum(CodePointBefore(text, static_cast<size_t>(position))))
         {
           return position;
         }
@@ -112,7 +97,7 @@ namespace krys::text
     while (position != UBRK_DONE)
     {
       // We stop searching when the character following the break is alphanumeric.
-      if (position && u_isalnum(CodePointAt(text, position)))
+      if (position && u_isalnum(CodePointAt(text, static_cast<size_t>(position))))
       {
         return position;
       }

@@ -133,8 +133,7 @@ namespace krys::boo
           // Spec: Fullwidth ideographic and fullwidth Latin text will be set with a glyph-orientation of
           // 0-degrees. Text which is not fullwidth will be set with a glyph-orientation of 90-degrees.
           // FIXME: There's not an accurate way to tell if text is fullwidth by looking at a single character.
-          switch (static_cast<UEastAsianWidth>(
-            u_getIntPropertyValue(static_cast<UChar32>(character), UCHAR_EAST_ASIAN_WIDTH)))
+          switch (static_cast<UEastAsianWidth>(u_getIntPropertyValue(character, UCHAR_EAST_ASIAN_WIDTH)))
           {
             case U_EA_NEUTRAL:
             case U_EA_HALFWIDTH:

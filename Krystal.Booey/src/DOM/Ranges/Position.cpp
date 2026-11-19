@@ -54,8 +54,8 @@
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGTextElement.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <climits>
-#include <unicode/utf8.h>
 
 namespace krys::boo::dom
 {
@@ -123,11 +123,8 @@ namespace krys::boo::dom
       {
         return 0;
       }
-      int32 index = static_cast<int32>(offset);
-      UChar32 codePoint;
-      U8_NEXT(reinterpret_cast<const uint8_t *>(data.data()), index, static_cast<int32>(data.size()),
-              codePoint);
-      return codePoint < 0 ? 0 : static_cast<char32>(codePoint);
+      auto decoded = text::DecodeUTF8(Span<const char8>(data.data() + offset, data.size() - offset));
+      return decoded.IsValid ? decoded.CodePoint : 0;
     }
   }
 

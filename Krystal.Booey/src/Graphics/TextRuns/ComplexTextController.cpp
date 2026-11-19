@@ -1086,8 +1086,7 @@ namespace krys::boo
         if (_forTextEmphasis)
         {
           // FIXME: Combining marks should receive a text emphasis mark if they are combine with a space.
-          if (!FontCascade::CanReceiveTextEmphasis(character)
-              || (U_GET_GC_MASK(static_cast<UChar32>(character)) & U_GC_M_MASK))
+          if (!FontCascade::CanReceiveTextEmphasis(character) || (U_GET_GC_MASK(character) & U_GC_M_MASK))
           {
             glyph = DeletedGlyph;
           }

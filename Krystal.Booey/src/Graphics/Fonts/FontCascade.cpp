@@ -229,7 +229,7 @@ namespace krys::boo
     {
       if (_fontDescription.VariantCaps() == FontVariantCaps::Small)
       {
-        auto upperC = static_cast<char32>(u_toupper(static_cast<UChar32>(c)));
+        auto upperC = static_cast<char32>(u_toupper(c));
         if (upperC != c)
         {
           c = upperC;
@@ -248,7 +248,7 @@ namespace krys::boo
 
     if (mirror)
     {
-      c = static_cast<char32>(u_charMirror(static_cast<UChar32>(c)));
+      c = static_cast<char32>(u_charMirror(c));
     }
 
     auto emojiPolicy = resolvedEmojiPolicy.value_or(ResolveEmojiPolicy(_fontDescription.VariantEmoji(), c));
@@ -849,7 +849,7 @@ namespace krys::boo
           .CodePoint;
       // u_getIntPropertyValue with UCHAR_IDEOGRAPHIC doesn't return true for Japanese or Korean codepoints.
       // Instead, we can use the "Unicode allocation block" for the character.
-      UBlockCode blockCode = ublock_getCode(static_cast<UChar32>(baseCharacter));
+      UBlockCode blockCode = ublock_getCode(baseCharacter);
       switch (blockCode)
       {
         case UBLOCK_CJK_RADICALS_SUPPLEMENT:
@@ -2010,7 +2010,7 @@ namespace krys::boo
   // https://www.w3.org/TR/css-text-decor-3/#text-emphasis-style-property
   bool FontCascade::CanReceiveTextEmphasis(char32 c) noexcept
   {
-    auto mask = U_GET_GC_MASK(static_cast<UChar32>(c));
+    auto mask = U_GET_GC_MASK(c);
     if (mask & (U_GC_Z_MASK | U_GC_CN_MASK | U_GC_CC_MASK | U_GC_CF_MASK))
     {
       return false;
@@ -2490,12 +2490,12 @@ namespace krys::boo
 
   Maybe<char32> Capitalized(char32 baseCharacter) noexcept
   {
-    if (U_GET_GC_MASK(static_cast<UChar32>(baseCharacter)) & U_GC_M_MASK)
+    if (U_GET_GC_MASK(baseCharacter) & U_GC_M_MASK)
     {
       return null;
     }
 
-    auto uppercaseCharacter = static_cast<char32>(u_toupper(static_cast<UChar32>(baseCharacter)));
+    auto uppercaseCharacter = static_cast<char32>(u_toupper(baseCharacter));
     krys_debug_assert(uppercaseCharacter == baseCharacter
                       || ((baseCharacter <= 0xFFFF) == (uppercaseCharacter <= 0xFFFF)));
     if (uppercaseCharacter != baseCharacter)

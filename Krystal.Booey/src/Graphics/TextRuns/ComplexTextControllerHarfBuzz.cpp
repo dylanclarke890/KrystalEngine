@@ -44,7 +44,7 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<UScriptCode> CharacterScript(char32 character) noexcept
     {
       UErrorCode errorCode = U_ZERO_ERROR;
-      UScriptCode script = uscript_getScript(static_cast<UChar32>(character), &errorCode);
+      UScriptCode script = uscript_getScript(character, &errorCode);
       if (U_FAILURE(errorCode))
       {
         return null;
@@ -127,8 +127,7 @@ namespace krys::boo
           continue;
         }
 
-        if (*currentScript != *nextScript
-            && !uscript_hasScript(static_cast<UChar32>(character), *currentScript))
+        if (*currentScript != *nextScript && !uscript_hasScript(character, *currentScript))
         {
           return HBRun {startIndex, index, *currentScript};
         }

@@ -81,7 +81,7 @@ namespace krys::boo
 
     KRYS_NODISCARD UCharDirection Direction() const noexcept
     {
-      return AtEnd() ? U_OTHER_NEUTRAL : u_charDirection(static_cast<UChar32>(Current()));
+      return AtEnd() ? U_OTHER_NEUTRAL : u_charDirection(Current());
     }
 
     KRYS_NODISCARD friend bool operator==(const TextRunIterator &,

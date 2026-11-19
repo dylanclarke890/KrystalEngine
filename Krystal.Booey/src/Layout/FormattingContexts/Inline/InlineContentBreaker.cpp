@@ -207,8 +207,8 @@ namespace krys::boo::layout
       {
         return false;
       }
-      auto isPunctuation = U_GET_GC_MASK(static_cast<UChar32>(character))
-                           & (U_GC_PS_MASK | U_GC_PE_MASK | U_GC_PI_MASK | U_GC_PF_MASK | U_GC_PO_MASK);
+      auto isPunctuation =
+        U_GET_GC_MASK(character) & (U_GC_PS_MASK | U_GC_PE_MASK | U_GC_PI_MASK | U_GC_PF_MASK | U_GC_PO_MASK);
       return character == text::ReverseSolidus || !isPunctuation;
     }
 

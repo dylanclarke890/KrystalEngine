@@ -1,4 +1,5 @@
 #include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include <charconv>
 #include <cmath>
@@ -145,29 +146,10 @@ namespace krys
 
   void StringBuilder::AppendCodePoint(char32 codePoint) noexcept
   {
-    krys_debug_assert(codePoint <= 0x10FFFF && (codePoint < 0xD800 || codePoint > 0xDFFF));
-    if (codePoint < 0x80)
-    {
-      _buffer.push_back(static_cast<char8>(codePoint));
-    }
-    else if (codePoint < 0x800)
-    {
-      _buffer.push_back(static_cast<char8>(0xC0 | (codePoint >> 6)));
-      _buffer.push_back(static_cast<char8>(0x80 | (codePoint & 0x3F)));
-    }
-    else if (codePoint < 0x10000)
-    {
-      _buffer.push_back(static_cast<char8>(0xE0 | (codePoint >> 12)));
-      _buffer.push_back(static_cast<char8>(0x80 | ((codePoint >> 6) & 0x3F)));
-      _buffer.push_back(static_cast<char8>(0x80 | (codePoint & 0x3F)));
-    }
-    else
-    {
-      _buffer.push_back(static_cast<char8>(0xF0 | (codePoint >> 18)));
-      _buffer.push_back(static_cast<char8>(0x80 | ((codePoint >> 12) & 0x3F)));
-      _buffer.push_back(static_cast<char8>(0x80 | ((codePoint >> 6) & 0x3F)));
-      _buffer.push_back(static_cast<char8>(0x80 | (codePoint & 0x3F)));
-    }
+    Array<char8, text::MaxUTF8SequenceLength> buffer {};
+    auto length = text::EncodeUTF8(codePoint, buffer);
+    krys_debug_assert(length);
+    _buffer.append(buffer.data(), length);
   }
 
   void StringBuilder::AppendInteger(int64 number) noexcept

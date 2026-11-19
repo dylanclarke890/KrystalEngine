@@ -2420,7 +2420,7 @@ namespace krys::boo
       if (auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event))
       {
         if (!keyboardEvent->CtrlKey() && !keyboardEvent->AltKey() && !keyboardEvent->MetaKey()
-            && u_isprint(static_cast<UChar32>(keyboardEvent->CharCode())))
+            && u_isprint(keyboardEvent->CharCode()))
         {
           TypeAheadFind(*keyboardEvent);
           event.SetDefaultHandled();

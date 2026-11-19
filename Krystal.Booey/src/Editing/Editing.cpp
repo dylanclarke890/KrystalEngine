@@ -488,7 +488,7 @@ namespace krys::boo
     // Use IsUnicodeCompatibleASCIIWhitespace() for all Latin-1 characters, which is incorrect as it
     // excludes U+0085 and U+00A0.
     return character <= 0xFF ? text::IsUnicodeCompatibleASCIIWhitespace(character)
-                             : u_charDirection(static_cast<UChar32>(character)) == U_WHITE_SPACE_NEUTRAL;
+                             : u_charDirection(character) == U_WHITE_SPACE_NEUTRAL;
   }
 
   bool IsTableStructureNode(const Node &node) noexcept

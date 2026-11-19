@@ -39,7 +39,6 @@
 #include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include <unicode/ubidi.h>
-#include <unicode/utf16.h>
 
 namespace krys::boo::layout
 {
@@ -523,8 +522,9 @@ namespace krys::boo::layout
           }
           else
           {
-            Characters.push_back(U16_LEAD(decoded.CodePoint));
-            Characters.push_back(U16_TRAIL(decoded.CodePoint));
+            auto [lead, trail] = text::UTF16SplitSurrogates(decoded.CodePoint);
+            Characters.push_back(lead);
+            Characters.push_back(trail);
             ByteOffsets.push_back(position);
             ByteOffsets.push_back(position);
           }

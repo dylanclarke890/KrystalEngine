@@ -75,13 +75,13 @@ namespace krys::boo::layout
         {
           if (isSmallCaps)
           {
-            character = static_cast<char32>(u_toupper(static_cast<UChar32>(character)));
+            character = static_cast<char32>(u_toupper(character));
           }
 
           auto glyphData = fontCascade.GlyphDataForCharacter(character, isRTL);
           if (glyphData.Glyph && glyphData.Font && glyphData.Font.get() != primaryFont.get())
           {
-            auto isNonSpacingMark = U_MASK(u_charType(static_cast<UChar32>(character))) & U_GC_MN_MASK;
+            auto isNonSpacingMark = U_MASK(u_charType(character)) & U_GC_MN_MASK;
 
             // https://drafts.csswg.org/css-text-3/#white-space-processing
             // "Unsupported Default_ignorable characters must be ignored for text rendering."
@@ -117,7 +117,7 @@ namespace krys::boo::layout
         {
           if (isSmallCaps)
           {
-            character = static_cast<char32>(u_toupper(static_cast<UChar32>(character)));
+            character = static_cast<char32>(u_toupper(character));
           }
 
           auto glyphData = fontCascade.GlyphDataForCharacter(character, isRTL);
@@ -658,7 +658,7 @@ namespace krys::boo::layout
       return false;
     }
 
-    auto bidiCategory = u_charDirection(static_cast<UChar32>(character));
+    auto bidiCategory = u_charDirection(character);
     return bidiCategory == U_RIGHT_TO_LEFT || bidiCategory == U_RIGHT_TO_LEFT_ARABIC
            || bidiCategory == U_RIGHT_TO_LEFT_EMBEDDING || bidiCategory == U_RIGHT_TO_LEFT_OVERRIDE
            || bidiCategory == U_LEFT_TO_RIGHT_EMBEDDING || bidiCategory == U_LEFT_TO_RIGHT_OVERRIDE
@@ -736,8 +736,7 @@ namespace krys::boo::layout
       return false;
     }
     auto leadingCharacter = DecodeAt(inlineTextItem.Content(), 0).CodePoint;
-    return U_GET_GC_MASK(static_cast<UChar32>(leadingCharacter))
-           & (U_GC_PS_MASK | U_GC_PI_MASK | U_GC_PF_MASK);
+    return U_GET_GC_MASK(leadingCharacter) & (U_GC_PS_MASK | U_GC_PI_MASK | U_GC_PF_MASK);
   }
 
   float TextUtil::HangablePunctuationStartWidth(const InlineTextItem &inlineTextItem,
@@ -765,8 +764,7 @@ namespace krys::boo::layout
     auto content = inlineTextItem.Content();
     auto trailingCharacter =
       DecodeAt(content, text::PreviousCodePointStart(content, content.size())).CodePoint;
-    return U_GET_GC_MASK(static_cast<UChar32>(trailingCharacter))
-           & (U_GC_PE_MASK | U_GC_PI_MASK | U_GC_PF_MASK);
+    return U_GET_GC_MASK(trailingCharacter) & (U_GC_PE_MASK | U_GC_PI_MASK | U_GC_PF_MASK);
   }
 
   float TextUtil::HangablePunctuationEndWidth(const InlineTextItem &inlineTextItem,

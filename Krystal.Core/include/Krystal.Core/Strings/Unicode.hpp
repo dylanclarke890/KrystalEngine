@@ -5,6 +5,7 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::text
 {
@@ -204,6 +205,47 @@ namespace krys::text
     return 0;
   }
 
+  /// @brief The most bytes one code point takes in UTF-8.
+  constexpr uint8 MaxUTF8SequenceLength = 4;
+
+  /// @brief Writes @p codePoint as UTF-8 to the start of @p buffer.
+  /// @return The number of bytes written, or 0 if @p codePoint isn't a Unicode scalar value.
+  KRYS_NODISCARD constexpr uint8 EncodeUTF8(char32 codePoint,
+                                            Span<char8, MaxUTF8SequenceLength> buffer) noexcept
+  {
+    if (codePoint < 0x80)
+    {
+      buffer[0] = static_cast<char8>(codePoint);
+      return 1;
+    }
+    if (codePoint < 0x800)
+    {
+      buffer[0] = static_cast<char8>(0xC0 | (codePoint >> 6));
+      buffer[1] = static_cast<char8>(0x80 | (codePoint & 0x3F));
+      return 2;
+    }
+    if (codePoint >= 0xD800 && codePoint <= 0xDFFF)
+    {
+      return 0;
+    }
+    if (codePoint < 0x10000)
+    {
+      buffer[0] = static_cast<char8>(0xE0 | (codePoint >> 12));
+      buffer[1] = static_cast<char8>(0x80 | ((codePoint >> 6) & 0x3F));
+      buffer[2] = static_cast<char8>(0x80 | (codePoint & 0x3F));
+      return 3;
+    }
+    if (codePoint <= MaxUnicodeChar)
+    {
+      buffer[0] = static_cast<char8>(0xF0 | (codePoint >> 18));
+      buffer[1] = static_cast<char8>(0x80 | ((codePoint >> 12) & 0x3F));
+      buffer[2] = static_cast<char8>(0x80 | ((codePoint >> 6) & 0x3F));
+      buffer[3] = static_cast<char8>(0x80 | (codePoint & 0x3F));
+      return 4;
+    }
+    return 0;
+  }
+
 #pragma endregion
 
 #pragma region UTF16
@@ -272,6 +314,25 @@ namespace krys::text
     char16 lowTag = 0b110111 << 10;
 
     return {static_cast<char16>(highTag | highValue), static_cast<char16>(lowTag | lowValue)};
+  }
+
+  /// @brief Writes @p codePoint as UTF-16 to the start of @p buffer.
+  /// @return The number of code units written (1 or 2), or 0 if @p codePoint is past U+10FFFF.
+  KRYS_NODISCARD constexpr uint8 EncodeUTF16(char32 codePoint, Span<char16, 2> buffer) noexcept
+  {
+    if (codePoint < 0x10000)
+    {
+      buffer[0] = static_cast<char16>(codePoint);
+      return 1;
+    }
+    if (codePoint > MaxUnicodeChar)
+    {
+      return 0;
+    }
+    auto [lead, trail] = UTF16SplitSurrogates(codePoint);
+    buffer[0] = lead;
+    buffer[1] = trail;
+    return 2;
   }
 
 #pragma endregion

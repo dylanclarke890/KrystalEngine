@@ -63,7 +63,7 @@ namespace krys::boo
         }
         if (char32 current = iter.Current())
         {
-          UCharDirection charDirection = u_charDirection(static_cast<UChar32>(current));
+          UCharDirection charDirection = u_charDirection(current);
           if (charDirection == U_LEFT_TO_RIGHT)
           {
             dir = text::TextDirection::LTR;

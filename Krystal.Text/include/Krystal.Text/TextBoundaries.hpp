@@ -42,7 +42,7 @@ namespace krys::text
     // U_LB_CONDITIONAL_JAPANESE_STARTER.
     constexpr int lineBreakConditionalJapaneseStarter = 37;
 
-    int lineBreak = u_getIntPropertyValue(static_cast<UChar32>(character), UCHAR_LINE_BREAK);
+    int lineBreak = u_getIntPropertyValue(character, UCHAR_LINE_BREAK);
     return lineBreak == U_LB_COMPLEX_CONTEXT || lineBreak == lineBreakConditionalJapaneseStarter
            || lineBreak == U_LB_IDEOGRAPHIC;
   }

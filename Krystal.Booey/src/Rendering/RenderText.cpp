@@ -85,8 +85,7 @@ namespace krys::boo
     void AppendTitleCase(char32 codePoint, StringBuilder &output) noexcept
     {
       std::array<UChar, 2> source {};
-      int32_t sourceLength = 0;
-      U16_APPEND_UNSAFE(source.data(), sourceLength, codePoint);
+      int32_t sourceLength = text::EncodeUTF16(codePoint, source);
 
       std::array<UChar, 8> destination {};
       UErrorCode status = U_ZERO_ERROR;
@@ -99,9 +98,10 @@ namespace krys::boo
       }
       for (int32_t i = 0; i < length;)
       {
-        UChar32 titleCodePoint;
-        U16_NEXT(destination.data(), i, length, titleCodePoint);
-        output.Append(static_cast<char32>(titleCodePoint));
+        auto decoded =
+          text::DecodeUTF16(Span<const char16>(destination.data() + i, static_cast<size_t>(length - i)));
+        output.Append(decoded.CodePoint);
+        i += decoded.Length;
       }
     }
 
@@ -127,7 +127,7 @@ namespace krys::boo
         }
         if (character <= 'z')
         {
-          output.Append(static_cast<char32>(u_totitle(static_cast<UChar32>(character))));
+          output.Append(static_cast<char32>(u_totitle(character)));
           return 1;
         }
       }
@@ -181,20 +181,18 @@ namespace krys::boo
     {
       std::array<UChar, 4> buffer {};
       UErrorCode status = U_ZERO_ERROR;
-      int32_t length = unorm2_getRawDecomposition(normalizer, static_cast<UChar32>(character), buffer.data(),
+      int32_t length = unorm2_getRawDecomposition(normalizer, character, buffer.data(),
                                                   static_cast<int32_t>(buffer.size()), &status);
       if (U_FAILURE(status) || length <= 0)
       {
         return {};
       }
-      UChar32 decomposed = 0;
-      int32_t offset = 0;
-      U16_NEXT(buffer.data(), offset, length, decomposed);
-      if (offset != length)
+      auto decoded = text::DecodeUTF16(Span<const char16>(buffer.data(), static_cast<size_t>(length)));
+      if (decoded.Length != length)
       {
         return {};
       }
-      return static_cast<char32>(decomposed);
+      return decoded.CodePoint;
     }
 
     /// @brief @p character's full-width form, or itself when it has none: what its `<narrow>` decomposition
@@ -209,7 +207,7 @@ namespace krys::boo
         return character;
       }
 
-      auto type = u_getIntPropertyValue(static_cast<UChar32>(character), UCHAR_DECOMPOSITION_TYPE);
+      auto type = u_getIntPropertyValue(character, UCHAR_DECOMPOSITION_TYPE);
       if (type == U_DT_NARROW)
       {
         return SingleDecomposition(normalizer, character).value_or(character);
@@ -222,7 +220,7 @@ namespace krys::boo
         List<std::pair<char32, char32>> forms;
         auto add = [&](char32 wide)
         {
-          if (u_getIntPropertyValue(static_cast<UChar32>(wide), UCHAR_DECOMPOSITION_TYPE) == U_DT_WIDE)
+          if (u_getIntPropertyValue(wide, UCHAR_DECOMPOSITION_TYPE) == U_DT_WIDE)
           {
             if (auto narrow = SingleDecomposition(normalizer, wide))
             {
@@ -840,12 +838,12 @@ namespace krys::boo
 
     KRYS_NODISCARD inline bool IsHangablePunctuationAtLineStart(char32 character) noexcept
     {
-      return U_GET_GC_MASK(static_cast<UChar32>(character)) & (U_GC_PS_MASK | U_GC_PI_MASK | U_GC_PF_MASK);
+      return U_GET_GC_MASK(character) & (U_GC_PS_MASK | U_GC_PI_MASK | U_GC_PF_MASK);
     }
 
     KRYS_NODISCARD inline bool IsHangablePunctuationAtLineEnd(char32 character) noexcept
     {
-      return U_GET_GC_MASK(static_cast<UChar32>(character)) & (U_GC_PE_MASK | U_GC_PI_MASK | U_GC_PF_MASK);
+      return U_GET_GC_MASK(character) & (U_GC_PE_MASK | U_GC_PI_MASK | U_GC_PF_MASK);
     }
 
     // -webkit-nbsp-mode was dropped, so only a space is a space.

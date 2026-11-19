@@ -38,7 +38,7 @@ namespace krys::boo
     {
       for (auto c : string)
       {
-        uset_add(smartSet, static_cast<UChar32>(c));
+        uset_add(smartSet, c);
       }
     }
 
@@ -102,6 +102,6 @@ namespace krys::boo
 
   bool IsCharacterSmartReplaceExempt(char32 c, bool isPreviousCharacter) noexcept
   {
-    return uset_contains(GetSmartSet(isPreviousCharacter), static_cast<UChar32>(c));
+    return uset_contains(GetSmartSet(isPreviousCharacter), c);
   }
 }

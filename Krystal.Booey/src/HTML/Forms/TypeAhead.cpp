@@ -28,9 +28,9 @@
 #include "Krystal.Booey/HTML/Forms/TypeAhead.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include <unicode/uchar.h>
-#include <unicode/utf8.h>
 
 namespace krys::boo::html
 {
@@ -44,23 +44,22 @@ namespace krys::boo::html
       {
         return c == ' ' || (c >= '\t' && c <= '\r');
       }
-      return u_charDirection(static_cast<UChar32>(c)) == U_WHITE_SPACE_NEUTRAL;
+      return u_charDirection(c) == U_WHITE_SPACE_NEUTRAL;
     }
 
     /// @brief @p text's code points, case folded, without its leading white space.
     KRYS_NODISCARD utf32_string FoldCaseStrippingLeadingWhiteSpace(DOMStringView text) noexcept
     {
       utf32_string folded;
-      auto *bytes = reinterpret_cast<const uint8_t *>(text.data());
-      auto length = static_cast<int32>(text.size());
-      for (int32 i = 0; i < length;)
+      for (size_t i = 0; i < text.size();)
       {
-        UChar32 c;
-        U8_NEXT(bytes, i, length, c);
-        if (c < 0)
+        auto decoded = text::DecodeUTF8(Span<const char8>(text.data() + i, text.size() - i));
+        i += decoded.Length;
+        if (!decoded.IsValid)
         {
           continue;
         }
+        auto c = decoded.CodePoint;
         if (folded.empty() && (c == 0xA0 || IsSpaceOrNewline(static_cast<char32>(c))))
         {
           continue;
@@ -76,7 +75,7 @@ namespace krys::boo::html
       folded.reserve(text.size());
       for (auto c : text)
       {
-        folded.push_back(static_cast<char32>(u_foldCase(static_cast<UChar32>(c), U_FOLD_CASE_DEFAULT)));
+        folded.push_back(static_cast<char32>(u_foldCase(c, U_FOLD_CASE_DEFAULT)));
       }
       return folded;
     }

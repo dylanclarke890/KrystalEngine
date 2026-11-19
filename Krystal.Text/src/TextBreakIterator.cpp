@@ -21,6 +21,7 @@
 
 #include "Krystal.Text/TextBreakIterator.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Visitor.hpp"
@@ -28,7 +29,6 @@
 #include <unicode/ubrk.h>
 #include <unicode/uloc.h>
 #include <unicode/utext.h>
-#include <unicode/utf8.h>
 #include <utility>
 
 namespace krys::text
@@ -411,7 +411,8 @@ namespace krys::text
     auto length = GetLength();
     for (auto i = _priorContext.size() - length; i < _priorContext.size(); ++i)
     {
-      U8_APPEND_UNSAFE(encoded.data(), offset, _priorContext[i]);
+      offset += EncodeUTF8(
+        _priorContext[i], Span<char8, MaxUTF8SequenceLength>(encoded.data() + offset, MaxUTF8SequenceLength));
     }
     _encodedLength = static_cast<uint32>(offset);
     std::ranges::fill(_encoded, 0);
