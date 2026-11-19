@@ -27,6 +27,7 @@
 
 #include "Krystal.Booey/Graphics/Adwaita/ToggleButtonAdwaita.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorLuminance.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
@@ -99,7 +100,8 @@ namespace krys::boo
     }
 
     Color accentColor = AccentColor(style);
-    Color foregroundColor = accentColor.Luminance() > 0.5 ? Color(SRGBA<uint8> {0, 0, 0, 204}) : Color::white;
+    Color foregroundColor =
+      RelativeLuminance(accentColor) > 0.5 ? Color(SRGBA<uint8> {0, 0, 0, 204}) : Color::white;
     Color accentHoverColor = BlendSourceOver(accentColor, foregroundColor.ColorWithAlphaMultipliedBy(0.1f));
 
     if (!style.States.Contains(ControlStyle::State::Enabled))
@@ -203,7 +205,8 @@ namespace krys::boo
     }
 
     Color accentColor = AccentColor(style);
-    Color foregroundColor = accentColor.Luminance() > 0.5 ? Color(SRGBA<uint8> {0, 0, 0, 204}) : Color::white;
+    Color foregroundColor =
+      RelativeLuminance(accentColor) > 0.5 ? Color(SRGBA<uint8> {0, 0, 0, 204}) : Color::white;
     Color accentHoverColor = BlendSourceOver(accentColor, foregroundColor.ColorWithAlphaMultipliedBy(0.1f));
 
     if (!style.States.Contains(ControlStyle::State::Enabled))

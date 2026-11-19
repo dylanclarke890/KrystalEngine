@@ -25,6 +25,7 @@
 
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarThemeAdwaita.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorLuminance.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
@@ -202,7 +203,7 @@ namespace krys::boo
     if (scrollbarColor)
     {
       // Darker than mid grey.
-      bool darkThumb = scrollbarColor->ThumbColor.Luminance() < 0.2;
+      bool darkThumb = RelativeLuminance(scrollbarColor->ThumbColor) < 0.2;
       thumbColor = scrollbarColor->ThumbColor;
       thumbHoveredColor = ThumbStateColor(thumbColor, darkThumb);
       thumbPressedColor = ThumbStateColor(thumbHoveredColor, darkThumb);

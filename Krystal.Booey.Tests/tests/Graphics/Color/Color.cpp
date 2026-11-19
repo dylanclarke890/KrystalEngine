@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorHash.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorLuminance.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 
 // Ported from WebKit's Tools/TestWebKitAPI/Tests/WebCore/ColorTests.cpp, plus regression tests.
@@ -105,24 +106,24 @@ namespace krys::boo::tests
 
   TEST_CASE("Color: luminance, lightened and darkened", "[Graphics][Color]")
   {
-    CHECK_THAT(static_cast<float>(Color(Color::black).Luminance()), WithinULP(0.0f, 4));
-    CHECK_THAT(static_cast<float>(Color(Color::white).Luminance()), WithinULP(1.0f, 4));
+    CHECK_THAT(static_cast<float>(RelativeLuminance(Color(Color::black))), WithinULP(0.0f, 4));
+    CHECK_THAT(static_cast<float>(RelativeLuminance(Color(Color::white))), WithinULP(1.0f, 4));
 
     auto cComponents = SRGBA<uint8> {85, 90, 160}.Resolved();
-    CHECK_THAT(static_cast<float>(Color(cComponents).Luminance()), WithinULP(0.11781455f, 4));
+    CHECK_THAT(static_cast<float>(RelativeLuminance(Color(cComponents))), WithinULP(0.11781455f, 4));
 
     CHECK(cComponents.Red == 85);
     CHECK(cComponents.Green == 90);
     CHECK(cComponents.Blue == 160);
 
     auto cLightened = Color(cComponents).Lightened().ToColorTypeLossy<SRGBA<uint8>>().Resolved();
-    CHECK_THAT(static_cast<float>(Color(cLightened).Luminance()), WithinULP(0.291682f, 4));
+    CHECK_THAT(static_cast<float>(RelativeLuminance(Color(cLightened))), WithinULP(0.291682f, 4));
     CHECK(cLightened.Red == 130);
     CHECK(cLightened.Green == 137);
     CHECK(cLightened.Blue == 244);
 
     auto cDarkened = Color(cComponents).Darkened().ToColorTypeLossy<SRGBA<uint8>>().Resolved();
-    CHECK_THAT(static_cast<float>(Color(cDarkened).Luminance()), WithinULP(0.027006242f, 4));
+    CHECK_THAT(static_cast<float>(RelativeLuminance(Color(cDarkened))), WithinULP(0.027006242f, 4));
     CHECK(cDarkened.Red == 40);
     CHECK(cDarkened.Green == 43);
     CHECK(cDarkened.Blue == 76);
@@ -375,16 +376,16 @@ namespace krys::boo::tests
 
   TEST_CASE("Color: black and white", "[Graphics][Color]")
   {
-    CHECK(Color::IsBlackColor(Color::black));
-    CHECK_FALSE(Color::IsBlackColor(Color::white));
-    CHECK(Color::IsBlackColor(Color {Lab<float> {0, 0, 0, 1}}));
-    CHECK(Color::IsBlackColor(Color {HWBA<float> {0, 0, 100, 1}}));
-    CHECK_FALSE(Color::IsBlackColor(Color {SRGBA<uint8> {0, 0, 0, 128}}));
+    CHECK(IsBlack(Color::black));
+    CHECK_FALSE(IsBlack(Color::white));
+    CHECK(IsBlack(Color {Lab<float> {0, 0, 0, 1}}));
+    CHECK(IsBlack(Color {HWBA<float> {0, 0, 100, 1}}));
+    CHECK_FALSE(IsBlack(Color {SRGBA<uint8> {0, 0, 0, 128}}));
 
-    CHECK(Color::IsWhiteColor(Color::white));
-    CHECK_FALSE(Color::IsWhiteColor(Color::black));
-    CHECK(Color::IsWhiteColor(Color {OKLab<float> {1, 0, 0, 1}}));
-    CHECK(Color::IsWhiteColor(Color {SRGBA<float> {1, 1, 1, 1}}));
+    CHECK(IsWhite(Color::white));
+    CHECK_FALSE(IsWhite(Color::black));
+    CHECK(IsWhite(Color {OKLab<float> {1, 0, 0, 1}}));
+    CHECK(IsWhite(Color {SRGBA<float> {1, 1, 1, 1}}));
   }
 
   TEST_CASE("Color: InvertedColorWithAlpha", "[Graphics][Color]")

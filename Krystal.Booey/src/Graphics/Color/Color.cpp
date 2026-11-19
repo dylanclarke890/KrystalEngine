@@ -79,11 +79,6 @@ namespace krys::boo
     return 0.5 * (max + min);
   }
 
-  double Color::Luminance() const noexcept
-  {
-    return RelativeLuminance(*this);
-  }
-
   bool Color::AnyComponentIsNone() const noexcept
   {
     return CallOnUnderlyingType(
@@ -168,13 +163,13 @@ namespace krys::boo
     return {ColourSpace::SRGB, AsColourComponents(ConvertColour<SRGBA<float>>(AsInline()).Resolved())};
   }
 
-  bool Color::IsBlackColor(const Color &color) noexcept
+  bool IsBlack(const Color &color) noexcept
   {
     return color.CallOnUnderlyingType([](const auto &underlyingColor)
                                       { return krys::IsBlack(underlyingColor); });
   }
 
-  bool Color::IsWhiteColor(const Color &color) noexcept
+  bool IsWhite(const Color &color) noexcept
   {
     return color.CallOnUnderlyingType([](const auto &underlyingColor)
                                       { return krys::IsWhite(underlyingColor); });

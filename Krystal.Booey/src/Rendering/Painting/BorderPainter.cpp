@@ -25,6 +25,7 @@
 
 #include "Krystal.Booey/Rendering/Painting/BorderPainter.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorLuminance.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
@@ -1561,7 +1562,7 @@ namespace krys::boo
     Operation operation =
       (side == BoxSide::Top || side == BoxSide::Left) == (style == BorderStyle::Inset) ? Darken : Lighten;
 
-    auto luminance = color.Luminance();
+    auto luminance = RelativeLuminance(color);
     bool isVeryDarkColor = luminance <= baseDarkColorLuminance;
     bool isVeryLightColor = luminance > baseLightColorLuminance;
 

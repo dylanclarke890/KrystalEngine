@@ -306,8 +306,6 @@ namespace krys::boo
                            : ConvertByteAlphaTo<float>(AsInline().Resolved().Alpha);
     }
 
-    KRYS_NODISCARD double Luminance() const noexcept;
-
     // FIXME: Replace remaining uses with Luminance.
     KRYS_NODISCARD double Lightness() const noexcept;
 
@@ -405,10 +403,6 @@ namespace krys::boo
 
       return null;
     }
-
-    KRYS_NODISCARD static bool IsBlackColor(const Color &) noexcept;
-
-    KRYS_NODISCARD static bool IsWhiteColor(const Color &) noexcept;
 
     KRYS_NODISCARD DebugRGBAData DebugRGBA() const noexcept;
 
@@ -583,6 +577,12 @@ namespace krys::boo
 
     return a._colorAndFlags == b._colorAndFlags;
   }
+
+  /// @brief Whether @p color is black in its own colour space (Core's `IsBlack`).
+  KRYS_NODISCARD bool IsBlack(const Color &color) noexcept;
+
+  /// @brief Whether @p color is white in its own colour space (Core's `IsWhite`).
+  KRYS_NODISCARD bool IsWhite(const Color &color) noexcept;
 }
 
 namespace krys

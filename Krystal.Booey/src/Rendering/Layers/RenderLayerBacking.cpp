@@ -3969,7 +3969,7 @@ namespace krys::boo
       }
 
       // Background color could be of interest to tests or other dumpers if it's non-white.
-      if (propertyName == u8"backgroundColor" && Color::IsWhiteColor(layer->BackgroundColor()))
+      if (propertyName == u8"backgroundColor" && IsWhite(layer->BackgroundColor()))
       {
         return false;
       }

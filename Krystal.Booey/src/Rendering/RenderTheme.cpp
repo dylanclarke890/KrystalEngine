@@ -28,6 +28,7 @@
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorLuminance.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Graphics/Controls/ButtonPart.hpp"
 #include "Krystal.Booey/Graphics/Controls/ColorWellPart.hpp"
@@ -1906,7 +1907,7 @@ namespace krys::boo
     // FIXME: Consider using LCHA<float> rather than HSLA<float> for better perceptual results and to avoid
     // clamping to sRGB gamut, which is what HSLA does.
     auto hsla = textColor.ToColorTypeLossy<HSLA<float>>().Resolved();
-    if (textColor.Luminance() < backgroundColor.Luminance())
+    if (RelativeLuminance(textColor) < RelativeLuminance(backgroundColor))
     {
       hsla.Lightness += DatePlaceholderColorLightnessAdjustmentFactor * (100.0f - hsla.Lightness);
     }
