@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -29,7 +30,6 @@
 namespace krys::boo
 {
   class CachedImageClient;
-  class LayoutSize;
   class RenderObject;
   class SVGImage;
   class SVGImageForContainer;

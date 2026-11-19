@@ -601,7 +601,7 @@ namespace krys::boo::dom
       return nullptr;
     }
 
-    auto node = NodeFromPoint(LayoutPoint(clientX, clientY), nullptr, source);
+    auto node = NodeFromPoint(LayoutPoint(PointD(clientX, clientY)), nullptr, source);
     if (!node)
     {
       return nullptr;
@@ -632,7 +632,7 @@ namespace krys::boo::dom
       return elements;
     }
 
-    auto absolutePoint = AbsolutePointIfNotClipped(*document, LayoutPoint(clientX, clientY));
+    auto absolutePoint = AbsolutePointIfNotClipped(*document, LayoutPoint(PointD(clientX, clientY)));
     if (!absolutePoint)
     {
       return elements;

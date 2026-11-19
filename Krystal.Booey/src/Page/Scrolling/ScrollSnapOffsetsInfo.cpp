@@ -457,8 +457,8 @@ namespace krys::boo
 
     // The scroll container's snapport, where the top left of its border box is the origin.
     auto scrollSnapPort = viewportRect;
-    scrollSnapPort.Contract(
-      style::ExtentForRect(style.GetScrollPaddingBox(), viewportRect, style::ZoomNeeded {}));
+    Contract(scrollSnapPort,
+             style::ExtentForRect(style.GetScrollPaddingBox(), viewportRect, style::ZoomNeeded {}));
 
     ScrollSnapOffsetsInfo info;
     info.Strictness = container->Strictness;
@@ -483,7 +483,7 @@ namespace krys::boo
         scrollSnapArea.MoveBy(scrollPosition);
       }
 
-      scrollSnapArea.Expand(style::ExtentForRect(child->Style().GetScrollMarginBox(), scrollSnapArea));
+      Expand(scrollSnapArea, style::ExtentForRect(child->Style().GetScrollMarginBox(), scrollSnapArea));
       auto alignment = child->Style().GetScrollSnapAlign();
       auto stop = child->Style().GetScrollSnapStop();
 

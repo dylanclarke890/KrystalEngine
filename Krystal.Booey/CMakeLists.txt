@@ -1566,6 +1566,7 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Geometry/BoxExtents.hpp
   include/Krystal.Booey/Graphics/Geometry/BoxSides.hpp
   include/Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp
+  include/Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp
   include/Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp
   include/Krystal.Booey/Graphics/Geometry/LayoutRange.hpp
   include/Krystal.Booey/Graphics/Geometry/LayoutRect.hpp

@@ -77,8 +77,8 @@ namespace krys::boo
         LayoutSize size;
         if (auto svgRect = svg->GetBoundingBox())
         {
-          size.SetWidth(svgRect->Width());
-          size.SetHeight(svgRect->Height());
+          size.SetWidth(LayoutUnit(svgRect->Width()));
+          size.SetHeight(LayoutUnit(svgRect->Height()));
         }
         return BoxSizes {size, size, size,
                          ResizeObserverDevicePixels(SizeF(size), svg->NodeDocument().DeviceScaleFactor())};

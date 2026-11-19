@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
 #include "Krystal.Booey/Rendering/RepaintRectCalculation.hpp"
@@ -79,9 +80,6 @@ namespace krys::boo
   class HitTestRequest;
   class HitTestResult;
   enum class HitTestSource : bool;
-  class LayoutPoint;
-  class LayoutRect;
-  class LayoutSize;
   class LocalFrameViewLayoutContext;
   class ReferencedSVGResources;
   class RenderBlock;

@@ -24,13 +24,13 @@
 
 #pragma once
 
+#include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/TransformFunction.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 #include "Krystal.Core/Geometry/GeometryForward.hpp"
 
 namespace krys::boo
 {
-  class LayoutSize;
   class TransformationMatrix;
 
   namespace style

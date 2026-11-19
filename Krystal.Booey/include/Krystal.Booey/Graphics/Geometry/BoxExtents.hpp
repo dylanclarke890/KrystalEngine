@@ -64,6 +64,18 @@ namespace krys::boo
     rect.Expand(-(box.Left() + box.Right()), -(box.Top() + box.Bottom()));
   }
 
+  constexpr void Expand(LayoutRect &rect, const LayoutBoxExtent &box) noexcept
+  {
+    rect.Move(-box.Left(), -box.Top());
+    rect.Expand(box.Left() + box.Right(), box.Top() + box.Bottom());
+  }
+
+  constexpr void Contract(LayoutRect &rect, const LayoutBoxExtent &box) noexcept
+  {
+    rect.Move(box.Left(), box.Top());
+    rect.Contract(box.Left() + box.Right(), box.Top() + box.Bottom());
+  }
+
   KRYS_NODISCARD constexpr RectF operator+(const RectF &rect, const FloatBoxExtent &box) noexcept
   {
     RectF result = rect;

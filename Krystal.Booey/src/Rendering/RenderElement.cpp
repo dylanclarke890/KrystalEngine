@@ -3226,7 +3226,7 @@ namespace krys::boo
     // box of the transformed border box of the target element.
     // See https://www.w3.org/TR/css-scroll-snap-1/#scroll-margin.
     auto marginRect = anchorRect;
-    marginRect.Expand(style::ExtentForRect(scrollMarginBox, anchorRect));
+    Expand(marginRect, style::ExtentForRect(scrollMarginBox, anchorRect));
     return {marginRect, anchorRect};
   }
 

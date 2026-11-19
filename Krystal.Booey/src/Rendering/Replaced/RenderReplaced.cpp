@@ -629,8 +629,9 @@ namespace krys::boo
       case ObjectFit::Contain:
       case ObjectFit::ScaleDown:
       case ObjectFit::Cover:
-        finalRect.SetSize(finalRect.Size().FitToAspectRatio(
-          intrinsicSize, objectFit == ObjectFit::Cover ? AspectRatioFit::Grow : AspectRatioFit::Shrink));
+        finalRect.SetSize(
+          FitToAspectRatio(finalRect.Size(), intrinsicSize,
+                           objectFit == ObjectFit::Cover ? AspectRatioFit::Grow : AspectRatioFit::Shrink));
         if (objectFit != ObjectFit::ScaleDown || finalRect.Width() <= intrinsicSize.Width())
         {
           break;
@@ -1071,11 +1072,11 @@ namespace krys::boo
     auto zoomValue = Style().UsedZoom();
     if (IsHorizontalWritingMode() ? ShouldApplySizeOrInlineSizeContainment() : ShouldApplySizeContainment())
     {
-      size.SetWidth(ExplicitIntrinsicInnerWidth().value_or(0_lu) * zoomValue);
+      size.SetWidth(LayoutUnit(ExplicitIntrinsicInnerWidth().value_or(0_lu) * zoomValue));
     }
     if (IsHorizontalWritingMode() ? ShouldApplySizeContainment() : ShouldApplySizeOrInlineSizeContainment())
     {
-      size.SetHeight(ExplicitIntrinsicInnerHeight().value_or(0_lu) * zoomValue);
+      size.SetHeight(LayoutUnit(ExplicitIntrinsicInnerHeight().value_or(0_lu) * zoomValue));
     }
     return size;
   }

@@ -583,8 +583,8 @@ namespace krys::boo
     RectF glyphBounds = BoundsForGlyph(data);
 
     LayoutRect glyphPaintRect(origin,
-                              LayoutSize(glyphBounds.X() + glyphBounds.Width(), glyphBounds.Height()));
-    glyphPaintRect.SetY(origin.Y() + glyphBounds.Y());
+                              LayoutSize(SizeF(glyphBounds.X() + glyphBounds.Width(), glyphBounds.Height())));
+    glyphPaintRect.SetY(LayoutUnit(origin.Y() + glyphBounds.Y()));
 
     // In order to have glyphs fit snugly with one another we snap the connecting edges to pixel boundaries
     // and trim off one pixel. The pixel trim is to account for fonts that have edge pixels that have less

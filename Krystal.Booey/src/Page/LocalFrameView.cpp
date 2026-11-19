@@ -1298,7 +1298,7 @@ namespace krys::boo
     auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
     if (auto *renderer = documentElement ? DynamicDowncast<RenderBox>(documentElement->Renderer()) : nullptr)
     {
-      paddedViewRect.Contract(renderer->ScrollPaddingForViewportRect(paddedViewRect));
+      Contract(paddedViewRect, renderer->ScrollPaddingForViewportRect(paddedViewRect));
     }
 
     if (_horizontalScrollbar)
@@ -2206,7 +2206,7 @@ namespace krys::boo
     auto *element = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
     if (auto *renderBox = element ? DynamicDowncast<RenderBox>(element->Renderer()) : nullptr)
     {
-      targetRect.Expand(renderBox->ScrollPaddingForViewportRect(viewRect));
+      Expand(targetRect, renderBox->ScrollPaddingForViewportRect(viewRect));
     }
 
     LayoutRect revealRect =
@@ -2961,8 +2961,8 @@ namespace krys::boo
         ? 1
         : (totalContentsSize.Height() - visibleContentRect.Height() * frameScaleFactor) / maxSize.Height();
 
-    return LayoutPoint(position.X() * dragFactorX / frameScaleFactor,
-                       position.Y() * dragFactorY / frameScaleFactor);
+    return LayoutPoint(LayoutUnit(position.X() * dragFactorX / frameScaleFactor),
+                       LayoutUnit(position.Y() * dragFactorY / frameScaleFactor));
   }
 
   LayoutRect LocalFrameView::RectForFixedPositionLayout() const noexcept

@@ -331,7 +331,7 @@ namespace krys::boo
                                                                    const RenderStyle &style) noexcept
   {
     auto zoom = style.UsedZoom();
-    return {size.Width() / zoom, size.Height() / zoom};
+    return {LayoutUnit(size.Width() / zoom), LayoutUnit(size.Height() / zoom)};
   }
 
   KRYS_NODISCARD inline LayoutUnit AdjustLayoutUnitForAbsoluteZoom(LayoutUnit value,

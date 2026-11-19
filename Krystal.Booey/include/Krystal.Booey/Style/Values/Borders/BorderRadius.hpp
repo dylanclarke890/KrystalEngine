@@ -26,13 +26,12 @@
 
 #include "Krystal.Booey/CSS/Values/Borders/BorderRadius.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 
 namespace krys::boo
 {
-  class LayoutSize;
-
   namespace style
   {
     using BorderRadiusValue = css::MinimallySerialisingSpaceSeparatedSize<LengthPercentage<css::NonNegative>>;

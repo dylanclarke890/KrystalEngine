@@ -40,7 +40,7 @@ namespace krys::boo
     if (auto *container = renderer.Container())
     {
       PointF absContentPoint = container->LocalToAbsolute(PointF(), {MapCoordinatesMode::UseTransforms});
-      _paintOffset = LayoutSize(absContentPoint.X(), absContentPoint.Y());
+      _paintOffset = LayoutSize(LayoutUnit(absContentPoint.X()), LayoutUnit(absContentPoint.Y()));
 
       if (container->HasNonVisibleOverflow())
       {
@@ -84,7 +84,7 @@ namespace krys::boo
     if (fixed)
     {
       PointF fixedOffset = renderer.View().LocalToAbsolute(PointF(), {MapCoordinatesMode::IsFixed});
-      _paintOffset = LayoutSize(fixedOffset.X(), fixedOffset.Y()) + offset;
+      _paintOffset = LayoutSize(LayoutUnit(fixedOffset.X()), LayoutUnit(fixedOffset.Y())) + offset;
     }
     else
     {

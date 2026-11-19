@@ -824,10 +824,10 @@ namespace krys::boo
       }
 
       tileSize.SetWidth(positioningAreaSize.Width() / numTiles);
-      phase.SetWidth(tileSize.Width()
-                       ? tileSize.Width()
-                           - std::fmodf((computedXPosition + left).ToFloat(), tileSize.Width().ToFloat())
-                       : 0);
+      phase.SetWidth(LayoutUnit(
+        tileSize.Width()
+          ? tileSize.Width() - std::fmodf((computedXPosition + left).ToFloat(), tileSize.Width().ToFloat())
+          : 0));
     }
 
     auto computedYPosition =
@@ -841,18 +841,18 @@ namespace krys::boo
       }
 
       tileSize.SetHeight(positioningAreaSize.Height() / numTiles);
-      phase.SetHeight(tileSize.Height()
-                        ? tileSize.Height()
-                            - std::fmodf((computedYPosition + top).ToFloat(), tileSize.Height().ToFloat())
-                        : 0);
+      phase.SetHeight(LayoutUnit(
+        tileSize.Height()
+          ? tileSize.Height() - std::fmodf((computedYPosition + top).ToFloat(), tileSize.Height().ToFloat())
+          : 0));
     }
 
     if (backgroundRepeatX == FillRepeat::Repeat)
     {
-      phase.SetWidth(tileSize.Width()
-                       ? tileSize.Width()
-                           - std::fmodf((computedXPosition + left).ToFloat(), tileSize.Width().ToFloat())
-                       : 0);
+      phase.SetWidth(LayoutUnit(
+        tileSize.Width()
+          ? tileSize.Width() - std::fmodf((computedXPosition + left).ToFloat(), tileSize.Width().ToFloat())
+          : 0));
       spaceSize.SetWidth(0);
     }
     else if (backgroundRepeatX == FillRepeat::Space && tileSize.Width() > 0)
@@ -863,9 +863,9 @@ namespace krys::boo
         computedXPosition = 0;
         spaceSize.SetWidth(*space);
         spaceSize.SetHeight(0);
-        phase.SetWidth(
+        phase.SetWidth(LayoutUnit(
           actualWidth ? actualWidth - std::fmodf((computedXPosition + left).ToFloat(), actualWidth.ToFloat())
-                      : 0);
+                      : 0));
       }
       else
       {
@@ -888,10 +888,10 @@ namespace krys::boo
 
     if (backgroundRepeatY == FillRepeat::Repeat)
     {
-      phase.SetHeight(tileSize.Height()
-                        ? tileSize.Height()
-                            - std::fmodf((computedYPosition + top).ToFloat(), tileSize.Height().ToFloat())
-                        : 0);
+      phase.SetHeight(LayoutUnit(
+        tileSize.Height()
+          ? tileSize.Height() - std::fmodf((computedYPosition + top).ToFloat(), tileSize.Height().ToFloat())
+          : 0));
       spaceSize.SetHeight(0);
     }
     else if (backgroundRepeatY == FillRepeat::Space && tileSize.Height() > 0)
@@ -901,10 +901,10 @@ namespace krys::boo
         LayoutUnit actualHeight = tileSize.Height() + *space;
         computedYPosition = 0;
         spaceSize.SetHeight(*space);
-        phase.SetHeight(actualHeight
-                          ? actualHeight
-                              - std::fmodf((computedYPosition + top).ToFloat(), actualHeight.ToFloat())
-                          : 0);
+        phase.SetHeight(LayoutUnit(
+          actualHeight
+            ? actualHeight - std::fmodf((computedYPosition + top).ToFloat(), actualHeight.ToFloat())
+            : 0));
       }
       else
       {
@@ -1073,8 +1073,8 @@ namespace krys::boo
         continue;
       }
 
-      LayoutSize shadowOffset(shadow.Location.x().ResolveZoom(zoomFactor),
-                              shadow.Location.y().ResolveZoom(zoomFactor));
+      LayoutSize shadowOffset(LayoutUnit(shadow.Location.x().ResolveZoom(zoomFactor)),
+                              LayoutUnit(shadow.Location.y().ResolveZoom(zoomFactor)));
       LayoutUnit shadowPaintingExtent = style::PaintingExtent(shadow, zoomFactor);
       LayoutUnit shadowSpread = LayoutUnit(shadow.Spread.ResolveZoom(zoomFactor));
       auto shadowRadius = shadow.Blur.ResolveZoom(zoomFactor);

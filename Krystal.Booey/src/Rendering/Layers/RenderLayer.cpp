@@ -3354,7 +3354,7 @@ namespace krys::boo
     }
 
     LayoutRect rectForRepaint = rect;
-    rectForRepaint.Expand(ToLayoutBoxExtent(FilterOutsets()));
+    Expand(rectForRepaint, ToLayoutBoxExtent(FilterOutsets()));
 
     _filters->ExpandDirtySourceRect(rectForRepaint);
 
@@ -4563,7 +4563,7 @@ namespace krys::boo
         childLayer.CalculateLayerBounds(this, childLayer.OffsetFromAncestor(this), descendantFlags);
       // Ignore child layer (and behave as if we had overflow: hidden) when it is positioned off the parent
       // layer so much that we hit the max LayoutUnit value.
-      (void)unionBounds.CheckedUnite(childBounds);
+      (void)CheckedUnite(unionBounds, childBounds);
     };
 
     for (auto *childLayer : NegativeZOrderLayers())
@@ -4587,7 +4587,7 @@ namespace krys::boo
                                         ? EnumSet<PaintBehavior> {PaintBehavior::FlattenCompositingLayers}
                                         : EnumSet<PaintBehavior> {})))
     {
-      unionBounds.Expand(ToLayoutBoxExtent(FilterOutsets()));
+      Expand(unionBounds, ToLayoutBoxExtent(FilterOutsets()));
     }
 
     if (flags.Contains(IncludeSelfTransform) && PaintsWithTransform({}))
@@ -4840,13 +4840,14 @@ namespace krys::boo
     auto localPoint = RoundedPointI(AbsoluteToContents(LayoutPoint(absolutePoint)));
 
     LayoutSize newOffset = OffsetFromResizeCorner(localPoint);
-    newOffset.SetWidth(newOffset.Width() / zoomFactor);
-    newOffset.SetHeight(newOffset.Height() / zoomFactor);
+    newOffset.SetWidth(LayoutUnit(newOffset.Width() / zoomFactor));
+    newOffset.SetHeight(LayoutUnit(newOffset.Height() / zoomFactor));
 
-    LayoutSize currentSize = LayoutSize(renderer->Width() / zoomFactor, renderer->Height() / zoomFactor);
+    LayoutSize currentSize =
+      LayoutSize(LayoutUnit(renderer->Width() / zoomFactor), LayoutUnit(renderer->Height() / zoomFactor));
 
     LayoutSize adjustedOldOffset =
-      LayoutSize(oldOffset.Width() / zoomFactor, oldOffset.Height() / zoomFactor);
+      LayoutSize(LayoutUnit(oldOffset.Width() / zoomFactor), LayoutUnit(oldOffset.Height() / zoomFactor));
     if (renderer->Style().ShouldPlaceVerticalScrollbarOnLeft())
     {
       newOffset.SetWidth(-newOffset.Width());
@@ -5165,7 +5166,7 @@ namespace krys::boo
         LayoutRect clipRect = layer.BoundingBox(&layer);
         ExpandClipRectForDescendantsAndReflection(clipRect, layer, &layer, transparencyBehavior,
                                                   paintBehavior, paintDirtyRect);
-        clipRect.Expand(ToLayoutBoxExtent(layer.FilterOutsets()));
+        Expand(clipRect, ToLayoutBoxExtent(layer.FilterOutsets()));
         LayoutRect result = transform.MapRect(clipRect);
         if (!paginationLayer)
         {
@@ -5197,7 +5198,7 @@ namespace krys::boo
       auto clipRect = layer.BoundingBox(rootLayer, layer.OffsetFromAncestor(rootLayer), flags);
       ExpandClipRectForDescendantsAndReflection(clipRect, layer, rootLayer, transparencyBehavior,
                                                 paintBehavior, paintDirtyRect);
-      clipRect.Expand(ToLayoutBoxExtent(layer.FilterOutsets()));
+      Expand(clipRect, ToLayoutBoxExtent(layer.FilterOutsets()));
 
       if (paintDirtyRect)
       {

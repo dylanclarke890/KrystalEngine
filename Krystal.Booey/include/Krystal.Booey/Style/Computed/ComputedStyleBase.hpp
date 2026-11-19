@@ -29,6 +29,7 @@
 #include "Krystal.Booey/Animation/Timelines/ScrollAxis.hpp"
 #include "Krystal.Booey/CSS/Values/Aggregates.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/Paths/WindRule.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
@@ -55,8 +56,6 @@ namespace krys::boo
   class FontCascadeDescription;
   class FontMetrics;
   class FontSelectionValue;
-  class LayoutRect;
-  class LayoutSize;
   class LayoutUnit;
   class RenderElement;
   class RenderStyle;

@@ -65,7 +65,7 @@ namespace krys
   class TextStream;
 
   /// @brief An axis-aligned rectangle: a location (its minimum corner) and a size.
-  template <Number T>
+  template <GeometryCoordinate T>
   class Rect
   {
   private:
@@ -94,17 +94,17 @@ namespace krys
     {
     }
 
-    // Floating point only: an integer rect is often made from a location and a braced size, which this would
+    // Not for integers: an integer rect is often made from a location and a braced size, which this would
     // make ambiguous.
     constexpr Rect(const PointType &topLeft, const PointType &bottomRight) noexcept
-    requires FloatingPoint<T>
+    requires(!Integral<T>)
         : _location(topLeft), _size(bottomRight.X() - topLeft.X(), bottomRight.Y() - topLeft.Y())
     {
     }
 
     /// @brief Converts from another coordinate type: implicitly when no value is lost, explicitly (clamping
     /// to the integer range) otherwise.
-    template <Number U>
+    template <GeometryCoordinate U>
     requires(!SameType<T, U>)
     constexpr explicit(!detail::IsWideningGeometryConversion<U, T>) Rect(const Rect<U> &rect) noexcept
         : _location(rect.Location()), _size(rect.Size())
@@ -120,9 +120,18 @@ namespace krys
     }
 
     KRYS_NODISCARD constexpr static Rect InfiniteRect() noexcept
-    requires FloatingPoint<T>
+    requires FloatingPoint<T> || detail::HasInfiniteRectTraits<T>
     {
-      return {-Limits<T>::max() / 2, -Limits<T>::max() / 2, Limits<T>::max(), Limits<T>::max()};
+      if constexpr (detail::HasInfiniteRectTraits<T>)
+      {
+        using Traits = GeometryTraits<T>;
+        return {Traits::InfiniteRectMin(), Traits::InfiniteRectMin(), Traits::InfiniteRectExtent(),
+                Traits::InfiniteRectExtent()};
+      }
+      else
+      {
+        return {-Limits<T>::max() / 2, -Limits<T>::max() / 2, Limits<T>::max(), Limits<T>::max()};
+      }
     }
 
     KRYS_NODISCARD constexpr static Rect SmallestRect() noexcept
@@ -224,7 +233,7 @@ namespace krys
     }
 
     KRYS_NODISCARD constexpr bool IsInfinite() const noexcept
-    requires FloatingPoint<T>
+    requires FloatingPoint<T> || detail::HasInfiniteRectTraits<T>
     {
       return *this == InfiniteRect();
     }
@@ -354,7 +363,7 @@ namespace krys
 
     constexpr void ShiftMaxXEdgeBy(T delta) noexcept
     {
-      if constexpr (Integral<T>)
+      if constexpr (detail::IsDiscreteCoordinate<T>)
       {
         SetWidth(std::max(T {0}, Width() + delta));
       }
@@ -372,7 +381,7 @@ namespace krys
 
     constexpr void ShiftMaxYEdgeBy(T delta) noexcept
     {
-      if constexpr (Integral<T>)
+      if constexpr (detail::IsDiscreteCoordinate<T>)
       {
         SetHeight(std::max(T {0}, Height() + delta));
       }
@@ -424,11 +433,12 @@ namespace krys
       return X() <= other.X() && MaxX() >= other.MaxX() && Y() <= other.Y() && MaxY() >= other.MaxY();
     }
 
-    /// @brief Whether (@p px, @p py) is in this: for integers, whether the 1x1 rect below and to the right of
-    /// it is (so the maximum edges are excluded); for floating point, including the edges.
+    /// @brief Whether (@p px, @p py) is in this: for integer and fixed-point types, whether the 1x1 rect
+    /// below and to the right of it is (so the maximum edges are excluded); for floating point, including the
+    /// edges.
     KRYS_NODISCARD constexpr bool Contains(T px, T py) const noexcept
     {
-      if constexpr (Integral<T>)
+      if constexpr (detail::IsDiscreteCoordinate<T>)
       {
         return px >= X() && px < MaxX() && py >= Y() && py < MaxY();
       }
@@ -439,7 +449,7 @@ namespace krys
     }
 
     KRYS_NODISCARD constexpr bool Contains(const PointType &point) const noexcept
-    requires Integral<T>
+    requires detail::IsDiscreteCoordinate<T>
     {
       return Contains(point.X(), point.Y());
     }
@@ -595,9 +605,17 @@ namespace krys
       SetHeight(Height() + deltaY + deltaMaxY);
     }
 
-    /// @brief Scales the location and size; integer values are truncated.
+    /// @brief Scales the location and size; integer values are truncated, and a type's infinite rect from
+    /// `GeometryTraits` is left alone.
     constexpr void Scale(ScaleType scaleX, ScaleType scaleY) noexcept
     {
+      if constexpr (detail::HasInfiniteRectTraits<T>)
+      {
+        if (IsInfinite())
+        {
+          return;
+        }
+      }
       if constexpr (Integral<T>)
       {
         _location.SetX(static_cast<T>(static_cast<ScaleType>(X()) * scaleX));
@@ -605,8 +623,8 @@ namespace krys
       }
       else
       {
-        _location.SetX(X() * scaleX);
-        _location.SetY(Y() * scaleY);
+        _location.SetX(static_cast<T>(X() * scaleX));
+        _location.SetY(static_cast<T>(Y() * scaleY));
       }
       _size.Scale(scaleX, scaleY);
     }
@@ -676,7 +694,7 @@ namespace krys
     }
   };
 
-  template <Number T>
+  template <GeometryCoordinate T>
   constexpr Point<T> Point<T>::ConstrainedWithin(const Rect<T> &rect) const noexcept
   {
     return ConstrainedBetween(rect.MinXMinYCorner(), rect.MaxXMaxYCorner());

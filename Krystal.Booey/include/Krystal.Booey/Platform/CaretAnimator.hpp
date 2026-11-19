@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -39,7 +40,6 @@ namespace krys::boo
   class Color;
   class Document;
   class GraphicsContext;
-  class LayoutPoint;
   class Node;
   class Page;
 

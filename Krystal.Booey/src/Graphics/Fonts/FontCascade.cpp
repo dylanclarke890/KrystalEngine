@@ -1397,7 +1397,7 @@ namespace krys::boo
       auto beforeWidth = controller.RunWidthSoFar();
       controller.Advance(current);
       auto afterWidth = controller.RunWidthSoFar();
-      characterRect.Move(rtl ? controller.TotalAdvance().Width() - afterWidth : beforeWidth, 0);
+      characterRect.Move(LayoutUnit(rtl ? controller.TotalAdvance().Width() - afterWidth : beforeWidth), 0);
       characterRect.SetWidth(LayoutUnit::FromFloatCeil(afterWidth - beforeWidth));
       rects.push_back(characterRect);
     }
@@ -2310,12 +2310,12 @@ namespace krys::boo
       it.Advance(run.Length(), glyphBuffer);
       it.Finalize(glyphBuffer);
       float totalWidth = it.RunWidthSoFar();
-      selectionRect.Move(totalWidth - afterWidth, 0);
+      selectionRect.Move(LayoutUnit(totalWidth - afterWidth), 0);
     }
     else
     {
       it.Finalize(glyphBuffer);
-      selectionRect.Move(beforeWidth, 0);
+      selectionRect.Move(LayoutUnit(beforeWidth), 0);
     }
     selectionRect.SetWidth(LayoutUnit::FromFloatCeil(afterWidth - beforeWidth));
   }
@@ -2331,11 +2331,11 @@ namespace krys::boo
 
     if (run.Rtl())
     {
-      selectionRect.Move(controller.TotalAdvance().Width() - afterWidth, 0);
+      selectionRect.Move(LayoutUnit(controller.TotalAdvance().Width() - afterWidth), 0);
     }
     else
     {
-      selectionRect.Move(beforeWidth, 0);
+      selectionRect.Move(LayoutUnit(beforeWidth), 0);
     }
     selectionRect.SetWidth(LayoutUnit::FromFloatCeil(afterWidth - beforeWidth));
   }
@@ -2351,11 +2351,11 @@ namespace krys::boo
     if (run.Rtl())
     {
       float totalWidth = WidthForSimpleTextWithFixedPitch(run.Text(), whitespaceIsCollapsed);
-      selectionRect.Move(totalWidth - afterWidth, 0);
+      selectionRect.Move(LayoutUnit(totalWidth - afterWidth), 0);
     }
     else
     {
-      selectionRect.Move(beforeWidth, 0);
+      selectionRect.Move(LayoutUnit(beforeWidth), 0);
     }
     selectionRect.SetWidth(LayoutUnit::FromFloatCeil(afterWidth - beforeWidth));
   }

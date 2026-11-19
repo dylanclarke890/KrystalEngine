@@ -98,7 +98,8 @@ namespace krys::boo
   void RenderHTMLCanvas::CanvasSizeChanged() noexcept
   {
     SizeI canvasSize = CanvasElement().Size();
-    LayoutSize zoomedSize(canvasSize.Width() * Style().UsedZoom(), canvasSize.Height() * Style().UsedZoom());
+    LayoutSize zoomedSize(LayoutUnit(canvasSize.Width() * Style().UsedZoom()),
+                          LayoutUnit(canvasSize.Height() * Style().UsedZoom()));
 
     if (zoomedSize == IntrinsicSize())
     {

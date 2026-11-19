@@ -1709,7 +1709,7 @@ namespace krys::boo
       repaintRect = ComputeRectForRepaint(*partialRepaintRect, repaintContainer.Renderer);
       if (additionalRepaintOutsets)
       {
-        repaintRect.Expand(*additionalRepaintOutsets);
+        Expand(repaintRect, *additionalRepaintOutsets);
       }
     }
     else

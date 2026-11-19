@@ -26,6 +26,7 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
 #include "Krystal.Booey/Graphics/Transforms/Quaternion.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
@@ -36,7 +37,6 @@
 namespace krys::boo
 {
   class AffineTransform;
-  class LayoutRect;
 
   /// @brief A 4x4 transform matrix. The first index is the column, the second the row.
   class TransformationMatrix

@@ -33,103 +33,34 @@
 
 namespace krys::boo
 {
-  LayoutRect::LayoutRect(const RectF &r) noexcept
-      : _location(LayoutPoint(r.Location())), _size(LayoutSize(r.Size()))
+  bool IsMaxXMaxYRepresentable(const LayoutRect &rect) noexcept
   {
+    RectF floatRect = rect;
+    float maxX = floatRect.MaxX();
+    float maxY = floatRect.MaxY();
+    return maxX > LayoutUnit::NearlyMin() && maxX < LayoutUnit::NearlyMax() && maxY > LayoutUnit::NearlyMin()
+           && maxY < LayoutUnit::NearlyMax();
   }
 
-  bool LayoutRect::Intersects(const LayoutRect &other) const noexcept
-  {
-    // Checking emptiness handles negative widths as well as zero.
-    return !IsEmpty() && !other.IsEmpty() && X() < other.MaxX() && other.X() < MaxX() && Y() < other.MaxY()
-           && other.Y() < MaxY();
-  }
-
-  bool LayoutRect::Contains(const LayoutRect &other) const noexcept
-  {
-    return X() <= other.X() && MaxX() >= other.MaxX() && Y() <= other.Y() && MaxY() >= other.MaxY();
-  }
-
-  void LayoutRect::Intersect(const LayoutRect &other) noexcept
-  {
-    LayoutPoint newLocation(std::max(X(), other.X()), std::max(Y(), other.Y()));
-    LayoutPoint newMaxPoint(std::min(MaxX(), other.MaxX()), std::min(MaxY(), other.MaxY()));
-
-    // Return a clean empty rectangle for non-intersecting cases.
-    if (newLocation.X() >= newMaxPoint.X() || newLocation.Y() >= newMaxPoint.Y())
-    {
-      newLocation = LayoutPoint(0, 0);
-      newMaxPoint = LayoutPoint(0, 0);
-    }
-
-    _location = newLocation;
-    _size = newMaxPoint - newLocation;
-  }
-
-  bool LayoutRect::EdgeInclusiveIntersect(const LayoutRect &other) noexcept
-  {
-    LayoutPoint newLocation(std::max(X(), other.X()), std::max(Y(), other.Y()));
-    LayoutPoint newMaxPoint(std::min(MaxX(), other.MaxX()), std::min(MaxY(), other.MaxY()));
-
-    bool intersects = true;
-
-    // Return a clean empty rectangle for non-intersecting cases.
-    if (newLocation.X() > newMaxPoint.X() || newLocation.Y() > newMaxPoint.Y())
-    {
-      newLocation = {};
-      newMaxPoint = {};
-      intersects = false;
-    }
-
-    _location = newLocation;
-    _size = newMaxPoint - newLocation;
-    return intersects;
-  }
-
-  void LayoutRect::Unite(const LayoutRect &other) noexcept
-  {
-    // Handle empty special cases first.
-    if (other.IsEmpty())
-    {
-      return;
-    }
-    if (IsEmpty())
-    {
-      *this = other;
-      return;
-    }
-
-    UniteEvenIfEmpty(other);
-  }
-
-  void LayoutRect::UniteEvenIfEmpty(const LayoutRect &other) noexcept
-  {
-    auto minX = std::min(X(), other.X());
-    auto minY = std::min(Y(), other.Y());
-    auto maxX = std::max(MaxX(), other.MaxX());
-    auto maxY = std::max(MaxY(), other.MaxY());
-
-    ShiftEdgesTo(minX, minY, maxX, maxY);
-  }
-
-  bool LayoutRect::CheckedUnite(const LayoutRect &other) noexcept
+  bool CheckedUnite(LayoutRect &rect, const LayoutRect &other) noexcept
   {
     if (other.IsEmpty())
     {
       return true;
     }
-    if (IsEmpty())
+    if (rect.IsEmpty())
     {
-      *this = other;
+      rect = other;
       return true;
     }
-    if (!IsMaxXMaxYRepresentable() || !other.IsMaxXMaxYRepresentable())
+    if (!IsMaxXMaxYRepresentable(rect) || !IsMaxXMaxYRepresentable(other))
     {
       return false;
     }
 
-    PointF topLeft = PointF(std::min<float>(X(), other.X()), std::min<float>(Y(), other.Y()));
-    PointF bottomRight = PointF(std::max<float>(MaxX(), other.MaxX()), std::max<float>(MaxY(), other.MaxY()));
+    PointF topLeft = PointF(std::min<float>(rect.X(), other.X()), std::min<float>(rect.Y(), other.Y()));
+    PointF bottomRight =
+      PointF(std::max<float>(rect.MaxX(), other.MaxX()), std::max<float>(rect.MaxY(), other.MaxY()));
     SizeF size = bottomRight - topLeft;
 
     if (size.Width() >= LayoutUnit::NearlyMax() || size.Height() >= LayoutUnit::NearlyMax())
@@ -137,59 +68,22 @@ namespace krys::boo
       return false;
     }
 
-    _location = LayoutPoint(topLeft);
-    _size = LayoutSize(size);
+    rect = LayoutRect(LayoutPoint(topLeft), LayoutSize(size));
     return true;
   }
 
-  void LayoutRect::UniteIfNonZero(const LayoutRect &other) noexcept
+  void ExpandToInfiniteX(LayoutRect &rect) noexcept
   {
-    // Handle empty special cases first.
-    if (!other.Width() && !other.Height())
-    {
-      return;
-    }
-    if (!Width() && !Height())
-    {
-      *this = other;
-      return;
-    }
-
-    LayoutPoint newLocation(std::min(X(), other.X()), std::min(Y(), other.Y()));
-    LayoutPoint newMaxPoint(std::max(MaxX(), other.MaxX()), std::max(MaxY(), other.MaxY()));
-
-    _location = newLocation;
-    _size = newMaxPoint - newLocation;
+    LayoutRect infiniteRect = LayoutRect::InfiniteRect();
+    rect.SetX(infiniteRect.X());
+    rect.SetWidth(infiniteRect.Width());
   }
 
-  void LayoutRect::Scale(float scaleValue) noexcept
+  void ExpandToInfiniteY(LayoutRect &rect) noexcept
   {
-    Scale(scaleValue, scaleValue);
-  }
-
-  void LayoutRect::Scale(float xScale, float yScale) noexcept
-  {
-    if (IsInfinite())
-    {
-      return;
-    }
-
-    _location.Scale(xScale, yScale);
-    _size.Scale(xScale, yScale);
-  }
-
-  void LayoutRect::ExpandToInfiniteY() noexcept
-  {
-    LayoutRect infRect = LayoutRect::InfiniteRect();
-    SetY(infRect.Y());
-    SetHeight(infRect.Height());
-  }
-
-  void LayoutRect::ExpandToInfiniteX() noexcept
-  {
-    LayoutRect infRect = LayoutRect::InfiniteRect();
-    SetX(infRect.X());
-    SetWidth(infRect.Width());
+    LayoutRect infiniteRect = LayoutRect::InfiniteRect();
+    rect.SetY(infiniteRect.Y());
+    rect.SetHeight(infiniteRect.Height());
   }
 
   LayoutRect UnionRect(Span<const LayoutRect> rects) noexcept

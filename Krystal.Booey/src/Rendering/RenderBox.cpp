@@ -4737,17 +4737,17 @@ namespace krys::boo
     LayoutRect clipRect(LayoutPoint(), CachedSizeForOverflowClip());
     if (EffectiveOverflowX() == Overflow::Visible)
     {
-      clipRect.ExpandToInfiniteX();
+      ExpandToInfiniteX(clipRect);
     }
     if (EffectiveOverflowY() == Overflow::Visible)
     {
-      clipRect.ExpandToInfiniteY();
+      ExpandToInfiniteY(clipRect);
     }
 
     if (context.ScrollMargin && (IsScrollContainerX() || IsScrollContainerY()))
     {
       auto borderWidths = BorderWidths();
-      clipRect.Contract(borderWidths);
+      Contract(clipRect, borderWidths);
       auto scrollMarginEdges = LayoutBoxExtent {
         style::Evaluate<LayoutUnit>(context.ScrollMargin->Top(), clipRect.Height(), style::ZoomNeeded {}),
         style::Evaluate<LayoutUnit>(context.ScrollMargin->Right(), clipRect.Width(), style::ZoomNeeded {}),
@@ -4755,7 +4755,7 @@ namespace krys::boo
         style::Evaluate<LayoutUnit>(context.ScrollMargin->Left(), clipRect.Width(), style::ZoomNeeded {}),
       };
 
-      clipRect.Expand(scrollMarginEdges);
+      Expand(clipRect, scrollMarginEdges);
     }
 
     bool intersects;
@@ -6224,11 +6224,11 @@ namespace krys::boo
                      - LayoutSize(BorderLeft() + BorderRight(), BorderTop() + BorderBottom()));
     if (Style().OverflowX() == Overflow::Clip && Style().OverflowY() == Overflow::Visible)
     {
-      clipRect.ExpandToInfiniteY();
+      ExpandToInfiniteY(clipRect);
     }
     else if (Style().OverflowY() == Overflow::Clip && Style().OverflowX() == Overflow::Visible)
     {
-      clipRect.ExpandToInfiniteX();
+      ExpandToInfiniteX(clipRect);
     }
 
     // Subtract out scrollbars if we have them.
@@ -6540,7 +6540,7 @@ namespace krys::boo
       LayoutRect borderImageRect = BorderBoxRect();
 
       // Apply outsets to the border box.
-      borderImageRect.Expand(Style().MaskBorderOutsets());
+      Expand(borderImageRect, Style().MaskBorderOutsets());
       return borderImageRect;
     }
 

@@ -2124,11 +2124,11 @@ namespace krys::boo
       LayoutUnit vSpacing = 0_lu;
       if (table.GetWritingMode().IsHorizontal())
       {
-        rect.Contract({vSpacing, hSpacing, vSpacing, hSpacing});
+        Contract(rect, LayoutBoxExtent(vSpacing, hSpacing, vSpacing, hSpacing));
       }
       else
       {
-        rect.Contract({hSpacing, vSpacing, hSpacing, vSpacing});
+        Contract(rect, LayoutBoxExtent(hSpacing, vSpacing, hSpacing, vSpacing));
       }
     }
     return rect;
@@ -2149,15 +2149,15 @@ namespace krys::boo
       auto beforeBlockSpacing = &tableSection == table.TopSection() ? vSpacing : 0_lu;
       if (table.GetWritingMode().IsHorizontal())
       {
-        rect.Contract({beforeBlockSpacing, hSpacing, vSpacing, hSpacing});
+        Contract(rect, LayoutBoxExtent(beforeBlockSpacing, hSpacing, vSpacing, hSpacing));
       }
       else if (table.GetWritingMode().IsBlockFlipped())
       {
-        rect.Contract({hSpacing, beforeBlockSpacing, hSpacing, vSpacing});
+        Contract(rect, LayoutBoxExtent(hSpacing, beforeBlockSpacing, hSpacing, vSpacing));
       }
       else
       {
-        rect.Contract({hSpacing, vSpacing, hSpacing, beforeBlockSpacing});
+        Contract(rect, LayoutBoxExtent(hSpacing, vSpacing, hSpacing, beforeBlockSpacing));
       }
     }
     return rect;

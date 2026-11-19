@@ -174,7 +174,7 @@ namespace krys::boo
       // FIXME: This flipping was added for drop-shadow, but it's not obvious that it's correct.
       LayoutBoxExtent flippedOutsets {LayoutUnit {outsets.Bottom()}, LayoutUnit {outsets.Left()},
                                       LayoutUnit {outsets.Top()}, LayoutUnit {outsets.Right()}};
-      dirtyFilterRegion.Expand(flippedOutsets);
+      Expand(dirtyFilterRegion, flippedOutsets);
     }
 
     dirtyFilterRegion = Intersection(filterBoxRect, dirtyFilterRegion);
@@ -182,7 +182,7 @@ namespace krys::boo
 
     if (!outsets.IsZero())
     {
-      filterRegion.Expand(ToLayoutBoxExtent(outsets));
+      Expand(filterRegion, ToLayoutBoxExtent(outsets));
     }
 
     if (filterRegion.IsEmpty())

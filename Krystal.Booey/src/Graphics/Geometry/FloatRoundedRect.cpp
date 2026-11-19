@@ -306,7 +306,8 @@ namespace krys::boo
       for (decltype(count) i = 0; i < count; ++i)
       {
         auto angle = fromAngle + (i + 1) * (toAngle - fromAngle) / (count + 1);
-        auto ellipsisPoint = LayoutPoint {axes.Width() * std::cos(angle), axes.Height() * std::sin(angle)};
+        auto ellipsisPoint =
+          LayoutPoint(PointD(axes.Width() * std::cos(angle), axes.Height() * std::sin(angle)));
         auto cornerRect = makeRectI(corner, ellipsisCenter + ellipsisPoint);
         region.Subtract(cornerRect);
       }
@@ -315,28 +316,28 @@ namespace krys::boo
     {
       auto corner = rect.MaxXMaxYCorner();
       auto axes = radii.BottomRight();
-      auto ellipsisCenter = LayoutPoint(corner.X() - axes.Width(), corner.Y() - axes.Height());
+      auto ellipsisCenter = LayoutPoint(PointF(corner.X() - axes.Width(), corner.Y() - axes.Height()));
       subtractCornerRects(corner, ellipsisCenter, axes, 0);
     }
 
     {
       auto corner = rect.MinXMaxYCorner();
       auto axes = radii.BottomLeft();
-      auto ellipsisCenter = LayoutPoint(corner.X() + axes.Width(), corner.Y() - axes.Height());
+      auto ellipsisCenter = LayoutPoint(PointF(corner.X() + axes.Width(), corner.Y() - axes.Height()));
       subtractCornerRects(corner, ellipsisCenter, axes, std::numbers::pi / 2);
     }
 
     {
       auto corner = rect.MinXMinYCorner();
       auto axes = radii.TopLeft();
-      auto ellipsisCenter = LayoutPoint(corner.X() + axes.Width(), corner.Y() + axes.Height());
+      auto ellipsisCenter = LayoutPoint(PointF(corner.X() + axes.Width(), corner.Y() + axes.Height()));
       subtractCornerRects(corner, ellipsisCenter, axes, std::numbers::pi);
     }
 
     {
       auto corner = rect.MaxXMinYCorner();
       auto axes = radii.TopRight();
-      auto ellipsisCenter = LayoutPoint(corner.X() - axes.Width(), corner.Y() + axes.Height());
+      auto ellipsisCenter = LayoutPoint(PointF(corner.X() - axes.Width(), corner.Y() + axes.Height()));
       subtractCornerRects(corner, ellipsisCenter, axes, std::numbers::pi * 3 / 2);
     }
 

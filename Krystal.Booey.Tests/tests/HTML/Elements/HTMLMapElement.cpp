@@ -66,7 +66,7 @@ namespace krys::boo::html::tests
 
       KRYS_NODISCARD HitTestResult HitTest(double x, double y) noexcept
       {
-        HitTestResult result(LayoutPoint(x, y));
+        HitTestResult result(LayoutPoint(PointD(x, y)));
         Document->HitTest(HitTestRequest(), result);
         return result;
       }

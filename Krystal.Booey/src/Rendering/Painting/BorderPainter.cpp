@@ -231,7 +231,7 @@ namespace krys::boo
       }
 
       auto rectWithOutsets = rect;
-      rectWithOutsets.Expand(style.ImageOutsets(borderImage));
+      Expand(rectWithOutsets, style.ImageOutsets(borderImage));
       return !rectWithOutsets.IsEmpty();
     };
 
@@ -508,7 +508,7 @@ namespace krys::boo
     float deviceScaleFactor = Document().DeviceScaleFactor();
 
     LayoutRect rectWithOutsets = rect;
-    rectWithOutsets.Expand(style.ImageOutsets(ninePieceImage));
+    Expand(rectWithOutsets, style.ImageOutsets(ninePieceImage));
     LayoutRect destination = LayoutRect(SnapRectToDevicePixels(rectWithOutsets, deviceScaleFactor));
 
     auto source = modelObject->CalculateImageIntrinsicDimensions(image.get(), destination.Size(),
@@ -1242,8 +1242,8 @@ namespace krys::boo
         graphicsContext.SetStrokeThickness(thickness);
         graphicsContext.SetStrokeStyle(borderStyle == BorderStyle::Dashed ? StrokeStyle::DashedStroke
                                                                           : StrokeStyle::DottedStroke);
-        graphicsContext.DrawLine(RoundPointToDevicePixels(LayoutPoint(x1, y1), deviceScaleFactor),
-                                 RoundPointToDevicePixels(LayoutPoint(x2, y2), deviceScaleFactor));
+        graphicsContext.DrawLine(RoundPointToDevicePixels(LayoutPoint(PointF(x1, y1)), deviceScaleFactor),
+                                 RoundPointToDevicePixels(LayoutPoint(PointF(x2, y2)), deviceScaleFactor));
         graphicsContext.SetShouldAntialias(wasAntialiased);
         graphicsContext.SetStrokeStyle(oldStrokeStyle);
         break;
@@ -1266,17 +1266,17 @@ namespace krys::boo
           {
             case BoxSide::Top:
             case BoxSide::Bottom:
-              drawBorderRect(
-                SnapRectToDevicePixels(LayoutRect(x1, y1, length, thirdOfThickness), deviceScaleFactor));
+              drawBorderRect(SnapRectToDevicePixels(LayoutRect(RectF(x1, y1, length, thirdOfThickness)),
+                                                    deviceScaleFactor));
               drawBorderRect(SnapRectToDevicePixels(
-                LayoutRect(x1, y2 - thirdOfThickness, length, thirdOfThickness), deviceScaleFactor));
+                LayoutRect(RectF(x1, y2 - thirdOfThickness, length, thirdOfThickness)), deviceScaleFactor));
               break;
             case BoxSide::Left:
             case BoxSide::Right:
-              drawBorderRect(
-                SnapRectToDevicePixels(LayoutRect(x1, y1, thirdOfThickness, length), deviceScaleFactor));
+              drawBorderRect(SnapRectToDevicePixels(LayoutRect(RectF(x1, y1, thirdOfThickness, length)),
+                                                    deviceScaleFactor));
               drawBorderRect(SnapRectToDevicePixels(
-                LayoutRect(x2 - thirdOfThickness, y1, thirdOfThickness, length), deviceScaleFactor));
+                LayoutRect(RectF(x2 - thirdOfThickness, y1, thirdOfThickness, length)), deviceScaleFactor));
               break;
           }
 
@@ -1300,60 +1300,62 @@ namespace krys::boo
           switch (side)
           {
             case BoxSide::Top:
-              paintBorderRect = SnapRectToDevicePixels(LayoutRect(x1 + mitreOffset1, y1,
-                                                                  (x2 - mitreOffset3) - (x1 + mitreOffset1),
-                                                                  thirdOfThickness),
-                                                       deviceScaleFactor);
+              paintBorderRect = SnapRectToDevicePixels(
+                LayoutRect(
+                  RectF(x1 + mitreOffset1, y1, (x2 - mitreOffset3) - (x1 + mitreOffset1), thirdOfThickness)),
+                deviceScaleFactor);
               drawLineFor(paintBorderRect, side, BorderStyle::Solid,
                           SizeF(adjacent1BigThird, adjacent2BigThird));
 
-              paintBorderRect = SnapRectToDevicePixels(LayoutRect(x1 + mitreOffset2, y2 - thirdOfThickness,
-                                                                  (x2 - mitreOffset4) - (x1 + mitreOffset2),
-                                                                  thirdOfThickness),
-                                                       deviceScaleFactor);
+              paintBorderRect = SnapRectToDevicePixels(
+                LayoutRect(RectF(x1 + mitreOffset2, y2 - thirdOfThickness,
+                                 (x2 - mitreOffset4) - (x1 + mitreOffset2), thirdOfThickness)),
+                deviceScaleFactor);
               drawLineFor(paintBorderRect, side, BorderStyle::Solid,
                           SizeF(adjacent1BigThird, adjacent2BigThird));
               break;
             case BoxSide::Left:
-              paintBorderRect = SnapRectToDevicePixels(LayoutRect(x1, y1 + mitreOffset1, thirdOfThickness,
-                                                                  (y2 - mitreOffset3) - (y1 + mitreOffset1)),
-                                                       deviceScaleFactor);
+              paintBorderRect =
+                SnapRectToDevicePixels(LayoutRect(RectF(x1, y1 + mitreOffset1, thirdOfThickness,
+                                                        (y2 - mitreOffset3) - (y1 + mitreOffset1))),
+                                       deviceScaleFactor);
               drawLineFor(paintBorderRect, side, BorderStyle::Solid,
                           SizeF(adjacent1BigThird, adjacent2BigThird));
 
-              paintBorderRect =
-                SnapRectToDevicePixels(LayoutRect(x2 - thirdOfThickness, y1 + mitreOffset2, thirdOfThickness,
-                                                  (y2 - mitreOffset4) - (y1 + mitreOffset2)),
-                                       deviceScaleFactor);
+              paintBorderRect = SnapRectToDevicePixels(
+                LayoutRect(RectF(x2 - thirdOfThickness, y1 + mitreOffset2, thirdOfThickness,
+                                 (y2 - mitreOffset4) - (y1 + mitreOffset2))),
+                deviceScaleFactor);
               drawLineFor(paintBorderRect, side, BorderStyle::Solid,
                           SizeF(adjacent1BigThird, adjacent2BigThird));
               break;
             case BoxSide::Bottom:
-              paintBorderRect = SnapRectToDevicePixels(LayoutRect(x1 + mitreOffset2, y1,
-                                                                  (x2 - mitreOffset4) - (x1 + mitreOffset2),
-                                                                  thirdOfThickness),
-                                                       deviceScaleFactor);
+              paintBorderRect = SnapRectToDevicePixels(
+                LayoutRect(
+                  RectF(x1 + mitreOffset2, y1, (x2 - mitreOffset4) - (x1 + mitreOffset2), thirdOfThickness)),
+                deviceScaleFactor);
               drawLineFor(paintBorderRect, side, BorderStyle::Solid,
                           SizeF(adjacent1BigThird, adjacent2BigThird));
 
-              paintBorderRect = SnapRectToDevicePixels(LayoutRect(x1 + mitreOffset1, y2 - thirdOfThickness,
-                                                                  (x2 - mitreOffset3) - (x1 + mitreOffset1),
-                                                                  thirdOfThickness),
-                                                       deviceScaleFactor);
+              paintBorderRect = SnapRectToDevicePixels(
+                LayoutRect(RectF(x1 + mitreOffset1, y2 - thirdOfThickness,
+                                 (x2 - mitreOffset3) - (x1 + mitreOffset1), thirdOfThickness)),
+                deviceScaleFactor);
               drawLineFor(paintBorderRect, side, BorderStyle::Solid,
                           SizeF(adjacent1BigThird, adjacent2BigThird));
               break;
             case BoxSide::Right:
-              paintBorderRect = SnapRectToDevicePixels(LayoutRect(x1, y1 + mitreOffset2, thirdOfThickness,
-                                                                  (y2 - mitreOffset4) - (y1 + mitreOffset2)),
-                                                       deviceScaleFactor);
+              paintBorderRect =
+                SnapRectToDevicePixels(LayoutRect(RectF(x1, y1 + mitreOffset2, thirdOfThickness,
+                                                        (y2 - mitreOffset4) - (y1 + mitreOffset2))),
+                                       deviceScaleFactor);
               drawLineFor(paintBorderRect, side, BorderStyle::Solid,
                           SizeF(adjacent1BigThird, adjacent2BigThird));
 
-              paintBorderRect =
-                SnapRectToDevicePixels(LayoutRect(x2 - thirdOfThickness, y1 + mitreOffset1, thirdOfThickness,
-                                                  (y2 - mitreOffset3) - (y1 + mitreOffset1)),
-                                       deviceScaleFactor);
+              paintBorderRect = SnapRectToDevicePixels(
+                LayoutRect(RectF(x2 - thirdOfThickness, y1 + mitreOffset1, thirdOfThickness,
+                                 (y2 - mitreOffset3) - (y1 + mitreOffset1))),
+                deviceScaleFactor);
               drawLineFor(paintBorderRect, side, BorderStyle::Solid,
                           SizeF(adjacent1BigThird, adjacent2BigThird));
               break;
@@ -1463,7 +1465,8 @@ namespace krys::boo
           graphicsContext.SetFillColor(color);
           bool wasAntialiased = graphicsContext.ShouldAntialias();
           graphicsContext.SetShouldAntialias(antialias);
-          drawBorderRect(SnapRectToDevicePixels(LayoutRect(x1, y1, x2 - x1, y2 - y1), deviceScaleFactor));
+          drawBorderRect(
+            SnapRectToDevicePixels(LayoutRect(RectF(x1, y1, x2 - x1, y2 - y1)), deviceScaleFactor));
           graphicsContext.SetShouldAntialias(wasAntialiased);
           graphicsContext.SetStrokeStyle(oldStrokeStyle);
           return;

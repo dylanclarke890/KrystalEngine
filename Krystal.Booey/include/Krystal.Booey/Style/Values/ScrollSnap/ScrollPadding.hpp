@@ -25,12 +25,11 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapper.hpp"
 
 namespace krys::boo
 {
-  class LayoutRect;
-
   namespace style
   {
     // <'scroll-padding-*'> = auto | <length-percentage [0,∞]>

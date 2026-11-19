@@ -273,7 +273,7 @@ namespace krys::boo
     if (auto *box = scrollerElement ? scrollerElement->GetRenderBox() : nullptr)
     {
       LayoutRect paddedLayerBounds(containingRect);
-      paddedLayerBounds.Contract(box->ScrollPaddingForViewportRect(paddedLayerBounds));
+      Contract(paddedLayerBounds, box->ScrollPaddingForViewportRect(paddedLayerBounds));
       containingRect = SnappedRectI(paddedLayerBounds);
     }
 

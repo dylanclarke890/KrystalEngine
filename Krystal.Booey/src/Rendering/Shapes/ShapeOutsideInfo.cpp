@@ -91,23 +91,23 @@ namespace krys::boo
         case CSSBoxType::PaddingBox:
           if (isHorizontalWritingMode)
           {
-            size.Shrink(renderer.HorizontalBorderExtent(), renderer.VerticalBorderExtent());
+            size.Contract(renderer.HorizontalBorderExtent(), renderer.VerticalBorderExtent());
           }
           else
           {
-            size.Shrink(renderer.VerticalBorderExtent(), renderer.HorizontalBorderExtent());
+            size.Contract(renderer.VerticalBorderExtent(), renderer.HorizontalBorderExtent());
           }
           break;
         case CSSBoxType::ContentBox:
           if (isHorizontalWritingMode)
           {
-            size.Shrink(renderer.HorizontalBorderAndPaddingExtent(),
-                        renderer.VerticalBorderAndPaddingExtent());
+            size.Contract(renderer.HorizontalBorderAndPaddingExtent(),
+                          renderer.VerticalBorderAndPaddingExtent());
           }
           else
           {
-            size.Shrink(renderer.VerticalBorderAndPaddingExtent(),
-                        renderer.HorizontalBorderAndPaddingExtent());
+            size.Contract(renderer.VerticalBorderAndPaddingExtent(),
+                          renderer.HorizontalBorderAndPaddingExtent());
           }
           break;
         case CSSBoxType::FillBox:

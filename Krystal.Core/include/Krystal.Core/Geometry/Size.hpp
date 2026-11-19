@@ -90,16 +90,31 @@ namespace krys
 
   namespace detail
   {
-    /// @brief Whether converting a `TFrom` to a `TTo` keeps every value: an integer to a floating point type,
-    /// or a floating point type to one at least as wide. Geometry types convert implicitly only then.
+    /// @brief Whether `T` is an integer or fixed-point type, whose points are in a rect when the 1x1 square
+    /// below and to the right of them is.
+    template <typename T>
+    constexpr bool IsDiscreteCoordinate = Integral<T> || GeometryTraits<T>::IsFixedPoint;
+
+    /// @brief Whether `GeometryTraits<T>` gives the type's infinite rect.
+    template <typename T>
+    concept HasInfiniteRectTraits = requires {
+      GeometryTraits<T>::InfiniteRectMin();
+      GeometryTraits<T>::InfiniteRectExtent();
+    };
+
+    /// @brief Whether converting a `TFrom` to a `TTo` keeps every value: an integer to a floating point or
+    /// fixed-point type (though a fixed-point type saturates on large values), a fixed-point type to a
+    /// floating point one, or a floating point type to one at least as wide. Geometry types convert
+    /// implicitly only then.
     template <typename TFrom, typename TTo>
     constexpr bool IsWideningGeometryConversion =
-      (Integral<TFrom> && FloatingPoint<TTo>)
+      (Integral<TFrom> && (FloatingPoint<TTo> || GeometryTraits<TTo>::IsFixedPoint))
+      || (GeometryTraits<TFrom>::IsFixedPoint && FloatingPoint<TTo>)
       || (FloatingPoint<TFrom> && FloatingPoint<TTo> && sizeof(TTo) >= sizeof(TFrom));
 
     /// @brief @p value as a `TTo`: clamped to the integer range when narrowing a floating point value to an
     /// integer.
-    template <Number TTo, Number TFrom>
+    template <GeometryCoordinate TTo, GeometryCoordinate TFrom>
     KRYS_NODISCARD constexpr TTo ConvertGeometryValue(TFrom value) noexcept
     {
       if constexpr (Integral<TTo> && FloatingPoint<TFrom>)
@@ -113,12 +128,12 @@ namespace krys
     }
 
     /// @brief The type geometry types scale by: `double` for `double` coordinates, `float` otherwise.
-    template <Number T>
+    template <GeometryCoordinate T>
     using GeometryScale = conditional_t<SameType<T, double>, double, float>;
   }
 
   /// @brief A width and height.
-  template <Number T>
+  template <GeometryCoordinate T>
   class Size
   {
   private:
@@ -136,7 +151,7 @@ namespace krys
 
     /// @brief Converts from another coordinate type: implicitly when no value is lost, explicitly (clamping
     /// to the integer range) otherwise.
-    template <Number U>
+    template <GeometryCoordinate U>
     requires(!SameType<T, U>)
     constexpr explicit(!detail::IsWideningGeometryConversion<U, T>) Size(const Size<U> &size) noexcept
         : _width(detail::ConvertGeometryValue<T>(size.Width())),
@@ -191,7 +206,7 @@ namespace krys
       return _width <= 0 || _height <= 0;
     }
 
-    /// @brief Whether both sides are zero: exactly for integers, within epsilon for floating point.
+    /// @brief Whether both sides are zero: within epsilon for floating point, exactly otherwise.
     KRYS_NODISCARD constexpr bool IsZero() const noexcept
     {
       if constexpr (FloatingPoint<T>)
@@ -261,7 +276,7 @@ namespace krys
       }
       else
       {
-        return {_width * widthScale, _height * heightScale};
+        return {static_cast<T>(_width * widthScale), static_cast<T>(_height * heightScale)};
       }
     }
 

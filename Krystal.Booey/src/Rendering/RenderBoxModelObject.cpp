@@ -793,9 +793,10 @@ namespace krys::boo
     else
     {
       containerContentRect = containingBlock->LayoutOverflowRect();
-      containerContentRect.Contract(LayoutBoxExtent {
-        containingBlock->ComputedCSSPaddingTop(), containingBlock->ComputedCSSPaddingRight(),
-        containingBlock->ComputedCSSPaddingBottom(), containingBlock->ComputedCSSPaddingLeft()});
+      Contract(containerContentRect, LayoutBoxExtent {containingBlock->ComputedCSSPaddingTop(),
+                                                      containingBlock->ComputedCSSPaddingRight(),
+                                                      containingBlock->ComputedCSSPaddingBottom(),
+                                                      containingBlock->ComputedCSSPaddingLeft()});
     }
 
     LayoutUnit maxWidth = containingBlock->ContentBoxLogicalWidth();
@@ -811,7 +812,7 @@ namespace krys::boo
       style::EvaluateMinimum<LayoutUnit>(Style().MarginLeft(), maxWidth, zoomFactor));
 
     // Compute the container-relative area within which the sticky element is allowed to move.
-    containerContentRect.Contract(minMargin);
+    Contract(containerContentRect, minMargin);
 
     // Finally compute container rect relative to the scrolling ancestor. We pass an empty mode here, because
     // sticky positioning should ignore transforms.
@@ -1210,7 +1211,7 @@ namespace krys::boo
     SizeF intrinsicRatio;
     image->ComputeIntrinsicDimensions(this, intrinsicWidth, intrinsicHeight, intrinsicRatio);
 
-    LayoutSize resolvedSize(intrinsicWidth, intrinsicHeight);
+    LayoutSize resolvedSize {LayoutUnit(intrinsicWidth), LayoutUnit(intrinsicHeight)};
     LayoutSize minimumSize(resolvedSize.Width() > 0 ? 1 : 0, resolvedSize.Height() > 0 ? 1 : 0);
 
     if (scaleByUsedZoom == ScaleByUsedZoom::Yes)

@@ -23,6 +23,7 @@
 
 #pragma once
 
+#include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
 #include "Krystal.Booey/Rendering/LayoutRepainter.hpp"
 #include "Krystal.Booey/Rendering/RepaintRectCalculation.hpp"
 #include "Krystal.Booey/Rendering/VisibleRectContext.hpp"
@@ -35,7 +36,6 @@ namespace krys::boo
 {
   class AffineTransform;
   class GraphicsContext;
-  class LayoutRect;
   class LegacyRenderSVGRoot;
   struct PaintInfo;
   class RenderElement;

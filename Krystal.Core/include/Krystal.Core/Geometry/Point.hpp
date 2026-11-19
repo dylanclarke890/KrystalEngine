@@ -89,7 +89,7 @@ namespace krys
   class TextStream;
 
   /// @brief A point.
-  template <Number T>
+  template <GeometryCoordinate T>
   class Point
   {
   private:
@@ -111,7 +111,7 @@ namespace krys
 
     /// @brief Converts from another coordinate type: implicitly when no value is lost, explicitly (clamping
     /// to the integer range) otherwise.
-    template <Number U>
+    template <GeometryCoordinate U>
     requires(!SameType<T, U>)
     constexpr explicit(!detail::IsWideningGeometryConversion<U, T>) Point(const Point<U> &point) noexcept
         : _x(detail::ConvertGeometryValue<T>(point.X())), _y(detail::ConvertGeometryValue<T>(point.Y()))
@@ -209,7 +209,7 @@ namespace krys
       }
       else
       {
-        return {_x * scaleX, _y * scaleY};
+        return {static_cast<T>(_x * scaleX), static_cast<T>(_y * scaleY)};
       }
     }
 

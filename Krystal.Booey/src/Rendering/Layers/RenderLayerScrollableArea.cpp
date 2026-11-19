@@ -1288,7 +1288,7 @@ namespace krys::boo
     krys_debug_assert(box);
 
     LayoutRect paddedLayerBounds(0_lu, 0_lu, box->ClientWidth(), box->ClientHeight());
-    paddedLayerBounds.Contract(box->ScrollPaddingForViewportRect(paddedLayerBounds));
+    Contract(paddedLayerBounds, box->ScrollPaddingForViewportRect(paddedLayerBounds));
 
     // Set up the  page step/line step.
     if (_hBar)
@@ -1419,7 +1419,7 @@ namespace krys::boo
       // scroll-padding applies to the scroll container, but expand the rectangle that we want to expose in
       // order simulate padding the scroll container. This rectangle is passed up the tree of scrolling
       // elements to ensure that the padding on this scroll container is maintained.
-      localExposeRect.Expand(box->ScrollPaddingForViewportRect(layerBounds));
+      Expand(localExposeRect, box->ScrollPaddingForViewportRect(layerBounds));
       return localExposeRect;
     }
   }

@@ -389,8 +389,8 @@ namespace krys::boo
     if (HasNotation(Notation::Circle))
     {
       LayoutRect ellipseRect;
-      ellipseRect.SetWidth(_contentRect.Width() * std::numbers::sqrt2_v<float> + thickness);
-      ellipseRect.SetHeight(_contentRect.Height() * std::numbers::sqrt2_v<float> + thickness);
+      ellipseRect.SetWidth(LayoutUnit(_contentRect.Width() * std::numbers::sqrt2_v<float> + thickness));
+      ellipseRect.SetHeight(LayoutUnit(_contentRect.Height() * std::numbers::sqrt2_v<float> + thickness));
       ellipseRect.SetX(_contentRect.X() - (ellipseRect.Width() - _contentRect.Width()) / 2);
       ellipseRect.SetY(_contentRect.Y() - (ellipseRect.Height() - _contentRect.Height()) / 2);
       Path path;
