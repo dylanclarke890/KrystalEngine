@@ -36,6 +36,8 @@ target_compile_definitions(Krystal.UI.Tests
     KRYS_UI_TESTS_FONTS_DIR="${CMAKE_SOURCE_DIR}/third-party/liberation-fonts"
     # The page goldens are kept in the source tree, compared with Krystal.Gfx.Tests' golden helpers.
     KRYS_GFX_TESTS_GOLDEN_DIR="${CMAKE_CURRENT_SOURCE_DIR}/golden"
+    # Fresh output (actual images and diffs) goes to the build tree, wherever the tests run from.
+    KRYS_GFX_TESTS_GOLDEN_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/golden-output"
 )
 
 catch_discover_tests(Krystal.UI.Tests)

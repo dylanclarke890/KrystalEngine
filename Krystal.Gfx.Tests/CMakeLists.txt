@@ -30,6 +30,8 @@ target_compile_options(Krystal.Gfx.Tests
 target_compile_definitions(Krystal.Gfx.Tests
   PRIVATE
     KRYS_GFX_TESTS_GOLDEN_DIR="${CMAKE_CURRENT_SOURCE_DIR}/golden"
+    # Fresh output (actual images and diffs) goes to the build tree, wherever the tests run from.
+    KRYS_GFX_TESTS_GOLDEN_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/golden-output"
     KRYS_GFX_TESTS_FONTS_DIR="${CMAKE_SOURCE_DIR}/third-party/liberation-fonts"
 )
 
