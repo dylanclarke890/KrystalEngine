@@ -58,7 +58,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD
-    SizeF Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept final;
+    SizeF Size(img::ImageOrientation = img::ImageOrientation::Orientation::FromImage) const noexcept final;
 
     KRYS_NODISCARD bool UsesContainerSize() const noexcept final
     {

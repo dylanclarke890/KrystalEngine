@@ -52,14 +52,14 @@ namespace krys::boo
   private:
     BitmapImageSource &_source;
     uint32 _frameCount {0};
-    RepetitionCount _repetitionCount {RepetitionCountNone};
+    img::RepetitionCount _repetitionCount {img::RepetitionCountNone};
 
     UniquePtr<Timer> _frameTimer;
     SubsamplingLevel _nextFrameSubsamplingLevel {SubsamplingLevel::Default};
     DecodingOptions _nextFrameOptions {DecodingMode::Asynchronous};
 
     uint32 _currentFrameIndex {0};
-    RepetitionCount _repetitionsComplete {RepetitionCountNone};
+    img::RepetitionCount _repetitionsComplete {img::RepetitionCountNone};
     // When the current frame should have started showing, in the host's time; null until the animation first
     // starts.
     Maybe<MonotonicTime::duration> _desiredFrameStartTime;
@@ -69,7 +69,7 @@ namespace krys::boo
 
     ~ImageFrameAnimator() noexcept;
 
-    bool ImageFrameDecodeAtIndexHasFinished(uint32 index, ImageAnimatingState, DecodingStatus) noexcept;
+    bool ImageFrameDecodeAtIndexHasFinished(uint32 index, ImageAnimatingState, img::DecodingStatus) noexcept;
 
     bool StartAnimation(SubsamplingLevel, const DecodingOptions &) noexcept;
 

@@ -538,15 +538,15 @@ namespace krys::boo
 
     ImageDrawResult DrawImage(Image &, const PointF &destination,
                               ImagePaintingOptions = ImagePaintingOptions {
-                                ImageOrientation::Orientation::FromImage}) noexcept;
+                                img::ImageOrientation::Orientation::FromImage}) noexcept;
 
     ImageDrawResult DrawImage(Image &, const RectF &destination,
                               ImagePaintingOptions = ImagePaintingOptions {
-                                ImageOrientation::Orientation::FromImage}) noexcept;
+                                img::ImageOrientation::Orientation::FromImage}) noexcept;
 
     virtual ImageDrawResult DrawImage(Image &, const RectF &destination, const RectF &source,
                                       ImagePaintingOptions = ImagePaintingOptions {
-                                        ImageOrientation::Orientation::FromImage}) noexcept;
+                                        img::ImageOrientation::Orientation::FromImage}) noexcept;
 
     virtual ImageDrawResult DrawTiledImage(Image &, const RectF &destination, const PointF &source,
                                            const SizeF &tileSize, const SizeF &spacing,

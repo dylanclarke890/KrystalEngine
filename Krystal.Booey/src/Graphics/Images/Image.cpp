@@ -83,14 +83,14 @@ namespace krys::boo
     return nullImage;
   }
 
-  EncodedDataStatus Image::SetData(RefPtr<SharedBuffer> &&data, bool allDataReceived) noexcept
+  img::EncodedDataStatus Image::SetData(RefPtr<SharedBuffer> &&data, bool allDataReceived) noexcept
   {
     _encodedImageData = krys::move(data);
 
     // Don't do anything; it is an empty image.
     if (!_encodedImageData || !_encodedImageData->Size())
     {
-      return EncodedDataStatus::Complete;
+      return img::EncodedDataStatus::Complete;
     }
 
     return DataChanged(allDataReceived);
@@ -247,7 +247,7 @@ namespace krys::boo
     return GetNativeImage();
   }
 
-  RefPtr<NativeImage> Image::CurrentPreTransformedNativeImage(ImageOrientation) noexcept
+  RefPtr<NativeImage> Image::CurrentPreTransformedNativeImage(img::ImageOrientation) noexcept
   {
     return CurrentNativeImage();
   }
@@ -369,7 +369,7 @@ namespace krys::boo
     intrinsicHeight = intrinsicRatio.Height();
   }
 
-  SizeF Image::SourceSize(ImageOrientation orientation) const noexcept
+  SizeF Image::SourceSize(img::ImageOrientation orientation) const noexcept
   {
     return Size(orientation);
   }

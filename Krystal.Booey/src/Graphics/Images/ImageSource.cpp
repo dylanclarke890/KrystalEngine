@@ -27,17 +27,17 @@
 
 namespace krys::boo
 {
-  Expected<Ref<NativeImage>, DecodingStatus>
+  Expected<Ref<NativeImage>, img::DecodingStatus>
     ImageSource::PrimaryNativeImageForDrawing(SubsamplingLevel, const DecodingOptions &) noexcept
   {
     if (RefPtr<NativeImage> nativeImage = PrimaryNativeImage())
     {
       return krys::move(nativeImage);
     }
-    return Unexpected<DecodingStatus>(DecodingStatus::Invalid);
+    return Unexpected<img::DecodingStatus>(img::DecodingStatus::Invalid);
   }
 
-  Expected<Ref<NativeImage>, DecodingStatus>
+  Expected<Ref<NativeImage>, img::DecodingStatus>
     ImageSource::CurrentNativeImageForDrawing(SubsamplingLevel subsamplingLevel,
                                               const DecodingOptions &options) noexcept
   {

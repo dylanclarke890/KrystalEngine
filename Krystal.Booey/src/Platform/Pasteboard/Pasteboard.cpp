@@ -24,11 +24,11 @@
  */
 
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
-#include "Krystal.Booey/Graphics/Images/ImageDecoder.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/PasteboardStrategy.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
+#include "Krystal.Image/ImageDecoder.hpp"
 #include <algorithm>
 #include <array>
 
@@ -571,7 +571,7 @@ namespace krys::boo
     }
 
     bool hasImage = std::ranges::any_of(types, [](const utf8_string &type)
-                                        { return ImageDecoder::SupportsMimeType(type); });
+                                        { return img::ImageDecoder::SupportsMimeType(type); });
     return hasImage ? FileContentState::MayContainFilePaths : FileContentState::NoFileOrImageData;
   }
 

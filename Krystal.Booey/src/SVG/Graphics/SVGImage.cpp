@@ -257,9 +257,9 @@ namespace krys::boo
 
     auto orientation = options.Orientation();
     // SVG images don't have intrinsic orientation metadata like EXIF, so FromImage defaults to None.
-    if (orientation == ImageOrientation::Orientation::FromImage)
+    if (orientation == img::ImageOrientation::Orientation::FromImage)
     {
-      orientation = ImageOrientation::Orientation::None;
+      orientation = img::ImageOrientation::Orientation::None;
     }
 
     SizeF scale(destination.Width() / source.Width(), destination.Height() / source.Height());
@@ -273,11 +273,11 @@ namespace krys::boo
     context.Scale(scale);
 
     // Apply orientation transformation if needed.
-    if (orientation != ImageOrientation::Orientation::None)
+    if (orientation != img::ImageOrientation::Orientation::None)
     {
       auto containerSizeForTransform = ContainerSize();
       auto orientationTransform =
-        ImageOrientation(orientation).TransformFromDefault(SizeF(containerSizeForTransform));
+        img::ImageOrientation(orientation).TransformFromDefault(SizeF(containerSizeForTransform));
       context.ConcatCTM(orientationTransform);
     }
 
@@ -424,12 +424,12 @@ namespace krys::boo
     return rootElement->HasActiveAnimation();
   }
 
-  EncodedDataStatus SVGImage::DataChanged(bool allDataReceived) noexcept
+  img::EncodedDataStatus SVGImage::DataChanged(bool allDataReceived) noexcept
   {
     // Don't do anything; it is an empty image.
     if (!Data()->Size())
     {
-      return EncodedDataStatus::Complete;
+      return img::EncodedDataStatus::Complete;
     }
 
     if (allDataReceived)
@@ -484,7 +484,7 @@ namespace krys::boo
       _intrinsicSize = SizeF(ContainerSize());
     }
 
-    return _page ? EncodedDataStatus::Complete : EncodedDataStatus::Unknown;
+    return _page ? img::EncodedDataStatus::Complete : img::EncodedDataStatus::Unknown;
   }
 
   utf8_string SVGImage::FilenameExtension() const noexcept

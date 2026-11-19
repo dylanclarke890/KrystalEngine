@@ -3,8 +3,8 @@
 #include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ByteArrayPixelBuffer.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageFrame.hpp"
-#include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
+#include "Krystal.Image/ImageDecoder.hpp"
 #include "Krystal.Text/Base64.hpp"
 #include <cstdlib>
 
@@ -27,14 +27,13 @@ namespace krys::boo::tests
     KRYS_NODISCARD List<uint32> Decoded(const List<uint8> &encoded) noexcept
     {
       auto data = SharedBuffer::Create(Span<const uint8>(encoded));
-      auto decoder = ScalableImageDecoder::Create(*data, AlphaOption::NotPremultiplied,
-                                                  GammaAndColorProfileOption::Applied);
+      auto decoder = img::ImageDecoder::Create(*data, img::AlphaOption::NotPremultiplied,
+                                               img::GammaAndColorProfileOption::Applied);
       REQUIRE(decoder);
       decoder->SetData(*data, true);
       auto image = decoder->CreateFrameImageAtIndex(0);
       REQUIRE(image);
-      auto pixels = image->Pixels();
-      return {pixels.begin(), pixels.end()};
+      return image->Pixels->Pixels;
     }
 
     /// @brief Whether each channel of @p actual is within @p tolerance of @p expected (lossy formats).

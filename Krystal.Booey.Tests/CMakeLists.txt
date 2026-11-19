@@ -28,6 +28,9 @@ target_compile_options(Krystal.Booey.Tests
 		$<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8>
 )
 
+# The test images Krystal.Image.Tests keeps.
+target_include_directories(Krystal.Booey.Tests PRIVATE "${CMAKE_SOURCE_DIR}/Krystal.Image.Tests/include")
+
 target_compile_definitions(Krystal.Booey.Tests PRIVATE
     KRYS_BOOEY_TESTS_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
 
@@ -90,9 +93,6 @@ target_sources(Krystal.Booey.Tests
 		include/Krystal.Booey.Tests/SVG/TestSVGElement.hpp
 		include/Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp
 		include/Krystal.Booey.Tests/CSS/MediaTestUtils.hpp
-		include/Krystal.Booey.Tests/Platform/ImageDecoders/EXIFImages.hpp
-		include/Krystal.Booey.Tests/Platform/ImageDecoders/ICCImages.hpp
-		include/Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp
 		include/Krystal.Booey.Tests/CSS/SelectorTestUtils.hpp
 		include/Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp
 		include/Krystal.Booey.Tests/CSS/ValueTestUtils.hpp
@@ -328,7 +328,6 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/ImageBuffers/ImageBufferUtilities.cpp
 		tests/Graphics/ImageBuffers/PixelBuffer.cpp
 		tests/Graphics/Images/BitmapImage.cpp
-		tests/Graphics/Images/ImageDecoder.cpp
 		tests/Graphics/Layers/GraphicsLayer.cpp
 		tests/Graphics/Paths/Path.cpp
 		tests/Graphics/Pattern.cpp
@@ -489,7 +488,6 @@ target_sources(Krystal.Booey.Tests
 		tests/Layout/FormattingContexts/Inline/Ruby/RubyFormattingContext.cpp
 		tests/Layout/FormattingContexts/Inline/Invalidation/InlineInvalidation.cpp
 		tests/Platform/DateComponents.cpp
-		tests/Platform/ImageDecoders/ScalableImageDecoder.cpp
 		tests/Platform/Scrolling/ScrollAlignment.cpp
 		tests/Rendering/Grid/RenderGrid.cpp
 		tests/Rendering/RenderFlexibleBox.cpp

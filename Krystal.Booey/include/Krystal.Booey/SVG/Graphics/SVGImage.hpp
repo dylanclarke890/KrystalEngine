@@ -73,7 +73,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD SizeF
-      Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept final
+      Size(img::ImageOrientation = img::ImageOrientation::Orientation::FromImage) const noexcept final
     {
       return _intrinsicSize;
     }
@@ -124,7 +124,7 @@ namespace krys::boo
     void ComputeIntrinsicDimensions(float &intrinsicWidth, float &intrinsicHeight,
                                     SizeF &intrinsicRatio) noexcept final;
 
-    EncodedDataStatus DataChanged(bool allDataReceived) noexcept final;
+    img::EncodedDataStatus DataChanged(bool allDataReceived) noexcept final;
 
     // FIXME: Implement this to be less conservative.
     KRYS_NODISCARD bool CurrentFrameKnownToBeOpaque() const noexcept final

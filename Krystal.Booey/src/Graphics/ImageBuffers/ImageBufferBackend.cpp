@@ -109,7 +109,7 @@ namespace krys::boo
     }
 
     // The pixels are drawn as an image: premultiplied ARGB (BGRA in memory), the destination's size.
-    auto pixels = AdoptRef(*new PixelData(static_cast<size_t>(destinationRect.Size().UnclampedArea())));
+    auto pixels = AdoptRef(*new img::PixelData(static_cast<size_t>(destinationRect.Size().UnclampedArea())));
     auto sourceBytesPerPixel = PixelBuffer::BytesPerPixel(sourcePixelBuffer.Format().Format);
     auto sourceBytesPerRow = static_cast<uint32>(sourcePixelBuffer.Size().Width()) * sourceBytesPerPixel;
     ConstPixelBufferConversionView source {

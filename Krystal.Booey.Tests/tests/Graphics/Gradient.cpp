@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Image/ImageOrientation.hpp"
 
 namespace krys::boo::tests
 {
@@ -67,29 +67,29 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("ImageOrientation", "[Graphics][ImageOrientation]")
+  TEST_CASE("ImageOrientation", "[Graphics][img::ImageOrientation]")
   {
-    using Orientation = ImageOrientation::Orientation;
+    using Orientation = img::ImageOrientation::Orientation;
 
-    CHECK(ImageOrientation {} == Orientation::None);
-    CHECK(ImageOrientation::FromEXIFValue(6) == Orientation::OriginRightTop);
-    CHECK(ImageOrientation::FromEXIFValue(0) == Orientation::None);
-    CHECK(ImageOrientation::FromEXIFValue(9) == Orientation::None);
+    CHECK(img::ImageOrientation {} == Orientation::None);
+    CHECK(img::ImageOrientation::FromEXIFValue(6) == Orientation::OriginRightTop);
+    CHECK(img::ImageOrientation::FromEXIFValue(0) == Orientation::None);
+    CHECK(img::ImageOrientation::FromEXIFValue(9) == Orientation::None);
 
-    CHECK(ImageOrientation {Orientation::OriginRightTop}.UsesWidthAsHeight());
-    CHECK_FALSE(ImageOrientation {Orientation::OriginBottomRight}.UsesWidthAsHeight());
+    CHECK(img::ImageOrientation {Orientation::OriginRightTop}.UsesWidthAsHeight());
+    CHECK_FALSE(img::ImageOrientation {Orientation::OriginBottomRight}.UsesWidthAsHeight());
 
-    CHECK(ImageOrientation {Orientation::OriginTopLeft}.WithFlippedY() == Orientation::OriginBottomLeft);
-    CHECK(ImageOrientation {Orientation::OriginLeftBottom}.WithFlippedY() == Orientation::OriginLeftTop);
+    CHECK(img::ImageOrientation {Orientation::OriginTopLeft}.WithFlippedY() == Orientation::OriginBottomLeft);
+    CHECK(img::ImageOrientation {Orientation::OriginLeftBottom}.WithFlippedY() == Orientation::OriginLeftTop);
 
     // 90 degrees clockwise: x' = -y + w, y' = x.
-    auto transform = ImageOrientation {Orientation::OriginRightTop}.TransformFromDefault({20, 10});
+    auto transform = img::ImageOrientation {Orientation::OriginRightTop}.TransformFromDefault({20, 10});
     CHECK(transform.A() == 0);
     CHECK(transform.B() == 1);
     CHECK(transform.C() == -1);
     CHECK(transform.D() == 0);
     CHECK(transform.E() == 20);
     CHECK(transform.F() == 0);
-    CHECK(ImageOrientation {Orientation::OriginTopLeft}.TransformFromDefault({20, 10}).IsIdentity());
+    CHECK(img::ImageOrientation {Orientation::OriginTopLeft}.TransformFromDefault({20, 10}).IsIdentity());
   }
 }

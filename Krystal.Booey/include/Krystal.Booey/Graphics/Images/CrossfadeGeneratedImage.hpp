@@ -68,7 +68,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD SizeF
-      Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept override
+      Size(img::ImageOrientation = img::ImageOrientation::Orientation::FromImage) const noexcept override
     {
       return _crossfadeSize;
     }

@@ -265,7 +265,7 @@ namespace krys::boo
 
     ImageDrawResult DrawImage(Image &, const RectF &, const RectF &,
                               ImagePaintingOptions = ImagePaintingOptions {
-                                ImageOrientation::Orientation::FromImage}) noexcept final
+                                img::ImageOrientation::Orientation::FromImage}) noexcept final
     {
       return ImageDrawResult::DidNothing;
     }

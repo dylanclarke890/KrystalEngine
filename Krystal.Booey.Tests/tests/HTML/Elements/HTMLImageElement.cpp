@@ -3,9 +3,6 @@
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/AnimatedImages.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/EXIFImages.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -21,6 +18,9 @@
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Threading/ManualWorkQueue.hpp"
 #include "Krystal.Core/Utils/ScopeExit.hpp"
+#include "Krystal.Image.Tests/AnimatedImages.hpp"
+#include "Krystal.Image.Tests/EXIFImages.hpp"
+#include "Krystal.Image.Tests/TestImages.hpp"
 
 namespace krys::boo::tests
 {
@@ -89,7 +89,7 @@ namespace krys::boo::tests
             "[html:img-dimensions]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
     loader.Strategy.Defer = true;
 
     ImageFixture fixture(u8"<img id=img src='file:///a.png'>");
@@ -175,7 +175,7 @@ namespace krys::boo::tests
             "[HTML][HTMLImageElement]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
 
     ImageFixture fixture(u8"<img id=text alt=a><img id=loaded alt=a src='file:///a.png'>");
     RunNetworkingTasks();
@@ -223,7 +223,7 @@ namespace krys::boo::tests
             "[HTML][HTMLImageElement]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
     loader.Strategy.Defer = true;
 
     ImageFixture fixture(u8"<style>img { display: block }</style>"
@@ -249,9 +249,9 @@ namespace krys::boo::tests
             "and-height]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///one.png"] = images::PNG;
-    loader.Strategy.Resources[u8"file:///two.png"] = images::PNG;
-    loader.Strategy.Resources[u8"file:///large.jpg"] = images::JPEG;
+    loader.Strategy.Resources[u8"file:///one.png"] = img::tests::images::PNG;
+    loader.Strategy.Resources[u8"file:///two.png"] = img::tests::images::PNG;
+    loader.Strategy.Resources[u8"file:///large.jpg"] = img::tests::images::JPEG;
 
     ImageFixture fixture(
       u8"<img id=density src='file:///one.png' srcset='file:///two.png 2x'>"
@@ -283,8 +283,8 @@ namespace krys::boo::tests
     "[html:select-an-image-source]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///photo.jpg"] = images::JPEG;
-    loader.Strategy.Resources[u8"file:///fallback.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///photo.jpg"] = img::tests::images::JPEG;
+    loader.Strategy.Resources[u8"file:///fallback.png"] = img::tests::images::PNG;
 
     ImageFixture fixture(
       u8"<picture>"
@@ -318,8 +318,8 @@ namespace krys::boo::tests
             "[HTML][HTMLImageElement][html:the-source-element][html:the-img-element]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///photo.jpg"] = images::JPEG;
-    loader.Strategy.Resources[u8"file:///fallback.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///photo.jpg"] = img::tests::images::JPEG;
+    loader.Strategy.Resources[u8"file:///fallback.png"] = img::tests::images::PNG;
 
     ImageFixture fixture(u8"<div id=outside></div><picture id=picture>"
                          u8"<source id=jpeg srcset='file:///photo.jpg' type=image/jpeg>"
@@ -373,8 +373,8 @@ namespace krys::boo::tests
   TEST_CASE("HTMLImageElement: changing the source loads it", "[HTML][HTMLImageElement]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
-    loader.Strategy.Resources[u8"file:///b.jpg"] = images::JPEG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
+    loader.Strategy.Resources[u8"file:///b.jpg"] = img::tests::images::JPEG;
 
     ImageFixture fixture(u8"<img id=img src='file:///a.png'>");
     auto &image = fixture.Image(u8"img");
@@ -402,7 +402,7 @@ namespace krys::boo::tests
             "[HTML][HTMLImageElement][html:density-corrected-intrinsic-width-and-height]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.jpg"] = images::DensityJPEG;
+    loader.Strategy.Resources[u8"file:///a.jpg"] = img::tests::images::DensityJPEG;
 
     ImageFixture fixture(u8"<img id=one src='file:///a.jpg'><img id=two srcset='file:///a.jpg 2x'>");
     RunNetworkingTasks();
@@ -420,7 +420,7 @@ namespace krys::boo::tests
   TEST_CASE("HTMLImageElement: generated content images", "[HTML][HTMLImageElement]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
 
     ImageFixture fixture(u8"<style>#before::before { content: url(file:///a.png) }</style>"
                          u8"<div id=replaced style='content: url(file:///a.png)'>text</div>"
@@ -438,8 +438,8 @@ namespace krys::boo::tests
   {
     using namespace std::chrono_literals;
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.gif"] = images::AnimatedGIF;
-    loader.Strategy.Resources[u8"file:///b.webp"] = images::AnimatedWebP;
+    loader.Strategy.Resources[u8"file:///a.gif"] = img::tests::images::AnimatedGIF;
+    loader.Strategy.Resources[u8"file:///b.webp"] = img::tests::images::AnimatedWebP;
 
     ImageFixture fixture(
       u8"<img id=img src='file:///a.gif'>"
@@ -479,8 +479,8 @@ namespace krys::boo::tests
   {
     using namespace std::chrono_literals;
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.gif"] = images::AnimatedGIF;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.gif"] = img::tests::images::AnimatedGIF;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
 
     ImageFixture fixture(u8"<img id=animated src='file:///a.gif'><img id=still src='file:///a.png'>"
                          u8"<img id=second><img id=third>");
@@ -513,7 +513,7 @@ namespace krys::boo::tests
   {
     using namespace std::chrono_literals;
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.gif"] = images::AnimatedGIF;
+    loader.Strategy.Resources[u8"file:///a.gif"] = img::tests::images::AnimatedGIF;
 
     ImageFixture fixture(
       u8"<style>body { margin: 0 }</style>"
@@ -551,7 +551,7 @@ namespace krys::boo::tests
   {
     using namespace std::chrono_literals;
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.gif"] = images::AnimatedGIF;
+    loader.Strategy.Resources[u8"file:///a.gif"] = img::tests::images::AnimatedGIF;
 
     Ref<Page> page = Page::Create();
     ImageFixture fixture(*page, u8"<img id=img src='file:///a.gif'>");
@@ -584,7 +584,7 @@ namespace krys::boo::tests
             "[HTML][HTMLImageElement][html:dom-img-decode]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
     loader.Strategy.Defer = true;
 
     ImageFixture fixture(u8"<img id=img src='file:///a.png'>");
@@ -612,8 +612,8 @@ namespace krys::boo::tests
     "[HTML][HTMLImageElement][html:dom-img-decode]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
-    loader.Strategy.Resources[u8"file:///b.jpg"] = images::JPEG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
+    loader.Strategy.Resources[u8"file:///b.jpg"] = img::tests::images::JPEG;
     loader.Strategy.Defer = true;
 
     ImageFixture fixture(
@@ -655,7 +655,7 @@ namespace krys::boo::tests
             "[HTML][HTMLImageElement][html:dom-img-decode]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
     ManualWorkQueue queue;
     PlatformStrategies::Singleton().SetWorkQueue(&queue);
     auto clearWorkQueue = MakeScopeExit([] { PlatformStrategies::Singleton().SetWorkQueue(nullptr); });

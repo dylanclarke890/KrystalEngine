@@ -6,7 +6,6 @@
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp"
@@ -24,6 +23,7 @@
 #include "Krystal.Booey/HTML/ImageData/ImageData.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
+#include "Krystal.Image.Tests/TestImages.hpp"
 #include <cmath>
 #include <limits>
 #include <numbers>
@@ -709,7 +709,7 @@ namespace krys::boo::tests
             "[html:check-the-usability-of-the-image-argument]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
     Canvas2DFixture fixture(
       u8"<canvas id=canvas width=10 height=10></canvas><canvas id=other width=4 height=4>"
       u8"</canvas><canvas id=empty width=0 height=4></canvas><img id=img src='file:///a.png'>"

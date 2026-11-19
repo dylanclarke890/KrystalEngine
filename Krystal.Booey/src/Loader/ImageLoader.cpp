@@ -478,10 +478,10 @@ namespace krys::boo
     }
 
     bitmapImage->Decode(
-      [promises = std::exchange(_decodingPromises, {})](DecodingStatus decodingStatus) mutable
+      [promises = std::exchange(_decodingPromises, {})](img::DecodingStatus decodingStatus) mutable
       {
-        krys_debug_assert(decodingStatus != DecodingStatus::Decoding);
-        SettleDecodePromises(krys::move(promises), decodingStatus == DecodingStatus::Invalid
+        krys_debug_assert(decodingStatus != img::DecodingStatus::Decoding);
+        SettleDecodePromises(krys::move(promises), decodingStatus == img::DecodingStatus::Invalid
                                                      ? Maybe<utf8_stringview>(u8"Decoding error.")
                                                      : null);
       });

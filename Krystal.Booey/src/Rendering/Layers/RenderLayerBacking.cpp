@@ -3248,7 +3248,7 @@ namespace krys::boo
         return false;
       }
 
-      if (image->CurrentFrameOrientation() != ImageOrientation::Orientation::None)
+      if (image->CurrentFrameOrientation() != img::ImageOrientation::Orientation::None)
       {
         return false;
       }
@@ -3302,7 +3302,7 @@ namespace krys::boo
           return false;
         }
 
-        if (image->CurrentFrameOrientation() != ImageOrientation::Orientation::None)
+        if (image->CurrentFrameOrientation() != img::ImageOrientation::Orientation::None)
         {
           return false;
         }

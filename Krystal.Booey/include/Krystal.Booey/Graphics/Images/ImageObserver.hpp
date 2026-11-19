@@ -55,7 +55,7 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual int64 ExpectedContentLength() const noexcept = 0;
 
-    virtual void EncodedDataStatusChanged(const Image &, EncodedDataStatus) noexcept
+    virtual void EncodedDataStatusChanged(const Image &, img::EncodedDataStatus) noexcept
     {
     }
 
@@ -69,7 +69,7 @@ namespace krys::boo
     }
 
     virtual void ImageFrameAvailable(const Image &, ImageAnimatingState, const RectI *changeRect = nullptr,
-                                     DecodingStatus = DecodingStatus::Invalid) noexcept = 0;
+                                     img::DecodingStatus = img::DecodingStatus::Invalid) noexcept = 0;
 
     virtual void ChangedInRect(const Image &, const RectI *changeRect = nullptr) noexcept = 0;
 

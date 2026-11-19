@@ -31,7 +31,7 @@ namespace krys::boo
   {
   }
 
-  SizeF SVGImageForContainer::Size(ImageOrientation) const noexcept
+  SizeF SVGImageForContainer::Size(img::ImageOrientation) const noexcept
   {
     SizeF scaledContainerSize(_containerSize);
     scaledContainerSize.Scale(_containerZoom);

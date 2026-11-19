@@ -1,14 +1,14 @@
 ﻿#include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/AnimatedImages.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/EXIFImages.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageObserver.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Image.Tests/AnimatedImages.hpp"
+#include "Krystal.Image.Tests/EXIFImages.hpp"
+#include "Krystal.Image.Tests/TestImages.hpp"
 
 namespace krys::boo::tests
 {
@@ -21,7 +21,7 @@ namespace krys::boo::tests
       int Draws {0};
       int FramesAvailable {0};
       int64 DecodedSize {0};
-      List<EncodedDataStatus> Statuses;
+      List<img::EncodedDataStatus> Statuses;
 
       KRYS_NODISCARD net::Url SourceUrl() const noexcept override
       {
@@ -38,7 +38,7 @@ namespace krys::boo::tests
         return 0;
       }
 
-      void EncodedDataStatusChanged(const Image &, EncodedDataStatus status) noexcept override
+      void EncodedDataStatusChanged(const Image &, img::EncodedDataStatus status) noexcept override
       {
         Statuses.push_back(status);
       }
@@ -54,7 +54,7 @@ namespace krys::boo::tests
       }
 
       void ImageFrameAvailable(const Image &, ImageAnimatingState state, const RectI *,
-                               DecodingStatus) noexcept override
+                               img::DecodingStatus) noexcept override
       {
         if (state == ImageAnimatingState::Yes)
         {
@@ -102,7 +102,8 @@ namespace krys::boo::tests
   {
     auto image = BitmapImage::Create();
     CHECK(image->IsNull());
-    CHECK(image->SetData(SharedBuffer::Create(images::PNG), true) == EncodedDataStatus::Complete);
+    CHECK(image->SetData(SharedBuffer::Create(img::tests::images::PNG), true)
+          == img::EncodedDataStatus::Complete);
 
     CHECK(Is<BitmapImage>(static_cast<Image &>(*image)));
     CHECK(image->Size() == SizeF(3, 2));
@@ -110,7 +111,7 @@ namespace krys::boo::tests
     CHECK_FALSE(image->IsAnimated());
     CHECK(image->FilenameExtension() == u8"png");
     CHECK_FALSE(image->CurrentFrameKnownToBeOpaque());
-    CHECK(image->Orientation() == ImageOrientation::Orientation::None);
+    CHECK(image->Orientation() == img::ImageOrientation::Orientation::None);
 
     auto nativeImage = image->GetNativeImage();
     REQUIRE(nativeImage);
@@ -129,7 +130,8 @@ namespace krys::boo::tests
 
     const uint8 text[] = "definitely not an image";
     auto image = BitmapImage::Create();
-    CHECK(image->SetData(SharedBuffer::Create(Span<const uint8> {text}), true) == EncodedDataStatus::Unknown);
+    CHECK(image->SetData(SharedBuffer::Create(Span<const uint8> {text}), true)
+          == img::EncodedDataStatus::Unknown);
     CHECK(image->IsNull());
     CHECK_FALSE(image->GetNativeImage());
     CHECK(Record(*image, {0, 0, 10, 10})->Items().empty());
@@ -137,17 +139,17 @@ namespace krys::boo::tests
 
   TEST_CASE("BitmapImage: the EXIF orientation sizes and transforms the image", "[Graphics][BitmapImage]")
   {
-    auto image = ImageFrom(images::RotatedJPEG);
-    CHECK(image->Orientation() == ImageOrientation::Orientation::OriginRightTop);
+    auto image = ImageFrom(img::tests::images::RotatedJPEG);
+    CHECK(image->Orientation() == img::ImageOrientation::Orientation::OriginRightTop);
     CHECK(image->Size() == SizeF(8, 16));
-    CHECK(image->Size(ImageOrientation::Orientation::None) == SizeF(16, 8));
+    CHECK(image->Size(img::ImageOrientation::Orientation::None) == SizeF(16, 8));
 
     SECTION("Drawing passes the orientation on")
     {
       auto displayList = Record(*image, {0, 0, 8, 16});
       REQUIRE(displayList->Items().size() == 1u);
       const auto &item = std::get<display_list::DrawNativeImage>(displayList->Items()[0]);
-      CHECK(item.Options().Orientation() == ImageOrientation::Orientation::OriginRightTop);
+      CHECK(item.Options().Orientation() == img::ImageOrientation::Orientation::OriginRightTop);
       CHECK(item.DestinationRect() == RectF(0, 0, 8, 16));
       CHECK(item.Source() == RectF(0, 0, 8, 16));
       CHECK(item.GetNativeImage().Size() == SizeI(16, 8));
@@ -170,7 +172,7 @@ namespace krys::boo::tests
 
   TEST_CASE("BitmapImage: the density-corrected size sizes and scales the image", "[Graphics][BitmapImage]")
   {
-    auto image = ImageFrom(images::DensityJPEG);
+    auto image = ImageFrom(img::tests::images::DensityJPEG);
     CHECK(image->HasDensityCorrectedSize());
     CHECK(image->Size() == SizeF(8, 4));
     CHECK(image->SourceSize() == SizeF(16, 8));
@@ -214,7 +216,7 @@ namespace krys::boo::tests
 
   TEST_CASE("BitmapImage: drawing records native image draws", "[Graphics][BitmapImage]")
   {
-    auto image = ImageFrom(images::PNG);
+    auto image = ImageFrom(img::tests::images::PNG);
 
     SECTION("An image")
     {
@@ -239,7 +241,7 @@ namespace krys::boo::tests
 
     SECTION("A single pixel draws as its colour")
     {
-      auto solid = ImageFrom(images::SolidPNG);
+      auto solid = ImageFrom(img::tests::images::SolidPNG);
       auto displayList = Record(*solid, {0, 0, 10, 10});
       bool filled = false;
       for (const auto &item : displayList->Items())
@@ -254,9 +256,9 @@ namespace krys::boo::tests
   TEST_CASE("BitmapImage: tells its observer about data, decoding and drawing", "[Graphics][BitmapImage]")
   {
     auto observer = AdoptRef(*new CountingObserver());
-    auto image = ImageFrom(images::PNG, observer.get());
+    auto image = ImageFrom(img::tests::images::PNG, observer.get());
     REQUIRE_FALSE(observer->Statuses.empty());
-    CHECK(observer->Statuses.back() == EncodedDataStatus::Complete);
+    CHECK(observer->Statuses.back() == img::EncodedDataStatus::Complete);
     CHECK(image->MimeType() == u8"image/png");
 
     (void)Record(*image, {0, 0, 3, 2});
@@ -274,15 +276,15 @@ namespace krys::boo::tests
 
   TEST_CASE("BitmapImage: decoding calls back once the frame is decoded", "[Graphics][BitmapImage]")
   {
-    auto image = ImageFrom(images::GIF);
-    Maybe<DecodingStatus> status;
-    image->Decode([&](DecodingStatus decodingStatus) { status = decodingStatus; });
-    CHECK(status == DecodingStatus::Complete);
+    auto image = ImageFrom(img::tests::images::GIF);
+    Maybe<img::DecodingStatus> status;
+    image->Decode([&](img::DecodingStatus decodingStatus) { status = decodingStatus; });
+    CHECK(status == img::DecodingStatus::Complete);
   }
 
   TEST_CASE("BitmapImage: made from a native image", "[Graphics][BitmapImage]")
   {
-    auto pixels = AdoptRef(*new PixelData(List<uint32> {0xFF'FF'00'00u, 0xFF'00'FF'00u}));
+    auto pixels = AdoptRef(*new img::PixelData(List<uint32> {0xFF'FF'00'00u, 0xFF'00'FF'00u}));
     PlatformImagePtr platformImage = AdoptRef(*new PlatformImage(SizeI(2, 1), krys::move(pixels), true));
     auto image = BitmapImage::Create(krys::move(platformImage));
     REQUIRE(image);
@@ -300,7 +302,8 @@ namespace krys::boo::tests
     auto &loop = html::EventLoop::Current();
     loop.RunUntilIdle();
 
-    for (auto bytes : {images::AnimatedGIF, images::AnimatedPNG, images::AnimatedWebP})
+    for (auto bytes :
+         {img::tests::images::AnimatedGIF, img::tests::images::AnimatedPNG, img::tests::images::AnimatedWebP})
     {
       auto observer = AdoptRef(*new CountingObserver());
       auto image = ImageFrom(bytes, observer.get());
@@ -342,7 +345,7 @@ namespace krys::boo::tests
     auto &loop = html::EventLoop::Current();
     loop.RunUntilIdle();
 
-    auto image = ImageFrom(images::OnceGIF);
+    auto image = ImageFrom(img::tests::images::OnceGIF);
     REQUIRE(image->IsAnimated());
     auto start = loop.Now();
     (void)Record(*image, RectF(0, 0, 2, 2));

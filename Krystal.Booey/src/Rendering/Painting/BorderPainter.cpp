@@ -502,7 +502,7 @@ namespace krys::boo
     }
 
     // FIXME: HDR content and the dynamic range limit come with bitmap images.
-    ImagePaintingOptions options = {op, ImageOrientation::Orientation::FromImage};
+    ImagePaintingOptions options = {op, img::ImageOrientation::Orientation::FromImage};
 
     // FIXME: border-image is broken with full page zooming when tiling has to happen, since the tiling
     // function doesn't have any understanding of the zoom that is in effect on the tile.

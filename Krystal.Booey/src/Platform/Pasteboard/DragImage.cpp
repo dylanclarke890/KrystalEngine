@@ -142,7 +142,7 @@ namespace krys::boo
     return dissolvedImage;
   }
 
-  DragImageRef CreateDragImageFromImage(Image *image, ImageOrientation orientation) noexcept
+  DragImageRef CreateDragImageFromImage(Image *image, img::ImageOrientation orientation) noexcept
   {
     if (!image)
     {

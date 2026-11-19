@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/HTML/Images/ImageDocument.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/LoadTestUtils.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Image.Tests/TestImages.hpp"
 #include <string>
 
 namespace krys::boo::tests
@@ -83,7 +83,8 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "ImageDocument: a loaded image becomes an image document",
                    "[HTML][ImageDocument][html:read-media]")
   {
-    ImageDocumentFixture fixture(images::PNG, u8"image/png", u8"https://example.com/dir/my%20image.png");
+    ImageDocumentFixture fixture(img::tests::images::PNG, u8"image/png",
+                                 u8"https://example.com/dir/my%20image.png");
     auto &document = fixture.ImageDocument();
 
     CHECK(Narrow(document.ContentType()) == "image/png");
@@ -114,7 +115,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "ImageDocument: the title falls back on the host",
                    "[HTML][ImageDocument]")
   {
-    ImageDocumentFixture fixture(images::PNG, u8"image/png", u8"https://example.com/");
+    ImageDocumentFixture fixture(img::tests::images::PNG, u8"image/png", u8"https://example.com/");
     CHECK(Narrow(fixture.ImageDocument().Title())
           == "example.com (3\xC3\x97"
              "2)");
@@ -164,7 +165,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "ImageDocument: an image that fits the view is left as it is",
                    "[HTML][ImageDocument]")
   {
-    ImageDocumentFixture fixture(images::PNG, u8"image/png", u8"https://example.com/image.png");
+    ImageDocumentFixture fixture(img::tests::images::PNG, u8"image/png", u8"https://example.com/image.png");
     CHECK(fixture.Image().Width() == 3);
     CHECK(fixture.Image().Height() == 2);
     CHECK_FALSE(fixture.Style().contains("cursor"));
@@ -178,7 +179,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "ImageDocument: other types aren't image documents",
                    "[HTML][ImageDocument]")
   {
-    ImageDocumentFixture fixture(images::PNG, u8"image/x-unknown", u8"https://example.com/image");
+    ImageDocumentFixture fixture(img::tests::images::PNG, u8"image/x-unknown", u8"https://example.com/image");
     CHECK_FALSE(Is<ImageDocument>(fixture.Document()));
   }
 }

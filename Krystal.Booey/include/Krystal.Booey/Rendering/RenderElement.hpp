@@ -22,7 +22,6 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
@@ -34,6 +33,7 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Image/ImageOrientation.hpp"
 
 namespace krys::boo
 {
@@ -240,7 +240,7 @@ namespace krys::boo
     /// @brief How images drawn for the renderer are oriented: its `image-orientation`.
     // FIXME: An image element that doesn't allow the orientation to be overridden draws its image's
     // (allowsOrientationOverride, G7c).
-    KRYS_NODISCARD boo::ImageOrientation GetImageOrientation() const noexcept;
+    KRYS_NODISCARD img::ImageOrientation GetImageOrientation() const noexcept;
 
     /// @brief Whether the renderer can be seen at all: it's visible and its document's frame is on screen.
     KRYS_NODISCARD bool IsVisibleIgnoringGeometry() const noexcept;

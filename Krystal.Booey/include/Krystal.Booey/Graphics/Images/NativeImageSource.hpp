@@ -42,7 +42,7 @@ namespace krys::boo
     explicit NativeImageSource(Ref<NativeImage> &&) noexcept;
 
     KRYS_NODISCARD SizeI
-      Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept final
+      Size(img::ImageOrientation = img::ImageOrientation::Orientation::FromImage) const noexcept final
     {
       return _frame.Size();
     }

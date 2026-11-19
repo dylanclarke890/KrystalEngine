@@ -625,7 +625,7 @@ namespace krys::boo
         ImagePaintingOptions options = {
           op == CompositeOperator::SourceOver ? layer.Layer.CompositeForPainting(layer.IsLast) : op,
           layer.Layer.GetBlendMode(), _renderer.DecodingModeForImageDraw(*image, _paintInfo),
-          ImageOrientation::Orientation::FromImage,
+          img::ImageOrientation::Orientation::FromImage,
           _renderer.ChooseInterpolationQuality(context, *image, &layer.Layer, geometry.TileSize)};
 
         auto drawResult = context.DrawTiledImage(

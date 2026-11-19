@@ -32,8 +32,8 @@
 
 namespace krys::boo
 {
-  Ref<BitmapImage> BitmapImage::Create(ImageObserver *observer, AlphaOption alphaOption,
-                                       GammaAndColorProfileOption gammaAndColorProfileOption) noexcept
+  Ref<BitmapImage> BitmapImage::Create(ImageObserver *observer, img::AlphaOption alphaOption,
+                                       img::GammaAndColorProfileOption gammaAndColorProfileOption) noexcept
   {
     return AdoptRef(*new BitmapImage(observer, alphaOption, gammaAndColorProfileOption));
   }
@@ -57,8 +57,8 @@ namespace krys::boo
     return Create(NativeImage::Create(krys::move(platformImage)));
   }
 
-  BitmapImage::BitmapImage(ImageObserver *observer, AlphaOption alphaOption,
-                           GammaAndColorProfileOption gammaAndColorProfileOption) noexcept
+  BitmapImage::BitmapImage(ImageObserver *observer, img::AlphaOption alphaOption,
+                           img::GammaAndColorProfileOption gammaAndColorProfileOption) noexcept
       : Image(observer), _source(BitmapImageSource::Create(*this, alphaOption, gammaAndColorProfileOption))
   {
   }
@@ -68,7 +68,7 @@ namespace krys::boo
   {
   }
 
-  EncodedDataStatus BitmapImage::DataChanged(bool allDataReceived) noexcept
+  img::EncodedDataStatus BitmapImage::DataChanged(bool allDataReceived) noexcept
   {
     return _source->DataChanged(Data(), allDataReceived);
   }
@@ -86,8 +86,8 @@ namespace krys::boo
       return ImageDrawResult::DidNothing;
     }
 
-    auto size = SizeF(_source->Size(ImageOrientation::Orientation::None));
-    auto sourceSize = SizeF(_source->SourceSize(ImageOrientation::Orientation::None));
+    auto size = SizeF(_source->Size(img::ImageOrientation::Orientation::None));
+    auto sourceSize = SizeF(_source->SourceSize(img::ImageOrientation::Orientation::None));
 
     // adjustedSourceRect is in the coordinates of densityCorrectedSize, so map it to the sourceSize.
     auto adjustedSourceRect = sourceRect;
@@ -110,19 +110,19 @@ namespace krys::boo
       // has happened.
       if (options.GetShowDebugBackground() == ShowDebugBackground::Yes)
       {
-        if (nativeImageOrError.error() == DecodingStatus::Decoding)
+        if (nativeImageOrError.error() == img::DecodingStatus::Decoding)
         {
           FillWithSolidColor(context, destinationRect, SRGBA<uint8> {255, 255, 0, 128},
                              options.GetCompositeOperator());
         }
-        else if (nativeImageOrError.error() == DecodingStatus::Invalid)
+        else if (nativeImageOrError.error() == img::DecodingStatus::Invalid)
         {
           FillWithSolidColor(context, destinationRect, SRGBA<uint8> {255, 0, 0, 128},
                              options.GetCompositeOperator());
         }
       }
-      return nativeImageOrError.error() == DecodingStatus::Decoding ? ImageDrawResult::DidRequestDecoding
-                                                                    : ImageDrawResult::DidNothing;
+      return nativeImageOrError.error() == img::DecodingStatus::Decoding ? ImageDrawResult::DidRequestDecoding
+                                                                         : ImageDrawResult::DidNothing;
     }
 
     Ref<NativeImage> nativeImage = krys::move(*nativeImageOrError);
@@ -141,7 +141,7 @@ namespace krys::boo
       }
 
       auto orientation = options.Orientation();
-      if (orientation == ImageOrientation::Orientation::FromImage)
+      if (orientation == img::ImageOrientation::Orientation::FromImage)
       {
         orientation = CurrentFrameOrientation();
       }
@@ -178,7 +178,7 @@ namespace krys::boo
     else
     {
       Image::DrawPattern(context, destinationRect, tileRect, transform, phase, spacing,
-                         {options, ImageOrientation(ImageOrientation::Orientation::FromImage)});
+                         {options, img::ImageOrientation(img::ImageOrientation::Orientation::FromImage)});
     }
   }
 
@@ -189,7 +189,7 @@ namespace krys::boo
   {
     // As Chrome, the pattern tiles the full-resolution pixels, scaled to the density-corrected size, rather
     // than pixels resampled to it (upstream's pre-transformed image).
-    const ImageOrientation orientation = ImageOrientation::Orientation::FromImage;
+    const img::ImageOrientation orientation = img::ImageOrientation::Orientation::FromImage;
     RefPtr<NativeImage> tileImage = _source->CurrentOrientedNativeImage(orientation);
     if (!tileImage)
     {
@@ -234,16 +234,16 @@ namespace krys::boo
     SetImageObserver(nullptr);
 
     auto bufferRect = RectF {{}, buffer->LogicalSize()};
-    (void)Draw(
-      buffer->Context(), bufferRect, tileRect,
-      {options, DecodingMode::Synchronous, ImageOrientation(ImageOrientation::Orientation::FromImage)});
+    (void)Draw(buffer->Context(), bufferRect, tileRect,
+               {options, DecodingMode::Synchronous,
+                img::ImageOrientation(img::ImageOrientation::Orientation::FromImage)});
 
     SetImageObserver(krys::move(observer));
     buffer->ConvertToLuminanceMask();
 
     context.SetDrawLuminanceMask(false);
     context.DrawPattern(*buffer, destinationRect, bufferRect, transform, phase, spacing,
-                        {options, ImageOrientation(ImageOrientation::Orientation::FromImage)});
+                        {options, img::ImageOrientation(img::ImageOrientation::Orientation::FromImage)});
   }
 
   void BitmapImage::Dump(TextStream &ts) const noexcept

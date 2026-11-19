@@ -640,7 +640,7 @@ namespace krys::ui::tests
     constexpr uint32 argbBlue = 0xFF'00'00'FFu;
     auto makeImage = [](const SizeI &size, List<uint32> &&pixels, bool premultiplied)
     {
-      auto data = AdoptRef(*new boo::PixelData(krys::move(pixels)));
+      auto data = AdoptRef(*new img::PixelData(krys::move(pixels)));
       auto image =
         boo::NativeImage::Create(AdoptRef(*new boo::PlatformImage(size, krys::move(data), premultiplied)));
       REQUIRE(image);
@@ -677,7 +677,7 @@ namespace krys::ui::tests
           context.SetImageInterpolationQuality(boo::InterpolationQuality::DoNotInterpolate);
           context.DrawNativeImage(
             *image, {0, 0, 4, 8}, {0, 0, 2, 4},
-            boo::ImagePaintingOptions {boo::ImageOrientation::Orientation::OriginRightTop});
+            boo::ImagePaintingOptions {img::ImageOrientation::Orientation::OriginRightTop});
         });
       CHECK(replayed[0] == red);
       CHECK(replayed[3 * Width + 3] == red);

@@ -81,7 +81,7 @@ namespace krys::boo
 
       KRYS_NODISCARD int64 ExpectedContentLength() const noexcept override;
 
-      void EncodedDataStatusChanged(const Image &, EncodedDataStatus) noexcept final;
+      void EncodedDataStatusChanged(const Image &, img::EncodedDataStatus) noexcept final;
 
       void DecodedSizeChanged(const Image &, int64 delta) noexcept final;
 
@@ -90,7 +90,7 @@ namespace krys::boo
       KRYS_NODISCARD bool CanDestroyDecodedData(const Image &) const noexcept final;
 
       void ImageFrameAvailable(const Image &, ImageAnimatingState, const RectI *changeRect = nullptr,
-                               DecodingStatus = DecodingStatus::Invalid) noexcept final;
+                               img::DecodingStatus = img::DecodingStatus::Invalid) noexcept final;
 
       void ChangedInRect(const Image &, const RectI *) noexcept final;
 
@@ -241,13 +241,13 @@ namespace krys::boo
 
     void DestroyDecodedData() noexcept override;
 
-    EncodedDataStatus UpdateImageData(bool allDataReceived) noexcept;
+    img::EncodedDataStatus UpdateImageData(bool allDataReceived) noexcept;
 
     void Error(CachedResource::Status) noexcept override;
 
     void ResponseReceived(net::ResourceResponse &&) noexcept override;
 
-    void EncodedDataStatusChanged(const Image &, EncodedDataStatus) noexcept;
+    void EncodedDataStatusChanged(const Image &, img::EncodedDataStatus) noexcept;
 
     void DecodedSizeChanged(const Image &, int64 delta) noexcept;
 
@@ -256,7 +256,7 @@ namespace krys::boo
     KRYS_NODISCARD bool CanDestroyDecodedData(const Image &) const noexcept;
 
     void ImageFrameAvailable(const Image &, ImageAnimatingState, const RectI *changeRect = nullptr,
-                             DecodingStatus = DecodingStatus::Invalid) noexcept;
+                             img::DecodingStatus = img::DecodingStatus::Invalid) noexcept;
 
     void ChangedInRect(const Image &, const RectI *) noexcept;
 

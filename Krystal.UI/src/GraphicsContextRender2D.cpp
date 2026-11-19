@@ -903,8 +903,8 @@ namespace krys::ui
     }
 
     auto normalizedDestRect = NormaliseRect(destRect);
-    boo::GraphicsContextStateSaver stateSaver(*this, orientation != boo::ImageOrientation::Orientation::None);
-    if (orientation != boo::ImageOrientation::Orientation::None)
+    boo::GraphicsContextStateSaver stateSaver(*this, orientation != img::ImageOrientation::Orientation::None);
+    if (orientation != img::ImageOrientation::Orientation::None)
     {
       // ImageOrientation expects the origin to be at (0, 0).
       Translate(normalizedDestRect.X(), normalizedDestRect.Y());

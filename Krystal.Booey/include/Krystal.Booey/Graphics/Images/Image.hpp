@@ -162,10 +162,10 @@ namespace krys::boo
                                             SizeF &intrinsicRatio) noexcept;
 
     KRYS_NODISCARD virtual SizeF
-      Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept = 0;
+      Size(img::ImageOrientation = img::ImageOrientation::Orientation::FromImage) const noexcept = 0;
 
     KRYS_NODISCARD virtual SizeF
-      SourceSize(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept;
+      SourceSize(img::ImageOrientation = img::ImageOrientation::Orientation::FromImage) const noexcept;
 
     KRYS_NODISCARD virtual bool HasDensityCorrectedSize() const noexcept
     {
@@ -192,17 +192,17 @@ namespace krys::boo
       return null;
     }
 
-    KRYS_NODISCARD virtual ImageOrientation Orientation() const noexcept
+    KRYS_NODISCARD virtual img::ImageOrientation Orientation() const noexcept
     {
-      return ImageOrientation::Orientation::FromImage;
+      return img::ImageOrientation::Orientation::FromImage;
     }
 
     /// @brief Replaces the encoded data and tells the image it changed.
-    EncodedDataStatus SetData(RefPtr<SharedBuffer> &&data, bool allDataReceived) noexcept;
+    img::EncodedDataStatus SetData(RefPtr<SharedBuffer> &&data, bool allDataReceived) noexcept;
 
-    virtual EncodedDataStatus DataChanged(bool /*allDataReceived*/) noexcept
+    virtual img::EncodedDataStatus DataChanged(bool /*allDataReceived*/) noexcept
     {
-      return EncodedDataStatus::Unknown;
+      return img::EncodedDataStatus::Unknown;
     }
 
     /// @brief The file extension the data's format uses; empty if unknown.
@@ -270,8 +270,8 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual RefPtr<NativeImage> CurrentNativeImage() noexcept;
 
-    KRYS_NODISCARD virtual RefPtr<NativeImage>
-      CurrentPreTransformedNativeImage(ImageOrientation = ImageOrientation::Orientation::FromImage) noexcept;
+    KRYS_NODISCARD virtual RefPtr<NativeImage> CurrentPreTransformedNativeImage(
+      img::ImageOrientation = img::ImageOrientation::Orientation::FromImage) noexcept;
 
     virtual void DrawPattern(GraphicsContext &, const RectF &destRect, const RectF &tileRect,
                              const AffineTransform &patternTransform, const PointF &phase,

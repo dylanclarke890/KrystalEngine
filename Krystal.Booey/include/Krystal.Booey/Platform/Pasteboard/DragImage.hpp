@@ -26,13 +26,13 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
-#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Image/ImageOrientation.hpp"
 
 namespace krys::net
 {
@@ -66,7 +66,8 @@ namespace krys::boo
   KRYS_NODISCARD DragImageRef DissolveDragImageToFraction(const DragImageRef &image, float fraction) noexcept;
 
   /// @brief A drag image of @p image at its size, oriented by @p orientation; null if it has no size.
-  KRYS_NODISCARD DragImageRef CreateDragImageFromImage(Image *image, ImageOrientation orientation) noexcept;
+  KRYS_NODISCARD DragImageRef CreateDragImageFromImage(Image *image,
+                                                       img::ImageOrientation orientation) noexcept;
 
   /// @brief The icon for a dragged image's file, which the host doesn't give: null.
   KRYS_NODISCARD DragImageRef CreateDragImageIconForCachedImageFilename(utf8_stringview filename) noexcept;

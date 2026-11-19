@@ -1989,7 +1989,7 @@ namespace krys::boo::html
     auto imageRect = RectF(PointF(), SizeF(Size(imageElement, ImageSizeType::BeforeDevicePixelRatio)));
 
     // FIXME: The computed style's orientation for an image without a renderer.
-    auto orientation = ImageOrientation(ImageOrientation::Orientation::FromImage);
+    auto orientation = img::ImageOrientation(img::ImageOrientation::Orientation::FromImage);
     if (auto *renderer = imageElement.Renderer())
     {
       orientation = renderer->GetImageOrientation();
@@ -2042,7 +2042,7 @@ namespace krys::boo::html
                                                             const RectF &imageRect, const RectF &srcRect,
                                                             const RectF &dstRect, const CompositeOperator &op,
                                                             const BlendMode &blendMode,
-                                                            ImageOrientation orientation) noexcept
+                                                            img::ImageOrientation orientation) noexcept
   {
     if (!std::isfinite(dstRect.X()) || !std::isfinite(dstRect.Y()) || !std::isfinite(dstRect.Width())
         || !std::isfinite(dstRect.Height()) || !std::isfinite(srcRect.X()) || !std::isfinite(srcRect.Y())

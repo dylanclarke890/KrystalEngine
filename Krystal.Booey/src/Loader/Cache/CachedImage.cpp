@@ -211,7 +211,7 @@ namespace krys::boo
     }
 
     return _image->Size(renderer ? renderer->GetImageOrientation()
-                                 : boo::ImageOrientation(boo::ImageOrientation::Orientation::FromImage));
+                                 : img::ImageOrientation(img::ImageOrientation::Orientation::FromImage));
   }
 
   LayoutSize CachedImage::UnclampedImageSizeForRenderer(const RenderElement *renderer, float multiplier,
@@ -328,7 +328,7 @@ namespace krys::boo
   }
 
   void CachedImage::CachedImageObserver::EncodedDataStatusChanged(const Image &image,
-                                                                  EncodedDataStatus status) noexcept
+                                                                  img::EncodedDataStatus status) noexcept
   {
     for (auto *cachedImage : List<CachedImage *>(_cachedImages.begin(), _cachedImages.end()))
     {
@@ -374,7 +374,7 @@ namespace krys::boo
   void CachedImage::CachedImageObserver::ImageFrameAvailable(const Image &image,
                                                              ImageAnimatingState animatingState,
                                                              const RectI *changeRect,
-                                                             DecodingStatus decodingStatus) noexcept
+                                                             img::DecodingStatus decodingStatus) noexcept
   {
     for (auto *cachedImage : List<CachedImage *>(_cachedImages.begin(), _cachedImages.end()))
     {
@@ -479,14 +479,15 @@ namespace krys::boo
     // Have the image update its data from its internal buffer. Decoding the image data
     // will be delayed until info (like size or specific image frames) are queried which
     // usually happens when the observers are repainted.
-    EncodedDataStatus encodedDataStatus = UpdateImageData(false);
+    img::EncodedDataStatus encodedDataStatus = UpdateImageData(false);
 
-    if (encodedDataStatus > EncodedDataStatus::Error && encodedDataStatus < EncodedDataStatus::SizeAvailable)
+    if (encodedDataStatus > img::EncodedDataStatus::Error
+        && encodedDataStatus < img::EncodedDataStatus::SizeAvailable)
     {
       return;
     }
 
-    if (encodedDataStatus == EncodedDataStatus::Error || _image->IsNull())
+    if (encodedDataStatus == img::EncodedDataStatus::Error || _image->IsNull())
     {
       // Image decoding failed. Either we need more image data or the image data is malformed.
       Error(ErrorOccurred() ? GetStatus() : DecodeError);
@@ -501,11 +502,11 @@ namespace krys::boo
     NotifyObservers();
   }
 
-  EncodedDataStatus CachedImage::UpdateImageData(bool allDataReceived) noexcept
+  img::EncodedDataStatus CachedImage::UpdateImageData(bool allDataReceived) noexcept
   {
     if (!_image || !_data)
     {
-      return EncodedDataStatus::Error;
+      return img::EncodedDataStatus::Error;
     }
     return _image->SetData(RefPtr<SharedBuffer>(_data), allDataReceived);
   }
@@ -525,9 +526,9 @@ namespace krys::boo
       CreateImage();
     }
 
-    EncodedDataStatus encodedDataStatus = UpdateImageData(true);
+    img::EncodedDataStatus encodedDataStatus = UpdateImageData(true);
 
-    if (encodedDataStatus == EncodedDataStatus::Error || !_image || _image->IsNull())
+    if (encodedDataStatus == img::EncodedDataStatus::Error || !_image || _image->IsNull())
     {
       // Image decoding failed; the image data is malformed.
       Error(ErrorOccurred() ? GetStatus() : DecodeError);
@@ -575,7 +576,7 @@ namespace krys::boo
     }
   }
 
-  void CachedImage::EncodedDataStatusChanged(const Image &image, EncodedDataStatus) noexcept
+  void CachedImage::EncodedDataStatusChanged(const Image &image, img::EncodedDataStatus) noexcept
   {
     if (&image != _image.get())
     {
@@ -658,7 +659,7 @@ namespace krys::boo
   }
 
   void CachedImage::ImageFrameAvailable(const Image &image, ImageAnimatingState animatingState,
-                                        const RectI *changeRect, DecodingStatus decodingStatus) noexcept
+                                        const RectI *changeRect, img::DecodingStatus decodingStatus) noexcept
   {
     if (&image != _image.get())
     {
@@ -686,7 +687,7 @@ namespace krys::boo
       _image->StopAnimation();
     }
 
-    if (decodingStatus != DecodingStatus::Partial)
+    if (decodingStatus != img::DecodingStatus::Partial)
     {
       _clientsWaitingForAsyncDecoding.clear();
     }

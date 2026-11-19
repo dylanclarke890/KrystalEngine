@@ -2,11 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderImageResource.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGImage.hpp"
 #include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Image.Tests/TestImages.hpp"
 
 namespace krys::boo::svg::tests
 {
@@ -14,7 +14,6 @@ namespace krys::boo::svg::tests
   using boo::tests::LoadEvents;
   using boo::tests::PageInFrameFixture;
   using boo::tests::RunNetworkingTasks;
-  namespace images = boo::tests::images;
 
   namespace
   {
@@ -32,7 +31,7 @@ namespace krys::boo::svg::tests
   TEST_CASE("SVGImageElement: an image loads, fires load and paints", "[SVG][SVGImageElement]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
     loader.Strategy.Defer = true;
 
     PageInFrameFixture fixture(

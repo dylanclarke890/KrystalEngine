@@ -26,10 +26,13 @@
 
 #include "Krystal.Booey/Style/Values/Types.hpp"
 
-namespace krys::boo
+namespace krys::img
 {
   struct ImageOrientation;
+}
 
+namespace krys::boo
+{
   namespace style
   {
     // <'image-orientation'> = from-image | none | [ <angle> || flip ]
@@ -46,7 +49,7 @@ namespace krys::boo
     template <>
     struct ToPlatform<ImageOrientation>
     {
-      KRYS_NODISCARD boo::ImageOrientation operator()(ImageOrientation) noexcept;
+      KRYS_NODISCARD img::ImageOrientation operator()(ImageOrientation) noexcept;
     };
   }
 }

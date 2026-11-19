@@ -28,7 +28,6 @@
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Images/DecodingOptions.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageFrame.hpp"
-#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
@@ -38,6 +37,7 @@
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Image/ImageOrientation.hpp"
 
 namespace krys
 {
@@ -57,10 +57,10 @@ namespace krys::boo
     virtual ~ImageSource() noexcept = default;
 
     // Encoded and decoded data
-    virtual EncodedDataStatus DataChanged(SharedBuffer *, bool) noexcept
+    virtual img::EncodedDataStatus DataChanged(SharedBuffer *, bool) noexcept
     {
       krys_assert_msg(false, "Not reached");
-      return EncodedDataStatus::Unknown;
+      return img::EncodedDataStatus::Unknown;
     }
 
     virtual void DestroyDecodedData(bool) noexcept
@@ -108,7 +108,7 @@ namespace krys::boo
     }
 
     // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): overrides take it.
-    virtual void Decode(Func<void(DecodingStatus)> &&) noexcept
+    virtual void Decode(Func<void(img::DecodingStatus)> &&) noexcept
     {
       krys_assert_msg(false, "Not reached");
     }
@@ -135,7 +135,8 @@ namespace krys::boo
       return PrimaryNativeImage();
     }
 
-    KRYS_NODISCARD virtual RefPtr<NativeImage> CurrentPreTransformedNativeImage(ImageOrientation) noexcept
+    KRYS_NODISCARD virtual RefPtr<NativeImage>
+      CurrentPreTransformedNativeImage(img::ImageOrientation) noexcept
     {
       return CurrentNativeImage();
     }
@@ -143,7 +144,7 @@ namespace krys::boo
     /// @brief The current frame laid out as drawn with the orientation, at its full resolution: unlike the
     /// pre-transformed image, not scaled to a density-corrected size.
     KRYS_NODISCARD virtual RefPtr<NativeImage>
-      CurrentOrientedNativeImage(ImageOrientation orientation) noexcept
+      CurrentOrientedNativeImage(img::ImageOrientation orientation) noexcept
     {
       return CurrentPreTransformedNativeImage(orientation);
     }
@@ -153,18 +154,18 @@ namespace krys::boo
       return PrimaryNativeImage();
     }
 
-    KRYS_NODISCARD virtual Expected<Ref<NativeImage>, DecodingStatus>
+    KRYS_NODISCARD virtual Expected<Ref<NativeImage>, img::DecodingStatus>
       PrimaryNativeImageForDrawing(SubsamplingLevel, const DecodingOptions &) noexcept;
 
-    KRYS_NODISCARD virtual Expected<Ref<NativeImage>, DecodingStatus>
+    KRYS_NODISCARD virtual Expected<Ref<NativeImage>, img::DecodingStatus>
       CurrentNativeImageForDrawing(SubsamplingLevel, const DecodingOptions &) noexcept;
 
     // Image Metadata
     KRYS_NODISCARD virtual SizeI
-      Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept = 0;
+      Size(img::ImageOrientation = img::ImageOrientation::Orientation::FromImage) const noexcept = 0;
 
-    KRYS_NODISCARD virtual SizeI
-      SourceSize(ImageOrientation orientation = ImageOrientation::Orientation::FromImage) const noexcept
+    KRYS_NODISCARD virtual SizeI SourceSize(
+      img::ImageOrientation orientation = img::ImageOrientation::Orientation::FromImage) const noexcept
     {
       return Size(orientation);
     }
@@ -174,9 +175,9 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD virtual ImageOrientation Orientation() const noexcept
+    KRYS_NODISCARD virtual img::ImageOrientation Orientation() const noexcept
     {
-      return ImageOrientation::Orientation::None;
+      return img::ImageOrientation::Orientation::None;
     }
 
     KRYS_NODISCARD virtual uint32 PrimaryFrameIndex() const noexcept
@@ -221,16 +222,16 @@ namespace krys::boo
       return {};
     }
 
-    KRYS_NODISCARD virtual ImageOrientation FrameOrientationAtIndex(uint32) const noexcept
+    KRYS_NODISCARD virtual img::ImageOrientation FrameOrientationAtIndex(uint32) const noexcept
     {
       krys_assert_msg(false, "Not reached");
-      return ImageOrientation::Orientation::None;
+      return img::ImageOrientation::Orientation::None;
     }
 
-    KRYS_NODISCARD virtual DecodingStatus FrameDecodingStatusAtIndex(uint32) const noexcept
+    KRYS_NODISCARD virtual img::DecodingStatus FrameDecodingStatusAtIndex(uint32) const noexcept
     {
       krys_assert_msg(false, "Not reached");
-      return DecodingStatus::Invalid;
+      return img::DecodingStatus::Invalid;
     }
 
     virtual void Dump(TextStream &) const noexcept

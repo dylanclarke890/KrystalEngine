@@ -343,7 +343,7 @@ namespace krys::boo
     return htmlElement && Is<HTMLMarqueeElement>(*htmlElement);
   }
 
-  boo::ImageOrientation RenderElement::GetImageOrientation() const noexcept
+  img::ImageOrientation RenderElement::GetImageOrientation() const noexcept
   {
     return style::ToPlatform<style::ImageOrientation> {}(Style().GetImageOrientation());
   }

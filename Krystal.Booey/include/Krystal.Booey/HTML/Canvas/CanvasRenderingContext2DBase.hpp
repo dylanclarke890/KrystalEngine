@@ -33,7 +33,6 @@
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
-#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasDirection.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasFillRule.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasFontKerning.hpp"
@@ -60,6 +59,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Image/ImageOrientation.hpp"
 
 namespace krys::boo
 {
@@ -856,10 +856,10 @@ namespace krys::boo::html
 
     ExceptionOr<void> DrawImage(CanvasBase &, const RectF &srcRect, const RectF &dstRect) noexcept;
 
-    ExceptionOr<void> DrawImage(Document &, CachedImage &, const RenderObject *, const RectF &imageRect,
-                                const RectF &srcRect, const RectF &dstRect, const CompositeOperator &,
-                                const BlendMode &,
-                                ImageOrientation = ImageOrientation::Orientation::FromImage) noexcept;
+    ExceptionOr<void>
+      DrawImage(Document &, CachedImage &, const RenderObject *, const RectF &imageRect, const RectF &srcRect,
+                const RectF &dstRect, const CompositeOperator &, const BlendMode &,
+                img::ImageOrientation = img::ImageOrientation::Orientation::FromImage) noexcept;
 
     /// @brief Keeps @p imageData's pixels, premultiplied, when they're put over the whole canvas, so that
     /// reading them back soon after needn't read the buffer; null if they aren't.

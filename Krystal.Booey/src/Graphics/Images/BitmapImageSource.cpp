@@ -25,10 +25,10 @@
 
 #include "Krystal.Booey/Graphics/Images/BitmapImageSource.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
-#include "Krystal.Booey/Graphics/Images/ImageDecoder.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageObserver.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
+#include "Krystal.Image/ImageDecoder.hpp"
 #include <cmath>
 #include <limits>
 
@@ -37,12 +37,12 @@ namespace krys::boo
   namespace
   {
     /// @brief @p image's pixels laid out as drawn with @p orientation, at @p size (the oriented size).
-    PlatformImagePtr OrientedPlatformImage(const PlatformImage &image, ImageOrientation orientation,
+    PlatformImagePtr OrientedPlatformImage(const PlatformImage &image, img::ImageOrientation orientation,
                                            const SizeI &size) noexcept
     {
       const auto &sourceSize = image.Size();
       const auto transform = orientation.TransformFromDefault(SizeF(size));
-      auto pixels = AdoptRef(*new PixelData(static_cast<size_t>(size.UnclampedArea())));
+      auto pixels = AdoptRef(*new img::PixelData(static_cast<size_t>(size.UnclampedArea())));
       const auto source = image.Pixels();
       for (int32 y = 0; y < sourceSize.Height(); ++y)
       {
@@ -74,7 +74,7 @@ namespace krys::boo
       const bool premultiplied = image.PremultipliedAlpha();
       const double scaleX = static_cast<double>(sourceSize.Width()) / size.Width();
       const double scaleY = static_cast<double>(sourceSize.Height()) / size.Height();
-      auto pixels = AdoptRef(*new PixelData(static_cast<size_t>(size.UnclampedArea())));
+      auto pixels = AdoptRef(*new img::PixelData(static_cast<size_t>(size.UnclampedArea())));
 
       for (int32 y = 0; y < size.Height(); ++y)
       {
@@ -127,14 +127,14 @@ namespace krys::boo
   }
 
   Ref<BitmapImageSource>
-    BitmapImageSource::Create(BitmapImage &bitmapImage, AlphaOption alphaOption,
-                              GammaAndColorProfileOption gammaAndColorProfileOption) noexcept
+    BitmapImageSource::Create(BitmapImage &bitmapImage, img::AlphaOption alphaOption,
+                              img::GammaAndColorProfileOption gammaAndColorProfileOption) noexcept
   {
     return AdoptRef(*new BitmapImageSource(bitmapImage, alphaOption, gammaAndColorProfileOption));
   }
 
-  BitmapImageSource::BitmapImageSource(BitmapImage &bitmapImage, AlphaOption alphaOption,
-                                       GammaAndColorProfileOption gammaAndColorProfileOption) noexcept
+  BitmapImageSource::BitmapImageSource(BitmapImage &bitmapImage, img::AlphaOption alphaOption,
+                                       img::GammaAndColorProfileOption gammaAndColorProfileOption) noexcept
       : _bitmapImage(CreateWeakPtr(&bitmapImage)), _alphaOption(alphaOption),
         _gammaAndColorProfileOption(gammaAndColorProfileOption), _descriptor(*this)
   {
@@ -168,14 +168,14 @@ namespace krys::boo
     return _bitmapImage.get();
   }
 
-  RefPtr<ImageDecoder> BitmapImageSource::CreateWorkQueueDecoder() const noexcept
+  RefPtr<img::ImageDecoder> BitmapImageSource::CreateWorkQueueDecoder() const noexcept
   {
     auto *data = _bitmapImage ? _bitmapImage->Data() : nullptr;
     if (!data || !_allDataReceived)
     {
       return nullptr;
     }
-    auto decoder = ImageDecoder::Create(*data, MimeType(), _alphaOption, _gammaAndColorProfileOption);
+    auto decoder = img::ImageDecoder::Create(*data, _alphaOption, _gammaAndColorProfileOption);
     if (decoder)
     {
       decoder->SetData(*data, true);
@@ -183,7 +183,7 @@ namespace krys::boo
     return decoder;
   }
 
-  ImageDecoder *BitmapImageSource::Decoder(SharedBuffer *data) const noexcept
+  img::ImageDecoder *BitmapImageSource::Decoder(SharedBuffer *data) const noexcept
   {
     if (_decoder)
     {
@@ -195,25 +195,20 @@ namespace krys::boo
       return nullptr;
     }
 
-    _decoder = ImageDecoder::Create(*data, MimeType(), _alphaOption, _gammaAndColorProfileOption);
+    _decoder = img::ImageDecoder::Create(*data, _alphaOption, _gammaAndColorProfileOption);
     if (!_decoder)
     {
       return nullptr;
     }
 
-    if (auto expectedContentLength = ExpectedContentLength())
-    {
-      _decoder->SetExpectedContentSize(expectedContentLength);
-    }
-
     return _decoder.get();
   }
 
-  void BitmapImageSource::EncodedDataStatusChanged(EncodedDataStatus status) noexcept
+  void BitmapImageSource::EncodedDataStatusChanged(img::EncodedDataStatus status) noexcept
   {
     krys_debug_assert(_decoder);
 
-    if (status >= EncodedDataStatus::SizeAvailable)
+    if (status >= img::EncodedDataStatus::SizeAvailable)
     {
       _frames.resize(_decoder->FrameCount());
       _frames.shrink_to_fit();
@@ -225,7 +220,7 @@ namespace krys::boo
     }
   }
 
-  EncodedDataStatus BitmapImageSource::DataChanged(SharedBuffer *data, bool allDataReceived) noexcept
+  img::EncodedDataStatus BitmapImageSource::DataChanged(SharedBuffer *data, bool allDataReceived) noexcept
   {
     _descriptor.Clear();
 
@@ -236,7 +231,7 @@ namespace krys::boo
     }
 
     auto status = SetData(data, allDataReceived);
-    if (status < EncodedDataStatus::TypeAvailable)
+    if (status < img::EncodedDataStatus::TypeAvailable)
     {
       return status;
     }
@@ -383,17 +378,17 @@ namespace krys::boo
     _decoder->ClearFrameBufferCache(CurrentFrameIndex());
   }
 
-  EncodedDataStatus BitmapImageSource::SetData(SharedBuffer *data, bool allDataReceived) noexcept
+  img::EncodedDataStatus BitmapImageSource::SetData(SharedBuffer *data, bool allDataReceived) noexcept
   {
     if (!data)
     {
-      return EncodedDataStatus::Unknown;
+      return img::EncodedDataStatus::Unknown;
     }
 
-    RefPtr<ImageDecoder> decoder = ShareRefPtr(Decoder(data));
+    RefPtr<img::ImageDecoder> decoder = ShareRefPtr(Decoder(data));
     if (!decoder)
     {
-      return EncodedDataStatus::Unknown;
+      return img::EncodedDataStatus::Unknown;
     }
 
     decoder->SetData(*data, allDataReceived);
@@ -419,7 +414,7 @@ namespace krys::boo
     }
 
     // Number of frames can only be known for sure when loading the image is complete.
-    if (GetEncodedDataStatus() != EncodedDataStatus::Complete)
+    if (GetEncodedDataStatus() != img::EncodedDataStatus::Complete)
     {
       return nullptr;
     }
@@ -489,7 +484,7 @@ namespace krys::boo
 
   bool BitmapImageSource::IsAnimated() const noexcept
   {
-    return FrameCount() > 1 && GetRepetitionCount() != RepetitionCountNone;
+    return FrameCount() > 1 && GetRepetitionCount() != img::RepetitionCountNone;
   }
 
   bool BitmapImageSource::IsAnimationAllowed() const noexcept
@@ -511,7 +506,7 @@ namespace krys::boo
   bool BitmapImageSource::IsLargeForDecoding() const noexcept
   {
     constexpr uint64 KB = 1'024;
-    auto sizeInBytes = Size(ImageOrientation::Orientation::None).UnclampedArea() * sizeof(uint32);
+    auto sizeInBytes = Size(img::ImageOrientation::Orientation::None).UnclampedArea() * sizeof(uint32);
     return sizeInBytes > (IsAnimated() ? 100 * KB : 500 * KB);
   }
 
@@ -542,7 +537,7 @@ namespace krys::boo
     return FrameAtIndex(index).HasDecodedNativeImageCompatibleWithOptions(options, subsamplingLevel);
   }
 
-  void BitmapImageSource::Decode(Func<void(DecodingStatus)> &&decodeCallback) noexcept
+  void BitmapImageSource::Decode(Func<void(img::DecodingStatus)> &&decodeCallback) noexcept
   {
     _decodeCallbacks.push_back(krys::move(decodeCallback));
     uint32 index = CurrentFrameIndex();
@@ -579,10 +574,10 @@ namespace krys::boo
     // Without the work queue, the frame decodes now, and the callbacks are called before this returns.
     auto nativeImage = NativeImageAtIndexCacheIfNeeded(index, SubsamplingLevel::Default,
                                                        DecodingOptions(DecodingMode::Asynchronous));
-    CallDecodeCallbacks(nativeImage ? FrameDecodingStatusAtIndex(index) : DecodingStatus::Invalid);
+    CallDecodeCallbacks(nativeImage ? FrameDecodingStatusAtIndex(index) : img::DecodingStatus::Invalid);
   }
 
-  void BitmapImageSource::CallDecodeCallbacks(DecodingStatus status) noexcept
+  void BitmapImageSource::CallDecodeCallbacks(img::DecodingStatus status) noexcept
   {
     if (_decodeCallbacks.empty())
     {
@@ -597,7 +592,7 @@ namespace krys::boo
   }
 
   void BitmapImageSource::ImageFrameAtIndexAvailable(uint32 index, ImageAnimatingState animatingState,
-                                                     DecodingStatus decodingStatus) noexcept
+                                                     img::DecodingStatus decodingStatus) noexcept
   {
     krys_debug_assert(index < FrameCount());
     (void)index;
@@ -606,7 +601,7 @@ namespace krys::boo
     // Decoding promises have to resolved or rejected.
     CallDecodeCallbacks(decodingStatus);
 
-    if (decodingStatus == DecodingStatus::Invalid)
+    if (decodingStatus == img::DecodingStatus::Invalid)
     {
       return;
     }
@@ -618,7 +613,7 @@ namespace krys::boo
   }
 
   void BitmapImageSource::ImageFrameDecodeAtIndexHasFinished(uint32 index, ImageAnimatingState animatingState,
-                                                             DecodingStatus decodingStatus) noexcept
+                                                             img::DecodingStatus decodingStatus) noexcept
   {
     // Depending on its timer, the animator may call or postpone calling imageFrameAvailable().
     if (_frameAnimator
@@ -640,7 +635,7 @@ namespace krys::boo
     if (!nativeImage || !_decoder)
     {
       DestroyNativeImageAtIndex(index);
-      ImageFrameDecodeAtIndexHasFinished(index, animatingState, DecodingStatus::Invalid);
+      ImageFrameDecodeAtIndexHasFinished(index, animatingState, img::DecodingStatus::Invalid);
     }
     else
     {
@@ -673,7 +668,22 @@ namespace krys::boo
 
     auto &frame = _frames[index];
 
-    (void)_decoder->FetchFrameMetaDataAtIndex(index, subsamplingLevel, options, frame);
+    if (options.HasSizeForDrawing())
+    {
+      krys_debug_assert(frame.HasNativeImage());
+      frame._size = frame.GetNativeImage()->Size();
+    }
+    else
+    {
+      frame._size = _decoder->FrameSizeAtIndex(index);
+    }
+
+    frame._densityCorrectedSize = _decoder->FrameDensityCorrectedSizeAtIndex(index);
+    frame._subsamplingLevel = subsamplingLevel;
+    frame._hasAlpha = _decoder->FrameHasAlphaAtIndex(index);
+    frame._orientation = _decoder->FrameOrientationAtIndex(index);
+    frame._decodingStatus =
+      _decoder->FrameIsCompleteAtIndex(index) ? img::DecodingStatus::Complete : img::DecodingStatus::Partial;
 
     if (GetRepetitionCount())
     {
@@ -748,36 +758,35 @@ namespace krys::boo
     return frame;
   }
 
-  Expected<Ref<NativeImage>, DecodingStatus>
+  Expected<Ref<NativeImage>, img::DecodingStatus>
     BitmapImageSource::NativeImageAtIndexCacheIfNeeded(uint32 index, SubsamplingLevel subsamplingLevel,
                                                        const DecodingOptions &options) noexcept
   {
     if (!_decoder)
     {
-      return Unexpected<DecodingStatus>(DecodingStatus::Invalid);
+      return Unexpected<img::DecodingStatus>(img::DecodingStatus::Invalid);
     }
 
     if (index >= _frames.size())
     {
-      return Unexpected<DecodingStatus>(DecodingStatus::Invalid);
+      return Unexpected<img::DecodingStatus>(img::DecodingStatus::Invalid);
     }
 
     // Never decode the same frame from two different threads.
     if (IsPendingDecodingAtIndex(index, subsamplingLevel, options))
     {
-      return Unexpected<DecodingStatus>(DecodingStatus::Decoding);
+      return Unexpected<img::DecodingStatus>(img::DecodingStatus::Decoding);
     }
 
     if (!IsCompatibleWithOptionsAtIndex(index, subsamplingLevel, options))
     {
       DecodingOptions decodingOptions {DecodingMode::Synchronous};
-      PlatformImagePtr platformImage =
-        _decoder->CreateFrameImageAtIndex(index, subsamplingLevel, decodingOptions);
+      PlatformImagePtr platformImage = CreatePlatformImage(_decoder->CreateFrameImageAtIndex(index));
 
       RefPtr<NativeImage> nativeImage = NativeImage::Create(krys::move(platformImage));
       if (!nativeImage)
       {
-        return Unexpected<DecodingStatus>(DecodingStatus::Invalid);
+        return Unexpected<img::DecodingStatus>(img::DecodingStatus::Invalid);
       }
 
       CacheNativeImageAtIndex(index, subsamplingLevel, decodingOptions, krys::move(nativeImage));
@@ -788,61 +797,62 @@ namespace krys::boo
       return krys::move(nativeImage);
     }
 
-    return Unexpected<DecodingStatus>(DecodingStatus::Invalid);
+    return Unexpected<img::DecodingStatus>(img::DecodingStatus::Invalid);
   }
 
-  DecodingStatus BitmapImageSource::RequestNativeImageAtIndex(uint32 index, SubsamplingLevel subsamplingLevel,
-                                                              ImageAnimatingState animatingState,
-                                                              const DecodingOptions &options) noexcept
+  img::DecodingStatus BitmapImageSource::RequestNativeImageAtIndex(uint32 index,
+                                                                   SubsamplingLevel subsamplingLevel,
+                                                                   ImageAnimatingState animatingState,
+                                                                   const DecodingOptions &options) noexcept
   {
     if (index >= _frames.size())
     {
-      return DecodingStatus::Invalid;
+      return img::DecodingStatus::Invalid;
     }
 
     FrameWorkQueue().Dispatch({index, subsamplingLevel, animatingState, options});
-    return DecodingStatus::Decoding;
+    return img::DecodingStatus::Decoding;
   }
 
-  DecodingStatus BitmapImageSource::RequestNativeImageAtIndexIfNeeded(uint32 index,
-                                                                      SubsamplingLevel subsamplingLevel,
-                                                                      ImageAnimatingState animatingState,
-                                                                      const DecodingOptions &options) noexcept
+  img::DecodingStatus
+    BitmapImageSource::RequestNativeImageAtIndexIfNeeded(uint32 index, SubsamplingLevel subsamplingLevel,
+                                                         ImageAnimatingState animatingState,
+                                                         const DecodingOptions &options) noexcept
   {
     if (index >= _frames.size())
     {
-      return DecodingStatus::Invalid;
+      return img::DecodingStatus::Invalid;
     }
 
     // Never decode the same frame from two different threads.
     if (IsPendingDecodingAtIndex(index, subsamplingLevel, options))
     {
-      return DecodingStatus::Decoding;
+      return img::DecodingStatus::Decoding;
     }
 
     // isCompatibleWithOptionsAtIndex() returns true only if the frame is complete.
     if (IsCompatibleWithOptionsAtIndex(index, subsamplingLevel, options))
     {
-      return DecodingStatus::Complete;
+      return img::DecodingStatus::Complete;
     }
 
     return RequestNativeImageAtIndex(index, subsamplingLevel, animatingState, options);
   }
 
-  Expected<Ref<NativeImage>, DecodingStatus>
+  Expected<Ref<NativeImage>, img::DecodingStatus>
     BitmapImageSource::NativeImageAtIndexRequestIfNeeded(uint32 index, SubsamplingLevel subsamplingLevel,
                                                          const DecodingOptions &options) noexcept
   {
     if (!_decoder)
     {
-      return Unexpected<DecodingStatus>(DecodingStatus::Invalid);
+      return Unexpected<img::DecodingStatus>(img::DecodingStatus::Invalid);
     }
 
     auto status =
       RequestNativeImageAtIndexIfNeeded(index, subsamplingLevel, ImageAnimatingState::No, options);
-    if (status == DecodingStatus::Invalid || status == DecodingStatus::Decoding)
+    if (status == img::DecodingStatus::Invalid || status == img::DecodingStatus::Decoding)
     {
-      return Unexpected<DecodingStatus>(status);
+      return Unexpected<img::DecodingStatus>(status);
     }
 
     if (RefPtr<NativeImage> nativeImage = FrameAtIndex(index).GetNativeImage())
@@ -850,10 +860,10 @@ namespace krys::boo
       return krys::move(nativeImage);
     }
 
-    return Unexpected<DecodingStatus>(DecodingStatus::Invalid);
+    return Unexpected<img::DecodingStatus>(img::DecodingStatus::Invalid);
   }
 
-  Expected<Ref<NativeImage>, DecodingStatus>
+  Expected<Ref<NativeImage>, img::DecodingStatus>
     BitmapImageSource::NativeImageAtIndexForDrawing(uint32 index, SubsamplingLevel subsamplingLevel,
                                                     const DecodingOptions &options) noexcept
   {
@@ -867,7 +877,7 @@ namespace krys::boo
     return NativeImageAtIndexCacheIfNeeded(index, subsamplingLevel, options);
   }
 
-  Expected<Ref<NativeImage>, DecodingStatus>
+  Expected<Ref<NativeImage>, img::DecodingStatus>
     BitmapImageSource::CurrentNativeImageForDrawing(SubsamplingLevel subsamplingLevel,
                                                     const DecodingOptions &options) noexcept
   {
@@ -889,7 +899,7 @@ namespace krys::boo
   }
 
   RefPtr<NativeImage>
-    BitmapImageSource::PreTransformedNativeImageAtIndex(uint32 index, ImageOrientation orientation,
+    BitmapImageSource::PreTransformedNativeImageAtIndex(uint32 index, img::ImageOrientation orientation,
                                                         bool scaleToDensityCorrectedSize) noexcept
   {
     RefPtr<NativeImage> nativeImage = NativeImageAtIndex(index);
@@ -901,12 +911,12 @@ namespace krys::boo
     auto size = Size();
     auto sourceSize = SourceSize();
 
-    if (orientation == ImageOrientation::Orientation::FromImage)
+    if (orientation == img::ImageOrientation::Orientation::FromImage)
     {
       orientation = FrameOrientationAtIndex(index);
     }
 
-    if (orientation == ImageOrientation::Orientation::None
+    if (orientation == img::ImageOrientation::Orientation::None
         && (size == sourceSize || !scaleToDensityCorrectedSize))
     {
       return nativeImage;
@@ -919,7 +929,7 @@ namespace krys::boo
       return nativeImage;
     }
 
-    if (orientation != ImageOrientation::Orientation::None)
+    if (orientation != img::ImageOrientation::Orientation::None)
     {
       auto orientedSize =
         orientation.UsesWidthAsHeight() ? platformImage->Size().TransposedSize() : platformImage->Size();
@@ -944,12 +954,12 @@ namespace krys::boo
     return const_cast<BitmapImageSource &>(*this).FrameAtIndexCacheIfNeeded(index).Duration();
   }
 
-  ImageOrientation BitmapImageSource::FrameOrientationAtIndex(uint32 index) const noexcept
+  img::ImageOrientation BitmapImageSource::FrameOrientationAtIndex(uint32 index) const noexcept
   {
     return const_cast<BitmapImageSource &>(*this).FrameAtIndexCacheIfNeeded(index).Orientation();
   }
 
-  DecodingStatus BitmapImageSource::FrameDecodingStatusAtIndex(uint32 index) const noexcept
+  img::DecodingStatus BitmapImageSource::FrameDecodingStatusAtIndex(uint32 index) const noexcept
   {
     return const_cast<BitmapImageSource &>(*this).FrameAtIndexCacheIfNeeded(index).GetDecodingStatus();
   }

@@ -5,7 +5,6 @@
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
-#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCachedImage.hpp"
@@ -22,6 +21,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordSerialisation.hpp"
+#include "Krystal.Image/ImageOrientation.hpp"
 
 namespace krys::boo::style::tests
 {
@@ -230,8 +230,8 @@ namespace krys::boo::style::tests
     CHECK(Convert<ImageOrientation>(PropertyId::ImageOrientation, u8"from-image")
           == ImageOrientation::FromImage);
     CHECK(Serialised(ImageOrientation::FromImage) == "from-image");
-    CHECK(ConvertToPlatform(ImageOrientation::None) == boo::ImageOrientation::Orientation::None);
-    CHECK(ConvertToPlatform(ImageOrientation::FromImage) == boo::ImageOrientation::Orientation::FromImage);
+    CHECK(ConvertToPlatform(ImageOrientation::None) == img::ImageOrientation::Orientation::None);
+    CHECK(ConvertToPlatform(ImageOrientation::FromImage) == img::ImageOrientation::Orientation::FromImage);
   }
 
   TEST_CASE("Style images", "[Style][Values][Images]")

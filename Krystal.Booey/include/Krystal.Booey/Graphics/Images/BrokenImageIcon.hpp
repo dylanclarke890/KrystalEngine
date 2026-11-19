@@ -15,7 +15,7 @@ namespace krys::boo
     KRYS_NODISCARD static BrokenImageIcon &Singleton() noexcept;
 
     KRYS_NODISCARD SizeF
-      Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept override
+      Size(img::ImageOrientation = img::ImageOrientation::Orientation::FromImage) const noexcept override
     {
       return SizeF(IconSize, IconSize);
     }

@@ -26,13 +26,13 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Images/DecodingOptions.hpp"
-#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Time/Duration.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Image/ImageOrientation.hpp"
 
 namespace krys::boo
 {
@@ -41,7 +41,6 @@ namespace krys::boo
   class ImageFrame
   {
     friend class BitmapImageSource;
-    friend class ImageDecoder;
 
   public:
     enum class Caching : uint8
@@ -81,11 +80,11 @@ namespace krys::boo
       }
     };
 
-    DecodingStatus _decodingStatus {DecodingStatus::Invalid};
+    img::DecodingStatus _decodingStatus {img::DecodingStatus::Invalid};
     SizeI _size;
     Maybe<SizeI> _densityCorrectedSize;
     SubsamplingLevel _subsamplingLevel {SubsamplingLevel::Default};
-    ImageOrientation _orientation {ImageOrientation::Orientation::None};
+    img::ImageOrientation _orientation {img::ImageOrientation::Orientation::None};
     seconds _duration {};
     bool _hasAlpha {true};
     Source _source;
@@ -108,23 +107,23 @@ namespace krys::boo
 
     uint32 Clear() noexcept;
 
-    void SetDecodingStatus(DecodingStatus decodingStatus) noexcept;
+    void SetDecodingStatus(img::DecodingStatus decodingStatus) noexcept;
 
-    KRYS_NODISCARD DecodingStatus GetDecodingStatus() const noexcept;
+    KRYS_NODISCARD img::DecodingStatus GetDecodingStatus() const noexcept;
 
     KRYS_NODISCARD bool IsInvalid() const noexcept
     {
-      return _decodingStatus == DecodingStatus::Invalid;
+      return _decodingStatus == img::DecodingStatus::Invalid;
     }
 
     KRYS_NODISCARD bool IsPartial() const noexcept
     {
-      return _decodingStatus == DecodingStatus::Partial;
+      return _decodingStatus == img::DecodingStatus::Partial;
     }
 
     KRYS_NODISCARD bool IsComplete() const noexcept
     {
-      return _decodingStatus == DecodingStatus::Complete;
+      return _decodingStatus == img::DecodingStatus::Complete;
     }
 
     void SetSize(const SizeI &size) noexcept
@@ -167,12 +166,12 @@ namespace krys::boo
       return _source.Options;
     }
 
-    void SetOrientation(ImageOrientation orientation) noexcept
+    void SetOrientation(img::ImageOrientation orientation) noexcept
     {
       _orientation = orientation;
     }
 
-    KRYS_NODISCARD ImageOrientation Orientation() const noexcept
+    KRYS_NODISCARD img::ImageOrientation Orientation() const noexcept
     {
       return _orientation;
     }

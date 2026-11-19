@@ -865,7 +865,7 @@ namespace krys::boo::dom
 
     if (_dragImage)
     {
-      return CreateDragImageFromImage(_dragImage->GetImage(), ImageOrientation::Orientation::None);
+      return CreateDragImageFromImage(_dragImage->GetImage(), img::ImageOrientation::Orientation::None);
     }
 
     if (_dragImageElement)

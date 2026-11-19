@@ -3,7 +3,6 @@
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
@@ -11,6 +10,7 @@
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Image.Tests/TestImages.hpp"
 
 namespace krys::boo::tests
 {
@@ -55,7 +55,7 @@ namespace krys::boo::tests
             "[HTML][ImageInputType][html:attr-input-src][html:input-img-available]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
     loader.Strategy.Defer = true;
 
     InputFixture fixture(u8"<input id=i type=image src='file:///a.png'>");
@@ -85,7 +85,7 @@ namespace krys::boo::tests
             "[HTML][ImageInputType][html:dom-input-width][html:input-img-dimensions]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
 
     InputFixture fixture(u8"<input id=both type=image src='file:///a.png' width=30 height=30>"
                          u8"<input id=width type=image src='file:///a.png' width=6>"
@@ -105,7 +105,7 @@ namespace krys::boo::tests
             "[HTML][ImageInputType][html:input-img-dimensions]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
 
     InputFixture fixture(u8"<input id=hidden type=image src='file:///a.png' style='display: none'>");
     auto createdElement = fixture.Document->CreateElement(u8"input").ReleaseValue();
@@ -182,8 +182,8 @@ namespace krys::boo::tests
   TEST_CASE("ImageInputType: changing src and alt", "[HTML][ImageInputType][html:attr-input-src]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
-    loader.Strategy.Resources[u8"file:///b.jpg"] = images::JPEG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
+    loader.Strategy.Resources[u8"file:///b.jpg"] = img::tests::images::JPEG;
 
     InputFixture fixture(u8"<input id=i type=image alt=a>");
     auto &input = fixture.Input(u8"i");
@@ -230,8 +230,8 @@ namespace krys::boo::tests
   TEST_CASE("ImageInputType: loading follows the type", "[HTML][ImageInputType][html:attr-input-src]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
-    loader.Strategy.Resources[u8"file:///b.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
+    loader.Strategy.Resources[u8"file:///b.png"] = img::tests::images::PNG;
 
     InputFixture fixture(
       u8"<input id=text src='file:///a.png'><input id=first src='file:///b.png' type=image>");
@@ -282,7 +282,7 @@ namespace krys::boo::tests
   TEST_CASE("ImageInputType: clones load, and adoption starts a load", "[HTML][ImageInputType]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
 
     InputFixture fixture(u8"<input id=i type=image src='file:///a.png'>");
     RunNetworkingTasks();
@@ -309,7 +309,7 @@ namespace krys::boo::tests
             "[HTML][ImageInputType][html:concept-input-type-image-coordinate]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
 
     Ref<Page> page = Page::Create();
     InputFixture fixture(

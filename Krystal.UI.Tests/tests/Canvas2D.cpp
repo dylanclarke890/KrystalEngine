@@ -7,9 +7,9 @@
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/ImageData/ImageData.hpp"
-#include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
+#include "Krystal.Image/ImageDecoder.hpp"
 #include "Krystal.Text/Base64.hpp"
 #include "Krystal.UI.Tests/RepaintFixture.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
@@ -395,14 +395,13 @@ namespace krys::ui::tests
         Span<const uint8>(reinterpret_cast<const uint8 *>(url.data()) + comma + 1, url.size() - comma - 1));
       REQUIRE(bytes);
       auto data = SharedBuffer::Create(Span<const uint8>(*bytes));
-      auto decoder = boo::ScalableImageDecoder::Create(*data, boo::AlphaOption::NotPremultiplied,
-                                                       boo::GammaAndColorProfileOption::Applied);
+      auto decoder = img::ImageDecoder::Create(*data, img::AlphaOption::NotPremultiplied,
+                                               img::GammaAndColorProfileOption::Applied);
       REQUIRE(decoder);
       decoder->SetData(*data, true);
       auto image = decoder->CreateFrameImageAtIndex(0);
       REQUIRE(image);
-      auto pixels = image->Pixels();
-      return {pixels.begin(), pixels.end()};
+      return image->Pixels->Pixels;
     };
 
     auto png = decode(fixture.Canvas().ToDataUrl());

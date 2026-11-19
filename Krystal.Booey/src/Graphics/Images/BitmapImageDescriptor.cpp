@@ -26,8 +26,8 @@
 #include "Krystal.Booey/Graphics/Images/BitmapImageDescriptor.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImageSource.hpp"
-#include "Krystal.Booey/Graphics/Images/ImageDecoder.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
+#include "Krystal.Image/ImageDecoder.hpp"
 
 namespace krys::boo
 {
@@ -38,7 +38,7 @@ namespace krys::boo
   template <typename TMetadata>
   TMetadata BitmapImageDescriptor::ImageMetadata(TMetadata &cachedValue, const TMetadata &defaultValue,
                                                  CachedFlag cachedFlag,
-                                                 TMetadata (ImageDecoder::*functor)()
+                                                 TMetadata (img::ImageDecoder::*functor)()
                                                    const noexcept) const noexcept
   {
     if (IsCached(cachedFlag))
@@ -46,7 +46,7 @@ namespace krys::boo
       return cachedValue;
     }
 
-    RefPtr<ImageDecoder> decoder = ShareRefPtr(_source.DecoderIfExists());
+    RefPtr<img::ImageDecoder> decoder = ShareRefPtr(_source.DecoderIfExists());
     if (!decoder)
     {
       return defaultValue;
@@ -109,23 +109,23 @@ namespace krys::boo
     return cachedValue;
   }
 
-  EncodedDataStatus BitmapImageDescriptor::GetEncodedDataStatus() const noexcept
+  img::EncodedDataStatus BitmapImageDescriptor::GetEncodedDataStatus() const noexcept
   {
     if (IsCached(CachedFlag::EncodedDataStatus))
     {
       return _encodedDataStatus;
     }
 
-    RefPtr<ImageDecoder> decoder = ShareRefPtr(_source.DecoderIfExists());
+    RefPtr<img::ImageDecoder> decoder = ShareRefPtr(_source.DecoderIfExists());
     if (!decoder)
     {
-      return EncodedDataStatus::Unknown;
+      return img::EncodedDataStatus::Unknown;
     }
 
     _encodedDataStatus = decoder->GetEncodedDataStatus();
     SetCached(CachedFlag::EncodedDataStatus);
 
-    if (_encodedDataStatus >= EncodedDataStatus::SizeAvailable)
+    if (_encodedDataStatus >= img::EncodedDataStatus::SizeAvailable)
     {
       _source.DidDecodeProperties(static_cast<uint32>(decoder->BytesDecodedToDetermineProperties()));
     }
@@ -133,7 +133,7 @@ namespace krys::boo
     return _encodedDataStatus;
   }
 
-  SizeI BitmapImageDescriptor::Size(ImageOrientation orientation) const noexcept
+  SizeI BitmapImageDescriptor::Size(img::ImageOrientation orientation) const noexcept
   {
     auto densityCorrectedSize = DensityCorrectedSize();
     if (!densityCorrectedSize)
@@ -141,7 +141,7 @@ namespace krys::boo
       return SourceSize(orientation);
     }
 
-    if (orientation == ImageOrientation::Orientation::FromImage)
+    if (orientation == img::ImageOrientation::Orientation::FromImage)
     {
       orientation = Orientation();
     }
@@ -149,14 +149,14 @@ namespace krys::boo
     return orientation.UsesWidthAsHeight() ? densityCorrectedSize->TransposedSize() : *densityCorrectedSize;
   }
 
-  SizeI BitmapImageDescriptor::SourceSize(ImageOrientation orientation) const noexcept
+  SizeI BitmapImageDescriptor::SourceSize(img::ImageOrientation orientation) const noexcept
   {
     SizeI size;
 
     // It's possible that we have decoded the metadata, but not frame contents yet. In that case ImageDecoder
     // claims to have the size available, but the frame cache is empty. Return the decoder size without
     // caching in such case.
-    RefPtr<ImageDecoder> decoder = ShareRefPtr(_source.DecoderIfExists());
+    RefPtr<img::ImageDecoder> decoder = ShareRefPtr(_source.DecoderIfExists());
     if (decoder && _source.Frames().empty())
     {
       size = decoder->Size();
@@ -166,7 +166,7 @@ namespace krys::boo
       size = PrimaryImageFrameMetadata(_size, CachedFlag::Size, &ImageFrame::Size, SubsamplingLevel::Default);
     }
 
-    if (orientation == ImageOrientation::Orientation::FromImage)
+    if (orientation == img::ImageOrientation::Orientation::FromImage)
     {
       orientation = Orientation();
     }
@@ -180,7 +180,7 @@ namespace krys::boo
                                      &ImageFrame::DensityCorrectedSize, SubsamplingLevel::Default);
   }
 
-  ImageOrientation BitmapImageDescriptor::Orientation() const noexcept
+  img::ImageOrientation BitmapImageDescriptor::Orientation() const noexcept
   {
     return PrimaryImageFrameMetadata(_orientation, CachedFlag::Orientation, &ImageFrame::Orientation);
   }
@@ -188,19 +188,19 @@ namespace krys::boo
   uint32 BitmapImageDescriptor::PrimaryFrameIndex() const noexcept
   {
     return static_cast<uint32>(ImageMetadata(_primaryFrameIndex, size_t(0), CachedFlag::PrimaryFrameIndex,
-                                             &ImageDecoder::PrimaryFrameIndex));
+                                             &img::ImageDecoder::PrimaryFrameIndex));
   }
 
   uint32 BitmapImageDescriptor::FrameCount() const noexcept
   {
     return static_cast<uint32>(
-      ImageMetadata(_frameCount, size_t(0), CachedFlag::FrameCount, &ImageDecoder::FrameCount));
+      ImageMetadata(_frameCount, size_t(0), CachedFlag::FrameCount, &img::ImageDecoder::FrameCount));
   }
 
-  RepetitionCount BitmapImageDescriptor::GetRepetitionCount() const noexcept
+  img::RepetitionCount BitmapImageDescriptor::GetRepetitionCount() const noexcept
   {
-    return ImageMetadata(_repetitionCount, static_cast<RepetitionCount>(RepetitionCountNone),
-                         CachedFlag::RepetitionCount, &ImageDecoder::GetRepetitionCount);
+    return ImageMetadata(_repetitionCount, static_cast<img::RepetitionCount>(img::RepetitionCountNone),
+                         CachedFlag::RepetitionCount, &img::ImageDecoder::GetRepetitionCount);
   }
 
   Maybe<Color> BitmapImageDescriptor::SinglePixelSolidColor() const noexcept
@@ -217,18 +217,18 @@ namespace krys::boo
   utf8_string BitmapImageDescriptor::FilenameExtension() const noexcept
   {
     return ImageMetadata(_filenameExtension, utf8_string(), CachedFlag::FilenameExtension,
-                         &ImageDecoder::FilenameExtension);
+                         &img::ImageDecoder::FilenameExtension);
   }
 
   utf8_string BitmapImageDescriptor::AccessibilityDescription() const noexcept
   {
     return ImageMetadata(_accessibilityDescription, utf8_string(), CachedFlag::AccessibilityDescription,
-                         &ImageDecoder::AccessibilityDescription);
+                         &img::ImageDecoder::AccessibilityDescription);
   }
 
   Maybe<PointI> BitmapImageDescriptor::HotSpot() const noexcept
   {
-    return ImageMetadata(_hotSpot, Maybe<PointI>(), CachedFlag::HotSpot, &ImageDecoder::HotSpot);
+    return ImageMetadata(_hotSpot, Maybe<PointI>(), CachedFlag::HotSpot, &img::ImageDecoder::HotSpot);
   }
 
   SubsamplingLevel BitmapImageDescriptor::MaximumSubsamplingLevel() const noexcept
@@ -238,7 +238,7 @@ namespace krys::boo
       return _maximumSubsamplingLevel;
     }
 
-    RefPtr<ImageDecoder> decoder = ShareRefPtr(_source.DecoderIfExists());
+    RefPtr<img::ImageDecoder> decoder = ShareRefPtr(_source.DecoderIfExists());
     if (!decoder)
     {
       return SubsamplingLevel::Default;

@@ -21,7 +21,7 @@ namespace krys::boo::tests
 
     explicit FakeEngineTexture(SizeI size, uint32 argb = 0xFF'33'66'99u) noexcept : TextureSize(size)
     {
-      auto pixels = CreateRef<PixelData>(static_cast<size_t>(size.UnclampedArea()));
+      auto pixels = CreateRef<img::PixelData>(static_cast<size_t>(size.UnclampedArea()));
       std::fill(pixels->Pixels.begin(), pixels->Pixels.end(), argb);
       Image = NativeImage::Create(CreateRefPtr<PlatformImage>(size, krys::move(pixels), true));
     }

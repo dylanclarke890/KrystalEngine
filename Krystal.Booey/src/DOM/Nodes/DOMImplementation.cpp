@@ -7,13 +7,13 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Nodes/XHTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
-#include "Krystal.Booey/Graphics/Images/ImageDecoder.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Images/ImageDocument.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Image/ImageDecoder.hpp"
 #include "Krystal.Net/MimeTypeRegistry.hpp"
 #include "Krystal.Net/Url.hpp"
 
@@ -211,7 +211,7 @@ namespace krys::boo::dom
         return document;
       }
       // https://html.spec.whatwg.org/#navigate-media
-      if (ImageDecoder::SupportsMimeType(contentType))
+      if (img::ImageDecoder::SupportsMimeType(contentType))
       {
         Ref<Document> document = CreateRef<ImageDocument>();
         document->_contentType = DOMString(contentType);

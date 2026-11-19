@@ -2,7 +2,6 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -15,6 +14,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include "Krystal.Image.Tests/TestImages.hpp"
 
 namespace krys::boo::tests
 {
@@ -38,7 +38,7 @@ namespace krys::boo::tests
             "[Loader][CachedResourceLoader]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///images/a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///images/a.png"] = img::tests::images::PNG;
     loader.Strategy.Defer = true;
 
     PaintFixture fixture(u8"<!DOCTYPE html><div id=box style='width: 30px; height: 20px; background: "
@@ -70,7 +70,7 @@ namespace krys::boo::tests
             "[Loader][CachedResourceLoader]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///images/shared.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///images/shared.png"] = img::tests::images::PNG;
 
     PaintFixture fixture(
       u8"<!DOCTYPE html>"
@@ -160,7 +160,7 @@ namespace krys::boo::tests
 
     PaintFixture fixture(
       u8"<!DOCTYPE html><div id=box style='width: 6px; height: 4px; background: url(data:image/png;base64,"
-      + utf8_string(images::PNGBase64) + u8")'>");
+      + utf8_string(img::tests::images::PNGBase64) + u8")'>");
     (void)fixture.Painted();
     RunNetworkingTasks();
 
@@ -191,7 +191,7 @@ namespace krys::boo::tests
   TEST_CASE("CachedResourceLoader: a load schedules a rendering update", "[Loader][CachedResourceLoader]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///images/update.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///images/update.png"] = img::tests::images::PNG;
 
     auto page = Page::Create();
     auto &frame = page->MainFrame();
@@ -214,7 +214,7 @@ namespace krys::boo::tests
   TEST_CASE("MemoryCache: prunes resources nothing uses when it's over capacity", "[Loader][MemoryCache]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///images/dead.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///images/dead.png"] = img::tests::images::PNG;
 
     PaintFixture fixture(u8"<!DOCTYPE html>");
     auto &resourceLoader = fixture.Document->GetCachedResourceLoader();
@@ -243,7 +243,7 @@ namespace krys::boo::tests
             "[Loader][CachedResourceLoader]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///images/marker.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///images/marker.png"] = img::tests::images::PNG;
 
     PaintFixture fixture(u8"<!DOCTYPE html><ul style='list-style: url(file:///images/marker.png) inside'><li "
                          u8"id=item style='height: "

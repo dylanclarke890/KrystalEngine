@@ -42,6 +42,9 @@ target_link_libraries(Krystal.Booey PUBLIC Krystal.Net)
 # Font faces, shared with Krystal.Gfx
 target_link_libraries(Krystal.Booey PUBLIC Krystal.Text)
 
+# Image decoders and encoders
+target_link_libraries(Krystal.Booey PUBLIC Krystal.Image)
+
 # Third-party - FreeType (metrics and glyphs)
 find_package(Freetype REQUIRED)
 target_link_libraries(Krystal.Booey PRIVATE Freetype::Freetype)
@@ -49,16 +52,6 @@ target_link_libraries(Krystal.Booey PRIVATE Freetype::Freetype)
 # Third-party - HarfBuzz (shaping)
 find_package(harfbuzz CONFIG REQUIRED)
 target_link_libraries(Krystal.Booey PRIVATE harfbuzz::harfbuzz)
-
-# Third-party - image decoders (PNG, JPEG and WebP; GIF, BMP and ICO are decoded in-tree)
-find_package(PNG REQUIRED)
-find_package(JPEG REQUIRED)
-find_package(WebP CONFIG REQUIRED)
-target_link_libraries(Krystal.Booey PRIVATE PNG::PNG JPEG::JPEG WebP::webp WebP::webpdemux)
-
-# Third-party - colour management (ICC profiles in images)
-find_package(lcms2 CONFIG REQUIRED)
-target_link_libraries(Krystal.Booey PRIVATE lcms2::lcms2)
 
 # XML documents and SVG images: libxml2, without encodings of its own (documents arrive decoded) or compression.
 find_package(LibXml2 REQUIRED)
@@ -1602,13 +1595,10 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Images/GeneratedImage.hpp
   include/Krystal.Booey/Graphics/Images/GradientImage.hpp
   include/Krystal.Booey/Graphics/Images/Image.hpp
-  include/Krystal.Booey/Graphics/Images/ImageBackingStore.hpp
-  include/Krystal.Booey/Graphics/Images/ImageDecoder.hpp
   include/Krystal.Booey/Graphics/Images/ImageFrame.hpp
   include/Krystal.Booey/Graphics/Images/ImageFrameAnimator.hpp
   include/Krystal.Booey/Graphics/Images/ImageFrameWorkQueue.hpp
   include/Krystal.Booey/Graphics/Images/ImageObserver.hpp
-  include/Krystal.Booey/Graphics/Images/ImageOrientation.hpp
   include/Krystal.Booey/Graphics/Images/ImagePaintingOptions.hpp
   include/Krystal.Booey/Graphics/Images/ImageSource.hpp
   include/Krystal.Booey/Graphics/Images/ImageTypes.hpp
@@ -1786,7 +1776,6 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
   src/Graphics/Images/GeneratedImage.cpp
   src/Graphics/Images/GradientImage.cpp
   src/Graphics/Images/Image.cpp
-  src/Graphics/Images/ImageDecoder.cpp
   src/Graphics/Images/ImageFrame.cpp
   src/Graphics/Images/ImageFrameAnimator.cpp
   src/Graphics/Images/ImageFrameWorkQueue.cpp
@@ -2606,18 +2595,6 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/Events/LegacyKeyCodes.hpp
   include/Krystal.Booey/Platform/GraphicsClient.hpp
   include/Krystal.Booey/Platform/DateComponents.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/BMPImageDecoder.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/BMPImageReader.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/EXIFMetadata.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/GIFImageDecoder.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/GIFImageReader.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/ICCProfileTransform.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/ICOImageDecoder.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/JPEGImageDecoder.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/PNGImageDecoder.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoderFrame.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/WEBPImageDecoder.hpp
   include/Krystal.Booey/Platform/LocalizedStrings.hpp
   include/Krystal.Booey/Platform/Pasteboard/DragData.hpp
   include/Krystal.Booey/Platform/Pasteboard/DragImage.hpp
@@ -2644,18 +2621,6 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/CaretAnimator.cpp
   src/Platform/Cursor.cpp
   src/Platform/DateComponents.cpp
-  src/Platform/ImageDecoders/BMPImageDecoder.cpp
-  src/Platform/ImageDecoders/BMPImageReader.cpp
-  src/Platform/ImageDecoders/EXIFMetadata.cpp
-  src/Platform/ImageDecoders/GIFImageDecoder.cpp
-  src/Platform/ImageDecoders/GIFImageReader.cpp
-  src/Platform/ImageDecoders/ICCProfileTransform.cpp
-  src/Platform/ImageDecoders/ICOImageDecoder.cpp
-  src/Platform/ImageDecoders/JPEGImageDecoder.cpp
-  src/Platform/ImageDecoders/PNGImageDecoder.cpp
-  src/Platform/ImageDecoders/ScalableImageDecoder.cpp
-  src/Platform/ImageDecoders/ScalableImageDecoderFrame.cpp
-  src/Platform/ImageDecoders/WEBPImageDecoder.cpp
   src/Platform/LocalizedStrings.cpp
   src/Platform/Pasteboard/DragData.cpp
   src/Platform/Pasteboard/DragImage.cpp
