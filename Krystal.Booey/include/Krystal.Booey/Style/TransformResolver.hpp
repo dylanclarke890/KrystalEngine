@@ -31,7 +31,6 @@
 
 namespace krys::boo
 {
-  class FloatPoint3D;
   class RenderStyle;
   class TransformationMatrix;
   struct TransformOperationData;
@@ -74,13 +73,13 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool AffectedByTransformOrigin() const noexcept;
 
-    KRYS_NODISCARD static FloatPoint3D ComputeTransformOrigin(const RenderStyle &,
-                                                              const RectF &boundingBox) noexcept;
+    KRYS_NODISCARD static Point3F ComputeTransformOrigin(const RenderStyle &,
+                                                         const RectF &boundingBox) noexcept;
 
-    KRYS_NODISCARD static FloatPoint3D ComputeTransformOrigin(const ComputedStyle &,
-                                                              const RectF &boundingBox) noexcept;
+    KRYS_NODISCARD static Point3F ComputeTransformOrigin(const ComputedStyle &,
+                                                         const RectF &boundingBox) noexcept;
 
-    KRYS_NODISCARD FloatPoint3D ComputeTransformOrigin(const RectF &boundingBox) const noexcept;
+    KRYS_NODISCARD Point3F ComputeTransformOrigin(const RectF &boundingBox) const noexcept;
 
     KRYS_NODISCARD static PointF ComputePerspectiveOrigin(const RenderStyle &,
                                                           const RectF &boundingBox) noexcept;
@@ -92,9 +91,9 @@ namespace krys::boo::style
 
     void ApplyPerspective(const PointF &originTranslate) noexcept;
 
-    void ApplyTransformOrigin(const FloatPoint3D &originTranslate) noexcept;
+    void ApplyTransformOrigin(const Point3F &originTranslate) noexcept;
 
-    void UnapplyTransformOrigin(const FloatPoint3D &originTranslate) noexcept;
+    void UnapplyTransformOrigin(const Point3F &originTranslate) noexcept;
 
     void ApplyCSSTransform(const TransformOperationData &, EnumSet<Option> = AllTransformOperations) noexcept;
 

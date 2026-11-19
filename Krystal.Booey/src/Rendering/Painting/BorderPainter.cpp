@@ -26,7 +26,6 @@
 #include "Krystal.Booey/Rendering/Painting/BorderPainter.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Rendering/Painting/BorderShape.hpp"
@@ -36,6 +35,7 @@
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/BorderImage.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include <algorithm>
 #include <cmath>

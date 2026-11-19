@@ -24,13 +24,13 @@
 
 #include "Krystal.Booey/Style/Values/Shapes/EllipseFunction.hpp"
 
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Style/Values/Images/Gradient.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Position.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/TinyLRUCache.hpp"
 

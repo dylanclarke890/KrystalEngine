@@ -105,7 +105,7 @@ namespace krys::ui
 
     void SetBoundsOrigin(const PointF &value) noexcept override;
 
-    void SetAnchorPoint(const boo::FloatPoint3D &value) noexcept override;
+    void SetAnchorPoint(const Point3F &value) noexcept override;
 
     void SetSize(const SizeF &value) noexcept override;
 

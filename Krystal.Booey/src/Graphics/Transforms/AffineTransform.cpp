@@ -26,8 +26,8 @@
  */
 
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Geometry/Region.hpp"

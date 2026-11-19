@@ -1565,16 +1565,14 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Fonts/WOFFFileFormat.hpp
   include/Krystal.Booey/Graphics/Geometry/BoxExtents.hpp
   include/Krystal.Booey/Graphics/Geometry/BoxSides.hpp
-  include/Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp
-  include/Krystal.Booey/Graphics/Geometry/FloatPointGraph.hpp
   include/Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp
-  include/Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp
   include/Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp
   include/Krystal.Booey/Graphics/Geometry/LayoutRange.hpp
   include/Krystal.Booey/Graphics/Geometry/LayoutRect.hpp
   include/Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp
   include/Krystal.Booey/Graphics/Geometry/LayoutSize.hpp
   include/Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp
+  include/Krystal.Booey/Graphics/Geometry/RayIntersection.hpp
   include/Krystal.Booey/Graphics/Geometry/RectCorners.hpp
   include/Krystal.Booey/Graphics/Geometry/RectEdges.hpp
   include/Krystal.Booey/Graphics/Gradient.hpp
@@ -1757,16 +1755,14 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
   src/Graphics/Fonts/OpenTypeMathData.cpp
   src/Graphics/Fonts/SystemFallbackFontCache.cpp
   src/Graphics/Fonts/WOFFFileFormat.cpp
-  src/Graphics/Geometry/FloatPoint3D.cpp
-  src/Graphics/Geometry/FloatPointGraph.cpp
   src/Graphics/Geometry/FloatRoundedRect.cpp
-  src/Graphics/Geometry/GeometryUtilities.cpp
   src/Graphics/Geometry/LayoutPoint.cpp
   src/Graphics/Geometry/LayoutRange.cpp
   src/Graphics/Geometry/LayoutRect.cpp
   src/Graphics/Geometry/LayoutRoundedRect.cpp
   src/Graphics/Geometry/LayoutSize.cpp
   src/Graphics/Geometry/LayoutUnit.cpp
+  src/Graphics/Geometry/RayIntersection.cpp
   src/Graphics/Gradient.cpp
   src/Graphics/GradientColorStop.cpp
   src/Graphics/GradientColorStops.cpp

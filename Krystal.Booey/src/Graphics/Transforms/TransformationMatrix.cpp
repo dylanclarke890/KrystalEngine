@@ -835,13 +835,12 @@ namespace krys::boo
     return InternalMapPoint(p);
   }
 
-  FloatPoint3D TransformationMatrix::MapPoint(const FloatPoint3D &p) const noexcept
+  Point3F TransformationMatrix::MapPoint(const Point3F &p) const noexcept
   {
     if (IsIdentityOrTranslation())
     {
-      return FloatPoint3D(p.X() + static_cast<float>(_matrix[3][0]),
-                          p.Y() + static_cast<float>(_matrix[3][1]),
-                          p.Z() + static_cast<float>(_matrix[3][2]));
+      return Point3F(p.X() + static_cast<float>(_matrix[3][0]), p.Y() + static_cast<float>(_matrix[3][1]),
+                     p.Z() + static_cast<float>(_matrix[3][2]));
     }
 
     return InternalMapPoint(p);

@@ -51,7 +51,6 @@ namespace krys::boo
 {
   class Color;
   class Element;
-  class FloatPoint3D;
   class FontCascade;
   class FontCascadeDescription;
   class FontMetrics;

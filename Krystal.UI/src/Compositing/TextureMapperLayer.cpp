@@ -509,7 +509,7 @@ namespace krys::ui
     _state.Size = size;
   }
 
-  void TextureMapperLayer::SetAnchorPoint(const boo::FloatPoint3D &anchorPoint) noexcept
+  void TextureMapperLayer::SetAnchorPoint(const Point3F &anchorPoint) noexcept
   {
     _state.AnchorPoint = anchorPoint;
   }

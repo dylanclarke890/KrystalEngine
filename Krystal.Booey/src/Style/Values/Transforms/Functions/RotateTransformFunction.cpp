@@ -119,7 +119,7 @@ namespace krys::boo::style
     // Interpolation of Matrices afterwards. Otherwise the rotation angle gets interpolated numerically and
     // the rotation vector of the non-zero angle is used or (0, 0, 1) if both angles are zero.
 
-    auto normalizedVector = [](const RotateTransformFunction &op) -> FloatPoint3D
+    auto normalizedVector = [](const RotateTransformFunction &op) -> Point3F
     {
       if (auto length = std::hypot(op._x.Value, op._y.Value, op._z.Value))
       {
@@ -131,7 +131,7 @@ namespace krys::boo::style
 
     auto fromAngle = fromOp ? fromOp->_angle : Angle<> {0};
     auto toAngle = toOp->_angle;
-    auto fromNormalizedVector = fromOp ? normalizedVector(*fromOp) : FloatPoint3D(0, 0, 1);
+    auto fromNormalizedVector = fromOp ? normalizedVector(*fromOp) : Point3F(0, 0, 1);
     auto toNormalizedVector = normalizedVector(*toOp);
     if (fromAngle.IsZero() || toAngle.IsZero() || fromNormalizedVector == toNormalizedVector)
     {

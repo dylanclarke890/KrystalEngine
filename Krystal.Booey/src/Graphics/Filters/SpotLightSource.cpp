@@ -48,14 +48,14 @@ namespace krys::boo
     constexpr float AntialiasThreshold = 0.016f;
   }
 
-  Ref<SpotLightSource> SpotLightSource::Create(const FloatPoint3D &position, const FloatPoint3D &direction,
+  Ref<SpotLightSource> SpotLightSource::Create(const Point3F &position, const Point3F &direction,
                                                float specularExponent, float limitingConeAngle) noexcept
   {
     return AdoptRef(*new SpotLightSource(position, direction, specularExponent, limitingConeAngle));
   }
 
-  SpotLightSource::SpotLightSource(const FloatPoint3D &position, const FloatPoint3D &pointsAt,
-                                   float specularExponent, float limitingConeAngle) noexcept
+  SpotLightSource::SpotLightSource(const Point3F &position, const Point3F &pointsAt, float specularExponent,
+                                   float limitingConeAngle) noexcept
       : LightSource(LightType::LS_SPOT), _position(position), _pointsAt(pointsAt),
         _specularExponent(std::clamp(specularExponent, 1.0f, 128.0f)), _limitingConeAngle(limitingConeAngle)
   {
@@ -108,8 +108,8 @@ namespace krys::boo
     SpotLightSource::ComputePixelLightingData(const PaintingData &paintingData, int32 x, int32 y,
                                               float z) const noexcept
   {
-    FloatPoint3D lightVector = {_bufferPosition.X() - static_cast<float>(x),
-                                _bufferPosition.Y() - static_cast<float>(y), _bufferPosition.Z() - z};
+    Point3F lightVector = {_bufferPosition.X() - static_cast<float>(x),
+                           _bufferPosition.Y() - static_cast<float>(y), _bufferPosition.Z() - z};
     float lightVectorLength = lightVector.Length();
 
     float cosineOfAngle = (lightVector * paintingData.DirectionVector) / lightVectorLength;

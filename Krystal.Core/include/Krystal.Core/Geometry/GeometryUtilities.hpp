@@ -25,7 +25,6 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/RectEdges.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
@@ -35,7 +34,7 @@
 #include <algorithm>
 #include <utility>
 
-namespace krys::boo
+namespace krys
 {
   KRYS_NODISCARD float EuclidianDistance(const SizeF &delta) noexcept;
 
@@ -75,36 +74,6 @@ namespace krys::boo
                                            const PointF &point) noexcept;
 
   KRYS_NODISCARD PointF MidPoint(const PointF &first, const PointF &second) noexcept;
-
-  // -------------
-  // |   h\  |s  |
-  // |     \a|   |
-  // |      \|   |
-  // |       *   |
-  // |     (x,y) |
-  // -------------
-  // Given a box and a ray (described by an offset from the top left corner of the box and angle from vertical
-  // in degrees), compute the length from the starting position to the intersection of the ray with the box.
-  // Given the above diagram, we are trying to calculate h, with lengthOfPointToSideOfIntersection computing
-  // the length of s, and angleOfPointToSideOfIntersection computing a.
-  KRYS_NODISCARD double LengthOfRayIntersectionWithBoundingBox(const RectF &boundingRect,
-                                                               std::pair<const PointF &, float> ray) noexcept;
-
-  // Given a box and a ray (described by an offset from the top left corner of the box and angle from vertical
-  // in degrees), compute the closest length from the starting position to the side that the ray intersects
-  // with.
-  KRYS_NODISCARD double LengthOfPointToSideOfIntersection(const RectF &boundingRect,
-                                                          std::pair<const PointF &, float> ray) noexcept;
-
-  // Given a box and a ray (described by an offset from the top left corner of the box and angle from vertical
-  // in degrees) compute the acute angle between the ray and the line segment from the starting point to the
-  // closest point on the side that the ray intersects with.
-  KRYS_NODISCARD float AngleOfPointToSideOfIntersection(const RectF &boundingRect,
-                                                        std::pair<const PointF &, float> ray) noexcept;
-
-  // Given a box and an offset from the top left corner, calculate the distance of the point from each side
-  KRYS_NODISCARD RectEdges<double> DistanceOfPointToSidesOfRect(const RectF &box,
-                                                                const PointF &position) noexcept;
 
   KRYS_NODISCARD float DistanceToClosestSide(PointF p, SizeF size) noexcept;
 

@@ -31,8 +31,8 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point3.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -81,7 +81,7 @@ namespace krys::boo::dom
       return Create(init.X, init.Y, init.Z, init.W);
     }
 
-    KRYS_NODISCARD static Ref<DOMPointReadOnly> FromPointF(const FloatPoint3D &p) noexcept
+    KRYS_NODISCARD static Ref<DOMPointReadOnly> FromPointF(const Point3F &p) noexcept
     {
       return Create(p.X(), p.Y(), p.Z(), 1);
     }

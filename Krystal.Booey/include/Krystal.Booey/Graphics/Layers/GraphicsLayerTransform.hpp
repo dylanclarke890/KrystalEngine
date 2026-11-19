@@ -19,10 +19,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Point3.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 
 namespace krys::boo
@@ -31,7 +31,7 @@ namespace krys::boo
   class GraphicsLayerTransform
   {
   private:
-    FloatPoint3D _anchorPoint;
+    Point3F _anchorPoint;
     PointF _position;
     SizeF _size;
     bool _flattening {true};
@@ -49,7 +49,7 @@ namespace krys::boo
 
     void SetSize(const SizeF &size) noexcept;
 
-    void SetAnchorPoint(const FloatPoint3D &anchorPoint) noexcept;
+    void SetAnchorPoint(const Point3F &anchorPoint) noexcept;
 
     void SetFlattening(bool flattening) noexcept;
 

@@ -24,15 +24,14 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
-#include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 #include <numbers>
 #include <numeric>
 
-namespace krys::boo
+namespace krys
 {
   float EuclidianDistance(const SizeF &delta) noexcept
   {
@@ -312,16 +311,6 @@ namespace krys::boo
     return std::abs(180 - angle);
   }
 
-  RectEdges<double> DistanceOfPointToSidesOfRect(const RectF &box, const PointF &position) noexcept
-  {
-    // Compute distance to each side of the containing box
-    double top = std::abs(position.Y());
-    double bottom = std::abs(position.Y() - box.Height());
-    double left = std::abs(position.X());
-    double right = std::abs(position.X() - box.Width());
-    return RectEdges<double>(top, right, bottom, left);
-  }
-
   float DistanceToClosestSide(PointF p, SizeF size) noexcept
   {
     float widthDelta = std::abs(size.Width() - p.X());
@@ -367,60 +356,6 @@ namespace krys::boo
     return {PointF(-position.X(), -position.Y()), PointF(box.Width() - position.X(), -position.Y()),
             PointF(box.Width() - position.X(), box.Height() - position.Y()),
             PointF(-position.X(), box.Height() - position.Y())};
-  }
-
-  double LengthOfRayIntersectionWithBoundingBox(const RectF &boundingRect,
-                                                std::pair<const PointF &, float> ray) noexcept
-  {
-    auto length = LengthOfPointToSideOfIntersection(boundingRect, ray);
-    auto angleOfTriangle = AngleOfPointToSideOfIntersection(boundingRect, ray);
-
-    // Given a length and angle of a right triangle, calculate the hypotenuse, which corresponds to
-    // the length from the given point to the intersecting point on the box
-    return length / std::cos(deg2rad(angleOfTriangle));
-  }
-
-  namespace
-  {
-    // Get the side of box the ray intersects with
-    KRYS_NODISCARD BoxSide IntersectionSide(const RectF &boundingRect,
-                                            std::pair<const PointF &, float> ray) noexcept
-    {
-      auto position = ray.first;
-      auto angleInRadians = deg2rad(ray.second);
-      auto distances = DistanceOfPointToSidesOfRect(boundingRect, position);
-
-      // Get possible intersection sides
-      auto s1 = std::cos(angleInRadians) >= 0 ? distances.Top() : distances.Bottom();
-      auto s2 = std::sin(angleInRadians) >= 0 ? distances.Right() : distances.Left();
-      auto vertical = std::cos(angleInRadians) >= 0 ? BoxSide::Top : BoxSide::Bottom;
-      auto horizontal = std::sin(angleInRadians) >= 0 ? BoxSide::Right : BoxSide::Left;
-      auto acuteAngle = deg2rad(ToRelatedAcuteAngle(ray.second));
-
-      return std::sin(acuteAngle) * s1 > std::cos(acuteAngle) * s2 ? horizontal : vertical;
-    }
-  }
-
-  double LengthOfPointToSideOfIntersection(const RectF &boundingRect,
-                                           std::pair<const PointF &, float> ray) noexcept
-  {
-    auto position = ray.first;
-    if (position.X() < 0 || position.X() > boundingRect.Width() || position.Y() < 0
-        || position.Y() > boundingRect.Height())
-    {
-      return 0;
-    }
-    auto distances = DistanceOfPointToSidesOfRect(boundingRect, position);
-    return distances.At(IntersectionSide(boundingRect, ray));
-  }
-
-  float AngleOfPointToSideOfIntersection(const RectF &boundingRect,
-                                         std::pair<const PointF &, float> ray) noexcept
-  {
-    auto angle = ray.second;
-    auto side = IntersectionSide(boundingRect, ray);
-    angle = ToRelatedAcuteAngle(angle);
-    return side == BoxSide::Top || side == BoxSide::Bottom ? angle : 90 - angle;
   }
 
   float NormaliseAngleInRadians(float radians) noexcept

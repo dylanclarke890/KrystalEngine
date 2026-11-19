@@ -36,12 +36,12 @@
 
 namespace krys::boo
 {
-  Ref<PointLightSource> PointLightSource::Create(const FloatPoint3D &position) noexcept
+  Ref<PointLightSource> PointLightSource::Create(const Point3F &position) noexcept
   {
     return AdoptRef(*new PointLightSource(position));
   }
 
-  PointLightSource::PointLightSource(const FloatPoint3D &position) noexcept
+  PointLightSource::PointLightSource(const Point3F &position) noexcept
       : LightSource(LightType::LS_POINT), _position(position)
   {
   }
@@ -67,8 +67,8 @@ namespace krys::boo
     PointLightSource::ComputePixelLightingData(const PaintingData &paintingData, int32 x, int32 y,
                                                float z) const noexcept
   {
-    FloatPoint3D lightVector = {_bufferPosition.X() - static_cast<float>(x),
-                                _bufferPosition.Y() - static_cast<float>(y), _bufferPosition.Z() - z};
+    Point3F lightVector = {_bufferPosition.X() - static_cast<float>(x),
+                           _bufferPosition.Y() - static_cast<float>(y), _bufferPosition.Z() - z};
 
     return {lightVector, paintingData.InitialLightingData.ColorVector, lightVector.Length()};
   }

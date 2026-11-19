@@ -24,16 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPointGraph.hpp"
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Core/Geometry/PointGraph.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 #include <cmath>
 #include <numbers>
 
-namespace krys::boo
+namespace krys
 {
-  FloatPointGraph::Node *FloatPointGraph::FindOrCreateNode(PointF point)
+  PointGraphF::Node *PointGraphF::FindOrCreateNode(PointF point)
   {
     for (auto &testNode : _allNodes)
     {
@@ -49,11 +49,11 @@ namespace krys::boo
       }
     }
 
-    _allNodes.push_back(CreateUnique<FloatPointGraph::Node>(point));
+    _allNodes.push_back(CreateUnique<PointGraphF::Node>(point));
     return _allNodes.back().get();
   }
 
-  void FloatPointGraph::Reset() noexcept
+  void PointGraphF::Reset() noexcept
   {
     for (auto &node : _allNodes)
     {
@@ -61,8 +61,8 @@ namespace krys::boo
     }
   }
 
-  KRYS_NODISCARD static bool FindLineSegmentIntersection(const FloatPointGraph::Edge &edgeA,
-                                                         const FloatPointGraph::Edge &edgeB,
+  KRYS_NODISCARD static bool FindLineSegmentIntersection(const PointGraphF::Edge &edgeA,
+                                                         const PointGraphF::Edge &edgeB,
                                                          PointF &intersectionPoint) noexcept
   {
     if (!FindIntersection(*edgeA.first, *edgeA.second, *edgeB.first, *edgeB.second, intersectionPoint))
@@ -88,21 +88,21 @@ namespace krys::boo
     return true;
   }
 
-  static bool AddIntersectionPoints(List<FloatPointGraph::Polygon> &polys, FloatPointGraph &graph)
+  static bool AddIntersectionPoints(List<PointGraphF::Polygon> &polys, PointGraphF &graph)
   {
     bool foundAnyIntersections = false;
 
-    List<FloatPointGraph::Edge> allEdges;
+    List<PointGraphF::Edge> allEdges;
     for (auto &poly : polys)
     {
       allEdges.insert(allEdges.end(), poly.begin(), poly.end());
     }
 
-    for (const FloatPointGraph::Edge &edgeA : allEdges)
+    for (const PointGraphF::Edge &edgeA : allEdges)
     {
-      List<FloatPointGraph::Node *> intersectionPoints({edgeA.first, edgeA.second});
+      List<PointGraphF::Node *> intersectionPoints({edgeA.first, edgeA.second});
 
-      for (const FloatPointGraph::Edge &edgeB : allEdges)
+      for (const PointGraphF::Edge &edgeB : allEdges)
       {
         if (&edgeA == &edgeB)
         {
@@ -134,12 +134,12 @@ namespace krys::boo
     return foundAnyIntersections;
   }
 
-  KRYS_NODISCARD static FloatPointGraph::Polygon WalkGraphAndExtractPolygon(FloatPointGraph::Node *startNode)
+  KRYS_NODISCARD static PointGraphF::Polygon WalkGraphAndExtractPolygon(PointGraphF::Node *startNode)
   {
-    FloatPointGraph::Polygon outPoly;
+    PointGraphF::Polygon outPoly;
 
-    FloatPointGraph::Node *currentNode = startNode;
-    FloatPointGraph::Node *previousNode = startNode;
+    PointGraphF::Node *currentNode = startNode;
+    PointGraphF::Node *previousNode = startNode;
 
     do
     {
@@ -150,7 +150,7 @@ namespace krys::boo
 
       // Walk the graph, at each node choosing the next non-visited
       // point with the greatest internal angle.
-      FloatPointGraph::Node *nextNode = nullptr;
+      PointGraphF::Node *nextNode = nullptr;
       float nextNodeAngle = 0;
       for (auto *potentialNextNode : currentNode->NextPoints())
       {
@@ -195,7 +195,7 @@ namespace krys::boo
       // so bail out. We'll use a bounding box instead.
       if (!nextNode)
       {
-        return FloatPointGraph::Polygon();
+        return PointGraphF::Polygon();
       }
 
       outPoly.emplace_back(currentNode, nextNode);
@@ -207,12 +207,11 @@ namespace krys::boo
     return outPoly;
   }
 
-  KRYS_NODISCARD static FloatPointGraph::Node *
-    FindUnvisitedPolygonStartPoint(List<FloatPointGraph::Polygon> &polys)
+  KRYS_NODISCARD static PointGraphF::Node *FindUnvisitedPolygonStartPoint(List<PointGraphF::Polygon> &polys)
   {
     for (auto &poly : polys)
     {
-      bool visited = std::ranges::any_of(poly, [](const FloatPointGraph::Edge &edge)
+      bool visited = std::ranges::any_of(poly, [](const PointGraphF::Edge &edge)
                                          { return edge.first->IsVisited() || edge.second->IsVisited(); });
       if (visited)
       {
@@ -225,8 +224,8 @@ namespace krys::boo
     return nullptr;
   }
 
-  KRYS_NODISCARD static List<FloatPointGraph::Polygon> UnitePolygons(List<FloatPointGraph::Polygon> &polys,
-                                                                     FloatPointGraph &graph)
+  KRYS_NODISCARD static List<PointGraphF::Polygon> UnitePolygons(List<PointGraphF::Polygon> &polys,
+                                                                 PointGraphF &graph)
   {
     graph.Reset();
 
@@ -237,14 +236,14 @@ namespace krys::boo
       return polys;
     }
 
-    List<FloatPointGraph::Polygon> unitedPolygons;
+    List<PointGraphF::Polygon> unitedPolygons;
 
-    while (FloatPointGraph::Node *startNode = FindUnvisitedPolygonStartPoint(polys))
+    while (PointGraphF::Node *startNode = FindUnvisitedPolygonStartPoint(polys))
     {
-      FloatPointGraph::Polygon unitedPolygon = WalkGraphAndExtractPolygon(startNode);
+      PointGraphF::Polygon unitedPolygon = WalkGraphAndExtractPolygon(startNode);
       if (unitedPolygon.empty())
       {
-        return List<FloatPointGraph::Polygon>();
+        return List<PointGraphF::Polygon>();
       }
       unitedPolygons.push_back(unitedPolygon);
     }
@@ -252,26 +251,25 @@ namespace krys::boo
     return unitedPolygons;
   }
 
-  KRYS_NODISCARD static FloatPointGraph::Polygon EdgesForRect(RectF rect, FloatPointGraph &graph)
+  KRYS_NODISCARD static PointGraphF::Polygon EdgesForRect(RectF rect, PointGraphF &graph)
   {
     auto minMin = graph.FindOrCreateNode(rect.MinXMinYCorner());
     auto minMax = graph.FindOrCreateNode(rect.MinXMaxYCorner());
     auto maxMax = graph.FindOrCreateNode(rect.MaxXMaxYCorner());
     auto maxMin = graph.FindOrCreateNode(rect.MaxXMinYCorner());
 
-    return FloatPointGraph::Polygon({std::make_pair(minMin, maxMin), std::make_pair(maxMin, maxMax),
-                                     std::make_pair(maxMax, minMax), std::make_pair(minMax, minMin)});
+    return PointGraphF::Polygon({std::make_pair(minMin, maxMin), std::make_pair(maxMin, maxMax),
+                                 std::make_pair(maxMax, minMax), std::make_pair(minMax, minMin)});
   }
 
-  std::pair<FloatPointGraph, List<FloatPointGraph::Polygon>>
-    FloatPointGraph::PolygonsForRect(const List<RectF> &rects)
+  std::pair<PointGraphF, List<PointGraphF::Polygon>> PointGraphF::PolygonsForRect(const List<RectF> &rects)
   {
     List<RectF> sortedRects = rects;
     // FIXME: Replace it with 2 dimensional sort.
     std::ranges::stable_sort(sortedRects, {}, &RectF::X);
     std::ranges::stable_sort(sortedRects, {}, &RectF::Y);
 
-    FloatPointGraph graph;
+    PointGraphF graph;
 
     List<Polygon> rectPolygons;
     rectPolygons.reserve(sortedRects.size());

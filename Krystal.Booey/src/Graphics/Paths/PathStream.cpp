@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/Graphics/Paths/PathStream.hpp"
 
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 
 namespace krys::boo
 {

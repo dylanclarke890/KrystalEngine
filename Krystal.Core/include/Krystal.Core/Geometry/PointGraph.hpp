@@ -35,12 +35,12 @@
 #include <algorithm>
 #include <utility>
 
-namespace krys::boo
+namespace krys
 {
   /// @brief A graph of points joined by edges, for uniting rects into the polygons that outline them.
-  class FloatPointGraph
+  class PointGraphF
   {
-    KRYS_NON_COPYABLE(FloatPointGraph);
+    KRYS_NON_COPYABLE(PointGraphF);
 
   public:
     /// @brief A point and the points its edges lead to.
@@ -94,15 +94,15 @@ namespace krys::boo
     List<UniquePtr<Node>> _allNodes;
 
   public:
-    FloatPointGraph() noexcept = default;
+    PointGraphF() noexcept = default;
 
-    FloatPointGraph(FloatPointGraph &&) noexcept = default;
+    PointGraphF(PointGraphF &&) noexcept = default;
 
-    FloatPointGraph &operator=(FloatPointGraph &&) noexcept = default;
+    PointGraphF &operator=(PointGraphF &&) noexcept = default;
 
     /// @brief The polygons outlining the union of @p rects, or none when it has holes; the graph owns their
     /// points.
-    KRYS_NODISCARD static std::pair<FloatPointGraph, List<Polygon>> PolygonsForRect(const List<RectF> &rects);
+    KRYS_NODISCARD static std::pair<PointGraphF, List<Polygon>> PolygonsForRect(const List<RectF> &rects);
 
     /// @brief The node at @p point (within a small tolerance), made if there isn't one.
     KRYS_NODISCARD Node *FindOrCreateNode(PointF point);

@@ -24,7 +24,6 @@
 
 #include "Krystal.Booey/Style/Values/Shapes/ShapeFunction.hpp"
 
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
@@ -34,6 +33,7 @@
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStreamSource.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathParser.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathSource.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 

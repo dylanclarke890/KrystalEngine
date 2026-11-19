@@ -8,6 +8,10 @@ namespace krys
   template <Number T>
   class Point;
 
+  class Point3F;
+
+  class PointGraphF;
+
   class PolygonF;
 
   class QuadF;

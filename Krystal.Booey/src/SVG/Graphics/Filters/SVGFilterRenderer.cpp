@@ -23,13 +23,13 @@
 #include "Krystal.Booey/SVG/Graphics/Filters/SVGFilterRenderer.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterEffect.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterImage.hpp"
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGFilterElement.hpp"
 #include "Krystal.Booey/SVG/Graphics/Filters/SVGFilterEffectGraph.hpp"
 #include "Krystal.Booey/SVG/Graphics/Filters/SVGFilterPrimitiveGraph.hpp"
 #include "Krystal.Booey/SVG/SVGFilterPrimitiveStandardAttributes.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Core/Utils/PointerComparison.hpp"
 #include <numbers>
@@ -336,7 +336,7 @@ namespace krys::boo
     return CalculateResolvedSize(size, ReferenceBox(), _primitiveUnits);
   }
 
-  FloatPoint3D SVGFilterRenderer::ResolvedPoint3D(const FloatPoint3D &point) const noexcept
+  Point3F SVGFilterRenderer::ResolvedPoint3D(const Point3F &point) const noexcept
   {
     if (_primitiveUnits != SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
     {
@@ -344,7 +344,7 @@ namespace krys::boo
     }
 
     auto referenceBox = ReferenceBox();
-    FloatPoint3D resolvedPoint;
+    Point3F resolvedPoint;
     resolvedPoint.SetX(referenceBox.X() + point.X() * referenceBox.Width());
     resolvedPoint.SetY(referenceBox.Y() + point.Y() * referenceBox.Height());
 

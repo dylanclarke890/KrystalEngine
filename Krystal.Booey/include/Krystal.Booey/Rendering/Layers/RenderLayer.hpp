@@ -45,7 +45,6 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerEnums.hpp"
@@ -62,6 +61,7 @@
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/Debug.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Point3.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -1410,7 +1410,7 @@ namespace krys::boo
 
     KRYS_NODISCARD PointF PerspectiveOrigin() const noexcept;
 
-    KRYS_NODISCARD FloatPoint3D TransformOriginPixelSnappedIfNeeded() const noexcept;
+    KRYS_NODISCARD Point3F TransformOriginPixelSnappedIfNeeded() const noexcept;
 
     KRYS_NODISCARD bool Preserves3D() const noexcept;
 

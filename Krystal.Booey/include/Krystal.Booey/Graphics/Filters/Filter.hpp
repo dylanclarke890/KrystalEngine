@@ -22,7 +22,7 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Filters/FilterFunction.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
+#include "Krystal.Core/Geometry/Point3.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -94,7 +94,7 @@ namespace krys::boo
       return size;
     }
 
-    KRYS_NODISCARD virtual FloatPoint3D ResolvedPoint3D(const FloatPoint3D &point) const noexcept
+    KRYS_NODISCARD virtual Point3F ResolvedPoint3D(const Point3F &point) const noexcept
     {
       return point;
     }

@@ -154,10 +154,10 @@ namespace krys::boo::tests
     // Euler angles: rotating about x by 180 degrees flips y and z.
     TransformationMatrix euler;
     euler.Rotate3d(180, 0, 0);
-    CHECK(euler.MapPoint(FloatPoint3D(1, 2, 3)) == FloatPoint3D(1, -2, -3));
+    CHECK(euler.MapPoint(Point3F(1, 2, 3)) == Point3F(1, -2, -3));
     TransformationMatrix arbitrary;
     arbitrary.Rotate3d(1, 1, 0, 180);
-    auto swapped = arbitrary.MapPoint(FloatPoint3D(1, 0, 0));
+    auto swapped = arbitrary.MapPoint(Point3F(1, 0, 0));
     CHECK_THAT(swapped.X(), WithinAbs(0, 1e-6));
     CHECK_THAT(swapped.Y(), WithinAbs(1, 1e-6));
     CHECK_THAT(swapped.Z(), WithinAbs(0, 1e-6));
@@ -174,7 +174,7 @@ namespace krys::boo::tests
     CHECK(perspective.HasPerspective());
     CHECK_FALSE(TransformationMatrix().HasPerspective());
     perspective.Translate3d(0, 0, -100);
-    auto projected = perspective.MapPoint(FloatPoint3D(50, 50, 0));
+    auto projected = perspective.MapPoint(Point3F(50, 50, 0));
     CHECK_THAT(projected.X(), WithinAbs(25, 1e-4));
     CHECK_THAT(projected.Y(), WithinAbs(25, 1e-4));
 
@@ -276,7 +276,7 @@ namespace krys::boo::tests
     TransformationMatrix right;
     right.Scale(2);
     right.TranslateRight3d(1, 2, 3);
-    CHECK(right.MapPoint(FloatPoint3D(1, 1, 1)) == FloatPoint3D(3, 4, 4));
+    CHECK(right.MapPoint(Point3F(1, 1, 1)) == Point3F(3, 4, 4));
 
     // Multiplying by an affine transform.
     TransformationMatrix withAffine;

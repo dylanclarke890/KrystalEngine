@@ -46,7 +46,7 @@ namespace krys::boo
     _dirty = true;
   }
 
-  void GraphicsLayerTransform::SetAnchorPoint(const FloatPoint3D &anchorPoint) noexcept
+  void GraphicsLayerTransform::SetAnchorPoint(const Point3F &anchorPoint) noexcept
   {
     if (_anchorPoint == anchorPoint)
     {

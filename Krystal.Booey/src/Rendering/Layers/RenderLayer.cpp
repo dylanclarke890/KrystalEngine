@@ -3043,7 +3043,7 @@ namespace krys::boo
     return transform;
   }
 
-  FloatPoint3D RenderLayer::TransformOriginPixelSnappedIfNeeded() const noexcept
+  Point3F RenderLayer::TransformOriginPixelSnappedIfNeeded() const noexcept
   {
     if (!Renderer().HasTransformRelatedProperty())
     {
@@ -6798,7 +6798,7 @@ namespace krys::boo
       PointF targetPoint = transformState.MappedPoint();
 
       // Now map the point back through the transform, which computes Z.
-      FloatPoint3D backmappedPoint = transformState.AccumulatedTransform.MapPoint(FloatPoint3D(targetPoint));
+      Point3F backmappedPoint = transformState.AccumulatedTransform.MapPoint(Point3F(targetPoint));
       return backmappedPoint.Z();
     }
 

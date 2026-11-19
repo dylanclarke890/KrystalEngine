@@ -26,8 +26,8 @@
 #include "Krystal.Booey/Graphics/Paths/PathSegmentData.hpp"
 
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
 #include <cmath>

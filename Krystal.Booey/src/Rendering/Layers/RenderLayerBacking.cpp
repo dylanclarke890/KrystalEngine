@@ -564,7 +564,7 @@ namespace krys::boo
   void RenderLayerBacking::UpdateChildrenTransformAndAnchorPoint(
     const LayoutRect &primaryGraphicsLayerRect, LayoutSize offsetFromParentGraphicsLayer) noexcept
   {
-    auto defaultAnchorPoint = FloatPoint3D {0.5, 0.5, 0};
+    auto defaultAnchorPoint = Point3F {0.5, 0.5, 0};
 
     if (_owningLayer.IsRenderViewLayer())
     {
@@ -601,15 +601,15 @@ namespace krys::boo
     auto layerOffset =
       RoundPointToDevicePixels(ToLayoutPoint(offsetFromParentGraphicsLayer), deviceScaleFactor);
     auto anchor =
-      FloatPoint3D {primaryGraphicsLayerRect.Width()
-                      ? ((layerOffset.X() - primaryGraphicsLayerRect.X().ToFloat()) + transformOrigin.X())
-                          / primaryGraphicsLayerRect.Width().ToFloat()
-                      : 0.5f,
-                    primaryGraphicsLayerRect.Height()
-                      ? ((layerOffset.Y() - primaryGraphicsLayerRect.Y().ToFloat()) + transformOrigin.Y())
-                          / primaryGraphicsLayerRect.Height().ToFloat()
-                      : 0.5f,
-                    transformOrigin.Z()};
+      Point3F {primaryGraphicsLayerRect.Width()
+                 ? ((layerOffset.X() - primaryGraphicsLayerRect.X().ToFloat()) + transformOrigin.X())
+                     / primaryGraphicsLayerRect.Width().ToFloat()
+                 : 0.5f,
+               primaryGraphicsLayerRect.Height()
+                 ? ((layerOffset.Y() - primaryGraphicsLayerRect.Y().ToFloat()) + transformOrigin.Y())
+                     / primaryGraphicsLayerRect.Height().ToFloat()
+                 : 0.5f,
+               transformOrigin.Z()};
 
     if (_contentsContainmentLayer)
     {
@@ -673,14 +673,14 @@ namespace krys::boo
         _scrolledContentsLayer->SetPreserves3D(true);
       }
 
-      auto perspectiveAnchorPoint = FloatPoint3D {
-        layerForPerspectiveRect.Width()
-          ? (transformOrigin.X() - layerForPerspectiveRect.X()) / layerForPerspectiveRect.Width()
-          : 0.5f,
-        layerForPerspectiveRect.Height()
-          ? (transformOrigin.Y() - layerForPerspectiveRect.Y()) / layerForPerspectiveRect.Height()
-          : 0.5f,
-        transformOrigin.Z()};
+      auto perspectiveAnchorPoint =
+        Point3F {layerForPerspectiveRect.Width()
+                   ? (transformOrigin.X() - layerForPerspectiveRect.X()) / layerForPerspectiveRect.Width()
+                   : 0.5f,
+                 layerForPerspectiveRect.Height()
+                   ? (transformOrigin.Y() - layerForPerspectiveRect.Y()) / layerForPerspectiveRect.Height()
+                   : 0.5f,
+                 transformOrigin.Z()};
 
       layerForPerspective->SetAnchorPoint(perspectiveAnchorPoint);
     }
@@ -2553,7 +2553,7 @@ namespace krys::boo
       {
         _backgroundLayer = CreateGraphicsLayer(_owningLayer.Name() + u8" (background)");
         _backgroundLayer->SetDrawsContent(true);
-        _backgroundLayer->SetAnchorPoint(FloatPoint3D());
+        _backgroundLayer->SetAnchorPoint(Point3F());
         layerChanged = true;
       }
 
@@ -3986,7 +3986,7 @@ namespace krys::boo
     {
       if (propertyName == u8"anchorPoint")
       {
-        return layer->AnchorPoint() != FloatPoint3D {};
+        return layer->AnchorPoint() != Point3F {};
       }
 
       return true;
@@ -3994,7 +3994,7 @@ namespace krys::boo
 
     if (propertyName == u8"anchorPoint")
     {
-      return layer->AnchorPoint() != FloatPoint3D(0.5f, 0.5f, 0);
+      return layer->AnchorPoint() != Point3F(0.5f, 0.5f, 0);
     }
 
     return true;

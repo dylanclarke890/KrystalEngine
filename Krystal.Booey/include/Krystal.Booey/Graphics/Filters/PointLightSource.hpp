@@ -32,15 +32,15 @@ namespace krys::boo
   class PointLightSource : public LightSource
   {
   private:
-    FloatPoint3D _position;
-    mutable FloatPoint3D _bufferPosition;
+    Point3F _position;
+    mutable Point3F _bufferPosition;
 
   public:
-    KRYS_NODISCARD static Ref<PointLightSource> Create(const FloatPoint3D &position) noexcept;
+    KRYS_NODISCARD static Ref<PointLightSource> Create(const Point3F &position) noexcept;
 
     KRYS_NODISCARD bool operator==(const PointLightSource &) const noexcept;
 
-    KRYS_NODISCARD const FloatPoint3D &Position() const noexcept
+    KRYS_NODISCARD const Point3F &Position() const noexcept
     {
       return _position;
     }
@@ -59,7 +59,7 @@ namespace krys::boo
     TextStream &ExternalRepresentation(TextStream &) const noexcept override;
 
   private:
-    explicit PointLightSource(const FloatPoint3D &position) noexcept;
+    explicit PointLightSource(const Point3F &position) noexcept;
 
     KRYS_NODISCARD bool operator==(const LightSource &other) const noexcept override
     {

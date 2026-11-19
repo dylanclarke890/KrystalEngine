@@ -292,7 +292,7 @@ namespace krys::boo::tests
     CHECK(lit.DiffuseConstant() == 2.f);
     CHECK(lit.SurfaceScale() == 3.f);
     auto &spot = Downcast<SpotLightSource>(lit.GetLightSource());
-    CHECK(spot.Position() == FloatPoint3D {1, 2, 3});
+    CHECK(spot.Position() == Point3F {1, 2, 3});
     CHECK(spot.LimitingConeAngle() == 30.f);
 
     // Lighting needs a light source.

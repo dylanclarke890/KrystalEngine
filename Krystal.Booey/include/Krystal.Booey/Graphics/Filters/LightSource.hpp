@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point3.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
@@ -53,15 +53,15 @@ namespace krys::boo
   public:
     struct ComputedLightingData
     {
-      FloatPoint3D LightVector;
-      FloatPoint3D ColorVector;
+      Point3F LightVector;
+      Point3F ColorVector;
       float LightVectorLength {0.f};
     };
 
     struct PaintingData
     {
       ComputedLightingData InitialLightingData;
-      FloatPoint3D DirectionVector;
+      Point3F DirectionVector;
       float ConeCutOffLimit {0.f};
       float ConeFullLight {0.f};
     };

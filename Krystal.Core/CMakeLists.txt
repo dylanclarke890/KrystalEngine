@@ -122,7 +122,10 @@ target_sources(Krystal.Core
 
       # Geometry
       include/Krystal.Core/Geometry/GeometryForward.hpp
+      include/Krystal.Core/Geometry/GeometryUtilities.hpp
       include/Krystal.Core/Geometry/Point.hpp
+      include/Krystal.Core/Geometry/Point3.hpp
+      include/Krystal.Core/Geometry/PointGraph.hpp
       include/Krystal.Core/Geometry/Polygon.hpp
       include/Krystal.Core/Geometry/Quad.hpp
       include/Krystal.Core/Geometry/Rect.hpp
@@ -300,7 +303,10 @@ target_sources(Krystal.Core
     src/Events/EventManager.cpp
     
     # Geometry
+    src/Geometry/GeometryUtilities.cpp
     src/Geometry/Point.cpp
+    src/Geometry/Point3.cpp
+    src/Geometry/PointGraph.cpp
     src/Geometry/Polygon.cpp
     src/Geometry/Quad.cpp
     src/Geometry/Rect.cpp

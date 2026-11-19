@@ -24,7 +24,6 @@
  */
 
 #include "Krystal.Booey/Style/TransformResolver.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Rendering/MotionPath.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
@@ -32,6 +31,7 @@
 #include "Krystal.Booey/Style/Computed/ComputedStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Point3.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo::style
@@ -63,10 +63,10 @@ namespace krys::boo::style
     return AffectedByTransformOrigin(_style);
   }
 
-  FloatPoint3D TransformResolver::ComputeTransformOrigin(const ComputedStyle &style,
-                                                         const RectF &boundingBox) noexcept
+  Point3F TransformResolver::ComputeTransformOrigin(const ComputedStyle &style,
+                                                    const RectF &boundingBox) noexcept
   {
-    FloatPoint3D originTranslate;
+    Point3F originTranslate;
     originTranslate.SetXY(
       boundingBox.Location()
       + Evaluate<PointF>(style.GetTransformOrigin().XY(), boundingBox.Size(), ZoomNeeded {}));
@@ -74,13 +74,13 @@ namespace krys::boo::style
     return originTranslate;
   }
 
-  FloatPoint3D TransformResolver::ComputeTransformOrigin(const RenderStyle &style,
-                                                         const RectF &boundingBox) noexcept
+  Point3F TransformResolver::ComputeTransformOrigin(const RenderStyle &style,
+                                                    const RectF &boundingBox) noexcept
   {
     return ComputeTransformOrigin(style.ComputedStyle(), boundingBox);
   }
 
-  FloatPoint3D TransformResolver::ComputeTransformOrigin(const RectF &boundingBox) const noexcept
+  Point3F TransformResolver::ComputeTransformOrigin(const RectF &boundingBox) const noexcept
   {
     return ComputeTransformOrigin(_style, boundingBox);
   }
@@ -120,7 +120,7 @@ namespace krys::boo::style
     _transform.Translate(-originTranslate.X(), -originTranslate.Y());
   }
 
-  void TransformResolver::ApplyTransformOrigin(const FloatPoint3D &originTranslate) noexcept
+  void TransformResolver::ApplyTransformOrigin(const Point3F &originTranslate) noexcept
   {
     if (!originTranslate.IsZero())
     {
@@ -128,7 +128,7 @@ namespace krys::boo::style
     }
   }
 
-  void TransformResolver::UnapplyTransformOrigin(const FloatPoint3D &originTranslate) noexcept
+  void TransformResolver::UnapplyTransformOrigin(const Point3F &originTranslate) noexcept
   {
     if (!originTranslate.IsZero())
     {

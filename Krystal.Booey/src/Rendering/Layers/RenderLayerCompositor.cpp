@@ -677,7 +677,7 @@ namespace krys::boo
   {
     if (propertyName == u8"anchorPoint")
     {
-      return layer->AnchorPoint() != FloatPoint3D(0.5f, 0.5f, 0);
+      return layer->AnchorPoint() != Point3F(0.5f, 0.5f, 0);
     }
 
     return true;
@@ -2894,7 +2894,7 @@ namespace krys::boo
       auto &frameView = _renderView.FrameView();
       _rootContentsLayer->SetSize(SizeF(frameView.ContentsSize()));
       _rootContentsLayer->SetPosition(frameView.PositionForRootContentLayer());
-      _rootContentsLayer->SetAnchorPoint(FloatPoint3D());
+      _rootContentsLayer->SetAnchorPoint(Point3F());
     }
 
     UpdateScrollLayerClipping();

@@ -95,7 +95,10 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Commands/Command.cpp
 	
   # Geometry
+	PRIVATE tests/Geometry/GeometryUtilities.cpp
 	PRIVATE tests/Geometry/Point.cpp
+	PRIVATE tests/Geometry/Point3.cpp
+	PRIVATE tests/Geometry/PointGraph.cpp
 	PRIVATE tests/Geometry/Polygon.cpp
 	PRIVATE tests/Geometry/Quad.cpp
 	PRIVATE tests/Geometry/Rect.cpp

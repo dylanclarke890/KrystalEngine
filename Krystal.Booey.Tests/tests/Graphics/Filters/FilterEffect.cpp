@@ -270,7 +270,7 @@ namespace krys::boo::tests
       auto light = PointLightSource::Create({15, 15, 5});
       light->InitPaintingData(*filter, *result, data);
       auto position = light->ComputePixelLightingData(data, 0, 0, 0).LightVector;
-      CHECK(position == FloatPoint3D {20, 10, 10});
+      CHECK(position == Point3F {20, 10, 10});
     }
 
     SECTION("A spot light's cone")
@@ -278,7 +278,7 @@ namespace krys::boo::tests
       SpotLightSource::Create({0, 0, 10}, {0, 0, 0}, 1, 30)->InitPaintingData(*filter, *result, data);
       CHECK(data.ConeCutOffLimit == Approx(-0.866f).margin(1e-3));
       CHECK(data.ConeFullLight == Approx(data.ConeCutOffLimit - 0.016f));
-      CHECK(data.DirectionVector == FloatPoint3D {0, 0, -1});
+      CHECK(data.DirectionVector == Point3F {0, 0, -1});
 
       SpotLightSource::Create({0, 0, 10}, {0, 0, 0}, 1, 0)->InitPaintingData(*filter, *result, data);
       CHECK(data.ConeCutOffLimit == 0.f);

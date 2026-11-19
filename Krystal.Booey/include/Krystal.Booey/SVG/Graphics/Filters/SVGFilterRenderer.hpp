@@ -133,7 +133,7 @@ namespace krys::boo
 
     KRYS_NODISCARD SizeF ResolvedSize(const SizeF &size) const noexcept final;
 
-    KRYS_NODISCARD FloatPoint3D ResolvedPoint3D(const FloatPoint3D &point) const noexcept final;
+    KRYS_NODISCARD Point3F ResolvedPoint3D(const Point3F &point) const noexcept final;
 
     KRYS_NODISCARD EnumSet<FilterRenderingMode> SupportedFilterRenderingModes(
       EnumSet<FilterRenderingMode> preferredFilterRenderingModes) const noexcept final;

@@ -173,7 +173,7 @@ namespace krys::ui
     NotifyChange(BoundsOriginChange);
   }
 
-  void GraphicsLayerTextureMapper::SetAnchorPoint(const boo::FloatPoint3D &value) noexcept
+  void GraphicsLayerTextureMapper::SetAnchorPoint(const Point3F &value) noexcept
   {
     if (value == AnchorPoint())
     {
@@ -553,7 +553,7 @@ namespace krys::ui
         if (!_backdropLayer)
         {
           _backdropLayer = CreateUnique<TextureMapperLayer>();
-          _backdropLayer->SetAnchorPoint(boo::FloatPoint3D());
+          _backdropLayer->SetAnchorPoint(Point3F());
           _backdropLayer->SetContentsVisible(true);
           _backdropLayer->SetMasksToBounds(true);
         }

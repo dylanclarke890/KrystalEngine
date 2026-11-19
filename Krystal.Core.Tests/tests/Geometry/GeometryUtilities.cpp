@@ -1,14 +1,14 @@
-﻿#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
+﻿#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
 #include <numbers>
 
-namespace krys::boo::tests
+namespace krys::tests
 {
   using Catch::Matchers::WithinAbs;
 
-  TEST_CASE("GeometryUtilities: distances and intersections", "[Graphics][GeometryUtilities]")
+  TEST_CASE("GeometryUtilities: distances and intersections", "[Geometry][GeometryUtilities]")
   {
     CHECK(EuclidianDistance(SizeF(3, 4)) == 5);
     CHECK(EuclidianDistance(PointF(1, 1), PointF(4, 5)) == 5);
@@ -26,12 +26,6 @@ namespace krys::boo::tests
     CHECK(DistanceToClosestCorner(PointF(3, 4), SizeF(100, 100)) == 5);
     CHECK_THAT(DistanceToFarthestCorner(PointF(0, 0), SizeF(3, 4)), WithinAbs(5, 1e-6));
 
-    auto sides = DistanceOfPointToSidesOfRect(RectF(0, 0, 10, 20), PointF(2, 5));
-    CHECK(sides.Top() == 5);
-    CHECK(sides.Right() == 8);
-    CHECK(sides.Bottom() == 15);
-    CHECK(sides.Left() == 2);
-
     auto vertices = VerticesForBox(RectF(0, 0, 10, 20), PointF(2, 5));
     CHECK(vertices[0] == PointF(-2, -5));
     CHECK(vertices[2] == PointF(8, 15));
@@ -42,7 +36,7 @@ namespace krys::boo::tests
     CHECK_FALSE(EllipseContainsPoint(PointF(10, 10), SizeF(0, 2), PointF(10, 10)));
   }
 
-  TEST_CASE("GeometryUtilities: rect helpers", "[Graphics][GeometryUtilities]")
+  TEST_CASE("GeometryUtilities: rect helpers", "[Geometry][GeometryUtilities]")
   {
     RectI intRects[] = {RectI(0, 0, 10, 10), RectI(0, 0, 0, 5), RectI(20, 20, 5, 5)};
     CHECK(UnionRect(Span<const RectI>(intRects)) == RectI(0, 0, 25, 25));
@@ -72,7 +66,7 @@ namespace krys::boo::tests
     CHECK(ScaledRectAtOrigin(RectF(10, 10, 10, 10), 2, PointF(5, 5)) == RectF(15, 15, 20, 20));
   }
 
-  TEST_CASE("GeometryUtilities: angles and rays", "[Graphics][GeometryUtilities]")
+  TEST_CASE("GeometryUtilities: angles and rays", "[Geometry][GeometryUtilities]")
   {
     CHECK(ToPositiveAngle(-90) == 270);
     CHECK(ToPositiveAngle(450) == 90);
@@ -83,23 +77,9 @@ namespace krys::boo::tests
                WithinAbs(3 * std::numbers::pi_v<float> / 2, 1e-5));
     CHECK_THAT(NormaliseAngleInRadians(5 * std::numbers::pi_v<float>),
                WithinAbs(std::numbers::pi_v<float>, 1e-5));
-
-    // A ray straight up from the middle of a 100x100 box hits the top after 50.
-    RectF box(0, 0, 100, 100);
-    PointF centre(50, 50);
-    CHECK_THAT(LengthOfPointToSideOfIntersection(box, {centre, 0.0f}), WithinAbs(50, 1e-6));
-    CHECK_THAT(AngleOfPointToSideOfIntersection(box, {centre, 0.0f}), WithinAbs(0, 1e-6));
-    CHECK_THAT(LengthOfRayIntersectionWithBoundingBox(box, {centre, 0.0f}), WithinAbs(50, 1e-6));
-    // At 45 degrees it hits the top-right corner.
-    CHECK_THAT(LengthOfRayIntersectionWithBoundingBox(box, {centre, 45.0f}),
-               WithinAbs(50 * std::numbers::sqrt2, 1e-4));
-    // At 90 degrees it hits the right side.
-    CHECK_THAT(LengthOfPointToSideOfIntersection(box, {PointF(80, 50), 90.0f}), WithinAbs(20, 1e-6));
-    // A point outside the box has no length.
-    CHECK(LengthOfPointToSideOfIntersection(box, {PointF(150, 50), 0.0f}) == 0);
   }
 
-  TEST_CASE("GeometryUtilities: min and max", "[Graphics][GeometryUtilities]")
+  TEST_CASE("GeometryUtilities: min and max", "[Geometry][GeometryUtilities]")
   {
     STATIC_CHECK(Min3(3, 1, 2) == 1);
     STATIC_CHECK(Max3(3, 1, 2) == 3);
@@ -116,28 +96,28 @@ namespace krys::boo::tests
     CHECK_THAT(info.Size.Height(), WithinAbs(size.Height(), 0.001));
   }
 
-  TEST_CASE("GeometryUtilities: RotatedBoundingRectForPoint", "[Graphics][GeometryUtilities]")
+  TEST_CASE("GeometryUtilities: RotatedBoundingRectForPoint", "[Geometry][GeometryUtilities]")
   {
     ExpectRotatedRect({1, -5}, {0, 0}, 0,
                       RotatedBoundingRectWithMinimumAngleOfRotation(
                         {PointF(1, -5), PointF(1, -5), PointF(1, -5), PointF(1, -5)}));
   }
 
-  TEST_CASE("GeometryUtilities: RotatedBoundingRectForLineSegment", "[Graphics][GeometryUtilities]")
+  TEST_CASE("GeometryUtilities: RotatedBoundingRectForLineSegment", "[Geometry][GeometryUtilities]")
   {
     ExpectRotatedRect({0, -5}, {20, 0}, 0,
                       RotatedBoundingRectWithMinimumAngleOfRotation(
                         {PointF(-10, -5), PointF(10, -5), PointF(10, -5), PointF(-10, -5)}));
   }
 
-  TEST_CASE("GeometryUtilities: RotatedBoundingRectForTriangle", "[Graphics][GeometryUtilities]")
+  TEST_CASE("GeometryUtilities: RotatedBoundingRectForTriangle", "[Geometry][GeometryUtilities]")
   {
     ExpectRotatedRect({10, 0}, {40, 20}, 0,
                       RotatedBoundingRectWithMinimumAngleOfRotation(
                         {PointF(-10, -10), PointF(30, 0), PointF(30, 0), PointF(-10, 10)}));
   }
 
-  TEST_CASE("GeometryUtilities: RotatedBoundingRectForTrapezoid", "[Graphics][GeometryUtilities]")
+  TEST_CASE("GeometryUtilities: RotatedBoundingRectForTrapezoid", "[Geometry][GeometryUtilities]")
   {
     ExpectRotatedRect({25, 15}, {28.284f, 14.142f}, 5.498f,
                       RotatedBoundingRectWithMinimumAngleOfRotation(
@@ -148,7 +128,7 @@ namespace krys::boo::tests
                         {PointF(20, 10), PointF(30, 30), PointF(20, 40), PointF(10, 20)}));
   }
 
-  TEST_CASE("GeometryUtilities: RotatedBoundingRectWithMinimumAngle", "[Graphics][GeometryUtilities]")
+  TEST_CASE("GeometryUtilities: RotatedBoundingRectWithMinimumAngle", "[Geometry][GeometryUtilities]")
   {
     ExpectRotatedRect({20, -14.95f}, {20, 10.1f}, 0,
                       RotatedBoundingRectWithMinimumAngleOfRotation(

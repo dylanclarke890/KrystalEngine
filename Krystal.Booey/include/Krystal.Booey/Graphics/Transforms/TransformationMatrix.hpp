@@ -26,10 +26,10 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
 #include "Krystal.Booey/Graphics/Transforms/Quaternion.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Point3.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
@@ -178,7 +178,7 @@ namespace krys::boo
     void Map4ComponentPoint(double &x, double &y, double &z, double &w) const noexcept;
 
     // Maps a 3D point through the transform, returning a 3D point.
-    KRYS_NODISCARD FloatPoint3D MapPoint(const FloatPoint3D &p) const noexcept;
+    KRYS_NODISCARD Point3F MapPoint(const Point3F &p) const noexcept;
 
     // Maps a 2D point through the transform, returning a 2D point.
     // Note that this ignores the z component, effectively projecting the point into the z=0 plane.
@@ -604,14 +604,13 @@ namespace krys::boo
     void MultVecMatrix(double x, double y, double z, double &resultX, double &resultY,
                        double &resultZ) const noexcept;
 
-    KRYS_NODISCARD FloatPoint3D InternalMapPoint(const FloatPoint3D &sourcePoint) const noexcept
+    KRYS_NODISCARD Point3F InternalMapPoint(const Point3F &sourcePoint) const noexcept
     {
       double resultX;
       double resultY;
       double resultZ;
       MultVecMatrix(sourcePoint.X(), sourcePoint.Y(), sourcePoint.Z(), resultX, resultY, resultZ);
-      return FloatPoint3D(static_cast<float>(resultX), static_cast<float>(resultY),
-                          static_cast<float>(resultZ));
+      return Point3F(static_cast<float>(resultX), static_cast<float>(resultY), static_cast<float>(resultZ));
     }
 
     KRYS_NODISCARD constexpr Type GetType() const noexcept

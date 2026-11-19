@@ -25,7 +25,6 @@
 
 #include "Krystal.Booey/Rendering/Painting/OutlinePainter.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPointGraph.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
@@ -44,6 +43,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGModelObject.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
+#include "Krystal.Core/Geometry/PointGraph.hpp"
 
 namespace krys::boo
 {
@@ -512,8 +512,8 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD std::pair<PointF, PointF> StartAndEndPointsForCorner(const FloatPointGraph::Edge &fromEdge,
-                                                                        const FloatPointGraph::Edge &toEdge,
+    KRYS_NODISCARD std::pair<PointF, PointF> StartAndEndPointsForCorner(const PointGraphF::Edge &fromEdge,
+                                                                        const PointGraphF::Edge &toEdge,
                                                                         const SizeF &radius) noexcept
     {
       SizeF fromEdgeVector = *fromEdge.second - *fromEdge.first;
@@ -540,8 +540,8 @@ namespace krys::boo
       Other,
     };
 
-    KRYS_NODISCARD CornerType GetCornerType(const FloatPointGraph::Edge &fromEdge,
-                                            const FloatPointGraph::Edge &toEdge) noexcept
+    KRYS_NODISCARD CornerType GetCornerType(const PointGraphF::Edge &fromEdge,
+                                            const PointGraphF::Edge &toEdge) noexcept
     {
       auto fromEdgeVector = *fromEdge.second - *fromEdge.first;
       auto toEdgeVector = *toEdge.second - *toEdge.first;
@@ -565,8 +565,8 @@ namespace krys::boo
       return CornerType::Other;
     }
 
-    KRYS_NODISCARD CornerType CornerTypeForMultiline(const FloatPointGraph::Edge &fromEdge,
-                                                     const FloatPointGraph::Edge &toEdge,
+    KRYS_NODISCARD CornerType CornerTypeForMultiline(const PointGraphF::Edge &fromEdge,
+                                                     const PointGraphF::Edge &toEdge,
                                                      const List<PointF> &corners) noexcept
     {
       auto corner = GetCornerType(fromEdge, toEdge);
@@ -589,9 +589,10 @@ namespace krys::boo
       return CornerType::Other;
     }
 
-    KRYS_NODISCARD std::pair<PointF, PointF>
-      ControlPointsForBezierCurve(CornerType cornerType, const FloatPointGraph::Edge &fromEdge,
-                                  const FloatPointGraph::Edge &toEdge, const SizeF &radius) noexcept
+    KRYS_NODISCARD std::pair<PointF, PointF> ControlPointsForBezierCurve(CornerType cornerType,
+                                                                         const PointGraphF::Edge &fromEdge,
+                                                                         const PointGraphF::Edge &toEdge,
+                                                                         const SizeF &radius) noexcept
     {
       PointF cp1;
       PointF cp2;
@@ -663,7 +664,7 @@ namespace krys::boo
       };
     }
 
-    KRYS_NODISCARD Maybe<RectF> RectFromPolygon(const FloatPointGraph::Polygon &poly) noexcept
+    KRYS_NODISCARD Maybe<RectF> RectFromPolygon(const PointGraphF::Polygon &poly) noexcept
     {
       if (poly.size() != 4)
       {
@@ -720,7 +721,7 @@ namespace krys::boo
       return roundedRect(rects.at(0));
     }
 
-    auto [graph, polys] = FloatPointGraph::PolygonsForRect(rects);
+    auto [graph, polys] = PointGraphF::PolygonsForRect(rects);
 
     // Fall back to corner painting with no radius for empty and disjoint rectangles.
     if (polys.empty() || polys.size() > 1)

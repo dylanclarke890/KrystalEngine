@@ -19,12 +19,12 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
+#include "Krystal.Core/Geometry/Point3.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
 
-namespace krys::boo
+namespace krys
 {
-  void FloatPoint3D::Normalise() noexcept
+  void Point3F::Normalise() noexcept
   {
     float tempLength = Length();
 
@@ -36,7 +36,7 @@ namespace krys::boo
     }
   }
 
-  TextStream &operator<<(TextStream &ts, const FloatPoint3D &point) noexcept
+  TextStream &operator<<(TextStream &ts, const Point3F &point) noexcept
   {
     return ts << point.X() << u8' ' << point.Y() << u8' ' << point.Z();
   }

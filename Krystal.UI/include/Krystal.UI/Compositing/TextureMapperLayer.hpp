@@ -2,13 +2,13 @@
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerEnums.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Point3.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -37,7 +37,7 @@ namespace krys::ui
     struct State
     {
       PointF Pos;
-      boo::FloatPoint3D AnchorPoint {0.5, 0.5, 0};
+      Point3F AnchorPoint {0.5, 0.5, 0};
       PointF BoundsOrigin;
       SizeF Size;
       boo::TransformationMatrix Transform;
@@ -117,7 +117,7 @@ namespace krys::ui
 
     void SetSize(const SizeF &size) noexcept;
 
-    void SetAnchorPoint(const boo::FloatPoint3D &anchorPoint) noexcept;
+    void SetAnchorPoint(const Point3F &anchorPoint) noexcept;
 
     void SetPreserves3D(bool preserves3D) noexcept;
 

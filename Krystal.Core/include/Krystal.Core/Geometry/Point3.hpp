@@ -31,10 +31,10 @@ namespace krys
   class TextStream;
 }
 
-namespace krys::boo
+namespace krys
 {
   /// @brief A point (or vector) in 3D floating point coordinates.
-  class FloatPoint3D
+  class Point3F
   {
   private:
     float _x {0};
@@ -42,13 +42,13 @@ namespace krys::boo
     float _z {0};
 
   public:
-    constexpr FloatPoint3D() noexcept = default;
+    constexpr Point3F() noexcept = default;
 
-    constexpr FloatPoint3D(float x, float y, float z) noexcept : _x(x), _y(y), _z(z)
+    constexpr Point3F(float x, float y, float z) noexcept : _x(x), _y(y), _z(z)
     {
     }
 
-    constexpr FloatPoint3D(const PointF &p) noexcept : _x(p.X()), _y(p.Y())
+    constexpr Point3F(const PointF &p) noexcept : _x(p.X()), _y(p.Y())
     {
     }
 
@@ -121,15 +121,15 @@ namespace krys::boo
 
     void Normalise() noexcept;
 
-    KRYS_NODISCARD constexpr float Dot(const FloatPoint3D &a) const noexcept
+    KRYS_NODISCARD constexpr float Dot(const Point3F &a) const noexcept
     {
       return _x * a.X() + _y * a.Y() + _z * a.Z();
     }
 
-    // Sets this FloatPoint3D to the cross product of the passed two.
+    // Sets this Point3F to the cross product of the passed two.
     // It is safe for "this" to be the same as either or both of the
     // arguments.
-    constexpr void Cross(const FloatPoint3D &a, const FloatPoint3D &b) noexcept
+    constexpr void Cross(const Point3F &a, const Point3F &b) noexcept
     {
       float x = a.Y() * b.Z() - a.Z() * b.Y();
       float y = a.Z() * b.X() - a.X() * b.Z();
@@ -141,9 +141,9 @@ namespace krys::boo
 
     // Convenience function returning "this cross point" as a
     // stack-allocated result.
-    KRYS_NODISCARD constexpr FloatPoint3D Cross(const FloatPoint3D &point) const noexcept
+    KRYS_NODISCARD constexpr Point3F Cross(const Point3F &point) const noexcept
     {
-      FloatPoint3D result;
+      Point3F result;
       result.Cross(*this, point);
       return result;
     }
@@ -158,76 +158,75 @@ namespace krys::boo
       return std::hypot(_x, _y, _z);
     }
 
-    KRYS_NODISCARD float DistanceTo(const FloatPoint3D &a) const noexcept;
+    KRYS_NODISCARD float DistanceTo(const Point3F &a) const noexcept;
 
-    KRYS_NODISCARD friend constexpr bool operator==(const FloatPoint3D &,
-                                                    const FloatPoint3D &) noexcept = default;
+    KRYS_NODISCARD friend constexpr bool operator==(const Point3F &, const Point3F &) noexcept = default;
   };
 
-  constexpr FloatPoint3D &operator+=(FloatPoint3D &a, const FloatPoint3D &b) noexcept
+  constexpr Point3F &operator+=(Point3F &a, const Point3F &b) noexcept
   {
     a.Move(b.X(), b.Y(), b.Z());
     return a;
   }
 
-  constexpr FloatPoint3D &operator+=(FloatPoint3D &a, const PointF &b) noexcept
+  constexpr Point3F &operator+=(Point3F &a, const PointF &b) noexcept
   {
     a.Move(b.X(), b.Y());
     return a;
   }
 
-  constexpr FloatPoint3D &operator-=(FloatPoint3D &a, const FloatPoint3D &b) noexcept
+  constexpr Point3F &operator-=(Point3F &a, const Point3F &b) noexcept
   {
     a.Move(-b.X(), -b.Y(), -b.Z());
     return a;
   }
 
-  constexpr FloatPoint3D &operator-=(FloatPoint3D &a, const PointF &b) noexcept
+  constexpr Point3F &operator-=(Point3F &a, const PointF &b) noexcept
   {
     a.Move(-b.X(), -b.Y());
     return a;
   }
 
-  KRYS_NODISCARD constexpr FloatPoint3D operator+(const FloatPoint3D &a, const FloatPoint3D &b) noexcept
+  KRYS_NODISCARD constexpr Point3F operator+(const Point3F &a, const Point3F &b) noexcept
   {
-    return FloatPoint3D(a.X() + b.X(), a.Y() + b.Y(), a.Z() + b.Z());
+    return Point3F(a.X() + b.X(), a.Y() + b.Y(), a.Z() + b.Z());
   }
 
-  KRYS_NODISCARD constexpr FloatPoint3D operator+(const FloatPoint3D &a, const PointF &b) noexcept
+  KRYS_NODISCARD constexpr Point3F operator+(const Point3F &a, const PointF &b) noexcept
   {
-    return FloatPoint3D(a.X() + b.X(), a.Y() + b.Y(), a.Z());
+    return Point3F(a.X() + b.X(), a.Y() + b.Y(), a.Z());
   }
 
-  KRYS_NODISCARD constexpr FloatPoint3D operator-(const FloatPoint3D &a, const FloatPoint3D &b) noexcept
+  KRYS_NODISCARD constexpr Point3F operator-(const Point3F &a, const Point3F &b) noexcept
   {
-    return FloatPoint3D(a.X() - b.X(), a.Y() - b.Y(), a.Z() - b.Z());
+    return Point3F(a.X() - b.X(), a.Y() - b.Y(), a.Z() - b.Z());
   }
 
-  KRYS_NODISCARD constexpr FloatPoint3D operator-(const FloatPoint3D &a, const PointF &b) noexcept
+  KRYS_NODISCARD constexpr Point3F operator-(const Point3F &a, const PointF &b) noexcept
   {
-    return FloatPoint3D(a.X() - b.X(), a.Y() - b.Y(), a.Z());
+    return Point3F(a.X() - b.X(), a.Y() - b.Y(), a.Z());
   }
 
   // Dot product.
-  KRYS_NODISCARD constexpr float operator*(const FloatPoint3D &a, const FloatPoint3D &b) noexcept
+  KRYS_NODISCARD constexpr float operator*(const Point3F &a, const Point3F &b) noexcept
   {
     return a.Dot(b);
   }
 
-  KRYS_NODISCARD constexpr FloatPoint3D operator*(float k, const FloatPoint3D &v) noexcept
+  KRYS_NODISCARD constexpr Point3F operator*(float k, const Point3F &v) noexcept
   {
-    return FloatPoint3D(k * v.X(), k * v.Y(), k * v.Z());
+    return Point3F(k * v.X(), k * v.Y(), k * v.Z());
   }
 
-  KRYS_NODISCARD constexpr FloatPoint3D operator*(const FloatPoint3D &v, float k) noexcept
+  KRYS_NODISCARD constexpr Point3F operator*(const Point3F &v, float k) noexcept
   {
-    return FloatPoint3D(k * v.X(), k * v.Y(), k * v.Z());
+    return Point3F(k * v.X(), k * v.Y(), k * v.Z());
   }
 
-  inline float FloatPoint3D::DistanceTo(const FloatPoint3D &a) const noexcept
+  inline float Point3F::DistanceTo(const Point3F &a) const noexcept
   {
     return (*this - a).Length();
   }
 
-  TextStream &operator<<(TextStream &ts, const FloatPoint3D &point) noexcept;
+  TextStream &operator<<(TextStream &ts, const Point3F &point) noexcept;
 }

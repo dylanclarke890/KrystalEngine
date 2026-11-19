@@ -32,25 +32,25 @@ namespace krys::boo
   class SpotLightSource : public LightSource
   {
   private:
-    FloatPoint3D _position;
-    FloatPoint3D _pointsAt;
-    mutable FloatPoint3D _bufferPosition;
+    Point3F _position;
+    Point3F _pointsAt;
+    mutable Point3F _bufferPosition;
     float _specularExponent;
     float _limitingConeAngle;
 
   public:
-    KRYS_NODISCARD static Ref<SpotLightSource> Create(const FloatPoint3D &position,
-                                                      const FloatPoint3D &pointsAt, float specularExponent,
+    KRYS_NODISCARD static Ref<SpotLightSource> Create(const Point3F &position, const Point3F &pointsAt,
+                                                      float specularExponent,
                                                       float limitingConeAngle) noexcept;
 
     KRYS_NODISCARD bool operator==(const SpotLightSource &) const noexcept;
 
-    KRYS_NODISCARD const FloatPoint3D &Position() const noexcept
+    KRYS_NODISCARD const Point3F &Position() const noexcept
     {
       return _position;
     }
 
-    KRYS_NODISCARD const FloatPoint3D &Direction() const noexcept
+    KRYS_NODISCARD const Point3F &Direction() const noexcept
     {
       return _pointsAt;
     }
@@ -89,7 +89,7 @@ namespace krys::boo
     TextStream &ExternalRepresentation(TextStream &) const noexcept override;
 
   private:
-    SpotLightSource(const FloatPoint3D &position, const FloatPoint3D &pointsAt, float specularExponent,
+    SpotLightSource(const Point3F &position, const Point3F &pointsAt, float specularExponent,
                     float limitingConeAngle) noexcept;
 
     KRYS_NODISCARD bool operator==(const LightSource &other) const noexcept override

@@ -27,7 +27,6 @@
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerClient.hpp"
@@ -40,6 +39,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Point3.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Strings/String.hpp"
@@ -111,7 +111,7 @@ namespace krys::boo
     // If set, overrides _position. Only used for coverage computation.
     Maybe<PointF> _approximatePosition;
 
-    FloatPoint3D _anchorPoint {0.5f, 0.5f, 0};
+    Point3F _anchorPoint {0.5f, 0.5f, 0};
     SizeF _size;
     PointF _boundsOrigin;
 
@@ -382,12 +382,12 @@ namespace krys::boo
 
     // Anchor point: (0, 0) is top left, (1, 1) is bottom right. The anchor point affects the origin of the
     // transforms.
-    KRYS_NODISCARD const FloatPoint3D &AnchorPoint() const noexcept
+    KRYS_NODISCARD const Point3F &AnchorPoint() const noexcept
     {
       return _anchorPoint;
     }
 
-    virtual void SetAnchorPoint(const FloatPoint3D &p) noexcept
+    virtual void SetAnchorPoint(const Point3F &p) noexcept
     {
       _anchorPoint = p;
     }

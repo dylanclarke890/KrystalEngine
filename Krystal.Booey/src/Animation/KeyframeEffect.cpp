@@ -45,7 +45,6 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerAnimation.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformOperationsSharedPrimitivesPrefix.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
@@ -70,6 +69,7 @@
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Transform.hpp"
 #include "Krystal.Booey/Style/Values/WillChange/WillChange.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include <algorithm>
 #include <charconv>
 #include <cmath>
