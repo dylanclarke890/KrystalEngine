@@ -1,9 +1,9 @@
-﻿#include "Krystal.Net/Http/MIMETypeRegistry.hpp"
+﻿#include "Krystal.Net/MimeTypeRegistry.hpp"
 #include "catch2/catch_test_macros.hpp"
 
-namespace krys::net::http::tests
+namespace krys::net::tests
 {
-  TEST_CASE("MIMETypeRegistry: types by extension", "[Http][MIMETypeRegistry]")
+  TEST_CASE("MimeTypeRegistry: types by extension", "[MimeTypeRegistry]")
   {
     // Extensions are without their dot, and ASCII case-insensitive.
     CHECK(MimeTypeRegistry::MimeTypeForExtension(u8"PNG") == u8"image/png");

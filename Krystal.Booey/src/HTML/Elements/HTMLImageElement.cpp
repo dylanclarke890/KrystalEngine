@@ -27,6 +27,7 @@
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageDecoder.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
@@ -40,7 +41,6 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Platform/MimeTypeRegistry.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
@@ -704,7 +704,8 @@ namespace krys::boo
       if (auto typeAttribute = source->GetAttribute(u8"type"))
       {
         auto type = ExtractMimeTypeFromTypeAttributeForLookup(*typeAttribute);
-        if (!type.empty() && !MimeTypeRegistry::IsSupportedImageVideoOrSVGMimeType(type))
+        if (!type.empty() && !ImageDecoder::SupportsMimeType(type)
+            && !text::IsASCIICaselessEqual(type, u8"image/svg+xml"))
         {
           continue;
         }

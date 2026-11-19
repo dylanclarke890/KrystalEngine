@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/ImageBuffers/ImageBufferUtilities.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/PixelBuffer.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Net/Http/MimeTypeRegistry.hpp"
+#include "Krystal.Net/MimeTypeRegistry.hpp"
 #include "Krystal.Text/Base64.hpp"
 #include <csetjmp>
 #include <cstdio>
@@ -181,6 +181,13 @@ namespace krys::boo
     return true;
   }
 
+  bool SupportsEncodingMimeType(utf8_stringview mimeType) noexcept
+  {
+    return net::MimeTypeRegistry::IsJPEGMimeType(mimeType)
+           || text::IsASCIICaselessEqual(mimeType, u8"image/webp")
+           || text::IsASCIICaselessEqual(mimeType, u8"image/png");
+  }
+
   List<uint8> EncodeData(const PixelBuffer &pixelBuffer, utf8_stringview mimeType,
                          Maybe<double> quality) noexcept
   {
@@ -192,7 +199,7 @@ namespace krys::boo
 
     List<uint8> output;
     bool encoded = false;
-    if (net::http::MimeTypeRegistry::IsJPEGMimeType(mimeType))
+    if (net::MimeTypeRegistry::IsJPEGMimeType(mimeType))
     {
       encoded = EncodeJPEG(pixelBuffer, EncoderQuality(quality), output);
     }

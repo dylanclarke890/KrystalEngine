@@ -1,4 +1,4 @@
-﻿#include "Krystal.Net/Http/HTTPParsers.hpp"
+﻿#include "Krystal.Net/Http/HttpParsers.hpp"
 #include "catch2/catch_test_macros.hpp"
 
 namespace krys::net::http::tests

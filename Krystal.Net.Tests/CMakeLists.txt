@@ -36,7 +36,7 @@ target_sources(Krystal.Net.Tests
   PRIVATE
     tests/Http/HttpHeaderMap.cpp
     tests/Http/HttpParsers.cpp
-    tests/Http/MimeTypeRegistry.cpp
+    tests/MimeTypeRegistry.cpp
     tests/Url.cpp
     tests/WPT.cpp
 )

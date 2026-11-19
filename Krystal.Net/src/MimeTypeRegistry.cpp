@@ -24,11 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Net/Http/MimeTypeRegistry.hpp"
+#include "Krystal.Net/MimeTypeRegistry.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
 
-namespace krys::net::http
+namespace krys::net
 {
   namespace
   {

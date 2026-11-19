@@ -10,6 +10,9 @@ namespace krys::boo
 {
   class PixelBuffer;
 
+  /// @brief Whether `EncodeData` can encode @p mimeType (PNG, JPEG and WebP), ignoring case.
+  KRYS_NODISCARD bool SupportsEncodingMimeType(utf8_stringview mimeType) noexcept;
+
   /// @brief @p pixelBuffer, whose pixels are RGBA8, encoded as @p mimeType (PNG, JPEG or WebP); empty if
   /// the type isn't one of those or encoding fails.
   /// @param quality From 0 to 1, for JPEG and WebP; the encoder's best if empty or out of range.

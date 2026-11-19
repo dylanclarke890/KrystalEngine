@@ -116,4 +116,14 @@ namespace krys::boo::tests
       CHECK(DataUrl(bytes, u8"image/png") == u8"data:image/png;base64,AQID");
     }
   }
+
+  TEST_CASE("SupportsEncodingMimeType: PNG, JPEG and WebP", "[Graphics][ImageBufferUtilities]")
+  {
+    CHECK(SupportsEncodingMimeType(u8"image/png"));
+    CHECK(SupportsEncodingMimeType(u8"IMAGE/JPEG"));
+    CHECK(SupportsEncodingMimeType(u8"image/webp"));
+    CHECK_FALSE(SupportsEncodingMimeType(u8"image/gif"));
+    CHECK_FALSE(SupportsEncodingMimeType(u8"image/svg+xml"));
+    CHECK_FALSE(SupportsEncodingMimeType(u8""));
+  }
 }

@@ -1,4 +1,4 @@
-﻿#include "Krystal.Booey/HTML/Mixins/URLDecomposition.hpp"
+﻿#include "Krystal.Booey/HTML/Mixins/UrlDecomposition.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"

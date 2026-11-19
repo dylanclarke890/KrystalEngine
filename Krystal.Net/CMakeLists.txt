@@ -33,7 +33,7 @@ target_sources(Krystal.Net
     FILES
       include/Krystal.Net/Http/HttpHeaderMap.hpp
       include/Krystal.Net/Http/HttpParsers.hpp
-      include/Krystal.Net/Http/MimeTypeRegistry.hpp
+      include/Krystal.Net/MimeTypeRegistry.hpp
       include/Krystal.Net/Url.hpp
       include/Krystal.Net/UrlHash.hpp
       include/Krystal.Net/UrlParser.hpp
@@ -41,7 +41,7 @@ target_sources(Krystal.Net
   PRIVATE
     src/Http/HttpHeaderMap.cpp
     src/Http/HttpParsers.cpp
-    src/Http/MimeTypeRegistry.cpp
+    src/MimeTypeRegistry.cpp
     src/Url.cpp
     src/UrlParser.cpp
 )

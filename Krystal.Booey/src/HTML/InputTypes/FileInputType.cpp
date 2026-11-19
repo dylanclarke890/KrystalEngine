@@ -35,7 +35,7 @@
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderFileUploadControl.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Net/Http/MimeTypeRegistry.hpp"
+#include "Krystal.Net/MimeTypeRegistry.hpp"
 
 namespace krys::boo::html
 {
@@ -116,8 +116,7 @@ namespace krys::boo::html
     // posts an empty file.
     if (_fileList->IsEmpty())
     {
-      auto file =
-        File::Create(*Blob::Create(List<uint8> {}, net::http::MimeTypeRegistry::DefaultMimeType()), u8"");
+      auto file = File::Create(*Blob::Create(List<uint8> {}, net::MimeTypeRegistry::DefaultMimeType()), u8"");
       formData.Append(name, *file);
       return true;
     }

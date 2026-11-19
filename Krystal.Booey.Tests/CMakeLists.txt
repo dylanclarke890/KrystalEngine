@@ -332,6 +332,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/ImageBuffers/ImageBufferUtilities.cpp
 		tests/Graphics/ImageBuffers/PixelBuffer.cpp
 		tests/Graphics/Images/BitmapImage.cpp
+		tests/Graphics/Images/ImageDecoder.cpp
 		tests/Graphics/Layers/GraphicsLayer.cpp
 		tests/Graphics/Paths/Path.cpp
 		tests/Graphics/Pattern.cpp

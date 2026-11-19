@@ -81,6 +81,10 @@ namespace krys::boo
 
     KRYS_NODISCARD static bool SupportsMediaType(MediaType mediaType) noexcept;
 
+    /// @brief Whether there's a decoder for @p mimeType (PNG, JPEG, GIF, WebP, BMP and ICO), ignoring case.
+    // FIXME: AVIF once it's supported.
+    KRYS_NODISCARD static bool SupportsMimeType(utf8_stringview mimeType) noexcept;
+
     KRYS_NODISCARD virtual size_t BytesDecodedToDetermineProperties() const noexcept = 0;
 
     KRYS_NODISCARD virtual EncodedDataStatus GetEncodedDataStatus() const noexcept = 0;

@@ -1,4 +1,4 @@
-﻿#include "Krystal.Booey/Platform/Network/DataURLDecoder.hpp"
+﻿#include "Krystal.Booey/Platform/Network/DataUrlDecoder.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 

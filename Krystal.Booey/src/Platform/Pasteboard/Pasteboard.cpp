@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
-#include "Krystal.Booey/Platform/MimeTypeRegistry.hpp"
+#include "Krystal.Booey/Graphics/Images/ImageDecoder.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/PasteboardStrategy.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
@@ -571,7 +571,7 @@ namespace krys::boo
     }
 
     bool hasImage = std::ranges::any_of(types, [](const utf8_string &type)
-                                        { return MimeTypeRegistry::IsSupportedImageMimeType(type); });
+                                        { return ImageDecoder::SupportsMimeType(type); });
     return hasImage ? FileContentState::MayContainFilePaths : FileContentState::NoFileOrImageData;
   }
 

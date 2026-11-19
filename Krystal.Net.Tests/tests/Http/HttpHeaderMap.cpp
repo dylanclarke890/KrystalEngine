@@ -1,4 +1,4 @@
-﻿#include "Krystal.Net/Http/HTTPHeaderMap.hpp"
+﻿#include "Krystal.Net/Http/HttpHeaderMap.hpp"
 #include "catch2/catch_test_macros.hpp"
 
 namespace krys::net::http::tests

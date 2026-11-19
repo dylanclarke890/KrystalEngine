@@ -26,6 +26,8 @@
 #include "Krystal.Booey/Graphics/Images/ImageDecoder.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageFrame.hpp"
 #include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include <algorithm>
 
 namespace krys::boo
 {
@@ -44,6 +46,25 @@ namespace krys::boo
   bool ImageDecoder::SupportsMediaType(MediaType type) noexcept
   {
     return ScalableImageDecoder::SupportsMediaType(type);
+  }
+
+  bool ImageDecoder::SupportsMimeType(utf8_stringview mimeType) noexcept
+  {
+    constexpr utf8_stringview supportedTypes[] = {
+      u8"image/png",
+      u8"image/apng",
+      u8"image/jpeg",
+      u8"image/jpg",
+      u8"image/pjpeg",
+      u8"image/gif",
+      u8"image/bmp",
+      u8"image/x-bmp",
+      u8"image/webp",
+      u8"image/x-icon",
+      u8"image/vnd.microsoft.icon",
+    };
+    return std::ranges::any_of(supportedTypes,
+                               [&](auto type) { return text::IsASCIICaselessEqual(mimeType, type); });
   }
 
   bool ImageDecoder::FetchFrameMetaDataAtIndex(size_t index, SubsamplingLevel subsamplingLevel,
