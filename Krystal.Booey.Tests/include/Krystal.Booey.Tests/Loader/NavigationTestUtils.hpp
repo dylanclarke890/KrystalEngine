@@ -100,7 +100,7 @@ namespace krys::boo::tests
       Frame = ShareRefPtr(&TestPage->MainFrame());
       Frame->CreateView({400, 300});
       Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
-      Document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
+      Document->SetURL(net::URL(u8"https://example.com/dir/page.html"));
     }
 
     template <typename T>

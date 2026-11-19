@@ -29,11 +29,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Http/HTTPHeaderMap.hpp"
+#include "Krystal.Net/Http/HTTPHeaderMap.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
 
-namespace krys::http
+namespace krys::net::http
 {
   Maybe<utf8_stringview> HTTPHeaderMap::Get(utf8_stringview name) const noexcept
   {

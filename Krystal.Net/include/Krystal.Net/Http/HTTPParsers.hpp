@@ -36,7 +36,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <chrono>
 
-namespace krys::http
+namespace krys::net::http
 {
   /// @brief The time an HTTP-date names (`Last-Modified`, `Date`): an IMF-fixdate
   /// (`Sun, 06 Nov 1994 08:49:37 GMT`), or the obsolete RFC 850 (`Sunday, 06-Nov-94 08:49:37 GMT`) or asctime

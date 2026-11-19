@@ -38,10 +38,10 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/Network/ResourceResponse.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/URL/URLParser.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
+#include "Krystal.Net/URLParser.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -117,7 +117,7 @@ namespace krys::boo
       if (size.Width())
       {
         // The decoded file name, or the host if the path has none.
-        auto name = text::ReplaceInvalidUTF8(url::URLParser::PercentDecode(GetURL().LastPathComponent()));
+        auto name = text::ReplaceInvalidUTF8(net::URLParser::PercentDecode(GetURL().LastPathComponent()));
         if (name.empty())
         {
           name = utf8_string(GetURL().Host());

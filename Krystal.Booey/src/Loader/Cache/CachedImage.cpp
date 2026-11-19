@@ -174,7 +174,7 @@ namespace krys::boo
 
   void CachedImage::SetContainerContextForClient(const CachedImageClient &client,
                                                  const LayoutSize &containerSize, float containerZoom,
-                                                 const url::URL &imageURL) noexcept
+                                                 const net::URL &imageURL) noexcept
   {
     if (containerSize.IsEmpty())
     {
@@ -307,9 +307,9 @@ namespace krys::boo
     _cachedImages.insert(&image);
   }
 
-  url::URL CachedImage::CachedImageObserver::SourceUrl() const noexcept
+  net::URL CachedImage::CachedImageObserver::SourceUrl() const noexcept
   {
-    return !_cachedImages.empty() ? (*_cachedImages.begin())->URL() : url::URL();
+    return !_cachedImages.empty() ? (*_cachedImages.begin())->URL() : net::URL();
   }
 
   utf8_string CachedImage::CachedImageObserver::MimeType() const noexcept

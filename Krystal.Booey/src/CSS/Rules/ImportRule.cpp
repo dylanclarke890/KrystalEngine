@@ -58,7 +58,7 @@ namespace krys::boo::css
     }
   }
 
-  void ImportRule::SetCSSStyleSheet(const utf8_string &href, const url::URL &baseURL, utf8_stringview charset,
+  void ImportRule::SetCSSStyleSheet(const utf8_string &href, const net::URL &baseURL, utf8_stringview charset,
                                     const CachedCSSStyleSheet *cachedStyleSheet) noexcept
   {
     if (_styleSheet)
@@ -135,11 +135,11 @@ namespace krys::boo::css
       return;
     }
 
-    url::URL absURL;
+    net::URL absURL;
     if (!_parentStyleSheet->BaseURL().IsNull())
     {
       // use parent styleheet's URL as the base URL
-      absURL = url::URL(_parentStyleSheet->BaseURL(), _href);
+      absURL = net::URL(_parentStyleSheet->BaseURL(), _href);
     }
     else
     {
@@ -151,8 +151,8 @@ namespace krys::boo::css
     StyleSheetContents *rootSheet = _parentStyleSheet;
     for (auto *sheet = _parentStyleSheet; sheet; sheet = sheet->ParentStyleSheet())
     {
-      if (url::EqualIgnoringFragmentIdentifier(absURL, sheet->BaseURL())
-          || url::EqualIgnoringFragmentIdentifier(absURL, document->CompleteURL(sheet->OriginalURL())))
+      if (net::EqualIgnoringFragmentIdentifier(absURL, sheet->BaseURL())
+          || net::EqualIgnoringFragmentIdentifier(absURL, document->CompleteURL(sheet->OriginalURL())))
       {
         return;
       }

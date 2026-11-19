@@ -25,15 +25,13 @@
 
 #pragma once
 
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Net/URL.hpp"
 
-// ICU's IDNA transcoder (`unicode/uidna.h`); only the sources include ICU.
-struct UIDNA;
-
-namespace krys::boo::url
+namespace krys::net
 {
   /// @brief The URL parser, https://url.spec.whatwg.org/#concept-basic-url-parser, plus the
   /// `application/x-www-form-urlencoded` parser and serialiser.
@@ -43,11 +41,7 @@ namespace krys::boo::url
     using CodePointIterator = text::CodePointIterator;
 
   public:
-    /// @brief The IDNA errors `uidna_nameToASCII` may report without the host being rejected.
-    static const uint32 AllowedNameToASCIIErrors;
-
-    // Needs to be big enough to hold an IDN-encoded name.
-    // For host names bigger than this, we won't do IDN encoding, which is almost certainly OK.
+    // Host names longer than this aren't IDN-encoded when a URL is made from its parts.
     constexpr static size_t HostnameBufferLength = 2'048;
 
     using URLEncodedForm = List<KeyValuePair>;
@@ -76,8 +70,6 @@ namespace krys::boo::url
     KRYS_NODISCARD static bool IsSpecialScheme(utf8_stringview scheme) noexcept;
 
     KRYS_NODISCARD static Maybe<utf8_string> MaybeCanonicaliseScheme(utf8_stringview scheme) noexcept;
-
-    KRYS_NODISCARD static const UIDNA &InternationalDomainNameTranscoder() noexcept;
 
     KRYS_NODISCARD static bool IsInUserInfoEncodeSet(char32 c) noexcept;
 

@@ -1,7 +1,7 @@
-﻿#include "Krystal.Http/HTTPParsers.hpp"
+﻿#include "Krystal.Net/Http/HTTPParsers.hpp"
 #include "catch2/catch_test_macros.hpp"
 
-namespace krys::http::tests
+namespace krys::net::http::tests
 {
   namespace
   {

@@ -14,7 +14,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo::tests
 {
@@ -196,7 +196,7 @@ namespace krys::boo::tests
 
     SECTION("A link's label: its text over its URL, at most 200px wide")
     {
-      url::URL url(u8"https://example.com/");
+      net::URL url(u8"https://example.com/");
       auto labelled = CreateDragImageForLink(fixture.ById(u8"link"), url, u8"a link", 1).DragImage;
       auto unlabelled = CreateDragImageForLink(fixture.ById(u8"link"), url, u8"", 1).DragImage;
       REQUIRE(labelled);

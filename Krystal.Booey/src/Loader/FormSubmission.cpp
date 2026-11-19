@@ -97,14 +97,14 @@ namespace krys::boo
     _method = ParseMethodType(type);
   }
 
-  FormSubmission::FormSubmission(Maybe<DOMString> returnValue, url::URL action, DOMStringView target,
+  FormSubmission::FormSubmission(Maybe<DOMString> returnValue, net::URL action, DOMStringView target,
                                  DOMStringView encodingType, boo::Event *event) noexcept
       : _method(Method::Dialog), _action(krys::move(action)), _target(target), _encodingType(encodingType),
         _event(ShareRefPtr(event)), _returnValue(krys::move(returnValue))
   {
   }
 
-  FormSubmission::FormSubmission(Method method, url::URL action, DOMStringView target,
+  FormSubmission::FormSubmission(Method method, net::URL action, DOMStringView target,
                                  DOMStringView encodingType, Ref<html::DOMFormData> &&entryList,
                                  boo::Event *event) noexcept
       : _method(method), _action(krys::move(action)), _target(target), _encodingType(encodingType),

@@ -135,7 +135,7 @@ namespace krys::boo::data_url_decoder
     }
   }
 
-  Maybe<Result> Decode(const url::URL &url, ShouldValidatePadding shouldValidatePadding) noexcept
+  Maybe<Result> Decode(const net::URL &url, ShouldValidatePadding shouldValidatePadding) noexcept
   {
     krys_debug_assert(url.ProtocolIsData());
 

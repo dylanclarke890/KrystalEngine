@@ -268,7 +268,7 @@ namespace krys::boo
 
   Document::Document() noexcept
       : ContainerNode(*this, dom::NodeType::DOCUMENT_NODE, dom::NodeFlags::IsContainerNode),
-        DocumentOrShadowRoot(static_cast<ContainerNode &>(*this)), _url(url::AboutBlankURL()), _baseURL(_url),
+        DocumentOrShadowRoot(static_cast<ContainerNode &>(*this)), _url(net::AboutBlankURL()), _baseURL(_url),
         _settings(ShareRef(Settings::Default())),
         _userActionElements(CreateUnique<dom::UserActionElementSet>()),
         _styleRecalcTimer([this] { std::ignore = ShareRef(*this)->UpdateStyleIfNeeded(); }),
@@ -1440,9 +1440,9 @@ namespace krys::boo
 
 #pragma region URLs
 
-  void Document::SetURL(url::URL url) noexcept
+  void Document::SetURL(net::URL url) noexcept
   {
-    url::URL newURL = url.IsEmpty() ? url::AboutBlankURL() : krys::move(url);
+    net::URL newURL = url.IsEmpty() ? net::AboutBlankURL() : krys::move(url);
 
     if (newURL == _url)
     {
@@ -1456,7 +1456,7 @@ namespace krys::boo
     UpdateBaseURL();
   }
 
-  const url::URL &Document::FallbackBaseURL() const noexcept
+  const net::URL &Document::FallbackBaseURL() const noexcept
   {
     // 1. If document's URL matches about:blank or matches about:srcdoc, and document's about base URL is
     //    non-null, then return document's about base URL. (Skipped: documents have no about base URL.)
@@ -1464,7 +1464,7 @@ namespace krys::boo
     return _url;
   }
 
-  url::URL Document::CompleteURL(utf8_stringview url) const noexcept
+  net::URL Document::CompleteURL(utf8_stringview url) const noexcept
   {
     // 1. Let encoding be UTF-8.
     // 2. If environment is a Document object, then set encoding to environment's character encoding.
@@ -1478,9 +1478,9 @@ namespace krys::boo
     return CompleteURL(url, _baseURL);
   }
 
-  url::URL Document::CompleteURL(utf8_stringview url, const url::URL &baseURL) noexcept
+  net::URL Document::CompleteURL(utf8_stringview url, const net::URL &baseURL) noexcept
   {
-    return url::URL(baseURL, url);
+    return net::URL(baseURL, url);
   }
 
   void Document::ProcessBaseElement() noexcept
@@ -1516,7 +1516,7 @@ namespace krys::boo
     _baseTarget = target.value_or(DOMString());
 
     // The frozen base URL of the first base element with an href; only that one's matters.
-    url::URL baseElementURL;
+    net::URL baseElementURL;
     if (href.has_value())
     {
       // To set the frozen base URL for an element element:
@@ -1582,7 +1582,7 @@ namespace krys::boo
   {
     if (_cachedCSSParserContext == nullptr)
     {
-      _cachedCSSParserContext = CreateUnique<css::ParserContext>(*this, url::URL {}, utf8_stringview {});
+      _cachedCSSParserContext = CreateUnique<css::ParserContext>(*this, net::URL {}, utf8_stringview {});
     }
 
     return *_cachedCSSParserContext;

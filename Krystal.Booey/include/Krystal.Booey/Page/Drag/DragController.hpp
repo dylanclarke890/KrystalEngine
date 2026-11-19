@@ -29,13 +29,13 @@
 #include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Booey/Page/Drag/DragClient.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo
 {
@@ -88,7 +88,7 @@ namespace krys::boo
     /// @brief Set in StartDrag when a drag starts from a mouse down within the page.
     EnumSet<DragOperation> _sourceDragOperationMask;
     IntPoint _dragOffset;
-    url::URL _draggingImageURL;
+    net::URL _draggingImageURL;
     bool _isPerformingDrop {false};
 
   public:
@@ -133,7 +133,7 @@ namespace krys::boo
       return _sourceDragOperationMask;
     }
 
-    KRYS_NODISCARD const url::URL &DraggingImageURL() const noexcept
+    KRYS_NODISCARD const net::URL &DraggingImageURL() const noexcept
     {
       return _draggingImageURL;
     }
@@ -243,7 +243,7 @@ namespace krys::boo
     }
 
     static void DeclareAndWriteDragImage(dom::DataTransfer &dataTransfer, Element &element,
-                                         const url::URL &url, utf8_stringview label) noexcept;
+                                         const net::URL &url, utf8_stringview label) noexcept;
   };
 
   /// @brief Whether @p element is a link a press may drag: an `a` with an `href` that isn't editable, or an

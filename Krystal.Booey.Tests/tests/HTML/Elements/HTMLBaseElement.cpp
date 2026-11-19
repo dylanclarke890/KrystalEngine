@@ -11,7 +11,7 @@ namespace krys::boo::html::tests
     KRYS_NODISCARD Ref<HTMLDocument> ParseWithBase(utf8_string &&input) noexcept
     {
       auto document = CreateRef<HTMLDocument>();
-      document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
+      document->SetURL(net::URL(u8"https://example.com/dir/page.html"));
       auto parser = CreateRef<DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       parser->PumpTokenizer();

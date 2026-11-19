@@ -54,7 +54,7 @@ namespace krys::boo
   {
   }
 
-  bool MemoryCache::ShouldRemoveFragmentIdentifier(const url::URL &originalURL) noexcept
+  bool MemoryCache::ShouldRemoveFragmentIdentifier(const net::URL &originalURL) noexcept
   {
     if (!originalURL.HasFragmentIdentifier())
     {
@@ -66,13 +66,13 @@ namespace krys::boo
     return originalURL.ProtocolIsInHTTPFamily();
   }
 
-  url::URL MemoryCache::RemoveFragmentIdentifierIfNeeded(const url::URL &originalURL) noexcept
+  net::URL MemoryCache::RemoveFragmentIdentifierIfNeeded(const net::URL &originalURL) noexcept
   {
     if (!ShouldRemoveFragmentIdentifier(originalURL))
     {
       return originalURL;
     }
-    url::URL url = originalURL;
+    net::URL url = originalURL;
     url.RemoveFragmentIdentifier();
     return url;
   }
@@ -96,7 +96,7 @@ namespace krys::boo
 
   CachedResource *MemoryCache::ResourceForRequest(const ResourceRequest &request) noexcept
   {
-    url::URL url = RemoveFragmentIdentifierIfNeeded(request.URL());
+    net::URL url = RemoveFragmentIdentifierIfNeeded(request.URL());
     auto found = _resources.find(url.String());
     return found != _resources.end() ? found->second.get() : nullptr;
   }

@@ -653,7 +653,7 @@ namespace krys::boo
   {
     _bestFitImageURL = candidate.String;
     auto source = ImageSourceURL();
-    _currentURL = source ? NodeDocument().CompleteURL(*source) : url::URL();
+    _currentURL = source ? NodeDocument().CompleteURL(*source) : net::URL();
     if (candidate.Density >= 0)
     {
       _imageDevicePixelRatio = 1 / candidate.Density;

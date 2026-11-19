@@ -25,10 +25,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo
 {
@@ -48,14 +48,14 @@ namespace krys::boo
   private:
     utf8_string _domain;
     int32 _errorCode {0};
-    url::URL _failingURL;
+    net::URL _failingURL;
     utf8_string _localizedDescription;
     Type _type {Type::Null};
 
   public:
     ResourceError() noexcept = default;
 
-    ResourceError(utf8_string domain, int32 errorCode, url::URL failingURL, utf8_string localizedDescription,
+    ResourceError(utf8_string domain, int32 errorCode, net::URL failingURL, utf8_string localizedDescription,
                   Type type = Type::General) noexcept
         : _domain(krys::move(domain)), _errorCode(errorCode), _failingURL(krys::move(failingURL)),
           _localizedDescription(krys::move(localizedDescription)), _type(type)
@@ -97,7 +97,7 @@ namespace krys::boo
       return _errorCode;
     }
 
-    KRYS_NODISCARD const url::URL &FailingURL() const noexcept
+    KRYS_NODISCARD const net::URL &FailingURL() const noexcept
     {
       return _failingURL;
     }

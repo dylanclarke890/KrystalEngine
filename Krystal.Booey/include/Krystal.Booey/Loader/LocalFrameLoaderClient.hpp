@@ -32,10 +32,10 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Loader/FrameLoaderTypes.hpp"
 #include "Krystal.Booey/Loader/Icons/LinkIcon.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo
 {

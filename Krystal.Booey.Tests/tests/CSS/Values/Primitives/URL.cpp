@@ -18,7 +18,7 @@ namespace krys::boo::css::tests
 
     ParserContext ContextWithBase(utf8_stringview base)
     {
-      return ParserContext {ParserMode::HTMLStandard, url::URL {base}};
+      return ParserContext {ParserMode::HTMLStandard, net::URL {base}};
     }
   }
 

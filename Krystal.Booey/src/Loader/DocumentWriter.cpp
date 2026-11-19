@@ -127,7 +127,7 @@ namespace krys::boo
     _frame = CreateWeakPtr(&frame);
   }
 
-  bool DocumentWriter::Begin(const url::URL &url) noexcept
+  bool DocumentWriter::Begin(const net::URL &url) noexcept
   {
     RefPtr<LocalFrame> frame = ShareRefPtr(_frame.get());
     if (!frame)

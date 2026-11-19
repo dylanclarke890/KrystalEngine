@@ -79,7 +79,7 @@ namespace krys::boo
   class StylePropertyMapReadOnly;
 }
 
-namespace krys::boo::url
+namespace krys::net
 {
   class URL;
 }
@@ -1131,7 +1131,7 @@ namespace krys::boo
     KRYS_NODISCARD virtual Maybe<DOMString> ImageSourceURL() const noexcept;
 
     /// @brief The URL the element links to, if it's a link, resolved against its document's base URL.
-    KRYS_NODISCARD url::URL AbsoluteLinkURL() const noexcept;
+    KRYS_NODISCARD net::URL AbsoluteLinkURL() const noexcept;
 
     /// @brief Fires `focus` (then `focusin`) at the element as the focus update steps focus it; text controls
     /// update their placeholder and begin editing first.

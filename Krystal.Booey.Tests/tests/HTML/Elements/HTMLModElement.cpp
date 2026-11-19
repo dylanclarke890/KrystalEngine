@@ -9,7 +9,7 @@ namespace krys::boo::html::tests
     "[HTML][HTMLModElement][html:attr-mod-cite][html:attr-mod-datetime]")
   {
     auto document = CreateRef<HTMLDocument>();
-    document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
+    document->SetURL(net::URL(u8"https://example.com/dir/page.html"));
     for (auto localName : {u8"ins", u8"del"})
     {
       auto element = document->CreateElement(DOMStringAtom(localName)).ReleaseValue();

@@ -14,7 +14,7 @@ Status: reviewed (2026-11-01)
 #### [2.4.1 Terminology](https://html.spec.whatwg.org/#terminology-2)
 
 Status: reviewed (2026-11-01)
-> Matching about:blank and about:srcdoc is `url::URL::IsAboutBlank` and `IsAboutSrcDoc`. Fixed: `IsAboutSrcDoc` matched a URL with a query (DIFFERENCES.md, from upstream). The valid URL definitions are author conformance.
+> Matching about:blank and about:srcdoc is `net::URL::IsAboutBlank` and `IsAboutSrcDoc`. Fixed: `IsAboutSrcDoc` matched a URL with a query (DIFFERENCES.md, from upstream). The valid URL definitions are author conformance.
 <!-- definitions: about:legacy-compat about:html-kind about:srcdoc -->
 
 - [x] [valid non-empty URL](https://html.spec.whatwg.org/#valid-non-empty-url) — A string is a valid non-empty URL if it is a valid URL string but it is not the empty string.

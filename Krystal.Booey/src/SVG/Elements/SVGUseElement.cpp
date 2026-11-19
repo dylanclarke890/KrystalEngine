@@ -817,7 +817,7 @@ namespace krys::boo
 
   void SVGUseElement::UpdateExternalDocument() noexcept
   {
-    url::URL externalDocumentURL;
+    net::URL externalDocumentURL;
     Ref<Document> document = ShareRef(NodeDocument());
     // FIXME: This early exit should be removed once the assert(!url.ProtocolIsData()) is removed from
     // IsExternalURIReference().
@@ -830,11 +830,11 @@ namespace krys::boo
       externalDocumentURL = document->CompleteURL(Href());
       if (!externalDocumentURL.HasFragmentIdentifier())
       {
-        externalDocumentURL = url::URL();
+        externalDocumentURL = net::URL();
       }
     }
 
-    if (externalDocumentURL == (_externalDocument ? _externalDocument->URL() : url::URL()))
+    if (externalDocumentURL == (_externalDocument ? _externalDocument->URL() : net::URL()))
     {
       return;
     }

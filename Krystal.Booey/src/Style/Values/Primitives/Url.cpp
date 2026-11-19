@@ -91,7 +91,7 @@ namespace krys::boo::style
     {
       return ConvertToStyle(url->URL(), state);
     }
-    return {.Resolved = url::URL {u8""}, .Modifiers = {}};
+    return {.Resolved = net::URL {u8""}, .Modifiers = {}};
   }
 
   // MARK: - Serialisation

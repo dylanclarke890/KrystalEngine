@@ -33,12 +33,12 @@ target_compile_options(Krystal.Booey
 find_path(BRIGAND_INCLUDE_DIRS "brigand/adapted.hpp")
 target_include_directories(Krystal.Booey PRIVATE ${BRIGAND_INCLUDE_DIRS})
 
-# Third-party - ICU (IDNA for URL host parsing; script codes in the public font description; locale data for form controls)
+# Third-party - ICU (bidi, case mapping and other text processing not yet behind Krystal.Text; locale data for form controls)
 find_package(ICU REQUIRED COMPONENTS uc in dt)
 target_link_libraries(Krystal.Booey PUBLIC ICU::uc PRIVATE ICU::in ICU::dt)
 
-# HTTP header maps and parsers, and MIME types
-target_link_libraries(Krystal.Booey PUBLIC Krystal.Http)
+# URLs, HTTP header maps and parsers, and MIME types
+target_link_libraries(Krystal.Booey PUBLIC Krystal.Net)
 
 # Font faces, shared with Krystal.Gfx
 target_link_libraries(Krystal.Booey PUBLIC Krystal.Text)
@@ -4274,17 +4274,6 @@ set(KRYSTAL_BOOEY_TYPES_HEADERS
   include/Krystal.Booey/Types/SourceLocation.hpp
 )
 
-set(KRYSTAL_BOOEY_URL_HEADERS
-  include/Krystal.Booey/URL/URL.hpp
-  include/Krystal.Booey/URL/URLHash.hpp
-  include/Krystal.Booey/URL/URLParser.hpp
-)
-
-set(KRYSTAL_BOOEY_URL_SOURCES
-  src/URL/URL.cpp
-  src/URL/URLParser.cpp
-)
-
 set(KRYSTAL_BOOEY_XML_HEADERS
   include/Krystal.Booey/XML/PseudoAttributes.hpp
   include/Krystal.Booey/XML/XMLDocumentParser.hpp
@@ -4383,7 +4372,6 @@ target_sources(Krystal.Booey
       ${KRYSTAL_BOOEY_SVG_HEADERS}
       ${KRYSTAL_BOOEY_TEXT_HEADERS}
       ${KRYSTAL_BOOEY_TYPES_HEADERS}
-      ${KRYSTAL_BOOEY_URL_HEADERS}
       ${KRYSTAL_BOOEY_XML_HEADERS}
   PRIVATE
     ${KRYSTAL_BOOEY_GENERATED_SOURCES}
@@ -4406,6 +4394,5 @@ target_sources(Krystal.Booey
     ${KRYSTAL_BOOEY_STYLE_SOURCES}
     ${KRYSTAL_BOOEY_SVG_SOURCES}
     ${KRYSTAL_BOOEY_TEXT_SOURCES}
-    ${KRYSTAL_BOOEY_URL_SOURCES}
     ${KRYSTAL_BOOEY_XML_SOURCES}
 )

@@ -18,13 +18,13 @@
 
 #pragma once
 
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo
 {
@@ -36,7 +36,7 @@ namespace krys::boo
   private:
     utf8_string _text;
     utf8_string _markup;
-    url::URL _url;
+    net::URL _url;
     utf8_string _uriList;
     List<utf8_string> _filenames;
     bool _canSmartReplace {false};
@@ -46,7 +46,7 @@ namespace krys::boo
   public:
     SelectionData() noexcept = default;
 
-    SelectionData(utf8_stringview text, utf8_stringview markup, const url::URL &url, utf8_stringview uriList,
+    SelectionData(utf8_stringview text, utf8_stringview markup, const net::URL &url, utf8_stringview uriList,
                   RefPtr<SharedBuffer> &&customData, bool canSmartReplace) noexcept;
 
     /// @brief Sets the text, with no-break spaces made spaces.
@@ -88,9 +88,9 @@ namespace krys::boo
     }
 
     /// @brief Sets the URL, and the URI list, text and markup (a link labelled @p label) if they're empty.
-    void SetURL(const url::URL &url, utf8_stringview label) noexcept;
+    void SetURL(const net::URL &url, utf8_stringview label) noexcept;
 
-    KRYS_NODISCARD const url::URL &GetURL() const noexcept
+    KRYS_NODISCARD const net::URL &GetURL() const noexcept
     {
       return _url;
     }

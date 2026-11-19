@@ -382,7 +382,7 @@ namespace krys::ui
     /// `Update` until `IsLoading` is false (or the load handler hears it committed).
     /// @param cachePolicy How its style sheets, images and other resources use the memory cache: `Reload`
     /// loads them again, as reloading a page does.
-    void LoadHTML(utf8_string markup, boo::url::URL &&url = {},
+    void LoadHTML(utf8_string markup, net::URL &&url = {},
                   boo::CachePolicy cachePolicy = boo::CachePolicy::Use) noexcept;
 
     /// @brief Starts loading the UTF-8 file at @p path, at the file's URL, through the loader strategy; as
@@ -394,7 +394,7 @@ namespace krys::ui
 
     /// @brief Starts loading @p url through the loader strategy.
     /// @param cachePolicy As for `LoadHTML`.
-    void Load(boo::url::URL &&url, boo::CachePolicy cachePolicy = boo::CachePolicy::Use) noexcept;
+    void Load(net::URL &&url, boo::CachePolicy cachePolicy = boo::CachePolicy::Use) noexcept;
 
     /// @brief Whether a document is loading.
     KRYS_NODISCARD bool IsLoading() const noexcept;

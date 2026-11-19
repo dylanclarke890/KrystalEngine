@@ -25,38 +25,39 @@
 
 #pragma once
 
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Utils/ForbidHeapAllocation.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
+#include "Krystal.Net/URL.hpp"
 #include <memory>
 
 namespace krys
 {
   template <>
-  struct DefaultHash<boo::url::URL>
+  struct DefaultHash<net::URL>
   {
     constexpr static bool IsSafeToCompareToEmptyOrDeleted = false;
 
-    KRYS_NODISCARD static size_t Hash(const boo::url::URL &key) noexcept
+    KRYS_NODISCARD static size_t Hash(const net::URL &key) noexcept
     {
       return std::hash<utf8_string> {}(key.String());
     }
 
-    KRYS_NODISCARD static bool Equal(const boo::url::URL &a, const boo::url::URL &b) noexcept
+    KRYS_NODISCARD static bool Equal(const net::URL &a, const net::URL &b) noexcept
     {
       return a.String() == b.String();
     }
   };
 
   template <>
-  struct HashTraits<boo::url::URL> : public GenericHashTraits<boo::url::URL>
+  struct HashTraits<net::URL> : public GenericHashTraits<net::URL>
   {
-    static void ConstructDeletedValue(boo::url::URL &slot) noexcept
+    static void ConstructDeletedValue(net::URL &slot) noexcept
     {
-      new (NotNullTag {}, std::addressof(slot)) boo::url::URL(HashTableDeletedValueTag {});
+      new (NotNullTag {}, std::addressof(slot)) net::URL(HashTableDeletedValueTag {});
     }
 
-    KRYS_NODISCARD static bool IsDeletedValue(const boo::url::URL &value) noexcept
+    KRYS_NODISCARD static bool IsDeletedValue(const net::URL &value) noexcept
     {
       return value.IsHashTableDeletedValue();
     }

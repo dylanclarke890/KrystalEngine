@@ -58,7 +58,7 @@ namespace krys::boo
   private:
     UniquePtr<html::HTMLImageLoader> _imageLoader;
     DOMString _bestFitImageURL;
-    url::URL _currentURL;
+    net::URL _currentURL;
     float _imageDevicePixelRatio {1.0f};
     WeakPtr<HTMLPictureElement> _pictureElement;
     // The source element that was selected to provide the source URL.
@@ -256,7 +256,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IsReplaced(const RenderStyle *style = nullptr) const noexcept override;
 
     /// @brief The URL of the selected source, resolved against the document.
-    KRYS_NODISCARD const url::URL &CurrentURL() const noexcept
+    KRYS_NODISCARD const net::URL &CurrentURL() const noexcept
     {
       return _currentURL;
     }

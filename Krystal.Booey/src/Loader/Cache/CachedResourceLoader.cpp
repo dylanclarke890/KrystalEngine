@@ -93,7 +93,7 @@ namespace krys::boo
                     : nullptr;
   }
 
-  CachedResource *CachedResourceLoader::GetCachedResource(const url::URL &url) const noexcept
+  CachedResource *CachedResourceLoader::GetCachedResource(const net::URL &url) const noexcept
   {
     krys_debug_assert(!MemoryCache::ShouldRemoveFragmentIdentifier(url));
     auto found = _documentResources.find(url.String());
@@ -189,7 +189,7 @@ namespace krys::boo
     CachedResourceLoader::RequestResource(CachedResource::Type type, CachedResourceRequest &&request,
                                           ImageLoading imageLoading) noexcept
   {
-    url::URL url = request.GetResourceRequest().URL();
+    net::URL url = request.GetResourceRequest().URL();
     if (!Frame())
     {
       return Unexpected<ResourceError>(
@@ -429,17 +429,17 @@ namespace krys::boo
     ReloadImagesIfNotDeferred();
   }
 
-  ImageLoading CachedResourceLoader::ClientDefersImage(const url::URL &) const noexcept
+  ImageLoading CachedResourceLoader::ClientDefersImage(const net::URL &) const noexcept
   {
     return _imagesEnabled ? ImageLoading::Immediate : ImageLoading::DeferredUntilVisible;
   }
 
-  bool CachedResourceLoader::ShouldPerformImageLoad(const url::URL &url) const noexcept
+  bool CachedResourceLoader::ShouldPerformImageLoad(const net::URL &url) const noexcept
   {
     return _autoLoadImages || url.ProtocolIsData();
   }
 
-  bool CachedResourceLoader::ShouldDeferImageLoad(const url::URL &url) const noexcept
+  bool CachedResourceLoader::ShouldDeferImageLoad(const net::URL &url) const noexcept
   {
     return ClientDefersImage(url) == ImageLoading::DeferredUntilVisible || !ShouldPerformImageLoad(url);
   }

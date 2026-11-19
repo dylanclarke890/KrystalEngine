@@ -26,8 +26,8 @@
 
 #include "Krystal.Booey/CSS/Values/Primitives/URLModifiers.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo::css
 {
@@ -38,7 +38,7 @@ namespace krys::boo::css
   struct CSSURL
   {
     CSSOMString Specified;
-    url::URL Resolved;
+    net::URL Resolved;
     URLModifiers Modifiers;
 
     /// @brief The absence of a URL (e.g. for `none`).

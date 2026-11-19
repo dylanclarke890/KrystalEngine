@@ -542,9 +542,9 @@ namespace krys::ui::tests
     Maybe<boo::LoadResult> result;
     auto load = [&](const std::filesystem::path &file)
     {
-      loader.LoadResource(
-        view.Frame(), boo::ResourceRequest(boo::url::URL::FileURLWithFileSystemPath(file.generic_u8string())),
-        {}, [&](boo::LoadResult &&loaded) { result = krys::move(loaded); });
+      loader.LoadResource(view.Frame(),
+                          boo::ResourceRequest(net::URL::FileURLWithFileSystemPath(file.generic_u8string())),
+                          {}, [&](boo::LoadResult &&loaded) { result = krys::move(loaded); });
     };
 
     load(path);
@@ -2124,7 +2124,7 @@ namespace krys::ui::tests
     View view({400, 300});
     view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } a { display: block; height: 40px }</style>"
                   u8"<a id=away href=\"https://example.com/away\">Away</a><a id=here href=\"#here\">Here</a>",
-                  boo::url::URL(u8"https://example.com/page.html"));
+                  net::URL(u8"https://example.com/page.html"));
     WaitForLoad(view);
     view.UpdateRendering();
 
@@ -2153,7 +2153,7 @@ namespace krys::ui::tests
     View view({400, 300});
     view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 2000px }</style><div></div>"
                   u8"<p id=far>Far</p><div></div>",
-                  boo::url::URL(u8"https://example.com/page.html#far"));
+                  net::URL(u8"https://example.com/page.html#far"));
     WaitForLoad(view);
     view.UpdateRendering();
 
@@ -2799,7 +2799,7 @@ namespace krys::ui::tests
       });
 
     view.LoadHTML(u8"<!DOCTYPE html><a id=next href=next.html>Next</a>",
-                  boo::url::URL(u8"https://example.com/page.html"));
+                  net::URL(u8"https://example.com/page.html"));
     CHECK(view.IsLoading());
     CHECK(view.Document().GetURL().String() == u8"about:blank");
     WaitForLoad(view);
@@ -2824,7 +2824,7 @@ namespace krys::ui::tests
         [&](const NavigationRequest &request)
         {
           asked.emplace_back(request.URL.begin(), request.URL.end());
-          view.Load(boo::url::URL(request.URL));
+          view.Load(net::URL(request.URL));
         });
       view.Document().GetElementById(u8"next")->DispatchSimulatedClick(nullptr);
       CHECK(asked == List<std::string> {"https://example.com/next.html"});
@@ -2880,7 +2880,7 @@ namespace krys::ui::tests
 
     // "UE5H" is "PNG".
     view.LoadHTML(u8"<!DOCTYPE html><link rel=icon sizes=16x16 href=\"data:image/png;base64,UE5H\">",
-                  boo::url::URL(u8"https://example.com/page.html"));
+                  net::URL(u8"https://example.com/page.html"));
     WaitForLoad(view);
     auto &eventLoop = boo::html::EventLoop::Current();
     while (icons.empty() && eventLoop.RunNextTask())

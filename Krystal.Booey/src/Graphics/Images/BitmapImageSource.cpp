@@ -969,9 +969,9 @@ namespace krys::boo
     return _bitmapImage ? _bitmapImage->ExpectedContentLength() : 0;
   }
 
-  url::URL BitmapImageSource::SourceURL() const noexcept
+  net::URL BitmapImageSource::SourceURL() const noexcept
   {
-    return _bitmapImage ? _bitmapImage->SourceURL() : url::URL();
+    return _bitmapImage ? _bitmapImage->SourceURL() : net::URL();
   }
 
   void BitmapImageSource::Dump(TextStream &ts) const noexcept

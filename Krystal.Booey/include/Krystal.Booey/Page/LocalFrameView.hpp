@@ -934,7 +934,7 @@ namespace krys::boo
     /// scrolls it into view (the top of the document for `#top` or an empty fragment), and focuses it.
     /// @return Whether there was something to scroll to.
     /// @see https://html.spec.whatwg.org/#scroll-to-the-fragment-identifier
-    bool ScrollToFragment(const url::URL &url) noexcept;
+    bool ScrollToFragment(const net::URL &url) noexcept;
 
     /// @brief Scrolls to the element the fragment @p fragmentIdentifier indicates.
     /// @return Whether there was something to scroll to.

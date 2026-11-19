@@ -24,8 +24,8 @@
 #include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo
 {
@@ -67,7 +67,7 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<ImageValue> Create(CSSURL location,
                                                  CSSOMStringAtom initiatorType = null) noexcept;
 
-    KRYS_NODISCARD static Ref<ImageValue> Create(url::URL imageURL,
+    KRYS_NODISCARD static Ref<ImageValue> Create(net::URL imageURL,
                                                  CSSOMStringAtom initiatorType = null) noexcept;
 
     KRYS_NODISCARD Ref<ImageValue> CopyForComputedStyle(const CSSURL &resolvedURL) const noexcept;

@@ -7,7 +7,7 @@
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo::tests
 {
@@ -27,7 +27,7 @@ namespace krys::boo::tests
 
       void Navigate(utf8_stringview url) noexcept
       {
-        Frame->Loader().ChangeLocation(url::URL(Document->GetURL(), url), DOMStringAtom::Empty(), nullptr,
+        Frame->Loader().ChangeLocation(net::URL(Document->GetURL(), url), DOMStringAtom::Empty(), nullptr,
                                        ReferrerPolicy::EmptyString, null);
         html::EventLoop::Current().RunUntilIdle();
       }
@@ -168,7 +168,7 @@ namespace krys::boo::tests
     auto &frame = page->MainFrame();
     frame.CreateView({400, 300});
     auto document = CreateRef<HTMLDocument>();
-    document->SetURL(url::URL(u8"https://example.com/page.html#section"));
+    document->SetURL(net::URL(u8"https://example.com/page.html#section"));
     frame.SetDocument(ShareRefPtr<Document>(document.get()));
 
     auto parser = CreateRef<html::DocumentParser>(*document);

@@ -2,7 +2,7 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Threading/WorkQueue.hpp"
-#include "Krystal.Http/MIMETypeRegistry.hpp"
+#include "Krystal.Net/Http/MIMETypeRegistry.hpp"
 #include <algorithm>
 #include <chrono>
 #include <filesystem>
@@ -49,7 +49,7 @@ namespace krys::ui
 
     /// @brief What loading @p url, the file at @p path, gave: @p contents as a resource, or an error if the
     /// file couldn't be read.
-    KRYS_NODISCARD boo::LoadResult LoadResultFor(const boo::url::URL &url, const std::filesystem::path &path,
+    KRYS_NODISCARD boo::LoadResult LoadResultFor(const net::URL &url, const std::filesystem::path &path,
                                                  Maybe<FileContents> contents) noexcept
     {
       if (!contents)
@@ -62,7 +62,7 @@ namespace krys::ui
       const auto extension = path.extension().u8string();
       const auto size = static_cast<int64>(contents->Bytes.size());
       boo::ResourceResponse response(url,
-                                     http::MIMETypeRegistry::MIMETypeForExtension(
+                                     net::http::MIMETypeRegistry::MIMETypeForExtension(
                                        utf8_stringview(extension).substr(extension.empty() ? 0 : 1)),
                                      size);
       if (const auto &date = contents->LastModified)
@@ -97,7 +97,7 @@ namespace krys::ui
     // Only the read leaves the main thread: the response is made from it back on the main thread, as
     // Booey's types are the main thread's.
     _readQueue->Dispatch([path] { return ReadFile(path); }, boo::html::EventLoop::Current().Inbox(),
-                         [url = boo::url::URL(url), path, completionHandler = krys::move(completionHandler)](
+                         [url = net::URL(url), path, completionHandler = krys::move(completionHandler)](
                            Maybe<FileContents> contents) mutable
                          { completionHandler(LoadResultFor(url, path, krys::move(contents))); },
                          {.MayBlock = true});

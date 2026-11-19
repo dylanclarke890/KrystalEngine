@@ -40,7 +40,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::url
+namespace krys::net
 {
   class URL;
 }
@@ -302,12 +302,12 @@ namespace krys::boo
     void WriteSelectionToPasteboard(Pasteboard &pasteboard) noexcept;
 
     /// @brief Writes @p url, titled @p title, to @p pasteboard.
-    static void CopyURL(const url::URL &url, utf8_stringview title, Pasteboard &pasteboard) noexcept;
+    static void CopyURL(const net::URL &url, utf8_stringview title, Pasteboard &pasteboard) noexcept;
 
     /// @brief Writes the image @p imageElement shows to @p pasteboard: its URL, titled @p title, and its
     /// markup.
     // FIXME: The image itself, with images on the pasteboard.
-    static void WriteImageToPasteboard(Pasteboard &pasteboard, Element &imageElement, const url::URL &url,
+    static void WriteImageToPasteboard(Pasteboard &pasteboard, Element &imageElement, const net::URL &url,
                                        utf8_stringview title) noexcept;
 
     /// @brief The pasteboard's richest content as a fragment to paste at @p context.

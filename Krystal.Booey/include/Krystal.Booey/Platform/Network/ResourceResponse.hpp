@@ -26,12 +26,12 @@
 
 #pragma once
 
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Http/HTTPHeaderMap.hpp"
+#include "Krystal.Net/Http/HTTPHeaderMap.hpp"
+#include "Krystal.Net/URL.hpp"
 #include <chrono>
 
 namespace krys::boo
@@ -42,18 +42,18 @@ namespace krys::boo
   class ResourceResponse
   {
   private:
-    url::URL _url;
+    net::URL _url;
     utf8_string _mimeType;
     int64 _expectedContentLength {0};
     utf8_string _textEncodingName;
     uint16 _httpStatusCode {0};
     utf8_string _httpStatusText;
-    http::HTTPHeaderMap _httpHeaderFields;
+    net::http::HTTPHeaderMap _httpHeaderFields;
 
   public:
     ResourceResponse() noexcept = default;
 
-    ResourceResponse(url::URL url, utf8_string mimeType, int64 expectedContentLength,
+    ResourceResponse(net::URL url, utf8_string mimeType, int64 expectedContentLength,
                      utf8_string textEncodingName = {}) noexcept
         : _url(krys::move(url)), _mimeType(krys::move(mimeType)),
           _expectedContentLength(expectedContentLength), _textEncodingName(krys::move(textEncodingName))
@@ -65,12 +65,12 @@ namespace krys::boo
       return _url.IsNull();
     }
 
-    KRYS_NODISCARD const url::URL &URL() const noexcept
+    KRYS_NODISCARD const net::URL &URL() const noexcept
     {
       return _url;
     }
 
-    void SetURL(url::URL url) noexcept
+    void SetURL(net::URL url) noexcept
     {
       _url = krys::move(url);
     }
@@ -118,7 +118,7 @@ namespace krys::boo
       return _httpStatusCode >= 200 && _httpStatusCode <= 299;
     }
 
-    KRYS_NODISCARD const http::HTTPHeaderMap &HTTPHeaderFields() const noexcept
+    KRYS_NODISCARD const net::http::HTTPHeaderMap &HTTPHeaderFields() const noexcept
     {
       return _httpHeaderFields;
     }

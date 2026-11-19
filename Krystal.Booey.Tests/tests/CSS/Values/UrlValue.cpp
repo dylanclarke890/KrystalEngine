@@ -11,7 +11,7 @@ namespace krys::boo::css::tests
     KRYS_NODISCARD CSSURL UrlFor(const CSSOMString &specified) noexcept
     {
       return *CompleteURL(specified,
-                          ParserContext {ParserMode::HTMLStandard, url::URL {u8"https://example.com/"}});
+                          ParserContext {ParserMode::HTMLStandard, net::URL {u8"https://example.com/"}});
     }
   }
 

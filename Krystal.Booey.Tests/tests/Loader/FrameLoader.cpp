@@ -3,7 +3,7 @@
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo::tests
 {
@@ -12,7 +12,7 @@ namespace krys::boo::tests
     void Navigate(NavigationFixture &fixture, utf8_stringview url,
                   DOMStringAtom target = DOMStringAtom::Empty()) noexcept
     {
-      fixture.Frame->Loader().ChangeLocation(url::URL(fixture.Document->GetURL(), url), krys::move(target),
+      fixture.Frame->Loader().ChangeLocation(net::URL(fixture.Document->GetURL(), url), krys::move(target),
                                              nullptr, ReferrerPolicy::EmptyString, null);
     }
   }
@@ -69,11 +69,11 @@ namespace krys::boo::tests
 
   TEST_CASE("FrameLoader::ShouldReload", "[Loader][FrameLoader]")
   {
-    url::URL page(u8"https://example.com/a?q#x");
-    CHECK(FrameLoader::ShouldReload(page, url::URL(u8"https://example.com/a?q")));
-    CHECK_FALSE(FrameLoader::ShouldReload(page, url::URL(u8"https://example.com/a?q#y")));
-    CHECK_FALSE(FrameLoader::ShouldReload(page, url::URL(u8"https://example.com/a?q#")));
-    CHECK(FrameLoader::ShouldReload(page, url::URL(u8"https://example.com/a?r#x")));
+    net::URL page(u8"https://example.com/a?q#x");
+    CHECK(FrameLoader::ShouldReload(page, net::URL(u8"https://example.com/a?q")));
+    CHECK_FALSE(FrameLoader::ShouldReload(page, net::URL(u8"https://example.com/a?q#y")));
+    CHECK_FALSE(FrameLoader::ShouldReload(page, net::URL(u8"https://example.com/a?q#")));
+    CHECK(FrameLoader::ShouldReload(page, net::URL(u8"https://example.com/a?r#x")));
   }
 
   TEST_CASE("FrameLoader: form submissions", "[Loader][FrameLoader]")

@@ -557,7 +557,7 @@ namespace krys::boo
   }
 
   // (No link decoration filtering (applyLinkDecorationFiltering): it's Cocoa's, not a standard feature.)
-  void Editor::CopyURL(const url::URL &url, utf8_stringview title, Pasteboard &pasteboard) noexcept
+  void Editor::CopyURL(const net::URL &url, utf8_stringview title, Pasteboard &pasteboard) noexcept
   {
     PasteboardURL pasteboardURL;
     pasteboardURL.Url = url;
@@ -604,7 +604,7 @@ namespace krys::boo
     }
   }
 
-  void Editor::WriteImageToPasteboard(Pasteboard &pasteboard, Element &imageElement, const url::URL &,
+  void Editor::WriteImageToPasteboard(Pasteboard &pasteboard, Element &imageElement, const net::URL &,
                                       utf8_stringview title) noexcept
   {
     PasteboardImage pasteboardImage;

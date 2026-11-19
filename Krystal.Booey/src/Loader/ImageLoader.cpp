@@ -184,7 +184,7 @@ namespace krys::boo
       auto *imageElement = DynamicDowncast<HTMLImageElement>(element.get());
 
       // Use URL from original request for same URL loads in order to preserve the original base URL.
-      url::URL imageURL;
+      net::URL imageURL;
       if (_image && *attr == _pendingURL)
       {
         imageURL = _image->URL();

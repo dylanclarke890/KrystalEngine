@@ -28,11 +28,11 @@
 #include "Krystal.Booey/Rendering/HitTesting/HitTestLocation.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo
 {
@@ -206,9 +206,9 @@ namespace krys::boo
     /// @brief The box of the image hit, in absolute coordinates.
     KRYS_NODISCARD IntRect ImageRect() const noexcept;
 
-    KRYS_NODISCARD url::URL AbsoluteImageURL() const noexcept;
+    KRYS_NODISCARD net::URL AbsoluteImageURL() const noexcept;
 
-    KRYS_NODISCARD url::URL AbsoluteLinkURL() const noexcept;
+    KRYS_NODISCARD net::URL AbsoluteLinkURL() const noexcept;
 
     /// @brief The text of the link hit.
     KRYS_NODISCARD utf8_string TextContent() const noexcept;

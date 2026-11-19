@@ -39,7 +39,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo
 {
@@ -267,7 +267,7 @@ namespace krys::boo
     }
   }
 
-  DragImageData CreateDragImageForLink(boo::Element &element, url::URL &url, utf8_stringview inLabel,
+  DragImageData CreateDragImageForLink(boo::Element &element, net::URL &url, utf8_stringview inLabel,
                                        float) noexcept
   {
     const auto &settings = element.NodeDocument().GetSettings();

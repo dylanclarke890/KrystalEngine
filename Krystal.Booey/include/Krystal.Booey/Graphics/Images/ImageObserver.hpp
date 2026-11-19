@@ -26,11 +26,11 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo
 {
@@ -44,7 +44,7 @@ namespace krys::boo
   public:
     virtual ~ImageObserver() noexcept = default;
 
-    KRYS_NODISCARD virtual url::URL SourceUrl() const noexcept = 0;
+    KRYS_NODISCARD virtual net::URL SourceUrl() const noexcept = 0;
 
     KRYS_NODISCARD virtual utf8_string MimeType() const noexcept = 0;
 

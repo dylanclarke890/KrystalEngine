@@ -36,17 +36,17 @@
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
+namespace krys::net
+{
+  class URL;
+}
+
 namespace krys::boo
 {
   class Element;
   class Image;
   class LocalFrame;
   class Node;
-
-  namespace url
-  {
-    class URL;
-  }
 
   /// @brief A drag image: an image buffer the host draws under the cursor, its size in device pixels.
   using DragImageRef = RefPtr<ImageBuffer>;
@@ -88,7 +88,7 @@ namespace krys::boo
                                                            bool forceBlackText = false) noexcept;
 
   /// @brief A label for a dragged link: its text in bold over its URL, or the URL alone if there's no text.
-  KRYS_NODISCARD DragImageData CreateDragImageForLink(boo::Element &element, url::URL &url,
+  KRYS_NODISCARD DragImageData CreateDragImageForLink(boo::Element &element, net::URL &url,
                                                       utf8_stringview label,
                                                       float deviceScaleFactor) noexcept;
 

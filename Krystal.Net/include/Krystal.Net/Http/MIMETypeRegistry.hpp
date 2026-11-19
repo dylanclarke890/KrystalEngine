@@ -28,7 +28,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 
-namespace krys::http
+namespace krys::net::http
 {
   /// @brief MIME types: the types of file extensions, and checks on types.
   // FIXME: The rest of the registry, such as a type's preferred extension.

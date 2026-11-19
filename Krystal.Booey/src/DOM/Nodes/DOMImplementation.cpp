@@ -13,9 +13,9 @@
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Http/MIMETypeRegistry.hpp"
+#include "Krystal.Net/Http/MIMETypeRegistry.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo::dom
 {
@@ -184,7 +184,7 @@ namespace krys::boo::dom
     return AdoptRef<Document>(*document.release());
   }
 
-  Ref<Document> DOMImplementation::CreateDocument(utf8_stringview contentType, const url::URL &url) noexcept
+  Ref<Document> DOMImplementation::CreateDocument(utf8_stringview contentType, const net::URL &url) noexcept
   {
     auto create = [&]() -> Ref<Document>
     {
@@ -204,7 +204,7 @@ namespace krys::boo::dom
         document->_contentType = u8"image/svg+xml";
         return document;
       }
-      if (http::MIMETypeRegistry::IsXMLMIMEType(contentType))
+      if (net::http::MIMETypeRegistry::IsXMLMIMEType(contentType))
       {
         auto document = CreateRef<XMLDocument>();
         document->_contentType = DOMString(contentType);

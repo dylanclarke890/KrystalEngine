@@ -116,7 +116,7 @@ namespace krys::boo
 
     KRYS_NODISCARD boo::CachedResource *GetCachedResource(utf8_stringview url) const noexcept;
 
-    KRYS_NODISCARD boo::CachedResource *GetCachedResource(const url::URL &url) const noexcept;
+    KRYS_NODISCARD boo::CachedResource *GetCachedResource(const net::URL &url) const noexcept;
 
     KRYS_NODISCARD const DocumentResourceMap &AllCachedResources() const noexcept
     {
@@ -137,9 +137,9 @@ namespace krys::boo
 
     void SetImagesEnabled(bool) noexcept;
 
-    KRYS_NODISCARD bool ShouldDeferImageLoad(const url::URL &) const noexcept;
+    KRYS_NODISCARD bool ShouldDeferImageLoad(const net::URL &) const noexcept;
 
-    KRYS_NODISCARD bool ShouldPerformImageLoad(const url::URL &) const noexcept;
+    KRYS_NODISCARD bool ShouldPerformImageLoad(const net::URL &) const noexcept;
 
     KRYS_NODISCARD LocalFrame *Frame() const noexcept; // Can be null
 
@@ -183,7 +183,7 @@ namespace krys::boo
                                                                   boo::CachedResource *existingResource,
                                                                   ImageLoading) const noexcept;
 
-    KRYS_NODISCARD ImageLoading ClientDefersImage(const url::URL &) const noexcept;
+    KRYS_NODISCARD ImageLoading ClientDefersImage(const net::URL &) const noexcept;
 
     void ReloadImagesIfNotDeferred() noexcept;
   };

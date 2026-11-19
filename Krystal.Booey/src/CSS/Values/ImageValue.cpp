@@ -49,7 +49,7 @@ namespace krys::boo::css
     return AdoptRef(*new ImageValue(krys::move(location), krys::move(initiatorType)));
   }
 
-  Ref<ImageValue> ImageValue::Create(url::URL imageURL, CSSOMStringAtom initiatorType) noexcept
+  Ref<ImageValue> ImageValue::Create(net::URL imageURL, CSSOMStringAtom initiatorType) noexcept
   {
     CSSOMString specified {imageURL.String()};
     return Create(

@@ -31,7 +31,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascadeDescription.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCreationContext.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo::css
 {

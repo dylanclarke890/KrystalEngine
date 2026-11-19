@@ -67,17 +67,17 @@ namespace krys::boo::css
 
   namespace
   {
-    CSSURL CompleteURL(const CSSOMString &string, const url::URL &baseURL) noexcept
+    CSSURL CompleteURL(const CSSOMString &string, const net::URL &baseURL) noexcept
     {
       if (string.empty() || string.starts_with(u8'#'))
       {
-        return CSSURL {.Specified = string, .Resolved = url::URL {string}, .Modifiers = {}};
+        return CSSURL {.Specified = string, .Resolved = net::URL {string}, .Modifiers = {}};
       }
       if (baseURL.IsNull() || baseURL.IsAboutBlank())
       {
-        return CSSURL {.Specified = string, .Resolved = url::URL {}, .Modifiers = {}};
+        return CSSURL {.Specified = string, .Resolved = net::URL {}, .Modifiers = {}};
       }
-      return CSSURL {.Specified = string, .Resolved = url::URL {baseURL, string}, .Modifiers = {}};
+      return CSSURL {.Specified = string, .Resolved = net::URL {baseURL, string}, .Modifiers = {}};
     }
   }
 
@@ -91,7 +91,7 @@ namespace krys::boo::css
   {
     if (url.Resolved.IsNull())
     {
-      url.Resolved = url::URL {url.Specified};
+      url.Resolved = net::URL {url.Specified};
     }
     return krys::move(url);
   }

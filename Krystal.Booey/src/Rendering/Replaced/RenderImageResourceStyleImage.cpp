@@ -69,7 +69,7 @@ namespace krys::boo
     return ShareRefPtr(&Image::NullImage());
   }
 
-  void RenderImageResourceStyleImage::SetContainerContext(const IntSize &size, const url::URL &) noexcept
+  void RenderImageResourceStyleImage::SetContainerContext(const IntSize &size, const net::URL &) noexcept
   {
     if (auto *renderer = Renderer())
     {

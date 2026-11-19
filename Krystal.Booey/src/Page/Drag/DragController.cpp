@@ -1023,7 +1023,7 @@ namespace krys::boo
 
     IntPoint mouseDraggedPoint = src.View()->WindowToContents(FlooredIntPoint(dragEvent.Position()));
 
-    _draggingImageURL = url::URL();
+    _draggingImageURL = net::URL();
     _sourceDragOperationMask = sourceOperationMask;
 
     DragImage dragImage;
@@ -1317,7 +1317,7 @@ namespace krys::boo
   }
 
   void DragController::DeclareAndWriteDragImage(dom::DataTransfer &dataTransfer, Element &element,
-                                                const url::URL &url, utf8_stringview label) noexcept
+                                                const net::URL &url, utf8_stringview label) noexcept
   {
     auto *frame = element.NodeDocument().Frame();
     krys_debug_assert(frame);

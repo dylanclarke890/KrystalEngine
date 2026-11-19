@@ -10,7 +10,7 @@ namespace krys::boo::css::tests
     CSSURL ImageURL(utf8_stringview url)
     {
       return *CompleteURL(CSSOMString {url},
-                          ParserContext {ParserMode::HTMLStandard, url::URL {u8"https://example.com/"}});
+                          ParserContext {ParserMode::HTMLStandard, net::URL {u8"https://example.com/"}});
     }
   }
 
@@ -29,7 +29,7 @@ namespace krys::boo::css::tests
 
     SECTION("From a resolved URL")
     {
-      auto value = ImageValue::Create(url::URL {u8"https://example.com/a.png"});
+      auto value = ImageValue::Create(net::URL {u8"https://example.com/a.png"});
       CHECK(ToNarrow(value->URL().Specified) == "https://example.com/a.png");
       CHECK(ToNarrow(value->URL().Resolved.String()) == "https://example.com/a.png");
       CHECK(CssText(*value) == "url(\"https://example.com/a.png\")");

@@ -1,9 +1,10 @@
-﻿#include "Krystal.Booey/URL/URL.hpp"
+﻿#include "Krystal.Net/URL.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/URL/URLHash.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Net/URLHash.hpp"
 #include <string>
 
-namespace krys::boo::url::tests
+namespace krys::net::tests
 {
   namespace
   {

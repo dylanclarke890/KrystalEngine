@@ -316,7 +316,7 @@ namespace krys::boo
     IntSize containerSize(ReplacedContentRect().Size());
     if (!containerSize.IsEmpty())
     {
-      url::URL imageSourceURL;
+      net::URL imageSourceURL;
       if (auto *imageElement = DynamicDowncast<HTMLImageElement>(GetElement()))
       {
         imageSourceURL = imageElement->CurrentURL();

@@ -180,9 +180,9 @@ namespace krys::boo
                             Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
   private:
-    KRYS_NODISCARD url::URL FullURL() const noexcept final;
+    KRYS_NODISCARD net::URL FullURL() const noexcept final;
 
-    void SetFullURL(const url::URL &url) noexcept final;
+    void SetFullURL(const net::URL &url) noexcept final;
 
     KRYS_NODISCARD Path GetRegion(const LayoutSize &size) const noexcept;
 

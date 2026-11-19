@@ -21,9 +21,9 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo
 {
@@ -67,7 +67,7 @@ namespace krys::boo
 
     virtual void ClearOwnerNode() noexcept = 0;
 
-    KRYS_NODISCARD virtual url::URL BaseURL() const noexcept = 0;
+    KRYS_NODISCARD virtual net::URL BaseURL() const noexcept = 0;
 
     KRYS_NODISCARD virtual bool IsLoading() const noexcept = 0;
 

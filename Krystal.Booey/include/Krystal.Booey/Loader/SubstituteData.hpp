@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo
 {
@@ -38,13 +38,13 @@ namespace krys::boo
   private:
     utf8_string _content;
     utf8_string _mimeType {u8"text/html"};
-    url::URL _responseURL;
+    net::URL _responseURL;
 
   public:
     SubstituteData() noexcept = default;
 
     /// @param responseURL The document's URL; the request's if null.
-    SubstituteData(utf8_string content, utf8_string mimeType, url::URL responseURL) noexcept
+    SubstituteData(utf8_string content, utf8_string mimeType, net::URL responseURL) noexcept
         : _content(krys::move(content)), _mimeType(krys::move(mimeType)),
           _responseURL(krys::move(responseURL))
     {
@@ -60,7 +60,7 @@ namespace krys::boo
       return _mimeType;
     }
 
-    KRYS_NODISCARD const url::URL &ResponseURL() const noexcept
+    KRYS_NODISCARD const net::URL &ResponseURL() const noexcept
     {
       return _responseURL;
     }

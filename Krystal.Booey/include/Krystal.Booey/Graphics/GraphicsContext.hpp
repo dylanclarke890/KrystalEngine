@@ -38,10 +38,10 @@
 #include "Krystal.Booey/Graphics/Paths/DashArray.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Text/TextFlags.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo
 {
@@ -738,7 +738,7 @@ namespace krys::boo
 
     // Links
 
-    virtual void SetURLForRect(const url::URL &, const FloatRect &) noexcept
+    virtual void SetURLForRect(const net::URL &, const FloatRect &) noexcept
     {
     }
 

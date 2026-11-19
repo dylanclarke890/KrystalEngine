@@ -78,7 +78,7 @@ namespace krys::boo
     }
   }
 
-  SelectionData::SelectionData(utf8_stringview text, utf8_stringview markup, const url::URL &url,
+  SelectionData::SelectionData(utf8_stringview text, utf8_stringview markup, const net::URL &url,
                                utf8_stringview uriList, RefPtr<SharedBuffer> &&customData,
                                bool canSmartReplace) noexcept
   {
@@ -138,7 +138,7 @@ namespace krys::boo
         continue;
       }
 
-      url::URL url {line};
+      net::URL url {line};
       if (url.IsValid())
       {
         if (!setURL)
@@ -158,7 +158,7 @@ namespace krys::boo
     }
   }
 
-  void SelectionData::SetURL(const url::URL &url, utf8_stringview label) noexcept
+  void SelectionData::SetURL(const net::URL &url, utf8_stringview label) noexcept
   {
     _url = url;
     if (_uriList.empty())

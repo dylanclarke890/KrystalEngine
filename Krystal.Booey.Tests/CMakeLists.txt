@@ -1,7 +1,6 @@
 ﻿add_executable(Krystal.Booey.Tests)
 
-# Third-party - RapidJSON (WPT URL test data), magic_enum (tokenizer test state names)
-find_package(RapidJSON CONFIG REQUIRED)
+# Third-party - magic_enum (tokenizer test state names)
 find_package(magic_enum CONFIG REQUIRED)
 
 target_link_libraries(Krystal.Booey.Tests
@@ -9,7 +8,6 @@ target_link_libraries(Krystal.Booey.Tests
 	 	Krystal.Core
 		Krystal.Booey
    	Catch2::Catch2WithMain
-		rapidjson
 		magic_enum::magic_enum
 )
 
@@ -842,8 +840,6 @@ target_sources(Krystal.Booey.Tests
 		tests/SVG/SVGFilterPrimitiveStandardAttributes.cpp
 		tests/SVG/Elements/SVGUseElement.cpp
 		tests/SVG/Elements/SVGGradientElement.cpp
-		tests/URL/URL.cpp
-		tests/URL/WPT.cpp
 		tests/XML/PseudoAttributes.cpp
 		tests/XML/XMLDocumentParser.cpp
 )

@@ -29,7 +29,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::url
+namespace krys::net
 {
   class URL;
 }
@@ -107,7 +107,7 @@ namespace krys::boo::html
 
     /// @brief The serialization of @p url's origin: `null` for an opaque origin.
     /// @see https://html.spec.whatwg.org/#ascii-serialisation-of-an-origin
-    KRYS_NODISCARD static dom::USVString SerializedOrigin(const url::URL &url) noexcept;
+    KRYS_NODISCARD static dom::USVString SerializedOrigin(const net::URL &url) noexcept;
 
   protected:
     URLDecomposition() noexcept = default;
@@ -115,8 +115,8 @@ namespace krys::boo::html
     virtual ~URLDecomposition() noexcept = default;
 
   private:
-    KRYS_NODISCARD virtual url::URL FullURL() const noexcept = 0;
+    KRYS_NODISCARD virtual net::URL FullURL() const noexcept = 0;
 
-    virtual void SetFullURL(const url::URL &url) noexcept = 0;
+    virtual void SetFullURL(const net::URL &url) noexcept = 0;
   };
 }

@@ -15,7 +15,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -68,7 +68,7 @@ namespace krys::boo::html::tests
 
     void Navigate(NavigationFixture &fixture, utf8_stringview url) noexcept
     {
-      fixture.Frame->Loader().ChangeLocation(url::URL(fixture.Document->GetURL(), url),
+      fixture.Frame->Loader().ChangeLocation(net::URL(fixture.Document->GetURL(), url),
                                              DOMStringAtom::Empty(), nullptr, ReferrerPolicy::EmptyString,
                                              null);
       html::EventLoop::Current().RunUntilIdle();

@@ -33,13 +33,13 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo::html
 {
   bool URLInputType::TypeMismatchFor(DOMStringView value) const noexcept
   {
-    return !value.empty() && !url::URL(value).IsValid();
+    return !value.empty() && !net::URL(value).IsValid();
   }
 
   bool URLInputType::TypeMismatch() const noexcept

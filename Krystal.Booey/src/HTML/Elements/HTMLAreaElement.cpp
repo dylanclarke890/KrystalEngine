@@ -429,12 +429,12 @@ namespace krys::boo
     return Href();
   }
 
-  url::URL HTMLAreaElement::FullURL() const noexcept
+  net::URL HTMLAreaElement::FullURL() const noexcept
   {
     return html::HyperlinkAlgorithms::Href(*this);
   }
 
-  void HTMLAreaElement::SetFullURL(const url::URL &url) noexcept
+  void HTMLAreaElement::SetFullURL(const net::URL &url) noexcept
   {
     html::CEReactionsScope ceReactions;
     html::HyperlinkAlgorithms::SetHref(*this, url);

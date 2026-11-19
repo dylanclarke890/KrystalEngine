@@ -25,13 +25,13 @@
  */
 
 #include "Krystal.Booey/Platform/Network/ResourceResponse.hpp"
-#include "Krystal.Http/HTTPParsers.hpp"
+#include "Krystal.Net/Http/HTTPParsers.hpp"
 
 namespace krys::boo
 {
   Maybe<std::chrono::sys_seconds> ResourceResponse::LastModified() const noexcept
   {
     auto value = _httpHeaderFields.Get(u8"Last-Modified");
-    return value ? http::ParseHTTPDate(*value) : null;
+    return value ? net::http::ParseHTTPDate(*value) : null;
   }
 }

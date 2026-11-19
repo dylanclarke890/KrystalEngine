@@ -118,7 +118,7 @@ namespace krys::boo
 
   ExceptionOr<Ref<CSSStyleSheet>> CSSStyleSheet::Create(Document &document, Init init) noexcept
   {
-    url::URL baseURL;
+    net::URL baseURL;
     if (!init.BaseURL)
     {
       baseURL = document.BaseURL();
@@ -560,7 +560,7 @@ namespace krys::boo
     return _contents->OriginalURL();
   }
 
-  url::URL CSSStyleSheet::BaseURL() const noexcept
+  net::URL CSSStyleSheet::BaseURL() const noexcept
   {
     return _contents->BaseURL();
   }

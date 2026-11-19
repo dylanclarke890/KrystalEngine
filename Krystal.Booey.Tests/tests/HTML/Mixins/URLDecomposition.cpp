@@ -3,7 +3,7 @@
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -225,7 +225,7 @@ namespace krys::boo::html::tests
   {
     auto origin = [](utf8_stringview url)
     {
-      return Str(URLDecomposition::SerializedOrigin(url::URL(url)));
+      return Str(URLDecomposition::SerializedOrigin(net::URL(url)));
     };
     CHECK(origin(u8"https://example.com:8443/a?b#c") == "https://example.com:8443");
     CHECK(origin(u8"http://example.com:80/") == "http://example.com");

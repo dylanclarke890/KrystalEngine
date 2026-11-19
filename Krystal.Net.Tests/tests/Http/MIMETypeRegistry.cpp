@@ -1,7 +1,7 @@
-﻿#include "Krystal.Http/MIMETypeRegistry.hpp"
+﻿#include "Krystal.Net/Http/MIMETypeRegistry.hpp"
 #include "catch2/catch_test_macros.hpp"
 
-namespace krys::http::tests
+namespace krys::net::http::tests
 {
   TEST_CASE("MIMETypeRegistry: types by extension", "[Http][MIMETypeRegistry]")
   {

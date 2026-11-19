@@ -2,8 +2,8 @@
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/PasteboardCustomData.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/SelectionData.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
+#include "Krystal.Net/URL.hpp"
 #include "Krystal.PAL/Platform.hpp"
 
 namespace krys::ui
@@ -50,7 +50,7 @@ namespace krys::ui
         {
           uriList += u8"\r\n";
         }
-        uriList += boo::url::URL::FileURLWithFileSystemPath(path).String();
+        uriList += net::URL::FileURLWithFileSystemPath(path).String();
       }
       return uriList;
     }

@@ -67,7 +67,7 @@ namespace krys::boo
       // We don't need to create a new frame because the new document belongs to the parent UseElement.
       auto document = CreateRef<SVGDocument>();
       document->SetSettings(Ref<Settings>(_settings));
-      document->SetURL(url::URL(Response().URL()));
+      document->SetURL(net::URL(Response().URL()));
 
       auto parser = xml::XMLDocumentParser::Create(*document);
       parser->Append(DecodeDocument(data->GetSpan()));

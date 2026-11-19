@@ -227,7 +227,7 @@ namespace krys::boo::tests
     LoadFixture fixture;
     DocumentWriter writer;
     writer.SetFrame(fixture.Frame());
-    REQUIRE(writer.Begin(url::URL(u8"about:blank")));
+    REQUIRE(writer.Begin(net::URL(u8"about:blank")));
 
     // A byte order mark, then é split between two chunks, then an invalid byte.
     const uint8 first[] = {0xEF, 0xBB, 0xBF, '<', 'p', ' ', 'i', 'd', '=', 't', '>', 0xC3};
@@ -249,7 +249,7 @@ namespace krys::boo::tests
     REQUIRE(view);
     DocumentWriter writer;
     writer.SetFrame(fixture.Frame());
-    REQUIRE(writer.Begin(url::URL(u8"about:blank")));
+    REQUIRE(writer.Begin(net::URL(u8"about:blank")));
     CHECK(view->ScrollbarsSuppressed());
 
     SECTION("a tall page is laid out with its vertical scrollbar from the start")
@@ -408,7 +408,7 @@ namespace krys::boo::tests
     // Navigating from the events does nothing.
     auto tryToNavigate = [&]
     {
-      fixture.Frame().Loader().ChangeLocation(url::URL(u8"https://example.com/elsewhere.html"),
+      fixture.Frame().Loader().ChangeLocation(net::URL(u8"https://example.com/elsewhere.html"),
                                               DOMStringAtom::Empty(), nullptr, ReferrerPolicy::EmptyString,
                                               null);
     };

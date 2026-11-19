@@ -194,7 +194,7 @@ namespace krys::boo::css::tests
             "[CSS][CSSOM][CSSStyleSheet]")
   {
     auto context = CSSOMTestContext();
-    context.BaseURL = url::URL(u8"https://example.com/a.css");
+    context.BaseURL = net::URL(u8"https://example.com/a.css");
     auto contents = StyleSheetContents::Create(context);
     contents->ParseString(u8"a { }");
 
@@ -268,7 +268,7 @@ namespace krys::boo::css::tests
 
     SECTION("a relative base URL is resolved against the document base URL")
     {
-      document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
+      document->SetURL(net::URL(u8"https://example.com/dir/page.html"));
 
       auto sheet = ConstructedSheet(*document, {.BaseURL = u8"sheets/"});
       REQUIRE(ToNarrow(sheet->BaseURL().String()) == "https://example.com/dir/sheets/");

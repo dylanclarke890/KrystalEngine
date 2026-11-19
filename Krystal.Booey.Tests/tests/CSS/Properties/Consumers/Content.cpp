@@ -19,7 +19,7 @@ namespace krys::boo::css::parse_property::tests
 
   TEST_CASE("parse_property(ConsumeContent)", "[CSS][Properties][Consumers]")
   {
-    ParserContext context {ParserMode::HTMLStandard, url::URL(u8"https://example.com/dir/")};
+    ParserContext context {ParserMode::HTMLStandard, net::URL(u8"https://example.com/dir/")};
 
     CHECK(ConsumeToText(u8"normal", ConsumeContent) == "normal");
     CHECK(ConsumeToText(u8"none", ConsumeContent) == "none");

@@ -31,7 +31,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGUseElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo
 {
@@ -97,7 +97,7 @@ namespace krys::boo
     auto base = document.CompleteURL(url.substr(0, start), document.BaseURL());
     auto fragmentIdentifier = url.substr(start);
     auto urlWithFragment = document.CompleteURL(fragmentIdentifier, base);
-    if (url::EqualIgnoringFragmentIdentifier(urlWithFragment, document.GetURL()))
+    if (net::EqualIgnoringFragmentIdentifier(urlWithFragment, document.GetURL()))
     {
       return DOMStringAtom(fragmentIdentifier.substr(1));
     }
@@ -134,7 +134,7 @@ namespace krys::boo
     // If the URI matches our documents URL, we're dealing with a local reference.
     auto url = document.CompleteURL(uri);
     krys_assert(!url.ProtocolIsData());
-    return !url::EqualIgnoringFragmentIdentifier(url, document.GetURL());
+    return !net::EqualIgnoringFragmentIdentifier(url, document.GetURL());
   }
 
   auto SVGURIReference::TargetElementFromIRIString(DOMStringView iri,
@@ -161,14 +161,14 @@ namespace krys::boo
     if (externalDocument)
     {
       // Enforce that the referenced url matches the url of the document that we've loaded for it!
-      krys_assert(url::EqualIgnoringFragmentIdentifier(url, externalDocument->GetURL()));
+      krys_assert(net::EqualIgnoringFragmentIdentifier(url, externalDocument->GetURL()));
       return {externalDocument->GetElementById(id.View()), krys::move(id)};
     }
 
     if (url.ProtocolIsData())
     {
       // FIXME: We need to load the data url in a Document to be able to get the target element.
-      if (!url::EqualIgnoringFragmentIdentifier(url, document.GetURL()))
+      if (!net::EqualIgnoringFragmentIdentifier(url, document.GetURL()))
       {
         return {nullptr, krys::move(id)};
       }

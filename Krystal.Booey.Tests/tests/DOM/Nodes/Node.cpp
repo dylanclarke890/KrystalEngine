@@ -110,7 +110,7 @@ namespace krys::boo::dom::tests
       auto document = CreateRef<Document>();
       auto element = CreateRef<TestElement>(*document);
       CHECK(element->BaseURI() == u8"about:blank");
-      document->SetURL(url::URL(u8"https://example.test/a/b?c"));
+      document->SetURL(net::URL(u8"https://example.test/a/b?c"));
       CHECK(element->BaseURI() == u8"https://example.test/a/b?c");
       CHECK(document->BaseURI() == u8"https://example.test/a/b?c");
     }

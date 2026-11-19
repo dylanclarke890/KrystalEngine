@@ -25,7 +25,7 @@
 namespace krys::boo
 {
   SVGImageForContainer::SVGImageForContainer(SVGImage *image, const FloatSize &containerSize,
-                                             float containerZoom, url::URL initialFragmentURL) noexcept
+                                             float containerZoom, net::URL initialFragmentURL) noexcept
       : _image(CreateWeakPtr(image)), _containerSize(containerSize), _containerZoom(containerZoom),
         _initialFragmentURL(krys::move(initialFragmentURL))
   {

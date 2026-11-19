@@ -34,7 +34,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
 
-namespace krys::boo::url
+namespace krys::net
 {
   class URLParser;
 

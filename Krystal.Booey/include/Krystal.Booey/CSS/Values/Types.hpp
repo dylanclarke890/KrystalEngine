@@ -30,13 +30,13 @@
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/IterationStatus.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Utils/Apply.hpp"
 #include "Krystal.Core/Visitor.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo::css
 {
@@ -489,11 +489,11 @@ namespace krys::boo::css
     }
   };
 
-  // Specialization for `url::URL`.
+  // Specialization for `net::URL`.
   template <>
-  struct ComputedStyleDependenciesCollector<url::URL>
+  struct ComputedStyleDependenciesCollector<net::URL>
   {
-    constexpr void operator()(ComputedStyleDependencies &, const url::URL &)
+    constexpr void operator()(ComputedStyleDependencies &, const net::URL &)
     {
       // Nothing to do.
     }
@@ -674,12 +674,12 @@ namespace krys::boo::css
     }
   };
 
-  // Specialization for `url::URL`.
+  // Specialization for `net::URL`.
   template <>
-  struct ValueChildrenVisitor<url::URL>
+  struct ValueChildrenVisitor<net::URL>
   {
     constexpr IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &,
-                                         const url::URL &)
+                                         const net::URL &)
     {
       return IterationStatus::Continue;
     }

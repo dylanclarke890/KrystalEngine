@@ -92,7 +92,7 @@ namespace krys::boo
   void FrameLoader::Init() noexcept
   {
     // This somewhat odd set of steps gives the frame an initial empty document.
-    auto loader = DocumentLoader::Create(ResourceRequest(url::URL(u8"about:blank")), SubstituteData());
+    auto loader = DocumentLoader::Create(ResourceRequest(net::URL(u8"about:blank")), SubstituteData());
     loader->AttachToFrame(_frame);
     _documentLoader = loader;
     _isDisplayingInitialEmptyDocument = true;
@@ -410,7 +410,7 @@ namespace krys::boo
     }
   }
 
-  void FrameLoader::ChangeLocation(const url::URL &url, DOMStringAtom passedTarget, Event *triggeringEvent,
+  void FrameLoader::ChangeLocation(const net::URL &url, DOMStringAtom passedTarget, Event *triggeringEvent,
                                    ReferrerPolicy referrerPolicy, DOMStringAtom downloadAttribute,
                                    Element *sourceElement) noexcept
   {
@@ -563,7 +563,7 @@ namespace krys::boo
     return nullptr;
   }
 
-  bool FrameLoader::ShouldReload(const url::URL &currentURL, const url::URL &destinationURL) noexcept
+  bool FrameLoader::ShouldReload(const net::URL &currentURL, const net::URL &destinationURL) noexcept
   {
     // This function implements the rule: "Don't reload if navigating by fragment within the same URL, but do
     // reload if going to a new URL or to the same URL with no fragment identifier at all."
@@ -571,15 +571,15 @@ namespace krys::boo
     {
       return true;
     }
-    return !url::EqualIgnoringFragmentIdentifier(currentURL, destinationURL);
+    return !net::EqualIgnoringFragmentIdentifier(currentURL, destinationURL);
   }
 
-  bool FrameLoader::ShouldPerformFragmentNavigation(const url::URL &url) const noexcept
+  bool FrameLoader::ShouldPerformFragmentNavigation(const net::URL &url) const noexcept
   {
     return !ShouldReload(_frame.Document()->GetURL(), url);
   }
 
-  void FrameLoader::LoadInSameDocument(const url::URL &url) noexcept
+  void FrameLoader::LoadInSameDocument(const net::URL &url) noexcept
   {
     Ref<LocalFrame> protectedFrame = ShareRef(_frame);
     RefPtr<boo::Document> document = ShareRefPtr(_frame.Document());
@@ -592,7 +592,7 @@ namespace krys::boo
     document->SetURL(url);
 
     // If we were in the autoscroll mode we want to stop it before following the link to the anchor.
-    bool hashChange = url::EqualIgnoringFragmentIdentifier(url, oldURL)
+    bool hashChange = net::EqualIgnoringFragmentIdentifier(url, oldURL)
                       && (url.FragmentIdentifier() != oldURL.FragmentIdentifier()
                           || url.HasFragmentIdentifier() != oldURL.HasFragmentIdentifier());
     if (hashChange)
@@ -629,7 +629,7 @@ namespace krys::boo
     }
   }
 
-  void FrameLoader::ScrollToFragment(const url::URL &url) noexcept
+  void FrameLoader::ScrollToFragment(const net::URL &url) noexcept
   {
     RefPtr<LocalFrameView> view = ShareRefPtr(_frame.View());
     RefPtr<boo::Document> document = ShareRefPtr(_frame.Document());

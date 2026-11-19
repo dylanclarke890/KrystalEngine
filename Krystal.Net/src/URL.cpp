@@ -24,22 +24,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/URL/URL.hpp"
-#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include "Krystal.Booey/URL/URLParser.hpp"
+#include "Krystal.Net/URL.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Detection/OS.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Net/URLParser.hpp"
+#include "Krystal.Text/IDNA.hpp"
 #include <algorithm>
 #include <charconv>
 #include <compare>
-#include <unicode/uidna.h>
 #include <utility>
 
-namespace krys::boo::url
+namespace krys::net
 {
   namespace
   {
@@ -104,7 +103,7 @@ namespace krys::boo::url
 
     utf8_string DecodeEscapeSequencesFromParsedURL(utf8_stringview input) noexcept
     {
-      krys_debug_assert(infra::StringAlgorithms::IsASCIIString(input));
+      krys_debug_assert(text::IsASCII(input));
 
       auto length = input.size();
       if (length < 3 || !input.contains(u8'%'))
@@ -139,28 +138,19 @@ namespace krys::boo::url
     {
       // hostnameBuffer needs to be big enough to hold an IDN-encoded name.
       // For host names bigger than this, we won't do IDN encoding, which is almost certainly OK.
-      if (string.size() > URLParser::HostnameBufferLength || infra::StringAlgorithms::IsASCIIString(string))
+      if (string.size() > URLParser::HostnameBufferLength || text::IsASCII(string))
       {
         buffer.append(string);
         return true;
       }
 
-      Array<char, URLParser::HostnameBufferLength> hostnameBuffer;
-      UErrorCode error = U_ZERO_ERROR;
-      UIDNAInfo processingDetails = UIDNA_INFO_INITIALIZER;
-      int32 numCharactersConverted = uidna_nameToASCII_UTF8(
-        &URLParser::InternationalDomainNameTranscoder(), reinterpret_cast<const char *>(string.data()),
-        static_cast<int32>(string.size()), hostnameBuffer.data(), static_cast<int32>(hostnameBuffer.size()),
-        &processingDetails, &error);
-
-      if (U_SUCCESS(error) && !(processingDetails.errors & ~URLParser::AllowedNameToASCIIErrors)
-          && numCharactersConverted)
+      auto ascii = text::DomainToASCII(string);
+      if (!ascii)
       {
-        buffer.append(reinterpret_cast<const char8 *>(hostnameBuffer.data()),
-                      static_cast<size_t>(numCharactersConverted));
-        return true;
+        return false;
       }
-      return false;
+      buffer.append(*ascii);
+      return true;
     }
 
     bool ForwardSlashHashOrQuestionMark(char8 c) noexcept
@@ -567,7 +557,7 @@ namespace krys::boo::url
 
   bool URL::ProtocolIsJavaScript() const noexcept
   {
-    return url::ProtocolIsJavaScript(String());
+    return net::ProtocolIsJavaScript(String());
   }
 
   bool URL::ProtocolIs(utf8_stringview protocol) const noexcept

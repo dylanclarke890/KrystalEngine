@@ -1,7 +1,7 @@
-﻿#include "Krystal.Http/HTTPHeaderMap.hpp"
+﻿#include "Krystal.Net/Http/HTTPHeaderMap.hpp"
 #include "catch2/catch_test_macros.hpp"
 
-namespace krys::http::tests
+namespace krys::net::http::tests
 {
   TEST_CASE("HTTPHeaderMap: names ignore case, and values given twice are joined", "[Http][HTTPHeaderMap]")
   {

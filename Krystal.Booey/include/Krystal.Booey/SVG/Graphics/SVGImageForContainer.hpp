@@ -29,8 +29,8 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo
 {
@@ -42,12 +42,12 @@ namespace krys::boo
     WeakPtr<SVGImage> _image;
     const FloatSize _containerSize;
     const float _containerZoom;
-    const url::URL _initialFragmentURL;
+    const net::URL _initialFragmentURL;
 
   public:
     KRYS_NODISCARD static Ref<SVGImageForContainer> Create(SVGImage *image, const FloatSize &containerSize,
                                                            float containerZoom,
-                                                           const url::URL &initialFragmentURL) noexcept
+                                                           const net::URL &initialFragmentURL) noexcept
     {
       return AdoptRef(*new SVGImageForContainer(image, containerSize, containerZoom, initialFragmentURL));
     }
@@ -103,7 +103,7 @@ namespace krys::boo
 
   private:
     SVGImageForContainer(SVGImage *, const FloatSize &containerSize, float containerZoom,
-                         url::URL initialFragmentURL) noexcept;
+                         net::URL initialFragmentURL) noexcept;
   };
 }
 

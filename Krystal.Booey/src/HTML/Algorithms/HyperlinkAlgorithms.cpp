@@ -47,7 +47,7 @@ namespace krys::boo::html
     }
   }
 
-  url::URL HyperlinkAlgorithms::Href(const HTMLElement &element) noexcept
+  net::URL HyperlinkAlgorithms::Href(const HTMLElement &element) noexcept
   {
     auto href = element.GetAttribute(u8"href");
     if (!href)
@@ -57,7 +57,7 @@ namespace krys::boo::html
     return element.NodeDocument().CompleteURL(*href);
   }
 
-  void HyperlinkAlgorithms::SetHref(HTMLElement &element, const url::URL &url) noexcept
+  void HyperlinkAlgorithms::SetHref(HTMLElement &element, const net::URL &url) noexcept
   {
     (void)element.SetAttribute(u8"href", url.String());
   }

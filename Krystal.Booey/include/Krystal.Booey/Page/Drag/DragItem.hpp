@@ -30,9 +30,9 @@
 #include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragImage.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo
 {
@@ -50,7 +50,7 @@ namespace krys::boo
     IntPoint DragLocationInContentCoordinates;
     IntPoint DragLocationInWindowCoordinates;
     utf8_string Title;
-    url::URL Url;
+    net::URL Url;
     IntRect DragPreviewFrameInRootViewCoordinates;
     bool ContainsSelection {false};
   };

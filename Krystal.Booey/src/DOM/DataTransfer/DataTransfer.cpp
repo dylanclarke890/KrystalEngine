@@ -37,9 +37,9 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/StaticPasteboard.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
+#include "Krystal.Net/URL.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -433,7 +433,7 @@ namespace krys::boo::dom
     }
     else if (type == u8"text/uri-list")
     {
-      url::URL parsedURL({}, data);
+      net::URL parsedURL({}, data);
       if (parsedURL.IsValid())
       {
         sanitizedData = parsedURL.String();

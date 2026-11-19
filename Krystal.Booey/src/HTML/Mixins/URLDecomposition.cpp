@@ -24,20 +24,20 @@
  */
 
 #include "Krystal.Booey/HTML/Mixins/URLDecomposition.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Net/URL.hpp"
 #include <limits>
 
 namespace krys::boo::html
 {
-  dom::USVString URLDecomposition::SerializedOrigin(const url::URL &url) noexcept
+  dom::USVString URLDecomposition::SerializedOrigin(const net::URL &url) noexcept
   {
     // https://url.spec.whatwg.org/#concept-url-origin
     if (url.ProtocolIsBlob())
     {
       // Let pathURL be the result of parsing the result of URL path serializing url. If pathURL's scheme is
       // "http" or "https", return pathURL's origin.
-      url::URL pathURL(url.Path());
+      net::URL pathURL(url.Path());
       if (pathURL.IsValid() && (pathURL.ProtocolIs(u8"http") || pathURL.ProtocolIs(u8"https")))
       {
         return SerializedOrigin(pathURL);
@@ -93,7 +93,7 @@ namespace krys::boo::html
   {
     // 1. Reinitialize url.
     auto fullURL = FullURL();
-    if (url::ProtocolIsJavaScript(fullURL.String()))
+    if (net::ProtocolIsJavaScript(fullURL.String()))
     {
       return dom::USVString(u8"javascript:");
     }
@@ -296,7 +296,7 @@ namespace krys::boo::html
       }
       break;
     }
-    if (!foundDigit || url::IsDefaultPortForProtocol(static_cast<uint16>(port), protocol))
+    if (!foundDigit || net::IsDefaultPortForProtocol(static_cast<uint16>(port), protocol))
     {
       return Maybe<uint16>();
     }

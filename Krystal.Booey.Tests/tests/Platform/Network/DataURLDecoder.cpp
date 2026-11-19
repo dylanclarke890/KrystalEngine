@@ -8,7 +8,7 @@ namespace krys::boo::tests
   {
     KRYS_NODISCARD Maybe<data_url_decoder::Result> Decode(utf8_stringview url) noexcept
     {
-      return data_url_decoder::Decode(url::URL(url));
+      return data_url_decoder::Decode(net::URL(url));
     }
 
     KRYS_NODISCARD utf8_string AsText(const List<uint8> &data) noexcept

@@ -262,7 +262,7 @@ namespace krys::boo
   }
 
   // (No link decoration filtering (applyLinkDecorationFiltering): it's Cocoa's, not a standard feature.)
-  url::URL HitTestResult::AbsoluteImageURL() const noexcept
+  net::URL HitTestResult::AbsoluteImageURL() const noexcept
   {
     if (!_innerNonSharedNode)
     {
@@ -288,7 +288,7 @@ namespace krys::boo
     return {};
   }
 
-  url::URL HitTestResult::AbsoluteLinkURL() const noexcept
+  net::URL HitTestResult::AbsoluteLinkURL() const noexcept
   {
     if (!_innerURLElement)
     {

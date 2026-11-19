@@ -821,7 +821,7 @@ namespace krys::boo
     return GetAttribute(u8"src");
   }
 
-  url::URL Element::AbsoluteLinkURL() const noexcept
+  net::URL Element::AbsoluteLinkURL() const noexcept
   {
     if (!css::IsLink(*this))
     {

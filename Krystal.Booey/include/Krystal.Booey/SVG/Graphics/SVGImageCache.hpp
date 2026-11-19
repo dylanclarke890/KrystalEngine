@@ -21,10 +21,10 @@
 
 #include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo
 {
@@ -51,7 +51,7 @@ namespace krys::boo
     void RemoveClientFromCache(const CachedImageClient *) noexcept;
 
     void SetContainerContextForClient(const CachedImageClient &, const LayoutSize &, float,
-                                      const url::URL &) noexcept;
+                                      const net::URL &) noexcept;
 
     KRYS_NODISCARD FloatSize ImageSizeForRenderer(const RenderObject *) const noexcept;
 

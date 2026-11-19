@@ -84,7 +84,7 @@ namespace krys::boo
     {
     }
 
-    KRYS_NODISCARD const url::URL &URL() const noexcept final
+    KRYS_NODISCARD const net::URL &URL() const noexcept final
     {
       return _font->URL();
     }

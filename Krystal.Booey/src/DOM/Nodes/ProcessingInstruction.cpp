@@ -360,7 +360,7 @@ namespace krys::boo
     return false;
   }
 
-  void ProcessingInstruction::SetCSSStyleSheet(const utf8_string &href, const url::URL &baseURL,
+  void ProcessingInstruction::SetCSSStyleSheet(const utf8_string &href, const net::URL &baseURL,
                                                utf8_stringview charset,
                                                const CachedCSSStyleSheet *sheet) noexcept
   {

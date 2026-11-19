@@ -80,9 +80,9 @@ namespace krys::boo
 
     void Remove(CachedResource &) noexcept;
 
-    KRYS_NODISCARD static bool ShouldRemoveFragmentIdentifier(const url::URL &) noexcept;
+    KRYS_NODISCARD static bool ShouldRemoveFragmentIdentifier(const net::URL &) noexcept;
 
-    KRYS_NODISCARD static url::URL RemoveFragmentIdentifierIfNeeded(const url::URL &) noexcept;
+    KRYS_NODISCARD static net::URL RemoveFragmentIdentifierIfNeeded(const net::URL &) noexcept;
 
     void ForEachResource(KRYS_NOESCAPE const Func<void(CachedResource &)> &) noexcept;
 

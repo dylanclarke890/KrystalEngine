@@ -286,7 +286,7 @@ namespace krys::boo::tests
     CHECK(Narrow(data.Filenames()[0]).ends_with("a b.txt"));
 
     SelectionData link;
-    link.SetURL(url::URL(u8"https://example.com/"), u8"<Example>");
+    link.SetURL(net::URL(u8"https://example.com/"), u8"<Example>");
     CHECK(link.Text() == u8"https://example.com/");
     CHECK(link.URIList() == u8"https://example.com/");
     CHECK(link.Markup() == u8"<a href=\"https://example.com/\">&lt;Example&gt;</a>");

@@ -107,11 +107,11 @@ namespace krys::boo
     }
 
     /// @brief The document's URL: the substitute data's, the response's, or the request's.
-    KRYS_NODISCARD const url::URL &DocumentURL() const noexcept;
+    KRYS_NODISCARD const net::URL &DocumentURL() const noexcept;
 
     /// @brief The URL the document's history item has: its URL, also for the host's markup, which the item
     /// keeps.
-    KRYS_NODISCARD const url::URL &URLForHistory() const noexcept
+    KRYS_NODISCARD const net::URL &URLForHistory() const noexcept
     {
       return DocumentURL();
     }

@@ -184,12 +184,12 @@ namespace krys::boo
 
     if (auto *fromSVGImage = DynamicDowncast<SVGImage>(fromImage.get()))
     {
-      auto fromURL = _cachedFromImage ? _cachedFromImage->URL() : url::URL();
+      auto fromURL = _cachedFromImage ? _cachedFromImage->URL() : net::URL();
       fromImage = SVGImageForContainer::Create(fromSVGImage, size, 1, fromURL);
     }
     if (auto *toSVGImage = DynamicDowncast<SVGImage>(toImage.get()))
     {
-      auto toURL = _cachedToImage ? _cachedToImage->URL() : url::URL();
+      auto toURL = _cachedToImage ? _cachedToImage->URL() : net::URL();
       toImage = SVGImageForContainer::Create(toSVGImage, size, 1, toURL);
     }
 

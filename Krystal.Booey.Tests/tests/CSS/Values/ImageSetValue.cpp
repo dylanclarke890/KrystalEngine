@@ -14,7 +14,7 @@ namespace krys::boo::css::tests
     {
       return ImageSetOptionValue::Create(
         ImageValue::Create(*CompleteURL(
-          CSSOMString {url}, ParserContext {ParserMode::HTMLStandard, url::URL {u8"https://example.com/"}})),
+          CSSOMString {url}, ParserContext {ParserMode::HTMLStandard, net::URL {u8"https://example.com/"}})),
         PrimitiveValue::Create(resolution, UnitType::x));
     }
   }

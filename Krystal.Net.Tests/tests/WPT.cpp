@@ -1,5 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Net/URL.hpp"
 #include <algorithm>
 #include <cctype>
 #include <fstream>
@@ -7,10 +7,10 @@
 #include <sstream>
 #include <string>
 
-// Runs the web-platform-tests URL data (url/resources/*.json) against url::URL, mapping each expected field
+// Runs the web-platform-tests URL data (url/resources/*.json) against net::URL, mapping each expected field
 // to the URL getter the DOM's URL interface uses for it.
 
-namespace krys::boo::url::tests
+namespace krys::net::tests
 {
   namespace
   {
@@ -58,7 +58,7 @@ namespace krys::boo::url::tests
 
     rapidjson::Document LoadTestData(const char *fileName)
     {
-      std::ifstream file(std::string(KRYS_BOOEY_TESTS_DATA_DIR "/url/") + fileName, std::ios::binary);
+      std::ifstream file(std::string(KRYS_NET_TESTS_DATA_DIR "/url/") + fileName, std::ios::binary);
       REQUIRE(file.is_open());
       std::stringstream contents;
       contents << file.rdbuf();

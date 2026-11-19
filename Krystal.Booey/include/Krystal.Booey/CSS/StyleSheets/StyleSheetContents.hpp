@@ -23,7 +23,6 @@
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"
@@ -32,6 +31,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo
 {
@@ -236,7 +236,7 @@ namespace krys::boo::css
       return _originalURL;
     }
 
-    KRYS_NODISCARD const url::URL &BaseURL() const noexcept
+    KRYS_NODISCARD const net::URL &BaseURL() const noexcept
     {
       return _parserContext.BaseURL;
     }

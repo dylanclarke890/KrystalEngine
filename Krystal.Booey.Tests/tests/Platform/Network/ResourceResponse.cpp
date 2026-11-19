@@ -14,7 +14,7 @@ namespace krys::boo::tests
   TEST_CASE("ResourceResponse: a status, headers and the Last-Modified date",
             "[Platform][Network][ResourceResponse]")
   {
-    ResourceResponse response(url::URL(u8"https://example.com/"), u8"text/html", 0);
+    ResourceResponse response(net::URL(u8"https://example.com/"), u8"text/html", 0);
     CHECK(response.HTTPStatusCode() == 0);
     CHECK_FALSE(response.IsSuccessful());
     CHECK_FALSE(response.LastModified());

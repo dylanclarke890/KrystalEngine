@@ -47,7 +47,7 @@ namespace krys::boo::css
     return strictContext;
   }
 
-  ParserContext::ParserContext(ParserMode mode, url::URL baseURL) noexcept
+  ParserContext::ParserContext(ParserMode mode, net::URL baseURL) noexcept
       : BaseURL(krys::move(baseURL)), Mode(mode)
   {
     if (IsUASheetBehavior(mode))
@@ -62,7 +62,7 @@ namespace krys::boo::css
   {
   }
 
-  ParserContext::ParserContext(const Document &document, const url::URL &sheetBaseURL,
+  ParserContext::ParserContext(const Document &document, const net::URL &sheetBaseURL,
                                utf8_stringview charset) noexcept
       : ParserContext(ParserMode::HTMLStandard)
   {

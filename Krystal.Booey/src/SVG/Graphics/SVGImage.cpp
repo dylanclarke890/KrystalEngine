@@ -152,7 +152,7 @@ namespace krys::boo
   }
 
   ImageDrawResult SVGImage::DrawForContainer(GraphicsContext &context, FloatSize containerSize,
-                                             float containerZoom, const url::URL &initialFragmentURL,
+                                             float containerZoom, const net::URL &initialFragmentURL,
                                              const FloatRect &dstRect, const FloatRect &srcRect,
                                              ImagePaintingOptions options) noexcept
   {
@@ -189,7 +189,7 @@ namespace krys::boo
   }
 
   void SVGImage::DrawPatternForContainer(GraphicsContext &context, const FloatSize &containerSize,
-                                         float containerZoom, const url::URL &initialFragmentURL,
+                                         float containerZoom, const net::URL &initialFragmentURL,
                                          const FloatRect &srcRect, const AffineTransform &patternTransform,
                                          const FloatPoint &phase, const FloatSize &spacing,
                                          const FloatRect &dstRect, ImagePaintingOptions options) noexcept
@@ -465,7 +465,7 @@ namespace krys::boo
       RefPtr<DocumentLoader> activeDocumentLoader = ShareRefPtr(loader.GetDocumentLoader());
       krys_debug_assert(activeDocumentLoader); // The DocumentLoader should have been created by Init().
       activeDocumentLoader->Writer().SetMIMEType(u8"image/svg+xml");
-      if (activeDocumentLoader->Writer().Begin(url::URL())) // create the empty document
+      if (activeDocumentLoader->Writer().Begin(net::URL())) // create the empty document
       {
         if (auto *document = mainFrame.Document(); document && settings)
         {

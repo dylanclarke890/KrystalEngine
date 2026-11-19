@@ -20,7 +20,7 @@ namespace krys::boo::css::parse_property::tests
 
   TEST_CASE("parse_property(ConsumeURL)", "[CSS][Properties][Consumers]")
   {
-    ParserContext context {ParserMode::HTMLStandard, url::URL(u8"https://example.com/dir/")};
+    ParserContext context {ParserMode::HTMLStandard, net::URL(u8"https://example.com/dir/")};
     auto consume = Consume<AllowedURLModifiers::None>;
 
     CHECK(ConsumeToText(u8"url(a.png)", consume, context) == "url(\"a.png\")");
@@ -38,7 +38,7 @@ namespace krys::boo::css::parse_property::tests
 
   TEST_CASE("parse_property(ConsumeURL modifiers)", "[CSS][Properties][Consumers]")
   {
-    ParserContext context {ParserMode::HTMLStandard, url::URL(u8"https://example.com/")};
+    ParserContext context {ParserMode::HTMLStandard, net::URL(u8"https://example.com/")};
 
     CHECK(ConsumeToText(u8"url(\"a\" cross-origin(anonymous))", Consume<AllModifiers>, context)
           == "url(\"a\" cross-origin(anonymous))");

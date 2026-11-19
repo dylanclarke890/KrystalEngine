@@ -37,9 +37,9 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Net/URL.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
 #include "Krystal.UI/Compositing/GraphicsLayerTextureMapper.hpp"
 #include "Krystal.UI/DataListSuggestionsOverlay.hpp"
@@ -655,10 +655,10 @@ namespace krys::ui
     return Downcast<boo::HTMLDocument>(*_frame->Document());
   }
 
-  void View::LoadHTML(utf8_string markup, boo::url::URL &&url, boo::CachePolicy cachePolicy) noexcept
+  void View::LoadHTML(utf8_string markup, net::URL &&url, boo::CachePolicy cachePolicy) noexcept
   {
     _frame->SetSubresourceCachePolicy(cachePolicy);
-    auto requestURL = url.IsNull() ? boo::url::URL(u8"about:blank") : url;
+    auto requestURL = url.IsNull() ? net::URL(u8"about:blank") : url;
     boo::FrameLoadRequest request(ShareRef<boo::Document>(Document()),
                                   boo::ResourceRequest(krys::move(requestURL)), null);
     request.SetSubstituteData(boo::SubstituteData(krys::move(markup), u8"text/html", krys::move(url)));
@@ -673,11 +673,11 @@ namespace krys::ui
       return Unexpected<string>(std::format("Couldn't open {}", path.string()));
     }
     auto absolutePath = std::filesystem::absolute(path).generic_u8string();
-    Load(boo::url::URL::FileURLWithFileSystemPath(absolutePath), cachePolicy);
+    Load(net::URL::FileURLWithFileSystemPath(absolutePath), cachePolicy);
     return {};
   }
 
-  void View::Load(boo::url::URL &&url, boo::CachePolicy cachePolicy) noexcept
+  void View::Load(net::URL &&url, boo::CachePolicy cachePolicy) noexcept
   {
     _frame->SetSubresourceCachePolicy(cachePolicy);
     boo::FrameLoadRequest request(ShareRef<boo::Document>(Document()), boo::ResourceRequest(krys::move(url)),
@@ -750,7 +750,7 @@ namespace krys::ui
     // inserted; it replaces the current one at once, without a load.
     boo::DocumentWriter writer;
     writer.SetFrame(*_frame);
-    if (!writer.Begin(boo::url::URL(u8"about:blank")))
+    if (!writer.Begin(net::URL(u8"about:blank")))
     {
       return;
     }
@@ -2568,7 +2568,7 @@ namespace krys::ui
       }
       if (content.URL)
       {
-        boo::url::URL url(*content.URL);
+        net::URL url(*content.URL);
         if (url.IsValid())
         {
           data.SetURL(url, content.URLTitle);
@@ -2582,7 +2582,7 @@ namespace krys::ui
         {
           uriList += u8"\r\n";
         }
-        uriList += boo::url::URL::FileURLWithFileSystemPath(path).String();
+        uriList += net::URL::FileURLWithFileSystemPath(path).String();
       }
       if (!uriList.empty())
       {

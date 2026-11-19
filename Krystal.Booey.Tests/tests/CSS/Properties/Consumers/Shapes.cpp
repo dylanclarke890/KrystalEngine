@@ -80,7 +80,7 @@ namespace krys::boo::css::parse_property::tests
 
   TEST_CASE("parse_property(ConsumeShapeOutside)", "[CSS][Properties][Consumers]")
   {
-    ParserContext context {ParserMode::HTMLStandard, url::URL(u8"https://example.com/dir/")};
+    ParserContext context {ParserMode::HTMLStandard, net::URL(u8"https://example.com/dir/")};
 
     CHECK(ConsumeToText(u8"none", ConsumeShapeOutside) == "none");
     CHECK(ConsumeToText(u8"circle()", ConsumeShapeOutside) == "circle()");

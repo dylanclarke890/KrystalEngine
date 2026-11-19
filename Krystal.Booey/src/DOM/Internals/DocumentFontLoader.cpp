@@ -44,7 +44,7 @@ namespace krys::boo::dom
     StopLoadingAndClearFonts();
   }
 
-  CachedFont *DocumentFontLoader::GetCachedFont(url::URL url,
+  CachedFont *DocumentFontLoader::GetCachedFont(net::URL url,
                                                 bool isInitiatingElementInUserAgentShadowTree) noexcept
   {
     ResourceLoaderOptions options = CachedResourceLoader::DefaultCachedResourceOptions();

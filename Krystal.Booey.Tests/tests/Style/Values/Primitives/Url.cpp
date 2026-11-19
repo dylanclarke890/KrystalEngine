@@ -10,7 +10,7 @@ namespace krys::boo::style::tests
   {
     SECTION("An unresolved URL is completed against the document")
     {
-      Document->SetURL(url::URL {u8"https://example.com/dir/page.html"});
+      Document->SetURL(net::URL {u8"https://example.com/dir/page.html"});
       auto url = ConvertCSSValueToStyle<URL>(
         *State,
         *css::UrlValue::Create(css::CSSURL {.Specified = u8"image.png", .Resolved = {}, .Modifiers = {}}));
@@ -20,7 +20,7 @@ namespace krys::boo::style::tests
 
     SECTION("A resolved URL is kept")
     {
-      auto resolved = url::URL {u8"https://example.org/sheet/image.png"};
+      auto resolved = net::URL {u8"https://example.org/sheet/image.png"};
       auto url = ConvertCSSValueToStyle<URL>(
         *State, *css::UrlValue::Create(
                   css::CSSURL {.Specified = u8"image.png", .Resolved = resolved, .Modifiers = {}}));
@@ -37,7 +37,7 @@ namespace krys::boo::style::tests
 
     SECTION("Creation and serialisation")
     {
-      URL url {.Resolved = url::URL {u8"https://example.com/a.png"}, .Modifiers = {}};
+      URL url {.Resolved = net::URL {u8"https://example.com/a.png"}, .Modifiers = {}};
       CHECK(Created(url) == "url(\"https://example.com/a.png\")");
       CHECK(Serialised(url) == "url(\"https://example.com/a.png\")");
     }
@@ -46,7 +46,7 @@ namespace krys::boo::style::tests
     {
       Markable<URL> url;
       CHECK_FALSE(url);
-      url = URL {.Resolved = url::URL {u8"https://example.com/"}, .Modifiers = {}};
+      url = URL {.Resolved = net::URL {u8"https://example.com/"}, .Modifiers = {}};
       CHECK(url);
     }
   }

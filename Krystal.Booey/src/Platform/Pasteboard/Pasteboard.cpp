@@ -148,7 +148,7 @@ namespace krys::boo
 
   bool Pasteboard::CanExposeURLToDOMWhenPasteboardContainsFiles(utf8_stringview urlString) noexcept
   {
-    url::URL url({}, urlString);
+    net::URL url({}, urlString);
     return url.ProtocolIsInHTTPFamily() || url.ProtocolIsBlob() || url.ProtocolIsData();
   }
 

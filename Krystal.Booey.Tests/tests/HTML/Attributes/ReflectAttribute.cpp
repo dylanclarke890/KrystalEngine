@@ -70,7 +70,7 @@ namespace krys::boo::html::tests
         REQUIRE(Reflect<dom::USVString>(*data.Element, TestAttribute).empty());
 
         // Not treated as a URL: the value is returned as it is, not completed.
-        data.Document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
+        data.Document->SetURL(net::URL(u8"https://example.com/dir/page.html"));
         Reflect<dom::USVString>(*data.Element, TestAttribute, u8"source.html");
         REQUIRE(data.Element->GetAttribute(TestAttribute) == u8"source.html");
         REQUIRE(Reflect<dom::USVString>(*data.Element, TestAttribute) == u8"source.html");
@@ -311,7 +311,7 @@ namespace krys::boo::html::tests
   TEST_CASE("ReflectURL", "[HTML][Attributes][html:xattr-reflecturl][html:treated-as-a-url]")
   {
     TestData data;
-    data.Document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
+    data.Document->SetURL(net::URL(u8"https://example.com/dir/page.html"));
 
     SECTION("An absent attribute is the empty string")
     {

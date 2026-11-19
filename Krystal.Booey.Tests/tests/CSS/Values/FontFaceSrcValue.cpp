@@ -29,7 +29,7 @@ namespace krys::boo::css::tests
     CSSURL FontURL(utf8_stringview url)
     {
       return *CompleteURL(CSSOMString {url},
-                          ParserContext {ParserMode::HTMLStandard, url::URL {u8"https://example.com/"}});
+                          ParserContext {ParserMode::HTMLStandard, net::URL {u8"https://example.com/"}});
     }
   }
 

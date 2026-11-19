@@ -163,7 +163,7 @@ namespace krys::boo
     }
   }
 
-  const url::URL &DocumentLoader::DocumentURL() const noexcept
+  const net::URL &DocumentLoader::DocumentURL() const noexcept
   {
     if (_substituteData && !_substituteData->ResponseURL().IsNull())
     {
@@ -352,9 +352,9 @@ namespace krys::boo
   void DocumentLoader::CommitInitialEmptyDocument() noexcept
   {
     _committed = true;
-    _response = ResourceResponse(url::URL(u8"about:blank"), u8"text/html", 0, u8"UTF-8");
+    _response = ResourceResponse(net::URL(u8"about:blank"), u8"text/html", 0, u8"UTF-8");
     _writer.SetMIMEType(u8"text/html");
-    if (!_writer.Begin(url::URL(u8"about:blank")))
+    if (!_writer.Begin(net::URL(u8"about:blank")))
     {
       return;
     }

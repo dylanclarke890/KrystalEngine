@@ -15,7 +15,7 @@ namespace krys::boo::css::parse_property::tests
 
     ParserContext Context(ParserMode mode = ParserMode::HTMLStandard)
     {
-      return ParserContext {mode, url::URL(u8"https://example.com/dir/")};
+      return ParserContext {mode, net::URL(u8"https://example.com/dir/")};
     }
   }
 

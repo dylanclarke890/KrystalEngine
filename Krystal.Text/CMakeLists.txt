@@ -72,6 +72,7 @@ target_sources(Krystal.Text
       include/Krystal.Text/HarfBuzz.hpp
       include/Krystal.Text/Hyphenation.hpp
       include/Krystal.Text/ICodec.hpp
+      include/Krystal.Text/IDNA.hpp
       include/Krystal.Text/LocaleToScriptMapping.hpp
       include/Krystal.Text/Script.hpp
       include/Krystal.Text/TextBoundaries.hpp
@@ -87,6 +88,7 @@ target_sources(Krystal.Text
     src/FreeTypeFace.cpp
     src/HarfBuzz.cpp
     src/Hyphenation.cpp
+    src/IDNA.cpp
     src/LocaleToScriptMapping.cpp
     src/Script.cpp
     src/TextBoundaries.cpp

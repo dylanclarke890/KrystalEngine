@@ -87,7 +87,7 @@ namespace krys::boo::tests
     CHECK(a->GetCachedImage() == b->GetCachedImage());
     CHECK(a->GetCachedImage()->NumberOfClients() == 2u);
     CHECK(
-      MemoryCache::Singleton().ResourceForRequest(ResourceRequest(url::URL(u8"file:///images/shared.png")))
+      MemoryCache::Singleton().ResourceForRequest(ResourceRequest(net::URL(u8"file:///images/shared.png")))
       == a->GetCachedImage());
   }
 
@@ -140,7 +140,7 @@ namespace krys::boo::tests
     auto sheetText = [&](utf8_stringview url)
     {
       auto sheet = fixture.Document->GetCachedResourceLoader().RequestCSSStyleSheet(
-        CachedResourceRequest(ResourceRequest(url::URL(url))));
+        CachedResourceRequest(ResourceRequest(net::URL(url))));
       REQUIRE(sheet);
       RunNetworkingTasks();
       bool hasValidMIMEType = true;
@@ -220,7 +220,7 @@ namespace krys::boo::tests
     auto &resourceLoader = fixture.Document->GetCachedResourceLoader();
     {
       auto image = resourceLoader.RequestImage(
-        CachedResourceRequest(ResourceRequest(url::URL(u8"file:///images/dead.png")),
+        CachedResourceRequest(ResourceRequest(net::URL(u8"file:///images/dead.png")),
                               CachedResourceLoader::DefaultCachedResourceOptions()));
       REQUIRE(image);
       RunNetworkingTasks();
@@ -229,7 +229,7 @@ namespace krys::boo::tests
     resourceLoader.GarbageCollectDocumentResources();
 
     auto &memoryCache = MemoryCache::Singleton();
-    const ResourceRequest request(url::URL(u8"file:///images/dead.png"));
+    const ResourceRequest request(net::URL(u8"file:///images/dead.png"));
     REQUIRE(memoryCache.ResourceForRequest(request));
     CHECK(memoryCache.DeadSize() > 0u);
 

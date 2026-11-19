@@ -30,11 +30,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Http/HTTPParsers.hpp"
+#include "Krystal.Net/Http/HTTPParsers.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 
-namespace krys::http
+namespace krys::net::http
 {
   namespace
   {

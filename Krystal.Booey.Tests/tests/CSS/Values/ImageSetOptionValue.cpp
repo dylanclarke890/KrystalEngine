@@ -12,7 +12,7 @@ namespace krys::boo::css::tests
     Ref<Value> Image(utf8_stringview url)
     {
       return ImageValue::Create(*CompleteURL(
-        CSSOMString {url}, ParserContext {ParserMode::HTMLStandard, url::URL {u8"https://example.com/"}}));
+        CSSOMString {url}, ParserContext {ParserMode::HTMLStandard, net::URL {u8"https://example.com/"}}));
     }
 
     Ref<PrimitiveValue> X(double value)

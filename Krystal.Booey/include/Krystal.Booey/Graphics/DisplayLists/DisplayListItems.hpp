@@ -1714,18 +1714,18 @@ namespace krys::boo::display_list
   class SetURLForRect
   {
   private:
-    url::URL _link;
+    net::URL _link;
     FloatRect _destRect;
 
   public:
     constexpr static std::string_view Name = "set-URL-for-rect";
 
-    SetURLForRect(url::URL link, const FloatRect &destRect) noexcept
+    SetURLForRect(net::URL link, const FloatRect &destRect) noexcept
         : _link(krys::move(link)), _destRect(destRect)
     {
     }
 
-    KRYS_NODISCARD const url::URL &Link() const noexcept
+    KRYS_NODISCARD const net::URL &Link() const noexcept
     {
       return _link;
     }

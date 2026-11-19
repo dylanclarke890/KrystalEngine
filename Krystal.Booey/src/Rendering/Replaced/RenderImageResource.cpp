@@ -120,7 +120,7 @@ namespace krys::boo
   }
 
   void RenderImageResource::SetContainerContext(const IntSize &imageContainerSize,
-                                                const url::URL &imageURL) noexcept
+                                                const net::URL &imageURL) noexcept
   {
     if (!_cachedImage || !_renderer)
     {

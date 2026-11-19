@@ -161,10 +161,10 @@ namespace krys::boo::style
   template <>
   constexpr inline bool TreatAsNonConverting<CSSOMString> = true;
 
-  // Specialize `TreatAsNonConverting` for `url::URL`, to indicate that its type does not change from the CSS
+  // Specialize `TreatAsNonConverting` for `net::URL`, to indicate that its type does not change from the CSS
   // representation.
   template <>
-  constexpr inline bool TreatAsNonConverting<url::URL> = true;
+  constexpr inline bool TreatAsNonConverting<net::URL> = true;
 
 #pragma endregion
 

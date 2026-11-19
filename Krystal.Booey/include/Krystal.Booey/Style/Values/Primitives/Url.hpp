@@ -39,7 +39,7 @@ namespace krys::boo::style
   /// @brief A computed `<url>`: the resolved URL and its modifiers.
   struct URL
   {
-    url::URL Resolved;
+    net::URL Resolved;
     css::URLModifiers Modifiers;
 
     KRYS_NODISCARD bool operator==(const URL &) const noexcept = default;

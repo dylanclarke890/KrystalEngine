@@ -28,7 +28,6 @@
 #include "Krystal.Booey/Platform/Pasteboard/DragImage.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/PasteboardCustomData.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/SelectionData.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -39,6 +38,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::boo
 {
@@ -68,7 +68,7 @@ namespace krys::boo
 
   struct PasteboardURL
   {
-    url::URL Url;
+    net::URL Url;
     utf8_string Title;
     utf8_string Markup;
   };
@@ -98,7 +98,7 @@ namespace krys::boo
 
     virtual bool ReadHTML(utf8_stringview markup) noexcept = 0;
 
-    virtual bool ReadURL(const url::URL &url, utf8_stringview title) noexcept = 0;
+    virtual bool ReadURL(const net::URL &url, utf8_stringview title) noexcept = 0;
 
     virtual bool ReadPlainText(utf8_stringview text) noexcept = 0;
 

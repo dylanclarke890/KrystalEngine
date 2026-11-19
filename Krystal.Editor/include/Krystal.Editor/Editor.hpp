@@ -693,7 +693,7 @@ namespace krys
     }
 
     /// @brief The guide topic @p url names in its `guide` query parameter; empty if none.
-    KRYS_NODISCARD static utf8_string GuideTopic(const boo::url::URL &url) noexcept
+    KRYS_NODISCARD static utf8_string GuideTopic(const net::URL &url) noexcept
     {
       constexpr utf8_stringview key = u8"guide=";
       auto query = url.Query();
@@ -711,7 +711,7 @@ namespace krys
     }
 
     /// @brief Shows the guide topic @p url names, and marks its link.
-    void ShowGuide(const boo::url::URL &url) noexcept
+    void ShowGuide(const net::URL &url) noexcept
     {
       auto &document = _pageView->Document();
       auto view = document.GetElementById(u8"guide-view");
@@ -807,7 +807,7 @@ namespace krys
     /// the page's `#last-submission` element.
     void HandleNavigation(const ui::NavigationRequest &request) noexcept
     {
-      boo::url::URL url(request.URL);
+      net::URL url(request.URL);
       if (!request.IsFormSubmission && !request.Download && !request.OpensNewWindow
           && url.ProtocolIs(u8"file"))
       {

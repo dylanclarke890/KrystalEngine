@@ -23,16 +23,16 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/URL/URLParser.hpp"
-#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Net/URLParser.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Text/IDNA.hpp"
 #include <algorithm>
 #include <limits>
-#include <unicode/uidna.h>
 #include <utility>
 
-namespace krys::boo::url
+namespace krys::net
 {
   namespace
   {
@@ -365,10 +365,6 @@ namespace krys::boo::url
     }
   }
 
-  const uint32 URLParser::AllowedNameToASCIIErrors =
-    UIDNA_ERROR_EMPTY_LABEL | UIDNA_ERROR_LABEL_TOO_LONG | UIDNA_ERROR_DOMAIN_NAME_TOO_LONG
-    | UIDNA_ERROR_LEADING_HYPHEN | UIDNA_ERROR_TRAILING_HYPHEN | UIDNA_ERROR_HYPHEN_3_4;
-
   bool IsForbiddenHostCodePoint(char32 c) noexcept
   {
     return c <= 0x7F && CharacterClassTable[c] & ForbiddenHost;
@@ -377,7 +373,7 @@ namespace krys::boo::url
   bool URLParser::IsForbiddenHostCodePoint(char32 c) const noexcept
   {
     krys_debug_assert(!_urlIsSpecial);
-    return url::IsForbiddenHostCodePoint(c);
+    return net::IsForbiddenHostCodePoint(c);
   }
 
   bool URLParser::IsForbiddenDomainCodePoint(char32 c) const noexcept
@@ -388,7 +384,7 @@ namespace krys::boo::url
 
   bool URLParser::IsInUserInfoEncodeSet(char32 c) noexcept
   {
-    return url::IsInUserInfoEncodeSet(c);
+    return net::IsInUserInfoEncodeSet(c);
   }
 
   template <URLParser::ReportSyntaxViolation reportSyntaxViolation>
@@ -2102,11 +2098,11 @@ namespace krys::boo::url
         AppendToASCIIBuffer(':');
         break;
       }
-      UTF8PercentEncode<url::IsInUserInfoEncodeSet>(iterator);
+      UTF8PercentEncode<net::IsInUserInfoEncodeSet>(iterator);
     }
     for (; !iterator.AtEnd(); Advance(iterator))
     {
-      UTF8PercentEncode<url::IsInUserInfoEncodeSet>(iterator);
+      UTF8PercentEncode<net::IsInUserInfoEncodeSet>(iterator);
     }
     _url._passwordEnd = static_cast<uint32>(CurrentPosition(iterator));
     if (!_url._userEnd)
@@ -2702,7 +2698,7 @@ namespace krys::boo::url
                              const CodePointIterator &iteratorForSyntaxViolationPosition) noexcept
   {
     utf8_string ascii;
-    if (infra::StringAlgorithms::IsASCIIString(domain) && !SubdomainStartsWithXNDashDash(domain))
+    if (text::IsASCII(domain) && !SubdomainStartsWithXNDashDash(domain))
     {
       ascii.reserve(domain.size());
       for (char8 c : domain)
@@ -2716,30 +2712,21 @@ namespace krys::boo::url
       return ascii;
     }
 
-    Array<char, HostnameBufferLength> hostnameBuffer;
-    UErrorCode error = U_ZERO_ERROR;
-    UIDNAInfo processingDetails = UIDNA_INFO_INITIALIZER;
-    int32 numCharactersConverted = uidna_nameToASCII_UTF8(
-      &InternationalDomainNameTranscoder(), reinterpret_cast<const char *>(domain.data()),
-      static_cast<int32>(domain.size()), hostnameBuffer.data(), static_cast<int32>(HostnameBufferLength),
-      &processingDetails, &error);
-
-    if (U_SUCCESS(error) && !(processingDetails.errors & ~AllowedNameToASCIIErrors) && numCharactersConverted)
+    auto converted = text::DomainToASCII(domain);
+    if (!converted)
     {
-      for (int32 i = 0; i < numCharactersConverted; ++i)
-      {
-        krys_debug_assert(text::IsASCII(hostnameBuffer[i]));
-        krys_debug_assert(!text::IsASCIIUpper(hostnameBuffer[i]));
-      }
-      ascii.assign(reinterpret_cast<const char8 *>(hostnameBuffer.data()),
-                   static_cast<size_t>(numCharactersConverted));
-      if (domain != utf8_stringview {ascii})
-      {
-        SyntaxViolation(iteratorForSyntaxViolationPosition);
-      }
-      return ascii;
+      return null;
     }
-    return null;
+    for (char8 c : *converted)
+    {
+      krys_debug_assert(text::IsASCII(c));
+      krys_debug_assert(!text::IsASCIIUpper(c));
+    }
+    if (domain != utf8_stringview {*converted})
+    {
+      SyntaxViolation(iteratorForSyntaxViolationPosition);
+    }
+    return converted;
   }
 
   bool URLParser::HasForbiddenHostCodePoint(utf8_stringview asciiDomain) noexcept
@@ -3062,7 +3049,7 @@ namespace krys::boo::url
     }
     // Upstream compares the UTF-8-decoded domain with the bytes read as Latin-1; they differ exactly when a
     // byte is non-ASCII.
-    if (!infra::StringAlgorithms::IsASCIIString(percentDecoded))
+    if (!text::IsASCII(utf8_stringview {percentDecoded}))
     {
       SyntaxViolation(hostBegin);
     }
@@ -3183,21 +3170,6 @@ namespace krys::boo::url
       SerialiseURLEncodedForm(tuple.Value, output);
     }
     return output;
-  }
-
-  const UIDNA &URLParser::InternationalDomainNameTranscoder() noexcept
-  {
-    static UIDNA *encoder = []
-    {
-      UErrorCode error = U_ZERO_ERROR;
-      auto *transcoder =
-        uidna_openUTS46(UIDNA_CHECK_BIDI | UIDNA_CHECK_CONTEXTJ | UIDNA_NONTRANSITIONAL_TO_UNICODE
-                          | UIDNA_NONTRANSITIONAL_TO_ASCII,
-                        &error);
-      krys_assert_msg(U_SUCCESS(error) && transcoder, "Couldn't create the IDNA transcoder.");
-      return transcoder;
-    }();
-    return *encoder;
   }
 
   bool URLParser::AllValuesEqual(const URL &a, const URL &b) noexcept

@@ -58,7 +58,6 @@
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Array.hpp"
@@ -71,6 +70,7 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Net/URL.hpp"
 
 namespace krys::text
 {
@@ -331,12 +331,12 @@ namespace krys::boo
     List<WeakRef<Element>> _renderBlockingElements;
 
     /// @see https://dom.spec.whatwg.org/#concept-document-url
-    url::URL _url;
+    net::URL _url;
     /// @see https://html.spec.whatwg.org/#document-base-url
-    url::URL _baseURL;
+    net::URL _baseURL;
     /// @brief The frozen base URL of the first `base` element with an `href` in the document tree, or null.
     /// @see https://html.spec.whatwg.org/#frozen-base-url
-    url::URL _baseElementURL;
+    net::URL _baseElementURL;
     /// @brief The target of the first `base` element with a `target` in the document tree.
     DOMString _baseTarget;
 
@@ -917,7 +917,7 @@ namespace krys::boo
 
     /// @brief The document's URL; `about:blank` until the host sets one.
     /// @see https://dom.spec.whatwg.org/#concept-document-url
-    KRYS_NODISCARD const url::URL &GetURL() const noexcept
+    KRYS_NODISCARD const net::URL &GetURL() const noexcept
     {
       return _url;
     }
@@ -925,7 +925,7 @@ namespace krys::boo
     /// @brief Sets the document's URL. An empty URL becomes `about:blank`, and its fragment directive is
     /// consumed.
     /// @see https://html.spec.whatwg.org/#set-the-url
-    void SetURL(url::URL url) noexcept;
+    void SetURL(net::URL url) noexcept;
 
     /// @brief The target of the first `base` element with a `target` attribute, or the empty string.
     /// @see https://html.spec.whatwg.org/#get-an-element's-target
@@ -935,12 +935,12 @@ namespace krys::boo
     }
 
     /// @see https://html.spec.whatwg.org/#fallback-base-url
-    KRYS_NODISCARD const url::URL &FallbackBaseURL() const noexcept;
+    KRYS_NODISCARD const net::URL &FallbackBaseURL() const noexcept;
 
     /// @brief The document base URL, which getting the base URL returns: there's no base URL override.
     /// @see https://html.spec.whatwg.org/#document-base-url
     /// @see https://dom.spec.whatwg.org/#get-the-base-url
-    KRYS_NODISCARD const url::URL &BaseURL() const noexcept
+    KRYS_NODISCARD const net::URL &BaseURL() const noexcept
     {
       return _baseURL;
     }
@@ -949,11 +949,11 @@ namespace krys::boo
     /// both parsing and encoding-parsing a URL.
     /// @see https://html.spec.whatwg.org/#encoding-parsing-a-url
     /// @see https://html.spec.whatwg.org/#parse-a-url
-    KRYS_NODISCARD url::URL CompleteURL(utf8_stringview url) const noexcept;
+    KRYS_NODISCARD net::URL CompleteURL(utf8_stringview url) const noexcept;
 
     /// @brief Parses @p url relative to @p baseURL.
     /// @see https://html.spec.whatwg.org/#encoding-parsing-a-url
-    KRYS_NODISCARD static url::URL CompleteURL(utf8_stringview url, const url::URL &baseURL) noexcept;
+    KRYS_NODISCARD static net::URL CompleteURL(utf8_stringview url, const net::URL &baseURL) noexcept;
 
 #pragma endregion
 

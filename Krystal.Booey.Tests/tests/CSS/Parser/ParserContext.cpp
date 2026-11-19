@@ -26,9 +26,9 @@ namespace krys::boo::css::tests
 
     SECTION("Base URL")
     {
-      ParserContext context {ParserMode::HTMLQuirks, url::URL {u8"https://example.com/a.css"}};
+      ParserContext context {ParserMode::HTMLQuirks, net::URL {u8"https://example.com/a.css"}};
       CHECK(context.Mode == ParserMode::HTMLQuirks);
-      CHECK(context.BaseURL == url::URL {u8"https://example.com/a.css"});
+      CHECK(context.BaseURL == net::URL {u8"https://example.com/a.css"});
     }
 
     SECTION("UA sheets enable the features they rely on")
@@ -77,7 +77,7 @@ namespace krys::boo::css::tests
 
     SECTION("Base URL")
     {
-      b.BaseURL = url::URL {u8"https://example.com/"};
+      b.BaseURL = net::URL {u8"https://example.com/"};
       CHECK(a != b);
       CHECK(a.Hash() != b.Hash());
     }

@@ -49,7 +49,7 @@ namespace krys::boo
   class Event;
 }
 
-namespace krys::boo::url
+namespace krys::net
 {
   class URL;
 }
@@ -178,7 +178,7 @@ namespace krys::boo
     /// @param triggeringEvent The event that started the navigation (a click), if any.
     /// @param downloadAttribute The link's `download` attribute; null if it has none.
     /// @param sourceElement The link, if any.
-    void ChangeLocation(const url::URL &url, DOMStringAtom passedTarget, Event *triggeringEvent,
+    void ChangeLocation(const net::URL &url, DOMStringAtom passedTarget, Event *triggeringEvent,
                         ReferrerPolicy referrerPolicy, DOMStringAtom downloadAttribute,
                         Element *sourceElement = nullptr) noexcept;
 
@@ -224,8 +224,8 @@ namespace krys::boo
 
     /// @brief Whether navigating from @p currentURL to @p destinationURL loads a document, rather than
     /// navigating to a fragment: unless @p destinationURL has a fragment and is otherwise @p currentURL.
-    KRYS_NODISCARD static bool ShouldReload(const url::URL &currentURL,
-                                            const url::URL &destinationURL) noexcept;
+    KRYS_NODISCARD static bool ShouldReload(const net::URL &currentURL,
+                                            const net::URL &destinationURL) noexcept;
 
   private:
     /// @brief Loads @p request (or @p substituteData) as a new document. A reload of a document the host gave
@@ -253,14 +253,14 @@ namespace krys::boo
     void DispatchUnloadEvents() noexcept;
 
     /// @brief Whether a navigation to @p url navigates within the document: to a fragment of its URL.
-    KRYS_NODISCARD bool ShouldPerformFragmentNavigation(const url::URL &url) const noexcept;
+    KRYS_NODISCARD bool ShouldPerformFragmentNavigation(const net::URL &url) const noexcept;
 
     /// @brief Navigates to @p url, which differs from the document's URL at most in its fragment: the
     /// document takes the URL and scrolls to its fragment.
-    void LoadInSameDocument(const url::URL &url) noexcept;
+    void LoadInSameDocument(const net::URL &url) noexcept;
 
     /// @brief Scrolls to @p url's fragment, once the document's style sheets have loaded.
     /// @see https://html.spec.whatwg.org/#try-to-scroll-to-the-fragment
-    void ScrollToFragment(const url::URL &url) noexcept;
+    void ScrollToFragment(const net::URL &url) noexcept;
   };
 }

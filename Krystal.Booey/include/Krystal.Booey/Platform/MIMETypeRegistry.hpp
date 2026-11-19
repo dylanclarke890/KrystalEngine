@@ -30,7 +30,7 @@
 
 namespace krys::boo
 {
-  /// @brief Which MIME types Booey supports. General MIME type facts are in `http::MIMETypeRegistry`.
+  /// @brief Which MIME types Booey supports. General MIME type facts are in `net::http::MIMETypeRegistry`.
   // FIXME: AVIF and video types once they're supported.
   struct MIMETypeRegistry
   {

@@ -234,7 +234,7 @@ namespace krys::boo
     }
   }
 
-  url::URL HTMLLinkElement::NonEmptyHrefURL() const noexcept
+  net::URL HTMLLinkElement::NonEmptyHrefURL() const noexcept
   {
     auto href = GetAttribute(u8"href");
     if (!href || infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(*href).empty())
@@ -574,7 +574,7 @@ namespace krys::boo
   // https://html.spec.whatwg.org/#link-type-stylesheet:process-the-linked-resource
   // (The load or error event is fired once the sheet's imports load, by
   // NotifyLoadedSheetAndAllCriticalSubresources.)
-  void HTMLLinkElement::SetCSSStyleSheet(const utf8_string &href, const url::URL &baseURL,
+  void HTMLLinkElement::SetCSSStyleSheet(const utf8_string &href, const net::URL &baseURL,
                                          utf8_stringview charset,
                                          const CachedCSSStyleSheet *cachedStyleSheet) noexcept
   {

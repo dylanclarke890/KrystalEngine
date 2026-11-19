@@ -4,7 +4,7 @@
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerConstants.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Net/URL.hpp"
 #include <algorithm>
 
 namespace krys::boo::html
@@ -683,7 +683,7 @@ namespace krys::boo::html
   bool SanitizerAlgorithms::ContainsJavaScriptURL(DOMStringView value) noexcept
   {
     // 1. Let url be the result of running the basic URL parser on value.
-    url::URL url(value);
+    net::URL url(value);
 
     // 2. If url is failure, then return false.
     if (!url.IsValid())
