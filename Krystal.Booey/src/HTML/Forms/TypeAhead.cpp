@@ -31,7 +31,7 @@
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Text/Bidi.hpp"
-#include <unicode/uchar.h>
+#include "Krystal.Text/CaseMapping.hpp"
 
 namespace krys::boo::html
 {
@@ -65,7 +65,7 @@ namespace krys::boo::html
         {
           continue;
         }
-        folded.push_back(static_cast<char32>(u_foldCase(c, U_FOLD_CASE_DEFAULT)));
+        folded.push_back(text::SimpleCaseFold(c));
       }
       return folded;
     }
@@ -76,7 +76,7 @@ namespace krys::boo::html
       folded.reserve(text.size());
       for (auto c : text)
       {
-        folded.push_back(static_cast<char32>(u_foldCase(c, U_FOLD_CASE_DEFAULT)));
+        folded.push_back(text::SimpleCaseFold(c));
       }
       return folded;
     }

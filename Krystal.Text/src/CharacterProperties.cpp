@@ -24,7 +24,14 @@
  */
 
 #include "Krystal.Text/CharacterProperties.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include <algorithm>
 #include <unicode/uchar.h>
+#include <unicode/unorm2.h>
+#include <utility>
 
 namespace krys::text
 {
@@ -132,5 +139,113 @@ namespace krys::text
     auto block = ublock_getCode(static_cast<UChar32>(character));
     return block == UBLOCK_PRIVATE_USE_AREA || block == UBLOCK_SUPPLEMENTARY_PRIVATE_USE_AREA_A
            || block == UBLOCK_SUPPLEMENTARY_PRIVATE_USE_AREA_B;
+  }
+
+  bool IsPrintable(char32 character) noexcept
+  {
+    return u_isprint(static_cast<UChar32>(character));
+  }
+
+  bool IsWhiteSpace(char32 character) noexcept
+  {
+    return u_isUWhiteSpace(static_cast<UChar32>(character));
+  }
+
+  bool IsInCJKBlock(char32 character) noexcept
+  {
+    switch (ublock_getCode(static_cast<UChar32>(character)))
+    {
+      case UBLOCK_CJK_RADICALS_SUPPLEMENT:
+      case UBLOCK_CJK_SYMBOLS_AND_PUNCTUATION:
+      case UBLOCK_ENCLOSED_CJK_LETTERS_AND_MONTHS:
+      case UBLOCK_CJK_COMPATIBILITY:
+      case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A:
+      case UBLOCK_CJK_UNIFIED_IDEOGRAPHS:
+      case UBLOCK_CJK_COMPATIBILITY_IDEOGRAPHS:
+      case UBLOCK_CJK_COMPATIBILITY_FORMS:
+      case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B:
+      case UBLOCK_CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT:
+      case UBLOCK_CJK_STROKES:
+      case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C:
+      case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D:
+      case UBLOCK_IDEOGRAPHIC_DESCRIPTION_CHARACTERS:
+      case UBLOCK_LINEAR_B_IDEOGRAMS:
+      case UBLOCK_ENCLOSED_IDEOGRAPHIC_SUPPLEMENT:
+      case UBLOCK_HIRAGANA:
+      case UBLOCK_KATAKANA:
+      case UBLOCK_BOPOMOFO:
+      case UBLOCK_BOPOMOFO_EXTENDED:
+      case UBLOCK_HANGUL_JAMO:
+      case UBLOCK_HANGUL_COMPATIBILITY_JAMO:
+      case UBLOCK_HANGUL_SYLLABLES:
+      case UBLOCK_HANGUL_JAMO_EXTENDED_A:
+      case UBLOCK_HANGUL_JAMO_EXTENDED_B:                  return true;
+      default:                                             return false;
+    }
+  }
+
+  namespace
+  {
+    /// @brief The single code point @p character's compatibility decomposition maps it to, if it has one.
+    KRYS_NODISCARD Maybe<char32> SingleDecomposition(const UNormalizer2 *normalizer,
+                                                     char32 character) noexcept
+    {
+      Array<UChar, 4> buffer {};
+      UErrorCode status = U_ZERO_ERROR;
+      int32 length = unorm2_getRawDecomposition(normalizer, static_cast<UChar32>(character), buffer.data(),
+                                                static_cast<int32>(buffer.size()), &status);
+      if (U_FAILURE(status) || length <= 0)
+      {
+        return {};
+      }
+      auto decoded = DecodeUTF16(Span<const char16>(buffer.data(), static_cast<size_t>(length)));
+      if (decoded.Length != length)
+      {
+        return {};
+      }
+      return decoded.CodePoint;
+    }
+  }
+
+  char32 FullWidthForm(char32 character) noexcept
+  {
+    UErrorCode status = U_ZERO_ERROR;
+    const UNormalizer2 *normalizer = unorm2_getNFKDInstance(&status);
+    if (U_FAILURE(status))
+    {
+      return character;
+    }
+
+    auto type = u_getIntPropertyValue(static_cast<UChar32>(character), UCHAR_DECOMPOSITION_TYPE);
+    if (type == U_DT_NARROW)
+    {
+      return SingleDecomposition(normalizer, character).value_or(character);
+    }
+
+    // The wide characters are the ideographic space and the Halfwidth and Fullwidth Forms block's; their
+    // narrow counterparts are looked up, sorted, once.
+    static const auto wideForms = [normalizer]
+    {
+      List<std::pair<char32, char32>> forms;
+      auto add = [&](char32 wide)
+      {
+        if (u_getIntPropertyValue(static_cast<UChar32>(wide), UCHAR_DECOMPOSITION_TYPE) == U_DT_WIDE)
+        {
+          if (auto narrow = SingleDecomposition(normalizer, wide))
+          {
+            forms.emplace_back(*narrow, wide);
+          }
+        }
+      };
+      add(0x3000);
+      for (char32 wide = 0xFF00; wide <= 0xFFEF; ++wide)
+      {
+        add(wide);
+      }
+      std::ranges::sort(forms);
+      return forms;
+    }();
+    auto it = std::ranges::lower_bound(wideForms, character, {}, &std::pair<char32, char32>::first);
+    return it != wideForms.end() && it->first == character ? it->second : character;
   }
 }

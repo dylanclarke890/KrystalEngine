@@ -216,4 +216,19 @@ namespace krys::text
   {
     return GetGeneralCategory(character) == GeneralCategory::CurrencySymbol;
   }
+
+  /// @brief Whether @p character is printable: a graphic character or a space separator.
+  KRYS_NODISCARD bool IsPrintable(char32 character) noexcept;
+
+  /// @brief Whether @p character has the White_Space property.
+  KRYS_NODISCARD bool IsWhiteSpace(char32 character) noexcept;
+
+  /// @brief Whether @p character is in one of the CJK, Hangul, Kana, Bopomofo or ideograph blocks, which hold
+  /// the Han ideographs and the Japanese and Korean characters set beside them.
+  KRYS_NODISCARD bool IsInCJKBlock(char32 character) noexcept;
+
+  /// @brief @p character's full-width form, or itself when it has none: what its `<narrow>` decomposition
+  /// maps it to, or the character whose `<wide>` decomposition maps to it (as in Firefox and Safari, and the
+  /// tests of CSS Text's `text-transform: full-width`).
+  KRYS_NODISCARD char32 FullWidthForm(char32 character) noexcept;
 }

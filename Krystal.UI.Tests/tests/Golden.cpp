@@ -22,6 +22,7 @@
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
+#include "Krystal.Text/Locale.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/EngineTexture.hpp"
 #include "Krystal.UI/View.hpp"
@@ -31,7 +32,6 @@
 #include <numbers>
 #include <sstream>
 #include <string>
-#include <unicode/uloc.h>
 
 namespace krys::ui::tests
 {
@@ -661,18 +661,16 @@ namespace krys::ui::tests
     /// every machine.
     struct USEnglishScope
     {
-      std::string Previous;
+      utf8_string Previous;
 
-      USEnglishScope() noexcept : Previous(uloc_getDefault())
+      USEnglishScope() noexcept : Previous(text::DefaultLocale())
       {
-        UErrorCode status = U_ZERO_ERROR;
-        uloc_setDefault("en_US", &status);
+        text::SetDefaultLocale(u8"en_US");
       }
 
       ~USEnglishScope() noexcept
       {
-        UErrorCode status = U_ZERO_ERROR;
-        uloc_setDefault(Previous.c_str(), &status);
+        text::SetDefaultLocale(Previous);
       }
     };
   }

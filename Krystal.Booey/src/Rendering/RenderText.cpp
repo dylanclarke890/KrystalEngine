@@ -58,6 +58,7 @@
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/CaseMapping.hpp"
 #include "Krystal.Text/CharacterProperties.hpp"
 #include "Krystal.Text/Hyphenation.hpp"
 #include "Krystal.Text/TextBreakIterator.hpp"
@@ -66,10 +67,6 @@
 #include <bitset>
 #include <limits>
 #include <string>
-#include <unicode/ucasemap.h>
-#include <unicode/uchar.h>
-#include <unicode/unorm2.h>
-#include <unicode/ustring.h>
 
 namespace krys::boo
 {
@@ -84,24 +81,9 @@ namespace krys::boo
     /// @brief Appends @p codePoint, title-cased, to @p output.
     void AppendTitleCase(char32 codePoint, StringBuilder &output) noexcept
     {
-      std::array<UChar, 2> source {};
-      int32 sourceLength = text::EncodeUTF16(codePoint, source);
-
-      std::array<UChar, 8> destination {};
-      UErrorCode status = U_ZERO_ERROR;
-      auto length = u_strToTitle(destination.data(), static_cast<int32>(destination.size()), source.data(),
-                                 sourceLength, nullptr, "", &status);
-      if (U_FAILURE(status))
+      for (auto character : text::ToTitlecase(codePoint))
       {
-        output.Append(codePoint);
-        return;
-      }
-      for (int32 i = 0; i < length;)
-      {
-        auto decoded =
-          text::DecodeUTF16(Span<const char16>(destination.data() + i, static_cast<size_t>(length - i)));
-        output.Append(decoded.CodePoint);
-        i += decoded.Length;
+        output.Append(character);
       }
     }
 
@@ -127,7 +109,7 @@ namespace krys::boo
         }
         if (character <= 'z')
         {
-          output.Append(static_cast<char32>(u_totitle(character)));
+          output.Append(text::SimpleTitlecase(character));
           return 1;
         }
       }
@@ -136,117 +118,13 @@ namespace krys::boo
       return end - startOffset;
     }
 
-    KRYS_NODISCARD utf8_string ConvertCase(utf8_stringview text, const CSSOMStringAtom &locale,
-                                           bool toUpper) noexcept
-    {
-      std::string localeName;
-      for (auto character : locale.View())
-      {
-        localeName.push_back(static_cast<char>(character));
-      }
-
-      UErrorCode status = U_ZERO_ERROR;
-      auto *caseMap = ucasemap_open(localeName.c_str(), 0, &status);
-      if (U_FAILURE(status))
-      {
-        return utf8_string(text);
-      }
-
-      auto convert = [&](char *destination, int32 capacity)
-      {
-        status = U_ZERO_ERROR;
-        auto *source = reinterpret_cast<const char *>(text.data());
-        auto sourceLength = static_cast<int32>(text.size());
-        return toUpper ? ucasemap_utf8ToUpper(caseMap, destination, capacity, source, sourceLength, &status)
-                       : ucasemap_utf8ToLower(caseMap, destination, capacity, source, sourceLength, &status);
-      };
-
-      auto length = convert(nullptr, 0);
-      utf8_string result(static_cast<size_t>(length), u8'\0');
-      if (status == U_BUFFER_OVERFLOW_ERROR || U_SUCCESS(status))
-      {
-        (void)convert(reinterpret_cast<char *>(result.data()), length);
-      }
-      ucasemap_close(caseMap);
-      if (U_FAILURE(status))
-      {
-        return utf8_string(text);
-      }
-      return result;
-    }
-
-    /// @brief The single code point @p character's compatibility decomposition maps it to, if it has one.
-    KRYS_NODISCARD Maybe<char32> SingleDecomposition(const UNormalizer2 *normalizer,
-                                                     char32 character) noexcept
-    {
-      std::array<UChar, 4> buffer {};
-      UErrorCode status = U_ZERO_ERROR;
-      int32 length = unorm2_getRawDecomposition(normalizer, character, buffer.data(),
-                                                static_cast<int32>(buffer.size()), &status);
-      if (U_FAILURE(status) || length <= 0)
-      {
-        return {};
-      }
-      auto decoded = text::DecodeUTF16(Span<const char16>(buffer.data(), static_cast<size_t>(length)));
-      if (decoded.Length != length)
-      {
-        return {};
-      }
-      return decoded.CodePoint;
-    }
-
-    /// @brief @p character's full-width form, or itself when it has none: what its `<narrow>` decomposition
-    /// maps it to, or the character whose `<wide>` decomposition maps to it (as in Firefox and Safari, and
-    /// the tests of CSS Text).
-    KRYS_NODISCARD char32 FullWidthForm(char32 character) noexcept
-    {
-      UErrorCode status = U_ZERO_ERROR;
-      const UNormalizer2 *normalizer = unorm2_getNFKDInstance(&status);
-      if (U_FAILURE(status))
-      {
-        return character;
-      }
-
-      auto type = u_getIntPropertyValue(character, UCHAR_DECOMPOSITION_TYPE);
-      if (type == U_DT_NARROW)
-      {
-        return SingleDecomposition(normalizer, character).value_or(character);
-      }
-
-      // The wide characters are the ideographic space and the Halfwidth and Fullwidth Forms block's; their
-      // narrow counterparts are looked up, sorted, once.
-      static const auto wideForms = [normalizer]
-      {
-        List<std::pair<char32, char32>> forms;
-        auto add = [&](char32 wide)
-        {
-          if (u_getIntPropertyValue(wide, UCHAR_DECOMPOSITION_TYPE) == U_DT_WIDE)
-          {
-            if (auto narrow = SingleDecomposition(normalizer, wide))
-            {
-              forms.emplace_back(*narrow, wide);
-            }
-          }
-        };
-        add(0x3000);
-        for (char32 wide = 0xFF00; wide <= 0xFFEF; ++wide)
-        {
-          add(wide);
-        }
-        std::ranges::sort(forms);
-        return forms;
-      }();
-      auto it = std::ranges::lower_bound(wideForms, character, {}, &std::pair<char32, char32>::first);
-      return it != wideForms.end() && it->first == character ? it->second : character;
-    }
-
     // https://www.w3.org/TR/css-text-3/#valdef-text-transform-full-width
     KRYS_NODISCARD utf8_string ConvertToFullWidth(utf8_stringview string) noexcept
     {
       StringBuilder result;
       for (text::CodePointIterator it(string); !it.AtEnd(); ++it)
       {
-        result.Append(FullWidthForm(*it));
+        result.Append(text::FullWidthForm(*it));
       }
       return krys::move(result).ToString();
     }
@@ -412,11 +290,11 @@ namespace krys::boo
     }
     else if (transform.Contains(style::TextTransformValue::Uppercase))
     {
-      modified = ConvertCase(modified, style.ComputedLocale().GetPlatform(), true);
+      modified = text::ToUppercase(modified, style.ComputedLocale().GetPlatform().View());
     }
     else if (transform.Contains(style::TextTransformValue::Lowercase))
     {
-      modified = ConvertCase(modified, style.ComputedLocale().GetPlatform(), false);
+      modified = text::ToLowercase(modified, style.ComputedLocale().GetPlatform().View());
     }
 
     if (transform.Contains(style::TextTransformValue::FullWidth))

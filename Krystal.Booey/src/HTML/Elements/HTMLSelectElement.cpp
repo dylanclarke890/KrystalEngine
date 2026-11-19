@@ -64,8 +64,8 @@
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
 #include <climits>
-#include <unicode/uchar.h>
 
 namespace krys::boo
 {
@@ -2420,7 +2420,7 @@ namespace krys::boo
       if (auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event))
       {
         if (!keyboardEvent->CtrlKey() && !keyboardEvent->AltKey() && !keyboardEvent->MetaKey()
-            && u_isprint(keyboardEvent->CharCode()))
+            && text::IsPrintable(static_cast<char32>(keyboardEvent->CharCode())))
         {
           TypeAheadFind(*keyboardEvent);
           event.SetDefaultHandled();

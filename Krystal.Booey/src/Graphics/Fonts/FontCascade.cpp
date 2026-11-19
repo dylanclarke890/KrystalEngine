@@ -34,12 +34,12 @@
 #include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Text/Bidi.hpp"
+#include "Krystal.Text/CaseMapping.hpp"
 #include "Krystal.Text/CharacterProperties.hpp"
 #include <algorithm>
 #include <cmath>
 #include <limits>
 #include <ranges>
-#include <unicode/uchar.h>
 
 namespace krys::boo
 {
@@ -230,7 +230,7 @@ namespace krys::boo
     {
       if (_fontDescription.VariantCaps() == FontVariantCaps::Small)
       {
-        auto upperC = static_cast<char32>(u_toupper(c));
+        auto upperC = text::SimpleUppercase(c);
         if (upperC != c)
         {
           c = upperC;
@@ -848,38 +848,10 @@ namespace krys::boo
       char32 baseCharacter =
         text::DecodeUTF8(Span<const char8> {textRun.Text()}.subspan(static_cast<size_t>(offsetInString)))
           .CodePoint;
-      // u_getIntPropertyValue with UCHAR_IDEOGRAPHIC doesn't return true for Japanese or Korean codepoints.
-      // Instead, we can use the "Unicode allocation block" for the character.
-      UBlockCode blockCode = ublock_getCode(baseCharacter);
-      switch (blockCode)
-      {
-        case UBLOCK_CJK_RADICALS_SUPPLEMENT:
-        case UBLOCK_CJK_SYMBOLS_AND_PUNCTUATION:
-        case UBLOCK_ENCLOSED_CJK_LETTERS_AND_MONTHS:
-        case UBLOCK_CJK_COMPATIBILITY:
-        case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A:
-        case UBLOCK_CJK_UNIFIED_IDEOGRAPHS:
-        case UBLOCK_CJK_COMPATIBILITY_IDEOGRAPHS:
-        case UBLOCK_CJK_COMPATIBILITY_FORMS:
-        case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B:
-        case UBLOCK_CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT:
-        case UBLOCK_CJK_STROKES:
-        case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C:
-        case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D:
-        case UBLOCK_IDEOGRAPHIC_DESCRIPTION_CHARACTERS:
-        case UBLOCK_LINEAR_B_IDEOGRAMS:
-        case UBLOCK_ENCLOSED_IDEOGRAPHIC_SUPPLEMENT:
-        case UBLOCK_HIRAGANA:
-        case UBLOCK_KATAKANA:
-        case UBLOCK_BOPOMOFO:
-        case UBLOCK_BOPOMOFO_EXTENDED:
-        case UBLOCK_HANGUL_JAMO:
-        case UBLOCK_HANGUL_COMPATIBILITY_JAMO:
-        case UBLOCK_HANGUL_SYLLABLES:
-        case UBLOCK_HANGUL_JAMO_EXTENDED_A:
-        case UBLOCK_HANGUL_JAMO_EXTENDED_B:                  return GlyphUnderlineType::DrawOverGlyph;
-        default:                                             return GlyphUnderlineType::SkipDescenders;
-      }
+      // The Ideographic property doesn't include Japanese or Korean characters, so the blocks are used
+      // instead.
+      return text::IsInCJKBlock(baseCharacter) ? GlyphUnderlineType::DrawOverGlyph
+                                               : GlyphUnderlineType::SkipDescenders;
     }
 
     struct GlyphIterationState
@@ -2499,7 +2471,7 @@ namespace krys::boo
       return null;
     }
 
-    auto uppercaseCharacter = static_cast<char32>(u_toupper(baseCharacter));
+    auto uppercaseCharacter = text::SimpleUppercase(baseCharacter);
     krys_debug_assert(uppercaseCharacter == baseCharacter
                       || ((baseCharacter <= 0xFFFF) == (uppercaseCharacter <= 0xFFFF)));
     if (uppercaseCharacter != baseCharacter)

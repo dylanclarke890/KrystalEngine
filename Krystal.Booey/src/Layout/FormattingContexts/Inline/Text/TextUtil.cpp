@@ -38,11 +38,11 @@
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Text/Bidi.hpp"
+#include "Krystal.Text/CaseMapping.hpp"
 #include "Krystal.Text/CharacterProperties.hpp"
 #include "Krystal.Text/UnicodeHelpers.hpp"
 #include <cmath>
 #include <numeric>
-#include <unicode/uchar.h>
 
 namespace krys::boo::layout
 {
@@ -76,7 +76,7 @@ namespace krys::boo::layout
         {
           if (isSmallCaps)
           {
-            character = static_cast<char32>(u_toupper(character));
+            character = text::SimpleUppercase(character);
           }
 
           auto glyphData = fontCascade.GlyphDataForCharacter(character, isRTL);
@@ -119,7 +119,7 @@ namespace krys::boo::layout
         {
           if (isSmallCaps)
           {
-            character = static_cast<char32>(u_toupper(character));
+            character = text::SimpleUppercase(character);
           }
 
           auto glyphData = fontCascade.GlyphDataForCharacter(character, isRTL);

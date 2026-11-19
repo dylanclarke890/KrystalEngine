@@ -40,6 +40,8 @@ target_sources(Krystal.Text.Tests
   PRIVATE
     tests/Base64.cpp
     tests/Bidi.cpp
+    tests/CaseMapping.cpp
+    tests/CharacterProperties.cpp
     tests/EncodingRegistry.cpp
     tests/Encodings/ASCII.cpp
     tests/Encodings/Atari.cpp
@@ -47,5 +49,6 @@ target_sources(Krystal.Text.Tests
     tests/Encodings/Windows.cpp
     tests/FreeTypeFace.cpp
     tests/LocaleToScriptMapping.cpp
+    tests/Regex.cpp
     tests/TextBreakIterator.cpp
 )
