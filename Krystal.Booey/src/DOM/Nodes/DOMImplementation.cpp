@@ -15,6 +15,7 @@
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Http/MIMETypeRegistry.hpp"
 
 namespace krys::boo::dom
 {
@@ -203,7 +204,7 @@ namespace krys::boo::dom
         document->_contentType = u8"image/svg+xml";
         return document;
       }
-      if (MIMETypeRegistry::IsXMLMIMEType(contentType))
+      if (http::MIMETypeRegistry::IsXMLMIMEType(contentType))
       {
         auto document = CreateRef<XMLDocument>();
         document->_contentType = DOMString(contentType);

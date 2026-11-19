@@ -30,11 +30,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Platform/Network/HTTPParsers.hpp"
+#include "Krystal.Http/HTTPParsers.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 
-namespace krys::boo
+namespace krys::http
 {
   namespace
   {

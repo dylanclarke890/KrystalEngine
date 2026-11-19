@@ -34,8 +34,8 @@
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerContentsDisplayDelegate.hpp"
 #include "Krystal.Booey/Platform/GraphicsClient.hpp"
-#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Http/MIMETypeRegistry.hpp"
 #include <atomic>
 #include <cmath>
 
@@ -235,8 +235,9 @@ namespace krys::boo
   {
     // The pixels are read back to be encoded. A JPEG has no alpha, so its pixels are premultiplied: what's
     // drawn over opaque black.
-    auto alphaFormat = MIMETypeRegistry::IsJPEGMIMEType(mimeType) ? AlphaPremultiplication::Premultiplied
-                                                                  : AlphaPremultiplication::Unpremultiplied;
+    auto alphaFormat = http::MIMETypeRegistry::IsJPEGMIMEType(mimeType)
+                         ? AlphaPremultiplication::Premultiplied
+                         : AlphaPremultiplication::Unpremultiplied;
     auto size = source->TruncatedLogicalSize();
     auto pixelBuffer = source->GetPixelBuffer(
       {alphaFormat, PixelFormat::RGBA8, DestinationColorSpace::SRGB()}, IntRect({}, size));

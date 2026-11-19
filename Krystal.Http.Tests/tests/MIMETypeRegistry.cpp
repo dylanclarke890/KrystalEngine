@@ -1,9 +1,9 @@
-﻿#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
+﻿#include "Krystal.Http/MIMETypeRegistry.hpp"
 #include "catch2/catch_test_macros.hpp"
 
-namespace krys::boo::tests
+namespace krys::http::tests
 {
-  TEST_CASE("MIMETypeRegistry: types by extension", "[Platform][MIMETypeRegistry]")
+  TEST_CASE("MIMETypeRegistry: types by extension", "[Http][MIMETypeRegistry]")
   {
     // Extensions are without their dot, and ASCII case-insensitive.
     CHECK(MIMETypeRegistry::MIMETypeForExtension(u8"PNG") == u8"image/png");

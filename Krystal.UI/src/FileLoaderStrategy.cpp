@@ -1,8 +1,8 @@
 ﻿#include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Threading/WorkQueue.hpp"
+#include "Krystal.Http/MIMETypeRegistry.hpp"
 #include <algorithm>
 #include <chrono>
 #include <filesystem>
@@ -62,7 +62,7 @@ namespace krys::ui
       const auto extension = path.extension().u8string();
       const auto size = static_cast<int64>(contents->Bytes.size());
       boo::ResourceResponse response(url,
-                                     boo::MIMETypeRegistry::MIMETypeForExtension(
+                                     http::MIMETypeRegistry::MIMETypeForExtension(
                                        utf8_stringview(extension).substr(extension.empty() ? 0 : 1)),
                                      size);
       if (const auto &date = contents->LastModified)

@@ -32,7 +32,7 @@
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/String.hpp"
 
-namespace krys::boo
+namespace krys::http
 {
   /// @brief A response's or request's HTTP headers: names compare ignoring ASCII case, and a header given
   /// more than once is one header, its values joined with ", ", as Fetch's header lists combine them.

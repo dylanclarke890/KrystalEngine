@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Graphics/ImageBuffers/ImageBufferUtilities.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/PixelBuffer.hpp"
-#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/Base64.hpp"
+#include "Krystal.Http/MIMETypeRegistry.hpp"
 #include <csetjmp>
 #include <cstdio>
 #include <cstdlib>
@@ -192,7 +192,7 @@ namespace krys::boo
 
     List<uint8> output;
     bool encoded = false;
-    if (MIMETypeRegistry::IsJPEGMIMEType(mimeType))
+    if (http::MIMETypeRegistry::IsJPEGMIMEType(mimeType))
     {
       encoded = EncodeJPEG(pixelBuffer, EncoderQuality(quality), output);
     }

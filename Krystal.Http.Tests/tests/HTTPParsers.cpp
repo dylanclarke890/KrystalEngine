@@ -1,9 +1,7 @@
-﻿#include "Krystal.Booey/Platform/Network/HTTPParsers.hpp"
+﻿#include "Krystal.Http/HTTPParsers.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Platform/Network/HTTPHeaderMap.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceResponse.hpp"
 
-namespace krys::boo::tests
+namespace krys::http::tests
 {
   namespace
   {
@@ -13,7 +11,7 @@ namespace krys::boo::tests
     constexpr sys_seconds RFCExample = sys_days(1'994y / November / 6) + 8h + 49min + 37s;
   }
 
-  TEST_CASE("ParseHTTPDate: the three HTTP-date forms", "[Platform][Network][HTTPParsers]")
+  TEST_CASE("ParseHTTPDate: the three HTTP-date forms", "[Http][HTTPParsers]")
   {
     CHECK(ParseHTTPDate(u8"Sun, 06 Nov 1994 08:49:37 GMT") == RFCExample);
     CHECK(ParseHTTPDate(u8"Sunday, 06-Nov-94 08:49:37 GMT") == RFCExample);
@@ -25,7 +23,7 @@ namespace krys::boo::tests
           == sys_days(2'024y / February / 29) + 23h + 59min + 59s);
   }
 
-  TEST_CASE("ParseHTTPDate: anything else is no date", "[Platform][Network][HTTPParsers]")
+  TEST_CASE("ParseHTTPDate: anything else is no date", "[Http][HTTPParsers]")
   {
     for (auto value : {u8"", u8"Sun, 06 Nov 1994 08:49:37", u8"Sun, 06 Nov 1994 08:49:37 UTC",
                        u8"Sun, 6 Nov 1994 08:49:37 GMT", u8"Sun, 06 Foo 1994 08:49:37 GMT",
@@ -39,7 +37,7 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("ParseHTTPDate: an RFC 850 year more than 50 years ahead is in the past century",
-            "[Platform][Network][HTTPParsers]")
+            "[Http][HTTPParsers]")
   {
     auto year = static_cast<int32>(year_month_day(floor<days>(system_clock::now())).year());
     auto parsed = ParseHTTPDate(u8"Sunday, 06-Nov-94 08:49:37 GMT");
@@ -50,7 +48,7 @@ namespace krys::boo::tests
     CHECK(parsedYear > year - 50);
   }
 
-  TEST_CASE("IsNosniffContentTypeOptions: the first value is nosniff", "[Platform][Network][HTTPParsers]")
+  TEST_CASE("IsNosniffContentTypeOptions: the first value is nosniff", "[Http][HTTPParsers]")
   {
     CHECK(IsNosniffContentTypeOptions(u8"nosniff"));
     CHECK(IsNosniffContentTypeOptions(u8" NoSniff "));
@@ -58,42 +56,5 @@ namespace krys::boo::tests
     CHECK_FALSE(IsNosniffContentTypeOptions(u8"other, nosniff"));
     CHECK_FALSE(IsNosniffContentTypeOptions(u8""));
     CHECK_FALSE(IsNosniffContentTypeOptions(u8"nosniffing"));
-  }
-
-  TEST_CASE("HTTPHeaderMap: names ignore case, and values given twice are joined",
-            "[Platform][Network][HTTPHeaderMap]")
-  {
-    HTTPHeaderMap headers;
-    headers.Add(u8"Content-Language", u8"en");
-    headers.Add(u8"content-language", u8"fr");
-    CHECK(headers.Get(u8"CONTENT-LANGUAGE") == utf8_stringview(u8"en, fr"));
-    CHECK(headers.Size() == 1);
-    CHECK(headers.begin()->first == u8"Content-Language");
-
-    headers.Set(u8"CONTENT-language", u8"de");
-    CHECK(headers.Get(u8"Content-Language") == utf8_stringview(u8"de"));
-    CHECK_FALSE(headers.Contains(u8"Last-Modified"));
-    headers.Remove(u8"content-LANGUAGE");
-    CHECK(headers.IsEmpty());
-  }
-
-  TEST_CASE("ResourceResponse: a status, headers and the Last-Modified date",
-            "[Platform][Network][ResourceResponse]")
-  {
-    ResourceResponse response(url::URL(u8"https://example.com/"), u8"text/html", 0);
-    CHECK(response.HTTPStatusCode() == 0);
-    CHECK_FALSE(response.IsSuccessful());
-    CHECK_FALSE(response.LastModified());
-    CHECK(response.HTTPHeaderField(u8"Last-Modified").empty());
-
-    response.SetHTTPStatusCode(204);
-    CHECK(response.IsSuccessful());
-    response.SetHTTPStatusCode(404);
-    CHECK_FALSE(response.IsSuccessful());
-
-    response.SetHTTPHeaderField(u8"last-modified", u8"Sun, 06 Nov 1994 08:49:37 GMT");
-    CHECK(response.LastModified() == RFCExample);
-    response.SetHTTPHeaderField(u8"Last-Modified", u8"yesterday");
-    CHECK_FALSE(response.LastModified());
   }
 }

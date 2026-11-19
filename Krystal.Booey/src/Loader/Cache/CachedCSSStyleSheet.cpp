@@ -27,12 +27,12 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceClientWalker.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedStyleSheetClient.hpp"
-#include "Krystal.Booey/Platform/Network/HTTPParsers.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/Encodings/Decode.hpp"
 #include "Krystal.Core/Text/Encodings/Encode.hpp"
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
+#include "Krystal.Http/HTTPParsers.hpp"
 
 namespace krys::boo
 {
@@ -160,7 +160,7 @@ namespace krys::boo
   bool CachedCSSStyleSheet::MimeTypeAllowedByNosniff() const noexcept
   {
     // A nosniff response is a style sheet only if it says it's one.
-    return !IsNosniffContentTypeOptions(Response().HTTPHeaderField(u8"X-Content-Type-Options"))
+    return !http::IsNosniffContentTypeOptions(Response().HTTPHeaderField(u8"X-Content-Type-Options"))
            || text::IsASCIICaselessEqual(ResponseMIMEType(), u8"text/css");
   }
 

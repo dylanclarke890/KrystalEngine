@@ -26,12 +26,12 @@
 
 #pragma once
 
-#include "Krystal.Booey/Platform/Network/HTTPHeaderMap.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Http/HTTPHeaderMap.hpp"
 #include <chrono>
 
 namespace krys::boo
@@ -48,7 +48,7 @@ namespace krys::boo
     utf8_string _textEncodingName;
     uint16 _httpStatusCode {0};
     utf8_string _httpStatusText;
-    HTTPHeaderMap _httpHeaderFields;
+    http::HTTPHeaderMap _httpHeaderFields;
 
   public:
     ResourceResponse() noexcept = default;
@@ -118,7 +118,7 @@ namespace krys::boo
       return _httpStatusCode >= 200 && _httpStatusCode <= 299;
     }
 
-    KRYS_NODISCARD const HTTPHeaderMap &HTTPHeaderFields() const noexcept
+    KRYS_NODISCARD const http::HTTPHeaderMap &HTTPHeaderFields() const noexcept
     {
       return _httpHeaderFields;
     }
