@@ -9,13 +9,13 @@ namespace krys::boo::tests
   TEST_CASE("FloatPoint3D: construction and accessors", "[Graphics][FloatPoint3D]")
   {
     STATIC_CHECK(FloatPoint3D().IsZero());
-    STATIC_CHECK(FloatPoint3D(FloatPoint(1, 2)) == FloatPoint3D(1, 2, 0));
-    STATIC_CHECK(FloatPoint3D(1, 2, 3).XY() == FloatPoint(1, 2));
+    STATIC_CHECK(FloatPoint3D(PointF(1, 2)) == FloatPoint3D(1, 2, 0));
+    STATIC_CHECK(FloatPoint3D(1, 2, 3).XY() == PointF(1, 2));
 
     FloatPoint3D p;
     p.Set(1, 2, 3);
     CHECK(p == FloatPoint3D(1, 2, 3));
-    p.SetXY(FloatPoint(4, 5));
+    p.SetXY(PointF(4, 5));
     p.SetZ(6);
     CHECK(p == FloatPoint3D(4, 5, 6));
     p.Move(1, 1);
@@ -58,18 +58,18 @@ namespace krys::boo::tests
   TEST_CASE("FloatPoint3D: operators", "[Graphics][FloatPoint3D]")
   {
     STATIC_CHECK(FloatPoint3D(1, 2, 3) + FloatPoint3D(1, 1, 1) == FloatPoint3D(2, 3, 4));
-    STATIC_CHECK(FloatPoint3D(1, 2, 3) + FloatPoint(1, 1) == FloatPoint3D(2, 3, 3));
+    STATIC_CHECK(FloatPoint3D(1, 2, 3) + PointF(1, 1) == FloatPoint3D(2, 3, 3));
     STATIC_CHECK(FloatPoint3D(1, 2, 3) - FloatPoint3D(1, 1, 1) == FloatPoint3D(0, 1, 2));
-    STATIC_CHECK(FloatPoint3D(1, 2, 3) - FloatPoint(1, 1) == FloatPoint3D(0, 1, 3));
+    STATIC_CHECK(FloatPoint3D(1, 2, 3) - PointF(1, 1) == FloatPoint3D(0, 1, 3));
     STATIC_CHECK(2 * FloatPoint3D(1, 2, 3) == FloatPoint3D(2, 4, 6));
     STATIC_CHECK(FloatPoint3D(1, 2, 3) * 2 == FloatPoint3D(2, 4, 6));
 
     FloatPoint3D p(1, 2, 3);
     p += FloatPoint3D(1, 1, 1);
-    p += FloatPoint(1, 1);
+    p += PointF(1, 1);
     CHECK(p == FloatPoint3D(3, 4, 4));
     p -= FloatPoint3D(1, 1, 1);
-    p -= FloatPoint(1, 1);
+    p -= PointF(1, 1);
     CHECK(p == FloatPoint3D(1, 2, 3));
   }
 }

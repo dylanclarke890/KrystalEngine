@@ -22,9 +22,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderReplaced.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
@@ -40,11 +40,11 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(LegacyRenderSVGRoot);
 
   private:
-    IntSize _containerSize;
-    FloatRect _repaintBoundingBox {};
-    Markable<FloatRect> _objectBoundingBox;
-    mutable Markable<FloatRect> _strokeBoundingBox;
-    mutable Markable<FloatRect> _accurateRepaintBoundingBox;
+    SizeI _containerSize;
+    RectF _repaintBoundingBox {};
+    Markable<RectF> _objectBoundingBox;
+    mutable Markable<RectF> _strokeBoundingBox;
+    mutable Markable<RectF> _accurateRepaintBoundingBox;
     mutable AffineTransform _localToParentTransform {};
     AffineTransform _localToBorderBoxTransform {};
     List<WeakPtr<LegacyRenderSVGResourceContainer>> _resourcesNeedingToInvalidateClients;
@@ -63,9 +63,9 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsEmbeddedThroughSVGImage() const noexcept;
 
-    KRYS_NODISCARD FloatSize ComputeIntrinsicSize() const noexcept final;
+    KRYS_NODISCARD SizeF ComputeIntrinsicSize() const noexcept final;
 
-    KRYS_NODISCARD FloatSize PreferredAspectRatio() const noexcept final;
+    KRYS_NODISCARD SizeF PreferredAspectRatio() const noexcept final;
 
     KRYS_NODISCARD bool HasIntrinsicAspectRatio() const noexcept final;
 
@@ -89,12 +89,12 @@ namespace krys::boo
       _needsBoundariesOrTransformUpdate = true;
     }
 
-    KRYS_NODISCARD IntSize ContainerSize() const noexcept
+    KRYS_NODISCARD SizeI ContainerSize() const noexcept
     {
       return _containerSize;
     }
 
-    void SetContainerSize(const IntSize &containerSize) noexcept
+    void SetContainerSize(const SizeI &containerSize) noexcept
     {
       _containerSize = containerSize;
     }
@@ -138,17 +138,17 @@ namespace krys::boo
 
     KRYS_NODISCARD const AffineTransform &LocalToParentTransform() const noexcept override;
 
-    KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept override
+    KRYS_NODISCARD RectF ObjectBoundingBox() const noexcept override
     {
-      return _objectBoundingBox.value_or(FloatRect());
+      return _objectBoundingBox.value_or(RectF());
     }
 
-    KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept override;
+    KRYS_NODISCARD RectF StrokeBoundingBox() const noexcept override;
 
-    KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
+    KRYS_NODISCARD RectF RepaintRectInLocalCoordinates(
       RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept override;
 
-    KRYS_NODISCARD FloatRect DecoratedBoundingBox() const noexcept override;
+    KRYS_NODISCARD RectF DecoratedBoundingBox() const noexcept override;
 
     bool NodeAtPoint(const HitTestRequest &, HitTestResult &, const HitTestLocation &locationInContainer,
                      const LayoutPoint &accumulatedOffset, HitTestAction) noexcept override;
@@ -163,8 +163,8 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutRect ComputeContentsInkOverflow() const noexcept;
 
-    KRYS_NODISCARD Maybe<FloatRect>
-      ComputeFloatVisibleRectInContainer(const FloatRect &, const RenderLayerModelObject *container,
+    KRYS_NODISCARD Maybe<RectF>
+      ComputeFloatVisibleRectInContainer(const RectF &, const RenderLayerModelObject *container,
                                          VisibleRectContext) const noexcept override;
 
     void MapLocalToContainer(const RenderLayerModelObject *ancestorContainer, TransformState &,

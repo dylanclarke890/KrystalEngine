@@ -243,7 +243,7 @@ namespace krys::boo
       {
         LayoutRect selectionRect = LocalSelectionRect();
         selectionRect.MoveBy(boxOrigin);
-        context.FillRect(FloatRect(SnappedIntRect(selectionRect)), _listItem->SelectionBackgroundColor());
+        context.FillRect(RectF(SnappedRectI(selectionRect)), _listItem->SelectionBackgroundColor());
       }
       return;
     }
@@ -252,7 +252,7 @@ namespace krys::boo
     {
       LayoutRect selectionRect = LocalSelectionRect();
       selectionRect.MoveBy(boxOrigin);
-      context.FillRect(FloatRect(SnappedIntRect(selectionRect)), _listItem->SelectionBackgroundColor());
+      context.FillRect(RectF(SnappedRectI(selectionRect)), _listItem->SelectionBackgroundColor());
     }
 
     auto color = Style().ColorResolvingCurrentColor(css::PropertyId::Color);
@@ -285,24 +285,23 @@ namespace krys::boo
     GraphicsContextStateSaver stateSaver(context, false);
     if (!GetWritingMode().IsHorizontal())
     {
-      markerRect.MoveBy(-FloatPoint(boxOrigin));
+      markerRect.MoveBy(-PointF(boxOrigin));
       markerRect = markerRect.TransposedRect();
-      markerRect.MoveBy(FloatPoint(box.X(), box.Y() - LogicalHeight()));
+      markerRect.MoveBy(PointF(box.X(), box.Y() - LogicalHeight()));
       stateSaver.Save();
       context.Translate(markerRect.X(), markerRect.MaxY());
       context.Rotate(deg2rad(90.f));
       context.Translate(-markerRect.X(), -markerRect.MaxY());
     }
 
-    auto textOrigin =
-      FloatPoint {markerRect.X(), markerRect.Y() + Snap(Style().MetricsOfPrimaryFont().Ascent())};
+    auto textOrigin = PointF {markerRect.X(), markerRect.Y() + Snap(Style().MetricsOfPrimaryFont().Ascent())};
     textOrigin = RoundPointToDevicePixels(LayoutPoint(textOrigin), GetDocument().DeviceScaleFactor(),
                                           GetWritingMode().IsLogicalLeftInlineStart());
     auto text = TextForRun(_textContent, Style());
     context.DrawText(Style().GetFontCascade(), RenderBlock::ConstructTextRun(text, Style()), textOrigin);
   }
 
-  FloatRect RenderListMarker::RelativeMarkerRect() noexcept
+  RectF RenderListMarker::RelativeMarkerRect() noexcept
   {
     if (IsImage())
     {
@@ -310,7 +309,7 @@ namespace krys::boo
       return {0.f, 0.f, imageSize.Width(), imageSize.Height()};
     }
 
-    FloatRect relativeRect;
+    RectF relativeRect;
     if (WidthUsesMetricsOfPrimaryFont())
     {
       auto &fontMetrics = Style().MetricsOfPrimaryFont();
@@ -420,7 +419,7 @@ namespace krys::boo
       LayoutSize defaultBulletSize(bulletWidth, bulletWidth);
       LayoutSize imageSize =
         CalculateImageIntrinsicDimensions(_image.get(), defaultBulletSize, ScaleByUsedZoom::No);
-      _image->SetContainerContextForRenderer(*this, FloatSize(imageSize), Style().UsedZoom());
+      _image->SetContainerContextForRenderer(*this, SizeF(imageSize), Style().UsedZoom());
       _textContent = {
         .TextWithSuffix = {},
         .TextWithoutSuffixLength = 0,
@@ -637,7 +636,7 @@ namespace krys::boo
             Snap(primaryFontAscentAndDescent.second + halfLeading, SnapDirection::Ceil)};
   }
 
-  void RenderListMarker::ImageChanged(WrappedImagePtr o, const IntRect *rect) noexcept
+  void RenderListMarker::ImageChanged(WrappedImagePtr o, const RectI *rect) noexcept
   {
     if (Parent())
     {

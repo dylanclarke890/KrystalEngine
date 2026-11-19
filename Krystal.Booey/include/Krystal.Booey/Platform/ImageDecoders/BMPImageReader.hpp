@@ -30,8 +30,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include <array>
 #include <cstring>
 
@@ -172,7 +172,7 @@ namespace krys::boo
     List<RGBTriple> _colorTable;
 
     // The coordinate to which we've decoded the image.
-    IntPoint _coord;
+    PointI _coord;
 
     // Variables that track whether we've seen pixels with alpha values != 0
     // and == 0, respectively. See comments in processNonRLEData() on how
@@ -347,7 +347,7 @@ namespace krys::boo
       {
         return;
       }
-      _buffer->BackingStore()->FillRect(IntRect(_coord.X(), _coord.Y(), endCoord - _coord.X(), 1),
+      _buffer->BackingStore()->FillRect(RectI(_coord.X(), _coord.Y(), endCoord - _coord.X(), 1),
                                         static_cast<uint8>(red), static_cast<uint8>(green),
                                         static_cast<uint8>(blue), static_cast<uint8>(alpha));
       _coord.SetX(endCoord);

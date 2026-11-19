@@ -114,7 +114,7 @@ namespace krys::boo
     return observer ? observer->ExpectedContentLength() : 0;
   }
 
-  void Image::FillWithSolidColor(GraphicsContext &ctxt, const FloatRect &dstRect, const Color &color,
+  void Image::FillWithSolidColor(GraphicsContext &ctxt, const RectF &dstRect, const Color &color,
                                  CompositeOperator op) noexcept
   {
     if (!color.IsVisible())
@@ -129,8 +129,8 @@ namespace krys::boo
     ctxt.SetCompositeOperation(previousOperator);
   }
 
-  ImageDrawResult Image::DrawTiled(GraphicsContext &ctxt, const FloatRect &dstRect, const FloatRect &srcRect,
-                                   const FloatSize &tileScaleFactor, TileRule hRule, TileRule vRule,
+  ImageDrawResult Image::DrawTiled(GraphicsContext &ctxt, const RectF &dstRect, const RectF &srcRect,
+                                   const SizeF &tileScaleFactor, TileRule hRule, TileRule vRule,
                                    ImagePaintingOptions options) noexcept
   {
     if (auto color = SinglePixelSolidColor())
@@ -139,8 +139,8 @@ namespace krys::boo
       return ImageDrawResult::DidDraw;
     }
 
-    FloatSize tileScale = tileScaleFactor;
-    FloatSize spacing;
+    SizeF tileScale = tileScaleFactor;
+    SizeF spacing;
 
     // FIXME: These rules follow CSS border-image rules, but they should not be down here in Image.
     bool centerOnGapHorizonally = false;
@@ -227,7 +227,7 @@ namespace krys::boo
       vPhase -= (dstRect.Height() - scaledTileHeight) / 2;
     }
 
-    FloatPoint patternPhase(dstRect.X() - hPhase, dstRect.Y() - vPhase);
+    PointF patternPhase(dstRect.X() - hPhase, dstRect.Y() - vPhase);
     DrawPattern(ctxt, dstRect, srcRect, patternTransform, patternPhase, spacing, options);
     return ImageDrawResult::DidDraw;
   }
@@ -252,9 +252,9 @@ namespace krys::boo
     return CurrentNativeImage();
   }
 
-  void Image::DrawPattern(GraphicsContext &ctxt, const FloatRect &destRect, const FloatRect &tileRect,
-                          const AffineTransform &patternTransform, const FloatPoint &phase,
-                          const FloatSize &spacing, ImagePaintingOptions options) noexcept
+  void Image::DrawPattern(GraphicsContext &ctxt, const RectF &destRect, const RectF &tileRect,
+                          const AffineTransform &patternTransform, const PointF &phase, const SizeF &spacing,
+                          ImagePaintingOptions options) noexcept
   {
     RefPtr<NativeImage> tileImage = CurrentPreTransformedNativeImage(options.Orientation());
     if (!tileImage)
@@ -270,9 +270,9 @@ namespace krys::boo
     }
   }
 
-  ImageDrawResult Image::DrawTiled(GraphicsContext &ctxt, const FloatRect &destinationRect,
-                                   const FloatPoint &srcPoint, const FloatSize &scaledTileSize,
-                                   const FloatSize &spacing, ImagePaintingOptions options) noexcept
+  ImageDrawResult Image::DrawTiled(GraphicsContext &ctxt, const RectF &destinationRect,
+                                   const PointF &srcPoint, const SizeF &scaledTileSize, const SizeF &spacing,
+                                   ImagePaintingOptions options) noexcept
   {
     if (auto color = SinglePixelSolidColor())
     {
@@ -280,7 +280,7 @@ namespace krys::boo
       return ImageDrawResult::DidDraw;
     }
 
-    FloatSize intrinsicTileSize = Size();
+    SizeF intrinsicTileSize = Size();
     if (HasRelativeWidth())
     {
       intrinsicTileSize.SetWidth(scaledTileSize.Width());
@@ -290,10 +290,10 @@ namespace krys::boo
       intrinsicTileSize.SetHeight(scaledTileSize.Height());
     }
 
-    FloatSize scale(scaledTileSize / intrinsicTileSize);
+    SizeF scale(scaledTileSize / intrinsicTileSize);
 
-    FloatRect oneTileRect;
-    FloatSize actualTileSize = scaledTileSize + spacing;
+    RectF oneTileRect;
+    SizeF actualTileSize = scaledTileSize + spacing;
     oneTileRect.SetX(destinationRect.X()
                      + std::fmodf(std::fmodf(-srcPoint.X(), actualTileSize.Width()) - actualTileSize.Width(),
                                   actualTileSize.Width()));
@@ -306,7 +306,7 @@ namespace krys::boo
     // Check and see if a single draw of the image can cover the entire area we are supposed to tile.
     if (oneTileRect.Contains(destinationRect) && !ctxt.DrawLuminanceMask())
     {
-      FloatRect visibleSrcRect;
+      RectF visibleSrcRect;
       visibleSrcRect.SetX((destinationRect.X() - oneTileRect.X()) / scale.Width());
       visibleSrcRect.SetY((destinationRect.Y() - oneTileRect.Y()) / scale.Height());
       visibleSrcRect.SetWidth(destinationRect.Width() / scale.Width());
@@ -319,9 +319,9 @@ namespace krys::boo
     // Memory consumption depends on the transformed tile size which can get
     // larger than the original tile if user zooms in enough.
     const float maxPatternTilePixels = 2'048 * 2'048;
-    FloatRect transformedTileSize = ctxt.GetCTM().MapRect(FloatRect(FloatPoint(), scaledTileSize));
+    RectF transformedTileSize = ctxt.GetCTM().MapRect(RectF(PointF(), scaledTileSize));
     float transformedTileSizePixels = transformedTileSize.Width() * transformedTileSize.Height();
-    FloatRect currentTileRect = oneTileRect;
+    RectF currentTileRect = oneTileRect;
     if (transformedTileSizePixels > maxPatternTilePixels)
     {
       GraphicsContextStateSaver stateSaver(ctxt);
@@ -336,9 +336,9 @@ namespace krys::boo
         float toX = currentTileRect.X();
         while (toX < destinationRect.MaxX())
         {
-          FloatRect toRect(toX, toY, currentTileRect.Width(), currentTileRect.Height());
-          FloatRect fromRect(ToFloatPoint(currentTileRect.Location() - oneTileRect.Location()),
-                             currentTileRect.Size());
+          RectF toRect(toX, toY, currentTileRect.Width(), currentTileRect.Height());
+          RectF fromRect(ToPointF(currentTileRect.Location() - oneTileRect.Location()),
+                         currentTileRect.Size());
           fromRect.Scale(1 / scale.Width(), 1 / scale.Height());
 
           result = Draw(ctxt, toRect, fromRect, {options, BlendMode::Normal});
@@ -356,20 +356,20 @@ namespace krys::boo
     }
 
     AffineTransform patternTransform = AffineTransform().ScaleNonUniform(scale.Width(), scale.Height());
-    FloatRect tileRect(FloatPoint(), intrinsicTileSize);
+    RectF tileRect(PointF(), intrinsicTileSize);
     DrawPattern(ctxt, destinationRect, tileRect, patternTransform, oneTileRect.Location(), spacing, options);
     return ImageDrawResult::DidDraw;
   }
 
   void Image::ComputeIntrinsicDimensions(float &intrinsicWidth, float &intrinsicHeight,
-                                         FloatSize &intrinsicRatio) noexcept
+                                         SizeF &intrinsicRatio) noexcept
   {
     intrinsicRatio = Size();
     intrinsicWidth = intrinsicRatio.Width();
     intrinsicHeight = intrinsicRatio.Height();
   }
 
-  FloatSize Image::SourceSize(ImageOrientation orientation) const noexcept
+  SizeF Image::SourceSize(ImageOrientation orientation) const noexcept
   {
     return Size(orientation);
   }

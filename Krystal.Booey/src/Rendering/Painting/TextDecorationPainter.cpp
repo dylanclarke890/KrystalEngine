@@ -48,7 +48,7 @@ namespace krys::boo
     return strokeStyle;
   }
 
-  static void AdjustLineToPixelBoundaries(FloatPoint &p1, FloatPoint &p2, float strokeWidth,
+  static void AdjustLineToPixelBoundaries(PointF &p1, PointF &p2, float strokeWidth,
                                           StrokeStyle penStyle) noexcept
   {
     // For odd widths, we add in 0.5 to the appropriate x/y so that the float arithmetic
@@ -113,7 +113,7 @@ namespace krys::boo
    *             |-----------|
    *                 step
    */
-  static void StrokeWavyTextDecoration(GraphicsContext &context, const FloatRect &rect, bool isPrinting,
+  static void StrokeWavyTextDecoration(GraphicsContext &context, const RectF &rect, bool isPrinting,
                                        WavyStrokeParameters wavyStrokeParameters,
                                        StrokeStyle strokeStyle) noexcept
   {
@@ -123,8 +123,8 @@ namespace krys::boo
     }
 
     // 1. Calculate the endpoints.
-    FloatPoint p1 = rect.MinXMinYCorner();
-    FloatPoint p2 = rect.MaxXMinYCorner();
+    PointF p1 = rect.MinXMinYCorner();
+    PointF p2 = rect.MaxXMinYCorner();
 
     // Extent the wavy line before and after the text so it can cover the whole length.
     p1.SetX(p1.X() - 2 * wavyStrokeParameters.Step);
@@ -146,8 +146,8 @@ namespace krys::boo
 
     // 2. Contruct the wavy underline path.
     float yAxis = p1.Y();
-    FloatPoint controlPoint1(0, yAxis + wavyStrokeParameters.ControlPointDistance);
-    FloatPoint controlPoint2(0, yAxis - wavyStrokeParameters.ControlPointDistance);
+    PointF controlPoint1(0, yAxis + wavyStrokeParameters.ControlPointDistance);
+    PointF controlPoint2(0, yAxis - wavyStrokeParameters.ControlPointDistance);
 
     Path path;
     path.MoveTo(p1);
@@ -157,7 +157,7 @@ namespace krys::boo
       controlPoint1.SetX(static_cast<float>(x + wavyStrokeParameters.Step));
       controlPoint2.SetX(static_cast<float>(x + wavyStrokeParameters.Step));
       x += 2 * wavyStrokeParameters.Step;
-      path.AddBezierCurveTo(controlPoint1, controlPoint2, FloatPoint(static_cast<float>(x), yAxis));
+      path.AddBezierCurveTo(controlPoint1, controlPoint2, PointF(static_cast<float>(x), yAxis));
     }
 
     // Offset the bounds and set extra height to ensure the whole wavy line is covered.
@@ -198,7 +198,7 @@ namespace krys::boo
     using Flag = style::TextDecorationLine::Flag;
 
     auto paintDecoration =
-      [&](Flag decoration, TextDecorationStyle underlineStyle, const Color &color, const FloatRect &rect)
+      [&](Flag decoration, TextDecorationStyle underlineStyle, const Color &color, const RectF &rect)
     {
       _context.SetStrokeColor(color);
 
@@ -261,7 +261,7 @@ namespace krys::boo
     if (clipping)
     {
       auto clipRect =
-        FloatRect {boxOrigin, FloatSize {decorationGeometry.TextBoxWidth, decorationGeometry.ClippingOffset}};
+        RectF {boxOrigin, SizeF {decorationGeometry.TextBoxWidth, decorationGeometry.ClippingOffset}};
       const auto &zoomFactor = style.UsedZoomForLength();
       for (const auto &shadow : _shadow)
       {
@@ -281,8 +281,8 @@ namespace krys::boo
     }
 
     // These decorations should match the visual overflows computed in visualOverflowForDecorations().
-    auto underlineRect = FloatRect {
-      boxOrigin, FloatSize {decorationGeometry.TextBoxWidth, decorationGeometry.TextDecorationThickness}};
+    auto underlineRect =
+      RectF {boxOrigin, SizeF {decorationGeometry.TextBoxWidth, decorationGeometry.TextDecorationThickness}};
     auto overlineRect = underlineRect;
     if (decorationType.HasUnderline())
     {
@@ -363,9 +363,9 @@ namespace krys::boo
     TextDecorationPainter::PaintLineThrough(const ForegroundDecorationGeometry &foregroundDecorationGeometry,
                                             const Color &color, const Styles &decorationStyle) noexcept
   {
-    auto rect = FloatRect {foregroundDecorationGeometry.BoxOrigin,
-                           FloatSize {foregroundDecorationGeometry.TextBoxWidth,
-                                      foregroundDecorationGeometry.TextDecorationThickness}};
+    auto rect = RectF {foregroundDecorationGeometry.BoxOrigin,
+                       SizeF {foregroundDecorationGeometry.TextBoxWidth,
+                              foregroundDecorationGeometry.TextDecorationThickness}};
     rect.Move(0.f, foregroundDecorationGeometry.LinethroughCenter);
 
     _context.SetStrokeColor(color);

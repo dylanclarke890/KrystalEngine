@@ -107,18 +107,18 @@ namespace krys::boo
     RenderReplaced::WillBeDestroyed();
   }
 
-  IntSize RenderImage::ImageSizeForError(CachedImage *newImage) const noexcept
+  SizeI RenderImage::ImageSizeForError(CachedImage *newImage) const noexcept
   {
     krys_debug_assert(newImage);
     krys_debug_assert(newImage->ImageForRenderer(this));
 
-    FloatSize imageSize;
+    SizeF imageSize;
     if (newImage->WillPaintBrokenImage())
     {
       // Alt text stands in for the broken image icon, as in Chrome.
       if (!_altText.empty())
       {
-        return IntSize(PaddingWidth, PaddingHeight);
+        return SizeI(PaddingWidth, PaddingHeight);
       }
       auto [brokenImage, imageScaleFactor] = newImage->BrokenImage(GetDocument().DeviceScaleFactor());
       imageSize = brokenImage->Size();
@@ -131,15 +131,15 @@ namespace krys::boo
 
     // imageSize() returns 0 for the error image. We need the true size of the
     // error image, so we have to get it by grabbing image() directly.
-    return IntSize(static_cast<int32>(PaddingWidth + imageSize.Width() * Style().UsedZoom()),
-                   static_cast<int32>(PaddingHeight + imageSize.Height() * Style().UsedZoom()));
+    return SizeI(static_cast<int32>(PaddingWidth + imageSize.Width() * Style().UsedZoom()),
+                 static_cast<int32>(PaddingHeight + imageSize.Height() * Style().UsedZoom()));
   }
 
   // Sets the image height and width to fit the alt text. Returns true if the
   // image size changed.
   ImageSizeChangeType RenderImage::SetImageSizeForAltText(CachedImage *newImage) noexcept
   {
-    IntSize imageSize;
+    SizeI imageSize;
     if (newImage && newImage->ImageForRenderer(this))
     {
       imageSize = ImageSizeForError(newImage);
@@ -147,14 +147,14 @@ namespace krys::boo
     else if (!_altText.empty() || newImage)
     {
       // If we'll be displaying either text or an image, add a little padding.
-      imageSize = IntSize(PaddingWidth, PaddingHeight);
+      imageSize = SizeI(PaddingWidth, PaddingHeight);
     }
 
     // we have an alt and the user meant it (its not a text we invented)
     if (!_altText.empty())
     {
       const FontCascade &font = Style().GetFontCascade();
-      IntSize paddedTextSize(
+      SizeI paddedTextSize(
         PaddingWidth
           + static_cast<int32>(std::min(
             std::ceil(font.Width(RenderBlock::ConstructTextRun(_altText, Style()))), MaxAltTextWidth)),
@@ -248,7 +248,7 @@ namespace krys::boo
     return RenderReplaced::ComputeReplacedLogicalHeight(estimatedUsedWidth);
   }
 
-  void RenderImage::ImageChanged(WrappedImagePtr newImage, const IntRect *rect) noexcept
+  void RenderImage::ImageChanged(WrappedImagePtr newImage, const RectI *rect) noexcept
   {
     if (RenderTreeBeingDestroyed())
     {
@@ -313,7 +313,7 @@ namespace krys::boo
   void RenderImage::UpdateInnerContentRect() noexcept
   {
     // Propagate container size to image resource.
-    IntSize containerSize(ReplacedContentRect().Size());
+    SizeI containerSize(SizeF(ReplacedContentRect().Size()));
     if (!containerSize.IsEmpty())
     {
       net::Url imageSourceUrl;
@@ -325,7 +325,7 @@ namespace krys::boo
     }
   }
 
-  void RenderImage::RepaintOrMarkForLayout(ImageSizeChangeType imageSizeChange, const IntRect *rect) noexcept
+  void RenderImage::RepaintOrMarkForLayout(ImageSizeChangeType imageSizeChange, const RectI *rect) noexcept
   {
     LayoutSize newIntrinsicSize = ImageResource().IntrinsicSize(Style().UsedZoom());
     LayoutSize oldIntrinsicSize = IntrinsicSize();
@@ -368,11 +368,11 @@ namespace krys::boo
       {
         // The image changed rect is in source image coordinates (pre-zooming),
         // so map from the bounds of the image to the contentsBox.
-        if (auto srcImg = ImageResource().GetImage(FlooredIntSize(ContentBoxRect().Size())))
+        if (auto srcImg = ImageResource().GetImage(FlooredSizeI(ContentBoxRect().Size())))
         {
-          FloatSize sourceSize = srcImg->Size() / Style().UsedZoom();
-          repaintRect.Intersect(LayoutRect(EnclosingIntRect(
-            MapRect(FloatRect(*rect), FloatRect(FloatPoint(), sourceSize), FloatRect(repaintRect)))));
+          SizeF sourceSize = srcImg->Size() / Style().UsedZoom();
+          repaintRect.Intersect(LayoutRect(
+            EnclosingRectI(MapRect(RectF(*rect), RectF(PointF(), sourceSize), RectF(repaintRect)))));
         }
       }
       RepaintRectangle(repaintRect);
@@ -527,7 +527,7 @@ namespace krys::boo
 
     auto adjustedOffset = paintOffset;
     adjustedOffset.MoveBy(Location());
-    path.Translate(ToFloatSize(adjustedOffset));
+    path.Translate(ToSizeF(adjustedOffset));
 
     paintInfo.Context().DrawFocusRing(
       path, outlineWidth, areaElementStyle->ColorResolvingCurrentColor(css::PropertyId::OutlineColor));
@@ -630,7 +630,7 @@ namespace krys::boo
             && usableSize.Width() >= image->Width() && usableSize.Height() >= image->Height())
         {
           auto [brokenImage, imageScaleFactor] = GetCachedImage()->BrokenImage(deviceScaleFactor);
-          FloatSize imageSize = brokenImage->Size();
+          SizeF imageSize = brokenImage->Size();
           imageSize.Scale(1 / imageScaleFactor);
 
           // Centre the error image, accounting for border and padding.
@@ -706,7 +706,7 @@ namespace krys::boo
               }
               context.DrawBidiText(
                 fontCascade, textRun,
-                FloatPoint(paintOffset + LayoutPoint {contentHorizontalOffset, contentVerticalOffset}));
+                PointF(paintOffset + LayoutPoint {contentHorizontalOffset, contentVerticalOffset}));
             }
             else
             {
@@ -724,11 +724,11 @@ namespace krys::boo
               }
               visualLeft += adjustedPaintOffset.X();
 
-              auto rotationRect = FloatRect(LayoutRect {visualLeft, adjustedPaintOffset.Y(), textWidth,
-                                                        LayoutUnit(contentLogicalHeight)});
+              auto rotationRect = RectF(LayoutRect {visualLeft, adjustedPaintOffset.Y(), textWidth,
+                                                    LayoutUnit(contentLogicalHeight)});
               context.ConcatCTM(Rotation(rotationRect, RotationDirection::Clockwise));
               auto textOrigin = LayoutPoint {visualLeft, adjustedPaintOffset.Y() + fontMetrics.IntAscent()};
-              context.DrawBidiText(fontCascade, textRun, FloatPoint(textOrigin));
+              context.DrawBidiText(fontCascade, textRun, PointF(textOrigin));
               context.ConcatCTM(Rotation(rotationRect, RotationDirection::Counterclockwise));
             }
           }
@@ -744,7 +744,7 @@ namespace krys::boo
 
     // FIXME: Recording unpainted and repainted objects for paint milestones.
 
-    RefPtr<Image> img = ImageResource().GetImage(FlooredIntSize(contentSize));
+    RefPtr<Image> img = ImageResource().GetImage(FlooredSizeI(contentSize));
     if (!img || img->IsNull())
     {
       return;
@@ -758,13 +758,13 @@ namespace krys::boo
     GraphicsContextStateSaver stateSaver(context, clip);
     if (clip)
     {
-      context.Clip(FloatRect(contentBoxRect));
+      context.Clip(RectF(contentBoxRect));
     }
 
     (void)PaintIntoRect(paintInfo, SnapRectToDevicePixels(replacedContentRect, deviceScaleFactor));
   }
 
-  ImageDrawResult RenderImage::PaintIntoRect(PaintInfo &paintInfo, const FloatRect &rect) noexcept
+  ImageDrawResult RenderImage::PaintIntoRect(PaintInfo &paintInfo, const RectF &rect) noexcept
   {
     if (!ImageResource().GetCachedImage() || ImageResource().ErrorOccurred() || rect.Width() <= 0
         || rect.Height() <= 0)
@@ -772,7 +772,7 @@ namespace krys::boo
       return ImageDrawResult::DidNothing;
     }
 
-    RefPtr<Image> img = ImageResource().GetImage(FlooredIntSize(rect.Size()));
+    RefPtr<Image> img = ImageResource().GetImage(FlooredSizeI(rect.Size()));
     if (!img || img->IsNull())
     {
       return ImageDrawResult::DidNothing;
@@ -855,7 +855,7 @@ namespace krys::boo
     UpdateInnerContentRect();
   }
 
-  FloatSize RenderImage::ComputeIntrinsicSize() const noexcept
+  SizeF RenderImage::ComputeIntrinsicSize() const noexcept
   {
     krys_debug_assert(!ShouldApplySizeContainment());
     auto intrinsicSize = RenderReplaced::ComputeIntrinsicSize();
@@ -877,7 +877,7 @@ namespace krys::boo
     return intrinsicSize;
   }
 
-  FloatSize RenderImage::PreferredAspectRatio() const noexcept
+  SizeF RenderImage::PreferredAspectRatio() const noexcept
   {
     krys_debug_assert(!ShouldApplySizeContainment());
 
@@ -887,8 +887,8 @@ namespace krys::boo
     {
       if (Style().GetAspectRatio().IsAutoAndRatio() && !IsShowingAltText())
       {
-        return FloatSize::NarrowPrecision(Style().GetAspectRatio().Width().Value,
-                                          Style().GetAspectRatio().Height().Value);
+        return SizeF::NarrowPrecision(Style().GetAspectRatio().Width().Value,
+                                      Style().GetAspectRatio().Height().Value);
       }
       return {1.0f, 1.0f};
     }

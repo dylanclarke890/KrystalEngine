@@ -73,7 +73,7 @@ namespace krys::boo::html::tests
 
       KRYS_NODISCARD static PlatformMouseEvent Event(PlatformEvent::Type type, double x, double y) noexcept
       {
-        return PlatformMouseEvent(DoublePoint(x, y), DoublePoint(x, y), MouseButton::Left, type, 1, {},
+        return PlatformMouseEvent(PointD(x, y), PointD(x, y), MouseButton::Left, type, 1, {},
                                   MonotonicTime::Now());
       }
 

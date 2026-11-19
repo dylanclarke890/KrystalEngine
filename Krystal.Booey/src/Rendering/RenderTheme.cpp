@@ -484,7 +484,7 @@ namespace krys::boo
       auto &input = Downcast<boo::HTMLInputElement>(*renderer.GetElement());
       krys_debug_assert(input.IsRangeControl());
 
-      IntSize thumbSize;
+      SizeI thumbSize;
       if (auto *thumbRenderer = input.SliderThumbElement()->Renderer())
       {
         const auto &thumbStyle = thumbRenderer->Style();
@@ -499,7 +499,7 @@ namespace krys::boo
         thumbSize = {thumbWidth, thumbHeight};
       }
 
-      IntRect trackBounds;
+      RectI trackBounds;
       if (auto *trackRenderer = input.SliderTrackElement()->Renderer())
       {
         trackBounds = trackRenderer->AbsoluteBoundingBoxRectIgnoringTransforms();
@@ -826,7 +826,7 @@ namespace krys::boo
     }
 
     float deviceScaleFactor = box.GetDocument().DeviceScaleFactor();
-    FloatRect devicePixelSnappedRect = SnapRectToDevicePixels(rect, deviceScaleFactor);
+    RectF devicePixelSnappedRect = SnapRectToDevicePixels(rect, deviceScaleFactor);
 
     // FIXME: The media controls' parts, with media elements' default controls.
     switch (appearance)
@@ -900,7 +900,7 @@ namespace krys::boo
       return;
     }
 
-    FloatRect devicePixelSnappedRect = SnapRectToDevicePixels(rect, box.GetDocument().DeviceScaleFactor());
+    RectF devicePixelSnappedRect = SnapRectToDevicePixels(rect, box.GetDocument().DeviceScaleFactor());
 
     // Call the appropriate paint method based off the appearance value.
     switch (box.Style().UsedAppearance())
@@ -1517,7 +1517,7 @@ namespace krys::boo
     style.SetBoxShadow(css::keywords::None {});
   }
 
-  FloatSize RenderTheme::MeterSizeForBounds(const RenderMeter &, const FloatRect &bounds) const noexcept
+  SizeF RenderTheme::MeterSizeForBounds(const RenderMeter &, const RectF &bounds) const noexcept
   {
     return bounds.Size();
   }
@@ -1529,13 +1529,12 @@ namespace krys::boo
     // 8 pixels square, drawn a pixel at a time.
     // FIXME: The platform image (textAreaResizeCorner), and its 2x version, once the theme has images.
     constexpr float cornerResizerSize = 8;
-    auto origin =
-      FloatPoint(resizerCornerRect.MaxXMaxYCorner()) - FloatSize(cornerResizerSize, cornerResizerSize);
+    auto origin = PointF(resizerCornerRect.MaxXMaxYCorner()) - SizeF(cornerResizerSize, cornerResizerSize);
     bool flip = renderer.Style().ShouldPlaceVerticalScrollbarOnLeft();
     if (flip)
     {
       origin =
-        FloatPoint(resizerCornerRect.X().ToFloat(), resizerCornerRect.MaxY().ToFloat() - cornerResizerSize);
+        PointF(resizerCornerRect.X().ToFloat(), resizerCornerRect.MaxY().ToFloat() - cornerResizerSize);
     }
 
     auto dark = Color(SRGBA<uint8> {0, 0, 0, 0x99});
@@ -1543,7 +1542,7 @@ namespace krys::boo
     auto pixel = [&](int32 x, int32 y, const Color &color)
     {
       auto column = flip ? static_cast<int32>(cornerResizerSize) - 1 - x : x;
-      context.FillRect(FloatRect(origin.X() + column, origin.Y() + y, 1, 1), color);
+      context.FillRect(RectF(origin.X() + column, origin.Y() + y, 1, 1), color);
     };
     for (int32 y = 0; y < 7; ++y)
     {
@@ -1570,13 +1569,13 @@ namespace krys::boo
   {
     // Clipping will exclude the right and bottom edges of this frame.
     GraphicsContextStateSaver stateSaver(context);
-    context.Clip(FloatRect(resizerAbsRect));
+    context.Clip(RectF(resizerAbsRect));
     LayoutRect largerCorner = resizerAbsRect;
     largerCorner.SetSize(LayoutSize(largerCorner.Width() + 1_lu, largerCorner.Height() + 1_lu));
     context.SetStrokeColor(Color(SRGBA<uint8> {217, 217, 217}));
     context.SetStrokeThickness(1.0f);
     context.SetFillColor(Color::transparentBlack);
-    context.DrawRect(FloatRect(SnappedIntRect(largerCorner)));
+    context.DrawRect(RectF(SnappedRectI(largerCorner)));
   }
 
   bool RenderTheme::ShouldHaveSpinButton(const boo::HTMLInputElement &inputElement) const noexcept

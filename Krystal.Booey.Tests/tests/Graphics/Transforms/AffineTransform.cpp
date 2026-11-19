@@ -2,8 +2,8 @@
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo::tests
 {
@@ -106,10 +106,10 @@ namespace krys::boo::tests
     TestIdentity(test);
   }
 
-  TEST_CASE("AffineTransform: MapFloatPoint", "[Graphics][AffineTransform]")
+  TEST_CASE("AffineTransform: MapPointF", "[Graphics][AffineTransform]")
   {
     AffineTransform test;
-    FloatPoint point(100.0f, 50.0f);
+    PointF point(100.0f, 50.0f);
 
     auto mappedPoint = test.MapPoint(point);
 
@@ -131,10 +131,10 @@ namespace krys::boo::tests
     REQUIRE_THAT(mappedPoint3.Y(), WithinULP(100.0f, 4));
   }
 
-  TEST_CASE("AffineTransform: MapIntPoint", "[Graphics][AffineTransform]")
+  TEST_CASE("AffineTransform: MapPointI", "[Graphics][AffineTransform]")
   {
     AffineTransform test;
-    IntPoint point(100, 50);
+    PointI point(100, 50);
 
     auto mappedPoint = test.MapPoint(point);
 
@@ -156,10 +156,10 @@ namespace krys::boo::tests
     REQUIRE(100 == mappedPoint3.Y());
   }
 
-  TEST_CASE("AffineTransform: MapIntSize", "[Graphics][AffineTransform]")
+  TEST_CASE("AffineTransform: MapSizeI", "[Graphics][AffineTransform]")
   {
     AffineTransform test;
-    IntSize size(200, 300);
+    SizeI size(200, 300);
 
     auto mappedSize = test.MapSize(size);
 
@@ -181,10 +181,10 @@ namespace krys::boo::tests
     REQUIRE(600 == mappedSize3.Height());
   }
 
-  TEST_CASE("AffineTransform: MapFloatSize", "[Graphics][AffineTransform]")
+  TEST_CASE("AffineTransform: MapSizeF", "[Graphics][AffineTransform]")
   {
     AffineTransform test;
-    FloatSize size(200.0f, 300.0f);
+    SizeF size(200.0f, 300.0f);
 
     auto mappedSize = test.MapSize(size);
 
@@ -206,10 +206,10 @@ namespace krys::boo::tests
     REQUIRE(600.0f == mappedSize3.Height());
   }
 
-  TEST_CASE("AffineTransform: MapIntRect", "[Graphics][AffineTransform]")
+  TEST_CASE("AffineTransform: MapRectI", "[Graphics][AffineTransform]")
   {
     AffineTransform test;
-    IntRect rect(10, 20, 200, 300);
+    RectI rect(10, 20, 200, 300);
 
     auto mappedRect = test.MapRect(rect);
 
@@ -237,10 +237,10 @@ namespace krys::boo::tests
     REQUIRE(600 == mappedRect3.Height());
   }
 
-  TEST_CASE("AffineTransform: MapFloatRect", "[Graphics][AffineTransform]")
+  TEST_CASE("AffineTransform: MapRectF", "[Graphics][AffineTransform]")
   {
     AffineTransform test;
-    FloatRect rect(10.f, 20.0f, 200.0f, 300.0f);
+    RectF rect(10.f, 20.0f, 200.0f, 300.0f);
 
     auto mappedRect = test.MapRect(rect);
 
@@ -270,7 +270,7 @@ namespace krys::boo::tests
 
   TEST_CASE("AffineTransform: MapFloatQuad", "[Graphics][AffineTransform]")
   {
-    FloatRect rect(100.0f, 100.0f, 100.0f, 50.0f);
+    RectF rect(100.0f, 100.0f, 100.0f, 50.0f);
     FloatQuad quad(rect);
 
     REQUIRE_THAT(quad.P1().X(), WithinULP(100.0f, 4));
@@ -437,13 +437,13 @@ namespace krys::boo::tests
     CHECK_THAT(test.F(), WithinULP(1.0, 4));
   }
 
-  TEST_CASE("AffineTransform: ScaleFloatSize", "[Graphics][AffineTransform]")
+  TEST_CASE("AffineTransform: ScaleSizeF", "[Graphics][AffineTransform]")
   {
     AffineTransform test(6.0, 5.0, 4.0, 3.0, 2.0, 1.0);
 
     TestValueConstruction(test);
 
-    FloatSize first(1.0f, 2.0f);
+    SizeF first(1.0f, 2.0f);
 
     test.Scale(first);
 
@@ -454,13 +454,13 @@ namespace krys::boo::tests
     CHECK_THAT(test.E(), WithinULP(2.0, 4));
     CHECK_THAT(test.F(), WithinULP(1.0, 4));
 
-    FloatSize second(1.0f, 0.5f);
+    SizeF second(1.0f, 0.5f);
 
     test.Scale(second);
 
     TestValueConstruction(test);
 
-    FloatSize third(2.0f, 1.0f);
+    SizeF third(2.0f, 1.0f);
 
     test.Scale(third);
 
@@ -471,13 +471,13 @@ namespace krys::boo::tests
     CHECK_THAT(test.E(), WithinULP(2.0, 4));
     CHECK_THAT(test.F(), WithinULP(1.0, 4));
 
-    FloatSize fourth(0.5f, 1.0f);
+    SizeF fourth(0.5f, 1.0f);
 
     test.Scale(fourth);
 
     TestValueConstruction(test);
 
-    FloatSize fifth(0.5f, 2.0f);
+    SizeF fifth(0.5f, 2.0f);
 
     test.Scale(fifth);
 
@@ -553,16 +553,16 @@ namespace krys::boo::tests
     CHECK_THAT(test.F(), WithinULP(22.4, 4));
   }
 
-  TEST_CASE("AffineTransform: TranslateFloatPoint", "[Graphics][AffineTransform]")
+  TEST_CASE("AffineTransform: TranslatePointF", "[Graphics][AffineTransform]")
   {
     AffineTransform test(6.0, 5.0, 4.0, 3.0, 2.0, 1.0);
 
-    FloatPoint none;
+    PointF none;
     test.Translate(none);
 
     TestValueConstruction(test);
 
-    FloatPoint first(5.0f, 0.0f);
+    PointF first(5.0f, 0.0f);
 
     test.Translate(first);
 
@@ -573,7 +573,7 @@ namespace krys::boo::tests
     CHECK_THAT(test.E(), WithinULP(32.0, 4));
     CHECK_THAT(test.F(), WithinULP(26.0, 4));
 
-    FloatPoint second(0.0f, -1.2f);
+    PointF second(0.0f, -1.2f);
 
     test.Translate(second);
 
@@ -911,8 +911,8 @@ namespace krys::boo::tests
 
   TEST_CASE("AffineTransform: MakeMapBetweenRects", "[Graphics][AffineTransform]")
   {
-    FloatRect fromRect(10.0f, 10.0f, 100.0f, 100.0f);
-    FloatRect toRect(70.0f, 70.0f, 200.0f, 50.0f);
+    RectF fromRect(10.0f, 10.0f, 100.0f, 100.0f);
+    RectF toRect(70.0f, 70.0f, 200.0f, 50.0f);
 
     auto mapBetween = MakeMapBetweenRects(fromRect, toRect);
 

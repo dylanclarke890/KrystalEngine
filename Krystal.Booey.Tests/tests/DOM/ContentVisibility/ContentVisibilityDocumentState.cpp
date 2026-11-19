@@ -24,7 +24,7 @@ namespace krys::boo::tests
     /// `content-visibility: auto`.
     struct ContentVisibilityFixture : css::tests::ValueFixture
     {
-      constexpr static IntSize ViewSize {200, 100};
+      constexpr static SizeI ViewSize {200, 100};
       Ref<Page> TestPage;
       Ref<HTMLDocument> Document;
 
@@ -68,8 +68,8 @@ namespace krys::boo::tests
       {
         (void)Document->UpdateLayout();
         display_list::RecorderImpl recorder(
-          FloatSize(static_cast<float>(ViewSize.Width()), static_cast<float>(ViewSize.Height())));
-        TestPage->MainFrame().View()->Paint(recorder, IntRect(IntPoint(), ViewSize));
+          SizeF(static_cast<float>(ViewSize.Width()), static_cast<float>(ViewSize.Height())));
+        TestPage->MainFrame().View()->Paint(recorder, RectI(PointI(), ViewSize));
         auto colourText = utf8_string(u8"(color ") + utf8_string(colour) + u8")";
         return recorder.TakeDisplayList()->AsText({}).contains(colourText);
       }

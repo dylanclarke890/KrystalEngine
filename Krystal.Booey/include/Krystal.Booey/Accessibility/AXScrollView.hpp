@@ -79,7 +79,7 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
 
-    KRYS_NODISCARD AXObject *AccessibilityHitTest(const IntPoint &point) const noexcept override;
+    KRYS_NODISCARD AXObject *AccessibilityHitTest(const PointI &point) const noexcept override;
 
     void AddChildren() noexcept override;
 

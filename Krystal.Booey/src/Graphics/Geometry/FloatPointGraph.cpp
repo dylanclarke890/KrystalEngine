@@ -33,7 +33,7 @@
 
 namespace krys::boo
 {
-  FloatPointGraph::Node *FloatPointGraph::FindOrCreateNode(FloatPoint point)
+  FloatPointGraph::Node *FloatPointGraph::FindOrCreateNode(PointF point)
   {
     for (auto &testNode : _allNodes)
     {
@@ -63,23 +63,23 @@ namespace krys::boo
 
   KRYS_NODISCARD static bool FindLineSegmentIntersection(const FloatPointGraph::Edge &edgeA,
                                                          const FloatPointGraph::Edge &edgeB,
-                                                         FloatPoint &intersectionPoint) noexcept
+                                                         PointF &intersectionPoint) noexcept
   {
     if (!FindIntersection(*edgeA.first, *edgeA.second, *edgeB.first, *edgeB.second, intersectionPoint))
     {
       return false;
     }
 
-    FloatPoint edgeAVec = ToFloatPoint(*edgeA.second - *edgeA.first);
-    FloatPoint edgeBVec = ToFloatPoint(*edgeB.second - *edgeB.first);
+    PointF edgeAVec = ToPointF(*edgeA.second - *edgeA.first);
+    PointF edgeBVec = ToPointF(*edgeB.second - *edgeB.first);
 
-    float dotA = edgeAVec.Dot(ToFloatPoint(intersectionPoint - *edgeA.first));
+    float dotA = edgeAVec.Dot(ToPointF(intersectionPoint - *edgeA.first));
     if (dotA < 0 || dotA > edgeAVec.LengthSquared())
     {
       return false;
     }
 
-    float dotB = edgeBVec.Dot(ToFloatPoint(intersectionPoint - *edgeB.first));
+    float dotB = edgeBVec.Dot(ToPointF(intersectionPoint - *edgeB.first));
     if (dotB < 0 || dotB > edgeBVec.LengthSquared())
     {
       return false;
@@ -109,7 +109,7 @@ namespace krys::boo
           continue;
         }
 
-        FloatPoint intersectionPoint;
+        PointF intersectionPoint;
         if (!FindLineSegmentIntersection(edgeA, edgeB, intersectionPoint))
         {
           continue;
@@ -121,8 +121,8 @@ namespace krys::boo
       std::ranges::sort(intersectionPoints,
                         [edgeA](auto *a, auto *b)
                         {
-                          return ToFloatPoint(*edgeA.first - *b).LengthSquared()
-                                 > ToFloatPoint(*edgeA.first - *a).LengthSquared();
+                          return ToPointF(*edgeA.first - *b).LengthSquared()
+                                 > ToPointF(*edgeA.first - *a).LengthSquared();
                         });
 
       for (size_t pointIndex = 1; pointIndex < intersectionPoints.size(); pointIndex++)
@@ -145,7 +145,7 @@ namespace krys::boo
     {
       currentNode->Visit();
 
-      FloatPoint currentVec = ToFloatPoint(*previousNode - *currentNode);
+      PointF currentVec = ToPointF(*previousNode - *currentNode);
       currentVec.Normalise();
 
       // Walk the graph, at each node choosing the next non-visited
@@ -172,7 +172,7 @@ namespace krys::boo
           continue;
         }
 
-        FloatPoint nextVec = ToFloatPoint(*potentialNextNode - *currentNode);
+        PointF nextVec = ToPointF(*potentialNextNode - *currentNode);
         nextVec.Normalise();
 
         float angle = std::acos(nextVec.Dot(currentVec));
@@ -252,7 +252,7 @@ namespace krys::boo
     return unitedPolygons;
   }
 
-  KRYS_NODISCARD static FloatPointGraph::Polygon EdgesForRect(FloatRect rect, FloatPointGraph &graph)
+  KRYS_NODISCARD static FloatPointGraph::Polygon EdgesForRect(RectF rect, FloatPointGraph &graph)
   {
     auto minMin = graph.FindOrCreateNode(rect.MinXMinYCorner());
     auto minMax = graph.FindOrCreateNode(rect.MinXMaxYCorner());
@@ -264,12 +264,12 @@ namespace krys::boo
   }
 
   std::pair<FloatPointGraph, List<FloatPointGraph::Polygon>>
-    FloatPointGraph::PolygonsForRect(const List<FloatRect> &rects)
+    FloatPointGraph::PolygonsForRect(const List<RectF> &rects)
   {
-    List<FloatRect> sortedRects = rects;
+    List<RectF> sortedRects = rects;
     // FIXME: Replace it with 2 dimensional sort.
-    std::ranges::stable_sort(sortedRects, {}, &FloatRect::X);
-    std::ranges::stable_sort(sortedRects, {}, &FloatRect::Y);
+    std::ranges::stable_sort(sortedRects, {}, &RectF::X);
+    std::ranges::stable_sort(sortedRects, {}, &RectF::Y);
 
     FloatPointGraph graph;
 

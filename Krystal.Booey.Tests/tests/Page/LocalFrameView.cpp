@@ -69,11 +69,11 @@ namespace krys::boo::tests
 
     public:
       explicit ImageBufferCallbackRecorder(Func<void()> onDrawImageBuffer) noexcept
-          : RecorderImpl(FloatSize(800, 600)), _onDrawImageBuffer(krys::move(onDrawImageBuffer))
+          : RecorderImpl(SizeF(800, 600)), _onDrawImageBuffer(krys::move(onDrawImageBuffer))
       {
       }
 
-      void DrawImageBuffer(ImageBuffer &buffer, const FloatRect &destRect, const FloatRect &srcRect,
+      void DrawImageBuffer(ImageBuffer &buffer, const RectF &destRect, const RectF &srcRect,
                            ImagePaintingOptions options) noexcept override
       {
         _onDrawImageBuffer();
@@ -93,7 +93,7 @@ namespace krys::boo::tests
     frame->CreateView({800, 600});
     auto &view = *frame->View();
     CHECK(&view.Frame() == frame.get());
-    CHECK(view.Size() == IntSize {800, 600});
+    CHECK(view.Size() == SizeI {800, 600});
     CHECK(view.MediaType() == u8"screen");
 
     frame->SetDocument(ShareRefPtr<Document>(document.get()));
@@ -115,7 +115,7 @@ namespace krys::boo::tests
 
       frame->CreateView({400, 300});
       CHECK(document->HasLivingRenderTree());
-      CHECK(document->View()->Size() == IntSize {400, 300});
+      CHECK(document->View()->Size() == SizeI {400, 300});
     }
 
     SECTION("Replacing the document")
@@ -149,49 +149,49 @@ namespace krys::boo::tests
     FrameFixture fixture {u8"<!DOCTYPE html>"};
     auto &view = fixture.View();
 
-    CHECK(view.FrameRect() == IntRect {0, 0, 800, 600});
-    CHECK(view.GetLayoutSize() == IntSize {800, 600});
-    CHECK(view.VisibleContentRect() == IntRect {0, 0, 800, 600});
-    CHECK(view.SizeForCSSDefaultViewportUnits() == FloatSize {800, 600});
-    CHECK(view.SizeForCSSSmallViewportUnits() == FloatSize {800, 600});
-    CHECK(view.SizeForCSSLargeViewportUnits() == FloatSize {800, 600});
-    CHECK(view.SizeForCSSDynamicViewportUnits() == FloatSize {800, 600});
+    CHECK(view.FrameRect() == RectI {0, 0, 800, 600});
+    CHECK(view.GetLayoutSize() == SizeI {800, 600});
+    CHECK(view.VisibleContentRect() == RectI {0, 0, 800, 600});
+    CHECK(view.SizeForCSSDefaultViewportUnits() == SizeF {800, 600});
+    CHECK(view.SizeForCSSSmallViewportUnits() == SizeF {800, 600});
+    CHECK(view.SizeForCSSLargeViewportUnits() == SizeF {800, 600});
+    CHECK(view.SizeForCSSDynamicViewportUnits() == SizeF {800, 600});
 
     SECTION("Fixed layout")
     {
       view.SetFixedLayoutSize({1'000, 2'000});
-      CHECK(view.GetLayoutSize() == IntSize {800, 600});
+      CHECK(view.GetLayoutSize() == SizeI {800, 600});
       view.SetUseFixedLayout(true);
-      CHECK(view.GetLayoutSize() == IntSize {1'000, 2'000});
-      CHECK(view.SizeForCSSDefaultViewportUnits() == FloatSize {1'000, 2'000});
-      CHECK(view.SizeForCSSDynamicViewportUnits() == FloatSize {1'000, 2'000});
+      CHECK(view.GetLayoutSize() == SizeI {1'000, 2'000});
+      CHECK(view.SizeForCSSDefaultViewportUnits() == SizeF {1'000, 2'000});
+      CHECK(view.SizeForCSSDynamicViewportUnits() == SizeF {1'000, 2'000});
 
       // A fixed layout view is laid out at its fixed size whatever its frame.
       view.Resize({100, 100});
-      CHECK(view.GetLayoutSize() == IntSize {1'000, 2'000});
+      CHECK(view.GetLayoutSize() == SizeI {1'000, 2'000});
 
       view.SetFixedLayoutSize({});
-      CHECK(view.GetLayoutSize() == IntSize {100, 100});
+      CHECK(view.GetLayoutSize() == SizeI {100, 100});
     }
 
     SECTION("Viewport unit overrides")
     {
       view.SetSizeForCSSSmallViewportUnits({300, 200});
       view.SetSizeForCSSLargeViewportUnits({900, 700});
-      CHECK(view.SizeForCSSSmallViewportUnits() == FloatSize {300, 200});
-      CHECK(view.SizeForCSSLargeViewportUnits() == FloatSize {900, 700});
-      CHECK(view.SizeForCSSDefaultViewportUnits() == FloatSize {800, 600});
+      CHECK(view.SizeForCSSSmallViewportUnits() == SizeF {300, 200});
+      CHECK(view.SizeForCSSLargeViewportUnits() == SizeF {900, 700});
+      CHECK(view.SizeForCSSDefaultViewportUnits() == SizeF {800, 600});
 
       // A width-only override keeps the view's height.
       view.SetOverrideSizeForCSSDefaultViewportUnits({.Width = 500.f});
-      CHECK(view.SizeForCSSDefaultViewportUnits() == FloatSize {500, 600});
+      CHECK(view.SizeForCSSDefaultViewportUnits() == SizeF {500, 600});
 
       view.ClearSizeOverrideForCSSDefaultViewportUnits();
       view.ClearSizeOverrideForCSSSmallViewportUnits();
       view.ClearSizeOverrideForCSSLargeViewportUnits();
       CHECK_FALSE(view.OverrideSizeForCSSDefaultViewportUnits());
-      CHECK(view.SizeForCSSSmallViewportUnits() == FloatSize {800, 600});
-      CHECK(view.SizeForCSSLargeViewportUnits() == FloatSize {800, 600});
+      CHECK(view.SizeForCSSSmallViewportUnits() == SizeF {800, 600});
+      CHECK(view.SizeForCSSLargeViewportUnits() == SizeF {800, 600});
     }
   }
 

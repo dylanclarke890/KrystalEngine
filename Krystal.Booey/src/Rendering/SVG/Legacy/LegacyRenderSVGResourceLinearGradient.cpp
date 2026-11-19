@@ -43,14 +43,14 @@ namespace krys::boo
     return LinearGradientElement().CollectGradientAttributes(_attributes);
   }
 
-  FloatPoint LegacyRenderSVGResourceLinearGradient::StartPoint(
+  PointF LegacyRenderSVGResourceLinearGradient::StartPoint(
     const svg::LinearGradientAttributes &attributes) const noexcept
   {
     return SVGLengthContext::ResolvePoint(&LinearGradientElement(), attributes.GradientUnits(),
                                           attributes.X1(), attributes.Y1());
   }
 
-  FloatPoint LegacyRenderSVGResourceLinearGradient::EndPoint(
+  PointF LegacyRenderSVGResourceLinearGradient::EndPoint(
     const svg::LinearGradientAttributes &attributes) const noexcept
   {
     return SVGLengthContext::ResolvePoint(&LinearGradientElement(), attributes.GradientUnits(),

@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
@@ -67,7 +67,7 @@ namespace krys::boo
       return IsWBR();
     }
 
-    KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept;
+    KRYS_NODISCARD RectI LinesBoundingBox() const noexcept;
 
     KRYS_NODISCARD int32 CaretMinOffset() const noexcept final
     {

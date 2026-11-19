@@ -107,7 +107,7 @@ namespace krys::boo
     template <>
     struct Evaluation<BorderRadius, FloatRoundedRect::Radii>
     {
-      KRYS_NODISCARD FloatRoundedRect::Radii operator()(const BorderRadius &, FloatSize, ZoomNeeded) noexcept;
+      KRYS_NODISCARD FloatRoundedRect::Radii operator()(const BorderRadius &, SizeF, ZoomNeeded) noexcept;
     };
 
     template <>

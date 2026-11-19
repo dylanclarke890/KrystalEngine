@@ -42,8 +42,6 @@
 #include "Krystal.Booey/DOM/Parsing/ParserContentPolicy.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Booey/Page/ScrollOptions.hpp"
@@ -53,6 +51,8 @@
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
 #include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
@@ -554,14 +554,14 @@ namespace krys::boo
     /// @brief The union of the element's boxes, in client coordinates.
     KRYS_NODISCARD Ref<dom::DOMRect> GetBoundingClientRect() noexcept;
 
-    KRYS_NODISCARD FloatRect BoundingClientRect() noexcept;
+    KRYS_NODISCARD RectF BoundingClientRect() noexcept;
 
     /// @brief Where the element's renderer's bounding box is on the screen; empty without a renderer.
-    KRYS_NODISCARD IntRect ScreenRect() const noexcept;
+    KRYS_NODISCARD RectI ScreenRect() const noexcept;
 
     /// @brief The element's renderer and the union of its boxes in absolute coordinates, without updating
     /// layout; null if it has no boxes.
-    KRYS_NODISCARD Maybe<Pair<RenderElement *, FloatRect>> BoundingAbsoluteRectWithoutLayout() const noexcept;
+    KRYS_NODISCARD Maybe<Pair<RenderElement *, RectF>> BoundingAbsoluteRectWithoutLayout() const noexcept;
 
     /// @brief Scrolls the element's ancestors so the element is aligned as @p options ask.
     void ScrollIntoView(const ScrollIntoViewOptions &options = {}) noexcept;
@@ -1172,9 +1172,9 @@ namespace krys::boo
     KRYS_NODISCARD PseudoElement *BeforePseudoElement() const noexcept;
 
     /// @brief The scroll position of the element's layer, kept while the element has no renderer.
-    KRYS_NODISCARD IntPoint SavedLayerScrollPosition() const noexcept;
+    KRYS_NODISCARD PointI SavedLayerScrollPosition() const noexcept;
 
-    void SetSavedLayerScrollPosition(const IntPoint &position) noexcept;
+    void SetSavedLayerScrollPosition(const PointI &position) noexcept;
 
     /// @brief The element's `::after` pseudo-element, or null if it has none.
     KRYS_NODISCARD PseudoElement *AfterPseudoElement() const noexcept;

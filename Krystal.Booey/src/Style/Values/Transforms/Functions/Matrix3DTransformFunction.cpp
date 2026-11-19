@@ -49,7 +49,7 @@ namespace krys::boo::style
     return AdoptRef(*new Matrix3DTransformFunction(_matrix));
   }
 
-  Ref<TransformOperation> Matrix3DTransformFunction::ToPlatform(const FloatSize &) const noexcept
+  Ref<TransformOperation> Matrix3DTransformFunction::ToPlatform(const SizeF &) const noexcept
   {
     return Matrix3DTransformOperation::Create(_matrix);
   }
@@ -65,7 +65,7 @@ namespace krys::boo::style
     return _matrix == otherMatrix3D._matrix;
   }
 
-  void Matrix3DTransformFunction::Apply(TransformationMatrix &transform, const FloatSize &) const noexcept
+  void Matrix3DTransformFunction::Apply(TransformationMatrix &transform, const SizeF &) const noexcept
   {
     transform.Multiply(_matrix);
   }

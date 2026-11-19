@@ -272,17 +272,17 @@ namespace krys::boo
                                              PreviousLeafOnLine()->RightmostCaretOffset());
   }
 
-  IntRect RenderedPosition::AbsoluteRect(CaretRectMode caretRectMode) const noexcept
+  RectI RenderedPosition::AbsoluteRect(CaretRectMode caretRectMode) const noexcept
   {
     if (IsNull())
     {
-      return IntRect();
+      return RectI();
     }
 
-    IntRect localRect = SnappedIntRect(ComputeLocalCaretRect(*_renderer, {_box, _offset}, caretRectMode));
-    return localRect == IntRect()
-             ? IntRect()
-             : _renderer->LocalToAbsoluteQuad(FloatQuad(FloatRect(localRect))).EnclosingBoundingBox();
+    RectI localRect = SnappedRectI(ComputeLocalCaretRect(*_renderer, {_box, _offset}, caretRectMode));
+    return localRect == RectI()
+             ? RectI()
+             : _renderer->LocalToAbsoluteQuad(FloatQuad(RectF(localRect))).EnclosingBoundingBox();
   }
 
   Maybe<dom::BoundaryPoint> RenderedPosition::BoundaryPoint() const noexcept

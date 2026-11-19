@@ -47,7 +47,7 @@ namespace krys::ui
   public:
     explicit ImageBufferRender2DLayer(ImageBufferRender2DBackend &backend) noexcept;
 
-    void PaintToTextureMapper(TextureMapper &textureMapper, const boo::FloatRect &targetRect,
+    void PaintToTextureMapper(TextureMapper &textureMapper, const RectF &targetRect,
                               const boo::TransformationMatrix &modelViewMatrix = {},
                               float opacity = 1.0) noexcept override;
   };
@@ -129,15 +129,15 @@ namespace krys::ui
       using boo::display_list::Recorder::ContextState;
       using boo::display_list::Recorder::StateStack;
 
-      Recorder(const boo::FloatSize &size, ImageBufferRender2DBackend &backend) noexcept
+      Recorder(const SizeF &size, ImageBufferRender2DBackend &backend) noexcept
           : RecorderImpl(size), _backend(backend)
       {
       }
 
       KRYS_NODISCARD RefPtr<boo::ImageBuffer>
-        CreateImageBuffer(const boo::FloatSize &, float resolutionScale = 1) const noexcept override;
+        CreateImageBuffer(const SizeF &, float resolutionScale = 1) const noexcept override;
 
-      void DrawImageBuffer(boo::ImageBuffer &, const boo::FloatRect &destRect, const boo::FloatRect &srcRect,
+      void DrawImageBuffer(boo::ImageBuffer &, const RectF &destRect, const RectF &srcRect,
                            boo::ImagePaintingOptions) noexcept override;
 
       using RecorderImpl::DrawImageBuffer;
@@ -200,7 +200,7 @@ namespace krys::ui
 
     using ImageBufferBackend::GetPixelBuffer;
 
-    void GetPixelBuffer(const boo::IntRect &sourceRect, boo::PixelBuffer &destination) noexcept override;
+    void GetPixelBuffer(const RectI &sourceRect, boo::PixelBuffer &destination) noexcept override;
 
     /// @brief Renders what's been flushed into the texture with @p renderer, recording into @p commands,
     /// and returns the texture; invalid if it can't be made.
@@ -279,7 +279,7 @@ namespace krys::ui
     void DestroyRetiredTextures() noexcept;
 
     /// @brief An accelerated buffer of @p size logical units; null if it's empty.
-    KRYS_NODISCARD RefPtr<boo::ImageBuffer> Create(const boo::FloatSize &size, boo::RenderingPurpose purpose,
+    KRYS_NODISCARD RefPtr<boo::ImageBuffer> Create(const SizeF &size, boo::RenderingPurpose purpose,
                                                    float resolutionScale) noexcept;
 
     /// @brief Called by a backend as it's made.

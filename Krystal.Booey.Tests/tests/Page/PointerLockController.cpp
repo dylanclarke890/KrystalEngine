@@ -173,13 +173,12 @@ namespace krys::boo::tests
         html::EventLoop::Current().RunUntilIdle();
       }
 
-      KRYS_NODISCARD static PlatformMouseEvent Mouse(Type type, double x, double y, DoublePoint movement = {},
+      KRYS_NODISCARD static PlatformMouseEvent Mouse(Type type, double x, double y, PointD movement = {},
                                                      uint16 buttons = 0) noexcept
       {
-        PlatformMouseEvent event(DoublePoint(x, y), DoublePoint(x, y),
-                                 type == Type::MouseMoved ? MouseButton::None : MouseButton::Left, type,
-                                 type == Type::MouseMoved ? 0 : 1, {}, MonotonicTime::Now(), buttons,
-                                 movement);
+        PlatformMouseEvent event(
+          PointD(x, y), PointD(x, y), type == Type::MouseMoved ? MouseButton::None : MouseButton::Left, type,
+          type == Type::MouseMoved ? 0 : 1, {}, MonotonicTime::Now(), buttons, movement);
         if (type == Type::MouseMoved)
         {
           event.SetCoalescedEvents({event});
@@ -230,7 +229,7 @@ namespace krys::boo::tests
     (void)fixture.Handler().HandleMousePressEvent(LockFixture::Mouse(Type::MousePressed, 50, 75, {}, 1));
     (void)fixture.Handler().HandleMouseReleaseEvent(LockFixture::Mouse(Type::MouseReleased, 50, 75));
     (void)fixture.Handler().HandleWheelEvent(
-      PlatformWheelEvent(IntPoint(50, 75), IntPoint(50, 75), 0, -40, 0, -1,
+      PlatformWheelEvent(PointI(50, 75), PointI(50, 75), 0, -40, 0, -1,
                          PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, MonotonicTime::Now()));
     CHECK(fixture.Take()
           == Strings {"pointermove:a", "mousemove(5,-3):a", "pointerdown:a", "mousedown:a", "pointerup:a",

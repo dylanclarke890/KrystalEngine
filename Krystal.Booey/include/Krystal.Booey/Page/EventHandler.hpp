@@ -29,9 +29,6 @@
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Editing/Selection/TextGranularity.hpp"
-#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
@@ -45,6 +42,7 @@
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Func.hpp"
@@ -218,7 +216,7 @@ namespace krys::boo
     bool _mouseDownWasSingleClickInSelection {false};
     SelectionInitiationState _selectionInitiationState {HaveNotStartedSelection};
     LayoutPoint _mouseDownContentsPosition;
-    IntPoint _dragStartPosition;
+    PointI _dragStartPosition;
     Maybe<dom::SimpleRange> _dragStartSelection;
     RefPtr<Element> _dragTarget;
     bool _mouseDownMayStartDrag {false};
@@ -250,8 +248,8 @@ namespace krys::boo
     int32 _clickCount {0};
 
     // Same coordinates as PlatformMouseEvent::Position().
-    Maybe<DoublePoint> _lastKnownMousePosition;
-    Maybe<DoublePoint> _lastKnownMouseGlobalPosition;
+    Maybe<PointD> _lastKnownMousePosition;
+    Maybe<PointD> _lastKnownMouseGlobalPosition;
     MonotonicTime::duration _mouseDownTimestamp {};
     /// @brief How long the longest mouse move took to handle (real time), which picks the fake mouse move
     /// interval.
@@ -340,7 +338,7 @@ namespace krys::boo
       return _mousePressed;
     }
 
-    KRYS_NODISCARD Maybe<DoublePoint> LastKnownMousePosition() const noexcept
+    KRYS_NODISCARD Maybe<PointD> LastKnownMousePosition() const noexcept
     {
       return _lastKnownMousePosition;
     }
@@ -401,7 +399,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ShouldUpdateAutoscroll() const noexcept;
 
-    KRYS_NODISCARD IntPoint TargetPositionInWindowForSelectionAutoscroll() const noexcept;
+    KRYS_NODISCARD PointI TargetPositionInWindowForSelectionAutoscroll() const noexcept;
 
     KRYS_NODISCARD RenderBox *AutoscrollRenderer() const noexcept;
 
@@ -638,16 +636,16 @@ namespace krys::boo
 
     bool DispatchDragStartEventOnSourceElement(dom::DataTransfer &dataTransfer) noexcept;
 
-    KRYS_NODISCARD bool DragHysteresisExceeded(const FloatPoint &dragViewportLocation) const noexcept;
+    KRYS_NODISCARD bool DragHysteresisExceeded(const PointF &dragViewportLocation) const noexcept;
 
-    KRYS_NODISCARD bool MouseMovementExceedsThreshold(const FloatPoint &viewportLocation,
+    KRYS_NODISCARD bool MouseMovementExceedsThreshold(const PointF &viewportLocation,
                                                       int32 pointsThreshold) const noexcept;
 
     static void InvalidateDataTransfer() noexcept;
 
 #pragma endregion
 
-    void SetLastKnownMousePosition(DoublePoint position, DoublePoint globalPosition) noexcept;
+    void SetLastKnownMousePosition(PointD position, PointD globalPosition) noexcept;
 
     void InvalidateClick() noexcept;
 
@@ -705,10 +703,10 @@ namespace krys::boo
     /// @param biasedDelta The delta whose axes `overscroll-behavior` may stop from passing to the boxes
     /// further out.
     bool HandleWheelEventInAppropriateEnclosingBox(Node *startNode, const PlatformWheelEvent &event,
-                                                   FloatSize biasedDelta) noexcept;
+                                                   SizeF biasedDelta) noexcept;
 
     bool HandleWheelEventInAppropriateEnclosingBox(Node *startNode, const WheelEvent &wheelEvent,
-                                                   const FloatSize &filteredPlatformDelta) noexcept;
+                                                   const SizeF &filteredPlatformDelta) noexcept;
 
     KRYS_NODISCARD static bool ScrollableAreaCanHandleEvent(const PlatformWheelEvent &wheelEvent,
                                                             ScrollableArea &scrollableArea) noexcept;
@@ -723,7 +721,7 @@ namespace krys::boo
     /// and `MouseEntered` to @p scrollbar if it's set as the new one.
     void UpdateLastScrollbarUnderMouse(Scrollbar *scrollbar, SetOrClearLastScrollbar setOrClear) noexcept;
 
-    KRYS_NODISCARD bool IsInsideScrollbar(const IntPoint &windowPoint) const noexcept;
+    KRYS_NODISCARD bool IsInsideScrollbar(const PointI &windowPoint) const noexcept;
 
 #pragma region Selection
 

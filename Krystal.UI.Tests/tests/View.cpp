@@ -199,7 +199,7 @@ namespace krys::ui::tests
   TEST_CASE("View: lays out at the viewport's size", "[UI]")
   {
     View view({400, 300});
-    CHECK(view.ViewportSize() == boo::IntSize(400, 300));
+    CHECK(view.ViewportSize() == SizeI(400, 300));
     view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } #half { width: 50% }</style>"
                   u8"<div id=full>a</div><div id=half>b</div>");
     WaitForLoad(view);
@@ -211,7 +211,7 @@ namespace krys::ui::tests
     {
       view.Resize({600, 300});
       view.UpdateRendering();
-      CHECK(view.ViewportSize() == boo::IntSize(600, 300));
+      CHECK(view.ViewportSize() == SizeI(600, 300));
       CHECK(WidthOf(view, u8"full") == 600);
       CHECK(WidthOf(view, u8"half") == 300);
     }
@@ -237,7 +237,7 @@ namespace krys::ui::tests
     view.SetDeviceScaleFactor(2);
     view.UpdateRendering();
     CHECK(view.DeviceScaleFactor() == 2);
-    CHECK(view.ViewportSize() == boo::IntSize(200, 150));
+    CHECK(view.ViewportSize() == SizeI(200, 150));
     CHECK(WidthOf(view, u8"a") == 100);
     CHECK(view.Document().Window()->DevicePixelRatio() == 2);
 
@@ -245,14 +245,14 @@ namespace krys::ui::tests
     {
       view.Resize({600, 300});
       view.UpdateRendering();
-      CHECK(view.ViewportSize() == boo::IntSize(300, 150));
+      CHECK(view.ViewportSize() == SizeI(300, 150));
       CHECK(WidthOf(view, u8"a") == 150);
     }
 
     SECTION("A fraction lays out as many CSS pixels as fit, to the nearest")
     {
       view.SetDeviceScaleFactor(1.5f);
-      CHECK(view.ViewportSize() == boo::IntSize(267, 200));
+      CHECK(view.ViewportSize() == SizeI(267, 200));
       // Scales that aren't positive and finite are ignored.
       view.SetDeviceScaleFactor(0);
       view.SetDeviceScaleFactor(std::numeric_limits<float>::infinity());
@@ -811,7 +811,7 @@ namespace krys::ui::tests
                   u8"</style><div id=a></div>");
     WaitForLoad(view);
     view.UpdateRendering();
-    CHECK(view.ScreenOrigin() == boo::IntPoint());
+    CHECK(view.ScreenOrigin() == PointI());
     view.SetScreenOrigin({100, 200});
 
     // Each event as `type:screenX,screenY`.
@@ -1153,7 +1153,7 @@ namespace krys::ui::tests
   TEST_CASE("View: a tap puts the caret under the finger, as a click does", "[UI]")
   {
     // In the middle of "wonderful", which runs from 6 to 15.
-    const boo::IntPoint point(120, 10);
+    const PointI point(120, 10);
 
     // Each in its own view, as a click and a tap at the same place would count as a double click.
     auto caretOffsetAfter = [&](auto press)
@@ -1186,10 +1186,10 @@ namespace krys::ui::tests
         touch.Type = pal::PointerType::Touch;
         touch.Action = pal::PointerAction::Pressed;
         touch.InContact = true;
-        (void)view.TouchInput(boo::DoublePoint(point), touch);
+        (void)view.TouchInput(PointD(point), touch);
         touch.Action = pal::PointerAction::Released;
         touch.InContact = false;
-        (void)view.TouchInput(boo::DoublePoint(point), touch);
+        (void)view.TouchInput(PointD(point), touch);
       });
     CHECK(tapped == clicked);
   }
@@ -1245,7 +1245,7 @@ namespace krys::ui::tests
                                 Func<void(boo::Event &)>([](boo::Event &event) { event.PreventDefault(); })));
     };
 
-    auto touch = [&](pal::PointerAction action, boo::DoublePoint point, uint32 id = 1)
+    auto touch = [&](pal::PointerAction action, PointD point, uint32 id = 1)
     {
       pal::PointerInput input;
       input.Id = id;
@@ -1254,7 +1254,7 @@ namespace krys::ui::tests
       input.InContact = action == pal::PointerAction::Pressed || action == pal::PointerAction::Moved;
       (void)view.TouchInput(point, input);
     };
-    auto tap = [&](boo::DoublePoint point)
+    auto tap = [&](PointD point)
     {
       touch(pal::PointerAction::Pressed, point);
       touch(pal::PointerAction::Released, point);
@@ -1312,13 +1312,13 @@ namespace krys::ui::tests
       touch(pal::PointerAction::Pressed, {100, 200});
       // Within the threshold, nothing scrolls.
       touch(pal::PointerAction::Moved, {100, 195});
-      CHECK(view.ScrollPosition() == boo::IntPoint());
+      CHECK(view.ScrollPosition() == PointI());
       touch(pal::PointerAction::Moved, {100, 150});
       CHECK(records == List<std::string> {"pointerdown:tall/touch3", "pointercancel:tall/touch3"});
-      CHECK(view.ScrollPosition() == boo::IntPoint(0, 50));
+      CHECK(view.ScrollPosition() == PointI(0, 50));
       frame();
       touch(pal::PointerAction::Moved, {100, 100});
-      CHECK(view.ScrollPosition() == boo::IntPoint(0, 100));
+      CHECK(view.ScrollPosition() == PointI(0, 100));
       touch(pal::PointerAction::Released, {100, 100});
       // No pointerup or click follows the cancelled pointer.
       CHECK(records == List<std::string> {"pointerdown:tall/touch3", "pointercancel:tall/touch3"});
@@ -1358,7 +1358,7 @@ namespace krys::ui::tests
       touch(pal::PointerAction::Pressed, {10, 60});
       touch(pal::PointerAction::Moved, {10, 160});
       touch(pal::PointerAction::Released, {10, 160});
-      CHECK(view.ScrollPosition() == boo::IntPoint());
+      CHECK(view.ScrollPosition() == PointI());
       CHECK(records == List<std::string> {"pointerdown:none/touch3", "pointerup:none/touch3"});
     }
 
@@ -1369,12 +1369,12 @@ namespace krys::ui::tests
       touch(pal::PointerAction::Moved, {100, 60});
       touch(pal::PointerAction::Moved, {40, 60});
       touch(pal::PointerAction::Released, {40, 60});
-      CHECK(view.ScrollPosition() == boo::IntPoint());
+      CHECK(view.ScrollPosition() == PointI());
 
       // Sideways, it pans, along the one axis.
       touch(pal::PointerAction::Pressed, {100, 125});
       touch(pal::PointerAction::Moved, {40, 115});
-      CHECK(view.ScrollPosition() == boo::IntPoint(60, 0));
+      CHECK(view.ScrollPosition() == PointI(60, 0));
       touch(pal::PointerAction::Released, {40, 115});
     }
 
@@ -1384,7 +1384,7 @@ namespace krys::ui::tests
       touch(pal::PointerAction::Pressed, {100, 200});
       touch(pal::PointerAction::Moved, {100, 150});
       touch(pal::PointerAction::Released, {100, 150});
-      CHECK(view.ScrollPosition() == boo::IntPoint());
+      CHECK(view.ScrollPosition() == PointI());
       CHECK(records == List<std::string> {"pointerdown:tall/touch3", "pointerup:tall/touch3"});
     }
 
@@ -1399,7 +1399,7 @@ namespace krys::ui::tests
       // Twice as far apart: twice the scale, with the document's (150, 200) between them at (200, 200).
       touch(pal::PointerAction::Moved, {300, 200}, 2);
       CHECK(view.GetPage().PageScaleFactor() == 2);
-      CHECK(view.ScrollPosition() == boo::IntPoint(100, 200));
+      CHECK(view.ScrollPosition() == PointI(100, 200));
 
       // The scale has its limits.
       touch(pal::PointerAction::Moved, {1'000, 200}, 2);
@@ -1436,7 +1436,7 @@ namespace krys::ui::tests
     auto handle =
       input.AddEventListener(u8"change", Func<void(boo::Event &)>([&](boo::Event &) { ++changes; }));
 
-    auto touch = [&](pal::PointerAction action, boo::DoublePoint point)
+    auto touch = [&](pal::PointerAction action, PointD point)
     {
       pal::PointerInput pointer;
       pointer.Id = 1;
@@ -1453,7 +1453,7 @@ namespace krys::ui::tests
       touch(pal::PointerAction::Moved, {100, y + 5});
       touch(pal::PointerAction::Moved, {190, y + 30});
       CHECK(input.ValueAsNumber() > 90);
-      CHECK(view.ScrollPosition() == boo::IntPoint());
+      CHECK(view.ScrollPosition() == PointI());
       CHECK(changes == 0);
       touch(pal::PointerAction::Released, {190, y + 30});
       CHECK(changes == 1);
@@ -1854,12 +1854,12 @@ namespace krys::ui::tests
     Ref<ScrollCounter> counter = CreateRef<ScrollCounter>();
     view.Document().AddEventListener(u8"scroll", counter, false);
 
-    CHECK(view.ScrollPosition() == boo::IntPoint());
+    CHECK(view.ScrollPosition() == PointI());
     view.ScrollTo({0, 150});
-    CHECK(view.ScrollPosition() == boo::IntPoint(0, 150));
+    CHECK(view.ScrollPosition() == PointI(0, 150));
     // Clamped to the document, and `scroll` fires at the next rendering update.
     view.ScrollTo({0, 1'000});
-    CHECK(view.ScrollPosition() == boo::IntPoint(0, 400));
+    CHECK(view.ScrollPosition() == PointI(0, 400));
     CHECK(counter->Count == 0);
     view.UpdateRendering();
     CHECK(counter->Count == 1);
@@ -1886,13 +1886,13 @@ namespace krys::ui::tests
     // The content moving up and left scrolls down and right, whatever the wheel's settings.
     CHECK_FALSE(pan(pal::TouchpadPanPhase::Began, 0, 0));
     CHECK(pan(pal::TouchpadPanPhase::Changed, 0, -7));
-    CHECK(view.ScrollPosition() == boo::IntPoint(0, 7));
+    CHECK(view.ScrollPosition() == PointI(0, 7));
     CHECK(pan(pal::TouchpadPanPhase::Changed, -12, 0));
-    CHECK(view.ScrollPosition() == boo::IntPoint(12, 7));
+    CHECK(view.ScrollPosition() == PointI(12, 7));
     CHECK(pan(pal::TouchpadPanPhase::MomentumChanged, 0, -5));
-    CHECK(view.ScrollPosition() == boo::IntPoint(12, 12));
+    CHECK(view.ScrollPosition() == PointI(12, 12));
     CHECK_FALSE(pan(pal::TouchpadPanPhase::MomentumEnded, 0, 0));
-    CHECK(view.ScrollPosition() == boo::IntPoint(12, 12));
+    CHECK(view.ScrollPosition() == PointI(12, 12));
   }
 
   TEST_CASE("View: the wheel scrolls", "[UI]")
@@ -1910,20 +1910,20 @@ namespace krys::ui::tests
 
     // A notch towards the user is three lines down, at 100 pixels per three lines.
     CHECK(view.MouseWheel({50, 50}, 0, -1, {}, threeLines));
-    CHECK(view.ScrollPosition() == boo::IntPoint(0, 100));
+    CHECK(view.ScrollPosition() == PointI(0, 100));
     // Fractions of a notch, from touchpads.
     CHECK(view.MouseWheel({50, 50}, 0, 0.5f, {}, threeLines));
-    CHECK(view.ScrollPosition() == boo::IntPoint(0, 50));
+    CHECK(view.ScrollPosition() == PointI(0, 50));
 
     // The horizontal wheel, and the vertical one with Shift, scroll sideways.
     CHECK(view.MouseWheel({50, 50}, 0.5f, 0, {}, threeLines));
-    CHECK(view.ScrollPosition() == boo::IntPoint(50, 50));
+    CHECK(view.ScrollPosition() == PointI(50, 50));
     CHECK(view.MouseWheel({50, 50}, 0, -0.5f, pal::KeyModifiers {pal::KeyModifier::Shift}, threeLines));
-    CHECK(view.ScrollPosition() == boo::IntPoint(100, 50));
+    CHECK(view.ScrollPosition() == PointI(100, 50));
 
     // A page per notch: four fifths of the 79 pixels in view, less the horizontal scrollbar.
     CHECK(view.MouseWheel({50, 50}, 0, -1, {}, {.Lines = null, .Chars = 3}));
-    CHECK(view.ScrollPosition() == boo::IntPoint(100, 113));
+    CHECK(view.ScrollPosition() == PointI(100, 113));
 
     // No turn, no event.
     CHECK_FALSE(view.MouseWheel({50, 50}, 0, 0, {}, threeLines));
@@ -2176,7 +2176,7 @@ namespace krys::ui::tests
 
     auto &select = Downcast<boo::HTMLSelectElement>(*view.Document().GetElementById(u8"s"));
     auto box = select.GetBoundingClientRect();
-    boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+    PointI inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
     auto changes = 0;
 
     struct Counter : public boo::EventListenerCallback
@@ -2240,8 +2240,8 @@ namespace krys::ui::tests
     REQUIRE_FALSE(date.HasException());
     REQUIRE(date.Value());
     auto dateBox = date.Value()->GetBoundingClientRect();
-    boo::IntPoint onDate(popup->Rect().X() + static_cast<int32>(dateBox->X()) + 5,
-                         popup->Rect().Y() + static_cast<int32>(dateBox->Y()) + 3);
+    PointI onDate(popup->Rect().X() + static_cast<int32>(dateBox->X()) + 5,
+                  popup->Rect().Y() + static_cast<int32>(dateBox->Y()) + 3);
     view.MouseMoved(onDate);
     CHECK(popup->HighlightedIndex() == 4);
     view.MousePressed(onDate, pal::MouseButton::Left);
@@ -2269,11 +2269,11 @@ namespace krys::ui::tests
   namespace
   {
     /// @brief The middle of @p element, in its view's viewport offset by @p origin.
-    KRYS_NODISCARD boo::IntPoint CentreOf(boo::Element &element, boo::IntPoint origin = {}) noexcept
+    KRYS_NODISCARD PointI CentreOf(boo::Element &element, PointI origin = {}) noexcept
     {
       auto box = element.GetBoundingClientRect();
-      return boo::IntPoint(origin.X() + static_cast<int32>(box->X() + box->Width() / 2),
-                           origin.Y() + static_cast<int32>(box->Y() + box->Height() / 2));
+      return PointI(origin.X() + static_cast<int32>(box->X() + box->Width() / 2),
+                    origin.Y() + static_cast<int32>(box->Y() + box->Height() / 2));
     }
 
     /// @brief The days since 1970-01-01 of the date @p date, as the date picker's cells name them.
@@ -2310,7 +2310,7 @@ namespace krys::ui::tests
 
     auto &select = Downcast<boo::HTMLSelectElement>(*view.Document().GetElementById(u8"s"));
     auto box = select.GetBoundingClientRect();
-    boo::IntPoint inside((static_cast<int32>(box->X()) + 5) * 2, (static_cast<int32>(box->Y()) + 5) * 2);
+    PointI inside((static_cast<int32>(box->X()) + 5) * 2, (static_cast<int32>(box->Y()) + 5) * 2);
     view.MousePressed(inside, pal::MouseButton::Left);
     view.MouseReleased(inside, pal::MouseButton::Left);
     auto *popup = static_cast<PopupMenuOverlay *>(view.ShownOverlay());
@@ -2326,8 +2326,8 @@ namespace krys::ui::tests
     REQUIRE_FALSE(item.HasException());
     REQUIRE(item.Value());
     auto itemBox = item.Value()->GetBoundingClientRect();
-    boo::IntPoint onItem((popup->Rect().X() + static_cast<int32>(itemBox->X()) + 5) * 2,
-                         (popup->Rect().Y() + static_cast<int32>(itemBox->Y()) + 5) * 2);
+    PointI onItem((popup->Rect().X() + static_cast<int32>(itemBox->X()) + 5) * 2,
+                  (popup->Rect().Y() + static_cast<int32>(itemBox->Y()) + 5) * 2);
     view.MouseMoved(onItem);
     view.MousePressed(onItem, pal::MouseButton::Left);
     view.MouseReleased(onItem, pal::MouseButton::Left);
@@ -2345,7 +2345,7 @@ namespace krys::ui::tests
 
     auto &input = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"d"));
     auto box = input.GetBoundingClientRect();
-    boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+    PointI inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
     auto changes = CreateRef<EventCounter>();
     input.AddEventListener(u8"change", changes, false);
     auto open = [&]
@@ -2470,7 +2470,7 @@ namespace krys::ui::tests
 
     auto &input = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"c"));
     auto box = input.GetBoundingClientRect();
-    boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+    PointI inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
     auto changes = CreateRef<EventCounter>();
     input.AddEventListener(u8"change", changes, false);
     auto open = [&]
@@ -2591,10 +2591,10 @@ namespace krys::ui::tests
 
     auto &input = Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"t"));
     auto box = input.GetBoundingClientRect();
-    boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+    PointI inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
     auto changes = CreateRef<EventCounter>();
     input.AddEventListener(u8"change", changes, false);
-    auto click = [&](boo::IntPoint point)
+    auto click = [&](PointI point)
     {
       view.MousePressed(point, pal::MouseButton::Left);
       view.MouseReleased(point, pal::MouseButton::Left);
@@ -2638,8 +2638,8 @@ namespace krys::ui::tests
     // The list button opens it; Escape closes it.
     (void)input.SetValue(u8"");
     auto button = input.DataListButtonElement()->GetBoundingClientRect();
-    click(boo::IntPoint(static_cast<int32>(button->X() + button->Width() / 2),
-                        static_cast<int32>(button->Y() + button->Height() / 2)));
+    click(PointI(static_cast<int32>(button->X() + button->Width() / 2),
+                 static_cast<int32>(button->Y() + button->Height() / 2)));
     list = static_cast<DataListSuggestionsOverlay *>(view.ShownOverlay());
     REQUIRE(list);
     CHECK(list->Suggestions().size() == 3uz);

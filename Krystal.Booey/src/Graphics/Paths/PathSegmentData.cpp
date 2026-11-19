@@ -35,7 +35,7 @@
 
 namespace krys::boo
 {
-  inline void ExtendRect(FloatRect &rect, FloatPoint a, FloatPoint b, FloatPoint c) noexcept
+  inline void ExtendRect(RectF &rect, PointF a, PointF b, PointF c) noexcept
   {
     auto minX = Min3(a.X(), b.X(), c.X());
     auto maxX = Max3(a.X(), b.X(), c.X());
@@ -45,7 +45,7 @@ namespace krys::boo
     rect.Extend({minX, minY}, {maxX, maxY});
   }
 
-  inline void ExtendRect(FloatRect &rect, FloatPoint a, FloatPoint b, FloatPoint c, FloatPoint d) noexcept
+  inline void ExtendRect(RectF &rect, PointF a, PointF b, PointF c, PointF d) noexcept
   {
     auto minX = Min4(a.X(), b.X(), c.X(), d.X());
     auto maxX = Max4(a.X(), b.X(), c.X(), d.X());
@@ -55,23 +55,23 @@ namespace krys::boo
     rect.Extend({minX, minY}, {maxX, maxY});
   }
 
-  FloatPoint PathMoveTo::CalculateEndPoint(const FloatPoint &, FloatPoint &lastMoveToPoint) const noexcept
+  PointF PathMoveTo::CalculateEndPoint(const PointF &, PointF &lastMoveToPoint) const noexcept
   {
     lastMoveToPoint = Point;
     return lastMoveToPoint;
   }
 
-  Maybe<FloatPoint> PathMoveTo::TryGetEndPointWithoutContext() const noexcept
+  Maybe<PointF> PathMoveTo::TryGetEndPointWithoutContext() const noexcept
   {
-    FloatPoint lastMoveToPoint;
+    PointF lastMoveToPoint;
     return CalculateEndPoint({}, lastMoveToPoint);
   }
 
-  void PathMoveTo::ExtendFastBoundingRect(const FloatPoint &, const FloatPoint &, FloatRect &) const noexcept
+  void PathMoveTo::ExtendFastBoundingRect(const PointF &, const PointF &, RectF &) const noexcept
   {
   }
 
-  void PathMoveTo::ExtendBoundingRect(const FloatPoint &, const FloatPoint &, FloatRect &) const noexcept
+  void PathMoveTo::ExtendBoundingRect(const PointF &, const PointF &, RectF &) const noexcept
   {
   }
 
@@ -85,25 +85,25 @@ namespace krys::boo
     Point = transform.MapPoint(Point);
   }
 
-  FloatPoint PathLineTo::CalculateEndPoint(const FloatPoint &, FloatPoint &) const noexcept
+  PointF PathLineTo::CalculateEndPoint(const PointF &, PointF &) const noexcept
   {
     return Point;
   }
 
-  Maybe<FloatPoint> PathLineTo::TryGetEndPointWithoutContext() const noexcept
+  Maybe<PointF> PathLineTo::TryGetEndPointWithoutContext() const noexcept
   {
-    FloatPoint lastMoveToPoint;
+    PointF lastMoveToPoint;
     return CalculateEndPoint({}, lastMoveToPoint);
   }
 
-  void PathLineTo::ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
-                                          FloatRect &boundingRect) const noexcept
+  void PathLineTo::ExtendFastBoundingRect(const PointF &currentPoint, const PointF &lastMoveToPoint,
+                                          RectF &boundingRect) const noexcept
   {
     ExtendBoundingRect(currentPoint, lastMoveToPoint, boundingRect);
   }
 
-  void PathLineTo::ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &,
-                                      FloatRect &boundingRect) const noexcept
+  void PathLineTo::ExtendBoundingRect(const PointF &currentPoint, const PointF &,
+                                      RectF &boundingRect) const noexcept
   {
     boundingRect.Extend(currentPoint);
     boundingRect.Extend(Point);
@@ -119,19 +119,19 @@ namespace krys::boo
     Point = transform.MapPoint(Point);
   }
 
-  FloatPoint PathQuadCurveTo::CalculateEndPoint(const FloatPoint &, FloatPoint &) const noexcept
+  PointF PathQuadCurveTo::CalculateEndPoint(const PointF &, PointF &) const noexcept
   {
     return EndPoint;
   }
 
-  Maybe<FloatPoint> PathQuadCurveTo::TryGetEndPointWithoutContext() const noexcept
+  Maybe<PointF> PathQuadCurveTo::TryGetEndPointWithoutContext() const noexcept
   {
-    FloatPoint lastMoveToPoint;
+    PointF lastMoveToPoint;
     return CalculateEndPoint({}, lastMoveToPoint);
   }
 
-  void PathQuadCurveTo::ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &,
-                                               FloatRect &boundingRect) const noexcept
+  void PathQuadCurveTo::ExtendFastBoundingRect(const PointF &currentPoint, const PointF &,
+                                               RectF &boundingRect) const noexcept
   {
     ExtendRect(boundingRect, currentPoint, ControlPoint, EndPoint);
   }
@@ -186,17 +186,17 @@ namespace krys::boo
     return CalculateQuadratic(t, p0, p1, p2);
   }
 
-  KRYS_NODISCARD static FloatPoint CalculateQuadraticExtremity(const FloatPoint &currentPoint,
-                                                               const FloatPoint &controlPoint,
-                                                               const FloatPoint &endPoint) noexcept
+  KRYS_NODISCARD static PointF CalculateQuadraticExtremity(const PointF &currentPoint,
+                                                           const PointF &controlPoint,
+                                                           const PointF &endPoint) noexcept
   {
     float x = CalculateQuadraticExtremity(currentPoint.X(), controlPoint.X(), endPoint.X());
     float y = CalculateQuadraticExtremity(currentPoint.Y(), controlPoint.Y(), endPoint.Y());
     return {x, y};
   }
 
-  void PathQuadCurveTo::ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &,
-                                           FloatRect &boundingRect) const noexcept
+  void PathQuadCurveTo::ExtendBoundingRect(const PointF &currentPoint, const PointF &,
+                                           RectF &boundingRect) const noexcept
   {
     auto extremity = CalculateQuadraticExtremity(currentPoint, ControlPoint, EndPoint);
     ExtendRect(boundingRect, currentPoint, extremity, EndPoint);
@@ -213,19 +213,19 @@ namespace krys::boo
     EndPoint = transform.MapPoint(EndPoint);
   }
 
-  FloatPoint PathBezierCurveTo::CalculateEndPoint(const FloatPoint &, FloatPoint &) const noexcept
+  PointF PathBezierCurveTo::CalculateEndPoint(const PointF &, PointF &) const noexcept
   {
     return EndPoint;
   }
 
-  Maybe<FloatPoint> PathBezierCurveTo::TryGetEndPointWithoutContext() const noexcept
+  Maybe<PointF> PathBezierCurveTo::TryGetEndPointWithoutContext() const noexcept
   {
-    FloatPoint lastMoveToPoint;
+    PointF lastMoveToPoint;
     return CalculateEndPoint({}, lastMoveToPoint);
   }
 
-  void PathBezierCurveTo::ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &,
-                                                 FloatRect &boundingRect) const noexcept
+  void PathBezierCurveTo::ExtendFastBoundingRect(const PointF &currentPoint, const PointF &,
+                                                 RectF &boundingRect) const noexcept
   {
     ExtendRect(boundingRect, currentPoint, ControlPoint1, ControlPoint2, EndPoint);
   }
@@ -310,18 +310,19 @@ namespace krys::boo
     return std::make_pair(s1, s2);
   }
 
-  KRYS_NODISCARD static std::pair<FloatPoint, FloatPoint>
-    CalculateBezierExtremities(const FloatPoint &currentPoint, const FloatPoint &controlPoint1,
-                               const FloatPoint &controlPoint2, const FloatPoint &endPoint) noexcept
+  KRYS_NODISCARD static std::pair<PointF, PointF> CalculateBezierExtremities(const PointF &currentPoint,
+                                                                             const PointF &controlPoint1,
+                                                                             const PointF &controlPoint2,
+                                                                             const PointF &endPoint) noexcept
   {
     auto x = CalculateBezierExtremities(currentPoint.X(), controlPoint1.X(), controlPoint2.X(), endPoint.X());
     auto y = CalculateBezierExtremities(currentPoint.Y(), controlPoint1.Y(), controlPoint2.Y(), endPoint.Y());
 
-    return std::make_pair(FloatPoint(x.first, y.first), FloatPoint(x.second, y.second));
+    return std::make_pair(PointF(x.first, y.first), PointF(x.second, y.second));
   }
 
-  void PathBezierCurveTo::ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &,
-                                             FloatRect &boundingRect) const noexcept
+  void PathBezierCurveTo::ExtendBoundingRect(const PointF &currentPoint, const PointF &,
+                                             RectF &boundingRect) const noexcept
   {
     auto bezierExtremities = CalculateBezierExtremities(currentPoint, ControlPoint1, ControlPoint2, EndPoint);
     ExtendRect(boundingRect, currentPoint, bezierExtremities.first, bezierExtremities.second, EndPoint);
@@ -345,9 +346,9 @@ namespace krys::boo
     // out.
     struct ArcToGeometry
     {
-      FloatPoint StartTangent;
-      FloatPoint EndTangent;
-      FloatPoint Center;
+      PointF StartTangent;
+      PointF EndTangent;
+      PointF Center;
       float StartAngle;
       float EndAngle;
       RotationDirection Direction;
@@ -355,12 +356,11 @@ namespace krys::boo
 
     // Nothing when the lines are parallel or the radius is zero, in which case the arc is a line to the
     // corner, as a platform path makes it.
-    KRYS_NODISCARD Maybe<ArcToGeometry> ComputeArcToGeometry(const FloatPoint &currentPoint,
-                                                             const FloatPoint &corner, const FloatPoint &next,
-                                                             float radius) noexcept
+    KRYS_NODISCARD Maybe<ArcToGeometry> ComputeArcToGeometry(const PointF &currentPoint, const PointF &corner,
+                                                             const PointF &next, float radius) noexcept
     {
-      const FloatSize in = currentPoint - corner;
-      const FloatSize out = next - corner;
+      const SizeF in = currentPoint - corner;
+      const SizeF out = next - corner;
       const float inLength = std::hypot(in.Width(), in.Height());
       const float outLength = std::hypot(out.Width(), out.Height());
       if (!radius || !inLength || !outLength)
@@ -368,8 +368,8 @@ namespace krys::boo
         return null;
       }
 
-      const FloatSize inUnit = in / inLength;
-      const FloatSize outUnit = out / outLength;
+      const SizeF inUnit = in / inLength;
+      const SizeF outUnit = out / outLength;
       const float cross = inUnit.Width() * outUnit.Height() - inUnit.Height() * outUnit.Width();
       if (std::abs(cross) < 1e-6f)
       {
@@ -383,7 +383,7 @@ namespace krys::boo
       const float tangentDistance = radius / std::tan(halfAngle);
       const float centerDistance = radius / std::sin(halfAngle);
 
-      FloatSize bisector = inUnit + outUnit;
+      SizeF bisector = inUnit + outUnit;
       bisector = bisector / std::hypot(bisector.Width(), bisector.Height());
 
       ArcToGeometry geometry;
@@ -399,9 +399,8 @@ namespace krys::boo
       return geometry;
     }
 
-    KRYS_NODISCARD FloatPoint CalculateArcToEndPoint(const FloatPoint &currentPoint,
-                                                     const FloatPoint &controlPoint1,
-                                                     const FloatPoint &controlPoint2, float radius) noexcept
+    KRYS_NODISCARD PointF CalculateArcToEndPoint(const PointF &currentPoint, const PointF &controlPoint1,
+                                                 const PointF &controlPoint2, float radius) noexcept
     {
       if (auto geometry = ComputeArcToGeometry(currentPoint, controlPoint1, controlPoint2, radius))
       {
@@ -411,8 +410,8 @@ namespace krys::boo
     }
 
     // The point at the angle on an ellipse, rotated by the rotation (in radians) about its center.
-    KRYS_NODISCARD FloatPoint EllipsePoint(const FloatPoint &center, float radiusX, float radiusY,
-                                           float rotation, float angle) noexcept
+    KRYS_NODISCARD PointF EllipsePoint(const PointF &center, float radiusX, float radiusY, float rotation,
+                                       float angle) noexcept
     {
       const float x = radiusX * std::cos(angle);
       const float y = radiusY * std::sin(angle);
@@ -423,10 +422,9 @@ namespace krys::boo
 
     // Applies an arc of an ellipse as cubic beziers of at most a quarter turn each, after a line from the
     // current point to its start (or a move to it, when there is none).
-    void ApplyEllipseArcElements(const Maybe<FloatPoint> &currentPoint, const FloatPoint &center,
-                                 float radiusX, float radiusY, float rotation, float startAngle,
-                                 float endAngle, RotationDirection direction,
-                                 const PathElementApplier &applier) noexcept
+    void ApplyEllipseArcElements(const Maybe<PointF> &currentPoint, const PointF &center, float radiusX,
+                                 float radiusY, float rotation, float startAngle, float endAngle,
+                                 RotationDirection direction, const PathElementApplier &applier) noexcept
     {
       constexpr float twoPi = 2 * std::numbers::pi_v<float>;
       // As a platform path sweeps: the other way round is through a whole turn less the difference.
@@ -453,7 +451,7 @@ namespace krys::boo
       const float handle = 4.f / 3.f * std::tan(step / 4);
       const float cosine = std::cos(rotation);
       const float sine = std::sin(rotation);
-      auto map = [&](float x, float y) -> FloatPoint
+      auto map = [&](float x, float y) -> PointF
       {
         x *= radiusX;
         y *= radiusY;
@@ -475,7 +473,7 @@ namespace krys::boo
 
     // Applies an arcTo from the current point: a line to the first tangent point and the arc, or a line to
     // the corner when there is no arc.
-    void ApplyArcToElements(const FloatPoint &currentPoint, const FloatPoint &corner, const FloatPoint &next,
+    void ApplyArcToElements(const PointF &currentPoint, const PointF &corner, const PointF &next,
                             float radius, const PathElementApplier &applier) noexcept
     {
       auto geometry = ComputeArcToGeometry(currentPoint, corner, next, radius);
@@ -489,46 +487,45 @@ namespace krys::boo
     }
   }
 
-  FloatPoint PathArcTo::CalculateEndPoint(const FloatPoint &currentPoint, FloatPoint &) const noexcept
+  PointF PathArcTo::CalculateEndPoint(const PointF &currentPoint, PointF &) const noexcept
   {
     return CalculateArcToEndPoint(currentPoint, ControlPoint1, ControlPoint2, Radius);
   }
 
-  Maybe<FloatPoint> PathArcTo::TryGetEndPointWithoutContext() noexcept
+  Maybe<PointF> PathArcTo::TryGetEndPointWithoutContext() noexcept
   {
     return std::nullopt;
   }
 
-  void PathArcTo::ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &,
-                                         FloatRect &boundingRect) const noexcept
+  void PathArcTo::ExtendFastBoundingRect(const PointF &currentPoint, const PointF &,
+                                         RectF &boundingRect) const noexcept
   {
     ExtendRect(boundingRect, currentPoint, ControlPoint1, ControlPoint2);
   }
 
-  void PathArcTo::ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &,
-                                     FloatRect &boundingRect) const noexcept
+  void PathArcTo::ExtendBoundingRect(const PointF &currentPoint, const PointF &,
+                                     RectF &boundingRect) const noexcept
   {
     auto endPoint = CalculateArcToEndPoint(currentPoint, ControlPoint1, ControlPoint2, Radius);
     ExtendRect(boundingRect, currentPoint, ControlPoint1, endPoint);
   }
 
-  FloatPoint PathArc::CalculateEndPoint(const FloatPoint &, FloatPoint &lastMoveToPoint) const noexcept
+  PointF PathArc::CalculateEndPoint(const PointF &, PointF &lastMoveToPoint) const noexcept
   {
     lastMoveToPoint = EllipsePoint(Center, Radius, Radius, 0, StartAngle);
     return EllipsePoint(Center, Radius, Radius, 0, EndAngle);
   }
 
-  Maybe<FloatPoint> PathArc::TryGetEndPointWithoutContext() const noexcept
+  Maybe<PointF> PathArc::TryGetEndPointWithoutContext() const noexcept
   {
-    FloatPoint lastMoveToPoint;
+    PointF lastMoveToPoint;
     return CalculateEndPoint({}, lastMoveToPoint);
   }
 
-  void PathArc::ExtendFastBoundingRect(const FloatPoint &, const FloatPoint &,
-                                       FloatRect &boundingRect) const noexcept
+  void PathArc::ExtendFastBoundingRect(const PointF &, const PointF &, RectF &boundingRect) const noexcept
   {
-    auto minXMinYCorner = Center - FloatSize {Radius, Radius};
-    auto maxXMaxYCorner = Center + FloatSize {Radius, Radius};
+    auto minXMinYCorner = Center - SizeF {Radius, Radius};
+    auto maxXMaxYCorner = Center + SizeF {Radius, Radius};
     boundingRect.Extend(minXMinYCorner, maxXMaxYCorner);
   }
 
@@ -537,10 +534,9 @@ namespace krys::boo
     return direction == RotationDirection::Clockwise ? angle : angle - radiansPerTurnFloat;
   }
 
-  void PathArc::ExtendBoundingRect(const FloatPoint &, const FloatPoint &,
-                                   FloatRect &boundingRect) const noexcept
+  void PathArc::ExtendBoundingRect(const PointF &, const PointF &, RectF &boundingRect) const noexcept
   {
-    auto circleRect = FloatRect {Center - FloatSize {Radius, Radius}, Center + FloatSize {Radius, Radius}};
+    auto circleRect = RectF {Center - SizeF {Radius, Radius}, Center + SizeF {Radius, Radius}};
 
     if (EndAngle - StartAngle >= radiansPerTurnFloat)
     {
@@ -597,48 +593,46 @@ namespace krys::boo
     boundingRect.Extend({x2, y2});
   }
 
-  FloatPoint PathClosedArc::CalculateEndPoint(const FloatPoint &, FloatPoint &lastMoveToPoint) const noexcept
+  PointF PathClosedArc::CalculateEndPoint(const PointF &, PointF &lastMoveToPoint) const noexcept
   {
     lastMoveToPoint = EllipsePoint(Arc.Center, Arc.Radius, Arc.Radius, 0, Arc.StartAngle);
     return lastMoveToPoint;
   }
 
-  Maybe<FloatPoint> PathClosedArc::TryGetEndPointWithoutContext() const noexcept
+  Maybe<PointF> PathClosedArc::TryGetEndPointWithoutContext() const noexcept
   {
-    FloatPoint lastMoveToPoint;
+    PointF lastMoveToPoint;
     return CalculateEndPoint({}, lastMoveToPoint);
   }
 
-  void PathClosedArc::ExtendFastBoundingRect(const FloatPoint &currentPoint,
-                                             const FloatPoint &lastMoveToPoint,
-                                             FloatRect &boundingRect) const noexcept
+  void PathClosedArc::ExtendFastBoundingRect(const PointF &currentPoint, const PointF &lastMoveToPoint,
+                                             RectF &boundingRect) const noexcept
   {
     Arc.ExtendFastBoundingRect(currentPoint, lastMoveToPoint, boundingRect);
   }
 
-  void PathClosedArc::ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
-                                         FloatRect &boundingRect) const noexcept
+  void PathClosedArc::ExtendBoundingRect(const PointF &currentPoint, const PointF &lastMoveToPoint,
+                                         RectF &boundingRect) const noexcept
   {
     Arc.ExtendBoundingRect(currentPoint, lastMoveToPoint, boundingRect);
   }
 
-  FloatPoint PathEllipse::CalculateEndPoint(const FloatPoint &, FloatPoint &lastMoveToPoint) const noexcept
+  PointF PathEllipse::CalculateEndPoint(const PointF &, PointF &lastMoveToPoint) const noexcept
   {
     lastMoveToPoint = EllipsePoint(Center, RadiusX, RadiusY, Rotation, StartAngle);
     return EllipsePoint(Center, RadiusX, RadiusY, Rotation, EndAngle);
   }
 
-  Maybe<FloatPoint> PathEllipse::TryGetEndPointWithoutContext() const noexcept
+  Maybe<PointF> PathEllipse::TryGetEndPointWithoutContext() const noexcept
   {
-    FloatPoint lastMoveToPoint;
+    PointF lastMoveToPoint;
     return CalculateEndPoint({}, lastMoveToPoint);
   }
 
-  void PathEllipse::ExtendFastBoundingRect(const FloatPoint &, const FloatPoint &,
-                                           FloatRect &boundingRect) const noexcept
+  void PathEllipse::ExtendFastBoundingRect(const PointF &, const PointF &, RectF &boundingRect) const noexcept
   {
-    auto minXMinYCorner = Center - FloatSize {RadiusX, RadiusY};
-    auto maxXMaxYCorner = Center + FloatSize {RadiusX, RadiusY};
+    auto minXMinYCorner = Center - SizeF {RadiusX, RadiusY};
+    auto maxXMaxYCorner = Center + SizeF {RadiusX, RadiusY};
 
     if (!Rotation)
     {
@@ -647,7 +641,7 @@ namespace krys::boo
     }
 
     // The rotation is in radians, about the centre.
-    auto rect = FloatRect {minXMinYCorner, maxXMaxYCorner};
+    auto rect = RectF {minXMinYCorner, maxXMaxYCorner};
     AffineTransform rotation;
     rotation.Translate(Center.X(), Center.Y())
       .RotateRadians(this->Rotation)
@@ -656,135 +650,127 @@ namespace krys::boo
     boundingRect.UniteEvenIfEmpty(rect);
   }
 
-  void PathEllipse::ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &,
-                                       FloatRect &boundingRect) noexcept
+  void PathEllipse::ExtendBoundingRect(const PointF &currentPoint, const PointF &,
+                                       RectF &boundingRect) noexcept
   {
     // FIXME: Implement this function.
     boundingRect.Extend(currentPoint);
   }
 
-  FloatPoint PathEllipseInRect::CalculateEndPoint(const FloatPoint &,
-                                                  FloatPoint &lastMoveToPoint) const noexcept
+  PointF PathEllipseInRect::CalculateEndPoint(const PointF &, PointF &lastMoveToPoint) const noexcept
   {
-    lastMoveToPoint = Rect.Center() + FloatSize {Rect.Width() / 2, 0};
+    lastMoveToPoint = Rect.Center() + SizeF {Rect.Width() / 2, 0};
     return lastMoveToPoint;
   }
 
-  Maybe<FloatPoint> PathEllipseInRect::TryGetEndPointWithoutContext() const noexcept
+  Maybe<PointF> PathEllipseInRect::TryGetEndPointWithoutContext() const noexcept
   {
-    FloatPoint lastMoveToPoint;
+    PointF lastMoveToPoint;
     return CalculateEndPoint({}, lastMoveToPoint);
   }
 
-  void PathEllipseInRect::ExtendFastBoundingRect(const FloatPoint &currentPoint,
-                                                 const FloatPoint &lastMoveToPoint,
-                                                 FloatRect &boundingRect) const noexcept
+  void PathEllipseInRect::ExtendFastBoundingRect(const PointF &currentPoint, const PointF &lastMoveToPoint,
+                                                 RectF &boundingRect) const noexcept
   {
     ExtendBoundingRect(currentPoint, lastMoveToPoint, boundingRect);
   }
 
-  void PathEllipseInRect::ExtendBoundingRect(const FloatPoint &, const FloatPoint &,
-                                             FloatRect &boundingRect) const noexcept
+  void PathEllipseInRect::ExtendBoundingRect(const PointF &, const PointF &,
+                                             RectF &boundingRect) const noexcept
   {
     boundingRect.UniteEvenIfEmpty(Rect);
   }
 
-  FloatPoint PathRect::CalculateEndPoint(const FloatPoint &, FloatPoint &lastMoveToPoint) const noexcept
+  PointF PathRect::CalculateEndPoint(const PointF &, PointF &lastMoveToPoint) const noexcept
   {
     lastMoveToPoint = Rect.Location();
     return lastMoveToPoint;
   }
 
-  Maybe<FloatPoint> PathRect::TryGetEndPointWithoutContext() const noexcept
+  Maybe<PointF> PathRect::TryGetEndPointWithoutContext() const noexcept
   {
-    FloatPoint lastMoveToPoint;
+    PointF lastMoveToPoint;
     return CalculateEndPoint({}, lastMoveToPoint);
   }
 
-  void PathRect::ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
-                                        FloatRect &boundingRect) const noexcept
+  void PathRect::ExtendFastBoundingRect(const PointF &currentPoint, const PointF &lastMoveToPoint,
+                                        RectF &boundingRect) const noexcept
   {
     ExtendBoundingRect(currentPoint, lastMoveToPoint, boundingRect);
   }
 
-  void PathRect::ExtendBoundingRect(const FloatPoint &, const FloatPoint &,
-                                    FloatRect &boundingRect) const noexcept
+  void PathRect::ExtendBoundingRect(const PointF &, const PointF &, RectF &boundingRect) const noexcept
   {
     boundingRect.UniteEvenIfEmpty(Rect);
   }
 
-  FloatPoint PathRoundedRect::CalculateEndPoint(const FloatPoint &,
-                                                FloatPoint &lastMoveToPoint) const noexcept
+  PointF PathRoundedRect::CalculateEndPoint(const PointF &, PointF &lastMoveToPoint) const noexcept
   {
     lastMoveToPoint = RoundedRect.Rect().Location();
     return lastMoveToPoint;
   }
 
-  Maybe<FloatPoint> PathRoundedRect::TryGetEndPointWithoutContext() const noexcept
+  Maybe<PointF> PathRoundedRect::TryGetEndPointWithoutContext() const noexcept
   {
-    FloatPoint lastMoveToPoint;
+    PointF lastMoveToPoint;
     return CalculateEndPoint({}, lastMoveToPoint);
   }
 
-  void PathRoundedRect::ExtendFastBoundingRect(const FloatPoint &currentPoint,
-                                               const FloatPoint &lastMoveToPoint,
-                                               FloatRect &boundingRect) const noexcept
+  void PathRoundedRect::ExtendFastBoundingRect(const PointF &currentPoint, const PointF &lastMoveToPoint,
+                                               RectF &boundingRect) const noexcept
   {
     ExtendBoundingRect(currentPoint, lastMoveToPoint, boundingRect);
   }
 
-  void PathRoundedRect::ExtendBoundingRect(const FloatPoint &, const FloatPoint &,
-                                           FloatRect &boundingRect) const noexcept
+  void PathRoundedRect::ExtendBoundingRect(const PointF &, const PointF &, RectF &boundingRect) const noexcept
   {
     boundingRect.UniteEvenIfEmpty(RoundedRect.Rect());
   }
 
-  FloatPoint PathContinuousRoundedRect::CalculateEndPoint(const FloatPoint &,
-                                                          FloatPoint &lastMoveToPoint) const noexcept
+  PointF PathContinuousRoundedRect::CalculateEndPoint(const PointF &, PointF &lastMoveToPoint) const noexcept
   {
     lastMoveToPoint = Rect.Location();
     return lastMoveToPoint;
   }
 
-  Maybe<FloatPoint> PathContinuousRoundedRect::TryGetEndPointWithoutContext() const noexcept
+  Maybe<PointF> PathContinuousRoundedRect::TryGetEndPointWithoutContext() const noexcept
   {
-    FloatPoint lastMoveToPoint;
+    PointF lastMoveToPoint;
     return CalculateEndPoint({}, lastMoveToPoint);
   }
 
-  void PathContinuousRoundedRect::ExtendFastBoundingRect(const FloatPoint &currentPoint,
-                                                         const FloatPoint &lastMoveToPoint,
-                                                         FloatRect &boundingRect) const noexcept
+  void PathContinuousRoundedRect::ExtendFastBoundingRect(const PointF &currentPoint,
+                                                         const PointF &lastMoveToPoint,
+                                                         RectF &boundingRect) const noexcept
   {
     ExtendBoundingRect(currentPoint, lastMoveToPoint, boundingRect);
   }
 
-  void PathContinuousRoundedRect::ExtendBoundingRect(const FloatPoint &, const FloatPoint &,
-                                                     FloatRect &boundingRect) const noexcept
+  void PathContinuousRoundedRect::ExtendBoundingRect(const PointF &, const PointF &,
+                                                     RectF &boundingRect) const noexcept
   {
     boundingRect.UniteEvenIfEmpty(Rect);
   }
 
-  FloatPoint PathDataLine::CalculateEndPoint(const FloatPoint &, FloatPoint &lastMoveToPoint) const noexcept
+  PointF PathDataLine::CalculateEndPoint(const PointF &, PointF &lastMoveToPoint) const noexcept
   {
     lastMoveToPoint = Start();
     return End();
   }
 
-  Maybe<FloatPoint> PathDataLine::TryGetEndPointWithoutContext() const noexcept
+  Maybe<PointF> PathDataLine::TryGetEndPointWithoutContext() const noexcept
   {
-    FloatPoint lastMoveToPoint;
+    PointF lastMoveToPoint;
     return CalculateEndPoint({}, lastMoveToPoint);
   }
 
-  void PathDataLine::ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
-                                            FloatRect &boundingRect) const noexcept
+  void PathDataLine::ExtendFastBoundingRect(const PointF &currentPoint, const PointF &lastMoveToPoint,
+                                            RectF &boundingRect) const noexcept
   {
     ExtendBoundingRect(currentPoint, lastMoveToPoint, boundingRect);
   }
 
-  void PathDataLine::ExtendBoundingRect(const FloatPoint &, const FloatPoint &,
-                                        FloatRect &boundingRect) const noexcept
+  void PathDataLine::ExtendBoundingRect(const PointF &, const PointF &, RectF &boundingRect) const noexcept
   {
     boundingRect.Extend(Start());
     boundingRect.Extend(End());
@@ -802,27 +788,26 @@ namespace krys::boo
     SetEnd(transform.MapPoint(End()));
   }
 
-  FloatPoint PathDataQuadCurve::CalculateEndPoint(const FloatPoint &,
-                                                  FloatPoint &lastMoveToPoint) const noexcept
+  PointF PathDataQuadCurve::CalculateEndPoint(const PointF &, PointF &lastMoveToPoint) const noexcept
   {
     lastMoveToPoint = Start;
     return EndPoint;
   }
 
-  Maybe<FloatPoint> PathDataQuadCurve::TryGetEndPointWithoutContext() const noexcept
+  Maybe<PointF> PathDataQuadCurve::TryGetEndPointWithoutContext() const noexcept
   {
-    FloatPoint lastMoveToPoint;
+    PointF lastMoveToPoint;
     return CalculateEndPoint({}, lastMoveToPoint);
   }
 
-  void PathDataQuadCurve::ExtendFastBoundingRect(const FloatPoint &, const FloatPoint &,
-                                                 FloatRect &boundingRect) const noexcept
+  void PathDataQuadCurve::ExtendFastBoundingRect(const PointF &, const PointF &,
+                                                 RectF &boundingRect) const noexcept
   {
     ExtendRect(boundingRect, Start, ControlPoint, EndPoint);
   }
 
-  void PathDataQuadCurve::ExtendBoundingRect(const FloatPoint &, const FloatPoint &,
-                                             FloatRect &boundingRect) const noexcept
+  void PathDataQuadCurve::ExtendBoundingRect(const PointF &, const PointF &,
+                                             RectF &boundingRect) const noexcept
   {
     auto extremity = CalculateQuadraticExtremity(Start, ControlPoint, EndPoint);
     ExtendRect(boundingRect, Start, extremity, EndPoint);
@@ -841,27 +826,26 @@ namespace krys::boo
     EndPoint = transform.MapPoint(EndPoint);
   }
 
-  FloatPoint PathDataBezierCurve::CalculateEndPoint(const FloatPoint &,
-                                                    FloatPoint &lastMoveToPoint) const noexcept
+  PointF PathDataBezierCurve::CalculateEndPoint(const PointF &, PointF &lastMoveToPoint) const noexcept
   {
     lastMoveToPoint = Start;
     return EndPoint;
   }
 
-  Maybe<FloatPoint> PathDataBezierCurve::TryGetEndPointWithoutContext() const noexcept
+  Maybe<PointF> PathDataBezierCurve::TryGetEndPointWithoutContext() const noexcept
   {
-    FloatPoint lastMoveToPoint;
+    PointF lastMoveToPoint;
     return CalculateEndPoint({}, lastMoveToPoint);
   }
 
-  void PathDataBezierCurve::ExtendFastBoundingRect(const FloatPoint &, const FloatPoint &,
-                                                   FloatRect &boundingRect) const noexcept
+  void PathDataBezierCurve::ExtendFastBoundingRect(const PointF &, const PointF &,
+                                                   RectF &boundingRect) const noexcept
   {
     ExtendRect(boundingRect, Start, ControlPoint1, ControlPoint2, EndPoint);
   }
 
-  void PathDataBezierCurve::ExtendBoundingRect(const FloatPoint &, const FloatPoint &,
-                                               FloatRect &boundingRect) const noexcept
+  void PathDataBezierCurve::ExtendBoundingRect(const PointF &, const PointF &,
+                                               RectF &boundingRect) const noexcept
   {
     auto bezierExtremities = CalculateBezierExtremities(Start, ControlPoint1, ControlPoint2, EndPoint);
     ExtendRect(boundingRect, Start, bezierExtremities.first, bezierExtremities.second, EndPoint);
@@ -881,49 +865,47 @@ namespace krys::boo
     EndPoint = transform.MapPoint(EndPoint);
   }
 
-  FloatPoint PathDataArc::CalculateEndPoint(const FloatPoint &, FloatPoint &lastMoveToPoint) const noexcept
+  PointF PathDataArc::CalculateEndPoint(const PointF &, PointF &lastMoveToPoint) const noexcept
   {
     lastMoveToPoint = Start;
     return CalculateArcToEndPoint(Start, ControlPoint1, ControlPoint2, Radius);
   }
 
-  Maybe<FloatPoint> PathDataArc::TryGetEndPointWithoutContext() const noexcept
+  Maybe<PointF> PathDataArc::TryGetEndPointWithoutContext() const noexcept
   {
-    FloatPoint lastMoveToPoint;
+    PointF lastMoveToPoint;
     return CalculateEndPoint({}, lastMoveToPoint);
   }
 
-  void PathDataArc::ExtendFastBoundingRect(const FloatPoint &, const FloatPoint &,
-                                           FloatRect &boundingRect) const noexcept
+  void PathDataArc::ExtendFastBoundingRect(const PointF &, const PointF &, RectF &boundingRect) const noexcept
   {
     ExtendRect(boundingRect, Start, ControlPoint1, ControlPoint2);
   }
 
-  void PathDataArc::ExtendBoundingRect(const FloatPoint &, const FloatPoint &,
-                                       FloatRect &boundingRect) const noexcept
+  void PathDataArc::ExtendBoundingRect(const PointF &, const PointF &, RectF &boundingRect) const noexcept
   {
     auto endPoint = CalculateArcToEndPoint(Start, ControlPoint1, ControlPoint2, Radius);
     ExtendRect(boundingRect, Start, ControlPoint1, endPoint);
   }
 
-  FloatPoint PathCloseSubpath::CalculateEndPoint(const FloatPoint &, FloatPoint &lastMoveToPoint) noexcept
+  PointF PathCloseSubpath::CalculateEndPoint(const PointF &, PointF &lastMoveToPoint) noexcept
   {
     return lastMoveToPoint;
   }
 
-  Maybe<FloatPoint> PathCloseSubpath::TryGetEndPointWithoutContext() noexcept
+  Maybe<PointF> PathCloseSubpath::TryGetEndPointWithoutContext() noexcept
   {
     return std::nullopt;
   }
 
-  void PathCloseSubpath::ExtendFastBoundingRect(const FloatPoint &, const FloatPoint &lastMoveToPoint,
-                                                FloatRect &boundingRect) noexcept
+  void PathCloseSubpath::ExtendFastBoundingRect(const PointF &, const PointF &lastMoveToPoint,
+                                                RectF &boundingRect) noexcept
   {
     boundingRect.Extend(lastMoveToPoint);
   }
 
-  void PathCloseSubpath::ExtendBoundingRect(const FloatPoint &, const FloatPoint &lastMoveToPoint,
-                                            FloatRect &boundingRect) noexcept
+  void PathCloseSubpath::ExtendBoundingRect(const PointF &, const PointF &lastMoveToPoint,
+                                            RectF &boundingRect) noexcept
   {
     boundingRect.Extend(lastMoveToPoint);
   }
@@ -1034,7 +1016,7 @@ namespace krys::boo
     return ts << "close subpath";
   }
 
-  void PathArcTo::ApplyFlattenedElements(const Maybe<FloatPoint> &currentPoint,
+  void PathArcTo::ApplyFlattenedElements(const Maybe<PointF> &currentPoint,
                                          const PathElementApplier &applier) const noexcept
   {
     // From an empty path, the arc starts at its corner.
@@ -1046,28 +1028,28 @@ namespace krys::boo
     ApplyArcToElements(*currentPoint, ControlPoint1, ControlPoint2, Radius, applier);
   }
 
-  void PathArc::ApplyFlattenedElements(const Maybe<FloatPoint> &currentPoint,
+  void PathArc::ApplyFlattenedElements(const Maybe<PointF> &currentPoint,
                                        const PathElementApplier &applier) const noexcept
   {
     ApplyEllipseArcElements(currentPoint, Center, Radius, Radius, 0, StartAngle, EndAngle, Direction,
                             applier);
   }
 
-  void PathClosedArc::ApplyFlattenedElements(const Maybe<FloatPoint> &currentPoint,
+  void PathClosedArc::ApplyFlattenedElements(const Maybe<PointF> &currentPoint,
                                              const PathElementApplier &applier) const noexcept
   {
     Arc.ApplyFlattenedElements(currentPoint, applier);
     applier({PathElement::Type::CloseSubpath, {}});
   }
 
-  void PathEllipse::ApplyFlattenedElements(const Maybe<FloatPoint> &currentPoint,
+  void PathEllipse::ApplyFlattenedElements(const Maybe<PointF> &currentPoint,
                                            const PathElementApplier &applier) const noexcept
   {
     ApplyEllipseArcElements(currentPoint, Center, RadiusX, RadiusY, Rotation, StartAngle, EndAngle, Direction,
                             applier);
   }
 
-  void PathDataArc::ApplyFlattenedElements(const Maybe<FloatPoint> &,
+  void PathDataArc::ApplyFlattenedElements(const Maybe<PointF> &,
                                            const PathElementApplier &applier) const noexcept
   {
     applier({PathElement::Type::MoveToPoint, {Start}});

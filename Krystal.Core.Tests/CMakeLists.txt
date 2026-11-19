@@ -94,6 +94,11 @@ target_sources(Krystal.Core.Tests
   # Commands
 	PRIVATE tests/Commands/Command.cpp
 	
+  # Geometry
+	PRIVATE tests/Geometry/Point.cpp
+	PRIVATE tests/Geometry/Rect.cpp
+	PRIVATE tests/Geometry/Size.cpp
+
   # IO
   PRIVATE tests/IO/Backends/NativeFileBackend.cpp
 	PRIVATE tests/IO/Streams/NativeFileStream.cpp

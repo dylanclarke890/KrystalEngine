@@ -50,12 +50,12 @@ namespace krys::boo
   private:
     SVGResourceImage(LegacyRenderSVGResourceContainer &, style::Url) noexcept;
 
-    ImageDrawResult Draw(GraphicsContext &, const FloatRect &destinationRect, const FloatRect &sourceRect,
+    ImageDrawResult Draw(GraphicsContext &, const RectF &destinationRect, const RectF &sourceRect,
                          ImagePaintingOptions = {}) noexcept final;
 
-    void DrawPattern(GraphicsContext &, const FloatRect &destinationRect, const FloatRect &sourceRect,
-                     const AffineTransform &patternTransform, const FloatPoint &phase,
-                     const FloatSize &spacing, ImagePaintingOptions = {}) noexcept final;
+    void DrawPattern(GraphicsContext &, const RectF &destinationRect, const RectF &sourceRect,
+                     const AffineTransform &patternTransform, const PointF &phase, const SizeF &spacing,
+                     ImagePaintingOptions = {}) noexcept final;
 
     KRYS_NODISCARD bool IsSVGResourceImage() const noexcept final
     {

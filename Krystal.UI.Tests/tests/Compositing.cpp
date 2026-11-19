@@ -29,7 +29,7 @@ namespace krys::ui::tests
       struct Contents
       {
         boo::Color Fill;
-        boo::FloatRect Inner;
+        RectF Inner;
         boo::Color InnerFill;
       };
 
@@ -41,8 +41,7 @@ namespace krys::ui::tests
       float StripeHeight {0};
       uint32 PaintCount {0};
 
-      void PaintContents(const boo::GraphicsLayer &layer, boo::GraphicsContext &context,
-                         const boo::FloatRect &clip,
+      void PaintContents(const boo::GraphicsLayer &layer, boo::GraphicsContext &context, const RectF &clip,
                          EnumSet<boo::GraphicsLayerPaintBehavior>) noexcept override
       {
         ++PaintCount;
@@ -64,7 +63,7 @@ namespace krys::ui::tests
         {
           return;
         }
-        context.FillRect({boo::FloatPoint(), layer.Size()}, it->second.Fill);
+        context.FillRect({PointF(), layer.Size()}, it->second.Fill);
         if (!it->second.Inner.IsEmpty())
         {
           context.FillRect(it->second.Inner, it->second.InnerFill);
@@ -108,9 +107,8 @@ namespace krys::ui::tests
         Compositor = krys::move(*compositor);
       }
 
-      KRYS_NODISCARD Ref<GraphicsLayerTextureMapper> CreateLayer(utf8_stringview name,
-                                                                 const boo::FloatPoint &position,
-                                                                 const boo::FloatSize &size) noexcept
+      KRYS_NODISCARD Ref<GraphicsLayerTextureMapper> CreateLayer(utf8_stringview name, const PointF &position,
+                                                                 const SizeF &size) noexcept
       {
         Ref<boo::GraphicsLayer> layer = boo::GraphicsLayer::Create(&Factory, Client);
         layer->SetName(utf8_string(name));
@@ -131,8 +129,8 @@ namespace krys::ui::tests
                                  .DebugName = u8"Compositing"});
         REQUIRE(target.has_value());
 
-        const boo::IntRect viewRect(0, 0, static_cast<int32>(Width), static_cast<int32>(Height));
-        root.FlushCompositingState(boo::FloatRect(viewRect));
+        const RectI viewRect(0, 0, static_cast<int32>(Width), static_cast<int32>(Height));
+        root.FlushCompositingState(RectF(viewRect));
 
         Device->BeginFrame();
         auto &commands = Device->GetCommandBuffer();
@@ -230,7 +228,7 @@ namespace krys::ui::tests
     auto solid = fixture.CreateLayer(u8"solid", {280, 150}, {60, 50});
     solid->SetContentsToSolidColor(Rgb(0x8338EC));
     solid->SetContentsRect({0, 0, 60, 50});
-    solid->SetContentsClippingRect(boo::FloatRoundedRect(boo::FloatRect {0, 0, 60, 50}));
+    solid->SetContentsClippingRect(boo::FloatRoundedRect(RectF {0, 0, 60, 50}));
 
     for (auto *layer : {drawn.get(), group.get(), turned.get(), blurred.get(), clipping.get(), solid.get()})
     {
@@ -298,7 +296,7 @@ namespace krys::ui::tests
     checkStripes(image, 1'500);
 
     // What's visible of the layer, in its coordinates, and the tiles near it: none far from it.
-    CHECK(tall->VisibleRect() == boo::IntRect(0, 1'500, 360, 240));
+    CHECK(tall->VisibleRect() == RectI(0, 1'500, 360, 240));
     auto *backingStore = tall->BackingStore();
     REQUIRE(backingStore);
     REQUIRE_FALSE(backingStore->Tiles().empty());
@@ -315,7 +313,7 @@ namespace krys::ui::tests
     tall->SetPosition({0, -4'000});
     image = fixture.Composite(*root);
     checkStripes(image, 4'000);
-    CHECK(tall->VisibleRect() == boo::IntRect(0, 4'000, 360, 240));
+    CHECK(tall->VisibleRect() == RectI(0, 4'000, 360, 240));
     for (const auto &tile : backingStore->Tiles())
     {
       CHECK(tile.Rect().MaxY() > 4'000 - 240 - 240);
@@ -431,7 +429,7 @@ namespace krys::ui::tests
 
       box->SetBackdropFilters(boo::FilterOperations(List<Ref<boo::FilterOperation>> {
         boo::BasicColorMatrixFilterOperation::Create(0, boo::FilterOperation::Type::Grayscale)}));
-      box->SetBackdropFiltersRect(boo::FloatRoundedRect(boo::FloatRect {0, 0, 100, 100}));
+      box->SetBackdropFiltersRect(boo::FloatRoundedRect(RectF {0, 0, 100, 100}));
       REQUIRE(box->AddAnimation(keyframes, LongAnimation().get(), u8"backdrop", 0));
       CHECK(PixelAt(fixture.Composite(*root), 50, 50) == Array<uint8, 4> {239, 71, 111, 255});
     }
@@ -457,7 +455,7 @@ namespace krys::ui::tests
     root->SetContentsDisplayDelegate(engineTexture->LayerContentsDisplayDelegate(),
                                      boo::GraphicsLayerContentsLayerPurpose::Canvas);
     root->SetContentsRect({0, 0, 200, 100});
-    root->SetContentsClippingRect(boo::FloatRoundedRect(boo::FloatRect {0, 0, 200, 100}));
+    root->SetContentsClippingRect(boo::FloatRoundedRect(RectF {0, 0, 200, 100}));
 
     SECTION("linear blends the texels")
     {

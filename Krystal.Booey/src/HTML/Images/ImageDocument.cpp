@@ -112,7 +112,7 @@ namespace krys::boo
       // The title gives the image's natural size, whatever the zoom.
       UpdateStyleIfNeeded();
       auto *imageElement = ImageElement();
-      auto size = FlooredIntSize(
+      auto size = FlooredSizeI(
         cachedImage->ImageSizeForRenderer(imageElement ? imageElement->Renderer() : nullptr, 1.0f));
       if (size.Width())
       {
@@ -375,6 +375,6 @@ namespace krys::boo
       static_cast<int32>(static_cast<float>(x) / scale - static_cast<float>(viewportSize.Width()) / 2.0f);
     auto scrollY =
       static_cast<int32>(static_cast<float>(y) / scale - static_cast<float>(viewportSize.Height()) / 2.0f);
-    view->SetScrollPosition(IntPoint(scrollX, scrollY));
+    view->SetScrollPosition(PointI(scrollX, scrollY));
   }
 }

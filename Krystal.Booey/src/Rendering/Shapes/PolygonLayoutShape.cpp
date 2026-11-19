@@ -34,22 +34,22 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD FloatSize InwardEdgeNormal(const FloatPolygonEdge &edge) noexcept
+    KRYS_NODISCARD SizeF InwardEdgeNormal(const FloatPolygonEdge &edge) noexcept
     {
-      FloatSize edgeDelta = edge.Vertex2() - edge.Vertex1();
+      SizeF edgeDelta = edge.Vertex2() - edge.Vertex1();
       if (!edgeDelta.Width())
       {
-        return FloatSize((edgeDelta.Height() > 0 ? -1.f : 1.f), 0);
+        return SizeF((edgeDelta.Height() > 0 ? -1.f : 1.f), 0);
       }
       if (!edgeDelta.Height())
       {
-        return FloatSize(0, (edgeDelta.Width() > 0 ? 1.f : -1.f));
+        return SizeF(0, (edgeDelta.Width() > 0 ? 1.f : -1.f));
       }
       float edgeLength = edgeDelta.DiagonalLength();
-      return FloatSize(-edgeDelta.Height() / edgeLength, edgeDelta.Width() / edgeLength);
+      return SizeF(-edgeDelta.Height() / edgeLength, edgeDelta.Width() / edgeLength);
     }
 
-    KRYS_NODISCARD FloatSize OutwardEdgeNormal(const FloatPolygonEdge &edge) noexcept
+    KRYS_NODISCARD SizeF OutwardEdgeNormal(const FloatPolygonEdge &edge) noexcept
     {
       return -InwardEdgeNormal(edge);
     }
@@ -60,7 +60,7 @@ namespace krys::boo
       return radius * std::sqrt(1 - (y * y) / (radius * radius));
     }
 
-    KRYS_NODISCARD FloatShapeInterval ClippedCircleXRange(const FloatPoint &center, float radius, float y1,
+    KRYS_NODISCARD FloatShapeInterval ClippedCircleXRange(const PointF &center, float radius, float y1,
                                                           float y2) noexcept
     {
       if (y1 >= center.Y() + radius || y2 <= center.Y() - radius)
@@ -117,8 +117,8 @@ namespace krys::boo
     // Clip the edge line segment to the vertical range y1,y2 and then return
     // the clipped line segment's horizontal range.
 
-    FloatPoint minYVertex;
-    FloatPoint maxYVertex;
+    PointF minYVertex;
+    PointF maxYVertex;
     if (Vertex1().Y() < Vertex2().Y())
     {
       minYVertex = Vertex1();
@@ -136,7 +136,7 @@ namespace krys::boo
 
   LayoutRect PolygonLayoutShape::ShapeMarginLogicalBoundingBox() const noexcept
   {
-    FloatRect box = _polygon.BoundingBox();
+    RectF box = _polygon.BoundingBox();
     box.Inflate(ShapeMargin());
     return LayoutRect(box);
   }
@@ -161,7 +161,7 @@ namespace krys::boo
       }
       if (!ShapeMargin())
       {
-        excludedInterval.Unite(OffsetPolygonEdge(edge, FloatSize()).ClippedEdgeXRange(y1, y2));
+        excludedInterval.Unite(OffsetPolygonEdge(edge, SizeF()).ClippedEdgeXRange(y1, y2));
       }
       else
       {

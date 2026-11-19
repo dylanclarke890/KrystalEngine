@@ -139,7 +139,7 @@ namespace krys::boo
     }
   }
 
-  FloatPoint TransformState::MappedPoint() const noexcept
+  PointF TransformState::MappedPoint() const noexcept
   {
     auto point = _inputPoint;
     auto offset =

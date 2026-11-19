@@ -23,7 +23,6 @@
  */
 
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
@@ -44,6 +43,7 @@
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo
@@ -82,9 +82,9 @@ namespace krys::boo
     return ComputeIntrinsicAspectRatio();
   }
 
-  FloatSize LegacyRenderSVGRoot::ComputeIntrinsicSize() const noexcept
+  SizeF LegacyRenderSVGRoot::ComputeIntrinsicSize() const noexcept
   {
-    FloatSize intrinsicSize = {SvgSvgElement().IntrinsicWidth(), SvgSvgElement().IntrinsicHeight()};
+    SizeF intrinsicSize = {SvgSvgElement().IntrinsicWidth(), SvgSvgElement().IntrinsicHeight()};
     // Transpose for vertical writing mode
     if (!IsHorizontalWritingMode())
     {
@@ -93,36 +93,36 @@ namespace krys::boo
     return intrinsicSize;
   }
 
-  FloatSize LegacyRenderSVGRoot::PreferredAspectRatio() const noexcept
+  SizeF LegacyRenderSVGRoot::PreferredAspectRatio() const noexcept
   {
     krys_debug_assert(!ShouldApplySizeContainment());
 
     if (Style().GetAspectRatio().IsRatio())
     {
-      return FloatSize::NarrowPrecision(Style().AspectRatioLogicalWidth().Value,
-                                        Style().AspectRatioLogicalHeight().Value);
+      return SizeF::NarrowPrecision(Style().AspectRatioLogicalWidth().Value,
+                                    Style().AspectRatioLogicalHeight().Value);
     }
 
     auto intrinsicSize = ComputeIntrinsicSize();
-    Maybe<FloatSize> intrinsicRatioValue;
-    FloatSize preferredAspectRatio;
+    Maybe<SizeF> intrinsicRatioValue;
+    SizeF preferredAspectRatio;
     if (!intrinsicSize.IsEmpty())
     {
       preferredAspectRatio = {intrinsicSize.Width(), intrinsicSize.Height()};
     }
     else
     {
-      FloatSize viewBoxSize = SvgSvgElement().CurrentViewBoxRect().Size();
+      SizeF viewBoxSize = SvgSvgElement().CurrentViewBoxRect().Size();
       if (!viewBoxSize.IsEmpty())
       {
         // The viewBox can only yield an intrinsic ratio, not an intrinsic size.
         if (IsHorizontalWritingMode())
         {
-          intrinsicRatioValue = FloatSize {viewBoxSize.Width(), viewBoxSize.Height()};
+          intrinsicRatioValue = SizeF {viewBoxSize.Width(), viewBoxSize.Height()};
         }
         else
         {
-          intrinsicRatioValue = FloatSize {viewBoxSize.Height(), viewBoxSize.Width()};
+          intrinsicRatioValue = SizeF {viewBoxSize.Height(), viewBoxSize.Width()};
         }
       }
     }
@@ -133,8 +133,8 @@ namespace krys::boo
     }
     if (Style().GetAspectRatio().IsAutoAndRatio())
     {
-      return FloatSize::NarrowPrecision(Style().AspectRatioLogicalWidth().Value,
-                                        Style().AspectRatioLogicalHeight().Value);
+      return SizeF::NarrowPrecision(Style().AspectRatioLogicalWidth().Value,
+                                    Style().AspectRatioLogicalHeight().Value);
     }
 
     return preferredAspectRatio;
@@ -244,7 +244,7 @@ namespace krys::boo
 
   LayoutRect LegacyRenderSVGRoot::ComputeContentsInkOverflow() const noexcept
   {
-    FloatRect contentRepaintRect = RepaintRectInLocalCoordinates();
+    RectF contentRepaintRect = RepaintRectInLocalCoordinates();
     contentRepaintRect = _localToBorderBoxTransform.MapRect(contentRepaintRect);
     // Condition the visual overflow rect to avoid being clipped/culled
     // out if it is huge. This may sacrifice overflow, but usually only
@@ -326,16 +326,16 @@ namespace krys::boo
     // Apply initial viewport clip
     if (clipViewport)
     {
-      auto clipRect = SnappedIntRect(OverflowClipRect(paintOffset));
+      auto clipRect = SnappedRectI(OverflowClipRect(paintOffset));
       childPaintInfo.Context().Clip(clipRect);
       // FIXME: Push the clip onto the event region context, once there's one.
     }
 
     // Convert from container offsets (html renderers) to a relative transform (svg renderers).
     // Transform from our paint container's coordinate system to our local coords.
-    IntPoint adjustedPaintOffset = RoundedIntPoint(paintOffset);
+    PointI adjustedPaintOffset = RoundedPointI(paintOffset);
     auto transform =
-      AffineTransform::MakeTranslation(ToFloatSize(adjustedPaintOffset)) * LocalToBorderBoxTransform();
+      AffineTransform::MakeTranslation(ToSizeF(adjustedPaintOffset)) * LocalToBorderBoxTransform();
     childPaintInfo.ApplyTransform(transform);
 
     // SVGRenderingContext must be destroyed before we restore the childPaintInfo.context(), because a filter
@@ -405,11 +405,11 @@ namespace krys::boo
   void LegacyRenderSVGRoot::BuildLocalToBorderBoxTransform() noexcept
   {
     float scale = Style().UsedZoom();
-    FloatPoint translate = SvgSvgElement().CurrentTranslateValue();
+    PointF translate = SvgSvgElement().CurrentTranslateValue();
     LayoutSize borderAndPadding(BorderLeft() + PaddingLeft(), BorderTop() + PaddingTop());
     _localToBorderBoxTransform =
       SvgSvgElement().ViewBoxToViewTransform(ContentBoxWidth() / scale, ContentBoxHeight() / scale);
-    if (borderAndPadding.IsZero() && scale == 1 && translate == FloatPoint::Zero())
+    if (borderAndPadding.IsZero() && scale == 1 && translate == PointF::Zero())
     {
       return;
     }
@@ -439,7 +439,7 @@ namespace krys::boo
   {
     auto contentRepaintRect =
       _localToBorderBoxTransform.MapRect(RepaintRectInLocalCoordinates(repaintRectCalculation));
-    contentRepaintRect.Intersect(SnappedIntRect(BorderBoxRect()));
+    contentRepaintRect.Intersect(SnappedRectI(BorderBoxRect()));
 
     LayoutRect repaintRect = EnclosingLayoutRect(contentRepaintRect);
     if (_hasBoxDecorations || HasRenderOverflow())
@@ -447,7 +447,7 @@ namespace krys::boo
       repaintRect.Unite(UnionRect(LocalSelectionRect(false), VisualOverflowRect()));
     }
 
-    return EnclosingIntRect(repaintRect);
+    return EnclosingRectI(repaintRect);
   }
 
   LayoutRect LegacyRenderSVGRoot::ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
@@ -480,26 +480,26 @@ namespace krys::boo
     return RenderReplaced::ComputeRects(rects, repaintContainer, VisibleRectContextForRepaint());
   }
 
-  Maybe<FloatRect> LegacyRenderSVGRoot::ComputeFloatVisibleRectInContainer(
-    const FloatRect &rect, const RenderLayerModelObject *container, VisibleRectContext context) const noexcept
+  Maybe<RectF> LegacyRenderSVGRoot::ComputeFloatVisibleRectInContainer(
+    const RectF &rect, const RenderLayerModelObject *container, VisibleRectContext context) const noexcept
   {
     // Apply our local transforms (except for x/y translation) and then call
     // RenderBox's method to handle all the normal CSS Box model bits
-    FloatRect adjustedRect = _localToBorderBoxTransform.MapRect(rect);
+    RectF adjustedRect = _localToBorderBoxTransform.MapRect(rect);
 
     // Apply initial viewport clip
     if (ShouldApplyViewportClip())
     {
       if (context.Options.Contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
       {
-        if (!adjustedRect.EdgeInclusiveIntersect(FloatRect(SnappedIntRect(BorderBoxRect()))))
+        if (!adjustedRect.EdgeInclusiveIntersect(RectF(SnappedRectI(BorderBoxRect()))))
         {
           return null;
         }
       }
       else
       {
-        adjustedRect.Intersect(FloatRect(SnappedIntRect(BorderBoxRect())));
+        adjustedRect.Intersect(RectF(SnappedRectI(BorderBoxRect())));
       }
     }
 
@@ -508,17 +508,17 @@ namespace krys::boo
       // The selectionRect can project outside of the overflowRect, so take their union
       // for repainting to avoid selection painting glitches.
       LayoutRect decoratedRepaintRect = UnionRect(LocalSelectionRect(false), VisualOverflowRect());
-      adjustedRect.Unite(FloatRect(decoratedRepaintRect));
+      adjustedRect.Unite(RectF(decoratedRepaintRect));
     }
 
-    auto rects = RepaintRects {LayoutRect(EnclosingIntRect(adjustedRect))};
+    auto rects = RepaintRects {LayoutRect(EnclosingRectI(adjustedRect))};
     auto rectsInContainer = RenderReplaced::ComputeVisibleRectsInContainer(rects, container, context);
     if (!rectsInContainer)
     {
       return null;
     }
 
-    return FloatRect(rectsInContainer->ClippedOverflowRect);
+    return RectF(rectsInContainer->ClippedOverflowRect);
   }
 
   // This method expects local CSS box coordinates.
@@ -555,7 +555,7 @@ namespace krys::boo
     _repaintBoundingBox = boundingBoxes.RepaintBoundingBox;
   }
 
-  FloatRect LegacyRenderSVGRoot::StrokeBoundingBox() const noexcept
+  RectF LegacyRenderSVGRoot::StrokeBoundingBox() const noexcept
   {
     // FIXME: Once we enable approximate repainting bounding box computation, m_strokeBoundingBox becomes
     // std::nullopt in updateCachedBoundaries and gets lazily computed.
@@ -564,13 +564,13 @@ namespace krys::boo
     {
       // Initialize m_strokeBoundingBox before calling computeContainerStrokeBoundingBox, since recursively
       // referenced markers can cause us to re-enter here.
-      _strokeBoundingBox = FloatRect {};
+      _strokeBoundingBox = RectF {};
       _strokeBoundingBox = SVGRenderSupport::ComputeContainerStrokeBoundingBox(*this);
     }
     return *_strokeBoundingBox;
   }
 
-  FloatRect LegacyRenderSVGRoot::RepaintRectInLocalCoordinates(
+  RectF LegacyRenderSVGRoot::RepaintRectInLocalCoordinates(
     RepaintRectCalculation repaintRectCalculation) const noexcept
   {
     if (repaintRectCalculation == RepaintRectCalculation::Fast)
@@ -582,7 +582,7 @@ namespace krys::boo
     {
       // Initialize m_accurateRepaintBoundingBox before calling computeContainerBoundingBoxes, since
       // recursively referenced markers can cause us to re-enter here.
-      _accurateRepaintBoundingBox = FloatRect {};
+      _accurateRepaintBoundingBox = RectF {};
 
       auto boundingBoxes =
         SVGRenderSupport::ComputeContainerBoundingBoxes(*this, RepaintRectCalculation::Accurate);
@@ -595,7 +595,7 @@ namespace krys::boo
     return *_accurateRepaintBoundingBox;
   }
 
-  FloatRect LegacyRenderSVGRoot::DecoratedBoundingBox() const noexcept
+  RectF LegacyRenderSVGRoot::DecoratedBoundingBox() const noexcept
   {
     // The area it may paint, as a mask's buffer must cover it: its fill, stroke and markers with its filter's
     // region, within its clip and mask.
@@ -612,17 +612,17 @@ namespace krys::boo
 
     // Test SVG content if the point is in our content box or it is inside the visualOverflowRect and the
     // overflow is visible.
-    // FIXME: This should be an intersection when rect-based hit tests are supported by nodeAtFloatPoint.
+    // FIXME: This should be an intersection when rect-based hit tests are supported by nodeAtPointF.
     if (ContentBoxRect().Contains(pointInBorderBox)
         || (!ShouldApplyViewportClip() && VisualOverflowRect().Contains(pointInParent)))
     {
-      FloatPoint localPoint =
-        LocalToParentTransform().Inverse().value_or(AffineTransform {}).MapPoint(FloatPoint(pointInParent));
+      PointF localPoint =
+        LocalToParentTransform().Inverse().value_or(AffineTransform {}).MapPoint(PointF(pointInParent));
 
       for (RenderObject *child = LastChild(); child; child = child->PreviousSibling())
       {
-        // FIXME: nodeAtFloatPoint() doesn't handle rect-based hit tests yet.
-        if (child->NodeAtFloatPoint(request, result, localPoint, hitTestAction))
+        // FIXME: nodeAtPointF() doesn't handle rect-based hit tests yet.
+        if (child->NodeAtPointF(request, result, localPoint, hitTestAction))
         {
           UpdateHitTestResult(result, pointInBorderBox);
           if (result.AddNodeToListBasedTestResult(child->GetNode(), request, locationInContainer)

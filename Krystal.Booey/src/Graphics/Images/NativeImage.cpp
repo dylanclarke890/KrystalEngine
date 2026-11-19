@@ -57,9 +57,9 @@ namespace krys::boo
     return _platformImage;
   }
 
-  IntSize NativeImage::Size() const noexcept
+  SizeI NativeImage::Size() const noexcept
   {
-    return _platformImage ? _platformImage->Size() : IntSize();
+    return _platformImage ? _platformImage->Size() : SizeI();
   }
 
   bool NativeImage::HasAlpha() const noexcept
@@ -70,7 +70,7 @@ namespace krys::boo
 
   Maybe<Color> NativeImage::SinglePixelSolidColor() const noexcept
   {
-    if (Size() != IntSize(1, 1) || _platformImage->External())
+    if (Size() != SizeI(1, 1) || _platformImage->External())
     {
       return null;
     }

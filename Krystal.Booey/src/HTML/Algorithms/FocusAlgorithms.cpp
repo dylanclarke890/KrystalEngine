@@ -1301,7 +1301,7 @@ namespace krys::boo::html
       if (!intersectionRect.IsEmpty() && !AreElementsOnSameLine(closest, candidate))
       {
         // If 2 nodes are intersecting, do hit test to find which node in on top.
-        auto center = FlooredIntPoint(intersectionRect.Center()); // FIXME: Would roundedIntPoint be better?
+        auto center = FlooredPointI(intersectionRect.Center()); // FIXME: Would roundedPointI be better?
         constexpr EnumSet<HitTestRequest::Type> hitType {
           HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active, HitTestRequest::Type::IgnoreClipping,
           HitTestRequest::Type::DisallowUserAgentShadowContent, HitTestRequest::Type::AllowChildFrameContent};

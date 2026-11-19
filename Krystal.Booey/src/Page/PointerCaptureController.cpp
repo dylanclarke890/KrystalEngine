@@ -402,7 +402,7 @@ namespace krys::boo
   void PointerCaptureController::DispatchOverOrOutEvent(DOMStringAtom type, EventTarget *target,
                                                         const PlatformTouchEvent &event, uint32 index,
                                                         bool isPrimary, LocalFrameView *view,
-                                                        const DoublePoint &touchDelta) noexcept
+                                                        const PointD &touchDelta) noexcept
   {
     DispatchEvent(*PointerEvent::Create(krys::move(type), event, {}, {}, index, isPrimary, view, touchDelta),
                   target);
@@ -411,7 +411,7 @@ namespace krys::boo
   void PointerCaptureController::DispatchEnterOrLeaveEvent(DOMStringAtom type, Element &targetElement,
                                                            const PlatformTouchEvent &event, uint32 index,
                                                            bool isPrimary, LocalFrameView *view,
-                                                           const DoublePoint &touchDelta) noexcept
+                                                           const PointD &touchDelta) noexcept
   {
     List<Ref<Element>> targetChain;
     for (Element *element = &targetElement; element; element = element->ParentElementInComposedTree())
@@ -443,7 +443,7 @@ namespace krys::boo
                                                               const PlatformTouchEvent &platformTouchEvent,
                                                               uint32 index, bool isPrimary,
                                                               LocalFrameView *view,
-                                                              const DoublePoint &touchDelta) noexcept
+                                                              const PointD &touchDelta) noexcept
   {
     RefPtr<Page> page = ShareRefPtr(_page.get());
     if (!page)
@@ -586,8 +586,7 @@ namespace krys::boo
     if (type == event_names::PointerCancel)
     {
       auto location = touchPoint.Pos();
-      IntPoint documentPoint =
-        view ? view->WindowToContents(FlooredIntPoint(location)) : FlooredIntPoint(location);
+      PointI documentPoint = view ? view->WindowToContents(FlooredPointI(location)) : FlooredPointI(location);
       CancelPointer(pointerId, documentPoint, createPointerEvent().get());
       return;
     }
@@ -764,7 +763,7 @@ namespace krys::boo
     }
   }
 
-  void PointerCaptureController::CancelPointer(PointerId pointerId, const IntPoint &documentPoint,
+  void PointerCaptureController::CancelPointer(PointerId pointerId, const PointI &documentPoint,
                                                PointerEvent *existingCancelEvent) noexcept
   {
     // https://w3c.github.io/pointerevents/#the-pointercancel-event

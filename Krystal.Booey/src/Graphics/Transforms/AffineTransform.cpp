@@ -27,11 +27,10 @@
 
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/Region.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
 #include <cmath>
@@ -47,14 +46,14 @@ namespace krys::boo
     }
   }
 
-  AffineTransform AffineTransform::MakeRotation(double angleInDegrees, FloatPoint center) noexcept
+  AffineTransform AffineTransform::MakeRotation(double angleInDegrees, PointF center) noexcept
   {
     if (center.IsZero())
     {
       return MakeRotation(angleInDegrees);
     }
 
-    auto centerSize = ToFloatSize(center);
+    auto centerSize = ToSizeF(center);
     auto matrix = MakeTranslation(centerSize);
     matrix.Rotate(angleInDegrees);
     matrix.Translate(-centerSize);
@@ -187,7 +186,7 @@ namespace krys::boo
     return Scale(sx, sy);
   }
 
-  AffineTransform &AffineTransform::Scale(const FloatSize &s) noexcept
+  AffineTransform &AffineTransform::Scale(const SizeF &s) noexcept
   {
     return Scale(s.Width(), s.Height());
   }
@@ -207,12 +206,12 @@ namespace krys::boo
     return *this;
   }
 
-  AffineTransform &AffineTransform::Translate(const FloatPoint &t) noexcept
+  AffineTransform &AffineTransform::Translate(const PointF &t) noexcept
   {
     return Translate(t.X(), t.Y());
   }
 
-  AffineTransform &AffineTransform::Translate(const FloatSize &t) noexcept
+  AffineTransform &AffineTransform::Translate(const SizeF &t) noexcept
   {
     return Translate(t.Width(), t.Height());
   }
@@ -260,7 +259,7 @@ namespace krys::boo
     return Shear(0, std::tan(deg2rad(angle)));
   }
 
-  AffineTransform MakeMapBetweenRects(const FloatRect &source, const FloatRect &dest) noexcept
+  AffineTransform MakeMapBetweenRects(const RectF &source, const RectF &dest) noexcept
   {
     AffineTransform transform;
     transform.Translate(dest.X() - source.X(), dest.Y() - source.Y());
@@ -274,49 +273,49 @@ namespace krys::boo
     y2 = (_transform[1] * x + _transform[3] * y + _transform[5]);
   }
 
-  IntPoint AffineTransform::MapPoint(const IntPoint &point) const noexcept
+  PointI AffineTransform::MapPoint(const PointI &point) const noexcept
   {
     double x2, y2;
     Map(point.X(), point.Y(), x2, y2);
 
     // Round the point.
-    return IntPoint(static_cast<int32>(std::lround(x2)), static_cast<int32>(std::lround(y2)));
+    return PointI(static_cast<int32>(std::lround(x2)), static_cast<int32>(std::lround(y2)));
   }
 
-  FloatPoint AffineTransform::MapPoint(const FloatPoint &point) const noexcept
+  PointF AffineTransform::MapPoint(const PointF &point) const noexcept
   {
     double x2, y2;
     Map(point.X(), point.Y(), x2, y2);
 
-    return FloatPoint(NarrowPrecisionToFloat(x2), NarrowPrecisionToFloat(y2));
+    return PointF(NarrowPrecisionToFloat(x2), NarrowPrecisionToFloat(y2));
   }
 
-  IntSize AffineTransform::MapSize(const IntSize &size) const noexcept
+  SizeI AffineTransform::MapSize(const SizeI &size) const noexcept
   {
     double width2 = size.Width() * XScale();
     double height2 = size.Height() * YScale();
 
-    return IntSize(static_cast<int32>(std::lround(width2)), static_cast<int32>(std::lround(height2)));
+    return SizeI(static_cast<int32>(std::lround(width2)), static_cast<int32>(std::lround(height2)));
   }
 
-  FloatSize AffineTransform::MapSize(const FloatSize &size) const noexcept
+  SizeF AffineTransform::MapSize(const SizeF &size) const noexcept
   {
     double width2 = size.Width() * XScale();
     double height2 = size.Height() * YScale();
 
-    return FloatSize(NarrowPrecisionToFloat(width2), NarrowPrecisionToFloat(height2));
+    return SizeF(NarrowPrecisionToFloat(width2), NarrowPrecisionToFloat(height2));
   }
 
-  IntRect AffineTransform::MapRect(const IntRect &rect) const noexcept
+  RectI AffineTransform::MapRect(const RectI &rect) const noexcept
   {
-    return EnclosingIntRect(MapRect(FloatRect(rect)));
+    return EnclosingRectI(MapRect(RectF(rect)));
   }
 
-  FloatRect AffineTransform::MapRect(const FloatRect &rect) const noexcept
+  RectF AffineTransform::MapRect(const RectF &rect) const noexcept
   {
     if (IsIdentityOrTranslation())
     {
-      FloatRect mappedRect(rect);
+      RectF mappedRect(rect);
       mappedRect.Move(NarrowPrecisionToFloat(_transform[4]), NarrowPrecisionToFloat(_transform[5]));
       return mappedRect;
     }
@@ -367,7 +366,7 @@ namespace krys::boo
     auto maxX = Max4(x1, x2, x3, x4);
     auto maxY = Max4(y1, y2, y3, y4);
 
-    return FloatRect {minX, minY, maxX - minX, maxY - minY};
+    return RectF {minX, minY, maxX - minX, maxY - minY};
   }
 
   FloatQuad AffineTransform::MapQuad(const FloatQuad &q) const noexcept
@@ -392,8 +391,8 @@ namespace krys::boo
     if (IsIdentityOrTranslation())
     {
       Region mappedRegion(region);
-      mappedRegion.Translate(RoundedIntSize(
-        FloatSize(NarrowPrecisionToFloat(_transform[4]), NarrowPrecisionToFloat(_transform[5]))));
+      mappedRegion.Translate(
+        RoundedSizeI(SizeF(NarrowPrecisionToFloat(_transform[4]), NarrowPrecisionToFloat(_transform[5]))));
       return mappedRegion;
     }
 
@@ -540,5 +539,12 @@ namespace krys::boo
          << ")) t=(" << transform.E() << "," << transform.F() << ")}";
     }
     return ts;
+  }
+
+  PointF MatrixTransform(const PointF &point, const AffineTransform &transform) noexcept
+  {
+    double newX, newY;
+    transform.Map(static_cast<double>(point.X()), static_cast<double>(point.Y()), newX, newY);
+    return PointF::NarrowPrecision(newX, newY);
   }
 }

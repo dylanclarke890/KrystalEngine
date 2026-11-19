@@ -123,7 +123,7 @@ namespace krys::boo
 
   bool ScrollLatchingController::ShouldLatchToScrollableArea(const LocalFrameView &view,
                                                              ScrollableArea *scrollableArea,
-                                                             FloatSize scrollDelta) noexcept
+                                                             SizeF scrollDelta) noexcept
   {
     if (!scrollableArea)
     {

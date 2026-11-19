@@ -56,7 +56,7 @@ namespace krys::boo::svg::tests
     auto &image = ImageById(fixture, u8"i");
     auto *svgImage = SVGImageOf(image);
     REQUIRE(svgImage);
-    CHECK(svgImage->Size() == FloatSize(40, 20));
+    CHECK(svgImage->Size() == SizeF(40, 20));
     CHECK(image.NaturalWidth() == 40);
     CHECK(image.NaturalHeight() == 20);
     auto root = svgImage->RootElement();
@@ -70,13 +70,13 @@ namespace krys::boo::svg::tests
     CHECK(renderer->Size() == LayoutSize(40, 20));
     auto *forContainer = image.GetCachedImage()->ImageForRenderer(renderer);
     CHECK(Is<SVGImageForContainer>(*forContainer));
-    CHECK(forContainer->Size() == FloatSize(40, 20));
+    CHECK(forContainer->Size() == SizeF(40, 20));
 
     auto &wide = ImageById(fixture, u8"wide");
     auto *wideRenderer = DynamicDowncast<RenderBox>(wide.Renderer());
     REQUIRE(wideRenderer);
     CHECK(wideRenderer->Size() == LayoutSize(80, 40));
-    CHECK(wide.GetCachedImage()->ImageForRenderer(wideRenderer)->Size() == FloatSize(80, 40));
+    CHECK(wide.GetCachedImage()->ImageForRenderer(wideRenderer)->Size() == SizeF(80, 40));
 
     auto painted = fixture.Painted();
     CHECK(Contains(painted, u8"(color #008000)"));
@@ -98,7 +98,7 @@ namespace krys::boo::svg::tests
     auto *svgImage = SVGImageOf(image);
     REQUIRE(svgImage);
     // Without a width or height, the image's own size is its view box's.
-    CHECK(svgImage->Size() == FloatSize(10, 5));
+    CHECK(svgImage->Size() == SizeF(10, 5));
     (void)fixture.Document->UpdateLayout();
     auto *renderer = DynamicDowncast<RenderBox>(image.Renderer());
     REQUIRE(renderer);
@@ -117,7 +117,7 @@ namespace krys::boo::svg::tests
     auto root = svgImage->RootElement();
     REQUIRE(root);
     CHECK(root->ViewBox().IsEmpty());
-    CHECK(root->CurrentViewBoxRect() == FloatRect(0, 0, 40, 20));
+    CHECK(root->CurrentViewBoxRect() == RectF(0, 0, 40, 20));
     CHECK(IsInSVGImage(root.get()));
     CHECK_FALSE(IsInSVGImage(&ImageById(fixture, u8"i")));
   }

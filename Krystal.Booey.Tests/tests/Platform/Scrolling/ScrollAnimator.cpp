@@ -347,7 +347,7 @@ namespace krys::boo::tests
     auto &scroller = fixture.ById(u8"s");
     auto &handler = fixture.TestPage->MainFrame().GetEventHandler();
     // A notch down (the content moves up), over the box.
-    auto notch = [&](IntPoint position = {10, 10})
+    auto notch = [&](PointI position = {10, 10})
     {
       return handler.HandleWheelEvent(PlatformWheelEvent(
         position, position, 0, -100, 0, -1, PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {}));
@@ -389,7 +389,7 @@ namespace krys::boo::tests
     SECTION("but not a touchpad's pan, which follows the fingers")
     {
       CHECK(handler.HandleWheelEvent(
-        PlatformWheelEvent(IntPoint(10, 10), IntPoint(10, 10), 0, -30, 0, 0,
+        PlatformWheelEvent(PointI(10, 10), PointI(10, 10), 0, -30, 0, 0,
                            PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {})
           .CopyAsTouchpadPan(PlatformWheelEventPhase::Changed, PlatformWheelEventPhase::None)));
       CHECK(scroller.ScrollTop() == 30);

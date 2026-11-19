@@ -1,8 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.UI/Compositing/BitmapTexture.hpp"
 
 namespace krys::boo
@@ -22,12 +21,12 @@ namespace krys::ui
     RefPtr<BitmapTexture> _texture;
 
   private:
-    boo::FloatRect _rect;
+    RectF _rect;
     /// @brief What needs painting again, in the backing store's coordinates.
-    boo::IntRect _dirtyRect;
+    RectI _dirtyRect;
 
   public:
-    explicit TextureMapperTile(const boo::FloatRect &rect) noexcept;
+    explicit TextureMapperTile(const RectF &rect) noexcept;
 
     virtual ~TextureMapperTile() noexcept;
 
@@ -37,33 +36,32 @@ namespace krys::ui
 
     KRYS_NODISCARD RefPtr<BitmapTexture> Texture() const noexcept;
 
-    KRYS_NODISCARD boo::FloatRect Rect() const noexcept
+    KRYS_NODISCARD RectF Rect() const noexcept
     {
       return _rect;
     }
 
     void SetTexture(BitmapTexture *texture) noexcept;
 
-    void SetRect(const boo::FloatRect &rect) noexcept
+    void SetRect(const RectF &rect) noexcept
     {
       _rect = rect;
     }
 
-    KRYS_NODISCARD const boo::IntRect &DirtyRect() const noexcept
+    KRYS_NODISCARD const RectI &DirtyRect() const noexcept
     {
       return _dirtyRect;
     }
 
-    void AddDirtyRect(const boo::IntRect &rect) noexcept
+    void AddDirtyRect(const RectI &rect) noexcept
     {
       _dirtyRect.Unite(rect);
     }
 
-    void UpdateContents(TextureMapper &textureMapper, boo::Image &image,
-                        const boo::IntRect &dirtyRect) noexcept;
+    void UpdateContents(TextureMapper &textureMapper, boo::Image &image, const RectI &dirtyRect) noexcept;
 
     void UpdateContents(TextureMapper &textureMapper, const boo::GraphicsLayer &sourceLayer,
-                        const boo::IntRect &dirtyRect, float scale = 1) noexcept;
+                        const RectI &dirtyRect, float scale = 1) noexcept;
 
     virtual void Paint(TextureMapper &textureMapper, const boo::TransformationMatrix &transform,
                        float opacity, bool allEdgesExposed) noexcept;

@@ -26,10 +26,10 @@
 
 #include "Krystal.Booey/Graphics/Fonts/Font.hpp"
 #include "Krystal.Booey/Graphics/Fonts/GlyphBuffer.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Text/TextSpacing.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
@@ -66,8 +66,8 @@ namespace krys::boo
     class ComplexTextRun;
 
   private:
-    SmallList<FloatSize, 256> _adjustedBaseAdvances;
-    SmallList<FloatPoint, 256> _glyphOrigins;
+    SmallList<SizeF, 256> _adjustedBaseAdvances;
+    SmallList<PointF, 256> _glyphOrigins;
     SmallList<Glyph, 256> _adjustedGlyphs;
     SmallList<float, 256> _textAutoSpaceSpacings;
     /// @brief When small caps are synthesised, the capital to shape for the letter starting at each byte of
@@ -96,7 +96,7 @@ namespace krys::boo
     uint32 _currentCharacter {0};
     uint32 _end {0};
 
-    FloatSize _totalAdvance;
+    SizeF _totalAdvance;
     float _runWidthSoFar {0};
     uint32 _numGlyphsSoFar {0};
     uint32 _currentRun {0};
@@ -151,7 +151,7 @@ namespace krys::boo
       return _runWidthSoFar;
     }
 
-    KRYS_NODISCARD FloatSize TotalAdvance() const noexcept
+    KRYS_NODISCARD SizeF TotalAdvance() const noexcept
     {
       return _totalAdvance;
     }
@@ -180,12 +180,12 @@ namespace krys::boo
     class ComplexTextRun : public RefCounted<ComplexTextRun>
     {
     private:
-      SmallList<FloatSize, 64> _baseAdvances;
-      SmallList<FloatPoint, 64> _glyphOrigins;
+      SmallList<SizeF, 64> _baseAdvances;
+      SmallList<PointF, 64> _glyphOrigins;
       SmallList<Glyph, 64> _glyphs;
       SmallList<uint32, 64> _glyphEndOffsets;
       SmallList<uint32, 64> _coreTextIndices;
-      FloatSize _initialAdvance;
+      SizeF _initialAdvance;
       Ref<const Font> _font;
       utf8_stringview _characters;
       uint32 _indexBegin;
@@ -202,8 +202,8 @@ namespace krys::boo
       ComplexTextRun(const Font &font, utf8_stringview characters, uint32 stringLocation, uint32 indexBegin,
                      uint32 indexEnd, bool ltr) noexcept;
 
-      ComplexTextRun(Span<const FloatSize> advances, Span<const FloatPoint> origins, Span<const Glyph> glyphs,
-                     Span<const uint32> stringIndices, FloatSize initialAdvance, const Font &font,
+      ComplexTextRun(Span<const SizeF> advances, Span<const PointF> origins, Span<const Glyph> glyphs,
+                     Span<const uint32> stringIndices, SizeF initialAdvance, const Font &font,
                      utf8_stringview characters, uint32 stringLocation, uint32 indexBegin, uint32 indexEnd,
                      bool ltr) noexcept;
 
@@ -225,11 +225,12 @@ namespace krys::boo
       }
 
       /// @brief A run of the given glyphs.
-      KRYS_NODISCARD static Ref<ComplexTextRun>
-        Create(Span<const FloatSize> advances, Span<const FloatPoint> origins, Span<const Glyph> glyphs,
-               Span<const uint32> stringIndices, FloatSize initialAdvance, const Font &font,
-               utf8_stringview characters, uint32 stringLocation, uint32 indexBegin, uint32 indexEnd,
-               bool ltr) noexcept
+      KRYS_NODISCARD static Ref<ComplexTextRun> Create(Span<const SizeF> advances, Span<const PointF> origins,
+                                                       Span<const Glyph> glyphs,
+                                                       Span<const uint32> stringIndices, SizeF initialAdvance,
+                                                       const Font &font, utf8_stringview characters,
+                                                       uint32 stringLocation, uint32 indexBegin,
+                                                       uint32 indexEnd, bool ltr) noexcept
       {
         return AdoptRef(*new ComplexTextRun(advances, origins, glyphs, stringIndices, initialAdvance, font,
                                             characters, stringLocation, indexBegin, indexEnd, ltr));
@@ -292,20 +293,20 @@ namespace krys::boo
         _initialAdvance.Expand(delta, 0);
       }
 
-      KRYS_NODISCARD FloatSize InitialAdvance() const noexcept
+      KRYS_NODISCARD SizeF InitialAdvance() const noexcept
       {
         return _initialAdvance;
       }
 
-      KRYS_NODISCARD Span<const FloatSize> BaseAdvances() const noexcept
+      KRYS_NODISCARD Span<const SizeF> BaseAdvances() const noexcept
       {
         return _baseAdvances;
       }
 
-      KRYS_NODISCARD Span<const FloatPoint> GlyphOrigins() const noexcept
+      KRYS_NODISCARD Span<const PointF> GlyphOrigins() const noexcept
       {
-        return _glyphOrigins.size() == GlyphCount() ? Span<const FloatPoint> {_glyphOrigins}
-                                                    : Span<const FloatPoint> {};
+        return _glyphOrigins.size() == GlyphCount() ? Span<const PointF> {_glyphOrigins}
+                                                    : Span<const PointF> {};
       }
 
       KRYS_NODISCARD bool IsLTR() const noexcept
@@ -360,9 +361,9 @@ namespace krys::boo
                                                uint32 glyphEndOffset, uint32 oldCharacterInCurrentGlyph,
                                                GlyphIterationStyle iterationStyle) const noexcept;
 
-    KRYS_NODISCARD FloatPoint GlyphOrigin(uint32 index) const noexcept
+    KRYS_NODISCARD PointF GlyphOrigin(uint32 index) const noexcept
     {
-      return index < _glyphOrigins.size() ? _glyphOrigins[index] : FloatPoint();
+      return index < _glyphOrigins.size() ? _glyphOrigins[index] : PointF();
     }
 
     void AdvanceByCombiningCharacterSequence(const text::CachedTextBreakIterator &graphemeClusterIterator,

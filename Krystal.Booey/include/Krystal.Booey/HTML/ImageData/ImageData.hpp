@@ -29,11 +29,11 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ByteArrayPixelBuffer.hpp"
 #include "Krystal.Booey/HTML/Canvas/PredefinedColorSpace.hpp"
 #include "Krystal.Booey/HTML/ImageData/ImageDataArray.hpp"
 #include "Krystal.Booey/HTML/ImageData/ImageDataSettings.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 
 namespace krys
@@ -48,7 +48,7 @@ namespace krys::boo::html
   class ImageData final : public RefCounted<ImageData>
   {
   private:
-    IntSize _size;
+    SizeI _size;
     ImageDataArray _data;
     PredefinedColorSpace _colorSpace;
 
@@ -65,11 +65,11 @@ namespace krys::boo::html
 
     /// @brief Transparent black image data of @p size; null if it's too big.
     KRYS_NODISCARD static RefPtr<ImageData>
-      Create(const IntSize &size, PredefinedColorSpace,
+      Create(const SizeI &size, PredefinedColorSpace,
              ImageDataPixelFormat = ImageDataPixelFormat::RgbaUnorm8) noexcept;
 
     /// @brief Image data of @p size holding @p array; null if it's not as long as @p size's pixels.
-    KRYS_NODISCARD static RefPtr<ImageData> Create(const IntSize &size, ImageDataArray &&array,
+    KRYS_NODISCARD static RefPtr<ImageData> Create(const SizeI &size, ImageDataArray &&array,
                                                    PredefinedColorSpace) noexcept;
 
     /// @brief `new ImageData(sw, sh, settings)` in @p defaultColorSpace, a copy of @p bytes or transparent
@@ -93,7 +93,7 @@ namespace krys::boo::html
       ComputeColorSpace(Maybe<ImageDataSettings>,
                         PredefinedColorSpace defaultColorSpace = PredefinedColorSpace::SRGB) noexcept;
 
-    KRYS_NODISCARD const IntSize &Size() const noexcept
+    KRYS_NODISCARD const SizeI &Size() const noexcept
     {
       return _size;
     }
@@ -129,9 +129,9 @@ namespace krys::boo::html
     KRYS_NODISCARD Ref<PixelBuffer> GetPixelBuffer() const noexcept;
 
   private:
-    ImageData(const IntSize &, ImageDataArray &&, PredefinedColorSpace) noexcept;
+    ImageData(const SizeI &, ImageDataArray &&, PredefinedColorSpace) noexcept;
 
-    ImageData(const IntSize &, ImageDataArray &&, PredefinedColorSpace, Maybe<ImageDataPixelFormat>) noexcept;
+    ImageData(const SizeI &, ImageDataArray &&, PredefinedColorSpace, Maybe<ImageDataPixelFormat>) noexcept;
   };
 
   TextStream &operator<<(TextStream &, const ImageData &) noexcept;

@@ -23,12 +23,12 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Style/Values/Borders/BorderRadius.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo
@@ -63,7 +63,7 @@ namespace krys::boo
 
     /// @brief One path outlining @p rects (an inline's line boxes) with the box's corner radii on its first
     /// and last lines, or an empty path when they don't join into one shape.
-    KRYS_NODISCARD static Path PathWithShrinkWrappedRects(const List<FloatRect> &rects,
+    KRYS_NODISCARD static Path PathWithShrinkWrappedRects(const List<RectF> &rects,
                                                           const style::BorderRadius &radii,
                                                           float outlineOffset, WritingMode writingMode,
                                                           float deviceScaleFactor) noexcept;

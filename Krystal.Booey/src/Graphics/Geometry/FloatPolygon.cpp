@@ -33,13 +33,12 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD bool AreCollinearPoints(const FloatPoint &p0, const FloatPoint &p1,
-                                           const FloatPoint &p2) noexcept
+    KRYS_NODISCARD bool AreCollinearPoints(const PointF &p0, const PointF &p1, const PointF &p2) noexcept
     {
       return !Determinant(p1 - p0, p2 - p0);
     }
 
-    KRYS_NODISCARD bool AreCoincidentPoints(const FloatPoint &p0, const FloatPoint &p1) noexcept
+    KRYS_NODISCARD bool AreCoincidentPoints(const PointF &p0, const PointF &p1) noexcept
     {
       return p0.X() == p1.X() && p0.Y() == p1.Y();
     }
@@ -76,7 +75,7 @@ namespace krys::boo
     }
   }
 
-  FloatPolygon::FloatPolygon(List<FloatPoint> &&vertices) noexcept
+  FloatPolygon::FloatPolygon(List<PointF> &&vertices) noexcept
       : _vertices(krys::move(vertices)), _empty(_vertices.size() < 3), _edges(_vertices.size())
   {
     uint32 nVertices = NumberOfVertices();
@@ -93,15 +92,15 @@ namespace krys::boo
     uint32 minVertexIndex = 0;
     for (uint32 i = 1; i < nVertices; ++i)
     {
-      const FloatPoint &vertex = VertexAt(i);
+      const PointF &vertex = VertexAt(i);
       if (vertex.Y() < VertexAt(minVertexIndex).Y()
           || (vertex.Y() == VertexAt(minVertexIndex).Y() && vertex.X() < VertexAt(minVertexIndex).X()))
       {
         minVertexIndex = i;
       }
     }
-    FloatPoint nextVertex = VertexAt((minVertexIndex + 1) % nVertices);
-    FloatPoint prevVertex = VertexAt((minVertexIndex + nVertices - 1) % nVertices);
+    PointF nextVertex = VertexAt((minVertexIndex + 1) % nVertices);
+    PointF prevVertex = VertexAt((minVertexIndex + nVertices - 1) % nVertices);
     bool clockwise = Determinant(VertexAt(minVertexIndex) - prevVertex, nextVertex - prevVertex) > 0;
 
     uint32 edgeIndex = 0;
@@ -156,12 +155,12 @@ namespace krys::boo
     return edges;
   }
 
-  bool VertexPair::Intersection(const VertexPair &other, FloatPoint &point) const noexcept
+  bool VertexPair::Intersection(const VertexPair &other, PointF &point) const noexcept
   {
     // See: http://paulbourke.net/geometry/pointlineplane/, "Intersection point of two lines in 2 dimensions"
 
-    const FloatSize &thisDelta = Vertex2() - Vertex1();
-    const FloatSize &otherDelta = other.Vertex2() - other.Vertex1();
+    const SizeF &thisDelta = Vertex2() - Vertex1();
+    const SizeF &otherDelta = other.Vertex2() - other.Vertex1();
     float denominator = Determinant(thisDelta, otherDelta);
     if (!denominator)
     {
@@ -172,7 +171,7 @@ namespace krys::boo
     // in parametric form. Each point on the line segment is: vertex1 + u * (vertex2 - vertex1),
     // when 0 <= u <= 1. We're computing the values of u for each line at their intersection point.
 
-    const FloatSize &vertex1Delta = Vertex1() - other.Vertex1();
+    const SizeF &vertex1Delta = Vertex1() - other.Vertex1();
     float uThisLine = Determinant(otherDelta, vertex1Delta) / denominator;
     float uOtherLine = Determinant(thisDelta, vertex1Delta) / denominator;
 

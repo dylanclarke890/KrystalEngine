@@ -322,11 +322,11 @@ namespace krys::boo::tests
       CHECK(dataTransfer->HasDragImage());
       CHECK(dataTransfer->DragImageElement() == a.get());
 
-      IntPoint location;
+      PointI location;
       auto image = dataTransfer->CreateDragImage(&document, location);
-      CHECK(location == IntPoint(3, 4));
+      CHECK(location == PointI(3, 4));
       REQUIRE(image);
-      CHECK(DragImageSize(image) == IntSize(30, 20));
+      CHECK(DragImageSize(image) == SizeI(30, 20));
     }
 
     SECTION("An image that isn't in a document is the image itself, not an element")
@@ -345,9 +345,9 @@ namespace krys::boo::tests
       auto drag = DataTransfer::CreateForDrag(document);
       drag->MoveDragState(krys::move(dragStart));
       CHECK(drag->HasDragImage());
-      IntPoint location;
+      PointI location;
       CHECK(drag->CreateDragImage(&document, location));
-      CHECK(location == IntPoint(5, 6));
+      CHECK(location == PointI(5, 6));
     }
   }
 }

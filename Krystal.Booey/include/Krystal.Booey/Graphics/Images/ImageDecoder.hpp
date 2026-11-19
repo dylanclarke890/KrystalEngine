@@ -25,14 +25,14 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Images/DecodingOptions.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
 #include "Krystal.Booey/Graphics/Images/PlatformImage.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Strings/String.hpp"
@@ -94,7 +94,7 @@ namespace krys::boo
       return GetEncodedDataStatus() >= EncodedDataStatus::SizeAvailable;
     }
 
-    KRYS_NODISCARD virtual IntSize Size() const noexcept = 0;
+    KRYS_NODISCARD virtual SizeI Size() const noexcept = 0;
 
     KRYS_NODISCARD virtual size_t FrameCount() const noexcept = 0;
 
@@ -112,9 +112,9 @@ namespace krys::boo
       return {};
     }
 
-    KRYS_NODISCARD virtual Maybe<IntPoint> HotSpot() const noexcept = 0;
+    KRYS_NODISCARD virtual Maybe<PointI> HotSpot() const noexcept = 0;
 
-    KRYS_NODISCARD virtual IntSize
+    KRYS_NODISCARD virtual SizeI
       FrameSizeAtIndex(size_t index, SubsamplingLevel = SubsamplingLevel::Default) const noexcept = 0;
 
     KRYS_NODISCARD virtual bool FrameIsCompleteAtIndex(size_t index) const noexcept = 0;
@@ -124,7 +124,7 @@ namespace krys::boo
       return ImageOrientation::Orientation::None;
     }
 
-    KRYS_NODISCARD virtual Maybe<IntSize> FrameDensityCorrectedSizeAtIndex(size_t) const noexcept
+    KRYS_NODISCARD virtual Maybe<SizeI> FrameDensityCorrectedSizeAtIndex(size_t) const noexcept
     {
       return null;
     }

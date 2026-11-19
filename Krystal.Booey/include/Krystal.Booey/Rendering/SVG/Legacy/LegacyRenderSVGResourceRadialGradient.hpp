@@ -42,9 +42,9 @@ namespace krys::boo
 
     KRYS_NODISCARD SVGRadialGradientElement &RadialGradientElement() const noexcept;
 
-    KRYS_NODISCARD FloatPoint CenterPoint(const svg::RadialGradientAttributes &) const noexcept;
+    KRYS_NODISCARD PointF CenterPoint(const svg::RadialGradientAttributes &) const noexcept;
 
-    KRYS_NODISCARD FloatPoint FocalPoint(const svg::RadialGradientAttributes &) const noexcept;
+    KRYS_NODISCARD PointF FocalPoint(const svg::RadialGradientAttributes &) const noexcept;
 
     KRYS_NODISCARD float Radius(const svg::RadialGradientAttributes &) const noexcept;
 

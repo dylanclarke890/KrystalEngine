@@ -321,13 +321,13 @@ namespace krys::boo
 
 #pragma region Repaint
 
-    KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
+    KRYS_NODISCARD RectF RepaintRectInLocalCoordinates(
       RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept override
     {
       return BorderBoxRect();
     }
 
-    KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept override
+    KRYS_NODISCARD RectF ObjectBoundingBox() const noexcept override
     {
       return BorderBoxRect();
     }
@@ -971,13 +971,13 @@ namespace krys::boo
 
     /// @brief Scrolls the box to bring @p positionInWindow into view, while a mouse drag selects past its
     /// edge.
-    virtual void Autoscroll(const IntPoint &positionInWindow) noexcept;
+    virtual void Autoscroll(const PointI &positionInWindow) noexcept;
 
     KRYS_NODISCARD bool CanAutoscroll() const noexcept;
 
     /// @brief How far @p windowPoint is within the band along the box's edges that autoscrolls, as an offset
     /// out of the box.
-    KRYS_NODISCARD IntSize CalculateAutoscrollDirection(const IntPoint &windowPoint) const noexcept;
+    KRYS_NODISCARD SizeI CalculateAutoscrollDirection(const PointI &windowPoint) const noexcept;
 
     /// @brief @p renderer or its nearest ancestor that can autoscroll.
     KRYS_NODISCARD static RenderBox *FindAutoscrollable(RenderObject *renderer) noexcept;
@@ -988,7 +988,7 @@ namespace krys::boo
 
     /// @brief Scrolls the box towards @p mousePosition, the further from @p source the faster (both in the
     /// window).
-    virtual void PanScroll(const IntPoint &source, const IntPoint &mousePosition) noexcept;
+    virtual void PanScroll(const PointI &source, const PointI &mousePosition) noexcept;
 
     /// @brief Scrolls the box, or else its nearest containing block that scrolls, by @p stepCount steps of
     /// @p granularity in @p direction; the render view's isn't one.
@@ -1094,13 +1094,13 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutPoint FlipForWritingMode(const LayoutPoint &position) const noexcept;
 
-    KRYS_NODISCARD FloatPoint FlipForWritingMode(const FloatPoint &position) const noexcept;
+    KRYS_NODISCARD PointF FlipForWritingMode(const PointF &position) const noexcept;
 
     KRYS_NODISCARD LayoutSize FlipForWritingMode(const LayoutSize &offset) const noexcept;
 
     void FlipForWritingMode(LayoutRect &rect) const noexcept;
 
-    void FlipForWritingMode(FloatRect &rect) const noexcept;
+    void FlipForWritingMode(RectF &rect) const noexcept;
 
 #pragma endregion
 
@@ -1143,13 +1143,12 @@ namespace krys::boo
   public:
     KRYS_NODISCARD bool RequiresLayer() const noexcept override;
 
-    void ApplyTransform(TransformationMatrix &transform, const RenderStyle &style,
-                        const FloatRect &boundingBox,
+    void ApplyTransform(TransformationMatrix &transform, const RenderStyle &style, const RectF &boundingBox,
                         EnumSet<style::TransformResolverOption> options) const noexcept override;
 
     using RenderLayerModelObject::ApplyTransform;
 
-    KRYS_NODISCARD FloatRect ReferenceBoxRect(CSSBoxType boxType) const noexcept override;
+    KRYS_NODISCARD RectF ReferenceBoxRect(CSSBoxType boxType) const noexcept override;
 
     KRYS_NODISCARD virtual LayoutRect OverflowClipRect(
       const LayoutPoint &location,
@@ -1309,7 +1308,7 @@ namespace krys::boo
 
     void AddOverflowFromFloatBox(const FloatingObject &floatBox) noexcept;
 
-    void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept override;
+    void ImageChanged(WrappedImagePtr, const RectI * = nullptr) noexcept override;
 
     /// @brief Repaints the rects @p layers paint @p image in; background layers of the root paint the view's.
     /// @return Whether that repainted the whole box.

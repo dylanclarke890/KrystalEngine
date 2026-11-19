@@ -28,11 +28,10 @@
 #include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 
@@ -162,16 +161,16 @@ namespace krys::boo
     return LayoutUnit(Blend(from.ToFloat(), to.ToFloat(), context));
   }
 
-  KRYS_NODISCARD inline IntPoint Blend(const IntPoint &from, const IntPoint &to,
-                                       const BlendingContext &context) noexcept
+  KRYS_NODISCARD inline PointI Blend(const PointI &from, const PointI &to,
+                                     const BlendingContext &context) noexcept
   {
-    return IntPoint(Blend(from.X(), to.X(), context), Blend(from.Y(), to.Y(), context));
+    return PointI(Blend(from.X(), to.X(), context), Blend(from.Y(), to.Y(), context));
   }
 
-  KRYS_NODISCARD inline FloatPoint Blend(const FloatPoint &from, const FloatPoint &to,
-                                         const BlendingContext &context) noexcept
+  KRYS_NODISCARD inline PointF Blend(const PointF &from, const PointF &to,
+                                     const BlendingContext &context) noexcept
   {
-    return FloatPoint(Blend(from.X(), to.X(), context), Blend(from.Y(), to.Y(), context));
+    return PointF(Blend(from.X(), to.X(), context), Blend(from.Y(), to.Y(), context));
   }
 
   KRYS_NODISCARD inline LayoutPoint Blend(const LayoutPoint &from, const LayoutPoint &to,

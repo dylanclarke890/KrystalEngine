@@ -236,7 +236,7 @@ namespace krys::boo
     return _cachedImage->ErrorOccurred();
   }
 
-  FloatSize StyleCachedImage::ImageSize(const RenderElement *renderer, float multiplier) const noexcept
+  SizeF StyleCachedImage::ImageSize(const RenderElement *renderer, float multiplier) const noexcept
   {
     if (IsRenderSVGResource(renderer))
     {
@@ -246,7 +246,7 @@ namespace krys::boo
     {
       return {};
     }
-    return FloatSize(_cachedImage->ImageSizeForRenderer(renderer, multiplier)) / _scaleFactor;
+    return SizeF(_cachedImage->ImageSizeForRenderer(renderer, multiplier)) / _scaleFactor;
   }
 
   bool StyleCachedImage::ImageHasRelativeWidth() const noexcept
@@ -268,14 +268,13 @@ namespace krys::boo
   }
 
   void StyleCachedImage::ComputeIntrinsicDimensions(const RenderElement *renderer, float &intrinsicWidth,
-                                                    float &intrinsicHeight,
-                                                    FloatSize &intrinsicRatio) noexcept
+                                                    float &intrinsicHeight, SizeF &intrinsicRatio) noexcept
   {
     // In case of an SVG resource, we should return the container size.
     if (IsRenderSVGResource(renderer))
     {
-      FloatSize size = FloorSizeToDevicePixels(LayoutSize(_containerSize),
-                                               renderer ? renderer->GetDocument().DeviceScaleFactor() : 1);
+      SizeF size = FloorSizeToDevicePixels(LayoutSize(_containerSize),
+                                           renderer ? renderer->GetDocument().DeviceScaleFactor() : 1);
       intrinsicWidth = size.Width();
       intrinsicHeight = size.Height();
       intrinsicRatio = size;
@@ -300,7 +299,7 @@ namespace krys::boo
   }
 
   void StyleCachedImage::SetContainerContextForRenderer(const RenderElement &renderer,
-                                                        const FloatSize &containerSize,
+                                                        const SizeF &containerSize,
                                                         float containerZoom) noexcept
   {
     _containerSize = containerSize;
@@ -351,7 +350,7 @@ namespace krys::boo
     return _cachedImage->HasImage();
   }
 
-  RefPtr<Image> StyleCachedImage::GetImage(const RenderElement *renderer, const FloatSize &,
+  RefPtr<Image> StyleCachedImage::GetImage(const RenderElement *renderer, const SizeF &,
                                            const GraphicsContext &, bool) const noexcept
   {
     krys_debug_assert(!_isPending);

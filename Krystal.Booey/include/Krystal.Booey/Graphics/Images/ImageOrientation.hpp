@@ -26,9 +26,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 
 namespace krys::boo
 {
@@ -106,7 +106,7 @@ namespace krys::boo
       }
     }
 
-    KRYS_NODISCARD constexpr AffineTransform TransformFromDefault(const FloatSize &drawnSize) const noexcept
+    KRYS_NODISCARD constexpr AffineTransform TransformFromDefault(const SizeF &drawnSize) const noexcept
     {
       float w = drawnSize.Width();
       float h = drawnSize.Height();

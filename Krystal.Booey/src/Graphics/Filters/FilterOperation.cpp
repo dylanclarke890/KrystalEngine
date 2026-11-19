@@ -310,8 +310,8 @@ namespace krys::boo
   IntOutsets DropShadowFilterOperationBase::Outsets() const noexcept
   {
     return FEDropShadow::CalculateOutsets(
-      FloatSize(static_cast<float>(X()), static_cast<float>(Y())),
-      FloatSize(static_cast<float>(_stdDeviation), static_cast<float>(_stdDeviation)));
+      SizeF(static_cast<float>(X()), static_cast<float>(Y())),
+      SizeF(static_cast<float>(_stdDeviation), static_cast<float>(_stdDeviation)));
   }
 
   bool DropShadowFilterOperation::Equals(const FilterOperation &operation) const noexcept

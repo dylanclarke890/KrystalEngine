@@ -152,8 +152,8 @@ namespace krys::boo
         return;
       }
 
-      FloatRect transformedRect(
-        localToAncestorTransform.Inverse().value_or(AffineTransform {}).MapRect(FloatRect(Rect)));
+      RectF transformedRect(
+        localToAncestorTransform.Inverse().value_or(AffineTransform {}).MapRect(RectF(Rect)));
       Rect.SetLocation(LayoutPoint(transformedRect.Location()));
       Rect.SetSize(LayoutSize(transformedRect.Size()));
     }

@@ -26,11 +26,10 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/Transforms/Quaternion.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
@@ -38,8 +37,6 @@ namespace krys::boo
 {
   class AffineTransform;
   class FloatQuad;
-  class FloatRect;
-  class IntRect;
   class LayoutRect;
 
   /// @brief A 4x4 transform matrix. The first index is the column, the second the row.
@@ -186,21 +183,21 @@ namespace krys::boo
 
     // Maps a 2D point through the transform, returning a 2D point.
     // Note that this ignores the z component, effectively projecting the point into the z=0 plane.
-    KRYS_NODISCARD FloatPoint MapPoint(const FloatPoint &p) const noexcept;
+    KRYS_NODISCARD PointF MapPoint(const PointF &p) const noexcept;
 
     // Like the version above, except that it rounds the mapped point to the nearest integer value.
-    KRYS_NODISCARD IntPoint MapPoint(const IntPoint &p) const noexcept
+    KRYS_NODISCARD PointI MapPoint(const PointI &p) const noexcept
     {
-      return RoundedIntPoint(MapPoint(FloatPoint(p)));
+      return RoundedPointI(MapPoint(PointF(p)));
     }
 
     // If the matrix has 3D components, the z component of the result is
     // dropped, effectively projecting the rect into the z=0 plane.
-    KRYS_NODISCARD FloatRect MapRect(const FloatRect &r) const noexcept;
+    KRYS_NODISCARD RectF MapRect(const RectF &r) const noexcept;
 
     // Rounds the resulting mapped rectangle out. This is helpful for bounding
     // box computations but may not be what is wanted in other contexts.
-    KRYS_NODISCARD IntRect MapRect(const IntRect &r) const noexcept;
+    KRYS_NODISCARD RectI MapRect(const RectI &r) const noexcept;
 
     KRYS_NODISCARD LayoutRect MapRect(const LayoutRect &r) const noexcept;
 
@@ -211,7 +208,7 @@ namespace krys::boo
     // Maps a point on the z=0 plane into a point on the plane with with the transform applied, by
     // extending a ray perpendicular to the source plane and computing the local x,y position of
     // the point where that ray intersects with the destination plane.
-    KRYS_NODISCARD FloatPoint ProjectPoint(const FloatPoint &p, bool *clamped = nullptr) const noexcept;
+    KRYS_NODISCARD PointF ProjectPoint(const PointF &p, bool *clamped = nullptr) const noexcept;
 
     // Projects the four corners of the quad.
     KRYS_NODISCARD FloatQuad ProjectQuad(const FloatQuad &q, bool *clamped = nullptr) const noexcept;
@@ -502,8 +499,7 @@ namespace krys::boo
     }
 
     // Returns a transformation that maps a rect to a rect.
-    KRYS_NODISCARD static TransformationMatrix RectToRect(const FloatRect &from,
-                                                          const FloatRect &to) noexcept;
+    KRYS_NODISCARD static TransformationMatrix RectToRect(const RectF &from, const RectF &to) noexcept;
 
     // Changes the transform to:
     //
@@ -598,12 +594,12 @@ namespace krys::boo
     // multiply passed 2D point by matrix (assume z=0)
     void MultVecMatrix(double x, double y, double &resultX, double &resultY) const noexcept;
 
-    KRYS_NODISCARD FloatPoint InternalMapPoint(const FloatPoint &sourcePoint) const noexcept
+    KRYS_NODISCARD PointF InternalMapPoint(const PointF &sourcePoint) const noexcept
     {
       double resultX;
       double resultY;
       MultVecMatrix(sourcePoint.X(), sourcePoint.Y(), resultX, resultY);
-      return FloatPoint(static_cast<float>(resultX), static_cast<float>(resultY));
+      return PointF(static_cast<float>(resultX), static_cast<float>(resultY));
     }
 
     void MultVecMatrix(double x, double y, double z, double &resultX, double &resultY,
@@ -637,4 +633,7 @@ namespace krys::boo
   };
 
   constexpr inline TransformationMatrix TransformationMatrix::Identity {};
+
+  /// @brief @p point mapped by @p transform, in double precision.
+  KRYS_NODISCARD PointF MatrixTransform(const PointF &point, const TransformationMatrix &transform) noexcept;
 }

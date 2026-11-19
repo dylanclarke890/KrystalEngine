@@ -355,7 +355,7 @@ namespace krys::boo::tests
 
     PageInFrameFixture fixture(u8"<style>body{margin:0}</style><div "
                                u8"style='width:400px;height:400px;background:url(file:///large.png)'>",
-                               IntSize(500, 500));
+                               SizeI(500, 500));
     (void)fixture.Painted();
     RunNetworkingTasks();
 

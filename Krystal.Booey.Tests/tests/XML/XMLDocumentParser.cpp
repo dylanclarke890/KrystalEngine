@@ -257,6 +257,6 @@ namespace krys::boo::tests
     REQUIRE(root);
     REQUIRE(IsSVG<SVGSvgElement>(*root));
     auto &svg = Downcast<SVGSvgElement>(Downcast<SVGElement>(*root));
-    CHECK(svg.CurrentViewBoxRect() == FloatRect(0, 0, 10, 5));
+    CHECK(svg.CurrentViewBoxRect() == RectF(0, 0, 10, 5));
   }
 }

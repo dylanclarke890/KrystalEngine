@@ -92,7 +92,7 @@ namespace krys::boo
       return u8"RenderListMarker";
     }
 
-    void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept override;
+    void ImageChanged(WrappedImagePtr, const RectI * = nullptr) noexcept override;
 
     KRYS_NODISCARD LayoutRect SelectionRectForRepaint(const RenderLayerModelObject *repaintContainer,
                                                       bool clipToVisibleContent) noexcept final;
@@ -124,7 +124,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IsImage() const noexcept;
 
     /// @brief Where the marker's image, bullet or text is drawn, relative to the marker.
-    KRYS_NODISCARD FloatRect RelativeMarkerRect() noexcept;
+    KRYS_NODISCARD RectF RelativeMarkerRect() noexcept;
 
     KRYS_NODISCARD LayoutUnit LineLogicalOffsetForListItem() const noexcept
     {

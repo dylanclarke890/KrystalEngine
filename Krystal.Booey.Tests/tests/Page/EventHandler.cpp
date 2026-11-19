@@ -99,7 +99,7 @@ namespace krys::boo::tests
                                                      MouseButton button = MouseButton::None,
                                                      int32 clickCount = 0) noexcept
       {
-        return PlatformMouseEvent(DoublePoint(x, y), DoublePoint(x, y), button, type, clickCount, {},
+        return PlatformMouseEvent(PointD(x, y), PointD(x, y), button, type, clickCount, {},
                                   MonotonicTime::Now());
       }
 
@@ -776,8 +776,8 @@ namespace krys::boo::tests
         auto paintView = [&]
         {
           (void)fixture.Document->UpdateLayout();
-          display_list::RecorderImpl recorder(FloatSize(200, 100));
-          view->Paint(recorder, IntRect(0, 0, 200, 100));
+          display_list::RecorderImpl recorder(SizeF(200, 100));
+          view->Paint(recorder, RectI(0, 0, 200, 100));
           return recorder.TakeDisplayList()->AsText({});
         };
         // Three discs centred on the mouse: an outline, a white fill, and a dot.
@@ -816,7 +816,7 @@ namespace krys::boo::tests
         REQUIRE(view->ScrollY() > 0);
         // The moved pixels include the icon's, so the square around it is damaged.
         auto damage = view->TakeDamage();
-        CHECK(damage.Contains(Region(IntRect(92, 12, 16, 16))));
+        CHECK(damage.Contains(Region(RectI(92, 12, 16, 16))));
       }
 
       SECTION("a press stops it, and is swallowed")
@@ -855,8 +855,8 @@ namespace krys::boo::tests
         auto painted = [&]
         {
           (void)fixture.Document->UpdateLayout();
-          display_list::RecorderImpl recorder(FloatSize(200, 100));
-          view->Paint(recorder, IntRect(0, 0, 200, 100));
+          display_list::RecorderImpl recorder(SizeF(200, 100));
+          view->Paint(recorder, RectI(0, 0, 200, 100));
           return recorder.TakeDisplayList()->AsText({});
         };
         CHECK(painted().contains(u8"ellipse"));

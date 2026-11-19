@@ -84,7 +84,7 @@ namespace krys::boo
     return farthest;
   }
 
-  FloatRect SVGLocatable::GetBBox(SVGElement *element, StyleUpdateStrategy styleUpdateStrategy) noexcept
+  RectF SVGLocatable::GetBBox(SVGElement *element, StyleUpdateStrategy styleUpdateStrategy) noexcept
   {
     krys_debug_assert(element);
     if (styleUpdateStrategy == AllowStyleUpdate)
@@ -95,7 +95,7 @@ namespace krys::boo
     // FIXME: Eventually we should support getBBox for detached elements.
     if (!element->Renderer())
     {
-      return FloatRect();
+      return RectF();
     }
 
     return element->Renderer()->ObjectBoundingBox();

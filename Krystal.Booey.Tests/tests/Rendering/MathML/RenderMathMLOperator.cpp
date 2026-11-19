@@ -56,8 +56,8 @@ namespace krys::boo::tests
     KRYS_NODISCARD std::string PaintedRuns(ResolverFixture &fixture) noexcept
     {
       (void)fixture.Document->UpdateLayout();
-      display_list::RecorderImpl recorder(FloatSize(800, 600));
-      fixture.Frame->View()->Paint(recorder, IntRect(0, 0, 800, 600));
+      display_list::RecorderImpl recorder(SizeF(800, 600));
+      fixture.Frame->View()->Paint(recorder, RectI(0, 0, 800, 600));
       std::string runs;
       for (const auto &item : recorder.TakeDisplayList()->Items())
       {

@@ -20,7 +20,7 @@ namespace krys::boo::layout::tests
     struct RecordingPopupMenu final : PopupMenu
     {
       PopupMenuClient *Client {nullptr};
-      IntRect ShownAt;
+      RectI ShownAt;
       int32 ShownIndex {-1};
       bool Visible {false};
       int32 Updates {0};
@@ -29,7 +29,7 @@ namespace krys::boo::layout::tests
       {
       }
 
-      void Show(const IntRect &rect, LocalFrameView &, int32 selectedIndex) noexcept final
+      void Show(const RectI &rect, LocalFrameView &, int32 selectedIndex) noexcept final
       {
         ShownAt = rect;
         ShownIndex = selectedIndex;
@@ -76,9 +76,9 @@ namespace krys::boo::layout::tests
       }
     };
 
-    KRYS_NODISCARD PlatformMouseEvent MouseEvent(PlatformEvent::Type type, IntPoint position) noexcept
+    KRYS_NODISCARD PlatformMouseEvent MouseEvent(PlatformEvent::Type type, PointI position) noexcept
     {
-      DoublePoint point(position.X(), position.Y());
+      PointD point(position.X(), position.Y());
       int32 clickCount = type == PlatformEvent::Type::MousePressed ? 1 : 0;
       return PlatformMouseEvent(point, point, MouseButton::Left, type, clickCount, {}, MonotonicTime::Now());
     }
@@ -149,7 +149,7 @@ layer at (0,0) size 400x23
     CHECK(popup.Visible);
     CHECK(menuList.PopupIsVisible());
     CHECK(popup.ShownIndex == 0);
-    CHECK(popup.ShownAt == IntRect(0, 0, menuList.Width().ToInt(), menuList.Height().ToInt()));
+    CHECK(popup.ShownAt == RectI(0, 0, menuList.Width().ToInt(), menuList.Height().ToInt()));
     (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, {5, 5}));
 
     // The popup asks the menu list for its items.

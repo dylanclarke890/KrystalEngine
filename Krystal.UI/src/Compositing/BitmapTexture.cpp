@@ -2,13 +2,13 @@
 
 namespace krys::ui
 {
-  Ref<BitmapTexture> BitmapTexture::Create(gfx::Device &device, const boo::IntSize &size,
+  Ref<BitmapTexture> BitmapTexture::Create(gfx::Device &device, const SizeI &size,
                                            EnumSet<Flags> flags) noexcept
   {
     return AdoptRef(*new BitmapTexture(device, size, flags));
   }
 
-  BitmapTexture::BitmapTexture(gfx::Device &device, const boo::IntSize &size, EnumSet<Flags> flags) noexcept
+  BitmapTexture::BitmapTexture(gfx::Device &device, const SizeI &size, EnumSet<Flags> flags) noexcept
       : _device(device), _flags(flags), _size(size)
   {
     CreateTexture();
@@ -19,7 +19,7 @@ namespace krys::ui
     DestroyTexture();
   }
 
-  void BitmapTexture::Reset(const boo::IntSize &size, EnumSet<Flags> flags) noexcept
+  void BitmapTexture::Reset(const SizeI &size, EnumSet<Flags> flags) noexcept
   {
     _flags = flags;
     if (size == _size && _texture.IsValid())

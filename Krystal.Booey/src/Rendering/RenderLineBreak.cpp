@@ -55,7 +55,7 @@ namespace krys::boo
     return CreatePositionWithAffinity(0, Affinity::Downstream);
   }
 
-  IntRect RenderLineBreak::LinesBoundingBox() const noexcept
+  RectI RenderLineBreak::LinesBoundingBox() const noexcept
   {
     auto run = inline_iterator::BoxFor(*this);
     if (!run)
@@ -63,7 +63,7 @@ namespace krys::boo
       return {};
     }
 
-    return EnclosingIntRect(run->VisualRectIgnoringBlockDirection());
+    return EnclosingRectI(run->VisualRectIgnoringBlockDirection());
   }
 
   void RenderLineBreak::BoundingRects(List<LayoutRect> &rects,
@@ -89,7 +89,7 @@ namespace krys::boo
     }
 
     auto rect = box->VisualRectIgnoringBlockDirection();
-    quads.push_back(LocalToAbsoluteQuad(FloatRect(rect.Location(), rect.Size()),
-                                        MapCoordinatesMode::UseTransforms, wasFixed));
+    quads.push_back(
+      LocalToAbsoluteQuad(RectF(rect.Location(), rect.Size()), MapCoordinatesMode::UseTransforms, wasFixed));
   }
 }

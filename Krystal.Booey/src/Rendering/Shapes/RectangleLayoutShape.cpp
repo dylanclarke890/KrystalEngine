@@ -41,7 +41,7 @@ namespace krys::boo
     }
   }
 
-  FloatRect RectangleLayoutShape::ShapeMarginBounds() const noexcept
+  RectF RectangleLayoutShape::ShapeMarginBounds() const noexcept
   {
     krys_debug_assert(ShapeMargin() >= 0);
     if (!ShapeMargin())
@@ -53,7 +53,7 @@ namespace krys::boo
     float boundsY = Y() - ShapeMargin();
     float boundsWidth = Width() + ShapeMargin() * 2;
     float boundsHeight = Height() + ShapeMargin() * 2;
-    return FloatRect(boundsX, boundsY, boundsWidth, boundsHeight);
+    return RectF(boundsX, boundsY, boundsWidth, boundsHeight);
   }
 
   LineSegment RectangleLayoutShape::GetExcludedInterval(LayoutUnit logicalTop,

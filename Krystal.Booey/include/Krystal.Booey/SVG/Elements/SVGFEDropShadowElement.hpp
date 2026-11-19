@@ -110,7 +110,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsIdentity() const noexcept final;
 
-    KRYS_NODISCARD IntOutsets Outsets(const FloatRect &targetBoundingBox,
+    KRYS_NODISCARD IntOutsets Outsets(const RectF &targetBoundingBox,
                                       SVGUnitTypes::SVGUnitType primitiveUnits) const noexcept final;
 
     KRYS_NODISCARD RefPtr<FilterEffect>

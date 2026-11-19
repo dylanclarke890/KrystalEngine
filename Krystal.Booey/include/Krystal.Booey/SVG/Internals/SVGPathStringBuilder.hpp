@@ -44,11 +44,11 @@ namespace krys::boo
     KRYS_NODISCARD bool ContinueConsuming() noexcept final;
 
     // Used in UnalteredParsing/NormalizedParsing modes.
-    void MoveTo(const FloatPoint &targetPoint, bool closed, svg::PathCoordinateMode mode) noexcept final;
+    void MoveTo(const PointF &targetPoint, bool closed, svg::PathCoordinateMode mode) noexcept final;
 
-    void LineTo(const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept final;
+    void LineTo(const PointF &targetPoint, svg::PathCoordinateMode mode) noexcept final;
 
-    void CurveToCubic(const FloatPoint &point1, const FloatPoint &point2, const FloatPoint &targetPoint,
+    void CurveToCubic(const PointF &point1, const PointF &point2, const PointF &targetPoint,
                       svg::PathCoordinateMode mode) noexcept final;
 
     void ClosePath() noexcept final;
@@ -58,15 +58,15 @@ namespace krys::boo
 
     void LineToVertical(float y, svg::PathCoordinateMode mode) noexcept final;
 
-    void CurveToCubicSmooth(const FloatPoint &point2, const FloatPoint &targetPoint,
+    void CurveToCubicSmooth(const PointF &point2, const PointF &targetPoint,
                             svg::PathCoordinateMode mode) noexcept final;
 
-    void CurveToQuadratic(const FloatPoint &point1, const FloatPoint &targetPoint,
+    void CurveToQuadratic(const PointF &point1, const PointF &targetPoint,
                           svg::PathCoordinateMode mode) noexcept final;
 
-    void CurveToQuadraticSmooth(const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept final;
+    void CurveToQuadraticSmooth(const PointF &targetPoint, svg::PathCoordinateMode mode) noexcept final;
 
-    void ArcTo(float r1, float r2, float angle, bool largeArcFlag, bool sweepFlag,
-               const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept final;
+    void ArcTo(float r1, float r2, float angle, bool largeArcFlag, bool sweepFlag, const PointF &targetPoint,
+               svg::PathCoordinateMode mode) noexcept final;
   };
 }

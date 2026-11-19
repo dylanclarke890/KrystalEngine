@@ -25,12 +25,12 @@ namespace krys::boo::svg::tests
     auto point = SVGPoint::Create({1, 2});
     REQUIRE_FALSE(point->SetX(3).HasException());
     REQUIRE_FALSE(point->SetY(4).HasException());
-    CHECK(point->Value() == FloatPoint(3, 4));
+    CHECK(point->Value() == PointF(3, 4));
 
     auto matrix = SVGMatrix::Create(AffineTransform(2, 0, 0, 2, 10, 20));
     auto transformed = point->MatrixTransform(*matrix);
-    CHECK(transformed->Value() == FloatPoint(16, 28));
-    CHECK(point->Value() == FloatPoint(3, 4));
-    CHECK(point->Clone()->Value() == FloatPoint(3, 4));
+    CHECK(transformed->Value() == PointF(16, 28));
+    CHECK(point->Value() == PointF(3, 4));
+    CHECK(point->Clone()->Value() == PointF(3, 4));
   }
 }

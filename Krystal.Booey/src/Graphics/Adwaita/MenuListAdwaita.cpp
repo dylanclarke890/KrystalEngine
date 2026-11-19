@@ -48,7 +48,7 @@ namespace krys::boo
     ButtonControlAdwaita::DrawButton(graphicsContext, borderRect, deviceScaleFactor, style);
 
     auto zoomedArrowSize = MenuListButtonArrowSize * style.ZoomFactor;
-    FloatRect fieldRect = borderRect.Rect();
+    RectF fieldRect = borderRect.Rect();
     auto borderWidth = fieldRect.Width();
     auto borderHeight = fieldRect.Height();
     fieldRect.SetSize({zoomedArrowSize, zoomedArrowSize});

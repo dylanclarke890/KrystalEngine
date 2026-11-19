@@ -201,7 +201,7 @@ namespace krys::boo
     }
 
     // Set our size.
-    if (!_parent->SetSize(IntSize(_infoHeader.BiWidth, _infoHeader.BiHeight)))
+    if (!_parent->SetSize(SizeI(_infoHeader.BiWidth, _infoHeader.BiHeight)))
     {
       return false;
     }

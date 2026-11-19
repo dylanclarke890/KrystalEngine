@@ -38,18 +38,18 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD float Dot(const FloatSize &a, const FloatSize &b) noexcept
+    KRYS_NODISCARD float Dot(const SizeF &a, const SizeF &b) noexcept
     {
       return a.Width() * b.Width() + a.Height() * b.Height();
     }
 
-    KRYS_NODISCARD bool IsPointInTriangle(const FloatPoint &p, const FloatPoint &t1, const FloatPoint &t2,
-                                          const FloatPoint &t3) noexcept
+    KRYS_NODISCARD bool IsPointInTriangle(const PointF &p, const PointF &t1, const PointF &t2,
+                                          const PointF &t3) noexcept
     {
       // Compute vectors
-      FloatSize v0 = t3 - t1;
-      FloatSize v1 = t2 - t1;
-      FloatSize v2 = p - t1;
+      SizeF v0 = t3 - t1;
+      SizeF v1 = t2 - t1;
+      SizeF v2 = p - t1;
 
       // Compute dot products
       float dot00 = Dot(v0, v0);
@@ -77,7 +77,7 @@ namespace krys::boo
       return value;
     }
 
-    KRYS_NODISCARD FloatPoint RightMostCornerToVector(const FloatRect &rect, const FloatSize &vector) noexcept
+    KRYS_NODISCARD PointF RightMostCornerToVector(const RectF &rect, const SizeF &vector) noexcept
     {
       // Return the corner of the rectangle that if it is to the left of the vector
       // would mean all of the rectangle is to the left of the vector.
@@ -88,7 +88,7 @@ namespace krys::boo
       //  QQQ      the right corner of Q, then all of X is left of the vector, and intersection impossible.
       //   Q
       //
-      FloatPoint point;
+      PointF point;
       if (vector.Width() >= 0)
       {
         point.SetY(rect.MaxY());
@@ -109,8 +109,8 @@ namespace krys::boo
     }
 
     // Tests whether the line is contained by or intersected with the circle.
-    KRYS_NODISCARD bool LineIntersectsCircle(const FloatPoint &center, float radius, const FloatPoint &p0,
-                                             const FloatPoint &p1) noexcept
+    KRYS_NODISCARD bool LineIntersectsCircle(const PointF &center, float radius, const PointF &p0,
+                                             const PointF &p1) noexcept
     {
       float x0 = p0.X() - center.X(), y0 = p0.Y() - center.Y();
       float x1 = p1.X() - center.X(), y1 = p1.Y() - center.Y();
@@ -143,7 +143,7 @@ namespace krys::boo
     }
   }
 
-  FloatRect FloatQuad::BoundingBox() const noexcept
+  RectF FloatQuad::BoundingBox() const noexcept
   {
     float left = ClampToIntRange(Min4(_p1.X(), _p2.X(), _p3.X(), _p4.X()));
     float top = ClampToIntRange(Min4(_p1.Y(), _p2.Y(), _p3.Y(), _p4.Y()));
@@ -151,7 +151,7 @@ namespace krys::boo
     float right = ClampToIntRange(Max4(_p1.X(), _p2.X(), _p3.X(), _p4.X()));
     float bottom = ClampToIntRange(Max4(_p1.Y(), _p2.Y(), _p3.Y(), _p4.Y()));
 
-    return FloatRect(left, top, right - left, bottom - top);
+    return RectF(left, top, right - left, bottom - top);
   }
 
   bool FloatQuad::IsRectilinear() const noexcept
@@ -162,7 +162,7 @@ namespace krys::boo
                && AreEssentiallyEqual(_p3.Y(), _p4.Y()) && AreEssentiallyEqual(_p4.X(), _p1.X()));
   }
 
-  bool FloatQuad::ContainsPoint(const FloatPoint &p) const noexcept
+  bool FloatQuad::ContainsPoint(const PointF &p) const noexcept
   {
     return IsPointInTriangle(p, _p1, _p2, _p3) || IsPointInTriangle(p, _p1, _p3, _p4);
   }
@@ -174,12 +174,12 @@ namespace krys::boo
            && ContainsPoint(other.P4());
   }
 
-  bool FloatQuad::IntersectsRect(const FloatRect &rect) const noexcept
+  bool FloatQuad::IntersectsRect(const RectF &rect) const noexcept
   {
     // For each side of the quad clockwise we check if the rectangle is to the left of it
     // since only content on the right can onlap with the quad.
     // This only works if the quad is convex.
-    FloatSize v1, v2, v3, v4;
+    SizeF v1, v2, v3, v4;
 
     // Ensure we use clockwise vectors.
     if (!IsCounterclockwise())
@@ -197,7 +197,7 @@ namespace krys::boo
       v4 = _p3 - _p4;
     }
 
-    FloatPoint p = RightMostCornerToVector(rect, v1);
+    PointF p = RightMostCornerToVector(rect, v1);
     if (Determinant(v1, p - _p1) < 0)
     {
       return false;
@@ -226,7 +226,7 @@ namespace krys::boo
     return true;
   }
 
-  bool FloatQuad::IntersectsCircle(const FloatPoint &center, float radius) const noexcept
+  bool FloatQuad::IntersectsCircle(const PointF &center, float radius) const noexcept
   {
     return ContainsPoint(center) // The circle may be totally contained by the quad.
            || LineIntersectsCircle(center, radius, _p1, _p2) || LineIntersectsCircle(center, radius, _p2, _p3)
@@ -234,7 +234,7 @@ namespace krys::boo
            || LineIntersectsCircle(center, radius, _p4, _p1);
   }
 
-  bool FloatQuad::IntersectsEllipse(const FloatPoint &center, const FloatSize &radii) const noexcept
+  bool FloatQuad::IntersectsEllipse(const PointF &center, const SizeF &radii) const noexcept
   {
     // Transform the ellipse to an origin-centered circle whose radius is the product of major radius and
     // minor radius. Here we apply the same transformation to the quad.
@@ -242,7 +242,7 @@ namespace krys::boo
     transformedQuad.Move(-center.X(), -center.Y());
     transformedQuad.Scale(radii.Height(), radii.Width());
 
-    FloatPoint originPoint;
+    PointF originPoint;
     return transformedQuad.IntersectsCircle(originPoint, radii.Height() * radii.Width());
   }
 
@@ -295,7 +295,7 @@ namespace krys::boo
       b3 = b3 / b3.DiagonalLength();
     }
 
-    auto areNormalisedVectorsLinearlyIndependent = [](const FloatSize &u, const FloatSize &v)
+    auto areNormalisedVectorsLinearlyIndependent = [](const SizeF &u, const SizeF &v)
     {
       if (u.IsZero() || v.IsZero())
       {
@@ -311,9 +311,9 @@ namespace krys::boo
            && !areNormalisedVectorsLinearlyIndependent(b1, b3);
   }
 
-  List<FloatRect> BoundingBoxes(Span<const FloatQuad> quads)
+  List<RectF> BoundingBoxes(Span<const FloatQuad> quads)
   {
-    List<FloatRect> boxes;
+    List<RectF> boxes;
     boxes.reserve(quads.size());
     for (auto &quad : quads)
     {
@@ -322,7 +322,7 @@ namespace krys::boo
     return boxes;
   }
 
-  FloatRect UnitedBoundingBoxes(Span<const FloatQuad> quads) noexcept
+  RectF UnitedBoundingBoxes(Span<const FloatQuad> quads) noexcept
   {
     auto size = quads.size();
     if (!size)

@@ -29,6 +29,7 @@
 #include "Krystal.Booey/Page/MouseEventTypes.hpp"
 #include "Krystal.Booey/Platform/Events/PointerId.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -39,10 +40,8 @@
 namespace krys::boo
 {
   class Document;
-  class DoublePoint;
   class Element;
   class EventTarget;
-  class IntPoint;
   class LocalFrameView;
   class MouseEvent;
   class Page;
@@ -153,7 +152,7 @@ namespace krys::boo
     /// @param view The frame view of @p target's document.
     void DispatchEventForTouchAtIndex(EventTarget &target, const PlatformTouchEvent &event, uint32 index,
                                       bool isPrimary, LocalFrameView *view,
-                                      const DoublePoint &touchDelta) noexcept;
+                                      const PointD &touchDelta) noexcept;
 
     void TouchWithIdentifierWasRemoved(PointerId pointerId) noexcept;
 
@@ -167,7 +166,7 @@ namespace krys::boo
     /// @brief Fires `pointercancel`, `pointerout` and `pointerleave` for @p pointerId, at its capturing
     /// element or else the element at @p documentPoint, and releases its capture.
     /// @see https://w3c.github.io/pointerevents/#the-pointercancel-event
-    void CancelPointer(PointerId pointerId, const IntPoint &documentPoint,
+    void CancelPointer(PointerId pointerId, const PointI &documentPoint,
                        PointerEvent *existingCancelEvent = nullptr) noexcept;
 
     /// @see https://w3c.github.io/pointerevents/#process-pending-pointer-capture
@@ -199,11 +198,11 @@ namespace krys::boo
 
     void DispatchOverOrOutEvent(DOMStringAtom type, EventTarget *target, const PlatformTouchEvent &event,
                                 uint32 index, bool isPrimary, LocalFrameView *view,
-                                const DoublePoint &touchDelta) noexcept;
+                                const PointD &touchDelta) noexcept;
 
     void DispatchEnterOrLeaveEvent(DOMStringAtom type, Element &targetElement,
                                    const PlatformTouchEvent &event, uint32 index, bool isPrimary,
-                                   LocalFrameView *view, const DoublePoint &touchDelta) noexcept;
+                                   LocalFrameView *view, const PointD &touchDelta) noexcept;
 
     void UpdateHaveAnyCapturingElement() noexcept;
 

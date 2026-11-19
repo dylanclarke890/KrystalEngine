@@ -33,11 +33,11 @@
 #include "Krystal.Booey/DOM/Ranges/BoundaryPoint.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/TextAffinity.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Rendering/Selection/CaretRectComputation.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
@@ -136,7 +136,7 @@ namespace krys::boo
       return _box && _offset == _box->RightmostCaretOffset();
     }
 
-    KRYS_NODISCARD IntRect AbsoluteRect(CaretRectMode caretRectMode = CaretRectMode::Normal) const noexcept;
+    KRYS_NODISCARD RectI AbsoluteRect(CaretRectMode caretRectMode = CaretRectMode::Normal) const noexcept;
 
     KRYS_NODISCARD Maybe<dom::BoundaryPoint> BoundaryPoint() const noexcept;
 

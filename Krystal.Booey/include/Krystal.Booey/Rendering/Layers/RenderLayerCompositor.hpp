@@ -384,7 +384,7 @@ namespace krys::boo
     KRYS_NODISCARD bool Has3DContent() const noexcept;
 
     // Update the geometry of the layers used for clipping and scrolling in frames.
-    void FrameViewDidChangeLocation(FloatPoint contentsOffset) noexcept;
+    void FrameViewDidChangeLocation(PointF contentsOffset) noexcept;
 
     void FrameViewDidChangeSize() noexcept;
 
@@ -407,7 +407,7 @@ namespace krys::boo
 
     KRYS_NODISCARD float ZoomedOutPageScaleFactor() const noexcept override;
 
-    KRYS_NODISCARD FloatSize EnclosingFrameViewVisibleSize() const noexcept override;
+    KRYS_NODISCARD SizeF EnclosingFrameViewVisibleSize() const noexcept override;
 
     void DidChangePlatformLayerForLayer(const GraphicsLayer *) noexcept override
     {
@@ -492,7 +492,7 @@ namespace krys::boo
 
   private:
     // GraphicsLayerClient implementation
-    void PaintContents(const GraphicsLayer &graphicsLayer, GraphicsContext &context, const FloatRect &clip,
+    void PaintContents(const GraphicsLayer &graphicsLayer, GraphicsContext &context, const RectF &clip,
                        EnumSet<GraphicsLayerPaintBehavior>) noexcept override;
 
     KRYS_NODISCARD bool ShouldDumpPropertyForLayer(const GraphicsLayer *layer, utf8_stringview propertyName,
@@ -623,9 +623,9 @@ namespace krys::boo
 
     void UpdateScrollLayerClipping() noexcept;
 
-    KRYS_NODISCARD FloatRect InsetClipLayerRect() const noexcept;
+    KRYS_NODISCARD RectF InsetClipLayerRect() const noexcept;
 
-    KRYS_NODISCARD FloatRect VisibleRectForLayerFlushing() const noexcept;
+    KRYS_NODISCARD RectF VisibleRectForLayerFlushing() const noexcept;
 
     KRYS_NODISCARD Page *GetPage() const noexcept;
 
@@ -702,7 +702,7 @@ namespace krys::boo
     void UpdateCompositingForLayerTreeAsTextDump() noexcept;
   };
 
-  void PaintScrollbar(Scrollbar *scrollbar, GraphicsContext &context, const IntRect &clip,
+  void PaintScrollbar(Scrollbar *scrollbar, GraphicsContext &context, const RectI &clip,
                       const Color &backgroundColor = Color()) noexcept;
 
   TextStream &operator<<(TextStream &ts, CompositingUpdateType updateType) noexcept;

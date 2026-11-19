@@ -50,8 +50,7 @@ namespace krys::boo
   {
     RenderBox::UpdateLogicalWidth();
 
-    auto frameSize =
-      RenderTheme::Singleton().MeterSizeForBounds(*this, FloatRect(SnappedIntRect(FrameRect())));
+    auto frameSize = RenderTheme::Singleton().MeterSizeForBounds(*this, RectF(SnappedRectI(FrameRect())));
     SetLogicalWidth(LayoutUnit(IsHorizontalWritingMode() ? frameSize.Width() : frameSize.Height()));
   }
 
@@ -68,7 +67,7 @@ namespace krys::boo
     {
       frame.SetWidth(computedValues.Extent);
     }
-    auto frameSize = RenderTheme::Singleton().MeterSizeForBounds(*this, FloatRect(SnappedIntRect(frame)));
+    auto frameSize = RenderTheme::Singleton().MeterSizeForBounds(*this, RectF(SnappedRectI(frame)));
     computedValues.Extent = LayoutUnit(IsHorizontalWritingMode() ? frameSize.Height() : frameSize.Width());
     return computedValues;
   }

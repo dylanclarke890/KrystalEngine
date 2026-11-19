@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/DoubleSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -45,23 +45,23 @@ namespace krys::boo
     RefPtr<EventTarget> _target;
     int32 _identifier {0};
     // Position relative to the viewport in CSS px.
-    DoublePoint _clientPosition;
+    PointD _clientPosition;
     // Position relative to the screen in DIPs.
-    DoublePoint _screenPosition;
+    PointD _screenPosition;
     // Position relative to the page in CSS px.
-    DoublePoint _pagePosition;
+    PointD _pagePosition;
     // Radius in CSS px.
-    DoubleSize _radius;
+    SizeD _radius;
     float _rotationAngle {0};
     // Twist is stored so that it can be exposed for pointer events.
     double _twist {0};
     float _force {0};
-    DoublePoint _absoluteLocation;
+    PointD _absoluteLocation;
 
   public:
     KRYS_NODISCARD static Ref<Touch> Create(LocalFrame *frame, EventTarget *target, int32 identifier,
-                                            const DoublePoint &screenPos, const DoublePoint &pagePos,
-                                            const DoubleSize &radius, float rotationAngle, float force,
+                                            const PointD &screenPos, const PointD &pagePos,
+                                            const SizeD &radius, float rotationAngle, float force,
                                             double twist = 0) noexcept;
 
     ~Touch() noexcept;
@@ -143,7 +143,7 @@ namespace krys::boo
       return _force;
     }
 
-    KRYS_NODISCARD const DoublePoint &AbsoluteLocation() const noexcept
+    KRYS_NODISCARD const PointD &AbsoluteLocation() const noexcept
     {
       return _absoluteLocation;
     }
@@ -151,12 +151,12 @@ namespace krys::boo
     KRYS_NODISCARD Ref<Touch> CloneWithNewTarget(EventTarget *eventTarget) const noexcept;
 
   private:
-    Touch(LocalFrame *frame, EventTarget *target, int32 identifier, const DoublePoint &screenPosition,
-          const DoublePoint &pagePosition, const DoubleSize &radius, float rotationAngle, double twist,
+    Touch(LocalFrame *frame, EventTarget *target, int32 identifier, const PointD &screenPosition,
+          const PointD &pagePosition, const SizeD &radius, float rotationAngle, double twist,
           float force) noexcept;
 
-    Touch(EventTarget *target, int32 identifier, const DoublePoint &clientPosition,
-          const DoublePoint &screenPosition, const DoublePoint &pagePosition, const DoubleSize &radius,
-          float rotationAngle, double twist, float force, const DoublePoint &absoluteLocation) noexcept;
+    Touch(EventTarget *target, int32 identifier, const PointD &clientPosition, const PointD &screenPosition,
+          const PointD &pagePosition, const SizeD &radius, float rotationAngle, double twist, float force,
+          const PointD &absoluteLocation) noexcept;
   };
 }

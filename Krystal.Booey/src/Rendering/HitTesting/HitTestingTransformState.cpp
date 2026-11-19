@@ -42,7 +42,7 @@ namespace krys::boo
     AccumulatedTransform.Flatten();
   }
 
-  FloatPoint HitTestingTransformState::MappedPoint() const noexcept
+  PointF HitTestingTransformState::MappedPoint() const noexcept
   {
     if (auto inverse = AccumulatedTransform.Inverse())
     {

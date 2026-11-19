@@ -24,8 +24,6 @@
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlStyle.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Platform/Choosers/PopupMenuStyle.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
@@ -36,6 +34,7 @@
 #include "Krystal.Booey/Style/Values/Sizing/MinimumSize.hpp"
 #include "Krystal.Booey/Style/Values/Sizing/PreferredSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -205,11 +204,11 @@ namespace krys::boo
     // Some controls may spill out of their containers (e.g., the check on a macOS checkbox). When these
     // controls repaint, the theme needs to communicate this inflated rect to the engine so that it can
     // invalidate the whole control.
-    virtual void InflateRectForControlRenderer(const RenderElement &, FloatRect &) noexcept
+    virtual void InflateRectForControlRenderer(const RenderElement &, RectF &) noexcept
     {
     }
 
-    virtual void AdjustRepaintRect(const RenderBox &, FloatRect &) noexcept
+    virtual void AdjustRepaintRect(const RenderBox &, RectF &) noexcept
     {
     }
 
@@ -324,7 +323,7 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual style::PaddingBox PopupInternalPaddingBox(const RenderStyle &) const noexcept;
 
-    KRYS_NODISCARD virtual PopupMenuStyle::Size PopupMenuSize(const RenderStyle &, IntRect &) const noexcept
+    KRYS_NODISCARD virtual PopupMenuStyle::Size PopupMenuSize(const RenderStyle &, RectI &) const noexcept
     {
       return PopupMenuStyle::Size::Normal;
     }
@@ -345,14 +344,13 @@ namespace krys::boo
       return {};
     }
 
-    KRYS_NODISCARD virtual IntRect ProgressBarRectForBounds(const RenderProgress &,
-                                                            const IntRect &bounds) const noexcept
+    KRYS_NODISCARD virtual RectI ProgressBarRectForBounds(const RenderProgress &,
+                                                          const RectI &bounds) const noexcept
     {
       return bounds;
     }
 
-    KRYS_NODISCARD virtual FloatSize MeterSizeForBounds(const RenderMeter &,
-                                                        const FloatRect &) const noexcept;
+    KRYS_NODISCARD virtual SizeF MeterSizeForBounds(const RenderMeter &, const RectF &) const noexcept;
 
     KRYS_NODISCARD virtual bool SupportsMeter(StyleAppearance) const noexcept
     {
@@ -367,7 +365,7 @@ namespace krys::boo
 
     // Returns size of one slider tick mark for a horizontal track.
     // For vertical tracks we rotate it and use it. i.e. Width is always length along the track.
-    KRYS_NODISCARD virtual IntSize SliderTickSize() const noexcept
+    KRYS_NODISCARD virtual SizeI SliderTickSize() const noexcept
     {
       return {};
     }
@@ -552,34 +550,33 @@ namespace krys::boo
     // Methods for each appearance value.
     virtual void AdjustCheckboxStyle(RenderStyle &, const boo::Element *) const noexcept;
 
-    virtual bool PaintCheckbox(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
+    virtual bool PaintCheckbox(const RenderElement &, const PaintInfo &, const RectF &) noexcept
     {
       return true;
     }
 
     virtual void AdjustRadioStyle(RenderStyle &, const boo::Element *) const noexcept;
 
-    virtual bool PaintRadio(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
+    virtual bool PaintRadio(const RenderElement &, const PaintInfo &, const RectF &) noexcept
     {
       return true;
     }
 
     virtual void AdjustButtonStyle(RenderStyle &, const boo::Element *) const noexcept;
 
-    virtual bool PaintButton(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
+    virtual bool PaintButton(const RenderElement &, const PaintInfo &, const RectF &) noexcept
     {
       return true;
     }
 
     virtual void AdjustColorWellStyle(RenderStyle &, const boo::Element *) const noexcept;
 
-    virtual bool PaintColorWell(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
+    virtual bool PaintColorWell(const RenderElement &, const PaintInfo &, const RectF &) noexcept
     {
       return true;
     }
 
-    virtual void PaintColorWellDecorations(const RenderElement &, const PaintInfo &,
-                                           const FloatRect &) noexcept
+    virtual void PaintColorWellDecorations(const RenderElement &, const PaintInfo &, const RectF &) noexcept
     {
     }
 
@@ -595,14 +592,14 @@ namespace krys::boo
     {
     }
 
-    virtual bool PaintColorWellSwatch(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
+    virtual bool PaintColorWellSwatch(const RenderElement &, const PaintInfo &, const RectF &) noexcept
     {
       return true;
     }
 
     virtual void AdjustInnerSpinButtonStyle(RenderStyle &, const boo::Element *) const noexcept;
 
-    virtual bool PaintInnerSpinButton(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
+    virtual bool PaintInnerSpinButton(const RenderElement &, const PaintInfo &, const RectF &) noexcept
     {
       return true;
     }
@@ -611,12 +608,12 @@ namespace krys::boo
     {
     }
 
-    virtual bool PaintTextField(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
+    virtual bool PaintTextField(const RenderElement &, const PaintInfo &, const RectF &) noexcept
     {
       return true;
     }
 
-    virtual void PaintTextFieldDecorations(const RenderBox &, const PaintInfo &, const FloatRect &) noexcept
+    virtual void PaintTextFieldDecorations(const RenderBox &, const PaintInfo &, const RectF &) noexcept
     {
     }
 
@@ -624,24 +621,23 @@ namespace krys::boo
     {
     }
 
-    virtual bool PaintTextArea(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
+    virtual bool PaintTextArea(const RenderElement &, const PaintInfo &, const RectF &) noexcept
     {
       return true;
     }
 
-    virtual void PaintTextAreaDecorations(const RenderBox &, const PaintInfo &, const FloatRect &) noexcept
+    virtual void PaintTextAreaDecorations(const RenderBox &, const PaintInfo &, const RectF &) noexcept
     {
     }
 
     virtual void AdjustMenuListStyle(RenderStyle &, const boo::Element *) const noexcept;
 
-    virtual bool PaintMenuList(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
+    virtual bool PaintMenuList(const RenderElement &, const PaintInfo &, const RectF &) noexcept
     {
       return true;
     }
 
-    virtual void PaintMenuListDecorations(const RenderElement &, const PaintInfo &,
-                                          const FloatRect &) noexcept
+    virtual void PaintMenuListDecorations(const RenderElement &, const PaintInfo &, const RectF &) noexcept
     {
     }
 
@@ -649,19 +645,18 @@ namespace krys::boo
     {
     }
 
-    virtual void PaintMenuListButtonDecorations(const RenderBox &, const PaintInfo &,
-                                                const FloatRect &) noexcept
+    virtual void PaintMenuListButtonDecorations(const RenderBox &, const PaintInfo &, const RectF &) noexcept
     {
     }
 
-    virtual bool PaintMenuListButton(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
+    virtual bool PaintMenuListButton(const RenderElement &, const PaintInfo &, const RectF &) noexcept
     {
       return true;
     }
 
     virtual void AdjustMeterStyle(RenderStyle &, const boo::Element *) const noexcept;
 
-    virtual bool PaintMeter(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
+    virtual bool PaintMeter(const RenderElement &, const PaintInfo &, const RectF &) noexcept
     {
       return true;
     }
@@ -670,7 +665,7 @@ namespace krys::boo
     {
     }
 
-    virtual bool PaintListButton(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
+    virtual bool PaintListButton(const RenderElement &, const PaintInfo &, const RectF &) noexcept
     {
       return true;
     }
@@ -679,7 +674,7 @@ namespace krys::boo
     {
     }
 
-    virtual bool PaintProgressBar(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
+    virtual bool PaintProgressBar(const RenderElement &, const PaintInfo &, const RectF &) noexcept
     {
       return true;
     }
@@ -688,14 +683,14 @@ namespace krys::boo
     {
     }
 
-    virtual bool PaintSliderTrack(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
+    virtual bool PaintSliderTrack(const RenderElement &, const PaintInfo &, const RectF &) noexcept
     {
       return true;
     }
 
     virtual void AdjustSliderThumbStyle(RenderStyle &, const boo::Element *) const noexcept;
 
-    virtual bool PaintSliderThumb(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
+    virtual bool PaintSliderThumb(const RenderElement &, const PaintInfo &, const RectF &) noexcept
     {
       return true;
     }
@@ -704,12 +699,12 @@ namespace krys::boo
     {
     }
 
-    virtual bool PaintSearchField(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
+    virtual bool PaintSearchField(const RenderElement &, const PaintInfo &, const RectF &) noexcept
     {
       return true;
     }
 
-    virtual void PaintSearchFieldDecorations(const RenderBox &, const PaintInfo &, const FloatRect &) noexcept
+    virtual void PaintSearchFieldDecorations(const RenderBox &, const PaintInfo &, const RectF &) noexcept
     {
     }
 
@@ -717,8 +712,7 @@ namespace krys::boo
     {
     }
 
-    virtual bool PaintSearchFieldCancelButton(const RenderBox &, const PaintInfo &,
-                                              const FloatRect &) noexcept
+    virtual bool PaintSearchFieldCancelButton(const RenderBox &, const PaintInfo &, const RectF &) noexcept
     {
       return true;
     }
@@ -728,7 +722,7 @@ namespace krys::boo
     }
 
     virtual bool PaintSearchFieldDecorationPart(const RenderElement &, const PaintInfo &,
-                                                const FloatRect &) noexcept
+                                                const RectF &) noexcept
     {
       return true;
     }
@@ -739,7 +733,7 @@ namespace krys::boo
     }
 
     virtual bool PaintSearchFieldResultsDecorationPart(const RenderBox &, const PaintInfo &,
-                                                       const FloatRect &) noexcept
+                                                       const RectF &) noexcept
     {
       return true;
     }
@@ -748,8 +742,7 @@ namespace krys::boo
     {
     }
 
-    virtual bool PaintSearchFieldResultsButton(const RenderBox &, const PaintInfo &,
-                                               const FloatRect &) noexcept
+    virtual bool PaintSearchFieldResultsButton(const RenderBox &, const PaintInfo &, const RectF &) noexcept
     {
       return true;
     }

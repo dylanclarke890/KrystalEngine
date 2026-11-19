@@ -57,7 +57,7 @@ namespace krys::boo::style
     return AdoptRef(*new RotateTransformFunction(_x, _y, _z, _angle, GetType()));
   }
 
-  Ref<TransformOperation> RotateTransformFunction::ToPlatform(const FloatSize &) const noexcept
+  Ref<TransformOperation> RotateTransformFunction::ToPlatform(const SizeF &) const noexcept
   {
     return RotateTransformOperation::Create(_x.Value, _y.Value, _z.Value, _angle.Value,
                                             style::ConvertToPlatform(GetType()));
@@ -75,7 +75,7 @@ namespace krys::boo::style
            && _z == otherRotate._z;
   }
 
-  void RotateTransformFunction::Apply(TransformationMatrix &transform, const FloatSize &) const noexcept
+  void RotateTransformFunction::Apply(TransformationMatrix &transform, const SizeF &) const noexcept
   {
     if (GetType() == TransformFunctionBase::Type::Rotate)
     {

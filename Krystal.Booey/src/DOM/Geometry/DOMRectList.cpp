@@ -36,7 +36,7 @@ namespace krys::boo::dom
     }
   }
 
-  DOMRectList::DOMRectList(const List<FloatRect> &rects) noexcept
+  DOMRectList::DOMRectList(const List<RectF> &rects) noexcept
   {
     _items.reserve(rects.size());
     for (const auto &rect : rects)

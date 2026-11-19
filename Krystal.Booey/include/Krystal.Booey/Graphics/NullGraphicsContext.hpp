@@ -84,20 +84,20 @@ namespace krys::boo
     {
     }
 
-    KRYS_NODISCARD IntRect ClipBounds() const noexcept final
+    KRYS_NODISCARD RectI ClipBounds() const noexcept final
     {
       return {};
     }
 
-    void DrawRect(const FloatRect &, float = 1) noexcept final
+    void DrawRect(const RectF &, float = 1) noexcept final
     {
     }
 
-    void DrawLine(const FloatPoint &, const FloatPoint &) noexcept final
+    void DrawLine(const PointF &, const PointF &) noexcept final
     {
     }
 
-    void DrawEllipse(const FloatRect &) noexcept final
+    void DrawEllipse(const RectF &) noexcept final
     {
     }
 
@@ -109,15 +109,15 @@ namespace krys::boo
     {
     }
 
-    void FillRect(const FloatRect &, RequiresClipToRect) noexcept final
+    void FillRect(const RectF &, RequiresClipToRect) noexcept final
     {
     }
 
-    void FillRect(const FloatRect &, Gradient &, const AffineTransform &, RequiresClipToRect) noexcept final
+    void FillRect(const RectF &, Gradient &, const AffineTransform &, RequiresClipToRect) noexcept final
     {
     }
 
-    void FillRect(const FloatRect &, const Color &) noexcept final
+    void FillRect(const RectF &, const Color &) noexcept final
     {
     }
 
@@ -125,7 +125,7 @@ namespace krys::boo
     {
     }
 
-    void StrokeRect(const FloatRect &, float) noexcept final
+    void StrokeRect(const RectF &, float) noexcept final
     {
     }
 
@@ -133,11 +133,11 @@ namespace krys::boo
     {
     }
 
-    void ClipToImageBuffer(ImageBuffer &, const FloatRect &) noexcept final
+    void ClipToImageBuffer(ImageBuffer &, const RectF &) noexcept final
     {
     }
 
-    void DrawLinesForText(const FloatPoint &, float, Span<const FloatSegment>, bool, bool,
+    void DrawLinesForText(const PointF &, float, Span<const FloatSegment>, bool, bool,
                           boo::StrokeStyle) noexcept final
     {
     }
@@ -162,7 +162,7 @@ namespace krys::boo
     {
     }
 
-    void Scale(const FloatSize &) noexcept final
+    void Scale(const SizeF &) noexcept final
     {
     }
 
@@ -188,7 +188,7 @@ namespace krys::boo
       return {};
     }
 
-    void ClearRect(const FloatRect &) noexcept final
+    void ClearRect(const RectF &) noexcept final
     {
     }
 
@@ -196,11 +196,11 @@ namespace krys::boo
     {
     }
 
-    void Clip(const FloatRect &) noexcept final
+    void Clip(const RectF &) noexcept final
     {
     }
 
-    void ClipOut(const FloatRect &) noexcept final
+    void ClipOut(const RectF &) noexcept final
     {
     }
 
@@ -212,12 +212,12 @@ namespace krys::boo
     {
     }
 
-    void DrawRaisedEllipse(const FloatRect &, const Color &, const Color &) noexcept final
+    void DrawRaisedEllipse(const RectF &, const Color &, const Color &) noexcept final
     {
     }
 
     void DrawGlyphs(const Font &, Span<const GlyphBufferGlyph>, Span<const GlyphBufferAdvance>,
-                    const FloatPoint &, FontSmoothingMode) noexcept final
+                    const PointF &, FontSmoothingMode) noexcept final
     {
     }
 
@@ -225,7 +225,7 @@ namespace krys::boo
     {
     }
 
-    void DrawDotsForDocumentMarker(const FloatRect &, DocumentMarkerLineStyle) noexcept final
+    void DrawDotsForDocumentMarker(const RectF &, DocumentMarkerLineStyle) noexcept final
     {
     }
 
@@ -233,7 +233,7 @@ namespace krys::boo
     {
     }
 
-    void DrawFocusRing(const List<FloatRect> &, float, float, const Color &) noexcept final
+    void DrawFocusRing(const List<RectF> &, float, float, const Color &) noexcept final
     {
     }
 
@@ -245,11 +245,11 @@ namespace krys::boo
     {
     }
 
-    void FillRect(const FloatRect &, Gradient &) noexcept final
+    void FillRect(const RectF &, Gradient &) noexcept final
     {
     }
 
-    void FillRect(const FloatRect &, const Color &, CompositeOperator,
+    void FillRect(const RectF &, const Color &, CompositeOperator,
                   boo::BlendMode = BlendMode::Normal) noexcept final
     {
     }
@@ -259,49 +259,49 @@ namespace krys::boo
     {
     }
 
-    void FillRectWithRoundedHole(const FloatRect &, const FloatRoundedRect &, const Color &) noexcept final
+    void FillRectWithRoundedHole(const RectF &, const FloatRoundedRect &, const Color &) noexcept final
     {
     }
 
-    ImageDrawResult DrawImage(Image &, const FloatRect &, const FloatRect &,
+    ImageDrawResult DrawImage(Image &, const RectF &, const RectF &,
                               ImagePaintingOptions = ImagePaintingOptions {
                                 ImageOrientation::Orientation::FromImage}) noexcept final
     {
       return ImageDrawResult::DidNothing;
     }
 
-    ImageDrawResult DrawTiledImage(Image &, const FloatRect &, const FloatPoint &, const FloatSize &,
-                                   const FloatSize &, ImagePaintingOptions = {}) noexcept final
+    ImageDrawResult DrawTiledImage(Image &, const RectF &, const PointF &, const SizeF &, const SizeF &,
+                                   ImagePaintingOptions = {}) noexcept final
     {
       return ImageDrawResult::DidNothing;
     }
 
-    void DrawNativeImage(NativeImage &, const FloatRect &, const FloatRect &,
+    void DrawNativeImage(NativeImage &, const RectF &, const RectF &,
                          ImagePaintingOptions = {}) noexcept final
     {
     }
 
-    void DrawPattern(NativeImage &, const FloatRect &, const FloatRect &, const AffineTransform &,
-                     const FloatPoint &, const FloatSize &, ImagePaintingOptions = {}) noexcept final
+    void DrawPattern(NativeImage &, const RectF &, const RectF &, const AffineTransform &, const PointF &,
+                     const SizeF &, ImagePaintingOptions = {}) noexcept final
     {
     }
 
-    void DrawImageBuffer(ImageBuffer &, const FloatRect &, const FloatRect &,
+    void DrawImageBuffer(ImageBuffer &, const RectF &, const RectF &,
                          ImagePaintingOptions = {}) noexcept final
     {
     }
 
-    void DrawFilteredImageBuffer(ImageBuffer *, const FloatRect &, Filter &, FilterResults &) noexcept final
+    void DrawFilteredImageBuffer(ImageBuffer *, const RectF &, Filter &, FilterResults &) noexcept final
     {
     }
 
-    void DrawPattern(ImageBuffer &, const FloatRect &, const FloatRect &, const AffineTransform &,
-                     const FloatPoint &, const FloatSize &, ImagePaintingOptions = {}) noexcept final
+    void DrawPattern(ImageBuffer &, const RectF &, const RectF &, const AffineTransform &, const PointF &,
+                     const SizeF &, ImagePaintingOptions = {}) noexcept final
     {
     }
 
-    ImageDrawResult DrawTiledImage(Image &, const FloatRect &, const FloatRect &, const FloatSize &,
-                                   Image::TileRule, Image::TileRule, ImagePaintingOptions = {}) noexcept final
+    ImageDrawResult DrawTiledImage(Image &, const RectF &, const RectF &, const SizeF &, Image::TileRule,
+                                   Image::TileRule, ImagePaintingOptions = {}) noexcept final
     {
       return ImageDrawResult::DidNothing;
     }

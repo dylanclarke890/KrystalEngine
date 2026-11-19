@@ -102,7 +102,7 @@ namespace krys::boo::tests
     CHECK(bounds.Y() == Catch::Approx(-12.8f));
     CHECK(bounds.Width() == 16);
     CHECK(bounds.Height() == 16);
-    CHECK(font->BoundsForGlyph(253) == FloatRect());
+    CHECK(font->BoundsForGlyph(253) == RectF());
     auto glyphs = Array<Glyph, 2> {58, 67};
     CHECK(font->BoundsForGlyphs(glyphs).size() == 2u);
   }

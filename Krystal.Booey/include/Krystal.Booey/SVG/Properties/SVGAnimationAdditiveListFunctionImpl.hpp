@@ -200,11 +200,11 @@ namespace krys::boo
 
       for (size_t i = 0; i < toItems.size(); ++i)
       {
-        FloatPoint from = i < fromItems.size() ? fromItems[i]->Value() : FloatPoint();
-        FloatPoint to = toItems[i]->Value();
-        FloatPoint toAtEndOfDuration =
-          i < toAtEndOfDurationItems.size() ? toAtEndOfDurationItems[i]->Value() : FloatPoint();
-        FloatPoint &animatedPoint = animatedItems[i]->Value();
+        PointF from = i < fromItems.size() ? fromItems[i]->Value() : PointF();
+        PointF to = toItems[i]->Value();
+        PointF toAtEndOfDuration =
+          i < toAtEndOfDurationItems.size() ? toAtEndOfDurationItems[i]->Value() : PointF();
+        PointF &animatedPoint = animatedItems[i]->Value();
 
         float animatedX =
           Base::Animate(progress, repeatCount, from.X(), to.X(), toAtEndOfDuration.X(), animatedPoint.X());

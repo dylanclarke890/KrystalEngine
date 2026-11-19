@@ -22,12 +22,12 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestLocation.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -62,7 +62,7 @@ namespace krys::boo
 
     RefPtr<boo::Node> _innerNode;
     RefPtr<boo::Node> _innerNonSharedNode;
-    DoublePoint _doublePointInInnerNodeFrame; // The hit-tested point in innerNode frame coordinates.
+    PointD _doublePointInInnerNodeFrame; // The hit-tested point in innerNode frame coordinates.
     // A point in the local coordinate space of _innerNonSharedNode's renderer. Allows us to efficiently
     // determine where inside the renderer we hit on subsequent operations.
     LayoutPoint _localPoint;
@@ -156,9 +156,9 @@ namespace krys::boo
       return _hitTestLocation.Point();
     }
 
-    KRYS_NODISCARD IntPoint RoundedPointInMainFrame() const noexcept
+    KRYS_NODISCARD PointI RoundedPointInMainFrame() const noexcept
     {
-      return RoundedIntPoint(PointInMainFrame());
+      return RoundedPointI(PointInMainFrame());
     }
 
     /// @brief The hit-tested point in the coordinates of the frame containing the inner node.
@@ -167,7 +167,7 @@ namespace krys::boo
       return LayoutPoint(_doublePointInInnerNodeFrame);
     }
 
-    KRYS_NODISCARD const DoublePoint &DoublePointInInnerNodeFrame() const noexcept
+    KRYS_NODISCARD const PointD &PointDInInnerNodeFrame() const noexcept
     {
       return _doublePointInInnerNodeFrame;
     }
@@ -204,7 +204,7 @@ namespace krys::boo
     KRYS_NODISCARD Image *GetImage() const noexcept;
 
     /// @brief The box of the image hit, in absolute coordinates.
-    KRYS_NODISCARD IntRect ImageRect() const noexcept;
+    KRYS_NODISCARD RectI ImageRect() const noexcept;
 
     KRYS_NODISCARD net::Url AbsoluteImageUrl() const noexcept;
 
@@ -222,7 +222,7 @@ namespace krys::boo
 
     HitTestProgress AddNodeToListBasedTestResult(boo::Node *node, const HitTestRequest &request,
                                                  const HitTestLocation &locationInContainer,
-                                                 const FloatRect &rect) noexcept;
+                                                 const RectF &rect) noexcept;
 
     /// @brief Takes @p other's inner node if there's none yet, and adds its list of nodes.
     void Append(const HitTestResult &other, const HitTestRequest &request) noexcept;

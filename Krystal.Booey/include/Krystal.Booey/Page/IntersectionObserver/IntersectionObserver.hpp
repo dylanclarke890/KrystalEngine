@@ -27,10 +27,10 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Page/IntersectionObserver/IntersectionObserverCallback.hpp"
 #include "Krystal.Booey/Page/IntersectionObserver/IntersectionObserverMarginBox.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -102,10 +102,10 @@ namespace krys::boo
   private:
     struct IntersectionObservationState
     {
-      FloatRect RootBounds;
-      Maybe<FloatRect> AbsoluteIntersectionRect; // Only computed if intersecting.
-      Maybe<FloatRect> AbsoluteTargetRect;       // Only computed if first observation, or intersecting.
-      Maybe<FloatRect> AbsoluteRootBounds;       // Only computed if observationChanged.
+      RectF RootBounds;
+      Maybe<RectF> AbsoluteIntersectionRect; // Only computed if intersecting.
+      Maybe<RectF> AbsoluteTargetRect;       // Only computed if first observation, or intersecting.
+      Maybe<RectF> AbsoluteRootBounds;       // Only computed if observationChanged.
       float IntersectionRatio {0};
       size_t ThresholdIndex {0};
       bool CanComputeIntersection {false};

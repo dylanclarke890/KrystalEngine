@@ -51,10 +51,9 @@ namespace krys::boo::tests
                            { return CreateUnique<CountingApplier>(count); });
     }
 
-    constexpr FloatRect FilterRegion {0, 0, 32, 32};
+    constexpr RectF FilterRegion {0, 0, 32, 32};
 
-    KRYS_NODISCARD Ref<Filter> FilterOf(List<Ref<FilterFunction>> &&functions,
-                                        FloatSize scale = {1, 1}) noexcept
+    KRYS_NODISCARD Ref<Filter> FilterOf(List<Ref<FilterFunction>> &&functions, SizeF scale = {1, 1}) noexcept
     {
       return CSSFilterRenderer::Create(krys::move(functions), {FilterRegion, FilterRegion, scale},
                                        FilterRenderingMode::Accelerated);
@@ -84,8 +83,8 @@ namespace krys::boo::tests
         auto filter = FilterOf({SourceGraphic::Create(), FEOffset::Create(4, 2)});
         auto result = filter->Apply(source.get(), {0, 0, 16, 16}, results);
         REQUIRE(result);
-        CHECK(result->ImageRect() == FloatRect {4, 2, 16, 16});
-        CHECK(result->AbsoluteImageRect() == IntRect {4, 2, 16, 16});
+        CHECK(result->ImageRect() == RectF {4, 2, 16, 16});
+        CHECK(result->AbsoluteImageRect() == RectI {4, 2, 16, 16});
         CHECK(result->PrimitiveSubregion() == FilterRegion);
         CHECK(result->AcceleratedImage() == 1u);
         CHECK(count == 2u);
@@ -97,7 +96,7 @@ namespace krys::boo::tests
           FilterOf({SourceGraphic::Create(), FEMorphology::Create(MorphologyOperatorType::Dilate, 2, 3)});
         auto result = filter->Apply(source.get(), {0, 0, 16, 16}, results);
         REQUIRE(result);
-        CHECK(result->ImageRect() == FloatRect {0, 0, 18, 19});
+        CHECK(result->ImageRect() == RectF {0, 0, 18, 19});
       }
 
       SECTION("The filter scale scales the absolute rect")
@@ -105,7 +104,7 @@ namespace krys::boo::tests
         auto filter = FilterOf({SourceGraphic::Create(), FEOffset::Create(4, 2)}, {2, 2});
         auto result = filter->Apply(source.get(), {0, 0, 16, 16}, results);
         REQUIRE(result);
-        CHECK(result->AbsoluteImageRect() == IntRect {8, 4, 32, 32});
+        CHECK(result->AbsoluteImageRect() == RectI {8, 4, 32, 32});
       }
     }
 

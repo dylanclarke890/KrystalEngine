@@ -224,7 +224,7 @@ namespace krys::boo
 
   bool LayoutRoundedRect::IntersectsQuad(const FloatQuad &quad) const noexcept
   {
-    FloatRect rect(_rect);
+    RectF rect(_rect);
     if (!quad.IntersectsRect(rect))
     {
       return false;
@@ -233,11 +233,11 @@ namespace krys::boo
     const LayoutSize &topLeft = _radii.TopLeft();
     if (!topLeft.IsEmpty())
     {
-      FloatRect cornerRect(_rect.X(), _rect.Y(), topLeft.Width(), topLeft.Height());
+      RectF cornerRect(_rect.X(), _rect.Y(), topLeft.Width(), topLeft.Height());
       if (quad.IntersectsRect(cornerRect))
       {
-        FloatPoint center(_rect.X() + topLeft.Width(), _rect.Y() + topLeft.Height());
-        FloatSize size(topLeft.Width(), topLeft.Height());
+        PointF center(_rect.X() + topLeft.Width(), _rect.Y() + topLeft.Height());
+        SizeF size(topLeft.Width(), topLeft.Height());
         if (!quad.IntersectsEllipse(center, size))
         {
           return false;
@@ -248,11 +248,11 @@ namespace krys::boo
     const LayoutSize &topRight = _radii.TopRight();
     if (!topRight.IsEmpty())
     {
-      FloatRect cornerRect(_rect.MaxX() - topRight.Width(), _rect.Y(), topRight.Width(), topRight.Height());
+      RectF cornerRect(_rect.MaxX() - topRight.Width(), _rect.Y(), topRight.Width(), topRight.Height());
       if (quad.IntersectsRect(cornerRect))
       {
-        FloatPoint center(_rect.MaxX() - topRight.Width(), _rect.Y() + topRight.Height());
-        FloatSize size(topRight.Width(), topRight.Height());
+        PointF center(_rect.MaxX() - topRight.Width(), _rect.Y() + topRight.Height());
+        SizeF size(topRight.Width(), topRight.Height());
         if (!quad.IntersectsEllipse(center, size))
         {
           return false;
@@ -263,12 +263,12 @@ namespace krys::boo
     const LayoutSize &bottomLeft = _radii.BottomLeft();
     if (!bottomLeft.IsEmpty())
     {
-      FloatRect cornerRect(_rect.X(), _rect.MaxY() - bottomLeft.Height(), bottomLeft.Width(),
-                           bottomLeft.Height());
+      RectF cornerRect(_rect.X(), _rect.MaxY() - bottomLeft.Height(), bottomLeft.Width(),
+                       bottomLeft.Height());
       if (quad.IntersectsRect(cornerRect))
       {
-        FloatPoint center(_rect.X() + bottomLeft.Width(), _rect.MaxY() - bottomLeft.Height());
-        FloatSize size(bottomLeft.Width(), bottomLeft.Height());
+        PointF center(_rect.X() + bottomLeft.Width(), _rect.MaxY() - bottomLeft.Height());
+        SizeF size(bottomLeft.Width(), bottomLeft.Height());
         if (!quad.IntersectsEllipse(center, size))
         {
           return false;
@@ -279,12 +279,12 @@ namespace krys::boo
     const LayoutSize &bottomRight = _radii.BottomRight();
     if (!bottomRight.IsEmpty())
     {
-      FloatRect cornerRect(_rect.MaxX() - bottomRight.Width(), _rect.MaxY() - bottomRight.Height(),
-                           bottomRight.Width(), bottomRight.Height());
+      RectF cornerRect(_rect.MaxX() - bottomRight.Width(), _rect.MaxY() - bottomRight.Height(),
+                       bottomRight.Width(), bottomRight.Height());
       if (quad.IntersectsRect(cornerRect))
       {
-        FloatPoint center(_rect.MaxX() - bottomRight.Width(), _rect.MaxY() - bottomRight.Height());
-        FloatSize size(bottomRight.Width(), bottomRight.Height());
+        PointF center(_rect.MaxX() - bottomRight.Width(), _rect.MaxY() - bottomRight.Height());
+        SizeF size(bottomRight.Width(), bottomRight.Height());
         if (!quad.IntersectsEllipse(center, size))
         {
           return false;
@@ -305,7 +305,7 @@ namespace krys::boo
     const LayoutSize &topLeft = _radii.TopLeft();
     if (!topLeft.IsEmpty())
     {
-      FloatPoint center = {_rect.X() + topLeft.Width(), _rect.Y() + topLeft.Height()};
+      PointF center = {_rect.X() + topLeft.Width(), _rect.Y() + topLeft.Height()};
       if (otherRect.X() <= center.X() && otherRect.Y() <= center.Y())
       {
         if (!EllipseContainsPoint(center, topLeft, otherRect.MinXMinYCorner()))
@@ -318,7 +318,7 @@ namespace krys::boo
     const LayoutSize &topRight = _radii.TopRight();
     if (!topRight.IsEmpty())
     {
-      FloatPoint center = {_rect.MaxX() - topRight.Width(), _rect.Y() + topRight.Height()};
+      PointF center = {_rect.MaxX() - topRight.Width(), _rect.Y() + topRight.Height()};
       if (otherRect.MaxX() >= center.X() && otherRect.Y() <= center.Y())
       {
         if (!EllipseContainsPoint(center, topRight, otherRect.MaxXMinYCorner()))
@@ -331,7 +331,7 @@ namespace krys::boo
     const LayoutSize &bottomLeft = _radii.BottomLeft();
     if (!bottomLeft.IsEmpty())
     {
-      FloatPoint center = {_rect.X() + bottomLeft.Width(), _rect.MaxY() - bottomLeft.Height()};
+      PointF center = {_rect.X() + bottomLeft.Width(), _rect.MaxY() - bottomLeft.Height()};
       if (otherRect.X() <= center.X() && otherRect.MaxY() >= center.Y())
       {
         if (!EllipseContainsPoint(center, bottomLeft, otherRect.MinXMaxYCorner()))
@@ -344,7 +344,7 @@ namespace krys::boo
     const LayoutSize &bottomRight = _radii.BottomRight();
     if (!bottomRight.IsEmpty())
     {
-      FloatPoint center = {_rect.MaxX() - bottomRight.Width(), _rect.MaxY() - bottomRight.Height()};
+      PointF center = {_rect.MaxX() - bottomRight.Width(), _rect.MaxY() - bottomRight.Height()};
       if (otherRect.MaxX() >= center.X() && otherRect.MaxY() >= center.Y())
       {
         if (!EllipseContainsPoint(center, bottomRight, otherRect.MaxXMaxYCorner()))
@@ -366,7 +366,7 @@ namespace krys::boo
       return FloatRoundedRect(originalRect, GetRadii());
     }
 
-    FloatRect pixelSnappedRect = SnapRectToDevicePixels(originalRect, deviceScaleFactor);
+    RectF pixelSnappedRect = SnapRectToDevicePixels(originalRect, deviceScaleFactor);
 
     if (!IsRenderable())
     {

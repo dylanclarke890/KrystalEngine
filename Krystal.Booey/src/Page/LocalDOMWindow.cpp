@@ -392,8 +392,8 @@ namespace krys::boo
     view->CancelScheduledScrolls();
     (void)Document()->UpdateLayoutIgnorePendingStylesheets();
 
-    IntPoint layoutPos(view->MapFromCSSToLayoutUnits(static_cast<int32>(*scrollToOptions.Left)),
-                       view->MapFromCSSToLayoutUnits(static_cast<int32>(*scrollToOptions.Top)));
+    PointI layoutPos(view->MapFromCSSToLayoutUnits(static_cast<int32>(*scrollToOptions.Left)),
+                     view->MapFromCSSToLayoutUnits(static_cast<int32>(*scrollToOptions.Top)));
 
     auto animated = UseSmoothScrolling(scrollToOptions.Behavior.value_or(ScrollBehavior::Auto),
                                        Document()->DocumentElement().get())

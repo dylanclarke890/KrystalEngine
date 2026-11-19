@@ -58,7 +58,7 @@ namespace krys::boo::style
     return AdoptRef(*new ScaleTransformFunction(_x, _y, _z, GetType()));
   }
 
-  Ref<TransformOperation> ScaleTransformFunction::ToPlatform(const FloatSize &) const noexcept
+  Ref<TransformOperation> ScaleTransformFunction::ToPlatform(const SizeF &) const noexcept
   {
     return ScaleTransformOperation::Create(_x.Value.Value, _y.Value.Value, _z.Value.Value,
                                            style::ConvertToPlatform(GetType()));
@@ -75,7 +75,7 @@ namespace krys::boo::style
     return _x == otherScale._x && _y == otherScale._y && _z == otherScale._z;
   }
 
-  void ScaleTransformFunction::Apply(TransformationMatrix &transform, const FloatSize &) const noexcept
+  void ScaleTransformFunction::Apply(TransformationMatrix &transform, const SizeF &) const noexcept
   {
     transform.Scale3d(_x.Value.Value, _y.Value.Value, _z.Value.Value);
   }

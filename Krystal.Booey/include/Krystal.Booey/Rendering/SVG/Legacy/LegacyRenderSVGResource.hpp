@@ -20,10 +20,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Rendering/RepaintRectCalculation.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 
@@ -99,8 +99,8 @@ namespace krys::boo
     {
     }
 
-    KRYS_NODISCARD virtual FloatRect ResourceBoundingBox(const RenderObject &,
-                                                         RepaintRectCalculation) noexcept = 0;
+    KRYS_NODISCARD virtual RectF ResourceBoundingBox(const RenderObject &,
+                                                     RepaintRectCalculation) noexcept = 0;
 
     KRYS_NODISCARD virtual RenderSVGResourceType ResourceType() const noexcept = 0;
 

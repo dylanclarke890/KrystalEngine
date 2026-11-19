@@ -262,7 +262,7 @@ namespace krys::boo
     paintInfo.Context().SetStrokeStyle(StrokeStyle::SolidStroke);
     paintInfo.Context().SetStrokeColor(Style().ColorResolvingCurrentColor(css::PropertyId::Color));
     paintInfo.Context().SetFillColor(Color::transparentBlack);
-    paintInfo.ApplyTransform(AffineTransform().Translate(FloatPoint(paintOffset + Location())));
+    paintInfo.ApplyTransform(AffineTransform().Translate(PointF(paintOffset + Location())));
 
     // In the MathML in HTML5 implementation note, the "left" notation is described as follows:
     // - center of the left vertical bar is at 3\xi_8 padding + \xi_8 border/2 = 7\xi_8/2

@@ -39,9 +39,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
@@ -54,10 +54,10 @@ namespace krys::boo
     ImageOrientation Orientation {ImageOrientation::Orientation::None};
     /// @brief The image's preferred density-corrected dimensions: its EXIF pixel dimensions, when its
     /// resolution (in inches) scales its size to them.
-    Maybe<IntSize> DensityCorrectedSize;
+    Maybe<SizeI> DensityCorrectedSize;
 
     /// @brief Reads the metadata of an image of @p physicalSize from @p tiff, the TIFF block EXIF stores
     /// (from its byte order mark, `II` or `MM`); what can't be read is left out.
-    KRYS_NODISCARD static EXIFMetadata Read(Span<const uint8> tiff, const IntSize &physicalSize) noexcept;
+    KRYS_NODISCARD static EXIFMetadata Read(Span<const uint8> tiff, const SizeI &physicalSize) noexcept;
   };
 }

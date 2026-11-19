@@ -147,6 +147,6 @@ namespace krys::boo::svg::tests
     CHECK(p.PatternContentUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX);
     CHECK(p.LocalCoordinateSpaceTransform(CTMScope::NearestViewportScope)
           == AffineTransform::MakeScale({2, 2}));
-    CHECK(p.ViewBox() == FloatRect(0, 0, 10, 10));
+    CHECK(p.ViewBox() == RectF(0, 0, 10, 10));
   }
 }

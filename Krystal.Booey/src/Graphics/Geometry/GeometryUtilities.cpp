@@ -34,18 +34,18 @@
 
 namespace krys::boo
 {
-  float EuclidianDistance(const FloatSize &delta) noexcept
+  float EuclidianDistance(const SizeF &delta) noexcept
   {
     return std::hypot(delta.Width(), delta.Height());
   }
 
-  float EuclidianDistance(const FloatPoint &p1, const FloatPoint &p2) noexcept
+  float EuclidianDistance(const PointF &p1, const PointF &p2) noexcept
   {
     return EuclidianDistance(p1 - p2);
   }
 
-  bool FindIntersection(const FloatPoint &p1, const FloatPoint &p2, const FloatPoint &d1,
-                        const FloatPoint &d2, FloatPoint &intersection) noexcept
+  bool FindIntersection(const PointF &p1, const PointF &p2, const PointF &d1, const PointF &d2,
+                        PointF &intersection) noexcept
   {
     float pxLength = p2.X() - p1.X();
     float pyLength = p2.Y() - p1.Y();
@@ -66,9 +66,9 @@ namespace krys::boo
     return true;
   }
 
-  IntRect UnionRect(Span<const IntRect> rects) noexcept
+  RectI UnionRect(Span<const RectI> rects) noexcept
   {
-    IntRect result;
+    RectI result;
     for (auto &rect : rects)
     {
       result.Unite(rect);
@@ -77,9 +77,9 @@ namespace krys::boo
     return result;
   }
 
-  IntRect UnionRectIgnoringZeroRects(Span<const IntRect> rects) noexcept
+  RectI UnionRectIgnoringZeroRects(Span<const RectI> rects) noexcept
   {
-    IntRect result;
+    RectI result;
     for (auto &rect : rects)
     {
       result.UniteIfNonZero(rect);
@@ -88,9 +88,9 @@ namespace krys::boo
     return result;
   }
 
-  FloatRect UnionRect(Span<const FloatRect> rects) noexcept
+  RectF UnionRect(Span<const RectF> rects) noexcept
   {
-    FloatRect result;
+    RectF result;
     for (auto &rect : rects)
     {
       result.Unite(rect);
@@ -99,9 +99,9 @@ namespace krys::boo
     return result;
   }
 
-  FloatRect UnionRectIgnoringZeroRects(Span<const FloatRect> rects) noexcept
+  RectF UnionRectIgnoringZeroRects(Span<const RectF> rects) noexcept
   {
-    FloatRect result;
+    RectF result;
     for (auto &rect : rects)
     {
       result.UniteIfNonZero(rect);
@@ -110,7 +110,7 @@ namespace krys::boo
     return result;
   }
 
-  FloatPoint MapPoint(FloatPoint p, const FloatRect &srcRect, const FloatRect &destRect) noexcept
+  PointF MapPoint(PointF p, const RectF &srcRect, const RectF &destRect) noexcept
   {
     if (!srcRect.Width() || !srcRect.Height())
     {
@@ -123,11 +123,11 @@ namespace krys::boo
             destRect.Y() + (p.Y() - srcRect.Y()) * heightScale};
   }
 
-  FloatRect MapRect(const FloatRect &r, const FloatRect &srcRect, const FloatRect &destRect) noexcept
+  RectF MapRect(const RectF &r, const RectF &srcRect, const RectF &destRect) noexcept
   {
     if (!srcRect.Width() || !srcRect.Height())
     {
-      return FloatRect();
+      return RectF();
     }
 
     float widthScale = destRect.Width() / srcRect.Width();
@@ -137,9 +137,9 @@ namespace krys::boo
             r.Height() * heightScale};
   }
 
-  FloatRect LargestRectWithAspectRatioInsideRect(float aspectRatio, const FloatRect &srcRect) noexcept
+  RectF LargestRectWithAspectRatioInsideRect(float aspectRatio, const RectF &srcRect) noexcept
   {
-    FloatRect destRect = srcRect;
+    RectF destRect = srcRect;
 
     if (aspectRatio > srcRect.Size().AspectRatio())
     {
@@ -154,20 +154,20 @@ namespace krys::boo
     return destRect;
   }
 
-  FloatRect BoundsOfRotatingRect(const FloatRect &r) noexcept
+  RectF BoundsOfRotatingRect(const RectF &r) noexcept
   {
     // Compute the furthest corner from the origin.
-    float maxCornerDistance = EuclidianDistance(FloatPoint(), r.MinXMinYCorner());
-    maxCornerDistance = std::max(maxCornerDistance, EuclidianDistance(FloatPoint(), r.MaxXMinYCorner()));
-    maxCornerDistance = std::max(maxCornerDistance, EuclidianDistance(FloatPoint(), r.MinXMaxYCorner()));
-    maxCornerDistance = std::max(maxCornerDistance, EuclidianDistance(FloatPoint(), r.MaxXMaxYCorner()));
+    float maxCornerDistance = EuclidianDistance(PointF(), r.MinXMinYCorner());
+    maxCornerDistance = std::max(maxCornerDistance, EuclidianDistance(PointF(), r.MaxXMinYCorner()));
+    maxCornerDistance = std::max(maxCornerDistance, EuclidianDistance(PointF(), r.MinXMaxYCorner()));
+    maxCornerDistance = std::max(maxCornerDistance, EuclidianDistance(PointF(), r.MaxXMaxYCorner()));
 
-    return FloatRect(-maxCornerDistance, -maxCornerDistance, 2 * maxCornerDistance, 2 * maxCornerDistance);
+    return RectF(-maxCornerDistance, -maxCornerDistance, 2 * maxCornerDistance, 2 * maxCornerDistance);
   }
 
-  FloatRect SmallestRectWithAspectRatioAroundRect(float aspectRatio, const FloatRect &srcRect) noexcept
+  RectF SmallestRectWithAspectRatioAroundRect(float aspectRatio, const RectF &srcRect) noexcept
   {
-    FloatRect destRect = srcRect;
+    RectF destRect = srcRect;
 
     if (aspectRatio < srcRect.Size().AspectRatio())
     {
@@ -182,14 +182,13 @@ namespace krys::boo
     return destRect;
   }
 
-  FloatSize SizeWithAreaAndAspectRatio(float area, float aspectRatio) noexcept
+  SizeF SizeWithAreaAndAspectRatio(float area, float aspectRatio) noexcept
   {
     auto scaledWidth = std::sqrt(area * aspectRatio);
     return {scaledWidth, scaledWidth / aspectRatio};
   }
 
-  bool EllipseContainsPoint(const FloatPoint &center, const FloatSize &radii,
-                            const FloatPoint &point) noexcept
+  bool EllipseContainsPoint(const PointF &center, const SizeF &radii, const PointF &point) noexcept
   {
     if (radii.Width() <= 0 || radii.Height() <= 0)
     {
@@ -197,7 +196,7 @@ namespace krys::boo
     }
 
     // First, offset the query point so that the ellipse is effectively centered at the origin.
-    FloatPoint transformedPoint(point);
+    PointF transformedPoint(point);
     transformedPoint.Move(-center.X(), -center.Y());
 
     // If the point lies outside of the bounding box determined by the radii of the ellipse, it can't possibly
@@ -223,19 +222,19 @@ namespace krys::boo
            || transformedPoint.LengthSquared() <= transformedRadius * transformedRadius;
   }
 
-  FloatPoint MidPoint(const FloatPoint &first, const FloatPoint &second) noexcept
+  PointF MidPoint(const PointF &first, const PointF &second) noexcept
   {
     return {std::midpoint(first.X(), second.X()), std::midpoint(first.Y(), second.Y())};
   }
 
   namespace
   {
-    KRYS_NODISCARD float DotProduct(const FloatSize &u, const FloatSize &v) noexcept
+    KRYS_NODISCARD float DotProduct(const SizeF &u, const SizeF &v) noexcept
     {
       return u.Width() * v.Width() + u.Height() * v.Height();
     }
 
-    KRYS_NODISCARD float AngleBetweenVectors(const FloatSize &u, const FloatSize &v) noexcept
+    KRYS_NODISCARD float AngleBetweenVectors(const SizeF &u, const SizeF &v) noexcept
     {
       auto magnitudes = u.DiagonalLength() * v.DiagonalLength();
       return magnitudes ? std::acos(ClampTo<float>(DotProduct(u, v) / magnitudes, -1, 1)) : 0;
@@ -268,7 +267,7 @@ namespace krys::boo
       return {boundingBox.Center(), boundingBox.Size(), 0};
     }
 
-    auto heightVector = FloatSize {widthVector.Height(), -widthVector.Width()};
+    auto heightVector = SizeF {widthVector.Height(), -widthVector.Width()};
     auto leftPerpendicularAngle = AngleBetweenVectors(heightVector, quad.P1() - leftMidPoint);
     auto rightPerpendicularAngle = AngleBetweenVectors(heightVector, quad.P2() - rightMidPoint);
 
@@ -313,7 +312,7 @@ namespace krys::boo
     return std::abs(180 - angle);
   }
 
-  RectEdges<double> DistanceOfPointToSidesOfRect(const FloatRect &box, const FloatPoint &position) noexcept
+  RectEdges<double> DistanceOfPointToSidesOfRect(const RectF &box, const PointF &position) noexcept
   {
     // Compute distance to each side of the containing box
     double top = std::abs(position.Y());
@@ -323,55 +322,55 @@ namespace krys::boo
     return RectEdges<double>(top, right, bottom, left);
   }
 
-  float DistanceToClosestSide(FloatPoint p, FloatSize size) noexcept
+  float DistanceToClosestSide(PointF p, SizeF size) noexcept
   {
     float widthDelta = std::abs(size.Width() - p.X());
     float heightDelta = std::abs(size.Height() - p.Y());
     return Min4(std::abs(p.X()), widthDelta, std::abs(p.Y()), heightDelta);
   }
 
-  float DistanceToFarthestSide(FloatPoint p, FloatSize size) noexcept
+  float DistanceToFarthestSide(PointF p, SizeF size) noexcept
   {
     float widthDelta = std::abs(size.Width() - p.X());
     float heightDelta = std::abs(size.Height() - p.Y());
     return Max4(std::abs(p.X()), widthDelta, std::abs(p.Y()), heightDelta);
   }
 
-  float DistanceToClosestCorner(FloatPoint p, FloatSize size) noexcept
+  float DistanceToClosestCorner(PointF p, SizeF size) noexcept
   {
-    FloatPoint topLeft;
-    float topLeftDistance = FloatSize(p - topLeft).DiagonalLength();
-    FloatPoint topRight(size.Width(), 0);
-    float topRightDistance = FloatSize(p - topRight).DiagonalLength();
-    FloatPoint bottomLeft(0, size.Height());
-    float bottomLeftDistance = FloatSize(p - bottomLeft).DiagonalLength();
-    FloatPoint bottomRight(size.Width(), size.Height());
-    float bottomRightDistance = FloatSize(p - bottomRight).DiagonalLength();
+    PointF topLeft;
+    float topLeftDistance = SizeF(p - topLeft).DiagonalLength();
+    PointF topRight(size.Width(), 0);
+    float topRightDistance = SizeF(p - topRight).DiagonalLength();
+    PointF bottomLeft(0, size.Height());
+    float bottomLeftDistance = SizeF(p - bottomLeft).DiagonalLength();
+    PointF bottomRight(size.Width(), size.Height());
+    float bottomRightDistance = SizeF(p - bottomRight).DiagonalLength();
     return Min4(topLeftDistance, topRightDistance, bottomLeftDistance, bottomRightDistance);
   }
 
-  float DistanceToFarthestCorner(FloatPoint p, FloatSize size) noexcept
+  float DistanceToFarthestCorner(PointF p, SizeF size) noexcept
   {
-    FloatPoint topLeft;
-    float topLeftDistance = FloatSize(p - topLeft).DiagonalLength();
-    FloatPoint topRight(size.Width(), 0);
-    float topRightDistance = FloatSize(p - topRight).DiagonalLength();
-    FloatPoint bottomLeft(0, size.Height());
-    float bottomLeftDistance = FloatSize(p - bottomLeft).DiagonalLength();
-    FloatPoint bottomRight(size.Width(), size.Height());
-    float bottomRightDistance = FloatSize(p - bottomRight).DiagonalLength();
+    PointF topLeft;
+    float topLeftDistance = SizeF(p - topLeft).DiagonalLength();
+    PointF topRight(size.Width(), 0);
+    float topRightDistance = SizeF(p - topRight).DiagonalLength();
+    PointF bottomLeft(0, size.Height());
+    float bottomLeftDistance = SizeF(p - bottomLeft).DiagonalLength();
+    PointF bottomRight(size.Width(), size.Height());
+    float bottomRightDistance = SizeF(p - bottomRight).DiagonalLength();
     return Max4(topLeftDistance, topRightDistance, bottomLeftDistance, bottomRightDistance);
   }
 
-  Array<FloatPoint, 4> VerticesForBox(const FloatRect &box, const FloatPoint position) noexcept
+  Array<PointF, 4> VerticesForBox(const RectF &box, const PointF position) noexcept
   {
-    return {FloatPoint(-position.X(), -position.Y()), FloatPoint(box.Width() - position.X(), -position.Y()),
-            FloatPoint(box.Width() - position.X(), box.Height() - position.Y()),
-            FloatPoint(-position.X(), box.Height() - position.Y())};
+    return {PointF(-position.X(), -position.Y()), PointF(box.Width() - position.X(), -position.Y()),
+            PointF(box.Width() - position.X(), box.Height() - position.Y()),
+            PointF(-position.X(), box.Height() - position.Y())};
   }
 
-  double LengthOfRayIntersectionWithBoundingBox(const FloatRect &boundingRect,
-                                                std::pair<const FloatPoint &, float> ray) noexcept
+  double LengthOfRayIntersectionWithBoundingBox(const RectF &boundingRect,
+                                                std::pair<const PointF &, float> ray) noexcept
   {
     auto length = LengthOfPointToSideOfIntersection(boundingRect, ray);
     auto angleOfTriangle = AngleOfPointToSideOfIntersection(boundingRect, ray);
@@ -384,8 +383,8 @@ namespace krys::boo
   namespace
   {
     // Get the side of box the ray intersects with
-    KRYS_NODISCARD BoxSide IntersectionSide(const FloatRect &boundingRect,
-                                            std::pair<const FloatPoint &, float> ray) noexcept
+    KRYS_NODISCARD BoxSide IntersectionSide(const RectF &boundingRect,
+                                            std::pair<const PointF &, float> ray) noexcept
     {
       auto position = ray.first;
       auto angleInRadians = deg2rad(ray.second);
@@ -402,8 +401,8 @@ namespace krys::boo
     }
   }
 
-  double LengthOfPointToSideOfIntersection(const FloatRect &boundingRect,
-                                           std::pair<const FloatPoint &, float> ray) noexcept
+  double LengthOfPointToSideOfIntersection(const RectF &boundingRect,
+                                           std::pair<const PointF &, float> ray) noexcept
   {
     auto position = ray.first;
     if (position.X() < 0 || position.X() > boundingRect.Width() || position.Y() < 0
@@ -415,8 +414,8 @@ namespace krys::boo
     return distances.At(IntersectionSide(boundingRect, ray));
   }
 
-  float AngleOfPointToSideOfIntersection(const FloatRect &boundingRect,
-                                         std::pair<const FloatPoint &, float> ray) noexcept
+  float AngleOfPointToSideOfIntersection(const RectF &boundingRect,
+                                         std::pair<const PointF &, float> ray) noexcept
   {
     auto angle = ray.second;
     auto side = IntersectionSide(boundingRect, ray);
@@ -430,7 +429,7 @@ namespace krys::boo
     return radiansPerTurnFloat * (circles - std::floor(circles));
   }
 
-  FloatRect ScaledRectAtOrigin(const FloatRect &rect, float scale, const FloatPoint &origin) noexcept
+  RectF ScaledRectAtOrigin(const RectF &rect, float scale, const PointF &origin) noexcept
   {
     return {origin + (rect.Location() - origin) * scale, rect.Size() * scale};
   }

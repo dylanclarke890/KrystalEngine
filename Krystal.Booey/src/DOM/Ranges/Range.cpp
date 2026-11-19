@@ -1069,7 +1069,7 @@ namespace krys::boo::dom
   {
     (void)range.Start.GetDocument().UpdateLayout();
     auto rects = RenderObject::ClientBorderAndTextRects(range);
-    return DOMRect::Create(UnionRectIgnoringZeroRects(Span<const FloatRect>(rects)));
+    return DOMRect::Create(UnionRectIgnoringZeroRects(Span<const RectF>(rects)));
   }
 
   ExceptionOr<DOMString> Range::ToString() const noexcept

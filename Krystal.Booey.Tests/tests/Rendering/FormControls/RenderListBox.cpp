@@ -20,16 +20,16 @@ namespace krys::boo::layout::tests
 
   namespace
   {
-    KRYS_NODISCARD PlatformMouseEvent MouseEvent(PlatformEvent::Type type, IntPoint position,
+    KRYS_NODISCARD PlatformMouseEvent MouseEvent(PlatformEvent::Type type, PointI position,
                                                  EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
     {
-      DoublePoint point(position.X(), position.Y());
+      PointD point(position.X(), position.Y());
       int32 clickCount = type == PlatformEvent::Type::MousePressed ? 1 : 0;
       return PlatformMouseEvent(point, point, MouseButton::Left, type, clickCount, modifiers,
                                 MonotonicTime::Now());
     }
 
-    void Click(EventHandler &handler, IntPoint position,
+    void Click(EventHandler &handler, PointI position,
                EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
     {
       (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, position, modifiers));
@@ -45,7 +45,7 @@ namespace krys::boo::layout::tests
                               keyCode, false, false, false, modifiers, {}));
     }
 
-    bool Wheel(EventHandler &handler, IntPoint position, float deltaY) noexcept
+    bool Wheel(EventHandler &handler, PointI position, float deltaY) noexcept
     {
       return handler.HandleWheelEvent(
         PlatformWheelEvent(position, position, 0, -deltaY, 0, deltaY > 0 ? -1.0f : 1.0f,
@@ -95,13 +95,13 @@ layer at (0,0) size 400x37
     SECTION("Clicking selects the item under the mouse")
     {
       auto banana = listBox.ItemBoundingBoxRect({}, 2);
-      Click(handler, RoundedIntPoint(FloatPoint(banana.Center())));
+      Click(handler, RoundedPointI(PointF(banana.Center())));
       CHECK(select.SelectedIndex() == 1);
       CHECK(changes->Count == 1);
 
       // Clicking the optgroup's label selects nothing.
       auto group = listBox.ItemBoundingBoxRect({}, 1);
-      Click(handler, RoundedIntPoint(FloatPoint(group.Center())));
+      Click(handler, RoundedPointI(PointF(group.Center())));
       CHECK(select.SelectedIndex() == 1);
     }
 
@@ -129,25 +129,25 @@ layer at (0,0) size 400x37
       auto bounds = [](Element &element)
       {
         auto rect = element.GetBoundingClientRect();
-        return FloatRect(static_cast<float>(rect->X()), static_cast<float>(rect->Y()),
-                         static_cast<float>(rect->Width()), static_cast<float>(rect->Height()));
+        return RectF(static_cast<float>(rect->X()), static_cast<float>(rect->Y()),
+                     static_cast<float>(rect->Width()), static_cast<float>(rect->Height()));
       };
 
       auto &elderberry = *select.ListItems()[5];
-      CHECK(bounds(elderberry) == FloatRect(listBox.ItemBoundingBoxRect({}, 5)));
+      CHECK(bounds(elderberry) == RectF(listBox.ItemBoundingBoxRect({}, 5)));
       CHECK(elderberry.GetClientRects()->Length() == 1u);
 
       elderberry.ScrollIntoView(true);
       CHECK(listBox.GetScrollPosition() == ScrollPosition(0, 3 * itemHeight));
       CHECK(listBox.ListIndexIsVisible(5));
       // Its bounds follow the scroll.
-      CHECK(bounds(elderberry) == FloatRect(listBox.ItemBoundingBoxRect({}, 5)));
+      CHECK(bounds(elderberry) == RectF(listBox.ItemBoundingBoxRect({}, 5)));
       settings.ScrollAnimatorEnabled = true;
     }
 
     SECTION("The wheel scrolls by pixels, as far as the last item")
     {
-      auto center = RoundedIntPoint(FloatPoint(listBox.ItemBoundingBoxRect({}, 1).Center()));
+      auto center = RoundedPointI(PointF(listBox.ItemBoundingBoxRect({}, 1).Center()));
       CHECK(Wheel(handler, center, 5));
       CHECK(listBox.GetScrollPosition() == ScrollPosition(0, 5));
       CHECK(select.ScrollTop() == 5);
@@ -193,7 +193,7 @@ layer at (0,0) size 400x37
 
     auto at = [&](int32 index)
     {
-      return RoundedIntPoint(FloatPoint(listBox.ItemBoundingBoxRect({}, index).Center()));
+      return RoundedPointI(PointF(listBox.ItemBoundingBoxRect({}, index).Center()));
     };
 
     // A click selects one item; shift-click extends to another; ctrl-click toggles one.

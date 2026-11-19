@@ -6178,7 +6178,7 @@ namespace krys::boo
       floatBox.Move(floatingObject->LocationOffsetOfBorderBox());
       rootBlock.FlipForWritingMode(floatBox);
       floatBox.Move(rootBlockPhysicalPosition.X(), rootBlockPhysicalPosition.Y());
-      paintInfo->Context().ClipOut(FloatRect(SnappedIntRect(floatBox)));
+      paintInfo->Context().ClipOut(RectF(SnappedRectI(floatBox)));
     }
   }
 
@@ -6402,7 +6402,7 @@ namespace krys::boo
             {
               if (paintInfo && box->Renderer().Parent()->Style().UsedVisibility() == Visibility::Visible)
               {
-                paintInfo->Context().FillRect(FloatRect(gapRect),
+                paintInfo->Context().FillRect(RectF(gapRect),
                                               box->Renderer().Parent()->SelectionBackgroundColor());
               }
               // VisibleSelection may be non-contiguous, see comment above.

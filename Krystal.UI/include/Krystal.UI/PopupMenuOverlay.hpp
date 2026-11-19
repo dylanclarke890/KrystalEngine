@@ -24,9 +24,9 @@ namespace krys::ui
     boo::PopupMenuClient *_client {nullptr};
     UniquePtr<View> _view;
     /// @brief The control the popup is for, in the owner's viewport.
-    boo::IntRect _controlRect;
+    RectI _controlRect;
     /// @brief Where the popup is, in the owner's viewport.
-    boo::IntRect _rect;
+    RectI _rect;
     /// @brief The element of each item, by its index in the list; null for items that aren't shown.
     List<RefPtr<boo::Element>> _itemElements;
     int32 _highlightedIndex {-1};
@@ -41,7 +41,7 @@ namespace krys::ui
 
 #pragma region PopupMenu
 
-    void Show(const boo::IntRect &rect, boo::LocalFrameView &view, int32 selectedIndex) noexcept override;
+    void Show(const RectI &rect, boo::LocalFrameView &view, int32 selectedIndex) noexcept override;
 
     void Hide() noexcept final;
 
@@ -75,19 +75,19 @@ namespace krys::ui
     }
 
     /// @brief Where the popup is, in its owner's viewport.
-    KRYS_NODISCARD const boo::IntRect &Rect() const noexcept final
+    KRYS_NODISCARD const RectI &Rect() const noexcept final
     {
       return _rect;
     }
 
     /// @brief Highlights the item under @p point (in the popup's coordinates).
-    void MouseMoved(const boo::IntPoint &point) noexcept final;
+    void MouseMoved(const PointI &point) noexcept final;
 
     /// @brief Chooses the item under @p point (in the popup's coordinates).
-    void MouseReleased(const boo::IntPoint &point) noexcept final;
+    void MouseReleased(const PointI &point) noexcept final;
 
     /// @brief Scrolls the popup's items.
-    bool MouseWheel(const boo::IntPoint &point, float notchesX, float notchesY) noexcept final;
+    bool MouseWheel(const PointI &point, float notchesX, float notchesY) noexcept final;
 
     /// @brief The arrow keys, Home and End move the highlight; Enter and Space choose the highlighted item;
     /// Escape and Tab hide the popup.
@@ -107,7 +107,7 @@ namespace krys::ui
     }
 
     /// @brief The item at @p point (in the popup's coordinates), or -1.
-    KRYS_NODISCARD int32 ItemAt(const boo::IntPoint &point) const noexcept;
+    KRYS_NODISCARD int32 ItemAt(const PointI &point) const noexcept;
 
   private:
     /// @brief Fills the popup's page with the client's items, and places it.

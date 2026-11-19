@@ -25,10 +25,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Booey/Page/Drag/DragItem.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 
@@ -56,7 +56,7 @@ namespace krys::boo
     virtual void WillPerformDragDestinationAction(DragDestinationAction action,
                                                   const DragData &dragData) noexcept = 0;
 
-    virtual void WillPerformDragSourceAction(DragSourceAction action, const IntPoint &point,
+    virtual void WillPerformDragSourceAction(DragSourceAction action, const PointI &point,
                                              dom::DataTransfer &dataTransfer) noexcept = 0;
 
     virtual void DidConcludeEditDrag() noexcept
@@ -65,7 +65,7 @@ namespace krys::boo
 
     /// @brief The drags that may start at @p rootViewPoint.
     KRYS_NODISCARD virtual EnumSet<DragSourceAction>
-      DragSourceActionMaskForPoint(const IntPoint &rootViewPoint) noexcept = 0;
+      DragSourceActionMaskForPoint(const PointI &rootViewPoint) noexcept = 0;
 
     /// @brief Runs a drag of @p dataTransfer's data from @p frame, as @p dragItem describes.
     virtual void StartDrag(DragItem dragItem, dom::DataTransfer &dataTransfer,
@@ -84,11 +84,11 @@ namespace krys::boo
     {
     }
 
-    void WillPerformDragSourceAction(DragSourceAction, const IntPoint &, dom::DataTransfer &) noexcept final
+    void WillPerformDragSourceAction(DragSourceAction, const PointI &, dom::DataTransfer &) noexcept final
     {
     }
 
-    KRYS_NODISCARD EnumSet<DragSourceAction> DragSourceActionMaskForPoint(const IntPoint &) noexcept final
+    KRYS_NODISCARD EnumSet<DragSourceAction> DragSourceActionMaskForPoint(const PointI &) noexcept final
     {
       return {};
     }

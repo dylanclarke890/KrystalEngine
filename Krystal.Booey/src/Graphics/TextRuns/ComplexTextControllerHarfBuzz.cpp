@@ -329,7 +329,7 @@ namespace krys::boo
       _baseAdvances[i] = {advanceX, advanceY};
       _glyphOrigins[i] = {offsetX, offsetY};
     }
-    _initialAdvance = FloatSize(_glyphOrigins[0].X(), _glyphOrigins[0].Y());
+    _initialAdvance = SizeF(_glyphOrigins[0].X(), _glyphOrigins[0].Y());
   }
 
   void ComplexTextController::CollectComplexTextRunsForCharacters(utf8_stringview characters,

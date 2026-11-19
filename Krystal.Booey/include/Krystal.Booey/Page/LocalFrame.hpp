@@ -28,13 +28,13 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Loader/Cache/CachePolicy.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -130,7 +130,7 @@ namespace krys::boo
 
     /// @brief Gives the frame a new view of @p viewportSize, laid out at @p fixedLayoutSize if
     /// @p useFixedLayout.
-    void CreateView(const IntSize &viewportSize, const IntSize &fixedLayoutSize = {},
+    void CreateView(const SizeI &viewportSize, const SizeI &fixedLayoutSize = {},
                     bool useFixedLayout = false) noexcept;
 
     /// @brief Shows @p newDocument in the frame, in place of its current document. @p newDocument must not be
@@ -138,10 +138,10 @@ namespace krys::boo
     void SetDocument(const RefPtr<boo::Document> &newDocument) noexcept;
 
     /// @brief The caret position nearest @p framePoint (in the frame's contents).
-    KRYS_NODISCARD VisiblePosition VisiblePositionForPoint(const IntPoint &framePoint) const noexcept;
+    KRYS_NODISCARD VisiblePosition VisiblePositionForPoint(const PointI &framePoint) const noexcept;
 
     /// @brief The document under @p point (in the window).
-    KRYS_NODISCARD boo::Document *DocumentAtPoint(const IntPoint &point) const noexcept;
+    KRYS_NODISCARD boo::Document *DocumentAtPoint(const PointI &point) const noexcept;
 
     /// @brief The zoom applied to the whole document (the root style's `zoom`).
     KRYS_NODISCARD float PageZoomFactor() const noexcept

@@ -33,7 +33,7 @@ namespace krys::ui::tests
     /// @brief Where the view draws the drag image, and how opaque, if it draws one.
     struct DrawnDragImage
     {
-      boo::FloatRect Rect;
+      RectF Rect;
       float Alpha {1};
     };
 
@@ -185,14 +185,14 @@ namespace krys::ui::tests
       // The element was pressed 10px into it, so it's drawn 10px up and left of the cursor.
       auto drawn = DragImageIn(view);
       REQUIRE(drawn);
-      CHECK(drawn->Rect == boo::FloatRect(0, 20, 400, 40));
+      CHECK(drawn->Rect == RectF(0, 20, 400, 40));
       CHECK(drawn->Alpha == 0.75f);
 
       view.MouseMoved({50, 100});
       CHECK(view.NeedsPaint());
       drawn = DragImageIn(view);
       REQUIRE(drawn);
-      CHECK(drawn->Rect == boo::FloatRect(40, 90, 400, 40));
+      CHECK(drawn->Rect == RectF(40, 90, 400, 40));
 
       view.MouseReleased({50, 100}, pal::MouseButton::Left);
       CHECK_FALSE(DragImageIn(view));

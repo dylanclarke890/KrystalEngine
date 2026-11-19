@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
 #include "Krystal.Booey/SVG/SVGFitToViewBox.hpp"
 #include "Krystal.Booey/SVG/SVGPoint.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 
 namespace krys::boo::css
 {
@@ -89,7 +89,7 @@ namespace krys::boo
       return *_currentTranslate;
     }
 
-    KRYS_NODISCARD FloatPoint CurrentTranslateValue() const noexcept
+    KRYS_NODISCARD PointF CurrentTranslateValue() const noexcept
     {
       return _currentTranslate->Value();
     }
@@ -187,7 +187,7 @@ namespace krys::boo
 
     void ResetScrollAnchor() noexcept;
 
-    void SetCurrentTranslate(const FloatPoint &translation) noexcept; // Used to pan.
+    void SetCurrentTranslate(const PointF &translation) noexcept; // Used to pan.
 
     void UpdateCurrentTranslate() noexcept;
 
@@ -199,9 +199,9 @@ namespace krys::boo
 
     KRYS_NODISCARD float IntrinsicHeight() const noexcept;
 
-    KRYS_NODISCARD FloatSize CurrentViewportSizeExcludingZoom() const noexcept;
+    KRYS_NODISCARD SizeF CurrentViewportSizeExcludingZoom() const noexcept;
 
-    KRYS_NODISCARD FloatRect CurrentViewBoxRect() const noexcept;
+    KRYS_NODISCARD RectF CurrentViewBoxRect() const noexcept;
 
     KRYS_NODISCARD AffineTransform ViewBoxToViewTransform(float viewWidth, float viewHeight) const noexcept;
 

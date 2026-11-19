@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/RefCounted.hpp"
@@ -75,23 +75,23 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(PlatformImage);
 
   private:
-    IntSize _size;
+    SizeI _size;
     RefPtr<PixelData> _pixels;
     RefPtr<ExternalImage> _external;
     bool _premultipliedAlpha;
 
   public:
-    PlatformImage(const IntSize &size, Ref<PixelData> &&pixels, bool premultipliedAlpha) noexcept
+    PlatformImage(const SizeI &size, Ref<PixelData> &&pixels, bool premultipliedAlpha) noexcept
         : _size(size), _pixels(krys::move(pixels)), _premultipliedAlpha(premultipliedAlpha)
     {
     }
 
-    PlatformImage(const IntSize &size, Ref<ExternalImage> &&external, bool premultipliedAlpha) noexcept
+    PlatformImage(const SizeI &size, Ref<ExternalImage> &&external, bool premultipliedAlpha) noexcept
         : _size(size), _external(krys::move(external)), _premultipliedAlpha(premultipliedAlpha)
     {
     }
 
-    KRYS_NODISCARD const IntSize &Size() const noexcept
+    KRYS_NODISCARD const SizeI &Size() const noexcept
     {
       return _size;
     }

@@ -15,9 +15,9 @@ namespace krys::boo::tests
     STATIC_CHECK(size.ExpandedTo({3, 5}) == LayoutSize(4, 5));
     STATIC_CHECK(size.ShrunkTo({3, 5}) == LayoutSize(3, 2.5f));
     STATIC_CHECK(size.ConstrainedBetween({5, 0}, {6, 1}) == LayoutSize(5, 1));
-    STATIC_CHECK(LayoutSize(IntSize(3, 4)) == LayoutSize(3, 4));
-    STATIC_CHECK(LayoutSize(FloatSize(3.5f, 4.0f)) == LayoutSize(3.5f, 4));
-    STATIC_CHECK(static_cast<FloatSize>(size) == FloatSize(4.0f, 2.5f));
+    STATIC_CHECK(LayoutSize(SizeI(3, 4)) == LayoutSize(3, 4));
+    STATIC_CHECK(LayoutSize(SizeF(3.5f, 4.0f)) == LayoutSize(3.5f, 4));
+    STATIC_CHECK(static_cast<SizeF>(size) == SizeF(4.0f, 2.5f));
 
     STATIC_CHECK(LayoutSize().IsEmpty());
     STATIC_CHECK(LayoutSize().IsZero());
@@ -60,11 +60,11 @@ namespace krys::boo::tests
     STATIC_CHECK(LayoutSize(100, 100).FitToAspectRatio(ratio, AspectRatioFit::Grow) == LayoutSize(200, 100));
 
     constexpr LayoutSize size(1.5f, -1.25f);
-    STATIC_CHECK(FlooredIntSize(size) == IntSize(1, -2));
-    STATIC_CHECK(CeiledIntSize(size) == IntSize(2, -1));
-    STATIC_CHECK(RoundedIntSize(size) == IntSize(2, -1));
-    CHECK(FloorSizeToDevicePixels(LayoutSize(1.75f, 1.25f), 2.0f) == FloatSize(1.5f, 1.0f));
-    CHECK(RoundSizeToDevicePixels(LayoutSize(1.75f, 1.25f), 2.0f) == FloatSize(2.0f, 1.5f));
+    STATIC_CHECK(FlooredSizeI(size) == SizeI(1, -2));
+    STATIC_CHECK(CeiledSizeI(size) == SizeI(2, -1));
+    STATIC_CHECK(RoundedSizeI(size) == SizeI(2, -1));
+    CHECK(FloorSizeToDevicePixels(LayoutSize(1.75f, 1.25f), 2.0f) == SizeF(1.5f, 1.0f));
+    CHECK(RoundSizeToDevicePixels(LayoutSize(1.75f, 1.25f), 2.0f) == SizeF(2.0f, 1.5f));
 
     constexpr LayoutSizeLimits limits {LayoutSize(0, 0), LayoutSize(10, 10)};
     STATIC_CHECK(limits.Clamp(LayoutSize(20, -5)) == LayoutSize(10, 0));

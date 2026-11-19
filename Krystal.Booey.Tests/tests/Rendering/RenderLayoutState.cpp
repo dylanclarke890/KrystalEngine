@@ -59,10 +59,10 @@ namespace krys::boo::tests
     auto childPoint = child.LocalToAbsolute();
     auto innerPoint = inner.LocalToAbsolute();
     auto fixedInnerPoint = fixedInner.LocalToAbsolute();
-    CHECK(contentPoint == FloatPoint(10, -10));
-    CHECK(childPoint == FloatPoint(30, -10));
-    CHECK(innerPoint == FloatPoint(17, 9));
-    CHECK(fixedInnerPoint == FloatPoint(4, 5));
+    CHECK(contentPoint == PointF(10, -10));
+    CHECK(childPoint == PointF(30, -10));
+    CHECK(innerPoint == PointF(17, 9));
+    CHECK(fixedInnerPoint == PointF(4, 5));
 
     SECTION("A subtree root starts from its container's position, clipped and scrolled by it")
     {

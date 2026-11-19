@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
@@ -60,7 +60,7 @@ namespace krys::boo
   private:
     ScrollableArea &_owningScrollableArea;
     WeakPtr<Element> _anchorElement;
-    FloatPoint _lastOffsetForAnchorElement;
+    PointF _lastOffsetForAnchorElement;
     bool _midUpdatingScrollPositionForAnchorElement {false};
     bool _isQueuedForScrollPositionUpdate {false};
     bool _shouldSuppressScrollPositionUpdate {false};
@@ -109,7 +109,7 @@ namespace krys::boo
     /// @see https://drafts.csswg.org/css-scroll-anchoring/#priority-candidates
     KRYS_NODISCARD bool DidFindPriorityCandidate(Document &document) noexcept;
 
-    KRYS_NODISCARD FloatPoint ComputeOffsetFromOwningScroller(const RenderObject &candidate) const noexcept;
+    KRYS_NODISCARD PointF ComputeOffsetFromOwningScroller(const RenderObject &candidate) const noexcept;
 
     KRYS_NODISCARD LocalFrameView &FrameView() const noexcept;
   };

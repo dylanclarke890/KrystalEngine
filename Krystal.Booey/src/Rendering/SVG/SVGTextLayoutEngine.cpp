@@ -683,7 +683,7 @@ namespace krys::boo
         auto traversalState = _textPath.TraversalStateAtLength(textPathOffset);
         krys_debug_assert(traversalState.Success());
 
-        FloatPoint point = traversalState.Current();
+        PointF point = traversalState.Current();
         x = point.X();
         y = point.Y();
 

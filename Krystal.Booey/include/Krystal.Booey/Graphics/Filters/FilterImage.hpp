@@ -26,10 +26,9 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -48,9 +47,9 @@ namespace krys::boo
   class FilterImage : public RefCounted<FilterImage>
   {
   private:
-    FloatRect _primitiveSubregion;
-    FloatRect _imageRect;
-    IntRect _absoluteImageRect;
+    RectF _primitiveSubregion;
+    RectF _imageRect;
+    RectI _absoluteImageRect;
     bool _isAlphaImage {false};
     bool _isValidPremultiplied {true};
     DestinationColorSpace _colorSpace;
@@ -58,39 +57,37 @@ namespace krys::boo
     Maybe<uint32> _acceleratedImage;
 
   public:
-    KRYS_NODISCARD static Ref<FilterImage> Create(const FloatRect &primitiveSubregion,
-                                                  const FloatRect &imageRect,
-                                                  const IntRect &absoluteImageRect, bool isAlphaImage,
+    KRYS_NODISCARD static Ref<FilterImage> Create(const RectF &primitiveSubregion, const RectF &imageRect,
+                                                  const RectI &absoluteImageRect, bool isAlphaImage,
                                                   bool isValidPremultiplied,
                                                   const DestinationColorSpace &colorSpace) noexcept;
 
-    KRYS_NODISCARD static Ref<FilterImage> Create(const FloatRect &primitiveSubregion,
-                                                  const FloatRect &imageRect,
-                                                  const IntRect &absoluteImageRect,
+    KRYS_NODISCARD static Ref<FilterImage> Create(const RectF &primitiveSubregion, const RectF &imageRect,
+                                                  const RectI &absoluteImageRect,
                                                   Ref<ImageBuffer> &&imageBuffer) noexcept;
 
     // The return values are in filter coordinates.
-    KRYS_NODISCARD FloatRect PrimitiveSubregion() const noexcept
+    KRYS_NODISCARD RectF PrimitiveSubregion() const noexcept
     {
       return _primitiveSubregion;
     }
 
-    KRYS_NODISCARD FloatRect MaxEffectRect(const Filter &filter) const noexcept;
+    KRYS_NODISCARD RectF MaxEffectRect(const Filter &filter) const noexcept;
 
-    KRYS_NODISCARD FloatRect ImageRect() const noexcept
+    KRYS_NODISCARD RectF ImageRect() const noexcept
     {
       return _imageRect;
     }
 
     // The return values are in user-space coordinates.
-    KRYS_NODISCARD IntRect AbsoluteImageRect() const noexcept
+    KRYS_NODISCARD RectI AbsoluteImageRect() const noexcept
     {
       return _absoluteImageRect;
     }
 
-    KRYS_NODISCARD IntRect AbsoluteImageRectRelativeTo(const FilterImage &origin) const noexcept;
+    KRYS_NODISCARD RectI AbsoluteImageRectRelativeTo(const FilterImage &origin) const noexcept;
 
-    KRYS_NODISCARD FloatPoint MappedAbsolutePoint(const FloatPoint &point) const noexcept;
+    KRYS_NODISCARD PointF MappedAbsolutePoint(const PointF &point) const noexcept;
 
     KRYS_NODISCARD bool IsAlphaImage() const noexcept
     {
@@ -134,12 +131,12 @@ namespace krys::boo
     }
 
   private:
-    FilterImage(const FloatRect &primitiveSubregion, const FloatRect &imageRect,
-                const IntRect &absoluteImageRect, bool isAlphaImage, bool isValidPremultiplied,
+    FilterImage(const RectF &primitiveSubregion, const RectF &imageRect, const RectI &absoluteImageRect,
+                bool isAlphaImage, bool isValidPremultiplied,
                 const DestinationColorSpace &colorSpace) noexcept;
 
-    FilterImage(const FloatRect &primitiveSubregion, const FloatRect &imageRect,
-                const IntRect &absoluteImageRect, Ref<ImageBuffer> &&imageBuffer) noexcept;
+    FilterImage(const RectF &primitiveSubregion, const RectF &imageRect, const RectI &absoluteImageRect,
+                Ref<ImageBuffer> &&imageBuffer) noexcept;
   };
 
   using FilterImageVector = List<Ref<FilterImage>>;

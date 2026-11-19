@@ -89,7 +89,7 @@ namespace krys::boo
       }
     }
 
-    void InvalidateContentsAndRootView(const IntRect &rect) noexcept final
+    void InvalidateContentsAndRootView(const RectI &rect) noexcept final
     {
       RefPtr<SVGImage> image = ProtectedImage();
       if (!image)

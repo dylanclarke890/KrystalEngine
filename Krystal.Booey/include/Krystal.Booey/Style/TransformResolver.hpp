@@ -26,13 +26,12 @@
 #pragma once
 
 #include "Krystal.Booey/Style/Computed/ComputedStyle.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys::boo
 {
-  class FloatPoint;
   class FloatPoint3D;
-  class FloatRect;
   class RenderStyle;
   class TransformationMatrix;
   struct TransformOperationData;
@@ -76,22 +75,22 @@ namespace krys::boo::style
     KRYS_NODISCARD bool AffectedByTransformOrigin() const noexcept;
 
     KRYS_NODISCARD static FloatPoint3D ComputeTransformOrigin(const RenderStyle &,
-                                                              const FloatRect &boundingBox) noexcept;
+                                                              const RectF &boundingBox) noexcept;
 
     KRYS_NODISCARD static FloatPoint3D ComputeTransformOrigin(const ComputedStyle &,
-                                                              const FloatRect &boundingBox) noexcept;
+                                                              const RectF &boundingBox) noexcept;
 
-    KRYS_NODISCARD FloatPoint3D ComputeTransformOrigin(const FloatRect &boundingBox) const noexcept;
+    KRYS_NODISCARD FloatPoint3D ComputeTransformOrigin(const RectF &boundingBox) const noexcept;
 
-    KRYS_NODISCARD static FloatPoint ComputePerspectiveOrigin(const RenderStyle &,
-                                                              const FloatRect &boundingBox) noexcept;
+    KRYS_NODISCARD static PointF ComputePerspectiveOrigin(const RenderStyle &,
+                                                          const RectF &boundingBox) noexcept;
 
-    KRYS_NODISCARD static FloatPoint ComputePerspectiveOrigin(const ComputedStyle &,
-                                                              const FloatRect &boundingBox) noexcept;
+    KRYS_NODISCARD static PointF ComputePerspectiveOrigin(const ComputedStyle &,
+                                                          const RectF &boundingBox) noexcept;
 
-    KRYS_NODISCARD FloatPoint ComputePerspectiveOrigin(const FloatRect &boundingBox) const noexcept;
+    KRYS_NODISCARD PointF ComputePerspectiveOrigin(const RectF &boundingBox) const noexcept;
 
-    void ApplyPerspective(const FloatPoint &originTranslate) noexcept;
+    void ApplyPerspective(const PointF &originTranslate) noexcept;
 
     void ApplyTransformOrigin(const FloatPoint3D &originTranslate) noexcept;
 

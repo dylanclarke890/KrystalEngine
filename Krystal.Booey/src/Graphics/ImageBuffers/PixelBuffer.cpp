@@ -42,7 +42,7 @@ namespace krys::boo
       return static_cast<uint32>(value);
     }
 
-    KRYS_NODISCARD uint64 ComputeRawPixelCount(const IntSize &size) noexcept
+    KRYS_NODISCARD uint64 ComputeRawPixelCount(const SizeI &size) noexcept
     {
       if (size.Width() < 0 || size.Height() < 0)
       {
@@ -51,7 +51,7 @@ namespace krys::boo
       return static_cast<uint64>(size.Width()) * static_cast<uint64>(size.Height());
     }
 
-    KRYS_NODISCARD uint64 ComputeRawPixelComponentCount(PixelFormat pixelFormat, const IntSize &size) noexcept
+    KRYS_NODISCARD uint64 ComputeRawPixelComponentCount(PixelFormat pixelFormat, const SizeI &size) noexcept
     {
       krys_debug_assert(PixelBuffer::SupportedPixelFormat(pixelFormat));
       const auto pixels = ComputeRawPixelCount(size);
@@ -74,17 +74,17 @@ namespace krys::boo
     return false;
   }
 
-  Maybe<uint32> PixelBuffer::ComputePixelCount(const IntSize &size) noexcept
+  Maybe<uint32> PixelBuffer::ComputePixelCount(const SizeI &size) noexcept
   {
     return MustFitInInt32(ComputeRawPixelCount(size));
   }
 
-  Maybe<uint32> PixelBuffer::ComputePixelComponentCount(PixelFormat pixelFormat, const IntSize &size) noexcept
+  Maybe<uint32> PixelBuffer::ComputePixelComponentCount(PixelFormat pixelFormat, const SizeI &size) noexcept
   {
     return MustFitInInt32(ComputeRawPixelComponentCount(pixelFormat, size));
   }
 
-  Maybe<uint32> PixelBuffer::ComputeBufferSize(PixelFormat pixelFormat, const IntSize &size) noexcept
+  Maybe<uint32> PixelBuffer::ComputeBufferSize(PixelFormat pixelFormat, const SizeI &size) noexcept
   {
     const auto components = ComputeRawPixelComponentCount(pixelFormat, size);
     if (components > std::numeric_limits<uint64>::max() / BytesPerPixelComponent(pixelFormat))
@@ -94,7 +94,7 @@ namespace krys::boo
     return MustFitInInt32(components * BytesPerPixelComponent(pixelFormat));
   }
 
-  PixelBuffer::PixelBuffer(const PixelBufferFormat &format, const IntSize &size, Span<uint8> bytes) noexcept
+  PixelBuffer::PixelBuffer(const PixelBufferFormat &format, const SizeI &size, Span<uint8> bytes) noexcept
       : _format(format), _size(size), _bytes(bytes)
   {
     krys_assert(ComputeBufferSize(format.Format, size).value_or(0u) <= bytes.size());

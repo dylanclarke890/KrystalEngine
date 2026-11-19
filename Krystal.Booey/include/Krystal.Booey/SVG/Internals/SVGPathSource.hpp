@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathSegType.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
@@ -36,12 +36,12 @@ namespace krys::boo
   public:
     struct MoveToSegment
     {
-      FloatPoint TargetPoint;
+      PointF TargetPoint;
     };
 
     struct LineToSegment
     {
-      FloatPoint TargetPoint;
+      PointF TargetPoint;
     };
 
     struct LineToHorizontalSegment
@@ -56,26 +56,26 @@ namespace krys::boo
 
     struct CurveToCubicSegment
     {
-      FloatPoint Point1;
-      FloatPoint Point2;
-      FloatPoint TargetPoint;
+      PointF Point1;
+      PointF Point2;
+      PointF TargetPoint;
     };
 
     struct CurveToCubicSmoothSegment
     {
-      FloatPoint Point2;
-      FloatPoint TargetPoint;
+      PointF Point2;
+      PointF TargetPoint;
     };
 
     struct CurveToQuadraticSegment
     {
-      FloatPoint Point1;
-      FloatPoint TargetPoint;
+      PointF Point1;
+      PointF TargetPoint;
     };
 
     struct CurveToQuadraticSmoothSegment
     {
-      FloatPoint TargetPoint;
+      PointF TargetPoint;
     };
 
     struct ArcToSegment
@@ -85,7 +85,7 @@ namespace krys::boo
       float Angle {0};
       bool LargeArc {false};
       bool Sweep {false};
-      FloatPoint TargetPoint;
+      PointF TargetPoint;
     };
 
     SVGPathSource() noexcept = default;
@@ -100,28 +100,28 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual Maybe<SVGPathSegType> ParseSVGSegmentType() noexcept = 0;
 
-    KRYS_NODISCARD virtual Maybe<MoveToSegment> ParseMoveToSegment(FloatPoint currentPoint) noexcept = 0;
+    KRYS_NODISCARD virtual Maybe<MoveToSegment> ParseMoveToSegment(PointF currentPoint) noexcept = 0;
 
-    KRYS_NODISCARD virtual Maybe<LineToSegment> ParseLineToSegment(FloatPoint currentPoint) noexcept = 0;
+    KRYS_NODISCARD virtual Maybe<LineToSegment> ParseLineToSegment(PointF currentPoint) noexcept = 0;
 
     KRYS_NODISCARD virtual Maybe<LineToHorizontalSegment>
-      ParseLineToHorizontalSegment(FloatPoint currentPoint) noexcept = 0;
+      ParseLineToHorizontalSegment(PointF currentPoint) noexcept = 0;
 
     KRYS_NODISCARD virtual Maybe<LineToVerticalSegment>
-      ParseLineToVerticalSegment(FloatPoint currentPoint) noexcept = 0;
+      ParseLineToVerticalSegment(PointF currentPoint) noexcept = 0;
 
     KRYS_NODISCARD virtual Maybe<CurveToCubicSegment>
-      ParseCurveToCubicSegment(FloatPoint currentPoint) noexcept = 0;
+      ParseCurveToCubicSegment(PointF currentPoint) noexcept = 0;
 
     KRYS_NODISCARD virtual Maybe<CurveToCubicSmoothSegment>
-      ParseCurveToCubicSmoothSegment(FloatPoint currentPoint) noexcept = 0;
+      ParseCurveToCubicSmoothSegment(PointF currentPoint) noexcept = 0;
 
     KRYS_NODISCARD virtual Maybe<CurveToQuadraticSegment>
-      ParseCurveToQuadraticSegment(FloatPoint currentPoint) noexcept = 0;
+      ParseCurveToQuadraticSegment(PointF currentPoint) noexcept = 0;
 
     KRYS_NODISCARD virtual Maybe<CurveToQuadraticSmoothSegment>
-      ParseCurveToQuadraticSmoothSegment(FloatPoint currentPoint) noexcept = 0;
+      ParseCurveToQuadraticSmoothSegment(PointF currentPoint) noexcept = 0;
 
-    KRYS_NODISCARD virtual Maybe<ArcToSegment> ParseArcToSegment(FloatPoint currentPoint) noexcept = 0;
+    KRYS_NODISCARD virtual Maybe<ArcToSegment> ParseArcToSegment(PointF currentPoint) noexcept = 0;
   };
 }

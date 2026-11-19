@@ -67,8 +67,8 @@ namespace krys::boo
     return true;
   }
 
-  FloatRect FEFlood::CalculateImageRect(const Filter &filter, Span<const FloatRect>,
-                                        const FloatRect &primitiveSubregion) const noexcept
+  RectF FEFlood::CalculateImageRect(const Filter &filter, Span<const RectF>,
+                                    const RectF &primitiveSubregion) const noexcept
   {
     return filter.MaxEffectRect(primitiveSubregion);
   }

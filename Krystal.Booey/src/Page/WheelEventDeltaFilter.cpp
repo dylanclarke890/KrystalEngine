@@ -33,7 +33,7 @@ namespace krys::boo
   {
     constexpr size_t BasicWheelEventDeltaFilterWindowSize = 3;
 
-    KRYS_NODISCARD bool DeltaIsPredominantlyVertical(const FloatSize &delta) noexcept
+    KRYS_NODISCARD bool DeltaIsPredominantlyVertical(const SizeF &delta) noexcept
     {
       return std::abs(delta.Height()) > std::abs(delta.Width());
     }
@@ -69,7 +69,7 @@ namespace krys::boo
     }
   }
 
-  void WheelEventDeltaFilter::UpdateWithDelta(FloatSize delta) noexcept
+  void WheelEventDeltaFilter::UpdateWithDelta(SizeF delta) noexcept
   {
     _currentFilteredDelta = delta;
 

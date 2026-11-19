@@ -103,7 +103,7 @@ namespace krys::boo::style
 
   // MARK: - Path
 
-  boo::Path PathComputation<BasicShape>::operator()(const BasicShape &shape, const FloatRect &rect) noexcept
+  boo::Path PathComputation<BasicShape>::operator()(const BasicShape &shape, const RectF &rect) noexcept
   {
     return krys::SwitchOn(shape,
                           [&](const auto &shape) { return krys::boo::style::ComputePath(shape, rect); });

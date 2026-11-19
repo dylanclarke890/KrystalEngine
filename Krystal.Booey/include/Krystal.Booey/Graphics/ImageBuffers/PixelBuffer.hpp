@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/PixelBufferFormat.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -51,7 +51,7 @@ namespace krys::boo
 
   protected:
     PixelBufferFormat _format;
-    IntSize _size;
+    SizeI _size;
     Span<uint8> _bytes;
 
   public:
@@ -73,13 +73,13 @@ namespace krys::boo
     }
 
     /// @brief The pixels in @p size; empty if they don't fit in an `int32`.
-    KRYS_NODISCARD static Maybe<uint32> ComputePixelCount(const IntSize &size) noexcept;
+    KRYS_NODISCARD static Maybe<uint32> ComputePixelCount(const SizeI &size) noexcept;
 
     /// @brief The channels in @p size's pixels; empty if they don't fit in an `int32`.
-    KRYS_NODISCARD static Maybe<uint32> ComputePixelComponentCount(PixelFormat, const IntSize &size) noexcept;
+    KRYS_NODISCARD static Maybe<uint32> ComputePixelComponentCount(PixelFormat, const SizeI &size) noexcept;
 
     /// @brief The bytes in @p size's pixels; empty if they don't fit in an `int32`.
-    KRYS_NODISCARD static Maybe<uint32> ComputeBufferSize(PixelFormat, const IntSize &size) noexcept;
+    KRYS_NODISCARD static Maybe<uint32> ComputeBufferSize(PixelFormat, const SizeI &size) noexcept;
 
     KRYS_NODISCARD static bool SupportedPixelFormat(PixelFormat) noexcept;
 
@@ -88,7 +88,7 @@ namespace krys::boo
       return _format;
     }
 
-    KRYS_NODISCARD const IntSize &Size() const noexcept
+    KRYS_NODISCARD const SizeI &Size() const noexcept
     {
       return _size;
     }
@@ -103,7 +103,7 @@ namespace krys::boo
       return Type::Other;
     }
 
-    KRYS_NODISCARD virtual RefPtr<PixelBuffer> CreateScratchPixelBuffer(const IntSize &) const noexcept = 0;
+    KRYS_NODISCARD virtual RefPtr<PixelBuffer> CreateScratchPixelBuffer(const SizeI &) const noexcept = 0;
 
     bool SetRange(Span<const uint8> data, size_t byteOffset) noexcept;
 
@@ -119,7 +119,7 @@ namespace krys::boo
     void Set(size_t index, double value) noexcept;
 
   protected:
-    PixelBuffer(const PixelBufferFormat &, const IntSize &, Span<uint8> bytes) noexcept;
+    PixelBuffer(const PixelBufferFormat &, const SizeI &, Span<uint8> bytes) noexcept;
   };
 
   /// @brief Type to use for functions that use the PixelBuffer data as source during the call, but do not
@@ -128,7 +128,7 @@ namespace krys::boo
   {
   private:
     PixelBufferFormat _format;
-    IntSize _size;
+    SizeI _size;
     Span<const uint8> _bytes;
 
   public:
@@ -142,7 +142,7 @@ namespace krys::boo
     /// @brief A view of @p bytes as @p size pixels of @p format; empty if they're the wrong length or the
     /// format isn't supported.
     KRYS_NODISCARD static Maybe<PixelBufferSourceView>
-      Create(const PixelBufferFormat &format, const IntSize &size, Span<const uint8> bytes) noexcept
+      Create(const PixelBufferFormat &format, const SizeI &size, Span<const uint8> bytes) noexcept
     {
       if (!PixelBuffer::SupportedPixelFormat(format.Format))
       {
@@ -161,7 +161,7 @@ namespace krys::boo
       return _format;
     }
 
-    KRYS_NODISCARD IntSize Size() const noexcept
+    KRYS_NODISCARD SizeI Size() const noexcept
     {
       return _size;
     }
@@ -172,7 +172,7 @@ namespace krys::boo
     }
 
   private:
-    PixelBufferSourceView(const PixelBufferFormat &format, const IntSize &size,
+    PixelBufferSourceView(const PixelBufferFormat &format, const SizeI &size,
                           Span<const uint8> bytes) noexcept
         : _format(format), _size(size), _bytes(bytes)
     {

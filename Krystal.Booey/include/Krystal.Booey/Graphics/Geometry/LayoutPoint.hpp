@@ -30,11 +30,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include <algorithm>
 
 namespace krys
@@ -59,11 +58,11 @@ namespace krys::boo
     {
     }
 
-    constexpr LayoutPoint(const IntPoint &point) noexcept : _x(point.X()), _y(point.Y())
+    constexpr LayoutPoint(const PointI &point) noexcept : _x(point.X()), _y(point.Y())
     {
     }
 
-    constexpr explicit LayoutPoint(const FloatPoint &point) noexcept : _x(point.X()), _y(point.Y())
+    constexpr explicit LayoutPoint(const PointF &point) noexcept : _x(point.X()), _y(point.Y())
     {
     }
 
@@ -71,7 +70,7 @@ namespace krys::boo
     {
     }
 
-    constexpr explicit LayoutPoint(const DoublePoint &point) noexcept : _x(point.X()), _y(point.Y())
+    constexpr explicit LayoutPoint(const PointD &point) noexcept : _x(point.X()), _y(point.Y())
     {
     }
 
@@ -180,12 +179,12 @@ namespace krys::boo
       return {_x.Fraction(), _y.Fraction()};
     }
 
-    constexpr operator FloatPoint() const noexcept
+    constexpr operator PointF() const noexcept
     {
       return {_x, _y};
     }
 
-    constexpr operator DoublePoint() const noexcept
+    constexpr operator PointD() const noexcept
     {
       return {_x.ToDouble(), _y.ToDouble()};
     }
@@ -238,72 +237,70 @@ namespace krys::boo
     return LayoutSize(point.X(), point.Y());
   }
 
-  KRYS_NODISCARD constexpr IntPoint FlooredIntPoint(const LayoutPoint &point) noexcept
+  KRYS_NODISCARD constexpr PointI FlooredPointI(const LayoutPoint &point) noexcept
   {
-    return IntPoint(point.X().Floor(), point.Y().Floor());
+    return PointI(point.X().Floor(), point.Y().Floor());
   }
 
-  KRYS_NODISCARD constexpr IntPoint RoundedIntPoint(const LayoutPoint &point) noexcept
+  KRYS_NODISCARD constexpr PointI RoundedPointI(const LayoutPoint &point) noexcept
   {
-    return IntPoint(point.X().Round(), point.Y().Round());
+    return PointI(point.X().Round(), point.Y().Round());
   }
 
-  KRYS_NODISCARD constexpr IntPoint RoundedIntPoint(const LayoutSize &size) noexcept
+  KRYS_NODISCARD constexpr PointI RoundedPointI(const LayoutSize &size) noexcept
   {
-    return RoundedIntPoint(ToLayoutPoint(size));
+    return RoundedPointI(ToLayoutPoint(size));
   }
 
-  KRYS_NODISCARD constexpr IntPoint CeiledIntPoint(const LayoutPoint &point) noexcept
+  KRYS_NODISCARD constexpr PointI CeiledPointI(const LayoutPoint &point) noexcept
   {
-    return IntPoint(point.X().Ceil(), point.Y().Ceil());
+    return PointI(point.X().Ceil(), point.Y().Ceil());
   }
 
-  KRYS_NODISCARD inline LayoutPoint FlooredLayoutPoint(const FloatPoint &p) noexcept
+  KRYS_NODISCARD inline LayoutPoint FlooredLayoutPoint(const PointF &p) noexcept
   {
     return LayoutPoint(LayoutUnit::FromFloatFloor(p.X()), LayoutUnit::FromFloatFloor(p.Y()));
   }
 
-  KRYS_NODISCARD inline LayoutPoint CeiledLayoutPoint(const FloatPoint &p) noexcept
+  KRYS_NODISCARD inline LayoutPoint CeiledLayoutPoint(const PointF &p) noexcept
   {
     return LayoutPoint(LayoutUnit::FromFloatCeil(p.X()), LayoutUnit::FromFloatCeil(p.Y()));
   }
 
-  KRYS_NODISCARD constexpr IntSize SnappedIntSize(const LayoutSize &size,
-                                                  const LayoutPoint &location) noexcept
+  KRYS_NODISCARD constexpr SizeI SnappedSizeI(const LayoutSize &size, const LayoutPoint &location) noexcept
   {
     auto snap = [](LayoutUnit a, LayoutUnit b)
     {
       LayoutUnit fraction = b.Fraction();
       return RoundToInt(fraction + a) - RoundToInt(fraction);
     };
-    return IntSize(snap(size.Width(), location.X()), snap(size.Height(), location.Y()));
+    return SizeI(snap(size.Width(), location.X()), snap(size.Height(), location.Y()));
   }
 
-  KRYS_NODISCARD inline FloatPoint RoundPointToDevicePixels(const LayoutPoint &point,
-                                                            float pixelSnappingFactor,
-                                                            bool directionalRoundingToRight = true,
-                                                            bool directionalRoundingToBottom = true) noexcept
+  KRYS_NODISCARD inline PointF RoundPointToDevicePixels(const LayoutPoint &point, float pixelSnappingFactor,
+                                                        bool directionalRoundingToRight = true,
+                                                        bool directionalRoundingToBottom = true) noexcept
   {
-    return FloatPoint(RoundToDevicePixel(point.X(), pixelSnappingFactor, !directionalRoundingToRight),
-                      RoundToDevicePixel(point.Y(), pixelSnappingFactor, !directionalRoundingToBottom));
+    return PointF(RoundToDevicePixel(point.X(), pixelSnappingFactor, !directionalRoundingToRight),
+                  RoundToDevicePixel(point.Y(), pixelSnappingFactor, !directionalRoundingToBottom));
   }
 
-  KRYS_NODISCARD inline FloatPoint FloorPointToDevicePixels(const LayoutPoint &point,
-                                                            float pixelSnappingFactor) noexcept
-  {
-    return FloatPoint(FloorToDevicePixel(point.X(), pixelSnappingFactor),
-                      FloorToDevicePixel(point.Y(), pixelSnappingFactor));
-  }
-
-  KRYS_NODISCARD inline FloatPoint CeilPointToDevicePixels(const LayoutPoint &point,
-                                                           float pixelSnappingFactor) noexcept
-  {
-    return FloatPoint(CeilToDevicePixel(point.X(), pixelSnappingFactor),
-                      CeilToDevicePixel(point.Y(), pixelSnappingFactor));
-  }
-
-  KRYS_NODISCARD inline FloatSize SnapSizeToDevicePixel(const LayoutSize &size, const LayoutPoint &location,
+  KRYS_NODISCARD inline PointF FloorPointToDevicePixels(const LayoutPoint &point,
                                                         float pixelSnappingFactor) noexcept
+  {
+    return PointF(FloorToDevicePixel(point.X(), pixelSnappingFactor),
+                  FloorToDevicePixel(point.Y(), pixelSnappingFactor));
+  }
+
+  KRYS_NODISCARD inline PointF CeilPointToDevicePixels(const LayoutPoint &point,
+                                                       float pixelSnappingFactor) noexcept
+  {
+    return PointF(CeilToDevicePixel(point.X(), pixelSnappingFactor),
+                  CeilToDevicePixel(point.Y(), pixelSnappingFactor));
+  }
+
+  KRYS_NODISCARD inline SizeF SnapSizeToDevicePixel(const LayoutSize &size, const LayoutPoint &location,
+                                                    float pixelSnappingFactor) noexcept
   {
     auto snap = [&](LayoutUnit a, LayoutUnit b)
     {
@@ -311,7 +308,7 @@ namespace krys::boo
       return RoundToDevicePixel(fraction + a, pixelSnappingFactor)
              - RoundToDevicePixel(fraction, pixelSnappingFactor);
     };
-    return FloatSize(snap(size.Width(), location.X()), snap(size.Height(), location.Y()));
+    return SizeF(snap(size.Width(), location.X()), snap(size.Height(), location.Y()));
   }
 
   struct LayoutPointLimits

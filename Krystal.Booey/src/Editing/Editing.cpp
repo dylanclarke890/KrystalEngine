@@ -43,7 +43,6 @@
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBRElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDListElement.hpp"
@@ -61,6 +60,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Text/Bidi.hpp"
 
@@ -556,7 +556,7 @@ namespace krys::boo
   }
 
   VisiblePosition ClosestEditablePositionInElementForAbsolutePoint(const Element &element,
-                                                                   const IntPoint &point) noexcept
+                                                                   const PointI &point) noexcept
   {
     // FIXME: The frame check (element.document().frame()), once documents know their frames.
     if (!element.IsConnected())
@@ -588,7 +588,7 @@ namespace krys::boo
     auto constrainedAbsolutePoint =
       point.ConstrainedBetween(absoluteBoundingBox.MinXMinYCorner(), absoluteBoundingBox.MaxXMaxYCorner());
     auto localPoint =
-      renderer->AbsoluteToLocal(FloatPoint(constrainedAbsolutePoint), MapCoordinatesMode::UseTransforms);
+      renderer->AbsoluteToLocal(PointF(constrainedAbsolutePoint), MapCoordinatesMode::UseTransforms);
     auto visiblePosition =
       renderer->VisiblePositionForPoint(FlooredLayoutPoint(localPoint), HitTestSource::User);
     return IsEditablePosition(visiblePosition.DeepEquivalent()) ? visiblePosition : VisiblePosition {};
@@ -1183,8 +1183,8 @@ namespace krys::boo
     return localRect;
   }
 
-  IntRect AbsoluteBoundsForLocalCaretRect(RenderBlock *rendererForCaretPainting, const LayoutRect &rect,
-                                          bool *insideFixed) noexcept
+  RectI AbsoluteBoundsForLocalCaretRect(RenderBlock *rendererForCaretPainting, const LayoutRect &rect,
+                                        bool *insideFixed) noexcept
   {
     if (insideFixed)
     {
@@ -1193,13 +1193,13 @@ namespace krys::boo
 
     if (!rendererForCaretPainting || rect.IsEmpty())
     {
-      return IntRect();
+      return RectI();
     }
 
     LayoutRect localRect(rect);
     rendererForCaretPainting->FlipForWritingMode(localRect);
     return rendererForCaretPainting
-      ->LocalToAbsoluteQuad(FloatQuad(FloatRect(localRect)), MapCoordinatesMode::UseTransforms, insideFixed)
+      ->LocalToAbsoluteQuad(FloatQuad(RectF(localRect)), MapCoordinatesMode::UseTransforms, insideFixed)
       .EnclosingBoundingBox();
   }
 

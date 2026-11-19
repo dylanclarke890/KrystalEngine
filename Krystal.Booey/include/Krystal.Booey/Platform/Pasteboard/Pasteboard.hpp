@@ -238,7 +238,7 @@ namespace krys::boo
 
     /// @brief Changes the image of the drag in progress: nothing, as the host draws the image it started
     /// with.
-    virtual void SetDragImage(DragImage, const IntPoint &hotSpot) noexcept;
+    virtual void SetDragImage(DragImage, const PointI &hotSpot) noexcept;
 
     KRYS_NODISCARD int64 ChangeCount() const noexcept;
 

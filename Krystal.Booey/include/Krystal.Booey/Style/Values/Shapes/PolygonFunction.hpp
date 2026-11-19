@@ -65,7 +65,7 @@ namespace krys::boo::style
   template <>
   struct PathComputation<Polygon>
   {
-    KRYS_NODISCARD boo::Path operator()(const Polygon &, const FloatRect &) noexcept;
+    KRYS_NODISCARD boo::Path operator()(const Polygon &, const RectF &) noexcept;
   };
 
   template <>

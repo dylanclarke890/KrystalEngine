@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
@@ -53,7 +53,7 @@ namespace krys::boo
     void SetContainerContextForClient(const CachedImageClient &, const LayoutSize &, float,
                                       const net::Url &) noexcept;
 
-    KRYS_NODISCARD FloatSize ImageSizeForRenderer(const RenderObject *) const noexcept;
+    KRYS_NODISCARD SizeF ImageSizeForRenderer(const RenderObject *) const noexcept;
 
     KRYS_NODISCARD Image *ImageForRenderer(const RenderObject *) const noexcept;
 

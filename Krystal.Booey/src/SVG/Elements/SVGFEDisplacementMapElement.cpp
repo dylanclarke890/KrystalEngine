@@ -129,11 +129,11 @@ namespace krys::boo
     SVGFilterPrimitiveStandardAttributes::SVGAttributeChanged(attributeName);
   }
 
-  IntOutsets SVGFEDisplacementMapElement::Outsets(const FloatRect &targetBoundingBox,
+  IntOutsets SVGFEDisplacementMapElement::Outsets(const RectF &targetBoundingBox,
                                                   SVGUnitTypes::SVGUnitType primitiveUnits) const noexcept
   {
     auto halfScale = std::abs(Scale() / 2);
-    auto maxDisplacement = FloatSize {halfScale, halfScale};
+    auto maxDisplacement = SizeF {halfScale, halfScale};
     auto adjustedDisplacement =
       SVGFilterRenderer::CalculateResolvedSize(maxDisplacement, targetBoundingBox, primitiveUnits);
     return FEDisplacementMap::CalculateOutsets(adjustedDisplacement);

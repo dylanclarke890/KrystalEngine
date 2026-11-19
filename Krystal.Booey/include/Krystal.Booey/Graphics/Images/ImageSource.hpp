@@ -26,13 +26,13 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/Images/DecodingOptions.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageFrame.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
@@ -47,7 +47,6 @@ namespace krys
 
 namespace krys::boo
 {
-  class FloatSize;
   class GraphicsContext;
 
   /// @brief Where an image's frames and metadata come from: its decoder, or a native image it was made from.
@@ -161,10 +160,10 @@ namespace krys::boo
       CurrentNativeImageForDrawing(SubsamplingLevel, const DecodingOptions &) noexcept;
 
     // Image Metadata
-    KRYS_NODISCARD virtual IntSize
+    KRYS_NODISCARD virtual SizeI
       Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept = 0;
 
-    KRYS_NODISCARD virtual IntSize
+    KRYS_NODISCARD virtual SizeI
       SourceSize(ImageOrientation orientation = ImageOrientation::Orientation::FromImage) const noexcept
     {
       return Size(orientation);
@@ -204,13 +203,13 @@ namespace krys::boo
       return {};
     }
 
-    KRYS_NODISCARD virtual Maybe<IntPoint> HotSpot() const noexcept
+    KRYS_NODISCARD virtual Maybe<PointI> HotSpot() const noexcept
     {
       return null;
     }
 
-    KRYS_NODISCARD virtual SubsamplingLevel
-      SubsamplingLevelForScaleFactor(GraphicsContext &, const FloatSize &, AllowImageSubsampling) noexcept
+    KRYS_NODISCARD virtual SubsamplingLevel SubsamplingLevelForScaleFactor(GraphicsContext &, const SizeF &,
+                                                                           AllowImageSubsampling) noexcept
     {
       return SubsamplingLevel::Default;
     }

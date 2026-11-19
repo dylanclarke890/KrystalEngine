@@ -22,7 +22,6 @@
  */
 
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGContainer.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -40,6 +39,7 @@
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGVisitedRendererTracking.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo
@@ -153,7 +153,7 @@ namespace krys::boo
       return;
     }
 
-    FloatRect repaintRect = RepaintRectInLocalCoordinates();
+    RectF repaintRect = RepaintRectInLocalCoordinates();
     if (!SVGRenderSupport::PaintInfoIntersectsRepaintRect(repaintRect, LocalToParentTransform(), paintInfo))
     {
       return;
@@ -183,7 +183,7 @@ namespace krys::boo
         childPaintInfo.UpdateSubtreePaintRootForChildren(this);
         for (auto &child : ChildrenOfType<RenderElement>(*this))
         {
-          child.Paint(childPaintInfo, IntPoint());
+          child.Paint(childPaintInfo, PointI());
         }
       }
     }
@@ -198,7 +198,7 @@ namespace krys::boo
         && style::Evaluate<float>(Style().OutlineWidth(), style::ZoomNeeded {})
         && Style().UsedVisibility() == Visibility::Visible)
     {
-      IntRect paintRectInParent = EnclosingIntRect(LocalToParentTransform().MapRect(repaintRect));
+      RectI paintRectInParent = EnclosingRectI(LocalToParentTransform().MapRect(repaintRect));
       PaintOutline(paintInfo, paintRectInParent);
     }
   }
@@ -229,19 +229,19 @@ namespace krys::boo
     _repaintBoundingBox = boundingBoxes.RepaintBoundingBox;
   }
 
-  FloatRect LegacyRenderSVGContainer::StrokeBoundingBox() const noexcept
+  RectF LegacyRenderSVGContainer::StrokeBoundingBox() const noexcept
   {
     if (!_strokeBoundingBox)
     {
       // Initialize m_strokeBoundingBox before calling computeContainerStrokeBoundingBox, since recursively
       // referenced markers can cause us to re-enter here.
-      _strokeBoundingBox = FloatRect {};
+      _strokeBoundingBox = RectF {};
       _strokeBoundingBox = SVGRenderSupport::ComputeContainerStrokeBoundingBox(*this);
     }
     return *_strokeBoundingBox;
   }
 
-  FloatRect LegacyRenderSVGContainer::RepaintRectInLocalCoordinates(
+  RectF LegacyRenderSVGContainer::RepaintRectInLocalCoordinates(
     RepaintRectCalculation repaintRectCalculation) const noexcept
   {
     if (repaintRectCalculation == RepaintRectCalculation::Fast)
@@ -253,7 +253,7 @@ namespace krys::boo
     {
       // Initialize m_accurateRepaintBoundingBox before calling computeContainerBoundingBoxes, since
       // recursively referenced markers can cause us to re-enter here.
-      _accurateRepaintBoundingBox = FloatRect {};
+      _accurateRepaintBoundingBox = RectF {};
       auto boundingBoxes =
         SVGRenderSupport::ComputeContainerBoundingBoxes(*this, RepaintRectCalculation::Accurate);
       SVGRenderSupport::IntersectRepaintRectWithResources(*this, boundingBoxes.RepaintBoundingBox,
@@ -263,16 +263,16 @@ namespace krys::boo
     return *_accurateRepaintBoundingBox;
   }
 
-  FloatRect LegacyRenderSVGContainer::DecoratedBoundingBox() const noexcept
+  RectF LegacyRenderSVGContainer::DecoratedBoundingBox() const noexcept
   {
     // The area it may paint, as a mask's buffer must cover it: its fill, stroke and markers with its filter's
     // region, within its clip and mask.
     return RepaintRectInLocalCoordinates(RepaintRectCalculation::Accurate);
   }
 
-  bool LegacyRenderSVGContainer::NodeAtFloatPoint(const HitTestRequest &request, HitTestResult &result,
-                                                  const FloatPoint &pointInParent,
-                                                  HitTestAction hitTestAction) noexcept
+  bool LegacyRenderSVGContainer::NodeAtPointF(const HitTestRequest &request, HitTestResult &result,
+                                              const PointF &pointInParent,
+                                              HitTestAction hitTestAction) noexcept
   {
     // Give LegacyRenderSVGViewportContainer a chance to apply its viewport clip
     if (!PointIsInsideViewportClip(pointInParent))
@@ -290,7 +290,7 @@ namespace krys::boo
 
     SVGVisitedRendererTracking::Scope recursionScope(recursionTracking, *this);
 
-    FloatPoint localPoint =
+    PointF localPoint =
       LocalToParentTransform().Inverse().value_or(AffineTransform {}).MapPoint(pointInParent);
     if (!SVGRenderSupport::PointInClippingArea(*this, localPoint))
     {
@@ -299,7 +299,7 @@ namespace krys::boo
 
     for (RenderObject *child = LastChild(); child; child = child->PreviousSibling())
     {
-      if (child->NodeAtFloatPoint(request, result, localPoint, hitTestAction))
+      if (child->NodeAtPointF(request, result, localPoint, hitTestAction))
       {
         UpdateHitTestResult(result, LayoutPoint(localPoint));
         if (result.AddNodeToListBasedTestResult(child->GetNode(), request,

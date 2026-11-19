@@ -57,7 +57,7 @@ namespace krys::boo
     bool MapStartEndPositionsIntoFragmentCoordinates(const SVGTextFragment &, uint32 &startPosition,
                                                      uint32 &endPosition) const noexcept;
 
-    KRYS_NODISCARD FloatRect CalculateBoundaries() const noexcept;
+    KRYS_NODISCARD RectF CalculateBoundaries() const noexcept;
 
     KRYS_NODISCARD const List<SVGTextFragment> &TextFragments() const noexcept
     {

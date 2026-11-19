@@ -87,8 +87,8 @@ namespace krys::boo
                                              FontCascade &scaledFont) noexcept;
 
     /// @brief Preserves floating point precision for the use in dumps. It knows how to round and does a
-    /// better job than EnclosingIntRect.
-    KRYS_NODISCARD FloatRect FloatLinesBoundingBox() const noexcept;
+    /// better job than EnclosingRectI.
+    KRYS_NODISCARD RectF FloatLinesBoundingBox() const noexcept;
 
     void RemoveTextBox(LegacyInlineTextBox &box) noexcept
     {
@@ -123,7 +123,7 @@ namespace krys::boo
 
     void StyleDidChange(style::Difference, const RenderStyle *) noexcept override;
 
-    KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept override
+    KRYS_NODISCARD RectF ObjectBoundingBox() const noexcept override
     {
       return FloatLinesBoundingBox();
     }
@@ -132,7 +132,7 @@ namespace krys::boo
       PositionForPoint(const LayoutPoint &, HitTestSource,
                        const RenderFragmentContainer * = nullptr) noexcept override;
 
-    KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept override;
+    KRYS_NODISCARD RectI LinesBoundingBox() const noexcept override;
 
     void SetTextInternal(utf8_string, bool force) noexcept final;
   };

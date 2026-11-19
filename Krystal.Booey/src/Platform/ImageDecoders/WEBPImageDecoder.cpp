@@ -129,8 +129,8 @@ namespace krys::boo
         continue;
       }
 
-      IntRect frameRect(webpFrame.x_offset, webpFrame.y_offset, webpFrame.width, webpFrame.height);
-      if (!frameRect.Contains(IntRect(IntPoint(), Size())))
+      RectI frameRect(webpFrame.x_offset, webpFrame.y_offset, webpFrame.width, webpFrame.height);
+      if (!frameRect.Contains(RectI(PointI(), Size())))
       {
         continue;
       }
@@ -270,10 +270,10 @@ namespace krys::boo
     auto &buffer = _frameBufferCache[frameIndex];
 
     // Initialize the frame rect in our buffer.
-    IntRect frameRect(webpFrame->x_offset, webpFrame->y_offset, webpFrame->width, webpFrame->height);
+    RectI frameRect(webpFrame->x_offset, webpFrame->y_offset, webpFrame->width, webpFrame->height);
 
     // Make sure the frameRect doesn't extend outside the buffer.
-    frameRect.Intersect(IntRect(IntPoint(), Size()));
+    frameRect.Intersect(RectI(PointI(), Size()));
 
     if (!frameIndex || !_frameBufferCache[frameIndex - 1].BackingStore())
     {
@@ -298,7 +298,7 @@ namespace krys::boo
       {
         // We want to clear the previous frame to transparent, without
         // affecting pixels in the image outside of the frame.
-        const IntRect &prevRect = prevBuffer.BackingStore()->FrameRect();
+        const RectI &prevRect = prevBuffer.BackingStore()->FrameRect();
         buffer.BackingStore()->ClearRect(prevRect);
       }
     }
@@ -324,7 +324,7 @@ namespace krys::boo
       return;
     }
 
-    const IntRect &frameRect = buffer.BackingStore()->FrameRect();
+    const RectI &frameRect = buffer.BackingStore()->FrameRect();
     krys_assert(decodedWidth == frameRect.Width());
     krys_assert(decodedHeight <= frameRect.Height());
     const int left = frameRect.X();
@@ -419,7 +419,7 @@ namespace krys::boo
 
     int width = static_cast<int>(WebPDemuxGetI(demuxer, WEBP_FF_CANVAS_WIDTH));
     int height = static_cast<int>(WebPDemuxGetI(demuxer, WEBP_FF_CANVAS_HEIGHT));
-    if (!IsSizeAvailable() && !SetSize(IntSize(width, height)))
+    if (!IsSizeAvailable() && !SetSize(SizeI(width, height)))
     {
       WebPDemuxDelete(demuxer);
       return;

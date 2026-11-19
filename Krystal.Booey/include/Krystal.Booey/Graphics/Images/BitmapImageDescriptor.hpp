@@ -26,11 +26,11 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
@@ -42,7 +42,6 @@ namespace krys
 namespace krys::boo
 {
   class BitmapImageSource;
-  class FloatSize;
   class GraphicsContext;
   class ImageDecoder;
   class ImageFrame;
@@ -73,8 +72,8 @@ namespace krys::boo
     mutable uint16 _cachedFlags {0};
 
     mutable EncodedDataStatus _encodedDataStatus {EncodedDataStatus::Unknown};
-    mutable IntSize _size;
-    mutable Maybe<IntSize> _densityCorrectedSize;
+    mutable SizeI _size;
+    mutable Maybe<SizeI> _densityCorrectedSize;
     mutable ImageOrientation _orientation;
     mutable size_t _primaryFrameIndex {0};
     mutable size_t _frameCount {0};
@@ -82,7 +81,7 @@ namespace krys::boo
     mutable Maybe<Color> _singlePixelSolidColor;
     mutable utf8_string _filenameExtension;
     mutable utf8_string _accessibilityDescription;
-    mutable Maybe<IntPoint> _hotSpot;
+    mutable Maybe<PointI> _hotSpot;
     mutable SubsamplingLevel _maximumSubsamplingLevel {SubsamplingLevel::Default};
 
     BitmapImageSource &_source;
@@ -102,12 +101,12 @@ namespace krys::boo
       return GetEncodedDataStatus() >= EncodedDataStatus::SizeAvailable;
     }
 
-    KRYS_NODISCARD IntSize Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept;
+    KRYS_NODISCARD SizeI Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept;
 
     KRYS_NODISCARD
-    IntSize SourceSize(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept;
+    SizeI SourceSize(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept;
 
-    KRYS_NODISCARD Maybe<IntSize> DensityCorrectedSize() const noexcept;
+    KRYS_NODISCARD Maybe<SizeI> DensityCorrectedSize() const noexcept;
 
     KRYS_NODISCARD ImageOrientation Orientation() const noexcept;
 
@@ -123,12 +122,12 @@ namespace krys::boo
 
     KRYS_NODISCARD utf8_string AccessibilityDescription() const noexcept;
 
-    KRYS_NODISCARD Maybe<IntPoint> HotSpot() const noexcept;
+    KRYS_NODISCARD Maybe<PointI> HotSpot() const noexcept;
 
     KRYS_NODISCARD SubsamplingLevel MaximumSubsamplingLevel() const noexcept;
 
     KRYS_NODISCARD static SubsamplingLevel SubsamplingLevelForScaleFactor(GraphicsContext &,
-                                                                          const FloatSize &scaleFactor,
+                                                                          const SizeF &scaleFactor,
                                                                           AllowImageSubsampling) noexcept;
 
     void Dump(TextStream &) const noexcept;

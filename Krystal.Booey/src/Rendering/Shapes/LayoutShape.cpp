@@ -44,33 +44,32 @@ namespace krys::boo
       return AdoptRef(*new BoxLayoutShape(bounds));
     }
 
-    KRYS_NODISCARD Ref<LayoutShape> CreateCircleShape(const FloatPoint &center, float radius,
+    KRYS_NODISCARD Ref<LayoutShape> CreateCircleShape(const PointF &center, float radius,
                                                       float boxLogicalWidth) noexcept
     {
       krys_debug_assert(radius >= 0);
       return AdoptRef(
-        *new RectangleLayoutShape(FloatRect(center.X() - radius, center.Y() - radius, radius * 2, radius * 2),
-                                  FloatSize(radius, radius), boxLogicalWidth));
+        *new RectangleLayoutShape(RectF(center.X() - radius, center.Y() - radius, radius * 2, radius * 2),
+                                  SizeF(radius, radius), boxLogicalWidth));
     }
 
-    KRYS_NODISCARD Ref<LayoutShape> CreateEllipseShape(const FloatPoint &center, const FloatSize &radii,
+    KRYS_NODISCARD Ref<LayoutShape> CreateEllipseShape(const PointF &center, const SizeF &radii,
                                                        float boxLogicalWidth) noexcept
     {
       krys_debug_assert(radii.Width() >= 0 && radii.Height() >= 0);
-      return AdoptRef(
-        *new RectangleLayoutShape(FloatRect(center.X() - radii.Width(), center.Y() - radii.Height(),
-                                            radii.Width() * 2, radii.Height() * 2),
-                                  radii, boxLogicalWidth));
+      return AdoptRef(*new RectangleLayoutShape(
+        RectF(center.X() - radii.Width(), center.Y() - radii.Height(), radii.Width() * 2, radii.Height() * 2),
+        radii, boxLogicalWidth));
     }
 
-    KRYS_NODISCARD Ref<LayoutShape> CreatePolygonShape(List<FloatPoint> &&vertices,
+    KRYS_NODISCARD Ref<LayoutShape> CreatePolygonShape(List<PointF> &&vertices,
                                                        float boxLogicalWidth) noexcept
     {
       return AdoptRef(*new PolygonLayoutShape(krys::move(vertices), boxLogicalWidth));
     }
 
-    KRYS_NODISCARD FloatRect PhysicalRectToLogical(const FloatRect &rect, float logicalBoxHeight,
-                                                   WritingMode writingMode) noexcept
+    KRYS_NODISCARD RectF PhysicalRectToLogical(const RectF &rect, float logicalBoxHeight,
+                                               WritingMode writingMode) noexcept
     {
       if (writingMode.IsHorizontal())
       {
@@ -78,13 +77,13 @@ namespace krys::boo
       }
       if (writingMode.IsBlockFlipped())
       {
-        return FloatRect(rect.Y(), logicalBoxHeight - rect.MaxX(), rect.Height(), rect.Width());
+        return RectF(rect.Y(), logicalBoxHeight - rect.MaxX(), rect.Height(), rect.Width());
       }
       return rect.TransposedRect();
     }
 
-    KRYS_NODISCARD FloatPoint PhysicalPointToLogical(const FloatPoint &point, float logicalBoxHeight,
-                                                     WritingMode writingMode) noexcept
+    KRYS_NODISCARD PointF PhysicalPointToLogical(const PointF &point, float logicalBoxHeight,
+                                                 WritingMode writingMode) noexcept
     {
       if (writingMode.IsHorizontal())
       {
@@ -92,12 +91,12 @@ namespace krys::boo
       }
       if (writingMode.IsBlockFlipped())
       {
-        return FloatPoint(point.Y(), logicalBoxHeight - point.X());
+        return PointF(point.Y(), logicalBoxHeight - point.X());
       }
       return point.TransposedPoint();
     }
 
-    KRYS_NODISCARD FloatSize PhysicalSizeToLogical(const FloatSize &size, WritingMode writingMode) noexcept
+    KRYS_NODISCARD SizeF PhysicalSizeToLogical(const SizeF &size, WritingMode writingMode) noexcept
     {
       if (writingMode.IsHorizontal())
       {
@@ -117,13 +116,13 @@ namespace krys::boo
       horizontalWritingMode ? logicalBoxSize.Width().ToFloat() : logicalBoxSize.Height().ToFloat();
     float boxHeight =
       horizontalWritingMode ? logicalBoxSize.Height().ToFloat() : logicalBoxSize.Width().ToFloat();
-    FloatPoint borderBoxOffsetPoint = borderBoxOffset;
+    PointF borderBoxOffsetPoint = borderBoxOffset;
 
     auto shape = krys::SwitchOn(
       basicShape,
       [&](const style::CircleFunction &circle) -> Ref<LayoutShape>
       {
-        auto boxSize = FloatSize {boxWidth, boxHeight};
+        auto boxSize = SizeF {boxWidth, boxHeight};
         auto center = style::ResolvePosition(*circle, boxSize);
         auto radius = style::ResolveRadius(*circle, boxSize, center);
 
@@ -134,7 +133,7 @@ namespace krys::boo
       },
       [&](const style::EllipseFunction &ellipse) -> Ref<LayoutShape>
       {
-        auto boxSize = FloatSize {boxWidth, boxHeight};
+        auto boxSize = SizeF {boxWidth, boxHeight};
         auto center = style::ResolvePosition(*ellipse, boxSize);
         auto radii = style::ResolveRadii(*ellipse, boxSize, center);
 
@@ -152,7 +151,7 @@ namespace krys::boo
         auto left = style::Evaluate<float>(inset->Insets.Left(), boxWidth, style::ZoomNeeded {});
         auto top = style::Evaluate<float>(inset->Insets.Top(), boxHeight, style::ZoomNeeded {});
 
-        FloatRect rect {
+        RectF rect {
           left, top,
           std::max<float>(boxWidth - left
                             - style::Evaluate<float>(inset->Insets.Right(), boxWidth, style::ZoomNeeded {}),
@@ -164,31 +163,31 @@ namespace krys::boo
         auto logicalRect = PhysicalRectToLogical(rect, logicalBoxSize.Height().ToFloat(), writingMode);
         logicalRect.MoveBy(borderBoxOffsetPoint);
 
-        auto boxSize = FloatSize(boxWidth, boxHeight);
+        auto boxSize = SizeF(boxWidth, boxHeight);
         auto isBlockLeftToRight = writingMode.IsBlockLeftToRight();
         const auto &radii = inset->Radii;
         auto topLeftRadius = PhysicalSizeToLogical(
-          style::Evaluate<FloatSize>(horizontalWritingMode || isBlockLeftToRight ? radii.TopLeft()
-                                                                                 : radii.TopRight(),
-                                     boxSize, style::ZoomNeeded {}),
+          style::Evaluate<SizeF>(horizontalWritingMode || isBlockLeftToRight ? radii.TopLeft()
+                                                                             : radii.TopRight(),
+                                 boxSize, style::ZoomNeeded {}),
           writingMode);
         auto topRightRadius =
-          PhysicalSizeToLogical(style::Evaluate<FloatSize>(horizontalWritingMode ? radii.TopRight()
-                                                           : isBlockLeftToRight  ? radii.BottomLeft()
-                                                                                 : radii.BottomRight(),
-                                                           boxSize, style::ZoomNeeded {}),
+          PhysicalSizeToLogical(style::Evaluate<SizeF>(horizontalWritingMode ? radii.TopRight()
+                                                       : isBlockLeftToRight  ? radii.BottomLeft()
+                                                                             : radii.BottomRight(),
+                                                       boxSize, style::ZoomNeeded {}),
                                 writingMode);
         auto bottomLeftRadius =
-          PhysicalSizeToLogical(style::Evaluate<FloatSize>(horizontalWritingMode ? radii.BottomLeft()
-                                                           : isBlockLeftToRight  ? radii.TopRight()
-                                                                                 : radii.TopLeft(),
-                                                           boxSize, style::ZoomNeeded {}),
+          PhysicalSizeToLogical(style::Evaluate<SizeF>(horizontalWritingMode ? radii.BottomLeft()
+                                                       : isBlockLeftToRight  ? radii.TopRight()
+                                                                             : radii.TopLeft(),
+                                                       boxSize, style::ZoomNeeded {}),
                                 writingMode);
         auto bottomRightRadius =
-          PhysicalSizeToLogical(style::Evaluate<FloatSize>(horizontalWritingMode ? radii.BottomRight()
-                                                           : isBlockLeftToRight  ? radii.BottomRight()
-                                                                                 : radii.BottomLeft(),
-                                                           boxSize, style::ZoomNeeded {}),
+          PhysicalSizeToLogical(style::Evaluate<SizeF>(horizontalWritingMode ? radii.BottomRight()
+                                                       : isBlockLeftToRight  ? radii.BottomRight()
+                                                                             : radii.BottomLeft(),
+                                                       boxSize, style::ZoomNeeded {}),
                                 writingMode);
         auto cornerRadii =
           FloatRoundedRect::Radii(topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius);
@@ -203,15 +202,15 @@ namespace krys::boo
       },
       [&](const style::PolygonFunction &polygon) -> Ref<LayoutShape>
       {
-        auto boxSize = FloatSize {boxWidth, boxHeight};
+        auto boxSize = SizeF {boxWidth, boxHeight};
 
-        List<FloatPoint> vertices;
+        List<PointF> vertices;
         vertices.reserve(polygon->Vertices.Value.size());
         for (const auto &vertex : polygon->Vertices.Value)
         {
           vertices.push_back(
-            PhysicalPointToLogical(style::Evaluate<FloatPoint>(vertex, boxSize, style::ZoomNeeded {})
-                                     + FloatSize(borderBoxOffsetPoint.X(), borderBoxOffsetPoint.Y()),
+            PhysicalPointToLogical(style::Evaluate<PointF>(vertex, boxSize, style::ZoomNeeded {})
+                                     + SizeF(borderBoxOffsetPoint.X(), borderBoxOffsetPoint.Y()),
                                    logicalBoxSize.Height().ToFloat(), writingMode));
         }
 

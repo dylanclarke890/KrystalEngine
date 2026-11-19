@@ -93,7 +93,7 @@ namespace krys::boo::style
         {
           const auto &blurOperation = Downcast<BlurFilterOperation>(operation);
           float stdDeviation = blurOperation.StdDeviation();
-          IntSize outsetSize = FEGaussianBlur::CalculateOutsetSize({stdDeviation, stdDeviation});
+          SizeI outsetSize = FEGaussianBlur::CalculateOutsetSize({stdDeviation, stdDeviation});
           IntOutsets outsets {outsetSize.Height(), outsetSize.Width(), outsetSize.Height(),
                               outsetSize.Width()};
           totalOutsets += outsets;
@@ -104,7 +104,7 @@ namespace krys::boo::style
         {
           const auto &dropShadowOperation = Downcast<DropShadowFilterOperationBase>(operation);
           auto stdDeviation = static_cast<float>(dropShadowOperation.StdDeviation());
-          IntSize outsetSize = FEGaussianBlur::CalculateOutsetSize({stdDeviation, stdDeviation});
+          SizeI outsetSize = FEGaussianBlur::CalculateOutsetSize({stdDeviation, stdDeviation});
 
           int top = std::max(0, outsetSize.Height() - dropShadowOperation.Y());
           int right = std::max(0, outsetSize.Width() + dropShadowOperation.X());

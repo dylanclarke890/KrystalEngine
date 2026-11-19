@@ -38,11 +38,11 @@ namespace krys::boo
     FilterStyleVector _filterStyles;
 
   public:
-    TransparencyLayerContextSwitcher(GraphicsContext &destinationContext, const FloatRect &sourceImageRect,
+    TransparencyLayerContextSwitcher(GraphicsContext &destinationContext, const RectF &sourceImageRect,
                                      RefPtr<Filter> &&filter) noexcept;
 
-    void BeginClipAndDrawSourceImage(GraphicsContext &destinationContext, const FloatRect &repaintRect,
-                                     const FloatRect &clipRect) noexcept override;
+    void BeginClipAndDrawSourceImage(GraphicsContext &destinationContext, const RectF &repaintRect,
+                                     const RectF &clipRect) noexcept override;
 
     void EndClipAndDrawSourceImage(GraphicsContext &destinationContext) noexcept override
     {

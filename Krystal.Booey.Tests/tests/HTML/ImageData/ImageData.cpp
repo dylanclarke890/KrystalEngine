@@ -44,7 +44,7 @@ namespace krys::boo::tests
 
     auto imageData = ImageData::Create(ImageDataArray(Ref<dom::Uint8ClampedArray>(bytes)), 2u, {}, {});
     REQUIRE_FALSE(imageData.HasException());
-    CHECK(imageData.Value()->Size() == IntSize(2, 2));
+    CHECK(imageData.Value()->Size() == SizeI(2, 2));
     // The pixels are shared, not copied.
     CHECK(imageData.Value()->Data().AsUint8ClampedArray().get() == bytes.get());
 
@@ -74,12 +74,12 @@ namespace krys::boo::tests
 
   TEST_CASE("ImageData: its pixel buffer shares its pixels", "[HTML][ImageData]")
   {
-    auto imageData = ImageData::Create(IntSize(2, 1), PredefinedColorSpace::SRGB);
+    auto imageData = ImageData::Create(SizeI(2, 1), PredefinedColorSpace::SRGB);
     REQUIRE(imageData);
     auto pixelBuffer = imageData->GetByteArrayPixelBuffer();
     CHECK(pixelBuffer->Format().AlphaFormat == AlphaPremultiplication::Unpremultiplied);
     CHECK(pixelBuffer->Format().Format == PixelFormat::RGBA8);
-    CHECK(pixelBuffer->Size() == IntSize(2, 1));
+    CHECK(pixelBuffer->Size() == SizeI(2, 1));
     pixelBuffer->Set(5, 77);
     CHECK(imageData->Data().AsUint8ClampedArray()->Item(5) == 77);
 
@@ -89,6 +89,6 @@ namespace krys::boo::tests
     CHECK(fromBuffer->Data().AsUint8ClampedArray().get() == &pixelBuffer->Data());
     CHECK(fromBuffer->ColorSpace() == PredefinedColorSpace::SRGB);
 
-    CHECK_FALSE(ImageData::Create(IntSize(100'000, 100'000), PredefinedColorSpace::SRGB));
+    CHECK_FALSE(ImageData::Create(SizeI(100'000, 100'000), PredefinedColorSpace::SRGB));
   }
 }

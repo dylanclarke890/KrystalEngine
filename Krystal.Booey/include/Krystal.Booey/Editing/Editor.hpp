@@ -31,6 +31,7 @@
 #include "Krystal.Booey/Editing/Selection/TemporarySelectionChange.hpp"
 #include "Krystal.Booey/Editing/TextIteratorBehavior.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/TriState.hpp"
@@ -78,7 +79,6 @@ namespace krys::boo
   class EditorClient;
   class EditorInternalCommand;
   enum class FrameSelectionSetSelectionOption : uint8;
-  class IntRect;
   class LocalFrame;
   class Pasteboard;
   class ProhibitScrollingWhenChangingContentSizeForScope;
@@ -552,7 +552,7 @@ namespace krys::boo
 
     /// @brief The first line's rect of @p range in absolute coordinates (the caret's, without its width, when
     /// it's collapsed), for placing an input method's windows.
-    KRYS_NODISCARD static IntRect FirstRectForRange(const dom::SimpleRange &range) noexcept;
+    KRYS_NODISCARD static RectI FirstRectForRange(const dom::SimpleRange &range) noexcept;
 
     void CloseTyping() noexcept;
 

@@ -27,13 +27,13 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include <chrono>
 
 namespace krys::boo
 {
-  class FloatRect;
   class GraphicsContext;
   class Path;
 }
@@ -118,12 +118,12 @@ namespace krys::boo::adwaita
     Yes,
   };
 
-  void PaintFocus(GraphicsContext &, const FloatRect &, int32 offset, const Color &,
+  void PaintFocus(GraphicsContext &, const RectF &, int32 offset, const Color &,
                   PaintRounded = PaintRounded::No) noexcept;
 
   void PaintFocus(GraphicsContext &, const Path &, const Color &) noexcept;
 
-  void PaintFocus(GraphicsContext &, Span<const FloatRect>, const Color &,
+  void PaintFocus(GraphicsContext &, Span<const RectF>, const Color &,
                   PaintRounded = PaintRounded::No) noexcept;
 
   enum class ArrowDirection : uint8
@@ -132,7 +132,7 @@ namespace krys::boo::adwaita
     Down,
   };
 
-  void PaintArrow(GraphicsContext &, const FloatRect &, ArrowDirection, bool useDarkAppearance) noexcept;
+  void PaintArrow(GraphicsContext &, const RectF &, ArrowDirection, bool useDarkAppearance) noexcept;
 
   KRYS_NODISCARD inline Color FocusColor(const Color &accentColor) noexcept
   {

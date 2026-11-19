@@ -66,7 +66,7 @@ namespace krys::boo
     /// @brief A trusted event, which happened in @p view.
     KRYS_NODISCARD static Ref<TouchEvent> Create(TouchList *touches, TouchList *targetTouches,
                                                  TouchList *changedTouches, DOMStringAtom type,
-                                                 LocalFrameView *view, const DoublePoint &globalLocation,
+                                                 LocalFrameView *view, const PointD &globalLocation,
                                                  EnumSet<Modifier> modifiers) noexcept;
 
     /// @see https://w3c.github.io/touch-events/#dom-touchevent-touches
@@ -109,7 +109,7 @@ namespace krys::boo
 
   private:
     TouchEvent(TouchList *touches, TouchList *targetTouches, TouchList *changedTouches,
-               const DOMStringAtom &type, LocalFrameView *view, const DoublePoint &globalLocation,
+               const DOMStringAtom &type, LocalFrameView *view, const PointD &globalLocation,
                EnumSet<Modifier> modifiers) noexcept;
   };
 }

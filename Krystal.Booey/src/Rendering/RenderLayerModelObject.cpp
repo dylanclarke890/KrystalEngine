@@ -284,7 +284,7 @@ namespace krys::boo
   }
 
   void RenderLayerModelObject::ApplyTransform(TransformationMatrix &transform, const RenderStyle &style,
-                                              const FloatRect &boundingBox) const noexcept
+                                              const RectF &boundingBox) const noexcept
   {
     // FIXME: Shouldn't this be using Style::TransformResolver::individualTransformOperations?
     ApplyTransform(transform, style, boundingBox, style::TransformResolver::AllTransformOperations);
@@ -337,14 +337,13 @@ namespace krys::boo
     Layer()->Backing()->SuspendAnimations(time);
   }
 
-  FloatRect SnapRectToDevicePixelsIfNeeded(const LayoutRect &rect,
-                                           const RenderLayerModelObject &renderer) noexcept
+  RectF SnapRectToDevicePixelsIfNeeded(const LayoutRect &rect,
+                                       const RenderLayerModelObject &renderer) noexcept
   {
     return SnapRectToDevicePixels(rect, renderer.GetDocument().DeviceScaleFactor());
   }
 
-  FloatRect SnapRectToDevicePixelsIfNeeded(const FloatRect &rect,
-                                           const RenderLayerModelObject &renderer) noexcept
+  RectF SnapRectToDevicePixelsIfNeeded(const RectF &rect, const RenderLayerModelObject &renderer) noexcept
   {
     return SnapRectToDevicePixels(LayoutRect(rect), renderer.GetDocument().DeviceScaleFactor());
   }

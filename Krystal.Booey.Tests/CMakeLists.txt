@@ -318,12 +318,9 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Fonts/FontPaletteValues.cpp
 		tests/Graphics/Fonts/FontTaggedSettings.cpp
 		tests/Graphics/Fonts/WOFFFileFormat.cpp
-		tests/Graphics/Geometry/DoublePoint.cpp
-		tests/Graphics/Geometry/FloatPoint.cpp
+		tests/Graphics/Geometry/BoxExtents.cpp
 		tests/Graphics/Geometry/FloatPoint3D.cpp
 		tests/Graphics/Geometry/FloatQuad.cpp
-		tests/Graphics/Geometry/FloatRect.cpp
-		tests/Graphics/Geometry/FloatSize.cpp
 		tests/Graphics/Geometry/LayoutUnit.cpp
 		tests/Graphics/Geometry/RoundedRect.cpp
 		tests/Graphics/Gradient.cpp
@@ -359,9 +356,6 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Fonts/FontDescription.cpp
 		tests/Graphics/Fonts/FontSelectionAlgorithm.cpp
 		tests/Graphics/Geometry/GeometryUtilities.cpp
-		tests/Graphics/Geometry/IntPoint.cpp
-		tests/Graphics/Geometry/IntRect.cpp
-		tests/Graphics/Geometry/IntSize.cpp
 		tests/Graphics/Geometry/LayoutPoint.cpp
 		tests/Graphics/Geometry/LayoutRect.cpp
 		tests/Graphics/Geometry/LayoutSize.cpp

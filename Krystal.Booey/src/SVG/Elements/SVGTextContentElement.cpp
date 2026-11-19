@@ -133,7 +133,7 @@ namespace krys::boo
       {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
        dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
       this);
-    FloatPoint transformPoint {static_cast<float>(pointInit.X), static_cast<float>(pointInit.Y)};
+    PointF transformPoint {static_cast<float>(pointInit.X), static_cast<float>(pointInit.Y)};
     return SVGTextQuery(Renderer()).CharacterNumberAtPosition(transformPoint);
   }
 

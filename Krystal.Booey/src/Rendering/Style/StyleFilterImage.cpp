@@ -111,7 +111,7 @@ namespace krys::boo
     _inputImageIsReady = true;
   }
 
-  RefPtr<Image> StyleFilterImage::GetImage(const RenderElement *renderer, const FloatSize &size,
+  RefPtr<Image> StyleFilterImage::GetImage(const RenderElement *renderer, const SizeF &size,
                                            const GraphicsContext &destinationContext,
                                            bool isForFirstLine) const noexcept
   {
@@ -143,7 +143,7 @@ namespace krys::boo
     }
 
     auto preferredFilterRenderingModes = page->PreferredFilterRenderingModes(destinationContext);
-    auto sourceImageRect = FloatRect {FloatPoint(), size};
+    auto sourceImageRect = RectF {PointF(), size};
 
     auto cssFilter = CSSFilterRenderer::Create(const_cast<RenderElement &>(*renderer), _filter,
                                                {
@@ -163,7 +163,7 @@ namespace krys::boo
     return FilterGeneratedImage::Create(*image, *cssFilter, size);
   }
 
-  void StyleFilterImage::ImageChanged(CachedImage *, const IntRect *) noexcept
+  void StyleFilterImage::ImageChanged(CachedImage *, const RectI *) noexcept
   {
     if (!_inputImageIsReady)
     {
@@ -180,7 +180,7 @@ namespace krys::boo
     return _image && _image->IsPending();
   }
 
-  FloatSize StyleFilterImage::FixedSize(const RenderElement &renderer) const noexcept
+  SizeF StyleFilterImage::FixedSize(const RenderElement &renderer) const noexcept
   {
     if (_image)
     {

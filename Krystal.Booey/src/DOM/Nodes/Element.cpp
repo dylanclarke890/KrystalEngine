@@ -884,12 +884,12 @@ namespace krys::boo
     return GetElementRareData() ? GetElementRareData()->AfterPseudoElement() : nullptr;
   }
 
-  IntPoint Element::SavedLayerScrollPosition() const noexcept
+  PointI Element::SavedLayerScrollPosition() const noexcept
   {
-    return GetElementRareData() ? GetElementRareData()->SavedLayerScrollPosition() : IntPoint();
+    return GetElementRareData() ? GetElementRareData()->SavedLayerScrollPosition() : PointI();
   }
 
-  void Element::SetSavedLayerScrollPosition(const IntPoint &position) noexcept
+  void Element::SetSavedLayerScrollPosition(const PointI &position) noexcept
   {
     if (position.IsZero() && !GetElementRareData())
     {
@@ -4081,7 +4081,7 @@ namespace krys::boo
     else if (auto listBoxItem = ListBoxElementBoundingBox(*this))
     {
       renderer = listBoxItem->first;
-      quads.push_back(renderer->LocalToAbsoluteQuad(FloatQuad(FloatRect(listBoxItem->second))));
+      quads.push_back(renderer->LocalToAbsoluteQuad(FloatQuad(RectF(listBoxItem->second))));
     }
     else if (ShouldObtainBoundsFromBoxModel(*this))
     {
@@ -4099,7 +4099,7 @@ namespace krys::boo
     return dom::DOMRectList::Create(quads);
   }
 
-  Maybe<Pair<RenderElement *, FloatRect>> Element::BoundingAbsoluteRectWithoutLayout() const noexcept
+  Maybe<Pair<RenderElement *, RectF>> Element::BoundingAbsoluteRectWithoutLayout() const noexcept
   {
     auto *renderer = Renderer();
     List<FloatQuad> quads;
@@ -4113,7 +4113,7 @@ namespace krys::boo
     else if (auto listBoxItem = ListBoxElementBoundingBox(*this))
     {
       renderer = listBoxItem->first;
-      quads.push_back(renderer->LocalToAbsoluteQuad(FloatQuad(FloatRect(listBoxItem->second))));
+      quads.push_back(renderer->LocalToAbsoluteQuad(FloatQuad(RectF(listBoxItem->second))));
     }
     else if (ShouldObtainBoundsFromBoxModel(*this))
     {
@@ -4127,7 +4127,7 @@ namespace krys::boo
 
     // The union of the rects that have an area, or else the first.
     // https://drafts.csswg.org/cssom-view/#dom-element-getboundingclientrect
-    FloatRect bounds;
+    RectF bounds;
     bool hasArea = false;
     for (const auto &quad : quads)
     {
@@ -4146,10 +4146,10 @@ namespace krys::boo
         hasArea = true;
       }
     }
-    return Pair<RenderElement *, FloatRect> {renderer, hasArea ? bounds : quads.front().BoundingBox()};
+    return Pair<RenderElement *, RectF> {renderer, hasArea ? bounds : quads.front().BoundingBox()};
   }
 
-  FloatRect Element::BoundingClientRect() noexcept
+  RectF Element::BoundingClientRect() noexcept
   {
     auto &document = NodeDocument();
     document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
@@ -4166,7 +4166,7 @@ namespace krys::boo
     return result;
   }
 
-  IntRect Element::ScreenRect() const noexcept
+  RectI Element::ScreenRect() const noexcept
   {
     auto *renderer = Renderer();
     auto *view = NodeDocument().View();
@@ -4368,8 +4368,8 @@ namespace krys::boo
     auto scrollToOptions = NormalizeNonFiniteCoordinatesOrFallBackTo(
       options, AdjustForAbsoluteZoom(renderer->ScrollLeft(), renderer->Style()),
       AdjustForAbsoluteZoom(renderer->ScrollTop(), renderer->Style()));
-    IntPoint scrollPosition(ClampToInteger(*scrollToOptions.Left * renderer->Style().UsedZoom()),
-                            ClampToInteger(*scrollToOptions.Top * renderer->Style().UsedZoom()));
+    PointI scrollPosition(ClampToInteger(*scrollToOptions.Left * renderer->Style().UsedZoom()),
+                          ClampToInteger(*scrollToOptions.Top * renderer->Style().UsedZoom()));
 
     auto animated = UseSmoothScrolling(scrollToOptions.Behavior.value_or(ScrollBehavior::Auto), this)
                       ? ScrollIsAnimated::Yes
@@ -4710,8 +4710,8 @@ namespace krys::boo
     {
       if (auto *frame = DocumentFrameWithNonNullView(document))
       {
-        IntPoint position(static_cast<int32>(newLeft * frame->PageZoomFactor() * frame->FrameScaleFactor()),
-                          frame->View()->ScrollY());
+        PointI position(static_cast<int32>(newLeft * frame->PageZoomFactor() * frame->FrameScaleFactor()),
+                        frame->View()->ScrollY());
         frame->View()->SetScrollPosition(position, options);
       }
       return;
@@ -4742,8 +4742,8 @@ namespace krys::boo
     {
       if (auto *frame = DocumentFrameWithNonNullView(document))
       {
-        IntPoint position(frame->View()->ScrollX(),
-                          static_cast<int32>(newTop * frame->PageZoomFactor() * frame->FrameScaleFactor()));
+        PointI position(frame->View()->ScrollX(),
+                        static_cast<int32>(newTop * frame->PageZoomFactor() * frame->FrameScaleFactor()));
         frame->View()->SetScrollPosition(position, options);
       }
       return;

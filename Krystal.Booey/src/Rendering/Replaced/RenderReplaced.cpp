@@ -149,8 +149,7 @@ namespace krys::boo
     {
       return ComputeRectForRepaint(rect, repaintContainer);
     }
-    return LayoutRect(
-      LocalToContainerQuad(FloatQuad(FloatRect(rect)), repaintContainer).EnclosingBoundingBox());
+    return LayoutRect(LocalToContainerQuad(FloatQuad(RectF(rect)), repaintContainer).EnclosingBoundingBox());
   }
 
   LayoutRect RenderReplaced::LocalSelectionRect(bool checkWhetherSelected) const noexcept
@@ -350,8 +349,7 @@ namespace krys::boo
     {
       LayoutRect selectionPaintingRect = LocalSelectionRect();
       selectionPaintingRect.MoveBy(adjustedPaintOffset);
-      paintInfo.Context().FillRect(FloatRect(SnappedIntRect(selectionPaintingRect)),
-                                   SelectionBackgroundColor());
+      paintInfo.Context().FillRect(RectF(SnappedRectI(selectionPaintingRect)), SelectionBackgroundColor());
     }
   }
 
@@ -474,10 +472,11 @@ namespace krys::boo
     return false;
   }
 
-  void RenderReplaced::ComputeAspectRatioInformationForRenderBox(
-    RenderBox *contentRenderer, FloatSize &constrainedSize, FloatSize &preferredAspectRatio) const noexcept
+  void RenderReplaced::ComputeAspectRatioInformationForRenderBox(RenderBox *contentRenderer,
+                                                                 SizeF &constrainedSize,
+                                                                 SizeF &preferredAspectRatio) const noexcept
   {
-    FloatSize intrinsicSize;
+    SizeF intrinsicSize;
     if (ShouldApplySizeOrInlineSizeContainment())
     {
       intrinsicSize = RenderReplaced::ComputeIntrinsicSize();
@@ -493,8 +492,8 @@ namespace krys::boo
       if (Style().GetAspectRatio().IsRatio()
           || (Style().GetAspectRatio().IsAutoAndRatio() && preferredAspectRatio.IsEmpty()))
       {
-        preferredAspectRatio = FloatSize::NarrowPrecision(Style().GetAspectRatio().Width().Value,
-                                                          Style().GetAspectRatio().Height().Value);
+        preferredAspectRatio = SizeF::NarrowPrecision(Style().GetAspectRatio().Width().Value,
+                                                      Style().GetAspectRatio().Height().Value);
       }
 
       // Handle zoom & vertical writing modes here, as the embedded document doesn't know about them.
@@ -536,7 +535,7 @@ namespace krys::boo
   }
 
   void RenderReplaced::ComputeIntrinsicSizesConstrainedByTransferredMinMaxSizes(
-    RenderBox *contentRenderer, FloatSize &intrinsicSize, FloatSize &intrinsicRatio) const noexcept
+    RenderBox *contentRenderer, SizeF &intrinsicSize, SizeF &intrinsicRatio) const noexcept
   {
     ComputeAspectRatioInformationForRenderBox(contentRenderer, intrinsicSize, intrinsicRatio);
 
@@ -655,13 +654,13 @@ namespace krys::boo
 
   double RenderReplaced::ComputeIntrinsicAspectRatio() const noexcept
   {
-    FloatSize intrinsicRatio;
-    FloatSize intrinsicSize;
+    SizeF intrinsicRatio;
+    SizeF intrinsicSize;
     ComputeAspectRatioInformationForRenderBox(EmbeddedContentBox(), intrinsicSize, intrinsicRatio);
     return intrinsicRatio.AspectRatioDouble();
   }
 
-  FloatSize RenderReplaced::ComputeIntrinsicSize() const noexcept
+  SizeF RenderReplaced::ComputeIntrinsicSize() const noexcept
   {
     // If there's an embeddedContentBox() of a remote, referenced document available, this code-path should
     // never be used.
@@ -669,18 +668,18 @@ namespace krys::boo
     return {IntrinsicLogicalWidth().ToFloat(), IntrinsicLogicalHeight().ToFloat()};
   }
 
-  FloatSize RenderReplaced::PreferredAspectRatio() const noexcept
+  SizeF RenderReplaced::PreferredAspectRatio() const noexcept
   {
     // If there's an embeddedContentBox() of a remote, referenced document available, this code-path should
     // never be used.
     krys_debug_assert(!EmbeddedContentBox() || ShouldApplySizeOrInlineSizeContainment());
-    auto intrinsicSize = FloatSize(IntrinsicLogicalWidth().ToFloat(), IntrinsicLogicalHeight().ToFloat());
-    FloatSize preferredAspectRatio;
+    auto intrinsicSize = SizeF(IntrinsicLogicalWidth().ToFloat(), IntrinsicLogicalHeight().ToFloat());
+    SizeF preferredAspectRatio;
 
     if (Style().HasAspectRatio())
     {
-      preferredAspectRatio = FloatSize::NarrowPrecision(Style().AspectRatioLogicalWidth().Value,
-                                                        Style().AspectRatioLogicalHeight().Value);
+      preferredAspectRatio = SizeF::NarrowPrecision(Style().AspectRatioLogicalWidth().Value,
+                                                    Style().AspectRatioLogicalHeight().Value);
       // FIXME: Videos with their default object size keep the style's ratio, once there's video.
       if (Style().GetAspectRatio().IsRatio())
       {
@@ -806,8 +805,8 @@ namespace krys::boo
     RenderBox *contentRenderer = EmbeddedContentBox();
 
     // 10.3.2 Inline, replaced elements: http://www.w3.org/TR/CSS21/visudet.html#inline-replaced-width
-    FloatSize intrinsicRatio;
-    FloatSize constrainedSize;
+    SizeF intrinsicRatio;
+    SizeF constrainedSize;
     ComputeIntrinsicSizesConstrainedByTransferredMinMaxSizes(contentRenderer, constrainedSize,
                                                              intrinsicRatio);
 
@@ -938,8 +937,8 @@ namespace krys::boo
     RenderBox *contentRenderer = EmbeddedContentBox();
 
     // 10.6.2 Inline, replaced elements: http://www.w3.org/TR/CSS21/visudet.html#inline-replaced-height
-    FloatSize intrinsicRatio;
-    FloatSize constrainedSize;
+    SizeF intrinsicRatio;
+    SizeF constrainedSize;
     ComputeIntrinsicSizesConstrainedByTransferredMinMaxSizes(contentRenderer, constrainedSize,
                                                              intrinsicRatio);
 
@@ -1081,10 +1080,10 @@ namespace krys::boo
     return size;
   }
 
-  FloatSize RenderReplaced::IntrinsicRatio() const noexcept
+  SizeF RenderReplaced::IntrinsicRatio() const noexcept
   {
-    FloatSize intrinsicRatio;
-    FloatSize constrainedSize;
+    SizeF intrinsicRatio;
+    SizeF constrainedSize;
     ComputeAspectRatioInformationForRenderBox(EmbeddedContentBox(), constrainedSize, intrinsicRatio);
     return intrinsicRatio;
   }

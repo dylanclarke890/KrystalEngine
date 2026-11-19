@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
@@ -48,7 +48,7 @@ namespace krys::boo
   /// @brief A shadow cast by what's drawn: offset, blurred and coloured.
   struct GraphicsDropShadow
   {
-    FloatSize Offset;
+    SizeF Offset;
     float Radius;
     boo::Color Color;
     ShadowRadiusMode RadiusMode {ShadowRadiusMode::Default};
@@ -78,7 +78,7 @@ namespace krys::boo
   /// @brief A Gaussian blur applied to what's drawn.
   struct GraphicsGaussianBlur
   {
-    FloatSize Radius;
+    SizeF Radius;
 
     KRYS_NODISCARD friend bool operator==(const GraphicsGaussianBlur &,
                                           const GraphicsGaussianBlur &) = default;

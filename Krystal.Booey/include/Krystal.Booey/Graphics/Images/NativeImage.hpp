@@ -27,11 +27,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Images/PlatformImage.hpp"
 #include "Krystal.Booey/Graphics/RenderingResourceIdentifier.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -63,7 +63,7 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual const PlatformImagePtr &GetPlatformImage() const noexcept;
 
-    KRYS_NODISCARD virtual IntSize Size() const noexcept;
+    KRYS_NODISCARD virtual SizeI Size() const noexcept;
 
     KRYS_NODISCARD virtual bool HasAlpha() const noexcept;
 

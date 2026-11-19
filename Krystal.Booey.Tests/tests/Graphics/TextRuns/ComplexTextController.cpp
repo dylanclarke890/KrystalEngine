@@ -237,13 +237,13 @@ namespace krys::boo::tests
     // One glyph (a ligature, say) for two two-byte characters.
     utf8_stringview text = u8"\u00E9\u00E9";
     TextRun run {text};
-    Array<FloatSize, 1> advances {FloatSize {10, 0}};
-    Array<FloatPoint, 1> origins {FloatPoint {}};
+    Array<SizeF, 1> advances {SizeF {10, 0}};
+    Array<PointF, 1> origins {PointF {}};
     Array<Glyph, 1> glyphs {1};
     Array<uint32, 1> indices {0};
     List<Ref<ComplexTextController::ComplexTextRun>> runs;
-    runs.push_back(ComplexTextController::ComplexTextRun::Create(advances, origins, glyphs, indices,
-                                                                 FloatSize {}, font, text, 0, 0, 4, true));
+    runs.push_back(ComplexTextController::ComplexTextRun::Create(advances, origins, glyphs, indices, SizeF {},
+                                                                 font, text, 0, 0, 4, true));
     ComplexTextController controller {liberation, run, runs};
     CHECK(controller.TotalAdvance().Width() == Catch::Approx(10.f + font.SyntheticBoldOffset()));
 

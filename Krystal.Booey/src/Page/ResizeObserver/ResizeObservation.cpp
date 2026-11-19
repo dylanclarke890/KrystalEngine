@@ -41,7 +41,7 @@ namespace krys::boo
 
   ResizeObservation::ResizeObservation(Element &target, ResizeObserverBoxOptions observedBox) noexcept
       : _target(CreateWeakPtr(&target)),
-        _lastObservationSizes {LayoutSize(-1, -1), LayoutSize(-1, -1), LayoutSize(-1, -1), FloatSize(-1, -1)},
+        _lastObservationSizes {LayoutSize(-1, -1), LayoutSize(-1, -1), LayoutSize(-1, -1), SizeF(-1, -1)},
         _observedBox(observedBox)
   {
   }
@@ -55,16 +55,16 @@ namespace krys::boo
 
   void ResizeObservation::ResetObservationSize() noexcept
   {
-    _lastObservationSizes = {LayoutSize(-1, -1), LayoutSize(-1, -1), LayoutSize(-1, -1), FloatSize(-1, -1)};
+    _lastObservationSizes = {LayoutSize(-1, -1), LayoutSize(-1, -1), LayoutSize(-1, -1), SizeF(-1, -1)};
   }
 
   namespace
   {
     /// @brief @p size in whole device pixels.
-    KRYS_NODISCARD FloatSize ResizeObserverDevicePixels(FloatSize size, float deviceScaleFactor) noexcept
+    KRYS_NODISCARD SizeF ResizeObserverDevicePixels(SizeF size, float deviceScaleFactor) noexcept
     {
-      return FloatSize(std::round(size.Width() * deviceScaleFactor),
-                       std::round(size.Height() * deviceScaleFactor));
+      return SizeF(std::round(size.Width() * deviceScaleFactor),
+                   std::round(size.Height() * deviceScaleFactor));
     }
   }
 
@@ -80,9 +80,8 @@ namespace krys::boo
           size.SetWidth(svgRect->Width());
           size.SetHeight(svgRect->Height());
         }
-        return BoxSizes {
-          size, size, size,
-          ResizeObserverDevicePixels(FloatSize(size), svg->NodeDocument().DeviceScaleFactor())};
+        return BoxSizes {size, size, size,
+                         ResizeObserverDevicePixels(SizeF(size), svg->NodeDocument().DeviceScaleFactor())};
       }
     }
 
@@ -96,7 +95,7 @@ namespace krys::boo
       // the size the box actually draws at. Device pixels aren't zoomed CSS pixels, so zoom doesn't apply.
       auto deviceScaleFactor = box->GetDocument().DeviceScaleFactor();
       auto contentBox = box->ContentBoxRect();
-      auto absoluteOrigin = box->LocalToAbsolute(FloatPoint(contentBox.Location()));
+      auto absoluteOrigin = box->LocalToAbsolute(PointF(contentBox.Location()));
       auto snapped =
         SnapRectToDevicePixels(LayoutRect(LayoutPoint(absoluteOrigin), contentBox.Size()), deviceScaleFactor);
       auto devicePixelSize = ResizeObserverDevicePixels(snapped.Size(), deviceScaleFactor);
@@ -129,22 +128,22 @@ namespace krys::boo
     return {};
   }
 
-  FloatRect ResizeObservation::ComputeContentRect() const noexcept
+  RectF ResizeObservation::ComputeContentRect() const noexcept
   {
-    return FloatRect(FloatPoint(ComputeTargetLocation()), FloatSize(_lastObservationSizes.ContentBoxSize));
+    return RectF(PointF(ComputeTargetLocation()), SizeF(_lastObservationSizes.ContentBoxSize));
   }
 
-  FloatSize ResizeObservation::BorderBoxSize() const noexcept
+  SizeF ResizeObservation::BorderBoxSize() const noexcept
   {
-    return FloatSize(_lastObservationSizes.BorderBoxLogicalSize);
+    return SizeF(_lastObservationSizes.BorderBoxLogicalSize);
   }
 
-  FloatSize ResizeObservation::ContentBoxSize() const noexcept
+  SizeF ResizeObservation::ContentBoxSize() const noexcept
   {
-    return FloatSize(_lastObservationSizes.ContentBoxLogicalSize);
+    return SizeF(_lastObservationSizes.ContentBoxLogicalSize);
   }
 
-  FloatSize ResizeObservation::DevicePixelContentBoxSize() const noexcept
+  SizeF ResizeObservation::DevicePixelContentBoxSize() const noexcept
   {
     return _lastObservationSizes.DevicePixelContentBoxLogicalSize;
   }

@@ -45,9 +45,7 @@
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
-#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
@@ -59,6 +57,8 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
 #include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/BoolOr.hpp"
@@ -1044,7 +1044,7 @@ namespace krys::boo
     /// @brief Hit tests @p documentPoint for @p event and, unless the request is read-only, updates the hover
     /// and active state to match.
     KRYS_NODISCARD MouseEventWithHitTestResults PrepareMouseEvent(const HitTestRequest &request,
-                                                                  const DoublePoint &documentPoint,
+                                                                  const PointD &documentPoint,
                                                                   const PlatformMouseEvent &event) noexcept;
 
     void HoveredElementDidDetach(Element &element) noexcept;
@@ -1867,9 +1867,9 @@ namespace krys::boo
     /// @brief Converts absolute quads (or rects) to the client coordinates of the CSSOM View APIs.
     void ConvertAbsoluteToClientQuads(List<FloatQuad> &quads, const RenderStyle &style) const noexcept;
 
-    void ConvertAbsoluteToClientRects(List<FloatRect> &rects, const RenderStyle &style) const noexcept;
+    void ConvertAbsoluteToClientRects(List<RectF> &rects, const RenderStyle &style) const noexcept;
 
-    void ConvertAbsoluteToClientRect(FloatRect &rect, const RenderStyle &style) const noexcept;
+    void ConvertAbsoluteToClientRect(RectF &rect, const RenderStyle &style) const noexcept;
 
 #pragma endregion
 

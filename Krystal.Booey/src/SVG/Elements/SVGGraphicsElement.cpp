@@ -165,7 +165,7 @@ namespace krys::boo
     return SVGRect::Create(GetBBox());
   }
 
-  FloatRect SVGGraphicsElement::GetBBox(StyleUpdateStrategy styleUpdateStrategy) noexcept
+  RectF SVGGraphicsElement::GetBBox(StyleUpdateStrategy styleUpdateStrategy) noexcept
   {
     return SVGTransformable::GetBBox(this, styleUpdateStrategy);
   }

@@ -105,10 +105,10 @@ namespace krys::boo::svg::tests
     CHECK(point.Value()->Value().Y() == Approx(20));
     auto end = line.GetPointAtLength(100);
     REQUIRE_FALSE(end.HasException());
-    CHECK(end.Value()->Value() == FloatPoint(30, 40));
+    CHECK(end.Value()->Value() == PointF(30, 40));
     auto start = line.GetPointAtLength(-5);
     REQUIRE_FALSE(start.HasException());
-    CHECK(start.Value()->Value() == FloatPoint(0, 0));
+    CHECK(start.Value()->Value() == PointF(0, 0));
 
     // An unrendered shape has no length, and asking for a point throws.
     auto &unrendered = ById<SVGRectElement>(*fixture.Document, u8"unrendered");
@@ -132,8 +132,8 @@ namespace krys::boo::svg::tests
 
     // getBBox is the object bounding box, in the element's coordinates.
     auto bbox = rect.GetBBox();
-    CHECK(bbox == FloatRect(10, 10, 30, 40));
-    CHECK(unrendered.GetBBox() == FloatRect());
+    CHECK(bbox == RectF(10, 10, 30, 40));
+    CHECK(unrendered.GetBBox() == RectF());
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "SVGGeometryElement: changes", "[SVG][SVGGeometryElement]")
@@ -147,17 +147,17 @@ namespace krys::boo::svg::tests
     // Presentation attributes change the style, and the shape follows.
     auto &rect = ById<SVGRectElement>(*fixture.Document, u8"rect");
     REQUIRE_FALSE(rect.SetAttribute(u8"width", u8"50").HasException());
-    CHECK(rect.GetBBox() == FloatRect(10, 10, 50, 40));
+    CHECK(rect.GetBBox() == RectF(10, 10, 50, 40));
     REQUIRE_FALSE(rect.SetAttribute(u8"style", u8"x: 20px").HasException());
-    CHECK(rect.GetBBox() == FloatRect(20, 10, 50, 40));
+    CHECK(rect.GetBBox() == RectF(20, 10, 50, 40));
 
     // Other attributes update the shape directly.
     auto &line = ById<SVGLineElement>(*fixture.Document, u8"line");
     REQUIRE_FALSE(line.SetAttribute(u8"x2", u8"60").HasException());
-    CHECK(line.GetBBox() == FloatRect(0, 0, 60, 40));
+    CHECK(line.GetBBox() == RectF(0, 0, 60, 40));
     auto &polygon = ById<SVGPolygonElement>(*fixture.Document, u8"polygon");
     REQUIRE_FALSE(polygon.SetAttribute(u8"points", u8"0,0 20,0 20,30").HasException());
-    CHECK(polygon.GetBBox() == FloatRect(0, 0, 20, 30));
+    CHECK(polygon.GetBBox() == RectF(0, 0, 20, 30));
 
     // pathLength scales the dashes by the path's length over it.
     auto &path = ById<SVGGeometryElement>(*fixture.Document, u8"path");

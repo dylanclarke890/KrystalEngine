@@ -74,8 +74,8 @@ namespace krys::ui
     html += u8"</span>";
 
     auto viewport = _owner->ViewportSize();
-    boo::IntSize layoutSize(std::min(MaximumValidationMessageWidth, std::max(viewport.Width(), 1)),
-                            std::max(viewport.Height(), 1));
+    SizeI layoutSize(std::min(MaximumValidationMessageWidth, std::max(viewport.Width(), 1)),
+                     std::max(viewport.Height(), 1));
     if (!_view)
     {
       _view = CreateUnique<View>(layoutSize);
@@ -84,12 +84,12 @@ namespace krys::ui
     ReplaceDocument(*_view, krys::move(html));
     (void)_view->Document().UpdateLayout();
 
-    boo::IntSize contentSize(1, 1);
+    SizeI contentSize(1, 1);
     if (auto *root = _view->Document().DocumentElement().get())
     {
       if (auto *box = DynamicDowncast<boo::RenderBox>(root->Renderer()))
       {
-        contentSize = boo::IntSize(std::max(box->Width().ToInt(), 1), std::max(box->Height().ToInt(), 1));
+        contentSize = SizeI(std::max(box->Width().ToInt(), 1), std::max(box->Height().ToInt(), 1));
       }
     }
     _rect = Place(anchorRect, contentSize, viewport, rightToLeft);
@@ -122,7 +122,7 @@ namespace krys::ui
     }
   }
 
-  void ValidationMessageOverlay::MouseReleased(const boo::IntPoint &) noexcept
+  void ValidationMessageOverlay::MouseReleased(const PointI &) noexcept
   {
     Hide();
   }

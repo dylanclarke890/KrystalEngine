@@ -82,7 +82,7 @@ namespace krys::boo
     {
     }
 
-    void ImageChanged(CachedImage *, const IntRect *) noexcept final
+    void ImageChanged(CachedImage *, const RectI *) noexcept final
     {
       if (RefPtr<dom::DataTransfer> dataTransfer = ShareRefPtr(_dataTransfer.get()))
       {
@@ -805,7 +805,7 @@ namespace krys::boo::dom
       image = imageElement->GetCachedImage();
     }
 
-    _dragLocation = IntPoint(x, y);
+    _dragLocation = PointI(x, y);
 
     Ref<const Document> document = ShareRef(element->NodeDocument());
     if (RefPtr<DragImageLoader> dragImageLoader = _dragImageLoader; dragImageLoader && _dragImage)
@@ -844,7 +844,7 @@ namespace krys::boo::dom
       return;
     }
 
-    IntPoint computedHotSpot;
+    PointI computedHotSpot;
     auto computedImage = DragImage {CreateDragImage(document, computedHotSpot)};
     if (!computedImage)
     {
@@ -859,7 +859,7 @@ namespace krys::boo::dom
     return _dragImageElement;
   }
 
-  DragImageRef DataTransfer::CreateDragImage(const Document *, IntPoint &location) const noexcept
+  DragImageRef DataTransfer::CreateDragImage(const Document *, PointI &location) const noexcept
   {
     location = _dragLocation;
 

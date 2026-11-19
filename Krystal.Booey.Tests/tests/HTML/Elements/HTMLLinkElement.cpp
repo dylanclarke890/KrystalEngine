@@ -90,7 +90,7 @@ namespace krys::boo::html::tests
     CHECK(plain->Errors == 1);
     CHECK(sheet->Loads == 1);
     CHECK(file->Loads == 1);
-    CHECK(fixture.RendererSize(u8"box") == IntSize(20, 20));
+    CHECK(fixture.RendererSize(u8"box") == SizeI(20, 20));
   }
 
   TEST_CASE("HTMLLinkElement: a linked sheet loads, holds back rendering until it does, and fires load",
@@ -120,7 +120,7 @@ namespace krys::boo::html::tests
     CHECK_FALSE(link.StyleSheetIsLoading());
     REQUIRE(link.Sheet());
     CHECK_FALSE(fixture.Document->StyleScope().HasPendingSheets());
-    CHECK(fixture.RendererSize(u8"box") == IntSize(30, 20));
+    CHECK(fixture.RendererSize(u8"box") == SizeI(30, 20));
   }
 
   TEST_CASE("HTMLLinkElement: an explicitly enabled alternative sheet is active",
@@ -145,7 +145,7 @@ namespace krys::boo::html::tests
     RunNetworkingTasks();
     REQUIRE(alt.Sheet());
     CHECK_FALSE(fixture.Document->StyleScope().HasPendingSheets());
-    CHECK(fixture.RendererSize(u8"box") == IntSize(30, 20));
+    CHECK(fixture.RendererSize(u8"box") == SizeI(30, 20));
   }
 
   TEST_CASE("HTMLLinkElement: imports load, nested and with media conditions", "[HTML][HTMLLinkElement]")
@@ -168,7 +168,7 @@ namespace krys::boo::html::tests
           != loader.Strategy.Requests.end());
     CHECK(std::ranges::find(loader.Strategy.Requests, u8"file:///css/print.css")
           != loader.Strategy.Requests.end());
-    CHECK(fixture.RendererSize(u8"box") == IntSize(42, 10));
+    CHECK(fixture.RendererSize(u8"box") == SizeI(42, 10));
   }
 
   TEST_CASE("HTMLLinkElement: a sheet's byte order mark is dropped", "[HTML][HTMLLinkElement]")
@@ -182,7 +182,7 @@ namespace krys::boo::html::tests
                                u8"<body><div id=box style='display: inline-block'></div></body>");
     RunNetworkingTasks();
 
-    CHECK(fixture.RendererSize(u8"box") == IntSize(40, 10));
+    CHECK(fixture.RendererSize(u8"box") == SizeI(40, 10));
   }
 
   TEST_CASE("HTMLLinkElement: a cycle of imports ends", "[HTML][HTMLLinkElement]")
@@ -197,7 +197,7 @@ namespace krys::boo::html::tests
 
     CHECK(events->Loads == 1);
     CHECK(loader.Strategy.Requests.size() == 2u);
-    CHECK(fixture.RendererSize(u8"box") == IntSize(10, 10));
+    CHECK(fixture.RendererSize(u8"box") == SizeI(10, 10));
   }
 
   TEST_CASE("HTMLLinkElement: failed sheets and sheets that aren't CSS fire error",
@@ -221,7 +221,7 @@ namespace krys::boo::html::tests
     // A sheet whose import failed still applies, but reports an error.
     CHECK(imports->Errors == 1);
     // The page doesn't wait for them any more.
-    CHECK(fixture.RendererSize(u8"box") == IntSize(5, 10));
+    CHECK(fixture.RendererSize(u8"box") == SizeI(5, 10));
   }
 
   TEST_CASE("HTMLLinkElement: media, disabled sheets, and links added and removed",
@@ -241,7 +241,7 @@ namespace krys::boo::html::tests
 
     loader.Strategy.CompleteDeferred();
     RunNetworkingTasks();
-    CHECK(fixture.RendererSize(u8"box") == IntSize(184, 5));
+    CHECK(fixture.RendererSize(u8"box") == SizeI(184, 5));
 
     // Enabling the sheet loads it.
     loader.Strategy.Defer = false;
@@ -249,17 +249,17 @@ namespace krys::boo::html::tests
     disabled.RemoveAttribute(u8"disabled");
     RunNetworkingTasks();
     REQUIRE(disabled.Sheet());
-    CHECK(fixture.RendererSize(u8"box") == IntSize(50, 5));
+    CHECK(fixture.RendererSize(u8"box") == SizeI(50, 5));
 
     // Removing it removes its styles; adding a link loads its sheet (from the memory cache).
     REQUIRE_FALSE(disabled.Remove().HasException());
-    CHECK(fixture.RendererSize(u8"box") == IntSize(184, 5));
+    CHECK(fixture.RendererSize(u8"box") == SizeI(184, 5));
     auto link = fixture.Document->CreateElement(u8"link").ReleaseValue();
     REQUIRE_FALSE(link->SetAttribute(u8"rel", u8"stylesheet").HasException());
     REQUIRE_FALSE(link->SetAttribute(u8"href", u8"file:///wide.css").HasException());
     REQUIRE_FALSE(fixture.Document->Body()->AppendChild(*link).HasException());
     RunNetworkingTasks();
-    CHECK(fixture.RendererSize(u8"box") == IntSize(50, 5));
+    CHECK(fixture.RendererSize(u8"box") == SizeI(50, 5));
     CHECK(loader.Strategy.Requests.size() == 2u);
   }
 }

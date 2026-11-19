@@ -183,7 +183,7 @@ namespace krys::boo
       return style::ComputeWindRule(_shape);
     }
 
-    KRYS_NODISCARD Path PathForReferenceRect(const FloatRect &boundingRect) const noexcept
+    KRYS_NODISCARD Path PathForReferenceRect(const RectF &boundingRect) const noexcept
     {
       return style::ComputePath(_shape, boundingRect);
     }

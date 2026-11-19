@@ -55,11 +55,10 @@ namespace krys::boo
   }
 
   // Helper functions
-  KRYS_NODISCARD static inline FloatPoint BlendFloatPoint(const FloatPoint &a, const FloatPoint &b,
-                                                          float progress) noexcept
+  KRYS_NODISCARD static inline PointF BlendPointF(const PointF &a, const PointF &b, float progress) noexcept
   {
     BlendingContext context {progress};
-    return FloatPoint(Blend(a.X(), b.X(), context), Blend(a.Y(), b.Y(), context));
+    return PointF(Blend(a.X(), b.X(), context), Blend(a.Y(), b.Y(), context));
   }
 
   float SVGPathBlender::BlendAnimatedDimensonalFloat(float from, float to, svg::FloatBlendMode blendMode,
@@ -96,24 +95,24 @@ namespace krys::boo
                                                                    : animValue - currentValue;
   }
 
-  FloatPoint SVGPathBlender::BlendAnimatedFloatPoint(const FloatPoint &fromPoint, const FloatPoint &toPoint,
-                                                     float progress) noexcept
+  PointF SVGPathBlender::BlendAnimatedPointF(const PointF &fromPoint, const PointF &toPoint,
+                                             float progress) noexcept
   {
     if (_addTypesCount)
     {
       krys_debug_assert(_fromMode == _toMode);
-      FloatPoint repeatedToPoint = toPoint;
+      PointF repeatedToPoint = toPoint;
       repeatedToPoint.Scale(static_cast<float>(_addTypesCount));
       return fromPoint + repeatedToPoint;
     }
 
     if (_fromMode == _toMode)
     {
-      return BlendFloatPoint(fromPoint, toPoint, progress);
+      return BlendPointF(fromPoint, toPoint, progress);
     }
 
     // Transform toPoint to the coordinate mode of fromPoint
-    FloatPoint animatedPoint = toPoint;
+    PointF animatedPoint = toPoint;
     if (_fromMode == svg::PathCoordinateMode::AbsoluteCoordinates)
     {
       animatedPoint += _toCurrentPoint;
@@ -123,7 +122,7 @@ namespace krys::boo
       animatedPoint.Move(-_toCurrentPoint.X(), -_toCurrentPoint.Y());
     }
 
-    animatedPoint = BlendFloatPoint(fromPoint, animatedPoint, progress);
+    animatedPoint = BlendPointF(fromPoint, animatedPoint, progress);
 
     if (_isInFirstHalfOfAnimation)
     {
@@ -131,7 +130,7 @@ namespace krys::boo
     }
 
     // Transform the animated point to the coordinate mode, needed for the current progress.
-    FloatPoint currentPoint = BlendFloatPoint(_fromCurrentPoint, _toCurrentPoint, progress);
+    PointF currentPoint = BlendPointF(_fromCurrentPoint, _toCurrentPoint, progress);
     if (_toMode == svg::PathCoordinateMode::AbsoluteCoordinates)
     {
       return animatedPoint + currentPoint;
@@ -142,14 +141,14 @@ namespace krys::boo
   }
 
   template <typename Function>
-  using InvokeResult = typename std::invoke_result_t<Function, SVGPathSource, FloatPoint>::value_type;
+  using InvokeResult = typename std::invoke_result_t<Function, SVGPathSource, PointF>::value_type;
   template <typename Function>
   using ResultPair = std::pair<InvokeResult<Function>, InvokeResult<Function>>;
 
   template <typename Function>
   KRYS_NODISCARD static Maybe<ResultPair<Function>>
     PullFromSources(SVGPathSource &fromSource, SVGPathSource &toSource, Function &&function,
-                    FloatPoint currentPoint) noexcept
+                    PointF currentPoint) noexcept
   {
     InvokeResult<Function> fromResult;
     if (fromSource.HasMoreData())
@@ -187,7 +186,7 @@ namespace krys::boo
 
     auto [from, to] = *result;
 
-    _consumer->MoveTo(BlendAnimatedFloatPoint(from.TargetPoint, to.TargetPoint, progress), false,
+    _consumer->MoveTo(BlendAnimatedPointF(from.TargetPoint, to.TargetPoint, progress), false,
                       _isInFirstHalfOfAnimation ? _fromMode : _toMode);
     _fromCurrentPoint = _fromMode == svg::PathCoordinateMode::AbsoluteCoordinates
                           ? from.TargetPoint
@@ -218,7 +217,7 @@ namespace krys::boo
 
     auto [from, to] = *result;
 
-    _consumer->LineTo(BlendAnimatedFloatPoint(from.TargetPoint, to.TargetPoint, progress),
+    _consumer->LineTo(BlendAnimatedPointF(from.TargetPoint, to.TargetPoint, progress),
                       _isInFirstHalfOfAnimation ? _fromMode : _toMode);
     _fromCurrentPoint = _fromMode == svg::PathCoordinateMode::AbsoluteCoordinates
                           ? from.TargetPoint
@@ -297,9 +296,9 @@ namespace krys::boo
 
     auto [from, to] = *result;
 
-    _consumer->CurveToCubic(BlendAnimatedFloatPoint(from.Point1, to.Point1, progress),
-                            BlendAnimatedFloatPoint(from.Point2, to.Point2, progress),
-                            BlendAnimatedFloatPoint(from.TargetPoint, to.TargetPoint, progress),
+    _consumer->CurveToCubic(BlendAnimatedPointF(from.Point1, to.Point1, progress),
+                            BlendAnimatedPointF(from.Point2, to.Point2, progress),
+                            BlendAnimatedPointF(from.TargetPoint, to.TargetPoint, progress),
                             _isInFirstHalfOfAnimation ? _fromMode : _toMode);
     _fromCurrentPoint = _fromMode == svg::PathCoordinateMode::AbsoluteCoordinates
                           ? from.TargetPoint
@@ -326,8 +325,8 @@ namespace krys::boo
 
     auto [from, to] = *result;
 
-    _consumer->CurveToCubicSmooth(BlendAnimatedFloatPoint(from.Point2, to.Point2, progress),
-                                  BlendAnimatedFloatPoint(from.TargetPoint, to.TargetPoint, progress),
+    _consumer->CurveToCubicSmooth(BlendAnimatedPointF(from.Point2, to.Point2, progress),
+                                  BlendAnimatedPointF(from.TargetPoint, to.TargetPoint, progress),
                                   _isInFirstHalfOfAnimation ? _fromMode : _toMode);
     _fromCurrentPoint = _fromMode == svg::PathCoordinateMode::AbsoluteCoordinates
                           ? from.TargetPoint
@@ -354,8 +353,8 @@ namespace krys::boo
 
     auto [from, to] = *result;
 
-    _consumer->CurveToQuadratic(BlendAnimatedFloatPoint(from.Point1, to.Point1, progress),
-                                BlendAnimatedFloatPoint(from.TargetPoint, to.TargetPoint, progress),
+    _consumer->CurveToQuadratic(BlendAnimatedPointF(from.Point1, to.Point1, progress),
+                                BlendAnimatedPointF(from.TargetPoint, to.TargetPoint, progress),
                                 _isInFirstHalfOfAnimation ? _fromMode : _toMode);
     _fromCurrentPoint = _fromMode == svg::PathCoordinateMode::AbsoluteCoordinates
                           ? from.TargetPoint
@@ -382,7 +381,7 @@ namespace krys::boo
 
     auto [from, to] = *result;
 
-    _consumer->CurveToQuadraticSmooth(BlendAnimatedFloatPoint(from.TargetPoint, to.TargetPoint, progress),
+    _consumer->CurveToQuadraticSmooth(BlendAnimatedPointF(from.TargetPoint, to.TargetPoint, progress),
                                       _isInFirstHalfOfAnimation ? _fromMode : _toMode);
     _fromCurrentPoint = _fromMode == svg::PathCoordinateMode::AbsoluteCoordinates
                           ? from.TargetPoint
@@ -425,7 +424,7 @@ namespace krys::boo
                        Blend(from.Angle, to.Angle, context),
                        _isInFirstHalfOfAnimation ? from.LargeArc : to.LargeArc,
                        _isInFirstHalfOfAnimation ? from.Sweep : to.Sweep,
-                       BlendAnimatedFloatPoint(from.TargetPoint, to.TargetPoint, progress),
+                       BlendAnimatedPointF(from.TargetPoint, to.TargetPoint, progress),
                        _isInFirstHalfOfAnimation ? _fromMode : _toMode);
     }
     _fromCurrentPoint = _fromMode == svg::PathCoordinateMode::AbsoluteCoordinates

@@ -1668,7 +1668,7 @@ namespace krys::boo
       if (request.AllowsFrameScrollbars())
       {
         RefPtr<LocalFrameView> frameView = ShareRefPtr(View());
-        IntPoint windowPoint = frameView->ContentsToWindow(location.RoundedPoint());
+        PointI windowPoint = frameView->ContentsToWindow(location.RoundedPoint());
         if (RefPtr<Scrollbar> frameScrollbar = ShareRefPtr(frameView->ScrollbarAtPoint(windowPoint)))
         {
           result.SetScrollbar(krys::move(frameScrollbar));
@@ -1680,7 +1680,7 @@ namespace krys::boo
   }
 
   MouseEventWithHitTestResults Document::PrepareMouseEvent(const HitTestRequest &request,
-                                                           const DoublePoint &documentPoint,
+                                                           const PointD &documentPoint,
                                                            const PlatformMouseEvent &event) noexcept
   {
     if (!HasLivingRenderTree())
@@ -5556,7 +5556,7 @@ namespace krys::boo
     }
   }
 
-  void Document::ConvertAbsoluteToClientRects(List<FloatRect> &rects, const RenderStyle &style) const noexcept
+  void Document::ConvertAbsoluteToClientRects(List<RectF> &rects, const RenderStyle &style) const noexcept
   {
     auto *frameView = View();
     if (!frameView)
@@ -5578,7 +5578,7 @@ namespace krys::boo
     }
   }
 
-  void Document::ConvertAbsoluteToClientRect(FloatRect &rect, const RenderStyle &style) const noexcept
+  void Document::ConvertAbsoluteToClientRect(RectF &rect, const RenderStyle &style) const noexcept
   {
     auto *frameView = View();
     if (!frameView)

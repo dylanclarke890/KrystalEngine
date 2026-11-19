@@ -27,12 +27,11 @@
 
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 
@@ -688,7 +687,7 @@ namespace krys::boo
     return ScaleNonUniform(1.0, -1.0);
   }
 
-  FloatPoint TransformationMatrix::ProjectPoint(const FloatPoint &p, bool *clamped) const noexcept
+  PointF TransformationMatrix::ProjectPoint(const PointF &p, bool *clamped) const noexcept
   {
     // This is basically raytracing. We have a point in the destination
     // plane with z=0, and we cast a ray parallel to the z-axis from that
@@ -711,7 +710,7 @@ namespace krys::boo
     {
       // In this case, the projection plane is parallel to the ray we are trying to
       // trace, and there is no well-defined value for the projection.
-      return FloatPoint();
+      return PointF();
     }
 
     double x = p.X();
@@ -742,7 +741,7 @@ namespace krys::boo
       outY /= w;
     }
 
-    return FloatPoint(static_cast<float>(outX), static_cast<float>(outY));
+    return PointF(static_cast<float>(outX), static_cast<float>(outY));
   }
 
   FloatQuad TransformationMatrix::ProjectQuad(const FloatQuad &q, bool *clamped) const noexcept
@@ -777,7 +776,7 @@ namespace krys::boo
 
   LayoutRect TransformationMatrix::ClampedBoundsOfProjectedQuad(const FloatQuad &q) const noexcept
   {
-    FloatRect mappedQuadBounds = ProjectQuad(q).BoundingBox();
+    RectF mappedQuadBounds = ProjectQuad(q).BoundingBox();
 
     float left = ClampEdgeValue(std::floor(mappedQuadBounds.X()));
     float top = ClampEdgeValue(std::floor(mappedQuadBounds.Y()));
@@ -826,11 +825,11 @@ namespace krys::boo
     w = result[3];
   }
 
-  FloatPoint TransformationMatrix::MapPoint(const FloatPoint &p) const noexcept
+  PointF TransformationMatrix::MapPoint(const PointF &p) const noexcept
   {
     if (IsIdentityOrTranslation())
     {
-      return FloatPoint(p.X() + static_cast<float>(_matrix[3][0]), p.Y() + static_cast<float>(_matrix[3][1]));
+      return PointF(p.X() + static_cast<float>(_matrix[3][0]), p.Y() + static_cast<float>(_matrix[3][1]));
     }
 
     return InternalMapPoint(p);
@@ -848,22 +847,22 @@ namespace krys::boo
     return InternalMapPoint(p);
   }
 
-  IntRect TransformationMatrix::MapRect(const IntRect &rect) const noexcept
+  RectI TransformationMatrix::MapRect(const RectI &rect) const noexcept
   {
-    return EnclosingIntRect(MapRect(FloatRect(rect)));
+    return EnclosingRectI(MapRect(RectF(rect)));
   }
 
   LayoutRect TransformationMatrix::MapRect(const LayoutRect &r) const noexcept
   {
-    return EnclosingLayoutRect(MapRect(FloatRect(r)));
+    return EnclosingLayoutRect(MapRect(RectF(r)));
   }
 
-  FloatRect TransformationMatrix::MapRect(const FloatRect &r) const noexcept
+  RectF TransformationMatrix::MapRect(const RectF &r) const noexcept
   {
     auto type = GetType();
     if (type == Type::IdentityOrTranslation)
     {
-      FloatRect mappedRect(r);
+      RectF mappedRect(r);
       mappedRect.Move(static_cast<float>(_matrix[3][0]), static_cast<float>(_matrix[3][1]));
       return mappedRect;
     }
@@ -929,17 +928,16 @@ namespace krys::boo
         minResultY += d * maxY;
       }
 
-      return FloatRect(static_cast<float>(minResultX + M41()), static_cast<float>(minResultY + M42()),
-                       static_cast<float>(maxResultX - minResultX),
-                       static_cast<float>(maxResultY - minResultY));
+      return RectF(static_cast<float>(minResultX + M41()), static_cast<float>(minResultY + M42()),
+                   static_cast<float>(maxResultX - minResultX), static_cast<float>(maxResultY - minResultY));
     }
 
     FloatQuad result;
 
-    result.SetP1(InternalMapPoint(FloatPoint(minX, minY)));
-    result.SetP2(InternalMapPoint(FloatPoint(maxX, minY)));
-    result.SetP3(InternalMapPoint(FloatPoint(maxX, maxY)));
-    result.SetP4(InternalMapPoint(FloatPoint(minX, maxY)));
+    result.SetP1(InternalMapPoint(PointF(minX, minY)));
+    result.SetP2(InternalMapPoint(PointF(maxX, minY)));
+    result.SetP3(InternalMapPoint(PointF(maxX, maxY)));
+    result.SetP4(InternalMapPoint(PointF(minX, maxY)));
 
     return result.BoundingBox();
   }
@@ -1262,7 +1260,7 @@ namespace krys::boo
     return *this;
   }
 
-  TransformationMatrix TransformationMatrix::RectToRect(const FloatRect &from, const FloatRect &to) noexcept
+  TransformationMatrix TransformationMatrix::RectToRect(const RectF &from, const RectF &to) noexcept
   {
     krys_debug_assert(!from.IsEmpty());
     return TransformationMatrix(to.Width() / from.Width(), 0, 0, to.Height() / from.Height(),
@@ -1742,5 +1740,12 @@ namespace krys::boo
     TransformationMatrix transpose;
     TransposeMatrix4(_matrix, transpose._matrix);
     return transpose;
+  }
+
+  PointF MatrixTransform(const PointF &point, const TransformationMatrix &transform) noexcept
+  {
+    double newX, newY;
+    transform.Map(static_cast<double>(point.X()), static_cast<double>(point.Y()), newX, newY);
+    return PointF::NarrowPrecision(newX, newY);
   }
 }

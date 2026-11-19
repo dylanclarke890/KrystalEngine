@@ -139,9 +139,9 @@ namespace krys::boo
       if (auto *view = frame->View())
       {
         // The visual viewport is the visible content, less the scrollbars, unscaled.
-        auto visualViewportRect = FloatRect(view->VisibleContentRect());
+        auto visualViewportRect = RectF(view->VisibleContentRect());
         visualViewportRect.Scale(1 / view->FrameScaleFactor());
-        auto layoutViewportRect = FloatRect(view->LayoutViewportRect());
+        auto layoutViewportRect = RectF(view->LayoutViewportRect());
         auto pageZoomFactor = frame->PageZoomFactor();
         krys_debug_assert(pageZoomFactor);
         offsetLeft = (visualViewportRect.X() - layoutViewportRect.X()) / pageZoomFactor;

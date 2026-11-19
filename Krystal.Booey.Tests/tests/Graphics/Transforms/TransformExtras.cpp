@@ -25,19 +25,19 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("FloatPoint: Transforms", "[Graphics][FloatPoint]")
+  TEST_CASE("PointF: Transforms", "[Graphics][PointF]")
   {
-    FloatPoint test(100.0f, 200.0f);
+    PointF test(100.0f, 200.0f);
 
     AffineTransform affine;
-    CHECK(test.MatrixTransform(affine) == FloatPoint(100, 200));
+    CHECK(MatrixTransform(test, affine) == PointF(100, 200));
 
     AffineTransform affine2(2.0, 0.0, 0.0, 2.0, 0.0, 0.0);
-    CHECK(test.MatrixTransform(affine2) == FloatPoint(200, 400));
+    CHECK(MatrixTransform(test, affine2) == PointF(200, 400));
 
     TransformationMatrix matrix;
-    CHECK(test.MatrixTransform(matrix) == FloatPoint(100, 200));
-    CHECK(test.MatrixTransform(affine2.ToTransformationMatrix()) == FloatPoint(200, 400));
+    CHECK(MatrixTransform(test, matrix) == PointF(100, 200));
+    CHECK(MatrixTransform(test, affine2.ToTransformationMatrix()) == PointF(200, 400));
   }
 
   TEST_CASE("AffineTransform: rest of the API", "[Graphics][AffineTransform]")
@@ -46,12 +46,12 @@ namespace krys::boo::tests
     CHECK(AffineTransform::Identity.IsIdentity());
 
     // A quarter turn about (10, 10) maps (20, 10) to (10, 20).
-    auto rotation = AffineTransform::MakeRotation(90, FloatPoint(10, 10));
-    auto mapped = rotation.MapPoint(FloatPoint(20, 10));
+    auto rotation = AffineTransform::MakeRotation(90, PointF(10, 10));
+    auto mapped = rotation.MapPoint(PointF(20, 10));
     CHECK_THAT(mapped.X(), WithinAbs(10, 1e-5));
     CHECK_THAT(mapped.Y(), WithinAbs(20, 1e-5));
-    CHECK(AffineTransform::MakeRotation(90, FloatPoint()) == AffineTransform::MakeRotation(90));
-    CHECK(AffineTransform::MakeScale(FloatSize(2, 3)) == AffineTransform(2, 0, 0, 3, 0, 0));
+    CHECK(AffineTransform::MakeRotation(90, PointF()) == AffineTransform::MakeRotation(90));
+    CHECK(AffineTransform::MakeScale(SizeF(2, 3)) == AffineTransform(2, 0, 0, 3, 0, 0));
 
     AffineTransform fromVector;
     fromVector.RotateFromVector(0, 1);
@@ -70,10 +70,10 @@ namespace krys::boo::tests
 
     AffineTransform skewed;
     skewed.SkewX(45);
-    CHECK(skewed.MapPoint(FloatPoint(0, 10)) == FloatPoint(10, 10));
+    CHECK(skewed.MapPoint(PointF(0, 10)) == PointF(10, 10));
     AffineTransform skewedY;
     skewedY.SkewY(45);
-    CHECK(skewedY.MapPoint(FloatPoint(10, 0)) == FloatPoint(10, 10));
+    CHECK(skewedY.MapPoint(PointF(10, 0)) == PointF(10, 10));
 
     CHECK(AffineTransform(1, 2, 3, 4, 5, 6).AsSpan()[4] == 5);
     CHECK(AffineTransform(Span<const double, 6>(AffineTransform(1, 2, 3, 4, 5, 6).AsSpan()))
@@ -82,15 +82,15 @@ namespace krys::boo::tests
     AffineTransform set;
     set.SetMatrix(1, 2, 3, 4, 5, 6);
     CHECK(set == AffineTransform(1, 2, 3, 4, 5, 6));
-    set *= AffineTransform::MakeTranslation(FloatSize(1, 1));
+    set *= AffineTransform::MakeTranslation(SizeF(1, 1));
     CHECK(set == AffineTransform(1, 2, 3, 4, 9, 12));
 
     // A singular transform has no inverse.
     CHECK_FALSE(AffineTransform(1, 2, 2, 4, 0, 0).IsInvertible());
     CHECK_FALSE(AffineTransform(1, 2, 2, 4, 0, 0).Inverse());
     // A translation's inverse is the opposite translation.
-    CHECK(*AffineTransform::MakeTranslation(FloatSize(3, -4)).Inverse()
-          == AffineTransform::MakeTranslation(FloatSize(-3, 4)));
+    CHECK(*AffineTransform::MakeTranslation(SizeF(3, -4)).Inverse()
+          == AffineTransform::MakeTranslation(SizeF(-3, 4)));
   }
 
   TEST_CASE("AffineTransform: decomposition", "[Graphics][AffineTransform]")
@@ -114,24 +114,24 @@ namespace krys::boo::tests
     AffineTransform blended;
     blended.Scale(3);
     blended.Blend(AffineTransform(), 0.5);
-    CHECK(blended.IsEssentiallyEqualToAsFloats(AffineTransform::MakeScale(FloatSize(2, 2))));
+    CHECK(blended.IsEssentiallyEqualToAsFloats(AffineTransform::MakeScale(SizeF(2, 2))));
   }
 
   TEST_CASE("AffineTransform: mapping regions and sizes", "[Graphics][AffineTransform]")
   {
-    Region region(IntRect(0, 0, 10, 10));
-    region.Unite(IntRect(10, 10, 10, 10));
+    Region region(RectI(0, 0, 10, 10));
+    region.Unite(RectI(10, 10, 10, 10));
 
-    auto translated = AffineTransform::MakeTranslation(FloatSize(5, 5)).MapRegion(region);
-    CHECK(translated == Translate(region, IntSize(5, 5)));
+    auto translated = AffineTransform::MakeTranslation(SizeF(5, 5)).MapRegion(region);
+    CHECK(translated == Translate(region, SizeI(5, 5)));
 
-    auto scaled = AffineTransform::MakeScale(FloatSize(2, 2)).MapRegion(region);
-    CHECK(scaled.Rects() == SmallList<IntRect, 1> {IntRect(0, 0, 20, 20), IntRect(20, 20, 20, 20)});
+    auto scaled = AffineTransform::MakeScale(SizeF(2, 2)).MapRegion(region);
+    CHECK(scaled.Rects() == SmallList<RectI, 1> {RectI(0, 0, 20, 20), RectI(20, 20, 20, 20)});
 
     auto rotation = AffineTransform::MakeRotation(90);
-    CHECK(rotation.MapSize(IntSize(3, 4)) == IntSize(3, 4));
-    CHECK(AffineTransform::MakeScale(FloatSize(2, 0.5f)).MapSize(FloatSize(3, 4)) == FloatSize(6, 2));
-    CHECK(rotation.MapRect(IntRect(0, 0, 10, 20)) == IntRect(-20, 0, 20, 10));
+    CHECK(rotation.MapSize(SizeI(3, 4)) == SizeI(3, 4));
+    CHECK(AffineTransform::MakeScale(SizeF(2, 0.5f)).MapSize(SizeF(3, 4)) == SizeF(6, 2));
+    CHECK(rotation.MapRect(RectI(0, 0, 10, 20)) == RectI(-20, 0, 20, 10));
   }
 
   TEST_CASE("TransformationMatrix: 3D rotation and projection", "[Graphics][TransformationMatrix]")
@@ -185,20 +185,20 @@ namespace krys::boo::tests
     // ProjectPoint inverts the mapping onto the z=0 plane.
     TransformationMatrix tilted;
     tilted.Rotate3d(1, 0, 0, 60);
-    auto back = tilted.ProjectPoint(FloatPoint(10, 5));
+    auto back = tilted.ProjectPoint(PointF(10, 5));
     CHECK_THAT(back.X(), WithinAbs(10, 1e-4));
     CHECK_THAT(back.Y(), WithinAbs(10, 1e-4));
 
     // Rotating the plane edge-on leaves no well-defined projection.
     TransformationMatrix edgeOn;
     edgeOn.Rotate3d(1, 0, 0, 90);
-    CHECK(edgeOn.ProjectPoint(FloatPoint(1, 1)) == FloatPoint());
+    CHECK(edgeOn.ProjectPoint(PointF(1, 1)) == PointF());
 
     bool clamped = true;
-    auto quad = tilted.ProjectQuad(FloatQuad(FloatRect(0, 0, 10, 5)), &clamped);
+    auto quad = tilted.ProjectQuad(FloatQuad(RectF(0, 0, 10, 5)), &clamped);
     CHECK_FALSE(clamped);
     CHECK_THAT(quad.P3().Y(), WithinAbs(10, 1e-4));
-    CHECK(tilted.ClampedBoundsOfProjectedQuad(FloatQuad(FloatRect(0, 0, 10, 5))) == LayoutRect(0, 0, 10, 10));
+    CHECK(tilted.ClampedBoundsOfProjectedQuad(FloatQuad(RectF(0, 0, 10, 5))) == LayoutRect(0, 0, 10, 10));
   }
 
   TEST_CASE("TransformationMatrix: decomposition", "[Graphics][TransformationMatrix]")
@@ -280,9 +280,9 @@ namespace krys::boo::tests
 
     // Multiplying by an affine transform.
     TransformationMatrix withAffine;
-    withAffine.MultiplyAffineTransform(AffineTransform::MakeTranslation(FloatSize(5, 6)));
+    withAffine.MultiplyAffineTransform(AffineTransform::MakeTranslation(SizeF(5, 6)));
     CHECK(withAffine == TransformationMatrix(5, 6));
-    withAffine.MultiplyAffineTransform(AffineTransform::MakeScale(FloatSize(2, 2)));
+    withAffine.MultiplyAffineTransform(AffineTransform::MakeScale(SizeF(2, 2)));
     CHECK(withAffine == TransformationMatrix(2, 0, 0, 2, 5, 6));
     withAffine.MultiplyAffineTransform(AffineTransform());
     CHECK(withAffine == TransformationMatrix(2, 0, 0, 2, 5, 6));

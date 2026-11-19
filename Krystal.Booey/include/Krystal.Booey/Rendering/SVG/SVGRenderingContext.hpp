@@ -25,12 +25,12 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextSwitcher.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/Painting/CSSFilterRenderer.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -131,7 +131,7 @@ namespace krys::boo
     void BeginCSSFilter() noexcept;
 
   public:
-    static void ClipToImageBuffer(GraphicsContext &, const FloatRect &targetRect, const FloatSize &scale,
+    static void ClipToImageBuffer(GraphicsContext &, const RectF &targetRect, const SizeF &scale,
                                   RefPtr<ImageBuffer> &, bool safeToClear) noexcept;
 
     KRYS_NODISCARD static float CalculateScreenFontSizeScalingFactor(const RenderObject &) noexcept;
@@ -139,10 +139,10 @@ namespace krys::boo
     KRYS_NODISCARD static AffineTransform
       CalculateTransformationToOutermostCoordinateSystem(const RenderObject &) noexcept;
 
-    KRYS_NODISCARD static IntRect CalculateImageBufferRect(const FloatRect &targetRect,
-                                                           const AffineTransform &absoluteTransform) noexcept
+    KRYS_NODISCARD static RectI CalculateImageBufferRect(const RectF &targetRect,
+                                                         const AffineTransform &absoluteTransform) noexcept
     {
-      return EnclosingIntRect(absoluteTransform.MapRect(targetRect));
+      return EnclosingRectI(absoluteTransform.MapRect(targetRect));
     }
 
     KRYS_NODISCARD const RenderElement *Renderer() const noexcept

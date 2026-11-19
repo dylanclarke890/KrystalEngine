@@ -139,8 +139,8 @@ namespace krys::boo
 
     // Eliminate shear of the absolute transformation matrix, to be able to produce unsheared tile images for
     // feTile.
-    FloatSize filterScale(static_cast<float>(absoluteTransform.XScale()),
-                          static_cast<float>(absoluteTransform.YScale()));
+    SizeF filterScale(static_cast<float>(absoluteTransform.XScale()),
+                      static_cast<float>(absoluteTransform.YScale()));
 
     // Determine absolute boundaries of the filter and the drawing region.
     filterData->SourceImageRect = renderer.StrokeBoundingBox();
@@ -252,8 +252,8 @@ namespace krys::boo
     }
   }
 
-  FloatRect LegacyRenderSVGResourceFilter::ResourceBoundingBox(const RenderObject &object,
-                                                               RepaintRectCalculation) noexcept
+  RectF LegacyRenderSVGResourceFilter::ResourceBoundingBox(const RenderObject &object,
+                                                           RepaintRectCalculation) noexcept
   {
     auto &filterElement = FilterElement();
     auto *renderer = DynamicDowncast<RenderElement>(object);
@@ -289,10 +289,10 @@ namespace krys::boo
     RemoveAllClientsFromCacheAndMarkForInvalidation();
   }
 
-  FloatRect LegacyRenderSVGResourceFilter::DrawingRegion(RenderObject &object) const noexcept
+  RectF LegacyRenderSVGResourceFilter::DrawingRegion(RenderObject &object) const noexcept
   {
     auto it = _rendererFilterDataMap.find(&object);
-    return it != _rendererFilterDataMap.end() ? it->second->SourceImageRect : FloatRect();
+    return it != _rendererFilterDataMap.end() ? it->second->SourceImageRect : RectF();
   }
 
   TextStream &operator<<(TextStream &ts, FilterData::FilterDataState state) noexcept

@@ -25,12 +25,12 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Images/DecodingOptions.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Time/Duration.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
@@ -82,8 +82,8 @@ namespace krys::boo
     };
 
     DecodingStatus _decodingStatus {DecodingStatus::Invalid};
-    IntSize _size;
-    Maybe<IntSize> _densityCorrectedSize;
+    SizeI _size;
+    Maybe<SizeI> _densityCorrectedSize;
     SubsamplingLevel _subsamplingLevel {SubsamplingLevel::Default};
     ImageOrientation _orientation {ImageOrientation::Orientation::None};
     seconds _duration {};
@@ -127,12 +127,12 @@ namespace krys::boo
       return _decodingStatus == DecodingStatus::Complete;
     }
 
-    void SetSize(const IntSize &size) noexcept
+    void SetSize(const SizeI &size) noexcept
     {
       _size = size;
     }
 
-    KRYS_NODISCARD IntSize Size() const noexcept
+    KRYS_NODISCARD SizeI Size() const noexcept
     {
       return _size;
     }
@@ -142,12 +142,12 @@ namespace krys::boo
       return static_cast<uint32>(Size().UnclampedArea()) * sizeof(uint32);
     }
 
-    void SetDensityCorrectedSize(const IntSize &size) noexcept
+    void SetDensityCorrectedSize(const SizeI &size) noexcept
     {
       _densityCorrectedSize = size;
     }
 
-    KRYS_NODISCARD Maybe<IntSize> DensityCorrectedSize() const noexcept
+    KRYS_NODISCARD Maybe<SizeI> DensityCorrectedSize() const noexcept
     {
       return _densityCorrectedSize;
     }

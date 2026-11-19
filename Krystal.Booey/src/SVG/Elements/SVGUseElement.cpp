@@ -189,7 +189,7 @@ namespace krys::boo
     }
   }
 
-  FloatRect SVGUseElement::GetBBox(StyleUpdateStrategy styleUpdateStrategy) noexcept
+  RectF SVGUseElement::GetBBox(StyleUpdateStrategy styleUpdateStrategy) noexcept
   {
     auto bbox = SVGGraphicsElement::GetBBox(styleUpdateStrategy);
     if (bbox.IsEmpty())
@@ -436,7 +436,7 @@ namespace krys::boo
     Path path = targetClone->ToClipPath();
     SVGLengthContext lengthContext(this);
     // FIXME: Find a way to do this without manual resolution of x/y here. It's potentially incorrect.
-    path.Translate(FloatSize(X().Value(lengthContext), Y().Value(lengthContext)));
+    path.Translate(SizeF(X().Value(lengthContext), Y().Value(lengthContext)));
     path.Transform(AnimatedLocalTransform());
     return path;
   }

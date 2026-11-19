@@ -78,7 +78,7 @@ namespace krys::boo::tests
       auto decoder = Decode(images::PNG);
       REQUIRE(decoder);
       CHECK(decoder->GetEncodedDataStatus() == EncodedDataStatus::Complete);
-      CHECK(decoder->Size() == IntSize(3, 2));
+      CHECK(decoder->Size() == SizeI(3, 2));
       CHECK(decoder->FrameCount() == 1u);
       CHECK(decoder->FrameHasAlphaAtIndex(0));
       CHECK(Pixels(*decoder) == List<uint32> {Red, Green, Blue, White, Black, 0x80'80'00'00u});
@@ -101,7 +101,7 @@ namespace krys::boo::tests
       REQUIRE(decoder);
       decoder->SetData(*part, false);
       CHECK(decoder->GetEncodedDataStatus() == EncodedDataStatus::SizeAvailable);
-      CHECK(decoder->Size() == IntSize(3, 2));
+      CHECK(decoder->Size() == SizeI(3, 2));
       CHECK_FALSE(decoder->FrameIsCompleteAtIndex(0));
 
       decoder->SetData(*all, true);
@@ -124,7 +124,7 @@ namespace krys::boo::tests
   {
     auto decoder = Decode(images::JPEG);
     REQUIRE(decoder);
-    CHECK(decoder->Size() == IntSize(16, 8));
+    CHECK(decoder->Size() == SizeI(16, 8));
     CHECK(decoder->FrameOrientationAtIndex(0) == ImageOrientation::Orientation::None);
     // A frame has alpha until it's decoded.
     CHECK(decoder->FrameHasAlphaAtIndex(0));
@@ -137,7 +137,7 @@ namespace krys::boo::tests
     auto rotated = Decode(images::RotatedJPEG);
     REQUIRE(rotated);
     // The decoder reports the encoded size; the image applies the orientation.
-    CHECK(rotated->Size() == IntSize(16, 8));
+    CHECK(rotated->Size() == SizeI(16, 8));
     CHECK(rotated->FrameOrientationAtIndex(0) == ImageOrientation::Orientation::OriginRightTop);
   }
 
@@ -148,8 +148,8 @@ namespace krys::boo::tests
     {
       auto decoder = Decode(images::DensityJPEG);
       REQUIRE(decoder);
-      CHECK(decoder->Size() == IntSize(16, 8));
-      CHECK(decoder->FrameDensityCorrectedSizeAtIndex(0) == IntSize(8, 4));
+      CHECK(decoder->Size() == SizeI(16, 8));
+      CHECK(decoder->FrameDensityCorrectedSizeAtIndex(0) == SizeI(8, 4));
       CHECK(Pixels(*decoder).size() == 16u * 8u);
     }
 
@@ -159,7 +159,7 @@ namespace krys::boo::tests
       {
         auto decoder = Decode(bytes);
         REQUIRE(decoder);
-        CHECK(decoder->Size() == IntSize(16, 8));
+        CHECK(decoder->Size() == SizeI(16, 8));
         CHECK_FALSE(decoder->FrameDensityCorrectedSizeAtIndex(0));
       }
     }
@@ -170,7 +170,7 @@ namespace krys::boo::tests
       {
         auto decoder = Decode(bytes, AlphaOption::NotPremultiplied);
         REQUIRE(decoder);
-        CHECK(decoder->Size() == IntSize(3, 2));
+        CHECK(decoder->Size() == SizeI(3, 2));
         CHECK_FALSE(decoder->FrameDensityCorrectedSizeAtIndex(0));
         CHECK(Pixels(*decoder) == List<uint32> {Red, Green, Blue, White, Black, 0x80'FF'00'00u});
       }
@@ -181,7 +181,7 @@ namespace krys::boo::tests
   {
     auto decoder = Decode(images::WebP, AlphaOption::NotPremultiplied);
     REQUIRE(decoder);
-    CHECK(decoder->Size() == IntSize(3, 2));
+    CHECK(decoder->Size() == SizeI(3, 2));
     CHECK(decoder->FrameCount() == 1u);
     CHECK(Pixels(*decoder) == List<uint32> {Red, Green, Blue, White, Black, 0x80'FF'00'00u});
   }
@@ -190,7 +190,7 @@ namespace krys::boo::tests
   {
     auto decoder = Decode(images::GIF);
     REQUIRE(decoder);
-    CHECK(decoder->Size() == IntSize(3, 2));
+    CHECK(decoder->Size() == SizeI(3, 2));
     CHECK(decoder->FrameCount() == 1u);
     // Still GIFs loop once, as animated ones without a looping extension do.
     CHECK(decoder->GetRepetitionCount() == RepetitionCountOnce);
@@ -201,7 +201,7 @@ namespace krys::boo::tests
   {
     auto decoder = Decode(images::BMP);
     REQUIRE(decoder);
-    CHECK(decoder->Size() == IntSize(3, 2));
+    CHECK(decoder->Size() == SizeI(3, 2));
     CHECK(Pixels(*decoder) == List<uint32> {Red, Green, Blue, White, Black, Red});
   }
 
@@ -211,9 +211,9 @@ namespace krys::boo::tests
     {
       auto decoder = Decode(images::PNGIcon);
       REQUIRE(decoder);
-      CHECK(decoder->Size() == IntSize(32, 32));
+      CHECK(decoder->Size() == SizeI(32, 32));
       CHECK(decoder->FrameCount() == 2u);
-      CHECK(decoder->FrameSizeAtIndex(1, SubsamplingLevel::Default) == IntSize(16, 16));
+      CHECK(decoder->FrameSizeAtIndex(1, SubsamplingLevel::Default) == SizeI(16, 16));
       CHECK_FALSE(decoder->HotSpot());
       auto pixels = Pixels(*decoder);
       REQUIRE(pixels.size() == 32u * 32u);
@@ -225,7 +225,7 @@ namespace krys::boo::tests
     {
       auto decoder = Decode(images::BMPIcon);
       REQUIRE(decoder);
-      CHECK(decoder->Size() == IntSize(16, 16));
+      CHECK(decoder->Size() == SizeI(16, 16));
       auto pixels = Pixels(*decoder);
       REQUIRE(pixels.size() == 16u * 16u);
       CHECK(pixels[0] == Blue);
@@ -308,7 +308,7 @@ namespace krys::boo::tests
     {
       auto decoder = Decode(images::RotatedProfileWebP, AlphaOption::NotPremultiplied);
       REQUIRE(decoder);
-      CHECK(decoder->Size() == IntSize(3, 2));
+      CHECK(decoder->Size() == SizeI(3, 2));
       CHECK(Pixels(*decoder) == List<uint32> {Green, Blue, Red, White, Black, 0x80'00'FF'00u});
     }
 

@@ -27,13 +27,13 @@
 
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ByteArrayPixelBuffer.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBufferDisplayListBackend.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBufferUtilities.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerContentsDisplayDelegate.hpp"
 #include "Krystal.Booey/Platform/GraphicsClient.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Net/MimeTypeRegistry.hpp"
 #include <atomic>
@@ -58,7 +58,7 @@ namespace krys::boo
     return ts << identifier.ToUInt64();
   }
 
-  RefPtr<ImageBuffer> ImageBuffer::Create(const FloatSize &size, RenderingMode mode, RenderingPurpose purpose,
+  RefPtr<ImageBuffer> ImageBuffer::Create(const SizeF &size, RenderingMode mode, RenderingPurpose purpose,
                                           float resolutionScale, const DestinationColorSpace &colorSpace,
                                           GraphicsClient *graphicsClient) noexcept
   {
@@ -76,7 +76,7 @@ namespace krys::boo
     return Create<ImageBufferDisplayListBackend>(size, resolutionScale, purpose);
   }
 
-  RefPtr<ImageBuffer> ImageBuffer::Create(const FloatSize &size, float resolutionScale) noexcept
+  RefPtr<ImageBuffer> ImageBuffer::Create(const SizeF &size, float resolutionScale) noexcept
   {
     return Create(size, RenderingMode::Unaccelerated, RenderingPurpose::Unspecified, resolutionScale,
                   DestinationColorSpace::SRGB());
@@ -92,15 +92,15 @@ namespace krys::boo
 
   ImageBuffer::~ImageBuffer() noexcept = default;
 
-  IntSize ImageBuffer::CalculateBackendSize(FloatSize logicalSize, float resolutionScale) noexcept
+  SizeI ImageBuffer::CalculateBackendSize(SizeF logicalSize, float resolutionScale) noexcept
   {
-    FloatSize scaledSize = {std::ceil(resolutionScale * logicalSize.Width()),
-                            std::ceil(resolutionScale * logicalSize.Height())};
-    if (scaledSize.IsEmpty() || !scaledSize.IsExpressibleAsIntSize())
+    SizeF scaledSize = {std::ceil(resolutionScale * logicalSize.Width()),
+                        std::ceil(resolutionScale * logicalSize.Height())};
+    if (scaledSize.IsEmpty() || !scaledSize.IsExpressibleAsSizeI())
     {
       return {};
     }
-    return IntSize {scaledSize};
+    return SizeI {scaledSize};
   }
 
   ImageBufferBackendParameters
@@ -110,7 +110,7 @@ namespace krys::boo
             parameters.ResolutionScale};
   }
 
-  bool ImageBuffer::SizeNeedsClamping(const FloatSize &size) noexcept
+  bool ImageBuffer::SizeNeedsClamping(const SizeF &size) noexcept
   {
     if (size.IsEmpty())
     {
@@ -120,9 +120,9 @@ namespace krys::boo
     return std::floor(size.Height()) * std::floor(size.Width()) > MaxClampedArea;
   }
 
-  bool ImageBuffer::SizeNeedsClamping(const FloatSize &size, FloatSize &scale) noexcept
+  bool ImageBuffer::SizeNeedsClamping(const SizeF &size, SizeF &scale) noexcept
   {
-    FloatSize scaledSize(size);
+    SizeF scaledSize(size);
     scaledSize.Scale(scale.Width(), scale.Height());
 
     if (!SizeNeedsClamping(scaledSize))
@@ -183,7 +183,7 @@ namespace krys::boo
     ConvertToLuminanceMask(DestinationColorSpace::SRGB());
   }
 
-  IntSize ImageBuffer::BackendSize() const noexcept
+  SizeI ImageBuffer::BackendSize() const noexcept
   {
     return CalculateBackendSize(_parameters.LogicalSize, _parameters.ResolutionScale);
   }
@@ -240,7 +240,7 @@ namespace krys::boo
                          : AlphaPremultiplication::Unpremultiplied;
     auto size = source->TruncatedLogicalSize();
     auto pixelBuffer = source->GetPixelBuffer(
-      {alphaFormat, PixelFormat::RGBA8, DestinationColorSpace::SRGB()}, IntRect({}, size));
+      {alphaFormat, PixelFormat::RGBA8, DestinationColorSpace::SRGB()}, RectI({}, size));
     if (!pixelBuffer)
     {
       return {};
@@ -249,7 +249,7 @@ namespace krys::boo
   }
 
   RefPtr<PixelBuffer> ImageBuffer::GetPixelBuffer(const PixelBufferFormat &destinationFormat,
-                                                  const IntRect &sourceRect) const noexcept
+                                                  const RectI &sourceRect) const noexcept
   {
     krys_debug_assert(PixelBuffer::SupportedPixelFormat(destinationFormat.Format));
     auto sourceRectScaled = sourceRect;
@@ -271,8 +271,8 @@ namespace krys::boo
     return destination;
   }
 
-  void ImageBuffer::PutPixelBuffer(const PixelBufferSourceView &pixelBuffer, const IntRect &sourceRect,
-                                   const IntPoint &destinationPoint,
+  void ImageBuffer::PutPixelBuffer(const PixelBufferSourceView &pixelBuffer, const RectI &sourceRect,
+                                   const PointI &destinationPoint,
                                    AlphaPremultiplication destinationFormat) noexcept
   {
     krys_debug_assert(ResolutionScale() == 1);

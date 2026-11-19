@@ -46,7 +46,7 @@ namespace krys::boo::style
     return {};
   }
 
-  void Translate::Apply(TransformationMatrix &transform, const FloatSize &size) const noexcept
+  void Translate::Apply(TransformationMatrix &transform, const SizeF &size) const noexcept
   {
     if (const auto &protectedValue = _value)
     {
@@ -144,7 +144,7 @@ namespace krys::boo::style
   // MARK: - Platform
 
   RefPtr<TransformOperation> ToPlatform<Translate>::operator()(const Translate &value,
-                                                               const FloatSize &size) noexcept
+                                                               const SizeF &size) noexcept
   {
     if (const auto &function = value._value)
     {

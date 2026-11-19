@@ -368,8 +368,8 @@ namespace krys::ui::input
     }
   }
 
-  boo::PlatformWheelEvent WheelEvent(const boo::IntPoint &point, const boo::IntPoint &screenPoint,
-                                     float notchesX, float notchesY, pal::KeyModifiers palModifiers,
+  boo::PlatformWheelEvent WheelEvent(const PointI &point, const PointI &screenPoint, float notchesX,
+                                     float notchesY, pal::KeyModifiers palModifiers,
                                      const pal::WheelScrollSettings &settings) noexcept
   {
     // As a Windows wheel message: one wheel at a time, the horizontal one if it turned.
@@ -418,7 +418,7 @@ namespace krys::ui::input
                                    modifiers, boo::html::EventLoop::Current().Now());
   }
 
-  boo::PlatformWheelEvent TouchpadPanEvent(const boo::IntPoint &point, const boo::IntPoint &screenPoint,
+  boo::PlatformWheelEvent TouchpadPanEvent(const PointI &point, const PointI &screenPoint,
                                            const pal::TouchpadPanInput &input) noexcept
   {
     using Phase = boo::PlatformWheelEventPhase;

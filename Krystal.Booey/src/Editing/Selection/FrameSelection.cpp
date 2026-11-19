@@ -144,7 +144,7 @@ namespace krys::boo
     // FIXME: Maybe baseline would be better?
     KRYS_NODISCARD bool AbsoluteCaretY(const VisiblePosition &c, int32 &y) noexcept
     {
-      IntRect rect = c.AbsoluteCaretBounds();
+      RectI rect = c.AbsoluteCaretBounds();
       if (rect.IsEmpty())
       {
         return false;
@@ -670,7 +670,7 @@ namespace krys::boo
     {
       rect = revealSelectionOptions.RevealExtent == RevealExtentOption::RevealExtent
                ? LayoutRect(VisiblePosition(_selection.CanonicalFocus()).AbsoluteCaretBounds())
-               : LayoutRect(EnclosingIntRect(SelectionBounds(ClipToVisibleContent::No)));
+               : LayoutRect(EnclosingRectI(SelectionBounds(ClipToVisibleContent::No)));
     }
 
     dom::Position start = _selection.Start();
@@ -2228,7 +2228,7 @@ namespace krys::boo
     return true;
   }
 
-  FloatRect FrameSelection::SelectionBounds(ClipToVisibleContent clipToVisibleContent) noexcept
+  RectF FrameSelection::SelectionBounds(ClipToVisibleContent clipToVisibleContent) noexcept
   {
     if (!_document)
     {
@@ -2252,11 +2252,10 @@ namespace krys::boo
 
     if (clipToVisibleContent == ClipToVisibleContent::No)
     {
-      return FloatRect(selection.Bounds());
+      return RectF(selection.Bounds());
     }
 
-    return Intersection(FloatRect(visibleSelectionRect),
-                        FloatRect(renderView->FrameView().VisibleContentRect()));
+    return Intersection(RectF(visibleSelectionRect), RectF(renderView->FrameView().VisibleContentRect()));
   }
 
   // FIXME: Caret browsing, once there's caret browsing.
@@ -2410,11 +2409,11 @@ namespace krys::boo
     return RendererForCaretPainting(_selection.Start().DeprecatedNode());
   }
 
-  IntRect FrameSelection::AbsoluteCaretBounds(bool *insideFixed) noexcept
+  RectI FrameSelection::AbsoluteCaretBounds(bool *insideFixed) noexcept
   {
     if (!_document)
     {
-      return IntRect();
+      return RectI();
     }
     UpdateSelectionAppearanceNow();
     (void)RecomputeCaretRect();
@@ -2469,7 +2468,7 @@ namespace krys::boo
       return false;
     }
 
-    IntRect oldAbsCaretBounds = _absCaretBounds;
+    RectI oldAbsCaretBounds = _absCaretBounds;
     bool isInsideFixed = false;
     _absCaretBounds =
       AbsoluteBoundsForLocalCaretRect(RendererForCaretPainting(caretNode.get()), newRect, &isInsideFixed);

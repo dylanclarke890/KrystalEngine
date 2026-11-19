@@ -26,8 +26,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 
 namespace krys::boo
 {
@@ -44,7 +44,7 @@ namespace krys::boo
     PathTraversalState(Action, float desiredLength = 0) noexcept;
 
   public:
-    KRYS_NODISCARD bool ProcessPathElement(PathElement::Type, std::span<const FloatPoint>) noexcept;
+    KRYS_NODISCARD bool ProcessPathElement(PathElement::Type, std::span<const PointF>) noexcept;
 
     KRYS_NODISCARD bool ProcessPathElement(const PathElement &element) noexcept
     {
@@ -82,7 +82,7 @@ namespace krys::boo
       return _totalLength;
     }
 
-    KRYS_NODISCARD FloatPoint Current() const noexcept
+    KRYS_NODISCARD PointF Current() const noexcept
     {
       return _current;
     }
@@ -95,30 +95,30 @@ namespace krys::boo
   private:
     void CloseSubpath() noexcept;
 
-    void MoveTo(const FloatPoint &) noexcept;
+    void MoveTo(const PointF &) noexcept;
 
-    void LineTo(const FloatPoint &) noexcept;
+    void LineTo(const PointF &) noexcept;
 
-    void QuadraticBezierTo(const FloatPoint &, const FloatPoint &) noexcept;
+    void QuadraticBezierTo(const PointF &, const PointF &) noexcept;
 
-    void CubicBezierTo(const FloatPoint &, const FloatPoint &, const FloatPoint &) noexcept;
+    void CubicBezierTo(const PointF &, const PointF &, const PointF &) noexcept;
 
     KRYS_NODISCARD bool FinalizeAppendPathElement() noexcept;
 
-    KRYS_NODISCARD bool AppendPathElement(PathElement::Type, std::span<const FloatPoint>) noexcept;
+    KRYS_NODISCARD bool AppendPathElement(PathElement::Type, std::span<const PointF>) noexcept;
 
   private:
     Action _action;
     bool _success {false};
 
-    FloatPoint _current;
-    FloatPoint _start;
+    PointF _current;
+    PointF _start;
 
     float _totalLength {0};
     float _desiredLength {0};
 
     // For normal calculations
-    FloatPoint _previous;
+    PointF _previous;
     float _normalAngle {0}; // degrees
     bool _isZeroVector {false};
   };

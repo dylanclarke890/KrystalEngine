@@ -28,9 +28,9 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Color/ColorInterpolationMethod.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/GradientColorStops.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
@@ -42,8 +42,6 @@ namespace krys
 
 namespace krys::boo
 {
-  class FloatRect;
-
   /// @brief A linear, radial or conic gradient: its geometry, colour stops, interpolation and spread.
   /// FIXME: Drawing (`fill`, the platform shaders and patterns) and the rendering resource observers come
   /// with the graphics backend.
@@ -52,14 +50,14 @@ namespace krys::boo
   public:
     struct LinearData
     {
-      FloatPoint Point0;
-      FloatPoint Point1;
+      PointF Point0;
+      PointF Point1;
     };
 
     struct RadialData
     {
-      FloatPoint Point0;
-      FloatPoint Point1;
+      PointF Point0;
+      PointF Point1;
       float StartRadius;
       float EndRadius;
       float AspectRatio; // For elliptical gradient, width / height.
@@ -67,7 +65,7 @@ namespace krys::boo
 
     struct ConicData
     {
-      FloatPoint Point0;
+      PointF Point0;
       float AngleRadians;
     };
 
@@ -118,7 +116,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsZeroSize() const noexcept;
 
-    void AdjustParametersForTiledDrawing(FloatSize &, FloatRect &, const FloatSize &spacing) noexcept;
+    void AdjustParametersForTiledDrawing(SizeF &, RectF &, const SizeF &spacing) noexcept;
 
     /// @brief A hash of the geometry, interpolation, spread and stops, for caches drawn from the gradient.
     KRYS_NODISCARD uint32 Hash() const noexcept;

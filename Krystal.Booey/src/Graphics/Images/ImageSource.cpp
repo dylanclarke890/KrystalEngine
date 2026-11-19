@@ -46,6 +46,6 @@ namespace krys::boo
 
   bool ImageSource::HasSolidColor() const noexcept
   {
-    return Size() == IntSize(1, 1) && FrameCount() == 1;
+    return Size() == SizeI(1, 1) && FrameCount() == 1;
   }
 }

@@ -25,12 +25,12 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Images/PlatformImage.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
 #include "Krystal.Core/Colour/ColourUtilities.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include <algorithm>
 
@@ -42,12 +42,12 @@ namespace krys::boo
   {
   private:
     RefPtr<PixelData> _pixels;
-    IntSize _size;
-    IntRect _frameRect; // This will always just be the entire buffer except for GIF and PNG frames
+    SizeI _size;
+    RectI _frameRect; // This will always just be the entire buffer except for GIF and PNG frames
     bool _premultiplyAlpha {true};
 
   public:
-    KRYS_NODISCARD static UniquePtr<ImageBackingStore> Create(const IntSize &size,
+    KRYS_NODISCARD static UniquePtr<ImageBackingStore> Create(const SizeI &size,
                                                               bool premultiplyAlpha = true) noexcept
     {
       return UniquePtr<ImageBackingStore>(new ImageBackingStore(size, premultiplyAlpha));
@@ -64,7 +64,7 @@ namespace krys::boo
       return AdoptRef(*new PlatformImage(_size, ShareRef(*_pixels), _premultiplyAlpha));
     }
 
-    bool SetSize(const IntSize &size) noexcept
+    bool SetSize(const SizeI &size) noexcept
     {
       if (size.IsEmpty())
       {
@@ -73,24 +73,24 @@ namespace krys::boo
 
       _pixels = AdoptRef(*new PixelData(static_cast<size_t>(size.UnclampedArea())));
       _size = size;
-      _frameRect = IntRect(IntPoint(), _size);
+      _frameRect = RectI(PointI(), _size);
       Clear();
       return true;
     }
 
-    void SetFrameRect(const IntRect &frameRect) noexcept
+    void SetFrameRect(const RectI &frameRect) noexcept
     {
       krys_debug_assert(!_size.IsEmpty());
       krys_debug_assert(InBounds(frameRect));
       _frameRect = frameRect;
     }
 
-    KRYS_NODISCARD const IntSize &Size() const noexcept
+    KRYS_NODISCARD const SizeI &Size() const noexcept
     {
       return _size;
     }
 
-    KRYS_NODISCARD const IntRect &FrameRect() const noexcept
+    KRYS_NODISCARD const RectI &FrameRect() const noexcept
     {
       return _frameRect;
     }
@@ -100,7 +100,7 @@ namespace krys::boo
       std::ranges::fill(_pixels->Pixels, 0u);
     }
 
-    void ClearRect(const IntRect &rect) noexcept
+    void ClearRect(const RectI &rect) noexcept
     {
       if (rect.IsEmpty() || !InBounds(rect))
       {
@@ -114,7 +114,7 @@ namespace krys::boo
       }
     }
 
-    void FillRect(const IntRect &rect, uint8 r, uint8 g, uint8 b, uint8 a) noexcept
+    void FillRect(const RectI &rect, uint8 r, uint8 g, uint8 b, uint8 a) noexcept
     {
       if (rect.IsEmpty() || !InBounds(rect))
       {
@@ -129,7 +129,7 @@ namespace krys::boo
       }
     }
 
-    void RepeatFirstRow(const IntRect &rect) noexcept
+    void RepeatFirstRow(const RectI &rect) noexcept
     {
       if (rect.IsEmpty() || !InBounds(rect))
       {
@@ -145,7 +145,7 @@ namespace krys::boo
 
     KRYS_NODISCARD uint32 *PixelsStartingAt(int32 x, int32 y) noexcept
     {
-      krys_debug_assert(InBounds(IntPoint(x, y)));
+      krys_debug_assert(InBounds(PointI(x, y)));
       return _pixels->Pixels.data() + static_cast<size_t>(y) * static_cast<size_t>(_size.Width()) + x;
     }
 
@@ -206,7 +206,7 @@ namespace krys::boo
       destination = packed_colour::ARGB {result}.Value;
     }
 
-    KRYS_NODISCARD static bool IsOverSize(const IntSize &size) noexcept
+    KRYS_NODISCARD static bool IsOverSize(const SizeI &size) noexcept
     {
       constexpr uint64 maxPixels = (1u << 29) - 1;
       uint64 pixels = static_cast<uint64>(size.Width()) * static_cast<uint64>(size.Height());
@@ -214,7 +214,7 @@ namespace krys::boo
     }
 
   private:
-    ImageBackingStore(const IntSize &size, bool premultiplyAlpha = true) noexcept
+    ImageBackingStore(const SizeI &size, bool premultiplyAlpha = true) noexcept
         : _premultiplyAlpha(premultiplyAlpha)
     {
       krys_debug_assert(!size.IsEmpty() && !IsOverSize(size));
@@ -228,14 +228,14 @@ namespace krys::boo
       krys_debug_assert(!_size.IsEmpty() && !IsOverSize(_size));
     }
 
-    KRYS_NODISCARD bool InBounds(const IntPoint &point) const noexcept
+    KRYS_NODISCARD bool InBounds(const PointI &point) const noexcept
     {
-      return IntRect(IntPoint(), _size).Contains(point);
+      return RectI(PointI(), _size).Contains(point);
     }
 
-    KRYS_NODISCARD bool InBounds(const IntRect &rect) const noexcept
+    KRYS_NODISCARD bool InBounds(const RectI &rect) const noexcept
     {
-      return IntRect(IntPoint(), _size).Contains(rect);
+      return RectI(PointI(), _size).Contains(rect);
     }
 
     KRYS_NODISCARD uint32 PixelValue(uint8 r, uint8 g, uint8 b, uint8 a) const noexcept

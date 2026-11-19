@@ -33,10 +33,10 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(LegacyRenderSVGContainer);
 
   private:
-    Markable<FloatRect> _objectBoundingBox;
-    mutable Markable<FloatRect> _strokeBoundingBox;
-    FloatRect _repaintBoundingBox {};
-    mutable Markable<FloatRect> _accurateRepaintBoundingBox;
+    Markable<RectF> _objectBoundingBox;
+    mutable Markable<RectF> _strokeBoundingBox;
+    RectF _repaintBoundingBox {};
+    mutable Markable<RectF> _accurateRepaintBoundingBox;
 
     bool _needsBoundariesUpdate {true};
     bool _repaintIsSuspendedForChildrenDuringLayout {false};
@@ -66,9 +66,9 @@ namespace krys::boo
       return _repaintIsSuspendedForChildrenDuringLayout;
     }
 
-    KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept final
+    KRYS_NODISCARD RectF ObjectBoundingBox() const noexcept final
     {
-      return _objectBoundingBox.value_or(FloatRect());
+      return _objectBoundingBox.value_or(RectF());
     }
 
   protected:
@@ -89,15 +89,15 @@ namespace krys::boo
     void AddFocusRingRects(List<LayoutRect> &, const LayoutPoint &additionalOffset,
                            const RenderLayerModelObject *paintContainer = nullptr) const noexcept final;
 
-    KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept final;
+    KRYS_NODISCARD RectF StrokeBoundingBox() const noexcept final;
 
-    KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
+    KRYS_NODISCARD RectF RepaintRectInLocalCoordinates(
       RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept final;
 
-    KRYS_NODISCARD FloatRect DecoratedBoundingBox() const noexcept final;
+    KRYS_NODISCARD RectF DecoratedBoundingBox() const noexcept final;
 
-    bool NodeAtFloatPoint(const HitTestRequest &, HitTestResult &, const FloatPoint &pointInParent,
-                          HitTestAction) noexcept override;
+    bool NodeAtPointF(const HitTestRequest &, HitTestResult &, const PointF &pointInParent,
+                      HitTestAction) noexcept override;
 
     // Allow LegacyRenderSVGTransformableContainer to hook in at the right time in layout()
     virtual bool CalculateLocalTransform() noexcept
@@ -106,7 +106,7 @@ namespace krys::boo
     }
 
     // Allow RenderSVGViewportContainer to hook in at the right times in layout(), paint() and
-    // nodeAtFloatPoint()
+    // nodeAtPointF()
     virtual void CalcViewport() noexcept
     {
     }
@@ -115,7 +115,7 @@ namespace krys::boo
     {
     }
 
-    KRYS_NODISCARD virtual bool PointIsInsideViewportClip(const FloatPoint & /*pointInParent*/) noexcept
+    KRYS_NODISCARD virtual bool PointIsInsideViewportClip(const PointF & /*pointInParent*/) noexcept
     {
       return true;
     }

@@ -185,10 +185,10 @@ namespace krys::boo::tests
           == FEOffset::CalculateOutsets({20, 0}));
     CHECK(SVGFilterRenderer::CalculateResolvedSize({.5f, .25f}, {10, 10, 40, 20},
                                                    SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
-          == FloatSize {20, 5});
+          == SizeF {20, 5});
     CHECK(SVGFilterRenderer::CalculateResolvedSize({.5f, .25f}, {10, 10, 40, 20},
                                                    SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE)
-          == FloatSize {.5f, .25f});
+          == SizeF {.5f, .25f});
   }
 
   TEST_CASE("SVGFilterRenderer: a reused result name refers to the latest primitive",

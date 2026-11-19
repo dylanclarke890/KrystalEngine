@@ -33,25 +33,23 @@ namespace krys::boo
     _traversalState.SetDesiredLength(desiredLength);
   }
 
-  void SVGPathTraversalStateBuilder::MoveTo(const FloatPoint &targetPoint, bool,
-                                            svg::PathCoordinateMode) noexcept
+  void SVGPathTraversalStateBuilder::MoveTo(const PointF &targetPoint, bool, svg::PathCoordinateMode) noexcept
   {
     (void)_traversalState.ProcessPathElement(PathElement::Type::MoveToPoint, std::span {&targetPoint, 1});
   }
 
-  void SVGPathTraversalStateBuilder::LineTo(const FloatPoint &targetPoint, svg::PathCoordinateMode) noexcept
+  void SVGPathTraversalStateBuilder::LineTo(const PointF &targetPoint, svg::PathCoordinateMode) noexcept
   {
     (void)_traversalState.ProcessPathElement(PathElement::Type::AddLineToPoint, std::span {&targetPoint, 1});
   }
 
-  void SVGPathTraversalStateBuilder::CurveToCubic(const FloatPoint &point1, const FloatPoint &point2,
-                                                  const FloatPoint &targetPoint,
-                                                  svg::PathCoordinateMode) noexcept
+  void SVGPathTraversalStateBuilder::CurveToCubic(const PointF &point1, const PointF &point2,
+                                                  const PointF &targetPoint, svg::PathCoordinateMode) noexcept
   {
     std::array points {point1, point2, targetPoint};
 
     (void)_traversalState.ProcessPathElement(PathElement::Type::AddCurveToPoint,
-                                             std::span<const FloatPoint> {points});
+                                             std::span<const PointF> {points});
   }
 
   void SVGPathTraversalStateBuilder::ClosePath() noexcept
@@ -69,7 +67,7 @@ namespace krys::boo
     return _traversalState.TotalLength();
   }
 
-  FloatPoint SVGPathTraversalStateBuilder::CurrentPoint() const noexcept
+  PointF SVGPathTraversalStateBuilder::CurrentPoint() const noexcept
   {
     return _traversalState.Current();
   }

@@ -197,7 +197,7 @@ namespace krys::boo
     }
   }
 
-  void Pasteboard::SetDragImage(DragImage, const IntPoint &) noexcept
+  void Pasteboard::SetDragImage(DragImage, const PointI &) noexcept
   {
   }
 

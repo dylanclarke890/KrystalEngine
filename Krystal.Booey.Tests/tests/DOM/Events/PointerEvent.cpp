@@ -110,7 +110,7 @@ namespace krys::boo::dom::tests
 
     auto mouseEvent = [&](utf8_stringview type, MouseButton button, uint16 buttons)
     {
-      PlatformMouseEvent platform(DoublePoint(10.5, 20.25), DoublePoint(110.5, 220.25), button,
+      PlatformMouseEvent platform(PointD(10.5, 20.25), PointD(110.5, 220.25), button,
                                   PlatformEvent::Type::MouseMoved, 1, {}, MonotonicTime::Now(), buttons);
       return MouseEvent::Create(DOMStringAtom(type), view, platform, {}, {}, 1, nullptr);
     };
@@ -182,7 +182,7 @@ namespace krys::boo::dom::tests
 
     SECTION("a pen's pressure is its force")
     {
-      PlatformMouseEvent platform(DoublePoint(1, 1), DoublePoint(1, 1), MouseButton::Left,
+      PlatformMouseEvent platform(PointD(1, 1), PointD(1, 1), MouseButton::Left,
                                   PlatformEvent::Type::MousePressed, 1, {}, MonotonicTime::Now(), 1, {},
                                   0.75);
       auto source = MouseEvent::Create(u8"mousedown", view, platform, {}, {}, 1, nullptr);
@@ -194,7 +194,7 @@ namespace krys::boo::dom::tests
 
     SECTION("a move's coalesced events")
     {
-      PlatformMouseEvent platform(DoublePoint(5, 5), DoublePoint(5, 5), MouseButton::None,
+      PlatformMouseEvent platform(PointD(5, 5), PointD(5, 5), MouseButton::None,
                                   PlatformEvent::Type::MouseMoved, 0, {}, MonotonicTime::Now());
       auto coalesced = MouseEvent::Create(u8"mousemove", view, platform, {}, {}, 0, nullptr);
       auto source = MouseEvent::Create(u8"mousemove", view, platform, {coalesced}, {}, 0, nullptr);

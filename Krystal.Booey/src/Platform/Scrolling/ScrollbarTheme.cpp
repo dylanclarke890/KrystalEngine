@@ -37,9 +37,9 @@ namespace krys::boo
   }
 
   void ScrollbarTheme::DefaultPaintScrollCorner(ScrollableArea &, GraphicsContext &context,
-                                                const IntRect &cornerRect) noexcept
+                                                const RectI &cornerRect) noexcept
   {
-    context.FillRect(FloatRect(cornerRect), Color::white);
+    context.FillRect(RectF(cornerRect), Color::white);
   }
 
   ScrollbarButtonPressAction ScrollbarTheme::HandleMousePressEvent(Scrollbar &,

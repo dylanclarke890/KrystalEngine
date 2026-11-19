@@ -59,7 +59,6 @@
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/Editing/WritingDirection.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLEmbedElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
@@ -82,6 +81,7 @@
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/Selection/CaretRectComputation.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -2033,7 +2033,7 @@ namespace krys::boo
 
   namespace
   {
-    void CollapseCaretWidth(IntRect &rect) noexcept
+    void CollapseCaretWidth(RectI &rect) noexcept
     {
       // FIXME: Width adjustment doesn't work for rotated text.
       if (rect.Width() == CaretWidth())
@@ -2047,7 +2047,7 @@ namespace krys::boo
     }
   }
 
-  IntRect Editor::FirstRectForRange(const dom::SimpleRange &range) noexcept
+  RectI Editor::FirstRectForRange(const dom::SimpleRange &range) noexcept
   {
     (void)range.Start.GetDocument().UpdateLayout();
 
@@ -2057,7 +2057,7 @@ namespace krys::boo
     {
       // FIXME: Getting caret rect and removing caret width is a very roundabout way to get collapsed range
       // location. In particular, width adjustment doesn't work for rotated text.
-      IntRect startCaretRect = RenderedPosition(start).AbsoluteRect();
+      RectI startCaretRect = RenderedPosition(start).AbsoluteRect();
       CollapseCaretWidth(startCaretRect);
       return startCaretRect;
     }
@@ -2066,7 +2066,7 @@ namespace krys::boo
 
     if (InSameLine(start, end))
     {
-      return EnclosingIntRect(UnitedBoundingBoxes(RenderObject::AbsoluteTextQuads(range)));
+      return EnclosingRectI(UnitedBoundingBoxes(RenderObject::AbsoluteTextQuads(range)));
     }
 
     return RenderedPosition(start).AbsoluteRect(CaretRectMode::ExpandToEndOfLine);

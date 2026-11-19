@@ -33,7 +33,7 @@ namespace krys::boo::tests
       /// @brief The visible position for the absolute @p point, through the render view.
       KRYS_NODISCARD VisiblePosition PositionAt(float x, float y) noexcept
       {
-        return Document->GetRenderView()->VisiblePositionForPoint(LayoutPoint(FloatPoint(x, y)),
+        return Document->GetRenderView()->VisiblePositionForPoint(LayoutPoint(PointF(x, y)),
                                                                   HitTestSource::User);
       }
     };

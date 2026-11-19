@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Page/MouseEventTypes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo
@@ -60,7 +60,7 @@ namespace krys::boo
     struct MouseEventData : UIEventWithKeyStateData
     {
       /// @brief Where it happened, in the frame's absolute coordinates.
-      DoublePoint AbsoluteLocation;
+      PointD AbsoluteLocation;
       MouseButton Button {MouseButton::None};
       bool ButtonDown {false};
 

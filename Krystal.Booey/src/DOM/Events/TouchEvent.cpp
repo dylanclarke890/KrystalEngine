@@ -60,7 +60,7 @@ namespace krys::boo
   }
 
   TouchEvent::TouchEvent(TouchList *touches, TouchList *targetTouches, TouchList *changedTouches,
-                         const DOMStringAtom &type, LocalFrameView *view, const DoublePoint &globalLocation,
+                         const DOMStringAtom &type, LocalFrameView *view, const PointD &globalLocation,
                          EnumSet<Modifier> modifiers) noexcept
       : MouseRelatedEvent(type, TrustedInit(type), view, globalLocation, {}, 0, 0, modifiers, Simulated::No),
         _touches(ShareRefPtr(touches)), _targetTouches(ShareRefPtr(targetTouches)),
@@ -72,8 +72,8 @@ namespace krys::boo
   TouchEvent::~TouchEvent() noexcept = default;
 
   Ref<TouchEvent> TouchEvent::Create(TouchList *touches, TouchList *targetTouches, TouchList *changedTouches,
-                                     DOMStringAtom type, LocalFrameView *view,
-                                     const DoublePoint &globalLocation, EnumSet<Modifier> modifiers) noexcept
+                                     DOMStringAtom type, LocalFrameView *view, const PointD &globalLocation,
+                                     EnumSet<Modifier> modifiers) noexcept
   {
     return AdoptRef(*new TouchEvent(touches, targetTouches, changedTouches, krys::move(type), view,
                                     globalLocation, modifiers));

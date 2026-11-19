@@ -160,7 +160,7 @@ namespace krys::boo::html
     KRYS_NODISCARD bool ShouldHaveSpinButton() const noexcept;
 
     // DataListSuggestionsClient functions.
-    KRYS_NODISCARD IntRect ElementRectInRootViewCoordinates() const noexcept final;
+    KRYS_NODISCARD RectI ElementRectInRootViewCoordinates() const noexcept final;
 
     KRYS_NODISCARD List<DataListSuggestion> Suggestions() noexcept final;
 

@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
@@ -61,10 +61,10 @@ namespace krys::boo
     Timer _autoscrollTimer;
     WeakPtr<RenderBox> _autoscrollRenderer;
     AutoscrollType _autoscrollType {AutoscrollType::None};
-    IntPoint _dragAndDropAutoscrollReferencePosition;
+    PointI _dragAndDropAutoscrollReferencePosition;
     MonotonicTime::duration _dragAndDropAutoscrollStartTime {};
-    IntPoint _panScrollStartPosition;
-    IntPoint _panScrollMousePosition;
+    PointI _panScrollStartPosition;
+    PointI _panScrollMousePosition;
 
   public:
     AutoscrollController() noexcept;
@@ -84,7 +84,7 @@ namespace krys::boo
     void UpdateAutoscrollRenderer() noexcept;
 
     /// @brief Starts panning @p scrollable from @p lastKnownMousePosition (in the window).
-    void StartPanScrolling(RenderBox &scrollable, const IntPoint &lastKnownMousePosition) noexcept;
+    void StartPanScrolling(RenderBox &scrollable, const PointI &lastKnownMousePosition) noexcept;
 
     /// @brief A mouse button was released: stops panning, unless it's the release of the press that started
     /// it and the mouse hasn't moved away.
@@ -92,7 +92,7 @@ namespace krys::boo
 
     /// @brief A drag and drop moved over @p targetNode at @p eventPosition (in the window): scrolls the box
     /// it's near the edge of, after a moment.
-    void UpdateDragAndDrop(Node *targetNode, const IntPoint &eventPosition,
+    void UpdateDragAndDrop(Node *targetNode, const PointI &eventPosition,
                            MonotonicTime::duration eventTime) noexcept;
 
     void StopAutoscrollTimer(bool rendererIsBeingDestroyed = false) noexcept;
@@ -102,6 +102,6 @@ namespace krys::boo
 
     void StartAutoscrollTimer() noexcept;
 
-    void UpdatePanScrollState(LocalFrame &frame, const IntPoint &lastKnownMousePosition) noexcept;
+    void UpdatePanScrollState(LocalFrame &frame, const PointI &lastKnownMousePosition) noexcept;
   };
 }

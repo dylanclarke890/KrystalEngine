@@ -29,7 +29,7 @@ namespace krys::ui
     constexpr float circularCornerTolerance = 1.f / 16.f;
 
     const auto &radii = rect.GetRadii();
-    auto circular = [](const boo::FloatSize &radius)
+    auto circular = [](const SizeF &radius)
     {
       return std::abs(radius.Width() - radius.Height()) <= circularCornerTolerance;
     };
@@ -38,7 +38,7 @@ namespace krys::ui
     {
       return std::nullopt;
     }
-    auto radius = [](const boo::FloatSize &corner)
+    auto radius = [](const SizeF &corner)
     {
       return (corner.Width() + corner.Height()) / 2.f;
     };
@@ -52,7 +52,7 @@ namespace krys::ui
   void AddRoundedRect(gfx::Path2D &path, const boo::FloatRoundedRect &rect) noexcept
   {
     const auto &radii = rect.GetRadii();
-    auto toVec = [](const boo::FloatSize &size)
+    auto toVec = [](const SizeF &size)
     {
       return Vec2f {size.Width(), size.Height()};
     };
@@ -67,8 +67,8 @@ namespace krys::ui
     {
     private:
       gfx::Path2D _path;
-      boo::FloatPoint _currentPoint;
-      boo::FloatPoint _lastMoveToPoint;
+      PointF _currentPoint;
+      PointF _lastMoveToPoint;
       bool _hasCurrentPoint {false};
 
     public:
@@ -184,7 +184,7 @@ namespace krys::ui
 
       /// @brief An arc of @p radius tangent to the line from the current point to @p point1 and to the line
       /// from @p point1 to @p point2, joined to the current point by a line, as the canvas `arcTo` draws.
-      void AddArcTo(const boo::FloatPoint &point1, const boo::FloatPoint &point2, float radius) noexcept
+      void AddArcTo(const PointF &point1, const PointF &point2, float radius) noexcept
       {
         if (!_hasCurrentPoint)
         {
@@ -229,8 +229,8 @@ namespace krys::ui
 
       /// @brief An elliptical arc, rotated by @p rotation about its centre, joined to the current point by a
       /// line.
-      void AddEllipse(const boo::FloatPoint &centre, float radiusX, float radiusY, float rotation,
-                      float startAngle, float endAngle, boo::RotationDirection direction) noexcept
+      void AddEllipse(const PointF &centre, float radiusX, float radiusY, float rotation, float startAngle,
+                      float endAngle, boo::RotationDirection direction) noexcept
       {
         const bool anticlockwise = direction == boo::RotationDirection::Counterclockwise;
         if (!rotation)

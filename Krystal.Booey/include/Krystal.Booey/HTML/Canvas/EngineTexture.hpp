@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -26,7 +26,7 @@ namespace krys::boo::html
     virtual ~EngineTexture() noexcept = default;
 
     /// @brief The texture's size in pixels.
-    KRYS_NODISCARD virtual IntSize Size() const noexcept = 0;
+    KRYS_NODISCARD virtual SizeI Size() const noexcept = 0;
 
     /// @brief What shows the texture as a layer's contents in the host's compositor.
     KRYS_NODISCARD virtual RefPtr<GraphicsLayerContentsDisplayDelegate>

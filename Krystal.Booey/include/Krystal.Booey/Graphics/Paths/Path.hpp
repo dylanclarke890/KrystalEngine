@@ -57,7 +57,7 @@ namespace krys::boo
 
     Path(List<PathSegment> &&) noexcept;
 
-    explicit Path(const List<FloatPoint> &points) noexcept;
+    explicit Path(const List<PointF> &points) noexcept;
 
     Path(Ref<PathImpl> &&) noexcept;
 
@@ -71,36 +71,35 @@ namespace krys::boo
 
     KRYS_NODISCARD bool DefinitelyEqual(const Path &) const noexcept;
 
-    void MoveTo(const FloatPoint &) noexcept;
+    void MoveTo(const PointF &) noexcept;
 
-    void AddLineTo(const FloatPoint &) noexcept;
+    void AddLineTo(const PointF &) noexcept;
 
-    void AddQuadCurveTo(const FloatPoint &controlPoint, const FloatPoint &endPoint) noexcept;
+    void AddQuadCurveTo(const PointF &controlPoint, const PointF &endPoint) noexcept;
 
-    void AddBezierCurveTo(const FloatPoint &controlPoint1, const FloatPoint &controlPoint2,
-                          const FloatPoint &endPoint) noexcept;
+    void AddBezierCurveTo(const PointF &controlPoint1, const PointF &controlPoint2,
+                          const PointF &endPoint) noexcept;
 
-    void AddArcTo(const FloatPoint &point1, const FloatPoint &point2, float radius) noexcept;
+    void AddArcTo(const PointF &point1, const PointF &point2, float radius) noexcept;
 
-    void AddArc(const FloatPoint &, float radius, float startAngle, float endAngle,
-                RotationDirection) noexcept;
+    void AddArc(const PointF &, float radius, float startAngle, float endAngle, RotationDirection) noexcept;
 
-    void AddEllipse(const FloatPoint &, float radiusX, float radiusY, float rotation, float startAngle,
+    void AddEllipse(const PointF &, float radiusX, float radiusY, float rotation, float startAngle,
                     float endAngle, RotationDirection) noexcept;
 
-    void AddEllipseInRect(const FloatRect &) noexcept;
+    void AddEllipseInRect(const RectF &) noexcept;
 
-    void AddRect(const FloatRect &) noexcept;
+    void AddRect(const RectF &) noexcept;
 
     void AddRoundedRect(const FloatRoundedRect &,
                         PathRoundedRect::Strategy = PathRoundedRect::Strategy::PreferNative) noexcept;
 
-    void AddRoundedRect(const FloatRect &, const FloatSize &roundingRadii,
+    void AddRoundedRect(const RectF &, const SizeF &roundingRadii,
                         PathRoundedRect::Strategy = PathRoundedRect::Strategy::PreferNative) noexcept;
 
-    void AddContinuousRoundedRect(const FloatRect &, float cornerRadius) noexcept;
+    void AddContinuousRoundedRect(const RectF &, float cornerRadius) noexcept;
 
-    void AddContinuousRoundedRect(const FloatRect &, float cornerWidth, float cornerHeight) noexcept;
+    void AddContinuousRoundedRect(const RectF &, float cornerWidth, float cornerHeight) noexcept;
 
     void AddRoundedRect(const LayoutRoundedRect &) noexcept;
 
@@ -113,17 +112,17 @@ namespace krys::boo
     void ApplyElements(const PathElementApplier &) const noexcept;
 
     /// @brief Whether @p point is inside the path, filled with @p rule; curves are flattened into lines.
-    KRYS_NODISCARD bool Contains(const FloatPoint &point, WindRule rule = WindRule::NonZero) const noexcept;
+    KRYS_NODISCARD bool Contains(const PointF &point, WindRule rule = WindRule::NonZero) const noexcept;
 
     /// @brief Whether @p point is inside the path stroked as @p strokeStyleApplier sets up a graphics
     /// context, as the host's @ref PathStrokeStrategy strokes it.
     KRYS_NODISCARD bool
-      StrokeContains(const FloatPoint &point,
+      StrokeContains(const PointF &point,
                      const Func<void(GraphicsContext &)> &strokeStyleApplier) const noexcept;
 
     void Clear() noexcept;
 
-    void Translate(const FloatSize &delta) noexcept;
+    void Translate(const SizeF &delta) noexcept;
 
     void Transform(const AffineTransform &) noexcept;
 
@@ -155,19 +154,19 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasSubpaths() const noexcept;
 
-    KRYS_NODISCARD FloatPoint CurrentPoint() const noexcept;
+    KRYS_NODISCARD PointF CurrentPoint() const noexcept;
 
     KRYS_NODISCARD PathTraversalState TraversalStateAtLength(float length) const noexcept;
 
-    KRYS_NODISCARD FloatPoint PointAtLength(float length) const noexcept;
+    KRYS_NODISCARD PointF PointAtLength(float length) const noexcept;
 
-    KRYS_NODISCARD FloatRect FastBoundingRect() const noexcept;
+    KRYS_NODISCARD RectF FastBoundingRect() const noexcept;
 
-    KRYS_NODISCARD FloatRect BoundingRect() const noexcept;
+    KRYS_NODISCARD RectF BoundingRect() const noexcept;
 
     /// @brief The bounds of the path stroked as @p strokeStyleApplier sets up a graphics context (a solid
     /// stroke 1 wide without one), as the host's @ref PathStrokeStrategy strokes it.
-    KRYS_NODISCARD FloatRect
+    KRYS_NODISCARD RectF
       StrokeBoundingRect(const Func<void(GraphicsContext &)> &strokeStyleApplier = {}) const noexcept;
 
   private:
@@ -189,7 +188,7 @@ namespace krys::boo
 
     KRYS_NODISCARD const PathImpl *AsImpl() const noexcept;
 
-    KRYS_NODISCARD Maybe<FloatPoint> InitialMoveToPoint() const noexcept;
+    KRYS_NODISCARD Maybe<PointF> InitialMoveToPoint() const noexcept;
 
     Variant<std::monostate, PathSegment, DataRef<PathImpl>> _data;
   };
@@ -203,7 +202,7 @@ namespace krys::boo
     return std::holds_alternative<std::monostate>(_data);
   }
 
-  inline void Path::MoveTo(const FloatPoint &point) noexcept
+  inline void Path::MoveTo(const PointF &point) noexcept
   {
     if (IsEmpty())
     {
@@ -215,7 +214,7 @@ namespace krys::boo
     }
   }
 
-  inline void Path::AddLineTo(const FloatPoint &point) noexcept
+  inline void Path::AddLineTo(const PointF &point) noexcept
   {
     if (auto initial = InitialMoveToPoint())
     {
@@ -227,7 +226,7 @@ namespace krys::boo
     }
   }
 
-  inline void Path::AddQuadCurveTo(const FloatPoint &controlPoint, const FloatPoint &endPoint) noexcept
+  inline void Path::AddQuadCurveTo(const PointF &controlPoint, const PointF &endPoint) noexcept
   {
     if (auto initial = InitialMoveToPoint())
     {
@@ -239,8 +238,8 @@ namespace krys::boo
     }
   }
 
-  inline void Path::AddBezierCurveTo(const FloatPoint &controlPoint1, const FloatPoint &controlPoint2,
-                                     const FloatPoint &endPoint) noexcept
+  inline void Path::AddBezierCurveTo(const PointF &controlPoint1, const PointF &controlPoint2,
+                                     const PointF &endPoint) noexcept
   {
     if (auto initial = InitialMoveToPoint())
     {
@@ -252,7 +251,7 @@ namespace krys::boo
     }
   }
 
-  inline void Path::AddArcTo(const FloatPoint &point1, const FloatPoint &point2, float radius) noexcept
+  inline void Path::AddArcTo(const PointF &point1, const PointF &point2, float radius) noexcept
   {
     if (auto initial = InitialMoveToPoint())
     {
@@ -264,7 +263,7 @@ namespace krys::boo
     }
   }
 
-  inline void Path::AddArc(const FloatPoint &point, float radius, float startAngle, float endAngle,
+  inline void Path::AddArc(const PointF &point, float radius, float startAngle, float endAngle,
                            RotationDirection direction) noexcept
   {
     // Platform arc routines hang or crash when passed a non-finite radius or angle.
@@ -283,7 +282,7 @@ namespace krys::boo
     }
   }
 
-  inline void Path::AddEllipse(const FloatPoint &point, float radiusX, float radiusY, float rotation,
+  inline void Path::AddEllipse(const PointF &point, float radiusX, float radiusY, float rotation,
                                float startAngle, float endAngle, RotationDirection direction) noexcept
   {
     if (IsEmpty())
@@ -296,7 +295,7 @@ namespace krys::boo
     }
   }
 
-  inline void Path::AddEllipseInRect(const FloatRect &rect) noexcept
+  inline void Path::AddEllipseInRect(const RectF &rect) noexcept
   {
     if (IsEmpty())
     {
@@ -308,7 +307,7 @@ namespace krys::boo
     }
   }
 
-  inline void Path::AddRect(const FloatRect &rect) noexcept
+  inline void Path::AddRect(const RectF &rect) noexcept
   {
     if (IsEmpty())
     {
@@ -347,7 +346,7 @@ namespace krys::boo
     impl.Add(PathCloseSubpath {});
   }
 
-  inline FloatPoint Path::CurrentPoint() const noexcept
+  inline PointF Path::CurrentPoint() const noexcept
   {
     if (std::holds_alternative<std::monostate>(_data))
     {
@@ -355,17 +354,17 @@ namespace krys::boo
     }
     if (const auto *segment = std::get_if<PathSegment>(&_data))
     {
-      FloatPoint lastMoveToPoint;
+      PointF lastMoveToPoint;
       return segment->CalculateEndPoint({}, lastMoveToPoint);
     }
     return AsImpl()->CurrentPoint();
   }
 
-  inline Maybe<FloatPoint> Path::InitialMoveToPoint() const noexcept
+  inline Maybe<PointF> Path::InitialMoveToPoint() const noexcept
   {
     if (std::holds_alternative<std::monostate>(_data))
     {
-      return FloatPoint {0, 0};
+      return PointF {0, 0};
     }
     if (const auto *segment = std::get_if<PathSegment>(&_data))
     {

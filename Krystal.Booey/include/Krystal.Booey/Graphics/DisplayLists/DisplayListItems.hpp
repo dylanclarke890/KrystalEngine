@@ -122,16 +122,16 @@ namespace krys::boo::display_list
   class Scale
   {
   private:
-    FloatSize _size;
+    SizeF _size;
 
   public:
     constexpr static std::string_view Name = "scale";
 
-    explicit Scale(const FloatSize &size) noexcept : _size(size)
+    explicit Scale(const SizeF &size) noexcept : _size(size)
     {
     }
 
-    KRYS_NODISCARD const FloatSize &Amount() const noexcept
+    KRYS_NODISCARD const SizeF &Amount() const noexcept
     {
       return _size;
     }
@@ -383,16 +383,16 @@ namespace krys::boo::display_list
   class Clip
   {
   private:
-    FloatRect _rect;
+    RectF _rect;
 
   public:
     constexpr static std::string_view Name = "clip";
 
-    explicit Clip(const FloatRect &rect) noexcept : _rect(rect)
+    explicit Clip(const RectF &rect) noexcept : _rect(rect)
     {
     }
 
-    KRYS_NODISCARD const FloatRect &Rect() const noexcept
+    KRYS_NODISCARD const RectF &Rect() const noexcept
     {
       return _rect;
     }
@@ -427,16 +427,16 @@ namespace krys::boo::display_list
   class ClipOut
   {
   private:
-    FloatRect _rect;
+    RectF _rect;
 
   public:
     constexpr static std::string_view Name = "clip-out";
 
-    explicit ClipOut(const FloatRect &rect) noexcept : _rect(rect)
+    explicit ClipOut(const RectF &rect) noexcept : _rect(rect)
     {
     }
 
-    KRYS_NODISCARD const FloatRect &Rect() const noexcept
+    KRYS_NODISCARD const RectF &Rect() const noexcept
     {
       return _rect;
     }
@@ -536,14 +536,14 @@ namespace krys::boo::display_list
     Ref<const boo::Font> _font;
     List<GlyphBufferGlyph> _glyphs;
     List<GlyphBufferAdvance> _advances;
-    FloatPoint _localAnchor;
+    PointF _localAnchor;
     FontSmoothingMode _fontSmoothingMode;
 
   public:
     constexpr static std::string_view Name = "draw-glyphs";
 
     DrawGlyphs(Ref<const boo::Font> &&font, List<GlyphBufferGlyph> &&glyphs,
-               List<GlyphBufferAdvance> &&advances, const FloatPoint &localAnchor,
+               List<GlyphBufferAdvance> &&advances, const PointF &localAnchor,
                FontSmoothingMode smoothingMode) noexcept;
 
     KRYS_NODISCARD Ref<const boo::Font> GetFont() const noexcept
@@ -566,7 +566,7 @@ namespace krys::boo::display_list
       return _glyphs.size();
     }
 
-    KRYS_NODISCARD FloatPoint LocalAnchor() const noexcept
+    KRYS_NODISCARD PointF LocalAnchor() const noexcept
     {
       return _localAnchor;
     }
@@ -660,12 +660,12 @@ namespace krys::boo::display_list
   {
   private:
     Ref<ImageBuffer> _imageBuffer;
-    FloatRect _destinationRect;
+    RectF _destinationRect;
 
   public:
     constexpr static std::string_view Name = "clip-to-image-buffer";
 
-    ClipToImageBuffer(ImageBuffer &, const FloatRect &destinationRect) noexcept;
+    ClipToImageBuffer(ImageBuffer &, const RectF &destinationRect) noexcept;
 
     ClipToImageBuffer(const ClipToImageBuffer &) noexcept;
 
@@ -679,7 +679,7 @@ namespace krys::boo::display_list
 
     KRYS_NODISCARD ImageBuffer &GetImageBuffer() const noexcept;
 
-    KRYS_NODISCARD FloatRect DestinationRect() const noexcept
+    KRYS_NODISCARD RectF DestinationRect() const noexcept
     {
       return _destinationRect;
     }
@@ -693,13 +693,13 @@ namespace krys::boo::display_list
   {
   private:
     RefPtr<ImageBuffer> _sourceImage;
-    FloatRect _sourceImageRect;
+    RectF _sourceImageRect;
     Ref<Filter> _filter;
 
   public:
     constexpr static std::string_view Name = "draw-filtered-image-buffer";
 
-    DrawFilteredImageBuffer(RefPtr<ImageBuffer> &&sourceImage, const FloatRect &sourceImageRect,
+    DrawFilteredImageBuffer(RefPtr<ImageBuffer> &&sourceImage, const RectF &sourceImageRect,
                             Filter &filter) noexcept;
 
     DrawFilteredImageBuffer(const DrawFilteredImageBuffer &) noexcept;
@@ -714,7 +714,7 @@ namespace krys::boo::display_list
 
     KRYS_NODISCARD ImageBuffer *SourceImage() const noexcept;
 
-    KRYS_NODISCARD FloatRect SourceImageRect() const noexcept
+    KRYS_NODISCARD RectF SourceImageRect() const noexcept
     {
       return _sourceImageRect;
     }
@@ -730,14 +730,14 @@ namespace krys::boo::display_list
   {
   private:
     Ref<ImageBuffer> _imageBuffer;
-    FloatRect _destinationRect;
-    FloatRect _srcRect;
+    RectF _destinationRect;
+    RectF _srcRect;
     ImagePaintingOptions _options;
 
   public:
     constexpr static std::string_view Name = "draw-image-buffer";
 
-    DrawImageBuffer(ImageBuffer &, const FloatRect &destRect, const FloatRect &srcRect,
+    DrawImageBuffer(ImageBuffer &, const RectF &destRect, const RectF &srcRect,
                     ImagePaintingOptions) noexcept;
 
     DrawImageBuffer(const DrawImageBuffer &) noexcept;
@@ -752,12 +752,12 @@ namespace krys::boo::display_list
 
     KRYS_NODISCARD ImageBuffer &GetImageBuffer() const noexcept;
 
-    KRYS_NODISCARD FloatRect Source() const noexcept
+    KRYS_NODISCARD RectF Source() const noexcept
     {
       return _srcRect;
     }
 
-    KRYS_NODISCARD FloatRect DestinationRect() const noexcept
+    KRYS_NODISCARD RectF DestinationRect() const noexcept
     {
       return _destinationRect;
     }
@@ -776,14 +776,14 @@ namespace krys::boo::display_list
   {
   private:
     Ref<NativeImage> _image;
-    FloatRect _destinationRect;
-    FloatRect _srcRect;
+    RectF _destinationRect;
+    RectF _srcRect;
     ImagePaintingOptions _options;
 
   public:
     constexpr static std::string_view Name = "draw-native-image";
 
-    DrawNativeImage(NativeImage &, const FloatRect &destRect, const FloatRect &srcRect,
+    DrawNativeImage(NativeImage &, const RectF &destRect, const RectF &srcRect,
                     ImagePaintingOptions) noexcept;
 
     DrawNativeImage(const DrawNativeImage &) noexcept;
@@ -798,12 +798,12 @@ namespace krys::boo::display_list
 
     KRYS_NODISCARD NativeImage &GetNativeImage() const noexcept;
 
-    KRYS_NODISCARD FloatRect DestinationRect() const noexcept
+    KRYS_NODISCARD RectF DestinationRect() const noexcept
     {
       return _destinationRect;
     }
 
-    KRYS_NODISCARD FloatRect Source() const noexcept
+    KRYS_NODISCARD RectF Source() const noexcept
     {
       return _srcRect;
     }
@@ -822,19 +822,19 @@ namespace krys::boo::display_list
   {
   private:
     Ref<NativeImage> _image;
-    FloatRect _destination;
-    FloatRect _tileRect;
+    RectF _destination;
+    RectF _tileRect;
     AffineTransform _patternTransform;
-    FloatPoint _phase;
-    FloatSize _spacing;
+    PointF _phase;
+    SizeF _spacing;
     ImagePaintingOptions _options;
 
   public:
     constexpr static std::string_view Name = "draw-pattern-native-image";
 
-    DrawPatternNativeImage(NativeImage &, const FloatRect &destRect, const FloatRect &tileRect,
-                           const AffineTransform &patternTransform, const FloatPoint &phase,
-                           const FloatSize &spacing, ImagePaintingOptions) noexcept;
+    DrawPatternNativeImage(NativeImage &, const RectF &destRect, const RectF &tileRect,
+                           const AffineTransform &patternTransform, const PointF &phase, const SizeF &spacing,
+                           ImagePaintingOptions) noexcept;
 
     DrawPatternNativeImage(const DrawPatternNativeImage &) noexcept;
 
@@ -848,12 +848,12 @@ namespace krys::boo::display_list
 
     KRYS_NODISCARD NativeImage &GetNativeImage() const noexcept;
 
-    KRYS_NODISCARD FloatRect DestRect() const noexcept
+    KRYS_NODISCARD RectF DestRect() const noexcept
     {
       return _destination;
     }
 
-    KRYS_NODISCARD FloatRect TileRect() const noexcept
+    KRYS_NODISCARD RectF TileRect() const noexcept
     {
       return _tileRect;
     }
@@ -863,12 +863,12 @@ namespace krys::boo::display_list
       return _patternTransform;
     }
 
-    KRYS_NODISCARD FloatPoint Phase() const noexcept
+    KRYS_NODISCARD PointF Phase() const noexcept
     {
       return _phase;
     }
 
-    KRYS_NODISCARD FloatSize Spacing() const noexcept
+    KRYS_NODISCARD SizeF Spacing() const noexcept
     {
       return _spacing;
     }
@@ -887,19 +887,19 @@ namespace krys::boo::display_list
   {
   private:
     Ref<ImageBuffer> _imageBuffer;
-    FloatRect _destination;
-    FloatRect _tileRect;
+    RectF _destination;
+    RectF _tileRect;
     AffineTransform _patternTransform;
-    FloatPoint _phase;
-    FloatSize _spacing;
+    PointF _phase;
+    SizeF _spacing;
     ImagePaintingOptions _options;
 
   public:
     constexpr static std::string_view Name = "draw-pattern-imagebuffer";
 
-    DrawPatternImageBuffer(ImageBuffer &, const FloatRect &destRect, const FloatRect &tileRect,
-                           const AffineTransform &patternTransform, const FloatPoint &phase,
-                           const FloatSize &spacing, ImagePaintingOptions) noexcept;
+    DrawPatternImageBuffer(ImageBuffer &, const RectF &destRect, const RectF &tileRect,
+                           const AffineTransform &patternTransform, const PointF &phase, const SizeF &spacing,
+                           ImagePaintingOptions) noexcept;
 
     DrawPatternImageBuffer(const DrawPatternImageBuffer &) noexcept;
 
@@ -913,12 +913,12 @@ namespace krys::boo::display_list
 
     KRYS_NODISCARD ImageBuffer &GetImageBuffer() const noexcept;
 
-    KRYS_NODISCARD FloatRect DestRect() const noexcept
+    KRYS_NODISCARD RectF DestRect() const noexcept
     {
       return _destination;
     }
 
-    KRYS_NODISCARD FloatRect TileRect() const noexcept
+    KRYS_NODISCARD RectF TileRect() const noexcept
     {
       return _tileRect;
     }
@@ -928,12 +928,12 @@ namespace krys::boo::display_list
       return _patternTransform;
     }
 
-    KRYS_NODISCARD FloatPoint Phase() const noexcept
+    KRYS_NODISCARD PointF Phase() const noexcept
     {
       return _phase;
     }
 
-    KRYS_NODISCARD FloatSize Spacing() const noexcept
+    KRYS_NODISCARD SizeF Spacing() const noexcept
     {
       return _spacing;
     }
@@ -1023,17 +1023,17 @@ namespace krys::boo::display_list
   class DrawRect
   {
   private:
-    FloatRect _rect;
+    RectF _rect;
     float _borderThickness;
 
   public:
     constexpr static std::string_view Name = "draw-rect";
 
-    DrawRect(FloatRect rect, float borderThickness) noexcept : _rect(rect), _borderThickness(borderThickness)
+    DrawRect(RectF rect, float borderThickness) noexcept : _rect(rect), _borderThickness(borderThickness)
     {
     }
 
-    KRYS_NODISCARD FloatRect Rect() const noexcept
+    KRYS_NODISCARD RectF Rect() const noexcept
     {
       return _rect;
     }
@@ -1051,22 +1051,22 @@ namespace krys::boo::display_list
   class DrawLine
   {
   private:
-    FloatPoint _point1;
-    FloatPoint _point2;
+    PointF _point1;
+    PointF _point2;
 
   public:
     constexpr static std::string_view Name = "draw-line";
 
-    DrawLine(FloatPoint point1, FloatPoint point2) noexcept : _point1(point1), _point2(point2)
+    DrawLine(PointF point1, PointF point2) noexcept : _point1(point1), _point2(point2)
     {
     }
 
-    KRYS_NODISCARD FloatPoint Point1() const noexcept
+    KRYS_NODISCARD PointF Point1() const noexcept
     {
       return _point1;
     }
 
-    KRYS_NODISCARD FloatPoint Point2() const noexcept
+    KRYS_NODISCARD PointF Point2() const noexcept
     {
       return _point2;
     }
@@ -1079,7 +1079,7 @@ namespace krys::boo::display_list
   class DrawLinesForText
   {
   private:
-    FloatPoint _point;
+    PointF _point;
     List<FloatSegment> _lineSegments;
     float _thickness;
     bool _printing;
@@ -1089,10 +1089,10 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "draw-lines-for-text";
 
-    DrawLinesForText(const FloatPoint &, Span<const FloatSegment> lineSegments, float thickness,
-                     bool printing, bool doubleLines, boo::StrokeStyle) noexcept;
+    DrawLinesForText(const PointF &, Span<const FloatSegment> lineSegments, float thickness, bool printing,
+                     bool doubleLines, boo::StrokeStyle) noexcept;
 
-    KRYS_NODISCARD FloatPoint Point() const noexcept
+    KRYS_NODISCARD PointF Point() const noexcept
     {
       return _point;
     }
@@ -1130,18 +1130,18 @@ namespace krys::boo::display_list
   class DrawDotsForDocumentMarker
   {
   private:
-    FloatRect _rect;
+    RectF _rect;
     DocumentMarkerLineStyle _style;
 
   public:
     constexpr static std::string_view Name = "draw-dots-for-document-marker";
 
-    DrawDotsForDocumentMarker(FloatRect rect, DocumentMarkerLineStyle style) noexcept
+    DrawDotsForDocumentMarker(RectF rect, DocumentMarkerLineStyle style) noexcept
         : _rect(rect), _style(krys::move(style))
     {
     }
 
-    KRYS_NODISCARD FloatRect Rect() const noexcept
+    KRYS_NODISCARD RectF Rect() const noexcept
     {
       return _rect;
     }
@@ -1159,16 +1159,16 @@ namespace krys::boo::display_list
   class DrawEllipse
   {
   private:
-    FloatRect _rect;
+    RectF _rect;
 
   public:
     constexpr static std::string_view Name = "draw-ellipse";
 
-    explicit DrawEllipse(FloatRect rect) noexcept : _rect(rect)
+    explicit DrawEllipse(RectF rect) noexcept : _rect(rect)
     {
     }
 
-    KRYS_NODISCARD FloatRect Rect() const noexcept
+    KRYS_NODISCARD RectF Rect() const noexcept
     {
       return _rect;
     }
@@ -1238,7 +1238,7 @@ namespace krys::boo::display_list
   class DrawFocusRingRects
   {
   private:
-    List<FloatRect> _rects;
+    List<RectF> _rects;
     float _outlineOffset;
     float _outlineWidth;
     boo::Color _color;
@@ -1246,13 +1246,13 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "draw-focus-ring-rects";
 
-    DrawFocusRingRects(const List<FloatRect> &rects, float outlineOffset, float outlineWidth,
+    DrawFocusRingRects(const List<RectF> &rects, float outlineOffset, float outlineWidth,
                        boo::Color color) noexcept
         : _rects(rects), _outlineOffset(outlineOffset), _outlineWidth(outlineWidth), _color(krys::move(color))
     {
     }
 
-    KRYS_NODISCARD const List<FloatRect> &Rects() const noexcept
+    KRYS_NODISCARD const List<RectF> &Rects() const noexcept
     {
       return _rects;
     }
@@ -1280,18 +1280,18 @@ namespace krys::boo::display_list
   class FillRect
   {
   private:
-    FloatRect _rect;
+    RectF _rect;
     GraphicsContext::RequiresClipToRect _requiresClipToRect;
 
   public:
     constexpr static std::string_view Name = "fill-rect";
 
-    FillRect(const FloatRect &rect, GraphicsContext::RequiresClipToRect requiresClipToRect) noexcept
+    FillRect(const RectF &rect, GraphicsContext::RequiresClipToRect requiresClipToRect) noexcept
         : _rect(rect), _requiresClipToRect(requiresClipToRect)
     {
     }
 
-    KRYS_NODISCARD const FloatRect &Rect() const noexcept
+    KRYS_NODISCARD const RectF &Rect() const noexcept
     {
       return _rect;
     }
@@ -1309,17 +1309,17 @@ namespace krys::boo::display_list
   class FillRectWithColor
   {
   private:
-    FloatRect _rect;
+    RectF _rect;
     boo::Color _color;
 
   public:
     constexpr static std::string_view Name = "fill-rect-with-color";
 
-    FillRectWithColor(FloatRect rect, boo::Color color) noexcept : _rect(rect), _color(krys::move(color))
+    FillRectWithColor(RectF rect, boo::Color color) noexcept : _rect(rect), _color(krys::move(color))
     {
     }
 
-    KRYS_NODISCARD FloatRect Rect() const noexcept
+    KRYS_NODISCARD RectF Rect() const noexcept
     {
       return _rect;
     }
@@ -1337,17 +1337,17 @@ namespace krys::boo::display_list
   class FillRectWithGradient
   {
   private:
-    FloatRect _rect;
+    RectF _rect;
     const Ref<boo::Gradient> _gradient;
 
   public:
     constexpr static std::string_view Name = "fill-rect-with-gradient";
 
-    FillRectWithGradient(const FloatRect &, boo::Gradient &) noexcept;
+    FillRectWithGradient(const RectF &, boo::Gradient &) noexcept;
 
-    FillRectWithGradient(FloatRect &&, Ref<boo::Gradient> &&) noexcept;
+    FillRectWithGradient(RectF &&, Ref<boo::Gradient> &&) noexcept;
 
-    KRYS_NODISCARD const FloatRect &Rect() const noexcept
+    KRYS_NODISCARD const RectF &Rect() const noexcept
     {
       return _rect;
     }
@@ -1365,7 +1365,7 @@ namespace krys::boo::display_list
   class FillRectWithGradientAndSpaceTransform
   {
   private:
-    FloatRect _rect;
+    RectF _rect;
     const Ref<boo::Gradient> _gradient;
     AffineTransform _gradientSpaceTransform;
     GraphicsContext::RequiresClipToRect _requiresClipToRect;
@@ -1373,13 +1373,13 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "fill-rect-with-gradient-and-space-transform";
 
-    FillRectWithGradientAndSpaceTransform(const FloatRect &, boo::Gradient &, const AffineTransform &,
+    FillRectWithGradientAndSpaceTransform(const RectF &, boo::Gradient &, const AffineTransform &,
                                           GraphicsContext::RequiresClipToRect) noexcept;
 
-    FillRectWithGradientAndSpaceTransform(FloatRect &&, Ref<boo::Gradient> &&, AffineTransform &&,
+    FillRectWithGradientAndSpaceTransform(RectF &&, Ref<boo::Gradient> &&, AffineTransform &&,
                                           GraphicsContext::RequiresClipToRect) noexcept;
 
-    KRYS_NODISCARD const FloatRect &Rect() const noexcept
+    KRYS_NODISCARD const RectF &Rect() const noexcept
     {
       return _rect;
     }
@@ -1407,7 +1407,7 @@ namespace krys::boo::display_list
   class FillCompositedRect
   {
   private:
-    FloatRect _rect;
+    RectF _rect;
     boo::Color _color;
     CompositeOperator _op;
     boo::BlendMode _blendMode;
@@ -1415,13 +1415,12 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "fill-composited-rect";
 
-    FillCompositedRect(FloatRect rect, boo::Color color, CompositeOperator op,
-                       boo::BlendMode blendMode) noexcept
+    FillCompositedRect(RectF rect, boo::Color color, CompositeOperator op, boo::BlendMode blendMode) noexcept
         : _rect(rect), _color(krys::move(color)), _op(op), _blendMode(blendMode)
     {
     }
 
-    KRYS_NODISCARD FloatRect Rect() const noexcept
+    KRYS_NODISCARD RectF Rect() const noexcept
     {
       return _rect;
     }
@@ -1484,20 +1483,20 @@ namespace krys::boo::display_list
   class FillRectWithRoundedHole
   {
   private:
-    FloatRect _rect;
+    RectF _rect;
     FloatRoundedRect _roundedHoleRect;
     boo::Color _color;
 
   public:
     constexpr static std::string_view Name = "fill-rect-with-rounded-hole";
 
-    FillRectWithRoundedHole(const FloatRect &rect, const FloatRoundedRect &roundedHoleRect,
+    FillRectWithRoundedHole(const RectF &rect, const FloatRoundedRect &roundedHoleRect,
                             boo::Color color) noexcept
         : _rect(rect), _roundedHoleRect(roundedHoleRect), _color(krys::move(color))
     {
     }
 
-    KRYS_NODISCARD const FloatRect &Rect() const noexcept
+    KRYS_NODISCARD const RectF &Rect() const noexcept
     {
       return _rect;
     }
@@ -1542,16 +1541,16 @@ namespace krys::boo::display_list
   class FillEllipse
   {
   private:
-    FloatRect _rect;
+    RectF _rect;
 
   public:
     constexpr static std::string_view Name = "fill-ellipse";
 
-    explicit FillEllipse(FloatRect rect) noexcept : _rect(rect)
+    explicit FillEllipse(RectF rect) noexcept : _rect(rect)
     {
     }
 
-    KRYS_NODISCARD FloatRect Rect() const noexcept
+    KRYS_NODISCARD RectF Rect() const noexcept
     {
       return _rect;
     }
@@ -1564,17 +1563,17 @@ namespace krys::boo::display_list
   class StrokeRect
   {
   private:
-    FloatRect _rect;
+    RectF _rect;
     float _lineWidth;
 
   public:
     constexpr static std::string_view Name = "stroke-rect";
 
-    StrokeRect(FloatRect rect, float lineWidth) noexcept : _rect(rect), _lineWidth(lineWidth)
+    StrokeRect(RectF rect, float lineWidth) noexcept : _rect(rect), _lineWidth(lineWidth)
     {
     }
 
-    KRYS_NODISCARD FloatRect Rect() const noexcept
+    KRYS_NODISCARD RectF Rect() const noexcept
     {
       return _rect;
     }
@@ -1614,16 +1613,16 @@ namespace krys::boo::display_list
   class StrokeEllipse
   {
   private:
-    FloatRect _rect;
+    RectF _rect;
 
   public:
     constexpr static std::string_view Name = "stroke-ellipse";
 
-    explicit StrokeEllipse(const FloatRect &rect) noexcept : _rect(rect)
+    explicit StrokeEllipse(const RectF &rect) noexcept : _rect(rect)
     {
     }
 
-    KRYS_NODISCARD const FloatRect &Rect() const noexcept
+    KRYS_NODISCARD const RectF &Rect() const noexcept
     {
       return _rect;
     }
@@ -1636,16 +1635,16 @@ namespace krys::boo::display_list
   class ClearRect
   {
   private:
-    FloatRect _rect;
+    RectF _rect;
 
   public:
     constexpr static std::string_view Name = "clear-rect";
 
-    explicit ClearRect(const FloatRect &rect) noexcept : _rect(rect)
+    explicit ClearRect(const RectF &rect) noexcept : _rect(rect)
     {
     }
 
-    KRYS_NODISCARD const FloatRect &Rect() const noexcept
+    KRYS_NODISCARD const RectF &Rect() const noexcept
     {
       return _rect;
     }
@@ -1680,16 +1679,16 @@ namespace krys::boo::display_list
   class BeginPage
   {
   private:
-    FloatRect _pageRect;
+    RectF _pageRect;
 
   public:
     constexpr static std::string_view Name = "begin-page";
 
-    explicit BeginPage(const FloatRect &pageRect) noexcept : _pageRect(pageRect)
+    explicit BeginPage(const RectF &pageRect) noexcept : _pageRect(pageRect)
     {
     }
 
-    KRYS_NODISCARD const FloatRect &PageRect() const noexcept
+    KRYS_NODISCARD const RectF &PageRect() const noexcept
     {
       return _pageRect;
     }
@@ -1715,12 +1714,12 @@ namespace krys::boo::display_list
   {
   private:
     net::Url _link;
-    FloatRect _destRect;
+    RectF _destRect;
 
   public:
     constexpr static std::string_view Name = "set-URL-for-rect";
 
-    SetUrlForRect(net::Url link, const FloatRect &destRect) noexcept
+    SetUrlForRect(net::Url link, const RectF &destRect) noexcept
         : _link(krys::move(link)), _destRect(destRect)
     {
     }
@@ -1730,7 +1729,7 @@ namespace krys::boo::display_list
       return _link;
     }
 
-    KRYS_NODISCARD const FloatRect &DestRect() const noexcept
+    KRYS_NODISCARD const RectF &DestRect() const noexcept
     {
       return _destRect;
     }

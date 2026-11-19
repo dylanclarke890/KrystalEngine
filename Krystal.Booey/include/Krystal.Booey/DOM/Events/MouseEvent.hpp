@@ -202,9 +202,9 @@ namespace krys::boo
     }
 
     MouseEvent(DOMStringAtom type, const UIEventInit &eventInitDict, LocalFrameView *view,
-               const DoublePoint &screenLocation, const DoublePoint &windowLocation, double movementX,
-               double movementY, EnumSet<Modifier> modifiers, MouseButton button, uint16 buttons,
-               EventTarget *relatedTarget, double force, SyntheticClickType syntheticClickType,
+               const PointD &screenLocation, const PointD &windowLocation, double movementX, double movementY,
+               EnumSet<Modifier> modifiers, MouseButton button, uint16 buttons, EventTarget *relatedTarget,
+               double force, SyntheticClickType syntheticClickType,
                const List<Ref<MouseEvent>> &coalescedEvents, const List<Ref<MouseEvent>> &predictedEvents,
                Simulated isSimulated) noexcept;
   };

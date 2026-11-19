@@ -25,11 +25,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageBackingStore.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Time/Duration.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
@@ -73,7 +73,7 @@ namespace krys::boo
 
     bool Initialize(const ImageBackingStore &backingStore) noexcept;
 
-    bool Initialize(const IntSize &size, bool premultiplyAlpha) noexcept;
+    bool Initialize(const SizeI &size, bool premultiplyAlpha) noexcept;
 
     void SetDecodingStatus(DecodingStatus decodingStatus) noexcept;
 
@@ -94,7 +94,7 @@ namespace krys::boo
       return _decodingStatus == DecodingStatus::Complete;
     }
 
-    KRYS_NODISCARD IntSize Size() const noexcept;
+    KRYS_NODISCARD SizeI Size() const noexcept;
 
     void SetDisposalMethod(DisposalMethod method) noexcept
     {

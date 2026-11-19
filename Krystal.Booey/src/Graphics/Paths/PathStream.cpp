@@ -49,7 +49,7 @@ namespace krys::boo
     return AdoptRef(*new PathStream(segments));
   }
 
-  Ref<PathStream> PathStream::Create(const List<FloatPoint> &points) noexcept
+  Ref<PathStream> PathStream::Create(const List<PointF> &points) noexcept
   {
     auto stream = PathStream::Create();
     if (points.size() < 2)
@@ -272,7 +272,7 @@ namespace krys::boo
     return _segments.back().ClosesSubpath();
   }
 
-  FloatPoint PathStream::CurrentPoint() const noexcept
+  PointF PathStream::CurrentPoint() const noexcept
   {
     if (_segments.empty())
     {
@@ -284,8 +284,8 @@ namespace krys::boo
       return result.value();
     }
 
-    FloatPoint lastMoveToPoint;
-    FloatPoint currentPoint;
+    PointF lastMoveToPoint;
+    PointF currentPoint;
 
     for (auto &segment : _segments)
     {
@@ -295,11 +295,11 @@ namespace krys::boo
     return currentPoint;
   }
 
-  FloatRect PathStream::ComputeFastBoundingRect(std::span<const PathSegment> segments) noexcept
+  RectF PathStream::ComputeFastBoundingRect(std::span<const PathSegment> segments) noexcept
   {
-    FloatPoint lastMoveToPoint;
-    FloatPoint currentPoint;
-    FloatRect boundingRect = FloatRect::SmallestRect();
+    PointF lastMoveToPoint;
+    PointF currentPoint;
+    RectF boundingRect = RectF::SmallestRect();
 
     for (auto &segment : segments)
     {
@@ -317,9 +317,9 @@ namespace krys::boo
 
   bool PathStream::ComputeHasSubpaths(std::span<const PathSegment> segments) noexcept
   {
-    FloatPoint lastMoveToPoint;
-    FloatPoint currentPoint;
-    FloatRect boundingRect = FloatRect::SmallestRect();
+    PointF lastMoveToPoint;
+    PointF currentPoint;
+    RectF boundingRect = RectF::SmallestRect();
 
     for (auto &segment : segments)
     {
@@ -344,16 +344,16 @@ namespace krys::boo
     return ComputeHasSubpaths(std::span<const PathSegment> {_segments});
   }
 
-  FloatRect PathStream::FastBoundingRect() const noexcept
+  RectF PathStream::FastBoundingRect() const noexcept
   {
     return ComputeFastBoundingRect(std::span<const PathSegment> {_segments});
   }
 
-  FloatRect PathStream::ComputeBoundingRect(std::span<const PathSegment> segments) noexcept
+  RectF PathStream::ComputeBoundingRect(std::span<const PathSegment> segments) noexcept
   {
-    FloatPoint lastMoveToPoint;
-    FloatPoint currentPoint;
-    FloatRect boundingRect = FloatRect::SmallestRect();
+    PointF lastMoveToPoint;
+    PointF currentPoint;
+    RectF boundingRect = RectF::SmallestRect();
 
     for (auto &segment : segments)
     {
@@ -369,7 +369,7 @@ namespace krys::boo
     return boundingRect;
   }
 
-  FloatRect PathStream::BoundingRect() const noexcept
+  RectF PathStream::BoundingRect() const noexcept
   {
     return ComputeBoundingRect(std::span<const PathSegment> {_segments});
   }

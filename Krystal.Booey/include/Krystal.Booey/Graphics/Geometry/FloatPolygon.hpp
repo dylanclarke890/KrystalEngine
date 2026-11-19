@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/IntervalTree.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -49,9 +49,9 @@ namespace krys::boo
   public:
     virtual ~VertexPair() noexcept = default;
 
-    KRYS_NODISCARD virtual const FloatPoint &Vertex1() const noexcept = 0;
+    KRYS_NODISCARD virtual const PointF &Vertex1() const noexcept = 0;
 
-    KRYS_NODISCARD virtual const FloatPoint &Vertex2() const noexcept = 0;
+    KRYS_NODISCARD virtual const PointF &Vertex2() const noexcept = 0;
 
     KRYS_NODISCARD float MinX() const noexcept
     {
@@ -74,7 +74,7 @@ namespace krys::boo
     }
 
     /// @brief Whether this segment intersects @p other, and if so, where.
-    KRYS_NODISCARD bool Intersection(const VertexPair &other, FloatPoint &point) const noexcept;
+    KRYS_NODISCARD bool Intersection(const VertexPair &other, PointF &point) const noexcept;
   };
 
   /// @brief A polygon, with its edges indexed by their vertical range. Collinear and coincident vertices are
@@ -85,17 +85,17 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(FloatPolygon);
 
   private:
-    List<FloatPoint> _vertices;
-    FloatRect _boundingBox;
+    List<PointF> _vertices;
+    RectF _boundingBox;
     bool _empty;
     List<FloatPolygonEdge> _edges;
     EdgeIntervalTree _edgeTree; // Each EdgeIntervalTree node stores minY, maxY, and a ("UserData") pointer to
                                 // a FloatPolygonEdge.
 
   public:
-    explicit FloatPolygon(List<FloatPoint> &&vertices) noexcept;
+    explicit FloatPolygon(List<PointF> &&vertices) noexcept;
 
-    KRYS_NODISCARD const FloatPoint &VertexAt(uint32 index) const noexcept
+    KRYS_NODISCARD const PointF &VertexAt(uint32 index) const noexcept
     {
       return _vertices[index];
     }
@@ -109,7 +109,7 @@ namespace krys::boo
 
     KRYS_NODISCARD uint32 NumberOfEdges() const noexcept;
 
-    KRYS_NODISCARD FloatRect BoundingBox() const noexcept
+    KRYS_NODISCARD RectF BoundingBox() const noexcept
     {
       return _boundingBox;
     }
@@ -138,13 +138,13 @@ namespace krys::boo
     const FloatPolygon *_polygon {nullptr};
 
   public:
-    KRYS_NODISCARD const FloatPoint &Vertex1() const noexcept override
+    KRYS_NODISCARD const PointF &Vertex1() const noexcept override
     {
       krys_debug_assert(_polygon);
       return _polygon->VertexAt(_vertexIndex1);
     }
 
-    KRYS_NODISCARD const FloatPoint &Vertex2() const noexcept override
+    KRYS_NODISCARD const PointF &Vertex2() const noexcept override
     {
       krys_debug_assert(_polygon);
       return _polygon->VertexAt(_vertexIndex2);

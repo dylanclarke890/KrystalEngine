@@ -485,12 +485,12 @@ namespace krys::ui
       }
     }
 
-    boo::IntSize contentSize(1, 1);
+    SizeI contentSize(1, 1);
     if (auto *root = _view->Document().DocumentElement().get())
     {
       if (auto *box = DynamicDowncast<boo::RenderBox>(root->Renderer()))
       {
-        contentSize = boo::IntSize(box->Width().ToInt(), box->Height().ToInt());
+        contentSize = SizeI(box->Width().ToInt(), box->Height().ToInt());
       }
     }
     _rect = Place(_parameters.AnchorRectInRootView, contentSize, viewport, rightToLeft);
@@ -585,7 +585,7 @@ namespace krys::ui
     }
   }
 
-  void DateTimeChooserOverlay::MouseMoved(const boo::IntPoint &point) noexcept
+  void DateTimeChooserOverlay::MouseMoved(const PointI &point) noexcept
   {
     if (!_view)
     {
@@ -602,7 +602,7 @@ namespace krys::ui
     }
   }
 
-  void DateTimeChooserOverlay::MouseReleased(const boo::IntPoint &point) noexcept
+  void DateTimeChooserOverlay::MouseReleased(const PointI &point) noexcept
   {
     if (!_view)
     {
@@ -625,7 +625,7 @@ namespace krys::ui
     }
   }
 
-  bool DateTimeChooserOverlay::MouseWheel(const boo::IntPoint &, float, float notchesY) noexcept
+  bool DateTimeChooserOverlay::MouseWheel(const PointI &, float, float notchesY) noexcept
   {
     // The wheel turns the page.
     if (notchesY)

@@ -38,10 +38,10 @@ namespace krys::boo
   {
     /// @brief @p image's pixels laid out as drawn with @p orientation, at @p size (the oriented size).
     PlatformImagePtr OrientedPlatformImage(const PlatformImage &image, ImageOrientation orientation,
-                                           const IntSize &size) noexcept
+                                           const SizeI &size) noexcept
     {
       const auto &sourceSize = image.Size();
-      const auto transform = orientation.TransformFromDefault(FloatSize(size));
+      const auto transform = orientation.TransformFromDefault(SizeF(size));
       auto pixels = AdoptRef(*new PixelData(static_cast<size_t>(size.UnclampedArea())));
       const auto source = image.Pixels();
       for (int32 y = 0; y < sourceSize.Height(); ++y)
@@ -50,7 +50,7 @@ namespace krys::boo
         {
           // Map the pixel's centre; every orientation maps whole pixels onto whole pixels.
           const auto mapped =
-            transform.MapPoint(FloatPoint(static_cast<float>(x) + 0.5f, static_cast<float>(y) + 0.5f));
+            transform.MapPoint(PointF(static_cast<float>(x) + 0.5f, static_cast<float>(y) + 0.5f));
           const auto destX = static_cast<int32>(std::floor(mapped.X()));
           const auto destY = static_cast<int32>(std::floor(mapped.Y()));
           if (destX < 0 || destY < 0 || destX >= size.Width() || destY >= size.Height())
@@ -67,7 +67,7 @@ namespace krys::boo
 
     /// @brief @p image's pixels resampled to @p size, each the average of the area of the source it covers.
     /// @note Unpremultiplied colours are weighted by their alpha, so transparent pixels add no colour.
-    PlatformImagePtr ScaledPlatformImage(const PlatformImage &image, const IntSize &size) noexcept
+    PlatformImagePtr ScaledPlatformImage(const PlatformImage &image, const SizeI &size) noexcept
     {
       const auto &sourceSize = image.Size();
       const auto source = image.Pixels();
@@ -934,7 +934,7 @@ namespace krys::boo
     return NativeImage::Create(krys::move(platformImage));
   }
 
-  IntSize BitmapImageSource::FrameSizeAtIndex(uint32 index, SubsamplingLevel subsamplingLevel) const noexcept
+  SizeI BitmapImageSource::FrameSizeAtIndex(uint32 index, SubsamplingLevel subsamplingLevel) const noexcept
   {
     return const_cast<BitmapImageSource &>(*this).FrameAtIndexCacheIfNeeded(index, subsamplingLevel).Size();
   }

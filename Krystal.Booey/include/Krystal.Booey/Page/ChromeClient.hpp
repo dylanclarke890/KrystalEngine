@@ -22,7 +22,6 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Page/PointerCharacteristics.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Platform/Choosers/ColorChooser.hpp"
@@ -33,6 +32,7 @@
 #include "Krystal.Booey/Platform/GraphicsClient.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -50,7 +50,6 @@ namespace krys::boo
   class GraphicsLayer;
   class GraphicsLayerFactory;
   class HTMLSelectElement;
-  class IntRect;
   class LocalFrame;
   class PopupMenuClient;
   class SVGImageElement;
@@ -74,7 +73,7 @@ namespace krys::boo
     }
 
     /// @brief Called when @p rect (in the main frame's view) needs repainting.
-    virtual void InvalidateContentsAndRootView(const IntRect &rect) noexcept
+    virtual void InvalidateContentsAndRootView(const RectI &rect) noexcept
     {
       (void)rect;
     }
@@ -137,7 +136,7 @@ namespace krys::boo
     /// @brief Makes an image buffer with the host's own backend; null when the host has none for @p mode, so
     /// the buffer gets one of the page's (a display list).
     KRYS_NODISCARD RefPtr<ImageBuffer>
-      CreateImageBuffer(const FloatSize &size, RenderingMode mode, RenderingPurpose purpose,
+      CreateImageBuffer(const SizeF &size, RenderingMode mode, RenderingPurpose purpose,
                         float resolutionScale,
                         const DestinationColorSpace &colorSpace) const noexcept override
     {
@@ -281,19 +280,19 @@ namespace krys::boo
 
     /// @brief Where @p point, in the root view's coordinates, is on the screen. The base puts the root view
     /// at the screen's origin.
-    KRYS_NODISCARD virtual IntPoint RootViewToScreen(const IntPoint &point) const noexcept
+    KRYS_NODISCARD virtual PointI RootViewToScreen(const PointI &point) const noexcept
     {
       return point;
     }
 
     /// @brief Where @p rect, in the root view's coordinates, is on the screen.
-    KRYS_NODISCARD virtual IntRect RootViewToScreen(const IntRect &rect) const noexcept
+    KRYS_NODISCARD virtual RectI RootViewToScreen(const RectI &rect) const noexcept
     {
-      return IntRect(RootViewToScreen(rect.Location()), rect.Size());
+      return RectI(RootViewToScreen(rect.Location()), rect.Size());
     }
 
     /// @brief Where @p point, on the screen, is in the root view's coordinates.
-    KRYS_NODISCARD virtual IntPoint ScreenToRootView(const IntPoint &point) const noexcept
+    KRYS_NODISCARD virtual PointI ScreenToRootView(const PointI &point) const noexcept
     {
       return point;
     }
@@ -306,7 +305,7 @@ namespace krys::boo
     }
 
     /// @brief The screen's size, in CSS pixels (`device-width`, `device-height`, `device-aspect-ratio`).
-    KRYS_NODISCARD virtual FloatSize ScreenSize() const noexcept
+    KRYS_NODISCARD virtual SizeF ScreenSize() const noexcept
     {
       return {};
     }

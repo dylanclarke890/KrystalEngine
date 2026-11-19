@@ -27,12 +27,11 @@
 
 #include "Krystal.Booey/Graphics/ImageBuffers/PixelBufferFormat.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::boo
 {
-  class IntSize;
-
   /// @brief Rows of pixels to convert into.
   struct PixelBufferConversionView
   {
@@ -54,7 +53,7 @@ namespace krys::boo
   /// the destination's gamut) as needed.
   void ConvertImagePixels(const ConstPixelBufferConversionView &source,
                           const PixelBufferConversionView &destination,
-                          const IntSize &destinationSize) noexcept;
+                          const SizeI &destinationSize) noexcept;
 
   void CopyRowsInternal(uint32 sourceBytesPerRow, Span<const uint8> source, uint32 destinationBytesPerRow,
                         Span<uint8> destination, uint32 rows, uint32 copyBytesPerRow) noexcept;

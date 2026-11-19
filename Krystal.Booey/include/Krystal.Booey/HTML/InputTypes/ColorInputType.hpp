@@ -87,7 +87,7 @@ namespace krys::boo::html
 
     void DidEndChooser() noexcept final;
 
-    KRYS_NODISCARD IntRect ElementRectRelativeToRootView() const noexcept final;
+    KRYS_NODISCARD RectI ElementRectRelativeToRootView() const noexcept final;
 
     // InputType functions:
     KRYS_NODISCARD bool IsPresentingAttachedView() const noexcept final;

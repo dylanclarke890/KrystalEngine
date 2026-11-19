@@ -63,7 +63,7 @@ namespace krys::boo::tests
                                                      MouseButton button, int32 clickCount,
                                                      EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
       {
-        return PlatformMouseEvent(DoublePoint(x, y), DoublePoint(x, y), button, type, clickCount, modifiers,
+        return PlatformMouseEvent(PointD(x, y), PointD(x, y), button, type, clickCount, modifiers,
                                   MonotonicTime::Now());
       }
 

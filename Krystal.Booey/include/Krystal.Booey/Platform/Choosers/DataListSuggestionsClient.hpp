@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Platform/Choosers/DataListSuggestionPicker.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo
@@ -39,7 +39,7 @@ namespace krys::boo
     virtual ~DataListSuggestionsClient() noexcept = default;
 
     /// @brief Where the field is, in the root view's coordinates, for the list to go below it.
-    KRYS_NODISCARD virtual IntRect ElementRectInRootViewCoordinates() const noexcept = 0;
+    KRYS_NODISCARD virtual RectI ElementRectInRootViewCoordinates() const noexcept = 0;
 
     /// @brief The suggestions for the field's current text: those starting with it, then those containing
     /// it.

@@ -130,7 +130,7 @@ namespace krys::boo
     }
   }
 
-  void Page::SetPageScaleFactor(float scale, const IntPoint &origin) noexcept
+  void Page::SetPageScaleFactor(float scale, const PointI &origin) noexcept
   {
     RefPtr<boo::Document> mainDocument = ShareRefPtr(_mainFrame->Document());
     RefPtr<LocalFrameView> mainFrameView = mainDocument ? ShareRefPtr(mainDocument->View()) : nullptr;
@@ -159,7 +159,7 @@ namespace krys::boo
         }
 
         // Transform change on RenderView doesn't trigger repaint on non-composited contents.
-        view->InvalidateRect(IntRect(LayoutRect::InfiniteRect()));
+        view->InvalidateRect(RectI(LayoutRect::InfiniteRect()));
 
         _mainFrame->DeviceOrPageScaleFactorChanged();
       }

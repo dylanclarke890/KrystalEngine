@@ -26,7 +26,7 @@ namespace krys::boo
   {
   }
 
-  void GraphicsLayerTransform::SetPosition(const FloatPoint &position) noexcept
+  void GraphicsLayerTransform::SetPosition(const PointF &position) noexcept
   {
     if (_position == position)
     {
@@ -36,7 +36,7 @@ namespace krys::boo
     _dirty = true;
   }
 
-  void GraphicsLayerTransform::SetSize(const FloatSize &size) noexcept
+  void GraphicsLayerTransform::SetSize(const SizeF &size) noexcept
   {
     if (_size == size)
     {

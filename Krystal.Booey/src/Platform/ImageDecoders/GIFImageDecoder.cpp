@@ -52,7 +52,7 @@ namespace krys::boo
     }
   }
 
-  bool GIFImageDecoder::SetSize(const IntSize &size) noexcept
+  bool GIFImageDecoder::SetSize(const SizeI &size) noexcept
   {
     if (ScalableImageDecoder::GetEncodedDataStatus() >= EncodedDataStatus::SizeAvailable && Size() == size)
     {
@@ -140,10 +140,9 @@ namespace krys::boo
         // reader context.
         const auto *frameContext = _reader->FrameContext(i - 1);
         krys_debug_assert(frameContext);
-        IntRect frameRect(static_cast<int32>(frameContext->XOffset),
-                          static_cast<int32>(frameContext->YOffset), static_cast<int32>(frameContext->Width),
-                          static_cast<int32>(frameContext->Height));
-        if (frameRect.Contains(IntRect(IntPoint(), Size())))
+        RectI frameRect(static_cast<int32>(frameContext->XOffset), static_cast<int32>(frameContext->YOffset),
+                        static_cast<int32>(frameContext->Width), static_cast<int32>(frameContext->Height));
+        if (frameRect.Contains(RectI(PointI(), Size())))
         {
           return i;
         }
@@ -313,7 +312,7 @@ namespace krys::boo
     // Tell the frame to copy the row data if need be.
     if (repeatCount > 1)
     {
-      buffer.BackingStore()->RepeatFirstRow(IntRect(xBegin, yBegin, xEnd - xBegin, yEnd - yBegin));
+      buffer.BackingStore()->RepeatFirstRow(RectI(xBegin, yBegin, xEnd - xBegin, yEnd - yBegin));
     }
 
     return true;
@@ -336,11 +335,11 @@ namespace krys::boo
 
     if (!_currentBufferSawAlpha)
     {
-      IntRect rect = buffer.BackingStore()->FrameRect();
+      RectI rect = buffer.BackingStore()->FrameRect();
 
       // The whole frame was non-transparent, so it's possible that the entire
       // resulting buffer was non-transparent, and we can setHasAlpha(false).
-      if (rect.Contains(IntRect(IntPoint(), Size())))
+      if (rect.Contains(RectI(PointI(), Size())))
       {
         buffer.SetHasAlpha(false);
       }
@@ -370,7 +369,7 @@ namespace krys::boo
         // The only remaining case is a DisposalMethod::RestoreToBackground frame. If
         // it had no alpha, and its rect is contained in the current frame's
         // rect, we know the current frame has no alpha.
-        IntRect prevRect = prevBuffer->BackingStore()->FrameRect();
+        RectI prevRect = prevBuffer->BackingStore()->FrameRect();
         if ((prevBuffer->GetDisposalMethod()
              == ScalableImageDecoderFrame::DisposalMethod::RestoreToBackground)
             && !prevBuffer->HasAlpha() && rect.Contains(prevRect))
@@ -445,8 +444,8 @@ namespace krys::boo
   {
     // Initialize the frame rect in our buffer.
     const GIFFrameContext *frameContext = _reader->FrameContext();
-    IntRect frameRect(static_cast<int32>(frameContext->XOffset), static_cast<int32>(frameContext->YOffset),
-                      static_cast<int32>(frameContext->Width), static_cast<int32>(frameContext->Height));
+    RectI frameRect(static_cast<int32>(frameContext->XOffset), static_cast<int32>(frameContext->YOffset),
+                    static_cast<int32>(frameContext->Width), static_cast<int32>(frameContext->Height));
     auto *const buffer = &_frameBufferCache[frameIndex];
 
     if (!frameIndex)
@@ -490,9 +489,9 @@ namespace krys::boo
       {
         // We want to clear the previous frame to transparent, without
         // affecting pixels in the image outside of the frame.
-        IntRect prevRect = prevBuffer->BackingStore()->FrameRect();
-        const IntSize bufferSize = Size();
-        if (!frameIndex || prevRect.Contains(IntRect(IntPoint(), Size())))
+        RectI prevRect = prevBuffer->BackingStore()->FrameRect();
+        const SizeI bufferSize = Size();
+        if (!frameIndex || prevRect.Contains(RectI(PointI(), Size())))
         {
           // Clearing the first frame, or a frame the size of the whole
           // image, results in a completely empty image.

@@ -26,9 +26,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -44,7 +44,7 @@ namespace krys::boo
 
   public:
     /// @brief A point and the points its edges lead to.
-    class Node : public FloatPoint
+    class Node : public PointF
     {
       KRYS_NON_COPYABLE(Node);
 
@@ -53,7 +53,7 @@ namespace krys::boo
       bool _visited {false};
 
     public:
-      explicit Node(FloatPoint point) noexcept : FloatPoint(point)
+      explicit Node(PointF point) noexcept : PointF(point)
       {
       }
 
@@ -102,11 +102,10 @@ namespace krys::boo
 
     /// @brief The polygons outlining the union of @p rects, or none when it has holes; the graph owns their
     /// points.
-    KRYS_NODISCARD static std::pair<FloatPointGraph, List<Polygon>>
-      PolygonsForRect(const List<FloatRect> &rects);
+    KRYS_NODISCARD static std::pair<FloatPointGraph, List<Polygon>> PolygonsForRect(const List<RectF> &rects);
 
     /// @brief The node at @p point (within a small tolerance), made if there isn't one.
-    KRYS_NODISCARD Node *FindOrCreateNode(FloatPoint point);
+    KRYS_NODISCARD Node *FindOrCreateNode(PointF point);
 
     void Reset() noexcept;
   };

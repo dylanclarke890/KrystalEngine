@@ -24,10 +24,10 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Values/Value.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Url.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -135,13 +135,13 @@ namespace krys::boo
       return true;
     }
 
-    KRYS_NODISCARD virtual FloatSize ImageSize(const RenderElement *, float /* multiplier */) const noexcept
+    KRYS_NODISCARD virtual SizeF ImageSize(const RenderElement *, float /* multiplier */) const noexcept
     {
       return {};
     }
 
     virtual void ComputeIntrinsicDimensions(const RenderElement *, float &intrinsicWidth,
-                                            float &intrinsicHeight, FloatSize &intrinsicRatio) noexcept
+                                            float &intrinsicHeight, SizeF &intrinsicRatio) noexcept
     {
       intrinsicWidth = 0;
       intrinsicHeight = 0;
@@ -149,7 +149,7 @@ namespace krys::boo
     }
 
     // Image.
-    KRYS_NODISCARD virtual RefPtr<Image> GetImage(const RenderElement *, const FloatSize &,
+    KRYS_NODISCARD virtual RefPtr<Image> GetImage(const RenderElement *, const SizeF &,
                                                   const GraphicsContext & /* destinationContext */,
                                                   bool /* isForFirstLine */ = false) const noexcept
     {
@@ -177,7 +177,7 @@ namespace krys::boo
       return true;
     }
 
-    virtual void SetContainerContextForRenderer(const RenderElement &, const FloatSize &, float) noexcept
+    virtual void SetContainerContextForRenderer(const RenderElement &, const SizeF &, float) noexcept
     {
     }
 

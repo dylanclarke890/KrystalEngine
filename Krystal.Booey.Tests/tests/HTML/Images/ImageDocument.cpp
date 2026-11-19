@@ -74,7 +74,7 @@ namespace krys::boo::tests
 
       void ResizeView(int32 width, int32 height) noexcept
       {
-        Frame().View()->Resize(IntSize(width, height));
+        Frame().View()->Resize(SizeI(width, height));
         (void)Document().UpdateLayout();
       }
     };

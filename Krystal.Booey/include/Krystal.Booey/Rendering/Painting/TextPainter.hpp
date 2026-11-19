@@ -22,11 +22,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Paths/RotationDirection.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/Painting/TextPaintStyle.hpp"
 #include "Krystal.Booey/Style/Values/TextDecoration/TextShadow.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Strings/StringAtom.hpp"
 
 namespace krys::boo
@@ -39,8 +39,7 @@ namespace krys::boo
 
   /// @brief The transform turning @p boxRect a quarter turn in @p direction about its top left corner's
   /// diagonal, for vertical text.
-  KRYS_NODISCARD inline AffineTransform Rotation(const FloatRect &boxRect,
-                                                 RotationDirection direction) noexcept
+  KRYS_NODISCARD inline AffineTransform Rotation(const RectF &boxRect, RotationDirection direction) noexcept
   {
     return direction == RotationDirection::Clockwise
              ? AffineTransform(0, 1, -1, 0, boxRect.X() + boxRect.MaxY(), boxRect.MaxY() - boxRect.X())
@@ -70,22 +69,21 @@ namespace krys::boo
     /// @brief Paints @p textRun from byte offset @p start to @p end.
     /// @param boxRect The rect of the whole text box.
     /// @param textOrigin Where the whole text box's text starts, on its baseline.
-    void PaintRange(const TextRun &textRun, const FloatRect &boxRect, const FloatPoint &textOrigin,
-                    uint32 start, uint32 end) noexcept;
+    void PaintRange(const TextRun &textRun, const RectF &boxRect, const PointF &textOrigin, uint32 start,
+                    uint32 end) noexcept;
 
   private:
     void PaintTextOrEmphasisMarks(const FontCascade &font, const TextRun &textRun,
                                   const StringAtom &emphasisMark, float emphasisMarkOffset,
-                                  const FloatPoint &textOrigin, uint32 startOffset,
-                                  uint32 endOffset) noexcept;
+                                  const PointF &textOrigin, uint32 startOffset, uint32 endOffset) noexcept;
 
     void PaintTextWithShadows(const style::TextShadows *shadows, const FontCascade &font,
-                              const TextRun &textRun, const FloatRect &boxRect, const FloatPoint &textOrigin,
+                              const TextRun &textRun, const RectF &boxRect, const PointF &textOrigin,
                               uint32 startOffset, uint32 endOffset, const StringAtom &emphasisMark,
                               float emphasisMarkOffset, bool stroked) noexcept;
 
-    void PaintTextAndEmphasisMarksIfNeeded(const TextRun &textRun, const FloatRect &boxRect,
-                                           const FloatPoint &textOrigin, uint32 startOffset, uint32 endOffset,
+    void PaintTextAndEmphasisMarksIfNeeded(const TextRun &textRun, const RectF &boxRect,
+                                           const PointF &textOrigin, uint32 startOffset, uint32 endOffset,
                                            const TextPaintStyle &paintStyle,
                                            const style::TextShadows &shadow) noexcept;
   };
@@ -98,7 +96,7 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(ShadowApplier);
 
   private:
-    FloatSize _extraOffset;
+    SizeF _extraOffset;
     GraphicsContext &_context;
     const style::TextShadow *_shadow;
     bool _onlyDrawsShadow : 1;
@@ -108,14 +106,14 @@ namespace krys::boo
 
   public:
     ShadowApplier(const RenderStyle &renderStyle, GraphicsContext &context, const style::TextShadow *shadow,
-                  const FloatRect &textRect, bool isLastShadowIteration,
+                  const RectF &textRect, bool isLastShadowIteration,
                   bool lastShadowIterationShouldDrawText = true, bool opaque = false,
                   bool ignoreWritingMode = false) noexcept;
 
     ~ShadowApplier() noexcept;
 
     /// @brief How far the text is moved to draw only its shadow.
-    KRYS_NODISCARD FloatSize ExtraOffset() const noexcept
+    KRYS_NODISCARD SizeF ExtraOffset() const noexcept
     {
       return _extraOffset;
     }

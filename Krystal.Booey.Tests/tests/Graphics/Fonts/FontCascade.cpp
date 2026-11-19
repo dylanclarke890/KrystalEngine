@@ -311,8 +311,7 @@ namespace krys::boo::tests
     // Each Ahem glyph is a 16px square from 12.8px above the baseline to 3.2px below it, so a line 1px below
     // the baseline crosses every glyph but the space.
     TextRun run {utf8_stringview {u8"XX X"}};
-    auto segments =
-      cascade.LineSegmentsForIntersectionsWithRect(run, FloatPoint(10, 20), FloatRect(10, 21, 64, 1));
+    auto segments = cascade.LineSegmentsForIntersectionsWithRect(run, PointF(10, 20), RectF(10, 21, 64, 1));
     REQUIRE(segments.size() == 3u);
     CHECK(segments[0].Begin == Catch::Approx(0.f));
     CHECK(segments[0].End == Catch::Approx(16.f));
@@ -322,7 +321,6 @@ namespace krys::boo::tests
     CHECK(segments[2].End == Catch::Approx(64.f));
 
     // A line below the glyphs crosses nothing.
-    CHECK(cascade.LineSegmentsForIntersectionsWithRect(run, FloatPoint(10, 20), FloatRect(10, 30, 64, 1))
-            .empty());
+    CHECK(cascade.LineSegmentsForIntersectionsWithRect(run, PointF(10, 20), RectF(10, 30, 64, 1)).empty());
   }
 }

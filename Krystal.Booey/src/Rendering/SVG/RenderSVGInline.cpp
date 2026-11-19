@@ -69,27 +69,27 @@ namespace krys::boo
     return RenderElement::IsChildAllowed(child, style);
   }
 
-  FloatRect RenderSVGInline::ObjectBoundingBox() const noexcept
+  RectF RenderSVGInline::ObjectBoundingBox() const noexcept
   {
     if (auto *textAncestor = RenderSVGText::LocateRenderSVGTextAncestor(*this))
     {
       return textAncestor->ObjectBoundingBox();
     }
 
-    return FloatRect();
+    return RectF();
   }
 
-  FloatRect RenderSVGInline::StrokeBoundingBox() const noexcept
+  RectF RenderSVGInline::StrokeBoundingBox() const noexcept
   {
     if (auto *textAncestor = RenderSVGText::LocateRenderSVGTextAncestor(*this))
     {
       return textAncestor->StrokeBoundingBox();
     }
 
-    return FloatRect();
+    return RectF();
   }
 
-  FloatRect RenderSVGInline::RepaintRectInLocalCoordinates(
+  RectF RenderSVGInline::RepaintRectInLocalCoordinates(
     RepaintRectCalculation repaintRectCalculation) const noexcept
   {
     if (auto *textAncestor = RenderSVGText::LocateRenderSVGTextAncestor(*this))
@@ -97,10 +97,10 @@ namespace krys::boo
       return textAncestor->RepaintRectInLocalCoordinates(repaintRectCalculation);
     }
 
-    return FloatRect();
+    return RectF();
   }
 
-  FloatRect RenderSVGInline::DecoratedBoundingBox() const noexcept
+  RectF RenderSVGInline::DecoratedBoundingBox() const noexcept
   {
     if (auto *textAncestor = RenderSVGText::LocateRenderSVGTextAncestor(*this))
     {
@@ -131,8 +131,9 @@ namespace krys::boo
     return rects;
   }
 
-  Maybe<FloatRect> RenderSVGInline::ComputeFloatVisibleRectInContainer(
-    const FloatRect &rect, const RenderLayerModelObject *container, VisibleRectContext context) const noexcept
+  Maybe<RectF> RenderSVGInline::ComputeFloatVisibleRectInContainer(const RectF &rect,
+                                                                   const RenderLayerModelObject *container,
+                                                                   VisibleRectContext context) const noexcept
   {
     return SVGRenderSupport::ComputeFloatVisibleRectInContainer(*this, rect, container, context);
   }
@@ -158,12 +159,12 @@ namespace krys::boo
       return;
     }
 
-    FloatRect textBoundingBox = textAncestor->StrokeBoundingBox();
+    RectF textBoundingBox = textAncestor->StrokeBoundingBox();
     for (auto *box = FirstLegacyInlineBox(); box; box = box->NextLineBox())
     {
       quads.push_back(
-        LocalToAbsoluteQuad(FloatRect(textBoundingBox.X() + box->X(), textBoundingBox.Y() + box->Y(),
-                                      box->LogicalWidth(), box->LogicalHeight()),
+        LocalToAbsoluteQuad(RectF(textBoundingBox.X() + box->X(), textBoundingBox.Y() + box->Y(),
+                                  box->LogicalWidth(), box->LogicalHeight()),
                             MapCoordinatesMode::UseTransforms, wasFixed));
     }
   }

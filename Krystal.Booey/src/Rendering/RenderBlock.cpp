@@ -1237,9 +1237,9 @@ namespace krys::boo
       return;
     }
 
-    FloatRect inflatedRect = BorderBoxRect();
+    RectF inflatedRect = BorderBoxRect();
     RenderTheme::Singleton().AdjustRepaintRect(*this, inflatedRect);
-    AddVisualOverflow(LayoutRect(SnappedIntRect(LayoutRect(inflatedRect))));
+    AddVisualOverflow(LayoutRect(SnappedRectI(LayoutRect(inflatedRect))));
 
     if (auto *fragmentedFlow = EnclosingFragmentedFlow())
     {
@@ -2533,8 +2533,8 @@ namespace krys::boo
           && !paintInfo.PaintRootBackgroundOnly())
       {
         layer->GetScrollableArea()->PaintOverflowControls(paintInfo.Context(), paintInfo.PaintBehavior,
-                                                          RoundedIntPoint(adjustedPaintOffset),
-                                                          SnappedIntRect(paintInfo.Rect));
+                                                          RoundedPointI(adjustedPaintOffset),
+                                                          SnappedRectI(paintInfo.Rect));
       }
     }
   }
@@ -2549,7 +2549,7 @@ namespace krys::boo
     if (auto *scrollableArea = Layer() ? Layer()->GetScrollableArea() : nullptr)
     {
       return scrollableArea->HitTestOverflowControls(
-        result, RoundedIntPoint(locationInContainer - ToLayoutSize(accumulatedOffset)));
+        result, RoundedPointI(locationInContainer - ToLayoutSize(accumulatedOffset)));
     }
     return false;
   }
@@ -3202,9 +3202,9 @@ namespace krys::boo
 
       for (auto *renderer : *outOfFlowBoxes)
       {
-        paintInfo->Context().ClipOut(FloatRect(
-          IntRect(offset.X().ToInt() + renderer->X().ToInt(), offset.Y().ToInt() + renderer->Y().ToInt(),
-                  renderer->Width().ToInt(), renderer->Height().ToInt())));
+        paintInfo->Context().ClipOut(
+          RectF(RectI(offset.X().ToInt() + renderer->X().ToInt(), offset.Y().ToInt() + renderer->Y().ToInt(),
+                      renderer->Width().ToInt(), renderer->Height().ToInt())));
       }
     }
   }
@@ -3271,8 +3271,8 @@ namespace krys::boo
       return {};
     }
 
-    FloatPoint containerPoint = LocalToContainerPoint(FloatPoint(), repaintContainer);
-    LayoutPoint offsetFromRepaintContainer(containerPoint - ToFloatSize(FloatPoint(GetScrollPosition())));
+    PointF containerPoint = LocalToContainerPoint(PointF(), repaintContainer);
+    LayoutPoint offsetFromRepaintContainer(containerPoint - ToSizeF(PointF(GetScrollPosition())));
 
     LogicalSelectionOffsetCaches cache(*this);
     LayoutUnit lastTop;
@@ -3304,9 +3304,8 @@ namespace krys::boo
           {
             LayoutRect localBounds(gapRectsBounds);
             FlipForWritingMode(localBounds);
-            gapRectsBounds =
-              LayoutRect(LocalToContainerQuad(FloatQuad(FloatRect(localBounds)), &layer->Renderer())
-                           .EnclosingBoundingBox());
+            gapRectsBounds = LayoutRect(
+              LocalToContainerQuad(FloatQuad(RectF(localBounds)), &layer->Renderer()).EnclosingBoundingBox());
             if (auto *layerBox = DynamicDowncast<RenderBox>(layer->Renderer()))
             {
               gapRectsBounds.MoveBy(LayoutPoint(layerBox->GetScrollPosition()));

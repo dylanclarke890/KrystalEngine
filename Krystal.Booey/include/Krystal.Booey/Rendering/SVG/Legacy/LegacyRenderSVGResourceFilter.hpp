@@ -56,7 +56,7 @@ namespace krys::boo
 
     RefPtr<SVGFilterRenderer> Filter;
     UniquePtr<GraphicsContextSwitcher> TargetSwitcher;
-    FloatRect SourceImageRect;
+    RectF SourceImageRect;
     GraphicsContext *SavedContext {nullptr};
     FilterDataState State {PaintingSource};
   };
@@ -88,8 +88,7 @@ namespace krys::boo
     void PostApplyResource(RenderElement &, GraphicsContext *&, EnumSet<RenderSVGResourceMode>, const Path *,
                            const RenderElement *) noexcept override;
 
-    KRYS_NODISCARD FloatRect ResourceBoundingBox(const RenderObject &,
-                                                 RepaintRectCalculation) noexcept override;
+    KRYS_NODISCARD RectF ResourceBoundingBox(const RenderObject &, RepaintRectCalculation) noexcept override;
 
     KRYS_NODISCARD SVGUnitTypes::SVGUnitType FilterUnits() const noexcept;
 
@@ -104,7 +103,7 @@ namespace krys::boo
       return RenderSVGResourceType::FilterResourceType;
     }
 
-    KRYS_NODISCARD FloatRect DrawingRegion(RenderObject &) const noexcept;
+    KRYS_NODISCARD RectF DrawingRegion(RenderObject &) const noexcept;
 
     void GetElement() const = delete;
 

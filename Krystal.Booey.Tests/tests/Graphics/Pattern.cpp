@@ -20,7 +20,7 @@ namespace krys::boo::tests
                                    {true, false, AffineTransform::MakeTranslation({1, 2})});
     CHECK(pattern->TileImageBuffer() == tile.get());
     CHECK(pattern->TileNativeImage() == nullptr);
-    CHECK(pattern->TileImage().Size() == IntSize(20, 40));
+    CHECK(pattern->TileImage().Size() == SizeI(20, 40));
     CHECK(pattern->RepeatX());
     CHECK_FALSE(pattern->RepeatY());
     pattern->SetPatternSpaceTransform(AffineTransform::MakeScale({3, 3}));

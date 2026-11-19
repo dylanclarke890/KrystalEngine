@@ -30,8 +30,7 @@
 namespace krys::boo
 {
   CrossfadeGeneratedImage::CrossfadeGeneratedImage(Image &fromImage, Image &toImage, float percentage,
-                                                   const FloatSize &crossfadeSize,
-                                                   const FloatSize &size) noexcept
+                                                   const SizeF &crossfadeSize, const SizeF &size) noexcept
       : _fromImage(ShareRef(fromImage)), _toImage(ShareRef(toImage)), _percentage(percentage),
         _crossfadeSize(crossfadeSize)
   {
@@ -41,9 +40,9 @@ namespace krys::boo
   namespace
   {
     void DrawCrossfadeSubimage(GraphicsContext &context, Image &image, CompositeOperator operation,
-                               float opacity, const FloatSize &targetSize) noexcept
+                               float opacity, const SizeF &targetSize) noexcept
     {
-      FloatSize imageSize = image.Size();
+      SizeF imageSize = image.Size();
 
       // SVGImage resets the opacity when painting, so we have to use transparency layers to accurately paint
       // one at a given opacity.
@@ -69,7 +68,7 @@ namespace krys::boo
         context.Scale(targetSize / imageSize);
       }
 
-      (void)context.DrawImage(image, FloatPoint(), options);
+      (void)context.DrawImage(image, PointF(), options);
 
       if (useTransparencyLayer)
       {
@@ -88,7 +87,7 @@ namespace krys::boo
 
     GraphicsContextStateSaver stateSaver(context);
 
-    context.Clip(FloatRect(FloatPoint(), _crossfadeSize));
+    context.Clip(RectF(PointF(), _crossfadeSize));
     context.BeginTransparencyLayer(1);
 
     DrawCrossfadeSubimage(context, *_fromImage, CompositeOperator::SourceOver, 1 - _percentage,
@@ -98,9 +97,8 @@ namespace krys::boo
     context.EndTransparencyLayer();
   }
 
-  ImageDrawResult CrossfadeGeneratedImage::Draw(GraphicsContext &context, const FloatRect &dstRect,
-                                                const FloatRect &srcRect,
-                                                ImagePaintingOptions options) noexcept
+  ImageDrawResult CrossfadeGeneratedImage::Draw(GraphicsContext &context, const RectF &dstRect,
+                                                const RectF &srcRect, ImagePaintingOptions options) noexcept
   {
     GraphicsContextStateSaver stateSaver(context);
     context.SetCompositeOperation(options.GetCompositeOperator(), options.GetBlendMode());
@@ -116,9 +114,9 @@ namespace krys::boo
     return ImageDrawResult::DidDraw;
   }
 
-  void CrossfadeGeneratedImage::DrawPattern(GraphicsContext &context, const FloatRect &dstRect,
-                                            const FloatRect &srcRect, const AffineTransform &patternTransform,
-                                            const FloatPoint &phase, const FloatSize &spacing,
+  void CrossfadeGeneratedImage::DrawPattern(GraphicsContext &context, const RectF &dstRect,
+                                            const RectF &srcRect, const AffineTransform &patternTransform,
+                                            const PointF &phase, const SizeF &spacing,
                                             ImagePaintingOptions options) noexcept
   {
     auto imageBuffer = context.CreateImageBuffer(Size());

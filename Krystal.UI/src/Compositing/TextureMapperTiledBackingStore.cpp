@@ -19,7 +19,7 @@ namespace krys::ui
       return;
     }
 
-    UpdateContents(textureMapper, _image.get(), _image->Size(), boo::EnclosingIntRect(_image->Rect()));
+    UpdateContents(textureMapper, _image.get(), _image->Size(), EnclosingRectI(_image->Rect()));
 
     if (auto observer = _image->GetImageObserver())
     {
@@ -29,13 +29,13 @@ namespace krys::ui
   }
 
   boo::TransformationMatrix
-    TextureMapperTiledBackingStore::AdjustedTransformForRect(const boo::FloatRect &targetRect) noexcept
+    TextureMapperTiledBackingStore::AdjustedTransformForRect(const RectF &targetRect) noexcept
   {
     return boo::TransformationMatrix::RectToRect(Rect(), targetRect);
   }
 
   void TextureMapperTiledBackingStore::PaintToTextureMapper(TextureMapper &textureMapper,
-                                                            const boo::FloatRect &targetRect,
+                                                            const RectF &targetRect,
                                                             const boo::TransformationMatrix &transform,
                                                             float opacity) noexcept
   {
@@ -48,7 +48,7 @@ namespace krys::ui
   }
 
   void TextureMapperTiledBackingStore::DrawBorder(TextureMapper &textureMapper, const boo::Color &borderColor,
-                                                  float borderWidth, const boo::FloatRect &targetRect,
+                                                  float borderWidth, const RectF &targetRect,
                                                   const boo::TransformationMatrix &transform) noexcept
   {
     boo::TransformationMatrix adjustedTransform = transform * AdjustedTransformForRect(targetRect);
@@ -60,7 +60,7 @@ namespace krys::ui
 
   void TextureMapperTiledBackingStore::DrawRepaintCounter(TextureMapper &textureMapper, int32 repaintCount,
                                                           const boo::Color &borderColor,
-                                                          const boo::FloatRect &targetRect,
+                                                          const RectF &targetRect,
                                                           const boo::TransformationMatrix &transform) noexcept
   {
     boo::TransformationMatrix adjustedTransform = transform * AdjustedTransformForRect(targetRect);
@@ -81,8 +81,7 @@ namespace krys::ui
     _contentsScale = scale;
   }
 
-  void TextureMapperTiledBackingStore::CreateOrDestroyTilesIfNeeded(const boo::FloatSize &size,
-                                                                    const boo::IntSize &tileSize,
+  void TextureMapperTiledBackingStore::CreateOrDestroyTilesIfNeeded(const SizeF &size, const SizeI &tileSize,
                                                                     bool hasAlpha) noexcept
   {
     if (size == _size && !_isScaleDirty)
@@ -93,13 +92,13 @@ namespace krys::ui
     _size = size;
     _isScaleDirty = false;
 
-    boo::FloatSize scaledSize(_size);
+    SizeF scaledSize(_size);
     if (!_image)
     {
       scaledSize.Scale(_contentsScale);
     }
 
-    List<boo::FloatRect> tileRectsToAdd;
+    List<RectF> tileRectsToAdd;
     List<int32> tileIndicesToRemove;
     static const size_t TileEraseThreshold = 6;
 
@@ -109,8 +108,7 @@ namespace krys::ui
     {
       for (float x = 0; x < scaledSize.Width(); x += static_cast<float>(tileSize.Width()))
       {
-        boo::FloatRect tileRect(x, y, static_cast<float>(tileSize.Width()),
-                                static_cast<float>(tileSize.Height()));
+        RectF tileRect(x, y, static_cast<float>(tileSize.Width()), static_cast<float>(tileSize.Height()));
         tileRect.Intersect(Rect());
         tileRectsToAdd.push_back(tileRect);
       }
@@ -119,12 +117,12 @@ namespace krys::ui
     // Check which tiles need to be removed, and which already exist.
     for (int32 i = static_cast<int32>(_tiles.size()) - 1; i >= 0; --i)
     {
-      boo::FloatRect oldTile = _tiles[static_cast<size_t>(i)].Rect();
+      RectF oldTile = _tiles[static_cast<size_t>(i)].Rect();
       bool existsAlready = false;
 
       for (int32 j = static_cast<int32>(tileRectsToAdd.size()) - 1; j >= 0; --j)
       {
-        boo::FloatRect newTile = tileRectsToAdd[static_cast<size_t>(j)];
+        RectF newTile = tileRectsToAdd[static_cast<size_t>(j)];
         if (oldTile != newTile)
         {
           continue;
@@ -160,7 +158,7 @@ namespace krys::ui
           {
             flags.Add(BitmapTexture::Flags::SupportsAlpha);
           }
-          texture->Reset(boo::EnclosingIntRect(tile.Rect()).Size(), flags);
+          texture->Reset(EnclosingRectI(tile.Rect()).Size(), flags);
         }
         continue;
       }
@@ -181,8 +179,7 @@ namespace krys::ui
   }
 
   void TextureMapperTiledBackingStore::UpdateContents(TextureMapper &textureMapper, boo::Image *image,
-                                                      const boo::FloatSize &totalSize,
-                                                      const boo::IntRect &dirtyRect) noexcept
+                                                      const SizeF &totalSize, const RectI &dirtyRect) noexcept
   {
     CreateOrDestroyTilesIfNeeded(totalSize, textureMapper.MaxTextureSize(),
                                  !image->CurrentFrameKnownToBeOpaque());
@@ -192,19 +189,21 @@ namespace krys::ui
     }
   }
 
-  void TextureMapperTiledBackingStore::UpdateContents(
-    TextureMapper &textureMapper, const boo::GraphicsLayer &sourceLayer, const boo::FloatSize &totalSize,
-    const boo::IntRect &dirtyRect, const boo::IntRect &visibleRect, const boo::IntSize &viewportSize) noexcept
+  void TextureMapperTiledBackingStore::UpdateContents(TextureMapper &textureMapper,
+                                                      const boo::GraphicsLayer &sourceLayer,
+                                                      const SizeF &totalSize, const RectI &dirtyRect,
+                                                      const RectI &visibleRect,
+                                                      const SizeI &viewportSize) noexcept
   {
     CreateOrDestroyCoveringTiles(totalSize, visibleRect, viewportSize,
                                  textureMapper.MaxTextureSize().Width());
 
     for (auto &tile : _tiles)
     {
-      auto tileRect = boo::EnclosingIntRect(tile.Rect());
+      auto tileRect = EnclosingRectI(tile.Rect());
       if (tileRect.Intersects(dirtyRect))
       {
-        tile.AddDirtyRect(boo::Intersection(tileRect, dirtyRect));
+        tile.AddDirtyRect(Intersection(tileRect, dirtyRect));
       }
     }
 
@@ -217,23 +216,23 @@ namespace krys::ui
     }
   }
 
-  void TextureMapperTiledBackingStore::CreateOrDestroyCoveringTiles(const boo::FloatSize &size,
-                                                                    const boo::IntRect &unscaledVisibleRect,
-                                                                    const boo::IntSize &unscaledViewportSize,
+  void TextureMapperTiledBackingStore::CreateOrDestroyCoveringTiles(const SizeF &size,
+                                                                    const RectI &unscaledVisibleRect,
+                                                                    const SizeI &unscaledViewportSize,
                                                                     int32 maxTextureSize) noexcept
   {
     bool contentsScaleChanged = _isScaleDirty;
     _isScaleDirty = false;
     _size = size;
 
-    auto scaled = [&](const boo::IntRect &rect)
+    auto scaled = [&](const RectI &rect)
     {
-      boo::FloatRect scaledRect(rect);
+      RectF scaledRect(rect);
       scaledRect.Scale(_contentsScale);
-      return boo::EnclosingIntRect(scaledRect);
+      return EnclosingRectI(scaledRect);
     };
 
-    auto contentsRect = boo::EnclosingIntRect(Rect());
+    auto contentsRect = EnclosingRectI(Rect());
     _visibleRect = scaled(unscaledVisibleRect);
     if (contentsRect.IsEmpty())
     {
@@ -244,9 +243,9 @@ namespace krys::ui
     }
 
     auto viewportSize = unscaledViewportSize.IsEmpty() ? _visibleRect.Size() : unscaledViewportSize;
-    boo::FloatSize scaledViewportSize(viewportSize);
+    SizeF scaledViewportSize(viewportSize);
     scaledViewportSize.Scale(_contentsScale);
-    auto tileSize = ComputeTileSize(boo::IntSize(scaledViewportSize), maxTextureSize, contentsRect);
+    auto tileSize = ComputeTileSize(SizeI(scaledViewportSize), maxTextureSize, contentsRect);
     if (tileSize != _tileSize || contentsScaleChanged)
     {
       _tiles.clear();
@@ -264,7 +263,7 @@ namespace krys::ui
     std::erase_if(_tiles,
                   [&](TextureMapperTile &tile)
                   {
-                    auto rect = boo::EnclosingIntRect(tile.Rect());
+                    auto rect = EnclosingRectI(tile.Rect());
                     if (!rect.Intersects(_keepRect))
                     {
                       return true;
@@ -279,7 +278,7 @@ namespace krys::ui
 
                     if (expectedTileRect != rect)
                     {
-                      tile.SetRect(boo::FloatRect(expectedTileRect));
+                      tile.SetRect(RectF(expectedTileRect));
                       if (auto texture = tile.Texture())
                       {
                         texture->Reset(expectedTileRect.Size(), {BitmapTexture::Flags::SupportsAlpha});
@@ -296,7 +295,7 @@ namespace krys::ui
 
     // Cover the cover rect: a tile wherever there isn't one, painted whole.
     auto topLeft = TilePositionForPoint(_coverRect.MinXMinYCorner());
-    auto innerBottomRight = TilePositionForPoint(_coverRect.MaxXMaxYCorner() - boo::IntSize(1, 1));
+    auto innerBottomRight = TilePositionForPoint(_coverRect.MaxXMaxYCorner() - SizeI(1, 1));
     for (int32 y = topLeft.Y(); y <= innerBottomRight.Y(); ++y)
     {
       for (int32 x = topLeft.X(); x <= innerBottomRight.X(); ++x)
@@ -307,27 +306,26 @@ namespace krys::ui
           continue;
         }
         bool exists = std::any_of(_tiles.begin(), _tiles.end(), [&](const TextureMapperTile &tile)
-                                  { return boo::EnclosingIntRect(tile.Rect()) == rect; });
+                                  { return EnclosingRectI(tile.Rect()) == rect; });
         if (exists)
         {
           continue;
         }
-        TextureMapperTile tile(boo::FloatRect {rect});
+        TextureMapperTile tile(RectF {rect});
         tile.AddDirtyRect(rect);
         _tiles.push_back(krys::move(tile));
       }
     }
   }
 
-  boo::IntSize TextureMapperTiledBackingStore::ComputeTileSize(const boo::IntSize &viewportSize,
-                                                               int32 maxTextureSize,
-                                                               const boo::IntRect &contentsRect) noexcept
+  SizeI TextureMapperTiledBackingStore::ComputeTileSize(const SizeI &viewportSize, int32 maxTextureSize,
+                                                        const RectI &contentsRect) noexcept
   {
     // Tiles are painted by the GPU: tiles as wide as the viewport (or half of it), and a quarter of its
     // height.
     constexpr static int32 minGPUTileHeight = 256;
 
-    auto gpuTileSize = [&](const boo::IntSize &baseSize) -> boo::IntSize
+    auto gpuTileSize = [&](const SizeI &baseSize) -> SizeI
     {
       int32 width = baseSize.Width();
       int32 divisor = 4;
@@ -343,8 +341,8 @@ namespace krys::ui
       return {std::max(width, 1), std::max(height, minGPUTileHeight)};
     };
 
-    boo::IntSize baseSize = viewportSize;
-    boo::IntSize tileSize = gpuTileSize(baseSize);
+    SizeI baseSize = viewportSize;
+    SizeI tileSize = gpuTileSize(baseSize);
 
     // Use half-width tiles when the contents width is greater than computed tile size.
     if (contentsRect.Width() > tileSize.Width())
@@ -362,13 +360,13 @@ namespace krys::ui
     return tileSize;
   }
 
-  Pair<boo::IntRect, boo::IntRect>
-    TextureMapperTiledBackingStore::ComputeCoverAndKeepRect(const boo::IntRect &contentsRect) const noexcept
+  Pair<RectI, RectI>
+    TextureMapperTiledBackingStore::ComputeCoverAndKeepRect(const RectI &contentsRect) const noexcept
   {
     constexpr static float coverAreaMultiplier = 2.0f;
 
-    boo::IntRect coverRect = _visibleRect;
-    boo::IntRect keepRect = _visibleRect;
+    RectI coverRect = _visibleRect;
+    RectI keepRect = _visibleRect;
 
     // The initial cover area covers equally in each direction, according to the coverAreaMultiplier.
     coverRect.InflateX(
@@ -403,18 +401,16 @@ namespace krys::ui
     return {coverRect, keepRect};
   }
 
-  boo::IntRect
-    TextureMapperTiledBackingStore::TileRectForPosition(const boo::IntPoint &position,
-                                                        const boo::IntRect &contentsRect) const noexcept
+  RectI TextureMapperTiledBackingStore::TileRectForPosition(const PointI &position,
+                                                            const RectI &contentsRect) const noexcept
   {
-    boo::IntRect rect(position.X() * _tileSize.Width(), position.Y() * _tileSize.Height(), _tileSize.Width(),
-                      _tileSize.Height());
+    RectI rect(position.X() * _tileSize.Width(), position.Y() * _tileSize.Height(), _tileSize.Width(),
+               _tileSize.Height());
     rect.Intersect(contentsRect);
     return rect;
   }
 
-  boo::IntPoint
-    TextureMapperTiledBackingStore::TilePositionForPoint(const boo::IntPoint &point) const noexcept
+  PointI TextureMapperTiledBackingStore::TilePositionForPoint(const PointI &point) const noexcept
   {
     int32 x = point.X() / _tileSize.Width();
     int32 y = point.Y() / _tileSize.Height();

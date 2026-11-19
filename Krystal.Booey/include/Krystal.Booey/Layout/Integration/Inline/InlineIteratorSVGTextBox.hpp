@@ -48,7 +48,7 @@ namespace krys::boo::inline_iterator
 
     explicit SVGTextBox(PathVariant &&path) noexcept;
 
-    KRYS_NODISCARD FloatRect CalculateBoundariesIncludingSVGTransform() const noexcept;
+    KRYS_NODISCARD RectF CalculateBoundariesIncludingSVGTransform() const noexcept;
 
     KRYS_NODISCARD LayoutRect LocalSelectionRect(uint32 start, uint32 end) const noexcept;
 

@@ -111,8 +111,7 @@ namespace krys::boo::tests
       KRYS_NODISCARD static PlatformTouchPoint Point(uint32 id, PlatformTouchPoint::State state, double x,
                                                      double y) noexcept
       {
-        return PlatformTouchPoint(id, state, DoublePoint(x, y), DoublePoint(x, y), DoubleSize(3, 2), 0,
-                                  0.25f);
+        return PlatformTouchPoint(id, state, PointD(x, y), PointD(x, y), SizeD(3, 2), 0, 0.25f);
       }
 
       bool Touch(PlatformEvent::Type type, List<PlatformTouchPoint> points) noexcept
@@ -424,7 +423,7 @@ namespace krys::boo::tests
 
     auto penEvent = [](PlatformEvent::Type type, MouseButton button, uint16 buttons, double force)
     {
-      PlatformMouseEvent event(DoublePoint(10, 10), DoublePoint(10, 10), button, type,
+      PlatformMouseEvent event(PointD(10, 10), PointD(10, 10), button, type,
                                type == PlatformEvent::Type::MouseMoved ? 0 : 1, {}, MonotonicTime::Now(),
                                buttons, {}, force, SyntheticClickType::NoTap, PenPointerId,
                                dom::PenPointerEventType());

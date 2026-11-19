@@ -38,7 +38,7 @@
 namespace krys::boo
 {
   VisibleInViewportState CachedImageClient::ImageFrameAvailable(CachedImage &image, ImageAnimatingState,
-                                                                const IntRect *changeRect) noexcept
+                                                                const RectI *changeRect) noexcept
   {
     ImageChanged(&image, changeRect);
     return VisibleInViewportState::No;
@@ -191,14 +191,14 @@ namespace krys::boo
 
     if (!image->DrawsSVGImage())
     {
-      image->SetContainerSize(FloatSize(containerSize));
+      image->SetContainerSize(SizeF(containerSize));
       return;
     }
 
     _svgImageCache->SetContainerContextForClient(client, containerSize, containerZoom, imageUrl);
   }
 
-  FloatSize CachedImage::ImageSizeForRenderer(const RenderElement *renderer, SizeType sizeType) const noexcept
+  SizeF CachedImage::ImageSizeForRenderer(const RenderElement *renderer, SizeType sizeType) const noexcept
   {
     if (!_image)
     {
@@ -246,7 +246,7 @@ namespace krys::boo
   }
 
   void CachedImage::ComputeIntrinsicDimensions(float &intrinsicWidth, float &intrinsicHeight,
-                                               FloatSize &intrinsicRatio) noexcept
+                                               SizeF &intrinsicRatio) noexcept
   {
     if (_image)
     {
@@ -254,7 +254,7 @@ namespace krys::boo
     }
   }
 
-  void CachedImage::NotifyObservers(const IntRect *changeRect) noexcept
+  void CachedImage::NotifyObservers(const RectI *changeRect) noexcept
   {
     CachedResourceClientWalker<CachedImageClient> walker(*this);
     while (auto *client = walker.Next())
@@ -373,7 +373,7 @@ namespace krys::boo
 
   void CachedImage::CachedImageObserver::ImageFrameAvailable(const Image &image,
                                                              ImageAnimatingState animatingState,
-                                                             const IntRect *changeRect,
+                                                             const RectI *changeRect,
                                                              DecodingStatus decodingStatus) noexcept
   {
     for (auto *cachedImage : List<CachedImage *>(_cachedImages.begin(), _cachedImages.end()))
@@ -383,7 +383,7 @@ namespace krys::boo
     }
   }
 
-  void CachedImage::CachedImageObserver::ChangedInRect(const Image &image, const IntRect *rect) noexcept
+  void CachedImage::CachedImageObserver::ChangedInRect(const Image &image, const RectI *rect) noexcept
   {
     for (auto *cachedImage : List<CachedImage *>(_cachedImages.begin(), _cachedImages.end()))
     {
@@ -658,7 +658,7 @@ namespace krys::boo
   }
 
   void CachedImage::ImageFrameAvailable(const Image &image, ImageAnimatingState animatingState,
-                                        const IntRect *changeRect, DecodingStatus decodingStatus) noexcept
+                                        const RectI *changeRect, DecodingStatus decodingStatus) noexcept
   {
     if (&image != _image.get())
     {
@@ -692,7 +692,7 @@ namespace krys::boo
     }
   }
 
-  void CachedImage::ChangedInRect(const Image &image, const IntRect *rect) noexcept
+  void CachedImage::ChangedInRect(const Image &image, const RectI *rect) noexcept
   {
     if (&image != _image.get())
     {

@@ -1090,8 +1090,8 @@ namespace krys::boo::layout_integration
     return adjustments;
   }
 
-  FloatRect LineLayout::ConstructContent(const layout::InlineLayoutState &inlineLayoutState,
-                                         layout::InlineLayoutResult &&layoutResult) noexcept
+  RectF LineLayout::ConstructContent(const layout::InlineLayoutState &inlineLayoutState,
+                                     layout::InlineLayoutResult &&layoutResult) noexcept
   {
     auto damagedRect =
       InlineContentBuilder {Flow()}.Build(krys::move(layoutResult), EnsureInlineContent(), _lineDamage.get());
@@ -1273,19 +1273,19 @@ namespace krys::boo::layout_integration
     }
   }
 
-  FloatRect LineLayout::ApplySVGTextFragments(SVGTextFragmentMap fragmentMap) noexcept
+  RectF LineLayout::ApplySVGTextFragments(SVGTextFragmentMap fragmentMap) noexcept
   {
     auto &boxes = _inlineContent->DisplayContent().BoxList;
     auto &lines = _inlineContent->DisplayContent().LineList;
     auto &fragments = _inlineContent->SvgTextFragmentsForBoxes();
     fragments.resize(_inlineContent->DisplayContent().BoxList.size());
 
-    FloatRect fullBoundaries;
+    RectF fullBoundaries;
 
     struct Parent
     {
       size_t Index;
-      FloatRect Boundaries;
+      RectF Boundaries;
     };
 
     SmallList<Parent, 8> parentStack;
@@ -1341,7 +1341,7 @@ namespace krys::boo::layout_integration
 
     if (!lines.empty())
     {
-      lines[0].SetLineBoxRectForSVGText(FloatRect {{}, fullBoundaries.Size()});
+      lines[0].SetLineBoxRectForSVGText(RectF {{}, fullBoundaries.Size()});
     }
 
     return fullBoundaries;
@@ -1840,7 +1840,7 @@ namespace krys::boo::layout_integration
     return result;
   }
 
-  List<FloatRect> LineLayout::CollectInlineBoxRects(const RenderInline &renderInline) const noexcept
+  List<RectF> LineLayout::CollectInlineBoxRects(const RenderInline &renderInline) const noexcept
   {
     if (!_inlineContent)
     {
@@ -1850,7 +1850,7 @@ namespace krys::boo::layout_integration
     auto &layoutBox = *renderInline.LayoutBox();
 
     // Blocks that follow each other in the inline box are one piece of it.
-    List<FloatRect> result;
+    List<RectF> result;
     Maybe<size_t> previousBlockLine;
     _inlineContent->TraverseNonRootInlineBoxes(
       layoutBox,

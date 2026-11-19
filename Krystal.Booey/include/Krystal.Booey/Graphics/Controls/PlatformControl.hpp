@@ -26,8 +26,8 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Controls/ControlStyle.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -48,22 +48,20 @@ namespace krys::boo
 
     virtual ~PlatformControl() noexcept = default;
 
-    virtual void SetFocusRingClipRect(const FloatRect &) noexcept
+    virtual void SetFocusRingClipRect(const RectF &) noexcept
     {
     }
 
-    virtual void UpdateCellStates(const FloatRect &, const ControlStyle &) noexcept
+    virtual void UpdateCellStates(const RectF &, const ControlStyle &) noexcept
     {
     }
 
-    KRYS_NODISCARD virtual FloatSize SizeForBounds(const FloatRect &bounds,
-                                                   const ControlStyle &) const noexcept
+    KRYS_NODISCARD virtual SizeF SizeForBounds(const RectF &bounds, const ControlStyle &) const noexcept
     {
       return bounds.Size();
     }
 
-    KRYS_NODISCARD virtual FloatRect RectForBounds(const FloatRect &bounds,
-                                                   const ControlStyle &) const noexcept
+    KRYS_NODISCARD virtual RectF RectForBounds(const RectF &bounds, const ControlStyle &) const noexcept
     {
       return bounds;
     }

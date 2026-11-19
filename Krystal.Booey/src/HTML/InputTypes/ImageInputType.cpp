@@ -155,13 +155,13 @@ namespace krys::boo::html
 
     Ref<HTMLFormElement> protectedForm = ShareRef(*element->Form());
 
-    _clickLocation = IntPoint();
+    _clickLocation = PointI();
     if (auto *mouseEvent = DynamicDowncast<MouseEvent>(event))
     {
       if (!mouseEvent->IsSimulated())
       {
         _clickLocation =
-          IntPoint(static_cast<int32>(mouseEvent->OffsetX()), static_cast<int32>(mouseEvent->OffsetY()));
+          PointI(static_cast<int32>(mouseEvent->OffsetX()), static_cast<int32>(mouseEvent->OffsetY()));
       }
     }
 

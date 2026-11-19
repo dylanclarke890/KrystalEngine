@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/DoubleSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Numeric.hpp"
 
 namespace krys::boo
@@ -43,9 +43,9 @@ namespace krys::boo
   protected:
     uint32 _id {0};
     State _state {TouchReleased};
-    DoublePoint _screenPos;
-    DoublePoint _pos;
-    DoubleSize _radius;
+    PointD _screenPos;
+    PointD _pos;
+    SizeD _radius;
     float _rotationAngle {0};
     float _twist {0};
     float _force {0};
@@ -61,8 +61,8 @@ namespace krys::boo
     /// @param radius Half the contact's width and height, in the view's coordinates.
     /// @param rotationAngle How far the contact's ellipse is turned clockwise, in degrees from 0 to 90.
     /// @param force The pressure, from 0 to 1.
-    PlatformTouchPoint(uint32 id, State state, const DoublePoint &screenPos, const DoublePoint &pos,
-                       const DoubleSize &radius = {}, float rotationAngle = 0, float force = 0,
+    PlatformTouchPoint(uint32 id, State state, const PointD &screenPos, const PointD &pos,
+                       const SizeD &radius = {}, float rotationAngle = 0, float force = 0,
                        float twist = 0) noexcept
         : _id(id), _state(state), _screenPos(screenPos), _pos(pos), _radius(radius),
           _rotationAngle(rotationAngle), _twist(twist), _force(force)
@@ -79,17 +79,17 @@ namespace krys::boo
       return _state;
     }
 
-    KRYS_NODISCARD DoublePoint ScreenPos() const noexcept
+    KRYS_NODISCARD PointD ScreenPos() const noexcept
     {
       return _screenPos;
     }
 
-    KRYS_NODISCARD DoublePoint Pos() const noexcept
+    KRYS_NODISCARD PointD Pos() const noexcept
     {
       return _pos;
     }
 
-    KRYS_NODISCARD DoubleSize Radius() const noexcept
+    KRYS_NODISCARD SizeD Radius() const noexcept
     {
       return _radius;
     }

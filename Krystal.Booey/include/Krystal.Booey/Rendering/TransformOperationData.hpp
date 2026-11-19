@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Rendering/MotionPath.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -35,11 +35,11 @@ namespace krys::boo
   /// @brief What a transform or motion path needs to know about the box it applies to.
   struct TransformOperationData
   {
-    FloatRect BoundingBox;
+    RectF BoundingBox;
     Maybe<boo::MotionPathData> MotionPathData;
     bool IsSVGRenderer {false};
 
-    explicit TransformOperationData(FloatRect boundingBox,
+    explicit TransformOperationData(RectF boundingBox,
                                     Maybe<boo::MotionPathData> motionPathData = std::nullopt,
                                     bool isSVGRenderer = false) noexcept
         : BoundingBox(boundingBox), MotionPathData(motionPathData), IsSVGRenderer(isSVGRenderer)
@@ -47,6 +47,6 @@ namespace krys::boo
     }
 
     /// @brief The data for @p renderer's box, with its motion path data and whether it's an SVG renderer.
-    TransformOperationData(FloatRect boundingBox, const RenderElement *renderer) noexcept;
+    TransformOperationData(RectF boundingBox, const RenderElement *renderer) noexcept;
   };
 }

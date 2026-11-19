@@ -494,17 +494,17 @@ namespace krys::ui
     _state.BackdropFiltersRect = backdropFiltersRect;
   }
 
-  void TextureMapperLayer::SetPosition(const boo::FloatPoint &position) noexcept
+  void TextureMapperLayer::SetPosition(const PointF &position) noexcept
   {
     _state.Pos = position;
   }
 
-  void TextureMapperLayer::SetBoundsOrigin(const boo::FloatPoint &boundsOrigin) noexcept
+  void TextureMapperLayer::SetBoundsOrigin(const PointF &boundsOrigin) noexcept
   {
     _state.BoundsOrigin = boundsOrigin;
   }
 
-  void TextureMapperLayer::SetSize(const boo::FloatSize &size) noexcept
+  void TextureMapperLayer::SetSize(const SizeF &size) noexcept
   {
     _state.Size = size;
   }
@@ -529,17 +529,17 @@ namespace krys::ui
     _state.ChildrenTransform = childrenTransform;
   }
 
-  void TextureMapperLayer::SetContentsRect(const boo::FloatRect &contentsRect) noexcept
+  void TextureMapperLayer::SetContentsRect(const RectF &contentsRect) noexcept
   {
     _state.ContentsRect = contentsRect;
   }
 
-  void TextureMapperLayer::SetContentsTileSize(const boo::FloatSize &size) noexcept
+  void TextureMapperLayer::SetContentsTileSize(const SizeF &size) noexcept
   {
     _state.ContentsTileSize = size;
   }
 
-  void TextureMapperLayer::SetContentsTilePhase(const boo::FloatSize &phase) noexcept
+  void TextureMapperLayer::SetContentsTilePhase(const SizeF &phase) noexcept
   {
     _state.ContentsTilePhase = phase;
   }
@@ -670,7 +670,7 @@ namespace krys::ui
     return applicationResults.HasRunningAnimations;
   }
 
-  boo::FloatRect TextureMapperLayer::EffectiveLayerRect() const noexcept
+  RectF TextureMapperLayer::EffectiveLayerRect() const noexcept
   {
     return LayerRect();
   }

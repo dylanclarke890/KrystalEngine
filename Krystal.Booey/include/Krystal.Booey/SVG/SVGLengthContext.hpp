@@ -22,10 +22,10 @@
 
 #include "Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Units.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/SVG/SVGLengthValue.hpp"
 #include "Krystal.Booey/SVG/SVGUnitTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
@@ -62,36 +62,36 @@ namespace krys::boo
   {
   private:
     WeakPtr<SVGElement> _context;
-    mutable Maybe<FloatSize> _viewportSize;
+    mutable Maybe<SizeF> _viewportSize;
 
   public:
-    explicit SVGLengthContext(const SVGElement *, const Maybe<FloatSize> &viewportSize = {}) noexcept;
+    explicit SVGLengthContext(const SVGElement *, const Maybe<SizeF> &viewportSize = {}) noexcept;
 
     ~SVGLengthContext() noexcept;
 
     template <typename T>
-    KRYS_NODISCARD static FloatRect ResolveRectangle(const SVGElement *context, T &element,
-                                                     SVGUnitTypes::SVGUnitType type,
-                                                     const FloatRect &viewport) noexcept
+    KRYS_NODISCARD static RectF ResolveRectangle(const SVGElement *context, T &element,
+                                                 SVGUnitTypes::SVGUnitType type,
+                                                 const RectF &viewport) noexcept
     {
       return ResolveRectangle(context, type, viewport, element.X(), element.Y(), element.Width(),
                               element.Height());
     }
 
     template <typename T>
-    KRYS_NODISCARD static FloatRect ResolveRectangle(const T &element, SVGUnitTypes::SVGUnitType type,
-                                                     const FloatRect &viewport) noexcept
+    KRYS_NODISCARD static RectF ResolveRectangle(const T &element, SVGUnitTypes::SVGUnitType type,
+                                                 const RectF &viewport) noexcept
     {
       return ResolveRectangle(&element, element, type, viewport);
     }
 
-    KRYS_NODISCARD static FloatRect ResolveRectangle(const SVGElement *, SVGUnitTypes::SVGUnitType,
-                                                     const FloatRect &viewport, const SVGLengthValue &x,
-                                                     const SVGLengthValue &y, const SVGLengthValue &width,
-                                                     const SVGLengthValue &height) noexcept;
+    KRYS_NODISCARD static RectF ResolveRectangle(const SVGElement *, SVGUnitTypes::SVGUnitType,
+                                                 const RectF &viewport, const SVGLengthValue &x,
+                                                 const SVGLengthValue &y, const SVGLengthValue &width,
+                                                 const SVGLengthValue &height) noexcept;
 
-    KRYS_NODISCARD static FloatPoint ResolvePoint(const SVGElement *, SVGUnitTypes::SVGUnitType,
-                                                  const SVGLengthValue &x, const SVGLengthValue &y) noexcept;
+    KRYS_NODISCARD static PointF ResolvePoint(const SVGElement *, SVGUnitTypes::SVGUnitType,
+                                              const SVGLengthValue &x, const SVGLengthValue &y) noexcept;
 
     KRYS_NODISCARD static float ResolveLength(const SVGElement *, SVGUnitTypes::SVGUnitType,
                                               const SVGLengthValue &) noexcept;
@@ -126,7 +126,7 @@ namespace krys::boo
     KRYS_NODISCARD ExceptionOr<css::LengthPercentage<>>
       ResolveValueFromUserUnits(float, const css::LengthPercentageUnit &, SVGLengthMode) const noexcept;
 
-    KRYS_NODISCARD Maybe<FloatSize> ViewportSize() const noexcept;
+    KRYS_NODISCARD Maybe<SizeF> ViewportSize() const noexcept;
 
   private:
     KRYS_NODISCARD ExceptionOr<float> ConvertValueFromUserUnitsToPercentage(float value,
@@ -136,13 +136,13 @@ namespace krys::boo
                                                                             SVGLengthMode) const noexcept;
 
     KRYS_NODISCARD static float ConvertValueFromPercentageToUserUnits(float value, SVGLengthMode,
-                                                                      FloatSize) noexcept;
+                                                                      SizeF) noexcept;
 
     KRYS_NODISCARD ExceptionOr<float> ConvertValueFromUserUnitsToEXS(float) const noexcept;
 
     KRYS_NODISCARD ExceptionOr<float> ConvertValueFromEXSToUserUnits(float) const noexcept;
 
-    KRYS_NODISCARD Maybe<FloatSize> ComputeViewportSize() const noexcept;
+    KRYS_NODISCARD Maybe<SizeF> ComputeViewportSize() const noexcept;
 
     KRYS_NODISCARD float ComputeNonCalcLength(float, css::LengthUnit) const noexcept;
 

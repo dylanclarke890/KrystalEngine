@@ -77,11 +77,11 @@ namespace krys::boo::css
       return nullptr;
     }
 
-    Maybe<IntPoint> hotSpot;
+    Maybe<PointI> hotSpot;
     if (_hotSpot)
     {
       // FIXME: Should we clamp or round instead of just casting from double to int?
-      hotSpot = IntPoint {
+      hotSpot = PointI {
         static_cast<int>(
           Downcast<PrimitiveValue>(_hotSpot->First()).ResolveAsNumber(state.CssToLengthConversionData())),
         static_cast<int>(

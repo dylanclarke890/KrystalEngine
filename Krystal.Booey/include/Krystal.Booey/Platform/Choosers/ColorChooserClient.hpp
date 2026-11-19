@@ -30,7 +30,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo
@@ -48,7 +48,7 @@ namespace krys::boo
 
     virtual void DidEndChooser() noexcept = 0;
 
-    KRYS_NODISCARD virtual IntRect ElementRectRelativeToRootView() const noexcept = 0;
+    KRYS_NODISCARD virtual RectI ElementRectRelativeToRootView() const noexcept = 0;
 
     KRYS_NODISCARD virtual bool SupportsAlpha() const noexcept = 0;
 

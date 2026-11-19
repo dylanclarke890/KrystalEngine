@@ -24,7 +24,7 @@ namespace krys::boo::tests
       u8"<div id=other style=position:fixed;top:120px;left:0;width:100px;height:50px></div>";
 
     /// @brief A step of a touchpad's pan at @p position, with the content following @p deltaY.
-    bool Pan(AnimationPageFixture &fixture, Phase phase, float deltaY, IntPoint position = {10, 10}) noexcept
+    bool Pan(AnimationPageFixture &fixture, Phase phase, float deltaY, PointI position = {10, 10}) noexcept
     {
       return fixture.TestPage->MainFrame().GetEventHandler().HandleWheelEvent(
         PlatformWheelEvent(position, position, 0, deltaY, 0, 0,
@@ -121,11 +121,11 @@ namespace krys::boo::tests
       box.SetScrollTop(200);
       auto &handler = fixture.TestPage->MainFrame().GetEventHandler();
       CHECK(handler.HandleWheelEvent(
-        PlatformWheelEvent(IntPoint(10, 10), IntPoint(10, 10), 0, -100, 0, 1,
+        PlatformWheelEvent(PointI(10, 10), PointI(10, 10), 0, -100, 0, 1,
                            PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {})));
       CHECK(ViewY(fixture) == 100);
       CHECK(handler.HandleWheelEvent(
-        PlatformWheelEvent(IntPoint(10, 10), IntPoint(10, 10), 0, 50, 0, -1,
+        PlatformWheelEvent(PointI(10, 10), PointI(10, 10), 0, 50, 0, -1,
                            PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {})));
       CHECK(box.ScrollTop() == 150);
       CHECK(ViewY(fixture) == 100);

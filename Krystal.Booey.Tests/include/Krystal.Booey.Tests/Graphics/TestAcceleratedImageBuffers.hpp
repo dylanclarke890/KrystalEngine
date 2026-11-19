@@ -27,7 +27,7 @@ namespace krys::boo::tests
     }
 
     explicit TestAcceleratedBackend(const Parameters &parameters) noexcept
-        : ImageBufferBackend(parameters), _recorder(FloatSize(parameters.BackendSize))
+        : ImageBufferBackend(parameters), _recorder(SizeF(parameters.BackendSize))
     {
     }
 
@@ -59,7 +59,7 @@ namespace krys::boo::tests
     }
 
     KRYS_NODISCARD RefPtr<ImageBuffer>
-      CreateImageBuffer(const FloatSize &size, RenderingMode mode, RenderingPurpose purpose,
+      CreateImageBuffer(const SizeF &size, RenderingMode mode, RenderingPurpose purpose,
                         float resolutionScale, const DestinationColorSpace &) const noexcept override
     {
       if (mode != RenderingMode::Accelerated)

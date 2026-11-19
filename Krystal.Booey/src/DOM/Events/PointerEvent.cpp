@@ -237,7 +237,7 @@ namespace krys::boo
                                          const List<Ref<PointerEvent>> &coalescedEvents,
                                          const List<Ref<PointerEvent>> &predictedEvents, uint32 index,
                                          bool isPrimary, LocalFrameView *view,
-                                         const DoublePoint &touchDelta) noexcept
+                                         const PointD &touchDelta) noexcept
   {
     auto type = PointerEventType(event.TouchPoints()[index].GetState());
     return AdoptRef(*new PointerEvent(type, event, coalescedEvents, predictedEvents, TypeCanBubble(type),
@@ -248,7 +248,7 @@ namespace krys::boo
                                          const List<Ref<PointerEvent>> &coalescedEvents,
                                          const List<Ref<PointerEvent>> &predictedEvents, bool canBubble,
                                          bool isCancelable, uint32 index, bool isPrimary,
-                                         LocalFrameView *view, const DoublePoint &touchDelta) noexcept
+                                         LocalFrameView *view, const PointD &touchDelta) noexcept
   {
     auto type = PointerEventType(event.TouchPoints()[index].GetState());
     return AdoptRef(*new PointerEvent(type, event, coalescedEvents, predictedEvents, canBubble, isCancelable,
@@ -259,7 +259,7 @@ namespace krys::boo
                                          const List<Ref<PointerEvent>> &coalescedEvents,
                                          const List<Ref<PointerEvent>> &predictedEvents, bool canBubble,
                                          bool isCancelable, uint32 index, bool isPrimary,
-                                         LocalFrameView *view, const DoublePoint &touchDelta) noexcept
+                                         LocalFrameView *view, const PointD &touchDelta) noexcept
   {
     return AdoptRef(*new PointerEvent(krys::move(type), event, coalescedEvents, predictedEvents, canBubble,
                                       isCancelable, index, isPrimary, view, touchDelta));
@@ -269,7 +269,7 @@ namespace krys::boo
                                          const List<Ref<PointerEvent>> &coalescedEvents,
                                          const List<Ref<PointerEvent>> &predictedEvents, uint32 index,
                                          bool isPrimary, LocalFrameView *view,
-                                         const DoublePoint &touchDelta) noexcept
+                                         const PointD &touchDelta) noexcept
   {
     return AdoptRef(*new PointerEvent(type, event, coalescedEvents, predictedEvents, TypeCanBubble(type),
                                       TypeIsCancelable(type), index, isPrimary, view, touchDelta));
@@ -434,7 +434,7 @@ namespace krys::boo
                              const List<Ref<PointerEvent>> &coalescedEvents,
                              const List<Ref<PointerEvent>> &predictedEvents, bool canBubble,
                              bool isCancelable, uint32 index, bool isPrimary, LocalFrameView *view,
-                             const DoublePoint &touchDelta) noexcept
+                             const PointD &touchDelta) noexcept
       : MouseEvent(type, TrustedInit(canBubble, isCancelable, TypeIsComposed(type)), view,
                    event.TouchPoints()[index].ScreenPos(), event.TouchPoints()[index].Pos(), touchDelta.X(),
                    touchDelta.Y(), event.Modifiers(), ButtonForType(type), ButtonsForType(type), nullptr, 0,

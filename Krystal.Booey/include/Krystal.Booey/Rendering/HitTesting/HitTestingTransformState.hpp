@@ -25,10 +25,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -43,12 +43,12 @@ namespace krys::boo
   class HitTestingTransformState : public RefCounted<HitTestingTransformState>
   {
   public:
-    FloatPoint LastPlanarPoint;
+    PointF LastPlanarPoint;
     FloatQuad LastPlanarQuad;
     FloatQuad LastPlanarArea;
     TransformationMatrix AccumulatedTransform;
 
-    KRYS_NODISCARD static Ref<HitTestingTransformState> Create(const FloatPoint &p, const FloatQuad &quad,
+    KRYS_NODISCARD static Ref<HitTestingTransformState> Create(const PointF &p, const FloatQuad &quad,
                                                                const FloatQuad &area) noexcept
     {
       return AdoptRef(*new HitTestingTransformState(p, quad, area));
@@ -63,7 +63,7 @@ namespace krys::boo
 
     void ApplyTransform(const TransformationMatrix &transformFromContainer) noexcept;
 
-    KRYS_NODISCARD FloatPoint MappedPoint() const noexcept;
+    KRYS_NODISCARD PointF MappedPoint() const noexcept;
 
     KRYS_NODISCARD FloatQuad MappedQuad() const noexcept;
 
@@ -76,7 +76,7 @@ namespace krys::boo
     void Flatten() noexcept;
 
   private:
-    HitTestingTransformState(const FloatPoint &p, const FloatQuad &quad, const FloatQuad &area) noexcept
+    HitTestingTransformState(const PointF &p, const FloatQuad &quad, const FloatQuad &area) noexcept
         : LastPlanarPoint(p), LastPlanarQuad(quad), LastPlanarArea(area)
     {
     }

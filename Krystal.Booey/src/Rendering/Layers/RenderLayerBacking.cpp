@@ -648,17 +648,16 @@ namespace krys::boo
       return;
     }
 
-    auto layerForChildrenTransform = [&]() -> Pair<GraphicsLayer *, FloatRect>
+    auto layerForChildrenTransform = [&]() -> Pair<GraphicsLayer *, RectF>
     {
       if (_scrollContainerLayer)
       {
         // Scroll container layers are only created for RenderBox derived renderers.
-        return {_scrollContainerLayer.get(),
-                FloatRect(ScrollContainerLayerBox(Downcast<RenderBox>(Renderer())))};
+        return {_scrollContainerLayer.get(), RectF(ScrollContainerLayerBox(Downcast<RenderBox>(Renderer())))};
       }
       if (auto *layer = ClippingLayer())
       {
-        return {layer, FloatRect(ClippingLayerBox(Renderer()))};
+        return {layer, RectF(ClippingLayerBox(Renderer()))};
       }
 
       return {_graphicsLayer.get(), Renderer().TransformReferenceBoxRect()};
@@ -1201,21 +1200,19 @@ namespace krys::boo
                                                           const LayoutSize &newSubpixelOffsetFromRenderer,
                                                           float deviceScaleFactor) noexcept
     {
-      FloatSize previous =
-        SnapSizeToDevicePixel(oldSubpixelOffsetFromRenderer, LayoutPoint(), deviceScaleFactor);
-      FloatSize current =
-        SnapSizeToDevicePixel(newSubpixelOffsetFromRenderer, LayoutPoint(), deviceScaleFactor);
+      SizeF previous = SnapSizeToDevicePixel(oldSubpixelOffsetFromRenderer, LayoutPoint(), deviceScaleFactor);
+      SizeF current = SnapSizeToDevicePixel(newSubpixelOffsetFromRenderer, LayoutPoint(), deviceScaleFactor);
       return previous != current;
     }
 
-    KRYS_NODISCARD FloatSize SubpixelForLayerPainting(const LayoutPoint &point,
-                                                      float pixelSnappingFactor) noexcept
+    KRYS_NODISCARD SizeF SubpixelForLayerPainting(const LayoutPoint &point,
+                                                  float pixelSnappingFactor) noexcept
     {
       LayoutUnit x = point.X();
       LayoutUnit y = point.Y();
       x = x >= 0 ? FloorToDevicePixel(x, pixelSnappingFactor) : CeilToDevicePixel(x, pixelSnappingFactor);
       y = y >= 0 ? FloorToDevicePixel(y, pixelSnappingFactor) : CeilToDevicePixel(y, pixelSnappingFactor);
-      return FloatSize(point - LayoutPoint(x, y));
+      return SizeF(point - LayoutPoint(x, y));
     }
 
     struct OffsetFromRenderer
@@ -1391,7 +1388,7 @@ namespace krys::boo
       ScrollOffset scrollOffset = scrollableArea->GetScrollOffset();
       parentGraphicsLayerRect =
         LayoutRect((scrollContainerBox.Location() - ToLayoutSize(ancestorCompositedBounds.Location())
-                    - LayoutSize(ToIntSize(scrollOffset))),
+                    - LayoutSize(ToSizeI(scrollOffset))),
                    scrollContainerBox.Size());
     }
 
@@ -1439,7 +1436,7 @@ namespace krys::boo
 
     _compositedBoundsOffsetFromGraphicsLayer = compositedBoundsOffset.FromPrimaryGraphicsLayer();
 
-    auto primaryLayerPosition = FloatPoint(primaryGraphicsLayerRect.Location());
+    auto primaryLayerPosition = PointF(primaryGraphicsLayerRect.Location());
 
     bool preserves3D = style.Preserves3D();
 
@@ -1466,9 +1463,9 @@ namespace krys::boo
         krys_debug_assert(renderViewLayer->IsComposited());
         fixedPositionRect.Move(renderViewLayer->Backing()->ContentOffsetInCompositingLayer());
 
-        _viewportClippingLayer->SetPosition(FloatPoint(fixedPositionRect.Location()));
-        _viewportClippingLayer->SetSize(FloatSize(fixedPositionRect.Size()));
-        primaryLayerPosition.MoveBy(-FloatPoint(fixedPositionRect.Location()));
+        _viewportClippingLayer->SetPosition(PointF(fixedPositionRect.Location()));
+        _viewportClippingLayer->SetSize(SizeF(fixedPositionRect.Size()));
+        primaryLayerPosition.MoveBy(-PointF(fixedPositionRect.Location()));
       }
       _viewportAnchorLayer->SetPosition(primaryLayerPosition);
       primaryLayerPosition = {};
@@ -1480,17 +1477,17 @@ namespace krys::boo
       _contentsContainmentLayer->SetPosition(primaryLayerPosition);
       primaryLayerPosition = {};
       // Use the same size as _graphicsLayer so transforms behave correctly.
-      _contentsContainmentLayer->SetSize(FloatSize(primaryGraphicsLayerRect.Size()));
+      _contentsContainmentLayer->SetSize(SizeF(primaryGraphicsLayerRect.Size()));
     }
 
-    auto computeAnimationExtent = [&]() -> Maybe<FloatRect>
+    auto computeAnimationExtent = [&]() -> Maybe<RectF>
     {
       LayoutRect animatedBounds;
       if (isRunningAcceleratedTransformAnimation
           && _owningLayer.GetOverlapBoundsIncludingChildrenAccountingForTransformAnimations(
             animatedBounds, {RenderLayer::IncludeCompositedDescendants}))
       {
-        return FloatRect(animatedBounds);
+        return RectF(animatedBounds);
       }
       return null;
     };
@@ -1499,10 +1496,10 @@ namespace krys::boo
     _graphicsLayer->SetBackfaceVisibility(style.GetBackfaceVisibility() == BackfaceVisibility::Visible);
 
     _graphicsLayer->SetPosition(primaryLayerPosition);
-    _graphicsLayer->SetSize(FloatSize(primaryGraphicsLayerRect.Size()));
+    _graphicsLayer->SetSize(SizeF(primaryGraphicsLayerRect.Size()));
     if (HasTiledBackingFlatteningLayer())
     {
-      _childContainmentLayer->SetSize(FloatSize(primaryGraphicsLayerRect.Size()));
+      _childContainmentLayer->SetSize(SizeF(primaryGraphicsLayerRect.Size()));
     }
 
     // Compute renderer offset from primary graphics layer. Note that primaryGraphicsLayerRect is in
@@ -1516,11 +1513,10 @@ namespace krys::boo
     _hasSubpixelRounding =
       !_subpixelOffsetFromRenderer.IsZero() || CompositedBounds().Size() != primaryGraphicsLayerRect.Size();
 
-    if (FloatSize(primaryGraphicsLayerOffsetFromRenderer.DevicePixelOffset)
+    if (SizeF(primaryGraphicsLayerOffsetFromRenderer.DevicePixelOffset)
         != _graphicsLayer->OffsetFromRenderer())
     {
-      _graphicsLayer->SetOffsetFromRenderer(
-        FloatSize(primaryGraphicsLayerOffsetFromRenderer.DevicePixelOffset));
+      _graphicsLayer->SetOffsetFromRenderer(SizeF(primaryGraphicsLayerOffsetFromRenderer.DevicePixelOffset));
     }
 
     // If we have a layer that clips children, position it.
@@ -1534,10 +1530,10 @@ namespace krys::boo
         ToLayoutSize(clippingBox.Location()) + rendererOffset.FromPrimaryGraphicsLayer();
       SnappedRectInfo snappedClippingGraphicsLayer =
         SnappedGraphicsLayer(clipBoxOffsetFromGraphicsLayer, clippingBox.Size(), Renderer());
-      clipLayer->SetPosition(FloatPoint(snappedClippingGraphicsLayer.SnappedRect.Location()));
-      clipLayer->SetSize(FloatSize(snappedClippingGraphicsLayer.SnappedRect.Size()));
+      clipLayer->SetPosition(PointF(snappedClippingGraphicsLayer.SnappedRect.Location()));
+      clipLayer->SetSize(SizeF(snappedClippingGraphicsLayer.SnappedRect.Size()));
       clipLayer->SetOffsetFromRenderer(
-        FloatSize(ToLayoutSize(clippingBox.Location() - snappedClippingGraphicsLayer.SnapDelta)));
+        SizeF(ToLayoutSize(clippingBox.Location() - snappedClippingGraphicsLayer.SnapDelta)));
 
       auto computeMasksToBoundsRect = [&]
       {
@@ -1555,7 +1551,7 @@ namespace krys::boo
           return contentsClippingRect;
         }
 
-        return FloatRoundedRect {FloatRect {{}, FloatSize(snappedClippingGraphicsLayer.SnappedRect.Size())}};
+        return FloatRoundedRect {RectF {{}, SizeF(snappedClippingGraphicsLayer.SnappedRect.Size())}};
       };
 
       clipLayer->SetContentsClippingRect(computeMasksToBoundsRect());
@@ -1576,9 +1572,9 @@ namespace krys::boo
 
       // FIXME: need to do some pixel snapping here.
       _scrollContainerLayer->SetPosition(
-        FloatPoint(scrollContainerBox.Location() - parentLayerBounds.Location()));
+        PointF(scrollContainerBox.Location() - parentLayerBounds.Location()));
       _scrollContainerLayer->SetSize(
-        FloatSize(RoundedIntSize(LayoutSize(scrollContainerBox.Width(), scrollContainerBox.Height()))));
+        SizeF(RoundedSizeI(LayoutSize(scrollContainerBox.Width(), scrollContainerBox.Height()))));
 
       auto *scrollableArea = _owningLayer.GetScrollableArea();
       krys_debug_assert(scrollableArea);
@@ -1586,24 +1582,24 @@ namespace krys::boo
       ScrollOffset scrollOffset = scrollableArea->GetScrollOffset();
       UpdateScrollOffset(scrollOffset);
 
-      FloatSize oldScrollingLayerOffset = _scrollContainerLayer->OffsetFromRenderer();
-      _scrollContainerLayer->SetOffsetFromRenderer(FloatSize(ToLayoutSize(scrollContainerBox.Location())));
+      SizeF oldScrollingLayerOffset = _scrollContainerLayer->OffsetFromRenderer();
+      _scrollContainerLayer->SetOffsetFromRenderer(SizeF(ToLayoutSize(scrollContainerBox.Location())));
 
       bool paddingBoxOffsetChanged = oldScrollingLayerOffset != _scrollContainerLayer->OffsetFromRenderer();
 
-      IntSize scrollSize;
+      SizeI scrollSize;
       if (scrollableArea)
       {
-        scrollSize = IntSize(scrollableArea->ScrollWidth(), scrollableArea->ScrollHeight());
+        scrollSize = SizeI(scrollableArea->ScrollWidth(), scrollableArea->ScrollHeight());
       }
-      if (FloatSize(scrollSize) != _scrolledContentsLayer->Size() || paddingBoxOffsetChanged)
+      if (SizeF(scrollSize) != _scrolledContentsLayer->Size() || paddingBoxOffsetChanged)
       {
         _scrolledContentsLayer->SetNeedsDisplay();
       }
 
-      _scrolledContentsLayer->SetSize(FloatSize(scrollSize));
+      _scrolledContentsLayer->SetSize(SizeF(scrollSize));
       _scrolledContentsLayer->SetScrollOffset(scrollOffset, GraphicsLayer::ShouldSetNeedsDisplay::DoNotSet);
-      _scrolledContentsLayer->SetOffsetFromRenderer(FloatSize(ToLayoutSize(scrollContainerBox.Location())),
+      _scrolledContentsLayer->SetOffsetFromRenderer(SizeF(ToLayoutSize(scrollContainerBox.Location())),
                                                     GraphicsLayer::ShouldSetNeedsDisplay::DoNotSet);
 
       AdjustTiledBackingCoverage();
@@ -1617,21 +1613,21 @@ namespace krys::boo
       SnappedRectInfo snappedBoxInfo =
         SnappedGraphicsLayer(boxOffsetFromGraphicsLayer, overflowControlsBox.Size(), Renderer());
 
-      _overflowControlsContainer->SetPosition(FloatPoint(snappedBoxInfo.SnappedRect.Location()));
-      _overflowControlsContainer->SetSize(FloatSize(snappedBoxInfo.SnappedRect.Size()));
+      _overflowControlsContainer->SetPosition(PointF(snappedBoxInfo.SnappedRect.Location()));
+      _overflowControlsContainer->SetSize(SizeF(snappedBoxInfo.SnappedRect.Size()));
       _overflowControlsContainer->SetMasksToBounds(true);
     }
 
     if (_foregroundLayer)
     {
-      FloatSize foregroundSize;
-      FloatSize foregroundOffset;
+      SizeF foregroundSize;
+      SizeF foregroundOffset;
       auto needsDisplayOnOffsetChange = GraphicsLayer::ShouldSetNeedsDisplay::Set;
       if (_scrolledContentsLayer)
       {
         foregroundSize = _scrolledContentsLayer->Size();
         foregroundOffset = _scrolledContentsLayer->OffsetFromRenderer()
-                           - FloatSize(ToIntSize(_scrolledContentsLayer->GetScrollOffset()));
+                           - SizeF(ToSizeI(_scrolledContentsLayer->GetScrollOffset()));
         needsDisplayOnOffsetChange = GraphicsLayer::ShouldSetNeedsDisplay::DoNotSet;
       }
       else if (HasClippingLayer())
@@ -1639,12 +1635,12 @@ namespace krys::boo
         // If we have a clipping layer (which clips descendants), then the foreground layer is a child of it,
         // so that it gets correctly sorted with children. In that case, position relative to the clipping
         // layer.
-        foregroundSize = FloatSize(clippingBox.Size());
-        foregroundOffset = FloatSize(ToLayoutSize(clippingBox.Location()));
+        foregroundSize = SizeF(clippingBox.Size());
+        foregroundOffset = SizeF(ToLayoutSize(clippingBox.Location()));
       }
       else
       {
-        foregroundSize = FloatSize(primaryGraphicsLayerRect.Size());
+        foregroundSize = SizeF(primaryGraphicsLayerRect.Size());
         foregroundOffset = _graphicsLayer->OffsetFromRenderer();
       }
 
@@ -1655,17 +1651,17 @@ namespace krys::boo
 
     if (_backgroundLayer)
     {
-      FloatPoint backgroundPosition;
-      FloatSize backgroundSize = FloatSize(primaryGraphicsLayerRect.Size());
+      PointF backgroundPosition;
+      SizeF backgroundSize = SizeF(primaryGraphicsLayerRect.Size());
       if (BackgroundLayerPaintsFixedRootBackground())
       {
         const LocalFrameView &frameView = Renderer().View().FrameView();
-        backgroundPosition = FloatPoint(frameView.ScrollPositionForFixedPosition());
-        backgroundSize = FloatSize(frameView.GetLayoutSize());
+        backgroundPosition = PointF(frameView.ScrollPositionForFixedPosition());
+        backgroundSize = SizeF(frameView.GetLayoutSize());
       }
       else
       {
-        auto boundingBox = GetRenderBox() ? FloatRect(GetRenderBox()->BorderBoxRect()) : FloatRect();
+        auto boundingBox = GetRenderBox() ? RectF(GetRenderBox()->BorderBoxRect()) : RectF();
         backgroundPosition = boundingBox.Location();
         backgroundSize = boundingBox.Size();
       }
@@ -1725,15 +1721,15 @@ namespace krys::boo
     SnappedRectInfo snappedBoxInfo =
       SnappedGraphicsLayer(boxOffsetFromGraphicsLayer, overflowControlsRect.Size(), Renderer());
 
-    _overflowControlsContainer->SetPosition(FloatPoint(snappedBoxInfo.SnappedRect.Location()));
-    _overflowControlsContainer->SetSize(FloatSize(snappedBoxInfo.SnappedRect.Size()));
+    _overflowControlsContainer->SetPosition(PointF(snappedBoxInfo.SnappedRect.Location()));
+    _overflowControlsContainer->SetSize(SizeF(snappedBoxInfo.SnappedRect.Size()));
   }
 
   void RenderLayerBacking::UpdateScrollOffset(ScrollOffset scrollOffset) noexcept
   {
     // We implement the contents offset via the bounds origin on this layer, rather than a position on the
     // sublayer.
-    _scrollContainerLayer->SetBoundsOrigin(FloatPoint(scrollOffset));
+    _scrollContainerLayer->SetBoundsOrigin(PointF(scrollOffset));
 
     krys_debug_assert(_scrolledContentsLayer->Position().IsZero());
   }
@@ -1790,7 +1786,7 @@ namespace krys::boo
   void RenderLayerBacking::UpdateMaskingLayerGeometry() noexcept
   {
     _maskLayer->SetSize(_graphicsLayer->Size());
-    _maskLayer->SetPosition(FloatPoint());
+    _maskLayer->SetPosition(PointF());
     _maskLayer->SetOffsetFromRenderer(_graphicsLayer->OffsetFromRenderer());
 
     if (!_maskLayer->DrawsContent())
@@ -1806,7 +1802,7 @@ namespace krys::boo
           LayoutSize(SnapSizeToDevicePixel(-_subpixelOffsetFromRenderer, LayoutPoint(), DeviceScaleFactor()));
         auto [clipPath, windRule] = _owningLayer.ComputeClipPath(offset, referenceBoxForClippedInline);
 
-        FloatSize pathOffset = _maskLayer->OffsetFromRenderer();
+        SizeF pathOffset = _maskLayer->OffsetFromRenderer();
         if (!pathOffset.IsZero())
         {
           clipPath.Translate(-pathOffset);
@@ -1957,8 +1953,8 @@ namespace krys::boo
   void RenderLayerBacking::ResetContentsRect() noexcept
   {
     UpdateContentsRects();
-    _graphicsLayer->SetContentsTileSize(FloatSize());
-    _graphicsLayer->SetContentsTilePhase(FloatSize());
+    _graphicsLayer->SetContentsTileSize(SizeF());
+    _graphicsLayer->SetContentsTilePhase(SizeF());
   }
 
   void RenderLayerBacking::UpdateDrawsContent() noexcept
@@ -2154,8 +2150,8 @@ namespace krys::boo
 
       auto clippingLayerPosition =
         ToLayoutPoint(snappedClippingLayerRect.Location() - lastClipLayerRect.Location());
-      entry.ClippingLayer->SetPosition(FloatPoint(clippingLayerPosition));
-      entry.ClippingLayer->SetSize(FloatSize(snappedClippingLayerRect.Size()));
+      entry.ClippingLayer->SetPosition(PointF(clippingLayerPosition));
+      entry.ClippingLayer->SetSize(SizeF(snappedClippingLayerRect.Size()));
 
       clipRect.SetLocation({});
       roundedClipRect.SetRect(clipRect);
@@ -2174,7 +2170,7 @@ namespace krys::boo
         }
 
         // scrollingLayer size and position are always 0,0.
-        entry.ScrollingLayer->SetBoundsOrigin(FloatPoint(scrollOffset));
+        entry.ScrollingLayer->SetBoundsOrigin(PointF(scrollOffset));
         lastClipLayerRect.MoveBy(-LayoutPoint(scrollOffset));
       }
     }
@@ -2394,22 +2390,21 @@ namespace krys::boo
     }
     // FIXME: Should do device-pixel snapping.
     auto *box = GetRenderBox();
-    auto borderBox = SnappedIntRect(box->BorderBoxRect());
+    auto borderBox = SnappedRectI(box->BorderBoxRect());
 
     // _overflowControlsContainer is positioned using the paddingBoxRectIncludingScrollbar.
-    auto paddingBox = SnappedIntRect(box->PaddingBoxRectIncludingScrollbar());
+    auto paddingBox = SnappedRectI(box->PaddingBoxRectIncludingScrollbar());
     auto paddingBoxInset = paddingBox.Location() - borderBox.Location();
 
-    auto positionScrollbarLayer =
-      [](GraphicsLayer &layer, const IntRect &scrollbarRect, IntSize paddingBoxInset)
+    auto positionScrollbarLayer = [](GraphicsLayer &layer, const RectI &scrollbarRect, SizeI paddingBoxInset)
     {
-      layer.SetPosition(FloatPoint(scrollbarRect.Location() - paddingBoxInset));
-      layer.SetSize(FloatSize(scrollbarRect.Size()));
+      layer.SetPosition(PointF(scrollbarRect.Location() - paddingBoxInset));
+      layer.SetSize(SizeF(scrollbarRect.Size()));
       if (layer.UsesContentsLayer())
       {
-        IntRect barRect = IntRect(IntPoint(), scrollbarRect.Size());
-        layer.SetContentsRect(FloatRect(barRect));
-        layer.SetContentsClippingRect(FloatRoundedRect(FloatRect(barRect)));
+        RectI barRect = RectI(PointI(), scrollbarRect.Size());
+        layer.SetContentsRect(RectF(barRect));
+        layer.SetContentsClippingRect(FloatRoundedRect(RectF(barRect)));
       }
     };
 
@@ -2430,8 +2425,8 @@ namespace krys::boo
     if (auto *layer = LayerForScrollCorner())
     {
       auto cornerRect = rects.ScrollCornerOrResizerRect();
-      layer->SetPosition(FloatPoint(cornerRect.Location() - paddingBoxInset));
-      layer->SetSize(FloatSize(cornerRect.Size()));
+      layer->SetPosition(PointF(cornerRect.Location() - paddingBoxInset));
+      layer->SetSize(SizeF(cornerRect.Size()));
       layer->SetDrawsContent(!cornerRect.IsEmpty());
     }
   }
@@ -2803,7 +2798,7 @@ namespace krys::boo
       _graphicsLayer->SetContentsToSolidColor(Color());
       _backgroundLayer->SetContentsToSolidColor(RendererBackgroundColor());
 
-      FloatRect contentsRect = BackgroundBoxForSimpleContainerPainting();
+      RectF contentsRect = BackgroundBoxForSimpleContainerPainting();
       // NOTE: This is currently only used by RenderFullScreen, which we want to be big enough to hide
       // overflow areas of the root.
       contentsRect.Inflate(contentsRect.Size());
@@ -2823,7 +2818,7 @@ namespace krys::boo
 
     // An unset (invalid) color will remove the solid color.
     _graphicsLayer->SetContentsToSolidColor(backgroundColor);
-    FloatRect contentsRect = BackgroundBoxForSimpleContainerPainting();
+    RectF contentsRect = BackgroundBoxForSimpleContainerPainting();
     _graphicsLayer->SetContentsRect(contentsRect);
     _graphicsLayer->SetContentsClippingRect(FloatRoundedRect(contentsRect));
     didUpdateContentsRect = true;
@@ -2857,8 +2852,8 @@ namespace krys::boo
 
     _graphicsLayer->SetContentsTileSize(geometry.TileSize);
     _graphicsLayer->SetContentsTilePhase(geometry.Phase);
-    _graphicsLayer->SetContentsRect(FloatRect(geometry.DestinationRect));
-    _graphicsLayer->SetContentsClippingRect(FloatRoundedRect(FloatRect(geometry.DestinationRect)));
+    _graphicsLayer->SetContentsRect(RectF(geometry.DestinationRect));
+    _graphicsLayer->SetContentsClippingRect(FloatRoundedRect(RectF(geometry.DestinationRect)));
     _graphicsLayer->SetContentsToImage(
       backgroundLayer.GetImage().TryStyleImage()->GetCachedImage()->GetImage());
 
@@ -3324,11 +3319,11 @@ namespace krys::boo
     }
 
     auto &canvasRenderer = Downcast<RenderHTMLCanvas>(Renderer());
-    return SnappedIntRect(contents).Size() == canvasRenderer.CanvasElement().Size();
+    return SnappedRectI(contents).Size() == canvasRenderer.CanvasElement().Size();
   }
 
   void RenderLayerBacking::ContentChanged(ContentChangeType changeType,
-                                          const Maybe<FloatRect> &dirtyRect) noexcept
+                                          const Maybe<RectF> &dirtyRect) noexcept
   {
     PaintedContentsInfo contentsInfo(*this);
     if (changeType == ContentChangeType::Image || changeType == ContentChangeType::Canvas)
@@ -3464,12 +3459,12 @@ namespace krys::boo
     }
   }
 
-  FloatRect RenderLayerBacking::BackgroundBoxForSimpleContainerPainting() const noexcept
+  RectF RenderLayerBacking::BackgroundBoxForSimpleContainerPainting() const noexcept
   {
     auto *box = DynamicDowncast<RenderBox>(Renderer());
     if (!box)
     {
-      return FloatRect();
+      return RectF();
     }
 
     LayoutRect backgroundBox = BackgroundRectForBox(*box);
@@ -3567,7 +3562,7 @@ namespace krys::boo
       // By default, setNeedsDisplay will clip to the size of the GraphicsLayer, which does not include margin
       // tiles.
       // FIXME: Tiled backings' margins, once there are tiled backings.
-      FloatRect rectToRepaint = FloatRect(FloatPoint(0, 0), _graphicsLayer->Size());
+      RectF rectToRepaint = RectF(PointF(0, 0), _graphicsLayer->Size());
       _graphicsLayer->SetNeedsDisplayInRect(rectToRepaint, shouldClip);
     }
 
@@ -3607,53 +3602,53 @@ namespace krys::boo
     // FIXME: Event regions (invalidateEventRegion) and tracked repaints (addTrackedRepaintRect), once there
     // are any.
 
-    FloatRect pixelSnappedRectForPainting = SnapRectToDevicePixelsIfNeeded(r, Renderer());
+    RectF pixelSnappedRectForPainting = SnapRectToDevicePixelsIfNeeded(r, Renderer());
 
     if (_graphicsLayer && _graphicsLayer->DrawsContent())
     {
-      FloatRect layerDirtyRect = pixelSnappedRectForPainting;
-      layerDirtyRect.Move(-_graphicsLayer->OffsetFromRenderer() - FloatSize(_subpixelOffsetFromRenderer));
+      RectF layerDirtyRect = pixelSnappedRectForPainting;
+      layerDirtyRect.Move(-_graphicsLayer->OffsetFromRenderer() - SizeF(_subpixelOffsetFromRenderer));
       _graphicsLayer->SetNeedsDisplayInRect(layerDirtyRect, shouldClip);
     }
 
     if (_foregroundLayer && _foregroundLayer->DrawsContent())
     {
-      FloatRect layerDirtyRect = pixelSnappedRectForPainting;
-      layerDirtyRect.Move(-_foregroundLayer->OffsetFromRenderer() - FloatSize(_subpixelOffsetFromRenderer));
+      RectF layerDirtyRect = pixelSnappedRectForPainting;
+      layerDirtyRect.Move(-_foregroundLayer->OffsetFromRenderer() - SizeF(_subpixelOffsetFromRenderer));
       _foregroundLayer->SetNeedsDisplayInRect(layerDirtyRect, shouldClip);
     }
 
     // FIXME: need to split out repaints for the background.
     if (_backgroundLayer && _backgroundLayer->DrawsContent())
     {
-      FloatRect layerDirtyRect = pixelSnappedRectForPainting;
-      layerDirtyRect.Move(-_backgroundLayer->OffsetFromRenderer() - FloatSize(_subpixelOffsetFromRenderer));
+      RectF layerDirtyRect = pixelSnappedRectForPainting;
+      layerDirtyRect.Move(-_backgroundLayer->OffsetFromRenderer() - SizeF(_subpixelOffsetFromRenderer));
       _backgroundLayer->SetNeedsDisplayInRect(layerDirtyRect, shouldClip);
     }
 
     if (_maskLayer && _maskLayer->DrawsContent())
     {
-      FloatRect layerDirtyRect = pixelSnappedRectForPainting;
-      layerDirtyRect.Move(-_maskLayer->OffsetFromRenderer() - FloatSize(_subpixelOffsetFromRenderer));
+      RectF layerDirtyRect = pixelSnappedRectForPainting;
+      layerDirtyRect.Move(-_maskLayer->OffsetFromRenderer() - SizeF(_subpixelOffsetFromRenderer));
       _maskLayer->SetNeedsDisplayInRect(layerDirtyRect, shouldClip);
     }
 
     if (_scrolledContentsLayer && _scrolledContentsLayer->DrawsContent())
     {
-      FloatRect layerDirtyRect = pixelSnappedRectForPainting;
+      RectF layerDirtyRect = pixelSnappedRectForPainting;
       ScrollOffset scrollOffset;
       if (auto *scrollableArea = _owningLayer.GetScrollableArea())
       {
         scrollOffset = scrollableArea->GetScrollOffset();
       }
-      layerDirtyRect.Move(-_scrolledContentsLayer->OffsetFromRenderer() + FloatSize(ToIntSize(scrollOffset))
-                          - FloatSize(_subpixelOffsetFromRenderer));
+      layerDirtyRect.Move(-_scrolledContentsLayer->OffsetFromRenderer() + SizeF(ToSizeI(scrollOffset))
+                          - SizeF(_subpixelOffsetFromRenderer));
       _scrolledContentsLayer->SetNeedsDisplayInRect(layerDirtyRect, shouldClip);
     }
   }
 
   void RenderLayerBacking::PaintIntoLayer(const GraphicsLayer *graphicsLayer, GraphicsContext &context,
-                                          const IntRect &paintDirtyRect, // In the coords of rootLayer.
+                                          const RectI &paintDirtyRect, // In the coords of rootLayer.
                                           EnumSet<PaintBehavior> paintBehavior) noexcept
   {
     if ((PaintsIntoWindow() || PaintsIntoCompositedAncestor())
@@ -3776,13 +3771,13 @@ namespace krys::boo
   }
 
   void RenderLayerBacking::PaintContents(const GraphicsLayer &graphicsLayer, GraphicsContext &context,
-                                         const FloatRect &clip,
+                                         const RectF &clip,
                                          EnumSet<GraphicsLayerPaintBehavior> layerPaintBehavior) noexcept
   {
     // The dirtyRect is in the coords of the painting root.
-    FloatRect adjustedClipRect = clip;
-    adjustedClipRect.Move(FloatSize(_subpixelOffsetFromRenderer));
-    IntRect dirtyRect = EnclosingIntRect(adjustedClipRect);
+    RectF adjustedClipRect = clip;
+    adjustedClipRect.Move(SizeF(_subpixelOffsetFromRenderer));
+    RectI dirtyRect = EnclosingRectI(adjustedClipRect);
 
     if (!layerPaintBehavior.Contains(GraphicsLayerPaintBehavior::ForceSynchronousImageDecode))
     {
@@ -3798,7 +3793,7 @@ namespace krys::boo
     {
       if (!graphicsLayer.PaintingPhase().Contains(GraphicsLayerPaintingPhase::OverflowContents))
       {
-        dirtyRect.Intersect(EnclosingIntRect(FloatRect(CompositedBoundsIncludingMargin())));
+        dirtyRect.Intersect(EnclosingRectI(RectF(CompositedBoundsIncludingMargin())));
       }
 
       // We have to use the same root as for hit testing, because both methods can compute and cache
@@ -3844,10 +3839,10 @@ namespace krys::boo
 
       auto cornerRect = scrollableArea->OverflowControlsRects().ScrollCornerOrResizerRect();
       GraphicsContextStateSaver stateSaver(context);
-      context.Translate(-FloatSize(static_cast<float>(cornerRect.X()), static_cast<float>(cornerRect.Y())));
+      context.Translate(-SizeF(static_cast<float>(cornerRect.X()), static_cast<float>(cornerRect.Y())));
       LayoutRect transformedClip = LayoutRect(clip);
       transformedClip.MoveBy(LayoutPoint(cornerRect.Location()));
-      scrollableArea->PaintScrollCorner(context, IntPoint(), SnappedIntRect(transformedClip));
+      scrollableArea->PaintScrollCorner(context, PointI(), SnappedRectI(transformedClip));
       scrollableArea->PaintResizer(context, LayoutPoint(), transformedClip);
     }
   }
@@ -3862,7 +3857,7 @@ namespace krys::boo
     return Compositor().ZoomedOutPageScaleFactor();
   }
 
-  FloatSize RenderLayerBacking::EnclosingFrameViewVisibleSize() const noexcept
+  SizeF RenderLayerBacking::EnclosingFrameViewVisibleSize() const noexcept
   {
     return Compositor().EnclosingFrameViewVisibleSize();
   }
@@ -3891,7 +3886,7 @@ namespace krys::boo
     RenderLayerBacking::TransformMatrixForProperty(AnimatedProperty property) const noexcept
   {
     TransformationMatrix matrix;
-    auto size = FloatSize(SnappedIntRect(_owningLayer.RendererBorderBoxRect()).Size());
+    auto size = SizeF(SnappedRectI(_owningLayer.RendererBorderBoxRect()).Size());
     const auto &style = Renderer().Style();
     auto applyOperation = [&](const RefPtr<TransformOperation> &operation)
     {
@@ -4030,7 +4025,7 @@ namespace krys::boo
     }
 
     auto referenceBoxRect = Renderer().TransformReferenceBoxRect(Renderer().Style());
-    referenceBoxRect = FloatRect(SnappedIntRect(LayoutRect(referenceBoxRect)));
+    referenceBoxRect = RectF(SnappedRectI(LayoutRect(referenceBoxRect)));
 
     GraphicsLayerKeyframeValueList rotateVector(AnimatedProperty::Rotate);
     GraphicsLayerKeyframeValueList scaleVector(AnimatedProperty::Scale);

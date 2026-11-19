@@ -97,8 +97,8 @@ namespace krys::boo
     return true;
   }
 
-  FloatRect FEComposite::CalculateImageRect(const Filter &filter, Span<const FloatRect> inputImageRects,
-                                            const FloatRect &primitiveSubregion) const noexcept
+  RectF FEComposite::CalculateImageRect(const Filter &filter, Span<const RectF> inputImageRects,
+                                        const RectF &primitiveSubregion) const noexcept
   {
     switch (_type)
     {

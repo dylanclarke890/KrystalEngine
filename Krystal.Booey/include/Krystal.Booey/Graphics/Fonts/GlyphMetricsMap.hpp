@@ -29,9 +29,9 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Fonts/Glyph.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -148,8 +148,8 @@ namespace krys::boo
   }
 
   template <>
-  inline FloatRect GlyphMetricsMap<FloatRect>::UnknownMetrics() noexcept
+  inline RectF GlyphMetricsMap<RectF>::UnknownMetrics() noexcept
   {
-    return FloatRect(0, 0, GlyphSizeUnknown, GlyphSizeUnknown);
+    return RectF(0, 0, GlyphSizeUnknown, GlyphSizeUnknown);
   }
 }

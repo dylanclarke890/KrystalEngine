@@ -65,7 +65,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD TransformFunctionSizeDependencies ComputeSizeDependencies() const noexcept;
 
-    void Apply(TransformationMatrix &, const FloatSize &) const noexcept;
+    void Apply(TransformationMatrix &, const SizeF &) const noexcept;
 
     KRYS_NODISCARD bool IsNone() const noexcept
     {
@@ -163,7 +163,7 @@ namespace krys::boo::style
   template <>
   struct ToPlatform<Translate>
   {
-    KRYS_NODISCARD RefPtr<TransformOperation> operator()(const Translate &, const FloatSize &) noexcept;
+    KRYS_NODISCARD RefPtr<TransformOperation> operator()(const Translate &, const SizeF &) noexcept;
   };
 }
 

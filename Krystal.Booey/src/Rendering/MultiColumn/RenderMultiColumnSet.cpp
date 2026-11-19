@@ -26,11 +26,11 @@
 
 #include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSet.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSpannerPlaceholder.hpp"
 #include "Krystal.Booey/Rendering/Painting/BorderPainter.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include <cmath>
 
 namespace krys::boo
@@ -737,9 +737,9 @@ namespace krys::boo
                                : paintOffset.Y() + ruleLogicalLeft - ruleThickness / 2 + ruleAdd;
         LayoutUnit ruleBottom =
           IsHorizontalWritingMode() ? ruleTop + ContentBoxHeight() : ruleTop + ruleThickness;
-        IntRect pixelSnappedRuleRect =
-          SnappedIntRect(ruleLeft, ruleTop, ruleRight - ruleLeft, ruleBottom - ruleTop);
-        BorderPainter::DrawLineForBoxSide(paintInfo.Context(), GetDocument(), FloatRect(pixelSnappedRuleRect),
+        RectI pixelSnappedRuleRect =
+          SnappedRectI(ruleLeft, ruleTop, ruleRight - ruleLeft, ruleBottom - ruleTop);
+        BorderPainter::DrawLineForBoxSide(paintInfo.Context(), GetDocument(), RectF(pixelSnappedRuleRect),
                                           boxSide, ruleColor, ruleStyle, 0, 0, antialias);
       }
 

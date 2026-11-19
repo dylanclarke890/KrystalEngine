@@ -33,7 +33,7 @@
 
 namespace krys::boo
 {
-  LayoutRect::LayoutRect(const FloatRect &r) noexcept
+  LayoutRect::LayoutRect(const RectF &r) noexcept
       : _location(LayoutPoint(r.Location())), _size(LayoutSize(r.Size()))
   {
   }
@@ -128,10 +128,9 @@ namespace krys::boo
       return false;
     }
 
-    FloatPoint topLeft = FloatPoint(std::min<float>(X(), other.X()), std::min<float>(Y(), other.Y()));
-    FloatPoint bottomRight =
-      FloatPoint(std::max<float>(MaxX(), other.MaxX()), std::max<float>(MaxY(), other.MaxY()));
-    FloatSize size = bottomRight - topLeft;
+    PointF topLeft = PointF(std::min<float>(X(), other.X()), std::min<float>(Y(), other.Y()));
+    PointF bottomRight = PointF(std::max<float>(MaxX(), other.MaxX()), std::max<float>(MaxY(), other.MaxY()));
+    SizeF size = bottomRight - topLeft;
 
     if (size.Width() >= LayoutUnit::NearlyMax() || size.Height() >= LayoutUnit::NearlyMax())
     {
@@ -209,38 +208,38 @@ namespace krys::boo
     return result;
   }
 
-  IntRect EnclosingIntRect(const LayoutRect &rect) noexcept
+  RectI EnclosingRectI(const LayoutRect &rect) noexcept
   {
     // Empty rects with fractional x, y values turn into non-empty rects when converting to enclosing.
     // We need to ensure that empty rects stay empty after the conversion, because the selection code expects
     // them to be empty.
-    IntPoint location = FlooredIntPoint(rect.MinXMinYCorner());
-    IntPoint maxPoint = IntPoint(rect.Width() ? rect.MaxX().Ceil() : location.X(),
-                                 rect.Height() ? rect.MaxY().Ceil() : location.Y());
-    return IntRect(location, maxPoint - location);
+    PointI location = FlooredPointI(rect.MinXMinYCorner());
+    PointI maxPoint = PointI(rect.Width() ? rect.MaxX().Ceil() : location.X(),
+                             rect.Height() ? rect.MaxY().Ceil() : location.Y());
+    return RectI(location, maxPoint - location);
   }
 
-  LayoutRect EnclosingLayoutRect(const FloatRect &rect) noexcept
+  LayoutRect EnclosingLayoutRect(const RectF &rect) noexcept
   {
     LayoutPoint location = FlooredLayoutPoint(rect.MinXMinYCorner());
     LayoutPoint maxPoint = CeiledLayoutPoint(rect.MaxXMaxYCorner());
     return LayoutRect(location, maxPoint - location);
   }
 
-  FloatRect EncloseRectToDevicePixels(const LayoutRect &rect, float pixelSnappingFactor) noexcept
+  RectF EncloseRectToDevicePixels(const LayoutRect &rect, float pixelSnappingFactor) noexcept
   {
-    FloatPoint location = FloorPointToDevicePixels(rect.MinXMinYCorner(), pixelSnappingFactor);
-    FloatPoint maxPoint = CeilPointToDevicePixels(rect.MaxXMaxYCorner(), pixelSnappingFactor);
-    return FloatRect(location, maxPoint - location);
+    PointF location = FloorPointToDevicePixels(rect.MinXMinYCorner(), pixelSnappingFactor);
+    PointF maxPoint = CeilPointToDevicePixels(rect.MaxXMaxYCorner(), pixelSnappingFactor);
+    return RectF(location, maxPoint - location);
   }
 
   TextStream &operator<<(TextStream &ts, const LayoutRect &value) noexcept
   {
     if (ts.HasFormattingFlag(TextStream::Formatting::LayoutUnitsAsIntegers))
     {
-      return ts << SnappedIntRect(value);
+      return ts << SnappedRectI(value);
     }
 
-    return ts << FloatRect(value);
+    return ts << RectF(value);
   }
 }

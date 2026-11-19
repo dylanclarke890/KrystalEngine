@@ -3089,7 +3089,7 @@ namespace krys::boo
       // in transforms with a 90deg angle.
       if (hasRotation)
       {
-        keyframeBounds = LayoutRect(BoundsOfRotatingRect(FloatRect(keyframeBounds)));
+        keyframeBounds = LayoutRect(BoundsOfRotatingRect(RectF(keyframeBounds)));
       }
 
       cumulativeBounds.Unite(transform.MapRect(keyframeBounds));

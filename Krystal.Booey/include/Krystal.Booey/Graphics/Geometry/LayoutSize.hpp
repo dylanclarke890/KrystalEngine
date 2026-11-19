@@ -30,10 +30,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include <algorithm>
 
 namespace krys
@@ -59,7 +58,7 @@ namespace krys::boo
   public:
     constexpr LayoutSize() noexcept = default;
 
-    constexpr LayoutSize(const IntSize &size) noexcept : _width(size.Width()), _height(size.Height())
+    constexpr LayoutSize(const SizeI &size) noexcept : _width(size.Width()), _height(size.Height())
     {
     }
 
@@ -68,8 +67,7 @@ namespace krys::boo
     {
     }
 
-    constexpr explicit LayoutSize(const FloatSize &size) noexcept
-        : _width(size.Width()), _height(size.Height())
+    constexpr explicit LayoutSize(const SizeF &size) noexcept : _width(size.Width()), _height(size.Height())
     {
     }
 
@@ -187,9 +185,9 @@ namespace krys::boo
       return LayoutSize(_height, _width);
     }
 
-    constexpr operator FloatSize() const noexcept
+    constexpr operator SizeF() const noexcept
     {
-      return FloatSize(_width, _height);
+      return SizeF(_width, _height);
     }
 
     KRYS_NODISCARD constexpr LayoutSize FitToAspectRatio(const LayoutSize &aspectRatio,
@@ -244,33 +242,33 @@ namespace krys::boo
     return LayoutSize(-size.Width(), -size.Height());
   }
 
-  KRYS_NODISCARD constexpr IntSize FlooredIntSize(const LayoutSize &s) noexcept
+  KRYS_NODISCARD constexpr SizeI FlooredSizeI(const LayoutSize &s) noexcept
   {
-    return IntSize(s.Width().Floor(), s.Height().Floor());
+    return SizeI(s.Width().Floor(), s.Height().Floor());
   }
 
-  KRYS_NODISCARD constexpr IntSize CeiledIntSize(const LayoutSize &s) noexcept
+  KRYS_NODISCARD constexpr SizeI CeiledSizeI(const LayoutSize &s) noexcept
   {
-    return IntSize(s.Width().Ceil(), s.Height().Ceil());
+    return SizeI(s.Width().Ceil(), s.Height().Ceil());
   }
 
-  KRYS_NODISCARD constexpr IntSize RoundedIntSize(const LayoutSize &s) noexcept
+  KRYS_NODISCARD constexpr SizeI RoundedSizeI(const LayoutSize &s) noexcept
   {
-    return IntSize(s.Width().Round(), s.Height().Round());
+    return SizeI(s.Width().Round(), s.Height().Round());
   }
 
-  KRYS_NODISCARD inline FloatSize FloorSizeToDevicePixels(const LayoutSize &size,
-                                                          float pixelSnappingFactor) noexcept
+  KRYS_NODISCARD inline SizeF FloorSizeToDevicePixels(const LayoutSize &size,
+                                                      float pixelSnappingFactor) noexcept
   {
-    return FloatSize(FloorToDevicePixel(size.Width(), pixelSnappingFactor),
-                     FloorToDevicePixel(size.Height(), pixelSnappingFactor));
+    return SizeF(FloorToDevicePixel(size.Width(), pixelSnappingFactor),
+                 FloorToDevicePixel(size.Height(), pixelSnappingFactor));
   }
 
-  KRYS_NODISCARD inline FloatSize RoundSizeToDevicePixels(const LayoutSize &size,
-                                                          float pixelSnappingFactor) noexcept
+  KRYS_NODISCARD inline SizeF RoundSizeToDevicePixels(const LayoutSize &size,
+                                                      float pixelSnappingFactor) noexcept
   {
-    return FloatSize(RoundToDevicePixel(size.Width(), pixelSnappingFactor),
-                     RoundToDevicePixel(size.Height(), pixelSnappingFactor));
+    return SizeF(RoundToDevicePixel(size.Width(), pixelSnappingFactor),
+                 RoundToDevicePixel(size.Height(), pixelSnappingFactor));
   }
 
   struct LayoutSizeLimits

@@ -133,16 +133,16 @@ namespace krys::boo
     }
 
     // Image Metadata
-    KRYS_NODISCARD FloatSize
+    KRYS_NODISCARD SizeF
       Size(ImageOrientation orientation = ImageOrientation::Orientation::FromImage) const noexcept final
     {
-      return FloatSize(_source->Size(orientation));
+      return SizeF(_source->Size(orientation));
     }
 
-    KRYS_NODISCARD FloatSize
+    KRYS_NODISCARD SizeF
       SourceSize(ImageOrientation orientation = ImageOrientation::Orientation::FromImage) const noexcept final
     {
-      return FloatSize(_source->SourceSize(orientation));
+      return SizeF(_source->SourceSize(orientation));
     }
 
     KRYS_NODISCARD ImageOrientation Orientation() const noexcept final
@@ -188,7 +188,7 @@ namespace krys::boo
       return _source->AccessibilityDescription();
     }
 
-    KRYS_NODISCARD Maybe<IntPoint> HotSpot() const noexcept final
+    KRYS_NODISCARD Maybe<PointI> HotSpot() const noexcept final
     {
       return _source->HotSpot();
     }
@@ -215,14 +215,13 @@ namespace krys::boo
       return _source->CurrentImageFrame().IsComplete();
     }
 
-    void DrawDensityCorrectedPattern(GraphicsContext &, const FloatRect &destinationRect,
-                                     const FloatRect &tileRect, const AffineTransform &,
-                                     const FloatPoint &phase, const FloatSize &spacing,
+    void DrawDensityCorrectedPattern(GraphicsContext &, const RectF &destinationRect, const RectF &tileRect,
+                                     const AffineTransform &, const PointF &phase, const SizeF &spacing,
                                      ImagePaintingOptions) noexcept;
 
-    void DrawPattern(GraphicsContext &, const FloatRect &destinationRect, const FloatRect &tileRect,
-                     const AffineTransform &patternTransform, const FloatPoint &phase,
-                     const FloatSize &spacing, ImagePaintingOptions = {}) noexcept final;
+    void DrawPattern(GraphicsContext &, const RectF &destinationRect, const RectF &tileRect,
+                     const AffineTransform &patternTransform, const PointF &phase, const SizeF &spacing,
+                     ImagePaintingOptions = {}) noexcept final;
 
     void Dump(TextStream &) const noexcept final;
 
@@ -230,9 +229,9 @@ namespace krys::boo
     BitmapImage(ImageObserver *, AlphaOption, GammaAndColorProfileOption) noexcept;
 
     /// @brief Draws the pattern of the tile turned into a luminance mask.
-    void DrawLuminanceMaskPattern(GraphicsContext &, const FloatRect &destinationRect,
-                                  const FloatRect &tileRect, const AffineTransform &, const FloatPoint &phase,
-                                  const FloatSize &spacing, ImagePaintingOptions) noexcept;
+    void DrawLuminanceMaskPattern(GraphicsContext &, const RectF &destinationRect, const RectF &tileRect,
+                                  const AffineTransform &, const PointF &phase, const SizeF &spacing,
+                                  ImagePaintingOptions) noexcept;
 
     explicit BitmapImage(Ref<NativeImage> &&) noexcept;
 
@@ -249,7 +248,7 @@ namespace krys::boo
       return _source->SinglePixelSolidColor();
     }
 
-    ImageDrawResult Draw(GraphicsContext &, const FloatRect &destinationRect, const FloatRect &sourceRect,
+    ImageDrawResult Draw(GraphicsContext &, const RectF &destinationRect, const RectF &sourceRect,
                          ImagePaintingOptions = {}) noexcept final;
   };
 }

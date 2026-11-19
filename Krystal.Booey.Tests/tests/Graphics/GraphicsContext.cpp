@@ -15,7 +15,7 @@ namespace krys::boo::tests
     class LinesRecorder : public display_list::RecorderImpl
     {
     public:
-      LinesRecorder() noexcept : RecorderImpl(FloatSize {100, 100})
+      LinesRecorder() noexcept : RecorderImpl(SizeF {100, 100})
       {
       }
 
@@ -110,7 +110,7 @@ namespace krys::boo::tests
       auto result = context.ComputeRectsAndStrokeColorForLinesForText({0, 10.3f}, 1, segment, false, false,
                                                                       StrokeStyle::SolidStroke);
       REQUIRE(result.Rects.size() == 1u);
-      CHECK(result.Rects[0] == FloatRect(0, 11, 10, 1));
+      CHECK(result.Rects[0] == RectF(0, 11, 10, 1));
       CHECK(result.StrokeColor == Color::black);
     }
 
@@ -119,9 +119,9 @@ namespace krys::boo::tests
       auto result = context.ComputeRectsAndStrokeColorForLinesForText({0, 10}, 1, segment, false, false,
                                                                       StrokeStyle::DashedStroke);
       REQUIRE(result.Rects.size() == 3u);
-      CHECK(result.Rects[0] == FloatRect(0, 10, 2, 1));
-      CHECK(result.Rects[1] == FloatRect(4, 10, 2, 1));
-      CHECK(result.Rects[2] == FloatRect(8, 10, 2, 1));
+      CHECK(result.Rects[0] == RectF(0, 10, 2, 1));
+      CHECK(result.Rects[1] == RectF(4, 10, 2, 1));
+      CHECK(result.Rects[2] == RectF(8, 10, 2, 1));
     }
 
     SECTION("A double line has a second line a line's height below")
@@ -129,7 +129,7 @@ namespace krys::boo::tests
       auto result = context.ComputeRectsAndStrokeColorForLinesForText({0, 10}, 2, segment, false, true,
                                                                       StrokeStyle::SolidStroke);
       REQUIRE(result.Rects.size() == 2u);
-      CHECK(result.Rects[1] == FloatRect(0, 14, 10, 2));
+      CHECK(result.Rects[1] == RectF(0, 14, 10, 2));
     }
 
     SECTION("Scaled down, the line fades")

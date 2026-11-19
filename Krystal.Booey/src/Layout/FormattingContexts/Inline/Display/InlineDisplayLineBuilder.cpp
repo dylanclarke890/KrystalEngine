@@ -259,7 +259,7 @@ namespace krys::boo::layout
       return truncateLeft.value_or(left(boxes.front())) - ellipsisWidth;
     }
 
-    KRYS_NODISCARD Maybe<FloatRect> TrailingEllipsisVisualRectAfterTruncation(
+    KRYS_NODISCARD Maybe<RectF> TrailingEllipsisVisualRectAfterTruncation(
       LineEndingTruncationPolicy lineEndingTruncationPolicy, const StringAtom &ellipsisText,
       const inline_display::Line &displayLine, inline_display::Boxes &displayBoxes) noexcept
     {
@@ -337,9 +337,9 @@ namespace krys::boo::layout
 
       if (rootStyle.GetWritingMode().IsHorizontal())
       {
-        return FloatRect {ellipsisStart, rootInlineBox.Top(), ellipsisWidth, rootInlineBox.Height()};
+        return RectF {ellipsisStart, rootInlineBox.Top(), ellipsisWidth, rootInlineBox.Height()};
       }
-      return FloatRect {rootInlineBox.Left(), ellipsisStart, rootInlineBox.Width(), ellipsisWidth};
+      return RectF {rootInlineBox.Left(), ellipsisStart, rootInlineBox.Width(), ellipsisWidth};
     }
   }
 

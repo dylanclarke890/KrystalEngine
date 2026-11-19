@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
@@ -45,11 +45,11 @@ namespace krys::boo
   {
   private:
     DecodingMode _decodingMode;
-    Maybe<IntSize> _sizeForDrawing;
+    Maybe<SizeI> _sizeForDrawing;
 
   public:
     constexpr DecodingOptions(DecodingMode decodingMode = DecodingMode::Synchronous,
-                              const Maybe<IntSize> &sizeForDrawing = null) noexcept
+                              const Maybe<SizeI> &sizeForDrawing = null) noexcept
         : _decodingMode(decodingMode), _sizeForDrawing(sizeForDrawing)
     {
     }
@@ -77,7 +77,7 @@ namespace krys::boo
       return _decodingMode == DecodingMode::Asynchronous;
     }
 
-    KRYS_NODISCARD constexpr Maybe<IntSize> SizeForDrawing() const noexcept
+    KRYS_NODISCARD constexpr Maybe<SizeI> SizeForDrawing() const noexcept
     {
       return _sizeForDrawing;
     }

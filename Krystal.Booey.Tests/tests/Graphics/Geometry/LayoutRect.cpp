@@ -16,13 +16,13 @@ namespace krys::boo::tests
     CHECK(LayoutRect().IsEmpty());
 
     CHECK(LayoutRect(LayoutPoint(1, 2), LayoutPoint(4, 6)) == rect);
-    CHECK(LayoutRect(IntRect(1, 2, 3, 4)) == rect);
-    CHECK(LayoutRect(FloatPoint(1, 2), FloatSize(3, 4)) == rect);
-    CHECK(LayoutRect(FloatRect(1.5f, 2.25f, 3, 4)) == LayoutRect(LayoutUnit(1.5f), LayoutUnit(2.25f), 3, 4));
+    CHECK(LayoutRect(RectI(1, 2, 3, 4)) == rect);
+    CHECK(LayoutRect(PointF(1, 2), SizeF(3, 4)) == rect);
+    CHECK(LayoutRect(RectF(1.5f, 2.25f, 3, 4)) == LayoutRect(LayoutUnit(1.5f), LayoutUnit(2.25f), 3, 4));
 
-    FloatRect asFloat = LayoutRect(LayoutUnit(1.5f), 2, 3, 4);
-    CHECK(asFloat == FloatRect(1.5f, 2, 3, 4));
-    CHECK(IntRect(LayoutRect(LayoutUnit(1.5f), 2, 3, 4)) == IntRect(1, 2, 3, 4));
+    RectF asFloat = LayoutRect(LayoutUnit(1.5f), 2, 3, 4);
+    CHECK(asFloat == RectF(1.5f, 2, 3, 4));
+    CHECK(RectI(LayoutRect(LayoutUnit(1.5f), 2, 3, 4)) == RectI(1, 2, 3, 4));
 
     CHECK(rect.Center() == LayoutPoint(LayoutUnit(2.5f), 4));
     CHECK(rect.TransposedRect() == LayoutRect(2, 1, 4, 3));
@@ -151,25 +151,31 @@ namespace krys::boo::tests
   {
     LayoutRect rect(LayoutUnit(1.5f), LayoutUnit(2.25f), LayoutUnit(10.5f), LayoutUnit(3.5f));
 
-    CHECK(SnappedIntRect(rect) == IntRect(2, 2, 10, 4));
-    CHECK(SnappedIntRect(rect.X(), rect.Y(), rect.Width(), rect.Height()) == SnappedIntRect(rect));
-    CHECK(SnappedIntRect(rect.Location(), rect.Size()) == SnappedIntRect(rect));
+    CHECK(SnappedRectI(rect) == RectI(2, 2, 10, 4));
+    CHECK(SnappedRectI(rect.X(), rect.Y(), rect.Width(), rect.Height()) == SnappedRectI(rect));
+    CHECK(SnappedRectI(rect.Location(), rect.Size()) == SnappedRectI(rect));
 
-    CHECK(EnclosingIntRect(rect) == IntRect(1, 2, 11, 4));
+    CHECK(EnclosingRectI(rect) == RectI(1, 2, 11, 4));
     // Empty rects stay empty.
-    CHECK(EnclosingIntRect(LayoutRect(LayoutUnit(1.5f), LayoutUnit(2.5f), 0, 3)) == IntRect(1, 2, 0, 4));
+    CHECK(EnclosingRectI(LayoutRect(LayoutUnit(1.5f), LayoutUnit(2.5f), 0, 3)) == RectI(1, 2, 0, 4));
 
-    CHECK(EnclosingLayoutRect(FloatRect(1.01f, 2, 3, 4))
+    CHECK(EnclosingLayoutRect(RectF(1.01f, 2, 3, 4))
           == LayoutRect(LayoutUnit(1), 2, LayoutUnit(3.015625f), 4));
 
-    CHECK(SnapRectToDevicePixels(rect, 1) == FloatRect(2, 2, 10, 4));
-    CHECK(SnapRectToDevicePixels(rect, 2) == FloatRect(1.5f, 2.5f, 10.5f, 3.5f));
+    CHECK(SnapRectToDevicePixels(rect, 1) == RectF(2, 2, 10, 4));
+    CHECK(SnapRectToDevicePixels(rect, 2) == RectF(1.5f, 2.5f, 10.5f, 3.5f));
     CHECK(SnapRectToDevicePixels(rect.X(), rect.Y(), rect.Width(), rect.Height(), 2)
           == SnapRectToDevicePixels(rect, 2));
     CHECK(SnapRectToDevicePixelsWithWritingDirection(rect, 2, true) == SnapRectToDevicePixels(rect, 2));
-    CHECK(SnapRectToDevicePixelsWithWritingDirection(rect, 1, false) == FloatRect(1, 2, 11, 4));
+    CHECK(SnapRectToDevicePixelsWithWritingDirection(rect, 1, false) == RectF(1, 2, 11, 4));
 
-    CHECK(EncloseRectToDevicePixels(rect, 1) == FloatRect(1, 2, 11, 4));
-    CHECK(EncloseRectToDevicePixels(rect, 2) == FloatRect(1.5f, 2, 10.5f, 4));
+    CHECK(EncloseRectToDevicePixels(rect, 1) == RectF(1, 2, 11, 4));
+    CHECK(EncloseRectToDevicePixels(rect, 2) == RectF(1.5f, 2, 10.5f, 4));
+  }
+
+  TEST_CASE("LayoutRect: conversion to RectI truncates", "[Graphics][LayoutRect]")
+  {
+    CHECK(RectI(LayoutRect(LayoutUnit(1.75f), LayoutUnit(-1.75f), LayoutUnit(10.5f), LayoutUnit(2)))
+          == RectI(1, -1, 10, 2));
   }
 }

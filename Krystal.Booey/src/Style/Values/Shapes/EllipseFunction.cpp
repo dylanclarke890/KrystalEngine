@@ -24,7 +24,6 @@
 
 #include "Krystal.Booey/Style/Values/Shapes/EllipseFunction.hpp"
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Style/Values/Images/Gradient.hpp"
@@ -32,21 +31,22 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Position.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/TinyLRUCache.hpp"
 
 namespace krys::boo::style
 {
   // MARK: - Path Caching
 
-  struct EllipsePathPolicy final : public TinyLRUCachePolicy<FloatRect, boo::Path>
+  struct EllipsePathPolicy final : public TinyLRUCachePolicy<RectF, boo::Path>
   {
   public:
-    KRYS_NODISCARD static bool IsKeyNull(const FloatRect &rect) noexcept
+    KRYS_NODISCARD static bool IsKeyNull(const RectF &rect) noexcept
     {
       return rect.IsEmpty();
     }
 
-    KRYS_NODISCARD static boo::Path CreateValueForKey(const FloatRect &rect) noexcept
+    KRYS_NODISCARD static boo::Path CreateValueForKey(const RectF &rect) noexcept
     {
       boo::Path path;
       path.AddEllipseInRect(rect);
@@ -54,21 +54,21 @@ namespace krys::boo::style
     }
   };
 
-  static const boo::Path &CachedEllipsePath(const FloatRect &rect)
+  static const boo::Path &CachedEllipsePath(const RectF &rect)
   {
-    static NeverDestroyed<TinyLRUCache<FloatRect, boo::Path, 4, EllipsePathPolicy>> cache;
+    static NeverDestroyed<TinyLRUCache<RectF, boo::Path, 4, EllipsePathPolicy>> cache;
     return cache.get().Get(rect);
   }
 
   // MARK: - Path Generation
 
-  KRYS_NODISCARD FloatPoint ResolvePosition(const Ellipse &value, FloatSize boxSize) noexcept
+  KRYS_NODISCARD PointF ResolvePosition(const Ellipse &value, SizeF boxSize) noexcept
   {
-    return value.Position ? Evaluate<FloatPoint>(*value.Position, boxSize, style::ZoomNeeded {})
-                          : FloatPoint {boxSize.Width() / 2, boxSize.Height() / 2};
+    return value.Position ? Evaluate<PointF>(*value.Position, boxSize, style::ZoomNeeded {})
+                          : PointF {boxSize.Width() / 2, boxSize.Height() / 2};
   }
 
-  KRYS_NODISCARD FloatSize ResolveRadii(const Ellipse &value, FloatSize boxSize, FloatPoint center) noexcept
+  KRYS_NODISCARD SizeF ResolveRadii(const Ellipse &value, SizeF boxSize, PointF center) noexcept
   {
     auto sizeForAxis = [&](const Ellipse::RadialSize &radius, float centerValue, float dimensionSize)
     {
@@ -92,17 +92,17 @@ namespace krys::boo::style
             sizeForAxis(get<1>(value.Radii), center.Y(), boxSize.Height())};
   }
 
-  KRYS_NODISCARD boo::Path PathForCenterCoordinate(const Ellipse &value, const FloatRect &boundingBox,
-                                                   FloatPoint center) noexcept
+  KRYS_NODISCARD boo::Path PathForCenterCoordinate(const Ellipse &value, const RectF &boundingBox,
+                                                   PointF center) noexcept
   {
     auto radii = ResolveRadii(value, boundingBox.Size(), center);
     auto bounding =
-      FloatRect {center.X() - radii.Width() + boundingBox.X(), center.Y() - radii.Height() + boundingBox.Y(),
-                 radii.Width() * 2, radii.Height() * 2};
+      RectF {center.X() - radii.Width() + boundingBox.X(), center.Y() - radii.Height() + boundingBox.Y(),
+             radii.Width() * 2, radii.Height() * 2};
     return CachedEllipsePath(bounding);
   }
 
-  boo::Path PathComputation<Ellipse>::operator()(const Ellipse &value, const FloatRect &boundingBox) noexcept
+  boo::Path PathComputation<Ellipse>::operator()(const Ellipse &value, const RectF &boundingBox) noexcept
   {
     return PathForCenterCoordinate(value, boundingBox, ResolvePosition(value, boundingBox.Size()));
   }

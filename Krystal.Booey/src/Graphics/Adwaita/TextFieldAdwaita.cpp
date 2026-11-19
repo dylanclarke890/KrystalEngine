@@ -72,8 +72,8 @@ namespace krys::boo
       graphicsContext.BeginTransparencyLayer(static_cast<float>(DisabledOpacity));
     }
 
-    FloatRect fieldRect = borderRect.Rect();
-    FloatSize corner(5, 5);
+    RectF fieldRect = borderRect.Rect();
+    SizeF corner(5, 5);
     Path path;
     path.AddRoundedRect(fieldRect, corner);
     fieldRect.Inflate(static_cast<float>(-borderSize));
@@ -99,7 +99,7 @@ namespace krys::boo
     if (style.States.Contains(ControlStyle::State::ListButton))
     {
       auto zoomedArrowSize = MenuListButtonArrowSize * style.ZoomFactor;
-      FloatRect arrowRect = borderRect.Rect();
+      RectF arrowRect = borderRect.Rect();
       auto borderWidth = arrowRect.Width();
       auto borderHeight = arrowRect.Height();
       arrowRect.SetSize({zoomedArrowSize, zoomedArrowSize});

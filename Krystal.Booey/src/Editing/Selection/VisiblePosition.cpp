@@ -863,14 +863,14 @@ namespace krys::boo
     return {ComputeLocalCaretRect(*renderer, boxAndOffset), renderer};
   }
 
-  IntRect VisiblePosition::AbsoluteCaretBounds(bool *insideFixed) const noexcept
+  RectI VisiblePosition::AbsoluteCaretBounds(bool *insideFixed) const noexcept
   {
     RenderBlock *renderer = nullptr;
     LayoutRect localRect = LocalCaretRectInRendererForCaretPainting(*this, renderer);
     return AbsoluteBoundsForLocalCaretRect(renderer, localRect, insideFixed);
   }
 
-  FloatRect VisiblePosition::AbsoluteSelectionBoundsForLine() const noexcept
+  RectF VisiblePosition::AbsoluteSelectionBoundsForLine() const noexcept
   {
     auto box = GetInlineBoxAndOffset().Box;
     if (!box)
@@ -896,7 +896,7 @@ namespace krys::boo
     // without consulting transforms, so that 'up' in transformed text is 'up'
     // relative to the text, not absolute 'up'.
     auto *renderer = localRect.Renderer;
-    auto caretPoint = renderer->LocalToAbsolute(FloatPoint(localRect.Rect.Location()));
+    auto caretPoint = renderer->LocalToAbsolute(PointF(localRect.Rect.Location()));
     const RenderObject *containingBlock = renderer->ContainingBlock();
     if (!containingBlock)
     {

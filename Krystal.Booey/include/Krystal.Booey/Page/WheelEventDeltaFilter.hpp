@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
@@ -41,8 +41,8 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(WheelEventDeltaFilter);
 
   private:
-    List<FloatSize> _recentWheelEventDeltas;
-    FloatSize _currentFilteredDelta;
+    List<SizeF> _recentWheelEventDeltas;
+    SizeF _currentFilteredDelta;
 
   public:
     WheelEventDeltaFilter() noexcept = default;
@@ -51,7 +51,7 @@ namespace krys::boo
     void UpdateFromEvent(const PlatformWheelEvent &event) noexcept;
 
     /// @brief The last step's delta, on its gesture's axis.
-    KRYS_NODISCARD FloatSize FilteredDelta() const noexcept
+    KRYS_NODISCARD SizeF FilteredDelta() const noexcept
     {
       return _currentFilteredDelta;
     }
@@ -62,6 +62,6 @@ namespace krys::boo
   private:
     void Reset() noexcept;
 
-    void UpdateWithDelta(FloatSize delta) noexcept;
+    void UpdateWithDelta(SizeF delta) noexcept;
   };
 }

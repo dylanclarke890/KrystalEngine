@@ -45,14 +45,14 @@ namespace krys::boo
 
     void Shutdown() noexcept override;
 
-    KRYS_NODISCARD RefPtr<Image> GetImage(const IntSize &size = {}) const noexcept override;
+    KRYS_NODISCARD RefPtr<Image> GetImage(const SizeI &size = {}) const noexcept override;
 
     KRYS_NODISCARD bool ErrorOccurred() const noexcept override
     {
       return _styleImage->ErrorOccurred();
     }
 
-    void SetContainerContext(const IntSize &size, const net::Url &) noexcept override;
+    void SetContainerContext(const SizeI &size, const net::Url &) noexcept override;
 
     KRYS_NODISCARD bool ImageHasRelativeWidth() const noexcept override
     {

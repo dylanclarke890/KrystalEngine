@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -23,17 +23,17 @@ namespace krys::ui
   {
   private:
     List<TextureMapperTile> _tiles;
-    boo::FloatSize _size;
+    SizeF _size;
     RefPtr<boo::Image> _image;
     float _contentsScale {1};
     bool _isScaleDirty {false};
 
     // A layer's tiles: their size, the rect they cover, and the rect beyond which they're dropped (in the
     // backing store's coordinates).
-    boo::IntSize _tileSize;
-    boo::IntRect _visibleRect;
-    boo::IntRect _coverRect;
-    boo::IntRect _keepRect;
+    SizeI _tileSize;
+    RectI _visibleRect;
+    RectI _coverRect;
+    RectI _keepRect;
 
   public:
     KRYS_NODISCARD static Ref<TextureMapperTiledBackingStore> Create() noexcept
@@ -43,27 +43,26 @@ namespace krys::ui
 
     ~TextureMapperTiledBackingStore() noexcept override = default;
 
-    void PaintToTextureMapper(TextureMapper &textureMapper, const boo::FloatRect &targetRect,
+    void PaintToTextureMapper(TextureMapper &textureMapper, const RectF &targetRect,
                               const boo::TransformationMatrix &transform, float opacity) noexcept override;
 
     void DrawBorder(TextureMapper &textureMapper, const boo::Color &borderColor, float borderWidth,
-                    const boo::FloatRect &targetRect,
-                    const boo::TransformationMatrix &transform) noexcept override;
+                    const RectF &targetRect, const boo::TransformationMatrix &transform) noexcept override;
 
     void DrawRepaintCounter(TextureMapper &textureMapper, int32 repaintCount, const boo::Color &borderColor,
-                            const boo::FloatRect &targetRect,
+                            const RectF &targetRect,
                             const boo::TransformationMatrix &transform) noexcept override;
 
     void UpdateContentsScale(float scale) noexcept;
 
-    void UpdateContents(TextureMapper &textureMapper, boo::Image *image, const boo::FloatSize &totalSize,
-                        const boo::IntRect &dirtyRect) noexcept;
+    void UpdateContents(TextureMapper &textureMapper, boo::Image *image, const SizeF &totalSize,
+                        const RectI &dirtyRect) noexcept;
 
     /// @brief Covers `visibleRect` (in the layer's coordinates) and a margin around it with tiles for a
     /// viewport of `viewportSize`, and paints what's dirty of them: `dirtyRect` (scaled), and new tiles.
     void UpdateContents(TextureMapper &textureMapper, const boo::GraphicsLayer &sourceLayer,
-                        const boo::FloatSize &totalSize, const boo::IntRect &dirtyRect,
-                        const boo::IntRect &visibleRect, const boo::IntSize &viewportSize) noexcept;
+                        const SizeF &totalSize, const RectI &dirtyRect, const RectI &visibleRect,
+                        const SizeI &viewportSize) noexcept;
 
     void SetContentsToImage(boo::Image *image) noexcept;
 
@@ -75,31 +74,29 @@ namespace krys::ui
   private:
     TextureMapperTiledBackingStore() noexcept = default;
 
-    void CreateOrDestroyTilesIfNeeded(const boo::FloatSize &backingStoreSize, const boo::IntSize &tileSize,
+    void CreateOrDestroyTilesIfNeeded(const SizeF &backingStoreSize, const SizeI &tileSize,
                                       bool hasAlpha) noexcept;
 
-    void CreateOrDestroyCoveringTiles(const boo::FloatSize &backingStoreSize, const boo::IntRect &visibleRect,
-                                      const boo::IntSize &viewportSize, int32 maxTextureSize) noexcept;
+    void CreateOrDestroyCoveringTiles(const SizeF &backingStoreSize, const RectI &visibleRect,
+                                      const SizeI &viewportSize, int32 maxTextureSize) noexcept;
 
     void UpdateContentsFromImageIfNeeded(TextureMapper &textureMapper) noexcept;
 
-    KRYS_NODISCARD boo::TransformationMatrix
-      AdjustedTransformForRect(const boo::FloatRect &targetRect) noexcept;
+    KRYS_NODISCARD boo::TransformationMatrix AdjustedTransformForRect(const RectF &targetRect) noexcept;
 
-    KRYS_NODISCARD static boo::IntSize ComputeTileSize(const boo::IntSize &viewportSize, int32 maxTextureSize,
-                                                       const boo::IntRect &contentsRect) noexcept;
+    KRYS_NODISCARD static SizeI ComputeTileSize(const SizeI &viewportSize, int32 maxTextureSize,
+                                                const RectI &contentsRect) noexcept;
 
-    KRYS_NODISCARD Pair<boo::IntRect, boo::IntRect>
-      ComputeCoverAndKeepRect(const boo::IntRect &contentsRect) const noexcept;
+    KRYS_NODISCARD Pair<RectI, RectI> ComputeCoverAndKeepRect(const RectI &contentsRect) const noexcept;
 
-    KRYS_NODISCARD boo::IntRect TileRectForPosition(const boo::IntPoint &position,
-                                                    const boo::IntRect &contentsRect) const noexcept;
+    KRYS_NODISCARD RectI TileRectForPosition(const PointI &position,
+                                             const RectI &contentsRect) const noexcept;
 
-    KRYS_NODISCARD boo::IntPoint TilePositionForPoint(const boo::IntPoint &point) const noexcept;
+    KRYS_NODISCARD PointI TilePositionForPoint(const PointI &point) const noexcept;
 
-    KRYS_NODISCARD boo::FloatRect Rect() const noexcept
+    KRYS_NODISCARD RectF Rect() const noexcept
     {
-      boo::FloatRect rect(boo::FloatPoint(), _size);
+      RectF rect(PointF(), _size);
       rect.Scale(_contentsScale);
       return rect;
     }

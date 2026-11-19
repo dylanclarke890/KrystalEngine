@@ -27,15 +27,15 @@
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp"
 #include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 
 namespace krys::boo::css::mq
 {
   KRYS_NODISCARD EvaluationResult EvaluateLengthFeature(
     const Feature &feature, LayoutUnit, const ToLengthConversionData &conversionData) noexcept;
 
-  KRYS_NODISCARD EvaluationResult EvaluateRatioFeature(const Feature &feature, FloatSize,
+  KRYS_NODISCARD EvaluationResult EvaluateRatioFeature(const Feature &feature, SizeF,
                                                        const ToLengthConversionData &conversionData) noexcept;
 
   KRYS_NODISCARD EvaluationResult EvaluateBooleanFeature(

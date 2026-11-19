@@ -32,9 +32,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/HTML/InputTypes/BaseButtonInputType.hpp"
 #include "Krystal.Booey/HTML/InputTypes/InputTypeNames.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 
 namespace krys::boo::html
 {
@@ -43,7 +43,7 @@ namespace krys::boo::html
   class ImageInputType final : public BaseButtonInputType
   {
   private:
-    IntPoint _clickLocation;
+    PointI _clickLocation;
 
   public:
     explicit ImageInputType(HTMLInputElement &element) noexcept : BaseButtonInputType(Type::Image, element)

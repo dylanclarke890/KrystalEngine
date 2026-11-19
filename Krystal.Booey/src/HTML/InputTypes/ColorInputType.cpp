@@ -354,7 +354,7 @@ namespace krys::boo::html
     return wrapper ? DynamicDowncast<HTMLElement>(wrapper->FirstChild()) : nullptr;
   }
 
-  IntRect ColorInputType::ElementRectRelativeToRootView() const noexcept
+  RectI ColorInputType::ElementRectRelativeToRootView() const noexcept
   {
     krys_debug_assert(Element());
     auto &element = *Element();
@@ -362,7 +362,7 @@ namespace krys::boo::html
     auto *view = element.NodeDocument().View();
     if (!renderer || !view)
     {
-      return IntRect();
+      return RectI();
     }
     return view->ContentsToView(renderer->AbsoluteBoundingBoxRect());
   }

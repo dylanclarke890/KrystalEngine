@@ -148,9 +148,9 @@ namespace krys::ui
     auto width = std::max(fieldRect.Width(), 1);
     if (!_view)
     {
-      _view = CreateUnique<View>(boo::IntSize(width, viewport.Height()));
+      _view = CreateUnique<View>(SizeI(width, viewport.Height()));
     }
-    SizeContentView(*_view, *_owner, boo::IntSize(width, viewport.Height()));
+    SizeContentView(*_view, *_owner, SizeI(width, viewport.Height()));
     ReplaceDocument(*_view, krys::move(html));
     (void)_view->Document().UpdateLayout();
 
@@ -171,12 +171,12 @@ namespace krys::ui
       }
     }
 
-    boo::IntSize contentSize(width, 1);
+    SizeI contentSize(width, 1);
     if (auto *root = _view->Document().DocumentElement().get())
     {
       if (auto *box = DynamicDowncast<boo::RenderBox>(root->Renderer()))
       {
-        contentSize = boo::IntSize(box->Width().ToInt(), box->Height().ToInt());
+        contentSize = SizeI(box->Width().ToInt(), box->Height().ToInt());
       }
     }
     int32 itemHeight = 0;
@@ -235,7 +235,7 @@ namespace krys::ui
     }
   }
 
-  int32 DataListSuggestionsOverlay::ItemAt(const boo::IntPoint &point) const noexcept
+  int32 DataListSuggestionsOverlay::ItemAt(const PointI &point) const noexcept
   {
     if (!_view)
     {
@@ -252,7 +252,7 @@ namespace krys::ui
     return -1;
   }
 
-  void DataListSuggestionsOverlay::MouseMoved(const boo::IntPoint &point) noexcept
+  void DataListSuggestionsOverlay::MouseMoved(const PointI &point) noexcept
   {
     if (auto index = ItemAt(point); index >= 0)
     {
@@ -260,12 +260,12 @@ namespace krys::ui
     }
   }
 
-  void DataListSuggestionsOverlay::MouseReleased(const boo::IntPoint &point) noexcept
+  void DataListSuggestionsOverlay::MouseReleased(const PointI &point) noexcept
   {
     Choose(ItemAt(point));
   }
 
-  bool DataListSuggestionsOverlay::MouseWheel(const boo::IntPoint &, float, float) noexcept
+  bool DataListSuggestionsOverlay::MouseWheel(const PointI &, float, float) noexcept
   {
     return false;
   }

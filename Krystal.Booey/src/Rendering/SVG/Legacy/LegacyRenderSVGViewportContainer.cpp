@@ -60,8 +60,8 @@ namespace krys::boo
   {
     auto &element = SvgSvgElement();
     SVGLengthContext lengthContext(&element);
-    FloatRect newViewport(element.X().Value(lengthContext), element.Y().Value(lengthContext),
-                          element.Width().Value(lengthContext), element.Height().Value(lengthContext));
+    RectF newViewport(element.X().Value(lengthContext), element.Y().Value(lengthContext),
+                      element.Width().Value(lengthContext), element.Height().Value(lengthContext));
 
     if (_viewport == newViewport)
     {
@@ -83,7 +83,7 @@ namespace krys::boo
     }
 
     _localToParentTransform =
-      AffineTransform::MakeTranslation(ToFloatSize(_viewport.Location())) * ViewportTransform();
+      AffineTransform::MakeTranslation(ToSizeF(_viewport.Location())) * ViewportTransform();
     _needsTransformUpdate = false;
     return true;
   }
@@ -93,7 +93,7 @@ namespace krys::boo
     return SvgSvgElement().ViewBoxToViewTransform(_viewport.Width(), _viewport.Height());
   }
 
-  bool LegacyRenderSVGViewportContainer::PointIsInsideViewportClip(const FloatPoint &pointInParent) noexcept
+  bool LegacyRenderSVGViewportContainer::PointIsInsideViewportClip(const PointF &pointInParent) noexcept
   {
     // Respect the viewport clip (which is in parent coords)
     if (!SVGRenderSupport::IsOverflowHidden(*this))

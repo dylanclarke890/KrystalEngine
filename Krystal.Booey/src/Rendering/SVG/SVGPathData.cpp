@@ -53,7 +53,7 @@ namespace krys::boo
       {
         float cx = lengthContext.ValueForLength(style.Cx(), style::ZoomNeeded {}, SVGLengthMode::Width);
         float cy = lengthContext.ValueForLength(style.Cy(), style::ZoomNeeded {}, SVGLengthMode::Height);
-        path.AddEllipseInRect(FloatRect(cx - r, cy - r, r * 2, r * 2));
+        path.AddEllipseInRect(RectF(cx - r, cy - r, r * 2, r * 2));
       }
       return path;
     }
@@ -83,7 +83,7 @@ namespace krys::boo
       Path path;
       float cx = lengthContext.ValueForLength(style.Cx(), style::ZoomNeeded {}, SVGLengthMode::Width);
       float cy = lengthContext.ValueForLength(style.Cy(), style::ZoomNeeded {}, SVGLengthMode::Height);
-      path.AddEllipseInRect(FloatRect(cx - rx, cy - ry, rx * 2, ry * 2));
+      path.AddEllipseInRect(RectF(cx - rx, cy - ry, rx * 2, ry * 2));
       return path;
     }
 
@@ -91,8 +91,8 @@ namespace krys::boo
     {
       Path path;
       SVGLengthContext lengthContext(&element);
-      path.MoveTo(FloatPoint(element.X1().Value(lengthContext), element.Y1().Value(lengthContext)));
-      path.AddLineTo(FloatPoint(element.X2().Value(lengthContext), element.Y2().Value(lengthContext)));
+      path.MoveTo(PointF(element.X1().Value(lengthContext), element.Y1().Value(lengthContext)));
+      path.AddLineTo(PointF(element.X2().Value(lengthContext), element.Y2().Value(lengthContext)));
       return path;
     }
 
@@ -152,8 +152,8 @@ namespace krys::boo
       const auto &style = renderer->Style();
       auto usedZoom = style.UsedZoomForLength();
       SVGLengthContext lengthContext(&element);
-      auto size = FloatSize {lengthContext.ValueForLength(style.Width(), usedZoom, SVGLengthMode::Width),
-                             lengthContext.ValueForLength(style.Height(), usedZoom, SVGLengthMode::Height)};
+      auto size = SizeF {lengthContext.ValueForLength(style.Width(), usedZoom, SVGLengthMode::Width),
+                         lengthContext.ValueForLength(style.Height(), usedZoom, SVGLengthMode::Height)};
 
       if (size.IsEmpty())
       {
@@ -161,12 +161,12 @@ namespace krys::boo
       }
 
       auto location =
-        FloatPoint {lengthContext.ValueForLength(style.X(), style::ZoomNeeded {}, SVGLengthMode::Width),
-                    lengthContext.ValueForLength(style.Y(), style::ZoomNeeded {}, SVGLengthMode::Height)};
+        PointF {lengthContext.ValueForLength(style.X(), style::ZoomNeeded {}, SVGLengthMode::Width),
+                lengthContext.ValueForLength(style.Y(), style::ZoomNeeded {}, SVGLengthMode::Height)};
 
       auto radii =
-        FloatSize {lengthContext.ValueForLength(style.Rx(), style::ZoomNeeded {}, SVGLengthMode::Width),
-                   lengthContext.ValueForLength(style.Ry(), style::ZoomNeeded {}, SVGLengthMode::Height)};
+        SizeF {lengthContext.ValueForLength(style.Rx(), style::ZoomNeeded {}, SVGLengthMode::Width),
+               lengthContext.ValueForLength(style.Ry(), style::ZoomNeeded {}, SVGLengthMode::Height)};
 
       // Per SVG spec: if one of radii.x() and radii.y() is auto or negative, then the other corner
       // radius value is used. If both are auto or negative, then they are both set to 0.
@@ -193,7 +193,7 @@ namespace krys::boo
       // FIXME: We currently enforce using beziers here, as at least on CoreGraphics/Lion, as
       // the native method uses a different line dash origin, causing svg/custom/dashOrigin.svg to fail.
       // See bug https://bugs.webkit.org/show_bug.cgi?id=79932 which tracks this issue.
-      path.AddRoundedRect(FloatRect {location, size}, radii, PathRoundedRect::Strategy::PreferBezier);
+      path.AddRoundedRect(RectF {location, size}, radii, PathRoundedRect::Strategy::PreferBezier);
       return path;
     }
   }
@@ -215,7 +215,7 @@ namespace krys::boo
       auto path = PathFromGraphicsElement(*clipChildElement);
       if (x || y)
       {
-        path.Translate(FloatSize(x, y));
+        path.Translate(SizeF(x, y));
       }
 
       return path;

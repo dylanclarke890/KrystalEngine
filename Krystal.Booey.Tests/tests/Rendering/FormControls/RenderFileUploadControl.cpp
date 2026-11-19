@@ -44,8 +44,8 @@ namespace krys::boo::layout::tests
     KRYS_NODISCARD std::string PaintedRuns(ResolverFixture &fixture) noexcept
     {
       (void)fixture.Document->UpdateLayout();
-      display_list::RecorderImpl recorder(FloatSize(800, 600));
-      fixture.Frame->View()->Paint(recorder, IntRect(0, 0, 800, 600));
+      display_list::RecorderImpl recorder(SizeF(800, 600));
+      fixture.Frame->View()->Paint(recorder, RectI(0, 0, 800, 600));
       std::string runs;
       for (const auto &item : recorder.TakeDisplayList()->Items())
       {
@@ -113,8 +113,8 @@ layer at (0,0) size 800x38
       // "ab", then Hebrew shin and lamed: the Hebrew is drawn right to left, lamed first.
       one.SetFiles(Files({u8"C:/drops/abשל"}));
       (void)fixture.Document->UpdateLayout();
-      display_list::RecorderImpl recorder(FloatSize(800, 600));
-      fixture.Frame->View()->Paint(recorder, IntRect(0, 0, 800, 600));
+      display_list::RecorderImpl recorder(SizeF(800, 600));
+      fixture.Frame->View()->Paint(recorder, RectI(0, 0, 800, 600));
       CHECK(boo::tests::DrawnText(*recorder.TakeDisplayList(), u8"של") == u8"לש");
     }
 

@@ -87,7 +87,7 @@ namespace krys::boo
     /// @see https://svgwg.org/svg2-draft/types.html#__svg__SVGGraphicsElement__getBBox
     KRYS_NODISCARD Ref<SVGRect> GetBBoxForBindings() noexcept;
 
-    KRYS_NODISCARD FloatRect GetBBox(StyleUpdateStrategy = AllowStyleUpdate) noexcept override;
+    KRYS_NODISCARD RectF GetBBox(StyleUpdateStrategy = AllowStyleUpdate) noexcept override;
 
     KRYS_NODISCARD bool ShouldIsolateBlending() const noexcept
     {

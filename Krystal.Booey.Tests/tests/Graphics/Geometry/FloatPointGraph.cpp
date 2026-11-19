@@ -7,7 +7,7 @@ namespace krys::boo::tests
   {
     SECTION("one rect")
     {
-      auto [graph, polygons] = FloatPointGraph::PolygonsForRect({FloatRect(0, 0, 10, 10)});
+      auto [graph, polygons] = FloatPointGraph::PolygonsForRect({RectF(0, 0, 10, 10)});
       REQUIRE(polygons.size() == 1u);
       CHECK(polygons[0].size() == 4u);
     }
@@ -15,8 +15,7 @@ namespace krys::boo::tests
     SECTION("overlapping rects make one polygon round both")
     {
       // Two lines of an inline box, the second shorter and overlapping the first.
-      auto [graph, polygons] =
-        FloatPointGraph::PolygonsForRect({FloatRect(0, 0, 30, 10), FloatRect(0, 8, 20, 10)});
+      auto [graph, polygons] = FloatPointGraph::PolygonsForRect({RectF(0, 0, 30, 10), RectF(0, 8, 20, 10)});
       REQUIRE(polygons.size() == 1u);
       // Six corners, and the two points where one rect's corner lies on the other's left edge.
       CHECK(polygons[0].size() == 8u);
@@ -33,15 +32,13 @@ namespace krys::boo::tests
 
     SECTION("disjoint rects stay apart")
     {
-      auto [graph, polygons] =
-        FloatPointGraph::PolygonsForRect({FloatRect(0, 0, 10, 10), FloatRect(20, 20, 10, 10)});
+      auto [graph, polygons] = FloatPointGraph::PolygonsForRect({RectF(0, 0, 10, 10), RectF(20, 20, 10, 10)});
       CHECK(polygons.size() == 2u);
     }
 
     SECTION("a rect inside another is dropped")
     {
-      auto [graph, polygons] =
-        FloatPointGraph::PolygonsForRect({FloatRect(0, 0, 30, 30), FloatRect(10, 10, 5, 5)});
+      auto [graph, polygons] = FloatPointGraph::PolygonsForRect({RectF(0, 0, 30, 30), RectF(10, 10, 5, 5)});
       REQUIRE(polygons.size() == 1u);
       CHECK(polygons[0].size() == 4u);
     }

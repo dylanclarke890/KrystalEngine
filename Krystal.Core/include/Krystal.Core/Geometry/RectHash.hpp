@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2011 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,12 +23,42 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Graphics/Geometry/DoubleSize.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
+#pragma once
 
-namespace krys::boo
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Hash.hpp"
+
+namespace krys
 {
-  DoubleSize::DoubleSize(const FloatSize &size) noexcept : _width(size.Width()), _height(size.Height())
+  template <>
+  struct DefaultHash<RectI>
   {
-  }
+    KRYS_NODISCARD static size_t Hash(const RectI &key) noexcept
+    {
+      return krys::Hash::Combine(key.X(), key.Y(), key.Width(), key.Height());
+    }
+
+    KRYS_NODISCARD static bool Equal(const RectI &a, const RectI &b) noexcept
+    {
+      return a == b;
+    }
+
+    constexpr static bool IsSafeToCompareToEmptyOrDeleted = true;
+  };
+
+  template <>
+  struct HashTraits<RectI> : public GenericHashTraits<RectI>
+  {
+    constexpr static bool EmptyValueIsZero = true;
+
+    constexpr static void ConstructDeletedValue(RectI &slot) noexcept
+    {
+      slot = RectI(-1, -1, -1, -1);
+    }
+
+    KRYS_NODISCARD constexpr static bool IsDeletedValue(const RectI &value) noexcept
+    {
+      return value.X() == -1 && value.Y() == -1 && value.Width() == -1 && value.Height() == -1;
+    }
+  };
 }

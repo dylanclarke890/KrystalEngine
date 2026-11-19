@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo::tests
 {
@@ -46,24 +46,24 @@ namespace krys::boo::tests
     SECTION("tiled drawing")
     {
       // A vertical gradient only needs a one pixel wide tile.
-      FloatSize size {100, 100};
-      FloatRect srcRect {10, 10, 50, 50};
+      SizeF size {100, 100};
+      RectF srcRect {10, 10, 50, 50};
       linear->AdjustParametersForTiledDrawing(size, srcRect, {});
-      CHECK(size == FloatSize {1, 100});
-      CHECK(srcRect == FloatRect {0, 10, 1, 50});
+      CHECK(size == SizeF {1, 100});
+      CHECK(srcRect == RectF {0, 10, 1, 50});
 
       // ... unless the tiles are spaced.
-      FloatSize spacedSize {100, 100};
-      FloatRect spacedRect {10, 10, 50, 50};
+      SizeF spacedSize {100, 100};
+      RectF spacedRect {10, 10, 50, 50};
       linear->AdjustParametersForTiledDrawing(spacedSize, spacedRect, {2, 2});
-      CHECK(spacedSize == FloatSize {100, 100});
+      CHECK(spacedSize == SizeF {100, 100});
 
       auto horizontal = Gradient::Create(Gradient::LinearData {{0, 0}, {100, 0}}, method);
-      FloatSize horizontalSize {100, 100};
-      FloatRect horizontalRect {10, 10, 50, 50};
+      SizeF horizontalSize {100, 100};
+      RectF horizontalRect {10, 10, 50, 50};
       horizontal->AdjustParametersForTiledDrawing(horizontalSize, horizontalRect, {});
-      CHECK(horizontalSize == FloatSize {100, 1});
-      CHECK(horizontalRect == FloatRect {10, 0, 50, 1});
+      CHECK(horizontalSize == SizeF {100, 1});
+      CHECK(horizontalRect == RectF {10, 0, 50, 1});
     }
   }
 

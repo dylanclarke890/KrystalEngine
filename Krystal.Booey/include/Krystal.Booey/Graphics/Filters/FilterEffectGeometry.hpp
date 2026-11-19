@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
@@ -54,13 +54,13 @@ namespace krys::boo
     using Flags = FilterEffectGeometryFlag;
 
   private:
-    FloatRect _boundaries;
+    RectF _boundaries;
     EnumSet<Flags> _flags;
 
   public:
     FilterEffectGeometry() noexcept = default;
 
-    FilterEffectGeometry(const FloatRect &boundaries, EnumSet<Flags> flags) noexcept
+    FilterEffectGeometry(const RectF &boundaries, EnumSet<Flags> flags) noexcept
         : _boundaries(boundaries), _flags(flags)
     {
     }

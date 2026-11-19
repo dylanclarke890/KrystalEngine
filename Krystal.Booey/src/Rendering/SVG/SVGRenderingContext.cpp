@@ -154,7 +154,7 @@ namespace krys::boo
 
     if (opacity < 1 || hasBlendMode || isolateMaskForBlending || hasIsolation)
     {
-      FloatRect repaintRect = _renderer->RepaintRectInLocalCoordinates();
+      RectF repaintRect = _renderer->RepaintRectInLocalCoordinates();
       _paintInfo->Context().Clip(repaintRect);
 
       if (opacity < 1 || hasBlendMode || isolateMaskForBlending || hasIsolation)
@@ -251,7 +251,7 @@ namespace krys::boo
         // changes, we need to paint the whole filter region. Otherwise, elements not visible
         // at the time of the initial paint (due to scrolling, window size, etc.) will never
         // be drawn.
-        _paintInfo->Rect = LayoutRect(IntRect(_filter->DrawingRegion(*_renderer)));
+        _paintInfo->Rect = LayoutRect(RectI(_filter->DrawingRegion(*_renderer)));
       }
       else if (!_filter)
       {
@@ -297,8 +297,8 @@ namespace krys::boo
     {
       return;
     }
-    FloatSize scale(static_cast<float>(absoluteTransform.XScale()),
-                    static_cast<float>(absoluteTransform.YScale()));
+    SizeF scale(static_cast<float>(absoluteTransform.XScale()),
+                static_cast<float>(absoluteTransform.YScale()));
 
     auto sourceRect = renderer.StrokeBoundingBox();
     auto outsets = CSSFilterOutsets(renderer);
@@ -331,12 +331,12 @@ namespace krys::boo
     _savedContext = &context;
     _savedPaintRect = _paintInfo->Rect;
     _paintInfo->SetContext(*_cssFilterSwitcher->DrawingContext(context));
-    _paintInfo->Rect = LayoutRect(EnclosingIntRect(filterRegion));
+    _paintInfo->Rect = LayoutRect(EnclosingRectI(filterRegion));
     _renderingFlags.Add(RenderingFlag::EndCSSFilterLayer);
   }
 
-  void SVGRenderingContext::ClipToImageBuffer(GraphicsContext &context, const FloatRect &targetRect,
-                                              const FloatSize &scale, RefPtr<ImageBuffer> &imageBuffer,
+  void SVGRenderingContext::ClipToImageBuffer(GraphicsContext &context, const RectF &targetRect,
+                                              const SizeF &scale, RefPtr<ImageBuffer> &imageBuffer,
                                               bool safeToClear) noexcept
   {
     if (!imageBuffer)
@@ -352,7 +352,7 @@ namespace krys::boo
     // The mask image has been created in the absolute coordinate space, as the image should not be scaled.
     // So the actual masking process has to be done in the absolute coordinate space as well.
     context.ConcatCTM(absoluteTransform.Inverse().value_or(AffineTransform {}));
-    context.ClipToImageBuffer(*imageBuffer, FloatRect(absoluteTargetRect));
+    context.ClipToImageBuffer(*imageBuffer, RectF(absoluteTargetRect));
     context.ConcatCTM(absoluteTransform);
 
     // When nesting resources, with objectBoundingBox as content unit types, there's no use in caching the

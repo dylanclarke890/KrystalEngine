@@ -223,20 +223,20 @@ namespace krys::boo
 
     void SetVisualOverflow(const LayoutRect &, LayoutUnit lineTop, LayoutUnit lineBottom) noexcept;
 
-    KRYS_NODISCARD FloatRect FrameRectIncludingLineHeight(LayoutUnit lineTop,
-                                                          LayoutUnit lineBottom) const noexcept
+    KRYS_NODISCARD RectF FrameRectIncludingLineHeight(LayoutUnit lineTop,
+                                                      LayoutUnit lineBottom) const noexcept
     {
       if (IsHorizontal())
       {
-        return FloatRect(X(), lineTop.ToFloat(), Width(), (lineBottom - lineTop).ToFloat());
+        return RectF(X(), lineTop.ToFloat(), Width(), (lineBottom - lineTop).ToFloat());
       }
-      return FloatRect(lineTop.ToFloat(), Y(), (lineBottom - lineTop).ToFloat(), Height());
+      return RectF(lineTop.ToFloat(), Y(), (lineBottom - lineTop).ToFloat(), Height());
     }
 
-    KRYS_NODISCARD FloatRect LogicalFrameRectIncludingLineHeight(LayoutUnit lineTop,
-                                                                 LayoutUnit lineBottom) const noexcept
+    KRYS_NODISCARD RectF LogicalFrameRectIncludingLineHeight(LayoutUnit lineTop,
+                                                             LayoutUnit lineBottom) const noexcept
     {
-      return FloatRect(LogicalLeft(), lineTop.ToFloat(), LogicalWidth(), (lineBottom - lineTop).ToFloat());
+      return RectF(LogicalLeft(), lineTop.ToFloat(), LogicalWidth(), (lineBottom - lineTop).ToFloat());
     }
 
     KRYS_NODISCARD bool HasSelfPaintInlineBox() const noexcept

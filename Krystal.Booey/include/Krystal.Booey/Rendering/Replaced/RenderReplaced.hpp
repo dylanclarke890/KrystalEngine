@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
@@ -95,7 +95,7 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutSize IntrinsicSize() const noexcept final;
 
-    KRYS_NODISCARD FloatSize IntrinsicRatio() const noexcept;
+    KRYS_NODISCARD SizeF IntrinsicRatio() const noexcept;
 
     KRYS_NODISCARD bool ShouldInvalidatePreferredWidths() const noexcept override;
 
@@ -164,9 +164,9 @@ namespace krys::boo
 
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
 
-    KRYS_NODISCARD virtual FloatSize ComputeIntrinsicSize() const noexcept;
+    KRYS_NODISCARD virtual SizeF ComputeIntrinsicSize() const noexcept;
 
-    KRYS_NODISCARD virtual FloatSize PreferredAspectRatio() const noexcept;
+    KRYS_NODISCARD virtual SizeF PreferredAspectRatio() const noexcept;
 
     void SetIntrinsicSize(const LayoutSize &intrinsicSize) noexcept
     {
@@ -213,12 +213,12 @@ namespace krys::boo
 
     void ComputePreferredLogicalWidths() noexcept final;
 
-    void ComputeAspectRatioInformationForRenderBox(RenderBox *contentRenderer, FloatSize &constrainedSize,
-                                                   FloatSize &preferredAspectRatio) const noexcept;
+    void ComputeAspectRatioInformationForRenderBox(RenderBox *contentRenderer, SizeF &constrainedSize,
+                                                   SizeF &preferredAspectRatio) const noexcept;
 
     void ComputeIntrinsicSizesConstrainedByTransferredMinMaxSizes(RenderBox *contentRenderer,
-                                                                  FloatSize &intrinsicSize,
-                                                                  FloatSize &intrinsicRatio) const noexcept;
+                                                                  SizeF &intrinsicSize,
+                                                                  SizeF &intrinsicRatio) const noexcept;
 
     KRYS_NODISCARD bool HasReplacedLogicalHeight() const noexcept;
   };

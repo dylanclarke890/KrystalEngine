@@ -5,8 +5,7 @@
 
 namespace krys::ui
 {
-  void EngineTextureLayer::PaintToTextureMapper(TextureMapper &textureMapper,
-                                                const boo::FloatRect &targetRect,
+  void EngineTextureLayer::PaintToTextureMapper(TextureMapper &textureMapper, const RectF &targetRect,
                                                 const boo::TransformationMatrix &modelViewMatrix,
                                                 float opacity) noexcept
   {
@@ -14,13 +13,13 @@ namespace krys::ui
                               _texture.Alpha());
   }
 
-  EngineTexture::EngineTexture(gfx::TextureHandle texture, const boo::IntSize &size,
+  EngineTexture::EngineTexture(gfx::TextureHandle texture, const SizeI &size,
                                AlphaPremultiplication alpha) noexcept
       : _texture(texture), _size(size), _alpha(alpha)
   {
   }
 
-  Ref<EngineTexture> EngineTexture::Create(gfx::TextureHandle texture, const boo::IntSize &size,
+  Ref<EngineTexture> EngineTexture::Create(gfx::TextureHandle texture, const SizeI &size,
                                            AlphaPremultiplication alpha) noexcept
   {
     return AdoptRef(*new EngineTexture(texture, size, alpha));

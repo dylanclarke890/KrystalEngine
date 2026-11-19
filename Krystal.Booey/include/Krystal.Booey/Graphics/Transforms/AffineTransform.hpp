@@ -28,9 +28,9 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -44,8 +44,6 @@ namespace krys
 namespace krys::boo
 {
   class FloatQuad;
-  class FloatRect;
-  class IntRect;
   class Region;
   class TransformationMatrix;
 
@@ -78,19 +76,19 @@ namespace krys::boo
     void Map(double x, double y, double &x2, double &y2) const noexcept;
 
     // Rounds the mapped point to the nearest integer value.
-    KRYS_NODISCARD IntPoint MapPoint(const IntPoint &point) const noexcept;
+    KRYS_NODISCARD PointI MapPoint(const PointI &point) const noexcept;
 
-    KRYS_NODISCARD FloatPoint MapPoint(const FloatPoint &point) const noexcept;
+    KRYS_NODISCARD PointF MapPoint(const PointF &point) const noexcept;
 
-    KRYS_NODISCARD IntSize MapSize(const IntSize &size) const noexcept;
+    KRYS_NODISCARD SizeI MapSize(const SizeI &size) const noexcept;
 
-    KRYS_NODISCARD FloatSize MapSize(const FloatSize &size) const noexcept;
+    KRYS_NODISCARD SizeF MapSize(const SizeF &size) const noexcept;
 
     // Rounds the resulting mapped rectangle out. This is helpful for bounding
     // box computations but may not be what is wanted in other contexts.
-    KRYS_NODISCARD IntRect MapRect(const IntRect &rect) const noexcept;
+    KRYS_NODISCARD RectI MapRect(const RectI &rect) const noexcept;
 
-    KRYS_NODISCARD FloatRect MapRect(const FloatRect &rect) const noexcept;
+    KRYS_NODISCARD RectF MapRect(const RectF &rect) const noexcept;
 
     KRYS_NODISCARD FloatQuad MapQuad(const FloatQuad &quad) const noexcept;
 
@@ -169,7 +167,7 @@ namespace krys::boo
     // Same as Scale(sx, sy).
     AffineTransform &ScaleNonUniform(double sx, double sy) noexcept;
 
-    AffineTransform &Scale(const FloatSize &s) noexcept;
+    AffineTransform &Scale(const SizeF &s) noexcept;
 
     AffineTransform &Rotate(double angleInDegrees) noexcept;
 
@@ -179,9 +177,9 @@ namespace krys::boo
 
     AffineTransform &Translate(double tx, double ty) noexcept;
 
-    AffineTransform &Translate(const FloatPoint &t) noexcept;
+    AffineTransform &Translate(const PointF &t) noexcept;
 
-    AffineTransform &Translate(const FloatSize &t) noexcept;
+    AffineTransform &Translate(const SizeF &t) noexcept;
 
     AffineTransform &Shear(double sx, double sy) noexcept;
 
@@ -267,17 +265,17 @@ namespace krys::boo
       return Span<const double, 6>(_transform);
     }
 
-    KRYS_NODISCARD static AffineTransform MakeTranslation(FloatSize delta) noexcept
+    KRYS_NODISCARD static AffineTransform MakeTranslation(SizeF delta) noexcept
     {
       return AffineTransform(1, 0, 0, 1, delta.Width(), delta.Height());
     }
 
-    KRYS_NODISCARD static AffineTransform MakeScale(FloatSize scale) noexcept
+    KRYS_NODISCARD static AffineTransform MakeScale(SizeF scale) noexcept
     {
       return AffineTransform(scale.Width(), 0, 0, scale.Height(), 0, 0);
     }
 
-    KRYS_NODISCARD static AffineTransform MakeRotation(double angleInDegrees, FloatPoint center) noexcept;
+    KRYS_NODISCARD static AffineTransform MakeRotation(double angleInDegrees, PointF center) noexcept;
 
     KRYS_NODISCARD static AffineTransform MakeRotation(double angleInDegrees) noexcept;
 
@@ -302,10 +300,13 @@ namespace krys::boo
 
   constexpr inline AffineTransform AffineTransform::Identity {};
 
-  KRYS_NODISCARD AffineTransform MakeMapBetweenRects(const FloatRect &source, const FloatRect &dest) noexcept;
+  KRYS_NODISCARD AffineTransform MakeMapBetweenRects(const RectF &source, const RectF &dest) noexcept;
 }
 
 namespace krys::boo
 {
   TextStream &operator<<(TextStream &ts, const AffineTransform &transform) noexcept;
+
+  /// @brief @p point mapped by @p transform, in double precision.
+  KRYS_NODISCARD PointF MatrixTransform(const PointF &point, const AffineTransform &transform) noexcept;
 }

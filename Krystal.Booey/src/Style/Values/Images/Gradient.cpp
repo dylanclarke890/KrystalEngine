@@ -237,7 +237,7 @@ namespace krys::boo::style
   class RadialGradientAdapter
   {
   public:
-    explicit RadialGradientAdapter(boo::Gradient::RadialData &data, FloatSize size) noexcept
+    explicit RadialGradientAdapter(boo::Gradient::RadialData &data, SizeF size) noexcept
         : _data(data), _size(size)
     {
     }
@@ -320,7 +320,7 @@ namespace krys::boo::style
 
   private:
     boo::Gradient::RadialData &_data;
-    FloatSize _size;
+    SizeF _size;
   };
 
   class ConicGradientAdapter
@@ -791,15 +791,14 @@ namespace krys::boo::style
   }
 
   template <typename Position>
-  KRYS_NODISCARD static inline FloatPoint ComputeEndPoint(const Position &value,
-                                                          const FloatSize &size) noexcept
+  KRYS_NODISCARD static inline PointF ComputeEndPoint(const Position &value, const SizeF &size) noexcept
   {
     return {PositionFromValue(get<0>(value), size.Width()), PositionFromValue(get<1>(value), size.Height())};
   }
 
   // Compute the endpoints so that a gradient of the given angle covers a box of the given size.
-  KRYS_NODISCARD static std::pair<FloatPoint, FloatPoint> EndPointsFromAngle(float angleDeg,
-                                                                             const FloatSize &size) noexcept
+  KRYS_NODISCARD static std::pair<PointF, PointF> EndPointsFromAngle(float angleDeg,
+                                                                     const SizeF &size) noexcept
   {
     angleDeg = ToPositiveAngle(angleDeg);
 
@@ -834,7 +833,7 @@ namespace krys::boo::style
     // Compute start corner relative to center, in Cartesian space (+y = up).
     float halfHeight = size.Height() / 2;
     float halfWidth = size.Width() / 2;
-    FloatPoint endCorner;
+    PointF endCorner;
     if (angleDeg < 90)
     {
       endCorner.Set(halfWidth, halfHeight);
@@ -862,7 +861,7 @@ namespace krys::boo::style
     // that we're in drawing space (+y = down). Reflect
     // around the center for the start point.
 
-    return {FloatPoint(halfWidth - endX, halfHeight + endY), FloatPoint(halfWidth + endX, halfHeight - endY)};
+    return {PointF(halfWidth - endX, halfHeight + endY), PointF(halfWidth + endX, halfHeight - endY)};
   }
 
   KRYS_NODISCARD static float ResolveRadius(const LengthPercentage<css::NonNegative> &radius,
@@ -874,25 +873,25 @@ namespace krys::boo::style
   struct DistanceToCorner
   {
     float distance;
-    FloatPoint corner;
+    PointF corner;
   };
 
-  KRYS_NODISCARD static DistanceToCorner FindDistanceToClosestCorner(const FloatPoint &p,
-                                                                     const FloatSize &size) noexcept
+  KRYS_NODISCARD static DistanceToCorner FindDistanceToClosestCorner(const PointF &p,
+                                                                     const SizeF &size) noexcept
   {
-    FloatPoint topLeft;
-    float topLeftDistance = FloatSize(p - topLeft).DiagonalLength();
+    PointF topLeft;
+    float topLeftDistance = SizeF(p - topLeft).DiagonalLength();
 
-    FloatPoint topRight {size.Width(), 0};
-    float topRightDistance = FloatSize(p - topRight).DiagonalLength();
+    PointF topRight {size.Width(), 0};
+    float topRightDistance = SizeF(p - topRight).DiagonalLength();
 
-    FloatPoint bottomLeft {0, size.Height()};
-    float bottomLeftDistance = FloatSize(p - bottomLeft).DiagonalLength();
+    PointF bottomLeft {0, size.Height()};
+    float bottomLeftDistance = SizeF(p - bottomLeft).DiagonalLength();
 
-    FloatPoint bottomRight {size.Width(), size.Height()};
-    float bottomRightDistance = FloatSize(p - bottomRight).DiagonalLength();
+    PointF bottomRight {size.Width(), size.Height()};
+    float bottomRightDistance = SizeF(p - bottomRight).DiagonalLength();
 
-    FloatPoint corner = topLeft;
+    PointF corner = topLeft;
     float minDistance = topLeftDistance;
 
     if (topRightDistance < minDistance)
@@ -915,22 +914,22 @@ namespace krys::boo::style
     return {minDistance, corner};
   }
 
-  KRYS_NODISCARD static DistanceToCorner FindDistanceToFarthestCorner(const FloatPoint &p,
-                                                                      const FloatSize &size) noexcept
+  KRYS_NODISCARD static DistanceToCorner FindDistanceToFarthestCorner(const PointF &p,
+                                                                      const SizeF &size) noexcept
   {
-    FloatPoint topLeft;
-    float topLeftDistance = FloatSize(p - topLeft).DiagonalLength();
+    PointF topLeft;
+    float topLeftDistance = SizeF(p - topLeft).DiagonalLength();
 
-    FloatPoint topRight {size.Width(), 0};
-    float topRightDistance = FloatSize(p - topRight).DiagonalLength();
+    PointF topRight {size.Width(), 0};
+    float topRightDistance = SizeF(p - topRight).DiagonalLength();
 
-    FloatPoint bottomLeft {0, size.Height()};
-    float bottomLeftDistance = FloatSize(p - bottomLeft).DiagonalLength();
+    PointF bottomLeft {0, size.Height()};
+    float bottomLeftDistance = SizeF(p - bottomLeft).DiagonalLength();
 
-    FloatPoint bottomRight {size.Width(), size.Height()};
-    float bottomRightDistance = FloatSize(p - bottomRight).DiagonalLength();
+    PointF bottomRight {size.Width(), size.Height()};
+    float bottomRightDistance = SizeF(p - bottomRight).DiagonalLength();
 
-    FloatPoint corner = topLeft;
+    PointF corner = topLeft;
     float maxDistance = topLeftDistance;
 
     if (topRightDistance > maxDistance)
@@ -956,7 +955,7 @@ namespace krys::boo::style
 
   // Compute horizontal radius of ellipse with center at 0,0 which passes through p, and has
   // width/height given by aspectRatio.
-  KRYS_NODISCARD static inline float HorizontalEllipseRadius(const FloatSize &p, float aspectRatio) noexcept
+  KRYS_NODISCARD static inline float HorizontalEllipseRadius(const SizeF &p, float aspectRatio) noexcept
   {
     // x^2/a^2 + y^2/b^2 = 1
     // a/b = aspectRatio, b = a/aspectRatio
@@ -968,31 +967,29 @@ namespace krys::boo::style
 
   template <css::ValueId Name>
   KRYS_NODISCARD static Ref<boo::Gradient>
-    CreatePlatformGradient(const css::FunctionNotation<Name, LinearGradient> &linear, const FloatSize &size,
+    CreatePlatformGradient(const css::FunctionNotation<Name, LinearGradient> &linear, const SizeF &size,
                            const RenderStyle &style) noexcept
   {
     krys_debug_assert(!size.IsEmpty());
 
     auto [point0, point1] = krys::SwitchOn(
-      linear.Parameters.GradientLine, [&](const Angle<> &angle) -> std::pair<FloatPoint, FloatPoint>
+      linear.Parameters.GradientLine, [&](const Angle<> &angle) -> std::pair<PointF, PointF>
       { return EndPointsFromAngle(static_cast<float>(angle.Value), size); },
-      [&](const Horizontal &horizontal) -> std::pair<FloatPoint, FloatPoint>
+      [&](const Horizontal &horizontal) -> std::pair<PointF, PointF>
       {
         return krys::SwitchOn(
-          horizontal, [&](css::keywords::Left) -> std::pair<FloatPoint, FloatPoint>
-          { return {{size.Width(), 0}, {0, 0}}; },
-          [&](css::keywords::Right) -> std::pair<FloatPoint, FloatPoint>
-          { return {{0, 0}, {size.Width(), 0}}; });
+          horizontal,
+          [&](css::keywords::Left) -> std::pair<PointF, PointF> { return {{size.Width(), 0}, {0, 0}}; },
+          [&](css::keywords::Right) -> std::pair<PointF, PointF> { return {{0, 0}, {size.Width(), 0}}; });
       },
-      [&](const Vertical &vertical) -> std::pair<FloatPoint, FloatPoint>
+      [&](const Vertical &vertical) -> std::pair<PointF, PointF>
       {
         return krys::SwitchOn(
-          vertical, [&](css::keywords::Top) -> std::pair<FloatPoint, FloatPoint>
-          { return {{0, size.Height()}, {0, 0}}; },
-          [&](css::keywords::Bottom) -> std::pair<FloatPoint, FloatPoint>
-          { return {{0, 0}, {0, size.Height()}}; });
+          vertical,
+          [&](css::keywords::Top) -> std::pair<PointF, PointF> { return {{0, size.Height()}, {0, 0}}; },
+          [&](css::keywords::Bottom) -> std::pair<PointF, PointF> { return {{0, 0}, {0, size.Height()}}; });
       },
-      [&](const css::SpaceSeparatedTuple<Horizontal, Vertical> &pair) -> std::pair<FloatPoint, FloatPoint>
+      [&](const css::SpaceSeparatedTuple<Horizontal, Vertical> &pair) -> std::pair<PointF, PointF>
       {
         float rise = size.Width();
         float run = size.Height();
@@ -1021,19 +1018,19 @@ namespace krys::boo::style
 
   template <css::ValueId Name>
   KRYS_NODISCARD static Ref<boo::Gradient>
-    CreatePlatformGradient(const css::FunctionNotation<Name, RadialGradient> &radial, const FloatSize &size,
+    CreatePlatformGradient(const css::FunctionNotation<Name, RadialGradient> &radial, const SizeF &size,
                            const RenderStyle &style) noexcept
   {
     krys_debug_assert(!size.IsEmpty());
 
-    auto computeCenterPoint = [&](const Maybe<Position> &position) -> FloatPoint
+    auto computeCenterPoint = [&](const Maybe<Position> &position) -> PointF
     {
-      return position ? ComputeEndPoint(*position, size) : FloatPoint {size.Width() / 2, size.Height() / 2};
+      return position ? ComputeEndPoint(*position, size) : PointF {size.Width() / 2, size.Height() / 2};
     };
 
     auto computeCircleRadius =
       [&](const Variant<RadialGradient::Circle::Length, RadialGradient::Extent> &circleLengthOrExtent,
-          FloatPoint centerPoint) -> std::pair<float, float>
+          PointF centerPoint) -> std::pair<float, float>
     {
       return krys::SwitchOn(
         circleLengthOrExtent,
@@ -1055,7 +1052,7 @@ namespace krys::boo::style
 
     auto computeEllipseRadii =
       [&](const Variant<RadialGradient::Ellipse::SizeType, RadialGradient::Extent> &ellipseSizeOrExtent,
-          FloatPoint centerPoint) -> std::pair<float, float>
+          PointF centerPoint) -> std::pair<float, float>
     {
       return krys::SwitchOn(
         ellipseSizeOrExtent,
@@ -1130,14 +1127,14 @@ namespace krys::boo::style
 
   template <css::ValueId Name>
   KRYS_NODISCARD static Ref<boo::Gradient>
-    CreatePlatformGradient(const css::FunctionNotation<Name, ConicGradient> &conic, const FloatSize &size,
+    CreatePlatformGradient(const css::FunctionNotation<Name, ConicGradient> &conic, const SizeF &size,
                            const RenderStyle &style) noexcept
   {
     krys_debug_assert(!size.IsEmpty());
 
-    auto computeCenterPoint = [&](const Maybe<Position> &position) -> FloatPoint
+    auto computeCenterPoint = [&](const Maybe<Position> &position) -> PointF
     {
-      return position ? ComputeEndPoint(*position, size) : FloatPoint {size.Width() / 2, size.Height() / 2};
+      return position ? ComputeEndPoint(*position, size) : PointF {size.Width() / 2, size.Height() / 2};
     };
 
     auto centerPoint = computeCenterPoint(conic.Parameters.GradientBox.Position);
@@ -1156,7 +1153,7 @@ namespace krys::boo::style
 
   // MARK: - createPlatformGradient
 
-  KRYS_NODISCARD Ref<boo::Gradient> CreatePlatformGradient(const Gradient &gradient, const FloatSize &size,
+  KRYS_NODISCARD Ref<boo::Gradient> CreatePlatformGradient(const Gradient &gradient, const SizeF &size,
                                                            const RenderStyle &style) noexcept
   {
     return krys::SwitchOn(gradient,

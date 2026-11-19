@@ -26,7 +26,7 @@ namespace krys::ui
     List<boo::DataListSuggestion> _suggestions;
     /// @brief The element of each suggestion, by its index.
     List<RefPtr<boo::Element>> _items;
-    boo::IntRect _rect;
+    RectI _rect;
     int32 _highlightedIndex {-1};
     bool _visible {false};
 
@@ -71,7 +71,7 @@ namespace krys::ui
       return *_view;
     }
 
-    KRYS_NODISCARD const boo::IntRect &Rect() const noexcept final
+    KRYS_NODISCARD const RectI &Rect() const noexcept final
     {
       return _rect;
     }
@@ -84,12 +84,12 @@ namespace krys::ui
     void Hide() noexcept final;
 
     /// @brief Highlights the suggestion under @p point.
-    void MouseMoved(const boo::IntPoint &point) noexcept final;
+    void MouseMoved(const PointI &point) noexcept final;
 
     /// @brief Chooses the suggestion under @p point.
-    void MouseReleased(const boo::IntPoint &point) noexcept final;
+    void MouseReleased(const PointI &point) noexcept final;
 
-    bool MouseWheel(const boo::IntPoint &point, float notchesX, float notchesY) noexcept final;
+    bool MouseWheel(const PointI &point, float notchesX, float notchesY) noexcept final;
 
     /// @brief The field takes the keys.
     bool KeyPressed(pal::Key key, pal::KeyModifiers modifiers) noexcept final;
@@ -120,6 +120,6 @@ namespace krys::ui
 
     void Choose(int32 index) noexcept;
 
-    KRYS_NODISCARD int32 ItemAt(const boo::IntPoint &point) const noexcept;
+    KRYS_NODISCARD int32 ItemAt(const PointI &point) const noexcept;
   };
 }

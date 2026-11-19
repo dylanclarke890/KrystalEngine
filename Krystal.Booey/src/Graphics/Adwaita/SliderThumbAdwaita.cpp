@@ -65,7 +65,7 @@ namespace krys::boo
       sliderThumbBorderColor = SliderThumbBorderColorLight;
     }
 
-    FloatRect fieldRect = borderRect.Rect();
+    RectF fieldRect = borderRect.Rect();
     Path path;
     path.AddEllipseInRect(fieldRect);
     fieldRect.Inflate(-SliderThumbBorderSize);

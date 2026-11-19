@@ -27,9 +27,9 @@
 
 #include "Krystal.Booey/DOM/Geometry/DOMRectReadOnly.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Page/ResizeObserver/ResizeObserverSize.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
@@ -48,8 +48,8 @@ namespace krys::boo
     List<Ref<ResizeObserverSize>> _contentBoxSizes;
     List<Ref<ResizeObserverSize>> _devicePixelContentBoxSizes;
 
-    ResizeObserverEntry(Ref<Element> &&target, const FloatRect &contentRect, FloatSize borderBoxSize,
-                        FloatSize contentBoxSize, FloatSize devicePixelContentBoxSize) noexcept
+    ResizeObserverEntry(Ref<Element> &&target, const RectF &contentRect, SizeF borderBoxSize,
+                        SizeF contentBoxSize, SizeF devicePixelContentBoxSize) noexcept
         : _target(krys::move(target)),
           _contentRect(dom::DOMRectReadOnly::Create(contentRect.X(), contentRect.Y(), contentRect.Width(),
                                                     contentRect.Height())),
@@ -61,9 +61,9 @@ namespace krys::boo
     }
 
   public:
-    KRYS_NODISCARD static Ref<ResizeObserverEntry> Create(Ref<Element> &&target, const FloatRect &contentRect,
-                                                          FloatSize borderBoxSize, FloatSize contentBoxSize,
-                                                          FloatSize devicePixelContentBoxSize) noexcept
+    KRYS_NODISCARD static Ref<ResizeObserverEntry> Create(Ref<Element> &&target, const RectF &contentRect,
+                                                          SizeF borderBoxSize, SizeF contentBoxSize,
+                                                          SizeF devicePixelContentBoxSize) noexcept
     {
       return AdoptRef(*new ResizeObserverEntry(krys::move(target), contentRect, borderBoxSize, contentBoxSize,
                                                devicePixelContentBoxSize));

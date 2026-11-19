@@ -152,7 +152,7 @@ namespace krys::boo
       return {DOMStringAtom(In1()), DOMStringAtom(In2())};
     }
 
-    KRYS_NODISCARD IntOutsets Outsets(const FloatRect &targetBoundingBox,
+    KRYS_NODISCARD IntOutsets Outsets(const RectF &targetBoundingBox,
                                       SVGUnitTypes::SVGUnitType primitiveUnits) const noexcept final;
 
     KRYS_NODISCARD RefPtr<FilterEffect>

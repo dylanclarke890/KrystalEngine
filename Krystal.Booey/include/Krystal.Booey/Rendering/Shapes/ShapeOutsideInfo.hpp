@@ -29,10 +29,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Rendering/Shapes/LayoutShape.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 
 namespace krys::boo
 {
@@ -135,7 +135,7 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutRect ComputedShapePhysicalBoundingBox() const noexcept;
 
-    KRYS_NODISCARD FloatPoint ShapeToRendererPoint(const FloatPoint &point) const noexcept;
+    KRYS_NODISCARD PointF ShapeToRendererPoint(const PointF &point) const noexcept;
 
     KRYS_NODISCARD const LayoutShape &ComputedShape() const noexcept;
   };

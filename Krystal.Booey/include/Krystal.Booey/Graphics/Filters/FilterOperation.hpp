@@ -28,7 +28,7 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 
 namespace krys::boo
@@ -356,7 +356,7 @@ namespace krys::boo
       return _location.Y();
     }
 
-    KRYS_NODISCARD IntPoint Location() const noexcept
+    KRYS_NODISCARD PointI Location() const noexcept
     {
       return _location;
     }
@@ -379,7 +379,7 @@ namespace krys::boo
   protected:
     KRYS_NODISCARD bool NonColorEqual(const DropShadowFilterOperationBase &) const noexcept;
 
-    DropShadowFilterOperationBase(Type type, const IntPoint &location, int stdDeviation) noexcept
+    DropShadowFilterOperationBase(Type type, const PointI &location, int stdDeviation) noexcept
         : FilterOperation(type), _location(location), _stdDeviation(stdDeviation)
     {
     }
@@ -388,14 +388,14 @@ namespace krys::boo
 
     KRYS_NODISCARD IntOutsets Outsets() const noexcept override;
 
-    IntPoint _location; // FIXME: Should _location be a FloatPoint?
-    int _stdDeviation;  // FIXME: Should _stdDeviation be a float?
+    PointI _location;  // FIXME: Should _location be a PointF?
+    int _stdDeviation; // FIXME: Should _stdDeviation be a float?
   };
 
   class DropShadowFilterOperation : public DropShadowFilterOperationBase
   {
   public:
-    KRYS_NODISCARD static Ref<DropShadowFilterOperation> Create(const IntPoint &location, int stdDeviation,
+    KRYS_NODISCARD static Ref<DropShadowFilterOperation> Create(const PointI &location, int stdDeviation,
                                                                 const Color &color) noexcept
     {
       return AdoptRef(*new DropShadowFilterOperation(location, stdDeviation, color));
@@ -417,7 +417,7 @@ namespace krys::boo
   private:
     KRYS_NODISCARD bool Equals(const FilterOperation &) const noexcept override;
 
-    DropShadowFilterOperation(const IntPoint &location, int stdDeviation, Color color) noexcept
+    DropShadowFilterOperation(const PointI &location, int stdDeviation, Color color) noexcept
         : DropShadowFilterOperationBase(Type::DropShadow, location, stdDeviation), _color(krys::move(color))
     {
     }

@@ -117,7 +117,7 @@ namespace krys::boo
     void ErrorExit(j_common_ptr cinfo);
 
     /// @brief The EXIF metadata of an image of @p size, from its first APP1 block that holds it.
-    KRYS_NODISCARD EXIFMetadata ReadEXIFMetadata(jpeg_decompress_struct *info, const IntSize &size) noexcept
+    KRYS_NODISCARD EXIFMetadata ReadEXIFMetadata(jpeg_decompress_struct *info, const SizeI &size) noexcept
     {
       // An EXIF APP1 block is "Exif\0", a fill byte, then the TIFF block that holds the metadata.
       // FIXME: Possibly implement XMP and IPTC support.
@@ -319,13 +319,13 @@ namespace krys::boo
 
           // We can fill in the size now that the header is available.
           if (!_decoder->SetSize(
-                IntSize(static_cast<int32>(_info.image_width), static_cast<int32>(_info.image_height))))
+                SizeI(static_cast<int32>(_info.image_width), static_cast<int32>(_info.image_height))))
           {
             return false;
           }
 
           _decoder->SetEXIFMetadata(ReadEXIFMetadata(
-            Info(), IntSize(static_cast<int32>(_info.image_width), static_cast<int32>(_info.image_height))));
+            Info(), SizeI(static_cast<int32>(_info.image_width), static_cast<int32>(_info.image_height))));
 
           if (!_decoder->IgnoresGammaAndColorProfile())
           {

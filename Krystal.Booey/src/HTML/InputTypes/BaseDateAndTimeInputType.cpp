@@ -639,7 +639,7 @@ namespace krys::boo::html
 
     auto *renderer = element.Renderer();
     parameters.AnchorRectInRootView =
-      renderer ? view->ContentsToView(renderer->AbsoluteBoundingBoxRect()) : IntRect();
+      renderer ? view->ContentsToView(renderer->AbsoluteBoundingBoxRect()) : RectI();
     parameters.CurrentValue = element.Value();
 
     if (renderer)

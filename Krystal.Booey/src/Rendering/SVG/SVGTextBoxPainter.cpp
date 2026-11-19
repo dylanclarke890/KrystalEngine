@@ -83,9 +83,9 @@ namespace krys::boo
     return TextBoxIterator()->ParentInlineBox()->Renderer();
   }
 
-  FloatRect SelectionRectForTextFragment(const RenderSVGInlineText &renderer, text::TextDirection direction,
-                                         const SVGTextFragment &fragment, uint32 startPosition,
-                                         uint32 endPosition) noexcept
+  RectF SelectionRectForTextFragment(const RenderSVGInlineText &renderer, text::TextDirection direction,
+                                     const SVGTextFragment &fragment, uint32 startPosition,
+                                     uint32 endPosition) noexcept
   {
     krys_debug_assert(startPosition < endPosition);
 
@@ -94,7 +94,7 @@ namespace krys::boo
 
     const FontCascade &scaledFont = renderer.ScaledFont();
     const FontMetrics &scaledFontMetrics = scaledFont.MetricsOfPrimaryFont();
-    FloatPoint textOrigin(fragment.X, fragment.Y);
+    PointF textOrigin(fragment.X, fragment.Y);
     if (scalingFactor != 1)
     {
       textOrigin.Scale(scalingFactor);
@@ -107,7 +107,7 @@ namespace krys::boo
     TextRun run = ConstructTextRun(renderer.Text(), direction, fragment);
     scaledFont.AdjustSelectionRectForText(renderer.CanUseSimplifiedTextMeasuring().value_or(false), run,
                                           selectionRect, startPosition, endPosition);
-    FloatRect snappedSelectionRect = SnapRectToDevicePixelsWithWritingDirection(
+    RectF snappedSelectionRect = SnapRectToDevicePixelsWithWritingDirection(
       selectionRect, renderer.GetDocument().DeviceScaleFactor(), run.Ltr());
     if (scalingFactor == 1)
     {
@@ -567,7 +567,7 @@ namespace krys::boo
       return;
     }
 
-    FloatPoint decorationOrigin(fragment.X, fragment.Y);
+    PointF decorationOrigin(fragment.X, fragment.Y);
     float width = fragment.Width;
     const FontMetrics &scaledFontMetrics = scaledFont.MetricsOfPrimaryFont();
 
@@ -583,7 +583,7 @@ namespace krys::boo
                                + PositionOffsetForDecoration(decoration, scaledFontMetrics, thickness));
 
     Path path;
-    path.AddRect(FloatRect(decorationOrigin, FloatSize(width, thickness)));
+    path.AddRect(RectF(decorationOrigin, SizeF(width, thickness)));
 
     GraphicsContext *usedContext = &context;
     if (AcquireLegacyPaintingResource(usedContext, scalingFactor,
@@ -608,8 +608,8 @@ namespace krys::boo
     const auto &scaledFont = Renderer().ScaledFont();
     const auto &shadows = style.GetTextShadow();
 
-    FloatPoint textOrigin(fragment.X, fragment.Y);
-    FloatSize textSize(fragment.Width, fragment.Height);
+    PointF textOrigin(fragment.X, fragment.Y);
+    SizeF textSize(fragment.Width, fragment.Height);
 
     if (scalingFactor != 1)
     {
@@ -617,8 +617,8 @@ namespace krys::boo
       textSize.Scale(scalingFactor);
     }
 
-    FloatRect shadowRect(
-      FloatPoint(textOrigin.X(), textOrigin.Y() - scaledFont.MetricsOfPrimaryFont().Ascent()), textSize);
+    RectF shadowRect(PointF(textOrigin.X(), textOrigin.Y() - scaledFont.MetricsOfPrimaryFont().Ascent()),
+                     textSize);
 
     GraphicsContext *usedContext = &context;
 

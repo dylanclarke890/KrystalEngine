@@ -61,9 +61,9 @@ namespace krys::boo
     KRYS_NODISCARD RepaintRects RectsForRepaintingAfterLayout(const RenderLayerModelObject *repaintContainer,
                                                               RepaintOutlineBounds) const noexcept final;
 
-    KRYS_NODISCARD Maybe<FloatRect>
-      ComputeFloatVisibleRectInContainer(const FloatRect &, const RenderLayerModelObject *container,
-                                         VisibleRectContext) const noexcept final;
+    KRYS_NODISCARD Maybe<RectF> ComputeFloatVisibleRectInContainer(const RectF &,
+                                                                   const RenderLayerModelObject *container,
+                                                                   VisibleRectContext) const noexcept final;
 
     KRYS_NODISCARD Maybe<RepaintRects>
       ComputeVisibleRectsInContainer(const RepaintRects &, const RenderLayerModelObject *container,

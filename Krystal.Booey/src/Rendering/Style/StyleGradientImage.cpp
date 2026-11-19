@@ -61,7 +61,7 @@ namespace krys::boo
     return false;
   }
 
-  RefPtr<Image> StyleGradientImage::GetImage(const RenderElement *renderer, const FloatSize &size,
+  RefPtr<Image> StyleGradientImage::GetImage(const RenderElement *renderer, const SizeF &size,
                                              const GraphicsContext &, bool isForFirstLine) const noexcept
   {
     if (!renderer)
@@ -98,7 +98,7 @@ namespace krys::boo
     return style::IsOpaque(_gradient, renderer.Style());
   }
 
-  FloatSize StyleGradientImage::FixedSize(const RenderElement &) const noexcept
+  SizeF StyleGradientImage::FixedSize(const RenderElement &) const noexcept
   {
     return {};
   }

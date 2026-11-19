@@ -302,8 +302,8 @@ namespace krys::boo
       std::chrono::duration<double>(1.0 / Page::FullSpeedFramesPerSecond));
   }
 
-  IntRect RenderThemeAdwaita::ProgressBarRectForBounds(const RenderProgress &,
-                                                       const IntRect &bounds) const noexcept
+  RectI RenderThemeAdwaita::ProgressBarRectForBounds(const RenderProgress &,
+                                                     const RectI &bounds) const noexcept
   {
     // FIXME: Vertical progress bars (the renderer's isHorizontalWritingMode), with RenderProgress (G14d2).
     bool isHorizontal = true;
@@ -330,7 +330,7 @@ namespace krys::boo
     return LayoutUnit(5);
   }
 
-  IntSize RenderThemeAdwaita::SliderTickSize() const noexcept
+  SizeI RenderThemeAdwaita::SliderTickSize() const noexcept
   {
     return {1, 7};
   }

@@ -24,14 +24,14 @@
 
 #include "Krystal.Booey/Graphics/Filters/FEConvolveMatrix.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo
 {
-  Ref<FEConvolveMatrix> FEConvolveMatrix::Create(const IntSize &kernelSize, float divisor, float bias,
-                                                 const IntPoint &targetOffset, EdgeModeType edgeMode,
-                                                 const FloatPoint &kernelUnitLength, bool preserveAlpha,
+  Ref<FEConvolveMatrix> FEConvolveMatrix::Create(const SizeI &kernelSize, float divisor, float bias,
+                                                 const PointI &targetOffset, EdgeModeType edgeMode,
+                                                 const PointF &kernelUnitLength, bool preserveAlpha,
                                                  const List<float> &kernelMatrix,
                                                  const DestinationColorSpace &colorSpace) noexcept
   {
@@ -39,9 +39,9 @@ namespace krys::boo
                                           preserveAlpha, kernelMatrix, colorSpace));
   }
 
-  FEConvolveMatrix::FEConvolveMatrix(const IntSize &kernelSize, float divisor, float bias,
-                                     const IntPoint &targetOffset, EdgeModeType edgeMode,
-                                     const FloatPoint &kernelUnitLength, bool preserveAlpha,
+  FEConvolveMatrix::FEConvolveMatrix(const SizeI &kernelSize, float divisor, float bias,
+                                     const PointI &targetOffset, EdgeModeType edgeMode,
+                                     const PointF &kernelUnitLength, bool preserveAlpha,
                                      const List<float> &kernelMatrix,
                                      const DestinationColorSpace &colorSpace) noexcept
       : FilterEffect(FilterEffect::Type::FEConvolveMatrix, colorSpace), _kernelSize(kernelSize),
@@ -50,7 +50,7 @@ namespace krys::boo
   {
     krys_debug_assert(_kernelSize.Width() > 0);
     krys_debug_assert(_kernelSize.Height() > 0);
-    krys_debug_assert(IntRect(IntPoint(), kernelSize).Contains(targetOffset));
+    krys_debug_assert(RectI(PointI(), kernelSize).Contains(targetOffset));
   }
 
   bool FEConvolveMatrix::operator==(const FEConvolveMatrix &other) const noexcept
@@ -61,7 +61,7 @@ namespace krys::boo
            && _kernelMatrix == other._kernelMatrix;
   }
 
-  void FEConvolveMatrix::SetKernelSize(const IntSize &kernelSize) noexcept
+  void FEConvolveMatrix::SetKernelSize(const SizeI &kernelSize) noexcept
   {
     krys_debug_assert(kernelSize.Width() > 0);
     krys_debug_assert(kernelSize.Height() > 0);
@@ -94,7 +94,7 @@ namespace krys::boo
     return true;
   }
 
-  bool FEConvolveMatrix::SetTargetOffset(const IntPoint &targetOffset) noexcept
+  bool FEConvolveMatrix::SetTargetOffset(const PointI &targetOffset) noexcept
   {
     if (_targetOffset == targetOffset)
     {
@@ -114,7 +114,7 @@ namespace krys::boo
     return true;
   }
 
-  bool FEConvolveMatrix::SetKernelUnitLength(const FloatPoint &kernelUnitLength) noexcept
+  bool FEConvolveMatrix::SetKernelUnitLength(const PointF &kernelUnitLength) noexcept
   {
     krys_debug_assert(kernelUnitLength.X() > 0);
     krys_debug_assert(kernelUnitLength.Y() > 0);
@@ -136,8 +136,8 @@ namespace krys::boo
     return true;
   }
 
-  FloatRect FEConvolveMatrix::CalculateImageRect(const Filter &filter, Span<const FloatRect>,
-                                                 const FloatRect &primitiveSubregion) const noexcept
+  RectF FEConvolveMatrix::CalculateImageRect(const Filter &filter, Span<const RectF>,
+                                             const RectF &primitiveSubregion) const noexcept
   {
     return filter.MaxEffectRect(primitiveSubregion);
   }

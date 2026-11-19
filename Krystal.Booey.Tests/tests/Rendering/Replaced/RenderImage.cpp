@@ -170,7 +170,7 @@ namespace krys::boo::tests
         Fixture =
           CreateUnique<PageInFrameFixture>(u8"<style>body{margin:0}</style><img id=i "
                                              + utf8_string(attributes) + u8" src='file:///image.png'>",
-                                           IntSize(500, 500));
+                                           SizeI(500, 500));
         (void)Fixture->Document->UpdateLayout();
         RunNetworkingTasks();
       }

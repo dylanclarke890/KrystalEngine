@@ -22,11 +22,11 @@
 
 #include "Krystal.Booey/Rendering/Line/LegacyInlineTextBox.hpp"
 
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Rendering/Line/LegacyRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 
@@ -114,7 +114,7 @@ namespace krys::boo
   LayoutRect SnappedSelectionRect(const LayoutRect &selectionRect, float logicalRight,
                                   WritingMode writingMode) noexcept
   {
-    auto snappedSelectionRect = EnclosingIntRect(selectionRect);
+    auto snappedSelectionRect = EnclosingRectI(selectionRect);
     LayoutUnit logicalWidth {snappedSelectionRect.Width()};
     if (static_cast<float>(snappedSelectionRect.X()) > logicalRight)
     {

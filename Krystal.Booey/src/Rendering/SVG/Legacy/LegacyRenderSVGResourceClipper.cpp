@@ -80,7 +80,7 @@ namespace krys::boo
 
   void LegacyRenderSVGResourceClipper::RemoveAllClientsFromCache() noexcept
   {
-    _clipBoundaries.fill(FloatRect {});
+    _clipBoundaries.fill(RectF {});
     _clipperMap.clear();
   }
 
@@ -109,7 +109,7 @@ namespace krys::boo
   auto LegacyRenderSVGResourceClipper::PathOnlyClipping(GraphicsContext &context,
                                                         const RenderElement &renderer,
                                                         const AffineTransform &animatedLocalTransform,
-                                                        const FloatRect &objectBoundingBox,
+                                                        const RectF &objectBoundingBox,
                                                         float usedZoom) noexcept -> EnumSet<ApplyResult>
   {
     // If the current clip-path gets clipped itself, we have to fall back to masking.
@@ -205,7 +205,7 @@ namespace krys::boo
     // The SVG specification wants us to clip everything, if clip-path doesn't have a child.
     if (clipPath.IsEmpty())
     {
-      clipPath.AddRect(FloatRect());
+      clipPath.AddRect(RectF());
     }
 
     EnumSet<ApplyResult> result = {ApplyResult::ResourceApplied};
@@ -227,16 +227,16 @@ namespace krys::boo
 
   ClipperData::Inputs LegacyRenderSVGResourceClipper::ComputeInputs(const GraphicsContext &context,
                                                                     const RenderElement &renderer,
-                                                                    const FloatRect &objectBoundingBox,
-                                                                    const FloatRect &clippedContentBounds,
+                                                                    const RectF &objectBoundingBox,
+                                                                    const RectF &clippedContentBounds,
                                                                     float usedZoom) noexcept
   {
     AffineTransform absoluteTransform =
       SVGRenderingContext::CalculateTransformationToOutermostCoordinateSystem(renderer);
 
     // Ignore 2D rotation, as it doesn't affect the size of the mask.
-    FloatSize scale(static_cast<float>(absoluteTransform.XScale()),
-                    static_cast<float>(absoluteTransform.YScale()));
+    SizeF scale(static_cast<float>(absoluteTransform.XScale()),
+                static_cast<float>(absoluteTransform.YScale()));
 
     // Determine scale factor for the clipper. The size of intermediate ImageBuffers shouldn't be bigger than
     // kMaxFilterSize.
@@ -247,8 +247,8 @@ namespace krys::boo
 
   auto LegacyRenderSVGResourceClipper::ApplyClippingToContext(GraphicsContext &context,
                                                               RenderElement &renderer,
-                                                              const FloatRect &objectBoundingBox,
-                                                              const FloatRect &clippedContentBounds,
+                                                              const RectF &objectBoundingBox,
+                                                              const RectF &clippedContentBounds,
                                                               float usedZoom) noexcept -> EnumSet<ApplyResult>
   {
     AffineTransform animatedLocalTransform = ClipPathElement().AnimatedLocalTransform();
@@ -324,7 +324,7 @@ namespace krys::boo
   }
 
   bool LegacyRenderSVGResourceClipper::DrawContentIntoMaskImage(ImageBuffer &maskImageBuffer,
-                                                                const FloatRect &objectBoundingBox,
+                                                                const RectF &objectBoundingBox,
                                                                 float usedZoom) noexcept
   {
     GraphicsContext &maskContext = maskImageBuffer.Context();
@@ -441,8 +441,8 @@ namespace krys::boo
     clipBoundaries = ClipPathElement().AnimatedLocalTransform().MapRect(clipBoundaries);
   }
 
-  bool LegacyRenderSVGResourceClipper::HitTestClipContent(const FloatRect &objectBoundingBox,
-                                                          const FloatPoint &nodeAtPoint) noexcept
+  bool LegacyRenderSVGResourceClipper::HitTestClipContent(const RectF &objectBoundingBox,
+                                                          const PointF &nodeAtPoint) noexcept
   {
     static SVGVisitedRendererTracking::VisitedSet visitedSet;
 
@@ -454,7 +454,7 @@ namespace krys::boo
 
     SVGVisitedRendererTracking::Scope recursionScope(recursionTracking, *this);
 
-    FloatPoint point = nodeAtPoint;
+    PointF point = nodeAtPoint;
     if (!SVGRenderSupport::PointInClippingArea(*this, point))
     {
       return false;
@@ -486,7 +486,7 @@ namespace krys::boo
       HitTestResult result {LayoutPoint {}};
       HitTestRequest request(HitTestSource::User, {HitTestRequest::Type::SVGClipContent,
                                                    HitTestRequest::Type::DisallowUserAgentShadowContent});
-      if (renderer->NodeAtFloatPoint(request, result, point, HitTestForeground))
+      if (renderer->NodeAtPointF(request, result, point, HitTestForeground))
       {
         return true;
       }
@@ -495,7 +495,7 @@ namespace krys::boo
     return false;
   }
 
-  FloatRect LegacyRenderSVGResourceClipper::ResourceBoundingBox(
+  RectF LegacyRenderSVGResourceClipper::ResourceBoundingBox(
     const RenderObject &object, RepaintRectCalculation repaintRectCalculation) noexcept
   {
     // Resource was not layouted yet. Give back the boundingBox of the object.
@@ -518,7 +518,7 @@ namespace krys::boo
 
     if (ClipPathElement().ClipPathUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
     {
-      FloatRect objectBoundingBox = object.ObjectBoundingBox();
+      RectF objectBoundingBox = object.ObjectBoundingBox();
       AffineTransform transform;
       transform.Translate(objectBoundingBox.Location());
       transform.Scale(objectBoundingBox.Size());

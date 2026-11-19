@@ -202,9 +202,9 @@ namespace krys::boo
     {
       r = box->FrameRect();
     }
-    // FIXME: Convert layout test results to report sub-pixel values, in the meantime using enclosingIntRect
+    // FIXME: Convert layout test results to report sub-pixel values, in the meantime using enclosingRectI
     // for consistency with old results.
-    ts << ' ' << EnclosingIntRect(r);
+    ts << ' ' << EnclosingRectI(r);
 
     // The SVG painting features and visual overflow of the layer-based SVG renderers (RenderSVGModelObject)
     // aren't written: there are none, and the legacy ones write theirs (SVGRenderTreeAsText.cpp).
@@ -667,9 +667,9 @@ namespace krys::boo
                     LayerPaintPhase paintPhase = LayerPaintPhaseAll,
                     EnumSet<RenderAsTextFlag> behavior = {}) noexcept
     {
-      WriteLayerUsingGeometryType<IntRect>(ts, layer, SnappedIntRect(layerBounds),
-                                           SnappedIntRect(backgroundClipRect), SnappedIntRect(clipRect),
-                                           paintPhase, behavior);
+      WriteLayerUsingGeometryType<RectI>(ts, layer, SnappedRectI(layerBounds),
+                                         SnappedRectI(backgroundClipRect), SnappedRectI(clipRect), paintPhase,
+                                         behavior);
     }
 
     void WriteLayerRenderers(TextStream &ts, const RenderLayer &layer, LayerPaintPhase paintPhase,
@@ -699,8 +699,8 @@ namespace krys::boo
                                                      rootLayer.GetRenderBox()->LayoutOverflowRect().MaxX()));
         paintDirtyRect.SetHeight(std::max<LayoutUnit>(paintDirtyRect.Height(),
                                                       rootLayer.GetRenderBox()->LayoutOverflowRect().MaxY()));
-        layer.SetSize(layer.Size().ExpandedTo(
-          SnappedIntSize(MaxLayoutOverflow(layer.GetRenderBox()), LayoutPoint(0, 0))));
+        layer.SetSize(
+          layer.Size().ExpandedTo(SnappedSizeI(MaxLayoutOverflow(layer.GetRenderBox()), LayoutPoint(0, 0))));
         layer.SetNeedsPositionUpdate();
       }
 

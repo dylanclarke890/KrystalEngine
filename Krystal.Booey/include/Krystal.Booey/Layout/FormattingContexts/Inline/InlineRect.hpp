@@ -70,7 +70,7 @@ namespace krys::boo::layout
     {
     }
 
-    InlineRect(const FloatRect &rect) noexcept : InlineRect(rect.Y(), rect.X(), rect.Width(), rect.Height())
+    InlineRect(const RectF &rect) noexcept : InlineRect(rect.Y(), rect.X(), rect.Width(), rect.Height())
     {
     }
 

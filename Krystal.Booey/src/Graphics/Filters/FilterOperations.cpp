@@ -26,8 +26,8 @@
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/Filters/FEGaussianBlur.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Rendering/Style/DropShadowFilterOperationWithStyleColor.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 
 namespace krys::boo
 {
@@ -75,7 +75,7 @@ namespace krys::boo
         {
           const auto &blurOperation = Downcast<BlurFilterOperation>(*operation);
           float stdDeviation = blurOperation.StdDeviation();
-          IntSize outsetSize = FEGaussianBlur::CalculateOutsetSize({stdDeviation, stdDeviation});
+          SizeI outsetSize = FEGaussianBlur::CalculateOutsetSize({stdDeviation, stdDeviation});
           IntOutsets outsets {outsetSize.Height(), outsetSize.Width(), outsetSize.Height(),
                               outsetSize.Width()};
           totalOutsets += outsets;
@@ -86,7 +86,7 @@ namespace krys::boo
         {
           const auto &dropShadowOperation = Downcast<DropShadowFilterOperationBase>(*operation);
           auto stdDeviation = static_cast<float>(dropShadowOperation.StdDeviation());
-          IntSize outsetSize = FEGaussianBlur::CalculateOutsetSize({stdDeviation, stdDeviation});
+          SizeI outsetSize = FEGaussianBlur::CalculateOutsetSize({stdDeviation, stdDeviation});
 
           int top = std::max(0, outsetSize.Height() - dropShadowOperation.Y());
           int right = std::max(0, outsetSize.Width() + dropShadowOperation.X());

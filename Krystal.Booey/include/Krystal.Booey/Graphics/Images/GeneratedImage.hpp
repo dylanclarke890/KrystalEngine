@@ -33,10 +33,10 @@ namespace krys::boo
   class GeneratedImage : public Image
   {
   private:
-    FloatSize _size;
+    SizeF _size;
 
   public:
-    void SetContainerSize(const FloatSize &size) noexcept override
+    void SetContainerSize(const SizeF &size) noexcept override
     {
       _size = size;
     }
@@ -57,9 +57,9 @@ namespace krys::boo
     }
 
     void ComputeIntrinsicDimensions(float &intrinsicWidth, float &intrinsicHeight,
-                                    FloatSize &intrinsicRatio) noexcept override;
+                                    SizeF &intrinsicRatio) noexcept override;
 
-    KRYS_NODISCARD FloatSize
+    KRYS_NODISCARD SizeF
       Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept override
     {
       return _size;
@@ -68,12 +68,12 @@ namespace krys::boo
   protected:
     GeneratedImage() noexcept = default;
 
-    ImageDrawResult Draw(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect,
+    ImageDrawResult Draw(GraphicsContext &, const RectF &dstRect, const RectF &srcRect,
                          ImagePaintingOptions = {}) noexcept override = 0;
 
-    void DrawPattern(GraphicsContext &, const FloatRect &destRect, const FloatRect &srcRect,
-                     const AffineTransform &patternTransform, const FloatPoint &phase,
-                     const FloatSize &spacing, ImagePaintingOptions = {}) noexcept override = 0;
+    void DrawPattern(GraphicsContext &, const RectF &destRect, const RectF &srcRect,
+                     const AffineTransform &patternTransform, const PointF &phase, const SizeF &spacing,
+                     ImagePaintingOptions = {}) noexcept override = 0;
 
     // FIXME: Implement this to be less conservative.
     KRYS_NODISCARD bool CurrentFrameKnownToBeOpaque() const noexcept override

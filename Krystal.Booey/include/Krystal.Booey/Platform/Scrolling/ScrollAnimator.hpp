@@ -32,10 +32,10 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Animation/TimingFunction.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -57,9 +57,9 @@ namespace krys::boo
     ScrollableArea &_scrollableArea;
     bool _isAnimating {false};
     ScrollType _scrollType {ScrollType::Programmatic};
-    FloatPoint _startOffset;
-    FloatPoint _currentOffset;
-    FloatPoint _destinationOffset;
+    PointF _startOffset;
+    PointF _currentOffset;
+    PointF _destinationOffset;
     /// @brief When the animation's first frame was: its time starts then, so it moves from the frame after.
     Maybe<MonotonicTime::duration> _startTime;
     double _durationInSeconds {0};
@@ -75,7 +75,7 @@ namespace krys::boo
 
     /// @brief Scrolls to @p destinationOffset, from where a running animation has got to.
     /// @return Whether it's animating: false if it's already there.
-    bool ScrollToOffsetWithAnimation(const FloatPoint &destinationOffset, ScrollType scrollType) noexcept;
+    bool ScrollToOffsetWithAnimation(const PointF &destinationOffset, ScrollType scrollType) noexcept;
 
     void StopAnimation() noexcept
     {
@@ -87,7 +87,7 @@ namespace krys::boo
       return _isAnimating;
     }
 
-    KRYS_NODISCARD const FloatPoint &DestinationOffset() const noexcept
+    KRYS_NODISCARD const PointF &DestinationOffset() const noexcept
     {
       return _destinationOffset;
     }
@@ -114,13 +114,13 @@ namespace krys::boo
     void ClearSnapOffsetsInfo() noexcept;
 
     /// @brief @p offset, moved to where a scroll to it snaps.
-    KRYS_NODISCARD FloatPoint ScrollOffsetAdjustedForSnapping(
-      const FloatPoint &offset, ScrollSnapPointSelectionMethod method) const noexcept;
+    KRYS_NODISCARD PointF ScrollOffsetAdjustedForSnapping(
+      const PointF &offset, ScrollSnapPointSelectionMethod method) const noexcept;
 
     /// @brief The offset on @p axis of the snap position for a scroll to @p destination.
     /// @param velocity The scroll's direction on @p axis: 0 for the closest position.
     /// @param originalOffset Where a directional scroll started on @p axis.
-    KRYS_NODISCARD float AdjustedScrollDestination(ScrollEventAxis axis, const FloatPoint &destination,
+    KRYS_NODISCARD float AdjustedScrollDestination(ScrollEventAxis axis, const PointF &destination,
                                                    float velocity,
                                                    Maybe<float> originalOffset = null) const noexcept;
 

@@ -25,11 +25,11 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Values/Primitives/Position.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapper.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 
 namespace krys::boo::style
 {
@@ -83,7 +83,7 @@ namespace krys::boo::style
     {
     }
 
-    Position(FloatPoint point) noexcept : X {PositionX::Fixed {point.X()}}, Y {PositionY::Fixed {point.Y()}}
+    Position(PointF point) noexcept : X {PositionX::Fixed {point.X()}}, Y {PositionY::Fixed {point.Y()}}
     {
     }
 
@@ -202,9 +202,9 @@ namespace krys::boo::style
   // MARK: - Evaluation
 
   template <>
-  struct Evaluation<Position, FloatPoint>
+  struct Evaluation<Position, PointF>
   {
-    KRYS_NODISCARD FloatPoint operator()(const Position &, FloatSize, ZoomNeeded) noexcept;
+    KRYS_NODISCARD PointF operator()(const Position &, SizeF, ZoomNeeded) noexcept;
   };
 }
 

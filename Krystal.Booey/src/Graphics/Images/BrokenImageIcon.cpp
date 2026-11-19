@@ -11,8 +11,8 @@ namespace krys::boo
     return icon;
   }
 
-  ImageDrawResult BrokenImageIcon::Draw(GraphicsContext &context, const FloatRect &dstRect,
-                                        const FloatRect &srcRect, ImagePaintingOptions options) noexcept
+  ImageDrawResult BrokenImageIcon::Draw(GraphicsContext &context, const RectF &dstRect, const RectF &srcRect,
+                                        ImagePaintingOptions options) noexcept
   {
     GraphicsContextStateSaver stateSaver(context);
     context.SetCompositeOperation(options.GetCompositeOperator(), options.GetBlendMode());
@@ -31,10 +31,10 @@ namespace krys::boo
     constexpr auto hillColor = SRGBA<uint8> {84, 150, 98};
     constexpr auto sunColor = SRGBA<uint8> {236, 183, 58};
 
-    context.FillRect(FloatRect(2, 1, 12, 14), sheetColor);
-    context.FillRect(FloatRect(3.5f, 2.5f, 9, 11), skyColor);
+    context.FillRect(RectF(2, 1, 12, 14), sheetColor);
+    context.FillRect(RectF(3.5f, 2.5f, 9, 11), skyColor);
     context.SetFillColor(sunColor);
-    context.FillEllipse(FloatRect(9, 3.5f, 2.5f, 2.5f));
+    context.FillEllipse(RectF(9, 3.5f, 2.5f, 2.5f));
 
     Path hill;
     hill.MoveTo({3.5f, 13.5f});
@@ -49,7 +49,7 @@ namespace krys::boo
 
     context.SetStrokeColor(edgeColor);
     context.SetStrokeThickness(1);
-    context.StrokeRect(FloatRect(2.5f, 1.5f, 11, 13), 1);
+    context.StrokeRect(RectF(2.5f, 1.5f, 11, 13), 1);
 
     // The tear: a jagged gap from edge to edge, in the sheet's colour.
     Path tear;

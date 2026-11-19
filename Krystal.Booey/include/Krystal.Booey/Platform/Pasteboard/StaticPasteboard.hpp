@@ -97,7 +97,7 @@ namespace krys::boo
 
     void WritePlainText(utf8_stringview text, SmartReplaceOption smartReplaceOption) noexcept final;
 
-    void SetDragImage(DragImage, const IntPoint &) noexcept final
+    void SetDragImage(DragImage, const PointI &) noexcept final
     {
     }
 

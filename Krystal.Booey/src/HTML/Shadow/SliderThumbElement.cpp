@@ -260,11 +260,9 @@ namespace krys::boo::html
     bool isInlineFlipped = thumbRenderer->GetWritingMode().IsInlineFlipped()
                            || (isVertical && thumbRenderer->GetWritingMode().IsHorizontal());
 
-    auto offset =
-      inputRenderer->AbsoluteToLocal(FloatPoint(absolutePoint), MapCoordinatesMode::UseTransforms);
+    auto offset = inputRenderer->AbsoluteToLocal(PointF(absolutePoint), MapCoordinatesMode::UseTransforms);
     auto trackBoundingBox =
-      trackRenderer
-        ->LocalToContainerQuad(FloatQuad(FloatRect({}, FloatSize(trackRenderer->Size()))), inputRenderer)
+      trackRenderer->LocalToContainerQuad(FloatQuad(RectF({}, SizeF(trackRenderer->Size()))), inputRenderer)
         .EnclosingBoundingBox();
 
     LayoutUnit trackLength;
@@ -404,7 +402,7 @@ namespace krys::boo::html
       {
         auto location = mouseEvent->AbsoluteLocation();
         SetPositionFromPoint(
-          LayoutPoint(FloatPoint(static_cast<float>(location.X()), static_cast<float>(location.Y()))));
+          LayoutPoint(PointF(static_cast<float>(location.X()), static_cast<float>(location.Y()))));
       }
       return;
     }
@@ -522,7 +520,7 @@ namespace krys::boo::html
     }
 
     auto point = touches->Item(0)->AbsoluteLocation();
-    auto layoutPoint = LayoutPoint(FloatPoint(static_cast<float>(point.X()), static_cast<float>(point.Y())));
+    auto layoutPoint = LayoutPoint(PointF(static_cast<float>(point.X()), static_cast<float>(point.Y())));
     if (type == event_names::TouchStart)
     {
       _touchStartPoint = point;

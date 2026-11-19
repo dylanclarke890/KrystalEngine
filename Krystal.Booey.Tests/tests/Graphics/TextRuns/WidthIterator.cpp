@@ -188,7 +188,7 @@ namespace krys::boo::tests
       CHECK(buffer.IsEmpty());
       buffer.Add(1, font, 10, 0);
       buffer.Add(2, font, 20, 1);
-      buffer.Add(3, font, MakeGlyphBufferAdvance(30, 0), 2, FloatPoint {1, 2});
+      buffer.Add(3, font, MakeGlyphBufferAdvance(30, 0), 2, PointF {1, 2});
       CHECK(buffer.Size() == 3);
       CHECK(buffer.CheckedStringOffsetAt(2, 3) == 2u);
       CHECK_FALSE(buffer.CheckedStringOffsetAt(2, 2));

@@ -630,7 +630,7 @@ namespace krys::ui::tests
                 auto select = view.Document().GetElementById(u8"plain");
                 REQUIRE(select);
                 auto box = select->GetBoundingClientRect();
-                boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+                PointI inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
                 view.MousePressed(inside, pal::MouseButton::Left);
                 view.MouseReleased(inside, pal::MouseButton::Left);
                 REQUIRE(Downcast<boo::HTMLSelectElement>(*select).IsPickerOpen());
@@ -647,7 +647,7 @@ namespace krys::ui::tests
                 auto select = view.Document().GetElementById(u8"fruit");
                 REQUIRE(select);
                 auto box = select->GetBoundingClientRect();
-                boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+                PointI inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
                 view.MousePressed(inside, pal::MouseButton::Left);
                 view.MouseReleased(inside, pal::MouseButton::Left);
                 REQUIRE(view.ShownOverlay());
@@ -725,7 +725,7 @@ namespace krys::ui::tests
                 auto select = view.Document().GetElementById(u8"fruit");
                 REQUIRE(select);
                 auto box = select->GetBoundingClientRect();
-                boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+                PointI inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
                 view.MousePressed(inside, pal::MouseButton::Left);
                 view.MouseReleased(inside, pal::MouseButton::Left);
                 REQUIRE(view.ShownOverlay());
@@ -846,7 +846,7 @@ namespace krys::ui::tests
         auto select = view.Document().GetElementById(u8"fruit");
         REQUIRE(select);
         auto box = select->GetBoundingClientRect();
-        boo::IntPoint inside((static_cast<int32>(box->X()) + 5) * 2, (static_cast<int32>(box->Y()) + 5) * 2);
+        PointI inside((static_cast<int32>(box->X()) + 5) * 2, (static_cast<int32>(box->Y()) + 5) * 2);
         view.MousePressed(inside, pal::MouseButton::Left);
         view.MouseReleased(inside, pal::MouseButton::Left);
         REQUIRE(view.ShownOverlay());

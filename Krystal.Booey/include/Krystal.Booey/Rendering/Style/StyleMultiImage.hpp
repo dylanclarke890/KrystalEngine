@@ -78,18 +78,18 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ErrorOccurred() const noexcept final;
 
-    KRYS_NODISCARD FloatSize ImageSize(const RenderElement *, float multiplier) const noexcept final;
+    KRYS_NODISCARD SizeF ImageSize(const RenderElement *, float multiplier) const noexcept final;
 
     KRYS_NODISCARD bool ImageHasRelativeWidth() const noexcept final;
 
     KRYS_NODISCARD bool ImageHasRelativeHeight() const noexcept final;
 
     void ComputeIntrinsicDimensions(const RenderElement *, float &intrinsicWidth, float &intrinsicHeight,
-                                    FloatSize &intrinsicRatio) noexcept final;
+                                    SizeF &intrinsicRatio) noexcept final;
 
     KRYS_NODISCARD bool UsesImageContainerSize() const noexcept final;
 
-    void SetContainerContextForRenderer(const RenderElement &, const FloatSize &, float) noexcept final;
+    void SetContainerContextForRenderer(const RenderElement &, const SizeF &, float) noexcept final;
 
     void AddClient(RenderElement &) noexcept final;
 
@@ -97,7 +97,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasClient(RenderElement &) const noexcept final;
 
-    KRYS_NODISCARD RefPtr<Image> GetImage(const RenderElement *, const FloatSize &, const GraphicsContext &,
+    KRYS_NODISCARD RefPtr<Image> GetImage(const RenderElement *, const SizeF &, const GraphicsContext &,
                                           bool isForFirstLine) const noexcept final;
 
     KRYS_NODISCARD float ImageScaleFactor() const noexcept final;

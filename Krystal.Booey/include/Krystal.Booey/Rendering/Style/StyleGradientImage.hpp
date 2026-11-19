@@ -65,12 +65,12 @@ namespace krys::boo
     {
     }
 
-    KRYS_NODISCARD RefPtr<Image> GetImage(const RenderElement *, const FloatSize &, const GraphicsContext &,
+    KRYS_NODISCARD RefPtr<Image> GetImage(const RenderElement *, const SizeF &, const GraphicsContext &,
                                           bool isForFirstLine) const noexcept final;
 
     KRYS_NODISCARD bool KnownToBeOpaque(const RenderElement &) const noexcept final;
 
-    KRYS_NODISCARD FloatSize FixedSize(const RenderElement &) const noexcept final;
+    KRYS_NODISCARD SizeF FixedSize(const RenderElement &) const noexcept final;
   };
 }
 

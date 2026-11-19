@@ -65,7 +65,7 @@ namespace krys::boo
 
     void SetData(const SharedBuffer &data, bool allDataReceived) noexcept final;
 
-    bool SetSize(const IntSize &size) noexcept final;
+    bool SetSize(const SizeI &size) noexcept final;
 
     KRYS_NODISCARD size_t FrameCount() const noexcept final;
 

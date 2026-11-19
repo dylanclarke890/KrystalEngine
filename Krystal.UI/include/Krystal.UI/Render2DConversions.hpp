@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/Paths/WindRule.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Gfx/Render2D/Gradient2D.hpp"
 #include "Krystal.Gfx/Render2D/Path2D.hpp"
 #include "Krystal.Gfx/Render2D/Rect2D.hpp"
@@ -21,12 +21,12 @@ namespace krys::boo
 
 namespace krys::ui
 {
-  KRYS_NODISCARD constexpr gfx::Rect2D ToRect2D(const boo::FloatRect &rect) noexcept
+  KRYS_NODISCARD constexpr gfx::Rect2D ToRect2D(const RectF &rect) noexcept
   {
     return {rect.X(), rect.Y(), rect.Width(), rect.Height()};
   }
 
-  KRYS_NODISCARD constexpr Vec2f ToVec2f(const boo::FloatPoint &point) noexcept
+  KRYS_NODISCARD constexpr Vec2f ToVec2f(const PointF &point) noexcept
   {
     return {point.X(), point.Y()};
   }

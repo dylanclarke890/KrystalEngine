@@ -13,9 +13,9 @@ namespace krys::boo::tests
 {
   namespace
   {
-    KRYS_NODISCARD PlatformMouseEvent MouseEvent(PlatformEvent::Type type, IntPoint position) noexcept
+    KRYS_NODISCARD PlatformMouseEvent MouseEvent(PlatformEvent::Type type, PointI position) noexcept
     {
-      DoublePoint point(position.X(), position.Y());
+      PointD point(position.X(), position.Y());
       int32 clickCount = type == PlatformEvent::Type::MousePressed ? 1 : 0;
       return PlatformMouseEvent(
         point, point, type == PlatformEvent::Type::MouseMoved ? MouseButton::None : MouseButton::Left, type,
@@ -38,8 +38,8 @@ namespace krys::boo::tests
 
     auto &spinButton = Downcast<html::SpinButtonElement>(*number.InnerSpinButtonElement());
     auto bounds = spinButton.GetRenderBox()->AbsoluteBoundingBoxRect();
-    IntPoint upper(bounds.X() + bounds.Width() / 2, bounds.Y() + bounds.Height() / 4);
-    IntPoint lower(bounds.X() + bounds.Width() / 2, bounds.MaxY() - bounds.Height() / 4);
+    PointI upper(bounds.X() + bounds.Width() / 2, bounds.Y() + bounds.Height() / 4);
+    PointI lower(bounds.X() + bounds.Width() / 2, bounds.MaxY() - bounds.Height() / 4);
 
     // Moving over the upper half and pressing steps up, and focuses the field; the lower half steps down.
     (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, upper));
@@ -81,7 +81,7 @@ namespace krys::boo::tests
 
     auto &spinButton = Downcast<html::SpinButtonElement>(*number.InnerSpinButtonElement());
     auto bounds = spinButton.GetRenderBox()->AbsoluteBoundingBoxRect();
-    IntPoint upper(bounds.X() + bounds.Width() / 2, bounds.Y() + bounds.Height() / 4);
+    PointI upper(bounds.X() + bounds.Width() / 2, bounds.Y() + bounds.Height() / 4);
 
     // Pressing the spin button captures the mouse until it's released.
     (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, upper));
@@ -109,7 +109,7 @@ namespace krys::boo::tests
 
     auto &spinButton = Downcast<html::SpinButtonElement>(*number.InnerSpinButtonElement());
     auto bounds = spinButton.GetRenderBox()->AbsoluteBoundingBoxRect();
-    IntPoint upper(bounds.X() + bounds.Width() / 2, bounds.Y() + bounds.Height() / 4);
+    PointI upper(bounds.X() + bounds.Width() / 2, bounds.Y() + bounds.Height() / 4);
 
     (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, upper));
     (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, upper));

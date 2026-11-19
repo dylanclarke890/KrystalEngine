@@ -26,11 +26,11 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Events/PointerEventTypeNames.hpp"
-#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
 #include "Krystal.Booey/Page/MouseEventTypes.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformEvent.hpp"
 #include "Krystal.Booey/Platform/Events/PointerId.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
@@ -42,10 +42,10 @@ namespace krys::boo
   protected:
     MouseButton _button {MouseButton::None};
     SyntheticClickType _syntheticClickType {SyntheticClickType::NoTap};
-    DoublePoint _position;
-    DoublePoint _globalPosition;
-    DoublePoint _movementDelta;
-    DoublePoint _unadjustedMovementDelta;
+    PointD _position;
+    PointD _globalPosition;
+    PointD _movementDelta;
+    PointD _unadjustedMovementDelta;
     double _force {0};
     PenOrientation _penOrientation;
     boo::PointerId _pointerId {MousePointerId};
@@ -64,10 +64,10 @@ namespace krys::boo
     /// @param globalPosition The point in the screen's coordinates.
     /// @param buttons The buttons held, as the DOM's `buttons` bit set.
     /// @param force The pressure, from 0 to 1, for a pressure sensitive device.
-    PlatformMouseEvent(const DoublePoint &position, const DoublePoint &globalPosition, MouseButton button,
+    PlatformMouseEvent(const PointD &position, const PointD &globalPosition, MouseButton button,
                        PlatformEvent::Type type, int32 clickCount, EnumSet<PlatformEvent::Modifier> modifiers,
                        MonotonicTime::duration timestamp, uint16 buttons = 0,
-                       const DoublePoint &movementDelta = {}, double force = 0,
+                       const PointD &movementDelta = {}, double force = 0,
                        SyntheticClickType syntheticClickType = SyntheticClickType::NoTap,
                        boo::PointerId pointerId = MousePointerId,
                        DOMString pointerType = dom::MousePointerEventType()) noexcept
@@ -80,28 +80,28 @@ namespace krys::boo
 
     // This position is relative to the view. Use the view's windowToContents() to convert it to into the
     // contents of a given view.
-    KRYS_NODISCARD const DoublePoint &Position() const noexcept
+    KRYS_NODISCARD const PointD &Position() const noexcept
     {
       return _position;
     }
 
-    KRYS_NODISCARD const DoublePoint &GlobalPosition() const noexcept
+    KRYS_NODISCARD const PointD &GlobalPosition() const noexcept
     {
       return _globalPosition;
     }
 
-    KRYS_NODISCARD const DoublePoint &MovementDelta() const noexcept
+    KRYS_NODISCARD const PointD &MovementDelta() const noexcept
     {
       return _movementDelta;
     }
 
     // Unaccelerated pointer movement
-    KRYS_NODISCARD const DoublePoint &UnadjustedMovementDelta() const noexcept
+    KRYS_NODISCARD const PointD &UnadjustedMovementDelta() const noexcept
     {
       return _unadjustedMovementDelta;
     }
 
-    void SetUnadjustedMovementDelta(const DoublePoint &unadjustedMovementDelta) noexcept
+    void SetUnadjustedMovementDelta(const PointD &unadjustedMovementDelta) noexcept
     {
       _unadjustedMovementDelta = unadjustedMovementDelta;
     }

@@ -100,7 +100,7 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD inline bool ComputeInkOverflowForInlineLevelBox(const RenderStyle &style,
-                                                                   FloatRect &inkOverflow) noexcept
+                                                                   RectF &inkOverflow) noexcept
     {
       auto hasInkOverflow = false;
 
@@ -136,7 +136,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD inline bool ComputeInkOverflowForInlineBox(const InlineLevelBox &inlineBox,
                                                               const RenderStyle &style,
-                                                              FloatRect &inkOverflow) noexcept
+                                                              RectF &inkOverflow) noexcept
     {
       krys_debug_assert(inlineBox.IsInlineBox());
       auto hasInkOverflow = ComputeInkOverflowForInlineLevelBox(style, inkOverflow);
@@ -353,8 +353,8 @@ namespace krys::boo::layout
         .GeometryForBox(
           FormattingContext::GetInitialContainingBlock(Root()),
           InlineFormattingContext::EscapeReason::InkOverflowNeedsInitialContiningBlockForStrokeWidth);
-    _initialContaingBlockSize = CeiledIntSize(LayoutSize {initialContainingBlockGeometry.ContentBoxWidth(),
-                                                          initialContainingBlockGeometry.ContentBoxHeight()});
+    _initialContaingBlockSize = CeiledSizeI(LayoutSize {initialContainingBlockGeometry.ContentBoxWidth(),
+                                                        initialContainingBlockGeometry.ContentBoxHeight()});
   }
 
   InlineRect InlineDisplayContentBuilder::LogicalRectForInlineBoxOnBlockLine(
@@ -596,7 +596,7 @@ namespace krys::boo::layout
     auto isContentful = true;
     auto inkOverflow = [&]
     {
-      auto inkOverflow = FloatRect {borderBoxRect};
+      auto inkOverflow = RectF {borderBoxRect};
       auto &style = IsFirstFormattedLine() ? layoutBox.FirstLineStyle() : layoutBox.Style();
       (void)ComputeInkOverflowForInlineLevelBox(style, inkOverflow);
       // Atomic inline box contribute to their inline box parents ink overflow at all times (e.g.
@@ -667,7 +667,7 @@ namespace krys::boo::layout
     auto inkOverflow = [&]
     {
       auto &style = IsFirstFormattedLine() ? layoutBox.FirstLineStyle() : layoutBox.Style();
-      auto inkOverflow = FloatRect {inlineBoxBorderBox};
+      auto inkOverflow = RectF {inlineBoxBorderBox};
       _contentHasInkOverflow =
         ComputeInkOverflowForInlineBox(inlineBox, style, inkOverflow) || _contentHasInkOverflow;
       return inkOverflow;
@@ -913,12 +913,12 @@ namespace krys::boo::layout
         }
         auto &boxGeometry = GetFormattingContext().GeometryForBox(layoutBox);
         auto borderBoxLogicalTopLeft =
-          LayoutPoint {lineBox.LogicalRect().TopLeft() + FloatSize {logicalRect.Left(), logicalRect.Top()}};
+          LayoutPoint {lineBox.LogicalRect().TopLeft() + SizeF {logicalRect.Left(), logicalRect.Top()}};
         if (lineRun.IsInlineBoxStart() || lineRun.IsLineSpanningInlineBoxStart())
         {
           // Inline boxes need special (stretchy) box geometry handling.
           SetInlineBoxGeometry(lineRun.LayoutBox(), boxGeometry,
-                               {FloatPoint {borderBoxLogicalTopLeft}, logicalRect.Size()},
+                               {PointF {borderBoxLogicalTopLeft}, logicalRect.Size()},
                                lineBox.InlineLevelBoxFor(lineRun).IsFirstBox());
           return;
         }
@@ -1069,7 +1069,7 @@ namespace krys::boo::layout
     krys_debug_assert(inlineBox);
     auto computeInkOverflow = [&]
     {
-      auto inkOverflow = FloatRect {displayBox.VisualRectIgnoringBlockDirection()};
+      auto inkOverflow = RectF {displayBox.VisualRectIgnoringBlockDirection()};
       _contentHasInkOverflow =
         ComputeInkOverflowForInlineBox(
           *inlineBox, IsFirstFormattedLine() ? layoutBox.FirstLineStyle() : layoutBox.Style(), inkOverflow)
@@ -1432,7 +1432,7 @@ namespace krys::boo::layout
           {
             visualRect.SetTop(GetConstraints().VisualLeft().ToFloat());
           }
-          boxes[index].SetRect(FloatRect(visualRect), FloatRect(visualRect));
+          boxes[index].SetRect(RectF(visualRect), RectF(visualRect));
         }
       }
     }
@@ -1828,7 +1828,7 @@ namespace krys::boo::layout
         // FIXME: We may wanna go back to full logical geometry on BoxGeometry (instead of this with visual
         // left) and resolve it when render tree needs it.
         auto borderBoxLogicalRect = InlineRect {
-          FloatRect {BoxGeometry::BorderBoxRect(GetFormattingContext().GeometryForBox(annotationBox))}};
+          RectF {BoxGeometry::BorderBoxRect(GetFormattingContext().GeometryForBox(annotationBox))}};
         borderBoxLogicalRect.SetTop(borderBoxLogicalRect.Top() - lineBoxLogicalRect.Top());
         auto visualRect = MapInlineRectLogicalToVisual(borderBoxLogicalRect, lineBoxLogicalRect, writingMode);
         if (writingMode.IsLineOverLeft())

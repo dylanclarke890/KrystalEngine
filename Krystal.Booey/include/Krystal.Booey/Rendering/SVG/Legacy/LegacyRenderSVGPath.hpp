@@ -37,7 +37,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(LegacyRenderSVGPath);
 
   private:
-    List<FloatPoint> _zeroLengthLinecapLocations;
+    List<PointF> _zeroLengthLinecapLocations;
     List<MarkerPosition> _markerPositions;
 
   public:
@@ -47,8 +47,8 @@ namespace krys::boo
 
     void DrawMarkers(PaintInfo &) noexcept final;
 
-    KRYS_NODISCARD FloatRect AdjustStrokeBoundingBoxForMarkersAndZeroLengthLinecaps(
-      RepaintRectCalculation, FloatRect strokeBoundingBox) const noexcept override;
+    KRYS_NODISCARD RectF AdjustStrokeBoundingBoxForMarkersAndZeroLengthLinecaps(
+      RepaintRectCalculation, RectF strokeBoundingBox) const noexcept override;
 
   private:
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
@@ -61,16 +61,16 @@ namespace krys::boo
     void StrokeShape(GraphicsContext &) const noexcept override;
 
     KRYS_NODISCARD bool
-      ShapeDependentStrokeContains(const FloatPoint &,
+      ShapeDependentStrokeContains(const PointF &,
                                    PointCoordinateSpace = GlobalCoordinateSpace) noexcept override;
 
     void StyleDidChange(style::Difference, const RenderStyle *) noexcept final;
 
     KRYS_NODISCARD bool ShouldStrokeZeroLengthSubpath() const noexcept;
 
-    KRYS_NODISCARD Path *ZeroLengthLinecapPath(const FloatPoint &) const noexcept;
+    KRYS_NODISCARD Path *ZeroLengthLinecapPath(const PointF &) const noexcept;
 
-    KRYS_NODISCARD static FloatRect ZeroLengthSubpathRect(const FloatPoint &, float) noexcept;
+    KRYS_NODISCARD static RectF ZeroLengthSubpathRect(const PointF &, float) noexcept;
 
     void UpdateZeroLengthSubpaths() noexcept;
 
@@ -80,7 +80,7 @@ namespace krys::boo
 
     void ProcessMarkerPositions() noexcept;
 
-    KRYS_NODISCARD FloatRect MarkerRect(RepaintRectCalculation, float strokeWidth) const noexcept;
+    KRYS_NODISCARD RectF MarkerRect(RepaintRectCalculation, float strokeWidth) const noexcept;
 
     KRYS_NODISCARD bool IsRenderingDisabled() const noexcept override;
   };

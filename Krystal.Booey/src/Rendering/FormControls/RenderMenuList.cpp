@@ -407,9 +407,9 @@ namespace krys::boo
 
     // Compute the top left taking transforms into account, but use the actual width of the element to size
     // the popup.
-    FloatPoint absTopLeft = LocalToAbsolute(FloatPoint(), {MapCoordinatesMode::UseTransforms});
-    IntRect absBounds = AbsoluteBoundingBoxRectIgnoringTransforms();
-    absBounds.SetLocation(RoundedIntPoint(absTopLeft));
+    PointF absTopLeft = LocalToAbsolute(PointF(), {MapCoordinatesMode::UseTransforms});
+    RectI absBounds = AbsoluteBoundingBoxRectIgnoringTransforms();
+    absBounds.SetLocation(RoundedPointI(absTopLeft));
     auto &select = SelectElement();
     // May destroy `this`.
     RefPtr<PopupMenu> popup = _popup;

@@ -104,7 +104,7 @@ namespace krys::boo
   }
 
   void AutoscrollController::StartPanScrolling(RenderBox &scrollable,
-                                               const IntPoint &lastKnownMousePosition) noexcept
+                                               const PointI &lastKnownMousePosition) noexcept
   {
     // We don't want to trigger the autoscroll or the panScroll if it's already active
     if (_autoscrollTimer.IsActive())
@@ -137,7 +137,7 @@ namespace krys::boo
   }
 
   void AutoscrollController::UpdatePanScrollState(LocalFrame &frame,
-                                                  const IntPoint &lastKnownMousePosition) noexcept
+                                                  const PointI &lastKnownMousePosition) noexcept
   {
     // Over the icon at the press there's no scrolling, so the cursor doesn't point anywhere.
     auto radius = LocalFrameView::NoPanScrollRadius;
@@ -196,10 +196,10 @@ namespace krys::boo
     StartAutoscrollTimer();
   }
 
-  void AutoscrollController::UpdateDragAndDrop(Node *dropTargetNode, const IntPoint &eventPosition,
+  void AutoscrollController::UpdateDragAndDrop(Node *dropTargetNode, const PointI &eventPosition,
                                                MonotonicTime::duration eventTime) noexcept
   {
-    IntSize offset;
+    SizeI offset;
     auto findDragAndDropScroller = [&]() -> RenderBox *
     {
       if (!dropTargetNode)
@@ -320,7 +320,7 @@ namespace krys::boo
         if (auto position = frame->GetEventHandler().LastKnownMousePosition())
         {
           // With the mouse out of the window its position says nothing: panning goes on as it was.
-          auto mousePosition = FlooredIntPoint(*position);
+          auto mousePosition = FlooredPointI(*position);
           if (mousePosition.X() >= 0 && mousePosition.Y() >= 0)
           {
             _panScrollMousePosition = mousePosition;

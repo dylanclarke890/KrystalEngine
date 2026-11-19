@@ -38,6 +38,7 @@
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
@@ -74,13 +75,11 @@ namespace krys::boo
   class AffineTransform;
   enum class Affinity : bool;
   class ControlPart;
-  class FloatPoint;
   class FloatQuad;
   class HitTestLocation;
   class HitTestRequest;
   class HitTestResult;
   enum class HitTestSource : bool;
-  class IntRect;
   class LayoutPoint;
   class LayoutRect;
   class LayoutSize;
@@ -460,7 +459,7 @@ namespace krys::boo
     {
     }
 
-    virtual void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept
+    virtual void ImageChanged(WrappedImagePtr, const RectI * = nullptr) noexcept
     {
     }
 
@@ -475,7 +474,7 @@ namespace krys::boo
     }
 
     virtual VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
-                                                       const IntRect *) noexcept;
+                                                       const RectI *) noexcept;
 
     KRYS_NODISCARD virtual VisibleInViewportState ImageVisibleInViewport(const Document &) const noexcept
     {
@@ -588,7 +587,7 @@ namespace krys::boo
         }
       }
 
-      void EncloseToIntRects() noexcept;
+      void EncloseToRectsI() noexcept;
 
       void Unite(const RepaintRects &other) noexcept
       {
@@ -629,7 +628,7 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutRect AbsoluteClippedOverflowRectForRenderTreeAsText() const noexcept;
 
-    KRYS_NODISCARD IntRect PixelSnappedAbsoluteClippedOverflowRect() const noexcept;
+    KRYS_NODISCARD RectI PixelSnappedAbsoluteClippedOverflowRect() const noexcept;
 
     KRYS_NODISCARD virtual LayoutRect ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
                                                           VisibleRectContext context) const noexcept;
@@ -652,8 +651,8 @@ namespace krys::boo
     KRYS_NODISCARD LayoutRect ComputeRectForRepaint(
       const LayoutRect &rect, const RenderLayerModelObject *repaintContainer) const noexcept;
 
-    KRYS_NODISCARD FloatRect ComputeFloatRectForRepaint(
-      const FloatRect &rect, const RenderLayerModelObject *repaintContainer) const noexcept;
+    KRYS_NODISCARD RectF ComputeRectFForRepaint(
+      const RectF &rect, const RenderLayerModelObject *repaintContainer) const noexcept;
 
     KRYS_NODISCARD virtual RepaintRects
       RectsForRepaintingAfterLayout(const RenderLayerModelObject *repaintContainer,
@@ -667,8 +666,8 @@ namespace krys::boo
                                      VisibleRectContext context) const noexcept;
 
     /// @brief `ComputeVisibleRectsInContainer` for SVG renderers, which map float rects.
-    KRYS_NODISCARD virtual Maybe<FloatRect>
-      ComputeFloatVisibleRectInContainer(const FloatRect &rect, const RenderLayerModelObject *container,
+    KRYS_NODISCARD virtual Maybe<RectF>
+      ComputeFloatVisibleRectInContainer(const RectF &rect, const RenderLayerModelObject *container,
                                          VisibleRectContext context) const noexcept;
 
     KRYS_NODISCARD static VisibleRectContext VisibleRectContextForRepaint() noexcept;
@@ -725,14 +724,14 @@ namespace krys::boo
       void NotifyFinished(CachedResource &) noexcept final;
 
       // CachedImageClient.
-      void ImageChanged(CachedImage *, const IntRect * = nullptr) noexcept final;
+      void ImageChanged(CachedImage *, const RectI * = nullptr) noexcept final;
 
       KRYS_NODISCARD bool AllowsAnimation() const noexcept final;
 
       KRYS_NODISCARD bool CanDestroyDecodedData() const noexcept final;
 
       VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
-                                                 const IntRect *) noexcept final;
+                                                 const RectI *) noexcept final;
 
       KRYS_NODISCARD VisibleInViewportState ImageVisibleInViewport(const Document &) const noexcept final;
 
@@ -1434,9 +1433,9 @@ namespace krys::boo
     // since stroke-width is ignored (and marker size can depend on stroke-width).
     // objectBoundingBox is returned local coordinates.
     // The name objectBoundingBox is taken from the SVG 1.1 spec.
-    KRYS_NODISCARD virtual FloatRect ObjectBoundingBox() const noexcept;
+    KRYS_NODISCARD virtual RectF ObjectBoundingBox() const noexcept;
 
-    KRYS_NODISCARD virtual FloatRect StrokeBoundingBox() const noexcept;
+    KRYS_NODISCARD virtual RectF StrokeBoundingBox() const noexcept;
 
     // The objectBoundingBox of a SVG container is affected by the transformations applied on its children --
     // the container bounding box is a union of all child bounding boxes, mapped through their transformation
@@ -1449,7 +1448,7 @@ namespace krys::boo
     // NOT affect layout, as in HTML/CSS world, but take affect during painting, hit-testing etc. This allows
     // to minimize the amount of re-layouts when animating transformations in SVG (not using CSS
     // Animations/Transitions / Web Animations, but e.g. SMIL <animateTransform>, JS, ...).
-    KRYS_NODISCARD virtual FloatRect ObjectBoundingBoxWithoutTransformations() const noexcept
+    KRYS_NODISCARD virtual RectF ObjectBoundingBoxWithoutTransformations() const noexcept
     {
       return ObjectBoundingBox();
     }
@@ -1457,13 +1456,13 @@ namespace krys::boo
     // Returns the smallest rectangle enclosing all of the painted content
     // respecting clipping, masking, filters, opacity, stroke-width and markers
     // This returns approximate rectangle for SVG renderers when RepaintRectCalculation::Fast is specified.
-    KRYS_NODISCARD virtual FloatRect
+    KRYS_NODISCARD virtual RectF
       RepaintRectInLocalCoordinates(RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept;
 
     // Returns the bounding box including fill, stroke, and markers.
     // This is the geometric visual extent, used for masks/gradients/clippers.
     // Unlike repaintRectInLocalCoordinates, this is always accurate.
-    KRYS_NODISCARD virtual FloatRect DecoratedBoundingBox() const noexcept;
+    KRYS_NODISCARD virtual RectF DecoratedBoundingBox() const noexcept;
 
     // This only returns the transform="" value from the element
     // most callsites want localToParentTransform() instead.
@@ -1474,11 +1473,11 @@ namespace krys::boo
     // element.
     KRYS_NODISCARD virtual const AffineTransform &LocalToParentTransform() const noexcept;
 
-    // SVG uses FloatPoint precise hit testing, and passes the point in parent
+    // SVG uses PointF precise hit testing, and passes the point in parent
     // coordinates instead of in repaint container coordinates.  Eventually the
     // rest of the rendering tree will move to a similar model.
-    virtual bool NodeAtFloatPoint(const HitTestRequest &, HitTestResult &, const FloatPoint &pointInParent,
-                                  HitTestAction) noexcept;
+    virtual bool NodeAtPointF(const HitTestRequest &, HitTestResult &, const PointF &pointInParent,
+                              HitTestAction) noexcept;
 
     KRYS_NODISCARD bool IsAnonymous() const noexcept
     {
@@ -1682,15 +1681,14 @@ namespace krys::boo
 #pragma region Geometry mapping
 
     /// @brief Converts a point in this renderer's coordinates to absolute (render view) coordinates.
-    KRYS_NODISCARD FloatPoint LocalToAbsolute(const FloatPoint &localPoint,
-                                              EnumSet<MapCoordinatesMode> mode = {},
-                                              bool *wasFixed = nullptr) const noexcept;
+    KRYS_NODISCARD PointF LocalToAbsolute(const PointF &localPoint, EnumSet<MapCoordinatesMode> mode = {},
+                                          bool *wasFixed = nullptr) const noexcept;
 
-    KRYS_NODISCARD FloatPoint LocalToAbsolute() const noexcept;
+    KRYS_NODISCARD PointF LocalToAbsolute() const noexcept;
 
     /// @brief Converts an absolute point to this renderer's coordinates.
-    KRYS_NODISCARD FloatPoint AbsoluteToLocal(const FloatPoint &containerPoint,
-                                              EnumSet<MapCoordinatesMode> mode = {}) const noexcept;
+    KRYS_NODISCARD PointF AbsoluteToLocal(const PointF &containerPoint,
+                                          EnumSet<MapCoordinatesMode> mode = {}) const noexcept;
 
     KRYS_NODISCARD FloatQuad AbsoluteToLocalQuad(const FloatQuad &quad,
                                                  EnumSet<MapCoordinatesMode> mode = {}) const noexcept;
@@ -1706,8 +1704,8 @@ namespace krys::boo
                            EnumSet<MapCoordinatesMode> mode = MapCoordinatesMode::UseTransforms,
                            bool *wasFixed = nullptr) const noexcept;
 
-    KRYS_NODISCARD FloatPoint
-      LocalToContainerPoint(const FloatPoint &localPoint, const RenderLayerModelObject *container,
+    KRYS_NODISCARD PointF
+      LocalToContainerPoint(const PointF &localPoint, const RenderLayerModelObject *container,
                             EnumSet<MapCoordinatesMode> mode = MapCoordinatesMode::UseTransforms,
                             bool *wasFixed = nullptr) const noexcept;
 
@@ -1745,19 +1743,19 @@ namespace krys::boo
 
     /// @brief The border boxes of the elements @p range wholly selects (outermost only) and the rects of the
     /// text it covers, in absolute coordinates.
-    KRYS_NODISCARD static List<FloatRect>
+    KRYS_NODISCARD static List<RectF>
       AbsoluteBorderAndTextRects(const dom::SimpleRange &range,
                                  EnumSet<BoundingRectBehavior> behavior = {}) noexcept;
 
     /// @brief `AbsoluteBorderAndTextRects` in client coordinates, as `Range`'s `getClientRects()` returns
     /// them.
-    KRYS_NODISCARD static List<FloatRect> ClientBorderAndTextRects(const dom::SimpleRange &range) noexcept;
+    KRYS_NODISCARD static List<RectF> ClientBorderAndTextRects(const dom::SimpleRange &range) noexcept;
 
     /// @brief The bounding box of the renderer in absolute coordinates.
-    KRYS_NODISCARD IntRect AbsoluteBoundingBoxRect(bool useTransforms = true,
-                                                   bool *wasFixed = nullptr) const noexcept;
+    KRYS_NODISCARD RectI AbsoluteBoundingBoxRect(bool useTransforms = true,
+                                                 bool *wasFixed = nullptr) const noexcept;
 
-    KRYS_NODISCARD IntRect AbsoluteBoundingBoxRectIgnoringTransforms() const noexcept;
+    KRYS_NODISCARD RectI AbsoluteBoundingBoxRectIgnoringTransforms() const noexcept;
 
     /// @brief The absolute rect painting the renderer's subtree covers: its bounding box with its
     /// descendants' layers'.

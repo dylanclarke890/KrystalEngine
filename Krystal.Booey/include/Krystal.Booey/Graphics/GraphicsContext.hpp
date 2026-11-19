@@ -28,9 +28,7 @@
 
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Fonts/GlyphBufferMembers.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatSegment.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextState.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
@@ -38,6 +36,7 @@
 #include "Krystal.Booey/Graphics/Paths/DashArray.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Text/TextFlags.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
@@ -421,7 +420,7 @@ namespace krys::boo
         _state, GraphicsContextState::ToIndex(GraphicsContextState::Change::ShadowsIgnoreTransforms));
     }
 
-    KRYS_NODISCARD static FloatSize PlatformShadowOffset(const FloatSize &) noexcept;
+    KRYS_NODISCARD static SizeF PlatformShadowOffset(const SizeF &) noexcept;
 
     KRYS_NODISCARD bool DrawLuminanceMask() const noexcept
     {
@@ -478,13 +477,13 @@ namespace krys::boo
     // FIXME: ...except drawRect(), which fills properly but always strokes
     // using a 1-pixel stroke inset from the rect borders (of the correct
     // stroke color).
-    virtual void DrawRect(const FloatRect &, float borderThickness = 1) noexcept = 0;
+    virtual void DrawRect(const RectF &, float borderThickness = 1) noexcept = 0;
 
-    virtual void DrawLine(const FloatPoint &, const FloatPoint &) noexcept = 0;
+    virtual void DrawLine(const PointF &, const PointF &) noexcept = 0;
 
-    virtual void DrawEllipse(const FloatRect &) noexcept = 0;
+    virtual void DrawEllipse(const RectF &) noexcept = 0;
 
-    virtual void DrawRaisedEllipse(const FloatRect &, const Color &ellipseColor,
+    virtual void DrawRaisedEllipse(const RectF &, const Color &ellipseColor,
                                    const Color &shadowColor) noexcept;
 
     virtual void FillPath(const Path &) noexcept = 0;
@@ -493,26 +492,26 @@ namespace krys::boo
 
     virtual void DrawPath(const Path &) noexcept;
 
-    virtual void FillEllipse(const FloatRect &ellipse) noexcept
+    virtual void FillEllipse(const RectF &ellipse) noexcept
     {
       FillEllipseAsPath(ellipse);
     }
 
-    virtual void StrokeEllipse(const FloatRect &ellipse) noexcept
+    virtual void StrokeEllipse(const RectF &ellipse) noexcept
     {
       StrokeEllipseAsPath(ellipse);
     }
 
-    virtual void FillRect(const FloatRect &, RequiresClipToRect = RequiresClipToRect::Yes) noexcept = 0;
+    virtual void FillRect(const RectF &, RequiresClipToRect = RequiresClipToRect::Yes) noexcept = 0;
 
-    virtual void FillRect(const FloatRect &, const Color &) noexcept = 0;
+    virtual void FillRect(const RectF &, const Color &) noexcept = 0;
 
-    virtual void FillRect(const FloatRect &, Gradient &, const AffineTransform &,
+    virtual void FillRect(const RectF &, Gradient &, const AffineTransform &,
                           RequiresClipToRect = RequiresClipToRect::Yes) noexcept = 0;
 
-    virtual void FillRect(const FloatRect &, Gradient &) noexcept;
+    virtual void FillRect(const RectF &, Gradient &) noexcept;
 
-    virtual void FillRect(const FloatRect &, const Color &, CompositeOperator,
+    virtual void FillRect(const RectF &, const Color &, CompositeOperator,
                           boo::BlendMode = BlendMode::Normal) noexcept;
 
     virtual void FillRoundedRectImpl(const FloatRoundedRect &, const Color &) noexcept = 0;
@@ -520,12 +519,12 @@ namespace krys::boo
     virtual void FillRoundedRect(const FloatRoundedRect &, const Color &,
                                  boo::BlendMode = BlendMode::Normal) noexcept;
 
-    virtual void FillRectWithRoundedHole(const FloatRect &, const FloatRoundedRect &roundedHoleRect,
+    virtual void FillRectWithRoundedHole(const RectF &, const FloatRoundedRect &roundedHoleRect,
                                          const Color &) noexcept;
 
-    virtual void ClearRect(const FloatRect &) noexcept = 0;
+    virtual void ClearRect(const RectF &) noexcept = 0;
 
-    virtual void StrokeRect(const FloatRect &, float lineWidth) noexcept = 0;
+    virtual void StrokeRect(const RectF &, float lineWidth) noexcept = 0;
 
     virtual void SetLineCap(LineCap) noexcept = 0;
 
@@ -537,85 +536,85 @@ namespace krys::boo
 
     // Images
 
-    ImageDrawResult DrawImage(Image &, const FloatPoint &destination,
+    ImageDrawResult DrawImage(Image &, const PointF &destination,
                               ImagePaintingOptions = ImagePaintingOptions {
                                 ImageOrientation::Orientation::FromImage}) noexcept;
 
-    ImageDrawResult DrawImage(Image &, const FloatRect &destination,
+    ImageDrawResult DrawImage(Image &, const RectF &destination,
                               ImagePaintingOptions = ImagePaintingOptions {
                                 ImageOrientation::Orientation::FromImage}) noexcept;
 
-    virtual ImageDrawResult DrawImage(Image &, const FloatRect &destination, const FloatRect &source,
+    virtual ImageDrawResult DrawImage(Image &, const RectF &destination, const RectF &source,
                                       ImagePaintingOptions = ImagePaintingOptions {
                                         ImageOrientation::Orientation::FromImage}) noexcept;
 
-    virtual ImageDrawResult DrawTiledImage(Image &, const FloatRect &destination, const FloatPoint &source,
-                                           const FloatSize &tileSize, const FloatSize &spacing,
+    virtual ImageDrawResult DrawTiledImage(Image &, const RectF &destination, const PointF &source,
+                                           const SizeF &tileSize, const SizeF &spacing,
                                            ImagePaintingOptions = {}) noexcept;
 
     // Native images
 
     /// @brief Draws @p srcRect of the image into @p destRect, oriented by the options' orientation.
-    virtual void DrawNativeImage(NativeImage &, const FloatRect &destRect, const FloatRect &srcRect,
+    virtual void DrawNativeImage(NativeImage &, const RectF &destRect, const RectF &srcRect,
                                  ImagePaintingOptions = {}) noexcept = 0;
 
     /// @brief Fills @p destRect with @p tileRect of the image, repeated: tiles are mapped by @p
     /// patternTransform, start at @p phase (where the image's origin goes) and are @p spacing apart.
-    virtual void DrawPattern(NativeImage &, const FloatRect &destRect, const FloatRect &tileRect,
-                             const AffineTransform &patternTransform, const FloatPoint &phase,
-                             const FloatSize &spacing, ImagePaintingOptions = {}) noexcept = 0;
+    virtual void DrawPattern(NativeImage &, const RectF &destRect, const RectF &tileRect,
+                             const AffineTransform &patternTransform, const PointF &phase,
+                             const SizeF &spacing, ImagePaintingOptions = {}) noexcept = 0;
 
     // Image buffers
 
-    KRYS_NODISCARD virtual RefPtr<ImageBuffer> CreateImageBuffer(const FloatSize &,
+    KRYS_NODISCARD virtual RefPtr<ImageBuffer> CreateImageBuffer(const SizeF &,
                                                                  float resolutionScale = 1) const noexcept;
 
-    KRYS_NODISCARD RefPtr<ImageBuffer> CreateScaledImageBuffer(const FloatSize &,
-                                                               const FloatSize &scale) const noexcept;
+    KRYS_NODISCARD RefPtr<ImageBuffer> CreateScaledImageBuffer(const SizeF &,
+                                                               const SizeF &scale) const noexcept;
 
-    KRYS_NODISCARD RefPtr<ImageBuffer> CreateScaledImageBuffer(const FloatRect &,
-                                                               const FloatSize &scale) const noexcept;
+    KRYS_NODISCARD RefPtr<ImageBuffer> CreateScaledImageBuffer(const RectF &,
+                                                               const SizeF &scale) const noexcept;
 
     /// @brief A buffer of @p size at the resolution this context draws at, its context scaled so @p size
     /// fills it.
-    KRYS_NODISCARD virtual RefPtr<ImageBuffer> CreateAlignedImageBuffer(const FloatSize &size) const noexcept;
+    KRYS_NODISCARD virtual RefPtr<ImageBuffer> CreateAlignedImageBuffer(const SizeF &size) const noexcept;
 
-    void DrawImageBuffer(ImageBuffer &, const FloatPoint &destination, ImagePaintingOptions = {}) noexcept;
+    void DrawImageBuffer(ImageBuffer &, const PointF &destination, ImagePaintingOptions = {}) noexcept;
 
-    void DrawImageBuffer(ImageBuffer &, const FloatRect &destination, ImagePaintingOptions = {}) noexcept;
+    void DrawImageBuffer(ImageBuffer &, const RectF &destination, ImagePaintingOptions = {}) noexcept;
 
     /// @brief Draws @p source of the buffer into @p destination.
     /// FIXME: Buffers record display lists rather than pixels, so the base draws nothing (rather than the
     /// buffer's native image); display list recorders record the draw and drawing backends render the buffer.
-    virtual void DrawImageBuffer(ImageBuffer &, const FloatRect &destination, const FloatRect &source,
+    virtual void DrawImageBuffer(ImageBuffer &, const RectF &destination, const RectF &source,
                                  ImagePaintingOptions = {}) noexcept;
 
     /// @brief Draws @p filter applied to @p sourceImage, which holds @p sourceImageRect (in filter
     /// coordinates), with @p results caching the filter's effects.
-    virtual void DrawFilteredImageBuffer(ImageBuffer *sourceImage, const FloatRect &sourceImageRect,
+    virtual void DrawFilteredImageBuffer(ImageBuffer *sourceImage, const RectF &sourceImageRect,
                                          Filter &filter, FilterResults &results) noexcept;
 
     /// @brief Fills @p destRect with @p tileRect of the buffer, repeated: tiles are mapped by @p
     /// patternTransform, start at @p phase (where the buffer's origin goes) and are @p spacing apart.
     /// FIXME: Buffers record display lists rather than pixels, so the base draws nothing (rather than the
     /// buffer's native image); display list recorders record the draw and drawing backends render the buffer.
-    virtual void DrawPattern(ImageBuffer &, const FloatRect &destRect, const FloatRect &tileRect,
-                             const AffineTransform &patternTransform, const FloatPoint &phase,
-                             const FloatSize &spacing, ImagePaintingOptions = {}) noexcept;
+    virtual void DrawPattern(ImageBuffer &, const RectF &destRect, const RectF &tileRect,
+                             const AffineTransform &patternTransform, const PointF &phase,
+                             const SizeF &spacing, ImagePaintingOptions = {}) noexcept;
 
-    virtual ImageDrawResult DrawTiledImage(Image &, const FloatRect &destination, const FloatRect &source,
-                                           const FloatSize &tileScaleFactor, Image::TileRule, Image::TileRule,
+    virtual ImageDrawResult DrawTiledImage(Image &, const RectF &destination, const RectF &source,
+                                           const SizeF &tileScaleFactor, Image::TileRule, Image::TileRule,
                                            ImagePaintingOptions = {}) noexcept;
 
     // Clipping
 
     virtual void ResetClip() noexcept = 0;
 
-    virtual void Clip(const FloatRect &) noexcept = 0;
+    virtual void Clip(const RectF &) noexcept = 0;
 
     virtual void ClipRoundedRect(const FloatRoundedRect &) noexcept;
 
-    virtual void ClipOut(const FloatRect &) noexcept = 0;
+    virtual void ClipOut(const RectF &) noexcept = 0;
 
     virtual void ClipOut(const Path &) noexcept = 0;
 
@@ -623,28 +622,28 @@ namespace krys::boo
 
     virtual void ClipPath(const Path &, WindRule = WindRule::EvenOdd) noexcept = 0;
 
-    KRYS_NODISCARD virtual IntRect ClipBounds() const noexcept;
+    KRYS_NODISCARD virtual RectI ClipBounds() const noexcept;
 
-    virtual void ClipToImageBuffer(ImageBuffer &, const FloatRect &) noexcept = 0;
+    virtual void ClipToImageBuffer(ImageBuffer &, const RectF &) noexcept = 0;
 
     // Text
 
     /// @brief Draws @p run from byte offset @p from to @p to at @p point, through `DrawGlyphs`.
     /// @return How far the first glyph drawn is from @p point.
-    virtual FloatSize DrawText(const FontCascade &, const TextRun &, const FloatPoint &, uint32 from = 0,
-                               Maybe<uint32> to = null) noexcept;
+    virtual SizeF DrawText(const FontCascade &, const TextRun &, const PointF &, uint32 from = 0,
+                           Maybe<uint32> to = null) noexcept;
 
     /// @brief Draws @p run at @p point, split into runs of one direction by the bidi algorithm (from the
     /// run's direction and override) and drawn in visual order.
-    virtual void DrawBidiText(const FontCascade &, const TextRun &, const FloatPoint &,
+    virtual void DrawBidiText(const FontCascade &, const TextRun &, const PointF &,
                               FontCascade::CustomFontNotReadyAction =
                                 FontCascade::CustomFontNotReadyAction::DoNotPaintIfFontNotReady) noexcept;
 
     virtual void DrawEmphasisMarks(const FontCascade &, const TextRun &, const StringAtom &mark,
-                                   const FloatPoint &, uint32 from = 0, Maybe<uint32> to = null) noexcept;
+                                   const PointF &, uint32 from = 0, Maybe<uint32> to = null) noexcept;
 
     virtual void DrawGlyphs(const Font &, Span<const GlyphBufferGlyph>, Span<const GlyphBufferAdvance>,
-                            const FloatPoint &, FontSmoothingMode) noexcept = 0;
+                            const PointF &, FontSmoothingMode) noexcept = 0;
 
     virtual void DrawDisplayList(const display_list::DisplayList &) noexcept;
 
@@ -652,18 +651,18 @@ namespace krys::boo
     virtual void DrawControlPart(ControlPart &, const FloatRoundedRect &borderRect, float deviceScaleFactor,
                                  const ControlStyle &) noexcept;
 
-    KRYS_NODISCARD FloatRect ComputeUnderlineBoundsForText(const FloatRect &, bool printing) noexcept;
+    KRYS_NODISCARD RectF ComputeUnderlineBoundsForText(const RectF &, bool printing) noexcept;
 
-    void DrawLineForText(const FloatRect &, bool isPrinting, bool doubleUnderlines = false,
+    void DrawLineForText(const RectF &, bool isPrinting, bool doubleUnderlines = false,
                          boo::StrokeStyle = boo::StrokeStyle::SolidStroke) noexcept;
 
     // The `origin` defines the line origin point.
     // The `lineSegments` defines the start and end offset of each segment along the line.
-    virtual void DrawLinesForText(const FloatPoint &origin, float thickness,
+    virtual void DrawLinesForText(const PointF &origin, float thickness,
                                   Span<const FloatSegment> lineSegments, bool isPrinting, bool doubleLines,
                                   boo::StrokeStyle) noexcept = 0;
 
-    virtual void DrawDotsForDocumentMarker(const FloatRect &, DocumentMarkerLineStyle) noexcept = 0;
+    virtual void DrawDotsForDocumentMarker(const RectF &, DocumentMarkerLineStyle) noexcept = 0;
 
     // Transparency Layers
 
@@ -682,26 +681,26 @@ namespace krys::boo
 
     virtual void DrawFocusRing(const Path &, float outlineWidth, const Color &) noexcept = 0;
 
-    virtual void DrawFocusRing(const List<FloatRect> &, float outlineOffset, float outlineWidth,
+    virtual void DrawFocusRing(const List<RectF> &, float outlineOffset, float outlineWidth,
                                const Color &) noexcept = 0;
 
     // Transforms
 
     void Scale(float s) noexcept
     {
-      Scale(FloatSize {s, s});
+      Scale(SizeF {s, s});
     }
 
-    virtual void Scale(const FloatSize &) noexcept = 0;
+    virtual void Scale(const SizeF &) noexcept = 0;
 
     virtual void Rotate(float angleInRadians) noexcept = 0;
 
-    void Translate(const FloatSize &size) noexcept
+    void Translate(const SizeF &size) noexcept
     {
       Translate(size.Width(), size.Height());
     }
 
-    void Translate(const FloatPoint &p) noexcept
+    void Translate(const PointF &p) noexcept
     {
       Translate(p.X(), p.Y());
     }
@@ -722,13 +721,12 @@ namespace krys::boo
       Scale(factor);
     }
 
-    KRYS_NODISCARD FloatSize ScaleFactor() const noexcept;
+    KRYS_NODISCARD SizeF ScaleFactor() const noexcept;
 
-    KRYS_NODISCARD FloatSize ScaleFactorForDrawing(const FloatRect &destRect,
-                                                   const FloatRect &srcRect) const noexcept;
+    KRYS_NODISCARD SizeF ScaleFactorForDrawing(const RectF &destRect, const RectF &srcRect) const noexcept;
 
     // PDF, printing and snapshotting
-    virtual void BeginPage(const FloatRect &) noexcept
+    virtual void BeginPage(const RectF &) noexcept
     {
     }
 
@@ -738,15 +736,15 @@ namespace krys::boo
 
     // Links
 
-    virtual void SetUrlForRect(const net::Url &, const FloatRect &) noexcept
+    virtual void SetUrlForRect(const net::Url &, const RectF &) noexcept
     {
     }
 
-    virtual void SetDestinationForRect(const utf8_string &, const FloatRect &) noexcept
+    virtual void SetDestinationForRect(const utf8_string &, const RectF &) noexcept
     {
     }
 
-    virtual void AddDestinationAtPoint(const utf8_string &, const FloatPoint &) noexcept
+    virtual void AddDestinationAtPoint(const utf8_string &, const PointF &) noexcept
     {
     }
 
@@ -785,16 +783,16 @@ namespace krys::boo
                                                                         bool closedPath) noexcept;
 
   protected:
-    void FillEllipseAsPath(const FloatRect &) noexcept;
+    void FillEllipseAsPath(const RectF &) noexcept;
 
-    void StrokeEllipseAsPath(const FloatRect &) noexcept;
+    void StrokeEllipseAsPath(const RectF &) noexcept;
 
     virtual void DrawGlyphsImmediate(const Font &, Span<const GlyphBufferGlyph>,
-                                     Span<const GlyphBufferAdvance>, const FloatPoint &,
+                                     Span<const GlyphBufferAdvance>, const PointF &,
                                      FontSmoothingMode) noexcept;
 
-    KRYS_NODISCARD FloatRect ComputeLineBoundsAndAntialiasingModeForText(const FloatRect &, bool printing,
-                                                                         Color &) const noexcept;
+    KRYS_NODISCARD RectF ComputeLineBoundsAndAntialiasingModeForText(const RectF &, bool printing,
+                                                                     Color &) const noexcept;
 
     KRYS_NODISCARD float DashedLineCornerWidthForStrokeWidth(float) const noexcept;
 
@@ -803,18 +801,17 @@ namespace krys::boo
     KRYS_NODISCARD static float DashedLinePatternOffsetForPatternAndStrokeWidth(float patternWidth,
                                                                                 float strokeWidth) noexcept;
 
-    KRYS_NODISCARD static List<FloatPoint> CenterLineAndCutOffCorners(bool isVerticalLine, float cornerWidth,
-                                                                      FloatPoint point1,
-                                                                      FloatPoint point2) noexcept;
+    KRYS_NODISCARD static List<PointF> CenterLineAndCutOffCorners(bool isVerticalLine, float cornerWidth,
+                                                                  PointF point1, PointF point2) noexcept;
 
     struct RectsAndStrokeColor
     {
-      SmallList<FloatRect, 4> Rects;
+      SmallList<RectF, 4> Rects;
       Color StrokeColor;
     };
 
     KRYS_NODISCARD RectsAndStrokeColor ComputeRectsAndStrokeColorForLinesForText(
-      const FloatPoint &origin, float thickness, Span<const FloatSegment>, bool isPrinting, bool doubleLines,
+      const PointF &origin, float thickness, Span<const FloatSegment>, bool isPrinting, bool doubleLines,
       boo::StrokeStyle) noexcept;
   };
 }

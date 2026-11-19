@@ -31,10 +31,9 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include <algorithm>
 
@@ -71,17 +70,17 @@ namespace krys::boo
     {
     }
 
-    constexpr LayoutRect(const FloatPoint &location, const FloatSize &size) noexcept
+    constexpr LayoutRect(const PointF &location, const SizeF &size) noexcept
         : _location(location), _size(size)
     {
     }
 
-    constexpr LayoutRect(const IntRect &rect) noexcept : _location(rect.Location()), _size(rect.Size())
+    constexpr LayoutRect(const RectI &rect) noexcept : _location(rect.Location()), _size(rect.Size())
     {
     }
 
     // Lossy, so not implicit.
-    explicit LayoutRect(const FloatRect &rect) noexcept;
+    explicit LayoutRect(const RectF &rect) noexcept;
 
     KRYS_NODISCARD constexpr LayoutPoint Location() const noexcept
     {
@@ -328,7 +327,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsMaxXMaxYRepresentable() const noexcept
     {
-      FloatRect rect = *this;
+      RectF rect = *this;
       float maxX = rect.MaxX();
       float maxY = rect.MaxY();
       return maxX > LayoutUnit::NearlyMin() && maxX < LayoutUnit::NearlyMax()
@@ -417,14 +416,20 @@ namespace krys::boo
     KRYS_NODISCARD constexpr static LayoutRect InfiniteRect() noexcept
     {
       // Return a rect that is slightly smaller than the true max rect to allow pixelSnapping to round up to
-      // the nearest IntRect without overflowing.
+      // the nearest RectI without overflowing.
       return LayoutRect(LayoutUnit::NearlyMin() / 2, LayoutUnit::NearlyMin() / 2, LayoutUnit::NearlyMax(),
                         LayoutUnit::NearlyMax());
     }
 
-    constexpr operator FloatRect() const noexcept
+    constexpr operator RectF() const noexcept
     {
-      return FloatRect(_location, _size);
+      return RectF(_location, _size);
+    }
+
+    /// @brief This with each value truncated to an integer.
+    constexpr explicit operator RectI() const noexcept
+    {
+      return RectI(X().ToInt(), Y().ToInt(), Width().ToInt(), Height().ToInt());
     }
 
     KRYS_NODISCARD friend constexpr bool operator==(const LayoutRect &,
@@ -448,60 +453,58 @@ namespace krys::boo
   KRYS_NODISCARD LayoutRect UnionRect(Span<const LayoutRect> rects) noexcept;
 
   // Integral snapping functions.
-  KRYS_NODISCARD constexpr IntRect SnappedIntRect(const LayoutRect &rect) noexcept
+  KRYS_NODISCARD constexpr RectI SnappedRectI(const LayoutRect &rect) noexcept
   {
-    return IntRect(RoundedIntPoint(rect.Location()), SnappedIntSize(rect.Size(), rect.Location()));
+    return RectI(RoundedPointI(rect.Location()), SnappedSizeI(rect.Size(), rect.Location()));
   }
 
-  KRYS_NODISCARD constexpr IntRect SnappedIntRect(LayoutUnit left, LayoutUnit top, LayoutUnit width,
-                                                  LayoutUnit height) noexcept
+  KRYS_NODISCARD constexpr RectI SnappedRectI(LayoutUnit left, LayoutUnit top, LayoutUnit width,
+                                              LayoutUnit height) noexcept
   {
-    return IntRect(IntPoint(left.Round(), top.Round()),
-                   SnappedIntSize(LayoutSize(width, height), LayoutPoint(left, top)));
+    return RectI(PointI(left.Round(), top.Round()),
+                 SnappedSizeI(LayoutSize(width, height), LayoutPoint(left, top)));
   }
 
-  KRYS_NODISCARD constexpr IntRect SnappedIntRect(LayoutPoint location, LayoutSize size) noexcept
+  KRYS_NODISCARD constexpr RectI SnappedRectI(LayoutPoint location, LayoutSize size) noexcept
   {
-    return IntRect(RoundedIntPoint(location), SnappedIntSize(size, location));
+    return RectI(RoundedPointI(location), SnappedSizeI(size, location));
   }
 
-  KRYS_NODISCARD IntRect EnclosingIntRect(const LayoutRect &rect) noexcept;
+  KRYS_NODISCARD RectI EnclosingRectI(const LayoutRect &rect) noexcept;
 
-  KRYS_NODISCARD LayoutRect EnclosingLayoutRect(const FloatRect &rect) noexcept;
+  KRYS_NODISCARD LayoutRect EnclosingLayoutRect(const RectF &rect) noexcept;
 
   // Device pixel snapping functions.
-  KRYS_NODISCARD inline FloatRect SnapRectToDevicePixels(const LayoutRect &rect,
-                                                         float pixelSnappingFactor) noexcept
+  KRYS_NODISCARD inline RectF SnapRectToDevicePixels(const LayoutRect &rect,
+                                                     float pixelSnappingFactor) noexcept
   {
-    return FloatRect(FloatPoint(RoundToDevicePixel(rect.X(), pixelSnappingFactor),
-                                RoundToDevicePixel(rect.Y(), pixelSnappingFactor)),
-                     SnapSizeToDevicePixel(rect.Size(), rect.Location(), pixelSnappingFactor));
+    return RectF(PointF(RoundToDevicePixel(rect.X(), pixelSnappingFactor),
+                        RoundToDevicePixel(rect.Y(), pixelSnappingFactor)),
+                 SnapSizeToDevicePixel(rect.Size(), rect.Location(), pixelSnappingFactor));
   }
 
-  KRYS_NODISCARD inline FloatRect SnapRectToDevicePixels(LayoutUnit x, LayoutUnit y, LayoutUnit width,
-                                                         LayoutUnit height,
-                                                         float pixelSnappingFactor) noexcept
+  KRYS_NODISCARD inline RectF SnapRectToDevicePixels(LayoutUnit x, LayoutUnit y, LayoutUnit width,
+                                                     LayoutUnit height, float pixelSnappingFactor) noexcept
   {
     return SnapRectToDevicePixels(LayoutRect(x, y, width, height), pixelSnappingFactor);
   }
 
   // FIXME: This needs to take vertical centering into account too.
-  KRYS_NODISCARD inline FloatRect SnapRectToDevicePixelsWithWritingDirection(const LayoutRect &rect,
-                                                                             float deviceScaleFactor,
-                                                                             bool ltr) noexcept
+  KRYS_NODISCARD inline RectF SnapRectToDevicePixelsWithWritingDirection(const LayoutRect &rect,
+                                                                         float deviceScaleFactor,
+                                                                         bool ltr) noexcept
   {
     if (!ltr)
     {
-      FloatPoint snappedTopRight = RoundPointToDevicePixels(rect.MaxXMinYCorner(), deviceScaleFactor, ltr);
-      FloatSize snappedSize = SnapSizeToDevicePixel(rect.Size(), rect.MaxXMinYCorner(), deviceScaleFactor);
-      return FloatRect(snappedTopRight.X() - snappedSize.Width(), snappedTopRight.Y(), snappedSize.Width(),
-                       snappedSize.Height());
+      PointF snappedTopRight = RoundPointToDevicePixels(rect.MaxXMinYCorner(), deviceScaleFactor, ltr);
+      SizeF snappedSize = SnapSizeToDevicePixel(rect.Size(), rect.MaxXMinYCorner(), deviceScaleFactor);
+      return RectF(snappedTopRight.X() - snappedSize.Width(), snappedTopRight.Y(), snappedSize.Width(),
+                   snappedSize.Height());
     }
     return SnapRectToDevicePixels(rect, deviceScaleFactor);
   }
 
-  KRYS_NODISCARD FloatRect EncloseRectToDevicePixels(const LayoutRect &rect,
-                                                     float pixelSnappingFactor) noexcept;
+  KRYS_NODISCARD RectF EncloseRectToDevicePixels(const LayoutRect &rect, float pixelSnappingFactor) noexcept;
 
   TextStream &operator<<(TextStream &ts, const LayoutRect &value) noexcept;
 }

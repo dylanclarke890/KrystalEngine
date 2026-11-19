@@ -62,7 +62,7 @@ namespace krys::boo::tests
     CHECK_FALSE(image->GetCachedImage()->IsLoading());
     CHECK(image->GetCachedImage()->GetStatus() == CachedResource::Cached);
     CHECK(image->HasImage());
-    CHECK(image->ImageSize(box.Renderer(), 1) == FloatSize(3, 2));
+    CHECK(image->ImageSize(box.Renderer(), 1) == SizeF(3, 2));
     CHECK(Contains(fixture.Painted(), u8"draw-pattern-native-image"));
   }
 
@@ -268,7 +268,7 @@ namespace krys::boo::tests
     {
       PageInFrameFixture first {utf8_string(markup)};
       RunNetworkingTasks();
-      CHECK(first.RendererSize(u8"box") == IntSize(10, 0));
+      CHECK(first.RendererSize(u8"box") == SizeI(10, 0));
     }
     // A document uses what's in the memory cache.
     {
@@ -282,7 +282,7 @@ namespace krys::boo::tests
       PageInFrameFixture reloaded {utf8_string(markup), {200, 100}, CachePolicy::Reload};
       RunNetworkingTasks();
       CHECK(loader.Strategy.Requests.size() == 2u);
-      CHECK(reloaded.RendererSize(u8"box") == IntSize(20, 0));
+      CHECK(reloaded.RendererSize(u8"box") == SizeI(20, 0));
     }
   }
 }

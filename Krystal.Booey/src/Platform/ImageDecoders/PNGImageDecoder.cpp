@@ -334,7 +334,7 @@ namespace krys::boo
     // will cease to exist.  Note that we'll still properly set the failure flag
     // in this case as soon as we longjmp().
     _doNothingOnFailure = true;
-    bool result = SetSize(IntSize(static_cast<int32>(width), static_cast<int32>(height)));
+    bool result = SetSize(SizeI(static_cast<int32>(width), static_cast<int32>(height)));
     _doNothingOnFailure = false;
     if (!result)
     {
@@ -953,8 +953,8 @@ namespace krys::boo
     {
       // We want to clear the previous frame to transparent, without
       // affecting pixels in the image outside of the frame.
-      IntRect prevRect = prevBuffer->BackingStore()->FrameRect();
-      if (!frameIndex || prevRect.Contains(IntRect(IntPoint(), Size())))
+      RectI prevRect = prevBuffer->BackingStore()->FrameRect();
+      if (!frameIndex || prevRect.Contains(RectI(PointI(), Size())))
       {
         // Clearing the first frame, or a frame the size of the whole
         // image, results in a completely empty image.
@@ -973,8 +973,8 @@ namespace krys::boo
       }
     }
 
-    IntRect frameRect(static_cast<int32>(_xOffset), static_cast<int32>(_yOffset), static_cast<int32>(_width),
-                      static_cast<int32>(_height));
+    RectI frameRect(static_cast<int32>(_xOffset), static_cast<int32>(_yOffset), static_cast<int32>(_width),
+                    static_cast<int32>(_height));
 
     // Make sure the frameRect doesn't extend outside the buffer.
     if (frameRect.MaxX() > Size().Width())
@@ -1003,7 +1003,7 @@ namespace krys::boo
 
     if (_currentFrame && interlaceBuffer)
     {
-      IntRect rect = buffer.BackingStore()->FrameRect();
+      RectI rect = buffer.BackingStore()->FrameRect();
       bool hasAlpha = _reader->HasAlpha();
       bool nonTrivialAlpha = false;
       if (_blend && !hasAlpha)
@@ -1038,8 +1038,8 @@ namespace krys::boo
 
       if (!nonTrivialAlpha)
       {
-        IntRect frameRect = buffer.BackingStore()->FrameRect();
-        if (frameRect.Contains(IntRect(IntPoint(), Size())))
+        RectI frameRect = buffer.BackingStore()->FrameRect();
+        if (frameRect.Contains(RectI(PointI(), Size())))
         {
           buffer.SetHasAlpha(false);
         }
@@ -1054,7 +1054,7 @@ namespace krys::boo
             prevBuffer = &_frameBufferCache[--frameIndex];
           }
 
-          IntRect prevRect = prevBuffer->BackingStore()->FrameRect();
+          RectI prevRect = prevBuffer->BackingStore()->FrameRect();
           if ((prevBuffer->GetDisposalMethod()
                == ScalableImageDecoderFrame::DisposalMethod::RestoreToBackground)
               && !prevBuffer->HasAlpha() && frameRect.Contains(prevRect))

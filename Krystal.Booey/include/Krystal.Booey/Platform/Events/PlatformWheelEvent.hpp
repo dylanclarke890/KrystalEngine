@@ -25,10 +25,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformEvent.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 
 namespace krys::boo
 {
@@ -84,8 +84,8 @@ namespace krys::boo
   {
   protected:
     PlatformWheelEventGranularity _granularity {PlatformWheelEventGranularity::ScrollByPixelWheelEvent};
-    IntPoint _position;
-    IntPoint _globalPosition;
+    PointI _position;
+    PointI _globalPosition;
     float _deltaX {0};
     float _deltaY {0};
     float _wheelTicksX {0};
@@ -104,8 +104,8 @@ namespace krys::boo
     /// @param globalPosition The point in the screen's coordinates.
     /// @param deltaX How far to scroll: pixels, or a page's direction when @p granularity is by page.
     /// @param wheelTicksX How far the wheel turned, in notches.
-    PlatformWheelEvent(IntPoint position, IntPoint globalPosition, float deltaX, float deltaY,
-                       float wheelTicksX, float wheelTicksY, PlatformWheelEventGranularity granularity,
+    PlatformWheelEvent(PointI position, PointI globalPosition, float deltaX, float deltaY, float wheelTicksX,
+                       float wheelTicksY, PlatformWheelEventGranularity granularity,
                        EnumSet<PlatformEvent::Modifier> modifiers, MonotonicTime::duration timestamp) noexcept
         : PlatformEvent(Type::Wheel, modifiers, timestamp), _granularity(granularity), _position(position),
           _globalPosition(globalPosition), _deltaX(deltaX), _deltaY(deltaY), _wheelTicksX(wheelTicksX),
@@ -202,7 +202,7 @@ namespace krys::boo
       return ends(_phase) || ends(_momentumPhase);
     }
 
-    KRYS_NODISCARD PlatformWheelEvent CopyWithDelta(FloatSize delta) const noexcept
+    KRYS_NODISCARD PlatformWheelEvent CopyWithDelta(SizeF delta) const noexcept
     {
       PlatformWheelEvent copy = *this;
       copy._deltaX = delta.Width();
@@ -211,13 +211,13 @@ namespace krys::boo
     }
 
     // PlatformWindow coordinates.
-    KRYS_NODISCARD const IntPoint &Position() const noexcept
+    KRYS_NODISCARD const PointI &Position() const noexcept
     {
       return _position;
     }
 
     // Screen coordinates.
-    KRYS_NODISCARD const IntPoint &GlobalPosition() const noexcept
+    KRYS_NODISCARD const PointI &GlobalPosition() const noexcept
     {
       return _globalPosition;
     }
@@ -232,7 +232,7 @@ namespace krys::boo
       return _deltaY;
     }
 
-    KRYS_NODISCARD FloatSize Delta() const noexcept
+    KRYS_NODISCARD SizeF Delta() const noexcept
     {
       return {_deltaX, _deltaY};
     }

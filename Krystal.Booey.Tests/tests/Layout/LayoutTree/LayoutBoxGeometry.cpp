@@ -120,6 +120,6 @@ namespace krys::boo::layout::tests
     CHECK(rect.Intersects(Rect {50_lu, 60_lu, 5_lu, 5_lu}));
     CHECK_FALSE(rect.IsEmpty());
     CHECK(LayoutRect(rect.Clone()) == LayoutRect(rect));
-    CHECK(Rect(FloatRect {1.5f, 2.f, 3.f, 4.f}).Left() == LayoutUnit(1.5f));
+    CHECK(Rect(RectF {1.5f, 2.f, 3.f, 4.f}).Left() == LayoutUnit(1.5f));
   }
 }

@@ -28,9 +28,9 @@
 
 namespace krys::boo
 {
-  FloatPoint ViewportConstraints::ViewportRelativeLayerPosition(const FloatRect &viewportRect) const noexcept
+  PointF ViewportConstraints::ViewportRelativeLayerPosition(const RectF &viewportRect) const noexcept
   {
-    FloatSize offset;
+    SizeF offset;
 
     if (HasAnchorEdge(AnchorEdge::Left) || !HasAnchorEdge(AnchorEdge::Right))
     {
@@ -53,10 +53,9 @@ namespace krys::boo
     return _layerPositionAtLastLayout + offset;
   }
 
-  FloatSize
-    StickyPositionViewportConstraints::ComputeStickyOffset(const FloatRect &constrainingRect) const noexcept
+  SizeF StickyPositionViewportConstraints::ComputeStickyOffset(const RectF &constrainingRect) const noexcept
   {
-    FloatRect boxRect = _stickyBoxRect;
+    RectF boxRect = _stickyBoxRect;
 
     if (HasAnchorEdge(AnchorEdge::Right))
     {
@@ -113,19 +112,19 @@ namespace krys::boo
     return boxRect.Location() - _stickyBoxRect.Location();
   }
 
-  FloatPoint StickyPositionViewportConstraints::AnchorLayerPositionForConstrainingRect(
-    const FloatRect &constrainingRect) const noexcept
+  PointF StickyPositionViewportConstraints::AnchorLayerPositionForConstrainingRect(
+    const RectF &constrainingRect) const noexcept
   {
-    FloatSize offset = ComputeStickyOffset(constrainingRect);
+    SizeF offset = ComputeStickyOffset(constrainingRect);
     return AnchorLayerPositionAtLastLayout() + offset - _stickyOffsetAtLastLayout;
   }
 
-  FloatPoint StickyPositionViewportConstraints::AnchorLayerPositionAtLastLayout() const noexcept
+  PointF StickyPositionViewportConstraints::AnchorLayerPositionAtLastLayout() const noexcept
   {
     return _layerPositionAtLastLayout + _anchorLayerOffsetAtLastLayout;
   }
 
-  FloatRect StickyPositionViewportConstraints::ComputeStickyExtent() const noexcept
+  RectF StickyPositionViewportConstraints::ComputeStickyExtent() const noexcept
   {
     float minShiftX = 0;
     float maxShiftX = 0;
@@ -157,6 +156,6 @@ namespace krys::boo
     float maxX = _stickyBoxRect.MaxX() + maxShiftX;
     float maxY = _stickyBoxRect.MaxY() + maxShiftY;
 
-    return FloatRect(minX, minY, maxX - minX, maxY - minY);
+    return RectF(minX, minY, maxX - minX, maxY - minY);
   }
 }

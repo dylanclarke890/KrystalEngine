@@ -37,9 +37,9 @@ namespace krys::boo::inline_iterator
   {
   }
 
-  FloatRect SVGTextBox::CalculateBoundariesIncludingSVGTransform() const noexcept
+  RectF SVGTextBox::CalculateBoundariesIncludingSVGTransform() const noexcept
   {
-    FloatRect textRect;
+    RectF textRect;
 
     float scalingFactor = Renderer().ScalingFactor();
     krys_debug_assert(scalingFactor);
@@ -47,7 +47,7 @@ namespace krys::boo::inline_iterator
     float baseline = Renderer().ScaledFont().MetricsOfPrimaryFont().Ascent() / scalingFactor;
     for (auto &fragment : TextFragments())
     {
-      auto fragmentRect = FloatRect {fragment.X, fragment.Y - baseline, fragment.Width, fragment.Height};
+      auto fragmentRect = RectF {fragment.X, fragment.Y - baseline, fragment.Width, fragment.Height};
 
       AffineTransform fragmentTransform;
       fragment.BuildFragmentTransform(fragmentTransform);
@@ -71,7 +71,7 @@ namespace krys::boo::inline_iterator
     }
 
     AffineTransform fragmentTransform;
-    FloatRect selectionRect;
+    RectF selectionRect;
     uint32 fragmentStartPosition = 0;
     uint32 fragmentEndPosition = 0;
 
@@ -85,8 +85,8 @@ namespace krys::boo::inline_iterator
         continue;
       }
 
-      FloatRect fragmentRect = SelectionRectForTextFragment(Renderer(), Direction(), fragment,
-                                                            fragmentStartPosition, fragmentEndPosition);
+      RectF fragmentRect = SelectionRectForTextFragment(Renderer(), Direction(), fragment,
+                                                        fragmentStartPosition, fragmentEndPosition);
       fragment.BuildFragmentTransform(fragmentTransform);
       if (!fragmentTransform.IsIdentity())
       {
@@ -96,7 +96,7 @@ namespace krys::boo::inline_iterator
       selectionRect.Unite(fragmentRect);
     }
 
-    return EnclosingIntRect(selectionRect);
+    return EnclosingRectI(selectionRect);
   }
 
   const List<SVGTextFragment> &SVGTextBox::TextFragments() const noexcept

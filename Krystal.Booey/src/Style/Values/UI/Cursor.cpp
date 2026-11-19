@@ -73,7 +73,7 @@ namespace krys::boo::style
         // generate one (done in the Cursor class).
         // FIXME: Would it be better to extend the concept of "no hot spot" deeper, into CursorImage and
         // beyond, rather than using -1/-1 for it?
-        auto hotSpot = styleImage->HotSpot().value_or(IntPoint {-1, -1});
+        auto hotSpot = styleImage->HotSpot().value_or(PointI {-1, -1});
         return CursorImage {Ref<StyleImage> {krys::move(styleImage)}, hotSpot};
       });
 

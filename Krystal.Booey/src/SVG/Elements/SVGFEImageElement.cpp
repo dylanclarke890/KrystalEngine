@@ -228,8 +228,8 @@ namespace krys::boo
     }
 
     // Ignore 2D rotation, as it doesn't affect the image size.
-    FloatSize scale(static_cast<float>(absoluteTransform.XScale()),
-                    static_cast<float>(absoluteTransform.YScale()));
+    SizeF scale(static_cast<float>(absoluteTransform.XScale()),
+                static_cast<float>(absoluteTransform.YScale()));
     auto imageRect = renderer->RepaintRectInLocalCoordinates();
 
     auto imageBuffer = destinationContext.CreateScaledImageBuffer(imageRect, scale);
@@ -262,7 +262,7 @@ namespace krys::boo
         return nullptr;
       }
 
-      auto imageRect = FloatRect {{}, image->Size()};
+      auto imageRect = RectF {{}, image->Size()};
       return FEImage::Create({Ref<NativeImage>(nativeImage)}, imageRect, PreserveAspectRatio());
     }
 

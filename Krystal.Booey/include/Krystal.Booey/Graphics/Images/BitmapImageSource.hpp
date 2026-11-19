@@ -167,8 +167,8 @@ namespace krys::boo
     }
 
     // ImageFrame metadata
-    KRYS_NODISCARD IntSize FrameSizeAtIndex(uint32 index,
-                                            SubsamplingLevel = SubsamplingLevel::Default) const noexcept;
+    KRYS_NODISCARD SizeI FrameSizeAtIndex(uint32 index,
+                                          SubsamplingLevel = SubsamplingLevel::Default) const noexcept;
 
     KRYS_NODISCARD seconds FrameDurationAtIndex(uint32 index) const noexcept final;
 
@@ -289,19 +289,19 @@ namespace krys::boo
       return _descriptor.GetEncodedDataStatus();
     }
 
-    KRYS_NODISCARD IntSize
+    KRYS_NODISCARD SizeI
       Size(ImageOrientation orientation = ImageOrientation::Orientation::FromImage) const noexcept final
     {
       return _descriptor.Size(orientation);
     }
 
-    KRYS_NODISCARD IntSize
+    KRYS_NODISCARD SizeI
       SourceSize(ImageOrientation orientation = ImageOrientation::Orientation::FromImage) const noexcept final
     {
       return _descriptor.SourceSize(orientation);
     }
 
-    KRYS_NODISCARD Maybe<IntSize> DensityCorrectedSize() const noexcept
+    KRYS_NODISCARD Maybe<SizeI> DensityCorrectedSize() const noexcept
     {
       return _descriptor.DensityCorrectedSize();
     }
@@ -331,7 +331,7 @@ namespace krys::boo
       return _descriptor.AccessibilityDescription();
     }
 
-    KRYS_NODISCARD Maybe<IntPoint> HotSpot() const noexcept final
+    KRYS_NODISCARD Maybe<PointI> HotSpot() const noexcept final
     {
       return _descriptor.HotSpot();
     }
@@ -342,7 +342,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD SubsamplingLevel
-      SubsamplingLevelForScaleFactor(GraphicsContext &context, const FloatSize &scaleFactor,
+      SubsamplingLevelForScaleFactor(GraphicsContext &context, const SizeF &scaleFactor,
                                      AllowImageSubsampling allowImageSubsampling) noexcept final
     {
       return _descriptor.SubsamplingLevelForScaleFactor(context, scaleFactor, allowImageSubsampling);

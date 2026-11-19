@@ -39,9 +39,9 @@ namespace krys::boo
   namespace
   {
     // A square as large as fits, centred in the control's rect.
-    KRYS_NODISCARD FloatRect ButtonRect(const FloatRoundedRect &borderRect) noexcept
+    KRYS_NODISCARD RectF ButtonRect(const FloatRoundedRect &borderRect) noexcept
     {
-      FloatRect fieldRect = borderRect.Rect();
+      RectF fieldRect = borderRect.Rect();
       if (fieldRect.Width() != fieldRect.Height())
       {
         auto buttonSize = std::min(fieldRect.Width(), fieldRect.Height());
@@ -82,7 +82,7 @@ namespace krys::boo
   {
     GraphicsContextStateSaver stateSaver(graphicsContext);
 
-    FloatRect fieldRect = ButtonRect(borderRect);
+    RectF fieldRect = ButtonRect(borderRect);
 
     SRGBA<uint8> toggleBorderColor;
     SRGBA<uint8> toggleBorderHoverColor;
@@ -107,7 +107,7 @@ namespace krys::boo
       graphicsContext.BeginTransparencyLayer(static_cast<float>(DisabledOpacity));
     }
 
-    FloatSize corner(2, 2);
+    SizeF corner(2, 2);
     Path path;
 
     if (style.States.ContainsAny({ControlStyle::State::Checked, ControlStyle::State::Indeterminate}))
@@ -128,11 +128,11 @@ namespace krys::boo
 
       GraphicsContextStateSaver checkedStateSaver(graphicsContext);
       graphicsContext.Translate(fieldRect.X(), fieldRect.Y());
-      graphicsContext.Scale(FloatSize(static_cast<float>(fieldRect.Width() / ToggleSize),
-                                      static_cast<float>(fieldRect.Height() / ToggleSize)));
+      graphicsContext.Scale(SizeF(static_cast<float>(fieldRect.Width() / ToggleSize),
+                                  static_cast<float>(fieldRect.Height() / ToggleSize)));
       if (style.States.Contains(ControlStyle::State::Indeterminate))
       {
-        path.AddRoundedRect(FloatRect(2, 5, 10, 4), corner);
+        path.AddRoundedRect(RectF(2, 5, 10, 4), corner);
       }
       else
       {
@@ -186,7 +186,7 @@ namespace krys::boo
   {
     GraphicsContextStateSaver stateSaver(graphicsContext);
 
-    FloatRect fieldRect = ButtonRect(borderRect);
+    RectF fieldRect = ButtonRect(borderRect);
 
     SRGBA<uint8> toggleBorderColor;
     SRGBA<uint8> toggleBorderHoverColor;

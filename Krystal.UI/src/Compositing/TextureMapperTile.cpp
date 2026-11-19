@@ -4,7 +4,7 @@
 
 namespace krys::ui
 {
-  TextureMapperTile::TextureMapperTile(const boo::FloatRect &rect) noexcept : _rect(rect)
+  TextureMapperTile::TextureMapperTile(const RectF &rect) noexcept : _rect(rect)
   {
   }
 
@@ -21,15 +21,15 @@ namespace krys::ui
   }
 
   void TextureMapperTile::UpdateContents(TextureMapper &textureMapper, boo::Image &image,
-                                         const boo::IntRect &dirtyRect) noexcept
+                                         const RectI &dirtyRect) noexcept
   {
-    boo::IntRect targetRect = boo::EnclosingIntRect(_rect);
+    RectI targetRect = EnclosingRectI(_rect);
     targetRect.Intersect(dirtyRect);
     if (targetRect.IsEmpty())
     {
       return;
     }
-    boo::IntPoint sourceOffset = targetRect.Location();
+    PointI sourceOffset = targetRect.Location();
 
     // Normalize sourceRect to the buffer's coordinates.
     sourceOffset.Move(-dirtyRect.X(), -dirtyRect.Y());
@@ -43,29 +43,29 @@ namespace krys::ui
       {
         flags.Add(BitmapTexture::Flags::SupportsAlpha);
       }
-      _texture = BitmapTexture::Create(textureMapper.Device(), boo::EnclosingIntRect(_rect).Size(), flags);
+      _texture = BitmapTexture::Create(textureMapper.Device(), EnclosingRectI(_rect).Size(), flags);
     }
 
     textureMapper.UpdateContents(*_texture, image, targetRect, sourceOffset);
   }
 
   void TextureMapperTile::UpdateContents(TextureMapper &textureMapper, const boo::GraphicsLayer &sourceLayer,
-                                         const boo::IntRect &dirtyRect, float scale) noexcept
+                                         const RectI &dirtyRect, float scale) noexcept
   {
-    boo::IntRect targetRect = boo::EnclosingIntRect(_rect);
+    RectI targetRect = EnclosingRectI(_rect);
     targetRect.Intersect(dirtyRect);
     _dirtyRect = {};
     if (targetRect.IsEmpty())
     {
       return;
     }
-    boo::IntPoint sourceOffset = targetRect.Location();
+    PointI sourceOffset = targetRect.Location();
 
     // Normalize targetRect to the texture's coordinates.
     targetRect.Move(-static_cast<int32>(_rect.X()), -static_cast<int32>(_rect.Y()));
     if (!_texture)
     {
-      _texture = BitmapTexture::Create(textureMapper.Device(), boo::EnclosingIntRect(_rect).Size(),
+      _texture = BitmapTexture::Create(textureMapper.Device(), EnclosingRectI(_rect).Size(),
                                        {BitmapTexture::Flags::SupportsAlpha});
     }
 

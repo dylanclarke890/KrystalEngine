@@ -47,7 +47,7 @@ namespace krys::boo
     return _platformControl.get();
   }
 
-  FloatSize ControlPart::SizeForBounds(const FloatRect &bounds, const ControlStyle &style) noexcept
+  SizeF ControlPart::SizeForBounds(const RectF &bounds, const ControlStyle &style) noexcept
   {
     auto *platformControl = GetPlatformControl();
     if (!platformControl)
@@ -59,7 +59,7 @@ namespace krys::boo
     return platformControl->SizeForBounds(bounds, style);
   }
 
-  FloatRect ControlPart::RectForBounds(const FloatRect &bounds, const ControlStyle &style) noexcept
+  RectF ControlPart::RectForBounds(const RectF &bounds, const ControlStyle &style) noexcept
   {
     auto *platformControl = GetPlatformControl();
     if (!platformControl)
@@ -82,7 +82,7 @@ namespace krys::boo
 
     // It's important to get the clip from the context, because it may be significantly
     // smaller than the layer bounds (e.g. tiled layers)
-    platformControl->SetFocusRingClipRect(FloatRect(context.ClipBounds()));
+    platformControl->SetFocusRingClipRect(RectF(context.ClipBounds()));
 
     platformControl->UpdateCellStates(borderRect.Rect(), style);
     platformControl->Draw(context, borderRect, deviceScaleFactor, style);

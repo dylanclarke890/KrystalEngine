@@ -31,25 +31,25 @@
 
 namespace krys::boo
 {
-  Ref<StyleCursorImage> StyleCursorImage::Create(const Ref<StyleImage> &image, Maybe<IntPoint> hotSpot,
+  Ref<StyleCursorImage> StyleCursorImage::Create(const Ref<StyleImage> &image, Maybe<PointI> hotSpot,
                                                  const style::Url &originalUrl) noexcept
   {
     return AdoptRef(*new StyleCursorImage(image, hotSpot, originalUrl));
   }
 
-  Ref<StyleCursorImage> StyleCursorImage::Create(Ref<StyleImage> &&image, Maybe<IntPoint> hotSpot,
+  Ref<StyleCursorImage> StyleCursorImage::Create(Ref<StyleImage> &&image, Maybe<PointI> hotSpot,
                                                  style::Url &&originalUrl) noexcept
   {
     return AdoptRef(*new StyleCursorImage(krys::move(image), hotSpot, krys::move(originalUrl)));
   }
 
-  StyleCursorImage::StyleCursorImage(const Ref<StyleImage> &image, Maybe<IntPoint> hotSpot,
+  StyleCursorImage::StyleCursorImage(const Ref<StyleImage> &image, Maybe<PointI> hotSpot,
                                      const style::Url &originalUrl) noexcept
       : StyleMultiImage {Type::CursorImage}, _image {image}, _hotSpot {hotSpot}, _originalUrl {originalUrl}
   {
   }
 
-  StyleCursorImage::StyleCursorImage(Ref<StyleImage> &&image, Maybe<IntPoint> hotSpot,
+  StyleCursorImage::StyleCursorImage(Ref<StyleImage> &&image, Maybe<PointI> hotSpot,
                                      style::Url &&originalUrl) noexcept
       : StyleMultiImage {Type::CursorImage}, _image {krys::move(image)}, _hotSpot {hotSpot},
         _originalUrl {krys::move(originalUrl)}

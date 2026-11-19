@@ -744,7 +744,7 @@ namespace krys::boo
           glyphEndOffset = complexTextRun.EndOffsetAt(glyphIndexIntoCurrentRun);
         }
 
-        FloatSize adjustedBaseAdvance = _adjustedBaseAdvances[glyphIndexIntoComplexTextController];
+        SizeF adjustedBaseAdvance = _adjustedBaseAdvances[glyphIndexIntoComplexTextController];
 
         if (glyphStartOffset + complexTextRun.StringLocation() >= _currentCharacter)
         {
@@ -793,7 +793,7 @@ namespace krys::boo
           glyphBuffer->Add(_adjustedGlyphs[glyphIndexIntoComplexTextController], complexTextRun.GetFont(),
                            paintAdvance,
                            complexTextRun.IndexAt(glyphIndexIntoCurrentRun) + complexTextRun.StringLocation(),
-                           FloatPoint(textAutoSpaceSpacing, 0));
+                           PointF(textAutoSpaceSpacing, 0));
         }
 
         uint32 oldCharacterInCurrentGlyph = _characterInCurrentGlyph;
@@ -901,7 +901,7 @@ namespace krys::boo
       // it here.
       float spaceWidth = font.SpaceWidth(Font::SyntheticBoldInclusion::Exclude);
       auto charactersSpan = complexTextRun.Characters();
-      FloatPoint glyphOrigin;
+      PointF glyphOrigin;
       uint32 previousCharacterIndex =
         _run.Ltr() ? std::numeric_limits<uint32>::min() : std::numeric_limits<uint32>::max();
       bool isMonotonic = true;
@@ -927,8 +927,8 @@ namespace krys::boo
         char32 character = decoded.CodePoint;
         bool treatAsSpace = FontCascade::TreatAsSpace(character);
         Glyph glyph = glyphs[glyphIndex];
-        FloatSize advance =
-          treatAsSpace ? FloatSize(spaceWidth, advances[glyphIndex].Height()) : advances[glyphIndex];
+        SizeF advance =
+          treatAsSpace ? SizeF(spaceWidth, advances[glyphIndex].Height()) : advances[glyphIndex];
 
         if (character == text::TabCharacter && _run.AllowTabs())
         {
@@ -1097,7 +1097,7 @@ namespace krys::boo
         {
           krys_debug_assert(_glyphOrigins.size() < _adjustedBaseAdvances.size());
           _glyphOrigins.resize(_adjustedBaseAdvances.size());
-          _glyphOrigins.back() = origins[glyphIndex] + FloatSize(textAutoSpaceSpacing, 0);
+          _glyphOrigins.back() = origins[glyphIndex] + SizeF(textAutoSpaceSpacing, 0);
           krys_debug_assert(_glyphOrigins.size() == _adjustedBaseAdvances.size());
         }
         _adjustedGlyphs.push_back(glyph);
@@ -1151,13 +1151,15 @@ namespace krys::boo
     _glyphs.assign(_glyphCount, 0);
     // Synthetic bold will be handled later in AdjustGlyphsAndAdvances().
     _baseAdvances.assign(_glyphCount,
-                         FloatSize(_font->WidthForGlyph(0, Font::SyntheticBoldInclusion::Exclude), 0));
+                         SizeF(_font->WidthForGlyph(0, Font::SyntheticBoldInclusion::Exclude), 0));
   }
 
-  ComplexTextController::ComplexTextRun::ComplexTextRun(
-    Span<const FloatSize> advances, Span<const FloatPoint> origins, Span<const Glyph> glyphs,
-    Span<const uint32> stringIndices, FloatSize initialAdvance, const Font &font, utf8_stringview characters,
-    uint32 stringLocation, uint32 indexBegin, uint32 indexEnd, bool ltr) noexcept
+  ComplexTextController::ComplexTextRun::ComplexTextRun(Span<const SizeF> advances,
+                                                        Span<const PointF> origins, Span<const Glyph> glyphs,
+                                                        Span<const uint32> stringIndices,
+                                                        SizeF initialAdvance, const Font &font,
+                                                        utf8_stringview characters, uint32 stringLocation,
+                                                        uint32 indexBegin, uint32 indexEnd, bool ltr) noexcept
       : _baseAdvances(advances.begin(), advances.end()), _glyphOrigins(origins.begin(), origins.end()),
         _glyphs(glyphs.begin(), glyphs.end()), _coreTextIndices(stringIndices.begin(), stringIndices.end()),
         _initialAdvance(initialAdvance), _font(ShareRef(font)), _characters(characters),

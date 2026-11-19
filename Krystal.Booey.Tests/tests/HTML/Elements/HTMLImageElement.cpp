@@ -100,7 +100,7 @@ namespace krys::boo::tests
     CHECK(image.CurrentUrl().String() == u8"file:///a.png");
     CHECK_FALSE(image.Complete());
     CHECK(image.NaturalWidth() == 0u);
-    CHECK(fixture.RendererSize(u8"img") == IntSize(0, 0));
+    CHECK(fixture.RendererSize(u8"img") == SizeI(0, 0));
     CHECK(Count(fixture.Painted(), u8"draw-native-image") == 0u);
 
     loader.Strategy.CompleteDeferred();
@@ -112,7 +112,7 @@ namespace krys::boo::tests
     CHECK(image.NaturalWidth() == 3u);
     CHECK(image.NaturalHeight() == 2u);
     CHECK(image.Width() == 3u);
-    CHECK(fixture.RendererSize(u8"img") == IntSize(3, 2));
+    CHECK(fixture.RendererSize(u8"img") == SizeI(3, 2));
     auto *renderer = DynamicDowncast<RenderImage>(image.Renderer());
     REQUIRE(renderer);
     CHECK(renderer->GetCachedImage() == image.GetCachedImage());
@@ -145,7 +145,7 @@ namespace krys::boo::tests
     CHECK(missingSize.Height() > 10);
     CHECK(fixture.RendererSize(u8"nosrc").Width() > 10);
     // An empty alt makes a broken inline image collapse.
-    CHECK(fixture.RendererSize(u8"nothing") == IntSize(0, 0));
+    CHECK(fixture.RendererSize(u8"nothing") == SizeI(0, 0));
 
     auto painted = fixture.Painted();
     CHECK(Count(painted, u8"draw-glyphs") == 2u);
@@ -163,7 +163,7 @@ namespace krys::boo::tests
     RunNetworkingTasks();
 
     // The 16px icon with 4px of padding sizes the box.
-    CHECK(fixture.RendererSize(u8"broken") == IntSize(20, 20));
+    CHECK(fixture.RendererSize(u8"broken") == SizeI(20, 20));
 
     // It's drawn (its hill is green) inside the grey outline wherever it fits: not in the tiny image.
     auto painted = fixture.Painted();
@@ -180,14 +180,14 @@ namespace krys::boo::tests
     ImageFixture fixture(u8"<img id=text alt=a><img id=loaded alt=a src='file:///a.png'>");
     RunNetworkingTasks();
     auto small = fixture.RendererSize(u8"text");
-    CHECK(fixture.RendererSize(u8"loaded") == IntSize(3, 2));
+    CHECK(fixture.RendererSize(u8"loaded") == SizeI(3, 2));
 
     fixture.Image(u8"text").Alt(u8"a much longer label");
     CHECK(fixture.RendererSize(u8"text").Width() > small.Width());
 
     // An alt change leaves a loaded image alone, and losing the image shows the text.
     fixture.Image(u8"loaded").Alt(u8"b");
-    CHECK(fixture.RendererSize(u8"loaded") == IntSize(3, 2));
+    CHECK(fixture.RendererSize(u8"loaded") == SizeI(3, 2));
     fixture.Image(u8"loaded").RemoveAttribute(u8"src");
     RunNetworkingTasks();
     CHECK(fixture.RendererSize(u8"loaded") == small);
@@ -232,14 +232,14 @@ namespace krys::boo::tests
                          u8"<img id=contain style='width: 30px; height: 30px; object-fit: contain' "
                          u8"src='file:///a.png'>");
     // The attributes are the aspect ratio while the image loads.
-    CHECK(fixture.RendererSize(u8"both") == IntSize(40, 20));
+    CHECK(fixture.RendererSize(u8"both") == SizeI(40, 20));
 
     loader.Strategy.CompleteDeferred();
     RunNetworkingTasks();
 
-    CHECK(fixture.RendererSize(u8"both") == IntSize(40, 20));
-    CHECK(fixture.RendererSize(u8"width") == IntSize(60, 40));
-    CHECK(fixture.RendererSize(u8"contain") == IntSize(30, 30));
+    CHECK(fixture.RendererSize(u8"both") == SizeI(40, 20));
+    CHECK(fixture.RendererSize(u8"width") == SizeI(60, 40));
+    CHECK(fixture.RendererSize(u8"contain") == SizeI(30, 30));
     // The contained image is centred in its box: 30x20, 5px down.
     CHECK(Count(fixture.Painted(), u8"(dest-rect at (8,73) size 30x20)") == 1u);
   }
@@ -266,7 +266,7 @@ namespace krys::boo::tests
     CHECK(widths.CurrentUrl().String() == u8"file:///large.jpg");
     CHECK(widths.NaturalWidth() == 8u);
     CHECK(widths.NaturalHeight() == 4u);
-    CHECK(fixture.RendererSize(u8"widths") == IntSize(8, 4));
+    CHECK(fixture.RendererSize(u8"widths") == SizeI(8, 4));
     CHECK(std::ranges::find(loader.Strategy.Requests, u8"file:///small.png")
           == loader.Strategy.Requests.end());
 
@@ -299,7 +299,7 @@ namespace krys::boo::tests
     CHECK(image.CurrentUrl().String() == u8"file:///photo.jpg");
     CHECK(image.UsesSrcsetOrPicture());
     // The selected source's width and height are the image's.
-    CHECK(fixture.RendererSize(u8"img") == IntSize(32, 16));
+    CHECK(fixture.RendererSize(u8"img") == SizeI(32, 16));
 
     auto events = LoadEvents::ListenTo(image);
     REQUIRE_FALSE(fixture.ById(u8"jpeg").Remove().HasException());
@@ -307,7 +307,7 @@ namespace krys::boo::tests
 
     CHECK(image.CurrentUrl().String() == u8"file:///fallback.png");
     CHECK(events->Loads == 1);
-    CHECK(fixture.RendererSize(u8"img") == IntSize(3, 2));
+    CHECK(fixture.RendererSize(u8"img") == SizeI(3, 2));
     CHECK(std::ranges::find(loader.Strategy.Requests, u8"file:///photo.avif")
           == loader.Strategy.Requests.end());
     CHECK(std::ranges::find(loader.Strategy.Requests, u8"file:///wide.png")
@@ -389,7 +389,7 @@ namespace krys::boo::tests
     CHECK(events->Loads == 2);
     CHECK(image.Complete());
     CHECK(image.CurrentUrl().String() == u8"file:///b.jpg");
-    CHECK(fixture.RendererSize(u8"img") == IntSize(16, 8));
+    CHECK(fixture.RendererSize(u8"img") == SizeI(16, 8));
 
     // Setting the same source again fires load again, from the memory cache.
     REQUIRE_FALSE(image.SetAttribute(u8"src", u8"file:///b.jpg").HasException());
@@ -410,11 +410,11 @@ namespace krys::boo::tests
     // 16x8 at 144 dots per inch.
     CHECK(fixture.Image(u8"one").NaturalWidth() == 8u);
     CHECK(fixture.Image(u8"one").NaturalHeight() == 4u);
-    CHECK(fixture.RendererSize(u8"one") == IntSize(8, 4));
+    CHECK(fixture.RendererSize(u8"one") == SizeI(8, 4));
     // Then halved again for its density.
     CHECK(fixture.Image(u8"two").NaturalWidth() == 4u);
     CHECK(fixture.Image(u8"two").NaturalHeight() == 2u);
-    CHECK(fixture.RendererSize(u8"two") == IntSize(4, 2));
+    CHECK(fixture.RendererSize(u8"two") == SizeI(4, 2));
   }
 
   TEST_CASE("HTMLImageElement: generated content images", "[HTML][HTMLImageElement]")
@@ -430,7 +430,7 @@ namespace krys::boo::tests
     auto *replaced = DynamicDowncast<RenderImage>(fixture.ById(u8"replaced").Renderer());
     REQUIRE(replaced);
     CHECK(replaced->IsGeneratedContent());
-    CHECK(fixture.RendererSize(u8"replaced") == IntSize(3, 2));
+    CHECK(fixture.RendererSize(u8"replaced") == SizeI(3, 2));
     CHECK(Count(fixture.Painted(), u8"draw-native-image") == 2u);
   }
 

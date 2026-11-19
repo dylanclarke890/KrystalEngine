@@ -58,7 +58,7 @@ namespace krys::boo
     AffineTransform _localTransform;
     SVGTextLayoutAttributesBuilder _layoutAttributesBuilder;
     List<SVGTextLayoutAttributes *> _layoutAttributes;
-    FloatRect _objectBoundingBox;
+    RectF _objectBoundingBox;
 
   public:
     RenderSVGText(SVGTextElement &, RenderStyle &&) noexcept;
@@ -107,21 +107,21 @@ namespace krys::boo
 
     void SubtreeTextDidChange(RenderSVGInlineText *) noexcept;
 
-    KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept final
+    KRYS_NODISCARD RectF ObjectBoundingBox() const noexcept final
     {
       return _objectBoundingBox;
     }
 
-    KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept final;
+    KRYS_NODISCARD RectF StrokeBoundingBox() const noexcept final;
 
     KRYS_NODISCARD bool IsObjectBoundingBoxValid() const noexcept;
 
-    KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
+    KRYS_NODISCARD RectF RepaintRectInLocalCoordinates(
       RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept final;
 
-    KRYS_NODISCARD FloatRect DecoratedBoundingBox() const noexcept final;
+    KRYS_NODISCARD RectF DecoratedBoundingBox() const noexcept final;
 
-    void UpdatePositionAndOverflow(const FloatRect &) noexcept;
+    void UpdatePositionAndOverflow(const RectF &) noexcept;
 
     KRYS_NODISCARD SVGRootInlineBox *LegacyRootBox() const noexcept;
 
@@ -157,9 +157,9 @@ namespace krys::boo
     void LayoutCharactersInTextBoxes(const inline_iterator::InlineBoxIterator &,
                                      SVGTextLayoutEngine &) noexcept;
 
-    FloatRect LayoutChildBoxes(LegacyInlineFlowBox *, SVGTextFragmentMap &) noexcept;
+    RectF LayoutChildBoxes(LegacyInlineFlowBox *, SVGTextFragmentMap &) noexcept;
 
-    void LayoutRootBox(const FloatRect &) noexcept;
+    void LayoutRootBox(const RectF &) noexcept;
 
     void ReorderValueListsToLogicalOrder() noexcept;
 
@@ -167,8 +167,8 @@ namespace krys::boo
 
     void StyleDidChange(style::Difference, const RenderStyle *oldStyle) noexcept final;
 
-    bool NodeAtFloatPoint(const HitTestRequest &, HitTestResult &, const FloatPoint &pointInParent,
-                          HitTestAction) noexcept override;
+    bool NodeAtPointF(const HitTestRequest &, HitTestResult &, const PointF &pointInParent,
+                      HitTestAction) noexcept override;
 
     KRYS_NODISCARD const AffineTransform &LocalToParentTransform() const noexcept override
     {

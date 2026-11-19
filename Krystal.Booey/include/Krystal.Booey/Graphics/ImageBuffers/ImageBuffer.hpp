@@ -27,12 +27,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBufferBackend.hpp"
 #include "Krystal.Booey/Graphics/RenderingResourceIdentifier.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -41,11 +40,9 @@
 namespace krys::boo
 {
   class DestinationColorSpace;
-  class FloatRect;
   class GraphicsClient;
   class GraphicsContext;
   class GraphicsLayerContentsDisplayDelegate;
-  class IntRect;
   class NativeImage;
   class PixelBuffer;
   struct PixelBufferFormat;
@@ -55,7 +52,7 @@ namespace krys::boo
   /// it's for.
   struct ImageBufferParameters
   {
-    FloatSize LogicalSize;
+    SizeF LogicalSize;
     float ResolutionScale;
     RenderingPurpose Purpose {RenderingPurpose::Unspecified};
   };
@@ -80,18 +77,18 @@ namespace krys::boo
     /// @brief A buffer of @p size logical units, @p resolutionScale backend pixels a unit, drawn as @p mode
     /// asks: by @p graphicsClient's backend when it has one, otherwise into a display list; null when the
     /// backend size is empty.
-    KRYS_NODISCARD static RefPtr<ImageBuffer> Create(const FloatSize &size, RenderingMode mode,
+    KRYS_NODISCARD static RefPtr<ImageBuffer> Create(const SizeF &size, RenderingMode mode,
                                                      RenderingPurpose purpose, float resolutionScale,
                                                      const DestinationColorSpace &colorSpace,
                                                      GraphicsClient *graphicsClient = nullptr) noexcept;
 
     /// @brief An unaccelerated buffer for no purpose in particular, in sRGB.
-    KRYS_NODISCARD static RefPtr<ImageBuffer> Create(const FloatSize &size, float resolutionScale) noexcept;
+    KRYS_NODISCARD static RefPtr<ImageBuffer> Create(const SizeF &size, float resolutionScale) noexcept;
 
     /// @brief A buffer whose backend is a @p TBackend, made from the backend parameters and @p arguments;
     /// null when the backend size is empty or the backend can't be made.
     template <typename TBackend, typename... TArguments>
-    KRYS_NODISCARD static RefPtr<ImageBuffer> Create(const FloatSize &size, float resolutionScale,
+    KRYS_NODISCARD static RefPtr<ImageBuffer> Create(const SizeF &size, float resolutionScale,
                                                      RenderingPurpose purpose,
                                                      TArguments &&...arguments) noexcept
     {
@@ -114,13 +111,13 @@ namespace krys::boo
 
     ~ImageBuffer() noexcept;
 
-    KRYS_NODISCARD static IntSize CalculateBackendSize(FloatSize logicalSize, float resolutionScale) noexcept;
+    KRYS_NODISCARD static SizeI CalculateBackendSize(SizeF logicalSize, float resolutionScale) noexcept;
 
     KRYS_NODISCARD static ImageBufferBackendParameters BackendParameters(const Parameters &) noexcept;
 
-    KRYS_NODISCARD static bool SizeNeedsClamping(const FloatSize &) noexcept;
+    KRYS_NODISCARD static bool SizeNeedsClamping(const SizeF &) noexcept;
 
-    KRYS_NODISCARD static bool SizeNeedsClamping(const FloatSize &, FloatSize &scale) noexcept;
+    KRYS_NODISCARD static bool SizeNeedsClamping(const SizeF &, SizeF &scale) noexcept;
 
     KRYS_NODISCARD GraphicsContext &Context() const noexcept;
 
@@ -135,7 +132,7 @@ namespace krys::boo
     /// @brief What shows the buffer as a layer's contents; null when it's painted instead.
     KRYS_NODISCARD RefPtr<GraphicsLayerContentsDisplayDelegate> LayerContentsDisplayDelegate() const noexcept;
 
-    KRYS_NODISCARD IntSize BackendSize() const noexcept;
+    KRYS_NODISCARD SizeI BackendSize() const noexcept;
 
     /// @brief An immutable copy of what's been drawn; null if the backend can't make one.
     KRYS_NODISCARD RefPtr<NativeImage> CopyNativeImage() const noexcept;
@@ -152,7 +149,7 @@ namespace krys::boo
     /// @brief Reads @p srcRect (in logical units) into a new pixel buffer of @p outputFormat; what's outside
     /// the buffer is transparent black. Null if the pixel buffer can't be made.
     KRYS_NODISCARD RefPtr<PixelBuffer> GetPixelBuffer(const PixelBufferFormat &destinationFormat,
-                                                      const IntRect &sourceRect) const noexcept;
+                                                      const RectI &sourceRect) const noexcept;
 
     /// @brief What's been drawn, encoded as @p mimeType (PNG, JPEG or WebP; a JPEG is drawn over black) as a
     /// `data:` URL; `data:,` if it can't be.
@@ -171,8 +168,7 @@ namespace krys::boo
     /// @brief Writes @p srcRect of @p pixelBuffer at @p destPoint, replacing what's there, whatever the
     /// context's state.
     void PutPixelBuffer(
-      const PixelBufferSourceView &pixelBuffer, const IntRect &sourceRect,
-      const IntPoint &destinationPoint = {},
+      const PixelBufferSourceView &pixelBuffer, const RectI &sourceRect, const PointI &destinationPoint = {},
       AlphaPremultiplication destinationFormat = AlphaPremultiplication::Premultiplied) noexcept;
 
     /// @brief Turns what's drawn into a luminance mask (for `mask-mode: luminance`).
@@ -187,15 +183,15 @@ namespace krys::boo
       return _renderingResourceIdentifier;
     }
 
-    KRYS_NODISCARD FloatSize LogicalSize() const noexcept
+    KRYS_NODISCARD SizeF LogicalSize() const noexcept
     {
       return _parameters.LogicalSize;
     }
 
-    KRYS_NODISCARD IntSize TruncatedLogicalSize() const noexcept // You probably should be calling
-                                                                 // logicalSize() instead.
+    KRYS_NODISCARD SizeI TruncatedLogicalSize() const noexcept // You probably should be calling
+                                                               // logicalSize() instead.
     {
-      return IntSize(_parameters.LogicalSize);
+      return SizeI(_parameters.LogicalSize);
     }
 
     KRYS_NODISCARD float ResolutionScale() const noexcept

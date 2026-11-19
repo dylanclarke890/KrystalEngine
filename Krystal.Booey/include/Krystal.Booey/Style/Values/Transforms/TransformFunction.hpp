@@ -97,6 +97,6 @@ namespace krys::boo::style
   template <>
   struct ToPlatform<TransformFunction>
   {
-    KRYS_NODISCARD Ref<TransformOperation> operator()(const TransformFunction &, const FloatSize &) noexcept;
+    KRYS_NODISCARD Ref<TransformOperation> operator()(const TransformFunction &, const SizeF &) noexcept;
   };
 }

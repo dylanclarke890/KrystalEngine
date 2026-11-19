@@ -26,7 +26,6 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStream.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimationAdditiveValueFunction.hpp"
@@ -34,6 +33,7 @@
 #include "Krystal.Booey/SVG/SVGAngleValue.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 #include "Krystal.Booey/SVG/SVGLengthValue.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include <cmath>
 
 namespace krys::boo
@@ -315,27 +315,27 @@ namespace krys::boo
     }
   };
 
-  class SVGAnimationRectFunction : public SVGAnimationAdditiveValueFunction<FloatRect>
+  class SVGAnimationRectFunction : public SVGAnimationAdditiveValueFunction<RectF>
   {
   public:
-    using Base = SVGAnimationAdditiveValueFunction<FloatRect>;
+    using Base = SVGAnimationAdditiveValueFunction<RectF>;
     using Base::Base;
 
     void SetFromAndToValues(SVGElement &targetElement, DOMStringView from, DOMStringView to) noexcept override
     {
-      _from = SVGPropertyTraits<FloatRect>::FromString(targetElement, from);
-      _to = SVGPropertyTraits<FloatRect>::FromString(targetElement, to);
+      _from = SVGPropertyTraits<RectF>::FromString(targetElement, from);
+      _to = SVGPropertyTraits<RectF>::FromString(targetElement, to);
     }
 
     void SetToAtEndOfDurationValue(SVGElement &targetElement,
                                    DOMStringView toAtEndOfDuration) noexcept override
     {
-      _toAtEndOfDuration = SVGPropertyTraits<FloatRect>::FromString(targetElement, toAtEndOfDuration);
+      _toAtEndOfDuration = SVGPropertyTraits<RectF>::FromString(targetElement, toAtEndOfDuration);
     }
 
-    void Animate(SVGElement &, float progress, uint32 repeatCount, FloatRect &animated) noexcept
+    void Animate(SVGElement &, float progress, uint32 repeatCount, RectF &animated) noexcept
     {
-      FloatRect from = _animationMode == svg::AnimationMode::To ? animated : _from;
+      RectF from = _animationMode == svg::AnimationMode::To ? animated : _from;
 
       float x =
         Base::Animate(progress, repeatCount, from.X(), _to.X(), ToAtEndOfDuration().X(), animated.X());

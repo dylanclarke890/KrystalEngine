@@ -120,7 +120,7 @@ namespace krys::boo
     return !std::max(0.0f, RadiusX()) && !std::max(0.0f, RadiusY());
   }
 
-  IntOutsets SVGFEMorphologyElement::Outsets(const FloatRect &targetBoundingBox,
+  IntOutsets SVGFEMorphologyElement::Outsets(const RectF &targetBoundingBox,
                                              SVGUnitTypes::SVGUnitType primitiveUnits) const noexcept
   {
     auto radius =

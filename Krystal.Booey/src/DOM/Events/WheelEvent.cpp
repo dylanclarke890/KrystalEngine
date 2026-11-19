@@ -44,7 +44,7 @@ namespace krys::boo
       return init;
     }
 
-    KRYS_NODISCARD DoublePoint ToDoublePoint(const IntPoint &point) noexcept
+    KRYS_NODISCARD PointD ToPointD(const PointI &point) noexcept
     {
       return {static_cast<double>(point.X()), static_cast<double>(point.Y())};
     }
@@ -58,8 +58,8 @@ namespace krys::boo
 
   WheelEvent::WheelEvent(const PlatformWheelEvent &event, LocalFrameView *view,
                          IsCancelable isCancelable) noexcept
-      : MouseEvent(event_names::Wheel, TrustedInit(isCancelable), view, ToDoublePoint(event.GlobalPosition()),
-                   ToDoublePoint(event.Position()), 0, 0, event.Modifiers(), MouseButton::Left, 0, nullptr, 0,
+      : MouseEvent(event_names::Wheel, TrustedInit(isCancelable), view, ToPointD(event.GlobalPosition()),
+                   ToPointD(event.Position()), 0, 0, event.Modifiers(), MouseButton::Left, 0, nullptr, 0,
                    SyntheticClickType::NoTap, {}, {}, Simulated::No),
         _deltaX(-event.DeltaX()), _deltaY(-event.DeltaY()), _deltaMode(DetermineDeltaMode(event)),
         _underlyingPlatformEvent(event)

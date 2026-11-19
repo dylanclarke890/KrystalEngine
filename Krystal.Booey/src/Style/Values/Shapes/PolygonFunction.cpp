@@ -24,48 +24,48 @@
 
 #include "Krystal.Booey/Style/Values/Shapes/PolygonFunction.hpp"
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/TinyLRUCache.hpp"
 
 namespace krys::boo::style
 {
   // MARK: - Path Caching
 
-  struct PolygonPathPolicy : TinyLRUCachePolicy<List<FloatPoint>, boo::Path>
+  struct PolygonPathPolicy : TinyLRUCachePolicy<List<PointF>, boo::Path>
   {
   public:
-    KRYS_NODISCARD static bool IsKeyNull(const List<FloatPoint> &points) noexcept
+    KRYS_NODISCARD static bool IsKeyNull(const List<PointF> &points) noexcept
     {
       return points.empty();
     }
 
-    KRYS_NODISCARD static boo::Path CreateValueForKey(const List<FloatPoint> &points) noexcept
+    KRYS_NODISCARD static boo::Path CreateValueForKey(const List<PointF> &points) noexcept
     {
       return boo::Path(points);
     }
   };
 
-  static const boo::Path &CachedPolygonPath(const List<FloatPoint> &points)
+  static const boo::Path &CachedPolygonPath(const List<PointF> &points)
   {
-    static NeverDestroyed<TinyLRUCache<List<FloatPoint>, boo::Path, 4, PolygonPathPolicy>> cache;
+    static NeverDestroyed<TinyLRUCache<List<PointF>, boo::Path, 4, PolygonPathPolicy>> cache;
     return cache.get().Get(points);
   }
 
   // MARK: - Path
 
-  boo::Path PathComputation<Polygon>::operator()(const Polygon &value, const FloatRect &boundingBox) noexcept
+  boo::Path PathComputation<Polygon>::operator()(const Polygon &value, const RectF &boundingBox) noexcept
   {
     auto boundingLocation = boundingBox.Location();
     auto boundingSize = boundingBox.Size();
-    List<FloatPoint> points;
+    List<PointF> points;
     points.reserve(value.Vertices.size());
     for (const auto &vertex : value.Vertices)
     {
-      points.push_back(Evaluate<FloatPoint>(vertex, boundingSize, style::ZoomNeeded {}) + boundingLocation);
+      points.push_back(Evaluate<PointF>(vertex, boundingSize, style::ZoomNeeded {}) + boundingLocation);
     }
     return CachedPolygonPath(points);
   }

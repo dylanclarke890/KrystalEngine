@@ -108,8 +108,8 @@ namespace krys::boo
     return true;
   }
 
-  FloatRect FEDropShadow::CalculateImageRect(const Filter &filter, Span<const FloatRect> inputImageRects,
-                                             const FloatRect &primitiveSubregion) const noexcept
+  RectF FEDropShadow::CalculateImageRect(const Filter &filter, Span<const RectF> inputImageRects,
+                                         const RectF &primitiveSubregion) const noexcept
   {
     auto imageRect = inputImageRects[0];
     auto imageRectWithOffset(imageRect);
@@ -125,9 +125,9 @@ namespace krys::boo
     return filter.ClipToMaxEffectRect(imageRect, primitiveSubregion);
   }
 
-  IntOutsets FEDropShadow::CalculateOutsets(const FloatSize &offset, const FloatSize &stdDeviation) noexcept
+  IntOutsets FEDropShadow::CalculateOutsets(const SizeF &offset, const SizeF &stdDeviation) noexcept
   {
-    IntSize outsetSize = FEGaussianBlur::CalculateOutsetSize(stdDeviation);
+    SizeI outsetSize = FEGaussianBlur::CalculateOutsetSize(stdDeviation);
 
     int top = std::max<int>(0, static_cast<int>(outsetSize.Height() - offset.Height()));
     int right = std::max<int>(0, static_cast<int>(outsetSize.Width() + offset.Width()));

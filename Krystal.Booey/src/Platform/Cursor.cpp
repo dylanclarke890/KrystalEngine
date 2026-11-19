@@ -24,14 +24,14 @@
  */
 
 #include "Krystal.Booey/Platform/Cursor.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD IntPoint DetermineHotSpot(const Image &image, const IntPoint &specifiedHotSpot,
-                                             float scale) noexcept
+    KRYS_NODISCARD PointI DetermineHotSpot(const Image &image, const PointI &specifiedHotSpot,
+                                           float scale) noexcept
     {
       if (image.IsNull())
       {
@@ -40,8 +40,8 @@ namespace krys::boo
 
       // Hot spot must be inside cursor rectangle.
       auto size = image.Size();
-      IntRect imageRect(IntPoint(), IntSize(static_cast<int32>(size.Width() / scale),
-                                            static_cast<int32>(size.Height() / scale)));
+      RectI imageRect(
+        PointI(), SizeI(static_cast<int32>(size.Width() / scale), static_cast<int32>(size.Height() / scale)));
       if (imageRect.Contains(specifiedHotSpot))
       {
         return specifiedHotSpot;
@@ -60,7 +60,7 @@ namespace krys::boo
     }
   }
 
-  Cursor::Cursor(Image &image, const IntPoint &hotSpot, float scale) noexcept
+  Cursor::Cursor(Image &image, const PointI &hotSpot, float scale) noexcept
       : _type(Type::Custom), _image(ShareRefPtr(&image)), _hotSpot(DetermineHotSpot(image, hotSpot, scale)),
         _imageScaleFactor(scale)
   {

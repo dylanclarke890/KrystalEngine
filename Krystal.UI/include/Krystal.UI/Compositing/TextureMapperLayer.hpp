@@ -2,14 +2,14 @@
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerEnums.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
@@ -36,16 +36,16 @@ namespace krys::ui
   private:
     struct State
     {
-      boo::FloatPoint Pos;
+      PointF Pos;
       boo::FloatPoint3D AnchorPoint {0.5, 0.5, 0};
-      boo::FloatPoint BoundsOrigin;
-      boo::FloatSize Size;
+      PointF BoundsOrigin;
+      SizeF Size;
       boo::TransformationMatrix Transform;
       boo::TransformationMatrix ChildrenTransform;
       float Opacity {1};
-      boo::FloatRect ContentsRect;
-      boo::FloatSize ContentsTileSize;
-      boo::FloatSize ContentsTilePhase;
+      RectF ContentsRect;
+      SizeF ContentsTileSize;
+      SizeF ContentsTilePhase;
       boo::FloatRoundedRect ContentsClippingRect;
       WeakPtr<TextureMapperLayer> MaskLayer;
       WeakPtr<TextureMapperLayer> ReplicaLayer;
@@ -111,11 +111,11 @@ namespace krys::ui
 
     void SetBackdropFiltersRect(const boo::FloatRoundedRect &backdropFiltersRect) noexcept;
 
-    void SetPosition(const boo::FloatPoint &position) noexcept;
+    void SetPosition(const PointF &position) noexcept;
 
-    void SetBoundsOrigin(const boo::FloatPoint &boundsOrigin) noexcept;
+    void SetBoundsOrigin(const PointF &boundsOrigin) noexcept;
 
-    void SetSize(const boo::FloatSize &size) noexcept;
+    void SetSize(const SizeF &size) noexcept;
 
     void SetAnchorPoint(const boo::FloatPoint3D &anchorPoint) noexcept;
 
@@ -125,7 +125,7 @@ namespace krys::ui
 
     void SetChildrenTransform(const boo::TransformationMatrix &childrenTransform) noexcept;
 
-    void SetContentsRect(const boo::FloatRect &contentsRect) noexcept;
+    void SetContentsRect(const RectF &contentsRect) noexcept;
 
     void SetMasksToBounds(bool masksToBounds) noexcept;
 
@@ -141,7 +141,7 @@ namespace krys::ui
       return _state.ContentsVisible;
     }
 
-    KRYS_NODISCARD boo::FloatSize Size() const noexcept
+    KRYS_NODISCARD SizeF Size() const noexcept
     {
       return _state.Size;
     }
@@ -177,9 +177,9 @@ namespace krys::ui
 
     void SetBackgroundColor(const boo::Color &color) noexcept;
 
-    void SetContentsTileSize(const boo::FloatSize &size) noexcept;
+    void SetContentsTileSize(const SizeF &size) noexcept;
 
-    void SetContentsTilePhase(const boo::FloatSize &phase) noexcept;
+    void SetContentsTilePhase(const SizeF &phase) noexcept;
 
     void SetContentsClippingRect(const boo::FloatRoundedRect &contentsClippingRect) noexcept;
 
@@ -235,7 +235,7 @@ namespace krys::ui
 
     void AddChild(TextureMapperLayer *childLayer) noexcept;
 
-    KRYS_NODISCARD boo::FloatRect EffectiveLayerRect() const noexcept;
+    KRYS_NODISCARD RectF EffectiveLayerRect() const noexcept;
 
   private:
     void ComputeTransformsRecursive() noexcept;
@@ -302,9 +302,9 @@ namespace krys::ui
       return _state.BackdropLayer != nullptr;
     }
 
-    KRYS_NODISCARD boo::FloatRect LayerRect() const noexcept
+    KRYS_NODISCARD RectF LayerRect() const noexcept
     {
-      return {boo::FloatPoint(), _state.Size};
+      return {PointF(), _state.Size};
     }
   };
 }

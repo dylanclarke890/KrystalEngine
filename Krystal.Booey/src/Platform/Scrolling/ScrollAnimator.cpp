@@ -47,7 +47,7 @@ namespace krys::boo
     constexpr double FramesPerSecond = 60;
     constexpr double MaxAnimationDurationInSeconds = 1.5;
 
-    KRYS_NODISCARD float ComponentForAxis(const FloatPoint &point, ScrollEventAxis axis) noexcept
+    KRYS_NODISCARD float ComponentForAxis(const PointF &point, ScrollEventAxis axis) noexcept
     {
       return axis == ScrollEventAxis::Horizontal ? point.X() : point.Y();
     }
@@ -62,11 +62,11 @@ namespace krys::boo
   {
   }
 
-  bool ScrollAnimator::ScrollToOffsetWithAnimation(const FloatPoint &destinationOffset,
+  bool ScrollAnimator::ScrollToOffsetWithAnimation(const PointF &destinationOffset,
                                                    ScrollType scrollType) noexcept
   {
-    FloatPoint minimum(_scrollableArea.MinimumScrollOffset());
-    FloatPoint maximum(_scrollableArea.MaximumScrollOffset());
+    PointF minimum(_scrollableArea.MinimumScrollOffset());
+    PointF maximum(_scrollableArea.MaximumScrollOffset());
     auto destination = destinationOffset.ConstrainedBetween(minimum, maximum);
 
     // A running animation is retargeted, already moving, so it only eases out. A new one has the curve that
@@ -78,7 +78,7 @@ namespace krys::boo
     }
     else
     {
-      _currentOffset = FloatPoint(_scrollableArea.GetScrollOffset());
+      _currentOffset = PointF(_scrollableArea.GetScrollOffset());
       _timingFunction = RefPtr<TimingFunction>(CubicBezierTimingFunction::Create(0.4, 0, 0, 1));
     }
 
@@ -112,21 +112,21 @@ namespace krys::boo
     }
 
     // What it can reach may have changed since it started.
-    _destinationOffset = _destinationOffset.ConstrainedBetween(
-      FloatPoint(_scrollableArea.MinimumScrollOffset()), FloatPoint(_scrollableArea.MaximumScrollOffset()));
+    _destinationOffset = _destinationOffset.ConstrainedBetween(PointF(_scrollableArea.MinimumScrollOffset()),
+                                                               PointF(_scrollableArea.MaximumScrollOffset()));
 
     double elapsed = std::chrono::duration<double>(now - *_startTime).count();
     bool finished = elapsed >= _durationInSeconds;
     double progress =
       finished ? 1 : _timingFunction->TransformProgress(elapsed / _durationInSeconds, _durationInSeconds);
     _currentOffset =
-      FloatPoint(static_cast<float>(Interpolate(progress, _startOffset.X(), _destinationOffset.X())),
-                 static_cast<float>(Interpolate(progress, _startOffset.Y(), _destinationOffset.Y())));
+      PointF(static_cast<float>(Interpolate(progress, _startOffset.X(), _destinationOffset.X())),
+             static_cast<float>(Interpolate(progress, _startOffset.Y(), _destinationOffset.Y())));
 
     auto oldScrollType = _scrollableArea.CurrentScrollType();
     _scrollableArea.SetCurrentScrollType(_scrollType);
     _scrollableArea.NotifyScrollPositionChanged(
-      _scrollableArea.ScrollPositionFromOffset(RoundedIntPoint(_currentOffset)));
+      _scrollableArea.ScrollPositionFromOffset(RoundedPointI(_currentOffset)));
     _scrollableArea.SetCurrentScrollType(oldScrollType);
 
     if (finished)
@@ -145,9 +145,8 @@ namespace krys::boo
     _verticalSnapTargets.clear();
   }
 
-  FloatPoint
-    ScrollAnimator::ScrollOffsetAdjustedForSnapping(const FloatPoint &offset,
-                                                    ScrollSnapPointSelectionMethod method) const noexcept
+  PointF ScrollAnimator::ScrollOffsetAdjustedForSnapping(const PointF &offset,
+                                                         ScrollSnapPointSelectionMethod method) const noexcept
   {
     if (!_snapOffsetsInfo || method == ScrollSnapPointSelectionMethod::None)
     {
@@ -160,13 +159,13 @@ namespace krys::boo
       {
         return AdjustedScrollDestination(axis, offset, 0);
       }
-      float current = ComponentForAxis(FloatPoint(_scrollableArea.GetScrollOffset()), axis);
+      float current = ComponentForAxis(PointF(_scrollableArea.GetScrollOffset()), axis);
       return AdjustedScrollDestination(axis, offset, ComponentForAxis(offset, axis) - current, current);
     };
-    return FloatPoint(forAxis(ScrollEventAxis::Horizontal), forAxis(ScrollEventAxis::Vertical));
+    return PointF(forAxis(ScrollEventAxis::Horizontal), forAxis(ScrollEventAxis::Vertical));
   }
 
-  float ScrollAnimator::AdjustedScrollDestination(ScrollEventAxis axis, const FloatPoint &destination,
+  float ScrollAnimator::AdjustedScrollDestination(ScrollEventAxis axis, const PointF &destination,
                                                   float velocity, Maybe<float> originalOffset) const noexcept
   {
     if (!_snapOffsetsInfo)
@@ -182,8 +181,8 @@ namespace krys::boo
     auto [target, index] = _snapOffsetsInfo->ClosestSnapOffset(
       axis, LayoutSize(_scrollableArea.VisibleSize()),
       LayoutPoint(LayoutUnit(destination.X()), LayoutUnit(destination.Y())), velocity, original);
-    float minimum = ComponentForAxis(FloatPoint(_scrollableArea.MinimumScrollOffset()), axis);
-    float maximum = ComponentForAxis(FloatPoint(_scrollableArea.MaximumScrollOffset()), axis);
+    float minimum = ComponentForAxis(PointF(_scrollableArea.MinimumScrollOffset()), axis);
+    float maximum = ComponentForAxis(PointF(_scrollableArea.MaximumScrollOffset()), axis);
     return std::clamp(static_cast<float>(target), minimum, std::max(minimum, maximum));
   }
 
@@ -285,7 +284,7 @@ namespace krys::boo
       {
         return static_cast<int32>(found->Offset);
       }
-      return static_cast<int32>(std::lround(AdjustedScrollDestination(axis, FloatPoint(current), 0)));
+      return static_cast<int32>(std::lround(AdjustedScrollDestination(axis, PointF(current), 0)));
     };
 
     ScrollOffset corrected(

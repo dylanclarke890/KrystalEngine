@@ -26,10 +26,10 @@
 
 #include "Krystal.Booey/Style/Values/Transforms/TransformFunction.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 
 namespace krys::boo
 {
-  class FloatSize;
   class LayoutSize;
   class TransformationMatrix;
 
@@ -96,7 +96,7 @@ namespace krys::boo
       template <TransformFunctionType>
       KRYS_NODISCARD bool HasTransformOfType() const noexcept;
 
-      void Apply(TransformationMatrix &, const FloatSize &, size_t start = 0) const noexcept;
+      void Apply(TransformationMatrix &, const SizeF &, size_t start = 0) const noexcept;
 
       // Return true if any of the operation types are 3D operation types (even if the
       // values describe affine transforms)

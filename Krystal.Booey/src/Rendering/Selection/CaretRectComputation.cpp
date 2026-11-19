@@ -189,7 +189,7 @@ namespace krys::boo
         left = std::max(left, lineLeft);
       }
 
-      auto rect = IntRect(static_cast<int32>(left), top, CaretWidth(), height);
+      auto rect = RectI(static_cast<int32>(left), top, CaretWidth(), height);
 
       if (caretRectMode == CaretRectMode::ExpandToEndOfLine)
       {

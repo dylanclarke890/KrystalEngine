@@ -863,7 +863,7 @@ namespace krys::boo
     NodeDocument().UpdateSVGRenderer(*this);
   }
 
-  Maybe<FloatRect> SVGElement::GetBoundingBox() const noexcept
+  Maybe<RectF> SVGElement::GetBoundingBox() const noexcept
   {
     if (Is<SVGGraphicsElement>(*this))
     {

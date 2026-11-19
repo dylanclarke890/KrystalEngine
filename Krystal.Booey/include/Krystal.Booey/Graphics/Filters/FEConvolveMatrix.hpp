@@ -24,10 +24,9 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Filters/FilterEffect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -46,30 +45,30 @@ namespace krys::boo
   class FEConvolveMatrix final : public FilterEffect
   {
   private:
-    IntSize _kernelSize;
+    SizeI _kernelSize;
     float _divisor;
     float _bias;
-    IntPoint _targetOffset;
+    PointI _targetOffset;
     EdgeModeType _edgeMode;
-    FloatPoint _kernelUnitLength;
+    PointF _kernelUnitLength;
     bool _preserveAlpha;
     List<float> _kernelMatrix;
 
   public:
     KRYS_NODISCARD static Ref<FEConvolveMatrix>
-      Create(const IntSize &kernelSize, float divisor, float bias, const IntPoint &targetOffset,
-             EdgeModeType edgeMode, const FloatPoint &kernelUnitLength, bool preserveAlpha,
+      Create(const SizeI &kernelSize, float divisor, float bias, const PointI &targetOffset,
+             EdgeModeType edgeMode, const PointF &kernelUnitLength, bool preserveAlpha,
              const List<float> &kernelMatrix,
              const DestinationColorSpace &colorSpace = DestinationColorSpace::SRGB()) noexcept;
 
     KRYS_NODISCARD bool operator==(const FEConvolveMatrix &other) const noexcept;
 
-    KRYS_NODISCARD IntSize KernelSize() const noexcept
+    KRYS_NODISCARD SizeI KernelSize() const noexcept
     {
       return _kernelSize;
     }
 
-    void SetKernelSize(const IntSize &kernelSize) noexcept;
+    void SetKernelSize(const SizeI &kernelSize) noexcept;
 
     KRYS_NODISCARD const List<float> &Kernel() const noexcept
     {
@@ -92,12 +91,12 @@ namespace krys::boo
 
     bool SetBias(float bias) noexcept;
 
-    KRYS_NODISCARD IntPoint TargetOffset() const noexcept
+    KRYS_NODISCARD PointI TargetOffset() const noexcept
     {
       return _targetOffset;
     }
 
-    bool SetTargetOffset(const IntPoint &targetOffset) noexcept;
+    bool SetTargetOffset(const PointI &targetOffset) noexcept;
 
     KRYS_NODISCARD EdgeModeType EdgeMode() const noexcept
     {
@@ -106,12 +105,12 @@ namespace krys::boo
 
     bool SetEdgeMode(EdgeModeType edgeMode) noexcept;
 
-    KRYS_NODISCARD FloatPoint KernelUnitLength() const noexcept
+    KRYS_NODISCARD PointF KernelUnitLength() const noexcept
     {
       return _kernelUnitLength;
     }
 
-    bool SetKernelUnitLength(const FloatPoint &kernelUnitLength) noexcept;
+    bool SetKernelUnitLength(const PointF &kernelUnitLength) noexcept;
 
     KRYS_NODISCARD bool PreserveAlpha() const noexcept
     {
@@ -121,8 +120,8 @@ namespace krys::boo
     bool SetPreserveAlpha(bool preserveAlpha) noexcept;
 
   private:
-    FEConvolveMatrix(const IntSize &kernelSize, float divisor, float bias, const IntPoint &targetOffset,
-                     EdgeModeType edgeMode, const FloatPoint &kernelUnitLength, bool preserveAlpha,
+    FEConvolveMatrix(const SizeI &kernelSize, float divisor, float bias, const PointI &targetOffset,
+                     EdgeModeType edgeMode, const PointF &kernelUnitLength, bool preserveAlpha,
                      const List<float> &kernelMatrix, const DestinationColorSpace &colorSpace) noexcept;
 
     KRYS_NODISCARD bool operator==(const FilterEffect &other) const noexcept override
@@ -130,8 +129,8 @@ namespace krys::boo
       return AreEqual<FEConvolveMatrix>(*this, other);
     }
 
-    KRYS_NODISCARD FloatRect CalculateImageRect(const Filter &filter, Span<const FloatRect> inputImageRects,
-                                                const FloatRect &primitiveSubregion) const noexcept override;
+    KRYS_NODISCARD RectF CalculateImageRect(const Filter &filter, Span<const RectF> inputImageRects,
+                                            const RectF &primitiveSubregion) const noexcept override;
 
     TextStream &ExternalRepresentation(TextStream &ts,
                                        FilterRepresentation representation) const noexcept override;

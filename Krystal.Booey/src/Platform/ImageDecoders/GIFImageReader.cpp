@@ -554,7 +554,7 @@ namespace krys::boo
           // Note: A subsequent frame might have dimensions larger than the "screen" dimensions.
           if (_client
               && !_client->SetSize(
-                IntSize(static_cast<int32>(_screenWidth), static_cast<int32>(_screenHeight))))
+                SizeI(static_cast<int32>(_screenWidth), static_cast<int32>(_screenHeight))))
           {
             return false;
           }
@@ -827,7 +827,7 @@ namespace krys::boo
             // CALLBACK: Inform the decoderplugin of our size.
             if (_client
                 && !_client->SetSize(
-                  IntSize(static_cast<int32>(_screenWidth), static_cast<int32>(_screenHeight))))
+                  SizeI(static_cast<int32>(_screenWidth), static_cast<int32>(_screenHeight))))
             {
               return false;
             }

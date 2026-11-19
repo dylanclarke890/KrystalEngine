@@ -78,16 +78,16 @@ namespace krys::boo
     _source->DestroyDecodedData(destroyAll);
   }
 
-  ImageDrawResult BitmapImage::Draw(GraphicsContext &context, const FloatRect &destinationRect,
-                                    const FloatRect &sourceRect, ImagePaintingOptions options) noexcept
+  ImageDrawResult BitmapImage::Draw(GraphicsContext &context, const RectF &destinationRect,
+                                    const RectF &sourceRect, ImagePaintingOptions options) noexcept
   {
     if (destinationRect.IsEmpty() || sourceRect.IsEmpty())
     {
       return ImageDrawResult::DidNothing;
     }
 
-    auto size = FloatSize(_source->Size(ImageOrientation::Orientation::None));
-    auto sourceSize = FloatSize(_source->SourceSize(ImageOrientation::Orientation::None));
+    auto size = SizeF(_source->Size(ImageOrientation::Orientation::None));
+    auto sourceSize = SizeF(_source->SourceSize(ImageOrientation::Orientation::None));
 
     // adjustedSourceRect is in the coordinates of densityCorrectedSize, so map it to the sourceSize.
     auto adjustedSourceRect = sourceRect;
@@ -97,7 +97,7 @@ namespace krys::boo
     }
 
     auto scaleFactorForDrawing = context.ScaleFactorForDrawing(destinationRect, adjustedSourceRect);
-    auto sizeForDrawing = ExpandedIntSize(sourceSize * scaleFactorForDrawing);
+    auto sizeForDrawing = ExpandedSizeI(sourceSize * scaleFactorForDrawing);
     auto subsamplingLevel = _source->SubsamplingLevelForScaleFactor(context, scaleFactorForDrawing,
                                                                     options.GetAllowImageSubsampling());
 
@@ -134,7 +134,7 @@ namespace krys::boo
     {
       // adjustedSourceRect is in the coordinates of the unsubsampled image, so map it to the subsampled
       // image.
-      auto imageSize = FloatSize(nativeImage->Size());
+      auto imageSize = SizeF(nativeImage->Size());
       if (imageSize != sourceSize)
       {
         adjustedSourceRect.Scale(imageSize / sourceSize);
@@ -157,9 +157,8 @@ namespace krys::boo
     return ImageDrawResult::DidDraw;
   }
 
-  void BitmapImage::DrawPattern(GraphicsContext &context, const FloatRect &destinationRect,
-                                const FloatRect &tileRect, const AffineTransform &transform,
-                                const FloatPoint &phase, const FloatSize &spacing,
+  void BitmapImage::DrawPattern(GraphicsContext &context, const RectF &destinationRect, const RectF &tileRect,
+                                const AffineTransform &transform, const PointF &phase, const SizeF &spacing,
                                 ImagePaintingOptions options) noexcept
   {
     if (tileRect.IsEmpty())
@@ -183,9 +182,9 @@ namespace krys::boo
     }
   }
 
-  void BitmapImage::DrawDensityCorrectedPattern(GraphicsContext &context, const FloatRect &destinationRect,
-                                                const FloatRect &tileRect, const AffineTransform &transform,
-                                                const FloatPoint &phase, const FloatSize &spacing,
+  void BitmapImage::DrawDensityCorrectedPattern(GraphicsContext &context, const RectF &destinationRect,
+                                                const RectF &tileRect, const AffineTransform &transform,
+                                                const PointF &phase, const SizeF &spacing,
                                                 ImagePaintingOptions options) noexcept
   {
     // As Chrome, the pattern tiles the full-resolution pixels, scaled to the density-corrected size, rather
@@ -199,7 +198,7 @@ namespace krys::boo
 
     // The tile rectangle is in the density-corrected size's units; map it to the pixels, and the pattern's
     // transform back.
-    auto pixelsPerUnit = FloatSize(_source->SourceSize(orientation)) / FloatSize(_source->Size(orientation));
+    auto pixelsPerUnit = SizeF(_source->SourceSize(orientation)) / SizeF(_source->Size(orientation));
     auto pixelTileRect = tileRect;
     pixelTileRect.Scale(pixelsPerUnit.Width(), pixelsPerUnit.Height());
     auto pixelTransform = transform;
@@ -214,15 +213,15 @@ namespace krys::boo
     }
   }
 
-  void BitmapImage::DrawLuminanceMaskPattern(GraphicsContext &context, const FloatRect &destinationRect,
-                                             const FloatRect &tileRect, const AffineTransform &transform,
-                                             const FloatPoint &phase, const FloatSize &spacing,
+  void BitmapImage::DrawLuminanceMaskPattern(GraphicsContext &context, const RectF &destinationRect,
+                                             const RectF &tileRect, const AffineTransform &transform,
+                                             const PointF &phase, const SizeF &spacing,
                                              ImagePaintingOptions options) noexcept
   {
     krys_debug_assert(!tileRect.IsEmpty());
     krys_debug_assert(context.DrawLuminanceMask());
 
-    auto buffer = context.CreateImageBuffer(FloatSize(ExpandedIntSize(tileRect.Size())));
+    auto buffer = context.CreateImageBuffer(SizeF(ExpandedSizeI(tileRect.Size())));
     if (!buffer)
     {
       return;
@@ -234,7 +233,7 @@ namespace krys::boo
     // relayout.
     SetImageObserver(nullptr);
 
-    auto bufferRect = FloatRect {{}, buffer->LogicalSize()};
+    auto bufferRect = RectF {{}, buffer->LogicalSize()};
     (void)Draw(
       buffer->Context(), bufferRect, tileRect,
       {options, DecodingMode::Synchronous, ImageOrientation(ImageOrientation::Orientation::FromImage)});

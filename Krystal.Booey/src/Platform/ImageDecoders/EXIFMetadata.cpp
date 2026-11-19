@@ -158,7 +158,7 @@ namespace krys::boo
     };
   }
 
-  EXIFMetadata EXIFMetadata::Read(Span<const uint8> tiff, const IntSize &physicalSize) noexcept
+  EXIFMetadata EXIFMetadata::Read(Span<const uint8> tiff, const SizeI &physicalSize) noexcept
   {
     // A TIFF block starts with its byte order (`II`, little endian, or `MM`, big endian), 42, and the offset
     // of its first image file directory. See https://www.cipa.jp/std/documents/e/DC-008-2012_E.pdf.
@@ -228,8 +228,7 @@ namespace krys::boo
         && static_cast<float>(physicalSize.Height()) * DefaultResolution / *resolutionY
              == static_cast<float>(*dimensionY))
     {
-      metadata.DensityCorrectedSize =
-        IntSize(static_cast<int32>(*dimensionX), static_cast<int32>(*dimensionY));
+      metadata.DensityCorrectedSize = SizeI(static_cast<int32>(*dimensionX), static_cast<int32>(*dimensionY));
     }
     return metadata;
   }

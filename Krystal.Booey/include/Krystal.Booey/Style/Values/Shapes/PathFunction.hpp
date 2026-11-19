@@ -128,7 +128,7 @@ namespace krys::boo::style
   template <>
   struct PathComputation<Path>
   {
-    KRYS_NODISCARD boo::Path operator()(const Path &, const FloatRect &) noexcept;
+    KRYS_NODISCARD boo::Path operator()(const Path &, const RectF &) noexcept;
   };
 
   // MARK: - Wind Rule

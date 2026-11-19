@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderImageResource.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderReplaced.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
@@ -144,17 +144,17 @@ namespace krys::boo
 
     KRYS_NODISCARD RenderBox *EmbeddedContentBox() const noexcept final;
 
-    KRYS_NODISCARD FloatSize ComputeIntrinsicSize() const noexcept final;
+    KRYS_NODISCARD SizeF ComputeIntrinsicSize() const noexcept final;
 
-    KRYS_NODISCARD FloatSize PreferredAspectRatio() const noexcept final;
+    KRYS_NODISCARD SizeF PreferredAspectRatio() const noexcept final;
 
     void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept override;
 
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
 
-    void ImageChanged(WrappedImagePtr newImage, const IntRect *rect = nullptr) noexcept override;
+    void ImageChanged(WrappedImagePtr newImage, const RectI *rect = nullptr) noexcept override;
 
-    ImageDrawResult PaintIntoRect(PaintInfo &paintInfo, const FloatRect &rect) noexcept;
+    ImageDrawResult PaintIntoRect(PaintInfo &paintInfo, const RectF &rect) noexcept;
 
     void Layout() noexcept override;
 
@@ -186,9 +186,9 @@ namespace krys::boo
 
     void NotifyFinished(CachedResource &newImage) noexcept final;
 
-    KRYS_NODISCARD IntSize ImageSizeForError(CachedImage *newImage) const noexcept;
+    KRYS_NODISCARD SizeI ImageSizeForError(CachedImage *newImage) const noexcept;
 
-    void RepaintOrMarkForLayout(ImageSizeChangeType imageSizeChange, const IntRect *rect = nullptr) noexcept;
+    void RepaintOrMarkForLayout(ImageSizeChangeType imageSizeChange, const RectI *rect = nullptr) noexcept;
 
     void UpdateIntrinsicSizeIfNeeded(const LayoutSize &newSize) noexcept;
 

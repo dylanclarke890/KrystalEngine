@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/Selection/RenderSelection.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/TypeCast.hpp"
@@ -171,10 +171,10 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutRect UnextendedBackgroundRect() const noexcept;
 
-    KRYS_NODISCARD IntRect UnscaledDocumentRect() const noexcept;
+    KRYS_NODISCARD RectI UnscaledDocumentRect() const noexcept;
 
     /// @brief The document's rect, transformed by the view's transform if it has one.
-    KRYS_NODISCARD IntRect DocumentRect() const noexcept;
+    KRYS_NODISCARD RectI DocumentRect() const noexcept;
 
     /// @brief Whether the view fills with the base background colour first.
     KRYS_NODISCARD bool ShouldPaintBaseBackground() const noexcept;
@@ -230,13 +230,13 @@ namespace krys::boo
 
     KRYS_NODISCARD RenderCounterSet TakeCountersNeedingUpdate() noexcept;
 
-    KRYS_NODISCARD FloatSize SizeForCSSSmallViewportUnits() const noexcept;
+    KRYS_NODISCARD SizeF SizeForCSSSmallViewportUnits() const noexcept;
 
-    KRYS_NODISCARD FloatSize SizeForCSSLargeViewportUnits() const noexcept;
+    KRYS_NODISCARD SizeF SizeForCSSLargeViewportUnits() const noexcept;
 
-    KRYS_NODISCARD FloatSize SizeForCSSDynamicViewportUnits() const noexcept;
+    KRYS_NODISCARD SizeF SizeForCSSDynamicViewportUnits() const noexcept;
 
-    KRYS_NODISCARD FloatSize SizeForCSSDefaultViewportUnits() const noexcept;
+    KRYS_NODISCARD SizeF SizeForCSSDefaultViewportUnits() const noexcept;
 
     void RegisterBoxWithScrollSnapPositions(const RenderBox &box) noexcept
     {
@@ -348,7 +348,7 @@ namespace krys::boo
     KRYS_NODISCARD static bool ShouldRepaint(const LayoutRect &rect) noexcept;
 
     /// @return Whether the whole view is now dirty.
-    bool AccumulateRepaintRect(IntRect rect, IntRect viewRect) noexcept;
+    bool AccumulateRepaintRect(RectI rect, RectI viewRect) noexcept;
 
     void FlushAccumulatedRepaintRegion() const noexcept;
 
@@ -356,7 +356,7 @@ namespace krys::boo
 #pragma endregion
 
     /// @brief Resumes the paused image animations of the renderers now visible in @p visibleRect.
-    void ResumePausedImageAnimationsIfNeeded(const IntRect &visibleRect) noexcept;
+    void ResumePausedImageAnimationsIfNeeded(const RectI &visibleRect) noexcept;
 
     void AddRendererWithPausedImageAnimations(RenderElement &renderer, CachedImage &image) noexcept;
 

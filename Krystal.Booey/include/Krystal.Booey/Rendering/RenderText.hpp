@@ -24,10 +24,10 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Style/Difference.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/TypeCast.hpp"
@@ -104,10 +104,10 @@ namespace krys::boo
     KRYS_NODISCARD const layout::InlineTextBox *LayoutBox() const noexcept;
 
     /// @brief The bounding box of the text's line boxes.
-    KRYS_NODISCARD virtual IntRect LinesBoundingBox() const noexcept;
+    KRYS_NODISCARD virtual RectI LinesBoundingBox() const noexcept;
 
     /// @brief The location of the text's first text box.
-    KRYS_NODISCARD IntPoint FirstRunLocation() const noexcept;
+    KRYS_NODISCARD PointI FirstRunLocation() const noexcept;
 
     /// @brief The preferred widths of the text, and how it can break, for the legacy inline preferred widths.
     struct Widths

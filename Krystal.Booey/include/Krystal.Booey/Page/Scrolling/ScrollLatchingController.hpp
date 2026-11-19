@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -54,7 +54,7 @@ namespace krys::boo
       WeakPtr<ScrollableArea> GestureScrollableArea;
     };
 
-    FloatSize _cumulativeEventDelta;
+    SizeF _cumulativeEventDelta;
     Maybe<LatchingState> _state;
 
   public:
@@ -68,7 +68,7 @@ namespace krys::boo
     void ReceivedWheelEvent(const PlatformWheelEvent &wheelEvent) noexcept;
 
     /// @brief The deltas of the gesture so far.
-    KRYS_NODISCARD FloatSize CumulativeEventDelta() const noexcept
+    KRYS_NODISCARD SizeF CumulativeEventDelta() const noexcept
     {
       return _cumulativeEventDelta;
     }
@@ -91,6 +91,6 @@ namespace krys::boo
   private:
     KRYS_NODISCARD static bool ShouldLatchToScrollableArea(const LocalFrameView &view,
                                                            ScrollableArea *scrollableArea,
-                                                           FloatSize scrollDelta) noexcept;
+                                                           SizeF scrollDelta) noexcept;
   };
 }

@@ -559,7 +559,7 @@ namespace krys::boo::tests
     {
       (void)fixture.Document->UpdateLayout();
       auto rect = element.Renderer()->AbsoluteBoundingBoxRect();
-      auto position = DoublePoint(rect.X() + rect.Width() / 2.0, rect.Y() + rect.Height() / 2.0);
+      auto position = PointD(rect.X() + rect.Width() / 2.0, rect.Y() + rect.Height() / 2.0);
       auto &handler = fixture.Frame->GetEventHandler();
       auto event = [&](PlatformEvent::Type type)
       {
@@ -721,7 +721,7 @@ namespace krys::boo::tests
       SECTION("clicking outside closes it")
       {
         auto &handler = fixture.Frame->GetEventHandler();
-        auto position = DoublePoint(390, 290);
+        auto position = PointD(390, 290);
         auto event = [&](PlatformEvent::Type type)
         {
           return PlatformMouseEvent(position, position, MouseButton::Left, type, 1, {}, MonotonicTime::Now());

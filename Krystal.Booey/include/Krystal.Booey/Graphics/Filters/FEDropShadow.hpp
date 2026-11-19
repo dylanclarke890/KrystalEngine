@@ -23,8 +23,8 @@
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterEffect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
@@ -89,8 +89,8 @@ namespace krys::boo
     bool SetShadowOpacity(float shadowOpacity) noexcept;
 
     /// @brief How far a shadow at `offset`, blurred by `stdDeviation`, spreads past each edge.
-    KRYS_NODISCARD static IntOutsets CalculateOutsets(const FloatSize &offset,
-                                                      const FloatSize &stdDeviation) noexcept;
+    KRYS_NODISCARD static IntOutsets CalculateOutsets(const SizeF &offset,
+                                                      const SizeF &stdDeviation) noexcept;
 
   private:
     FEDropShadow(float stdX, float stdY, float dx, float dy, Color shadowColor, float shadowOpacity) noexcept;
@@ -100,8 +100,8 @@ namespace krys::boo
       return AreEqual<FEDropShadow>(*this, other);
     }
 
-    KRYS_NODISCARD FloatRect CalculateImageRect(const Filter &filter, Span<const FloatRect> inputImageRects,
-                                                const FloatRect &primitiveSubregion) const noexcept override;
+    KRYS_NODISCARD RectF CalculateImageRect(const Filter &filter, Span<const RectF> inputImageRects,
+                                            const RectF &primitiveSubregion) const noexcept override;
 
     KRYS_NODISCARD EnumSet<FilterRenderingMode> SupportedFilterRenderingModes(
       EnumSet<FilterRenderingMode> preferredFilterRenderingModes) const noexcept override;

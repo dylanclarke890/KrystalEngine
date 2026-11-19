@@ -224,7 +224,7 @@ namespace krys::boo::html::tests
     {
       auto event = [](PlatformEvent::Type type)
       {
-        return PlatformMouseEvent(DoublePoint(30, 10), DoublePoint(30, 10), MouseButton::Left, type, 1, {},
+        return PlatformMouseEvent(PointD(30, 10), PointD(30, 10), MouseButton::Left, type, 1, {},
                                   MonotonicTime::Now());
       };
       auto &handler = fixture.Frame->GetEventHandler();

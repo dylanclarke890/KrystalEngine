@@ -34,7 +34,7 @@
 namespace krys::boo
 {
   ShadowApplier::ShadowApplier(const RenderStyle &renderStyle, GraphicsContext &context,
-                               const style::TextShadow *shadow, const FloatRect &textRect,
+                               const style::TextShadow *shadow, const RectF &textRect,
                                bool isLastShadowIteration, bool lastShadowIterationShouldDrawText,
                                bool opaque, bool ignoreWritingMode) noexcept
       : _context {context}, _shadow {shadow},
@@ -59,15 +59,14 @@ namespace krys::boo
     // often draw the *last* shadow and the text itself in a single call.
     if (_onlyDrawsShadow)
     {
-      FloatRect shadowRect(textRect);
+      RectF shadowRect(textRect);
       shadowRect.Inflate(style::PaintingExtent(*shadow, zoomFactor) + 3 * textRect.Height());
       shadowRect.Move(shadowOffset);
       context.Save();
       context.Clip(shadowRect);
 
       _didSaveContext = true;
-      _extraOffset =
-        FloatSize(0, 2 * shadowRect.Height() + std::max(0.0f, shadowOffset.Height()) + shadowRadius);
+      _extraOffset = SizeF(0, 2 * shadowRect.Height() + std::max(0.0f, shadowOffset.Height()) + shadowRadius);
       shadowOffset -= _extraOffset;
     }
 
@@ -111,7 +110,7 @@ namespace krys::boo
 
   void TextPainter::PaintTextOrEmphasisMarks(const FontCascade &font, const TextRun &textRun,
                                              const StringAtom &emphasisMark, float emphasisMarkOffset,
-                                             const FloatPoint &textOrigin, uint32 startOffset,
+                                             const PointF &textOrigin, uint32 startOffset,
                                              uint32 endOffset) noexcept
   {
     krys_debug_assert(startOffset < endOffset);
@@ -127,7 +126,7 @@ namespace krys::boo
 
     if (!emphasisMark.View().empty())
     {
-      _context.DrawEmphasisMarks(font, textRun, emphasisMark, textOrigin + FloatSize(0, emphasisMarkOffset),
+      _context.DrawEmphasisMarks(font, textRun, emphasisMark, textOrigin + SizeF(0, emphasisMarkOffset),
                                  startOffset, endOffset);
     }
     else
@@ -137,8 +136,8 @@ namespace krys::boo
   }
 
   void TextPainter::PaintTextWithShadows(const style::TextShadows *shadows, const FontCascade &font,
-                                         const TextRun &textRun, const FloatRect &boxRect,
-                                         const FloatPoint &textOrigin, uint32 startOffset, uint32 endOffset,
+                                         const TextRun &textRun, const RectF &boxRect,
+                                         const PointF &textOrigin, uint32 startOffset, uint32 endOffset,
                                          const StringAtom &emphasisMark, float emphasisMarkOffset,
                                          bool stroked) noexcept
   {
@@ -178,8 +177,8 @@ namespace krys::boo
     }
   }
 
-  void TextPainter::PaintTextAndEmphasisMarksIfNeeded(const TextRun &textRun, const FloatRect &boxRect,
-                                                      const FloatPoint &textOrigin, uint32 startOffset,
+  void TextPainter::PaintTextAndEmphasisMarksIfNeeded(const TextRun &textRun, const RectF &boxRect,
+                                                      const PointF &textOrigin, uint32 startOffset,
                                                       uint32 endOffset, const TextPaintStyle &paintStyle,
                                                       const style::TextShadows &shadow) noexcept
   {
@@ -190,7 +189,7 @@ namespace krys::boo
     {
       compressionSaver.Save();
       _context.Translate(textOrigin.X(), 0);
-      _context.Scale(FloatSize(scale, 1));
+      _context.Scale(SizeF(scale, 1));
       _context.Translate(-textOrigin.X(), 0);
     }
 
@@ -271,7 +270,7 @@ namespace krys::boo
     }
   }
 
-  void TextPainter::PaintRange(const TextRun &textRun, const FloatRect &boxRect, const FloatPoint &textOrigin,
+  void TextPainter::PaintRange(const TextRun &textRun, const RectF &boxRect, const PointF &textOrigin,
                                uint32 start, uint32 end) noexcept
   {
     krys_debug_assert(start < end);

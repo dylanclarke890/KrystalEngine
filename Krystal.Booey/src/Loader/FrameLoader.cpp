@@ -186,7 +186,7 @@ namespace krys::boo
     {
       return;
     }
-    _frame.CreateView(IntSize(oldView->Width(), oldView->Height()), oldView->FixedLayoutSize(),
+    _frame.CreateView(SizeI(oldView->Width(), oldView->Height()), oldView->FixedLayoutSize(),
                       oldView->UseFixedLayout());
   }
 

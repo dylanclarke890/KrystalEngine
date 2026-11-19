@@ -23,18 +23,17 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Rendering/LayoutRepainter.hpp"
 #include "Krystal.Booey/Rendering/RepaintRectCalculation.hpp"
 #include "Krystal.Booey/Rendering/VisibleRectContext.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo
 {
   class AffineTransform;
-  class FloatPoint;
   class GraphicsContext;
   class LayoutRect;
   class LegacyRenderSVGRoot;
@@ -63,7 +62,7 @@ namespace krys::boo
 
     // Calculates the repaintRect in combination with filter, clipper and masker in local coordinates.
     static void
-      IntersectRepaintRectWithResources(const RenderElement &, FloatRect &,
+      IntersectRepaintRectWithResources(const RenderElement &, RectF &,
                                         RepaintRectCalculation = RepaintRectCalculation::Fast) noexcept;
 
     // Determines whether a container needs to be laid out because it's filtered and a child is being laid
@@ -71,22 +70,21 @@ namespace krys::boo
     KRYS_NODISCARD static bool FiltersForceContainerLayout(const RenderElement &) noexcept;
 
     // Determines whether the passed point lies in a clipping area
-    KRYS_NODISCARD static bool PointInClippingArea(const RenderElement &, const FloatPoint &) noexcept;
+    KRYS_NODISCARD static bool PointInClippingArea(const RenderElement &, const PointF &) noexcept;
 
     struct ContainerBoundingBoxes
     {
-      Markable<FloatRect> ObjectBoundingBox;
-      FloatRect RepaintBoundingBox {};
+      Markable<RectF> ObjectBoundingBox;
+      RectF RepaintBoundingBox {};
     };
 
     KRYS_NODISCARD static ContainerBoundingBoxes
       ComputeContainerBoundingBoxes(const RenderElement &,
                                     RepaintRectCalculation = RepaintRectCalculation::Fast) noexcept;
 
-    KRYS_NODISCARD static FloatRect
-      ComputeContainerStrokeBoundingBox(const RenderElement &container) noexcept;
+    KRYS_NODISCARD static RectF ComputeContainerStrokeBoundingBox(const RenderElement &container) noexcept;
 
-    KRYS_NODISCARD static bool PaintInfoIntersectsRepaintRect(const FloatRect &localRepaintRect,
+    KRYS_NODISCARD static bool PaintInfoIntersectsRepaintRect(const RectF &localRepaintRect,
                                                               const AffineTransform &localTransform,
                                                               const PaintInfo &) noexcept;
 
@@ -96,8 +94,8 @@ namespace krys::boo
                                                                    const RenderLayerModelObject *container,
                                                                    const VisibleRectContext &) noexcept;
 
-    KRYS_NODISCARD static Maybe<FloatRect>
-      ComputeFloatVisibleRectInContainer(const RenderElement &, const FloatRect &,
+    KRYS_NODISCARD static Maybe<RectF>
+      ComputeFloatVisibleRectInContainer(const RenderElement &, const RectF &,
                                          const RenderLayerModelObject *container,
                                          VisibleRectContext) noexcept;
 
@@ -113,7 +111,7 @@ namespace krys::boo
     KRYS_NODISCARD static LayoutRepainter::CheckForRepaint
       CheckForSVGRepaintDuringLayout(const RenderElement &) noexcept;
 
-    KRYS_NODISCARD static FloatRect CalculateApproximateStrokeBoundingBox(const RenderElement &) noexcept;
+    KRYS_NODISCARD static RectF CalculateApproximateStrokeBoundingBox(const RenderElement &) noexcept;
 
     // Shared between SVG renderers and resources.
     static void ApplyStrokeStyleToContext(GraphicsContext &, const RenderStyle &,

@@ -780,9 +780,9 @@ namespace krys::boo
     return LayoutSimpleText(run, from, to, forTextEmphasis);
   }
 
-  FloatSize FontCascade::DrawText(GraphicsContext &context, const TextRun &run, const FloatPoint &point,
-                                  uint32 from, Maybe<uint32> to,
-                                  CustomFontNotReadyAction customFontNotReadyAction) const noexcept
+  SizeF FontCascade::DrawText(GraphicsContext &context, const TextRun &run, const PointF &point, uint32 from,
+                              Maybe<uint32> to,
+                              CustomFontNotReadyAction customFontNotReadyAction) const noexcept
   {
     uint32 destination = to.value_or(run.Length());
     auto glyphBuffer = LayoutText(GetCodePath(run, from, to), run, from, destination);
@@ -790,16 +790,16 @@ namespace krys::boo
 
     if (glyphBuffer.IsEmpty())
     {
-      return FloatSize();
+      return SizeF();
     }
 
-    FloatPoint startPoint = point + boo::Size(glyphBuffer.InitialAdvance());
+    PointF startPoint = point + boo::Size(glyphBuffer.InitialAdvance());
     DrawGlyphBuffer(context, glyphBuffer, startPoint, customFontNotReadyAction);
     return startPoint - point;
   }
 
   void FontCascade::DrawEmphasisMarks(GraphicsContext &context, const TextRun &run, const StringAtom &mark,
-                                      const FloatPoint &point, uint32 from, Maybe<uint32> to) const noexcept
+                                      const PointF &point, uint32 from, Maybe<uint32> to) const noexcept
   {
     if (IsLoadingCustomFonts())
     {
@@ -817,7 +817,7 @@ namespace krys::boo
       return;
     }
 
-    FloatPoint startPoint = point + boo::Size(glyphBuffer.InitialAdvance());
+    PointF startPoint = point + boo::Size(glyphBuffer.InitialAdvance());
     DrawEmphasisMarks(context, glyphBuffer, mark, startPoint);
   }
 
@@ -856,15 +856,15 @@ namespace krys::boo
 
     struct GlyphIterationState
     {
-      FloatPoint StartingPoint;
-      FloatPoint CurrentPoint;
+      PointF StartingPoint;
+      PointF CurrentPoint;
       float Y1;
       float Y2;
       float MinX;
       float MaxX;
     };
 
-    KRYS_NODISCARD Maybe<float> FindIntersectionPoint(float y, FloatPoint p1, FloatPoint p2) noexcept
+    KRYS_NODISCARD Maybe<float> FindIntersectionPoint(float y, PointF p1, PointF p2) noexcept
     {
       if ((p1.Y() < y && p2.Y() > y) || (p1.Y() > y && p2.Y() < y))
       {
@@ -887,7 +887,7 @@ namespace krys::boo
     void FindPathIntersections(GlyphIterationState &state, const PathElement &element) noexcept
     {
       bool doIntersection = false;
-      FloatPoint point = FloatPoint();
+      PointF point = PointF();
       switch (element.ElementType)
       {
         case PathElement::Type::MoveToPoint:
@@ -943,9 +943,9 @@ namespace krys::boo
 
     public:
       GlyphToPathTranslator(const TextRun &textRun, const GlyphBuffer &glyphBuffer,
-                            const FloatPoint &textOrigin) noexcept
+                            const PointF &textOrigin) noexcept
           : _textRun(textRun), _glyphBuffer(glyphBuffer), _fontData(&glyphBuffer.FontAt(_index)),
-            _translation(AffineTransform::MakeTranslation(ToFloatSize(textOrigin)))
+            _translation(AffineTransform::MakeTranslation(ToSizeF(textOrigin)))
       {
       }
 
@@ -963,7 +963,7 @@ namespace krys::boo
 
       KRYS_NODISCARD std::pair<float, float> Extents() const noexcept
       {
-        auto beginning = _translation.MapPoint(FloatPoint(0, 0));
+        auto beginning = _translation.MapPoint(PointF(0, 0));
         auto advance = _glyphBuffer.AdvanceAt(_index);
         auto end = _translation.MapSize(boo::Size(advance));
         return std::make_pair(beginning.X(), beginning.X() + end.Width());
@@ -988,8 +988,8 @@ namespace krys::boo
   }
 
   List<FloatSegment>
-    FontCascade::LineSegmentsForIntersectionsWithRect(const TextRun &run, const FloatPoint &textOrigin,
-                                                      const FloatRect &lineExtents) const noexcept
+    FontCascade::LineSegmentsForIntersectionsWithRect(const TextRun &run, const PointF &textOrigin,
+                                                      const RectF &lineExtents) const noexcept
   {
     List<FloatSegment> result;
     if (IsLoadingCustomFonts())
@@ -1003,12 +1003,12 @@ namespace krys::boo
       return result;
     }
 
-    FloatPoint origin = textOrigin + boo::Size(glyphBuffer.InitialAdvance());
+    PointF origin = textOrigin + boo::Size(glyphBuffer.InitialAdvance());
     GlyphToPathTranslator translator(run, glyphBuffer, origin);
     for (; translator.ContainsMorePaths(); translator.Advance())
     {
-      GlyphIterationState info = {FloatPoint(0, 0),
-                                  FloatPoint(0, 0),
+      GlyphIterationState info = {PointF(0, 0),
+                                  PointF(0, 0),
                                   lineExtents.Y(),
                                   lineExtents.Y() + lineExtents.Height(),
                                   lineExtents.X() + lineExtents.Width(),
@@ -2147,7 +2147,7 @@ namespace krys::boo
     {
       // Exploit the fact that the sum of the paint advances is equal to
       // the sum of the layout advances.
-      FloatSize initialAdvance = controller.TotalAdvance();
+      SizeF initialAdvance = controller.TotalAdvance();
       for (uint32 i = 0; i < glyphBufferForStartingIndex.Size(); ++i)
       {
         initialAdvance -= boo::Size(glyphBufferForStartingIndex.AdvanceAt(i));
@@ -2162,7 +2162,7 @@ namespace krys::boo
     }
     else
     {
-      FloatSize initialAdvance = boo::Size(glyphBufferForStartingIndex.InitialAdvance());
+      SizeF initialAdvance = boo::Size(glyphBufferForStartingIndex.InitialAdvance());
       for (uint32 i = 0; i < glyphBufferForStartingIndex.Size(); ++i)
       {
         initialAdvance += boo::Size(glyphBufferForStartingIndex.AdvanceAt(i));
@@ -2190,7 +2190,7 @@ namespace krys::boo
     {
       if (fontData.PlatformData().Orientation() == FontOrientation::Horizontal)
       {
-        FloatRect bounds = fontData.BoundsForGlyph(glyph);
+        RectF bounds = fontData.BoundsForGlyph(glyph);
         return bounds.X() + bounds.Width() / 2;
       }
       // FIXME: Use glyph bounds once they make sense for vertical fonts.
@@ -2206,13 +2206,12 @@ namespace krys::boo
 
   // This function assumes the GlyphBuffer's initial advance has already been incorporated into the start
   // point.
-  void FontCascade::DrawGlyphBuffer(GraphicsContext &context, const GlyphBuffer &glyphBuffer,
-                                    FloatPoint &point,
+  void FontCascade::DrawGlyphBuffer(GraphicsContext &context, const GlyphBuffer &glyphBuffer, PointF &point,
                                     CustomFontNotReadyAction customFontNotReadyAction) const noexcept
   {
     krys_debug_assert(glyphBuffer.IsFlattened());
     const Font *fontData = &glyphBuffer.FontAt(0);
-    FloatPoint startPoint = point;
+    PointF startPoint = point;
     float nextX = startPoint.X() + boo::Width(glyphBuffer.AdvanceAt(0));
     float nextY = startPoint.Y() + boo::Height(glyphBuffer.AdvanceAt(0));
     uint32 lastFrom = 0;
@@ -2251,7 +2250,7 @@ namespace krys::boo
   }
 
   void FontCascade::DrawEmphasisMarks(GraphicsContext &context, const GlyphBuffer &glyphBuffer,
-                                      const StringAtom &mark, const FloatPoint &point) const noexcept
+                                      const StringAtom &mark, const PointF &point) const noexcept
   {
     krys_debug_assert(glyphBuffer.IsFlattened());
     Maybe<GlyphData> markGlyphData = GetEmphasisMarkGlyphData(mark);
@@ -2274,8 +2273,8 @@ namespace krys::boo
     // The problem might actually be harder for complex text, though.
     // Putting a mark over every glyph probably isn't great in complex scripts.
     float middleOfLastGlyph = OffsetToMiddleOfGlyphAtIndex(glyphBuffer, 0);
-    FloatPoint startPoint(point.X() + middleOfLastGlyph - OffsetToMiddleOfGlyph(*markFontData, markGlyph),
-                          point.Y());
+    PointF startPoint(point.X() + middleOfLastGlyph - OffsetToMiddleOfGlyph(*markFontData, markGlyph),
+                      point.Y());
 
     GlyphBuffer markBuffer;
     auto glyphForMarker = [&](uint32 index)

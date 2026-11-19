@@ -25,7 +25,6 @@
 
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBufferBackend.hpp"
 #include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/PixelBuffer.hpp"
@@ -33,6 +32,7 @@
 #include "Krystal.Booey/Graphics/Images/ImagePaintingOptions.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerContentsDisplayDelegate.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -80,17 +80,17 @@ namespace krys::boo
     return DestinationColorSpace::SRGB();
   }
 
-  void ImageBufferBackend::GetPixelBuffer(const IntRect &, PixelBuffer &destination) noexcept
+  void ImageBufferBackend::GetPixelBuffer(const RectI &, PixelBuffer &destination) noexcept
   {
     destination.ZeroFill();
   }
 
   void ImageBufferBackend::PutPixelBuffer(const PixelBufferSourceView &sourcePixelBuffer,
-                                          const IntRect &sourceRect, const IntPoint &destinationPoint,
+                                          const RectI &sourceRect, const PointI &destinationPoint,
                                           AlphaPremultiplication) noexcept
   {
-    IntRect backendRect {{}, Size()};
-    auto sourceRectClipped = Intersection({IntPoint::Zero(), sourcePixelBuffer.Size()}, sourceRect);
+    RectI backendRect {{}, Size()};
+    auto sourceRectClipped = Intersection({PointI::Zero(), sourcePixelBuffer.Size()}, sourceRect);
     auto destinationRect = sourceRectClipped;
     destinationRect.MoveBy(destinationPoint);
     if (sourceRect.X() < 0)
@@ -136,18 +136,17 @@ namespace krys::boo
     context.SetAlpha(1);
     context.ClearDropShadow();
     context.SetImageInterpolationQuality(InterpolationQuality::DoNotInterpolate);
-    context.Clip(FloatRect(destinationRect));
-    context.DrawNativeImage(*image, FloatRect(destinationRect),
-                            FloatRect({}, FloatSize(destinationRect.Size())),
+    context.Clip(RectF(destinationRect));
+    context.DrawNativeImage(*image, RectF(destinationRect), RectF({}, SizeF(destinationRect.Size())),
                             ImagePaintingOptions(CompositeOperator::Copy));
   }
 
-  void ImageBufferBackend::GetPixelBuffer(const IntRect &sourceRect, Span<const uint8> sourceData,
+  void ImageBufferBackend::GetPixelBuffer(const RectI &sourceRect, Span<const uint8> sourceData,
                                           PixelBuffer &destinationPixelBuffer) noexcept
   {
-    IntRect backendRect {{}, Size()};
+    RectI backendRect {{}, Size()};
     auto sourceRectClipped = Intersection(backendRect, sourceRect);
-    IntRect destinationRect {IntPoint::Zero(), sourceRectClipped.Size()};
+    RectI destinationRect {PointI::Zero(), sourceRectClipped.Size()};
 
     if (sourceRect.X() < 0)
     {
@@ -193,12 +192,12 @@ namespace krys::boo
   }
 
   void ImageBufferBackend::PutPixelBuffer(const PixelBufferSourceView &sourcePixelBuffer,
-                                          const IntRect &sourceRect, const IntPoint &destinationPoint,
+                                          const RectI &sourceRect, const PointI &destinationPoint,
                                           AlphaPremultiplication destinationAlphaFormat,
                                           Span<uint8> destinationData) noexcept
   {
-    IntRect backendRect {{}, Size()};
-    auto sourceRectClipped = Intersection({IntPoint::Zero(), sourcePixelBuffer.Size()}, sourceRect);
+    RectI backendRect {{}, Size()};
+    auto sourceRectClipped = Intersection({PointI::Zero(), sourcePixelBuffer.Size()}, sourceRect);
     auto destinationRect = sourceRectClipped;
     destinationRect.MoveBy(destinationPoint);
 

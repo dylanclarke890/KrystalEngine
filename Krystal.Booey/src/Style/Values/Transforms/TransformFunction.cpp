@@ -1041,7 +1041,7 @@ namespace krys::boo::style
   // MARK: - Platform
 
   Ref<TransformOperation> ToPlatform<TransformFunction>::operator()(const TransformFunction &value,
-                                                                    const FloatSize &size) noexcept
+                                                                    const SizeF &size) noexcept
   {
     return value.Value->ToPlatform(size);
   }

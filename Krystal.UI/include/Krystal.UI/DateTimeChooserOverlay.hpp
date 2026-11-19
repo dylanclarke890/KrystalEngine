@@ -40,7 +40,7 @@ namespace krys::ui
     UniquePtr<View> _view;
     boo::DateTimeChooserParameters _parameters;
     Mode _mode {Mode::Days};
-    boo::IntRect _rect;
+    RectI _rect;
     /// @brief The month shown (months since January 1970) in the day modes, or the year shown in the month
     /// mode.
     int32 _page {0};
@@ -88,7 +88,7 @@ namespace krys::ui
       return *_view;
     }
 
-    KRYS_NODISCARD const boo::IntRect &Rect() const noexcept final
+    KRYS_NODISCARD const RectI &Rect() const noexcept final
     {
       return _rect;
     }
@@ -96,12 +96,12 @@ namespace krys::ui
     void Hide() noexcept final;
 
     /// @brief Highlights the day or month under @p point.
-    void MouseMoved(const boo::IntPoint &point) noexcept final;
+    void MouseMoved(const PointI &point) noexcept final;
 
     /// @brief Chooses the day or month under @p point, or turns the page.
-    void MouseReleased(const boo::IntPoint &point) noexcept final;
+    void MouseReleased(const PointI &point) noexcept final;
 
-    bool MouseWheel(const boo::IntPoint &point, float notchesX, float notchesY) noexcept final;
+    bool MouseWheel(const PointI &point, float notchesX, float notchesY) noexcept final;
 
     /// @brief The arrow keys move the highlight, Page Up and Page Down turn the page, Home and End go to its
     /// start and end; Enter and Space choose; Escape and Tab hide the picker.

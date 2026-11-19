@@ -62,14 +62,14 @@ namespace krys::boo
     // We search for the root text element and take its bounding box.
     // It is also necessary to take the stroke and repaint rect of
     // this element, since we need it for filters.
-    KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept final;
+    KRYS_NODISCARD RectF ObjectBoundingBox() const noexcept final;
 
-    KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept final;
+    KRYS_NODISCARD RectF StrokeBoundingBox() const noexcept final;
 
-    KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
+    KRYS_NODISCARD RectF RepaintRectInLocalCoordinates(
       RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept final;
 
-    KRYS_NODISCARD FloatRect DecoratedBoundingBox() const noexcept final;
+    KRYS_NODISCARD RectF DecoratedBoundingBox() const noexcept final;
 
     KRYS_NODISCARD LayoutRect ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
                                                   VisibleRectContext) const noexcept final;
@@ -77,9 +77,9 @@ namespace krys::boo
     KRYS_NODISCARD RepaintRects RectsForRepaintingAfterLayout(const RenderLayerModelObject *repaintContainer,
                                                               RepaintOutlineBounds) const noexcept final;
 
-    KRYS_NODISCARD Maybe<FloatRect>
-      ComputeFloatVisibleRectInContainer(const FloatRect &, const RenderLayerModelObject *container,
-                                         VisibleRectContext) const noexcept final;
+    KRYS_NODISCARD Maybe<RectF> ComputeFloatVisibleRectInContainer(const RectF &,
+                                                                   const RenderLayerModelObject *container,
+                                                                   VisibleRectContext) const noexcept final;
 
     void MapLocalToContainer(const RenderLayerModelObject *ancestorContainer, TransformState &,
                              EnumSet<MapCoordinatesMode>, bool *wasFixed) const noexcept final;

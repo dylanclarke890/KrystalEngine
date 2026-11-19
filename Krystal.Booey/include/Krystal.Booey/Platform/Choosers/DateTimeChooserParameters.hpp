@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
@@ -35,7 +35,7 @@ namespace krys::boo
   struct DateTimeChooserParameters
   {
     utf8_string Type;
-    IntRect AnchorRectInRootView;
+    RectI AnchorRectInRootView;
     /// @brief The locale the chooser should be localized for. It might be an invalid name, because it comes
     /// from HTML `lang` attributes.
     utf8_string Locale;

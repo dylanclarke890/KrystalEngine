@@ -25,11 +25,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Booey/Page/Drag/DragClient.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -56,7 +56,6 @@ namespace krys::boo
   class HTMLInputElement;
   class HitTestResult;
   class Image;
-  class IntRect;
   class LocalFrame;
   class Page;
   class PlatformMouseEvent;
@@ -87,7 +86,7 @@ namespace krys::boo
     bool _didInitiateDrag {false};
     /// @brief Set in StartDrag when a drag starts from a mouse down within the page.
     EnumSet<DragOperation> _sourceDragOperationMask;
-    IntPoint _dragOffset;
+    PointI _dragOffset;
     net::Url _draggingImageUrl;
     bool _isPerformingDrop {false};
 
@@ -138,12 +137,12 @@ namespace krys::boo
       return _draggingImageUrl;
     }
 
-    void SetDragOffset(const IntPoint &offset) noexcept
+    void SetDragOffset(const PointI &offset) noexcept
     {
       _dragOffset = offset;
     }
 
-    KRYS_NODISCARD const IntPoint &DragOffset() const noexcept
+    KRYS_NODISCARD const PointI &DragOffset() const noexcept
     {
       return _dragOffset;
     }
@@ -169,32 +168,32 @@ namespace krys::boo
     }
 
     /// @brief Asks the client which drags may start at @p rootViewPoint, and remembers it.
-    EnumSet<DragSourceAction> DelegateDragSourceAction(const IntPoint &rootViewPoint) noexcept;
+    EnumSet<DragSourceAction> DelegateDragSourceAction(const PointI &rootViewPoint) noexcept;
 
     /// @brief The element a press at @p dragOrigin on @p start would drag, noting in @p state what it drags.
     KRYS_NODISCARD RefPtr<Element> DraggableElement(const LocalFrame *sourceFrame, Element *start,
-                                                    const IntPoint &dragOrigin,
+                                                    const PointI &dragOrigin,
                                                     DragState &state) const noexcept;
 
     void DragEnded() noexcept;
 
     /// @brief Puts the drag caret at @p windowPoint, as a host controlling the drag itself does.
-    void PlaceDragCaret(const IntPoint &windowPoint) noexcept;
+    void PlaceDragCaret(const PointI &windowPoint) noexcept;
 
     /// @brief Writes what a drag of @p element (the selection, an image or a link, as @p actionMask says)
     /// carries by default to @p dataTransfer, before `dragstart` lets the page change it.
     void PrepareForDragStart(LocalFrame &sourceFrame, EnumSet<DragSourceAction> actionMask,
                              Element &sourceElement, dom::DataTransfer &dataTransfer,
-                             const IntPoint &dragOrigin) const noexcept;
+                             const PointI &dragOrigin) const noexcept;
 
     /// @brief Starts the drag @p state describes, handing it to the client.
     /// @return Whether it started.
     bool StartDrag(LocalFrame &src, const DragState &state, EnumSet<DragOperation> sourceOperationMask,
-                   const PlatformMouseEvent &dragEvent, const IntPoint &dragOrigin,
+                   const PlatformMouseEvent &dragEvent, const PointI &dragOrigin,
                    HasNonDefaultPasteboardData hasData) noexcept;
 
     /// @brief The largest an image's drag image is, in CSS pixels.
-    KRYS_NODISCARD static const IntSize &MaxDragImageSize() noexcept;
+    KRYS_NODISCARD static const SizeI &MaxDragImageSize() noexcept;
 
     // FIXME: These values are straight out of DragControllerMac, so probably have
     // little correlation with Gdk standards...
@@ -227,14 +226,14 @@ namespace krys::boo
     void DisallowFileAccessIfNeeded(DragData &dragData) noexcept;
 
     KRYS_NODISCARD static Maybe<HitTestResult> HitTestResultForDragStart(LocalFrame &source, Element &element,
-                                                                         const IntPoint &location) noexcept;
+                                                                         const PointI &location) noexcept;
 
     KRYS_NODISCARD static bool ShouldUseCachedImageForDragImage(const Image &image) noexcept;
 
-    void DoImageDrag(Element &element, const IntPoint &dragOrigin, const IntRect &layoutRect,
-                     LocalFrame &frame, IntPoint &dragImageOffset, const DragState &state) noexcept;
+    void DoImageDrag(Element &element, const PointI &dragOrigin, const RectI &layoutRect, LocalFrame &frame,
+                     PointI &dragImageOffset, const DragState &state) noexcept;
 
-    void DoSystemDrag(DragImage image, const IntPoint &dragLoc, const IntPoint &eventPos, LocalFrame &frame,
+    void DoSystemDrag(DragImage image, const PointI &dragLoc, const PointI &eventPos, LocalFrame &frame,
                       const DragState &state) noexcept;
 
     KRYS_NODISCARD DragClient &Client() const noexcept

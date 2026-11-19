@@ -94,7 +94,7 @@ namespace krys::boo::html
                                                               document, const_cast<RenderStyle &>(*style));
   }
 
-  RefPtr<Filter> CanvasRenderingContext2D::CreateFilter(const FloatRect &bounds) const noexcept
+  RefPtr<Filter> CanvasRenderingContext2D::CreateFilter(const RectF &bounds) const noexcept
   {
     if (bounds.IsEmpty())
     {
@@ -138,7 +138,7 @@ namespace krys::boo::html
     return filter;
   }
 
-  IntOutsets CanvasRenderingContext2D::CalculateFilterOutsets(const FloatRect &bounds) const noexcept
+  IntOutsets CanvasRenderingContext2D::CalculateFilterOutsets(const RectF &bounds) const noexcept
   {
     if (GetState().Filter.IsNone())
     {

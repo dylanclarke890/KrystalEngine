@@ -1565,22 +1565,13 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Fonts/WOFFFileFormat.hpp
   include/Krystal.Booey/Graphics/Geometry/BoxExtents.hpp
   include/Krystal.Booey/Graphics/Geometry/BoxSides.hpp
-  include/Krystal.Booey/Graphics/Geometry/DoublePoint.hpp
-  include/Krystal.Booey/Graphics/Geometry/DoubleSize.hpp
-  include/Krystal.Booey/Graphics/Geometry/FloatPoint.hpp
   include/Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp
   include/Krystal.Booey/Graphics/Geometry/FloatPointGraph.hpp
   include/Krystal.Booey/Graphics/Geometry/FloatPolygon.hpp
   include/Krystal.Booey/Graphics/Geometry/FloatQuad.hpp
-  include/Krystal.Booey/Graphics/Geometry/FloatRect.hpp
   include/Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp
   include/Krystal.Booey/Graphics/Geometry/FloatSegment.hpp
-  include/Krystal.Booey/Graphics/Geometry/FloatSize.hpp
   include/Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp
-  include/Krystal.Booey/Graphics/Geometry/IntPoint.hpp
-  include/Krystal.Booey/Graphics/Geometry/IntRect.hpp
-  include/Krystal.Booey/Graphics/Geometry/IntRectHash.hpp
-  include/Krystal.Booey/Graphics/Geometry/IntSize.hpp
   include/Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp
   include/Krystal.Booey/Graphics/Geometry/LayoutRange.hpp
   include/Krystal.Booey/Graphics/Geometry/LayoutRect.hpp
@@ -1770,20 +1761,13 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
   src/Graphics/Fonts/OpenTypeMathData.cpp
   src/Graphics/Fonts/SystemFallbackFontCache.cpp
   src/Graphics/Fonts/WOFFFileFormat.cpp
-  src/Graphics/Geometry/DoubleSize.cpp
-  src/Graphics/Geometry/FloatPoint.cpp
   src/Graphics/Geometry/FloatPoint3D.cpp
   src/Graphics/Geometry/FloatPointGraph.cpp
   src/Graphics/Geometry/FloatPolygon.cpp
   src/Graphics/Geometry/FloatQuad.cpp
-  src/Graphics/Geometry/FloatRect.cpp
   src/Graphics/Geometry/FloatRoundedRect.cpp
   src/Graphics/Geometry/FloatSegment.cpp
-  src/Graphics/Geometry/FloatSize.cpp
   src/Graphics/Geometry/GeometryUtilities.cpp
-  src/Graphics/Geometry/IntPoint.cpp
-  src/Graphics/Geometry/IntRect.cpp
-  src/Graphics/Geometry/IntSize.cpp
   src/Graphics/Geometry/LayoutPoint.cpp
   src/Graphics/Geometry/LayoutRange.cpp
   src/Graphics/Geometry/LayoutRect.cpp

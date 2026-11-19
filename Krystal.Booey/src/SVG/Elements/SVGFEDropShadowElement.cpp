@@ -147,7 +147,7 @@ namespace krys::boo
     return !StdDeviationX() && !StdDeviationY() && !Dx() && !Dy();
   }
 
-  IntOutsets SVGFEDropShadowElement::Outsets(const FloatRect &targetBoundingBox,
+  IntOutsets SVGFEDropShadowElement::Outsets(const RectF &targetBoundingBox,
                                              SVGUnitTypes::SVGUnitType primitiveUnits) const noexcept
   {
     auto offset = SVGFilterRenderer::CalculateResolvedSize({Dx(), Dy()}, targetBoundingBox, primitiveUnits);

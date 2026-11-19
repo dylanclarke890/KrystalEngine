@@ -24,15 +24,15 @@
  */
 
 #include "Krystal.Booey/Style/TransformResolver.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Rendering/MotionPath.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Rendering/TransformOperationData.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo::style
 {
@@ -64,46 +64,46 @@ namespace krys::boo::style
   }
 
   FloatPoint3D TransformResolver::ComputeTransformOrigin(const ComputedStyle &style,
-                                                         const FloatRect &boundingBox) noexcept
+                                                         const RectF &boundingBox) noexcept
   {
     FloatPoint3D originTranslate;
     originTranslate.SetXY(
       boundingBox.Location()
-      + Evaluate<FloatPoint>(style.GetTransformOrigin().XY(), boundingBox.Size(), ZoomNeeded {}));
+      + Evaluate<PointF>(style.GetTransformOrigin().XY(), boundingBox.Size(), ZoomNeeded {}));
     originTranslate.SetZ(style.GetTransformOriginZ().ResolveZoom(ZoomNeeded {}));
     return originTranslate;
   }
 
   FloatPoint3D TransformResolver::ComputeTransformOrigin(const RenderStyle &style,
-                                                         const FloatRect &boundingBox) noexcept
+                                                         const RectF &boundingBox) noexcept
   {
     return ComputeTransformOrigin(style.ComputedStyle(), boundingBox);
   }
 
-  FloatPoint3D TransformResolver::ComputeTransformOrigin(const FloatRect &boundingBox) const noexcept
+  FloatPoint3D TransformResolver::ComputeTransformOrigin(const RectF &boundingBox) const noexcept
   {
     return ComputeTransformOrigin(_style, boundingBox);
   }
 
-  FloatPoint TransformResolver::ComputePerspectiveOrigin(const ComputedStyle &style,
-                                                         const FloatRect &boundingBox) noexcept
+  PointF TransformResolver::ComputePerspectiveOrigin(const ComputedStyle &style,
+                                                     const RectF &boundingBox) noexcept
   {
     return boundingBox.Location()
-           + Evaluate<FloatPoint>(style.GetPerspectiveOrigin(), boundingBox.Size(), ZoomNeeded {});
+           + Evaluate<PointF>(style.GetPerspectiveOrigin(), boundingBox.Size(), ZoomNeeded {});
   }
 
-  FloatPoint TransformResolver::ComputePerspectiveOrigin(const RenderStyle &style,
-                                                         const FloatRect &boundingBox) noexcept
+  PointF TransformResolver::ComputePerspectiveOrigin(const RenderStyle &style,
+                                                     const RectF &boundingBox) noexcept
   {
     return ComputePerspectiveOrigin(style.ComputedStyle(), boundingBox);
   }
 
-  FloatPoint TransformResolver::ComputePerspectiveOrigin(const FloatRect &boundingBox) const noexcept
+  PointF TransformResolver::ComputePerspectiveOrigin(const RectF &boundingBox) const noexcept
   {
     return ComputePerspectiveOrigin(_style, boundingBox);
   }
 
-  void TransformResolver::ApplyPerspective(const FloatPoint &originTranslate) noexcept
+  void TransformResolver::ApplyPerspective(const PointF &originTranslate) noexcept
   {
     // https://www.w3.org/TR/css-transforms-2/#perspective
     // The perspective matrix is computed as follows:
@@ -239,9 +239,9 @@ namespace krys::boo::style
 
     auto offsetDistance = Evaluate<float>(_style.GetOffsetDistance(), offsetPath->Length(), ZoomNeeded {});
     auto offsetAnchor = krys::SwitchOn(
-      _style.GetOffsetAnchor(), [&](const Position &position) -> Maybe<FloatPoint>
-      { return Evaluate<FloatPoint>(position, boundingBox.Size(), ZoomNeeded {}); },
-      [&](const css::keywords::Auto &) -> Maybe<FloatPoint> { return null; });
+      _style.GetOffsetAnchor(), [&](const Position &position) -> Maybe<PointF>
+      { return Evaluate<PointF>(position, boundingBox.Size(), ZoomNeeded {}); },
+      [&](const css::keywords::Auto &) -> Maybe<PointF> { return null; });
     auto offsetRotate = _style.GetOffsetRotate().GetAngle().Value;
     auto offsetRotateHasAuto = _style.GetOffsetRotate().HasAuto();
 

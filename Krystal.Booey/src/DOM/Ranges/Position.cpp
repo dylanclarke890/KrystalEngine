@@ -1118,7 +1118,7 @@ namespace krys::boo::dom
         continue;
       }
 
-      auto boundingBoxLogicalHeight = [&](const IntRect &rect)
+      auto boundingBoxLogicalHeight = [&](const RectI &rect)
       {
         return isHorizontal ? rect.Height() : rect.Width();
       };

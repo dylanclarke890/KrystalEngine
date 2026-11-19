@@ -90,13 +90,13 @@ namespace krys::boo::style
   // MARK: - Evaluation
 
   FloatRoundedRect::Radii Evaluation<BorderRadius, FloatRoundedRect::Radii>::operator()(
-    const BorderRadius &value, FloatSize referenceSize, ZoomNeeded token) noexcept
+    const BorderRadius &value, SizeF referenceSize, ZoomNeeded token) noexcept
   {
     return {
-      Evaluate<FloatSize>(value.TopLeft(), referenceSize, token),
-      Evaluate<FloatSize>(value.TopRight(), referenceSize, token),
-      Evaluate<FloatSize>(value.BottomLeft(), referenceSize, token),
-      Evaluate<FloatSize>(value.BottomRight(), referenceSize, token),
+      Evaluate<SizeF>(value.TopLeft(), referenceSize, token),
+      Evaluate<SizeF>(value.TopRight(), referenceSize, token),
+      Evaluate<SizeF>(value.BottomLeft(), referenceSize, token),
+      Evaluate<SizeF>(value.BottomRight(), referenceSize, token),
     };
   }
 

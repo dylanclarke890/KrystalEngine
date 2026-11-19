@@ -1928,8 +1928,7 @@ namespace krys::boo::style
     }();
     const auto *anchoredContainingBlock = anchoredBox.Container();
 
-    auto anchorRect =
-      defaultAnchor->LocalToAbsoluteQuad(FloatQuad {FloatRect {localAnchorRect}}).BoundingBox();
+    auto anchorRect = defaultAnchor->LocalToAbsoluteQuad(FloatQuad {RectF {localAnchorRect}}).BoundingBox();
 
     for (const auto *anchorAncestor = defaultAnchor->Container();
          anchorAncestor && anchorAncestor != anchoredContainingBlock;
@@ -1945,7 +1944,7 @@ namespace krys::boo::style
         continue;
       }
       auto localClipRect = clipAncestor->OverflowClipRect({});
-      auto clipRect = clipAncestor->LocalToAbsoluteQuad(FloatQuad {FloatRect {localClipRect}}).BoundingBox();
+      auto clipRect = clipAncestor->LocalToAbsoluteQuad(FloatQuad {RectF {localClipRect}}).BoundingBox();
       if (!clipRect.Intersects(anchorRect))
       {
         return true;

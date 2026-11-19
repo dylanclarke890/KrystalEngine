@@ -20,9 +20,9 @@ namespace krys::boo::layout::tests
 
   namespace
   {
-    KRYS_NODISCARD PlatformMouseEvent MouseEvent(PlatformEvent::Type type, IntPoint position) noexcept
+    KRYS_NODISCARD PlatformMouseEvent MouseEvent(PlatformEvent::Type type, PointI position) noexcept
     {
-      DoublePoint point(position.X(), position.Y());
+      PointD point(position.X(), position.Y());
       int32 clickCount = type == PlatformEvent::Type::MousePressed ? 1 : 0;
       return PlatformMouseEvent(
         point, point, type == PlatformEvent::Type::MouseMoved ? MouseButton::None : MouseButton::Left, type,

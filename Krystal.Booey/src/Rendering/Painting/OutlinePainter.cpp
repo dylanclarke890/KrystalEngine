@@ -63,7 +63,7 @@ namespace krys::boo
       context.DrawFocusRing(path, style::Evaluate<float>(style.OutlineWidth(), style::ZoomNeeded {}), color);
     }
 
-    void DrawFocusRing(GraphicsContext &context, const List<FloatRect> &rects, const RenderStyle &style,
+    void DrawFocusRing(GraphicsContext &context, const List<RectF> &rects, const RenderStyle &style,
                        const Color &color) noexcept
     {
       context.DrawFocusRing(rects, style::Evaluate<float>(style.OutlineOffset(), style::ZoomNeeded {}),
@@ -195,8 +195,8 @@ namespace krys::boo
       }
       auto logicalTop = std::max(lineBox->ContentLogicalTop(), box->LogicalTop());
       auto logicalBottom = std::min(lineBox->ContentLogicalBottom(), box->LogicalBottom());
-      auto enclosingVisualRect = FloatRect {box->LogicalLeftIgnoringInlineDirection(), logicalTop,
-                                            box->LogicalWidth(), logicalBottom - logicalTop};
+      auto enclosingVisualRect = RectF {box->LogicalLeftIgnoringInlineDirection(), logicalTop,
+                                        box->LogicalWidth(), logicalBottom - logicalTop};
 
       if (!isHorizontalWritingMode)
       {
@@ -231,7 +231,7 @@ namespace krys::boo
 
     auto deviceScaleFactor = DeviceScaleFactor(renderer);
 
-    List<FloatRect> pixelSnappedRects;
+    List<RectF> pixelSnappedRects;
     for (size_t index = 0; index < lineRects.size(); ++index)
     {
       auto rect = lineRects[index];
@@ -283,7 +283,7 @@ namespace krys::boo
     auto deviceScaleFactor = DeviceScaleFactor(renderer);
     auto outlineOffset = style::Evaluate<float>(style.OutlineOffset(), style::ZoomNeeded {});
 
-    List<FloatRect> pixelSnappedFocusRingRects;
+    List<RectF> pixelSnappedFocusRingRects;
     for (auto rect : focusRingRects)
     {
       rect.Inflate(LayoutUnit(outlineOffset));
@@ -364,17 +364,17 @@ namespace krys::boo
       {
         continue;
       }
-      FloatPoint pos(additionalOffset);
+      PointF pos(additionalOffset);
       // FIXME: This doesn't work correctly with transforms.
       if (child.HasLayer())
       {
-        pos = child.LocalToContainerPoint(FloatPoint(), paintContainer);
+        pos = child.LocalToContainerPoint(PointF(), paintContainer);
       }
       else if (const auto *box = DynamicDowncast<RenderBox>(child))
       {
         pos.Move(box->LocationOffset());
       }
-      CollectFocusRingRects(child, rects, FlooredIntPoint(pos), paintContainer);
+      CollectFocusRingRects(child, rects, FlooredPointI(pos), paintContainer);
     }
 
     // There are no continuations: blocks in inlines are laid out in the inline's lines.
@@ -436,7 +436,7 @@ namespace krys::boo
     int32 selectedItem = selectElement.ActiveSelectionEndListIndex();
     if (selectedItem >= 0)
     {
-      rects.emplace_back(SnappedIntRect(renderer.ItemBoundingBoxRect(additionalOffset, selectedItem)));
+      rects.emplace_back(SnappedRectI(renderer.ItemBoundingBoxRect(additionalOffset, selectedItem)));
       return true;
     }
 
@@ -497,38 +497,37 @@ namespace krys::boo
       return;
     }
 
-    FloatPoint pos;
+    PointF pos;
     // FIXME: This doesn't work correctly with transforms.
     if (box.Layer())
     {
-      pos = box.LocalToContainerPoint(FloatPoint(), paintContainer);
+      pos = box.LocalToContainerPoint(PointF(), paintContainer);
     }
     else
     {
-      pos =
-        FloatPoint((additionalOffset.X() + box.X()).ToFloat(), (additionalOffset.Y() + box.Y()).ToFloat());
+      pos = PointF((additionalOffset.X() + box.X()).ToFloat(), (additionalOffset.Y() + box.Y()).ToFloat());
     }
     CollectFocusRingRects(box, rects, FlooredLayoutPoint(pos), paintContainer);
   }
 
   namespace
   {
-    KRYS_NODISCARD std::pair<FloatPoint, FloatPoint>
-      StartAndEndPointsForCorner(const FloatPointGraph::Edge &fromEdge, const FloatPointGraph::Edge &toEdge,
-                                 const FloatSize &radius) noexcept
+    KRYS_NODISCARD std::pair<PointF, PointF> StartAndEndPointsForCorner(const FloatPointGraph::Edge &fromEdge,
+                                                                        const FloatPointGraph::Edge &toEdge,
+                                                                        const SizeF &radius) noexcept
     {
-      FloatSize fromEdgeVector = *fromEdge.second - *fromEdge.first;
-      FloatSize toEdgeVector = *toEdge.second - *toEdge.first;
+      SizeF fromEdgeVector = *fromEdge.second - *fromEdge.first;
+      SizeF toEdgeVector = *toEdge.second - *toEdge.first;
 
-      FloatPoint fromEdgeNorm = ToFloatPoint(fromEdgeVector);
+      PointF fromEdgeNorm = ToPointF(fromEdgeVector);
       fromEdgeNorm.Normalise();
-      FloatSize fromOffset = FloatSize(radius.Width() * fromEdgeNorm.X(), radius.Height() * fromEdgeNorm.Y());
-      FloatPoint startPoint = *fromEdge.second - fromOffset;
+      SizeF fromOffset = SizeF(radius.Width() * fromEdgeNorm.X(), radius.Height() * fromEdgeNorm.Y());
+      PointF startPoint = *fromEdge.second - fromOffset;
 
-      FloatPoint toEdgeNorm = ToFloatPoint(toEdgeVector);
+      PointF toEdgeNorm = ToPointF(toEdgeVector);
       toEdgeNorm.Normalise();
-      FloatSize toOffset = FloatSize(radius.Width() * toEdgeNorm.X(), radius.Height() * toEdgeNorm.Y());
-      FloatPoint endPoint = *toEdge.first + toOffset;
+      SizeF toOffset = SizeF(radius.Width() * toEdgeNorm.X(), radius.Height() * toEdgeNorm.Y());
+      PointF endPoint = *toEdge.first + toOffset;
       return std::make_pair(startPoint, endPoint);
     }
 
@@ -568,7 +567,7 @@ namespace krys::boo
 
     KRYS_NODISCARD CornerType CornerTypeForMultiline(const FloatPointGraph::Edge &fromEdge,
                                                      const FloatPointGraph::Edge &toEdge,
-                                                     const List<FloatPoint> &corners) noexcept
+                                                     const List<PointF> &corners) noexcept
     {
       auto corner = GetCornerType(fromEdge, toEdge);
       if (corner == CornerType::TopLeft && corners.at(0) == *fromEdge.second)
@@ -590,44 +589,40 @@ namespace krys::boo
       return CornerType::Other;
     }
 
-    KRYS_NODISCARD std::pair<FloatPoint, FloatPoint>
+    KRYS_NODISCARD std::pair<PointF, PointF>
       ControlPointsForBezierCurve(CornerType cornerType, const FloatPointGraph::Edge &fromEdge,
-                                  const FloatPointGraph::Edge &toEdge, const FloatSize &radius) noexcept
+                                  const FloatPointGraph::Edge &toEdge, const SizeF &radius) noexcept
     {
-      FloatPoint cp1;
-      FloatPoint cp2;
+      PointF cp1;
+      PointF cp2;
       switch (cornerType)
       {
         case CornerType::TopLeft:
         {
-          cp1 = FloatPoint(fromEdge.second->X(),
-                           fromEdge.second->Y() + radius.Height() * Path::CircleControlPoint());
-          cp2 =
-            FloatPoint(toEdge.first->X() + radius.Width() * Path::CircleControlPoint(), toEdge.first->Y());
+          cp1 =
+            PointF(fromEdge.second->X(), fromEdge.second->Y() + radius.Height() * Path::CircleControlPoint());
+          cp2 = PointF(toEdge.first->X() + radius.Width() * Path::CircleControlPoint(), toEdge.first->Y());
           break;
         }
         case CornerType::TopRight:
         {
-          cp1 = FloatPoint(fromEdge.second->X() - radius.Width() * Path::CircleControlPoint(),
-                           fromEdge.second->Y());
-          cp2 =
-            FloatPoint(toEdge.first->X(), toEdge.first->Y() + radius.Height() * Path::CircleControlPoint());
+          cp1 =
+            PointF(fromEdge.second->X() - radius.Width() * Path::CircleControlPoint(), fromEdge.second->Y());
+          cp2 = PointF(toEdge.first->X(), toEdge.first->Y() + radius.Height() * Path::CircleControlPoint());
           break;
         }
         case CornerType::BottomRight:
         {
-          cp1 = FloatPoint(fromEdge.second->X(),
-                           fromEdge.second->Y() - radius.Height() * Path::CircleControlPoint());
-          cp2 =
-            FloatPoint(toEdge.first->X() - radius.Width() * Path::CircleControlPoint(), toEdge.first->Y());
+          cp1 =
+            PointF(fromEdge.second->X(), fromEdge.second->Y() - radius.Height() * Path::CircleControlPoint());
+          cp2 = PointF(toEdge.first->X() - radius.Width() * Path::CircleControlPoint(), toEdge.first->Y());
           break;
         }
         case CornerType::BottomLeft:
         {
-          cp1 = FloatPoint(fromEdge.second->X() + radius.Width() * Path::CircleControlPoint(),
-                           fromEdge.second->Y());
-          cp2 =
-            FloatPoint(toEdge.first->X(), toEdge.first->Y() - radius.Height() * Path::CircleControlPoint());
+          cp1 =
+            PointF(fromEdge.second->X() + radius.Width() * Path::CircleControlPoint(), fromEdge.second->Y());
+          cp2 = PointF(toEdge.first->X(), toEdge.first->Y() - radius.Height() * Path::CircleControlPoint());
           break;
         }
         case CornerType::Other:
@@ -643,9 +638,9 @@ namespace krys::boo
       AdjustedRadiiForHuggingCurve(const FloatRoundedRect::Radii &inputRadii, float outlineOffset) noexcept
     {
       // This adjusts the radius so that it follows the border curve even when offset is present.
-      auto adjustedRadius = [outlineOffset](const FloatSize &radius)
+      auto adjustedRadius = [outlineOffset](const SizeF &radius)
       {
-        FloatSize expandSize;
+        SizeF expandSize;
         if (radius.Width() > outlineOffset)
         {
           expandSize.SetWidth(std::min(outlineOffset, radius.Width() - outlineOffset));
@@ -654,10 +649,10 @@ namespace krys::boo
         {
           expandSize.SetHeight(std::min(outlineOffset, radius.Height() - outlineOffset));
         }
-        FloatSize adjustedRadius = radius;
+        SizeF adjustedRadius = radius;
         adjustedRadius.Expand(expandSize.Width(), expandSize.Height());
         // Do not go to negative radius.
-        return adjustedRadius.ExpandedTo(FloatSize(0, 0));
+        return adjustedRadius.ExpandedTo(SizeF(0, 0));
       };
 
       return {
@@ -668,15 +663,15 @@ namespace krys::boo
       };
     }
 
-    KRYS_NODISCARD Maybe<FloatRect> RectFromPolygon(const FloatPointGraph::Polygon &poly) noexcept
+    KRYS_NODISCARD Maybe<RectF> RectFromPolygon(const FloatPointGraph::Polygon &poly) noexcept
     {
       if (poly.size() != 4)
       {
-        return Maybe<FloatRect>();
+        return Maybe<RectF>();
       }
 
-      Maybe<FloatPoint> topLeft;
-      Maybe<FloatPoint> bottomRight;
+      Maybe<PointF> topLeft;
+      Maybe<PointF> bottomRight;
       for (size_t i = 0; i < poly.size(); ++i)
       {
         const auto &toEdge = poly[i];
@@ -695,17 +690,17 @@ namespace krys::boo
       }
       if (!topLeft || !bottomRight)
       {
-        return Maybe<FloatRect>();
+        return Maybe<RectF>();
       }
-      return FloatRect(topLeft.value(), bottomRight.value());
+      return RectF(topLeft.value(), bottomRight.value());
     }
   }
 
-  Path OutlinePainter::PathWithShrinkWrappedRects(const List<FloatRect> &rects,
-                                                  const style::BorderRadius &radii, float outlineOffset,
-                                                  WritingMode writingMode, float deviceScaleFactor) noexcept
+  Path OutlinePainter::PathWithShrinkWrappedRects(const List<RectF> &rects, const style::BorderRadius &radii,
+                                                  float outlineOffset, WritingMode writingMode,
+                                                  float deviceScaleFactor) noexcept
   {
-    auto roundedRect = [&radii, outlineOffset, deviceScaleFactor](const FloatRect &rect)
+    auto roundedRect = [&radii, outlineOffset, deviceScaleFactor](const RectF &rect)
     {
       auto adjustedRadii = AdjustedRadiiForHuggingCurve(
         style::Evaluate<FloatRoundedRect::Radii>(radii, rect.Size(), style::ZoomNeeded {}), outlineOffset);
@@ -734,7 +729,7 @@ namespace krys::boo
     }
     const auto &poly = polys.at(0);
     // Fast path when poly has one rect only.
-    Maybe<FloatRect> rect = RectFromPolygon(poly);
+    Maybe<RectF> rect = RectFromPolygon(poly);
     if (rect)
     {
       return roundedRect(rect.value());
@@ -756,7 +751,7 @@ namespace krys::boo
 
     // physical topLeft/topRight/bottomRight/bottomLeft
     auto isHorizontal = writingMode.IsHorizontal();
-    auto corners = List<FloatPoint> {
+    auto corners = List<PointF> {
       firstLineRect.MinXMinYCorner(),
       isHorizontal ? lastLineRect.MaxXMinYCorner() : firstLineRect.MaxXMinYCorner(),
       lastLineRect.MaxXMaxYCorner(),
@@ -765,7 +760,7 @@ namespace krys::boo
 
     for (size_t i = 0; i < poly.size(); ++i)
     {
-      auto moveOrAddLineTo = [i, &path](const FloatPoint &startPoint)
+      auto moveOrAddLineTo = [i, &path](const PointF &startPoint)
       {
         if (!i)
         {
@@ -778,7 +773,7 @@ namespace krys::boo
       };
       const auto &toEdge = poly[i];
       const auto &fromEdge = (i > 0) ? poly[i - 1] : poly[poly.size() - 1];
-      FloatSize radius;
+      SizeF radius;
       auto corner = CornerTypeForMultiline(fromEdge, toEdge, corners);
       switch (corner)
       {

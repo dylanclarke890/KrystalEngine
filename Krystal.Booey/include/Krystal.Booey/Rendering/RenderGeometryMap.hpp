@@ -25,12 +25,12 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -89,7 +89,7 @@ namespace krys::boo
       return _mapCoordinatesFlags;
     }
 
-    KRYS_NODISCARD FloatRect AbsoluteRect(const FloatRect &rect) const noexcept
+    KRYS_NODISCARD RectF AbsoluteRect(const RectF &rect) const noexcept
     {
       return MapToContainer(rect, nullptr).BoundingBox();
     }
@@ -97,10 +97,10 @@ namespace krys::boo
     // Map to a container. Will assert that the container has been pushed onto this map. A null container maps
     // through the RenderView (including its scale transform, if any). If the container is the RenderView, the
     // scroll offset is applied, but not the scale.
-    KRYS_NODISCARD FloatPoint MapToContainer(const FloatPoint &p,
-                                             const RenderLayerModelObject *container) const noexcept;
+    KRYS_NODISCARD PointF MapToContainer(const PointF &p,
+                                         const RenderLayerModelObject *container) const noexcept;
 
-    KRYS_NODISCARD FloatQuad MapToContainer(const FloatRect &rect,
+    KRYS_NODISCARD FloatQuad MapToContainer(const RectF &rect,
                                             const RenderLayerModelObject *container) const noexcept;
 
     // Called by code walking the renderer or layer trees.

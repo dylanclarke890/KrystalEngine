@@ -54,9 +54,9 @@ namespace krys::boo
     return physicalBoundingBox;
   }
 
-  FloatPoint ShapeOutsideInfo::ShapeToRendererPoint(const FloatPoint &point) const noexcept
+  PointF ShapeOutsideInfo::ShapeToRendererPoint(const PointF &point) const noexcept
   {
-    FloatPoint result = point;
+    PointF result = point;
     if (_renderer.Style().GetWritingMode().IsBlockFlipped())
     {
       result.SetY(_renderer.LogicalHeight().ToFloat() - result.Y());

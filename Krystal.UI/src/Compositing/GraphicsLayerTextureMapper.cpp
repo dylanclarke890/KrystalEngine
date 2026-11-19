@@ -54,7 +54,7 @@ namespace krys::ui
     // The current size might change, thus we need to update the whole display.
     _needsDisplay = true;
     NotifyChange(DisplayChange);
-    AddRepaintRect(boo::FloatRect(boo::FloatPoint(), _size));
+    AddRepaintRect(RectF(PointF(), _size));
   }
 
   void GraphicsLayerTextureMapper::SetContentsNeedsDisplay() noexcept
@@ -63,8 +63,7 @@ namespace krys::ui
     AddRepaintRect(ContentsRect());
   }
 
-  void GraphicsLayerTextureMapper::SetNeedsDisplayInRect(const boo::FloatRect &rect,
-                                                         ShouldClipToLayer) noexcept
+  void GraphicsLayerTextureMapper::SetNeedsDisplayInRect(const RectF &rect, ShouldClipToLayer) noexcept
   {
     if (!DrawsContent())
     {
@@ -154,7 +153,7 @@ namespace krys::ui
     NotifyChange(ReplicaLayerChange);
   }
 
-  void GraphicsLayerTextureMapper::SetPosition(const boo::FloatPoint &value) noexcept
+  void GraphicsLayerTextureMapper::SetPosition(const PointF &value) noexcept
   {
     if (value == Position())
     {
@@ -164,7 +163,7 @@ namespace krys::ui
     NotifyChange(PositionChange);
   }
 
-  void GraphicsLayerTextureMapper::SetBoundsOrigin(const boo::FloatPoint &value) noexcept
+  void GraphicsLayerTextureMapper::SetBoundsOrigin(const PointF &value) noexcept
   {
     if (value == BoundsOrigin())
     {
@@ -184,7 +183,7 @@ namespace krys::ui
     NotifyChange(AnchorPointChange);
   }
 
-  void GraphicsLayerTextureMapper::SetSize(const boo::FloatSize &value) noexcept
+  void GraphicsLayerTextureMapper::SetSize(const SizeF &value) noexcept
   {
     if (value == Size())
     {
@@ -329,7 +328,7 @@ namespace krys::ui
     NotifyChange(OpacityChange);
   }
 
-  void GraphicsLayerTextureMapper::SetContentsRect(const boo::FloatRect &value) noexcept
+  void GraphicsLayerTextureMapper::SetContentsRect(const RectF &value) noexcept
   {
     if (value == ContentsRect())
     {
@@ -722,7 +721,7 @@ namespace krys::ui
     _changeMask = NoChanges;
   }
 
-  void GraphicsLayerTextureMapper::FlushCompositingState(const boo::FloatRect &rect) noexcept
+  void GraphicsLayerTextureMapper::FlushCompositingState(const RectF &rect) noexcept
   {
     FlushCompositingStateForThisLayerOnly();
     UpdateVisibleRects(rect);
@@ -748,11 +747,11 @@ namespace krys::ui
     }
   }
 
-  void GraphicsLayerTextureMapper::UpdateVisibleRects(const boo::FloatRect &rect) noexcept
+  void GraphicsLayerTextureMapper::UpdateVisibleRects(const RectF &rect) noexcept
   {
     _layerTransform.SetLocalTransform(Transform());
     _layerTransform.SetAnchorPoint(AnchorPoint());
-    _layerTransform.SetPosition(boo::FloatPoint(Position() - BoundsOrigin()));
+    _layerTransform.SetPosition(PointF(Position() - BoundsOrigin()));
     _layerTransform.SetSize(Size());
     _layerTransform.SetFlattening(!Preserves3D());
     _layerTransform.SetChildrenTransform(ChildrenTransform());
@@ -771,7 +770,7 @@ namespace krys::ui
     // A projection of the rect (surface coordinates) onto the layer's plane (layer coordinates). The
     // resulting quad might be skewed and the result is the bounding box of this quad, so it might spread
     // further than the real visible area.
-    boo::FloatRect visibleRect(inverse->ClampedBoundsOfProjectedQuad(boo::FloatQuad(rect)));
+    RectF visibleRect(inverse->ClampedBoundsOfProjectedQuad(boo::FloatQuad(rect)));
     if (visibleRect.Width() >= boo::LayoutUnit::NearlyMax().ToFloat()
         || visibleRect.Width() <= boo::LayoutUnit::NearlyMin().ToFloat())
     {
@@ -784,7 +783,7 @@ namespace krys::ui
       visibleRect.SetY(0);
       visibleRect.SetHeight(_size.Height());
     }
-    _visibleRect = boo::EnclosingIntRect(visibleRect);
+    _visibleRect = EnclosingRectI(visibleRect);
   }
 
   void GraphicsLayerTextureMapper::UpdateBackingStoreIncludingSubLayers(TextureMapper &textureMapper) noexcept
@@ -815,10 +814,10 @@ namespace krys::ui
     }
     krys_debug_assert(_backingStore);
 
-    boo::IntRect dirtyRect = boo::EnclosingIntRect(boo::FloatRect(boo::FloatPoint(), _size));
+    RectI dirtyRect = EnclosingRectI(RectF(PointF(), _size));
     if (!_needsDisplay)
     {
-      dirtyRect.Intersect(boo::EnclosingIntRect(_needsDisplayRect));
+      dirtyRect.Intersect(EnclosingRectI(_needsDisplayRect));
     }
 
     // The tiles follow what's visible of the layer even when nothing in it changed.
@@ -826,9 +825,8 @@ namespace krys::ui
     _backingStore->UpdateContentsScale(scale);
 
     dirtyRect.Scale(scale);
-    _backingStore->UpdateContents(
-      textureMapper, *this, _size, dirtyRect, _visibleRect,
-      boo::ExpandedIntSize(GraphicsLayer::Client().EnclosingFrameViewVisibleSize()));
+    _backingStore->UpdateContents(textureMapper, *this, _size, dirtyRect, _visibleRect,
+                                  ExpandedSizeI(GraphicsLayer::Client().EnclosingFrameViewVisibleSize()));
 
     _needsDisplay = false;
     _needsDisplayRect = {};

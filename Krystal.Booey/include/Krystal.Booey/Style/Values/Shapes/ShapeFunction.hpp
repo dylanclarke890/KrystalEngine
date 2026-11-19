@@ -514,7 +514,7 @@ namespace krys::boo::style
   template <>
   struct PathComputation<Shape>
   {
-    KRYS_NODISCARD boo::Path operator()(const Shape &, const FloatRect &) noexcept;
+    KRYS_NODISCARD boo::Path operator()(const Shape &, const RectF &) noexcept;
   };
 
   template <>

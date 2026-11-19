@@ -120,6 +120,13 @@ target_sources(Krystal.Core
       include/Krystal.Core/Events/Event.hpp
       include/Krystal.Core/Events/EventManager.hpp
 
+      # Geometry
+      include/Krystal.Core/Geometry/GeometryForward.hpp
+      include/Krystal.Core/Geometry/Point.hpp
+      include/Krystal.Core/Geometry/Rect.hpp
+      include/Krystal.Core/Geometry/RectHash.hpp
+      include/Krystal.Core/Geometry/Size.hpp
+
       # IO
       include/Krystal.Core/IO/Backends/NativeFileBackend.hpp
       include/Krystal.Core/IO/Streams/MemoryStream.hpp
@@ -287,6 +294,11 @@ target_sources(Krystal.Core
     
     # Events
     src/Events/EventManager.cpp
+    
+    # Geometry
+    src/Geometry/Point.cpp
+    src/Geometry/Rect.cpp
+    src/Geometry/Size.cpp
     
     # IO
     src/IO/Backends/NativeFileBackend.cpp

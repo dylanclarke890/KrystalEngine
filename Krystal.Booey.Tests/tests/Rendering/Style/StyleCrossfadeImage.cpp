@@ -35,11 +35,11 @@ namespace krys::boo::tests
     };
 
     // A quarter of the way from the 3x2 PNG to the 16x8 JPEG.
-    CHECK(imageSize(u8"mixed") == FloatSize(6.25f, 3.5f));
+    CHECK(imageSize(u8"mixed") == SizeF(6.25f, 3.5f));
     // Images of the same size keep it exactly.
-    CHECK(imageSize(u8"same") == FloatSize(3, 2));
+    CHECK(imageSize(u8"same") == SizeF(3, 2));
     // Without both images, the size is empty.
-    CHECK(imageSize(u8"none") == FloatSize());
+    CHECK(imageSize(u8"none") == SizeF());
   }
 
   TEST_CASE("StyleCrossfadeImage::Blend: the percentages, once the input images have loaded",

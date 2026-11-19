@@ -54,9 +54,9 @@ namespace krys::boo
 
     struct IconDirectoryEntry
     {
-      IntSize Size;
+      SizeI Size;
       uint16 BitCount {0};
-      IntPoint HotSpot;
+      PointI HotSpot;
       uint32 ImageOffset {0};
     };
 
@@ -77,7 +77,7 @@ namespace krys::boo
 
     // Valid only while a BMPImageReader is decoding, this holds the size
     // for the particular entry being decoded.
-    IntSize _frameSize;
+    SizeI _frameSize;
 
   public:
     KRYS_NODISCARD static Ref<ScalableImageDecoder>
@@ -96,11 +96,11 @@ namespace krys::boo
 
     void SetData(const SharedBuffer &data, bool allDataReceived) noexcept final;
 
-    KRYS_NODISCARD IntSize Size() const noexcept final;
+    KRYS_NODISCARD SizeI Size() const noexcept final;
 
-    KRYS_NODISCARD IntSize FrameSizeAtIndex(size_t index, SubsamplingLevel) const noexcept final;
+    KRYS_NODISCARD SizeI FrameSizeAtIndex(size_t index, SubsamplingLevel) const noexcept final;
 
-    bool SetSize(const IntSize &size) noexcept final;
+    bool SetSize(const SizeI &size) noexcept final;
 
     KRYS_NODISCARD size_t FrameCount() const noexcept final;
 
@@ -111,7 +111,7 @@ namespace krys::boo
     // inside BMPImageReader!
     bool SetFailed() noexcept final;
 
-    KRYS_NODISCARD Maybe<IntPoint> HotSpot() const noexcept final;
+    KRYS_NODISCARD Maybe<PointI> HotSpot() const noexcept final;
 
   private:
     ICOImageDecoder(AlphaOption, GammaAndColorProfileOption) noexcept;
@@ -162,7 +162,7 @@ namespace krys::boo
     bool ProcessDirectoryEntries() noexcept;
 
     // Returns the hot-spot for |index|, returns std::nullopt if there is none.
-    KRYS_NODISCARD Maybe<IntPoint> HotSpotAtIndex(size_t index) const noexcept;
+    KRYS_NODISCARD Maybe<PointI> HotSpotAtIndex(size_t index) const noexcept;
 
     // Reads and returns a directory entry from the current offset into
     // |data|.

@@ -41,7 +41,7 @@ namespace krys::boo
 
     KRYS_NODISCARD static Ref<PathStream> Create(PathSegment &&) noexcept;
 
-    KRYS_NODISCARD static Ref<PathStream> Create(const List<FloatPoint> &) noexcept;
+    KRYS_NODISCARD static Ref<PathStream> Create(const List<PointF> &) noexcept;
 
     KRYS_NODISCARD static Ref<PathStream> Create(List<PathSegment> &&) noexcept;
 
@@ -86,15 +86,15 @@ namespace krys::boo
 
     KRYS_NODISCARD bool Transform(const AffineTransform &) noexcept final;
 
-    KRYS_NODISCARD FloatRect FastBoundingRect() const noexcept final;
+    KRYS_NODISCARD RectF FastBoundingRect() const noexcept final;
 
-    KRYS_NODISCARD FloatRect BoundingRect() const noexcept final;
+    KRYS_NODISCARD RectF BoundingRect() const noexcept final;
 
     KRYS_NODISCARD bool HasSubpaths() const noexcept final;
 
-    KRYS_NODISCARD static FloatRect ComputeFastBoundingRect(std::span<const PathSegment>) noexcept;
+    KRYS_NODISCARD static RectF ComputeFastBoundingRect(std::span<const PathSegment>) noexcept;
 
-    KRYS_NODISCARD static FloatRect ComputeBoundingRect(std::span<const PathSegment>) noexcept;
+    KRYS_NODISCARD static RectF ComputeBoundingRect(std::span<const PathSegment>) noexcept;
 
     KRYS_NODISCARD static bool ComputeHasSubpaths(std::span<const PathSegment>) noexcept;
 
@@ -120,7 +120,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsClosed() const noexcept final;
 
-    KRYS_NODISCARD FloatPoint CurrentPoint() const noexcept final;
+    KRYS_NODISCARD PointF CurrentPoint() const noexcept final;
 
     KRYS_NODISCARD List<PathSegment> &Segments() noexcept
     {

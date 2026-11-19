@@ -27,10 +27,8 @@
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerClient.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerEnums.hpp"
@@ -41,6 +39,8 @@
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
@@ -100,20 +100,20 @@ namespace krys::boo
     utf8_string _name;
 
     // Offset from the owning renderer
-    FloatSize _offsetFromRenderer;
+    SizeF _offsetFromRenderer;
 
     // Scroll offset of the content layer inside its scrolling parent layer.
     ScrollOffset _scrollOffset;
 
     // Position is relative to the parent GraphicsLayer
-    FloatPoint _position;
+    PointF _position;
 
     // If set, overrides _position. Only used for coverage computation.
-    Maybe<FloatPoint> _approximatePosition;
+    Maybe<PointF> _approximatePosition;
 
     FloatPoint3D _anchorPoint {0.5f, 0.5f, 0};
-    FloatSize _size;
-    FloatPoint _boundsOrigin;
+    SizeF _size;
+    PointF _boundsOrigin;
 
     UniquePtr<TransformationMatrix> _transform;
     UniquePtr<TransformationMatrix> _childrenTransform;
@@ -170,16 +170,16 @@ namespace krys::boo
     // the primary reference to it.
     RefPtr<GraphicsLayer> _replicaLayer;
     GraphicsLayer *_replicatedLayer {nullptr}; // For a replica layer, a reference to the original layer.
-    FloatPoint _replicatedLayerPosition;       // For a replica layer, the position of the replica.
+    PointF _replicatedLayerPosition;           // For a replica layer, the position of the replica.
 
-    FloatRect _contentsRect;
+    RectF _contentsRect;
     FloatRoundedRect _contentsClippingRect;
-    FloatSize _contentsTilePhase;
-    FloatSize _contentsTileSize;
+    SizeF _contentsTilePhase;
+    SizeF _contentsTileSize;
     ScalingFilter _contentsMinificationFilter {ScalingFilter::Linear};
     ScalingFilter _contentsMagnificationFilter {ScalingFilter::Linear};
     FloatRoundedRect _backdropFiltersRect;
-    Maybe<FloatRect> _animationExtent;
+    Maybe<RectF> _animationExtent;
 
   public:
     KRYS_NODISCARD virtual LayerMode GetLayerMode() const noexcept
@@ -321,24 +321,24 @@ namespace krys::boo
       return _replicaLayer.get();
     }
 
-    KRYS_NODISCARD const FloatPoint &ReplicatedLayerPosition() const noexcept
+    KRYS_NODISCARD const PointF &ReplicatedLayerPosition() const noexcept
     {
       return _replicatedLayerPosition;
     }
 
-    void SetReplicatedLayerPosition(const FloatPoint &p) noexcept
+    void SetReplicatedLayerPosition(const PointF &p) noexcept
     {
       _replicatedLayerPosition = p;
     }
 
     // Offset is origin of the renderer minus origin of the graphics layer.
-    KRYS_NODISCARD FloatSize OffsetFromRenderer() const noexcept
+    KRYS_NODISCARD SizeF OffsetFromRenderer() const noexcept
     {
       return _offsetFromRenderer;
     }
 
-    void SetOffsetFromRenderer(const FloatSize &offset, ShouldSetNeedsDisplay shouldSetNeedsDisplay =
-                                                          ShouldSetNeedsDisplay::Set) noexcept;
+    void SetOffsetFromRenderer(
+      const SizeF &offset, ShouldSetNeedsDisplay shouldSetNeedsDisplay = ShouldSetNeedsDisplay::Set) noexcept;
 
     // Scroll offset of the content layer inside its scrolling parent layer.
     KRYS_NODISCARD ScrollOffset GetScrollOffset() const noexcept
@@ -350,31 +350,31 @@ namespace krys::boo
                          ShouldSetNeedsDisplay shouldSetNeedsDisplay = ShouldSetNeedsDisplay::Set) noexcept;
 
     // The position of the layer (the location of its top-left corner in its parent)
-    KRYS_NODISCARD const FloatPoint &Position() const noexcept
+    KRYS_NODISCARD const PointF &Position() const noexcept
     {
       return _position;
     }
 
-    virtual void SetPosition(const FloatPoint &p) noexcept
+    virtual void SetPosition(const PointF &p) noexcept
     {
       _approximatePosition = null;
       _position = p;
     }
 
     // approximatePosition, if set, overrides position() and is used during coverage rect computation.
-    KRYS_NODISCARD FloatPoint ApproximatePosition() const noexcept
+    KRYS_NODISCARD PointF ApproximatePosition() const noexcept
     {
       return _approximatePosition ? _approximatePosition.value() : _position;
     }
 
-    virtual void SetApproximatePosition(const FloatPoint &p) noexcept
+    virtual void SetApproximatePosition(const PointF &p) noexcept
     {
       _approximatePosition = p;
     }
 
     // For platforms that move underlying platform layers on a different thread for scrolling; just update the
     // GraphicsLayer state.
-    virtual void SyncPosition(const FloatPoint &p) noexcept
+    virtual void SyncPosition(const PointF &p) noexcept
     {
       _approximatePosition = null;
       _position = p;
@@ -393,27 +393,27 @@ namespace krys::boo
     }
 
     // The size of the layer.
-    KRYS_NODISCARD const FloatSize &Size() const noexcept
+    KRYS_NODISCARD const SizeF &Size() const noexcept
     {
       return _size;
     }
 
-    virtual void SetSize(const FloatSize &size) noexcept;
+    virtual void SetSize(const SizeF &size) noexcept;
 
     // The boundOrigin affects the offset at which content is rendered, and sublayers are positioned.
-    KRYS_NODISCARD const FloatPoint &BoundsOrigin() const noexcept
+    KRYS_NODISCARD const PointF &BoundsOrigin() const noexcept
     {
       return _boundsOrigin;
     }
 
-    virtual void SetBoundsOrigin(const FloatPoint &origin) noexcept
+    virtual void SetBoundsOrigin(const PointF &origin) noexcept
     {
       _boundsOrigin = origin;
     }
 
     // For platforms that move underlying platform layers on a different thread for scrolling; just update the
     // GraphicsLayer state.
-    virtual void SyncBoundsOrigin(const FloatPoint &origin) noexcept
+    virtual void SyncBoundsOrigin(const PointF &origin) noexcept
     {
       _boundsOrigin = origin;
     }
@@ -586,35 +586,35 @@ namespace krys::boo
     virtual void SetNeedsDisplay() noexcept = 0;
 
     // mark the given rect (in layer coords) as needing dispay. Never goes deep.
-    virtual void SetNeedsDisplayInRect(const FloatRect &rect,
+    virtual void SetNeedsDisplayInRect(const RectF &rect,
                                        ShouldClipToLayer shouldClip = ShouldClipToLayer::Clip) noexcept = 0;
 
     virtual void SetContentsNeedsDisplay() noexcept
     {
     }
 
-    virtual void SetContentsNeedsDisplayInRect(const FloatRect &) noexcept
+    virtual void SetContentsNeedsDisplayInRect(const RectF &) noexcept
     {
       SetContentsNeedsDisplay();
     }
 
     // The tile phase is relative to the GraphicsLayer bounds.
-    virtual void SetContentsTilePhase(const FloatSize &p) noexcept
+    virtual void SetContentsTilePhase(const SizeF &p) noexcept
     {
       _contentsTilePhase = p;
     }
 
-    KRYS_NODISCARD FloatSize ContentsTilePhase() const noexcept
+    KRYS_NODISCARD SizeF ContentsTilePhase() const noexcept
     {
       return _contentsTilePhase;
     }
 
-    virtual void SetContentsTileSize(const FloatSize &s) noexcept
+    virtual void SetContentsTileSize(const SizeF &s) noexcept
     {
       _contentsTileSize = s;
     }
 
-    KRYS_NODISCARD FloatSize ContentsTileSize() const noexcept
+    KRYS_NODISCARD SizeF ContentsTileSize() const noexcept
     {
       return _contentsTileSize;
     }
@@ -625,12 +625,12 @@ namespace krys::boo
     }
 
     // Set that the position/size of the contents (image or video).
-    KRYS_NODISCARD FloatRect ContentsRect() const noexcept
+    KRYS_NODISCARD RectF ContentsRect() const noexcept
     {
       return _contentsRect;
     }
 
-    virtual void SetContentsRect(const FloatRect &r) noexcept
+    virtual void SetContentsRect(const RectF &r) noexcept
     {
       _contentsRect = r;
     }
@@ -737,7 +737,7 @@ namespace krys::boo
 
     // Callback from the underlying graphics system to draw layer contents.
     void
-      PaintGraphicsLayerContents(GraphicsContext &context, const FloatRect &clip,
+      PaintGraphicsLayerContents(GraphicsContext &context, const RectF &clip,
                                  EnumSet<GraphicsLayerPaintBehavior> layerPaintBehavior = {}) const noexcept;
 
     // Flippedness of the contents of this layer. Does not affect sublayer geometry.
@@ -840,7 +840,7 @@ namespace krys::boo
 
     virtual void SetZPosition(float position) noexcept;
 
-    KRYS_NODISCARD virtual FloatSize PixelAlignmentOffset() const noexcept
+    KRYS_NODISCARD virtual SizeF PixelAlignmentOffset() const noexcept
     {
       return {};
     }
@@ -911,7 +911,7 @@ namespace krys::boo
     // Some compositing systems may do internal batching to synchronize compositing updates with updates drawn
     // into the window. These methods flush internal batched state on this layer and descendant layers, and
     // this layer only.
-    virtual void FlushCompositingState(const FloatRect & /* clipRect */) noexcept
+    virtual void FlushCompositingState(const RectF & /* clipRect */) noexcept
     {
     }
 
@@ -921,15 +921,14 @@ namespace krys::boo
 
     // If the exposed rect of this layer changes, returns true if this or descendant layers need a flush, for
     // example to allocate new tiles.
-    KRYS_NODISCARD virtual bool
-      VisibleRectChangeRequiresFlush(const FloatRect & /* clipRect */) const noexcept
+    KRYS_NODISCARD virtual bool VisibleRectChangeRequiresFlush(const RectF & /* clipRect */) const noexcept
     {
       return false;
     }
 
-    KRYS_NODISCARD static FloatRect
-      AdjustCoverageRectForMovement(const FloatRect &coverageRect, const FloatRect &previousVisibleRect,
-                                    const FloatRect &currentVisibleRect) noexcept;
+    KRYS_NODISCARD static RectF AdjustCoverageRectForMovement(const RectF &coverageRect,
+                                                              const RectF &previousVisibleRect,
+                                                              const RectF &currentVisibleRect) noexcept;
 
     // Return a string with a human readable form of the layer tree, If debug is true pointers for the layers
     // and timing data will be included in the returned string.
@@ -969,7 +968,7 @@ namespace krys::boo
 
     void ResetTrackedRepaints() noexcept;
 
-    void AddRepaintRect(const FloatRect &repaintRect) noexcept;
+    void AddRepaintRect(const RectF &repaintRect) noexcept;
 
     KRYS_NODISCARD static bool SupportsLayerType(Type type) noexcept;
 
@@ -1002,12 +1001,12 @@ namespace krys::boo
       _renderingIsSuppressedIncludingDescendants = suppressed;
     }
 
-    KRYS_NODISCARD const Maybe<FloatRect> &AnimationExtent() const noexcept
+    KRYS_NODISCARD const Maybe<RectF> &AnimationExtent() const noexcept
     {
       return _animationExtent;
     }
 
-    void SetAnimationExtent(Maybe<FloatRect> animationExtent) noexcept
+    void SetAnimationExtent(Maybe<RectF> animationExtent) noexcept
     {
       _animationExtent = animationExtent;
     }

@@ -36,7 +36,6 @@
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
@@ -72,6 +71,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 
 namespace krys::boo
@@ -337,13 +337,13 @@ namespace krys::boo
                && _typeSpecificFlags.SVGFlags().Contains(SVGModelObjectFlag::UsesBoundaryCaching));
   }
 
-  FloatRect RenderObject::ObjectBoundingBox() const noexcept
+  RectF RenderObject::ObjectBoundingBox() const noexcept
   {
     krys_debug_assert(false);
     return {};
   }
 
-  FloatRect RenderObject::StrokeBoundingBox() const noexcept
+  RectF RenderObject::StrokeBoundingBox() const noexcept
   {
     krys_debug_assert(false);
     return {};
@@ -351,13 +351,13 @@ namespace krys::boo
 
   // Returns the smallest rectangle enclosing all of the painted content
   // respecting clipping, masking, filters, opacity, stroke-width and markers
-  FloatRect RenderObject::RepaintRectInLocalCoordinates(RepaintRectCalculation) const noexcept
+  RectF RenderObject::RepaintRectInLocalCoordinates(RepaintRectCalculation) const noexcept
   {
     krys_debug_assert(false);
     return {};
   }
 
-  FloatRect RenderObject::DecoratedBoundingBox() const noexcept
+  RectF RenderObject::DecoratedBoundingBox() const noexcept
   {
     krys_debug_assert(false);
     return {};
@@ -373,8 +373,8 @@ namespace krys::boo
     return AffineTransform::Identity;
   }
 
-  bool RenderObject::NodeAtFloatPoint(const HitTestRequest &, HitTestResult &, const FloatPoint &,
-                                      HitTestAction) noexcept
+  bool RenderObject::NodeAtPointF(const HitTestRequest &, HitTestResult &, const PointF &,
+                                  HitTestAction) noexcept
   {
     krys_debug_assert(false);
     return false;
@@ -918,8 +918,8 @@ namespace krys::boo
     return ContainerForElement(*this, repaintContainer, &repaintContainerSkipped);
   }
 
-  FloatPoint RenderObject::LocalToAbsolute(const FloatPoint &localPoint, EnumSet<MapCoordinatesMode> mode,
-                                           bool *wasFixed) const noexcept
+  PointF RenderObject::LocalToAbsolute(const PointF &localPoint, EnumSet<MapCoordinatesMode> mode,
+                                       bool *wasFixed) const noexcept
   {
     TransformState transformState(TransformState::TransformDirection::ApplyTransform, localPoint);
     mode.Add(MapCoordinatesMode::ApplyContainerFlip);
@@ -928,14 +928,14 @@ namespace krys::boo
     return transformState.MappedPoint();
   }
 
-  FloatPoint RenderObject::LocalToAbsolute() const noexcept
+  PointF RenderObject::LocalToAbsolute() const noexcept
   {
-    return LocalToAbsolute(FloatPoint());
+    return LocalToAbsolute(PointF());
   }
 
   // FIXME: Should this exist? It is lossy but not obvious when called.
-  FloatPoint RenderObject::AbsoluteToLocal(const FloatPoint &containerPoint,
-                                           EnumSet<MapCoordinatesMode> mode) const noexcept
+  PointF RenderObject::AbsoluteToLocal(const PointF &containerPoint,
+                                       EnumSet<MapCoordinatesMode> mode) const noexcept
   {
     TransformState transformState(TransformState::TransformDirection::UnapplyInverseTransform,
                                   containerPoint);
@@ -1099,10 +1099,9 @@ namespace krys::boo
     return transformState.MappedQuad();
   }
 
-  FloatPoint RenderObject::LocalToContainerPoint(const FloatPoint &localPoint,
-                                                 const RenderLayerModelObject *container,
-                                                 EnumSet<MapCoordinatesMode> mode,
-                                                 bool *wasFixed) const noexcept
+  PointF RenderObject::LocalToContainerPoint(const PointF &localPoint,
+                                             const RenderLayerModelObject *container,
+                                             EnumSet<MapCoordinatesMode> mode, bool *wasFixed) const noexcept
   {
     TransformState transformState(TransformState::TransformDirection::ApplyTransform, localPoint);
     mode.Add(MapCoordinatesMode::ApplyContainerFlip);
@@ -1161,7 +1160,7 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD List<FloatRect>
+    KRYS_NODISCARD List<RectF>
       AbsoluteRectsForRangeInText(const dom::SimpleRange &range, Text &node,
                                   EnumSet<RenderObject::BoundingRectBehavior> behavior) noexcept
     {
@@ -1177,8 +1176,8 @@ namespace krys::boo
 
       if (behavior.Contains(RenderObject::BoundingRectBehavior::RespectClipping))
       {
-        auto absoluteClippedOverflowRect = FloatRect(renderer->AbsoluteClippedOverflowRectForRepaint());
-        List<FloatRect> rects;
+        auto absoluteClippedOverflowRect = RectF(renderer->AbsoluteClippedOverflowRectForRepaint());
+        List<RectF> rects;
         for (auto &quad : textQuads)
         {
           auto clippedRect = Intersection(quad.BoundingBox(), absoluteClippedOverflowRect);
@@ -1208,11 +1207,11 @@ namespace krys::boo
       Absolute,
     };
 
-    KRYS_NODISCARD List<FloatRect>
+    KRYS_NODISCARD List<RectF>
       BorderAndTextRects(const dom::SimpleRange &range, CoordinateSpace space,
                          EnumSet<RenderObject::BoundingRectBehavior> behavior) noexcept
     {
-      List<FloatRect> rects;
+      List<RectF> rects;
 
       (void)range.Start.GetDocument().UpdateLayoutIgnorePendingStylesheets();
 
@@ -1302,20 +1301,20 @@ namespace krys::boo
 
       if (behavior.Contains(RenderObject::BoundingRectBehavior::IgnoreTinyRects))
       {
-        std::erase_if(rects, [](const FloatRect &rect) { return rect.Area() <= 1; });
+        std::erase_if(rects, [](const RectF &rect) { return rect.Area() <= 1; });
       }
 
       return rects;
     }
   }
 
-  List<FloatRect> RenderObject::AbsoluteBorderAndTextRects(const dom::SimpleRange &range,
-                                                           EnumSet<BoundingRectBehavior> behavior) noexcept
+  List<RectF> RenderObject::AbsoluteBorderAndTextRects(const dom::SimpleRange &range,
+                                                       EnumSet<BoundingRectBehavior> behavior) noexcept
   {
     return BorderAndTextRects(range, CoordinateSpace::Absolute, behavior);
   }
 
-  List<FloatRect> RenderObject::ClientBorderAndTextRects(const dom::SimpleRange &range) noexcept
+  List<RectF> RenderObject::ClientBorderAndTextRects(const dom::SimpleRange &range) noexcept
   {
     return BorderAndTextRects(range, CoordinateSpace::Client, {});
   }
@@ -1347,29 +1346,29 @@ namespace krys::boo
     return quads;
   }
 
-  IntRect RenderObject::AbsoluteBoundingBoxRect(bool useTransforms, bool *wasFixed) const noexcept
+  RectI RenderObject::AbsoluteBoundingBoxRect(bool useTransforms, bool *wasFixed) const noexcept
   {
     if (useTransforms)
     {
       List<FloatQuad> quads;
       AbsoluteQuads(quads, wasFixed);
-      return EnclosingIntRect(UnitedBoundingBoxes(quads)).ToRectWithExtentsClippedToNumericLimits();
+      return EnclosingRectI(UnitedBoundingBoxes(quads)).ToRectWithExtentsClippedToNumericLimits();
     }
 
-    auto absPos = LocalToAbsolute(FloatPoint(), {} /* ignore transforms */, wasFixed);
+    auto absPos = LocalToAbsolute(PointF(), {} /* ignore transforms */, wasFixed);
     List<LayoutRect> rects;
     BoundingRects(rects, FlooredLayoutPoint(absPos));
 
     if (rects.empty())
     {
-      return IntRect();
+      return RectI();
     }
 
     auto result = UnionRect(rects);
-    return SnappedIntRect(result).ToRectWithExtentsClippedToNumericLimits();
+    return SnappedRectI(result).ToRectWithExtentsClippedToNumericLimits();
   }
 
-  IntRect RenderObject::AbsoluteBoundingBoxRectIgnoringTransforms() const noexcept
+  RectI RenderObject::AbsoluteBoundingBoxRectIgnoringTransforms() const noexcept
   {
     return AbsoluteBoundingBoxRect(false);
   }
@@ -1451,7 +1450,7 @@ namespace krys::boo
     _renderer.NotifyFinished(resource);
   }
 
-  void RenderObject::CachedImageListener::ImageChanged(CachedImage *image, const IntRect *rect) noexcept
+  void RenderObject::CachedImageListener::ImageChanged(CachedImage *image, const RectI *rect) noexcept
   {
     _renderer.ImageChanged(static_cast<WrappedImagePtr>(image), rect);
   }
@@ -1468,7 +1467,7 @@ namespace krys::boo
 
   VisibleInViewportState RenderObject::CachedImageListener::ImageFrameAvailable(CachedImage &image,
                                                                                 ImageAnimatingState state,
-                                                                                const IntRect *rect) noexcept
+                                                                                const RectI *rect) noexcept
   {
     return _renderer.ImageFrameAvailable(image, state, rect);
   }
@@ -1509,7 +1508,7 @@ namespace krys::boo
   }
 
   VisibleInViewportState RenderObject::ImageFrameAvailable(CachedImage &image, ImageAnimatingState,
-                                                           const IntRect *changeRect) noexcept
+                                                           const RectI *changeRect) noexcept
   {
     ImageChanged(static_cast<WrappedImagePtr>(&image), changeRect);
     return VisibleInViewportState::No;
@@ -1631,10 +1630,9 @@ namespace krys::boo
       }
       else if (auto *rendererWithOutline = DynamicDowncast<RenderLayerModelObject>(*originalRenderer))
       {
-        adjustedRepaintRect =
-          LayoutRect(repaintContainer
-                       .LocalToContainerQuad(FloatQuad(FloatRect(adjustedRepaintRect)), rendererWithOutline)
-                       .BoundingBox());
+        adjustedRepaintRect = LayoutRect(
+          repaintContainer.LocalToContainerQuad(FloatQuad(RectF(adjustedRepaintRect)), rendererWithOutline)
+            .BoundingBox());
         rendererWithOutline->RepaintRectangle(adjustedRepaintRect);
       }
       return;
@@ -1769,17 +1767,17 @@ namespace krys::boo
     const auto *repaintContainer = ContainerForRepaint().Renderer;
 
     bool shouldClipToLayer = true;
-    IntRect repaintRect;
+    RectI repaintRect;
     // If this is the root background, we need to check if there is an extended background rect. If
     // there is, then we should not allow painting to clip to the layer size.
     if (IsDocumentElementRenderer() || IsBody())
     {
       shouldClipToLayer = !View().FrameView().HasExtendedBackgroundRectForPainting();
-      repaintRect = SnappedIntRect(View().BackgroundRect());
+      repaintRect = SnappedRectI(View().BackgroundRect());
     }
     else
     {
-      repaintRect = SnappedIntRect(ClippedOverflowRectForRepaint(repaintContainer));
+      repaintRect = SnappedRectI(ClippedOverflowRectForRepaint(repaintContainer));
     }
 
     RepaintUsingContainer(repaintContainer, LayoutRect(repaintRect), shouldClipToLayer);
@@ -1800,9 +1798,9 @@ namespace krys::boo
     return ClippedOverflowRect(nullptr, VisibleRectContextForRenderTreeAsText());
   }
 
-  IntRect RenderObject::PixelSnappedAbsoluteClippedOverflowRect() const noexcept
+  RectI RenderObject::PixelSnappedAbsoluteClippedOverflowRect() const noexcept
   {
-    return SnappedIntRect(AbsoluteClippedOverflowRectForRepaint());
+    return SnappedRectI(AbsoluteClippedOverflowRectForRepaint());
   }
 
   LayoutRect
@@ -1878,8 +1876,7 @@ namespace krys::boo
       .ClippedOverflowRect;
   }
 
-  FloatRect
-    RenderObject::ComputeFloatRectForRepaint(const FloatRect &rect,
+  RectF RenderObject::ComputeRectFForRepaint(const RectF &rect,
                                              const RenderLayerModelObject *repaintContainer) const noexcept
   {
     auto result = ComputeFloatVisibleRectInContainer(rect, repaintContainer, VisibleRectContextForRepaint());
@@ -1920,20 +1917,20 @@ namespace krys::boo
     return parent->ComputeVisibleRectsInContainer(adjustedRects, container, context);
   }
 
-  Maybe<FloatRect> RenderObject::ComputeFloatVisibleRectInContainer(
-    const FloatRect &, const RenderLayerModelObject *,
+  Maybe<RectF> RenderObject::ComputeFloatVisibleRectInContainer(
+    const RectF &, const RenderLayerModelObject *,
     // NOLINTNEXTLINE(performance-unnecessary-value-param): overrides change their copy.
     VisibleRectContext) const noexcept
   {
     krys_debug_assert(false);
-    return FloatRect();
+    return RectF();
   }
 
   VisibleRectContext RenderObject::VisibleRectContextForRepaint() noexcept
   {
     return {.HasPositionFixedDescendant = false,
             .DirtyRectIsFlipped = false,
-            .DescendantNeedsEnclosingIntRect = false,
+            .DescendantNeedsEnclosingRectI = false,
             .Options = {VisibleRectContext::Option::ApplyContainerClip,
                         VisibleRectContext::Option::ApplyCompositedContainerScrolls}};
   }
@@ -1942,7 +1939,7 @@ namespace krys::boo
   {
     return {.HasPositionFixedDescendant = false,
             .DirtyRectIsFlipped = false,
-            .DescendantNeedsEnclosingIntRect = false,
+            .DescendantNeedsEnclosingRectI = false,
             .Options = {VisibleRectContext::Option::ApplyContainerClip,
                         VisibleRectContext::Option::ApplyCompositedContainerScrolls,
                         VisibleRectContext::Option::ApplyCompositedClips}};
@@ -1952,7 +1949,7 @@ namespace krys::boo
   {
     return {.HasPositionFixedDescendant = false,
             .DirtyRectIsFlipped = false,
-            .DescendantNeedsEnclosingIntRect = false,
+            .DescendantNeedsEnclosingRectI = false,
             .Options = {VisibleRectContext::Option::ApplyContainerClip,
                         VisibleRectContext::Option::ApplyCompositedContainerScrolls,
                         VisibleRectContext::Option::ApplyCompositedClips,
@@ -1995,12 +1992,12 @@ namespace krys::boo
       RepaintStatus::NeedsFullRepaintForOutOfFlowMovementLayout);
   }
 
-  void RenderObject::RepaintRects::EncloseToIntRects() noexcept
+  void RenderObject::RepaintRects::EncloseToRectsI() noexcept
   {
-    ClippedOverflowRect = LayoutRect(EnclosingIntRect(ClippedOverflowRect));
+    ClippedOverflowRect = LayoutRect(EnclosingRectI(ClippedOverflowRect));
     if (OutlineBoundsRect)
     {
-      *OutlineBoundsRect = LayoutRect(EnclosingIntRect(*OutlineBoundsRect));
+      *OutlineBoundsRect = LayoutRect(EnclosingRectI(*OutlineBoundsRect));
     }
   }
 

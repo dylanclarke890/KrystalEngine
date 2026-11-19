@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include <limits>
@@ -59,12 +59,12 @@ namespace krys::boo
     }
 
     /// @return Whether the theme painted the scrollbar.
-    virtual bool Paint(Scrollbar &, GraphicsContext &, const IntRect & /*damageRect*/) noexcept
+    virtual bool Paint(Scrollbar &, GraphicsContext &, const RectI & /*damageRect*/) noexcept
     {
       return false;
     }
 
-    KRYS_NODISCARD virtual ScrollbarPart HitTest(Scrollbar &, const IntPoint &) noexcept
+    KRYS_NODISCARD virtual ScrollbarPart HitTest(Scrollbar &, const PointI &) noexcept
     {
       return NoPart;
     }
@@ -140,13 +140,13 @@ namespace krys::boo
     }
 
     virtual void PaintScrollCorner(ScrollableArea &area, GraphicsContext &context,
-                                   const IntRect &cornerRect) noexcept
+                                   const RectI &cornerRect) noexcept
     {
       DefaultPaintScrollCorner(area, context, cornerRect);
     }
 
     static void DefaultPaintScrollCorner(ScrollableArea &, GraphicsContext &context,
-                                         const IntRect &cornerRect) noexcept;
+                                         const RectI &cornerRect) noexcept;
 
     KRYS_NODISCARD virtual ScrollbarButtonPressAction
       HandleMousePressEvent(Scrollbar &, const PlatformMouseEvent &, ScrollbarPart) noexcept;

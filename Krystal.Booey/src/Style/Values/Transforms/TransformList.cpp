@@ -34,7 +34,7 @@
 
 namespace krys::boo::style
 {
-  void TransformList::Apply(TransformationMatrix &matrix, const FloatSize &size, size_t start) const noexcept
+  void TransformList::Apply(TransformationMatrix &matrix, const SizeF &size, size_t start) const noexcept
   {
     for (size_t i = start; i < _value.size(); ++i)
     {

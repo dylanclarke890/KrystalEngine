@@ -25,13 +25,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -52,15 +50,15 @@ namespace krys::boo
   using DragImageRef = RefPtr<ImageBuffer>;
 
   /// @brief The size of @p image in device pixels; empty if there's none.
-  KRYS_NODISCARD IntSize DragImageSize(const DragImageRef &image) noexcept;
+  KRYS_NODISCARD SizeI DragImageSize(const DragImageRef &image) noexcept;
 
   // These functions should be memory neutral, eg. if they return a newly allocated image,
   // they should release the input image. As a corollary these methods don't guarantee
   // the input image ref will still be valid after they have been called.
-  KRYS_NODISCARD DragImageRef FitDragImageToMaxSize(DragImageRef image, const IntSize &layoutSize,
-                                                    const IntSize &maxSize) noexcept;
+  KRYS_NODISCARD DragImageRef FitDragImageToMaxSize(DragImageRef image, const SizeI &layoutSize,
+                                                    const SizeI &maxSize) noexcept;
 
-  KRYS_NODISCARD DragImageRef ScaleDragImage(DragImageRef image, FloatSize scale) noexcept;
+  KRYS_NODISCARD DragImageRef ScaleDragImage(DragImageRef image, SizeF scale) noexcept;
 
   KRYS_NODISCARD DragImageRef PlatformAdjustDragImageForDeviceScaleFactor(DragImageRef image,
                                                                           float deviceScaleFactor) noexcept;
@@ -93,10 +91,10 @@ namespace krys::boo
                                                       float deviceScaleFactor) noexcept;
 
   /// @brief Where a link's drag image goes relative to the cursor.
-  KRYS_NODISCARD IntPoint DragOffsetForLinkDragImage(const DragImageRef &dragImage) noexcept;
+  KRYS_NODISCARD PointI DragOffsetForLinkDragImage(const DragImageRef &dragImage) noexcept;
 
   /// @brief The point of a link's drag image that's under the cursor, as fractions of its size.
-  KRYS_NODISCARD FloatPoint AnchorPointForLinkDragImage(const DragImageRef &dragImage) noexcept;
+  KRYS_NODISCARD PointF AnchorPointForLinkDragImage(const DragImageRef &dragImage) noexcept;
 
   /// @brief A drag image, owned.
   /// FIXME: The text indicator and visible path, with text indicators.

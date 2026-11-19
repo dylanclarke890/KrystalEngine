@@ -324,7 +324,7 @@ namespace krys::boo
       }
 
       uint32 Position;
-      FloatPoint StartPosition;
+      PointF StartPosition;
     };
   }
 
@@ -340,7 +340,7 @@ namespace krys::boo
       return false;
     }
 
-    data->StartPosition = FloatPoint(fragment.X, fragment.Y);
+    data->StartPosition = PointF(fragment.X, fragment.Y);
 
     if (startPosition)
     {
@@ -368,7 +368,7 @@ namespace krys::boo
     return true;
   }
 
-  FloatPoint SVGTextQuery::StartPositionOfCharacter(uint32 position) const noexcept
+  PointF SVGTextQuery::StartPositionOfCharacter(uint32 position) const noexcept
   {
     StartPositionOfCharacterData data(position);
     ExecuteQuery(&data, &SVGTextQuery::StartPositionOfCharacterCallback);
@@ -385,7 +385,7 @@ namespace krys::boo
       }
 
       uint32 Position;
-      FloatPoint EndPosition;
+      PointF EndPosition;
     };
   }
 
@@ -401,7 +401,7 @@ namespace krys::boo
       return false;
     }
 
-    data->EndPosition = FloatPoint(fragment.X, fragment.Y);
+    data->EndPosition = PointF(fragment.X, fragment.Y);
 
     uint32 characterLength =
       CharacterLengthAt(*queryData->TextRenderer, fragment.CharacterOffset + startPosition);
@@ -428,7 +428,7 @@ namespace krys::boo
     return true;
   }
 
-  FloatPoint SVGTextQuery::EndPositionOfCharacter(uint32 position) const noexcept
+  PointF SVGTextQuery::EndPositionOfCharacter(uint32 position) const noexcept
   {
     EndPositionOfCharacterData data(position);
     ExecuteQuery(&data, &SVGTextQuery::EndPositionOfCharacterCallback);
@@ -495,16 +495,16 @@ namespace krys::boo
       }
 
       uint32 Position;
-      FloatRect Extent;
+      RectF Extent;
     };
 
     void CalculateGlyphBoundaries(SVGTextQuery::Data *queryData, const SVGTextFragment &fragment,
-                                  uint32 startPosition, FloatRect &extent) noexcept
+                                  uint32 startPosition, RectF &extent) noexcept
     {
       float scalingFactor = queryData->TextRenderer->ScalingFactor();
       krys_debug_assert(scalingFactor);
 
-      extent.SetLocation(FloatPoint(
+      extent.SetLocation(PointF(
         fragment.X,
         fragment.Y - queryData->TextRenderer->ScaledFont().MetricsOfPrimaryFont().Ascent() / scalingFactor));
 
@@ -526,7 +526,7 @@ namespace krys::boo
       SVGTextMetrics metrics =
         SVGTextMetrics::MeasureCharacterRange(*queryData->TextRenderer, characterOffset,
                                               CharacterLengthAt(*queryData->TextRenderer, characterOffset));
-      extent.SetSize(FloatSize(metrics.Width(), metrics.Height()));
+      extent.SetSize(SizeF(metrics.Width(), metrics.Height()));
 
       AffineTransform fragmentTransform;
       fragment.BuildFragmentTransform(fragmentTransform,
@@ -539,8 +539,8 @@ namespace krys::boo
       extent = fragmentTransform.MapRect(extent);
     }
 
-    KRYS_NODISCARD FloatRect CalculateFragmentBoundaries(const RenderSVGInlineText &textRenderer,
-                                                         const SVGTextFragment &fragment) noexcept
+    KRYS_NODISCARD RectF CalculateFragmentBoundaries(const RenderSVGInlineText &textRenderer,
+                                                     const SVGTextFragment &fragment) noexcept
     {
       float scalingFactor = textRenderer.ScalingFactor();
       krys_debug_assert(scalingFactor);
@@ -548,7 +548,7 @@ namespace krys::boo
       float baseline = textRenderer.ScaledFont().MetricsOfPrimaryFont().Ascent() / scalingFactor;
 
       AffineTransform fragmentTransform;
-      FloatRect fragmentRect(fragment.X, fragment.Y - baseline, fragment.Width, fragment.Height);
+      RectF fragmentRect(fragment.X, fragment.Y - baseline, fragment.Width, fragment.Height);
       fragment.BuildFragmentTransform(fragmentTransform);
       return fragmentTransform.MapRect(fragmentRect);
     }
@@ -570,7 +570,7 @@ namespace krys::boo
     return true;
   }
 
-  FloatRect SVGTextQuery::ExtentOfCharacter(uint32 position) const noexcept
+  RectF SVGTextQuery::ExtentOfCharacter(uint32 position) const noexcept
   {
     ExtentOfCharacterData data(position);
     ExecuteQuery(&data, &SVGTextQuery::ExtentOfCharacterCallback);
@@ -582,12 +582,11 @@ namespace krys::boo
   {
     struct CharacterNumberAtPositionData : SVGTextQuery::Data
     {
-      explicit CharacterNumberAtPositionData(const FloatPoint &queryPosition) noexcept
-          : Position(queryPosition)
+      explicit CharacterNumberAtPositionData(const PointF &queryPosition) noexcept : Position(queryPosition)
       {
       }
 
-      FloatPoint Position;
+      PointF Position;
     };
   }
 
@@ -598,7 +597,7 @@ namespace krys::boo
     auto *data = static_cast<CharacterNumberAtPositionData *>(queryData);
 
     // Test the query point against the bounds of the entire fragment first.
-    FloatRect fragmentExtents = CalculateFragmentBoundaries(*queryData->TextRenderer, fragment);
+    RectF fragmentExtents = CalculateFragmentBoundaries(*queryData->TextRenderer, fragment);
     if (!fragmentExtents.Contains(data->Position))
     {
       return false;
@@ -606,7 +605,7 @@ namespace krys::boo
 
     // Iterate through the glyphs in this fragment, and check if their extents
     // contain the query point.
-    FloatRect extent;
+    RectF extent;
     auto &textMetrics = queryData->TextRenderer->LayoutAttributes()->TextMetricsValues();
     uint32 textMetricsOffset = fragment.MetricsListOffset;
     uint32 fragmentOffset = 0;
@@ -627,7 +626,7 @@ namespace krys::boo
     return false;
   }
 
-  int32 SVGTextQuery::CharacterNumberAtPosition(const FloatPoint &position) const noexcept
+  int32 SVGTextQuery::CharacterNumberAtPosition(const PointF &position) const noexcept
   {
     CharacterNumberAtPositionData data(position);
     if (!ExecuteQuery(&data, &SVGTextQuery::CharacterNumberAtPositionCallback))

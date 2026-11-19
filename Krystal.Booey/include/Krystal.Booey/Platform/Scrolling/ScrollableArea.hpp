@@ -26,14 +26,13 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -78,7 +77,7 @@ namespace krys::boo
     // vertical-lr / rtl            NO                      YES
     // vertical-rl / ltr            YES                     NO
     // vertical-rl / rtl            YES                     YES
-    IntPoint _scrollOrigin;
+    PointI _scrollOrigin;
     ScrollClamping _scrollClamping {ScrollClamping::Clamped};
     ScrollElasticity _verticalScrollElasticity {ScrollElasticity::None};
     ScrollElasticity _horizontalScrollElasticity {ScrollElasticity::None};
@@ -103,10 +102,10 @@ namespace krys::boo
       return false;
     }
 
-    bool ScrollToPositionWithoutAnimation(const IntPoint &position,
+    bool ScrollToPositionWithoutAnimation(const PointI &position,
                                           ScrollClamping clamping = ScrollClamping::Clamped) noexcept;
 
-    void ScrollToOffsetWithoutAnimation(const IntPoint &offset,
+    void ScrollToOffsetWithoutAnimation(const PointI &offset,
                                         ScrollClamping clamping = ScrollClamping::Clamped) noexcept;
 
     void ScrollToOffsetWithoutAnimation(ScrollbarOrientation orientation, float offset) noexcept;
@@ -306,13 +305,13 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual bool IsScrollCornerVisible() const noexcept = 0;
 
-    KRYS_NODISCARD virtual IntRect ScrollCornerRect() const noexcept = 0;
+    KRYS_NODISCARD virtual RectI ScrollCornerRect() const noexcept = 0;
 
     KRYS_NODISCARD int32 HorizontalScrollbarIntrusion() const noexcept;
 
     KRYS_NODISCARD int32 VerticalScrollbarIntrusion() const noexcept;
 
-    KRYS_NODISCARD IntSize ScrollbarIntrusion() const noexcept;
+    KRYS_NODISCARD SizeI ScrollbarIntrusion() const noexcept;
 
     KRYS_NODISCARD virtual Scrollbar *HorizontalScrollbar() const noexcept
     {
@@ -340,7 +339,7 @@ namespace krys::boo
       return nullptr;
     }
 
-    KRYS_NODISCARD const IntPoint &ScrollOrigin() const noexcept
+    KRYS_NODISCARD const PointI &ScrollOrigin() const noexcept
     {
       return _scrollOrigin;
     }
@@ -426,9 +425,9 @@ namespace krys::boo
       _scrollAnimationStatus = status;
     }
 
-    KRYS_NODISCARD IntRect VisibleContentRect() const noexcept;
+    KRYS_NODISCARD RectI VisibleContentRect() const noexcept;
 
-    KRYS_NODISCARD IntRect VisibleContentRectIncludingScrollbars() const noexcept;
+    KRYS_NODISCARD RectI VisibleContentRectIncludingScrollbars() const noexcept;
 
     KRYS_NODISCARD int32 VisibleWidth() const noexcept
     {
@@ -440,9 +439,9 @@ namespace krys::boo
       return VisibleSize().Height();
     }
 
-    KRYS_NODISCARD virtual IntSize VisibleSize() const noexcept = 0;
+    KRYS_NODISCARD virtual SizeI VisibleSize() const noexcept = 0;
 
-    KRYS_NODISCARD virtual IntSize ContentsSize() const noexcept = 0;
+    KRYS_NODISCARD virtual SizeI ContentsSize() const noexcept = 0;
 
     KRYS_NODISCARD virtual int32 HeaderHeight() const noexcept
     {
@@ -455,9 +454,9 @@ namespace krys::boo
     }
 
     // The totalContentsSize() is equivalent to the contentsSize() plus the header and footer heights.
-    KRYS_NODISCARD IntSize TotalContentsSize() const noexcept;
+    KRYS_NODISCARD SizeI TotalContentsSize() const noexcept;
 
-    KRYS_NODISCARD virtual IntSize ReachableTotalContentsSize() const noexcept;
+    KRYS_NODISCARD virtual SizeI ReachableTotalContentsSize() const noexcept;
 
     // Note that this only returns scrollable areas that can actually be scrolled.
     KRYS_NODISCARD virtual ScrollableArea *EnclosingScrollableArea() const noexcept = 0;
@@ -494,15 +493,15 @@ namespace krys::boo
     }
 
     /// @brief Repaints @p rect of @p scrollbar.
-    virtual void InvalidateScrollbar(Scrollbar &, const IntRect &) noexcept
+    virtual void InvalidateScrollbar(Scrollbar &, const RectI &) noexcept
     {
     }
 
     /// @brief Converts a point in the view that contains the scrollbars (for the frame view, the window) to
     /// @p scrollbar's coordinates.
-    KRYS_NODISCARD virtual IntPoint
+    KRYS_NODISCARD virtual PointI
       ConvertFromContainingViewToScrollbar(const Scrollbar &scrollbar,
-                                           const IntPoint &parentPoint) const noexcept;
+                                           const PointI &parentPoint) const noexcept;
 
     /// @brief The vertical step of a page scroll, less what fixed content covers.
     KRYS_NODISCARD virtual float AdjustVerticalPageScrollStepForFixedContent(float step) noexcept
@@ -513,8 +512,7 @@ namespace krys::boo
     /// @brief Whether the scroll position is at @p side's end, or the area can't scroll that way.
     KRYS_NODISCARD bool IsPinnedOnSide(BoxSide side) const noexcept;
 
-    KRYS_NODISCARD static Maybe<BoxSide> TargetSideForScrollDelta(FloatSize delta,
-                                                                  ScrollEventAxis axis) noexcept;
+    KRYS_NODISCARD static Maybe<BoxSide> TargetSideForScrollDelta(SizeF delta, ScrollEventAxis axis) noexcept;
 
     KRYS_NODISCARD virtual OverscrollBehavior HorizontalOverscrollBehavior() const noexcept
     {
@@ -537,9 +535,9 @@ namespace krys::boo
     }
 
     /// @brief @p biasedDelta, less the axes `overscroll-behavior` stops from scrolling past the area.
-    KRYS_NODISCARD FloatSize DeltaForPropagation(const FloatSize &biasedDelta) const noexcept;
+    KRYS_NODISCARD SizeF DeltaForPropagation(const SizeF &biasedDelta) const noexcept;
 
-    KRYS_NODISCARD bool ShouldBlockScrollPropagation(const FloatSize &biasedDelta) const noexcept;
+    KRYS_NODISCARD bool ShouldBlockScrollPropagation(const SizeF &biasedDelta) const noexcept;
 
     KRYS_NODISCARD virtual bool IsHorizontalWritingMode() const noexcept
     {
@@ -583,7 +581,7 @@ namespace krys::boo
 
     virtual ~ScrollableArea() noexcept;
 
-    void SetScrollOrigin(const IntPoint &origin) noexcept;
+    void SetScrollOrigin(const PointI &origin) noexcept;
 
     void ResetScrollOriginChanged() noexcept
     {
@@ -601,7 +599,7 @@ namespace krys::boo
     }
 
   private:
-    KRYS_NODISCARD virtual IntRect
+    KRYS_NODISCARD virtual RectI
       VisibleContentRectInternal(VisibleContentRectIncludesScrollbars scrollbarInclusion) const noexcept;
 
     void ScrollPositionChanged(const ScrollPosition &position) noexcept;

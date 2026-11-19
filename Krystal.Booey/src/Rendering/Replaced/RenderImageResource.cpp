@@ -96,7 +96,7 @@ namespace krys::boo
     }
   }
 
-  RefPtr<Image> RenderImageResource::GetImage(const IntSize &) const noexcept
+  RefPtr<Image> RenderImageResource::GetImage(const SizeI &) const noexcept
   {
     if (!_cachedImage)
     {
@@ -119,7 +119,7 @@ namespace krys::boo
     return _cachedImage->CurrentFrameIsComplete(_renderer);
   }
 
-  void RenderImageResource::SetContainerContext(const IntSize &imageContainerSize,
+  void RenderImageResource::SetContainerContext(const SizeI &imageContainerSize,
                                                 const net::Url &imageUrl) noexcept
   {
     if (!_cachedImage || !_renderer)

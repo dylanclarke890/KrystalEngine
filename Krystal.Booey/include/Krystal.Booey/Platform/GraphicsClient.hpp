@@ -26,13 +26,13 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {
   class DestinationColorSpace;
-  class FloatSize;
   class ImageBuffer;
   enum class RenderingMode : uint8;
   enum class RenderingPurpose : uint8;
@@ -53,7 +53,7 @@ namespace krys::boo
   private:
     // Called by passing GraphicsClient into ImageBuffer functions.
     KRYS_NODISCARD virtual RefPtr<ImageBuffer>
-      CreateImageBuffer(const FloatSize &, RenderingMode, RenderingPurpose, float resolutionScale,
+      CreateImageBuffer(const SizeF &, RenderingMode, RenderingPurpose, float resolutionScale,
                         const DestinationColorSpace &) const noexcept = 0;
   };
 }

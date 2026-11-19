@@ -82,8 +82,8 @@ namespace krys::boo
     return true;
   }
 
-  FloatRect FEMorphology::CalculateImageRect(const Filter &filter, Span<const FloatRect> inputImageRects,
-                                             const FloatRect &primitiveSubregion) const noexcept
+  RectF FEMorphology::CalculateImageRect(const Filter &filter, Span<const RectF> inputImageRects,
+                                         const RectF &primitiveSubregion) const noexcept
   {
     auto imageRect = inputImageRects[0];
     imageRect.Inflate(filter.ResolvedSize({_radiusX, _radiusY}));

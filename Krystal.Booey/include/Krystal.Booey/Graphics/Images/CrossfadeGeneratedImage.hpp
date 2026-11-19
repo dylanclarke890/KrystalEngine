@@ -36,20 +36,19 @@ namespace krys::boo
     const Ref<Image> _fromImage;
     const Ref<Image> _toImage;
     float _percentage;
-    FloatSize _crossfadeSize;
+    SizeF _crossfadeSize;
 
   public:
     /// @brief @p toImage at @p percentage over @p fromImage, both scaled to @p crossfadeSize, drawn into a
     /// container of @p size.
     KRYS_NODISCARD static Ref<CrossfadeGeneratedImage> Create(Image &fromImage, Image &toImage,
-                                                              float percentage,
-                                                              const FloatSize &crossfadeSize,
-                                                              const FloatSize &size) noexcept
+                                                              float percentage, const SizeF &crossfadeSize,
+                                                              const SizeF &size) noexcept
     {
       return AdoptRef(*new CrossfadeGeneratedImage(fromImage, toImage, percentage, crossfadeSize, size));
     }
 
-    void SetContainerSize(const FloatSize &) noexcept override
+    void SetContainerSize(const SizeF &) noexcept override
     {
     }
 
@@ -68,22 +67,22 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD FloatSize
+    KRYS_NODISCARD SizeF
       Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept override
     {
       return _crossfadeSize;
     }
 
   private:
-    CrossfadeGeneratedImage(Image &fromImage, Image &toImage, float percentage,
-                            const FloatSize &crossfadeSize, const FloatSize &) noexcept;
+    CrossfadeGeneratedImage(Image &fromImage, Image &toImage, float percentage, const SizeF &crossfadeSize,
+                            const SizeF &) noexcept;
 
-    ImageDrawResult Draw(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect,
+    ImageDrawResult Draw(GraphicsContext &, const RectF &dstRect, const RectF &srcRect,
                          ImagePaintingOptions = {}) noexcept override;
 
-    void DrawPattern(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect,
-                     const AffineTransform &patternTransform, const FloatPoint &phase,
-                     const FloatSize &spacing, ImagePaintingOptions = {}) noexcept override;
+    void DrawPattern(GraphicsContext &, const RectF &dstRect, const RectF &srcRect,
+                     const AffineTransform &patternTransform, const PointF &phase, const SizeF &spacing,
+                     ImagePaintingOptions = {}) noexcept override;
 
     void DrawCrossfade(GraphicsContext &) noexcept;
   };

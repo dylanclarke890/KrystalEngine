@@ -105,16 +105,16 @@ namespace krys::boo::inline_iterator
                       [&](const auto &path) -> decltype(auto) { return path.IsAtomicInlineBox(); });
     }
 
-    KRYS_NODISCARD FloatRect VisualRect() const noexcept;
+    KRYS_NODISCARD RectF VisualRect() const noexcept;
 
-    KRYS_NODISCARD FloatRect VisualRectIgnoringBlockDirection() const noexcept
+    KRYS_NODISCARD RectF VisualRectIgnoringBlockDirection() const noexcept
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto)
                       { return path.VisualRectIgnoringBlockDirection(); });
     }
 
     /// @brief Visual in inline direction, logical for writing mode.
-    KRYS_NODISCARD FloatRect LogicalRectIgnoringInlineDirection() const noexcept
+    KRYS_NODISCARD RectF LogicalRectIgnoringInlineDirection() const noexcept
     {
       auto rect = VisualRectIgnoringBlockDirection();
       return IsHorizontal() ? rect : rect.TransposedRect();

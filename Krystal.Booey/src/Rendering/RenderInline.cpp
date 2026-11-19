@@ -313,27 +313,27 @@ namespace krys::boo
   namespace
   {
     // The rects of an inline's line boxes, or a single empty rect when it has none.
-    KRYS_NODISCARD List<FloatRect> LineBoxRects(const RenderInline &renderInline) noexcept
+    KRYS_NODISCARD List<RectF> LineBoxRects(const RenderInline &renderInline) noexcept
     {
       if (auto *lineLayout = layout_integration::LineLayout::Containing(renderInline))
       {
         auto inlineBoxRects = lineLayout->CollectInlineBoxRects(renderInline);
         if (inlineBoxRects.empty())
         {
-          return {FloatRect()};
+          return {RectF()};
         }
         return inlineBoxRects;
       }
       if (auto *curr = renderInline.FirstLegacyInlineBox())
       {
-        List<FloatRect> rects;
+        List<RectF> rects;
         for (; curr; curr = curr->NextLineBox())
         {
           rects.emplace_back(curr->TopLeft(), curr->Size());
         }
         return rects;
       }
-      return {FloatRect()};
+      return {RectF()};
     }
   }
 
@@ -567,7 +567,7 @@ namespace krys::boo
     return {};
   }
 
-  IntRect RenderInline::LinesBoundingBox() const noexcept
+  RectI RenderInline::LinesBoundingBox() const noexcept
   {
     if (auto *layout = layout_integration::LineLayout::Containing(*this))
     {
@@ -583,21 +583,21 @@ namespace krys::boo
       {
         // FIXME: Always build the bounding box like this. LineLayouyt::enclosingBorderBoxRectFor does not
         // include any post-layout box adjustments.
-        FloatRect result;
+        RectF result;
         for (auto box = inline_iterator::LineLeftmostInlineBoxFor(*this); box;
              box.TraverseInlineBoxLineRightward())
         {
           auto rect = box->VisualRectIgnoringBlockDirection();
           result.Unite(rect);
         }
-        return EnclosingIntRect(result);
+        return EnclosingRectI(result);
       }
-      return EnclosingIntRect(layout->EnclosingBorderBoxRectFor(*this));
+      return EnclosingRectI(layout->EnclosingBorderBoxRectFor(*this));
     }
 
     krys_debug_assert(!FirstLegacyInlineBox()
                       == !LastLegacyInlineBox()); // Either both are null or both exist.
-    IntRect result;
+    RectI result;
     if (FirstLegacyInlineBox() && LastLegacyInlineBox())
     {
       // Return the width of the minimal left side and the maximal right side.
@@ -623,7 +623,7 @@ namespace krys::boo
         isHorizontal ? logicalRightSide - logicalLeftSide : LastLegacyInlineBox()->LogicalBottom() - x;
       float height =
         isHorizontal ? LastLegacyInlineBox()->LogicalBottom() - y : logicalRightSide - logicalLeftSide;
-      result = EnclosingIntRect(FloatRect(x, y, width, height));
+      result = EnclosingRectI(RectF(x, y, width, height));
     }
 
     return result;
@@ -938,7 +938,7 @@ namespace krys::boo
     }
   }
 
-  void RenderInline::ImageChanged(WrappedImagePtr, const IntRect *) noexcept
+  void RenderInline::ImageChanged(WrappedImagePtr, const RectI *) noexcept
   {
     if (!Parent())
     {

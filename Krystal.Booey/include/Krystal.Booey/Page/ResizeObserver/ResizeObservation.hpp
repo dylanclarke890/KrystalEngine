@@ -25,11 +25,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Page/ResizeObserver/ResizeObserverBoxOptions.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -51,7 +51,7 @@ namespace krys::boo
       LayoutSize ContentBoxLogicalSize;
       LayoutSize BorderBoxLogicalSize;
       /// @brief The content box's logical size in whole device pixels, snapped where it sits on the page.
-      FloatSize DevicePixelContentBoxLogicalSize;
+      SizeF DevicePixelContentBoxLogicalSize;
     };
 
   private:
@@ -76,13 +76,13 @@ namespace krys::boo
     /// @brief Forgets the last reported sizes, so the next gathering reports the target.
     void ResetObservationSize() noexcept;
 
-    KRYS_NODISCARD FloatRect ComputeContentRect() const noexcept;
+    KRYS_NODISCARD RectF ComputeContentRect() const noexcept;
 
-    KRYS_NODISCARD FloatSize BorderBoxSize() const noexcept;
+    KRYS_NODISCARD SizeF BorderBoxSize() const noexcept;
 
-    KRYS_NODISCARD FloatSize ContentBoxSize() const noexcept;
+    KRYS_NODISCARD SizeF ContentBoxSize() const noexcept;
 
-    KRYS_NODISCARD FloatSize DevicePixelContentBoxSize() const noexcept;
+    KRYS_NODISCARD SizeF DevicePixelContentBoxSize() const noexcept;
 
     KRYS_NODISCARD Element *Target() const noexcept
     {

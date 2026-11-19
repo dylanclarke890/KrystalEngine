@@ -52,7 +52,7 @@ namespace krys::boo
     void CombineTextIfNeeded() noexcept;
 
     /// @brief Where to draw the combined text so it's centred in @p boxRect, if it's combined.
-    KRYS_NODISCARD Maybe<FloatPoint> ComputeTextOrigin(const FloatRect &boxRect) const noexcept;
+    KRYS_NODISCARD Maybe<PointF> ComputeTextOrigin(const RectF &boxRect) const noexcept;
 
     KRYS_NODISCARD bool IsCombined() const noexcept
     {

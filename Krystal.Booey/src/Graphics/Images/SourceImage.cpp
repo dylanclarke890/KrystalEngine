@@ -24,10 +24,10 @@
  */
 
 #include "Krystal.Booey/Graphics/Images/SourceImage.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -99,8 +99,8 @@ namespace krys::boo
     {
       const auto &nativeImage = std::get<Ref<NativeImage>>(_imageVariant);
 
-      auto rect = FloatRect {{}, FloatSize(nativeImage->Size())};
-      auto imageBuffer = ImageBuffer::Create(FloatSize(nativeImage->Size()), 1);
+      auto rect = RectF {{}, SizeF(nativeImage->Size())};
+      auto imageBuffer = ImageBuffer::Create(SizeF(nativeImage->Size()), 1);
       if (!imageBuffer)
       {
         return nullptr;
@@ -124,7 +124,7 @@ namespace krys::boo
                       _imageVariant);
   }
 
-  IntSize SourceImage::Size() const noexcept
+  SizeI SourceImage::Size() const noexcept
   {
     return std::visit(CreateVisitor([](const Ref<NativeImage> &nativeImage) { return nativeImage->Size(); },
                                     [](const Ref<ImageBuffer> &imageBuffer)

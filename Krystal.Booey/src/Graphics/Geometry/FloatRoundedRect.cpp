@@ -48,14 +48,13 @@ namespace krys::boo
   {
   }
 
-  FloatRoundedRect::FloatRoundedRect(const FloatRect &rect, const Radii &radii) noexcept
+  FloatRoundedRect::FloatRoundedRect(const RectF &rect, const Radii &radii) noexcept
       : _rect(rect), _radii(radii)
   {
   }
 
-  FloatRoundedRect::FloatRoundedRect(const FloatRect &rect, const FloatSize &topLeft,
-                                     const FloatSize &topRight, const FloatSize &bottomLeft,
-                                     const FloatSize &bottomRight) noexcept
+  FloatRoundedRect::FloatRoundedRect(const RectF &rect, const SizeF &topLeft, const SizeF &topRight,
+                                     const SizeF &bottomLeft, const SizeF &bottomRight) noexcept
       : _rect(rect), _radii(topLeft, topRight, bottomLeft, bottomRight)
   {
   }
@@ -92,22 +91,22 @@ namespace krys::boo
     _topLeft.Scale(horizontalFactor, verticalFactor);
     if (!_topLeft.Width() || !_topLeft.Height())
     {
-      _topLeft = FloatSize();
+      _topLeft = SizeF();
     }
     _topRight.Scale(horizontalFactor, verticalFactor);
     if (!_topRight.Width() || !_topRight.Height())
     {
-      _topRight = FloatSize();
+      _topRight = SizeF();
     }
     _bottomLeft.Scale(horizontalFactor, verticalFactor);
     if (!_bottomLeft.Width() || !_bottomLeft.Height())
     {
-      _bottomLeft = FloatSize();
+      _bottomLeft = SizeF();
     }
     _bottomRight.Scale(horizontalFactor, verticalFactor);
     if (!_bottomRight.Width() || !_bottomRight.Height())
     {
-      _bottomRight = FloatSize();
+      _bottomRight = SizeF();
     }
   }
 
@@ -150,7 +149,7 @@ namespace krys::boo
     expand(_bottomRight);
   }
 
-  KRYS_NODISCARD static inline float CornerRectIntercept(float y, const FloatRect &cornerRect) noexcept
+  KRYS_NODISCARD static inline float CornerRectIntercept(float y, const RectF &cornerRect) noexcept
   {
     krys_debug_assert(cornerRect.Height() > 0);
     return cornerRect.Width() * sqrt(1 - (y * y) / (cornerRect.Height() * cornerRect.Height()));
@@ -170,8 +169,8 @@ namespace krys::boo
       return true;
     }
 
-    const FloatRect &topLeftRect = TopLeftCorner();
-    const FloatRect &bottomLeftRect = BottomLeftCorner();
+    const RectF &topLeftRect = TopLeftCorner();
+    const RectF &bottomLeftRect = BottomLeftCorner();
 
     if (!topLeftRect.IsEmpty() && y >= topLeftRect.Y() && y < topLeftRect.MaxY())
     {
@@ -186,8 +185,8 @@ namespace krys::boo
       minXIntercept = _rect.X();
     }
 
-    const FloatRect &topRightRect = TopRightCorner();
-    const FloatRect &bottomRightRect = BottomRightCorner();
+    const RectF &topRightRect = TopRightCorner();
+    const RectF &bottomRightRect = BottomRightCorner();
 
     if (!topRightRect.IsEmpty() && y >= topRightRect.Y() && y <= topRightRect.MaxY())
     {
@@ -219,7 +218,7 @@ namespace krys::boo
 
   void FloatRoundedRect::InflateWithRadii(float size) noexcept
   {
-    FloatRect old = _rect;
+    RectF old = _rect;
 
     _rect.Inflate(size);
     // Considering the inflation factor of shorter size to scale the radii seems appropriate here
@@ -254,7 +253,7 @@ namespace krys::boo
   }
 
   // This is conservative; it does not test intrusion into the corner rects.
-  bool FloatRoundedRect::IntersectionIsRectangular(const FloatRect &rect) const noexcept
+  bool FloatRoundedRect::IntersectionIsRectangular(const RectF &rect) const noexcept
   {
     return !(rect.Intersects(TopLeftCorner()) || rect.Intersects(TopRightCorner())
              || rect.Intersects(BottomLeftCorner()) || rect.Intersects(BottomRightCorner()));
@@ -277,7 +276,7 @@ namespace krys::boo
     }
 
     auto rect = LayoutRect(roundedRect.Rect());
-    region.Unite(EnclosingIntRect(rect));
+    region.Unite(EnclosingRectI(rect));
 
     if (!roundedRect.IsRounded())
     {
@@ -286,14 +285,14 @@ namespace krys::boo
 
     auto &radii = roundedRect.GetRadii();
 
-    auto makeIntRect = [](LayoutPoint a, LayoutPoint b)
+    auto makeRectI = [](LayoutPoint a, LayoutPoint b)
     {
-      return EnclosingIntRect(LayoutRect {LayoutPoint {std::min(a.X(), b.X()), std::min(a.Y(), b.Y())},
-                                          LayoutPoint {std::max(a.X(), b.X()), std::max(a.Y(), b.Y())}});
+      return EnclosingRectI(LayoutRect {LayoutPoint {std::min(a.X(), b.X()), std::min(a.Y(), b.Y())},
+                                        LayoutPoint {std::max(a.X(), b.X()), std::max(a.Y(), b.Y())}});
     };
 
     auto subtractCornerRects =
-      [&](LayoutPoint corner, LayoutPoint ellipsisCenter, FloatSize axes, double fromAngle)
+      [&](LayoutPoint corner, LayoutPoint ellipsisCenter, SizeF axes, double fromAngle)
     {
       double toAngle = fromAngle + std::numbers::pi / 2;
 
@@ -308,7 +307,7 @@ namespace krys::boo
       {
         auto angle = fromAngle + (i + 1) * (toAngle - fromAngle) / (count + 1);
         auto ellipsisPoint = LayoutPoint {axes.Width() * std::cos(angle), axes.Height() * std::sin(angle)};
-        auto cornerRect = makeIntRect(corner, ellipsisCenter + ellipsisPoint);
+        auto cornerRect = makeRectI(corner, ellipsisCenter + ellipsisPoint);
         region.Subtract(cornerRect);
       }
     };

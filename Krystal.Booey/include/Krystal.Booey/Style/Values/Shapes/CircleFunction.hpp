@@ -60,16 +60,16 @@ namespace krys::boo::style
 
   DEFINE_TYPE_MAPPING(css::Circle, Circle)
 
-  KRYS_NODISCARD FloatPoint ResolvePosition(const Circle &value, FloatSize boxSize) noexcept;
+  KRYS_NODISCARD PointF ResolvePosition(const Circle &value, SizeF boxSize) noexcept;
 
-  KRYS_NODISCARD float ResolveRadius(const Circle &value, FloatSize boxSize, FloatPoint center) noexcept;
+  KRYS_NODISCARD float ResolveRadius(const Circle &value, SizeF boxSize, PointF center) noexcept;
 
-  KRYS_NODISCARD boo::Path PathForCenterCoordinate(const Circle &, const FloatRect &, FloatPoint) noexcept;
+  KRYS_NODISCARD boo::Path PathForCenterCoordinate(const Circle &, const RectF &, PointF) noexcept;
 
   template <>
   struct PathComputation<Circle>
   {
-    KRYS_NODISCARD boo::Path operator()(const Circle &, const FloatRect &) noexcept;
+    KRYS_NODISCARD boo::Path operator()(const Circle &, const RectF &) noexcept;
   };
 
   template <>

@@ -28,7 +28,6 @@
 
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGShape.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
@@ -45,6 +44,7 @@
 #include "Krystal.Booey/Rendering/SVG/SVGVisitedRendererTracking.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -94,7 +94,7 @@ namespace krys::boo
     context.StrokePath(*usePath);
   }
 
-  bool LegacyRenderSVGShape::ShapeDependentStrokeContains(const FloatPoint &point,
+  bool LegacyRenderSVGShape::ShapeDependentStrokeContains(const PointF &point,
                                                           PointCoordinateSpace pointCoordinateSpace) noexcept
   {
     krys_debug_assert(_path);
@@ -112,13 +112,13 @@ namespace krys::boo
                                  { SVGRenderSupport::ApplyStrokeStyleToContext(context, Style(), *this); });
   }
 
-  bool LegacyRenderSVGShape::ShapeDependentFillContains(const FloatPoint &point,
+  bool LegacyRenderSVGShape::ShapeDependentFillContains(const PointF &point,
                                                         const WindRule fillRule) const noexcept
   {
     return const_cast<LegacyRenderSVGShape &>(*this).EnsurePath().Contains(point, fillRule);
   }
 
-  bool LegacyRenderSVGShape::FillContains(const FloatPoint &point, bool requiresFill,
+  bool LegacyRenderSVGShape::FillContains(const PointF &point, bool requiresFill,
                                           const WindRule fillRule) noexcept
   {
     if (_fillBoundingBox.IsEmpty() || !_fillBoundingBox.Contains(point))
@@ -135,7 +135,7 @@ namespace krys::boo
     return ShapeDependentFillContains(point, fillRule);
   }
 
-  bool LegacyRenderSVGShape::StrokeContains(const FloatPoint &point, bool requiresStroke) noexcept
+  bool LegacyRenderSVGShape::StrokeContains(const PointF &point, bool requiresStroke) noexcept
   {
     // "A zero value causes no stroke to be painted."
     if (!StrokeWidth())
@@ -334,7 +334,7 @@ namespace krys::boo
       return;
     }
 
-    FloatRect boundingBox = RepaintRectInLocalCoordinates();
+    RectF boundingBox = RepaintRectInLocalCoordinates();
     if (!SVGRenderSupport::PaintInfoIntersectsRepaintRect(boundingBox, _localTransform, paintInfo))
     {
       return;
@@ -363,7 +363,7 @@ namespace krys::boo
 
     if (style::Evaluate<float>(Style().OutlineWidth(), style::ZoomNeeded {}))
     {
-      PaintOutline(childPaintInfo, LayoutRect(IntRect(boundingBox)));
+      PaintOutline(childPaintInfo, LayoutRect(RectI(boundingBox)));
     }
   }
 
@@ -379,12 +379,12 @@ namespace krys::boo
     }
   }
 
-  bool LegacyRenderSVGShape::IsPointInFill(const FloatPoint &point) noexcept
+  bool LegacyRenderSVGShape::IsPointInFill(const PointF &point) noexcept
   {
     return ShapeDependentFillContains(point, Style().GetFillRule());
   }
 
-  bool LegacyRenderSVGShape::IsPointInStroke(const FloatPoint &point) noexcept
+  bool LegacyRenderSVGShape::IsPointInStroke(const PointF &point) noexcept
   {
     if (!Style().HasStroke())
     {
@@ -399,14 +399,13 @@ namespace krys::boo
     return HasPath() ? GetPath().Length() : CreatePath()->Length();
   }
 
-  FloatPoint LegacyRenderSVGShape::GetPointAtLength(float distance) const noexcept
+  PointF LegacyRenderSVGShape::GetPointAtLength(float distance) const noexcept
   {
     return HasPath() ? GetPath().PointAtLength(distance) : CreatePath()->PointAtLength(distance);
   }
 
-  bool LegacyRenderSVGShape::NodeAtFloatPoint(const HitTestRequest &request, HitTestResult &result,
-                                              const FloatPoint &pointInParent,
-                                              HitTestAction hitTestAction) noexcept
+  bool LegacyRenderSVGShape::NodeAtPointF(const HitTestRequest &request, HitTestResult &result,
+                                          const PointF &pointInParent, HitTestAction hitTestAction) noexcept
   {
     // We only draw in the forground phase, so we only hit-test then.
     if (hitTestAction != HitTestForeground)
@@ -422,7 +421,7 @@ namespace krys::boo
       return false;
     }
 
-    FloatPoint localPoint = _localTransform.Inverse().value_or(AffineTransform {}).MapPoint(pointInParent);
+    PointF localPoint = _localTransform.Inverse().value_or(AffineTransform {}).MapPoint(pointInParent);
 
     if (!SVGRenderSupport::PointInClippingArea(*this, localPoint))
     {
@@ -458,7 +457,7 @@ namespace krys::boo
     return false;
   }
 
-  FloatRect LegacyRenderSVGShape::StrokeBoundingBox() const noexcept
+  RectF LegacyRenderSVGShape::StrokeBoundingBox() const noexcept
   {
     if (_shapeType == ShapeType::Empty)
     {
@@ -468,16 +467,16 @@ namespace krys::boo
     {
       // Initialize m_strokeBoundingBox before calling calculateStrokeBoundingBox, since recursively
       // referenced markers can cause us to re-enter here.
-      _strokeBoundingBox = FloatRect {};
+      _strokeBoundingBox = RectF {};
       _strokeBoundingBox = CalculateStrokeBoundingBox();
     }
     return *_strokeBoundingBox;
   }
 
-  FloatRect LegacyRenderSVGShape::CalculateStrokeBoundingBox() const noexcept
+  RectF LegacyRenderSVGShape::CalculateStrokeBoundingBox() const noexcept
   {
     krys_debug_assert(_path);
-    FloatRect strokeBoundingBox = _fillBoundingBox;
+    RectF strokeBoundingBox = _fillBoundingBox;
 
     if (Style().HasStroke())
     {
@@ -492,7 +491,7 @@ namespace krys::boo
         if (Maybe<AffineTransform> inverse = nonScalingTransform.Inverse())
         {
           Path *usePath = NonScalingStrokePath(_path.get(), nonScalingTransform);
-          FloatRect strokeBoundingRect = usePath->StrokeBoundingRect(strokeStyleApplier);
+          RectF strokeBoundingRect = usePath->StrokeBoundingRect(strokeStyleApplier);
           strokeBoundingRect = inverse.value().MapRect(strokeBoundingRect);
           if (!strokeBoundingRect.IsNaN())
           {
@@ -514,7 +513,7 @@ namespace krys::boo
                                                                   strokeBoundingBox);
   }
 
-  FloatRect LegacyRenderSVGShape::ApproximateStrokeBoundingBox() const noexcept
+  RectF LegacyRenderSVGShape::ApproximateStrokeBoundingBox() const noexcept
   {
     if (_shapeType == ShapeType::Empty)
     {
@@ -524,13 +523,13 @@ namespace krys::boo
     {
       // Initialize m_approximateStrokeBoundingBox before calling calculateApproximateStrokeBoundingBox, since
       // recursively referenced markers can cause us to re-enter here.
-      _approximateStrokeBoundingBox = FloatRect {};
+      _approximateStrokeBoundingBox = RectF {};
       _approximateStrokeBoundingBox = CalculateApproximateStrokeBoundingBox();
     }
     return *_approximateStrokeBoundingBox;
   }
 
-  FloatRect LegacyRenderSVGShape::CalculateApproximateStrokeBoundingBox() const noexcept
+  RectF LegacyRenderSVGShape::CalculateApproximateStrokeBoundingBox() const noexcept
   {
     if (_shapeType == ShapeType::Empty)
     {
@@ -551,7 +550,7 @@ namespace krys::boo
     SVGRenderSupport::IntersectRepaintRectWithResources(*this, _repaintBoundingBox);
   }
 
-  FloatRect LegacyRenderSVGShape::RepaintRectInLocalCoordinates(
+  RectF LegacyRenderSVGShape::RepaintRectInLocalCoordinates(
     RepaintRectCalculation repaintRectCalculation) const noexcept
   {
     if (repaintRectCalculation == RepaintRectCalculation::Fast)
@@ -559,13 +558,13 @@ namespace krys::boo
       return _repaintBoundingBox;
     }
 
-    FloatRect strokeBoundingBox = StrokeBoundingBox();
+    RectF strokeBoundingBox = StrokeBoundingBox();
     SVGRenderSupport::IntersectRepaintRectWithResources(*this, strokeBoundingBox,
                                                         RepaintRectCalculation::Accurate);
     return strokeBoundingBox;
   }
 
-  FloatRect LegacyRenderSVGShape::DecoratedBoundingBox() const noexcept
+  RectF LegacyRenderSVGShape::DecoratedBoundingBox() const noexcept
   {
     // The area it may paint, as a mask's buffer must cover it: its fill, stroke and markers with its filter's
     // region, within its clip and mask.

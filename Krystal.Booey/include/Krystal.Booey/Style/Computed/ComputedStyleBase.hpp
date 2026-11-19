@@ -40,6 +40,7 @@
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Booey/Text/UnicodeBidi.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/Types/DataRef.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
@@ -50,15 +51,11 @@ namespace krys::boo
 {
   class Color;
   class Element;
-  class FloatPoint;
   class FloatPoint3D;
-  class FloatRect;
-  class FloatSize;
   class FontCascade;
   class FontCascadeDescription;
   class FontMetrics;
   class FontSelectionValue;
-  class IntSize;
   class LayoutRect;
   class LayoutSize;
   class LayoutUnit;

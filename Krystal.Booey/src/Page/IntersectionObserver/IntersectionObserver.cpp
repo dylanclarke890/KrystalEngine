@@ -190,8 +190,7 @@ namespace krys::boo
       return krys::move(stringBuilder).ToString();
     }
 
-    void ExpandRootBoundsWithRootMargin(FloatRect &rootBounds,
-                                        const IntersectionObserverMarginBox &rootMargin,
+    void ExpandRootBoundsWithRootMargin(RectF &rootBounds, const IntersectionObserverMarginBox &rootMargin,
                                         float zoomFactor) noexcept
     {
       auto zoomAdjustedLength =
@@ -211,7 +210,7 @@ namespace krys::boo
         zoomAdjustedLength(rootMargin.Left(), rootBounds.Width(), zoomFactor),
       };
 
-      rootBounds.Expand(rootMarginEdges);
+      Expand(rootBounds, rootMarginEdges);
     }
 
     // There's no frame tree, so the renderer is always in the main frame, which is where the rect stops: its
@@ -225,7 +224,7 @@ namespace krys::boo
         {
           .HasPositionFixedDescendant = false,
           .DirtyRectIsFlipped = false,
-          .DescendantNeedsEnclosingIntRect = false,
+          .DescendantNeedsEnclosingRectI = false,
           .Options = {VisibleRectContext::Option::UseEdgeInclusiveIntersection,
                       VisibleRectContext::Option::ApplyCompositedClips,
                       VisibleRectContext::Option::ApplyCompositedContainerScrolls},
@@ -514,15 +513,15 @@ namespace krys::boo
         intersectionState.CanComputeIntersection = true;
         if (Root() == &target.NodeDocument())
         {
-          intersectionState.RootBounds = FloatRect(layoutViewportRectForIntersection());
+          intersectionState.RootBounds = RectF(layoutViewportRectForIntersection());
         }
         else if (rootRenderer->HasNonVisibleOverflow())
         {
-          intersectionState.RootBounds = FloatRect(rootRenderer->PaddingBoxRect());
+          intersectionState.RootBounds = RectF(rootRenderer->PaddingBoxRect());
         }
         else
         {
-          intersectionState.RootBounds = FloatRect(FloatPoint(), FloatSize(rootRenderer->Size()));
+          intersectionState.RootBounds = RectF(PointF(), SizeF(rootRenderer->Size()));
         }
 
         rootUsedZoom = rootRenderer->Style().UsedZoom();
@@ -537,7 +536,7 @@ namespace krys::boo
 
       intersectionState.CanComputeIntersection = true;
       rootUsedZoom = hostFrameView.GetRenderView()->Style().UsedZoom();
-      intersectionState.RootBounds = FloatRect(layoutViewportRectForIntersection());
+      intersectionState.RootBounds = RectF(layoutViewportRectForIntersection());
     };
 
     computeRootBounds();
@@ -590,7 +589,7 @@ namespace krys::boo
           {
             .HasPositionFixedDescendant = false,
             .DirtyRectIsFlipped = false,
-            .DescendantNeedsEnclosingIntRect = false,
+            .DescendantNeedsEnclosingRectI = false,
             .Options = {VisibleRectContext::Option::UseEdgeInclusiveIntersection,
                         VisibleRectContext::Option::ApplyCompositedClips,
                         VisibleRectContext::Option::ApplyCompositedContainerScrolls},
@@ -609,12 +608,12 @@ namespace krys::boo
     auto rootLocalIntersectionRect = intersectionState.RootBounds;
     intersectionState.IsIntersecting =
       rootRelativeTargetRect
-      && rootLocalIntersectionRect.EdgeInclusiveIntersect(FloatRect(*rootRelativeTargetRect));
+      && rootLocalIntersectionRect.EdgeInclusiveIntersect(RectF(*rootRelativeTargetRect));
 
     if (isFirstObservation || intersectionState.IsIntersecting)
     {
       intersectionState.AbsoluteTargetRect =
-        targetRenderer->LocalToAbsoluteQuad(FloatQuad(FloatRect(localTargetBounds))).BoundingBox();
+        targetRenderer->LocalToAbsoluteQuad(FloatQuad(RectF(localTargetBounds))).BoundingBox();
     }
 
     if (intersectionState.IsIntersecting)
@@ -676,7 +675,7 @@ namespace krys::boo
       if (!intersectionState.AbsoluteTargetRect)
       {
         intersectionState.AbsoluteTargetRect =
-          targetRenderer->LocalToAbsoluteQuad(FloatQuad(FloatRect(localTargetBounds))).BoundingBox();
+          targetRenderer->LocalToAbsoluteQuad(FloatQuad(RectF(localTargetBounds))).BoundingBox();
       }
     }
 
@@ -713,9 +712,9 @@ namespace krys::boo
 
       if (intersectionState.ObservationChanged)
       {
-        FloatRect targetBoundingClientRect;
-        FloatRect clientIntersectionRect;
-        FloatRect clientRootBounds;
+        RectF targetBoundingClientRect;
+        RectF clientIntersectionRect;
+        RectF clientRootBounds;
         if (intersectionState.CanComputeIntersection)
         {
           krys_debug_assert(intersectionState.AbsoluteTargetRect);

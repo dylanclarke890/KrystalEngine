@@ -26,8 +26,6 @@
 #pragma once
 
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
@@ -37,6 +35,7 @@
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -313,7 +312,7 @@ namespace krys::boo
     RefPtr<dom::Range> _associatedLiveRange;
     RefPtr<EditingStyle> _typingStyle;
     // The painted bounds of the caret in absolute coordinates
-    IntRect _absCaretBounds;
+    RectI _absCaretBounds;
     UniquePtr<CaretAnimator> _caretAnimator;
     EnumSet<CaretVisibilitySuppressionReason> _caretVisibilitySuppressionReasons;
     Maybe<LayoutUnit> _xPosForVerticalArrowNavigation;
@@ -471,7 +470,7 @@ namespace krys::boo
     KRYS_NODISCARD RenderBlock *CaretRendererWithoutUpdatingLayout() const noexcept;
 
     /// @brief Bounds of possibly-transformed caret in absolute coordinates.
-    KRYS_NODISCARD IntRect AbsoluteCaretBounds(bool *insideFixed = nullptr) noexcept;
+    KRYS_NODISCARD RectI AbsoluteCaretBounds(bool *insideFixed = nullptr) noexcept;
 
     /// @brief The style typing applies next, set by styling a caret.
     KRYS_NODISCARD EditingStyle *TypingStyle() const noexcept;
@@ -527,7 +526,7 @@ namespace krys::boo
       const VisibleSelection &passedNewSelection, TextGranularity granularity,
       EndPointsAdjustmentMode endpointsAdjustmentMode = EndPointsAdjustmentMode::DoNotAdjust) noexcept;
 
-    KRYS_NODISCARD FloatRect
+    KRYS_NODISCARD RectF
       SelectionBounds(ClipToVisibleContent clipToVisibleContent = ClipToVisibleContent::Yes) noexcept;
 
     void SetSelectionFromNone() noexcept;

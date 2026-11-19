@@ -38,7 +38,7 @@ namespace krys::boo::tests
     RunNetworkingTasks();
     (void)fixture.Document->UpdateLayout();
 
-    display_list::RecorderImpl recorder(FloatSize(200, 100));
+    display_list::RecorderImpl recorder(SizeF(200, 100));
     auto quality = [&](DOMStringView id)
     {
       auto *renderer = DynamicDowncast<RenderImage>(fixture.ById(id).Renderer());

@@ -269,7 +269,7 @@ namespace krys::boo
   }
 
   IntOutsets SVGFilterRenderer::CalculateOutsets(boo::SVGFilterElement &filterElement,
-                                                 const FloatRect &targetBoundingBox) noexcept
+                                                 const RectF &targetBoundingBox) noexcept
   {
     auto graph = BuildFilterPrimitiveGraph(filterElement);
     if (!graph)
@@ -324,15 +324,14 @@ namespace krys::boo
     return outsetsStack.back().first;
   }
 
-  FloatSize SVGFilterRenderer::CalculateResolvedSize(const FloatSize &size,
-                                                     const FloatRect &targetBoundingBox,
-                                                     SVGUnitTypes::SVGUnitType primitiveUnits) noexcept
+  SizeF SVGFilterRenderer::CalculateResolvedSize(const SizeF &size, const RectF &targetBoundingBox,
+                                                 SVGUnitTypes::SVGUnitType primitiveUnits) noexcept
   {
     return primitiveUnits == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX ? size * targetBoundingBox.Size()
                                                                            : size;
   }
 
-  FloatSize SVGFilterRenderer::ResolvedSize(const FloatSize &size) const noexcept
+  SizeF SVGFilterRenderer::ResolvedSize(const SizeF &size) const noexcept
   {
     return CalculateResolvedSize(size, ReferenceBox(), _primitiveUnits);
   }

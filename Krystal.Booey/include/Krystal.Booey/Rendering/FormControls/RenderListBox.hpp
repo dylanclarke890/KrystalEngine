@@ -113,7 +113,7 @@ namespace krys::boo
     KRYS_NODISCARD bool ListIndexIsVisible(int32 index) const noexcept;
 
     /// @return The new index, or -1 if no scroll occurred.
-    int32 ScrollToward(const IntPoint &destination) noexcept;
+    int32 ScrollToward(const PointI &destination) noexcept;
 
     /// @brief How many items tall the list box is.
     KRYS_NODISCARD uint32 Size() const noexcept;
@@ -178,9 +178,9 @@ namespace krys::boo
       return true;
     }
 
-    void Autoscroll(const IntPoint &positionInWindow) noexcept override;
+    void Autoscroll(const PointI &positionInWindow) noexcept override;
 
-    void PanScroll(const IntPoint &source, const IntPoint &mousePosition) noexcept override;
+    void PanScroll(const PointI &source, const PointI &mousePosition) noexcept override;
 
     void StopAutoscroll() noexcept override;
 
@@ -222,7 +222,7 @@ namespace krys::boo
 
     KRYS_NODISCARD ScrollPosition MaximumScrollPosition() const noexcept final;
 
-    void InvalidateScrollbar(Scrollbar &scrollbar, const IntRect &rect) noexcept final;
+    void InvalidateScrollbar(Scrollbar &scrollbar, const RectI &rect) noexcept final;
 
     void RegisterForAnimatedScroll() noexcept final;
 
@@ -232,19 +232,19 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD IntRect ScrollCornerRect() const noexcept final
+    KRYS_NODISCARD RectI ScrollCornerRect() const noexcept final
     {
-      return IntRect();
+      return RectI();
     }
 
-    KRYS_NODISCARD IntPoint ConvertFromContainingViewToScrollbar(
-      const Scrollbar &scrollbar, const IntPoint &parentPoint) const noexcept final;
+    KRYS_NODISCARD PointI ConvertFromContainingViewToScrollbar(
+      const Scrollbar &scrollbar, const PointI &parentPoint) const noexcept final;
 
-    KRYS_NODISCARD IntSize ContentsSize() const noexcept final;
+    KRYS_NODISCARD SizeI ContentsSize() const noexcept final;
 
-    KRYS_NODISCARD IntSize VisibleSize() const noexcept final
+    KRYS_NODISCARD SizeI VisibleSize() const noexcept final
     {
-      return IntSize(Width().ToInt(), Height().ToInt());
+      return SizeI(Width().ToInt(), Height().ToInt());
     }
 
     KRYS_NODISCARD ScrollableArea *EnclosingScrollableArea() const noexcept final;

@@ -23,7 +23,7 @@
 
 #include "Krystal.Booey/Graphics/Filters/FilterFunction.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -39,9 +39,9 @@ namespace krys::boo
   /// @brief Where a filter applies: the box it's relative to, the region it draws into, and its scale.
   struct FilterGeometry
   {
-    FloatRect ReferenceBox;
-    FloatRect FilterRegion;
-    FloatSize Scale;
+    RectF ReferenceBox;
+    RectF FilterRegion;
+    SizeF Scale;
   };
 
   /// @brief A whole filter: functions applied one after another, over a region.
@@ -64,32 +64,32 @@ namespace krys::boo
       return _geometry;
     }
 
-    KRYS_NODISCARD FloatSize FilterScale() const noexcept
+    KRYS_NODISCARD SizeF FilterScale() const noexcept
     {
       return _geometry.Scale;
     }
 
-    void SetFilterScale(const FloatSize &filterScale) noexcept
+    void SetFilterScale(const SizeF &filterScale) noexcept
     {
       _geometry.Scale = filterScale;
     }
 
-    KRYS_NODISCARD FloatRect FilterRegion() const noexcept
+    KRYS_NODISCARD RectF FilterRegion() const noexcept
     {
       return _geometry.FilterRegion;
     }
 
-    void SetFilterRegion(const FloatRect &filterRegion) noexcept
+    void SetFilterRegion(const RectF &filterRegion) noexcept
     {
       _geometry.FilterRegion = filterRegion;
     }
 
-    KRYS_NODISCARD FloatRect ReferenceBox() const noexcept
+    KRYS_NODISCARD RectF ReferenceBox() const noexcept
     {
       return _geometry.ReferenceBox;
     }
 
-    KRYS_NODISCARD virtual FloatSize ResolvedSize(const FloatSize &size) const noexcept
+    KRYS_NODISCARD virtual SizeF ResolvedSize(const SizeF &size) const noexcept
     {
       return size;
     }
@@ -99,16 +99,16 @@ namespace krys::boo
       return point;
     }
 
-    KRYS_NODISCARD FloatPoint ScaledByFilterScale(const FloatPoint &point) const noexcept;
+    KRYS_NODISCARD PointF ScaledByFilterScale(const PointF &point) const noexcept;
 
-    KRYS_NODISCARD FloatSize ScaledByFilterScale(const FloatSize &size) const noexcept;
+    KRYS_NODISCARD SizeF ScaledByFilterScale(const SizeF &size) const noexcept;
 
-    KRYS_NODISCARD FloatRect ScaledByFilterScale(const FloatRect &rect) const noexcept;
+    KRYS_NODISCARD RectF ScaledByFilterScale(const RectF &rect) const noexcept;
 
-    KRYS_NODISCARD FloatRect MaxEffectRect(const FloatRect &primitiveSubregion) const noexcept;
+    KRYS_NODISCARD RectF MaxEffectRect(const RectF &primitiveSubregion) const noexcept;
 
-    KRYS_NODISCARD FloatRect ClipToMaxEffectRect(const FloatRect &imageRect,
-                                                 const FloatRect &primitiveSubregion) const noexcept;
+    KRYS_NODISCARD RectF ClipToMaxEffectRect(const RectF &imageRect,
+                                             const RectF &primitiveSubregion) const noexcept;
 
     KRYS_NODISCARD virtual FilterEffectVector EffectsOfType(FilterFunction::Type) const noexcept = 0;
 
@@ -118,13 +118,13 @@ namespace krys::boo
 
     /// @brief The filter applied to @p sourceImage, which holds @p sourceImageRect (in filter coordinates);
     /// null when it can't be.
-    KRYS_NODISCARD RefPtr<FilterImage> Apply(ImageBuffer *sourceImage, const FloatRect &sourceImageRect,
+    KRYS_NODISCARD RefPtr<FilterImage> Apply(ImageBuffer *sourceImage, const RectF &sourceImageRect,
                                              FilterResults &results) noexcept;
 
     /// @brief The styles that apply the filter in the graphics context, the last function's first: each is a
     /// transparency layer, the first outermost.
     KRYS_NODISCARD FilterStyleVector CreateFilterStyles(GraphicsContext &context,
-                                                        const FloatRect &sourceImageRect) const noexcept;
+                                                        const RectF &sourceImageRect) const noexcept;
 
     /// @brief The image buffer holding @p filterImage's pixels; null when an accelerated backend holds them.
     KRYS_NODISCARD static ImageBuffer *FilterResultBuffer(FilterImage &filterImage) noexcept;

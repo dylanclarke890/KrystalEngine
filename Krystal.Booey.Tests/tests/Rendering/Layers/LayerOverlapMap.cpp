@@ -47,12 +47,12 @@ namespace krys::boo::tests
       auto &layer = fixture.LayerOf(id);
       RenderGeometryMap geometryMap;
       geometryMap.PushMappingsToAncestor(&layer, nullptr);
-      auto expected = layer.Renderer().LocalToAbsoluteQuad(FloatQuad(FloatRect(0, 0, 10, 10))).BoundingBox();
-      auto mapped = geometryMap.MapToContainer(FloatRect(0, 0, 10, 10), nullptr).BoundingBox();
+      auto expected = layer.Renderer().LocalToAbsoluteQuad(FloatQuad(RectF(0, 0, 10, 10))).BoundingBox();
+      auto mapped = geometryMap.MapToContainer(RectF(0, 0, 10, 10), nullptr).BoundingBox();
       INFO(reinterpret_cast<const char *>(id));
       CHECK(AreEssentiallyEqual(mapped.Location(), expected.Location()));
-      CHECK(AreEssentiallyEqual(FloatPoint(mapped.MaxX(), mapped.MaxY()),
-                                FloatPoint(expected.MaxX(), expected.MaxY())));
+      CHECK(
+        AreEssentiallyEqual(PointF(mapped.MaxX(), mapped.MaxY()), PointF(expected.MaxX(), expected.MaxY())));
       geometryMap.PopMappingsToAncestor(static_cast<const RenderLayer *>(nullptr));
     }
 
@@ -61,7 +61,7 @@ namespace krys::boo::tests
     RenderGeometryMap geometryMap;
     geometryMap.PushMappingsToAncestor(&fixture.LayerOf(u8"outer"), nullptr);
     geometryMap.PushMappingsToAncestor(&inner, &fixture.LayerOf(u8"outer"));
-    CHECK(geometryMap.MapToContainer(FloatPoint(1, 1), nullptr) == FloatPoint(16, 27));
+    CHECK(geometryMap.MapToContainer(PointF(1, 1), nullptr) == PointF(16, 27));
   }
 
   TEST_CASE("LayerOverlapMap: layers overlap what's composited before them", "[Rendering][LayerOverlapMap]")

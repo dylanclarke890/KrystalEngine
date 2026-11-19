@@ -155,7 +155,7 @@ namespace krys::boo
     _inputImagesAreReady = true;
   }
 
-  RefPtr<Image> StyleCrossfadeImage::GetImage(const RenderElement *renderer, const FloatSize &size,
+  RefPtr<Image> StyleCrossfadeImage::GetImage(const RenderElement *renderer, const SizeF &size,
                                               const GraphicsContext &destinationContext,
                                               bool isForFirstLine) const noexcept
   {
@@ -210,7 +210,7 @@ namespace krys::boo
     return true;
   }
 
-  void StyleCrossfadeImage::ImageChanged(CachedImage *, const IntRect *) noexcept
+  void StyleCrossfadeImage::ImageChanged(CachedImage *, const RectI *) noexcept
   {
     if (!_inputImagesAreReady)
     {
@@ -237,7 +237,7 @@ namespace krys::boo
     return false;
   }
 
-  FloatSize StyleCrossfadeImage::FixedSize(const RenderElement &renderer) const noexcept
+  SizeF StyleCrossfadeImage::FixedSize(const RenderElement &renderer) const noexcept
   {
     if (!_from || !_to)
     {

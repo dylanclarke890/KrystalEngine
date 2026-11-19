@@ -27,11 +27,11 @@
 #include "Krystal.Booey/Graphics/Fonts/GlyphMetricsMap.hpp"
 #include "Krystal.Booey/Graphics/Fonts/GlyphPage.hpp"
 #include "Krystal.Booey/Graphics/Fonts/OpenTypeMathData.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Strings/String.hpp"
@@ -157,7 +157,7 @@ namespace krys::boo
 
     mutable HashMap<uint32, RefPtr<GlyphPage>> _glyphPages;
     mutable GlyphMetricsMap<float> _glyphToWidthMap;
-    mutable UniquePtr<GlyphMetricsMap<FloatRect>> _glyphToBoundsMap;
+    mutable UniquePtr<GlyphMetricsMap<RectF>> _glyphToBoundsMap;
     mutable UniquePtr<GlyphMetricsMap<Maybe<Path>>> _glyphPathMap;
     // Two bits per code point of `CodePointSupportIndex`: whether it's been checked, and whether it's
     // supported.
@@ -291,12 +291,12 @@ namespace krys::boo
       _avgCharWidth = avgCharWidth;
     }
 
-    KRYS_NODISCARD FloatRect BoundsForGlyph(Glyph glyph) const noexcept;
+    KRYS_NODISCARD RectF BoundsForGlyph(Glyph glyph) const noexcept;
 
     /// @brief @p glyph's outline at the font's size, with its origin on the baseline and y pointing down.
     KRYS_NODISCARD Path PathForGlyph(Glyph glyph) const noexcept;
 
-    KRYS_NODISCARD SmallList<FloatRect, InlineGlyphRunCapacity>
+    KRYS_NODISCARD SmallList<RectF, InlineGlyphRunCapacity>
       BoundsForGlyphs(Span<const Glyph> glyphs) const noexcept;
 
     KRYS_NODISCARD float WidthForGlyph(Glyph glyph, SyntheticBoldInclusion syntheticBoldInclusion =
@@ -434,7 +434,7 @@ namespace krys::boo
 
     KRYS_NODISCARD DerivedFonts &EnsureDerivedFontData() const noexcept;
 
-    KRYS_NODISCARD FloatRect PlatformBoundsForGlyph(Glyph glyph) const noexcept;
+    KRYS_NODISCARD RectF PlatformBoundsForGlyph(Glyph glyph) const noexcept;
 
     KRYS_NODISCARD Path PlatformPathForGlyph(Glyph glyph) const noexcept;
 

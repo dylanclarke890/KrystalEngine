@@ -65,7 +65,7 @@ namespace krys::boo
     template <>
     struct PathComputation<Inset>
     {
-      KRYS_NODISCARD boo::Path operator()(const Inset &, const FloatRect &) noexcept;
+      KRYS_NODISCARD boo::Path operator()(const Inset &, const RectF &) noexcept;
     };
   }
 }

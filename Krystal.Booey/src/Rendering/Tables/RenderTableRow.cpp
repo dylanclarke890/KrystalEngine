@@ -347,7 +347,7 @@ namespace krys::boo
     return rects;
   }
 
-  void RenderTableRow::ImageChanged(WrappedImagePtr, const IntRect *) noexcept
+  void RenderTableRow::ImageChanged(WrappedImagePtr, const RectI *) noexcept
   {
     // FIXME: Examine cells and repaint only the rect the image paints in.
     if (!Parent())

@@ -28,11 +28,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageDecoder.hpp"
 #include "Krystal.Booey/Platform/ImageDecoders/EXIFMetadata.hpp"
 #include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoderFrame.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 
@@ -49,10 +49,10 @@ namespace krys::boo
     bool _premultiplyAlpha;
     bool _ignoreGammaAndColorProfile;
     ImageOrientation _orientation;
-    Maybe<IntSize> _densityCorrectedSize;
+    Maybe<SizeI> _densityCorrectedSize;
 
   private:
-    IntSize _size;
+    SizeI _size;
     EncodedDataStatus _encodedDataStatus {EncodedDataStatus::TypeAvailable};
     bool _decodingSizeFromSetData {false};
 
@@ -125,9 +125,9 @@ namespace krys::boo
       return _encodedDataStatus >= EncodedDataStatus::SizeAvailable;
     }
 
-    KRYS_NODISCARD IntSize Size() const noexcept override
+    KRYS_NODISCARD SizeI Size() const noexcept override
     {
-      return IsSizeAvailable() ? _size : IntSize();
+      return IsSizeAvailable() ? _size : SizeI();
     }
 
     // This will only differ from size() for ICO (where each frame is a
@@ -135,14 +135,14 @@ namespace krys::boo
     // sizes. This does NOT differ from size() for GIF, since decoding GIFs
     // composites any smaller frames against previous frames to create full-
     // size frames.
-    KRYS_NODISCARD IntSize FrameSizeAtIndex(size_t, SubsamplingLevel) const noexcept override
+    KRYS_NODISCARD SizeI FrameSizeAtIndex(size_t, SubsamplingLevel) const noexcept override
     {
       return Size();
     }
 
     // Returns whether the size is legal (i.e. not going to result in
     // overflow elsewhere). If not, marks decoding as failed.
-    virtual bool SetSize(const IntSize &size) noexcept
+    virtual bool SetSize(const SizeI &size) noexcept
     {
       if (ImageBackingStore::IsOverSize(size))
       {
@@ -197,7 +197,7 @@ namespace krys::boo
       return _orientation;
     }
 
-    KRYS_NODISCARD Maybe<IntSize> FrameDensityCorrectedSizeAtIndex(size_t) const noexcept final
+    KRYS_NODISCARD Maybe<SizeI> FrameDensityCorrectedSizeAtIndex(size_t) const noexcept final
     {
       return _densityCorrectedSize;
     }
@@ -245,7 +245,7 @@ namespace krys::boo
 
     // If the image has a cursor hot-spot, stores it in the argument
     // and returns true. Otherwise returns false.
-    KRYS_NODISCARD Maybe<IntPoint> HotSpot() const noexcept override
+    KRYS_NODISCARD Maybe<PointI> HotSpot() const noexcept override
     {
       return null;
     }

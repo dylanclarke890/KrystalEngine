@@ -523,7 +523,7 @@ namespace krys::boo
         std::tie(selectionStart, selectionEnd) = SelectionStartEnd();
       }
 
-      FloatRect textDecorationSelectionClipOutRect;
+      RectF textDecorationSelectionClipOutRect;
       if ((_paintInfo.PaintBehavior.Contains(PaintBehavior::ExcludeSelection))
           && selectionStart < selectionEnd && selectionEnd <= length)
       {
@@ -624,11 +624,10 @@ namespace krys::boo
     auto &context = _paintInfo.Context();
     context.SetStrokeColor(underlineColor);
     context.SetStrokeThickness(static_cast<float>(lineThickness));
-    context.DrawLineForText(
-      FloatRect(_paintRect.X() + start,
-                _paintRect.Y() + _logicalRect.Height() - static_cast<float>(lineThickness), width,
-                static_cast<float>(lineThickness)),
-      _isPrinting);
+    context.DrawLineForText(RectF(_paintRect.X() + start,
+                                  _paintRect.Y() + _logicalRect.Height() - static_cast<float>(lineThickness),
+                                  width, static_cast<float>(lineThickness)),
+                            _isPrinting);
   }
 
   void TextBoxPainter::PaintCompositionUnderlines() noexcept
@@ -780,7 +779,7 @@ namespace krys::boo
     {
       // We could also just use ink overflow here but since non-range painting
       // sets up no clipping, we should not do that either here.
-      auto rect = FloatRect::InfiniteRect();
+      auto rect = RectF::InfiniteRect();
       rect.SetX(_paintRect.X());
       // Note that this is RTL direction.
       auto &textContent = _textBox.GetBox().GetText();
@@ -824,7 +823,7 @@ namespace krys::boo
   }
 
   TextDecorationPainter TextBoxPainter::CreateDecorationPainter(const StyledMarkedText &markedText,
-                                                                const FloatRect &clipOutRect) noexcept
+                                                                const RectF &clipOutRect) noexcept
   {
     auto &context = _paintInfo.Context();
 
@@ -925,7 +924,7 @@ namespace krys::boo
 
   void TextBoxPainter::CollectDecoratingBoxesForBackgroundPainting(
     DecoratingBoxList &decoratingBoxList, const inline_iterator::TextBoxIterator &textBox,
-    FloatPoint textBoxLocation, const TextDecorationPainter::Styles &overrideDecorationStyle) noexcept
+    PointF textBoxLocation, const TextDecorationPainter::Styles &overrideDecorationStyle) noexcept
   {
     auto ancestorInlineBox = textBox->ParentInlineBox();
     if (!ancestorInlineBox)
@@ -994,12 +993,12 @@ namespace krys::boo
                ? static_cast<float>(parentInlineBox->Renderer().BorderAndPaddingBefore())
                : 0.f);
         decoratingBoxLocation.MoveBy(
-          FloatPoint {0.f, decoratingBoxContentBoxTop - parentInlineBoxContentBoxTop
-                             + TextBoxEdgeAdjustmentForUnderline(parentInlineBox->Style())});
+          PointF {0.f, decoratingBoxContentBoxTop - parentInlineBoxContentBoxTop
+                         + TextBoxEdgeAdjustmentForUnderline(parentInlineBox->Style())});
       }
       else
       {
-        decoratingBoxLocation.MoveBy(FloatPoint {0.f, TextBoxEdgeAdjustmentForUnderline(inlineBox->Style())});
+        decoratingBoxLocation.MoveBy(PointF {0.f, TextBoxEdgeAdjustmentForUnderline(inlineBox->Style())});
       }
       auto decorationStyleToUse = useOverriderDecorationStyle == UseOverriderDecorationStyle::Yes
                                     ? overrideDecorationStyle
@@ -1024,7 +1023,7 @@ namespace krys::boo
 
   void TextBoxPainter::PaintBackgroundDecorations(TextDecorationPainter &decorationPainter,
                                                   const StyledMarkedText &markedText,
-                                                  const FloatRect &textBoxPaintRect) noexcept
+                                                  const RectF &textBoxPaintRect) noexcept
   {
     if (_isCombinedText)
     {
@@ -1115,7 +1114,7 @@ namespace krys::boo
 
   void TextBoxPainter::PaintForegroundDecorations(TextDecorationPainter &decorationPainter,
                                                   const StyledMarkedText &markedText,
-                                                  const FloatRect &textBoxPaintRect) noexcept
+                                                  const RectF &textBoxPaintRect) noexcept
   {
     auto textBox = MakeIterator();
     auto &styleForDecoration = DecoratingBoxStyle(textBox);
@@ -1153,9 +1152,9 @@ namespace krys::boo
     }
   }
 
-  FloatRect TextBoxPainter::ComputePaintRect(const LayoutPoint &paintOffset) const noexcept
+  RectF TextBoxPainter::ComputePaintRect(const LayoutPoint &paintOffset) const noexcept
   {
-    FloatPoint localPaintOffset(paintOffset);
+    PointF localPaintOffset(paintOffset);
     if (GetWritingMode().IsVertical())
     {
       localPaintOffset.Move(0, -_logicalRect.Height());
@@ -1176,7 +1175,7 @@ namespace krys::boo
       // This is required by the CTM rotation we do for vertical content.
       boxOrigin.SetX(RoundToDevicePixel(LayoutUnit {boxOrigin.X()}, _document.DeviceScaleFactor()));
     }
-    return {boxOrigin, FloatSize(_logicalRect.Width(), _logicalRect.Height())};
+    return {boxOrigin, SizeF(_logicalRect.Width(), _logicalRect.Height())};
   }
 
   const FontCascade &TextBoxPainter::GetFontCascade() const noexcept
@@ -1193,7 +1192,7 @@ namespace krys::boo
     return _style.GetWritingMode();
   }
 
-  FloatPoint TextBoxPainter::TextOriginFromPaintRect(const FloatRect &paintRect) const noexcept
+  PointF TextBoxPainter::TextOriginFromPaintRect(const RectF &paintRect) const noexcept
   {
     auto ascent = Snap(_style.MetricsOfPrimaryFont().Ascent());
     if (GetWritingMode().IsVertical())
@@ -1202,7 +1201,7 @@ namespace krys::boo
       ascent = RoundToDevicePixel(LayoutUnit {ascent}, _document.DeviceScaleFactor());
     }
 
-    auto textOrigin = FloatPoint {paintRect.X(), paintRect.Y() + ascent};
+    auto textOrigin = PointF {paintRect.X(), paintRect.Y() + ascent};
 
     if (_isCombinedText)
     {
@@ -1231,7 +1230,7 @@ namespace krys::boo
            || textContent.IsInsideShapingBoundary();
   }
 
-  FloatSize TextBoxPainter::RotateShadowOffset(
+  SizeF TextBoxPainter::RotateShadowOffset(
     const css::SpaceSeparatedPoint<style::Length<css::AllUnzoomed>> &offset, WritingMode writingMode,
     const style::ZoomFactor &zoomFactor) noexcept
   {

@@ -177,8 +177,8 @@ namespace krys::boo
   bool SVGAnimateMotionElement::SetFromAndToValues(DOMStringView fromString, DOMStringView toString) noexcept
   {
     _toPointAtEndOfDuration = {};
-    _fromPoint = svg::ParsePoint(fromString).value_or(FloatPoint {});
-    _toPoint = svg::ParsePoint(toString).value_or(FloatPoint {});
+    _fromPoint = svg::ParsePoint(fromString).value_or(PointF {});
+    _toPoint = svg::ParsePoint(toString).value_or(PointF {});
     return true;
   }
 
@@ -189,15 +189,15 @@ namespace krys::boo
     {
       return false;
     }
-    _fromPoint = svg::ParsePoint(fromString).value_or(FloatPoint {});
-    auto byPoint = svg::ParsePoint(byString).value_or(FloatPoint {});
-    _toPoint = FloatPoint(_fromPoint.X() + byPoint.X(), _fromPoint.Y() + byPoint.Y());
+    _fromPoint = svg::ParsePoint(fromString).value_or(PointF {});
+    auto byPoint = svg::ParsePoint(byString).value_or(PointF {});
+    _toPoint = PointF(_fromPoint.X() + byPoint.X(), _fromPoint.Y() + byPoint.Y());
     return true;
   }
 
   bool SVGAnimateMotionElement::SetToAtEndOfDurationValue(DOMStringView toAtEndOfDurationString) noexcept
   {
-    _toPointAtEndOfDuration = svg::ParsePoint(toAtEndOfDurationString).value_or(FloatPoint {});
+    _toPointAtEndOfDuration = svg::ParsePoint(toAtEndOfDurationString).value_or(PointF {});
     return true;
   }
 
@@ -213,7 +213,7 @@ namespace krys::boo
       return;
     }
 
-    FloatPoint position = traversalState.Current();
+    PointF position = traversalState.Current();
     transform->Translate(position);
   }
 
@@ -238,7 +238,7 @@ namespace krys::boo
 
     if (GetAnimationMode() != svg::AnimationMode::Path)
     {
-      FloatPoint toPointAtEndOfDuration = _toPoint;
+      PointF toPointAtEndOfDuration = _toPoint;
       if (IsAccumulated() && repeatCount && _toPointAtEndOfDuration)
       {
         toPointAtEndOfDuration = *_toPointAtEndOfDuration;

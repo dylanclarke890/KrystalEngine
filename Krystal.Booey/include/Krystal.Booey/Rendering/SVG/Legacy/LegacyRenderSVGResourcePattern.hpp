@@ -69,10 +69,9 @@ namespace krys::boo
     void PostApplyResource(RenderElement &, GraphicsContext *&, EnumSet<RenderSVGResourceMode>, const Path *,
                            const RenderElement *) noexcept override;
 
-    KRYS_NODISCARD FloatRect ResourceBoundingBox(const RenderObject &,
-                                                 RepaintRectCalculation) noexcept override
+    KRYS_NODISCARD RectF ResourceBoundingBox(const RenderObject &, RepaintRectCalculation) noexcept override
     {
-      return FloatRect();
+      return RectF();
     }
 
     KRYS_NODISCARD RenderSVGResourceType ResourceType() const noexcept override
@@ -91,11 +90,11 @@ namespace krys::boo
     }
 
     static bool BuildTileImageTransform(RenderElement &, const svg::PatternAttributes &,
-                                        const SVGPatternElement &, FloatRect &patternBoundaries,
+                                        const SVGPatternElement &, RectF &patternBoundaries,
                                         AffineTransform &tileImageTransform) noexcept;
 
-    KRYS_NODISCARD static RefPtr<ImageBuffer> CreateTileImage(GraphicsContext &, const FloatSize &,
-                                                              const FloatSize &scale,
+    KRYS_NODISCARD static RefPtr<ImageBuffer> CreateTileImage(GraphicsContext &, const SizeF &,
+                                                              const SizeF &scale,
                                                               const AffineTransform &tileImageTransform,
                                                               const svg::PatternAttributes &) noexcept;
 

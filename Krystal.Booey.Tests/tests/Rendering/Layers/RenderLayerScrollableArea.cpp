@@ -140,7 +140,7 @@ namespace krys::boo::tests
                                           ScrollPositionChangeOptions::CreateProgrammaticUnclamped());
       CHECK(scrollableArea.GetScrollPosition() == ScrollPosition(10, 20));
       CHECK(scrollableArea.VerticalScrollbar()->CurrentPos() == 20);
-      CHECK(fixture.ById(u8"scroll").SavedLayerScrollPosition() == IntPoint(10, 20));
+      CHECK(fixture.ById(u8"scroll").SavedLayerScrollPosition() == PointI(10, 20));
       CHECK(BoxOf(fixture, u8"child").Layer()->Location() == LayoutPoint(-10, -20));
       CHECK(BoxOf(fixture, u8"scroll").ScrollLeft() == 10);
       CHECK(BoxOf(fixture, u8"scroll").ScrollTop() == 20);
@@ -370,7 +370,7 @@ namespace krys::boo::tests
     CHECK_FALSE(fixture.Painted().contains(Thumb));
 
     // The mouse coming over the scroller shows it.
-    auto move = PlatformMouseEvent(DoublePoint(50, 50), DoublePoint(50, 50), MouseButton::None,
+    auto move = PlatformMouseEvent(PointD(50, 50), PointD(50, 50), MouseButton::None,
                                    PlatformEvent::Type::MouseMoved, 0, {}, MonotonicTime::Now());
     (void)fixture.Frame->GetEventHandler().MouseMoved(move);
     loop.Run(loop.Now() + 1s);
@@ -400,8 +400,8 @@ namespace krys::boo::tests
     auto move = [&](double x, double y)
     {
       (void)fixture.Frame->GetEventHandler().MouseMoved(
-        PlatformMouseEvent(DoublePoint(x, y), DoublePoint(x, y), MouseButton::None,
-                           PlatformEvent::Type::MouseMoved, 0, {}, MonotonicTime::Now()));
+        PlatformMouseEvent(PointD(x, y), PointD(x, y), MouseButton::None, PlatformEvent::Type::MouseMoved, 0,
+                           {}, MonotonicTime::Now()));
     };
 
     // Both fade out once they're made, and the mouse starts outside them.

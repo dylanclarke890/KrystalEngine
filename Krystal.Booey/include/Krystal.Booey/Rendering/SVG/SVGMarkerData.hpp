@@ -38,13 +38,13 @@ namespace krys::boo
   /// @brief Where a marker is drawn on a path, and at what angle.
   struct MarkerPosition
   {
-    MarkerPosition(SVGMarkerType useType, const FloatPoint &useOrigin, float useAngle) noexcept
+    MarkerPosition(SVGMarkerType useType, const PointF &useOrigin, float useAngle) noexcept
         : Type(useType), Origin(useOrigin), Angle(useAngle)
     {
     }
 
     SVGMarkerType Type;
-    FloatPoint Origin;
+    PointF Origin;
     float Angle;
   };
 
@@ -54,10 +54,10 @@ namespace krys::boo
   private:
     List<MarkerPosition> &_positions;
     uint32 _elementIndex {0};
-    FloatPoint _origin;
-    FloatPoint _subpathStart;
-    std::array<FloatPoint, 2> _inslopePoints;
-    std::array<FloatPoint, 2> _outslopePoints;
+    PointF _origin;
+    PointF _subpathStart;
+    std::array<PointF, 2> _inslopePoints;
+    std::array<PointF, 2> _outslopePoints;
     bool _reverseStart;
     bool _previousWasMoveTo {false};
 
@@ -112,8 +112,8 @@ namespace krys::boo
     {
       // For details of this calculation, see:
       // http://www.w3.org/TR/SVG/single-page.html#painting-MarkerElement
-      FloatPoint inSlope(_inslopePoints[1] - _inslopePoints[0]);
-      FloatPoint outSlope(_outslopePoints[1] - _outslopePoints[0]);
+      PointF inSlope(_inslopePoints[1] - _inslopePoints[0]);
+      PointF outSlope(_outslopePoints[1] - _outslopePoints[0]);
 
       double inAngle = rad2deg(static_cast<double>(inSlope.SlopeAngleRadians()));
       double outAngle = rad2deg(static_cast<double>(outSlope.SlopeAngleRadians()));
@@ -147,13 +147,13 @@ namespace krys::boo
       return 0;
     }
 
-    void UpdateOutslope(const FloatPoint &point) noexcept
+    void UpdateOutslope(const PointF &point) noexcept
     {
       _outslopePoints[0] = _origin;
       _outslopePoints[1] = point;
     }
 
-    void UpdateInslope(const FloatPoint &point) noexcept
+    void UpdateInslope(const PointF &point) noexcept
     {
       _inslopePoints[0] = _origin;
       _inslopePoints[1] = point;
@@ -196,7 +196,7 @@ namespace krys::boo
         {
           UpdateInslope(points[0]);
           _origin = _subpathStart;
-          _subpathStart = FloatPoint();
+          _subpathStart = PointF();
           break;
         }
       }

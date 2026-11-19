@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo::style
 {
@@ -34,7 +34,7 @@ namespace krys::boo::style
   // function:
   //
   //    template<> struct krys::boo::style::PathComputation<StyleType> {
-  //        boo::Path operator()(const StyleType&, const FloatRect&);
+  //        boo::Path operator()(const StyleType&, const RectF&);
   //    };
 
   template <typename StyleType>

@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include <cmath>
 
 namespace krys
@@ -48,7 +48,7 @@ namespace krys::boo
     {
     }
 
-    constexpr FloatPoint3D(const FloatPoint &p) noexcept : _x(p.X()), _y(p.Y())
+    constexpr FloatPoint3D(const PointF &p) noexcept : _x(p.X()), _y(p.Y())
     {
     }
 
@@ -72,12 +72,12 @@ namespace krys::boo
       _y = y;
     }
 
-    KRYS_NODISCARD constexpr FloatPoint XY() const noexcept
+    KRYS_NODISCARD constexpr PointF XY() const noexcept
     {
       return {_x, _y};
     }
 
-    constexpr void SetXY(FloatPoint p) noexcept
+    constexpr void SetXY(PointF p) noexcept
     {
       _x = p.X();
       _y = p.Y();
@@ -170,7 +170,7 @@ namespace krys::boo
     return a;
   }
 
-  constexpr FloatPoint3D &operator+=(FloatPoint3D &a, const FloatPoint &b) noexcept
+  constexpr FloatPoint3D &operator+=(FloatPoint3D &a, const PointF &b) noexcept
   {
     a.Move(b.X(), b.Y());
     return a;
@@ -182,7 +182,7 @@ namespace krys::boo
     return a;
   }
 
-  constexpr FloatPoint3D &operator-=(FloatPoint3D &a, const FloatPoint &b) noexcept
+  constexpr FloatPoint3D &operator-=(FloatPoint3D &a, const PointF &b) noexcept
   {
     a.Move(-b.X(), -b.Y());
     return a;
@@ -193,7 +193,7 @@ namespace krys::boo
     return FloatPoint3D(a.X() + b.X(), a.Y() + b.Y(), a.Z() + b.Z());
   }
 
-  KRYS_NODISCARD constexpr FloatPoint3D operator+(const FloatPoint3D &a, const FloatPoint &b) noexcept
+  KRYS_NODISCARD constexpr FloatPoint3D operator+(const FloatPoint3D &a, const PointF &b) noexcept
   {
     return FloatPoint3D(a.X() + b.X(), a.Y() + b.Y(), a.Z());
   }
@@ -203,7 +203,7 @@ namespace krys::boo
     return FloatPoint3D(a.X() - b.X(), a.Y() - b.Y(), a.Z() - b.Z());
   }
 
-  KRYS_NODISCARD constexpr FloatPoint3D operator-(const FloatPoint3D &a, const FloatPoint &b) noexcept
+  KRYS_NODISCARD constexpr FloatPoint3D operator-(const FloatPoint3D &a, const PointF &b) noexcept
   {
     return FloatPoint3D(a.X() - b.X(), a.Y() - b.Y(), a.Z());
   }

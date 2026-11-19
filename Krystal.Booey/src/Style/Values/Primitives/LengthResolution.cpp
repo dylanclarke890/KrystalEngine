@@ -61,7 +61,7 @@ namespace krys::boo::style
     return dimension / conversionData.GetRenderView()->ZoomFactor();
   }
 
-  static double LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis logicalAxis, const FloatSize &size,
+  static double LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis logicalAxis, const SizeF &size,
                                                            const RenderStyle *style) noexcept
   {
     if (!style)
@@ -78,7 +78,7 @@ namespace krys::boo::style
     krys_unreachable();
   }
 
-  static double LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis logicalAxis, const FloatSize &size,
+  static double LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis logicalAxis, const SizeF &size,
                                                            const RenderView &renderView) noexcept
   {
     auto rootElement = renderView.GetDocument().DocumentElement();

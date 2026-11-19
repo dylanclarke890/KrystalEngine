@@ -1179,7 +1179,7 @@ namespace krys::boo
     return following ? static_cast<int32>(*following) : current + 1;
   }
 
-  IntRect RenderText::LinesBoundingBox() const noexcept
+  RectI RenderText::LinesBoundingBox() const noexcept
   {
     auto firstTextBox = inline_iterator::LineLeftmostTextBoxFor(*this);
     if (!firstTextBox)
@@ -1193,17 +1193,17 @@ namespace krys::boo
       boundingBox.UniteEvenIfEmpty(textBox->VisualRectIgnoringBlockDirection());
     }
 
-    return EnclosingIntRect(boundingBox);
+    return EnclosingRectI(boundingBox);
   }
 
-  IntPoint RenderText::FirstRunLocation() const noexcept
+  PointI RenderText::FirstRunLocation() const noexcept
   {
     auto first = inline_iterator::LineLeftmostTextBoxFor(*this);
     if (!first)
     {
       return {};
     }
-    return IntPoint {first->VisualRectIgnoringBlockDirection().Location()};
+    return PointI {first->VisualRectIgnoringBlockDirection().Location()};
   }
 
   namespace
@@ -2056,8 +2056,8 @@ namespace krys::boo
                                   textBox.GetWritingMode());
     }
 
-    KRYS_NODISCARD Maybe<IntRect> EllipsisRectForTextBox(const inline_iterator::TextBox &textBox,
-                                                         uint32 start, uint32 end) noexcept
+    KRYS_NODISCARD Maybe<RectI> EllipsisRectForTextBox(const inline_iterator::TextBox &textBox, uint32 start,
+                                                       uint32 end) noexcept
     {
       auto lineBox = textBox.GetLineBox();
       if (!lineBox->HasEllipsis())
@@ -2083,12 +2083,11 @@ namespace krys::boo
         return {};
       }
 
-      return EnclosingIntRect(
-        lineBox->EllipsisVisualRect(inline_iterator::LineBox::AdjustedForSelection::Yes));
+      return EnclosingRectI(lineBox->EllipsisVisualRect(inline_iterator::LineBox::AdjustedForSelection::Yes));
     }
 
-    KRYS_NODISCARD FloatRect LocalQuadForTextBox(const inline_iterator::TextBox &textBox, uint32 start,
-                                                 uint32 end, bool useSelectionHeight) noexcept
+    KRYS_NODISCARD RectF LocalQuadForTextBox(const inline_iterator::TextBox &textBox, uint32 start,
+                                             uint32 end, bool useSelectionHeight) noexcept
     {
       LayoutRect boxSelectionRect = SelectionRectForTextBox(textBox, start, end);
       if (!boxSelectionRect.Height())
@@ -2209,7 +2208,7 @@ namespace krys::boo
 
         for (auto &rect : rects)
         {
-          if (FloatRect localRect {rect}; !localRect.IsZero())
+          if (RectF localRect {rect}; !localRect.IsZero())
           {
             quads.push_back(LocalToAbsoluteQuad(localRect, MapCoordinatesMode::UseTransforms, wasFixed));
           }
@@ -2240,7 +2239,7 @@ namespace krys::boo
         quads.push_back(LocalToAbsoluteQuad(boundaries, MapCoordinatesMode::UseTransforms, wasFixed));
         continue;
       }
-      FloatRect rect = LocalQuadForTextBox(textBox, start, end, useSelectionHeight);
+      RectF rect = LocalQuadForTextBox(textBox, start, end, useSelectionHeight);
       if (!rect.IsZero())
       {
         quads.push_back(LocalToAbsoluteQuad(rect, MapCoordinatesMode::UseTransforms, wasFixed));
@@ -2365,7 +2364,7 @@ namespace krys::boo
     {
       LayoutRect rect;
       rect.Unite(SelectionRectForTextBox(textBox, startOffset, endOffset));
-      rect.Unite(LayoutRect(EllipsisRectForTextBox(textBox, startOffset, endOffset).value_or(IntRect {})));
+      rect.Unite(LayoutRect(EllipsisRectForTextBox(textBox, startOffset, endOffset).value_or(RectI {})));
       if (rect.IsEmpty())
       {
         continue;
@@ -2375,7 +2374,7 @@ namespace krys::boo
 
       if (quads)
       {
-        quads->push_back(LocalToContainerQuad(FloatQuad(FloatRect(rect)), repaintContainer));
+        quads->push_back(LocalToContainerQuad(FloatQuad(RectF(rect)), repaintContainer));
       }
     }
 
@@ -2384,7 +2383,7 @@ namespace krys::boo
       return ComputeRectForRepaint(resultRect, repaintContainer);
     }
     return LayoutRect(
-      LocalToContainerQuad(FloatQuad(FloatRect(resultRect)), repaintContainer).EnclosingBoundingBox());
+      LocalToContainerQuad(FloatQuad(RectF(resultRect)), repaintContainer).EnclosingBoundingBox());
   }
 
   LayoutRect RenderText::SelectionRectForRepaint(const RenderLayerModelObject *repaintContainer,

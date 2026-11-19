@@ -52,7 +52,7 @@ namespace krys::boo
 
   Region::Region() noexcept = default;
 
-  Region::Region(const IntRect &rect) noexcept : _bounds(rect)
+  Region::Region(const RectI &rect) noexcept : _bounds(rect)
   {
   }
 
@@ -82,9 +82,9 @@ namespace krys::boo
     return *this;
   }
 
-  SmallList<IntRect, 1> Region::Rects() const noexcept
+  SmallList<RectI, 1> Region::Rects() const noexcept
   {
-    SmallList<IntRect, 1> rects;
+    SmallList<RectI, 1> rects;
 
     if (!_shape)
     {
@@ -105,7 +105,7 @@ namespace krys::boo
         int x = segments[0];
         int width = segments[1] - x; // Ok since isValidShape ensures increasing segments.
 
-        rects.push_back(IntRect(x, y, width, height));
+        rects.push_back(RectI(x, y, width, height));
       }
     }
 
@@ -128,7 +128,7 @@ namespace krys::boo
       *_shape, region._shape ? *region._shape : Shape(region._bounds));
   }
 
-  bool Region::Contains(const IntPoint &point) const noexcept
+  bool Region::Contains(const PointI &point) const noexcept
   {
     if (!_bounds.Contains(point))
     {
@@ -355,7 +355,7 @@ namespace krys::boo
     }
   };
 
-  Region::Shape::Shape(const IntRect &rect) noexcept
+  Region::Shape::Shape(const RectI &rect) noexcept
   {
     if (rect.IsEmpty())
     {
@@ -427,11 +427,11 @@ namespace krys::boo
       .subspan(span[0].SegmentIndex, span[1].SegmentIndex - span[0].SegmentIndex);
   }
 
-  IntRect Region::Shape::Bounds() const noexcept
+  RectI Region::Shape::Bounds() const noexcept
   {
     if (IsEmpty())
     {
-      return IntRect();
+      return RectI();
     }
 
     auto spans = Spans();
@@ -469,11 +469,11 @@ namespace krys::boo
 
     int64 width = static_cast<int64>(maxX) - minX;
     int64 height = static_cast<int64>(maxY) - minY;
-    return IntRect(minX, minY, static_cast<int>(std::min<int64>(width, Limits<int32>::max())),
-                   static_cast<int>(std::min<int64>(height, Limits<int32>::max())));
+    return RectI(minX, minY, static_cast<int>(std::min<int64>(width, Limits<int32>::max())),
+                 static_cast<int>(std::min<int64>(height, Limits<int32>::max())));
   }
 
-  void Region::Shape::Translate(const IntSize &offset) noexcept
+  void Region::Shape::Translate(const SizeI &offset) noexcept
   {
     for (auto &segment : _segments)
     {
@@ -669,12 +669,12 @@ namespace krys::boo
     if (!_bounds.Intersects(region._bounds))
     {
       _shape = nullptr;
-      _bounds = IntRect();
+      _bounds = RectI();
       return;
     }
     if (!_shape && !region._shape)
     {
-      _bounds = boo::Intersection(_bounds, region._bounds);
+      _bounds = Intersection(_bounds, region._bounds);
       return;
     }
 
@@ -727,7 +727,7 @@ namespace krys::boo
       Shape::SubtractShapes(_shape ? *_shape : _bounds, region._shape ? *region._shape : region._bounds));
   }
 
-  void Region::Translate(const IntSize &offset) noexcept
+  void Region::Translate(const SizeI &offset) noexcept
   {
     _bounds.Move(offset);
     if (_shape)

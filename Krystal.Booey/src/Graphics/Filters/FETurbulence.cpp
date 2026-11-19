@@ -113,8 +113,8 @@ namespace krys::boo
     return true;
   }
 
-  FloatRect FETurbulence::CalculateImageRect(const Filter &filter, Span<const FloatRect>,
-                                             const FloatRect &primitiveSubregion) const noexcept
+  RectF FETurbulence::CalculateImageRect(const Filter &filter, Span<const RectF>,
+                                         const RectF &primitiveSubregion) const noexcept
   {
     return filter.MaxEffectRect(primitiveSubregion);
   }

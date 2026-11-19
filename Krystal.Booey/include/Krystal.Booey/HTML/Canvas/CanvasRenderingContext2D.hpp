@@ -88,9 +88,9 @@ namespace krys::boo::html
 
     KRYS_NODISCARD Maybe<style::Filter> SetFilterStringWithoutUpdatingStyle(DOMStringView) noexcept override;
 
-    KRYS_NODISCARD RefPtr<boo::Filter> CreateFilter(const FloatRect &bounds) const noexcept override;
+    KRYS_NODISCARD RefPtr<boo::Filter> CreateFilter(const RectF &bounds) const noexcept override;
 
-    KRYS_NODISCARD IntOutsets CalculateFilterOutsets(const FloatRect &bounds) const noexcept override;
+    KRYS_NODISCARD IntOutsets CalculateFilterOutsets(const RectF &bounds) const noexcept override;
 
     KRYS_NODISCARD StringAtom InheritedLanguage() const noexcept final;
 

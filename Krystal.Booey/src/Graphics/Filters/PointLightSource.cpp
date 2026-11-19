@@ -59,7 +59,7 @@ namespace krys::boo
     _bufferPosition.SetXY(result.MappedAbsolutePoint(absolutePosition));
 
     // To scale Z, map a point offset from position in the x direction by z.
-    auto absoluteMappedZ = filter.ScaledByFilterScale(FloatPoint {position.X() + position.Z(), position.Y()});
+    auto absoluteMappedZ = filter.ScaledByFilterScale(PointF {position.X() + position.Z(), position.Y()});
     _bufferPosition.SetZ(result.MappedAbsolutePoint(absoluteMappedZ).X() - _bufferPosition.X());
   }
 

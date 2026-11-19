@@ -108,10 +108,10 @@ namespace krys::boo
     }
   }
 
-  FloatPoint RenderGeometryMap::MapToContainer(const FloatPoint &p,
-                                               const RenderLayerModelObject *container) const noexcept
+  PointF RenderGeometryMap::MapToContainer(const PointF &p,
+                                           const RenderLayerModelObject *container) const noexcept
   {
-    FloatPoint result;
+    PointF result;
 
     if (!HasFixedPositionStep() && !HasTransformStep() && !HasNonUniformStep()
         && (!container || (!_mapping.empty() && container == _mapping[0].Renderer)))
@@ -129,7 +129,7 @@ namespace krys::boo
     return result;
   }
 
-  FloatQuad RenderGeometryMap::MapToContainer(const FloatRect &rect,
+  FloatQuad RenderGeometryMap::MapToContainer(const RectF &rect,
                                               const RenderLayerModelObject *container) const noexcept
   {
     FloatQuad result;

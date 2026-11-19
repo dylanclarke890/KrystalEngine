@@ -2136,8 +2136,8 @@ namespace krys::boo
 
       // Convert to coords relative to the list box if needed.
       auto absoluteLocation = mouseEvent->AbsoluteLocation();
-      IntPoint localOffset = RoundedIntPoint(renderListBox->AbsoluteToLocal(
-        FloatPoint(static_cast<float>(absoluteLocation.X()), static_cast<float>(absoluteLocation.Y())),
+      PointI localOffset = RoundedPointI(renderListBox->AbsoluteToLocal(
+        PointF(static_cast<float>(absoluteLocation.X()), static_cast<float>(absoluteLocation.Y())),
         {MapCoordinatesMode::UseTransforms}));
       int32 listIndex = renderListBox->ListIndexAtOffset(LayoutSize(localOffset.X(), localOffset.Y()));
       if (listIndex >= 0)
@@ -2168,8 +2168,8 @@ namespace krys::boo
       }
 
       auto absoluteLocation = mouseEvent->AbsoluteLocation();
-      IntPoint localOffset = RoundedIntPoint(renderListBox.AbsoluteToLocal(
-        FloatPoint(static_cast<float>(absoluteLocation.X()), static_cast<float>(absoluteLocation.Y())),
+      PointI localOffset = RoundedPointI(renderListBox.AbsoluteToLocal(
+        PointF(static_cast<float>(absoluteLocation.X()), static_cast<float>(absoluteLocation.Y())),
         {MapCoordinatesMode::UseTransforms}));
       int32 listIndex = renderListBox.ListIndexAtOffset(LayoutSize(localOffset.X(), localOffset.Y()));
       if (listIndex >= 0)

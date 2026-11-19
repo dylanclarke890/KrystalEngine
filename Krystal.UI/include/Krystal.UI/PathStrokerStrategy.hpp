@@ -13,11 +13,11 @@ namespace krys::ui
     gfx::PathStroker _stroker;
 
   public:
-    KRYS_NODISCARD bool StrokeContains(const boo::Path &path, const boo::FloatPoint &point,
+    KRYS_NODISCARD bool StrokeContains(const boo::Path &path, const PointF &point,
                                        const boo::PathStrokeStyle &style) noexcept override;
 
-    KRYS_NODISCARD boo::FloatRect StrokeBoundingRect(const boo::Path &path,
-                                                     const boo::PathStrokeStyle &style) noexcept override;
+    KRYS_NODISCARD RectF StrokeBoundingRect(const boo::Path &path,
+                                            const boo::PathStrokeStyle &style) noexcept override;
 
   private:
     /// @brief The outline of @p path stroked with @p style, in the path's coordinates.

@@ -22,9 +22,9 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 
 namespace krys::boo
 {
@@ -36,7 +36,7 @@ namespace krys::boo
     LayoutPoint _point;
     LayoutRect _boundingBox;
 
-    FloatPoint _transformedPoint;
+    PointF _transformedPoint;
     FloatQuad _transformedRect;
 
     bool _isRectBased {false};
@@ -47,7 +47,7 @@ namespace krys::boo
 
     explicit HitTestLocation(const LayoutPoint &point) noexcept;
 
-    HitTestLocation(const FloatPoint &point, const FloatQuad &quad) noexcept;
+    HitTestLocation(const PointF &point, const FloatQuad &quad) noexcept;
 
     explicit HitTestLocation(const LayoutRect &rect) noexcept;
 
@@ -63,9 +63,9 @@ namespace krys::boo
       return _point;
     }
 
-    KRYS_NODISCARD IntPoint RoundedPoint() const noexcept
+    KRYS_NODISCARD PointI RoundedPoint() const noexcept
     {
-      return RoundedIntPoint(_point);
+      return RoundedPointI(_point);
     }
 
     // Rect-based hit test related methods.
@@ -86,11 +86,11 @@ namespace krys::boo
 
     KRYS_NODISCARD bool Intersects(const LayoutRect &rect) const noexcept;
 
-    KRYS_NODISCARD bool Intersects(const FloatRect &rect) const noexcept;
+    KRYS_NODISCARD bool Intersects(const RectF &rect) const noexcept;
 
     KRYS_NODISCARD bool Intersects(const LayoutRoundedRect &rect) const noexcept;
 
-    KRYS_NODISCARD const FloatPoint &TransformedPoint() const noexcept
+    KRYS_NODISCARD const PointF &TransformedPoint() const noexcept
     {
       return _transformedPoint;
     }

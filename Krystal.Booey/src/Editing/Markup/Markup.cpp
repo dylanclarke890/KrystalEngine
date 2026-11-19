@@ -1548,7 +1548,7 @@ namespace krys::boo
     Ref<Page> page = Page::Create();
 
     auto &frame = page->MainFrame();
-    frame.CreateView(IntSize {800, 600});
+    frame.CreateView(SizeI {800, 600});
 
     constexpr static utf8_stringview markup = u8"<!DOCTYPE html><html><head><meta name='color-scheme' "
                                               u8"content='light dark'/></head><body></body></html>";

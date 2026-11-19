@@ -35,7 +35,7 @@ namespace krys::boo::style
   {
   public:
     KRYS_NODISCARD static Ref<DropShadowFilterOperationWithStyleColor>
-      Create(const IntPoint &location, int stdDeviation, const style::Color &color) noexcept
+      Create(const PointI &location, int stdDeviation, const style::Color &color) noexcept
     {
       return AdoptRef(*new DropShadowFilterOperationWithStyleColor(location, stdDeviation, color));
     }
@@ -64,7 +64,7 @@ namespace krys::boo::style
       return _styleColor.ContainsCurrentColor();
     }
 
-    DropShadowFilterOperationWithStyleColor(const IntPoint &location, int stdDeviation,
+    DropShadowFilterOperationWithStyleColor(const PointI &location, int stdDeviation,
                                             style::Color color) noexcept
         : DropShadowFilterOperationBase(Type::DropShadowWithStyleColor, location, stdDeviation),
           _styleColor(krys::move(color))

@@ -39,7 +39,7 @@
 
 namespace krys::boo
 {
-  Path::Path(const List<FloatPoint> &points) noexcept
+  Path::Path(const List<PointF> &points) noexcept
       : _data(DataRef<PathImpl> {Ref<PathImpl> {PathStream::Create(points)}})
   {
   }
@@ -131,11 +131,11 @@ namespace krys::boo
     return nullptr;
   }
 
-  KRYS_NODISCARD static FloatRoundedRect CalculateEvenRoundedRect(const FloatRect &rect,
-                                                                  const FloatSize &roundingRadii) noexcept
+  KRYS_NODISCARD static FloatRoundedRect CalculateEvenRoundedRect(const RectF &rect,
+                                                                  const SizeF &roundingRadii) noexcept
   {
-    FloatSize radius(roundingRadii);
-    FloatSize halfSize = rect.Size() / 2;
+    SizeF radius(roundingRadii);
+    SizeF halfSize = rect.Size() / 2;
 
     // Apply the SVG corner radius constraints, per the rect section of the SVG shapes spec: if
     // one of rx,ry is negative, then the other corner radius value is used. If both values are
@@ -189,7 +189,7 @@ namespace krys::boo
     }
   }
 
-  void Path::AddRoundedRect(const FloatRect &rect, const FloatSize &roundingRadii,
+  void Path::AddRoundedRect(const RectF &rect, const SizeF &roundingRadii,
                             PathRoundedRect::Strategy strategy) noexcept
   {
     if (rect.IsEmpty())
@@ -212,7 +212,7 @@ namespace krys::boo
     AddRoundedRect(FloatRoundedRect(rect));
   }
 
-  void Path::AddContinuousRoundedRect(const FloatRect &rect, const float cornerRadius) noexcept
+  void Path::AddContinuousRoundedRect(const RectF &rect, const float cornerRadius) noexcept
   {
     if (rect.IsEmpty())
     {
@@ -230,7 +230,7 @@ namespace krys::boo
     }
   }
 
-  void Path::AddContinuousRoundedRect(const FloatRect &rect, const float cornerWidth,
+  void Path::AddContinuousRoundedRect(const RectF &rect, const float cornerWidth,
                                       const float cornerHeight) noexcept
   {
     if (rect.IsEmpty())
@@ -283,7 +283,7 @@ namespace krys::boo
     }
   }
 
-  bool Path::Contains(const FloatPoint &point, WindRule rule) const noexcept
+  bool Path::Contains(const PointF &point, WindRule rule) const noexcept
   {
     if (IsEmpty() || !FastBoundingRect().Contains(point))
     {
@@ -294,9 +294,9 @@ namespace krys::boo
     // one way going up and the other going down. Curves are flattened into lines.
     constexpr int32 curveSteps = 16;
     int32 winding = 0;
-    FloatPoint current;
-    FloatPoint subpathStart;
-    auto addEdge = [&](FloatPoint from, FloatPoint to)
+    PointF current;
+    PointF subpathStart;
+    auto addEdge = [&](PointF from, PointF to)
     {
       if (from.Y() <= point.Y())
       {
@@ -329,12 +329,12 @@ namespace krys::boo
             break;
           case PathElement::Type::AddQuadCurveToPoint:
           {
-            FloatPoint start = current;
+            PointF start = current;
             for (int32 step = 1; step <= curveSteps; ++step)
             {
               float t = static_cast<float>(step) / curveSteps;
               float u = 1 - t;
-              FloatPoint next(
+              PointF next(
                 u * u * start.X() + 2 * u * t * element.Points[0].X() + t * t * element.Points[1].X(),
                 u * u * start.Y() + 2 * u * t * element.Points[0].Y() + t * t * element.Points[1].Y());
               addEdge(current, next);
@@ -344,15 +344,15 @@ namespace krys::boo
           }
           case PathElement::Type::AddCurveToPoint:
           {
-            FloatPoint start = current;
+            PointF start = current;
             for (int32 step = 1; step <= curveSteps; ++step)
             {
               float t = static_cast<float>(step) / curveSteps;
               float u = 1 - t;
-              FloatPoint next(u * u * u * start.X() + 3 * u * u * t * element.Points[0].X()
-                                + 3 * u * t * t * element.Points[1].X() + t * t * t * element.Points[2].X(),
-                              u * u * u * start.Y() + 3 * u * u * t * element.Points[0].Y()
-                                + 3 * u * t * t * element.Points[1].Y() + t * t * t * element.Points[2].Y());
+              PointF next(u * u * u * start.X() + 3 * u * u * t * element.Points[0].X()
+                            + 3 * u * t * t * element.Points[1].X() + t * t * t * element.Points[2].X(),
+                          u * u * u * start.Y() + 3 * u * u * t * element.Points[0].Y()
+                            + 3 * u * t * t * element.Points[1].Y() + t * t * t * element.Points[2].Y());
               addEdge(current, next);
               current = next;
             }
@@ -393,8 +393,8 @@ namespace krys::boo
     // rounded rects and ellipses become beziers, as a platform path preferring them adds them
     // (PathImpl::BeziersForRoundedRect), and arcs become beziers after the current point.
     // FIXME: Continuous rounded rects need a platform path; they apply nothing.
-    Maybe<FloatPoint> currentPoint;
-    FloatPoint subpathStart;
+    Maybe<PointF> currentPoint;
+    PointF subpathStart;
     PathElementApplier tracking = [&](const PathElement &element)
     {
       switch (element.ElementType)
@@ -473,7 +473,7 @@ namespace krys::boo
     _data = std::monostate {};
   }
 
-  void Path::Translate(const FloatSize &delta) noexcept
+  void Path::Translate(const SizeF &delta) noexcept
   {
     Transform(AffineTransform::MakeTranslation(delta));
   }
@@ -616,7 +616,7 @@ namespace krys::boo
     return traversalState;
   }
 
-  FloatPoint Path::PointAtLength(float length) const noexcept
+  PointF Path::PointAtLength(float length) const noexcept
   {
     return TraversalStateAtLength(length).Current();
   }
@@ -636,7 +636,7 @@ namespace krys::boo
     return false;
   }
 
-  FloatRect Path::FastBoundingRect() const noexcept
+  RectF Path::FastBoundingRect() const noexcept
   {
     if (auto *segment = AsSingle())
     {
@@ -651,7 +651,7 @@ namespace krys::boo
     return {};
   }
 
-  FloatRect Path::BoundingRect() const noexcept
+  RectF Path::BoundingRect() const noexcept
   {
     if (auto *segment = AsSingle())
     {
@@ -708,7 +708,7 @@ namespace krys::boo
     };
   }
 
-  bool Path::StrokeContains(const FloatPoint &point,
+  bool Path::StrokeContains(const PointF &point,
                             const Func<void(GraphicsContext &)> &strokeStyleApplier) const noexcept
   {
     krys_debug_assert(strokeStyleApplier);
@@ -728,7 +728,7 @@ namespace krys::boo
     return strategy->StrokeContains(*this, point, collector.Style);
   }
 
-  FloatRect Path::StrokeBoundingRect(const Func<void(GraphicsContext &)> &strokeStyleApplier) const noexcept
+  RectF Path::StrokeBoundingRect(const Func<void(GraphicsContext &)> &strokeStyleApplier) const noexcept
   {
     if (IsEmpty())
     {

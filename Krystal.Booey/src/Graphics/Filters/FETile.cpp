@@ -36,8 +36,8 @@ namespace krys::boo
   {
   }
 
-  FloatRect FETile::CalculateImageRect(const Filter &filter, Span<const FloatRect>,
-                                       const FloatRect &primitiveSubregion) const noexcept
+  RectF FETile::CalculateImageRect(const Filter &filter, Span<const RectF>,
+                                   const RectF &primitiveSubregion) const noexcept
   {
     return filter.MaxEffectRect(primitiveSubregion);
   }

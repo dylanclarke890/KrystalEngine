@@ -1379,7 +1379,7 @@ namespace krys::boo
 
     /// @brief Where a press lands: the middle of the object (of its one child, for a heading, which is
     /// usually much wider than its text).
-    KRYS_NODISCARD IntPoint ClickPoint() noexcept;
+    KRYS_NODISCARD PointI ClickPoint() noexcept;
 
     /// @brief Whether none of the object is in the view's visible content.
     KRYS_NODISCARD virtual bool IsOffScreen() const noexcept
@@ -1388,10 +1388,10 @@ namespace krys::boo
     }
 
     /// @brief The unignored object at @p point (in the root view's coordinates) in this one's subtree.
-    KRYS_NODISCARD virtual AXObject *AccessibilityHitTest(const IntPoint &point) const noexcept;
+    KRYS_NODISCARD virtual AXObject *AccessibilityHitTest(const PointI &point) const noexcept;
 
     /// @brief The object at @p point among this one and the children it makes itself (a slider's thumb).
-    KRYS_NODISCARD virtual AXObject *ElementAccessibilityHitTest(const IntPoint &point) const noexcept;
+    KRYS_NODISCARD virtual AXObject *ElementAccessibilityHitTest(const PointI &point) const noexcept;
 
     // Actions: what assistive technology does with an object, as the user would.
 

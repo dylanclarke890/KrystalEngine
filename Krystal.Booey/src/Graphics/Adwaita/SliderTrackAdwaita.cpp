@@ -47,8 +47,8 @@ namespace krys::boo
 
     GraphicsContextStateSaver stateSaver(graphicsContext);
 
-    FloatRect rect = borderRect.Rect();
-    FloatRect fieldRect = rect;
+    RectF rect = borderRect.Rect();
+    RectF fieldRect = rect;
     bool isHorizontal = sliderTrackPart.GetType() == StyleAppearance::SliderHorizontal;
     if (isHorizontal)
     {
@@ -76,7 +76,7 @@ namespace krys::boo
       graphicsContext.BeginTransparencyLayer(static_cast<float>(DisabledOpacity));
     }
 
-    FloatSize corner(3, 3);
+    SizeF corner(3, 3);
     Path path;
 
     path.AddRoundedRect(fieldRect, corner);
@@ -85,7 +85,7 @@ namespace krys::boo
     graphicsContext.FillPath(path);
     path.Clear();
 
-    FloatRect rangeRect = fieldRect;
+    RectF rangeRect = fieldRect;
     FloatRoundedRect::Radii corners;
     if (isHorizontal)
     {

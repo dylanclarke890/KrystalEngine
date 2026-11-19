@@ -26,11 +26,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Net/Url.hpp"
 
@@ -54,7 +53,7 @@ namespace krys::boo
   private:
     RefPtr<Page> _page;
     Timer _startAnimationTimer;
-    FloatSize _intrinsicSize;
+    SizeF _intrinsicSize;
 
   public:
     KRYS_NODISCARD static Ref<SVGImage> Create(ImageObserver *observer) noexcept
@@ -73,7 +72,7 @@ namespace krys::boo
       return true;
     }
 
-    KRYS_NODISCARD FloatSize
+    KRYS_NODISCARD SizeF
       Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept final
     {
       return _intrinsicSize;
@@ -113,9 +112,9 @@ namespace krys::boo
 
     KRYS_NODISCARD utf8_string FilenameExtension() const noexcept final;
 
-    void SetContainerSize(const FloatSize &) noexcept final;
+    void SetContainerSize(const SizeF &) noexcept final;
 
-    KRYS_NODISCARD IntSize ContainerSize() const noexcept;
+    KRYS_NODISCARD SizeI ContainerSize() const noexcept;
 
     KRYS_NODISCARD bool UsesContainerSize() const noexcept final
     {
@@ -123,7 +122,7 @@ namespace krys::boo
     }
 
     void ComputeIntrinsicDimensions(float &intrinsicWidth, float &intrinsicHeight,
-                                    FloatSize &intrinsicRatio) noexcept final;
+                                    SizeF &intrinsicRatio) noexcept final;
 
     EncodedDataStatus DataChanged(bool allDataReceived) noexcept final;
 
@@ -138,17 +137,17 @@ namespace krys::boo
       return static_cast<bool>(_page);
     }
 
-    ImageDrawResult Draw(GraphicsContext &, const FloatRect &destination, const FloatRect &source,
+    ImageDrawResult Draw(GraphicsContext &, const RectF &destination, const RectF &source,
                          ImagePaintingOptions = {}) noexcept final;
 
-    ImageDrawResult DrawForContainer(GraphicsContext &, FloatSize containerSize, float containerZoom,
-                                     const net::Url &initialFragmentUrl, const FloatRect &dstRect,
-                                     const FloatRect &srcRect, ImagePaintingOptions = {}) noexcept;
+    ImageDrawResult DrawForContainer(GraphicsContext &, SizeF containerSize, float containerZoom,
+                                     const net::Url &initialFragmentUrl, const RectF &dstRect,
+                                     const RectF &srcRect, ImagePaintingOptions = {}) noexcept;
 
-    void DrawPatternForContainer(GraphicsContext &, const FloatSize &containerSize, float containerZoom,
-                                 const net::Url &initialFragmentUrl, const FloatRect &srcRect,
-                                 const AffineTransform &, const FloatPoint &phase, const FloatSize &spacing,
-                                 const FloatRect &, ImagePaintingOptions = {}) noexcept;
+    void DrawPatternForContainer(GraphicsContext &, const SizeF &containerSize, float containerZoom,
+                                 const net::Url &initialFragmentUrl, const RectF &srcRect,
+                                 const AffineTransform &, const PointF &phase, const SizeF &spacing,
+                                 const RectF &, ImagePaintingOptions = {}) noexcept;
   };
 }
 

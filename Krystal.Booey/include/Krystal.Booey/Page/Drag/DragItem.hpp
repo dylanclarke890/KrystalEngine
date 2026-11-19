@@ -25,11 +25,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragImage.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Net/Url.hpp"
@@ -43,15 +42,15 @@ namespace krys::boo
     DragImage Image;
 
     // Where the image should be positioned relative to the cursor.
-    FloatPoint ImageAnchorPoint;
+    PointF ImageAnchorPoint;
 
     Maybe<DragSourceAction> SourceAction;
-    IntPoint EventPositionInContentCoordinates;
-    IntPoint DragLocationInContentCoordinates;
-    IntPoint DragLocationInWindowCoordinates;
+    PointI EventPositionInContentCoordinates;
+    PointI DragLocationInContentCoordinates;
+    PointI DragLocationInWindowCoordinates;
     utf8_string Title;
     net::Url Url;
-    IntRect DragPreviewFrameInRootViewCoordinates;
+    RectI DragPreviewFrameInRootViewCoordinates;
     bool ContainsSelection {false};
   };
 }

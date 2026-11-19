@@ -104,7 +104,7 @@ namespace krys::boo::tests
       KRYS_NODISCARD static PlatformMouseEvent Event(PlatformEvent::Type type, double x, double y,
                                                      MouseButton button, uint16 buttons) noexcept
       {
-        PlatformMouseEvent event(DoublePoint(x, y), DoublePoint(x, y), button, type,
+        PlatformMouseEvent event(PointD(x, y), PointD(x, y), button, type,
                                  type == PlatformEvent::Type::MouseMoved ? 0 : 1, {}, MonotonicTime::Now(),
                                  buttons);
         if (type == PlatformEvent::Type::MouseMoved)
@@ -470,11 +470,11 @@ namespace krys::boo::tests
       fixture.Move(10, 10);
       fixture.Press(10, 10);
       (void)fixture.Take();
-      fixture.Controller().CancelPointer(MousePointerId, IntPoint(10, 10));
+      fixture.Controller().CancelPointer(MousePointerId, PointI(10, 10));
       CHECK(fixture.Take() == Strings {"pointercancel!:a", "pointerout!:a", "pointerleave!:a"});
       CHECK(fixture.Controller().HasCancelledPointerEventForIdentifier(MousePointerId));
       // Only once.
-      fixture.Controller().CancelPointer(MousePointerId, IntPoint(10, 10));
+      fixture.Controller().CancelPointer(MousePointerId, PointI(10, 10));
       CHECK(fixture.Take().empty());
 
       // The page's main document changing forgets it.

@@ -102,7 +102,7 @@ namespace krys::boo::style
   template <>
   struct PathComputation<BasicShape>
   {
-    KRYS_NODISCARD boo::Path operator()(const BasicShape &, const FloatRect &) noexcept;
+    KRYS_NODISCARD boo::Path operator()(const BasicShape &, const RectF &) noexcept;
   };
 
   // MARK: - Winding

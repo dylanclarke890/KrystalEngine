@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -62,9 +62,9 @@ namespace krys::boo
     public:
       Shape() noexcept = default;
 
-      Shape(const IntRect &rect) noexcept;
+      Shape(const RectI &rect) noexcept;
 
-      KRYS_NODISCARD IntRect Bounds() const noexcept;
+      KRYS_NODISCARD RectI Bounds() const noexcept;
 
       KRYS_NODISCARD bool IsEmpty() const noexcept
       {
@@ -94,7 +94,7 @@ namespace krys::boo
 
       KRYS_NODISCARD static Shape SubtractShapes(const Shape &shape1, const Shape &shape2) noexcept;
 
-      void Translate(const IntSize &offset) noexcept;
+      void Translate(const SizeI &offset) noexcept;
 
       struct CompareContainsOperation;
       struct CompareIntersectsOperation;
@@ -134,13 +134,13 @@ namespace krys::boo
     };
 
   private:
-    IntRect _bounds;
+    RectI _bounds;
     UniquePtr<Shape> _shape;
 
   public:
     Region() noexcept;
 
-    Region(const IntRect &rect) noexcept;
+    Region(const RectI &rect) noexcept;
 
     Region(const Region &other) noexcept;
 
@@ -152,7 +152,7 @@ namespace krys::boo
 
     Region &operator=(Region &&other) noexcept;
 
-    KRYS_NODISCARD IntRect Bounds() const noexcept
+    KRYS_NODISCARD RectI Bounds() const noexcept
     {
       return _bounds;
     }
@@ -167,7 +167,7 @@ namespace krys::boo
       return !_shape;
     }
 
-    KRYS_NODISCARD SmallList<IntRect, 1> Rects() const noexcept;
+    KRYS_NODISCARD SmallList<RectI, 1> Rects() const noexcept;
 
     void Unite(const Region &region) noexcept;
 
@@ -175,12 +175,12 @@ namespace krys::boo
 
     void Subtract(const Region &region) noexcept;
 
-    void Translate(const IntSize &offset) noexcept;
+    void Translate(const SizeI &offset) noexcept;
 
     // Returns true if the query region is a subset of this region.
     KRYS_NODISCARD bool Contains(const Region &region) const noexcept;
 
-    KRYS_NODISCARD bool Contains(const IntPoint &point) const noexcept;
+    KRYS_NODISCARD bool Contains(const PointI &point) const noexcept;
 
     // Returns true if the query region intersects any part of this region.
     KRYS_NODISCARD bool Intersects(const Region &region) const noexcept;
@@ -252,7 +252,7 @@ namespace krys::boo
     return result;
   }
 
-  KRYS_NODISCARD inline Region Translate(const Region &region, const IntSize &offset) noexcept
+  KRYS_NODISCARD inline Region Translate(const Region &region, const SizeI &offset) noexcept
   {
     Region result(region);
     result.Translate(offset);

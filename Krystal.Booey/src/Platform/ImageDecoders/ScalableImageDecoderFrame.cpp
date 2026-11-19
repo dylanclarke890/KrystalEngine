@@ -83,7 +83,7 @@ namespace krys::boo
     return _backingStore != nullptr;
   }
 
-  bool ScalableImageDecoderFrame::Initialize(const IntSize &size, bool premultiplyAlpha) noexcept
+  bool ScalableImageDecoderFrame::Initialize(const SizeI &size, bool premultiplyAlpha) noexcept
   {
     if (size.IsEmpty())
     {
@@ -94,7 +94,7 @@ namespace krys::boo
     return _backingStore != nullptr;
   }
 
-  IntSize ScalableImageDecoderFrame::Size() const noexcept
+  SizeI ScalableImageDecoderFrame::Size() const noexcept
   {
     if (HasBackingStore())
     {

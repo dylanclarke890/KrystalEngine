@@ -14,7 +14,7 @@ namespace krys::boo::tests
     KRYS_NODISCARD PlatformWheelEvent PanStep(Phase phase, float deltaX, float deltaY,
                                               Phase momentumPhase = Phase::None) noexcept
     {
-      return PlatformWheelEvent(IntPoint(), IntPoint(), deltaX, deltaY, 0, 0,
+      return PlatformWheelEvent(PointI(), PointI(), deltaX, deltaY, 0, 0,
                                 PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {})
         .CopyAsTouchpadPan(phase, momentumPhase);
     }
@@ -28,16 +28,16 @@ namespace krys::boo::tests
     SECTION("while its recent steps all go mostly one way, the other way's delta is dropped")
     {
       filter.UpdateFromEvent(PanStep(Phase::Began, -2, -30));
-      CHECK(filter.FilteredDelta() == FloatSize(0, -30));
+      CHECK(filter.FilteredDelta() == SizeF(0, -30));
       filter.UpdateFromEvent(PanStep(Phase::Changed, -3, -30));
-      CHECK(filter.FilteredDelta() == FloatSize(0, -30));
+      CHECK(filter.FilteredDelta() == SizeF(0, -30));
       filter.UpdateFromEvent(PanStep(Phase::Changed, -30, -2));
-      CHECK(filter.FilteredDelta() == FloatSize(-30, -2));
+      CHECK(filter.FilteredDelta() == SizeF(-30, -2));
 
       // Three steps sideways, and it keeps to that axis instead.
       filter.UpdateFromEvent(PanStep(Phase::Changed, -30, -3));
       filter.UpdateFromEvent(PanStep(Phase::Changed, -30, -4));
-      CHECK(filter.FilteredDelta() == FloatSize(-30, 0));
+      CHECK(filter.FilteredDelta() == SizeF(-30, 0));
     }
 
     SECTION("it starts over when the gesture ends")
@@ -45,9 +45,9 @@ namespace krys::boo::tests
       filter.UpdateFromEvent(PanStep(Phase::Changed, -30, -2));
       filter.UpdateFromEvent(PanStep(Phase::Changed, -30, -2));
       filter.UpdateFromEvent(PanStep(Phase::Ended, 0, 0));
-      CHECK(filter.FilteredDelta() == FloatSize());
+      CHECK(filter.FilteredDelta() == SizeF());
       filter.UpdateFromEvent(PanStep(Phase::Began, -2, -30));
-      CHECK(filter.FilteredDelta() == FloatSize(0, -30));
+      CHECK(filter.FilteredDelta() == SizeF(0, -30));
     }
 
     SECTION("only the gesture's own steps are filtered, not its momentum or a wheel's notches")
@@ -56,9 +56,8 @@ namespace krys::boo::tests
       CHECK(WheelEventDeltaFilter::ShouldApplyFilteringForEvent(PanStep(Phase::Changed, 0, 0)));
       CHECK_FALSE(
         WheelEventDeltaFilter::ShouldApplyFilteringForEvent(PanStep(Phase::None, 0, 0, Phase::Changed)));
-      CHECK_FALSE(WheelEventDeltaFilter::ShouldApplyFilteringForEvent(
-        PlatformWheelEvent(IntPoint(), IntPoint(), 0, -30, 0, 1,
-                           PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {})));
+      CHECK_FALSE(WheelEventDeltaFilter::ShouldApplyFilteringForEvent(PlatformWheelEvent(
+        PointI(), PointI(), 0, -30, 0, 1, PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {})));
     }
   }
 
@@ -71,7 +70,7 @@ namespace krys::boo::tests
     auto &view = *fixture.TestPage->MainFrame().View();
     auto pan = [&](Phase phase, float deltaX, float deltaY)
     {
-      PlatformWheelEvent event(IntPoint(10, 10), IntPoint(10, 10), deltaX, deltaY, 0, 0,
+      PlatformWheelEvent event(PointI(10, 10), PointI(10, 10), deltaX, deltaY, 0, 0,
                                PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {});
       return handler.HandleWheelEvent(event.CopyAsTouchpadPan(phase, Phase::None));
     };

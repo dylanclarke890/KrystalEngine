@@ -46,11 +46,11 @@ namespace krys::boo
     // to avoid using garbage.
     ClearPath();
     _shapeType = ShapeType::Empty;
-    _fillBoundingBox = FloatRect();
+    _fillBoundingBox = RectF();
     _strokeBoundingBox = null;
     _approximateStrokeBoundingBox = null;
-    _center = FloatPoint();
-    _radii = FloatSize();
+    _center = PointF();
+    _radii = SizeF();
 
     CalculateRadiiAndCenter();
 
@@ -76,8 +76,8 @@ namespace krys::boo
       return;
     }
 
-    _fillBoundingBox = FloatRect(_center.X() - _radii.Width(), _center.Y() - _radii.Height(),
-                                 2 * _radii.Width(), 2 * _radii.Height());
+    _fillBoundingBox = RectF(_center.X() - _radii.Width(), _center.Y() - _radii.Height(), 2 * _radii.Width(),
+                             2 * _radii.Height());
     auto strokeBoundingBox = _fillBoundingBox;
     if (Style().HasStroke())
     {
@@ -90,13 +90,12 @@ namespace krys::boo
   {
     auto &graphicsElement = GraphicsElement();
     SVGLengthContext lengthContext(&graphicsElement);
-    _center =
-      FloatPoint(lengthContext.ValueForLength(Style().Cx(), style::ZoomNeeded {}, SVGLengthMode::Width),
-                 lengthContext.ValueForLength(Style().Cy(), style::ZoomNeeded {}, SVGLengthMode::Height));
+    _center = PointF(lengthContext.ValueForLength(Style().Cx(), style::ZoomNeeded {}, SVGLengthMode::Width),
+                     lengthContext.ValueForLength(Style().Cy(), style::ZoomNeeded {}, SVGLengthMode::Height));
     if (Is<SVGCircleElement>(graphicsElement))
     {
       float radius = lengthContext.ValueForLength(Style().R(), style::ZoomNeeded {});
-      _radii = FloatSize(radius, radius);
+      _radii = SizeF(radius, radius);
       return;
     }
 
@@ -104,9 +103,9 @@ namespace krys::boo
 
     const auto &rx = Style().Rx();
     const auto &ry = Style().Ry();
-    _radii = FloatSize(
-      lengthContext.ValueForLength(rx.IsAuto() ? ry : rx, style::ZoomNeeded {}, SVGLengthMode::Width),
-      lengthContext.ValueForLength(ry.IsAuto() ? rx : ry, style::ZoomNeeded {}, SVGLengthMode::Height));
+    _radii =
+      SizeF(lengthContext.ValueForLength(rx.IsAuto() ? ry : rx, style::ZoomNeeded {}, SVGLengthMode::Width),
+            lengthContext.ValueForLength(ry.IsAuto() ? rx : ry, style::ZoomNeeded {}, SVGLengthMode::Height));
     if (rx.IsAuto())
     {
       _radii.SetWidth(_radii.Height());
@@ -155,7 +154,7 @@ namespace krys::boo
   }
 
   bool
-    LegacyRenderSVGEllipse::ShapeDependentStrokeContains(const FloatPoint &point,
+    LegacyRenderSVGEllipse::ShapeDependentStrokeContains(const PointF &point,
                                                          PointCoordinateSpace pointCoordinateSpace) noexcept
   {
     if (_radii.IsEmpty())
@@ -172,19 +171,18 @@ namespace krys::boo
     }
 
     float halfStrokeWidth = StrokeWidth() / 2;
-    FloatPoint centerOffset = FloatPoint(_center.X() - point.X(), _center.Y() - point.Y());
+    PointF centerOffset = PointF(_center.X() - point.X(), _center.Y() - point.Y());
     return std::abs(centerOffset.Length() - _radii.Width()) <= halfStrokeWidth;
   }
 
-  bool LegacyRenderSVGEllipse::ShapeDependentFillContains(const FloatPoint &point,
-                                                          const WindRule) const noexcept
+  bool LegacyRenderSVGEllipse::ShapeDependentFillContains(const PointF &point, const WindRule) const noexcept
   {
     if (_radii.IsEmpty())
     {
       return false;
     }
 
-    FloatPoint center = FloatPoint(_center.X() - point.X(), _center.Y() - point.Y());
+    PointF center = PointF(_center.X() - point.X(), _center.Y() - point.Y());
 
     // This works by checking if the point satisfies the ellipse equation.
     // (x/rX)^2 + (y/rY)^2 <= 1

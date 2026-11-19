@@ -75,17 +75,17 @@ namespace krys::boo
     }
   }
 
-  IntSize ICOImageDecoder::Size() const noexcept
+  SizeI ICOImageDecoder::Size() const noexcept
   {
     return _frameSize.IsEmpty() ? ScalableImageDecoder::Size() : _frameSize;
   }
 
-  IntSize ICOImageDecoder::FrameSizeAtIndex(size_t index, SubsamplingLevel) const noexcept
+  SizeI ICOImageDecoder::FrameSizeAtIndex(size_t index, SubsamplingLevel) const noexcept
   {
     return (index && (index < _dirEntries.size())) ? _dirEntries[index].Size : Size();
   }
 
-  bool ICOImageDecoder::SetSize(const IntSize &size) noexcept
+  bool ICOImageDecoder::SetSize(const SizeI &size) noexcept
   {
     // The size calculated inside the BMPImageReader had better match the one in
     // the icon directory.
@@ -121,7 +121,7 @@ namespace krys::boo
     return ScalableImageDecoder::SetFailed();
   }
 
-  Maybe<IntPoint> ICOImageDecoder::HotSpot() const noexcept
+  Maybe<PointI> ICOImageDecoder::HotSpot() const noexcept
   {
     // When unspecified, the default frame is always frame 0. This is consistent with
     // BitmapImage where currentFrame() starts at 0 and only increases when animation is
@@ -129,7 +129,7 @@ namespace krys::boo
     return HotSpotAtIndex(0);
   }
 
-  Maybe<IntPoint> ICOImageDecoder::HotSpotAtIndex(size_t index) const noexcept
+  Maybe<PointI> ICOImageDecoder::HotSpotAtIndex(size_t index) const noexcept
   {
     if (index >= _dirEntries.size() || _fileType != CURSOR)
     {
@@ -229,7 +229,7 @@ namespace krys::boo
       }
       _frameSize = dirEntry.Size;
       bool result = _bmpReaders[index]->DecodeBMP(false);
-      _frameSize = IntSize();
+      _frameSize = SizeI();
       return result;
     }
 
@@ -338,16 +338,16 @@ namespace krys::boo
       height = 256;
     }
     IconDirectoryEntry entry;
-    entry.Size = IntSize(width, height);
+    entry.Size = SizeI(width, height);
     if (_fileType == CURSOR)
     {
       entry.BitCount = 0;
-      entry.HotSpot = IntPoint(ReadUint16(4), ReadUint16(6));
+      entry.HotSpot = PointI(ReadUint16(4), ReadUint16(6));
     }
     else
     {
       entry.BitCount = ReadUint16(6);
-      entry.HotSpot = IntPoint();
+      entry.HotSpot = PointI();
     }
     entry.ImageOffset = ReadUint32(12);
 

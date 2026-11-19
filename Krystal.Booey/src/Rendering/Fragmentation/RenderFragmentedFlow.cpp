@@ -267,7 +267,7 @@ namespace krys::boo
       return false;
     }
 
-    auto boxRect = FloatRect {{}, box.Size()};
+    auto boxRect = RectF {{}, box.Size()};
     auto boxRectInFlowCoordinates = LayoutRect {box.LocalToContainerQuad(boxRect, this).BoundingBox()};
 
     RenderFragmentContainer *startFragment = nullptr;
@@ -282,7 +282,7 @@ namespace krys::boo
       for (auto rect : fragment->FragmentRectsForFlowContentRect(boxRectInFlowCoordinates))
       {
         quads.push_back(
-          fragment->LocalToAbsoluteQuad(FloatRect(rect), MapCoordinatesMode::UseTransforms, wasFixed));
+          fragment->LocalToAbsoluteQuad(RectF(rect), MapCoordinatesMode::UseTransforms, wasFixed));
       }
 
       if (fragment == endFragment)
@@ -298,7 +298,7 @@ namespace krys::boo
   {
     krys_debug_assert(HasValidFragmentInfo());
 
-    auto boxRect = FloatRect {{}, box.Size()};
+    auto boxRect = RectF {{}, box.Size()};
     auto boxRectInFlowCoordinates = LayoutRect {box.LocalToContainerQuad(boxRect, this).BoundingBox()};
 
     RenderFragmentContainer *startFragment = nullptr;
@@ -1144,10 +1144,10 @@ namespace krys::boo
       LayoutRect borderBox = block.BorderBoxRect();
       borderBox = fragment->RectFlowPortionForBox(block, borderBox);
 
-      FloatRect inflatedRect = borderBox;
+      RectF inflatedRect = borderBox;
       RenderTheme::Singleton().AdjustRepaintRect(block, inflatedRect);
 
-      fragment->AddVisualOverflowForBox(block, LayoutRect(SnappedIntRect(LayoutRect(inflatedRect))));
+      fragment->AddVisualOverflowForBox(block, LayoutRect(SnappedRectI(LayoutRect(inflatedRect))));
       if (fragment == endFragment)
       {
         break;

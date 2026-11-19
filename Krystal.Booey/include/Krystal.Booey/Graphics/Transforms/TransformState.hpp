@@ -25,12 +25,12 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
@@ -61,7 +61,7 @@ namespace krys::boo
     };
 
   private:
-    FloatPoint _inputPoint;
+    PointF _inputPoint;
     FloatQuad _inputQuad;
     Maybe<FloatQuad> _inputSecondaryQuad;
 
@@ -72,12 +72,12 @@ namespace krys::boo
     TransformDirection _direction;
 
   public:
-    TransformState(TransformDirection mappingDirection, const FloatPoint &p, const FloatQuad &quad) noexcept
+    TransformState(TransformDirection mappingDirection, const PointF &p, const FloatQuad &quad) noexcept
         : _inputPoint(p), _inputQuad(quad), _direction(mappingDirection)
     {
     }
 
-    TransformState(TransformDirection mappingDirection, const FloatPoint &p) noexcept
+    TransformState(TransformDirection mappingDirection, const PointF &p) noexcept
         : _inputPoint(p), _direction(mappingDirection)
     {
     }
@@ -132,7 +132,7 @@ namespace krys::boo
     }
 
     /// @brief The point mapped through the current transform.
-    KRYS_NODISCARD FloatPoint MappedPoint() const noexcept;
+    KRYS_NODISCARD PointF MappedPoint() const noexcept;
 
     /// @brief The quad mapped through the current transform.
     KRYS_NODISCARD FloatQuad MappedQuad(bool *wasClamped = nullptr) const noexcept;

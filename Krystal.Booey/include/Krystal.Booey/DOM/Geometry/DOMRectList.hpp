@@ -27,8 +27,8 @@
 
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -47,7 +47,7 @@ namespace krys::boo::dom
 
     explicit DOMRectList(const List<FloatQuad> &quads) noexcept;
 
-    explicit DOMRectList(const List<FloatRect> &rects) noexcept;
+    explicit DOMRectList(const List<RectF> &rects) noexcept;
 
   public:
     ~DOMRectList() noexcept;
@@ -58,7 +58,7 @@ namespace krys::boo::dom
       return AdoptRef(*new DOMRectList(quads));
     }
 
-    KRYS_NODISCARD static Ref<DOMRectList> Create(const List<FloatRect> &rects) noexcept
+    KRYS_NODISCARD static Ref<DOMRectList> Create(const List<RectF> &rects) noexcept
     {
       return AdoptRef(*new DOMRectList(rects));
     }

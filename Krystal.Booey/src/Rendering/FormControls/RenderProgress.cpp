@@ -70,8 +70,7 @@ namespace krys::boo
     {
       frame.SetWidth(computedValues.Extent);
     }
-    IntSize frameSize =
-      RenderTheme::Singleton().ProgressBarRectForBounds(*this, SnappedIntRect(frame)).Size();
+    SizeI frameSize = RenderTheme::Singleton().ProgressBarRectForBounds(*this, SnappedRectI(frame)).Size();
     computedValues.Extent = LayoutUnit(IsHorizontalWritingMode() ? frameSize.Height() : frameSize.Width());
     return computedValues;
   }

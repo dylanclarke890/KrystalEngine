@@ -140,8 +140,7 @@ namespace krys::boo
       return element;
     }
 
-    KRYS_NODISCARD DoublePoint DocumentPointForWindowPoint(LocalFrame &frame,
-                                                           const DoublePoint &windowPoint) noexcept
+    KRYS_NODISCARD PointD DocumentPointForWindowPoint(LocalFrame &frame, const PointD &windowPoint) noexcept
     {
       auto *view = frame.View();
       if (!view)
@@ -242,7 +241,7 @@ namespace krys::boo
     {
       if (view)
       {
-        if (auto *scrollbar = view->ScrollbarAtPoint(FlooredIntPoint(mouseEvent.Event().Position())))
+        if (auto *scrollbar = view->ScrollbarAtPoint(FlooredPointI(mouseEvent.Event().Position())))
         {
           return scrollbar;
         }
@@ -466,7 +465,7 @@ namespace krys::boo
                   [&](const RefPtr<Element> &element) { return contains(element.get()); });
   }
 
-  void EventHandler::SetLastKnownMousePosition(DoublePoint position, DoublePoint globalPosition) noexcept
+  void EventHandler::SetLastKnownMousePosition(PointD position, PointD globalPosition) noexcept
   {
     _lastKnownMousePosition = position;
     _lastKnownMouseGlobalPosition = globalPosition;
@@ -507,7 +506,7 @@ namespace krys::boo
     if (auto *view = frame->View())
     {
       _mouseDownContentsPosition =
-        LayoutPoint(view->WindowToContents(FlooredIntPoint(platformMouseEvent.Position())));
+        LayoutPoint(view->WindowToContents(FlooredPointI(platformMouseEvent.Position())));
     }
     else
     {
@@ -517,7 +516,7 @@ namespace krys::boo
 
     // Save the document point we generate in case the window coordinate is invalidated by what happens
     // when we dispatch the event.
-    DoublePoint documentPoint = DocumentPointForWindowPoint(*frame, platformMouseEvent.Position());
+    PointD documentPoint = DocumentPointForWindowPoint(*frame, platformMouseEvent.Position());
     auto *document = frame->Document();
     if (!document)
     {
@@ -555,7 +554,7 @@ namespace krys::boo
     _clickNode = ShareRefPtr(mouseEvent.TargetNode());
 
     auto *layer = _clickNode && _clickNode->Renderer() ? _clickNode->Renderer()->EnclosingLayer() : nullptr;
-    auto localPoint = RoundedIntPoint(mouseEvent.GetHitTestResult().LocalPoint());
+    auto localPoint = RoundedPointI(mouseEvent.GetHitTestResult().LocalPoint());
     if (layer && layer->IsPointInResizeControl(localPoint))
     {
       layer->SetInResizeMode(true);
@@ -685,8 +684,8 @@ namespace krys::boo
 
       if (resizeLayer->Renderer().Style().ShouldPlaceVerticalScrollbarOnLeft())
       {
-        auto absolutePoint = frame->View()->WindowToContents(FlooredIntPoint(platformMouseEvent.Position()));
-        auto localPoint = RoundedIntPoint(resizeLayer->AbsoluteToContents(LayoutPoint(absolutePoint)));
+        auto absolutePoint = frame->View()->WindowToContents(FlooredPointI(platformMouseEvent.Position()));
+        auto localPoint = RoundedPointI(resizeLayer->AbsoluteToContents(LayoutPoint(absolutePoint)));
         _offsetFromResizeCorner.SetWidth(LayoutUnit(resizeLayer->OffsetFromResizeCorner(localPoint).Width()));
       }
     }
@@ -1193,7 +1192,7 @@ namespace krys::boo
 
     // If clicking on a frame scrollbar, do not make any change to which element is focused.
     if (auto *view = _frame.View();
-        view && view->ScrollbarAtPoint(FlooredIntPoint(platformMouseEvent.Position())))
+        view && view->ScrollbarAtPoint(FlooredPointI(platformMouseEvent.Position())))
     {
       return true;
     }
@@ -1210,7 +1209,7 @@ namespace krys::boo
     }
 
     // Only change the focus when clicking scrollbars if it can be transferred to a mouse focusable node.
-    if (!element && IsInsideScrollbar(FlooredIntPoint(platformMouseEvent.Position())))
+    if (!element && IsInsideScrollbar(FlooredPointI(platformMouseEvent.Position())))
     {
       return false;
     }
@@ -1808,7 +1807,7 @@ namespace krys::boo
       return;
     }
 
-    if (!quad.ContainsPoint(FloatPoint(view->WindowToContents(*_lastKnownMousePosition))))
+    if (!quad.ContainsPoint(PointF(view->WindowToContents(*_lastKnownMousePosition))))
     {
       return;
     }
@@ -1867,7 +1866,7 @@ namespace krys::boo
 
     HitTestRequest request(
       {HitTestRequest::Type::Move, HitTestRequest::Type::DisallowUserAgentShadowContent});
-    HitTestResult result(view->WindowToContents(FlooredIntPoint(*_lastKnownMousePosition)));
+    HitTestResult result(view->WindowToContents(FlooredPointI(*_lastKnownMousePosition)));
     document->HitTest(request, result);
     document->UpdateHoverActiveState(request, result.TargetElement());
   }
@@ -2030,7 +2029,7 @@ namespace krys::boo
         if (resizerRenderer && resizerRenderer->HasLayer())
         {
           auto &layerRenderer = Downcast<RenderLayerModelObject>(*resizerRenderer);
-          if (layerRenderer.Layer()->IsPointInResizeControl(RoundedIntPoint(result.LocalPoint())))
+          if (layerRenderer.Layer()->IsPointInResizeControl(RoundedPointI(result.LocalPoint())))
           {
             return Cursor(layerRenderer.Style().ShouldPlaceVerticalScrollbarOnLeft()
                             ? Cursor::Type::SouthWestResize
@@ -2142,7 +2141,7 @@ namespace krys::boo
     }
   }
 
-  bool EventHandler::IsInsideScrollbar(const IntPoint &windowPoint) const noexcept
+  bool EventHandler::IsInsideScrollbar(const PointI &windowPoint) const noexcept
   {
     if (RefPtr<boo::Document> document = ShareRefPtr(_frame.Document()))
     {
@@ -2196,8 +2195,8 @@ namespace krys::boo
     _isHandlingWheelEvent = true;
 
     SetFrameWasScrolledByUser();
-    SetLastKnownMousePosition(DoublePoint(event.Position().X(), event.Position().Y()),
-                              DoublePoint(event.GlobalPosition().X(), event.GlobalPosition().Y()));
+    SetLastKnownMousePosition(PointD(event.Position().X(), event.Position().Y()),
+                              PointD(event.GlobalPosition().X(), event.GlobalPosition().Y()));
 
     if (auto *page = frame->GetPage())
     {
@@ -2357,9 +2356,8 @@ namespace krys::boo
     }
   }
 
-  bool
-    EventHandler::HandleWheelEventInAppropriateEnclosingBox(Node *startNode, const WheelEvent &wheelEvent,
-                                                            const FloatSize &filteredPlatformDelta) noexcept
+  bool EventHandler::HandleWheelEventInAppropriateEnclosingBox(Node *startNode, const WheelEvent &wheelEvent,
+                                                               const SizeF &filteredPlatformDelta) noexcept
   {
     bool shouldHandleEvent = wheelEvent.DeltaX() || wheelEvent.DeltaY();
     if (!startNode->Renderer())
@@ -2381,12 +2379,12 @@ namespace krys::boo
 
     return HandleWheelEventInAppropriateEnclosingBox(
       startNode, platformEvent->CopyWithDelta(filteredPlatformDelta),
-      FloatSize(static_cast<float>(wheelEvent.DeltaX()), static_cast<float>(wheelEvent.DeltaY())));
+      SizeF(static_cast<float>(wheelEvent.DeltaX()), static_cast<float>(wheelEvent.DeltaY())));
   }
 
   bool EventHandler::HandleWheelEventInAppropriateEnclosingBox(Node *startNode,
                                                                const PlatformWheelEvent &event,
-                                                               FloatSize biasedDelta) noexcept
+                                                               SizeF biasedDelta) noexcept
   {
     if (!startNode->Renderer())
     {
@@ -2466,8 +2464,8 @@ namespace krys::boo
       return false;
     }
 
-    FloatSize filteredPlatformDelta(static_cast<float>(wheelEvent.DeltaX()),
-                                    static_cast<float>(wheelEvent.DeltaY()));
+    SizeF filteredPlatformDelta(static_cast<float>(wheelEvent.DeltaX()),
+                                static_cast<float>(wheelEvent.DeltaY()));
     if (auto &platformEvent = wheelEvent.UnderlyingPlatformEvent())
     {
       filteredPlatformDelta = platformEvent->Delta();
@@ -2819,12 +2817,12 @@ namespace krys::boo
     doc->Selection().SetCaretBlinkingSuspended(false);
     // Clear mouse press state to avoid initiating a drag while context menu is up.
     _mousePressed = false;
-    const auto flooredEventPosition = FlooredIntPoint(event.Position());
+    const auto flooredEventPosition = FlooredPointI(event.Position());
     LayoutPoint viewportPos {view->WindowToContents(flooredEventPosition)};
     MouseEventWithHitTestResults mouseEvent = doc->PrepareMouseEvent(
       HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::Active,
                                                     HitTestRequest::Type::DisallowUserAgentShadowContent}),
-      DoublePoint(viewportPos), event);
+      PointD(viewportPos), event);
 
     // Do not show context menus when clicking on scrollbars.
     if (mouseEvent.GetScrollbar() || view->ScrollbarAtPoint(flooredEventPosition))
@@ -2871,8 +2869,8 @@ namespace krys::boo
 
       if (frame->View())
       {
-        IntRect rect = frame->View()->VisibleContentRect();
-        if (!rect.Contains(RoundedIntPoint(point)))
+        RectI rect = frame->View()->VisibleContentRect();
+        if (!rect.Contains(RoundedPointI(point)))
         {
           return result;
         }
@@ -2956,7 +2954,7 @@ namespace krys::boo
     {
       auto &point = points[index];
       PlatformTouchPoint::State pointState = point.GetState();
-      LayoutPoint pagePoint = LayoutPoint(frame->View()->WindowToContents(FlooredIntPoint(point.Pos())));
+      LayoutPoint pagePoint = LayoutPoint(frame->View()->WindowToContents(FlooredPointI(point.Pos())));
 
       EnumSet<HitTestRequest::Type> hitType {HitTestRequest::Type::TouchEvent};
       // The HitTestRequest types used for mouse events map quite adequately
@@ -2997,9 +2995,8 @@ namespace krys::boo
         else if (_originatingTouchPointDocument && _originatingTouchPointDocument->Frame())
         {
           Ref documentFrame = ShareRef(*_originatingTouchPointDocument->Frame());
-          DoublePoint framePoint = documentFrame->View()->WindowToContents(point.Pos());
-          result =
-            HitTestResultInFrame(documentFrame.get(), LayoutPoint(RoundedIntPoint(framePoint)), hitType);
+          PointD framePoint = documentFrame->View()->WindowToContents(point.Pos());
+          result = HitTestResultInFrame(documentFrame.get(), LayoutPoint(RoundedPointI(framePoint)), hitType);
           if (!result.InnerNode())
           {
             continue;
@@ -3091,13 +3088,13 @@ namespace krys::boo
       }
 
       // pagePoint should always be relative to the target elements containing frame.
-      pagePoint = LayoutPoint(targetFrame->View()->WindowToContents(FlooredIntPoint(point.Pos())));
+      pagePoint = LayoutPoint(targetFrame->View()->WindowToContents(FlooredPointI(point.Pos())));
 
       float scaleFactor = targetFrame->PageZoomFactor() * targetFrame->View()->FrameScaleFactor();
 
-      DoublePoint adjustedPagePoint(pagePoint.X().ToDouble() / scaleFactor,
-                                    pagePoint.Y().ToDouble() / scaleFactor);
-      DoubleSize adjustedRadius = point.Radius().ScaledBy(1 / scaleFactor);
+      PointD adjustedPagePoint(pagePoint.X().ToDouble() / scaleFactor,
+                               pagePoint.Y().ToDouble() / scaleFactor);
+      SizeD adjustedRadius = point.Radius().ScaledBy(1 / scaleFactor);
 
       auto touch =
         Touch::Create(targetFrame.get(), touchTarget.get(), static_cast<int32>(point.Id()), point.ScreenPos(),
@@ -3255,7 +3252,7 @@ namespace krys::boo
     // existing selection so we can allow for text dragging.
     if (auto *view = frame->View())
     {
-      LayoutPoint vPoint {view->WindowToContents(FlooredIntPoint(event.Event().Position()))};
+      LayoutPoint vPoint {view->WindowToContents(FlooredPointI(event.Event().Position()))};
       if (!extendSelection && selection.Contains(vPoint))
       {
         _mouseDownWasSingleClickInSelection = true;
@@ -3388,7 +3385,7 @@ namespace krys::boo
 
     // A press in the scrollbars' corner neither selects nor drags.
     if (auto *view = frame->View();
-        view && view->IsPointInScrollbarCorner(FlooredIntPoint(event.Event().Position())))
+        view && view->IsPointInScrollbarCorner(FlooredPointI(event.Event().Position())))
     {
       return false;
     }
@@ -3413,7 +3410,7 @@ namespace krys::boo
     _mousePressNode = ShareRefPtr(event.TargetNode());
     frame->Document()->SetSequentialFocusNavigationStartingPoint(event.TargetNode());
 
-    _dragStartPosition = FlooredIntPoint(event.Event().Position());
+    _dragStartPosition = FlooredPointI(event.Event().Position());
 
     _mousePressed = true;
     _selectionInitiationState = HaveNotStartedSelection;
@@ -3457,7 +3454,7 @@ namespace krys::boo
                                                                          const LayoutPoint &localPoint,
                                                                          Node *targetNode) noexcept
   {
-    FloatPoint selectionEndPoint = localPoint;
+    PointF selectionEndPoint = localPoint;
     auto *editableElement = selection.RootEditableElement();
 
     if (!targetNode || !targetNode->Renderer())
@@ -3473,7 +3470,7 @@ namespace krys::boo
         return {};
       }
 
-      FloatPoint absolutePoint = targetNode->Renderer()->LocalToAbsolute(FloatPoint(selectionEndPoint));
+      PointF absolutePoint = targetNode->Renderer()->LocalToAbsolute(PointF(selectionEndPoint));
       selectionEndPoint = editableElement->Renderer()->AbsoluteToLocal(absolutePoint);
       adjustedTarget = editableElement;
     }
@@ -3559,7 +3556,7 @@ namespace krys::boo
                                                      HitTestRequest::Type::Active, HitTestRequest::Type::Move,
                                                      HitTestRequest::Type::DisallowUserAgentShadowContent};
     HitTestResult result(
-      LayoutPoint(view->WindowToContents(FlooredIntPoint(_lastKnownMousePosition.value_or(DoublePoint())))));
+      LayoutPoint(view->WindowToContents(FlooredPointI(_lastKnownMousePosition.value_or(PointD())))));
     document->HitTest(HitTestRequest(hitType), result);
     UpdateSelectionForMouseDrag(result);
   }
@@ -3727,7 +3724,7 @@ namespace krys::boo
     // editing, place the caret.
     auto &selection = frame->Document()->Selection();
     if (_mouseDownWasSingleClickInSelection && _selectionInitiationState != ExtendedSelection
-        && _dragStartPosition == FlooredIntPoint(event.Event().Position()) && selection.IsRange()
+        && _dragStartPosition == FlooredPointI(event.Event().Position()) && selection.IsRange()
         && event.Event().Button() != MouseButton::Right)
     {
       VisibleSelection newSelection;
@@ -3751,9 +3748,9 @@ namespace krys::boo
     return MousePressed();
   }
 
-  IntPoint EventHandler::TargetPositionInWindowForSelectionAutoscroll() const noexcept
+  PointI EventHandler::TargetPositionInWindowForSelectionAutoscroll() const noexcept
   {
-    return FlooredIntPoint(_lastKnownMousePosition.value_or(DoublePoint()));
+    return FlooredPointI(_lastKnownMousePosition.value_or(PointD()));
   }
 
   RenderBox *EventHandler::AutoscrollRenderer() const noexcept
@@ -3775,7 +3772,7 @@ namespace krys::boo
   {
     if (_lastKnownMousePosition)
     {
-      _autoscrollController->StartPanScrolling(renderer, FlooredIntPoint(*_lastKnownMousePosition));
+      _autoscrollController->StartPanScrolling(renderer, FlooredPointI(*_lastKnownMousePosition));
       InvalidateClick();
     }
   }
@@ -3846,7 +3843,7 @@ namespace krys::boo
 
     // The frame's view is the root view.
     return page->GetDragController().DelegateDragSourceAction(
-      view->ContentsToWindow(RoundedIntPoint(_mouseDownContentsPosition)));
+      view->ContentsToWindow(RoundedPointI(_mouseDownContentsPosition)));
   }
 
   bool EventHandler::EventMayStartDrag(const PlatformMouseEvent &event) const noexcept
@@ -3878,7 +3875,7 @@ namespace krys::boo
     }
 
     (void)UpdateDragSourceActionsAllowed();
-    HitTestResult result(LayoutPoint(view->WindowToContents(FlooredIntPoint(event.Position()))));
+    HitTestResult result(LayoutPoint(view->WindowToContents(FlooredPointI(event.Position()))));
     document->HitTest(
       HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::ReadOnly,
                                                     HitTestRequest::Type::DisallowUserAgentShadowContent}),
@@ -3887,7 +3884,7 @@ namespace krys::boo
     auto *targetElement = result.TargetElement();
     return targetElement
            && page->GetDragController().DraggableElement(
-             &_frame, targetElement, RoundedIntPoint(result.GetHitTestLocation().Point()), state);
+             &_frame, targetElement, RoundedPointI(result.GetHitTestLocation().Point()), state);
   }
 
   bool EventHandler::DispatchDragEvent(DOMStringAtom eventType, Element &dragTarget,
@@ -3903,11 +3900,11 @@ namespace krys::boo
       return false;
     }
 
-    auto dragEvent = DragEvent::Create(
-      eventType, true, true, true, event.Timestamp(), view.get(), 0,
-      DoublePoint(FlooredIntPoint(event.GlobalPosition())), DoublePoint(FlooredIntPoint(event.Position())),
-      event.MovementDelta().X(), event.MovementDelta().Y(), event.Modifiers(), MouseButton::Left, 0, nullptr,
-      event.Force(), SyntheticClickType::NoTap, &dataTransfer);
+    auto dragEvent = DragEvent::Create(eventType, true, true, true, event.Timestamp(), view.get(), 0,
+                                       PointD(FlooredPointI(event.GlobalPosition())),
+                                       PointD(FlooredPointI(event.Position())), event.MovementDelta().X(),
+                                       event.MovementDelta().Y(), event.Modifiers(), MouseButton::Left, 0,
+                                       nullptr, event.Force(), SyntheticClickType::NoTap, &dataTransfer);
 
     (void)dragTarget.DispatchEvent(*dragEvent);
 
@@ -3992,7 +3989,7 @@ namespace krys::boo
       }
     }
 
-    _autoscrollController->UpdateDragAndDrop(newTarget.get(), FlooredIntPoint(event.Position()),
+    _autoscrollController->UpdateDragAndDrop(newTarget.get(), FlooredPointI(event.Position()),
                                              event.Timestamp());
 
     DragTargetResponse response;
@@ -4085,7 +4082,7 @@ namespace krys::boo
     _shouldOnlyFireDragOverEvent = false;
   }
 
-  bool EventHandler::DragHysteresisExceeded(const FloatPoint &dragViewportLocation) const noexcept
+  bool EventHandler::DragHysteresisExceeded(const PointF &dragViewportLocation) const noexcept
   {
     auto dragOperation = GetDragState().Type.ToSingleValue();
     krys_debug_assert(dragOperation);
@@ -4105,7 +4102,7 @@ namespace krys::boo
     return MouseMovementExceedsThreshold(dragViewportLocation, threshold);
   }
 
-  bool EventHandler::MouseMovementExceedsThreshold(const FloatPoint &viewportLocation,
+  bool EventHandler::MouseMovementExceedsThreshold(const PointF &viewportLocation,
                                                    int32 pointsThreshold) const noexcept
   {
     auto *view = _frame.View();
@@ -4113,8 +4110,8 @@ namespace krys::boo
     {
       return false;
     }
-    IntPoint location = view->WindowToContents(FlooredIntPoint(viewportLocation));
-    IntSize delta = location - RoundedIntPoint(_mouseDownContentsPosition);
+    PointI location = view->WindowToContents(FlooredPointI(viewportLocation));
+    SizeI delta = location - RoundedPointI(_mouseDownContentsPosition);
 
     return std::abs(delta.Width()) >= pointsThreshold || std::abs(delta.Height()) >= pointsThreshold;
   }
@@ -4194,8 +4191,7 @@ namespace krys::boo
     if (auto *page = _frame.GetPage())
     {
       page->GetDragController().PrepareForDragStart(_frame, GetDragState().Type, *draggedElement,
-                                                    dataTransfer,
-                                                    RoundedIntPoint(_mouseDownContentsPosition));
+                                                    dataTransfer, RoundedPointI(_mouseDownContentsPosition));
     }
     return !DispatchDragEvent(event_names::DragStart, *draggedElement, _mouseDownEvent, dataTransfer)
            && !_frame.Document()->Selection().Selection().IsInPasswordField();
@@ -4233,7 +4229,7 @@ namespace krys::boo
       {
         SetDragStateSource(page->GetDragController()
                              .DraggableElement(frame.get(), result.TargetElement(),
-                                               RoundedIntPoint(_mouseDownContentsPosition), dragState)
+                                               RoundedPointI(_mouseDownContentsPosition), dragState)
                              .get());
       }
 
@@ -4295,7 +4291,7 @@ namespace krys::boo
     _currentMouseCursor = Cursor(Cursor::Type::Pointer);
 
     if (checkDragHysteresis == ShouldCheckDragHysteresis
-        && !DragHysteresisExceeded(FloatPoint(event.Event().Position())))
+        && !DragHysteresisExceeded(PointF(event.Event().Position())))
     {
       return true;
     }
@@ -4340,7 +4336,7 @@ namespace krys::boo
         if (auto *renderer = draggedElement->Renderer())
         {
           auto absolutePosition = renderer->LocalToAbsolute();
-          auto delta = RoundedIntPoint(_mouseDownContentsPosition) - RoundedIntPoint(absolutePosition);
+          auto delta = RoundedPointI(_mouseDownContentsPosition) - RoundedPointI(absolutePosition);
           Ref<Element> element = draggedElement;
           dragState.DataTransfer->SetDragImage(krys::move(element), delta.Width(), delta.Height());
         }
@@ -4374,7 +4370,7 @@ namespace krys::boo
       _didStartDrag = page
                       && page->GetDragController().StartDrag(
                         *frame, dragState, sourceOperationMask, event.Event(),
-                        RoundedIntPoint(_mouseDownContentsPosition), hasNonDefaultPasteboardData);
+                        RoundedPointI(_mouseDownContentsPosition), hasNonDefaultPasteboardData);
       // The host could re-enter this code and start another drag.
       if (_didStartDrag)
       {

@@ -60,7 +60,7 @@ namespace krys::boo
     LegacyRenderSVGResourceGradient::ComputeInputs(RenderElement &renderer,
                                                    EnumSet<RenderSVGResourceMode> resourceMode) noexcept
   {
-    Maybe<FloatRect> objectBoundingBox;
+    Maybe<RectF> objectBoundingBox;
     if (GradientUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
     {
       objectBoundingBox = renderer.ObjectBoundingBox();

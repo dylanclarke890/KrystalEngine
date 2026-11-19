@@ -123,9 +123,9 @@ namespace krys::boo::dom::tests
     (void)fixture.Document->UpdateLayout();
     auto &box = fixture.ById(u8"box");
 
-    PlatformMouseEvent platform(DoublePoint(32.6, 27.2), DoublePoint(132, 227), MouseButton::Left,
+    PlatformMouseEvent platform(PointD(32.6, 27.2), PointD(132, 227), MouseButton::Left,
                                 PlatformEvent::Type::MousePressed, 1, {PlatformEvent::Modifier::ShiftKey},
-                                MonotonicTime::Now(), 1, DoublePoint(3, 4));
+                                MonotonicTime::Now(), 1, PointD(3, 4));
 
     SECTION("enter and leave don't bubble")
     {

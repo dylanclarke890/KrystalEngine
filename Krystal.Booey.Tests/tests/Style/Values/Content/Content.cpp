@@ -86,9 +86,9 @@ namespace krys::boo::style::tests
     CHECK(cursor.Predefined == CursorType::Auto);
     REQUIRE(cursor.Images);
     REQUIRE(cursor.Images->size() == 2);
-    CHECK((*cursor.Images)[0].HotSpot == IntPoint {3, 4});
+    CHECK((*cursor.Images)[0].HotSpot == PointI {3, 4});
     // No hot spot.
-    CHECK((*cursor.Images)[1].HotSpot == IntPoint {-1, -1});
+    CHECK((*cursor.Images)[1].HotSpot == PointI {-1, -1});
     CHECK((*cursor.Images)[0].Image->IsCursorImage());
     CHECK(Serialised(cursor)
           == "url(\"https://example.com/a.png\") 3 4, url(\"https://example.com/b.png\"), auto");

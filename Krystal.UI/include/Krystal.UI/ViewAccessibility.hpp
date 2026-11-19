@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.PAL/Accessibility.hpp"
 
@@ -46,7 +46,7 @@ namespace krys::ui
   private:
     View &_view;
     pal::IWindow *_window {nullptr};
-    boo::IntPoint _origin;
+    PointI _origin;
     /// @brief The other pages' caches whose objects are nodes (a shown overlay's page, SVG images'
     /// documents), by their tag in node IDs less one. A slot is cleared, never reused, when its nodes go, so
     /// a stale ID can't be taken for a node of another page.
@@ -58,13 +58,13 @@ namespace krys::ui
     ~ViewAccessibility() noexcept override;
 
     /// @brief Exposes the page through @p window, whose client area has the view's top left at @p origin.
-    void Attach(pal::IWindow &window, const boo::IntPoint &origin) noexcept;
+    void Attach(pal::IWindow &window, const PointI &origin) noexcept;
 
     /// @brief Stops exposing the page.
     void Detach() noexcept;
 
     /// @brief Moves the view's top left in the window's client area to @p origin.
-    void SetOrigin(const boo::IntPoint &origin) noexcept
+    void SetOrigin(const PointI &origin) noexcept
     {
       _origin = origin;
     }
@@ -147,7 +147,7 @@ namespace krys::ui
     KRYS_NODISCARD boo::AXObject *Object(pal::AccessibilityNodeId node) noexcept;
 
     /// @brief The view @p object's page is in, and its top left in the window's client area.
-    KRYS_NODISCARD Pair<View *, boo::IntPoint> ViewAndOrigin(const boo::AXObject &object) const noexcept;
+    KRYS_NODISCARD Pair<View *, PointI> ViewAndOrigin(const boo::AXObject &object) const noexcept;
 
     /// @brief @p rect (in the page's coordinates for @p object) in the window's client area.
     KRYS_NODISCARD pal::AccessibilityRect ToWindow(const boo::AXObject &object, float x, float y, float width,
@@ -155,6 +155,6 @@ namespace krys::ui
 
     /// @brief The deepest unignored object at @p viewPoint (in @p view's coordinates) in @p cache's tree.
     KRYS_NODISCARD static boo::AXObject *HitTestIn(boo::AXObjectCache &cache, View &view,
-                                                   const boo::IntPoint &viewPoint) noexcept;
+                                                   const PointI &viewPoint) noexcept;
   };
 }

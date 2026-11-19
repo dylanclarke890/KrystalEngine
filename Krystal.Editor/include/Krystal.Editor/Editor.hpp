@@ -90,9 +90,9 @@ namespace krys
     uint32 _secondsOpen {0};
     bool _focused {true};
     /// @brief Where the window's input method was last told the page's text input is, in the window.
-    Maybe<boo::IntRect> _textInputRect;
+    Maybe<RectI> _textInputRect;
     /// @brief The mouse in page view coordinates: below the header.
-    boo::IntPoint _pointer;
+    PointI _pointer;
 
   public:
     explicit Editor(int argc, char **argv, const ApplicationSettings &settings) noexcept
@@ -303,8 +303,8 @@ namespace krys
       _context->Events->On<MouseMoveEvent>(
         [&](const auto &event)
         {
-          _pointer = boo::IntPoint(static_cast<int32>(event.ClientX()),
-                                   static_cast<int32>(event.ClientY() - HeaderHeight));
+          _pointer =
+            PointI(static_cast<int32>(event.ClientX()), static_cast<int32>(event.ClientY() - HeaderHeight));
           if (_pageView)
           {
             if (_pointer.Y() < 0)
@@ -326,9 +326,8 @@ namespace krys
         {
           if (_pageView)
           {
-            _pageView->LockedMouseMoved(boo::DoublePoint(event.DeltaX(), event.DeltaY()),
-                                        boo::DoublePoint(event.RawDeltaX(), event.RawDeltaY()),
-                                        event.Modifiers());
+            _pageView->LockedMouseMoved(PointD(event.DeltaX(), event.DeltaY()),
+                                        PointD(event.RawDeltaX(), event.RawDeltaY()), event.Modifiers());
           }
           return true;
         });
@@ -362,7 +361,7 @@ namespace krys
             return true;
           }
           auto &input = event.Input();
-          boo::DoublePoint point(input.ClientX, input.ClientY - HeaderHeight);
+          PointD point(input.ClientX, input.ClientY - HeaderHeight);
           if (input.Type == pal::PointerType::Pen)
           {
             _pageView->PenInput(point, input);
@@ -383,8 +382,8 @@ namespace krys
           {
             return true;
           }
-          boo::IntPoint point(static_cast<int32>(event.ClientX()),
-                              static_cast<int32>(event.ClientY() - HeaderHeight));
+          PointI point(static_cast<int32>(event.ClientX()),
+                       static_cast<int32>(event.ClientY() - HeaderHeight));
           if (point.Y() >= 0)
           {
             (void)_pageView->MouseWheel(point, event.DeltaX(), event.DeltaY(), event.Modifiers());
@@ -402,8 +401,7 @@ namespace krys
             return true;
           }
           auto &input = event.Input();
-          boo::IntPoint point(static_cast<int32>(input.ClientX),
-                              static_cast<int32>(input.ClientY - HeaderHeight));
+          PointI point(static_cast<int32>(input.ClientX), static_cast<int32>(input.ClientY - HeaderHeight));
           bool moves = input.DeltaX || input.DeltaY;
           if (point.Y() >= 0 || !moves)
           {
@@ -422,8 +420,7 @@ namespace krys
             return true;
           }
           auto &input = event.Input();
-          boo::IntPoint point(static_cast<int32>(input.ClientX),
-                              static_cast<int32>(input.ClientY - HeaderHeight));
+          PointI point(static_cast<int32>(input.ClientX), static_cast<int32>(input.ClientY - HeaderHeight));
           _context->Window->SetDropOperation(_pageView->SystemDragInput(point, input));
           return true;
         });
@@ -453,7 +450,7 @@ namespace krys
         _pageView->SetDisplayColour(_context->Window->GetDisplayColour());
         // The page view sits below the header, wherever the window is on the screen.
         auto origin = _context->Window->ClientOriginOnScreen();
-        _pageView->SetScreenOrigin(boo::IntPoint(origin.X, origin.Y + static_cast<int32>(HeaderHeight)));
+        _pageView->SetScreenOrigin(PointI(origin.X, origin.Y + static_cast<int32>(HeaderHeight)));
         // The pads drive the page as the keyboard does, before its frame runs.
         _pageView->GamepadInput(_context->Input->GetGamepads(), _pageTime);
         if (_cube)
@@ -523,10 +520,10 @@ namespace krys
     }
 
     /// @brief The size of the page view: the window below the header.
-    KRYS_NODISCARD boo::IntSize PageSize() const noexcept
+    KRYS_NODISCARD SizeI PageSize() const noexcept
     {
       const auto height = std::max(static_cast<float>(_height) - HeaderHeight, 0.f);
-      return boo::IntSize(static_cast<int32>(_width), static_cast<int32>(height));
+      return SizeI(static_cast<int32>(_width), static_cast<int32>(height));
     }
 
     /// @brief Loads the page view's first page.

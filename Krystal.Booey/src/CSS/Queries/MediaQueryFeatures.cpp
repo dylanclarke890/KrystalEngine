@@ -110,7 +110,7 @@ namespace krys::boo::css::mq::features
 
   struct RatioSchema : public FeatureSchema
   {
-    using ValueFunction = Func<FloatSize(const FeatureEvaluationContext &)>;
+    using ValueFunction = Func<SizeF(const FeatureEvaluationContext &)>;
 
     RatioSchema(const CSSOMStringAtom &name, MediaQueryDynamicDependency dependencies,
                 ValueFunction &&valueFunction) noexcept
@@ -278,7 +278,7 @@ namespace krys::boo::css::mq::features
       u8"aspect-ratio", Dependency::Viewport, [](auto &context)
       {
         auto &view = ViewOf(context);
-        return FloatSize(static_cast<float>(view.LayoutWidth()), static_cast<float>(view.LayoutHeight()));
+        return SizeF(static_cast<float>(view.LayoutWidth()), static_cast<float>(view.LayoutHeight()));
       }};
     return schema;
   }

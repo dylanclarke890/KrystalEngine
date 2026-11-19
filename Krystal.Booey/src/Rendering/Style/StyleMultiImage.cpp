@@ -110,7 +110,7 @@ namespace krys::boo
     return _selectedImage && _selectedImage->IsLoaded(renderer);
   }
 
-  FloatSize StyleMultiImage::ImageSize(const RenderElement *renderer, float multiplier) const noexcept
+  SizeF StyleMultiImage::ImageSize(const RenderElement *renderer, float multiplier) const noexcept
   {
     if (!_selectedImage)
     {
@@ -120,7 +120,7 @@ namespace krys::boo
   }
 
   void StyleMultiImage::ComputeIntrinsicDimensions(const RenderElement *element, float &intrinsicWidth,
-                                                   float &intrinsicHeight, FloatSize &intrinsicRatio) noexcept
+                                                   float &intrinsicHeight, SizeF &intrinsicRatio) noexcept
   {
     if (!_selectedImage)
     {
@@ -130,7 +130,7 @@ namespace krys::boo
   }
 
   void StyleMultiImage::SetContainerContextForRenderer(const RenderElement &renderer,
-                                                       const FloatSize &containerSize,
+                                                       const SizeF &containerSize,
                                                        float containerZoom) noexcept
   {
     if (!_selectedImage)
@@ -167,7 +167,7 @@ namespace krys::boo
     return _selectedImage->HasClient(renderer);
   }
 
-  RefPtr<Image> StyleMultiImage::GetImage(const RenderElement *renderer, const FloatSize &size,
+  RefPtr<Image> StyleMultiImage::GetImage(const RenderElement *renderer, const SizeF &size,
                                           const GraphicsContext &destinationContext,
                                           bool isForFirstLine) const noexcept
   {

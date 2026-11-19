@@ -237,10 +237,10 @@ namespace krys::boo::tests
     TestAffineVersion(test);
   }
 
-  TEST_CASE("TransformationMatrix: MapFloatPoint", "[Graphics][TransformationMatrix]")
+  TEST_CASE("TransformationMatrix: MapPointF", "[Graphics][TransformationMatrix]")
   {
     TransformationMatrix test;
-    FloatPoint point(100.0f, 50.0f);
+    PointF point(100.0f, 50.0f);
 
     auto mappedPoint = test.MapPoint(point);
 
@@ -276,10 +276,10 @@ namespace krys::boo::tests
     REQUIRE_THAT(mappedPoint5.Y(), WithinULP(25.0f, 4));
   }
 
-  TEST_CASE("TransformationMatrix: MapIntPoint", "[Graphics][TransformationMatrix]")
+  TEST_CASE("TransformationMatrix: MapPointI", "[Graphics][TransformationMatrix]")
   {
     TransformationMatrix test;
-    IntPoint point(100, 50);
+    PointI point(100, 50);
 
     auto mappedPoint = test.MapPoint(point);
 
@@ -315,10 +315,10 @@ namespace krys::boo::tests
     REQUIRE(25 == mappedPoint5.Y());
   }
 
-  TEST_CASE("TransformationMatrix: MapIntRect", "[Graphics][TransformationMatrix]")
+  TEST_CASE("TransformationMatrix: MapRectI", "[Graphics][TransformationMatrix]")
   {
     TransformationMatrix test;
-    IntRect rect(10, 20, 200, 300);
+    RectI rect(10, 20, 200, 300);
 
     auto mappedRect = test.MapRect(rect);
 
@@ -364,10 +364,10 @@ namespace krys::boo::tests
     REQUIRE(150 == mappedRect4.Height());
   }
 
-  TEST_CASE("TransformationMatrix: MapFloatRect", "[Graphics][TransformationMatrix]")
+  TEST_CASE("TransformationMatrix: MapRectF", "[Graphics][TransformationMatrix]")
   {
     TransformationMatrix test;
-    FloatRect rect(10.f, 20.0f, 200.0f, 300.0f);
+    RectF rect(10.f, 20.0f, 200.0f, 300.0f);
 
     auto mappedRect = test.MapRect(rect);
 
@@ -415,7 +415,7 @@ namespace krys::boo::tests
 
   TEST_CASE("TransformationMatrix: MapFloatQuad", "[Graphics][TransformationMatrix]")
   {
-    FloatRect rect(100.0f, 100.0f, 100.0f, 50.0f);
+    RectF rect(100.0f, 100.0f, 100.0f, 50.0f);
     FloatQuad quad(rect);
 
     REQUIRE_THAT(quad.P1().X(), WithinULP(100.0f, 4));
@@ -1125,8 +1125,8 @@ namespace krys::boo::tests
 
   TEST_CASE("TransformationMatrix: MakeMapBetweenRects", "[Graphics][TransformationMatrix]")
   {
-    FloatRect fromRect(10.0f, 10.0f, 100.0f, 100.0f);
-    FloatRect toRect(70.0f, 70.0f, 200.0f, 50.0f);
+    RectF fromRect(10.0f, 10.0f, 100.0f, 100.0f);
+    RectF toRect(70.0f, 70.0f, 200.0f, 50.0f);
 
     auto mapBetween = TransformationMatrix::RectToRect(fromRect, toRect);
 

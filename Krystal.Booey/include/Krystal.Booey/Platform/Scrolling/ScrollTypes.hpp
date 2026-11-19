@@ -26,17 +26,17 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Numeric.hpp"
 
 namespace krys::boo
 {
   // scrollPosition is in content coordinates (0,0 is at scrollOrigin), so may have negative components.
-  using ScrollPosition = IntPoint;
+  using ScrollPosition = PointI;
   // scrollOffset() is the value used by scrollbars (min is 0,0), and should never have negative components.
-  using ScrollOffset = IntPoint;
+  using ScrollOffset = PointI;
 
   enum class ScrollType : bool
   {

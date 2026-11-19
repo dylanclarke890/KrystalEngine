@@ -1283,8 +1283,7 @@ namespace krys::boo
                                                     LayoutUnit lineDirectionPoint) noexcept
     {
       auto &root = lineBox->FormattingContextRoot();
-      auto absoluteBlockPoint =
-        root.LocalToAbsolute(FloatPoint()) - ToFloatSize(FloatPoint(root.GetScrollPosition()));
+      auto absoluteBlockPoint = root.LocalToAbsolute(PointF()) - ToSizeF(PointF(root.GetScrollPosition()));
 
       if (root.IsHorizontalWritingMode())
       {

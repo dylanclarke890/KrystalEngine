@@ -203,7 +203,7 @@ namespace krys::boo::inline_iterator
       });
   }
 
-  FloatRect Box::VisualRect() const noexcept
+  RectF Box::VisualRect() const noexcept
   {
     auto rect = VisualRectIgnoringBlockDirection();
     FormattingContextRoot().FlipForWritingMode(rect);

@@ -25,9 +25,9 @@ namespace krys::boo::style::tests
     CHECK(Created(ellipse) == "10px 50%");
 
     BorderRadius radius {ellipse, circle, circle, circle};
-    auto radii = Evaluate<FloatRoundedRect::Radii>(radius, FloatSize {100, 40}, ZoomNeeded {});
-    CHECK(radii.TopLeft() == FloatSize {10, 20});
-    CHECK(radii.TopRight() == FloatSize {10, 10});
+    auto radii = Evaluate<FloatRoundedRect::Radii>(radius, SizeF {100, 40}, ZoomNeeded {});
+    CHECK(radii.TopLeft() == SizeF {10, 20});
+    CHECK(radii.TopRight() == SizeF {10, 10});
 
     auto layoutRadii = Evaluate<LayoutRoundedRect::Radii>(radius, LayoutSize {100, 40}, ZoomNeeded {});
     CHECK(layoutRadii.TopLeft() == LayoutSize {10, 20});

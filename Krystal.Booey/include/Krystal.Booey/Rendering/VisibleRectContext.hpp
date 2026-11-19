@@ -54,7 +54,7 @@ namespace krys::boo
 
     bool HasPositionFixedDescendant {false};
     bool DirtyRectIsFlipped {false};
-    bool DescendantNeedsEnclosingIntRect {false};
+    bool DescendantNeedsEnclosingRectI {false};
     EnumSet<Option> Options;
     /// @brief An intersection observer's scroll margin, which grows the clips of the scroll containers on the
     /// way.

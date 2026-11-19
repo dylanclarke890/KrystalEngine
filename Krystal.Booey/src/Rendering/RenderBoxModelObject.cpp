@@ -585,7 +585,7 @@ namespace krys::boo
   }
 
   void RenderBoxModelObject::ContentChanged(ContentChangeType changeType,
-                                            const Maybe<FloatRect> &dirtyRect) noexcept
+                                            const Maybe<RectF> &dirtyRect) noexcept
   {
     if (!HasLayer())
     {
@@ -765,9 +765,8 @@ namespace krys::boo
     return {box, clipLayer};
   }
 
-  void
-    RenderBoxModelObject::ComputeStickyPositionConstraints(StickyPositionViewportConstraints &constraints,
-                                                           const FloatRect &constrainingRect) const noexcept
+  void RenderBoxModelObject::ComputeStickyPositionConstraints(StickyPositionViewportConstraints &constraints,
+                                                              const RectF &constrainingRect) const noexcept
   {
     constraints.SetConstrainingRectAtLastLayout(constrainingRect);
 
@@ -816,21 +815,20 @@ namespace krys::boo
 
     // Finally compute container rect relative to the scrolling ancestor. We pass an empty mode here, because
     // sticky positioning should ignore transforms.
-    FloatRect containerRectRelativeToScrollingAncestor =
-      containingBlock->LocalToContainerQuad(FloatRect(containerContentRect), &enclosingClippingBox, {})
+    RectF containerRectRelativeToScrollingAncestor =
+      containingBlock->LocalToContainerQuad(RectF(containerContentRect), &enclosingClippingBox, {})
         .BoundingBox();
     if (enclosingClippingLayer)
     {
-      FloatPoint containerLocationRelativeToScrollingAncestor =
+      PointF containerLocationRelativeToScrollingAncestor =
         containerRectRelativeToScrollingAncestor.Location()
-        - FloatSize(enclosingClippingBox.BorderLeft() + enclosingClippingBox.PaddingLeft(),
-                    enclosingClippingBox.BorderTop() + enclosingClippingBox.PaddingTop());
+        - SizeF(enclosingClippingBox.BorderLeft() + enclosingClippingBox.PaddingLeft(),
+                enclosingClippingBox.BorderTop() + enclosingClippingBox.PaddingTop());
       if (&enclosingClippingBox != containingBlock)
       {
         if (auto *scrollableArea = enclosingClippingLayer->GetScrollableArea())
         {
-          containerLocationRelativeToScrollingAncestor +=
-            FloatSize(ToIntSize(scrollableArea->GetScrollOffset()));
+          containerLocationRelativeToScrollingAncestor += SizeF(ToSizeI(scrollableArea->GetScrollOffset()));
         }
       }
       containerRectRelativeToScrollingAncestor.SetLocation(containerLocationRelativeToScrollingAncestor);
@@ -855,19 +853,19 @@ namespace krys::boo
       parentBox->FlipForWritingMode(stickyBoxRect);
     }
     auto stickyBoxRelativeToScrollingAncestor =
-      Parent()->LocalToContainerQuad(FloatRect(stickyBoxRect), &enclosingClippingBox, {}).BoundingBox();
+      Parent()->LocalToContainerQuad(RectF(stickyBoxRect), &enclosingClippingBox, {}).BoundingBox();
 
     if (enclosingClippingLayer)
     {
       stickyBoxRelativeToScrollingAncestor.Move(
-        -FloatSize(enclosingClippingBox.BorderLeft() + enclosingClippingBox.PaddingLeft(),
-                   enclosingClippingBox.BorderTop() + enclosingClippingBox.PaddingTop()));
+        -SizeF(enclosingClippingBox.BorderLeft() + enclosingClippingBox.PaddingLeft(),
+               enclosingClippingBox.BorderTop() + enclosingClippingBox.PaddingTop()));
 
       if (&enclosingClippingBox != Parent())
       {
         if (auto *scrollableArea = enclosingClippingLayer->GetScrollableArea())
         {
-          stickyBoxRelativeToScrollingAncestor.Move(FloatSize(ToIntSize(scrollableArea->GetScrollOffset())));
+          stickyBoxRelativeToScrollingAncestor.Move(SizeF(ToSizeI(scrollableArea->GetScrollOffset())));
         }
       }
     }
@@ -934,7 +932,7 @@ namespace krys::boo
     }
   }
 
-  FloatRect RenderBoxModelObject::ConstrainingRectForStickyPosition() const noexcept
+  RectF RenderBoxModelObject::ConstrainingRectForStickyPosition() const noexcept
   {
     RenderLayer *enclosingClippingLayer =
       HasLayer() ? Layer()->EnclosingOverflowClipLayer(ExcludeSelf) : nullptr;
@@ -946,14 +944,14 @@ namespace krys::boo
       clipRect.Contract(LayoutSize(enclosingClippingBox.PaddingLeft() + enclosingClippingBox.PaddingRight(),
                                    enclosingClippingBox.PaddingTop() + enclosingClippingBox.PaddingBottom()));
 
-      FloatRect constrainingRect =
-        enclosingClippingBox.LocalToContainerQuad(FloatRect(clipRect), &View()).BoundingBox();
+      RectF constrainingRect =
+        enclosingClippingBox.LocalToContainerQuad(RectF(clipRect), &View()).BoundingBox();
 
       auto *scrollableArea = enclosingClippingLayer->GetScrollableArea();
-      FloatPoint scrollOffset;
+      PointF scrollOffset;
       if (scrollableArea)
       {
-        scrollOffset = FloatPoint() + FloatSize(ToIntSize(scrollableArea->GetScrollOffset()));
+        scrollOffset = PointF() + SizeF(ToSizeI(scrollableArea->GetScrollOffset()));
       }
 
       float scrollbarOffset = 0;
@@ -965,16 +963,16 @@ namespace krys::boo
                                                  Style().GetWritingMode().IsHorizontal()));
       }
 
-      constrainingRect.SetLocation(FloatPoint(scrollOffset.X() + scrollbarOffset, scrollOffset.Y()));
+      constrainingRect.SetLocation(PointF(scrollOffset.X() + scrollbarOffset, scrollOffset.Y()));
       return constrainingRect;
     }
 
-    return FloatRect(View().FrameView().RectForFixedPositionLayout());
+    return RectF(View().FrameView().RectForFixedPositionLayout());
   }
 
   LayoutSize RenderBoxModelObject::StickyPositionOffset() const noexcept
   {
-    FloatRect constrainingRect = ConstrainingRectForStickyPosition();
+    RectF constrainingRect = ConstrainingRectForStickyPosition();
     StickyPositionViewportConstraints constraints;
     ComputeStickyPositionConstraints(constraints, constrainingRect);
 
@@ -1076,7 +1074,7 @@ namespace krys::boo
            || HasHiddenBackface();
   }
 
-  void RenderBoxModelObject::ApplyTransform(TransformationMatrix &, const RenderStyle &, const FloatRect &,
+  void RenderBoxModelObject::ApplyTransform(TransformationMatrix &, const RenderStyle &, const RectF &,
                                             EnumSet<style::TransformResolverOption>) const noexcept
   {
     // applyTransform() is only used through RenderLayer*, which only invokes this for RenderBox derived
@@ -1209,7 +1207,7 @@ namespace krys::boo
 
     float intrinsicWidth = 0;
     float intrinsicHeight = 0;
-    FloatSize intrinsicRatio;
+    SizeF intrinsicRatio;
     image->ComputeIntrinsicDimensions(this, intrinsicWidth, intrinsicHeight, intrinsicRatio);
 
     LayoutSize resolvedSize(intrinsicWidth, intrinsicHeight);
@@ -1340,7 +1338,7 @@ namespace krys::boo
     return defaultDecodingMode();
   }
 
-  void RenderBoxModelObject::PaintMaskForTextFillBox(GraphicsContext &context, const FloatRect &paintRect,
+  void RenderBoxModelObject::PaintMaskForTextFillBox(GraphicsContext &context, const RectF &paintRect,
                                                      const inline_iterator::InlineBoxIterator &inlineBox,
                                                      const LayoutRect &scrolledPaintRect) noexcept
   {
@@ -1379,7 +1377,7 @@ namespace krys::boo
     return ImageQualityController::ChooseInterpolationQuality(context, *this, image);
   }
 
-  bool RenderBoxModelObject::BorderObscuresBackgroundEdge(const FloatSize &contextScale) const noexcept
+  bool RenderBoxModelObject::BorderObscuresBackgroundEdge(const SizeF &contextScale) const noexcept
   {
     auto edges = GetBorderEdges(Style(), GetDocument().DeviceScaleFactor());
 

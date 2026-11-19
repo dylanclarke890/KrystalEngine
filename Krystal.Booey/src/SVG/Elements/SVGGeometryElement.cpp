@@ -124,7 +124,7 @@ namespace krys::boo
       return false;
     }
 
-    FloatPoint point {static_cast<float>(pointInit.X), static_cast<float>(pointInit.Y)};
+    PointF point {static_cast<float>(pointInit.X), static_cast<float>(pointInit.Y)};
     if (auto *renderSVGShape = DynamicDowncast<LegacyRenderSVGShape>(renderer))
     {
       return renderSVGShape->IsPointInFill(point);
@@ -144,7 +144,7 @@ namespace krys::boo
       return false;
     }
 
-    FloatPoint point {static_cast<float>(pointInit.X), static_cast<float>(pointInit.Y)};
+    PointF point {static_cast<float>(pointInit.X), static_cast<float>(pointInit.Y)};
     if (auto *renderSVGShape = DynamicDowncast<LegacyRenderSVGShape>(renderer))
     {
       return renderSVGShape->IsPointInStroke(point);

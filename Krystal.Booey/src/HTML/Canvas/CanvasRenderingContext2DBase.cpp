@@ -46,7 +46,6 @@
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ByteArrayPixelBuffer.hpp"
@@ -71,6 +70,7 @@
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Visitor.hpp"
@@ -304,7 +304,7 @@ namespace krys::boo::html
     if (auto *c = ExistingDrawingContext())
     {
       GetCanvasBase().ResetGraphicsContextState();
-      c->ClearRect(FloatRect {{}, FloatSize(GetCanvasBase().Size())});
+      c->ClearRect(RectF {{}, SizeF(GetCanvasBase().Size())});
       // The canvas is cleared: it's drawn.
       DidDrawEntireCanvas(DefaultDidDrawOptions() | DidDrawOption::PreserveCachedContents);
     }
@@ -756,7 +756,7 @@ namespace krys::boo::html
       return;
     }
 
-    c->Scale(FloatSize(floatX, floatY));
+    c->Scale(SizeF(floatX, floatY));
     _path.Transform(AffineTransform().ScaleNonUniform(1.0 / floatX, 1.0 / floatY));
   }
 
@@ -1227,7 +1227,7 @@ namespace krys::boo::html
     const auto &state = GetState();
     auto transformedPoint = state.Transform.Inverse()
                               .value_or(AffineTransform {})
-                              .MapPoint(FloatPoint(static_cast<float>(x), static_cast<float>(y)));
+                              .MapPoint(PointF(static_cast<float>(x), static_cast<float>(y)));
     krys_debug_assert(std::isfinite(transformedPoint.X()) && std::isfinite(transformedPoint.Y()));
 
     return path.Contains(transformedPoint, ToWindRule(windingRule));
@@ -1260,7 +1260,7 @@ namespace krys::boo::html
     const auto &state = GetState();
     auto transformedPoint = state.Transform.Inverse()
                               .value_or(AffineTransform {})
-                              .MapPoint(FloatPoint(static_cast<float>(x), static_cast<float>(y)));
+                              .MapPoint(PointF(static_cast<float>(x), static_cast<float>(y)));
     krys_debug_assert(std::isfinite(transformedPoint.X()) && std::isfinite(transformedPoint.Y()));
 
     return path.StrokeContains(transformedPoint,
@@ -1299,15 +1299,15 @@ namespace krys::boo::html
     {
       return;
     }
-    FloatRect rect(static_cast<float>(x), static_cast<float>(y), static_cast<float>(width),
-                   static_cast<float>(height));
+    RectF rect(static_cast<float>(x), static_cast<float>(y), static_cast<float>(width),
+               static_cast<float>(height));
 
     bool saved = false;
     if (ShouldDrawShadows())
     {
       context->Save();
       saved = true;
-      context->SetDropShadow({FloatSize(), 0, Color::transparentBlack, ShadowRadiusMode::Legacy});
+      context->SetDropShadow({SizeF(), 0, Color::transparentBlack, ShadowRadiusMode::Legacy});
     }
     if (GetState().GlobalAlpha != 1)
     {
@@ -1350,8 +1350,8 @@ namespace krys::boo::html
 
     // 3. Paint the specified rectangular area using this's fill style.
 
-    FloatRect rect(static_cast<float>(x), static_cast<float>(y), static_cast<float>(width),
-                   static_cast<float>(height));
+    RectF rect(static_cast<float>(x), static_cast<float>(y), static_cast<float>(width),
+               static_cast<float>(height));
 
     auto targetSwitcher = CanvasFilterContextSwitcher::Create(*this, rect);
 
@@ -1424,9 +1424,9 @@ namespace krys::boo::html
     // 2. Take the result of tracing the path described below, using the CanvasPathDrawingStyles interface's
     //    line styles, and fill it with this's stroke style.
 
-    FloatRect rect(static_cast<float>(x), static_cast<float>(y), static_cast<float>(width),
-                   static_cast<float>(height));
-    FloatRect inflatedStrokeRect = rect;
+    RectF rect(static_cast<float>(x), static_cast<float>(y), static_cast<float>(width),
+               static_cast<float>(height));
+    RectF inflatedStrokeRect = rect;
     inflatedStrokeRect.Inflate(static_cast<float>(GetState().LineWidth / 2));
 
     auto targetSwitcher = CanvasFilterContextSwitcher::Create(*this, inflatedStrokeRect);
@@ -1475,8 +1475,7 @@ namespace krys::boo::html
     DidDraw(repaintEntireCanvas, targetSwitcher ? targetSwitcher->ExpandedBounds() : inflatedStrokeRect);
   }
 
-  void CanvasRenderingContext2DBase::SetShadow(const FloatSize &offset, float blur,
-                                               const Color &color) noexcept
+  void CanvasRenderingContext2DBase::SetShadow(const SizeF &offset, float blur, const Color &color) noexcept
   {
     if (GetState().ShadowOffset == offset && GetState().ShadowBlur == blur && GetState().ShadowColor == color)
     {
@@ -1529,16 +1528,16 @@ namespace krys::boo::html
 
     c->Save();
     c->SetCTM(BaseTransform());
-    c->ClearRect(FloatRect(0, 0, static_cast<float>(GetCanvasBase().Width()),
-                           static_cast<float>(GetCanvasBase().Height())));
+    c->ClearRect(
+      RectF(0, 0, static_cast<float>(GetCanvasBase().Width()), static_cast<float>(GetCanvasBase().Height())));
     c->Restore();
   }
 
-  bool CanvasRenderingContext2DBase::RectContainsCanvas(const FloatRect &rect) const noexcept
+  bool CanvasRenderingContext2DBase::RectContainsCanvas(const RectF &rect) const noexcept
   {
     FloatQuad quad(rect);
-    FloatQuad canvasQuad(FloatRect(0, 0, static_cast<float>(GetCanvasBase().Width()),
-                                   static_cast<float>(GetCanvasBase().Height())));
+    FloatQuad canvasQuad(
+      RectF(0, 0, static_cast<float>(GetCanvasBase().Width()), static_cast<float>(GetCanvasBase().Height())));
     return GetState().Transform.MapQuad(quad).ContainsQuad(canvasQuad);
   }
 
@@ -1677,7 +1676,7 @@ namespace krys::boo::html
       return Exception {ExceptionCode::TypeError};
     }
 
-    return CanvasGradient::Create(FloatPoint(x0, y0), FloatPoint(x1, y1));
+    return CanvasGradient::Create(PointF(x0, y0), PointF(x1, y1));
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-createradialgradient
@@ -1699,7 +1698,7 @@ namespace krys::boo::html
       return Exception {ExceptionCode::IndexSizeError};
     }
 
-    return CanvasGradient::Create(FloatPoint(x0, y0), r0, FloatPoint(x1, y1), r1);
+    return CanvasGradient::Create(PointF(x0, y0), r0, PointF(x1, y1), r1);
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-createconicgradient
@@ -1715,7 +1714,7 @@ namespace krys::boo::html
     // Angle starts from x-axis for consistency within canvas methods. See
     // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-createconicgradient
     angleInRadians = NormaliseAngleInRadians(angleInRadians) + piOverTwoFloat;
-    return CanvasGradient::Create(FloatPoint(x, y), angleInRadians);
+    return CanvasGradient::Create(PointF(x, y), angleInRadians);
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-createpattern
@@ -1783,7 +1782,7 @@ namespace krys::boo::html
     // Image may have a zero-width or a zero-height.
     float intrinsicWidth = 0;
     float intrinsicHeight = 0;
-    FloatSize intrinsicRatio;
+    SizeF intrinsicRatio;
     cachedImage->ComputeIntrinsicDimensions(intrinsicWidth, intrinsicHeight, intrinsicRatio);
     if (intrinsicWidth == 0 || intrinsicHeight == 0)
     {
@@ -1819,7 +1818,7 @@ namespace krys::boo::html
     // Image may have a zero-width or a zero-height.
     float intrinsicWidth = 0;
     float intrinsicHeight = 0;
-    FloatSize intrinsicRatio;
+    SizeF intrinsicRatio;
     cachedImage->ComputeIntrinsicDimensions(intrinsicWidth, intrinsicHeight, intrinsicRatio);
     if (intrinsicWidth == 0 || intrinsicHeight == 0)
     {
@@ -1889,13 +1888,12 @@ namespace krys::boo::html
     return Size(element.GetCachedImage(), element.Renderer(), sizeType);
   }
 
-  KRYS_NODISCARD static FloatSize Size(CanvasBase &canvas) noexcept
+  KRYS_NODISCARD static SizeF Size(CanvasBase &canvas) noexcept
   {
-    return FloatSize(canvas.Size());
+    return SizeF(canvas.Size());
   }
 
-  KRYS_NODISCARD static bool AreDrawImageRectsFinite(const FloatRect &srcRect,
-                                                     const FloatRect &dstRect) noexcept
+  KRYS_NODISCARD static bool AreDrawImageRectsFinite(const RectF &srcRect, const RectF &dstRect) noexcept
   {
     return std::isfinite(srcRect.X()) && std::isfinite(srcRect.Y()) && std::isfinite(srcRect.Width())
            && std::isfinite(srcRect.Height()) && std::isfinite(dstRect.X()) && std::isfinite(dstRect.Y())
@@ -1913,23 +1911,21 @@ namespace krys::boo::html
       {
         LayoutSize destRectSize = Size(*imageElement, ImageSizeType::AfterDevicePixelRatio);
         LayoutSize sourceRectSize = Size(*imageElement, ImageSizeType::BeforeDevicePixelRatio);
-        return this->DrawImage(*imageElement,
-                               FloatRect {0, 0, sourceRectSize.Width(), sourceRectSize.Height()},
-                               FloatRect {dx, dy, destRectSize.Width(), destRectSize.Height()});
+        return this->DrawImage(*imageElement, RectF {0, 0, sourceRectSize.Width(), sourceRectSize.Height()},
+                               RectF {dx, dy, destRectSize.Width(), destRectSize.Height()});
       },
       [&](RefPtr<SVGImageElement> &imageElement) -> ExceptionOr<void>
       {
         LayoutSize destRectSize = Size(*imageElement, ImageSizeType::AfterDevicePixelRatio);
         LayoutSize sourceRectSize = Size(*imageElement, ImageSizeType::BeforeDevicePixelRatio);
-        return this->DrawImage(*imageElement,
-                               FloatRect {0, 0, sourceRectSize.Width(), sourceRectSize.Height()},
-                               FloatRect {dx, dy, destRectSize.Width(), destRectSize.Height()});
+        return this->DrawImage(*imageElement, RectF {0, 0, sourceRectSize.Width(), sourceRectSize.Height()},
+                               RectF {dx, dy, destRectSize.Width(), destRectSize.Height()});
       },
       [&](auto &element) -> ExceptionOr<void>
       {
-        FloatSize elementSize = FloatSize(Size(*element));
-        return this->DrawImage(*element, FloatRect {0, 0, elementSize.Width(), elementSize.Height()},
-                               FloatRect {dx, dy, elementSize.Width(), elementSize.Height()});
+        SizeF elementSize = SizeF(Size(*element));
+        return this->DrawImage(*element, RectF {0, 0, elementSize.Width(), elementSize.Height()},
+                               RectF {dx, dy, elementSize.Width(), elementSize.Height()});
       });
   }
 
@@ -1939,10 +1935,10 @@ namespace krys::boo::html
     return SwitchOn(image,
                     [&](auto &element) -> ExceptionOr<void>
                     {
-                      FloatSize elementSize = FloatSize(Size(*element));
+                      SizeF elementSize = SizeF(Size(*element));
                       return this->DrawImage(*element,
-                                             FloatRect {0, 0, elementSize.Width(), elementSize.Height()},
-                                             FloatRect {dx, dy, dw, dh});
+                                             RectF {0, 0, elementSize.Width(), elementSize.Height()},
+                                             RectF {dx, dy, dw, dh});
                     });
   }
 
@@ -1950,21 +1946,19 @@ namespace krys::boo::html
                                                             float sw, float sh, float dx, float dy, float dw,
                                                             float dh) noexcept
   {
-    return SwitchOn(
-      image, [&](auto &element) -> ExceptionOr<void>
-      { return this->DrawImage(*element, FloatRect {sx, sy, sw, sh}, FloatRect {dx, dy, dw, dh}); });
+    return SwitchOn(image, [&](auto &element) -> ExceptionOr<void>
+                    { return this->DrawImage(*element, RectF {sx, sy, sw, sh}, RectF {dx, dy, dw, dh}); });
   }
 
   ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(HTMLImageElement &imageElement,
-                                                            const FloatRect &srcRect,
-                                                            const FloatRect &dstRect) noexcept
+                                                            const RectF &srcRect,
+                                                            const RectF &dstRect) noexcept
   {
     return DrawImage(imageElement, srcRect, dstRect, GetState().GlobalComposite, GetState().GlobalBlend);
   }
 
   ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(HTMLImageElement &imageElement,
-                                                            const FloatRect &srcRect,
-                                                            const FloatRect &dstRect,
+                                                            const RectF &srcRect, const RectF &dstRect,
                                                             const CompositeOperator &op,
                                                             const BlendMode &blendMode) noexcept
   {
@@ -1992,8 +1986,7 @@ namespace krys::boo::html
       return {};
     }
 
-    auto imageRect =
-      FloatRect(FloatPoint(), FloatSize(Size(imageElement, ImageSizeType::BeforeDevicePixelRatio)));
+    auto imageRect = RectF(PointF(), SizeF(Size(imageElement, ImageSizeType::BeforeDevicePixelRatio)));
 
     // FIXME: The computed style's orientation for an image without a renderer.
     auto orientation = ImageOrientation(ImageOrientation::Orientation::FromImage);
@@ -2007,15 +2000,14 @@ namespace krys::boo::html
   }
 
   ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(SVGImageElement &imageElement,
-                                                            const FloatRect &srcRect,
-                                                            const FloatRect &dstRect) noexcept
+                                                            const RectF &srcRect,
+                                                            const RectF &dstRect) noexcept
   {
     return DrawImage(imageElement, srcRect, dstRect, GetState().GlobalComposite, GetState().GlobalBlend);
   }
 
   ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(SVGImageElement &imageElement,
-                                                            const FloatRect &srcRect,
-                                                            const FloatRect &dstRect,
+                                                            const RectF &srcRect, const RectF &dstRect,
                                                             const CompositeOperator &op,
                                                             const BlendMode &blendMode) noexcept
   {
@@ -2039,17 +2031,18 @@ namespace krys::boo::html
                         u8"The SVGImageElement provided is in the 'broken' state."};
     }
 
-    auto imageRect =
-      FloatRect(FloatPoint(), FloatSize(Size(imageElement, ImageSizeType::BeforeDevicePixelRatio)));
+    auto imageRect = RectF(PointF(), SizeF(Size(imageElement, ImageSizeType::BeforeDevicePixelRatio)));
 
     return DrawImage(imageElement.NodeDocument(), *cachedImage, imageElement.Renderer(), imageRect, srcRect,
                      dstRect, op, blendMode);
   }
 
-  ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(
-    Document &, CachedImage &cachedImage, const RenderObject *renderer, const FloatRect &imageRect,
-    const FloatRect &srcRect, const FloatRect &dstRect, const CompositeOperator &op,
-    const BlendMode &blendMode, ImageOrientation orientation) noexcept
+  ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(Document &, CachedImage &cachedImage,
+                                                            const RenderObject *renderer,
+                                                            const RectF &imageRect, const RectF &srcRect,
+                                                            const RectF &dstRect, const CompositeOperator &op,
+                                                            const BlendMode &blendMode,
+                                                            ImageOrientation orientation) noexcept
   {
     if (!std::isfinite(dstRect.X()) || !std::isfinite(dstRect.Y()) || !std::isfinite(dstRect.Width())
         || !std::isfinite(dstRect.Height()) || !std::isfinite(srcRect.X()) || !std::isfinite(srcRect.Y())
@@ -2159,9 +2152,8 @@ namespace krys::boo::html
     return {};
   }
 
-  ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasBase &sourceCanvas,
-                                                            const FloatRect &srcRect,
-                                                            const FloatRect &dstRect) noexcept
+  ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasBase &sourceCanvas, const RectF &srcRect,
+                                                            const RectF &dstRect) noexcept
   {
     // 1. If any of the arguments are infinite or NaN, then return.
     if (!AreDrawImageRectsFinite(srcRect, dstRect))
@@ -2172,7 +2164,7 @@ namespace krys::boo::html
     // 2. Let usability be the result of checking the usability of image.
     // (If image has either a horizontal dimension or a vertical dimension equal to zero, then throw an
     // "InvalidStateError" DOMException.)
-    FloatRect srcCanvasRect = FloatRect(FloatPoint(), FloatSize(sourceCanvas.Size()));
+    RectF srcCanvasRect = RectF(PointF(), SizeF(sourceCanvas.Size()));
     if (!srcCanvasRect.Width() || !srcCanvasRect.Height())
     {
       return Exception {ExceptionCode::InvalidStateError};
@@ -2273,22 +2265,22 @@ namespace krys::boo::html
     return transformed;
   }
 
-  Path CanvasRenderingContext2DBase::TransformAreaToDevice(const FloatRect &rect) const noexcept
+  Path CanvasRenderingContext2DBase::TransformAreaToDevice(const RectF &rect) const noexcept
   {
     Path path;
     path.AddRect(rect);
     return TransformAreaToDevice(path);
   }
 
-  IntRect CanvasRenderingContext2DBase::CalculateCompositingBufferRect(const FloatRect &area,
-                                                                       IntSize *croppedOffset) noexcept
+  RectI CanvasRenderingContext2DBase::CalculateCompositingBufferRect(const RectF &area,
+                                                                     SizeI *croppedOffset) noexcept
   {
-    IntRect canvasRect(0, 0, static_cast<int32>(GetCanvasBase().Width()),
-                       static_cast<int32>(GetCanvasBase().Height()));
+    RectI canvasRect(0, 0, static_cast<int32>(GetCanvasBase().Width()),
+                     static_cast<int32>(GetCanvasBase().Height()));
     canvasRect = BaseTransform().MapRect(canvasRect);
     Path path = TransformAreaToDevice(area);
-    IntRect bufferRect = EnclosingIntRect(path.FastBoundingRect());
-    IntPoint originalLocation = bufferRect.Location();
+    RectI bufferRect = EnclosingRectI(path.FastBoundingRect());
+    PointI originalLocation = bufferRect.Location();
     bufferRect.Intersect(canvasRect);
     if (croppedOffset)
     {
@@ -2297,11 +2289,11 @@ namespace krys::boo::html
     return bufferRect;
   }
 
-  void CanvasRenderingContext2DBase::CompositeBuffer(ImageBuffer &buffer, const IntRect &bufferRect,
+  void CanvasRenderingContext2DBase::CompositeBuffer(ImageBuffer &buffer, const RectI &bufferRect,
                                                      CompositeOperator op) noexcept
   {
-    IntRect canvasRect(0, 0, static_cast<int32>(GetCanvasBase().Width()),
-                       static_cast<int32>(GetCanvasBase().Height()));
+    RectI canvasRect(0, 0, static_cast<int32>(GetCanvasBase().Width()),
+                     static_cast<int32>(GetCanvasBase().Height()));
     canvasRect = BaseTransform().MapRect(canvasRect);
 
     auto *c = EffectiveDrawingContext();
@@ -2315,34 +2307,34 @@ namespace krys::boo::html
     c->SetCompositeOperation(op);
 
     c->Save();
-    c->ClipOut(FloatRect(bufferRect));
-    c->ClearRect(FloatRect(canvasRect));
+    c->ClipOut(RectF(bufferRect));
+    c->ClearRect(RectF(canvasRect));
     c->Restore();
-    c->DrawImageBuffer(buffer, FloatPoint(bufferRect.Location()),
+    c->DrawImageBuffer(buffer, PointF(bufferRect.Location()),
                        ImagePaintingOptions(GetState().GlobalComposite));
     c->Restore();
   }
 
-  static void DrawImageToContext(Image &image, GraphicsContext &context, const FloatRect &dest,
-                                 const FloatRect &src, ImagePaintingOptions options) noexcept
+  static void DrawImageToContext(Image &image, GraphicsContext &context, const RectF &dest, const RectF &src,
+                                 ImagePaintingOptions options) noexcept
   {
     std::ignore = context.DrawImage(image, dest, src, options);
   }
 
-  static void DrawImageToContext(ImageBuffer &imageBuffer, GraphicsContext &context, const FloatRect &dest,
-                                 const FloatRect &src, ImagePaintingOptions options) noexcept
+  static void DrawImageToContext(ImageBuffer &imageBuffer, GraphicsContext &context, const RectF &dest,
+                                 const RectF &src, ImagePaintingOptions options) noexcept
   {
     context.DrawImageBuffer(imageBuffer, dest, src, options);
   }
 
   template <typename T>
-  void CanvasRenderingContext2DBase::FullCanvasCompositedDrawImage(T &image, const FloatRect &dest,
-                                                                   const FloatRect &src,
+  void CanvasRenderingContext2DBase::FullCanvasCompositedDrawImage(T &image, const RectF &dest,
+                                                                   const RectF &src,
                                                                    CompositeOperator op) noexcept
   {
     krys_debug_assert(IsFullCanvasCompositeMode(op));
 
-    IntSize croppedOffset;
+    SizeI croppedOffset;
     auto bufferRect = CalculateCompositingBufferRect(dest, &croppedOffset);
     if (bufferRect.IsEmpty())
     {
@@ -2356,18 +2348,18 @@ namespace krys::boo::html
       return;
     }
 
-    auto buffer = c->CreateImageBuffer(FloatSize(bufferRect.Size()));
+    auto buffer = c->CreateImageBuffer(SizeF(bufferRect.Size()));
     if (!buffer)
     {
       return;
     }
 
-    FloatRect adjustedDest = dest;
-    adjustedDest.SetLocation(FloatPoint(0, 0));
+    RectF adjustedDest = dest;
+    adjustedDest.SetLocation(PointF(0, 0));
     AffineTransform effectiveTransform = c->GetCTM();
-    IntRect transformedAdjustedRect = EnclosingIntRect(effectiveTransform.MapRect(adjustedDest));
-    buffer->Context().Translate(FloatPoint(-transformedAdjustedRect.Location()));
-    buffer->Context().Translate(FloatSize(croppedOffset));
+    RectI transformedAdjustedRect = EnclosingRectI(effectiveTransform.MapRect(adjustedDest));
+    buffer->Context().Translate(PointF(-transformedAdjustedRect.Location()));
+    buffer->Context().Translate(SizeF(croppedOffset));
     buffer->Context().ConcatCTM(effectiveTransform);
     DrawImageToContext(image, buffer->Context(), adjustedDest, src,
                        ImagePaintingOptions(CompositeOperator::SourceOver));
@@ -2437,7 +2429,7 @@ namespace krys::boo::html
   }
 
   RefPtr<ByteArrayPixelBuffer> CanvasRenderingContext2DBase::CacheImageDataIfPossible(
-    const ImageData &imageData, const IntRect &sourceRect, const IntPoint &destinationPosition) noexcept
+    const ImageData &imageData, const RectI &sourceRect, const PointI &destinationPosition) noexcept
   {
     if (!destinationPosition.IsZero() || !sourceRect.Location().IsZero()
         || sourceRect.Size() != imageData.Size() || sourceRect.Size() != GetCanvasBase().Size())
@@ -2495,7 +2487,7 @@ namespace krys::boo::html
   }
 
   RefPtr<ImageData> CanvasRenderingContext2DBase::MakeImageDataIfContentsCached(
-    const IntRect &sourceRect, PredefinedColorSpace colorSpace) const noexcept
+    const RectI &sourceRect, PredefinedColorSpace colorSpace) const noexcept
   {
     if (std::holds_alternative<CachedContentsTransparent>(_cachedContents))
     {
@@ -2510,7 +2502,7 @@ namespace krys::boo::html
       krys::move(std::get<CachedContentsImageData>(_cachedContents).Pixels);
     _cachedContents.emplace<CachedContentsUnknown>();
 
-    if (sourceRect != IntRect {{}, GetCanvasBase().Size()})
+    if (sourceRect != RectI {{}, GetCanvasBase().Size()})
     {
       return nullptr;
     }
@@ -2578,7 +2570,7 @@ namespace krys::boo::html
       sh = -sh;
     }
 
-    IntRect imageDataRect {sx, sy, sw, sh};
+    RectI imageDataRect {sx, sy, sw, sh};
     auto outputImageDataPixelFormat = settings ? settings->Format : ImageDataPixelFormat::RgbaUnorm8;
     auto outputPixelFormat = ToPixelFormat(outputImageDataPixelFormat);
 
@@ -2624,19 +2616,19 @@ namespace krys::boo::html
     return PutImageData(data, dx, dy, 0, 0, data.Width(), data.Height());
   }
 
-  KRYS_NODISCARD static IntRect ComputeImageDataRect(const ImageBuffer &buffer, IntSize sourceSize,
-                                                     IntRect &destRect, IntPoint destOffset) noexcept
+  KRYS_NODISCARD static RectI ComputeImageDataRect(const ImageBuffer &buffer, SizeI sourceSize,
+                                                   RectI &destRect, PointI destOffset) noexcept
   {
-    destRect.Intersect(IntRect {{}, sourceSize});
+    destRect.Intersect(RectI {{}, sourceSize});
     destRect.MoveBy(destOffset);
-    destRect.Intersect(IntRect {{}, buffer.TruncatedLogicalSize()});
+    destRect.Intersect(RectI {{}, buffer.TruncatedLogicalSize()});
     if (destRect.IsEmpty())
     {
       return destRect;
     }
-    IntRect sourceRect {destRect};
+    RectI sourceRect {destRect};
     sourceRect.MoveBy(-destOffset);
-    sourceRect.Intersect(IntRect {{}, sourceSize});
+    sourceRect.Intersect(RectI {{}, sourceSize});
     return sourceRect;
   }
 
@@ -2674,9 +2666,9 @@ namespace krys::boo::html
       dirtyHeight = -dirtyHeight;
     }
 
-    IntPoint destOffset {dx, dy};
-    IntRect destRect {dirtyX, dirtyY, dirtyWidth, dirtyHeight};
-    IntRect sourceRect = ComputeImageDataRect(*buffer, data.Size(), destRect, destOffset);
+    PointI destOffset {dx, dy};
+    RectI destRect {dirtyX, dirtyY, dirtyWidth, dirtyHeight};
+    RectI sourceRect = ComputeImageDataRect(*buffer, data.Size(), destRect, destOffset);
 
     EnumSet<DidDrawOption> options; // ignore transform, shadow, clip, and post-processing
     if (!sourceRect.IsEmpty())
@@ -2693,7 +2685,7 @@ namespace krys::boo::html
       buffer->PutPixelBuffer(*pixelBuffer, sourceRect, destOffset);
     }
 
-    DidDraw(FloatRect {destRect}, options);
+    DidDraw(RectF {destRect}, options);
 
     return {};
   }
@@ -2703,7 +2695,7 @@ namespace krys::boo::html
     DidDraw(BackingStoreBounds(), options);
   }
 
-  void CanvasRenderingContext2DBase::DidDraw(Maybe<FloatRect> rect, EnumSet<DidDrawOption> options) noexcept
+  void CanvasRenderingContext2DBase::DidDraw(Maybe<RectF> rect, EnumSet<DidDrawOption> options) noexcept
   {
     if (!options.Contains(DidDrawOption::PreserveCachedContents))
     {
@@ -2767,7 +2759,7 @@ namespace krys::boo::html
     }
   }
 
-  void CanvasRenderingContext2DBase::DidDraw(bool entireCanvas, const FloatRect &rect,
+  void CanvasRenderingContext2DBase::DidDraw(bool entireCanvas, const RectF &rect,
                                              EnumSet<DidDrawOption> options) noexcept
   {
     DidDraw(entireCanvas, [&] { return rect; }, options);
@@ -2792,7 +2784,7 @@ namespace krys::boo::html
     }
     else
     {
-      DidDraw(Maybe<FloatRect>(rectProvider()), options);
+      DidDraw(Maybe<RectF>(rectProvider()), options);
     }
   }
 
@@ -2844,7 +2836,7 @@ namespace krys::boo::html
     return context;
   }
 
-  RefPtr<Filter> CanvasRenderingContext2DBase::CreateFilter(const FloatRect &) const noexcept
+  RefPtr<Filter> CanvasRenderingContext2DBase::CreateFilter(const RectF &) const noexcept
   {
     return nullptr;
   }
@@ -2887,7 +2879,7 @@ namespace krys::boo::html
     return GetCanvasBase().Buffer()->BaseTransform();
   }
 
-  FloatRect CanvasRenderingContext2DBase::InflatedStrokeRect(const FloatRect &rect) const noexcept
+  RectF CanvasRenderingContext2DBase::InflatedStrokeRect(const RectF &rect) const noexcept
   {
     // Fast approximation of the stroke's bounding rect.
     // This yields a slightly oversized rect but is very fast
@@ -3145,7 +3137,7 @@ namespace krys::boo::html
   }
 
   void CanvasRenderingContext2DBase::FontProxy::DrawBidiText(
-    GraphicsContext &context, const TextRun &run, const FloatPoint &point,
+    GraphicsContext &context, const TextRun &run, const PointF &point,
     FontCascade::CustomFontNotReadyAction action) const noexcept
   {
     context.DrawBidiText(_font, run, point, action);
@@ -3591,11 +3583,11 @@ namespace krys::boo::html
 
     bool useMaxWidth = maxWidth && *maxWidth < fontWidth;
     float width = useMaxWidth ? static_cast<float>(*maxWidth) : fontWidth;
-    auto location = FloatPoint(static_cast<float>(x), static_cast<float>(y));
+    auto location = PointF(static_cast<float>(x), static_cast<float>(y));
     location += TextOffset(width, textRun.Direction());
 
     // The slop built in to this mask rect matches the heuristic used in FontCGWin.cpp for GDI text.
-    auto textRect = FloatRect(
+    auto textRect = RectF(
       location.X() - static_cast<float>(fontMetrics.IntHeight()) / 2,
       location.Y() - static_cast<float>(fontMetrics.IntAscent() + fontMetrics.IntLineGap()),
       width + static_cast<float>(fontMetrics.IntHeight()), static_cast<float>(fontMetrics.IntLineSpacing()));
@@ -3617,8 +3609,8 @@ namespace krys::boo::html
     {
       c->Translate(location);
       // We draw when fontWidth is 0 so compositing operations (eg, a "copy" op) still work.
-      c->Scale(FloatSize((fontWidth > 0 ? (width / fontWidth) : 0), 1));
-      location = FloatPoint();
+      c->Scale(SizeF((fontWidth > 0 ? (width / fontWidth) : 0), 1));
+      location = PointF();
     }
 
     bool repaintEntireCanvas = false;
@@ -3678,10 +3670,10 @@ namespace krys::boo::html
     return metrics;
   }
 
-  FloatPoint CanvasRenderingContext2DBase::TextOffset(float width, text::TextDirection direction) noexcept
+  PointF CanvasRenderingContext2DBase::TextOffset(float width, text::TextDirection direction) noexcept
   {
     const auto &fontMetrics = GetFontProxy()->MetricsOfPrimaryFont();
-    FloatPoint offset;
+    PointF offset;
 
     switch (GetState().TextBaseline)
     {

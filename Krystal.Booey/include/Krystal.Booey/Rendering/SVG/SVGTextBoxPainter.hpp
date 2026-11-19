@@ -123,9 +123,9 @@ namespace krys::boo
   KRYS_NODISCARD TextRun ConstructTextRun(utf8_stringview, text::TextDirection,
                                           const SVGTextFragment &) noexcept;
 
-  KRYS_NODISCARD FloatRect SelectionRectForTextFragment(const RenderSVGInlineText &, text::TextDirection,
-                                                        const SVGTextFragment &, uint32 startPosition,
-                                                        uint32 endPosition) noexcept;
+  KRYS_NODISCARD RectF SelectionRectForTextFragment(const RenderSVGInlineText &, text::TextDirection,
+                                                    const SVGTextFragment &, uint32 startPosition,
+                                                    uint32 endPosition) noexcept;
 
   bool MapStartEndPositionsIntoFragmentCoordinates(uint32 textBoxStart, const SVGTextFragment &,
                                                    uint32 &startPosition, uint32 &endPosition) noexcept;

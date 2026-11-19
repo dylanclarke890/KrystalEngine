@@ -5,7 +5,7 @@
 
 namespace krys::boo
 {
-  FilterGeneratedImage::FilterGeneratedImage(Image &image, Filter &filter, const FloatSize &size) noexcept
+  FilterGeneratedImage::FilterGeneratedImage(Image &image, Filter &filter, const SizeF &size) noexcept
       : _image(ShareRef(image)), _filter(ShareRef(filter))
   {
     SetContainerSize(size);
@@ -13,7 +13,7 @@ namespace krys::boo
 
   void FilterGeneratedImage::DrawFiltered(GraphicsContext &context) noexcept
   {
-    FloatRect sourceImageRect {FloatPoint(), Size()};
+    RectF sourceImageRect {PointF(), Size()};
     auto switcher = GraphicsContextSwitcher::Create(context, sourceImageRect, RefPtr<Filter>(_filter));
     if (!switcher)
     {
@@ -28,8 +28,8 @@ namespace krys::boo
     switcher->EndDrawSourceImage(context);
   }
 
-  ImageDrawResult FilterGeneratedImage::Draw(GraphicsContext &context, const FloatRect &dstRect,
-                                             const FloatRect &srcRect, ImagePaintingOptions options) noexcept
+  ImageDrawResult FilterGeneratedImage::Draw(GraphicsContext &context, const RectF &dstRect,
+                                             const RectF &srcRect, ImagePaintingOptions options) noexcept
   {
     GraphicsContextStateSaver stateSaver(context);
     context.SetCompositeOperation(options.GetCompositeOperator(), options.GetBlendMode());
@@ -45,10 +45,9 @@ namespace krys::boo
     return ImageDrawResult::DidDraw;
   }
 
-  void FilterGeneratedImage::DrawPattern(GraphicsContext &context, const FloatRect &dstRect,
-                                         const FloatRect &srcRect, const AffineTransform &patternTransform,
-                                         const FloatPoint &phase, const FloatSize &spacing,
-                                         ImagePaintingOptions options) noexcept
+  void FilterGeneratedImage::DrawPattern(GraphicsContext &context, const RectF &dstRect, const RectF &srcRect,
+                                         const AffineTransform &patternTransform, const PointF &phase,
+                                         const SizeF &spacing, ImagePaintingOptions options) noexcept
   {
     auto imageBuffer = context.CreateImageBuffer(Size());
     if (!imageBuffer)

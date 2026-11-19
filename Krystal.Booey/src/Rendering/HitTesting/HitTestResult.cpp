@@ -251,7 +251,7 @@ namespace krys::boo
     return nullptr;
   }
 
-  IntRect HitTestResult::ImageRect() const noexcept
+  RectI HitTestResult::ImageRect() const noexcept
   {
     if (!GetImage())
     {
@@ -358,7 +358,7 @@ namespace krys::boo
 
   HitTestProgress HitTestResult::AddNodeToListBasedTestResult(boo::Node *node, const HitTestRequest &request,
                                                               const HitTestLocation &locationInContainer,
-                                                              const FloatRect &rect) noexcept
+                                                              const RectF &rect) noexcept
   {
     return AddNodeToListBasedTestResultCommon(node, request, locationInContainer, rect);
   }

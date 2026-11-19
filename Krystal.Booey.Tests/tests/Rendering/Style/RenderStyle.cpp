@@ -189,7 +189,7 @@ namespace krys::boo::tests
 
     // Without an explicit stroke colour the stroke uses `color`.
     CHECK(style.UsedStrokeColor() == Red);
-    CHECK(style.UsedStrokeWidth(IntSize {100, 100}) == 0);
+    CHECK(style.UsedStrokeWidth(SizeI {100, 100}) == 0);
 
     style.SetBorderTopColor(style::Color {boo::Color {Blue}});
     CHECK(style.ColorResolvingCurrentColor(css::PropertyId::BorderTopColor) == Blue);

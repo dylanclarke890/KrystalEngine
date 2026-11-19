@@ -74,7 +74,7 @@ namespace krys::boo::layout
                                     InlineFormattingContext &inlineFormattingContext) noexcept
     {
       auto marginBoxLogicalRect = InlineRect {
-        FloatRect {BoxGeometry::MarginBoxRect(inlineFormattingContext.GeometryForBox(annotationBox))}};
+        RectF {BoxGeometry::MarginBoxRect(inlineFormattingContext.GeometryForBox(annotationBox))}};
       auto writingMode = inlineFormattingContext.Root().GetWritingMode();
       if (writingMode.IsHorizontal())
       {

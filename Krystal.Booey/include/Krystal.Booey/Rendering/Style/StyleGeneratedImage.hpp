@@ -40,7 +40,7 @@ namespace krys::boo
     class CachedGeneratedImage;
 
   protected:
-    FloatSize _containerSize;
+    SizeF _containerSize;
 
   private:
     bool _fixedSize;
@@ -79,7 +79,7 @@ namespace krys::boo
       return !UsesImageContainerSize();
     }
 
-    KRYS_NODISCARD FloatSize ImageSize(const RenderElement *, float multiplier) const noexcept final;
+    KRYS_NODISCARD SizeF ImageSize(const RenderElement *, float multiplier) const noexcept final;
 
     void AddClient(RenderElement &) noexcept final;
 
@@ -101,22 +101,22 @@ namespace krys::boo
     }
 
     void ComputeIntrinsicDimensions(const RenderElement *, float &intrinsicWidth, float &intrinsicHeight,
-                                    FloatSize &intrinsicRatio) noexcept final;
+                                    SizeF &intrinsicRatio) noexcept final;
 
-    void SetContainerContextForRenderer(const RenderElement &, const FloatSize &containerSize,
+    void SetContainerContextForRenderer(const RenderElement &, const SizeF &containerSize,
                                         float) noexcept final
     {
       _containerSize = containerSize;
     }
 
     /// @brief The image made for @p size, if it's still kept; it's then kept for longer.
-    KRYS_NODISCARD GeneratedImage *CachedImageForSize(FloatSize size) noexcept;
+    KRYS_NODISCARD GeneratedImage *CachedImageForSize(SizeF size) noexcept;
 
     /// @brief Keeps @p image, made for @p size, until it hasn't been asked for in a few seconds.
-    void SaveCachedImageForSize(FloatSize size, GeneratedImage &image) noexcept;
+    void SaveCachedImageForSize(SizeF size, GeneratedImage &image) noexcept;
 
     /// @brief The image's size when it's fixed-size (it doesn't take the size of its container).
-    KRYS_NODISCARD virtual FloatSize FixedSize(const RenderElement &) const noexcept = 0;
+    KRYS_NODISCARD virtual SizeF FixedSize(const RenderElement &) const noexcept = 0;
 
   private:
     void EvictCachedGeneratedImage(const CachedGeneratedImage &) noexcept;

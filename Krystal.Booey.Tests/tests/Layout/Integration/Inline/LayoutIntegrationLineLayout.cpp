@@ -188,8 +188,8 @@ layer at (0,0) size 800x60
     CHECK_FALSE(line);
 
     auto &text = FirstTextIn(fixture, u8"d");
-    CHECK(text.LinesBoundingBox() == IntRect(5, 5, 30, 10));
-    CHECK(text.FirstRunLocation() == IntPoint(5, 5));
+    CHECK(text.LinesBoundingBox() == RectI(5, 5, 30, 10));
+    CHECK(text.FirstRunLocation() == PointI(5, 5));
     auto textBoxCount = 0;
     for (auto &textBox : inline_iterator::TextBoxesFor(text))
     {
@@ -200,9 +200,9 @@ layer at (0,0) size 800x60
 
     // The inline box's bounding box spans both of its lines.
     auto &span = Downcast<RenderInline>(*fixture.ById(u8"s").Renderer());
-    CHECK(span.LinesBoundingBox() == IntRect(5, 5, 50, 20));
+    CHECK(span.LinesBoundingBox() == RectI(5, 5, 50, 20));
     auto &lineBreak = Downcast<RenderLineBreak>(*fixture.ById(u8"br").Renderer());
-    CHECK(lineBreak.LinesBoundingBox() == IntRect(25, 15, 0, 10));
+    CHECK(lineBreak.LinesBoundingBox() == RectI(25, 15, 0, 10));
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture,

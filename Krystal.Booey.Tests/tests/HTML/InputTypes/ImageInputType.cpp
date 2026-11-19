@@ -73,12 +73,12 @@ namespace krys::boo::tests
     CHECK(events->Errors == 0);
     CHECK(input.Width() == 3u);
     CHECK(input.Height() == 2u);
-    CHECK(fixture.RendererSize(u8"i") == IntSize(3, 2));
+    CHECK(fixture.RendererSize(u8"i") == SizeI(3, 2));
     CHECK(fixture.ShowsImage(u8"i"));
     CHECK(Count(fixture.Painted(), u8"draw-native-image") == 1u);
 
     CHECK(input.Renderer()->Style().GetCursorType() == CursorType::Pointer);
-    CHECK(fixture.RendererSize(u8"i") == IntSize(3, 2));
+    CHECK(fixture.RendererSize(u8"i") == SizeI(3, 2));
   }
 
   TEST_CASE("ImageInputType: the width and height attributes size its box",
@@ -93,9 +93,9 @@ namespace krys::boo::tests
                          u8"style='width: 12px; padding: 5px; border: 2px solid'>");
     RunNetworkingTasks();
 
-    CHECK(fixture.RendererSize(u8"both") == IntSize(30, 30));
-    CHECK(fixture.RendererSize(u8"width") == IntSize(6, 4));
-    CHECK(fixture.RendererSize(u8"css") == IntSize(26, 22));
+    CHECK(fixture.RendererSize(u8"both") == SizeI(30, 30));
+    CHECK(fixture.RendererSize(u8"width") == SizeI(6, 4));
+    CHECK(fixture.RendererSize(u8"css") == SizeI(26, 22));
     // The content box.
     CHECK(fixture.Input(u8"css").Width() == 12u);
     CHECK(fixture.Input(u8"css").Height() == 8u);
@@ -130,7 +130,7 @@ namespace krys::boo::tests
     // It shows the loaded image when it is rendered later.
     fixture.ById(u8"hidden").RemoveAttribute(u8"style");
     CHECK(fixture.ShowsImage(u8"hidden"));
-    CHECK(fixture.RendererSize(u8"hidden") == IntSize(3, 2));
+    CHECK(fixture.RendererSize(u8"hidden") == SizeI(3, 2));
     CHECK(hiddenEvents->Loads == 1);
   }
 
@@ -151,7 +151,7 @@ namespace krys::boo::tests
                          u8"<input id=sized type=image alt=Label src='file:///none.png' width=100 height=30>"
                          u8"<div><input id=collapsed style='display: inline' type=image alt='' "
                          u8"src='file:///none.png'></div>",
-                         IntSize(400, 400));
+                         SizeI(400, 400));
     auto missingEvents = LoadEvents::ListenTo(fixture.ById(u8"missing"));
     auto noSourceEvents = LoadEvents::ListenTo(fixture.ById(u8"nosrc"));
     auto emptyEvents = LoadEvents::ListenTo(fixture.ById(u8"empty"));
@@ -171,8 +171,8 @@ namespace krys::boo::tests
     CHECK(fixture.RendererSize(u8"empty") == size);
     CHECK(fixture.RendererSize(u8"none") == fixture.RendererSize(u8"submit"));
     CHECK(fixture.RendererSize(u8"nosrcNone") == fixture.RendererSize(u8"submit"));
-    CHECK(fixture.RendererSize(u8"sized") == IntSize(100, 30));
-    CHECK(fixture.RendererSize(u8"collapsed") == IntSize(0, 0));
+    CHECK(fixture.RendererSize(u8"sized") == SizeI(100, 30));
+    CHECK(fixture.RendererSize(u8"collapsed") == SizeI(0, 0));
     CHECK(fixture.Input(u8"missing").Width() == static_cast<uint32>(size.Width()));
 
     CHECK(Count(fixture.Painted(), u8"draw-glyphs") == 9u);
@@ -198,18 +198,18 @@ namespace krys::boo::tests
     input.Src(u8"file:///a.png");
     RunNetworkingTasks();
     CHECK(events->Loads == 1);
-    CHECK(fixture.RendererSize(u8"i") == IntSize(3, 2));
+    CHECK(fixture.RendererSize(u8"i") == SizeI(3, 2));
 
     // An alt change leaves the image alone.
     input.Alt(u8"a");
-    CHECK(fixture.RendererSize(u8"i") == IntSize(3, 2));
+    CHECK(fixture.RendererSize(u8"i") == SizeI(3, 2));
 
     input.Src(u8"file:///b.jpg");
     RunNetworkingTasks();
     CHECK(events->Loads == 2);
     CHECK(loader.Strategy.Requests == List<utf8_string> {u8"file:///a.png", u8"file:///b.jpg"});
     CHECK(fixture.ShowsImage(u8"i"));
-    CHECK(fixture.RendererSize(u8"i") != IntSize(3, 2));
+    CHECK(fixture.RendererSize(u8"i") != SizeI(3, 2));
 
     // A failed source shows the label again.
     input.Src(u8"file:///none.png");
@@ -220,7 +220,7 @@ namespace krys::boo::tests
     // So does having no source.
     input.Src(u8"file:///a.png");
     RunNetworkingTasks();
-    CHECK(fixture.RendererSize(u8"i") == IntSize(3, 2));
+    CHECK(fixture.RendererSize(u8"i") == SizeI(3, 2));
     input.RemoveAttribute(u8"src");
     RunNetworkingTasks();
     CHECK_FALSE(fixture.ShowsImage(u8"i"));
@@ -250,7 +250,7 @@ namespace krys::boo::tests
     CHECK(loader.Strategy.Requests == List<utf8_string> {u8"file:///a.png"});
     CHECK(events->Loads == 1);
     CHECK(fixture.ShowsImage(u8"text"));
-    CHECK(fixture.RendererSize(u8"text") == IntSize(3, 2));
+    CHECK(fixture.RendererSize(u8"text") == SizeI(3, 2));
 
     // Away from the state, it's an ordinary control, and a new src waits.
     text.Type(u8"text");
@@ -264,7 +264,7 @@ namespace krys::boo::tests
     CHECK(loader.Strategy.Requests.empty());
     CHECK(events->Loads == 1);
     CHECK(fixture.ShowsImage(u8"text"));
-    CHECK(fixture.RendererSize(u8"text") == IntSize(3, 2));
+    CHECK(fixture.RendererSize(u8"text") == SizeI(3, 2));
 
     text.Type(u8"text");
     text.Src(u8"file:///b.png");
@@ -322,7 +322,7 @@ namespace krys::boo::tests
 
     auto event = [](PlatformEvent::Type type, double x, double y)
     {
-      return PlatformMouseEvent(DoublePoint(x, y), DoublePoint(x, y), MouseButton::Left, type, 1, {},
+      return PlatformMouseEvent(PointD(x, y), PointD(x, y), MouseButton::Left, type, 1, {},
                                 MonotonicTime::Now());
     };
     auto &handler = fixture.Frame->GetEventHandler();

@@ -69,8 +69,7 @@ namespace krys::boo::layout
     {
     }
 
-    explicit Rect(const FloatRect &rect) noexcept
-        : Rect(LayoutPoint(rect.Location()), LayoutSize(rect.Size()))
+    explicit Rect(const RectF &rect) noexcept : Rect(LayoutPoint(rect.Location()), LayoutSize(rect.Size()))
     {
     }
 
@@ -274,7 +273,7 @@ namespace krys::boo::layout
       return _rect;
     }
 
-    operator FloatRect() const noexcept
+    operator RectF() const noexcept
     {
       krys_debug_assert(HasValidGeometry());
       return _rect;

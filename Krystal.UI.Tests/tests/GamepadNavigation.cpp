@@ -202,15 +202,15 @@ namespace krys::ui::tests
     focus(u8"r1");
     setAxis(pal::GamepadAxis::RightY, 1);
     frame(3s);
-    CHECK(view.ScrollPosition() == boo::IntPoint());
+    CHECK(view.ScrollPosition() == PointI());
     frame(3s + 50ms);
-    CHECK(view.ScrollPosition() == boo::IntPoint(0, 75));
+    CHECK(view.ScrollPosition() == PointI(0, 75));
     // A long frame scrolls no more than a tenth of a second does.
     frame(4s);
-    CHECK(view.ScrollPosition() == boo::IntPoint(0, 225));
+    CHECK(view.ScrollPosition() == PointI(0, 225));
     setAxis(pal::GamepadAxis::RightY, -0.5f);
     frame(4s + 100ms);
-    CHECK(view.ScrollPosition() == boo::IntPoint(0, 188));
+    CHECK(view.ScrollPosition() == PointI(0, 188));
     setAxis(pal::GamepadAxis::RightY, 0);
     frame(5s);
     view.ScrollTo({});
@@ -221,7 +221,7 @@ namespace krys::ui::tests
     frame(6s);
     frame(6s + 20ms);
     CHECK(byId(u8"list")->ScrollTop() == 30);
-    CHECK(view.ScrollPosition() == boo::IntPoint());
+    CHECK(view.ScrollPosition() == PointI());
     setAxis(pal::GamepadAxis::RightY, 0);
     frame(7s);
 

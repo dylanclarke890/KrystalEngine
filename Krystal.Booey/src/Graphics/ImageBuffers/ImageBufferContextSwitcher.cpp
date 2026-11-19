@@ -32,7 +32,7 @@
 namespace krys::boo
 {
   ImageBufferContextSwitcher::ImageBufferContextSwitcher(GraphicsContext &destinationContext,
-                                                         const FloatRect &sourceImageRect,
+                                                         const RectF &sourceImageRect,
                                                          RefPtr<Filter> &&filter,
                                                          FilterResults *results) noexcept
       : GraphicsContextSwitcher(krys::move(filter)), _sourceImageRect(sourceImageRect), _results(results)
@@ -70,8 +70,8 @@ namespace krys::boo
   }
 
   void ImageBufferContextSwitcher::BeginClipAndDrawSourceImage(GraphicsContext &destinationContext,
-                                                               const FloatRect &repaintRect,
-                                                               const FloatRect &) noexcept
+                                                               const RectF &repaintRect,
+                                                               const RectF &) noexcept
   {
     if (auto *context = DrawingContext(destinationContext))
     {

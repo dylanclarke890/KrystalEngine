@@ -99,7 +99,7 @@ namespace krys::boo::inline_iterator
       return GetBox().IsAtomicInlineBox();
     }
 
-    KRYS_NODISCARD FloatRect VisualRectIgnoringBlockDirection() const noexcept
+    KRYS_NODISCARD RectF VisualRectIgnoringBlockDirection() const noexcept
     {
       return GetBox().VisualRectIgnoringBlockDirection();
     }

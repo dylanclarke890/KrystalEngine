@@ -63,7 +63,7 @@ namespace krys::boo::style
     return AdoptRef(*new MatrixTransformFunction(_a, _b, _c, _d, _e, _f));
   }
 
-  Ref<TransformOperation> MatrixTransformFunction::ToPlatform(const FloatSize &) const noexcept
+  Ref<TransformOperation> MatrixTransformFunction::ToPlatform(const SizeF &) const noexcept
   {
     return MatrixTransformOperation::Create(_a.Value, _b.Value, _c.Value, _d.Value, _e.Value, _f.Value);
   }
@@ -80,7 +80,7 @@ namespace krys::boo::style
            && _e == otherMatrix._e && _f == otherMatrix._f;
   }
 
-  void MatrixTransformFunction::Apply(TransformationMatrix &transform, const FloatSize &) const noexcept
+  void MatrixTransformFunction::Apply(TransformationMatrix &transform, const SizeF &) const noexcept
   {
     transform.Multiply(Matrix());
   }

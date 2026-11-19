@@ -539,9 +539,9 @@ namespace krys::boo::tests
       u8"<div id=editable style='overflow:hidden' contenteditable><p>text</p></div>"
       u8"<div id=auto style='overflow:auto'><p>text</p></div>");
     auto &handler = fixture.Frame->GetEventHandler();
-    auto mouse = [](PlatformEvent::Type type, IntPoint position)
+    auto mouse = [](PlatformEvent::Type type, PointI position)
     {
-      DoublePoint point(position.X(), position.Y());
+      PointD point(position.X(), position.Y());
       return PlatformMouseEvent(point, point, MouseButton::Left, type,
                                 type == PlatformEvent::Type::MousePressed ? 1 : 0, {}, MonotonicTime::Now());
     };

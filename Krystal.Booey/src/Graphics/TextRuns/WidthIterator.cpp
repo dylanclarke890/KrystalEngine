@@ -490,7 +490,7 @@ namespace krys::boo
   void WidthIterator::AdvanceInternal(Utf8TextIterator &textIterator, GlyphBuffer &glyphBuffer) noexcept
   {
     // The core logic here needs to match FontCascade::WidthForTextUsingSimplifiedMeasuring()
-    FloatRect bounds;
+    RectF bounds;
     auto &fontDescription = _fontCascade.GetFontDescription();
     Ref<const Font> primaryFont = _fontCascade.PrimaryFont();
     AdvanceInternalState advanceInternalState(glyphBuffer, *primaryFont, textIterator.CurrentIndex());

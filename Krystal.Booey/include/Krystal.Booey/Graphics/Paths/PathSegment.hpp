@@ -66,18 +66,18 @@ namespace krys::boo
       return std::holds_alternative<PathCloseSubpath>(_data) || std::holds_alternative<PathClosedArc>(_data);
     }
 
-    KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
-                                                FloatPoint &lastMoveToPoint) const noexcept;
+    KRYS_NODISCARD PointF CalculateEndPoint(const PointF &currentPoint,
+                                            PointF &lastMoveToPoint) const noexcept;
 
-    KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
+    KRYS_NODISCARD Maybe<PointF> TryGetEndPointWithoutContext() const noexcept;
 
-    KRYS_NODISCARD FloatRect FastBoundingRect() const noexcept;
+    KRYS_NODISCARD RectF FastBoundingRect() const noexcept;
 
-    void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
-                                FloatRect &boundingRect) const noexcept;
+    void ExtendFastBoundingRect(const PointF &currentPoint, const PointF &lastMoveToPoint,
+                                RectF &boundingRect) const noexcept;
 
-    void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
-                            FloatRect &boundingRect) const noexcept;
+    void ExtendBoundingRect(const PointF &currentPoint, const PointF &lastMoveToPoint,
+                            RectF &boundingRect) const noexcept;
 
     KRYS_NODISCARD bool CanApplyElements() const noexcept;
 

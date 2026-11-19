@@ -99,7 +99,7 @@ namespace krys::ui
     return _stroker.Stroke(ToPath2D(path), strokeStyle, gfx::Transform2D::Identity());
   }
 
-  bool PathStrokerStrategy::StrokeContains(const boo::Path &path, const boo::FloatPoint &point,
+  bool PathStrokerStrategy::StrokeContains(const boo::Path &path, const PointF &point,
                                            const boo::PathStrokeStyle &style) noexcept
   {
     // The outline is filled with the nonzero rule: the point is inside when the edges wind around it.
@@ -124,8 +124,8 @@ namespace krys::ui
     return winding != 0;
   }
 
-  boo::FloatRect PathStrokerStrategy::StrokeBoundingRect(const boo::Path &path,
-                                                         const boo::PathStrokeStyle &style) noexcept
+  RectF PathStrokerStrategy::StrokeBoundingRect(const boo::Path &path,
+                                                const boo::PathStrokeStyle &style) noexcept
   {
     auto outline = Outline(path, style);
     if (outline.IsEmpty())

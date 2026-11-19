@@ -123,7 +123,7 @@ namespace krys::boo::ax::tests
     auto &webArea = *Downcast<AXScrollView>(*page.Cache().RootObject()).WebAreaObject();
     auto rect = text->ElementRect();
     auto *hit = webArea.AccessibilityHitTest(
-      IntPoint((rect.X() + rect.Width() / 2).ToInt(), (rect.Y() + rect.Height() / 2).ToInt()));
+      PointI((rect.X() + rect.Width() / 2).ToInt(), (rect.Y() + rect.Height() / 2).ToInt()));
     REQUIRE(hit);
     CHECK(hit->AxObjectCache() == root.AxObjectCache());
     CHECK((hit == text || hit->ParentObjectUnignored() == text));
@@ -145,7 +145,7 @@ namespace krys::boo::ax::tests
     CHECK(rect.MaxY() <= 60);
     auto &webArea = *Downcast<AXScrollView>(*page.Cache().RootObject()).WebAreaObject();
     auto *hit = webArea.AccessibilityHitTest(
-      IntPoint((rect.X() + rect.Width() / 2).ToInt(), (rect.Y() + rect.Height() / 2).ToInt()));
+      PointI((rect.X() + rect.Width() / 2).ToInt(), (rect.Y() + rect.Height() / 2).ToInt()));
     REQUIRE(hit);
     CHECK((hit == &text || hit->ParentObjectUnignored() == &text));
   }

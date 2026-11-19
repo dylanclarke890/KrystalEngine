@@ -28,6 +28,7 @@
 #include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Net/Url.hpp"
@@ -35,7 +36,6 @@
 namespace krys::boo
 {
   class Image;
-  class IntRect;
   struct Settings;
 
   /// @brief Interface for notification about changes to an image, including decoding, drawing, and animating.
@@ -68,10 +68,10 @@ namespace krys::boo
       return true;
     }
 
-    virtual void ImageFrameAvailable(const Image &, ImageAnimatingState, const IntRect *changeRect = nullptr,
+    virtual void ImageFrameAvailable(const Image &, ImageAnimatingState, const RectI *changeRect = nullptr,
                                      DecodingStatus = DecodingStatus::Invalid) noexcept = 0;
 
-    virtual void ChangedInRect(const Image &, const IntRect *changeRect = nullptr) noexcept = 0;
+    virtual void ChangedInRect(const Image &, const RectI *changeRect = nullptr) noexcept = 0;
 
     virtual void ImageContentChanged(const Image &) noexcept = 0;
 

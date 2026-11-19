@@ -278,8 +278,7 @@ namespace krys::boo::html
     }
 
     auto location = event.AbsoluteLocation();
-    thumb.DragFrom(
-      LayoutPoint(FloatPoint(static_cast<float>(location.X()), static_cast<float>(location.Y()))));
+    thumb.DragFrom(LayoutPoint(PointF(static_cast<float>(location.X()), static_cast<float>(location.Y()))));
   }
 
   void RangeInputType::DisabledStateChanged() noexcept

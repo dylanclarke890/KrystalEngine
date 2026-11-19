@@ -506,7 +506,7 @@ namespace krys::boo::display_list
   }
 
   DrawGlyphs::DrawGlyphs(Ref<const boo::Font> &&font, List<GlyphBufferGlyph> &&glyphs,
-                         List<GlyphBufferAdvance> &&advances, const FloatPoint &localAnchor,
+                         List<GlyphBufferAdvance> &&advances, const PointF &localAnchor,
                          FontSmoothingMode smoothingMode) noexcept
       : _font(krys::move(font)), _glyphs(krys::move(glyphs)), _advances(krys::move(advances)),
         _localAnchor(localAnchor), _fontSmoothingMode(smoothingMode)
@@ -573,7 +573,7 @@ namespace krys::boo::display_list
     return _displayList;
   }
 
-  ClipToImageBuffer::ClipToImageBuffer(ImageBuffer &imageBuffer, const FloatRect &destinationRect) noexcept
+  ClipToImageBuffer::ClipToImageBuffer(ImageBuffer &imageBuffer, const RectF &destinationRect) noexcept
       : _imageBuffer(ShareRef(imageBuffer)), _destinationRect(destinationRect)
   {
   }
@@ -608,7 +608,7 @@ namespace krys::boo::display_list
   }
 
   DrawFilteredImageBuffer::DrawFilteredImageBuffer(RefPtr<ImageBuffer> &&sourceImage,
-                                                   const FloatRect &sourceImageRect, Filter &filter) noexcept
+                                                   const RectF &sourceImageRect, Filter &filter) noexcept
       : _sourceImage(krys::move(sourceImage)), _sourceImageRect(sourceImageRect), _filter(ShareRef(filter))
   {
   }
@@ -652,8 +652,8 @@ namespace krys::boo::display_list
     ts.DumpProperty(u8"source-image-rect", SourceImageRect());
   }
 
-  DrawImageBuffer::DrawImageBuffer(ImageBuffer &imageBuffer, const FloatRect &destRect,
-                                   const FloatRect &srcRect, ImagePaintingOptions options) noexcept
+  DrawImageBuffer::DrawImageBuffer(ImageBuffer &imageBuffer, const RectF &destRect, const RectF &srcRect,
+                                   ImagePaintingOptions options) noexcept
       : _imageBuffer(ShareRef(imageBuffer)), _destinationRect(destRect), _srcRect(srcRect), _options(options)
   {
   }
@@ -688,7 +688,7 @@ namespace krys::boo::display_list
     ts.DumpProperty(u8"dest-rect", DestinationRect());
   }
 
-  DrawNativeImage::DrawNativeImage(NativeImage &image, const FloatRect &destRect, const FloatRect &srcRect,
+  DrawNativeImage::DrawNativeImage(NativeImage &image, const RectF &destRect, const RectF &srcRect,
                                    ImagePaintingOptions options) noexcept
       : _image(ShareRef(image)), _destinationRect(destRect), _srcRect(srcRect), _options(options)
   {
@@ -724,11 +724,10 @@ namespace krys::boo::display_list
     ts.DumpProperty(u8"dest-rect", DestinationRect());
   }
 
-  DrawPatternNativeImage::DrawPatternNativeImage(NativeImage &image, const FloatRect &destRect,
-                                                 const FloatRect &tileRect,
-                                                 const AffineTransform &patternTransform,
-                                                 const FloatPoint &phase, const FloatSize &spacing,
-                                                 ImagePaintingOptions options) noexcept
+  DrawPatternNativeImage::DrawPatternNativeImage(NativeImage &image, const RectF &destRect,
+                                                 const RectF &tileRect,
+                                                 const AffineTransform &patternTransform, const PointF &phase,
+                                                 const SizeF &spacing, ImagePaintingOptions options) noexcept
       : _image(ShareRef(image)), _destination(destRect), _tileRect(tileRect),
         _patternTransform(patternTransform), _phase(phase), _spacing(spacing), _options(options)
   {
@@ -768,11 +767,10 @@ namespace krys::boo::display_list
     ts.DumpProperty(u8"spacing", Spacing());
   }
 
-  DrawPatternImageBuffer::DrawPatternImageBuffer(ImageBuffer &image, const FloatRect &destRect,
-                                                 const FloatRect &tileRect,
-                                                 const AffineTransform &patternTransform,
-                                                 const FloatPoint &phase, const FloatSize &spacing,
-                                                 ImagePaintingOptions options) noexcept
+  DrawPatternImageBuffer::DrawPatternImageBuffer(ImageBuffer &image, const RectF &destRect,
+                                                 const RectF &tileRect,
+                                                 const AffineTransform &patternTransform, const PointF &phase,
+                                                 const SizeF &spacing, ImagePaintingOptions options) noexcept
       : _imageBuffer(ShareRef(image)), _destination(destRect), _tileRect(tileRect),
         _patternTransform(patternTransform), _phase(phase), _spacing(spacing), _options(options)
   {
@@ -850,7 +848,7 @@ namespace krys::boo::display_list
   {
   }
 
-  DrawLinesForText::DrawLinesForText(const FloatPoint &point, Span<const FloatSegment> lineSegments,
+  DrawLinesForText::DrawLinesForText(const PointF &point, Span<const FloatSegment> lineSegments,
                                      float thickness, bool printing, bool doubleLines,
                                      boo::StrokeStyle style) noexcept
       : _point(point), _lineSegments(lineSegments.begin(), lineSegments.end()), _thickness(thickness),
@@ -873,12 +871,12 @@ namespace krys::boo::display_list
     ts.DumpProperty(u8"double", DoubleLines());
   }
 
-  FillRectWithGradient::FillRectWithGradient(const FloatRect &rect, boo::Gradient &gradient) noexcept
+  FillRectWithGradient::FillRectWithGradient(const RectF &rect, boo::Gradient &gradient) noexcept
       : _rect(rect), _gradient(ShareRef(gradient))
   {
   }
 
-  FillRectWithGradient::FillRectWithGradient(FloatRect &&rect, Ref<boo::Gradient> &&gradient) noexcept
+  FillRectWithGradient::FillRectWithGradient(RectF &&rect, Ref<boo::Gradient> &&gradient) noexcept
       : _rect(krys::move(rect)), _gradient(krys::move(gradient))
   {
   }
@@ -895,7 +893,7 @@ namespace krys::boo::display_list
   }
 
   FillRectWithGradientAndSpaceTransform::FillRectWithGradientAndSpaceTransform(
-    const FloatRect &rect, boo::Gradient &gradient, const AffineTransform &gradientSpaceTransform,
+    const RectF &rect, boo::Gradient &gradient, const AffineTransform &gradientSpaceTransform,
     GraphicsContext::RequiresClipToRect requiresClipToRect) noexcept
       : _rect(rect), _gradient(ShareRef(gradient)), _gradientSpaceTransform(gradientSpaceTransform),
         _requiresClipToRect(requiresClipToRect)
@@ -903,7 +901,7 @@ namespace krys::boo::display_list
   }
 
   FillRectWithGradientAndSpaceTransform::FillRectWithGradientAndSpaceTransform(
-    FloatRect &&rect, Ref<boo::Gradient> &&gradient, AffineTransform &&gradientSpaceTransform,
+    RectF &&rect, Ref<boo::Gradient> &&gradient, AffineTransform &&gradientSpaceTransform,
     GraphicsContext::RequiresClipToRect requiresClipToRect) noexcept
       : _rect(krys::move(rect)), _gradient(krys::move(gradient)),
         _gradientSpaceTransform(krys::move(gradientSpaceTransform)), _requiresClipToRect(requiresClipToRect)

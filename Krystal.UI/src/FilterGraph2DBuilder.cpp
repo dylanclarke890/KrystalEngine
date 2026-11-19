@@ -52,7 +52,7 @@ namespace krys::ui
       }
     };
 
-    KRYS_NODISCARD gfx::PixelRect2D ToPixelRect(const boo::IntRect &rect) noexcept
+    KRYS_NODISCARD gfx::PixelRect2D ToPixelRect(const RectI &rect) noexcept
     {
       return {.X = rect.X(),
               .Y = rect.Y(),
@@ -507,7 +507,7 @@ namespace krys::ui
         auto tileRect = inputs[0]->MaxEffectRect(filter);
         tileRect.Scale(filter.FilterScale());
         node.Type = Kind::Tile;
-        node.TileRect = ToPixelRect(EnclosingIntRect(tileRect));
+        node.TileRect = ToPixelRect(EnclosingRectI(tileRect));
         break;
       }
 
@@ -538,7 +538,7 @@ namespace krys::ui
         // The image drawn into a buffer over the result, as it's drawn in software.
         const auto &image = Downcast<boo::FEImage>(effect);
         const auto absoluteImageRect = result.AbsoluteImageRect();
-        auto buffer = boo::ImageBuffer::Create(boo::FloatSize(absoluteImageRect.Size()), 1);
+        auto buffer = boo::ImageBuffer::Create(SizeF(absoluteImageRect.Size()), 1);
         if (!buffer)
         {
           return false;
@@ -552,7 +552,7 @@ namespace krys::ui
           auto srcRect = image.SourceImageRect();
           image.PreserveAspectRatio().TransformRect(imageRect, srcRect);
           imageRect.Scale(filter.FilterScale());
-          imageRect = boo::FloatRect(boo::IntRect(imageRect) - absoluteImageRect.Location());
+          imageRect = RectF(RectI(imageRect) - absoluteImageRect.Location());
           context.DrawNativeImage(*nativeImage, imageRect, srcRect);
         }
         else if (auto *imageBuffer = sourceImage.ImageBufferIfExists())
@@ -560,7 +560,7 @@ namespace krys::ui
           auto imageRect = primitiveSubregion;
           imageRect.MoveBy(image.SourceImageRect().Location());
           imageRect.Scale(filter.FilterScale());
-          imageRect = boo::FloatRect(boo::IntRect(imageRect) - absoluteImageRect.Location());
+          imageRect = RectF(RectI(imageRect) - absoluteImageRect.Location());
           context.DrawImageBuffer(*imageBuffer, imageRect.Location());
         }
         else

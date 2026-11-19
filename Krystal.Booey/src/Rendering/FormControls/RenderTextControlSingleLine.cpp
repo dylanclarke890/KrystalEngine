@@ -498,7 +498,7 @@ namespace krys::boo
     return lineHeight + nonContentHeight;
   }
 
-  void RenderTextControlSingleLine::Autoscroll(const IntPoint &position) noexcept
+  void RenderTextControlSingleLine::Autoscroll(const PointI &position) noexcept
   {
     auto *renderer = InnerTextElement()->Renderer();
     if (!renderer)

@@ -468,7 +468,7 @@ namespace krys::boo
         default:                         krys_debug_assert(false); return false;
       }
 
-      frame->View()->ScrollBy(IntSize(dx.ToInt(), dy.ToInt()));
+      frame->View()->ScrollBy(SizeI(dx.ToInt(), dy.ToInt()));
       return true;
     }
     return false;
@@ -515,7 +515,7 @@ namespace krys::boo
 
       if (auto *scrollableArea = renderBox->EnclosingLayer()->GetScrollableArea())
       {
-        scrollableArea->ScrollByRecursively(IntSize(dx.ToInt(), dy.ToInt()));
+        scrollableArea->ScrollByRecursively(SizeI(dx.ToInt(), dy.ToInt()));
       }
       return true;
     }

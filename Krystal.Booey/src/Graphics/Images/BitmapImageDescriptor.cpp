@@ -133,7 +133,7 @@ namespace krys::boo
     return _encodedDataStatus;
   }
 
-  IntSize BitmapImageDescriptor::Size(ImageOrientation orientation) const noexcept
+  SizeI BitmapImageDescriptor::Size(ImageOrientation orientation) const noexcept
   {
     auto densityCorrectedSize = DensityCorrectedSize();
     if (!densityCorrectedSize)
@@ -149,9 +149,9 @@ namespace krys::boo
     return orientation.UsesWidthAsHeight() ? densityCorrectedSize->TransposedSize() : *densityCorrectedSize;
   }
 
-  IntSize BitmapImageDescriptor::SourceSize(ImageOrientation orientation) const noexcept
+  SizeI BitmapImageDescriptor::SourceSize(ImageOrientation orientation) const noexcept
   {
-    IntSize size;
+    SizeI size;
 
     // It's possible that we have decoded the metadata, but not frame contents yet. In that case ImageDecoder
     // claims to have the size available, but the frame cache is empty. Return the decoder size without
@@ -174,7 +174,7 @@ namespace krys::boo
     return orientation.UsesWidthAsHeight() ? size.TransposedSize() : size;
   }
 
-  Maybe<IntSize> BitmapImageDescriptor::DensityCorrectedSize() const noexcept
+  Maybe<SizeI> BitmapImageDescriptor::DensityCorrectedSize() const noexcept
   {
     return PrimaryImageFrameMetadata(_densityCorrectedSize, CachedFlag::DensityCorrectedSize,
                                      &ImageFrame::DensityCorrectedSize, SubsamplingLevel::Default);
@@ -226,9 +226,9 @@ namespace krys::boo
                          &ImageDecoder::AccessibilityDescription);
   }
 
-  Maybe<IntPoint> BitmapImageDescriptor::HotSpot() const noexcept
+  Maybe<PointI> BitmapImageDescriptor::HotSpot() const noexcept
   {
-    return ImageMetadata(_hotSpot, Maybe<IntPoint>(), CachedFlag::HotSpot, &ImageDecoder::HotSpot);
+    return ImageMetadata(_hotSpot, Maybe<PointI>(), CachedFlag::HotSpot, &ImageDecoder::HotSpot);
   }
 
   SubsamplingLevel BitmapImageDescriptor::MaximumSubsamplingLevel() const noexcept
@@ -270,7 +270,7 @@ namespace krys::boo
     return _maximumSubsamplingLevel;
   }
 
-  SubsamplingLevel BitmapImageDescriptor::SubsamplingLevelForScaleFactor(GraphicsContext &, const FloatSize &,
+  SubsamplingLevel BitmapImageDescriptor::SubsamplingLevelForScaleFactor(GraphicsContext &, const SizeF &,
                                                                          AllowImageSubsampling) noexcept
   {
     // Images are subsampled only where the platform decoder can decode at a lower resolution.

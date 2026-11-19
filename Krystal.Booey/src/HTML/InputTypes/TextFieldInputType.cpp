@@ -854,7 +854,7 @@ namespace krys::boo::html
     }
   }
 
-  IntRect TextFieldInputType::ElementRectInRootViewCoordinates() const noexcept
+  RectI TextFieldInputType::ElementRectInRootViewCoordinates() const noexcept
   {
     auto &element = *Element();
     auto *renderer = element.Renderer();

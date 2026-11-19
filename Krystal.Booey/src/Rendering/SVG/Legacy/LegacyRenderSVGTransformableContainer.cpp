@@ -56,7 +56,7 @@ namespace krys::boo
     if (useElement)
     {
       SVGLengthContext lengthContext(&element);
-      FloatSize translation(useElement->X().Value(lengthContext), useElement->Y().Value(lengthContext));
+      SizeF translation(useElement->X().Value(lengthContext), useElement->Y().Value(lengthContext));
       if (translation != _additionalTranslation)
       {
         _needsTransformUpdate = true;

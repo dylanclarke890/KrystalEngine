@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 
 namespace krys::boo
@@ -42,7 +42,7 @@ namespace krys::boo
     };
 
     Type ElementType;
-    std::array<FloatPoint, 3> Points;
+    std::array<PointF, 3> Points;
   };
 
   using PathElementApplier = Func<void(const PathElement &)>;

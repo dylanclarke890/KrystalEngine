@@ -2107,7 +2107,7 @@ namespace krys::boo
       {
         BorderPainter::DrawLineForBoxSide(
           graphicsContext, GetDocument(),
-          FloatRect(LayoutRect(LayoutPoint(border->X1, border->Y1), LayoutPoint(border->X2, border->Y2))),
+          RectF(LayoutRect(LayoutPoint(border->X1, border->Y1), LayoutPoint(border->X2, border->Y2))),
           border->Side, border->BorderValue.GetColor(), border->Style, 0, 0, antialias);
       }
     }
@@ -2215,13 +2215,13 @@ namespace krys::boo
     GraphicsContextStateSaver stateSaver(paintInfo.Context(), shouldClip);
     if (paintBackgroundObject)
     {
-      paintInfo.Context().Clip(FloatRect(LayoutRect {adjustedPaintOffset, Size()}));
+      paintInfo.Context().Clip(RectF(LayoutRect {adjustedPaintOffset, Size()}));
     }
     else if (shouldClip)
     {
       LayoutRect clipRect(adjustedPaintOffset.X() + BorderLeft(), adjustedPaintOffset.Y() + BorderTop(),
                           Width() - BorderLeft() - BorderRight(), Height() - BorderTop() - BorderBottom());
-      paintInfo.Context().Clip(FloatRect(clipRect));
+      paintInfo.Context().Clip(RectF(clipRect));
     }
     LayoutRect fillRect;
     if (paintBackgroundObject)

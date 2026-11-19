@@ -54,7 +54,7 @@ namespace krys::boo
 
   void LegacyRenderSVGResourceMasker::RemoveAllClientsFromCache() noexcept
   {
-    _maskContentBoundaries.fill(FloatRect {});
+    _maskContentBoundaries.fill(RectF {});
     _masker.clear();
   }
 
@@ -79,11 +79,11 @@ namespace krys::boo
     MaskerData *maskerData = _masker[&renderer].get();
     AffineTransform absoluteTransform =
       SVGRenderingContext::CalculateTransformationToOutermostCoordinateSystem(renderer);
-    FloatRect decoratedBounds = renderer.DecoratedBoundingBox();
+    RectF decoratedBounds = renderer.DecoratedBoundingBox();
 
     // Ignore 2D rotation, as it doesn't affect the size of the mask.
-    FloatSize scale(static_cast<float>(absoluteTransform.XScale()),
-                    static_cast<float>(absoluteTransform.YScale()));
+    SizeF scale(static_cast<float>(absoluteTransform.XScale()),
+                static_cast<float>(absoluteTransform.YScale()));
 
     // Determine scale factor for the mask. The size of intermediate ImageBuffers shouldn't be bigger than
     // kMaxFilterSize.
@@ -141,7 +141,7 @@ namespace krys::boo
   }
 
   bool LegacyRenderSVGResourceMasker::DrawContentIntoContext(GraphicsContext &context,
-                                                             const FloatRect &objectBoundingBox) noexcept
+                                                             const RectF &objectBoundingBox) noexcept
   {
     // Eventually adjust the mask image context according to the target objectBoundingBox.
     AffineTransform maskContentTransformation;
@@ -183,8 +183,8 @@ namespace krys::boo
   }
 
   bool LegacyRenderSVGResourceMasker::DrawContentIntoContext(GraphicsContext &context,
-                                                             const FloatRect &destinationRect,
-                                                             const FloatRect &sourceRect,
+                                                             const RectF &destinationRect,
+                                                             const RectF &sourceRect,
                                                              ImagePaintingOptions options) noexcept
   {
     GraphicsContextStateSaver stateSaver(context);
@@ -224,13 +224,13 @@ namespace krys::boo
     }
   }
 
-  FloatRect
+  RectF
     LegacyRenderSVGResourceMasker::ResourceBoundingBox(const RenderObject &object,
                                                        RepaintRectCalculation repaintRectCalculation) noexcept
   {
-    FloatRect objectBoundingBox = object.ObjectBoundingBox();
+    RectF objectBoundingBox = object.ObjectBoundingBox();
     auto &maskElement = MaskElement();
-    FloatRect maskBoundaries =
+    RectF maskBoundaries =
       SVGLengthContext::ResolveRectangle(maskElement, maskElement.MaskUnits(), objectBoundingBox);
 
     // Resource was not layouted yet. Give back clipping rect of the mask.
@@ -245,7 +245,7 @@ namespace krys::boo
       CalculateMaskContentRepaintRect(repaintRectCalculation);
     }
 
-    FloatRect maskRect = maskContentBoundaries;
+    RectF maskRect = maskContentBoundaries;
     if (maskElement.MaskContentUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
     {
       AffineTransform transform;

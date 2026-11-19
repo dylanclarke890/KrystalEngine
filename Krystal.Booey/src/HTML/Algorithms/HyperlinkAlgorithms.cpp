@@ -18,8 +18,8 @@ namespace krys::boo::html
   namespace
   {
     /// @brief Where @p event clicked in @p image, in CSS pixels from its top left corner.
-    KRYS_NODISCARD Maybe<FloatPoint> ServerMapClickPosition(const HTMLImageElement &image,
-                                                            const Event &event) noexcept
+    KRYS_NODISCARD Maybe<PointF> ServerMapClickPosition(const HTMLImageElement &image,
+                                                        const Event &event) noexcept
     {
       auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
       auto *renderer = DynamicDowncast<RenderImage>(image.Renderer());
@@ -30,7 +30,7 @@ namespace krys::boo::html
 
       // FIXME: This should probably pass UseTransforms in the EnumSet<MapCoordinatesMode>.
       return renderer->AbsoluteToLocal(
-        FloatPoint(static_cast<float>(mouseEvent->PageX()), static_cast<float>(mouseEvent->PageY())));
+        PointF(static_cast<float>(mouseEvent->PageX()), static_cast<float>(mouseEvent->PageY())));
     }
 
     /// @brief The target @p target, unless it has dangling markup (a newline and a `<`), which makes it

@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -49,7 +49,7 @@ namespace krys::boo
     /// @brief A switcher that applies @p filter as it's drawn: through the graphics context when the filter
     /// supports it; otherwise to an image buffer the source is drawn into.
     KRYS_NODISCARD static UniquePtr<GraphicsContextSwitcher>
-      Create(GraphicsContext &destinationContext, const FloatRect &sourceImageRect,
+      Create(GraphicsContext &destinationContext, const RectF &sourceImageRect,
              RefPtr<Filter> &&filter = nullptr, FilterResults *results = nullptr) noexcept;
 
     virtual ~GraphicsContextSwitcher() noexcept = default;
@@ -64,9 +64,8 @@ namespace krys::boo
       return false;
     }
 
-    virtual void BeginClipAndDrawSourceImage(GraphicsContext &destinationContext,
-                                             const FloatRect &repaintRect,
-                                             const FloatRect &clipRect) noexcept = 0;
+    virtual void BeginClipAndDrawSourceImage(GraphicsContext &destinationContext, const RectF &repaintRect,
+                                             const RectF &clipRect) noexcept = 0;
 
     virtual void EndClipAndDrawSourceImage(GraphicsContext &destinationContext) noexcept = 0;
 

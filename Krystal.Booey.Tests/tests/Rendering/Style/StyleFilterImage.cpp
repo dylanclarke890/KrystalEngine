@@ -29,8 +29,8 @@ namespace krys::boo::tests
       return image->ImageSize(&renderer, 1);
     };
 
-    CHECK(imageSize(u8"image") == FloatSize(16, 8));
-    CHECK(imageSize(u8"none") == FloatSize());
+    CHECK(imageSize(u8"image") == SizeF(16, 8));
+    CHECK(imageSize(u8"none") == SizeF());
   }
 
   TEST_CASE("StyleFilterImage: its renderers hear when the input image loads",

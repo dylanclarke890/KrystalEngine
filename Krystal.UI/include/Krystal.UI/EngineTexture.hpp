@@ -29,7 +29,7 @@ namespace krys::ui
   {
   private:
     gfx::TextureHandle _texture;
-    boo::IntSize _size;
+    SizeI _size;
     AlphaPremultiplication _alpha;
     WeakPtr<EngineTextureDisplayDelegate> _delegate;
     WeakPtr<boo::NativeImage> _image;
@@ -37,7 +37,7 @@ namespace krys::ui
   public:
     /// @param alpha Whether the texture's colours are already multiplied by their alpha.
     KRYS_NODISCARD static Ref<EngineTexture>
-      Create(gfx::TextureHandle texture, const boo::IntSize &size,
+      Create(gfx::TextureHandle texture, const SizeI &size,
              AlphaPremultiplication alpha = AlphaPremultiplication::Premultiplied) noexcept;
 
     KRYS_NODISCARD gfx::TextureHandle Handle() const noexcept
@@ -50,7 +50,7 @@ namespace krys::ui
       return _alpha;
     }
 
-    KRYS_NODISCARD boo::IntSize Size() const noexcept override
+    KRYS_NODISCARD SizeI Size() const noexcept override
     {
       return _size;
     }
@@ -61,7 +61,6 @@ namespace krys::ui
     KRYS_NODISCARD RefPtr<boo::NativeImage> GetNativeImage() noexcept override;
 
   private:
-    EngineTexture(gfx::TextureHandle texture, const boo::IntSize &size,
-                  AlphaPremultiplication alpha) noexcept;
+    EngineTexture(gfx::TextureHandle texture, const SizeI &size, AlphaPremultiplication alpha) noexcept;
   };
 }

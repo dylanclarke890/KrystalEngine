@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGAnimationElement.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 
 namespace krys::boo
 {
@@ -44,9 +44,9 @@ namespace krys::boo
   private:
     // Note: we do not support percentage values for to/from coords as the spec implies we should (opera
     // doesn't either)
-    FloatPoint _fromPoint;
-    FloatPoint _toPoint;
-    Maybe<FloatPoint> _toPointAtEndOfDuration;
+    PointF _fromPoint;
+    PointF _toPoint;
+    Maybe<PointF> _toPointAtEndOfDuration;
 
     Path _path;
     Path _animationPath;

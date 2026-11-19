@@ -84,12 +84,12 @@ namespace krys::boo::html::tests
     void Click(LocalFrame &frame, double x, double y) noexcept
     {
       auto &handler = frame.GetEventHandler();
-      (void)handler.HandleMousePressEvent(
-        PlatformMouseEvent(DoublePoint(x, y), DoublePoint(x, y), MouseButton::Left,
-                           PlatformEvent::Type::MousePressed, 1, {}, MonotonicTime::Now()));
-      (void)handler.HandleMouseReleaseEvent(
-        PlatformMouseEvent(DoublePoint(x, y), DoublePoint(x, y), MouseButton::Left,
-                           PlatformEvent::Type::MouseReleased, 1, {}, MonotonicTime::Now()));
+      (void)handler.HandleMousePressEvent(PlatformMouseEvent(PointD(x, y), PointD(x, y), MouseButton::Left,
+                                                             PlatformEvent::Type::MousePressed, 1, {},
+                                                             MonotonicTime::Now()));
+      (void)handler.HandleMouseReleaseEvent(PlatformMouseEvent(PointD(x, y), PointD(x, y), MouseButton::Left,
+                                                               PlatformEvent::Type::MouseReleased, 1, {},
+                                                               MonotonicTime::Now()));
     }
   }
 

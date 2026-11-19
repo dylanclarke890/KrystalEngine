@@ -25,11 +25,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/PixelBufferFormat.hpp"
 #include "Krystal.Booey/Graphics/RenderingMode.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Span.hpp"
@@ -38,8 +38,6 @@ namespace krys::boo
 {
   class GraphicsContext;
   class GraphicsLayerContentsDisplayDelegate;
-  class IntPoint;
-  class IntRect;
   class NativeImage;
   class PixelBuffer;
   class PixelBufferSourceView;
@@ -47,7 +45,7 @@ namespace krys::boo
   /// @brief What an image buffer's backend was made for.
   struct ImageBufferBackendParameters
   {
-    IntSize BackendSize;
+    SizeI BackendSize;
     float ResolutionScale; // Resolution scale is of the ImageBuffer logical size.
   };
 
@@ -106,13 +104,13 @@ namespace krys::boo
     /// @brief Reads @p srcRect of the backend's pixels into @p destination, converted to its format; what's
     /// outside the backend is transparent black.
     /// @note What's drawn can't be read back from a display list, so it reads transparent black.
-    virtual void GetPixelBuffer(const IntRect &srcRect, PixelBuffer &destination) noexcept;
+    virtual void GetPixelBuffer(const RectI &srcRect, PixelBuffer &destination) noexcept;
 
     /// @brief Writes @p srcRect of @p source at @p destPoint, replacing what's there, ignoring the context's
     /// state (its transform, clip, alpha, shadow and compositing).
     /// @note It's drawn into the context as an image, in order with what's drawn before and after.
-    virtual void PutPixelBuffer(const PixelBufferSourceView &source, const IntRect &sourceRect,
-                                const IntPoint &destinationPoint, AlphaPremultiplication destFormat) noexcept;
+    virtual void PutPixelBuffer(const PixelBufferSourceView &source, const RectI &sourceRect,
+                                const PointI &destinationPoint, AlphaPremultiplication destFormat) noexcept;
 
     KRYS_NODISCARD virtual uint32 BytesPerRow() const noexcept;
 
@@ -123,7 +121,7 @@ namespace krys::boo
       return PixelFormat::RGBA8;
     }
 
-    KRYS_NODISCARD IntSize Size() const noexcept
+    KRYS_NODISCARD SizeI Size() const noexcept
     {
       return _parameters.BackendSize;
     }
@@ -162,12 +160,12 @@ namespace krys::boo
     explicit ImageBufferBackend(const Parameters &) noexcept;
 
     /// @brief Reads @p srcRect of @p sourceData, the backend's pixels, into @p destination.
-    void GetPixelBuffer(const IntRect &sourceRect, Span<const uint8> sourceData,
+    void GetPixelBuffer(const RectI &sourceRect, Span<const uint8> sourceData,
                         PixelBuffer &destination) noexcept;
 
     /// @brief Writes @p srcRect of @p source at @p destPoint into @p destinationData, the backend's pixels.
-    void PutPixelBuffer(const PixelBufferSourceView &source, const IntRect &sourceRect,
-                        const IntPoint &destinationPoint, AlphaPremultiplication destinationAlphaFormat,
+    void PutPixelBuffer(const PixelBufferSourceView &source, const RectI &sourceRect,
+                        const PointI &destinationPoint, AlphaPremultiplication destinationAlphaFormat,
                         Span<uint8> destinationData) noexcept;
   };
 }

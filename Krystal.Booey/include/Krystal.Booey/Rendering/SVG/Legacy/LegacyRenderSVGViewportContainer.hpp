@@ -39,7 +39,7 @@ namespace krys::boo
     bool _didTransformToRootUpdate : 1 {false};
     bool _isLayoutSizeChanged : 1 {false};
     bool _needsTransformUpdate : 1 {true};
-    FloatRect _viewport {};
+    RectF _viewport {};
     mutable AffineTransform _localToParentTransform {};
 
   public:
@@ -49,7 +49,7 @@ namespace krys::boo
 
     KRYS_NODISCARD SVGSvgElement &SvgSvgElement() const noexcept;
 
-    KRYS_NODISCARD FloatRect Viewport() const noexcept
+    KRYS_NODISCARD RectF Viewport() const noexcept
     {
       return _viewport;
     }
@@ -94,7 +94,7 @@ namespace krys::boo
 
     void ApplyViewportClip(PaintInfo &) noexcept override;
 
-    KRYS_NODISCARD bool PointIsInsideViewportClip(const FloatPoint &pointInParent) noexcept override;
+    KRYS_NODISCARD bool PointIsInsideViewportClip(const PointF &pointInParent) noexcept override;
   };
 }
 

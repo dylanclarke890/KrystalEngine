@@ -438,7 +438,7 @@ namespace krys::boo
           if (sides.Edges.At(side).ShouldRender())
           {
             auto sideRect = CalculateSideRect(outerBorderRect, sides.Edges, side);
-            path.AddRect(FloatRect(sideRect)); // FIXME: Need pixel snapping here.
+            path.AddRect(RectF(sideRect)); // FIXME: Need pixel snapping here.
           }
         }
 
@@ -515,7 +515,7 @@ namespace krys::boo
                                                                  RenderBoxModelObject::ScaleByUsedZoom::No);
 
     // If both values are ‘auto’ then the intrinsic width and/or height of the image should be used, if any.
-    image->SetContainerContextForRenderer(_renderer, FloatSize(source), style.UsedZoom());
+    image->SetContainerContextForRenderer(_renderer, SizeF(source), style.UsedZoom());
 
     NinePieceImagePainter::Paint(ninePieceImage, _paintInfo.Context(), &_renderer, style, destination, source,
                                  deviceScaleFactor, options);
@@ -867,7 +867,7 @@ namespace krys::boo
         mitreAdjacentSide1 = false;
         mitreAdjacentSide2 = false;
       }
-      DrawLineForBoxSide(graphicsContext, Document(), FloatRect(sideRect), side, colorToPaint,
+      DrawLineForBoxSide(graphicsContext, Document(), RectF(sideRect), side, colorToPaint,
                          edgeToRender.Style(), mitreAdjacentSide1 ? adjacentEdge1.WidthForPainting() : 0,
                          mitreAdjacentSide2 ? adjacentEdge2.WidthForPainting() : 0, antialias);
     }
@@ -919,7 +919,7 @@ namespace krys::boo
           auto centerlineRadii = centerline.GetRadii();
           centerlineRadii.Shrink(top, bottom, left, right);
           auto centerlineRect = centerline.Rect();
-          centerlineRect.Contract(FloatBoxExtent {top, right, bottom, left});
+          Contract(centerlineRect, FloatBoxExtent {top, right, bottom, left});
           Path centerlinePath;
           centerlinePath.AddRoundedRect(FloatRoundedRect(centerlineRect, centerlineRadii));
           if (auto pattern =
@@ -1068,7 +1068,7 @@ namespace krys::boo
     //       3  /              \  3
     //         0----------------3
     //
-    List<FloatPoint> quad;
+    List<PointF> quad;
     switch (side)
     {
       case BoxSide::Top:
@@ -1152,20 +1152,20 @@ namespace krys::boo
     }
 
     // Square off the end which shouldn't be affected by antialiasing, and clip.
-    List<FloatPoint> firstQuad = {quad[0], quad[1], quad[2],
-                                  side == BoxSide::Top || side == BoxSide::Bottom
-                                    ? FloatPoint(quad[3].X(), quad[2].Y())
-                                    : FloatPoint(quad[2].X(), quad[3].Y()),
-                                  quad[3]};
+    List<PointF> firstQuad = {quad[0], quad[1], quad[2],
+                              side == BoxSide::Top || side == BoxSide::Bottom
+                                ? PointF(quad[3].X(), quad[2].Y())
+                                : PointF(quad[2].X(), quad[3].Y()),
+                              quad[3]};
     bool wasAntialiased = graphicsContext.ShouldAntialias();
     graphicsContext.SetShouldAntialias(!firstEdgeMatches);
     graphicsContext.ClipPath(Path(firstQuad), WindRule::NonZero);
 
-    List<FloatPoint> secondQuad = {quad[0],
-                                   side == BoxSide::Top || side == BoxSide::Bottom
-                                     ? FloatPoint(quad[0].X(), quad[1].Y())
-                                     : FloatPoint(quad[1].X(), quad[0].Y()),
-                                   quad[1], quad[2], quad[3]};
+    List<PointF> secondQuad = {quad[0],
+                               side == BoxSide::Top || side == BoxSide::Bottom
+                                 ? PointF(quad[0].X(), quad[1].Y())
+                                 : PointF(quad[1].X(), quad[0].Y()),
+                               quad[1], quad[2], quad[3]};
     // Antialiasing affects the second side.
     graphicsContext.SetShouldAntialias(!secondEdgeMatches);
     graphicsContext.ClipPath(Path(secondQuad), WindRule::NonZero);
@@ -1174,11 +1174,11 @@ namespace krys::boo
   }
 
   void BorderPainter::DrawLineForBoxSide(GraphicsContext &graphicsContext, const boo::Document &document,
-                                         const FloatRect &rect, BoxSide side, Color color,
+                                         const RectF &rect, BoxSide side, Color color,
                                          BorderStyle borderStyle, float adjacentWidth1, float adjacentWidth2,
                                          bool antialias) noexcept
   {
-    auto drawBorderRect = [&graphicsContext](const FloatRect &rect)
+    auto drawBorderRect = [&graphicsContext](const RectF &rect)
     {
       if (rect.IsEmpty())
       {
@@ -1187,9 +1187,8 @@ namespace krys::boo
       graphicsContext.DrawRect(rect);
     };
 
-    auto drawLineFor = [&graphicsContext, &document, color, antialias](const FloatRect &rect, BoxSide side,
-                                                                       BorderStyle borderStyle,
-                                                                       const FloatSize &adjacent)
+    auto drawLineFor = [&graphicsContext, &document, color, antialias](
+                         const RectF &rect, BoxSide side, BorderStyle borderStyle, const SizeF &adjacent)
     {
       if (rect.IsEmpty())
       {
@@ -1297,7 +1296,7 @@ namespace krys::boo
           float mitreOffset3 = adjacentWidth2 < 0 ? offset2 : 0;
           float mitreOffset4 = adjacentWidth2 > 0 ? offset2 : 0;
 
-          FloatRect paintBorderRect;
+          RectF paintBorderRect;
           switch (side)
           {
             case BoxSide::Top:
@@ -1306,28 +1305,28 @@ namespace krys::boo
                                                                   thirdOfThickness),
                                                        deviceScaleFactor);
               drawLineFor(paintBorderRect, side, BorderStyle::Solid,
-                          FloatSize(adjacent1BigThird, adjacent2BigThird));
+                          SizeF(adjacent1BigThird, adjacent2BigThird));
 
               paintBorderRect = SnapRectToDevicePixels(LayoutRect(x1 + mitreOffset2, y2 - thirdOfThickness,
                                                                   (x2 - mitreOffset4) - (x1 + mitreOffset2),
                                                                   thirdOfThickness),
                                                        deviceScaleFactor);
               drawLineFor(paintBorderRect, side, BorderStyle::Solid,
-                          FloatSize(adjacent1BigThird, adjacent2BigThird));
+                          SizeF(adjacent1BigThird, adjacent2BigThird));
               break;
             case BoxSide::Left:
               paintBorderRect = SnapRectToDevicePixels(LayoutRect(x1, y1 + mitreOffset1, thirdOfThickness,
                                                                   (y2 - mitreOffset3) - (y1 + mitreOffset1)),
                                                        deviceScaleFactor);
               drawLineFor(paintBorderRect, side, BorderStyle::Solid,
-                          FloatSize(adjacent1BigThird, adjacent2BigThird));
+                          SizeF(adjacent1BigThird, adjacent2BigThird));
 
               paintBorderRect =
                 SnapRectToDevicePixels(LayoutRect(x2 - thirdOfThickness, y1 + mitreOffset2, thirdOfThickness,
                                                   (y2 - mitreOffset4) - (y1 + mitreOffset2)),
                                        deviceScaleFactor);
               drawLineFor(paintBorderRect, side, BorderStyle::Solid,
-                          FloatSize(adjacent1BigThird, adjacent2BigThird));
+                          SizeF(adjacent1BigThird, adjacent2BigThird));
               break;
             case BoxSide::Bottom:
               paintBorderRect = SnapRectToDevicePixels(LayoutRect(x1 + mitreOffset2, y1,
@@ -1335,28 +1334,28 @@ namespace krys::boo
                                                                   thirdOfThickness),
                                                        deviceScaleFactor);
               drawLineFor(paintBorderRect, side, BorderStyle::Solid,
-                          FloatSize(adjacent1BigThird, adjacent2BigThird));
+                          SizeF(adjacent1BigThird, adjacent2BigThird));
 
               paintBorderRect = SnapRectToDevicePixels(LayoutRect(x1 + mitreOffset1, y2 - thirdOfThickness,
                                                                   (x2 - mitreOffset3) - (x1 + mitreOffset1),
                                                                   thirdOfThickness),
                                                        deviceScaleFactor);
               drawLineFor(paintBorderRect, side, BorderStyle::Solid,
-                          FloatSize(adjacent1BigThird, adjacent2BigThird));
+                          SizeF(adjacent1BigThird, adjacent2BigThird));
               break;
             case BoxSide::Right:
               paintBorderRect = SnapRectToDevicePixels(LayoutRect(x1, y1 + mitreOffset2, thirdOfThickness,
                                                                   (y2 - mitreOffset4) - (y1 + mitreOffset2)),
                                                        deviceScaleFactor);
               drawLineFor(paintBorderRect, side, BorderStyle::Solid,
-                          FloatSize(adjacent1BigThird, adjacent2BigThird));
+                          SizeF(adjacent1BigThird, adjacent2BigThird));
 
               paintBorderRect =
                 SnapRectToDevicePixels(LayoutRect(x2 - thirdOfThickness, y1 + mitreOffset1, thirdOfThickness,
                                                   (y2 - mitreOffset3) - (y1 + mitreOffset1)),
                                        deviceScaleFactor);
               drawLineFor(paintBorderRect, side, BorderStyle::Solid,
-                          FloatSize(adjacent1BigThird, adjacent2BigThird));
+                          SizeF(adjacent1BigThird, adjacent2BigThird));
               break;
             default: break;
           }
@@ -1425,28 +1424,28 @@ namespace krys::boo
         switch (side)
         {
           case BoxSide::Top:
-            drawLineFor(FloatRect(FloatPoint(x1 + offset1, y1), FloatPoint(x2 - offset2, adjustedY)), side,
-                        s1, FloatSize(adjacent1BigHalf, adjacent2BigHalf));
-            drawLineFor(FloatRect(FloatPoint(x1 + offset3, adjustedY), FloatPoint(x2 - offset4, y2)), side,
-                        s2, FloatSize(adjacent1SmallHalf, adjacent2SmallHalf));
+            drawLineFor(RectF(PointF(x1 + offset1, y1), PointF(x2 - offset2, adjustedY)), side, s1,
+                        SizeF(adjacent1BigHalf, adjacent2BigHalf));
+            drawLineFor(RectF(PointF(x1 + offset3, adjustedY), PointF(x2 - offset4, y2)), side, s2,
+                        SizeF(adjacent1SmallHalf, adjacent2SmallHalf));
             break;
           case BoxSide::Left:
-            drawLineFor(FloatRect(FloatPoint(x1, y1 + offset1), FloatPoint(adjustedX, y2 - offset2)), side,
-                        s1, FloatSize(adjacent1BigHalf, adjacent2BigHalf));
-            drawLineFor(FloatRect(FloatPoint(adjustedX, y1 + offset3), FloatPoint(x2, y2 - offset4)), side,
-                        s2, FloatSize(adjacent1SmallHalf, adjacent2SmallHalf));
+            drawLineFor(RectF(PointF(x1, y1 + offset1), PointF(adjustedX, y2 - offset2)), side, s1,
+                        SizeF(adjacent1BigHalf, adjacent2BigHalf));
+            drawLineFor(RectF(PointF(adjustedX, y1 + offset3), PointF(x2, y2 - offset4)), side, s2,
+                        SizeF(adjacent1SmallHalf, adjacent2SmallHalf));
             break;
           case BoxSide::Bottom:
-            drawLineFor(FloatRect(FloatPoint(x1 + offset1, y1), FloatPoint(x2 - offset2, adjustedY)), side,
-                        s2, FloatSize(adjacent1BigHalf, adjacent2BigHalf));
-            drawLineFor(FloatRect(FloatPoint(x1 + offset3, adjustedY), FloatPoint(x2 - offset4, y2)), side,
-                        s1, FloatSize(adjacent1SmallHalf, adjacent2SmallHalf));
+            drawLineFor(RectF(PointF(x1 + offset1, y1), PointF(x2 - offset2, adjustedY)), side, s2,
+                        SizeF(adjacent1BigHalf, adjacent2BigHalf));
+            drawLineFor(RectF(PointF(x1 + offset3, adjustedY), PointF(x2 - offset4, y2)), side, s1,
+                        SizeF(adjacent1SmallHalf, adjacent2SmallHalf));
             break;
           case BoxSide::Right:
-            drawLineFor(FloatRect(FloatPoint(x1, y1 + offset1), FloatPoint(adjustedX, y2 - offset2)), side,
-                        s2, FloatSize(adjacent1BigHalf, adjacent2BigHalf));
-            drawLineFor(FloatRect(FloatPoint(adjustedX, y1 + offset3), FloatPoint(x2, y2 - offset4)), side,
-                        s1, FloatSize(adjacent1SmallHalf, adjacent2SmallHalf));
+            drawLineFor(RectF(PointF(x1, y1 + offset1), PointF(adjustedX, y2 - offset2)), side, s2,
+                        SizeF(adjacent1BigHalf, adjacent2BigHalf));
+            drawLineFor(RectF(PointF(adjustedX, y1 + offset3), PointF(x2, y2 - offset4)), side, s1,
+                        SizeF(adjacent1SmallHalf, adjacent2SmallHalf));
             break;
         }
         break;
@@ -1477,7 +1476,7 @@ namespace krys::boo
         x2 = RoundToDevicePixel(x2, deviceScaleFactor);
         y2 = RoundToDevicePixel(y2, deviceScaleFactor);
 
-        List<FloatPoint> quad;
+        List<PointF> quad;
         switch (side)
         {
           case BoxSide::Top:

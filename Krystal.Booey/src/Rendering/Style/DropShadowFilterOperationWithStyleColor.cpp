@@ -62,12 +62,12 @@ namespace krys::boo::style
     if (blendToPassthrough)
     {
       return DropShadowFilterOperationWithStyleColor::Create(
-        boo::Blend(_location, IntPoint(), context), boo::Blend(_stdDeviation, 0, context),
+        boo::Blend(_location, PointI(), context), boo::Blend(_stdDeviation, 0, context),
         boo::Blend(toColor, boo::Color::transparentBlack, context));
     }
 
     const auto *fromOperation = Downcast<DropShadowFilterOperationWithStyleColor>(from);
-    IntPoint fromLocation = fromOperation ? fromOperation->Location() : IntPoint();
+    PointI fromLocation = fromOperation ? fromOperation->Location() : PointI();
     int fromStdDeviation = fromOperation ? fromOperation->StdDeviation() : 0;
 
     auto fromColor = fromOperation ? fromOperation->StyleColor().ResolveColor(context.FromCurrentColor)

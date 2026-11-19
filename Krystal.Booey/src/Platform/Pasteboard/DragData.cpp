@@ -28,9 +28,9 @@
 
 namespace krys::boo
 {
-  DragData::DragData(const SelectionData *data, const IntPoint &clientPosition,
-                     const IntPoint &globalPosition, EnumSet<DragOperation> sourceOperationMask,
-                     EnumSet<DragApplicationFlags> flags, EnumSet<PlatformEventModifier> modifiers,
+  DragData::DragData(const SelectionData *data, const PointI &clientPosition, const PointI &globalPosition,
+                     EnumSet<DragOperation> sourceOperationMask, EnumSet<DragApplicationFlags> flags,
+                     EnumSet<PlatformEventModifier> modifiers,
                      EnumSet<DragDestinationAction> destinationActionMask) noexcept
       : _clientPosition(clientPosition), _globalPosition(globalPosition), _platformDragData(data),
         _draggingSourceOperationMask(sourceOperationMask), _applicationFlags(flags), _modifiers(modifiers),

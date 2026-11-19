@@ -52,8 +52,8 @@ namespace krys::boo
     // This subtree does not take up space or paint
   }
 
-  bool LegacyRenderSVGHiddenContainer::NodeAtFloatPoint(const HitTestRequest &, HitTestResult &,
-                                                        const FloatPoint &, HitTestAction) noexcept
+  bool LegacyRenderSVGHiddenContainer::NodeAtPointF(const HitTestRequest &, HitTestResult &, const PointF &,
+                                                    HitTestAction) noexcept
   {
     return false;
   }

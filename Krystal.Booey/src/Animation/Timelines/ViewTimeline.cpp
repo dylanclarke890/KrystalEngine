@@ -392,13 +392,13 @@ namespace krys::boo
   {
     auto previousCurrentTimeData = _cachedCurrentTimeData;
 
-    auto pointForLocalToContainer = [](const ScrollableArea &area) -> FloatPoint
+    auto pointForLocalToContainer = [](const ScrollableArea &area) -> PointF
     {
       // For subscrollers we need to ajust the point fed into LocalToContainerPoint as the returned value can
       // be outside of the scroller.
       if (Is<RenderLayerScrollableArea>(area))
       {
-        return FloatPoint(area.GetScrollOffset());
+        return PointF(area.GetScrollOffset());
       }
       return {};
     };
@@ -447,11 +447,11 @@ namespace krys::boo
       subjectOffset -=
         scrollDirection.IsVertical ? scrollerPaddingBoxOrigin.Y() : scrollerPaddingBoxOrigin.X();
 
-      auto subjectBounds = [&]() -> FloatSize
+      auto subjectBounds = [&]() -> SizeF
       {
         if (const auto *subjectRenderBoxModelObject = DynamicDowncast<RenderBoxModelObject>(subjectRenderer))
         {
-          return FloatSize(subjectRenderBoxModelObject->BorderBoundingBox().Size());
+          return SizeF(subjectRenderBoxModelObject->BorderBoundingBox().Size());
         }
         if (Is<LegacyRenderSVGModelObject>(subjectRenderer))
         {
@@ -534,7 +534,7 @@ namespace krys::boo
       StickinessAdjustmentData stickyData;
       if (const auto *stickyContainer = DynamicDowncast<RenderBoxModelObject>(StickyContainer()))
       {
-        FloatRect constrainingRect = stickyContainer->ConstrainingRectForStickyPosition();
+        RectF constrainingRect = stickyContainer->ConstrainingRectForStickyPosition();
         StickyPositionViewportConstraints constraints;
         stickyContainer->ComputeStickyPositionConstraints(constraints, constrainingRect);
         stickyData = StickinessAdjustmentData::ComputeStickinessAdjustmentData(

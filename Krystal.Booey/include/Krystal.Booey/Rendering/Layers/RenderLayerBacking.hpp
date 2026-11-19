@@ -297,7 +297,7 @@ namespace krys::boo
                                                              GraphicsLayerShouldClipToLayer::Clip) noexcept;
 
     // Notification from the renderer that its content changed.
-    void ContentChanged(ContentChangeType changeType, const Maybe<FloatRect> &dirtyRect) noexcept;
+    void ContentChanged(ContentChangeType changeType, const Maybe<RectF> &dirtyRect) noexcept;
 
     KRYS_NODISCARD LayoutRect CompositedBounds() const noexcept;
 
@@ -343,7 +343,7 @@ namespace krys::boo
 
     void NotifySubsequentFlushRequired(const GraphicsLayer *layer) noexcept override;
 
-    void PaintContents(const GraphicsLayer &graphicsLayer, GraphicsContext &context, const FloatRect &clip,
+    void PaintContents(const GraphicsLayer &graphicsLayer, GraphicsContext &context, const RectF &clip,
                        EnumSet<GraphicsLayerPaintBehavior> layerPaintBehavior) noexcept override;
 
     KRYS_NODISCARD float DeviceScaleFactor() const noexcept override;
@@ -357,7 +357,7 @@ namespace krys::boo
 
     KRYS_NODISCARD float ZoomedOutPageScaleFactor() const noexcept override;
 
-    KRYS_NODISCARD FloatSize EnclosingFrameViewVisibleSize() const noexcept override;
+    KRYS_NODISCARD SizeF EnclosingFrameViewVisibleSize() const noexcept override;
 
     void DidChangePlatformLayerForLayer(const GraphicsLayer *layer) noexcept override;
 
@@ -432,7 +432,7 @@ namespace krys::boo
     void SetUsesDisplayListDrawing(bool usesDisplayListDrawing) noexcept;
 
   private:
-    KRYS_NODISCARD FloatRect BackgroundBoxForSimpleContainerPainting() const noexcept;
+    KRYS_NODISCARD RectF BackgroundBoxForSimpleContainerPainting() const noexcept;
 
     void CreatePrimaryGraphicsLayer() noexcept;
 
@@ -593,7 +593,7 @@ namespace krys::boo
     }
 
     void PaintIntoLayer(const GraphicsLayer *graphicsLayer, GraphicsContext &context,
-                        const IntRect &paintDirtyRect, EnumSet<PaintBehavior> paintBehavior) noexcept;
+                        const RectI &paintDirtyRect, EnumSet<PaintBehavior> paintBehavior) noexcept;
 
     KRYS_NODISCARD EnumSet<RenderLayer::PaintLayerFlag>
       PaintFlagsForLayer(const GraphicsLayer &graphicsLayer) const noexcept;

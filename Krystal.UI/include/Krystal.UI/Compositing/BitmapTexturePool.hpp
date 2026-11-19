@@ -28,7 +28,7 @@ namespace krys::ui
     {
     }
 
-    KRYS_NODISCARD Ref<BitmapTexture> AcquireTexture(const boo::IntSize &size,
+    KRYS_NODISCARD Ref<BitmapTexture> AcquireTexture(const SizeI &size,
                                                      EnumSet<BitmapTexture::Flags> flags) noexcept;
 
     /// @brief Releases the textures unused for a while.

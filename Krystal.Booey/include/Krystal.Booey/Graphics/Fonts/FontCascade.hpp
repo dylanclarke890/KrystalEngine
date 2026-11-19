@@ -29,11 +29,11 @@
 #include "Krystal.Booey/Graphics/Fonts/FontMetrics.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
 #include "Krystal.Booey/Graphics/Fonts/GlyphBuffer.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatSegment.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
@@ -181,22 +181,22 @@ namespace krys::boo
 
     /// @brief Draws @p run from byte offset @p from to @p to at @p point (its start on the baseline).
     /// @return How far the first glyph drawn is from @p point (the width of the text before @p from).
-    FloatSize DrawText(GraphicsContext &context, const TextRun &run, const FloatPoint &point, uint32 from = 0,
-                       Maybe<uint32> to = null,
-                       CustomFontNotReadyAction customFontNotReadyAction =
-                         CustomFontNotReadyAction::DoNotPaintIfFontNotReady) const noexcept;
+    SizeF DrawText(GraphicsContext &context, const TextRun &run, const PointF &point, uint32 from = 0,
+                   Maybe<uint32> to = null,
+                   CustomFontNotReadyAction customFontNotReadyAction =
+                     CustomFontNotReadyAction::DoNotPaintIfFontNotReady) const noexcept;
 
     /// @brief Draws @p mark over each character of @p run from byte offset @p from to @p to that can take
     /// one, @p point being the run's start on the baseline the marks are drawn on.
     void DrawEmphasisMarks(GraphicsContext &context, const TextRun &run, const StringAtom &mark,
-                           const FloatPoint &point, uint32 from = 0, Maybe<uint32> to = null) const noexcept;
+                           const PointF &point, uint32 from = 0, Maybe<uint32> to = null) const noexcept;
 
     /// @brief Where @p run's glyphs, drawn from @p textOrigin, cross @p lineExtents (an underline or
     /// overline), as spans along the line from its left: each glyph's outline where it crosses the line's top
     /// and bottom, for decorations that skip ink.
     KRYS_NODISCARD List<FloatSegment>
-      LineSegmentsForIntersectionsWithRect(const TextRun &run, const FloatPoint &textOrigin,
-                                           const FloatRect &lineExtents) const noexcept;
+      LineSegmentsForIntersectionsWithRect(const TextRun &run, const PointF &textOrigin,
+                                           const RectF &lineExtents) const noexcept;
 
     /// @brief The width of @p run from byte offset @p from to @p to.
     /// @param outWidthBeforeRange Set to the width of the run before @p from.
@@ -544,11 +544,11 @@ namespace krys::boo
 
     /// @brief Draws @p glyphBuffer's glyphs from @p point, one run per font, moving @p point past them.
     /// @note @p point already includes the glyph buffer's initial advance.
-    void DrawGlyphBuffer(GraphicsContext &context, const GlyphBuffer &glyphBuffer, FloatPoint &point,
+    void DrawGlyphBuffer(GraphicsContext &context, const GlyphBuffer &glyphBuffer, PointF &point,
                          CustomFontNotReadyAction customFontNotReadyAction) const noexcept;
 
     void DrawEmphasisMarks(GraphicsContext &context, const GlyphBuffer &glyphBuffer, const StringAtom &mark,
-                           const FloatPoint &point) const noexcept;
+                           const PointF &point) const noexcept;
 
     KRYS_NODISCARD int32 OffsetForPositionForSimpleText(const TextRun &run, float position,
                                                         bool includePartialGlyphs) const noexcept;

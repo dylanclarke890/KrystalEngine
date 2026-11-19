@@ -18,7 +18,7 @@ namespace krys::boo::tests
     /// images load as they're inserted.
     struct LazyImageFixture : css::tests::ValueFixture
     {
-      constexpr static IntSize ViewSize {200, 100};
+      constexpr static SizeI ViewSize {200, 100};
       Ref<Page> TestPage;
       Ref<HTMLDocument> Document;
 
@@ -62,8 +62,8 @@ namespace krys::boo::tests
       {
         (void)Document->UpdateLayout();
         display_list::RecorderImpl recorder(
-          FloatSize(static_cast<float>(ViewSize.Width()), static_cast<float>(ViewSize.Height())));
-        Frame().View()->PaintContents(recorder, IntRect(IntPoint(), ViewSize));
+          SizeF(static_cast<float>(ViewSize.Width()), static_cast<float>(ViewSize.Height())));
+        Frame().View()->PaintContents(recorder, RectI(PointI(), ViewSize));
         return recorder.TakeDisplayList()->AsText({}).contains(u8"draw-native-image");
       }
     };

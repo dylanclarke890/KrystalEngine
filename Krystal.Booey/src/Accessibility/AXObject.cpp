@@ -1658,7 +1658,7 @@ namespace krys::boo
     return static_cast<int32>(result.Value);
   }
 
-  IntPoint AXObject::ClickPoint() noexcept
+  PointI AXObject::ClickPoint() noexcept
   {
     if (IsHeading())
     {
@@ -1668,15 +1668,15 @@ namespace krys::boo
         return children[0]->ClickPoint();
       }
     }
-    return RoundedIntPoint(ElementRect().Center());
+    return RoundedPointI(ElementRect().Center());
   }
 
-  AXObject *AXObject::AccessibilityHitTest(const IntPoint &point) const noexcept
+  AXObject *AXObject::AccessibilityHitTest(const PointI &point) const noexcept
   {
     return ElementAccessibilityHitTest(point);
   }
 
-  AXObject *AXObject::ElementAccessibilityHitTest(const IntPoint &point) const noexcept
+  AXObject *AXObject::ElementAccessibilityHitTest(const PointI &point) const noexcept
   {
     // The objects an object makes itself have no renderer for a hit test to find.
     for (const auto &child : const_cast<AXObject *>(this)->Children(false))

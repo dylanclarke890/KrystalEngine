@@ -31,24 +31,23 @@
 
 namespace krys::boo
 {
-  FloatPoint PathSegment::CalculateEndPoint(const FloatPoint &currentPoint,
-                                            FloatPoint &lastMoveToPoint) const noexcept
+  PointF PathSegment::CalculateEndPoint(const PointF &currentPoint, PointF &lastMoveToPoint) const noexcept
   {
     return krys::SwitchOn(_data,
                           [&](auto &data) { return data.CalculateEndPoint(currentPoint, lastMoveToPoint); });
   }
 
-  Maybe<FloatPoint> PathSegment::TryGetEndPointWithoutContext() const noexcept
+  Maybe<PointF> PathSegment::TryGetEndPointWithoutContext() const noexcept
   {
     return krys::SwitchOn(_data, [&](auto &data) { return data.TryGetEndPointWithoutContext(); });
   }
 
-  FloatRect PathSegment::FastBoundingRect() const noexcept
+  RectF PathSegment::FastBoundingRect() const noexcept
   {
-    FloatPoint currentPoint;
-    FloatPoint lastMoveToPoint;
+    PointF currentPoint;
+    PointF lastMoveToPoint;
 
-    auto boundingRect = FloatRect::SmallestRect();
+    auto boundingRect = RectF::SmallestRect();
     ExtendFastBoundingRect(currentPoint, lastMoveToPoint, boundingRect);
 
     if (boundingRect.IsSmallest())
@@ -60,15 +59,15 @@ namespace krys::boo
     return boundingRect;
   }
 
-  void PathSegment::ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
-                                           FloatRect &boundingRect) const noexcept
+  void PathSegment::ExtendFastBoundingRect(const PointF &currentPoint, const PointF &lastMoveToPoint,
+                                           RectF &boundingRect) const noexcept
   {
     krys::SwitchOn(_data, [&](auto &data)
                    { data.ExtendFastBoundingRect(currentPoint, lastMoveToPoint, boundingRect); });
   }
 
-  void PathSegment::ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
-                                       FloatRect &boundingRect) const noexcept
+  void PathSegment::ExtendBoundingRect(const PointF &currentPoint, const PointF &lastMoveToPoint,
+                                       RectF &boundingRect) const noexcept
   {
     krys::SwitchOn(_data,
                    [&](auto &data) { data.ExtendBoundingRect(currentPoint, lastMoveToPoint, boundingRect); });

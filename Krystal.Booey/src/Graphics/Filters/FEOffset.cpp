@@ -64,17 +64,17 @@ namespace krys::boo
     return true;
   }
 
-  FloatRect FEOffset::CalculateImageRect(const Filter &filter, Span<const FloatRect> inputImageRects,
-                                         const FloatRect &primitiveSubregion) const noexcept
+  RectF FEOffset::CalculateImageRect(const Filter &filter, Span<const RectF> inputImageRects,
+                                     const RectF &primitiveSubregion) const noexcept
   {
     auto imageRect = inputImageRects[0];
     imageRect.Move(filter.ResolvedSize({_dx, _dy}));
     return filter.ClipToMaxEffectRect(imageRect, primitiveSubregion);
   }
 
-  IntOutsets FEOffset::CalculateOutsets(const FloatSize &offset) noexcept
+  IntOutsets FEOffset::CalculateOutsets(const SizeF &offset) noexcept
   {
-    auto adjustedOffset = ExpandedIntSize(offset);
+    auto adjustedOffset = ExpandedSizeI(offset);
 
     IntOutsets outsets;
     if (adjustedOffset.Height() < 0)

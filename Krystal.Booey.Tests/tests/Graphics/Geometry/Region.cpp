@@ -20,9 +20,9 @@ namespace krys::boo::tests
       CHECK(actualSpans == SpanList(spans));
     }
 
-    void CheckRects(const Region &region, std::initializer_list<IntRect> rects)
+    void CheckRects(const Region &region, std::initializer_list<RectI> rects)
     {
-      CHECK(region.Rects() == SmallList<IntRect, 1>(rects));
+      CHECK(region.Rects() == SmallList<RectI, 1>(rects));
     }
 
     bool IsValid(const Region &region)
@@ -32,7 +32,7 @@ namespace krys::boo::tests
                                  Span<const Region::Span>(spans.data(), spans.size()));
     }
 
-    IntRect RandomRect(std::minstd_rand &rand)
+    RectI RandomRect(std::minstd_rand &rand)
     {
       std::uniform_int_distribution<> coord(Limits<int>::min(), Limits<int>::max());
       int x0 = coord(rand);
@@ -57,7 +57,7 @@ namespace krys::boo::tests
     Shape s1 = Shape::CreateForTesting({}, {});
     CHECK(s1.IsEmpty());
     CHECK(Shape {} == s1);
-    CHECK(Shape {IntRect {}} == s1);
+    CHECK(Shape {RectI {}} == s1);
     Region r1 = Region::CreateForTesting(Shape {s1});
     CHECK(r1.IsEmpty());
     CHECK(s1 == r1.DataForTesting());
@@ -66,7 +66,7 @@ namespace krys::boo::tests
   TEST_CASE("Region: ShapeEmptyIsEmpty", "[Graphics][Region]")
   {
     CHECK(Shape().IsEmpty());
-    CHECK(Shape(IntRect {}).IsEmpty());
+    CHECK(Shape(RectI {}).IsEmpty());
   }
 
   TEST_CASE("Region: IsValidShapeFalse", "[Graphics][Region]")
@@ -87,19 +87,19 @@ namespace krys::boo::tests
   TEST_CASE("Region: UniteTests1", "[Graphics][Region]")
   {
     Region r1;
-    r1.Unite(IntRect {50, 40, 50, 40});
-    r1.Unite(IntRect {5, 5, 45, 35});
-    CheckRects(r1, {IntRect(5, 5, 45, 35), IntRect(50, 40, 50, 40)});
+    r1.Unite(RectI {50, 40, 50, 40});
+    r1.Unite(RectI {5, 5, 45, 35});
+    CheckRects(r1, {RectI(5, 5, 45, 35), RectI(50, 40, 50, 40)});
 
     Region r2;
-    r2.Unite(IntRect {5, 40, 45, 40});
-    r2.Unite(IntRect {50, 5, 50, 35});
-    CheckRects(r2, {IntRect(50, 5, 50, 35), IntRect(5, 40, 45, 40)});
+    r2.Unite(RectI {5, 40, 45, 40});
+    r2.Unite(RectI {50, 5, 50, 35});
+    CheckRects(r2, {RectI(50, 5, 50, 35), RectI(5, 40, 45, 40)});
 
     Region r3;
     r3.Unite(r1);
     r3.Unite(r2);
-    Region r4 {IntRect {5, 5, 95, 75}};
+    Region r4 {RectI {5, 5, 95, 75}};
     CHECK(r4.Contains(r3));
     CHECK(r3.Contains(r4));
     CHECK(r4 == r3);
@@ -110,7 +110,7 @@ namespace krys::boo::tests
   // Describes how the algorithm stores an individual rectangle.
   TEST_CASE("Region: ShapeFormatIndividual", "[Graphics][Region]")
   {
-    Region r1 {IntRect {0, 0, 10, 10}};
+    Region r1 {RectI {0, 0, 10, 10}};
     CheckShape(r1, {0, 10}, {{0, 0}, {10, 2}});
   }
 
@@ -119,8 +119,8 @@ namespace krys::boo::tests
   // previous span. I.e the "y: 50 si: 2" part.
   TEST_CASE("Region: ShapeFormatDisjoint", "[Graphics][Region]")
   {
-    Region r1 {IntRect {0, 0, 10, 10}};
-    r1.Unite(IntRect {50, 50, 60, 60});
+    Region r1 {RectI {0, 0, 10, 10}};
+    r1.Unite(RectI {50, 50, 60, 60});
     CheckShape(r1, {0, 10, 50, 110}, {{0, 0}, {10, 2}, {50, 2}, {110, 4}});
   }
 
@@ -128,8 +128,8 @@ namespace krys::boo::tests
   // It merges them and produces single rect.
   TEST_CASE("Region: ShapeFormatTestJointXMergeable", "[Graphics][Region]")
   {
-    Region r1 {IntRect {0, 0, 10, 10}};
-    r1.Unite(IntRect {10, 0, 10, 10});
+    Region r1 {RectI {0, 0, 10, 10}};
+    r1.Unite(RectI {10, 0, 10, 10});
     CheckShape(r1, {0, 20}, {{0, 0}, {10, 2}});
   }
 
@@ -137,8 +137,8 @@ namespace krys::boo::tests
   // It merges them and produces a single rect.
   TEST_CASE("Region: ShapeFormatTestJointYMergeable", "[Graphics][Region]")
   {
-    Region r1 {IntRect {0, 0, 10, 10}};
-    r1.Unite(IntRect {0, 10, 10, 10});
+    Region r1 {RectI {0, 0, 10, 10}};
+    r1.Unite(RectI {0, 10, 10, 10});
     CheckShape(r1, {0, 10}, {{0, 0}, {20, 2}});
   }
 
@@ -146,8 +146,8 @@ namespace krys::boo::tests
   // It merges the horizontal parts and produces new rect for the leftover vertical part.
   TEST_CASE("Region: ShapeFormatTestJointX", "[Graphics][Region]")
   {
-    Region r1 {IntRect {0, 0, 10, 10}};
-    r1.Unite(IntRect {10, 0, 10, 11});
+    Region r1 {RectI {0, 0, 10, 10}};
+    r1.Unite(RectI {10, 0, 10, 11});
     CheckShape(r1, {0, 20, 10, 20}, {{0, 0}, {10, 2}, {11, 4}});
   }
 
@@ -155,8 +155,8 @@ namespace krys::boo::tests
   // It does not merge anything.
   TEST_CASE("Region: ShapeFormatTestJointY", "[Graphics][Region]")
   {
-    Region r1 {IntRect {0, 0, 10, 10}};
-    r1.Unite(IntRect {0, 10, 11, 10});
+    Region r1 {RectI {0, 0, 10, 10}};
+    r1.Unite(RectI {0, 10, 11, 10});
     CheckShape(r1, {0, 10, 0, 11}, {{0, 0}, {10, 2}, {20, 4}});
   }
 
@@ -164,9 +164,9 @@ namespace krys::boo::tests
   // Other algorithm could share the segments, but not this one.
   TEST_CASE("Region: ShapeFormatTestEvenSegments", "[Graphics][Region]")
   {
-    Region r1 {IntRect {0, 0, 10, 10}};
-    r1.Unite(IntRect {10, 10, 10, 10});
-    CheckRects(r1, {IntRect(0, 0, 10, 10), IntRect(10, 10, 10, 10)});
+    Region r1 {RectI {0, 0, 10, 10}};
+    r1.Unite(RectI {10, 10, 10, 10});
+    CheckRects(r1, {RectI(0, 0, 10, 10), RectI(10, 10, 10, 10)});
     CheckShape(r1, {0, 10, 10, 20}, {{0, 0}, {10, 2}, {20, 4}});
   }
 
@@ -174,10 +174,9 @@ namespace krys::boo::tests
   // The whole segment array is not sorted, only per Span regions of it.
   TEST_CASE("Region: ShapeFormatTestSortedSpan", "[Graphics][Region]")
   {
-    Region r1 {IntRect {10, 0, 10, 10}};
-    r1.Unite(IntRect {1, 1, 5, 5});
-    CheckRects(r1,
-               {IntRect(10, 0, 10, 1), IntRect(1, 1, 5, 5), IntRect(10, 1, 10, 5), IntRect(10, 6, 10, 4)});
+    Region r1 {RectI {10, 0, 10, 10}};
+    r1.Unite(RectI {1, 1, 5, 5});
+    CheckRects(r1, {RectI(10, 0, 10, 1), RectI(1, 1, 5, 5), RectI(10, 1, 10, 5), RectI(10, 6, 10, 4)});
     CheckShape(r1, {10, 20, 1, 6, 10, 20, 10, 20}, {{0, 0}, {1, 2}, {6, 6}, {10, 8}});
   }
 
@@ -218,77 +217,77 @@ namespace krys::boo::tests
   TEST_CASE("Region: IsValidShape1", "[Graphics][Region]")
   {
     Region r;
-    r.Unite(IntRect {620'280'709, 86'198'313, 951'242'283, 733'368'814});
-    r.Subtract(IntRect {416'621'960, 440'858'151, 1'275'303'923, 1'424'992'047});
-    r.Subtract(IntRect {1'329'326'038, 360'395'968, 435'226'361, 1'588'476'209});
+    r.Unite(RectI {620'280'709, 86'198'313, 951'242'283, 733'368'814});
+    r.Subtract(RectI {416'621'960, 440'858'151, 1'275'303'923, 1'424'992'047});
+    r.Subtract(RectI {1'329'326'038, 360'395'968, 435'226'361, 1'588'476'209});
     REQUIRE(IsValid(r));
   }
 
   TEST_CASE("Region: IsValidShape2", "[Graphics][Region]")
   {
     Region r;
-    r.Subtract(IntRect {384'928'833, 12'330'228, 959'619'016, 578'249'146});
-    r.Intersect(IntRect {828'730'499, 921'697'549, 1'295'834'393, 903'531'184});
-    r.Intersect(IntRect {290'731'592, 195'208'138, 497'331'448, 106'244'923});
-    r.Unite(IntRect {587'928'172, 216'906'104, 1'428'192'965, 1'718'162'329});
-    r.Subtract(IntRect {1'745'551'117, 534'538'086, 297'055'811, 1'154'752'629});
+    r.Subtract(RectI {384'928'833, 12'330'228, 959'619'016, 578'249'146});
+    r.Intersect(RectI {828'730'499, 921'697'549, 1'295'834'393, 903'531'184});
+    r.Intersect(RectI {290'731'592, 195'208'138, 497'331'448, 106'244'923});
+    r.Unite(RectI {587'928'172, 216'906'104, 1'428'192'965, 1'718'162'329});
+    r.Subtract(RectI {1'745'551'117, 534'538'086, 297'055'811, 1'154'752'629});
     REQUIRE(IsValid(r));
   }
 
   TEST_CASE("Region: Operations", "[Graphics][Region]")
   {
     // An L shape: a 20x10 bar with a 10x10 block below its left half.
-    Region l {IntRect {0, 0, 20, 10}};
-    l.Unite(IntRect {0, 10, 10, 10});
+    Region l {RectI {0, 0, 20, 10}};
+    l.Unite(RectI {0, 10, 10, 10});
     CHECK_FALSE(l.IsRect());
-    CHECK(l.Bounds() == IntRect(0, 0, 20, 20));
+    CHECK(l.Bounds() == RectI(0, 0, 20, 20));
     CHECK(l.TotalArea() == 300);
     CHECK(l.GridSize() == 12);
 
-    CHECK(l.Contains(IntPoint(15, 5)));
-    CHECK(l.Contains(IntPoint(5, 15)));
-    CHECK_FALSE(l.Contains(IntPoint(15, 15)));
-    CHECK_FALSE(l.Contains(IntPoint(20, 5)));
-    CHECK(l.Contains(Region(IntRect(0, 0, 5, 20))));
-    CHECK_FALSE(l.Contains(Region(IntRect(5, 5, 10, 10))));
+    CHECK(l.Contains(PointI(15, 5)));
+    CHECK(l.Contains(PointI(5, 15)));
+    CHECK_FALSE(l.Contains(PointI(15, 15)));
+    CHECK_FALSE(l.Contains(PointI(20, 5)));
+    CHECK(l.Contains(Region(RectI(0, 0, 5, 20))));
+    CHECK_FALSE(l.Contains(Region(RectI(5, 5, 10, 10))));
 
-    CHECK(l.Intersects(Region(IntRect(5, 5, 10, 10))));
-    CHECK_FALSE(l.Intersects(Region(IntRect(12, 12, 5, 5))));
+    CHECK(l.Intersects(Region(RectI(5, 5, 10, 10))));
+    CHECK_FALSE(l.Intersects(Region(RectI(12, 12, 5, 5))));
 
     // Subtracting the missing corner changes nothing; subtracting the bar leaves the block.
-    CHECK(Subtract(l, Region(IntRect(10, 10, 10, 10))) == l);
-    Region block = Subtract(l, Region(IntRect(0, 0, 20, 10)));
+    CHECK(Subtract(l, Region(RectI(10, 10, 10, 10))) == l);
+    Region block = Subtract(l, Region(RectI(0, 0, 20, 10)));
     CHECK(block.IsRect());
-    CHECK(block.Bounds() == IntRect(0, 10, 10, 10));
+    CHECK(block.Bounds() == RectI(0, 10, 10, 10));
 
     // Intersecting with a rect clips the shape.
-    Region clipped = Intersect(l, Region(IntRect(5, 5, 10, 10)));
-    CheckRects(clipped, {IntRect(5, 5, 10, 5), IntRect(5, 10, 5, 5)});
-    CHECK(Intersect(l, Region(IntRect(50, 50, 1, 1))).IsEmpty());
+    Region clipped = Intersect(l, Region(RectI(5, 5, 10, 10)));
+    CheckRects(clipped, {RectI(5, 5, 10, 5), RectI(5, 10, 5, 5)});
+    CHECK(Intersect(l, Region(RectI(50, 50, 1, 1))).IsEmpty());
 
-    Region moved = Translate(l, IntSize(5, -5));
-    CHECK(moved.Bounds() == IntRect(5, -5, 20, 20));
-    CheckRects(moved, {IntRect(5, -5, 20, 10), IntRect(5, 5, 10, 10)});
+    Region moved = Translate(l, SizeI(5, -5));
+    CHECK(moved.Bounds() == RectI(5, -5, 20, 20));
+    CheckRects(moved, {RectI(5, -5, 20, 10), RectI(5, 5, 10, 10)});
   }
 
   TEST_CASE("Region: Copy and move", "[Graphics][Region]")
   {
-    Region l {IntRect {0, 0, 20, 10}};
-    l.Unite(IntRect {0, 10, 10, 10});
+    Region l {RectI {0, 0, 20, 10}};
+    l.Unite(RectI {0, 10, 10, 10});
 
     Region copy = l;
     CHECK(copy == l);
-    copy.Translate(IntSize(1, 1));
+    copy.Translate(SizeI(1, 1));
     CHECK(copy != l);
 
     Region moved = krys::move(copy);
-    CHECK(moved.Bounds() == IntRect(1, 1, 20, 20));
+    CHECK(moved.Bounds() == RectI(1, 1, 20, 20));
 
     Region assigned;
     assigned = l;
     CHECK(assigned == l);
-    assigned = Region(IntRect(1, 2, 3, 4));
+    assigned = Region(RectI(1, 2, 3, 4));
     CHECK(assigned.IsRect());
-    CHECK(assigned == Region(IntRect(1, 2, 3, 4)));
+    CHECK(assigned == Region(RectI(1, 2, 3, 4)));
   }
 }

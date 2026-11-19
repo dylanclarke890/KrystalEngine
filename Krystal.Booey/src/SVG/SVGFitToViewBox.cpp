@@ -48,7 +48,7 @@ namespace krys::boo
     return PropertyRegistry::IsKnownAttribute(attributeName);
   }
 
-  void SVGFitToViewBox::SetViewBox(const FloatRect &viewBox) noexcept
+  void SVGFitToViewBox::SetViewBox(const RectF &viewBox) noexcept
   {
     _viewBox->SetBaseValInternal(viewBox);
     _isViewBoxValid = true;
@@ -62,7 +62,7 @@ namespace krys::boo
 
   DOMString SVGFitToViewBox::ViewBoxString() const noexcept
   {
-    return SVGPropertyTraits<FloatRect>::ToString(ViewBox());
+    return SVGPropertyTraits<RectF>::ToString(ViewBox());
   }
 
   void SVGFitToViewBox::Reset() noexcept
@@ -96,12 +96,12 @@ namespace krys::boo
     return false;
   }
 
-  Maybe<FloatRect> SVGFitToViewBox::ParseViewBox(DOMStringView value) noexcept
+  Maybe<RectF> SVGFitToViewBox::ParseViewBox(DOMStringView value) noexcept
   {
     return ParseViewBox(value, true);
   }
 
-  Maybe<FloatRect> SVGFitToViewBox::ParseViewBox(DOMStringView &buffer, bool validate) noexcept
+  Maybe<RectF> SVGFitToViewBox::ParseViewBox(DOMStringView &buffer, bool validate) noexcept
   {
     svg::SkipOptionalSVGSpaces(buffer);
 
@@ -137,11 +137,11 @@ namespace krys::boo
       }
     }
 
-    return FloatRect {x.value_or(0), y.value_or(0), width.value_or(0), height.value_or(0)};
+    return RectF {x.value_or(0), y.value_or(0), width.value_or(0), height.value_or(0)};
   }
 
   AffineTransform
-    SVGFitToViewBox::ViewBoxToViewTransform(const FloatRect &viewBoxRect,
+    SVGFitToViewBox::ViewBoxToViewTransform(const RectF &viewBoxRect,
                                             const SVGPreserveAspectRatioValue &preserveAspectRatio,
                                             float viewWidth, float viewHeight) noexcept
   {

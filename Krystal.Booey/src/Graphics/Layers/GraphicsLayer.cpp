@@ -25,12 +25,12 @@
 
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayer.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerFactory.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerFilterAnimationValue.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerKeyframeValueList.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -58,7 +58,7 @@ namespace krys::boo
 
   namespace
   {
-    using RepaintMap = HashMap<const GraphicsLayer *, List<FloatRect>>;
+    using RepaintMap = HashMap<const GraphicsLayer *, List<RectF>>;
 
     RepaintMap &RepaintRectMap() noexcept
     {
@@ -519,7 +519,7 @@ namespace krys::boo
     _replicaLayer = krys::move(layer);
   }
 
-  void GraphicsLayer::SetOffsetFromRenderer(const FloatSize &offset,
+  void GraphicsLayer::SetOffsetFromRenderer(const SizeF &offset,
                                             ShouldSetNeedsDisplay shouldSetNeedsDisplay) noexcept
   {
     if (offset == _offsetFromRenderer)
@@ -553,7 +553,7 @@ namespace krys::boo
     }
   }
 
-  void GraphicsLayer::SetSize(const FloatSize &size) noexcept
+  void GraphicsLayer::SetSize(const SizeF &size) noexcept
   {
     if (size == _size)
     {
@@ -586,10 +586,10 @@ namespace krys::boo
   }
 
   void GraphicsLayer::PaintGraphicsLayerContents(
-    GraphicsContext &context, const FloatRect &clip,
+    GraphicsContext &context, const RectF &clip,
     EnumSet<GraphicsLayerPaintBehavior> layerPaintBehavior) const noexcept
   {
-    auto offset = OffsetFromRenderer() - ToFloatSize(FloatPoint(GetScrollOffset()));
+    auto offset = OffsetFromRenderer() - ToSizeF(PointF(GetScrollOffset()));
     auto clipRect = clip;
 
     if (!offset.IsZero())
@@ -601,9 +601,9 @@ namespace krys::boo
     Client().PaintContents(*this, context, clipRect, layerPaintBehavior);
   }
 
-  FloatRect GraphicsLayer::AdjustCoverageRectForMovement(const FloatRect &coverageRect,
-                                                         const FloatRect &previousVisibleRect,
-                                                         const FloatRect &currentVisibleRect) noexcept
+  RectF GraphicsLayer::AdjustCoverageRectForMovement(const RectF &coverageRect,
+                                                     const RectF &previousVisibleRect,
+                                                     const RectF &currentVisibleRect) noexcept
   {
     // If the old visible rect is empty, we have no information about how the visible area is changing (maybe
     // the layer was just created), so don't attempt to expand. Also don't attempt to expand if the rects
@@ -621,7 +621,7 @@ namespace krys::boo
     float topEdgeDelta = paddingMultiplier * (currentVisibleRect.Y() - previousVisibleRect.Y());
     float bottomEdgeDelta = paddingMultiplier * (currentVisibleRect.MaxY() - previousVisibleRect.MaxY());
 
-    FloatRect expandedRect = currentVisibleRect;
+    RectF expandedRect = currentVisibleRect;
 
     // More exposed on left side.
     if (leftEdgeDelta < 0)
@@ -826,14 +826,14 @@ namespace krys::boo
     RepaintRectMap().erase(this);
   }
 
-  void GraphicsLayer::AddRepaintRect(const FloatRect &repaintRect) noexcept
+  void GraphicsLayer::AddRepaintRect(const RectF &repaintRect) noexcept
   {
     if (!Client().IsTrackingRepaints())
     {
       return;
     }
 
-    FloatRect largestRepaintRect(FloatPoint(), _size);
+    RectF largestRepaintRect(PointF(), _size);
     largestRepaintRect.Intersect(repaintRect);
 
     RepaintRectMap()[this].push_back(largestRepaintRect);
@@ -924,7 +924,7 @@ namespace krys::boo
       ts << Indent << "(scrollOffset " << _scrollOffset << ")\n";
     }
 
-    if (_position != FloatPoint())
+    if (_position != PointF())
     {
       ts << Indent << "(position " << _position.X() << ' ' << _position.Y() << ")\n";
     }
@@ -935,7 +935,7 @@ namespace krys::boo
          << _approximatePosition.value().Y() << ")\n";
     }
 
-    if (_boundsOrigin != FloatPoint())
+    if (_boundsOrigin != PointF())
     {
       ts << Indent << "(bounds origin " << _boundsOrigin.X() << ' ' << _boundsOrigin.Y() << ")\n";
     }
@@ -950,7 +950,7 @@ namespace krys::boo
       ts << ")\n";
     }
 
-    if (_size != FloatSize())
+    if (_size != SizeF())
     {
       ts << Indent << "(bounds " << _size.Width() << ' ' << _size.Height() << ")\n";
     }
