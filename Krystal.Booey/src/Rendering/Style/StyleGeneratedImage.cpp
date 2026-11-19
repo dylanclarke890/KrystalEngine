@@ -24,8 +24,8 @@
 #include "Krystal.Booey/Rendering/Style/StyleGeneratedImage.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Images/GeneratedImage.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include <algorithm>
 #include <chrono>
 

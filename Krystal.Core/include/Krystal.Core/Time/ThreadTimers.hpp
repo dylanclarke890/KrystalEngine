@@ -33,15 +33,16 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
+namespace krys
 {
   class TimerBase;
 
-  /// @brief The active timers, in the order they fire (a heap on their fire times, then the order they were
-  /// started), and the current time, which the host gives when it runs the event loop.
-  /// @note Time never goes backwards: an earlier time than the current one is ignored. The timers are
-  /// process-wide, as there are no agents (see DIFFERENCES.md).
-  // FIXME: One set per thread, once there are threads.
+  /// @brief A thread's active timers, in the order they fire (a heap on their fire times, then the order they
+  /// were started), and its current time, which the thread's loop gives before firing the timers that are
+  /// due.
+  /// @note Time never goes backwards: an earlier time than the current one is ignored. Each thread has its
+  /// own set, and a thread that never runs a loop never fires its timers; its timers must be stopped before
+  /// it exits.
   class ThreadTimers
   {
     friend class TimerBase;
@@ -56,6 +57,7 @@ namespace krys::boo
   public:
     ThreadTimers() noexcept = default;
 
+    /// @brief The calling thread's timers.
     KRYS_NODISCARD static ThreadTimers &Current() noexcept;
 
     /// @brief The host's time, as of the last time it ran the event loop.

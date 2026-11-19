@@ -2650,8 +2650,6 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/Scrolling/ScrollbarsController.hpp
   include/Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp
   include/Krystal.Booey/Platform/SimpleCaretAnimator.hpp
-  include/Krystal.Booey/Platform/ThreadTimers.hpp
-  include/Krystal.Booey/Platform/Timer.hpp
 )
 
 set(KRYSTAL_BOOEY_PLATFORM_SOURCES
@@ -2690,8 +2688,6 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/Scrolling/ScrollbarThemeComposite.cpp
   src/Platform/Scrolling/ScrollbarsController.cpp
   src/Platform/SimpleCaretAnimator.cpp
-  src/Platform/ThreadTimers.cpp
-  src/Platform/Timer.cpp
 )
 
 set(KRYSTAL_BOOEY_RENDERING_HEADERS

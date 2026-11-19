@@ -25,10 +25,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo

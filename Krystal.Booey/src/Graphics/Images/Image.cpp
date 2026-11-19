@@ -28,10 +28,10 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include <cmath>
 
 namespace krys::boo

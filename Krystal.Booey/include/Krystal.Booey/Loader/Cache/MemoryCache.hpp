@@ -25,8 +25,8 @@
 #pragma once
 
 #include "Krystal.Booey/Loader/Cache/CachedResource.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 

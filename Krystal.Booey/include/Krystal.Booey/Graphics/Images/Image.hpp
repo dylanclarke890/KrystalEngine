@@ -42,13 +42,13 @@
 namespace krys
 {
   class TextStream;
+  class Timer;
 }
 
 namespace krys::boo
 {
   class GraphicsContext;
   class NativeImage;
-  class Timer;
 
   /// @brief Something drawable as an image: a bitmap image, an SVG image or a generated image (a gradient).
   class Image : public RefCounted<Image>, public CanMakeWeakPtr<Image>

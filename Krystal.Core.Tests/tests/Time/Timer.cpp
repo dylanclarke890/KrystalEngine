@@ -1,25 +1,26 @@
-﻿#include "Krystal.Booey/Platform/Timer.hpp"
+﻿#include "Krystal.Core/Time/Timer.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Platform/ThreadTimers.hpp"
+#include "Krystal.Core/Time/ThreadTimers.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include <thread>
 
-namespace krys::boo::tests
+namespace krys::tests
 {
   namespace
   {
     using namespace std::chrono_literals;
 
-    /// @brief Runs the event loop @p delta of host time after the last run.
+    /// @brief Moves this thread's time on by @p delta and fires the timers that are due.
     void Advance(MonotonicTime::duration delta) noexcept
     {
-      auto &loop = html::EventLoop::Current();
-      loop.Run(loop.Now() + delta);
+      auto &timers = ThreadTimers::Current();
+      timers.SetCurrentTime(timers.CurrentTime() + delta);
+      (void)timers.FireTimersDue();
     }
   }
 
-  TEST_CASE("Timer: one-shot timers fire once, when they're due", "[Platform][Timer]")
+  TEST_CASE("Timer: one-shot timers fire once, when they're due", "[Time][Timer]")
   {
     int32 fired = 0;
     Timer timer([&] { ++fired; });
@@ -58,7 +59,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("Timer: repeating timers", "[Platform][Timer]")
+  TEST_CASE("Timer: repeating timers", "[Time][Timer]")
   {
     int32 fired = 0;
     Timer timer([&] { ++fired; });
@@ -81,7 +82,7 @@ namespace krys::boo::tests
     CHECK(fired == 3);
   }
 
-  TEST_CASE("Timer: timers fire soonest first, then in the order they were started", "[Platform][Timer]")
+  TEST_CASE("Timer: timers fire soonest first, then in the order they were started", "[Time][Timer]")
   {
     List<int32> order;
     Timer late([&] { order.push_back(3); });
@@ -95,35 +96,29 @@ namespace krys::boo::tests
     CHECK(order == List<int32> {1, 2, 3});
   }
 
-  TEST_CASE("Timer: the host's time", "[Platform][Timer]")
+  TEST_CASE("Timer: the host's time", "[Time][Timer]")
   {
-    auto &loop = html::EventLoop::Current();
+    auto &timers = ThreadTimers::Current();
     int32 fired = 0;
     Timer timer([&] { ++fired; });
 
     SECTION("doesn't go backwards")
     {
-      auto now = loop.Now();
-      loop.Run(now - 1s);
-      CHECK(loop.Now() == now);
+      auto now = timers.CurrentTime();
+      timers.SetCurrentTime(now - 1s);
+      CHECK(timers.CurrentTime() == now);
     }
 
     SECTION("a zero-delay timer is due at once, but one started while timers fire waits for the next run")
     {
       Timer restarting([&] { timer.StartOneShot({}); });
       restarting.StartOneShot({});
-      loop.RunUntilIdle();
-      // The loop runs again until idle, so the timer it started fires too.
-      CHECK(fired == 1);
-
-      timer.StartOneShot({});
-      Timer again([&] { timer.StartOneShot({}); });
-      again.StartOneShot({});
-      loop.Run(loop.Now());
-      CHECK(fired == 2);
+      CHECK(timers.FireTimersDue());
+      CHECK(fired == 0);
       CHECK(timer.IsActive());
-      loop.Run(loop.Now());
-      CHECK(fired == 3);
+      CHECK(timers.FireTimersDue());
+      CHECK(fired == 1);
+      CHECK_FALSE(timers.FireTimersDue());
     }
 
     SECTION("a destroyed timer stops")
@@ -152,29 +147,28 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("EventLoop: tasks after a timeout, the budget and the next wake time", "[HTML][EventLoop][Timer]")
+  TEST_CASE("Timer: each thread has its own timers", "[Time][Timer]")
   {
-    auto &loop = html::EventLoop::Current();
-    loop.RunUntilIdle();
-    List<int32> order;
+    auto &mainTimers = ThreadTimers::Current();
+    auto mainNextFireTime = mainTimers.NextFireTime();
 
-    loop.ScheduleTask(50ms, html::TaskSource::Timer, [&] { order.push_back(1); });
-    REQUIRE(loop.NextWakeTime());
-    CHECK(*loop.NextWakeTime() <= loop.Now() + 50ms);
-    Advance(49ms);
-    CHECK(order.empty());
-    Advance(1ms);
-    CHECK(order == List<int32> {1});
+    bool separate = false;
+    bool firedOnItsThread = false;
+    std::thread thread(
+      [&]
+      {
+        auto &timers = ThreadTimers::Current();
+        separate = &timers != &mainTimers;
+        Timer timer([&] { firedOnItsThread = true; });
+        timer.StartOneShot(10ms);
+        timers.SetCurrentTime(timers.CurrentTime() + 10ms);
+        (void)timers.FireTimersDue();
+      });
+    thread.join();
 
-    // Queued tasks are work now.
-    loop.QueueTask(html::TaskSource::DOMManipulation, [&] { order.push_back(2); });
-    CHECK(loop.NextWakeTime() == loop.Now());
-
-    // A spent budget leaves tasks for the next run.
-    loop.QueueTask(html::TaskSource::DOMManipulation, [&] { order.push_back(3); });
-    loop.Run(loop.Now(), MonotonicTime::duration::zero());
-    CHECK(order == List<int32> {1});
-    loop.Run(loop.Now());
-    CHECK(order == List<int32> {1, 2, 3});
+    CHECK(separate);
+    CHECK(firedOnItsThread);
+    // The other thread's timer never joined this thread's set.
+    CHECK(mainTimers.NextFireTime() == mainNextFireTime);
   }
 }

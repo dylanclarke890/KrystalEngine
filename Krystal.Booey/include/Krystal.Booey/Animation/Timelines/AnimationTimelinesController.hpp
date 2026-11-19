@@ -27,8 +27,8 @@
 
 #include "Krystal.Booey/Animation/Timing/WebAnimationTime.hpp"
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 

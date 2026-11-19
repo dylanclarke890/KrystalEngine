@@ -27,8 +27,8 @@
 #pragma once
 
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
 namespace krys::net

@@ -24,17 +24,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Platform/ThreadTimers.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
+#include "Krystal.Core/Time/ThreadTimers.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include <utility>
 
-namespace krys::boo
+namespace krys
 {
   ThreadTimers &ThreadTimers::Current() noexcept
   {
-    static NeverDestroyed<ThreadTimers> timers;
+    // Never destroyed, so that a timer destroyed late in the main thread's shutdown can still stop.
+    thread_local NeverDestroyed<ThreadTimers> timers;
     return timers;
   }
 

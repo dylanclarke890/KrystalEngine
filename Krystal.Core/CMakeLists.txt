@@ -220,6 +220,8 @@ target_sources(Krystal.Core
       # Time
       include/Krystal.Core/Time/Duration.hpp
       include/Krystal.Core/Time/MonotonicTime.hpp
+      include/Krystal.Core/Time/ThreadTimers.hpp
+      include/Krystal.Core/Time/Timer.hpp
 
       # Types
       include/Krystal.Core/Types/Any.hpp
@@ -331,6 +333,10 @@ target_sources(Krystal.Core
     src/Threading/ManualWorkQueue.cpp
     src/Threading/TaskInbox.cpp
     src/Threading/Thread.cpp
+
+    # Time
+    src/Time/ThreadTimers.cpp
+    src/Time/Timer.cpp
 
     # Types
     src/Types/Decimal.cpp

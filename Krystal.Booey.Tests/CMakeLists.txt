@@ -496,7 +496,6 @@ target_sources(Krystal.Booey.Tests
 		tests/Platform/Network/DataUrlDecoder.cpp
 		tests/Platform/Network/ResourceResponse.cpp
 		tests/Platform/Scrolling/ScrollAlignment.cpp
-		tests/Platform/Timer.cpp
 		tests/Rendering/Grid/RenderGrid.cpp
 		tests/Rendering/RenderFlexibleBox.cpp
 		tests/Rendering/RenderObject.cpp

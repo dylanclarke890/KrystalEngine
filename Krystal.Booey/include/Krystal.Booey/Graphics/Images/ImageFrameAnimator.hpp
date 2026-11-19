@@ -27,10 +27,10 @@
 
 #include "Krystal.Booey/Graphics/Images/DecodingOptions.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 

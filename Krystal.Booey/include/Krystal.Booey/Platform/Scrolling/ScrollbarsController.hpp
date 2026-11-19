@@ -56,10 +56,10 @@
 #pragma once
 
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 
 namespace krys::boo
 {

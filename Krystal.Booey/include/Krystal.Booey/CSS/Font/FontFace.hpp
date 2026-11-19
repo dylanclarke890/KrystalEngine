@@ -27,10 +27,10 @@
 
 #include "Krystal.Booey/Graphics/Fonts/FontSelectionAlgorithm.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontTaggedSettings.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Span.hpp"

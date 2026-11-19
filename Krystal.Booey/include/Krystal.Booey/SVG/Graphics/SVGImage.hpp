@@ -27,9 +27,9 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Net/Url.hpp"
 

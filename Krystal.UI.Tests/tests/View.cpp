@@ -39,9 +39,9 @@
 #include "Krystal.Booey/Platform/Pasteboard/PasteboardStrategy.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/SelectionData.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Core/Threading/ManualWorkQueue.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Utils/ScopeExit.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
@@ -1947,7 +1947,7 @@ namespace krys::ui::tests
 
     // Timers follow the time the host passes.
     int32 fired = 0;
-    boo::Timer timer([&] { ++fired; });
+    Timer timer([&] { ++fired; });
     timer.StartOneShot(100ms);
     view.Update(start + 99ms);
     CHECK(fired == 0);

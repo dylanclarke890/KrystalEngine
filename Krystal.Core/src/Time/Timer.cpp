@@ -24,10 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Platform/Timer.hpp"
-#include "Krystal.Booey/Platform/ThreadTimers.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
+#include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Time/ThreadTimers.hpp"
 
-namespace krys::boo
+namespace krys
 {
   TimerBase::~TimerBase() noexcept
   {
@@ -38,6 +39,8 @@ namespace krys::boo
                         MonotonicTime::duration repeatInterval) noexcept
   {
     auto &timers = ThreadTimers::Current();
+    krys_debug_assert_msg(!IsActive() || _timers == &timers, "A timer must be restarted on its own thread");
+    _timers = &timers;
     _repeatInterval = repeatInterval;
     timers.SetNextFireTime(*this, timers.CurrentTime() + nextFireInterval, true);
   }
@@ -47,14 +50,15 @@ namespace krys::boo
     _repeatInterval = {};
     if (IsActive())
     {
-      ThreadTimers::Current().SetNextFireTime(*this, {}, false);
+      krys_debug_assert_msg(_timers == &ThreadTimers::Current(), "A timer must be stopped on its own thread");
+      _timers->SetNextFireTime(*this, {}, false);
     }
   }
 
   MonotonicTime::duration TimerBase::NextFireInterval() const noexcept
   {
     krys_debug_assert(IsActive());
-    auto current = ThreadTimers::Current().CurrentTime();
+    auto current = _timers->CurrentTime();
     if (_nextFireTime < current)
     {
       return {};

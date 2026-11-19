@@ -18,11 +18,11 @@
 #include "Krystal.Booey/Platform/Network/ResourceError.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragImage.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/SelectionData.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Region.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -314,7 +314,7 @@ namespace krys::ui
 
     Maybe<Fling> _fling;
     /// @brief Fires when a touch has been held still long enough to be a long press.
-    boo::Timer _longPressTimer {*this, &View::LongPressed};
+    Timer _longPressTimer {*this, &View::LongPressed};
 
     /// @brief A custom element definition the view gives each document it loads.
     struct CustomElementDefinition

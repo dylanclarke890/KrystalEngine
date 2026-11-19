@@ -12,10 +12,14 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
+namespace krys
+{
+  class Timer;
+}
+
 namespace krys::boo
 {
   class Document;
-  class Timer;
 }
 
 namespace krys::boo::html

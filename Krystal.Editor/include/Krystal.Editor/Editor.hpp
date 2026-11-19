@@ -14,9 +14,9 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarThemeAdwaita.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Utils/ScopedProfiler.hpp"
@@ -86,7 +86,7 @@ namespace krys
     /// @brief The page's time, which only moves while the editor runs (Booey's timers follow it).
     MonotonicTime::duration _pageTime {};
     /// @brief Counts the seconds the page has been open in its `#clock` element.
-    boo::Timer _clockTimer {[this] { TickClock(); }};
+    Timer _clockTimer {[this] { TickClock(); }};
     uint32 _secondsOpen {0};
     bool _focused {true};
     /// @brief Where the window's input method was last told the page's text input is, in the window.

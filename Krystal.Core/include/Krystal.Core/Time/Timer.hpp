@@ -30,14 +30,16 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
-namespace krys::boo
+namespace krys
 {
   class ThreadTimers;
 
-  /// @brief A timer that fires once, or repeatedly, after an interval of the host's time: the event loop
-  /// fires the timers that are due when the host runs it with the current time.
-  /// @note A timer stops when it's destroyed, so its owner may hold it as a member.
+  /// @brief A timer that fires once, or repeatedly, after an interval of the host's time: the thread's loop
+  /// fires the timers that are due when it runs with the current time (see `ThreadTimers`).
+  /// @note A timer stops when it's destroyed, so its owner may hold it as a member. It belongs to the thread
+  /// that starts it, which alone may start, stop or destroy it while it's active.
   // (No timer alignment or nesting levels: they're for script timers, and scripting isn't planned.)
   class TimerBase
   {
@@ -51,6 +53,7 @@ namespace krys::boo
     MonotonicTime::duration _repeatInterval {};
     uint64 _heapInsertionOrder {0};
     size_t _heapIndex {NotInHeap};
+    ThreadTimers *_timers {nullptr};
 
   public:
     TimerBase() noexcept = default;

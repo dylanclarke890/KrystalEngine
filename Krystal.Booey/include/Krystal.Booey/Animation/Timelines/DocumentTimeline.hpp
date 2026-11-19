@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/Animation/Timelines/AnimationTimeline.hpp"
 #include "Krystal.Booey/Animation/Timelines/DocumentTimelineOptions.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 

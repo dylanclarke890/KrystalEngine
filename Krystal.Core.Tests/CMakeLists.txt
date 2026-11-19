@@ -91,6 +91,9 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Threading/TaskInbox.cpp
 	PRIVATE tests/Threading/Thread.cpp
 
+  # Time
+	PRIVATE tests/Time/Timer.cpp
+
   # Commands
 	PRIVATE tests/Commands/Command.cpp
 	

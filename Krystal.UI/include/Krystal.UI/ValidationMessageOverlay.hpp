@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 #include "Krystal.UI/Overlay.hpp"
@@ -22,7 +22,7 @@ namespace krys::ui
     WeakPtr<boo::Element> _anchor;
     utf8_string _message;
     RectI _rect;
-    boo::Timer _hideTimer {*this, &ValidationMessageOverlay::Hide};
+    Timer _hideTimer {*this, &ValidationMessageOverlay::Hide};
     bool _visible {false};
 
   public:
