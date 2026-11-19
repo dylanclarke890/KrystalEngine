@@ -32,6 +32,7 @@
 #include "Krystal.Booey/Platform/Locale/Language.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Text/LocaleToScriptMapping.hpp"
+#include "Krystal.Text/Script.hpp"
 #include <array>
 #include <hb.h>
 #include <unicode/udatpg.h>
@@ -176,13 +177,15 @@ namespace krys::boo
 
   Locale::WritingDirection LocaleICU::DefaultWritingDirection() const noexcept
   {
-    UScriptCode icuScript = text::LocaleToScriptCode(
+    text::Script icuScript = text::LocaleToScriptCode(
       utf8_stringview(reinterpret_cast<const char8 *>(_locale.data()), _locale.size()));
-    if (icuScript == USCRIPT_INVALID_CODE)
+    if (icuScript == text::Script::Invalid)
     {
       return WritingDirection::Default;
     }
-    hb_script_t script = hb_script_from_string(uscript_getShortName(icuScript), -1);
+    auto scriptName = text::ScriptShortName(icuScript);
+    hb_script_t script = hb_script_from_string(reinterpret_cast<const char *>(scriptName.data()),
+                                               static_cast<int>(scriptName.size()));
 
     switch (hb_script_get_horizontal_direction(script))
     {

@@ -28,6 +28,7 @@
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Text/CharacterProperties.hpp"
+#include "Krystal.Text/Script.hpp"
 
 namespace krys::boo
 {
@@ -105,7 +106,7 @@ namespace krys::boo
       {
         return true;
       }
-      if (text::IsOfScriptType(character, UScriptCode::USCRIPT_HAN))
+      if (text::IsOfScriptType(character, text::Script::Han))
       {
         return true;
       }

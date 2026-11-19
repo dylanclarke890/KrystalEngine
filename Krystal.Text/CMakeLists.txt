@@ -41,6 +41,7 @@ target_sources(Krystal.Text
       include
     FILES
       include/Krystal.Text/Base64.hpp
+      include/Krystal.Text/Bidi.hpp
       include/Krystal.Text/BidiContext.hpp
       include/Krystal.Text/BidiResolver.hpp
       include/Krystal.Text/BidiRunList.hpp
@@ -72,6 +73,7 @@ target_sources(Krystal.Text
       include/Krystal.Text/Hyphenation.hpp
       include/Krystal.Text/ICodec.hpp
       include/Krystal.Text/LocaleToScriptMapping.hpp
+      include/Krystal.Text/Script.hpp
       include/Krystal.Text/TextBoundaries.hpp
       include/Krystal.Text/TextBreakIterator.hpp
       include/Krystal.Text/TextDirection.hpp
@@ -79,11 +81,13 @@ target_sources(Krystal.Text
 
   PRIVATE
     src/Base64.cpp
+    src/Bidi.cpp
     src/BidiContext.cpp
     src/FreeTypeFace.cpp
     src/HarfBuzz.cpp
     src/Hyphenation.cpp
     src/LocaleToScriptMapping.cpp
+    src/Script.cpp
     src/TextBoundaries.cpp
     src/TextBreakIterator.cpp
     src/UnicodeHelpers.cpp

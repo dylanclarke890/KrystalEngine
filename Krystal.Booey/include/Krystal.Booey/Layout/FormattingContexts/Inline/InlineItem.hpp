@@ -30,7 +30,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include <unicode/ubidi.h>
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo::layout
 {
@@ -69,7 +69,7 @@ namespace krys::boo::layout
     uint32 _startOrPosition {0};
 
   private:
-    UBiDiLevel _bidiLevel {UBIDI_DEFAULT_LTR};
+    text::BidiLevel _bidiLevel {text::DefaultLeftToRightBidiLevel};
 
     Type _type : 4 {};
 
@@ -88,7 +88,8 @@ namespace krys::boo::layout
     bool _isWordSeparator : 1 {false};
 
   public:
-    InlineItem(const Box &layoutBox, Type type, UBiDiLevel bidiLevel = UBIDI_DEFAULT_LTR) noexcept
+    InlineItem(const Box &layoutBox, Type type,
+               text::BidiLevel bidiLevel = text::DefaultLeftToRightBidiLevel) noexcept
         : _layoutBox(&layoutBox), _bidiLevel(bidiLevel), _type(type)
     {
     }
@@ -98,9 +99,9 @@ namespace krys::boo::layout
       return _type;
     }
 
-    constexpr static UBiDiLevel OpaqueBidiLevel = 0xFF;
+    constexpr static text::BidiLevel OpaqueBidiLevel = 0xFF;
 
-    KRYS_NODISCARD UBiDiLevel BidiLevel() const noexcept
+    KRYS_NODISCARD text::BidiLevel BidiLevel() const noexcept
     {
       return _bidiLevel;
     }
@@ -181,7 +182,7 @@ namespace krys::boo::layout
     }
 
   private:
-    void SetBidiLevel(UBiDiLevel bidiLevel) noexcept
+    void SetBidiLevel(text::BidiLevel bidiLevel) noexcept
     {
       _bidiLevel = bidiLevel;
     }

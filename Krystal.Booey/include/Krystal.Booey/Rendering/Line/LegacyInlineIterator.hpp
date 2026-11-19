@@ -31,6 +31,7 @@
 #include "Krystal.Booey/Text/UnicodeBidi.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Text/Bidi.hpp"
 #include <limits>
 
 namespace krys::boo
@@ -233,24 +234,25 @@ namespace krys::boo
       return CharacterAt(static_cast<uint32>(text::PreviousCodePointStart(textRenderer->Text(), _pos)));
     }
 
-    KRYS_NODISCARD UCharDirection Direction() const noexcept
+    KRYS_NODISCARD text::BidiClass Direction() const noexcept
     {
       if (!_renderer) KRYS_UNLIKELY
       {
-        return U_OTHER_NEUTRAL;
+        return text::BidiClass::OtherNeutral;
       }
 
       if (auto *textRenderer = DynamicDowncast<RenderText>(*_renderer)) KRYS_LIKELY
       {
-        return u_charDirection(CharacterAt(_pos));
+        return text::GetBidiClass(CharacterAt(_pos));
       }
 
       if (auto *listMarkerRenderer = DynamicDowncast<RenderListMarker>(*_renderer))
       {
-        return listMarkerRenderer->GetWritingMode().IsBidiLTR() ? U_LEFT_TO_RIGHT : U_RIGHT_TO_LEFT;
+        return listMarkerRenderer->GetWritingMode().IsBidiLTR() ? text::BidiClass::LeftToRight
+                                                                : text::BidiClass::RightToLeft;
       }
 
-      return U_OTHER_NEUTRAL;
+      return text::BidiClass::OtherNeutral;
     }
 
     KRYS_NODISCARD friend bool operator==(const LegacyInlineIterator &it1,
@@ -295,14 +297,16 @@ namespace krys::text
 
 namespace krys::boo
 {
-  KRYS_NODISCARD inline UCharDirection EmbedCharFromDirection(WritingMode writingMode,
-                                                              UnicodeBidi unicodeBidi) noexcept
+  KRYS_NODISCARD inline text::BidiClass EmbedCharFromDirection(WritingMode writingMode,
+                                                               UnicodeBidi unicodeBidi) noexcept
   {
     if (unicodeBidi == UnicodeBidi::Embed)
     {
-      return writingMode.IsBidiRTL() ? U_RIGHT_TO_LEFT_EMBEDDING : U_LEFT_TO_RIGHT_EMBEDDING;
+      return writingMode.IsBidiRTL() ? text::BidiClass::RightToLeftEmbedding
+                                     : text::BidiClass::LeftToRightEmbedding;
     }
-    return writingMode.IsBidiRTL() ? U_RIGHT_TO_LEFT_OVERRIDE : U_LEFT_TO_RIGHT_OVERRIDE;
+    return writingMode.IsBidiRTL() ? text::BidiClass::RightToLeftOverride
+                                   : text::BidiClass::LeftToRightOverride;
   }
 
   template <class Observer>
@@ -361,7 +365,7 @@ namespace krys::boo
     // Otherwise we pop any embed/override character we added when we opened this tag.
     if (!observer->InIsolate())
     {
-      observer->Embed(U_POP_DIRECTIONAL_FORMAT, text::BidiEmbeddingSource::FromStyleOrDOM);
+      observer->Embed(text::BidiClass::PopDirectionalFormat, text::BidiEmbeddingSource::FromStyleOrDOM);
     }
   }
 
@@ -548,7 +552,7 @@ namespace krys::boo
     }
 
     // We don't care if we encounter bidi directional overrides.
-    void Embed(UCharDirection, text::BidiEmbeddingSource) noexcept
+    void Embed(text::BidiClass, text::BidiEmbeddingSource) noexcept
     {
     }
 

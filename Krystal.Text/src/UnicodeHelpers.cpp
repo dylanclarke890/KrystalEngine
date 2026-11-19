@@ -25,8 +25,8 @@
 
 #include "Krystal.Text/UnicodeHelpers.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Text/Bidi.hpp"
 #include <algorithm>
-#include <unicode/uchar.h>
 
 namespace krys::text
 {
@@ -43,12 +43,12 @@ namespace krys::text
     for (text::CodePointIterator it {content}; !it.AtEnd(); ++it)
     {
       isLatin1 = isLatin1 && *it <= 0xFF;
-      switch (u_charDirection(*it))
+      switch (GetBidiClass(*it))
       {
-        case U_LEFT_TO_RIGHT:        return TextDirection::LTR;
-        case U_RIGHT_TO_LEFT:
-        case U_RIGHT_TO_LEFT_ARABIC: return TextDirection::RTL;
-        default:                     break;
+        case BidiClass::LeftToRight:       return TextDirection::LTR;
+        case BidiClass::RightToLeft:
+        case BidiClass::RightToLeftArabic: return TextDirection::RTL;
+        default:                           break;
       }
     }
     if (isLatin1)
@@ -62,12 +62,12 @@ namespace krys::text
   {
     for (text::CodePointIterator it {content}; !it.AtEnd(); ++it)
     {
-      switch (u_charDirection(*it))
+      switch (GetBidiClass(*it))
       {
-        case U_LEFT_TO_RIGHT:        return TextDirection::LTR;
-        case U_RIGHT_TO_LEFT:
-        case U_RIGHT_TO_LEFT_ARABIC: return TextDirection::RTL;
-        default:                     break;
+        case BidiClass::LeftToRight:       return TextDirection::LTR;
+        case BidiClass::RightToLeft:
+        case BidiClass::RightToLeftArabic: return TextDirection::RTL;
+        default:                           break;
       }
     }
     return null;

@@ -29,8 +29,8 @@
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Text/HarfBuzz.hpp"
+#include "Krystal.Text/Script.hpp"
 #include <hb.h>
-#include <unicode/uscript.h>
 
 namespace krys::boo
 {
@@ -41,31 +41,32 @@ namespace krys::boo
       return static_cast<float>(value) / (1 << 16);
     }
 
-    KRYS_NODISCARD Maybe<UScriptCode> CharacterScript(char32 character) noexcept
+    KRYS_NODISCARD Maybe<text::Script> CharacterScript(char32 character) noexcept
     {
-      UErrorCode errorCode = U_ZERO_ERROR;
-      UScriptCode script = uscript_getScript(character, &errorCode);
-      if (U_FAILURE(errorCode))
+      auto script = text::GetScript(character);
+      if (script == text::Script::Invalid)
       {
         return null;
       }
       return script;
     }
 
-    KRYS_NODISCARD hb_script_t HarfBuzzScript(UScriptCode script) noexcept
+    KRYS_NODISCARD hb_script_t HarfBuzzScript(text::Script script) noexcept
     {
-      if (script == USCRIPT_INVALID_CODE)
+      if (script == text::Script::Invalid)
       {
         return HB_SCRIPT_INVALID;
       }
-      return hb_script_from_string(uscript_getShortName(script), -1);
+      auto name = text::ScriptShortName(script);
+      return hb_script_from_string(reinterpret_cast<const char *>(name.data()),
+                                   static_cast<int>(name.size()));
     }
 
     struct HBRun
     {
       uint32 StartIndex;
       uint32 EndIndex;
-      UScriptCode Script;
+      text::Script Script;
     };
 
     KRYS_NODISCARD Maybe<HBRun> FindNextRun(utf8_stringview characters, uint32 offset) noexcept
@@ -114,20 +115,20 @@ namespace krys::boo
         // FIXME: cover all other cases mentioned in the spec (ie. brackets or quotation marks).
         //
         // If next script is inherited or common, keep using the current script.
-        if (*nextScript == USCRIPT_INHERITED || *nextScript == USCRIPT_COMMON)
+        if (*nextScript == text::Script::Inherited || *nextScript == text::Script::Common)
         {
           index += decoded.Length;
           continue;
         }
         // If current script is inherited or common, set the next script as current.
-        if (*currentScript == USCRIPT_INHERITED || *currentScript == USCRIPT_COMMON)
+        if (*currentScript == text::Script::Inherited || *currentScript == text::Script::Common)
         {
           currentScript = nextScript;
           index += decoded.Length;
           continue;
         }
 
-        if (*currentScript != *nextScript && !uscript_hasScript(character, *currentScript))
+        if (*currentScript != *nextScript && !text::HasScript(character, *currentScript))
         {
           return HBRun {startIndex, index, *currentScript};
         }

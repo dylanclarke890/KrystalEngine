@@ -34,7 +34,7 @@
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include <unicode/ubidi.h>
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo::inline_display
 {
@@ -186,7 +186,7 @@ namespace krys::boo::inline_display
     float _horizontalExpansion {0};
 
     ExpansionBehavior _expansionBehavior {ExpansionBehavior::DefaultBehavior()};
-    UBiDiLevel _bidiLevel {UBIDI_DEFAULT_LTR};
+    text::BidiLevel _bidiLevel {text::DefaultLeftToRightBidiLevel};
     Type _type : 4 {Type::GenericInlineLevelBox};
     bool _hasContent : 1 {false};
     bool _isFirstForLayoutBox : 1 {false};
@@ -196,7 +196,7 @@ namespace krys::boo::inline_display
     Text _text;
 
   public:
-    Box(size_t lineIndex, Type type, const layout::Box &layoutBox, UBiDiLevel bidiLevel,
+    Box(size_t lineIndex, Type type, const layout::Box &layoutBox, text::BidiLevel bidiLevel,
         const FloatRect &physicalRect, const FloatRect &inkOverflow, bool isFirstFormattedLine,
         Expansion expansion, Maybe<Text> text = null, bool hasContent = true, bool isFullyTruncated = false,
         EnumSet<PositionWithinInlineLevelBox> positionWithinInlineLevelBox = {}) noexcept
@@ -285,7 +285,7 @@ namespace krys::boo::inline_display
       return IsInlineLevelBox() && !IsRootInlineBox();
     }
 
-    KRYS_NODISCARD UBiDiLevel BidiLevel() const noexcept
+    KRYS_NODISCARD text::BidiLevel BidiLevel() const noexcept
     {
       return _bidiLevel;
     }

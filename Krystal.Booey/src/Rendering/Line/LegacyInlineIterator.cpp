@@ -27,6 +27,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Krystal.Booey/Rendering/Line/LegacyInlineIterator.hpp"
 
 #include "Krystal.Booey/Rendering/Line/LegacyLineLayout.hpp"
+#include "Krystal.Text/Bidi.hpp"
 #include <limits>
 
 namespace krys::boo
@@ -169,7 +170,7 @@ namespace krys::text
       _sor = _eor;
     }
 
-    _direction = U_OTHER_NEUTRAL;
-    _status.Eor = U_OTHER_NEUTRAL;
+    _direction = text::BidiClass::OtherNeutral;
+    _status.Eor = text::BidiClass::OtherNeutral;
   }
 }

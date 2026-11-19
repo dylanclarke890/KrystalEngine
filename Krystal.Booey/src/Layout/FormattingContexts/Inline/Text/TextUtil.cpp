@@ -37,6 +37,7 @@
 #include "Krystal.Booey/Text/UnicodeBidi.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/Bidi.hpp"
 #include "Krystal.Text/CharacterProperties.hpp"
 #include "Krystal.Text/UnicodeHelpers.hpp"
 #include <cmath>
@@ -658,11 +659,13 @@ namespace krys::boo::layout
       return false;
     }
 
-    auto bidiCategory = u_charDirection(character);
-    return bidiCategory == U_RIGHT_TO_LEFT || bidiCategory == U_RIGHT_TO_LEFT_ARABIC
-           || bidiCategory == U_RIGHT_TO_LEFT_EMBEDDING || bidiCategory == U_RIGHT_TO_LEFT_OVERRIDE
-           || bidiCategory == U_LEFT_TO_RIGHT_EMBEDDING || bidiCategory == U_LEFT_TO_RIGHT_OVERRIDE
-           || bidiCategory == U_POP_DIRECTIONAL_FORMAT;
+    auto bidiCategory = text::GetBidiClass(character);
+    return bidiCategory == text::BidiClass::RightToLeft || bidiCategory == text::BidiClass::RightToLeftArabic
+           || bidiCategory == text::BidiClass::RightToLeftEmbedding
+           || bidiCategory == text::BidiClass::RightToLeftOverride
+           || bidiCategory == text::BidiClass::LeftToRightEmbedding
+           || bidiCategory == text::BidiClass::LeftToRightOverride
+           || bidiCategory == text::BidiClass::PopDirectionalFormat;
   }
 
   bool TextUtil::ContainsStrongDirectionalityText(utf8_stringview text) noexcept

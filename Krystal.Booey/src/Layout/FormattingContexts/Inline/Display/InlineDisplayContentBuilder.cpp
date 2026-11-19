@@ -39,6 +39,7 @@
 #include "Krystal.Booey/Style/Values/Borders/Shadow.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
+#include "Krystal.Text/Bidi.hpp"
 
 #include <algorithm>
 #include <ranges>
@@ -637,7 +638,7 @@ namespace krys::boo::layout
     boxes.push_back({LineIndex(),
                      inline_display::Box::Type::RootInlineBox,
                      Root(),
-                     UBIDI_DEFAULT_LTR,
+                     text::DefaultLeftToRightBidiLevel,
                      rootInlineBoxVisualRect,
                      rootInlineBoxVisualRect,
                      IsFirstFormattedLine(),
@@ -696,7 +697,7 @@ namespace krys::boo::layout
     boxes.push_back({LineIndex(),
                      inline_display::Box::Type::NonRootInlineBox,
                      layoutBox,
-                     UBIDI_DEFAULT_LTR,
+                     text::DefaultLeftToRightBidiLevel,
                      {},
                      {},
                      IsFirstFormattedLine(),
@@ -715,7 +716,7 @@ namespace krys::boo::layout
                  inline_display::Box {LineIndex(),
                                       inline_display::Box::Type::AtomicInlineBox,
                                       annotationBox,
-                                      UBIDI_DEFAULT_LTR,
+                                      text::DefaultLeftToRightBidiLevel,
                                       borderBoxRect,
                                       borderBoxRect,
                                       IsFirstFormattedLine(),

@@ -39,6 +39,7 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRootInlineBox.hpp"
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo
 {
@@ -63,13 +64,14 @@ namespace krys::boo
         }
         if (char32 current = iter.Current())
         {
-          UCharDirection charDirection = u_charDirection(current);
-          if (charDirection == U_LEFT_TO_RIGHT)
+          text::BidiClass charDirection = text::GetBidiClass(current);
+          if (charDirection == text::BidiClass::LeftToRight)
           {
             dir = text::TextDirection::LTR;
             return;
           }
-          if (charDirection == U_RIGHT_TO_LEFT || charDirection == U_RIGHT_TO_LEFT_ARABIC)
+          if (charDirection == text::BidiClass::RightToLeft
+              || charDirection == text::BidiClass::RightToLeftArabic)
           {
             dir = text::TextDirection::RTL;
             return;

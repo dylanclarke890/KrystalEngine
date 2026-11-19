@@ -24,6 +24,7 @@
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Text/Bidi.hpp"
 #include "Krystal.Text/BidiContext.hpp"
 #include "Krystal.Text/BidiRunList.hpp"
 #include "Krystal.Text/TextDirection.hpp"
@@ -112,23 +113,23 @@ namespace krys::text
   /// restart bidi resolution at that position.
   struct BidiStatus
   {
-    UCharDirection Eor {U_OTHER_NEUTRAL};
-    UCharDirection LastStrong {U_OTHER_NEUTRAL};
-    UCharDirection Last {U_OTHER_NEUTRAL};
+    BidiClass Eor {BidiClass::OtherNeutral};
+    BidiClass LastStrong {BidiClass::OtherNeutral};
+    BidiClass Last {BidiClass::OtherNeutral};
     RefPtr<BidiContext> Context;
 
     BidiStatus() noexcept = default;
 
     /// @brief Creates a BidiStatus representing a new paragraph root with a default direction.
-    /// Uses TextDirection as it only has two possibilities instead of UCharDirection which has at least 19.
+    /// Uses TextDirection as it only has two possibilities instead of BidiClass which has at least 19.
     BidiStatus(TextDirection direction, bool isOverride) noexcept
-        : Eor(direction == TextDirection::LTR ? U_LEFT_TO_RIGHT : U_RIGHT_TO_LEFT), LastStrong(Eor),
-          Last(Eor), Context(BidiContext::Create(direction == TextDirection::LTR ? 0 : 1, Eor, isOverride))
+        : Eor(direction == TextDirection::LTR ? BidiClass::LeftToRight : BidiClass::RightToLeft),
+          LastStrong(Eor), Last(Eor),
+          Context(BidiContext::Create(direction == TextDirection::LTR ? 0 : 1, Eor, isOverride))
     {
     }
 
-    BidiStatus(UCharDirection eor, UCharDirection lastStrong, UCharDirection last,
-               RefPtr<BidiContext> &&context) noexcept
+    BidiStatus(BidiClass eor, BidiClass lastStrong, BidiClass last, RefPtr<BidiContext> &&context) noexcept
         : Eor(eor), LastStrong(lastStrong), Last(last), Context(krys::move(context))
     {
     }
@@ -136,7 +137,7 @@ namespace krys::text
 
   struct BidiEmbedding
   {
-    UCharDirection Direction;
+    BidiClass Direction;
     BidiEmbeddingSource Source;
   };
 
@@ -157,10 +158,10 @@ namespace krys::text
     bool _override : 1;
 
   public:
-    BidiCharacterRun(uint32 start, uint32 stop, BidiContext *context, UCharDirection direction) noexcept
+    BidiCharacterRun(uint32 start, uint32 stop, BidiContext *context, BidiClass direction) noexcept
         : _start(start), _stop(stop), _override(context->Override())
     {
-      if (direction == U_OTHER_NEUTRAL)
+      if (direction == BidiClass::OtherNeutral)
       {
         direction = context->Dir();
       }
@@ -170,18 +171,19 @@ namespace krys::text
       // add level of run (cases I1 & I2)
       if (_level % 2)
       {
-        if (direction == U_LEFT_TO_RIGHT || direction == U_ARABIC_NUMBER || direction == U_EUROPEAN_NUMBER)
+        if (direction == BidiClass::LeftToRight || direction == BidiClass::ArabicNumber
+            || direction == BidiClass::EuropeanNumber)
         {
           _level++;
         }
       }
       else
       {
-        if (direction == U_RIGHT_TO_LEFT)
+        if (direction == BidiClass::RightToLeft)
         {
           _level++;
         }
-        else if (direction == U_ARABIC_NUMBER || direction == U_EUROPEAN_NUMBER)
+        else if (direction == BidiClass::ArabicNumber || direction == BidiClass::EuropeanNumber)
         {
           _level += 2;
         }
@@ -259,10 +261,10 @@ namespace krys::text
     Iterator _eor; // Points to the last character in the current run.
     Iterator _last;
     BidiStatus _status;
-    UCharDirection _direction {U_OTHER_NEUTRAL};
+    BidiClass _direction {BidiClass::OtherNeutral};
     Iterator _endOfLine;
     bool _reachedEndOfLine {false};
-    Iterator _lastBeforeET; // Before a U_EUROPEAN_NUMBER_TERMINATOR
+    Iterator _lastBeforeET; // Before a BidiClass::EuropeanNumberTerminator
     bool _emptyRun {true};
 
     // FIXME: This should not belong to the resolver, but rather be passed
@@ -309,27 +311,27 @@ namespace krys::text
       _status.Context = krys::move(context);
     }
 
-    void SetLastDir(UCharDirection lastDir) noexcept
+    void SetLastDir(BidiClass lastDir) noexcept
     {
       _status.Last = lastDir;
     }
 
-    void SetLastStrongDir(UCharDirection lastStrongDir) noexcept
+    void SetLastStrongDir(BidiClass lastStrongDir) noexcept
     {
       _status.LastStrong = lastStrongDir;
     }
 
-    void SetEorDir(UCharDirection eorDir) noexcept
+    void SetEorDir(BidiClass eorDir) noexcept
     {
       _status.Eor = eorDir;
     }
 
-    KRYS_NODISCARD UCharDirection Dir() const noexcept
+    KRYS_NODISCARD BidiClass Dir() const noexcept
     {
       return _direction;
     }
 
-    void SetDir(UCharDirection direction) noexcept
+    void SetDir(BidiClass direction) noexcept
     {
       _direction = direction;
     }
@@ -368,15 +370,15 @@ namespace krys::text
       return _nestedIsolateCount;
     }
 
-    void Embed(UCharDirection dir, BidiEmbeddingSource source) noexcept
+    void Embed(BidiClass dir, BidiEmbeddingSource source) noexcept
     {
       // Isolated spans compute base directionality during their own UBA run.
       // Do not insert fake embed characters once we enter an isolated span.
       krys_debug_assert(!InIsolate());
 
-      krys_debug_assert(dir == U_POP_DIRECTIONAL_FORMAT || dir == U_LEFT_TO_RIGHT_EMBEDDING
-                        || dir == U_LEFT_TO_RIGHT_OVERRIDE || dir == U_RIGHT_TO_LEFT_EMBEDDING
-                        || dir == U_RIGHT_TO_LEFT_OVERRIDE);
+      krys_debug_assert(dir == BidiClass::PopDirectionalFormat || dir == BidiClass::LeftToRightEmbedding
+                        || dir == BidiClass::LeftToRightOverride || dir == BidiClass::RightToLeftEmbedding
+                        || dir == BidiClass::RightToLeftOverride);
       _currentExplicitEmbeddingSequence.push_back(BidiEmbedding {dir, source});
     }
 
@@ -442,13 +444,13 @@ namespace krys::text
     }
 
   private:
-    void RaiseExplicitEmbeddingLevel(UCharDirection from, UCharDirection to) noexcept;
+    void RaiseExplicitEmbeddingLevel(BidiClass from, BidiClass to) noexcept;
 
-    void LowerExplicitEmbeddingLevel(UCharDirection from) noexcept;
+    void LowerExplicitEmbeddingLevel(BidiClass from) noexcept;
 
     void CheckDirectionInLowerRaiseEmbeddingLevel() noexcept;
 
-    void UpdateStatusLastFromCurrentDirection(UCharDirection) noexcept;
+    void UpdateStatusLastFromCurrentDirection(BidiClass) noexcept;
 
     void ReorderRunsFromLevels() noexcept;
   };
@@ -514,61 +516,61 @@ namespace krys::text
       _sor = _eor;
     }
 
-    _direction = U_OTHER_NEUTRAL;
-    _status.Eor = U_OTHER_NEUTRAL;
+    _direction = BidiClass::OtherNeutral;
+    _status.Eor = BidiClass::OtherNeutral;
   }
 
   template <typename Iterator, typename Run, typename DerivedClass>
   void BidiResolverBase<Iterator, Run, DerivedClass>::CheckDirectionInLowerRaiseEmbeddingLevel() noexcept
   {
-    krys_debug_assert(_status.Eor != U_OTHER_NEUTRAL || _eor.AtEnd());
-    krys_debug_assert(_status.Last != U_DIR_NON_SPACING_MARK && _status.Last != U_BOUNDARY_NEUTRAL
-                      && _status.Last != U_RIGHT_TO_LEFT_EMBEDDING
-                      && _status.Last != U_LEFT_TO_RIGHT_EMBEDDING && _status.Last != U_RIGHT_TO_LEFT_OVERRIDE
-                      && _status.Last != U_LEFT_TO_RIGHT_OVERRIDE
-                      && _status.Last != U_POP_DIRECTIONAL_FORMAT);
-    if (_direction == U_OTHER_NEUTRAL)
+    krys_debug_assert(_status.Eor != BidiClass::OtherNeutral || _eor.AtEnd());
+    krys_debug_assert(
+      _status.Last != BidiClass::NonSpacingMark && _status.Last != BidiClass::BoundaryNeutral
+      && _status.Last != BidiClass::RightToLeftEmbedding && _status.Last != BidiClass::LeftToRightEmbedding
+      && _status.Last != BidiClass::RightToLeftOverride && _status.Last != BidiClass::LeftToRightOverride
+      && _status.Last != BidiClass::PopDirectionalFormat);
+    if (_direction == BidiClass::OtherNeutral)
     {
-      _direction = _status.LastStrong == U_LEFT_TO_RIGHT ? U_LEFT_TO_RIGHT : U_RIGHT_TO_LEFT;
+      _direction =
+        _status.LastStrong == BidiClass::LeftToRight ? BidiClass::LeftToRight : BidiClass::RightToLeft;
     }
   }
 
   template <typename Iterator, typename Run, typename DerivedClass>
-  void
-    BidiResolverBase<Iterator, Run, DerivedClass>::LowerExplicitEmbeddingLevel(UCharDirection from) noexcept
+  void BidiResolverBase<Iterator, Run, DerivedClass>::LowerExplicitEmbeddingLevel(BidiClass from) noexcept
   {
     if (!_emptyRun && _eor != _last)
     {
       CheckDirectionInLowerRaiseEmbeddingLevel();
       // bidi.sor ... bidi.eor ... bidi.last eor; need to append the bidi.sor-bidi.eor run or extend it
       // through bidi.last
-      if (from == U_LEFT_TO_RIGHT)
+      if (from == BidiClass::LeftToRight)
       {
         // bidi.sor ... bidi.eor ... bidi.last L
-        if (_status.Eor == U_EUROPEAN_NUMBER)
+        if (_status.Eor == BidiClass::EuropeanNumber)
         {
-          if (_status.LastStrong != U_LEFT_TO_RIGHT)
+          if (_status.LastStrong != BidiClass::LeftToRight)
           {
-            _direction = U_EUROPEAN_NUMBER;
+            _direction = BidiClass::EuropeanNumber;
             AppendRun();
           }
         }
-        else if (_status.Eor == U_ARABIC_NUMBER)
+        else if (_status.Eor == BidiClass::ArabicNumber)
         {
-          _direction = U_ARABIC_NUMBER;
+          _direction = BidiClass::ArabicNumber;
           AppendRun();
         }
-        else if (_status.LastStrong != U_LEFT_TO_RIGHT)
+        else if (_status.LastStrong != BidiClass::LeftToRight)
         {
           AppendRun();
-          _direction = U_LEFT_TO_RIGHT;
+          _direction = BidiClass::LeftToRight;
         }
       }
-      else if (_status.Eor == U_EUROPEAN_NUMBER || _status.Eor == U_ARABIC_NUMBER
-               || _status.LastStrong == U_LEFT_TO_RIGHT)
+      else if (_status.Eor == BidiClass::EuropeanNumber || _status.Eor == BidiClass::ArabicNumber
+               || _status.LastStrong == BidiClass::LeftToRight)
       {
         AppendRun();
-        _direction = U_RIGHT_TO_LEFT;
+        _direction = BidiClass::RightToLeft;
       }
       _eor = _last;
     }
@@ -583,44 +585,44 @@ namespace krys::text
   }
 
   template <typename Iterator, typename Run, typename DerivedClass>
-  void BidiResolverBase<Iterator, Run, DerivedClass>::RaiseExplicitEmbeddingLevel(UCharDirection from,
-                                                                                  UCharDirection to) noexcept
+  void BidiResolverBase<Iterator, Run, DerivedClass>::RaiseExplicitEmbeddingLevel(BidiClass from,
+                                                                                  BidiClass to) noexcept
   {
     if (!_emptyRun && _eor != _last)
     {
       CheckDirectionInLowerRaiseEmbeddingLevel();
       // bidi.sor ... bidi.eor ... bidi.last eor; need to append the bidi.sor-bidi.eor run or extend it
       // through bidi.last
-      if (to == U_LEFT_TO_RIGHT)
+      if (to == BidiClass::LeftToRight)
       {
         // bidi.sor ... bidi.eor ... bidi.last L
-        if (_status.Eor == U_EUROPEAN_NUMBER)
+        if (_status.Eor == BidiClass::EuropeanNumber)
         {
-          if (_status.LastStrong != U_LEFT_TO_RIGHT)
+          if (_status.LastStrong != BidiClass::LeftToRight)
           {
-            _direction = U_EUROPEAN_NUMBER;
+            _direction = BidiClass::EuropeanNumber;
             AppendRun();
           }
         }
-        else if (_status.Eor == U_ARABIC_NUMBER)
+        else if (_status.Eor == BidiClass::ArabicNumber)
         {
-          _direction = U_ARABIC_NUMBER;
+          _direction = BidiClass::ArabicNumber;
           AppendRun();
         }
-        else if (_status.LastStrong != U_LEFT_TO_RIGHT && from == U_LEFT_TO_RIGHT)
+        else if (_status.LastStrong != BidiClass::LeftToRight && from == BidiClass::LeftToRight)
         {
           AppendRun();
-          _direction = U_LEFT_TO_RIGHT;
+          _direction = BidiClass::LeftToRight;
         }
       }
-      else if (_status.Eor == U_ARABIC_NUMBER
-               || (_status.Eor == U_EUROPEAN_NUMBER
-                   && (_status.LastStrong != U_LEFT_TO_RIGHT || from == U_RIGHT_TO_LEFT))
-               || (_status.Eor != U_EUROPEAN_NUMBER && _status.LastStrong == U_LEFT_TO_RIGHT
-                   && from == U_RIGHT_TO_LEFT))
+      else if (_status.Eor == BidiClass::ArabicNumber
+               || (_status.Eor == BidiClass::EuropeanNumber
+                   && (_status.LastStrong != BidiClass::LeftToRight || from == BidiClass::RightToLeft))
+               || (_status.Eor != BidiClass::EuropeanNumber && _status.LastStrong == BidiClass::LeftToRight
+                   && from == BidiClass::RightToLeft))
       {
         AppendRun();
-        _direction = U_RIGHT_TO_LEFT;
+        _direction = BidiClass::RightToLeft;
       }
       _eor = _last;
     }
@@ -646,7 +648,7 @@ namespace krys::text
 
     for (auto &embedding : _currentExplicitEmbeddingSequence)
     {
-      if (embedding.Direction == U_POP_DIRECTIONAL_FORMAT)
+      if (embedding.Direction == BidiClass::PopDirectionalFormat)
       {
         if (auto *parentContext = toContext->Parent())
         {
@@ -655,14 +657,14 @@ namespace krys::text
       }
       else
       {
-        UCharDirection direction = (embedding.Direction == U_RIGHT_TO_LEFT_EMBEDDING
-                                    || embedding.Direction == U_RIGHT_TO_LEFT_OVERRIDE)
-                                     ? U_RIGHT_TO_LEFT
-                                     : U_LEFT_TO_RIGHT;
-        bool override =
-          embedding.Direction == U_LEFT_TO_RIGHT_OVERRIDE || embedding.Direction == U_RIGHT_TO_LEFT_OVERRIDE;
+        BidiClass direction = (embedding.Direction == BidiClass::RightToLeftEmbedding
+                               || embedding.Direction == BidiClass::RightToLeftOverride)
+                                ? BidiClass::RightToLeft
+                                : BidiClass::LeftToRight;
+        bool override = embedding.Direction == BidiClass::LeftToRightOverride
+                        || embedding.Direction == BidiClass::RightToLeftOverride;
         uint8 level = toContext->Level();
-        if (direction == U_RIGHT_TO_LEFT)
+        if (direction == BidiClass::RightToLeft)
         {
           level = NextGreaterOddLevel(level);
         }
@@ -681,12 +683,12 @@ namespace krys::text
 
     if (toLevel > fromLevel)
     {
-      RaiseExplicitEmbeddingLevel(fromLevel % 2 ? U_RIGHT_TO_LEFT : U_LEFT_TO_RIGHT,
-                                  toLevel % 2 ? U_RIGHT_TO_LEFT : U_LEFT_TO_RIGHT);
+      RaiseExplicitEmbeddingLevel(fromLevel % 2 ? BidiClass::RightToLeft : BidiClass::LeftToRight,
+                                  toLevel % 2 ? BidiClass::RightToLeft : BidiClass::LeftToRight);
     }
     else if (toLevel < fromLevel)
     {
-      LowerExplicitEmbeddingLevel(fromLevel % 2 ? U_RIGHT_TO_LEFT : U_LEFT_TO_RIGHT);
+      LowerExplicitEmbeddingLevel(fromLevel % 2 ? BidiClass::RightToLeft : BidiClass::LeftToRight);
     }
 
     SetContext(krys::move(toContext));
@@ -698,42 +700,42 @@ namespace krys::text
 
   template <typename Iterator, typename Run, typename DerivedClass>
   inline void BidiResolverBase<Iterator, Run, DerivedClass>::UpdateStatusLastFromCurrentDirection(
-    UCharDirection dirCurrent) noexcept
+    BidiClass dirCurrent) noexcept
   {
     switch (dirCurrent)
     {
-      case U_EUROPEAN_NUMBER_TERMINATOR:
-        if (_status.Last != U_EUROPEAN_NUMBER)
+      case BidiClass::EuropeanNumberTerminator:
+        if (_status.Last != BidiClass::EuropeanNumber)
         {
-          _status.Last = U_EUROPEAN_NUMBER_TERMINATOR;
+          _status.Last = BidiClass::EuropeanNumberTerminator;
         }
         break;
-      case U_EUROPEAN_NUMBER_SEPARATOR:
-      case U_COMMON_NUMBER_SEPARATOR:
-      case U_SEGMENT_SEPARATOR:
-      case U_WHITE_SPACE_NEUTRAL:
-      case U_OTHER_NEUTRAL:
+      case BidiClass::EuropeanNumberSeparator:
+      case BidiClass::CommonNumberSeparator:
+      case BidiClass::SegmentSeparator:
+      case BidiClass::WhiteSpaceNeutral:
+      case BidiClass::OtherNeutral:
         switch (_status.Last)
         {
-          case U_LEFT_TO_RIGHT:
-          case U_RIGHT_TO_LEFT:
-          case U_RIGHT_TO_LEFT_ARABIC:
-          case U_EUROPEAN_NUMBER:
-          case U_ARABIC_NUMBER:        _status.Last = dirCurrent; break;
-          default:                     _status.Last = U_OTHER_NEUTRAL;
+          case BidiClass::LeftToRight:
+          case BidiClass::RightToLeft:
+          case BidiClass::RightToLeftArabic:
+          case BidiClass::EuropeanNumber:
+          case BidiClass::ArabicNumber:      _status.Last = dirCurrent; break;
+          default:                           _status.Last = BidiClass::OtherNeutral;
         }
         break;
-      case U_DIR_NON_SPACING_MARK:
-      case U_BOUNDARY_NEUTRAL:
-      case U_RIGHT_TO_LEFT_EMBEDDING:
-      case U_LEFT_TO_RIGHT_EMBEDDING:
-      case U_RIGHT_TO_LEFT_OVERRIDE:
-      case U_LEFT_TO_RIGHT_OVERRIDE:
-      case U_POP_DIRECTIONAL_FORMAT:
+      case BidiClass::NonSpacingMark:
+      case BidiClass::BoundaryNeutral:
+      case BidiClass::RightToLeftEmbedding:
+      case BidiClass::LeftToRightEmbedding:
+      case BidiClass::RightToLeftOverride:
+      case BidiClass::LeftToRightOverride:
+      case BidiClass::PopDirectionalFormat:
         // ignore these
         break;
-      case U_EUROPEAN_NUMBER: [[fallthrough]];
-      default:                _status.Last = dirCurrent;
+      case BidiClass::EuropeanNumber: [[fallthrough]];
+      default:                        _status.Last = dirCurrent;
     }
   }
 
@@ -787,7 +789,7 @@ namespace krys::text
   void BidiResolverBase<Iterator, Run, DerivedClass>::CreateBidiRunsForLine(const Iterator &end,
                                                                             bool hardLineBreak) noexcept
   {
-    krys_debug_assert(_direction == U_OTHER_NEUTRAL);
+    krys_debug_assert(_direction == BidiClass::OtherNeutral);
 
     _emptyRun = true;
 
@@ -799,7 +801,7 @@ namespace krys::text
 
     while (true)
     {
-      UCharDirection dirCurrent;
+      BidiClass dirCurrent;
       if (pastEnd && (hardLineBreak || _current.AtEnd()))
       {
         BidiContext *c = Context();
@@ -828,13 +830,13 @@ namespace krys::text
       else
       {
         dirCurrent = _current.Direction();
-        if (Context()->Override() && dirCurrent != U_RIGHT_TO_LEFT_EMBEDDING
-            && dirCurrent != U_LEFT_TO_RIGHT_EMBEDDING && dirCurrent != U_RIGHT_TO_LEFT_OVERRIDE
-            && dirCurrent != U_LEFT_TO_RIGHT_OVERRIDE && dirCurrent != U_POP_DIRECTIONAL_FORMAT)
+        if (Context()->Override() && dirCurrent != BidiClass::RightToLeftEmbedding
+            && dirCurrent != BidiClass::LeftToRightEmbedding && dirCurrent != BidiClass::RightToLeftOverride
+            && dirCurrent != BidiClass::LeftToRightOverride && dirCurrent != BidiClass::PopDirectionalFormat)
         {
           dirCurrent = Context()->Dir();
         }
-        else if (dirCurrent == U_DIR_NON_SPACING_MARK)
+        else if (dirCurrent == BidiClass::NonSpacingMark)
         {
           dirCurrent = _status.Last;
         }
@@ -842,83 +844,84 @@ namespace krys::text
 
       // We ignore all character directionality while in unicode-bidi: isolate spans.
       // We'll handle ordering the isolated characters in a second pass.
-      if (InIsolate() || dirCurrent == U_FIRST_STRONG_ISOLATE || dirCurrent == U_LEFT_TO_RIGHT_ISOLATE
-          || dirCurrent == U_RIGHT_TO_LEFT_ISOLATE || dirCurrent == U_POP_DIRECTIONAL_ISOLATE)
+      if (InIsolate() || dirCurrent == BidiClass::FirstStrongIsolate
+          || dirCurrent == BidiClass::LeftToRightIsolate || dirCurrent == BidiClass::RightToLeftIsolate
+          || dirCurrent == BidiClass::PopDirectionalIsolate)
       {
-        dirCurrent = U_OTHER_NEUTRAL;
+        dirCurrent = BidiClass::OtherNeutral;
       }
 
-      krys_debug_assert(_status.Eor != U_OTHER_NEUTRAL || _eor.AtEnd());
+      krys_debug_assert(_status.Eor != BidiClass::OtherNeutral || _eor.AtEnd());
       switch (dirCurrent)
       {
           // embedding and overrides (X1-X9 in the Bidi specs)
-        case U_RIGHT_TO_LEFT_EMBEDDING:
-        case U_LEFT_TO_RIGHT_EMBEDDING:
-        case U_RIGHT_TO_LEFT_OVERRIDE:
-        case U_LEFT_TO_RIGHT_OVERRIDE:
-        case U_POP_DIRECTIONAL_FORMAT:
+        case BidiClass::RightToLeftEmbedding:
+        case BidiClass::LeftToRightEmbedding:
+        case BidiClass::RightToLeftOverride:
+        case BidiClass::LeftToRightOverride:
+        case BidiClass::PopDirectionalFormat:
           Embed(dirCurrent, BidiEmbeddingSource::FromUnicode);
           CommitExplicitEmbedding();
           break;
 
           // strong types
-        case U_LEFT_TO_RIGHT:
+        case BidiClass::LeftToRight:
           switch (_status.Last)
           {
-            case U_RIGHT_TO_LEFT:
-            case U_RIGHT_TO_LEFT_ARABIC:
-            case U_EUROPEAN_NUMBER:
-            case U_ARABIC_NUMBER:
-              if (_status.Last != U_EUROPEAN_NUMBER || _status.LastStrong != U_LEFT_TO_RIGHT)
+            case BidiClass::RightToLeft:
+            case BidiClass::RightToLeftArabic:
+            case BidiClass::EuropeanNumber:
+            case BidiClass::ArabicNumber:
+              if (_status.Last != BidiClass::EuropeanNumber || _status.LastStrong != BidiClass::LeftToRight)
               {
                 AppendRun();
               }
               break;
-            case U_LEFT_TO_RIGHT: break;
-            case U_EUROPEAN_NUMBER_SEPARATOR:
-            case U_EUROPEAN_NUMBER_TERMINATOR:
-            case U_COMMON_NUMBER_SEPARATOR:
-            case U_BOUNDARY_NEUTRAL:
-            case U_BLOCK_SEPARATOR:
-            case U_SEGMENT_SEPARATOR:
-            case U_WHITE_SPACE_NEUTRAL:
-            case U_OTHER_NEUTRAL:
-              if (_status.Eor == U_EUROPEAN_NUMBER)
+            case BidiClass::LeftToRight: break;
+            case BidiClass::EuropeanNumberSeparator:
+            case BidiClass::EuropeanNumberTerminator:
+            case BidiClass::CommonNumberSeparator:
+            case BidiClass::BoundaryNeutral:
+            case BidiClass::BlockSeparator:
+            case BidiClass::SegmentSeparator:
+            case BidiClass::WhiteSpaceNeutral:
+            case BidiClass::OtherNeutral:
+              if (_status.Eor == BidiClass::EuropeanNumber)
               {
-                if (_status.LastStrong != U_LEFT_TO_RIGHT)
+                if (_status.LastStrong != BidiClass::LeftToRight)
                 {
                   // the numbers need to be on a higher embedding level, so let's close that run
-                  _direction = U_EUROPEAN_NUMBER;
+                  _direction = BidiClass::EuropeanNumber;
                   AppendRun();
-                  if (Context()->Dir() != U_LEFT_TO_RIGHT)
+                  if (Context()->Dir() != BidiClass::LeftToRight)
                   {
                     // the neutrals take the embedding direction, which is R
                     _eor = _last;
-                    _direction = U_RIGHT_TO_LEFT;
+                    _direction = BidiClass::RightToLeft;
                     AppendRun();
                   }
                 }
               }
-              else if (_status.Eor == U_ARABIC_NUMBER)
+              else if (_status.Eor == BidiClass::ArabicNumber)
               {
                 // Arabic numbers are always on a higher embedding level, so let's close that run
-                _direction = U_ARABIC_NUMBER;
+                _direction = BidiClass::ArabicNumber;
                 AppendRun();
-                if (Context()->Dir() != U_LEFT_TO_RIGHT)
+                if (Context()->Dir() != BidiClass::LeftToRight)
                 {
                   // the neutrals take the embedding direction, which is R
                   _eor = _last;
-                  _direction = U_RIGHT_TO_LEFT;
+                  _direction = BidiClass::RightToLeft;
                   AppendRun();
                 }
               }
-              else if (_status.LastStrong != U_LEFT_TO_RIGHT)
+              else if (_status.LastStrong != BidiClass::LeftToRight)
               {
                 // last stuff takes embedding dir
-                if (Context()->Dir() == U_RIGHT_TO_LEFT)
+                if (Context()->Dir() == BidiClass::RightToLeft)
                 {
                   _eor = _last;
-                  _direction = U_RIGHT_TO_LEFT;
+                  _direction = BidiClass::RightToLeft;
                 }
                 AppendRun();
               }
@@ -926,42 +929,43 @@ namespace krys::text
             default: break;
           }
           _eor = _current;
-          _status.Eor = U_LEFT_TO_RIGHT;
-          _status.LastStrong = U_LEFT_TO_RIGHT;
-          _direction = U_LEFT_TO_RIGHT;
+          _status.Eor = BidiClass::LeftToRight;
+          _status.LastStrong = BidiClass::LeftToRight;
+          _direction = BidiClass::LeftToRight;
           break;
-        case U_RIGHT_TO_LEFT_ARABIC:
-        case U_RIGHT_TO_LEFT:
+        case BidiClass::RightToLeftArabic:
+        case BidiClass::RightToLeft:
           switch (_status.Last)
           {
-            case U_LEFT_TO_RIGHT:
-            case U_EUROPEAN_NUMBER:
-            case U_ARABIC_NUMBER:        AppendRun(); [[fallthrough]];
-            case U_RIGHT_TO_LEFT:
-            case U_RIGHT_TO_LEFT_ARABIC: break;
-            case U_EUROPEAN_NUMBER_SEPARATOR:
-            case U_EUROPEAN_NUMBER_TERMINATOR:
-            case U_COMMON_NUMBER_SEPARATOR:
-            case U_BOUNDARY_NEUTRAL:
-            case U_BLOCK_SEPARATOR:
-            case U_SEGMENT_SEPARATOR:
-            case U_WHITE_SPACE_NEUTRAL:
-            case U_OTHER_NEUTRAL:
-              if (_status.Eor == U_EUROPEAN_NUMBER)
+            case BidiClass::LeftToRight:
+            case BidiClass::EuropeanNumber:
+            case BidiClass::ArabicNumber:      AppendRun(); [[fallthrough]];
+            case BidiClass::RightToLeft:
+            case BidiClass::RightToLeftArabic: break;
+            case BidiClass::EuropeanNumberSeparator:
+            case BidiClass::EuropeanNumberTerminator:
+            case BidiClass::CommonNumberSeparator:
+            case BidiClass::BoundaryNeutral:
+            case BidiClass::BlockSeparator:
+            case BidiClass::SegmentSeparator:
+            case BidiClass::WhiteSpaceNeutral:
+            case BidiClass::OtherNeutral:
+              if (_status.Eor == BidiClass::EuropeanNumber)
               {
-                if (_status.LastStrong == U_LEFT_TO_RIGHT && Context()->Dir() == U_LEFT_TO_RIGHT)
+                if (_status.LastStrong == BidiClass::LeftToRight
+                    && Context()->Dir() == BidiClass::LeftToRight)
                 {
                   _eor = _last;
                 }
                 AppendRun();
               }
-              else if (_status.Eor == U_ARABIC_NUMBER)
+              else if (_status.Eor == BidiClass::ArabicNumber)
               {
                 AppendRun();
               }
-              else if (_status.LastStrong == U_LEFT_TO_RIGHT)
+              else if (_status.LastStrong == BidiClass::LeftToRight)
               {
-                if (Context()->Dir() == U_LEFT_TO_RIGHT)
+                if (Context()->Dir() == BidiClass::LeftToRight)
                 {
                   _eor = _last;
                 }
@@ -971,135 +975,138 @@ namespace krys::text
             default: break;
           }
           _eor = _current;
-          _status.Eor = U_RIGHT_TO_LEFT;
+          _status.Eor = BidiClass::RightToLeft;
           _status.LastStrong = dirCurrent;
-          _direction = U_RIGHT_TO_LEFT;
+          _direction = BidiClass::RightToLeft;
           break;
 
           // weak types:
 
-        case U_EUROPEAN_NUMBER:
-          if (_status.LastStrong != U_RIGHT_TO_LEFT_ARABIC)
+        case BidiClass::EuropeanNumber:
+          if (_status.LastStrong != BidiClass::RightToLeftArabic)
           {
             // if last strong was AL change EN to AN
             switch (_status.Last)
             {
-              case U_EUROPEAN_NUMBER:
-              case U_LEFT_TO_RIGHT:   break;
-              case U_RIGHT_TO_LEFT:
-              case U_RIGHT_TO_LEFT_ARABIC:
-              case U_ARABIC_NUMBER:
+              case BidiClass::EuropeanNumber:
+              case BidiClass::LeftToRight:    break;
+              case BidiClass::RightToLeft:
+              case BidiClass::RightToLeftArabic:
+              case BidiClass::ArabicNumber:
                 _eor = _last;
                 AppendRun();
-                _direction = U_EUROPEAN_NUMBER;
+                _direction = BidiClass::EuropeanNumber;
                 break;
-              case U_EUROPEAN_NUMBER_SEPARATOR:
-              case U_COMMON_NUMBER_SEPARATOR:
-                if (_status.Eor == U_EUROPEAN_NUMBER)
+              case BidiClass::EuropeanNumberSeparator:
+              case BidiClass::CommonNumberSeparator:
+                if (_status.Eor == BidiClass::EuropeanNumber)
                 {
                   break;
                 }
                 [[fallthrough]];
-              case U_EUROPEAN_NUMBER_TERMINATOR:
-              case U_BOUNDARY_NEUTRAL:
-              case U_BLOCK_SEPARATOR:
-              case U_SEGMENT_SEPARATOR:
-              case U_WHITE_SPACE_NEUTRAL:
-              case U_OTHER_NEUTRAL:
-                if (_status.Eor == U_EUROPEAN_NUMBER)
+              case BidiClass::EuropeanNumberTerminator:
+              case BidiClass::BoundaryNeutral:
+              case BidiClass::BlockSeparator:
+              case BidiClass::SegmentSeparator:
+              case BidiClass::WhiteSpaceNeutral:
+              case BidiClass::OtherNeutral:
+                if (_status.Eor == BidiClass::EuropeanNumber)
                 {
-                  if (_status.LastStrong == U_RIGHT_TO_LEFT)
+                  if (_status.LastStrong == BidiClass::RightToLeft)
                   {
                     // ENs on both sides behave like Rs, so the neutrals should be R.
                     // Terminate the EN run.
                     AppendRun();
                     // Make an R run.
-                    _eor = _status.Last == U_EUROPEAN_NUMBER_TERMINATOR ? _lastBeforeET : _last;
-                    _direction = U_RIGHT_TO_LEFT;
+                    _eor = _status.Last == BidiClass::EuropeanNumberTerminator ? _lastBeforeET : _last;
+                    _direction = BidiClass::RightToLeft;
                     AppendRun();
                     // Begin a new EN run.
-                    _direction = U_EUROPEAN_NUMBER;
+                    _direction = BidiClass::EuropeanNumber;
                   }
                 }
-                else if (_status.Eor == U_ARABIC_NUMBER)
+                else if (_status.Eor == BidiClass::ArabicNumber)
                 {
                   // Terminate the AN run.
                   AppendRun();
-                  if (_status.LastStrong == U_RIGHT_TO_LEFT || Context()->Dir() == U_RIGHT_TO_LEFT)
+                  if (_status.LastStrong == BidiClass::RightToLeft
+                      || Context()->Dir() == BidiClass::RightToLeft)
                   {
                     // Make an R run.
-                    _eor = _status.Last == U_EUROPEAN_NUMBER_TERMINATOR ? _lastBeforeET : _last;
-                    _direction = U_RIGHT_TO_LEFT;
+                    _eor = _status.Last == BidiClass::EuropeanNumberTerminator ? _lastBeforeET : _last;
+                    _direction = BidiClass::RightToLeft;
                     AppendRun();
                     // Begin a new EN run.
-                    _direction = U_EUROPEAN_NUMBER;
+                    _direction = BidiClass::EuropeanNumber;
                   }
                 }
-                else if (_status.LastStrong == U_RIGHT_TO_LEFT)
+                else if (_status.LastStrong == BidiClass::RightToLeft)
                 {
                   // Extend the R run to include the neutrals.
-                  _eor = _status.Last == U_EUROPEAN_NUMBER_TERMINATOR ? _lastBeforeET : _last;
-                  _direction = U_RIGHT_TO_LEFT;
+                  _eor = _status.Last == BidiClass::EuropeanNumberTerminator ? _lastBeforeET : _last;
+                  _direction = BidiClass::RightToLeft;
                   AppendRun();
                   // Begin a new EN run.
-                  _direction = U_EUROPEAN_NUMBER;
+                  _direction = BidiClass::EuropeanNumber;
                 }
                 break;
               default: break;
             }
             _eor = _current;
-            _status.Eor = U_EUROPEAN_NUMBER;
-            if (_direction == U_OTHER_NEUTRAL)
+            _status.Eor = BidiClass::EuropeanNumber;
+            if (_direction == BidiClass::OtherNeutral)
             {
-              _direction = U_LEFT_TO_RIGHT;
+              _direction = BidiClass::LeftToRight;
             }
             break;
           }
           [[fallthrough]];
-        case U_ARABIC_NUMBER:
-          dirCurrent = U_ARABIC_NUMBER;
+        case BidiClass::ArabicNumber:
+          dirCurrent = BidiClass::ArabicNumber;
           switch (_status.Last)
           {
-            case U_LEFT_TO_RIGHT:
-              if (Context()->Dir() == U_LEFT_TO_RIGHT)
+            case BidiClass::LeftToRight:
+              if (Context()->Dir() == BidiClass::LeftToRight)
               {
                 AppendRun();
               }
               break;
-            case U_ARABIC_NUMBER: break;
-            case U_RIGHT_TO_LEFT:
-            case U_RIGHT_TO_LEFT_ARABIC:
-            case U_EUROPEAN_NUMBER:
+            case BidiClass::ArabicNumber: break;
+            case BidiClass::RightToLeft:
+            case BidiClass::RightToLeftArabic:
+            case BidiClass::EuropeanNumber:
               _eor = _last;
               AppendRun();
               break;
-            case U_COMMON_NUMBER_SEPARATOR:
-              if (_status.Eor == U_ARABIC_NUMBER)
+            case BidiClass::CommonNumberSeparator:
+              if (_status.Eor == BidiClass::ArabicNumber)
               {
                 break;
               }
               [[fallthrough]];
-            case U_EUROPEAN_NUMBER_SEPARATOR:
-            case U_EUROPEAN_NUMBER_TERMINATOR:
-            case U_BOUNDARY_NEUTRAL:
-            case U_BLOCK_SEPARATOR:
-            case U_SEGMENT_SEPARATOR:
-            case U_WHITE_SPACE_NEUTRAL:
-            case U_OTHER_NEUTRAL:
-              if (_status.Eor == U_ARABIC_NUMBER
-                  || (_status.Eor == U_EUROPEAN_NUMBER
-                      && (_status.LastStrong == U_RIGHT_TO_LEFT || Context()->Dir() == U_RIGHT_TO_LEFT))
-                  || (_status.Eor != U_EUROPEAN_NUMBER && _status.LastStrong == U_LEFT_TO_RIGHT
-                      && Context()->Dir() == U_RIGHT_TO_LEFT))
+            case BidiClass::EuropeanNumberSeparator:
+            case BidiClass::EuropeanNumberTerminator:
+            case BidiClass::BoundaryNeutral:
+            case BidiClass::BlockSeparator:
+            case BidiClass::SegmentSeparator:
+            case BidiClass::WhiteSpaceNeutral:
+            case BidiClass::OtherNeutral:
+              if (_status.Eor == BidiClass::ArabicNumber
+                  || (_status.Eor == BidiClass::EuropeanNumber
+                      && (_status.LastStrong == BidiClass::RightToLeft
+                          || Context()->Dir() == BidiClass::RightToLeft))
+                  || (_status.Eor != BidiClass::EuropeanNumber && _status.LastStrong == BidiClass::LeftToRight
+                      && Context()->Dir() == BidiClass::RightToLeft))
               {
                 // Terminate the run before the neutrals.
                 AppendRun();
                 // Begin an R run for the neutrals.
-                _direction = U_RIGHT_TO_LEFT;
+                _direction = BidiClass::RightToLeft;
               }
-              else if (_direction == U_OTHER_NEUTRAL)
+              else if (_direction == BidiClass::OtherNeutral)
               {
-                _direction = _status.LastStrong == U_LEFT_TO_RIGHT ? U_LEFT_TO_RIGHT : U_RIGHT_TO_LEFT;
+                _direction = _status.LastStrong == BidiClass::LeftToRight ? BidiClass::LeftToRight
+                                                                          : BidiClass::RightToLeft;
               }
               _eor = _last;
               AppendRun();
@@ -1107,29 +1114,29 @@ namespace krys::text
             default: break;
           }
           _eor = _current;
-          _status.Eor = U_ARABIC_NUMBER;
-          if (_direction == U_OTHER_NEUTRAL)
+          _status.Eor = BidiClass::ArabicNumber;
+          if (_direction == BidiClass::OtherNeutral)
           {
-            _direction = U_ARABIC_NUMBER;
+            _direction = BidiClass::ArabicNumber;
           }
           break;
-        case U_EUROPEAN_NUMBER_SEPARATOR:
-        case U_COMMON_NUMBER_SEPARATOR:   break;
-        case U_EUROPEAN_NUMBER_TERMINATOR:
-          if (_status.Last == U_EUROPEAN_NUMBER)
+        case BidiClass::EuropeanNumberSeparator:
+        case BidiClass::CommonNumberSeparator:   break;
+        case BidiClass::EuropeanNumberTerminator:
+          if (_status.Last == BidiClass::EuropeanNumber)
           {
-            dirCurrent = U_EUROPEAN_NUMBER;
+            dirCurrent = BidiClass::EuropeanNumber;
             _eor = _current;
             _status.Eor = dirCurrent;
           }
-          else if (_status.Last != U_EUROPEAN_NUMBER_TERMINATOR)
+          else if (_status.Last != BidiClass::EuropeanNumberTerminator)
           {
             _lastBeforeET = _emptyRun ? _eor : _last;
           }
           break;
 
           // boundary neutrals should be ignored
-        case U_BOUNDARY_NEUTRAL:
+        case BidiClass::BoundaryNeutral:
           if (_eor == _last)
           {
             _eor = _current;
@@ -1137,15 +1144,15 @@ namespace krys::text
           break;
           // neutrals
         // NOLINTNEXTLINE(bugprone-branch-clone): each has its own FIXME.
-        case U_BLOCK_SEPARATOR:
+        case BidiClass::BlockSeparator:
           // FIXME: What do we do with newline and paragraph separators that come to here?
           break;
-        case U_SEGMENT_SEPARATOR:
+        case BidiClass::SegmentSeparator:
           // FIXME: Implement rule L1.
           break;
-        case U_WHITE_SPACE_NEUTRAL: break;
-        case U_OTHER_NEUTRAL:       break;
-        default:                    break;
+        case BidiClass::WhiteSpaceNeutral: break;
+        case BidiClass::OtherNeutral:      break;
+        default:                           break;
       }
 
       if (pastEnd && (_eor == _current || !NeedsContinuePastEnd()))
@@ -1155,11 +1162,12 @@ namespace krys::text
           _eor = _endOfLine;
           switch (_status.Eor)
           {
-            case U_LEFT_TO_RIGHT:
-            case U_RIGHT_TO_LEFT:
-            case U_ARABIC_NUMBER: _direction = _status.Eor; break;
-            case U_EUROPEAN_NUMBER:
-              _direction = _status.LastStrong == U_LEFT_TO_RIGHT ? U_LEFT_TO_RIGHT : U_EUROPEAN_NUMBER;
+            case BidiClass::LeftToRight:
+            case BidiClass::RightToLeft:
+            case BidiClass::ArabicNumber: _direction = _status.Eor; break;
+            case BidiClass::EuropeanNumber:
+              _direction = _status.LastStrong == BidiClass::LeftToRight ? BidiClass::LeftToRight
+                                                                        : BidiClass::EuropeanNumber;
               break;
             default:
               // FIXME: handle neutrals in this case. See https://bugs.webkit.org/show_bug.cgi?id=204817
@@ -1175,7 +1183,7 @@ namespace krys::text
         _reachedEndOfLine = stateAtEnd._reachedEndOfLine;
         _lastBeforeET = stateAtEnd._lastBeforeET;
         _emptyRun = stateAtEnd._emptyRun;
-        _direction = U_OTHER_NEUTRAL;
+        _direction = BidiClass::OtherNeutral;
         break;
       }
 
@@ -1202,7 +1210,7 @@ namespace krys::text
           _reachedEndOfLine = stateAtEnd._reachedEndOfLine;
           _lastBeforeET = stateAtEnd._lastBeforeET;
           _emptyRun = stateAtEnd._emptyRun;
-          _direction = U_OTHER_NEUTRAL;
+          _direction = BidiClass::OtherNeutral;
           break;
         }
       }

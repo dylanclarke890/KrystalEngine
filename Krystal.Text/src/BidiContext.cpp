@@ -24,26 +24,27 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::text
 {
-  BidiContext::BidiContext(uint8 level, UCharDirection direction, bool override, BidiEmbeddingSource source,
+  BidiContext::BidiContext(uint8 level, BidiClass direction, bool override, BidiEmbeddingSource source,
                            BidiContext *parent) noexcept
       : _level(level), _direction(static_cast<uint32>(direction)), _override(override),
         _source(static_cast<uint32>(source)), _parent(ShareRefPtr(parent))
   {
   }
 
-  Ref<BidiContext> BidiContext::CreateUncached(uint8 level, UCharDirection direction, bool override,
+  Ref<BidiContext> BidiContext::CreateUncached(uint8 level, BidiClass direction, bool override,
                                                BidiEmbeddingSource source, BidiContext *parent) noexcept
   {
     return AdoptRef(*new BidiContext(level, direction, override, source, parent));
   }
 
-  Ref<BidiContext> BidiContext::Create(uint8 level, UCharDirection direction, bool override,
+  Ref<BidiContext> BidiContext::Create(uint8 level, BidiClass direction, bool override,
                                        BidiEmbeddingSource source, BidiContext *parent) noexcept
   {
-    krys_debug_assert(direction == (level % 2 ? U_RIGHT_TO_LEFT : U_LEFT_TO_RIGHT));
+    krys_debug_assert(direction == (level % 2 ? BidiClass::RightToLeft : BidiClass::LeftToRight));
 
     if (parent)
     {
@@ -56,24 +57,24 @@ namespace krys::text
       if (!override)
       {
         static NeverDestroyed<RefPtr<BidiContext>> ltrContext =
-          CreateUncached(0, U_LEFT_TO_RIGHT, false, BidiEmbeddingSource::FromStyleOrDOM, nullptr);
+          CreateUncached(0, BidiClass::LeftToRight, false, BidiEmbeddingSource::FromStyleOrDOM, nullptr);
         return ltrContext.get();
       }
 
       static NeverDestroyed<RefPtr<BidiContext>> ltrOverrideContext =
-        CreateUncached(0, U_LEFT_TO_RIGHT, true, BidiEmbeddingSource::FromStyleOrDOM, nullptr);
+        CreateUncached(0, BidiClass::LeftToRight, true, BidiEmbeddingSource::FromStyleOrDOM, nullptr);
       return ltrOverrideContext.get();
     }
 
     if (!override)
     {
       static NeverDestroyed<RefPtr<BidiContext>> rtlContext =
-        CreateUncached(1, U_RIGHT_TO_LEFT, false, BidiEmbeddingSource::FromStyleOrDOM, nullptr);
+        CreateUncached(1, BidiClass::RightToLeft, false, BidiEmbeddingSource::FromStyleOrDOM, nullptr);
       return rtlContext.get();
     }
 
     static NeverDestroyed<RefPtr<BidiContext>> rtlOverrideContext =
-      CreateUncached(1, U_RIGHT_TO_LEFT, true, BidiEmbeddingSource::FromStyleOrDOM, nullptr);
+      CreateUncached(1, BidiClass::RightToLeft, true, BidiEmbeddingSource::FromStyleOrDOM, nullptr);
     return rtlOverrideContext.get();
   }
 
@@ -82,7 +83,7 @@ namespace krys::text
     Ref<BidiContext> CopyContextAndRebaselineLevel(BidiContext &context, BidiContext *parent) noexcept
     {
       auto newLevel = parent ? parent->Level() : uint8 {0};
-      if (context.Dir() == U_RIGHT_TO_LEFT)
+      if (context.Dir() == BidiClass::RightToLeft)
       {
         newLevel = NextGreaterOddLevel(newLevel);
       }

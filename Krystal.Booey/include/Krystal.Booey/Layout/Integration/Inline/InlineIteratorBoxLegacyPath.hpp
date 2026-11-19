@@ -33,6 +33,7 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGInlineTextBox.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo::inline_iterator
 {
@@ -97,7 +98,7 @@ namespace krys::boo::inline_iterator
       return static_cast<uint32>(_inlineBox->CaretMaxOffset());
     }
 
-    KRYS_NODISCARD UBiDiLevel BidiLevel() const noexcept
+    KRYS_NODISCARD text::BidiLevel BidiLevel() const noexcept
     {
       return _inlineBox->BidiLevel();
     }

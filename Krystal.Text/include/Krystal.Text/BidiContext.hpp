@@ -25,7 +25,7 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include <unicode/uchar.h>
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::text
 {
@@ -47,7 +47,7 @@ namespace krys::text
     RefPtr<BidiContext> _parent;
 
   public:
-    KRYS_NODISCARD static Ref<BidiContext> Create(uint8 level, UCharDirection, bool override = false,
+    KRYS_NODISCARD static Ref<BidiContext> Create(uint8 level, BidiClass, bool override = false,
                                                   BidiEmbeddingSource = BidiEmbeddingSource::FromStyleOrDOM,
                                                   BidiContext *parent = nullptr) noexcept;
 
@@ -61,9 +61,9 @@ namespace krys::text
       return static_cast<uint8>(_level);
     }
 
-    KRYS_NODISCARD UCharDirection Dir() const noexcept
+    KRYS_NODISCARD BidiClass Dir() const noexcept
     {
-      return static_cast<UCharDirection>(_direction);
+      return static_cast<BidiClass>(_direction);
     }
 
     KRYS_NODISCARD bool Override() const noexcept
@@ -79,10 +79,9 @@ namespace krys::text
     KRYS_NODISCARD Ref<BidiContext> CopyStackRemovingUnicodeEmbeddingContexts() noexcept;
 
   private:
-    BidiContext(uint8 level, UCharDirection, bool override, BidiEmbeddingSource,
-                BidiContext *parent) noexcept;
+    BidiContext(uint8 level, BidiClass, bool override, BidiEmbeddingSource, BidiContext *parent) noexcept;
 
-    KRYS_NODISCARD static Ref<BidiContext> CreateUncached(uint8 level, UCharDirection, bool override,
+    KRYS_NODISCARD static Ref<BidiContext> CreateUncached(uint8 level, BidiClass, bool override,
                                                           BidiEmbeddingSource, BidiContext *parent) noexcept;
   };
 

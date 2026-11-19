@@ -34,6 +34,7 @@
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo::layout_integration
 {
@@ -374,7 +375,7 @@ namespace krys::boo::layout_integration
         continue;
       }
       auto &layoutBox = displayBox.LayoutBox();
-      if (Is<layout::InlineTextBox>(layoutBox) && displayBox.BidiLevel() != UBIDI_DEFAULT_LTR)
+      if (Is<layout::InlineTextBox>(layoutBox) && displayBox.BidiLevel() != text::DefaultLeftToRightBidiLevel)
       {
         Downcast<RenderText>(*layoutBox.RendererForIntegration()).SetNeedsVisualReordering();
       }

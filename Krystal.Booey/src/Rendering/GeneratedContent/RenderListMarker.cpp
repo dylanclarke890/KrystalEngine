@@ -40,6 +40,7 @@
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Text/Bidi.hpp"
 #include <unicode/uchar.h>
 
 namespace krys::boo
@@ -70,9 +71,9 @@ namespace krys::boo
       }
       // FIXME: Depending on the string value, we may need the real bidi algorithm. (rdar://106139180)
       // Also we may need to start checking for the entire content for directionality (and whether we need to
-      // check for additional directionality characters like U_RIGHT_TO_LEFT_EMBEDDING).
-      auto bidiCategory = u_charDirection(*text::CodePointIterator(content));
-      if (bidiCategory != U_RIGHT_TO_LEFT && bidiCategory != U_RIGHT_TO_LEFT_ARABIC)
+      // check for additional directionality characters like text::BidiClass::RightToLeftEmbedding).
+      auto bidiCategory = text::GetBidiClass(*text::CodePointIterator(content));
+      if (bidiCategory != text::BidiClass::RightToLeft && bidiCategory != text::BidiClass::RightToLeftArabic)
       {
         return text::TextDirection::LTR;
       }
@@ -119,7 +120,7 @@ namespace krys::boo
       krys_debug_assert(!textContent.IsEmpty());
 
       // Since the bidi algorithm doesn't run on this text, we instead reorder the characters here.
-      // We use u_charDirection to figure out if the marker text is RTL and assume the suffix matches the
+      // We use text::GetBidiClass to figure out if the marker text is RTL and assume the suffix matches the
       // surrounding direction.
       StringBuilder textForRun;
       if (textContent.TextDirection == text::TextDirection::LTR)

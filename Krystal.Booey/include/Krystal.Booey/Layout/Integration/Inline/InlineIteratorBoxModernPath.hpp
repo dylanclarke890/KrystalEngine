@@ -32,6 +32,7 @@
 #include "Krystal.Booey/Rendering/Selection/TextBoxSelectableRange.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo
 {
@@ -128,7 +129,7 @@ namespace krys::boo::inline_iterator
       return IsText() ? End() : 1;
     }
 
-    KRYS_NODISCARD UBiDiLevel BidiLevel() const noexcept
+    KRYS_NODISCARD text::BidiLevel BidiLevel() const noexcept
     {
       return GetBox().BidiLevel();
     }

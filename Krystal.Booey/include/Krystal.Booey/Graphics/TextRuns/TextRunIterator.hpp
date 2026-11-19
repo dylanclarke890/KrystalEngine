@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
-#include <unicode/uchar.h>
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo
 {
@@ -79,9 +79,9 @@ namespace krys::boo
       return text::CodePointAt(_textRun->Text(), _offset);
     }
 
-    KRYS_NODISCARD UCharDirection Direction() const noexcept
+    KRYS_NODISCARD text::BidiClass Direction() const noexcept
     {
-      return AtEnd() ? U_OTHER_NEUTRAL : u_charDirection(Current());
+      return AtEnd() ? text::BidiClass::OtherNeutral : text::GetBidiClass(Current());
     }
 
     KRYS_NODISCARD friend bool operator==(const TextRunIterator &,

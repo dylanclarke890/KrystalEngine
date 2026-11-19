@@ -27,8 +27,8 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Text/Script.hpp"
 #include <unicode/uchar.h>
-#include <unicode/uscript.h>
 
 namespace krys::text
 {
@@ -127,15 +127,9 @@ namespace krys::text
     return generalCategoryMask & U_GC_PE_MASK;
   }
 
-  KRYS_NODISCARD inline bool IsOfScriptType(char32 codePoint, UScriptCode scriptType) noexcept
+  KRYS_NODISCARD inline bool IsOfScriptType(char32 codePoint, Script scriptType) noexcept
   {
-    UErrorCode error = U_ZERO_ERROR;
-    UScriptCode script = uscript_getScript(codePoint, &error);
-    if (error != U_ZERO_ERROR)
-    {
-      return false;
-    }
-    return script == scriptType;
+    return GetScript(codePoint) == scriptType;
   }
 
   KRYS_NODISCARD inline UEastAsianWidth EastAsianWidth(char32 character) noexcept

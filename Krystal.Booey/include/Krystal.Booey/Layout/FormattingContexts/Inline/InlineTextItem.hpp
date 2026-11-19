@@ -32,6 +32,7 @@
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo::layout
 {
@@ -47,7 +48,7 @@ namespace krys::boo::layout
   public:
     KRYS_NODISCARD static InlineTextItem CreateWhitespaceItem(const InlineTextBox &inlineTextBox,
                                                               uint32 start, uint32 length,
-                                                              UBiDiLevel bidiLevel, bool isWordSeparator,
+                                                              text::BidiLevel bidiLevel, bool isWordSeparator,
                                                               Maybe<InlineLayoutUnit> width) noexcept
     {
       return {inlineTextBox, start,           length, bidiLevel,
@@ -56,7 +57,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD static InlineTextItem CreateNonWhitespaceItem(const InlineTextBox &inlineTextBox,
                                                                  uint32 start, uint32 length,
-                                                                 UBiDiLevel bidiLevel,
+                                                                 text::BidiLevel bidiLevel,
                                                                  bool hasTrailingSoftHyphen,
                                                                  Maybe<InlineLayoutUnit> width) noexcept
     {
@@ -140,7 +141,7 @@ namespace krys::boo::layout
     KRYS_NODISCARD static bool ShouldPreserveSpacesAndTabs(const InlineTextItem &inlineTextItem) noexcept;
 
   private:
-    InlineTextItem(const InlineTextBox &inlineTextBox, uint32 start, uint32 length, UBiDiLevel bidiLevel,
+    InlineTextItem(const InlineTextBox &inlineTextBox, uint32 start, uint32 length, text::BidiLevel bidiLevel,
                    bool hasTrailingSoftHyphen, bool isWordSeparator, Maybe<InlineLayoutUnit> width,
                    TextItemType textItemType) noexcept;
 

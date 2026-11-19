@@ -28,7 +28,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
-#include <unicode/uchar.h>
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo
 {
@@ -53,9 +53,9 @@ namespace krys::boo
     // Whether or not this line uses alphabetic or ideographic baselines by default.
     FontBaseline _baselineType {FontBaseline::Alphabetic};
 
-    UCharDirection _lineBreakBidiStatusEor {U_OTHER_NEUTRAL};
-    UCharDirection _lineBreakBidiStatusLastStrong {U_OTHER_NEUTRAL};
-    UCharDirection _lineBreakBidiStatusLast {U_OTHER_NEUTRAL};
+    text::BidiClass _lineBreakBidiStatusEor {text::BidiClass::OtherNeutral};
+    text::BidiClass _lineBreakBidiStatusLastStrong {text::BidiClass::OtherNeutral};
+    text::BidiClass _lineBreakBidiStatusLast {text::BidiClass::OtherNeutral};
 
     bool _hasSelfPaintInlineBox : 1 {false};
 

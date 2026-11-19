@@ -38,6 +38,7 @@
 #include "Krystal.Booey/Style/Computed/ComputedStyle.hpp"
 #include "Krystal.Booey/Text/UnicodeBidi.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Text/Bidi.hpp"
 #include <ranges>
 #include <unicode/ubidi.h>
 
@@ -213,7 +214,7 @@ namespace krys::boo::layout
 
     void ComputedVisualOrder(const Line::RunList &lineRuns, List<int32> &visualOrderList) noexcept
     {
-      List<UBiDiLevel> runLevels;
+      List<text::BidiLevel> runLevels;
       runLevels.reserve(lineRuns.size());
 
       List<size_t> runIndexOffsetMap;
@@ -230,9 +231,9 @@ namespace krys::boo::layout
 
         // bidiLevels are required to be less than the MAX + 1, otherwise
         // ubidi_reorderVisual will silently fail.
-        if (lineRuns[i].BidiLevel() > UBIDI_MAX_EXPLICIT_LEVEL + 1)
+        if (lineRuns[i].BidiLevel() > text::MaxExplicitBidiLevel + 1)
         {
-          krys_debug_assert(lineRuns[i].BidiLevel() == UBIDI_DEFAULT_LTR);
+          krys_debug_assert(lineRuns[i].BidiLevel() == text::DefaultLeftToRightBidiLevel);
           continue;
         }
 
@@ -253,8 +254,9 @@ namespace krys::boo::layout
         {
           return;
         }
-        runLevels.push_back(static_cast<UBiDiLevel>(
-          lineRuns.front().LayoutBox().Parent().GetWritingMode().IsBidiLTR() ? UBIDI_LTR : UBIDI_RTL));
+        runLevels.push_back(static_cast<text::BidiLevel>(
+          lineRuns.front().LayoutBox().Parent().GetWritingMode().IsBidiLTR() ? text::LeftToRightBidiLevel
+                                                                             : text::RightToLeftBidiLevel));
         runIndexOffsetMap.push_back(0);
       };
       forceBiDiOnOpaqueLine();
@@ -792,7 +794,7 @@ namespace krys::boo::layout
                 // position is before the right border and not after.
                 auto &trailingLineBreak = *inlineContent.TrailingLineBreak();
                 _line.AppendLineBreak(trailingLineBreak, trailingLineBreak.Style());
-                if (trailingLineBreak.BidiLevel() != UBIDI_DEFAULT_LTR)
+                if (trailingLineBreak.BidiLevel() != text::DefaultLeftToRightBidiLevel)
                 {
                   _line.SetContentNeedsBidiReordering();
                 }
@@ -919,8 +921,8 @@ namespace krys::boo::layout
 
       // On each line, reset the embedding level of any sequence of whitespace characters at the end of the
       // line to the paragraph embedding level
-      _line.ResetBidiLevelForTrailingWhitespace(
-        static_cast<UBiDiLevel>(rootStyle.GetWritingMode().IsBidiLTR() ? UBIDI_LTR : UBIDI_RTL));
+      _line.ResetBidiLevelForTrailingWhitespace(static_cast<text::BidiLevel>(
+        rootStyle.GetWritingMode().IsBidiLTR() ? text::LeftToRightBidiLevel : text::RightToLeftBidiLevel));
 
       if (_line.HasContent())
       {
@@ -2310,7 +2312,7 @@ namespace krys::boo::layout
       auto &run = runs[index];
       auto &inlineItem = run.Item;
 
-      if (inlineItem.BidiLevel() != UBIDI_DEFAULT_LTR)
+      if (inlineItem.BidiLevel() != text::DefaultLeftToRightBidiLevel)
       {
         _line.SetContentNeedsBidiReordering();
       }
@@ -2429,7 +2431,7 @@ namespace krys::boo::layout
           _line.AppendText(partialTrailingTextItem, trailingInlineTextItem->Style(), partialRun->LogicalWidth,
                            shapingBoundaryStart ? Maybe<Line::ShapingBoundary> {Line::ShapingBoundary::End}
                                                 : null);
-          if (trailingInlineTextItem->BidiLevel() != UBIDI_DEFAULT_LTR)
+          if (trailingInlineTextItem->BidiLevel() != text::DefaultLeftToRightBidiLevel)
           {
             _line.SetContentNeedsBidiReordering();
           }

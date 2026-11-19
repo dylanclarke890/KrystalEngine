@@ -24,6 +24,7 @@
 #pragma once
 
 #include "Krystal.Core/Types/CheckedPtr.hpp"
+#include "Krystal.Text/Bidi.hpp"
 #include "Krystal.Text/BidiResolver.hpp"
 
 namespace krys::boo
@@ -39,7 +40,7 @@ namespace krys::boo
     LegacyInlineBox *_box {nullptr};
 
   public:
-    BidiRun(uint32 start, uint32 stop, RenderObject &, text::BidiContext *, UCharDirection) noexcept;
+    BidiRun(uint32 start, uint32 stop, RenderObject &, text::BidiContext *, text::BidiClass) noexcept;
 
     ~BidiRun() noexcept override;
 

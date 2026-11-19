@@ -29,6 +29,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo::layout
 {
@@ -38,7 +39,7 @@ namespace krys::boo::layout
   public:
     KRYS_NODISCARD static InlineSoftLineBreakItem
       CreateSoftLineBreakItem(const InlineTextBox &inlineTextBox, uint32 position,
-                              UBiDiLevel bidiLevel = UBIDI_DEFAULT_LTR) noexcept
+                              text::BidiLevel bidiLevel = text::DefaultLeftToRightBidiLevel) noexcept
     {
       return {inlineTextBox, position, bidiLevel};
     }
@@ -55,7 +56,7 @@ namespace krys::boo::layout
 
   private:
     InlineSoftLineBreakItem(const InlineTextBox &inlineTextBox, uint32 position,
-                            UBiDiLevel bidiLevel) noexcept
+                            text::BidiLevel bidiLevel) noexcept
         : InlineItem(inlineTextBox, Type::SoftLineBreak, bidiLevel)
     {
       _startOrPosition = position;

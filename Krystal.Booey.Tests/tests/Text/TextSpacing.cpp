@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Text/CharacterProperties.hpp"
 #include "Krystal.Text/Hyphenation.hpp"
+#include "Krystal.Text/Script.hpp"
 #include "Krystal.Text/UnicodeHelpers.hpp"
 
 namespace krys::boo::tests
@@ -63,7 +64,7 @@ namespace krys::boo::tests
     CHECK(text::IsPrivateUseAreaCharacter(U'\uE000'));
     CHECK(text::IsPunctuation(U','));
     CHECK_FALSE(text::IsPunctuation(U'a'));
-    CHECK(text::IsOfScriptType(U'\u0628', USCRIPT_ARABIC));
+    CHECK(text::IsOfScriptType(U'\u0628', text::Script::Arabic));
     CHECK(text::IsEastAsianFullWidth(U'\uFF21'));
     CHECK_FALSE(text::IsEastAsianFullWidth(U'\u6F22'));
     CHECK(text::IsCJKSymbolOrPunctuation(U'\u3001'));

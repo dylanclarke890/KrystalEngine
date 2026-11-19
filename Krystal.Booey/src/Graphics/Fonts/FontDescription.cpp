@@ -32,6 +32,7 @@
 #include "Krystal.Booey/Platform/Locale/Language.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Text/LocaleToScriptMapping.hpp"
+#include "Krystal.Text/Script.hpp"
 
 namespace krys::boo
 {
@@ -68,10 +69,10 @@ namespace krys::boo
   {
     _specifiedLocale = locale;
     _script = static_cast<uint32>(text::LocaleToScriptCode(_specifiedLocale.View()));
-    _locale = _script == USCRIPT_HAN ? SpecializedChineseLocale() : _specifiedLocale;
+    _locale = Script() == text::Script::Han ? SpecializedChineseLocale() : _specifiedLocale;
   }
 
-  StringAtom FontDescription::PlatformResolveGenericFamily(UScriptCode, const StringAtom &,
+  StringAtom FontDescription::PlatformResolveGenericFamily(text::Script, const StringAtom &,
                                                            const StringAtom &) noexcept
   {
     return null;

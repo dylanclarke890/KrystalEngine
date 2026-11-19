@@ -30,6 +30,7 @@
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
+#include "Krystal.Text/Bidi.hpp"
 #include <unicode/uchar.h>
 
 namespace krys::boo::html
@@ -44,7 +45,7 @@ namespace krys::boo::html
       {
         return c == ' ' || (c >= '\t' && c <= '\r');
       }
-      return u_charDirection(c) == U_WHITE_SPACE_NEUTRAL;
+      return text::GetBidiClass(c) == text::BidiClass::WhiteSpaceNeutral;
     }
 
     /// @brief @p text's code points, case folded, without its leading white space.

@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontPalette.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSizeAdjust.hpp"
 #include "Krystal.Booey/Platform/Locale/Language.hpp"
+#include "Krystal.Text/Script.hpp"
 
 namespace krys::boo::tests
 {
@@ -89,7 +90,7 @@ namespace krys::boo::tests
     CHECK(description.Weight() == NormalWeightValue());
     CHECK(description.Width() == NormalWidthValue());
     CHECK_FALSE(description.FontStyleSlope());
-    CHECK(description.Script() == USCRIPT_COMMON);
+    CHECK(description.Script() == text::Script::Common);
     CHECK(description.ComputedLocale() == null);
     CHECK(description.GetFontPalette().PaletteType == FontPalette::Type::Normal);
     CHECK(description.VariantAlternates().IsNormal());
@@ -157,18 +158,18 @@ namespace krys::boo::tests
     SECTION("locale")
     {
       description.SetSpecifiedLocale(u8"ja-JP");
-      CHECK(description.Script() == USCRIPT_KATAKANA_OR_HIRAGANA);
+      CHECK(description.Script() == text::Script::KatakanaOrHiragana);
       CHECK(description.ComputedLocale() == u8"ja-JP");
       CHECK(description.SpecifiedLocale() == u8"ja-JP");
 
       // Han locales compute to a specialised Chinese locale.
       description.SetSpecifiedLocale(u8"zh");
-      CHECK(description.Script() == USCRIPT_HAN);
+      CHECK(description.Script() == text::Script::Han);
       CHECK(description.ComputedLocale() == u8"zh-hans");
       CHECK(description.SpecifiedLocale() == u8"zh");
 
       description.SetSpecifiedLocale(u8"zh-TW");
-      CHECK(description.Script() == USCRIPT_TRADITIONAL_HAN);
+      CHECK(description.Script() == text::Script::TraditionalHan);
       CHECK(description.ComputedLocale() == u8"zh-TW");
 
       // The specialised locale is the first Chinese language the user prefers.
@@ -189,7 +190,7 @@ namespace krys::boo::tests
       CHECK(other.GetTextRenderingMode() == TextRenderingMode::OptimizeLegibility);
     }
 
-    CHECK(FontDescription::PlatformResolveGenericFamily(USCRIPT_LATIN, null, u8"serif") == null);
+    CHECK(FontDescription::PlatformResolveGenericFamily(text::Script::Latin, null, u8"serif") == null);
   }
 
   TEST_CASE("FontCascadeDescription", "[Graphics][FontDescription]")

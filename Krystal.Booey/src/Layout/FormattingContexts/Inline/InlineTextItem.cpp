@@ -27,13 +27,14 @@
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo::layout
 {
   static_assert(sizeof(InlineItem) == sizeof(InlineTextItem));
 
   InlineTextItem::InlineTextItem(const InlineTextBox &inlineTextBox, uint32 start, uint32 length,
-                                 UBiDiLevel bidiLevel, bool hasTrailingSoftHyphen, bool isWordSeparator,
+                                 text::BidiLevel bidiLevel, bool hasTrailingSoftHyphen, bool isWordSeparator,
                                  Maybe<InlineLayoutUnit> width, TextItemType textItemType) noexcept
       : InlineItem(inlineTextBox, Type::Text, bidiLevel)
   {
@@ -47,7 +48,7 @@ namespace krys::boo::layout
   }
 
   InlineTextItem::InlineTextItem(const InlineTextBox &inlineTextBox) noexcept
-      : InlineItem(inlineTextBox, Type::Text, UBIDI_DEFAULT_LTR)
+      : InlineItem(inlineTextBox, Type::Text, text::DefaultLeftToRightBidiLevel)
   {
   }
 

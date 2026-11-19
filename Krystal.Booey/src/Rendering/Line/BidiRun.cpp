@@ -25,11 +25,12 @@
 
 #include "Krystal.Booey/Rendering/Line/LegacyInlineBox.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo
 {
   BidiRun::BidiRun(uint32 start, uint32 stop, RenderObject &renderer, text::BidiContext *context,
-                   UCharDirection dir) noexcept
+                   text::BidiClass dir) noexcept
       : text::BidiCharacterRun(start, stop, context, dir), _renderer(ShareCheckedRef(renderer))
   {
     krys_debug_assert(!Is<RenderText>(renderer) || stop <= Downcast<RenderText>(renderer).Text().length());

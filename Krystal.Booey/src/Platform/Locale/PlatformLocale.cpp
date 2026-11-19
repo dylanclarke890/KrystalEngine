@@ -33,8 +33,8 @@
 #include "Krystal.Booey/Platform/Locale/DateTimeFormat.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Text/Bidi.hpp"
 #include <format>
-#include <unicode/uchar.h>
 
 namespace krys::boo
 {
@@ -211,7 +211,7 @@ namespace krys::boo
       {
         return c == ' ' || (c >= '\t' && c <= '\r');
       }
-      return u_charDirection(c) == U_WHITE_SPACE_NEUTRAL;
+      return text::GetBidiClass(c) == text::BidiClass::WhiteSpaceNeutral;
     }
 
     /// @brief @p text without the white space at its ends.

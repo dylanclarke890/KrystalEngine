@@ -62,7 +62,7 @@
 #include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include <unicode/uchar.h>
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo
 {
@@ -488,7 +488,7 @@ namespace krys::boo
     // Use IsUnicodeCompatibleASCIIWhitespace() for all Latin-1 characters, which is incorrect as it
     // excludes U+0085 and U+00A0.
     return character <= 0xFF ? text::IsUnicodeCompatibleASCIIWhitespace(character)
-                             : u_charDirection(character) == U_WHITE_SPACE_NEUTRAL;
+                             : text::GetBidiClass(character) == text::BidiClass::WhiteSpaceNeutral;
   }
 
   bool IsTableStructureNode(const Node &node) noexcept

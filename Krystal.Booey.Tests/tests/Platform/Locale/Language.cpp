@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontGenericFamilies.hpp"
 #include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
+#include "Krystal.Text/Script.hpp"
 
 namespace krys::boo::tests
 {
@@ -56,14 +57,14 @@ namespace krys::boo::tests
     SECTION("Han text's generic families follow the preference")
     {
       FontGenericFamilies families;
-      (void)families.SetStandardFontFamily(u8"Simplified", USCRIPT_SIMPLIFIED_HAN);
-      (void)families.SetStandardFontFamily(u8"Traditional", USCRIPT_TRADITIONAL_HAN);
+      (void)families.SetStandardFontFamily(u8"Simplified", text::Script::SimplifiedHan);
+      (void)families.SetStandardFontFamily(u8"Traditional", text::Script::TraditionalHan);
       {
         PreferredLanguagesScope scope({u8"zh-CN"});
-        CHECK(families.StandardFontFamily(USCRIPT_HAN) == u8"Simplified");
+        CHECK(families.StandardFontFamily(text::Script::Han) == u8"Simplified");
       }
       PreferredLanguagesScope scope({u8"zh-TW"});
-      CHECK(families.StandardFontFamily(USCRIPT_HAN) == u8"Traditional");
+      CHECK(families.StandardFontFamily(text::Script::Han) == u8"Traditional");
     }
   }
 }

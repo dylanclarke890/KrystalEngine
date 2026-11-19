@@ -32,6 +32,7 @@
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Visitor.hpp"
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo
 {
@@ -189,7 +190,7 @@ namespace krys::boo::inline_iterator
     }
 
     /// @note IsLeftToRightDirection() here is not the same as GetWritingMode().IsBidiLTR().
-    KRYS_NODISCARD UBiDiLevel BidiLevel() const noexcept
+    KRYS_NODISCARD text::BidiLevel BidiLevel() const noexcept
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.BidiLevel(); });
     }

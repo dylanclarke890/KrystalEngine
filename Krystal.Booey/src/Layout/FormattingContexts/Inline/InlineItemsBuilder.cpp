@@ -38,6 +38,7 @@
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
+#include "Krystal.Text/Bidi.hpp"
 #include <unicode/ubidi.h>
 
 namespace krys::boo::layout
@@ -907,11 +908,12 @@ namespace krys::boo::layout
       }
     } closeUBiDiOnExit {ubidi};
 
-    UBiDiLevel rootBidiLevel = UBIDI_DEFAULT_LTR;
+    text::BidiLevel rootBidiLevel = text::DefaultLeftToRightBidiLevel;
     bool useHeuristicBaseDirection = Root().Style().GetUnicodeBidi() == UnicodeBidi::Plaintext;
     if (!useHeuristicBaseDirection)
     {
-      rootBidiLevel = static_cast<UBiDiLevel>(Root().GetWritingMode().IsBidiLTR() ? UBIDI_LTR : UBIDI_RTL);
+      rootBidiLevel = static_cast<text::BidiLevel>(
+        Root().GetWritingMode().IsBidiLTR() ? text::LeftToRightBidiLevel : text::RightToLeftBidiLevel);
     }
 
     // ICU's bidi algorithm takes UTF-16: the runs it finds are mapped back to byte offsets.
@@ -931,11 +933,11 @@ namespace krys::boo::layout
     auto hasSeenOpaqueItem = false;
     for (int32_t currentPosition = 0; currentPosition < bidiContentLength;)
     {
-      UBiDiLevel bidiLevel;
+      text::BidiLevel bidiLevel;
       int32_t endPosition = currentPosition;
       ubidi_getLogicalRun(ubidi, currentPosition, &endPosition, &bidiLevel);
 
-      auto setBidiLevelOnRange = [&](size_t bidiEnd, UBiDiLevel bidiLevelForRange)
+      auto setBidiLevelOnRange = [&](size_t bidiEnd, text::BidiLevel bidiLevelForRange)
       {
         // We should always have inline item(s) associated with a bidi range.
         krys_debug_assert(inlineItemIndex < inlineItemOffsets.size());
@@ -1207,14 +1209,14 @@ namespace krys::boo::layout
       {
         auto isWordSeparator = character != u8'\t' || !shouldPreserveSpacesAndTabs;
         inlineItemList.push_back(InlineTextItem::CreateWhitespaceItem(
-          inlineTextBox, start, length, UBIDI_DEFAULT_LTR, isWordSeparator, {}));
+          inlineTextBox, start, length, text::DefaultLeftToRightBidiLevel, isWordSeparator, {}));
         continue;
       }
 
       krys_debug_assert(endPosition);
       auto hasTrailingSoftHyphen = EndsWithSoftHyphen(text, endPosition);
       inlineItemList.push_back(InlineTextItem::CreateNonWhitespaceItem(
-        inlineTextBox, start, length, UBIDI_DEFAULT_LTR, hasTrailingSoftHyphen, {}));
+        inlineTextBox, start, length, text::DefaultLeftToRightBidiLevel, hasTrailingSoftHyphen, {}));
     }
     return true;
   }
@@ -1236,7 +1238,7 @@ namespace krys::boo::layout
     if (inlineTextBox.IsCombined())
     {
       return inlineItemList.push_back(InlineTextItem::CreateNonWhitespaceItem(
-        inlineTextBox, {}, static_cast<uint32>(contentLength), UBIDI_DEFAULT_LTR, false, {}));
+        inlineTextBox, {}, static_cast<uint32>(contentLength), text::DefaultLeftToRightBidiLevel, false, {}));
     }
 
     if (!partialContentOffset
@@ -1293,15 +1295,15 @@ namespace krys::boo::layout
         for (size_t offset = 0; offset < whitespaceContent->Length; ++offset)
         {
           inlineItemList.push_back(InlineTextItem::CreateWhitespaceItem(
-            inlineTextBox, static_cast<uint32>(currentPosition + offset), 1, UBIDI_DEFAULT_LTR,
-            whitespaceContent->IsWordSeparator, {}));
+            inlineTextBox, static_cast<uint32>(currentPosition + offset), 1,
+            text::DefaultLeftToRightBidiLevel, whitespaceContent->IsWordSeparator, {}));
         }
       }
       else
       {
         inlineItemList.push_back(InlineTextItem::CreateWhitespaceItem(
           inlineTextBox, static_cast<uint32>(currentPosition), static_cast<uint32>(whitespaceContent->Length),
-          UBIDI_DEFAULT_LTR, whitespaceContent->IsWordSeparator, {}));
+          text::DefaultLeftToRightBidiLevel, whitespaceContent->IsWordSeparator, {}));
       }
       currentPosition += whitespaceContent->Length;
       return true;
@@ -1327,9 +1329,9 @@ namespace krys::boo::layout
         hasTrailingSoftHyphen = EndsWithSoftHyphen(text, endPosition);
       }
       krys_debug_assert(style.GetHyphens() != Hyphens::None || !hasTrailingSoftHyphen);
-      inlineItemList.push_back(
-        InlineTextItem::CreateNonWhitespaceItem(inlineTextBox, startPosition, endPosition - startPosition,
-                                                UBIDI_DEFAULT_LTR, hasTrailingSoftHyphen, {}));
+      inlineItemList.push_back(InlineTextItem::CreateNonWhitespaceItem(
+        inlineTextBox, startPosition, endPosition - startPosition, text::DefaultLeftToRightBidiLevel,
+        hasTrailingSoftHyphen, {}));
       currentPosition = endPosition;
       return true;
     };

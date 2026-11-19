@@ -27,9 +27,9 @@
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Text/Bidi.hpp"
 #include "Krystal.Text/CharacterProperties.hpp"
 #include <algorithm>
-#include <unicode/uchar.h>
 #include <utility>
 
 namespace krys::boo
@@ -583,7 +583,7 @@ namespace krys::boo
 
       if (Rtl())
       {
-        characterToWrite = u_charMirror(characterToWrite);
+        characterToWrite = text::MirroredCharacter(characterToWrite);
       }
 
       Glyph glyph = glyphData.Glyph;

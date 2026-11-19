@@ -37,7 +37,6 @@
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
-#include <unicode/uchar.h>
 
 namespace krys::boo
 {

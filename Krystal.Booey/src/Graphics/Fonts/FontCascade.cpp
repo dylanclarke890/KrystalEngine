@@ -33,6 +33,7 @@
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Text/Bidi.hpp"
 #include "Krystal.Text/CharacterProperties.hpp"
 #include <algorithm>
 #include <cmath>
@@ -248,7 +249,7 @@ namespace krys::boo
 
     if (mirror)
     {
-      c = static_cast<char32>(u_charMirror(c));
+      c = text::MirroredCharacter(c);
     }
 
     auto emojiPolicy = resolvedEmojiPolicy.value_or(ResolveEmojiPolicy(_fontDescription.VariantEmoji(), c));
