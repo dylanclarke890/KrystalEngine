@@ -83,6 +83,7 @@ target_sources(Krystal.Text
     src/Base64.cpp
     src/Bidi.cpp
     src/BidiContext.cpp
+    src/CharacterProperties.cpp
     src/FreeTypeFace.cpp
     src/HarfBuzz.cpp
     src/Hyphenation.cpp

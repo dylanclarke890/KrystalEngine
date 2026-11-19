@@ -2011,8 +2011,11 @@ namespace krys::boo
   // https://www.w3.org/TR/css-text-decor-3/#text-emphasis-style-property
   bool FontCascade::CanReceiveTextEmphasis(char32 c) noexcept
   {
-    auto mask = U_GET_GC_MASK(c);
-    if (mask & (U_GC_Z_MASK | U_GC_CN_MASK | U_GC_CC_MASK | U_GC_CF_MASK))
+    auto category = text::GetGeneralCategory(c);
+    if ((text::SeparatorCategories
+         | text::GeneralCategorySet {text::GeneralCategory::Unassigned, text::GeneralCategory::Control,
+                                     text::GeneralCategory::Format})
+          .Contains(category))
     {
       return false;
     }
@@ -2026,7 +2029,7 @@ namespace krys::boo
       return false;
     }
 
-    if (mask & U_GC_P_MASK)
+    if (text::PunctuationCategories.Contains(category))
     {
       return c == U'#' || c == U'%' || c == U'&' || c == U'@' || c == text::ArabicIndicPerMilleSign
              || c == text::ArabicIndicPerTenThousandSign || c == text::ArabicPercentSign
@@ -2491,7 +2494,7 @@ namespace krys::boo
 
   Maybe<char32> Capitalized(char32 baseCharacter) noexcept
   {
-    if (U_GET_GC_MASK(baseCharacter) & U_GC_M_MASK)
+    if (text::IsInGeneralCategory(baseCharacter, text::MarkCategories))
     {
       return null;
     }

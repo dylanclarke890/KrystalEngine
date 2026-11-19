@@ -25,8 +25,8 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextMetrics.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
 #include <cmath>
-#include <unicode/uchar.h>
 
 namespace krys::boo
 {
@@ -133,15 +133,14 @@ namespace krys::boo
           // Spec: Fullwidth ideographic and fullwidth Latin text will be set with a glyph-orientation of
           // 0-degrees. Text which is not fullwidth will be set with a glyph-orientation of 90-degrees.
           // FIXME: There's not an accurate way to tell if text is fullwidth by looking at a single character.
-          switch (static_cast<UEastAsianWidth>(u_getIntPropertyValue(character, UCHAR_EAST_ASIAN_WIDTH)))
+          switch (text::GetEastAsianWidth(character))
           {
-            case U_EA_NEUTRAL:
-            case U_EA_HALFWIDTH:
-            case U_EA_NARROW:    return 90.0f;
-            case U_EA_AMBIGUOUS:
-            case U_EA_FULLWIDTH:
-            case U_EA_WIDE:      return 0.0f;
-            default:             break;
+            case text::EastAsianWidth::Neutral:
+            case text::EastAsianWidth::Halfwidth:
+            case text::EastAsianWidth::Narrow:    return 90.0f;
+            case text::EastAsianWidth::Ambiguous:
+            case text::EastAsianWidth::Fullwidth:
+            case text::EastAsianWidth::Wide:      return 0.0f;
           }
           krys_debug_assert(false);
           return 0.0f;

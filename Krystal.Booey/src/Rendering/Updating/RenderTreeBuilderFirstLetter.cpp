@@ -35,8 +35,8 @@
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
 #include "Krystal.Text/TextBreakIterator.hpp"
-#include <unicode/uchar.h>
 
 namespace krys::boo
 {
@@ -125,7 +125,11 @@ namespace krys::boo
     // letter should be included"
     KRYS_NODISCARD bool IsPunctuationForFirstLetter(char32 c) noexcept
     {
-      return U_GET_GC_MASK(c) & (U_GC_PS_MASK | U_GC_PE_MASK | U_GC_PI_MASK | U_GC_PF_MASK | U_GC_PO_MASK);
+      return text::IsInGeneralCategory(c, text::GeneralCategorySet {text::GeneralCategory::OpenPunctuation,
+                                                                    text::GeneralCategory::ClosePunctuation,
+                                                                    text::GeneralCategory::InitialPunctuation,
+                                                                    text::GeneralCategory::FinalPunctuation,
+                                                                    text::GeneralCategory::OtherPunctuation});
     }
 
     KRYS_NODISCARD bool ShouldSkipForFirstLetter(char32 c) noexcept

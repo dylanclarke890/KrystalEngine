@@ -115,11 +115,11 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD static bool IsNonIdeographicNumeral(char32_t character,
-                                                       uint32 generalCategoryMask) noexcept
+                                                       text::GeneralCategory category) noexcept
     {
       // FIXME: Should also check that it is not: upright in vertical text flow using the text-orientation
       // property or the text-combine-upright property.
-      return (generalCategoryMask & U_GC_ND_MASK) && !text::IsEastAsianFullWidth(character);
+      return category == text::GeneralCategory::DecimalNumber && !text::IsEastAsianFullWidth(character);
     }
 
     CharacterClass GetCharacterClass(char32_t character) noexcept
@@ -134,7 +134,7 @@ namespace krys::boo
         return CharacterClass::NonIdeographNumeral;
       }
 
-      auto generalCategoryMask = static_cast<uint32>(U_GET_GC_MASK(character));
+      auto category = text::GetGeneralCategory(character);
       if (IsIdeograph(character))
       {
         return CharacterClass::Ideograph;
@@ -143,7 +143,7 @@ namespace krys::boo
       // We already know it is not an Ideograph from here
       // FIXME: Should also check that it is not: upright in vertical text flow using the text-orientation
       // property or the text-combine-upright property.
-      if (generalCategoryMask & (U_GC_M_MASK | U_GC_L_MASK))
+      if ((text::MarkCategories | text::LetterCategories).Contains(category))
       {
         if (!text::IsEastAsianFullWidth(character))
         {
@@ -153,20 +153,20 @@ namespace krys::boo
         return CharacterClass::Undefined;
       }
 
-      if (IsNonIdeographicNumeral(character, generalCategoryMask))
+      if (IsNonIdeographicNumeral(character, category))
       {
         return CharacterClass::NonIdeographNumeral;
       }
 
-      if (generalCategoryMask & U_GC_P_MASK)
+      if (text::PunctuationCategories.Contains(category))
       {
         if (text::IsCJKSymbolOrPunctuation(character) || text::IsEastAsianFullWidth(character))
         {
-          if (text::IsOpeningPunctuation(generalCategoryMask))
+          if (text::IsOpeningPunctuation(category))
           {
             return CharacterClass::FullWidthOpeningPunctuation;
           }
-          if (text::IsClosingPunctuation(generalCategoryMask))
+          if (text::IsClosingPunctuation(category))
           {
             return CharacterClass::FullWidthClosingPunctuation;
           }

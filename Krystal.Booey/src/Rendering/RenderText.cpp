@@ -58,6 +58,7 @@
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
 #include "Krystal.Text/Hyphenation.hpp"
 #include "Krystal.Text/TextBreakIterator.hpp"
 #include <algorithm>
@@ -838,12 +839,18 @@ namespace krys::boo
 
     KRYS_NODISCARD inline bool IsHangablePunctuationAtLineStart(char32 character) noexcept
     {
-      return U_GET_GC_MASK(character) & (U_GC_PS_MASK | U_GC_PI_MASK | U_GC_PF_MASK);
+      return text::IsInGeneralCategory(character,
+                                       text::GeneralCategorySet {text::GeneralCategory::OpenPunctuation,
+                                                                 text::GeneralCategory::InitialPunctuation,
+                                                                 text::GeneralCategory::FinalPunctuation});
     }
 
     KRYS_NODISCARD inline bool IsHangablePunctuationAtLineEnd(char32 character) noexcept
     {
-      return U_GET_GC_MASK(character) & (U_GC_PE_MASK | U_GC_PI_MASK | U_GC_PF_MASK);
+      return text::IsInGeneralCategory(character,
+                                       text::GeneralCategorySet {text::GeneralCategory::ClosePunctuation,
+                                                                 text::GeneralCategory::InitialPunctuation,
+                                                                 text::GeneralCategory::FinalPunctuation});
     }
 
     // -webkit-nbsp-mode was dropped, so only a space is a space.

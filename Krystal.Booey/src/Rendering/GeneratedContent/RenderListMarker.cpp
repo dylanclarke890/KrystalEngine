@@ -41,7 +41,6 @@
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Text/Bidi.hpp"
-#include <unicode/uchar.h>
 
 namespace krys::boo
 {

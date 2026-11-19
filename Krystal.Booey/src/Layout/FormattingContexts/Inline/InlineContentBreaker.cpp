@@ -33,8 +33,8 @@
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
 #include "Krystal.Text/Hyphenation.hpp"
-#include <unicode/uchar.h>
 
 namespace krys::boo::layout
 {
@@ -207,8 +207,11 @@ namespace krys::boo::layout
       {
         return false;
       }
-      auto isPunctuation =
-        U_GET_GC_MASK(character) & (U_GC_PS_MASK | U_GC_PE_MASK | U_GC_PI_MASK | U_GC_PF_MASK | U_GC_PO_MASK);
+      auto isPunctuation = text::IsInGeneralCategory(
+        character, text::GeneralCategorySet {
+                     text::GeneralCategory::OpenPunctuation, text::GeneralCategory::ClosePunctuation,
+                     text::GeneralCategory::InitialPunctuation, text::GeneralCategory::FinalPunctuation,
+                     text::GeneralCategory::OtherPunctuation});
       return character == text::ReverseSolidus || !isPunctuation;
     }
 

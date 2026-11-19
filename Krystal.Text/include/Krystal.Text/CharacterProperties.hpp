@@ -27,25 +27,107 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Text/Script.hpp"
-#include <unicode/uchar.h>
 
 namespace krys::text
 {
-  KRYS_NODISCARD inline bool IsEmojiGroupCandidate(char32 character) noexcept
+  /// @brief A character's General_Category property, in ICU's `UCharCategory` order.
+  enum class GeneralCategory : uint8
   {
-    switch (ublock_getCode(character))
-    {
-      case UBLOCK_MISCELLANEOUS_SYMBOLS:
-      case UBLOCK_DINGBATS:
-      case UBLOCK_MISCELLANEOUS_SYMBOLS_AND_PICTOGRAPHS:
-      case UBLOCK_EMOTICONS:
-      case UBLOCK_TRANSPORT_AND_MAP_SYMBOLS:
-      case UBLOCK_SUPPLEMENTAL_SYMBOLS_AND_PICTOGRAPHS:
-      case UBLOCK_SYMBOLS_AND_PICTOGRAPHS_EXTENDED_A:    return true;
-      default:                                           return false;
-    }
+    Unassigned,
+    UppercaseLetter,
+    LowercaseLetter,
+    TitlecaseLetter,
+    ModifierLetter,
+    OtherLetter,
+    NonspacingMark,
+    EnclosingMark,
+    SpacingMark,
+    DecimalNumber,
+    LetterNumber,
+    OtherNumber,
+    SpaceSeparator,
+    LineSeparator,
+    ParagraphSeparator,
+    Control,
+    Format,
+    PrivateUse,
+    Surrogate,
+    DashPunctuation,
+    OpenPunctuation,
+    ClosePunctuation,
+    ConnectorPunctuation,
+    OtherPunctuation,
+    MathSymbol,
+    CurrencySymbol,
+    ModifierSymbol,
+    OtherSymbol,
+    InitialPunctuation,
+    FinalPunctuation,
+  };
+
+  using GeneralCategorySet = EnumSet<GeneralCategory>;
+
+  /// @brief The categories of general category L.
+  constexpr GeneralCategorySet LetterCategories {
+    GeneralCategory::UppercaseLetter, GeneralCategory::LowercaseLetter, GeneralCategory::TitlecaseLetter,
+    GeneralCategory::ModifierLetter, GeneralCategory::OtherLetter};
+
+  /// @brief The categories of general category M.
+  constexpr GeneralCategorySet MarkCategories {GeneralCategory::NonspacingMark,
+                                               GeneralCategory::EnclosingMark, GeneralCategory::SpacingMark};
+
+  /// @brief The categories of general category N.
+  constexpr GeneralCategorySet NumberCategories {GeneralCategory::DecimalNumber,
+                                                 GeneralCategory::LetterNumber, GeneralCategory::OtherNumber};
+
+  /// @brief The categories of general category P.
+  constexpr GeneralCategorySet PunctuationCategories {
+    GeneralCategory::DashPunctuation,  GeneralCategory::OpenPunctuation,
+    GeneralCategory::ClosePunctuation, GeneralCategory::ConnectorPunctuation,
+    GeneralCategory::OtherPunctuation, GeneralCategory::InitialPunctuation,
+    GeneralCategory::FinalPunctuation};
+
+  /// @brief The categories of general category S.
+  constexpr GeneralCategorySet SymbolCategories {GeneralCategory::MathSymbol, GeneralCategory::CurrencySymbol,
+                                                 GeneralCategory::ModifierSymbol,
+                                                 GeneralCategory::OtherSymbol};
+
+  /// @brief The categories of general category Z.
+  constexpr GeneralCategorySet SeparatorCategories {
+    GeneralCategory::SpaceSeparator, GeneralCategory::LineSeparator, GeneralCategory::ParagraphSeparator};
+
+  /// @brief The categories of general category C.
+  constexpr GeneralCategorySet OtherCategories {GeneralCategory::Unassigned, GeneralCategory::Control,
+                                                GeneralCategory::Format, GeneralCategory::PrivateUse,
+                                                GeneralCategory::Surrogate};
+
+  /// @brief @p character's General_Category property.
+  KRYS_NODISCARD GeneralCategory GetGeneralCategory(char32 character) noexcept;
+
+  /// @brief Whether @p character's general category is one of @p categories.
+  KRYS_NODISCARD inline bool IsInGeneralCategory(char32 character, GeneralCategorySet categories) noexcept
+  {
+    return categories.Contains(GetGeneralCategory(character));
   }
+
+  /// @brief A character's East_Asian_Width property (UAX #11), in ICU's `UEastAsianWidth` order.
+  enum class EastAsianWidth : uint8
+  {
+    Neutral,
+    Ambiguous,
+    Halfwidth,
+    Fullwidth,
+    Narrow,
+    Wide,
+  };
+
+  /// @brief @p character's East_Asian_Width property.
+  KRYS_NODISCARD EastAsianWidth GetEastAsianWidth(char32 character) noexcept;
+
+  /// @brief Whether @p character is in one of the emoji and pictograph blocks.
+  KRYS_NODISCARD bool IsEmojiGroupCandidate(char32 character) noexcept;
 
   KRYS_NODISCARD constexpr bool IsEmojiFitzpatrickModifier(char32 character) noexcept
   {
@@ -73,58 +155,32 @@ namespace krys::text
     return character >= 0x1F1E6 && character <= 0x1F1FF;
   }
 
-  KRYS_NODISCARD inline bool IsEmojiWithPresentationByDefault(char32 character) noexcept
-  {
-    // No characters in Latin-1 include "Emoji_Presentation"
-    // https://www.unicode.org/Public/UCD/latest/ucd/emoji/emoji-data.txt
-    if (character <= 0xFF)
-    {
-      return false;
-    }
-    return u_hasBinaryProperty(character, UCHAR_EMOJI_PRESENTATION);
-  }
+  KRYS_NODISCARD bool IsEmojiWithPresentationByDefault(char32 character) noexcept;
 
-  KRYS_NODISCARD inline bool IsEmojiModifierBase(char32 character) noexcept
-  {
-    // No characters in Latin-1 include "Emoji_Modifier_Base"
-    // https://www.unicode.org/Public/UCD/latest/ucd/emoji/emoji-data.txt
-    if (character <= 0xFF)
-    {
-      return false;
-    }
-    return u_hasBinaryProperty(character, UCHAR_EMOJI_MODIFIER_BASE);
-  }
+  KRYS_NODISCARD bool IsEmojiModifierBase(char32 character) noexcept;
 
-  KRYS_NODISCARD inline bool IsDefaultIgnorableCodePoint(char32 character) noexcept
-  {
-    return u_hasBinaryProperty(character, UCHAR_DEFAULT_IGNORABLE_CODE_POINT);
-  }
+  KRYS_NODISCARD bool IsDefaultIgnorableCodePoint(char32 character) noexcept;
 
   KRYS_NODISCARD inline bool IsControlCharacter(char32 character) noexcept
   {
-    return u_charType(character) == U_CONTROL_CHAR;
+    return GetGeneralCategory(character) == GeneralCategory::Control;
   }
 
-  KRYS_NODISCARD inline bool IsPrivateUseAreaCharacter(char32 character) noexcept
-  {
-    auto block = ublock_getCode(character);
-    return block == UBLOCK_PRIVATE_USE_AREA || block == UBLOCK_SUPPLEMENTARY_PRIVATE_USE_AREA_A
-           || block == UBLOCK_SUPPLEMENTARY_PRIVATE_USE_AREA_B;
-  }
+  KRYS_NODISCARD bool IsPrivateUseAreaCharacter(char32 character) noexcept;
 
   KRYS_NODISCARD inline bool IsPunctuation(char32 character) noexcept
   {
-    return U_GET_GC_MASK(character) & U_GC_P_MASK;
+    return IsInGeneralCategory(character, PunctuationCategories);
   }
 
-  KRYS_NODISCARD constexpr bool IsOpeningPunctuation(uint32 generalCategoryMask) noexcept
+  KRYS_NODISCARD constexpr bool IsOpeningPunctuation(GeneralCategory category) noexcept
   {
-    return generalCategoryMask & U_GC_PS_MASK;
+    return category == GeneralCategory::OpenPunctuation;
   }
 
-  KRYS_NODISCARD constexpr bool IsClosingPunctuation(uint32 generalCategoryMask) noexcept
+  KRYS_NODISCARD constexpr bool IsClosingPunctuation(GeneralCategory category) noexcept
   {
-    return generalCategoryMask & U_GC_PE_MASK;
+    return category == GeneralCategory::ClosePunctuation;
   }
 
   KRYS_NODISCARD inline bool IsOfScriptType(char32 codePoint, Script scriptType) noexcept
@@ -132,14 +188,9 @@ namespace krys::text
     return GetScript(codePoint) == scriptType;
   }
 
-  KRYS_NODISCARD inline UEastAsianWidth EastAsianWidth(char32 character) noexcept
-  {
-    return static_cast<UEastAsianWidth>(u_getIntPropertyValue(character, UCHAR_EAST_ASIAN_WIDTH));
-  }
-
   KRYS_NODISCARD inline bool IsEastAsianFullWidth(char32 character) noexcept
   {
-    return EastAsianWidth(character) == UEastAsianWidth::U_EA_FULLWIDTH;
+    return GetEastAsianWidth(character) == EastAsianWidth::Fullwidth;
   }
 
   KRYS_NODISCARD constexpr bool IsCJKSymbolOrPunctuation(char32 character) noexcept
@@ -163,6 +214,6 @@ namespace krys::text
 
   KRYS_NODISCARD inline bool IsCurrencySymbol(char32 character) noexcept
   {
-    return u_charType(character) == U_CURRENCY_SYMBOL;
+    return GetGeneralCategory(character) == GeneralCategory::CurrencySymbol;
   }
 }
