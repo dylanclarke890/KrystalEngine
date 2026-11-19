@@ -37,10 +37,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/HTML/InputTypes/StepRange.hpp"
 #include "Krystal.Booey/Platform/DateComponents.hpp"
-#include "Krystal.Booey/Platform/Decimal.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/Decimal.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo

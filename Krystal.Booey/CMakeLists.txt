@@ -2629,7 +2629,6 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/Choosers/PopupMenuStyle.hpp
   include/Krystal.Booey/Platform/Cursor.hpp
   include/Krystal.Booey/Platform/DateComponents.hpp
-  include/Krystal.Booey/Platform/Decimal.hpp
   include/Krystal.Booey/Platform/Events/PlatformEvent.hpp
   include/Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp
   include/Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp
@@ -2694,7 +2693,6 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/CaretAnimator.cpp
   src/Platform/Cursor.cpp
   src/Platform/DateComponents.cpp
-  src/Platform/Decimal.cpp
   src/Platform/ImageDecoders/BMPImageDecoder.cpp
   src/Platform/ImageDecoders/BMPImageReader.cpp
   src/Platform/ImageDecoders/EXIFMetadata.cpp

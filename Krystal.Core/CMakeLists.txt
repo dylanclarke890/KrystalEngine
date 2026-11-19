@@ -240,6 +240,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/BloomFilter.hpp
       include/Krystal.Core/Types/CompactVariant.hpp
       include/Krystal.Core/Types/DataRef.hpp
+      include/Krystal.Core/Types/Decimal.hpp
       include/Krystal.Core/Types/Expected.hpp
       include/Krystal.Core/Types/FixedVector.hpp
       include/Krystal.Core/Types/Func.hpp
@@ -330,6 +331,7 @@ target_sources(Krystal.Core
     src/Threading/Thread.cpp
 
     # Types
+    src/Types/Decimal.cpp
     src/Types/SharedBuffer.cpp
 
     # Utils

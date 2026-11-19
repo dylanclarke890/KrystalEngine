@@ -36,7 +36,7 @@
 #include "Krystal.Core/Types/String.hpp"
 #include <compare>
 
-namespace krys::boo
+namespace krys
 {
   namespace detail
   {
@@ -44,8 +44,6 @@ namespace krys::boo
   }
 
   /// @brief A decimal floating point number: an 18 digit coefficient and a base 10 exponent.
-  // FIXME: Once all C++ compiler support decimal type, we should replace this class to compiler supported
-  // one.
   class Decimal
   {
   public:

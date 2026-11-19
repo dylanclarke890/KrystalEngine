@@ -1,9 +1,9 @@
-﻿#include "Krystal.Booey/Platform/Decimal.hpp"
+﻿#include "Krystal.Core/Types/Decimal.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include <cmath>
 #include <string>
 
-namespace krys::boo::tests
+namespace krys::tests
 {
   namespace
   {
@@ -24,7 +24,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("Decimal: arithmetic is exact in base ten", "[Platform][Decimal]")
+  TEST_CASE("Decimal: arithmetic is exact in base ten", "[Types][Decimal]")
   {
     CHECK(ToString(FromString("0.1") + FromString("0.2")) == "0.3");
     CHECK(ToString(Decimal(1) - FromString("0.9")) == "0.1");
@@ -41,7 +41,7 @@ namespace krys::boo::tests
     CHECK(product.Exponent() > 0);
   }
 
-  TEST_CASE("Decimal: special values", "[Platform][Decimal]")
+  TEST_CASE("Decimal: special values", "[Types][Decimal]")
   {
     auto infinity = Decimal::Infinity(Decimal::Positive);
     auto negativeInfinity = Decimal::Infinity(Decimal::Negative);
@@ -68,7 +68,7 @@ namespace krys::boo::tests
     CHECK(ToString(nan) == "NaN");
   }
 
-  TEST_CASE("Decimal: comparison", "[Platform][Decimal]")
+  TEST_CASE("Decimal: comparison", "[Types][Decimal]")
   {
     CHECK(Decimal(1) < Decimal(2));
     CHECK(FromString("1.5") > Decimal(1));
@@ -78,7 +78,7 @@ namespace krys::boo::tests
     CHECK(Decimal::Zero(Decimal::Negative) == Decimal::Zero(Decimal::Positive));
   }
 
-  TEST_CASE("Decimal: rounding and remainders", "[Platform][Decimal]")
+  TEST_CASE("Decimal: rounding and remainders", "[Types][Decimal]")
   {
     CHECK(ToString(FromString("1.5").Ceil()) == "2");
     CHECK(ToString(FromString("-1.5").Ceil()) == "-1");
@@ -99,7 +99,7 @@ namespace krys::boo::tests
     CHECK(ToString(FromString("-3.5").Abs()) == "3.5");
   }
 
-  TEST_CASE("Decimal: parsing strings", "[Platform][Decimal]")
+  TEST_CASE("Decimal: parsing strings", "[Types][Decimal]")
   {
     CHECK(ToString(FromString("0")) == "0");
     CHECK(ToString(FromString("-0")) == "-0");
@@ -125,7 +125,7 @@ namespace krys::boo::tests
     CHECK(FromString("1e-2000").IsZero());
   }
 
-  TEST_CASE("Decimal: serialising", "[Platform][Decimal]")
+  TEST_CASE("Decimal: serialising", "[Types][Decimal]")
   {
     CHECK(ToString(Encode(1, 21, Decimal::Positive)) == "1e+21");
     CHECK(ToString(Encode(15, 20, Decimal::Positive)) == "1.5e+21");
@@ -135,7 +135,7 @@ namespace krys::boo::tests
     CHECK(ToString(Encode(100, 0, Decimal::Positive)) == "100");
   }
 
-  TEST_CASE("Decimal: doubles", "[Platform][Decimal]")
+  TEST_CASE("Decimal: doubles", "[Types][Decimal]")
   {
     CHECK(ToString(Decimal::FromDouble(0.1)) == "0.1");
     CHECK(ToString(Decimal::FromDouble(-2.5)) == "-2.5");

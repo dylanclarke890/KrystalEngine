@@ -29,7 +29,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Platform/Decimal.hpp"
+#include "Krystal.Core/Types/Decimal.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include <cfloat>
@@ -40,7 +40,7 @@
   #include <intrin.h>
 #endif
 
-namespace krys::boo
+namespace krys
 {
   namespace detail
   {

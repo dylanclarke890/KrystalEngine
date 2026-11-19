@@ -39,6 +39,7 @@ namespace krys::boo
       {
         return false;
       }
+
       return std::ranges::all_of(
         value, [](char8 c)
         { return text::IsASCIIAlphanumeric(c) || utf8_stringview(u8"!#$%&'*+-.^_`|~").contains(c); });
@@ -177,10 +178,12 @@ namespace krys::boo
       {u8"p7c", u8"application/pkcs7-mime"},
       {u8"p7s", u8"application/pkcs7-signature"},
     };
+
     if (extension.empty())
     {
       return {};
     }
+
     for (auto &mapping : mappings)
     {
       if (text::IsASCIICaselessEqual(extension, mapping.Extension))
@@ -188,6 +191,7 @@ namespace krys::boo
         return utf8_string(mapping.Type);
       }
     }
+
     return {};
   }
 
@@ -206,6 +210,7 @@ namespace krys::boo
       u8"image/x-icon",
       u8"image/vnd.microsoft.icon",
     };
+
     return std::ranges::any_of(supportedTypes,
                                [&](auto type) { return text::IsASCIICaselessEqual(mimeType, type); });
   }
@@ -217,6 +222,7 @@ namespace krys::boo
       u8"image/jpeg",
       u8"image/webp",
     };
+
     return std::ranges::any_of(supportedTypes,
                                [&](auto type) { return text::IsASCIICaselessEqual(mimeType, type); });
   }
