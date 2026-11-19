@@ -22,10 +22,10 @@
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/TextAffinity.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLWBRElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 
 namespace krys::boo
 {
@@ -80,7 +80,7 @@ namespace krys::boo
     rects.push_back(rect);
   }
 
-  void RenderLineBreak::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  void RenderLineBreak::AbsoluteQuads(List<QuadF> &quads, bool *wasFixed) const noexcept
   {
     auto box = inline_iterator::BoxFor(*this);
     if (!box)

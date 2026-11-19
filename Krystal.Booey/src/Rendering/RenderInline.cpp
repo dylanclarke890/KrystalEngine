@@ -364,7 +364,7 @@ namespace krys::boo
     }
   }
 
-  void RenderInline::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  void RenderInline::AbsoluteQuads(List<QuadF> &quads, bool *wasFixed) const noexcept
   {
     for (const auto &rect : LineBoxRects(*this))
     {

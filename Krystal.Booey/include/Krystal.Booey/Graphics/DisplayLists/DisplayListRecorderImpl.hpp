@@ -104,7 +104,7 @@ namespace krys::boo::display_list
 
     void DrawLine(const PointF &point1, const PointF &point2) noexcept final;
 
-    void DrawLinesForText(const PointF &, float thickness, Span<const FloatSegment>, bool isPrinting,
+    void DrawLinesForText(const PointF &, float thickness, Span<const SegmentF>, bool isPrinting,
                           bool doubleLines, boo::StrokeStyle) noexcept final;
 
     void DrawDotsForDocumentMarker(const RectF &, DocumentMarkerLineStyle) noexcept final;

@@ -47,7 +47,7 @@ namespace krys::boo::tests
       auto &layer = fixture.LayerOf(id);
       RenderGeometryMap geometryMap;
       geometryMap.PushMappingsToAncestor(&layer, nullptr);
-      auto expected = layer.Renderer().LocalToAbsoluteQuad(FloatQuad(RectF(0, 0, 10, 10))).BoundingBox();
+      auto expected = layer.Renderer().LocalToAbsoluteQuad(QuadF(RectF(0, 0, 10, 10))).BoundingBox();
       auto mapped = geometryMap.MapToContainer(RectF(0, 0, 10, 10), nullptr).BoundingBox();
       INFO(reinterpret_cast<const char *>(id));
       CHECK(AreEssentiallyEqual(mapped.Location(), expected.Location()));

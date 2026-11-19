@@ -1,10 +1,10 @@
 ﻿#include "Krystal.UI/Compositing/GraphicsLayerTextureMapper.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerFilterAnimationValue.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.UI/Compositing/PlatformLayerDisplayDelegate.hpp"
 #include "Krystal.UI/Compositing/TextureMapper.hpp"
 
@@ -770,7 +770,7 @@ namespace krys::ui
     // A projection of the rect (surface coordinates) onto the layer's plane (layer coordinates). The
     // resulting quad might be skewed and the result is the bounding box of this quad, so it might spread
     // further than the real visible area.
-    RectF visibleRect(inverse->ClampedBoundsOfProjectedQuad(boo::FloatQuad(rect)));
+    RectF visibleRect(inverse->ClampedBoundsOfProjectedQuad(QuadF(rect)));
     if (visibleRect.Width() >= boo::LayoutUnit::NearlyMax().ToFloat()
         || visibleRect.Width() <= boo::LayoutUnit::NearlyMin().ToFloat())
     {

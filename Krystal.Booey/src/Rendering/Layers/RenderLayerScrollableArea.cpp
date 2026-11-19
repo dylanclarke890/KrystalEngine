@@ -47,7 +47,6 @@
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
@@ -74,6 +73,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Values/Scrollbars/ScrollbarWidth.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <algorithm>
 #include <cmath>
@@ -375,7 +375,7 @@ namespace krys::boo
     auto cachedRect = _layer.CachedClippedOverflowRect();
     auto rectForRepaint = cachedRect ? *cachedRect : renderer.ClippedOverflowRectForRepaint(repaintContainer);
 
-    FloatQuad quadForFakeMouseMoveEvent = FloatQuad(RectF(rectForRepaint));
+    QuadF quadForFakeMouseMoveEvent = QuadF(RectF(rectForRepaint));
     if (repaintContainer)
     {
       quadForFakeMouseMoveEvent = repaintContainer->LocalToAbsoluteQuad(quadForFakeMouseMoveEvent);
@@ -1402,8 +1402,7 @@ namespace krys::boo
                                                  int32 verticalScrollbarWidth,
                                                  const LayoutRect &layerBounds) noexcept
     {
-      auto localExposeRect =
-        LayoutRect(box->AbsoluteToLocalQuad(FloatQuad(RectF(absoluteRect))).BoundingBox());
+      auto localExposeRect = LayoutRect(box->AbsoluteToLocalQuad(QuadF(RectF(absoluteRect))).BoundingBox());
 
       // localExposedRect is now the absolute rect in local coordinates, but relative to the
       // border edge. Make the rectangle relative to the scrollable area.
@@ -1485,7 +1484,7 @@ namespace krys::boo
     auto localExposeRectScrolled = localExposeRect;
     localExposeRectScrolled.Move(-LayoutSize(scrollOffsetDifference));
     return LayoutRect(
-      box->LocalToAbsoluteQuad(FloatQuad(RectF(localExposeRectScrolled)), MapCoordinatesMode::UseTransforms)
+      box->LocalToAbsoluteQuad(QuadF(RectF(localExposeRectScrolled)), MapCoordinatesMode::UseTransforms)
         .BoundingBox());
   }
 

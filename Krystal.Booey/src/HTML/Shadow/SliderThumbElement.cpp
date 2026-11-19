@@ -38,7 +38,6 @@
 #include "Krystal.Booey/DOM/Events/TouchEvent.hpp"
 #include "Krystal.Booey/DOM/Events/TouchList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/InputTypes/StepRange.hpp"
@@ -51,6 +50,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 
 namespace krys::boo::html
 {
@@ -262,7 +262,7 @@ namespace krys::boo::html
 
     auto offset = inputRenderer->AbsoluteToLocal(PointF(absolutePoint), MapCoordinatesMode::UseTransforms);
     auto trackBoundingBox =
-      trackRenderer->LocalToContainerQuad(FloatQuad(RectF({}, SizeF(trackRenderer->Size()))), inputRenderer)
+      trackRenderer->LocalToContainerQuad(QuadF(RectF({}, SizeF(trackRenderer->Size()))), inputRenderer)
         .EnclosingBoundingBox();
 
     LayoutUnit trackLength;

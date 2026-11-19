@@ -2,9 +2,9 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 
 namespace krys::boo::tests
 {
@@ -57,7 +57,7 @@ namespace krys::boo::tests
 
     SECTION("Quads")
     {
-      List<FloatQuad> quads;
+      List<QuadF> quads;
       Downcast<RenderBox>(RendererOf(fixture, u8"outer")).AbsoluteQuads(quads);
       REQUIRE(quads.size() == 1);
       CHECK(quads[0].BoundingBox() == RectF(20, 10, 206, 106));

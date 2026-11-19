@@ -30,7 +30,6 @@
 #include "Krystal.Booey/Graphics/Fonts/Font.hpp"
 #include "Krystal.Booey/Graphics/Fonts/GlyphBufferMembers.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSegment.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
@@ -38,6 +37,7 @@
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Style/StyleAppearance.hpp"
 #include "Krystal.Booey/Text/TextFlags.hpp"
+#include "Krystal.Core/Geometry/Segment.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
@@ -1080,7 +1080,7 @@ namespace krys::boo::display_list
   {
   private:
     PointF _point;
-    List<FloatSegment> _lineSegments;
+    List<SegmentF> _lineSegments;
     float _thickness;
     bool _printing;
     bool _doubleLines;
@@ -1089,7 +1089,7 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "draw-lines-for-text";
 
-    DrawLinesForText(const PointF &, Span<const FloatSegment> lineSegments, float thickness, bool printing,
+    DrawLinesForText(const PointF &, Span<const SegmentF> lineSegments, float thickness, bool printing,
                      bool doubleLines, boo::StrokeStyle) noexcept;
 
     KRYS_NODISCARD PointF Point() const noexcept
@@ -1102,7 +1102,7 @@ namespace krys::boo::display_list
       return _thickness;
     }
 
-    KRYS_NODISCARD const List<FloatSegment> &LineSegments() const noexcept
+    KRYS_NODISCARD const List<SegmentF> &LineSegments() const noexcept
     {
       return _lineSegments;
     }

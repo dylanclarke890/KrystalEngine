@@ -27,7 +27,7 @@
 
 namespace krys::boo::dom
 {
-  DOMRectList::DOMRectList(const List<FloatQuad> &quads) noexcept
+  DOMRectList::DOMRectList(const List<QuadF> &quads) noexcept
   {
     _items.reserve(quads.size());
     for (const auto &quad : quads)

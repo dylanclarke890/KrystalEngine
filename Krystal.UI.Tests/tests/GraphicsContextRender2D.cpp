@@ -442,7 +442,7 @@ namespace krys::ui::tests
         [](boo::GraphicsContext &context)
         {
           context.SetStrokeColor(boo::Color::red);
-          const boo::FloatSegment segments[] {{0, 30}};
+          const SegmentF segments[] {{0, 30}};
           context.DrawLinesForText({5, 10}, 2, segments, false, true, boo::StrokeStyle::SolidStroke);
         });
       auto direct = Draw(

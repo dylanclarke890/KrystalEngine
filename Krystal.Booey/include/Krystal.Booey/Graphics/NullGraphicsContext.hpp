@@ -137,7 +137,7 @@ namespace krys::boo
     {
     }
 
-    void DrawLinesForText(const PointF &, float, Span<const FloatSegment>, bool, bool,
+    void DrawLinesForText(const PointF &, float, Span<const SegmentF>, bool, bool,
                           boo::StrokeStyle) noexcept final
     {
     }

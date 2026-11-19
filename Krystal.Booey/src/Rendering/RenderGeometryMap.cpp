@@ -129,21 +129,21 @@ namespace krys::boo
     return result;
   }
 
-  FloatQuad RenderGeometryMap::MapToContainer(const RectF &rect,
-                                              const RenderLayerModelObject *container) const noexcept
+  QuadF RenderGeometryMap::MapToContainer(const RectF &rect,
+                                          const RenderLayerModelObject *container) const noexcept
   {
-    FloatQuad result;
+    QuadF result;
 
     if (!HasFixedPositionStep() && !HasTransformStep() && !HasNonUniformStep()
         && (!container || (!_mapping.empty() && container == _mapping[0].Renderer)))
     {
-      result = FloatQuad(rect);
+      result = QuadF(rect);
       result.Move(_accumulatedOffset);
     }
     else
     {
       TransformState transformState(TransformState::TransformDirection::ApplyTransform, rect.Center(),
-                                    FloatQuad(rect));
+                                    QuadF(rect));
       MapToContainer(transformState, container);
       result = transformState.MappedQuad();
     }

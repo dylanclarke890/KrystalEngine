@@ -123,8 +123,12 @@ target_sources(Krystal.Core
       # Geometry
       include/Krystal.Core/Geometry/GeometryForward.hpp
       include/Krystal.Core/Geometry/Point.hpp
+      include/Krystal.Core/Geometry/Polygon.hpp
+      include/Krystal.Core/Geometry/Quad.hpp
       include/Krystal.Core/Geometry/Rect.hpp
       include/Krystal.Core/Geometry/RectHash.hpp
+      include/Krystal.Core/Geometry/Region.hpp
+      include/Krystal.Core/Geometry/Segment.hpp
       include/Krystal.Core/Geometry/Size.hpp
 
       # IO
@@ -297,7 +301,11 @@ target_sources(Krystal.Core
     
     # Geometry
     src/Geometry/Point.cpp
+    src/Geometry/Polygon.cpp
+    src/Geometry/Quad.cpp
     src/Geometry/Rect.cpp
+    src/Geometry/Region.cpp
+    src/Geometry/Segment.cpp
     src/Geometry/Size.cpp
     
     # IO

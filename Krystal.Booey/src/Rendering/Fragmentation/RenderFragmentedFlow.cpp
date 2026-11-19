@@ -28,7 +28,6 @@
  */
 
 #include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
@@ -40,6 +39,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableSection.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -259,7 +259,7 @@ namespace krys::boo
     }
   }
 
-  bool RenderFragmentedFlow::AbsoluteQuadsForBox(List<FloatQuad> &quads, bool *wasFixed,
+  bool RenderFragmentedFlow::AbsoluteQuadsForBox(List<QuadF> &quads, bool *wasFixed,
                                                  const RenderBox &box) const noexcept
   {
     if (!HasValidFragmentInfo())

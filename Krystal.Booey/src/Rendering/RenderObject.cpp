@@ -35,7 +35,6 @@
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
@@ -71,6 +70,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 
@@ -944,8 +944,7 @@ namespace krys::boo
     return transformState.MappedPoint();
   }
 
-  FloatQuad RenderObject::AbsoluteToLocalQuad(const FloatQuad &quad,
-                                              EnumSet<MapCoordinatesMode> mode) const noexcept
+  QuadF RenderObject::AbsoluteToLocalQuad(const QuadF &quad, EnumSet<MapCoordinatesMode> mode) const noexcept
   {
     TransformState transformState(TransformState::TransformDirection::UnapplyInverseTransform,
                                   quad.BoundingBox().Center(), quad);
@@ -1077,16 +1076,14 @@ namespace krys::boo
     }
   }
 
-  FloatQuad RenderObject::LocalToAbsoluteQuad(const FloatQuad &quad, EnumSet<MapCoordinatesMode> mode,
-                                              bool *wasFixed) const noexcept
+  QuadF RenderObject::LocalToAbsoluteQuad(const QuadF &quad, EnumSet<MapCoordinatesMode> mode,
+                                          bool *wasFixed) const noexcept
   {
     return LocalToContainerQuad(quad, nullptr, mode, wasFixed);
   }
 
-  FloatQuad RenderObject::LocalToContainerQuad(const FloatQuad &localQuad,
-                                               const RenderLayerModelObject *container,
-                                               EnumSet<MapCoordinatesMode> mode,
-                                               bool *wasFixed) const noexcept
+  QuadF RenderObject::LocalToContainerQuad(const QuadF &localQuad, const RenderLayerModelObject *container,
+                                           EnumSet<MapCoordinatesMode> mode, bool *wasFixed) const noexcept
   {
     // Track the point at the center of the quad's bounding box. As MapLocalToContainer() calls
     // OffsetFromContainer(), it will use that point as the reference point to decide which column's transform
@@ -1276,7 +1273,7 @@ namespace krys::boo
             continue;
           }
 
-          List<FloatQuad> elementQuads;
+          List<QuadF> elementQuads;
           renderer->AbsoluteQuads(elementQuads);
           if (space == CoordinateSpace::Client)
           {
@@ -1319,10 +1316,10 @@ namespace krys::boo
     return BorderAndTextRects(range, CoordinateSpace::Client, {});
   }
 
-  List<FloatQuad> RenderObject::AbsoluteTextQuads(const dom::SimpleRange &range,
-                                                  EnumSet<BoundingRectBehavior> behavior) noexcept
+  List<QuadF> RenderObject::AbsoluteTextQuads(const dom::SimpleRange &range,
+                                              EnumSet<BoundingRectBehavior> behavior) noexcept
   {
-    List<FloatQuad> quads;
+    List<QuadF> quads;
     for (auto &node : dom::IntersectingNodes(range))
     {
       auto *renderer = node.Renderer();
@@ -1350,7 +1347,7 @@ namespace krys::boo
   {
     if (useTransforms)
     {
-      List<FloatQuad> quads;
+      List<QuadF> quads;
       AbsoluteQuads(quads, wasFixed);
       return EnclosingRectI(UnitedBoundingBoxes(quads)).ToRectWithExtentsClippedToNumericLimits();
     }
@@ -1631,7 +1628,7 @@ namespace krys::boo
       else if (auto *rendererWithOutline = DynamicDowncast<RenderLayerModelObject>(*originalRenderer))
       {
         adjustedRepaintRect = LayoutRect(
-          repaintContainer.LocalToContainerQuad(FloatQuad(RectF(adjustedRepaintRect)), rendererWithOutline)
+          repaintContainer.LocalToContainerQuad(QuadF(RectF(adjustedRepaintRect)), rendererWithOutline)
             .BoundingBox());
         rendererWithOutline->RepaintRectangle(adjustedRepaintRect);
       }

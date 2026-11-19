@@ -33,14 +33,14 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
-namespace krys::boo
+namespace krys
 {
   // FIXME: Seems like this would be better as a struct.
-  // A FloatQuad is a collection of 4 points, often representing the result of
+  // A QuadF is a collection of 4 points, often representing the result of
   // mapping a rectangle through transforms. When initialized from a rect, the
   // points are in clockwise order from top left.
   /// @brief Four points, usually a rectangle mapped through a transform.
-  class FloatQuad
+  class QuadF
   {
   private:
     PointF _p1;
@@ -49,14 +49,14 @@ namespace krys::boo
     PointF _p4;
 
   public:
-    constexpr FloatQuad() noexcept = default;
+    constexpr QuadF() noexcept = default;
 
-    constexpr FloatQuad(const PointF &p1, const PointF &p2, const PointF &p3, const PointF &p4) noexcept
+    constexpr QuadF(const PointF &p1, const PointF &p2, const PointF &p3, const PointF &p4) noexcept
         : _p1(p1), _p2(p2), _p3(p3), _p4(p4)
     {
     }
 
-    constexpr FloatQuad(const RectF &inRect) noexcept
+    constexpr QuadF(const RectF &inRect) noexcept
         : _p1(inRect.Location()), _p2(inRect.MaxX(), inRect.Y()), _p3(inRect.MaxX(), inRect.MaxY()),
           _p4(inRect.X(), inRect.MaxY())
     {
@@ -122,7 +122,7 @@ namespace krys::boo
     // Tests whether the four corners of other are inside, or coincident with the sides of this quad.
     // Note that this only works for convex quads, but that includes all quads that originate
     // from transformed rects.
-    KRYS_NODISCARD bool ContainsQuad(const FloatQuad &other) const noexcept;
+    KRYS_NODISCARD bool ContainsQuad(const QuadF &other) const noexcept;
 
     // Tests whether any part of the rectangle intersects with this quad.
     // This only works for convex quads.
@@ -182,22 +182,22 @@ namespace krys::boo
     // Note that output is undefined when all points are colinear.
     KRYS_NODISCARD bool IsCounterclockwise() const noexcept;
 
-    KRYS_NODISCARD friend constexpr bool operator==(const FloatQuad &, const FloatQuad &) noexcept = default;
+    KRYS_NODISCARD friend constexpr bool operator==(const QuadF &, const QuadF &) noexcept = default;
   };
 
-  constexpr FloatQuad &operator+=(FloatQuad &a, const SizeF &b) noexcept
+  constexpr QuadF &operator+=(QuadF &a, const SizeF &b) noexcept
   {
     a.Move(b);
     return a;
   }
 
-  constexpr FloatQuad &operator-=(FloatQuad &a, const SizeF &b) noexcept
+  constexpr QuadF &operator-=(QuadF &a, const SizeF &b) noexcept
   {
     a.Move(-b.Width(), -b.Height());
     return a;
   }
 
-  KRYS_NODISCARD List<RectF> BoundingBoxes(Span<const FloatQuad> quads);
+  KRYS_NODISCARD List<RectF> BoundingBoxes(Span<const QuadF> quads);
 
-  KRYS_NODISCARD RectF UnitedBoundingBoxes(Span<const FloatQuad> quads) noexcept;
+  KRYS_NODISCARD RectF UnitedBoundingBoxes(Span<const QuadF> quads) noexcept;
 }

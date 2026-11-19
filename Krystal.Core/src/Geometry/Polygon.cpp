@@ -27,9 +27,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPolygon.hpp"
+#include "Krystal.Core/Geometry/Polygon.hpp"
 
-namespace krys::boo
+namespace krys
 {
   namespace
   {
@@ -48,7 +48,7 @@ namespace krys::boo
       return ((clockwise) ? vertexIndex + 1 : vertexIndex - 1 + nVertices) % nVertices;
     }
 
-    KRYS_NODISCARD uint32 FindNextEdgeVertexIndex(const FloatPolygon &polygon, uint32 vertexIndex1,
+    KRYS_NODISCARD uint32 FindNextEdgeVertexIndex(const PolygonF &polygon, uint32 vertexIndex1,
                                                   bool clockwise) noexcept
     {
       uint32 nVertices = polygon.NumberOfVertices();
@@ -75,7 +75,7 @@ namespace krys::boo
     }
   }
 
-  FloatPolygon::FloatPolygon(List<PointF> &&vertices) noexcept
+  PolygonF::PolygonF(List<PointF> &&vertices) noexcept
       : _vertices(krys::move(vertices)), _empty(_vertices.size() < 3), _edges(_vertices.size())
   {
     uint32 nVertices = NumberOfVertices();
@@ -119,8 +119,8 @@ namespace krys::boo
 
     if (edgeIndex > 3)
     {
-      const FloatPolygonEdge &firstEdge = _edges[0];
-      const FloatPolygonEdge &lastEdge = _edges[edgeIndex - 1];
+      const PolygonEdgeF &firstEdge = _edges[0];
+      const PolygonEdgeF &lastEdge = _edges[edgeIndex - 1];
       if (AreCollinearPoints(lastEdge.Vertex1(), lastEdge.Vertex2(), firstEdge.Vertex2()))
       {
         _edges[0]._vertexIndex1 = lastEdge._vertexIndex1;
@@ -142,11 +142,11 @@ namespace krys::boo
     }
   }
 
-  List<std::reference_wrapper<const FloatPolygonEdge>>
-    FloatPolygon::OverlappingEdges(float minY, float maxY) const noexcept
+  List<std::reference_wrapper<const PolygonEdgeF>> PolygonF::OverlappingEdges(float minY,
+                                                                              float maxY) const noexcept
   {
     auto overlappingEdgeIntervals = _edgeTree.allOverlaps({minY, maxY});
-    List<std::reference_wrapper<const FloatPolygonEdge>> edges;
+    List<std::reference_wrapper<const PolygonEdgeF>> edges;
     edges.reserve(overlappingEdgeIntervals.size());
     for (const auto &interval : overlappingEdgeIntervals)
     {

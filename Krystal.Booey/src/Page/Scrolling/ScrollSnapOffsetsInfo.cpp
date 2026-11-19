@@ -26,7 +26,6 @@
 
 #include "Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAnimator.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -35,6 +34,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollMargin.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollPadding.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -473,7 +473,7 @@ namespace krys::boo
       // The snap area is the bounding box of the element's border box, transformed.
       auto scrollSnapArea = LayoutRect(
         child
-          ->LocalToContainerQuad(FloatQuad(RectF(child->BorderBoundingBox())), &scrollingElementBox,
+          ->LocalToContainerQuad(QuadF(RectF(child->BorderBoundingBox())), &scrollingElementBox,
                                  {MapCoordinatesMode::UseTransforms, MapCoordinatesMode::IgnoreStickyOffsets})
           .BoundingBox());
 

@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPolygon.hpp"
 #include "Krystal.Booey/Rendering/Shapes/LayoutShape.hpp"
 #include "Krystal.Booey/Rendering/Shapes/ShapeInterval.hpp"
+#include "Krystal.Core/Geometry/Polygon.hpp"
 #include "Krystal.Core/Macros.hpp"
 
 namespace krys::boo
@@ -44,7 +44,7 @@ namespace krys::boo
     PointF _vertex2;
 
   public:
-    OffsetPolygonEdge(const FloatPolygonEdge &edge, const SizeF &offset) noexcept
+    OffsetPolygonEdge(const PolygonEdgeF &edge, const SizeF &offset) noexcept
         : _vertex1(edge.Vertex1() + offset), _vertex2(edge.Vertex2() + offset)
     {
     }
@@ -80,7 +80,7 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(PolygonLayoutShape);
 
   private:
-    FloatPolygon _polygon;
+    PolygonF _polygon;
     float _boxLogicalWidth {0.f};
 
   public:

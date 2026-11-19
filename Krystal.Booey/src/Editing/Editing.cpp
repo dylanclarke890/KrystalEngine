@@ -42,7 +42,6 @@
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBRElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDListElement.hpp"
@@ -61,6 +60,7 @@
 #include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Text/Bidi.hpp"
 
@@ -1199,7 +1199,7 @@ namespace krys::boo
     LayoutRect localRect(rect);
     rendererForCaretPainting->FlipForWritingMode(localRect);
     return rendererForCaretPainting
-      ->LocalToAbsoluteQuad(FloatQuad(RectF(localRect)), MapCoordinatesMode::UseTransforms, insideFixed)
+      ->LocalToAbsoluteQuad(QuadF(RectF(localRect)), MapCoordinatesMode::UseTransforms, insideFixed)
       .EnclosingBoundingBox();
   }
 

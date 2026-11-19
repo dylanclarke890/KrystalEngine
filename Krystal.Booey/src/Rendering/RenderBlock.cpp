@@ -3305,7 +3305,7 @@ namespace krys::boo
             LayoutRect localBounds(gapRectsBounds);
             FlipForWritingMode(localBounds);
             gapRectsBounds = LayoutRect(
-              LocalToContainerQuad(FloatQuad(RectF(localBounds)), &layer->Renderer()).EnclosingBoundingBox());
+              LocalToContainerQuad(QuadF(RectF(localBounds)), &layer->Renderer()).EnclosingBoundingBox());
             if (auto *layerBox = DynamicDowncast<RenderBox>(layer->Renderer()))
             {
               gapRectsBounds.MoveBy(LayoutPoint(layerBox->GetScrollPosition()));

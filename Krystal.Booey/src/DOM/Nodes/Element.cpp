@@ -72,7 +72,6 @@
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/HTMLInsertionAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
@@ -125,6 +124,7 @@
 #include "Krystal.Booey/Style/TreeResolver.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include <ranges>
@@ -4069,7 +4069,7 @@ namespace krys::boo
 
     auto *renderer = Renderer();
 
-    List<FloatQuad> quads;
+    List<QuadF> quads;
 
     if (auto *svgElement = ElementWithSVGLayoutBox(*this))
     {
@@ -4081,7 +4081,7 @@ namespace krys::boo
     else if (auto listBoxItem = ListBoxElementBoundingBox(*this))
     {
       renderer = listBoxItem->first;
-      quads.push_back(renderer->LocalToAbsoluteQuad(FloatQuad(RectF(listBoxItem->second))));
+      quads.push_back(renderer->LocalToAbsoluteQuad(QuadF(RectF(listBoxItem->second))));
     }
     else if (ShouldObtainBoundsFromBoxModel(*this))
     {
@@ -4102,7 +4102,7 @@ namespace krys::boo
   Maybe<Pair<RenderElement *, RectF>> Element::BoundingAbsoluteRectWithoutLayout() const noexcept
   {
     auto *renderer = Renderer();
-    List<FloatQuad> quads;
+    List<QuadF> quads;
     if (auto *svgElement = ElementWithSVGLayoutBox(*this))
     {
       if (auto localRect = svgElement->GetBoundingBox())
@@ -4113,7 +4113,7 @@ namespace krys::boo
     else if (auto listBoxItem = ListBoxElementBoundingBox(*this))
     {
       renderer = listBoxItem->first;
-      quads.push_back(renderer->LocalToAbsoluteQuad(FloatQuad(RectF(listBoxItem->second))));
+      quads.push_back(renderer->LocalToAbsoluteQuad(QuadF(RectF(listBoxItem->second))));
     }
     else if (ShouldObtainBoundsFromBoxModel(*this))
     {

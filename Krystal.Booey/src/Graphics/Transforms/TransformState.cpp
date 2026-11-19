@@ -158,7 +158,7 @@ namespace krys::boo
     return _accumulatedTransform->Inverse().value_or(TransformationMatrix()).ProjectPoint(point);
   }
 
-  FloatQuad TransformState::MappedQuad(bool *wasClamped) const noexcept
+  QuadF TransformState::MappedQuad(bool *wasClamped) const noexcept
   {
     if (wasClamped)
     {
@@ -170,7 +170,7 @@ namespace krys::boo
     return quad;
   }
 
-  Maybe<FloatQuad> TransformState::MappedSecondaryQuad(bool *wasClamped) const noexcept
+  Maybe<QuadF> TransformState::MappedSecondaryQuad(bool *wasClamped) const noexcept
   {
     if (wasClamped)
     {
@@ -187,7 +187,7 @@ namespace krys::boo
     return quad;
   }
 
-  void TransformState::Reset(const FloatQuad &quad, const Maybe<FloatQuad> &secondaryQuad) noexcept
+  void TransformState::Reset(const QuadF &quad, const Maybe<QuadF> &secondaryQuad) noexcept
   {
     _inputQuad = quad;
     _inputSecondaryQuad = secondaryQuad;
@@ -195,7 +195,7 @@ namespace krys::boo
     _accumulatedOffset = {};
   }
 
-  void TransformState::SetSecondaryQuadInMappedSpace(const Maybe<FloatQuad> &quad) noexcept
+  void TransformState::SetSecondaryQuadInMappedSpace(const Maybe<QuadF> &quad) noexcept
   {
     if (!quad)
     {
@@ -209,7 +209,7 @@ namespace krys::boo
     _inputSecondaryQuad = backMappedQuad;
   }
 
-  void TransformState::MapQuad(FloatQuad &quad, TransformDirection direction, bool *wasClamped) const noexcept
+  void TransformState::MapQuad(QuadF &quad, TransformDirection direction, bool *wasClamped) const noexcept
   {
     auto offset =
       (direction == TransformDirection::ApplyTransform) ? _accumulatedOffset : -_accumulatedOffset;

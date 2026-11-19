@@ -26,11 +26,11 @@
  */
 
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
@@ -744,9 +744,9 @@ namespace krys::boo
     return PointF(static_cast<float>(outX), static_cast<float>(outY));
   }
 
-  FloatQuad TransformationMatrix::ProjectQuad(const FloatQuad &q, bool *clamped) const noexcept
+  QuadF TransformationMatrix::ProjectQuad(const QuadF &q, bool *clamped) const noexcept
   {
-    FloatQuad projectedQuad;
+    QuadF projectedQuad;
 
     bool clamped1 = false;
     bool clamped2 = false;
@@ -768,13 +768,13 @@ namespace krys::boo
     bool everythingWasClipped = clamped1 && clamped2 && clamped3 && clamped4;
     if (everythingWasClipped)
     {
-      return FloatQuad();
+      return QuadF();
     }
 
     return projectedQuad;
   }
 
-  LayoutRect TransformationMatrix::ClampedBoundsOfProjectedQuad(const FloatQuad &q) const noexcept
+  LayoutRect TransformationMatrix::ClampedBoundsOfProjectedQuad(const QuadF &q) const noexcept
   {
     RectF mappedQuadBounds = ProjectQuad(q).BoundingBox();
 
@@ -932,7 +932,7 @@ namespace krys::boo
                    static_cast<float>(maxResultX - minResultX), static_cast<float>(maxResultY - minResultY));
     }
 
-    FloatQuad result;
+    QuadF result;
 
     result.SetP1(InternalMapPoint(PointF(minX, minY)));
     result.SetP2(InternalMapPoint(PointF(maxX, minY)));
@@ -942,16 +942,16 @@ namespace krys::boo
     return result.BoundingBox();
   }
 
-  FloatQuad TransformationMatrix::MapQuad(const FloatQuad &q) const noexcept
+  QuadF TransformationMatrix::MapQuad(const QuadF &q) const noexcept
   {
     if (IsIdentityOrTranslation())
     {
-      FloatQuad mappedQuad(q);
+      QuadF mappedQuad(q);
       mappedQuad.Move(static_cast<float>(_matrix[3][0]), static_cast<float>(_matrix[3][1]));
       return mappedQuad;
     }
 
-    FloatQuad result;
+    QuadF result;
     result.SetP1(InternalMapPoint(q.P1()));
     result.SetP2(InternalMapPoint(q.P2()));
     result.SetP3(InternalMapPoint(q.P3()));

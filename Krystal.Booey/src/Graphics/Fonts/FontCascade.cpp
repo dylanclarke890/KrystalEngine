@@ -987,11 +987,11 @@ namespace krys::boo
     };
   }
 
-  List<FloatSegment>
-    FontCascade::LineSegmentsForIntersectionsWithRect(const TextRun &run, const PointF &textOrigin,
-                                                      const RectF &lineExtents) const noexcept
+  List<SegmentF> FontCascade::LineSegmentsForIntersectionsWithRect(const TextRun &run,
+                                                                   const PointF &textOrigin,
+                                                                   const RectF &lineExtents) const noexcept
   {
-    List<FloatSegment> result;
+    List<SegmentF> result;
     if (IsLoadingCustomFonts())
     {
       return result;

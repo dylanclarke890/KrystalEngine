@@ -51,7 +51,7 @@ namespace krys::boo
     return LastPlanarPoint;
   }
 
-  FloatQuad HitTestingTransformState::MappedQuad() const noexcept
+  QuadF HitTestingTransformState::MappedQuad() const noexcept
   {
     if (auto inverse = AccumulatedTransform.Inverse())
     {
@@ -60,7 +60,7 @@ namespace krys::boo
     return LastPlanarQuad;
   }
 
-  FloatQuad HitTestingTransformState::MappedArea() const noexcept
+  QuadF HitTestingTransformState::MappedArea() const noexcept
   {
     if (auto inverse = AccumulatedTransform.Inverse())
     {

@@ -85,7 +85,7 @@ namespace krys::boo
 
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
 
-    void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
+    void AbsoluteQuads(List<QuadF> &quads, bool *wasFixed = nullptr) const noexcept override;
 
     KRYS_NODISCARD bool CanBeSelectionLeaf() const noexcept final;
 

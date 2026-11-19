@@ -23,12 +23,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Graphics/Geometry/FloatSegment.hpp"
+#include "Krystal.Core/Geometry/Segment.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
 
-namespace krys::boo
+namespace krys
 {
-  TextStream &operator<<(TextStream &ts, FloatSegment floatSegment) noexcept
+  TextStream &operator<<(TextStream &ts, SegmentF floatSegment) noexcept
   {
     TextStream::GroupScope scope(ts);
     ts.DumpProperty(u8"begin", floatSegment.Begin);

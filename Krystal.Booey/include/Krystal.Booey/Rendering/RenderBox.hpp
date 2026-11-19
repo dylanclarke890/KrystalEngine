@@ -25,7 +25,6 @@
 
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRange.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
@@ -34,6 +33,7 @@
 #include "Krystal.Booey/Style/Values/Box/MarginTrim.hpp"
 #include "Krystal.Booey/Style/Values/Flexbox/FlexBasis.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -1042,10 +1042,10 @@ namespace krys::boo
 
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
 
-    void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
+    void AbsoluteQuads(List<QuadF> &quads, bool *wasFixed = nullptr) const noexcept override;
 
     /// @brief The content box in absolute coordinates.
-    KRYS_NODISCARD FloatQuad AbsoluteContentQuad() const noexcept;
+    KRYS_NODISCARD QuadF AbsoluteContentQuad() const noexcept;
 
     /// @brief The scroll padding, resolved against @p viewportRect.
     KRYS_NODISCARD LayoutBoxExtent

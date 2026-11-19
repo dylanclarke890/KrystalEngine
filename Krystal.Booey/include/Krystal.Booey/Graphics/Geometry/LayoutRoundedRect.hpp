@@ -28,6 +28,7 @@
 
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/RectEdges.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include <algorithm>
 
 namespace krys
@@ -37,7 +38,6 @@ namespace krys
 
 namespace krys::boo
 {
-  class FloatQuad;
   class FloatRoundedRect;
 
   /// @brief The four corner radii of a `LayoutRoundedRect`.
@@ -234,7 +234,7 @@ namespace krys::boo
 
     // Tests whether the quad intersects any part of this rounded rectangle.
     // This only works for convex quads.
-    KRYS_NODISCARD bool IntersectsQuad(const FloatQuad &) const noexcept;
+    KRYS_NODISCARD bool IntersectsQuad(const QuadF &) const noexcept;
 
     KRYS_NODISCARD bool Contains(const LayoutRect &) const noexcept;
 

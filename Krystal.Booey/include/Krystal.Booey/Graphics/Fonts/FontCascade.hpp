@@ -29,11 +29,11 @@
 #include "Krystal.Booey/Graphics/Fonts/FontMetrics.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
 #include "Krystal.Booey/Graphics/Fonts/GlyphBuffer.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSegment.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Segment.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
@@ -194,7 +194,7 @@ namespace krys::boo
     /// @brief Where @p run's glyphs, drawn from @p textOrigin, cross @p lineExtents (an underline or
     /// overline), as spans along the line from its left: each glyph's outline where it crosses the line's top
     /// and bottom, for decorations that skip ink.
-    KRYS_NODISCARD List<FloatSegment>
+    KRYS_NODISCARD List<SegmentF>
       LineSegmentsForIntersectionsWithRect(const TextRun &run, const PointF &textOrigin,
                                            const RectF &lineExtents) const noexcept;
 

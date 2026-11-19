@@ -26,12 +26,12 @@
  */
 
 #include "Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
-#include "Krystal.Booey/Graphics/Geometry/Region.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
+#include "Krystal.Core/Geometry/Region.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
 #include <algorithm>
@@ -222,7 +222,7 @@ namespace krys::boo
     _radii.MakeRenderableInRect(_rect);
   }
 
-  bool LayoutRoundedRect::IntersectsQuad(const FloatQuad &quad) const noexcept
+  bool LayoutRoundedRect::IntersectsQuad(const QuadF &quad) const noexcept
   {
     RectF rect(_rect);
     if (!quad.IntersectsRect(rect))

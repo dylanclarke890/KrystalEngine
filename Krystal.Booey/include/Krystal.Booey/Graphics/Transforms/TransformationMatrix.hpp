@@ -36,7 +36,6 @@
 namespace krys::boo
 {
   class AffineTransform;
-  class FloatQuad;
   class LayoutRect;
 
   /// @brief A 4x4 transform matrix. The first index is the column, the second the row.
@@ -203,7 +202,7 @@ namespace krys::boo
 
     // If the matrix has 3D components, the z component of the result is
     // dropped, effectively projecting the quad into the z=0 plane.
-    KRYS_NODISCARD FloatQuad MapQuad(const FloatQuad &q) const noexcept;
+    KRYS_NODISCARD QuadF MapQuad(const QuadF &q) const noexcept;
 
     // Maps a point on the z=0 plane into a point on the plane with with the transform applied, by
     // extending a ray perpendicular to the source plane and computing the local x,y position of
@@ -211,11 +210,11 @@ namespace krys::boo
     KRYS_NODISCARD PointF ProjectPoint(const PointF &p, bool *clamped = nullptr) const noexcept;
 
     // Projects the four corners of the quad.
-    KRYS_NODISCARD FloatQuad ProjectQuad(const FloatQuad &q, bool *clamped = nullptr) const noexcept;
+    KRYS_NODISCARD QuadF ProjectQuad(const QuadF &q, bool *clamped = nullptr) const noexcept;
 
     // Projects the four corners of the quad and takes a bounding box,
     // while sanitizing values created when the w component is negative.
-    KRYS_NODISCARD LayoutRect ClampedBoundsOfProjectedQuad(const FloatQuad &q) const noexcept;
+    KRYS_NODISCARD LayoutRect ClampedBoundsOfProjectedQuad(const QuadF &q) const noexcept;
 
     KRYS_NODISCARD constexpr double M11() const noexcept
     {

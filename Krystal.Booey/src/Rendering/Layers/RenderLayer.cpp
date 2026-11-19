@@ -49,7 +49,6 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
@@ -87,6 +86,7 @@
 #include "Krystal.Booey/Style/TransformResolver.hpp"
 #include "Krystal.Booey/Style/Values/Masking/ClipPath.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/BasicShape.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
@@ -3312,7 +3312,7 @@ namespace krys::boo
   {
     auto bounds = CalculateLayerBounds(
       this, {}, {UseLocalClipRectIfPossible, IncludeFilterOutsets, UseFragmentBoxesExcludingCompositing});
-    return LayoutRect(Renderer().LocalToAbsoluteQuad(FloatQuad(RectF(bounds))).EnclosingBoundingBox());
+    return LayoutRect(Renderer().LocalToAbsoluteQuad(QuadF(RectF(bounds))).EnclosingBoundingBox());
   }
 
   RenderLayer *RenderLayer::EnclosingFilterLayer(IncludeSelfOrNot includeSelf) const noexcept
@@ -3360,7 +3360,7 @@ namespace krys::boo
 
     RenderLayer *parentLayer = EnclosingFilterRepaintLayer();
     krys_debug_assert(parentLayer);
-    FloatQuad repaintQuad(RectF {rectForRepaint});
+    QuadF repaintQuad(RectF {rectForRepaint});
     LayoutRect parentLayerRect = LayoutRect(
       Renderer().LocalToContainerQuad(repaintQuad, &parentLayer->Renderer()).EnclosingBoundingBox());
 
@@ -4005,7 +4005,7 @@ namespace krys::boo
         if (needsTransform)
         {
           newOverflowClip = LayoutRect(Renderer()
-                                         .LocalToContainerQuad(FloatQuad(RectF(newOverflowClip.Rect())),
+                                         .LocalToContainerQuad(QuadF(RectF(newOverflowClip.Rect())),
                                                                &clipRectsContext.RootLayer->Renderer())
                                          .BoundingBox());
         }
@@ -4030,7 +4030,7 @@ namespace krys::boo
           {
             newPosClip = LayoutRect(
               Renderer()
-                .LocalToContainerQuad(FloatQuad(RectF(newPosClip)), &clipRectsContext.RootLayer->Renderer())
+                .LocalToContainerQuad(QuadF(RectF(newPosClip)), &clipRectsContext.RootLayer->Renderer())
                 .BoundingBox());
           }
           newPosClip.MoveBy(offset);
@@ -6978,7 +6978,7 @@ namespace krys::boo
       // If this is the first time we need to make transform state, then base it off of hitTestLocation,
       // which is relative to rootLayer.
       transformState = HitTestingTransformState::Create(
-        hitTestLocation.TransformedPoint(), hitTestLocation.TransformedRect(), FloatQuad(hitTestRect));
+        hitTestLocation.TransformedPoint(), hitTestLocation.TransformedRect(), QuadF(hitTestRect));
       offset = OffsetFromAncestor(rootLayer);
     }
     offset += translationOffset;
@@ -7391,7 +7391,7 @@ namespace krys::boo
       {
         return HitTestLocation(localPoint, newTransformState->MappedQuad());
       }
-      return HitTestLocation(localPoint, FloatQuad(RectF(newTransformState->BoundsOfMappedQuad())));
+      return HitTestLocation(localPoint, QuadF(RectF(newTransformState->BoundsOfMappedQuad())));
     }();
 
     // Now do a hit test with the root layer shifted to be us.

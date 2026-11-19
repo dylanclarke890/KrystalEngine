@@ -30,7 +30,6 @@
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Graphics/Fonts/Font.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
@@ -54,6 +53,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Style/Values/Text/TabSize.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
@@ -1979,7 +1979,7 @@ namespace krys::boo
     }
   }
 
-  void RenderText::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  void RenderText::AbsoluteQuads(List<QuadF> &quads, bool *wasFixed) const noexcept
   {
     for (auto &textBox : inline_iterator::TextBoxesFor(*this))
     {
@@ -2156,9 +2156,9 @@ namespace krys::boo
     }
   }
 
-  List<FloatQuad> RenderText::AbsoluteQuadsForRange(uint32 start, uint32 end,
-                                                    EnumSet<BoundingRectBehavior> behavior,
-                                                    bool *wasFixed) const noexcept
+  List<QuadF> RenderText::AbsoluteQuadsForRange(uint32 start, uint32 end,
+                                                EnumSet<BoundingRectBehavior> behavior,
+                                                bool *wasFixed) const noexcept
   {
     bool useSelectionHeight = behavior.Contains(BoundingRectBehavior::UseSelectionHeight);
     bool ignoreEmptyTextSelections = behavior.Contains(BoundingRectBehavior::IgnoreEmptyTextSelections);
@@ -2177,7 +2177,7 @@ namespace krys::boo
     start = std::min(std::max(caretMinOffset, start), caretMaxOffset);
     end = std::min(std::max(caretMinOffset, end), caretMaxOffset);
 
-    List<FloatQuad> quads;
+    List<QuadF> quads;
     for (auto &textBox : inline_iterator::TextBoxesFor(*this))
     {
       if (ignoreEmptyTextSelections && !textBox.SelectableRange().Intersects(start, end))
@@ -2307,16 +2307,14 @@ namespace krys::boo
 
   LayoutRect
     RenderText::CollectSelectionGeometriesForLineBoxes(const RenderLayerModelObject *repaintContainer,
-                                                       bool clipToVisibleContent,
-                                                       List<FloatQuad> &quads) noexcept
+                                                       bool clipToVisibleContent, List<QuadF> &quads) noexcept
   {
     return CollectSelectionGeometriesForLineBoxes(repaintContainer, clipToVisibleContent, &quads);
   }
 
   LayoutRect
     RenderText::CollectSelectionGeometriesForLineBoxes(const RenderLayerModelObject *repaintContainer,
-                                                       bool clipToVisibleContent,
-                                                       List<FloatQuad> *quads) noexcept
+                                                       bool clipToVisibleContent, List<QuadF> *quads) noexcept
   {
     krys_debug_assert(!NeedsLayout());
 
@@ -2374,7 +2372,7 @@ namespace krys::boo
 
       if (quads)
       {
-        quads->push_back(LocalToContainerQuad(FloatQuad(RectF(rect)), repaintContainer));
+        quads->push_back(LocalToContainerQuad(QuadF(RectF(rect)), repaintContainer));
       }
     }
 
@@ -2383,7 +2381,7 @@ namespace krys::boo
       return ComputeRectForRepaint(resultRect, repaintContainer);
     }
     return LayoutRect(
-      LocalToContainerQuad(FloatQuad(RectF(resultRect)), repaintContainer).EnclosingBoundingBox());
+      LocalToContainerQuad(QuadF(RectF(resultRect)), repaintContainer).EnclosingBoundingBox());
   }
 
   LayoutRect RenderText::SelectionRectForRepaint(const RenderLayerModelObject *repaintContainer,

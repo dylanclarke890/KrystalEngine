@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo::tests
@@ -268,10 +268,10 @@ namespace krys::boo::tests
     REQUIRE_THAT(mappedRect3.Height(), WithinULP(600.0f, 4));
   }
 
-  TEST_CASE("AffineTransform: MapFloatQuad", "[Graphics][AffineTransform]")
+  TEST_CASE("AffineTransform: MapQuadF", "[Graphics][AffineTransform]")
   {
     RectF rect(100.0f, 100.0f, 100.0f, 50.0f);
-    FloatQuad quad(rect);
+    QuadF quad(rect);
 
     REQUIRE_THAT(quad.P1().X(), WithinULP(100.0f, 4));
     REQUIRE_THAT(quad.P1().Y(), WithinULP(100.0f, 4));

@@ -1,9 +1,10 @@
-﻿#include "Krystal.Booey/Graphics/Geometry/Region.hpp"
+﻿#include "Krystal.Core/Geometry/Region.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include <random>
 
-namespace krys::boo::tests
+namespace krys::tests
 {
   namespace
   {
@@ -51,7 +52,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("Region: ShapeEmptyIsRepresentable", "[Graphics][Region]")
+  TEST_CASE("Region: ShapeEmptyIsRepresentable", "[Geometry][Region]")
   {
     CHECK(Shape::IsValidShape({}, {}));
     Shape s1 = Shape::CreateForTesting({}, {});
@@ -63,13 +64,13 @@ namespace krys::boo::tests
     CHECK(s1 == r1.DataForTesting());
   }
 
-  TEST_CASE("Region: ShapeEmptyIsEmpty", "[Graphics][Region]")
+  TEST_CASE("Region: ShapeEmptyIsEmpty", "[Geometry][Region]")
   {
     CHECK(Shape().IsEmpty());
     CHECK(Shape(RectI {}).IsEmpty());
   }
 
-  TEST_CASE("Region: IsValidShapeFalse", "[Graphics][Region]")
+  TEST_CASE("Region: IsValidShapeFalse", "[Geometry][Region]")
   {
     auto isValid = [](List<int> segments, List<Region::Span> spans)
     {
@@ -84,7 +85,7 @@ namespace krys::boo::tests
       isValid({0, 28, 8, 10, 31, 20, 5, 5'607'747, 11, 639, 23, 25, 20, 9}, {{703, 12}, {2'463'700, 2}}));
   }
 
-  TEST_CASE("Region: UniteTests1", "[Graphics][Region]")
+  TEST_CASE("Region: UniteTests1", "[Geometry][Region]")
   {
     Region r1;
     r1.Unite(RectI {50, 40, 50, 40});
@@ -108,7 +109,7 @@ namespace krys::boo::tests
   }
 
   // Describes how the algorithm stores an individual rectangle.
-  TEST_CASE("Region: ShapeFormatIndividual", "[Graphics][Region]")
+  TEST_CASE("Region: ShapeFormatIndividual", "[Geometry][Region]")
   {
     Region r1 {RectI {0, 0, 10, 10}};
     CheckShape(r1, {0, 10}, {{0, 0}, {10, 2}});
@@ -117,7 +118,7 @@ namespace krys::boo::tests
   // Describes how the algorithm stores disjoint rectangles.
   // The rect is marked as ended with the span that has y: as the end corner and segmentIndex the same as the
   // previous span. I.e the "y: 50 si: 2" part.
-  TEST_CASE("Region: ShapeFormatDisjoint", "[Graphics][Region]")
+  TEST_CASE("Region: ShapeFormatDisjoint", "[Geometry][Region]")
   {
     Region r1 {RectI {0, 0, 10, 10}};
     r1.Unite(RectI {50, 50, 60, 60});
@@ -126,7 +127,7 @@ namespace krys::boo::tests
 
   // Describes how the algorithm stores x-joint mergeable rectangles.
   // It merges them and produces single rect.
-  TEST_CASE("Region: ShapeFormatTestJointXMergeable", "[Graphics][Region]")
+  TEST_CASE("Region: ShapeFormatTestJointXMergeable", "[Geometry][Region]")
   {
     Region r1 {RectI {0, 0, 10, 10}};
     r1.Unite(RectI {10, 0, 10, 10});
@@ -135,7 +136,7 @@ namespace krys::boo::tests
 
   // Describes how the algorithm stores mergeable y-joint rectangles.
   // It merges them and produces a single rect.
-  TEST_CASE("Region: ShapeFormatTestJointYMergeable", "[Graphics][Region]")
+  TEST_CASE("Region: ShapeFormatTestJointYMergeable", "[Geometry][Region]")
   {
     Region r1 {RectI {0, 0, 10, 10}};
     r1.Unite(RectI {0, 10, 10, 10});
@@ -144,7 +145,7 @@ namespace krys::boo::tests
 
   // Describes how the algorithm stores x-joint rectangles.
   // It merges the horizontal parts and produces new rect for the leftover vertical part.
-  TEST_CASE("Region: ShapeFormatTestJointX", "[Graphics][Region]")
+  TEST_CASE("Region: ShapeFormatTestJointX", "[Geometry][Region]")
   {
     Region r1 {RectI {0, 0, 10, 10}};
     r1.Unite(RectI {10, 0, 10, 11});
@@ -153,7 +154,7 @@ namespace krys::boo::tests
 
   // Describes how the algorithm stores y-joint rectangles.
   // It does not merge anything.
-  TEST_CASE("Region: ShapeFormatTestJointY", "[Graphics][Region]")
+  TEST_CASE("Region: ShapeFormatTestJointY", "[Geometry][Region]")
   {
     Region r1 {RectI {0, 0, 10, 10}};
     r1.Unite(RectI {0, 10, 11, 10});
@@ -162,7 +163,7 @@ namespace krys::boo::tests
 
   // Describes how the algorithm always produces even number of segments.
   // Other algorithm could share the segments, but not this one.
-  TEST_CASE("Region: ShapeFormatTestEvenSegments", "[Graphics][Region]")
+  TEST_CASE("Region: ShapeFormatTestEvenSegments", "[Geometry][Region]")
   {
     Region r1 {RectI {0, 0, 10, 10}};
     r1.Unite(RectI {10, 10, 10, 10});
@@ -172,7 +173,7 @@ namespace krys::boo::tests
 
   // Describes how the algorithm always produces sorted segment array per Span.
   // The whole segment array is not sorted, only per Span regions of it.
-  TEST_CASE("Region: ShapeFormatTestSortedSpan", "[Graphics][Region]")
+  TEST_CASE("Region: ShapeFormatTestSortedSpan", "[Geometry][Region]")
   {
     Region r1 {RectI {10, 0, 10, 10}};
     r1.Unite(RectI {1, 1, 5, 5});
@@ -181,7 +182,7 @@ namespace krys::boo::tests
   }
 
   // Tests that Region operations never produce segment-span lists that fail isValidShape.
-  TEST_CASE("Region: FuzzOperationsIsValidShape", "[Graphics][Region]")
+  TEST_CASE("Region: FuzzOperationsIsValidShape", "[Geometry][Region]")
   {
     constexpr int iterations = 5'000;
     // A fixed seed, so a failure can be reproduced.
@@ -214,7 +215,7 @@ namespace krys::boo::tests
     CHECK(allValid);
   }
 
-  TEST_CASE("Region: IsValidShape1", "[Graphics][Region]")
+  TEST_CASE("Region: IsValidShape1", "[Geometry][Region]")
   {
     Region r;
     r.Unite(RectI {620'280'709, 86'198'313, 951'242'283, 733'368'814});
@@ -223,7 +224,7 @@ namespace krys::boo::tests
     REQUIRE(IsValid(r));
   }
 
-  TEST_CASE("Region: IsValidShape2", "[Graphics][Region]")
+  TEST_CASE("Region: IsValidShape2", "[Geometry][Region]")
   {
     Region r;
     r.Subtract(RectI {384'928'833, 12'330'228, 959'619'016, 578'249'146});
@@ -234,7 +235,7 @@ namespace krys::boo::tests
     REQUIRE(IsValid(r));
   }
 
-  TEST_CASE("Region: Operations", "[Graphics][Region]")
+  TEST_CASE("Region: Operations", "[Geometry][Region]")
   {
     // An L shape: a 20x10 bar with a 10x10 block below its left half.
     Region l {RectI {0, 0, 20, 10}};
@@ -270,7 +271,7 @@ namespace krys::boo::tests
     CheckRects(moved, {RectI(5, -5, 20, 10), RectI(5, 5, 10, 10)});
   }
 
-  TEST_CASE("Region: Copy and move", "[Graphics][Region]")
+  TEST_CASE("Region: Copy and move", "[Geometry][Region]")
   {
     Region l {RectI {0, 0, 20, 10}};
     l.Unite(RectI {0, 10, 10, 10});

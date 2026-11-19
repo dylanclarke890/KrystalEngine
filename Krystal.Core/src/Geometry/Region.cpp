@@ -23,13 +23,13 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Graphics/Geometry/Region.hpp"
+#include "Krystal.Core/Geometry/Region.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 #include <compare>
 
-namespace krys::boo
+namespace krys
 {
   namespace
   {

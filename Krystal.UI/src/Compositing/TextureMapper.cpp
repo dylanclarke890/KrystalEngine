@@ -2,11 +2,11 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperation.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayer.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Core/Colour/ColourMatrix.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.UI/GraphicsContextRender2D.hpp"
 #include "Krystal.UI/ImageBufferTextures.hpp"
@@ -312,7 +312,7 @@ namespace krys::ui
     {
       // A rectilinear clip is a scissor around the pixels it touches, so a clip at a fractional position
       // doesn't fade the edge it cuts.
-      auto quad = modelViewMatrix.ProjectQuad(boo::FloatQuad(targetRect.Rect()));
+      auto quad = modelViewMatrix.ProjectQuad(QuadF(targetRect.Rect()));
       auto rect = quad.EnclosingBoundingBox();
       if (modelViewMatrix.IsAffine() && quad.IsRectilinear() && !rect.IsEmpty())
       {
@@ -336,7 +336,7 @@ namespace krys::ui
       _renderer->ClipPath(ToPath2D(path), gfx::FillRule::NonZero);
     }
 
-    auto bounds = EnclosingRectI(modelViewMatrix.MapQuad(boo::FloatQuad(targetRect.Rect())).BoundingBox());
+    auto bounds = EnclosingRectI(modelViewMatrix.MapQuad(QuadF(targetRect.Rect())).BoundingBox());
     bounds.Intersect(ClipBounds());
     _clipBounds.push_back(bounds);
   }

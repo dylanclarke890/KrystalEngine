@@ -73,7 +73,6 @@ namespace krys::boo
 {
   class AutoscrollController;
   struct DragState;
-  class FloatQuad;
   class LocalFrame;
   class LocalFrameView;
   class MouseEventWithHitTestResults;
@@ -493,7 +492,7 @@ namespace krys::boo
     void DispatchFakeMouseMoveEventSoon() noexcept;
 
     /// @brief As `DispatchFakeMouseMoveEventSoon`, if the mouse is in @p quad (in absolute coordinates).
-    void DispatchFakeMouseMoveEventSoonInQuad(const FloatQuad &quad) noexcept;
+    void DispatchFakeMouseMoveEventSoonInQuad(const QuadF &quad) noexcept;
 
     void CancelFakeMouseMoveEvent() noexcept;
 

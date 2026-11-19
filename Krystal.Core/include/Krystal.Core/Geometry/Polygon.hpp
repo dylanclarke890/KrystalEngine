@@ -37,11 +37,11 @@
 #include "Krystal.Core/Types/List.hpp"
 #include <functional>
 
-namespace krys::boo
+namespace krys
 {
-  class FloatPolygonEdge;
+  class PolygonEdgeF;
 
-  using EdgeIntervalTree = IntervalTree<float, FloatPolygonEdge *>;
+  using EdgeIntervalTree = IntervalTree<float, PolygonEdgeF *>;
 
   /// @brief A pair of vertices: a line segment.
   class VertexPair
@@ -79,21 +79,21 @@ namespace krys::boo
 
   /// @brief A polygon, with its edges indexed by their vertical range. Collinear and coincident vertices are
   /// merged into single edges.
-  class FloatPolygon
+  class PolygonF
   {
     // The edges point back to the polygon, and the edge tree points to the edges.
-    KRYS_NON_COPY_MOVABLE(FloatPolygon);
+    KRYS_NON_COPY_MOVABLE(PolygonF);
 
   private:
     List<PointF> _vertices;
     RectF _boundingBox;
     bool _empty;
-    List<FloatPolygonEdge> _edges;
+    List<PolygonEdgeF> _edges;
     EdgeIntervalTree _edgeTree; // Each EdgeIntervalTree node stores minY, maxY, and a ("UserData") pointer to
-                                // a FloatPolygonEdge.
+                                // a PolygonEdgeF.
 
   public:
-    explicit FloatPolygon(List<PointF> &&vertices) noexcept;
+    explicit PolygonF(List<PointF> &&vertices) noexcept;
 
     KRYS_NODISCARD const PointF &VertexAt(uint32 index) const noexcept
     {
@@ -105,7 +105,7 @@ namespace krys::boo
       return static_cast<uint32>(_vertices.size());
     }
 
-    KRYS_NODISCARD const FloatPolygonEdge &EdgeAt(uint32 index) const noexcept;
+    KRYS_NODISCARD const PolygonEdgeF &EdgeAt(uint32 index) const noexcept;
 
     KRYS_NODISCARD uint32 NumberOfEdges() const noexcept;
 
@@ -115,7 +115,7 @@ namespace krys::boo
     }
 
     /// @brief The edges whose vertical range overlaps `[minY, maxY]`.
-    KRYS_NODISCARD List<std::reference_wrapper<const FloatPolygonEdge>>
+    KRYS_NODISCARD List<std::reference_wrapper<const PolygonEdgeF>>
       OverlappingEdges(float minY, float maxY) const noexcept;
 
     KRYS_NODISCARD bool IsEmpty() const noexcept
@@ -125,9 +125,9 @@ namespace krys::boo
   };
 
   /// @brief An edge of a polygon.
-  class FloatPolygonEdge : public VertexPair
+  class PolygonEdgeF : public VertexPair
   {
-    friend class FloatPolygon;
+    friend class PolygonF;
 
   private:
     // Edge vertex index1 is less than index2, except the last edge, where index2 is 0. When a polygon edge
@@ -135,7 +135,7 @@ namespace krys::boo
     uint32 _vertexIndex1 {0};
     uint32 _vertexIndex2 {0};
     uint32 _edgeIndex {0};
-    const FloatPolygon *_polygon {nullptr};
+    const PolygonF *_polygon {nullptr};
 
   public:
     KRYS_NODISCARD const PointF &Vertex1() const noexcept override
@@ -150,19 +150,19 @@ namespace krys::boo
       return _polygon->VertexAt(_vertexIndex2);
     }
 
-    KRYS_NODISCARD const FloatPolygonEdge &PreviousEdge() const noexcept
+    KRYS_NODISCARD const PolygonEdgeF &PreviousEdge() const noexcept
     {
       krys_debug_assert(_polygon && _polygon->NumberOfEdges() > 1);
       return _polygon->EdgeAt((_edgeIndex + _polygon->NumberOfEdges() - 1) % _polygon->NumberOfEdges());
     }
 
-    KRYS_NODISCARD const FloatPolygonEdge &NextEdge() const noexcept
+    KRYS_NODISCARD const PolygonEdgeF &NextEdge() const noexcept
     {
       krys_debug_assert(_polygon && _polygon->NumberOfEdges() > 1);
       return _polygon->EdgeAt((_edgeIndex + 1) % _polygon->NumberOfEdges());
     }
 
-    KRYS_NODISCARD const FloatPolygon *Polygon() const noexcept
+    KRYS_NODISCARD const PolygonF *Polygon() const noexcept
     {
       return _polygon;
     }
@@ -183,13 +183,13 @@ namespace krys::boo
     }
   };
 
-  // After FloatPolygonEdge, which they need complete.
-  inline const FloatPolygonEdge &FloatPolygon::EdgeAt(uint32 index) const noexcept
+  // After PolygonEdgeF, which they need complete.
+  inline const PolygonEdgeF &PolygonF::EdgeAt(uint32 index) const noexcept
   {
     return _edges[index];
   }
 
-  inline uint32 FloatPolygon::NumberOfEdges() const noexcept
+  inline uint32 PolygonF::NumberOfEdges() const noexcept
   {
     return static_cast<uint32>(_edges.size());
   }

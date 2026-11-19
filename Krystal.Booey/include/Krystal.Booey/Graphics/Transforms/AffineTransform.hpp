@@ -43,8 +43,6 @@ namespace krys
 
 namespace krys::boo
 {
-  class FloatQuad;
-  class Region;
   class TransformationMatrix;
 
   /// @brief A 2D affine transform: a 2x2 matrix [a c; b d] plus a translation (e, f).
@@ -90,7 +88,7 @@ namespace krys::boo
 
     KRYS_NODISCARD RectF MapRect(const RectF &rect) const noexcept;
 
-    KRYS_NODISCARD FloatQuad MapQuad(const FloatQuad &quad) const noexcept;
+    KRYS_NODISCARD QuadF MapQuad(const QuadF &quad) const noexcept;
 
     KRYS_NODISCARD Region MapRegion(const Region &region) const noexcept;
 

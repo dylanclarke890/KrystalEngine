@@ -37,7 +37,6 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Page/IntersectionObserver/IntersectionObserverEntry.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -50,6 +49,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/VisibleRectContext.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Visitor.hpp"
@@ -613,7 +613,7 @@ namespace krys::boo
     if (isFirstObservation || intersectionState.IsIntersecting)
     {
       intersectionState.AbsoluteTargetRect =
-        targetRenderer->LocalToAbsoluteQuad(FloatQuad(RectF(localTargetBounds))).BoundingBox();
+        targetRenderer->LocalToAbsoluteQuad(QuadF(RectF(localTargetBounds))).BoundingBox();
     }
 
     if (intersectionState.IsIntersecting)
@@ -621,7 +621,7 @@ namespace krys::boo
       // If implicit root, rootLocalIntersectionRect is already in absolute coordinates. There's no frame
       // tree, so the target is in the root's frame, and the rect needs no mapping between frames.
       intersectionState.AbsoluteIntersectionRect =
-        Root() ? rootRenderer->LocalToAbsoluteQuad(FloatQuad(rootLocalIntersectionRect)).BoundingBox()
+        Root() ? rootRenderer->LocalToAbsoluteQuad(QuadF(rootLocalIntersectionRect)).BoundingBox()
                : rootLocalIntersectionRect;
 
       intersectionState.IsIntersecting = intersectionState.AbsoluteIntersectionRect->EdgeInclusiveIntersect(
@@ -663,7 +663,7 @@ namespace krys::boo
       if (Root())
       {
         intersectionState.AbsoluteRootBounds =
-          rootRenderer->LocalToAbsoluteQuad(FloatQuad(intersectionState.RootBounds)).BoundingBox();
+          rootRenderer->LocalToAbsoluteQuad(QuadF(intersectionState.RootBounds)).BoundingBox();
       }
       else
       {
@@ -675,7 +675,7 @@ namespace krys::boo
       if (!intersectionState.AbsoluteTargetRect)
       {
         intersectionState.AbsoluteTargetRect =
-          targetRenderer->LocalToAbsoluteQuad(FloatQuad(RectF(localTargetBounds))).BoundingBox();
+          targetRenderer->LocalToAbsoluteQuad(QuadF(RectF(localTargetBounds))).BoundingBox();
       }
     }
 

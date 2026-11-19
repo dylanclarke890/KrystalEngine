@@ -27,7 +27,6 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"
@@ -58,6 +57,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGTextElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGTextPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <algorithm>
 #include <tuple>
@@ -841,7 +841,7 @@ namespace krys::boo
         AffineTransform fragmentTransform;
         for (auto &fragment : textBox->TextFragments())
         {
-          FloatQuad fragmentQuad(RectF(fragment.X, fragment.Y - baseline, fragment.Width, fragment.Height));
+          QuadF fragmentQuad(RectF(fragment.X, fragment.Y - baseline, fragment.Width, fragment.Height));
           fragment.BuildFragmentTransform(fragmentTransform);
           if (!fragmentTransform.IsIdentity())
           {

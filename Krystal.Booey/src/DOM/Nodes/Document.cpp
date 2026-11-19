@@ -5534,7 +5534,7 @@ namespace krys::boo
     return html::DOMTreeAccessors::GetBodyElement(*this);
   }
 
-  void Document::ConvertAbsoluteToClientQuads(List<FloatQuad> &quads, const RenderStyle &style) const noexcept
+  void Document::ConvertAbsoluteToClientQuads(List<QuadF> &quads, const RenderStyle &style) const noexcept
   {
     auto *frameView = View();
     if (!frameView)

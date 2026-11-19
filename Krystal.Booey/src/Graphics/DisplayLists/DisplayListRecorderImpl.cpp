@@ -286,9 +286,8 @@ namespace krys::boo::display_list
     _items.emplace_back(display_list::DrawLine(point1, point2));
   }
 
-  void RecorderImpl::DrawLinesForText(const PointF &point, float thickness,
-                                      Span<const FloatSegment> lineSegments, bool printing, bool doubleLines,
-                                      boo::StrokeStyle style) noexcept
+  void RecorderImpl::DrawLinesForText(const PointF &point, float thickness, Span<const SegmentF> lineSegments,
+                                      bool printing, bool doubleLines, boo::StrokeStyle style) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(

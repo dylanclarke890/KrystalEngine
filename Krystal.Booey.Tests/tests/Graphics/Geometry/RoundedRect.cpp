@@ -1,8 +1,8 @@
 ﻿#include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 
 namespace krys::boo::tests
 {
@@ -105,8 +105,8 @@ namespace krys::boo::tests
     CHECK_FALSE(roundedRect.Contains(LayoutRect {0, 0, 2, 2}));
 
     // A quad over the clipped top-left corner misses; one through the middle hits.
-    CHECK_FALSE(roundedRect.IntersectsQuad(FloatQuad {RectF {0, 0, 1, 1}}));
-    CHECK(roundedRect.IntersectsQuad(FloatQuad {RectF {40, 20, 10, 10}}));
+    CHECK_FALSE(roundedRect.IntersectsQuad(QuadF {RectF {0, 0, 1, 1}}));
+    CHECK(roundedRect.IntersectsQuad(QuadF {RectF {40, 20, 10, 10}}));
 
     SECTION("radii")
     {

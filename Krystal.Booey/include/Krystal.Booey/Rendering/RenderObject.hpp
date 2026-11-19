@@ -75,7 +75,6 @@ namespace krys::boo
   class AffineTransform;
   enum class Affinity : bool;
   class ControlPart;
-  class FloatQuad;
   class HitTestLocation;
   class HitTestRequest;
   class HitTestResult;
@@ -1690,17 +1689,17 @@ namespace krys::boo
     KRYS_NODISCARD PointF AbsoluteToLocal(const PointF &containerPoint,
                                           EnumSet<MapCoordinatesMode> mode = {}) const noexcept;
 
-    KRYS_NODISCARD FloatQuad AbsoluteToLocalQuad(const FloatQuad &quad,
-                                                 EnumSet<MapCoordinatesMode> mode = {}) const noexcept;
+    KRYS_NODISCARD QuadF AbsoluteToLocalQuad(const QuadF &quad,
+                                             EnumSet<MapCoordinatesMode> mode = {}) const noexcept;
 
     /// @brief Converts a quad in this renderer's coordinates to absolute (render view) coordinates.
-    KRYS_NODISCARD FloatQuad LocalToAbsoluteQuad(
-      const FloatQuad &quad, EnumSet<MapCoordinatesMode> mode = MapCoordinatesMode::UseTransforms,
+    KRYS_NODISCARD QuadF LocalToAbsoluteQuad(
+      const QuadF &quad, EnumSet<MapCoordinatesMode> mode = MapCoordinatesMode::UseTransforms,
       bool *wasFixed = nullptr) const noexcept;
 
     /// @brief Converts a quad in this renderer's coordinates to @p container's (absolute if null).
-    KRYS_NODISCARD FloatQuad
-      LocalToContainerQuad(const FloatQuad &localQuad, const RenderLayerModelObject *container,
+    KRYS_NODISCARD QuadF
+      LocalToContainerQuad(const QuadF &localQuad, const RenderLayerModelObject *container,
                            EnumSet<MapCoordinatesMode> mode = MapCoordinatesMode::UseTransforms,
                            bool *wasFixed = nullptr) const noexcept;
 
@@ -1733,13 +1732,13 @@ namespace krys::boo
     }
 
     /// @brief Appends the renderer's border boxes, or line boxes, in absolute coordinates.
-    virtual void AbsoluteQuads(List<FloatQuad> &, bool * /*wasFixed*/ = nullptr) const noexcept
+    virtual void AbsoluteQuads(List<QuadF> &, bool * /*wasFixed*/ = nullptr) const noexcept
     {
     }
 
     /// @brief The quads, in absolute coordinates, of the text and line breaks @p range covers.
-    KRYS_NODISCARD static List<FloatQuad>
-      AbsoluteTextQuads(const dom::SimpleRange &range, EnumSet<BoundingRectBehavior> behavior = {}) noexcept;
+    KRYS_NODISCARD static List<QuadF> AbsoluteTextQuads(const dom::SimpleRange &range,
+                                                        EnumSet<BoundingRectBehavior> behavior = {}) noexcept;
 
     /// @brief The border boxes of the elements @p range wholly selects (outermost only) and the rects of the
     /// text it covers, in absolute coordinates.

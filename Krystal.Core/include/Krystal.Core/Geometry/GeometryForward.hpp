@@ -8,8 +8,16 @@ namespace krys
   template <Number T>
   class Point;
 
+  class PolygonF;
+
+  class QuadF;
+
   template <Number T>
   class Rect;
+
+  class Region;
+
+  class SegmentF;
 
   template <Number T>
   class Size;

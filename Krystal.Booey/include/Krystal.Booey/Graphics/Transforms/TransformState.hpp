@@ -25,12 +25,12 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
@@ -62,8 +62,8 @@ namespace krys::boo
 
   private:
     PointF _inputPoint;
-    FloatQuad _inputQuad;
-    Maybe<FloatQuad> _inputSecondaryQuad;
+    QuadF _inputQuad;
+    Maybe<QuadF> _inputSecondaryQuad;
 
     // We only allocate the transform if we need to
     UniquePtr<TransformationMatrix> _accumulatedTransform;
@@ -72,7 +72,7 @@ namespace krys::boo
     TransformDirection _direction;
 
   public:
-    TransformState(TransformDirection mappingDirection, const PointF &p, const FloatQuad &quad) noexcept
+    TransformState(TransformDirection mappingDirection, const PointF &p, const QuadF &quad) noexcept
         : _inputPoint(p), _inputQuad(quad), _direction(mappingDirection)
     {
     }
@@ -82,8 +82,8 @@ namespace krys::boo
     {
     }
 
-    TransformState(TransformDirection mappingDirection, const FloatQuad &quad,
-                   Maybe<FloatQuad> secondaryQuad = null) noexcept
+    TransformState(TransformDirection mappingDirection, const QuadF &quad,
+                   Maybe<QuadF> secondaryQuad = null) noexcept
         : _inputQuad(quad), _inputSecondaryQuad(secondaryQuad), _direction(mappingDirection)
     {
     }
@@ -95,9 +95,9 @@ namespace krys::boo
 
     TransformState &operator=(const TransformState &other) noexcept;
 
-    void Reset(const FloatQuad &quad, const Maybe<FloatQuad> &secondaryQuad = null) noexcept;
+    void Reset(const QuadF &quad, const Maybe<QuadF> &secondaryQuad = null) noexcept;
 
-    void SetSecondaryQuadInMappedSpace(const Maybe<FloatQuad> &quad) noexcept;
+    void SetSecondaryQuadInMappedSpace(const Maybe<QuadF> &quad) noexcept;
 
     void SetTransformMatrixTracking(TransformMatrixTracking tracking) noexcept
     {
@@ -135,9 +135,9 @@ namespace krys::boo
     KRYS_NODISCARD PointF MappedPoint() const noexcept;
 
     /// @brief The quad mapped through the current transform.
-    KRYS_NODISCARD FloatQuad MappedQuad(bool *wasClamped = nullptr) const noexcept;
+    KRYS_NODISCARD QuadF MappedQuad(bool *wasClamped = nullptr) const noexcept;
 
-    KRYS_NODISCARD Maybe<FloatQuad> MappedSecondaryQuad(bool *wasClamped = nullptr) const noexcept;
+    KRYS_NODISCARD Maybe<QuadF> MappedSecondaryQuad(bool *wasClamped = nullptr) const noexcept;
 
     KRYS_NODISCARD LayoutSize AccumulatedOffset() const noexcept
     {
@@ -179,6 +179,6 @@ namespace krys::boo
                                                               : TransformDirection::ApplyTransform;
     }
 
-    void MapQuad(FloatQuad &quad, TransformDirection direction, bool *wasClamped = nullptr) const noexcept;
+    void MapQuad(QuadF &quad, TransformDirection direction, bool *wasClamped = nullptr) const noexcept;
   };
 }

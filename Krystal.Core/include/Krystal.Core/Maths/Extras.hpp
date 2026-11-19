@@ -377,6 +377,18 @@ namespace krys
     return ClampTo<int32>(value);
   }
 
+  /// @brief The smallest of four values.
+  KRYS_NODISCARD constexpr float Min4(float a, float b, float c, float d) noexcept
+  {
+    return std::min({a, b, c, d});
+  }
+
+  /// @brief The largest of four values.
+  KRYS_NODISCARD constexpr float Max4(float a, float b, float c, float d) noexcept
+  {
+    return std::max({a, b, c, d});
+  }
+
   /// @brief Whether `x` lies strictly inside the range of `int32`.
   KRYS_NODISCARD constexpr bool IsWithinIntRange(float x) noexcept
   {

@@ -30,7 +30,6 @@
 
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGModelObject.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
@@ -39,6 +38,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGUseElement.hpp"
 #include "Krystal.Booey/SVG/SVGLocatable.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 
 namespace krys::boo
 {
@@ -125,7 +125,7 @@ namespace krys::boo
     LayoutRect box = EnclosingLayoutRect(RepaintRectInLocalCoordinates());
     AdjustRectForOutlineAndShadow(*this, box, Style().UsedZoomForLength());
 
-    FloatQuad containerRelativeQuad = LocalToContainerQuad(RectF(box), repaintContainer);
+    QuadF containerRelativeQuad = LocalToContainerQuad(RectF(box), repaintContainer);
     return LayoutRect(SnapRectToDevicePixels(LayoutRect(containerRelativeQuad.BoundingBox()),
                                              GetDocument().DeviceScaleFactor()));
   }
@@ -138,7 +138,7 @@ namespace krys::boo
     rects.push_back(rect);
   }
 
-  void LegacyRenderSVGModelObject::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  void LegacyRenderSVGModelObject::AbsoluteQuads(List<QuadF> &quads, bool *wasFixed) const noexcept
   {
     quads.push_back(LocalToAbsoluteQuad(StrokeBoundingBox(), MapCoordinatesMode::UseTransforms, wasFixed));
   }

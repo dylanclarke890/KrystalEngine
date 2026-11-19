@@ -25,31 +25,30 @@
 
 #pragma once
 
+#include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 #include <ranges>
 
 namespace krys
 {
   class TextStream;
-}
 
-namespace krys::boo
-{
   /// @brief A span along a line, from `Begin` to `End`.
-  struct FloatSegment
+  struct SegmentF
   {
     float Begin {0.f};
     float End {0.f};
 
-    KRYS_NODISCARD constexpr bool operator==(const FloatSegment &) const noexcept = default;
+    KRYS_NODISCARD constexpr bool operator==(const SegmentF &) const noexcept = default;
 
     KRYS_NODISCARD constexpr float Length() const noexcept
     {
       return End - Begin;
     }
 
-    KRYS_NODISCARD constexpr FloatSegment Dilate(float length) const noexcept
+    KRYS_NODISCARD constexpr SegmentF Dilate(float length) const noexcept
     {
       return {Begin - length, End + length};
     }
@@ -59,16 +58,16 @@ namespace krys::boo
   // dilationAmount.
   // The difference list is further filtered to only results > dilationAmount.
   //
-  // List<FloatSegment> intersections = ...;
-  // List<FloatSegment> solidLine { { 0, totalWidth } };
-  // List<FloatSegment> diff = difference(solidLine, dilate(intersections, dilationAmount));
+  // List<SegmentF> intersections = ...;
+  // List<SegmentF> solidLine { { 0, totalWidth } };
+  // List<SegmentF> diff = difference(solidLine, dilate(intersections, dilationAmount));
   // return filter(diff, [](auto&& s) { return s.length() > dilationAmount });
   // <=>
   // return DifferenceWithDilation({ 0, totalWidth }, intersections);
-  KRYS_NODISCARD inline List<FloatSegment> DifferenceWithDilation(FloatSegment a, List<FloatSegment> &&bs,
-                                                                  float dilationAmount) noexcept
+  KRYS_NODISCARD inline List<SegmentF> DifferenceWithDilation(SegmentF a, List<SegmentF> &&bs,
+                                                              float dilationAmount) noexcept
   {
-    std::ranges::sort(bs, {}, &FloatSegment::Begin);
+    std::ranges::sort(bs, {}, &SegmentF::Begin);
     auto result = bs.begin();
     for (auto b : bs)
     {
@@ -81,7 +80,7 @@ namespace krys::boo
       {
         break;
       }
-      FloatSegment candidate {a.Begin, b.Begin};
+      SegmentF candidate {a.Begin, b.Begin};
       if (candidate.Length() > dilationAmount)
       {
         *result = candidate;
@@ -97,5 +96,5 @@ namespace krys::boo
     return krys::move(bs);
   }
 
-  TextStream &operator<<(TextStream &ts, FloatSegment floatSegment) noexcept;
+  TextStream &operator<<(TextStream &ts, SegmentF floatSegment) noexcept;
 }

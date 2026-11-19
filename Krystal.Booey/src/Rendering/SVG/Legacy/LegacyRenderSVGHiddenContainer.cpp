@@ -47,7 +47,7 @@ namespace krys::boo
     return {};
   }
 
-  void LegacyRenderSVGHiddenContainer::AbsoluteQuads(List<FloatQuad> &, bool *) const noexcept
+  void LegacyRenderSVGHiddenContainer::AbsoluteQuads(List<QuadF> &, bool *) const noexcept
   {
     // This subtree does not take up space or paint
   }

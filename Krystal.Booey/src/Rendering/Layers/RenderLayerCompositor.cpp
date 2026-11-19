@@ -3812,7 +3812,7 @@ namespace krys::boo
        RenderLayer::DontConstrainForMask, RenderLayer::IncludeCompositedDescendants});
     // Map to the render view to ignore page scale.
     RectF absoluteBounds =
-      layer.Renderer().LocalToContainerQuad(FloatQuad(RectF(layerBounds)), &_renderView).BoundingBox();
+      layer.Renderer().LocalToContainerQuad(QuadF(RectF(layerBounds)), &_renderView).BoundingBox();
     return viewBounds.Intersects(LayoutRect(EnclosingRectI(absoluteBounds)));
   }
 

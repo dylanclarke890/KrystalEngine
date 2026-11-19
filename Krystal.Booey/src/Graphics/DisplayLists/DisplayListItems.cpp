@@ -848,9 +848,8 @@ namespace krys::boo::display_list
   {
   }
 
-  DrawLinesForText::DrawLinesForText(const PointF &point, Span<const FloatSegment> lineSegments,
-                                     float thickness, bool printing, bool doubleLines,
-                                     boo::StrokeStyle style) noexcept
+  DrawLinesForText::DrawLinesForText(const PointF &point, Span<const SegmentF> lineSegments, float thickness,
+                                     bool printing, bool doubleLines, boo::StrokeStyle style) noexcept
       : _point(point), _lineSegments(lineSegments.begin(), lineSegments.end()), _thickness(thickness),
         _printing(printing), _doubleLines(doubleLines), _style(style)
   {

@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 
 namespace krys::boo
 {
@@ -37,7 +37,7 @@ namespace krys::boo
     LayoutRect _boundingBox;
 
     PointF _transformedPoint;
-    FloatQuad _transformedRect;
+    QuadF _transformedRect;
 
     bool _isRectBased {false};
     bool _isRectilinear {true};
@@ -47,7 +47,7 @@ namespace krys::boo
 
     explicit HitTestLocation(const LayoutPoint &point) noexcept;
 
-    HitTestLocation(const PointF &point, const FloatQuad &quad) noexcept;
+    HitTestLocation(const PointF &point, const QuadF &quad) noexcept;
 
     explicit HitTestLocation(const LayoutRect &rect) noexcept;
 
@@ -95,7 +95,7 @@ namespace krys::boo
       return _transformedPoint;
     }
 
-    KRYS_NODISCARD const FloatQuad &TransformedRect() const noexcept
+    KRYS_NODISCARD const QuadF &TransformedRect() const noexcept
     {
       return _transformedRect;
     }

@@ -25,11 +25,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -100,8 +100,8 @@ namespace krys::boo
     KRYS_NODISCARD PointF MapToContainer(const PointF &p,
                                          const RenderLayerModelObject *container) const noexcept;
 
-    KRYS_NODISCARD FloatQuad MapToContainer(const RectF &rect,
-                                            const RenderLayerModelObject *container) const noexcept;
+    KRYS_NODISCARD QuadF MapToContainer(const RectF &rect,
+                                        const RenderLayerModelObject *container) const noexcept;
 
     // Called by code walking the renderer or layer trees.
     void PushMappingsToAncestor(const RenderLayer *layer, const RenderLayer *ancestorLayer,

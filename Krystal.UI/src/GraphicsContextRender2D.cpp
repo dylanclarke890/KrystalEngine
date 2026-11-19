@@ -642,7 +642,7 @@ namespace krys::ui
   }
 
   void GraphicsContextRender2D::DrawLinesForText(const PointF &origin, float thickness,
-                                                 Span<const boo::FloatSegment> lineSegments, bool printing,
+                                                 Span<const SegmentF> lineSegments, bool printing,
                                                  bool doubleUnderlines, boo::StrokeStyle strokeStyle) noexcept
   {
     auto [rects, strokeColor] = ComputeRectsAndStrokeColorForLinesForText(

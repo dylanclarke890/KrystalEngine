@@ -96,7 +96,11 @@ target_sources(Krystal.Core.Tests
 	
   # Geometry
 	PRIVATE tests/Geometry/Point.cpp
+	PRIVATE tests/Geometry/Polygon.cpp
+	PRIVATE tests/Geometry/Quad.cpp
 	PRIVATE tests/Geometry/Rect.cpp
+	PRIVATE tests/Geometry/Region.cpp
+	PRIVATE tests/Geometry/Segment.cpp
 	PRIVATE tests/Geometry/Size.cpp
 
   # IO

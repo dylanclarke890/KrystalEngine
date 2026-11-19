@@ -53,7 +53,7 @@ namespace krys::boo
   private:
     void BoundingRects(List<LayoutRect> &, const LayoutPoint &accumulatedOffset) const noexcept override;
 
-    void AbsoluteQuads(List<FloatQuad> &, bool *wasFixed) const noexcept override;
+    void AbsoluteQuads(List<QuadF> &, bool *wasFixed) const noexcept override;
 
     KRYS_NODISCARD LayoutRect ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
                                                   VisibleRectContext) const noexcept final;

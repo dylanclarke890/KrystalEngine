@@ -20,12 +20,12 @@
  */
 
 #include "Krystal.Booey/Rendering/SVG/RenderSVGBlock.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/Style/Values/Borders/Shadow.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
@@ -70,7 +70,7 @@ namespace krys::boo
     krys_debug_assert_msg(false, "SVG blocks are mapped with their transforms (AbsoluteQuads)");
   }
 
-  void RenderSVGBlock::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  void RenderSVGBlock::AbsoluteQuads(List<QuadF> &quads, bool *wasFixed) const noexcept
   {
     quads.push_back(LocalToAbsoluteQuad(RectF {{}, Size()}, MapCoordinatesMode::UseTransforms, wasFixed));
   }

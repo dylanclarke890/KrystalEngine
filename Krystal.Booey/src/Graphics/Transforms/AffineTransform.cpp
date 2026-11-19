@@ -26,11 +26,11 @@
  */
 
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
-#include "Krystal.Booey/Graphics/Geometry/Region.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/Region.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
 #include <cmath>
@@ -369,16 +369,16 @@ namespace krys::boo
     return RectF {minX, minY, maxX - minX, maxY - minY};
   }
 
-  FloatQuad AffineTransform::MapQuad(const FloatQuad &q) const noexcept
+  QuadF AffineTransform::MapQuad(const QuadF &q) const noexcept
   {
     if (IsIdentityOrTranslation())
     {
-      FloatQuad mappedQuad(q);
+      QuadF mappedQuad(q);
       mappedQuad.Move(NarrowPrecisionToFloat(_transform[4]), NarrowPrecisionToFloat(_transform[5]));
       return mappedQuad;
     }
 
-    FloatQuad result;
+    QuadF result;
     result.SetP1(MapPoint(q.P1()));
     result.SetP2(MapPoint(q.P2()));
     result.SetP3(MapPoint(q.P3()));

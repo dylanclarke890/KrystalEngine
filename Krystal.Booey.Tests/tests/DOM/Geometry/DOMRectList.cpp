@@ -35,8 +35,8 @@ namespace krys::boo::dom::tests
     CHECK(DOMRectList::Create()->Length() == 0u);
 
     // A list of quads holds their bounding boxes.
-    auto list = DOMRectList::Create(List<FloatQuad> {
-      FloatQuad(RectF(1, 2, 3, 4)), FloatQuad(PointF(0, 0), PointF(10, 5), PointF(5, 20), PointF(-5, 10))});
+    auto list = DOMRectList::Create(List<QuadF> {
+      QuadF(RectF(1, 2, 3, 4)), QuadF(PointF(0, 0), PointF(10, 5), PointF(5, 20), PointF(-5, 10))});
     REQUIRE(list->Length() == 2u);
     CHECK(list->Item(0)->ToRectF() == RectF(1, 2, 3, 4));
     CHECK(list->Item(1)->ToRectF() == RectF(-5, 0, 15, 20));

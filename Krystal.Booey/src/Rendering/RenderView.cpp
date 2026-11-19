@@ -20,8 +20,6 @@
 
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Geometry/Region.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
@@ -44,6 +42,8 @@
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/FillLayers.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
+#include "Krystal.Core/Geometry/Region.hpp"
 
 namespace krys::boo
 {
@@ -541,7 +541,7 @@ namespace krys::boo
     rects.emplace_back(accumulatedOffset, LayoutSize(Layer()->Size()));
   }
 
-  void RenderView::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  void RenderView::AbsoluteQuads(List<QuadF> &quads, bool *wasFixed) const noexcept
   {
     if (wasFixed)
     {

@@ -21,7 +21,6 @@
  */
 
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Rendering/Line/LegacyInlineFlowBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
@@ -30,6 +29,7 @@
 #include "Krystal.Booey/Rendering/SVG/SVGInlineFlowBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 
 namespace krys::boo
 {
@@ -151,7 +151,7 @@ namespace krys::boo
     return SVGRenderSupport::PushMappingToContainer(*this, ancestorToStopAt, geometryMap);
   }
 
-  void RenderSVGInline::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  void RenderSVGInline::AbsoluteQuads(List<QuadF> &quads, bool *wasFixed) const noexcept
   {
     auto *textAncestor = RenderSVGText::LocateRenderSVGTextAncestor(*this);
     if (!textAncestor)

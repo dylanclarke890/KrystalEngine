@@ -29,12 +29,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 
-namespace krys::boo
+namespace krys
 {
   namespace
   {
@@ -143,7 +142,7 @@ namespace krys::boo
     }
   }
 
-  RectF FloatQuad::BoundingBox() const noexcept
+  RectF QuadF::BoundingBox() const noexcept
   {
     float left = ClampToIntRange(Min4(_p1.X(), _p2.X(), _p3.X(), _p4.X()));
     float top = ClampToIntRange(Min4(_p1.Y(), _p2.Y(), _p3.Y(), _p4.Y()));
@@ -154,7 +153,7 @@ namespace krys::boo
     return RectF(left, top, right - left, bottom - top);
   }
 
-  bool FloatQuad::IsRectilinear() const noexcept
+  bool QuadF::IsRectilinear() const noexcept
   {
     return (AreEssentiallyEqual(_p1.X(), _p2.X()) && AreEssentiallyEqual(_p2.Y(), _p3.Y())
             && AreEssentiallyEqual(_p3.X(), _p4.X()) && AreEssentiallyEqual(_p4.Y(), _p1.Y()))
@@ -162,19 +161,19 @@ namespace krys::boo
                && AreEssentiallyEqual(_p3.Y(), _p4.Y()) && AreEssentiallyEqual(_p4.X(), _p1.X()));
   }
 
-  bool FloatQuad::ContainsPoint(const PointF &p) const noexcept
+  bool QuadF::ContainsPoint(const PointF &p) const noexcept
   {
     return IsPointInTriangle(p, _p1, _p2, _p3) || IsPointInTriangle(p, _p1, _p3, _p4);
   }
 
   // Note that we only handle convex quads here.
-  bool FloatQuad::ContainsQuad(const FloatQuad &other) const noexcept
+  bool QuadF::ContainsQuad(const QuadF &other) const noexcept
   {
     return ContainsPoint(other.P1()) && ContainsPoint(other.P2()) && ContainsPoint(other.P3())
            && ContainsPoint(other.P4());
   }
 
-  bool FloatQuad::IntersectsRect(const RectF &rect) const noexcept
+  bool QuadF::IntersectsRect(const RectF &rect) const noexcept
   {
     // For each side of the quad clockwise we check if the rectangle is to the left of it
     // since only content on the right can onlap with the quad.
@@ -226,7 +225,7 @@ namespace krys::boo
     return true;
   }
 
-  bool FloatQuad::IntersectsCircle(const PointF &center, float radius) const noexcept
+  bool QuadF::IntersectsCircle(const PointF &center, float radius) const noexcept
   {
     return ContainsPoint(center) // The circle may be totally contained by the quad.
            || LineIntersectsCircle(center, radius, _p1, _p2) || LineIntersectsCircle(center, radius, _p2, _p3)
@@ -234,11 +233,11 @@ namespace krys::boo
            || LineIntersectsCircle(center, radius, _p4, _p1);
   }
 
-  bool FloatQuad::IntersectsEllipse(const PointF &center, const SizeF &radii) const noexcept
+  bool QuadF::IntersectsEllipse(const PointF &center, const SizeF &radii) const noexcept
   {
     // Transform the ellipse to an origin-centered circle whose radius is the product of major radius and
     // minor radius. Here we apply the same transformation to the quad.
-    FloatQuad transformedQuad(*this);
+    QuadF transformedQuad(*this);
     transformedQuad.Move(-center.X(), -center.Y());
     transformedQuad.Scale(radii.Height(), radii.Width());
 
@@ -246,14 +245,14 @@ namespace krys::boo
     return transformedQuad.IntersectsCircle(originPoint, radii.Height() * radii.Width());
   }
 
-  bool FloatQuad::IsCounterclockwise() const noexcept
+  bool QuadF::IsCounterclockwise() const noexcept
   {
     // Return if the two first vectors are turning clockwise. If the quad is convex then all following vectors
     // will turn the same way.
     return Determinant(_p2 - _p1, _p3 - _p2) < 0;
   }
 
-  bool FloatQuad::IsEmpty() const noexcept
+  bool QuadF::IsEmpty() const noexcept
   {
     if (AreEssentiallyEqual(_p1, _p3) || AreEssentiallyEqual(_p2, _p4))
     {
@@ -311,7 +310,7 @@ namespace krys::boo
            && !areNormalisedVectorsLinearlyIndependent(b1, b3);
   }
 
-  List<RectF> BoundingBoxes(Span<const FloatQuad> quads)
+  List<RectF> BoundingBoxes(Span<const QuadF> quads)
   {
     List<RectF> boxes;
     boxes.reserve(quads.size());
@@ -322,7 +321,7 @@ namespace krys::boo
     return boxes;
   }
 
-  RectF UnitedBoundingBoxes(Span<const FloatQuad> quads) noexcept
+  RectF UnitedBoundingBoxes(Span<const QuadF> quads) noexcept
   {
     auto size = quads.size();
     if (!size)

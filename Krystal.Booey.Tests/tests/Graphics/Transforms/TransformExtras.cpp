@@ -1,10 +1,10 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/Region.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
+#include "Krystal.Core/Geometry/Region.hpp"
 #include <cmath>
 #include <numbers>
 
@@ -195,10 +195,10 @@ namespace krys::boo::tests
     CHECK(edgeOn.ProjectPoint(PointF(1, 1)) == PointF());
 
     bool clamped = true;
-    auto quad = tilted.ProjectQuad(FloatQuad(RectF(0, 0, 10, 5)), &clamped);
+    auto quad = tilted.ProjectQuad(QuadF(RectF(0, 0, 10, 5)), &clamped);
     CHECK_FALSE(clamped);
     CHECK_THAT(quad.P3().Y(), WithinAbs(10, 1e-4));
-    CHECK(tilted.ClampedBoundsOfProjectedQuad(FloatQuad(RectF(0, 0, 10, 5))) == LayoutRect(0, 0, 10, 10));
+    CHECK(tilted.ClampedBoundsOfProjectedQuad(QuadF(RectF(0, 0, 10, 5))) == LayoutRect(0, 0, 10, 10));
   }
 
   TEST_CASE("TransformationMatrix: decomposition", "[Graphics][TransformationMatrix]")

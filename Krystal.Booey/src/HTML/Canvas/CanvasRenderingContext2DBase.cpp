@@ -44,7 +44,6 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
@@ -70,6 +69,7 @@
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
@@ -1535,8 +1535,8 @@ namespace krys::boo::html
 
   bool CanvasRenderingContext2DBase::RectContainsCanvas(const RectF &rect) const noexcept
   {
-    FloatQuad quad(rect);
-    FloatQuad canvasQuad(
+    QuadF quad(rect);
+    QuadF canvasQuad(
       RectF(0, 0, static_cast<float>(GetCanvasBase().Width()), static_cast<float>(GetCanvasBase().Height())));
     return GetState().Transform.MapQuad(quad).ContainsQuad(canvasQuad);
   }

@@ -233,13 +233,11 @@ namespace krys::boo
     /// @brief The selected part of the text's boxes (with their ellipses), in @p repaintContainer's
     /// coordinates, adding each box's quad to @p quads.
     LayoutRect CollectSelectionGeometriesForLineBoxes(const RenderLayerModelObject *repaintContainer,
-                                                      bool clipToVisibleContent,
-                                                      List<FloatQuad> &quads) noexcept;
+                                                      bool clipToVisibleContent, List<QuadF> &quads) noexcept;
 
   private:
     LayoutRect CollectSelectionGeometriesForLineBoxes(const RenderLayerModelObject *repaintContainer,
-                                                      bool clipToVisibleContent,
-                                                      List<FloatQuad> *quads) noexcept;
+                                                      bool clipToVisibleContent, List<QuadF> *quads) noexcept;
 
   public:
     KRYS_NODISCARD FontCascade::CodePath FontCodePath() const noexcept
@@ -323,13 +321,13 @@ namespace krys::boo
 
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
 
-    void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
+    void AbsoluteQuads(List<QuadF> &quads, bool *wasFixed = nullptr) const noexcept override;
 
     /// @brief The quads, in absolute coordinates, of the text from @p start to @p end, one per text box (or
     /// one per character, with `ComputeIndividualCharacterRects`).
-    KRYS_NODISCARD List<FloatQuad> AbsoluteQuadsForRange(uint32 start, uint32 end,
-                                                         EnumSet<BoundingRectBehavior> behavior = {},
-                                                         bool *wasFixed = nullptr) const noexcept;
+    KRYS_NODISCARD List<QuadF> AbsoluteQuadsForRange(uint32 start, uint32 end,
+                                                     EnumSet<BoundingRectBehavior> behavior = {},
+                                                     bool *wasFixed = nullptr) const noexcept;
 
   protected:
     RenderText(Type type, Node &node, utf8_string text) noexcept;

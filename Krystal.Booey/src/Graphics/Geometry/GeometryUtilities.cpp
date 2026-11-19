@@ -26,7 +26,7 @@
 
 #include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 #include <numbers>
@@ -241,7 +241,7 @@ namespace krys::boo
     }
   }
 
-  RotatedRect RotatedBoundingRectWithMinimumAngleOfRotation(const FloatQuad &quad,
+  RotatedRect RotatedBoundingRectWithMinimumAngleOfRotation(const QuadF &quad,
                                                             Maybe<float> minRotationInRadians) noexcept
   {
     constexpr auto twoPiFloat = 2 * std::numbers::pi_v<float>;

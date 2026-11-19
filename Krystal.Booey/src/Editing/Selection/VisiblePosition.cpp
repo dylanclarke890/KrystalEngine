@@ -33,7 +33,6 @@
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
@@ -41,6 +40,7 @@
 #include "Krystal.Booey/Layout/Integration/Inline/LineSelection.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/Selection/CaretRectComputation.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <algorithm>
 
@@ -880,7 +880,7 @@ namespace krys::boo
 
     auto line = box->GetLineBox();
     return line->FormattingContextRoot()
-      .LocalToAbsoluteQuad(FloatQuad(LineSelection::PhysicalRect(*line)))
+      .LocalToAbsoluteQuad(QuadF(LineSelection::PhysicalRect(*line)))
       .BoundingBox();
   }
 

@@ -28,7 +28,6 @@
 
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Fonts/GlyphBufferMembers.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSegment.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextState.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
@@ -37,6 +36,7 @@
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/Segment.hpp"
 #include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
@@ -658,9 +658,8 @@ namespace krys::boo
 
     // The `origin` defines the line origin point.
     // The `lineSegments` defines the start and end offset of each segment along the line.
-    virtual void DrawLinesForText(const PointF &origin, float thickness,
-                                  Span<const FloatSegment> lineSegments, bool isPrinting, bool doubleLines,
-                                  boo::StrokeStyle) noexcept = 0;
+    virtual void DrawLinesForText(const PointF &origin, float thickness, Span<const SegmentF> lineSegments,
+                                  bool isPrinting, bool doubleLines, boo::StrokeStyle) noexcept = 0;
 
     virtual void DrawDotsForDocumentMarker(const RectF &, DocumentMarkerLineStyle) noexcept = 0;
 
@@ -810,9 +809,9 @@ namespace krys::boo
       Color StrokeColor;
     };
 
-    KRYS_NODISCARD RectsAndStrokeColor ComputeRectsAndStrokeColorForLinesForText(
-      const PointF &origin, float thickness, Span<const FloatSegment>, bool isPrinting, bool doubleLines,
-      boo::StrokeStyle) noexcept;
+    KRYS_NODISCARD RectsAndStrokeColor
+      ComputeRectsAndStrokeColorForLinesForText(const PointF &origin, float thickness, Span<const SegmentF>,
+                                                bool isPrinting, bool doubleLines, boo::StrokeStyle) noexcept;
   };
 }
 

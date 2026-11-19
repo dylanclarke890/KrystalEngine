@@ -87,7 +87,7 @@ namespace krys::boo
     const RenderElement *PushMappingToContainer(const RenderLayerModelObject *ancestorToStopAt,
                                                 RenderGeometryMap &) const noexcept final;
 
-    void AbsoluteQuads(List<FloatQuad> &, bool *wasFixed) const noexcept final;
+    void AbsoluteQuads(List<QuadF> &, bool *wasFixed) const noexcept final;
 
     KRYS_NODISCARD UniquePtr<LegacyInlineFlowBox> CreateInlineFlowBox() noexcept final;
 

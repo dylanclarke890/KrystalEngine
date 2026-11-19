@@ -136,7 +136,7 @@ namespace krys::ui
     void DrawGlyphs(const boo::Font &, Span<const boo::GlyphBufferGlyph>, Span<const boo::GlyphBufferAdvance>,
                     const PointF &, boo::FontSmoothingMode) noexcept override;
 
-    void DrawLinesForText(const PointF &origin, float thickness, Span<const boo::FloatSegment> lineSegments,
+    void DrawLinesForText(const PointF &origin, float thickness, Span<const SegmentF> lineSegments,
                           bool isPrinting, bool doubleUnderlines, boo::StrokeStyle) noexcept override;
 
     void DrawDotsForDocumentMarker(const RectF &, boo::DocumentMarkerLineStyle) noexcept override;

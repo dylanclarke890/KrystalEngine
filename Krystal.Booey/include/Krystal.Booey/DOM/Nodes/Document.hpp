@@ -45,7 +45,6 @@
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
@@ -58,6 +57,7 @@
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Array.hpp"
@@ -1865,7 +1865,7 @@ namespace krys::boo
     KRYS_NODISCARD HTMLElement *BodyOrFrameset() const noexcept;
 
     /// @brief Converts absolute quads (or rects) to the client coordinates of the CSSOM View APIs.
-    void ConvertAbsoluteToClientQuads(List<FloatQuad> &quads, const RenderStyle &style) const noexcept;
+    void ConvertAbsoluteToClientQuads(List<QuadF> &quads, const RenderStyle &style) const noexcept;
 
     void ConvertAbsoluteToClientRects(List<RectF> &rects, const RenderStyle &style) const noexcept;
 

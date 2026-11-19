@@ -29,7 +29,7 @@ namespace krys::boo
   {
   }
 
-  HitTestLocation::HitTestLocation(const PointF &point, const FloatQuad &quad) noexcept
+  HitTestLocation::HitTestLocation(const PointF &point, const QuadF &quad) noexcept
       : _point {FlooredLayoutPoint(point)}, _boundingBox {quad.EnclosingBoundingBox()},
         _transformedPoint {point}, _transformedRect {quad}, _isRectBased {true},
         _isRectilinear {quad.IsRectilinear()}
@@ -39,7 +39,7 @@ namespace krys::boo
   HitTestLocation::HitTestLocation(const LayoutRect &rect) noexcept
       : _point {rect.Center()}, // Rounded to an integer point; it may not be the exact center.
         _boundingBox {rect}, _transformedPoint {rect.Center()},
-        _transformedRect {FloatQuad {RectF(_boundingBox)}}, _isRectBased {true}
+        _transformedRect {QuadF {RectF(_boundingBox)}}, _isRectBased {true}
   {
   }
 

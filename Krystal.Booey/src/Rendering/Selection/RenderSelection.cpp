@@ -232,7 +232,7 @@ namespace krys::boo
       if (auto *repaintContainer = selectionGeometry->RepaintContainer())
       {
         RectF localRect = currentRect;
-        FloatQuad absQuad = repaintContainer->LocalToAbsoluteQuad(localRect);
+        QuadF absQuad = repaintContainer->LocalToAbsoluteQuad(localRect);
         currentRect = LayoutRect(absQuad.EnclosingBoundingBox());
       }
       selectionRect.Unite(currentRect);

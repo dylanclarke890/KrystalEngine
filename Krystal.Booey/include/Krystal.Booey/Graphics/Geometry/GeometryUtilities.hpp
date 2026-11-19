@@ -28,6 +28,7 @@
 #include "Krystal.Booey/Graphics/Geometry/RectEdges.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Span.hpp"
@@ -36,8 +37,6 @@
 
 namespace krys::boo
 {
-  class FloatQuad;
-
   KRYS_NODISCARD float EuclidianDistance(const SizeF &delta) noexcept;
 
   KRYS_NODISCARD float EuclidianDistance(const PointF &p1, const PointF &p2) noexcept;
@@ -135,7 +134,7 @@ namespace krys::boo
   };
 
   KRYS_NODISCARD RotatedRect RotatedBoundingRectWithMinimumAngleOfRotation(
-    const FloatQuad &quad, Maybe<float> minRotationInRadians = {}) noexcept;
+    const QuadF &quad, Maybe<float> minRotationInRadians = {}) noexcept;
 
   KRYS_NODISCARD constexpr float Min3(float a, float b, float c) noexcept
   {
@@ -145,15 +144,5 @@ namespace krys::boo
   KRYS_NODISCARD constexpr float Max3(float a, float b, float c) noexcept
   {
     return std::max({a, b, c});
-  }
-
-  KRYS_NODISCARD constexpr float Min4(float a, float b, float c, float d) noexcept
-  {
-    return std::min({a, b, c, d});
-  }
-
-  KRYS_NODISCARD constexpr float Max4(float a, float b, float c, float d) noexcept
-  {
-    return std::max({a, b, c, d});
   }
 }

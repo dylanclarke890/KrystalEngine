@@ -32,7 +32,7 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include <utility>
 
-namespace krys::boo
+namespace krys
 {
   /// @brief A set of integer pixels, stored as horizontal bands (spans) of x-intervals (segments).
   class Region

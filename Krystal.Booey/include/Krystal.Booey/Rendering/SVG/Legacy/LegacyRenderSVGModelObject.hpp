@@ -62,7 +62,7 @@ namespace krys::boo
 
     void BoundingRects(List<LayoutRect> &, const LayoutPoint &accumulatedOffset) const noexcept final;
 
-    void AbsoluteQuads(List<FloatQuad> &, bool *wasFixed) const noexcept override;
+    void AbsoluteQuads(List<QuadF> &, bool *wasFixed) const noexcept override;
 
     void MapLocalToContainer(const RenderLayerModelObject *ancestorContainer, TransformState &,
                              EnumSet<MapCoordinatesMode>, bool *wasFixed) const noexcept final;

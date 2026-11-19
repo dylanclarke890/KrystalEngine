@@ -985,7 +985,7 @@ namespace krys::boo
     rects.emplace_back(accumulatedOffset, Size());
   }
 
-  void RenderBox::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  void RenderBox::AbsoluteQuads(List<QuadF> &quads, bool *wasFixed) const noexcept
   {
     if (auto *fragmentedFlow = EnclosingFragmentedFlow();
         fragmentedFlow && fragmentedFlow->AbsoluteQuadsForBox(quads, wasFixed, *this))
@@ -997,7 +997,7 @@ namespace krys::boo
     quads.push_back(LocalToAbsoluteQuad(localRect, MapCoordinatesMode::UseTransforms, wasFixed));
   }
 
-  FloatQuad RenderBox::AbsoluteContentQuad() const noexcept
+  QuadF RenderBox::AbsoluteContentQuad() const noexcept
   {
     auto rect = ContentBoxRect();
     return LocalToAbsoluteQuad(RectF(rect));
@@ -4482,7 +4482,7 @@ namespace krys::boo
     if (repaintContainer != this)
     {
       // FIXME: The geometry map.
-      auto containerRelativeQuad = LocalToContainerQuad(FloatQuad(RectF(box)), repaintContainer);
+      auto containerRelativeQuad = LocalToContainerQuad(QuadF(RectF(box)), repaintContainer);
       box = LayoutRect(containerRelativeQuad.BoundingBox());
     }
 

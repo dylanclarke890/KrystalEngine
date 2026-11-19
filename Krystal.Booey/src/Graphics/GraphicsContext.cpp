@@ -507,7 +507,7 @@ namespace krys::boo
   void GraphicsContext::DrawLineForText(const RectF &rect, bool isPrinting, bool doubleUnderlines,
                                         boo::StrokeStyle style) noexcept
   {
-    FloatSegment line[1] {{0, rect.Width()}};
+    SegmentF line[1] {{0, rect.Width()}};
     DrawLinesForText(rect.Location(), rect.Height(), line, isPrinting, doubleUnderlines, style);
   }
 
@@ -662,7 +662,7 @@ namespace krys::boo
   }
 
   auto GraphicsContext::ComputeRectsAndStrokeColorForLinesForText(const PointF &point, float thickness,
-                                                                  Span<const FloatSegment> lineSegments,
+                                                                  Span<const SegmentF> lineSegments,
                                                                   bool isPrinting, bool doubleLines,
                                                                   boo::StrokeStyle strokeStyle) noexcept
     -> RectsAndStrokeColor

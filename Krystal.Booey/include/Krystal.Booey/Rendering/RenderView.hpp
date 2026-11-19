@@ -45,7 +45,6 @@ namespace krys::boo
   class LocalFrameView;
   class RenderCounter;
 
-  class Region;
   class RenderLayerCompositor;
 
   /// @brief Counters whose text needs updating, keyed by address; the weak pointer tells whether the counter
@@ -309,7 +308,7 @@ namespace krys::boo
 
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
 
-    void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
+    void AbsoluteQuads(List<QuadF> &quads, bool *wasFixed = nullptr) const noexcept override;
 
 #pragma region Repaint
 

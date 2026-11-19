@@ -34,7 +34,7 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD SizeF InwardEdgeNormal(const FloatPolygonEdge &edge) noexcept
+    KRYS_NODISCARD SizeF InwardEdgeNormal(const PolygonEdgeF &edge) noexcept
     {
       SizeF edgeDelta = edge.Vertex2() - edge.Vertex1();
       if (!edgeDelta.Width())
@@ -49,7 +49,7 @@ namespace krys::boo
       return SizeF(-edgeDelta.Height() / edgeLength, edgeDelta.Width() / edgeLength);
     }
 
-    KRYS_NODISCARD SizeF OutwardEdgeNormal(const FloatPolygonEdge &edge) noexcept
+    KRYS_NODISCARD SizeF OutwardEdgeNormal(const PolygonEdgeF &edge) noexcept
     {
       return -InwardEdgeNormal(edge);
     }
@@ -153,7 +153,7 @@ namespace krys::boo
     }
 
     FloatShapeInterval excludedInterval;
-    for (const FloatPolygonEdge &edge : _polygon.OverlappingEdges(y1 - ShapeMargin(), y2 + ShapeMargin()))
+    for (const PolygonEdgeF &edge : _polygon.OverlappingEdges(y1 - ShapeMargin(), y2 + ShapeMargin()))
     {
       if (edge.MaxY() == edge.MinY())
       {

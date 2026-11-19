@@ -149,7 +149,7 @@ namespace krys::boo
     {
       return ComputeRectForRepaint(rect, repaintContainer);
     }
-    return LayoutRect(LocalToContainerQuad(FloatQuad(RectF(rect)), repaintContainer).EnclosingBoundingBox());
+    return LayoutRect(LocalToContainerQuad(QuadF(RectF(rect)), repaintContainer).EnclosingBoundingBox());
   }
 
   LayoutRect RenderReplaced::LocalSelectionRect(bool checkWhetherSelected) const noexcept

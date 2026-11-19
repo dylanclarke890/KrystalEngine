@@ -49,7 +49,6 @@
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
@@ -86,6 +85,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/UI/Cursor.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include <algorithm>
 #include <ranges>
 
@@ -1799,7 +1799,7 @@ namespace krys::boo
                                             : fakeMouseMoveShortInterval);
   }
 
-  void EventHandler::DispatchFakeMouseMoveEventSoonInQuad(const FloatQuad &quad) noexcept
+  void EventHandler::DispatchFakeMouseMoveEventSoonInQuad(const QuadF &quad) noexcept
   {
     auto *view = _frame.View();
     if (!view || !_lastKnownMousePosition)
