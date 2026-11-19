@@ -27,8 +27,11 @@
 
 #include "Krystal.Core/Numeric.hpp"
 
-/// @brief Windows virtual key codes: the legacy `keyCode` and `which` of keyboard events on every platform.
-/// Digits and letters are their ASCII codes (`'0'` to `'9'`, `'A'` to `'Z'`).
+/// @brief The legacy key codes, Windows' virtual key codes, which are the `keyCode` and `which` of keyboard
+/// events on every platform: https://w3c.github.io/uievents/#legacy-key-models (the fixed codes:
+/// https://w3c.github.io/uievents/#fixed-virtual-key-codes). Digits and letters are their ASCII codes (`'0'`
+/// to
+/// `'9'`, `'A'` to `'Z'`).
 namespace krys::boo::vk
 {
   constexpr int32 Back = 0x08;

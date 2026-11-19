@@ -16,7 +16,7 @@
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
+#include "Krystal.Booey/Platform/Events/LegacyKeyCodes.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/PasteboardCustomData.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/PasteboardStrategy.hpp"

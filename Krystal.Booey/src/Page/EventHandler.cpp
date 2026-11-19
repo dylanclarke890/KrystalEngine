@@ -1352,7 +1352,7 @@ namespace krys::boo
 
     if (handledByInputMethod)
     {
-      keyDownEvent.SetWindowsVirtualKeyCode(CompositionEventKeyCode);
+      keyDownEvent.SetLegacyKeyCode(CompositionEventKeyCode);
       keydown = KeyboardEvent::Create(keyDownEvent, _frame.Window());
       keydown->SetTarget(element);
       keydown->SetIsDefaultEventHandlerIgnored();

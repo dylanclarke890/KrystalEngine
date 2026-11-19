@@ -6,8 +6,8 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
+#include "Krystal.Booey/Platform/Events/LegacyKeyCodes.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
 #include "Krystal.Core/Utils/ScopeExit.hpp"
 
 namespace krys::boo::tests

@@ -35,7 +35,7 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/DateComponents.hpp"
-#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
+#include "Krystal.Booey/Platform/Events/LegacyKeyCodes.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/PasteboardStrategy.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/SelectionData.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
@@ -1771,21 +1771,21 @@ namespace krys::ui::tests
     CHECK(tab.Code == u8"Tab");
     CHECK(tab.NamedKey == u8"Tab");
     CHECK(tab.KeyIdentifier == u8"U+0009");
-    CHECK(tab.WindowsVirtualKeyCode == boo::vk::Tab);
+    CHECK(tab.LegacyKeyCode == boo::vk::Tab);
     CHECK(input::Describe(pal::Key::Num4).Code == u8"Digit4");
-    CHECK(input::Describe(pal::Key::Num4).WindowsVirtualKeyCode == '4');
+    CHECK(input::Describe(pal::Key::Num4).LegacyKeyCode == '4');
     CHECK(input::Describe(pal::Key::Z).Code == u8"KeyZ");
     CHECK(input::Describe(pal::Key::F12).NamedKey == u8"F12");
-    CHECK(input::Describe(pal::Key::F12).WindowsVirtualKeyCode == boo::vk::F1 + 11);
+    CHECK(input::Describe(pal::Key::F12).LegacyKeyCode == boo::vk::F1 + 11);
     CHECK(input::Describe(pal::Key::Del).NamedKey == u8"Backspace");
-    CHECK(input::Describe(pal::Key::Option).WindowsVirtualKeyCode == boo::vk::LMenu);
+    CHECK(input::Describe(pal::Key::Option).LegacyKeyCode == boo::vk::LMenu);
     CHECK(input::Describe(pal::Key::KeypadEnter).IsKeypad);
     auto contextMenu = input::Describe(pal::Key::ContextMenu);
     CHECK(contextMenu.Code == u8"ContextMenu");
     CHECK(contextMenu.NamedKey == u8"ContextMenu");
-    CHECK(contextMenu.WindowsVirtualKeyCode == boo::vk::Apps);
+    CHECK(contextMenu.LegacyKeyCode == boo::vk::Apps);
     CHECK(input::Describe(pal::Key::Insert).NamedKey == u8"Insert");
-    CHECK(input::Describe(pal::Key::PrintScreen).WindowsVirtualKeyCode == boo::vk::Snapshot);
+    CHECK(input::Describe(pal::Key::PrintScreen).LegacyKeyCode == boo::vk::Snapshot);
     CHECK(input::Describe(pal::Key::Pause).Code == u8"Pause");
     CHECK(input::Describe(pal::Key::ScrollLock).NamedKey == u8"ScrollLock");
     CHECK(input::Describe(pal::Key::NumLock).Code == u8"NumLock");

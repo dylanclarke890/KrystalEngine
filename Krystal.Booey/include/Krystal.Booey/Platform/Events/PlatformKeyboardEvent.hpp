@@ -134,17 +134,17 @@ namespace krys::boo
     }
 
     /// @brief Most compatible Windows virtual key code associated with the event. Zero for Char events.
-    KRYS_NODISCARD int32 WindowsVirtualKeyCode() const noexcept
+    KRYS_NODISCARD int32 LegacyKeyCode() const noexcept
     {
       return _type != Type::Char ? _windowsVirtualKeyCode : 0;
     }
 
-    void SetWindowsVirtualKeyCode(int32 code) noexcept
+    void SetLegacyKeyCode(int32 code) noexcept
     {
       _windowsVirtualKeyCode = code;
     }
 
-    KRYS_NODISCARD int32 WindowsVirtualKeyCodeWithoutKeyPressOverride() const noexcept
+    KRYS_NODISCARD int32 LegacyKeyCodeWithoutKeyPressOverride() const noexcept
     {
       return _windowsVirtualKeyCode;
     }

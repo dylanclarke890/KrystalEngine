@@ -36,7 +36,7 @@ namespace krys::ui::input
     /// identified by their text.
     utf8_stringview KeyIdentifier;
     /// @brief The Windows virtual key code, with the side for modifiers (`LShift`, `RControl`).
-    int32 WindowsVirtualKeyCode {0};
+    int32 LegacyKeyCode {0};
     bool IsKeypad {false};
   };
 

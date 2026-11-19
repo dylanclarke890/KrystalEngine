@@ -15,7 +15,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
+#include "Krystal.Booey/Platform/Events/LegacyKeyCodes.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include <string>
 

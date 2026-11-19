@@ -4,8 +4,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Platform/Events/LegacyKeyCodes.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
 
 namespace krys::boo::tests
 {

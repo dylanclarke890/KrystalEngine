@@ -13,8 +13,8 @@
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooser.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooserClient.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooserParameters.hpp"
+#include "Krystal.Booey/Platform/Events/LegacyKeyCodes.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
 
 namespace krys::boo::tests
 {

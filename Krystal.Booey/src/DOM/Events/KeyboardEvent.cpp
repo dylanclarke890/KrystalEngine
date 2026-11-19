@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
+#include "Krystal.Booey/Platform/Events/LegacyKeyCodes.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 
 namespace krys::boo
@@ -59,7 +59,7 @@ namespace krys::boo
       return event_names::KeyDown;
     }
 
-    KRYS_NODISCARD int32 WindowsVirtualKeyCodeWithoutLocation(int32 keycode) noexcept
+    KRYS_NODISCARD int32 LegacyKeyCodeWithoutLocation(int32 keycode) noexcept
     {
       switch (keycode)
       {
@@ -81,7 +81,7 @@ namespace krys::boo
         return KeyboardEvent::DOM_KEY_LOCATION_NUMPAD;
       }
 
-      switch (key.WindowsVirtualKeyCode())
+      switch (key.LegacyKeyCode())
       {
         case vk::LControl:
         case vk::LShift:
@@ -171,7 +171,7 @@ namespace krys::boo
     }
     if (Type() == event_names::KeyDown || Type() == event_names::KeyUp)
     {
-      return WindowsVirtualKeyCodeWithoutLocation(_underlyingPlatformEvent->WindowsVirtualKeyCode());
+      return LegacyKeyCodeWithoutLocation(_underlyingPlatformEvent->LegacyKeyCode());
     }
 
     return CharCode();
@@ -190,8 +190,7 @@ namespace krys::boo
       return 0;
     }
 
-    return WindowsVirtualKeyCodeWithoutLocation(
-      _underlyingPlatformEvent->WindowsVirtualKeyCodeWithoutKeyPressOverride());
+    return LegacyKeyCodeWithoutLocation(_underlyingPlatformEvent->LegacyKeyCodeWithoutKeyPressOverride());
   }
 
   int32 KeyboardEvent::CharCode() const noexcept
