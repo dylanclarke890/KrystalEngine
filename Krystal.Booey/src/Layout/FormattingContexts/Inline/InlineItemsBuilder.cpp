@@ -39,7 +39,6 @@
 #include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Text/Bidi.hpp"
-#include <unicode/ubidi.h>
 
 namespace krys::boo::layout
 {
@@ -501,39 +500,6 @@ namespace krys::boo::layout
         spacingState.LastCharacterClassFromPreviousRun = text_spacing::CharacterClass::Undefined;
       }
     }
-
-    /// @brief The UTF-16 form of UTF-8 text, for ICU's bidi algorithm, with the byte offset of each UTF-16
-    /// offset (and of the end).
-    struct UTF16Paragraph
-    {
-      List<UChar> Characters;
-      List<size_t> ByteOffsets;
-
-      explicit UTF16Paragraph(utf8_stringview text) noexcept
-      {
-        Characters.reserve(text.size());
-        ByteOffsets.reserve(text.size() + 1);
-        for (size_t position = 0; position < text.size();)
-        {
-          auto decoded = text::DecodeUTF8(Span<const char8>(text.data() + position, text.size() - position));
-          if (decoded.CodePoint <= 0xFFFF)
-          {
-            Characters.push_back(static_cast<UChar>(decoded.CodePoint));
-            ByteOffsets.push_back(position);
-          }
-          else
-          {
-            auto [lead, trail] = text::UTF16SplitSurrogates(decoded.CodePoint);
-            Characters.push_back(lead);
-            Characters.push_back(trail);
-            ByteOffsets.push_back(position);
-            ByteOffsets.push_back(position);
-          }
-          position += decoded.Length;
-        }
-        ByteOffsets.push_back(text.size());
-      }
-    };
   }
 
   InlineItemsBuilder::InlineItemsBuilder(InlineContentCache &inlineContentCache,
@@ -893,21 +859,8 @@ namespace krys::boo::layout
       return;
     }
     krys_debug_assert(inlineItemOffsets.size() == inlineItemList.size());
-    // 1. Setup the bidi boundary loop by calling ubidi_setPara with the paragraph text.
-    // 2. Call ubidi_getLogicalRun to advance to the next bidi boundary until we hit the end of the content.
-    // 3. Set the computed bidi level on the associated inline items. Split them as needed.
-    UBiDi *ubidi = ubidi_open();
-
-    struct CloseUBiDiOnExit
-    {
-      UBiDi *UBiDi;
-
-      ~CloseUBiDiOnExit() noexcept
-      {
-        ubidi_close(UBiDi);
-      }
-    } closeUBiDiOnExit {ubidi};
-
+    // Resolve the paragraph's bidi level runs, then set each run's level on its inline items, splitting them
+    // at run boundaries as needed.
     text::BidiLevel rootBidiLevel = text::DefaultLeftToRightBidiLevel;
     bool useHeuristicBaseDirection = Root().Style().GetUnicodeBidi() == UnicodeBidi::Plaintext;
     if (!useHeuristicBaseDirection)
@@ -916,14 +869,9 @@ namespace krys::boo::layout
         Root().GetWritingMode().IsBidiLTR() ? text::LeftToRightBidiLevel : text::RightToLeftBidiLevel);
     }
 
-    // ICU's bidi algorithm takes UTF-16: the runs it finds are mapped back to byte offsets.
-    auto bidiContent = UTF16Paragraph(paragraphContentBuilder.View());
-    auto bidiContentLength = static_cast<int32>(bidiContent.Characters.size());
-    UErrorCode error = U_ZERO_ERROR;
-    krys_debug_assert(bidiContentLength);
-    ubidi_setPara(ubidi, bidiContent.Characters.data(), bidiContentLength, rootBidiLevel, nullptr, &error);
-
-    if (U_FAILURE(error))
+    krys_debug_assert(!paragraphContentBuilder.View().empty());
+    auto bidiRuns = text::ResolveBidiLevelRuns(paragraphContentBuilder.View(), rootBidiLevel);
+    if (bidiRuns.empty())
     {
       krys_debug_assert(false);
       return;
@@ -931,12 +879,8 @@ namespace krys::boo::layout
 
     size_t inlineItemIndex = 0;
     auto hasSeenOpaqueItem = false;
-    for (int32 currentPosition = 0; currentPosition < bidiContentLength;)
+    for (auto &bidiRun : bidiRuns)
     {
-      text::BidiLevel bidiLevel;
-      int32 endPosition = currentPosition;
-      ubidi_getLogicalRun(ubidi, currentPosition, &endPosition, &bidiLevel);
-
       auto setBidiLevelOnRange = [&](size_t bidiEnd, text::BidiLevel bidiLevelForRange)
       {
         // We should always have inline item(s) associated with a bidi range.
@@ -979,8 +923,7 @@ namespace krys::boo::layout
           }
         }
       };
-      setBidiLevelOnRange(bidiContent.ByteOffsets[static_cast<size_t>(endPosition)], bidiLevel);
-      currentPosition = endPosition;
+      setBidiLevelOnRange(bidiRun.End, bidiRun.Level);
     }
 
     auto setBidiLevelForOpaqueInlineItems = [&]

@@ -39,6 +39,7 @@ catch_discover_tests(Krystal.Text.Tests)
 target_sources(Krystal.Text.Tests
   PRIVATE
     tests/Base64.cpp
+    tests/Bidi.cpp
     tests/EncodingRegistry.cpp
     tests/Encodings/ASCII.cpp
     tests/Encodings/Atari.cpp

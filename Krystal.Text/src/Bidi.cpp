@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Text/Bidi.hpp"
+#include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <unicode/ubidi.h>
 #include <unicode/uchar.h>
 
@@ -41,5 +43,84 @@ namespace krys::text
   char32 MirroredCharacter(char32 character) noexcept
   {
     return static_cast<char32>(u_charMirror(static_cast<UChar32>(character)));
+  }
+
+  namespace
+  {
+    /// @brief The UTF-16 form of UTF-8 text, for ICU's bidi algorithm, with the byte offset of each UTF-16
+    /// offset (and of the end).
+    struct UTF16Paragraph
+    {
+      List<UChar> Characters;
+      List<size_t> ByteOffsets;
+
+      explicit UTF16Paragraph(utf8_stringview text) noexcept
+      {
+        Characters.reserve(text.size());
+        ByteOffsets.reserve(text.size() + 1);
+        for (size_t position = 0; position < text.size();)
+        {
+          auto decoded = DecodeUTF8(Span<const char8>(text.data() + position, text.size() - position));
+          if (decoded.CodePoint <= 0xFFFF)
+          {
+            Characters.push_back(static_cast<UChar>(decoded.CodePoint));
+            ByteOffsets.push_back(position);
+          }
+          else
+          {
+            auto [lead, trail] = UTF16SplitSurrogates(decoded.CodePoint);
+            Characters.push_back(lead);
+            Characters.push_back(trail);
+            ByteOffsets.push_back(position);
+            ByteOffsets.push_back(position);
+          }
+          position += decoded.Length;
+        }
+        ByteOffsets.push_back(text.size());
+      }
+    };
+  }
+
+  List<BidiLevelRun> ResolveBidiLevelRuns(utf8_stringview paragraph, BidiLevel paragraphLevel) noexcept
+  {
+    if (paragraph.empty())
+    {
+      return {};
+    }
+
+    UBiDi *bidi = ubidi_open();
+    if (!bidi)
+    {
+      return {};
+    }
+
+    // ICU's bidi algorithm takes UTF-16: the runs it finds are mapped back to byte offsets.
+    UTF16Paragraph utf16 {paragraph};
+    auto length = static_cast<int32>(utf16.Characters.size());
+    UErrorCode error = U_ZERO_ERROR;
+    ubidi_setPara(bidi, utf16.Characters.data(), length, paragraphLevel, nullptr, &error);
+
+    List<BidiLevelRun> runs;
+    if (U_SUCCESS(error))
+    {
+      for (int32 start = 0; start < length;)
+      {
+        int32 end = start;
+        UBiDiLevel level;
+        ubidi_getLogicalRun(bidi, start, &end, &level);
+        runs.push_back({.Start = utf16.ByteOffsets[static_cast<size_t>(start)],
+                        .End = utf16.ByteOffsets[static_cast<size_t>(end)],
+                        .Level = level});
+        start = end;
+      }
+    }
+    ubidi_close(bidi);
+    return runs;
+  }
+
+  void ReorderBidiRunsVisually(Span<const BidiLevel> levels, Span<int32> visualToLogical) noexcept
+  {
+    krys_debug_assert(levels.size() == visualToLogical.size());
+    ubidi_reorderVisual(levels.data(), static_cast<int32>(levels.size()), visualToLogical.data());
   }
 }

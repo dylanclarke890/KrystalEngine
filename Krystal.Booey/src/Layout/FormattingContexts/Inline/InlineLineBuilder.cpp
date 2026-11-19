@@ -40,7 +40,6 @@
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Text/Bidi.hpp"
 #include <ranges>
-#include <unicode/ubidi.h>
 
 namespace krys::boo::layout
 {
@@ -230,7 +229,7 @@ namespace krys::boo::layout
         }
 
         // bidiLevels are required to be less than the MAX + 1, otherwise
-        // ubidi_reorderVisual will silently fail.
+        // ReorderBidiRunsVisually will silently fail.
         if (lineRuns[i].BidiLevel() > text::MaxExplicitBidiLevel + 1)
         {
           krys_debug_assert(lineRuns[i].BidiLevel() == text::DefaultLeftToRightBidiLevel);
@@ -262,7 +261,7 @@ namespace krys::boo::layout
       forceBiDiOnOpaqueLine();
 
       visualOrderList.resize(runLevels.size());
-      ubidi_reorderVisual(runLevels.data(), static_cast<int32>(runLevels.size()), visualOrderList.data());
+      text::ReorderBidiRunsVisually(runLevels, visualOrderList);
       if (numberOfOpaqueRuns)
       {
         krys_debug_assert(visualOrderList.size() == runIndexOffsetMap.size());

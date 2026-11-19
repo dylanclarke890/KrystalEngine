@@ -2,6 +2,9 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::text
 {
@@ -53,4 +56,26 @@ namespace krys::text
   /// @brief @p character's mirrored counterpart (Bidi_Mirroring_Glyph), such as `)` for `(`, or itself if it
   /// has none.
   KRYS_NODISCARD char32 MirroredCharacter(char32 character) noexcept;
+
+  /// @brief A run of a paragraph whose characters resolved to one embedding level, as byte offsets.
+  struct BidiLevelRun
+  {
+    size_t Start;
+    size_t End;
+    BidiLevel Level;
+  };
+
+  /// @brief Resolves the embedding levels of @p paragraph with the Unicode Bidirectional Algorithm (UAX #9).
+  /// @param paragraphLevel The paragraph's level, or `DefaultLeftToRightBidiLevel` to take it from the first
+  /// strong character.
+  /// @return The runs of characters at one level, in logical order and covering the whole paragraph; empty if
+  /// the paragraph is empty or the levels couldn't be resolved.
+  KRYS_NODISCARD List<BidiLevelRun> ResolveBidiLevelRuns(utf8_stringview paragraph,
+                                                         BidiLevel paragraphLevel) noexcept;
+
+  /// @brief Reorders runs from logical to visual order by their levels (UAX #9 rule L2).
+  /// @param levels Each run's level, in logical order; none above `MaxExplicitBidiLevel + 1`.
+  /// @param visualToLogical Receives the logical index of the run at each visual position; as long as
+  /// @p levels.
+  void ReorderBidiRunsVisually(Span<const BidiLevel> levels, Span<int32> visualToLogical) noexcept;
 }
