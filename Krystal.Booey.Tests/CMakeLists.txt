@@ -490,8 +490,6 @@ target_sources(Krystal.Booey.Tests
 		tests/Layout/FormattingContexts/Inline/Invalidation/InlineInvalidation.cpp
 		tests/Platform/DateComponents.cpp
 		tests/Platform/ImageDecoders/ScalableImageDecoder.cpp
-		tests/Platform/Network/DataUrlDecoder.cpp
-		tests/Platform/Network/ResourceResponse.cpp
 		tests/Platform/Scrolling/ScrollAlignment.cpp
 		tests/Rendering/Grid/RenderGrid.cpp
 		tests/Rendering/RenderFlexibleBox.cpp

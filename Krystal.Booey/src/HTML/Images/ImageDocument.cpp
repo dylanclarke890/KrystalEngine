@@ -36,11 +36,11 @@
 #include "Krystal.Booey/Loader/ImageLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceResponse.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
+#include "Krystal.Net/ResourceResponse.hpp"
 #include "Krystal.Net/UrlParser.hpp"
 #include <algorithm>
 
@@ -165,7 +165,7 @@ namespace krys::boo
     imageLoader.SetLoadManually(false);
     if (auto *cachedImage = imageElement->GetCachedImage())
     {
-      cachedImage->SetResponse(ResourceResponse(GetUrl(), utf8_string(ContentType()), -1));
+      cachedImage->SetResponse(net::ResourceResponse(GetUrl(), utf8_string(ContentType()), -1));
     }
 
     if (_shouldShrinkImage)

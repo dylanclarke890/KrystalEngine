@@ -29,8 +29,8 @@
 #include "Krystal.Booey/Loader/FetchOptions.hpp"
 #include "Krystal.Booey/Loader/FrameLoaderTypes.hpp"
 #include "Krystal.Booey/Loader/SubstituteData.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceRequest.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Net/ResourceRequest.hpp"
 
 namespace krys::boo
 {
@@ -84,7 +84,7 @@ namespace krys::boo
   {
   private:
     Ref<Document> _requester;
-    ResourceRequest _resourceRequest;
+    net::ResourceRequest _resourceRequest;
     DOMStringAtom _frameName;
     ReferrerPolicy _referrerPolicy {ReferrerPolicy::EmptyString};
     Maybe<SubstituteData> _substituteData;
@@ -93,8 +93,8 @@ namespace krys::boo
     /// @param requester The document asking for the load.
     /// @param frameName The browsing context to load into (`_self`, `_blank` and the others, or a name).
     /// @param downloadAttribute The `download` attribute of the link followed; null if it has none.
-    FrameLoadRequest(Ref<Document> &&requester, ResourceRequest &&resourceRequest, DOMStringAtom frameName,
-                     DOMStringAtom downloadAttribute = null) noexcept;
+    FrameLoadRequest(Ref<Document> &&requester, net::ResourceRequest &&resourceRequest,
+                     DOMStringAtom frameName, DOMStringAtom downloadAttribute = null) noexcept;
 
     ~FrameLoadRequest() noexcept;
 
@@ -116,12 +116,12 @@ namespace krys::boo
       return *_requester;
     }
 
-    KRYS_NODISCARD ResourceRequest &GetResourceRequest() noexcept
+    KRYS_NODISCARD net::ResourceRequest &GetResourceRequest() noexcept
     {
       return _resourceRequest;
     }
 
-    KRYS_NODISCARD const ResourceRequest &GetResourceRequest() const noexcept
+    KRYS_NODISCARD const net::ResourceRequest &GetResourceRequest() const noexcept
     {
       return _resourceRequest;
     }

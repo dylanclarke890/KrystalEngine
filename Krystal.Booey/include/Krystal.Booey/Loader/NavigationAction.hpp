@@ -68,7 +68,7 @@ namespace krys::boo
     };
 
   private:
-    ResourceRequest _originalRequest;
+    net::ResourceRequest _originalRequest;
     Maybe<UIEventWithKeyStateData> _keyStateEventData;
     Maybe<MouseEventData> _mouseEventData;
     NavigationType _type {NavigationType::Other};
@@ -76,7 +76,7 @@ namespace krys::boo
   public:
     NavigationAction() noexcept;
 
-    NavigationAction(ResourceRequest originalRequest, bool isFormSubmission, Event *event = nullptr,
+    NavigationAction(net::ResourceRequest originalRequest, bool isFormSubmission, Event *event = nullptr,
                      DOMStringAtom downloadAttribute = null, Element *sourceElement = nullptr) noexcept;
 
     ~NavigationAction() noexcept;
@@ -112,7 +112,7 @@ namespace krys::boo
       return _originalRequest.Url();
     }
 
-    KRYS_NODISCARD const ResourceRequest &OriginalRequest() const noexcept
+    KRYS_NODISCARD const net::ResourceRequest &OriginalRequest() const noexcept
     {
       return _originalRequest;
     }

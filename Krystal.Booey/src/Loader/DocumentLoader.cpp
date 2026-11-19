@@ -39,21 +39,22 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/Platform/Network/DataUrlDecoder.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
+#include "Krystal.Net/DataUrlDecoder.hpp"
 
 namespace krys::boo
 {
-  DocumentLoader::DocumentLoader(ResourceRequest &&request, Maybe<SubstituteData> &&substituteData) noexcept
+  DocumentLoader::DocumentLoader(net::ResourceRequest &&request,
+                                 Maybe<SubstituteData> &&substituteData) noexcept
       : _request(krys::move(request)), _substituteData(krys::move(substituteData))
   {
   }
 
   DocumentLoader::~DocumentLoader() noexcept = default;
 
-  Ref<DocumentLoader> DocumentLoader::Create(ResourceRequest &&request,
+  Ref<DocumentLoader> DocumentLoader::Create(net::ResourceRequest &&request,
                                              Maybe<SubstituteData> &&substituteData) noexcept
   {
     return AdoptRef(*new DocumentLoader(krys::move(request), krys::move(substituteData)));
@@ -200,7 +201,7 @@ namespace krys::boo
                                              }
                                              if (!result)
                                              {
-                                               loader->MainReceivedError(ResourceError(result.error()));
+                                               loader->MainReceivedError(net::ResourceError(result.error()));
                                                return;
                                              }
                                              loader->ContinueAfterMainResourceLoad(
@@ -214,8 +215,8 @@ namespace krys::boo
       auto &content = _substituteData->Content();
       auto data = SharedBuffer::Create(
         Span<const uint8>(reinterpret_cast<const uint8 *>(content.data()), content.size()));
-      finish(LoadedResource {.Response = ResourceResponse(DocumentUrl(), _substituteData->MimeType(),
-                                                          static_cast<int64>(content.size()), u8"UTF-8"),
+      finish(LoadedResource {.Response = net::ResourceResponse(DocumentUrl(), _substituteData->MimeType(),
+                                                               static_cast<int64>(content.size()), u8"UTF-8"),
                              .Data = krys::move(data)});
       return;
     }
@@ -225,7 +226,7 @@ namespace krys::boo
     // about:blank, and the other about: URLs, are empty documents.
     if (url.ProtocolIsAbout())
     {
-      finish(LoadedResource {.Response = ResourceResponse(url, u8"text/html", 0, u8"UTF-8"),
+      finish(LoadedResource {.Response = net::ResourceResponse(url, u8"text/html", 0, u8"UTF-8"),
                              .Data = SharedBuffer::Create(Span<const uint8>())});
       return;
     }
@@ -233,25 +234,25 @@ namespace krys::boo
     // Data URLs are decoded here, rather than by the host.
     if (url.ProtocolIsData())
     {
-      auto decoded = data_url_decoder::Decode(url);
+      auto decoded = net::data_url_decoder::Decode(url);
       if (!decoded)
       {
-        finish(Unexpected<ResourceError>(
-          ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"Invalid data URL")));
+        finish(Unexpected<net::ResourceError>(
+          net::ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"Invalid data URL")));
         return;
       }
       auto size = static_cast<int64>(decoded->Data.size());
-      finish(LoadedResource {
-        .Response = ResourceResponse(url, krys::move(decoded->MimeType), size, krys::move(decoded->Charset)),
-        .Data = SharedBuffer::Create(krys::move(decoded->Data))});
+      finish(LoadedResource {.Response = net::ResourceResponse(url, krys::move(decoded->MimeType), size,
+                                                               krys::move(decoded->Charset)),
+                             .Data = SharedBuffer::Create(krys::move(decoded->Data))});
       return;
     }
 
     auto *loaderStrategy = PlatformStrategies::Singleton().GetLoaderStrategy();
     if (!loaderStrategy)
     {
-      finish(Unexpected<ResourceError>(
-        ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"No loader strategy")));
+      finish(Unexpected<net::ResourceError>(
+        net::ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"No loader strategy")));
       return;
     }
 
@@ -271,15 +272,15 @@ namespace krys::boo
     _isLoadingMainResource = false;
     if (RefPtr<LocalFrame> frame = ShareRefPtr(_frame.get()))
     {
-      ResourceError cancelled(utf8_string(ErrorDomainBooeyInternal), 0, _request.Url(), u8"Cancelled",
-                              ResourceError::Type::Cancellation);
+      net::ResourceError cancelled(utf8_string(ErrorDomainBooeyInternal), 0, _request.Url(), u8"Cancelled",
+                                   net::ResourceError::Type::Cancellation);
       _mainDocumentError = cancelled;
       Ref<DocumentLoader> protectedThis = ShareRef(*this);
       frame->Loader().ReceivedMainResourceError(*this, cancelled);
     }
   }
 
-  void DocumentLoader::MainReceivedError(ResourceError &&error) noexcept
+  void DocumentLoader::MainReceivedError(net::ResourceError &&error) noexcept
   {
     _isLoadingMainResource = false;
     _mainDocumentError = krys::move(error);
@@ -290,7 +291,7 @@ namespace krys::boo
     }
   }
 
-  void DocumentLoader::ContinueAfterMainResourceLoad(ResourceResponse &&response,
+  void DocumentLoader::ContinueAfterMainResourceLoad(net::ResourceResponse &&response,
                                                      Span<const uint8> data) noexcept
   {
     _response = krys::move(response);
@@ -352,7 +353,7 @@ namespace krys::boo
   void DocumentLoader::CommitInitialEmptyDocument() noexcept
   {
     _committed = true;
-    _response = ResourceResponse(net::Url(u8"about:blank"), u8"text/html", 0, u8"UTF-8");
+    _response = net::ResourceResponse(net::Url(u8"about:blank"), u8"text/html", 0, u8"UTF-8");
     _writer.SetMimeType(u8"text/html");
     if (!_writer.Begin(net::Url(u8"about:blank")))
     {

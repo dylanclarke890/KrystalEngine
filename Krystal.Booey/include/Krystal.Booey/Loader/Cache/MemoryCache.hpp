@@ -74,7 +74,7 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static MemoryCache &Singleton() noexcept;
 
-    KRYS_NODISCARD CachedResource *ResourceForRequest(const ResourceRequest &) noexcept;
+    KRYS_NODISCARD CachedResource *ResourceForRequest(const net::ResourceRequest &) noexcept;
 
     bool Add(CachedResource &) noexcept;
 

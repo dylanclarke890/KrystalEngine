@@ -4,15 +4,15 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Loader/LoaderStrategy.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceError.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceRequest.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceResponse.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Net/ResourceError.hpp"
+#include "Krystal.Net/ResourceRequest.hpp"
+#include "Krystal.Net/ResourceResponse.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iterator>
@@ -37,7 +37,7 @@ namespace krys::boo::tests
     bool Defer {false};
     List<Pair<net::Url, Func<void(LoadResult &&)>>> Deferred;
 
-    void LoadResource(LocalFrame &, const ResourceRequest &request, const ResourceLoaderOptions &,
+    void LoadResource(LocalFrame &, const net::ResourceRequest &request, const ResourceLoaderOptions &,
                       Func<void(LoadResult &&)> &&completionHandler) noexcept override
     {
       Requests.push_back(request.Url().String());
@@ -87,13 +87,14 @@ namespace krys::boo::tests
       auto found = Resources.find(key);
       if (found == Resources.end())
       {
-        completionHandler(Unexpected<ResourceError>(ResourceError(u8"Test", 404, url, u8"Not found")));
+        completionHandler(
+          Unexpected<net::ResourceError>(net::ResourceError(u8"Test", 404, url, u8"Not found")));
         return;
       }
       auto mimeType = MimeTypes.find(key);
-      ResourceResponse response(url,
-                                mimeType != MimeTypes.end() ? mimeType->second : utf8_string(u8"image/png"),
-                                static_cast<int64>(found->second.size()));
+      net::ResourceResponse response(
+        url, mimeType != MimeTypes.end() ? mimeType->second : utf8_string(u8"image/png"),
+        static_cast<int64>(found->second.size()));
       if (auto headers = Headers.find(key); headers != Headers.end())
       {
         for (const auto &[name, value] : headers->second)

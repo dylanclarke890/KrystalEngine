@@ -87,7 +87,7 @@ namespace krys::boo::css
       ResourceLoaderOptions loadOptions = options;
       ApplyModifiersToLoaderOptions(_location.Modifiers, loadOptions);
 
-      CachedResourceRequest request(ResourceRequest(_location.Resolved), loadOptions);
+      CachedResourceRequest request(net::ResourceRequest(_location.Resolved), loadOptions);
       if (_initiatorType.View().empty())
       {
         request.SetInitiatorType(CachedResourceRequestInitiatorTypes::CSS);

@@ -245,7 +245,7 @@ namespace krys::boo
 
     void Error(CachedResource::Status) noexcept override;
 
-    void ResponseReceived(ResourceResponse &&) noexcept override;
+    void ResponseReceived(net::ResourceResponse &&) noexcept override;
 
     void EncodedDataStatusChanged(const Image &, EncodedDataStatus) noexcept;
 

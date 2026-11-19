@@ -10,9 +10,9 @@
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceRequest.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Net/ResourceRequest.hpp"
 #include <string>
 
 namespace krys::boo::tests
@@ -44,13 +44,13 @@ namespace krys::boo::tests
     /// @brief Called with each navigation as it's recorded.
     Func<void(const ReceivedNavigation &)> OnRecord;
 
-    void DispatchNavigationRequested(const NavigationAction &action, const ResourceRequest &request,
+    void DispatchNavigationRequested(const NavigationAction &action, const net::ResourceRequest &request,
                                      const FormSubmission *formSubmission) noexcept final
     {
       Record(action, request, formSubmission, false, {});
     }
 
-    void DispatchNewWindowRequested(const NavigationAction &action, const ResourceRequest &request,
+    void DispatchNewWindowRequested(const NavigationAction &action, const net::ResourceRequest &request,
                                     const FormSubmission *formSubmission,
                                     DOMStringView frameName) noexcept final
     {
@@ -63,7 +63,7 @@ namespace krys::boo::tests
     }
 
   private:
-    void Record(const NavigationAction &action, const ResourceRequest &request,
+    void Record(const NavigationAction &action, const net::ResourceRequest &request,
                 const FormSubmission *formSubmission, bool isNewWindow, DOMStringView frameName) noexcept
     {
       auto narrow = [](utf8_stringview text)

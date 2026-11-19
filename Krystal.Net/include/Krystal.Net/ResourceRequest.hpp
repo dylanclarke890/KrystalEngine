@@ -1,6 +1,6 @@
 ﻿/*
- * Copyright (C) 2006-2025 Apple Inc. All rights reserved.
- * Copyright (C) 2009 Google Inc. All rights reserved.
+ * Copyright (C) 2003-2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2006 Samuel Weinig <sam.weinig@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,14 +24,56 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Platform/Network/ResourceResponse.hpp"
-#include "Krystal.Net/Http/HttpParsers.hpp"
+#pragma once
 
-namespace krys::boo
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Net/Url.hpp"
+
+namespace krys::net
 {
-  Maybe<std::chrono::sys_seconds> ResourceResponse::LastModified() const noexcept
+  /// @brief What's asked of the loader: the URL to load, and the HTTP method.
+  class ResourceRequest
   {
-    auto value = _httpHeaderFields.Get(u8"Last-Modified");
-    return value ? net::http::ParseHttpDate(*value) : null;
-  }
+  private:
+    net::Url _url;
+    utf8_string _httpMethod {u8"GET"};
+
+  public:
+    ResourceRequest() noexcept = default;
+
+    explicit ResourceRequest(net::Url url) noexcept : _url(krys::move(url))
+    {
+    }
+
+    KRYS_NODISCARD const net::Url &Url() const noexcept
+    {
+      return _url;
+    }
+
+    void SetUrl(net::Url url) noexcept
+    {
+      _url = krys::move(url);
+    }
+
+    void RemoveFragmentIdentifier() noexcept
+    {
+      _url.RemoveFragmentIdentifier();
+    }
+
+    KRYS_NODISCARD const utf8_string &HttpMethod() const noexcept
+    {
+      return _httpMethod;
+    }
+
+    void SetHttpMethod(utf8_string method) noexcept
+    {
+      _httpMethod = krys::move(method);
+    }
+
+    KRYS_NODISCARD bool IsNull() const noexcept
+    {
+      return _url.IsNull();
+    }
+  };
 }

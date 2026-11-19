@@ -421,7 +421,7 @@ namespace krys::boo
         UnblockRendering();
       }
 
-      CachedResourceRequest request(ResourceRequest(_url),
+      CachedResourceRequest request(net::ResourceRequest(_url),
                                     CachedResourceLoader::DefaultCachedResourceOptions());
       request.SetCharset(krys::move(charset));
       request.SetInitiatorType(LocalName().View());

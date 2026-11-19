@@ -2619,11 +2619,6 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoderFrame.hpp
   include/Krystal.Booey/Platform/ImageDecoders/WEBPImageDecoder.hpp
   include/Krystal.Booey/Platform/LocalizedStrings.hpp
-  include/Krystal.Booey/Platform/Network/BlobData.hpp
-  include/Krystal.Booey/Platform/Network/DataUrlDecoder.hpp
-  include/Krystal.Booey/Platform/Network/ResourceError.hpp
-  include/Krystal.Booey/Platform/Network/ResourceRequest.hpp
-  include/Krystal.Booey/Platform/Network/ResourceResponse.hpp
   include/Krystal.Booey/Platform/Pasteboard/DragData.hpp
   include/Krystal.Booey/Platform/Pasteboard/DragImage.hpp
   include/Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp
@@ -2662,9 +2657,6 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/ImageDecoders/ScalableImageDecoderFrame.cpp
   src/Platform/ImageDecoders/WEBPImageDecoder.cpp
   src/Platform/LocalizedStrings.cpp
-  src/Platform/Network/BlobData.cpp
-  src/Platform/Network/DataUrlDecoder.cpp
-  src/Platform/Network/ResourceResponse.cpp
   src/Platform/Pasteboard/DragData.cpp
   src/Platform/Pasteboard/DragImage.cpp
   src/Platform/Pasteboard/Pasteboard.cpp

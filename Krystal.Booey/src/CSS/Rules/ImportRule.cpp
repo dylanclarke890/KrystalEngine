@@ -160,7 +160,7 @@ namespace krys::boo::css
     }
 
     auto options = CachedResourceLoader::DefaultCachedResourceOptions();
-    CachedResourceRequest request(ResourceRequest(krys::move(absUrl)), options);
+    CachedResourceRequest request(net::ResourceRequest(krys::move(absUrl)), options);
     request.SetCharset(utf8_string(_parentStyleSheet->Charset()));
     request.SetInitiatorType(CachedResourceRequestInitiatorTypes::CSS);
     if (_cachedSheet)

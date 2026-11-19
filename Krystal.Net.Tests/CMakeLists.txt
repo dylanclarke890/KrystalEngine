@@ -35,8 +35,10 @@ catch_discover_tests(Krystal.Net.Tests)
 target_sources(Krystal.Net.Tests
   PRIVATE
     tests/Http/HttpHeaderMap.cpp
+    tests/DataUrlDecoder.cpp
     tests/Http/HttpParsers.cpp
     tests/MimeTypeRegistry.cpp
+    tests/ResourceResponse.cpp
     tests/Url.cpp
     tests/WPT.cpp
 )

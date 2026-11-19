@@ -94,7 +94,7 @@ namespace krys::boo
     return true;
   }
 
-  CachedResource *MemoryCache::ResourceForRequest(const ResourceRequest &request) noexcept
+  CachedResource *MemoryCache::ResourceForRequest(const net::ResourceRequest &request) noexcept
   {
     net::Url url = RemoveFragmentIdentifierIfNeeded(request.Url());
     auto found = _resources.find(url.String());

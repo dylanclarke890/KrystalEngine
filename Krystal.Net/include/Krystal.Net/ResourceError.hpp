@@ -28,9 +28,10 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Net/Url.hpp"
 
-namespace krys::boo
+namespace krys::net
 {
   /// @brief Why a load failed.
   class ResourceError
@@ -112,7 +113,4 @@ namespace krys::boo
       return _type;
     }
   };
-
-  /// @brief The domain of errors Booey raises itself, rather than the host's loader.
-  constexpr inline utf8_stringview ErrorDomainBooeyInternal = u8"BooeyInternal";
 }

@@ -39,8 +39,9 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
-namespace krys::boo
+namespace krys::net
 {
   /// @brief A range of a blob's bytes: in memory, or in a file.
   class BlobDataItem

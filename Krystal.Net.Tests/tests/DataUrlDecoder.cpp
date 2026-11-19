@@ -1,8 +1,7 @@
-﻿#include "Krystal.Booey/Platform/Network/DataUrlDecoder.hpp"
+﻿#include "Krystal.Net/DataUrlDecoder.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 
-namespace krys::boo::tests
+namespace krys::net::tests
 {
   namespace
   {
@@ -17,7 +16,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("DataURLDecoder: decodes percent-encoded and base64 data", "[Platform][Network][DataURLDecoder]")
+  TEST_CASE("DataURLDecoder: decodes percent-encoded and base64 data", "[DataUrlDecoder]")
   {
     SECTION("Text")
     {
@@ -44,10 +43,11 @@ namespace krys::boo::tests
       REQUIRE(result);
       CHECK(AsText(result->Data) == u8"Hello");
 
-      auto image = Decode(u8"data:image/png;base64," + utf8_string(images::PNGBase64));
+      // Binary data: PNG's signature.
+      auto image = Decode(u8"data:image/png;base64,iVBORw0KGgo=");
       REQUIRE(image);
       CHECK(image->MimeType == u8"image/png");
-      CHECK(image->Data == List<uint8>(images::PNG.begin(), images::PNG.end()));
+      CHECK(image->Data == List<uint8> {0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'});
     }
 
     SECTION("The fragment isn't data")
@@ -58,7 +58,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("DataURLDecoder: rejects malformed URLs", "[Platform][Network][DataURLDecoder]")
+  TEST_CASE("DataURLDecoder: rejects malformed URLs", "[DataUrlDecoder]")
   {
     CHECK_FALSE(Decode(u8"data:text/plain"));
     CHECK_FALSE(Decode(u8"data:;base64,!!!!"));

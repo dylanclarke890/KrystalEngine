@@ -32,7 +32,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Net/Url.hpp"
 
-namespace krys::boo::data_url_decoder
+namespace krys::net::data_url_decoder
 {
   struct Result
   {

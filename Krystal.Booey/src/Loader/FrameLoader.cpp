@@ -92,7 +92,7 @@ namespace krys::boo
   void FrameLoader::Init() noexcept
   {
     // This somewhat odd set of steps gives the frame an initial empty document.
-    auto loader = DocumentLoader::Create(ResourceRequest(net::Url(u8"about:blank")), SubstituteData());
+    auto loader = DocumentLoader::Create(net::ResourceRequest(net::Url(u8"about:blank")), SubstituteData());
     loader->AttachToFrame(_frame);
     _documentLoader = loader;
     _isDisplayingInitialEmptyDocument = true;
@@ -127,7 +127,7 @@ namespace krys::boo
                              krys::move(substituteData));
   }
 
-  void FrameLoader::LoadWithNavigationAction(const ResourceRequest &request, NavigationAction &&action,
+  void FrameLoader::LoadWithNavigationAction(const net::ResourceRequest &request, NavigationAction &&action,
                                              FrameLoadType loadType,
                                              Maybe<SubstituteData> &&substituteData) noexcept
   {
@@ -138,7 +138,7 @@ namespace krys::boo
       substituteData = _documentLoader->GetSubstituteData();
     }
 
-    auto loader = DocumentLoader::Create(ResourceRequest(request), krys::move(substituteData));
+    auto loader = DocumentLoader::Create(net::ResourceRequest(request), krys::move(substituteData));
     loader->SetTriggeringAction(krys::move(action));
 
     StopAllLoaders();
@@ -174,7 +174,7 @@ namespace krys::boo
       return;
     }
 
-    ResourceRequest request(documentLoader->Request());
+    net::ResourceRequest request(documentLoader->Request());
     NavigationAction action(request, false);
     LoadWithNavigationAction(request, krys::move(action), FrameLoadType::Reload, null);
   }
@@ -391,7 +391,8 @@ namespace krys::boo
     _client->DispatchDidFinishLoad();
   }
 
-  void FrameLoader::ReceivedMainResourceError(DocumentLoader &loader, const ResourceError &error) noexcept
+  void FrameLoader::ReceivedMainResourceError(DocumentLoader &loader,
+                                              const net::ResourceError &error) noexcept
   {
     if (&loader == _provisionalDocumentLoader.get())
     {
@@ -420,8 +421,8 @@ namespace krys::boo
       return;
     }
 
-    FrameLoadRequest frameLoadRequest(ShareRef(*document), ResourceRequest(url), krys::move(passedTarget),
-                                      krys::move(downloadAttribute));
+    FrameLoadRequest frameLoadRequest(ShareRef(*document), net::ResourceRequest(url),
+                                      krys::move(passedTarget), krys::move(downloadAttribute));
     frameLoadRequest.SetReferrerPolicy(referrerPolicy);
     frameLoadRequest.SetSourceElement(sourceElement);
     ChangeLocation(krys::move(frameLoadRequest), triggeringEvent);
@@ -507,7 +508,7 @@ namespace krys::boo
         }
         auto *form = submission->Form();
         FrameLoadRequest frameLoadRequest(ShareRef(form ? form->NodeDocument() : *document),
-                                          ResourceRequest(), null);
+                                          net::ResourceRequest(), null);
         submission->PopulateFrameLoadRequest(frameLoadRequest);
         const auto &request = frameLoadRequest.GetResourceRequest();
         NavigationAction action(request, true, submission->Event(), null, form);
@@ -515,7 +516,7 @@ namespace krys::boo
       });
   }
 
-  void FrameLoader::RequestNavigation(const NavigationAction &action, const ResourceRequest &request,
+  void FrameLoader::RequestNavigation(const NavigationAction &action, const net::ResourceRequest &request,
                                       const FormSubmission *formSubmission, DOMStringView frameName) noexcept
   {
     if (frameName.empty())

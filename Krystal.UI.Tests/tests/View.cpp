@@ -543,7 +543,7 @@ namespace krys::ui::tests
     auto load = [&](const std::filesystem::path &file)
     {
       loader.LoadResource(view.Frame(),
-                          boo::ResourceRequest(net::Url::FileUrlWithFileSystemPath(file.generic_u8string())),
+                          net::ResourceRequest(net::Url::FileUrlWithFileSystemPath(file.generic_u8string())),
                           {}, [&](boo::LoadResult &&loaded) { result = krys::move(loaded); });
     };
 

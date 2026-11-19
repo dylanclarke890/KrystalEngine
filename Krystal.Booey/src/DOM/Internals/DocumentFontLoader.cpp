@@ -52,7 +52,7 @@ namespace krys::boo::dom
                                       ? ContentSecurityPolicyImposition::SkipPolicyCheck
                                       : ContentSecurityPolicyImposition::DoPolicyCheck;
 
-    CachedResourceRequest request(ResourceRequest(krys::move(url)), options);
+    CachedResourceRequest request(net::ResourceRequest(krys::move(url)), options);
     request.SetInitiatorType(CachedResourceRequestInitiatorTypes::CSS);
     auto font = _document.GetCachedResourceLoader().RequestFont(krys::move(request));
     return font ? font->get() : nullptr;

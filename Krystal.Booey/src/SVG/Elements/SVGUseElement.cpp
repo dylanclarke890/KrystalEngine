@@ -852,7 +852,7 @@ namespace krys::boo
     {
       // Requests carry no fetch mode, destination or content sniffing policy: there are no origins or HTTP
       // semantics (see DIFFERENCES.md).
-      CachedResourceRequest request(ResourceRequest(krys::move(externalDocumentUrl)),
+      CachedResourceRequest request(net::ResourceRequest(krys::move(externalDocumentUrl)),
                                     CachedResourceLoader::DefaultCachedResourceOptions());
       auto requested = document->GetCachedResourceLoader().RequestSVGDocument(krys::move(request));
       _externalDocument = requested ? *requested : CachedResourceHandle<CachedSVGDocument>();

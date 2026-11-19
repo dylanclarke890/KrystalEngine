@@ -54,14 +54,14 @@ namespace krys::ui
     {
       if (!contents)
       {
-        return Unexpected<boo::ResourceError>(
-          boo::ResourceError(utf8_string(ErrorDomain), 0, url, u8"Couldn't open the file"));
+        return Unexpected<net::ResourceError>(
+          net::ResourceError(utf8_string(ErrorDomain), 0, url, u8"Couldn't open the file"));
       }
 
       // The type is the extension's, without its dot.
       const auto extension = path.extension().u8string();
       const auto size = static_cast<int64>(contents->Bytes.size());
-      boo::ResourceResponse response(url,
+      net::ResourceResponse response(url,
                                      net::MimeTypeRegistry::MimeTypeForExtension(
                                        utf8_stringview(extension).substr(extension.empty() ? 0 : 1)),
                                      size);
@@ -75,15 +75,15 @@ namespace krys::ui
     }
   }
 
-  void FileLoaderStrategy::LoadResource(boo::LocalFrame &, const boo::ResourceRequest &request,
+  void FileLoaderStrategy::LoadResource(boo::LocalFrame &, const net::ResourceRequest &request,
                                         const boo::ResourceLoaderOptions &,
                                         Func<void(boo::LoadResult &&)> &&completionHandler) noexcept
   {
     const auto &url = request.Url();
     if (!url.ProtocolIsFile())
     {
-      completionHandler(Unexpected<boo::ResourceError>(
-        boo::ResourceError(utf8_string(ErrorDomain), 0, url, u8"Only file URLs load")));
+      completionHandler(Unexpected<net::ResourceError>(
+        net::ResourceError(utf8_string(ErrorDomain), 0, url, u8"Only file URLs load")));
       return;
     }
 

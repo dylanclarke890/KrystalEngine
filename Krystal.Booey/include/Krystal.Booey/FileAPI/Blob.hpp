@@ -33,7 +33,6 @@
 
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/FileAPI/BlobPropertyBag.hpp"
-#include "Krystal.Booey/Platform/Network/BlobData.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -44,6 +43,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
+#include "Krystal.Net/BlobData.hpp"
 
 namespace krys::boo
 {
@@ -62,7 +62,7 @@ namespace krys::boo
     utf8_string _type;
     mutable Maybe<uint64> _size;
     size_t _memoryCost {0};
-    Ref<BlobData> _data;
+    Ref<net::BlobData> _data;
 
   public:
     /// @brief An empty blob.
@@ -93,7 +93,7 @@ namespace krys::boo
     }
 
     /// @brief The ranges of memory and files the blob's bytes are in.
-    KRYS_NODISCARD const BlobData &Data() const noexcept
+    KRYS_NODISCARD const net::BlobData &Data() const noexcept
     {
       return *_data;
     }
@@ -128,7 +128,7 @@ namespace krys::boo
       ReferencingExistingBlob,
     };
 
-    Blob(Ref<BlobData> &&data, utf8_stringview type, Maybe<uint64> size, size_t memoryCost) noexcept;
+    Blob(Ref<net::BlobData> &&data, utf8_stringview type, Maybe<uint64> size, size_t memoryCost) noexcept;
 
     Blob(List<BlobPartVariant> blobPartVariants, const BlobPropertyBag &propertyBag) noexcept;
 

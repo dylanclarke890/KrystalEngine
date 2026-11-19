@@ -28,6 +28,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
+#include "Krystal.Booey/Loader/LoaderStrategy.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
@@ -126,7 +127,7 @@ namespace krys::boo
     auto resource = RequestResource(CachedResource::Type::ImageResource, krys::move(request), imageLoading);
     if (!resource)
     {
-      return Unexpected<ResourceError>(resource.error());
+      return Unexpected<net::ResourceError>(resource.error());
     }
     return CachedResourceHandle<CachedImage>(Downcast<CachedImage>(resource->get()));
   }
@@ -147,7 +148,7 @@ namespace krys::boo
     auto resource = RequestResource(CachedResource::Type::CSSStyleSheet, krys::move(request));
     if (!resource)
     {
-      return Unexpected<ResourceError>(resource.error());
+      return Unexpected<net::ResourceError>(resource.error());
     }
     return CachedResourceHandle<CachedCSSStyleSheet>(Downcast<CachedCSSStyleSheet>(resource->get()));
   }
@@ -158,7 +159,7 @@ namespace krys::boo
     auto resource = RequestResource(CachedResource::Type::FontResource, krys::move(request));
     if (!resource)
     {
-      return Unexpected<ResourceError>(resource.error());
+      return Unexpected<net::ResourceError>(resource.error());
     }
     return CachedResourceHandle<CachedFont>(Downcast<CachedFont>(resource->get()));
   }
@@ -169,7 +170,7 @@ namespace krys::boo
     auto resource = RequestResource(CachedResource::Type::SVGDocumentResource, krys::move(request));
     if (!resource)
     {
-      return Unexpected<ResourceError>(resource.error());
+      return Unexpected<net::ResourceError>(resource.error());
     }
     return CachedResourceHandle<CachedSVGDocument>(Downcast<CachedSVGDocument>(resource->get()));
   }
@@ -180,7 +181,7 @@ namespace krys::boo
     auto resource = RequestResource(CachedResource::Type::Icon, krys::move(request));
     if (!resource)
     {
-      return Unexpected<ResourceError>(resource.error());
+      return Unexpected<net::ResourceError>(resource.error());
     }
     return CachedResourceHandle<CachedRawResource>(Downcast<CachedRawResource>(resource->get()));
   }
@@ -192,14 +193,14 @@ namespace krys::boo
     net::Url url = request.GetResourceRequest().Url();
     if (!Frame())
     {
-      return Unexpected<ResourceError>(
-        ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"Invalid loader state"));
+      return Unexpected<net::ResourceError>(
+        net::ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"Invalid loader state"));
     }
 
     if (!url.IsValid())
     {
-      return Unexpected<ResourceError>(
-        ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"URL is invalid"));
+      return Unexpected<net::ResourceError>(
+        net::ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"URL is invalid"));
     }
 
     // SVG Images have unique security rules that prevent all subresource requests except for data urls.
@@ -208,9 +209,9 @@ namespace krys::boo
       if (auto *page = Frame()->GetPage();
           page && page->GetChromeClient().IsSVGImageChromeClient() && !url.ProtocolIsData())
       {
-        return Unexpected<ResourceError>(ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url,
-                                                       u8"Not allowed to request resource",
-                                                       ResourceError::Type::AccessControl));
+        return Unexpected<net::ResourceError>(net::ResourceError(utf8_string(ErrorDomainBooeyInternal), 0,
+                                                                 url, u8"Not allowed to request resource",
+                                                                 net::ResourceError::Type::AccessControl));
       }
     }
 
@@ -255,9 +256,10 @@ namespace krys::boo
         // Synchronous cancellations are likely due to access control.
         if (resourceError.IsNull() || resourceError.IsCancellation())
         {
-          return Unexpected<ResourceError>(ResourceError({}, 0, url, {}, ResourceError::Type::AccessControl));
+          return Unexpected<net::ResourceError>(
+            net::ResourceError({}, 0, url, {}, net::ResourceError::Type::AccessControl));
         }
-        return Unexpected<ResourceError>(resourceError);
+        return Unexpected<net::ResourceError>(resourceError);
       }
     }
 

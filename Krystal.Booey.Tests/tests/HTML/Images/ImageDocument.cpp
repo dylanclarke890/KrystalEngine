@@ -44,7 +44,7 @@ namespace krys::boo::tests
     {
       ImageDocumentFixture(Span<const uint8> bytes, utf8_stringview mimeType, utf8_stringview url) noexcept
       {
-        FrameLoadRequest request(ShareRef(Document()), ResourceRequest(net::Url(url)), null);
+        FrameLoadRequest request(ShareRef(Document()), net::ResourceRequest(net::Url(url)), null);
         request.SetSubstituteData(
           SubstituteData(utf8_string(reinterpret_cast<const char8 *>(bytes.data()), bytes.size()),
                          utf8_string(mimeType), net::Url(url)));

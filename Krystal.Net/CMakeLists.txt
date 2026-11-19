@@ -31,17 +31,25 @@ target_sources(Krystal.Net
     BASE_DIRS
       include
     FILES
+      include/Krystal.Net/BlobData.hpp
+      include/Krystal.Net/DataUrlDecoder.hpp
       include/Krystal.Net/Http/HttpHeaderMap.hpp
       include/Krystal.Net/Http/HttpParsers.hpp
       include/Krystal.Net/MimeTypeRegistry.hpp
+      include/Krystal.Net/ResourceError.hpp
+      include/Krystal.Net/ResourceRequest.hpp
+      include/Krystal.Net/ResourceResponse.hpp
       include/Krystal.Net/Url.hpp
       include/Krystal.Net/UrlHash.hpp
       include/Krystal.Net/UrlParser.hpp
 
   PRIVATE
+    src/BlobData.cpp
+    src/DataUrlDecoder.cpp
     src/Http/HttpHeaderMap.cpp
     src/Http/HttpParsers.cpp
     src/MimeTypeRegistry.cpp
+    src/ResourceResponse.cpp
     src/Url.cpp
     src/UrlParser.cpp
 )

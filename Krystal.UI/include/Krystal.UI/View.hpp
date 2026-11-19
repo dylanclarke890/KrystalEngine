@@ -15,7 +15,6 @@
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformTouchEvent.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceError.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragImage.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/SelectionData.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
@@ -29,6 +28,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
+#include "Krystal.Net/ResourceError.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
 #include "Krystal.PAL/Display.hpp"
 #include "Krystal.PAL/DragAndDrop.hpp"
@@ -117,7 +117,7 @@ namespace krys::ui
   {
     LoadEventType Type {LoadEventType::Started};
     /// @brief The error, for a failure.
-    boo::ResourceError Error;
+    net::ResourceError Error;
   };
 
   /// @brief Shows a Booey page: parses its document into the page's main frame, with a view of the viewport's

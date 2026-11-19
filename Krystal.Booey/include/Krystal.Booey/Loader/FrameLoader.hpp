@@ -51,6 +51,8 @@ namespace krys::boo
 
 namespace krys::net
 {
+  class ResourceError;
+  class ResourceRequest;
   class Url;
 }
 
@@ -61,8 +63,6 @@ namespace krys::boo
   class FrameLoadRequest;
   class LocalFrame;
   class NavigationAction;
-  class ResourceError;
-  class ResourceRequest;
 
   /// @brief Where a frame is in loading a document.
   enum class FrameState : uint8
@@ -220,7 +220,7 @@ namespace krys::boo
     }
 
     /// @brief @p loader's main resource couldn't be loaded (or the load was stopped).
-    void ReceivedMainResourceError(DocumentLoader &loader, const ResourceError &error) noexcept;
+    void ReceivedMainResourceError(DocumentLoader &loader, const net::ResourceError &error) noexcept;
 
     /// @brief Whether navigating from @p currentURL to @p destinationURL loads a document, rather than
     /// navigating to a fragment: unless @p destinationURL has a fragment and is otherwise @p currentURL.
@@ -230,12 +230,12 @@ namespace krys::boo
   private:
     /// @brief Loads @p request (or @p substituteData) as a new document. A reload of a document the host gave
     /// the markup of loads that markup again.
-    void LoadWithNavigationAction(const ResourceRequest &request, NavigationAction &&action,
+    void LoadWithNavigationAction(const net::ResourceRequest &request, NavigationAction &&action,
                                   FrameLoadType loadType, Maybe<SubstituteData> &&substituteData) noexcept;
 
     /// @brief Hands the navigation @p action started to the host, for the browsing context @p frameName
     /// names (a new one for `_blank` or a name no frame has).
-    void RequestNavigation(const NavigationAction &action, const ResourceRequest &request,
+    void RequestNavigation(const NavigationAction &action, const net::ResourceRequest &request,
                            const FormSubmission *formSubmission, DOMStringView frameName) noexcept;
 
     /// @brief The committed document gets a view of its own, as a new page's would: scrolled to its top, not

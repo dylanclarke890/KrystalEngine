@@ -116,12 +116,12 @@ namespace krys::boo
     {
     private:
       EndingType _endings;
-      Ref<BlobData> _data;
+      Ref<net::BlobData> _data;
       List<uint8> _appendableData;
 
     public:
       BlobBuilder(EndingType endings, utf8_stringview contentType) noexcept
-          : _endings(endings), _data(BlobData::Create(contentType))
+          : _endings(endings), _data(net::BlobData::Create(contentType))
       {
       }
 
@@ -156,7 +156,7 @@ namespace krys::boo
         _data->AppendData(krys::move(buffer));
       }
 
-      KRYS_NODISCARD Ref<BlobData> Finalize() noexcept
+      KRYS_NODISCARD Ref<net::BlobData> Finalize() noexcept
       {
         Flush();
         return _data;
@@ -185,8 +185,8 @@ namespace krys::boo
       return memoryCost;
     }
 
-    KRYS_NODISCARD Ref<BlobData> BuildBlobData(List<BlobPartVariant> blobPartVariants, EndingType endings,
-                                               utf8_stringview contentType) noexcept
+    KRYS_NODISCARD Ref<net::BlobData> BuildBlobData(List<BlobPartVariant> blobPartVariants,
+                                                    EndingType endings, utf8_stringview contentType) noexcept
     {
       BlobBuilder builder(endings, contentType);
       for (auto &blobPartVariant : blobPartVariants)
@@ -197,7 +197,7 @@ namespace krys::boo
     }
 
     /// @brief Appends @p length bytes of the file at @p path, from @p offset (to its end for
-    /// `BlobDataItem::ToEndOfFile`), to @p bytes.
+    /// `net::BlobDataItem::ToEndOfFile`), to @p bytes.
     KRYS_NODISCARD Maybe<Exception> ReadFileRange(utf8_stringview path, int64 offset, int64 length,
                                                   List<uint8> &bytes) noexcept
     {
@@ -213,7 +213,7 @@ namespace krys::boo
       {
         return Exception {ExceptionCode::NotReadableError};
       }
-      if (length == BlobDataItem::ToEndOfFile)
+      if (length == net::BlobDataItem::ToEndOfFile)
       {
         auto size = static_cast<int64>(std::filesystem::file_size(filePath, error));
         if (error)
@@ -235,7 +235,7 @@ namespace krys::boo
     }
   }
 
-  Blob::Blob(Ref<BlobData> &&data, utf8_stringview type, Maybe<uint64> size, size_t memoryCost) noexcept
+  Blob::Blob(Ref<net::BlobData> &&data, utf8_stringview type, Maybe<uint64> size, size_t memoryCost) noexcept
       : _type(type), _size(size), _memoryCost(memoryCost), _data(krys::move(data))
   {
   }
@@ -253,7 +253,7 @@ namespace krys::boo
 
   Ref<Blob> Blob::Create() noexcept
   {
-    return AdoptRef(*new Blob(BlobData::Create({}), {}, 0, 0));
+    return AdoptRef(*new Blob(net::BlobData::Create({}), {}, 0, 0));
   }
 
   Ref<Blob> Blob::Create(List<BlobPartVariant> blobPartVariants, const BlobPropertyBag &propertyBag) noexcept
@@ -333,7 +333,7 @@ namespace krys::boo
     List<uint8> bytes;
     for (auto &item : _data->Items())
     {
-      if (item.GetType() == BlobDataItem::Type::Data)
+      if (item.GetType() == net::BlobDataItem::Type::Data)
       {
         auto span = item.Data()->GetSpan().subspan(static_cast<size_t>(item.Offset()),
                                                    static_cast<size_t>(item.Length()));

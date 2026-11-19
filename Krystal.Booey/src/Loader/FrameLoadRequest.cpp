@@ -52,7 +52,7 @@ namespace krys::boo
     _sourceElement = ShareRefPtr(sourceElement);
   }
 
-  FrameLoadRequest::FrameLoadRequest(Ref<Document> &&requester, ResourceRequest &&resourceRequest,
+  FrameLoadRequest::FrameLoadRequest(Ref<Document> &&requester, net::ResourceRequest &&resourceRequest,
                                      DOMStringAtom frameName, DOMStringAtom downloadAttribute) noexcept
       : _requester(krys::move(requester)), _resourceRequest(krys::move(resourceRequest)),
         _frameName(krys::move(frameName))

@@ -23,12 +23,13 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Platform/Network/DataUrlDecoder.hpp"
+#include "Krystal.Net/DataUrlDecoder.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Text/Base64.hpp"
 #include <algorithm>
 
-namespace krys::boo::data_url_decoder
+namespace krys::net::data_url_decoder
 {
   namespace
   {

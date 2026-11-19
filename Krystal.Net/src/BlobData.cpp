@@ -28,11 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Platform/Network/BlobData.hpp"
+#include "Krystal.Net/BlobData.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <filesystem>
 #include <system_error>
 
-namespace krys::boo
+namespace krys::net
 {
   int64 BlobDataItem::Length() const noexcept
   {

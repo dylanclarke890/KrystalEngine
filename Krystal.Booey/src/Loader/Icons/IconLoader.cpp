@@ -64,7 +64,7 @@ namespace krys::boo
       return;
     }
 
-    CachedResourceRequest request(ResourceRequest(net::Url(_url)),
+    CachedResourceRequest request(net::ResourceRequest(net::Url(_url)),
                                   CachedResourceLoader::DefaultCachedResourceOptions());
     request.SetInitiatorType(CachedResourceRequestInitiatorTypes::Icon);
     // An icon doesn't hold up the document's load.

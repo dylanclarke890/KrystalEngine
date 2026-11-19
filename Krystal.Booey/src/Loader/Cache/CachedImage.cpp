@@ -552,7 +552,7 @@ namespace krys::boo
     NotifyObservers();
   }
 
-  void CachedImage::ResponseReceived(ResourceResponse &&newResponse) noexcept
+  void CachedImage::ResponseReceived(net::ResourceResponse &&newResponse) noexcept
   {
     if (!Response().IsNull())
     {

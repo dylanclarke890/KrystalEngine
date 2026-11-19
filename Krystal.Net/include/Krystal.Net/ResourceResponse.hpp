@@ -30,11 +30,12 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Net/Http/HttpHeaderMap.hpp"
 #include "Krystal.Net/Url.hpp"
 #include <chrono>
 
-namespace krys::boo
+namespace krys::net
 {
   /// @brief What came back for a load: the URL it came from, its type and the length it said it had, and for
   /// an HTTP load, its status and headers. The host's loader strategy fills them in; a file load may give a

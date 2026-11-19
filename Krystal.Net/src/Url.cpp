@@ -31,6 +31,7 @@
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Net/UrlParser.hpp"
 #include "Krystal.Text/IDNA.hpp"
 #include <algorithm>

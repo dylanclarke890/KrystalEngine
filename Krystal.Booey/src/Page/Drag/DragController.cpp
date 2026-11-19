@@ -1218,7 +1218,7 @@ namespace krys::boo
     }
     else
     {
-      // FIXME: The response's suggested filename (ResourceResponse::suggestedFilename), once responses
+      // FIXME: The response's suggested filename (net::ResourceResponse::suggestedFilename), once responses
       // parse it; the host has no icon for it either way.
       if (GetCachedImage(element))
       {

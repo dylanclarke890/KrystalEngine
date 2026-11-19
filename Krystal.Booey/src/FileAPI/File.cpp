@@ -46,7 +46,7 @@ namespace krys::boo
     utf8_string type;
     ComputeNameAndContentType(path, nameOverride, name, type);
 
-    auto data = BlobData::Create(type);
+    auto data = net::BlobData::Create(type);
     data->AppendFile(path);
     return AdoptRef(*new File(krys::move(data), type, utf8_string(path), krys::move(name)));
   }
@@ -67,7 +67,7 @@ namespace krys::boo
     return AdoptRef(*new File(existingFile, name));
   }
 
-  File::File(Ref<BlobData> &&data, utf8_stringview type, utf8_string path, utf8_string name) noexcept
+  File::File(Ref<net::BlobData> &&data, utf8_stringview type, utf8_string path, utf8_string name) noexcept
       : Blob(krys::move(data), type, std::nullopt, 0), _path(krys::move(path)), _name(krys::move(name))
   {
   }

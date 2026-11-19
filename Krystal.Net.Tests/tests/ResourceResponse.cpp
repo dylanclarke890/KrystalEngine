@@ -1,7 +1,7 @@
-﻿#include "Krystal.Booey/Platform/Network/ResourceResponse.hpp"
+﻿#include "Krystal.Net/ResourceResponse.hpp"
 #include "catch2/catch_test_macros.hpp"
 
-namespace krys::boo::tests
+namespace krys::net::tests
 {
   namespace
   {

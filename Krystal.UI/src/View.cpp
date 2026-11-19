@@ -431,12 +431,12 @@ namespace krys::ui
       Notify({LoadEventType::Finished, {}});
     }
 
-    void DispatchDidFailProvisionalLoad(const boo::ResourceError &error) noexcept override
+    void DispatchDidFailProvisionalLoad(const net::ResourceError &error) noexcept override
     {
       Notify({LoadEventType::Failed, error});
     }
 
-    void DispatchDidFailLoad(const boo::ResourceError &error) noexcept override
+    void DispatchDidFailLoad(const net::ResourceError &error) noexcept override
     {
       Notify({LoadEventType::Failed, error});
     }
@@ -482,13 +482,13 @@ namespace krys::ui
       }
     }
 
-    void DispatchNavigationRequested(const boo::NavigationAction &action, const boo::ResourceRequest &request,
+    void DispatchNavigationRequested(const boo::NavigationAction &action, const net::ResourceRequest &request,
                                      const boo::FormSubmission *formSubmission) noexcept override
     {
       Request(action, request, formSubmission, {});
     }
 
-    void DispatchNewWindowRequested(const boo::NavigationAction &action, const boo::ResourceRequest &request,
+    void DispatchNewWindowRequested(const boo::NavigationAction &action, const net::ResourceRequest &request,
                                     const boo::FormSubmission *formSubmission,
                                     boo::DOMStringView frameName) noexcept override
     {
@@ -508,7 +508,7 @@ namespace krys::ui
   private:
     /// @param newWindowName The browsing context a new window would be; null (a null view) for the view's
     /// own.
-    void Request(const boo::NavigationAction &action, const boo::ResourceRequest &request,
+    void Request(const boo::NavigationAction &action, const net::ResourceRequest &request,
                  const boo::FormSubmission *formSubmission, boo::DOMStringView newWindowName) const noexcept
     {
       if (!_navigationHandler)
@@ -660,7 +660,7 @@ namespace krys::ui
     _frame->SetSubresourceCachePolicy(cachePolicy);
     auto requestUrl = url.IsNull() ? net::Url(u8"about:blank") : url;
     boo::FrameLoadRequest request(ShareRef<boo::Document>(Document()),
-                                  boo::ResourceRequest(krys::move(requestUrl)), null);
+                                  net::ResourceRequest(krys::move(requestUrl)), null);
     request.SetSubstituteData(boo::SubstituteData(krys::move(markup), u8"text/html", krys::move(url)));
     _frame->Loader().Load(krys::move(request));
   }
@@ -680,7 +680,7 @@ namespace krys::ui
   void View::Load(net::Url &&url, boo::CachePolicy cachePolicy) noexcept
   {
     _frame->SetSubresourceCachePolicy(cachePolicy);
-    boo::FrameLoadRequest request(ShareRef<boo::Document>(Document()), boo::ResourceRequest(krys::move(url)),
+    boo::FrameLoadRequest request(ShareRef<boo::Document>(Document()), net::ResourceRequest(krys::move(url)),
                                   null);
     _frame->Loader().Load(krys::move(request));
   }

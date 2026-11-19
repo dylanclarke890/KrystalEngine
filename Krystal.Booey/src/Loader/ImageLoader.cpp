@@ -209,7 +209,7 @@ namespace krys::boo
         _pendingUrl = *attr;
       }
 
-      CachedResourceRequest request(ResourceRequest(krys::move(imageUrl)), options);
+      CachedResourceRequest request(net::ResourceRequest(krys::move(imageUrl)), options);
       request.SetInitiatorType(element->LocalName().View());
 
       if (_loadManually)

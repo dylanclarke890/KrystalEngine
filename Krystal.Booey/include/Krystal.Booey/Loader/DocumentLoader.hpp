@@ -33,9 +33,6 @@
 #include "Krystal.Booey/Loader/Icons/LinkIcon.hpp"
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
 #include "Krystal.Booey/Loader/SubstituteData.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceError.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceRequest.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceResponse.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -46,6 +43,9 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Net/ResourceError.hpp"
+#include "Krystal.Net/ResourceRequest.hpp"
+#include "Krystal.Net/ResourceResponse.hpp"
 
 namespace krys
 {
@@ -67,11 +67,11 @@ namespace krys::boo
 
   private:
     WeakPtr<LocalFrame> _frame;
-    ResourceRequest _request;
+    net::ResourceRequest _request;
     Maybe<SubstituteData> _substituteData;
     NavigationAction _triggeringAction;
-    ResourceResponse _response;
-    ResourceError _mainDocumentError;
+    net::ResourceResponse _response;
+    net::ResourceError _mainDocumentError;
     DocumentWriter _writer;
     bool _isLoadingMainResource {false};
     bool _committed {false};
@@ -83,12 +83,12 @@ namespace krys::boo
     List<std::pair<Ref<IconLoader>, Func<void(const SharedBuffer *)>>> _iconLoaders;
     uint64 _nextIconLoadIdentifier {1};
 
-    DocumentLoader(ResourceRequest &&request, Maybe<SubstituteData> &&substituteData) noexcept;
+    DocumentLoader(net::ResourceRequest &&request, Maybe<SubstituteData> &&substituteData) noexcept;
 
   public:
     ~DocumentLoader() noexcept;
 
-    KRYS_NODISCARD static Ref<DocumentLoader> Create(ResourceRequest &&request,
+    KRYS_NODISCARD static Ref<DocumentLoader> Create(net::ResourceRequest &&request,
                                                      Maybe<SubstituteData> &&substituteData = null) noexcept;
 
     /// @brief Attaches the loader to the frame it loads into.
@@ -101,7 +101,7 @@ namespace krys::boo
       return _frame.get();
     }
 
-    KRYS_NODISCARD const ResourceRequest &Request() const noexcept
+    KRYS_NODISCARD const net::ResourceRequest &Request() const noexcept
     {
       return _request;
     }
@@ -121,12 +121,12 @@ namespace krys::boo
       return _substituteData;
     }
 
-    KRYS_NODISCARD const ResourceResponse &Response() const noexcept
+    KRYS_NODISCARD const net::ResourceResponse &Response() const noexcept
     {
       return _response;
     }
 
-    KRYS_NODISCARD const ResourceError &MainDocumentError() const noexcept
+    KRYS_NODISCARD const net::ResourceError &MainDocumentError() const noexcept
     {
       return _mainDocumentError;
     }
@@ -186,10 +186,10 @@ namespace krys::boo
 
   private:
     /// @brief The main resource arrived: commits the load and writes the document.
-    void ContinueAfterMainResourceLoad(ResourceResponse &&response, Span<const uint8> data) noexcept;
+    void ContinueAfterMainResourceLoad(net::ResourceResponse &&response, Span<const uint8> data) noexcept;
 
     /// @brief The main resource couldn't be loaded.
-    void MainReceivedError(ResourceError &&error) noexcept;
+    void MainReceivedError(net::ResourceError &&error) noexcept;
 
     /// @brief Commits the load, making the frame show the new document.
     void CommitLoad(Span<const uint8> data) noexcept;
