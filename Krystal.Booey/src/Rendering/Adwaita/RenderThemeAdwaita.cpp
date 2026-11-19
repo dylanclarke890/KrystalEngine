@@ -31,7 +31,6 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Platform/ThemeAdwaita.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderProgress.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -168,12 +167,6 @@ namespace krys::boo
   Color RenderThemeAdwaita::PlatformFocusRingColor(style::ColorOptions) const noexcept
   {
     return SystemFocusRingColor();
-  }
-
-  void RenderThemeAdwaita::PlatformColorsDidChange() noexcept
-  {
-    static_cast<ThemeAdwaita &>(Theme::Singleton()).PlatformColorsDidChange();
-    RenderTheme::PlatformColorsDidChange();
   }
 
   utf8_stringview RenderThemeAdwaita::ExtraDefaultStyleSheet() noexcept
@@ -449,7 +442,11 @@ namespace krys::boo
 
   void RenderThemeAdwaita::SetAccentColor(const Color &color) noexcept
   {
-    static_cast<ThemeAdwaita &>(Theme::Singleton()).SetAccentColor(color);
+    if (SystemAccentColor() == color)
+    {
+      return;
+    }
+    SetSystemAccentColor(color);
     PlatformColorsDidChange();
   }
 }

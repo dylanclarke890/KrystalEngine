@@ -91,8 +91,6 @@ namespace krys::boo
 
     KRYS_NODISCARD Color PlatformFocusRingColor(style::ColorOptions) const noexcept final;
 
-    void PlatformColorsDidChange() noexcept final;
-
     KRYS_NODISCARD Color SystemColor(css::ValueId, style::ColorOptions) const noexcept final;
 
     void AdjustTextFieldStyle(RenderStyle &, const boo::Element *) const noexcept final;

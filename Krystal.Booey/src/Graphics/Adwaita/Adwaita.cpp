@@ -29,7 +29,6 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
-#include "Krystal.Booey/Platform/ThemeAdwaita.hpp"
 
 namespace krys::boo::adwaita
 {
@@ -125,9 +124,23 @@ namespace krys::boo::adwaita
     graphicsContext.FillPath(path);
   }
 
+  namespace
+  {
+    KRYS_NODISCARD Color &AccentColorStorage() noexcept
+    {
+      static Color accentColor {SRGBA<uint8> {52, 132, 228}};
+      return accentColor;
+    }
+  }
+
   Color SystemAccentColor() noexcept
   {
-    return static_cast<ThemeAdwaita &>(Theme::Singleton()).AccentColor();
+    return AccentColorStorage();
+  }
+
+  void SetSystemAccentColor(const Color &color) noexcept
+  {
+    AccentColorStorage() = color;
   }
 
   Color SystemFocusRingColor() noexcept

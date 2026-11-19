@@ -139,7 +139,13 @@ namespace krys::boo::adwaita
     return accentColor.ColorWithAlphaMultipliedBy(static_cast<float>(FocusRingOpacity));
   }
 
+  /// @brief The accent colour of controls whose `accent-color` is `auto`, focus rings and selections:
+  /// Adwaita's blue unless set.
   KRYS_NODISCARD Color SystemAccentColor() noexcept;
+
+  /// @brief Sets the accent colour. Use `RenderThemeAdwaita::SetAccentColor`, which also invalidates the
+  /// theme's cached colours.
+  void SetSystemAccentColor(const Color &color) noexcept;
 
   KRYS_NODISCARD Color SystemFocusRingColor() noexcept;
 }
