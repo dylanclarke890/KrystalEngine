@@ -30,12 +30,11 @@
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.I18n/DateTimeFields.hpp"
 #include <array>
 
-namespace krys::boo
+namespace krys::i18n
 {
-  class DateComponents;
-
   /// @brief The language of the user interface: the system's default locale, as a BCP 47 language tag.
   KRYS_NODISCARD utf8_string DefaultLanguage() noexcept;
 
@@ -146,7 +145,7 @@ namespace krys::boo
     /// implementation doesn't support localized dates the function should return an empty string.
     /// @p formatType can be used to specify if you want the short format.
     KRYS_NODISCARD virtual utf8_string
-      FormatDateTime(const DateComponents &date, FormatType formatType = FormatType::Unspecified) noexcept;
+      FormatDateTime(const DateTimeFields &date, FormatType formatType = FormatType::Unspecified) noexcept;
 
   protected:
     Locale() noexcept = default;

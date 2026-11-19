@@ -29,13 +29,12 @@ target_compile_options(Krystal.Booey
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8 /bigobj>
 )
 
-# Third-party - brigand
+# Third-party - brigand (public: the CSS value headers use it)
 find_path(BRIGAND_INCLUDE_DIRS "brigand/adapted.hpp")
-target_include_directories(Krystal.Booey PRIVATE ${BRIGAND_INCLUDE_DIRS})
+target_include_directories(Krystal.Booey PUBLIC ${BRIGAND_INCLUDE_DIRS})
 
-# Third-party - ICU (bidi, case mapping and other text processing not yet behind Krystal.Text; locale data for form controls)
-find_package(ICU REQUIRED COMPONENTS uc in dt)
-target_link_libraries(Krystal.Booey PUBLIC ICU::uc PRIVATE ICU::in ICU::dt)
+# Locales: date and number formatting, preferred languages
+target_link_libraries(Krystal.Booey PUBLIC Krystal.I18n)
 
 # URLs, HTTP header maps and parsers, and MIME types
 target_link_libraries(Krystal.Booey PUBLIC Krystal.Net)
@@ -2631,7 +2630,6 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/Choosers/PopupMenuClient.hpp
   include/Krystal.Booey/Platform/Choosers/PopupMenuStyle.hpp
   include/Krystal.Booey/Platform/Cursor.hpp
-  include/Krystal.Booey/Platform/DateComponents.hpp
   include/Krystal.Booey/Platform/Events/PlatformEvent.hpp
   include/Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp
   include/Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp
@@ -2641,6 +2639,7 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/Events/PointerId.hpp
   include/Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp
   include/Krystal.Booey/Platform/GraphicsClient.hpp
+  include/Krystal.Booey/Platform/DateComponents.hpp
   include/Krystal.Booey/Platform/ImageDecoders/BMPImageDecoder.hpp
   include/Krystal.Booey/Platform/ImageDecoders/BMPImageReader.hpp
   include/Krystal.Booey/Platform/ImageDecoders/EXIFMetadata.hpp
@@ -2653,11 +2652,7 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp
   include/Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoderFrame.hpp
   include/Krystal.Booey/Platform/ImageDecoders/WEBPImageDecoder.hpp
-  include/Krystal.Booey/Platform/Locale/DateTimeFormat.hpp
-  include/Krystal.Booey/Platform/Locale/Language.hpp
-  include/Krystal.Booey/Platform/Locale/LocaleICU.hpp
-  include/Krystal.Booey/Platform/Locale/LocalizedStrings.hpp
-  include/Krystal.Booey/Platform/Locale/PlatformLocale.hpp
+  include/Krystal.Booey/Platform/LocalizedStrings.hpp
   include/Krystal.Booey/Platform/MIMETypeRegistry.hpp
   include/Krystal.Booey/Platform/Network/BlobData.hpp
   include/Krystal.Booey/Platform/Network/DataUrlDecoder.hpp
@@ -2706,11 +2701,7 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/ImageDecoders/ScalableImageDecoder.cpp
   src/Platform/ImageDecoders/ScalableImageDecoderFrame.cpp
   src/Platform/ImageDecoders/WEBPImageDecoder.cpp
-  src/Platform/Locale/DateTimeFormat.cpp
-  src/Platform/Locale/Language.cpp
-  src/Platform/Locale/LocaleICU.cpp
-  src/Platform/Locale/LocalizedStrings.cpp
-  src/Platform/Locale/PlatformLocale.cpp
+  src/Platform/LocalizedStrings.cpp
   src/Platform/MIMETypeRegistry.cpp
   src/Platform/Network/BlobData.cpp
   src/Platform/Network/DataUrlDecoder.cpp

@@ -28,10 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Platform/Locale/LocaleICU.hpp"
-#include "Krystal.Booey/Platform/Locale/Language.hpp"
+#include "LocaleICU.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Text/LocaleToScriptMapping.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.I18n/Language.hpp"
+#include "Krystal.I18n/LocaleToScriptMapping.hpp"
 #include "Krystal.Text/Script.hpp"
 #include <array>
 #include <hb.h>
@@ -39,7 +40,7 @@
 #include <unicode/uloc.h>
 #include <unicode/ustring.h>
 
-namespace krys::boo
+namespace krys::i18n
 {
   namespace
   {
@@ -177,8 +178,8 @@ namespace krys::boo
 
   Locale::WritingDirection LocaleICU::DefaultWritingDirection() const noexcept
   {
-    text::Script icuScript = text::LocaleToScriptCode(
-      utf8_stringview(reinterpret_cast<const char8 *>(_locale.data()), _locale.size()));
+    text::Script icuScript =
+      LocaleToScriptCode(utf8_stringview(reinterpret_cast<const char8 *>(_locale.data()), _locale.size()));
     if (icuScript == text::Script::Invalid)
     {
       return WritingDirection::Default;

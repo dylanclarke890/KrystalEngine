@@ -2333,7 +2333,7 @@ namespace krys::boo
     return ShareRef(attr);
   }
 
-  boo::Locale &Element::GetLocale() const noexcept
+  i18n::Locale &Element::GetLocale() const noexcept
   {
     return NodeDocument().GetCachedLocale(css::EffectiveLang(*this));
   }

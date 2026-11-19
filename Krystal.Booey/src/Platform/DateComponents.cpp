@@ -1307,4 +1307,27 @@ namespace krys::boo
     }
     return krys::move(builder).ToString();
   }
+
+  Maybe<i18n::DateTimeFields> DateComponents::ToDateTimeFields() const noexcept
+  {
+    i18n::DateTimeKind kind {};
+    switch (_type)
+    {
+      case DateComponentsType::Date:          kind = i18n::DateTimeKind::Date; break;
+      case DateComponentsType::Month:         kind = i18n::DateTimeKind::Month; break;
+      case DateComponentsType::Week:          kind = i18n::DateTimeKind::Week; break;
+      case DateComponentsType::Time:          kind = i18n::DateTimeKind::Time; break;
+      case DateComponentsType::DateTimeLocal: kind = i18n::DateTimeKind::DateTime; break;
+      case DateComponentsType::Invalid:       return null;
+    }
+    return i18n::DateTimeFields {.Kind = kind,
+                                 .Year = FullYear(),
+                                 .Month = Month(),
+                                 .Day = MonthDay(),
+                                 .Week = Week(),
+                                 .Hour = Hour(),
+                                 .Minute = Minute(),
+                                 .Second = Second(),
+                                 .Millisecond = Millisecond()};
+  }
 }

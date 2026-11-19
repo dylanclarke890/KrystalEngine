@@ -1,8 +1,8 @@
-﻿#include "Krystal.Text/Locale.hpp"
+﻿#include "Krystal.I18n/DefaultLocale.hpp"
 #include <string>
 #include <unicode/uloc.h>
 
-namespace krys::text
+namespace krys::i18n
 {
   utf8_string DefaultLocale() noexcept
   {

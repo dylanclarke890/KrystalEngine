@@ -48,7 +48,6 @@ target_sources(Krystal.Text.Tests
     tests/Encodings/ISO-8859.cpp
     tests/Encodings/Windows.cpp
     tests/FreeTypeFace.cpp
-    tests/LocaleToScriptMapping.cpp
     tests/Regex.cpp
     tests/TextBreakIterator.cpp
 )

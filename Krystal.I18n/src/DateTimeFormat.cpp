@@ -23,11 +23,11 @@
  * SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Platform/Locale/DateTimeFormat.hpp"
+#include "Krystal.I18n/DateTimeFormat.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include <array>
 
-namespace krys::boo
+namespace krys::i18n
 {
   namespace
   {

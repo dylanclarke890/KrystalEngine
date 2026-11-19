@@ -35,13 +35,13 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Text/Script.hpp"
 
-namespace krys::text
+namespace krys::i18n
 {
   /// @brief The script a BCP 47 locale (e.g. `zh-Hant`, `sr_Latn`) is written in: the locale's language and
-  /// region, then its script subtag. `Script::Common` when nothing matches.
-  KRYS_NODISCARD Script LocaleToScriptCode(utf8_stringview) noexcept;
+  /// region, then its script subtag. `text::Script::Common` when nothing matches.
+  KRYS_NODISCARD text::Script LocaleToScriptCode(utf8_stringview) noexcept;
 
   /// @brief The script an ISO 15924 script code (e.g. `Latn`, ASCII case-insensitive) names.
-  /// `Script::Invalid` when nothing matches.
-  KRYS_NODISCARD Script ScriptNameToCode(utf8_stringview) noexcept;
+  /// `text::Script::Invalid` when nothing matches.
+  KRYS_NODISCARD text::Script ScriptNameToCode(utf8_stringview) noexcept;
 }

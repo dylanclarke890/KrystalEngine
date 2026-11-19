@@ -28,11 +28,15 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
 
+namespace krys::i18n
+{
+  class Locale;
+}
+
 namespace krys::boo
 {
   class DateComponents;
   class KeyboardEvent;
-  class Locale;
   class RenderStyle;
 }
 
@@ -129,7 +133,7 @@ namespace krys::boo::html
     static void Initialize(DateTimeFieldElement &field, DOMStringAtom part,
                            utf8_stringview label = {}) noexcept;
 
-    KRYS_NODISCARD Locale &LocaleForOwner() const noexcept;
+    KRYS_NODISCARD i18n::Locale &LocaleForOwner() const noexcept;
 
     KRYS_NODISCARD DOMString LocaleIdentifier() const noexcept;
 

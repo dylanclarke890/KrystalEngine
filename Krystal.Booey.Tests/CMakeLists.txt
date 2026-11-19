@@ -314,6 +314,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Filters/FilterOperations.cpp
 		tests/Graphics/Fonts/FontCustomPlatformData.cpp
 		tests/Graphics/Fonts/FontFeatureValues.cpp
+		tests/Graphics/Fonts/FontGenericFamilies.cpp
 		tests/Graphics/Fonts/FontPaletteValues.cpp
 		tests/Graphics/Fonts/FontTaggedSettings.cpp
 		tests/Graphics/Fonts/WOFFFileFormat.cpp
@@ -368,9 +369,6 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Transforms/Quaternion.cpp
 		tests/Graphics/Transforms/TransformationMatrix.cpp
 		tests/Graphics/Transforms/TransformExtras.cpp
-		tests/Platform/Locale/DateTimeFormat.cpp
-		tests/Platform/Locale/Language.cpp
-		tests/Platform/Locale/LocaleICU.cpp
 		tests/Text/TextFlags.cpp
 		tests/Text/TextSpacing.cpp
 		tests/Rendering/Style/GridSpan.cpp

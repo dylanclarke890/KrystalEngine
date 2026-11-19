@@ -22,7 +22,7 @@
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
-#include "Krystal.Text/Locale.hpp"
+#include "Krystal.I18n/DefaultLocale.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/EngineTexture.hpp"
 #include "Krystal.UI/View.hpp"
@@ -663,14 +663,14 @@ namespace krys::ui::tests
     {
       utf8_string Previous;
 
-      USEnglishScope() noexcept : Previous(text::DefaultLocale())
+      USEnglishScope() noexcept : Previous(i18n::DefaultLocale())
       {
-        text::SetDefaultLocale(u8"en_US");
+        i18n::SetDefaultLocale(u8"en_US");
       }
 
       ~USEnglishScope() noexcept
       {
-        text::SetDefaultLocale(Previous);
+        i18n::SetDefaultLocale(Previous);
       }
     };
   }

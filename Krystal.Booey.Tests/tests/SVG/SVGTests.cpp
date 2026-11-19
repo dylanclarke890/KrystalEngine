@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey.Tests/SVG/TestSVGElement.hpp"
-#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
+#include "Krystal.I18n/Locale.hpp"
 
 namespace krys::boo::svg::tests
 {
@@ -40,7 +40,7 @@ namespace krys::boo::svg::tests
     CHECK(element->IsValid());
 
     // A language matches the first two letters of the user's language.
-    auto language = DefaultLanguage().substr(0, 2);
+    auto language = i18n::DefaultLanguage().substr(0, 2);
     REQUIRE_FALSE(element->SetAttribute(u8"systemLanguage", language).HasException());
     CHECK(element->IsValid());
     REQUIRE_FALSE(

@@ -1,10 +1,9 @@
-﻿#include "Krystal.Booey/Platform/Locale/Language.hpp"
+﻿#include "Krystal.I18n/Language.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Graphics/Fonts/FontGenericFamilies.hpp"
-#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
-#include "Krystal.Text/Script.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.I18n/Locale.hpp"
 
-namespace krys::boo::tests
+namespace krys::i18n::tests
 {
   namespace
   {
@@ -23,7 +22,7 @@ namespace krys::boo::tests
     };
   }
 
-  TEST_CASE("Language: the user's preferred languages", "[Platform][Language]")
+  TEST_CASE("Language: the user's preferred languages", "[I18n][Language]")
   {
     // Without the host's, the system's language is the only one.
     CHECK(UserPreferredLanguages() == List<utf8_string> {DefaultLanguage()});
@@ -34,7 +33,7 @@ namespace krys::boo::tests
     CHECK(UserPreferredLanguagesGeneration() != generation);
   }
 
-  TEST_CASE("Language: Simplified or Traditional Chinese", "[Platform][Language]")
+  TEST_CASE("Language: Simplified or Traditional Chinese", "[I18n][Language]")
   {
     SECTION("Simplified without a signal")
     {
@@ -52,19 +51,6 @@ namespace krys::boo::tests
     {
       PreferredLanguagesScope scope({u8"zh-CN", u8"zh-TW"});
       CHECK(UserPrefersSimplifiedChinese());
-    }
-
-    SECTION("Han text's generic families follow the preference")
-    {
-      FontGenericFamilies families;
-      (void)families.SetStandardFontFamily(u8"Simplified", text::Script::SimplifiedHan);
-      (void)families.SetStandardFontFamily(u8"Traditional", text::Script::TraditionalHan);
-      {
-        PreferredLanguagesScope scope({u8"zh-CN"});
-        CHECK(families.StandardFontFamily(text::Script::Han) == u8"Simplified");
-      }
-      PreferredLanguagesScope scope({u8"zh-TW"});
-      CHECK(families.StandardFontFamily(text::Script::Han) == u8"Traditional");
     }
   }
 }

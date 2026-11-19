@@ -29,7 +29,7 @@
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
-namespace krys::boo
+namespace krys::i18n
 {
   /// @brief Sets the user's preferred languages, most preferred first, as BCP 47 tags (empty for the
   /// system's).

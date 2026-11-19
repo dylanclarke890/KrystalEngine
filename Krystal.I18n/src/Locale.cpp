@@ -28,15 +28,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
-#include "Krystal.Booey/Platform/DateComponents.hpp"
-#include "Krystal.Booey/Platform/Locale/DateTimeFormat.hpp"
+#include "Krystal.I18n/Locale.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.I18n/DateTimeFormat.hpp"
 #include "Krystal.Text/Bidi.hpp"
 #include <format>
 
-namespace krys::boo
+namespace krys::i18n
 {
   namespace
   {
@@ -47,11 +47,11 @@ namespace krys::boo
     private:
       utf8_string _builder;
       Locale &_localizer;
-      const DateComponents &_date;
+      const DateTimeFields &_date;
 
     public:
       // The argument objects must be alive until this object dies.
-      DateTimeStringBuilder(Locale &localizer, const DateComponents &date) noexcept
+      DateTimeStringBuilder(Locale &localizer, const DateTimeFields &date) noexcept
           : _localizer(localizer), _date(date)
       {
       }
@@ -75,52 +75,52 @@ namespace krys::boo
         {
           case FieldType::Year:
             // Always use padding width of 4 so it matches DateTimeEditElement.
-            AppendNumber(_date.FullYear(), 4);
+            AppendNumber(_date.Year, 4);
             return;
           case FieldType::Month:
             if (numberOfPatternCharacters == 3)
             {
-              _builder.append(_localizer.ShortMonthLabels()[static_cast<size_t>(_date.Month())]);
+              _builder.append(_localizer.ShortMonthLabels()[static_cast<size_t>(_date.Month)]);
             }
             else if (numberOfPatternCharacters == 4)
             {
-              _builder.append(_localizer.MonthLabels()[static_cast<size_t>(_date.Month())]);
+              _builder.append(_localizer.MonthLabels()[static_cast<size_t>(_date.Month)]);
             }
             else
             {
               // Always use padding width of 2 so it matches DateTimeEditElement.
-              AppendNumber(_date.Month() + 1, 2);
+              AppendNumber(_date.Month + 1, 2);
             }
             return;
           case FieldType::MonthStandAlone:
             if (numberOfPatternCharacters == 3)
             {
-              _builder.append(_localizer.ShortStandAloneMonthLabels()[static_cast<size_t>(_date.Month())]);
+              _builder.append(_localizer.ShortStandAloneMonthLabels()[static_cast<size_t>(_date.Month)]);
             }
             else if (numberOfPatternCharacters == 4)
             {
-              _builder.append(_localizer.StandAloneMonthLabels()[static_cast<size_t>(_date.Month())]);
+              _builder.append(_localizer.StandAloneMonthLabels()[static_cast<size_t>(_date.Month)]);
             }
             else
             {
               // Always use padding width of 2 so it matches DateTimeEditElement.
-              AppendNumber(_date.Month() + 1, 2);
+              AppendNumber(_date.Month + 1, 2);
             }
             return;
           case FieldType::DayOfMonth:
             // Always use padding width of 2 so it matches DateTimeEditElement.
-            AppendNumber(_date.MonthDay(), 2);
+            AppendNumber(_date.Day, 2);
             return;
           case FieldType::WeekOfYear:
             // Always use padding width of 2 so it matches DateTimeEditElement.
-            AppendNumber(_date.Week(), 2);
+            AppendNumber(_date.Week, 2);
             return;
           case FieldType::Period:
-            _builder.append(_localizer.TimeAMPMLabels()[_date.Hour() >= 12 ? 1 : 0]);
+            _builder.append(_localizer.TimeAMPMLabels()[_date.Hour >= 12 ? 1 : 0]);
             return;
           case FieldType::Hour12:
           {
-            int hour12 = _date.Hour() % 12;
+            int hour12 = _date.Hour % 12;
             if (!hour12)
             {
               hour12 = 12;
@@ -129,14 +129,14 @@ namespace krys::boo
             return;
           }
           case FieldType::Hour23:
-            AppendNumber(_date.Hour(), static_cast<size_t>(numberOfPatternCharacters));
+            AppendNumber(_date.Hour, static_cast<size_t>(numberOfPatternCharacters));
             return;
           case FieldType::Hour11:
-            AppendNumber(_date.Hour() % 12, static_cast<size_t>(numberOfPatternCharacters));
+            AppendNumber(_date.Hour % 12, static_cast<size_t>(numberOfPatternCharacters));
             return;
           case FieldType::Hour24:
           {
-            int hour24 = _date.Hour();
+            int hour24 = _date.Hour;
             if (!hour24)
             {
               hour24 = 24;
@@ -145,16 +145,16 @@ namespace krys::boo
             return;
           }
           case FieldType::Minute:
-            AppendNumber(_date.Minute(), static_cast<size_t>(numberOfPatternCharacters));
+            AppendNumber(_date.Minute, static_cast<size_t>(numberOfPatternCharacters));
             return;
           case FieldType::Second:
-            if (!_date.Millisecond())
+            if (!_date.Millisecond)
             {
-              AppendNumber(_date.Second(), static_cast<size_t>(numberOfPatternCharacters));
+              AppendNumber(_date.Second, static_cast<size_t>(numberOfPatternCharacters));
             }
             else
             {
-              double second = _date.Second() + _date.Millisecond() / 1000.0;
+              double second = _date.Second + _date.Millisecond / 1000.0;
               auto formatted = std::format("{:.3f}", second);
               auto zeroPaddedSecondString = ZeroPadString(
                 utf8_stringview(reinterpret_cast<const char8 *>(formatted.data()), formatted.size()),
@@ -431,31 +431,25 @@ namespace krys::boo
     return WritingDirection::Default;
   }
 
-  utf8_string Locale::FormatDateTime(const DateComponents &date, FormatType formatType) noexcept
+  utf8_string Locale::FormatDateTime(const DateTimeFields &date, FormatType formatType) noexcept
   {
-    if (date.Type() == DateComponentsType::Invalid)
-    {
-      return {};
-    }
-
     DateTimeStringBuilder builder(*this, date);
-    switch (date.Type())
+    switch (date.Kind)
     {
-      case DateComponentsType::Time:
+      case DateTimeKind::Time:
         builder.Build(formatType == FormatType::Short ? ShortTimeFormat() : TimeFormat());
         break;
-      case DateComponentsType::Date: builder.Build(DateFormat()); break;
-      case DateComponentsType::Month:
+      case DateTimeKind::Date: builder.Build(DateFormat()); break;
+      case DateTimeKind::Month:
         builder.Build(formatType == FormatType::Short ? ShortMonthFormat() : MonthFormat());
         break;
-      case DateComponentsType::Week:
+      case DateTimeKind::Week:
         // FIXME: Add support for formatting weeks.
         break;
-      case DateComponentsType::DateTimeLocal:
+      case DateTimeKind::DateTime:
         builder.Build(formatType == FormatType::Short ? DateTimeFormatWithoutSeconds()
                                                       : DateTimeFormatWithSeconds());
         break;
-      case DateComponentsType::Invalid: krys_debug_assert(false); break;
     }
     return builder.ToString();
   }

@@ -4,8 +4,8 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooserClient.hpp"
 #include "Krystal.Booey/Platform/DateComponents.hpp"
-#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.I18n/Locale.hpp"
 #include "Krystal.UI/View.hpp"
 #include <algorithm>
 #include <charconv>
@@ -289,7 +289,7 @@ namespace krys::ui
   {
     krys_debug_assert(_owner);
 
-    auto locale = boo::Locale::Create(_parameters.Locale);
+    auto locale = i18n::Locale::Create(_parameters.Locale);
 
     // A right-to-left input's picker is mirrored: the week runs from the right, and the button for the
     // previous page is on the right (its arrow, a mirrored character, points right).
@@ -405,7 +405,10 @@ namespace krys::ui
         {
           month = *date;
         }
-        AppendEscaped(html, locale->FormatDateTime(month));
+        if (auto fields = month.ToDateTimeFields())
+        {
+          AppendEscaped(html, locale->FormatDateTime(*fields));
+        }
         html += nextButton;
         html += u8"<tr>";
 

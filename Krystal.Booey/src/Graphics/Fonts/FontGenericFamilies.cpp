@@ -24,8 +24,8 @@
  */
 
 #include "Krystal.Booey/Graphics/Fonts/FontGenericFamilies.hpp"
-#include "Krystal.Booey/Platform/Locale/Language.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.I18n/Language.hpp"
 #include "Krystal.Text/Script.hpp"
 
 namespace krys::boo
@@ -66,8 +66,8 @@ namespace krys::boo
     // Chinese. In the absence of all other signals, we consult with the user's system preferences.
     if (script == text::Script::Han)
     {
-      it = fontMap.find(static_cast<int32>(UserPrefersSimplifiedChinese() ? text::Script::SimplifiedHan
-                                                                          : text::Script::TraditionalHan));
+      it = fontMap.find(static_cast<int32>(
+        i18n::UserPrefersSimplifiedChinese() ? text::Script::SimplifiedHan : text::Script::TraditionalHan));
       if (it != fontMap.end())
       {
         return it->second;

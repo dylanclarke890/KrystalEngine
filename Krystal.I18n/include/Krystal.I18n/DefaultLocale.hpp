@@ -3,7 +3,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 
-namespace krys::text
+namespace krys::i18n
 {
   /// @brief The process's default locale for text processing (ICU's, such as `en_US`), which break iteration
   /// and locale formatting fall back to.

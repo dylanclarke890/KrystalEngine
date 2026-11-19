@@ -21,11 +21,11 @@
 
 #include "Krystal.Booey/SVG/SVGTests.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGStringList.hpp"
+#include "Krystal.I18n/Locale.hpp"
 
 namespace krys::boo
 {
@@ -67,7 +67,7 @@ namespace krys::boo
       return true;
     }
 
-    auto defaultLanguage = DefaultLanguage();
+    auto defaultLanguage = i18n::DefaultLanguage();
     auto genericDefaultLanguage = DOMStringView(defaultLanguage).substr(0, 2);
     for (auto &language : attributes->SystemLanguage().Items())
     {

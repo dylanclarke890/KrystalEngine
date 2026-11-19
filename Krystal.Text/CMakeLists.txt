@@ -23,7 +23,7 @@ target_compile_options(Krystal.Text
 )
 
 # Third-party - ICU (break iteration, character properties, bidi, scripts, case mapping, IDNA and regular
-# expressions); only the sources include it
+# expressions); only the sources include it. Krystal.I18n has its locale data.
 find_package(ICU REQUIRED COMPONENTS uc in dt)
 target_link_libraries(Krystal.Text PRIVATE ICU::uc ICU::in ICU::dt)
 
@@ -75,8 +75,6 @@ target_sources(Krystal.Text
       include/Krystal.Text/Hyphenation.hpp
       include/Krystal.Text/ICodec.hpp
       include/Krystal.Text/IDNA.hpp
-      include/Krystal.Text/Locale.hpp
-      include/Krystal.Text/LocaleToScriptMapping.hpp
       include/Krystal.Text/Regex.hpp
       include/Krystal.Text/Script.hpp
       include/Krystal.Text/TextBoundaries.hpp
@@ -94,8 +92,6 @@ target_sources(Krystal.Text
     src/HarfBuzz.cpp
     src/Hyphenation.cpp
     src/IDNA.cpp
-    src/Locale.cpp
-    src/LocaleToScriptMapping.cpp
     src/Regex.cpp
     src/Script.cpp
     src/TextBoundaries.cpp

@@ -30,13 +30,13 @@
 
 #pragma once
 
-#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.I18n/Locale.hpp"
 #include <string>
 #include <unicode/udat.h>
 #include <unicode/unum.h>
 
-namespace krys::boo
+namespace krys::i18n
 {
   /// @brief A locale whose data comes from ICU.
   class LocaleICU final : public Locale

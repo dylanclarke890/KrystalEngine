@@ -7,7 +7,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontMetrics.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontPalette.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSizeAdjust.hpp"
-#include "Krystal.Booey/Platform/Locale/Language.hpp"
+#include "Krystal.I18n/Language.hpp"
 #include "Krystal.Text/Script.hpp"
 
 namespace krys::boo::tests
@@ -173,10 +173,10 @@ namespace krys::boo::tests
       CHECK(description.ComputedLocale() == u8"zh-TW");
 
       // The specialised locale is the first Chinese language the user prefers.
-      OverrideUserPreferredLanguages({u8"en-GB", u8"zh-Hant-HK"});
+      i18n::OverrideUserPreferredLanguages({u8"en-GB", u8"zh-Hant-HK"});
       description.SetSpecifiedLocale(u8"zh");
       CHECK(description.ComputedLocale() == u8"zh-Hant-HK");
-      OverrideUserPreferredLanguages({});
+      i18n::OverrideUserPreferredLanguages({});
       description.SetSpecifiedLocale(u8"zh");
       CHECK(description.ComputedLocale() == u8"zh-hans");
     }

@@ -77,6 +77,11 @@ namespace krys::text
   class ICodec;
 }
 
+namespace krys::i18n
+{
+  class Locale;
+}
+
 namespace krys::boo
 {
   class AXObjectCache;
@@ -109,7 +114,6 @@ namespace krys::boo
   class LocalDOMWindow;
   class LocalFrame;
   class LocalFrameView;
-  class Locale;
   class MediaQueryList;
   class MouseEvent;
   class MouseEventWithHitTestResults;
@@ -477,7 +481,7 @@ namespace krys::boo
     Timer _styleRecalcTimer;
     Timer _intersectionObserversInitialUpdateTimer;
     List<WeakPtr<Element>> _autofocusCandidates;
-    mutable HashMap<utf8_string, UniquePtr<Locale>> _localeCache;
+    mutable HashMap<utf8_string, UniquePtr<i18n::Locale>> _localeCache;
     // The inputs inserted without their user agent shadow tree, which the next style resolution creates.
     List<WeakPtr<Element>> _elementsWithPendingUserAgentShadowTreeUpdates;
     bool _autofocusProcessed {false};
@@ -976,7 +980,7 @@ namespace krys::boo
 
     /// @brief The locale form controls in @p locale (a language tag, from a `lang` attribute) use: the user
     /// interface's, unless @p locale is given and `Settings::LangAttributeAwareFormControlUIEnabled` is on.
-    KRYS_NODISCARD boo::Locale &GetCachedLocale(utf8_stringview locale) const noexcept;
+    KRYS_NODISCARD i18n::Locale &GetCachedLocale(utf8_stringview locale) const noexcept;
 
     void InvalidateCachedCSSParserContext() noexcept;
 

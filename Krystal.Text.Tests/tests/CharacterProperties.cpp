@@ -1,6 +1,5 @@
 ﻿#include "Krystal.Text/CharacterProperties.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Text/Locale.hpp"
 
 namespace krys::text::tests
 {
@@ -38,14 +37,5 @@ namespace krys::text::tests
     // Half-width katakana have narrow decompositions to their full-width forms.
     CHECK(FullWidthForm(U'ｱ') == U'ア');
     CHECK(FullWidthForm(U'日') == U'日');
-  }
-
-  TEST_CASE("Locale: default locale", "[Text][Locale]")
-  {
-    auto previous = DefaultLocale();
-    SetDefaultLocale(u8"fr_FR");
-    CHECK(DefaultLocale() == u8"fr_FR");
-    SetDefaultLocale(previous);
-    CHECK(DefaultLocale() == previous);
   }
 }

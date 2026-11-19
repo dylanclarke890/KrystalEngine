@@ -23,11 +23,12 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Platform/Locale/Language.hpp"
-#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
+#include "Krystal.I18n/Language.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.I18n/Locale.hpp"
 
-namespace krys::boo
+namespace krys::i18n
 {
   namespace
   {

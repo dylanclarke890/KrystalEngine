@@ -34,9 +34,9 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/InputTypes/DateTimeFieldsState.hpp"
 #include "Krystal.Booey/HTML/Shadow/DateTimeFieldElements.hpp"
-#include "Krystal.Booey/Platform/Locale/DateTimeFormat.hpp"
-#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.I18n/DateTimeFormat.hpp"
+#include "Krystal.I18n/Locale.hpp"
 #include <algorithm>
 #include <limits>
 
@@ -46,7 +46,7 @@ namespace krys::boo::html
   {
     constexpr size_t NotFound = std::numeric_limits<size_t>::max();
 
-    class DateTimeEditBuilder final : private DateTimeFormat::TokenHandler
+    class DateTimeEditBuilder final : private i18n::DateTimeFormat::TokenHandler
     {
       KRYS_NON_COPYABLE(DateTimeEditBuilder);
 
@@ -64,14 +64,14 @@ namespace krys::boo::html
       bool Build(DOMStringView formatString) noexcept
       {
         _editElement->ResetFields();
-        return DateTimeFormat::Parse(formatString, *this);
+        return i18n::DateTimeFormat::Parse(formatString, *this);
       }
 
     private:
       // DateTimeFormat::TokenHandler functions:
-      void VisitField(DateTimeFormat::FieldType fieldType, int count) noexcept final
+      void VisitField(i18n::DateTimeFormat::FieldType fieldType, int count) noexcept final
       {
-        using FieldType = DateTimeFormat::FieldType;
+        using FieldType = i18n::DateTimeFormat::FieldType;
         auto &document = _editElement->NodeDocument();
         auto &owner = static_cast<DateTimeFieldElementFieldOwner &>(*_editElement);
 

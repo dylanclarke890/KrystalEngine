@@ -28,7 +28,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 
-namespace krys::boo
+namespace krys::i18n
 {
   /// @brief Parses date time formats defined in Unicode Technical Standard 35, Locale Data Markup Language
   /// (LDML).

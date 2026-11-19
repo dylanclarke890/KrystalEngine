@@ -59,13 +59,17 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
+namespace krys::i18n
+{
+  class Locale;
+}
+
 namespace krys::boo
 {
   class HTMLButtonElement;
   class HTMLElement;
   class HTMLSlotElement;
   struct IntersectionObserverData;
-  class Locale;
   class PlatformKeyboardEvent;
   class PlatformMouseEvent;
   class PseudoElement;
@@ -759,7 +763,7 @@ namespace krys::boo
     }
 
     /// @brief The locale the element's form controls use, from its language.
-    KRYS_NODISCARD boo::Locale &GetLocale() const noexcept;
+    KRYS_NODISCARD i18n::Locale &GetLocale() const noexcept;
 
     /// @brief The attribute list, synchronised first.
     KRYS_NODISCARD const List<Ref<Attr>> &AttributeList() const noexcept

@@ -150,7 +150,6 @@
 #include "Krystal.Booey/Page/ResizeObserver/ResizeObserverEntry.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
-#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
@@ -186,6 +185,7 @@
 #include "Krystal.Core/Utils/ScopeExit.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
+#include "Krystal.I18n/Locale.hpp"
 #include <algorithm>
 #include <chrono>
 #include <format>
@@ -3942,17 +3942,17 @@ namespace krys::boo
     ScheduleFullStyleRebuild();
   }
 
-  boo::Locale &Document::GetCachedLocale(utf8_stringview locale) const noexcept
+  i18n::Locale &Document::GetCachedLocale(utf8_stringview locale) const noexcept
   {
     utf8_string localeKey(locale);
     if (locale.empty() || !GetSettings().LangAttributeAwareFormControlUIEnabled)
     {
-      localeKey = DefaultLanguage();
+      localeKey = i18n::DefaultLanguage();
     }
     auto [it, isNewEntry] = _localeCache.try_emplace(localeKey);
     if (isNewEntry)
     {
-      it->second = boo::Locale::Create(localeKey);
+      it->second = i18n::Locale::Create(localeKey);
     }
     return *it->second;
   }

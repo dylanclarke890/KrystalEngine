@@ -1,10 +1,9 @@
-﻿#include "Krystal.Booey/Platform/Locale/LocaleICU.hpp"
-#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Platform/DateComponents.hpp"
+﻿#include "catch2/catch_test_macros.hpp"
+#include "Krystal.I18n/Locale.hpp"
 
-namespace krys::boo::tests
+namespace krys::i18n::tests
 {
-  TEST_CASE("LocaleICU: date and time formats", "[Core][LocaleICU]")
+  TEST_CASE("LocaleICU: date and time formats", "[I18n][LocaleICU]")
   {
     SECTION("en-US")
     {
@@ -50,7 +49,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("LocaleICU: month labels", "[Core][LocaleICU]")
+  TEST_CASE("LocaleICU: month labels", "[I18n][LocaleICU]")
   {
     auto english = Locale::Create(u8"en-US");
     REQUIRE(english->MonthLabels().size() == 12);
@@ -65,7 +64,7 @@ namespace krys::boo::tests
     CHECK(german->ShortMonthLabels()[0] == u8"Jan.");
   }
 
-  TEST_CASE("LocaleICU: numbers", "[Core][LocaleICU]")
+  TEST_CASE("LocaleICU: numbers", "[I18n][LocaleICU]")
   {
     SECTION("en-US")
     {
@@ -98,36 +97,30 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("LocaleICU: formatting dates", "[Core][LocaleICU]")
+  TEST_CASE("LocaleICU: formatting dates", "[I18n][LocaleICU]")
   {
     auto english = Locale::Create(u8"en-US");
-    auto date = DateComponents::FromParsingDate(u8"2026-03-07");
-    REQUIRE(date);
-    CHECK(english->FormatDateTime(*date) == u8"03/07/2026");
+    CHECK(english->FormatDateTime({.Kind = DateTimeKind::Date, .Year = 2'026, .Month = 2, .Day = 7})
+          == u8"03/07/2026");
 
-    auto month = DateComponents::FromParsingMonth(u8"2026-09");
-    REQUIRE(month);
-    CHECK(english->FormatDateTime(*month) == u8"September 2026");
-    CHECK(english->FormatDateTime(*month, Locale::FormatType::Short) == u8"Sep 2026");
+    DateTimeFields month {.Kind = DateTimeKind::Month, .Year = 2'026, .Month = 8};
+    CHECK(english->FormatDateTime(month) == u8"September 2026");
+    CHECK(english->FormatDateTime(month, Locale::FormatType::Short) == u8"Sep 2026");
 
-    auto time = DateComponents::FromParsingTime(u8"00:05:09.250");
-    REQUIRE(time);
-    CHECK(english->FormatDateTime(*time) == u8"12:05:09.250\u202fAM");
-    CHECK(english->FormatDateTime(*time, Locale::FormatType::Short) == u8"12:05\u202fAM");
+    DateTimeFields time {.Kind = DateTimeKind::Time, .Hour = 0, .Minute = 5, .Second = 9, .Millisecond = 250};
+    CHECK(english->FormatDateTime(time) == u8"12:05:09.250\u202fAM");
+    CHECK(english->FormatDateTime(time, Locale::FormatType::Short) == u8"12:05\u202fAM");
 
-    auto dateTime = DateComponents::FromParsingDateTimeLocal(u8"2026-12-31T23:59");
-    REQUIRE(dateTime);
-    CHECK(Locale::Create(u8"en-GB")->FormatDateTime(*dateTime, Locale::FormatType::Short)
+    DateTimeFields dateTime {
+      .Kind = DateTimeKind::DateTime, .Year = 2'026, .Month = 11, .Day = 31, .Hour = 23, .Minute = 59};
+    CHECK(Locale::Create(u8"en-GB")->FormatDateTime(dateTime, Locale::FormatType::Short)
           == u8"31/12/2026, 23:59");
 
     // Weeks aren't formatted.
-    auto week = DateComponents::FromParsingWeek(u8"2026-W10");
-    REQUIRE(week);
-    CHECK(english->FormatDateTime(*week).empty());
-    CHECK(english->FormatDateTime(DateComponents()).empty());
+    CHECK(english->FormatDateTime({.Kind = DateTimeKind::Week, .Year = 2'026, .Week = 10}).empty());
   }
 
-  TEST_CASE("LocaleICU: the default language", "[Core][LocaleICU]")
+  TEST_CASE("LocaleICU: the default language", "[I18n][LocaleICU]")
   {
     auto language = DefaultLanguage();
     CHECK(!language.empty());

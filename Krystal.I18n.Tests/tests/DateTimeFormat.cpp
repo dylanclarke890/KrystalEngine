@@ -1,7 +1,7 @@
-﻿#include "Krystal.Booey/Platform/Locale/DateTimeFormat.hpp"
+﻿#include "Krystal.I18n/DateTimeFormat.hpp"
 #include "catch2/catch_test_macros.hpp"
 
-namespace krys::boo::tests
+namespace krys::i18n::tests
 {
   namespace
   {
@@ -41,7 +41,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("DateTimeFormat: parsing", "[Core][DateTimeFormat]")
+  TEST_CASE("DateTimeFormat: parsing", "[I18n][DateTimeFormat]")
   {
     CHECK(Parse(u8"yyyy-MM-dd") == u8"y4 [-] M2 [-] d2 ");
     CHECK(Parse(u8"h:mm:ss a") == u8"h1 [:] m2 [:] s2 [ ] a1 ");
@@ -60,7 +60,7 @@ namespace krys::boo::tests
     CHECK(Parse(u8"").empty());
   }
 
-  TEST_CASE("DateTimeFormat: quoting literals", "[Core][DateTimeFormat]")
+  TEST_CASE("DateTimeFormat: quoting literals", "[I18n][DateTimeFormat]")
   {
     CHECK(Quote(u8"").empty());
     CHECK(Quote(u8"-/: ") == u8"-/: ");
