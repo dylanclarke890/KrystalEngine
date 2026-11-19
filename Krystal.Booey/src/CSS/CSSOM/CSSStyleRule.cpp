@@ -35,7 +35,7 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Style/Rules/RuleData.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 

@@ -30,8 +30,8 @@
  */
 
 #include "Krystal.Core/Types/Decimal.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include <cfloat>
 #include <charconv>
 #include <cmath>

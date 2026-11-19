@@ -35,7 +35,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 
 namespace krys::boo
 {

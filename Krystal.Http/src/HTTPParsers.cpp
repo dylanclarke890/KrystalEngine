@@ -31,7 +31,7 @@
  */
 
 #include "Krystal.Http/HTTPParsers.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 
 namespace krys::http

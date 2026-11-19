@@ -25,8 +25,8 @@
 
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineTextItem.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 
 namespace krys::boo::layout
 {

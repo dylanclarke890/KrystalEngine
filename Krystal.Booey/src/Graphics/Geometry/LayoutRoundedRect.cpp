@@ -33,7 +33,7 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Graphics/Geometry/Region.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include <algorithm>
 
 namespace krys::boo

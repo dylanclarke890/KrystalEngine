@@ -28,8 +28,8 @@
 #include "Krystal.Booey/Graphics/Fonts/FontSelectionAlgorithm.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/StringAtom.hpp"
 
 namespace krys::boo
 {

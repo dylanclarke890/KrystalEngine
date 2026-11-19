@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Text/UnicodeHelpers.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <algorithm>
 #include <unicode/uchar.h>
 

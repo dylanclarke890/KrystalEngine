@@ -27,10 +27,10 @@
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
 #include "Krystal.Booey/Text/TextBreakIterator.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Text/Encodings/UTF.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Text/Encodings/UTF.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <limits>

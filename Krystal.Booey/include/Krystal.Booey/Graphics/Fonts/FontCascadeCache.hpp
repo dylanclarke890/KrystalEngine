@@ -33,9 +33,9 @@
 #include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/StringAtom.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 

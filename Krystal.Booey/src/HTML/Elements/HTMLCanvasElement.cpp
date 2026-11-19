@@ -38,7 +38,7 @@
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderHTMLCanvas.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 
 namespace krys::boo
 {

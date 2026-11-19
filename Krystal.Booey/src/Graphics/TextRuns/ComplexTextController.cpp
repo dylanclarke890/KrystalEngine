@@ -27,8 +27,8 @@
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Booey/Text/TextBreakIterator.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include <algorithm>
 #include <unicode/uchar.h>
 

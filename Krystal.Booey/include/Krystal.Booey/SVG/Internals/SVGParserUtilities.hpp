@@ -25,7 +25,7 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <utility>
 

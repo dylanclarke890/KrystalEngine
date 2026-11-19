@@ -31,7 +31,7 @@
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/IterationStatus.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"

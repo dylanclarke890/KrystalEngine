@@ -24,7 +24,7 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Platform/Choosers/PopupMenuStyle.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 
 namespace krys::boo
 {

@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Booey/URL/URL.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 

@@ -42,9 +42,9 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/SubgridValue.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridPosition.hpp"
-#include "Krystal.Core/Text/Encodings/Decode.hpp"
-#include "Krystal.Core/Text/Encodings/Encode.hpp"
-#include "Krystal.Core/Text/Encodings/UTF.hpp"
+#include "Krystal.Text/Encodings/Decode.hpp"
+#include "Krystal.Text/Encodings/Encode.hpp"
+#include "Krystal.Text/Encodings/UTF.hpp"
 
 namespace krys::boo::css::parse_property
 {

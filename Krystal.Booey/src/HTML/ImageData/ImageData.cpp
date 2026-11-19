@@ -29,7 +29,7 @@
 
 #include "Krystal.Booey/HTML/ImageData/ImageData.hpp"
 #include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include <cstring>
 #include <limits>
 

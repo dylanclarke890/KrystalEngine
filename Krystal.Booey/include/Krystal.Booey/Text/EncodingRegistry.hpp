@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Core/Text/EncodingRegistry.hpp"
+#include "Krystal.Text/EncodingRegistry.hpp"
 
 namespace krys::boo
 {

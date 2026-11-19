@@ -21,7 +21,7 @@
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include <limits>
 
 namespace krys::boo::css

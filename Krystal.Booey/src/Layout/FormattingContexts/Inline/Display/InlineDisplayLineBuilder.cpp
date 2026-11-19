@@ -30,7 +30,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxGeometry.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 
 #include <ranges>
 

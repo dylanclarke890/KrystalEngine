@@ -30,8 +30,8 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCustomPlatformData.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFont.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFontLoadRequest.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::css
 {

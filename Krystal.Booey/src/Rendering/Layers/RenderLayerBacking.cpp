@@ -57,7 +57,7 @@
 #include "Krystal.Booey/Style/Values/Transforms/Scale.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Transform.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Translate.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 

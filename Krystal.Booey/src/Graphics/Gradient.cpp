@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Core/Colour/ColourTextStream.hpp"
 #include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
 namespace krys::boo

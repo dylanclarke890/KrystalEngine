@@ -61,7 +61,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
 #include <cmath>
 

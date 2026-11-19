@@ -36,7 +36,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include <algorithm>
 

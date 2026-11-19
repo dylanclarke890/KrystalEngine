@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo
 {

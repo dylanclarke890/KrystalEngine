@@ -6,7 +6,7 @@
 #include "Krystal.Booey/Graphics/Fonts/Font.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 
 namespace krys::boo::tests
 {

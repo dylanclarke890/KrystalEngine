@@ -25,7 +25,7 @@
 #include "Krystal.Booey/Graphics/Filters/FEDisplacementMap.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterImage.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo
 {

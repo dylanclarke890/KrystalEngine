@@ -59,20 +59,15 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Colour/ColourInterpolation.cpp
 	PRIVATE tests/Colour/ColourUtilities.cpp
 
-  # Text
-	PRIVATE tests/Text/ASCII.cpp
-	PRIVATE tests/Text/Base64.cpp
-	PRIVATE tests/Text/CodePointIterator.cpp
-	PRIVATE tests/Text/StringBuilder.cpp
-	PRIVATE tests/Text/StringToIntegerConversion.cpp
-	PRIVATE tests/Text/ParsingUtilities.cpp
-	PRIVATE tests/Text/TextStream.cpp
-	PRIVATE tests/Text/EncodingRegistry.cpp
-	PRIVATE tests/Text/Unicode.cpp
-	PRIVATE tests/Text/Encodings/ASCII.cpp
-	PRIVATE tests/Text/Encodings/Atari.cpp
-	PRIVATE tests/Text/Encodings/ISO-8859.cpp
-	PRIVATE tests/Text/Encodings/Windows.cpp
+  # Strings
+	PRIVATE tests/Strings/ASCII.cpp
+	PRIVATE tests/Strings/CodePointIterator.cpp
+	PRIVATE tests/Strings/StringAtom.cpp
+	PRIVATE tests/Strings/StringBuilder.cpp
+	PRIVATE tests/Strings/StringToIntegerConversion.cpp
+	PRIVATE tests/Strings/ParsingUtilities.cpp
+	PRIVATE tests/Strings/TextStream.cpp
+	PRIVATE tests/Strings/Unicode.cpp
 
   # Types
 	PRIVATE tests/Types/BloomFilter.cpp
@@ -84,7 +79,6 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Types/ListHashSet.cpp
 	PRIVATE tests/Types/Packed.cpp
 	PRIVATE tests/Types/SharedBuffer.cpp
-	PRIVATE tests/Types/StringAtom.cpp
 	PRIVATE tests/Types/ThreadSafeWeakPtr.cpp
 
   # Threading

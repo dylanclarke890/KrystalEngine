@@ -29,8 +29,8 @@
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/StringAtom.hpp"
 
 namespace krys::boo
 {

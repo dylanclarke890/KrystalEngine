@@ -35,8 +35,8 @@
 #include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 namespace krys::boo

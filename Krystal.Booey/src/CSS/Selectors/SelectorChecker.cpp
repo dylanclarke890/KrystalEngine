@@ -50,7 +50,7 @@
 #include "Krystal.Booey/Style/Rules/SelectorMatchingState.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include <algorithm>
 

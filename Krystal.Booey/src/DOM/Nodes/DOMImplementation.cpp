@@ -14,7 +14,7 @@
 #include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Http/MIMETypeRegistry.hpp"
 
 namespace krys::boo::dom

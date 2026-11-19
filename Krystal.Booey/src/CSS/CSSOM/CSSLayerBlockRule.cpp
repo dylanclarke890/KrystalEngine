@@ -30,7 +30,7 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSLayerBlockRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo
 {

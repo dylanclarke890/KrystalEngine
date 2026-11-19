@@ -26,8 +26,8 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
-#include "Krystal.Core/Text/ParsingUtilities.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/ParsingUtilities.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo
 {

@@ -34,8 +34,8 @@
 #include "Krystal.Booey/Style/Change.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Text/TextBreakIterator.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include <unicode/uchar.h>
 
 namespace krys::boo

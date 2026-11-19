@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 
 namespace krys::boo
 {

@@ -26,8 +26,8 @@
 #include "Krystal.Booey/Text/TextSpacing.hpp"
 #include "Krystal.Booey/Graphics/Fonts/Font.hpp"
 #include "Krystal.Booey/Text/CharacterProperties.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 
 namespace krys::boo
 {

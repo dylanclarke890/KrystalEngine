@@ -24,7 +24,7 @@
 
 #include "Krystal.Booey/CSS/Values/Borders/BorderRadius.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
 namespace krys::boo::css

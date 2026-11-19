@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo
 {

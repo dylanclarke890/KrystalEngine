@@ -23,7 +23,7 @@
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
-#include "Krystal.Core/Text/StringToIntegerConversion.hpp"
+#include "Krystal.Core/Strings/StringToIntegerConversion.hpp"
 
 namespace krys::boo
 {

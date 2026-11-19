@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Style/Values/Backgrounds/BorderImageSlice.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/BorderImageSource.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/BorderImageWidth.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {

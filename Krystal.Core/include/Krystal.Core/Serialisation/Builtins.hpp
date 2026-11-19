@@ -3,7 +3,7 @@
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
 
 namespace krys::serialisation

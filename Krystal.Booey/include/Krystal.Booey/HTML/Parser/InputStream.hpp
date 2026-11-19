@@ -3,9 +3,9 @@
 #include "Krystal.Booey/Types/IsEOF.hpp"
 #include "Krystal.Booey/Types/SourceLocation.hpp"
 #include "Krystal.Core/Base.hpp"
-#include "Krystal.Core/Text/Encodings/Decode.hpp"
-#include "Krystal.Core/Text/Encodings/Encode.hpp"
-#include "Krystal.Core/Text/Encodings/UTF.hpp"
+#include "Krystal.Text/Encodings/Decode.hpp"
+#include "Krystal.Text/Encodings/Encode.hpp"
+#include "Krystal.Text/Encodings/UTF.hpp"
 
 namespace krys::boo::html
 {

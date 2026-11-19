@@ -23,7 +23,7 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 // Helper functions for converting from CSSValues to text.
 namespace krys::boo::css

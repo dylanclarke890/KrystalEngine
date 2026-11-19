@@ -29,8 +29,8 @@
 #include "Krystal.Booey/URL/URLParser.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Detection/OS.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include <algorithm>

@@ -49,8 +49,8 @@
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParserScope.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>

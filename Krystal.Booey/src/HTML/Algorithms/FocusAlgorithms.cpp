@@ -58,7 +58,7 @@
 #include "Krystal.Booey/Page/SpatialNavigation.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include <algorithm>
 #include <limits>

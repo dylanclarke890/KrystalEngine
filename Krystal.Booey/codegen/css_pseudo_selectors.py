@@ -226,7 +226,7 @@ def generate_inlines_hpp(path, pseudo_classes, pseudo_elements):
             headers=[
                 f"{SELECTORS_DIR}/Selector.hpp",
                 f"{SELECTORS_DIR}/SelectorParserContext.hpp",
-                "Krystal.Core/Text/ASCII.hpp",
+                "Krystal.Core/Strings/ASCII.hpp",
             ],
         )
 

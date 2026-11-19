@@ -51,7 +51,7 @@
 #include "Krystal.Booey/Rendering/VisibleRectContext.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <algorithm>
 

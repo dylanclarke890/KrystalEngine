@@ -25,7 +25,7 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::css::mq
 {

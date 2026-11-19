@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include <algorithm>
 #include <cmath>
 #include <numbers>

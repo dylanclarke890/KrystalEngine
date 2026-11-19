@@ -34,7 +34,7 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSStyleValueFactory.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 
 namespace krys::boo
 {

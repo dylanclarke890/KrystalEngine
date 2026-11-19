@@ -27,7 +27,7 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 
 // The user-visible strings forms show, in English.
 // FIXME: Localisation, once the host says which language to use.

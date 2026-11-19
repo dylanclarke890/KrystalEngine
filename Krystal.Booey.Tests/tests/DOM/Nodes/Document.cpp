@@ -37,8 +37,8 @@
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Core/Text/Encodings/Windows.hpp"
-#include "Krystal.Core/Text/ICodec.hpp"
+#include "Krystal.Text/Encodings/Windows.hpp"
+#include "Krystal.Text/ICodec.hpp"
 
 namespace krys::boo::dom::tests
 {

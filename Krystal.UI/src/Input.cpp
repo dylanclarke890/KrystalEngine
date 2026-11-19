@@ -1,7 +1,7 @@
 ﻿#include "Krystal.UI/Input.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <format>
 
 namespace krys::ui::input

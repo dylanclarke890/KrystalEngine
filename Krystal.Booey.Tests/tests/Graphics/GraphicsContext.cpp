@@ -5,7 +5,7 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatSegment.hpp"
 #include "Krystal.Booey/Graphics/NullGraphicsContext.hpp"
 #include "Krystal.Core/Colour/ColourTextStream.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo::tests
 {

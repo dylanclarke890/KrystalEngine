@@ -29,8 +29,8 @@
  */
 
 #include "Krystal.Booey/Platform/DateComponents.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include <array>
 #include <charconv>

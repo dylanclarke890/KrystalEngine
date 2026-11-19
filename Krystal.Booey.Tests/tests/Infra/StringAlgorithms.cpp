@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 
 namespace krys::boo::infra::tests
 {

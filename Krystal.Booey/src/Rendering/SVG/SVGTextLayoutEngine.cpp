@@ -30,7 +30,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGGeometryElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGTextContentElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 
 namespace krys::boo
 {

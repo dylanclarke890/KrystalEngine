@@ -28,8 +28,8 @@
 #include "Krystal.Booey/Graphics/Filters/FilterOperation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/StringAtom.hpp"
 
 namespace krys::boo::style
 {

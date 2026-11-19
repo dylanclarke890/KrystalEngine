@@ -26,12 +26,12 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
 namespace krys::boo

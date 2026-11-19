@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/Painting/TextPaintStyle.hpp"
 #include "Krystal.Booey/Style/Values/TextDecoration/TextShadow.hpp"
-#include "Krystal.Core/Types/StringAtom.hpp"
+#include "Krystal.Core/Strings/StringAtom.hpp"
 
 namespace krys::boo
 {

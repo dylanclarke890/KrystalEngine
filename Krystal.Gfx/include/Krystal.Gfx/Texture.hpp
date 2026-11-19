@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Gfx/Formats.hpp"
 
 namespace krys::gfx

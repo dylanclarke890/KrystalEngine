@@ -31,8 +31,8 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include <unicode/uscript.h>
 
 namespace krys::boo

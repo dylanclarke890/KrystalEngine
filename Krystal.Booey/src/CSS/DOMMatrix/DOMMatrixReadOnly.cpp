@@ -29,7 +29,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Transform.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMPoint.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Transform.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <cmath>
 

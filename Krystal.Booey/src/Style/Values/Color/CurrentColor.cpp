@@ -25,7 +25,7 @@
  */
 
 #include "Krystal.Booey/Style/Values/Color/CurrentColor.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {

@@ -21,8 +21,8 @@
 #include "Krystal.Booey/Rendering/RenderCombineText.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 
 namespace krys::boo

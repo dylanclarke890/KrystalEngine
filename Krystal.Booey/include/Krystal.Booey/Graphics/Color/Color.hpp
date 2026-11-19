@@ -31,9 +31,9 @@
 #include "Krystal.Core/Colour/ColourUtilities.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
 #include <bit>
 #include <functional>

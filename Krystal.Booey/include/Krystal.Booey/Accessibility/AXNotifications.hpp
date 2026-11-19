@@ -27,7 +27,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 
 // Autocorrection, autofill, image overlays and frame loads are left out: Booey has none of them.
 // clang-format off

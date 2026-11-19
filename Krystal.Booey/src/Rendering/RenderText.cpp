@@ -56,10 +56,10 @@
 #include "Krystal.Booey/Style/Values/Text/TabSize.hpp"
 #include "Krystal.Booey/Text/Hyphenation.hpp"
 #include "Krystal.Booey/Text/TextBreakIterator.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include <algorithm>
 #include <array>
 #include <bitset>

@@ -35,7 +35,7 @@
 #include "Krystal.Booey/Style/Values/Shapes/ShapeFunction.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/WindRuleComputation.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/XywhFunction.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {

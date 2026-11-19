@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Types/String.hpp"
 
 // Generated with Pillow: the PNG, WebP (lossless), GIF and BMP hold 3x2 pixels: red, green, blue, then
 // white, black and red at half alpha (transparent in the GIF, opaque in the BMP). The JPEGs are 16x8, red on

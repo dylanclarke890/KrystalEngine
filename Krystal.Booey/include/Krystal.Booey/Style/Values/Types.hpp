@@ -27,7 +27,7 @@
 #include "Krystal.Booey/CSS/Calc/SymbolTable.hpp"
 #include "Krystal.Booey/CSS/Values/NoConversionDataRequiredTag.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Utils/ZipTuple.hpp"

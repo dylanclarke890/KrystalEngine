@@ -10,7 +10,7 @@
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerTransformAnimationValue.hpp"
 #include "Krystal.Booey/Graphics/NullGraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Transforms/RotateTransformOperation.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo::tests
 {

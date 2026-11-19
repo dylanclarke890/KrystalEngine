@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/HTML/Mixins/URLDecomposition.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <limits>
 
 namespace krys::boo::html

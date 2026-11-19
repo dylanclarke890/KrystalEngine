@@ -27,8 +27,8 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
 #include "Krystal.Booey/Style/Values/Content/Quotes.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include <array>
 #include <compare>
 #include <string>

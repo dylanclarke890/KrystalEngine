@@ -1,6 +1,6 @@
 ﻿#include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Threading/WorkQueue.hpp"
 #include "Krystal.Http/MIMETypeRegistry.hpp"
 #include <algorithm>

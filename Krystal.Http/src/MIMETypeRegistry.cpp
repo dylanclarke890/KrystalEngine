@@ -25,7 +25,7 @@
  */
 
 #include "Krystal.Http/MIMETypeRegistry.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
 
 namespace krys::http

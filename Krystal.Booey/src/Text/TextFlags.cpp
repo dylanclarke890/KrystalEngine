@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontFeatureValues.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::boo

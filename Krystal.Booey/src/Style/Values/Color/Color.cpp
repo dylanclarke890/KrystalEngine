@@ -52,7 +52,7 @@
 #include "Krystal.Booey/Style/Values/Color/KeywordColor.hpp"
 #include "Krystal.Booey/Style/Values/Color/LightDarkColor.hpp"
 #include "Krystal.Booey/Style/Values/Color/RelativeColor.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 namespace krys::boo::style

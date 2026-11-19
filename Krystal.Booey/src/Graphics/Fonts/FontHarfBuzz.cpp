@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/Graphics/Fonts/Font.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Text/FreeTypeFace.hpp"
 #include "Krystal.Text/HarfBuzz.hpp"
 #include <algorithm>

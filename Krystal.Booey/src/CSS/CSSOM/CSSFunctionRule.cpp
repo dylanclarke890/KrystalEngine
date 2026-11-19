@@ -27,7 +27,7 @@
 #include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
 #include "Krystal.Booey/CSS/Rules/FunctionRule.hpp"
 #include "Krystal.Booey/CSS/Values/VariableData.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo
 {

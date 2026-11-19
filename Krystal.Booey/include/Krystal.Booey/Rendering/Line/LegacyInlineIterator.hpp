@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Text/UnicodeBidi.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <limits>
 

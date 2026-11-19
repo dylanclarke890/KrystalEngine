@@ -38,7 +38,7 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <algorithm>

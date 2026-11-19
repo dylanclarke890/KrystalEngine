@@ -26,7 +26,7 @@
 #include "Krystal.Booey/URL/URLParser.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
 #include <limits>
 #include <unicode/uidna.h>

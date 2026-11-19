@@ -17,7 +17,7 @@
  */
 
 #include "Krystal.Booey/Platform/Pasteboard/SelectionData.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 
 namespace krys::boo
 {

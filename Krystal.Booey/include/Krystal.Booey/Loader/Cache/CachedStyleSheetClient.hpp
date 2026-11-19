@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/Loader/Cache/CachedResourceClient.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 
 namespace krys::boo
 {

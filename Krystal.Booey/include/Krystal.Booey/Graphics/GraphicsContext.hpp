@@ -39,9 +39,9 @@
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/StringAtom.hpp"
 
 namespace krys::boo
 {

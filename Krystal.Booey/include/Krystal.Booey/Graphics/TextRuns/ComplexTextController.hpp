@@ -31,12 +31,12 @@
 #include "Krystal.Booey/Text/TextSpacing.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include <limits>
 #include <utility>
 

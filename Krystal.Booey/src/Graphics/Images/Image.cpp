@@ -30,7 +30,7 @@
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include <cmath>
 

@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/SVG/Properties/SVGAnimationAdditiveValueFunctionImpl.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
-#include "Krystal.Core/Text/StringToIntegerConversion.hpp"
+#include "Krystal.Core/Strings/StringToIntegerConversion.hpp"
 
 namespace krys::boo
 {

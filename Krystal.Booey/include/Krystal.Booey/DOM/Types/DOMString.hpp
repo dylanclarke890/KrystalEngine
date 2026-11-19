@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Core/Types/String.hpp"
-#include "Krystal.Core/Types/StringAtom.hpp"
+#include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Core/Strings/StringAtom.hpp"
 
 namespace krys::boo
 {

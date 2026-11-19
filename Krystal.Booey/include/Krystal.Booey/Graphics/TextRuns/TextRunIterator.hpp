@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <unicode/uchar.h>
 
 namespace krys::boo

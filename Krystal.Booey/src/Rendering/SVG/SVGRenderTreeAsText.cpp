@@ -71,7 +71,7 @@
 #include "Krystal.Booey/SVG/SVGMarkerTypes.hpp"
 #include "Krystal.Booey/SVG/SVGPointList.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 
 namespace krys::boo
 {

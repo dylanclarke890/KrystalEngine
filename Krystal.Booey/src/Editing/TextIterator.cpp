@@ -48,7 +48,7 @@
 #include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableRow.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include <algorithm>
 #include <climits>
 #include <unicode/utf8.h>

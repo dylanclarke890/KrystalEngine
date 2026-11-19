@@ -37,8 +37,8 @@
 #include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Booey/Text/UnicodeBidi.hpp"
 #include "Krystal.Booey/Text/UnicodeHelpers.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include <cmath>
 #include <numeric>
 #include <unicode/uchar.h>

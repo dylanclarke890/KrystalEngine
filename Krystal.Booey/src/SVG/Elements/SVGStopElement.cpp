@@ -25,7 +25,7 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGGradientStop.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <charconv>
 
 namespace krys::boo

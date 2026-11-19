@@ -1,7 +1,7 @@
 ﻿#include "Krystal.PAL/Platform.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 #include <cstdio>

@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Style/Values/Shapes/FillRule.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/PathComputation.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/WindRuleComputation.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {

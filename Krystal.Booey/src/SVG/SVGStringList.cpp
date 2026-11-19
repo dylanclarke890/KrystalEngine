@@ -25,8 +25,8 @@
 
 #include "Krystal.Booey/SVG/SVGStringList.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo
 {

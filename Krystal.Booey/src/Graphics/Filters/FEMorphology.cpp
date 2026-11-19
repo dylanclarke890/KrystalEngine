@@ -26,7 +26,7 @@
 #include "Krystal.Booey/Graphics/Filters/FEMorphology.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterImage.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include <algorithm>
 
 namespace krys::boo

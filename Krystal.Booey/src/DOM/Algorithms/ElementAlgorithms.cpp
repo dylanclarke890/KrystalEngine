@@ -17,7 +17,7 @@
 #include "Krystal.Booey/Style/Invalidation/ClassChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/Invalidation/IdChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassStateInvalidation.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <utility>
 
 namespace krys::boo::dom

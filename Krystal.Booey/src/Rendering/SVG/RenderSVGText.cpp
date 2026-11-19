@@ -58,7 +58,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGTextElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGTextPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <algorithm>
 #include <tuple>
 

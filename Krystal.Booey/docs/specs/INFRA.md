@@ -118,7 +118,7 @@ Status: n/a (C++ types)
 ### [4.4. Bytes](https://infra.spec.whatwg.org/#bytes)
 
 Status: n/a (C++ types)
-> `uint8` and `byte`; the ASCII classes of `Krystal.Core/Text/ASCII.hpp` take bytes too.
+> `uint8` and `byte`; the ASCII classes of `Krystal.Core/Strings/ASCII.hpp` take bytes too.
 <!-- definitions: byte byte-value ascii-byte -->
 
 ### [4.5. Byte sequences](https://infra.spec.whatwg.org/#byte-sequences)
@@ -158,7 +158,7 @@ Status: n/a (unused)
 ### [4.6. Code points](https://infra.spec.whatwg.org/#code-points)
 
 Status: reviewed (2026-10-31)
-> The ASCII classes are `Krystal.Core/Text/ASCII.hpp` (`IsASCII`, `IsASCIIUpper`, `IsASCIILower`, `IsASCIIAlpha`, `IsASCIIDigit`, `IsASCIIAlphanumeric`, `IsASCIIHexDigit`, `IsASCIIWhitespace`). Tests: `tests/Infra/StringAlgorithms.cpp`. Strings are UTF-8, so they hold only scalar values: surrogates and noncharacters need no handling of their own.
+> The ASCII classes are `Krystal.Core/Strings/ASCII.hpp` (`IsASCII`, `IsASCIIUpper`, `IsASCIILower`, `IsASCIIAlpha`, `IsASCIIDigit`, `IsASCIIAlphanumeric`, `IsASCIIHexDigit`, `IsASCIIWhitespace`). Tests: `tests/Infra/StringAlgorithms.cpp`. Strings are UTF-8, so they hold only scalar values: surrogates and noncharacters need no handling of their own.
 <!-- definitions: code-point code-point-value leading-surrogate trailing-surrogate surrogate scalar-value noncharacter ascii-code-point ascii-tab-or-newline ascii-whitespace c0-control c0-control-or-space control ascii-digit ascii-upper-hex-digit ascii-lower-hex-digit ascii-hex-digit ascii-upper-alpha ascii-lower-alpha ascii-alpha ascii-alphanumeric -->
 
 ### [4.7. Strings](https://infra.spec.whatwg.org/#strings)
@@ -568,7 +568,7 @@ Status: n/a (no JavaScript)
 ## [7. Forgiving base64](https://infra.spec.whatwg.org/#forgiving-base64)
 
 Status: reviewed (2026-10-31)
-> `Base64Encode` and `Base64Decode` (`Krystal.Core/Text/Base64.hpp`); with `ValidatePadding` and `IgnoreWhitespace`, decoding is forgiving-base64 decode, as `atob()` uses it. Tests: `tests/Infra/ForgivingBase64.cpp`.
+> `Base64Encode` and `Base64Decode` (`Krystal.Text/Base64.hpp`); with `ValidatePadding` and `IgnoreWhitespace`, decoding is forgiving-base64 decode, as `atob()` uses it. Tests: `tests/Infra/ForgivingBase64.cpp`.
 
 - [x] [forgiving-base64 encode](https://infra.spec.whatwg.org/#forgiving-base64-encode) — To forgiving-base64 encode given a byte sequence data, apply the base64 algorithm defined in section 4 of RFC 4648 to data and return the result. [RFC4648]
 

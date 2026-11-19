@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImageSource.hpp"
 #include "Krystal.Booey/Platform/ThreadTimers.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include <algorithm>
 
 namespace krys::boo

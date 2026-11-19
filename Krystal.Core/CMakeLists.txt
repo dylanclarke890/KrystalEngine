@@ -180,39 +180,17 @@ target_sources(Krystal.Core
       include/Krystal.Core/Serialisation/Types/Quaternion.hpp
       include/Krystal.Core/Serialisation/Types/Vector.hpp
 
-      # Text
-      include/Krystal.Core/Text/Encodings/All.hpp
-      include/Krystal.Core/Text/Encodings/ASCII.hpp
-      include/Krystal.Core/Text/Encodings/Atari.hpp
-      include/Krystal.Core/Text/Encodings/Base.hpp
-      include/Krystal.Core/Text/Encodings/Big5-HKSCS.hpp
-      include/Krystal.Core/Text/Encodings/Decode.hpp
-      include/Krystal.Core/Text/Encodings/Encode.hpp
-      include/Krystal.Core/Text/Encodings/EncodingId.hpp
-      include/Krystal.Core/Text/Encodings/EUC-KR-UHC.hpp
-      include/Krystal.Core/Text/Encodings/GB18030.hpp
-      include/Krystal.Core/Text/Encodings/IBM.hpp
-      include/Krystal.Core/Text/Encodings/ISO-8859.hpp
-      include/Krystal.Core/Text/Encodings/Kamenicky.hpp
-      include/Krystal.Core/Text/Encodings/KOI8.hpp
-      include/Krystal.Core/Text/Encodings/KZ-1048.hpp
-      include/Krystal.Core/Text/Encodings/Macintosh.hpp
-      include/Krystal.Core/Text/Encodings/PETSCII.hpp
-      include/Krystal.Core/Text/Encodings/ShiftJIS.hpp
-      include/Krystal.Core/Text/Encodings/Tatar.hpp
-      include/Krystal.Core/Text/Encodings/UTF.hpp
-      include/Krystal.Core/Text/Encodings/Windows.hpp
-      include/Krystal.Core/Text/ASCII.hpp
-      include/Krystal.Core/Text/Base64.hpp
-      include/Krystal.Core/Text/CodePointIterator.hpp
-      include/Krystal.Core/Text/EncodingRegistry.hpp
-      include/Krystal.Core/Text/HexNumber.hpp
-      include/Krystal.Core/Text/ICodec.hpp
-      include/Krystal.Core/Text/ParsingUtilities.hpp
-      include/Krystal.Core/Text/StringBuilder.hpp
-      include/Krystal.Core/Text/StringToIntegerConversion.hpp
-      include/Krystal.Core/Text/TextStream.hpp
-      include/Krystal.Core/Text/Unicode.hpp
+      # Strings
+      include/Krystal.Core/Strings/ASCII.hpp
+      include/Krystal.Core/Strings/CodePointIterator.hpp
+      include/Krystal.Core/Strings/HexNumber.hpp
+      include/Krystal.Core/Strings/ParsingUtilities.hpp
+      include/Krystal.Core/Strings/String.hpp
+      include/Krystal.Core/Strings/StringAtom.hpp
+      include/Krystal.Core/Strings/StringBuilder.hpp
+      include/Krystal.Core/Strings/StringToIntegerConversion.hpp
+      include/Krystal.Core/Strings/TextStream.hpp
+      include/Krystal.Core/Strings/Unicode.hpp
 
       # Threading
       include/Krystal.Core/Threading/CancellationToken.hpp
@@ -267,8 +245,6 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/SmallList.hpp
       include/Krystal.Core/Types/Span.hpp
       include/Krystal.Core/Types/Stack.hpp
-      include/Krystal.Core/Types/String.hpp
-      include/Krystal.Core/Types/StringAtom.hpp
       include/Krystal.Core/Types/TaggedPtr.hpp
       include/Krystal.Core/Types/TinyLRUCache.hpp
       include/Krystal.Core/Types/ThreadSafeWeakPtr.hpp
@@ -337,8 +313,7 @@ target_sources(Krystal.Core
     # Utils
     src/Utils/ScopedProfiler.cpp
 
-    # Text
-    src/Text/StringBuilder.cpp
-    src/Text/Base64.cpp
-    src/Text/TextStream.cpp
+    # Strings
+    src/Strings/StringBuilder.cpp
+    src/Strings/TextStream.cpp
 )

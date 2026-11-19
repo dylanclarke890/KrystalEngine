@@ -3,7 +3,7 @@
 #include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.PAL/Input/KeyModifiers.hpp"
 #include "Krystal.PAL/Input/Keys.hpp"
 

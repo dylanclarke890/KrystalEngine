@@ -37,7 +37,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle.hpp"
 #include "Krystal.Booey/Text/UnicodeBidi.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include <ranges>
 #include <unicode/ubidi.h>
 

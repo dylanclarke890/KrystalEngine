@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/String.hpp"
 
 namespace krys::pal
 {

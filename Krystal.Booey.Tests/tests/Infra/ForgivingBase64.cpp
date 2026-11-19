@@ -1,5 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Core/Text/Base64.hpp"
+#include "Krystal.Text/Base64.hpp"
 #include <string>
 #include <string_view>
 

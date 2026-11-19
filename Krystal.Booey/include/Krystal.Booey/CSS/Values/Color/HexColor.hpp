@@ -28,7 +28,7 @@
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::css
 {

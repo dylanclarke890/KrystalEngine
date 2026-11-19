@@ -24,10 +24,10 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParser.hpp"
-#include "Krystal.Core/Text/Encodings/Decode.hpp"
-#include "Krystal.Core/Text/Encodings/Encode.hpp"
-#include "Krystal.Core/Text/Encodings/UTF.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
+#include "Krystal.Text/Encodings/Decode.hpp"
+#include "Krystal.Text/Encodings/Encode.hpp"
+#include "Krystal.Text/Encodings/UTF.hpp"
 
 namespace krys::boo
 {

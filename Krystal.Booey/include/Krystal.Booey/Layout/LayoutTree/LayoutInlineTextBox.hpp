@@ -28,9 +28,9 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBox.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/String.hpp"
 
 namespace krys::boo::layout
 {

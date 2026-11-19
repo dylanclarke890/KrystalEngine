@@ -4,7 +4,7 @@
 #include "Krystal.Core/Commands/CommandList.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Gfx/Commands.hpp"
 #include "Krystal.Gfx/RenderPass.hpp"
 

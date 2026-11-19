@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Graphics/ImageBuffers/ImageBufferUtilities.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/PixelBuffer.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/Base64.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Http/MIMETypeRegistry.hpp"
+#include "Krystal.Text/Base64.hpp"
 #include <csetjmp>
 #include <cstdio>
 #include <cstdlib>

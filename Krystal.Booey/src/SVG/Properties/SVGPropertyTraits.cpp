@@ -34,7 +34,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
-#include "Krystal.Core/Text/StringToIntegerConversion.hpp"
+#include "Krystal.Core/Strings/StringToIntegerConversion.hpp"
 
 namespace krys::boo
 {

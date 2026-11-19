@@ -41,7 +41,7 @@
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Network/DataURLDecoder.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 
 namespace krys::boo

@@ -34,7 +34,7 @@
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerContentsDisplayDelegate.hpp"
 #include "Krystal.Booey/Platform/GraphicsClient.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Http/MIMETypeRegistry.hpp"
 #include <atomic>
 #include <cmath>

@@ -4,7 +4,7 @@
 #include "Krystal.Core/Colour/AlphaPremultiplication.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
 #include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Visitor.hpp"
 

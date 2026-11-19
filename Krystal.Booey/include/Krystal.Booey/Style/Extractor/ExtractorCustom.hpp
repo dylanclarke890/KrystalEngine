@@ -65,7 +65,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include <algorithm>
 
 namespace krys::boo::style

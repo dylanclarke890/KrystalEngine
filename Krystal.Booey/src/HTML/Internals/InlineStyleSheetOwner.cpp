@@ -31,7 +31,7 @@
 #include "Krystal.Booey/Style/Rules/StyleSheetContentsCache.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <utility>
 
 namespace krys::boo::html

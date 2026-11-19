@@ -4,8 +4,8 @@
 #include "Krystal.Booey/Graphics/ImageBuffers/ByteArrayPixelBuffer.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageFrame.hpp"
 #include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp"
-#include "Krystal.Core/Text/Base64.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
+#include "Krystal.Text/Base64.hpp"
 #include <cstdlib>
 
 namespace krys::boo::tests

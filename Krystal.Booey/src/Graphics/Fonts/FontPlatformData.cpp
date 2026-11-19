@@ -26,7 +26,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontSizeAdjust.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include <hb-ot.h>
 #include <hb.h>
 

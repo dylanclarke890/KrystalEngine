@@ -27,7 +27,7 @@
 #include "Krystal.Booey/CSS/Queries/ContainerQueryAxis.hpp"
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::css::cq
 {

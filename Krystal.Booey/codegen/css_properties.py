@@ -8021,9 +8021,9 @@ class GeneratePropertyId:
                     "Krystal.Booey/CSS/Properties/Property.hpp",
                     "Krystal.Booey/CSS/Values/ValueId.hpp",
                     "Krystal.Booey/Page/Settings.hpp",
-                    "Krystal.Core/Text/ASCII.hpp",
+                    "Krystal.Core/Strings/ASCII.hpp",
                     "Krystal.Core/Types/SmallList.hpp",
-                    "Krystal.Core/Types/String.hpp",
+                    "Krystal.Core/Strings/String.hpp",
                 ],
             )
 

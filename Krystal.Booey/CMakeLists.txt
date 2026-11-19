@@ -4333,7 +4333,7 @@ target_precompile_headers(Krystal.Booey
     <variant>
     <vector>
 
-    <Krystal.Core/Text/Encodings/UTF.hpp>
+    <Krystal.Text/Encodings/UTF.hpp>
 
     include/Krystal.Booey/CSS/Calc/Tree.hpp
     include/Krystal.Booey/CSS/Calc/Value.hpp

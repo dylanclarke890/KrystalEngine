@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImageSource.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageDecoder.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo
 {

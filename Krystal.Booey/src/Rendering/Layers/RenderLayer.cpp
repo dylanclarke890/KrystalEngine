@@ -88,8 +88,8 @@
 #include "Krystal.Booey/Style/Values/Masking/ClipPath.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/BasicShape.hpp"
 #include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include <algorithm>

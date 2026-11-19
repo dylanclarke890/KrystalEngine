@@ -27,12 +27,12 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceClientWalker.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedStyleSheetClient.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/Encodings/Decode.hpp"
-#include "Krystal.Core/Text/Encodings/Encode.hpp"
-#include "Krystal.Core/Text/Encodings/UTF.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Http/HTTPParsers.hpp"
+#include "Krystal.Text/Encodings/Decode.hpp"
+#include "Krystal.Text/Encodings/Encode.hpp"
+#include "Krystal.Text/Encodings/UTF.hpp"
 
 namespace krys::boo
 {

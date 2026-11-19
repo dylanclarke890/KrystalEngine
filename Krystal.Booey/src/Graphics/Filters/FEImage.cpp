@@ -23,7 +23,7 @@
 
 #include "Krystal.Booey/Graphics/Filters/FEImage.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo
 {

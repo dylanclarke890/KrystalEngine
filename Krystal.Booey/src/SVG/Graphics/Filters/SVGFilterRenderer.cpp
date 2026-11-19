@@ -30,7 +30,7 @@
 #include "Krystal.Booey/SVG/Graphics/Filters/SVGFilterPrimitiveGraph.hpp"
 #include "Krystal.Booey/SVG/SVGFilterPrimitiveStandardAttributes.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Core/Utils/PointerComparison.hpp"
 #include <numbers>
 

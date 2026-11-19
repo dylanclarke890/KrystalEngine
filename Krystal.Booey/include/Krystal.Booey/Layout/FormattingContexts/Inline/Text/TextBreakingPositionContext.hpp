@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Types/StringAtom.hpp"
+#include "Krystal.Core/Strings/StringAtom.hpp"
 
 namespace krys::boo
 {

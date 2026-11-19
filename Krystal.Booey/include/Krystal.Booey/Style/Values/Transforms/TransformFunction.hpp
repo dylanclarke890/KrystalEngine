@@ -34,7 +34,7 @@
 #include "Krystal.Booey/Style/Values/Transforms/Functions/TransformFunctionBase.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Functions/TransformFunctionWrapper.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {

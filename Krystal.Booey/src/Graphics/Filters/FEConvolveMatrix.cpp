@@ -25,7 +25,7 @@
 #include "Krystal.Booey/Graphics/Filters/FEConvolveMatrix.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo
 {

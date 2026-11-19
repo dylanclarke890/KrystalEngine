@@ -24,8 +24,8 @@
  */
 
 #include "Krystal.Booey/Platform/Network/DataURLDecoder.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/Base64.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Text/Base64.hpp"
 #include <algorithm>
 
 namespace krys::boo::data_url_decoder

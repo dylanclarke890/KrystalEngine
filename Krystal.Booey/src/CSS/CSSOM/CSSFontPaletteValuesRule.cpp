@@ -28,7 +28,7 @@
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include <charconv>
 
 namespace krys::boo

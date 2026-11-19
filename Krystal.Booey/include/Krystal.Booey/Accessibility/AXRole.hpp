@@ -27,7 +27,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 
 // Roles for frames, remote frames and models are left out: Booey has no subframes or model elements.
 // clang-format off

@@ -31,9 +31,9 @@
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include <unicode/ubidi.h>
 
 namespace krys::boo::inline_display

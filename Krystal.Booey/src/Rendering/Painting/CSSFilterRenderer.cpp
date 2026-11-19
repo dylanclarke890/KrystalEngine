@@ -41,7 +41,7 @@
 #include "Krystal.Booey/SVG/Graphics/Filters/SVGFilterRenderer.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 #include "Krystal.Core/Colour/ColourMatrix.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo
 {

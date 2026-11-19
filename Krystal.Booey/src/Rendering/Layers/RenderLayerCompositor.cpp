@@ -46,7 +46,7 @@
 #include "Krystal.Booey/Style/Difference.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/FillLayers.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"

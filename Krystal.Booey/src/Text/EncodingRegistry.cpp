@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Text/EncodingRegistry.hpp"
-#include "Krystal.Core/Text/Encodings/UTF.hpp"
+#include "Krystal.Text/Encodings/UTF.hpp"
 
 namespace krys::boo
 {

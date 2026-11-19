@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/Graphics/Paths/PathElement.hpp"
 #include "Krystal.Booey/Graphics/Paths/PathImpl.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo
 {

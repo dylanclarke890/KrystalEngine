@@ -69,7 +69,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/TextBoxTrimmer.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 
 namespace krys::boo
 {

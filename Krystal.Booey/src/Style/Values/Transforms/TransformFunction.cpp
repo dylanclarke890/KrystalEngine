@@ -54,7 +54,7 @@
 #include "Krystal.Booey/Style/Values/Transforms/Functions/ScaleTransformFunction.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Functions/SkewTransformFunction.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Functions/TranslateTransformFunction.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {

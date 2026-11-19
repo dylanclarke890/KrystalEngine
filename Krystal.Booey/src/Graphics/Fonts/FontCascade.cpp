@@ -30,9 +30,9 @@
 #include "Krystal.Booey/Graphics/TextRuns/WidthIterator.hpp"
 #include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include <algorithm>
 #include <cmath>

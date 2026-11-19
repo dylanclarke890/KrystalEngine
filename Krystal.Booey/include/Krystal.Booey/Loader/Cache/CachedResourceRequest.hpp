@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Loader/ResourceLoaderOptions.hpp"
 #include "Krystal.Booey/Platform/Network/ResourceRequest.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo

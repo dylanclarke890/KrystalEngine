@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Style/Values/Grid/GridNamedAreaMap.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridNamedLinesMap.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridTrackSizingDirection.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {

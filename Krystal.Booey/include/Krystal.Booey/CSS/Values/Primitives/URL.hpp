@@ -27,7 +27,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/URLModifiers.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::css
 {

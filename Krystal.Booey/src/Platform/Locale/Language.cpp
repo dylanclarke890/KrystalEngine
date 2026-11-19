@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/Platform/Locale/Language.hpp"
 #include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 
 namespace krys::boo
 {

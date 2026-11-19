@@ -43,7 +43,7 @@
 #include "Krystal.Booey/HTML/Shadow/SliderThumbElement.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderSlider.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
 #include <cmath>
 

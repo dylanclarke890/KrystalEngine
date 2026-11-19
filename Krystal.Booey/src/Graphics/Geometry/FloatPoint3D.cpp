@@ -20,7 +20,7 @@
 */
 
 #include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo
 {

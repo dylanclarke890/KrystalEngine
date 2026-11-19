@@ -30,7 +30,7 @@
  */
 
 #include "Krystal.Http/HTTPHeaderMap.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
 
 namespace krys::http

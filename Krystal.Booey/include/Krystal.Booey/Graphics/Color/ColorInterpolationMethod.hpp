@@ -26,8 +26,8 @@
 #pragma once
 
 #include "Krystal.Core/Colour/ColourInterpolationMethod.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo
 {

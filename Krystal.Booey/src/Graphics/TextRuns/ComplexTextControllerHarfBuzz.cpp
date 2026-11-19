@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontTaggedSettings.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/ComplexTextController.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Text/HarfBuzz.hpp"
 #include <hb.h>
 #include <unicode/uscript.h>

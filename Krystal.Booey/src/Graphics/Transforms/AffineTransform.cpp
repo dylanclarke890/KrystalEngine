@@ -33,7 +33,7 @@
 #include "Krystal.Booey/Graphics/Geometry/Region.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include <cmath>
 #include <numbers>
 

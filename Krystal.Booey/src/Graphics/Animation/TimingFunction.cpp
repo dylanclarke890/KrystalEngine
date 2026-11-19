@@ -27,8 +27,8 @@
 #include "Krystal.Booey/CSS/Values/NumberFormatting.hpp"
 #include "Krystal.Booey/Graphics/Animation/SpringSolver.hpp"
 #include "Krystal.Booey/Graphics/Animation/UnitBezier.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include <algorithm>
 #include <cmath>
 #include <limits>

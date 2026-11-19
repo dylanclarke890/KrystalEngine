@@ -24,7 +24,7 @@
 #include "Krystal.Booey/Graphics/Filters/FEColorMatrix.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Core/Colour/ColourMatrix.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include <algorithm>
 #include <cmath>
 #include <limits>

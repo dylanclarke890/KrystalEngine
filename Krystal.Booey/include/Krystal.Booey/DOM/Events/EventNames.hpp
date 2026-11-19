@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 
 namespace krys::boo::event_names
 {

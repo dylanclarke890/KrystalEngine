@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextBoxPainter.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <algorithm>
 #include <cmath>
 #include <numbers>

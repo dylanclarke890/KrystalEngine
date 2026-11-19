@@ -25,7 +25,7 @@
 #include "Krystal.Booey/CSS/Values/Color/ContrastColor.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ContrastColorResolver.hpp"
 #include "Krystal.Booey/CSS/Values/Color/PlatformColorResolutionState.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::css
 {

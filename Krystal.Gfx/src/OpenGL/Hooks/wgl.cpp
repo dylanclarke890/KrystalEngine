@@ -2,8 +2,8 @@
 #include "Krystal.Gfx/OpenGL/Hooks/wgl.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include <algorithm>
 
 namespace

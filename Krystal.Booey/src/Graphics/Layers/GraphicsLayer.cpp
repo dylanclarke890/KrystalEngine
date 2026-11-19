@@ -31,7 +31,7 @@
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerFactory.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerFilterAnimationValue.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerKeyframeValueList.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include <format>

@@ -36,8 +36,8 @@
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/StringAtom.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include <unicode/uscript.h>
 

@@ -24,8 +24,8 @@
  */
 
 #include "Krystal.Booey/CSS/Values/UnicodeRangeValue.hpp"
-#include "Krystal.Core/Text/HexNumber.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/HexNumber.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::css
 {

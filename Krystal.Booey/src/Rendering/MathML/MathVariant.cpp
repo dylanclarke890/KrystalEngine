@@ -24,7 +24,7 @@
 
 #include "Krystal.Booey/Rendering/MathML/MathVariant.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
 #include <array>
 #include <utility>

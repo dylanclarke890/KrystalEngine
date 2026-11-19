@@ -31,8 +31,8 @@
 #include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/String.hpp"
 
 namespace krys
 {
