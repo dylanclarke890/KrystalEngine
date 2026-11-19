@@ -8,9 +8,9 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/ImageData/ImageData.hpp"
 #include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
 #include "Krystal.Core/Text/Base64.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.UI.Tests/RepaintFixture.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/View.hpp"
@@ -394,7 +394,7 @@ namespace krys::ui::tests
       auto bytes = Base64Decode(
         Span<const uint8>(reinterpret_cast<const uint8 *>(url.data()) + comma + 1, url.size() - comma - 1));
       REQUIRE(bytes);
-      auto data = boo::SharedBuffer::Create(Span<const uint8>(*bytes));
+      auto data = SharedBuffer::Create(Span<const uint8>(*bytes));
       auto decoder = boo::ScalableImageDecoder::Create(*data, boo::AlphaOption::NotPremultiplied,
                                                        boo::GammaAndColorProfileOption::Applied);
       REQUIRE(decoder);

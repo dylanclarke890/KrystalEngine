@@ -40,8 +40,8 @@
 // Define ourselves as the clientPtr.  Mozilla just hacked their C++ callback class into this old C decoder,
 // so we will too.
 #include "Krystal.Booey/Platform/ImageDecoders/GIFImageDecoder.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 

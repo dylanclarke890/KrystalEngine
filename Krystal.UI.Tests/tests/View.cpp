@@ -101,8 +101,8 @@ namespace krys::ui::tests
         return {};
       }
 
-      KRYS_NODISCARD RefPtr<boo::SharedBuffer> ReadBufferFromClipboard(utf8_stringview,
-                                                                       utf8_stringview) noexcept override
+      KRYS_NODISCARD RefPtr<SharedBuffer> ReadBufferFromClipboard(utf8_stringview,
+                                                                  utf8_stringview) noexcept override
       {
         return nullptr;
       }

@@ -8,9 +8,9 @@
 #include "Krystal.Booey/Platform/Network/ResourceRequest.hpp"
 #include "Krystal.Booey/Platform/Network/ResourceResponse.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include <filesystem>

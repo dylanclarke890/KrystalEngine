@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Loader/DocumentLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
 #include <algorithm>
 
 namespace krys::boo

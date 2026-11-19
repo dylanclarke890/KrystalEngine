@@ -40,10 +40,14 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/String.hpp"
 
+namespace krys
+{
+  class SharedBuffer;
+}
+
 namespace krys::boo
 {
   class ImageFrame;
-  class SharedBuffer;
 
   struct ImageDecoderFrameInfo
   {

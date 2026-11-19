@@ -58,6 +58,11 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Text/FreeTypeFace.hpp"
 
+namespace krys
+{
+  class SharedBuffer;
+}
+
 namespace krys::boo
 {
   namespace css
@@ -68,7 +73,6 @@ namespace krys::boo
   class FontCreationContext;
   class FontDescription;
   class FontPlatformData;
-  class SharedBuffer;
 
   /// @brief A web font loaded for the font backend: a FreeType face made from the font file's bytes.
   // FIXME: The faces of a font collection (itemInCollection), and font-face features and variations, which

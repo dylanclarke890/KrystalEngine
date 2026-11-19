@@ -27,8 +27,8 @@
 #include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageDecoder.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageObserver.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
 #include <cmath>
 #include <limits>
 

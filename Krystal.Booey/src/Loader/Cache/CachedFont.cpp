@@ -33,7 +33,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedFontClient.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceClientWalker.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
 
 namespace krys::boo
 {

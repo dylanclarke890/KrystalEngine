@@ -41,6 +41,7 @@
 
 namespace krys
 {
+  class SharedBuffer;
   class TextStream;
 }
 
@@ -48,7 +49,6 @@ namespace krys::boo
 {
   class FloatSize;
   class GraphicsContext;
-  class SharedBuffer;
 
   /// @brief Where an image's frames and metadata come from: its decoder, or a native image it was made from.
   // FIXME: Colour spaces and HDR, once there are any.

@@ -5,7 +5,7 @@
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/ICCImages.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageFrame.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
 #include <cstdlib>
 
 namespace krys::boo::tests

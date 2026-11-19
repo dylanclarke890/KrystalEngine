@@ -32,9 +32,9 @@
 #include "Krystal.Booey/Graphics/Images/ImageDecoder.hpp"
 #include "Krystal.Booey/Platform/ImageDecoders/EXIFMetadata.hpp"
 #include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoderFrame.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
 
 namespace krys::boo
 {

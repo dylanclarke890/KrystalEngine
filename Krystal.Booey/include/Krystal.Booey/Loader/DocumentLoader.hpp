@@ -47,11 +47,15 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
+namespace krys
+{
+  class SharedBuffer;
+}
+
 namespace krys::boo
 {
   class IconLoader;
   class LocalFrame;
-  class SharedBuffer;
 
   /// @brief Loads one document into a frame: its main resource (from the host's loader strategy, a `data:`
   /// URL, or the host's substitute data), which, once it arrives, commits the load and is written into the

@@ -262,6 +262,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/Queue.hpp
       include/Krystal.Core/Types/RefCountedFixedVector.hpp
       include/Krystal.Core/Types/RefPtr.hpp
+      include/Krystal.Core/Types/SharedBuffer.hpp
       include/Krystal.Core/Types/SmallList.hpp
       include/Krystal.Core/Types/Span.hpp
       include/Krystal.Core/Types/Stack.hpp
@@ -327,6 +328,9 @@ target_sources(Krystal.Core
     src/Threading/ManualWorkQueue.cpp
     src/Threading/TaskInbox.cpp
     src/Threading/Thread.cpp
+
+    # Types
+    src/Types/SharedBuffer.cpp
 
     # Utils
     src/Utils/ScopedProfiler.cpp

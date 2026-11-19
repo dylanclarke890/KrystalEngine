@@ -2682,7 +2682,6 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/Scrolling/ScrollbarThemeComposite.hpp
   include/Krystal.Booey/Platform/Scrolling/ScrollbarsController.hpp
   include/Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp
-  include/Krystal.Booey/Platform/SharedBuffer.hpp
   include/Krystal.Booey/Platform/SimpleCaretAnimator.hpp
   include/Krystal.Booey/Platform/Theme.hpp
   include/Krystal.Booey/Platform/ThemeAdwaita.hpp

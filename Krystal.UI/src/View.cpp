@@ -33,12 +33,12 @@
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
 #include "Krystal.UI/Compositing/GraphicsLayerTextureMapper.hpp"
@@ -464,7 +464,7 @@ namespace krys::ui
       {
         documentLoader->DidGetLoadDecisionForIcon(
           !!_iconHandler, decision.Identifier,
-          [this, icon = decision.Icon](const boo::SharedBuffer *data)
+          [this, icon = decision.Icon](const SharedBuffer *data)
           {
             if (data && _iconHandler)
             {

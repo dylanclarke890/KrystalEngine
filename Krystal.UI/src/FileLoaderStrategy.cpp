@@ -71,7 +71,7 @@ namespace krys::ui
           u8"Last-Modified", utf8_stringview(reinterpret_cast<const char8_t *>(date->data()), date->size()));
       }
       return boo::LoadedResource {.Response = krys::move(response),
-                                  .Data = boo::SharedBuffer::Create(krys::move(contents->Bytes))};
+                                  .Data = SharedBuffer::Create(krys::move(contents->Bytes))};
     }
   }
 
