@@ -215,7 +215,7 @@ namespace krys::boo
 
   void UpdatePositionForNodeRemoval(dom::Position &position, Node &node) noexcept;
 
-  KRYS_NODISCARD TextDirection DirectionOfEnclosingBlock(const dom::Position &position) noexcept;
+  KRYS_NODISCARD text::TextDirection DirectionOfEnclosingBlock(const dom::Position &position) noexcept;
 
   /// @brief The node, or the shadow host it's in (or that host's, and so on), that's in the tree whose root
   /// is

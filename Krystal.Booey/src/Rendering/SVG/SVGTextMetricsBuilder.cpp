@@ -198,7 +198,7 @@ namespace krys::boo
       // FIXME: This function is called even though width information is not changed at all. RenderSVGText /
       // RenderSVGInlineText should track the potential changes to width etc. and invoke this function only
       // when it is actually changed.
-      if (data.AllCharactersMap && _run.Direction() == TextDirection::LTR
+      if (data.AllCharactersMap && _run.Direction() == text::TextDirection::LTR
           && data.AllCharactersMap->size() == 1)
       {
         constexpr uint32 defaultPosition = 1;
@@ -238,7 +238,7 @@ namespace krys::boo
           }
 
           float width = scaledFont.WidthForTextUsingSimplifiedMeasuring(view.substr(i, characterLength),
-                                                                        TextDirection::LTR);
+                                                                        text::TextDirection::LTR);
           float scaledWidth = width / scalingFactor;
           textMetricsValues.emplace_back(characterLength, scaledWidth, scaledHeight);
           lastCharacter = currentCharacter;

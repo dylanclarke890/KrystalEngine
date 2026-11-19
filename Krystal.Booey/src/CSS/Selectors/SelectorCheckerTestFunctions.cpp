@@ -270,8 +270,8 @@ namespace krys::boo::css
   {
     switch (element.EffectiveTextDirection())
     {
-      case TextDirection::LTR: return text::IsASCIICaselessEqual(argument.View(), u8"ltr");
-      case TextDirection::RTL: return text::IsASCIICaselessEqual(argument.View(), u8"rtl");
+      case text::TextDirection::LTR: return text::IsASCIICaselessEqual(argument.View(), u8"ltr");
+      case text::TextDirection::RTL: return text::IsASCIICaselessEqual(argument.View(), u8"rtl");
     }
 
     return false;

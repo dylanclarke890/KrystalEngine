@@ -840,8 +840,8 @@ namespace krys::boo::html
 
     element->SetValueInternal(sanitizedValue, eventBehavior);
 
-    if (oldDirection.value_or(TextDirection::LTR)
-        != dom::ComputeTextDirectionIfDirIsAuto(*element).value_or(TextDirection::LTR))
+    if (oldDirection.value_or(text::TextDirection::LTR)
+        != dom::ComputeTextDirectionIfDirIsAuto(*element).value_or(text::TextDirection::LTR))
     {
       element->InvalidateStyleInternal();
     }

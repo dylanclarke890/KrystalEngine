@@ -582,9 +582,9 @@ namespace krys::boo
     /// @brief Tells accessibility the selection changed.
     void NotifyAccessibilityForSelectionChange() noexcept;
 
-    KRYS_NODISCARD TextDirection DirectionOfEnclosingBlock() noexcept;
+    KRYS_NODISCARD text::TextDirection DirectionOfEnclosingBlock() noexcept;
 
-    KRYS_NODISCARD TextDirection DirectionOfSelection() noexcept;
+    KRYS_NODISCARD text::TextDirection DirectionOfSelection() noexcept;
 
     KRYS_NODISCARD VisiblePosition PositionForPlatform(bool isGetStart) const noexcept;
 

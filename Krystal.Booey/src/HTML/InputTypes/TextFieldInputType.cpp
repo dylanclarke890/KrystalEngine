@@ -869,7 +869,7 @@ namespace krys::boo::html
   bool TextFieldInputType::IsElementRTL() const noexcept
   {
     auto *renderer = Element()->Renderer();
-    return renderer && renderer->Style().GetWritingMode().ComputedTextDirection() == TextDirection::RTL;
+    return renderer && renderer->Style().GetWritingMode().ComputedTextDirection() == text::TextDirection::RTL;
   }
 
   List<DataListSuggestion> TextFieldInputType::Suggestions() noexcept

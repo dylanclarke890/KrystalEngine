@@ -257,10 +257,10 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD InlineBoxAndOffset GetInlineBoxAndOffset(Affinity affinity) const noexcept;
 
-    KRYS_NODISCARD InlineBoxAndOffset GetInlineBoxAndOffset(Affinity affinity,
-                                                            TextDirection primaryDirection) const noexcept;
+    KRYS_NODISCARD InlineBoxAndOffset
+      GetInlineBoxAndOffset(Affinity affinity, text::TextDirection primaryDirection) const noexcept;
 
-    KRYS_NODISCARD TextDirection PrimaryDirection() const noexcept;
+    KRYS_NODISCARD text::TextDirection PrimaryDirection() const noexcept;
 
     // Returns the number of positions that exist between two positions.
     KRYS_NODISCARD static uint32 PositionCountBetweenPositions(const Position &a, const Position &b) noexcept;

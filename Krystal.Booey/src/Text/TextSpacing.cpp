@@ -25,9 +25,9 @@
 
 #include "Krystal.Booey/Text/TextSpacing.hpp"
 #include "Krystal.Booey/Graphics/Fonts/Font.hpp"
-#include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
 
 namespace krys::boo
 {
@@ -91,7 +91,7 @@ namespace krys::boo
       }
 
       // All characters in the range of U+3041 to U+30FF, except those that belong to Unicode Punctuation [P*]
-      if ((character >= 0x3041 && character <= 0x30FF) && !IsPunctuation(character))
+      if ((character >= 0x3041 && character <= 0x30FF) && !text::IsPunctuation(character))
       {
         return true;
       }
@@ -105,7 +105,7 @@ namespace krys::boo
       {
         return true;
       }
-      if (IsOfScriptType(character, UScriptCode::USCRIPT_HAN))
+      if (text::IsOfScriptType(character, UScriptCode::USCRIPT_HAN))
       {
         return true;
       }
@@ -118,7 +118,7 @@ namespace krys::boo
     {
       // FIXME: Should also check that it is not: upright in vertical text flow using the text-orientation
       // property or the text-combine-upright property.
-      return (generalCategoryMask & U_GC_ND_MASK) && !IsEastAsianFullWidth(character);
+      return (generalCategoryMask & U_GC_ND_MASK) && !text::IsEastAsianFullWidth(character);
     }
 
     CharacterClass GetCharacterClass(char32_t character) noexcept
@@ -144,7 +144,7 @@ namespace krys::boo
       // property or the text-combine-upright property.
       if (generalCategoryMask & (U_GC_M_MASK | U_GC_L_MASK))
       {
-        if (!IsEastAsianFullWidth(character))
+        if (!text::IsEastAsianFullWidth(character))
         {
           return CharacterClass::NonIdeographLetter;
         }
@@ -159,13 +159,13 @@ namespace krys::boo
 
       if (generalCategoryMask & U_GC_P_MASK)
       {
-        if (IsCJKSymbolOrPunctuation(character) || IsEastAsianFullWidth(character))
+        if (text::IsCJKSymbolOrPunctuation(character) || text::IsEastAsianFullWidth(character))
         {
-          if (IsOpeningPunctuation(generalCategoryMask))
+          if (text::IsOpeningPunctuation(generalCategoryMask))
           {
             return CharacterClass::FullWidthOpeningPunctuation;
           }
-          if (IsClosingPunctuation(generalCategoryMask))
+          if (text::IsClosingPunctuation(generalCategoryMask))
           {
             return CharacterClass::FullWidthClosingPunctuation;
           }
@@ -180,7 +180,7 @@ namespace krys::boo
         }
       }
 
-      if (IsFullwidthMiddleDotPunctuation(character))
+      if (text::IsFullwidthMiddleDotPunctuation(character))
       {
         return CharacterClass::FullWidthMiddleDotPunctuation;
       }

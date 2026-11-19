@@ -345,7 +345,7 @@ namespace krys::boo::layout
       return true;
     }
 
-    KRYS_NODISCARD TextDirection
+    KRYS_NODISCARD text::TextDirection
       InlineBaseDirectionForLineContent(const Line::RunList &runs, const RenderStyle &rootStyle,
                                         const Maybe<PreviousLine> &previousLine) noexcept
     {
@@ -484,7 +484,7 @@ namespace krys::boo::layout
       isLastInlineContent || lineContent->Range.EndIndex() == lineInput.NeedsLayoutRange.EndIndex();
     auto inlineBaseDirection = !result.Runs.empty()
                                  ? InlineBaseDirectionForLineContent(result.Runs, RootStyle(), _previousLine)
-                                 : TextDirection::LTR;
+                                 : text::TextDirection::LTR;
     auto lineEndsWithForcedLineBreak =
       lineContent->BreakReason == LineContent::LineBreakReason::ForcedLineBreakByBlockContent
       || Line::HasTrailingForcedLineBreak(result.Runs);
@@ -1115,7 +1115,7 @@ namespace krys::boo::layout
           {
             // Note that this depends on the content being RTL (inline-box-end vs. start decoration matching
             // visual order -visual matching).
-            auto shouldCheckLogicalStart = style.GetWritingMode().BidiDirection() == TextDirection::LTR
+            auto shouldCheckLogicalStart = style.GetWritingMode().BidiDirection() == text::TextDirection::LTR
                                              ? inlineItem.GetType() == InlineItem::Type::InlineBoxEnd
                                              : inlineItem.GetType() == InlineItem::Type::InlineBoxStart;
             return shouldCheckLogicalStart
@@ -1216,7 +1216,7 @@ namespace krys::boo::layout
             isFirstFormattedLineCandidate ? inlineTextItem.FirstLineStyle() : inlineTextItem.Style();
           auto &inlineTextBox = inlineTextItem.GetInlineTextBox();
           auto isEligibleText = !inlineTextBox.CanUseSimpleFontCodePath() && !inlineTextBox.IsCombined()
-                                && inlineTextItem.Direction() == TextDirection::RTL;
+                                && inlineTextItem.Direction() == text::TextDirection::RTL;
 
           if (!leadingContentRunIndex)
           {
@@ -1282,7 +1282,7 @@ namespace krys::boo::layout
                             _lineLogicalRect.Left(),
                             {},
                             ExpansionBehavior::DefaultBehavior(),
-                            TextDirection::RTL,
+                            text::TextDirection::RTL,
                             false /* directionalOverride */,
                             characterScanForCodePath};
     // The advance of each byte: a glyph's advance goes to the first byte of its character.

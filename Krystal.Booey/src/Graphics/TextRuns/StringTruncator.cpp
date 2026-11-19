@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Graphics/TextRuns/StringTruncator.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
-#include "Krystal.Booey/Text/TextBreakIterator.hpp"
+#include "Krystal.Text/TextBreakIterator.hpp"
 #include <unicode/ubrk.h>
 
 namespace krys::boo
@@ -67,7 +67,7 @@ namespace krys::boo
       krys_assert(keepCount < StringBufferSize);
 
       uint32 omitStart = (keepCount + 1) / 2;
-      NonSharedCharacterBreakIterator it(string.substr(0, length));
+      text::NonSharedCharacterBreakIterator it(string.substr(0, length));
       uint32 omitEnd = BoundedTextBreakFollowing(it, omitStart + (length - keepCount) - 1, length);
       omitStart = TextBreakAtOrPreceding(it, omitStart);
 
@@ -86,7 +86,7 @@ namespace krys::boo
       krys_assert(keepCount < length);
       krys_assert(keepCount < StringBufferSize);
 
-      NonSharedCharacterBreakIterator it(string.substr(0, length));
+      text::NonSharedCharacterBreakIterator it(string.substr(0, length));
       uint32 keepLength = TextBreakAtOrPreceding(it, keepCount);
 
       utf8_string buffer(string.substr(0, keepLength));
@@ -103,7 +103,7 @@ namespace krys::boo
       krys_debug_assert(keepCount < length);
       krys_debug_assert(keepCount < StringBufferSize);
 
-      NonSharedCharacterBreakIterator it(string.substr(0, length));
+      text::NonSharedCharacterBreakIterator it(string.substr(0, length));
       uint32 keepLength = TextBreakAtOrPreceding(it, keepCount);
       return utf8_string(string.substr(0, keepLength));
     }
@@ -114,7 +114,7 @@ namespace krys::boo
       krys_debug_assert(keepCount < length);
       krys_debug_assert(keepCount < StringBufferSize);
 
-      UBreakIterator *it = WordBreakIterator(string.substr(0, length));
+      UBreakIterator *it = text::WordBreakIterator(string.substr(0, length));
       uint32 keepLength = TextBreakAtOrPreceding(it, keepCount);
       return utf8_string(string.substr(0, keepLength));
     }
@@ -127,7 +127,7 @@ namespace krys::boo
 
       uint32 startIndex = length - keepCount;
 
-      NonSharedCharacterBreakIterator it(string);
+      text::NonSharedCharacterBreakIterator it(string);
       uint32 adjustedStartIndex = ubrk_isBoundary(it, static_cast<int32_t>(startIndex))
                                     ? startIndex
                                     : BoundedTextBreakFollowing(it, startIndex, length);

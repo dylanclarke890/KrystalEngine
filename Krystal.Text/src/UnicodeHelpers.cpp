@@ -23,12 +23,12 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Text/UnicodeHelpers.hpp"
+#include "Krystal.Text/UnicodeHelpers.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <algorithm>
 #include <unicode/uchar.h>
 
-namespace krys::boo
+namespace krys::text
 {
   Maybe<TextDirection> BaseTextDirection(utf8_stringview content) noexcept
   {

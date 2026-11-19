@@ -30,7 +30,7 @@
 #include "Krystal.Core/Strings/String.hpp"
 #include <unicode/uchar.h>
 
-namespace krys::boo
+namespace krys::text
 {
   // Word boundaries in UTF-8 text. Offsets are bytes.
 

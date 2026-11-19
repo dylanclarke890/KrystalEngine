@@ -532,7 +532,7 @@ namespace krys::ui::tests
     };
     auto isRightToLeft = [](const boo::Node &node)
     {
-      return node.Renderer()->Style().GetWritingMode().BidiDirection() == boo::TextDirection::RTL;
+      return node.Renderer()->Style().GetWritingMode().BidiDirection() == text::TextDirection::RTL;
     };
 
     SECTION("A text field's dir")

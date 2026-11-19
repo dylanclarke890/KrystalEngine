@@ -248,7 +248,7 @@ b	c  d</div>
       CHECK(Describe(items)
             == List<utf8_string> {u8"abc", u8" ", u8"\u05E9\u05DC\u05D5\u05DD", u8" ", u8"def"});
       CHECK(BidiLevels(items) == List<UBiDiLevel> {0, 0, 1, 0, 0});
-      CHECK(TextItem(items, 2).Direction() == TextDirection::RTL);
+      CHECK(TextItem(items, 2).Direction() == text::TextDirection::RTL);
       CHECK(TextItem(items, 2).Start() == 4);
       CHECK(TextItem(items, 2).Length() == 8);
       CHECK(cache.GetInlineItems().RequiresVisualReordering());

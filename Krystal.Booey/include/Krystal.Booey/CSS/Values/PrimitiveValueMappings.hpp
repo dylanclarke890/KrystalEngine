@@ -912,28 +912,28 @@ namespace krys::boo
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH
 
-  KRYS_NODISCARD constexpr css::ValueId ToValueId(TextDirection e) noexcept
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(text::TextDirection e) noexcept
   {
     switch (e)
     {
-      case TextDirection::LTR: return css::ValueId::Ltr;
-      case TextDirection::RTL: return css::ValueId::Rtl;
+      case text::TextDirection::LTR: return css::ValueId::Ltr;
+      case text::TextDirection::RTL: return css::ValueId::Rtl;
     }
     krys_debug_assert_msg(false, "Unexpected value");
     return css::ValueId::Invalid;
   }
 
   template <>
-  KRYS_NODISCARD constexpr TextDirection FromValueId(css::ValueId valueID) noexcept
+  KRYS_NODISCARD constexpr text::TextDirection FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case css::ValueId::Ltr: return TextDirection::LTR;
-      case css::ValueId::Rtl: return TextDirection::RTL;
+      case css::ValueId::Ltr: return text::TextDirection::LTR;
+      case css::ValueId::Rtl: return text::TextDirection::RTL;
       default:                break;
     }
     krys_debug_assert_msg(false, "Unexpected value");
-    return TextDirection::LTR;
+    return text::TextDirection::LTR;
   }
 
   KRYS_NODISCARD constexpr css::ValueId ToValueId(StyleWritingMode e) noexcept

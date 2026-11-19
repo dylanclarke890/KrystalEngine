@@ -30,10 +30,10 @@
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Booey/Text/Hyphenation.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/Hyphenation.hpp"
 #include <unicode/uchar.h>
 
 namespace krys::boo::layout
@@ -347,7 +347,7 @@ namespace krys::boo::layout
       while (true)
       {
         auto hyphenIndex =
-          LastHyphenLocation(content, candidatePosition, style.ComputedLocale().GetPlatform());
+          text::LastHyphenLocation(content, candidatePosition, style.ComputedLocale().GetPlatform());
         if (!hyphenIndex || hyphenIndex < limitBefore)
         {
           return firstHyphenLocation;
@@ -371,9 +371,9 @@ namespace krys::boo::layout
         return {};
       }
 
-      if (auto hyphenIndex =
-            LastHyphenLocation(content, std::min(contentLength, contentLength - LimitAfterValue(style) + 1),
-                               style.ComputedLocale().GetPlatform()))
+      if (auto hyphenIndex = text::LastHyphenLocation(
+            content, std::min(contentLength, contentLength - LimitAfterValue(style) + 1),
+            style.ComputedLocale().GetPlatform()))
       {
         return hyphenIndex >= LimitBeforeValue(style) ? Maybe<size_t> {hyphenIndex} : Maybe<size_t> {};
       }
@@ -392,9 +392,9 @@ namespace krys::boo::layout
         return {};
       }
 
-      if (auto hyphenIndex =
-            LastHyphenLocation(content, std::min(beforePosition, contentLength - LimitAfterValue(style)) + 1,
-                               style.ComputedLocale().GetPlatform()))
+      if (auto hyphenIndex = text::LastHyphenLocation(
+            content, std::min(beforePosition, contentLength - LimitAfterValue(style)) + 1,
+            style.ComputedLocale().GetPlatform()))
       {
         return hyphenIndex >= LimitBeforeValue(style) ? Maybe<size_t> {hyphenIndex} : Maybe<size_t> {};
       }
@@ -814,7 +814,7 @@ namespace krys::boo::layout
           auto availableWidthExcludingHyphen = availableWidth - hyphenWidth;
           auto hasSomeRoomForContent =
             availableWidthExcludingHyphen > 0
-            && EnoughWidthForHyphenation(availableWidthExcludingHyphen, fontCascade.Size());
+            && text::EnoughWidthForHyphenation(availableWidthExcludingHyphen, fontCascade.Size());
           if (hasSomeRoomForContent && candidateRun.SpaceRequired())
           {
             auto leftSideLength =
@@ -1099,7 +1099,7 @@ namespace krys::boo::layout
     auto hyphenWidth = TextUtil::HyphenWidth(style);
     auto availableWidthExcludingHyphen = lineStatus.AvailableWidth - hyphenWidth;
     if (availableWidthExcludingHyphen <= 0
-        || !EnoughWidthForHyphenation(availableWidthExcludingHyphen, fontCascade.Size()))
+        || !text::EnoughWidthForHyphenation(availableWidthExcludingHyphen, fontCascade.Size()))
     {
       return {};
     }
@@ -1273,7 +1273,7 @@ namespace krys::boo::layout
       -> EnumSet<InlineContentBreaker::WordBreakRule>
     {
       auto hyphenationIsAllowed = !_hyphenationIsDisabled && style.GetHyphens() == Hyphens::Auto
-                                  && CanHyphenate(style.ComputedLocale().GetPlatform());
+                                  && text::CanHyphenate(style.ComputedLocale().GetPlatform());
       if (hyphenationIsAllowed)
       {
         if (wordBreakRule)

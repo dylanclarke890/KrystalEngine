@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2010-2023 Apple Inc. All rights reserved.
+ * Copyright (C) 2010 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,20 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "Krystal.Text/Hyphenation.hpp"
+#include "Krystal.Core/Assert.hpp"
 
-#include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Strings/StringAtom.hpp"
-
-// FIXME: There are no hyphenation dictionaries: nothing can be hyphenated automatically (`hyphens: auto`).
-
-namespace krys::boo
+namespace krys::text
 {
-  KRYS_NODISCARD constexpr bool EnoughWidthForHyphenation(float availableWidth, float fontSize) noexcept
+  bool CanHyphenate(const StringAtom & /* localeIdentifier */) noexcept
   {
-    // If the maximum width available for the prefix before the hyphen is small, then it is very unlikely
-    // that an hyphenation opportunity exists, so do not bother to look for it.
-    return availableWidth > fontSize * 5 / 4;
+    return false;
   }
 
-  /// @brief Whether words in @p localeIdentifier's language can be hyphenated automatically.
-  KRYS_NODISCARD bool CanHyphenate(const StringAtom &localeIdentifier) noexcept;
-
-  /// @brief The byte offset of the last hyphenation opportunity in @p string before @p beforeIndex, or 0.
-  KRYS_NODISCARD size_t LastHyphenLocation(utf8_stringview string, size_t beforeIndex,
-                                           const StringAtom &localeIdentifier) noexcept;
+  size_t LastHyphenLocation(utf8_stringview, size_t /* beforeIndex */,
+                            const StringAtom & /* localeIdentifier */) noexcept
+  {
+    krys_debug_assert_msg(false, "nothing can be hyphenated (CanHyphenate is false)");
+    return 0;
+  }
 }

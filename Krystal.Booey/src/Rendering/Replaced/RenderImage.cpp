@@ -50,7 +50,7 @@
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
-#include "Krystal.Booey/Text/UnicodeHelpers.hpp"
+#include "Krystal.Text/UnicodeHelpers.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -670,7 +670,7 @@ namespace krys::boo
           if (auto *element = GetElement();
               _altTextIsFromAttribute && element && element->HasAutoTextDirectionState())
           {
-            textRun.SetDirection(DefaultWritingDirection(_altText).value_or(TextDirection::LTR));
+            textRun.SetDirection(text::DefaultWritingDirection(_altText).value_or(text::TextDirection::LTR));
           }
           auto textWidth = LayoutUnit {fontCascade.Width(textRun)};
 

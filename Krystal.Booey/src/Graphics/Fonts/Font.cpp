@@ -32,11 +32,11 @@
 #include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
 #include "Krystal.Booey/Graphics/Fonts/SystemFallbackFontCache.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
 #include <cmath>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -322,7 +322,7 @@ namespace krys::boo
   }
 
   GlyphBufferAdvance Font::ApplyTransforms(GlyphBuffer &, uint32, uint32, bool, bool, const StringAtom &,
-                                           utf8_stringview, TextDirection) noexcept
+                                           utf8_stringview, text::TextDirection) noexcept
   {
     return MakeGlyphBufferAdvance();
   }
@@ -461,7 +461,7 @@ namespace krys::boo
       auto codePoint = *it;
       ++it;
 
-      if (!it.AtEnd() && IsVariationSelector(*it))
+      if (!it.AtEnd() && text::IsVariationSelector(*it))
       {
         if (!PlatformSupportsCodePoint(codePoint, *it))
         {
@@ -915,7 +915,7 @@ namespace krys::boo
       auto glyph =
         static_cast<Glyph>(face->GlyphIndex(FontCascade::TreatAsSpace(character) ? text::Space : character));
       // If the font doesn't support a Default_Ignorable character, replace it with zero with space.
-      if (!glyph && (IsDefaultIgnorableCodePoint(character) || IsControlCharacter(character)))
+      if (!glyph && (text::IsDefaultIgnorableCodePoint(character) || text::IsControlCharacter(character)))
       {
         glyph = zeroWidthSpaceGlyph();
       }

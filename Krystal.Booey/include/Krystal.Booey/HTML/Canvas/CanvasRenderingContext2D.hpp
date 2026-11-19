@@ -27,12 +27,16 @@
 
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DBase.hpp"
 
+namespace krys::text
+{
+  enum class TextDirection : bool;
+}
+
 namespace krys::boo
 {
   class HTMLCanvasElement;
   class Path;
   class RenderStyle;
-  enum class TextDirection : bool;
 }
 
 namespace krys::boo::html
@@ -97,8 +101,8 @@ namespace krys::boo::html
     void DrawTextInternal(DOMStringView text, double x, double y, bool fill,
                           Maybe<double> maxWidth = null) noexcept;
 
-    KRYS_NODISCARD TextDirection ToTextDirection(Direction,
-                                                 const RenderStyle **computedStyle = nullptr) const noexcept;
+    KRYS_NODISCARD text::TextDirection
+      ToTextDirection(Direction, const RenderStyle **computedStyle = nullptr) const noexcept;
   };
 }
 

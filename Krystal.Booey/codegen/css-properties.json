@@ -421,7 +421,7 @@
         "render-style-storage-container": "struct",
         "render-style-storage-path": ["m_inheritedFlags"],
         "render-style-storage-kind": "enum",
-        "render-style-type": "TextDirection",
+        "render-style-type": "text::TextDirection",
         "high-priority": true,
         "parser-grammar": "<<values>>"
       },

@@ -33,12 +33,12 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatSegment.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
-#include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
 #include <bitset>
 #include <cmath>
 #include <utility>
@@ -216,7 +216,7 @@ namespace krys::boo
 
     KRYS_NODISCARD float
       WidthForTextUsingSimplifiedMeasuring(utf8_stringview text,
-                                           TextDirection = TextDirection::LTR) const noexcept;
+                                           text::TextDirection = text::TextDirection::LTR) const noexcept;
 
     KRYS_NODISCARD float WidthForSimpleTextWithFixedPitch(utf8_stringview text,
                                                           bool whitespaceIsCollapsed) const noexcept;
@@ -380,16 +380,16 @@ namespace krys::boo
     /// trailing expansion. If there are no opportunities, the bool will be true iff we are forbidding leading
     /// expansions.
     KRYS_NODISCARD static std::pair<uint32, bool>
-      ExpansionOpportunityCount(utf8_stringview text, TextDirection direction,
+      ExpansionOpportunityCount(utf8_stringview text, text::TextDirection direction,
                                 ExpansionBehavior expansionBehavior) noexcept;
 
     /// @brief Whether or not there is an expansion opportunity just before the first character.
     /// @note This does not take an isAfterExpansion flag; this assumes that isAfterExpansion is false.
     KRYS_NODISCARD static bool LeftExpansionOpportunity(utf8_stringview text,
-                                                        TextDirection direction) noexcept;
+                                                        text::TextDirection direction) noexcept;
 
     KRYS_NODISCARD static bool RightExpansionOpportunity(utf8_stringview text,
-                                                         TextDirection direction) noexcept;
+                                                         text::TextDirection direction) noexcept;
 
     /// @brief The code path @p run (from byte offset @p from to @p to) is measured on.
     KRYS_NODISCARD CodePath GetCodePath(const TextRun &run, Maybe<uint32> from = null,
@@ -466,12 +466,12 @@ namespace krys::boo
       {
         return true;
       }
-      if (IsControlCharacter(character))
+      if (text::IsControlCharacter(character))
       {
         return false;
       }
       // "Unsupported Default_ignorable characters must be ignored for text rendering."
-      return IsDefaultIgnorableCodePoint(character) || IsInvisibleReplacementObjectCharacter(character);
+      return text::IsDefaultIgnorableCodePoint(character) || IsInvisibleReplacementObjectCharacter(character);
     }
 
     // FIXME: Callers of treatAsZeroWidthSpace() and treatAsZeroWidthSpaceInComplexScript() should probably be
@@ -569,7 +569,7 @@ namespace krys::boo
                                HashSet<RefPtr<const Font>> *fallbackFonts = nullptr,
                                GlyphOverflow *glyphOverflow = nullptr) const noexcept;
 
-    KRYS_NODISCARD float WidthForSimpleTextSlow(utf8_stringview text, TextDirection textDirection,
+    KRYS_NODISCARD float WidthForSimpleTextSlow(utf8_stringview text, text::TextDirection textDirection,
                                                 float *cacheEntry) const noexcept;
 
     KRYS_NODISCARD static bool CanHandleRunAsSimpleText(const TextRun &run, uint32 from, uint32 to) noexcept;

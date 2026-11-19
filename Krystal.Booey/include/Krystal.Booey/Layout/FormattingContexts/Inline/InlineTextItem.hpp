@@ -128,9 +128,9 @@ namespace krys::boo::layout
       return utf8_stringview {GetInlineTextBox().Content()}.substr(Start(), Length());
     }
 
-    KRYS_NODISCARD TextDirection Direction() const noexcept
+    KRYS_NODISCARD text::TextDirection Direction() const noexcept
     {
-      return BidiLevel() % 2 ? TextDirection::RTL : TextDirection::LTR;
+      return BidiLevel() % 2 ? text::TextDirection::RTL : text::TextDirection::LTR;
     }
 
     KRYS_NODISCARD InlineTextItem Left(uint32 length) const noexcept;

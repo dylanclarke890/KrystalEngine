@@ -263,7 +263,7 @@ namespace krys::boo
         auto selectableRange = textBox->SelectableRange();
         auto [startOffset, endOffset] = [&]
         {
-          if (textBox->Direction() == TextDirection::RTL)
+          if (textBox->Direction() == text::TextDirection::RTL)
           {
             return std::pair {selectableRange.Clamp(offset), textBox->Length()};
           }

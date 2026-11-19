@@ -22,6 +22,10 @@ target_compile_options(Krystal.Text
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8>
 )
 
+# Third-party - ICU (break iteration, character properties, bidi and scripts; its headers are in the public ones)
+find_package(ICU REQUIRED COMPONENTS uc dt)
+target_link_libraries(Krystal.Text PUBLIC ICU::uc PRIVATE ICU::dt)
+
 # Third-party - FreeType (font files and faces)
 find_package(Freetype REQUIRED)
 target_link_libraries(Krystal.Text PRIVATE Freetype::Freetype)
@@ -37,6 +41,10 @@ target_sources(Krystal.Text
       include
     FILES
       include/Krystal.Text/Base64.hpp
+      include/Krystal.Text/BidiContext.hpp
+      include/Krystal.Text/BidiResolver.hpp
+      include/Krystal.Text/BidiRunList.hpp
+      include/Krystal.Text/CharacterProperties.hpp
       include/Krystal.Text/EncodingRegistry.hpp
       include/Krystal.Text/Encodings/All.hpp
       include/Krystal.Text/Encodings/ASCII.hpp
@@ -61,10 +69,22 @@ target_sources(Krystal.Text
       include/Krystal.Text/Encodings/Windows.hpp
       include/Krystal.Text/FreeTypeFace.hpp
       include/Krystal.Text/HarfBuzz.hpp
+      include/Krystal.Text/Hyphenation.hpp
       include/Krystal.Text/ICodec.hpp
+      include/Krystal.Text/LocaleToScriptMapping.hpp
+      include/Krystal.Text/TextBoundaries.hpp
+      include/Krystal.Text/TextBreakIterator.hpp
+      include/Krystal.Text/TextDirection.hpp
+      include/Krystal.Text/UnicodeHelpers.hpp
 
   PRIVATE
     src/Base64.cpp
+    src/BidiContext.cpp
     src/FreeTypeFace.cpp
     src/HarfBuzz.cpp
+    src/Hyphenation.cpp
+    src/LocaleToScriptMapping.cpp
+    src/TextBoundaries.cpp
+    src/TextBreakIterator.cpp
+    src/UnicodeHelpers.cpp
 )

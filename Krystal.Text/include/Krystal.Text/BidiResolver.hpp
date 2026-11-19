@@ -21,18 +21,16 @@
 
 #pragma once
 
-#include "Krystal.Booey/Text/BidiContext.hpp"
-#include "Krystal.Booey/Text/BidiRunList.hpp"
-#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Text/BidiContext.hpp"
+#include "Krystal.Text/BidiRunList.hpp"
+#include "Krystal.Text/TextDirection.hpp"
 #include <algorithm>
 
-namespace krys::boo
+namespace krys::text
 {
-  class RenderObject;
-
   template <typename Iterator>
   class WhitespaceCollapsingState
   {
@@ -60,10 +58,11 @@ namespace krys::boo
     }
 
     /// @brief When ignoring spaces, this needs to be called for objects that need line boxes such as
-    /// RenderInlines or hard line breaks to ensure that they're not ignored.
-    void EnsureLineBoxInsideIgnoredSpaces(RenderObject &renderer) noexcept
+    /// inlines or hard line breaks to ensure that they're not ignored.
+    template <typename TObject>
+    void EnsureLineBoxInsideIgnoredSpaces(TObject &object) noexcept
     {
-      Iterator transition(nullptr, &renderer, 0);
+      Iterator transition(nullptr, &object, 0);
       StopIgnoringSpaces(transition);
       StartIgnoringSpaces(transition);
     }

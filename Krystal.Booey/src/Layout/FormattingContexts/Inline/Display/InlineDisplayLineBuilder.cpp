@@ -131,7 +131,8 @@ namespace krys::boo::layout
           displayBox.SetIsFullyTruncated();
           return {};
         }
-        auto contentDirection = displayBox.BidiLevel() % 2 ? TextDirection::RTL : TextDirection::LTR;
+        auto contentDirection =
+          displayBox.BidiLevel() % 2 ? text::TextDirection::RTL : text::TextDirection::LTR;
         if (displayBox.LayoutBox().Parent().Style().GetWritingMode().BidiDirection() != contentDirection)
         {
           return TruncateTextContentWithMismatchingDirection(displayBox, contentWidth,
@@ -459,7 +460,7 @@ namespace krys::boo::layout
   {
     auto &constraints = GetConstraints();
     auto isLeftToRightDirection =
-      lineLayoutResult.BidiDirectionality.InlineBaseDirection == TextDirection::LTR;
+      lineLayoutResult.BidiDirectionality.InlineBaseDirection == text::TextDirection::LTR;
 
     InlineRect lineBoxLogicalRect = lineBox.LogicalRect();
     auto lineBoxLineLeftEdge =

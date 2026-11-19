@@ -32,8 +32,8 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
-#include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
 #include <unicode/utf8.h>
 
 namespace krys::boo
@@ -692,7 +692,7 @@ namespace krys::boo
     // families named in the font-family list that are not generic families. If none of the families named in
     // the font-family list contain a glyph for that codepoint, user agents must display some form of missing
     // glyph symbol for that character rather than attempting installed font fallback for that codepoint."
-    if (IsPrivateUseAreaCharacter(character))
+    if (text::IsPrivateUseAreaCharacter(character))
     {
       return {0, &PrimaryFont(description, fontSelector)}; // 0 is the font's reserved .notdef glyph
     }

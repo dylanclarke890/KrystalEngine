@@ -54,12 +54,12 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Style/Values/Text/TabSize.hpp"
-#include "Krystal.Booey/Text/Hyphenation.hpp"
-#include "Krystal.Booey/Text/TextBreakIterator.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/Hyphenation.hpp"
+#include "Krystal.Text/TextBreakIterator.hpp"
 #include <algorithm>
 #include <array>
 #include <bitset>
@@ -359,7 +359,7 @@ namespace krys::boo
     replaceNoBreakSpaces(string, stringWithPrevious);
     auto previousCharacterLength = static_cast<int32_t>(previousCharacter.size());
 
-    auto *breakIterator = WordBreakIterator(stringWithPrevious);
+    auto *breakIterator = text::WordBreakIterator(stringWithPrevious);
     if (!breakIterator)
     {
       return utf8_string(string);
@@ -1272,14 +1272,14 @@ namespace krys::boo
       return current - 1;
     }
 
-    CachedTextBreakIterator iterator(_text, {}, TextBreakIterator::CaretMode {}, null);
+    text::CachedTextBreakIterator iterator(_text, {}, text::TextBreakIterator::CaretMode {}, null);
     auto preceding = iterator.Preceding(static_cast<uint32>(current));
     return preceding ? static_cast<int32>(*preceding) : current - 1;
   }
 
   int32 RenderText::PreviousOffsetForBackwardDeletion(int32 current) const noexcept
   {
-    CachedTextBreakIterator iterator(_text, {}, TextBreakIterator::DeleteMode {}, null);
+    text::CachedTextBreakIterator iterator(_text, {}, text::TextBreakIterator::DeleteMode {}, null);
     auto preceding = iterator.Preceding(static_cast<uint32>(current));
     return preceding ? static_cast<int32>(*preceding) : 0;
   }
@@ -1291,7 +1291,7 @@ namespace krys::boo
       return current + 1;
     }
 
-    CachedTextBreakIterator iterator(_text, {}, TextBreakIterator::CaretMode {}, null);
+    text::CachedTextBreakIterator iterator(_text, {}, text::TextBreakIterator::CaretMode {}, null);
     auto following = iterator.Following(static_cast<uint32>(current));
     return following ? static_cast<int32>(*following) : current + 1;
   }
@@ -1618,7 +1618,7 @@ namespace krys::boo
     krys_debug_assert(word.size() >= minimumSuffixLength);
     auto hyphenLocation = word.size() - minimumSuffixLength;
     auto locale = style.ComputedLocale().GetPlatform();
-    while ((hyphenLocation = LastHyphenLocation(word, hyphenLocation, locale))
+    while ((hyphenLocation = text::LastHyphenLocation(word, hyphenLocation, locale))
            >= std::max<size_t>(minimumPrefixLength, 1))
     {
       hyphenLocations.push_back(hyphenLocation);
@@ -1694,8 +1694,8 @@ namespace krys::boo
     auto length = string.size();
     auto iteratorMode = layout::TextUtil::LineBreakIteratorMode(style.GetLineBreak());
     auto contentAnalysis = layout::TextUtil::GetContentAnalysis(style.GetWordBreak());
-    CachedLineBreakIteratorFactory lineBreakIteratorFactory(string, style.ComputedLocale().GetPlatform(),
-                                                            iteratorMode, contentAnalysis);
+    text::CachedLineBreakIteratorFactory lineBreakIteratorFactory(
+      string, style.ComputedLocale().GetPlatform(), iteratorMode, contentAnalysis);
     bool needsWordSpacing = false;
     bool ignoringSpaces = false;
     bool isSpace = false;
@@ -1710,7 +1710,7 @@ namespace krys::boo
     float maxWordWidth = std::numeric_limits<float>::max();
     size_t minimumPrefixLength = 0;
     size_t minimumSuffixLength = 0;
-    if (style.GetHyphens() == Hyphens::Auto && CanHyphenate(style.ComputedLocale().GetPlatform()))
+    if (style.GetHyphens() == Hyphens::Auto && text::CanHyphenate(style.ComputedLocale().GetPlatform()))
     {
       maxWordWidth = 0;
 
@@ -1735,8 +1735,8 @@ namespace krys::boo
        || style.GetOverflowWrap() == OverflowWrap::Anywhere)
       && style.AutoWrap();
     bool keepAllWords = style.GetWordBreak() == WordBreak::KeepAll;
-    bool canUseLineBreakShortcut = iteratorMode == TextBreakLineBehavior::Default
-                                   && contentAnalysis == TextBreakIterator::ContentAnalysis::Mechanical;
+    bool canUseLineBreakShortcut = iteratorMode == text::TextBreakLineBehavior::Default
+                                   && contentAnalysis == text::TextBreakIterator::ContentAnalysis::Mechanical;
 
     size_t i = 0;
     while (i < length)

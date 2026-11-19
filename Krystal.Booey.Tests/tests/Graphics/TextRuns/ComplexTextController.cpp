@@ -26,7 +26,7 @@ namespace krys::boo::tests
 
     KRYS_NODISCARD TextRun Rtl(utf8_stringview text)
     {
-      return TextRun {text, 0, 0, ExpansionBehavior::DefaultBehavior(), TextDirection::RTL};
+      return TextRun {text, 0, 0, ExpansionBehavior::DefaultBehavior(), text::TextDirection::RTL};
     }
 
     // Liberation Sans at 20px: A and V are 1366/2048em, and the pair kerns by -152/2048em.

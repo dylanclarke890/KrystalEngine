@@ -37,7 +37,7 @@ struct UBreakIterator;
 
 // Every offset here is a byte offset into UTF-8 text.
 
-namespace krys::boo
+namespace krys::text
 {
   /// @brief How strictly line breaks follow the line breaking rules (`line-break`).
   enum class TextBreakLineBehavior : uint8

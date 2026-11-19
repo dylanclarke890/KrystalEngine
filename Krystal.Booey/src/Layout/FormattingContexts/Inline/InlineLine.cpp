@@ -1195,7 +1195,7 @@ namespace krys::boo::layout
     constexpr size_t trailingTrimmableContentLength = 1;
 
     auto trimmedWidth = _trailingWhitespace->Width;
-    if (_lastNonWhitespaceContentStart && InlineDirection() == TextDirection::RTL)
+    if (_lastNonWhitespaceContentStart && InlineDirection() == text::TextDirection::RTL)
     {
       // While LTR content could also suffer from slightly incorrect content width after trimming trailing
       // whitespace (see TextUtil::width) it hardly produces visually observable result.
@@ -1257,7 +1257,7 @@ namespace krys::boo::layout
     return false;
   }
 
-  TextDirection Line::Run::InlineDirection() const noexcept
+  text::TextDirection Line::Run::InlineDirection() const noexcept
   {
     return _style->GetWritingMode().BidiDirection();
   }

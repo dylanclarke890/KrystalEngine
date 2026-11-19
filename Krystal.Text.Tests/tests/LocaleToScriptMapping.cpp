@@ -1,7 +1,7 @@
-﻿#include "Krystal.Booey/Text/LocaleToScriptMapping.hpp"
+﻿#include "Krystal.Text/LocaleToScriptMapping.hpp"
 #include "catch2/catch_test_macros.hpp"
 
-namespace krys::boo::tests
+namespace krys::text::tests
 {
   TEST_CASE("ScriptNameToCode", "[Core][LocaleToScriptMapping]")
   {

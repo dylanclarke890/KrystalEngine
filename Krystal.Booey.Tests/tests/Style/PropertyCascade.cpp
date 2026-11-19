@@ -187,7 +187,7 @@ namespace krys::boo::style::tests
                    "[Style][PropertyCascade]")
   {
     const WritingMode ltr;
-    const WritingMode rtl(StyleWritingMode::HorizontalTb, TextDirection::RTL, TextOrientation::Mixed);
+    const WritingMode rtl(StyleWritingMode::HorizontalTb, text::TextDirection::RTL, TextOrientation::Mixed);
 
     auto result = MatchResult::Create();
     result->AuthorDeclarations.push_back(Block(u8"margin-left: 1px; margin-inline-start: 2px"));

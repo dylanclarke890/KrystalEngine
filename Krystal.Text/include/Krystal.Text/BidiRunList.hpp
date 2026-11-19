@@ -29,7 +29,7 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
-namespace krys::boo
+namespace krys::text
 {
   /// @brief The runs a bidi resolver makes for a line, in a singly linked list.
   template <class Run>

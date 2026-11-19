@@ -31,7 +31,7 @@ namespace krys::boo::dom::tests
     /// @brief @p element's directionality, checked against `:dir()`.
     KRYS_NODISCARD std::string Dir(const Element &element)
     {
-      auto direction = element.EffectiveTextDirection() == TextDirection::LTR ? "ltr" : "rtl";
+      auto direction = element.EffectiveTextDirection() == text::TextDirection::LTR ? "ltr" : "rtl";
       auto matches = element.Matches(direction == std::string("ltr") ? u8":dir(ltr)" : u8":dir(rtl)");
       REQUIRE_FALSE(matches.HasException());
       CHECK(matches.Value());
@@ -264,7 +264,7 @@ namespace krys::boo::dom::tests
     SECTION("values")
     {
       REQUIRE_FALSE(i.SetValue(u8"123").HasException());
-      CHECK(ComputeAutoDirectionality(i) == TextDirection::LTR);
+      CHECK(ComputeAutoDirectionality(i) == text::TextDirection::LTR);
       CHECK(Dir(i) == "ltr");
       REQUIRE_FALSE(t.SetValue(Salam).HasException());
       CHECK(Dir(t) == "rtl");
@@ -333,7 +333,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(shadow->AppendChild(*slot).HasException());
 
     // The span has a dir and the bdi is a bdi, so neither decides: the bold text does.
-    CHECK(ComputeAutoDirectionality(*slot) == TextDirection::RTL);
+    CHECK(ComputeAutoDirectionality(*slot) == text::TextDirection::RTL);
     CHECK(Dir(*slot) == "rtl");
   }
 
@@ -352,13 +352,13 @@ namespace krys::boo::dom::tests
       REQUIRE(style);
       return style->GetWritingMode().ComputedTextDirection();
     };
-    CHECK(direction(p) == TextDirection::RTL);
-    CHECK(direction(fixture.ById(u8"b")) == TextDirection::LTR);
+    CHECK(direction(p) == text::TextDirection::RTL);
+    CHECK(direction(fixture.ById(u8"b")) == text::TextDirection::LTR);
 
     // Changing the text that decides it restyles the element.
     REQUIRE_FALSE(Downcast<Text>(*p.FirstChild()).Data(u8"abc").HasException());
     CHECK(p.NeedsStyleRecalc());
     document.UpdateStyleIfNeeded();
-    CHECK(direction(p) == TextDirection::LTR);
+    CHECK(direction(p) == text::TextDirection::LTR);
   }
 }

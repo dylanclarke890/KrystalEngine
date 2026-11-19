@@ -34,8 +34,8 @@
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRunIterator.hpp"
-#include "Krystal.Booey/Text/BidiResolver.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Text/BidiResolver.hpp"
 #include <cmath>
 
 namespace krys::boo
@@ -162,8 +162,8 @@ namespace krys::boo
   void GraphicsContext::DrawBidiText(const FontCascade &font, const TextRun &run, const FloatPoint &point,
                                      FontCascade::CustomFontNotReadyAction customFontNotReadyAction) noexcept
   {
-    BidiResolver<TextRunIterator, BidiCharacterRun> bidiResolver;
-    bidiResolver.SetStatus(BidiStatus(run.Direction(), run.DirectionalOverride()));
+    text::BidiResolver<TextRunIterator, text::BidiCharacterRun> bidiResolver;
+    bidiResolver.SetStatus(text::BidiStatus(run.Direction(), run.DirectionalOverride()));
     bidiResolver.SetPositionIgnoringNestedIsolates(TextRunIterator(&run, 0));
 
     // FIXME: This ownership should be reversed. We should pass BidiRunList
@@ -182,7 +182,7 @@ namespace krys::boo
     {
       auto subrun = run.SubRun(bidiRun->Start(), bidiRun->Stop() - bidiRun->Start());
       bool isRTL = bidiRun->Level() % 2;
-      subrun.SetDirection(isRTL ? TextDirection::RTL : TextDirection::LTR);
+      subrun.SetDirection(isRTL ? text::TextDirection::RTL : text::TextDirection::LTR);
       subrun.SetDirectionalOverride(bidiRun->DirOverride(false));
 
       std::ignore = font.DrawText(*this, subrun, currentPoint, 0, null, customFontNotReadyAction);

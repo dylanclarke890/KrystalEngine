@@ -24,9 +24,10 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 #include <unicode/uchar.h>
 
-namespace krys::boo
+namespace krys::text
 {
   enum class BidiEmbeddingSource : uint8
   {

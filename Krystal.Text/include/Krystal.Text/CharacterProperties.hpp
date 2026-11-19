@@ -30,7 +30,7 @@
 #include <unicode/uchar.h>
 #include <unicode/uscript.h>
 
-namespace krys::boo
+namespace krys::text
 {
   KRYS_NODISCARD inline bool IsEmojiGroupCandidate(char32 character) noexcept
   {

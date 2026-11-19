@@ -643,7 +643,7 @@ namespace krys::boo::html
     if (renderer)
     {
       parameters.IsAnchorElementRTL =
-        renderer->Style().GetWritingMode().ComputedTextDirection() == TextDirection::RTL;
+        renderer->Style().GetWritingMode().ComputedTextDirection() == text::TextDirection::RTL;
       parameters.UseDarkAppearance = renderer->UseDarkAppearance();
     }
     auto date = ParseToDateComponents(element.Value()).value_or(DateComponents());

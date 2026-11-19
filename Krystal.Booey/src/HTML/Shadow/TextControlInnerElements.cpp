@@ -100,7 +100,7 @@ namespace krys::boo::html
     newStyle->SetLogicalMinWidth(style::MinimumSize::Fixed {0});
 
     newStyle->SetDisplay(DisplayType::Block);
-    newStyle->SetDirection(TextDirection::LTR);
+    newStyle->SetDirection(text::TextDirection::LTR);
     // We don't want the shadow DOM to be editable, so we set this block to read-only in case the input itself
     // is editable.
     newStyle->SetUserModify(UserModify::ReadOnly);

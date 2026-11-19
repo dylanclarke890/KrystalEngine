@@ -19,7 +19,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "Krystal.Booey/Text/TextBreakIterator.hpp"
+#include "Krystal.Text/TextBreakIterator.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
@@ -31,7 +31,7 @@
 #include <unicode/utf8.h>
 #include <utility>
 
-namespace krys::boo
+namespace krys::text
 {
   /// @brief Gives @p iterator the UTF-8 @p string. The iterator keeps a reference to the string's memory.
   KRYS_NODISCARD static bool SetUTF8Text(UBreakIterator &iterator, utf8_stringview string) noexcept

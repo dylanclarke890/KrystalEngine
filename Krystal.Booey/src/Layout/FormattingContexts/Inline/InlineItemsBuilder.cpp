@@ -87,7 +87,7 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD uint32 MoveToNextBreakablePosition(
-      uint32 startPosition, CachedLineBreakIteratorFactory &lineBreakIteratorFactory,
+      uint32 startPosition, text::CachedLineBreakIteratorFactory &lineBreakIteratorFactory,
       const RenderStyle &style) noexcept
     {
       auto textLength = static_cast<uint32>(lineBreakIteratorFactory.StringView().length());
@@ -885,7 +885,7 @@ namespace krys::boo::layout
     }
     auto mayNotUseBlockDirection = Root().Style().GetUnicodeBidi() == UnicodeBidi::Plaintext;
     if (!ContentRequiresVisualReordering() && mayNotUseBlockDirection
-        && TextUtil::DirectionForTextContent(paragraphContentBuilder.View()) == TextDirection::LTR)
+        && TextUtil::DirectionForTextContent(paragraphContentBuilder.View()) == text::TextDirection::LTR)
     {
       // UnicodeBidi::Plaintext makes directionality calculated without taking parent direction property into
       // account.
@@ -1253,7 +1253,7 @@ namespace krys::boo::layout
     auto &style = inlineTextBox.Style();
     auto shouldPreserveSpacesAndTabs = TextUtil::ShouldPreserveSpacesAndTabs(inlineTextBox);
     auto shouldPreserveNewline = TextUtil::ShouldPreserveNewline(inlineTextBox);
-    auto lineBreakIteratorFactory = CachedLineBreakIteratorFactory {
+    auto lineBreakIteratorFactory = text::CachedLineBreakIteratorFactory {
       text, style.ComputedLocale().GetPlatform(), TextUtil::LineBreakIteratorMode(style.GetLineBreak()),
       TextUtil::GetContentAnalysis(style.GetWordBreak())};
     auto currentPosition = partialContentOffset.value_or(0);

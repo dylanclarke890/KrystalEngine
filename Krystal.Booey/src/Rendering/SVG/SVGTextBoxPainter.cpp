@@ -83,7 +83,7 @@ namespace krys::boo
     return TextBoxIterator()->ParentInlineBox()->Renderer();
   }
 
-  FloatRect SelectionRectForTextFragment(const RenderSVGInlineText &renderer, TextDirection direction,
+  FloatRect SelectionRectForTextFragment(const RenderSVGInlineText &renderer, text::TextDirection direction,
                                          const SVGTextFragment &fragment, uint32 startPosition,
                                          uint32 endPosition) noexcept
   {
@@ -711,7 +711,7 @@ namespace krys::boo
     }
   }
 
-  TextRun ConstructTextRun(utf8_stringview text, TextDirection direction,
+  TextRun ConstructTextRun(utf8_stringview text, text::TextDirection direction,
                            const SVGTextFragment &fragment) noexcept
   {
     TextRun run(text.substr(fragment.CharacterOffset, fragment.Length),

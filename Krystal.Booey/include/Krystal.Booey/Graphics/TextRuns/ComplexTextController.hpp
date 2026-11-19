@@ -42,9 +42,13 @@
 
 struct hb_buffer_t;
 
-namespace krys::boo
+namespace krys::text
 {
   class CachedTextBreakIterator;
+}
+
+namespace krys::boo
+{
   class FontCascade;
   class TextRun;
 
@@ -361,7 +365,7 @@ namespace krys::boo
       return index < _glyphOrigins.size() ? _glyphOrigins[index] : FloatPoint();
     }
 
-    void AdvanceByCombiningCharacterSequence(const CachedTextBreakIterator &graphemeClusterIterator,
+    void AdvanceByCombiningCharacterSequence(const text::CachedTextBreakIterator &graphemeClusterIterator,
                                              uint32 &currentIndex, char32 &baseCharacter) noexcept;
   };
 }

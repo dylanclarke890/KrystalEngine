@@ -62,11 +62,11 @@ namespace krys::boo
       return needsLayout ? style::Difference {style::DifferenceResult::Layout} : diff;
     }
 
-    KRYS_NODISCARD TextDirection ContentTextDirection(utf8_stringview content) noexcept
+    KRYS_NODISCARD text::TextDirection ContentTextDirection(utf8_stringview content) noexcept
     {
       if (content.empty())
       {
-        return TextDirection::LTR;
+        return text::TextDirection::LTR;
       }
       // FIXME: Depending on the string value, we may need the real bidi algorithm. (rdar://106139180)
       // Also we may need to start checking for the entire content for directionality (and whether we need to
@@ -74,9 +74,9 @@ namespace krys::boo
       auto bidiCategory = u_charDirection(static_cast<UChar32>(*text::CodePointIterator(content)));
       if (bidiCategory != U_RIGHT_TO_LEFT && bidiCategory != U_RIGHT_TO_LEFT_ARABIC)
       {
-        return TextDirection::LTR;
+        return text::TextDirection::LTR;
       }
-      return TextDirection::RTL;
+      return text::TextDirection::RTL;
     }
 
     enum class SnapDirection : uint8
@@ -122,7 +122,7 @@ namespace krys::boo
       // We use u_charDirection to figure out if the marker text is RTL and assume the suffix matches the
       // surrounding direction.
       StringBuilder textForRun;
-      if (textContent.TextDirection == TextDirection::LTR)
+      if (textContent.TextDirection == text::TextDirection::LTR)
       {
         if (style.GetWritingMode().IsBidiLTR())
         {
@@ -424,7 +424,7 @@ namespace krys::boo
       _textContent = {
         .TextWithSuffix = {},
         .TextWithoutSuffixLength = 0,
-        .TextDirection = TextDirection::LTR,
+        .TextDirection = text::TextDirection::LTR,
       };
       return;
     }
@@ -435,7 +435,7 @@ namespace krys::boo
         _textContent = {
           .TextWithSuffix = u8" ",
           .TextWithoutSuffixLength = 0,
-          .TextDirection = TextDirection::LTR,
+          .TextDirection = text::TextDirection::LTR,
         };
       },
       [&](const CSSOMStringAtom &identifier)

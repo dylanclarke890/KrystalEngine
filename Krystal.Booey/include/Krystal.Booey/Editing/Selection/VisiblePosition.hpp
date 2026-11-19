@@ -128,7 +128,8 @@ namespace krys::boo
 
     KRYS_NODISCARD InlineBoxAndOffset GetInlineBoxAndOffset() const noexcept;
 
-    KRYS_NODISCARD InlineBoxAndOffset GetInlineBoxAndOffset(TextDirection primaryDirection) const noexcept;
+    KRYS_NODISCARD InlineBoxAndOffset
+      GetInlineBoxAndOffset(text::TextDirection primaryDirection) const noexcept;
 
     struct LocalCaretRectResult
     {

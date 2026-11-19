@@ -24,12 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Text/TextBoundaries.hpp"
-#include "Krystal.Booey/Text/TextBreakIterator.hpp"
+#include "Krystal.Text/TextBoundaries.hpp"
+#include "Krystal.Text/TextBreakIterator.hpp"
 #include <unicode/ubrk.h>
 #include <unicode/utf8.h>
 
-namespace krys::boo
+namespace krys::text
 {
   namespace
   {

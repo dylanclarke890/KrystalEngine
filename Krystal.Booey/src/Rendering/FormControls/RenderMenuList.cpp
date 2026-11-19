@@ -45,7 +45,7 @@
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Booey/Text/UnicodeBidi.hpp"
-#include "Krystal.Booey/Text/UnicodeHelpers.hpp"
+#include "Krystal.Text/UnicodeHelpers.hpp"
 #include <cmath>
 
 namespace krys::boo
@@ -120,10 +120,10 @@ namespace krys::boo
       // Items in the popup will not respect the CSS text-align and direction properties, so we must adjust
       // our own style to match.
       innerStyle.SetTextAlign(style::TextAlign::Left);
-      auto direction = TextDirection::LTR;
-      if (_buttonText && BaseTextDirection(_buttonText->Text()) == TextDirection::RTL)
+      auto direction = text::TextDirection::LTR;
+      if (_buttonText && text::BaseTextDirection(_buttonText->Text()) == text::TextDirection::RTL)
       {
-        direction = TextDirection::RTL;
+        direction = text::TextDirection::RTL;
       }
       (void)innerStyle.SetDirection(direction);
     }

@@ -71,7 +71,7 @@ namespace krys::boo::css::tests
       CHECK(RoundTrips({StyleWritingMode::HorizontalTb, StyleWritingMode::VerticalRl,
                         StyleWritingMode::VerticalLr, StyleWritingMode::SidewaysRl,
                         StyleWritingMode::SidewaysLr}));
-      CHECK(RoundTrips({TextDirection::LTR, TextDirection::RTL}));
+      CHECK(RoundTrips({text::TextDirection::LTR, text::TextDirection::RTL}));
       CHECK(RoundTrips({WindRule::NonZero, WindRule::EvenOdd}));
       CHECK(RoundTrips({CSSBoxType::MarginBox, CSSBoxType::BorderBox, CSSBoxType::PaddingBox,
                         CSSBoxType::ContentBox, CSSBoxType::FillBox, CSSBoxType::StrokeBox,

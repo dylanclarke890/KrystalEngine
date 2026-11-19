@@ -373,8 +373,6 @@ target_sources(Krystal.Booey.Tests
 		tests/Platform/Locale/DateTimeFormat.cpp
 		tests/Platform/Locale/Language.cpp
 		tests/Platform/Locale/LocaleICU.cpp
-		tests/Text/LocaleToScriptMapping.cpp
-		tests/Text/TextBreakIterator.cpp
 		tests/Text/TextFlags.cpp
 		tests/Text/TextSpacing.cpp
 		tests/Rendering/Style/GridSpan.cpp

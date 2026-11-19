@@ -40,6 +40,11 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include <compare>
 
+namespace krys::text
+{
+  enum class TextDirection : bool;
+}
+
 namespace krys::boo
 {
   class ContainerNode;
@@ -49,7 +54,6 @@ namespace krys::boo
   class RenderObject;
   class RenderStyle;
   class ShadowRoot;
-  enum class TextDirection : bool;
 }
 
 namespace krys::boo::dom
@@ -484,9 +488,9 @@ namespace krys::boo
 
     /// @brief The node's directionality: its own if it keeps one, otherwise the document element's.
     /// @see https://html.spec.whatwg.org/#the-directionality
-    KRYS_NODISCARD TextDirection EffectiveTextDirection() const noexcept;
+    KRYS_NODISCARD text::TextDirection EffectiveTextDirection() const noexcept;
 
-    void SetEffectiveTextDirection(TextDirection direction) noexcept;
+    void SetEffectiveTextDirection(text::TextDirection direction) noexcept;
 
     /// @brief Whether the node keeps a directionality of its own.
     KRYS_NODISCARD bool UsesEffectiveTextDirection() const noexcept

@@ -28,12 +28,12 @@
 #include "Krystal.Booey/Graphics/TextRuns/ComplexTextController.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/WidthCache.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/WidthIterator.hpp"
-#include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -327,7 +327,7 @@ namespace krys::boo
     for (uint32 i = 0; !FallbackRangesAt(i).IsNull(); ++i)
     {
       auto &fontRanges = FallbackRangesAt(i);
-      if (fontRanges.IsGenericFontFamily() && IsPrivateUseAreaCharacter(baseCharacter))
+      if (fontRanges.IsGenericFontFamily() && text::IsPrivateUseAreaCharacter(baseCharacter))
       {
         continue;
       }
@@ -368,7 +368,7 @@ namespace krys::boo
 
       for (; !codePointsIterator.AtEnd(); ++codePointsIterator)
       {
-        if (!IsDefaultIgnorableCodePoint(*codePointsIterator))
+        if (!text::IsDefaultIgnorableCodePoint(*codePointsIterator))
         {
           return true;
         }
@@ -1208,7 +1208,7 @@ namespace krys::boo
   }
 
   float FontCascade::WidthForTextUsingSimplifiedMeasuring(utf8_stringview text,
-                                                          TextDirection textDirection) const noexcept
+                                                          text::TextDirection textDirection) const noexcept
   {
     if (text.empty())
     {
@@ -1225,7 +1225,7 @@ namespace krys::boo
     return WidthForSimpleTextSlow(text, textDirection, cacheEntry);
   }
 
-  float FontCascade::WidthForSimpleTextSlow(utf8_stringview text, TextDirection textDirection,
+  float FontCascade::WidthForSimpleTextSlow(utf8_stringview text, text::TextDirection textDirection,
                                             float *cacheEntry) const noexcept
   {
     TextRun run {text, 0, 0, ExpansionBehavior::DefaultBehavior(), textDirection, false, false};
@@ -1855,11 +1855,11 @@ namespace krys::boo
           return CodePath::Complex;
         }
 
-        if (IsEmojiFitzpatrickModifier(c))
+        if (text::IsEmojiFitzpatrickModifier(c))
         {
           return CodePath::Complex;
         }
-        if (IsEmojiGroupCandidate(c))
+        if (text::IsEmojiGroupCandidate(c))
         {
           previousCharacterIsEmojiGroupCandidate = true;
           continue;
@@ -1910,7 +1910,7 @@ namespace krys::boo
   }
 
   std::pair<uint32, bool> FontCascade::ExpansionOpportunityCount(utf8_stringview text,
-                                                                 TextDirection direction,
+                                                                 text::TextDirection direction,
                                                                  ExpansionBehavior expansionBehavior) noexcept
   {
     // For each character, iterating from left to right:
@@ -1946,7 +1946,7 @@ namespace krys::boo
       isAfterExpansion = false;
     };
 
-    if (direction == TextDirection::LTR)
+    if (direction == text::TextDirection::LTR)
     {
       for (text::CodePointIterator it {text}; !it.AtEnd(); ++it)
       {
@@ -1980,7 +1980,7 @@ namespace krys::boo
     return std::make_pair(count, isAfterExpansion);
   }
 
-  bool FontCascade::LeftExpansionOpportunity(utf8_stringview text, TextDirection direction) noexcept
+  bool FontCascade::LeftExpansionOpportunity(utf8_stringview text, text::TextDirection direction) noexcept
   {
     if (text.empty())
     {
@@ -1988,12 +1988,12 @@ namespace krys::boo
     }
 
     char32 initialCharacter =
-      direction == TextDirection::LTR ? *text::CodePointIterator {text} : text::LastCodePoint(text);
+      direction == text::TextDirection::LTR ? *text::CodePointIterator {text} : text::LastCodePoint(text);
 
     return CanExpandAroundIdeographsInComplexText() && IsCJKIdeographOrSymbol(initialCharacter);
   }
 
-  bool FontCascade::RightExpansionOpportunity(utf8_stringview text, TextDirection direction) noexcept
+  bool FontCascade::RightExpansionOpportunity(utf8_stringview text, text::TextDirection direction) noexcept
   {
     if (text.empty())
     {
@@ -2001,7 +2001,7 @@ namespace krys::boo
     }
 
     char32 finalCharacter =
-      direction == TextDirection::LTR ? text::LastCodePoint(text) : *text::CodePointIterator {text};
+      direction == text::TextDirection::LTR ? text::LastCodePoint(text) : *text::CodePointIterator {text};
 
     return TreatAsSpace(finalCharacter)
            || (CanExpandAroundIdeographsInComplexText() && IsCJKIdeographOrSymbol(finalCharacter));

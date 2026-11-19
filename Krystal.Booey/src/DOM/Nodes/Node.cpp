@@ -206,12 +206,12 @@ namespace krys::boo
     return shadowRoot && shadowRoot->Mode() == dom::ShadowRootMode::UserAgent;
   }
 
-  TextDirection Node::EffectiveTextDirection() const noexcept
+  text::TextDirection Node::EffectiveTextDirection() const noexcept
   {
     if (UsesEffectiveTextDirection())
     {
-      return HasNodeFlag(dom::NodeFlags::EffectiveTextDirectionIsRTL) ? TextDirection::RTL
-                                                                      : TextDirection::LTR;
+      return HasNodeFlag(dom::NodeFlags::EffectiveTextDirectionIsRTL) ? text::TextDirection::RTL
+                                                                      : text::TextDirection::LTR;
     }
 
     // The document element's directionality, if it's an HTML element that keeps one.
@@ -221,12 +221,12 @@ namespace krys::boo
     {
       return documentElement->EffectiveTextDirection();
     }
-    return TextDirection::LTR;
+    return text::TextDirection::LTR;
   }
 
-  void Node::SetEffectiveTextDirection(TextDirection direction) noexcept
+  void Node::SetEffectiveTextDirection(text::TextDirection direction) noexcept
   {
-    if (direction == TextDirection::RTL)
+    if (direction == text::TextDirection::RTL)
     {
       SetNodeFlag(dom::NodeFlags::EffectiveTextDirectionIsRTL);
     }

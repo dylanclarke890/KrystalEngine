@@ -734,7 +734,7 @@ namespace krys::boo::layout
     {
       hasContent = hasContent || lineRun.IsContentful();
     }
-    krys_debug_assert(lineLayoutResult.BidiDirectionality.InlineBaseDirection == TextDirection::LTR
+    krys_debug_assert(lineLayoutResult.BidiDirectionality.InlineBaseDirection == text::TextDirection::LTR
                       || !hasContent);
 #endif
     auto &lineBox = GetLineBox();

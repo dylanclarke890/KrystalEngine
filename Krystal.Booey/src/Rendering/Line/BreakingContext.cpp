@@ -324,8 +324,8 @@ namespace krys::boo
     bool keepAllWords = style.GetWordBreak() == WordBreak::KeepAll;
     auto iteratorMode = layout::TextUtil::LineBreakIteratorMode(_blockStyle.GetLineBreak());
     auto contentAnalysis = layout::TextUtil::GetContentAnalysis(_blockStyle.GetWordBreak());
-    bool canUseLineBreakShortcut = iteratorMode == TextBreakLineBehavior::Default
-                                   && contentAnalysis == TextBreakIterator::ContentAnalysis::Mechanical;
+    bool canUseLineBreakShortcut = iteratorMode == text::TextBreakLineBehavior::Default
+                                   && contentAnalysis == text::TextBreakIterator::ContentAnalysis::Mechanical;
 
     if (svgInlineTextRenderer)
     {

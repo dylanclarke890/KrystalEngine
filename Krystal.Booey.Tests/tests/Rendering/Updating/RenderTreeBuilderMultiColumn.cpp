@@ -115,8 +115,8 @@ namespace krys::boo::tests
     SECTION("The flow and set take the container's style")
     {
       fixture.SetStyle(u8"m", u8"columns: 2; direction: rtl");
-      CHECK(flow->Style().ComputedDirection() == TextDirection::RTL);
-      CHECK(flow->FirstMultiColumnSet()->Style().ComputedDirection() == TextDirection::RTL);
+      CHECK(flow->Style().ComputedDirection() == text::TextDirection::RTL);
+      CHECK(flow->FirstMultiColumnSet()->Style().ComputedDirection() == text::TextDirection::RTL);
     }
   }
 

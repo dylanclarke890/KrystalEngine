@@ -371,7 +371,7 @@ namespace krys::boo::html
   {
     krys_debug_assert(Element());
     auto *renderer = Element()->Renderer();
-    return renderer && renderer->Style().GetWritingMode().ComputedTextDirection() == TextDirection::RTL;
+    return renderer && renderer->Style().GetWritingMode().ComputedTextDirection() == text::TextDirection::RTL;
   }
 
   bool ColorInputType::SupportsAlpha() const noexcept

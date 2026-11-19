@@ -54,7 +54,7 @@ namespace krys::boo::tests
     {
       TextRun run {u8"a b c", 0, 10};
       CHECK(cascade.Width(run) == 90);
-      TextRun rtl {u8"a b c", 0, 10, ExpansionBehavior::DefaultBehavior(), TextDirection::RTL};
+      TextRun rtl {u8"a b c", 0, 10, ExpansionBehavior::DefaultBehavior(), text::TextDirection::RTL};
       CHECK(cascade.Width(rtl) == 90);
     }
 
@@ -156,7 +156,7 @@ namespace krys::boo::tests
       CHECK(cascade.OffsetForPosition(run, 40, false) == 4);
       CHECK(cascade.OffsetForPosition(run, 1'000, false) == 6);
 
-      TextRun rtl {u8"abcd", 0, 0, ExpansionBehavior::DefaultBehavior(), TextDirection::RTL};
+      TextRun rtl {u8"abcd", 0, 0, ExpansionBehavior::DefaultBehavior(), text::TextDirection::RTL};
       // In RTL, the first character is on the right.
       CHECK(cascade.OffsetForPosition(rtl, 60, false) == 0);
       CHECK(cascade.OffsetForPosition(rtl, 4, false) == 3);
@@ -169,7 +169,7 @@ namespace krys::boo::tests
       cascade.AdjustSelectionRectForText(false, run, rect, 1, 3);
       CHECK(rect == LayoutRect {16, 0, 32, 20});
 
-      TextRun rtl {u8"abcd", 0, 0, ExpansionBehavior::DefaultBehavior(), TextDirection::RTL};
+      TextRun rtl {u8"abcd", 0, 0, ExpansionBehavior::DefaultBehavior(), text::TextDirection::RTL};
       LayoutRect rtlRect {0, 0, 0, 20};
       cascade.AdjustSelectionRectForText(false, rtl, rtlRect, 0, 1);
       CHECK(rtlRect == LayoutRect {48, 0, 16, 20});
@@ -218,7 +218,7 @@ namespace krys::boo::tests
     SECTION("Expansion opportunities")
     {
       auto count = [](utf8_stringview text, ExpansionBehavior behavior = ExpansionBehavior::DefaultBehavior(),
-                      TextDirection direction = TextDirection::LTR)
+                      text::TextDirection direction = text::TextDirection::LTR)
       {
         return FontCascade::ExpansionOpportunityCount(text, direction, behavior);
       };
@@ -232,14 +232,14 @@ namespace krys::boo::tests
       CHECK(count(u8"ab",
                   ExpansionBehavior {ExpansionBehavior::Behavior::Force, ExpansionBehavior::Behavior::Force})
             == std::pair<uint32, bool> {2, true});
-      CHECK(count(u8" ab", ExpansionBehavior::DefaultBehavior(), TextDirection::RTL)
+      CHECK(count(u8" ab", ExpansionBehavior::DefaultBehavior(), text::TextDirection::RTL)
             == std::pair<uint32, bool> {1, true});
 
-      CHECK_FALSE(FontCascade::LeftExpansionOpportunity(u8"\u4E00", TextDirection::LTR));
-      CHECK(FontCascade::RightExpansionOpportunity(u8"a ", TextDirection::LTR));
-      CHECK_FALSE(FontCascade::RightExpansionOpportunity(u8"a ", TextDirection::RTL));
-      CHECK(FontCascade::RightExpansionOpportunity(u8" \u4E00", TextDirection::RTL));
-      CHECK_FALSE(FontCascade::RightExpansionOpportunity(u8"", TextDirection::LTR));
+      CHECK_FALSE(FontCascade::LeftExpansionOpportunity(u8"\u4E00", text::TextDirection::LTR));
+      CHECK(FontCascade::RightExpansionOpportunity(u8"a ", text::TextDirection::LTR));
+      CHECK_FALSE(FontCascade::RightExpansionOpportunity(u8"a ", text::TextDirection::RTL));
+      CHECK(FontCascade::RightExpansionOpportunity(u8" \u4E00", text::TextDirection::RTL));
+      CHECK_FALSE(FontCascade::RightExpansionOpportunity(u8"", text::TextDirection::LTR));
     }
 
     SECTION("Text emphasis")

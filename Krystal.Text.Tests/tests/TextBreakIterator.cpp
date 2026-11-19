@@ -1,8 +1,8 @@
-﻿#include "Krystal.Booey/Text/TextBreakIterator.hpp"
+﻿#include "Krystal.Text/TextBreakIterator.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include <unicode/ubrk.h>
 
-namespace krys::boo::tests
+namespace krys::text::tests
 {
   namespace
   {

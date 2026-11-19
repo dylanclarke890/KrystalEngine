@@ -1541,7 +1541,7 @@ namespace krys::boo::dom
   }
 
   InlineBoxAndOffset Position::GetInlineBoxAndOffset(Affinity affinity,
-                                                     TextDirection primaryDirection) const noexcept
+                                                     text::TextDirection primaryDirection) const noexcept
   {
     auto caretOffset = static_cast<uint32>(DeprecatedEditingOffset());
 
@@ -1675,11 +1675,11 @@ namespace krys::boo::dom
     return {box, caretOffset};
   }
 
-  TextDirection Position::PrimaryDirection() const noexcept
+  text::TextDirection Position::PrimaryDirection() const noexcept
   {
     if (!_anchorNode || !_anchorNode->Renderer())
     {
-      return TextDirection::LTR;
+      return text::TextDirection::LTR;
     }
     for (auto *renderer = _anchorNode->Renderer(); renderer; renderer = renderer->Parent())
     {
@@ -1688,7 +1688,7 @@ namespace krys::boo::dom
         return blockFlow->Style().GetWritingMode().BidiDirection();
       }
     }
-    return TextDirection::LTR;
+    return text::TextDirection::LTR;
   }
 
   bool Position::Equals(const Position &other) const noexcept

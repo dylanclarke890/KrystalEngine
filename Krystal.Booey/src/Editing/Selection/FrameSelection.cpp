@@ -917,12 +917,12 @@ namespace krys::boo
     _originalBase = {};
   }
 
-  TextDirection FrameSelection::DirectionOfEnclosingBlock() noexcept
+  text::TextDirection FrameSelection::DirectionOfEnclosingBlock() noexcept
   {
     return boo::DirectionOfEnclosingBlock(_selection.CanonicalFocus());
   }
 
-  TextDirection FrameSelection::DirectionOfSelection() noexcept
+  text::TextDirection FrameSelection::DirectionOfSelection() noexcept
   {
     // Get bot VisiblePositions first because VisibleStart() and VisibleEnd()
     // can cause layout, which has the potential to invalidate lineboxes.
@@ -960,9 +960,13 @@ namespace krys::boo
     {
       switch (direction)
       {
-        case SelectionDirection::Right:    baseIsStart = DirectionOfSelection() == TextDirection::LTR; break;
-        case SelectionDirection::Forward:  baseIsStart = true; break;
-        case SelectionDirection::Left:     baseIsStart = DirectionOfSelection() != TextDirection::LTR; break;
+        case SelectionDirection::Right:
+          baseIsStart = DirectionOfSelection() == text::TextDirection::LTR;
+          break;
+        case SelectionDirection::Forward: baseIsStart = true; break;
+        case SelectionDirection::Left:
+          baseIsStart = DirectionOfSelection() != text::TextDirection::LTR;
+          break;
         case SelectionDirection::Backward: baseIsStart = false; break;
       }
     }
@@ -1062,7 +1066,7 @@ namespace krys::boo
     switch (granularity)
     {
       case TextGranularity::CharacterGranularity:
-        if (DirectionOfEnclosingBlock() == TextDirection::LTR)
+        if (DirectionOfEnclosingBlock() == text::TextDirection::LTR)
         {
           pos = pos.Next(EditingBoundaryCrossingRule::CannotCrossEditingBoundary);
         }
@@ -1072,7 +1076,7 @@ namespace krys::boo
         }
         break;
       case TextGranularity::WordGranularity:
-        if (DirectionOfEnclosingBlock() == TextDirection::LTR)
+        if (DirectionOfEnclosingBlock() == text::TextDirection::LTR)
         {
           pos = NextWordPositionForPlatform(pos);
         }
@@ -1082,7 +1086,7 @@ namespace krys::boo
         }
         break;
       case TextGranularity::LineBoundary:
-        if (DirectionOfEnclosingBlock() == TextDirection::LTR)
+        if (DirectionOfEnclosingBlock() == text::TextDirection::LTR)
         {
           pos = ModifyExtendingForward(granularity, userTriggered);
         }
@@ -1102,7 +1106,8 @@ namespace krys::boo
         break;
       case TextGranularity::DocumentGranularity: krys_debug_assert(false); break;
     }
-    AdjustSelectionExtentIfNeeded(pos, DirectionOfEnclosingBlock() == TextDirection::LTR, userTriggered);
+    AdjustSelectionExtentIfNeeded(pos, DirectionOfEnclosingBlock() == text::TextDirection::LTR,
+                                  userTriggered);
     return pos;
   }
 
@@ -1139,7 +1144,8 @@ namespace krys::boo
         }
         break;
     }
-    AdjustSelectionExtentIfNeeded(pos, DirectionOfEnclosingBlock() == TextDirection::LTR, userTriggered);
+    AdjustSelectionExtentIfNeeded(pos, DirectionOfEnclosingBlock() == text::TextDirection::LTR,
+                                  userTriggered);
     return pos;
   }
 
@@ -1156,7 +1162,7 @@ namespace krys::boo
       case TextGranularity::CharacterGranularity:
         if (IsRange())
         {
-          if (DirectionOfSelection() == TextDirection::LTR)
+          if (DirectionOfSelection() == text::TextDirection::LTR)
           {
             pos = VisiblePosition(_selection.End(), _selection.GetAffinity());
           }
@@ -1170,7 +1176,7 @@ namespace krys::boo
           // The caret moves logically, by the enclosing block's direction, rather than visually through runs
           // of the other direction.
           VisiblePosition current(_selection.CanonicalFocus(), _selection.GetAffinity());
-          if (DirectionOfEnclosingBlock() == TextDirection::LTR)
+          if (DirectionOfEnclosingBlock() == text::TextDirection::LTR)
           {
             pos = current.Next(EditingBoundaryCrossingRule::CannotCrossEditingBoundary, reachedBoundary);
           }
@@ -1184,7 +1190,7 @@ namespace krys::boo
       {
         // Like characters, words are moved through logically.
         VisiblePosition currentPosition(_selection.CanonicalFocus(), _selection.GetAffinity());
-        if (DirectionOfEnclosingBlock() == TextDirection::LTR)
+        if (DirectionOfEnclosingBlock() == text::TextDirection::LTR)
         {
           pos = NextWordPositionForPlatform(currentPosition);
         }
@@ -1316,7 +1322,7 @@ namespace krys::boo
     switch (granularity)
     {
       case TextGranularity::CharacterGranularity:
-        if (DirectionOfEnclosingBlock() == TextDirection::LTR)
+        if (DirectionOfEnclosingBlock() == text::TextDirection::LTR)
         {
           pos = pos.Previous(EditingBoundaryCrossingRule::CannotCrossEditingBoundary);
         }
@@ -1326,7 +1332,7 @@ namespace krys::boo
         }
         break;
       case TextGranularity::WordGranularity:
-        if (DirectionOfEnclosingBlock() == TextDirection::LTR)
+        if (DirectionOfEnclosingBlock() == text::TextDirection::LTR)
         {
           pos = PreviousWordPosition(pos);
         }
@@ -1336,7 +1342,7 @@ namespace krys::boo
         }
         break;
       case TextGranularity::LineBoundary:
-        if (DirectionOfEnclosingBlock() == TextDirection::LTR)
+        if (DirectionOfEnclosingBlock() == text::TextDirection::LTR)
         {
           pos = ModifyExtendingBackward(granularity, userTriggered);
         }
@@ -1355,7 +1361,8 @@ namespace krys::boo
         break;
       case TextGranularity::DocumentGranularity: krys_debug_assert(false); break;
     }
-    AdjustSelectionExtentIfNeeded(pos, DirectionOfEnclosingBlock() == TextDirection::RTL, userTriggered);
+    AdjustSelectionExtentIfNeeded(pos, DirectionOfEnclosingBlock() == text::TextDirection::RTL,
+                                  userTriggered);
     return pos;
   }
 
@@ -1398,7 +1405,8 @@ namespace krys::boo
         break;
       case TextGranularity::DocumentGranularity: krys_debug_assert(false); break;
     }
-    AdjustSelectionExtentIfNeeded(pos, DirectionOfEnclosingBlock() == TextDirection::RTL, userTriggered);
+    AdjustSelectionExtentIfNeeded(pos, DirectionOfEnclosingBlock() == text::TextDirection::RTL,
+                                  userTriggered);
     return pos;
   }
 
@@ -1415,7 +1423,7 @@ namespace krys::boo
       case TextGranularity::CharacterGranularity:
         if (IsRange())
         {
-          if (DirectionOfSelection() == TextDirection::LTR)
+          if (DirectionOfSelection() == text::TextDirection::LTR)
           {
             pos = VisiblePosition(_selection.Start(), _selection.GetAffinity());
           }
@@ -1429,7 +1437,7 @@ namespace krys::boo
           // The caret moves logically, by the enclosing block's direction, rather than visually through runs
           // of the other direction.
           VisiblePosition current(_selection.CanonicalFocus(), _selection.GetAffinity());
-          if (DirectionOfEnclosingBlock() == TextDirection::RTL)
+          if (DirectionOfEnclosingBlock() == text::TextDirection::RTL)
           {
             pos = current.Next(EditingBoundaryCrossingRule::CannotCrossEditingBoundary, reachedBoundary);
           }
@@ -1443,7 +1451,7 @@ namespace krys::boo
       {
         // Like characters, words are moved through logically.
         VisiblePosition currentPosition(_selection.CanonicalFocus(), _selection.GetAffinity());
-        if (DirectionOfEnclosingBlock() == TextDirection::RTL)
+        if (DirectionOfEnclosingBlock() == text::TextDirection::RTL)
         {
           pos = NextWordPositionForPlatform(currentPosition);
         }
@@ -1693,10 +1701,10 @@ namespace krys::boo
         }
         else
         {
-          TextDirection textDirection = DirectionOfEnclosingBlock();
+          text::TextDirection textDirection = DirectionOfEnclosingBlock();
           if (direction == SelectionDirection::Forward
-              || (textDirection == TextDirection::LTR && direction == SelectionDirection::Right)
-              || (textDirection == TextDirection::RTL && direction == SelectionDirection::Left))
+              || (textDirection == text::TextDirection::LTR && direction == SelectionDirection::Right)
+              || (textDirection == text::TextDirection::RTL && direction == SelectionDirection::Left))
           {
             SetEnd(position, userTriggered);
           }

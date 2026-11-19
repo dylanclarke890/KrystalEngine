@@ -1107,16 +1107,16 @@ namespace krys::boo
         }
         switch (dom::ElementTextDirectionState(*element))
         {
-          case dom::TextDirectionState::RTL: return TextDirection::RTL;
-          case dom::TextDirectionState::LTR: return TextDirection::LTR;
+          case dom::TextDirectionState::RTL: return text::TextDirection::RTL;
+          case dom::TextDirectionState::LTR: return text::TextDirection::LTR;
           case dom::TextDirectionState::Auto:
-            return dom::ComputeAutoDirectionality(*element).value_or(TextDirection::LTR);
+            return dom::ComputeAutoDirectionality(*element).value_or(text::TextDirection::LTR);
           case dom::TextDirectionState::Undefined: break;
         }
       }
-      return TextDirection::LTR;
+      return text::TextDirection::LTR;
     }();
 
-    return direction == TextDirection::LTR ? u8"ltr" : u8"rtl";
+    return direction == text::TextDirection::LTR ? u8"ltr" : u8"rtl";
   }
 }

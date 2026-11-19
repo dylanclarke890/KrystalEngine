@@ -93,10 +93,16 @@ namespace krys::boo
     LegacyLineLayout::AppendRunsForObject(nullptr, static_cast<int32>(position), static_cast<int32>(end),
                                           object, resolver);
   }
+}
 
+// The resolver's hooks are specialised in its own namespace.
+namespace krys::text
+{
   template <>
-  void InlineBidiResolver::AppendRunInternal() noexcept
+  void boo::InlineBidiResolver::AppendRunInternal() noexcept
   {
+    using namespace boo;
+
     if (!_emptyRun && !_eor.AtEnd() && !_reachedEndOfLine)
     {
       // Keep track of when we enter/leave "unicode-bidi: isolate" inlines.

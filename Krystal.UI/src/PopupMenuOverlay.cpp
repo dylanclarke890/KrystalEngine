@@ -139,7 +139,7 @@ namespace krys::ui
     auto menuStyle = _client->MenuStyle();
     auto paddingLeft = _client->ClientPaddingLeft().ToInt();
     auto paddingRight = _client->ClientPaddingRight().ToInt();
-    _rightToLeft = menuStyle.GetTextDirection() == boo::TextDirection::RTL;
+    _rightToLeft = menuStyle.GetTextDirection() == text::TextDirection::RTL;
 
     // A right-to-left select's popup is mirrored: its items line up on the right.
     utf8_string html = _rightToLeft
@@ -202,8 +202,8 @@ namespace krys::ui
       // An item in the other direction runs and lines up its own way.
       if (itemStyle.GetTextDirection() != menuStyle.GetTextDirection())
       {
-        html += itemStyle.GetTextDirection() == boo::TextDirection::RTL ? u8"; direction: rtl"
-                                                                        : u8"; direction: ltr";
+        html += itemStyle.GetTextDirection() == text::TextDirection::RTL ? u8"; direction: rtl"
+                                                                         : u8"; direction: ltr";
       }
       html += u8"\"";
       auto toolTip = _client->ItemToolTip(index);

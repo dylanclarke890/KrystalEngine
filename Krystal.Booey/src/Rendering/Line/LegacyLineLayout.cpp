@@ -53,7 +53,7 @@ namespace krys::boo
 
   namespace
   {
-    void DetermineDirectionality(TextDirection &dir, LegacyInlineIterator iter) noexcept
+    void DetermineDirectionality(text::TextDirection &dir, LegacyInlineIterator iter) noexcept
     {
       while (!iter.AtEnd())
       {
@@ -66,12 +66,12 @@ namespace krys::boo
           UCharDirection charDirection = u_charDirection(static_cast<UChar32>(current));
           if (charDirection == U_LEFT_TO_RIGHT)
           {
-            dir = TextDirection::LTR;
+            dir = text::TextDirection::LTR;
             return;
           }
           if (charDirection == U_RIGHT_TO_LEFT || charDirection == U_RIGHT_TO_LEFT_ARABIC)
           {
-            dir = TextDirection::RTL;
+            dir = text::TextDirection::RTL;
             return;
           }
         }
@@ -136,7 +136,7 @@ namespace krys::boo
     }
 
     // FIXME: BidiResolver should have this logic.
-    void ConstructBidiRunsForSegment(InlineBidiResolver &topResolver, BidiRunList<BidiRun> &bidiRuns,
+    void ConstructBidiRunsForSegment(InlineBidiResolver &topResolver, text::BidiRunList<BidiRun> &bidiRuns,
                                      const LegacyInlineIterator &endOfRuns) noexcept
     {
       // FIXME: We should pass a BidiRunList into createBidiRunsForLine instead
@@ -164,7 +164,7 @@ namespace krys::boo
 
         InlineBidiResolver isolatedResolver;
         auto unicodeBidi = isolatedInline->Style().GetUnicodeBidi();
-        TextDirection direction = TextDirection::LTR;
+        text::TextDirection direction = text::TextDirection::LTR;
         if (unicodeBidi == UnicodeBidi::Plaintext)
         {
           DetermineDirectionality(direction, LegacyInlineIterator(isolatedInline, &isolatedRun.Object, 0));
@@ -175,7 +175,7 @@ namespace krys::boo
                             || unicodeBidi == UnicodeBidi::IsolateOverride);
           direction = isolatedInline->GetWritingMode().BidiDirection();
         }
-        isolatedResolver.SetStatus(BidiStatus(direction, IsOverride(unicodeBidi)));
+        isolatedResolver.SetStatus(text::BidiStatus(direction, IsOverride(unicodeBidi)));
 
         SetUpResolverToResumeInIsolate(isolatedResolver, topResolver, isolatedRun.RunToReplace,
                                        isolatedInline, &startObject);
@@ -247,7 +247,7 @@ namespace krys::boo
     return false;
   }
 
-  void LegacyLineLayout::AppendRunsForObject(BidiRunList<BidiRun> *runs, int32 start, int32 end,
+  void LegacyLineLayout::AppendRunsForObject(text::BidiRunList<BidiRun> *runs, int32 start, int32 end,
                                              RenderObject &obj, InlineBidiResolver &resolver) noexcept
   {
     if (start > end || ShouldSkipCreatingRunsForObject(obj))
@@ -425,7 +425,7 @@ namespace krys::boo
     return result;
   }
 
-  LegacyRootInlineBox *LegacyLineLayout::ConstructLine(BidiRunList<BidiRun> &bidiRuns,
+  LegacyRootInlineBox *LegacyLineLayout::ConstructLine(text::BidiRunList<BidiRun> &bidiRuns,
                                                        const LineInfo &lineInfo) noexcept
   {
     if (LegacyRootBox())
@@ -530,7 +530,7 @@ namespace krys::boo
 
   // This function constructs line boxes for all of the text runs in the resolver and computes their position.
   LegacyRootInlineBox *LegacyLineLayout::CreateLineBoxesFromBidiRuns(uint32 bidiLevel,
-                                                                     BidiRunList<BidiRun> &bidiRuns,
+                                                                     text::BidiRunList<BidiRun> &bidiRuns,
                                                                      const LegacyInlineIterator &end,
                                                                      LineInfo &lineInfo) noexcept
   {
@@ -562,7 +562,7 @@ namespace krys::boo
   {
     DeleteLegacyRootBox(true);
 
-    TextDirection direction = Style().GetWritingMode().BidiDirection();
+    text::TextDirection direction = Style().GetWritingMode().BidiDirection();
     if (Style().GetUnicodeBidi() == UnicodeBidi::Plaintext)
     {
       DetermineDirectionality(direction,
@@ -570,7 +570,7 @@ namespace krys::boo
     }
 
     InlineBidiResolver resolver;
-    resolver.SetStatus(BidiStatus(direction, IsOverride(Style().GetUnicodeBidi())));
+    resolver.SetStatus(text::BidiStatus(direction, IsOverride(Style().GetUnicodeBidi())));
     LegacyInlineIterator iter =
       LegacyInlineIterator(&_flow, FirstInlineRendererSkippingEmpty(_flow, &resolver), 0);
     resolver.SetPosition(iter, NumberOfIsolateAncestors(iter));
@@ -635,13 +635,13 @@ namespace krys::boo
       {
         if (styleToUse.GetUnicodeBidi() == UnicodeBidi::Plaintext && !resolver.Context()->Parent())
         {
-          TextDirection direction = styleToUse.GetWritingMode().BidiDirection();
+          text::TextDirection direction = styleToUse.GetWritingMode().BidiDirection();
           DetermineDirectionality(direction, resolver.Position());
-          resolver.SetStatus(BidiStatus(direction, IsOverride(styleToUse.GetUnicodeBidi())));
+          resolver.SetStatus(text::BidiStatus(direction, IsOverride(styleToUse.GetUnicodeBidi())));
         }
         // FIXME: This ownership is reversed. We should own the BidiRunList and pass it to
         // createBidiRunsForLine.
-        BidiRunList<BidiRun> &bidiRuns = resolver.Runs();
+        text::BidiRunList<BidiRun> &bidiRuns = resolver.Runs();
         ConstructBidiRunsForSegment(resolver, bidiRuns, end);
         krys_debug_assert(resolver.Position() == end);
 

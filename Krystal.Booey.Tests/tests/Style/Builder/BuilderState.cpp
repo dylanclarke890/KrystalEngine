@@ -210,12 +210,12 @@ namespace krys::boo::style::tests
     CHECK(style.SetWritingMode(StyleWritingMode::VerticalRl));
     CHECK_FALSE(style.SetWritingMode(StyleWritingMode::VerticalRl));
     CHECK(style.SetTextOrientation(TextOrientation::Upright));
-    CHECK(style.SetDirection(TextDirection::RTL));
+    CHECK(style.SetDirection(text::TextDirection::RTL));
 
     auto mode = style.GetWritingMode();
     CHECK(mode.ComputedWritingMode() == StyleWritingMode::VerticalRl);
     CHECK(mode.ComputedTextOrientation() == TextOrientation::Upright);
-    CHECK(mode.ComputedTextDirection() == TextDirection::RTL);
+    CHECK(mode.ComputedTextDirection() == text::TextDirection::RTL);
 
     // Changing the orientation keeps the writing mode.
     CHECK(style.SetTextOrientation(TextOrientation::Sideways));

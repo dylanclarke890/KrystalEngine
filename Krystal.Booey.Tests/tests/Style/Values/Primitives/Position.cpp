@@ -41,7 +41,7 @@ namespace krys::boo::style::tests
                        *State);
       CHECK(Serialised(horizontal) == "10px calc(100% - 5px)");
 
-      Style.SetDirection(TextDirection::RTL);
+      Style.SetDirection(text::TextDirection::RTL);
       auto rtl =
         ConvertToStyle(css::Position {css::ThreeComponentPositionHorizontalVerticalLengthFirst {
                          css::FourComponentPositionHorizontal {{css::keywords::XStart {}, 10_css_px}},

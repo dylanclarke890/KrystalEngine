@@ -28,9 +28,9 @@
 
 namespace krys::boo
 {
-  BidiRun::BidiRun(uint32 start, uint32 stop, RenderObject &renderer, BidiContext *context,
+  BidiRun::BidiRun(uint32 start, uint32 stop, RenderObject &renderer, text::BidiContext *context,
                    UCharDirection dir) noexcept
-      : BidiCharacterRun(start, stop, context, dir), _renderer(ShareCheckedRef(renderer))
+      : text::BidiCharacterRun(start, stop, context, dir), _renderer(ShareCheckedRef(renderer))
   {
     krys_debug_assert(!Is<RenderText>(renderer) || stop <= Downcast<RenderText>(renderer).Text().length());
   }
@@ -39,8 +39,8 @@ namespace krys::boo
 
   UniquePtr<BidiRun> BidiRun::TakeNext() noexcept
   {
-    UniquePtr<BidiCharacterRun> next = BidiCharacterRun::TakeNext();
-    BidiCharacterRun *raw = next.release();
+    UniquePtr<text::BidiCharacterRun> next = text::BidiCharacterRun::TakeNext();
+    text::BidiCharacterRun *raw = next.release();
     return UniquePtr<BidiRun>(static_cast<BidiRun *>(raw));
   }
 }

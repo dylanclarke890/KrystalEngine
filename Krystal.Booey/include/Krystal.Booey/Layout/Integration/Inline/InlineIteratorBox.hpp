@@ -194,14 +194,14 @@ namespace krys::boo::inline_iterator
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.BidiLevel(); });
     }
 
-    KRYS_NODISCARD TextDirection Direction() const noexcept
+    KRYS_NODISCARD text::TextDirection Direction() const noexcept
     {
-      return BidiLevel() % 2 ? TextDirection::RTL : TextDirection::LTR;
+      return BidiLevel() % 2 ? text::TextDirection::RTL : text::TextDirection::LTR;
     }
 
     KRYS_NODISCARD bool IsLeftToRightDirection() const noexcept
     {
-      return Direction() == TextDirection::LTR;
+      return Direction() == text::TextDirection::LTR;
     }
 
     KRYS_NODISCARD bool IsInlineFlipped() const noexcept

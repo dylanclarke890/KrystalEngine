@@ -44,11 +44,15 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Text/HarfBuzz.hpp"
 
+namespace krys::text
+{
+  enum class TextDirection : bool;
+}
+
 namespace krys::boo
 {
   class FontDescription;
   class GlyphBuffer;
-  enum class TextDirection : bool;
 
   enum FontVariant : uint8
   {
@@ -308,7 +312,7 @@ namespace krys::boo
     KRYS_NODISCARD static GlyphBufferAdvance
       ApplyTransforms(GlyphBuffer &glyphBuffer, uint32 beginningGlyphIndex, uint32 beginningStringIndex,
                       bool enableKerning, bool requiresShaping, const StringAtom &locale,
-                      utf8_stringview text, TextDirection textDirection) noexcept;
+                      utf8_stringview text, text::TextDirection textDirection) noexcept;
 
     KRYS_NODISCARD float SpaceWidth(
       SyntheticBoldInclusion syntheticBoldInclusion = SyntheticBoldInclusion::Incorporate) const noexcept

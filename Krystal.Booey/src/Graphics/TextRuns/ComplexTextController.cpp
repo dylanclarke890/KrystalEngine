@@ -25,10 +25,10 @@
 #include "Krystal.Booey/Graphics/TextRuns/ComplexTextController.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
-#include "Krystal.Booey/Text/CharacterProperties.hpp"
-#include "Krystal.Booey/Text/TextBreakIterator.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
+#include "Krystal.Text/TextBreakIterator.hpp"
 #include <algorithm>
 #include <unicode/uchar.h>
 
@@ -86,7 +86,8 @@ namespace krys::boo
     {
       uint32 expansionOpportunityCount =
         FontCascade::ExpansionOpportunityCount(
-          _run.Text(), _run.Ltr() ? TextDirection::LTR : TextDirection::RTL, _run.ExpansionBehavior())
+          _run.Text(), _run.Ltr() ? text::TextDirection::LTR : text::TextDirection::RTL,
+          _run.ExpansionBehavior())
           .first;
 
       if (!expansionOpportunityCount)
@@ -286,8 +287,8 @@ namespace krys::boo
           }
 
           uint32 stringLength = complexTextRun.StringLength();
-          CachedTextBreakIterator cursorPositionIterator(characters, {}, TextBreakIterator::CaretMode {},
-                                                         null);
+          text::CachedTextBreakIterator cursorPositionIterator(characters, {},
+                                                               text::TextBreakIterator::CaretMode {}, null);
           uint32 clusterStart;
           if (cursorPositionIterator.IsBoundary(hitIndex))
           {
@@ -362,7 +363,7 @@ namespace krys::boo
   }
 
   void ComplexTextController::AdvanceByCombiningCharacterSequence(
-    const CachedTextBreakIterator &graphemeClusterIterator, uint32 &currentIndex,
+    const text::CachedTextBreakIterator &graphemeClusterIterator, uint32 &currentIndex,
     char32 &baseCharacter) noexcept
   {
     uint32 remainingCharacters = _end - currentIndex;
@@ -417,8 +418,8 @@ namespace krys::boo
     RefPtr<const Font> smallSynthesizedFont;
     RefPtr<const Font> halfWidthFont;
 
-    CachedTextBreakIterator graphemeClusterIterator(baseOfString, {}, TextBreakIterator::CharacterMode {},
-                                                    fontDescription.ComputedLocale());
+    text::CachedTextBreakIterator graphemeClusterIterator(
+      baseOfString, {}, text::TextBreakIterator::CharacterMode {}, fontDescription.ComputedLocale());
 
     char32 baseCharacter;
     AdvanceByCombiningCharacterSequence(graphemeClusterIterator, currentIndex, baseCharacter);
@@ -957,7 +958,7 @@ namespace krys::boo
         // for compat. See https://github.com/w3c/csswg-drafts/pull/6983.
         if (character != text::NewlineCharacter && character != text::CarriageReturn
             && character != text::NoBreakSpace && character != text::TabCharacter
-            && character != text::NullCharacter && IsControlCharacter(character))
+            && character != text::NullCharacter && text::IsControlCharacter(character))
         {
           // Let's assume that .notdef is visible.
           glyph = 0;
@@ -1065,7 +1066,7 @@ namespace krys::boo
         auto characterClass = text_spacing::CharacterClass::Undefined;
         // Since we are iterating through glyphs here we skip combining marks, since we just care about the
         // grapheme cluster base for text-autospace.
-        if (!textAutoSpace.IsNoAutospace() && !IsCombiningMark(character))
+        if (!textAutoSpace.IsNoAutospace() && !text::IsCombiningMark(character))
         {
           characterClass = text_spacing::GetCharacterClass(character);
           if (textAutoSpace.ShouldApplySpacing(previousCharacterClass, characterClass))

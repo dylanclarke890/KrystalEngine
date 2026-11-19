@@ -47,7 +47,7 @@ namespace krys::boo
     utf8_string TextWithSuffix;
     // In bytes.
     size_t TextWithoutSuffixLength {0};
-    TextDirection TextDirection {TextDirection::LTR};
+    text::TextDirection TextDirection {text::TextDirection::LTR};
 
     KRYS_NODISCARD bool IsEmpty() const noexcept
     {

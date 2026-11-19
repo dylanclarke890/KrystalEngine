@@ -19,13 +19,13 @@
  *
  */
 
-#include "Krystal.Booey/Text/BidiContext.hpp"
+#include "Krystal.Text/BidiContext.hpp"
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
-namespace krys::boo
+namespace krys::text
 {
   BidiContext::BidiContext(uint8 level, UCharDirection direction, bool override, BidiEmbeddingSource source,
                            BidiContext *parent) noexcept

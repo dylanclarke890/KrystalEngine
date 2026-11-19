@@ -29,12 +29,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Text/LocaleToScriptMapping.hpp"
+#include "Krystal.Text/LocaleToScriptMapping.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include <algorithm>
 
-namespace krys::boo
+namespace krys::text
 {
   namespace
   {

@@ -63,9 +63,9 @@
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
-#include "Krystal.Booey/Text/UnicodeHelpers.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Text/UnicodeHelpers.hpp"
 #include <algorithm>
 #include <ranges>
 
@@ -140,9 +140,10 @@ namespace krys::boo
       return nullptr;
     }
 
-    KRYS_NODISCARD utf8_string DirectionAttributeAndValue(TextDirection direction) noexcept
+    KRYS_NODISCARD utf8_string DirectionAttributeAndValue(text::TextDirection direction) noexcept
     {
-      return direction == TextDirection::LTR ? utf8_string(u8"dir=\"ltr\"") : utf8_string(u8"dir=\"rtl\"");
+      return direction == text::TextDirection::LTR ? utf8_string(u8"dir=\"ltr\"")
+                                                   : utf8_string(u8"dir=\"rtl\"");
     }
 
     KRYS_NODISCARD bool PropertyMissingOrEqualToNone(const css::StyleProperties *style,
@@ -312,7 +313,7 @@ namespace krys::boo
       KRYS_NODISCARD bool ContainsOnlyASCII() const noexcept;
 
       void AppendStyleNodeOpenTag(utf8_string &out, css::StyleProperties *style, bool isBlock = false,
-                                  Maybe<TextDirection> directionToAppend = null) noexcept;
+                                  Maybe<text::TextDirection> directionToAppend = null) noexcept;
 
       KRYS_NODISCARD static utf8_stringview StyleNodeCloseTag(bool isBlock = false) noexcept
       {
@@ -432,9 +433,10 @@ namespace krys::boo
       Append(StyleNodeCloseTag(isBlock));
     }
 
-    void StyledMarkupAccumulator::AppendStyleNodeOpenTag(utf8_string &out, css::StyleProperties *style,
-                                                         bool isBlock,
-                                                         Maybe<TextDirection> directionToAppend) noexcept
+    void
+      StyledMarkupAccumulator::AppendStyleNodeOpenTag(utf8_string &out, css::StyleProperties *style,
+                                                      bool isBlock,
+                                                      Maybe<text::TextDirection> directionToAppend) noexcept
     {
       // With AnnotateForInterchange::Yes, wrappingStyleForSerialization should have removed
       // -webkit-text-decorations-in-effect
@@ -499,7 +501,7 @@ namespace krys::boo
         (void)wrappingStyle->Style()->SetProperty(PropertyId::Float, ValueId::None);
 
         AppendStyleNodeOpenTag(out, wrappingStyle->Style(), false,
-                               [&]() -> Maybe<TextDirection>
+                               [&]() -> Maybe<text::TextDirection>
                                {
                                  if (_hasAppendedAnyText)
                                  {
@@ -511,7 +513,7 @@ namespace krys::boo
                                    return null;
                                  }
 
-                                 auto directionFromText = BaseTextDirection(text.WholeText());
+                                 auto directionFromText = text::BaseTextDirection(text.WholeText());
                                  if (!directionFromText)
                                  {
                                    return null;

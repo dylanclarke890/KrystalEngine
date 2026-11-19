@@ -269,7 +269,7 @@ namespace krys::boo::dom::tests
     REQUIRE(box);
     CHECK(box->IsText());
     CHECK(offset == 2);
-    CHECK(At(text, 2).PrimaryDirection() == TextDirection::LTR);
-    CHECK(At(fixture.TextIn(u8"r"), 1).PrimaryDirection() == TextDirection::RTL);
+    CHECK(At(text, 2).PrimaryDirection() == text::TextDirection::LTR);
+    CHECK(At(fixture.TextIn(u8"r"), 1).PrimaryDirection() == text::TextDirection::RTL);
   }
 }

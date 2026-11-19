@@ -25,12 +25,12 @@
 
 #pragma once
 
-#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Text/TextDirection.hpp"
 
-namespace krys::boo
+namespace krys::text
 {
   /// @brief The direction of the first strong character of @p content, or null for neutral content.
   KRYS_NODISCARD Maybe<TextDirection> BaseTextDirection(utf8_stringview content) noexcept;

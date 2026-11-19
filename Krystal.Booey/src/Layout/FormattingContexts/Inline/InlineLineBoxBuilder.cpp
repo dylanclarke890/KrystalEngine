@@ -211,7 +211,7 @@ namespace krys::boo::layout
     // FIXME: The overflowing hanging content should be part of the ink overflow.
     auto contentLogicalWidth = [&]
     {
-      if (lineLayoutResult.BidiDirectionality.InlineBaseDirection == TextDirection::LTR)
+      if (lineLayoutResult.BidiDirectionality.InlineBaseDirection == text::TextDirection::LTR)
       {
         return lineLayoutResult.Content.LogicalWidth - lineLayoutResult.Hanging.LogicalWidth;
       }
@@ -629,7 +629,7 @@ namespace krys::boo::layout
           auto logicalWidth = rootInlineBox.LogicalRight() - logicalLeft;
           // We (editing, DOM etc) can't yet handle RTL hanging content (see contentLogicalWidth in
           // LineBoxBuilder::Build).
-          if (GetLineLayoutResult().BidiDirectionality.InlineBaseDirection == TextDirection::LTR)
+          if (GetLineLayoutResult().BidiDirectionality.InlineBaseDirection == text::TextDirection::LTR)
           {
             logicalWidth += GetLineLayoutResult().Hanging.LogicalWidth;
           }

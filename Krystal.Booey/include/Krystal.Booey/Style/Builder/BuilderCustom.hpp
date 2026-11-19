@@ -917,7 +917,7 @@ namespace krys::boo::style
 
   inline void BuilderCustom::ApplyValueDirection(BuilderState &builderState, css::Value &value) noexcept
   {
-    builderState.Style().SetDirection(FromCSSValue<TextDirection>(value));
+    builderState.Style().SetDirection(FromCSSValue<text::TextDirection>(value));
     builderState.Style().SetHasExplicitlySetDirection(true);
   }
 

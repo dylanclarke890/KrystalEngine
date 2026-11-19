@@ -120,9 +120,10 @@ namespace krys::boo
                             const LayoutPoint &paintOffset) noexcept;
   };
 
-  KRYS_NODISCARD TextRun ConstructTextRun(utf8_stringview, TextDirection, const SVGTextFragment &) noexcept;
+  KRYS_NODISCARD TextRun ConstructTextRun(utf8_stringview, text::TextDirection,
+                                          const SVGTextFragment &) noexcept;
 
-  KRYS_NODISCARD FloatRect SelectionRectForTextFragment(const RenderSVGInlineText &, TextDirection,
+  KRYS_NODISCARD FloatRect SelectionRectForTextFragment(const RenderSVGInlineText &, text::TextDirection,
                                                         const SVGTextFragment &, uint32 startPosition,
                                                         uint32 endPosition) noexcept;
 

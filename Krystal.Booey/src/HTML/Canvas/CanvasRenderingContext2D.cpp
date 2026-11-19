@@ -260,8 +260,9 @@ namespace krys::boo::html
     SetWordSpacing(std::exchange(ModifiableState().WordSpacing, wordSpacing));
   }
 
-  TextDirection CanvasRenderingContext2D::ToTextDirection(Direction direction,
-                                                          const RenderStyle **computedStyle) const noexcept
+  text::TextDirection
+    CanvasRenderingContext2D::ToTextDirection(Direction direction,
+                                              const RenderStyle **computedStyle) const noexcept
   {
     const auto *style =
       computedStyle || direction == Direction::Inherit ? Canvas().ExistingComputedStyle() : nullptr;
@@ -272,12 +273,12 @@ namespace krys::boo::html
     switch (direction)
     {
       case Direction::Inherit:
-        return style ? style->GetWritingMode().ComputedTextDirection() : TextDirection::LTR;
-      case Direction::Rtl: return TextDirection::RTL;
-      case Direction::Ltr: return TextDirection::LTR;
+        return style ? style->GetWritingMode().ComputedTextDirection() : text::TextDirection::LTR;
+      case Direction::Rtl: return text::TextDirection::RTL;
+      case Direction::Ltr: return text::TextDirection::LTR;
     }
     krys_debug_assert(false);
-    return TextDirection::LTR;
+    return text::TextDirection::LTR;
   }
 
   CanvasDirection CanvasRenderingContext2D::GetDirection() const noexcept
@@ -286,8 +287,8 @@ namespace krys::boo::html
     {
       Canvas().NodeDocument().UpdateStyleIfNeeded();
     }
-    return ToTextDirection(GetState().Direction) == TextDirection::RTL ? CanvasDirection::Rtl
-                                                                       : CanvasDirection::Ltr;
+    return ToTextDirection(GetState().Direction) == text::TextDirection::RTL ? CanvasDirection::Rtl
+                                                                             : CanvasDirection::Ltr;
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-filltext

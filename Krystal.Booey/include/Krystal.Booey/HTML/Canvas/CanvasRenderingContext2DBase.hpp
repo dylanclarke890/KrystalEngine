@@ -779,7 +779,7 @@ namespace krys::boo::html
     }
 
   private:
-    KRYS_NODISCARD FloatPoint TextOffset(float width, TextDirection) noexcept;
+    KRYS_NODISCARD FloatPoint TextOffset(float width, text::TextDirection) noexcept;
 
     /// @brief Resolves the font again with the text drawing styles, if one is set.
     void UpdateFontForTextDrawingStyles() noexcept;

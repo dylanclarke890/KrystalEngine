@@ -51,8 +51,8 @@ namespace krys::boo
     }
   };
 
-  using InlineBidiResolver = BidiResolverWithIsolate<LegacyInlineIterator, BidiRun, BidiIsolatedRun>;
-  using LineWhitespaceCollapsingState = WhitespaceCollapsingState<LegacyInlineIterator>;
+  using InlineBidiResolver = text::BidiResolverWithIsolate<LegacyInlineIterator, BidiRun, BidiIsolatedRun>;
+  using LineWhitespaceCollapsingState = text::WhitespaceCollapsingState<LegacyInlineIterator>;
 
   /// @brief Walks RenderInline subtrees, stepping by character within the text children. LegacyInlineIterator
   /// will use next to find the next RenderText optionally notifying a BidiResolver every time it steps
@@ -270,24 +270,31 @@ namespace krys::boo
       return text::CodePointAt(textRenderer->Text(), index);
     }
   };
+}
 
+// The resolver's hooks are specialised in its own namespace.
+namespace krys::text
+{
   template <>
-  inline void InlineBidiResolver::IncrementInternal() noexcept
+  inline void boo::InlineBidiResolver::IncrementInternal() noexcept
   {
     _current.Increment(this);
   }
 
   template <>
-  void InlineBidiResolver::AppendRunInternal() noexcept;
+  void boo::InlineBidiResolver::AppendRunInternal() noexcept;
 
   template <>
-  inline bool InlineBidiResolver::NeedsContinuePastEndInternal() const noexcept
+  inline bool boo::InlineBidiResolver::NeedsContinuePastEndInternal() const noexcept
   {
     // We don't collect runs beyond the endOfLine renderer. Stop traversing when the iterator moves to the
     // next renderer to prevent O(n^2).
     return _current.Renderer() == _endOfLine.Renderer();
   }
+}
 
+namespace krys::boo
+{
   KRYS_NODISCARD inline UCharDirection EmbedCharFromDirection(WritingMode writingMode,
                                                               UnicodeBidi unicodeBidi) noexcept
   {
@@ -328,7 +335,7 @@ namespace krys::boo
     if (!observer->InIsolate())
     {
       observer->Embed(EmbedCharFromDirection(style.GetWritingMode(), unicodeBidi),
-                      BidiEmbeddingSource::FromStyleOrDOM);
+                      text::BidiEmbeddingSource::FromStyleOrDOM);
     }
   }
 
@@ -354,7 +361,7 @@ namespace krys::boo
     // Otherwise we pop any embed/override character we added when we opened this tag.
     if (!observer->InIsolate())
     {
-      observer->Embed(U_POP_DIRECTIONAL_FORMAT, BidiEmbeddingSource::FromStyleOrDOM);
+      observer->Embed(U_POP_DIRECTIONAL_FORMAT, text::BidiEmbeddingSource::FromStyleOrDOM);
     }
   }
 
@@ -541,7 +548,7 @@ namespace krys::boo
     }
 
     // We don't care if we encounter bidi directional overrides.
-    void Embed(UCharDirection, BidiEmbeddingSource) noexcept
+    void Embed(UCharDirection, text::BidiEmbeddingSource) noexcept
     {
     }
 

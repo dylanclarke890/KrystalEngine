@@ -105,10 +105,12 @@ namespace krys::boo
 
   KRYS_NODISCARD bool IsLogicalEndOfLine(const VisiblePosition &position) noexcept;
 
-  KRYS_NODISCARD VisiblePosition LeftBoundaryOfLine(const VisiblePosition &position, TextDirection direction,
+  KRYS_NODISCARD VisiblePosition LeftBoundaryOfLine(const VisiblePosition &position,
+                                                    text::TextDirection direction,
                                                     bool *reachedBoundary) noexcept;
 
-  KRYS_NODISCARD VisiblePosition RightBoundaryOfLine(const VisiblePosition &position, TextDirection direction,
+  KRYS_NODISCARD VisiblePosition RightBoundaryOfLine(const VisiblePosition &position,
+                                                     text::TextDirection direction,
                                                      bool *reachedBoundary) noexcept;
 
   // paragraphs (perhaps a misnomer, can be divided by line break elements)

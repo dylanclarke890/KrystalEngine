@@ -1060,7 +1060,7 @@ namespace krys::boo::style
         if (auto textDirection = dom::ComputeTextDirectionIfDirIsAuto(*htmlElement))
         {
           auto &properties =
-            *textDirection == TextDirection::LTR ? LeftToRightDeclaration() : RightToLeftDeclaration();
+            *textDirection == text::TextDirection::LTR ? LeftToRightDeclaration() : RightToLeftDeclaration();
           AddMatchedProperties({ShareRef(properties)}, DeclarationOrigin::Author);
         }
       }

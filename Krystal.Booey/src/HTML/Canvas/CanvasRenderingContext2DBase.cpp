@@ -3678,7 +3678,7 @@ namespace krys::boo::html
     return metrics;
   }
 
-  FloatPoint CanvasRenderingContext2DBase::TextOffset(float width, TextDirection direction) noexcept
+  FloatPoint CanvasRenderingContext2DBase::TextOffset(float width, text::TextDirection direction) noexcept
   {
     const auto &fontMetrics = GetFontProxy()->MetricsOfPrimaryFont();
     FloatPoint offset;
@@ -3697,7 +3697,7 @@ namespace krys::boo::html
       default:                     break;
     }
 
-    bool isRTL = direction == TextDirection::RTL;
+    bool isRTL = direction == text::TextDirection::RTL;
     auto align = GetState().TextAlign;
     if (align == StartTextAlign)
     {

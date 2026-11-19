@@ -443,17 +443,17 @@ namespace krys::boo
     return nullptr;
   }
 
-  TextDirection DirectionOfEnclosingBlock(const dom::Position &position) noexcept
+  text::TextDirection DirectionOfEnclosingBlock(const dom::Position &position) noexcept
   {
     auto block = EnclosingBlock(ShareRefPtr(position.GetContainerNode()));
     if (!block)
     {
-      return TextDirection::LTR;
+      return text::TextDirection::LTR;
     }
     auto *renderer = block->Renderer();
     if (!renderer)
     {
-      return TextDirection::LTR;
+      return text::TextDirection::LTR;
     }
     return renderer->GetWritingMode().BidiDirection();
   }

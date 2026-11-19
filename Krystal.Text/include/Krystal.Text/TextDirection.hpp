@@ -1,5 +1,6 @@
 ﻿/*
- * Copyright (C) 2011 Google Inc. All rights reserved.
+ * Copyright (c) 2012 Google Inc. All rights reserved.
+ * Copyright (C) 2015-2024 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -30,18 +31,12 @@
 
 #pragma once
 
-#include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/Maybe.hpp"
-#include <unicode/uscript.h>
-
-namespace krys::boo
+namespace krys::text
 {
-  /// @brief The script a BCP 47 locale (e.g. `zh-Hant`, `sr_Latn`) is written in: the locale's language and
-  /// region, then its script subtag. `USCRIPT_COMMON` when nothing matches.
-  KRYS_NODISCARD UScriptCode LocaleToScriptCode(utf8_stringview) noexcept;
-
-  /// @brief The script an ISO 15924 script code (e.g. `Latn`, ASCII case-insensitive) names.
-  /// `USCRIPT_INVALID_CODE` when nothing matches.
-  KRYS_NODISCARD UScriptCode ScriptNameToCode(utf8_stringview) noexcept;
+  /// @brief The direction of text: left to right, or right to left.
+  enum class TextDirection : bool
+  {
+    LTR = false,
+    RTL = true,
+  };
 }

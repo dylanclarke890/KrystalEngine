@@ -862,7 +862,7 @@ namespace krys::boo
   TextRun RenderBlock::ConstructTextRun(utf8_stringview stringView, const RenderStyle &style,
                                         ExpansionBehavior expansion, EnumSet<TextRunFlag> flags) noexcept
   {
-    auto textDirection = TextDirection::LTR;
+    auto textDirection = text::TextDirection::LTR;
     bool directionalOverride = false;
     if (flags.Contains(TextRunFlag::RespectDirection))
     {

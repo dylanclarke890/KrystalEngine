@@ -4135,19 +4135,10 @@ set(KRYSTAL_BOOEY_SVG_HEADERS
 )
 
 set(KRYSTAL_BOOEY_TEXT_HEADERS
-  include/Krystal.Booey/Text/BidiContext.hpp
-  include/Krystal.Booey/Text/BidiResolver.hpp
-  include/Krystal.Booey/Text/BidiRunList.hpp
-  include/Krystal.Booey/Text/CharacterProperties.hpp
   include/Krystal.Booey/Text/EncodingRegistry.hpp
-  include/Krystal.Booey/Text/Hyphenation.hpp
-  include/Krystal.Booey/Text/LocaleToScriptMapping.hpp
-  include/Krystal.Booey/Text/TextBoundaries.hpp
-  include/Krystal.Booey/Text/TextBreakIterator.hpp
   include/Krystal.Booey/Text/TextFlags.hpp
   include/Krystal.Booey/Text/TextSpacing.hpp
   include/Krystal.Booey/Text/UnicodeBidi.hpp
-  include/Krystal.Booey/Text/UnicodeHelpers.hpp
   include/Krystal.Booey/Text/WritingMode.hpp
 )
 
@@ -4272,15 +4263,9 @@ set(KRYSTAL_BOOEY_SVG_SOURCES
 )
 
 set(KRYSTAL_BOOEY_TEXT_SOURCES
-  src/Text/BidiContext.cpp
   src/Text/EncodingRegistry.cpp
-  src/Text/Hyphenation.cpp
-  src/Text/LocaleToScriptMapping.cpp
-  src/Text/TextBoundaries.cpp
-  src/Text/TextBreakIterator.cpp
   src/Text/TextFlags.cpp
   src/Text/TextSpacing.cpp
-  src/Text/UnicodeHelpers.cpp
 )
 
 set(KRYSTAL_BOOEY_TYPES_HEADERS

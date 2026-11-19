@@ -123,7 +123,7 @@ namespace krys::boo
   static void BuildTextForShaping(ShapedContent &shapedContent, inline_iterator::BoxModernPath textBox,
                                   bool needsTextBoxVisualLeft = false) noexcept
   {
-    krys_debug_assert(textBox.Direction() == TextDirection::RTL);
+    krys_debug_assert(textBox.Direction() == text::TextDirection::RTL);
 
     auto shapingBoundaryIterator = textBox;
     // 1. Find shaping boundary start when we are at the end or inside a shape range (note that we deal with
@@ -169,7 +169,7 @@ namespace krys::boo
           continue;
         }
         auto &text = displayBox.GetText();
-        if (shapingBoundaryIterator.Direction() == TextDirection::LTR)
+        if (shapingBoundaryIterator.Direction() == text::TextDirection::LTR)
         {
           shapedContent.Text.Clear();
           return;
@@ -538,7 +538,7 @@ namespace krys::boo
           textDecorationSelectionClipOutRect.Move(0, logicalWidthBeforeRange);
           textDecorationSelectionClipOutRect.SetHeight(logicalSelectionWidth);
         }
-        else if (TextBox().Direction() == TextDirection::RTL)
+        else if (TextBox().Direction() == text::TextDirection::RTL)
         {
           textDecorationSelectionClipOutRect.Move(logicalWidthAfterRange, 0);
           textDecorationSelectionClipOutRect.SetWidth(logicalSelectionWidth);
@@ -665,9 +665,10 @@ namespace krys::boo
 
   namespace
   {
-    void MirrorRTLSegment(float logicalWidth, TextDirection direction, float &start, float width) noexcept
+    void MirrorRTLSegment(float logicalWidth, text::TextDirection direction, float &start,
+                          float width) noexcept
     {
-      if (direction == TextDirection::LTR)
+      if (direction == text::TextDirection::LTR)
       {
         return;
       }
@@ -771,7 +772,7 @@ namespace krys::boo
 
   bool TextBoxPainter::PaintForegroundForShapeRange(TextPainter &textPainter) noexcept
   {
-    krys_debug_assert(_textBox.Direction() == TextDirection::RTL);
+    krys_debug_assert(_textBox.Direction() == text::TextDirection::RTL);
 
     auto &context = _paintInfo.Context();
 

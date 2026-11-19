@@ -180,7 +180,7 @@ namespace krys::boo
     }
     auto styleWritingMode =
       alignmentContainerWritingMode.IsBidiLTR() ? StyleWritingMode::VerticalLr : StyleWritingMode::VerticalRl;
-    return {styleWritingMode, TextDirection::LTR, TextOrientation::Mixed};
+    return {styleWritingMode, text::TextDirection::LTR, TextOrientation::Mixed};
   }
 
   BaselineGroup &BaselineAlignmentState::FindCompatibleSharedGroup(const RenderBox &alignmentSubject,

@@ -227,7 +227,7 @@ namespace krys::boo::layout
         return HasTrailingWhitespace() && _trailingWhitespace->Length == _textContent->Length;
       }
 
-      KRYS_NODISCARD TextDirection InlineDirection() const noexcept;
+      KRYS_NODISCARD text::TextDirection InlineDirection() const noexcept;
 
       KRYS_NODISCARD InlineLayoutUnit LetterSpacing() const noexcept;
 
