@@ -66,7 +66,6 @@
 #include <bitset>
 #include <limits>
 #include <string>
-#include <unicode/ubrk.h>
 #include <unicode/ucasemap.h>
 #include <unicode/uchar.h>
 #include <unicode/unorm2.h>
@@ -86,18 +85,18 @@ namespace krys::boo
     void AppendTitleCase(char32 codePoint, StringBuilder &output) noexcept
     {
       std::array<UChar, 2> source {};
-      int32_t sourceLength = text::EncodeUTF16(codePoint, source);
+      int32 sourceLength = text::EncodeUTF16(codePoint, source);
 
       std::array<UChar, 8> destination {};
       UErrorCode status = U_ZERO_ERROR;
-      auto length = u_strToTitle(destination.data(), static_cast<int32_t>(destination.size()), source.data(),
+      auto length = u_strToTitle(destination.data(), static_cast<int32>(destination.size()), source.data(),
                                  sourceLength, nullptr, "", &status);
       if (U_FAILURE(status))
       {
         output.Append(codePoint);
         return;
       }
-      for (int32_t i = 0; i < length;)
+      for (int32 i = 0; i < length;)
       {
         auto decoded =
           text::DecodeUTF16(Span<const char16>(destination.data() + i, static_cast<size_t>(length - i)));
@@ -153,11 +152,11 @@ namespace krys::boo
         return utf8_string(text);
       }
 
-      auto convert = [&](char *destination, int32_t capacity)
+      auto convert = [&](char *destination, int32 capacity)
       {
         status = U_ZERO_ERROR;
         auto *source = reinterpret_cast<const char *>(text.data());
-        auto sourceLength = static_cast<int32_t>(text.size());
+        auto sourceLength = static_cast<int32>(text.size());
         return toUpper ? ucasemap_utf8ToUpper(caseMap, destination, capacity, source, sourceLength, &status)
                        : ucasemap_utf8ToLower(caseMap, destination, capacity, source, sourceLength, &status);
       };
@@ -182,8 +181,8 @@ namespace krys::boo
     {
       std::array<UChar, 4> buffer {};
       UErrorCode status = U_ZERO_ERROR;
-      int32_t length = unorm2_getRawDecomposition(normalizer, character, buffer.data(),
-                                                  static_cast<int32_t>(buffer.size()), &status);
+      int32 length = unorm2_getRawDecomposition(normalizer, character, buffer.data(),
+                                                static_cast<int32>(buffer.size()), &status);
       if (U_FAILURE(status) || length <= 0)
       {
         return {};
@@ -356,9 +355,9 @@ namespace krys::boo
     utf8_string stringWithPrevious;
     replaceNoBreakSpaces(previousCharacter, stringWithPrevious);
     replaceNoBreakSpaces(string, stringWithPrevious);
-    auto previousCharacterLength = static_cast<int32_t>(previousCharacter.size());
+    auto previousCharacterLength = static_cast<int32>(previousCharacter.size());
 
-    auto *breakIterator = text::WordBreakIterator(stringWithPrevious);
+    auto breakIterator = text::WordBreakIterator(stringWithPrevious);
     if (!breakIterator)
     {
       return utf8_string(string);
@@ -366,10 +365,11 @@ namespace krys::boo
 
     StringBuilder result;
 
-    int32_t startOfWord = ubrk_first(breakIterator);
-    for (int32_t endOfWord = ubrk_next(breakIterator); endOfWord != UBRK_DONE;
-         startOfWord = endOfWord, endOfWord = ubrk_next(breakIterator))
+    auto startOfWord = static_cast<int32>(breakIterator.First());
+    for (auto nextBoundary = breakIterator.Next(); nextBoundary;
+         startOfWord = static_cast<int32>(*nextBoundary), nextBoundary = breakIterator.Next())
     {
+      auto endOfWord = static_cast<int32>(*nextBoundary);
       // Do not try to titlecase the previous content.
       if (startOfWord >= previousCharacterLength)
       {

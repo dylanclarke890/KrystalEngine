@@ -2719,14 +2719,14 @@ namespace krys::boo::url
     Array<char, HostnameBufferLength> hostnameBuffer;
     UErrorCode error = U_ZERO_ERROR;
     UIDNAInfo processingDetails = UIDNA_INFO_INITIALIZER;
-    int32_t numCharactersConverted = uidna_nameToASCII_UTF8(
+    int32 numCharactersConverted = uidna_nameToASCII_UTF8(
       &InternationalDomainNameTranscoder(), reinterpret_cast<const char *>(domain.data()),
-      static_cast<int32_t>(domain.size()), hostnameBuffer.data(), static_cast<int32_t>(HostnameBufferLength),
+      static_cast<int32>(domain.size()), hostnameBuffer.data(), static_cast<int32>(HostnameBufferLength),
       &processingDetails, &error);
 
     if (U_SUCCESS(error) && !(processingDetails.errors & ~AllowedNameToASCIIErrors) && numCharactersConverted)
     {
-      for (int32_t i = 0; i < numCharactersConverted; ++i)
+      for (int32 i = 0; i < numCharactersConverted; ++i)
       {
         krys_debug_assert(text::IsASCII(hostnameBuffer[i]));
         krys_debug_assert(!text::IsASCIIUpper(hostnameBuffer[i]));

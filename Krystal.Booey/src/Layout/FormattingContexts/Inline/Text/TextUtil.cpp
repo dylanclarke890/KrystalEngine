@@ -505,15 +505,15 @@ namespace krys::boo::layout
 
     auto graphemeClusterIterator = text::NonSharedCharacterBreakIterator {text.substr(startPosition, length)};
     auto leftSide = TextUtil::WordBreakLeft {};
-    for (auto clusterStartPosition = ubrk_next(graphemeClusterIterator); clusterStartPosition != UBRK_DONE;
-         clusterStartPosition = ubrk_next(graphemeClusterIterator))
+    for (auto clusterStartPosition = graphemeClusterIterator.Next(); clusterStartPosition;
+         clusterStartPosition = graphemeClusterIterator.Next())
     {
-      auto clusterWidth = width(startPosition, startPosition + static_cast<size_t>(clusterStartPosition));
+      auto clusterWidth = width(startPosition, startPosition + *clusterStartPosition);
       if (clusterWidth > availableWidth)
       {
         return leftSide;
       }
-      leftSide = {static_cast<size_t>(clusterStartPosition), clusterWidth};
+      leftSide = {*clusterStartPosition, clusterWidth};
     }
     // This content is not supposed to fit availableWidth.
     krys_debug_assert(false);
@@ -695,12 +695,12 @@ namespace krys::boo::layout
       return endOfCodePoint - startPosition;
     }
     auto graphemeClustersIterator = text::NonSharedCharacterBreakIterator {textContent};
-    auto nextPosition = ubrk_following(graphemeClustersIterator, static_cast<int32_t>(startPosition));
-    if (nextPosition == UBRK_DONE)
+    auto nextPosition = graphemeClustersIterator.Following(static_cast<uint32>(startPosition));
+    if (!nextPosition)
     {
       return length;
     }
-    return static_cast<size_t>(nextPosition) - startPosition;
+    return *nextPosition - startPosition;
   }
 
   size_t TextUtil::FirstUserPerceivedCharacterLength(const InlineTextItem &inlineTextItem) noexcept

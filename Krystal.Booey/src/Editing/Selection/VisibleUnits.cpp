@@ -45,7 +45,6 @@
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Text/TextBoundaries.hpp"
 #include "Krystal.Text/TextBreakIterator.hpp"
-#include <unicode/ubrk.h>
 
 namespace krys::boo
 {
@@ -335,7 +334,7 @@ namespace krys::boo
       return {};
     }
 
-    KRYS_NODISCARD UBreakIterator *WordBreakIteratorForMinOffsetBoundary(
+    KRYS_NODISCARD text::BreakIteratorView WordBreakIteratorForMinOffsetBoundary(
       const VisiblePosition &visiblePosition, const inline_iterator::TextBoxIterator &textBox,
       uint32 &previousBoxLength, bool &previousBoxInDifferentLine, utf8_string &string) noexcept
     {
@@ -365,7 +364,7 @@ namespace krys::boo
       return text::WordBreakIterator(string);
     }
 
-    KRYS_NODISCARD UBreakIterator *
+    KRYS_NODISCARD text::BreakIteratorView
       WordBreakIteratorForMaxOffsetBoundary(const VisiblePosition &visiblePosition,
                                             const inline_iterator::TextBoxIterator &textBox,
                                             bool &nextBoxInDifferentLine, utf8_string &string) noexcept
@@ -393,25 +392,26 @@ namespace krys::boo
       return text::WordBreakIterator(string);
     }
 
-    KRYS_NODISCARD bool IsLogicalStartOfWord(UBreakIterator *iter, int32 position,
+    KRYS_NODISCARD bool IsLogicalStartOfWord(text::BreakIteratorView iter, int32 position,
                                              bool hardLineBreak) noexcept
     {
-      bool boundary = hardLineBreak ? true : ubrk_isBoundary(iter, position);
+      bool boundary = hardLineBreak ? true : iter.IsBoundary(static_cast<uint32>(position));
       if (!boundary)
       {
         return false;
       }
 
-      ubrk_following(iter, position);
-      // isWordTextBreak returns true after moving across a word and false after moving across a
+      iter.Following(static_cast<uint32>(position));
+      // IsWordBreak returns true after moving across a word and false after moving across a
       // punctuation/space.
-      return text::IsWordTextBreak(iter);
+      return iter.IsWordBreak();
     }
 
-    KRYS_NODISCARD bool IslogicalEndOfWord(UBreakIterator *iter, int32 position, bool hardLineBreak) noexcept
+    KRYS_NODISCARD bool IslogicalEndOfWord(text::BreakIteratorView iter, int32 position,
+                                           bool hardLineBreak) noexcept
     {
-      bool boundary = ubrk_isBoundary(iter, position);
-      return (hardLineBreak || boundary) && text::IsWordTextBreak(iter);
+      bool boundary = iter.IsBoundary(static_cast<uint32>(position));
+      return (hardLineBreak || boundary) && iter.IsWordBreak();
     }
 
     enum class CursorMovementDirection : bool
@@ -435,7 +435,7 @@ namespace krys::boo
       inline_iterator::LeafBoxIterator previouslyVisitedBox;
       VisiblePosition current = visiblePosition;
       Maybe<VisiblePosition> previousPosition;
-      UBreakIterator *iter = nullptr;
+      text::BreakIteratorView iter;
 
       utf8_string string;
 
@@ -495,7 +495,7 @@ namespace krys::boo
           break;
         }
 
-        ubrk_first(iter);
+        iter.First();
         int32 offsetInIterator = static_cast<int32>(offsetInBox - textBox->Start() + previousBoxLength);
 
         bool isWordBreak;
@@ -1465,9 +1465,7 @@ namespace krys::boo
   uint32 StartSentenceBoundary(utf8_stringview text, uint32, BoundarySearchContextAvailability,
                                bool &) noexcept
   {
-    // FIXME: The following function can return -1; we don't handle that.
-    return static_cast<uint32>(
-      ubrk_preceding(text::SentenceBreakIterator(text), static_cast<int32>(text.size())));
+    return text::SentenceBreakIterator(text).Preceding(static_cast<uint32>(text.size())).value_or(0);
   }
 
   VisiblePosition StartOfSentence(const VisiblePosition &position) noexcept
@@ -1477,7 +1475,7 @@ namespace krys::boo
 
   uint32 EndSentenceBoundary(utf8_stringview text, uint32, BoundarySearchContextAvailability, bool &) noexcept
   {
-    return static_cast<uint32>(ubrk_next(text::SentenceBreakIterator(text)));
+    return text::SentenceBreakIterator(text).Next().value_or(static_cast<uint32>(text.size()));
   }
 
   VisiblePosition EndOfSentence(const VisiblePosition &position) noexcept
@@ -1492,9 +1490,7 @@ namespace krys::boo
                                                            BoundarySearchContextAvailability, bool &) noexcept
     {
       // FIXME: This is identical to startSentenceBoundary. I'm pretty sure that's not right.
-      // FIXME: The following function can return -1; we don't handle that.
-      return static_cast<uint32>(
-        ubrk_preceding(text::SentenceBreakIterator(text), static_cast<int32>(text.size())));
+      return text::SentenceBreakIterator(text).Preceding(static_cast<uint32>(text.size())).value_or(0);
     }
 
     KRYS_NODISCARD uint32 NextSentencePositionBoundary(utf8_stringview text, uint32,
@@ -1502,7 +1498,7 @@ namespace krys::boo
     {
       // FIXME: This is identical to endSentenceBoundary.
       // That isn't right. This function needs to move to the equivalent position in the following sentence.
-      return static_cast<uint32>(ubrk_following(text::SentenceBreakIterator(text), 0));
+      return text::SentenceBreakIterator(text).Following(0).value_or(static_cast<uint32>(text.size()));
     }
   }
 

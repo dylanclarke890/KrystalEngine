@@ -1,6 +1,5 @@
 ﻿#include "Krystal.Text/TextBreakIterator.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include <unicode/ubrk.h>
 
 namespace krys::text::tests
 {
@@ -111,29 +110,37 @@ namespace krys::text::tests
     {
       NonSharedCharacterBreakIterator iterator {u8"\u00E9a"};
       REQUIRE(iterator);
-      CHECK(ubrk_next(iterator) == 2);
-      CHECK(ubrk_next(iterator) == 3);
-      CHECK(ubrk_next(iterator) == UBRK_DONE);
+      CHECK(iterator.Next() == 2u);
+      CHECK(iterator.Next() == 3u);
+      CHECK_FALSE(iterator.Next());
 
       NonSharedSentenceBreakIterator sentences {u8"One. Two."};
       REQUIRE(sentences);
-      CHECK(ubrk_next(sentences) == 5);
+      CHECK(sentences.Next() == 5u);
     }
   }
 
   TEST_CASE("TextBreakIterator: words", "[Core][TextBreakIterator]")
   {
-    auto *iterator = WordBreakIterator(u8"hello, world");
+    auto iterator = WordBreakIterator(u8"hello, world");
     REQUIRE(iterator);
-    CHECK(ubrk_first(iterator) == 0);
-    CHECK(ubrk_next(iterator) == 5);
-    CHECK(IsWordTextBreak(iterator));
-    CHECK(ubrk_next(iterator) == 6);
-    CHECK_FALSE(IsWordTextBreak(iterator));
+    CHECK(iterator.First() == 0u);
+    CHECK(iterator.Next() == 5u);
+    CHECK(iterator.IsWordBreak());
+    CHECK(iterator.Next() == 6u);
+    CHECK_FALSE(iterator.IsWordBreak());
+    CHECK(iterator.Current() == 6u);
+    CHECK(iterator.IsBoundary(7));
+    CHECK_FALSE(iterator.IsBoundary(9));
+    CHECK(iterator.Following(7) == 12u);
+    CHECK(iterator.Preceding(9) == 7u);
+    CHECK(iterator.Last() == 12u);
+    CHECK(iterator.Previous() == 7u);
+    CHECK_FALSE(iterator.Following(12));
 
-    auto *sentences = SentenceBreakIterator(u8"A b. C d.");
+    auto sentences = SentenceBreakIterator(u8"A b. C d.");
     REQUIRE(sentences);
-    CHECK(ubrk_next(sentences) == 5);
+    CHECK(sentences.Next() == 5u);
   }
 
   TEST_CASE("CachedLineBreakIteratorFactory", "[Core][TextBreakIterator]")

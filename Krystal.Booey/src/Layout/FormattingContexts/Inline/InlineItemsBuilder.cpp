@@ -918,7 +918,7 @@ namespace krys::boo::layout
 
     // ICU's bidi algorithm takes UTF-16: the runs it finds are mapped back to byte offsets.
     auto bidiContent = UTF16Paragraph(paragraphContentBuilder.View());
-    auto bidiContentLength = static_cast<int32_t>(bidiContent.Characters.size());
+    auto bidiContentLength = static_cast<int32>(bidiContent.Characters.size());
     UErrorCode error = U_ZERO_ERROR;
     krys_debug_assert(bidiContentLength);
     ubidi_setPara(ubidi, bidiContent.Characters.data(), bidiContentLength, rootBidiLevel, nullptr, &error);
@@ -931,10 +931,10 @@ namespace krys::boo::layout
 
     size_t inlineItemIndex = 0;
     auto hasSeenOpaqueItem = false;
-    for (int32_t currentPosition = 0; currentPosition < bidiContentLength;)
+    for (int32 currentPosition = 0; currentPosition < bidiContentLength;)
     {
       text::BidiLevel bidiLevel;
-      int32_t endPosition = currentPosition;
+      int32 endPosition = currentPosition;
       ubidi_getLogicalRun(ubidi, currentPosition, &endPosition, &bidiLevel);
 
       auto setBidiLevelOnRange = [&](size_t bidiEnd, text::BidiLevel bidiLevelForRange)

@@ -111,8 +111,7 @@ namespace krys::boo
     /// @brief The @p size labels of @p type from @p startIndex, or null if ICU doesn't have them.
     KRYS_NODISCARD static Maybe<List<utf8_string>> CreateLabelVector(const UDateFormat *dateFormat,
                                                                      UDateFormatSymbolType type,
-                                                                     int32_t startIndex,
-                                                                     int32_t size) noexcept;
+                                                                     int32 startIndex, int32 size) noexcept;
 
     void InitializeDateTimeFormat() noexcept;
   };

@@ -262,7 +262,7 @@ namespace krys::boo::layout
       forceBiDiOnOpaqueLine();
 
       visualOrderList.resize(runLevels.size());
-      ubidi_reorderVisual(runLevels.data(), static_cast<int32_t>(runLevels.size()), visualOrderList.data());
+      ubidi_reorderVisual(runLevels.data(), static_cast<int32>(runLevels.size()), visualOrderList.data());
       if (numberOfOpaqueRuns)
       {
         krys_debug_assert(visualOrderList.size() == runIndexOffsetMap.size());

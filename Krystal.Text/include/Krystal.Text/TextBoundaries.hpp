@@ -28,24 +28,12 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include <unicode/uchar.h>
 
 namespace krys::text
 {
   // Word boundaries in UTF-8 text. Offsets are bytes.
 
-  KRYS_NODISCARD inline bool RequiresContextForWordBoundary(char32 character) noexcept
-  {
-    // FIXME: This function won't be needed when https://bugs.webkit.org/show_bug.cgi?id=120656 is fixed.
-
-    // We can get rid of this constant if we require a newer version of the ICU headers, which has
-    // U_LB_CONDITIONAL_JAPANESE_STARTER.
-    constexpr int lineBreakConditionalJapaneseStarter = 37;
-
-    int lineBreak = u_getIntPropertyValue(character, UCHAR_LINE_BREAK);
-    return lineBreak == U_LB_COMPLEX_CONTEXT || lineBreak == lineBreakConditionalJapaneseStarter
-           || lineBreak == U_LB_IDEOGRAPHIC;
-  }
+  KRYS_NODISCARD bool RequiresContextForWordBoundary(char32 character) noexcept;
 
   KRYS_NODISCARD uint32 EndOfFirstWordBoundaryContext(utf8_stringview text) noexcept;
 

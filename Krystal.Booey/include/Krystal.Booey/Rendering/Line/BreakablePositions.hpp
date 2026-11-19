@@ -30,7 +30,6 @@
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Text/TextBreakIterator.hpp"
-#include <unicode/ubrk.h>
 
 namespace krys::boo
 {
@@ -398,12 +397,8 @@ namespace krys::boo
     // FIXME: Can/Should we implement this using a Shared Iterator (performance issue)
     // https://bugs.webkit.org/show_bug.cgi?id=197876
     text::NonSharedCharacterBreakIterator iterator(stringView);
-    auto next = ubrk_following(iterator, static_cast<int32_t>(startPosition));
-    if (next == UBRK_DONE)
-    {
-      return static_cast<uint32>(stringView.length());
-    }
-    return static_cast<uint32>(next);
+    return iterator.Following(static_cast<uint32>(startPosition))
+      .value_or(static_cast<uint32>(stringView.length()));
   }
 
   template <BreakablePositions::LineBreakRules TRules, BreakablePositions::WordBreakBehavior TWords,

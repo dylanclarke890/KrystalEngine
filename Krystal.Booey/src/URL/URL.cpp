@@ -148,10 +148,10 @@ namespace krys::boo::url
       Array<char, URLParser::HostnameBufferLength> hostnameBuffer;
       UErrorCode error = U_ZERO_ERROR;
       UIDNAInfo processingDetails = UIDNA_INFO_INITIALIZER;
-      int32_t numCharactersConverted = uidna_nameToASCII_UTF8(
+      int32 numCharactersConverted = uidna_nameToASCII_UTF8(
         &URLParser::InternationalDomainNameTranscoder(), reinterpret_cast<const char *>(string.data()),
-        static_cast<int32_t>(string.size()), hostnameBuffer.data(),
-        static_cast<int32_t>(hostnameBuffer.size()), &processingDetails, &error);
+        static_cast<int32>(string.size()), hostnameBuffer.data(), static_cast<int32>(hostnameBuffer.size()),
+        &processingDetails, &error);
 
       if (U_SUCCESS(error) && !(processingDetails.errors & ~URLParser::AllowedNameToASCIIErrors)
           && numCharactersConverted)

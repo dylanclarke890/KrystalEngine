@@ -94,8 +94,8 @@ namespace krys::boo
 
   private:
     WeakPtr<Page> _page;
-    // While PointerId is defined as int32_t, we use int64_t here so that we may use a value outside of the
-    // int32_t range to have safe empty and removed values, allowing any int32_t to be provided through the
+    // While PointerId is defined as int32, we use int64 here so that we may use a value outside of the
+    // int32 range to have safe empty and removed values, allowing any int32 to be provided through the
     // API for lookup in this hashmap.
     HashMap<int64, Ref<CapturingData>> _activePointerIdsToCapturingData;
     bool _processingPendingPointerCapture {false};

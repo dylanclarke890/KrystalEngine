@@ -268,13 +268,69 @@ namespace krys::text
     }
   };
 
-  // FIXME: Delete this in favor of CachedTextBreakIterator.
-  KRYS_NODISCARD UBreakIterator *WordBreakIterator(utf8_stringview string) noexcept;
+  class BreakIteratorView;
 
   // FIXME: Delete this in favor of CachedTextBreakIterator.
-  KRYS_NODISCARD UBreakIterator *SentenceBreakIterator(utf8_stringview string) noexcept;
+  /// @brief The shared word break iterator, set to @p string; null if ICU couldn't make one.
+  /// @note It's shared: the next call resets it.
+  KRYS_NODISCARD BreakIteratorView WordBreakIterator(utf8_stringview string) noexcept;
 
-  KRYS_NODISCARD bool IsWordTextBreak(UBreakIterator *iterator) noexcept;
+  // FIXME: Delete this in favor of CachedTextBreakIterator.
+  /// @brief The shared sentence break iterator, set to @p string; null if ICU couldn't make one.
+  /// @note It's shared: the next call resets it.
+  KRYS_NODISCARD BreakIteratorView SentenceBreakIterator(utf8_stringview string) noexcept;
+
+  /// @brief A view of a break iterator over some text. Its boundaries are byte offsets into the text; moving
+  /// to one makes it the current boundary.
+  class BreakIteratorView
+  {
+    friend BreakIteratorView WordBreakIterator(utf8_stringview string) noexcept;
+    friend BreakIteratorView SentenceBreakIterator(utf8_stringview string) noexcept;
+
+  protected:
+    UBreakIterator *_iterator {nullptr};
+
+    constexpr explicit BreakIteratorView(UBreakIterator *iterator) noexcept : _iterator(iterator)
+    {
+    }
+
+  public:
+    /// @brief A null view.
+    constexpr BreakIteratorView() noexcept = default;
+
+    constexpr explicit operator bool() const noexcept
+    {
+      return _iterator;
+    }
+
+    /// @brief Moves to the start of the text, and returns it (0).
+    uint32 First() const noexcept;
+
+    /// @brief Moves to the end of the text, and returns it.
+    uint32 Last() const noexcept;
+
+    /// @brief Moves to the next boundary, if there is one.
+    Maybe<uint32> Next() const noexcept;
+
+    /// @brief Moves to the previous boundary, if there is one.
+    Maybe<uint32> Previous() const noexcept;
+
+    /// @brief Moves to the first boundary after @p offset, if there is one.
+    Maybe<uint32> Following(uint32 offset) const noexcept;
+
+    /// @brief Moves to the last boundary before @p offset, if there is one.
+    Maybe<uint32> Preceding(uint32 offset) const noexcept;
+
+    /// @brief Whether @p offset is a boundary. Moves to it if it is, or to the first boundary after it.
+    bool IsBoundary(uint32 offset) const noexcept;
+
+    /// @brief The current boundary.
+    KRYS_NODISCARD uint32 Current() const noexcept;
+
+    /// @brief For a word break iterator: whether the text before the current boundary is a word, rather than
+    /// spaces or punctuation.
+    KRYS_NODISCARD bool IsWordBreak() const noexcept;
+  };
 
   /// @brief Makes line break iterators over a string on demand, with the code points that precede the string.
   class CachedLineBreakIteratorFactory
@@ -390,12 +446,9 @@ namespace krys::text
   /// @brief Iterates over extended grapheme clusters, as defined in UAX #29. Use this for general text
   /// processing, e.g. string truncation.
   /// @see https://www.unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries
-  class NonSharedCharacterBreakIterator
+  class NonSharedCharacterBreakIterator : public BreakIteratorView
   {
     KRYS_NON_COPYABLE(NonSharedCharacterBreakIterator);
-
-  private:
-    UBreakIterator *_iterator {nullptr};
 
   public:
     explicit NonSharedCharacterBreakIterator(utf8_stringview string) noexcept;
@@ -403,20 +456,12 @@ namespace krys::text
     ~NonSharedCharacterBreakIterator() noexcept;
 
     NonSharedCharacterBreakIterator(NonSharedCharacterBreakIterator &&other) noexcept;
-
-    operator UBreakIterator *() const noexcept
-    {
-      return _iterator;
-    }
   };
 
   /// @brief Iterates over sentences, as defined in UAX #29.
-  class NonSharedSentenceBreakIterator
+  class NonSharedSentenceBreakIterator : public BreakIteratorView
   {
     KRYS_NON_COPYABLE(NonSharedSentenceBreakIterator);
-
-  private:
-    UBreakIterator *_iterator {nullptr};
 
   public:
     explicit NonSharedSentenceBreakIterator(utf8_stringview string) noexcept;
@@ -424,11 +469,6 @@ namespace krys::text
     ~NonSharedSentenceBreakIterator() noexcept;
 
     NonSharedSentenceBreakIterator(NonSharedSentenceBreakIterator &&other) noexcept;
-
-    operator UBreakIterator *() const noexcept
-    {
-      return _iterator;
-    }
   };
 
   /// @brief The number of extended grapheme clusters in @p string. A sequence of a non-combining character

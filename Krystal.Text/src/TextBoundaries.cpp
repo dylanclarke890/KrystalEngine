@@ -27,7 +27,7 @@
 #include "Krystal.Text/TextBoundaries.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Text/TextBreakIterator.hpp"
-#include <unicode/ubrk.h>
+#include <unicode/uchar.h>
 
 namespace krys::text
 {
@@ -38,6 +38,19 @@ namespace krys::text
     {
       return CodePointAt(text, PreviousCodePointStart(text, offset));
     }
+  }
+
+  bool RequiresContextForWordBoundary(char32 character) noexcept
+  {
+    // FIXME: This function won't be needed when https://bugs.webkit.org/show_bug.cgi?id=120656 is fixed.
+
+    // We can get rid of this constant if we require a newer version of the ICU headers, which has
+    // U_LB_CONDITIONAL_JAPANESE_STARTER.
+    constexpr int lineBreakConditionalJapaneseStarter = 37;
+
+    int lineBreak = u_getIntPropertyValue(static_cast<UChar32>(character), UCHAR_LINE_BREAK);
+    return lineBreak == U_LB_COMPLEX_CONTEXT || lineBreak == lineBreakConditionalJapaneseStarter
+           || lineBreak == U_LB_IDEOGRAPHIC;
   }
 
   uint32 EndOfFirstWordBoundaryContext(utf8_stringview text) noexcept
@@ -73,36 +86,31 @@ namespace krys::text
 
   int32 FindNextWordFromIndex(utf8_stringview text, int32 position, bool forward) noexcept
   {
-    UBreakIterator *it = WordBreakIterator(text);
+    auto it = WordBreakIterator(text);
 
     if (forward)
     {
-      position = ubrk_following(it, position);
-      while (position != UBRK_DONE)
+      for (auto boundary = it.Following(static_cast<uint32>(position)); boundary;
+           boundary = it.Following(*boundary))
       {
         // We stop searching when the character preceeding the break is alphanumeric.
-        if (static_cast<uint32>(position) < text.size()
-            && u_isalnum(CodePointBefore(text, static_cast<size_t>(position))))
+        if (*boundary < text.size() && u_isalnum(CodePointBefore(text, *boundary)))
         {
-          return position;
+          return static_cast<int32>(*boundary);
         }
-
-        position = ubrk_following(it, position);
       }
 
       return static_cast<int32>(text.size());
     }
 
-    position = ubrk_preceding(it, position);
-    while (position != UBRK_DONE)
+    for (auto boundary = it.Preceding(static_cast<uint32>(position)); boundary;
+         boundary = it.Preceding(*boundary))
     {
       // We stop searching when the character following the break is alphanumeric.
-      if (position && u_isalnum(CodePointAt(text, static_cast<size_t>(position))))
+      if (*boundary && u_isalnum(CodePointAt(text, *boundary)))
       {
-        return position;
+        return static_cast<int32>(*boundary);
       }
-
-      position = ubrk_preceding(it, position);
     }
 
     return 0;
@@ -110,22 +118,16 @@ namespace krys::text
 
   void FindWordBoundary(utf8_stringview text, int32 position, int32 *start, int32 *end) noexcept
   {
-    UBreakIterator *it = WordBreakIterator(text);
-    *end = ubrk_following(it, position);
-    if (*end < 0)
-    {
-      *end = ubrk_last(it);
-    }
-    *start = ubrk_previous(it);
+    auto it = WordBreakIterator(text);
+    auto following = it.Following(static_cast<uint32>(position));
+    *end = static_cast<int32>(following ? *following : it.Last());
+    *start = static_cast<int32>(it.Previous().value_or(0));
   }
 
   void FindEndWordBoundary(utf8_stringview text, int32 position, int32 *end) noexcept
   {
-    UBreakIterator *it = WordBreakIterator(text);
-    *end = ubrk_following(it, position);
-    if (*end < 0)
-    {
-      *end = ubrk_last(it);
-    }
+    auto it = WordBreakIterator(text);
+    auto following = it.Following(static_cast<uint32>(position));
+    *end = static_cast<int32>(following ? *following : it.Last());
   }
 }

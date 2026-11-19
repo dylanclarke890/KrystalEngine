@@ -323,7 +323,7 @@ namespace krys::boo
     // Detect top-down BMPs.
     if (_infoHeader.BiHeight < 0)
     {
-      // We can't negate INT32_MIN below to get a positive int32_t.
+      // We can't negate INT32_MIN below to get a positive int32.
       // isInfoHeaderValid() will reject heights of 1 << 16 or larger anyway,
       // so just reject this bitmap now.
       if (_infoHeader.BiHeight == INT32_MIN)

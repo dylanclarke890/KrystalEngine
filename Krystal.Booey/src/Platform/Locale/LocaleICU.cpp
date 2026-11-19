@@ -44,10 +44,10 @@ namespace krys::boo
   namespace
   {
     /// @brief @p characters (UTF-16) in UTF-8.
-    KRYS_NODISCARD utf8_string ToUTF8(const UChar *characters, int32_t length) noexcept
+    KRYS_NODISCARD utf8_string ToUTF8(const UChar *characters, int32 length) noexcept
     {
       UErrorCode status = U_ZERO_ERROR;
-      int32_t utf8Length = 0;
+      int32 utf8Length = 0;
       u_strToUTF8(nullptr, 0, &utf8Length, characters, length, &status);
       if (status != U_BUFFER_OVERFLOW_ERROR && U_FAILURE(status))
       {
@@ -76,7 +76,7 @@ namespace krys::boo
       }
 
       UErrorCode status = U_ZERO_ERROR;
-      int32_t length = udat_toPattern(dateFormat, true, nullptr, 0, &status);
+      int32 length = udat_toPattern(dateFormat, true, nullptr, 0, &status);
       if (!NeedsToGrowToProduceBuffer(status) || !length)
       {
         return {};
@@ -102,8 +102,8 @@ namespace krys::boo
         return format;
       }
       status = U_ZERO_ERROR;
-      auto skeletonLength = static_cast<int32_t>(skeleton.size());
-      int32_t length =
+      auto skeletonLength = static_cast<int32>(skeleton.size());
+      int32 length =
         udatpg_getBestPattern(patternGenerator, skeleton.data(), skeletonLength, nullptr, 0, &status);
       if (NeedsToGrowToProduceBuffer(status) && length)
       {
@@ -154,8 +154,8 @@ namespace krys::boo
 
     std::array<char, ULOC_FULLNAME_CAPACITY> tag {};
     UErrorCode status = U_ZERO_ERROR;
-    int32_t length =
-      uloc_toLanguageTag(uloc_getDefault(), tag.data(), static_cast<int32_t>(tag.size()), false, &status);
+    int32 length =
+      uloc_toLanguageTag(uloc_getDefault(), tag.data(), static_cast<int32>(tag.size()), false, &status);
     if (U_FAILURE(status) || length <= 0)
     {
       return u8"en-US";
@@ -198,7 +198,7 @@ namespace krys::boo
   utf8_string LocaleICU::DecimalSymbol(UNumberFormatSymbol symbol) const noexcept
   {
     UErrorCode status = U_ZERO_ERROR;
-    int32_t bufferLength = unum_getSymbol(_numberFormat, symbol, nullptr, 0, &status);
+    int32 bufferLength = unum_getSymbol(_numberFormat, symbol, nullptr, 0, &status);
     krys_debug_assert(U_SUCCESS(status) || NeedsToGrowToProduceBuffer(status));
     if (U_FAILURE(status) && !NeedsToGrowToProduceBuffer(status))
     {
@@ -217,7 +217,7 @@ namespace krys::boo
   utf8_string LocaleICU::DecimalTextAttribute(UNumberFormatTextAttribute tag) const noexcept
   {
     UErrorCode status = U_ZERO_ERROR;
-    int32_t bufferLength = unum_getTextAttribute(_numberFormat, tag, nullptr, 0, &status);
+    int32 bufferLength = unum_getTextAttribute(_numberFormat, tag, nullptr, 0, &status);
     krys_debug_assert(U_SUCCESS(status) || NeedsToGrowToProduceBuffer(status));
     if (U_FAILURE(status) && !NeedsToGrowToProduceBuffer(status))
     {
@@ -278,12 +278,12 @@ namespace krys::boo
     constexpr std::array<UChar, 3> gmtTimezone {u'G', u'M', u'T'};
     UErrorCode status = U_ZERO_ERROR;
     return udat_open(timeStyle, dateStyle, _locale.c_str(), gmtTimezone.data(),
-                     static_cast<int32_t>(gmtTimezone.size()), nullptr, -1, &status);
+                     static_cast<int32>(gmtTimezone.size()), nullptr, -1, &status);
   }
 
   Maybe<List<utf8_string>> LocaleICU::CreateLabelVector(const UDateFormat *dateFormat,
-                                                        UDateFormatSymbolType type, int32_t startIndex,
-                                                        int32_t size) noexcept
+                                                        UDateFormatSymbolType type, int32 startIndex,
+                                                        int32 size) noexcept
   {
     if (!dateFormat)
     {
@@ -296,10 +296,10 @@ namespace krys::boo
 
     List<utf8_string> labels;
     labels.reserve(static_cast<size_t>(size));
-    for (int32_t i = 0; i < size; ++i)
+    for (int32 i = 0; i < size; ++i)
     {
       UErrorCode status = U_ZERO_ERROR;
-      int32_t length = udat_getSymbols(dateFormat, type, startIndex + i, nullptr, 0, &status);
+      int32 length = udat_getSymbols(dateFormat, type, startIndex + i, nullptr, 0, &status);
       if (!NeedsToGrowToProduceBuffer(status))
       {
         return null;

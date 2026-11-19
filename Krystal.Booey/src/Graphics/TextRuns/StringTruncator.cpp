@@ -30,7 +30,6 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Text/TextBreakIterator.hpp"
-#include <unicode/ubrk.h>
 
 namespace krys::boo
 {
@@ -43,21 +42,19 @@ namespace krys::boo
     using TruncationFunction = utf8_string(utf8_stringview string, uint32 length, uint32 keepCount,
                                            bool shouldInsertEllipsis);
 
-    KRYS_NODISCARD uint32 TextBreakAtOrPreceding(UBreakIterator *it, uint32 offset) noexcept
+    KRYS_NODISCARD uint32 TextBreakAtOrPreceding(text::BreakIteratorView it, uint32 offset) noexcept
     {
-      if (ubrk_isBoundary(it, static_cast<int32_t>(offset)))
+      if (it.IsBoundary(offset))
       {
         return offset;
       }
-
-      int32_t result = ubrk_preceding(it, static_cast<int32_t>(offset));
-      return result == UBRK_DONE ? 0 : static_cast<uint32>(result);
+      return it.Preceding(offset).value_or(0);
     }
 
-    KRYS_NODISCARD uint32 BoundedTextBreakFollowing(UBreakIterator *it, uint32 offset, uint32 length) noexcept
+    KRYS_NODISCARD uint32 BoundedTextBreakFollowing(text::BreakIteratorView it, uint32 offset,
+                                                    uint32 length) noexcept
     {
-      int32_t result = ubrk_following(it, static_cast<int32_t>(offset));
-      return result == UBRK_DONE ? length : static_cast<uint32>(result);
+      return it.Following(offset).value_or(length);
     }
 
     KRYS_NODISCARD utf8_string CenterTruncateToBuffer(utf8_stringview string, uint32 length, uint32 keepCount,
@@ -114,7 +111,7 @@ namespace krys::boo
       krys_debug_assert(keepCount < length);
       krys_debug_assert(keepCount < StringBufferSize);
 
-      UBreakIterator *it = text::WordBreakIterator(string.substr(0, length));
+      auto it = text::WordBreakIterator(string.substr(0, length));
       uint32 keepLength = TextBreakAtOrPreceding(it, keepCount);
       return utf8_string(string.substr(0, keepLength));
     }
@@ -128,9 +125,8 @@ namespace krys::boo
       uint32 startIndex = length - keepCount;
 
       text::NonSharedCharacterBreakIterator it(string);
-      uint32 adjustedStartIndex = ubrk_isBoundary(it, static_cast<int32_t>(startIndex))
-                                    ? startIndex
-                                    : BoundedTextBreakFollowing(it, startIndex, length);
+      uint32 adjustedStartIndex =
+        it.IsBoundary(startIndex) ? startIndex : BoundedTextBreakFollowing(it, startIndex, length);
 
       // Strip single character after ellipsis character, when that character is preceded by a space
       if (adjustedStartIndex < length && string[adjustedStartIndex] != u8' '

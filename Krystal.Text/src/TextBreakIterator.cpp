@@ -138,7 +138,7 @@ namespace krys::text
     {
       return null;
     }
-    auto result = ubrk_preceding(_iterator, static_cast<int32_t>(location + _priorContextLength));
+    auto result = ubrk_preceding(_iterator, static_cast<int32>(location + _priorContextLength));
     if (result == UBRK_DONE)
     {
       return null;
@@ -148,7 +148,7 @@ namespace krys::text
 
   Maybe<uint32> TextBreakIteratorICU::Following(uint32 location) const noexcept
   {
-    auto result = ubrk_following(_iterator, static_cast<int32_t>(location + _priorContextLength));
+    auto result = ubrk_following(_iterator, static_cast<int32>(location + _priorContextLength));
     if (result == UBRK_DONE)
     {
       return null;
@@ -158,7 +158,7 @@ namespace krys::text
 
   bool TextBreakIteratorICU::IsBoundary(uint32 location) const noexcept
   {
-    return ubrk_isBoundary(_iterator, static_cast<int32_t>(location + _priorContextLength));
+    return ubrk_isBoundary(_iterator, static_cast<int32>(location + _priorContextLength));
   }
 
   StringAtom TextBreakIteratorICU::MakeLocaleWithBreakKeyword(const StringAtom &locale,
@@ -192,15 +192,15 @@ namespace krys::text
     std::ranges::copy(utf8Locale, scratchBuffer.begin());
 
     UErrorCode status = U_ZERO_ERROR;
-    int32_t lengthNeeded = uloc_setKeywordValue("lb", keywordValue, scratchBuffer.data(),
-                                                static_cast<int32_t>(scratchBuffer.size()), &status);
+    int32 lengthNeeded = uloc_setKeywordValue("lb", keywordValue, scratchBuffer.data(),
+                                              static_cast<int32>(scratchBuffer.size()), &status);
     if (status == U_BUFFER_OVERFLOW_ERROR || status == U_STRING_NOT_TERMINATED_WARNING)
     {
       scratchBuffer.resize(static_cast<size_t>(lengthNeeded) + 1);
       std::fill(scratchBuffer.begin() + static_cast<ptrdiff_t>(utf8Locale.size()), scratchBuffer.end(), 0);
       status = U_ZERO_ERROR;
-      int32_t lengthNeeded2 = uloc_setKeywordValue("lb", keywordValue, scratchBuffer.data(),
-                                                   static_cast<int32_t>(scratchBuffer.size()), &status);
+      int32 lengthNeeded2 = uloc_setKeywordValue("lb", keywordValue, scratchBuffer.data(),
+                                                 static_cast<int32>(scratchBuffer.size()), &status);
       if (!U_SUCCESS(status) || lengthNeeded != lengthNeeded2)
       {
         return locale;
@@ -339,32 +339,82 @@ namespace krys::text
     return &iterator;
   }
 
-  UBreakIterator *WordBreakIterator(utf8_stringview string) noexcept
+  BreakIteratorView WordBreakIterator(utf8_stringview string) noexcept
   {
     static UBreakIterator *staticWordBreakIterator = InitializeIterator(UBRK_WORD);
     if (!staticWordBreakIterator)
     {
-      return nullptr;
+      return {};
     }
 
-    return SetTextForIterator(*staticWordBreakIterator, string);
+    return BreakIteratorView(SetTextForIterator(*staticWordBreakIterator, string));
   }
 
-  UBreakIterator *SentenceBreakIterator(utf8_stringview string) noexcept
+  BreakIteratorView SentenceBreakIterator(utf8_stringview string) noexcept
   {
     static UBreakIterator *staticSentenceBreakIterator = InitializeIterator(UBRK_SENTENCE);
     if (!staticSentenceBreakIterator)
     {
-      return nullptr;
+      return {};
     }
 
-    return SetTextForIterator(*staticSentenceBreakIterator, string);
+    return BreakIteratorView(SetTextForIterator(*staticSentenceBreakIterator, string));
   }
 
-  bool IsWordTextBreak(UBreakIterator *iterator) noexcept
+  // MARK: - BreakIteratorView
+
+  KRYS_NODISCARD static Maybe<uint32> BoundaryOrNull(int32 boundary) noexcept
   {
-    int ruleStatus = ubrk_getRuleStatus(iterator);
-    return ruleStatus != UBRK_WORD_NONE;
+    if (boundary == UBRK_DONE)
+    {
+      return null;
+    }
+    return static_cast<uint32>(boundary);
+  }
+
+  uint32 BreakIteratorView::First() const noexcept
+  {
+    return static_cast<uint32>(ubrk_first(_iterator));
+  }
+
+  uint32 BreakIteratorView::Last() const noexcept
+  {
+    return static_cast<uint32>(ubrk_last(_iterator));
+  }
+
+  Maybe<uint32> BreakIteratorView::Next() const noexcept
+  {
+    return BoundaryOrNull(ubrk_next(_iterator));
+  }
+
+  Maybe<uint32> BreakIteratorView::Previous() const noexcept
+  {
+    return BoundaryOrNull(ubrk_previous(_iterator));
+  }
+
+  Maybe<uint32> BreakIteratorView::Following(uint32 offset) const noexcept
+  {
+    return BoundaryOrNull(ubrk_following(_iterator, static_cast<int32>(offset)));
+  }
+
+  Maybe<uint32> BreakIteratorView::Preceding(uint32 offset) const noexcept
+  {
+    return BoundaryOrNull(ubrk_preceding(_iterator, static_cast<int32>(offset)));
+  }
+
+  bool BreakIteratorView::IsBoundary(uint32 offset) const noexcept
+  {
+    return ubrk_isBoundary(_iterator, static_cast<int32>(offset));
+  }
+
+  uint32 BreakIteratorView::Current() const noexcept
+  {
+    return static_cast<uint32>(ubrk_current(_iterator));
+  }
+
+  bool BreakIteratorView::IsWordBreak() const noexcept
+  {
+    return ubrk_getRuleStatus(_iterator) != UBRK_WORD_NONE;
   }
 
   // MARK: - CachedLineBreakIteratorFactory
@@ -407,7 +457,7 @@ namespace krys::text
     // Encode the last code points, then move them to the end of the buffer, so that the encoding starts at a
     // different address when its length changes.
     Array<char8, Length * 4> encoded {};
-    int32_t offset = 0;
+    int32 offset = 0;
     auto length = GetLength();
     for (auto i = _priorContext.size() - length; i < _priorContext.size(); ++i)
     {
@@ -569,7 +619,7 @@ namespace krys::text
     }
 
     uint32 numGraphemeClusters = 0;
-    while (ubrk_next(iterator) != UBRK_DONE)
+    while (iterator.Next())
     {
       ++numGraphemeClusters;
     }
@@ -606,12 +656,12 @@ namespace krys::text
 
     for (uint32 i = 0; i < numGraphemeClusters; ++i)
     {
-      if (ubrk_next(iterator) == UBRK_DONE)
+      if (!iterator.Next())
       {
         return stringLength;
       }
     }
-    return static_cast<uint32>(ubrk_current(iterator));
+    return iterator.Current();
   }
 
   const char *CurrentTextBreakLocaleID() noexcept
