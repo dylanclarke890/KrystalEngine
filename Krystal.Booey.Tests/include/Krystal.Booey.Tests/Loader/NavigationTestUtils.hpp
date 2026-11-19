@@ -28,7 +28,7 @@ namespace krys::boo::tests
   {
     NavigationAction Action;
     std::string Url;
-    std::string HTTPMethod;
+    std::string HttpMethod;
     /// @brief The browsing context named, for a new window; empty otherwise.
     std::string NewWindowName;
     bool IsNewWindow {false};
@@ -72,7 +72,7 @@ namespace krys::boo::tests
       };
       ReceivedNavigation received {.Action = action,
                                    .Url = narrow(request.Url().String()),
-                                   .HTTPMethod = narrow(request.HTTPMethod()),
+                                   .HttpMethod = narrow(request.HttpMethod()),
                                    .NewWindowName = narrow(frameName),
                                    .IsNewWindow = isNewWindow,
                                    .Submission = ShareRefPtr(const_cast<FormSubmission *>(formSubmission))};

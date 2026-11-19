@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
-#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
+#include "Krystal.Booey/Platform/MimeTypeRegistry.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/PasteboardStrategy.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
@@ -149,7 +149,7 @@ namespace krys::boo
   bool Pasteboard::CanExposeUrlToDOMWhenPasteboardContainsFiles(utf8_stringview urlString) noexcept
   {
     net::Url url({}, urlString);
-    return url.ProtocolIsInHTTPFamily() || url.ProtocolIsBlob() || url.ProtocolIsData();
+    return url.ProtocolIsInHttpFamily() || url.ProtocolIsBlob() || url.ProtocolIsData();
   }
 
   List<utf8_string> Pasteboard::ReadAllStrings(utf8_stringview type) noexcept
@@ -571,7 +571,7 @@ namespace krys::boo
     }
 
     bool hasImage = std::ranges::any_of(types, [](const utf8_string &type)
-                                        { return MIMETypeRegistry::IsSupportedImageMIMEType(type); });
+                                        { return MimeTypeRegistry::IsSupportedImageMimeType(type); });
     return hasImage ? FileContentState::MayContainFilePaths : FileContentState::NoFileOrImageData;
   }
 

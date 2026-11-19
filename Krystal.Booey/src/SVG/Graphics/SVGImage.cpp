@@ -464,7 +464,7 @@ namespace krys::boo
 
       RefPtr<DocumentLoader> activeDocumentLoader = ShareRefPtr(loader.GetDocumentLoader());
       krys_debug_assert(activeDocumentLoader); // The DocumentLoader should have been created by Init().
-      activeDocumentLoader->Writer().SetMIMEType(u8"image/svg+xml");
+      activeDocumentLoader->Writer().SetMimeType(u8"image/svg+xml");
       if (activeDocumentLoader->Writer().Begin(net::Url())) // create the empty document
       {
         if (auto *document = mainFrame.Document(); document && settings)

@@ -50,7 +50,7 @@ namespace krys::boo::tests
           == List<std::string> {"https://example.com/large.png", "https://example.com/small.png",
                                 "https://example.com/unsized.ico"});
     CHECK(icons[0].first.Size == 32u);
-    CHECK(icons[1].first.MIMEType == u8"image/png");
+    CHECK(icons[1].first.MimeType == u8"image/png");
     CHECK_FALSE(icons[2].first.Size);
     CHECK(fixture.Frame().Loader().GetDocumentLoader()->LinkIcons().size() == 3);
   }

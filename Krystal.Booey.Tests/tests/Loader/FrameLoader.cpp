@@ -87,7 +87,7 @@ namespace krys::boo::tests
     REQUIRE(fixture.Navigations().size() == 1);
     auto &get = fixture.Navigations()[0];
     CHECK(get.Url == "https://example.com/dir/page.html#done");
-    CHECK(get.HTTPMethod == "GET");
+    CHECK(get.HttpMethod == "GET");
     CHECK(get.Action.Type() == NavigationType::FormSubmitted);
     CHECK(get.Action.SourceElement() == &fixture.ById(u8"get"));
     REQUIRE(get.Submission);
@@ -100,7 +100,7 @@ namespace krys::boo::tests
     REQUIRE(fixture.Navigations().size() == 2);
     auto &post = fixture.Navigations()[1];
     CHECK(post.Url == "https://example.com/dir/submit");
-    CHECK(post.HTTPMethod == "POST");
+    CHECK(post.HttpMethod == "POST");
     CHECK(post.IsNewWindow);
     CHECK(post.NewWindowName == "results");
   }

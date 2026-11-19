@@ -36,7 +36,7 @@
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
-#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
+#include "Krystal.Booey/Platform/MimeTypeRegistry.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderHTMLCanvas.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 
@@ -507,7 +507,7 @@ namespace krys::boo
 
   KRYS_NODISCARD static DOMString ToEncodingMimeType(DOMStringView mimeType) noexcept
   {
-    if (!MIMETypeRegistry::IsSupportedImageMIMETypeForEncoding(mimeType))
+    if (!MimeTypeRegistry::IsSupportedImageMimeTypeForEncoding(mimeType))
     {
       return u8"image/png";
     }
@@ -538,7 +538,7 @@ namespace krys::boo
 
     // 3. Let file be a serialization of this canvas element's bitmap as a file, passing type and quality if
     //    given.
-    auto encodingMIMEType = ToEncodingMimeType(mimeType);
+    auto encodingMimeType = ToEncodingMimeType(mimeType);
     auto buffer = MakeRenderingResultsAvailable();
 
     // 4. If file is null, then return "data:,".
@@ -548,6 +548,6 @@ namespace krys::boo
     }
 
     // 5. Return a data: URL representing file.
-    return buffer->ToDataUrl(encodingMIMEType, QualityInRange(quality));
+    return buffer->ToDataUrl(encodingMimeType, QualityInRange(quality));
   }
 }

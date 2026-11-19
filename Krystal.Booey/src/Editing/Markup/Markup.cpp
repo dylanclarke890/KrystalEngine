@@ -1554,7 +1554,7 @@ namespace krys::boo
                                               u8"content='light dark'/></head><body></body></html>";
     DocumentWriter writer;
     writer.SetFrame(frame);
-    writer.SetMIMEType(u8"text/html");
+    writer.SetMimeType(u8"text/html");
     if (writer.Begin({}))
     {
       writer.AddData(Span<const uint8>(reinterpret_cast<const uint8 *>(markup.data()), markup.size()));

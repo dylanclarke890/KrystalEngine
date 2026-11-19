@@ -468,7 +468,7 @@ namespace krys::ui
           {
             if (data && _iconHandler)
             {
-              _iconHandler({icon.Url.String(), utf8_string(icon.MIMEType), icon.Size, data->GetSpan()});
+              _iconHandler({icon.Url.String(), utf8_string(icon.MimeType), icon.Size, data->GetSpan()});
             }
           });
       }
@@ -536,7 +536,7 @@ namespace krys::ui
       {
         navigation.Download = action.DownloadAttribute().ToString();
       }
-      navigation.Method = request.HTTPMethod();
+      navigation.Method = request.HttpMethod();
       if (formSubmission)
       {
         navigation.IsFormSubmission = true;

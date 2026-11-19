@@ -5,7 +5,7 @@ namespace krys::net::http::tests
 {
   TEST_CASE("HTTPHeaderMap: names ignore case, and values given twice are joined", "[Http][HTTPHeaderMap]")
   {
-    HTTPHeaderMap headers;
+    HttpHeaderMap headers;
     headers.Add(u8"Content-Language", u8"en");
     headers.Add(u8"content-language", u8"fr");
     CHECK(headers.Get(u8"CONTENT-LANGUAGE") == utf8_stringview(u8"en, fr"));

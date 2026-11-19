@@ -40,7 +40,7 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
+#include "Krystal.Booey/Platform/MimeTypeRegistry.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
@@ -63,7 +63,7 @@ namespace krys::boo
   namespace
   {
     KRYS_NODISCARD DOMStringView
-      ExtractMIMETypeFromTypeAttributeForLookup(DOMStringView typeAttribute) noexcept
+      ExtractMimeTypeFromTypeAttributeForLookup(DOMStringView typeAttribute) noexcept
     {
       auto semicolonIndex = typeAttribute.find(u8';');
       if (semicolonIndex == DOMStringView::npos)
@@ -703,8 +703,8 @@ namespace krys::boo
       //     the next child.
       if (auto typeAttribute = source->GetAttribute(u8"type"))
       {
-        auto type = ExtractMIMETypeFromTypeAttributeForLookup(*typeAttribute);
-        if (!type.empty() && !MIMETypeRegistry::IsSupportedImageVideoOrSVGMIMEType(type))
+        auto type = ExtractMimeTypeFromTypeAttributeForLookup(*typeAttribute);
+        if (!type.empty() && !MimeTypeRegistry::IsSupportedImageVideoOrSVGMimeType(type))
         {
           continue;
         }

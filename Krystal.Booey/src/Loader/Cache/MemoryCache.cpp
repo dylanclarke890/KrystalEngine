@@ -63,7 +63,7 @@ namespace krys::boo
     // Strip away fragment identifier from HTTP URLs.
     // Data URLs must be unmodified. For file and custom URLs clients may expect resources
     // to be unique even when they differ by the fragment identifier only.
-    return originalUrl.ProtocolIsInHTTPFamily();
+    return originalUrl.ProtocolIsInHttpFamily();
   }
 
   net::Url MemoryCache::RemoveFragmentIdentifierIfNeeded(const net::Url &originalUrl) noexcept

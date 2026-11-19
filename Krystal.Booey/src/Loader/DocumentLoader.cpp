@@ -94,7 +94,7 @@ namespace krys::boo
     }
 
     auto icons = CollectLinkIcons(*document);
-    if (icons.empty() && document->GetUrl().ProtocolIsInHTTPFamily())
+    if (icons.empty() && document->GetUrl().ProtocolIsInHttpFamily())
     {
       icons.push_back({document->CompleteUrl(u8"/favicon.ico"), {}, null});
     }
@@ -315,7 +315,7 @@ namespace krys::boo
     }
     _committed = true;
 
-    _writer.SetMIMEType(_response.MimeType());
+    _writer.SetMimeType(_response.MimeType());
     if (!_writer.Begin(DocumentUrl()))
     {
       _isLoadingMainResource = false;
@@ -326,7 +326,7 @@ namespace krys::boo
       document->SetLastModified(_response.LastModified());
       // The Content-Language header's first language is the document's language until a content-language
       // pragma sets one, as Chrome takes it.
-      auto contentLanguage = _response.HTTPHeaderField(u8"Content-Language");
+      auto contentLanguage = _response.HttpHeaderField(u8"Content-Language");
       contentLanguage = contentLanguage.substr(0, contentLanguage.find(u8','));
       while (!contentLanguage.empty() && text::IsASCIIWhitespace(contentLanguage.front()))
       {
@@ -353,7 +353,7 @@ namespace krys::boo
   {
     _committed = true;
     _response = ResourceResponse(net::Url(u8"about:blank"), u8"text/html", 0, u8"UTF-8");
-    _writer.SetMIMEType(u8"text/html");
+    _writer.SetMimeType(u8"text/html");
     if (!_writer.Begin(net::Url(u8"about:blank")))
     {
       return;

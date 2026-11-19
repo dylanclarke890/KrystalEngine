@@ -29,13 +29,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Net/Http/HTTPHeaderMap.hpp"
+#include "Krystal.Net/Http/HttpHeaderMap.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
 
 namespace krys::net::http
 {
-  Maybe<utf8_stringview> HTTPHeaderMap::Get(utf8_stringview name) const noexcept
+  Maybe<utf8_stringview> HttpHeaderMap::Get(utf8_stringview name) const noexcept
   {
     auto found = std::ranges::find_if(_headers, [&](const auto &header)
                                       { return text::IsASCIICaselessEqual(header.first, name); });
@@ -46,14 +46,14 @@ namespace krys::net::http
     return utf8_stringview(found->second);
   }
 
-  Pair<utf8_string, utf8_string> *HTTPHeaderMap::Find(utf8_stringview name) noexcept
+  Pair<utf8_string, utf8_string> *HttpHeaderMap::Find(utf8_stringview name) noexcept
   {
     auto found = std::ranges::find_if(_headers, [&](const auto &header)
                                       { return text::IsASCIICaselessEqual(header.first, name); });
     return found == _headers.end() ? nullptr : &*found;
   }
 
-  void HTTPHeaderMap::Set(utf8_stringview name, utf8_stringview value) noexcept
+  void HttpHeaderMap::Set(utf8_stringview name, utf8_stringview value) noexcept
   {
     if (auto *header = Find(name))
     {
@@ -63,7 +63,7 @@ namespace krys::net::http
     _headers.emplace_back(utf8_string(name), utf8_string(value));
   }
 
-  void HTTPHeaderMap::Add(utf8_stringview name, utf8_stringview value) noexcept
+  void HttpHeaderMap::Add(utf8_stringview name, utf8_stringview value) noexcept
   {
     if (auto *header = Find(name))
     {
@@ -74,7 +74,7 @@ namespace krys::net::http
     _headers.emplace_back(utf8_string(name), utf8_string(value));
   }
 
-  void HTTPHeaderMap::Remove(utf8_stringview name) noexcept
+  void HttpHeaderMap::Remove(utf8_stringview name) noexcept
   {
     std::erase_if(_headers,
                   [&](const auto &header) { return text::IsASCIICaselessEqual(header.first, name); });

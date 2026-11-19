@@ -35,14 +35,14 @@
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderFileUploadControl.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Net/Http/MIMETypeRegistry.hpp"
+#include "Krystal.Net/Http/MimeTypeRegistry.hpp"
 
 namespace krys::boo::html
 {
   namespace
   {
     // A MIME type or a wildcard one (`image/*`): a type and a subtype of token characters.
-    KRYS_NODISCARD bool IsAcceptedMIMEType(utf8_stringview type) noexcept
+    KRYS_NODISCARD bool IsAcceptedMimeType(utf8_stringview type) noexcept
     {
       auto slash = type.find(u8'/');
       if (slash == utf8_stringview::npos || slash == 0 || slash == type.size() - 1)
@@ -117,7 +117,7 @@ namespace krys::boo::html
     if (_fileList->IsEmpty())
     {
       auto file =
-        File::Create(*Blob::Create(List<uint8> {}, net::http::MIMETypeRegistry::DefaultMIMEType()), u8"");
+        File::Create(*Blob::Create(List<uint8> {}, net::http::MimeTypeRegistry::DefaultMimeType()), u8"");
       formData.Append(name, *file);
       return true;
     }
@@ -280,7 +280,7 @@ namespace krys::boo::html
     auto accept = element.GetAttribute(u8"accept").value_or(DOMString());
     FileChooserSettings settings {
       .AllowsMultipleFiles = element.Multiple(),
-      .AcceptMIMETypes = ParseAcceptAttribute(accept, IsAcceptedMIMEType),
+      .AcceptMimeTypes = ParseAcceptAttribute(accept, IsAcceptedMimeType),
       // An extension: a dot and at least one character.
       .AcceptFileExtensions = ParseAcceptAttribute(accept, [](utf8_stringview token)
                                                    { return token.size() >= 2 && token[0] == u8'.'; }),

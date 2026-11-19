@@ -72,7 +72,7 @@ namespace krys::boo
         continue;
       }
       auto url = document.CompleteUrl(*href);
-      if (!url.ProtocolIsInHTTPFamily() && !url.ProtocolIsData())
+      if (!url.ProtocolIsInHttpFamily() && !url.ProtocolIsData())
       {
         continue;
       }

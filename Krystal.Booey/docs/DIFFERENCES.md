@@ -351,5 +351,5 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From Chrome
 
-- A file's type comes from its extension through Krystal.Net's built-in table of common types (`net::http::MIMETypeRegistry::MIMETypeForExtension`, after Chrome's own mappings), for `File.type` and for files Krystal.UI loads. Chrome also asks the operating system (the registry's content types on Windows) for extensions its table lacks; Booey gives those no type.
+- A file's type comes from its extension through Krystal.Net's built-in table of common types (`net::http::MimeTypeRegistry::MimeTypeForExtension`, after Chrome's own mappings), for `File.type` and for files Krystal.UI loads. Chrome also asks the operating system (the registry's content types on Windows) for extensions its table lacks; Booey gives those no type.
 - Layout is scheduled as soon as the document has a body and the style sheets before it have loaded (`Document::ShouldScheduleLayout`). Browsers also hold scheduled layouts back until the page has enough text or image pixels to show (WebKit's visually non-empty state), so as not to paint a half-loaded page; the host pushes Booey its content, so that would only delay the first paint.

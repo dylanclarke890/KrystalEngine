@@ -429,7 +429,7 @@ namespace krys::boo
 
   void FrameLoader::ChangeLocation(FrameLoadRequest frameRequest, Event *triggeringEvent) noexcept
   {
-    krys_assert(frameRequest.GetResourceRequest().HTTPMethod() == u8"GET");
+    krys_assert(frameRequest.GetResourceRequest().HttpMethod() == u8"GET");
 
     auto *document = _frame.Document();
     // https://html.spec.whatwg.org/#navigate

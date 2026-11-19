@@ -202,7 +202,7 @@ namespace krys::boo
 
     if (_method == Method::Post)
     {
-      frameRequest.GetResourceRequest().SetHTTPMethod(u8"POST");
+      frameRequest.GetResourceRequest().SetHttpMethod(u8"POST");
     }
 
     frameRequest.GetResourceRequest().SetUrl(_action);

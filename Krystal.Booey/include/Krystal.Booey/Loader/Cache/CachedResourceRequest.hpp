@@ -38,7 +38,7 @@ namespace krys::boo
   {
     constexpr static utf8_stringview CSS = u8"css";
     constexpr static utf8_stringview Icon = u8"icon";
-    constexpr static utf8_stringview XMLHTTPRequest = u8"xmlhttprequest";
+    constexpr static utf8_stringview XMLHttpRequest = u8"xmlhttprequest";
   };
 
   /// @brief A request for a cached resource: the resource request, how to load it and who asked.

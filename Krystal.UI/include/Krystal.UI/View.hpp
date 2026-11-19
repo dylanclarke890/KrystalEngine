@@ -105,7 +105,7 @@ namespace krys::ui
   {
     utf8_string Url;
     /// @brief Its link's `type`, a hint of its MIME type; empty without one.
-    utf8_string MIMEType;
+    utf8_string MimeType;
     /// @brief The width its link's `sizes` gives first, if any.
     Maybe<uint32> Size;
     /// @brief Its bytes as loaded (PNG, ICO, SVG and so on), for the host to decode; valid during the call.

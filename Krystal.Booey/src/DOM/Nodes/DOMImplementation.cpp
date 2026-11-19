@@ -11,10 +11,10 @@
 #include "Krystal.Booey/HTML/Images/ImageDocument.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
+#include "Krystal.Booey/Platform/MimeTypeRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Net/Http/MIMETypeRegistry.hpp"
+#include "Krystal.Net/Http/MimeTypeRegistry.hpp"
 #include "Krystal.Net/Url.hpp"
 
 namespace krys::boo::dom
@@ -204,14 +204,14 @@ namespace krys::boo::dom
         document->_contentType = u8"image/svg+xml";
         return document;
       }
-      if (net::http::MIMETypeRegistry::IsXMLMIMEType(contentType))
+      if (net::http::MimeTypeRegistry::IsXMLMimeType(contentType))
       {
         auto document = CreateRef<XMLDocument>();
         document->_contentType = DOMString(contentType);
         return document;
       }
       // https://html.spec.whatwg.org/#navigate-media
-      if (MIMETypeRegistry::IsSupportedImageMIMEType(contentType))
+      if (MimeTypeRegistry::IsSupportedImageMimeType(contentType))
       {
         Ref<Document> document = CreateRef<ImageDocument>();
         document->_contentType = DOMString(contentType);

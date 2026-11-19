@@ -13,13 +13,13 @@ namespace krys::net::http::tests
 
   TEST_CASE("ParseHTTPDate: the three HTTP-date forms", "[Http][HTTPParsers]")
   {
-    CHECK(ParseHTTPDate(u8"Sun, 06 Nov 1994 08:49:37 GMT") == RFCExample);
-    CHECK(ParseHTTPDate(u8"Sunday, 06-Nov-94 08:49:37 GMT") == RFCExample);
-    CHECK(ParseHTTPDate(u8"Sun Nov  6 08:49:37 1994") == RFCExample);
-    CHECK(ParseHTTPDate(u8"Sun Nov 16 08:49:37 1994") == RFCExample + days(10));
+    CHECK(ParseHttpDate(u8"Sun, 06 Nov 1994 08:49:37 GMT") == RFCExample);
+    CHECK(ParseHttpDate(u8"Sunday, 06-Nov-94 08:49:37 GMT") == RFCExample);
+    CHECK(ParseHttpDate(u8"Sun Nov  6 08:49:37 1994") == RFCExample);
+    CHECK(ParseHttpDate(u8"Sun Nov 16 08:49:37 1994") == RFCExample + days(10));
     // The day name isn't checked against the date.
-    CHECK(ParseHTTPDate(u8"Mon, 06 Nov 1994 08:49:37 GMT") == RFCExample);
-    CHECK(ParseHTTPDate(u8"Thu, 29 Feb 2024 23:59:59 GMT")
+    CHECK(ParseHttpDate(u8"Mon, 06 Nov 1994 08:49:37 GMT") == RFCExample);
+    CHECK(ParseHttpDate(u8"Thu, 29 Feb 2024 23:59:59 GMT")
           == sys_days(2'024y / February / 29) + 23h + 59min + 59s);
   }
 
@@ -32,7 +32,7 @@ namespace krys::net::http::tests
                        u8"Fri, 29 Feb 2023 00:00:00 GMT"})
     {
       INFO(reinterpret_cast<const char *>(value));
-      CHECK_FALSE(ParseHTTPDate(value));
+      CHECK_FALSE(ParseHttpDate(value));
     }
   }
 
@@ -40,7 +40,7 @@ namespace krys::net::http::tests
             "[Http][HTTPParsers]")
   {
     auto year = static_cast<int32>(year_month_day(floor<days>(system_clock::now())).year());
-    auto parsed = ParseHTTPDate(u8"Sunday, 06-Nov-94 08:49:37 GMT");
+    auto parsed = ParseHttpDate(u8"Sunday, 06-Nov-94 08:49:37 GMT");
     REQUIRE(parsed);
     auto parsedYear = static_cast<int32>(year_month_day(floor<days>(*parsed)).year());
     CHECK(parsedYear % 100 == 94);

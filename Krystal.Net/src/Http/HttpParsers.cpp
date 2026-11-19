@@ -30,7 +30,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Net/Http/HTTPParsers.hpp"
+#include "Krystal.Net/Http/HttpParsers.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 
@@ -38,22 +38,22 @@ namespace krys::net::http
 {
   namespace
   {
-    constexpr Array<utf8_stringview, 12> HTTPDateMonths {u8"Jan", u8"Feb", u8"Mar", u8"Apr",
+    constexpr Array<utf8_stringview, 12> HttpDateMonths {u8"Jan", u8"Feb", u8"Mar", u8"Apr",
                                                          u8"May", u8"Jun", u8"Jul", u8"Aug",
                                                          u8"Sep", u8"Oct", u8"Nov", u8"Dec"};
-    constexpr Array<utf8_stringview, 7> HTTPDateDayNames {u8"Mon", u8"Tue", u8"Wed", u8"Thu",
+    constexpr Array<utf8_stringview, 7> HttpDateDayNames {u8"Mon", u8"Tue", u8"Wed", u8"Thu",
                                                           u8"Fri", u8"Sat", u8"Sun"};
-    constexpr Array<utf8_stringview, 7> HTTPDateLongDayNames {
+    constexpr Array<utf8_stringview, 7> HttpDateLongDayNames {
       u8"Monday", u8"Tuesday", u8"Wednesday", u8"Thursday", u8"Friday", u8"Saturday", u8"Sunday"};
 
     /// @brief Reads an HTTP-date's parts from the front of its text.
-    class HTTPDateReader
+    class HttpDateReader
     {
     private:
       utf8_stringview _text;
 
     public:
-      explicit HTTPDateReader(utf8_stringview text) noexcept : _text(text)
+      explicit HttpDateReader(utf8_stringview text) noexcept : _text(text)
       {
       }
 
@@ -135,7 +135,7 @@ namespace krys::net::http
       }
     };
 
-    KRYS_NODISCARD Maybe<std::chrono::sys_seconds> HTTPDateTime(int32 year, size_t month, uint32 day,
+    KRYS_NODISCARD Maybe<std::chrono::sys_seconds> HttpDateTime(int32 year, size_t month, uint32 day,
                                                                 std::chrono::seconds timeOfDay) noexcept
     {
       std::chrono::year_month_day date {
@@ -167,17 +167,17 @@ namespace krys::net::http
     }
   }
 
-  Maybe<std::chrono::sys_seconds> ParseHTTPDate(utf8_stringview value) noexcept
+  Maybe<std::chrono::sys_seconds> ParseHttpDate(utf8_stringview value) noexcept
   {
     // IMF-fixdate: day-name "," SP day SP month SP year SP time-of-day SP "GMT".
     {
-      HTTPDateReader reader(value);
-      if (reader.OneOf(HTTPDateDayNames) && reader.Skip(u8", "))
+      HttpDateReader reader(value);
+      if (reader.OneOf(HttpDateDayNames) && reader.Skip(u8", "))
       {
         auto day = reader.Number(2);
         if (day && reader.Skip(u8" "))
         {
-          auto month = reader.OneOf(HTTPDateMonths);
+          auto month = reader.OneOf(HttpDateMonths);
           if (month && reader.Skip(u8" "))
           {
             auto year = reader.Number(4);
@@ -186,7 +186,7 @@ namespace krys::net::http
               auto time = reader.TimeOfDay();
               if (time && reader.Skip(u8" GMT") && reader.AtEnd())
               {
-                return HTTPDateTime(static_cast<int32>(*year), *month, *day, *time);
+                return HttpDateTime(static_cast<int32>(*year), *month, *day, *time);
               }
             }
           }
@@ -196,13 +196,13 @@ namespace krys::net::http
 
     // rfc850-date: day-name-l "," SP day "-" month "-" 2DIGIT SP time-of-day SP "GMT".
     {
-      HTTPDateReader reader(value);
-      if (reader.OneOf(HTTPDateLongDayNames) && reader.Skip(u8", "))
+      HttpDateReader reader(value);
+      if (reader.OneOf(HttpDateLongDayNames) && reader.Skip(u8", "))
       {
         auto day = reader.Number(2);
         if (day && reader.Skip(u8"-"))
         {
-          auto month = reader.OneOf(HTTPDateMonths);
+          auto month = reader.OneOf(HttpDateMonths);
           if (month && reader.Skip(u8"-"))
           {
             auto year = reader.Number(2);
@@ -211,7 +211,7 @@ namespace krys::net::http
               auto time = reader.TimeOfDay();
               if (time && reader.Skip(u8" GMT") && reader.AtEnd())
               {
-                return HTTPDateTime(RFC850Year(*year), *month, *day, *time);
+                return HttpDateTime(RFC850Year(*year), *month, *day, *time);
               }
             }
           }
@@ -221,10 +221,10 @@ namespace krys::net::http
 
     // asctime-date: day-name SP month SP ( 2DIGIT / ( SP DIGIT ) ) SP time-of-day SP year.
     {
-      HTTPDateReader reader(value);
-      if (reader.OneOf(HTTPDateDayNames) && reader.Skip(u8" "))
+      HttpDateReader reader(value);
+      if (reader.OneOf(HttpDateDayNames) && reader.Skip(u8" "))
       {
-        auto month = reader.OneOf(HTTPDateMonths);
+        auto month = reader.OneOf(HttpDateMonths);
         if (month && reader.Skip(u8" "))
         {
           auto day = reader.Skip(u8" ") ? reader.Number(1) : reader.Number(2);
@@ -236,7 +236,7 @@ namespace krys::net::http
               auto year = reader.Number(4);
               if (year && reader.AtEnd())
               {
-                return HTTPDateTime(static_cast<int32>(*year), *month, *day, *time);
+                return HttpDateTime(static_cast<int32>(*year), *month, *day, *time);
               }
             }
           }
@@ -251,15 +251,15 @@ namespace krys::net::http
   {
     // Get, decode, and split the header: its first value, without the HTTP whitespace around it.
     auto first = value.substr(0, value.find(u8','));
-    auto isHTTPTabOrSpace = [](char8 c)
+    auto isHttpTabOrSpace = [](char8 c)
     {
       return c == u8' ' || c == u8'\t';
     };
-    while (!first.empty() && isHTTPTabOrSpace(first.front()))
+    while (!first.empty() && isHttpTabOrSpace(first.front()))
     {
       first.remove_prefix(1);
     }
-    while (!first.empty() && isHTTPTabOrSpace(first.back()))
+    while (!first.empty() && isHttpTabOrSpace(first.back()))
     {
       first.remove_suffix(1);
     }

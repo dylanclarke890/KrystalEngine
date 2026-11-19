@@ -217,8 +217,8 @@ namespace krys::net
       WSS,
       File,
       FTP,
-      HTTP,
-      HTTPS,
+      Http,
+      Https,
       NonSpecial,
     };
 
@@ -242,11 +242,11 @@ namespace krys::net
       }
       if (scheme == u8"http")
       {
-        return Scheme::HTTP;
+        return Scheme::Http;
       }
       if (scheme == u8"https")
       {
-        return Scheme::HTTPS;
+        return Scheme::Https;
       }
       return Scheme::NonSpecial;
     }
@@ -610,8 +610,8 @@ namespace krys::net
     {
       case Scheme::WS:         return wsPort;
       case Scheme::WSS:        return wssPort;
-      case Scheme::HTTP:       return httpPort;
-      case Scheme::HTTPS:      return httpsPort;
+      case Scheme::Http:       return httpPort;
+      case Scheme::Https:      return httpsPort;
       case Scheme::FTP:        return ftpPort;
       case Scheme::File:
       case Scheme::NonSpecial: return null;
@@ -720,7 +720,7 @@ namespace krys::net
       case UrlPart::UserStart:          _url._userStart = base._userStart; [[fallthrough]];
       case UrlPart::SchemeEnd:
         _url._isValid = base._isValid;
-        _url._protocolIsInHTTPFamily = base._protocolIsInHTTPFamily;
+        _url._protocolIsInHttpFamily = base._protocolIsInHttpFamily;
         _url._schemeEnd = base._schemeEnd;
     }
 
@@ -730,8 +730,8 @@ namespace krys::net
       case Scheme::WSS:   _urlIsSpecial = true; return;
       case Scheme::File:  _urlIsFile = true; [[fallthrough]];
       case Scheme::FTP:
-      case Scheme::HTTP:
-      case Scheme::HTTPS: _urlIsSpecial = true; return;
+      case Scheme::Http:
+      case Scheme::Https: _urlIsSpecial = true; return;
       case Scheme::NonSpecial:
         _urlIsSpecial = false;
         auto pathStart = _url._hostEnd + _url._portLength;
@@ -1157,8 +1157,8 @@ namespace krys::net
                 }
                 ++c;
                 break;
-              case Scheme::HTTP:
-              case Scheme::HTTPS: _url._protocolIsInHTTPFamily = true; [[fallthrough]];
+              case Scheme::Http:
+              case Scheme::Https: _url._protocolIsInHttpFamily = true; [[fallthrough]];
               case Scheme::FTP:
                 _urlIsSpecial = true;
                 if (base.ProtocolIs(urlScheme))
@@ -3175,7 +3175,7 @@ namespace krys::net
   bool UrlParser::AllValuesEqual(const Url &a, const Url &b) noexcept
   {
     return a._string == b._string && a._isValid == b._isValid && a._hasOpaquePath == b._hasOpaquePath
-           && a._protocolIsInHTTPFamily == b._protocolIsInHTTPFamily && a._schemeEnd == b._schemeEnd
+           && a._protocolIsInHttpFamily == b._protocolIsInHttpFamily && a._schemeEnd == b._schemeEnd
            && a._userStart == b._userStart && a._userEnd == b._userEnd && a._passwordEnd == b._passwordEnd
            && a._hostEnd == b._hostEnd && a._portLength == b._portLength
            && a._pathAfterLastSlash == b._pathAfterLastSlash && a._pathEnd == b._pathEnd

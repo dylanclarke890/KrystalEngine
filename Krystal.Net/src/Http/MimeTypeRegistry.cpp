@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Net/Http/MIMETypeRegistry.hpp"
+#include "Krystal.Net/Http/MimeTypeRegistry.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
 
@@ -33,7 +33,7 @@ namespace krys::net::http
   namespace
   {
     // https://www.rfc-editor.org/rfc/rfc7230#section-3.2.6
-    KRYS_NODISCARD bool IsValidHTTPToken(utf8_stringview value) noexcept
+    KRYS_NODISCARD bool IsValidHttpToken(utf8_stringview value) noexcept
     {
       if (value.empty())
       {
@@ -45,7 +45,7 @@ namespace krys::net::http
         { return text::IsASCIIAlphanumeric(c) || utf8_stringview(u8"!#$%&'*+-.^_`|~").contains(c); });
     }
 
-    KRYS_NODISCARD bool IsValidMIMETypeWithSuffix(utf8_stringview mimeType, utf8_stringview suffix) noexcept
+    KRYS_NODISCARD bool IsValidMimeTypeWithSuffix(utf8_stringview mimeType, utf8_stringview suffix) noexcept
     {
       if (mimeType.size() < suffix.size()
           || !text::IsASCIICaselessEqual(mimeType.substr(mimeType.size() - suffix.size()), suffix))
@@ -65,7 +65,7 @@ namespace krys::net::http
       }
 
       auto type = mimeType.substr(0, slashPosition);
-      if (!IsValidHTTPToken(type))
+      if (!IsValidHttpToken(type))
       {
         return false;
       }
@@ -73,11 +73,11 @@ namespace krys::net::http
       // Assume the suffix is already a valid HTTP token and avoid checking it.
       auto subtypeExcludingSuffix =
         mimeType.substr(slashPosition + 1, mimeType.size() - slashPosition - 1 - suffix.size());
-      return IsValidHTTPToken(subtypeExcludingSuffix);
+      return IsValidHttpToken(subtypeExcludingSuffix);
     }
   }
 
-  utf8_string MIMETypeRegistry::MIMETypeForExtension(utf8_stringview extension) noexcept
+  utf8_string MimeTypeRegistry::MimeTypeForExtension(utf8_stringview extension) noexcept
   {
     // The types of common extensions, after Chrome's built-in mappings (net::GetMimeTypeFromExtension),
     // without the system's types for other extensions (see docs/OVERVIEW.md).
@@ -195,13 +195,13 @@ namespace krys::net::http
     return {};
   }
 
-  bool MIMETypeRegistry::IsJPEGMIMEType(utf8_stringview mimeType) noexcept
+  bool MimeTypeRegistry::IsJPEGMimeType(utf8_stringview mimeType) noexcept
   {
     return text::IsASCIICaselessEqual(mimeType, u8"image/jpeg")
            || text::IsASCIICaselessEqual(mimeType, u8"image/jpg");
   }
 
-  bool MIMETypeRegistry::IsXMLMIMEType(utf8_stringview mimeType) noexcept
+  bool MimeTypeRegistry::IsXMLMimeType(utf8_stringview mimeType) noexcept
   {
     if (text::IsASCIICaselessEqual(mimeType, u8"text/xml")
         || text::IsASCIICaselessEqual(mimeType, u8"application/xml"))
@@ -209,6 +209,6 @@ namespace krys::net::http
       return true;
     }
 
-    return IsValidMIMETypeWithSuffix(mimeType, u8"+xml");
+    return IsValidMimeTypeWithSuffix(mimeType, u8"+xml");
   }
 }

@@ -1502,7 +1502,7 @@ namespace krys::ui::tests
       view.SetFileChooserHandler([&](Ref<boo::FileChooser> request) { chooser = krys::move(request); });
       click();
       REQUIRE(chooser);
-      CHECK(chooser->Settings().AcceptMIMETypes == List<utf8_string> {u8"image/*"});
+      CHECK(chooser->Settings().AcceptMimeTypes == List<utf8_string> {u8"image/*"});
       CHECK_FALSE(chooser->Settings().AllowsMultipleFiles);
 
       chooser->ChooseFiles({u8"C:/pictures/cat.png"});

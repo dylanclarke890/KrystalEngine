@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/FileAPI/File.hpp"
-#include "Krystal.Net/Http/MIMETypeRegistry.hpp"
+#include "Krystal.Net/Http/MimeTypeRegistry.hpp"
 #include <chrono>
 #include <filesystem>
 #include <system_error>
@@ -120,7 +120,7 @@ namespace krys::boo
     if (index != utf8_string::npos)
     {
       effectiveContentType =
-        net::http::MIMETypeRegistry::MIMETypeForExtension(utf8_stringview(effectiveName).substr(index + 1));
+        net::http::MimeTypeRegistry::MimeTypeForExtension(utf8_stringview(effectiveName).substr(index + 1));
     }
   }
 

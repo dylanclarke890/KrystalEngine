@@ -60,12 +60,12 @@ namespace krys::boo
       _url.RemoveFragmentIdentifier();
     }
 
-    KRYS_NODISCARD const utf8_string &HTTPMethod() const noexcept
+    KRYS_NODISCARD const utf8_string &HttpMethod() const noexcept
     {
       return _httpMethod;
     }
 
-    void SetHTTPMethod(utf8_string method) noexcept
+    void SetHttpMethod(utf8_string method) noexcept
     {
       _httpMethod = krys::move(method);
     }

@@ -863,7 +863,7 @@ Status: reviewed (2026-11-01)
 ##### [4.12.5.5 Serializing bitmaps to a file](https://html.spec.whatwg.org/#serialising-bitmaps-to-a-file)
 
 Status: reviewed (2026-11-01)
-> `ImageBuffer::ToData` and `ToDataUrl`, through `MIMETypeRegistry`'s encoders (see `DIFFERENCES.md`).
+> `ImageBuffer::ToData` and `ToDataUrl`, through `MimeTypeRegistry`'s encoders (see `DIFFERENCES.md`).
 <!-- definitions: a-serialisation-of-the-bitmap-as-a-file -->
 
 ##### [4.12.5.6 Security with canvas elements](https://html.spec.whatwg.org/#security-with-canvas-elements)

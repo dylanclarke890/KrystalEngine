@@ -24,13 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
+#include "Krystal.Booey/Platform/MimeTypeRegistry.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
 
 namespace krys::boo
 {
-  bool MIMETypeRegistry::IsSupportedImageMIMEType(utf8_stringview mimeType) noexcept
+  bool MimeTypeRegistry::IsSupportedImageMimeType(utf8_stringview mimeType) noexcept
   {
     constexpr utf8_stringview supportedTypes[] = {
       u8"image/png",
@@ -50,7 +50,7 @@ namespace krys::boo
                                [&](auto type) { return text::IsASCIICaselessEqual(mimeType, type); });
   }
 
-  bool MIMETypeRegistry::IsSupportedImageMIMETypeForEncoding(utf8_stringview mimeType) noexcept
+  bool MimeTypeRegistry::IsSupportedImageMimeTypeForEncoding(utf8_stringview mimeType) noexcept
   {
     constexpr utf8_stringview supportedTypes[] = {
       u8"image/png",
@@ -62,8 +62,8 @@ namespace krys::boo
                                [&](auto type) { return text::IsASCIICaselessEqual(mimeType, type); });
   }
 
-  bool MIMETypeRegistry::IsSupportedImageVideoOrSVGMIMEType(utf8_stringview mimeType) noexcept
+  bool MimeTypeRegistry::IsSupportedImageVideoOrSVGMimeType(utf8_stringview mimeType) noexcept
   {
-    return IsSupportedImageMIMEType(mimeType) || text::IsASCIICaselessEqual(mimeType, u8"image/svg+xml");
+    return IsSupportedImageMimeType(mimeType) || text::IsASCIICaselessEqual(mimeType, u8"image/svg+xml");
   }
 }

@@ -98,12 +98,12 @@ namespace krys::boo::tests
       {
         for (const auto &[name, value] : headers->second)
         {
-          response.AddHTTPHeaderField(name, value);
+          response.AddHttpHeaderField(name, value);
         }
       }
       if (auto status = StatusCodes.find(key); status != StatusCodes.end())
       {
-        response.SetHTTPStatusCode(status->second);
+        response.SetHttpstatusCode(status->second);
       }
       completionHandler(
         LoadedResource {.Response = krys::move(response), .Data = SharedBuffer::Create(found->second)});

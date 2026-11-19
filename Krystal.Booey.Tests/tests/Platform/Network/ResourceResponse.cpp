@@ -15,19 +15,19 @@ namespace krys::boo::tests
             "[Platform][Network][ResourceResponse]")
   {
     ResourceResponse response(net::Url(u8"https://example.com/"), u8"text/html", 0);
-    CHECK(response.HTTPStatusCode() == 0);
+    CHECK(response.HttpstatusCode() == 0);
     CHECK_FALSE(response.IsSuccessful());
     CHECK_FALSE(response.LastModified());
-    CHECK(response.HTTPHeaderField(u8"Last-Modified").empty());
+    CHECK(response.HttpHeaderField(u8"Last-Modified").empty());
 
-    response.SetHTTPStatusCode(204);
+    response.SetHttpstatusCode(204);
     CHECK(response.IsSuccessful());
-    response.SetHTTPStatusCode(404);
+    response.SetHttpstatusCode(404);
     CHECK_FALSE(response.IsSuccessful());
 
-    response.SetHTTPHeaderField(u8"last-modified", u8"Sun, 06 Nov 1994 08:49:37 GMT");
+    response.SetHttpHeaderField(u8"last-modified", u8"Sun, 06 Nov 1994 08:49:37 GMT");
     CHECK(response.LastModified() == LastModifiedExample);
-    response.SetHTTPHeaderField(u8"Last-Modified", u8"yesterday");
+    response.SetHttpHeaderField(u8"Last-Modified", u8"yesterday");
     CHECK_FALSE(response.LastModified());
   }
 }

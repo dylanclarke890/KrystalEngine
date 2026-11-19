@@ -60,7 +60,7 @@ namespace krys::net
     utf8_string _string;
 
     uint32 _isValid : 1 {false};
-    uint32 _protocolIsInHTTPFamily : 1 {false};
+    uint32 _protocolIsInHttpFamily : 1 {false};
     uint32 _hasOpaquePath : 1 {false};
     uint32 _isNull : 1 {true};
     uint32 _isHashTableDeletedValue : 1 {false};
@@ -241,9 +241,9 @@ namespace krys::net
       return ProtocolIs(u8"ftp") || ProtocolIs(u8"ftps");
     }
 
-    KRYS_NODISCARD bool ProtocolIsInHTTPFamily() const noexcept
+    KRYS_NODISCARD bool ProtocolIsInHttpFamily() const noexcept
     {
-      return _protocolIsInHTTPFamily;
+      return _protocolIsInHttpFamily;
     }
 
     KRYS_NODISCARD bool ProtocolIsSecure() const noexcept;
@@ -382,7 +382,7 @@ namespace krys::net
 
   KRYS_NODISCARD bool ProtocolIsJavaScript(utf8_stringview url) noexcept;
 
-  KRYS_NODISCARD bool ProtocolIsInHTTPFamily(utf8_stringview url) noexcept;
+  KRYS_NODISCARD bool ProtocolIsInHttpFamily(utf8_stringview url) noexcept;
 
   KRYS_NODISCARD Maybe<uint16> DefaultPortForProtocol(utf8_stringview protocol) noexcept;
 

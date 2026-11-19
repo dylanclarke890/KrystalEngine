@@ -37,7 +37,7 @@ namespace krys::net::http
   /// @brief A response's or request's HTTP headers: names compare ignoring ASCII case, and a header given
   /// more than once is one header, its values joined with ", ", as Fetch's header lists combine them.
   /// @see https://fetch.spec.whatwg.org/#concept-header-list
-  class HTTPHeaderMap
+  class HttpHeaderMap
   {
   private:
     /// @brief The headers in the order they were first given, with their names as first given.

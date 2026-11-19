@@ -224,20 +224,20 @@ namespace krys::net::tests
 
   TEST_CASE("URL(ProtocolIsInHTTPFamily)", "[URL]")
   {
-    CHECK_FALSE(ProtocolIsInHTTPFamily({}));
-    CHECK_FALSE(ProtocolIsInHTTPFamily(u8""));
-    CHECK_FALSE(ProtocolIsInHTTPFamily(u8"a"));
-    CHECK_FALSE(ProtocolIsInHTTPFamily(u8"ab"));
-    CHECK_FALSE(ProtocolIsInHTTPFamily(u8"abc"));
-    CHECK_FALSE(ProtocolIsInHTTPFamily(u8"abcd"));
-    CHECK_FALSE(ProtocolIsInHTTPFamily(u8"abcde"));
-    CHECK_FALSE(ProtocolIsInHTTPFamily(u8"abcdef"));
-    CHECK_FALSE(ProtocolIsInHTTPFamily(u8"abcdefg"));
-    CHECK(ProtocolIsInHTTPFamily(u8"http:"));
-    CHECK_FALSE(ProtocolIsInHTTPFamily(u8"http"));
-    CHECK(ProtocolIsInHTTPFamily(u8"https:"));
-    CHECK_FALSE(ProtocolIsInHTTPFamily(u8"https"));
-    CHECK(ProtocolIsInHTTPFamily(u8"https://!@#$%^&*()"));
+    CHECK_FALSE(ProtocolIsInHttpFamily({}));
+    CHECK_FALSE(ProtocolIsInHttpFamily(u8""));
+    CHECK_FALSE(ProtocolIsInHttpFamily(u8"a"));
+    CHECK_FALSE(ProtocolIsInHttpFamily(u8"ab"));
+    CHECK_FALSE(ProtocolIsInHttpFamily(u8"abc"));
+    CHECK_FALSE(ProtocolIsInHttpFamily(u8"abcd"));
+    CHECK_FALSE(ProtocolIsInHttpFamily(u8"abcde"));
+    CHECK_FALSE(ProtocolIsInHttpFamily(u8"abcdef"));
+    CHECK_FALSE(ProtocolIsInHttpFamily(u8"abcdefg"));
+    CHECK(ProtocolIsInHttpFamily(u8"http:"));
+    CHECK_FALSE(ProtocolIsInHttpFamily(u8"http"));
+    CHECK(ProtocolIsInHttpFamily(u8"https:"));
+    CHECK_FALSE(ProtocolIsInHttpFamily(u8"https"));
+    CHECK(ProtocolIsInHttpFamily(u8"https://!@#$%^&*()"));
   }
 
   TEST_CASE("URL(HostIsIPAddress)", "[URL]")

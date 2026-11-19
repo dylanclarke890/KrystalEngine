@@ -139,7 +139,7 @@ namespace krys::net::tests
       }
     }
 
-    utf8_string HTTPSUrl(utf8_stringview host)
+    utf8_string HttpsUrl(utf8_stringview host)
     {
       utf8_string result {u8"https://"};
       result.append(host);
@@ -201,7 +201,7 @@ namespace krys::net::tests
       INFO("input: <" << S(input) << ">");
       bool expectFailure = test["output"].IsNull();
 
-      Url url {HTTPSUrl(input)};
+      Url url {HttpsUrl(input)};
       if (expectFailure)
       {
         CHECK_FALSE(url.IsValid());
@@ -246,7 +246,7 @@ namespace krys::net::tests
       ++cases;
       INFO("input: <" << S(input) << ">");
 
-      Url url {HTTPSUrl(input)};
+      Url url {HttpsUrl(input)};
       if (test["output"].IsNull())
       {
         // These were generated before Unicode 17 assigned U+32931 and U+32B9A (CJK Extension J), so they

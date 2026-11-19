@@ -59,7 +59,7 @@ namespace krys::boo::html::tests
       REQUIRE(fixture.Navigations().size() == 1);
       auto &navigation = fixture.Navigations()[0];
       CHECK(navigation.Url == "https://example.com/dir/next.html");
-      CHECK(navigation.HTTPMethod == "GET");
+      CHECK(navigation.HttpMethod == "GET");
       CHECK_FALSE(navigation.IsNewWindow);
       CHECK(navigation.Action.Type() == NavigationType::LinkClicked);
       CHECK(navigation.Action.SourceElement() == &fixture.ById(u8"a"));

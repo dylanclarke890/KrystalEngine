@@ -143,9 +143,9 @@ namespace krys::boo::tests
         CachedResourceRequest(ResourceRequest(net::Url(url))));
       REQUIRE(sheet);
       RunNetworkingTasks();
-      bool hasValidMIMEType = true;
-      auto text = (*sheet)->SheetText(CachedCSSStyleSheet::MIMETypeCheckHint::Lax, &hasValidMIMEType);
-      return Pair<bool, bool>(text.has_value(), hasValidMIMEType);
+      bool hasValidMimeType = true;
+      auto text = (*sheet)->SheetText(CachedCSSStyleSheet::MimeTypeCheckHint::Lax, &hasValidMimeType);
+      return Pair<bool, bool>(text.has_value(), hasValidMimeType);
     };
 
     // A lax check takes any type, unless the response says not to sniff.

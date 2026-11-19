@@ -199,7 +199,7 @@ namespace krys::boo::html::tests
       REQUIRE(client->Choosers.size() == 1);
       auto &settings = client->Choosers[0]->Settings();
       CHECK(settings.AllowsMultipleFiles);
-      CHECK(settings.AcceptMIMETypes == List<utf8_string> {u8"image/*", u8"text/plain"});
+      CHECK(settings.AcceptMimeTypes == List<utf8_string> {u8"image/*", u8"text/plain"});
       CHECK(settings.AcceptFileExtensions == List<utf8_string> {u8".pdf"});
       CHECK(settings.SelectedFiles.empty());
 

@@ -48,7 +48,7 @@ namespace krys::boo
 
     ~CachedCSSStyleSheet() noexcept override;
 
-    enum class MIMETypeCheckHint : bool
+    enum class MimeTypeCheckHint : bool
     {
       Strict,
       Lax,
@@ -57,8 +57,8 @@ namespace krys::boo
     /// @brief The sheet's text, or null if it can't be used as a sheet (a load error, or a type that isn't
     /// CSS when @p mimeTypeCheckHint is strict).
     KRYS_NODISCARD Maybe<utf8_string>
-      SheetText(MIMETypeCheckHint mimeTypeCheckHint = MIMETypeCheckHint::Strict,
-                bool *hasValidMIMEType = nullptr, bool *hasHTTPStatusOK = nullptr) const noexcept;
+      SheetText(MimeTypeCheckHint mimeTypeCheckHint = MimeTypeCheckHint::Strict,
+                bool *hasValidMimeType = nullptr, bool *hasHttpstatusOK = nullptr) const noexcept;
 
     KRYS_NODISCARD RefPtr<css::StyleSheetContents>
       RestoreParsedStyleSheet(const css::ParserContext &context) noexcept;
@@ -71,10 +71,10 @@ namespace krys::boo
     KRYS_NODISCARD static utf8_stringview Encoding() noexcept;
 
   private:
-    KRYS_NODISCARD utf8_string ResponseMIMEType() const noexcept;
+    KRYS_NODISCARD utf8_string ResponseMimeType() const noexcept;
 
-    KRYS_NODISCARD bool CanUseSheet(MIMETypeCheckHint mimeTypeCheckHint, bool *hasValidMIMEType,
-                                    bool *hasHTTPStatusOK) const noexcept;
+    KRYS_NODISCARD bool CanUseSheet(MimeTypeCheckHint mimeTypeCheckHint, bool *hasValidMimeType,
+                                    bool *hasHttpstatusOK) const noexcept;
 
     void DidAddClient(CachedResourceClient &client) noexcept override;
 

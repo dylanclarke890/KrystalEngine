@@ -30,7 +30,7 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Net/Http/HTTPHeaderMap.hpp"
+#include "Krystal.Net/Http/HttpHeaderMap.hpp"
 #include "Krystal.Net/Url.hpp"
 #include <chrono>
 
@@ -48,7 +48,7 @@ namespace krys::boo
     utf8_string _textEncodingName;
     uint16 _httpStatusCode {0};
     utf8_string _httpStatusText;
-    net::http::HTTPHeaderMap _httpHeaderFields;
+    net::http::HttpHeaderMap _httpHeaderFields;
 
   public:
     ResourceResponse() noexcept = default;
@@ -91,22 +91,22 @@ namespace krys::boo
     }
 
     /// @brief The HTTP status code; 0 for a response that isn't HTTP's (a file's, a `data:` URL's).
-    KRYS_NODISCARD uint16 HTTPStatusCode() const noexcept
+    KRYS_NODISCARD uint16 HttpstatusCode() const noexcept
     {
       return _httpStatusCode;
     }
 
-    void SetHTTPStatusCode(uint16 statusCode) noexcept
+    void SetHttpstatusCode(uint16 statusCode) noexcept
     {
       _httpStatusCode = statusCode;
     }
 
-    KRYS_NODISCARD const utf8_string &HTTPStatusText() const noexcept
+    KRYS_NODISCARD const utf8_string &HttpstatusText() const noexcept
     {
       return _httpStatusText;
     }
 
-    void SetHTTPStatusText(utf8_string statusText) noexcept
+    void SetHttpstatusText(utf8_string statusText) noexcept
     {
       _httpStatusText = krys::move(statusText);
     }
@@ -118,23 +118,23 @@ namespace krys::boo
       return _httpStatusCode >= 200 && _httpStatusCode <= 299;
     }
 
-    KRYS_NODISCARD const net::http::HTTPHeaderMap &HTTPHeaderFields() const noexcept
+    KRYS_NODISCARD const net::http::HttpHeaderMap &HttpHeaderFields() const noexcept
     {
       return _httpHeaderFields;
     }
 
     /// @brief The value of the header @p name; empty without one.
-    KRYS_NODISCARD utf8_stringview HTTPHeaderField(utf8_stringview name) const noexcept
+    KRYS_NODISCARD utf8_stringview HttpHeaderField(utf8_stringview name) const noexcept
     {
       return _httpHeaderFields.Get(name).value_or(utf8_stringview());
     }
 
-    void SetHTTPHeaderField(utf8_stringview name, utf8_stringview value) noexcept
+    void SetHttpHeaderField(utf8_stringview name, utf8_stringview value) noexcept
     {
       _httpHeaderFields.Set(name, value);
     }
 
-    void AddHTTPHeaderField(utf8_stringview name, utf8_stringview value) noexcept
+    void AddHttpHeaderField(utf8_stringview name, utf8_stringview value) noexcept
     {
       _httpHeaderFields.Add(name, value);
     }

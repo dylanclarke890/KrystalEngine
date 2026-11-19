@@ -31,17 +31,17 @@ target_sources(Krystal.Net
     BASE_DIRS
       include
     FILES
-      include/Krystal.Net/Http/HTTPHeaderMap.hpp
-      include/Krystal.Net/Http/HTTPParsers.hpp
-      include/Krystal.Net/Http/MIMETypeRegistry.hpp
+      include/Krystal.Net/Http/HttpHeaderMap.hpp
+      include/Krystal.Net/Http/HttpParsers.hpp
+      include/Krystal.Net/Http/MimeTypeRegistry.hpp
       include/Krystal.Net/Url.hpp
       include/Krystal.Net/UrlHash.hpp
       include/Krystal.Net/UrlParser.hpp
 
   PRIVATE
-    src/Http/HTTPHeaderMap.cpp
-    src/Http/HTTPParsers.cpp
-    src/Http/MIMETypeRegistry.cpp
+    src/Http/HttpHeaderMap.cpp
+    src/Http/HttpParsers.cpp
+    src/Http/MimeTypeRegistry.cpp
     src/Url.cpp
     src/UrlParser.cpp
 )

@@ -320,7 +320,7 @@ namespace krys::net
   void Url::Invalidate() noexcept
   {
     _isValid = false;
-    _protocolIsInHTTPFamily = false;
+    _protocolIsInHttpFamily = false;
     _hasOpaquePath = false;
     _schemeEnd = 0;
     _userStart = 0;
@@ -349,7 +349,7 @@ namespace krys::net
 
   Url::Url(Url &&other) noexcept
       : _string(krys::move(other._string)), _isValid(other._isValid),
-        _protocolIsInHTTPFamily(other._protocolIsInHTTPFamily), _hasOpaquePath(other._hasOpaquePath),
+        _protocolIsInHttpFamily(other._protocolIsInHttpFamily), _hasOpaquePath(other._hasOpaquePath),
         _isNull(other._isNull), _isHashTableDeletedValue(other._isHashTableDeletedValue),
         _portLength(other._portLength), _schemeEnd(other._schemeEnd), _userStart(other._userStart),
         _userEnd(other._userEnd), _passwordEnd(other._passwordEnd), _hostEnd(other._hostEnd),
@@ -363,7 +363,7 @@ namespace krys::net
     _string = krys::move(other._string);
     _isValid = other._isValid;
     other._isValid = false;
-    _protocolIsInHTTPFamily = other._protocolIsInHTTPFamily;
+    _protocolIsInHttpFamily = other._protocolIsInHttpFamily;
     _hasOpaquePath = other._hasOpaquePath;
     _isNull = other._isNull;
     _isHashTableDeletedValue = other._isHashTableDeletedValue;
@@ -419,7 +419,7 @@ namespace krys::net
   bool Url::HasFetchScheme() const noexcept
   {
     // https://fetch.spec.whatwg.org/#fetch-scheme
-    return ProtocolIsInHTTPFamily() || ProtocolIsAbout() || ProtocolIsBlob() || ProtocolIsData()
+    return ProtocolIsInHttpFamily() || ProtocolIsAbout() || ProtocolIsBlob() || ProtocolIsData()
            || ProtocolIsFile();
   }
 
@@ -1021,7 +1021,7 @@ namespace krys::net
       return true;
     }
 
-    if (!ProtocolIsInHTTPFamily())
+    if (!ProtocolIsInHttpFamily())
     {
       return false;
     }
@@ -1123,7 +1123,7 @@ namespace krys::net
     return ProtocolIsInternal(url, u8"javascript");
   }
 
-  bool ProtocolIsInHTTPFamily(utf8_stringview url) noexcept
+  bool ProtocolIsInHttpFamily(utf8_stringview url) noexcept
   {
     auto length = url.size();
     // Do the comparison without making a new string object.

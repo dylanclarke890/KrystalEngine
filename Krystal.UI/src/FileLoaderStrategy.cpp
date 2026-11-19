@@ -2,7 +2,7 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Threading/WorkQueue.hpp"
-#include "Krystal.Net/Http/MIMETypeRegistry.hpp"
+#include "Krystal.Net/Http/MimeTypeRegistry.hpp"
 #include <algorithm>
 #include <chrono>
 #include <filesystem>
@@ -62,12 +62,12 @@ namespace krys::ui
       const auto extension = path.extension().u8string();
       const auto size = static_cast<int64>(contents->Bytes.size());
       boo::ResourceResponse response(url,
-                                     net::http::MIMETypeRegistry::MIMETypeForExtension(
+                                     net::http::MimeTypeRegistry::MimeTypeForExtension(
                                        utf8_stringview(extension).substr(extension.empty() ? 0 : 1)),
                                      size);
       if (const auto &date = contents->LastModified)
       {
-        response.SetHTTPHeaderField(
+        response.SetHttpHeaderField(
           u8"Last-Modified", utf8_stringview(reinterpret_cast<const char8_t *>(date->data()), date->size()));
       }
       return boo::LoadedResource {.Response = krys::move(response),
