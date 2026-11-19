@@ -124,6 +124,7 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Maths/Clipspace.cpp
 	PRIVATE tests/Maths/Compare.cpp
 	PRIVATE tests/Maths/Convert.cpp
+	PRIVATE tests/Maths/Easing.cpp
 	PRIVATE tests/Maths/Interpolate.cpp
 	PRIVATE tests/Maths/Maths.cpp
 	PRIVATE tests/Maths/Matrix.cpp

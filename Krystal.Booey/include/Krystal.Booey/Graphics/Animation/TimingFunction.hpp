@@ -26,6 +26,7 @@
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Maths/Easing.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Strings/String.hpp"
@@ -102,13 +103,7 @@ namespace krys::boo
   class LinearTimingFunction final : public TimingFunction
   {
   public:
-    struct Point
-    {
-      double Value;
-      double Progress;
-
-      KRYS_NODISCARD bool operator==(const Point &) const noexcept = default;
-    };
+    using Point = LinearEasingPoint;
 
   private:
     const List<Point> _points;
@@ -263,15 +258,7 @@ namespace krys::boo
   class StepsTimingFunction final : public TimingFunction
   {
   public:
-    enum class StepPosition : uint8
-    {
-      JumpStart,
-      JumpEnd,
-      JumpNone,
-      JumpBoth,
-      Start,
-      End,
-    };
+    using StepPosition = krys::StepPosition;
 
   private:
     const int _steps;

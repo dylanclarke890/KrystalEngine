@@ -175,9 +175,11 @@ target_sources(Krystal.Core
       include/Krystal.Core/Maths/Quaternion.hpp
       include/Krystal.Core/Maths/Random.hpp
       include/Krystal.Core/Maths/Round.hpp
+      include/Krystal.Core/Maths/SpringSolver.hpp
       include/Krystal.Core/Maths/Swizzle.hpp
       include/Krystal.Core/Maths/Traits.hpp
       include/Krystal.Core/Maths/Transform.hpp
+      include/Krystal.Core/Maths/UnitBezier.hpp
       include/Krystal.Core/Maths/Vector.hpp
 
       # Serialisation
@@ -330,6 +332,9 @@ target_sources(Krystal.Core
     
     # Log
     src/Log/SpdlogLogger.cpp
+    
+    # Maths
+    src/Maths/Easing.cpp
     
     # Threading
     src/Threading/JobSequence.cpp

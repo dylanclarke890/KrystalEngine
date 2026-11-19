@@ -30,7 +30,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace krys::boo
+namespace krys
 {
   /// @brief A cubic Bézier curve from (0, 0) to (1, 1) with two control points, solved for y given x.
   struct UnitBezier

@@ -28,7 +28,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include <cmath>
 
-namespace krys::boo
+namespace krys
 {
   /// @brief Solves a damped spring from 0 to 1 over time.
   class SpringSolver

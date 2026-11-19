@@ -3,6 +3,8 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys
 {
@@ -369,4 +371,36 @@ namespace krys
       return T(0.5) * BounceEaseOut(value * T(2) - One<T>()) + T(0.5);
     }
   }
+
+  /// @brief Where a step easing's jumps fall (CSS Easing's `<step-position>`). `Start` and `End` are
+  /// `JumpStart` and `JumpEnd` under their older names.
+  enum class StepPosition : uint8
+  {
+    JumpStart,
+    JumpEnd,
+    JumpNone,
+    JumpBoth,
+    Start,
+    End,
+  };
+
+  /// @brief Eases @p progress into @p steps equal steps, jumping at @p position (CSS Easing's `steps()`).
+  /// @param before Whether @p progress is from before the animation starts, when a jump exactly on a step
+  /// boundary isn't taken yet.
+  KRYS_NODISCARD double StepEasing(double progress, int32 steps, StepPosition position,
+                                   bool before = false) noexcept;
+
+  /// @brief A point on a piecewise-linear easing curve: the output @p Value at input @p Progress.
+  struct LinearEasingPoint
+  {
+    double Value;
+    double Progress;
+
+    KRYS_NODISCARD bool operator==(const LinearEasingPoint &) const noexcept = default;
+  };
+
+  /// @brief Eases @p progress along the piecewise-linear curve through @p points, ordered by progress
+  /// (CSS Easing's `linear()`), extending its first and last segments beyond them. Fewer than two points is
+  /// the identity.
+  KRYS_NODISCARD double LinearEasing(Span<const LinearEasingPoint> points, double progress) noexcept;
 }

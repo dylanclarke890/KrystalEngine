@@ -1460,9 +1460,7 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Adwaita/ToggleButtonAdwaita.hpp
   include/Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp
   include/Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp
-  include/Krystal.Booey/Graphics/Animation/SpringSolver.hpp
   include/Krystal.Booey/Graphics/Animation/TimingFunction.hpp
-  include/Krystal.Booey/Graphics/Animation/UnitBezier.hpp
   include/Krystal.Booey/Graphics/Color/Color.hpp
   include/Krystal.Booey/Graphics/Color/ColorBlending.hpp
   include/Krystal.Booey/Graphics/Color/ColorFlags.hpp
